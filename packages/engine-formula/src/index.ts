@@ -161,6 +161,7 @@ export { functionEngineering } from './functions/engineering/function-map';
 export { FUNCTION_NAMES_ENGINEERING } from './functions/engineering/function-names';
 export { functionFinancial } from './functions/financial/function-map';
 export { FUNCTION_NAMES_FINANCIAL } from './functions/financial/function-names';
+export { ALL_IMPLEMENTED_FUNCTIONS, ALL_IMPLEMENTED_FUNCTIONS_SET } from './functions/index';
 export { functionInformation } from './functions/information/function-map';
 export { FUNCTION_NAMES_INFORMATION } from './functions/information/function-names';
 export { functionLogical } from './functions/logical/function-map';
@@ -188,7 +189,7 @@ export { ActiveDirtyManagerService, IActiveDirtyManagerService } from './service
 export { CalculateFormulaService, ICalculateFormulaService } from './services/calculate-formula.service';
 export { DEFAULT_INTERVAL_COUNT } from './services/calculate-formula.service';
 export { FormulaCurrentConfigService, IFormulaCurrentConfigService, type IFormulaDirtyData } from './services/current-data.service';
-export { DefinedNamesService, type IDefinedNameMapItem, IDefinedNamesService, type IDefinedNamesServiceParam } from './services/defined-names.service';
+export { DefinedNamesService, type IDefinedNameMapItem, IDefinedNamesService, type IDefinedNamesServiceParam, type IDefinedNamesUpdateEvent } from './services/defined-names.service';
 export { IDependencyManagerService } from './services/dependency-manager.service';
 export { DependencyManagerService } from './services/dependency-manager.service';
 export { DependencyManagerBaseService } from './services/dependency-manager.service';
@@ -201,11 +202,8 @@ export { IFunctionService } from './services/function.service';
 export { GlobalComputingStatusService } from './services/global-computing-status.service';
 export { HyperlinkEngineFormulaService, IHyperlinkEngineFormulaService } from './services/hyperlink-engine-formula.service';
 export { IOtherFormulaManagerService, OtherFormulaManagerService } from './services/other-formula-manager.service';
-
 export { OtherFormulaBizType, RegisterOtherFormulaService } from './services/register-other-formula.service';
 export { FormulaExecutedStateType, FormulaExecuteStageType, FormulaRuntimeService, type IAllRuntimeData, type IExecutionInProgressParams, IFormulaRuntimeService } from './services/runtime.service';
 export { ISheetRowFilteredService, SheetRowFilteredService } from './services/sheet-row-filtered.service';
-
 export { ISuperTableService } from './services/super-table.service';
-
 export { SuperTableService } from './services/super-table.service';

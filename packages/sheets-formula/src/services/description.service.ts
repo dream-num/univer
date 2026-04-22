@@ -17,29 +17,8 @@
 import type { IDisposable } from '@univerjs/core';
 import type { IFunctionInfo, IFunctionNames } from '@univerjs/engine-formula';
 import type { IUniverSheetsFormulaBaseConfig } from '../config/config';
-import { createIdentifier, IConfigService, Inject, LocaleService, toDisposable } from '@univerjs/core';
-
-import {
-    functionArray,
-    functionCompatibility,
-    functionCube,
-    functionDatabase,
-    functionDate,
-    functionEngineering,
-    functionFinancial,
-    functionInformation,
-    functionLogical,
-    functionLookup,
-    functionMath,
-    functionMeta,
-    functionStatistical,
-    functionText,
-    FunctionType,
-    functionUniver,
-    functionWeb,
-    IFunctionService,
-    isReferenceStrings,
-} from '@univerjs/engine-formula';
+import { createIdentifier, Disposable, IConfigService, Inject, LocaleService, toDisposable } from '@univerjs/core';
+import { ALL_IMPLEMENTED_FUNCTIONS_SET, FunctionType, IFunctionService, isReferenceStrings } from '@univerjs/engine-formula';
 import { PLUGIN_CONFIG_KEY_BASE } from '../config/config';
 import { FUNCTION_LIST } from './function-list/function-list';
 import { getFunctionName } from './utils';
@@ -63,212 +42,108 @@ export interface IDescriptionService {
 
     /**
      * get function info by name
-     * @param searchText
      */
     getFunctionInfo(searchText: string): IFunctionInfo | undefined;
 
     /**
      * get search list by name
-     * @param searchText
-     * @returns
      */
     getSearchListByName(searchText: string): ISearchItem[];
 
     /**
      * get search list by name, from first letter
-     * @param searchText
-     * @returns
      */
     getSearchListByNameFirstLetter(searchText: string): ISearchItemWithType[];
 
     /**
      * get search list by type, if type is -1, return all
-     * @param type
-     * @returns
      */
     getSearchListByType(type: number): ISearchItem[];
 
     /**
      * register descriptions
-     * @param functionList
      */
     registerDescriptions(functionList: IFunctionInfo[]): IDisposable;
 
     /**
      * unregister descriptions
-     * @param functionList
      */
     unregisterDescriptions(functionNames: string[]): void;
 
     /**
      * check if has description
-     * @param name
      */
     hasDescription(name: string): boolean;
 
     /**
      * check if has defined name description
-     * @param name
      */
     hasDefinedNameDescription(name: string): boolean;
 
     /**
      * check if is formula defined name
-     * @param name
      */
     isFormulaDefinedName(name: string): boolean;
 }
 
 export const IDescriptionService = createIdentifier<IDescriptionService>('formula.description-service');
 
-export class DescriptionService implements IDescriptionService, IDisposable {
-    private _descriptions: IFunctionInfo[] = [];
+export class DescriptionService extends Disposable implements IDescriptionService {
+    private _descriptions: Map<IFunctionNames, IFunctionInfo> = new Map();
 
     constructor(
         @IFunctionService private readonly _functionService: IFunctionService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @IConfigService private readonly _configService: IConfigService
     ) {
+        super();
+
         this._initialize();
     }
 
-    dispose(): void {
-        this._localeService.localeChanged$.complete();
-    }
-
-    getDescriptions() {
-        return this._functionService.getDescriptions();
-    }
-
-    hasFunction(searchText: string) {
-        const functionList = this._functionService.getDescriptions();
-        return functionList.get(searchText.toLocaleUpperCase()) !== undefined;
-    }
-
-    getFunctionInfo(searchText: string) {
-        const functionList = this._functionService.getDescriptions();
-        return functionList.get(searchText.toLocaleUpperCase());
-    }
-
-    getSearchListByName(searchText: string) {
-        const searchList: ISearchItem[] = [];
-        const functionList = this._functionService.getDescriptions();
-        const _searchText = searchText.toLocaleUpperCase().trim();
-        functionList.forEach((item) => {
-            const { functionName, abstract, functionType } = item;
-            // Exclude DefinedName
-            if ((functionName.toLocaleUpperCase().indexOf(_searchText) > -1) && functionType !== FunctionType.DefinedName) {
-                searchList.push({ name: functionName, desc: abstract });
-            }
-        });
-
-        return searchList;
-    }
-
-    getSearchListByNameFirstLetter(searchText: string) {
-        const searchList: ISearchItemWithType[] = [];
-        const functionList = this._functionService.getDescriptions();
-        const _searchText = searchText.toLocaleUpperCase().trim();
-        functionList.forEach((item) => {
-            const { functionName, abstract, functionType } = item;
-            if (functionName.toLocaleUpperCase().indexOf(_searchText) === 0) {
-                searchList.push({ name: functionName, desc: abstract, functionType });
-            }
-        });
-
-        return searchList;
-    }
-
-    getSearchListByType(type: number) {
-        const searchList: ISearchItem[] = [];
-        const functionList = this._functionService.getDescriptions();
-        functionList.forEach((item) => {
-            const { functionName, functionType, abstract } = item;
-            // Exclude DefinedName
-            if ((functionType === type || type === -1) && functionType !== FunctionType.DefinedName) {
-                searchList.push({ name: functionName, desc: abstract });
-            }
-        });
-
-        return searchList;
-    }
-
-    registerDescriptions(description: IFunctionInfo[]): IDisposable {
-        this._descriptions = this._descriptions.concat(description);
-        this._registerDescriptions();
-
-        return toDisposable(() => {
-            const functionNames = description.map((item) => item.functionName);
-            this.unregisterDescriptions(functionNames);
-        });
-    }
-
-    unregisterDescriptions(functionNames: string[]) {
-        this._descriptions = this._descriptions.filter((item) => !functionNames.includes(item.functionName));
-
-        this._functionService.unregisterDescriptions(...functionNames);
-    }
-
-    hasDescription(name: string) {
-        return this._descriptions.some((item) => item.functionName === name);
-    }
-
-    hasDefinedNameDescription(name: string) {
-        return this._descriptions.some((item) => item.functionName === name && item.functionType === FunctionType.DefinedName);
-    }
-
-    isFormulaDefinedName(name: string) {
-        const items = this._descriptions.filter((item) => item.functionName === name && item.functionType === FunctionType.DefinedName);
-        if (items.length === 0) {
-            return false;
-        }
-
-        const token = items[0].description;
-        return !isReferenceStrings(token);
-    }
-
     private _initialize() {
-        this._localeService.localeChanged$.subscribe(() => {
-            this._registerDescriptions();
-        });
+        this.disposeWithMe(
+            toDisposable(
+                this._localeService.localeChanged$.subscribe(() => {
+                    this._functionService.clearDescriptions();
 
-        this._initDescription();
-        this._registerDescriptions();
+                    const newDescriptions: Map<IFunctionNames, IFunctionInfo> = new Map();
+                    this._descriptions.forEach((item) => {
+                        const functionName = getFunctionName(item, this._localeService).toUpperCase();
+                        newDescriptions.set(functionName, item);
+                    });
+
+                    this._descriptions = newDescriptions;
+                    this._initRegisterDescriptions();
+                })
+            )
+        );
+
+        this._initDescriptions();
+        this._initRegisterDescriptions();
     }
 
-    private _initDescription() {
-        // TODO@Dushusir: Remove filtering after all formulas have been implemented
-        const functions = [
-            ...functionArray,
-            ...functionCompatibility,
-            ...functionCube,
-            ...functionDatabase,
-            ...functionDate,
-            ...functionEngineering,
-            ...functionFinancial,
-            ...functionInformation,
-            ...functionLogical,
-            ...functionLookup,
-            ...functionMath,
-            ...functionMeta,
-            ...functionStatistical,
-            ...functionText,
-            ...functionUniver,
-            ...functionWeb,
-        ].map((item) => item[1]) as IFunctionNames[];
+    private _initDescriptions() {
+        const localeService = this._localeService;
 
-        const filterFunctionList = FUNCTION_LIST.filter((item) => {
-            return functions.includes(item.functionName as IFunctionNames);
+        FUNCTION_LIST.forEach((item) => {
+            if (ALL_IMPLEMENTED_FUNCTIONS_SET.has(item.functionName)) {
+                const functionName = getFunctionName(item, localeService).toUpperCase();
+                this._descriptions.set(functionName, item);
+            }
         });
 
         const config = this._configService.getConfig<IUniverSheetsFormulaBaseConfig>(PLUGIN_CONFIG_KEY_BASE);
-        this._descriptions = filterFunctionList.concat(config?.description ?? []);
+        config?.description?.forEach((item) => {
+            const functionName = getFunctionName(item, localeService).toUpperCase();
+            this._descriptions.set(functionName, item);
+        });
     }
 
-    private _registerDescriptions() {
+    private _initRegisterDescriptions() {
         const localeService = this._localeService;
 
-        const functionListLocale = this._descriptions.map((functionInfo) => ({
+        const functionListLocale = Array.from(this._descriptions.values()).map((functionInfo) => ({
             functionName: getFunctionName(functionInfo, localeService),
             functionType: functionInfo.functionType,
             description: localeService.t(functionInfo.description),
@@ -283,5 +158,155 @@ export class DescriptionService implements IDescriptionService, IDisposable {
         }));
 
         this._functionService.registerDescriptions(...functionListLocale);
+    }
+
+    private _registerDescriptions(descriptions: IFunctionInfo[]) {
+        const localeService = this._localeService;
+
+        const functionListLocale = descriptions.map((functionInfo) => ({
+            functionName: getFunctionName(functionInfo, localeService),
+            functionType: functionInfo.functionType,
+            description: localeService.t(functionInfo.description),
+            abstract: localeService.t(functionInfo.abstract),
+            functionParameter: functionInfo.functionParameter.map((item) => ({
+                name: localeService.t(item.name),
+                detail: localeService.t(item.detail),
+                example: item.example,
+                require: item.require,
+                repeat: item.repeat,
+            })),
+        }));
+
+        this._functionService.registerDescriptions(...functionListLocale);
+    }
+
+    override dispose(): void {
+        super.dispose();
+
+        this._descriptions.clear();
+    }
+
+    getDescriptions() {
+        return this._functionService.getDescriptions();
+    }
+
+    hasFunction(searchText: string) {
+        return this._descriptions.has(searchText.toUpperCase());
+    }
+
+    getFunctionInfo(searchText: string) {
+        const item = this._descriptions.get(searchText.toUpperCase());
+        if (!item) {
+            return;
+        }
+        return this._functionService.getDescription(getFunctionName(item, this._localeService));
+    }
+
+    getSearchListByName(searchText: string) {
+        const functionList = this._functionService.getDescriptions();
+        const _searchText = searchText.toUpperCase().trim();
+
+        const searchList: ISearchItem[] = [];
+
+        functionList.forEach((item) => {
+            const { functionName, abstract, functionType } = item;
+            // Exclude DefinedName
+            if ((functionName.toUpperCase().indexOf(_searchText) > -1) && functionType !== FunctionType.DefinedName) {
+                searchList.push({ name: functionName, desc: abstract });
+            }
+        });
+
+        return searchList;
+    }
+
+    getSearchListByNameFirstLetter(searchText: string) {
+        const functionList = this._functionService.getDescriptions();
+        const _searchText = searchText.toUpperCase().trim();
+
+        const searchList: ISearchItemWithType[] = [];
+
+        functionList.forEach((item) => {
+            const { functionName, abstract, functionType } = item;
+            if (functionName.toUpperCase().indexOf(_searchText) === 0) {
+                searchList.push({ name: functionName, desc: abstract, functionType });
+            }
+        });
+
+        return searchList;
+    }
+
+    getSearchListByType(type: number) {
+        const functionList = this._functionService.getDescriptions();
+
+        const searchList: ISearchItem[] = [];
+
+        functionList.forEach((item) => {
+            const { functionName, functionType, abstract } = item;
+            // Exclude DefinedName
+            if ((functionType === type || type === -1) && functionType !== FunctionType.DefinedName) {
+                searchList.push({ name: functionName, desc: abstract });
+            }
+        });
+
+        return searchList;
+    }
+
+    registerDescriptions(descriptions: IFunctionInfo[]): IDisposable {
+        const localeService = this._localeService;
+        const functionNames: string[] = [];
+
+        descriptions.forEach((item) => {
+            const functionName = getFunctionName(item, localeService).toUpperCase();
+            functionNames.push(functionName);
+            this._descriptions.set(functionName, item);
+        });
+
+        this._registerDescriptions(descriptions);
+
+        return toDisposable(() => {
+            this.unregisterDescriptions(functionNames);
+        });
+    }
+
+    unregisterDescriptions(functionNames: string[]) {
+        const removeFunctionNames: string[] = [];
+
+        functionNames.forEach((name) => {
+            const functionName = name.toUpperCase();
+            const item = this._descriptions.get(functionName);
+            if (!item) {
+                return;
+            }
+
+            removeFunctionNames.push(getFunctionName(item, this._localeService));
+            this._descriptions.delete(functionName);
+        });
+
+        this._functionService.unregisterDescriptions(...removeFunctionNames);
+    }
+
+    hasDescription(name: string) {
+        return this._descriptions.has(name.toUpperCase());
+    }
+
+    hasDefinedNameDescription(name: string) {
+        const item = this._descriptions.get(name.toUpperCase());
+        if (!item) {
+            return false;
+        }
+        return item.functionType === FunctionType.DefinedName;
+    }
+
+    isFormulaDefinedName(name: string) {
+        const item = this._descriptions.get(name.toUpperCase());
+        if (!item) {
+            return false;
+        }
+
+        if (item.functionType !== FunctionType.DefinedName) {
+            return false;
+        }
+
+        return !isReferenceStrings(item.description);
     }
 }

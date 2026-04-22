@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IExecutionOptions, Nullable, Workbook } from '@univerjs/core';
-import type { IFunctionInfo, ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
+import type { ICommandInfo, IExecutionOptions, Workbook } from '@univerjs/core';
+import type { IDefinedNamesUpdateEvent, IFunctionInfo, ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
+import type { ISetWorksheetActiveOperationParams } from '@univerjs/sheets';
 import {
     Disposable,
     ICommandService,
@@ -24,8 +25,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { FunctionType, IDefinedNamesService, RemoveDefinedNameMutation, SetDefinedNameMutation } from '@univerjs/engine-formula';
-import { SCOPE_WORKBOOK_VALUE_DEFINED_NAME, SetWorksheetActiveOperation } from '@univerjs/sheets';
-
+import { getSheetCommandTarget, SCOPE_WORKBOOK_VALUE_DEFINED_NAME, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { IDescriptionService } from '../services/description.service';
 
 /**
@@ -33,7 +33,7 @@ import { IDescriptionService } from '../services/description.service';
  * column menu: show, hover and mousedown event
  */
 export class DefinedNameController extends Disposable {
-    private _preUnitId: Nullable<string> = null;
+    private _preUnitId: string | null = null;
 
     constructor(
         @IDescriptionService private readonly _descriptionService: IDescriptionService,
@@ -49,28 +49,30 @@ export class DefinedNameController extends Disposable {
 
     private _initialize() {
         this._descriptionListener();
-
         this._changeUnitListener();
-
         this._changeSheetListener();
     }
 
     private _descriptionListener() {
-        toDisposable(
-            this._definedNamesService.update$.subscribe(() => {
-                this._registerDescriptions();
-            })
+        this.disposeWithMe(
+            toDisposable(
+                this._definedNamesService.update$.subscribe((event) => {
+                    this._updateDescriptions(event);
+                })
+            )
         );
     }
 
     private _changeUnitListener() {
-        toDisposable(
-            this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
-                this._unRegisterDescriptions();
-                if (workbook) {
-                    this._registerDescriptions();
-                }
-            })
+        this.disposeWithMe(
+            toDisposable(
+                this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
+                    this._unRegisterDescriptions();
+                    if (workbook) {
+                        this._initRegisterDescriptions(workbook.getUnitId());
+                    }
+                })
+            )
         );
     }
 
@@ -82,30 +84,73 @@ export class DefinedNameController extends Disposable {
                 }
 
                 if (command.id === SetWorksheetActiveOperation.id) {
-                    this._unregisterDescriptionsForNotInSheetId();
-                    this._registerDescriptions();
-                }
-                // Since command interception will supplement mutation, it is necessary to monitor mutation changes here
-                // SetDefinedNameMutation and RemoveDefinedNameMutation already cover all possible Defined Name updates
-                else if (command.id === SetDefinedNameMutation.id) {
-                    const param = command.params as ISetDefinedNameMutationParam;
-                    this._registerDescription(param);
+                    const params = command.params as ISetWorksheetActiveOperationParams;
+                    this._unregisterDescriptionsForNotInSheetId(params.unitId, params.subUnitId);
+                    this._initRegisterDescriptions(params.unitId, params.subUnitId);
+                } else if (command.id === SetDefinedNameMutation.id) {
+                    // Since command interception will supplement mutation, it is necessary to monitor mutation changes here
+                    // SetDefinedNameMutation and RemoveDefinedNameMutation already cover all possible Defined Name updates
+                    const params = command.params as ISetDefinedNameMutationParam;
+                    this._registerDescription(params);
                 } else if (command.id === RemoveDefinedNameMutation.id) {
-                    const param = command.params as ISetDefinedNameMutationParam;
-                    this._unregisterDescription(param);
+                    const params = command.params as ISetDefinedNameMutationParam;
+                    this._unregisterDescription(params);
                 }
             })
         );
     }
 
-    private _registerDescription(param: ISetDefinedNameMutationParam) {
-        const target = this._getUnitIdAndSheetId(param);
+    private _updateDescriptions(event: IDefinedNamesUpdateEvent) {
+        const target = getSheetCommandTarget(this._univerInstanceService);
         if (!target) return;
 
-        const { sheetId } = target;
+        const { unitId, subUnitId } = target;
+        const { type, unitId: updateUnitId, definedNames } = event;
 
-        const { name, comment, formulaOrRefString, localSheetId } = param;
-        if (!this._descriptionService.hasDescription(name) && (localSheetId == null || localSheetId === SCOPE_WORKBOOK_VALUE_DEFINED_NAME || localSheetId === sheetId)) {
+        if (updateUnitId !== unitId) {
+            return;
+        }
+
+        if (type === 'update') {
+            const functionList: IFunctionInfo[] = [];
+
+            definedNames.forEach((definedName) => {
+                const { name, comment, formulaOrRefString, localSheetId } = definedName;
+                if (localSheetId == null || localSheetId === SCOPE_WORKBOOK_VALUE_DEFINED_NAME || localSheetId === subUnitId) {
+                    functionList.push({
+                        functionName: name,
+                        description: formulaOrRefString + (comment || ''),
+                        abstract: formulaOrRefString,
+                        functionType: FunctionType.DefinedName,
+                        functionParameter: [],
+                    });
+                }
+            });
+
+            this._descriptionService.registerDescriptions(functionList);
+        } else if (type === 'remove') {
+            const functionList: string[] = [];
+
+            definedNames.forEach((definedName) => {
+                functionList.push(definedName.name);
+            });
+
+            this._descriptionService.unregisterDescriptions(functionList);
+        }
+    }
+
+    private _registerDescription(params: ISetDefinedNameMutationParam) {
+        const target = getSheetCommandTarget(this._univerInstanceService, params);
+        if (!target) return;
+
+        const { subUnitId } = target;
+        const { name, comment, formulaOrRefString, localSheetId } = params;
+
+        if (this._descriptionService.hasDescription(name)) {
+            return;
+        }
+
+        if (localSheetId == null || localSheetId === SCOPE_WORKBOOK_VALUE_DEFINED_NAME || localSheetId === subUnitId) {
             this._descriptionService.registerDescriptions([{
                 functionName: name,
                 description: formulaOrRefString + (comment || ''),
@@ -122,12 +167,12 @@ export class DefinedNameController extends Disposable {
     }
 
     private _unRegisterDescriptions() {
-        if (this._preUnitId == null) {
+        if (this._preUnitId === null) {
             return;
         }
-        const definedNames = this._definedNamesService.getDefinedNameMap(this._preUnitId);
 
-        if (definedNames == null) {
+        const definedNames = this._definedNamesService.getDefinedNameMap(this._preUnitId);
+        if (!definedNames) {
             return;
         }
 
@@ -142,43 +187,29 @@ export class DefinedNameController extends Disposable {
         this._preUnitId = null;
     }
 
-    private _getUnitIdAndSheetId(params: { unitId?: string; subUnitId?: string } = {}) {
-        const { unitId, subUnitId } = params;
-
-        const workbook = unitId
-            ? this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)
-            : this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-        if (!workbook) return null;
-
-        const worksheet = subUnitId
-            ? workbook.getSheetBySheetId(subUnitId)
-            : workbook.getActiveSheet(true);
-        if (!worksheet) return null;
-
-        return {
-            unitId: workbook.getUnitId(),
-            sheetId: worksheet.getSheetId(),
-        };
-    }
-
-    private _registerDescriptions() {
-        const target = this._getUnitIdAndSheetId();
+    private _initRegisterDescriptions(unitId: string, subUnitId?: string) {
+        const target = getSheetCommandTarget(this._univerInstanceService, { unitId, subUnitId });
         if (!target) return;
 
-        const { unitId, sheetId } = target;
+        const { unitId: _unitId, subUnitId: _subUnitId } = target;
 
-        const definedNames = this._definedNamesService.getDefinedNameMap(unitId);
+        const definedNames = this._definedNamesService.getDefinedNameMap(_unitId);
         if (!definedNames) {
             return;
         }
 
         const functionList: IFunctionInfo[] = [];
 
-        this._preUnitId = unitId;
+        this._preUnitId = _unitId;
 
         Array.from(Object.values(definedNames)).forEach((value) => {
             const { name, comment, formulaOrRefString, localSheetId } = value;
-            if (!this._descriptionService.hasDescription(name) && (localSheetId == null || localSheetId === SCOPE_WORKBOOK_VALUE_DEFINED_NAME || localSheetId === sheetId)) {
+
+            if (this._descriptionService.hasDescription(name)) {
+                return;
+            }
+
+            if (localSheetId == null || localSheetId === SCOPE_WORKBOOK_VALUE_DEFINED_NAME || localSheetId === _subUnitId) {
                 functionList.push({
                     functionName: name,
                     description: formulaOrRefString + (comment || ''),
@@ -192,12 +223,7 @@ export class DefinedNameController extends Disposable {
         this._descriptionService.registerDescriptions(functionList);
     }
 
-    private _unregisterDescriptionsForNotInSheetId() {
-        const target = this._getUnitIdAndSheetId();
-        if (!target) return;
-
-        const { unitId, sheetId } = target;
-
+    private _unregisterDescriptionsForNotInSheetId(unitId: string, subUnitId: string) {
         const definedNames = this._definedNamesService.getDefinedNameMap(unitId);
         if (!definedNames) {
             return;
@@ -207,7 +233,7 @@ export class DefinedNameController extends Disposable {
 
         Array.from(Object.values(definedNames)).forEach((value) => {
             const { name, localSheetId } = value;
-            if (localSheetId !== SCOPE_WORKBOOK_VALUE_DEFINED_NAME && localSheetId !== sheetId) {
+            if (localSheetId !== SCOPE_WORKBOOK_VALUE_DEFINED_NAME && localSheetId !== subUnitId) {
                 functionList.push(name);
             }
         });

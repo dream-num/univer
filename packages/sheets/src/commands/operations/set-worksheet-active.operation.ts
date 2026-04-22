@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IOperation } from '@univerjs/core';
-import { CommandType, IUniverInstanceService } from '@univerjs/core';
+import type { IOperation, Workbook } from '@univerjs/core';
+import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 
 export interface ISetWorksheetActiveOperationParams {
     unitId: string;
@@ -26,11 +26,11 @@ export const SetWorksheetActiveOperation: IOperation<ISetWorksheetActiveOperatio
     id: 'sheet.operation.set-worksheet-active',
     type: CommandType.OPERATION,
     handler: (accessor, params) => {
-        const workbook = accessor.get(IUniverInstanceService).getUniverSheetInstance(params.unitId);
-
+        const workbook = accessor.get(IUniverInstanceService).getUnit<Workbook>(params.unitId, UniverInstanceType.UNIVER_SHEET);
         if (!workbook) return false;
 
         const worksheets = workbook.getWorksheets();
+
         for (const [, worksheet] of worksheets) {
             if (worksheet.getSheetId() === params.subUnitId) {
                 workbook.setActiveSheet(worksheet);

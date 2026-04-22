@@ -34,18 +34,18 @@ export interface ISetDefinedNameMutationParam extends ISetDefinedNameMutationSea
 
 /**
  * Generate undo mutation of a `SetDefinedNameMutation`
- * @param accessor
- * @param params
- * @returns
  */
 export const SetDefinedNameMutationFactory = (
     accessor: IAccessor,
     params: ISetDefinedNameMutationParam
-): ISetDefinedNameMutationParam => {
+): ISetDefinedNameMutationParam | null => {
     const { unitId, id } = params;
     const definedNamesService = accessor.get(IDefinedNamesService);
 
     const definedName = definedNamesService.getValueById(unitId, id);
+    if (!definedName) {
+        return null;
+    }
 
     return {
         ...definedName,

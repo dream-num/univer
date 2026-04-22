@@ -48,11 +48,13 @@ export interface IFunctionService {
 
     getDescriptions(): Map<IFunctionNames, IFunctionInfo>;
 
-    getDescription(functionToken: IFunctionNames): Nullable<IFunctionInfo>;
+    getDescription(functionToken: IFunctionNames): IFunctionInfo | undefined;
 
     hasDescription(functionToken: IFunctionNames): boolean;
 
     unregisterDescriptions(...functionTokens: IFunctionNames[]): void;
+
+    clearDescriptions(): void;
 
     deleteFormulaAstCacheKey(...functionToken: IFunctionNames[]): void;
 }
@@ -126,6 +128,10 @@ export class FunctionService extends Disposable implements IFunctionService {
             const functionToken = functionTokens[i];
             this._functionDescriptions.delete(functionToken);
         }
+    }
+
+    clearDescriptions() {
+        this._functionDescriptions.clear();
     }
 
     deleteFormulaAstCacheKey(...functionToken: IFunctionNames[]) {

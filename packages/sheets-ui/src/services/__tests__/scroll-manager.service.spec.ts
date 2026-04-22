@@ -131,4 +131,44 @@ describe('SheetScrollManagerService', () => {
             viewportScrollX: 337,
         });
     });
+
+    it('calculates viewport scroll from the actual cell start when gaps shift the origin', () => {
+        const injector = new Injector();
+        injector.add([
+            SheetSkeletonManagerService,
+            {
+                useValue: {
+                    getCurrentSkeleton: () => ({
+                        rowHeightAccumulation: [28, 57, 81],
+                        columnWidthAccumulation: [72, 192, 271],
+                        getCellWithCoordByIndex: (row: number, column: number, header?: boolean) => {
+                            expect(header).toBe(false);
+                            expect(row).toBe(1);
+                            expect(column).toBe(2);
+
+                            return {
+                                startY: 33,
+                                startX: 199,
+                            };
+                        },
+                    }),
+                } as unknown as SheetSkeletonManagerService,
+            },
+        ]);
+        const service = injector.createInstance(SheetScrollManagerService, createRenderContext('u-1'));
+
+        expect(service.calcViewportScrollFromRowColOffset({
+            sheetViewStartRow: 1,
+            sheetViewStartColumn: 2,
+            offsetX: -4,
+            offsetY: -3,
+            scrollX: 0,
+            scrollY: 0,
+            viewportScrollX: 0,
+            viewportScrollY: 0,
+        })).toEqual({
+            viewportScrollX: 195,
+            viewportScrollY: 30,
+        });
+    });
 });

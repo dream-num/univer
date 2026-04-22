@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDisposable, Nullable } from '@univerjs/core';
+import type { IDisposable } from '@univerjs/core';
 import type { IFunctionInfo, IFunctionNames } from '@univerjs/engine-formula';
 import type { IUniverSheetsFormulaBaseConfig } from '../config/config';
 import { createIdentifier, Disposable, IConfigService, Inject, LocaleService, toDisposable } from '@univerjs/core';
@@ -43,7 +43,7 @@ export interface IDescriptionService {
     /**
      * get function info by name
      */
-    getFunctionInfo(searchText: string): Nullable<IFunctionInfo>;
+    getFunctionInfo(searchText: string): IFunctionInfo | undefined;
 
     /**
      * get search list by name

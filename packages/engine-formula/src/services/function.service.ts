@@ -48,7 +48,7 @@ export interface IFunctionService {
 
     getDescriptions(): Map<IFunctionNames, IFunctionInfo>;
 
-    getDescription(functionToken: IFunctionNames): Nullable<IFunctionInfo>;
+    getDescription(functionToken: IFunctionNames): IFunctionInfo | undefined;
 
     hasDescription(functionToken: IFunctionNames): boolean;
 

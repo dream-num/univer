@@ -46,22 +46,7 @@ import { SetImageFormulaDataMutation } from '../commands/mutations/set-image-for
 import { RemoveOtherFormulaMutation, SetOtherFormulaMutation } from '../commands/mutations/set-other-formula.mutation';
 import { RemoveSuperTableMutation, SetSuperTableMutation, SetSuperTableOptionMutation } from '../commands/mutations/set-super-table.mutation';
 import { ENGINE_FORMULA_PLUGIN_CONFIG_KEY } from '../config/config';
-import { functionArray } from '../functions/array/function-map';
-import { functionCompatibility } from '../functions/compatibility/function-map';
-import { functionCube } from '../functions/cube/function-map';
-import { functionDatabase } from '../functions/database/function-map';
-import { functionDate } from '../functions/date/function-map';
-import { functionEngineering } from '../functions/engineering/function-map';
-import { functionFinancial } from '../functions/financial/function-map';
-import { functionInformation } from '../functions/information/function-map';
-import { functionLogical } from '../functions/logical/function-map';
-import { functionLookup } from '../functions/lookup/function-map';
-import { functionMath } from '../functions/math/function-map';
-import { functionMeta } from '../functions/meta/function-map';
-import { functionStatistical } from '../functions/statistical/function-map';
-import { functionText } from '../functions/text/function-map';
-import { functionUniver } from '../functions/univer/function-map';
-import { functionWeb } from '../functions/web/function-map';
+import { ALL_IMPLEMENTED_FUNCTIONS } from '../functions';
 import { IFunctionService } from '../services/function.service';
 
 export class FormulaController extends Disposable {
@@ -123,27 +108,7 @@ export class FormulaController extends Disposable {
     private _registerFunctions() {
         const config = this._configService.getConfig<IUniverEngineFormulaConfig>(ENGINE_FORMULA_PLUGIN_CONFIG_KEY);
 
-        const functions: BaseFunction[] = (
-            [
-                ...functionArray,
-                ...functionCompatibility,
-                ...functionCube,
-                ...functionDatabase,
-                ...functionDate,
-                ...functionEngineering,
-                ...functionFinancial,
-                ...functionInformation,
-                ...functionLogical,
-                ...functionLookup,
-                ...functionMath,
-                ...functionMeta,
-                ...functionStatistical,
-                ...functionText,
-                ...functionUniver,
-                ...functionWeb,
-            ] as Array<[Ctor<BaseFunction>, IFunctionNames]>
-        )
-            .concat(config?.function ?? [])
+        const functions: BaseFunction[] = ALL_IMPLEMENTED_FUNCTIONS.concat(config?.function ?? [])
             .map((registerObject) => {
                 const Func = registerObject[0] as Ctor<BaseFunction>;
                 const name = registerObject[1] as IFunctionNames;

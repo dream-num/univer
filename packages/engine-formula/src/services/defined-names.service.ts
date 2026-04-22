@@ -42,6 +42,12 @@ export interface IDefinedNameMapItem {
     [id: string]: IDefinedNamesServiceParam;
 }
 
+export interface IDefinedNamesUpdateEvent {
+    type: 'update' | 'remove';
+    unitId: string;
+    definedNames: IDefinedNamesServiceParam[];
+}
+
 export interface IDefinedNamesService {
     registerDefinedName(unitId: string, param: IDefinedNamesServiceParam): void;
 
@@ -67,7 +73,7 @@ export interface IDefinedNamesService {
 
     currentRange$: Observable<IUnitRange>;
 
-    update$: Observable<unknown>;
+    update$: Observable<IDefinedNamesUpdateEvent>;
 
     focusRange$: Observable<IDefinedNamesServiceFocusParam>;
 
@@ -78,13 +84,15 @@ export interface IDefinedNamesService {
     getAllDefinedNames(): IDefinedNameMap;
 
 }
+
 export class DefinedNamesService extends Disposable implements IDefinedNamesService {
     // 18.2.6 definedNames (Defined Names)
     private _definedNameMap: IDefinedNameMap = {};
     // Cache for name-to-definition mapping, here name key is ignored case sensitivity
     private _nameCacheMap: { [unitId: string]: { [name: string]: IDefinedNamesServiceParam } } = {};
 
-    private readonly _update$ = new Subject();
+    private readonly _update$ = new Subject<IDefinedNamesUpdateEvent>();
+
     readonly update$ = this._update$.asObservable();
 
     private _currentRange: IUnitRange = {
@@ -147,7 +155,11 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
     registerDefinedNames(unitId: string, params: IDefinedNameMapItem) {
         this._definedNameMap[unitId] = params;
         this._updateCache(unitId);
-        this._update();
+        this._update({
+            type: 'update',
+            unitId,
+            definedNames: Object.values(params),
+        });
     }
 
     registerDefinedName(unitId: string, param: IDefinedNamesServiceParam) {
@@ -159,19 +171,41 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
         this._definedNameMap[unitId][param.id] = param;
 
         this._updateCache(unitId);
-        this._update();
+        this._update({
+            type: 'update',
+            unitId,
+            definedNames: [param],
+        });
     }
 
     removeDefinedName(unitId: string, id: string) {
-        delete this._definedNameMap[unitId]?.[id];
+        const definedName = this._definedNameMap[unitId]?.[id];
+        if (!definedName) {
+            return;
+        }
+
+        delete this._definedNameMap[unitId][id];
         this._updateCache(unitId);
-        this._update();
+        this._update({
+            type: 'remove',
+            unitId,
+            definedNames: [definedName],
+        });
     }
 
     removeUnitDefinedName(unitId: string) {
+        const definedNames = this._definedNameMap[unitId];
+        if (!definedNames) {
+            return;
+        }
+
         delete this._definedNameMap[unitId];
         this._updateCache(unitId);
-        this._update();
+        this._update({
+            type: 'remove',
+            unitId,
+            definedNames: Object.values(definedNames),
+        });
     }
 
     getDefinedNameMap(unitId: string) {
@@ -234,8 +268,8 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
         }
     }
 
-    private _update() {
-        this._update$.next(null);
+    private _update(event: IDefinedNamesUpdateEvent) {
+        this._update$.next(event);
     }
 
     private _updateCache(unitId: string) {

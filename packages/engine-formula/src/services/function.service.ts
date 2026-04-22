@@ -54,6 +54,8 @@ export interface IFunctionService {
 
     unregisterDescriptions(...functionTokens: IFunctionNames[]): void;
 
+    clearDescriptions(): void;
+
     deleteFormulaAstCacheKey(...functionToken: IFunctionNames[]): void;
 }
 export const IFunctionService = createIdentifier<FunctionService>('univer.formula-function.service');
@@ -126,6 +128,10 @@ export class FunctionService extends Disposable implements IFunctionService {
             const functionToken = functionTokens[i];
             this._functionDescriptions.delete(functionToken);
         }
+    }
+
+    clearDescriptions() {
+        this._functionDescriptions.clear();
     }
 
     deleteFormulaAstCacheKey(...functionToken: IFunctionNames[]) {

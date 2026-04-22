@@ -154,21 +154,18 @@ export class RegisterFunctionService extends Disposable implements IRegisterFunc
         }
 
         const disposables = new DisposableCollection();
-        if (description) {
-            disposables.add(this._descriptionService.registerDescriptions(description));
-        } else {
-            const descriptionList: IFunctionInfo[] = calculate.map(([_func, functionName, functionIntroduction]) => {
-                return {
-                    functionName,
-                    functionType: FunctionType.User,
-                    description: '',
-                    abstract: functionIntroduction || '',
-                    functionParameter: [],
-                };
-            });
 
-            disposables.add(this._functionService.registerDescriptions(...descriptionList));
-        }
+        const descriptions: IFunctionInfo[] = description ?? calculate.map(([_func, functionName, functionIntroduction]) => {
+            return {
+                functionName,
+                functionType: FunctionType.User,
+                description: '',
+                abstract: functionIntroduction || '',
+                functionParameter: [],
+            };
+        });
+
+        disposables.add(this._descriptionService.registerDescriptions(descriptions));
 
         // calculation
         disposables.add(this._registerLocalExecutors(calculate));

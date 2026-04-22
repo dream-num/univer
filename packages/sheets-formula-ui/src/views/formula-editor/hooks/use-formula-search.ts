@@ -56,7 +56,8 @@ export const useFormulaSearch = (isNeed: boolean, nodes: INode[] = [], editor?: 
                             indexRef.current = currentNodeIndex;
                             const token = currentNode.token;
                             const list = descriptionService.getSearchListByNameFirstLetter(token);
-                            setSearchList(list);
+                            // Here we limit the maximum number of search results to 10 to prevent performance issues caused by rendering too many items in the dropdown.
+                            setSearchList(list.slice(0, 10));
                             setSearchText(token);
                             return;
                         }

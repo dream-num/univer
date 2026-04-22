@@ -28,8 +28,8 @@ import {
     SetWorksheetShowCommand,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import { useDependency } from '@univerjs/ui';
-import { useEffect, useState } from 'react';
+import { useDependency, useVirtualList } from '@univerjs/ui';
+import { useEffect, useRef, useState } from 'react';
 import { DefinedNameInput } from './DefinedNameInput';
 
 export const DefinedNameContainer = () => {
@@ -56,6 +56,18 @@ export const DefinedNameContainer = () => {
     const [definedNames, setDefinedNames] = useState<IDefinedNamesServiceParam[]>([]);
     const [editorKey, setEditorKey] = useState<Nullable<string>>(null);
     const [deleteConformKey, setDeleteConformKey] = useState<Nullable<string>>();
+
+    const listContainerRef = useRef<HTMLDivElement>(undefined!);
+    const [virtualDefinedNames, virtualActions] = useVirtualList(definedNames, {
+        containerTarget: listContainerRef,
+        itemHeight: (index, item) => {
+            if (item.id === editorKey) {
+                return 240;
+            }
+            return 72;
+        },
+        overscan: 6,
+    });
 
     useEffect(() => {
         setDefinedNames(getDefinedNameMap());
@@ -181,144 +193,150 @@ export const DefinedNameContainer = () => {
     return (
         <div
             data-u-comp="defined-name-container"
-            className="univer-relative univer-box-border univer-w-full"
+            className="univer-relative univer-box-border univer-flex univer-h-full univer-w-full univer-flex-col"
         >
-            <div className={clsx('univer-w-full univer-overflow-hidden univer-overflow-y-auto', scrollbarClassName)}>
-                <div key="insertDefinedName" className="univer-mb-4">
-                    <Button
-                        className={clsx(
-                            'univer-w-full',
-                            {
-                                'univer-hidden': editState,
-                            }
-                        )}
-                        onClick={openInsertCloseKeyEditor}
-                    >
-                        <IncreaseIcon />
-                        <span className="univer-ml-1">{localeService.t('definedName.addButton')}</span>
-                    </Button>
-                    {editState && (
-                        <DefinedNameInput
-                            confirm={insertConfirm}
-                            cancel={closeInput}
-                            state={editState}
-                            inputId="insertDefinedName"
-                            name={getInsertDefinedName()}
-                            formulaOrRefString={getInertFormulaOrRefString()}
-                        />
+            <div key="insertDefinedName" className="univer-mb-4">
+                <Button
+                    className={clsx(
+                        'univer-w-full',
+                        {
+                            'univer-hidden': editState,
+                        }
                     )}
-                </div>
+                    onClick={openInsertCloseKeyEditor}
+                >
+                    <IncreaseIcon />
+                    <span className="univer-ml-1">{localeService.t('definedName.addButton')}</span>
+                </Button>
+                {editState && (
+                    <DefinedNameInput
+                        confirm={insertConfirm}
+                        cancel={closeInput}
+                        state={editState}
+                        inputId="insertDefinedName"
+                        name={getInsertDefinedName()}
+                        formulaOrRefString={getInertFormulaOrRefString()}
+                    />
+                )}
+            </div>
 
-                {definedNames.map((definedName, index) => {
-                    return (
-                        <div
-                            key={index}
-                            className={`
-                              univer-relative univer-w-full univer-divide-x-0 univer-divide-y univer-divide-solid
-                              univer-divide-gray-200
-                              dark:!univer-divide-gray-600
-                            `}
-                        >
+            <div
+                ref={listContainerRef}
+                className={clsx('univer-min-h-0 univer-flex-1 univer-overflow-y-auto', scrollbarClassName)}
+                {...virtualActions.containerProps}
+            >
+                <div style={virtualActions.wrapperStyle}>
+                    {virtualDefinedNames.map(({ data: definedName, index }) => {
+                        return (
                             <div
-                                className={clsx(`
-                                  univer-group univer-relative univer-flex univer-w-full univer-cursor-default
-                                  univer-select-none univer-items-center univer-justify-between univer-rounded-md
-                                  univer-p-2
-                                  hover:univer-bg-gray-50
-                                  dark:hover:!univer-bg-gray-700
-                                `, {
-                                    'univer-hidden': definedName.id === editorKey,
-                                })}
-                                onClick={() => { focusDefinedName(definedName); }}
+                                key={index}
+                                className={`
+                                  univer-relative univer-w-full univer-divide-x-0 univer-divide-y univer-divide-solid
+                                  univer-divide-gray-200
+                                  dark:!univer-divide-gray-600
+                                `}
                             >
-                                <div title={definedName.comment}>
-                                    <div
-                                        className={`
-                                          univer-my-1 univer-max-h-[100px] univer-max-w-[190px] univer-truncate
-                                          univer-text-sm univer-font-medium univer-text-gray-900
-                                          dark:!univer-text-white
-                                        `}
-                                    >
-                                        {definedName.name}
-                                        <span className="univer-text-xxs univer-ml-1 univer-text-gray-400">
-                                            {(definedName.localSheetId === SCOPE_WORKBOOK_VALUE_DEFINED_NAME || definedName.localSheetId == null) ? '' : getSheetNameBySheetId(definedName.localSheetId)}
-                                        </span>
-                                    </div>
-                                    <div
-                                        className={`
-                                          univer-my-1 univer-max-h-[100px] univer-w-full univer-max-w-[190px]
-                                          univer-truncate univer-text-xs univer-text-gray-500
-                                        `}
-                                        title={definedName.formulaOrRefString}
-                                    >
-                                        {definedName.formulaOrRefString}
-                                    </div>
-                                </div>
                                 <div
-                                    className={`
-                                      univer-absolute univer-right-5 univer-top-1/2 univer-hidden
-                                      -univer-translate-y-1/2 univer-cursor-pointer univer-items-center
-                                      univer-justify-end univer-gap-7 univer-text-xs univer-text-primary-600
-                                      group-hover:univer-flex
-                                      dark:hover:!univer-bg-gray-600
-                                    `}
+                                    className={clsx(`
+                                      univer-group univer-relative univer-flex univer-w-full univer-cursor-default
+                                      univer-select-none univer-items-center univer-justify-between univer-rounded-md
+                                      univer-p-2
+                                      hover:univer-bg-gray-50
+                                      dark:hover:!univer-bg-gray-700
+                                    `, {
+                                        'univer-hidden': definedName.id === editorKey,
+                                    })}
+                                    onClick={() => { focusDefinedName(definedName); }}
                                 >
-                                    <Tooltip title={localeService.t('definedName.updateButton')} placement="top">
-                                        <a
+                                    <div title={definedName.comment}>
+                                        <div
                                             className={`
-                                              univer-rounded univer-p-1
-                                              hover:univer-bg-gray-100
+                                              univer-my-1 univer-max-h-[100px] univer-max-w-[190px] univer-truncate
+                                              univer-text-sm univer-font-medium univer-text-gray-900
+                                              dark:!univer-text-white
                                             `}
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                closeInsertOpenKeyEditor(definedName.id);
-                                            }}
                                         >
-                                            <PenIcon />
-                                        </a>
-                                    </Tooltip>
-                                    <Tooltip title={localeService.t('definedName.deleteButton')} placement="top">
-                                        <a
+                                            {definedName.name}
+                                            <span className="univer-text-xxs univer-ml-1 univer-text-gray-400">
+                                                {(definedName.localSheetId === SCOPE_WORKBOOK_VALUE_DEFINED_NAME || definedName.localSheetId == null) ? '' : getSheetNameBySheetId(definedName.localSheetId)}
+                                            </span>
+                                        </div>
+                                        <div
                                             className={`
-                                              univer-rounded univer-p-1 univer-text-red-600
-                                              hover:univer-bg-gray-100
+                                              univer-my-1 univer-max-h-[100px] univer-w-full univer-max-w-[190px]
+                                              univer-truncate univer-text-xs univer-text-gray-500
                                             `}
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                deleteDefinedName(definedName.id);
-                                            }}
+                                            title={definedName.formulaOrRefString}
                                         >
-                                            <DeleteIcon />
-                                        </a>
-                                    </Tooltip>
+                                            {definedName.formulaOrRefString}
+                                        </div>
+                                    </div>
+                                    <div
+                                        className={`
+                                          univer-absolute univer-right-5 univer-top-1/2 univer-hidden
+                                          -univer-translate-y-1/2 univer-cursor-pointer univer-items-center
+                                          univer-justify-end univer-gap-7 univer-text-xs univer-text-primary-600
+                                          group-hover:univer-flex
+                                          dark:hover:!univer-bg-gray-600
+                                        `}
+                                    >
+                                        <Tooltip title={localeService.t('definedName.updateButton')} placement="top">
+                                            <a
+                                                className={`
+                                                  univer-rounded univer-p-1
+                                                  hover:univer-bg-gray-100
+                                                `}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    closeInsertOpenKeyEditor(definedName.id);
+                                                }}
+                                            >
+                                                <PenIcon />
+                                            </a>
+                                        </Tooltip>
+                                        <Tooltip title={localeService.t('definedName.deleteButton')} placement="top">
+                                            <a
+                                                className={`
+                                                  univer-rounded univer-p-1 univer-text-red-600
+                                                  hover:univer-bg-gray-100
+                                                `}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    deleteDefinedName(definedName.id);
+                                                }}
+                                            >
+                                                <DeleteIcon />
+                                            </a>
+                                        </Tooltip>
+                                    </div>
+
                                 </div>
 
+                                <Confirm
+                                    visible={deleteConformKey === definedName.id}
+                                    onClose={handleDeleteClose}
+                                    onConfirm={() => { handleDeleteConfirm(definedName.id); }}
+                                >
+                                    {localeService.t('definedName.deleteConfirmText')}
+                                </Confirm>
+
+                                {definedName.id === editorKey && (
+                                    <DefinedNameInput
+                                        confirm={insertConfirm}
+                                        cancel={closeInput}
+                                        state={definedName.id === editorKey}
+                                        id={definedName.id}
+                                        inputId={definedName.id + index}
+                                        name={definedName.name}
+                                        formulaOrRefString={definedName.formulaOrRefString}
+                                        comment={definedName.comment}
+                                        localSheetId={definedName.localSheetId}
+                                    />
+                                )}
                             </div>
-
-                            <Confirm
-                                visible={deleteConformKey === definedName.id}
-                                onClose={handleDeleteClose}
-                                onConfirm={() => { handleDeleteConfirm(definedName.id); }}
-                            >
-                                {localeService.t('definedName.deleteConfirmText')}
-                            </Confirm>
-
-                            {definedName.id === editorKey && (
-                                <DefinedNameInput
-                                    confirm={insertConfirm}
-                                    cancel={closeInput}
-                                    state={definedName.id === editorKey}
-                                    id={definedName.id}
-                                    inputId={definedName.id + index}
-                                    name={definedName.name}
-                                    formulaOrRefString={definedName.formulaOrRefString}
-                                    comment={definedName.comment}
-                                    localSheetId={definedName.localSheetId}
-                                />
-                            )}
-                        </div>
-                    );
-                })}
+                        );
+                    })}
+                </div>
             </div>
         </div>
     );

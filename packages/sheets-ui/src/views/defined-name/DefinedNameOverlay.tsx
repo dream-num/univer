@@ -15,14 +15,13 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-
 import type { IDefinedNamesServiceParam } from '@univerjs/engine-formula';
 import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { borderBottomClassName, clsx, scrollbarClassName } from '@univerjs/design';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
 import { SetWorksheetShowCommand } from '@univerjs/sheets';
-import { ISidebarService, useDependency } from '@univerjs/ui';
-import { useEffect, useMemo, useState } from 'react';
+import { ISidebarService, useDependency, useVirtualList } from '@univerjs/ui';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { SidebarDefinedNameOperation } from '../../commands/operations/sidebar-defined-name.operation';
 import { DEFINED_NAME_CONTAINER } from './component-name';
 
@@ -78,6 +77,13 @@ export function DefinedNameOverlay({ search, isInputEvent }: { search: string; i
             : definedNames;
     }, [search, isInputEvent, definedNames]);
 
+    const listContainerRef = useRef<HTMLDivElement>(undefined!);
+    const [virtualDefinedNames, virtualActions] = useVirtualList(filteredDefinedNames, {
+        containerTarget: listContainerRef,
+        itemHeight: 30,
+        overscan: 6,
+    });
+
     const openSlider = () => {
         commandService.executeCommand(SidebarDefinedNameOperation.id, { value: 'open' });
     };
@@ -100,50 +106,55 @@ export function DefinedNameOverlay({ search, isInputEvent }: { search: string; i
 
     return (
         <div className="univer-w-[300px]">
-            <ul
-                className={clsx('univer-m-0 univer-max-h-[360px] univer-list-none univer-overflow-y-auto univer-p-0', scrollbarClassName)}
+            <div
+                ref={listContainerRef}
+                className={clsx('univer-max-h-[360px] univer-min-h-0 univer-overflow-y-auto', scrollbarClassName, {
+                    'univer-min-h-[30px]': filteredDefinedNames.length > 0,
+                })}
+                {...virtualActions.containerProps}
             >
-                {filteredDefinedNames.map((definedName, index) => {
-                    return (
-                        <li
-                            key={index}
-                            className={`
-                              univer-cursor-pointer univer-px-2 univer-transition-colors univer-duration-200
-                              hover:univer-bg-gray-100
-                              dark:hover:!univer-bg-gray-600
-                            `}
-                            onClick={() => { focusDefinedName(definedName); }}
-                        >
-                            <div
-                                className={clsx(`
-                                  univer-flex univer-items-center univer-justify-between univer-gap-2 univer-py-1
-                                `, borderBottomClassName)}
+                <div style={virtualActions.wrapperStyle}>
+                    {virtualDefinedNames.map(({ data: definedName, index }) => {
+                        return (
+                            <li
+                                key={index}
+                                className={`
+                                  univer-cursor-pointer univer-px-2 univer-transition-colors univer-duration-200
+                                  hover:univer-bg-gray-100
+                                  dark:hover:!univer-bg-gray-600
+                                `}
+                                onClick={() => { focusDefinedName(definedName); }}
                             >
                                 <div
-                                    className={`
-                                      univer-w-[50%] univer-flex-shrink-0 univer-truncate univer-text-sm
-                                      univer-text-gray-600
-                                      dark:!univer-text-gray-200
-                                    `}
-                                    title={definedName.name}
+                                    className={clsx(`
+                                      univer-flex univer-items-center univer-justify-between univer-gap-2 univer-py-1
+                                    `, borderBottomClassName)}
                                 >
-                                    {definedName.name}
+                                    <div
+                                        className={`
+                                          univer-w-[50%] univer-flex-shrink-0 univer-truncate univer-text-sm
+                                          univer-text-gray-600
+                                          dark:!univer-text-gray-200
+                                        `}
+                                        title={definedName.name}
+                                    >
+                                        {definedName.name}
+                                    </div>
+                                    <div
+                                        className={`
+                                          univer-w-[50%] univer-flex-shrink-0 univer-truncate univer-text-xs
+                                          univer-text-gray-400
+                                        `}
+                                        title={definedName.formulaOrRefString}
+                                    >
+                                        {definedName.formulaOrRefString}
+                                    </div>
                                 </div>
-                                <div
-                                    className={`
-                                      univer-w-[50%] univer-flex-shrink-0 univer-truncate univer-text-xs
-                                      univer-text-gray-400
-                                    `}
-                                    title={definedName.formulaOrRefString}
-                                >
-                                    {definedName.formulaOrRefString}
-                                </div>
-                            </div>
-                        </li>
-                    );
-                })}
-            </ul>
-
+                            </li>
+                        );
+                    })}
+                </div>
+            </div>
             <div
                 className={`
                   univer-cursor-pointer univer-p-2 univer-transition-colors univer-duration-200

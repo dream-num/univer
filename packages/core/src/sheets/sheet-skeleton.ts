@@ -84,15 +84,14 @@ export function createSheetGapTestConfig(overrides: Partial<ISheetGapConfig> = {
         defaultBackgroundColor: 'rgba(24, 119, 242, 0.08)',
         defaultStripeColor: 'rgba(24, 119, 242, 0.25)',
         rowGaps: {
-            1: { size: 40 },
-            2: { size: 20 },
-            3: { size: 40, color: 'rgba(245, 158, 11, 0.14)' },
-            6: { size: 304, color: 'rgba(16, 185, 129, 0.12)', stripeColor: 'rgba(5, 150, 105, 0.35)' },
+            1: { size: 6 },
+            3: { size: 10, color: 'rgba(245, 158, 11, 0.14)' },
+            6: { size: 14, color: 'rgba(16, 185, 129, 0.12)', stripeColor: 'rgba(5, 150, 105, 0.35)' },
         },
         colGaps: {
-            1: { size: 45 },
-            2: { size: 18, stripeColor: 'rgba(59, 130, 246, 0.35)' },
-            4: { size: 22, color: 'rgba(244, 63, 94, 0.12)', stripeColor: 'rgba(225, 29, 72, 0.30)' },
+            1: { size: 5 },
+            2: { size: 8, stripeColor: 'rgba(59, 130, 246, 0.35)' },
+            4: { size: 12, color: 'rgba(244, 63, 94, 0.12)', stripeColor: 'rgba(225, 29, 72, 0.30)' },
         },
     };
 

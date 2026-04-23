@@ -255,20 +255,13 @@ export class SheetScrollManagerService implements IRenderModule {
     }
 
     private _clearByParamAndNotify(param: IScrollStateSearchParam): void {
+        const defaultScrollState = this._getDefaultScrollState(param);
         this._setScrollState({
             ...param,
-            sheetViewStartRow: 0,
-            sheetViewStartColumn: 0,
-            offsetX: 0,
-            offsetY: 0,
+            ...defaultScrollState,
         });
 
-        this._emitRawScroll({
-            sheetViewStartRow: 0,
-            sheetViewStartColumn: 0,
-            offsetX: 0,
-            offsetY: 0,
-        });
+        this._emitRawScroll(defaultScrollState);
     }
 
     private _getCurrentScroll(param: Nullable<IScrollStateSearchParam>): IScrollState {
@@ -283,7 +276,18 @@ export class SheetScrollManagerService implements IRenderModule {
         }
         const { unitId, sheetId } = param;
         const currScrollState = this._scrollStateMap.get(unitId)?.get(sheetId);
-        return currScrollState || emptyState;
+        return currScrollState || this._getDefaultScrollState(param);
+    }
+
+    private _getDefaultScrollState(param: IScrollStateSearchParam): IScrollState {
+        const skeleton = this._sheetSkeletonManagerService.getSkeleton(param.sheetId);
+
+        return {
+            sheetViewStartRow: 0,
+            sheetViewStartColumn: 0,
+            offsetX: -(skeleton?.getColGapSize(0) ?? 0),
+            offsetY: -(skeleton?.getRowGapSize(0) ?? 0),
+        };
     }
 
     private _emitRawScroll(param: IScrollState): void {

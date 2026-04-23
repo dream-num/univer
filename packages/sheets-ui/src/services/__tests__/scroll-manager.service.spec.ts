@@ -171,4 +171,76 @@ describe('SheetScrollManagerService', () => {
             viewportScrollY: 30,
         });
     });
+
+    it('keeps the initial viewport at origin when gap 0 exists but no scroll has been applied', () => {
+        const injector = new Injector();
+        injector.add([
+            SheetSkeletonManagerService,
+            {
+                useValue: {
+                    getCurrentSkeleton: () => ({
+                        getCellWithCoordByIndex: (row: number, column: number, header?: boolean) => {
+                            expect(header).toBe(false);
+                            expect(row).toBe(0);
+                            expect(column).toBe(0);
+
+                            return {
+                                startY: 10,
+                                startX: 7,
+                            };
+                        },
+                        getRowGapSize: (row: number) => (row === 0 ? 10 : 0),
+                        getColGapSize: (column: number) => (column === 0 ? 7 : 0),
+                    }),
+                    getSkeleton: () => ({
+                        getRowGapSize: (row: number) => (row === 0 ? 10 : 0),
+                        getColGapSize: (column: number) => (column === 0 ? 7 : 0),
+                    }),
+                } as unknown as SheetSkeletonManagerService,
+            },
+        ]);
+        const service = injector.createInstance(SheetScrollManagerService, createRenderContext('u-1'));
+
+        service.setSearchParam({ unitId: 'u-1', sheetId: 's-1' });
+
+        expect(service.getCurrentScrollState()).toEqual({
+            sheetViewStartRow: 0,
+            sheetViewStartColumn: 0,
+            offsetX: -7,
+            offsetY: -10,
+        });
+        expect(service.calcViewportScrollFromRowColOffset({
+            ...service.getCurrentScrollState(),
+            scrollX: 0,
+            scrollY: 0,
+            viewportScrollX: 0,
+            viewportScrollY: 0,
+        })).toEqual({
+            viewportScrollX: 0,
+            viewportScrollY: 0,
+        });
+    });
+
+    it('falls back to current skeleton when a mock does not provide getSkeleton', () => {
+        const injector = new Injector();
+        injector.add([
+            SheetSkeletonManagerService,
+            {
+                useValue: {
+                    getCurrentSkeleton: () => ({
+                        getRowGapSize: (row: number) => (row === 0 ? 9 : 0),
+                        getColGapSize: (column: number) => (column === 0 ? 6 : 0),
+                    }),
+                } as unknown as SheetSkeletonManagerService,
+            },
+        ]);
+        const service = injector.createInstance(SheetScrollManagerService, createRenderContext('u-1'));
+
+        expect(service.getScrollStateByParam({ unitId: 'u-1', sheetId: 's-2' })).toEqual({
+            sheetViewStartRow: 0,
+            sheetViewStartColumn: 0,
+            offsetX: -6,
+            offsetY: -9,
+        });
+    });
 });

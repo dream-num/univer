@@ -220,4 +220,27 @@ describe('SheetScrollManagerService', () => {
             viewportScrollY: 0,
         });
     });
+
+    it('falls back to current skeleton when a mock does not provide getSkeleton', () => {
+        const injector = new Injector();
+        injector.add([
+            SheetSkeletonManagerService,
+            {
+                useValue: {
+                    getCurrentSkeleton: () => ({
+                        getRowGapSize: (row: number) => (row === 0 ? 9 : 0),
+                        getColGapSize: (column: number) => (column === 0 ? 6 : 0),
+                    }),
+                } as unknown as SheetSkeletonManagerService,
+            },
+        ]);
+        const service = injector.createInstance(SheetScrollManagerService, createRenderContext('u-1'));
+
+        expect(service.getScrollStateByParam({ unitId: 'u-1', sheetId: 's-2' })).toEqual({
+            sheetViewStartRow: 0,
+            sheetViewStartColumn: 0,
+            offsetX: -6,
+            offsetY: -9,
+        });
+    });
 });

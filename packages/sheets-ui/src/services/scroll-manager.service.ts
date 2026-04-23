@@ -280,13 +280,16 @@ export class SheetScrollManagerService implements IRenderModule {
     }
 
     private _getDefaultScrollState(param: IScrollStateSearchParam): IScrollState {
-        const skeleton = this._sheetSkeletonManagerService.getSkeleton(param.sheetId);
+        const skeleton = this._sheetSkeletonManagerService.getSkeleton?.(param.sheetId)
+            ?? this._sheetSkeletonManagerService.getCurrentSkeleton?.();
+        const colGapSize = skeleton?.getColGapSize(0) ?? 0;
+        const rowGapSize = skeleton?.getRowGapSize(0) ?? 0;
 
         return {
             sheetViewStartRow: 0,
             sheetViewStartColumn: 0,
-            offsetX: -(skeleton?.getColGapSize(0) ?? 0),
-            offsetY: -(skeleton?.getRowGapSize(0) ?? 0),
+            offsetX: colGapSize === 0 ? 0 : -colGapSize,
+            offsetY: rowGapSize === 0 ? 0 : -rowGapSize,
         };
     }
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Dependency, DependencyIdentifier, IDisposable, Nullable, UnitModel } from '@univerjs/core';
+import type { Dependency, DependencyIdentifier, ICreateUnitOptions, IDisposable, Nullable, UnitModel } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import type { BaseObject } from '../base-object';
 import type { DocComponent } from '../components/docs/doc-component';
@@ -37,7 +37,7 @@ export interface IRenderManagerService extends IDisposable {
      * @param unitId
      * @returns renderUnit:IRender
      */
-    createRender(unitId: string): IRender;
+    createRender(unitId: string, createUnitOptions?: ICreateUnitOptions): IRender;
     removeRender(unitId: string): void;
     /**
      * Get RenderUnit By Id, RenderUnit implements IRender
@@ -196,8 +196,8 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
      * @param unitId
      * @returns renderUnit:IRender
      */
-    createRender(unitId: string): IRender {
-        const renderer = this._createRender(unitId, this._injector.createInstance(Engine, unitId, undefined));
+    createRender(unitId: string, createUnitOptions?: ICreateUnitOptions): IRender {
+        const renderer = this._createRender(unitId, this._injector.createInstance(Engine, unitId, undefined), true, createUnitOptions);
         this._renderCreated$.next(renderer);
         return renderer;
     }
@@ -232,7 +232,7 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
      * @param isMainScene
      * @returns renderUnit:IRender
      */
-    protected _createRender(unitId: string, engine: Engine, isMainScene: boolean = true): IRender {
+    protected _createRender(unitId: string, engine: Engine, isMainScene: boolean = true, createUnitOptions?: ICreateUnitOptions): IRender {
         const existItem = this.getRenderById(unitId);
         let shouldDestroyEngine = true;
 
@@ -264,6 +264,7 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
                 engine,
                 scene,
                 isMainScene,
+                createUnitOptions,
             });
             this._addRenderUnit(unitId, renderUnit);
 

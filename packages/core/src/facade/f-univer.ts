@@ -261,7 +261,8 @@ export class FUniver extends Disposable {
         this.disposeWithMe(
             this.registerEventHandler(
                 this.Event.DocCreated,
-                () => univerInstanceService.unitAdded$.subscribe((unit) => {
+                () => univerInstanceService.unitAdded$.subscribe((event) => {
+                    const { unit } = event;
                     if (unit.type === UniverInstanceType.UNIVER_DOC) {
                         const doc = unit as DocumentDataModel;
                         const docUnit = injector.createInstance(FDoc, doc);

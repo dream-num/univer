@@ -250,7 +250,8 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
         this.disposeWithMe(
             this.registerEventHandler(
                 this.Event.WorkbookCreated,
-                () => univerInstanceService.unitAdded$.subscribe((unit) => {
+                () => univerInstanceService.unitAdded$.subscribe((event) => {
+                    const { unit } = event;
                     if (unit.type === UniverInstanceType.UNIVER_SHEET) {
                         const workbook = unit as Workbook;
                         const workbookUnit = injector.createInstance(FWorkbook, workbook);
@@ -711,8 +712,8 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
     }
 
     override onUniverSheetCreated(callback: (workbook: FWorkbook) => void): IDisposable {
-        const subscription = this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
-            const fworkbook = this._injector.createInstance(FWorkbook, workbook);
+        const subscription = this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((event) => {
+            const fworkbook = this._injector.createInstance(FWorkbook, event.unit);
             callback(fworkbook);
         });
 

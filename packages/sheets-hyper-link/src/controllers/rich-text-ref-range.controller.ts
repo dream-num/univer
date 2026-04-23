@@ -174,7 +174,8 @@ export class SheetsHyperLinkRichTextRefRangeController extends Disposable {
             handleWorkbook(workbook);
         });
         this.disposeWithMe(
-            this._univerInstanceService.unitAdded$.subscribe((unit) => {
+            this._univerInstanceService.unitAdded$.subscribe((event) => {
+                const { unit } = event;
                 if (unit.type === UniverInstanceType.UNIVER_SHEET) {
                     const workbook = unit as Workbook;
                     handleWorkbook(workbook);

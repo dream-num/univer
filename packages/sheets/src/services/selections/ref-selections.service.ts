@@ -69,7 +69,8 @@ export class RefSelectionsService extends SheetsSelectionsService {
         aliveWorkbooks.forEach((workbook) => this._ensureWorkbookSelection(workbook.getUnitId()));
 
         const workbooks$ = new BehaviorSubject(aliveWorkbooks);
-        this.disposeWithMe(this._instanceSrv.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
+        this.disposeWithMe(this._instanceSrv.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((event) => {
+            const { unit: workbook } = event;
             this._ensureWorkbookSelection(workbook.getUnitId());
             workbooks$.next([...workbooks$.getValue(), workbook]);
         }));

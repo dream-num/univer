@@ -129,7 +129,7 @@ export class UpdateFormulaController extends Disposable {
         );
 
         this.disposeWithMe(this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET)
-            .subscribe((unit) => this._handleWorkbookAdded(unit)));
+            .subscribe((event) => this._handleWorkbookAdded(event.unit)));
         this.disposeWithMe(this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET)
             .pipe(map((unit) => unit.getUnitId()))
             .subscribe((unitId) => this._handleWorkbookDisposed(unitId)));

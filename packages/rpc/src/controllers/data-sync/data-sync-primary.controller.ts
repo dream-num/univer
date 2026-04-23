@@ -89,7 +89,8 @@ export class DataSyncPrimaryController extends RxDisposable {
     }
 
     private _init(): void {
-        this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(takeUntil(this.dispose$)).subscribe((sheet) => {
+        this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(takeUntil(this.dispose$)).subscribe((event) => {
+            const { unit: sheet } = event;
             this._syncingUnits.add(sheet.getUnitId());
 
             // If a sheet is created, it should sync the data to the worker thread.

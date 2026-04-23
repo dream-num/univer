@@ -48,11 +48,11 @@ export class SlideRenderService extends RxDisposable {
     }
 
     private _initSlideDataListener(): void {
-        this._instanceSrv.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SLIDE)
+        this._instanceSrv.getTypeOfUnitAdded$<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE)
             .pipe(takeUntil(this.dispose$))
-            .subscribe((slideModel) => {
+            .subscribe((event) => {
                 // TODO when does this function get called?
-                this._createRenderer(slideModel?.getUnitId());
+                this._createRenderer(event.unit.getUnitId());
             });
 
         this._instanceSrv.getAllUnitsForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE).forEach((slideModel) => {

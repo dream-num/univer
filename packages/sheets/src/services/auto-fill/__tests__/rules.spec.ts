@@ -104,6 +104,22 @@ describe('auto-fill rules', () => {
         );
         expect(fallbackCopy?.length).toBe(4);
         expect(`${fallbackCopy?.[0]?.v}`).toBe('A-001');
+
+        const oneCellWithPadStart0 = extendNumberRule.applyFunctions?.[AUTO_FILL_APPLY_TYPE.SERIES]?.(
+            { data: [{ v: 'A2B3C009D' }], index: [0] },
+            4,
+            Direction.DOWN,
+            {} as any
+        );
+        expect(oneCellWithPadStart0?.map((c) => `${c?.v}`)).toEqual(['A2B3C010D', 'A2B3C011D', 'A2B3C012D', 'A2B3C013D']);
+
+        const multipleCellsWithPadStart0 = extendNumberRule.applyFunctions?.[AUTO_FILL_APPLY_TYPE.SERIES]?.(
+            { data: [{ v: 'A2B3C003D' }, { v: 'A2B3C002D' }, { v: 'A2B3C001D' }, { v: 'A2B3C000D' }, { v: 'A2B3C001D' }, { v: 'A2B3C002D' }], index: [0, 1, 2, 3, 4, 5] },
+            4,
+            Direction.DOWN,
+            {} as any
+        );
+        expect(multipleCellsWithPadStart0?.map((c) => `${c?.v}`)).toEqual(['A2B3C003D', 'A2B3C004D', 'A2B3C005D', 'A2B3C006D']);
     });
 
     it('chinese-number rule should handle normal numbers and week cycle', () => {

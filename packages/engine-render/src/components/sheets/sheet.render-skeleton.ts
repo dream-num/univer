@@ -183,10 +183,14 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                 this.makeDirty(true);
             })
         );
+    }
 
-        this.disposeWithMe(this.worksheet.__registerGetCellHeight((row, col) => {
-            return this.calculateAutoHeightForCell(row, col) ?? 0;
-        }));
+    registerGetCellHeight() {
+        this.disposeWithMe(
+            this.worksheet.__registerGetCellHeight((row, col) => {
+                return this.calculateAutoHeightForCell(row, col) ?? 0;
+            })
+        );
     }
 
     setScene(scene: Scene) {

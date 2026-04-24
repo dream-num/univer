@@ -64,7 +64,6 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @Inject(IConfigService) private readonly _configService: IConfigService,
-
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @Inject(SheetsRenderService) private readonly _sheetRenderService: SheetsRenderService,
         @ICommandService private readonly _commandService: ICommandService,

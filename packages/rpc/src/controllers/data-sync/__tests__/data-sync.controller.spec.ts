@@ -43,7 +43,7 @@ function buildRemoteChannel(target: Record<string, (...args: unknown[]) => unkno
 
 describe('data-sync controllers', () => {
     it('DataSyncPrimaryController should sync add/dispose/mutation with branch guards', async () => {
-        const added$ = new Subject<{ getUnitId(): string; getSnapshot(): unknown }>();
+        const added$ = new Subject<{ unit: { getUnitId(): string; getSnapshot(): unknown } }>();
         const disposed$ = new Subject<{ getUnitId(): string }>();
         let commandCallback: ((commandInfo: unknown, options?: unknown) => void) | undefined;
         const dependencies: Array<[unknown, IDependencyFactory]> = [];
@@ -109,7 +109,7 @@ describe('data-sync controllers', () => {
             getUnitId: () => 'unit-1',
             getSnapshot: () => ({ snapshot: true }),
         };
-        added$.next(workbook);
+        added$.next({ unit: workbook });
         await Promise.resolve();
         expect(remoteInstanceImpl.createInstance).toHaveBeenCalledWith({
             unitID: 'unit-1',

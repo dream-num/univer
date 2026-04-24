@@ -190,8 +190,8 @@ export class FormulaEditorController extends RxDisposable {
 
     private _syncEditorSize() {
         // this._univerInstanceService.
-        const addFOrmulaBar$ = this._univerInstanceService.unitAdded$.pipe(filter((unit) => unit.getUnitId() === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY));
-        this.disposeWithMe(combineLatest([this._formulaEditorManagerService.position$, addFOrmulaBar$]).subscribe(([position]) => {
+        const addFormulaBar$ = this._univerInstanceService.unitAdded$.pipe(filter((event) => event.unit.getUnitId() === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY));
+        this.disposeWithMe(combineLatest([this._formulaEditorManagerService.position$, addFormulaBar$]).subscribe(([position]) => {
             if (!position) return this._clearScheduledCallback();
             const editorObject = getEditorObject(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, this._renderManagerService);
             const formulaEditorDataModel = this._univerInstanceService.getUniverDocInstance(

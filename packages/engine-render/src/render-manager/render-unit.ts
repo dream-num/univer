@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Dependency, DependencyIdentifier, IDisposable, Nullable, UnitModel, UniverInstanceType } from '@univerjs/core';
+import type { Dependency, DependencyIdentifier, ICreateUnitOptions, IDisposable, Nullable, UnitModel, UniverInstanceType } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import type { Engine } from '../engine';
 import type { Scene } from '../scene';
@@ -99,7 +99,7 @@ export class RenderUnit extends Disposable implements IRender {
     get components(): Map<string, RenderComponentType> { return this._renderContext.components; }
 
     constructor(
-        init: Pick<IRenderContext, 'engine' | 'scene' | 'isMainScene' | 'unit'>,
+        init: Pick<IRenderContext, 'engine' | 'scene' | 'isMainScene' | 'unit'> & { createUnitOptions?: ICreateUnitOptions },
         @Inject(Injector) parentInjector: Injector
     ) {
         super();
@@ -119,6 +119,10 @@ export class RenderUnit extends Disposable implements IRender {
             activate: () => this._activated$.next(true),
             deactivate: () => this._activated$.next(false),
         };
+
+        if (init.createUnitOptions?.makeCurrent === false) {
+            this.deactivate();
+        }
     }
 
     override dispose(): void {

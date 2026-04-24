@@ -108,8 +108,8 @@ describe('UniverInstanceService', () => {
 
     it('should create units, set current unit and expose lookup APIs', () => {
         const added: string[] = [];
-        service.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((unit) => {
-            added.push(unit.getUnitId());
+        service.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((event) => {
+            added.push(event.unit.getUnitId());
         });
 
         const workbook = service.createUnit<Partial<IWorkbookData>, WorkbookModel>(UniverInstanceType.UNIVER_SHEET, createWorkbookData());

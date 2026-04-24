@@ -60,7 +60,7 @@ export class SheetSkeletonService extends Disposable {
 
     private _init() {
         this.disposeWithMe(
-            this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => this._initWorkbookSkeleton(workbook))
+            this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((event) => this._initWorkbookSkeleton(event.unit))
         );
 
         this.disposeWithMe(

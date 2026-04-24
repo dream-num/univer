@@ -76,7 +76,7 @@ describe('RefSelectionsService', () => {
     const workbookA = createWorkbook('wb-a');
     const workbookB = createWorkbook('wb-b');
 
-    let add$: Subject<Workbook>;
+    let add$: Subject<{ unit: Workbook }>;
     let disposed$: Subject<Workbook>;
     let instanceService: {
         getAllUnitsForType: ReturnType<typeof vi.fn>;
@@ -87,7 +87,7 @@ describe('RefSelectionsService', () => {
     let service: TestRefSelectionsService;
 
     beforeEach(() => {
-        add$ = new Subject<Workbook>();
+        add$ = new Subject<{ unit: Workbook }>();
         disposed$ = new Subject<Workbook>();
         instanceService = {
             getAllUnitsForType: vi.fn(() => [workbookA]),
@@ -126,7 +126,7 @@ describe('RefSelectionsService', () => {
         expect(endEvents).toEqual(['a-end']);
         expect(setEvents).toEqual(['a-set']);
 
-        add$.next(workbookB);
+        add$.next({ unit: workbookB });
         const modelB = service.modelMap.get('wb-b')!;
         modelB.selectionMoving$.next('b-moving');
         expect(movingEvents).toEqual(['a-moving', 'b-moving']);

@@ -81,12 +81,14 @@ export class ResourceLoaderService extends Disposable implements IResourceLoader
         this.disposeWithMe(this._resourceManagerService.register$.subscribe((hook) => handleHookAdd(hook)));
 
         this.disposeWithMe(
-            this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
+            this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((event) => {
+                const { unit: workbook } = event;
                 this._resourceManagerService.loadResources(workbook.getUnitId(), workbook.getSnapshot().resources);
             })
         );
         this.disposeWithMe(
-            this._univerInstanceService.getTypeOfUnitAdded$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC).subscribe((doc) => {
+            this._univerInstanceService.getTypeOfUnitAdded$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC).subscribe((event) => {
+                const { unit: doc } = event;
                 const unitId = doc.getUnitId();
                 if (!isInternalEditorID(unitId)) {
                     this._resourceManagerService.loadResources(doc.getUnitId(), doc.getSnapshot().resources);

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDisposable, Workbook } from '@univerjs/core';
+import type { ICreateUnitOptions, IDisposable, Workbook } from '@univerjs/core';
 import {
     IContextService,
     Inject,
@@ -77,7 +77,7 @@ export class SheetsRenderService extends RxDisposable {
     private _initWorkbookListener(): void {
         this._instanceSrv.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET)
             .pipe(takeUntil(this.dispose$))
-            .subscribe((workbook) => this._createRenderer(workbook));
+            .subscribe((event) => this._createRenderer(event.unit, event.options));
         this._instanceSrv.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET)
             .forEach((workbook) => this._createRenderer(workbook));
         this._instanceSrv.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET)
@@ -85,7 +85,7 @@ export class SheetsRenderService extends RxDisposable {
             .subscribe((workbook) => this._disposeRenderer(workbook));
     }
 
-    private _createRenderer(workbook: Workbook): void {
+    private _createRenderer(workbook: Workbook, createUnitOptions?: ICreateUnitOptions): void {
         const unitId = workbook.getUnitId();
         this._renderManagerService.created$.subscribe((renderer) => {
             if (renderer.unitId === unitId) {
@@ -94,7 +94,7 @@ export class SheetsRenderService extends RxDisposable {
             }
         });
 
-        this._renderManagerService.createRender(unitId);
+        this._renderManagerService.createRender(unitId, createUnitOptions);
     }
 
     private _disposeRenderer(workbook: Workbook): void {

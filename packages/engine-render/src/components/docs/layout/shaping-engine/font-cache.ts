@@ -226,8 +226,19 @@ export class FontCache {
      */
     static getMeasureText(content: string, fontString: string): IMeasureTextCache {
         if (!this._context) {
-            const canvas = document.createElement('canvas');
-            this._context = canvas.getContext('2d')!;
+            try {
+                const canvas = document.createElement('canvas');
+                this._context = canvas.getContext('2d')!;
+            } catch (error) {
+                // In case of any error, return default value to avoid crash.
+                return {
+                    width: 0,
+                    fontBoundingBoxAscent: 0,
+                    fontBoundingBoxDescent: 0,
+                    actualBoundingBoxAscent: 0,
+                    actualBoundingBoxDescent: 0,
+                };
+            }
         }
         if (!this._context) {
             return {

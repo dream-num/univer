@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.21.1](https://github.com/dream-num/univer/compare/v0.21.0...v0.21.1) (2026-04-25)
+
+
+### Bug Fixes
+
+* **autofill:** fix extend number rule of auto fill ([#6837](https://github.com/dream-num/univer/issues/6837)) ([8fe1122](https://github.com/dream-num/univer/commit/8fe112264edc8cb360ae50f507dc5ab3e9234eb6))
+* **conditionformat:** fix condition format rule stopif true err ([#6823](https://github.com/dream-num/univer/issues/6823)) ([79ac910](https://github.com/dream-num/univer/commit/79ac910552223263b4f2ad5280eb009490670f75))
+* **definedName:** optimize performance issues related to defined name ([#6829](https://github.com/dream-num/univer/issues/6829)) ([8c15220](https://github.com/dream-num/univer/commit/8c15220ee9f395224b71d1eca0cac8f73efc98b3))
+* **drawing:** fix drawing visible in import ([#6822](https://github.com/dream-num/univer/issues/6822)) ([e84d694](https://github.com/dream-num/univer/commit/e84d6949855c4f5d14caf3e6f4cc9449c47c5f8c))
+* **engine-render:** add .js extension to opentype.js deep import for Node.js ESM compatibility ([#6835](https://github.com/dream-num/univer/issues/6835)) ([8c226ed](https://github.com/dream-num/univer/commit/8c226edff2821c33560681d4d18fc3216f44e5b2))
+* fix handleWorksheetRangePermissionIsEmpty error ([#6821](https://github.com/dream-num/univer/issues/6821)) ([da009a8](https://github.com/dream-num/univer/commit/da009a83b78dfc61ae2ad34f0e6d2dc0a97b7257))
+* fix the `document is not defined` error that occurred when using `FRange.setValue` in a Node.js environment ([#6834](https://github.com/dream-num/univer/issues/6834)) ([0b1ac31](https://github.com/dream-num/univer/commit/0b1ac31cdef372ac5ae7867c389218dd1e1a9914))
+* fix the issue of drawings will remove when creating a unit with makeCurrent is false ([#6833](https://github.com/dream-num/univer/issues/6833)) ([efb3980](https://github.com/dream-num/univer/commit/efb39805b1c638b2973cac1623bfdab775362a86))
+* **scroll:** gap config ([#6828](https://github.com/dream-num/univer/issues/6828)) ([48fb4c2](https://github.com/dream-num/univer/commit/48fb4c254dc3731b558d84b3f3dfac457c5df17b))
+* **scroll:** initial for gap zero ([#6832](https://github.com/dream-num/univer/issues/6832)) ([6e8f767](https://github.com/dream-num/univer/commit/6e8f7675f5cb602bc0b0c20d287e695ab635965a))
+* **sheets-ui:** fix incorrect JSDoc for attachRangePopup ([#6824](https://github.com/dream-num/univer/issues/6824)) ([dba94e9](https://github.com/dream-num/univer/commit/dba94e905374dde44f211271e279d16a5c473ee9))
+* **sheets-ui:** restore name box range naming flow ([#6705](https://github.com/dream-num/univer/issues/6705)) ([38eec33](https://github.com/dream-num/univer/commit/38eec3395fe35d396060903363668e313435a98b))
+
 # [0.21.0](https://github.com/dream-num/univer/compare/v0.20.1...v0.21.0) (2026-04-18)
 
 

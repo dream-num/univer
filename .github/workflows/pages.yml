@@ -1,0 +1,66 @@
+name: 🌐 Deploy to GitHub Pages
+
+on:
+    push:
+        branches: [dev]
+        tags:
+            - 'v*.*.*'
+            - 'v*.*.*-alpha.*'
+            - 'v*.*.*-beta.*'
+            - 'v*.*.*-rc.*'
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+permissions:
+    contents: write
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+              with:
+                  persist-credentials: false
+
+            - name: Setup Node.js
+              uses: ./.github/actions/setup-node
+
+            # ================= Deploy Demo =================
+            - name: 📦 Build demo
+              run: pnpm build:demo
+
+            - name: Copy demo to workspace
+              run: |
+                  mkdir -p dist
+                  cp -r ./examples/local/* dist
+
+            - name: 📦 Build react16 demo
+              run: |
+                  pnpm use:react16
+                  pnpm build:demo
+
+            - name: Copy react16 demo
+              run: |
+                  mkdir -p dist/react16
+                  cp -r ./examples/local/* dist/react16
+
+            # ================= Deploy Storybook =================
+            - name: 📦 Build storybook
+              run: pnpm storybook:build
+
+            - name: Copy storybook
+              run: |
+                  mkdir -p dist/storybook
+                  cp -r ./common/storybook/storybook-static/* dist/storybook
+
+            # ================= Deploy to GitHub Pages =================
+            - name: 🚀 Deploy to GitHub Pages
+              uses: peaceiris/actions-gh-pages@v4
+              with:
+                  github_token: ${{ secrets.GITHUB_TOKEN }}
+                  publish_dir: ./dist
+                  keep_files: true

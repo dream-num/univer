@@ -5,6 +5,7 @@ on:
         branches: [dev]
     pull_request:
         branches: [dev]
+        types: [opened, synchronize, reopened, closed]
 
 permissions:
     actions: write
@@ -24,10 +25,12 @@ jobs:
                   PR_ID: ${{ github.event.pull_request.number || '' }}
                   PR_REF: ${{ github.head_ref || github.ref_name }}
                   PR_REPO: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+                  PR_STATE: ${{ github.event.pull_request.state || '' }}
               run: |
                   printf '%s\n' "$PR_ID" > ./pr-id.txt
                   printf '%s\n' "$PR_REF" > ./pr-ref.txt
                   printf '%s\n' "$PR_REPO" > ./pr-repo.txt
+                  printf '%s\n' "$PR_STATE" > ./pr-state.txt
 
             - name: Upload PR number
               uses: actions/upload-artifact@v4
@@ -46,3 +49,9 @@ jobs:
               with:
                   name: pr-repo
                   path: ./pr-repo.txt
+
+            - name: Upload PR state
+              uses: actions/upload-artifact@v4
+              with:
+                  name: pr-state
+                  path: ./pr-state.txt

@@ -45,7 +45,7 @@ export interface IParsedCellValueByClipboard {
         p?: IDocumentData;
         v?: string;
     };
-
+    numfmtPattern?: string;
 }
 
 export interface IUniverSheetCopyDataModel {

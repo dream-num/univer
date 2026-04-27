@@ -20,7 +20,7 @@ import { BooleanNumber } from '@univerjs/core';
 import { extractNodeStyle as getInlineStyle } from '../parse-node-style';
 import { getParagraphStyle } from '../utils';
 
-const wordPastePlugin: IPastePlugin = {
+const WordPastePlugin: IPastePlugin = {
     name: 'univer-doc-paste-plugin-word',
     checkPasteType(html: string) {
         return /word|mso/i.test(html);
@@ -65,4 +65,4 @@ const wordPastePlugin: IPastePlugin = {
     ],
 };
 
-export default wordPastePlugin;
+export default WordPastePlugin;

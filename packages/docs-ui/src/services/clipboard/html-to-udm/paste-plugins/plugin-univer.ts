@@ -18,7 +18,7 @@ import type { IParagraph } from '@univerjs/core';
 import type { IPastePlugin } from './type';
 import { getParagraphStyle } from '../utils';
 
-const univerPastePlugin: IPastePlugin = {
+const UniverPastePlugin: IPastePlugin = {
     name: 'univer-doc-paste-plugin-univer',
     checkPasteType(html: string) {
         return /UniverNormal/i.test(html);
@@ -54,4 +54,4 @@ const univerPastePlugin: IPastePlugin = {
     ],
 };
 
-export default univerPastePlugin;
+export default UniverPastePlugin;

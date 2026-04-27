@@ -20,7 +20,7 @@ import { BooleanNumber } from '@univerjs/core';
 import { extractNodeStyle as getInlineStyle } from '../parse-node-style';
 
 export const LarkPastePlugin: IPastePlugin = {
-    name: 'univer-doc-paste-plugin-lark',
+    name: 'univer-sheet-paste-plugin-lark',
     checkPasteType(html: string) {
         return /lark-record-clipboard/i.test(html);
     },

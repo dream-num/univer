@@ -55,14 +55,14 @@ import { CutContentCommand, InnerPasteCommand } from '../../commands/commands/cl
 import { getCursorWhenDelete } from '../../commands/commands/doc-delete.command';
 import { copyContentCache, extractId, genId } from './copy-content-cache';
 import { HtmlToUDMService } from './html-to-udm/converter';
-import PastePluginLark from './html-to-udm/paste-plugins/plugin-lark';
-import PastePluginUniver from './html-to-udm/paste-plugins/plugin-univer';
-import PastePluginWord from './html-to-udm/paste-plugins/plugin-word';
+import LarkPastePlugin from './html-to-udm/paste-plugins/plugin-lark';
+import UniverPastePlugin from './html-to-udm/paste-plugins/plugin-univer';
+import WordPastePlugin from './html-to-udm/paste-plugins/plugin-word';
 import { UDMToHtmlService } from './udm-to-html/convertor';
 
-HtmlToUDMService.use(PastePluginWord);
-HtmlToUDMService.use(PastePluginLark);
-HtmlToUDMService.use(PastePluginUniver);
+HtmlToUDMService.use(LarkPastePlugin);
+HtmlToUDMService.use(UniverPastePlugin);
+HtmlToUDMService.use(WordPastePlugin);
 
 export interface IClipboardPropertyItem { }
 

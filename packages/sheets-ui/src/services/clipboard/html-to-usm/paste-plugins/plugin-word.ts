@@ -21,7 +21,7 @@ import { extractNodeStyle as getInlineStyle } from '../parse-node-style';
 import { getParagraphStyle } from '../utils';
 
 export const WordPastePlugin: IPastePlugin = {
-    name: 'univer-doc-paste-plugin-word',
+    name: 'univer-sheet-paste-plugin-word',
     checkPasteType(html: string) {
         return /word|mso/i.test(html);
     },

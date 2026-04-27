@@ -18,7 +18,7 @@ import type { IPastePlugin } from './type';
 import { BooleanNumber } from '@univerjs/core';
 import { extractNodeStyle as getInlineStyle } from '../parse-node-style';
 
-const wordPastePlugin: IPastePlugin = {
+const LarkPastePlugin: IPastePlugin = {
     name: 'univer-doc-paste-plugin-lark',
     checkPasteType(html: string) {
         return /lark-record-clipboard/i.test(html);
@@ -60,4 +60,4 @@ const wordPastePlugin: IPastePlugin = {
     ],
 };
 
-export default wordPastePlugin;
+export default LarkPastePlugin;

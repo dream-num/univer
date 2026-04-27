@@ -31,7 +31,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SheetSkeletonManagerService } from '../../sheet-skeleton-manager.service';
 import { ISheetClipboardService } from '../clipboard.service';
 import { clipboardTestBed } from './clipboard-test-bed';
-import { excelSample, excelSample2, excelSample3, excelSample4, excelSample5, excelSample6 } from './constant';
+import { excelSample, excelSample2, excelSample3, excelSample4, excelSample5, excelSample6, excelSample7 } from './constant';
 
 describe('Test clipboard', () => {
     let univer: Univer;
@@ -451,6 +451,41 @@ describe('Test clipboard', () => {
             // space char code is 32(' '), no-break space char code is 160(\u00A0)
             expect(cellValue?.v).toMatch(/[ \u00A0]{2}1[ \u00A0]{3}3[ \u00A0]{3}/);
             expect(cellValue?.t).toBe(CellValueType.STRING);
+        });
+
+        it('copy value is (30), (30,303,003,030), 3.14, 2015/2/2, 3000%, ¥ 1,234.57', async () => {
+            const worksheet = get(IUniverInstanceService).getUniverSheetInstance('test')?.getSheetBySheetId('sheet1');
+            if (!worksheet) return false;
+
+            // set selection to K1:L1
+            const selectionManager = get(SheetsSelectionsService);
+            selectionManager.addSelections([
+                {
+                    range: {
+                        startRow: 0,
+                        startColumn: 0,
+                        endRow: 0,
+                        endColumn: 0,
+                        rangeType: RANGE_TYPE.NORMAL,
+                    },
+                    primary: null,
+                    style: null,
+                },
+            ]);
+
+            // paste data, excelSample2 value is 000123456
+            const res = await sheetClipboardService.legacyPaste(excelSample7);
+            expect(res).toBeTruthy();
+
+            // check the values
+            const cellValues = getValues(0, 0, 5, 0);
+
+            expect(cellValues?.[0]?.[0]?.v).toBe(-30);
+            expect(cellValues?.[1]?.[0]?.v).toBe(-30303003030);
+            expect(cellValues?.[2]?.[0]?.v).toBe(3.14);
+            expect(cellValues?.[3]?.[0]?.v).toBe(42037);
+            expect(cellValues?.[4]?.[0]?.v).toBe(30);
+            expect(cellValues?.[5]?.[0]?.v).toBe(1234.57);
         });
     });
 });

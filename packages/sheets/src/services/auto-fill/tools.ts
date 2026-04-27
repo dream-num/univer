@@ -164,37 +164,37 @@ function isChnNumber(txt?: string) {
     return isChnNumber;
 }
 
-function matchExtendNumber(txt?: string) {
+function matchExtendNumber(txt?: string): {
+    isExtendNumber: false;
+} | {
+    isExtendNumber: true;
+    rawMatchTxt: string;
+    matchNumber: number;
+    beforeTxt: string;
+    afterTxt: string;
+} {
     if (!txt) {
-        return {
-            isExtendNumber: false,
-        };
+        return { isExtendNumber: false };
     }
-    const reg = /0|([1-9]+[0-9]*)/g;
-    const isExtendNumber = reg.test(txt);
 
-    if (isExtendNumber) {
-        const match = txt.match(reg);
-        if (match && match.length > 0) {
-            const matchTxt = match[match.length - 1];
-            const matchIndex = txt.lastIndexOf(matchTxt);
-            const beforeTxt = txt.substr(0, matchIndex);
-            const afterTxt = txt.substr(matchIndex + matchTxt.length);
+    const matches = [...txt.matchAll(/\d+/g)];
+    if (!matches.length) {
+        return { isExtendNumber: false };
+    };
 
-            return {
-                isExtendNumber: true,
-                matchTxt: Number(matchTxt),
-                beforeTxt,
-                afterTxt,
-            };
-        }
-        return {
-            isExtendNumber: false,
-        };
-    }
+    const last = matches[matches.length - 1];
+    const rawMatchTxt = last[0];
+    const index = last.index;
+
+    const beforeTxt = txt.substring(0, index);
+    const afterTxt = txt.substring(index + rawMatchTxt.length);
 
     return {
-        isExtendNumber,
+        isExtendNumber: true,
+        rawMatchTxt,
+        matchNumber: Number(rawMatchTxt),
+        beforeTxt,
+        afterTxt,
     };
 }
 
@@ -277,17 +277,29 @@ function getLenS(indexArr: any[], rsd: number) {
  * equal diff
  */
 function isEqualDiff(arr: number[]) {
-    let diff = true;
-    const step = arr[1] - arr[0];
+    if (arr.length < 3) return true;
 
-    for (let i = 1; i < arr.length; i++) {
-        if (arr[i] - arr[i - 1] !== step) {
-            diff = false;
-            break;
+    let step = arr[1] - arr[0];
+    let changeStep = false;
+
+    for (let i = 2; i < arr.length; i++) {
+        const currentStep = arr[i] - arr[i - 1];
+
+        if (currentStep !== step) {
+            if (changeStep) {
+                return false;
+            }
+
+            if (currentStep !== -step) {
+                return false;
+            }
+
+            step = currentStep;
+            changeStep = true;
         }
     }
 
-    return diff;
+    return true;
 }
 
 function getDataIndex(csLen: number, asLen: number, indexArr: number[]) {
@@ -467,28 +479,38 @@ function forecast(x: number, yArr: number[], xArr: number[], forward = true) {
 
 function fillExtendNumber(data: Array<Nullable<ICellData>>, len: number, step: number) {
     const applyData = [];
-    const reg = /0|([1-9]+[0-9]*)/g;
+
+    const lastData = data[data.length - 1];
+    const matchResult = matchExtendNumber(`${lastData?.v}`);
+
+    if (!matchResult.isExtendNumber) {
+        return fillCopy(data, len);
+    }
+
+    const { matchNumber, rawMatchTxt, beforeTxt, afterTxt } = matchResult;
+    const width = rawMatchTxt.length;
 
     for (let i = 1; i <= len; i++) {
         const index = (i - 1) % data.length;
-        const d = Tools.deepClone(data[index]);
 
+        const d = Tools.deepClone(data[index]);
         removeCellCustom(d);
 
-        const last = `${data[data.length - 1]?.v}`;
-        if (!last) continue;
+        if (!d || !d.v) {
+            continue;
+        }
 
-        const match = last?.match(reg);
-        const lastTxt = match?.[match.length - 1];
-        if (!lastTxt) continue;
+        const num = Math.abs(matchNumber + step * i);
 
-        const num = Math.abs(Number(lastTxt) + step * i);
-        const lastIndex = last.lastIndexOf(lastTxt);
-        const valueTxt = last.substr(0, lastIndex) + num.toString() + last.substr(lastIndex + lastTxt.length);
+        let numStr = num.toString();
+        if (numStr.length < width) {
+            numStr = numStr.padStart(width, '0');
+        }
+
+        const valueTxt = `${beforeTxt}${numStr}${afterTxt}`;
 
         if (d) {
             d.v = valueTxt;
-
             applyData.push(d);
         }
     }

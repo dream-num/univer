@@ -18,7 +18,7 @@ import type { IDocumentBody, IStyleBase, Nullable } from '@univerjs/core';
 import type Opentype from 'opentype.js';
 import { BooleanNumber } from '@univerjs/core';
 // @ts-ignore
-import { parse } from 'opentype.js/dist/opentype.module';
+import { parse } from 'opentype.js/dist/opentype.module.js';
 import { DEFAULT_FONTFACE_PLANE } from '../../../../basics/const';
 import { getFirstGrapheme, isEmojiGrapheme } from '../../../../basics/tools';
 import { fontLibrary } from './font-library';

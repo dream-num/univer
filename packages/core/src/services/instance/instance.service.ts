@@ -40,6 +40,11 @@ export interface ICreateUnitOptions {
     makeCurrent?: boolean;
 }
 
+interface ICreateUnitEvent<T extends UnitModel = UnitModel> {
+    unit: T;
+    options?: ICreateUnitOptions;
+}
+
 /**
  * IUniverInstanceService holds all the current univer instances and provides a set of
  * methods to add and remove univer instances.
@@ -48,9 +53,9 @@ export interface ICreateUnitOptions {
  */
 export interface IUniverInstanceService {
     /** Omits value when a new UnitModel is created. */
-    unitAdded$: Observable<UnitModel>;
+    unitAdded$: Observable<ICreateUnitEvent>;
     /** Subscribe to curtain type of units' creation. */
-    getTypeOfUnitAdded$<T extends UnitModel>(type: UniverInstanceType): Observable<T>;
+    getTypeOfUnitAdded$<T extends UnitModel>(type: UniverInstanceType): Observable<ICreateUnitEvent<T>>;
 
     /** @ignore */
     __addUnit(unit: UnitModel): void;
@@ -179,10 +184,10 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         this._currentUnits$.next(this._currentUnits);
     }
 
-    private readonly _unitAdded$ = new Subject<UnitModel>();
+    private readonly _unitAdded$ = new Subject<ICreateUnitEvent>();
     readonly unitAdded$ = this._unitAdded$.asObservable();
-    getTypeOfUnitAdded$<T extends UnitModel<object, number>>(type: UniverInstanceType): Observable<T> {
-        return this._unitAdded$.pipe(filter((unit) => unit.type === type)) as Observable<T>;
+    getTypeOfUnitAdded$<T extends UnitModel<object, number>>(type: UniverInstanceType): Observable<ICreateUnitEvent<T>> {
+        return this._unitAdded$.pipe(filter((event) => event.unit.type === type)) as Observable<ICreateUnitEvent<T>>;
     }
 
     /**
@@ -207,7 +212,7 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         }
 
         units.push(unit);
-        this._unitAdded$.next(unit);
+        this._unitAdded$.next({ unit, options });
 
         if (options?.makeCurrent ?? true) {
             this.setCurrentUnitForType(unit.getUnitId());

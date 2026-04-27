@@ -108,10 +108,16 @@ const extendNumberRule: IAutoFillRule = {
     match: (cellData) => matchExtendNumber(`${cellData?.v}` || '').isExtendNumber,
     isContinue: (prev, cur) => {
         if (prev.type === AUTO_FILL_DATA_TYPE.EXTEND_NUMBER) {
-            const { beforeTxt, afterTxt } = matchExtendNumber(`${prev.cellData?.v}` || '');
-            const { beforeTxt: curBeforeTxt, afterTxt: curAfterTxt } = matchExtendNumber(`${cur?.v}` || '');
-            if (beforeTxt === curBeforeTxt && afterTxt === curAfterTxt) {
-                return true;
+            const prevMatch = matchExtendNumber(`${prev.cellData?.v}` || '');
+            const curMatch = matchExtendNumber(`${cur?.v}` || '');
+
+            if (prevMatch.isExtendNumber && curMatch.isExtendNumber) {
+                const { beforeTxt: prevBeforeTxt, afterTxt: prevAfterTxt } = prevMatch;
+                const { beforeTxt: curBeforeTxt, afterTxt: curAfterTxt } = curMatch;
+
+                if (prevBeforeTxt === curBeforeTxt && prevAfterTxt === curAfterTxt) {
+                    return true;
+                }
             }
         }
         return false;
@@ -122,15 +128,22 @@ const extendNumberRule: IAutoFillRule = {
             const isReverse = direction === Direction.UP || direction === Direction.LEFT;
 
             let step;
+
             if (data.length === 1) {
                 step = isReverse ? -1 : 1;
                 return reverseIfNeed(fillExtendNumber(data, len, step), isReverse);
             }
+
             const dataNumArr = [];
 
             for (let i = 0; i < data.length; i++) {
                 const txt = `${data[i]?.v}`;
-                txt && dataNumArr.push(Number(matchExtendNumber(txt).matchTxt));
+
+                const matchResult = matchExtendNumber(txt);
+
+                if (matchResult.isExtendNumber) {
+                    dataNumArr.push(matchResult.matchNumber);
+                }
             }
 
             if (isReverse) {
@@ -139,9 +152,11 @@ const extendNumberRule: IAutoFillRule = {
             }
 
             if (isEqualDiff(dataNumArr)) {
-                step = dataNumArr[1] - dataNumArr[0];
+                const dataLen = data.length;
+                step = dataNumArr[dataLen - 1] - dataNumArr[dataLen - 2];
                 return reverseIfNeed(fillExtendNumber(data, len, step), isReverse);
             }
+
             return fillCopy(data, len);
         },
     },
@@ -221,7 +236,8 @@ const chnNumberRule: IAutoFillRule = {
                     (dataNumArr[0] < 6 && dataNumArr[dataNumArr.length - 1] > 0)
                 ) {
                     // Fill with sequence of Monday~Sunday
-                    const step = dataNumArr[1] - dataNumArr[0];
+                    const dataLen = data.length;
+                    const step = dataNumArr[dataLen - 1] - dataNumArr[dataLen - 2];
                     return reverseIfNeed(fillChnWeek(data, len, step), isReverse);
                 }
                 // Fill with sequence of Chinese lowercase numbers
@@ -283,7 +299,8 @@ const chnWeek2Rule: IAutoFillRule = {
             }
 
             if (isEqualDiff(dataNumArr)) {
-                const step = dataNumArr[1] - dataNumArr[0];
+                const dataLen = data.length;
+                const step = dataNumArr[dataLen - 1] - dataNumArr[dataLen - 2];
                 return reverseIfNeed(fillChnWeek(data, len, step, 1), isReverse);
             }
             return fillCopy(data, len);
@@ -337,7 +354,8 @@ const chnWeek3Rule: IAutoFillRule = {
             }
 
             if (isEqualDiff(dataNumArr)) {
-                const step = dataNumArr[1] - dataNumArr[0];
+                const dataLen = data.length;
+                const step = dataNumArr[dataLen - 1] - dataNumArr[dataLen - 2];
                 return reverseIfNeed(fillChnWeek(data, len, step, 2), isReverse);
             }
             return fillCopy(data, len);
@@ -394,7 +412,8 @@ const loopSeriesRule: IAutoFillRule = {
             }
 
             if (isEqualDiff(dataNumArr)) {
-                const step = dataNumArr[1] - dataNumArr[0];
+                const dataLen = data.length;
+                const step = dataNumArr[dataLen - 1] - dataNumArr[dataLen - 2];
                 return reverseIfNeed(fillLoopSeries(data, len, step, series), isReverse);
             }
             return fillCopy(data, len);

@@ -211,7 +211,7 @@ export class SheetPermissionCheckController extends Disposable {
 
             // clear all/content/format
             case ClearSelectionAllCommand.id:
-                params = commandInfo.params as IClearSelectionAllCommandParams;
+                params = commandInfo.params as IClearSelectionAllCommandParams | undefined;
 
                 permission = this.permissionCheckWithRanges(
                     {
@@ -219,14 +219,14 @@ export class SheetPermissionCheckController extends Disposable {
                         worksheetTypes: [WorksheetSetCellValuePermission, WorksheetSetCellStylePermission, WorksheetEditPermission],
                         rangeTypes: [RangeProtectionPermissionEditPoint],
                     },
-                    params.ranges,
-                    params.unitId,
-                    params.subUnitId
+                    params?.ranges,
+                    params?.unitId,
+                    params?.subUnitId
                 );
                 errorMsg = this._localeService.t('permission.dialog.editErr');
                 break;
             case ClearSelectionContentCommand.id:
-                params = commandInfo.params as IClearSelectionContentCommandParams;
+                params = commandInfo.params as IClearSelectionContentCommandParams | undefined;
 
                 permission = this.permissionCheckWithRanges(
                     {
@@ -234,14 +234,14 @@ export class SheetPermissionCheckController extends Disposable {
                         worksheetTypes: [WorksheetSetCellValuePermission, WorksheetEditPermission],
                         rangeTypes: [RangeProtectionPermissionEditPoint],
                     },
-                    params.ranges,
-                    params.unitId,
-                    params.subUnitId
+                    params?.ranges,
+                    params?.unitId,
+                    params?.subUnitId
                 );
                 errorMsg = this._localeService.t('permission.dialog.editErr');
                 break;
             case ClearSelectionFormatCommand.id:
-                params = commandInfo.params as IClearSelectionFormatCommandParams;
+                params = commandInfo.params as IClearSelectionFormatCommandParams | undefined;
 
                 permission = this.permissionCheckWithRanges(
                     {
@@ -249,9 +249,9 @@ export class SheetPermissionCheckController extends Disposable {
                         worksheetTypes: [WorksheetSetCellStylePermission, WorksheetEditPermission],
                         rangeTypes: [RangeProtectionPermissionEditPoint],
                     },
-                    params.ranges,
-                    params.unitId,
-                    params.subUnitId
+                    params?.ranges,
+                    params?.unitId,
+                    params?.subUnitId
                 );
                 errorMsg = this._localeService.t('permission.dialog.setStyleErr');
                 break;

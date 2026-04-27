@@ -83,7 +83,8 @@ describe('Test tool', () => {
     it('matches and extends numeric suffix in text', () => {
         expect(matchExtendNumber('item12')).toEqual({
             isExtendNumber: true,
-            matchTxt: 12,
+            rawMatchTxt: '12',
+            matchNumber: 12,
             beforeTxt: 'item',
             afterTxt: '',
         });
@@ -94,6 +95,8 @@ describe('Test tool', () => {
         expect(getLenS([0, 2, 4], 3)).toBe(2);
         expect(isEqualDiff([1, 3, 5, 7])).toBeTruthy();
         expect(isEqualDiff([1, 3, 6])).toBeFalsy();
+        expect(isEqualDiff([4, 3, 2, 1, 0, 1, 2])).toBeTruthy();
+        expect(isEqualDiff([4, 2, 0, 1, 2])).toBeFalsy();
         expect(isEqualRatio([2, 4, 8])).toBeTruthy();
         expect(isEqualRatio([2, 4, 9])).toBeFalsy();
         expect(getXArr(4)).toEqual([1, 2, 3, 4]);
@@ -142,6 +145,60 @@ describe('Test tool', () => {
     it('fills extended text-number and format-only content', () => {
         const extended = fillExtendNumber([{ v: 'item12', s: 's1', custom: { flag: true } }], 2, 2);
         expect(extended.map((d) => d?.v)).toEqual(['item14', 'item16']);
+        expect(extended[0]?.custom).toBeUndefined();
+
+        const formatOnly = fillOnlyFormat([{ v: 1, s: 's1', custom: { flag: true } }], 1);
+        expect(formatOnly[0]).toEqual({ s: 's1' });
+    });
+
+    it('fills extended text-number with padStart 0', () => {
+        const extended = fillExtendNumber([{ v: 'item009', s: 's1', custom: { flag: true } }], 5, 1);
+        expect(extended.map((d) => d?.v)).toEqual(['item010', 'item011', 'item012', 'item013', 'item014']);
+        expect(extended[0]?.custom).toBeUndefined();
+
+        const formatOnly = fillOnlyFormat([{ v: 1, s: 's1', custom: { flag: true } }], 1);
+        expect(formatOnly[0]).toEqual({ s: 's1' });
+    });
+
+    it('fills extended text-number with padStart 0 and end with text', () => {
+        const extended = fillExtendNumber([{ v: 'item009abc', s: 's1', custom: { flag: true } }], 5, 1);
+        expect(extended.map((d) => d?.v)).toEqual(['item010abc', 'item011abc', 'item012abc', 'item013abc', 'item014abc']);
+        expect(extended[0]?.custom).toBeUndefined();
+
+        const formatOnly = fillOnlyFormat([{ v: 1, s: 's1', custom: { flag: true } }], 1);
+        expect(formatOnly[0]).toEqual({ s: 's1' });
+    });
+
+    it('fills extended text-number with padStart 0 and end with multiple number block', () => {
+        const extended = fillExtendNumber([{ v: 'A2B3C4', s: 's1', custom: { flag: true } }], 5, 1);
+        expect(extended.map((d) => d?.v)).toEqual(['A2B3C5', 'A2B3C6', 'A2B3C7', 'A2B3C8', 'A2B3C9']);
+        expect(extended[0]?.custom).toBeUndefined();
+
+        const formatOnly = fillOnlyFormat([{ v: 1, s: 's1', custom: { flag: true } }], 1);
+        expect(formatOnly[0]).toEqual({ s: 's1' });
+    });
+
+    it('fills extended text-number with padStart 0 and direction up', () => {
+        const extended = fillExtendNumber([{ v: 'item003', s: 's1', custom: { flag: true } }], 5, -1);
+        expect(extended.map((d) => d?.v)).toEqual(['item002', 'item001', 'item000', 'item001', 'item002']);
+        expect(extended[0]?.custom).toBeUndefined();
+
+        const formatOnly = fillOnlyFormat([{ v: 1, s: 's1', custom: { flag: true } }], 1);
+        expect(formatOnly[0]).toEqual({ s: 's1' });
+    });
+
+    it('fills extended text-number with padStart 0 and multiple values', () => {
+        const extended = fillExtendNumber([
+            { v: 'item004' },
+            { v: 'item003' },
+            { v: 'item002' },
+            { v: 'item001' },
+            { v: 'item000' },
+            { v: 'item001' },
+            { v: 'item002' },
+            { v: 'item003' },
+        ], 5, 1);
+        expect(extended.map((d) => d?.v)).toEqual(['item004', 'item005', 'item006', 'item007', 'item008']);
         expect(extended[0]?.custom).toBeUndefined();
 
         const formatOnly = fillOnlyFormat([{ v: 1, s: 's1', custom: { flag: true } }], 1);

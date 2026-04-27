@@ -134,6 +134,20 @@ describe('DescriptionService', () => {
         expect(descriptionService.isFormulaDefinedName('BOOK_RANGE')).toBe(false);
         expect(descriptionService.isFormulaDefinedName('BOOK_FORMULA')).toBe(true);
         expect(descriptionService.getSearchListByName('BOOK')).toEqual([]);
+        expect(descriptionService.getSearchListByNameFirstLetter('BOOK')).toEqual(
+            expect.arrayContaining([
+                {
+                    name: 'BOOK_RANGE',
+                    desc: 'Workbook range',
+                    functionType: FunctionType.DefinedName,
+                },
+                {
+                    name: 'BOOK_FORMULA',
+                    desc: 'Workbook formula',
+                    functionType: FunctionType.DefinedName,
+                },
+            ])
+        );
         expect(descriptionService.getSearchListByType(-1)).not.toEqual(
             expect.arrayContaining([
                 { name: 'BOOK_RANGE', desc: 'Workbook range' },
@@ -149,6 +163,15 @@ describe('DescriptionService', () => {
         localeService.setLocale(LocaleType.EN_US);
 
         expect(descriptionService.hasFunction('CUSTOM_ALIAS')).toBe(true);
+        expect(descriptionService.getSearchListByName('ALIAS')).toContainEqual({
+            name: 'CUSTOM_ALIAS',
+            desc: 'Localized abstract',
+        });
+        expect(descriptionService.getSearchListByNameFirstLetter('CUSTOM_A')).toContainEqual({
+            name: 'CUSTOM_ALIAS',
+            desc: 'Localized abstract',
+            functionType: FunctionType.User,
+        });
         expect(descriptionService.getFunctionInfo('CUSTOM_ALIAS')).toMatchObject({
             functionName: 'CUSTOM_ALIAS',
             description: 'Localized description',

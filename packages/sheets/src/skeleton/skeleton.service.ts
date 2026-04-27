@@ -18,6 +18,7 @@ import type { Nullable, Styles, Workbook, Worksheet } from '@univerjs/core';
 import type { Scene } from '@univerjs/engine-render';
 import { Disposable, Inject, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { SpreadsheetSkeleton } from '@univerjs/engine-render';
+import { Subject } from 'rxjs';
 
 export interface ISheetSkeletonManagerParam {
     unitId: string;
@@ -30,6 +31,8 @@ export interface ISheetSkeletonManagerParam {
 export class SheetSkeletonService extends Disposable {
     private _sceneMap: Map<string, Scene> = new Map();
     private _sheetSkeletonParamStore: Map<string, Map<string, ISheetSkeletonManagerParam>> = new Map();
+    private _buildSkeleton$ = new Subject<SpreadsheetSkeleton>();
+    readonly buildSkeleton$ = this._buildSkeleton$.asObservable();
 
     constructor(
         @Inject(Injector) readonly _injector: Injector,
@@ -60,7 +63,7 @@ export class SheetSkeletonService extends Disposable {
 
     private _init() {
         this.disposeWithMe(
-            this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => this._initWorkbookSkeleton(workbook))
+            this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((event) => this._initWorkbookSkeleton(event.unit))
         );
 
         this.disposeWithMe(
@@ -139,6 +142,7 @@ export class SheetSkeletonService extends Disposable {
             spreadsheetSkeleton.setScene(scene);
         }
 
+        this._buildSkeleton$.next(spreadsheetSkeleton);
         return spreadsheetSkeleton;
     }
 
@@ -152,6 +156,15 @@ export class SheetSkeletonService extends Disposable {
         }
 
         sheetSkeletonMap.forEach((skeletonParam) => skeletonParam.skeleton.setScene(scene));
+    }
+
+    getSkeletonsByUnitId(unitId: string): SpreadsheetSkeleton[] {
+        const sheetSkeletonMap = this._sheetSkeletonParamStore.get(unitId);
+        if (!sheetSkeletonMap) {
+            return [];
+        }
+
+        return Array.from(sheetSkeletonMap.values()).map((param) => param.skeleton);
     }
 
     getSkeleton(unitId: string, subUnitId: string): Nullable<SpreadsheetSkeleton> {

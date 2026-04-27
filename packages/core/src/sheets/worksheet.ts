@@ -138,7 +138,7 @@ export class Worksheet {
         if (this._getCellHeight) {
             return this._getCellHeight(row, col);
         }
-        return this._snapshot.defaultRowHeight;
+        return this.getRowHeight(row);
     }
 
     /**

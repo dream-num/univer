@@ -14,21 +14,14 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand, IRange, Workbook } from '@univerjs/core';
-
+import type { ICommand, IRange } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
-import {
-    CommandType,
-    ICommandService,
-    IUndoRedoService,
-    IUniverInstanceService,
-    sequenceExecute,
-    UniverInstanceType,
-} from '@univerjs/core';
+import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecute } from '@univerjs/core';
 import { generateNullCellValue, getVisibleRanges } from '../../basics/utils';
 import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
+import { getSheetCommandTarget } from './utils/target-util';
 
 export interface IClearSelectionContentCommandParams {
     unitId?: string;
@@ -39,30 +32,24 @@ export interface IClearSelectionContentCommandParams {
 /**
  * The command to clear content in current selected ranges.
  */
-export const ClearSelectionContentCommand: ICommand = {
+export const ClearSelectionContentCommand: ICommand<IClearSelectionContentCommandParams> = {
     id: 'sheet.command.clear-selection-content',
 
     type: CommandType.COMMAND,
 
-    handler: (accessor: IAccessor, params: IClearSelectionContentCommandParams) => {
-        const univerInstanceService = accessor.get(IUniverInstanceService);
-        const commandService = accessor.get(ICommandService);
+    handler: (accessor, params) => {
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), { unitId: params?.unitId, subUnitId: params?.subUnitId });
+        if (!target) return false;
+
         const selectionManagerService = accessor.get(SheetsSelectionsService);
+        const { unitId, subUnitId } = target;
+        const ranges = params?.ranges || selectionManagerService.getCurrentSelections()?.map((s) => s.range);
+        if (!ranges?.length) return false;
+
+        const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
-        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-        if (!workbook) return false;
-
-        const unitId = params?.unitId || workbook.getUnitId();
-        const worksheet = workbook.getActiveSheet();
-        if (!worksheet) return false;
-
-        const subUnitId = params?.subUnitId || worksheet.getSheetId();
-        const ranges = params?.ranges || selectionManagerService.getCurrentSelections()?.map((s) => s.range);
-        if (!ranges?.length) {
-            return false;
-        }
         const visibleRanges = getVisibleRanges(ranges, accessor, unitId, subUnitId);
 
         const clearMutationParams: ISetRangeValuesMutationParams = {
@@ -75,7 +62,7 @@ export const ClearSelectionContentCommand: ICommand = {
             clearMutationParams
         );
 
-        const intercepted = sheetInterceptorService.onCommandExecute({ id: ClearSelectionContentCommand.id });
+        const intercepted = sheetInterceptorService.onCommandExecute({ id: ClearSelectionContentCommand.id, params });
         const redos = [{ id: SetRangeValuesMutation.id, params: clearMutationParams }, ...intercepted.redos];
         const undos = [...intercepted.undos, { id: SetRangeValuesMutation.id, params: undoClearMutationParams }];
 

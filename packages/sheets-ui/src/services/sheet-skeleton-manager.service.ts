@@ -52,6 +52,17 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
 
         const { unitId, scene } = this._context;
         this._sheetSkeletonService.setScene(unitId, scene);
+
+        this._initSkeletonsRegisterGetCellHeight(unitId);
+    }
+
+    private _initSkeletonsRegisterGetCellHeight(unitId: string) {
+        const skeletons = this._sheetSkeletonService.getSkeletonsByUnitId(unitId);
+        skeletons.forEach((skeleton) => skeleton.registerGetCellHeight());
+
+        this.disposeWithMe(
+            this._sheetSkeletonService.buildSkeleton$.subscribe((skeleton) => skeleton.registerGetCellHeight())
+        );
     }
 
     override dispose(): void {

@@ -14,21 +14,14 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand, IMutationInfo, IRange, Workbook } from '@univerjs/core';
+import type { ICommand, IMutationInfo, IRange } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
-
-import {
-    CommandType,
-    ICommandService,
-    IUndoRedoService,
-    IUniverInstanceService,
-    sequenceExecute,
-    UniverInstanceType,
-} from '@univerjs/core';
+import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecute } from '@univerjs/core';
 import { generateNullCell, getVisibleRanges } from '../../basics/utils';
 import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
+import { getSheetCommandTarget } from './utils/target-util';
 
 export interface IClearSelectionAllCommandParams {
     unitId?: string;
@@ -39,28 +32,22 @@ export interface IClearSelectionAllCommandParams {
 /**
  * The command to clear all in current selected ranges.
  */
-export const ClearSelectionAllCommand: ICommand = {
+export const ClearSelectionAllCommand: ICommand<IClearSelectionAllCommandParams> = {
     id: 'sheet.command.clear-selection-all',
     type: CommandType.COMMAND,
-    handler: (accessor: IAccessor, params: IClearSelectionAllCommandParams) => {
-        const univerInstanceService = accessor.get(IUniverInstanceService);
-        const commandService = accessor.get(ICommandService);
+    handler: (accessor, params) => {
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), { unitId: params?.unitId, subUnitId: params?.subUnitId });
+        if (!target) return false;
+
         const selectionManagerService = accessor.get(SheetsSelectionsService);
+        const { unitId, subUnitId } = target;
+        const selections = params?.ranges || selectionManagerService.getCurrentSelections()?.map((s) => s.range);
+        if (!selections?.length) return false;
+
+        const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
-        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-        if (!workbook) return false;
-
-        const unitId = params?.unitId || workbook.getUnitId();
-        const worksheet = workbook.getActiveSheet();
-        if (!worksheet) return false;
-
-        const subUnitId = params?.subUnitId || worksheet.getSheetId();
-        const selections = params?.ranges || selectionManagerService.getCurrentSelections()?.map((s) => s.range);
-        if (!selections?.length) {
-            return false;
-        }
         const visibleRanges = getVisibleRanges(selections, accessor, unitId, subUnitId);
 
         const sequenceExecuteList: IMutationInfo[] = [];
@@ -86,7 +73,7 @@ export const ClearSelectionAllCommand: ICommand = {
             params: undoClearMutationParams,
         });
 
-        const intercepted = sheetInterceptorService.onCommandExecute({ id: ClearSelectionAllCommand.id });
+        const intercepted = sheetInterceptorService.onCommandExecute({ id: ClearSelectionAllCommand.id, params });
 
         sequenceExecuteList.push(...intercepted.redos);
         sequenceExecuteUndoList.unshift(...intercepted.undos);

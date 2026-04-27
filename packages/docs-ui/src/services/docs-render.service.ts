@@ -41,7 +41,7 @@ export class DocsRenderService extends RxDisposable {
 
         this._instanceSrv.getTypeOfUnitAdded$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)
             .pipe(takeUntil(this.dispose$))
-            .subscribe((doc) => this._createRenderer(doc));
+            .subscribe((event) => this._createRenderer(event.unit));
 
         this._instanceSrv.getTypeOfUnitDisposed$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)
             .pipe(takeUntil(this.dispose$))

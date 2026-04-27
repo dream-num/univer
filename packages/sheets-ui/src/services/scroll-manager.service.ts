@@ -169,10 +169,10 @@ export class SheetScrollManagerService implements IRenderModule {
         offsetY = offsetY || 0;
 
         const skeleton = this._sheetSkeletonManagerService.getCurrentSkeleton();
-        const rowAcc = skeleton?.rowHeightAccumulation[sheetViewStartRow - 1] || 0;
-        const colAcc = skeleton?.columnWidthAccumulation[sheetViewStartColumn - 1] || 0;
-        const viewportScrollX = colAcc + offsetX;
-        const viewportScrollY = rowAcc + offsetY;
+        const { startX: colStart = skeleton?.columnWidthAccumulation[sheetViewStartColumn - 1] || 0, startY: rowStart = skeleton?.rowHeightAccumulation[sheetViewStartRow - 1] || 0 } =
+            skeleton?.getCellWithCoordByIndex?.(sheetViewStartRow, sheetViewStartColumn, false) ?? {};
+        const viewportScrollX = colStart + offsetX;
+        const viewportScrollY = rowStart + offsetY;
 
         return {
             viewportScrollX,
@@ -255,20 +255,13 @@ export class SheetScrollManagerService implements IRenderModule {
     }
 
     private _clearByParamAndNotify(param: IScrollStateSearchParam): void {
+        const defaultScrollState = this._getDefaultScrollState(param);
         this._setScrollState({
             ...param,
-            sheetViewStartRow: 0,
-            sheetViewStartColumn: 0,
-            offsetX: 0,
-            offsetY: 0,
+            ...defaultScrollState,
         });
 
-        this._emitRawScroll({
-            sheetViewStartRow: 0,
-            sheetViewStartColumn: 0,
-            offsetX: 0,
-            offsetY: 0,
-        });
+        this._emitRawScroll(defaultScrollState);
     }
 
     private _getCurrentScroll(param: Nullable<IScrollStateSearchParam>): IScrollState {
@@ -283,7 +276,21 @@ export class SheetScrollManagerService implements IRenderModule {
         }
         const { unitId, sheetId } = param;
         const currScrollState = this._scrollStateMap.get(unitId)?.get(sheetId);
-        return currScrollState || emptyState;
+        return currScrollState || this._getDefaultScrollState(param);
+    }
+
+    private _getDefaultScrollState(param: IScrollStateSearchParam): IScrollState {
+        const skeleton = this._sheetSkeletonManagerService.getSkeleton?.(param.sheetId)
+            ?? this._sheetSkeletonManagerService.getCurrentSkeleton?.();
+        const colGapSize = skeleton?.getColGapSize(0) ?? 0;
+        const rowGapSize = skeleton?.getRowGapSize(0) ?? 0;
+
+        return {
+            sheetViewStartRow: 0,
+            sheetViewStartColumn: 0,
+            offsetX: colGapSize === 0 ? 0 : -colGapSize,
+            offsetY: rowGapSize === 0 ? 0 : -rowGapSize,
+        };
     }
 
     private _emitRawScroll(param: IScrollState): void {

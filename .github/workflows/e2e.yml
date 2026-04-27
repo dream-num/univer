@@ -45,21 +45,12 @@ jobs:
             - name: Run Playwright Tests
               run: pnpm exec playwright test
 
-            - name: 🚀 Deploy to Vercel
-              uses: amondnet/vercel-action@v25
-              if: failure()
-              id: vercel-e2e-report # we only need to upload to Vercel if this CI fails
-              with:
-                  vercel-token: ${{ secrets.VERCEL_TOKEN }}
-                  vercel-org-id: ${{ secrets.ORG_ID }}
-                  vercel-project-id: ${{ secrets.PROJECT_ID_E2E }}
-
             - name: Write Playwright Report to PR Comment
               uses: daun/playwright-report-summary@v3
               if: always()
               with:
                   report-file: playwright-report.json
-                  custom-info: 'For more information, [see full report](${{ steps.vercel-e2e-report.outputs.preview-url }})'
+                  custom-info: 'For more information, [see full report and artifacts](https://github.com/dream-num/univer/actions/runs/${{ github.run_id }})'
 
             - name: Upload Artifact
               uses: actions/upload-artifact@v4

@@ -19,6 +19,7 @@ import type { IBoundRectNoAngle, IViewportInfo } from '../../../basics/vector2';
 import {
     BooleanNumber,
     BorderStyleTypes,
+    createSheetGapTestConfig,
     ILogService,
     IUniverInstanceService,
     LocaleType,
@@ -488,5 +489,55 @@ describe('spreadsheet integration', () => {
                 'rgba(11, 22, 33, 0.25)'
             );
         }).not.toThrow();
+    });
+
+    it('draws the reusable gap fixture with mixed default and item colors', () => {
+        const { spreadsheet, skeleton, mainCanvas } = fixture;
+        const context = mainCanvas.getContext() as any;
+
+        skeleton.setGapConfig(createSheetGapTestConfig());
+
+        const drawSingleGapRectSpy = vi.spyOn(spreadsheet as any, '_drawSingleGapRect');
+
+        (spreadsheet as any)._drawGapAreas(
+            context,
+            skeleton,
+            0,
+            7,
+            0,
+            5,
+            0,
+            500,
+            0,
+            320
+        );
+
+        expect(drawSingleGapRectSpy).toHaveBeenCalledTimes(6);
+        expect(drawSingleGapRectSpy).toHaveBeenCalledWith(
+            expect.anything(),
+            expect.objectContaining({
+                size: 10,
+                color: 'rgba(245, 158, 11, 0.14)',
+            }),
+            expect.any(Number),
+            expect.any(Number),
+            expect.any(Number),
+            10,
+            'rgba(24, 119, 242, 0.08)',
+            'rgba(24, 119, 242, 0.25)'
+        );
+        expect(drawSingleGapRectSpy).toHaveBeenCalledWith(
+            expect.anything(),
+            expect.objectContaining({
+                size: 8,
+                stripeColor: 'rgba(59, 130, 246, 0.35)',
+            }),
+            expect.any(Number),
+            expect.any(Number),
+            8,
+            expect.any(Number),
+            'rgba(24, 119, 242, 0.08)',
+            'rgba(24, 119, 242, 0.25)'
+        );
     });
 });

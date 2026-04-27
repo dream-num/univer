@@ -195,7 +195,7 @@ describe('docs ui services', () => {
     it('creates and disposes renderers for current, added, and removed docs', () => {
         const createRender$ = new Subject<string>();
         const created$ = new Subject<Record<string, unknown>>();
-        const added$ = new Subject<Record<string, unknown>>();
+        const added$ = new Subject<{ unit: Record<string, unknown> }>();
         const disposed$ = new Subject<Record<string, unknown>>();
         const existingDoc = { getUnitId: () => 'doc-1' };
         const addedDoc = { getUnitId: () => 'doc-2' };
@@ -234,7 +234,7 @@ describe('docs ui services', () => {
         expect(canvas.setId).toHaveBeenCalledWith('univer-doc-main-canvas');
         expect(context.setId).toHaveBeenCalledWith('univer-doc-main-canvas');
 
-        added$.next(addedDoc);
+        added$.next({ unit: addedDoc });
         createRender$.next('doc-4');
         disposed$.next(removedDoc);
 

@@ -22,8 +22,8 @@ import { IConfigService, LocaleService } from '@univerjs/core';
 import { borderClassName, clsx, Input, scrollbarClassName, Select } from '@univerjs/design';
 import { CheckMarkIcon } from '@univerjs/icons';
 import { IDescriptionService, PLUGIN_CONFIG_KEY_BASE } from '@univerjs/sheets-formula';
-import { ISidebarService, useDependency, useObservable } from '@univerjs/ui';
-import { useEffect, useState } from 'react';
+import { ISidebarService, useDependency, useObservable, useVirtualList } from '@univerjs/ui';
+import { useEffect, useRef, useState } from 'react';
 import { getFunctionTypeValues } from '../../../services/utils';
 import { FunctionHelp } from '../function-help/FunctionHelp';
 import { FunctionParams } from '../function-params/FunctionParams';
@@ -49,6 +49,13 @@ export function SelectFunction(props: ISelectFunctionProps) {
     const localeService = useDependency(LocaleService);
     const sidebarService = useDependency(ISidebarService);
     const sidebarOptions = useObservable<ISidebarMethodOptions>(sidebarService.sidebarOptions$);
+
+    const containerRef = useRef<HTMLUListElement>(null);
+    const [virtualList, { wrapperStyle, containerProps }] = useVirtualList(selectList, {
+        containerTarget: containerRef,
+        itemHeight: 32,
+        overscan: 5,
+    });
 
     const options = getFunctionTypeValues(localeService, Boolean(customFunction))
         .filter(
@@ -172,6 +179,8 @@ export function SelectFunction(props: ISelectFunctionProps) {
 
             {selectList.length > 0 && (
                 <ul
+                    ref={containerRef}
+                    {...containerProps}
                     className={clsx(`
                       univer-mb-0 univer-mt-2 univer-box-border univer-max-h-72 univer-w-full univer-select-none
                       univer-list-none univer-overflow-y-auto univer-rounded univer-p-3 univer-outline-none
@@ -179,31 +188,33 @@ export function SelectFunction(props: ISelectFunctionProps) {
                     onKeyDown={handleSelectListKeyDown}
                     tabIndex={-1}
                 >
-                    {selectList.map(({ name }, index) => (
-                        <li
-                            key={index}
-                            className={clsx(`
-                              univer-relative univer-box-border univer-cursor-pointer univer-rounded univer-px-7
-                              univer-py-1 univer-text-sm univer-text-gray-900 univer-transition-colors
-                              dark:!univer-text-white
-                            `, {
-                                'univer-bg-gray-200 dark:!univer-bg-gray-600': active === index,
-                            })}
-                            onMouseEnter={() => handleLiMouseEnter(index)}
-                            onMouseLeave={handleLiMouseLeave}
-                            onClick={() => setCurrentFunctionInfo(index)}
-                        >
-                            {nameSelected === index && (
-                                <CheckMarkIcon
-                                    className={`
-                                      univer-absolute univer-left-1.5 univer-top-1/2 univer-inline-flex
-                                      -univer-translate-y-1/2 univer-text-base univer-text-primary-600
-                                    `}
-                                />
-                            )}
-                            <span className="univer-block">{highlightSearchText(name)}</span>
-                        </li>
-                    ))}
+                    <div style={wrapperStyle}>
+                        {virtualList.map(({ data: { name }, index }) => (
+                            <li
+                                key={name}
+                                className={clsx(`
+                                  univer-relative univer-box-border univer-cursor-pointer univer-rounded univer-px-7
+                                  univer-py-1 univer-text-sm univer-text-gray-900 univer-transition-colors
+                                  dark:!univer-text-white
+                                `, {
+                                    'univer-bg-gray-200 dark:!univer-bg-gray-600': active === index,
+                                })}
+                                onMouseEnter={() => handleLiMouseEnter(index)}
+                                onMouseLeave={handleLiMouseLeave}
+                                onClick={() => setCurrentFunctionInfo(index)}
+                            >
+                                {nameSelected === index && (
+                                    <CheckMarkIcon
+                                        className={`
+                                          univer-absolute univer-left-1.5 univer-top-1/2 univer-inline-flex
+                                          -univer-translate-y-1/2 univer-text-base univer-text-primary-600
+                                        `}
+                                    />
+                                )}
+                                <span className="univer-block">{highlightSearchText(name)}</span>
+                            </li>
+                        ))}
+                    </div>
                 </ul>
             )}
 

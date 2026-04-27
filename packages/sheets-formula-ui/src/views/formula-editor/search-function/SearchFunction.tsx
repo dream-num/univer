@@ -19,7 +19,7 @@ import type { FunctionType, ISequenceNode } from '@univerjs/engine-formula';
 import { CommandType, DisposableCollection, ICommandService } from '@univerjs/core';
 import { borderClassName, clsx, scrollbarClassName } from '@univerjs/design';
 import { DeviceInputEventType } from '@univerjs/engine-render';
-import { IShortcutService, KeyCode, RectPopup, useDependency } from '@univerjs/ui';
+import { IShortcutService, KeyCode, RectPopup, useDependency, useVirtualList } from '@univerjs/ui';
 import { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
 import { useEditorPosition } from '../hooks/use-editor-position';
 import { useFormulaSearch } from '../hooks/use-formula-search';
@@ -45,11 +45,17 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
     const commandService = useDependency(ICommandService);
     const { searchList, searchText, handlerFormulaReplace, reset: resetFormulaSearch } = useFormulaSearch(isFocus, sequenceNodes, editor);
     const visible = useMemo(() => !!searchList.length, [searchList]);
-    const ulRef = useRef<HTMLUListElement>(undefined);
+    const containerRef = useRef<HTMLUListElement>(null);
     const [active, setActive] = useState(0);
     const isEnableMouseEnterOrOut = useRef(false);
     const [position$] = useEditorPosition(editorId, visible, [searchText, searchList]);
     const stateRef = useStateRef({ searchList, active });
+
+    const [virtualList, { wrapperStyle, scrollTo, containerProps }] = useVirtualList(searchList, {
+        containerTarget: containerRef,
+        itemHeight: 40,
+        overscan: 5,
+    });
 
     const handleFunctionSelect = (v: string, functionType: FunctionType) => {
         const res = handlerFormulaReplace(v, functionType);
@@ -144,36 +150,7 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
     }, [searchList]);
 
     function scrollToVisible(liIndex: number) {
-        // Get the <li> element directly from children
-        const ulElement = ulRef.current;
-        if (!ulElement) return;
-
-        const liElement = ulElement.children[liIndex] as HTMLLIElement;
-        if (!liElement) return;
-
-        // Get the height of the <ul> element
-        const ulRect = ulElement.getBoundingClientRect();
-        const ulTop = ulRect.top;
-        const ulHeight = ulElement.offsetHeight;
-
-        // Get the position and height of the <li> element
-        const liRect = liElement.getBoundingClientRect();
-        const liTop = liRect.top;
-        const liHeight = liRect.height;
-
-        // If the <li> element is within the visible area, no scrolling operation is performed
-        if (liTop >= 0 && liTop > ulTop && liTop - ulTop + liHeight <= ulHeight) {
-            return;
-        }
-
-        // Calculate scroll position
-        const scrollTo = liElement.offsetTop - (ulHeight - liHeight) / 2;
-
-        // Perform scrolling operation
-        ulElement.scrollTo({
-            top: scrollTo,
-            behavior: 'smooth',
-        });
+        scrollTo(liIndex);
     }
 
     const debounceResetMouseState = useMemo(() => {
@@ -191,11 +168,12 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
         <RectPopup portal anchorRect$={position$} direction="vertical">
             <ul
                 ref={(v) => {
-                    ulRef.current = v!;
+                    containerRef.current = v;
                     if (ref) {
-                        ref.current = v!;
+                        ref.current = v;
                     }
                 }}
+                {...containerProps}
                 data-u-comp="sheets-formula-editor"
                 className={clsx(`
                   univer-m-0 univer-box-border univer-max-h-[400px] univer-w-[250px] univer-list-none
@@ -204,37 +182,39 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
                   dark:!univer-bg-gray-900
                 `, borderClassName, scrollbarClassName)}
             >
-                {searchList.map((item, index) => (
-                    <li
-                        key={item.name}
-                        className={clsx(`
-                          univer-box-border univer-cursor-pointer univer-rounded univer-px-2 univer-py-1
-                          univer-text-gray-900 univer-transition-colors
-                          dark:!univer-text-white
-                        `, {
-                            'univer-bg-gray-200 dark:!univer-bg-gray-600': active === index,
-                        })}
-                        onMouseEnter={() => handleLiMouseEnter(index)}
-                        onMouseLeave={handleLiMouseLeave}
-                        onMouseMove={debounceResetMouseState}
-                        onClick={() => {
-                            handleFunctionSelect(item.name, item.functionType);
-                            if (editor) {
-                                editor.focus();
-                            }
-                        }}
-                    >
-                        <span className="univer-block univer-truncate univer-text-xs">
-                            <span className="univer-text-red-500">{item.name.substring(0, searchText.length)}</span>
-                            <span>{item.name.slice(searchText.length)}</span>
-                        </span>
-                        <span
-                            className="univer-block univer-text-xs univer-text-gray-400"
+                <div style={wrapperStyle}>
+                    {virtualList.map(({ data: item, index }) => (
+                        <li
+                            key={item.name}
+                            className={clsx(`
+                              univer-box-border univer-cursor-pointer univer-rounded univer-px-2 univer-py-1
+                              univer-text-gray-900 univer-transition-colors
+                              dark:!univer-text-white
+                            `, {
+                                'univer-bg-gray-200 dark:!univer-bg-gray-600': active === index,
+                            })}
+                            onMouseEnter={() => handleLiMouseEnter(index)}
+                            onMouseLeave={handleLiMouseLeave}
+                            onMouseMove={debounceResetMouseState}
+                            onClick={() => {
+                                handleFunctionSelect(item.name, item.functionType);
+                                if (editor) {
+                                    editor.focus();
+                                }
+                            }}
                         >
-                            {item.desc}
-                        </span>
-                    </li>
-                ))}
+                            <span className="univer-block univer-truncate univer-text-xs">
+                                <span className="univer-text-red-500">{item.name.substring(0, searchText.length)}</span>
+                                <span>{item.name.slice(searchText.length)}</span>
+                            </span>
+                            <span
+                                className="univer-block univer-text-xs univer-text-gray-400"
+                            >
+                                {item.desc}
+                            </span>
+                        </li>
+                    ))}
+                </div>
             </ul>
         </RectPopup>
     );

@@ -26,10 +26,11 @@ import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import { isRealNum, LocaleService } from '@univerjs/core';
 import { borderBottomClassName, borderClassName, clsx, scrollbarClassName } from '@univerjs/design';
 import { CheckMarkIcon, MoreIcon } from '@univerjs/icons';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { combineLatest, isObservable, of, scan, startWith } from 'rxjs';
 import { CustomLabel } from '../../../components/custom-label/CustomLabel';
+import { useVirtualList } from '../../../components/hooks';
 import { useScrollYOverContainer } from '../../../components/hooks/layout';
 import { UIQuickTileMenuGroup, UITinyMenuGroup } from '../../../components/menu/desktop/TinyMenuGroup';
 import { ILayoutService } from '../../../services/layout/layout.service';
@@ -265,7 +266,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
     );
 }
 
-function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
+const ContextMenuMenuItem = memo(function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
     const { menuKey, menuItem, submenuPortalContainer, onOptionSelect, maxMenuHeight } = props;
     const menuManagerService = useDependency(IMenuManagerService);
     const disabled = useObservable<boolean>(menuItem.disabled$, false);
@@ -301,6 +302,13 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
 
         return Array.isArray(selectorItem.selections) ? selectorItem.selections : [];
     }, [menuItem.type, selectionsFromObservable, selectorItem.selections]);
+
+    const selectionsContainerRef = useRef<HTMLDivElement>(null);
+    const [virtualList, { wrapperStyle, containerProps }] = useVirtualList(selections, {
+        containerTarget: selectionsContainerRef,
+        itemHeight: 36,
+        overscan: 5,
+    });
 
     const subMenuItems = useMemo(() => {
         if (menuItem.type !== MenuItemType.SUBITEMS || !menuItem.id) {
@@ -513,6 +521,8 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                             onWheel={(event) => event.stopPropagation()}
                         >
                             <div
+                                ref={hasSelectionSubmenu ? selectionsContainerRef : undefined}
+                                {...(hasSelectionSubmenu ? containerProps : {})}
                                 className={clsx(
                                     `
                                       univer-overflow-y-auto univer-overscroll-contain univer-rounded-md univer-border
@@ -527,8 +537,8 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                                 }}
                             >
                                 {hasSelectionSubmenu && (
-                                    <div className="univer-grid univer-gap-1">
-                                        {selections.map((option, index) => {
+                                    <div className="univer-grid univer-gap-1" style={wrapperStyle}>
+                                        {virtualList.map(({ data: option, index }) => {
                                             const optionKey = `${menuItem.id}-${option.label ?? option.id}-${index}`;
                                             const optionSelected = typeof inputValue !== 'undefined' && String(inputValue) === String(option.value);
                                             const optionSelectable = !isNonSelectableLabel(option.label);
@@ -631,7 +641,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
             )}
         </div>
     );
-}
+});
 
 function useContextGroupHiddenStates(menuSchemas: IMenuSchema[]) {
     const [hiddenStates, setHiddenStates] = useState<Record<string, boolean>>({});

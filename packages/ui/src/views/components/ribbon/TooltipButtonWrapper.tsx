@@ -20,7 +20,17 @@ import type { Subscription } from 'rxjs';
 import type { IMenuItem, IValueOption } from '../../../services/menu/menu';
 import { clsx, Dropdown, DropdownMenu, Tooltip } from '@univerjs/design';
 import { CheckMarkIcon } from '@univerjs/icons';
-import { createContext, forwardRef, useContext, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import {
+    createContext,
+    forwardRef,
+    memo,
+    useContext,
+    useEffect,
+    useImperativeHandle,
+    useMemo,
+    useRef,
+    useState,
+} from 'react';
 import { combineLatest, of } from 'rxjs';
 import { CustomLabel } from '../../../components/custom-label/CustomLabel';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
@@ -114,7 +124,7 @@ export function DropdownWrapper(props: Omit<Partial<IDropdownProps>, 'overlay'> 
     );
 }
 
-function Label({ icon, value, option, onOptionSelect }: {
+const Label = memo(function Label({ icon, value, option, onOptionSelect }: {
     icon?: IMenuItem['icon'];
     value?: string | number;
     option: IValueOption;
@@ -147,7 +157,7 @@ function Label({ icon, value, option, onOptionSelect }: {
             />
         </div>
     );
-}
+});
 
 export function DropdownMenuWrapper({
     menuId,

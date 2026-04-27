@@ -19,6 +19,7 @@ import type { CSSProperties, KeyboardEventHandler, ReactNode } from 'react';
 import { ColorKit, ThemeService } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
+import { memo } from 'react';
 
 export interface IBaseSheetBarProps {
     label?: ReactNode;
@@ -35,7 +36,7 @@ export interface IBaseSheetBarProps {
     tabIndex?: number;
 }
 
-export function SheetBarItem(props: IBaseSheetBarProps) {
+export const SheetBarItem = memo(function SheetBarItem(props: IBaseSheetBarProps) {
     const { sheetId, label, color, selected, className, onKeyDown, tabIndex } = props;
 
     const themeService = useDependency(ThemeService);
@@ -87,4 +88,4 @@ export function SheetBarItem(props: IBaseSheetBarProps) {
             </div>
         </div>
     );
-}
+});

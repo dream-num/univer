@@ -19,7 +19,7 @@ import type { ITooltipWrapperRef } from './TooltipButtonWrapper';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
 import { MoreDownIcon } from '@univerjs/icons';
-import { forwardRef, useMemo } from 'react';
+import { forwardRef, memo, useMemo } from 'react';
 import { isObservable, Observable } from 'rxjs';
 import { ComponentManager } from '../../../common/component-manager';
 import { CustomLabel } from '../../../components/custom-label/CustomLabel';
@@ -30,7 +30,7 @@ import { useToolbarItemStatus } from './hook';
 import { ToolbarButton } from './ToolbarButton';
 import { DropdownMenuWrapper, TooltipWrapper } from './TooltipButtonWrapper';
 
-export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenuItem>>((props, ref) => {
+export const ToolbarItem = memo(forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenuItem>>((props, ref) => {
     const localeService = useDependency(LocaleService);
     const commandService = useDependency(ICommandService);
     const layoutService = useDependency(ILayoutService);
@@ -260,4 +260,4 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
             {renderItem()}
         </TooltipWrapper>
     );
-});
+}));

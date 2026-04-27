@@ -17,7 +17,7 @@
 import type { ICustomRange, IParagraph, IPosition, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { IBoundRectNoAngle, IDocumentSkeletonDrawing, IMouseEvent, IPointerEvent, IRender } from '@univerjs/engine-render';
 import type { ISheetLocation, ISheetLocationBase, ISheetSkeletonManagerParam } from '@univerjs/sheets';
-import { Disposable, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { CellValueType, Disposable, isRealNum, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import { BehaviorSubject, distinctUntilChanged, map, of, Subject } from 'rxjs';
 import { getHoverCellPosition } from '../common/utils';
@@ -304,7 +304,10 @@ export class HoverManagerService extends Disposable {
         const cellData = worksheet.getCell(overflowLocation.row, overflowLocation.col);
         const { topOffset = 0, leftOffset = 0 } = cellData?.fontRenderExtension ?? {};
         if (font?.documentSkeleton) {
-            const { paddingLeft, paddingTop } = calcPadding(cell, font, (cellData?.v !== null && cellData?.v !== undefined) ? !Number.isNaN(+cellData.v) : false);
+            const isNum = cellData?.p ?
+                false :
+                isRealNum(cellData?.v) && (!cellData?.t || cellData.t === CellValueType.NUMBER);
+            const { paddingLeft, paddingTop } = calcPadding(cell, font, isNum);
             const rects = calculateDocSkeletonRects(font.documentSkeleton, paddingLeft, paddingTop);
 
             const innerX = offsetX - position.startX - leftOffset;

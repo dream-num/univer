@@ -499,8 +499,6 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
                             }
                         }
 
-                        this._remainDrawingSize(transform, updateDrawings, drawing, skeleton);
-
                         continue;
                     }
 
@@ -664,8 +662,6 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
                                 break;
                             }
                         }
-
-                        this._remainDrawingSize(transform, updateDrawings, drawing, skeleton);
 
                         continue;
                     }

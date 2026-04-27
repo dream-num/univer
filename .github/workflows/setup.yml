@@ -1,8 +1,6 @@
 name: 🎬 Setup
 
 on:
-    push:
-        branches: [dev]
     pull_request:
         branches: [dev]
         types: [opened, synchronize, reopened, closed]

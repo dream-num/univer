@@ -43,6 +43,21 @@ export function whenSheetEditorFocused(contextService: IContextService): boolean
     );
 }
 
+/**
+ * Requires the currently focused unit to be Workbook, regardless of whether the cell editor is activated.
+ * Used by inline-format shortcuts (bold/italic/underline/strikethrough) so they can also fire
+ * inside the cell editor — the corresponding command will route to the docs inline-format command
+ * when EDITOR_ACTIVATED is true.
+ * @param contextService
+ */
+export function whenSheetFocusedInlineFormat(contextService: IContextService): boolean {
+    return (
+        contextService.getContextValue(FOCUSING_SHEET) &&
+        contextService.getContextValue(FOCUSING_UNIVER_EDITOR) &&
+        !contextService.getContextValue(FOCUSING_COMMON_DRAWINGS)
+    );
+}
+
 export function whenSheetEditorFocusedAndFxNotFocused(contextService: IContextService): boolean {
     return (
         contextService.getContextValue(FOCUSING_SHEET) &&

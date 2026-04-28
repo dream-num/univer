@@ -93,7 +93,7 @@ import {
 } from '../../commands/commands/clipboard.command';
 import { SetScrollOperation } from '../../commands/operations/scroll.operation';
 import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
-import { ISheetClipboardService, PREDEFINED_HOOK_NAME_COPY, PREDEFINED_HOOK_NAME_PASTE } from '../../services/clipboard/clipboard.service';
+import { escapeSpecialCode, ISheetClipboardService, PREDEFINED_HOOK_NAME_COPY, PREDEFINED_HOOK_NAME_PASTE } from '../../services/clipboard/clipboard.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { ClipboardPopupMenu } from '../../views/clipboard/ClipboardPopupMenu';
 import { whenSheetEditorFocused } from '../shortcuts/utils';
@@ -243,11 +243,19 @@ export class SheetClipboardController extends RxDisposable {
             },
             onCopyCellContent(row: number, col: number): string {
                 const cell = currentSheet!.getCell(row, col);
+
+                let content = '';
                 if (cell?.p?.body?.paragraphs || cell?.p?.body?.textRuns) {
-                    return convertBodyToHtml(cell.p);
+                    content = convertBodyToHtml(cell.p);
+                } else if (cell) {
+                    content = extractPureTextFromCell(cell);
                 }
-                const content = cell ? extractPureTextFromCell(cell) : '';
-                return content;
+
+                /**
+                 * Used for generating the copied HTML, so we need to escape special code to avoid breaking the HTML structure.
+                 * For example, if the cell value contains <, > or &, it would break the HTML structure and cause the copied content to be incorrect.
+                 */
+                return escapeSpecialCode(content);
             },
             onCopyCellStyle: (row: number, col: number, rowSpan?: number, colSpan?: number) => {
                 const properties: IClipboardPropertyItem = {};

@@ -110,7 +110,7 @@ export function ParagraphSetting() {
                                   univer-flex univer-cursor-pointer univer-items-center univer-justify-center
                                   univer-rounded univer-bg-none univer-px-3 univer-py-1
                                 `, {
-                                    'univer-bg-blend-color-dodge/90': horizontalAlignValue === item.value,
+                                    'univer-bg-gray-200 dark:!univer-bg-gray-500': horizontalAlignValue === item.value,
                                 })}
                                 onClick={() => setHorizontalAlign(item.value)}
                             >

@@ -147,6 +147,7 @@ export function PageSettings(props: IConfirmChildrenProps) {
                             </label>
                             <InputNumber
                                 precision={2}
+                                min={0}
                                 max={settings.pageSise.height / 2}
                                 value={settings.margins.top}
                                 onChange={(e) => handleMarginChange('top', e)}
@@ -158,6 +159,7 @@ export function PageSettings(props: IConfirmChildrenProps) {
                             </label>
                             <InputNumber
                                 precision={2}
+                                min={0}
                                 max={settings.pageSise.height / 2}
                                 value={settings.margins.bottom}
                                 onChange={(e) => handleMarginChange('bottom', e)}
@@ -171,6 +173,7 @@ export function PageSettings(props: IConfirmChildrenProps) {
                             </label>
                             <InputNumber
                                 precision={2}
+                                min={0}
                                 max={settings.pageSise.width / 2}
                                 value={settings.margins.left}
                                 onChange={(e) => handleMarginChange('left', e)}
@@ -182,6 +185,7 @@ export function PageSettings(props: IConfirmChildrenProps) {
                             </label>
                             <InputNumber
                                 precision={2}
+                                min={0}
                                 max={settings.pageSise.width / 2}
                                 value={settings.margins.right}
                                 onChange={(e) => handleMarginChange('right', e)}

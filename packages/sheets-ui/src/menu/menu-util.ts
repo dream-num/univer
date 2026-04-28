@@ -138,23 +138,31 @@ export function getCurrentRangeDisable$(accessor: IAccessor, permissionTypes: IP
                         return of(true);
                     }
 
-                    const selectionManagerService = accessor.get(SheetsSelectionsService);
+                    const unitId = workbook.getUnitId();
+                    const subUnitId = worksheet.getSheetId();
+
                     const rangeProtectionRuleModel = accessor.get(RangeProtectionRuleModel);
                     const worksheetRuleModel = accessor.get(WorksheetProtectionRuleModel);
+
+                    const selectionManagerService = accessor.get(SheetsSelectionsService);
+                    const selectionChanged$ = selectionManagerService.selectionChanged$.pipe(
+                        startWith(selectionManagerService.getWorkbookSelections(unitId).getSelectionsOfWorksheet(subUnitId))
+                    );
 
                     const contextService = accessor.get(IContextService);
                     const focusedOnDrawing$ = contextService.subscribeContextValue$(FOCUSING_COMMON_DRAWINGS).pipe(startWith(false));
 
-                    return combineLatest([selectionManagerService.selectionMoveEnd$, focusedOnDrawing$]).pipe(
+                    const permissionService = accessor.get(IPermissionService);
+                    const permissionPointUpdate$ = permissionService.permissionPointUpdate$.pipe(
+                        debounceTime(100),
+                        startWith(null)
+                    );
+
+                    return combineLatest([selectionChanged$, focusedOnDrawing$, permissionPointUpdate$]).pipe(
                         switchMap(([selection, focusOnDrawings]) => {
                             if (focusOnDrawings && !focusingShapeTextEditor) {
                                 return of(true);
                             }
-
-                            const unitId = workbook.getUnitId();
-                            const subUnitId = worksheet.getSheetId();
-
-                            const permissionService = accessor.get(IPermissionService);
 
                             const { workbookTypes = [WorkbookEditablePermission], worksheetTypes, rangeTypes } = permissionTypes;
 

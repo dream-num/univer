@@ -27,6 +27,7 @@ import type { IInsertColCommandParams, IInsertRowCommandParams } from '../../com
 import type { IMoveRangeCommandParams } from '../../commands/commands/move-range.command';
 import type { IMoveColsCommandParams, IMoveRowsCommandParams } from '../../commands/commands/move-rows-cols.command';
 import type { IRemoveColByRangeCommandParams, IRemoveRowByRangeCommandParams } from '../../commands/commands/remove-row-col.command';
+import type { ISetBorderCommandParams } from '../../commands/commands/set-border-command';
 import type { ISetSpecificColsVisibleCommandParams } from '../../commands/commands/set-col-visible.command';
 import type { ISetRangeValuesCommandParams } from '../../commands/commands/set-range-values.command';
 import type { ISetSpecificRowsVisibleCommandParams } from '../../commands/commands/set-row-visible.command';
@@ -65,6 +66,7 @@ import { InsertColByRangeCommand, InsertRowByRangeCommand } from '../../commands
 import { MoveRangeCommand } from '../../commands/commands/move-range.command';
 import { MoveColsCommand, MoveRowsCommand } from '../../commands/commands/move-rows-cols.command';
 import { RemoveColByRangeCommand, RemoveRowByRangeCommand } from '../../commands/commands/remove-row-col.command';
+import { SetBorderCommand } from '../../commands/commands/set-border-command';
 import { SetSelectedColsVisibleCommand, SetSpecificColsVisibleCommand } from '../../commands/commands/set-col-visible.command';
 import { SetRangeValuesCommand } from '../../commands/commands/set-range-values.command';
 import { SetSelectedRowsVisibleCommand, SetSpecificRowsVisibleCommand } from '../../commands/commands/set-row-visible.command';
@@ -205,6 +207,21 @@ export class SheetPermissionCheckController extends Disposable {
                     params.range ? [params.range] : undefined,
                     params.unitId,
                     params.subUnitId
+                );
+                errorMsg = this._localeService.t('permission.dialog.setStyleErr');
+                break;
+            case SetBorderCommand.id:
+                params = commandInfo.params as ISetBorderCommandParams | undefined;
+
+                permission = this.permissionCheckWithRanges(
+                    {
+                        workbookTypes: [WorkbookEditablePermission],
+                        worksheetTypes: [WorksheetSetCellStylePermission, WorksheetEditPermission],
+                        rangeTypes: [RangeProtectionPermissionEditPoint],
+                    },
+                    params?.ranges,
+                    params?.unitId,
+                    params?.subUnitId
                 );
                 errorMsg = this._localeService.t('permission.dialog.setStyleErr');
                 break;

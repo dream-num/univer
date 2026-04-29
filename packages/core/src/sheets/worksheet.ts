@@ -1387,7 +1387,7 @@ export function extractPureTextFromCell(cell: Nullable<ICellData>): string {
         if (cell.t === CellValueType.BOOLEAN) {
             return rawValue.toUpperCase();
         }
-        return rawValue.replace(/[\r\n]/g, '');
+        return rawValue.replace(/\r\n/g, '');
     };
 
     if (typeof rawValue === 'number') {

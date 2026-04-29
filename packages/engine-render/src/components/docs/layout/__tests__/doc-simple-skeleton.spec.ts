@@ -90,4 +90,14 @@ describe('doc simple skeleton', () => {
         expect(lines.length).toBeGreaterThan(0);
         expect(skeleton.getTotalHeight()).toBeGreaterThanOrEqual(10);
     });
+
+    it('content with \n', () => {
+        const skeleton = new DocSimpleSkeleton('客户经理UM1\n客户经理UM2', '11pt Arial', true, 60, Infinity);
+        const lines = skeleton.calculate();
+        expect(lines.length).toBe(4);
+        expect(lines[0].text).toBe('客户经理');
+        expect(lines[1].text).toBe('UM1');
+        expect(lines[2].text).toBe('客户经理');
+        expect(lines[3].text).toBe('UM2');
+    });
 });

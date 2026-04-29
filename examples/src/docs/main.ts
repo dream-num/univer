@@ -19,6 +19,7 @@ import { FUniver } from '@univerjs/core/facade';
 import { UniverDebuggerPlugin } from '@univerjs/debugger';
 import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsDrawingUIPlugin } from '@univerjs/docs-drawing-ui';
+import { UniverDocsExchangeUIPlugin } from '@univerjs/docs-exchange-ui';
 import { UniverDocsHyperLinkUIPlugin } from '@univerjs/docs-hyper-link-ui';
 import { UniverDocsMentionUIPlugin } from '@univerjs/docs-mention-ui';
 import { UniverDocsQuickInsertUIPlugin } from '@univerjs/docs-quick-insert-ui';
@@ -60,6 +61,7 @@ univer.registerPlugin(UniverDocsUIPlugin, {
 });
 
 univer.registerPlugin(UniverDocsDrawingUIPlugin);
+univer.registerPlugin(UniverDocsExchangeUIPlugin);
 univer.registerPlugin(UniverDocsThreadCommentUIPlugin);
 univer.registerPlugin(UniverDocsHyperLinkUIPlugin);
 univer.registerPlugin(UniverDocsMentionUIPlugin);

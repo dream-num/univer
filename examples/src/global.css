@@ -1,3 +1,150 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ========================================
+   中文字体：用 local() 把 DOCX 字体名映射到系统已装字体
+   ========================================
+   DOCX 里 w:rFonts 可能写中文名（"仿宋"）或英文名（"FangSong"）。
+   Windows/macOS 系统字体名不一致，浏览器按 src 顺序找第一个已装的。
+   命中失败时 Univer Canvas 会退到默认 sans，渲染就不像 Word。
+   仅覆盖 macOS/Windows 桌面 Chrome；Linux/容器需要后续补 url() 兜底。
+*/
+
+@font-face {
+    font-family: '宋体';
+    src: local('SimSun'), local('Songti SC'), local('STSong'), local('Songti TC');
+}
+@font-face {
+    font-family: 'SimSun';
+    src: local('SimSun'), local('Songti SC'), local('STSong'), local('Songti TC');
+}
+
+@font-face {
+    font-family: '黑体';
+    src: local('SimHei'), local('Heiti SC'), local('STHeiti'), local('Heiti TC');
+}
+@font-face {
+    font-family: 'SimHei';
+    src: local('SimHei'), local('Heiti SC'), local('STHeiti'), local('Heiti TC');
+}
+
+@font-face {
+    font-family: '仿宋';
+    src: local('FangSong'), local('STFangsong'), local('FangSong_GB2312'), local('Fang Song');
+}
+@font-face {
+    font-family: 'FangSong';
+    src: local('FangSong'), local('STFangsong'), local('FangSong_GB2312'), local('Fang Song');
+}
+@font-face {
+    font-family: 'FangSong_GB2312';
+    src: local('FangSong_GB2312'), local('FangSong'), local('STFangsong'), local('Fang Song');
+}
+
+@font-face {
+    font-family: '楷体';
+    src: local('KaiTi'), local('STKaiti'), local('Kaiti SC'), local('Kaiti TC');
+}
+@font-face {
+    font-family: 'KaiTi';
+    src: local('KaiTi'), local('STKaiti'), local('Kaiti SC'), local('Kaiti TC');
+}
+@font-face {
+    font-family: 'KaiTi_GB2312';
+    src: local('KaiTi_GB2312'), local('KaiTi'), local('STKaiti'), local('Kaiti SC');
+}
+
+@font-face {
+    font-family: '微软雅黑';
+    src: local('Microsoft YaHei'), local('PingFang SC'), local('Heiti SC');
+}
+@font-face {
+    font-family: 'Microsoft YaHei';
+    src: local('Microsoft YaHei'), local('PingFang SC'), local('Heiti SC');
+}
+
+@font-face {
+    font-family: '苹方';
+    src: local('PingFang SC'), local('Microsoft YaHei'), local('Heiti SC');
+}
+@font-face {
+    font-family: 'PingFang SC';
+    src: local('PingFang SC'), local('Microsoft YaHei'), local('Heiti SC');
+}
+
+/* 新宋体：Windows 自带 NSimSun，macOS 退到 Songti SC */
+@font-face {
+    font-family: '新宋体';
+    src: local('NSimSun'), local('SimSun'), local('Songti SC'), local('STSong');
+}
+@font-face {
+    font-family: 'NSimSun';
+    src: local('NSimSun'), local('SimSun'), local('Songti SC'), local('STSong');
+}
+
+/* 隶书：两平台都有同名变体 */
+@font-face {
+    font-family: '隶书';
+    src: local('LiSu'), local('Libian SC'), local('Libian TC');
+}
+@font-face {
+    font-family: 'LiSu';
+    src: local('LiSu'), local('Libian SC'), local('Libian TC');
+}
+
+/* 幼圆：Windows 叫 YouYuan，macOS 叫 Yuanti SC */
+@font-face {
+    font-family: '幼圆';
+    src: local('YouYuan'), local('Yuanti SC'), local('Yuanti TC');
+}
+@font-face {
+    font-family: 'YouYuan';
+    src: local('YouYuan'), local('Yuanti SC'), local('Yuanti TC');
+}
+
+/* 华文细黑：macOS 自带 STXihei，Windows 部分 Office 装；最终退到黑体 */
+@font-face {
+    font-family: '华文细黑';
+    src: local('STXihei'), local('Microsoft YaHei Light'), local('Microsoft YaHei'), local('Heiti SC');
+}
+@font-face {
+    font-family: 'STXihei';
+    src: local('STXihei'), local('Microsoft YaHei Light'), local('Microsoft YaHei'), local('Heiti SC');
+}
+
+/* 华文行楷：macOS 自带，Windows 退到楷体 */
+@font-face {
+    font-family: '华文行楷';
+    src: local('STXingkai'), local('KaiTi'), local('STKaiti'), local('Kaiti SC');
+}
+@font-face {
+    font-family: 'STXingkai';
+    src: local('STXingkai'), local('KaiTi'), local('STKaiti'), local('Kaiti SC');
+}
+
+/* 等线：Win10+ 默认正文字体；macOS 无对等品，退到苹方 */
+@font-face {
+    font-family: '等线';
+    src: local('DengXian'), local('PingFang SC'), local('Microsoft YaHei'), local('Heiti SC');
+}
+@font-face {
+    font-family: 'DengXian';
+    src: local('DengXian'), local('PingFang SC'), local('Microsoft YaHei'), local('Heiti SC');
+}
+
+/* Calibri / Cambria：Office 装则有；macOS 无 Office 时退到系统西文字体 */
+@font-face {
+    font-family: 'Calibri';
+    src: local('Calibri'), local('Helvetica Neue'), local('PingFang SC'), local('Arial');
+}
+@font-face {
+    font-family: 'Cambria';
+    src: local('Cambria'), local('Times New Roman'), local('Times'), local('Songti SC');
+}
+
+/* Consolas：Windows 独占等宽，macOS 退到 Menlo */
+@font-face {
+    font-family: 'Consolas';
+    src: local('Consolas'), local('Menlo'), local('Monaco'), local('Courier New');
+}

@@ -17,7 +17,6 @@
 import type { DocumentDataModel, IAccessor, PresetListType } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IMenuButtonItem, IMenuItem, IMenuSelectorItem } from '@univerjs/ui';
-import type { Subscription } from 'rxjs';
 import {
     BaselineOffset,
     BooleanNumber,
@@ -875,9 +874,7 @@ const listValueFactory$ = (accessor: IAccessor) => {
     return new Observable<PresetListType | undefined>((subscriber) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
-        let textSubscription: Subscription | undefined;
         const subscription = univerInstanceService.focused$.subscribe((unitId) => {
-            textSubscription?.unsubscribe();
             if (unitId == null) {
                 return;
             }
@@ -887,33 +884,30 @@ const listValueFactory$ = (accessor: IAccessor) => {
                 return;
             }
 
-            textSubscription = docSelectionManagerService.textSelection$.subscribe(() => {
-                const docRanges = docSelectionManagerService.getDocRanges();
-                const range = docRanges.find((r) => r.isActive) ?? docRanges[0];
+            const docRanges = docSelectionManagerService.getDocRanges();
+            const range = docRanges.find((r) => r.isActive) ?? docRanges[0];
 
-                if (range) {
-                    const doc = docDataModel.getSelfOrHeaderFooterModel(range?.segmentId);
+            if (range) {
+                const doc = docDataModel.getSelfOrHeaderFooterModel(range?.segmentId);
 
-                    const paragraphs = BuildTextUtils.range.getParagraphsInRange(range, doc.getBody()?.paragraphs ?? [], doc.getBody()?.dataStream ?? '');
-                    let listType: string | undefined;
-                    if (paragraphs.every((p) => {
-                        if (!listType) {
-                            listType = p.bullet?.listType;
-                        }
-                        return p.bullet && p.bullet.listType === listType;
-                    })) {
-                        subscriber.next(listType as PresetListType);
-                        return;
+                const paragraphs = BuildTextUtils.range.getParagraphsInRange(range, doc.getBody()?.paragraphs ?? [], doc.getBody()?.dataStream ?? '');
+                let listType: string | undefined;
+                if (paragraphs.every((p) => {
+                    if (!listType) {
+                        listType = p.bullet?.listType;
                     }
+                    return p.bullet && p.bullet.listType === listType;
+                })) {
+                    subscriber.next(listType as PresetListType);
+                    return;
                 }
+            }
 
-                subscriber.next(undefined);
-            });
+            subscriber.next(undefined);
         });
 
         return () => {
             subscription.unsubscribe();
-            textSubscription?.unsubscribe();
         };
     });
 };

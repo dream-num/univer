@@ -371,6 +371,11 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
         setInputValue(newValue);
     };
 
+    const onSubmenuOptionSelect = (option: IValueOption) => {
+        onOptionSelect?.(option);
+        setSubmenuVisible(false);
+    };
+
     const itemClassName = clsx(
         `
           univer-relative univer-flex univer-min-h-8 univer-w-full univer-items-center univer-justify-between
@@ -569,7 +574,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                                                             label={option.label}
                                                             icon={option.icon}
                                                             onChange={(optionValue) => {
-                                                                onOptionSelect?.({
+                                                                onSubmenuOptionSelect?.({
                                                                     ...option,
                                                                     value: optionValue,
                                                                     id: menuItem.id,
@@ -591,7 +596,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                                                             className={optionClassName}
                                                             disabled={option.disabled}
                                                             onClick={() => {
-                                                                onOptionSelect?.({
+                                                                onSubmenuOptionSelect?.({
                                                                     ...option,
                                                                     id: menuItem.id,
                                                                     label: menuKey,
@@ -619,7 +624,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                                     <ContextMenuMenu
                                         menuSchemas={subMenuItems}
                                         submenuPortalContainer={submenuPortalContainer}
-                                        onOptionSelect={onOptionSelect}
+                                        onOptionSelect={onSubmenuOptionSelect}
                                         maxMenuHeight={maxMenuHeight}
                                     />
                                 )}

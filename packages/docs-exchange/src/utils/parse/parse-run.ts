@@ -313,12 +313,17 @@ export function parseRunsFromPNode(
             }
             return;
         }
-        const placeholder = kind === 'PAGE' ? '{{page}}' : '{{numpages}}';
+        const placeholder = '1';
         const style = resolveRunStyle(rPrForStyle, baseRpr, baseRFonts, styles, themeFonts, placeholder);
         runs.push(style ? { text: placeholder, style, fieldType: kind } : { text: placeholder, fieldType: kind });
     };
 
     let pendingFieldRPr: XmlNode | undefined;
+    // Cached-value run's rPr (between separate and end). Word writes the field's
+    // *display* style here (e.g. font size on the cached "1") rather than on the
+    // begin run, which often only carries partial rPr like <w:b/>. Prefer this
+    // when present so PAGE/NUMPAGES placeholders inherit the right size/font.
+    let pendingFieldResultRPr: XmlNode | undefined;
     let pendingFieldFallback = '';
 
     for (const child of nodeChildren(pNode)) {
@@ -332,6 +337,7 @@ export function parseRunsFromPNode(
                 fieldInstr = '';
                 inFieldResult = false;
                 pendingFieldRPr = rPr;
+                pendingFieldResultRPr = undefined;
                 pendingFieldFallback = '';
                 continue;
             }
@@ -341,11 +347,12 @@ export function parseRunsFromPNode(
             }
             if (signals?.fldChar === 'end') {
                 if (fieldDepth > 0) {
-                    emitField(pendingFieldRPr, pendingFieldFallback);
+                    emitField(pendingFieldResultRPr ?? pendingFieldRPr, pendingFieldFallback);
                     fieldDepth--;
                     fieldInstr = '';
                     inFieldResult = false;
                     pendingFieldRPr = undefined;
+                    pendingFieldResultRPr = undefined;
                     pendingFieldFallback = '';
                 }
                 continue;
@@ -358,6 +365,10 @@ export function parseRunsFromPNode(
                     continue;
                 }
                 if (inFieldResult) {
+                    // First cached-value run with text wins as the style source.
+                    if (pendingFieldResultRPr === undefined && rPr !== undefined && runTextFromR(child).length > 0) {
+                        pendingFieldResultRPr = rPr;
+                    }
           // Keep around in case the field is unrecognized and we need to fall back.
                     pendingFieldFallback += runTextFromR(child);
                     continue;
@@ -398,7 +409,7 @@ export function parseRunsFromPNode(
   // Unterminated field (malformed xml) — flush whatever we accumulated so we don't
   // silently drop the user's content. Emits as fallback text, not a placeholder.
     if (fieldDepth > 0 && pendingFieldFallback.length > 0) {
-        const style = resolveRunStyle(pendingFieldRPr, baseRpr, baseRFonts, styles, themeFonts, pendingFieldFallback);
+        const style = resolveRunStyle(pendingFieldResultRPr ?? pendingFieldRPr, baseRpr, baseRFonts, styles, themeFonts, pendingFieldFallback);
         runs.push(style ? { text: pendingFieldFallback, style } : { text: pendingFieldFallback });
     }
 

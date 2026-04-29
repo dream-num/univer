@@ -23,10 +23,11 @@ export interface ParsedRun {
     drawingId?: string;
   /**
    * OOXML field code semantics preserved past the importer (e.g. "PAGE", "NUMPAGES").
-   * When set, `text` is the placeholder the renderer should substitute at paint time —
-   * NOT the cached value Word wrote between <w:fldChar separate/> and <w:fldChar end/>.
-   * Renderer support is tracked separately; importer just guarantees the cached value
-   * doesn't leak through as static text (would freeze the page number forever).
+   * When set, `text` is a single-character cached value ("1") chosen to give layout a
+   * realistic glyph width — NOT the cached value Word wrote between <w:fldChar separate/>
+   * and <w:fldChar end/> (which would freeze at whatever page Word last saved).
+   * The renderer reads this via the FIELD customRange and substitutes the actual
+   * page number / total pages at paint time.
    */
     fieldType?: 'PAGE' | 'NUMPAGES';
 }

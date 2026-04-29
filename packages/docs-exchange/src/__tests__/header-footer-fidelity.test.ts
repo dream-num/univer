@@ -133,8 +133,7 @@ describe('footer PAGE / NUMPAGES field codes are recognized', () => {
         // A new field on the run that flags it as a page-number element.
         // Exact shape is up to the implementation; the test just asserts the
         // semantics survived past the importer.
-                (r as unknown as { fieldType?: string }).fieldType === 'PAGE' ||
-        (r.text ?? '').includes('{{page}}')
+                (r as unknown as { fieldType?: string }).fieldType === 'PAGE'
         );
         expect(hasPagePlaceholder).toBe(true);
     });
@@ -165,5 +164,27 @@ describe('footer PAGE / NUMPAGES field codes are recognized', () => {
         expect(flat).toMatch(/PAGE/);
         expect(flat).toMatch(/NUMPAGES/);
         expect(flat).not.toMatch(/^[^P]*2[^P]*$/); // "2" should not be the only numeric content
+    });
+
+    it('PAGE placeholder inherits fontSize/fontFamily from the cached-value run, not the begin run', () => {
+        // Real-world Word footers (e.g. 文书格式.docx) put the field's display
+        // style on the cached-value run, not on fldChar begin. The importer
+        // previously read rPr off the begin run, so PAGE/NUMPAGES placeholders
+        // dropped back to docDefault size — visibly different from surrounding text.
+        const xml = `<w:p ${W}>
+      <w:r><w:rPr><w:b/></w:rPr><w:fldChar w:fldCharType="begin"/></w:r>
+      <w:r><w:rPr><w:b/></w:rPr><w:instrText>PAGE</w:instrText></w:r>
+      <w:r><w:rPr><w:b/></w:rPr><w:fldChar w:fldCharType="separate"/></w:r>
+      <w:r><w:rPr><w:rFonts w:ascii="Calibri"/><w:b/><w:sz w:val="18"/></w:rPr><w:t>1</w:t></w:r>
+      <w:r><w:rPr><w:b/></w:rPr><w:fldChar w:fldCharType="end"/></w:r>
+    </w:p>`;
+        const runs = parseRunsFromParagraphXml(xml);
+        const pageRun = runs.find(
+            (r) => (r as unknown as { fieldType?: string }).fieldType === 'PAGE'
+        );
+        expect(pageRun).toBeDefined();
+        // sz="18" is half-points → fs 9; ff comes from rFonts on the cached run.
+        expect(pageRun!.style?.fs).toBe(9);
+        expect(pageRun!.style?.ff).toBe('Calibri');
     });
 });

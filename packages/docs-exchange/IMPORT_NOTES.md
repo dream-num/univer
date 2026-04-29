@@ -20,14 +20,19 @@ Update this file when you add a TODO that crosses the importer/renderer boundary
 
 - **Importer status:** parsed. `parseRunsFromPNode` consumes the
   `fldChar begin → instrText → separate → cached value → fldChar end` sequence,
-  drops the cached value, and emits a single placeholder run with
-  `fieldType: 'PAGE' | 'NUMPAGES'` and `text: '{{page}}' | '{{numpages}}'`.
-- **Renderer status:** not implemented. Univer's docs renderer has
-  `CustomRangeType.FIELD` in core but no consumer in `engine-render` /
-  `docs-ui`. The placeholder text will render literally (`{{page}}`).
-- **Why parse it anyway:** if the importer kept the cached value, every page
-  would show the page number Word last wrote (e.g. always "2") — strictly
-  worse than a visible placeholder.
+  drops the cached value, and emits a single-character placeholder run (`text: '1'`)
+  carrying `fieldType: 'PAGE' | 'NUMPAGES'`. Assemble persists this as a
+  `CustomRangeType.FIELD` customRange with `properties.subtype`.
+- **Renderer status:** implemented. `getFontCreateConfig` reads the FIELD
+  subtype off the customRange and threads it onto the glyph; `font-and-base-line.ts`
+  substitutes the live page number / total pages at paint time using
+  `parentPage.pageNumber` and `pages.length`. The footer skeleton is still cached
+  per `pageWidth` and shared across body pages — substitution happens during
+  `ctx.fillText`, not during layout.
+- **Why a "1" placeholder:** layout needs a realistic glyph width. Most footers
+  are centered or right-aligned; using "1" keeps width within ±1 digit of the
+  rendered value. Documents with 100+ pages will see the centered footer drift
+  by roughly the width of one or two digits — acceptable for v1.
 
 ### Paragraph `tabStops`
 

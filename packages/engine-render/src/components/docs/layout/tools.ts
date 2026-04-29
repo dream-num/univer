@@ -49,6 +49,7 @@ import {
     AlignTypeV,
     BooleanNumber,
     ColumnSeparatorType,
+    CustomRangeType,
     DataStreamTreeTokenType,
     DocumentFlavor,
     GridType,
@@ -772,6 +773,7 @@ interface IFontCreateConfig {
     gridType: GridType;
     snapToGrid: BooleanNumber;
     pageWidth: number;
+    fieldSubtype?: 'PAGE' | 'NUMPAGES';
 }
 
 const fontCreateConfigCache = new ObjectMatrix<IFontCreateConfig>();
@@ -854,7 +856,8 @@ export function getFontCreateConfig(
     const customRange = viewModel.getCustomRange(index + startIndex);
     const showCustomRange = customRange && (customRange.show !== false);
     const customRangeStyle = showCustomRange ? getCustomRangeStyle(customRange) : null;
-    const hasAddonStyle = showCustomRange || showCustomDecoration || !!bullet || paragraphStyle?.namedStyleType;
+    const isField = customRange?.rangeType === CustomRangeType.FIELD;
+    const hasAddonStyle = showCustomRange || showCustomDecoration || !!bullet || paragraphStyle?.namedStyleType || isField;
     const { st, ed } = textRun;
     let { ts: textStyle = {} } = textRun;
     const cache = fontCreateConfigCache.getValue(st, ed);
@@ -885,6 +888,10 @@ export function getFontCreateConfig(
 
     const pageWidth = pageSize.width || Number.POSITIVE_INFINITY - marginLeft - marginRight;
 
+    const fieldSubtype = isField
+        ? (customRange!.properties as { subtype?: 'PAGE' | 'NUMPAGES' } | undefined)?.subtype
+        : undefined;
+
     const result = {
         fontStyle,
         textStyle: mixTextStyle,
@@ -892,6 +899,7 @@ export function getFontCreateConfig(
         gridType,
         snapToGrid,
         pageWidth,
+        ...(fieldSubtype ? { fieldSubtype } : {}),
     };
 
     if (!hasAddonStyle && originTextRun) {

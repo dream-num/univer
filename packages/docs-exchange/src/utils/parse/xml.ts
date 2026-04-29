@@ -64,3 +64,23 @@ export function textOf(node: XmlNode): string {
     }
     return out;
 }
+
+/**
+ * Unwrap <w:sdt><w:sdtContent>...</w:sdtContent></w:sdt> containers so callers
+ * iterating over body/header/footer children see the wrapped <w:p>/<w:tbl> directly.
+ * SDTs can nest; non-sdt nodes pass through unchanged. Order is preserved.
+ */
+export function flattenSdt(nodes: XmlNode[]): XmlNode[] {
+    const out: XmlNode[] = [];
+    for (const node of nodes) {
+        if (nodeName(node) === 'w:sdt') {
+            const content = findChild(node, 'w:sdtContent');
+            if (content) {
+                for (const inner of flattenSdt(nodeChildren(content))) out.push(inner);
+            }
+        } else {
+            out.push(node);
+        }
+    }
+    return out;
+}

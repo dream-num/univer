@@ -29,7 +29,7 @@ import type {
 } from '@univerjs/core';
 import type { DrawingInfo } from './parse-drawing';
 import type { DocumentChild, ParsedBorder, ParsedCellBorders, ParsedCellMargin, ParsedNumberingDef, ParsedParagraph, ParsedRelationship, ParsedTable } from './types';
-import { DataStreamTreeTokenType, generateRandomId } from '@univerjs/core';
+import { CustomRangeType, DataStreamTreeTokenType, generateRandomId } from '@univerjs/core';
 import { buildDrawing } from './parse-drawing';
 
 const uuidv4 = () => generateRandomId();
@@ -53,7 +53,7 @@ interface Accumulator {
     paragraphs: IParagraph[];
     sectionBreaks: Array<Partial<ISectionBreak> & { startIndex: number }>;
     tables: ICustomTable[];
-    customRanges: ICustomRange<{ url: string }>[];
+    customRanges: ICustomRange[];
     customBlocks: ICustomBlock[];
     drawings: Record<string, unknown>;
     tableSource: Record<string, unknown>;
@@ -82,6 +82,16 @@ function emitRun(run: ParsedParagraph['runs'][number], acc: Accumulator, ctx: As
 
     if (run.style) {
         acc.textRuns.push({ st: runStart, ed: runEnd, ts: run.style });
+    }
+
+    if (run.fieldType) {
+        acc.customRanges.push({
+            startIndex: runStart,
+            endIndex: runEnd - 1,
+            rangeType: CustomRangeType.FIELD,
+            rangeId: uuidv4(),
+            properties: { subtype: run.fieldType },
+        });
     }
 
     if (run.hyperlink) {

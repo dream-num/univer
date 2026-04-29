@@ -25,6 +25,7 @@ import { parseRelationships } from './parse-hyperlink';
 import { parseParagraph } from './parse-paragraph';
 import { parseTable } from './parse-table';
 import {
+    flattenSdt,
     nodeChildren,
     nodeName,
     xmlParser,
@@ -72,7 +73,7 @@ export function parseHeaderFooterXml(
 
     const drawingInfoMap = new Map<string, DrawingInfo>();
     const children: DocumentChild[] = [];
-    for (const child of nodeChildren(root)) {
+    for (const child of flattenSdt(nodeChildren(root))) {
         const name = nodeName(child);
         try {
             if (name === 'w:p') {

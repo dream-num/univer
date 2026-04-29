@@ -29,6 +29,10 @@ export interface IExtensionConfig {
     centerPoint?: Vector2;
     alignOffset?: Vector2;
     renderConfig?: IDocumentRenderConfig;
+    /** Body page number for the page currently being painted (set when drawing headers/footers). */
+    pageNumber?: number;
+    /** Total body page count of the document (set when drawing headers/footers). */
+    totalPages?: number;
 }
 
 export interface IDrawInfo {

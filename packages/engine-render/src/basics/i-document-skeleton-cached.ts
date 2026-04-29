@@ -235,6 +235,7 @@ export interface IDocumentSkeletonGlyph {
     url?: string; // image url
     featureId?: string; // support interaction for feature ,eg. hyperLine person
     drawingId?: string; // drawing.drawingId
+    fieldSubtype?: 'PAGE' | 'NUMPAGES'; // OOXML field code; renderer substitutes content at paint time
 }
 
 export interface IDocumentSkeletonBullet {

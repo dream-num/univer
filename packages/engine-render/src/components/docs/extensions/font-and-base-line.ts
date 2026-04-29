@@ -108,12 +108,24 @@ export class FontAndBaseLine extends docExtension {
     }
 
     private _fillText(ctx: UniverRenderingContext, glyph: IDocumentSkeletonGlyph, spanPointWithFont: Vector2) {
-        const { renderConfig, spanStartPoint, centerPoint } = this.extensionOffset;
-        const { content, width, bBox } = glyph;
+        const { renderConfig, spanStartPoint, centerPoint, pageNumber, totalPages } = this.extensionOffset;
+        const { width, bBox } = glyph;
         const { aba, abd } = bBox;
+        let { content } = glyph;
 
         if (content == null || spanStartPoint == null || centerPoint == null) {
             return;
+        }
+
+    // OOXML field substitution. Importer marks PAGE/NUMPAGES glyphs via fieldSubtype;
+    // we paint the live value at draw time without touching the skeleton, so the
+    // shared header/footer skeleton can serve every body page with a different number.
+    // Falls back to the importer's "1" placeholder if pageNumber/totalPages weren't set
+    // (e.g. body-text fields outside of header/footer paint path).
+        if (glyph.fieldSubtype === 'PAGE' && pageNumber != null) {
+            content = String(pageNumber);
+        } else if (glyph.fieldSubtype === 'NUMPAGES' && totalPages != null) {
+            content = String(totalPages);
         }
 
         const { vertexAngle, centerAngle } = renderConfig ?? {};

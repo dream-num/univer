@@ -58,6 +58,36 @@ describe('assembleDocument', () => {
         expect(ranges[0]).toMatchObject({ startIndex: 0, endIndex: 4, rangeType: 0, properties: { url: 'https://x.com' } });
     });
 
+    it('emits PAGE/NUMPAGES fieldType as CustomRangeType.FIELD customRange', async () => {
+        const { CustomRangeType } = await import('@univerjs/core');
+        const children: DocumentChild[] = [
+            {
+                kind: 'paragraph',
+                paragraph: {
+                    runs: [
+                        { text: '1', fieldType: 'PAGE' },
+                        { text: ' / ' },
+                        { text: '1', fieldType: 'NUMPAGES' },
+                    ],
+                },
+            },
+        ];
+        const doc = assembleDocument(children, { numbering: new Map(), rels: new Map(), media: new Map() });
+        const ranges = (
+            doc.body as unknown as {
+                customRanges: Array<{ startIndex: number; endIndex: number; rangeType: number; properties: { subtype: string } }>;
+            }
+        ).customRanges;
+    // Two FIELD ranges, one per placeholder, both rangeType=FIELD with subtype recorded.
+        expect(ranges).toHaveLength(2);
+        expect(ranges[0]).toMatchObject({ rangeType: CustomRangeType.FIELD, properties: { subtype: 'PAGE' } });
+        expect(ranges[1]).toMatchObject({ rangeType: CustomRangeType.FIELD, properties: { subtype: 'NUMPAGES' } });
+    // Range covers exactly the placeholder text in dataStream.
+        const ds = doc.body!.dataStream!;
+        expect(ds.slice(ranges[0].startIndex, ranges[0].endIndex + 1)).toBe('1');
+        expect(ds.slice(ranges[1].startIndex, ranges[1].endIndex + 1)).toBe('1');
+    });
+
     it('attaches numbering as bullet via numId lookup; bullet.listType matches lists map key', () => {
         const numbering = new Map([
             [

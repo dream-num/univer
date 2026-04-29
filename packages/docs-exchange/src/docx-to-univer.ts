@@ -22,6 +22,7 @@ import {
     assembleDocument,
 
     findChild,
+    flattenSdt,
     nodeChildren,
     nodeName,
     parseEvenAndOddHeaders,
@@ -54,7 +55,7 @@ export async function docxToUniverData(input: DocxInput): Promise<IDocumentData>
     const drawingInfoMap = new Map<string, DrawingInfo>();
     const children: DocumentChild[] = [];
     if (body) {
-        for (const child of nodeChildren(body)) {
+        for (const child of flattenSdt(nodeChildren(body))) {
             const name = nodeName(child);
             try {
                 if (name === 'w:p') {

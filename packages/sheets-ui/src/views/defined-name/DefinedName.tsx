@@ -22,7 +22,7 @@ import { debounce, generateRandomId, ICommandService, IUniverInstanceService, Th
 import { borderRightClassName, clsx, Dropdown } from '@univerjs/design';
 import { deserializeRangeWithSheet, IDefinedNamesService, IFunctionService, ISuperTableService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { MoreDownIcon } from '@univerjs/icons';
-import { getPrimaryForRange, InsertDefinedNameCommand, SCOPE_WORKBOOK_VALUE_DEFINED_NAME, SetSelectionsOperation, SetWorksheetShowCommand, SheetsSelectionsService } from '@univerjs/sheets';
+import { getPrimaryForRange, InsertDefinedNameCommand, SCOPE_WORKBOOK_VALUE_DEFINED_NAME, SetSelectionsOperation, SetWorksheetShowCommand, SheetPermissionCheckController, SheetsSelectionsService, WorkbookEditablePermission } from '@univerjs/sheets';
 import { ILayoutService, useDependency } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
 import { ScrollToCellCommand } from '../../commands/commands/set-scroll.command';
@@ -41,6 +41,7 @@ export function DefinedName({ disable }: { disable: boolean }) {
     const superTableService = useDependency(ISuperTableService);
     const functionService = useDependency(IFunctionService);
     const layoutService = useDependency(ILayoutService);
+    const sheetPermissionCheckController = useDependency(SheetPermissionCheckController);
 
     const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const unitId = workbook?.getUnitId();
@@ -178,7 +179,15 @@ export function DefinedName({ disable }: { disable: boolean }) {
                 focusSelection(action.refString);
                 return true;
             case DefinedNameBoxActionType.CreateDefinedName: {
-                if (!formulaOrRefString) {
+                if (
+                    !formulaOrRefString ||
+                    !sheetPermissionCheckController.permissionCheckWithoutRange(
+                        {
+                            workbookTypes: [WorkbookEditablePermission],
+                        },
+                        unitId
+                    )
+                ) {
                     resetValue();
                     return false;
                 }

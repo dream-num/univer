@@ -16,7 +16,7 @@
 
 import type { Nullable, Workbook } from '@univerjs/core';
 import type { IDefinedNamesServiceParam, ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
-import { generateRandomId, ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
+import { generateRandomId, ICommandService, IPermissionService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { Button, clsx, Confirm, scrollbarClassName, Tooltip } from '@univerjs/design';
 import { IDefinedNamesService, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { DeleteIcon, IncreaseIcon, PenIcon } from '@univerjs/icons';
@@ -26,7 +26,10 @@ import {
     SCOPE_WORKBOOK_VALUE_DEFINED_NAME,
     SetDefinedNameCommand,
     SetWorksheetShowCommand,
+    SheetPermissionCheckController,
     SheetsSelectionsService,
+    WorkbookEditablePermission,
+    WorksheetEditPermission,
 } from '@univerjs/sheets';
 import { useDependency, useVirtualList } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
@@ -38,6 +41,8 @@ export const DefinedNameContainer = () => {
     const localeService = useDependency(LocaleService);
     const definedNamesService = useDependency(IDefinedNamesService);
     const selectionManagerService = useDependency(SheetsSelectionsService);
+    const permissionService = useDependency(IPermissionService);
+    const sheetPermissionCheckController = useDependency(SheetPermissionCheckController);
 
     const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
     const unitId = workbook?.getUnitId();
@@ -56,6 +61,7 @@ export const DefinedNameContainer = () => {
     const [definedNames, setDefinedNames] = useState<IDefinedNamesServiceParam[]>([]);
     const [editorKey, setEditorKey] = useState<Nullable<string>>(null);
     const [deleteConformKey, setDeleteConformKey] = useState<Nullable<string>>();
+    const [permissionCheckVersion, setPermissionCheckVersion] = useState(0);
 
     const listContainerRef = useRef<HTMLDivElement>(undefined!);
     const [virtualDefinedNames, virtualActions] = useVirtualList(definedNames, {
@@ -81,9 +87,43 @@ export const DefinedNameContainer = () => {
         };
     }, []);
 
+    // permission point update may cause the permission check result to change, so we need to update the component when permission point update happens
+    useEffect(() => {
+        const permissionSubscription = permissionService.permissionPointUpdate$.subscribe(() => {
+            setPermissionCheckVersion((v) => v + 1);
+        });
+
+        return () => {
+            permissionSubscription.unsubscribe();
+        };
+    }, [permissionService]);
+
     if (!workbook || !unitId) {
         return;
     }
+
+    // check defined name permission
+    const checkWorkbookPermission = sheetPermissionCheckController.permissionCheckWithoutRange(
+        {
+            workbookTypes: [WorkbookEditablePermission],
+        },
+        unitId
+    );
+    const checkDefinedNamePermission = (definedName: IDefinedNamesServiceParam): boolean => {
+        const { localSheetId } = definedName;
+
+        if (!localSheetId || localSheetId === SCOPE_WORKBOOK_VALUE_DEFINED_NAME) {
+            return checkWorkbookPermission;
+        }
+
+        return sheetPermissionCheckController.permissionCheckWithoutRange(
+            {
+                worksheetTypes: [WorksheetEditPermission],
+            },
+            unitId,
+            localSheetId
+        );
+    };
 
     const insertConfirm = (param: IDefinedNamesServiceParam) => {
         const { name, formulaOrRefString, comment, localSheetId, hidden } = param;
@@ -203,6 +243,7 @@ export const DefinedNameContainer = () => {
                             'univer-hidden': editState,
                         }
                     )}
+                    disabled={!checkWorkbookPermission}
                     onClick={openInsertCloseKeyEditor}
                 >
                     <IncreaseIcon />
@@ -271,45 +312,46 @@ export const DefinedNameContainer = () => {
                                             {definedName.formulaOrRefString}
                                         </div>
                                     </div>
-                                    <div
-                                        className={`
-                                          univer-absolute univer-right-5 univer-top-1/2 univer-hidden
-                                          -univer-translate-y-1/2 univer-cursor-pointer univer-items-center
-                                          univer-justify-end univer-gap-7 univer-text-xs univer-text-primary-600
-                                          group-hover:univer-flex
-                                          dark:hover:!univer-bg-gray-600
-                                        `}
-                                    >
-                                        <Tooltip title={localeService.t('definedName.updateButton')} placement="top">
-                                            <a
-                                                className={`
-                                                  univer-rounded univer-p-1
-                                                  hover:univer-bg-gray-100
-                                                `}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    closeInsertOpenKeyEditor(definedName.id);
-                                                }}
-                                            >
-                                                <PenIcon />
-                                            </a>
-                                        </Tooltip>
-                                        <Tooltip title={localeService.t('definedName.deleteButton')} placement="top">
-                                            <a
-                                                className={`
-                                                  univer-rounded univer-p-1 univer-text-red-600
-                                                  hover:univer-bg-gray-100
-                                                `}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    deleteDefinedName(definedName.id);
-                                                }}
-                                            >
-                                                <DeleteIcon />
-                                            </a>
-                                        </Tooltip>
-                                    </div>
-
+                                    {checkDefinedNamePermission(definedName) && (
+                                        <div
+                                            className={`
+                                              univer-absolute univer-right-5 univer-top-1/2 univer-hidden
+                                              -univer-translate-y-1/2 univer-cursor-pointer univer-items-center
+                                              univer-justify-end univer-gap-7 univer-text-xs univer-text-primary-600
+                                              group-hover:univer-flex
+                                              dark:hover:!univer-bg-gray-600
+                                            `}
+                                        >
+                                            <Tooltip title={localeService.t('definedName.updateButton')} placement="top">
+                                                <a
+                                                    className={`
+                                                      univer-rounded univer-p-1
+                                                      hover:univer-bg-gray-100
+                                                    `}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        closeInsertOpenKeyEditor(definedName.id);
+                                                    }}
+                                                >
+                                                    <PenIcon />
+                                                </a>
+                                            </Tooltip>
+                                            <Tooltip title={localeService.t('definedName.deleteButton')} placement="top">
+                                                <a
+                                                    className={`
+                                                      univer-rounded univer-p-1 univer-text-red-600
+                                                      hover:univer-bg-gray-100
+                                                    `}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        deleteDefinedName(definedName.id);
+                                                    }}
+                                                >
+                                                    <DeleteIcon />
+                                                </a>
+                                            </Tooltip>
+                                        </div>
+                                    )}
                                 </div>
 
                                 <Confirm

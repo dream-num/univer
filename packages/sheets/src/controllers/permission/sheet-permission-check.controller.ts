@@ -15,6 +15,7 @@
  */
 
 import type { ICellData, ICellDataForSheetInterceptor, ICommandInfo, IObjectMatrixPrimitiveType, IPermissionTypes, IRange, Nullable, Workbook, WorkbookPermissionPointConstructor } from '@univerjs/core';
+import type { ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import type { IAutoFillCommandParams } from '../../commands/commands/auto-fill.command';
 import type { IClearSelectionAllCommandParams } from '../../commands/commands/clear-selection-all.command';
 import type { IClearSelectionContentCommandParams } from '../../commands/commands/clear-selection-content.command';
@@ -32,8 +33,10 @@ import type { ISetSpecificColsVisibleCommandParams } from '../../commands/comman
 import type { ISetRangeValuesCommandParams } from '../../commands/commands/set-range-values.command';
 import type { ISetSpecificRowsVisibleCommandParams } from '../../commands/commands/set-row-visible.command';
 import type { ISetStyleCommandParams } from '../../commands/commands/set-style.command';
+import type { ISetColWidthCommandParams } from '../../commands/commands/set-worksheet-col-width.command';
 import type { ISetWorksheetNameCommandParams } from '../../commands/commands/set-worksheet-name.command';
 import type { ISetWorksheetOrderCommandParams } from '../../commands/commands/set-worksheet-order.command';
+import type { ISetRowHeightCommandParams, ISetWorksheetRowIsAutoHeightCommandParams } from '../../commands/commands/set-worksheet-row-height.command';
 import type { ISetWorksheetShowCommandParams } from '../../commands/commands/set-worksheet-show.command';
 import {
     CustomCommandExecutionError,
@@ -60,14 +63,17 @@ import { ClearSelectionContentCommand } from '../../commands/commands/clear-sele
 import { ClearSelectionFormatCommand } from '../../commands/commands/clear-selection-format.command';
 import { DeleteRangeMoveLeftCommand } from '../../commands/commands/delete-range-move-left.command';
 import { DeleteRangeMoveUpCommand } from '../../commands/commands/delete-range-move-up.command';
+import { InsertDefinedNameCommand } from '../../commands/commands/insert-defined-name.command';
 import { InsertRangeMoveDownCommand } from '../../commands/commands/insert-range-move-down.command';
 import { InsertRangeMoveRightCommand } from '../../commands/commands/insert-range-move-right.command';
 import { InsertColByRangeCommand, InsertRowByRangeCommand } from '../../commands/commands/insert-row-col.command';
 import { MoveRangeCommand } from '../../commands/commands/move-range.command';
 import { MoveColsCommand, MoveRowsCommand } from '../../commands/commands/move-rows-cols.command';
+import { RemoveDefinedNameCommand } from '../../commands/commands/remove-defined-name.command';
 import { RemoveColByRangeCommand, RemoveRowByRangeCommand } from '../../commands/commands/remove-row-col.command';
 import { SetBorderCommand } from '../../commands/commands/set-border-command';
 import { SetSelectedColsVisibleCommand, SetSpecificColsVisibleCommand } from '../../commands/commands/set-col-visible.command';
+import { SetDefinedNameCommand } from '../../commands/commands/set-defined-name.command';
 import { SetRangeValuesCommand } from '../../commands/commands/set-range-values.command';
 import { SetSelectedRowsVisibleCommand, SetSpecificRowsVisibleCommand } from '../../commands/commands/set-row-visible.command';
 import { SetStyleCommand } from '../../commands/commands/set-style.command';
@@ -102,6 +108,7 @@ import {
 } from '../../services/permission/permission-point';
 import { WorksheetProtectionRuleModel } from '../../services/permission/worksheet-permission';
 import { SheetsSelectionsService } from '../../services/selections';
+import { SCOPE_WORKBOOK_VALUE_DEFINED_NAME } from '../defined-name-data.controller';
 
 /* eslint-disable complexity */
 /* eslint-disable max-lines-per-function */
@@ -275,7 +282,6 @@ export class SheetPermissionCheckController extends Disposable {
 
             // set column width
             case DeltaColumnWidthCommand.id:
-            case SetColWidthCommand.id:
                 permission = this.permissionCheckWithoutRange(
                     {
                         worksheetTypes: [WorksheetSetColumnStylePermission],
@@ -283,15 +289,38 @@ export class SheetPermissionCheckController extends Disposable {
                 );
                 errorMsg = this._localeService.t('permission.dialog.setRowColStyleErr');
                 break;
+            case SetColWidthCommand.id:
+                params = commandInfo.params as ISetColWidthCommandParams;
+
+                permission = this.permissionCheckWithoutRange(
+                    {
+                        worksheetTypes: [WorksheetSetColumnStylePermission],
+                    },
+                    params.unitId,
+                    params.subUnitId
+                );
+                errorMsg = this._localeService.t('permission.dialog.setRowColStyleErr');
+                break;
 
             // set row height
             case DeltaRowHeightCommand.id:
-            case SetRowHeightCommand.id:
-            case SetWorksheetRowIsAutoHeightCommand.id:
                 permission = this.permissionCheckWithoutRange(
                     {
                         worksheetTypes: [WorksheetSetRowStylePermission],
                     }
+                );
+                errorMsg = this._localeService.t('permission.dialog.setRowColStyleErr');
+                break;
+            case SetRowHeightCommand.id:
+            case SetWorksheetRowIsAutoHeightCommand.id:
+                params = commandInfo.params as ISetRowHeightCommandParams | ISetWorksheetRowIsAutoHeightCommandParams;
+
+                permission = this.permissionCheckWithoutRange(
+                    {
+                        worksheetTypes: [WorksheetSetRowStylePermission],
+                    },
+                    params.unitId,
+                    params.subUnitId
                 );
                 errorMsg = this._localeService.t('permission.dialog.setRowColStyleErr');
                 break;
@@ -461,6 +490,32 @@ export class SheetPermissionCheckController extends Disposable {
                     params.subUnitId
                 );
                 errorMsg = this._localeService.t('permission.dialog.autoFillErr');
+                break;
+
+            // defined name
+            case InsertDefinedNameCommand.id:
+            case SetDefinedNameCommand.id:
+            case RemoveDefinedNameCommand.id:
+                params = commandInfo.params as ISetDefinedNameMutationParam;
+
+                if (!params.localSheetId || params.localSheetId === SCOPE_WORKBOOK_VALUE_DEFINED_NAME) {
+                    permission = this.permissionCheckWithoutRange(
+                        {
+                            workbookTypes: [WorkbookEditablePermission],
+                        },
+                        params.unitId
+                    );
+                } else {
+                    permission = this.permissionCheckWithoutRange(
+                        {
+                            workbookTypes: [WorkbookEditablePermission],
+                            worksheetTypes: [WorksheetEditPermission],
+                        },
+                        params.unitId,
+                        params.localSheetId
+                    );
+                }
+                errorMsg = this._localeService.t('permission.dialog.editErr');
                 break;
 
             default:

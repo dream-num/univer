@@ -239,7 +239,8 @@ export class Documents extends DocComponent {
                     renderConfig,
                     parentScale,
                     page,
-                    true
+                    true,
+                    pages.length
                 );
             }
 
@@ -485,7 +486,8 @@ export class Documents extends DocComponent {
                     renderConfig,
                     parentScale,
                     page,
-                    false
+                    false,
+                    pages.length
                 );
             }
 
@@ -862,7 +864,8 @@ export class Documents extends DocComponent {
         renderConfig: IDocumentRenderConfig,
         parentScale: IScale,
         parentPage: IDocumentSkeletonPage,
-        isHeader = true
+        isHeader = true,
+        totalPages = 1
     ) {
         if (this._drawLiquid == null) {
             return;
@@ -1003,6 +1006,8 @@ export class Documents extends DocComponent {
                                     centerPoint,
                                     alignOffset,
                                     renderConfig,
+                                    pageNumber: parentPage.pageNumber,
+                                    totalPages,
                                 };
 
                                 for (const extension of glyphExtensionsExcludeBackground) {

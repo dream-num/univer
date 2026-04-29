@@ -241,6 +241,7 @@ export function _createSkeletonWordOrLetter(
         adjustability: baseAdjustability(content, width),
         count: content.length,
         raw: content,
+        ...(config.fieldSubtype ? { fieldSubtype: config.fieldSubtype } : {}),
     };
 }
 

@@ -148,6 +148,7 @@ export interface IFontCreateConfig {
     snapToGrid: BooleanNumber;
     gridType?: GridType;
     pageWidth?: number;
+    fieldSubtype?: 'PAGE' | 'NUMPAGES';
 }
 
 // export interface IPageConfig {

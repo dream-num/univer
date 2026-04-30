@@ -487,7 +487,26 @@ export function updateInlineDrawingCoordsAndBorder(ctx: ILayoutContext, pages: I
             const lastDivide = line.divides[line.divides.length - 1];
             const lastGlyph = lastDivide.glyphGroup[lastDivide.glyphGroup.length - 1];
 
-            if (lastGlyph?.streamType === DataStreamTreeTokenType.PARAGRAPH && paragraphStyle?.borderBottom) {
+            // The line carries this paragraph's terminator if any of its divide
+            // groups contains the PARAGRAPH glyph (`\r`). For non-final paragraphs
+            // that's also the last glyph; for the document's final paragraph the
+            // SECTION_BREAK glyph (`\n`) sits to its right on the same line, so
+            // checking only the last glyph would miss the final paragraph's
+            // bottom border.
+            let hasParagraphTerminator = lastGlyph?.streamType === DataStreamTreeTokenType.PARAGRAPH;
+            if (!hasParagraphTerminator) {
+                for (const divide of line.divides) {
+                    for (const glyph of divide.glyphGroup) {
+                        if (glyph.streamType === DataStreamTreeTokenType.PARAGRAPH) {
+                            hasParagraphTerminator = true;
+                            break;
+                        }
+                    }
+                    if (hasParagraphTerminator) break;
+                }
+            }
+
+            if (hasParagraphTerminator && paragraphStyle?.borderBottom) {
                 line.borderBottom = paragraphStyle.borderBottom;
             }
         }

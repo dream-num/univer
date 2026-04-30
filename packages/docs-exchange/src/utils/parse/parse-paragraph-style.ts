@@ -65,14 +65,23 @@ const BORDER_DASH_MAP: Record<string, number> = {
     dashed: 3,
 };
 
+// Fallback color for `<w:bottom>` / `<w:top>` etc. when w:color is missing
+// or set to "auto". The renderer requires a concrete `color.rgb` and would
+// crash on `border.color.rgb` otherwise. Black is the closest match to how
+// Word resolves "automatic" on a white page.
+const DEFAULT_BORDER_COLOR_RGB = '#000000';
+
 function parseBorder(b: Record<string, unknown>): NonNullable<ParsedParagraphStyle['borderBottom']> {
     const a = nodeAttrs(b);
     const out: NonNullable<ParsedParagraphStyle['borderBottom']> = {};
-  // ECMA-376: w:color="auto" means "use theme/automatic color" — leave the color unset
-  // so the renderer falls back to its default (black). Writing "#AUTO" produces an
-  // invalid CSS color and the border silently disappears.
+  // ECMA-376: w:color="auto" means "use theme/automatic color". The renderer
+  // doesn't resolve theme colors and crashes on `border.color.rgb` when color
+  // is unset, so we always emit a concrete color: an explicit hex when given,
+  // otherwise DEFAULT_BORDER_COLOR_RGB. Black matches how Word resolves
+  // "automatic" on a white page.
     const colorAttr = a['@_w:color'] as string | undefined;
     if (colorAttr && colorAttr !== 'auto') out.color = { rgb: `#${colorAttr.toUpperCase()}` };
+    else out.color = { rgb: DEFAULT_BORDER_COLOR_RGB };
     const sz = Number(a['@_w:sz']);
     if (!Number.isNaN(sz)) out.width = Math.max(1, Math.round(sz / 6));
     const valAttr = a['@_w:val'] as string | undefined;

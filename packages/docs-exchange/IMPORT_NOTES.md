@@ -39,10 +39,21 @@ Update this file when you add a TODO that crosses the importer/renderer boundary
 - **Importer status:** parsed. `parsePPr` collects `<w:tabs>` and the
   `clear`/`right`/`center` merge with inherited pStyle tabs (see
   `header-footer-fidelity.test.ts` "right tab at 8844 dxa" case).
-- **Renderer status:** not consumed. `grep tabStops packages/engine-render/src/components/docs`
-  is empty; the renderer ignores per-paragraph tab stops, so a header that
-  relies on a `right` tab to push text to the page edge will render
-  left-aligned.
+- **Renderer status:** not consumed. `shaping.ts` shapes every `<w:tab/>`
+  with `getCharSpaceApply(charSpace, defaultTabStop, ...)` — a fixed-width
+  tab using the document-level `defaultTabStop`. The per-paragraph
+  `tabStops` array on `IParagraphStyle` is never read.
+- **Concrete symptom (文书格式.docx header2):** Word puts header text on the
+  right edge by writing `<w:jc w:val="left"/>` + a single right-aligned tab
+  stop at `pos=8844` + a leading `<w:tab/>` run. Word advances to the right
+  tab stop and right-aligns the text against it; Univer renders a
+  default-width tab and the text stays at the left margin.
+- **Why this is more than parsing:** right-aligned tab stops require a
+  back-fill or two-pass layout — the tab glyph's width depends on how wide
+  the *following* runs are. Adding it touches shaping (variable-width tab
+  glyph), line break (post-shaping width fixup), and the section/paragraph
+  config plumbing that hands `tabStops` down to `shaping.ts`. Out of scope
+  for an importer-only change.
 
 ### Table cell border `dashStyle`
 
@@ -50,3 +61,31 @@ See the long block-comment in `assemble.ts` (search for "KNOWN LIMITATION
 (Univer 0.16.1 render layer)"). DOCX dotted/dashed borders import correctly
 but render as solid lines because `_drawTableCellBordersAndBg` doesn't call
 `setLineDash`.
+
+## Paragraph borders
+
+### Sides other than `bottom` (top / left / right / between)
+
+- **Importer status:** partial. `parsePPr` only consumes `<w:bottom>` and
+  `<w:top>` from `<w:pBdr>`; `<w:left>`, `<w:right>`, `<w:between>`, `<w:bar>`
+  are dropped. `<w:top>` is parsed into `borderTop` but never makes it past
+  the renderer (see below).
+- **Renderer status:** bottom-only. `IDocumentSkeletonLine` carries a single
+  `borderBottom` slot, and `_drawBorderBottom` paints only that side. The
+  4-sided `_drawBorderTop / Left / Right` functions in `document.ts` exist
+  but are wired to **table cells**, not paragraphs.
+- **Symptom:** a Word paragraph with all four borders ("box") imports as a
+  single underline — the bottom side renders, the other three are silently
+  dropped.
+- **Why this isn't a parser tweak:** even if the importer emitted all four
+  sides, there's no skeleton slot to hand them to and no per-paragraph
+  painter to draw them. Wiring it up needs:
+  1. Importer: parse `w:left` / `w:right` (and surface the already-parsed
+     `borderTop`).
+  2. Skeleton: add `borderTop / Left / Right` slots on
+     `IDocumentSkeletonLine`.
+  3. Layout: decide which line carries the side borders (first / last /
+     every) and how consecutive same-styled paragraphs merge so vertical
+     rules don't double-up at the seam.
+  4. Renderer: per-paragraph `_drawBorderTop / Left / Right` honoring line
+     padding and the merge rules above.

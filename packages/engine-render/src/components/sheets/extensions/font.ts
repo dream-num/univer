@@ -25,7 +25,7 @@ import type { IDrawInfo } from '../../extension';
 import type { IFontCacheItem } from '../interfaces';
 import type { SheetComponent } from '../sheet-component';
 import type { SpreadsheetSkeleton } from '../sheet.render-skeleton';
-import { CellValueType, extractPureTextFromCell, HorizontalAlign, Range, Tools, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import { CellValueType, getDisplayValueFromCell, HorizontalAlign, Range, Tools, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics';
 import { VERTICAL_ROTATE_ANGLE } from '../../../basics/text-rotation';
 import { clampRange, inViewRanges } from '../../../basics/tools';
@@ -516,7 +516,7 @@ export class Font extends SheetExtension {
         const paddingBottom = padding.b ?? DEFAULT_PADDING_DATA.b;
         const { vertexAngle = 0, wrapStrategy, cellData } = fontCache;
         if (cellData?.v === undefined || cellData?.v === null) return;
-        const text = extractPureTextFromCell(cellData);
+        const text = getDisplayValueFromCell(cellData);
         const { startX, startY, endX, endY } = renderFontCtx;
         const cellWidth = endX - startX - paddingLeft - paddingRight;
         const cellHeight = endY - startY - paddingTop - paddingBottom;

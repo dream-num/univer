@@ -1387,7 +1387,7 @@ export function extractPureTextFromCell(cell: Nullable<ICellData>): string {
         if (cell.t === CellValueType.BOOLEAN) {
             return rawValue.toUpperCase();
         }
-        return rawValue.replace(/\r/g, '');
+        return rawValue.replace(/[\r\n]/g, '');
     };
 
     if (typeof rawValue === 'number') {
@@ -1398,6 +1398,39 @@ export function extractPureTextFromCell(cell: Nullable<ICellData>): string {
     if (typeof rawValue === 'boolean') return rawValue ? 'TRUE' : 'FALSE';
 
     return '';
+}
+
+export function getDisplayValueFromCell(cell: Nullable<ICellDataForSheetInterceptor>): string {
+    if (!cell) {
+        return '';
+    }
+
+    const richTextValue = cell.p?.body?.dataStream;
+    if (richTextValue) {
+        return BuildTextUtils.transform.getPlainText(richTextValue);
+    }
+
+    const displayValue = cell.v;
+
+    if (!displayValue) {
+        return '';
+    }
+
+    if (cell.t === CellValueType.BOOLEAN) {
+        if (typeof displayValue === 'string') {
+            return displayValue.toUpperCase();
+        }
+
+        if (typeof displayValue === 'number') {
+            return displayValue ? 'TRUE' : 'FALSE';
+        }
+    }
+
+    if (typeof displayValue === 'boolean') {
+        return displayValue ? 'TRUE' : 'FALSE';
+    }
+
+    return String(displayValue);
 }
 
 export function getOriginCellValue(cell: Nullable<ICellData>) {

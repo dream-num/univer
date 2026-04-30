@@ -600,7 +600,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
 
             if (style?.tb === WrapStrategy.WRAP) {
                 const skeleton = new DocSimpleSkeleton(
-                    `${cell!.v!}`,
+                    extractPureTextFromCell(cell),
                     getFontStyleString(style).fontCache,
                     style?.tb === WrapStrategy.WRAP,
                     colWidth - paddingLeft - paddingRight,

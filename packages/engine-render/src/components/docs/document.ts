@@ -24,7 +24,7 @@ import type { Scene } from '../../scene';
 import type { ComponentExtension, IDrawInfo, IExtensionConfig } from '../extension';
 import type { IDocumentsConfig, IPageMarginLayout } from './doc-component';
 import type { DocumentSkeleton } from './layout/doc-skeleton';
-import { CellValueType, HorizontalAlign, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import { CellValueType, DashStyleType, HorizontalAlign, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { BORDER_TYPE as BORDER_LTRB, drawLineByBorderType } from '../../basics';
 import { calculateRectRotate, getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
@@ -43,6 +43,24 @@ const DEFAULT_BORDER_COLOR: ITableCellBorder = {
         rgb: '#dee0e3',
     },
 };
+
+// DOCX/Univer paragraph- and table-cell borders carry an optional DashStyleType.
+// Translate it to the canvas-2d setLineDash([..]) segment list — kept narrow on
+// purpose (4 enum values, falls through to solid) so we don't grow a parallel
+// border-style enum here.
+function applyDocBorderDash(ctx: UniverRenderingContext, dashStyle: DashStyleType | undefined): void {
+    if (dashStyle === DashStyleType.DOT) {
+        ctx.setLineDash([2]);
+    } else if (dashStyle === DashStyleType.DASH) {
+        ctx.setLineDash([3]);
+    } else if (dashStyle === DashStyleType.DOT_DASH) {
+        ctx.setLineDash([4, 2, 1, 2]);
+    } else if (dashStyle === DashStyleType.DOT_DOT_DASH) {
+        ctx.setLineDash([4, 2, 1, 2, 1, 2]);
+    } else {
+        ctx.setLineDash([]);
+    }
+}
 
 export interface IPageRenderConfig {
     page: IDocumentSkeletonPage;
@@ -810,6 +828,7 @@ export class Documents extends DocComponent {
 
         ctx.save();
         ctx.strokeStyle = borderLeft.color.rgb ?? DEFAULT_BORDER_COLOR.color.rgb!;
+        applyDocBorderDash(ctx, borderLeft.dashStyle);
         drawLineByBorderType(ctx, BORDER_LTRB.LEFT, 0, {
             startX: x,
             startY: y,
@@ -820,6 +839,7 @@ export class Documents extends DocComponent {
 
         ctx.save();
         ctx.strokeStyle = borderTop.color.rgb ?? DEFAULT_BORDER_COLOR.color.rgb!;
+        applyDocBorderDash(ctx, borderTop.dashStyle);
         drawLineByBorderType(ctx, BORDER_LTRB.TOP, 0, {
             startX: x,
             startY: y,
@@ -830,6 +850,7 @@ export class Documents extends DocComponent {
 
         ctx.save();
         ctx.strokeStyle = borderRight.color.rgb ?? DEFAULT_BORDER_COLOR.color.rgb!;
+        applyDocBorderDash(ctx, borderRight.dashStyle);
         drawLineByBorderType(ctx, BORDER_LTRB.RIGHT, 0, {
             startX: x,
             startY: y,
@@ -840,6 +861,7 @@ export class Documents extends DocComponent {
 
         ctx.save();
         ctx.strokeStyle = borderBottom.color.rgb ?? DEFAULT_BORDER_COLOR.color.rgb!;
+        applyDocBorderDash(ctx, borderBottom.dashStyle);
         drawLineByBorderType(ctx, BORDER_LTRB.BOTTOM, 0, {
             startX: x,
             startY: y,

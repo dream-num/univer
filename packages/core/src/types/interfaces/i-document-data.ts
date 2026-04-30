@@ -811,6 +811,8 @@ export enum DashStyleType {
     SOLID, // Solid line. Corresponds to ECMA-376 ST_PresetLineDashVal value 'solid'. This is the default dash style.
     DOT, // Dotted line. Corresponds to ECMA-376 ST_PresetLineDashVal value 'dot'.
     DASH, // Dashed line. Corresponds to ECMA-376 ST_PresetLineDashVal value 'dash'.
+    DOT_DASH, // Dot-dash line. Corresponds to ECMA-376 ST_Border value 'dotDash'.
+    DOT_DOT_DASH, // Dot-dot-dash line. Corresponds to ECMA-376 ST_Border value 'dotDotDash'.
 }
 
 /**

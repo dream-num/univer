@@ -30,6 +30,7 @@ import type {
 import type { DrawingInfo } from './parse-drawing';
 import type { DocumentChild, ParsedBorder, ParsedCellBorders, ParsedCellMargin, ParsedNumberingDef, ParsedParagraph, ParsedRelationship, ParsedTable } from './types';
 import { CustomRangeType, DataStreamTreeTokenType, generateRandomId } from '@univerjs/core';
+import { DOCX_BORDER_TO_UNIVER_DASH } from './border-dash';
 import { buildDrawing } from './parse-drawing';
 
 const uuidv4 = () => generateRandomId();
@@ -165,47 +166,12 @@ function emitParagraph(p: ParsedParagraph, acc: Accumulator, ctx: AssembleContex
 // ── Table styling helpers ────────────────────────────────────────────────────
 //
 // DOCX → Univer mapping notes:
-// - Univer's DashStyleType only supports SOLID(1)/DOT(2)/DASH(3). DOCX has 17
-//   ST_Border values; we collapse the rest to SOLID. nil/none → omit border
-//   (different from absent → inherit).
+// - Univer's DashStyleType supports SOLID(1)/DOT(2)/DASH(3)/DOT_DASH(4)/DOT_DOT_DASH(5).
+//   DOCX has ~26 ST_Border values; the rest (double/triple/wave/3D/thinThick variants)
+//   collapse to SOLID. nil/none → omit border (different from absent → inherit).
 // - DOCX <w:sz> is in 1/8 pt; Univer ITableCellBorder.width is INumberUnit pt.
 // - DOCX color "auto" means "theme/automatic", which we render as black.
 //   TODO(unsupported): theme color resolution for borders/shading (themeColor / themeTint / themeShade).
-//
-// KNOWN LIMITATION (Univer 0.16.1 render layer): ITableCellBorder.dashStyle is
-// part of the data model but NOT consumed by the renderer. _drawTableCellBordersAndBg
-// in @univerjs/engine-render only reads color.rgb and calls B2() which does
-// beginPath/moveTo/lineTo/stroke without any setLineDash. Result: all table cell
-// borders render as solid lines regardless of the dashStyle we emit, so dotted/
-// dashed DOCX borders look solid in Univer today. We still emit the correct
-// dashStyle so the document model is right and dashed borders will show up
-// automatically once Univer wires the field through to setLineDash.
-// (Paragraph borderBottom and sheet cell borders DO honor dashStyle — only
-// table cell borders are missing.)
-
-const DOCX_BORDER_TO_UNIVER_DASH: Record<string, number> = {
-    single: 1, // SOLID
-    thick: 1,
-    double: 1, // TODO(unsupported): Univer has no DOUBLE; collapses to SOLID
-    triple: 1, // TODO(unsupported): collapse to SOLID
-    thinThickSmallGap: 1,
-    thickThinSmallGap: 1,
-    thinThickThinSmallGap: 1,
-    thinThickMediumGap: 1,
-    thickThinMediumGap: 1,
-    thinThickThinMediumGap: 1,
-    thinThickLargeGap: 1,
-    thickThinLargeGap: 1,
-    thinThickThinLargeGap: 1,
-    wave: 1, // TODO(unsupported): wave/doubleWave collapse to SOLID
-    doubleWave: 1,
-    dashSmallGap: 3, // DASH
-    dashed: 3,
-    dotDash: 3,
-    dotDotDash: 3,
-    dotted: 2, // DOT
-  // TODO(unsupported): 3D border styles (threeDEmboss/threeDEngrave/inset/outset) — collapse to SOLID
-};
 
 function borderToUniver(b: ParsedBorder | undefined):
   | { color: { rgb: string }; width?: { v: number }; dashStyle?: number }

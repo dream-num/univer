@@ -17,6 +17,7 @@
 import type { ParsedParagraphStyle } from './types';
 import type { XmlNode } from './xml';
 import { dxaToPx, ptToPx } from '../units';
+import { DOCX_BORDER_TO_UNIVER_DASH } from './border-dash';
 import { findChild, nodeAttrs, nodeChildren, nodeName } from './xml';
 
 const ALIGN_MAP: Record<string, number> = {
@@ -59,12 +60,6 @@ const HEADING_MAP: Record<string, number> = {
     Heading5: 8,
 };
 
-const BORDER_DASH_MAP: Record<string, number> = {
-    single: 1,
-    dotted: 2,
-    dashed: 3,
-};
-
 // Fallback color for `<w:bottom>` / `<w:top>` etc. when w:color is missing
 // or set to "auto". The renderer requires a concrete `color.rgb` and would
 // crash on `border.color.rgb` otherwise. Black is the closest match to how
@@ -85,7 +80,7 @@ function parseBorder(b: Record<string, unknown>): NonNullable<ParsedParagraphSty
     const sz = Number(a['@_w:sz']);
     if (!Number.isNaN(sz)) out.width = Math.max(1, Math.round(sz / 6));
     const valAttr = a['@_w:val'] as string | undefined;
-    out.dashStyle = (valAttr && BORDER_DASH_MAP[valAttr]) || 1;
+    out.dashStyle = (valAttr && DOCX_BORDER_TO_UNIVER_DASH[valAttr]) || 1;
     const space = Number(a['@_w:space']);
     if (!Number.isNaN(space)) out.padding = space;
     return out;

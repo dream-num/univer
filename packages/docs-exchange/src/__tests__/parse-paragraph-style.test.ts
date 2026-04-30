@@ -52,6 +52,20 @@ describe('parseParagraphStyle', () => {
         expect(style?.borderBottom?.dashStyle).toBe(1);
     });
 
+    it('maps borderBottom dotDash → DashStyleType.DOT_DASH (4)', () => {
+        const node = pNode(
+            '<w:p xmlns:w="x"><w:pPr><w:pBdr><w:bottom w:val="dotDash" w:sz="6" w:color="000000"/></w:pBdr></w:pPr></w:p>'
+        );
+        expect(parseParagraphStyle(node)?.borderBottom?.dashStyle).toBe(4);
+    });
+
+    it('maps borderBottom dotDotDash → DashStyleType.DOT_DOT_DASH (5)', () => {
+        const node = pNode(
+            '<w:p xmlns:w="x"><w:pPr><w:pBdr><w:bottom w:val="dotDotDash" w:sz="6" w:color="000000"/></w:pBdr></w:pPr></w:p>'
+        );
+        expect(parseParagraphStyle(node)?.borderBottom?.dashStyle).toBe(5);
+    });
+
     it('does not throw when w:jc has no val attribute (I2 guard)', () => {
     // <w:jc/> with no w:val — previously would do `undefined in ALIGN_MAP` → TypeError
         const node = pNode('<w:p xmlns:w="x"><w:pPr><w:jc/></w:pPr></w:p>');

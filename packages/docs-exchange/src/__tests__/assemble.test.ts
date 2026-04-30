@@ -469,6 +469,40 @@ describe('assembleDocument: table styling → Univer ITable', () => {
         expect(cell.borderRight).toBeUndefined(); // nil → no border emitted
     });
 
+    it('cell.borders dotDash/dotDotDash → DashStyleType DOT_DASH(4) / DOT_DOT_DASH(5)', () => {
+        const children: DocumentChild[] = [
+            {
+                kind: 'table',
+                table: {
+                    rows: [
+                        [
+                            {
+                                paragraphs: [{ runs: [{ text: 'X' }] }],
+                                borders: {
+                                    top: { val: 'dotDash', sizeEighths: 4, color: '000000' },
+                                    bottom: { val: 'dotDotDash', sizeEighths: 4, color: '000000' },
+                                },
+                            },
+                        ],
+                    ],
+                },
+            },
+        ];
+        const doc = assembleDocument(children, { numbering: new Map(), rels: new Map(), media: new Map() });
+        const cell = (
+            getTableSrc(doc) as {
+                tableRows: Array<{
+                    tableCells: Array<{
+                        borderTop?: { dashStyle?: number };
+                        borderBottom?: { dashStyle?: number };
+                    }>;
+                }>;
+            }
+        ).tableRows[0].tableCells[0];
+        expect(cell.borderTop?.dashStyle).toBe(4); // DOT_DASH
+        expect(cell.borderBottom?.dashStyle).toBe(5); // DOT_DOT_DASH
+    });
+
     it('cell.vAlign → ITableCell.vAlign (top=2, center=3, bottom=4)', () => {
         const children: DocumentChild[] = [
             {

@@ -55,13 +55,6 @@ Update this file when you add a TODO that crosses the importer/renderer boundary
   config plumbing that hands `tabStops` down to `shaping.ts`. Out of scope
   for an importer-only change.
 
-### Table cell border `dashStyle`
-
-See the long block-comment in `assemble.ts` (search for "KNOWN LIMITATION
-(Univer 0.16.1 render layer)"). DOCX dotted/dashed borders import correctly
-but render as solid lines because `_drawTableCellBordersAndBg` doesn't call
-`setLineDash`.
-
 ## Paragraph borders
 
 ### Sides other than `bottom` (top / left / right / between)

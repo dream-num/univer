@@ -53,6 +53,7 @@ import { AstTreeBuilder } from '../engine/analysis/parser';
 import { IFormulaDependencyGenerator } from '../engine/dependency/formula-dependency';
 import { Interpreter } from '../engine/interpreter/interpreter';
 import { FORMULA_REF_TO_ARRAY_CACHE } from '../engine/reference-object/base-reference-object';
+import { generateAstNode } from '../engine/utils/generate-ast-node';
 import { ErrorValueObjectCache } from '../engine/value-object/base-value-object';
 import { StringValueObjectCache } from '../engine/value-object/primitive-object';
 import { IFormulaCurrentConfigService } from './current-data.service';
@@ -270,7 +271,7 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
 
         this._executionInProgressListener$.next(this._runtimeService.getRuntimeState());
 
-        const treeList = (await this._formulaDependencyGenerator.generate(this._isCalculateTreeModel)).reverse();
+        const treeList = await this._formulaDependencyGenerator.generate(this._isCalculateTreeModel);
 
         const interpreter = this._interpreter;
 
@@ -290,18 +291,23 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
 
         const config = this._configService.getConfig(ENGINE_FORMULA_PLUGIN_CONFIG_KEY) as IUniverEngineFormulaConfig;
         const intervalCount = config?.intervalCount || DEFAULT_INTERVAL_COUNT;
-
+        let i = 0;
         const treeCount = treeList.length;
-        for (let i = 0; i < treeCount; i++) {
-            const tree = treeList[i];
-            const nodeData = tree.nodeData;
+        while (treeList.length > 0) {
+            const tree = treeList.pop()!;
+            const node = generateAstNode(tree.unitId, tree.formula, this._lexer, this._astTreeBuilder, this._currentConfigService);
+            const nodeData = {
+                node,
+                refOffsetX: tree.refOffsetX,
+                refOffsetY: tree.refOffsetY,
+            };
             const getDirtyData = tree.getDirtyData;
 
             // Execute the await every 100 iterations
             if (i % intervalCount === 0) {
-                /**
-                 * For every functions, execute a setTimeout to wait for external command input.
-                 */
+            /**
+             * For every functions, execute a setTimeout to wait for external command input.
+             */
                 await new Promise((resolve) => {
                     const calCancelTask = requestImmediateMacroTask(resolve);
                     pendingTasks.push(calCancelTask);
@@ -365,7 +371,9 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
                 }
             }
 
-            nodeData.node?.resetCalculationState();
+            node.resetCalculationState();
+
+            i++;
         }
 
         // clear all pending tasks

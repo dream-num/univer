@@ -19,7 +19,7 @@ import type { Observable } from 'rxjs';
 import type { IImageIoService, IImageIoServiceParam } from './image-io.service';
 import { generateRandomId } from '@univerjs/core';
 import { Subject } from 'rxjs';
-import { DRAWING_IMAGE_ALLOW_IMAGE_LIST, DRAWING_IMAGE_ALLOW_SIZE } from '../basics/config';
+import { DRAWING_IMAGE_ALLOW_IMAGE_LIST, getDrawingImageAllowSize } from '../basics/config';
 import { ImageSourceType, ImageUploadStatusType } from './image-io.service';
 
 export class ImageIoService implements IImageIoService {
@@ -61,7 +61,7 @@ export class ImageIoService implements IImageIoService {
                 this._decreaseWaiting();
                 return;
             }
-            if (imageFile.size > DRAWING_IMAGE_ALLOW_SIZE) {
+            if (imageFile.size > getDrawingImageAllowSize()) {
                 reject(new Error(ImageUploadStatusType.ERROR_EXCEED_SIZE));
                 this._decreaseWaiting();
                 return;

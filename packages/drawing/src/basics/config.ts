@@ -20,6 +20,14 @@ export const DRAWING_IMAGE_HEIGHT_LIMIT = 500;
 
 export const DRAWING_IMAGE_COUNT_LIMIT = 10;
 
-export const DRAWING_IMAGE_ALLOW_SIZE = 5 * 1024 * 1024;
+let DRAWING_IMAGE_ALLOW_SIZE = 5 * 1024 * 1024;
+
+export function setDrawingImageAllowSize(size: number): void {
+    DRAWING_IMAGE_ALLOW_SIZE = size;
+}
+
+export function getDrawingImageAllowSize(): number {
+    return DRAWING_IMAGE_ALLOW_SIZE;
+}
 
 export const DRAWING_IMAGE_ALLOW_IMAGE_LIST = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/bmp'];

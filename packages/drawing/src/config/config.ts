@@ -22,6 +22,11 @@ export const configSymbol = Symbol(DRAWING_PLUGIN_CONFIG_KEY);
 
 export interface IUniverDrawingConfig {
     override?: DependencyOverride;
+    /**
+     * The maximum allowed size of uploaded images in bytes.
+     * @default 5 * 1024 * 1024 (5MB)
+     */
+    allowImageSize?: number;
 }
 
 export const defaultPluginConfig: IUniverDrawingConfig = {};

@@ -25,7 +25,7 @@ import { MessageType } from '@univerjs/design';
 import { DocSelectionManagerService, DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { IDocDrawingService } from '@univerjs/docs-drawing';
 import { docDrawingPositionToTransform, DocSelectionRenderService } from '@univerjs/docs-ui';
-import { DRAWING_IMAGE_ALLOW_IMAGE_LIST, DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, getDrawingShapeKeyByDrawingSearch, getImageSize, IDrawingManagerService, IImageIoService, ImageUploadStatusType } from '@univerjs/drawing';
+import { DRAWING_IMAGE_ALLOW_IMAGE_LIST, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, getDrawingImageAllowSize, getDrawingShapeKeyByDrawingSearch, getImageSize, IDrawingManagerService, IImageIoService, ImageUploadStatusType } from '@univerjs/drawing';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 
 import { ILocalFileService, IMessageService } from '@univerjs/ui';
@@ -100,7 +100,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
 
             switch (type) {
                 case ImageUploadStatusType.ERROR_EXCEED_SIZE:
-                    content = this._localeService.t('update-status.exceedMaxSize', String(DRAWING_IMAGE_ALLOW_SIZE / (1024 * 1024)));
+                    content = this._localeService.t('update-status.exceedMaxSize', String(getDrawingImageAllowSize() / (1024 * 1024)));
                     break;
                 case ImageUploadStatusType.ERROR_IMAGE_TYPE:
                     content = this._localeService.t('update-status.invalidImageType');

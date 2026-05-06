@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export { DRAWING_IMAGE_ALLOW_IMAGE_LIST, DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT } from './basics/config';
+export { DRAWING_IMAGE_ALLOW_IMAGE_LIST, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, getDrawingImageAllowSize } from './basics/config';
 export { SetDrawingSelectedOperation } from './commands/operations/set-drawing-selected.operation';
 export type { IUniverDrawingConfig } from './config/config';
 export type { IDocFloatDomData, IDocFloatDomDataBase, IImageData } from './models/image-model-interface';

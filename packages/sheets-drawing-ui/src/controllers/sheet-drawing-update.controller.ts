@@ -43,10 +43,10 @@ import { MessageType } from '@univerjs/design';
 import { docDrawingPositionToTransform } from '@univerjs/docs-ui';
 import {
     DRAWING_IMAGE_ALLOW_IMAGE_LIST,
-    DRAWING_IMAGE_ALLOW_SIZE,
     DRAWING_IMAGE_COUNT_LIMIT,
     DRAWING_IMAGE_HEIGHT_LIMIT,
     DRAWING_IMAGE_WIDTH_LIMIT,
+    getDrawingImageAllowSize,
     getImageSize,
     IDrawingManagerService,
     IImageIoService,
@@ -202,7 +202,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
             if (type === ImageUploadStatusType.ERROR_EXCEED_SIZE) {
                 this._messageService.show({
                     type: MessageType.Error,
-                    content: this._localeService.t('update-status.exceedMaxSize', String(DRAWING_IMAGE_ALLOW_SIZE / (1024 * 1024))),
+                    content: this._localeService.t('update-status.exceedMaxSize', String(getDrawingImageAllowSize() / (1024 * 1024))),
                 });
             } else if (type === ImageUploadStatusType.ERROR_IMAGE_TYPE) {
                 this._messageService.show({
@@ -274,7 +274,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
             if (type === ImageUploadStatusType.ERROR_EXCEED_SIZE) {
                 this._messageService.show({
                     type: MessageType.Error,
-                    content: this._localeService.t('update-status.exceedMaxSize', String(DRAWING_IMAGE_ALLOW_SIZE / (1024 * 1024))),
+                    content: this._localeService.t('update-status.exceedMaxSize', String(getDrawingImageAllowSize() / (1024 * 1024))),
                 });
             } else if (type === ImageUploadStatusType.ERROR_IMAGE_TYPE) {
                 this._messageService.show({

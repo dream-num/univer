@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
+import type { IUniverSheetsUIConfig } from '../../config/config';
 import type { IScrollState } from './sheet-bar-tabs/utils/slide-tab-bar';
-import { ICommandService, IPermissionService, throttle } from '@univerjs/core';
+import { DEFAULT_WORKSHEET_COLUMN_COUNT, DEFAULT_WORKSHEET_ROW_COUNT, ICommandService, IPermissionService, throttle } from '@univerjs/core';
 import { IncreaseIcon, MoreIcon } from '@univerjs/icons';
 import { InsertSheetCommand, WorkbookCreateSheetPermission, WorkbookEditablePermission } from '@univerjs/sheets';
-import { useDependency, useObservable } from '@univerjs/ui';
+import { useConfigValue, useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 import { useActiveWorkbook } from '../../components/hook';
+import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { ISheetBarService } from '../../services/sheet-bar/sheet-bar.service';
 import { SheetBarButton } from './sheet-bar-button/SheetBarButton';
 import { SheetBarMenu } from './sheet-bar-menu/SheetBarMenu';
@@ -42,6 +44,9 @@ export const SheetBar = () => {
     const workbookEditablePermission = useObservable(permissionService.getPermissionPoint$(new WorkbookEditablePermission(unitId)?.id));
     const workbookCreateSheetPermission = useObservable(permissionService.getPermissionPoint$(new WorkbookCreateSheetPermission(unitId)?.id));
 
+    const config = useConfigValue<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
+    const { show: addSheetButtonShow = true, defaultRowCount = DEFAULT_WORKSHEET_ROW_COUNT, defaultColumnCount = DEFAULT_WORKSHEET_COLUMN_COUNT } = (config?.footer || {}).addSheetButtonConfig || {};
+
     const updateScrollButtonState = (state: IScrollState) => {
         const { leftEnd, rightEnd } = state;
         setLeftScrollState(leftEnd);
@@ -60,7 +65,12 @@ export const SheetBar = () => {
 
     // Complete the _addSheet, handleScrollLeft, and handleScrollRight functions
     const addSheet = () => {
-        commandService.executeCommand(InsertSheetCommand.id);
+        commandService.executeCommand(InsertSheetCommand.id, {
+            sheet: {
+                rowCount: defaultRowCount,
+                columnCount: defaultColumnCount,
+            },
+        });
         setTimeout(() => {
             sheetBarService.setAddSheet(0);
         }, 0);
@@ -78,13 +88,15 @@ export const SheetBar = () => {
         <div className="univer-relative univer-flex univer-h-full univer-min-w-0 univer-flex-1">
             <div className="univer-flex univer-items-center">
                 {/* Add sheet button */}
-                <SheetBarButton
-                    className="univer-mr-2"
-                    onClick={addSheet}
-                    disabled={!(workbookCreateSheetPermission?.value && workbookEditablePermission?.value)}
-                >
-                    <IncreaseIcon />
-                </SheetBarButton>
+                {addSheetButtonShow && (
+                    <SheetBarButton
+                        className="univer-mr-2"
+                        onClick={addSheet}
+                        disabled={!(workbookCreateSheetPermission?.value && workbookEditablePermission?.value)}
+                    >
+                        <IncreaseIcon />
+                    </SheetBarButton>
+                )}
                 {/* All sheets button */}
                 <SheetBarMenu />
             </div>

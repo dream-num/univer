@@ -1412,7 +1412,7 @@ export function getDisplayValueFromCell(cell: Nullable<ICellDataForSheetIntercep
 
     const displayValue = cell.v;
 
-    if (!displayValue) {
+    if (displayValue === null || displayValue === undefined) {
         return '';
     }
 

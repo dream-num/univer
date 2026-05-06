@@ -16,7 +16,7 @@
 
 import { ImageSourceType, ImageUploadStatusType } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { DRAWING_IMAGE_ALLOW_SIZE } from '../../basics/config';
+import { getDrawingImageAllowSize } from '../../basics/config';
 import { ImageIoService } from '../image-io-impl.service';
 
 type MockLoadEvent = ProgressEvent<FileReader> & {
@@ -107,7 +107,7 @@ describe('ImageIoService', () => {
 
         service.setWaitCount(1);
         await expect(
-            service.saveImage(new File([new Uint8Array(DRAWING_IMAGE_ALLOW_SIZE + 1)], 'big.png', { type: 'image/png' }))
+            service.saveImage(new File([new Uint8Array(getDrawingImageAllowSize() + 1)], 'big.png', { type: 'image/png' }))
         ).rejects.toThrow(ImageUploadStatusType.ERROR_EXCEED_SIZE);
 
         expect(counts).toContain(0);

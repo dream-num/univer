@@ -49,21 +49,46 @@ export interface IUniverSheetsUIConfig {
          * @default true
          */
         sheetBar?: boolean;
+
         /**
          * statistic bar including statistic info current selections, such as count, sum, average, etc.
          * @default true
          */
         statisticBar?: boolean;
+
         /**
          * Including the menus in the footer. such as highlight, gridlines, etc.
          * @default true
          */
         menus?: boolean;
+
         /**
          * Zoom slider is the zoom slider in the footer.
          * @default true
          */
         zoomSlider?: boolean;
+
+        /**
+         * The config of the add sheet button in the sheet bar.
+         */
+        addSheetButtonConfig?: {
+            /**
+             * Whether to show the add sheet button in the sheet bar.
+             * When `footer` or `footer.sheetBar` is false, this config will not work because the sheet bar will not be rendered.
+             * @default true
+             */
+            show?: boolean;
+            /**
+             * The default row count of the new sheet created by the add sheet button.
+             * @default 1000
+             */
+            defaultRowCount?: number;
+            /**
+             * The default column count of the new sheet created by the add sheet button.
+             * @default 20
+             */
+            defaultColumnCount?: number;
+        };
     };
 
     /**

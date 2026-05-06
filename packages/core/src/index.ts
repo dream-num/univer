@@ -181,7 +181,7 @@ export { addLinkToDocumentModel, getEmptyCell, isNotNullOrUndefined, isRangesEqu
 export { createDocumentModelWithStyle } from './sheets/util';
 export { SheetViewModel } from './sheets/view-model';
 export { getWorksheetUID, Workbook } from './sheets/workbook';
-export { extractPureTextFromCell, getOriginCellValue, Worksheet } from './sheets/worksheet';
+export { extractPureTextFromCell, getDisplayValueFromCell, getOriginCellValue, Worksheet } from './sheets/worksheet';
 export { Skeleton } from './skeleton';
 export * from './types/const';
 export { skipParseTagNames } from './types/const/clipboard';

@@ -48,6 +48,7 @@ import {
     DEFAULT_STYLES,
     extractPureTextFromCell,
     getColorStyle,
+    getDisplayValueFromCell,
     HorizontalAlign,
     IConfigService,
     IContextService,
@@ -600,7 +601,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
 
             if (style?.tb === WrapStrategy.WRAP) {
                 const skeleton = new DocSimpleSkeleton(
-                    extractPureTextFromCell(cell),
+                    getDisplayValueFromCell(cell),
                     getFontStyleString(style).fontCache,
                     style?.tb === WrapStrategy.WRAP,
                     colWidth - paddingLeft - paddingRight,

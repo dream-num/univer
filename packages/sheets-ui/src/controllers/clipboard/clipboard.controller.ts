@@ -244,11 +244,14 @@ export class SheetClipboardController extends RxDisposable {
             onCopyCellContent(row: number, col: number): string {
                 const cell = currentSheet!.getCell(row, col);
 
-                let content = '';
                 if (cell?.p?.body?.paragraphs || cell?.p?.body?.textRuns) {
-                    content = convertBodyToHtml(cell.p);
-                } else if (cell) {
-                    content = extractPureTextFromCell(cell);
+                    return convertBodyToHtml(cell.p);
+                }
+
+                const content = extractPureTextFromCell(cell);
+
+                if (content.trim() === '') {
+                    return content;
                 }
 
                 /**

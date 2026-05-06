@@ -132,7 +132,7 @@ describe('AutoFillController copy-fill shortcuts', () => {
     }
 
     function getCell(row: number, column: number): ICellData | undefined {
-        return workbook.getActiveSheet()!.getCellRaw(row, column);
+        return workbook.getActiveSheet()!.getCellRaw(row, column) ?? undefined;
     }
 
     function getCellStyle(row: number, column: number): IStyleData | undefined {

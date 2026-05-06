@@ -62,11 +62,15 @@ export const DocxImportOperation = {
 
         try {
             const data = await docxToUniverData(bytes);
+            const previous = instanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
             const unit = instanceService.createUnit<typeof data, DocumentDataModel>(
                 UniverInstanceType.UNIVER_DOC,
                 data
             );
             instanceService.focusUnit(unit.getUnitId());
+            if (previous && previous.getUnitId() !== unit.getUnitId()) {
+                instanceService.disposeUnit(previous.getUnitId());
+            }
             return true;
         } catch (err) {
             logService.error('[docs-exchange-ui] DOCX import failed:', err);

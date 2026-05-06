@@ -55,6 +55,56 @@ Update this file when you add a TODO that crosses the importer/renderer boundary
   config plumbing that hands `tabStops` down to `shaping.ts`. Out of scope
   for an importer-only change.
 
+### Mid-document orientation switch (`pageOrient` change between sections)
+
+- **Importer status:** correct. A landscape `<w:sectPr>`
+  (`<w:pgSz w:w="15840" w:h="12240" w:orient="landscape"/>`) is emitted as
+  a `sectionBreak` entry with the swapped `pageSize` (1056×816 in Univer
+  units), `pageOrient: PageOrientType.LANDSCAPE`, and its own
+  `defaultHeaderId` — verified against `全格式.docx` sectPr #2.
+- **Renderer status:** broken. When the document switches orientation
+  mid-stream (portrait → landscape → portrait), the landscape page renders
+  with header/footer placement off, and hit-testing on the landscape page
+  is misaligned (clicking text selects the wrong run / cursor lands at the
+  wrong column). The skeleton page is created at the new size but
+  downstream layout / pointer-mapping paths still use stale page metrics
+  somewhere — out of scope for an importer-only change. Reproducible with
+  `全格式.docx` (page 10 landscape).
+- **Workaround:** none on the importer side. Documents that stay in a
+  single orientation render correctly.
+
+### Section type — `nextColumn`
+
+- **Importer status:** silently dropped. `<w:type w:val>` maps to Univer
+  `SectionType` via `SECTION_TYPE_BY_NAME` in `assemble.ts`
+  (`continuous → CONTINUOUS`, `nextPage → NEXT_PAGE`, `evenPage → EVEN_PAGE`,
+  `oddPage → ODD_PAGE`). `nextColumn` has no Univer equivalent — Univer's
+  section model has no concept of multi-column section breaks — so the section
+  is emitted with `sectionType` unset (defaults to `NEXT_PAGE`-like behaviour).
+- **Why no warning:** Word documents that use `nextColumn` almost always also
+  set `<w:cols w:num="…">`, which the renderer doesn't honour either; warning
+  on the section break alone would be noise.
+
+## Inline content
+
+### Soft line break (`<w:br/>`)
+
+- **Importer status:** flattened to a single space. `<w:br/>` (no `w:type`)
+  is OOXML's soft line break — the next run continues on a new visual line
+  inside the same paragraph.
+- **Why not emit a real break:** Univer's `DataStreamTreeTokenType` has
+  `PARAGRAPH (\r)`, `SECTION_BREAK (\n)`, `COLUMN_BREAK (\v)`, `PAGE_BREAK (\f)`
+  — but no soft-break token. Emitting `\n` corrupts the dataStream because
+  `view-model.parseDataStreamToTree` treats every `\n` as SECTION_BREAK and
+  shatters the body into spurious sections (this was the bug behind
+  `全格式.docx` rendering with no headers — the body's first 7 pages were
+  bound to a synthetic section 0 that had no header inheritance).
+- **Possible follow-up:** split the surrounding `<w:p>` at every `<w:br/>`
+  and emit one Univer paragraph per visual line, copying the source
+  paragraph's pStyle / numbering / borders onto each piece. Out of scope
+  here — the importer would need access to the splitter at the run-grouping
+  level rather than within `runTextFromR`.
+
 ## Paragraph borders
 
 ### Sides other than `bottom` (top / left / right / between)

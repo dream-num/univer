@@ -52,7 +52,7 @@ describe('parseRunsFromParagraphXml', () => {
     it('handles w:tab and w:br', () => {
         const xml = '<w:p xmlns:w="x"><w:r><w:t>A</w:t><w:tab/><w:t>B</w:t><w:br/><w:t>C</w:t></w:r></w:p>';
         const runs = parseRunsFromParagraphXml(xml);
-        expect(runs.map((r: { text: string }) => r.text).join('')).toBe('A\tB\nC');
+        expect(runs.map((r: { text: string }) => r.text).join('')).toBe('A\tB C');
     });
 
     it('preserves multiple runs in order', () => {

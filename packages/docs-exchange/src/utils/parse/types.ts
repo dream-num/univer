@@ -15,6 +15,7 @@
  */
 
 import type { IUniverTextStyle } from '../types';
+import type { ParsedSection } from './parse-section';
 
 export interface ParsedRun {
     text: string;
@@ -81,6 +82,15 @@ export interface ParsedParagraph {
     runs: ParsedRun[];
     bullet?: ParsedBullet;
     style?: ParsedParagraphStyle;
+    /**
+     * Inline `<w:pPr><w:sectPr>`: this paragraph TERMINATES a section. The
+     * section's properties (pgSz, pgMar, headerReference, titlePg, etc.)
+     * apply to all content from the previous section break (or doc start)
+     * up to and including this paragraph (ECMA-376 §17.6.18).
+     *
+     * Body-end sectPr lives on `AssembleContext.bodyEndSection` instead.
+     */
+    sectionBreakAfter?: ParsedSection;
 }
 
 export interface ParsedBorder {

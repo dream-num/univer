@@ -20,6 +20,7 @@ import type { ThemeFonts } from './parse-theme';
 import type { ParsedBullet, ParsedParagraph, ParsedParagraphStyle } from './types';
 import { parsePPr, pPrStyleRef } from './parse-paragraph-style';
 import { parseRunsFromPNode } from './parse-run';
+import { parseSectionPropertiesFromNode } from './parse-section';
 import { findChild, nodeAttrs } from './xml';
 
 function parseBullet(pNode: Record<string, unknown>): ParsedBullet | undefined {
@@ -89,5 +90,13 @@ export function parseParagraph(
     if (style) out.style = style;
     const bullet = parseBullet(pNode);
     if (bullet) out.bullet = bullet;
+
+  // Inline `<w:pPr><w:sectPr>`: this paragraph terminates a document section.
+  // The section's properties apply to all preceding content up to and including
+  // this paragraph (ECMA-376 §17.6.18). assemble.ts emits an extra '\n' after
+  // the paragraph's '\r' and pushes the corresponding sectionBreak entry.
+    const inlineSectPr = pPr ? findChild(pPr, 'w:sectPr') : undefined;
+    if (inlineSectPr) out.sectionBreakAfter = parseSectionPropertiesFromNode(inlineSectPr);
+
     return out;
 }

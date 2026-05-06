@@ -119,3 +119,46 @@ describe('docxToUniverData — sectPr → documentStyle', () => {
         }
     });
 });
+
+// ── parseSectionPropertiesFromNode (the helper used by inline w:p/w:pPr/w:sectPr) ──
+
+describe('parseSectionPropertiesFromNode', () => {
+    it('parses inline sectPr with header/first/even refs, titlePg, type, landscape pgSz', async () => {
+        const { parseSectionPropertiesFromNode } = await import('../utils/parse/parse-section');
+        const { xmlParser } = await import('../utils/parse/xml');
+        const xml = `<w:sectPr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+            <w:headerReference w:type="default" r:id="rId4"/>
+            <w:headerReference w:type="first" r:id="rId7"/>
+            <w:footerReference w:type="default" r:id="rId5"/>
+            <w:titlePg/>
+            <w:type w:val="continuous"/>
+            <w:pgSz w:w="16838" w:h="11906" w:orient="landscape"/>
+            <w:pgMar w:top="720" w:right="900" w:bottom="720" w:left="900" w:header="360" w:footer="360"/>
+        </w:sectPr>`;
+        const node = (xmlParser.parse(xml) as Array<Record<string, unknown>>)[0];
+        const parsed = parseSectionPropertiesFromNode(node);
+        expect(parsed.headerRefs).toEqual({ default: 'rId4', first: 'rId7' });
+        expect(parsed.footerRefs).toEqual({ default: 'rId5' });
+        expect(parsed.titlePage).toBe(true);
+        expect(parsed.sectionTypeRaw).toBe('continuous');
+        // 16838 dxa ≈ 1122.53px (landscape width); 11906 dxa ≈ 793.73px (height).
+        expect(parsed.documentStyle.pageOrient).toBe(1);
+        expect(parsed.documentStyle.pageSize!.width).toBeCloseTo(1122.5, 1);
+        expect(parsed.documentStyle.pageSize!.height).toBeCloseTo(793.7, 1);
+        expect(parsed.documentStyle.marginTop).toBeCloseTo(48, 1);
+        expect(parsed.documentStyle.marginHeader).toBeCloseTo(24, 1);
+    });
+
+    it('returns empty refs/titlePage=false when sectPr has no relevant children', async () => {
+        const { parseSectionPropertiesFromNode } = await import('../utils/parse/parse-section');
+        const { xmlParser } = await import('../utils/parse/xml');
+        const node = (xmlParser.parse(
+            '<w:sectPr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"/>'
+        ) as Array<Record<string, unknown>>)[0];
+        const parsed = parseSectionPropertiesFromNode(node);
+        expect(parsed.headerRefs).toEqual({});
+        expect(parsed.footerRefs).toEqual({});
+        expect(parsed.titlePage).toBe(false);
+        expect(parsed.sectionTypeRaw).toBeUndefined();
+    });
+});

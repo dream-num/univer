@@ -52,6 +52,17 @@ export interface ParsedSection {
     footerRefs: { default?: string; first?: string; even?: string };
   /** <w:titlePg/> on the section — first page uses its own header/footer. */
     titlePage: boolean;
+  /**
+   * OOXML `<w:type w:val="continuous|nextPage|evenPage|oddPage|nextColumn">`
+   * if present. Mapped to Univer's SectionType enum at assemble time.
+   */
+    sectionTypeRaw?: string;
+  /**
+   * rId → stem header IDs after `parseHF` has run. Filled in by docx-to-univer.ts
+   * (only it has access to the document rels map). Empty until then.
+   */
+    resolvedHeaderIds?: { default?: string; first?: string; even?: string };
+    resolvedFooterIds?: { default?: string; first?: string; even?: string };
 }
 
 function dxaAttrToPx(value: string | undefined): number | undefined {
@@ -77,7 +88,16 @@ export function parseSectionProperties(body: XmlNode | undefined): ParsedSection
             titlePage: false,
         };
     }
+    return parseSectionPropertiesFromNode(sectPr);
+}
 
+/**
+ * Parse a single <w:sectPr> XML node into a ParsedSection. Used for both the
+ * body-end sectPr (via `parseSectionProperties`) and inline `<w:pPr><w:sectPr>`
+ * elements that terminate a section mid-document. The schema is identical in
+ * both positions.
+ */
+export function parseSectionPropertiesFromNode(sectPr: XmlNode): ParsedSection {
     const style: IDocumentStyle = { documentFlavor: DOCUMENT_FLAVOR_TRADITIONAL };
     const sectionBreakDefaults: Partial<ISectionBreak> = {};
     const headerRefs: ParsedSection['headerRefs'] = {};
@@ -98,6 +118,9 @@ export function parseSectionProperties(body: XmlNode | undefined): ParsedSection
     }
 
     const titlePage = findChild(sectPr, 'w:titlePg') !== undefined;
+
+    const typeNode = findChild(sectPr, 'w:type');
+    const sectionTypeRaw = typeNode ? (nodeAttrs(typeNode)['@_w:val'] as string | undefined) : undefined;
 
     const pgSz = findChild(sectPr, 'w:pgSz');
     if (pgSz) {
@@ -150,7 +173,7 @@ export function parseSectionProperties(body: XmlNode | undefined): ParsedSection
         }
     }
 
-    return { documentStyle: style, sectionBreakDefaults, headerRefs, footerRefs, titlePage };
+    return { documentStyle: style, sectionBreakDefaults, headerRefs, footerRefs, titlePage, sectionTypeRaw };
 }
 
 /**

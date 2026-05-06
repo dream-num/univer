@@ -28,8 +28,9 @@ import type {
     ITextRun,
 } from '@univerjs/core';
 import type { DrawingInfo } from './parse-drawing';
+import type { ParsedSection } from './parse-section';
 import type { DocumentChild, ParsedBorder, ParsedCellBorders, ParsedCellMargin, ParsedNumberingDef, ParsedParagraph, ParsedRelationship, ParsedTable } from './types';
-import { CustomRangeType, DataStreamTreeTokenType, generateRandomId } from '@univerjs/core';
+import { BooleanNumber, CustomRangeType, DataStreamTreeTokenType, generateRandomId, SectionType } from '@univerjs/core';
 import { DOCX_BORDER_TO_UNIVER_DASH } from './border-dash';
 import { buildDrawing } from './parse-drawing';
 
@@ -46,6 +47,12 @@ export interface AssembleContext {
     documentStyle?: IDocumentStyle;
   /** Fields merged onto every body.sectionBreaks[] entry (linePitch, gridType from w:docGrid). */
     sectionBreakDefaults?: Partial<ISectionBreak>;
+  /**
+   * Body-end `<w:sectPr>` (already with rId→stem refs resolved by docx-to-univer.ts).
+   * Applied to the synthesized doc-end sectionBreak entry so the trailing section
+   * gets its own pgSz/orient/margins/headerIds.
+   */
+    bodyEndSection?: ParsedSection;
 }
 
 interface Accumulator {
@@ -161,6 +168,70 @@ function emitParagraph(p: ParsedParagraph, acc: Accumulator, ctx: AssembleContex
         }
     }
     acc.paragraphs.push(entry);
+
+  // Inline `<w:pPr><w:sectPr>`: emit SECTION_BREAK token + sectionBreak entry.
+  // `acc.data.length` here equals the index of the '\n' we're about to write,
+  // which is the contract `view-model.parseDataStreamToTree` requires:
+  // sectionNode.endIndex === '\n' index === sectionBreak.startIndex.
+    if (p.sectionBreakAfter) {
+        acc.sectionBreaks.push({
+            startIndex: acc.data.length,
+            ...sectionToBreakFields(p.sectionBreakAfter),
+        });
+        acc.data += '\n';
+    }
+}
+
+// OOXML <w:type w:val=...> → Univer SectionType enum.
+// `nextColumn` has no Univer equivalent (Univer treats column transitions as
+// a separate column-properties concern); silently dropped — see IMPORT_NOTES.md.
+const SECTION_TYPE_BY_NAME: Record<string, SectionType> = {
+    continuous: SectionType.CONTINUOUS,
+    nextPage: SectionType.NEXT_PAGE,
+    evenPage: SectionType.EVEN_PAGE,
+    oddPage: SectionType.ODD_PAGE,
+};
+
+/**
+ * Project a ParsedSection (from inline `<w:pPr><w:sectPr>` or body-end sectPr)
+ * into the per-section override fields the renderer reads off each
+ * `body.sectionBreaks[i]` entry. Header/footer IDs come from `resolvedHeaderIds`
+ * / `resolvedFooterIds`, which docx-to-univer.ts has already populated by
+ * resolving rIds against the document rels.
+ */
+function sectionToBreakFields(parsed: ParsedSection): Partial<ISectionBreak> {
+    const out: Partial<ISectionBreak> = {};
+
+    if (parsed.sectionBreakDefaults.linePitch !== undefined) out.linePitch = parsed.sectionBreakDefaults.linePitch;
+    if (parsed.sectionBreakDefaults.gridType !== undefined) out.gridType = parsed.sectionBreakDefaults.gridType;
+
+    const ds = parsed.documentStyle;
+    if (ds.pageSize) out.pageSize = ds.pageSize;
+    if (ds.pageOrient !== undefined) out.pageOrient = ds.pageOrient;
+    if (ds.marginTop !== undefined) out.marginTop = ds.marginTop;
+    if (ds.marginBottom !== undefined) out.marginBottom = ds.marginBottom;
+    if (ds.marginLeft !== undefined) out.marginLeft = ds.marginLeft;
+    if (ds.marginRight !== undefined) out.marginRight = ds.marginRight;
+    if (ds.marginHeader !== undefined) out.marginHeader = ds.marginHeader;
+    if (ds.marginFooter !== undefined) out.marginFooter = ds.marginFooter;
+
+    if (parsed.titlePage) out.useFirstPageHeaderFooter = BooleanNumber.TRUE;
+
+    if (parsed.sectionTypeRaw && parsed.sectionTypeRaw in SECTION_TYPE_BY_NAME) {
+        out.sectionType = SECTION_TYPE_BY_NAME[parsed.sectionTypeRaw];
+    }
+
+    const h = parsed.resolvedHeaderIds;
+    if (h?.default) out.defaultHeaderId = h.default;
+    if (h?.first) out.firstPageHeaderId = h.first;
+    if (h?.even) out.evenPageHeaderId = h.even;
+
+    const f = parsed.resolvedFooterIds;
+    if (f?.default) out.defaultFooterId = f.default;
+    if (f?.first) out.firstPageFooterId = f.first;
+    if (f?.even) out.evenPageFooterId = f.even;
+
+    return out;
 }
 
 // ── Table styling helpers ────────────────────────────────────────────────────
@@ -267,7 +338,15 @@ function emitTable(t: ParsedTable, acc: Accumulator, ctx: AssembleContext) {
         for (const cell of row) {
             acc.data += TABLE_CELL_START;
             for (const p of cell.paragraphs) {
-                emitParagraph(p, acc, ctx);
+        // Inline `<w:pPr><w:sectPr>` inside a table cell is illegal per
+        // ECMA-376 but a few generators emit it. Strip silently — letting
+        // emitParagraph see it would inject document-level SECTION_BREAKs
+        // into the cell stream and corrupt the table.
+                emitParagraph(
+                    p.sectionBreakAfter ? { ...p, sectionBreakAfter: undefined } : p,
+                    acc,
+                    ctx
+                );
             }
       // Univer's view-model expects each cell to end with a SECTION_BREAK
       // after the last paragraph's PARAGRAPH (\r). Without the \n, the cell
@@ -478,11 +557,23 @@ export function assembleDocument(children: DocumentChild[], ctx: AssembleContext
   // even when other breaks exist mid-stream (e.g. table cell terminators).
     const docEndIndex = Math.max(0, acc.data.length - 1);
     if (!acc.sectionBreaks.some((sb) => sb.startIndex === docEndIndex)) {
-        acc.sectionBreaks.push({ startIndex: docEndIndex });
+        const tail: Partial<ISectionBreak> = ctx.bodyEndSection
+            ? sectionToBreakFields(ctx.bodyEndSection)
+            : {};
+        acc.sectionBreaks.push({ startIndex: docEndIndex, ...tail });
     }
+  // Default-fill (NOT clobber): inline-sectPr entries already carry their own
+  // linePitch/gridType from the section's <w:docGrid>; cell terminators have
+  // none and need the doc-level default. Old code did `Object.assign(sb, defaults)`
+  // which would overwrite per-section values with the body-end default.
     if (ctx.sectionBreakDefaults && Object.keys(ctx.sectionBreakDefaults).length > 0) {
         for (const sb of acc.sectionBreaks) {
-            Object.assign(sb, ctx.sectionBreakDefaults, { startIndex: sb.startIndex });
+            if (sb.linePitch === undefined && ctx.sectionBreakDefaults.linePitch !== undefined) {
+                sb.linePitch = ctx.sectionBreakDefaults.linePitch;
+            }
+            if (sb.gridType === undefined && ctx.sectionBreakDefaults.gridType !== undefined) {
+                sb.gridType = ctx.sectionBreakDefaults.gridType;
+            }
         }
     }
     body.sectionBreaks = acc.sectionBreaks;

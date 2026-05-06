@@ -775,3 +775,129 @@ describe('assembleDocument: table styling → Univer ITable', () => {
         expect(rows[1].repeatHeaderRow).toBeFalsy();
     });
 });
+
+// ── Inline `<w:pPr><w:sectPr>` → mid-stream SECTION_BREAK + per-section break entry ──
+
+describe('assembleDocument — inline sectionBreakAfter', () => {
+    it('emits \\r\\n at the section-terminating paragraph and pushes a sectionBreak entry at the \\n index', () => {
+        const children: DocumentChild[] = [
+            {
+                kind: 'paragraph',
+                paragraph: {
+                    runs: [{ text: 'A' }],
+                    sectionBreakAfter: {
+                        documentStyle: { pageOrient: 1, pageSize: { width: 1122.5, height: 793.7 } },
+                        sectionBreakDefaults: {},
+                        headerRefs: {},
+                        footerRefs: {},
+                        titlePage: true,
+                        sectionTypeRaw: 'continuous',
+                        resolvedHeaderIds: { default: 'header2' },
+                        resolvedFooterIds: { default: 'footer2' },
+                    },
+                },
+            },
+            { kind: 'paragraph', paragraph: { runs: [{ text: 'B' }] } },
+        ];
+        const doc = assembleDocument(children, { numbering: new Map(), rels: new Map(), media: new Map() });
+        // dataStream is "A\r\nB\r\n" — A=0, \r=1, \n=2, B=3, \r=4, \n=5
+        expect(doc.body!.dataStream).toBe('A\r\nB\r\n');
+        const breaks = doc.body!.sectionBreaks!;
+        expect(breaks.length).toBe(2);
+        // First break is the inline one at the '\n' after paragraph A.
+        const inline = breaks.find((b) => b.startIndex === 2)!;
+        expect(inline).toBeDefined();
+        expect(inline.defaultHeaderId).toBe('header2');
+        expect(inline.defaultFooterId).toBe('footer2');
+        expect(inline.useFirstPageHeaderFooter).toBe(1); // BooleanNumber.TRUE
+        expect(inline.sectionType).toBe(1); // SectionType.CONTINUOUS
+        expect(inline.pageOrient).toBe(1);
+        // Second break is the doc-end synthesized one at dataStream.length - 1 = 5.
+        const tail = breaks.find((b) => b.startIndex === 5)!;
+        expect(tail).toBeDefined();
+        expect(tail.defaultHeaderId).toBeUndefined();
+    });
+
+    it('strips sectionBreakAfter from cell paragraphs (illegal in OOXML, but defensive)', () => {
+        const children: DocumentChild[] = [
+            {
+                kind: 'table',
+                table: {
+                    rows: [[{
+                        paragraphs: [{
+                            runs: [{ text: 'cell' }],
+                            sectionBreakAfter: {
+                                documentStyle: {},
+                                sectionBreakDefaults: {},
+                                headerRefs: {},
+                                footerRefs: {},
+                                titlePage: false,
+                                resolvedHeaderIds: { default: 'shouldNotLeak' },
+                            },
+                        }],
+                    }]],
+                },
+            },
+        ];
+        const doc = assembleDocument(children, { numbering: new Map(), rels: new Map(), media: new Map() });
+        // No sectionBreak entry should carry the leaked headerId — only cell terminator + doc end.
+        for (const sb of doc.body!.sectionBreaks!) {
+            expect(sb.defaultHeaderId).toBeUndefined();
+        }
+    });
+
+    it('applies bodyEndSection to the synthesized doc-end break', () => {
+        const children: DocumentChild[] = [
+            { kind: 'paragraph', paragraph: { runs: [{ text: 'X' }] } },
+        ];
+        const doc = assembleDocument(children, {
+            numbering: new Map(),
+            rels: new Map(),
+            media: new Map(),
+            bodyEndSection: {
+                documentStyle: { pageSize: { width: 800, height: 1100 } },
+                sectionBreakDefaults: { linePitch: 20.8, gridType: 1 },
+                headerRefs: {},
+                footerRefs: {},
+                titlePage: false,
+                resolvedHeaderIds: { default: 'tailHeader' },
+            },
+        });
+        const tail = doc.body!.sectionBreaks!.find((b) => b.startIndex === doc.body!.dataStream.length - 1)!;
+        expect(tail.defaultHeaderId).toBe('tailHeader');
+        expect(tail.pageSize).toEqual({ width: 800, height: 1100 });
+    });
+
+    it('default-fill for sectionBreakDefaults does NOT clobber inline sectPr fields', () => {
+        const children: DocumentChild[] = [
+            {
+                kind: 'paragraph',
+                paragraph: {
+                    runs: [{ text: 'A' }],
+                    sectionBreakAfter: {
+                        documentStyle: {},
+                        sectionBreakDefaults: { linePitch: 30, gridType: 2 }, // section-local
+                        headerRefs: {},
+                        footerRefs: {},
+                        titlePage: false,
+                    },
+                },
+            },
+            { kind: 'paragraph', paragraph: { runs: [{ text: 'B' }] } },
+        ];
+        const doc = assembleDocument(children, {
+            numbering: new Map(),
+            rels: new Map(),
+            media: new Map(),
+            sectionBreakDefaults: { linePitch: 15.6, gridType: 1 }, // doc-level fallback
+        });
+        const inline = doc.body!.sectionBreaks!.find((b) => b.startIndex === 2)!;
+        // inline values must win over doc-level defaults.
+        expect(inline.linePitch).toBe(30);
+        expect(inline.gridType).toBe(2);
+        // Doc-end break has no own values → gets the doc-level defaults.
+        const tail = doc.body!.sectionBreaks!.find((b) => b.startIndex === doc.body!.dataStream.length - 1)!;
+        expect(tail.linePitch).toBe(15.6);
+        expect(tail.gridType).toBe(1);
+    });
+});

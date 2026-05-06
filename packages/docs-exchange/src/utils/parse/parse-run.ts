@@ -216,7 +216,12 @@ function runTextFromR(r: XmlNode): string {
         const name = nodeName(child);
         if (name === 'w:t') text += textOf(child);
         else if (name === 'w:tab') text += '\t';
-        else if (name === 'w:br') text += '\n';
+        // <w:br/> is a soft break; Univer's dataStream has no line-break
+        // token and a literal '\n' would be picked up as SECTION_BREAK by
+        // view-model.parseDataStreamToTree, shattering the body into bogus
+        // sections. Substitute a space until proper paragraph-splitting is
+        // wired up — see IMPORT_NOTES.md "Soft line break (<w:br/>)".
+        else if (name === 'w:br') text += ' ';
     }
     return text;
 }

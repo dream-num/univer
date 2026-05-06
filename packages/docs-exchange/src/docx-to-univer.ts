@@ -17,6 +17,7 @@
 import type { IDocumentData, IFooterData, IHeaderData } from '@univerjs/core';
 import type { DocxInput, XmlNode } from './utils/parse/index';
 import type { DrawingInfo } from './utils/parse/parse-drawing';
+import type { ParsedSection } from './utils/parse/parse-section';
 import type { DocumentChild } from './utils/parse/types';
 import {
     assembleDocument,
@@ -69,13 +70,25 @@ export async function docxToUniverData(input: DocxInput): Promise<IDocumentData>
         }
     }
 
-    const { documentStyle, sectionBreakDefaults, headerRefs, footerRefs, titlePage } = parseSectionProperties(body);
+    const { documentStyle, sectionBreakDefaults } = parseSectionProperties(body);
+    const bodyEndSection = parseSectionProperties(body);
+
+  // Collect all inline `<w:pPr><w:sectPr>` from body paragraphs. They live on
+  // ParsedParagraph.sectionBreakAfter (set by parse-paragraph). Each entry
+  // describes the section that ENDS at that paragraph; the body-end sectPr
+  // (parsed above) describes the trailing section.
+    const inlineSections: ParsedSection[] = [];
+    for (const c of children) {
+        if (c.kind === 'paragraph' && c.paragraph.sectionBreakAfter) {
+            inlineSections.push(c.paragraph.sectionBreakAfter);
+        }
+    }
 
   // ── Headers / footers ───────────────────────────────────────────────────────
   // Resolve <w:headerReference r:id> → "headerN" stem via document rels
   // (Target like "header1.xml" → strip ".xml"). Use the stem as IHeaderData.headerId
   // so it's stable across re-imports and easy to debug. Then plumb the IDs into
-  // documentStyle so the renderer (prepareSectionBreakConfig) picks them up.
+  // documentStyle (as document-level fallback) and onto each per-section break.
     const headers: Record<string, IHeaderData> = {};
     const footers: Record<string, IFooterData> = {};
   // Top-level drawings/lists/tableSource collected from header/footer parses.
@@ -101,7 +114,7 @@ export async function docxToUniverData(input: DocxInput): Promise<IDocumentData>
         const relsMap = kind === 'header' ? bundle.headerRels : bundle.footerRels;
         const xml = xmlMap?.get(stem);
         if (!xml) return undefined;
-    // Already parsed (same header referenced by multiple types) — reuse the id.
+    // Already parsed (same header referenced by multiple types/sections) — reuse the id.
         if (kind === 'header' ? headers[stem] : footers[stem]) return stem;
         const hfRels = parseHeaderFooterRels(relsMap?.get(stem));
         const parsed = parseHeaderFooterXml(xml, kind === 'header' ? 'w:hdr' : 'w:ftr', {
@@ -120,23 +133,81 @@ export async function docxToUniverData(input: DocxInput): Promise<IDocumentData>
         return stem;
     };
 
-    const defaultHeaderId = parseHF(refToStem(headerRefs.default), 'header');
-    const firstPageHeaderId = parseHF(refToStem(headerRefs.first), 'header');
-    const evenPageHeaderId = parseHF(refToStem(headerRefs.even), 'header');
-    const defaultFooterId = parseHF(refToStem(footerRefs.default), 'footer');
-    const firstPageFooterId = parseHF(refToStem(footerRefs.first), 'footer');
-    const evenPageFooterId = parseHF(refToStem(footerRefs.even), 'footer');
+  // For each section (inline + body-end), resolve its rIds to stems and stash
+  // the resolved IDs back on the ParsedSection (read by assemble.sectionToBreakFields).
+    const resolveSection = (sec: ParsedSection) => {
+        sec.resolvedHeaderIds = {
+            default: parseHF(refToStem(sec.headerRefs.default), 'header'),
+            first: parseHF(refToStem(sec.headerRefs.first), 'header'),
+            even: parseHF(refToStem(sec.headerRefs.even), 'header'),
+        };
+        sec.resolvedFooterIds = {
+            default: parseHF(refToStem(sec.footerRefs.default), 'footer'),
+            first: parseHF(refToStem(sec.footerRefs.first), 'footer'),
+            even: parseHF(refToStem(sec.footerRefs.even), 'footer'),
+        };
+    };
+    for (const sec of inlineSections) resolveSection(sec);
+    resolveSection(bodyEndSection);
+
+  // Document-level fallback IDs: prefer the body-end sectPr's refs; if it has
+  // none (common in python-docx output where the body-end sectPr is "empty"),
+  // fall back to the FIRST inline sectPr that has any ref. This roughly mirrors
+  // Word's section-inheritance behaviour for sections with no own refs.
+  // (Run BEFORE inheritance fill-forward so we see each section's own refs.)
+    const pickFallbackSection = (): ParsedSection | undefined => {
+        const hasAnyRef = (s: ParsedSection) =>
+            s.resolvedHeaderIds?.default || s.resolvedHeaderIds?.first || s.resolvedHeaderIds?.even
+            || s.resolvedFooterIds?.default || s.resolvedFooterIds?.first || s.resolvedFooterIds?.even;
+        if (hasAnyRef(bodyEndSection)) return bodyEndSection;
+        return inlineSections.find(hasAnyRef);
+    };
+    const fallback = pickFallbackSection();
+    const fallbackHeaderIds = fallback?.resolvedHeaderIds ?? {};
+    const fallbackFooterIds = fallback?.resolvedFooterIds ?? {};
+
+  // Cross-section inheritance: per ECMA-376 §17.6, a section that omits a
+  // headerReference inherits from the previous section (and ultimately from
+  // the body-end sectPr). python-docx keeps refs only on the FIRST sectPr
+  // and leaves the rest empty; without this fill-forward, the early sections
+  // render with no header even though documentStyle.defaultHeaderId is set,
+  // because the sectionBreak entry's empty headerId short-circuits the global
+  // fallback in prepareSectionBreakConfig.
+    const allSections = [...inlineSections, bodyEndSection];
+    const carried = { default: undefined as string | undefined, first: undefined as string | undefined, even: undefined as string | undefined };
+    const carriedF = { default: undefined as string | undefined, first: undefined as string | undefined, even: undefined as string | undefined };
+    for (const s of allSections) {
+        const h = s.resolvedHeaderIds ?? (s.resolvedHeaderIds = {});
+        const f = s.resolvedFooterIds ?? (s.resolvedFooterIds = {});
+        h.default = h.default ?? carried.default;
+        h.first = h.first ?? carried.first;
+        h.even = h.even ?? carried.even;
+        f.default = f.default ?? carriedF.default;
+        f.first = f.first ?? carriedF.first;
+        f.even = f.even ?? carriedF.even;
+        carried.default = h.default;
+        carried.first = h.first;
+        carried.even = h.even;
+        carriedF.default = f.default;
+        carriedF.first = f.first;
+        carriedF.even = f.even;
+    }
 
     const evenAndOdd = parseEvenAndOddHeaders(bundle.settingsXml);
 
-    if (defaultHeaderId) documentStyle.defaultHeaderId = defaultHeaderId;
-    if (defaultFooterId) documentStyle.defaultFooterId = defaultFooterId;
-    if (firstPageHeaderId) documentStyle.firstPageHeaderId = firstPageHeaderId;
-    if (firstPageFooterId) documentStyle.firstPageFooterId = firstPageFooterId;
-    if (evenPageHeaderId) documentStyle.evenPageHeaderId = evenPageHeaderId;
-    if (evenPageFooterId) documentStyle.evenPageFooterId = evenPageFooterId;
-  // BooleanNumber.TRUE = 1, FALSE = 0 — see @univerjs/core/types/enum/text-style.
-    if (titlePage) documentStyle.useFirstPageHeaderFooter = 1;
+    if (fallbackHeaderIds.default) documentStyle.defaultHeaderId = fallbackHeaderIds.default;
+    if (fallbackFooterIds.default) documentStyle.defaultFooterId = fallbackFooterIds.default;
+    if (fallbackHeaderIds.first) documentStyle.firstPageHeaderId = fallbackHeaderIds.first;
+    if (fallbackFooterIds.first) documentStyle.firstPageFooterId = fallbackFooterIds.first;
+    if (fallbackHeaderIds.even) documentStyle.evenPageHeaderId = fallbackHeaderIds.even;
+    if (fallbackFooterIds.even) documentStyle.evenPageFooterId = fallbackFooterIds.even;
+  // useFirstPageHeaderFooter is per-section in OOXML (<w:titlePg/> lives on
+  // each <w:sectPr>) and per-section in Univer (sectionBreak.useFirstPageHeaderFooter
+  // falls back to the global only when the section omits it). Setting the
+  // global from body-end's titlePg poisons every earlier section that didn't
+  // set its own — section #0 ends up walking the first-page path with no
+  // firstPageHeaderId and renders blank. sectionToBreakFields already writes
+  // the per-section value; leave the global at its default (FALSE).
     if (evenAndOdd) documentStyle.evenAndOddHeaders = 1;
 
     const docData = assembleDocument(children, {
@@ -146,6 +217,7 @@ export async function docxToUniverData(input: DocxInput): Promise<IDocumentData>
         drawingInfoMap,
         documentStyle,
         sectionBreakDefaults,
+        bodyEndSection,
     });
 
     if (Object.keys(headers).length > 0) docData.headers = headers;

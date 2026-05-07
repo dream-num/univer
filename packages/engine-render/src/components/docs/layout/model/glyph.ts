@@ -210,7 +210,7 @@ export function _createSkeletonWordOrLetter(
     let width = glyphWidth ?? contentWidth;
 
     if (validationGrid(gridType, snapToGrid)) {
-        // 当文字也需要对齐到网格式，进行处理
+        // When text also needs to align to the grid, process it
         // const multiple = Math.ceil(contentWidth / charSpace);
         width = contentWidth + (hasCJK(content) ? charSpace : charSpace / 2);
         if (gridType === GridType.SNAP_TO_CHARS) {
@@ -262,15 +262,15 @@ export function createSkeletonBulletGlyph(
     // getFontStyleString(fontStyle, localeService);
     const boundingBox = FontCache.getTextSize(content, fontStyle!);
     const contentWidth = boundingBox.width;
-    // 当文字也需要对齐到网格式，进行处理, LINES默认参照是doc全局字体大小
+    // When text also needs to align to the grid, process it. LINES default reference is the global font size of the doc
 
     const multiple = Math.ceil(contentWidth / charSpaceApply);
-    let width = (multiple < 2 ? 2 : multiple) * charSpaceApply; // 默认 bullet 有 2 个 tab
+    let width = (multiple < 2 ? 2 : multiple) * charSpaceApply; // Default bullet has 2 tabs
 
     let left = 0;
 
     if (bulletType) {
-        // 有序列表的处理，左对齐时left=0，其余情况根据contentWidth调整
+        // Ordered list processing, left=0 when left-aligned, otherwise adjusted based on contentWidth
         if (bulletAlign === BulletAlignment.CENTER) {
             left = -contentWidth / 2;
             width -= left;

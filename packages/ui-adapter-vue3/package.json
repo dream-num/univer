@@ -2,8 +2,8 @@
     "name": "@univerjs/ui-adapter-vue3",
     "version": "0.21.1",
     "private": false,
-    "description": "Vue adapter for Univer UI",
-    "author": "DreamNum <developer@univer.ai>",
+    "description": "Vue 3 adapter for Univer UI services.",
+    "author": "DreamNum Co., Ltd. <developer@univer.ai>",
     "license": "Apache-2.0",
     "funding": {
         "type": "opencollective",
@@ -18,7 +18,11 @@
         "url": "https://github.com/dream-num/univer/issues"
     },
     "keywords": [
-        "univer"
+        "univer",
+        "ui",
+        "vue3",
+        "adapter",
+        "plugin"
     ],
     "exports": {
         ".": "./src/index.ts",
@@ -68,8 +72,8 @@
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
-        "typescript": "^6.0.2",
-        "vitest": "^4.1.4",
-        "vue": "^3.5.32"
+        "typescript": "^6.0.3",
+        "vitest": "^4.1.5",
+        "vue": "^3.5.34"
     }
 }

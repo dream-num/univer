@@ -64,7 +64,7 @@ export function dealWithSection(
         }
 
         if (paragraphNode.nodeType === DataStreamTreeNodeType.PARAGRAPH) {
-            // Paragraph 段落
+            // Paragraph
             if (ctx.paragraphsOpenNewPage.has(paragraphNode.endIndex)) {
                 currentPageCache = createSkeletonPage(
                     ctx,

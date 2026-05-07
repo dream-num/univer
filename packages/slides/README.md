@@ -1,29 +1,38 @@
 # @univerjs/slides
 
+[![npm version](https://img.shields.io/npm/v/@univerjs/slides?style=flat-square)](https://npmjs.com/package/@univerjs/slides)
+[![license](https://img.shields.io/npm/l/@univerjs/slides?style=flat-square)](https://npmjs.com/package/@univerjs/slides)
+[![downloads](https://img.shields.io/npm/dm/@univerjs/slides?style=flat-square)](https://npmjs.com/package/@univerjs/slides)
+
+`@univerjs/slides` provides the core presentation data model and services for Univer Slides.
+
 ## Package Overview
 
-| Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
-| --- | --- | --- | --- | --- | :---: | :---: |
-| `@univerjs/slides` | `UniveSlides` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ❌ | ⭕️ |
+| Package | UMD global | CSS | Locales | Facade entry |
+| --- | --- | :---: | :---: | :---: |
+| `@univerjs/slides` | `UniverSlides` | No | No | No |
 
-## Introduction
+## Installation
 
-TODO: Not written yet.
+```sh
+pnpm add @univerjs/slides
+# or
+npm install @univerjs/slides
+```
+
+Keep all `@univerjs/*` packages on the same version.
 
 ## Usage
 
-### Installation
+```ts
+import { UniverSlidesPlugin } from '@univerjs/slides';
 
-```shell
-# Using npm
-npm install @univerjs/slides
-
-# Using pnpm
-pnpm add @univerjs/slides
+univer.registerPlugin(UniverSlidesPlugin);
 ```
 
-<!-- Links -->
-[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/slides?style=flat-square
-[npm-version-link]: https://npmjs.com/package/@univerjs/slides
-[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/slides?style=flat-square
-[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/slides?style=flat-square
+## Resources
+
+- [Documentation](https://docs.univer.ai)
+- [NPM package](https://npmjs.com/package/@univerjs/slides)
+- [GitHub repository](https://github.com/dream-num/univer)
+

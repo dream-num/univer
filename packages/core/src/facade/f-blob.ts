@@ -106,7 +106,7 @@ export class FBlob extends FBase {
         }
         return new Promise((resolve, reject) => {
             this._blob!.arrayBuffer().then((arrayBuffer) => {
-                const text = new TextDecoder(charset).decode(arrayBuffer); // 解码为字符串
+                const text = new TextDecoder(charset).decode(arrayBuffer); // Decode to string
                 resolve(text);
             }).catch((error) => {
                 reject(new Error(`Failed to read Blob as ArrayBuffer: ${error.message}`));

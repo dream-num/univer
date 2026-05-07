@@ -196,7 +196,7 @@ export function spilitLargeSetRangeValuesMutations(
 
     const matrix = new ObjectMatrix(cellValue);
 
-    // 计算单元格数量和边界
+    // Calculate cell count and boundaries
     let cellCount = 0;
     let minRow = Infinity;
     let maxRow = -Infinity;
@@ -211,33 +211,33 @@ export function spilitLargeSetRangeValuesMutations(
         maxCol = Math.max(maxCol, col);
     });
 
-    // 如果没有数据或单元格数量小于阈值，不拆分
+    // If no data or cell count is less than threshold, do not split
     if (minRow === Infinity || cellCount <= threshold) {
         return [mutation];
     }
 
     const chunks: IMutationInfo<ISetRangeValuesMutationParams>[] = [];
 
-    // 根据列数计算每个块的行数
+    // Calculate rows per chunk based on column count
     const colCount = maxCol - minCol + 1;
     let rowsPerChunk = Math.max(1, Math.floor(maxCellsPerChunk / colCount));
 
-    // 确保不会拆分成超过 maxChunks 个块
+    // Ensure it does not split into more than maxChunks chunks
     const totalRows = maxRow - minRow + 1;
     const estimatedChunks = Math.ceil(totalRows / rowsPerChunk);
     if (estimatedChunks > maxChunks) {
-        // 重新计算 rowsPerChunk，使得拆分后的块数不超过 maxChunks
+        // Recalculate rowsPerChunk so that the number of chunks does not exceed maxChunks
         rowsPerChunk = Math.ceil(totalRows / maxChunks);
     }
 
-    // 按照计算出的行数进行拆分
+    // Split by the calculated number of rows
     for (let rowStart = minRow; rowStart <= maxRow; rowStart += rowsPerChunk) {
         const rowEnd = Math.min(rowStart + rowsPerChunk - 1, maxRow);
 
         const chunkMatrix = new ObjectMatrix<Nullable<ICellData>>();
         let hasData = false;
 
-        // 提取当前块的数据
+        // Extract data for the current chunk
         for (let row = rowStart; row <= rowEnd; row++) {
             for (let col = minCol; col <= maxCol; col++) {
                 const value = matrix.getValue(row, col);
@@ -248,7 +248,7 @@ export function spilitLargeSetRangeValuesMutations(
             }
         }
 
-        // 只有当块中有数据时才创建 mutation
+        // Only create mutation when the chunk has data
         if (hasData) {
             chunks.push({
                 ...mutation,

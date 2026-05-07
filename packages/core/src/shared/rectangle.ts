@@ -519,7 +519,7 @@ export class Rectangle {
      * ```
      */
     static subtract(range1: IRange, range2: IRange): IRange[] {
-        // 如果没有交集，则返回 range1
+        // If no intersection, return range1
         if (
             range2.startRow > range1.endRow ||
             range2.endRow < range1.startRow ||
@@ -531,7 +531,7 @@ export class Rectangle {
 
         const ranges: IRange[] = [];
 
-        // 上部分
+        // Upper part
         if (range2.startRow >= range1.startRow) {
             ranges.push({
                 startRow: range1.startRow,
@@ -541,7 +541,7 @@ export class Rectangle {
             });
         }
 
-        // 下部分
+        // Lower part
         if (range2.endRow <= range1.endRow) {
             ranges.push({
                 startRow: range2.endRow + 1,
@@ -551,7 +551,7 @@ export class Rectangle {
             });
         }
 
-        // 左部分
+        // Left part
         const topBoundary = Math.max(range1.startRow, range2.startRow);
         const bottomBoundary = Math.min(range1.endRow, range2.endRow);
 
@@ -564,7 +564,7 @@ export class Rectangle {
             });
         }
 
-        // 右部分
+        // Right part
         if (range2.endColumn <= range1.endColumn) {
             ranges.push({
                 startRow: topBoundary,
@@ -654,10 +654,10 @@ export class Rectangle {
      */
     static hasIntersectionBetweenTwoRect(rect1: IRectLTRB, rect2: IRectLTRB) {
         if (
-            rect1.left > rect2.right || // rect1 在 rect2 右侧
-            rect1.right < rect2.left || // rect1 在 rect2 左侧
-            rect1.top > rect2.bottom || // rect1 在 rect2 下方
-            rect1.bottom < rect2.top // rect1 在 rect2 上方
+            rect1.left > rect2.right || // rect1 is to the right of rect2
+            rect1.right < rect2.left || // rect1 is to the left of rect2
+            rect1.top > rect2.bottom || // rect1 is below rect2
+            rect1.bottom < rect2.top // rect1 is above rect2
         ) {
             return false;
         }

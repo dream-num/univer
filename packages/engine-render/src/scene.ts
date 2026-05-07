@@ -261,7 +261,7 @@ export class Scene extends Disposable {
     attachControl(options?: ISceneInputControlOptions) {
         // const hasDown: boolean = true; const hasUp: boolean = true; const hasMove: boolean = true; const hasWheel: boolean = true;
         if (!(this._parent.classType === RENDER_CLASS_TYPE.ENGINE)) {
-            // 只绑定直接与 engine 挂载的 scene 来统一管理事件
+            // Only bind scenes directly mounted to the engine to manage events uniformly
             return;
         }
 
@@ -1262,9 +1262,9 @@ export class Scene extends Disposable {
      * Then only scene itself can response to pointer event, all objects under the scene would not.
      * see sceneInputManager@_onPointerMove
      */
-    // 禁用对象事件
+    // Disable object events
     disableObjectsEvent() {
-        // 将_evented属性设置为false
+        // Set the _evented property to false
         this._evented = false;
     }
 

@@ -64,7 +64,7 @@ interface IOptions {
     limit?: number;
 }
 
-// 定义数字字符集（0-9）
+// Define digit character set (0-9)
 const numberRange = (): CharRange[] => [
     {
         type: CharTypes.RANGE,
@@ -73,7 +73,7 @@ const numberRange = (): CharRange[] => [
     },
 ];
 
-// 定义字母和数字字符集（包含下划线、a-z、A-Z、0-9）
+// Define word character set (including underscore, a-z, A-Z, 0-9)
 const alphaNumericChars = (): CharRange[] => [
     {
         type: CharTypes.CHAR,
@@ -96,7 +96,7 @@ const alphaNumericChars = (): CharRange[] => [
     },
 ];
 
-// 定义空白字符集
+// Define whitespace character set
 const whitespaceChars = (): CharRange[] => [
     {
         type: CharTypes.CHAR,
@@ -161,49 +161,49 @@ const whitespaceChars = (): CharRange[] => [
     },
 ];
 
-// 定义 words 函数，返回字母数字字符集的 SET 类型
+// Define words function, returns SET type of word characters
 const words = (): ICharSet => ({
     type: CharTypes.SET,
     set: alphaNumericChars(),
     not: false,
 });
 
-// 定义 notWords 函数，返回字母数字字符集的 SET 类型，但取反
+// Define notWords function, returns negated SET type of word characters
 const notWords = (): ICharSet => ({
     type: CharTypes.SET,
     set: alphaNumericChars(),
     not: true,
 });
 
-// 定义 ints 函数，返回数字字符集的 SET 类型
+// Define ints function, returns SET type of digit characters
 const ints = (): ICharSet => ({
     type: CharTypes.SET,
     set: numberRange(),
     not: false,
 });
 
-// 定义 notInts 函数，返回数字字符集的 SET 类型，但取反
+// Define notInts function, returns negated SET type of digit characters
 const notInts = (): ICharSet => ({
     type: CharTypes.SET,
     set: numberRange(),
     not: true,
 });
 
-// 定义 whitespace 函数，返回空白字符集的 SET 类型
+// Define whitespace function, returns SET type of whitespace characters
 const whitespace = (): ICharSet => ({
     type: CharTypes.SET,
     set: whitespaceChars(),
     not: false,
 });
 
-// 定义 notWhitespace 函数，返回空白字符集的 SET 类型，但取反
+// Define notWhitespace function, returns negated SET type of whitespace characters
 const notWhitespace = (): ICharSet => ({
     type: CharTypes.SET,
     set: whitespaceChars(),
     not: true,
 });
 
-// 定义 anyChar 函数，返回特定字符集的 SET 类型，但取反
+// Define anyChar function, returns negated SET type of any character
 const anyChar = (): ICharSet => ({
     type: CharTypes.SET,
     set: [
@@ -334,18 +334,18 @@ function tokenizer(regExpString: string) {
                 break;
             case '[':
             {
-                const negated = (strChars[i] === '^'); // 检查是否是否定字符类（例如 `[^a-z]`）
+                const negated = (strChars[i] === '^'); // Check if it is a negated character class (e.g. `[^a-z]`)
                 if (negated) {
-                    i++; // 如果是否定的，则跳过 "^" 字符
+                    i++; // If negated, skip the "^" character
                 }
 
-                // 提取字符类的内容，并计算结束位置
+                // Extract the content of the character class and calculate the end position
                 const classTokens = tokenizeClass(strChars.slice(i), regExpString);
 
-                // 更新读取位置
+                // Update the reading position
                 i += classTokens[1];
 
-                // 将解析后的字符类添加到结果数组中
+                // Add the parsed character class to the result array
                 stack.push({
                     type: CharTypes.SET,
                     set: classTokens[0],
@@ -359,36 +359,36 @@ function tokenizer(regExpString: string) {
                 break;
             case '(':
             {
-                // 初始化一个对象来表示捕获组
+                // Initialize an object to represent the capture group
                 const group: IToken = {
                     type: CharTypes.GROUP,
                     stack: [],
-                    remember: true, // 默认情况下，捕获组是需要记住（捕获）的
+                    remember: true, // By default, capture groups are captured
                 };
 
-                // 检查是否存在 '?' 来指定组的特殊行为
+                // Check if '?' exists to specify special group behavior
                 if (strChars[i] === '?') {
-                    const nextChar = strChars[i + 1]; // 获取 '?' 后面的字符
-                    i += 2; // 跳过 '?' 和后面的字符
+                    const nextChar = strChars[i + 1]; // Get the character after '?'
+                    i += 2; // Skip '?' and the following character
 
-                    // 根据后面的字符确定组的类型
+                    // Determine the group type based on the following character
                     if (nextChar === '=') {
-                        group.followedBy = true; // 正向前瞻
+                        group.followedBy = true; // Positive lookahead
                     } else if (nextChar === '!') {
-                        group.notFollowedBy = true; // 负向前瞻
+                        group.notFollowedBy = true; // Negative lookahead
                     } else if (nextChar !== ':') {
                         throw new SyntaxError(`Invalid regular expression: /${regExpString}/: Invalid group, character '${nextChar}' after '?' at column ${i - 1}`);
                     }
 
                     group.remember = false;
                 } else {
-                    captureCount += 1; // 增加捕获组的计数
+                    captureCount += 1; // Increment capture group count
                 }
 
-                // 将捕获组对象添加到主栈中
+                // Add the capture group object to the main stack
                 stack.push(group);
 
-                // 保存当前状态并开始新的栈用于捕获组
+                // Save current state and start a new stack for the capture group
                 groups.push(currentScope);
                 currentScope = group;
                 stack = group.stack as IToken[];
@@ -405,15 +405,15 @@ function tokenizer(regExpString: string) {
                 break;
             case '|':
             {
-                // 如果当前作用域没有 'options' 属性，则初始化它
+                // If the current scope does not have an 'options' property, initialize it
                 if (!currentScope.options) {
                     currentScope.options = [currentScope.stack] as IToken[][];
                     delete currentScope.stack;
                 }
-                // 创建新的选项分支并添加到 'options'
+                // Create a new option branch and add it to 'options'
                 const newOption: IToken[] = [];
                 currentScope.options.push(newOption);
-                // 更新当前的解析栈为新的选项分支
+                // Update the current parsing stack to the new option branch
                 stack = newOption;
                 break;
             }

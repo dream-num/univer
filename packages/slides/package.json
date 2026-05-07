@@ -2,8 +2,8 @@
     "name": "@univerjs/slides",
     "version": "0.21.1",
     "private": false,
-    "description": "",
-    "author": "DreamNum <developer@univer.ai>",
+    "description": "Core presentation model and services for Univer Slides.",
+    "author": "DreamNum Co., Ltd. <developer@univer.ai>",
     "license": "Apache-2.0",
     "funding": {
         "type": "opencollective",
@@ -18,7 +18,11 @@
         "url": "https://github.com/dream-num/univer/issues"
     },
     "keywords": [
-        "univer"
+        "univer",
+        "slides",
+        "presentation",
+        "deck",
+        "plugin"
     ],
     "exports": {
         ".": "./src/index.ts",
@@ -69,7 +73,7 @@
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
         "rxjs": "^7.8.2",
-        "typescript": "^6.0.2",
-        "vitest": "^4.1.4"
+        "typescript": "^6.0.3",
+        "vitest": "^4.1.5"
     }
 }

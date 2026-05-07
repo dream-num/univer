@@ -333,13 +333,13 @@ export function getFontStyleString(
     };
 }
 
-// 是否有中文、日文、韩文等，不包括符号
+// Whether it contains CJK characters, excluding symbols
 const CJK_LETTER_REG = cjk.letters().toRegExp();
 export function hasCJKText(text: string) {
     return CJK_LETTER_REG.test(text);
 }
 
-// 是否有中文、日文、韩文等可以垂直布局的文字，包括标点符号
+// Whether it contains CJK characters that support vertical layout, including punctuation
 const CJK_ALL_REG = cjk.all().toRegExp();
 export function hasCJK(text: string) {
     return CJK_ALL_REG.test(text);
@@ -465,7 +465,7 @@ export function isCjkCenterAlignedPunctuation(text: string) {
 
 const one_thousand = 1000;
 
-// 返回屏幕 DPI
+// Return screen DPI
 let dpi_cache: Nullable<number>;
 export function getDPI() {
     if (dpi_cache) {

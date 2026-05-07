@@ -2,8 +2,8 @@
     "name": "@univerjs/engine-render",
     "version": "0.21.1",
     "private": false,
-    "description": "UniverSheet normal base-render",
-    "author": "DreamNum <developer@univer.ai>",
+    "description": "Canvas rendering engine for Univer documents, sheets, and slides.",
+    "author": "DreamNum Co., Ltd. <developer@univer.ai>",
     "license": "Apache-2.0",
     "funding": {
         "type": "opencollective",
@@ -18,7 +18,11 @@
         "url": "https://github.com/dream-num/univer/issues"
     },
     "keywords": [
-        "univer"
+        "univer",
+        "render-engine",
+        "canvas",
+        "layout",
+        "graphics"
     ],
     "exports": {
         ".": "./src/index.ts",
@@ -77,8 +81,8 @@
         "jest-canvas-mock": "^2.5.2",
         "rollup-plugin-polyfill-node": "^0.13.0",
         "rxjs": "^7.8.2",
-        "tsdown": "^0.21.8",
-        "typescript": "^6.0.2",
-        "vitest": "^4.1.4"
+        "tsdown": "^0.22.0",
+        "typescript": "^6.0.3",
+        "vitest": "^4.1.5"
     }
 }

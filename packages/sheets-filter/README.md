@@ -1,31 +1,42 @@
 # @univerjs/sheets-filter
 
+[![npm version](https://img.shields.io/npm/v/@univerjs/sheets-filter?style=flat-square)](https://npmjs.com/package/@univerjs/sheets-filter)
+[![license](https://img.shields.io/npm/l/@univerjs/sheets-filter?style=flat-square)](https://npmjs.com/package/@univerjs/sheets-filter)
+[![downloads](https://img.shields.io/npm/dm/@univerjs/sheets-filter?style=flat-square)](https://npmjs.com/package/@univerjs/sheets-filter)
+
+`@univerjs/sheets-filter` adds the core filtering model, commands, and services for Univer Sheets.
+
 ## Package Overview
 
-| Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
-| --- | --- | --- | --- | --- | :---: | :---: |
-| `@univerjs/sheets-filter` | `UniverSheetsFilter` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ❌ | ❌ |
+| Package | UMD global | CSS | Locales | Facade entry |
+| --- | --- | :---: | :---: | :---: |
+| `@univerjs/sheets-filter` | `UniverSheetsFilter` | No | No | Yes |
 
-## Introduction
+## Installation
 
-`@univerjs/sheets-filter` is a filter plugin for Univer Sheet.
+```sh
+pnpm add @univerjs/sheets-filter
+# or
+npm install @univerjs/sheets-filter
+```
+
+Keep all `@univerjs/*` packages on the same version.
 
 ## Usage
 
-You should use this plugin with the `@univerjs/sheets-filter-ui` package.
+```ts
+import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 
-### Installation
-
-```shell
-# Using npm
-npm install @univerjs/sheets-filter
-
-# Using pnpm
-pnpm add @univerjs/sheets-filter
+univer.registerPlugin(UniverSheetsFilterPlugin);
 ```
 
-<!-- Links -->
-[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/sheets-filter?style=flat-square
-[npm-version-link]: https://npmjs.com/package/@univerjs/sheets-filter
-[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/sheets-filter?style=flat-square
-[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/sheets-filter?style=flat-square
+## Integration Notes
+
+Use this package with `@univerjs/sheets-filter-ui` when users need filter menus and panels.
+
+## Resources
+
+- [Documentation](https://docs.univer.ai)
+- [NPM package](https://npmjs.com/package/@univerjs/sheets-filter)
+- [GitHub repository](https://github.com/dream-num/univer)
+

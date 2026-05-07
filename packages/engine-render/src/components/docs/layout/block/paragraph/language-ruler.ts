@@ -72,7 +72,7 @@ export function ArabicHandler(
     sectionBreakConfig: ISectionBreakConfig,
     paragraph: IParagraph
 ) {
-    // 组合阿拉伯语的词组
+    // Combine Arabic phrases
     const config = getFontCreateConfig(index, viewModel, paragraphNode, sectionBreakConfig, paragraph);
     const glyph = [];
     let step = 0;
@@ -118,7 +118,7 @@ export function TibetanHandler(
     sectionBreakConfig: ISectionBreakConfig,
     paragraph: IParagraph
 ) {
-    // 组合藏语词组
+    // Combine Tibetan phrases
     const config = getFontCreateConfig(index, viewModel, paragraphNode, sectionBreakConfig, paragraph);
     const glyph = [];
     let step = 0;

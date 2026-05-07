@@ -29,7 +29,7 @@ export function createSkeletonColumn(
 
     return {
         lines: [],
-        // column坐标系相对于section
+        // column coordinate system relative to section
         left,
         width,
         height: 0,

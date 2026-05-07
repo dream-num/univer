@@ -49,7 +49,7 @@ export class TableFilterController extends Disposable {
 
     initTableHiddenRowIntercept() {
         this.disposeWithMe(this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.ROW_FILTERED, {
-            // 这里需要保证优先级高于sheet的筛选，因为筛选没有next,低于筛选的不会触发interceptor
+            // Priority must be higher than sheet filtering, because filtering has no next, and those below filtering will not trigger interceptor
             priority: 100,
             handler: (filtered, rowLocation, next) => {
                 if (filtered) return true;

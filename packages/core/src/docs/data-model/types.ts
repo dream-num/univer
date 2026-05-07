@@ -15,44 +15,44 @@
  */
 
 export enum DataStreamTreeNodeType {
-    // COLUMN_BREAK, // \v 换列
-    // PAGE_BREAK, // \f 换页
-    // DOCS_END, // \0  文档结尾
-    // TAB, // \t  制表符
-    PARAGRAPH = 'PARAGRAPH', // \r  段落
-    SECTION_BREAK = 'SECTION_BREAK', // \n  章节
+    // COLUMN_BREAK, // \v column break
+    // PAGE_BREAK, // \f page break
+    // DOCS_END, // \0  document end
+    // TAB, // \t  tab
+    PARAGRAPH = 'PARAGRAPH', // \r  paragraph
+    SECTION_BREAK = 'SECTION_BREAK', // \n  section break
     TABLE = 'TABLE',
     TABLE_ROW = 'TABLE_ROW',
     TABLE_CELL = 'TABLE_CELL',
-    CUSTOM_BLOCK = 'CUSTOM_BLOCK', // \b  图片 mention 等不参与文档流的场景
+    CUSTOM_BLOCK = 'CUSTOM_BLOCK', // \b  images, mentions, etc. that do not participate in document flow
 }
 
 export enum DataStreamTreeTokenType {
-    PARAGRAPH = '\r', // 段落
-    SECTION_BREAK = '\n', // 章节
+    PARAGRAPH = '\r', // paragraph
+    SECTION_BREAK = '\n', // section break
     // table.
-    TABLE_START = '\x1A', // 表格开始
-    TABLE_ROW_START = '\x1B', // 表格行开始
-    TABLE_CELL_START = '\x1C', // 表格单元格开始
-    TABLE_CELL_END = '\x1D', // 表格单元格结束
-    TABLE_ROW_END = '\x0E', // 表格行结束
-    TABLE_END = '\x0F', // 表格结束
+    TABLE_START = '\x1A', // table start
+    TABLE_ROW_START = '\x1B', // table row start
+    TABLE_CELL_START = '\x1C', // table cell start
+    TABLE_CELL_END = '\x1D', // table cell end
+    TABLE_ROW_END = '\x0E', // table row end
+    TABLE_END = '\x0F', // table end
     // custom range.
     /**
      * @deprecated
      */
-    CUSTOM_RANGE_START = '\x1F', // 自定义范围开始
+    CUSTOM_RANGE_START = '\x1F', // custom range start
     /**
      * @deprecated
      */
-    CUSTOM_RANGE_END = '\x1E', // 自定义范围结束
+    CUSTOM_RANGE_END = '\x1E', // custom range end
 
-    COLUMN_BREAK = '\v', // 换列
-    PAGE_BREAK = '\f', // 换页
-    DOCS_END = '\0', // 文档结尾
-    TAB = '\t', // 制表符
+    COLUMN_BREAK = '\v', // column break
+    PAGE_BREAK = '\f', // page break
+    DOCS_END = '\0', // document end
+    TAB = '\t', // tab
     // custom block.
-    CUSTOM_BLOCK = '\b', // 图片 mention 等不参与文档流的场景
+    CUSTOM_BLOCK = '\b', // images, mentions, etc. that do not participate in document flow
 
     LETTER = '',
     SPACE = ' ',

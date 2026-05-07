@@ -58,12 +58,12 @@ export function dealWithBullet(
 export function getDefaultBulletSke(listId: string, startIndex: number = 1): IDocumentSkeletonBullet {
     return {
         listId,
-        symbol: '\u25CF', // symbol 列表的内容
+        symbol: '\u25CF', // symbol list content
         ts: {
             // TODO: @jikkai @DR-Univer should read default font from configuration, not from locale service
             ff: 'Arial',
             fs: 9,
-        }, // 文字样式
+        }, // text style
         startIndexItem: startIndex,
         // bBox: {
         //     width: 8.4560546875,
@@ -105,15 +105,15 @@ function _getBulletSke(
 
     const textStyle = { ...textStyleConfig, ...textStyleFirst };
 
-    const fontStyle = getFontStyleString(textStyle); // 获得canvas.font格式的字体样式
+    const fontStyle = getFontStyleString(textStyle); // Get font style in canvas.font format
 
     let symbolContent: string;
     if (glyphSymbol) {
-        // 无序列表直接使用
+        // Unordered list uses directly
         symbolContent = glyphSymbol;
     } else {
-        // 有序列表
-        symbolContent = __generateOrderedListSymbol(glyphFormat, nestingLevel, nestings, listLevelAncestors); // 有序列表的处理
+        // Ordered list
+        symbolContent = __generateOrderedListSymbol(glyphFormat, nestingLevel, nestings, listLevelAncestors); // Ordered list processing
     }
 
     // const bBox = FontCache.getTextSize(symbolContent, fontStyle);
@@ -121,14 +121,14 @@ function _getBulletSke(
 
     return {
         listId,
-        symbol: symbolContent, // symbol 列表的内容
-        ts: textStyle, // 文字样式
+        symbol: symbolContent, // symbol list content
+        ts: textStyle, // text style
         fontStyle, //
         startIndexItem: startIndex + 1,
         // bBox,
         nestingLevel: nesting,
         bulletAlign: bulletAlignment,
-        bulletType: glyphSymbol ? false : !!glyphType, // 默认是无序列表，假如glyphSymbol为空且glyphType不为空才是有序列表
+        bulletType: glyphSymbol ? false : !!glyphType, // Default is unordered list, only ordered if glyphSymbol is empty and glyphType is not empty
         paragraphProperties: nesting.paragraphProperties,
     };
 }
@@ -183,7 +183,7 @@ function ___getSymbolByBesting(startIndex: number = 1, nesting: INestingLevel) {
     const { startNumber, glyphType, glyphSymbol } = nesting;
 
     if (glyphSymbol) {
-        // 无序列表直接使用
+        // Unordered list uses directly
         return glyphSymbol;
     }
 

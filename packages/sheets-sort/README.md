@@ -1,31 +1,45 @@
 # @univerjs/sheets-sort
 
+[![npm version](https://img.shields.io/npm/v/@univerjs/sheets-sort?style=flat-square)](https://npmjs.com/package/@univerjs/sheets-sort)
+[![license](https://img.shields.io/npm/l/@univerjs/sheets-sort?style=flat-square)](https://npmjs.com/package/@univerjs/sheets-sort)
+[![downloads](https://img.shields.io/npm/dm/@univerjs/sheets-sort?style=flat-square)](https://npmjs.com/package/@univerjs/sheets-sort)
+
+`@univerjs/sheets-sort` adds the core sorting model, commands, and services for Univer Sheets.
+
 ## Package Overview
 
-| Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
-| --- | --- | --- | --- | --- | :---: | :---: |
-| `@univerjs/sheets-sort` | `UniverSheetsSort` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ❌ | ⭕️ |
+| Package | UMD global | CSS | Locales | Facade entry |
+| --- | --- | :---: | :---: | :---: |
+| `@univerjs/sheets-sort` | `UniverSheetsSort` | No | Yes | Yes |
 
-## Introduction
+## Installation
 
-`@univerjs/sheets-sort` is a sort plugin for Univer Sheet.
+```sh
+pnpm add @univerjs/sheets-sort
+# or
+npm install @univerjs/sheets-sort
+```
+
+Keep all `@univerjs/*` packages on the same version.
 
 ## Usage
 
-You should use this plugin with the `@univerjs/sheets-sort-ui` package.
+```ts
+import EnUS from '@univerjs/sheets-sort/locale/en-US';
+import { UniverSheetsSortPlugin } from '@univerjs/sheets-sort';
 
-### Installation
+univer.registerPlugin(UniverSheetsSortPlugin);
 
-```shell
-# Using npm
-npm install @univerjs/sheets-sort
-
-# Using pnpm
-pnpm add @univerjs/sheets-sort
+// Merge EnUS into your Univer locale map when this package contributes UI text.
 ```
 
-<!-- Links -->
-[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/sheets-sort?style=flat-square
-[npm-version-link]: https://npmjs.com/package/@univerjs/sheets-sort
-[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/sheets-sort?style=flat-square
-[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/sheets-sort?style=flat-square
+## Integration Notes
+
+Use this package with `@univerjs/sheets-sort-ui` when users need sorting menus and panels.
+
+## Resources
+
+- [Documentation](https://docs.univer.ai)
+- [NPM package](https://npmjs.com/package/@univerjs/sheets-sort)
+- [GitHub repository](https://github.com/dream-num/univer)
+

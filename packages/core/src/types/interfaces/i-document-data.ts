@@ -918,7 +918,7 @@ export enum TableRowHeightRule {
     EXACT,
 }
 
-export interface ITableColumn { // 合并拆分列，HTML 合并单元格
+export interface ITableColumn { // Merge/split columns, HTML merge cells
     size: IWidthInTableSize;
 }
 

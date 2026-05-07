@@ -1,29 +1,42 @@
 # @univerjs/slides-ui
 
+[![npm version](https://img.shields.io/npm/v/@univerjs/slides-ui?style=flat-square)](https://npmjs.com/package/@univerjs/slides-ui)
+[![license](https://img.shields.io/npm/l/@univerjs/slides-ui?style=flat-square)](https://npmjs.com/package/@univerjs/slides-ui)
+[![downloads](https://img.shields.io/npm/dm/@univerjs/slides-ui?style=flat-square)](https://npmjs.com/package/@univerjs/slides-ui)
+
+`@univerjs/slides-ui` adds the presentation editor UI layer for Univer Slides.
+
 ## Package Overview
 
-| Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
-| --- | --- | --- | --- | --- | :---: | :---: |
-| `@univerjs/slides-ui` | `UniveSlidesUi` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ⭕️ | ⭕️ |
+| Package | UMD global | CSS | Locales | Facade entry |
+| --- | --- | :---: | :---: | :---: |
+| `@univerjs/slides-ui` | `UniverSlidesUi` | Yes | Yes | No |
 
-## Introduction
+## Installation
 
-TODO: Not written yet.
+```sh
+pnpm add @univerjs/slides-ui
+# or
+npm install @univerjs/slides-ui
+```
+
+Keep all `@univerjs/*` packages on the same version.
 
 ## Usage
 
-### Installation
+```ts
+import '@univerjs/slides-ui/lib/index.css';
+import EnUS from '@univerjs/slides-ui/locale/en-US';
+import { UniverSlidesUIPlugin } from '@univerjs/slides-ui';
 
-```shell
-# Using npm
-npm install @univerjs/slides-ui
+univer.registerPlugin(UniverSlidesUIPlugin);
 
-# Using pnpm
-pnpm add @univerjs/slides-ui
+// Merge EnUS into your Univer locale map when this package contributes UI text.
 ```
 
-<!-- Links -->
-[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/slides-ui?style=flat-square
-[npm-version-link]: https://npmjs.com/package/@univerjs/slides-ui
-[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/slides-ui?style=flat-square
-[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/slides-ui?style=flat-square
+## Resources
+
+- [Documentation](https://docs.univer.ai)
+- [NPM package](https://npmjs.com/package/@univerjs/slides-ui)
+- [GitHub repository](https://github.com/dream-num/univer)
+

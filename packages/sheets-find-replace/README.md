@@ -1,39 +1,45 @@
 # @univerjs/sheets-find-replace
 
+[![npm version](https://img.shields.io/npm/v/@univerjs/sheets-find-replace?style=flat-square)](https://npmjs.com/package/@univerjs/sheets-find-replace)
+[![license](https://img.shields.io/npm/l/@univerjs/sheets-find-replace?style=flat-square)](https://npmjs.com/package/@univerjs/sheets-find-replace)
+[![downloads](https://img.shields.io/npm/dm/@univerjs/sheets-find-replace?style=flat-square)](https://npmjs.com/package/@univerjs/sheets-find-replace)
+
+`@univerjs/sheets-find-replace` extends shared find and replace capabilities to worksheets in Univer Sheets.
+
 ## Package Overview
 
-| Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
-| --- | --- | --- | --- | --- | :---: | :---: |
-| `@univerjs/sheets-find-replace` | `UniverSheetsFindReplace` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ❌ | ⭕️ |
+| Package | UMD global | CSS | Locales | Facade entry |
+| --- | --- | :---: | :---: | :---: |
+| `@univerjs/sheets-find-replace` | `UniverSheetsFindReplace` | No | Yes | Yes |
 
-## Introduction
+## Installation
 
-This package provides the feature to find and replace text in spreadsheets.
+```sh
+pnpm add @univerjs/sheets-find-replace
+# or
+npm install @univerjs/sheets-find-replace
+```
+
+Keep all `@univerjs/*` packages on the same version.
 
 ## Usage
 
-You should use this plugin with the `@univerjs/find-replace` package.
-
-```typescript
-import { UniverFindReplacePlugin } from '@univerjs/find-replace';
+```ts
+import EnUS from '@univerjs/sheets-find-replace/locale/en-US';
 import { UniverSheetsFindReplacePlugin } from '@univerjs/sheets-find-replace';
 
-univer.registerPlugin(UniverFindReplacePlugin);
 univer.registerPlugin(UniverSheetsFindReplacePlugin);
+
+// Merge EnUS into your Univer locale map when this package contributes UI text.
 ```
 
-### Installation
+## Integration Notes
 
-```shell
-# Using npm
-npm install @univerjs/sheets-find-replace
+Use this package with `@univerjs/find-replace` to share find and replace infrastructure across Univer surfaces.
 
-# Using pnpm
-pnpm add @univerjs/sheets-find-replace
-```
+## Resources
 
-<!-- Links -->
-[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/sheets-find-replace?style=flat-square
-[npm-version-link]: https://npmjs.com/package/@univerjs/sheets-find-replace
-[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/sheets-find-replace?style=flat-square
-[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/sheets-find-replace?style=flat-square
+- [Documentation](https://docs.univer.ai)
+- [NPM package](https://npmjs.com/package/@univerjs/sheets-find-replace)
+- [GitHub repository](https://github.com/dream-num/univer)
+

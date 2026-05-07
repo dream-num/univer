@@ -66,7 +66,7 @@ export class ImageIoService implements IImageIoService {
                 this._decreaseWaiting();
                 return;
             }
-            // 获取上传的图片的宽高
+            // Get the width and height of the uploaded image
             const reader = new FileReader();
             reader.readAsDataURL(imageFile);
             reader.onload = (evt) => {

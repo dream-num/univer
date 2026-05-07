@@ -18,14 +18,14 @@ import { ListGlyphType, numberToListABC } from '@univerjs/core';
 
 export function getBulletOrderedSymbol(startIndex: number, startNumber: number, glyphType: ListGlyphType | string) {
     // if (!(glyphType in GlyphType)) {
-    //     return dealWidthCustomBulletOrderedSymbol(startIndex, startNumber, glyphType as string); // 插件定义更多类型的bullet
+    //     return dealWidthCustomBulletOrderedSymbol(startIndex, startNumber, glyphType as string); // Plugin defines more types of bullets
     // }
 
     return generateOrderedSymbol(startIndex, startNumber, glyphType as ListGlyphType);
 }
 
 function generateOrderedSymbol(startIndex: number, startNumber: number, glyphType: ListGlyphType) {
-    // startIndex从0开始，startNumber为用户输入默认是1
+    // startIndex starts from 0, startNumber defaults to 1 for user input
     if (glyphType === ListGlyphType.DECIMAL) {
         return decimal(startIndex, startNumber);
     }

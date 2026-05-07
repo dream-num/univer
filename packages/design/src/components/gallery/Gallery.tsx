@@ -43,14 +43,14 @@ export function Gallery(props: IGalleryProps) {
 
     const activeImage = useMemo(() => images[activeImageIndex], [activeImageIndex, images]);
 
-    // 聚焦管理
+    // Focus management
     useEffect(() => {
         if (open && dialogRef.current) {
             dialogRef.current.focus();
         }
     }, [open]);
 
-    // ESC 关闭支持
+    // ESC close support
     useEffect(() => {
         if (!open) return;
         const handler = (e: KeyboardEvent) => {

@@ -77,7 +77,7 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
         if (!searchList.length) {
             return;
         }
-        // 注册方向键事件
+        // Register arrow key events
         const operationId = `sheet.formula-embedding-editor.search_function.${editorId}`;
         const d = new DisposableCollection();
         const handleKeycode = (keycode: KeyCode) => {

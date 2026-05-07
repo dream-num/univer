@@ -3,7 +3,7 @@
     "version": "0.21.1",
     "private": false,
     "description": "Core runtime, data models, command system, dependency injection, and Facade APIs for Univer.",
-    "author": "DreamNum <developer@univer.ai>",
+    "author": "DreamNum Co., Ltd. <developer@univer.ai>",
     "license": "Apache-2.0",
     "funding": {
         "type": "opencollective",

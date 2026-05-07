@@ -24,7 +24,7 @@ export interface IAddSheetTableParams {
     subUnitId: string;
     name: string;
     range: ITableRange;
-    // TODO 这里的参数应该聚合 Meta Columns Options 等信息
+    // TODO: Parameters here should be aggregated with Meta, Columns, Options, etc.
     options?: ITableOptions;
     tableId?: string;
     header?: string[];

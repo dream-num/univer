@@ -380,7 +380,7 @@ export class ScrollBar extends Disposable {
         const viewportW = this._viewportW;
         const contentWidth = this._contentW;
 
-        // ratioScrollY = 内容可视区高度/内容实际区高度= 滑动条的高度/滑道高度=滚动条的顶部距离/实际内容区域顶部距离；
+        // ratioScrollY = content visible height / content actual height = slider height / track height = scroll bar top distance / actual content area top distance;
         if (!this._enableHorizontal) {
             return;
         }

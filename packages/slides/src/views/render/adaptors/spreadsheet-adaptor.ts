@@ -219,7 +219,7 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
             mainScene,
         });
 
-        // 鼠标滚轮缩放
+        // Mouse wheel zoom
         scene.onMouseWheel$.subscribeEvent((evt: unknown, state: EventState) => {
             const e = evt as IWheelEvent;
             if (e.ctrlKey) {

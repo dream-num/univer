@@ -42,7 +42,7 @@ const transformDate2SerialNumber = (value: Nullable<CellValue>) => {
         return v;
     }
 
-    // support like 2020年11月11日 locale date
+    // support like 2020-11-11 locale date
     return numfmt.parseDate(dateKit(value).format('YYYY-MM-DD HH:mm:ss'))?.v as number | undefined;
 };
 

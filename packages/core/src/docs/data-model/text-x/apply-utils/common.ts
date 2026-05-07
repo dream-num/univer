@@ -504,13 +504,13 @@ interface IIndexRange {
 }
 
 function mergeRanges<T extends IIndexRange>(lineSegments: T[]): T[] {
-    lineSegments.sort((a, b) => a.startIndex - b.startIndex); // 按照起始值排序
+    lineSegments.sort((a, b) => a.startIndex - b.startIndex); // Sort by start value
 
     const mergedSegments: T[] = [];
     let currentSegment = lineSegments[0];
 
     for (let i = 1; i < lineSegments.length; i++) {
-        if (currentSegment.endIndex + 1 >= lineSegments[i].startIndex) { // 判断是否连续
+        if (currentSegment.endIndex + 1 >= lineSegments[i].startIndex) { // Check if continuous
             currentSegment.endIndex = Math.max(currentSegment.endIndex, lineSegments[i].endIndex);
         } else {
             mergedSegments.push(currentSegment);

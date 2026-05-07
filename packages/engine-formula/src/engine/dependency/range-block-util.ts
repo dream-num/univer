@@ -22,13 +22,13 @@
 // export function setRangeBlockToken(range: IRange, baseKey: string, token: string, map: Map<string, Map<string, Set<string>>>): void {
 //     const { startRow, startColumn, endRow, endColumn } = range;
 
-//     // 计算块的起始和结束索引
+//     // Calculate the start and end index of the block
 //     const startH = Math.floor(startRow / BLOCKSIZE);
 //     const endH = Math.ceil(endRow / BLOCKSIZE);
 //     const startV = Math.floor(startColumn / BLOCKSIZE);
 //     const endV = Math.ceil(endColumn / BLOCKSIZE);
 
-//     // 遍历所有与range有交集的块
+//     // Iterate over all blocks that intersect with the range
 //     for (let x = startH; x <= endH; x++) {
 //         for (let y = startV; y <= endV; y++) {
 //             const key = `${baseKey}_${x}_${y}`;
@@ -46,13 +46,13 @@
 // export function getBlockTokensByRange(tokensSet: Set<string>, range: IRange, baseKey: string, map: Map<string, Map<string, Set<string>>>): Set<string> {
 //     const { startRow, startColumn, endRow, endColumn } = range;
 
-//     // 计算块的起始和结束索引
+//     // Calculate the start and end index of the block
 //     const startH = Math.floor(startRow / BLOCKSIZE);
 //     const endH = Math.floor(endRow / BLOCKSIZE);
 //     const startV = Math.floor(startColumn / BLOCKSIZE);
 //     const endV = Math.floor(endColumn / BLOCKSIZE);
 
-//     // 遍历所有与range有交集的块
+//     // Iterate over all blocks that intersect with the range
 //     for (let x = startH; x <= endH; x++) {
 //         for (let y = startV; y <= endV; y++) {
 //             const key = `${baseKey}_${x}_${y}`;
@@ -69,7 +69,7 @@
 // export function updateBlockKey(tokensSet: Map<string, Set<string>>, range: IRange, baseKey: string, map: Map<string, Map<string, Set<string>>>) {
 //     const { startRow, startColumn, endRow, endColumn } = range;
 
-//     // 计算块的起始和结束索引
+//     // Calculate the start and end index of the block
 //     const startH = Math.floor(startRow / BLOCKSIZE);
 //     const endH = Math.floor(endRow / BLOCKSIZE);
 //     const startV = Math.floor(startColumn / BLOCKSIZE);
@@ -77,7 +77,7 @@
 
 //     let hasCreate = tokensSet.has(baseKey);
 
-//     // 遍历所有与range有交集的块
+//     // Iterate over all blocks that intersect with the range
 //     for (let x = startH; x <= endH; x++) {
 //         for (let y = startV; y <= endV; y++) {
 //             if (!hasCreate) {

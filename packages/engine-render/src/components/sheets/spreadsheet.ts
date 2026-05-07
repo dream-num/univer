@@ -296,20 +296,20 @@ export class Spreadsheet extends SheetComponent {
         const m = mainCtx.getTransform();
         cacheCtx.setTransform(m.a, m.b, m.c, m.d, 0, 0);
 
-        // leftOrigin 是 viewport 相对 sheetcorner 的偏移(不考虑缩放)
-        // - (leftOrigin - bufferEdgeX)  ----> 简化  - leftOrigin + bufferEdgeX
+        // leftOrigin is the offset of viewport relative to sheetcorner (without considering zoom)
+        // - (leftOrigin - bufferEdgeX)  ----> simplified to - leftOrigin + bufferEdgeX
         cacheCtx.translateWithPrecision(m.e / m.a - leftOrigin + bufferEdgeX, m.f / m.d - topOrigin + bufferEdgeY);
 
         if (shouldCacheUpdate) {
             for (const diffBound of diffCacheBounds) {
                 const { left: diffLeft, right: diffRight, bottom: diffBottom, top: diffTop } = diffBound;
 
-                // this.draw 的时候 ctx.translate 单元格偏移是相对 spreadsheet content
-                // 但是 diffBounds 包括 rowHeader columnWidth, 因此绘制前需要减去行头列头的偏移
+                // When this.draw, ctx.translate cell offset is relative to spreadsheet content
+                // But diffBounds includes rowHeader columnWidth, so the offset of row header and column header needs to be subtracted before drawing
                 const x = diffLeft - rowHeaderWidth;
                 const y = diffTop - columnHeaderHeight;
                 const w = diffRight - diffLeft;
-                const h = diffBottom - diffTop; // w h 必须精确和 diffarea 大小匹配, 否则会造成往回滚时, clear 的区域过大, 导致上一帧有效内容被擦除
+                const h = diffBottom - diffTop; // w and h must exactly match the diffarea size, otherwise when scrolling back, the clear area will be too large, causing valid content from the previous frame to be erased
 
                 cacheCtx.clearRectByPrecision(x, y, w, h);
                 // cacheCtx.fillStyle = this.testGetRandomLightColor();

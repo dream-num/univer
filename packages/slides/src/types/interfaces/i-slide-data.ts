@@ -138,7 +138,7 @@ export interface IPageElement {
     // line: ILine;
     // table: ITable;
     // chart: IChartProperties;
-    customBlock?: ICustomBlock; // customBlock 用户通过插件自定义的block
+    customBlock?: ICustomBlock; // customBlock block customized by user through plugin
 }
 
 export enum PageType {

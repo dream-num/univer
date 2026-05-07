@@ -25,4 +25,4 @@ export enum AutoFillSeries {
     ALTERNATE_SERIES,
 }
 
-// TODO 同类型整合
+// TODO: Merge same types

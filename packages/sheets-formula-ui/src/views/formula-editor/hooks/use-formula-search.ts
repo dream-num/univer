@@ -48,7 +48,7 @@ export const useFormulaSearch = (isNeed: boolean, nodes: INode[] = [], editor?: 
                     const nodes = stateRef.current.nodes;
                     const range = selections[0];
                     if (range.collapsed) {
-                        // 为什么减1,因为nodes是不包含初始 ‘=’ 字符的,但是 selection 会包含 '='
+                        // Why minus 1: because nodes do not include the initial ‘=’ character, but selection does
                         const currentNodeIndex = findIndexFromSequenceNodes(nodes, range.startOffset - 1, false);
                         indexRef.current = currentNodeIndex;
                         const currentNode = nodes[currentNodeIndex];

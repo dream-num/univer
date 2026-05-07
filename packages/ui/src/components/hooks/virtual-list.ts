@@ -83,7 +83,7 @@ const useVirtualList = <T>(list: T[], options: IVirtualListOptions<T>) => {
         return offset + 1;
     };
 
-  // 获取上部高度
+  // Get top height
     const getDistanceTop = (index: number) => {
         if (typeof (itemHeightRef.current) === 'number') {
             const height = index * itemHeightRef.current;

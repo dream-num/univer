@@ -3,7 +3,7 @@
     "version": "0.21.1",
     "private": false,
     "description": "Shared protocol types, generated service interfaces, and data contracts for Univer.",
-    "author": "DreamNum <developer@univer.ai>",
+    "author": "DreamNum Co., Ltd. <developer@univer.ai>",
     "license": "Apache-2.0",
     "funding": {
         "type": "opencollective",

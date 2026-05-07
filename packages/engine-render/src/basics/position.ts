@@ -21,7 +21,7 @@ export function getOffsetRectForDom(ele: HTMLElement) {
     const box = ele.getBoundingClientRect();
     const body = document.body;
     const docElem = document.documentElement;
-    // 获取页面的 scrollTop,scrollLeft(兼容性写法)
+    // Get page scrollTop and scrollLeft (compatibility approach)
     const scrollTop = window.pageYOffset || docElem.scrollTop || body.scrollTop;
     const scrollLeft = window.pageXOffset || docElem.scrollLeft || body.scrollLeft;
     const clientTop = docElem.clientTop || body.clientTop;
@@ -30,7 +30,7 @@ export function getOffsetRectForDom(ele: HTMLElement) {
     const left = box.left + scrollLeft - clientLeft;
 
     return {
-        // Math.round 兼容火狐浏览器 bug
+        // Math.round for Firefox browser bug compatibility
         top,
         left,
     };

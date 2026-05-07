@@ -100,7 +100,7 @@ export class FontCache {
         return this._globalFontMeasureCache.get(fontStyle)?.get(content);
     }
 
-    // 自动清除文字缓存，阈值可调整，清除规则是触发上限后删除一半的缓存
+    // Automatically clear text cache, threshold is adjustable, clear rule is to delete half of the cache after reaching the upper limit
     static autoCleanFontMeasureCache(cacheLimit: number = 1000000) {
         let allSize = 0;
         let isDelete = false;
@@ -123,11 +123,11 @@ export class FontCache {
                 deleteAllSize += values.size;
                 if (deleteAllSize > cacheLimit / 2) {
                     const limit = deleteAllSize - cacheLimit / 2;
-                    this._clearMeasureCache(limit, values); // 如果字体样式下面的文字数量部门超过阈值，则深入内部清除
+                    this._clearMeasureCache(limit, values); // If the number of characters under the font style exceeds the threshold, clear deeply internally
                     break;
                 }
 
-                // 清除整个样式下的字体缓存
+                // Clear font cache under the entire style
                 this._globalFontMeasureCache.delete(key);
             }
 
@@ -266,7 +266,7 @@ export class FontCache {
             actualBoundingBoxDescent,
         };
 
-        // 兼容不支持textMetrics的情况
+        // Compatibility for browsers that do not support textMetrics
         if (
             fontBoundingBoxAscent == null ||
             fontBoundingBoxDescent == null ||

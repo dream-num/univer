@@ -911,8 +911,8 @@ export function getNullSkeleton(): IDocumentSkeletonCached {
         st: 0,
         skeHeaders: new Map(),
         skeFooters: new Map(),
-        skeListLevel: new Map(), // TODO: 移到 context 中管理？
-        drawingAnchor: new Map(), // TODO: 移到 context 中管理
+        skeListLevel: new Map(), // TODO: Move to context management?
+        drawingAnchor: new Map(), // TODO: Move to context management
     };
 }
 

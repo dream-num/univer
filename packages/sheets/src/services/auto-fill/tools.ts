@@ -537,7 +537,7 @@ function fillOnlyFormat(data: Array<Nullable<ICellData>>, len: number) {
     return applyData;
 }
 
-// weekType: 0-日 1-周 2-星期
+// weekType: 0-Day 1-Week 2-Weekday
 function fillChnWeek(data: Array<Nullable<ICellData>>, len: number, step: number, weekType: number = 0) {
     const keywordMap = [
         ['日', '一', '二', '三', '四', '五', '六'],

@@ -24,6 +24,7 @@ import {
     RemoveWorksheetMergeMutation,
     SetRangeValuesMutation,
     SetSelectionsOperation,
+    SetWorksheetActiveOperation,
     SetWorksheetColWidthMutation,
     SetWorksheetRowAutoHeightMutation,
     SetWorksheetRowHeightMutation,
@@ -75,6 +76,7 @@ describe('Test clipboard', () => {
         commandService.registerCommand(SetSelectionsOperation);
         commandService.registerCommand(MoveRangeMutation);
         commandService.registerCommand(SetWorksheetRowAutoHeightMutation);
+        commandService.registerCommand(SetWorksheetActiveOperation);
 
         sheetClipboardService = get(ISheetClipboardService);
 

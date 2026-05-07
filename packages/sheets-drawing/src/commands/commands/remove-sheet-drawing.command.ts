@@ -94,7 +94,7 @@ export const RemoveSheetDrawingCommand: ICommand = {
 
         const result = sequenceExecute(redoMutations, commandService);
 
-        if (result) {
+        if (result.result) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations,

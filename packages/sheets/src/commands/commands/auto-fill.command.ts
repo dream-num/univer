@@ -213,7 +213,7 @@ export const AutoClearContentCommand: ICommand = {
         ];
 
         const result = sequenceExecute(redos, commandService);
-        if (result) {
+        if (result.result) {
             const afterInterceptors = sheetInterceptorService.afterCommandExecute({
                 id: SetRangeValuesMutation.id,
                 params: clearMutationParams,

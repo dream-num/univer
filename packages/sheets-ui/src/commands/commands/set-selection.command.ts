@@ -524,8 +524,8 @@ export const SelectAllCommand: ICommand<ISelectAllCommandParams> = {
         }
 
         const commandService = accessor.get(ICommandService);
-        sequenceExecute(redos, commandService);
+        const result = sequenceExecute(redos, commandService);
 
-        return true;
+        return result.result;
     },
 };

@@ -155,7 +155,7 @@ export const FlipSheetDrawingCommand: ICommand = {
 
         const result = sequenceExecute([updateMutation], commandService);
 
-        if (result) {
+        if (result.result) {
             undoRedoService.pushUndoRedo({
                 unitID: opUnitId,
                 undoMutations: [undoUpdateMutation, { id: ClearSheetDrawingTransformerOperation.id, params: unitIds }],

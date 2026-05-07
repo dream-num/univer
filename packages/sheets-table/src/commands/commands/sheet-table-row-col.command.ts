@@ -180,16 +180,18 @@ export const SheetTableInsertRowCommand: ICommand<ISheetTableRowColOperationComm
         const commandService = accessor.get(ICommandService);
         const res = sequenceExecute(redos, commandService);
 
-        if (res) {
+        if (res.result) {
             const undoRedoService = accessor.get(IUndoRedoService);
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations: undos,
                 redoMutations: redos,
             });
+
+            return true;
         }
 
-        return true;
+        return false;
     },
 };
 
@@ -334,16 +336,18 @@ export const SheetTableInsertColCommand: ICommand<ISheetTableRowColOperationComm
         }
         const commandService = accessor.get(ICommandService);
         const res = sequenceExecute(redos, commandService);
-        if (res) {
+        if (res.result) {
             const undoRedoService = accessor.get(IUndoRedoService);
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations: undos,
                 redoMutations: redos,
             });
+
+            return true;
         }
 
-        return true;
+        return false;
     },
 };
 
@@ -439,16 +443,18 @@ export const SheetTableRemoveRowCommand: ICommand<ISheetTableRowColOperationComm
 
         const commandService = accessor.get(ICommandService);
         const res = sequenceExecute(redos, commandService);
-        if (res) {
+        if (res.result) {
             const undoRedoService = accessor.get(IUndoRedoService);
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations: undos,
                 redoMutations: redos,
             });
+
+            return true;
         }
 
-        return true;
+        return false;
     },
 };
 
@@ -557,15 +563,17 @@ export const SheetTableRemoveColCommand: ICommand<ISheetTableRowColOperationComm
 
         const commandService = accessor.get(ICommandService);
         const res = sequenceExecute(redos, commandService);
-        if (res) {
+        if (res.result) {
             const undoRedoService = accessor.get(IUndoRedoService);
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations: undos,
                 redoMutations: redos,
             });
+
+            return true;
         }
 
-        return true;
+        return false;
     },
 };

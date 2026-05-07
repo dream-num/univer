@@ -2,325 +2,311 @@
 
 <picture>
     <source media="(prefers-color-scheme: dark)" srcset="./docs/img/banner-light.png">
-    <img src="./docs/img/banner-dark.png" alt="Univer" width="400" />
+    <img src="./docs/img/banner-dark.png" alt="Univer" width="420" />
 </picture>
 
-An Isomorphic Full-Stack Framework for Creating and Editing Spreadsheets Across Web and Server.<br />
-**Extensible. High-performance. Embedded to your application.**
+**A full-stack, isomorphic office SDK for building spreadsheets, documents, and presentations.**
 
-**English** | [简体中文][readme-zh-link] | [日本語][readme-ja-link] | [Español][readme-es-link] <br />
-[Official Site][official-site-link] | [Documentation][documentation-link] | [Online Playground][playground-link] | [Blog][blog-link]
+Build embeddable productivity experiences with a plugin architecture, Canvas-based rendering,
+a formula engine, and one Facade API that works in the browser and on Node.js.
 
-[![][github-license-shield]][github-license-link]
-[![][github-actions-shield]][github-actions-link]
-[![][github-stars-shield]][github-stars-link]
-[![][github-contributors-shield]][github-contributors-link] <br />
-[![][github-forks-shield]][github-forks-link]
-[![][github-issues-shield]][github-issues-link]
-[![][codecov-shield]][codecov-link]
-[![][codefactor-shield]][codefactor-link]
-[![][discord-shield]][discord-link]
+English | [简体中文](./docs/readme/zh-CN.md) | [繁體中文](./docs/readme/zh-TW.md) | [日本語](./docs/readme/ja-JP.md) | [한국어](./docs/readme/ko-KR.md) | [Español](./docs/readme/es-ES.md)
 
-[![Trendshift][github-trending-shield]][github-trending-url]
+[Documentation](https://docs.univer.ai) | [Showcase](https://docs.univer.ai/showcase) | [API Reference](https://docs.univer.ai/reference/classes/univer) | [Blog](https://docs.univer.ai/blog)
+
+[![License](https://img.shields.io/github/license/dream-num/univer?style=flat-square)](./LICENSE)
+[![Build](https://img.shields.io/github/actions/workflow/status/dream-num/univer/build.yml?style=flat-square)](https://github.com/dream-num/univer/actions/workflows/build.yml)
+[![Stars](https://img.shields.io/github/stars/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/stargazers)
+[![Contributors](https://img.shields.io/github/contributors/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/graphs/contributors)
+[![Issues](https://img.shields.io/github/issues/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/issues)
+[![Codecov](https://img.shields.io/codecov/c/gh/dream-num/univer?token=aPfyW2pIMN&style=flat-square)](https://codecov.io/gh/dream-num/univer)
+[![Discord](https://img.shields.io/discord/1136129819961217077?logo=discord&logoColor=FFFFFF&label=discord&color=5865F2&style=flat-square)](https://discord.gg/z3NKNT6D2f)
 
 </div>
 
-## Use [Univer Platform](https://github.com/dream-num/univer-mcp) to drive Univer Spreadsheets with natural language and build AI-native spreadsheets.
+## ✨ What is Univer?
 
-https://github.com/user-attachments/assets/7429bd5f-d769-4057-9e67-353337531024
+Univer is an open-source SDK for creating office applications inside your own product. It gives you the building blocks for spreadsheet, document, and presentation experiences without forcing you into a hosted app or a fixed UI.
+
+Use Univer when you need to:
+
+- Embed spreadsheet or document editing into a SaaS product, internal tool, BI workflow, or AI application.
+- Run workbook/document processing on the server with the same architecture used in the browser.
+- Compose only the features you need through plugins or start quickly with presets.
+- Extend behavior through custom plugins, commands, services, UI components, and Facade APIs.
+
+Univer is not a spreadsheet file viewer only. It is a framework for building your own productivity surface.
+
+## 🚀 Why Univer?
+
+- **Isomorphic by design**: run UI apps in browsers and headless processing in Node.js.
+- **Plugin-first architecture**: every capability is delivered as a composable plugin, so features can be added, removed, replaced, or lazy-loaded.
+- **Preset mode for fast integration**: use curated plugin bundles from [`univer-presets`](https://github.com/dream-num/univer-presets) when you want a working app quickly.
+- **Plugin mode for full control**: manually compose packages when you need custom loading, smaller bundles, or deep integration.
+- **Facade API**: work with workbooks, worksheets, ranges, documents, formulas, commands, and events through a higher-level API.
+- **Canvas rendering engine**: support large editable document surfaces with a rendering layer shared across document types.
+- **Extensible UI**: integrate with React, Vue, Web Components, and framework-specific application shells.
+
+## ⚡ Quick Start
+
+For most applications, start with **Preset Mode**. Use **Plugin Mode** when you need to manually compose packages and control plugin registration.
 
 <details open>
-<summary>
-<strong>Table of contents</strong>
-</summary>
+<summary><strong>Preset Mode (recommended)</strong></summary>
 
-- [🌈 Highlights](#-highlights)
-- [✨ Features](#-features)
-    - [📊 Univer Sheet](#-univer-sheet)
-    - [📝 Univer Doc](#-univer-doc-under-development)
-    - [📽️ Univer Slide](#%EF%B8%8F-univer-slide-under-development)
-- [🌐 Internationalization](#-internationalization)
-- [👾 Showcase](#-showcase)<!-- - [📦 Ecosystem](#-ecosystem) -->
-- [💬 Community](#-community)
-- [🤝 Contribution](#-contribution)
-- [❤️ Sponsor](#%EF%B8%8F-sponsors)
-- [📄 License](#-license)
+Presets are curated collections of Univer plugins that include the required Facade API registrations and styles.
+
+```bash
+pnpm add @univerjs/presets @univerjs/preset-sheets-core
+```
+
+```ts
+import { UniverSheetsCorePreset } from '@univerjs/preset-sheets-core'
+import UniverPresetSheetsCoreEnUS from '@univerjs/preset-sheets-core/locales/en-US'
+import { createUniver, LocaleType, mergeLocales } from '@univerjs/presets'
+
+import '@univerjs/preset-sheets-core/lib/index.css'
+
+const { univerAPI } = createUniver({
+  locale: LocaleType.EN_US,
+  locales: {
+    [LocaleType.EN_US]: mergeLocales(UniverPresetSheetsCoreEnUS),
+  },
+  presets: [
+    UniverSheetsCorePreset({
+      container: 'app',
+    }),
+  ],
+})
+
+univerAPI.createWorkbook({})
+```
 
 </details>
 
-## 🌈 Highlights
+<details>
+<summary><strong>Plugin Mode</strong></summary>
 
-- 📈 Univer is designed to support **spreadsheets**, **documents** and **presentation**.
-- 🧙‍♀️ Univer is **isomorphic**. It can run both on browsers and Node.js (in the future, mobile devices as well), with the same API.
-- ⚙️ Univer is easily **embeddable**, allowing seamless integration into your applications.
-- 🎇 Univer is **powerful**, offering a wide range of features including **formulas**, **conditional formatting**, **data validation**, **filtering**, **collaborative editing**, **printing**, **import & export** and more features on the horizon.
-- 🔌 Univer is **highly extensible**, thanks to its *plug-in architecture* that makes it a delight for developers to implement their unique requirements on the top of Univer.
-- 💄 Univer is **highly customizable**, allowing you to personalize its appearance using *themes*. It also provides support for internationalization (i18n).
-- 🥤 Univer is **easy to work with**. The *Presets* & *Facade API* make it easy to hands on.
-- ⚡ Univer in **performant**.
-  - ✏️ Univer boasts an efficient *rendering engine* based on canvas, capable of rendering various document types flawlessly. The rendering engines supports advanced typesetting features such as *punctuation squeezing*, *text and image layout* and *scroll buffering*.
-  - 🧮 Univer incorporates a lightning-fast *formula engine* that can operate in Web Workers or even on the server side.
-- 🌌 Univer is a **highly integrated** system. Documents, spreadsheets and slides can interoperate with each others and even rendered on the same canvas, allowing information and data flow within Univer.
+Plugin Mode gives you lower-level control over packages, style imports, locale merging, Facade API registration, and plugin order.
 
-## ✨ Features
+```bash
+pnpm add @univerjs/core @univerjs/design @univerjs/docs @univerjs/docs-ui @univerjs/engine-formula @univerjs/engine-render @univerjs/sheets @univerjs/sheets-formula @univerjs/sheets-formula-ui @univerjs/sheets-numfmt @univerjs/sheets-numfmt-ui @univerjs/sheets-ui @univerjs/ui
+```
 
-Univer provides a wide range of features for spreadsheets, documents and presentations. Here are some of the key features:
+```ts
+import { LocaleType, mergeLocales, Univer } from '@univerjs/core'
+import { FUniver } from '@univerjs/core/facade'
+import DesignEnUS from '@univerjs/design/locale/en-US'
+import { UniverDocsPlugin } from '@univerjs/docs'
+import { UniverDocsUIPlugin } from '@univerjs/docs-ui'
+import DocsUIEnUS from '@univerjs/docs-ui/locale/en-US'
+import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula'
+import { UniverRenderEnginePlugin } from '@univerjs/engine-render'
+import { UniverSheetsPlugin } from '@univerjs/sheets'
+import SheetsEnUS from '@univerjs/sheets/locale/en-US'
+import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula'
+import { UniverSheetsFormulaUIPlugin } from '@univerjs/sheets-formula-ui'
+import SheetsFormulaUIEnUS from '@univerjs/sheets-formula-ui/locale/en-US'
+import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt'
+import { UniverSheetsNumfmtUIPlugin } from '@univerjs/sheets-numfmt-ui'
+import SheetsNumfmtUIEnUS from '@univerjs/sheets-numfmt-ui/locale/en-US'
+import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui'
+import SheetsUIEnUS from '@univerjs/sheets-ui/locale/en-US'
+import { UniverUIPlugin } from '@univerjs/ui'
+import UIEnUS from '@univerjs/ui/locale/en-US'
 
-### 📊 Univer Sheets
+import '@univerjs/design/lib/index.css'
+import '@univerjs/ui/lib/index.css'
+import '@univerjs/docs-ui/lib/index.css'
+import '@univerjs/sheets-ui/lib/index.css'
+import '@univerjs/sheets-formula-ui/lib/index.css'
+import '@univerjs/sheets-numfmt-ui/lib/index.css'
 
-- **Core Features**: Univer supports core spreadsheet functionality, including cells, rows, columns, worksheets, and workbooks.
-- **Formulas**: Extensive support for various formulas, including mathematical, statistical, logical, text, date and time, lookup and reference, engineering, financial, and information formulas.
-- **Permissions**: Allows restricting access to specific elements.
-- **Number Formatting**: Supports formatting numbers based on specific criteria.
-- **Hyperlinks**: Enables linking to external websites, email addresses, and other locations within a spreadsheet.
-- **Floating Images**: Allows inserting images into a spreadsheet and positioning them anywhere on the sheet.
-- **Find & Replace**: Provides the ability to search for specific text within a spreadsheet and replace it with other text.
-- **Filtering**: Allows filtering data based on specific criteria.
-- **Sorting**: Allows sorting data based on specific criteria.
-- **Data Validation**: Supports restricting the type of data that can be entered into a cell.
-- **Conditional Formatting**: Supports applying formatting to cells based on specific criteria.
-- **Comments**: Enables adding comments to cells to provide additional information.
-- **Cross-highlighting**: Supports displaying cross-highlighting in spreadsheets to help users quickly locate selected cells.
-- **Zen Editor**: Provides a distraction-free editing experience with a clean interface and minimal distractions.
-- **Pivot Tables**[^1]: Supports pivot tables, allowing users to summarize and analyze data.
-- **Sparklines**[^1]: Supports sparklines, which are small charts that fit within a cell to provide a visual representation of data.
-- **Printing**[^1]: Allows printing a spreadsheet or exporting it to PDF.
-- **Import & Export**[^1]: Support for importing and exporting data in XLSX.
-- **Charts**[^1]: Supports various types of charts, including bar charts, line charts, pie charts, scatter plots, and more.
-- **Collaborative Editing**[^1]: Supports multiple users editing a spreadsheet simultaneously. File history and recovering are also provided.
-- **Editing History**[^1]: Allows users to view and restore previous versions of a spreadsheet.
+import '@univerjs/engine-formula/facade'
+import '@univerjs/ui/facade'
+import '@univerjs/docs-ui/facade'
+import '@univerjs/sheets/facade'
+import '@univerjs/sheets-ui/facade'
+import '@univerjs/sheets-formula/facade'
+import '@univerjs/sheets-numfmt/facade'
 
-### 📝 Univer Docs (rc)
+const univer = new Univer({
+  locale: LocaleType.EN_US,
+  locales: {
+    [LocaleType.EN_US]: mergeLocales(
+      DesignEnUS,
+      UIEnUS,
+      DocsUIEnUS,
+      SheetsEnUS,
+      SheetsUIEnUS,
+      SheetsFormulaUIEnUS,
+      SheetsNumfmtUIEnUS,
+    ),
+  },
+})
 
-- **Core Features**: Univer supports core document features, including paragraphs, headings, lists, superscript, subscript, and more.
-- **Lists**: Supports ordered lists, unordered lists, and task lists.
-- **Hyperlinks**: Supports inserting links to external websites, email addresses, and other locations within a document.
-- **Floating Images**: Allows inserting images into a document and supporting text and image layout.
-- **Headers & Footers**: Allows adding headers and footers to a document.
-- **Comments**: Enables adding comments to a document to provide additional information.
-- **Printing**[^1]: Allows printing a document or exporting it to PDF.
-- **Import & Export**[^1]: Supports importing and exporting data in DOCX format.
-- **Collaborative Editing**[^1]: Supports multiple users editing a document simultaneously.
+univer.registerPlugin(UniverRenderEnginePlugin)
+univer.registerPlugin(UniverFormulaEnginePlugin)
+univer.registerPlugin(UniverUIPlugin, { container: 'app' })
+univer.registerPlugin(UniverDocsPlugin)
+univer.registerPlugin(UniverDocsUIPlugin)
+univer.registerPlugin(UniverSheetsPlugin)
+univer.registerPlugin(UniverSheetsUIPlugin)
+univer.registerPlugin(UniverSheetsFormulaPlugin)
+univer.registerPlugin(UniverSheetsFormulaUIPlugin)
+univer.registerPlugin(UniverSheetsNumfmtPlugin)
+univer.registerPlugin(UniverSheetsNumfmtUIPlugin)
 
-### 📽️ Univer Slides (Under Development)
+const univerAPI = FUniver.newAPI(univer)
+univerAPI.createWorkbook({})
+```
 
-- **Core Features**: Univer will support core presentation features, including slides, shapes, text, images, and more.
+</details>
 
-## 🌐 Internationalization
+Your page needs a container:
 
-Univer supports multiple languages, including:
+```html
+<div id="app" style="height: 100vh"></div>
+```
 
-- `ca-ES`
-- `en-US`
-- `es-ES`
-- `fa-IR`
-- `ja-JP`
-- `ko-KR`
-- `ru-RU`
-- `sk-SK`
-- `vi-VN`
-- `zh-CN`
-- `zh-TW`
+Learn more in the [Installation & Basic Usage guide](https://docs.univer.ai/guides/sheets/getting-started/installation), the [`createUniver` reference](https://docs.univer.ai/reference/methods/create-univer), and the [Facade API reference](https://docs.univer.ai/reference/classes/univer).
 
-`zh-CN` and `en-US` are officially supported, while the others are contributed and maintained by the community.
+## 🧩 Preset Mode vs Plugin Mode
 
-You can add the language you want by [Using Custom Locales](https://docs.univer.ai/guides/sheets/getting-started/i18n#custom-language-packs). You can also help us add new language support by referring to the [contribution guide](./CONTRIBUTING.md).
+| Choose | When to use it | Start here |
+| --- | --- | --- |
+| **Preset Mode** | You want a working Sheets, Docs, or Node setup with minimal configuration. | [`univer-presets`](https://github.com/dream-num/univer-presets) and the [getting started guide](https://docs.univer.ai/guides/sheets/getting-started/installation) |
+| **Plugin Mode** | You need strict control over packages, plugin registration order, lazy loading, or custom runtime composition. | This repository's [`examples/`](./examples) and [architecture guide](https://docs.univer.ai/guides/recipes/architecture/univer) |
+| **Headless Mode** | You need server-side workbook/document processing, formula calculation, or automation without UI. | [Headless Univer](https://docs.univer.ai/guides/sheets/getting-started/node) |
 
-## 👾 Showcase
+Keep all `@univerjs/*` packages on the same version. If you use Univer Pro packages, keep `@univerjs-pro/*` versions aligned as well.
 
-Embed Univer in AI products as a data presentation tool.
+## 🧭 Compatibility
 
-[![][examples-preview-capalyze]][examples-link-capalyze]
+- **Browser runtime**: Univer is compiled with a Chrome 70 target and aims to work on Edge `>=70`, Firefox `>=63`, Chrome `>=70`, Safari `>=12.0`, and Electron `>=5`.
+- **Polyfills**: Univer relies on `Intl.Segmenter`. Add a polyfill such as `@formatjs/intl-segmenter` if your target browser or runtime does not provide it.
+- **Build tools**: We recommend Vite, esbuild, or Webpack 5. If your build tool does not support the `exports` field in `package.json` (common in Webpack 4), you may need extra path mapping.
+- **React**: Univer's view layer is built on React 18, supports React 18 and 19, and provides minimal compatibility support for React 16.9+ and 17.
+- **Node.js runtime**: Headless Univer supports Node.js `>=18.17.0`. Developing this monorepo requires Node.js `>=22.18`.
 
-You can find all the examples in the [Univer Examples](https://docs.univer.ai/showcase).
+## 🛠️ What You Can Build
 
-| **📊 Spreadsheets** | **📊 Multi-instance** | **📊 Uniscript** |
-| :---: | :---: | :---: |
-| [![][examples-preview-0]][examples-link-0] | [![][examples-preview-1]][examples-link-1] | [![][examples-preview-2]][examples-link-2] |
-| **📊 Big data** | **📊 Collaboration** | **📊 Collaboration Playground** |
-| [![][examples-preview-3]][examples-link-3] | [![][examples-preview-4]][examples-link-4] | [![][examples-preview-5]][examples-link-5] |
-| **📊 Import & Export** | **📊 Printing** | **📝 Documents** |
-| [![][examples-preview-6]][examples-link-6] | [![][examples-preview-7]][examples-link-7] | [![][examples-preview-8]][examples-link-8] |
-| **📝 Multi-instance** | **📝 Uniscript** | **📝 Big data** |
-| [![][examples-preview-9]][examples-link-9] | [![][examples-preview-10]][examples-link-10] | [![][examples-preview-11]][examples-link-11] |
-| **📝 Collaboration** | **📝 Collaboration Playground** | **📽️ Presentations** |
-| [![][examples-preview-12]][examples-link-12] | [![][examples-preview-13]][examples-link-13] | [![][examples-preview-14]][examples-link-14] |
-| **📊 Zen Editor** | **Univer Workspace (SaaS version)** | &nbsp; |
-| [![][examples-preview-15]][examples-link-15] | [![][examples-preview-16]][examples-link-16] | &nbsp; |
+| Area | Open-source capabilities |
+| --- | --- |
+| **Sheets** | Workbooks, worksheets, ranges, selection, formulas, number formatting, filtering, sorting, data validation, conditional formatting, hyperlinks, comments, find and replace, notes, tables, drawing integration, and extensible UI plugins. |
+| **Docs** | Rich document model, editing UI, lists, hyperlinks, drawing integration, comments, quick insert, and shared document architecture. |
+| **Slides** | Presentation data model and UI packages under active development. |
+| **Runtime** | Browser apps, Node.js headless usage, Web Worker/RPC patterns, multi-instance usage, and server-oriented automation. |
+| **Integrations** | React, Vue, Web Components, framework templates, theming, localization, and custom plugins. |
 
-<!-- ## 📦 Ecosystem
+Sheets are the most mature product surface today. Docs and Slides share Univer's architecture and continue to evolve in the same SDK.
 
-Univer has a rich ecosystem that includes a wide range of tools and resources to help you get started with Univer: -->
+## 🔓 Open Source and Pro
 
-## 🔗 Links
+This repository contains Univer's open-source core and first-party OSS plugins. Some enterprise features are developed as Univer Pro packages and require separate integration.
 
-- [Latest Preview of the `dev` Branch](https://univer-preview.vercel.app/)
-- [Official Site](https://univer.ai)
-- [Presets Repository](https://github.com/dream-num/univer-presets)
+| Open source | Univer Pro / commercial |
+| --- | --- |
+| Core SDK, plugin system, rendering engine, formula engine, Facade API, Sheets/Docs/Slides packages, themes, i18n, and many first-party plugins. | Real-time collaboration, import/export, printing, charts, pivot tables, sparklines, advanced formula capabilities, edit history, Pro server components, and license management. |
 
-## 🔒 Security
+Pro features are documented in the [Univer Pro guide](https://docs.univer.ai/guides/pro). They are intentionally separated here so the OSS package surface is clear.
 
-Univer is committed to maintaining a secure codebase. We follow best practices for security and regularly update our dependencies. For more information, please refer to our [Security Policy](./SECURITY.md).
+## 🌐 Ecosystem
+
+- **Core SDK**: [`dream-num/univer`](https://github.com/dream-num/univer), this monorepo.
+- **Presets**: [`dream-num/univer-presets`](https://github.com/dream-num/univer-presets), curated plugin bundles for browser and Node.js apps.
+- **AI agent skills**: [`dream-num/univer-sdk-skills`](https://github.com/dream-num/univer-sdk-skills), reusable instructions for AI agents working with Univer integration, Pro features, plugin development, and Node backends. See the [AI Skills guide](https://docs.univer.ai/guides/skills).
+- **Documentation**: [docs.univer.ai](https://docs.univer.ai), including Sheets, Docs, Slides, recipes, and Pro guides.
+- **API Reference**: [docs.univer.ai/reference](https://docs.univer.ai/reference/classes/univer), the Facade API and generated API reference.
+- **Examples and showcase**: [Univer Showcase](https://docs.univer.ai/showcase) and this repository's [`examples/`](./examples).
+- **AI-native spreadsheets**: [`dream-num/univer-mcp`](https://github.com/dream-num/univer-mcp), Univer Platform / MCP integration for driving Univer Sheets with natural language.
+
+## 📦 Repository Guide
+
+```text
+.
+├── packages/      Core packages, engines, document types, UI plugins, and feature plugins
+├── examples/      Local browser and Node.js demos used for development
+├── common/        Shared internal tooling, mock data, storybook, and utilities
+├── e2e/           Playwright and visual comparison tests
+├── tests/         Additional integration test projects
+└── docs/          Architecture notes, images, and repository-local documentation
+```
+
+Package-level READMEs live beside each package under [`packages/`](./packages).
+
+## 🧑‍💻 Development
+
+Requirements:
+
+- Node.js `>=22.18`
+- pnpm `>=10`
+
+```bash
+git clone https://github.com/dream-num/univer.git
+cd univer
+pnpm install
+pnpm dev
+```
+
+Useful commands:
+
+| Command | Purpose |
+| --- | --- |
+| `pnpm dev` | Start the local examples app. |
+| `pnpm build` | Build workspace packages, excluding internal common packages. |
+| `pnpm test` | Run unit tests through Turbo. |
+| `pnpm typecheck` | Run TypeScript checks through Turbo. |
+| `pnpm lint` | Run ESLint. |
+| `pnpm test:e2e` | Run Playwright tests. |
+| `pnpm storybook:dev` | Start Storybook for UI component development. |
+
+Read [CONTRIBUTING.md](./CONTRIBUTING.md) before opening a pull request.
+
+## 📝 Contributor Notes
+
+Repository-local notes worth reading before deeper changes:
+
+- [Building Isomorphic Univer](./docs/ISOMOPHIC.md): how to split browser, Node.js, UI, and shared plugin logic.
+- [Contributing to Facade API](./docs/CONTRIBUTING-FACADE.md): API design expectations for `FUniver`, `FWorkbook`, `FRange`, and related Facade classes.
+- [Naming Convention](./docs/NAMING_CONVENTION.md): file, folder, interface, plugin, command, and dependency injection token conventions.
+- [Fixing Memory Leaks](./docs/FIX_MEMORY_LEAK.md): common leak patterns and debugging workflow for Univer instances.
+- [Architecture TLDRs](./docs/tldr): concise notes for formula engine, web worker, permission, selection, and ref-range behavior.
 
 ## 💬 Community
 
-[![][github-community-badge]][github-community-link] [![][discord-community-badge]][discord-community-link] [![][stackoverflow-community-badge]][stackoverflow-community-link]
+- Ask questions in [GitHub Discussions](https://github.com/dream-num/univer/discussions).
+- Chat with the community on [Discord](https://discord.gg/z3NKNT6D2f).
+- Follow [Twitter / X](https://twitter.com/univerhq) and [YouTube](https://www.youtube.com/@dreamNum).
 
-Univer is an inclusive and welcoming project. Please read our [Code of Conduct](./CODE_OF_CONDUCT.md) before participating in the community.
+Please read the [Code of Conduct](./CODE_OF_CONDUCT.md) before participating.
 
-Join the Univer community:
+## 🔒 Security
 
-- Chat with us and other developers on [Discord][discord-community-link].
-- Start a discussion on [GitHub Discussions][github-community-link].
-- Open a topic on [Stack Overflow][stackoverflow-community-link] and tag it with `univer`.
-
-You can also find Univer on:
-
-[Twitter][twitter-community-link] | [YouTube][youtube-community-link]
-
-## 🤝 Contribution
-
-We appreciate any kinds of contributing. You can submit [issues or feature requests](https://github.com/dream-num/univer/issues) to us. Please read our [contributing guide](./CONTRIBUTING.md) first.
-
-If you would like to contribute code to Univer, please refer to the contributing guide as well. It would guide you through the process of setting up the development environment and submitting a pull request.
+If you believe you have found a security issue, please follow the [Security Policy](./SECURITY.md).
 
 ## ❤️ Sponsors
 
-The growth and development of the Univer project rely on the support of its backers and sponsors. If you are interested in supporting our project, we kindly invite you to consider becoming a sponsor. You can sponsor us through [Open Collective](https://opencollective.com/univer).
+Univer is supported by the community and sponsors. You can support the project through [Open Collective](https://opencollective.com/univer).
 
-Thanks to our sponsors, just part of them are listed here because of the space limit, ranking is no particular order:
+<a href="https://opencollective.com/univer/sponsor/0/website"><img src="https://opencollective.com/univer/sponsor/0/avatar.svg" alt="Sponsor 0" /></a>
+<a href="https://opencollective.com/univer/sponsor/1/website"><img src="https://opencollective.com/univer/sponsor/1/avatar.svg" alt="Sponsor 1" /></a>
+<a href="https://opencollective.com/univer/sponsor/2/website"><img src="https://opencollective.com/univer/sponsor/2/avatar.svg" alt="Sponsor 2" /></a>
+<a href="https://opencollective.com/univer/sponsor/3/website"><img src="https://opencollective.com/univer/sponsor/3/avatar.svg" alt="Sponsor 3" /></a>
+<a href="https://opencollective.com/univer/sponsor/4/website"><img src="https://opencollective.com/univer/sponsor/4/avatar.svg" alt="Sponsor 4" /></a>
+<a href="https://opencollective.com/univer/sponsor/5/website"><img src="https://opencollective.com/univer/sponsor/5/avatar.svg" alt="Sponsor 5" /></a>
+<a href="https://opencollective.com/univer/sponsor/6/website"><img src="https://opencollective.com/univer/sponsor/6/avatar.svg" alt="Sponsor 6" /></a>
 
-[![][sponsor-badge-0]][sponsor-link-0]
-[![][sponsor-badge-1]][sponsor-link-1]
-[![][sponsor-badge-2]][sponsor-link-2]
-[![][sponsor-badge-3]][sponsor-link-3]
-[![][sponsor-badge-4]][sponsor-link-4]
-[![][sponsor-badge-5]][sponsor-link-5]
-[![][sponsor-badge-6]][sponsor-link-6]
-
-[![][backer-badge-0]][backer-link-0]
-[![][backer-badge-1]][backer-link-1]
-[![][backer-badge-2]][backer-link-2]
-[![][backer-badge-3]][backer-link-3]
-[![][backer-badge-4]][backer-link-4]
-[![][backer-badge-5]][backer-link-5]
-[![][backer-badge-6]][backer-link-6]
+<a href="https://opencollective.com/univer/backer/0/website"><img src="https://opencollective.com/univer/backer/0/avatar.svg" alt="Backer 0" /></a>
+<a href="https://opencollective.com/univer/backer/1/website"><img src="https://opencollective.com/univer/backer/1/avatar.svg" alt="Backer 1" /></a>
+<a href="https://opencollective.com/univer/backer/2/website"><img src="https://opencollective.com/univer/backer/2/avatar.svg" alt="Backer 2" /></a>
+<a href="https://opencollective.com/univer/backer/3/website"><img src="https://opencollective.com/univer/backer/3/avatar.svg" alt="Backer 3" /></a>
+<a href="https://opencollective.com/univer/backer/4/website"><img src="https://opencollective.com/univer/backer/4/avatar.svg" alt="Backer 4" /></a>
+<a href="https://opencollective.com/univer/backer/5/website"><img src="https://opencollective.com/univer/backer/5/avatar.svg" alt="Backer 5" /></a>
+<a href="https://opencollective.com/univer/backer/6/website"><img src="https://opencollective.com/univer/backer/6/avatar.svg" alt="Backer 6" /></a>
 
 ## 📄 License
 
-Copyright © 2021-2025 DreamNum Co,Ltd. All Rights Reserved.
+Copyright (c) 2021-present DreamNum Co., Ltd.
 
-Licensed under the [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0) license.
-
-<!-- Footnotes -->
-[^1]: These features are provided by the non-OSS version of Univer, which is free for commercial use and also includes paid upgrade plans.
-
-<!-- Links -->
-[github-license-shield]: https://img.shields.io/github/license/dream-num/univer?style=flat-square
-[github-license-link]: ./LICENSE
-[github-actions-shield]: https://img.shields.io/github/actions/workflow/status/dream-num/univer/build.yml?style=flat-square
-[github-actions-link]: https://github.com/dream-num/univer/actions/workflows/build.yml
-[github-stars-link]: https://github.com/dream-num/univer/stargazers
-[github-stars-shield]: https://img.shields.io/github/stars/dream-num/univer?style=flat-square
-[github-trending-shield]: https://trendshift.io/api/badge/repositories/4376
-[github-trending-url]: https://trendshift.io/repositories/4376
-[github-contributors-link]: https://github.com/dream-num/univer/graphs/contributors
-[github-contributors-shield]: https://img.shields.io/github/contributors/dream-num/univer?style=flat-square
-[github-forks-link]: https://github.com/dream-num/univer/network/members
-[github-forks-shield]: https://img.shields.io/github/forks/dream-num/univer?style=flat-square
-[github-issues-link]: https://github.com/dream-num/univer/issues
-[github-issues-shield]: https://img.shields.io/github/issues/dream-num/univer?style=flat-square
-[codecov-shield]: https://img.shields.io/codecov/c/gh/dream-num/univer?token=aPfyW2pIMN&style=flat-square
-[codecov-link]: https://codecov.io/gh/dream-num/univer
-[codefactor-shield]: https://www.codefactor.io/repository/github/dream-num/univer/badge/dev?style=flat-square
-[codefactor-link]: https://www.codefactor.io/repository/github/dream-num/univer/overview/dev
-[discord-shield]: https://img.shields.io/discord/1136129819961217077?logo=discord&logoColor=FFFFFF&label=discord&color=5865F2&style=flat-square
-[discord-link]: https://discord.gg/z3NKNT6D2f
-
-[readme-en-link]: ./README.md
-[readme-zh-link]: ./README-zh.md
-[readme-ja-link]: ./README-ja.md
-[readme-es-link]: ./README-es.md
-
-[official-site-link]: https://univer.ai
-[documentation-link]: https://docs.univer.ai/en-US
-[playground-link]: https://docs.univer.ai/en-US/showcase
-[blog-link]: https://docs.univer.ai/en-US/blog
-
-[stackoverflow-community-link]: https://stackoverflow.com/questions/tagged/univer
-[stackoverflow-community-badge]: https://img.shields.io/badge/stackoverflow-univer-ef8236?labelColor=black&logo=stackoverflow&logoColor=white&style=for-the-badge
-[github-community-link]: https://github.com/dream-num/univer/discussions
-[github-community-badge]: https://img.shields.io/badge/github-univer-24292e?labelColor=black&logo=github&logoColor=white&style=for-the-badge
-[discord-community-link]: https://discord.gg/z3NKNT6D2f
-[discord-community-badge]: https://img.shields.io/discord/1136129819961217077?color=5865F2&label=discord&labelColor=black&logo=discord&logoColor=white&style=for-the-badge
-[twitter-community-link]: https://twitter.com/univerhq
-[youtube-community-link]: https://www.youtube.com/@dreamNum
-[zhihu-community-link]: https://www.zhihu.com/org/meng-shu-ke-ji
-[segmentfault-community-link]: https://segmentfault.com/u/congrongdehongjinyu
-[juejin-community-link]: https://juejin.cn/user/4312146127850733
-
-[sponsor-link-0]: https://opencollective.com/univer/sponsor/0/website
-[sponsor-link-1]: https://opencollective.com/univer/sponsor/1/website
-[sponsor-link-2]: https://opencollective.com/univer/sponsor/2/website
-[sponsor-link-3]: https://opencollective.com/univer/sponsor/3/website
-[sponsor-link-4]: https://opencollective.com/univer/sponsor/4/website
-[sponsor-link-5]: https://opencollective.com/univer/sponsor/5/website
-[sponsor-link-6]: https://opencollective.com/univer/sponsor/6/website
-[sponsor-badge-0]: https://opencollective.com/univer/sponsor/0/avatar.svg
-[sponsor-badge-1]: https://opencollective.com/univer/sponsor/1/avatar.svg
-[sponsor-badge-2]: https://opencollective.com/univer/sponsor/2/avatar.svg
-[sponsor-badge-3]: https://opencollective.com/univer/sponsor/3/avatar.svg
-[sponsor-badge-4]: https://opencollective.com/univer/sponsor/4/avatar.svg
-[sponsor-badge-5]: https://opencollective.com/univer/sponsor/5/avatar.svg
-[sponsor-badge-6]: https://opencollective.com/univer/sponsor/6/avatar.svg
-[backer-link-0]: https://opencollective.com/univer/backer/0/website
-[backer-link-1]: https://opencollective.com/univer/backer/1/website
-[backer-link-2]: https://opencollective.com/univer/backer/2/website
-[backer-link-3]: https://opencollective.com/univer/backer/3/website
-[backer-link-4]: https://opencollective.com/univer/backer/4/website
-[backer-link-5]: https://opencollective.com/univer/backer/5/website
-[backer-link-6]: https://opencollective.com/univer/backer/6/website
-[backer-badge-0]: https://opencollective.com/univer/backer/0/avatar.svg
-[backer-badge-1]: https://opencollective.com/univer/backer/1/avatar.svg
-[backer-badge-2]: https://opencollective.com/univer/backer/2/avatar.svg
-[backer-badge-3]: https://opencollective.com/univer/backer/3/avatar.svg
-[backer-badge-4]: https://opencollective.com/univer/backer/4/avatar.svg
-[backer-badge-5]: https://opencollective.com/univer/backer/5/avatar.svg
-[backer-badge-6]: https://opencollective.com/univer/backer/6/avatar.svg
-
-[examples-preview-capalyze]: ./docs/img/examples-sheets-capalyze.gif
-[examples-preview-0]: ./docs/img/examples-sheets.gif
-[examples-preview-1]: ./docs/img/examples-sheets-multi.gif
-[examples-preview-2]: ./docs/img/examples-sheets-uniscript.gif
-[examples-preview-3]: ./docs/img/examples-sheets-big-data.gif
-[examples-preview-4]: ./docs/img/pro-examples-sheets-collaboration.gif
-[examples-preview-5]: ./docs/img/pro-examples-sheets-collaboration-playground.gif
-[examples-preview-6]: ./docs/img/pro-examples-sheets-exchange.gif
-[examples-preview-7]: ./docs/img/pro-examples-sheets-print.gif
-[examples-preview-8]: ./docs/img/examples-docs.gif
-[examples-preview-9]: ./docs/img/examples-docs-multi.gif
-[examples-preview-10]: ./docs/img/examples-docs-uniscript.gif
-[examples-preview-11]: ./docs/img/examples-docs-big-data.gif
-[examples-preview-12]: ./docs/img/pro-examples-docs-collaboration.gif
-[examples-preview-13]: ./docs/img/pro-examples-docs-collaboration-playground.gif
-[examples-preview-14]: ./docs/img/examples-slides.gif
-[examples-preview-15]: ./docs/img/zen-mode.gif
-[examples-preview-16]: ./docs/img/univer-workspace-drag-chart.gif
-[examples-link-capalyze]: https://capalyze.ai/
-[examples-link-0]: https://docs.univer.ai/showcase
-[examples-link-1]: https://docs.univer.ai/showcase
-[examples-link-2]: https://docs.univer.ai/showcase
-[examples-link-3]: https://docs.univer.ai/showcase
-[examples-link-4]: https://docs.univer.ai/showcase
-[examples-link-5]: https://docs.univer.ai/showcase
-[examples-link-6]: https://docs.univer.ai/showcase
-[examples-link-7]: https://docs.univer.ai/showcase
-[examples-link-8]: https://docs.univer.ai/showcase
-[examples-link-9]: https://docs.univer.ai/showcase
-[examples-link-10]: https://docs.univer.ai/showcase
-[examples-link-11]: https://docs.univer.ai/showcase
-[examples-link-12]: https://docs.univer.ai/showcase
-[examples-link-13]: https://docs.univer.ai/showcase
-[examples-link-14]: https://docs.univer.ai/showcase
-[examples-link-15]: https://univer.ai/guides/sheet/features/zen-editor
-[examples-link-16]: https://youtu.be/kpV0MvQuFZA
+Licensed under the [Apache-2.0](./LICENSE) license.

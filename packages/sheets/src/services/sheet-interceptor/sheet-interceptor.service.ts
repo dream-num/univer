@@ -85,6 +85,7 @@ export interface IAutoHeightInterceptors {
 
 interface ISheetLocationForEditor extends ISheetLocation {
     origin: Nullable<ICellData>;
+    rawEditorCellData?: Nullable<ICellData>;
 }
 
 export const BEFORE_CELL_EDIT = createInterceptorKey<ICellDataForSheetInterceptor, ISheetLocationForEditor>('BEFORE_CELL_EDIT');
@@ -310,7 +311,7 @@ export class SheetInterceptorService extends Disposable {
 
     // #region intercept on writing cell
 
-    onWriteCell(workbook: Workbook, worksheet: Worksheet, row: number, col: number, cellData: ICellData) {
+    onWriteCell(workbook: Workbook, worksheet: Worksheet, row: number, col: number, cellData: ICellData, rawEditorCellData?: Nullable<ICellData>) {
         const context = {
             subUnitId: worksheet.getSheetId(),
             unitId: workbook.getUnitId(),
@@ -319,6 +320,7 @@ export class SheetInterceptorService extends Disposable {
             row,
             col,
             origin: Tools.deepClone(cellData),
+            rawEditorCellData,
         };
 
         return this.writeCellInterceptor.fetchThroughInterceptors(AFTER_CELL_EDIT)(cellData, context);

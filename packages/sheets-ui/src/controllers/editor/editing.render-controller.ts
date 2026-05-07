@@ -637,10 +637,19 @@ export class EditingRenderController extends Disposable {
             return true;
         }
 
+        const rawEditorCellData: Nullable<ICellData> = getCellDataByInput(
+            { s: worksheet.getCellRaw(row, column)?.s },
+            snapshot,
+            this._lexerTreeBuilder,
+            this._localService,
+            this._functionService,
+            workbook.getStyles()
+        );
+
         // Remove the same style attributes that have been set by composed style in the cell data.
         this._removeComposedCellStyleInCellData(cellData, worksheet.getComposedCellStyleWithoutSelf(row, column));
 
-        const finalCell = this._sheetInterceptorService.onWriteCell(workbook, worksheet, row, column, cellData) as ICellData;
+        const finalCell = this._sheetInterceptorService.onWriteCell(workbook, worksheet, row, column, cellData, rawEditorCellData) as ICellData;
 
         // If the cell data after interceptor is the same as the raw cell data, there is no need to execute setRangeValue command, just return directly.
         const finalCellCleaned = cleanCellDataObject(finalCell);

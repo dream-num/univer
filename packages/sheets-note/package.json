@@ -2,8 +2,8 @@
     "name": "@univerjs/sheets-note",
     "version": "0.21.1",
     "private": false,
-    "description": "Univer sheets note base plugin",
-    "author": "DreamNum <developer@univer.ai>",
+    "description": "Cell note model and commands for Univer Sheets.",
+    "author": "DreamNum Co., Ltd. <developer@univer.ai>",
     "license": "Apache-2.0",
     "funding": {
         "type": "opencollective",
@@ -17,7 +17,13 @@
     "bugs": {
         "url": "https://github.com/dream-num/univer/issues"
     },
-    "keywords": [],
+    "keywords": [
+        "univer",
+        "sheets",
+        "note",
+        "annotation",
+        "plugin"
+    ],
     "exports": {
         ".": "./src/index.ts",
         "./*": "./src/*",
@@ -81,7 +87,7 @@
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/network": "workspace:*",
         "rxjs": "^7.8.2",
-        "typescript": "^6.0.2",
-        "vitest": "^4.1.4"
+        "typescript": "^6.0.3",
+        "vitest": "^4.1.5"
     }
 }

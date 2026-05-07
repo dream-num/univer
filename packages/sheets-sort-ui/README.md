@@ -1,41 +1,42 @@
 # @univerjs/sheets-sort-ui
 
+[![npm version](https://img.shields.io/npm/v/@univerjs/sheets-sort-ui?style=flat-square)](https://npmjs.com/package/@univerjs/sheets-sort-ui)
+[![license](https://img.shields.io/npm/l/@univerjs/sheets-sort-ui?style=flat-square)](https://npmjs.com/package/@univerjs/sheets-sort-ui)
+[![downloads](https://img.shields.io/npm/dm/@univerjs/sheets-sort-ui?style=flat-square)](https://npmjs.com/package/@univerjs/sheets-sort-ui)
+
+`@univerjs/sheets-sort-ui` adds sorting menus and panels for Univer Sheets.
+
 ## Package Overview
 
-| Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
-| --- | --- | --- | --- | --- | :---: | :---: |
-| `@univerjs/sheets-sort-ui` | `UniverSheetsSortUi` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ⭕️ | ⭕️ |
+| Package | UMD global | CSS | Locales | Facade entry |
+| --- | --- | :---: | :---: | :---: |
+| `@univerjs/sheets-sort-ui` | `UniverSheetsSortUi` | Yes | Yes | No |
 
-## Introduction
+## Installation
 
-`@univerjs/sheets-sort-ui` provides a user interface for sorting in sheets.
+```sh
+pnpm add @univerjs/sheets-sort-ui
+# or
+npm install @univerjs/sheets-sort-ui
+```
+
+Keep all `@univerjs/*` packages on the same version.
 
 ## Usage
 
-You should use this plugin with the `@univerjs/sheets-sort` package.
-
 ```ts
 import '@univerjs/sheets-sort-ui/lib/index.css';
-
-import { UniverSheetsSortPlugin } from '@univerjs/sheets-sort';
+import EnUS from '@univerjs/sheets-sort-ui/locale/en-US';
 import { UniverSheetsSortUIPlugin } from '@univerjs/sheets-sort-ui';
 
-univer.registerPlugin(UniverSheetsSortPlugin);
 univer.registerPlugin(UniverSheetsSortUIPlugin);
+
+// Merge EnUS into your Univer locale map when this package contributes UI text.
 ```
 
-### Installation
+## Resources
 
-```shell
-# Using npm
-npm install @univerjs/sheets-sort-ui
+- [Documentation](https://docs.univer.ai)
+- [NPM package](https://npmjs.com/package/@univerjs/sheets-sort-ui)
+- [GitHub repository](https://github.com/dream-num/univer)
 
-# Using pnpm
-pnpm add @univerjs/sheets-sort-ui
-```
-
-<!-- Links -->
-[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/sheets-sort-ui?style=flat-square
-[npm-version-link]: https://npmjs.com/package/@univerjs/sheets-sort-ui
-[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/sheets-sort-ui?style=flat-square
-[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/sheets-sort-ui?style=flat-square

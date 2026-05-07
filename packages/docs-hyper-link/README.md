@@ -1,31 +1,42 @@
 # @univerjs/docs-hyper-link
 
-## Introduction
+[![npm version](https://img.shields.io/npm/v/@univerjs/docs-hyper-link?style=flat-square)](https://npmjs.com/package/@univerjs/docs-hyper-link)
+[![license](https://img.shields.io/npm/l/@univerjs/docs-hyper-link?style=flat-square)](https://npmjs.com/package/@univerjs/docs-hyper-link)
+[![downloads](https://img.shields.io/npm/dm/@univerjs/docs-hyper-link?style=flat-square)](https://npmjs.com/package/@univerjs/docs-hyper-link)
 
-`@univerjs/docs-hyper-link` provides the link function of Univer Docs.
+`@univerjs/docs-hyper-link` provides the core hyperlink model and commands for Univer Docs.
+
+## Package Overview
+
+| Package | UMD global | CSS | Locales | Facade entry |
+| --- | --- | :---: | :---: | :---: |
+| `@univerjs/docs-hyper-link` | `UniverDocsHyperLink` | No | No | No |
+
+## Installation
+
+```sh
+pnpm add @univerjs/docs-hyper-link
+# or
+npm install @univerjs/docs-hyper-link
+```
+
+Keep all `@univerjs/*` packages on the same version.
 
 ## Usage
 
-### Installation
+```ts
+import { UniverDocsHyperLinkPlugin } from '@univerjs/docs-hyper-link';
 
-```shell
-# Using npm
-npm install @univerjs/docs-hyper-link
-
-# Using pnpm
-pnpm add @univerjs/docs-hyper-link
+univer.registerPlugin(UniverDocsHyperLinkPlugin);
 ```
 
-### Register the plugin
+## Integration Notes
 
-```typescript
-import { UniverDocsHyperLinkUIPlugin} from '@univerjs/docs-hyper-link';
+Use this package with `@univerjs/docs-hyper-link-ui` when users need hyperlink editing UI.
 
-univer.registerPlugin(UniverDocsHyperLinkUIPlugin);
-```
+## Resources
 
-<!-- Links -->
-[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/docs-hyper-link?style=flat-square
-[npm-version-link]: https://npmjs.com/package/@univerjs/docs-hyper-link
-[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/docs-hyper-link?style=flat-square
-[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/docs-hyper-link?style=flat-square
+- [Documentation](https://docs.univer.ai)
+- [NPM package](https://npmjs.com/package/@univerjs/docs-hyper-link)
+- [GitHub repository](https://github.com/dream-num/univer)
+

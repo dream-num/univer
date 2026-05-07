@@ -1141,7 +1141,7 @@ export class DocumentSkeleton extends Skeleton {
                 );
             }
 
-            // 计算页内布局，block 结构
+            // Calculate page layout, block structure
             const { pages } = dealWithSection(
                 ctx,
                 viewModel,
@@ -1151,7 +1151,7 @@ export class DocumentSkeleton extends Skeleton {
                 layoutAnchor
             );
 
-            // todo: 当本节有多个列，且下一节为连续节类型的时候，需要按照列数分割，重新计算 lines
+            // todo: When this section has multiple columns and the next section is of continuous type, it needs to be split by column count and recalculate lines
             if (sectionTypeNext === SectionType.CONTINUOUS && columnProperties!.length > 0) {
                 // TODO
             }
@@ -1174,7 +1174,7 @@ export class DocumentSkeleton extends Skeleton {
             resetContext(ctx);
             return this._createSkeleton(ctx, _bounds);
         } else {
-            // 计算页和节的位置信息
+            // Calculate page and section position information
             this._iteratorCount = 0;
             removeDupPages(ctx);
             updateBlockIndex(skeleton.pages);
@@ -1196,7 +1196,7 @@ export class DocumentSkeleton extends Skeleton {
         }
     }
 
-    // 一页存在多个 section 的情况，仅在 SectionType.CONTINUOUS 的情况下出现
+    // A page with multiple sections only occurs in SectionType.CONTINUOUS
     private _addNewSectionByContinuous(
         curSkeletonPage: IDocumentSkeletonPage,
         columnProperties: ISectionColumnProperties[],

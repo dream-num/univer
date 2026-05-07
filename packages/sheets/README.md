@@ -1,53 +1,41 @@
 # @univerjs/sheets
 
+[![npm version](https://img.shields.io/npm/v/@univerjs/sheets?style=flat-square)](https://npmjs.com/package/@univerjs/sheets)
+[![license](https://img.shields.io/npm/l/@univerjs/sheets?style=flat-square)](https://npmjs.com/package/@univerjs/sheets)
+[![downloads](https://img.shields.io/npm/dm/@univerjs/sheets?style=flat-square)](https://npmjs.com/package/@univerjs/sheets)
+
+`@univerjs/sheets` provides the core spreadsheet data model and business logic for Univer Sheets, independent of the UI layer.
+
 ## Package Overview
 
-| Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
-| --- | --- | --- | --- | --- | :---: | :---: |
-| `@univerjs/sheets` | `UniverSheets` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ❌ | ⭕️ |
+| Package | UMD global | CSS | Locales | Facade entry |
+| --- | --- | :---: | :---: | :---: |
+| `@univerjs/sheets` | `UniverSheets` | No | Yes | Yes |
 
-## Introduction
+## Installation
 
-`@univerjs/sheets` serves as the foundation for the core business logic of spreadsheets, with base-sheets designed to be UI-agnostic, allowing for functionality such as collaborative editing to be implemented in a Node.js environment.
+```sh
+pnpm add @univerjs/sheets
+# or
+npm install @univerjs/sheets
+```
 
-`@univerjs/sheets` provides the following capabilities for Univer Sheet:
-
-* Core functionality, including numerical formatting, selection management, permissions, etc.
-* Commands/mutations for modifying spreadsheet data
-* Formula core functionality
-* Core numerical formatting functionality
+Keep all `@univerjs/*` packages on the same version.
 
 ## Usage
 
-### Installation
+```ts
+import EnUS from '@univerjs/sheets/locale/en-US';
+import { UniverSheetsPlugin } from '@univerjs/sheets';
 
-```shell
-# Using npm
-npm install @univerjs/sheets
+univer.registerPlugin(UniverSheetsPlugin);
 
-# Using pnpm
-pnpm add @univerjs/sheets
+// Merge EnUS into your Univer locale map when this package contributes UI text.
 ```
 
-### `SheetInterceptorService`
+## Resources
 
-`SheetInterceptorService` is a more specialized service provided by `@univerjs/sheets` that allows higher-level business to modify the results of operations such as obtaining cell data, retrieving row/column hiding information from a Worksheet, and supplementing mutations or operations at specific command executions. This service's primary goal is to enable specific functionalities, including:
+- [Documentation](https://docs.univer.ai)
+- [NPM package](https://npmjs.com/package/@univerjs/sheets)
+- [GitHub repository](https://github.com/dream-num/univer)
 
-1. Sheet formulas
-2. Sheet conditional formatting
-3. Sheet data validation
-4. Sheet pivot tables
-
-For detailed usage, please refer to the API documentation.
-
-#### When to use `SheetInterceptorService` and when not to?
-
-Use `SheetInterceptorService` when multiple features need to operate on the same data or state, but do not have a clear dependency relationship. For example: pivot tables, formulas, conditional formatting, data validation, and raw cell data can all affect how other features retrieve a cell's value, but they do not depend on each other. In this case, using `SheetInterceptorService` to implement these features is appropriate.
-
-However, if one feature relies explicitly on another feature, such as a formula needing to perform certain actions when the fill down or copy-paste functions are called, the formula module should directly depend on the fill down and copy-paste modules, instead of using `SheetInterceptorService` for implementation.
-
-<!-- Links -->
-[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/sheets?style=flat-square
-[npm-version-link]: https://npmjs.com/package/@univerjs/sheets
-[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/sheets?style=flat-square
-[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/sheets?style=flat-square

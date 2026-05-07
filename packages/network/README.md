@@ -1,33 +1,38 @@
 # @univerjs/network
 
+[![npm version](https://img.shields.io/npm/v/@univerjs/network?style=flat-square)](https://npmjs.com/package/@univerjs/network)
+[![license](https://img.shields.io/npm/l/@univerjs/network?style=flat-square)](https://npmjs.com/package/@univerjs/network)
+[![downloads](https://img.shields.io/npm/dm/@univerjs/network?style=flat-square)](https://npmjs.com/package/@univerjs/network)
+
+`@univerjs/network` provides basic network service abstractions for Univer runtimes, especially collaboration-oriented integrations.
+
 ## Package Overview
 
-| Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
-| --- | --- | --- | --- | --- | :---: | :---: |
-| `@univerjs/network` | `UniverNetwork` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ❌ | ❌ |
+| Package | UMD global | CSS | Locales | Facade entry |
+| --- | --- | :---: | :---: | :---: |
+| `@univerjs/network` | `UniverNetwork` | No | No | Yes |
 
-## Introduction
+## Installation
 
-The `@univerjs/network` library provides basic network service capabilities, primarily for use in collaborative editing scenarios.
+```sh
+pnpm add @univerjs/network
+# or
+npm install @univerjs/network
+```
+
+Keep all `@univerjs/*` packages on the same version.
 
 ## Usage
 
-### Installation
+```ts
+import { UniverNetworkPlugin } from '@univerjs/network';
 
-```shell
-# Using npm
-npm install @univerjs/network
-
-# Using pnpm
-pnpm add @univerjs/network
+univer.registerPlugin(UniverNetworkPlugin);
 ```
 
-## Credit
+## Resources
 
-This package is inspired by [Angular's implementation](https://github.com/angular/angular/tree/main/packages/common/http). Removed zone.js dependency and features that are not necessary for Univer.
+- [Documentation](https://docs.univer.ai)
+- [NPM package](https://npmjs.com/package/@univerjs/network)
+- [GitHub repository](https://github.com/dream-num/univer)
 
-<!-- Links -->
-[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/network?style=flat-square
-[npm-version-link]: https://npmjs.com/package/@univerjs/network
-[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/network?style=flat-square
-[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/network?style=flat-square

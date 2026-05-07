@@ -2,7 +2,8 @@
     "name": "@univerjs/rpc",
     "version": "0.21.1",
     "private": false,
-    "author": "DreamNum <developer@univer.ai>",
+    "description": "Browser RPC layer for Univer main-thread and worker communication.",
+    "author": "DreamNum Co., Ltd. <developer@univer.ai>",
     "license": "Apache-2.0",
     "funding": {
         "type": "opencollective",
@@ -17,7 +18,11 @@
         "url": "https://github.com/dream-num/univer/issues"
     },
     "keywords": [
-        "univer"
+        "univer",
+        "rpc",
+        "worker",
+        "message-channel",
+        "plugin"
     ],
     "exports": {
         ".": "./src/index.ts",
@@ -67,7 +72,7 @@
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
         "rxjs": "^7.8.2",
-        "typescript": "^6.0.2",
-        "vitest": "^4.1.4"
+        "typescript": "^6.0.3",
+        "vitest": "^4.1.5"
     }
 }

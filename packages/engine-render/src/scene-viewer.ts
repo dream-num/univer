@@ -124,7 +124,7 @@ export class SceneViewer extends BaseObject {
         return this._allowSelectedClipElement;
     }
 
-    // 判断被选中的唯一对象
+    // Determine the uniquely selected object
     pick(coord: Vector2) {
         if (this._activeSubScene === undefined) {
             return;

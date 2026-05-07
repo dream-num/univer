@@ -34,8 +34,8 @@ function getHeaderFooterMaxHeight(pageHeight: number) {
     return (pageHeight - 100) / 2;
 }
 
-// 新增数据结构框架
-// 判断奇数和偶数页码
+// New data structure framework
+// Determine odd and even page numbers
 export function createSkeletonPage(
     ctx: ILayoutContext,
     sectionBreakConfig: ISectionBreakConfig,

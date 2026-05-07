@@ -147,12 +147,12 @@ export const useSheetSelectionChange = (
             }
         } else {
             const orderedSelections = [...selections];
-            // 当 isCtrlAddMode 为 true 时，跳过 updatingRefIndex 的逻辑，不调整选区顺序
+            // When isCtrlAddMode is true, skip the updatingRefIndex logic and do not adjust selection order
             if (!isCtrlAddMode && updatingRefIndex !== -1) {
                 const last = orderedSelections.pop();
                 last && orderedSelections.splice(updatingRefIndex, 0, last);
             }
-            // 更新全部的 ref Selection
+            // Update all ref Selections
             let currentRefIndex = 0;
             const newTokens = sequenceNodes.map((item) => {
                 if (typeof item === 'string') {
@@ -169,7 +169,7 @@ export const useSheetSelectionChange = (
                     }
 
                     if (isSupportAcrossSheet) {
-                        // 直接跳过非当前表的 node 节点
+                        // Directly skip nodes that are not in the current sheet
                         if (contextRef.current.activeSheet?.getName() !== nodeRange.sheetName) {
                             return item.token;
                         }
@@ -234,7 +234,7 @@ export const useSheetSelectionChange = (
                     return;
                 }
 
-                // 通过比较选区数量判断是否是 ctrl 添加模式
+                // Determine if it is ctrl add mode by comparing selection count
                 const isCtrlAddMode = selections.length > prevSelectionsCount;
 
                 if (isEnd) {

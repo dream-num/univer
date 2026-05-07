@@ -123,7 +123,7 @@ export class AuthzIoLocalService implements IAuthzIoService {
             unitID: rangeObject?.unitID || '',
             name: rangeObject?.name || '',
             strategies: [
-                // 默认策略：Owner 和 Editor 拥有所有权限
+                // Default strategy: Owner and Editor have all permissions
                 { action: 6, role: UnitRole.Owner },
                 { action: 16, role: UnitRole.Owner },
                 { action: 17, role: UnitRole.Owner },
@@ -215,7 +215,7 @@ export class AuthzIoLocalService implements IAuthzIoService {
             const item = {
                 objectID,
                 unitID: config.unitID,
-                objectType: rule?.objectType || (3 as UnitObject), // 默认 SelectRange = 3
+                objectType: rule?.objectType || (3 as UnitObject), // Default SelectRange = 3
                 name: rule?.name || '',
                 shareOn: false,
                 shareRole: UnitRole.Owner,

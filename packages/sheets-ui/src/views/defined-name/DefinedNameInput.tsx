@@ -47,7 +47,7 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
         formulaOrRefString,
         comment = '',
         localSheetId = SCOPE_WORKBOOK_VALUE_DEFINED_NAME,
-        hidden = false, // 是否对用户隐藏，与excel兼容，暂时用不上。
+        hidden = false, // Whether to hide from users, compatible with Excel, not used for now.
         id,
     } = props;
     const univerInstanceService = useDependency(IUniverInstanceService);

@@ -2,8 +2,8 @@
     "name": "@univerjs/sheets-data-validation",
     "version": "0.21.1",
     "private": false,
-    "description": "Data validation for Univer Sheets",
-    "author": "DreamNum <developer@univer.ai>",
+    "description": "Sheet-specific data validation commands, services, and Facade APIs for Univer Sheets.",
+    "author": "DreamNum Co., Ltd. <developer@univer.ai>",
     "license": "Apache-2.0",
     "funding": {
         "type": "opencollective",
@@ -18,7 +18,11 @@
         "url": "https://github.com/dream-num/univer/issues"
     },
     "keywords": [
-        "univer"
+        "univer",
+        "sheets",
+        "data-validation",
+        "validation",
+        "plugin"
     ],
     "exports": {
         ".": "./src/index.ts",
@@ -85,7 +89,7 @@
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
         "rxjs": "^7.8.2",
-        "typescript": "^6.0.2",
-        "vitest": "^4.1.4"
+        "typescript": "^6.0.3",
+        "vitest": "^4.1.5"
     }
 }

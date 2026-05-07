@@ -108,10 +108,10 @@ export interface IMenuSelectorItem<V = MenuItemDefaultValueType, T = undefined> 
      */
     selectionsCommandId?: string;
 
-    // selections 子菜单可以为三种类型
-    // 一个是当前 menu 的 options，选中后直接使用其 value 触发 command
-    // 一个是一个特殊组件，比如 color picker，选中后直接使用其 value 触发 command
-    // 一个是其他 menu 的 id，直接渲染成其他的 menu
+    // selections submenu can be of three types
+    // One is the current menu's options, after selection directly use its value to trigger command
+    // One is a special component, such as color picker, after selection directly use its value to trigger command
+    // One is another menu's id, directly rendered as another menu
     /** Options or IDs of registered components. */
     selections?: Array<IValueOption<T>> | Observable<Array<IValueOption<T>>>;
 

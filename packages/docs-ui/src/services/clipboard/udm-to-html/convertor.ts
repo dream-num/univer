@@ -197,7 +197,7 @@ export function getBodySliceHtml(doc: IDocumentData, startIndex: number, endInde
                 break;
             }
         }
-        // 如果涉及 customBlock,需要跳过其占位符.
+        // If it involves customBlock, its placeholder needs to be skipped.
         cursorIndex = endIndex + 1 + (preHtml.customBlockLength + sliceHtml.customBlockLength);
     });
     const endHtml = handleCustomBlock(cursorIndex, endIndex);

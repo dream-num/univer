@@ -391,7 +391,7 @@ function dealWithTableRow(
                 skeTables.push(curTableSkeleton);
 
                 // Handle repeat first row.
-                // 如果当前行跨页，那么不用再第二页上面重复标题行了。
+                // If the current row crosses pages, there is no need to repeat the header row on the second page.
                 if (cache.repeatRow && isRepeatRow === false && row !== 0 && rowSkeleton.index !== lastRow.index) {
                     const FIRST_ROW_INDEX = 0;
                     cache.remainHeight = getAvailableHeight(curPage, cache, false);

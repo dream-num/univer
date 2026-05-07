@@ -2,8 +2,8 @@
     "name": "@univerjs/themes",
     "version": "0.21.1",
     "private": false,
-    "description": "Themes package for Univer",
-    "author": "DreamNum <developer@univer.ai>",
+    "description": "Built-in theme definitions for Univer.",
+    "author": "DreamNum Co., Ltd. <developer@univer.ai>",
     "license": "Apache-2.0",
     "funding": {
         "type": "opencollective",
@@ -19,7 +19,10 @@
     },
     "keywords": [
         "univer",
-        "theme"
+        "theme",
+        "themes",
+        "design-system",
+        "tokens"
     ],
     "exports": {
         ".": "./src/index.ts",

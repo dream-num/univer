@@ -1419,10 +1419,10 @@ function calcDomPositionByAnchor(rangePosition: IFloatDomLayout, domAnchor?: Par
 function calculateOffset(value: number | string | undefined, rangeWidth: number): number {
     if (value === undefined) return 0;
 
-    // 如果是数字直接返回
+    // Return directly if it is a number
     if (typeof value === 'number') return value;
 
-    // 处理百分比字符串
+    // Handle percentage string
     const percentage = Number.parseFloat(value);
     return (rangeWidth * percentage) / 100;
 }

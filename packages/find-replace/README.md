@@ -1,35 +1,42 @@
 # @univerjs/find-replace
 
+[![npm version](https://img.shields.io/npm/v/@univerjs/find-replace?style=flat-square)](https://npmjs.com/package/@univerjs/find-replace)
+[![license](https://img.shields.io/npm/l/@univerjs/find-replace?style=flat-square)](https://npmjs.com/package/@univerjs/find-replace)
+[![downloads](https://img.shields.io/npm/dm/@univerjs/find-replace?style=flat-square)](https://npmjs.com/package/@univerjs/find-replace)
+
+`@univerjs/find-replace` provides shared find and replace services and UI infrastructure that product-specific packages can extend.
+
 ## Package Overview
 
-| Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
-| --- | --- | --- | --- | --- | :---: | :---: |
-| `@univerjs/find-replace` | `UniverFindReplace` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ⭕️ | ⭕️ |
+| Package | UMD global | CSS | Locales | Facade entry |
+| --- | --- | :---: | :---: | :---: |
+| `@univerjs/find-replace` | `UniverFindReplace` | Yes | Yes | No |
 
-## Introduction
+## Installation
 
-This package provides the basic ability to support find and replace. With other plugins, such as `@univerjs/sheets-find-replace`, you can find and replace text in different types of files at the same time.
+```sh
+pnpm add @univerjs/find-replace
+# or
+npm install @univerjs/find-replace
+```
+
+Keep all `@univerjs/*` packages on the same version.
 
 ## Usage
 
 ```ts
+import '@univerjs/find-replace/lib/index.css';
+import EnUS from '@univerjs/find-replace/locale/en-US';
 import { UniverFindReplacePlugin } from '@univerjs/find-replace';
 
 univer.registerPlugin(UniverFindReplacePlugin);
+
+// Merge EnUS into your Univer locale map when this package contributes UI text.
 ```
 
-### Installation
+## Resources
 
-```shell
-# Using npm
-npm install @univerjs/find-replace
+- [Documentation](https://docs.univer.ai)
+- [NPM package](https://npmjs.com/package/@univerjs/find-replace)
+- [GitHub repository](https://github.com/dream-num/univer)
 
-# Using pnpm
-pnpm add @univerjs/find-replace
-```
-
-<!-- Links -->
-[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/find-replace?style=flat-square
-[npm-version-link]: https://npmjs.com/package/@univerjs/find-replace
-[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/find-replace?style=flat-square
-[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/find-replace?style=flat-square

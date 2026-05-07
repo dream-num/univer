@@ -86,7 +86,7 @@ function _updateListLevelAncestors(
         paragraph,
     });
 
-    cacheItem.splice(nestingLevel + 1); // 文档自上而下渲染，如果一个level被更新，则它以下的level数据的startIndex就要重置
+    cacheItem.splice(nestingLevel + 1); // Document renders from top to bottom, if a level is updated, the startIndex of data below it needs to be reset
 
     listLevel?.set(listId, cacheItem);
 }
@@ -196,10 +196,10 @@ export function lineBreaking(
 
         paragraphConfig.bulletSkeleton = bulletSkeleton;
     } else {
-        const listLevelAncestors = _getListLevelAncestors(bullet, skeListLevel); // 取得列表所有 level 的缓存
-        const bulletSkeleton = dealWithBullet(bullet, lists, listLevelAncestors, localeService); // 生成 bullet
+        const listLevelAncestors = _getListLevelAncestors(bullet, skeListLevel); // Get the cache of all levels of the list
+        const bulletSkeleton = dealWithBullet(bullet, lists, listLevelAncestors, localeService); // Generate bullet
 
-        _updateListLevelAncestors(paragraph, bullet, bulletSkeleton, skeListLevel); // 更新最新的 level 缓存列表
+        _updateListLevelAncestors(paragraph, bullet, bulletSkeleton, skeListLevel); // Update the latest level cache list
 
         paragraphConfig.bulletSkeleton = bulletSkeleton;
     }
@@ -225,7 +225,7 @@ export function lineBreaking(
     segmentParagraphCache.set(endIndex, paragraphConfig);
 
     let allPages = [curPage];
-    let isParagraphFirstShapedText = true; // 第一个分词
+    let isParagraphFirstShapedText = true; // First shaped text
     for (const [_index, { text, glyphs, breakPointType }] of shapedTextList.entries()) {
         const pushPending = () => {
             if (glyphs.length === 0) {
@@ -261,7 +261,7 @@ export function lineBreaking(
             continue;
         } else if (text.endsWith(DataStreamTreeTokenType.COLUMN_BREAK)) {
             pushPending();
-            // 换列标识，还在同一个节内
+            // Column break mark, still within the same section
             const lastPage = allPages[allPages.length - 1];
             const columnInfo = getLastNotFullColumnInfo(lastPage);
 

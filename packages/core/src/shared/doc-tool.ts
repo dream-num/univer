@@ -17,7 +17,7 @@
 import type { IParagraph, IParagraphStyle } from '../types/interfaces/i-document-data';
 
 export function horizontalLineSegmentsSubtraction(aStart: number, aEnd: number, bStart: number, bEnd: number) {
-    // 确保A1 < A2, B1 < B2
+    // Ensure A1 < A2, B1 < B2
     if (aStart > aEnd) {
         throw new Error('a1 should be less than a2');
     }
@@ -26,27 +26,27 @@ export function horizontalLineSegmentsSubtraction(aStart: number, aEnd: number, 
     }
 
     if (aEnd < bStart || bEnd < aStart) {
-        return [aStart, aEnd]; // 无重叠，返回原线段A
+        return [aStart, aEnd]; // No overlap, return original segment A
     }
 
-    // 如果 b 包含 a，则结果为空区间
+    // If b contains a, the result is an empty interval
     if (bStart <= aStart && bEnd >= aEnd) {
         return [];
     }
 
     const subLength = bEnd - bStart + 1;
 
-    // 如果 a 包含 b，需要返回两个剩余的区间
+    // If a contains b, return the two remaining intervals
     if (aStart < bStart && aEnd > bEnd) {
         return [aStart, aEnd - subLength];
     }
 
-    // 如果 b 覆盖了 a 的开始部分
+    // If b covers the start part of a
     if (bStart <= aStart && bEnd < aEnd) {
         return [bEnd + 1 - subLength, aEnd - subLength];
     }
 
-    // 如果 b 覆盖了 a 的结束部分
+    // If b covers the end part of a
     if (bStart > aStart && bEnd >= aEnd) {
         return [aStart, bStart - 1];
     }

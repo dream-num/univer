@@ -73,10 +73,10 @@ export function layoutParagraph(
     breakPointType = BreakPointType.Normal
 ) {
     if (isParagraphFirstShapedText) {
-        // elementIndex === 0 表示段落开始的第一个字符，需要新起一行，与之前的段落区分开
+        // elementIndex === 0 means the first character at the beginning of a paragraph, needs a new line to distinguish from the previous paragraph
         if (paragraphConfig.bulletSkeleton) {
             const { bulletSkeleton, paragraphStyle = {} } = paragraphConfig;
-            // 如果是一个段落的开头，需要加入bullet
+            // If it is the beginning of a paragraph, bullet needs to be added
             const { gridType = GridType.LINES, charSpace = 0, defaultTabStop = 10.5 } = sectionBreakConfig;
 
             const { snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
@@ -202,7 +202,7 @@ function _divideOperator(
     defaultSpanLineHeight?: number
 ) {
     const lastPage = getLastPage(pages);
-    const divideInfo = getLastNotFullDivideInfo(lastPage); // 取得最新一行里内容未满的第一个 divide.
+    const divideInfo = getLastNotFullDivideInfo(lastPage); // Get the first divide in the latest line that is not full.
     if (divideInfo) {
         const width = __getGlyphGroupWidth(glyphGroup);
         const { divide, isLast } = divideInfo;
@@ -213,17 +213,13 @@ function _divideOperator(
         const { hyphenationZone } = sectionBreakConfig;
 
         if (preOffsetLeft + width > divide.width) {
-            // width 超过 divide 宽度
+            // width exceeds divide width
             updateDivideInfo(divide, {
                 isFull: true,
             });
             const hyphenLineCount = _getConsecutiveHyphenLineCount(divideInfo.divide);
             const { consecutiveHyphenLimit = Number.POSITIVE_INFINITY } = sectionBreakConfig;
 
-            // 处理 word 或者数字串超过 divide width 的情况，主要分两种情况
-            // 1. 以段落符号结尾时候，即使超过 divide 宽度，也需要将换行符追加到 divide 结尾。
-            // 2. 空行中，英文单词或者连续数字超过 divide 宽度的情况，将把英文单词、数字串拆分，一部分追加到上一行，剩下的放在新的一行中，
-            // 有个边界 case，就是一个英文字符宽度超过 divide 宽度，这个时候也需要把这个字符追加到上一行中。
             // There are two main ways to deal with word or number strings exceeding divide width
             // 1. If you end with a line break(\r), you need to append a line break(\r) to the end of divide, even if it exceeds the divide width.
             // 2. In a blank line, if the English word or consecutive number exceeds the width of the divide, the English word and number string will be split, and some of them will be added to the previous line, and the rest will be placed in the new line.
@@ -333,7 +329,7 @@ function _divideOperator(
                 defaultSpanLineHeight
             );
         } else {
-            // w 不超过 divide 宽度，加入到 divide 中去
+            // w does not exceed divide width, add it to divide
             const currentLine = divide.parent;
             const maxBox = __maxFontBoundingBoxByGlyphGroup(glyphGroup);
 
@@ -353,7 +349,7 @@ function _divideOperator(
                 );
 
                 if (currentLine.contentHeight < contentHeight) {
-                    // 如果新内容的高度超过其加入行的高度，为了处理图文混排，整行都需要按照新高度重新计算
+                    // If the height of the new content exceeds the height of the line it joins, for mixed text and graphics layout, the entire line needs to be recalculated according to the new height
                     // If the height of the new content exceeds the height of the added row,
                     // the entire row needs to be recalculated according to the new height
                     // in order to handle the mixing of graphics and text
@@ -422,12 +418,12 @@ function _lineOperator(
     let lastPage = getLastPage(pages);
     let columnInfo = getLastNotFullColumnInfo(lastPage);
     if (!columnInfo || !columnInfo.column) {
-        // 如果列不存在，则做一个兜底策略，新增一页。
+        // If the column does not exist, use a fallback strategy and add a new page.
         _pageOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, true, breakPointType);
         lastPage = getLastPage(pages);
         columnInfo = getLastNotFullColumnInfo(lastPage);
     }
-    // Todo: demo4导入的时候columnInfo会不存在,先return了
+    // Todo: columnInfo does not exist when demo4 is imported, return first
     if (!columnInfo) return;
 
     const column = columnInfo!.column;
@@ -507,7 +503,7 @@ function _lineOperator(
 
     let section = column.parent;
     if (!section) {
-        // 做一个兜底，指向当前页最后一个section
+        // Fallback, point to the last section of the current page
         section = getLastSection(lastPage);
     }
     const preLineHeight = preLine?.lineHeight || 0;
@@ -553,10 +549,10 @@ function _lineOperator(
         lastPage,
         headerPage,
         footerPage
-    ); // WRAP_TOP_AND_BOTTOM 的 drawing 和 WRAP NONE 的 table 会改变行的起始 top
+    ); // WRAP_TOP_AND_BOTTOM drawing and WRAP NONE table will change the starting top of the line
 
     if ((lineHeight + newLineTop > section.height && column.lines.length > 0 && lastPage.sections.length > 0) || needOpenNewPageByTableLayout) {
-        // 行高超过Col高度，且列中已存在一行以上，且section大于一个；
+        // Line height exceeds column height, and there is more than one line in the column, and there is more than one section;
         // console.log('_lineOperator', { glyphGroup, pages, lineHeight, newLineTop, sectionHeight: section.height, lastPage });
         setColumnFullState(column, true);
         _columnOperator(
@@ -587,7 +583,7 @@ function _lineOperator(
         return;
     }
 
-    // line不超过Col高度，或者行超列高列中没有其他内容，或者行超页高页中没有其他内容；
+    // Line does not exceed column height, or line exceeds column height but there is no other content in the column, or line exceeds page height but there is no other content on the page;
     const lineIndex = preLine ? preLine.lineIndex + 1 : 0;
     const { charSpace, defaultTabStop } = getCharSpaceConfig(sectionBreakConfig, paragraphConfig);
     const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
@@ -600,7 +596,7 @@ function _lineOperator(
         isParagraphFirstShapedText
     );
 
-    // 如果宽度不足以容纳边距,这里留 1px 的宽度进行占位.
+    // If the width is insufficient to accommodate the margin, leave 1px width for placeholder.
     if (paddingLeft + paddingRight >= column.width) {
         const leftPercent = paddingLeft / (paddingLeft + paddingRight);
         paddingLeft = column.width * leftPercent - 0.5;
@@ -920,7 +916,7 @@ function _reLayoutCheck(
         if (floatObjectCache == null || floatObjectCache.page.segmentId !== page.segmentId) {
             continue;
         }
-        // TODO: 如何判断 drawing 是否在同一页？？？
+        // TODO: How to determine if drawing is on the same page???
         const cachePageStartParagraphIndex = floatObjectCache.page.sections[0]?.columns[0]?.lines[0]?.paragraphIndex;
         const startIndex = page.sections[0]?.columns[0]?.lines[0]?.paragraphIndex;
 
@@ -1148,9 +1144,9 @@ function __getLineHeight(
     let paddingBottom = paragraphLineGapDefault;
 
     if (gridType === GridType.DEFAULT || snapToGrid === BooleanNumber.FALSE) {
-        // 不应用doc grid网格的场景，根据字符高度和宽度决定布局
+        // Scenario where doc grid is not applied, layout is determined by character height and width
         if (spacingRule === SpacingRule.AUTO) {
-            // auto的情况下，lineSpacing代表行数
+            // In auto mode, lineSpacing represents the number of lines
             return {
                 paddingTop,
                 paddingBottom,
@@ -1170,7 +1166,7 @@ function __getLineHeight(
     // open xml $17.18.14 ST_DocGrid (Document Grid Types)
     let lineSpacingApply = 0;
     if (spacingRule === SpacingRule.AUTO) {
-        // auto 的情况下，lineSpacing代表行数
+        // In auto mode, lineSpacing represents the number of lines
         lineSpacingApply = lineSpacing * linePitch;
     } else {
         lineSpacingApply = lineSpacing;
@@ -1268,7 +1264,7 @@ function __getDrawingPosition(
     const drawings: Map<string, IDocumentSkeletonDrawing> = new Map();
     const isPageBreak = __checkPageBreak(column);
 
-    // TODO: @jocs 在段落跨页场景(一个段落在两页)，默认将 drawing 放到上一页，下一页不处理 drawing?
+    // TODO: @jocs In paragraph cross-page scenario (one paragraph across two pages), default to placing drawing on the previous page, and do not process drawing on the next page?
     if (isPageBreak && !isParagraphFirstShapedText) {
         return;
     }
@@ -1310,7 +1306,7 @@ function __getDrawingPosition(
     return drawings;
 }
 
-// 更新 paragraphNonInlineSkeDrawings 的绝对位置，相对于段落的第一行布局
+// Update the absolute position of paragraphNonInlineSkeDrawings, relative to the first line layout of the paragraph
 function __updateDrawingPosition(
     column: IDocumentSkeletonColumn,
     drawings?: Map<string, IDocumentSkeletonDrawing>
@@ -1338,8 +1334,6 @@ function __updateDrawingPosition(
     }
 }
 
-// 检查是否跨页的场景，如果向上搜索不到paragraphStart === true 的行，则代表一个段落跨页了
-// 跨页需要在临界点进行pageBreak
 // Check whether there is a page-spreading scenario, if the line with paragraphStart === true cannot be searched upwards, it means a paragraph is spanning pages
 // Cross-page requires pageBreak at critical point
 function __checkPageBreak(column: IDocumentSkeletonColumn) {

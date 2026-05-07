@@ -81,7 +81,7 @@ export class RegularPolygon extends Shape<IRegularPolygonProps> {
         return false;
     }
 
-    // 判断点是否在多边形内（包括处理洞）
+    // Determine if point is inside polygon (including holes)
     private _contains(point: Vector2): boolean {
         let inside = false;
 
@@ -93,7 +93,7 @@ export class RegularPolygon extends Shape<IRegularPolygonProps> {
                 const v2 = vertices[(i + 1) % n];
 
                 if (this._isOnLine(point, v1, v2)) {
-                    return true; // 点在边界上
+                    return true; // Point is on the boundary
                 }
 
                 if ((v1.y > point.y) !== (v2.y > point.y)) {
@@ -103,7 +103,7 @@ export class RegularPolygon extends Shape<IRegularPolygonProps> {
                     }
                 }
             }
-            // 对于每个子路径，如果点在路径内部，我们需要切换inside的状态。
+            // For each sub-path, if the point is inside the path, we need to toggle the inside state.
             if (count % 2 !== 0) {
                 inside = !inside;
             }
@@ -112,7 +112,7 @@ export class RegularPolygon extends Shape<IRegularPolygonProps> {
         return inside;
     }
 
-    // 辅助函数：判断点是否在给定的线段上
+    // Helper function: determine if point is on the given line segment
     private _isOnLine(point: IPoint, v1: IPoint, v2: IPoint): boolean {
         const area = (v1.x - point.x) * (v2.y - point.y) - (v2.x - point.x) * (v1.y - point.y);
         if (area !== 0) return false;

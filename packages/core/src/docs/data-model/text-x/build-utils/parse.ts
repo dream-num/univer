@@ -20,19 +20,19 @@ import { CustomRangeType } from '../../../../types/interfaces';
 import { DataStreamTreeTokenType } from '../../types';
 
 const tags = [
-    // DataStreamTreeTokenType.PARAGRAPH, // 段落
-    // DataStreamTreeTokenType.SECTION_BREAK, // 章节
-    DataStreamTreeTokenType.TABLE_START, // 表格开始
-    DataStreamTreeTokenType.TABLE_ROW_START, // 表格开始
-    DataStreamTreeTokenType.TABLE_CELL_START, // 表格开始
-    DataStreamTreeTokenType.TABLE_CELL_END, // 表格开始
-    DataStreamTreeTokenType.TABLE_ROW_END, // 表格开始
-    DataStreamTreeTokenType.TABLE_END, // 表格结束
-    // DataStreamTreeTokenType.COLUMN_BREAK, // 换列
-    // DataStreamTreeTokenType.PAGE_BREAK, // 换页
-    // DataStreamTreeTokenType.DOCS_END, // 文档结尾
-    // DataStreamTreeTokenType.TAB, // 制表符
-    // DataStreamTreeTokenType.CUSTOM_BLOCK, // 图片 mention 等不参与文档流的场景
+    // DataStreamTreeTokenType.PARAGRAPH, // paragraph
+    // DataStreamTreeTokenType.SECTION_BREAK, // section break
+    DataStreamTreeTokenType.TABLE_START, // table start
+    DataStreamTreeTokenType.TABLE_ROW_START, // table start
+    DataStreamTreeTokenType.TABLE_CELL_START, // table start
+    DataStreamTreeTokenType.TABLE_CELL_END, // table start
+    DataStreamTreeTokenType.TABLE_ROW_END, // table start
+    DataStreamTreeTokenType.TABLE_END, // table end
+    // DataStreamTreeTokenType.COLUMN_BREAK, // column break
+    // DataStreamTreeTokenType.PAGE_BREAK, // page break
+    // DataStreamTreeTokenType.DOCS_END, // document end
+    // DataStreamTreeTokenType.TAB, // tab
+    // DataStreamTreeTokenType.CUSTOM_BLOCK, // images, mentions, etc. that do not participate in document flow
 ];
 
 export const getPlainText = (dataStream: string) => {

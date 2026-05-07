@@ -2,8 +2,8 @@
     "name": "@univerjs/sheets-find-replace",
     "version": "0.21.1",
     "private": false,
-    "description": "UniverSheet find replace plugin",
-    "author": "DreamNum <developer@univer.ai>",
+    "description": "Find and replace integration for Univer Sheets.",
+    "author": "DreamNum Co., Ltd. <developer@univer.ai>",
     "license": "Apache-2.0",
     "funding": {
         "type": "opencollective",
@@ -18,7 +18,11 @@
         "url": "https://github.com/dream-num/univer/issues"
     },
     "keywords": [
-        "univer"
+        "univer",
+        "sheets",
+        "find-replace",
+        "search",
+        "plugin"
     ],
     "exports": {
         ".": "./src/index.ts",
@@ -89,7 +93,7 @@
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
         "rxjs": "^7.8.2",
-        "typescript": "^6.0.2",
-        "vitest": "^4.1.4"
+        "typescript": "^6.0.3",
+        "vitest": "^4.1.5"
     }
 }

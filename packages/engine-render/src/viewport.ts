@@ -623,7 +623,7 @@ export class Viewport {
         if (this._scrollBar) {
             const { scaleX, scaleY } = this.scene;
             if (this._scrollBar.ratioScrollX !== 0) {
-                x /= this._scrollBar.ratioScrollX; // 转换为内容区实际滚动距离
+                x /= this._scrollBar.ratioScrollX; // Convert to actual scroll distance in content area
                 x /= scaleX;
             } else if (this.viewportScrollX !== undefined) {
                 x = this.viewportScrollX;
@@ -858,7 +858,7 @@ export class Viewport {
         const yFrom: number = this.top;
         const yTo: number = ((height || 0) + this.top);
 
-        // this.getRelativeVector 加上了 scroll 后的坐标
+        // this.getRelativeVector adds coordinates after scroll
         const topLeft = this.transformVector2SceneCoord(Vector2.FromArray([xFrom, yFrom]));
         const bottomRight = this.transformVector2SceneCoord(Vector2.FromArray([xTo, yTo]));
 

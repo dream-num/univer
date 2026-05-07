@@ -1,67 +1,40 @@
 # @univerjs/core
 
+[![npm version](https://img.shields.io/npm/v/@univerjs/core?style=flat-square)](https://npmjs.com/package/@univerjs/core)
+[![license](https://img.shields.io/npm/l/@univerjs/core?style=flat-square)](https://npmjs.com/package/@univerjs/core)
+[![downloads](https://img.shields.io/npm/dm/@univerjs/core?style=flat-square)](https://npmjs.com/package/@univerjs/core)
+
+`@univerjs/core` is the foundation of Univer. It provides the Univer runtime, dependency injection, command and mutation services, data models, configuration, localization, and the shared Facade entry point used by higher-level packages.
+
 ## Package Overview
 
-| Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
-| --- | --- | --- | --- | --- | :---: | :---: |
-| `@univerjs/core` | `UniverCore` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ❌ | ❌ |
+| Package | UMD global | CSS | Locales | Facade entry |
+| --- | --- | :---: | :---: | :---: |
+| `@univerjs/core` | `UniverCore` | No | No | Yes |
 
-## Introduction
+## Installation
 
-`@univerjs/core` as its name shows, is the core package of Univer, and provides foundational capabilities including:
+```sh
+pnpm add @univerjs/core
+# or
+npm install @univerjs/core
+```
 
-* Provision of the Univer type, which serves as the entry point for applications and a mounting point for other plugins, as well as the UniverDoc and UniverSheet types for managing different document types
-* Basic models for each document type
-* Definition or implementation of several fundamental services, such as:
-  * Permission control
-  * Command system
-  * Undo/Redo
-  * Configuration system
-  * Logging system
-  * Context system
-  * Lifecycle
-  * Local storage
-  * Internationalization
-  * Resource management
-
-For more information about `@univerjs/core`'s API, please refer to the [API documentation](https://reference.univer.ai/).
+Keep all `@univerjs/*` packages on the same version.
 
 ## Usage
 
-### Installation
+```ts
+import { LocaleType, Univer } from '@univerjs/core';
 
-```shell
-# Using npm
-npm install @univerjs/core
-
-# Using pnpm
-pnpm add @univerjs/core
-```
-
-### Configuration
-
-```typescript
-import { Univer } from '@univerjs/core';
-
-new Univer({
-    theme: defaultTheme,
+const univer = new Univer({
     locale: LocaleType.EN_US,
-    locales,
-    logLevel: LogLevel.VERBOSE,
 });
 ```
 
-#### Options
+## Resources
 
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| theme | [Theme](https://docs.univer.ai/guides/sheets/ui/themes) | - | The theme of the application, which is used to control the appearance of the application. |
-| locale | [LocaleType](https://docs.univer.ai/guides/sheets/getting-started/i18n) | `LocaleType.ZH_CN` | The locale of the application. The default value is `LocaleType.ZH_CN`.
-| locales | [ILocales](https://docs.univer.ai/guides/sheets/getting-started/i18n) | - | The supported locales of the application. By default, the application supports Chinese.
-| logLevel | [LogLevel](https://github.com/dream-num/univer/blob/dev/packages/core/src/services/log/log.service.ts#L22) | `LogLevel.SILENT` | The log level of the application. |
+- [Documentation](https://docs.univer.ai)
+- [NPM package](https://npmjs.com/package/@univerjs/core)
+- [GitHub repository](https://github.com/dream-num/univer)
 
-<!-- Links -->
-[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/core?style=flat-square
-[npm-version-link]: https://npmjs.com/package/@univerjs/core
-[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/core?style=flat-square
-[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/core?style=flat-square

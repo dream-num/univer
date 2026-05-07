@@ -1,28 +1,42 @@
 # @univerjs/sheets-note
 
-| Package | Description | Version | License | Downloads | Continuous Integration | Coverage |
-|---------|-------------|---------|----------|-----------|----------------------|----------|
-| `@univerjs/sheets-note` | `UniverSheetsNote` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ❌ | ❌ |
+[![npm version](https://img.shields.io/npm/v/@univerjs/sheets-note?style=flat-square)](https://npmjs.com/package/@univerjs/sheets-note)
+[![license](https://img.shields.io/npm/l/@univerjs/sheets-note?style=flat-square)](https://npmjs.com/package/@univerjs/sheets-note)
+[![downloads](https://img.shields.io/npm/dm/@univerjs/sheets-note?style=flat-square)](https://npmjs.com/package/@univerjs/sheets-note)
 
-## Introduction
+`@univerjs/sheets-note` adds the core note model and commands for cell notes in Univer Sheets.
 
-`@univerjs/sheets-note` core package for sheet note. For using, please refer to [@univerjs/sheets-note](../sheets-note/README.md)
+## Package Overview
 
-## Usage
+| Package | UMD global | CSS | Locales | Facade entry |
+| --- | --- | :---: | :---: | :---: |
+| `@univerjs/sheets-note` | `UniverSheetsNote` | No | No | Yes |
 
-### Installation
+## Installation
 
-```shell
+```sh
+pnpm add @univerjs/sheets-note
+# or
 npm install @univerjs/sheets-note
 ```
 
-or
+Keep all `@univerjs/*` packages on the same version.
 
-```shell
-pnpm add @univerjs/sheets-note
+## Usage
+
+```ts
+import { UniverSheetsNotePlugin } from '@univerjs/sheets-note';
+
+univer.registerPlugin(UniverSheetsNotePlugin);
 ```
 
-[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/sheets-note?style=flat-square
-[npm-version-link]: https://npmjs.com/package/@univerjs/sheets-note
-[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/sheets-note?style=flat-square
-[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/sheets-note?style=flat-square
+## Integration Notes
+
+Use this package with `@univerjs/sheets-note-ui` when users need note editing UI.
+
+## Resources
+
+- [Documentation](https://docs.univer.ai)
+- [NPM package](https://npmjs.com/package/@univerjs/sheets-note)
+- [GitHub repository](https://github.com/dream-num/univer)
+

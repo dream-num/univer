@@ -78,7 +78,7 @@ export function SlideSideBar() {
         if (divRefs.length > 0) {
             commandService.syncExecuteCommand(SetSlidePageThumbOperation.id, { unitId: currentSlide?.getUnitId() });
         }
-    }, [divRefs, slideList, renderManagerService, commandService, currentSlide]); // 依赖于divRefs数组的变化
+    }, [divRefs, slideList, renderManagerService, commandService, currentSlide]); // Depends on changes in divRefs array
 
     const activatePage = useCallback((page: string) => {
         commandService.syncExecuteCommand(ActivateSlidePageOperation.id, { id: page, unitId: currentSlide?.getUnitId() });

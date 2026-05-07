@@ -419,6 +419,87 @@ describe('Test EndEditController', () => {
             });
         });
 
+        it('raw-vs-merged distinction for custom metadata', () => {
+            const originalCell: ICellData = {
+                v: 1,
+                custom: {
+                    uncertainty: 0.1,
+                },
+            };
+
+            const inputCell = {
+                v: '5',
+            };
+
+            const snapshot = spreadsheetSkeleton.getCellDocumentModelWithFormula(inputCell)?.documentModel?.getSnapshot();
+
+            // 1. Merged data (what currently goes to the command)
+            const mergedCellData = getCellDataByInput(
+                { ...originalCell },
+                snapshot!,
+                lexerTreeBuilder,
+                localeService,
+                get(IMockFunctionService) as IFunctionService,
+                workbook.getStyles()
+            );
+
+            // 2. Raw editor data (the new field we added)
+            const rawEditorCellData = getCellDataByInput(
+                { s: originalCell.s },
+                snapshot!,
+                lexerTreeBuilder,
+                localeService,
+                get(IMockFunctionService) as IFunctionService,
+                workbook.getStyles()
+            );
+
+            expect(mergedCellData?.custom).toEqual({ uncertainty: 0.1 });
+            expect(rawEditorCellData?.custom).toBeUndefined();
+            expect(mergedCellData?.v).toBe('5');
+            expect(rawEditorCellData?.v).toBe('5');
+        });
+
+        it('raw-vs-merged distinction when cleared', () => {
+            const originalCell: ICellData = {
+                v: 1,
+                custom: {
+                    uncertainty: 0.1,
+                },
+            };
+
+            const inputCell = {
+                v: '',
+            };
+
+            const snapshot = spreadsheetSkeleton.getCellDocumentModelWithFormula(inputCell)?.documentModel?.getSnapshot();
+
+            // 1. Merged data
+            const mergedCellData = getCellDataByInput(
+                { ...originalCell },
+                snapshot!,
+                lexerTreeBuilder,
+                localeService,
+                get(IMockFunctionService) as IFunctionService,
+                workbook.getStyles()
+            );
+
+            // 2. Raw editor data
+            const rawEditorCellData = getCellDataByInput(
+                { s: originalCell.s },
+                snapshot!,
+                lexerTreeBuilder,
+                localeService,
+                get(IMockFunctionService) as IFunctionService,
+                workbook.getStyles()
+            );
+
+            expect(mergedCellData?.custom).toEqual({ uncertainty: 0.1 });
+            expect(mergedCellData?.v).toBe('');
+
+            // Should be null when cleared entirely
+            expect(rawEditorCellData).toBeNull();
+        });
+
         it('Clear formula cell with rich text', () => {
             const cell = {
                 f: '=H18:H25',

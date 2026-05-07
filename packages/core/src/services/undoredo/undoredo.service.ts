@@ -128,7 +128,7 @@ export const UndoCommand = new (class extends MultiImplementationCommand impleme
 
         const commandService = accessor.get(ICommandService);
         const result = sequenceExecute(element.undoMutations, commandService);
-        if (result) {
+        if (result.result) {
             undoRedoService.popUndoToRedo();
 
             return true;
@@ -152,7 +152,7 @@ export const RedoCommand = new (class extends MultiImplementationCommand impleme
 
         const commandService = accessor.get(ICommandService);
         const result = sequenceExecute(element.redoMutations, commandService);
-        if (result) {
+        if (result.result) {
             undoRedoService.popRedoToUndo();
 
             return true;

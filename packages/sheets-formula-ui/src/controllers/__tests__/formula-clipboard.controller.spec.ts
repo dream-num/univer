@@ -20,7 +20,7 @@ import type { ICellDataWithSpanInfo } from '@univerjs/sheets-ui';
 import { DisposableCollection, ICommandService, ILogService, Inject, Injector, IUniverInstanceService, LocaleService, LocaleType, LogLevel, ObjectMatrix, Plugin, RANGE_TYPE, UndoCommand, Univer, UniverInstanceType } from '@univerjs/core';
 import { CalculateFormulaService, DefinedNamesService, FormulaCurrentConfigService, FormulaDataModel, FormulaRuntimeService, HyperlinkEngineFormulaService, ICalculateFormulaService, IDefinedNamesService, IFormulaCurrentConfigService, IFormulaRuntimeService, IHyperlinkEngineFormulaService, LexerTreeBuilder, SetArrayFormulaDataMutation, SetFormulaDataMutation } from '@univerjs/engine-formula';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
-import { discreteRangeToRange, MoveRangeMutation, SetRangeValuesMutation, SetSelectionsOperation, SetWorksheetRowAutoHeightMutation, SheetInterceptorService, SheetSkeletonService, SheetsSelectionsService } from '@univerjs/sheets';
+import { discreteRangeToRange, MoveRangeMutation, SetRangeValuesMutation, SetSelectionsOperation, SetWorksheetActiveOperation, SetWorksheetRowAutoHeightMutation, SheetInterceptorService, SheetSkeletonService, SheetsSelectionsService } from '@univerjs/sheets';
 import { UpdateFormulaController } from '@univerjs/sheets-formula';
 import { COPY_TYPE, IMarkSelectionService, ISheetClipboardService, ISheetSelectionRenderService, PREDEFINED_HOOK_NAME_PASTE, SheetClipboardController, SheetClipboardService, SheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { BrowserClipboardService, DesktopMessageService, IClipboardInterfaceService, IMessageService, INotificationService, IPlatformService, IUIPartsService, UIPartsService } from '@univerjs/ui';
@@ -280,6 +280,7 @@ describe('Test cut command with formulas', () => {
         commandService.registerCommand(SetWorksheetRowAutoHeightMutation);
         commandService.registerCommand(SetFormulaDataMutation);
         commandService.registerCommand(SetArrayFormulaDataMutation);
+        commandService.registerCommand(SetWorksheetActiveOperation);
         sheetClipboardService = get(ISheetClipboardService);
 
         get(UpdateFormulaController);

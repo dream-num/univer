@@ -150,7 +150,7 @@ export const UpdateHyperLinkCommand: ICommand<IUpdateHyperLinkCommandParams> = {
         }
 
         const res = sequenceExecute(redos, commandService);
-        if (res) {
+        if (res.result) {
             const isValid = await interceptorService.onValidateCell(workbook, worksheet, row, column);
             if (isValid === false) {
                 sequenceExecute(undos, commandService);

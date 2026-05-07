@@ -60,14 +60,16 @@ export const DeleteSheetTableCommand: ICommand<IDeleteSheetTableParams> = {
 
         const res = sequenceExecute(redos, commandService);
 
-        if (res) {
+        if (res.result) {
             undoRedoService.pushUndoRedo({
                 unitID: params.unitId,
                 undoMutations: undos,
                 redoMutations: redos,
             });
+
+            return true;
         }
 
-        return true;
+        return false;
     },
 };

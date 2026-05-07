@@ -12,7 +12,7 @@ a formula engine, and one Facade API that works in the browser and on Node.js.
 
 English | [简体中文](./docs/readme/zh-CN.md) | [繁體中文](./docs/readme/zh-TW.md) | [日本語](./docs/readme/ja-JP.md) | [한국어](./docs/readme/ko-KR.md) | [Español](./docs/readme/es-ES.md)
 
-[Documentation](https://docs.univer.ai) | [Showcase](https://docs.univer.ai/showcase) | [API Reference](https://docs.univer.ai/reference/classes/univer) | [Blog](https://docs.univer.ai/blog)
+[📖 Documentation](https://docs.univer.ai) | [✨ Showcase](https://docs.univer.ai/showcase) | [📘 API Reference](https://docs.univer.ai/reference/classes/univer) | [📝 Blog](https://docs.univer.ai/blog)
 
 [![License](https://img.shields.io/github/license/dream-num/univer?style=flat-square)](./LICENSE)
 [![Build](https://img.shields.io/github/actions/workflow/status/dream-num/univer/build.yml?style=flat-square)](https://github.com/dream-num/univer/actions/workflows/build.yml)
@@ -21,6 +21,16 @@ English | [简体中文](./docs/readme/zh-CN.md) | [繁體中文](./docs/readme/
 [![Issues](https://img.shields.io/github/issues/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/issues)
 [![Codecov](https://img.shields.io/codecov/c/gh/dream-num/univer?token=aPfyW2pIMN&style=flat-square)](https://codecov.io/gh/dream-num/univer)
 [![Discord](https://img.shields.io/discord/1136129819961217077?logo=discord&logoColor=FFFFFF&label=discord&color=5865F2&style=flat-square)](https://discord.gg/z3NKNT6D2f)
+[![Release](https://img.shields.io/github/v/release/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/releases)
+[![Twitter](https://img.shields.io/twitter/follow/univerhq?style=flat-square&logo=x)](https://twitter.com/univerhq)
+[![Open Collective](https://img.shields.io/opencollective/all/univer?logo=opencollective&style=flat-square)](https://opencollective.com/univer)
+[![Last Commit](https://img.shields.io/github/last-commit/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/commits/main/)
+[![Release](https://img.shields.io/github/v/release/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/releases)
+[![Twitter](https://img.shields.io/twitter/follow/univerhq?style=flat-square&logo=x)](https://twitter.com/univerhq)
+[![Open Collective](https://img.shields.io/opencollective/all/univer?logo=opencollective&style=flat-square)](https://opencollective.com/univer)
+[![Last Commit](https://img.shields.io/github/last-commit/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/commits/main/)
+
+[![Trendshift](https://trendshift.io/api/badge/repositories/4376)](https://trendshift.io/repositories/4376)
 
 </div>
 
@@ -36,6 +46,45 @@ Use Univer when you need to:
 - Extend behavior through custom plugins, commands, services, UI components, and Facade APIs.
 
 Univer is not a spreadsheet file viewer only. It is a framework for building your own productivity surface.
+
+## 🌟 Highlights
+
+<table>
+  <tr>
+    <td align="center" width="33%">
+      ⚡<br />
+      <strong>Built for large surfaces</strong><br />
+      <sub>Canvas-based rendering and a dedicated formula engine keep complex workbooks responsive.</sub>
+    </td>
+    <td align="center" width="33%">
+      🧩<br />
+      <strong>Plugin-shaped by default</strong><br />
+      <sub>Compose, replace, lazy-load, or extend capabilities without taking the whole stack.</sub>
+    </td>
+    <td align="center" width="33%">
+      🤖<br />
+      <strong>Headless for AI infrastructure</strong><br />
+      <sub>Run workbook and document logic in Node.js to power agents, automation, and server-side workflows.</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="33%">
+      🛠️<br />
+      <strong>Product-ready SDK</strong><br />
+      <sub>Framework adapters, Facade APIs, presets, and headless runtime fit real integration paths.</sub>
+    </td>
+    <td align="center" width="33%">
+      🌗<br />
+      <strong>Dark-mode ready</strong><br />
+      <sub>UI components and the rendering engine both adapt to light and dark themes.</sub>
+    </td>
+    <td align="center" width="33%">
+      🔌<br />
+      <strong>Unified Facade API</strong><br />
+      <sub>One consistent API surface for workbooks, ranges, formulas, and documents across browser and Node.js.</sub>
+    </td>
+  </tr>
+</table>
 
 ## 🚀 Why Univer?
 

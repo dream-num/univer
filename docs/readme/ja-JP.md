@@ -13,7 +13,7 @@ Univer は、プラグインアーキテクチャ、Canvas ベースのレンダ
 
 [English](../../README.md) | [简体中文](./zh-CN.md) | [繁體中文](./zh-TW.md) | 日本語 | [한국어](./ko-KR.md) | [Español](./es-ES.md)
 
-[ドキュメント](https://docs.univer.ai) | [ショーケース](https://docs.univer.ai/showcase) | [API Reference](https://docs.univer.ai/reference/classes/univer) | [ブログ](https://docs.univer.ai/blog)
+[📖 ドキュメント](https://docs.univer.ai) | [✨ ショーケース](https://docs.univer.ai/showcase) | [📘 API Reference](https://docs.univer.ai/reference/classes/univer) | [📝 ブログ](https://docs.univer.ai/blog)
 
 [![License](https://img.shields.io/github/license/dream-num/univer?style=flat-square)](../../LICENSE)
 [![Build](https://img.shields.io/github/actions/workflow/status/dream-num/univer/build.yml?style=flat-square)](https://github.com/dream-num/univer/actions/workflows/build.yml)
@@ -22,6 +22,12 @@ Univer は、プラグインアーキテクチャ、Canvas ベースのレンダ
 [![Issues](https://img.shields.io/github/issues/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/issues)
 [![Codecov](https://img.shields.io/codecov/c/gh/dream-num/univer?token=aPfyW2pIMN&style=flat-square)](https://codecov.io/gh/dream-num/univer)
 [![Discord](https://img.shields.io/discord/1136129819961217077?logo=discord&logoColor=FFFFFF&label=discord&color=5865F2&style=flat-square)](https://discord.gg/z3NKNT6D2f)
+[![Release](https://img.shields.io/github/v/release/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/releases)
+[![Twitter](https://img.shields.io/twitter/follow/univerhq?style=flat-square&logo=x)](https://twitter.com/univerhq)
+[![Open Collective](https://img.shields.io/opencollective/all/univer?logo=opencollective&style=flat-square)](https://opencollective.com/univer)
+[![Last Commit](https://img.shields.io/github/last-commit/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/commits/main/)
+
+[![Trendshift](https://trendshift.io/api/badge/repositories/4376)](https://trendshift.io/repositories/4376)
 
 </div>
 
@@ -37,6 +43,45 @@ Univer は次のような場面に適しています。
 - カスタムプラグイン、コマンド、サービス、UI コンポーネント、Facade API で振る舞いを拡張する。
 
 Univer は単なるスプレッドシートファイルビューアではありません。独自の生産性インターフェースを構築するためのフレームワークです。
+
+## 🌟 Highlights
+
+<table>
+  <tr>
+    <td align="center" width="33%">
+      ⚡<br />
+      <strong>大規模な編集面に対応</strong><br />
+      <sub>Canvas ベースのレンダリングと専用の数式エンジンにより、複雑なワークブックでも応答性を保ちます。</sub>
+    </td>
+    <td align="center" width="33%">
+      🧩<br />
+      <strong>プラグイン前提の設計</strong><br />
+      <sub>必要な機能を組み合わせ、置換、遅延読み込み、拡張できます。</sub>
+    </td>
+    <td align="center" width="33%">
+      🤖<br />
+      <strong>Headless AI 基盤</strong><br />
+      <sub>Node.js でワークブックとドキュメントのロジックを実行し、エージェント、自動化、サーバーサイドワークフローを支えます。</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="33%">
+      🛠️<br />
+      <strong>プロダクト向け SDK</strong><br />
+      <sub>フレームワークアダプター、Facade API、presets、headless runtime が実際の統合経路に対応します。</sub>
+    </td>
+    <td align="center" width="33%">
+      🌗<br />
+      <strong>Dark mode 対応</strong><br />
+      <sub>UI コンポーネントとレンダリングエンジンの両方がライト/ダークテーマに対応します。</sub>
+    </td>
+    <td align="center" width="33%">
+      🔌<br />
+      <strong>統合 Facade API</strong><br />
+      <sub>ブラウザと Node.js の両方で、ワークブック、範囲、数式、ドキュメントを一貫した API で扱えます。</sub>
+    </td>
+  </tr>
+</table>
 
 ## 🚀 なぜ Univer なのか？
 

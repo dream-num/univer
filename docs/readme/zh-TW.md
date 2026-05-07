@@ -12,7 +12,7 @@ Univer 以外掛化架構、Canvas 渲染引擎、公式引擎和統一的 Facad
 
 [English](../../README.md) | [简体中文](./zh-CN.md) | 繁體中文 | [日本語](./ja-JP.md) | [한국어](./ko-KR.md) | [Español](./es-ES.md)
 
-[文件](https://docs.univer.ai) | [示例](https://docs.univer.ai/showcase) | [API 參考](https://docs.univer.ai/reference/classes/univer) | [部落格](https://docs.univer.ai/blog)
+[📖 文件](https://docs.univer.ai) | [✨ 示例](https://docs.univer.ai/showcase) | [📘 API 參考](https://docs.univer.ai/reference/classes/univer) | [📝 部落格](https://docs.univer.ai/blog)
 
 [![License](https://img.shields.io/github/license/dream-num/univer?style=flat-square)](../../LICENSE)
 [![Build](https://img.shields.io/github/actions/workflow/status/dream-num/univer/build.yml?style=flat-square)](https://github.com/dream-num/univer/actions/workflows/build.yml)
@@ -21,6 +21,12 @@ Univer 以外掛化架構、Canvas 渲染引擎、公式引擎和統一的 Facad
 [![Issues](https://img.shields.io/github/issues/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/issues)
 [![Codecov](https://img.shields.io/codecov/c/gh/dream-num/univer?token=aPfyW2pIMN&style=flat-square)](https://codecov.io/gh/dream-num/univer)
 [![Discord](https://img.shields.io/discord/1136129819961217077?logo=discord&logoColor=FFFFFF&label=discord&color=5865F2&style=flat-square)](https://discord.gg/z3NKNT6D2f)
+[![Release](https://img.shields.io/github/v/release/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/releases)
+[![Twitter](https://img.shields.io/twitter/follow/univerhq?style=flat-square&logo=x)](https://twitter.com/univerhq)
+[![Open Collective](https://img.shields.io/opencollective/all/univer?logo=opencollective&style=flat-square)](https://opencollective.com/univer)
+[![Last Commit](https://img.shields.io/github/last-commit/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/commits/main/)
+
+[![Trendshift](https://trendshift.io/api/badge/repositories/4376)](https://trendshift.io/repositories/4376)
 
 </div>
 
@@ -36,6 +42,45 @@ Univer 是一個開源 SDK，用於在你的產品中建立辦公應用。它提
 - 透過自訂外掛、命令、服務、UI 元件和 Facade API 擴充行為。
 
 Univer 不只是一個試算表檔案檢視器。它是用於構建你自己的生產力介面的框架。
+
+## 🌟 Highlights
+
+<table>
+  <tr>
+    <td align="center" width="33%">
+      ⚡<br />
+      <strong>大型場景也流暢</strong><br />
+      <sub>Canvas 渲染搭配獨立公式引擎，複雜活頁簿依然流暢。</sub>
+    </td>
+    <td align="center" width="33%">
+      🧩<br />
+      <strong>外掛化擴充</strong><br />
+      <sub>需要哪些功能就組合、替換或按需載入，不必引入全套。</sub>
+    </td>
+    <td align="center" width="33%">
+      🤖<br />
+      <strong>Headless AI 基建</strong><br />
+      <sub>在 Node.js 中跑活頁簿與文件邏輯，支撐 Agent、自動化和伺服器端流程。</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="33%">
+      🛠️<br />
+      <strong>面向產品整合</strong><br />
+      <sub>框架適配器、Facade API、預設配置、無頭執行環境，對接各種實際整合場景。</sub>
+    </td>
+    <td align="center" width="33%">
+      🌗<br />
+      <strong>Dark mode 就緒</strong><br />
+      <sub>UI 元件與渲染引擎均支援淺色和深色主題。</sub>
+    </td>
+    <td align="center" width="33%">
+      🔌<br />
+      <strong>統一的 Facade API</strong><br />
+      <sub>共享一致的 API，在瀏覽器和 Node.js 中操作活頁簿、範圍、公式和文件。</sub>
+    </td>
+  </tr>
+</table>
 
 ## 🚀 為什麼選擇 Univer？
 

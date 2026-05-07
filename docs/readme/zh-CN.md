@@ -12,7 +12,7 @@ Univer 以插件化架构、Canvas 渲染引擎、公式引擎和统一的 Facad
 
 [English](../../README.md) | 简体中文 | [繁體中文](./zh-TW.md) | [日本語](./ja-JP.md) | [한국어](./ko-KR.md) | [Español](./es-ES.md)
 
-[文档](https://docs.univer.ai) | [示例](https://docs.univer.ai/showcase) | [API 参考](https://docs.univer.ai/reference/classes/univer) | [博客](https://docs.univer.ai/blog)
+[📖 文档](https://docs.univer.ai) | [✨ 示例](https://docs.univer.ai/showcase) | [📘 API 参考](https://docs.univer.ai/reference/classes/univer) | [📝 博客](https://docs.univer.ai/blog)
 
 [![License](https://img.shields.io/github/license/dream-num/univer?style=flat-square)](../../LICENSE)
 [![Build](https://img.shields.io/github/actions/workflow/status/dream-num/univer/build.yml?style=flat-square)](https://github.com/dream-num/univer/actions/workflows/build.yml)
@@ -21,6 +21,12 @@ Univer 以插件化架构、Canvas 渲染引擎、公式引擎和统一的 Facad
 [![Issues](https://img.shields.io/github/issues/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/issues)
 [![Codecov](https://img.shields.io/codecov/c/gh/dream-num/univer?token=aPfyW2pIMN&style=flat-square)](https://codecov.io/gh/dream-num/univer)
 [![Discord](https://img.shields.io/discord/1136129819961217077?logo=discord&logoColor=FFFFFF&label=discord&color=5865F2&style=flat-square)](https://discord.gg/z3NKNT6D2f)
+[![Release](https://img.shields.io/github/v/release/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/releases)
+[![Twitter](https://img.shields.io/twitter/follow/univerhq?style=flat-square&logo=x)](https://twitter.com/univerhq)
+[![Open Collective](https://img.shields.io/opencollective/all/univer?logo=opencollective&style=flat-square)](https://opencollective.com/univer)
+[![Last Commit](https://img.shields.io/github/last-commit/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/commits/main/)
+
+[![Trendshift](https://trendshift.io/api/badge/repositories/4376)](https://trendshift.io/repositories/4376)
 
 </div>
 
@@ -36,6 +42,45 @@ Univer 是一个开源 SDK，用于在你的产品中创建办公应用。它提
 - 通过自定义插件、命令、服务、UI 组件和 Facade API 扩展行为。
 
 Univer 不只是一个电子表格文件查看器。它是用于构建你自己的生产力界面的框架。
+
+## 🌟 Highlights
+
+<table>
+  <tr>
+    <td align="center" width="33%">
+      ⚡<br />
+      <strong>大型场景也流畅</strong><br />
+      <sub>Canvas 渲染与独立公式引擎，让复杂工作簿保持响应。</sub>
+    </td>
+    <td align="center" width="33%">
+      🧩<br />
+      <strong>插件化扩展</strong><br />
+      <sub>按需组合、替换、延迟加载或扩展能力，无需引入整套功能。</sub>
+    </td>
+    <td align="center" width="33%">
+      🤖<br />
+      <strong>Headless AI 基建</strong><br />
+      <sub>在 Node.js 中运行工作簿和文档逻辑，为 Agent、自动化和服务端流程提供底层能力。</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="33%">
+      🛠️<br />
+      <strong>面向产品集成</strong><br />
+      <sub>框架适配器、Facade API、预设和无头运行时，覆盖真实集成路径。</sub>
+    </td>
+    <td align="center" width="33%">
+      🌗<br />
+      <strong>Dark mode 就绪</strong><br />
+      <sub>UI 组件和渲染引擎都支持浅色与深色主题。</sub>
+    </td>
+    <td align="center" width="33%">
+      🔌<br />
+      <strong>统一的 Facade API</strong><br />
+      <sub>共享一致的 API，在浏览器和 Node.js 中操作工作簿、区域、公式和文档。</sub>
+    </td>
+  </tr>
+</table>
 
 ## 🚀 为什么选择 Univer？
 

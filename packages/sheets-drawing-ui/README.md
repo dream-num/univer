@@ -1,27 +1,47 @@
 # @univerjs/sheets-drawing-ui
 
+[![npm version](https://img.shields.io/npm/v/@univerjs/sheets-drawing-ui?style=flat-square)](https://npmjs.com/package/@univerjs/sheets-drawing-ui)
+[![license](https://img.shields.io/npm/l/@univerjs/sheets-drawing-ui?style=flat-square)](https://npmjs.com/package/@univerjs/sheets-drawing-ui)
+[![downloads](https://img.shields.io/npm/dm/@univerjs/sheets-drawing-ui?style=flat-square)](https://npmjs.com/package/@univerjs/sheets-drawing-ui)
+
+`@univerjs/sheets-drawing-ui` adds the UI for creating, selecting, editing, and exporting drawing objects in Univer Sheets.
+
 ## Package Overview
 
-| Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
-| --- | --- | --- | --- | --- | :---: | :---: |
-| `@univerjs/sheets-drawing-ui` | `UniverSheetsDrawingUi` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ⭕️ | ⭕️ |
+| Package | UMD global | CSS | Locales | Facade entry |
+| --- | --- | :---: | :---: | :---: |
+| `@univerjs/sheets-drawing-ui` | `UniverSheetsDrawingUi` | Yes | Yes | Yes |
 
-## Introduction
+## Installation
+
+```sh
+pnpm add @univerjs/sheets-drawing-ui
+# or
+npm install @univerjs/sheets-drawing-ui
+```
+
+Keep all `@univerjs/*` packages on the same version.
 
 ## Usage
 
-### Installation
+```ts
+import '@univerjs/sheets-drawing-ui/lib/index.css';
+import EnUS from '@univerjs/sheets-drawing-ui/locale/en-US';
+import { UniverSheetsDrawingUIPlugin } from '@univerjs/sheets-drawing-ui';
 
-```shell
-# Using npm
-npm install @univerjs/sheets-drawing-ui
+univer.registerPlugin(UniverSheetsDrawingUIPlugin);
 
-# Using pnpm
-pnpm add @univerjs/sheets-drawing-ui
+// Merge EnUS into your Univer locale map when this package contributes UI text.
 ```
 
-<!-- Links -->
-[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/sheets-drawing-ui?style=flat-square
-[npm-version-link]: https://npmjs.com/package/@univerjs/sheets-drawing-ui
-[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/sheets-drawing-ui?style=flat-square
-[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/sheets-drawing-ui?style=flat-square
+## Package Dependencies
+
+Important Univer dependencies: `@univerjs/core`, `@univerjs/design`, `@univerjs/docs-drawing`, `@univerjs/docs-ui`, `@univerjs/drawing`, `@univerjs/drawing-ui`, `@univerjs/engine-render`, `@univerjs/sheets`, `@univerjs/sheets-drawing`, `@univerjs/sheets-ui`, `@univerjs/ui`.
+Peer dependencies: `react`, `rxjs`.
+
+## Resources
+
+- [Documentation](https://docs.univer.ai)
+- [NPM package](https://npmjs.com/package/@univerjs/sheets-drawing-ui)
+- [GitHub repository](https://github.com/dream-num/univer)
+

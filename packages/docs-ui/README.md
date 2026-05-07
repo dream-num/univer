@@ -1,29 +1,47 @@
 # @univerjs/docs-ui
 
+[![npm version](https://img.shields.io/npm/v/@univerjs/docs-ui?style=flat-square)](https://npmjs.com/package/@univerjs/docs-ui)
+[![license](https://img.shields.io/npm/l/@univerjs/docs-ui?style=flat-square)](https://npmjs.com/package/@univerjs/docs-ui)
+[![downloads](https://img.shields.io/npm/dm/@univerjs/docs-ui?style=flat-square)](https://npmjs.com/package/@univerjs/docs-ui)
+
+`@univerjs/docs-ui` provides the editor UI layer for Univer Docs, including selection rendering, clipboard support, menus, and document interaction services.
+
 ## Package Overview
 
-| Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
-| --- | --- | --- | --- | --- | :---: | :---: |
-| `@univerjs/docs-ui` | `UniverDocsUi` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ⭕️ | ⭕️ |
+| Package | UMD global | CSS | Locales | Facade entry |
+| --- | --- | :---: | :---: | :---: |
+| `@univerjs/docs-ui` | `UniverDocsUi` | Yes | Yes | Yes |
 
-## Introduction
+## Installation
 
-`@univerjs/docs-ui` package provides the User Interface for Docs.
+```sh
+pnpm add @univerjs/docs-ui
+# or
+npm install @univerjs/docs-ui
+```
+
+Keep all `@univerjs/*` packages on the same version.
 
 ## Usage
 
-### Installation
+```ts
+import '@univerjs/docs-ui/lib/index.css';
+import EnUS from '@univerjs/docs-ui/locale/en-US';
+import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 
-```shell
-# Using npm
-npm install @univerjs/docs-ui
+univer.registerPlugin(UniverDocsUIPlugin);
 
-# Using pnpm
-pnpm add @univerjs/docs-ui
+// Merge EnUS into your Univer locale map when this package contributes UI text.
 ```
 
-<!-- Links -->
-[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/docs-ui?style=flat-square
-[npm-version-link]: https://npmjs.com/package/@univerjs/docs-ui
-[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/docs-ui?style=flat-square
-[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/docs-ui?style=flat-square
+## Package Dependencies
+
+Important Univer dependencies: `@univerjs/core`, `@univerjs/design`, `@univerjs/docs`, `@univerjs/drawing`, `@univerjs/engine-render`, `@univerjs/icons`, `@univerjs/ui`.
+Peer dependencies: `react`, `rxjs`.
+
+## Resources
+
+- [Documentation](https://docs.univer.ai)
+- [NPM package](https://npmjs.com/package/@univerjs/docs-ui)
+- [GitHub repository](https://github.com/dream-num/univer)
+

@@ -1,29 +1,43 @@
 # @univerjs/engine-formula
 
+[![npm version](https://img.shields.io/npm/v/@univerjs/engine-formula?style=flat-square)](https://npmjs.com/package/@univerjs/engine-formula)
+[![license](https://img.shields.io/npm/l/@univerjs/engine-formula?style=flat-square)](https://npmjs.com/package/@univerjs/engine-formula)
+[![downloads](https://img.shields.io/npm/dm/@univerjs/engine-formula?style=flat-square)](https://npmjs.com/package/@univerjs/engine-formula)
+
+`@univerjs/engine-formula` is Univer's formula engine. It parses formulas, manages dependencies, calculates results, and exposes services used by sheet formula packages.
+
 ## Package Overview
 
-| Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
-| --- | --- | --- | --- | --- | :---: | :---: |
-| `@univerjs/engine-formula` | `UniverEngineFormula` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ❌ | ❌ |
+| Package | UMD global | CSS | Locales | Facade entry |
+| --- | --- | :---: | :---: | :---: |
+| `@univerjs/engine-formula` | `UniverEngineFormula` | No | No | Yes |
 
-## Introduction
+## Installation
 
-The `@univerjs/engine-formula` is a formula engine that provides fundamental capabilities for formula computation, including but not limited to: formula string parsing, formula calculation, and formula dependency analysis.
+```sh
+pnpm add @univerjs/engine-formula
+# or
+npm install @univerjs/engine-formula
+```
+
+Keep all `@univerjs/*` packages on the same version.
 
 ## Usage
 
-### Installation
+```ts
+import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 
-```shell
-# Using npm
-npm install @univerjs/engine-formula
-
-# Using pnpm
-pnpm add @univerjs/engine-formula
+univer.registerPlugin(UniverFormulaEnginePlugin);
 ```
 
-<!-- Links -->
-[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/engine-formula?style=flat-square
-[npm-version-link]: https://npmjs.com/package/@univerjs/engine-formula
-[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/engine-formula?style=flat-square
-[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/engine-formula?style=flat-square
+## Package Dependencies
+
+Important Univer dependencies: `@univerjs/core`, `@univerjs/rpc`.
+Peer dependencies: `rxjs`.
+
+## Resources
+
+- [Documentation](https://docs.univer.ai)
+- [NPM package](https://npmjs.com/package/@univerjs/engine-formula)
+- [GitHub repository](https://github.com/dream-num/univer)
+

@@ -2,7 +2,7 @@
     "name": "@univerjs/sheets-zen-editor",
     "version": "0.21.1",
     "private": false,
-    "description": "Zen Editor plugin for Univer Sheets.",
+    "description": "Immersive cell editing experience for Univer Sheets.",
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
     "funding": {
@@ -18,7 +18,11 @@
         "url": "https://github.com/dream-num/univer/issues"
     },
     "keywords": [
-        "univer"
+        "univer",
+        "sheets",
+        "zen-editor",
+        "cell-editor",
+        "ui"
     ],
     "exports": {
         ".": "./src/index.ts",

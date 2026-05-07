@@ -2,7 +2,7 @@
     "name": "@univerjs/docs-hyper-link-ui",
     "version": "0.21.1",
     "private": false,
-    "description": "Univer thread comment plugin",
+    "description": "Hyperlink editing UI for Univer Docs.",
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
     "funding": {
@@ -17,7 +17,13 @@
     "bugs": {
         "url": "https://github.com/dream-num/univer/issues"
     },
-    "keywords": [],
+    "keywords": [
+        "univer",
+        "docs",
+        "hyperlink",
+        "link",
+        "ui"
+    ],
     "exports": {
         ".": "./src/index.ts",
         "./*": "./src/*",

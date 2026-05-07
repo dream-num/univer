@@ -1,29 +1,47 @@
 # @univerjs/sheets-thread-comment
 
+[![npm version](https://img.shields.io/npm/v/@univerjs/sheets-thread-comment?style=flat-square)](https://npmjs.com/package/@univerjs/sheets-thread-comment)
+[![license](https://img.shields.io/npm/l/@univerjs/sheets-thread-comment?style=flat-square)](https://npmjs.com/package/@univerjs/sheets-thread-comment)
+[![downloads](https://img.shields.io/npm/dm/@univerjs/sheets-thread-comment?style=flat-square)](https://npmjs.com/package/@univerjs/sheets-thread-comment)
+
+`@univerjs/sheets-thread-comment` connects shared thread comments to Univer Sheets and provides sheet-specific comment services.
+
 ## Package Overview
 
-| Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
-| --- | --- | --- | --- | --- | :---: | :---: |
-| `@univerjs/sheets-thread-comment` | `UniverSheetsThreadCommentBase` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ❌ | ❌ |
+| Package | UMD global | CSS | Locales | Facade entry |
+| --- | --- | :---: | :---: | :---: |
+| `@univerjs/sheets-thread-comment` | `UniverSheetsThreadComment` | No | No | Yes |
 
-## Introduction
+## Installation
 
-`@univerjs/sheets-thread-comment` core package for sheet comment. For using, please refer to [@univerjs/sheets-thread-comment](../sheets-thread-comment/README.md)
+```sh
+pnpm add @univerjs/sheets-thread-comment
+# or
+npm install @univerjs/sheets-thread-comment
+```
+
+Keep all `@univerjs/*` packages on the same version.
 
 ## Usage
 
-### Installation
+```ts
+import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment';
 
-```shell
-# Using npm
-npm install @univerjs/sheets-thread-comment
-
-# Using pnpm
-pnpm add @univerjs/sheets-thread-comment
+univer.registerPlugin(UniverSheetsThreadCommentPlugin);
 ```
 
-<!-- Links -->
-[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/sheets-thread-comment?style=flat-square
-[npm-version-link]: https://npmjs.com/package/@univerjs/sheets-thread-comment
-[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/sheets-thread-comment?style=flat-square
-[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/sheets-thread-comment?style=flat-square
+## Integration Notes
+
+Use this package with `@univerjs/sheets-thread-comment-ui` when users need comment UI in sheets.
+
+## Package Dependencies
+
+Important Univer dependencies: `@univerjs/core`, `@univerjs/engine-formula`, `@univerjs/sheets`, `@univerjs/thread-comment`.
+Peer dependencies: `rxjs`.
+
+## Resources
+
+- [Documentation](https://docs.univer.ai)
+- [NPM package](https://npmjs.com/package/@univerjs/sheets-thread-comment)
+- [GitHub repository](https://github.com/dream-num/univer)
+

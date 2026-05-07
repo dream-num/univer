@@ -1,41 +1,53 @@
 # @univerjs/sheets-filter-ui
 
+[![npm version](https://img.shields.io/npm/v/@univerjs/sheets-filter-ui?style=flat-square)](https://npmjs.com/package/@univerjs/sheets-filter-ui)
+[![license](https://img.shields.io/npm/l/@univerjs/sheets-filter-ui?style=flat-square)](https://npmjs.com/package/@univerjs/sheets-filter-ui)
+[![downloads](https://img.shields.io/npm/dm/@univerjs/sheets-filter-ui?style=flat-square)](https://npmjs.com/package/@univerjs/sheets-filter-ui)
+
+`@univerjs/sheets-filter-ui` adds filter menus, panels, and interaction UI for Univer Sheets.
+
 ## Package Overview
 
-| Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
-| --- | --- | --- | --- | --- | :---: | :---: |
-| `@univerjs/sheets-filter-ui` | `UniverSheetsFilterUi` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ⭕️ | ⭕️ |
+| Package | UMD global | CSS | Locales | Facade entry |
+| --- | --- | :---: | :---: | :---: |
+| `@univerjs/sheets-filter-ui` | `UniverSheetsFilterUi` | Yes | Yes | No |
 
-## Introduction
+## Installation
 
-`@univerjs/sheets-filter-ui` provides a user interface for filtering in sheets.
+```sh
+pnpm add @univerjs/sheets-filter-ui
+# or
+npm install @univerjs/sheets-filter-ui
+```
+
+Keep all `@univerjs/*` packages on the same version.
 
 ## Usage
 
-You should use this plugin with the `@univerjs/sheets-filter` package.
-
-```typescript
+```ts
 import '@univerjs/sheets-filter-ui/lib/index.css';
-
-import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
+import EnUS from '@univerjs/sheets-filter-ui/locale/en-US';
 import { UniverSheetsFilterUIPlugin } from '@univerjs/sheets-filter-ui';
 
-univer.registerPlugin(UniverSheetsFilterPlugin);
 univer.registerPlugin(UniverSheetsFilterUIPlugin);
+
+// Merge EnUS into your Univer locale map when this package contributes UI text.
 ```
 
-### Installation
+Exported plugin classes:
 
-```shell
-# Using npm
-npm install @univerjs/sheets-filter-ui
+- `UniverSheetsFilterUIPlugin`
+- `UniverSheetsFilterMobileUIPlugin`
+- `UniverSheetsFilterUIWorkerPlugin`
 
-# Using pnpm
-pnpm add @univerjs/sheets-filter-ui
-```
+## Package Dependencies
 
-<!-- Links -->
-[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/sheets-filter-ui?style=flat-square
-[npm-version-link]: https://npmjs.com/package/@univerjs/sheets-filter-ui
-[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/sheets-filter-ui?style=flat-square
-[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/sheets-filter-ui?style=flat-square
+Important Univer dependencies: `@univerjs/core`, `@univerjs/design`, `@univerjs/engine-render`, `@univerjs/icons`, `@univerjs/rpc`, `@univerjs/sheets`, `@univerjs/sheets-filter`, `@univerjs/sheets-ui`, `@univerjs/ui`.
+Peer dependencies: `react`, `rxjs`.
+
+## Resources
+
+- [Documentation](https://docs.univer.ai)
+- [NPM package](https://npmjs.com/package/@univerjs/sheets-filter-ui)
+- [GitHub repository](https://github.com/dream-num/univer)
+

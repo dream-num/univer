@@ -1,27 +1,47 @@
 # @univerjs/docs-drawing-ui
 
+[![npm version](https://img.shields.io/npm/v/@univerjs/docs-drawing-ui?style=flat-square)](https://npmjs.com/package/@univerjs/docs-drawing-ui)
+[![license](https://img.shields.io/npm/l/@univerjs/docs-drawing-ui?style=flat-square)](https://npmjs.com/package/@univerjs/docs-drawing-ui)
+[![downloads](https://img.shields.io/npm/dm/@univerjs/docs-drawing-ui?style=flat-square)](https://npmjs.com/package/@univerjs/docs-drawing-ui)
+
+`@univerjs/docs-drawing-ui` adds the user interface for creating, selecting, editing, and rendering drawing objects in Univer Docs.
+
 ## Package Overview
 
-| Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
-| --- | --- | --- | --- | --- | :---: | :---: |
-| `@univerjs/docs-drawing-ui` | `UniverDocsDrawingUi` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ⭕️ | ⭕️ |
+| Package | UMD global | CSS | Locales | Facade entry |
+| --- | --- | :---: | :---: | :---: |
+| `@univerjs/docs-drawing-ui` | `UniverDocsDrawingUi` | Yes | Yes | No |
 
-## Introduction
+## Installation
+
+```sh
+pnpm add @univerjs/docs-drawing-ui
+# or
+npm install @univerjs/docs-drawing-ui
+```
+
+Keep all `@univerjs/*` packages on the same version.
 
 ## Usage
 
-### Installation
+```ts
+import '@univerjs/docs-drawing-ui/lib/index.css';
+import EnUS from '@univerjs/docs-drawing-ui/locale/en-US';
+import { UniverDocsDrawingUIPlugin } from '@univerjs/docs-drawing-ui';
 
-```shell
-# Using npm
-npm install @univerjs/docs-drawing-ui
+univer.registerPlugin(UniverDocsDrawingUIPlugin);
 
-# Using pnpm
-pnpm add @univerjs/docs-drawing-ui
+// Merge EnUS into your Univer locale map when this package contributes UI text.
 ```
 
-<!-- Links -->
-[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/docs-drawing-ui?style=flat-square
-[npm-version-link]: https://npmjs.com/package/@univerjs/docs-drawing-ui
-[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/docs-drawing-ui?style=flat-square
-[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/docs-drawing-ui?style=flat-square
+## Package Dependencies
+
+Important Univer dependencies: `@univerjs/core`, `@univerjs/design`, `@univerjs/docs`, `@univerjs/docs-drawing`, `@univerjs/docs-ui`, `@univerjs/drawing`, `@univerjs/drawing-ui`, `@univerjs/engine-render`, `@univerjs/ui`.
+Peer dependencies: `react`, `rxjs`.
+
+## Resources
+
+- [Documentation](https://docs.univer.ai)
+- [NPM package](https://npmjs.com/package/@univerjs/docs-drawing-ui)
+- [GitHub repository](https://github.com/dream-num/univer)
+

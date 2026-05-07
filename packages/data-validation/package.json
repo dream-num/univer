@@ -2,7 +2,7 @@
     "name": "@univerjs/data-validation",
     "version": "0.21.1",
     "private": false,
-    "description": "Data validation library for Univer",
+    "description": "Shared data validation models and rule services for Univer.",
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
     "funding": {
@@ -18,7 +18,11 @@
         "url": "https://github.com/dream-num/univer/issues"
     },
     "keywords": [
-        "univer"
+        "univer",
+        "data-validation",
+        "validation",
+        "rules",
+        "plugin"
     ],
     "exports": {
         ".": "./src/index.ts",

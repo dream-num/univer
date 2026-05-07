@@ -2,7 +2,7 @@
     "name": "@univerjs/sheets-thread-comment",
     "version": "0.21.1",
     "private": false,
-    "description": "Univer sheets thread comment base plugin",
+    "description": "Thread comment integration for Univer Sheets.",
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
     "funding": {
@@ -17,7 +17,13 @@
     "bugs": {
         "url": "https://github.com/dream-num/univer/issues"
     },
-    "keywords": [],
+    "keywords": [
+        "univer",
+        "sheets",
+        "comment",
+        "thread-comment",
+        "plugin"
+    ],
     "exports": {
         ".": "./src/index.ts",
         "./*": "./src/*",

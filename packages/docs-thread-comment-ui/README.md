@@ -1,37 +1,48 @@
-# @univerjs/sheets-thread-comment
+# @univerjs/docs-thread-comment-ui
+
+[![npm version](https://img.shields.io/npm/v/@univerjs/docs-thread-comment-ui?style=flat-square)](https://npmjs.com/package/@univerjs/docs-thread-comment-ui)
+[![license](https://img.shields.io/npm/l/@univerjs/docs-thread-comment-ui?style=flat-square)](https://npmjs.com/package/@univerjs/docs-thread-comment-ui)
+[![downloads](https://img.shields.io/npm/dm/@univerjs/docs-thread-comment-ui?style=flat-square)](https://npmjs.com/package/@univerjs/docs-thread-comment-ui)
+
+`@univerjs/docs-thread-comment-ui` adds thread comment UI integration for Univer Docs.
 
 ## Package Overview
 
-| Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
-| --- | --- | --- | --- | --- | :---: | :---: |
-| `@univerjs/sheets-thread-comment` | `UniverSheetsThreadComment` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ⭕️ | ⭕️ |
+| Package | UMD global | CSS | Locales | Facade entry |
+| --- | --- | :---: | :---: | :---: |
+| `@univerjs/docs-thread-comment-ui` | `UniverDocsThreadCommentUi` | Yes | No | No |
 
-## Introduction
+## Installation
 
-`@univerjs/sheets-thread-comment` provides the comment/annotation function of Univer Sheets.
+```sh
+pnpm add @univerjs/docs-thread-comment-ui
+# or
+npm install @univerjs/docs-thread-comment-ui
+```
+
+Keep all `@univerjs/*` packages on the same version.
 
 ## Usage
 
-### Installation
-
-```shell
-# Using npm
-npm install @univerjs/sheets-thread-comment
-
-# Using pnpm
-pnpm add @univerjs/sheets-thread-comment
-```
-
-### Register the plugin
-
-```typescript
+```ts
+import '@univerjs/docs-thread-comment-ui/lib/index.css';
 import { UniverDocsThreadCommentUIPlugin } from '@univerjs/docs-thread-comment-ui';
 
 univer.registerPlugin(UniverDocsThreadCommentUIPlugin);
 ```
 
-<!-- Links -->
-[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/docs-hyper-link-ui?style=flat-square
-[npm-version-link]: https://npmjs.com/package/@univerjs/docs-hyper-link-ui
-[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/docs-hyper-link-ui?style=flat-square
-[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/docs-hyper-link-ui?style=flat-square
+## Integration Notes
+
+Use this package with `@univerjs/thread-comment` and `@univerjs/thread-comment-ui` for shared comment behavior.
+
+## Package Dependencies
+
+Important Univer dependencies: `@univerjs/core`, `@univerjs/docs`, `@univerjs/docs-ui`, `@univerjs/engine-render`, `@univerjs/icons`, `@univerjs/thread-comment`, `@univerjs/thread-comment-ui`, `@univerjs/ui`.
+Peer dependencies: `react`, `rxjs`.
+
+## Resources
+
+- [Documentation](https://docs.univer.ai)
+- [NPM package](https://npmjs.com/package/@univerjs/docs-thread-comment-ui)
+- [GitHub repository](https://github.com/dream-num/univer)
+

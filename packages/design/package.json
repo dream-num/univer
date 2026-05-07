@@ -2,7 +2,7 @@
     "name": "@univerjs/design",
     "version": "0.21.1",
     "private": false,
-    "description": "UI component library for building exceptional Univer.",
+    "description": "Shared React design components, styles, and locale resources for Univer UI packages.",
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
     "funding": {
@@ -18,7 +18,11 @@
         "url": "https://github.com/dream-num/univer/issues"
     },
     "keywords": [
-        "univer"
+        "univer",
+        "design-system",
+        "ui",
+        "react",
+        "components"
     ],
     "exports": {
         ".": "./src/index.ts",

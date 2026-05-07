@@ -2,7 +2,7 @@
     "name": "@univerjs/ui",
     "version": "0.21.1",
     "private": false,
-    "description": "UniverSheet normal plugin UI manager",
+    "description": "Shared application UI framework, workbench services, menus, dialogs, and Facade UI APIs for Univer.",
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
     "funding": {
@@ -18,7 +18,11 @@
         "url": "https://github.com/dream-num/univer/issues"
     },
     "keywords": [
-        "univer"
+        "univer",
+        "ui",
+        "workbench",
+        "menus",
+        "react"
     ],
     "exports": {
         ".": "./src/index.ts",

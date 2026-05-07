@@ -2,7 +2,7 @@
     "name": "@univerjs/action-recorder",
     "version": "0.21.1",
     "private": false,
-    "description": "",
+    "description": "Record and replay user actions in Univer.",
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
     "funding": {
@@ -17,7 +17,13 @@
     "bugs": {
         "url": "https://github.com/dream-num/univer/issues"
     },
-    "keywords": [],
+    "keywords": [
+        "univer",
+        "action-recorder",
+        "replay",
+        "automation",
+        "plugin"
+    ],
     "exports": {
         ".": "./src/index.ts",
         "./*": "./src/*",

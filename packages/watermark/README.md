@@ -1,37 +1,43 @@
 # @univerjs/watermark
 
+[![npm version](https://img.shields.io/npm/v/@univerjs/watermark?style=flat-square)](https://npmjs.com/package/@univerjs/watermark)
+[![license](https://img.shields.io/npm/l/@univerjs/watermark?style=flat-square)](https://npmjs.com/package/@univerjs/watermark)
+[![downloads](https://img.shields.io/npm/dm/@univerjs/watermark?style=flat-square)](https://npmjs.com/package/@univerjs/watermark)
+
+`@univerjs/watermark` adds configurable watermark rendering to Univer documents and sheets through the render engine.
+
 ## Package Overview
 
-| Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
-| --- | --- | --- | --- | --- | :---: | :---: |
-| `@univerjs/watermark` | `UniverWatermark` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ⭕️ | ⭕️ |
+| Package | UMD global | CSS | Locales | Facade entry |
+| --- | --- | :---: | :---: | :---: |
+| `@univerjs/watermark` | `UniverWatermark` | No | No | Yes |
 
-## Introduction
+## Installation
 
-`@univerjs/watermark` Provides Univer with the ability to add watermarks
+```sh
+pnpm add @univerjs/watermark
+# or
+npm install @univerjs/watermark
+```
+
+Keep all `@univerjs/*` packages on the same version.
 
 ## Usage
 
-### Installation
-
-```shell
-# Using npm
-npm install @univerjs/watermark
-
-# Using pnpm
-pnpm add @univerjs/watermark
-```
-
-### Register the plugin
-
-```typescript
+```ts
 import { UniverWatermarkPlugin } from '@univerjs/watermark';
 
 univer.registerPlugin(UniverWatermarkPlugin);
 ```
 
-<!-- Links -->
-[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/watermark?style=flat-square
-[npm-version-link]: https://npmjs.com/package/@univerjs/watermark
-[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/watermark?style=flat-square
-[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/watermark?style=flat-square
+## Package Dependencies
+
+Important Univer dependencies: `@univerjs/core`, `@univerjs/engine-render`.
+Peer dependencies: `rxjs`.
+
+## Resources
+
+- [Documentation](https://docs.univer.ai)
+- [NPM package](https://npmjs.com/package/@univerjs/watermark)
+- [GitHub repository](https://github.com/dream-num/univer)
+

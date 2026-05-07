@@ -1,29 +1,47 @@
 # @univerjs/sheets-hyper-link
 
+[![npm version](https://img.shields.io/npm/v/@univerjs/sheets-hyper-link?style=flat-square)](https://npmjs.com/package/@univerjs/sheets-hyper-link)
+[![license](https://img.shields.io/npm/l/@univerjs/sheets-hyper-link?style=flat-square)](https://npmjs.com/package/@univerjs/sheets-hyper-link)
+[![downloads](https://img.shields.io/npm/dm/@univerjs/sheets-hyper-link?style=flat-square)](https://npmjs.com/package/@univerjs/sheets-hyper-link)
+
+`@univerjs/sheets-hyper-link` adds the core hyperlink model, commands, and sheet-specific services for Univer Sheets.
+
 ## Package Overview
 
-| Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
-| --- | --- | --- | --- | --- | :---: | :---: |
-| `@univerjs/sheets-hyper-link` | `UniverSheetsHyperLink` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ❌ | ❌ |
+| Package | UMD global | CSS | Locales | Facade entry |
+| --- | --- | :---: | :---: | :---: |
+| `@univerjs/sheets-hyper-link` | `UniverSheetsHyperLink` | No | No | Yes |
 
-## Introduction
+## Installation
 
-A internal package for `@univerjs/sheets-hyper-link-ui`, for using hyper-link feature please refer to `@univerjs/sheets-hyper-link-ui`.
+```sh
+pnpm add @univerjs/sheets-hyper-link
+# or
+npm install @univerjs/sheets-hyper-link
+```
+
+Keep all `@univerjs/*` packages on the same version.
 
 ## Usage
 
-### Installation
+```ts
+import { UniverSheetsHyperLinkPlugin } from '@univerjs/sheets-hyper-link';
 
-```shell
-# Using npm
-npm install @univerjs/sheets-hyper-link
-
-# Using pnpm
-pnpm add @univerjs/sheets-hyper-link
+univer.registerPlugin(UniverSheetsHyperLinkPlugin);
 ```
 
-<!-- Links -->
-[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/sheets-hyper-link?style=flat-square
-[npm-version-link]: https://npmjs.com/package/@univerjs/sheets-hyper-link
-[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/sheets-hyper-link?style=flat-square
-[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/sheets-hyper-link?style=flat-square
+## Integration Notes
+
+Use this package with `@univerjs/sheets-hyper-link-ui` when users need hyperlink editing UI.
+
+## Package Dependencies
+
+Important Univer dependencies: `@univerjs/core`, `@univerjs/docs`, `@univerjs/engine-formula`, `@univerjs/sheets`.
+Peer dependencies: `rxjs`.
+
+## Resources
+
+- [Documentation](https://docs.univer.ai)
+- [NPM package](https://npmjs.com/package/@univerjs/sheets-hyper-link)
+- [GitHub repository](https://github.com/dream-num/univer)
+

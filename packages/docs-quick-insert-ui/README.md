@@ -1,27 +1,47 @@
 # @univerjs/docs-quick-insert-ui
 
+[![npm version](https://img.shields.io/npm/v/@univerjs/docs-quick-insert-ui?style=flat-square)](https://npmjs.com/package/@univerjs/docs-quick-insert-ui)
+[![license](https://img.shields.io/npm/l/@univerjs/docs-quick-insert-ui?style=flat-square)](https://npmjs.com/package/@univerjs/docs-quick-insert-ui)
+[![downloads](https://img.shields.io/npm/dm/@univerjs/docs-quick-insert-ui?style=flat-square)](https://npmjs.com/package/@univerjs/docs-quick-insert-ui)
+
+`@univerjs/docs-quick-insert-ui` adds quick-insert UI capabilities for Univer Docs, including insert affordances backed by the Docs and Drawing packages.
+
 ## Package Overview
 
-| Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
-| --- | --- | --- | --- | --- | :---: | :---: |
-| `@univerjs/docs-quick-insert-ui` | `UniverDocsDrawingUi` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ⭕️ | ⭕️ |
+| Package | UMD global | CSS | Locales | Facade entry |
+| --- | --- | :---: | :---: | :---: |
+| `@univerjs/docs-quick-insert-ui` | `UniverDocsQuickInsertUi` | Yes | Yes | No |
 
-## Introduction
+## Installation
+
+```sh
+pnpm add @univerjs/docs-quick-insert-ui
+# or
+npm install @univerjs/docs-quick-insert-ui
+```
+
+Keep all `@univerjs/*` packages on the same version.
 
 ## Usage
 
-### Installation
+```ts
+import '@univerjs/docs-quick-insert-ui/lib/index.css';
+import EnUS from '@univerjs/docs-quick-insert-ui/locale/en-US';
+import { UniverDocsQuickInsertUIPlugin } from '@univerjs/docs-quick-insert-ui';
 
-```shell
-# Using npm
-npm install @univerjs/docs-quick-insert-ui
+univer.registerPlugin(UniverDocsQuickInsertUIPlugin);
 
-# Using pnpm
-pnpm add @univerjs/docs-quick-insert-ui
+// Merge EnUS into your Univer locale map when this package contributes UI text.
 ```
 
-<!-- Links -->
-[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/docs-quick-insert-ui?style=flat-square
-[npm-version-link]: https://npmjs.com/package/@univerjs/docs-quick-insert-ui
-[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/docs-quick-insert-ui?style=flat-square
-[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/docs-quick-insert-ui?style=flat-square
+## Package Dependencies
+
+Important Univer dependencies: `@univerjs/core`, `@univerjs/design`, `@univerjs/docs`, `@univerjs/docs-drawing`, `@univerjs/docs-drawing-ui`, `@univerjs/docs-ui`, `@univerjs/drawing`, `@univerjs/drawing-ui`, `@univerjs/engine-render`, `@univerjs/icons`, `@univerjs/ui`.
+Peer dependencies: `react`, `rxjs`.
+
+## Resources
+
+- [Documentation](https://docs.univer.ai)
+- [NPM package](https://npmjs.com/package/@univerjs/docs-quick-insert-ui)
+- [GitHub repository](https://github.com/dream-num/univer)
+

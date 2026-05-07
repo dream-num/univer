@@ -1,37 +1,47 @@
 # @univerjs/sheets-note-ui
 
-| Package | Description | Version | License | Downloads | Continuous Integration | Coverage |
-|---------|-------------|---------|----------|-----------|----------------------|----------|
-| `@univerjs/sheets-note-ui` | `UniverSheetsNote` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ⭕️ | ⭕️ |
+[![npm version](https://img.shields.io/npm/v/@univerjs/sheets-note-ui?style=flat-square)](https://npmjs.com/package/@univerjs/sheets-note-ui)
+[![license](https://img.shields.io/npm/l/@univerjs/sheets-note-ui?style=flat-square)](https://npmjs.com/package/@univerjs/sheets-note-ui)
+[![downloads](https://img.shields.io/npm/dm/@univerjs/sheets-note-ui?style=flat-square)](https://npmjs.com/package/@univerjs/sheets-note-ui)
 
-## Introduction
+`@univerjs/sheets-note-ui` adds the UI for viewing and editing cell notes in Univer Sheets.
 
-`@univerjs/sheets-note-ui` provides the note/annotation function of Univer Sheets.
+## Package Overview
 
-## Usage
+| Package | UMD global | CSS | Locales | Facade entry |
+| --- | --- | :---: | :---: | :---: |
+| `@univerjs/sheets-note-ui` | `UniverSheetsNoteUi` | Yes | Yes | No |
 
-### Installation
+## Installation
 
-```shell
+```sh
+pnpm add @univerjs/sheets-note-ui
+# or
 npm install @univerjs/sheets-note-ui
 ```
 
-or
+Keep all `@univerjs/*` packages on the same version.
 
-```shell
-pnpm add @univerjs/sheets-note-ui
-```
-
-### Example
+## Usage
 
 ```ts
-import { UniverSheetsNotePlugin, INoteMentionDataService} from '@univerjs/sheets-note-ui';
+import '@univerjs/sheets-note-ui/lib/index.css';
+import EnUS from '@univerjs/sheets-note-ui/locale/en-US';
+import { UniverSheetsNoteUIPlugin } from '@univerjs/sheets-note-ui';
 
-// Register the plugin
-univer.registerPlugin(UniverSheetsNotePlugin);
+univer.registerPlugin(UniverSheetsNoteUIPlugin);
+
+// Merge EnUS into your Univer locale map when this package contributes UI text.
 ```
 
-[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/sheets-note-ui?style=flat-square
-[npm-version-link]: https://npmjs.com/package/@univerjs/sheets-note-ui
-[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/sheets-note-ui?style=flat-square
-[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/sheets-note-ui?style=flat-square
+## Package Dependencies
+
+Important Univer dependencies: `@univerjs/core`, `@univerjs/design`, `@univerjs/engine-render`, `@univerjs/icons`, `@univerjs/sheets`, `@univerjs/sheets-note`, `@univerjs/sheets-ui`, `@univerjs/ui`.
+Peer dependencies: `react`, `rxjs`.
+
+## Resources
+
+- [Documentation](https://docs.univer.ai)
+- [NPM package](https://npmjs.com/package/@univerjs/sheets-note-ui)
+- [GitHub repository](https://github.com/dream-num/univer)
+

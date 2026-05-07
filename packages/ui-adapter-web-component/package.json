@@ -2,7 +2,7 @@
     "name": "@univerjs/ui-adapter-web-component",
     "version": "0.21.1",
     "private": false,
-    "description": "Web component adapter for Univer UI",
+    "description": "Web Component adapter for Univer UI services.",
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
     "funding": {
@@ -18,7 +18,11 @@
         "url": "https://github.com/dream-num/univer/issues"
     },
     "keywords": [
-        "univer"
+        "univer",
+        "ui",
+        "web-components",
+        "adapter",
+        "plugin"
     ],
     "exports": {
         ".": "./src/index.ts",

@@ -1,120 +1,47 @@
 # @univerjs/sheets-data-validation
 
+[![npm version](https://img.shields.io/npm/v/@univerjs/sheets-data-validation?style=flat-square)](https://npmjs.com/package/@univerjs/sheets-data-validation)
+[![license](https://img.shields.io/npm/l/@univerjs/sheets-data-validation?style=flat-square)](https://npmjs.com/package/@univerjs/sheets-data-validation)
+[![downloads](https://img.shields.io/npm/dm/@univerjs/sheets-data-validation?style=flat-square)](https://npmjs.com/package/@univerjs/sheets-data-validation)
+
+`@univerjs/sheets-data-validation` connects shared data validation rules to Univer Sheets and provides sheet-specific commands, services, and Facade APIs.
+
 ## Package Overview
 
-| Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
-| --- | --- | --- | --- | --- | :---: | :---: |
-| `@univerjs/sheets-data-validation` | `UniverSheetsDataValidation` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ️❌ | ❌️ |
+| Package | UMD global | CSS | Locales | Facade entry |
+| --- | --- | :---: | :---: | :---: |
+| `@univerjs/sheets-data-validation` | `UniverSheetsDataValidation` | No | No | Yes |
 
-## Introduction
+## Installation
 
-> `@univerjs/sheets-data-validation` provides full capabilities for Univer Sheet data validation.
+```sh
+pnpm add @univerjs/sheets-data-validation
+# or
+npm install @univerjs/sheets-data-validation
+```
+
+Keep all `@univerjs/*` packages on the same version.
 
 ## Usage
 
-### Installation
+```ts
+import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validation';
 
-```shell
-# Using npm
-npm i @univerjs/sheets-data-validation
-
-# Using pnpm
-pnpm add
-```
-
-### Register the plugin
-
-```typescript
-import type { IWorkbookData } from '@univerjs/core';
-import { DataValidationType, ICommandService, LocaleType, Univer, UniverInstanceType } from '@univerjs/core';
-import { UniverDataValidationPlugin } from '@univerjs/data-validation';
-import {
-    DATA_VALIDATION_PLUGIN_NAME,
-    UniverSheetsDataValidationPlugin,
-} from '@univerjs/sheets-data-validation';
-
-univer.registerPlugin(UniverDataValidationPlugin);
 univer.registerPlugin(UniverSheetsDataValidationPlugin);
-
-// initial data validation
-// dentation: https://github.com/dream-num/univer/blob/dev/packages/core/src/types/interfaces/i-data-validation.ts#L48
-const dataValidation = [
-    {
-        uid: 'xxx-2',
-        type: DataValidationType.CHECKBOX,
-        ranges: [{
-            startRow: 6,
-            endRow: 10,
-            startColumn: 0,
-            endColumn: 5,
-        }],
-    },
-];
-
-export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
-    id: 'workbook-01',
-    locale: LocaleType.ZH_CN,
-    name: 'UniverSheet Demo',
-    resources: [{
-        name: DATA_VALIDATION_PLUGIN_NAME,
-        data: JSON.stringify({
-            'sheetId-1': dataValidation,
-        }),
-    }],
-    // ...
-};
-
-// load initial snapshot
-univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO);
 ```
 
-### API
-```typescript
-// Commands and Command params for sheet-data-validation management
-import type {
-    IAddSheetDataValidationCommandParams,
-    IRemoveSheetDataValidationCommandParams,
-    IUpdateSheetDataValidationOptionsCommandParams,
-    IUpdateSheetDataValidationRangeCommandParams,
-    IUpdateSheetDataValidationSettingCommandParams,
-} from '@univerjs/sheets-data-validation';
-import {
-    AddSheetDataValidationCommand,
-    DATA_VALIDATION_PLUGIN_NAME,
-    RemoveSheetDataValidationCommand,
-    UniverSheetsDataValidationPlugin,
-    UpdateSheetDataValidationOptionsCommand,
-    UpdateSheetDataValidationRangeCommand,
-    UpdateSheetDataValidationSettingCommand,
-    // internal service
-    SheetsDataValidationValidatorService
-} from '@univerjs/sheets-data-validation';
+## Integration Notes
 
-// eg. Add data validation from command
-const commandService = univer.__getInjector().get(ICommandService);
+Use this package with `@univerjs/sheets-data-validation-ui` when users need validation dialogs, dropdowns, and error UI.
 
-commandService.executeCommand(AddSheetDataValidationCommand.id, {
-    unitId: 'unitId',
-    subUnitId: 'subUnitId',
-    rule: {
-        uid: 'xxx-2',
-        type: DataValidationType.CHECKBOX,
-        ranges: [{
-            startRow: 6,
-            endRow: 10,
-            startColumn: 0,
-            endColumn: 5,
-        }],
-    },
-} as IAddSheetDataValidationCommandParams);
+## Package Dependencies
 
-// Using internal service Such as validator
-const sheetsDataValidationValidatorService = univer.__getInjector().get(SheetsDataValidationValidatorService);
-sheetsDataValidationValidatorService.validatorWorksheet('unitId', 'sheetId')
-```
+Important Univer dependencies: `@univerjs/core`, `@univerjs/data-validation`, `@univerjs/engine-formula`, `@univerjs/protocol`, `@univerjs/sheets`, `@univerjs/sheets-formula`.
+Peer dependencies: `rxjs`.
 
-<!-- Links -->
-[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/sheets-data-validation?style=flat-square
-[npm-version-link]: https://npmjs.com/package/@univerjs/sheets-data-validation
-[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/sheets-data-validation?style=flat-square
-[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/sheets-data-validation?style=flat-square
+## Resources
+
+- [Documentation](https://docs.univer.ai)
+- [NPM package](https://npmjs.com/package/@univerjs/sheets-data-validation)
+- [GitHub repository](https://github.com/dream-num/univer)
+

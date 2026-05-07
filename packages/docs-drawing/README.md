@@ -1,27 +1,42 @@
 # @univerjs/docs-drawing
 
+[![npm version](https://img.shields.io/npm/v/@univerjs/docs-drawing?style=flat-square)](https://npmjs.com/package/@univerjs/docs-drawing)
+[![license](https://img.shields.io/npm/l/@univerjs/docs-drawing?style=flat-square)](https://npmjs.com/package/@univerjs/docs-drawing)
+[![downloads](https://img.shields.io/npm/dm/@univerjs/docs-drawing?style=flat-square)](https://npmjs.com/package/@univerjs/docs-drawing)
+
+`@univerjs/docs-drawing` connects the common drawing model to Univer Docs so documents can host and manage drawing objects.
+
 ## Package Overview
 
-| Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
-| --- | --- | --- | --- | --- | :---: | :---: |
-| `@univerjs/docs-drawing` | `UniverDocsDrawing` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ❌ | ❌ |
+| Package | UMD global | CSS | Locales | Facade entry |
+| --- | --- | :---: | :---: | :---: |
+| `@univerjs/docs-drawing` | `UniverDocsDrawing` | No | No | No |
 
-## Introduction
+## Installation
+
+```sh
+pnpm add @univerjs/docs-drawing
+# or
+npm install @univerjs/docs-drawing
+```
+
+Keep all `@univerjs/*` packages on the same version.
 
 ## Usage
 
-### Installation
+```ts
+import { UniverDocsDrawingPlugin } from '@univerjs/docs-drawing';
 
-```shell
-# Using npm
-npm install @univerjs/docs-drawing
-
-# Using pnpm
-pnpm add @univerjs/docs-drawing
+univer.registerPlugin(UniverDocsDrawingPlugin);
 ```
 
-<!-- Links -->
-[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/docs-drawing?style=flat-square
-[npm-version-link]: https://npmjs.com/package/@univerjs/docs-drawing
-[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/docs-drawing?style=flat-square
-[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/docs-drawing?style=flat-square
+## Package Dependencies
+
+Important Univer dependencies: `@univerjs/core`, `@univerjs/drawing`.
+
+## Resources
+
+- [Documentation](https://docs.univer.ai)
+- [NPM package](https://npmjs.com/package/@univerjs/docs-drawing)
+- [GitHub repository](https://github.com/dream-num/univer)
+

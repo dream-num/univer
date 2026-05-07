@@ -1,39 +1,42 @@
 # @univerjs/design
 
+[![npm version](https://img.shields.io/npm/v/@univerjs/design?style=flat-square)](https://npmjs.com/package/@univerjs/design)
+[![license](https://img.shields.io/npm/l/@univerjs/design?style=flat-square)](https://npmjs.com/package/@univerjs/design)
+[![downloads](https://img.shields.io/npm/dm/@univerjs/design?style=flat-square)](https://npmjs.com/package/@univerjs/design)
+
+`@univerjs/design` contains the shared React design components, tokens, styles, and locale resources used by Univer UI packages.
+
 ## Package Overview
 
-| Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
-| --- | --- | --- | --- | --- | :---: | :---: |
-| `@univerjs/design` | `UniverDesign` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ⭕️ | ⭕️ |
+| Package | UMD global | CSS | Locales | Facade entry |
+| --- | --- | :---: | :---: | :---: |
+| `@univerjs/design` | `UniverDesign` | Yes | Yes | No |
 
-## Introduction
+## Installation
 
-To ensure better consistency in the UI of Univer plugins and to reduce the effort required for custom development, we provide some fundamental design guidelines and components.
+```sh
+pnpm add @univerjs/design
+# or
+npm install @univerjs/design
+```
 
-The components are developed using React and less, and you can find out more information by visiting the [component library website](https://univer-design.vercel.app).
-
-![](./assets/design.jpeg)
-
-:::note
-If you only need to extend the toolbar, context menu, and so on, you can directly use the extension interfaces provided by `@univerjs/ui` without implementing the UI yourself. For more information, please refer to [Extending UI](https://docs.univer.ai/guides/recipes/tutorials/custom-plugin).
-:::
+Keep all `@univerjs/*` packages on the same version.
 
 ## Usage
 
-### Installation
-
-```shell
-# Using npm
-npm install @univerjs/design
-
-# Using pnpm
-pnpm add @univerjs/design
+```ts
+import '@univerjs/design/lib/index.css';
+import DesignEnUS from '@univerjs/design/locale/en-US';
 ```
 
-This package contains CSS and has the highest priority. Please import it before importing any other Univer style files.
+## Package Dependencies
 
-<!-- Links -->
-[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/design?style=flat-square
-[npm-version-link]: https://npmjs.com/package/@univerjs/design
-[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/design?style=flat-square
-[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/design?style=flat-square
+Important Univer dependencies: `@univerjs/icons`.
+Peer dependencies: `react`, `react-dom`.
+
+## Resources
+
+- [Documentation](https://docs.univer.ai)
+- [NPM package](https://npmjs.com/package/@univerjs/design)
+- [GitHub repository](https://github.com/dream-num/univer)
+

@@ -1,37 +1,43 @@
 # @univerjs/data-validation
 
+[![npm version](https://img.shields.io/npm/v/@univerjs/data-validation?style=flat-square)](https://npmjs.com/package/@univerjs/data-validation)
+[![license](https://img.shields.io/npm/l/@univerjs/data-validation?style=flat-square)](https://npmjs.com/package/@univerjs/data-validation)
+[![downloads](https://img.shields.io/npm/dm/@univerjs/data-validation?style=flat-square)](https://npmjs.com/package/@univerjs/data-validation)
+
+`@univerjs/data-validation` provides the shared data validation model and rule services used by sheet data validation features.
+
 ## Package Overview
 
-| Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
-| --- | --- | --- | --- | --- | :---: | :---: |
-| `@univerjs/data-validation` | `UniverDataValidation` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ❌ | ❌ |
+| Package | UMD global | CSS | Locales | Facade entry |
+| --- | --- | :---: | :---: | :---: |
+| `@univerjs/data-validation` | `UniverDataValidation` | No | No | No |
 
-## Introduction
+## Installation
 
-> `@univerjs/data-validation` provides Univer Sheet with basic capabilities for data validation computation.
+```sh
+pnpm add @univerjs/data-validation
+# or
+npm install @univerjs/data-validation
+```
+
+Keep all `@univerjs/*` packages on the same version.
 
 ## Usage
 
-### Installation
-
-```shell
-# Using npm
-npm i @univerjs/data-validation
-
-# Using pnpm
-pnpm add @univerjs/data-validation
-```
-
-### Register the plugin
-
-```typescript
+```ts
 import { UniverDataValidationPlugin } from '@univerjs/data-validation';
 
 univer.registerPlugin(UniverDataValidationPlugin);
 ```
 
-<!-- Links -->
-[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/data-validation?style=flat-square
-[npm-version-link]: https://npmjs.com/package/@univerjs/data-validation
-[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/data-validation?style=flat-square
-[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/data-validation?style=flat-square
+## Package Dependencies
+
+Important Univer dependencies: `@univerjs/core`.
+Peer dependencies: `rxjs`.
+
+## Resources
+
+- [Documentation](https://docs.univer.ai)
+- [NPM package](https://npmjs.com/package/@univerjs/data-validation)
+- [GitHub repository](https://github.com/dream-num/univer)
+

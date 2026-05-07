@@ -1,39 +1,47 @@
 # @univerjs/sheets-formula-ui
 
+[![npm version](https://img.shields.io/npm/v/@univerjs/sheets-formula-ui?style=flat-square)](https://npmjs.com/package/@univerjs/sheets-formula-ui)
+[![license](https://img.shields.io/npm/l/@univerjs/sheets-formula-ui?style=flat-square)](https://npmjs.com/package/@univerjs/sheets-formula-ui)
+[![downloads](https://img.shields.io/npm/dm/@univerjs/sheets-formula-ui?style=flat-square)](https://npmjs.com/package/@univerjs/sheets-formula-ui)
+
+`@univerjs/sheets-formula-ui` adds formula editing UI for Univer Sheets, including formula input, suggestions, highlighting, and range selection.
+
 ## Package Overview
 
-| Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
-| --- | --- | --- | --- | --- | :---: | :---: |
-| `@univerjs/sheets-formula-ui` | `UniverSheetsFormulaUi` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ⭕️ | ⭕️ |
+| Package | UMD global | CSS | Locales | Facade entry |
+| --- | --- | :---: | :---: | :---: |
+| `@univerjs/sheets-formula-ui` | `UniverSheetsFormulaUi` | Yes | Yes | Yes |
 
-## Introduction
+## Installation
 
-`@univerjs/sheets-formula` provides the ability to edit formulas in spreadsheets, including features such as auto-completion, formula suggestions, drop-down filling for formulas, and copy-paste functionality.
+```sh
+pnpm add @univerjs/sheets-formula-ui
+# or
+npm install @univerjs/sheets-formula-ui
+```
 
-> [!NOTE]
-> Formula calculation is one of the core functionalities of spreadsheets, and formula calculation scheduling is done in `@univerjs/sheets`.
+Keep all `@univerjs/*` packages on the same version.
 
 ## Usage
 
-### Installation
+```ts
+import '@univerjs/sheets-formula-ui/lib/index.css';
+import EnUS from '@univerjs/sheets-formula-ui/locale/en-US';
+import { UniverSheetsFormulaUIPlugin } from '@univerjs/sheets-formula-ui';
 
-```shell
-# Using npm
-npm install @univerjs/sheets-formula-ui
+univer.registerPlugin(UniverSheetsFormulaUIPlugin);
 
-# Using pnpm
-pnpm add @univerjs/sheets-formula-ui
+// Merge EnUS into your Univer locale map when this package contributes UI text.
 ```
 
-### How To Customize Formulas
+## Package Dependencies
 
-If the officially provided formula does not meet your needs, you can expand the formula yourself. Depending on different needs, we provide multiple ways to support registering one or more custom formulas.
+Important Univer dependencies: `@univerjs/core`, `@univerjs/design`, `@univerjs/docs`, `@univerjs/docs-ui`, `@univerjs/engine-formula`, `@univerjs/engine-render`, `@univerjs/icons`, `@univerjs/sheets`, `@univerjs/sheets-formula`, `@univerjs/sheets-ui`, `@univerjs/ui`.
+Peer dependencies: `react`, `rxjs`.
 
-- [Register formula using Facade API](https://reference.univer.ai/zh-CN/classes/FFormula#registerfunction)
-- [Custom Formula](https://docs.univer.ai/guides/recipes/tutorials/custom-formula)
+## Resources
 
-<!-- Links -->
-[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/sheets-formula?style=flat-square
-[npm-version-link]: https://npmjs.com/package/@univerjs/sheets-formula
-[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/sheets-formula?style=flat-square
-[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/sheets-formula?style=flat-square
+- [Documentation](https://docs.univer.ai)
+- [NPM package](https://npmjs.com/package/@univerjs/sheets-formula-ui)
+- [GitHub repository](https://github.com/dream-num/univer)
+

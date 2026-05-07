@@ -2,7 +2,7 @@
     "name": "@univerjs/telemetry",
     "version": "0.21.1",
     "private": false,
-    "description": "",
+    "description": "Telemetry service interface for Univer packages.",
     "author": "DreamNum <developer@univer.ai>",
     "funding": {
         "type": "opencollective",
@@ -16,7 +16,13 @@
     "bugs": {
         "url": "https://github.com/dream-num/univer/issues"
     },
-    "keywords": [],
+    "keywords": [
+        "univer",
+        "telemetry",
+        "analytics",
+        "events",
+        "service"
+    ],
     "exports": {
         ".": "./src/index.ts",
         "./*": "./src/*"

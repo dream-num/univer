@@ -1,35 +1,52 @@
 # @univerjs/sheets-ui
 
+[![npm version](https://img.shields.io/npm/v/@univerjs/sheets-ui?style=flat-square)](https://npmjs.com/package/@univerjs/sheets-ui)
+[![license](https://img.shields.io/npm/l/@univerjs/sheets-ui?style=flat-square)](https://npmjs.com/package/@univerjs/sheets-ui)
+[![downloads](https://img.shields.io/npm/dm/@univerjs/sheets-ui?style=flat-square)](https://npmjs.com/package/@univerjs/sheets-ui)
+
+`@univerjs/sheets-ui` provides the main spreadsheet UI layer for Univer Sheets, including selection, menus, clipboard, formula bar integration, and rendering interaction services.
+
 ## Package Overview
 
-| Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
-| --- | --- | --- | --- | --- | :---: | :---: |
-| `@univerjs/sheets-ui` | `UniverSheetsUi` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ⭕️ | ⭕️ |
+| Package | UMD global | CSS | Locales | Facade entry |
+| --- | --- | :---: | :---: | :---: |
+| `@univerjs/sheets-ui` | `UniverSheetsUi` | Yes | Yes | Yes |
 
-## Introduction
+## Installation
 
-The `@univerjs/sheets-ui` library provides the user interface (UI) for sheets, including:
+```sh
+pnpm add @univerjs/sheets-ui
+# or
+npm install @univerjs/sheets-ui
+```
 
-* Keyboard shortcuts and menu items for basic sheet functions
-* Copy-paste service, allowing customization of copy-paste behavior for specific features via the provided methods
-* Autofill service, enabling customization of autofill behavior for specific features via the provided methods
-* Cell editor and formula editor
-* Rendering spreadsheets in canvas
+Keep all `@univerjs/*` packages on the same version.
 
 ## Usage
 
-### Installation
+```ts
+import '@univerjs/sheets-ui/lib/index.css';
+import EnUS from '@univerjs/sheets-ui/locale/en-US';
+import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 
-```shell
-# Using npm
-npm install @univerjs/sheets-ui
+univer.registerPlugin(UniverSheetsUIPlugin);
 
-# Using pnpm
-pnpm add @univerjs/sheets-ui
+// Merge EnUS into your Univer locale map when this package contributes UI text.
 ```
 
-<!-- Links -->
-[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/sheets-ui?style=flat-square
-[npm-version-link]: https://npmjs.com/package/@univerjs/sheets-ui
-[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/sheets-ui?style=flat-square
-[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/sheets-ui?style=flat-square
+Exported plugin classes:
+
+- `UniverSheetsUIPlugin`
+- `UniverSheetsMobileUIPlugin`
+
+## Package Dependencies
+
+Important Univer dependencies: `@univerjs/core`, `@univerjs/design`, `@univerjs/docs`, `@univerjs/docs-ui`, `@univerjs/engine-formula`, `@univerjs/engine-render`, `@univerjs/icons`, `@univerjs/protocol`, `@univerjs/sheets`, `@univerjs/telemetry`, `@univerjs/ui`.
+Peer dependencies: `react`, `rxjs`.
+
+## Resources
+
+- [Documentation](https://docs.univer.ai)
+- [NPM package](https://npmjs.com/package/@univerjs/sheets-ui)
+- [GitHub repository](https://github.com/dream-num/univer)
+

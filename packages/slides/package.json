@@ -2,7 +2,7 @@
     "name": "@univerjs/slides",
     "version": "0.21.1",
     "private": false,
-    "description": "",
+    "description": "Core presentation model and services for Univer Slides.",
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
     "funding": {
@@ -18,7 +18,11 @@
         "url": "https://github.com/dream-num/univer/issues"
     },
     "keywords": [
-        "univer"
+        "univer",
+        "slides",
+        "presentation",
+        "deck",
+        "plugin"
     ],
     "exports": {
         ".": "./src/index.ts",

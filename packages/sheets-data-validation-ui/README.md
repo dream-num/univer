@@ -1,38 +1,52 @@
 # @univerjs/sheets-data-validation-ui
 
+[![npm version](https://img.shields.io/npm/v/@univerjs/sheets-data-validation-ui?style=flat-square)](https://npmjs.com/package/@univerjs/sheets-data-validation-ui)
+[![license](https://img.shields.io/npm/l/@univerjs/sheets-data-validation-ui?style=flat-square)](https://npmjs.com/package/@univerjs/sheets-data-validation-ui)
+[![downloads](https://img.shields.io/npm/dm/@univerjs/sheets-data-validation-ui?style=flat-square)](https://npmjs.com/package/@univerjs/sheets-data-validation-ui)
+
+`@univerjs/sheets-data-validation-ui` adds data validation menus, dialogs, dropdowns, and validation UI for Univer Sheets.
+
 ## Package Overview
 
-| Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
-| --- | --- | --- | --- | --- | :---: | :---: |
-| `@univerjs/sheets-data-validation-ui` | `UniverSheetsDataValidationUi` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ⭕️ | ⭕️ |
+| Package | UMD global | CSS | Locales | Facade entry |
+| --- | --- | :---: | :---: | :---: |
+| `@univerjs/sheets-data-validation-ui` | `UniverSheetsDataValidationUi` | Yes | Yes | No |
 
-## Introduction
+## Installation
 
-> `@univerjs/sheets-data-validation-ui` provides UI Univer Sheet data validation.
+```sh
+pnpm add @univerjs/sheets-data-validation-ui
+# or
+npm install @univerjs/sheets-data-validation-ui
+```
+
+Keep all `@univerjs/*` packages on the same version.
 
 ## Usage
 
-### Installation
+```ts
+import '@univerjs/sheets-data-validation-ui/lib/index.css';
+import EnUS from '@univerjs/sheets-data-validation-ui/locale/en-US';
+import { UniverSheetsDataValidationUIPlugin } from '@univerjs/sheets-data-validation-ui';
 
-```shell
-# Using npm
-npm i @univerjs/sheets-data-validation-ui
+univer.registerPlugin(UniverSheetsDataValidationUIPlugin);
 
-# Using pnpm
-pnpm add
+// Merge EnUS into your Univer locale map when this package contributes UI text.
 ```
 
-### Register the plugin
+Exported plugin classes:
 
-```typescript
-import { UniverSheetsDataValidationUiPlugin } from '@univerjs/sheets-data-validation-ui';
+- `UniverSheetsDataValidationUIPlugin`
+- `UniverSheetsDataValidationMobileUIPlugin`
 
-univer.registerPlugin(UniverDataValidationPlugin);
-univer.registerPlugin(UniverSheetsDataValidationUiPlugin);
-```
+## Package Dependencies
 
-<!-- Links -->
-[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/sheets-data-validation-ui?style=flat-square
-[npm-version-link]: https://npmjs.com/package/@univerjs/sheets-data-validation-ui
-[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/sheets-data-validation-ui?style=flat-square
-[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/sheets-data-validation-ui?style=flat-square
+Important Univer dependencies: `@univerjs/core`, `@univerjs/data-validation`, `@univerjs/design`, `@univerjs/engine-formula`, `@univerjs/engine-render`, `@univerjs/icons`, `@univerjs/sheets`, `@univerjs/sheets-data-validation`, `@univerjs/sheets-formula-ui`, `@univerjs/sheets-numfmt`, `@univerjs/sheets-ui`, `@univerjs/ui`.
+Peer dependencies: `react`, `rxjs`.
+
+## Resources
+
+- [Documentation](https://docs.univer.ai)
+- [NPM package](https://npmjs.com/package/@univerjs/sheets-data-validation-ui)
+- [GitHub repository](https://github.com/dream-num/univer)
+

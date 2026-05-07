@@ -1,35 +1,43 @@
 # @univerjs/docs
 
+[![npm version](https://img.shields.io/npm/v/@univerjs/docs?style=flat-square)](https://npmjs.com/package/@univerjs/docs)
+[![license](https://img.shields.io/npm/l/@univerjs/docs?style=flat-square)](https://npmjs.com/package/@univerjs/docs)
+[![downloads](https://img.shields.io/npm/dm/@univerjs/docs?style=flat-square)](https://npmjs.com/package/@univerjs/docs)
+
+`@univerjs/docs` provides the document data model and core rich-text operations for Univer Docs, independent of the UI layer.
+
 ## Package Overview
 
-| Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
-| --- | --- | --- | --- | --- | :---: | :---: |
-| `@univerjs/docs` | `UniverDocs` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ❌ | ❌ |
+| Package | UMD global | CSS | Locales | Facade entry |
+| --- | --- | :---: | :---: | :---: |
+| `@univerjs/docs` | `UniverDocs` | No | No | No |
 
-## Introduction
+## Installation
 
-`@univerjs/docs` package provides the fundamental operations for rich text models, including the following capabilities:
+```sh
+pnpm add @univerjs/docs
+# or
+npm install @univerjs/docs
+```
 
-* Logic for selection areas
-* Commands/mutations for altering rich text data
-* Canvas rendering for document presentation
-
-Additionally, `@univerjs/docs` offers support for editors in other domains, such as cell editors for spreadsheets and formula editors, among others.
+Keep all `@univerjs/*` packages on the same version.
 
 ## Usage
 
-### Installation
+```ts
+import { UniverDocsPlugin } from '@univerjs/docs';
 
-```shell
-# Using npm
-npm install @univerjs/docs
-
-# Using pnpm
-pnpm add @univerjs/docs
+univer.registerPlugin(UniverDocsPlugin);
 ```
 
-<!-- Links -->
-[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/docs?style=flat-square
-[npm-version-link]: https://npmjs.com/package/@univerjs/docs
-[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/docs?style=flat-square
-[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/docs?style=flat-square
+## Package Dependencies
+
+Important Univer dependencies: `@univerjs/core`, `@univerjs/engine-render`.
+Peer dependencies: `rxjs`.
+
+## Resources
+
+- [Documentation](https://docs.univer.ai)
+- [NPM package](https://npmjs.com/package/@univerjs/docs)
+- [GitHub repository](https://github.com/dream-num/univer)
+

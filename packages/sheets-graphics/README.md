@@ -1,27 +1,42 @@
 # @univerjs/sheets-graphics
 
+[![npm version](https://img.shields.io/npm/v/@univerjs/sheets-graphics?style=flat-square)](https://npmjs.com/package/@univerjs/sheets-graphics)
+[![license](https://img.shields.io/npm/l/@univerjs/sheets-graphics?style=flat-square)](https://npmjs.com/package/@univerjs/sheets-graphics)
+[![downloads](https://img.shields.io/npm/dm/@univerjs/sheets-graphics?style=flat-square)](https://npmjs.com/package/@univerjs/sheets-graphics)
+
+`@univerjs/sheets-graphics` adds support for drawing simple in-cell graphics on Univer Sheets render surfaces.
+
 ## Package Overview
 
-| Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
-| --- | --- | --- | --- | --- | :---: | :---: |
-| `@univerjs/sheets-graphics` | `UniverSheetGraphicsPlugin` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ❌ | ❌ |
-
-## Introduction
-
-`@univerjs/sheets-graphics` is a basic in-cell graphics drawing plugin for Univer Sheet.
+| Package | UMD global | CSS | Locales | Facade entry |
+| --- | --- | :---: | :---: | :---: |
+| `@univerjs/sheets-graphics` | `UniverSheetsGraphics` | No | No | No |
 
 ## Installation
 
-```shell
-# Using npm
-npm install @univerjs/sheets-graphics
-
-# Using pnpm
+```sh
 pnpm add @univerjs/sheets-graphics
+# or
+npm install @univerjs/sheets-graphics
 ```
 
-<!-- Links -->
-[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/sheets-graphics?style=flat-square
-[npm-version-link]: https://npmjs.com/package/@univerjs/sheets-graphics
-[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/sheets-graphics?style=flat-square
-[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/sheets-graphics?style=flat-square
+Keep all `@univerjs/*` packages on the same version.
+
+## Usage
+
+```ts
+import { UniverSheetsGraphicsPlugin } from '@univerjs/sheets-graphics';
+
+univer.registerPlugin(UniverSheetsGraphicsPlugin);
+```
+
+## Package Dependencies
+
+Important Univer dependencies: `@univerjs/core`, `@univerjs/engine-render`, `@univerjs/sheets-ui`.
+
+## Resources
+
+- [Documentation](https://docs.univer.ai)
+- [NPM package](https://npmjs.com/package/@univerjs/sheets-graphics)
+- [GitHub repository](https://github.com/dream-num/univer)
+

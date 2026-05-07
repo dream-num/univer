@@ -1,29 +1,51 @@
 # @univerjs/thread-comment-ui
 
+[![npm version](https://img.shields.io/npm/v/@univerjs/thread-comment-ui?style=flat-square)](https://npmjs.com/package/@univerjs/thread-comment-ui)
+[![license](https://img.shields.io/npm/l/@univerjs/thread-comment-ui?style=flat-square)](https://npmjs.com/package/@univerjs/thread-comment-ui)
+[![downloads](https://img.shields.io/npm/dm/@univerjs/thread-comment-ui?style=flat-square)](https://npmjs.com/package/@univerjs/thread-comment-ui)
+
+`@univerjs/thread-comment-ui` provides common thread comment UI components and services shared by Docs and Sheets integrations.
+
 ## Package Overview
 
-| Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
-| --- | --- | --- | --- | --- | :---: | :---: |
-| `@univerjs/thread-comment-ui` | `UniveThreadCommentUi` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ⭕️ | ⭕️ |
+| Package | UMD global | CSS | Locales | Facade entry |
+| --- | --- | :---: | :---: | :---: |
+| `@univerjs/thread-comment-ui` | `UniverThreadCommentUi` | Yes | Yes | No |
 
-## Introduction
+## Installation
 
-> `@univerjs/thread-comment` common UI package for comment. For using, please refer to [@univerjs/sheets-thread-comment](../sheets-thread-comment/README.md)
+```sh
+pnpm add @univerjs/thread-comment-ui
+# or
+npm install @univerjs/thread-comment-ui
+```
+
+Keep all `@univerjs/*` packages on the same version.
 
 ## Usage
 
-### Installation
+```ts
+import '@univerjs/thread-comment-ui/lib/index.css';
+import EnUS from '@univerjs/thread-comment-ui/locale/en-US';
+import { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
 
-```shell
-# Using npm
-npm install @univerjs/thread-comment-ui
+univer.registerPlugin(UniverThreadCommentUIPlugin);
 
-# Using pnpm
-pnpm add @univerjs/thread-comment-ui
+// Merge EnUS into your Univer locale map when this package contributes UI text.
 ```
 
-<!-- Links -->
-[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/thread-comment-ui?style=flat-square
-[npm-version-link]: https://npmjs.com/package/@univerjs/thread-comment-ui
-[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/thread-comment-ui?style=flat-square
-[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/thread-comment-ui?style=flat-square
+## Integration Notes
+
+Product-specific packages such as `@univerjs/sheets-thread-comment-ui` and `@univerjs/docs-thread-comment-ui` build on this shared UI layer.
+
+## Package Dependencies
+
+Important Univer dependencies: `@univerjs/core`, `@univerjs/design`, `@univerjs/docs-ui`, `@univerjs/icons`, `@univerjs/thread-comment`, `@univerjs/ui`.
+Peer dependencies: `react`, `rxjs`.
+
+## Resources
+
+- [Documentation](https://docs.univer.ai)
+- [NPM package](https://npmjs.com/package/@univerjs/thread-comment-ui)
+- [GitHub repository](https://github.com/dream-num/univer)
+

@@ -381,7 +381,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         const element = undoRedoService.pitchTopUndoElement();
         if (element) {
             const result = sequenceExecute(element.undoMutations, this._commandService);
-            if (result) {
+            if (result.result) {
                 undoRedoService.popUndoToRedo();
             }
         }

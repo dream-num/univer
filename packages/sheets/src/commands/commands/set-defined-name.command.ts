@@ -58,7 +58,7 @@ export const SetDefinedNameCommand: ICommand = {
 
         const result = sequenceExecute(redos, commandService);
 
-        if (result) {
+        if (result.result) {
             undoRedoService.pushUndoRedo({
                 unitID: params.unitId,
                 undoMutations: undos.filter(Boolean),

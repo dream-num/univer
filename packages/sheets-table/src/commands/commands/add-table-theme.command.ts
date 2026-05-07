@@ -89,15 +89,17 @@ export const AddTableThemeCommand: ICommand<IAddTableThemeCommandParams> = {
 
         const commandService = accessor.get(ICommandService);
         const res = sequenceExecute(redos, commandService);
-        if (res) {
+        if (res.result) {
             const undoRedoService = accessor.get(IUndoRedoService);
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations: undos,
                 redoMutations: redos,
             });
+
+            return true;
         }
 
-        return true;
+        return false;
     },
 };

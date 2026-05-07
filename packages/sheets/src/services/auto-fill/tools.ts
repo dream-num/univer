@@ -865,6 +865,7 @@ function generateNullCellValueRowCol(range: IDiscreteRange[]): IObjectMatrixPrim
             cols.forEach((j) => {
                 cellValue.setValue(i, j, {
                     v: null,
+                    s: null,
                     p: null,
                     f: null,
                     si: null,

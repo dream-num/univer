@@ -293,11 +293,11 @@ describe('Test tool', () => {
             { rows: [3], cols: [1, 2] },
         ]);
         expect(nullMatrix).toEqual({
-            0: { 2: { v: null, p: null, f: null, si: null, custom: null } },
-            1: { 2: { v: null, p: null, f: null, si: null, custom: null } },
+            0: { 2: { v: null, s: null, p: null, f: null, si: null, custom: null } },
+            1: { 2: { v: null, s: null, p: null, f: null, si: null, custom: null } },
             3: {
-                1: { v: null, p: null, f: null, si: null, custom: null },
-                2: { v: null, p: null, f: null, si: null, custom: null },
+                1: { v: null, s: null, p: null, f: null, si: null, custom: null },
+                2: { v: null, s: null, p: null, f: null, si: null, custom: null },
             },
         });
     });

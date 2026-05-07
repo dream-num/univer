@@ -34,10 +34,6 @@ univer.registerPlugin(UniverSheetsDrawingPlugin);
 
 Use this package with `@univerjs/sheets-drawing-ui` when users need drawing interactions in the sheet UI.
 
-## Package Dependencies
-
-Important Univer dependencies: `@univerjs/core`, `@univerjs/drawing`, `@univerjs/engine-render`, `@univerjs/sheets`.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

@@ -34,11 +34,6 @@ univer.registerPlugin(UniverSheetsThreadCommentPlugin);
 
 Use this package with `@univerjs/sheets-thread-comment-ui` when users need comment UI in sheets.
 
-## Package Dependencies
-
-Important Univer dependencies: `@univerjs/core`, `@univerjs/engine-formula`, `@univerjs/sheets`, `@univerjs/thread-comment`.
-Peer dependencies: `rxjs`.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

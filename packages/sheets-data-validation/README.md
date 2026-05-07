@@ -34,11 +34,6 @@ univer.registerPlugin(UniverSheetsDataValidationPlugin);
 
 Use this package with `@univerjs/sheets-data-validation-ui` when users need validation dialogs, dropdowns, and error UI.
 
-## Package Dependencies
-
-Important Univer dependencies: `@univerjs/core`, `@univerjs/data-validation`, `@univerjs/engine-formula`, `@univerjs/protocol`, `@univerjs/sheets`, `@univerjs/sheets-formula`.
-Peer dependencies: `rxjs`.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

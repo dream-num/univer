@@ -39,11 +39,6 @@ Exported plugin classes:
 - `UniverSheetsConditionalFormattingUIPlugin`
 - `UniverSheetsConditionalFormattingMobileUIPlugin`
 
-## Package Dependencies
-
-Important Univer dependencies: `@univerjs/core`, `@univerjs/design`, `@univerjs/engine-formula`, `@univerjs/engine-render`, `@univerjs/icons`, `@univerjs/sheets`, `@univerjs/sheets-conditional-formatting`, `@univerjs/sheets-formula`, `@univerjs/sheets-formula-ui`, `@univerjs/sheets-ui`, `@univerjs/ui`.
-Peer dependencies: `react`, `rxjs`.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

@@ -37,11 +37,6 @@ univer.registerPlugin(UniverSheetsFindReplacePlugin);
 
 Use this package with `@univerjs/find-replace` to share find and replace infrastructure across Univer surfaces.
 
-## Package Dependencies
-
-Important Univer dependencies: `@univerjs/core`, `@univerjs/engine-render`, `@univerjs/find-replace`, `@univerjs/sheets`, `@univerjs/sheets-ui`.
-Peer dependencies: `rxjs`.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

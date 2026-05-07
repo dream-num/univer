@@ -34,10 +34,6 @@ univer.registerPlugin(UniverDocsHyperLinkPlugin);
 
 Use this package with `@univerjs/docs-hyper-link-ui` when users need hyperlink editing UI.
 
-## Package Dependencies
-
-Important Univer dependencies: `@univerjs/core`.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

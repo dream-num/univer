@@ -39,11 +39,6 @@ Exported plugin classes:
 - `UniverSheetsDataValidationUIPlugin`
 - `UniverSheetsDataValidationMobileUIPlugin`
 
-## Package Dependencies
-
-Important Univer dependencies: `@univerjs/core`, `@univerjs/data-validation`, `@univerjs/design`, `@univerjs/engine-formula`, `@univerjs/engine-render`, `@univerjs/icons`, `@univerjs/sheets`, `@univerjs/sheets-data-validation`, `@univerjs/sheets-formula-ui`, `@univerjs/sheets-numfmt`, `@univerjs/sheets-ui`, `@univerjs/ui`.
-Peer dependencies: `react`, `rxjs`.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

@@ -34,11 +34,6 @@ univer.registerPlugin(UniverSheetsFilterPlugin);
 
 Use this package with `@univerjs/sheets-filter-ui` when users need filter menus and panels.
 
-## Package Dependencies
-
-Important Univer dependencies: `@univerjs/core`, `@univerjs/engine-formula`, `@univerjs/engine-render`, `@univerjs/rpc`, `@univerjs/sheets`.
-Peer dependencies: `rxjs`.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

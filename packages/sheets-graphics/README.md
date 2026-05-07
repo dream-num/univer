@@ -30,10 +30,6 @@ import { UniverSheetsGraphicsPlugin } from '@univerjs/sheets-graphics';
 univer.registerPlugin(UniverSheetsGraphicsPlugin);
 ```
 
-## Package Dependencies
-
-Important Univer dependencies: `@univerjs/core`, `@univerjs/engine-render`, `@univerjs/sheets-ui`.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

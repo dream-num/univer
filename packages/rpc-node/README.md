@@ -35,11 +35,6 @@ Exported plugin classes:
 - `UniverRPCNodeMainPlugin`
 - `UniverRPCNodeWorkerPlugin`
 
-## Package Dependencies
-
-Important Univer dependencies: `@univerjs/core`, `@univerjs/rpc`.
-Peer dependencies: `rxjs`.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

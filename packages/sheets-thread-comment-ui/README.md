@@ -35,11 +35,6 @@ univer.registerPlugin(UniverThreadCommentUIPlugin);
 // Merge EnUS into your Univer locale map when this package contributes UI text.
 ```
 
-## Package Dependencies
-
-Important Univer dependencies: `@univerjs/core`, `@univerjs/engine-formula`, `@univerjs/engine-render`, `@univerjs/icons`, `@univerjs/sheets`, `@univerjs/sheets-thread-comment`, `@univerjs/sheets-ui`, `@univerjs/thread-comment`, `@univerjs/thread-comment-ui`, `@univerjs/ui`.
-Peer dependencies: `react`, `rxjs`.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

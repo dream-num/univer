@@ -28,10 +28,6 @@ Keep all `@univerjs/*` packages on the same version.
 import { ITelemetryService } from '@univerjs/telemetry';
 ```
 
-## Package Dependencies
-
-Important Univer dependencies: `@univerjs/core`.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

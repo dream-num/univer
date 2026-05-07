@@ -33,11 +33,6 @@ univer.registerPlugin(UniverSheetsPlugin);
 // Merge EnUS into your Univer locale map when this package contributes UI text.
 ```
 
-## Package Dependencies
-
-Important Univer dependencies: `@univerjs/core`, `@univerjs/engine-formula`, `@univerjs/engine-render`, `@univerjs/protocol`, `@univerjs/rpc`.
-Peer dependencies: `rxjs`.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

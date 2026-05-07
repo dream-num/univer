@@ -34,11 +34,6 @@ univer.registerPlugin(UniverThreadCommentPlugin);
 
 Product-specific packages such as `@univerjs/sheets-thread-comment` and `@univerjs/docs-thread-comment-ui` build on this shared layer.
 
-## Package Dependencies
-
-Important Univer dependencies: `@univerjs/core`.
-Peer dependencies: `rxjs`.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

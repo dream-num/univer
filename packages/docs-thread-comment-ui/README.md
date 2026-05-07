@@ -35,11 +35,6 @@ univer.registerPlugin(UniverDocsThreadCommentUIPlugin);
 
 Use this package with `@univerjs/thread-comment` and `@univerjs/thread-comment-ui` for shared comment behavior.
 
-## Package Dependencies
-
-Important Univer dependencies: `@univerjs/core`, `@univerjs/docs`, `@univerjs/docs-ui`, `@univerjs/engine-render`, `@univerjs/icons`, `@univerjs/thread-comment`, `@univerjs/thread-comment-ui`, `@univerjs/ui`.
-Peer dependencies: `react`, `rxjs`.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

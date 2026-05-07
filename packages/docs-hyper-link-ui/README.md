@@ -38,11 +38,6 @@ univer.registerPlugin(UniverDocsHyperLinkUIPlugin);
 
 Register this package after the Docs, Docs UI, and Docs hyperlink core packages.
 
-## Package Dependencies
-
-Important Univer dependencies: `@univerjs/core`, `@univerjs/design`, `@univerjs/docs`, `@univerjs/docs-hyper-link`, `@univerjs/docs-ui`, `@univerjs/engine-render`, `@univerjs/icons`, `@univerjs/ui`.
-Peer dependencies: `react`, `rxjs`.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

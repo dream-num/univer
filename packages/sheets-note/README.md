@@ -34,11 +34,6 @@ univer.registerPlugin(UniverSheetsNotePlugin);
 
 Use this package with `@univerjs/sheets-note-ui` when users need note editing UI.
 
-## Package Dependencies
-
-Important Univer dependencies: `@univerjs/core`, `@univerjs/sheets`.
-Peer dependencies: `rxjs`.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

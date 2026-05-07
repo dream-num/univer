@@ -30,10 +30,6 @@ import { UniverDocsDrawingPlugin } from '@univerjs/docs-drawing';
 univer.registerPlugin(UniverDocsDrawingPlugin);
 ```
 
-## Package Dependencies
-
-Important Univer dependencies: `@univerjs/core`, `@univerjs/drawing`.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

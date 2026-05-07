@@ -39,11 +39,6 @@ Exported plugin classes:
 - `UniverUIPlugin`
 - `UniverMobileUIPlugin`
 
-## Package Dependencies
-
-Important Univer dependencies: `@univerjs/core`, `@univerjs/design`, `@univerjs/engine-render`, `@univerjs/icons`.
-Peer dependencies: `react`, `react-dom`, `rxjs`.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

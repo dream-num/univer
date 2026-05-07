@@ -30,11 +30,6 @@ import { UniverSlidesPlugin } from '@univerjs/slides';
 univer.registerPlugin(UniverSlidesPlugin);
 ```
 
-## Package Dependencies
-
-Important Univer dependencies: `@univerjs/core`, `@univerjs/engine-render`.
-Peer dependencies: `rxjs`.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

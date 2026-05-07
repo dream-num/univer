@@ -31,11 +31,6 @@ import { UniverDocsMentionUIPlugin } from '@univerjs/docs-mention-ui';
 univer.registerPlugin(UniverDocsMentionUIPlugin);
 ```
 
-## Package Dependencies
-
-Important Univer dependencies: `@univerjs/core`, `@univerjs/design`, `@univerjs/docs`, `@univerjs/docs-ui`, `@univerjs/ui`.
-Peer dependencies: `react`, `rxjs`.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

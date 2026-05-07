@@ -32,11 +32,6 @@ const univer = new Univer({
 });
 ```
 
-## Package Dependencies
-
-Important Univer dependencies: `@univerjs/protocol`, `@univerjs/themes`.
-Peer dependencies: `rxjs`.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

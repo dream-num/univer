@@ -34,11 +34,6 @@ univer.registerPlugin(UniverDocsQuickInsertUIPlugin);
 // Merge EnUS into your Univer locale map when this package contributes UI text.
 ```
 
-## Package Dependencies
-
-Important Univer dependencies: `@univerjs/core`, `@univerjs/design`, `@univerjs/docs`, `@univerjs/docs-drawing`, `@univerjs/docs-drawing-ui`, `@univerjs/docs-ui`, `@univerjs/drawing`, `@univerjs/drawing-ui`, `@univerjs/engine-render`, `@univerjs/icons`, `@univerjs/ui`.
-Peer dependencies: `react`, `rxjs`.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

@@ -40,11 +40,6 @@ Exported plugin classes:
 - `UniverSheetsFilterMobileUIPlugin`
 - `UniverSheetsFilterUIWorkerPlugin`
 
-## Package Dependencies
-
-Important Univer dependencies: `@univerjs/core`, `@univerjs/design`, `@univerjs/engine-render`, `@univerjs/icons`, `@univerjs/rpc`, `@univerjs/sheets`, `@univerjs/sheets-filter`, `@univerjs/sheets-ui`, `@univerjs/ui`.
-Peer dependencies: `react`, `rxjs`.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

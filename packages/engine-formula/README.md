@@ -30,11 +30,6 @@ import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 univer.registerPlugin(UniverFormulaEnginePlugin);
 ```
 
-## Package Dependencies
-
-Important Univer dependencies: `@univerjs/core`, `@univerjs/rpc`.
-Peer dependencies: `rxjs`.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

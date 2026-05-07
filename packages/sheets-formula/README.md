@@ -42,11 +42,6 @@ Exported plugin classes:
 
 Register this package with `@univerjs/engine-formula` and `@univerjs/sheets` before adding formula UI packages.
 
-## Package Dependencies
-
-Important Univer dependencies: `@univerjs/core`, `@univerjs/engine-formula`, `@univerjs/rpc`, `@univerjs/sheets`.
-Peer dependencies: `rxjs`.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

@@ -35,11 +35,6 @@ Exported plugin classes:
 - `UniverRPCMainThreadPlugin`
 - `UniverRPCWorkerThreadPlugin`
 
-## Package Dependencies
-
-Important Univer dependencies: `@univerjs/core`.
-Peer dependencies: `rxjs`.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

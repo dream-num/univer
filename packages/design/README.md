@@ -29,11 +29,6 @@ import '@univerjs/design/lib/index.css';
 import DesignEnUS from '@univerjs/design/locale/en-US';
 ```
 
-## Package Dependencies
-
-Important Univer dependencies: `@univerjs/icons`.
-Peer dependencies: `react`, `react-dom`.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

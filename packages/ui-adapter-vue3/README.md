@@ -30,11 +30,6 @@ import { UniverVue3AdapterPlugin } from '@univerjs/ui-adapter-vue3';
 univer.registerPlugin(UniverVue3AdapterPlugin);
 ```
 
-## Package Dependencies
-
-Important Univer dependencies: `@univerjs/core`, `@univerjs/ui`.
-Peer dependencies: `vue`.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

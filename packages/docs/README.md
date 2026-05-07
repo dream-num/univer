@@ -30,11 +30,6 @@ import { UniverDocsPlugin } from '@univerjs/docs';
 univer.registerPlugin(UniverDocsPlugin);
 ```
 
-## Package Dependencies
-
-Important Univer dependencies: `@univerjs/core`, `@univerjs/engine-render`.
-Peer dependencies: `rxjs`.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

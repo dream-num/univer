@@ -30,10 +30,6 @@ import { UniverWebComponentAdapterPlugin } from '@univerjs/ui-adapter-web-compon
 univer.registerPlugin(UniverWebComponentAdapterPlugin);
 ```
 
-## Package Dependencies
-
-Important Univer dependencies: `@univerjs/core`, `@univerjs/ui`.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

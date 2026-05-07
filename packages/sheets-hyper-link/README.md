@@ -34,11 +34,6 @@ univer.registerPlugin(UniverSheetsHyperLinkPlugin);
 
 Use this package with `@univerjs/sheets-hyper-link-ui` when users need hyperlink editing UI.
 
-## Package Dependencies
-
-Important Univer dependencies: `@univerjs/core`, `@univerjs/docs`, `@univerjs/engine-formula`, `@univerjs/sheets`.
-Peer dependencies: `rxjs`.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

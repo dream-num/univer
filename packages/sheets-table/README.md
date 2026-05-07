@@ -34,11 +34,6 @@ univer.registerPlugin(UniverSheetsTablePlugin);
 
 Use this package with `@univerjs/sheets-table-ui` when users need table controls in the sheet UI.
 
-## Package Dependencies
-
-Important Univer dependencies: `@univerjs/core`, `@univerjs/engine-formula`, `@univerjs/sheets`.
-Peer dependencies: `rxjs`.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

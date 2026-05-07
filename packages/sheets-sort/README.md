@@ -37,10 +37,6 @@ univer.registerPlugin(UniverSheetsSortPlugin);
 
 Use this package with `@univerjs/sheets-sort-ui` when users need sorting menus and panels.
 
-## Package Dependencies
-
-Important Univer dependencies: `@univerjs/core`, `@univerjs/engine-formula`, `@univerjs/sheets`.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

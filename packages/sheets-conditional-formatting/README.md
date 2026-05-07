@@ -34,11 +34,6 @@ univer.registerPlugin(UniverSheetsConditionalFormattingPlugin);
 
 Use this package with `@univerjs/sheets-conditional-formatting-ui` when users need menus and rule-management panels.
 
-## Package Dependencies
-
-Important Univer dependencies: `@univerjs/core`, `@univerjs/engine-formula`, `@univerjs/engine-render`, `@univerjs/sheets`.
-Peer dependencies: `rxjs`.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

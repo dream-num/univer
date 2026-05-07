@@ -132,6 +132,7 @@ function createLocalSheetsTestBed(workbookData?: IWorkbookData, dependencies?: D
             dependencies?.forEach((dependency) => injector.add(dependency));
 
             injector.get(SheetInterceptorService);
+            injector.get(SheetSkeletonService);
             injector.get(WorkbookPermissionService);
             injector.get(WorksheetPermissionService);
         }

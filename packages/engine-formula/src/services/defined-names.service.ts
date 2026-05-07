@@ -83,6 +83,9 @@ export interface IDefinedNamesService {
 
     getAllDefinedNames(): IDefinedNameMap;
 
+    getAllDefinedNamesIsEmpty(): boolean;
+
+    getDefinedNameByRefString(unitId: string, formulaOrRefString: string): Nullable<IDefinedNamesServiceParam>;
 }
 
 export class DefinedNamesService extends Disposable implements IDefinedNamesService {
@@ -90,9 +93,10 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
     private _definedNameMap: IDefinedNameMap = {};
     // Cache for name-to-definition mapping, here name key is ignored case sensitivity
     private _nameCacheMap: { [unitId: string]: { [name: string]: IDefinedNamesServiceParam } } = {};
+    //
+    private _definedNamesIsEmpty: boolean = true;
 
     private readonly _update$ = new Subject<IDefinedNamesUpdateEvent>();
-
     readonly update$ = this._update$.asObservable();
 
     private _currentRange: IUnitRange = {
@@ -155,16 +159,21 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
     registerDefinedNames(unitId: string, params: IDefinedNameMapItem) {
         this._definedNameMap[unitId] = params;
         this._updateCache(unitId);
+
+        const definedNames = Object.values(params);
         this._update({
             type: 'update',
             unitId,
-            definedNames: Object.values(params),
+            definedNames,
         });
+
+        if (definedNames.length > 0) {
+            this._definedNamesIsEmpty = false;
+        }
     }
 
     registerDefinedName(unitId: string, param: IDefinedNamesServiceParam) {
         const unitMap = this._definedNameMap[unitId];
-
         if (unitMap === undefined) {
             this._definedNameMap[unitId] = {};
         }
@@ -176,6 +185,7 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
             unitId,
             definedNames: [param],
         });
+        this._definedNamesIsEmpty = false;
     }
 
     removeDefinedName(unitId: string, id: string) {
@@ -191,6 +201,7 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
             unitId,
             definedNames: [definedName],
         });
+        this._definedNamesIsEmpty = this._isDeepDefinedNameMapEmpty();
     }
 
     removeUnitDefinedName(unitId: string) {
@@ -206,6 +217,7 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
             unitId,
             definedNames: Object.values(definedNames),
         });
+        this._definedNamesIsEmpty = this._isDeepDefinedNameMapEmpty();
     }
 
     getDefinedNameMap(unitId: string) {
@@ -247,15 +259,18 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
     }
 
     hasDefinedName(unitId: string) {
-        if (this._definedNameMap[unitId] === undefined) {
+        if (!this._definedNameMap[unitId]) {
             return false;
         }
-        const size = Array.from(Object.values(this._definedNameMap[unitId])).length || 0;
-        return size !== 0;
+        return Object.keys(this._definedNameMap[unitId]).length > 0;
     }
 
     getAllDefinedNames() {
         return this._definedNameMap;
+    }
+
+    getAllDefinedNamesIsEmpty(): boolean {
+        return this._definedNamesIsEmpty;
     }
 
     getDefinedNameByRefString(unitId: string, formulaOrRefString: string) {
@@ -286,6 +301,15 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
             this._nameCacheMap[unitId][item.name.toLowerCase()] = item;
         }
     }
+
+    private _isDeepDefinedNameMapEmpty(): boolean {
+        for (const unitId in this._definedNameMap) {
+            if (this.hasDefinedName(unitId)) {
+                return false;
+            }
+        }
+        return true;
+    }
 }
 
-export const IDefinedNamesService = createIdentifier<DefinedNamesService>('univer.formula.defined-names.service');
+export const IDefinedNamesService = createIdentifier<IDefinedNamesService>('univer.formula.defined-names.service');

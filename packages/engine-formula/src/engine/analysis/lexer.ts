@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { IDefinedNameMap } from '../../services/defined-names.service';
 import { Disposable, Inject } from '@univerjs/core';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
 import { IDefinedNamesService } from '../../services/defined-names.service';
@@ -30,8 +29,7 @@ export class Lexer extends Disposable {
     }
 
     treeBuilder(formulaString: string, transformSuffix = true) {
-        const definedNames = this._definedNamesService.getAllDefinedNames();
-        if (this._isDeepDefinedNameMapEmpty(definedNames)) {
+        if (this._definedNamesService.getAllDefinedNamesIsEmpty()) {
             return this._lexerTreeBuilder.treeBuilder(formulaString, transformSuffix);
         }
 
@@ -41,14 +39,5 @@ export class Lexer extends Disposable {
             getDirtyDefinedNameMap: this._formulaCurrentConfigService.getDirtyDefinedNameMap.bind(this._formulaCurrentConfigService),
             getSheetName: this._formulaCurrentConfigService.getSheetName.bind(this._formulaCurrentConfigService),
         });
-    }
-
-    private _isDeepDefinedNameMapEmpty(map: IDefinedNameMap): boolean {
-        for (const unitId in map) {
-            if (Object.keys(map[unitId]).length > 0) {
-                return false;
-            }
-        }
-        return true;
     }
 }

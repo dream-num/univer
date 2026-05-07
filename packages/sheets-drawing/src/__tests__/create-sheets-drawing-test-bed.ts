@@ -32,6 +32,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { DrawingManagerService, IDrawingManagerService } from '@univerjs/drawing';
+import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import {
     CopySheetCommand,
     CopyWorksheetEndMutation,
@@ -101,6 +102,7 @@ export function createSheetsDrawingTestBed(workbookData?: IWorkbookData, depende
             this._injector.get(IUndoRedoService);
 
             ([
+                [IRenderManagerService, { useClass: RenderManagerService }],
                 [SheetInterceptorService],
                 [SheetLazyExecuteScheduleService],
                 [IDrawingManagerService, { useClass: DrawingManagerService }],

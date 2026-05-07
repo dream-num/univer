@@ -33,6 +33,7 @@ import {
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SheetsSelectionsService } from '../../../services/selections/selection.service';
 import { SetRangeValuesMutation } from '../../mutations/set-range-values.mutation';
+import { SetSelectionsOperation } from '../../operations/selection.operation';
 import { SetRangeValuesCommand } from '../set-range-values.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
@@ -153,6 +154,7 @@ describe('Test set range values commands', () => {
         commandService = get(ICommandService);
         commandService.registerCommand(SetRangeValuesCommand);
         commandService.registerCommand(SetRangeValuesMutation);
+        commandService.registerCommand(SetSelectionsOperation);
 
         selectionManager = get(SheetsSelectionsService);
         selectionManager.addSelections([

@@ -43,7 +43,7 @@ export enum SLIDE_VIEW_KEY {
     VIEWPORT = '__SLIDEViewPort_',
 }
 
-export const ISlideEditorBridgeService = createIdentifier<SlideEditorBridgeService>('univer.slide-editor-bridge.service');
+export const ISlideEditorBridgeService = createIdentifier<ISlideEditorBridgeService>('univer.slide-editor-bridge.service');
 
 export interface IEditorBridgeServiceParam {
     unitId: string;

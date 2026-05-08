@@ -93,6 +93,6 @@ export class SlideEditorManagerService implements ISlideEditorManagerService, ID
     }
 }
 
-export const ISlideEditorManagerService = createIdentifier<SlideEditorManagerService>(
+export const ISlideEditorManagerService = createIdentifier<ISlideEditorManagerService>(
     'univer.slide-editor-manager.service'
 );

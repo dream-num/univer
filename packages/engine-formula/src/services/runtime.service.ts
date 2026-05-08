@@ -944,4 +944,4 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
     }
 }
 
-export const IFormulaRuntimeService = createIdentifier<FormulaRuntimeService>('univer.formula.runtime.service');
+export const IFormulaRuntimeService = createIdentifier<IFormulaRuntimeService>('univer.formula.runtime.service');

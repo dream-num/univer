@@ -95,6 +95,6 @@ export class CellEditorManagerService implements ICellEditorManagerService, IDis
     }
 }
 
-export const ICellEditorManagerService = createIdentifier<CellEditorManagerService>(
+export const ICellEditorManagerService = createIdentifier<ICellEditorManagerService>(
     'univer.sheet-cell-editor-manager.service'
 );

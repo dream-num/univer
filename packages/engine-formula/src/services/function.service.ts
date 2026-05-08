@@ -58,7 +58,7 @@ export interface IFunctionService {
 
     deleteFormulaAstCacheKey(...functionToken: IFunctionNames[]): void;
 }
-export const IFunctionService = createIdentifier<FunctionService>('univer.formula-function.service');
+export const IFunctionService = createIdentifier<IFunctionService>('univer.formula-function.service');
 
 export class FunctionService extends Disposable implements IFunctionService {
     private _functionExecutors: Map<IFunctionNames, BaseFunction> = new Map();

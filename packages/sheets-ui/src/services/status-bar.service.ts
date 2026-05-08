@@ -118,4 +118,4 @@ export class StatusBarService implements IStatusBarService, IDisposable {
     }
 }
 
-export const IStatusBarService = createIdentifier<StatusBarService>('univer.sheet-status-bar.service');
+export const IStatusBarService = createIdentifier<IStatusBarService>('univer.sheet-status-bar.service');

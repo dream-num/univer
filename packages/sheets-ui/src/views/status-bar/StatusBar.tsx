@@ -17,7 +17,7 @@
 import type { Nullable } from '@univerjs/core';
 import type { ComponentType } from 'react';
 import type { IUniverSheetsUIConfig } from '../../config/config';
-import type { IStatusBarServiceStatus, StatusBarService } from '../../services/status-bar.service';
+import type { IStatusBarServiceStatus } from '../../services/status-bar.service';
 import type { IStatisticItem } from './CopyableStatisticItem';
 import { debounce } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
@@ -47,7 +47,7 @@ export const StatusBar = () => {
 
     const useStatistics = (
         initialItems: IStatisticItem[],
-        statusBarService: StatusBarService,
+        statusBarService: IStatusBarService,
         isSingle: boolean,
         showStatistic: boolean
     ) => {

@@ -43,6 +43,6 @@ export class SheetRowFilteredService extends Disposable implements ISheetRowFilt
     }
 }
 
-export const ISheetRowFilteredService = createIdentifier<SheetRowFilteredService>(
+export const ISheetRowFilteredService = createIdentifier<ISheetRowFilteredService>(
     'univer.formula.sheet-row-filtered.service'
 );

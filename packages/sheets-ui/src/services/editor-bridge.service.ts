@@ -102,7 +102,7 @@ export interface IEditorBridgeService {
     enableForceKeepVisible(): void;
     disableForceKeepVisible(): void;
     isForceKeepVisible(): boolean;
-    getCurrentEditorId(): Nullable<string>;
+    getCurrentEditorId(): string;
     helpFunctionVisible$: BehaviorSubject<boolean>;
 }
 
@@ -453,4 +453,4 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
     }
 }
 
-export const IEditorBridgeService = createIdentifier<EditorBridgeService>('univer.sheet-editor-bridge.service');
+export const IEditorBridgeService = createIdentifier<IEditorBridgeService>('univer.sheet-editor-bridge.service');

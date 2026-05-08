@@ -667,6 +667,6 @@ export class DependencyManagerService extends DependencyManagerBaseService imple
     }
 }
 
-export const IDependencyManagerService = createIdentifier<DependencyManagerService>(
+export const IDependencyManagerService = createIdentifier<IDependencyManagerService>(
     'univer.formula.dependency-manager.service'
 );

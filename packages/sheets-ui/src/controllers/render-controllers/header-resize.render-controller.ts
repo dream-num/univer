@@ -175,6 +175,8 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
                 scene,
                 skeleton
             );
+            const isLastRow = row === skeleton.worksheet.getRowCount() - 1;
+            const isLastColumn = column === skeleton.worksheet.getColumnCount() - 1;
 
             const transformCoord = getTransformCoord(evt.offsetX, evt.offsetY, scene, skeleton);
 
@@ -187,7 +189,9 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
             if (initialType === HEADER_RESIZE_TYPE.ROW) {
                 let top = startY - HEADER_MENU_SHAPE_WIDTH_HEIGHT_SCALE / 2;
 
-                if (
+                if (isLastRow && (endY - startY) <= HEADER_MENU_SHAPE_WIDTH_HEIGHT_SCALE / 2) {
+                    this._currentRow = row;
+                } else if (
                     transformCoord.y <= startY + HEADER_MENU_SHAPE_WIDTH_HEIGHT_SCALE / 2 &&
                     transformCoord.y >= startY
                 ) {
@@ -227,7 +231,9 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
             } else {
                 let left = startX - HEADER_MENU_SHAPE_WIDTH_HEIGHT_SCALE / 2;
 
-                if (
+                if (isLastColumn && (endX - startX) <= HEADER_MENU_SHAPE_WIDTH_HEIGHT_SCALE / 2) {
+                    this._currentColumn = column;
+                } else if (
                     transformCoord.x <= startX + HEADER_MENU_SHAPE_WIDTH_HEIGHT_SCALE / 2 &&
                     transformCoord.x >= startX
                 ) {

@@ -144,6 +144,6 @@ export class OtherFormulaManagerService extends Disposable implements IOtherForm
     }
 }
 
-export const IOtherFormulaManagerService = createIdentifier<OtherFormulaManagerService>(
+export const IOtherFormulaManagerService = createIdentifier<IOtherFormulaManagerService>(
     'univer.formula.other-formula-manager.service'
 );

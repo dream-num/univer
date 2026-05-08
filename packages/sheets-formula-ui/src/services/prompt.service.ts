@@ -152,7 +152,7 @@ export interface IFormulaPromptService {
     isLockedSelectionInsert(): boolean;
 }
 
-export const IFormulaPromptService = createIdentifier<FormulaPromptService>('formula-ui.prompt-service');
+export const IFormulaPromptService = createIdentifier<IFormulaPromptService>('formula-ui.prompt-service');
 
 export class FormulaPromptService implements IFormulaPromptService, IDisposable {
     private readonly _search$ = new Subject<ISearchFunctionOperationParams>();

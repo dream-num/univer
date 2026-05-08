@@ -117,6 +117,6 @@ export class FeatureCalculationManagerService extends Disposable implements IFea
     }
 }
 
-export const IFeatureCalculationManagerService = createIdentifier<FeatureCalculationManagerService>(
+export const IFeatureCalculationManagerService = createIdentifier<IFeatureCalculationManagerService>(
     'univer.formula.feature-calculation-manager.service'
 );

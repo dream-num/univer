@@ -77,6 +77,6 @@ export class ActiveDirtyManagerService extends Disposable implements IActiveDirt
     }
 }
 
-export const IActiveDirtyManagerService = createIdentifier<ActiveDirtyManagerService>(
+export const IActiveDirtyManagerService = createIdentifier<IActiveDirtyManagerService>(
     'univer.formula.active-dirty-manager.service'
 );

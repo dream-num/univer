@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { IDisposable, Nullable } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
 import type { Observable } from 'rxjs';
-import { createIdentifier } from '@univerjs/core';
+import { createIdentifier, Disposable } from '@univerjs/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 
 export interface IFormulaEditorManagerService {
@@ -24,13 +24,14 @@ export interface IFormulaEditorManagerService {
     focus$: Observable<boolean>;
     fxBtnClick$: Observable<boolean>;
     foldBtnStatus$: Observable<boolean>;
-    dispose(): void;
     setPosition(param: DOMRect): void;
     getPosition(): Readonly<Nullable<DOMRect>>;
     setFocus(param: boolean): void;
+    handleFxBtnClick(params: boolean): void;
+    handleFoldBtnClick(params: boolean): void;
 }
 
-export class FormulaEditorManagerService implements IDisposable {
+export class FormulaEditorManagerService extends Disposable implements IFormulaEditorManagerService {
     private _position: Nullable<DOMRect> = null;
 
     private readonly _position$ = new BehaviorSubject<Nullable<DOMRect>>(null);
@@ -47,7 +48,9 @@ export class FormulaEditorManagerService implements IDisposable {
     private readonly _foldBtnStatus$ = new Subject<boolean>();
     readonly foldBtnStatus$ = this._foldBtnStatus$.asObservable();
 
-    dispose(): void {
+    override dispose(): void {
+        super.dispose();
+
         this._position$.complete();
         this._focus$.complete();
         this._position = null;
@@ -82,6 +85,6 @@ export class FormulaEditorManagerService implements IDisposable {
     }
 }
 
-export const IFormulaEditorManagerService = createIdentifier<FormulaEditorManagerService>(
+export const IFormulaEditorManagerService = createIdentifier<IFormulaEditorManagerService>(
     'univer.sheet-formula-editor-manager.service'
 );

@@ -546,6 +546,6 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
     }
 }
 
-export const IFormulaCurrentConfigService = createIdentifier<FormulaCurrentConfigService>(
+export const IFormulaCurrentConfigService = createIdentifier<IFormulaCurrentConfigService>(
     'univer.formula.current-data.service'
 );

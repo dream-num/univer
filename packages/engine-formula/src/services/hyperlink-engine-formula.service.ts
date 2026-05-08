@@ -73,6 +73,6 @@ export class HyperlinkEngineFormulaService extends Disposable implements IHyperl
     }
 }
 
-export const IHyperlinkEngineFormulaService = createIdentifier<HyperlinkEngineFormulaService>(
+export const IHyperlinkEngineFormulaService = createIdentifier<IHyperlinkEngineFormulaService>(
     'univer.formula.hyperlink-engine-formula.service'
 );

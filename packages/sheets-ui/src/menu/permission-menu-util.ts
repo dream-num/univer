@@ -297,22 +297,33 @@ export function getAddPermissionFromSheetBarDisable$(accessor: IAccessor) {
                     if (!worksheet) {
                         return of(true);
                     }
+
                     const unitId = workbook.getUnitId();
                     const subUnitId = worksheet.getSheetId();
+
                     const selectionProtectionRuleModel = accessor.get(RangeProtectionRuleModel);
                     const worksheetProtectionRuleModel = accessor.get(WorksheetProtectionRuleModel);
-                    const permission$ = permissionService.composePermission$([new WorkbookCreateProtectPermission(unitId).id]).pipe(map((permissions) => permissions.every((permission) => permission.value))) ?? of(false);
+
+                    const permission$ = permissionService.composePermission$([
+                        new WorkbookCreateProtectPermission(unitId).id,
+                    ]).pipe(
+                        map((permissions) => permissions.every((permission) => permission.value))
+                    ) ?? of(false);
+
                     const ruleChange$ = merge(
                         selectionProtectionRuleModel.ruleChange$,
                         worksheetProtectionRuleModel.ruleChange$
                     ).pipe(
                         startWith(null)
                     );
+
                     return combineLatest([permission$, ruleChange$]).pipe(
                         map(([permission, _]) => {
                             if (!permission) return true;
+
                             const worksheetRule = worksheetProtectionRuleModel.getRule(unitId, subUnitId);
                             if (worksheetRule?.permissionId) return true;
+
                             const subUnitRuleList = selectionProtectionRuleModel.getSubunitRuleList(unitId, subUnitId)?.filter((item) => item?.permissionId);
                             return subUnitRuleList.length > 0;
                         })
@@ -340,14 +351,20 @@ export function getRemovePermissionFromSheetBarDisable$(accessor: IAccessor) {
                     if (!worksheet) {
                         return of(true);
                     }
+
                     const unitId = workbook.getUnitId();
                     const subUnitId = worksheet.getSheetId();
+
                     const worksheetProtectionRuleModel = accessor.get(WorksheetProtectionRuleModel);
-                    return worksheetProtectionRuleModel.ruleChange$.pipe(startWith(null)).pipe(
-                        map(() => {
-                            const rule = worksheetProtectionRuleModel.getRule(unitId, subUnitId);
-                            if (rule) {
-                                return permissionService.getPermissionPoint(new WorksheetDeleteProtectionPermission(unitId, subUnitId).id)?.value === false;
+
+                    const permission$ = permissionService.getPermissionPoint$(new WorksheetDeleteProtectionPermission(unitId, subUnitId).id)?.pipe(map((e) => !!e.value)) ?? of(false);
+                    const ruleChange$ = worksheetProtectionRuleModel.ruleChange$.pipe(startWith(null));
+
+                    return combineLatest([permission$, ruleChange$]).pipe(
+                        map(([permission, _]) => {
+                            const worksheetRule = worksheetProtectionRuleModel.getRule(unitId, subUnitId);
+                            if (worksheetRule?.permissionId) {
+                                return !permission;
                             }
                             return true;
                         })
@@ -375,24 +392,36 @@ export function getSetPermissionFromSheetBarDisable$(accessor: IAccessor) {
                     if (!worksheet) {
                         return of(true);
                     }
+
                     const unitId = workbook.getUnitId();
+                    const subUnitId = worksheet.getSheetId();
+
                     const selectionProtectionRuleModel = accessor.get(RangeProtectionRuleModel);
                     const worksheetProtectionRuleModel = accessor.get(WorksheetProtectionRuleModel);
-                    const permission$ = permissionService.composePermission$([new WorkbookCreateProtectPermission(unitId).id, new WorkbookManageCollaboratorPermission(unitId).id]).pipe(map((permissions) => permissions.every((permission) => permission.value))) ?? of(false);
-                    const worksheetRuleChange$ = worksheetProtectionRuleModel.ruleChange$.pipe(startWith(null));
-                    const selectionRuleChange$ = selectionProtectionRuleModel.ruleChange$.pipe(startWith(null));
-                    return combineLatest([permission$, worksheetRuleChange$, selectionRuleChange$]).pipe(
-                        map(([permission, _, __]) => {
-                            if (!permission) {
-                                return true;
-                            }
-                            const subUnitId = worksheet.getSheetId();
+
+                    const permission$ = permissionService.composePermission$([
+                        new WorkbookCreateProtectPermission(unitId).id,
+                        new WorkbookManageCollaboratorPermission(unitId).id,
+                    ]).pipe(
+                        map((permissions) => permissions.every((permission) => permission.value))
+                    ) ?? of(false);
+
+                    const ruleChange$ = merge(
+                        selectionProtectionRuleModel.ruleChange$,
+                        worksheetProtectionRuleModel.ruleChange$
+                    ).pipe(
+                        startWith(null)
+                    );
+
+                    return combineLatest([permission$, ruleChange$]).pipe(
+                        map(([permission, _]) => {
+                            if (!permission) return true;
+
                             const worksheetRule = worksheetProtectionRuleModel.getRule(unitId, subUnitId);
-                            const selectionRuleList = selectionProtectionRuleModel.getSubunitRuleList(unitId, subUnitId);
-                            if (worksheetRule || selectionRuleList.length) {
-                                return false;
-                            }
-                            return true;
+                            if (worksheetRule?.permissionId) return false;
+
+                            const subUnitRuleList = selectionProtectionRuleModel.getSubunitRuleList(unitId, subUnitId)?.filter((item) => item?.permissionId);
+                            return subUnitRuleList.length === 0;
                         })
                     );
                 })

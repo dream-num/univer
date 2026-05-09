@@ -90,7 +90,7 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
     protected readonly _executionCompleteListener$ = new Subject<IAllRuntimeData>();
     readonly executionCompleteListener$ = this._executionCompleteListener$.asObservable();
 
-    private _executeLock = new AsyncLock();
+    protected _executeLock = new AsyncLock();
 
     protected _isCalculateTreeModel: boolean = false;
 
@@ -172,7 +172,7 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
         });
     }
 
-    private async _executeStep() {
+    protected async _executeStep() {
         const executeState = await this._apply();
 
         if (executeState == null) {
@@ -199,7 +199,7 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
         return true;
     }
 
-    private _getArrayFormulaDirtyRangeAndExcludedRange(
+    protected _getArrayFormulaDirtyRangeAndExcludedRange(
         arrayFormulaRange: IArrayFormulaRangeType,
         runtimeFeatureRange: { [featureId: string]: IFeatureDirtyRangeType }
     ) {

@@ -57,7 +57,7 @@ const h = vi.hoisted(() => {
     };
 });
 
-vi.mock('opentype.js/dist/opentype.module.js', () => ({
+vi.mock('opentype.js', () => ({
     parse: h.parse,
 }));
 

@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-note-ui",
-    "version": "0.21.1",
+    "version": "0.22.0",
     "private": false,
     "description": "Cell note UI for Univer Sheets.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

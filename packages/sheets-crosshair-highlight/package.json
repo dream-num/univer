@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-crosshair-highlight",
-    "version": "0.21.1",
+    "version": "0.22.0",
     "private": false,
     "description": "Crosshair highlight plugin for Univer Sheets.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

@@ -1,5 +1,35 @@
 # Changelog
 
+# [0.22.0](https://github.com/dream-num/univer/compare/v0.21.1...v0.22.0) (2026-05-09)
+
+
+### Bug Fixes
+
+* active alignment style ([#6854](https://github.com/dream-num/univer/issues/6854)) ([15cdf62](https://github.com/dream-num/univer/commit/15cdf62020d514d23fb70694819bb44ade3983e1))
+* active list value ([#6856](https://github.com/dream-num/univer/issues/6856)) ([0ac415c](https://github.com/dream-num/univer/commit/0ac415cbf04c034e724bae31be0b37cfe67e3849))
+* **cellImage:** fix defects in image enlargement hot zone calculation ([#6845](https://github.com/dream-num/univer/issues/6845)) ([0e30fea](https://github.com/dream-num/univer/commit/0e30feaff54c643206412a06cce5428dd8cb66c5))
+* **copy:** fix unescaped special characters such as `<>` in copied HTML ([#6850](https://github.com/dream-num/univer/issues/6850)) ([7ba9b6a](https://github.com/dream-num/univer/commit/7ba9b6aafa63f5394bc2a98daf4d826a2583944c))
+* **definedName:** add defined name permission controller ([#6857](https://github.com/dream-num/univer/issues/6857)) ([44dbe3b](https://github.com/dream-num/univer/commit/44dbe3ba4d296478866e12cadb92a3b267ea0ce1))
+* **definedName:** fix lexer.treeBuilder performance ([#6873](https://github.com/dream-num/univer/issues/6873)) ([ed89f1f](https://github.com/dream-num/univer/commit/ed89f1fc9cf230027c4996b4047dba0e16268b34))
+* **drawing:** fix floating images did not update their position along with hidden rows and columns ([#6842](https://github.com/dream-num/univer/issues/6842)) ([a46d82b](https://github.com/dream-num/univer/commit/a46d82b9e7716a8a555c89baa735cfd0015aeb9c))
+* fix copy html error ([#6861](https://github.com/dream-num/univer/issues/6861)) ([eca1af9](https://github.com/dream-num/univer/commit/eca1af9ee6a90c9f6da9f3c135edb2867d1921ea))
+* fix when cell wrapping is enabled, cell text must wrap to the next line after `\n` ([#6859](https://github.com/dream-num/univer/issues/6859)) ([c4f3ce5](https://github.com/dream-num/univer/commit/c4f3ce5f8b944dc66b4cb9a87c78bbefd0a90660))
+* optimize auto row height recalculation when clearing cell content or styles ([#6870](https://github.com/dream-num/univer/issues/6870)) ([ef63690](https://github.com/dream-num/univer/commit/ef636900b6cf401bced1b0d981e63d67f90a8604))
+* optimize boundary cases where the width and height of the last row/column cannot be changed via UI ([#6876](https://github.com/dream-num/univer/issues/6876)) ([bbd5294](https://github.com/dream-num/univer/commit/bbd52941255129655ddf243e0828a3102646292c))
+* **paste:** fix some number formatted text copied from Excel was not parsed correctly ([#6844](https://github.com/dream-num/univer/issues/6844)) ([f171450](https://github.com/dream-num/univer/commit/f1714504ab0f02b1c5fa43c24320a46f5f464606))
+* **permission:** fix some issues with permission control ([#6853](https://github.com/dream-num/univer/issues/6853)) ([5af6a73](https://github.com/dream-num/univer/commit/5af6a73c98c0e16b9751332165ee2eff2097d406))
+* **permission:** fix the disabled status listener for the context menu in the sheet bar ([#6877](https://github.com/dream-num/univer/issues/6877)) ([67371e8](https://github.com/dream-num/univer/commit/67371e8ffb80a14eab18ef2810289738d0748bed))
+* set min value in page settings ([#6852](https://github.com/dream-num/univer/issues/6852)) ([4990505](https://github.com/dream-num/univer/commit/4990505479745be6e4063611ba766dcca1497c72))
+* **sheets-ui:** allow inline format shortcuts to fire inside cell editor ([#6851](https://github.com/dream-num/univer/issues/6851)) ([4b98f87](https://github.com/dream-num/univer/commit/4b98f87b66db2093b77d7cb8d351b309a875e3d5))
+* **sheets:** clear styles when copy filling blank cells ([#6869](https://github.com/dream-num/univer/issues/6869)) ([32a2c98](https://github.com/dream-num/univer/commit/32a2c98f41f5533796ac985eaed35e4b27a6cf64))
+* **ui:** fix the submenu in the context menu did not disappear when click it ([#6858](https://github.com/dream-num/univer/issues/6858)) ([0def2e2](https://github.com/dream-num/univer/commit/0def2e21a3c32d87185967209c0dd0e1fc524913))
+
+
+### Features
+
+* add `footer.addSheetButtonConfig` config ([#6866](https://github.com/dream-num/univer/issues/6866)) ([4055e42](https://github.com/dream-num/univer/commit/4055e42530b0aac1df690e7a3fe47d55efbe6c05))
+* add maximum allowed size config of uploaded images ([#6865](https://github.com/dream-num/univer/issues/6865)) ([46e1309](https://github.com/dream-num/univer/commit/46e13092c0a9348a0928d8b2a73418fecda23372))
+
 ## [0.21.1](https://github.com/dream-num/univer/compare/v0.21.0...v0.21.1) (2026-04-25)
 
 

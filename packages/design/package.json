@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/design",
-    "version": "0.21.1",
+    "version": "0.22.0",
     "private": false,
     "description": "Shared React design components, styles, and locale resources for Univer UI packages.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

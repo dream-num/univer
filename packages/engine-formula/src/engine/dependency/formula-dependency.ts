@@ -74,7 +74,7 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
         @IFormulaRuntimeService protected readonly _runtimeService: IFormulaRuntimeService,
         @IOtherFormulaManagerService protected readonly _otherFormulaManagerService: IOtherFormulaManagerService,
         @IFeatureCalculationManagerService
-        private readonly _featureCalculationManagerService: IFeatureCalculationManagerService,
+        protected readonly _featureCalculationManagerService: IFeatureCalculationManagerService,
         @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(Interpreter) private readonly _interpreter: Interpreter,
         @Inject(AstTreeBuilder) protected readonly _astTreeBuilder: AstTreeBuilder,

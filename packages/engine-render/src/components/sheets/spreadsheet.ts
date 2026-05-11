@@ -29,7 +29,7 @@ import type { IPaintForRefresh, IPaintForScrolling, SHEET_VIEWPORT_KEY } from '.
 import type { SpreadsheetSkeleton } from './sheet.render-skeleton';
 import { BooleanNumber, sortRules, Tools } from '@univerjs/core';
 import { FIX_ONE_PIXEL_BLUR_OFFSET, RENDER_CLASS_TYPE } from '../../basics/const';
-import { getColor } from '../../basics/tools';
+import { fixLineWidthByScale, getColor } from '../../basics/tools';
 import { Documents } from '../docs/document';
 import { SpreadsheetExtensionRegistry } from '../extension';
 import { sheetContentViewportKeys, sheetHeaderViewportKeys } from './constants';
@@ -573,20 +573,24 @@ export class Spreadsheet extends SheetComponent {
         const endY = rowHeightAccumulation[rowEnd];
         ctx.translateWithPrecisionRatio(FIX_ONE_PIXEL_BLUR_OFFSET, FIX_ONE_PIXEL_BLUR_OFFSET);
 
-        ctx.beginPath();
-        ctx.moveToByPrecision(startX, startY);
-        ctx.lineToByPrecision(endX, startY);
+        const { scaleX, scaleY } = ctx.getScale();
+        const fixedStartX = fixLineWidthByScale(startX, scaleX);
+        const fixedStartY = fixLineWidthByScale(startY, scaleY);
+        const fixedEndX = fixLineWidthByScale(endX, scaleX);
+        const fixedEndY = fixLineWidthByScale(endY, scaleY);
 
-        ctx.moveToByPrecision(startX, startY);
-        ctx.lineToByPrecision(startX, endY);
-
-        ctx.closePathByEnv();
-        ctx.stroke();
+        const borderPath = new Path2D();
+        borderPath.moveTo(fixedStartX, fixedStartY);
+        borderPath.lineTo(fixedEndX, fixedStartY);
+        borderPath.moveTo(fixedStartX, fixedStartY);
+        borderPath.lineTo(fixedStartX, fixedEndY);
+        ctx.stroke(borderPath);
 
         const mergeVisibleRanges: IRange[] = [];
         let mergeVisibleRangeStartRow = startRow;
 
         //#region draw horizontal lines
+        const horizontalPath = new Path2D();
         for (let r = rowStart; r <= rowEnd; r++) {
             if (worksheet.getRowVisible(r) === false) {
                 if (mergeVisibleRangeStartRow < r) {
@@ -613,25 +617,26 @@ export class Spreadsheet extends SheetComponent {
                 continue;
             }
             const rowEndPosition = rowHeightAccumulation[r];
-            ctx.beginPath();
-            ctx.moveToByPrecision(startX, rowEndPosition);
-            ctx.lineToByPrecision(endX, rowEndPosition);
-            ctx.closePathByEnv();
-            ctx.stroke();
+            const fixedY = fixLineWidthByScale(rowEndPosition, scaleY);
+            horizontalPath.moveTo(fixedStartX, fixedY);
+            horizontalPath.lineTo(fixedEndX, fixedY);
         }
+        ctx.stroke(horizontalPath);
         //#endregion
 
+        //#region draw vertical lines
+        const verticalPath = new Path2D();
         for (let c = columnStart; c <= columnEnd; c++) {
             if (c < 0 || c > columnWidthAccumulationLength - 1) {
                 continue;
             }
             const columnEndPosition = columnWidthAccumulation[c];
-            ctx.beginPath();
-            ctx.moveToByPrecision(columnEndPosition, startY);
-            ctx.lineToByPrecision(columnEndPosition, endY);
-            ctx.closePathByEnv();
-            ctx.stroke();
+            const fixedX = fixLineWidthByScale(columnEndPosition, scaleX);
+            verticalPath.moveTo(fixedX, fixedStartY);
+            verticalPath.lineTo(fixedX, fixedEndY);
         }
+        ctx.stroke(verticalPath);
+        //#endregion
         //#endregion
 
         // clear line of merge cell

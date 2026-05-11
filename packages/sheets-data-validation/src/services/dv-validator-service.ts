@@ -16,7 +16,7 @@
 
 import type { IDataValidationRule, IRange, Nullable, ObjectMatrix, Workbook, Worksheet } from '@univerjs/core';
 import { bufferDebounceTime, DataValidationStatus, Disposable, getIntersectRange, Inject, IUniverInstanceService, LifecycleService, LifecycleStages, Range, Tools, UniverInstanceType } from '@univerjs/core';
-import { bufferWhen, filter } from 'rxjs';
+import { bufferWhen, filter, skip } from 'rxjs';
 import { SheetDataValidationModel } from '../models/sheet-data-validation-model';
 import { DataValidationCacheService } from './dv-cache.service';
 
@@ -70,7 +70,7 @@ export class SheetsDataValidationValidatorService extends Disposable {
             });
         };
 
-        this.disposeWithMe(this._dataValidationCacheService.dirtyRanges$.pipe(bufferWhen(() => this._lifecycleService.lifecycle$.pipe(filter((stage) => stage === LifecycleStages.Rendered)))).subscribe(handleDirtyRanges));
+        this.disposeWithMe(this._dataValidationCacheService.dirtyRanges$.pipe(bufferWhen(() => this._lifecycleService.lifecycle$.pipe(skip(1), filter((stage) => stage === LifecycleStages.Rendered)))).subscribe(handleDirtyRanges));
         this.disposeWithMe(this._dataValidationCacheService.dirtyRanges$.pipe(filter(() => this._lifecycleService.stage >= LifecycleStages.Rendered), bufferDebounceTime(20)).subscribe(handleDirtyRanges));
     }
 

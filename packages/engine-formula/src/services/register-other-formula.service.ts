@@ -21,7 +21,7 @@ import type { ISetFormulaCalculationResultMutation } from '../commands/mutations
 import type { IRemoveOtherFormulaMutationParams, ISetOtherFormulaMutationParams } from '../commands/mutations/set-other-formula.mutation';
 import type { IOtherFormulaResult } from './formula-common';
 import { Disposable, generateRandomId, ICommandService, Inject, LifecycleService, ObjectMatrix } from '@univerjs/core';
-import { BehaviorSubject, bufferWhen, filter, Subject } from 'rxjs';
+import { BehaviorSubject, bufferWhen, filter, skip, Subject } from 'rxjs';
 import { OtherFormulaMarkDirty } from '../commands/mutations/formula.mutation';
 import { SetFormulaCalculationResultMutation } from '../commands/mutations/set-formula-calculation.mutation';
 import { RemoveOtherFormulaMutation, SetOtherFormulaMutation } from '../commands/mutations/set-other-formula.mutation';
@@ -133,7 +133,7 @@ export class RegisterOtherFormulaService extends Disposable {
 
         this.disposeWithMe(
             this._formulaChangeWithRange$
-                .pipe(bufferWhen(() => this.calculateStarted$.pipe(filter((calculateStarted) => calculateStarted))))
+                .pipe(bufferWhen(() => this.calculateStarted$.pipe(skip(1), filter((calculateStarted) => calculateStarted))))
                 .subscribe((options) => options.forEach(handleRegister))
         );
 

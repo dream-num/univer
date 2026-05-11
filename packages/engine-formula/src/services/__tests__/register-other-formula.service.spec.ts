@@ -133,6 +133,27 @@ describe('RegisterOtherFormulaService', () => {
         );
     });
 
+    it('should not recursively reopen buffer when calculation starts', () => {
+        const commandService = createCommandServiceMock();
+        const activeDirtyManagerService = { register: vi.fn() } as unknown as IActiveDirtyManagerService;
+        const service = new RegisterOtherFormulaService(
+            commandService as never,
+            activeDirtyManagerService,
+            {} as LifecycleService
+        );
+        let subscribeCount = 0;
+        const calculateStarted$ = service.calculateStarted$ as any;
+        const originalSubscribe = calculateStarted$._subscribe.bind(calculateStarted$);
+        calculateStarted$._subscribe = (...args: unknown[]) => {
+            subscribeCount++;
+            return originalSubscribe(...args);
+        };
+
+        service.calculateStarted$.next(true);
+
+        expect(subscribeCount).toBe(1);
+    });
+
     it('should cache formula results and resolve pending getFormulaValue', async () => {
         const commandService = createCommandServiceMock();
         const activeDirtyManagerService = { register: vi.fn() } as unknown as IActiveDirtyManagerService;

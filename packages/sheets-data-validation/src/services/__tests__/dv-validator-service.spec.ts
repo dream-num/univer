@@ -30,6 +30,13 @@ function createRule(uid: string, ranges: IRange[]): IDataValidationRule {
 function createService() {
     const dirtyRanges$ = new Subject<{ unitId: string; subUnitId: string; ranges: IRange[] }>();
     const lifecycle$ = new BehaviorSubject(LifecycleStages.Rendered);
+    let lifecycleSubscribeCount = 0;
+    const lifecycleSubject = lifecycle$ as any;
+    const originalSubscribe = lifecycleSubject._subscribe.bind(lifecycleSubject);
+    lifecycleSubject._subscribe = (...args: unknown[]) => {
+        lifecycleSubscribeCount++;
+        return originalSubscribe(...args);
+    };
     const worksheet = {
         getSheetId: () => 'sheet-1',
         getMergedCell: vi.fn(() => null),
@@ -81,6 +88,7 @@ function createService() {
         cacheService,
         univerInstanceService,
         lifecycleService,
+        getLifecycleSubscribeCount: () => lifecycleSubscribeCount,
         service: new SheetsDataValidationValidatorService(univerInstanceService, model, cacheService, lifecycleService),
     };
 }
@@ -97,6 +105,14 @@ describe('SheetsDataValidationValidatorService', () => {
     afterEach(() => {
         vi.useRealTimers();
         vi.unstubAllGlobals();
+    });
+
+    it('does not recursively reopen dirty range buffer when created after render', () => {
+        const { service, getLifecycleSubscribeCount } = createService();
+
+        expect(getLifecycleSubscribeCount()).toBe(1);
+
+        service.dispose();
     });
 
     it('validates single cells, merged cells, ranges, worksheets, and workbooks', async () => {

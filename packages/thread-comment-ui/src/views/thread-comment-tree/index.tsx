@@ -143,6 +143,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                                                   univer-items-center univer-justify-center univer-rounded-sm
                                                   univer-text-base
                                                   hover:univer-bg-gray-50
+                                                  dark:hover:!univer-bg-gray-800
                                                 `}
                                                 onClick={() => onReply(user)}
                                             >
@@ -191,6 +192,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                                               univer-items-center univer-justify-center univer-rounded-sm
                                               univer-text-base
                                               hover:univer-bg-gray-50
+                                              dark:hover:!univer-bg-gray-800
                                             `}
                                         >
                                             <MoreHorizontalIcon />

@@ -542,7 +542,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                                                 `
                                                   univer-relative univer-flex univer-min-h-8 univer-w-full
                                                   univer-items-center univer-rounded-md univer-border-none
-                                                  univer-bg-transparent univer-px-2 univer-text-left univer-text-sm
+                                                  univer-bg-transparent univer-text-left univer-text-sm
                                                   dark:!univer-text-white
                                                 `,
                                                 option.disabled

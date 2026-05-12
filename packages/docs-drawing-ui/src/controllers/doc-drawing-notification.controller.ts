@@ -141,11 +141,15 @@ export class DocDrawingAddRemoveController extends Disposable {
                 }
 
                 const params = command.params as IRichTextEditingMutationParams;
-                const { unitId, actions } = params;
+                const { unitId, actions, isSync, syncer } = params;
 
                 const addOrRemoveDrawings = getAddOrRemoveDrawings(actions);
                 if (addOrRemoveDrawings != null) {
                     for (const { type, drawingId, drawing } of addOrRemoveDrawings) {
+                        if (isSync && drawing?.unitId === syncer) {
+                            continue;
+                        }
+
                         if (type === 'add') {
                             this._addDrawings(unitId, [drawing!]);
                         } else {

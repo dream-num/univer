@@ -106,7 +106,6 @@ export class SheetCellImageCopyPasteController extends Disposable {
                                 });
                             }
                         }
-                        throw new Error('Sheet cell image copy paste is not supported in this unit');
                     }
                 }
             })

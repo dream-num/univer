@@ -35,6 +35,7 @@ import {
     RangeProtectionRuleModel,
     SheetsSelectionsService,
     UnitAction,
+    WorkbookEditablePermission,
     WorksheetEditPermission,
     WorksheetProtectionRuleModel,
     WorksheetViewPermission,
@@ -89,6 +90,13 @@ export function FormulaBar(props: IProps) {
     const contextService = useDependency(IContextService);
     useObservable(useMemo(() => contextService.subscribeContextValue$(FOCUSING_FX_BAR_EDITOR), [contextService]));
     const isFocusFxBar = contextService.getContextValue(FOCUSING_FX_BAR_EDITOR);
+    const workbookEditablePermission = useObservable(useMemo(() => {
+        if (!workbook) {
+            return undefined;
+        }
+
+        return permissionService.getPermissionPoint$(new WorkbookEditablePermission(workbook.getUnitId()).id);
+    }, [permissionService, workbook]));
     const ref = useRef<HTMLDivElement>(null);
     const editorService = useDependency(IEditorService);
     const config = useConfigValue<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
@@ -233,6 +241,8 @@ export function FormulaBar(props: IProps) {
     // TODO Is there a need to disable an editor here?
     const { viewDisable, editDisable: permissionEditDisable } = disableInfo;
     const editDisable = permissionEditDisable || !!disableEdit;
+    const workbookEditDisable = !(workbookEditablePermission?.value ?? true);
+    const editorActivationDisable = editDisable || workbookEditDisable;
     const disabled = editDisable || imageDisable;
     const shouldSkipFocus = useRef(false);
 
@@ -241,6 +251,12 @@ export function FormulaBar(props: IProps) {
             // When clicking on the formula bar, the cell editor also needs to enter the edit state
             const visibleState = editorBridgeService.isVisible();
             if (visibleState.visible === false) {
+                if (editorActivationDisable) {
+                    contextService.setContextValue(FOCUSING_FX_BAR_EDITOR, true);
+                    editorService.focus(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
+                    return;
+                }
+
                 const result = commandService.syncExecuteCommand(
                     SetCellEditVisibleOperation.id,
                     {

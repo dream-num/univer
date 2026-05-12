@@ -256,7 +256,7 @@ export class FWorkbook extends FBaseInitialable {
      */
     create(name: string, rows: number, columns: number, options?: { index?: number; sheet?: Partial<IWorksheetData> }): FWorksheet {
         const newSheet: Partial<IWorksheetData> = mergeWorksheetSnapshotWithDefault(Tools.deepClone(options?.sheet ?? {}));
-        newSheet.name = this._workbook.uniqueSheetName(name);
+        newSheet.name = name;
         newSheet.rowCount = rows;
         newSheet.columnCount = columns;
         newSheet.id = options?.sheet?.id;
@@ -386,7 +386,11 @@ export class FWorkbook extends FBaseInitialable {
      */
     insertSheet(sheetName?: string, options?: { index?: number; sheet?: Partial<IWorksheetData> }): FWorksheet {
         const newSheet: Partial<IWorksheetData> = mergeWorksheetSnapshotWithDefault(Tools.deepClone(options?.sheet ?? {}));
-        newSheet.name = this._workbook.uniqueSheetName(sheetName);
+        if (sheetName !== undefined) {
+            newSheet.name = sheetName;
+        } else {
+            delete (newSheet as Partial<IWorksheetData>).name;
+        }
         newSheet.id = options?.sheet?.id;
 
         const newSheetIndex = options?.index ?? this._workbook.getSheets().length;

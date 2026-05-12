@@ -24,7 +24,6 @@ import { DocSkeletonManagerService } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useDependency, useEvent, useObservable } from '@univerjs/ui';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { IEditorService } from '../../services/editor/editor-manager.service';
 import { useEditorClickOutside, useIsFocusing, useKeyboardEvent, useResize } from './hooks';
 import { useEditor } from './hooks/use-editor';
 import { useLeftAndRightArrow } from './hooks/use-left-and-right-arrow';
@@ -72,7 +71,6 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
         placeholder,
         noStyle,
     } = props;
-    const editorService = useDependency(IEditorService);
     const onFocusChange = useEvent(_onFocusChange);
     const onClickOutside = useEvent(_onClickOutside);
     const [height, setHeight] = useState(defaultHeight);
@@ -88,7 +86,7 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
     const renderManagerService = useDependency(IRenderManagerService);
     const renderer = renderManagerService.getRenderById(editorId);
     const isFocusing = useIsFocusing(editorId);
-    const sheetEmbeddingRef = useRef<HTMLDivElement>(null);
+    const docEmbeddingRef = useRef<HTMLDivElement>(null);
     const [showPlaceholder, setShowPlaceholder] = useState(() => !BuildTextUtils.transform.getPlainText(editor?.getDocumentData().body?.dataStream ?? ''));
     const { checkScrollBar } = useResize(editor, isSingle, true, true);
 
@@ -130,7 +128,7 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
         onFocusChange?.(isFocusing, getPlainText(data?.body?.dataStream ?? ''));
     }, [isFocusing, onFocusChange]);
 
-    useEditorClickOutside(editorId, sheetEmbeddingRef, onClickOutside);
+    useEditorClickOutside(editorId, docEmbeddingRef, onClickOutside);
 
     useLeftAndRightArrow(isFocusing && moveCursor, false, editor);
     useKeyboardEvent(isFocusing, keyboardEventConfig, editor);
@@ -152,7 +150,7 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
                     }
                 )}
                 style={{ height }}
-                ref={sheetEmbeddingRef}
+                ref={docEmbeddingRef}
             >
                 <div
                     ref={formulaEditorContainerRef}

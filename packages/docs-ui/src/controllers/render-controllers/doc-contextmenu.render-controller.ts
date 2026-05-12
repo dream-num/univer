@@ -35,7 +35,7 @@ const SKIP_UNIT_IDS = [
 ];
 
 /**
- * This controller subscribe to context menu events in sheet rendering views and invoke context menu at a correct
+ * This controller subscribe to context menu events in doc rendering views and invoke context menu at a correct
  * position and with correct menu type.
  */
 export class DocContextMenuRenderController extends Disposable implements IRenderModule {

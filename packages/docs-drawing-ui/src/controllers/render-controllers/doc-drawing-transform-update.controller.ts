@@ -16,7 +16,15 @@
 
 import type { DocumentDataModel, ICommandInfo, IDrawingParam, ITransformState } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import type { Documents, DocumentSkeleton, IDocumentSkeletonHeaderFooter, IDocumentSkeletonPage, Image, IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import type {
+    Documents,
+    DocumentSkeleton,
+    IDocumentSkeletonHeaderFooter,
+    IDocumentSkeletonPage,
+    Image,
+    IRenderContext,
+    IRenderModule,
+} from '@univerjs/engine-render';
 import {
     BooleanNumber,
     Disposable,
@@ -24,7 +32,6 @@ import {
     fromEventSubject,
     ICommandService,
     Inject,
-    IUniverInstanceService,
     LifecycleService,
     LifecycleStages,
     PositionedObjectLayoutType,
@@ -58,7 +65,6 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
         @IEditorService private readonly _editorService: IEditorService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @Inject(DocRefreshDrawingsService) private readonly _docRefreshDrawingsService: DocRefreshDrawingsService,
-        @IUniverInstanceService private _univerInstanceService: IUniverInstanceService,
         @Inject(LifecycleService) private _lifecycleService: LifecycleService
     ) {
         super();

@@ -193,7 +193,7 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocParagraphSettingController],
             [DocTableController],
 
-            // FIXME: LifecycleStages.Rendered must be used, otherwise the menu cannot be added to the DOM, but the sheet ui
+            // FIXME: LifecycleStages.Rendered must be used, otherwise the menu cannot be added to the DOM, but the docs ui
             // plugin can be added in LifecycleStages.Ready
             [DocUIController],
         ]);

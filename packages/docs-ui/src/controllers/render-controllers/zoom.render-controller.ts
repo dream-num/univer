@@ -16,7 +16,6 @@
 
 import type { DocumentDataModel, ICommandInfo, Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
-
 import type { ISetDocZoomRatioOperationParams } from '../../commands/operations/set-doc-zoom-ratio.operation';
 import {
     Disposable,

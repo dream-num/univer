@@ -19,7 +19,7 @@ import { IEditorService } from '@univerjs/docs-ui';
 import { ISidebarService, useDependency, useEvent } from '@univerjs/ui';
 import { useEffect, useMemo } from 'react';
 import { BehaviorSubject, throttleTime } from 'rxjs';
-import useResizeScrollObserver from './use-resize-scroll-observer';
+import { useResizeScrollObserver } from './use-resize-scroll-observer';
 
 export function useEditorPosition(editorId: string, ready: boolean, deps?: any[]) {
     const editorService = useDependency(IEditorService);

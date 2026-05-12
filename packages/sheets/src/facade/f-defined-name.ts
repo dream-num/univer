@@ -19,7 +19,15 @@ import type { FWorksheet } from './f-worksheet';
 import { generateRandomId, IAuthzIoService, ICommandService, Inject, Injector, IPermissionService, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { FBase } from '@univerjs/core/facade';
 import { IDefinedNamesService, IFunctionService, ISuperTableService, serializeRange } from '@univerjs/engine-formula';
-import { RangeProtectionRuleModel, RemoveDefinedNameCommand, SCOPE_WORKBOOK_VALUE_DEFINED_NAME, SetDefinedNameCommand, validateDefinedName, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import {
+    RangeProtectionRuleModel,
+    RemoveDefinedNameCommand,
+    SCOPE_WORKBOOK_VALUE_DEFINED_NAME,
+    SetDefinedNameCommand,
+    validateDefinedName,
+    WorksheetProtectionPointModel,
+    WorksheetProtectionRuleModel,
+} from '@univerjs/sheets';
 
 /**
  * Get defined name field name

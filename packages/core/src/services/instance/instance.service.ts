@@ -19,7 +19,7 @@ import type { IDisposable } from '../../common/di';
 import type { UnitModel } from '../../common/unit';
 import type { Nullable } from '../../shared';
 import { BehaviorSubject, distinctUntilChanged, filter, map, Subject } from 'rxjs';
-import { createIdentifier, Inject, Injector } from '../../common/di';
+import { createIdentifier, Inject } from '../../common/di';
 import { UniverInstanceType } from '../../common/unit';
 import { DocumentDataModel } from '../../docs/data-model/document-data-model';
 import { Disposable } from '../../shared/lifecycle';
@@ -111,7 +111,6 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
     private readonly _unitsByType = new Map<UniverInstanceType, UnitModel[]>();
 
     constructor(
-        @Inject(Injector) private readonly _injector: Injector,
         @IContextService private readonly _contextService: IContextService,
         @Inject(ILogService) private readonly _logService: ILogService
     ) {

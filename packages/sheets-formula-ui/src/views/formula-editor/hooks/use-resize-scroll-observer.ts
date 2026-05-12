@@ -43,5 +43,3 @@ export const useResizeScrollObserver = (callback: Callback, delay: number = 100)
         };
     }, [callback, delay]);
 };
-
-export default useResizeScrollObserver;

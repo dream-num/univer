@@ -19,7 +19,15 @@ import { ICommandService, IContextService, Inject, Injector, LocaleService } fro
 import { MessageType } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { FilterIcon } from '@univerjs/icons';
-import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand, RemoveSheetFilterCommand, SetSheetFilterRangeCommand, SetSheetsFilterCriteriaCommand, SheetsFilterService, SmartToggleSheetsFilterCommand } from '@univerjs/sheets-filter';
+import {
+    ClearSheetsFilterCriteriaCommand,
+    ReCalcSheetsFilterCommand,
+    RemoveSheetFilterCommand,
+    SetSheetFilterRangeCommand,
+    SetSheetsFilterCriteriaCommand,
+    SheetsFilterService,
+    SmartToggleSheetsFilterCommand,
+} from '@univerjs/sheets-filter';
 import { SheetCanvasPopManagerService, SheetsRenderService } from '@univerjs/sheets-ui';
 import { ComponentManager, IMenuManagerService, IMessageService, IShortcutService } from '@univerjs/ui';
 import { distinctUntilChanged } from 'rxjs';

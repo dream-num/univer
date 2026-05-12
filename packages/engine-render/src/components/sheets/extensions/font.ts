@@ -323,34 +323,16 @@ export class Font extends SheetExtension {
 
     private _renderImages(ctx: UniverRenderingContext, fontsConfig: IFontCacheItem, startX: number, startY: number, endX: number, endY: number) {
         const { documentSkeleton, verticalAlign, horizontalAlign } = fontsConfig;
-        const fontHeight = documentSkeleton!.getSkeletonData()!.pages[0].height;
-        const fontWidth = documentSkeleton!.getSkeletonData()!.pages[0].width;
         const PADDING = 2;
-        let fontX = startX;
-        let fontY = startY;
-        switch (verticalAlign) {
-            case VerticalAlign.TOP:
-                fontY = startY + PADDING;
-                break;
-            case VerticalAlign.MIDDLE:
-                fontY = (startY + endY) / 2 - fontHeight / 2;
-                break;
-            default:
-                fontY = endY - fontHeight - PADDING;
-                break;
-        }
-
-        switch (horizontalAlign) {
-            case HorizontalAlign.RIGHT:
-                fontX = endX - fontWidth - PADDING;
-                break;
-            case HorizontalAlign.CENTER:
-                fontX = (startX + endX) / 2 - fontWidth / 2;
-                break;
-            default:
-                fontX = startX + PADDING;
-                break;
-        }
+        const padding = fontsConfig.style?.pd;
+        const paddingLeft = padding?.l ?? PADDING;
+        const paddingRight = padding?.r ?? PADDING;
+        const paddingTop = padding?.t ?? PADDING;
+        const paddingBottom = padding?.b ?? PADDING;
+        const contentStartX = startX + paddingLeft;
+        const contentEndX = endX - paddingRight;
+        const contentStartY = startY + paddingTop;
+        const contentEndY = endY - paddingBottom;
 
         const documentDataModel = documentSkeleton!.getViewModel().getDataModel();
         const drawingDatas = documentDataModel.getDrawings();
@@ -369,11 +351,36 @@ export class Font extends SheetExtension {
                     }
                 );
 
-                const x = fontX + drawing.aLeft;
-                const y = fontY + drawing.aTop;
-                const width = drawing.width;
-                const height = drawing.height;
-                const angle = drawing.angle;
+                const width = drawingData.docTransform?.size.width ?? drawing.width;
+                const height = drawingData.docTransform?.size.height ?? drawing.height;
+                const angle = drawingData.docTransform?.angle ?? drawing.angle;
+                let x = startX;
+                let y = startY;
+
+                switch (verticalAlign) {
+                    case VerticalAlign.TOP:
+                        y = contentStartY;
+                        break;
+                    case VerticalAlign.MIDDLE:
+                        y = (contentStartY + contentEndY) / 2 - height / 2;
+                        break;
+                    default:
+                        y = contentEndY - height;
+                        break;
+                }
+
+                switch (horizontalAlign) {
+                    case HorizontalAlign.RIGHT:
+                        x = contentEndX - width;
+                        break;
+                    case HorizontalAlign.CENTER:
+                        x = (contentStartX + contentEndX) / 2 - width / 2;
+                        break;
+                    default:
+                        x = contentStartX;
+                        break;
+                }
+
                 const { rotatedHeight, rotatedWidth } = rotatedBoundingBox(width, height, angle);
 
                 if (image && image.complete) {

@@ -154,7 +154,7 @@ export const PRESET_LIST_TYPE: Record<string, IListData> = {
     } as IListData,
     [PresetListType.BULLET_LIST_4]: {
         listType: PresetListType.BULLET_LIST,
-        nestingLevel: bulletListFactory(['\u2727', '\u25CB', '\u25A0']),
+        nestingLevel: bulletListFactory(['\u2726', '\u25CB', '\u25A0']),
     } as IListData,
     [PresetListType.BULLET_LIST_5]: {
         listType: PresetListType.BULLET_LIST,

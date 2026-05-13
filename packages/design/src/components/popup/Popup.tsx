@@ -59,7 +59,7 @@ export function Popup(props: IPopupProps) {
 
     const [realOffset, setRealOffset] = useState<[number, number]>(HIDDEN_POPUP_OFFSET);
 
-    const { mountContainer } = useContext(ConfigContext);
+    const { mountContainer, direction } = useContext(ConfigContext);
 
     const calculateOffset = (): [number, number] | null => {
         const element = nodeRef.current;
@@ -130,6 +130,7 @@ export function Popup(props: IPopupProps) {
         >
             <section
                 ref={nodeRef}
+                dir={direction}
                 className="univer-popup"
                 style={{
                     // Fix #1089. If the popup does not have this 2px offset, the pointerup event's target would

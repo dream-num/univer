@@ -14,26 +14,26 @@
  * limitations under the License.
  */
 
+import { LocaleService } from '@univerjs/core';
+import { useDependency } from '@univerjs/ui';
 import { useEffect } from 'react';
 
-function applyDirection(value: 'ltr' | 'rtl') {
-    document.documentElement.setAttribute('dir', value);
-}
-
 export function useRTL() {
+    const localeService = useDependency(LocaleService);
+
     useEffect(() => {
         const dir = localStorage.getItem('local.direction');
 
         if (dir === 'rtl' || dir === 'ltr') {
-            applyDirection(dir);
+            localeService.setDirection(dir);
         }
-    }, []);
+    }, [localeService]);
 
     const onSelect = () => {
         const current = document.documentElement.getAttribute('dir');
         const nextDirection = current === 'rtl' ? 'ltr' : 'rtl';
 
-        applyDirection(nextDirection);
+        localeService.setDirection(nextDirection);
         localStorage.setItem('local.direction', nextDirection);
     };
 

@@ -15,9 +15,10 @@
  */
 
 import type { ReactElement, ReactNode } from 'react';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { clsx } from '../../helper/clsx';
+import { ConfigContext } from '../config-provider/ConfigProvider';
 
 export interface ITooltipProps {
     /**
@@ -70,6 +71,8 @@ export function Tooltip(props: ITooltipProps) {
         visible: controlledVisible,
         onVisibleChange,
     } = props;
+
+    const { direction } = useContext(ConfigContext);
 
     // Internal state for uncontrolled mode
     const [uncontrolledVisible, setUncontrolledVisible] = useState(false);
@@ -239,6 +242,7 @@ export function Tooltip(props: ITooltipProps) {
         tooltipNode = createPortal(
             <div
                 ref={tooltipRef}
+                dir={direction}
                 role="tooltip"
                 className={clsx(`
                   univer-animate-in univer-fade-in-0 univer-zoom-in-95 univer-pointer-events-auto univer-absolute

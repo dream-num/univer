@@ -15,12 +15,14 @@
  */
 
 import type { ReactNode } from 'react';
+import { DirectionProvider } from '@radix-ui/react-direction';
 import { createContext, useMemo } from 'react';
 import { isBrowser } from '../../helper/is-browser';
 
 export interface IConfigProviderProps {
     children: ReactNode;
     locale?: any;
+    direction?: 'ltr' | 'rtl';
     mountContainer: HTMLElement | null;
 }
 
@@ -29,18 +31,21 @@ export const ConfigContext = createContext<Omit<IConfigProviderProps, 'children'
 });
 
 export function ConfigProvider(props: IConfigProviderProps) {
-    const { children, locale, mountContainer } = props;
+    const { children, locale, mountContainer, direction } = props;
 
     const value = useMemo(() => {
         return {
             locale,
+            direction,
             mountContainer,
         };
-    }, [locale, mountContainer]);
+    }, [locale, direction, mountContainer]);
 
     return (
         <ConfigContext.Provider value={value}>
-            {children}
+            <DirectionProvider dir={direction ?? 'ltr'}>
+                {children}
+            </DirectionProvider>
         </ConfigContext.Provider>
     );
 }

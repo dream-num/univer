@@ -71,6 +71,12 @@ export interface IUniverConfig {
     locale?: LocaleType;
 
     /**
+     * The direction of the Univer instance.
+     * @default 'ltr'
+     */
+    direction?: 'ltr' | 'rtl';
+
+    /**
      * The locales to be used
      */
     locales?: ILocales;
@@ -117,11 +123,12 @@ export class Univer implements IDisposable {
     constructor(config: Partial<IUniverConfig> = {}, parentInjector?: Injector) {
         const injector = this._injector = createUniverInjector(parentInjector, config?.override);
 
-        const { theme, darkMode, locale, locales, logLevel, logCommandExecution } = config;
+        const { theme, darkMode, locale, locales, direction, logLevel, logCommandExecution } = config;
         if (theme) this._injector.get(ThemeService).setTheme(theme);
         if (darkMode) this._injector.get(ThemeService).setDarkMode(darkMode);
         if (locales) this._injector.get(LocaleService).load(locales);
         if (locale) this._injector.get(LocaleService).setLocale(locale);
+        if (direction) this._injector.get(LocaleService).setDirection(direction);
         if (logLevel) this._injector.get(ILogService).setLogLevel(logLevel);
         if (logCommandExecution !== undefined) {
             this._injector.get(IConfigService).setConfig(COMMAND_LOG_EXECUTION_CONFIG_KEY, logCommandExecution);

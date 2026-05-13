@@ -38,7 +38,8 @@ export function MobileContextMenu() {
     const commandService = useDependency(ICommandService);
     const layoutService = useDependency(ILayoutService);
     const localeService = useDependency(LocaleService);
-    const { mountContainer } = useContext(ConfigContext);
+    const { mountContainer, direction } = useContext(ConfigContext);
+
     visibleRef.current = visible;
 
     useEffect(() => {
@@ -90,7 +91,7 @@ export function MobileContextMenu() {
     }
 
     return createPortal(
-        <div className="univer-fixed univer-inset-0 univer-z-[1080] univer-flex univer-items-end">
+        <div dir={direction} className="univer-fixed univer-inset-0 univer-z-[1080] univer-flex univer-items-end">
             <button
                 type="button"
                 aria-label={localeService.t('rangeSelector.cancel')}

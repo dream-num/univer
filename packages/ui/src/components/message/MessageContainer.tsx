@@ -15,12 +15,14 @@
  */
 
 import { ThemeService } from '@univerjs/core';
-import { Messager } from '@univerjs/design';
+import { ConfigContext, Messager } from '@univerjs/design';
+import { useContext } from 'react';
 import { useDependency, useObservable } from '../../utils/di';
 
 export function MessageContainer() {
     const themeService = useDependency(ThemeService);
     const darkMode = useObservable(themeService.darkMode$);
+    const { direction } = useContext(ConfigContext);
 
-    return <Messager theme={darkMode ? 'dark' : 'light'} />;
+    return <Messager theme={darkMode ? 'dark' : 'light'} dir={direction} />;
 }

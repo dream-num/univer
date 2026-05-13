@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { clsx } from '@univerjs/design';
-import { useEffect, useMemo, useState } from 'react';
+import { clsx, ConfigContext } from '@univerjs/design';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import { ComponentManager } from '../../../common/component-manager';
 import { IGlobalZoneService } from '../../../services/global-zone/global-zone.service';
 import { useDependency, useObservable } from '../../../utils/di';
@@ -25,6 +25,7 @@ export function GlobalZone() {
     const [visible, setVisible] = useState(false);
     const componentKey = useObservable(globalZoneService.componentKey$, globalZoneService.componentKey);
     const componentManager = useDependency(ComponentManager);
+    const { direction } = useContext(ConfigContext);
 
     const Component = useMemo(() => {
         const Component = componentManager.get(componentKey ?? '');
@@ -49,6 +50,7 @@ export function GlobalZone() {
 
     return (
         <section
+            dir={direction}
             className={clsx(
                 'univer-absolute univer-bg-gray-100',
                 {

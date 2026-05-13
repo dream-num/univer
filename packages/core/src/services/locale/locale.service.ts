@@ -28,6 +28,9 @@ export class LocaleService extends Disposable {
     readonly currentLocale$ = this._currentLocale$.asObservable();
     private get _currentLocale(): LocaleType { return this._currentLocale$.value; }
 
+    private _direction$ = new BehaviorSubject<'ltr' | 'rtl'>('ltr');
+    readonly direction$ = this._direction$.asObservable();
+
     private _locales: ILocales | null = null;
 
     localeChanged$ = new Subject<void>();
@@ -38,6 +41,7 @@ export class LocaleService extends Disposable {
         this.disposeWithMe(toDisposable(() => {
             this._locales = null;
             this._currentLocale$.complete();
+            this._direction$.complete();
             this.localeChanged$.complete();
         }));
     }
@@ -103,6 +107,14 @@ export class LocaleService extends Disposable {
 
     getCurrentLocale() {
         return this._currentLocale;
+    }
+
+    setDirection(direction: 'ltr' | 'rtl') {
+        this._direction$.next(direction);
+    }
+
+    getDirection() {
+        return this._direction$.value;
     }
 
     public resolveKeyPath(obj: ILanguagePack, keys: string[]): LanguageValue | null {

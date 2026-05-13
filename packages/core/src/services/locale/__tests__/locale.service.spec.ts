@@ -66,6 +66,14 @@ describe('LocaleService', () => {
         expect(localeService.t('nonExistentKey')).toBe('nonExistentKey');
     });
 
+    it('should return RTL status independent from current locale', () => {
+        expect(localeService.getDirection()).toBe('ltr');
+        localeService.setLocale(LocaleType.FA_IR);
+        expect(localeService.getDirection()).toBe('ltr');
+        localeService.setDirection('rtl');
+        expect(localeService.getDirection()).toBe('rtl');
+    });
+
     it('should throw an error if locales are not initialized', () => {
         const newLocaleService = new LocaleService();
         const t = () => {

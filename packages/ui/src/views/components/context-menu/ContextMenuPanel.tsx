@@ -24,9 +24,9 @@ import type {
 } from '../../../services/menu/menu';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import { isRealNum, LocaleService } from '@univerjs/core';
-import { borderBottomClassName, borderClassName, clsx, scrollbarClassName } from '@univerjs/design';
+import { borderBottomClassName, borderClassName, clsx, ConfigContext, scrollbarClassName } from '@univerjs/design';
 import { CheckMarkIcon, MoreIcon } from '@univerjs/icons';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { combineLatest, isObservable, of, scan, startWith } from 'rxjs';
 import { CustomLabel } from '../../../components/custom-label/CustomLabel';
@@ -267,6 +267,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
 
 function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
     const { menuKey, menuItem, submenuPortalContainer, onOptionSelect, maxMenuHeight } = props;
+    const { direction } = useContext(ConfigContext);
     const menuManagerService = useDependency(IMenuManagerService);
     const disabled = useObservable<boolean>(menuItem.disabled$, false);
     const activated = useObservable<boolean>(menuItem.activated$, false);
@@ -495,6 +496,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                     ? createPortal(
                         <div
                             ref={submenuElementRef}
+                            dir={direction}
                             {...{ [CONTEXT_MENU_SUBMENU_PORTAL_ATTR]: 'true' }}
                             className="univer-z-[1080] univer-w-max univer-max-w-[calc(100vw-16px)]"
                             style={{

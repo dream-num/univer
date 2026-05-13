@@ -19,7 +19,7 @@ import type { ReactNode, RefObject } from 'react';
 import type { Observable } from 'rxjs';
 import type { IUniverUIConfig } from '../../../config/config';
 import { IConfigService } from '@univerjs/core';
-import { clsx } from '@univerjs/design';
+import { clsx, ConfigContext } from '@univerjs/design';
 import { createContext, useContext, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useEvent } from '../../../components/hooks/event';
@@ -311,6 +311,8 @@ function RectPopup(props: IRectPopupProps) {
         };
     }, [contextMenuFn]);
 
+    const { direction: dir } = useContext(ConfigContext);
+
     const ele = (
         <>
             {mask && (
@@ -324,6 +326,7 @@ function RectPopup(props: IRectPopupProps) {
             <section
                 data-u-comp="rect-popup"
                 ref={nodeRef}
+                dir={dir}
                 className={clsx(`
                   univer-pointer-events-auto univer-fixed univer-left-[-9999px] univer-top-[-9999px] univer-z-[1020]
                 `, {

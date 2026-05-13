@@ -56,6 +56,7 @@ describe('Univer', () => {
             darkMode: true,
             locales,
             locale: LocaleType.EN_US,
+            direction: 'rtl',
             logLevel: LogLevel.VERBOSE,
             logCommandExecution: true,
         });
@@ -64,11 +65,13 @@ describe('Univer', () => {
         const localeService = injector.get(LocaleService);
 
         expect(localeService.getCurrentLocale()).toBe(LocaleType.EN_US);
+        expect(localeService.getDirection()).toBe('rtl');
         expect(localeService.t('test.greeting', 'Univer')).toBe('Hello Univer');
         expect(injector.get(IConfigService).getConfig(COMMAND_LOG_EXECUTION_CONFIG_KEY)).toBe(true);
 
         univer.setLocale(LocaleType.ZH_CN);
         expect(localeService.getCurrentLocale()).toBe(LocaleType.ZH_CN);
+        expect(localeService.getDirection()).toBe('rtl');
 
         univer.dispose();
     });

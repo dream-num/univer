@@ -35,7 +35,7 @@
         "@univerjs/design": "workspace:*",
         "@univerjs/docs-drawing-ui": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "^1.1.1",
+        "@univerjs/icons": "^1.2.0",
         "@univerjs/mockdata": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-drawing-ui": "workspace:*",

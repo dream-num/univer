@@ -16,15 +16,17 @@
 
 import type { IToasterProps } from '@univerjs/design';
 import { ThemeService } from '@univerjs/core';
-import { toast, Toaster } from '@univerjs/design';
+import { ConfigContext, toast, Toaster } from '@univerjs/design';
+import { useContext } from 'react';
 import { useDependency, useObservable } from '../../utils/di';
 
 export function Notification() {
     const themeService = useDependency(ThemeService);
 
     const darkMode = useObservable(themeService.darkMode$);
+    const { direction } = useContext(ConfigContext);
 
-    return <Toaster theme={darkMode ? 'dark' : 'light'} />;
+    return <Toaster theme={darkMode ? 'dark' : 'light'} dir={direction} />;
 }
 
 export interface INotificationOptions {

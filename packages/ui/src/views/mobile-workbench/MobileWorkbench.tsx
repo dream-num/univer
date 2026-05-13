@@ -77,6 +77,7 @@ export function MobileWorkbench(props: IUniverAppProps) {
     }, [onRendered]);
 
     const [locale, setLocale] = useState(localeService.getLocales());
+    const [direction, setDirection] = useState(localeService.getDirection());
 
     // Create a portal container for injecting global component themes.
     const portalContainer = useMemo<HTMLElement>(() => document.createElement('div'), []);
@@ -98,6 +99,9 @@ export function MobileWorkbench(props: IUniverAppProps) {
             localeService.localeChanged$.subscribe(() => {
                 setLocale(localeService.getLocales());
             }),
+            localeService.direction$.subscribe(() => {
+                setDirection(localeService.getDirection());
+            }),
         ];
 
         return () => {
@@ -109,8 +113,12 @@ export function MobileWorkbench(props: IUniverAppProps) {
         };
     }, [localeService, mountContainer, portalContainer]);
 
+    useEffect(() => {
+        portalContainer.dir = direction;
+    }, [direction, portalContainer]);
+
     return (
-        <ConfigProvider locale={locale?.design} mountContainer={portalContainer}>
+        <ConfigProvider locale={locale?.design} direction={direction} mountContainer={portalContainer}>
             {/**
               * IMPORTANT! This `tabIndex` should not be moved. This attribute allows the element to catch
               * all focusin event merged from its descendants. The DesktopLayoutService would listen to focusin events
@@ -127,6 +135,7 @@ export function MobileWorkbench(props: IUniverAppProps) {
                 tabIndex={-1}
                 onBlur={(e) => e.stopPropagation()}
                 onContextMenu={(e) => e.preventDefault()}
+                dir={direction}
             >
                 {/* header */}
                 {header && toolbar && (
@@ -194,8 +203,10 @@ export function MobileWorkbench(props: IUniverAppProps) {
                     <ZenZone />
                 </section>
             </div>
-            <ComponentContainer key="global" components={globalComponents} />
-            {contextMenu && <MobileContextMenu />}
+            <div dir={direction}>
+                <ComponentContainer key="global" components={globalComponents} />
+                {contextMenu && <MobileContextMenu />}
+            </div>
         </ConfigProvider>
     );
 }

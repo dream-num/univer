@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/engine-formula",
-    "version": "0.22.0",
+    "version": "0.22.1",
     "private": false,
     "description": "Formula parsing, dependency management, and calculation engine for Univer.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

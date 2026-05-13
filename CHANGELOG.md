@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.22.1](https://github.com/dream-num/univer/compare/v0.22.0...v0.22.1) (2026-05-13)
+
+
+### Bug Fixes
+
+* avoid BehaviorSubject replay loop in bufferWhen ([#6882](https://github.com/dream-num/univer/issues/6882)) ([dfc5de7](https://github.com/dream-num/univer/commit/dfc5de756b46cb8ec97d6d0934f7df81c6f85a13))
+* **cellImage:** fix cell image align render ([#6885](https://github.com/dream-num/univer/issues/6885)) ([9b927c5](https://github.com/dream-num/univer/commit/9b927c50088786aac2bb222836562c7c6df3247a))
+* **comment:** fix the issue of comments in dark mode ([#6881](https://github.com/dream-num/univer/issues/6881)) ([192e607](https://github.com/dream-num/univer/commit/192e6070bae383df4753ca47b2f7ab09083443d2))
+* **core:** fix bullet list preset symbol ([#6884](https://github.com/dream-num/univer/issues/6884)) ([b71cbab](https://github.com/dream-num/univer/commit/b71cbab6dc308155686ca2240259edc1237ee76b))
+* **sheets-ui:** allow selecting formula bar content in read-only mode ([#6886](https://github.com/dream-num/univer/issues/6886)) ([02017c2](https://github.com/dream-num/univer/commit/02017c24ade74a74628de86f1e88c40794b84cdb))
+* **sheets:** ensure unique sheet name when inserting with explicit name ([#6887](https://github.com/dream-num/univer/issues/6887)) ([628bbf9](https://github.com/dream-num/univer/commit/628bbf91e660d727267d945f380e34644dda59a1))
+* **ui:** add box-sizing to context menu item for proper sizing ([#6892](https://github.com/dream-num/univer/issues/6892)) ([6ab5e91](https://github.com/dream-num/univer/commit/6ab5e9147cd1107c508364804047b786eeca7305))
+
+
+### Features
+
+* add condition format facade api enum ([#6891](https://github.com/dream-num/univer/issues/6891)) ([88eb25b](https://github.com/dream-num/univer/commit/88eb25b40887b7f47ee7f51209cf69c0811296c9))
+
 # [0.22.0](https://github.com/dream-num/univer/compare/v0.21.1...v0.22.0) (2026-05-09)
 
 

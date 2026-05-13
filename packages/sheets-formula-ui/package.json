@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-formula-ui",
-    "version": "0.22.0",
+    "version": "0.22.1",
     "private": false,
     "description": "Formula editing UI for Univer Sheets.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

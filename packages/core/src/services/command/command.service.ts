@@ -354,6 +354,10 @@ export class CommandService extends Disposable implements ICommandService {
         return this._disposed;
     }
 
+    private _warnCommandSkippedAfterDisposed(id: string): void {
+        this._logService.warn('[CommandService]', `command "${id}" skipped because CommandService is disposed.`);
+    }
+
     hasCommand(commandId: string): boolean {
         return this._commandRegistry.hasCommand(commandId);
     }
@@ -415,6 +419,11 @@ export class CommandService extends Disposable implements ICommandService {
         params?: P,
         options?: IExecutionOptions
     ): Promise<R> {
+        if (this._disposed) {
+            this._warnCommandSkippedAfterDisposed(id);
+            return false as R;
+        }
+
         try {
             const item = this._commandRegistry.getCommand(id);
             if (item) {
@@ -429,6 +438,12 @@ export class CommandService extends Disposable implements ICommandService {
                 const _options = options ?? {};
 
                 this._beforeCommandExecutionListeners.forEach((listener) => listener(commandInfo, _options));
+                if (this._disposed) {
+                    stackItemDisposable.dispose();
+                    this._warnCommandSkippedAfterDisposed(id);
+                    return false as R;
+                }
+
                 const result = await this._execute<P, R>(command as ICommand<P, R>, params, _options);
                 // For syncOnly mutations, only call collab listeners, not regular listeners
                 if (_options.syncOnly) {
@@ -463,6 +478,11 @@ export class CommandService extends Disposable implements ICommandService {
         params?: P | undefined,
         options?: IExecutionOptions
     ): R {
+        if (this._disposed) {
+            this._warnCommandSkippedAfterDisposed(id);
+            return false as R;
+        }
+
         try {
             const item = this._commandRegistry.getCommand(id);
             if (item) {
@@ -490,6 +510,12 @@ export class CommandService extends Disposable implements ICommandService {
                 const _options = options ?? {};
 
                 this._beforeCommandExecutionListeners.forEach((listener) => listener(commandInfo, _options));
+                if (this._disposed) {
+                    stackItemDisposable.dispose();
+                    this._warnCommandSkippedAfterDisposed(id);
+                    return false as R;
+                }
+
                 const result = this._syncExecute<P, R>(command as ICommand<P, R>, params, _options);
                 // For syncOnly mutations, only call collab listeners, not regular listeners
                 if (_options.syncOnly) {

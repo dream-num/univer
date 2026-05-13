@@ -35,7 +35,7 @@ import type {
     IValueConfig,
 } from '@univerjs/sheets-conditional-formatting';
 import { BooleanNumber, ColorKit, Tools } from '@univerjs/core';
-import { CFNumberOperator, CFRuleType, CFSubRuleType, CFTextOperator, CFValueType, createCfId, EMPTY_ICON_TYPE, iconMap } from '@univerjs/sheets-conditional-formatting';
+import { CFNumberOperator, CFRuleType, CFSubRuleType, CFTextOperator, CFValueType, createCfId, iconMap, IIconSetType } from '@univerjs/sheets-conditional-formatting';
 
 /**
  * @ignore
@@ -82,17 +82,17 @@ class ConditionalFormatRuleBaseBuilder {
                     config: [{
                         operator: CFNumberOperator.greaterThanOrEqual,
                         value: { type: CFValueType.min },
-                        iconType: EMPTY_ICON_TYPE,
+                        iconType: IIconSetType.empty,
                         iconId: '',
                     }, {
                         operator: CFNumberOperator.greaterThanOrEqual,
                         value: { type: CFValueType.percentile, value: 0.5 },
-                        iconType: EMPTY_ICON_TYPE,
+                        iconType: IIconSetType.empty,
                         iconId: '',
                     }, {
                         operator: CFNumberOperator.lessThanOrEqual,
                         value: { type: CFValueType.max },
-                        iconType: EMPTY_ICON_TYPE,
+                        iconType: IIconSetType.empty,
                         iconId: '',
                     }],
                 } as IIconSet;
@@ -1221,9 +1221,33 @@ class ConditionalFormatIconSetRuleBuilder extends ConditionalFormatRuleBaseBuild
      * const builder = fWorksheet.newConditionalFormattingRule()
      *   .setIconSet({
      *     iconConfigs: [
-     *       { iconType: '3Arrows', iconId: '0', operator: univerAPI.Enum.ConditionFormatNumberOperatorEnum.greaterThan, value: { type: 'num', value: 20 } },
-     *       { iconType: '3Arrows', iconId: '1', operator: univerAPI.Enum.ConditionFormatNumberOperatorEnum.greaterThan, value: { type: 'num', value: 10 } },
-     *       { iconType: '3Arrows', iconId: '2', operator: univerAPI.Enum.ConditionFormatNumberOperatorEnum.lessThanOrEqual, value: { type: 'num', value: 10 } }
+     *       {
+     *         iconType: univerAPI.Enum.ConditionFormatIconSetTypeEnum.threeArrows,
+     *         iconId: '0',
+     *         operator: univerAPI.Enum.ConditionFormatNumberOperatorEnum.greaterThan,
+     *         value: {
+     *           type: univerAPI.Enum.ConditionFormatValueTypeEnum.num,
+     *           value: 20
+     *         }
+     *       },
+     *       {
+     *         iconType: univerAPI.Enum.ConditionFormatIconSetTypeEnum.threeArrows,
+     *         iconId: '1',
+     *         operator: univerAPI.Enum.ConditionFormatNumberOperatorEnum.greaterThan,
+     *         value: {
+     *           type: univerAPI.Enum.ConditionFormatValueTypeEnum.num,
+     *           value: 10
+     *         }
+     *       },
+     *       {
+     *         iconType: univerAPI.Enum.ConditionFormatIconSetTypeEnum.threeArrows,
+     *         iconId: '2',
+     *         operator: univerAPI.Enum.ConditionFormatNumberOperatorEnum.lessThanOrEqual,
+     *         value: {
+     *           type: univerAPI.Enum.ConditionFormatValueTypeEnum.num,
+     *           value: 10
+     *         }
+     *       }
      *     ],
      *     isShowValue: true,
      *   })
@@ -1265,9 +1289,33 @@ class ConditionalFormatIconSetRuleBuilder extends ConditionalFormatRuleBaseBuild
      * console.log(builder.getIconMap()); // icons key-value map
      * const rule = builder.setIconSet({
      *     iconConfigs: [
-     *       { iconType: '3Arrows', iconId: '0', operator: univerAPI.Enum.ConditionFormatNumberOperatorEnum.greaterThan, value: { type: 'num', value: 20 } },
-     *       { iconType: '3Arrows', iconId: '1', operator: univerAPI.Enum.ConditionFormatNumberOperatorEnum.greaterThan, value: { type: 'num', value: 10 } },
-     *       { iconType: '3Arrows', iconId: '2', operator: univerAPI.Enum.ConditionFormatNumberOperatorEnum.lessThanOrEqual, value: { type: 'num', value: 10 } }
+     *       {
+     *         iconType: univerAPI.Enum.ConditionFormatIconSetTypeEnum.threeArrows,
+     *         iconId: '0',
+     *         operator: univerAPI.Enum.ConditionFormatNumberOperatorEnum.greaterThan,
+     *         value: {
+     *           type: univerAPI.Enum.ConditionFormatValueTypeEnum.num,
+     *           value: 20
+     *         }
+     *       },
+     *       {
+     *         iconType: univerAPI.Enum.ConditionFormatIconSetTypeEnum.threeArrows,
+     *         iconId: '1',
+     *         operator: univerAPI.Enum.ConditionFormatNumberOperatorEnum.greaterThan,
+     *         value: {
+     *           type: univerAPI.Enum.ConditionFormatValueTypeEnum.num,
+     *           value: 10
+     *         }
+     *       },
+     *       {
+     *         iconType: univerAPI.Enum.ConditionFormatIconSetTypeEnum.threeArrows,
+     *         iconId: '2',
+     *         operator: univerAPI.Enum.ConditionFormatNumberOperatorEnum.lessThanOrEqual,
+     *         value: {
+     *           type: univerAPI.Enum.ConditionFormatValueTypeEnum.num,
+     *           value: 10
+     *         }
+     *       }
      *     ],
      *     isShowValue: true,
      *   })
@@ -1442,9 +1490,33 @@ export class FConditionalFormattingBuilder {
      * console.log(builder.getIconMap()); // icons key-value map
      * const rule = builder.setIconSet({
      *     iconConfigs: [
-     *       { iconType: '3Arrows', iconId: '0', operator: univerAPI.Enum.ConditionFormatNumberOperatorEnum.greaterThan, value: { type: 'num', value: 20 } },
-     *       { iconType: '3Arrows', iconId: '1', operator: univerAPI.Enum.ConditionFormatNumberOperatorEnum.greaterThan, value: { type: 'num', value: 10 } },
-     *       { iconType: '3Arrows', iconId: '2', operator: univerAPI.Enum.ConditionFormatNumberOperatorEnum.lessThanOrEqual, value: { type: 'num', value: 10 } }
+     *       {
+     *         iconType: univerAPI.Enum.ConditionFormatIconSetTypeEnum.threeArrows,
+     *         iconId: '0',
+     *         operator: univerAPI.Enum.ConditionFormatNumberOperatorEnum.greaterThan,
+     *         value: {
+     *           type: univerAPI.Enum.ConditionFormatValueTypeEnum.num,
+     *           value: 20
+     *         }
+     *       },
+     *       {
+     *         iconType: univerAPI.Enum.ConditionFormatIconSetTypeEnum.threeArrows,
+     *         iconId: '1',
+     *         operator: univerAPI.Enum.ConditionFormatNumberOperatorEnum.greaterThan,
+     *         value: {
+     *           type: univerAPI.Enum.ConditionFormatValueTypeEnum.num,
+     *           value: 10
+     *         }
+     *       },
+     *       {
+     *         iconType: univerAPI.Enum.ConditionFormatIconSetTypeEnum.threeArrows,
+     *         iconId: '2',
+     *         operator: univerAPI.Enum.ConditionFormatNumberOperatorEnum.lessThanOrEqual,
+     *         value: {
+     *           type: univerAPI.Enum.ConditionFormatValueTypeEnum.num,
+     *           value: 10
+     *         }
+     *       }
      *     ],
      *     isShowValue: true,
      *   })

@@ -15,29 +15,18 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import type { IIconSet, IIconType } from '@univerjs/sheets-conditional-formatting';
+import type { IIconSet } from '@univerjs/sheets-conditional-formatting';
 import type { IFormulaEditorRef } from '@univerjs/sheets-formula-ui';
 import type { IStyleEditorProps } from './type';
 import { get, IUniverInstanceService, LocaleService, set, Tools, UniverInstanceType } from '@univerjs/core';
 import { borderClassName, Checkbox, clsx, Dropdown, InputNumber, Select } from '@univerjs/design';
 import { MoreDownIcon, SlashDoubleIcon } from '@univerjs/icons';
-import {
-    CFNumberOperator,
-    CFRuleType,
-    CFSubRuleType,
-    CFValueType,
-    compareWithNumber,
-    createDefaultValue,
-    EMPTY_ICON_TYPE,
-    getOppositeOperator,
-    iconGroup,
-    iconMap,
-} from '@univerjs/sheets-conditional-formatting';
+import { CFNumberOperator, CFRuleType, CFSubRuleType, CFValueType, compareWithNumber, createDefaultValue, getOppositeOperator, iconGroup, iconMap, IIconSetType } from '@univerjs/sheets-conditional-formatting';
 import { FormulaEditor } from '@univerjs/sheets-formula-ui';
 import { ILayoutService, useDependency, useScrollYOverContainer, useSidebarClick } from '@univerjs/ui';
 import { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
 
-const getIcon = (iconType: string, iconId: string | number) => {
+const getIcon = (iconType: IIconSetType, iconId: string | number) => {
     const arr = iconMap[iconType] || [];
     return arr[Number(iconId)] || '';
 };
@@ -102,7 +91,7 @@ const TextInput = (props: { id: number; type: CFValueType; value: number | strin
         </div>
     );
 };
-const createDefaultConfigItem = (iconType: IIconType, index: number, list: unknown[]): IIconSet['config'][number] => ({
+const createDefaultConfigItem = (iconType: IIconSetType, index: number, list: unknown[]): IIconSet['config'][number] => ({
     operator: CFNumberOperator.greaterThan,
     value: { type: CFValueType.num, value: (list.length - 1 - index) * 10 },
     iconType,
@@ -110,14 +99,14 @@ const createDefaultConfigItem = (iconType: IIconType, index: number, list: unkno
 });
 
 interface IIconGroupListProps {
-    onClick: (iconType: IIconType) => void;
-    iconType?: IIconType;
+    onClick: (iconType: IIconSetType) => void;
+    iconType?: IIconSetType;
 };
 const IconGroupList = forwardRef<HTMLDivElement, IIconGroupListProps>((props, ref) => {
     const { onClick } = props;
     const localeService = useDependency(LocaleService);
 
-    const handleClick = (iconType: IIconType) => {
+    const handleClick = (iconType: IIconSetType) => {
         onClick(iconType);
     };
     return (
@@ -162,14 +151,14 @@ const IconGroupList = forwardRef<HTMLDivElement, IIconGroupListProps>((props, re
     );
 });
 
-const IconItemList = (props: { onClick: (iconType: IIconType, iconId: string) => void; iconType?: IIconType; iconId: string }) => {
+const IconItemList = (props: { onClick: (iconType: IIconSetType, iconId: string) => void; iconType?: IIconSetType; iconId: string }) => {
     const { onClick } = props;
 
     const list = useMemo(() => {
-        const result: { iconType: IIconType; iconId: string; base64: string }[] = [];
+        const result: { iconType: IIconSetType; iconId: string; base64: string }[] = [];
         for (const key in iconMap) {
-            const list = iconMap[key as IIconType];
-            const iconType = key as IIconType;
+            const iconType = key as IIconSetType;
+            const list = iconMap[iconType];
             list.forEach((base64, index) => {
                 result.push({
                     iconType,
@@ -189,7 +178,7 @@ const IconItemList = (props: { onClick: (iconType: IIconType, iconId: string) =>
         <div>
             <div
                 className="univer-mb-2.5 univer-flex univer-cursor-pointer univer-items-center univer-pl-1"
-                onClick={() => handleClick({ iconType: EMPTY_ICON_TYPE as any, iconId: '', base64: '' })}
+                onClick={() => handleClick({ iconType: IIconSetType.empty, iconId: '', base64: '' })}
             >
                 <SlashDoubleIcon className="univer-size-5" />
                 <span className="univer-ml-2">无单元格图标</span>
@@ -258,7 +247,7 @@ const IconSetRuleEdit = (props: {
             const preItem = configList[index - 1];
             const lessThanText = preItem?.value.type === CFValueType.formula ? localeService.t('sheet.cf.valueType.formula') : preItem?.value.value;
 
-            const handleIconClick = (iconType: IIconType, iconId: string) => {
+            const handleIconClick = (iconType: IIconSetType, iconId: string) => {
                 const value = { ...item, iconId, iconType } as typeof item;
                 onChange([String(index)], value);
             };
@@ -398,8 +387,8 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
     const rule = props.rule?.type === CFRuleType.iconSet ? props.rule : undefined;
     const localeService = useDependency(LocaleService);
     const [errorMap, setErrorMap] = useState<Record<string, string>>({});
-    const [currentIconType, setCurrentIconType] = useState<IIconType>(() => {
-        const defaultV = Object.keys(iconMap)[0] as IIconType;
+    const [currentIconType, setCurrentIconType] = useState<IIconSetType>(() => {
+        const defaultV = Object.keys(iconMap)[0] as IIconSetType;
         if (rule && rule.config.length) {
             const type = rule.config[0].iconType;
             const isNotSame = rule.config.some((item) => item.iconType !== type);
@@ -505,7 +494,7 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
             setErrorMap(checkResult(configList));
         }
     };
-    const handleClickIconList = (iconType: IIconType) => {
+    const handleClickIconList = (iconType: IIconSetType) => {
         setCurrentIconType(iconType);
         const list = iconMap[iconType] || [];
         const config = new Array(list.length).fill('').map((_e, index, list) => createDefaultConfigItem(iconType, index, list));

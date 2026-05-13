@@ -16,11 +16,10 @@
 
 import type { IRange, IScale } from '@univerjs/core';
 import type { SpreadsheetSkeleton, UniverRenderingContext } from '@univerjs/engine-render';
-import type { IIconType } from '../models/icon-map';
 import type { IIconSetCellData } from './type';
 import { Range } from '@univerjs/core';
 import { SheetExtension, SpreadsheetExtensionRegistry } from '@univerjs/engine-render';
-import { EMPTY_ICON_TYPE, iconMap } from '../models/icon-map';
+import { iconMap, IIconSetType } from '../models/icon-map';
 
 export const IconUKey = 'sheet-conditional-rule-icon';
 const EXTENSION_Z_INDEX = 35;
@@ -78,7 +77,7 @@ export class ConditionalFormattingIcon extends SheetExtension {
             }
 
             const { iconType, iconId } = cellData.iconSet;
-            if (iconType === EMPTY_ICON_TYPE) {
+            if (iconType === IIconSetType.empty) {
                 return;
             }
 
@@ -116,9 +115,9 @@ export class ConditionalFormattingIcon extends SheetExtension {
 
     private _init() {
         for (const type in iconMap) {
-            const list = iconMap[type as IIconType];
+            const list = iconMap[type as IIconSetType];
             list.forEach((base64, index) => {
-                const key = this._createKey(type as IIconType, String(index));
+                const key = this._createKey(type as IIconSetType, String(index));
                 const image = new Image();
                 image.onload = () => {
                     this._imageMap.set(key, image);
@@ -128,7 +127,7 @@ export class ConditionalFormattingIcon extends SheetExtension {
         }
     }
 
-    private _createKey(iconType: IIconType, iconIndex: string) {
+    private _createKey(iconType: IIconSetType, iconIndex: string) {
         return `${iconType}_${iconIndex}`;
     }
 }

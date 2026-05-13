@@ -19,6 +19,7 @@ import type { IFindComplete, IFindMatch, IFindReplaceState } from '@univerjs/fin
 import { Disposable, Inject, Injector, IUniverInstanceService } from '@univerjs/core';
 import { createInitFindReplaceState, FindBy, FindReplaceModel, FindReplaceState, IFindReplaceService } from '@univerjs/find-replace';
 import { FRange } from '@univerjs/sheets/facade';
+import { filter, firstValueFrom } from 'rxjs';
 
 /**
  * @ignore
@@ -412,41 +413,23 @@ export class FTextFinder extends Disposable implements IFTextFinder {
 
     async matchCaseAsync(matchCase: boolean): Promise<IFTextFinder> {
         this._state.changeState({ caseSensitive: matchCase, findCompleted: false });
-        return new Promise((resolve) => {
-            const subscribe = this._state.stateUpdates$.subscribe(async (state) => {
-                if (state.findCompleted === true) {
-                    subscribe.unsubscribe();
-                    await this.ensureCompleteAsync();
-                    resolve(this);
-                }
-            });
-        });
+        await firstValueFrom(this._state.stateUpdates$.pipe(filter((state) => state.findCompleted === true)));
+        await this.ensureCompleteAsync();
+        return this;
     }
 
     async matchEntireCellAsync(matchEntireCell: boolean): Promise<IFTextFinder> {
         this._state.changeState({ matchesTheWholeCell: matchEntireCell, findCompleted: false });
-        return new Promise((resolve) => {
-            const subscribe = this._state.stateUpdates$.subscribe(async (state) => {
-                if (state.findCompleted === true) {
-                    subscribe.unsubscribe();
-                    await this.ensureCompleteAsync();
-                    resolve(this);
-                }
-            });
-        });
+        await firstValueFrom(this._state.stateUpdates$.pipe(filter((state) => state.findCompleted === true)));
+        await this.ensureCompleteAsync();
+        return this;
     }
 
     async matchFormulaTextAsync(matchFormulaText: boolean): Promise<IFTextFinder> {
         this._state.changeState({ findBy: matchFormulaText ? FindBy.FORMULA : FindBy.VALUE, findCompleted: false });
-        return new Promise((resolve) => {
-            const subscribe = this._state.stateUpdates$.subscribe(async (state) => {
-                if (state.findCompleted === true) {
-                    subscribe.unsubscribe();
-                    await this.ensureCompleteAsync();
-                    resolve(this);
-                }
-            });
-        });
+        await firstValueFrom(this._state.stateUpdates$.pipe(filter((state) => state.findCompleted === true)));
+        await this.ensureCompleteAsync();
+        return this;
     }
 
     async replaceAllWithAsync(replaceText: string): Promise<number> {

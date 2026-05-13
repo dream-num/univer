@@ -688,6 +688,7 @@ export class FindReplaceService extends Disposable implements IFindReplaceServic
     private readonly _providers = new Set<IFindReplaceProvider>();
     private readonly _state = new FindReplaceState();
     private _model: Nullable<FindReplaceModel>;
+    private _modelDisposables: Nullable<DisposableCollection> = null;
 
     private readonly _currentMatch$ = new BehaviorSubject<Nullable<IFindMatch>>(null);
     readonly currentMatch$ = this._currentMatch$.asObservable();
@@ -833,8 +834,9 @@ export class FindReplaceService extends Disposable implements IFindReplaceServic
         }
 
         this._model = this._injector.createInstance(FindReplaceModel, this._state, this._providers);
-        this._model.currentMatch$.subscribe((match) => this._currentMatch$.next(match));
-        this._model.replaceables$.subscribe((replaceables) => this._replaceables$.next(replaceables));
+        this._modelDisposables = new DisposableCollection();
+        this._modelDisposables.add(toDisposable(this._model.currentMatch$.subscribe((match) => this._currentMatch$.next(match))));
+        this._modelDisposables.add(toDisposable(this._model.replaceables$.subscribe((replaceables) => this._replaceables$.next(replaceables))));
 
         const newState = createInitFindReplaceState();
         if (revealReplace) {
@@ -853,6 +855,9 @@ export class FindReplaceService extends Disposable implements IFindReplaceServic
     terminate(): void {
         this._model?.dispose();
         this._model = null;
+
+        this._modelDisposables?.dispose();
+        this._modelDisposables = null;
 
         this._toggleDisplayRawFormula(false);
         this._toggleRevealReplace(false);

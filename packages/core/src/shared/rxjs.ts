@@ -80,7 +80,12 @@ export function afterTime(ms: number): Observable<void> {
 export function convertObservableToBehaviorSubject<T>(observable: Observable<T>, initValue: T): BehaviorSubject<T> {
     const subject = new BehaviorSubject(initValue);
 
-    observable.subscribe(subject);
+    const subscription = observable.subscribe(subject);
+    const originalComplete = subject.complete.bind(subject);
+    subject.complete = () => {
+        subscription.unsubscribe();
+        originalComplete();
+    };
 
     return subject;
 }

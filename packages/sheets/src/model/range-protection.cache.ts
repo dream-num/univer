@@ -56,7 +56,7 @@ export class RangeProtectionCache extends Disposable {
     }
 
     private _initUpdateCellInfoCache() {
-        this._permissionService.permissionPointUpdate$.pipe(
+        this.disposeWithMe(this._permissionService.permissionPointUpdate$.pipe(
             filter((permission) => permission.type === UnitObject.SelectRange),
             map((permission) => permission as IRangePermissionPoint)
         ).subscribe((permission) => {
@@ -79,9 +79,9 @@ export class RangeProtectionCache extends Disposable {
                     }
                 }
             });
-        });
+        }));
 
-        this._ruleModel.ruleChange$.subscribe((info) => {
+        this.disposeWithMe(this._ruleModel.ruleChange$.subscribe((info) => {
             const { unitId, subUnitId } = info;
             const cellInfoMap = this._ensureCellInfoMap(unitId, subUnitId);
             info.rule.ranges.forEach((range) => {
@@ -96,11 +96,11 @@ export class RangeProtectionCache extends Disposable {
                     });
                 });
             }
-        });
+        }));
     }
 
     private _initUpdateCellRuleCache() {
-        this._ruleModel.ruleChange$.subscribe((ruleChange) => {
+        this.disposeWithMe(this._ruleModel.ruleChange$.subscribe((ruleChange) => {
             const { type } = ruleChange;
             if (type === 'add') {
                 this._addCellRuleCache(ruleChange);
@@ -110,7 +110,7 @@ export class RangeProtectionCache extends Disposable {
                 this._deleteCellRuleCache({ ...ruleChange, rule: ruleChange.oldRule! });
                 this._addCellRuleCache(ruleChange);
             }
-        });
+        }));
     }
 
     private _ensureRuleMap(unitId: string, subUnitId: string) {
@@ -285,7 +285,7 @@ export class RangeProtectionCache extends Disposable {
     }
 
     private _initUpdateRowColInfoCache() {
-        this._permissionService.permissionPointUpdate$.pipe(
+        this.disposeWithMe(this._permissionService.permissionPointUpdate$.pipe(
             filter((permission) => permission.type === UnitObject.SelectRange),
             map((permission) => permission as IRangePermissionPoint)
         ).subscribe({
@@ -325,9 +325,9 @@ export class RangeProtectionCache extends Disposable {
                     }
                 });
             },
-        });
+        }));
 
-        this._ruleModel.ruleChange$.subscribe((info) => {
+        this.disposeWithMe(this._ruleModel.ruleChange$.subscribe((info) => {
             if (info.type === 'delete') {
                 const { unitId, subUnitId, rule } = info;
                 const rowInfoMap = this._ensureRowColInfoMap(unitId, subUnitId, 'row');
@@ -345,7 +345,7 @@ export class RangeProtectionCache extends Disposable {
                     }
                 });
             }
-        });
+        }));
     }
 
     public getCellInfo(unitId: string, subUnitId: string, row: number, col: number) {

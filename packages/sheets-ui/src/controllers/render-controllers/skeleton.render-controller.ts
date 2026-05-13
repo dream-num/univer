@@ -29,9 +29,11 @@ export class SheetSkeletonRenderController extends Disposable implements IRender
     ) {
         super();
 
-        this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param: Nullable<ISheetSkeletonManagerParam>) => {
-            this._updateSceneSize(param);
-        });
+        this.disposeWithMe(
+            this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param: Nullable<ISheetSkeletonManagerParam>) => {
+                this._updateSceneSize(param);
+            })
+        );
     }
 
     private _updateSceneSize(param: Nullable<ISheetSkeletonManagerParam>) {

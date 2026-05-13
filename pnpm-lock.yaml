@@ -382,8 +382,8 @@ importers:
         specifier: ^1.2.0
         version: 1.2.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@univerjs/icons-svg':
-        specifier: ^1.1.1
-        version: 1.1.1
+        specifier: ^1.2.0
+        version: 1.2.0
       '@univerjs/protocol':
         specifier: workspace:*
         version: link:../../packages/protocol
@@ -1602,8 +1602,8 @@ importers:
         specifier: workspace:*
         version: link:../../common/shared
       '@univerjs/icons-svg':
-        specifier: ^1.1.1
-        version: 1.1.1
+        specifier: ^1.2.0
+        version: 1.2.0
       rxjs:
         specifier: ^7.8.2
         version: 7.8.2
@@ -6385,8 +6385,8 @@ packages:
     resolution: {integrity: sha512-NwjLUnGy8/Zfx23fl50tRC8rYaYnM52xNRYFAXvmiil9yh1+K6aRVQMnzW6gQB/1DLgWt977lYQn7C+wtgXZiA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@univerjs/icons-svg@1.1.1':
-    resolution: {integrity: sha512-ur59SIR6JViQGFCwHfXIURmV5qBbSKcvE9OF9BRfDvxphmXYtWwfC0/ubrWF5Z4RGNKtP3VTPiVSJT27lkfE3A==}
+  '@univerjs/icons-svg@1.2.0':
+    resolution: {integrity: sha512-Tm0cYbTQwP2VfpiZClyzff5HO7w9UCZ/Qi0YWZ/YWi16QBTLqsc47a80VPAZTwOgUPqejuGxpBKViz6Welht6w==}
 
   '@univerjs/icons@1.2.0':
     resolution: {integrity: sha512-+rw4sSNGjyn4FI6LWa2Z7cMtc5MzBMr7cAaAfeh66d/aqT60CCrBbuF3x+nuC/fvDMXQzEjOqywXUZ4HE+MwLw==}
@@ -14487,7 +14487,7 @@ snapshots:
       '@typescript-eslint/types': 8.59.2
       eslint-visitor-keys: 5.0.1
 
-  '@univerjs/icons-svg@1.1.1': {}
+  '@univerjs/icons-svg@1.2.0': {}
 
   '@univerjs/icons@1.2.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)':
     dependencies:

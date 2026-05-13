@@ -15,12 +15,14 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { Disposable, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { Disposable, DisposableCollection, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { CONDITIONAL_FORMATTING_VIEWPORT_CACHE_LENGTH, ConditionalFormattingViewModel } from '@univerjs/sheets-conditional-formatting';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 
 export class ConditionalFormattingViewportController extends Disposable {
+    private _unitDisposable: DisposableCollection = new DisposableCollection();
+
     constructor(
         @Inject(ConditionalFormattingViewModel) private _conditionalFormattingViewModel: ConditionalFormattingViewModel,
         @IUniverInstanceService private _univerInstanceService: IUniverInstanceService,
@@ -33,13 +35,15 @@ export class ConditionalFormattingViewportController extends Disposable {
     private _init() {
         const unit = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         const bindUnit = (unit: Workbook) => {
+            this._unitDisposable.dispose();
+            this._unitDisposable = new DisposableCollection();
             const unitId = unit.getUnitId();
             const render = this._renderManagerService.getRenderById(unitId);
             if (!render) {
                 return;
             }
             const sheetSkeletonManagerService = render.with(SheetSkeletonManagerService);
-            this.disposeWithMe(sheetSkeletonManagerService.currentSkeleton$.subscribe((s) => {
+            this._unitDisposable.add(sheetSkeletonManagerService.currentSkeleton$.subscribe((s) => {
                 if (s) {
                     const range = s.skeleton.rowColumnSegment;
                     const col = range.endColumn - range.startColumn + 1;
@@ -54,11 +58,19 @@ export class ConditionalFormattingViewportController extends Disposable {
         if (unit) {
             bindUnit(unit);
         }
-        this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((unit) => {
-            if (!unit) {
-                return;
-            }
-            bindUnit(unit);
-        });
+        this.disposeWithMe(
+            this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((unit) => {
+                if (!unit) {
+                    this._unitDisposable.dispose();
+                    return;
+                }
+                bindUnit(unit);
+            })
+        );
+    }
+
+    override dispose(): void {
+        this._unitDisposable.dispose();
+        super.dispose();
     }
 }

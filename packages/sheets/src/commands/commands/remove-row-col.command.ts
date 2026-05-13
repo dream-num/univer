@@ -69,10 +69,8 @@ export interface IRemoveColByRangeCommandParams {
  * Set selection after remove row/col through throttle to avoid frequent set selection operation
  */
 const setSelection = throttle((range: IRange, workbook: Workbook, worksheet: Worksheet, commandService: ICommandService) => {
-    if (!commandService.disposed) {
-        const command = followSelectionOperation(range, workbook, worksheet);
-        commandService.executeCommand(command.id, command.params);
-    };
+    const command = followSelectionOperation(range, workbook, worksheet);
+    commandService.executeCommand(command.id, command.params);
 }, 300);
 
 export const RemoveRowCommandId = 'sheet.command.remove-row';

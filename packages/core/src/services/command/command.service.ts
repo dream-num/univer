@@ -209,7 +209,6 @@ export const ICommandService = createIdentifier<ICommandService>('univer.core.co
  * The service to register and execute commands.
  */
 export interface ICommandService {
-    disposed(): boolean;
     /**
      * Check if a command is already registered at the current command service.
      * @param commandId The id of the command.
@@ -350,10 +349,6 @@ export class CommandService extends Disposable implements ICommandService {
         this._collabMutationListeners.length = 0;
     }
 
-    disposed(): boolean {
-        return this._disposed;
-    }
-
     hasCommand(commandId: string): boolean {
         return this._commandRegistry.hasCommand(commandId);
     }
@@ -415,6 +410,10 @@ export class CommandService extends Disposable implements ICommandService {
         params?: P,
         options?: IExecutionOptions
     ): Promise<R> {
+        if (this._disposed) {
+            return false as R;
+        }
+
         try {
             const item = this._commandRegistry.getCommand(id);
             if (item) {
@@ -463,6 +462,10 @@ export class CommandService extends Disposable implements ICommandService {
         params?: P | undefined,
         options?: IExecutionOptions
     ): R {
+        if (this._disposed) {
+            return false as R;
+        }
+
         try {
             const item = this._commandRegistry.getCommand(id);
             if (item) {

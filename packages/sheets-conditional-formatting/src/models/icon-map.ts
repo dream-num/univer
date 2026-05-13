@@ -16,39 +16,86 @@
 
 import { ICON_MAP } from '../assets/icon-map';
 
-export type IIconItem = string;
+export enum IIconSetType {
+    threeArrows = '3Arrows',
+    threeArrowsGray = '3ArrowsGray',
+    fourArrows = '4Arrows',
+    fourArrowsGray = '4ArrowsGray',
+    fiveArrows = '5Arrows',
+    fiveArrowsGray = '5ArrowsGray',
+    threeTriangles = '3Triangles',
+    threeTrafficLights1 = '3TrafficLights1',
+    threeSigns = '3Signs',
+    threeTrafficLights2 = '3TrafficLights2',
+    fourRedToBlack = '4RedToBlack',
+    fourTrafficLights = '4TrafficLights',
+    threeSymbols = '3Symbols',
+    threeSymbols2 = '3Symbols2',
+    threeFlags = '3Flags',
+    fourRating = '4Rating',
+    fiveRating = '5Rating',
+    fiveQuarters = '5Quarters',
+    fiveFelling = '_5Felling',
+    fiveBoxes = '5Boxes',
+    threeStars = '3Stars',
+    empty = 'EMPTY_ICON_TYPE',
+}
 
-export const iconGroup: { title: string; group: { name: string; list: string[] }[] }[] = [
+export const iconGroup: { title: string; group: { name: IIconSetType; list: string[] }[] }[] = [
     {
         title: 'sheet.cf.iconSet.direction',
         group: [
-            { name: '3Arrows', list: [ICON_MAP.arrow['up-green'], ICON_MAP.arrow['right-gold'], ICON_MAP.arrow['down-red']] },
-            { name: '3ArrowsGray', list: [ICON_MAP.arrow['up-gray'], ICON_MAP.arrow['right-gray'], ICON_MAP.arrow['down-gray']] },
-            { name: '4Arrows', list: [ICON_MAP.arrow['up-green'], ICON_MAP.arrow['rightAndUp-gold'], ICON_MAP.arrow['rightAndDown-gold'], ICON_MAP.arrow['down-red']] },
-            { name: '4ArrowsGray', list: [ICON_MAP.arrow['up-gray'], ICON_MAP.arrow['rightAndUp-gray'], ICON_MAP.arrow['rightAndDown-gray'], ICON_MAP.arrow['down-gray']] },
-            { name: '5Arrows', list: [ICON_MAP.arrow['up-green'], ICON_MAP.arrow['rightAndUp-gold'], ICON_MAP.arrow['right-gold'], ICON_MAP.arrow['rightAndDown-gold'], ICON_MAP.arrow['down-red']] },
-            { name: '5ArrowsGray', list: [ICON_MAP.arrow['up-gray'], ICON_MAP.arrow['rightAndUp-gray'], ICON_MAP.arrow['right-gray'], ICON_MAP.arrow['rightAndDown-gray'], ICON_MAP.arrow['down-gray']] },
-            { name: '3Triangles', list: [ICON_MAP.shape.up, ICON_MAP.shape.cross, ICON_MAP.shape.down] },
+            {
+                name: IIconSetType.threeArrows,
+                list: [ICON_MAP.arrow['up-green'], ICON_MAP.arrow['right-gold'], ICON_MAP.arrow['down-red']],
+            },
+            {
+                name: IIconSetType.threeArrowsGray,
+                list: [ICON_MAP.arrow['up-gray'], ICON_MAP.arrow['right-gray'], ICON_MAP.arrow['down-gray']],
+            },
+            {
+                name: IIconSetType.fourArrows,
+                list: [ICON_MAP.arrow['up-green'], ICON_MAP.arrow['rightAndUp-gold'], ICON_MAP.arrow['rightAndDown-gold'], ICON_MAP.arrow['down-red']],
+            },
+            {
+                name: IIconSetType.fourArrowsGray,
+                list: [ICON_MAP.arrow['up-gray'], ICON_MAP.arrow['rightAndUp-gray'], ICON_MAP.arrow['rightAndDown-gray'], ICON_MAP.arrow['down-gray']],
+            },
+            {
+                name: IIconSetType.fiveArrows,
+                list: [ICON_MAP.arrow['up-green'], ICON_MAP.arrow['rightAndUp-gold'], ICON_MAP.arrow['right-gold'], ICON_MAP.arrow['rightAndDown-gold'], ICON_MAP.arrow['down-red']],
+            },
+            {
+                name: IIconSetType.fiveArrowsGray,
+                list: [ICON_MAP.arrow['up-gray'], ICON_MAP.arrow['rightAndUp-gray'], ICON_MAP.arrow['right-gray'], ICON_MAP.arrow['rightAndDown-gray'], ICON_MAP.arrow['down-gray']],
+            },
+            {
+                name: IIconSetType.threeTriangles,
+                list: [ICON_MAP.shape.up, ICON_MAP.shape.cross, ICON_MAP.shape.down],
+            },
         ],
     },
     {
         title: 'sheet.cf.iconSet.shape',
         group: [
             {
-                name: '3TrafficLights1',
+                name: IIconSetType.threeTrafficLights1,
                 list: [ICON_MAP.shape['roundness-greed'], ICON_MAP.shape['roundness-gold'], ICON_MAP.shape['roundness-red']],
             },
             {
-                name: '3Signs',
+                name: IIconSetType.threeSigns,
                 list: [ICON_MAP.shape['roundness-greed'], ICON_MAP.shape['triangle-gold'], ICON_MAP.shape['rhomboid-red']],
             },
-            { name: '3TrafficLights2', list: [ICON_MAP.shape['indicate-greed'], ICON_MAP.shape['indicate-gold'], ICON_MAP.shape['indicate-red']] },
             {
-                name: '4RedToBlack',
+                name: IIconSetType.threeTrafficLights2,
+                list: [ICON_MAP.shape['indicate-greed'], ICON_MAP.shape['indicate-gold'], ICON_MAP.shape['indicate-red']],
+            },
+            {
+                name: IIconSetType.fourRedToBlack,
                 list: [ICON_MAP.shape['roundness-red'], ICON_MAP.shape['roundness-pink'], ICON_MAP.shape['roundness-gray'], ICON_MAP.shape['roundness-black']],
             },
             {
-                name: '4TrafficLights',
+                name: IIconSetType.fourTrafficLights,
                 list: [ICON_MAP.shape['roundness-greed'], ICON_MAP.shape['roundness-gold'], ICON_MAP.shape['roundness-red'], ICON_MAP.shape['roundness-black']],
             },
         ],
@@ -57,15 +104,15 @@ export const iconGroup: { title: string; group: { name: string; list: string[] }
         title: 'sheet.cf.iconSet.mark',
         group: [
             {
-                name: '3Symbols',
+                name: IIconSetType.threeSymbols,
                 list: [ICON_MAP.feedback.correct, ICON_MAP.feedback.warn, ICON_MAP.feedback.mistake],
             },
             {
-                name: '3Symbols2',
+                name: IIconSetType.threeSymbols2,
                 list: [ICON_MAP.feedback2.correct2, ICON_MAP.feedback2.warn2, ICON_MAP.feedback2.mistake2],
             },
             {
-                name: '3Flags',
+                name: IIconSetType.threeFlags,
                 list: [ICON_MAP.flag['flag-green'], ICON_MAP.flag['flag-gold'], ICON_MAP.flag['flag-red']],
             },
 
@@ -75,27 +122,27 @@ export const iconGroup: { title: string; group: { name: string; list: string[] }
         title: 'sheet.cf.iconSet.rank',
         group: [
             {
-                name: '4Rating',
+                name: IIconSetType.fourRating,
                 list: [ICON_MAP.signal.signal25, ICON_MAP.signal.signal50, ICON_MAP.signal.signal75, ICON_MAP.signal.signal100],
             },
             {
-                name: '5Rating',
+                name: IIconSetType.fiveRating,
                 list: [ICON_MAP.signal.signal0, ICON_MAP.signal.signal25, ICON_MAP.signal.signal50, ICON_MAP.signal.signal75, ICON_MAP.signal.signal100],
             },
             {
-                name: '5Quarters',
+                name: IIconSetType.fiveQuarters,
                 list: [ICON_MAP.progress.progress100, ICON_MAP.progress.progress75, ICON_MAP.progress.progress50, ICON_MAP.progress.progress25, ICON_MAP.progress.progress0],
             },
             {
-                name: '_5Felling',
+                name: IIconSetType.fiveFelling,
                 list: [ICON_MAP.feeling.guffaw, ICON_MAP.feeling.smile, ICON_MAP.feeling.noninductive, ICON_MAP.feeling.dissatisfied, ICON_MAP.feeling.impatient],
             },
             {
-                name: '5Boxes',
+                name: IIconSetType.fiveBoxes,
                 list: [ICON_MAP.cell['cell-100'], ICON_MAP.cell['cell-75'], ICON_MAP.cell['cell-50'], ICON_MAP.cell['cell-25'], ICON_MAP.cell['cell-0']],
             },
             {
-                name: '3Stars',
+                name: IIconSetType.threeStars,
                 list: [ICON_MAP.star.starFull, ICON_MAP.star.starIncomplete, ICON_MAP.star.starEmpty],
             },
         ],
@@ -108,11 +155,9 @@ export const iconMap = iconGroup.reduce((result, cur) => {
         result[v.name] = v.list;
     }
     return result;
-}, {} as Record<string, string[]>);
-export type IIconType = keyof typeof iconMap;
+}, {} as Record<IIconSetType, string[]>);
 
 for (const key in iconMap) {
-    const v = iconMap[key as IIconType];
+    const v = iconMap[key as IIconSetType];
     Object.freeze(v);
 }
-export const EMPTY_ICON_TYPE = 'EMPTY_ICON_TYPE';

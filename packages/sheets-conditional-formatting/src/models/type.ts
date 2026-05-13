@@ -16,7 +16,7 @@
 
 import type { IRange, IStyleBase } from '@univerjs/core';
 import type { CFNumberOperator, CFRuleType, CFSubRuleType, CFTextOperator, CFTimePeriodOperator, CFValueType } from '../base/const';
-import type { IIconType } from './icon-map';
+import type { IIconSetType } from './icon-map';
 
 export interface IBaseCfRule {
     type: string;
@@ -96,7 +96,7 @@ export interface IColorScale extends IBaseCfRule {
 export interface IIconSet extends IBaseCfRule {
     type: CFRuleType.iconSet;
     isShowValue: boolean;
-    config: { operator: CFNumberOperator; value: IValueConfig; iconType: IIconType; iconId: string }[];
+    config: { operator: CFNumberOperator; value: IValueConfig; iconType: IIconSetType; iconId: string }[];
 }
 
 export type IConditionalFormattingRuleConfig = IColorScale | IDataBar | IUniqueValuesHighlightCell |

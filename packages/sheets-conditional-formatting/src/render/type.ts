@@ -15,7 +15,7 @@
  */
 
 import type { ICellData } from '@univerjs/core';
-import type { IIconType } from '../models/icon-map';
+import type { IIconSetType } from '../models/icon-map';
 
 export interface IDataBarRenderParams {
     color: string;
@@ -31,7 +31,7 @@ export interface IDataBarCellData extends ICellData {
 
 export interface IIconSetRenderParams {
     iconId: string;
-    iconType: IIconType;
+    iconType: IIconSetType;
     isShowValue: boolean;
 }
 

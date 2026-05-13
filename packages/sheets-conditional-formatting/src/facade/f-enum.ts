@@ -15,7 +15,7 @@
  */
 
 import { FEnum } from '@univerjs/core/facade';
-import { CFNumberOperator, CFTimePeriodOperator } from '@univerjs/sheets-conditional-formatting';
+import { CFNumberOperator, CFTimePeriodOperator, CFValueType, IIconSetType } from '@univerjs/sheets-conditional-formatting';
 
 /**
  * @ignore
@@ -30,6 +30,16 @@ export interface IFSheetsConditionalFormattingEnumMixin {
      * Conditional formatting time period operator
      */
     ConditionFormatTimePeriodOperatorEnum: typeof CFTimePeriodOperator;
+
+    /**
+     * Conditional formatting icon set type
+     */
+    ConditionFormatIconSetTypeEnum: typeof IIconSetType;
+
+    /**
+     * Conditional formatting value type
+     */
+    ConditionFormatValueTypeEnum: typeof CFValueType;
 }
 
 export class FSheetsConditionalFormattingEnumMixin extends FEnum implements IFSheetsConditionalFormattingEnumMixin {
@@ -39,6 +49,14 @@ export class FSheetsConditionalFormattingEnumMixin extends FEnum implements IFSh
 
     override get ConditionFormatTimePeriodOperatorEnum(): typeof CFTimePeriodOperator {
         return CFTimePeriodOperator;
+    }
+
+    override get ConditionFormatIconSetTypeEnum(): typeof IIconSetType {
+        return IIconSetType;
+    }
+
+    override get ConditionFormatValueTypeEnum(): typeof CFValueType {
+        return CFValueType;
     }
 }
 

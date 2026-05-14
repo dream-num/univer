@@ -42,6 +42,7 @@ function createService() {
             },
         })),
         getDirtyData: vi.fn(() => ({})),
+        getDirtyDefinedNameMap: vi.fn(() => ({})),
     };
     const runtimeService = {
         setFormulaExecuteStage: vi.fn(),

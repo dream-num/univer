@@ -30,6 +30,7 @@ export interface IMenuSchema {
     key: string;
     order: number;
     title?: string;
+    contextual?: boolean;
     item?: IMenuItem;
     children?: IMenuSchema[];
     quickLayout?: ContextMenuQuickLayout;
@@ -52,6 +53,7 @@ export type MenuSchemaType = {
     order?: number;
     menuItemFactory?: (accessor: IAccessor) => IMenuItem;
     title?: string;
+    contextual?: boolean;
     quickLayout?: ContextMenuQuickLayout;
 } | {
     [key: string]: MenuSchemaType;
@@ -283,6 +285,7 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
                 key,
                 order: value.order,
                 title: value.title,
+                contextual: value.contextual,
                 quickLayout: value.quickLayout,
             };
 

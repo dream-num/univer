@@ -31,6 +31,9 @@ export interface IRibbonService {
     fakeToolbarVisible$: Observable<boolean>;
 
     setActivatedTab(tab: string): void;
+    showContextualTab(tab: string, options?: { activate?: boolean }): void;
+    hideContextualTab(tab: string): void;
+    hideAllContextualTabs(): void;
     setCollapsedIds(ids: string[]): void;
     setFakeToolbarVisible(visible: boolean): void;
 }
@@ -48,6 +51,10 @@ export class DesktopRibbonService extends Disposable implements IRibbonService {
     private readonly _fakeToolbarVisible$ = new BehaviorSubject<boolean>(false);
     readonly fakeToolbarVisible$ = this._fakeToolbarVisible$.asObservable();
 
+    private readonly _visibleContextualTabs = new Set<string>();
+    private readonly _contextualTabs = new Set<string>();
+    private _lastNonContextualActivatedTab: string = RibbonPosition.START;
+
     constructor(
         @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
@@ -57,7 +64,37 @@ export class DesktopRibbonService extends Disposable implements IRibbonService {
     }
 
     setActivatedTab(tab: string): void {
+        if (!this._isContextualTab(tab)) {
+            this._lastNonContextualActivatedTab = tab;
+        }
+
         this._activatedTab$.next(tab);
+    }
+
+    showContextualTab(tab: string, options?: { activate?: boolean }): void {
+        this._visibleContextualTabs.add(tab);
+        this._updateRibbon();
+
+        if (options?.activate) {
+            this.setActivatedTab(tab);
+        }
+    }
+
+    hideContextualTab(tab: string): void {
+        if (!this._visibleContextualTabs.delete(tab)) {
+            return;
+        }
+
+        this._updateRibbon();
+    }
+
+    hideAllContextualTabs(): void {
+        if (this._visibleContextualTabs.size === 0) {
+            return;
+        }
+
+        this._visibleContextualTabs.clear();
+        this._updateRibbon();
     }
 
     setCollapsedIds(ids: string[]): void {
@@ -80,7 +117,9 @@ export class DesktopRibbonService extends Disposable implements IRibbonService {
     }
 
     private _updateRibbon() {
-        const ribbon = this._menuManagerService.getMenuByPositionKey(MenuManagerPosition.RIBBON);
+        const ribbon = this._filterContextualTabs(
+            this._menuManagerService.getMenuByPositionKey(MenuManagerPosition.RIBBON)
+        );
 
         // Collect all hidden$ Observables and their corresponding paths
         const hiddenObservableMap: Observable<boolean>[] = [];
@@ -101,7 +140,7 @@ export class DesktopRibbonService extends Disposable implements IRibbonService {
         }
 
         if (hiddenObservableMap.length === 0) {
-            this._ribbon$.next(ribbon);
+            this._setRibbon(ribbon);
             return;
         }
 
@@ -149,8 +188,43 @@ export class DesktopRibbonService extends Disposable implements IRibbonService {
                     }
                 }
 
-                this._ribbon$.next(newRibbon);
+                this._setRibbon(newRibbon);
             })
             .unsubscribe();
+    }
+
+    private _filterContextualTabs(ribbon: IMenuSchema[]): IMenuSchema[] {
+        this._contextualTabs.clear();
+
+        ribbon.forEach((group) => {
+            if (group.contextual) {
+                this._contextualTabs.add(group.key);
+            }
+        });
+
+        return ribbon.filter((group) => !group.contextual || this._visibleContextualTabs.has(group.key));
+    }
+
+    private _setRibbon(ribbon: IMenuSchema[]): void {
+        const activatedTab = this._activatedTab$.getValue();
+        const activeGroup = ribbon.find((group) => group.key === activatedTab);
+
+        if (!activeGroup && this._contextualTabs.has(activatedTab)) {
+            const fallbackTab = ribbon.find((group) => group.key === this._lastNonContextualActivatedTab && !group.contextual)
+                ?? ribbon.find((group) => group.key === RibbonPosition.START)
+                ?? ribbon[0];
+
+            if (fallbackTab) {
+                this._activatedTab$.next(fallbackTab.key);
+            }
+        } else if (activeGroup && !activeGroup.contextual) {
+            this._lastNonContextualActivatedTab = activeGroup.key;
+        }
+
+        this._ribbon$.next(ribbon);
+    }
+
+    private _isContextualTab(tab: string): boolean {
+        return this._contextualTabs.has(tab) || this._ribbon$.getValue().some((group) => group.key === tab && group.contextual);
     }
 }

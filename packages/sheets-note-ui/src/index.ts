@@ -21,4 +21,4 @@ export { SheetsCellContentController } from './controllers/sheets-cell-content.c
 export { SheetsNotePopupController } from './controllers/sheets-note-popup.controller';
 export { UniverSheetsNoteUIPlugin } from './plugin';
 export { SheetsNotePopupService } from './services/sheets-note-popup.service';
-export { SheetsNote } from './views/note';
+export { SheetsNote } from './views/Note';

@@ -133,7 +133,7 @@ export { MobileContextMenu } from './views/components/context-menu/MobileContext
 export { type IDialogPartMethodOptions } from './views/components/dialog-part/interface';
 export { FloatDomSingle } from './views/components/dom/FloatDom';
 export { FloatDom } from './views/components/dom/FloatDom';
-export { PrintFloatDomSingle } from './views/components/dom/print';
+export { PrintFloatDomSingle } from './views/components/dom/Print';
 export { GlobalZone } from './views/components/global-zone/GlobalZone';
 export { CanvasPopup, SingleCanvasPopup } from './views/components/popup/CanvasPopup';
 export { RectPopup, type RectPopupDirection } from './views/components/popup/RectPopup';

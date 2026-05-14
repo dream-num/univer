@@ -1,0 +1,152 @@
+/**
+ * Copyright 2023-present DreamNum Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { beforeEach, describe, expect, it } from 'vitest';
+import { FORMULA_AST_CACHE, generateAstNode } from '../generate-ast-node';
+
+describe('generateAstNode defined name cache invalidation', () => {
+    beforeEach(() => {
+        FORMULA_AST_CACHE.clear();
+    });
+
+    function createHarness(dirtyDefinedNameMap: Record<string, Record<string, string>>) {
+        let parseCount = 0;
+        const node = {
+            hasDefinedName: () => false,
+        };
+
+        const lexer = {
+            treeBuilder: (formula: string) => formula,
+        };
+        const astTreeBuilder = {
+            parse: () => {
+                parseCount++;
+                return node;
+            },
+        };
+        const currentConfigService = {
+            getDirtyDefinedNameMap: () => dirtyDefinedNameMap,
+            getExecuteUnitId: () => 'unit-1',
+        };
+
+        return {
+            lexer,
+            astTreeBuilder,
+            currentConfigService,
+            getParseCount: () => parseCount,
+        };
+    }
+
+    it('does not reuse cache when dirty defined name key matches formula in the same unit', () => {
+        const harness = createHarness({
+            'unit-1': {
+                'SUM(A1)': 'another formula text',
+            },
+        });
+
+        generateAstNode(
+            'unit-1',
+            '=SUM(A1)',
+            harness.lexer as never,
+            harness.astTreeBuilder as never,
+            harness.currentConfigService as never
+        );
+        generateAstNode(
+            'unit-1',
+            '=SUM(A1)',
+            harness.lexer as never,
+            harness.astTreeBuilder as never,
+            harness.currentConfigService as never
+        );
+
+        expect(harness.getParseCount()).toBe(2);
+    });
+
+    it('ignores a leading equal sign when matching dirty defined name key', () => {
+        const harness = createHarness({
+            'unit-1': {
+                '=SUM(A1)': 'another formula text',
+            },
+        });
+
+        generateAstNode(
+            'unit-1',
+            '=SUM(A1)',
+            harness.lexer as never,
+            harness.astTreeBuilder as never,
+            harness.currentConfigService as never
+        );
+        generateAstNode(
+            'unit-1',
+            '=SUM(A1)',
+            harness.lexer as never,
+            harness.astTreeBuilder as never,
+            harness.currentConfigService as never
+        );
+
+        expect(harness.getParseCount()).toBe(2);
+    });
+
+    it('reuses cache when dirty defined name key matches another unit', () => {
+        const harness = createHarness({
+            'unit-2': {
+                'SUM(A1)': 'another formula text',
+            },
+        });
+
+        generateAstNode(
+            'unit-1',
+            '=SUM(A1)',
+            harness.lexer as never,
+            harness.astTreeBuilder as never,
+            harness.currentConfigService as never
+        );
+        generateAstNode(
+            'unit-1',
+            '=SUM(A1)',
+            harness.lexer as never,
+            harness.astTreeBuilder as never,
+            harness.currentConfigService as never
+        );
+
+        expect(harness.getParseCount()).toBe(1);
+    });
+
+    it('reuses cache when dirty defined name value matches formula but key does not', () => {
+        const harness = createHarness({
+            'unit-1': {
+                'SUM(B1)': '=SUM(A1)',
+            },
+        });
+
+        generateAstNode(
+            'unit-1',
+            '=SUM(A1)',
+            harness.lexer as never,
+            harness.astTreeBuilder as never,
+            harness.currentConfigService as never
+        );
+        generateAstNode(
+            'unit-1',
+            '=SUM(A1)',
+            harness.lexer as never,
+            harness.astTreeBuilder as never,
+            harness.currentConfigService as never
+        );
+
+        expect(harness.getParseCount()).toBe(1);
+    });
+});

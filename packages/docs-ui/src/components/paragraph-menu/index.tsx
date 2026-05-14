@@ -27,7 +27,7 @@ import { HEADING_ICON_MAP } from '../../menu/paragraph-menu';
 import { DocEventManagerService } from '../../services/doc-event-manager.service';
 import { DocParagraphMenuService } from '../../services/doc-paragraph-menu.service';
 
-export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
+export function ParagraphMenu({ popup }: { popup: IPopup }) {
     const [visible, setVisible] = useState(false);
     const contentRef = useRef<HTMLDivElement>(null);
     const commandService = useDependency(ICommandService);

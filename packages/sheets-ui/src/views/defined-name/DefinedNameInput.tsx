@@ -36,7 +36,7 @@ export interface IDefinedNameInputProps extends Omit<IDefinedNamesServiceParam, 
     id?: string;
 }
 
-export const DefinedNameInput = (props: IDefinedNameInputProps) => {
+export function DefinedNameInput(props: IDefinedNameInputProps) {
     const {
         inputId,
         state = false,

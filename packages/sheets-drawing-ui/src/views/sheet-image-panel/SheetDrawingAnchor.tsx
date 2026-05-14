@@ -29,7 +29,7 @@ export interface ISheetDrawingAnchorProps {
     drawings: IDrawingParam[];
 }
 
-export const SheetDrawingAnchor = (props: ISheetDrawingAnchorProps) => {
+export function SheetDrawingAnchor(props: ISheetDrawingAnchorProps) {
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const drawingManagerService = useDependency(IDrawingManagerService);

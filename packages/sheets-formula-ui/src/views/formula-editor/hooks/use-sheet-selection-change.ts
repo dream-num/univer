@@ -67,7 +67,7 @@ export const useSheetSelectionChange = (
     isSelectingRef: RefObject<FormulaSelectingType>,
     unitId: string,
     subUnitId: string,
-    refSelectionRef: React.MutableRefObject<IRefSelection[]>,
+    refSelectionRef: RefObject<IRefSelection[]>,
     isSupportAcrossSheet: boolean,
     listenSelectionSet: boolean,
     editor?: Editor,

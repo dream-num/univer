@@ -40,7 +40,7 @@ interface ITableThemeStyle {
     lastRowStyle?: IRangeThemeStyleItem;
 }
 
-export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
+export function SheetTableThemePanel(props: ISheetTableThemePanelProps) {
     const { unitId, subUnitId, tableId } = props;
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);

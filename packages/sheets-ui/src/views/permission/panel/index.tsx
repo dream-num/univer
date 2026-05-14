@@ -30,7 +30,7 @@ interface ISheetPermissionPanelProps {
     oldRule?: IPermissionPanelRule;
 };
 
-export const SheetPermissionPanel = ({ showDetail, fromSheetBar, rule, oldRule }: ISheetPermissionPanelProps) => {
+export function SheetPermissionPanel({ showDetail, fromSheetBar, rule, oldRule }: ISheetPermissionPanelProps) {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const sheetsSelectionsService = useDependency(SheetsSelectionsService);
     const sheetPermissionPanelModel = useDependency(SheetPermissionPanelModel);

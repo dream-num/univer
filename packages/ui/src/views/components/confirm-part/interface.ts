@@ -15,7 +15,7 @@
  */
 
 import type { IConfirmProps } from '@univerjs/design';
-
+import type { ReactElement } from 'react';
 import type { ICustomLabelProps } from '../../../components/custom-label/CustomLabel';
 
 export interface IConfirmChildrenProps {
@@ -26,7 +26,7 @@ export interface IConfirmChildrenProps {
 }
 
 export interface IContextConfirmProps extends IConfirmProps {
-    children: React.ReactElement<IConfirmChildrenProps>;
+    children: ReactElement<IConfirmChildrenProps>;
     onClose?: (result?: Record<string, any>) => void;
     onConfirm?: (result?: Record<string, any>) => void;
 }

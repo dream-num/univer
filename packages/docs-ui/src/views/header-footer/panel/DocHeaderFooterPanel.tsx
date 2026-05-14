@@ -21,7 +21,7 @@ import { useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 import { DocHeaderFooterOptions } from './DocHeaderFooterOptions';
 
-export const DocHeaderFooterPanel = () => {
+export function DocHeaderFooterPanel() {
     const localeService = useDependency(LocaleService);
     const renderManagerService = useDependency(IRenderManagerService);
     const univerInstanceService = useDependency(IUniverInstanceService);

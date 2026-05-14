@@ -30,7 +30,7 @@ export interface IPrintingFloatDomProps {
     worksheet: Worksheet;
 };
 
-export const PrintingFloatDom = (props: IPrintingFloatDomProps) => {
+export function PrintingFloatDom(props: IPrintingFloatDomProps) {
     const { floatDomInfos, scene, skeleton, worksheet } = props;
     const floatDomParams = useMemo(() => floatDomInfos.map((info) => {
         const { width, height, angle, left, top } = info.transform!;

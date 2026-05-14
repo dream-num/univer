@@ -28,16 +28,14 @@ import { DrawingGroup } from './DrawingGroup';
 import { DrawingTransform } from './DrawingTransform';
 import { ImageCropper } from './ImageCropper';
 
-export interface IDrawingCommonPanelProps {
+export function DrawingCommonPanel(props: {
     drawings: IDrawingParam[];
     hasArrange?: boolean;
     hasTransform?: boolean;
     hasAlign?: boolean;
     hasCropper?: boolean;
     hasGroup?: boolean;
-}
-
-export const DrawingCommonPanel = (props: IDrawingCommonPanelProps) => {
+}) {
     const drawingManagerService = useDependency(IDrawingManagerService);
     const renderManagerService = useDependency(IRenderManagerService);
     const localeService = useDependency(LocaleService);

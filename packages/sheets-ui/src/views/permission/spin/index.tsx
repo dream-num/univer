@@ -24,7 +24,7 @@ interface ISpinProps {
     children: ReactNode;
 }
 
-const Spin = ({ loading, children }: ISpinProps) => {
+export function Spin({ loading, children }: ISpinProps) {
     return (
         <div className="univer-relative univer-size-full">
             {loading && (
@@ -50,5 +50,3 @@ const Spin = ({ loading, children }: ISpinProps) => {
         </div>
     );
 };
-
-export default Spin;

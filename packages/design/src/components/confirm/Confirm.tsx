@@ -33,7 +33,7 @@ export interface IConfirmProps {
     /**
      * The title of the Confirm.
      */
-    title?: React.ReactNode;
+    title?: ReactNode;
 
     /**
      * The text of the Confirm's confirm button.

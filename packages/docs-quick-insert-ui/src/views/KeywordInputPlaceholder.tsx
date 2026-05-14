@@ -51,7 +51,7 @@ function measureTextWidth(text: string, font: string) {
     return Math.ceil(context.measureText(text).width);
 }
 
-export const KeywordInputPlaceholder = ({ popup }: { popup: IPopup<IKeywordInputPlaceholderExtraProps> }) => {
+export function KeywordInputPlaceholder({ popup }: { popup: IPopup<IKeywordInputPlaceholderExtraProps> }) {
     const localeService = useDependency(LocaleService);
     const placeholder = localeService.t('docQuickInsert.keywordInputPlaceholder');
     const fontSize = popup.extraProps?.fontSize ?? DEFAULT_FONT_SIZE;

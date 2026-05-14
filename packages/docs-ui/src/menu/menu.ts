@@ -42,7 +42,6 @@ import {
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 import {
     COLOR_PICKER_COMPONENT,
-    COMMON_LABEL_COMPONENT,
     FONT_FAMILY_COMPONENT,
     FONT_FAMILY_ITEM_COMPONENT,
     FONT_SIZE_COMPONENT,
@@ -578,12 +577,6 @@ export function HeadingSelectorMenuItemFactory(accessor: IAccessor): IMenuSelect
         id: SetParagraphNamedStyleCommand.id,
         type: MenuItemType.SELECTOR,
         tooltip: 'toolbar.heading.tooltip',
-        label: {
-            name: COMMON_LABEL_COMPONENT,
-            props: {
-                selections: HEADING_LIST,
-            },
-        },
         selections: HEADING_LIST.map((item) => ({
             label: {
                 name: HEADING_ITEM_COMPONENT,

@@ -15,6 +15,7 @@
  */
 
 import type { IToasterProps } from '@univerjs/design';
+import type { ReactNode } from 'react';
 import { ThemeService } from '@univerjs/core';
 import { ConfigContext, toast, Toaster } from '@univerjs/design';
 import { useContext } from 'react';
@@ -48,7 +49,7 @@ export interface INotificationOptions {
     expand?: boolean;
 
     /** The icon of the notification */
-    icon?: React.ReactNode;
+    icon?: ReactNode;
 
     closable?: boolean;
 }

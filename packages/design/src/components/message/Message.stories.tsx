@@ -15,6 +15,7 @@
  */
 
 import type { Meta } from '@storybook/react';
+import type { ReactNode } from 'react';
 import type { IMessageProps } from './Message';
 import { useEffect } from 'react';
 import { Button } from '../button/Button';
@@ -101,7 +102,7 @@ const edgePreset: IMessageProps[] = [
     },
 ];
 
-function MessageStoryShell({ title, description, children }: { title: string; description: string; children?: React.ReactNode }) {
+function MessageStoryShell({ title, description, children }: { title: string; description: string; children?: ReactNode }) {
     return (
         <section
             className={`

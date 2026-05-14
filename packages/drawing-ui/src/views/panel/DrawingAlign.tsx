@@ -21,12 +21,10 @@ import { useDependency } from '@univerjs/ui';
 import { useState } from 'react';
 import { AlignType, SetDrawingAlignOperation } from '../../commands/operations/drawing-align.operation';
 
-export interface IDrawingAlignProps {
+export function DrawingAlign(props: {
     drawings: IDrawingParam[];
     alignShow: boolean;
-}
-
-export const DrawingAlign = (props: IDrawingAlignProps) => {
+}) {
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
 

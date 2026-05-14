@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { CSSProperties } from 'react';
 import { clsx, scrollbarClassName } from '@univerjs/design';
 import { CatalogueIcon, LeftIcon } from '@univerjs/icons';
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef } from 'react';
@@ -29,7 +30,7 @@ export interface ISideMenuProps {
     menus?: ISideMenuItem[];
     onClick?: (menu: ISideMenuItem) => void;
     className?: string;
-    style?: React.CSSProperties;
+    style?: CSSProperties;
     mode?: 'float' | 'side-bar';
     maxHeight: number;
     activeId?: string;
@@ -37,9 +38,9 @@ export interface ISideMenuProps {
     onOpenChange?: (open: boolean) => void;
     maxWidth?: number;
     wrapperClass?: string;
-    wrapperStyle?: React.CSSProperties;
+    wrapperStyle?: CSSProperties;
     iconClass?: string;
-    iconStyle?: React.CSSProperties;
+    iconStyle?: CSSProperties;
 }
 
 export interface ISideMenuInstance {

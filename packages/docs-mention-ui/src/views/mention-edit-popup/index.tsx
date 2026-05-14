@@ -25,7 +25,7 @@ import { AddDocMentionCommand } from '../../commands/commands/doc-mention.comman
 import { DocMentionPopupService } from '../../services/doc-mention-popup.service';
 import { MentionList } from '../mention-list';
 
-export const MentionEditPopup = () => {
+export function MentionEditPopup() {
     const popupService = useDependency(DocMentionPopupService);
     const commandService = useDependency(ICommandService);
     const univerInstanceService = useDependency(IUniverInstanceService);

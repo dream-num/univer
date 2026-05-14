@@ -29,11 +29,11 @@ export interface IButtonGroupProps {
     children: ReactElement<IButtonProps>[];
 }
 
-export const ButtonGroup = ({
+export function ButtonGroup({
     className,
     orientation = 'horizontal',
     children,
-}: IButtonGroupProps) => {
+}: IButtonGroupProps) {
     const totalButtons = Children.count(children);
     const isHorizontal = orientation === 'horizontal';
     const isVertical = orientation === 'vertical';

@@ -35,7 +35,7 @@ interface IConditionFilterProps {
     onChange: (conditionInfo: IConditionInfo) => void;
 }
 
-export const SheetTableConditionPanel = (props: IConditionFilterProps) => {
+export function SheetTableConditionPanel(props: IConditionFilterProps) {
     const { conditionInfo, onChange } = props;
     const localeService = useDependency(LocaleService);
 

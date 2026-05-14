@@ -57,12 +57,10 @@ enum ArrowDirection {
     Up,
 }
 
-interface IProps {
+export function FormulaBar(props: {
     className?: string;
     disableDefinedName?: boolean;
-}
-
-export function FormulaBar(props: IProps) {
+}) {
     const { className, disableDefinedName } = props;
     const [iconActivated, setIconActivated] = useState<boolean>(false);
     const [arrowDirection, setArrowDirection] = useState<ArrowDirection>(ArrowDirection.Down);
@@ -191,13 +189,14 @@ export function FormulaBar(props: IProps) {
             formulaEditorManagerService.setPosition(editorRect);
         };
 
-        if (ref.current) {
-            handleResize();
-            const a = new ResizeObserver(handleResize);
+        handleResize();
+        const observer = new ResizeObserver(handleResize);
 
-            a.observe(ref.current);
-            return () => a.disconnect();
+        if (ref.current) {
+            observer.observe(ref.current);
         }
+
+        return () => observer.disconnect();
     }, [formulaEditorManagerService]);
 
     function handleArrowClick() {

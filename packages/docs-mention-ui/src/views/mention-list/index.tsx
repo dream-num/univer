@@ -26,7 +26,7 @@ export interface IMentionListProps {
     editorId: string;
 }
 
-export const MentionList = (props: IMentionListProps) => {
+export function MentionList(props: IMentionListProps) {
     const { mentions, active, onSelect, onClick, editorId } = props;
     const ref = useRef<HTMLDivElement>(null);
     const [activeId, setActiveId] = useState(active ?? mentions[0]?.mentions[0]?.objectId);

@@ -21,7 +21,7 @@ import { useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 import { SheetDrawingAnchor } from './SheetDrawingAnchor';
 
-export const SheetDrawingPanel = () => {
+export function SheetDrawingPanel() {
     const drawingManagerService = useDependency(IDrawingManagerService);
     const focusDrawings = drawingManagerService.getFocusDrawings();
 

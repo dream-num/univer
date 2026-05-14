@@ -19,15 +19,12 @@ import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, IContextService } from
 import { DocSelectionRenderService, IEditorService } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { ComponentManager, DISABLE_AUTO_FOCUS_KEY, MetaKeys, useDependency, useEvent, useObservable, useSidebarClick } from '@univerjs/ui';
-import * as React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { SetCellEditVisibleArrowOperation, SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
 import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY } from '../../common/keys';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
 import { useKeyEventConfig } from './hooks';
-
-interface ICellIEditorProps { }
 
 const HIDDEN_EDITOR_POSITION = -1000;
 
@@ -42,7 +39,7 @@ const EDITOR_DEFAULT_POSITION = {
  * Cell editor container.
  * @returns
  */
-export const EditorContainer: React.FC<ICellIEditorProps> = () => {
+export function EditorContainer() {
     const [state, setState] = useState({
         ...EDITOR_DEFAULT_POSITION,
     });

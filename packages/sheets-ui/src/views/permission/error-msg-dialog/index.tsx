@@ -17,7 +17,7 @@
 import { LocaleService } from '@univerjs/core';
 import { useDependency } from '@univerjs/ui';
 
-export const AlertDialog = ({ errorMsg }: { errorMsg: string }) => {
+export function AlertDialog({ errorMsg }: { errorMsg: string }) {
     const localeService = useDependency(LocaleService);
 
     return (

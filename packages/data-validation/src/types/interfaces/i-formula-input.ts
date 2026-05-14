@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { ComponentType } from 'react';
 import type { IFormulaValidResult } from '../../validators/base-data-validator';
 
 export interface IFormulaValue {
@@ -32,4 +33,4 @@ export interface IFormulaInputProps {
     ruleId: string;
 }
 
-export type FormulaInputType = React.ComponentType<IFormulaInputProps>;
+export type FormulaInputType = ComponentType<IFormulaInputProps>;

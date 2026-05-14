@@ -97,7 +97,7 @@ const InputText = (props: { disabled?: boolean; id: string; className: string; t
         />
     );
 };
-export const DataBarStyleEditor = (props: IStyleEditorProps) => {
+export function DataBarStyleEditor(props: IStyleEditorProps) {
     const { interceptorManager } = props;
     const localeService = useDependency(LocaleService);
 

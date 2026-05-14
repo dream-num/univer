@@ -32,7 +32,7 @@ type INotePopupLocation = ISheetLocationBase & {
     trigger?: string;
 };
 
-export const SheetsNote = (props: { popup: IPopup<{ location: INotePopupLocation }> }) => {
+export function SheetsNote(props: { popup: IPopup<{ location: INotePopupLocation }> }) {
     const { popup } = props;
 
     const noteModel = useDependency(SheetsNoteModel);

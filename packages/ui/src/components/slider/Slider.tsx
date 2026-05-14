@@ -136,6 +136,7 @@ export function Slider(props: ISliderProps) {
             isDragging = false;
             document.removeEventListener('pointermove', onMouseMove);
             window.removeEventListener('pointerup', onMouseUp);
+            window.removeEventListener('pointerout', onMouseOut);
         }
 
         function onMouseOut(e: MouseEvent) {

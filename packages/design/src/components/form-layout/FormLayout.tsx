@@ -34,7 +34,7 @@ export interface IFormLayoutProps {
 
 const FormLayoutContext = createContext(false);
 
-export const FormLayout = (props: IFormLayoutProps) => {
+export function FormLayout(props: IFormLayoutProps) {
     const { label, desc, children, style, className, error, contentStyle, collapsable = false, defaultCollapsed = false } = props;
     const [collapsed, setCollapsed] = useState(defaultCollapsed);
 
@@ -113,7 +113,7 @@ export type IFormDualColumnLayoutProps = PropsWithChildren;
  * A dual columns layout component for the form.
  * @param props props of the component
  */
-export const FormDualColumnLayout = (props: IFormDualColumnLayoutProps) => {
+export function FormDualColumnLayout(props: IFormDualColumnLayoutProps) {
     return (
         <div
             className={`

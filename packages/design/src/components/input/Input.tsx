@@ -15,7 +15,7 @@
  */
 
 import type { VariantProps } from 'class-variance-authority';
-import type { InputHTMLAttributes } from 'react';
+import type { CSSProperties, InputHTMLAttributes, ReactNode } from 'react';
 import { CloseIcon } from '@univerjs/icons';
 import { cva } from 'class-variance-authority';
 import { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
@@ -51,7 +51,7 @@ export interface IInputProps extends Pick<InputProps, 'onFocus' | 'onBlur'>,
     VariantProps<typeof inputVariants> {
     autoFocus?: boolean;
     className?: string;
-    style?: React.CSSProperties;
+    style?: CSSProperties;
     type?: HTMLInputElement['type'];
     placeholder?: string;
     value?: string;
@@ -61,8 +61,8 @@ export interface IInputProps extends Pick<InputProps, 'onFocus' | 'onBlur'>,
     onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
     onChange?: (value: string) => void;
     inputClass?: string;
-    inputStyle?: React.CSSProperties;
-    slot?: React.ReactNode;
+    inputStyle?: CSSProperties;
+    slot?: ReactNode;
 }
 
 export const Input = forwardRef<HTMLInputElement, IInputProps>(

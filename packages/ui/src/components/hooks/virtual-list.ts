@@ -15,6 +15,7 @@
  */
 
 import type { Nullable } from '@univerjs/core';
+import type { RefObject } from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useEvent } from './event';
 
@@ -23,7 +24,7 @@ type ItemHeight<T> = (index: number, data: T) => number;
 const isNumber = (value: unknown): value is number => typeof value === 'number';
 
 export interface IVirtualListOptions<T> {
-    containerTarget: React.RefObject<HTMLElement>;
+    containerTarget: RefObject<HTMLElement>;
     itemHeight: number | ItemHeight<T>;
     overscan?: number;
 }

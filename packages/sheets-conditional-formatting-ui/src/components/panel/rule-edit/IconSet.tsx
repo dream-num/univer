@@ -382,7 +382,7 @@ const IconSetRuleEdit = (props: {
     }, [configList, errorMap]);
     return render;
 };
-export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
+export function IconSet(props: IStyleEditorProps<unknown, IIconSet>) {
     const { interceptorManager } = props;
     const rule = props.rule?.type === CFRuleType.iconSet ? props.rule : undefined;
     const localeService = useDependency(LocaleService);

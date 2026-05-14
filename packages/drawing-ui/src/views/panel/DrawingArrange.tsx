@@ -22,12 +22,10 @@ import { ComponentManager, useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 import { SetDrawingArrangeOperation } from '../../commands/operations/drawing-arrange.operation';
 
-export interface IDrawingArrangeProps {
+export function DrawingArrange(props: {
     arrangeShow: boolean;
     drawings: IDrawingParam[];
-}
-
-export const DrawingArrange = (props: IDrawingArrangeProps) => {
+}) {
     const { arrangeShow, drawings: focusDrawings } = props;
 
     const localeService = useDependency(LocaleService);

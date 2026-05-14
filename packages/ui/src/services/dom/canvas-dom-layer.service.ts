@@ -15,6 +15,7 @@
  */
 
 import type { IPosition, Serializable } from '@univerjs/core';
+import type { ComponentType } from 'react';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 
@@ -33,7 +34,7 @@ export interface IFloatDom {
     position$: Observable<IFloatDomLayout>;
     id: string;
     domId?: string; // Ensure unique id for dom element at runtime
-    componentKey: string | React.ComponentType;
+    componentKey: string | ComponentType;
     onPointerMove: (evt: PointerEvent | MouseEvent) => void;
     onPointerDown: (evt: PointerEvent | MouseEvent) => void;
     onPointerUp: (evt: PointerEvent | MouseEvent) => void;

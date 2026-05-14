@@ -15,7 +15,7 @@
  */
 
 import type { ComponentManager } from '@univerjs/ui';
-import type { MutableRefObject } from 'react';
+import type { RefObject } from 'react';
 import type { DocPopupMenu, IDocPopupMenuItem } from '../services/doc-quick-insert-popup.service';
 import { borderBottomClassName, borderClassName, clsx, scrollbarClassName, Tooltip } from '@univerjs/design';
 import { useEffect, useMemo, useRef } from 'react';
@@ -23,8 +23,8 @@ import { useEffect, useMemo, useRef } from 'react';
 interface IQuickInsertMenuProps {
     menus: DocPopupMenu[];
     focusedMenuIndex: number;
-    focusedMenuRef: MutableRefObject<IDocPopupMenuItem | null>;
-    menuNodeMapRef: MutableRefObject<Map<string, HTMLElement>>;
+    focusedMenuRef: RefObject<IDocPopupMenuItem | null>;
+    menuNodeMapRef: RefObject<Map<string, HTMLElement>>;
     componentManager: ComponentManager;
     onFocusedMenuIndexChange: (index: number) => void;
     onSelect: (menu: IDocPopupMenuItem) => void;

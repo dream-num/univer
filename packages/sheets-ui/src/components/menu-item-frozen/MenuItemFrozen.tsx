@@ -26,7 +26,7 @@ const defaultValue = {
     col: 'A',
 };
 
-export const MenuItemFrozen = (props: IMenuItemFrozenProps) => {
+export function MenuItemFrozen(props: IMenuItemFrozenProps) {
     const { type } = props;
 
     const localeService = useDependency(LocaleService);

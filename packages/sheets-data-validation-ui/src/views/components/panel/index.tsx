@@ -22,7 +22,7 @@ import { DataValidationPanelService } from '../../../services/data-validation-pa
 import { DataValidationDetail } from '../detail';
 import { DataValidationList } from '../list';
 
-export const DataValidationPanel = () => {
+export function DataValidationPanel() {
     const dataValidationPanelService = useDependency(DataValidationPanelService);
     const activeRule = useObservable(dataValidationPanelService.activeRule$, dataValidationPanelService.activeRule);
     const univerInstanceService = useDependency(IUniverInstanceService);

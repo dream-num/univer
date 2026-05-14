@@ -49,7 +49,7 @@ interface IThreadCommentWithUsers extends IThreadComment {
     users: Set<string>;
 }
 
-export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
+export function ThreadCommentPanel(props: IThreadCommentPanelProps) {
     const {
         unitId,
         subUnitId$,

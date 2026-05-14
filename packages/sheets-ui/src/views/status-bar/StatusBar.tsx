@@ -30,7 +30,7 @@ import { CopyableStatisticItem } from './CopyableStatisticItem';
 const SINGLE_MODE_WIDTH = 800;
 const ROW_COUNT_THRESHOLD = 3;
 
-export const StatusBar = () => {
+export function StatusBar() {
     const showStatistic = useConfigValue<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY)?.statusBarStatistic ?? true;
 
     const [isSingle, setIsSingle] = useState(window.innerWidth < SINGLE_MODE_WIDTH);

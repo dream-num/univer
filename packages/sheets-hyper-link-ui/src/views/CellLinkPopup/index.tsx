@@ -47,7 +47,7 @@ interface ICellLinkPopupPureProps {
     type: HyperLinkEditSourceType;
 }
 
-export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
+export function CellLinkPopupPure(props: ICellLinkPopupPureProps) {
     const popupService = useDependency(SheetsHyperLinkPopupService);
     const commandService = useDependency(ICommandService);
     const messageService = useDependency(IMessageService);
@@ -196,7 +196,7 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
     );
 };
 
-export const CellLinkPopup = () => {
+export function CellLinkPopup() {
     const popupService = useDependency(SheetsHyperLinkPopupService);
     const [currentPopup, setCurrentPopup] = useState<IHyperLinkPopup | null>(null);
     const univerInstanceService = useDependency(IUniverInstanceService);

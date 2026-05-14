@@ -92,7 +92,7 @@ const TextInput = (props: { id: string; type: CFValueType | 'none'; value: numbe
         return <InputNumber className={className} value={Number(props.value) || 0} onChange={(v) => props.onChange(v || 0)} {...config} />;
     }
 };
-export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
+export function ColorScaleStyleEditor(props: IStyleEditorProps) {
     const { interceptorManager } = props;
     const localeService = useDependency(LocaleService);
 

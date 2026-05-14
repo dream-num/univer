@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-export const BorderDouble = ({ className }: { className: string }) => (
-    <svg className={className} width="120" height="8" viewBox="0 0 120 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path
-            fillRule="evenodd"
-            clipRule="evenodd"
-            d="M119.991 2.06215H-0.0090332V0.862152H119.991V1.86215Z"
-        />
-        <path
-            fillRule="evenodd"
-            clipRule="evenodd"
-            d="M119.991 6.66215H-0.0090332V5.86215H119.991V6.86215Z"
-        />
-    </svg>
-);
+export function BorderDouble({ className }: { className: string }) {
+    return (
+        <svg className={className} width="120" height="8" viewBox="0 0 120 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path
+                fillRule="evenodd"
+                clipRule="evenodd"
+                d="M119.991 2.06215H-0.0090332V0.862152H119.991V1.86215Z"
+            />
+            <path
+                fillRule="evenodd"
+                clipRule="evenodd"
+                d="M119.991 6.66215H-0.0090332V5.86215H119.991V6.86215Z"
+            />
+        </svg>
+    );
+}

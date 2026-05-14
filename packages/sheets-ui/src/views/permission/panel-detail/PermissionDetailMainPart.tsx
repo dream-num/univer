@@ -35,7 +35,7 @@ interface IPermissionDetailMainPartProps {
     onDescChange: (desc: string) => void;
 }
 
-export const PermissionDetailMainPart = (props: IPermissionDetailMainPartProps) => {
+export function PermissionDetailMainPart(props: IPermissionDetailMainPartProps) {
     const { ranges, onRangesChange, desc, onDescChange, rangesErrMsg, permissionId } = props;
     const componentManager = useDependency(ComponentManager);
     const RangeSelector: ComponentType<IRangeSelectorProps> = useMemo(() => componentManager.get(RANGE_SELECTOR_COMPONENT_KEY), []) as any;

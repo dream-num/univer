@@ -25,7 +25,6 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { ComponentManager } from '../../common';
 import { HEADING_ITEM_COMPONENT, HeadingItem } from '../../components';
 import { COLOR_PICKER_COMPONENT } from '../../components/color-picker/interface';
-import { COMMON_LABEL_COMPONENT, CommonLabel } from '../../components/common-label';
 import { FontFamily, FontFamilyItem } from '../../components/font-family';
 import { FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT } from '../../components/font-family/interface';
 import { FontSize } from '../../components/font-size/FontSize';
@@ -64,7 +63,6 @@ export class DesktopUIController extends SingleUnitUIController {
 
     private _registerComponents() {
         ([
-            [COMMON_LABEL_COMPONENT, CommonLabel],
             [HEADING_ITEM_COMPONENT, HeadingItem],
             [FONT_FAMILY_COMPONENT, FontFamily],
             [FONT_FAMILY_ITEM_COMPONENT, FontFamilyItem],

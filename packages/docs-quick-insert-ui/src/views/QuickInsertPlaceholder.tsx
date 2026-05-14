@@ -19,7 +19,7 @@ import { useDependency } from '@univerjs/ui';
 
 export const QuickInsertPlaceholderComponentKey = 'docs.quick.insert.placeholder';
 
-export const QuickInsertPlaceholder = () => {
+export function QuickInsertPlaceholder() {
     const localeService = useDependency(LocaleService);
     return (
         <div

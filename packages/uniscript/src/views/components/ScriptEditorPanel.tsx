@@ -15,7 +15,7 @@
  */
 
 import type { IDisposable, Nullable } from '@univerjs/core';
-import type { MutableRefObject } from 'react';
+import type { RefObject } from 'react';
 import { DisposableCollection, LocaleService, ThemeService, toDisposable } from '@univerjs/core';
 import { Button, MessageType } from '@univerjs/design';
 import { IMessageService, IShortcutService, useDependency } from '@univerjs/ui';
@@ -104,7 +104,7 @@ export function ScriptEditorPanel() {
     );
 }
 
-function useExecution(monacoEditorRef: MutableRefObject<Nullable<editor.IStandaloneCodeEditor>>) {
+function useExecution(monacoEditorRef: RefObject<Nullable<editor.IStandaloneCodeEditor>>) {
     const scriptService = useDependency(IUniscriptExecutionService);
     const messageService = useDependency(IMessageService);
     const localeService = useDependency(LocaleService);

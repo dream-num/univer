@@ -157,7 +157,7 @@ export const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => 
     );
 });
 
-export const FloatDom = ({ unitId }: { unitId?: string }) => {
+export function FloatDom({ unitId }: { unitId?: string }) {
     const instanceService = useDependency(IUniverInstanceService);
     const domLayerService = useDependency(CanvasFloatDomService);
     const layers = useObservable(domLayerService.domLayers$);

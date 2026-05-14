@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { RefObject } from 'react';
 import { ICommandService } from '@univerjs/core';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
@@ -22,7 +23,7 @@ import { useMemo } from 'react';
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 
-export function useKeyEventConfig(isRefSelecting: React.MutableRefObject<0 | 1 | 2>, unitId?: string) {
+export function useKeyEventConfig(isRefSelecting: RefObject<0 | 1 | 2>, unitId?: string) {
     const editorBridgeService = useDependency(IEditorBridgeService);
     const commandService = useDependency(ICommandService);
 

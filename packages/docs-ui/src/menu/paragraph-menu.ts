@@ -15,7 +15,7 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
-import type { IMenuItem, IMenuSelectorItem } from '@univerjs/ui';
+import type { ComponentType, IMenuItem, IMenuSelectorItem } from '@univerjs/ui';
 import { ICommandService, NamedStyleType, UniverInstanceType } from '@univerjs/core';
 import { SetTextSelectionsOperation } from '@univerjs/docs';
 import { H1Icon, H2Icon, H3Icon, H4Icon, H5Icon, TextTypeIcon } from '@univerjs/icons';
@@ -41,7 +41,7 @@ const HEADING_MAP: Record<NamedStyleType, ICommand> = {
     [NamedStyleType.NAMED_STYLE_TYPE_UNSPECIFIED]: NormalTextHeadingCommand,
 };
 
-export const HEADING_ICON_MAP: Record<NamedStyleType, { key: string; component: React.ComponentType<{ className: string }> }> = {
+export const HEADING_ICON_MAP: Record<NamedStyleType, { key: string; component: ComponentType<{ className: string }> }> = {
     [NamedStyleType.HEADING_1]: { key: 'H1Icon', component: H1Icon },
     [NamedStyleType.HEADING_2]: { key: 'H2Icon', component: H2Icon },
     [NamedStyleType.HEADING_3]: { key: 'H3Icon', component: H3Icon },

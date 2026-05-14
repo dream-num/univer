@@ -64,7 +64,7 @@ export interface IDocHeaderFooterOptionsProps {
     unitId: string;
 }
 
-export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
+export function DocHeaderFooterOptions(props: IDocHeaderFooterOptionsProps) {
     const localeService = useDependency(LocaleService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const renderManagerService = useDependency(IRenderManagerService);

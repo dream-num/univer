@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const HelpHiddenTip = ({ onClick }: { onClick: () => void }) => {
+export function HelpHiddenTip({ onClick }: { onClick: () => void }) {
     return (
         <div
             className={`

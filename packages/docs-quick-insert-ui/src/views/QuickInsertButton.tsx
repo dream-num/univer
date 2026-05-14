@@ -30,9 +30,9 @@ import { DocQuickInsertPopupService } from '../services/doc-quick-insert-popup.s
 
 export const QuickInsertButtonComponentKey = 'doc.quick-insert.button';
 
-export const QuickInsertButton = ({ className = '' }: {
+export function QuickInsertButton({ className = '' }: {
     className?: string;
-}) => {
+}) {
     const docQuickInsertPopupService = useDependency(DocQuickInsertPopupService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const renderManagerService = useDependency(IRenderManagerService);

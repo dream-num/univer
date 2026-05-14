@@ -21,7 +21,7 @@ import { useEffect, useRef } from 'react';
 import { GlobalRangeSelectorService } from '../../services/range-selector.service';
 import { RangeSelector } from './index';
 
-export const GlobalRangeSelector = () => {
+export function GlobalRangeSelector() {
     const rangeSelectorService = useDependency(GlobalRangeSelectorService);
     const current = useObservable(rangeSelectorService.currentSelector$);
     const instance = useRef<IRangeSelectorInstance | null>(null);

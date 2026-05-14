@@ -39,7 +39,7 @@ interface IPermissionDetailFooterPartProps {
     oldRule?: IPermissionPanelRule;
 }
 
-export const PermissionDetailFooterPart = (props: IPermissionDetailFooterPartProps) => {
+export function PermissionDetailFooterPart(props: IPermissionDetailFooterPartProps) {
     const { viewState, editState, permissionId, ranges, rangesErrMsg, desc, oldRule, id } = props;
     const sheetPermissionPanelModel = useDependency(SheetPermissionPanelModel);
     const sidebarService = useDependency(ISidebarService);

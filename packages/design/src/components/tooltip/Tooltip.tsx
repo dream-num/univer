@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ReactElement, ReactNode } from 'react';
+import type { HTMLAttributes, ReactElement, ReactNode } from 'react';
 import { useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { clsx } from '../../helper/clsx';
@@ -222,7 +222,7 @@ export function Tooltip(props: ITooltipProps) {
         onMouseLeave: () => hideTooltip(),
         onFocus: () => showTooltip(),
         onBlur: () => hideTooltip(),
-    } as React.HTMLAttributes<HTMLElement> & { ref?: (node: HTMLElement | null) => void };
+    } as HTMLAttributes<HTMLElement> & { ref?: (node: HTMLElement | null) => void };
 
     const triggerElement = asChild
         ? (

@@ -106,7 +106,7 @@ const useMenuPosition = (range?: IDiscreteRange) => {
     };
 };
 
-export const ClipboardPopupMenu = () => {
+export function ClipboardPopupMenu() {
     const clipboardService = useDependency(ISheetClipboardService);
     const showMenu = useObservable(clipboardService.showMenu$, false);
     // const clipboardController = useDependency(SheetClipboardController);

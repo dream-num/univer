@@ -15,6 +15,7 @@
  */
 
 import type { IDocFloatDom } from '@univerjs/docs-drawing';
+import type { ComponentType } from '@univerjs/ui';
 import type { IPrintingFloatDomProps } from '../views/printing-float-dom';
 import { Disposable, DOC_DRAWING_PRINTING_COMPONENT_KEY, DrawingTypeEnum, Inject, Injector } from '@univerjs/core';
 import { render, unmount } from '@univerjs/design';
@@ -93,7 +94,7 @@ export class DocDrawingPrintingController extends Disposable {
 
                                 return null;
                             }).filter(Boolean) as IDocFloatDom[];
-                            const PrintingFloatDomInjector = connectInjector(DocPrintingFloatDom, this._injector) as React.ComponentType<IPrintingFloatDomProps>;
+                            const PrintingFloatDomInjector = connectInjector(DocPrintingFloatDom, this._injector) as ComponentType<IPrintingFloatDomProps>;
 
                             render(
                                 <PrintingFloatDomInjector

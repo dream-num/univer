@@ -42,7 +42,7 @@ interface IRuleEditProps {
 const getUnitId = (univerInstanceService: IUniverInstanceService) => univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
 const getSubUnitId = (univerInstanceService: IUniverInstanceService) => univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()?.getSheetId();
 
-export const RuleEdit = (props: IRuleEditProps) => {
+export function RuleEdit(props: IRuleEditProps) {
     const localeService = useDependency(LocaleService);
     const commandService = useDependency(ICommandService);
     const univerInstanceService = useDependency(IUniverInstanceService);

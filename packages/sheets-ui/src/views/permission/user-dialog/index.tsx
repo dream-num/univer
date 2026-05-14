@@ -25,7 +25,7 @@ import { UNIVER_SHEET_PERMISSION_USER_DIALOG_ID } from '../../../consts/permissi
 import { SheetPermissionUserManagerService } from '../../../services/permission/sheet-permission-user-list.service';
 import { UserEmptyBase64 } from './constant';
 
-export const SheetPermissionUserDialog = () => {
+export function SheetPermissionUserDialog() {
     const [inputValue, setInputValue] = useState('');
     const localeService = useDependency(LocaleService);
     const dialogService = useDependency(IDialogService);

@@ -30,7 +30,7 @@ import { DEFAULT_DOC_SUBUNIT_ID } from '../../common/const';
 import { shouldDisableAddComment } from '../../menu/menu';
 import { DocThreadCommentService } from '../../services/doc-thread-comment.service';
 
-export const DocThreadCommentPanel = () => {
+export function DocThreadCommentPanel() {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const injector = useDependency(Injector);
     const doc$ = useMemo(() => univerInstanceService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC).pipe(filter((doc) => !!doc && !isInternalEditorID(doc.getUnitId()))), [univerInstanceService]);

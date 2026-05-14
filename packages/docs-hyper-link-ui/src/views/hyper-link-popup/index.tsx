@@ -23,7 +23,7 @@ import { DeleteDocHyperLinkCommand } from '../../commands/commands/delete-link.c
 import { ShowDocHyperLinkEditPopupOperation } from '../../commands/operations/popup.operation';
 import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.service';
 
-export const DocLinkPopup = () => {
+export function DocLinkPopup() {
     const hyperLinkService = useDependency(DocHyperLinkPopupService);
     const commandService = useDependency(ICommandService);
     const messageService = useDependency(IMessageService);

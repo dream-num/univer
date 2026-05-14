@@ -28,7 +28,7 @@ import { SHEET_TABLE_THEME_PANEL, SHEET_TABLE_THEME_PANEL_ID } from '../../const
 import { SheetTableAnchorController } from '../../controllers/sheet-table-anchor.controller';
 import { SheetTableThemeUIController } from '../../controllers/sheet-table-theme-ui.controller';
 
-export const SheetTableAnchor = () => {
+export function SheetTableAnchor() {
     const [inputFocusId, setInputFocusId] = useState<string>('');
     const [inputValue, setInputValue] = useState<string>('');
     const sidebarService = useDependency(ISidebarService);

@@ -26,7 +26,7 @@ import { map } from 'rxjs';
 import { ShowAddSheetCommentModalOperation } from '../../commands/operations/comment.operation';
 import { SheetsThreadCommentPopupService } from '../../services/sheets-thread-comment-popup.service';
 
-export const SheetsThreadCommentPanel = () => {
+export function SheetsThreadCommentPanel() {
     const markSelectionService = useDependency(IMarkSelectionService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const sheetsThreadCommentPopupService = useDependency(SheetsThreadCommentPopupService);

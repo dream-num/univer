@@ -15,6 +15,7 @@
  */
 
 import type { IConfirmProps } from '@univerjs/design';
+import type { ReactElement } from 'react';
 import type { IConfirmChildrenProps, IConfirmPartMethodOptions, IContextConfirmProps } from './interface';
 import { IConfirmService } from '@univerjs/core';
 import { Confirm } from '@univerjs/design';
@@ -95,5 +96,5 @@ export function ConfirmPart() {
         return confirmProps;
     });
 
-    return props?.map((options, index) => <ContextConfirm key={index} {...options} children={options.children! as React.ReactElement<IConfirmChildrenProps>} />);
+    return props?.map((options, index) => <ContextConfirm key={index} {...options} children={options.children! as ReactElement<IConfirmChildrenProps>} />);
 }

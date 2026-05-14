@@ -19,7 +19,7 @@ import { LocaleService, NAMED_STYLE_MAP } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
 import { useDependency } from '../../utils/di';
 
-export const HeadingItem = (props: { value: NamedStyleType; text: string }) => {
+export function HeadingItem(props: { value: NamedStyleType; text: string }) {
     const { value, text } = props;
     const style = NAMED_STYLE_MAP[value];
 

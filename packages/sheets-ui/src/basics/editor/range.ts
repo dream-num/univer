@@ -16,6 +16,7 @@
 
 import type { Nullable } from '@univerjs/core';
 import type { Editor, IRichTextEditorProps } from '@univerjs/docs-ui';
+import type { RefObject } from 'react';
 
 export interface IRangeSelectorInstance {
     editor: Nullable<Editor>;
@@ -30,7 +31,7 @@ export interface IRangeSelectorProps extends IRichTextEditorProps {
     subUnitId: string;
     maxRangeCount?: number;
     supportAcrossSheet?: boolean;
-    selectorRef?: React.RefObject<IRangeSelectorInstance>;
+    selectorRef?: RefObject<IRangeSelectorInstance>;
     onVerify?: (res: boolean, rangeText: string) => void;
     onRangeSelectorDialogVisibleChange?: (visible: boolean) => void;
 };

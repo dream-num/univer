@@ -23,7 +23,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { IFontService } from '../../services/font.service';
 import { useDependency, useObservable } from '../../utils/di';
 
-export const FontFamily = ({ id, value, disabled$ }: IFontFamilyProps) => {
+export function FontFamily({ id, value, disabled$ }: IFontFamilyProps) {
     const disabled = useObservable(disabled$);
 
     const commandService = useDependency(ICommandService);
@@ -57,9 +57,9 @@ export const FontFamily = ({ id, value, disabled$ }: IFontFamilyProps) => {
         return localeService.t(font.label);
     }, [value, fonts, localeService]);
 
-    useMemo(() => {
+    useEffect(() => {
         setInputValue(viewValue);
-    }, [value]);
+    }, [viewValue]);
 
     function resetValue() {
         setInputValue(viewValue);

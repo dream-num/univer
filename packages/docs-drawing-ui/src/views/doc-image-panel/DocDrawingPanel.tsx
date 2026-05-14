@@ -22,7 +22,7 @@ import { useEffect, useState } from 'react';
 import { DocDrawingPosition } from './DocDrawingPosition';
 import { DocDrawingTextWrap } from './DocDrawingTextWrap';
 
-export const DocDrawingPanel = () => {
+export function DocDrawingPanel() {
     const drawingManagerService = useDependency(IDrawingManagerService);
     const focusDrawings = drawingManagerService.getFocusDrawings();
 

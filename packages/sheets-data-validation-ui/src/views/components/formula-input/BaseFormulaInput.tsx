@@ -19,7 +19,7 @@ import { LocaleService } from '@univerjs/core';
 import { FormLayout, Input } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
 
-export const BaseFormulaInput = (props: IFormulaInputProps) => {
+export function BaseFormulaInput(props: IFormulaInputProps) {
     const { isTwoFormula = false, value, onChange, showError, validResult } = props;
     const localeService = useDependency(LocaleService);
     const formula1Res = showError ? validResult?.formula1 : '';

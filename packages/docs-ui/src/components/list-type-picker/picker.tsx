@@ -26,7 +26,7 @@ interface IListTypePickerProps extends IListTypePickerBaseProps {
     options: { value: PresetListType; img: string }[];
 }
 
-export const ListTypePicker = (props: IListTypePickerProps) => {
+export function ListTypePicker(props: IListTypePickerProps) {
     const { value, onChange, options } = props;
     return (
         <div className="univer-grid univer-grid-cols-3 univer-gap-2 univer-p-1.5">
@@ -84,7 +84,7 @@ const orderListOptions = [
     },
 ];
 
-export const OrderListTypePicker = (props: IListTypePickerBaseProps) => {
+export function OrderListTypePicker(props: IListTypePickerBaseProps) {
     return (
         <ListTypePicker
             {...props}
@@ -120,7 +120,7 @@ const bulletOptions = [
     },
 ];
 
-export const BulletListTypePicker = (props: IListTypePickerBaseProps) => {
+export function BulletListTypePicker(props: IListTypePickerBaseProps) {
     return (
         <ListTypePicker
             {...props}

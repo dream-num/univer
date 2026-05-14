@@ -30,7 +30,7 @@ import { SheetBarTabs } from './sheet-bar-tabs/SheetBarTabs';
 
 const SCROLL_WIDTH = 100;
 
-export const SheetBar = () => {
+export function SheetBar() {
     const [leftScrollState, setLeftScrollState] = useState(true);
     const [rightScrollState, setRightScrollState] = useState(true);
 

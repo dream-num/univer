@@ -24,10 +24,10 @@ import { TableManager } from '@univerjs/sheets-table';
 import { useDependency } from '@univerjs/ui';
 import { useState } from 'react';
 
-export const SheetTableSelector = (props: ITableSelectionInfo & {
+export function SheetTableSelector(props: ITableSelectionInfo & {
     onConfirm: (info: ITableSelectionInfo) => void;
     onCancel: () => void;
-}) => {
+}) {
     const { unitId, subUnitId, range, onCancel, onConfirm, tableId } = props;
 
     const tableManager = useDependency(TableManager);

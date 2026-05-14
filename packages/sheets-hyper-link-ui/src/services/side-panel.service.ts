@@ -15,7 +15,7 @@
  */
 
 import type { ISheetHyperLink } from '@univerjs/sheets-hyper-link';
-import type * as React from 'react';
+import type { ComponentType, RefObject } from 'react';
 import { Disposable } from '@univerjs/core';
 import { SheetHyperLinkType } from '@univerjs/sheets-hyper-link';
 
@@ -23,7 +23,7 @@ export interface ICustomHyperLinkFormProps {
     linkId: string;
     payload: string;
     display: string;
-    setByPayload: React.MutableRefObject<boolean>;
+    setByPayload: RefObject<boolean>;
     showError: boolean;
     setDisplay: (display: string) => void;
     setPayload: (payload: string) => void;
@@ -35,7 +35,7 @@ export interface ICustomHyperLinkView {
         label: string;
         value: string;
     };
-    Form: React.FC<ICustomHyperLinkFormProps>;
+    Form: ComponentType<ICustomHyperLinkFormProps>;
     convert: (link: ISheetHyperLink) => { display: string; payload: string; type: string };
     match: (link: ISheetHyperLink) => boolean;
 }

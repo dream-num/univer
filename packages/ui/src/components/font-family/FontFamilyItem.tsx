@@ -23,7 +23,7 @@ import { IFontService } from '../../services/font.service';
 import { ILayoutService } from '../../services/layout/layout.service';
 import { useDependency } from '../../utils/di';
 
-export const FontFamilyItem = ({ id, value }: { id: string; value: string }) => {
+export function FontFamilyItem({ id, value }: { id: string; value: string }) {
     const commandService = useDependency(ICommandService);
     const fontService = useDependency(IFontService);
     const layoutService = useDependency(ILayoutService);

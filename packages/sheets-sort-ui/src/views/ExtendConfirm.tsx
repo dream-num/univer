@@ -23,7 +23,7 @@ export interface IExtendConfirmProps {
     onChange: (value: string) => void;
 };
 
-export const ExtendConfirm = (props: IExtendConfirmProps) => {
+export function ExtendConfirm(props: IExtendConfirmProps) {
     const [extend, setExtend] = useState<string>('0');
     const localeService = useDependency(LocaleService);
     return (

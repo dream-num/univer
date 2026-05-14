@@ -17,10 +17,10 @@
 import type { ReactElement } from 'react';
 
 // TODO@gggpound: Error checking needs to be implemented by the form control
-export const WrapperError = (props: {
+export function WrapperError(props: {
     errorText: string;
     children: ReactElement;
-}) => {
+}) {
     return (
         <div className="univer-relative">
             <div

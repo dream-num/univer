@@ -31,7 +31,7 @@ export interface IPrintingFloatDomProps {
     bound: IBoundRectNoAngle;
 };
 
-export const DocPrintingFloatDom = (props: IPrintingFloatDomProps) => {
+export function DocPrintingFloatDom(props: IPrintingFloatDomProps) {
     const { floatDomInfos, scene, offset, bound } = props;
     const width = bound.right - bound.left;
     const height = bound.bottom - bound.top;

@@ -20,7 +20,7 @@ import { InputNumber } from '@univerjs/design';
 import { useMemo, useState } from 'react';
 import { useObservable } from '../../utils/di';
 
-export const FontSize = (props: IFontSizeProps) => {
+export function FontSize(props: IFontSizeProps) {
     const { value, min, max, onChange, disabled$ } = props;
     const disabled = useObservable(disabled$);
     const [realValue, setRealValue] = useState<number>(Number(value ?? 0));

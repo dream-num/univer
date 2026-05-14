@@ -15,6 +15,7 @@
  */
 
 import type { Meta } from '@storybook/react';
+import type { ReactNode } from 'react';
 import { Button, toast, Toaster } from '@univerjs/design';
 import { useEffect } from 'react';
 
@@ -32,7 +33,7 @@ const meta: Meta<typeof Notification> = {
 
 export default meta;
 
-function NotificationStoryShell({ title, description, children }: { title: string; description: string; children?: React.ReactNode }) {
+function NotificationStoryShell({ title, description, children }: { title: string; description: string; children?: ReactNode }) {
     return (
         <section
             className={`

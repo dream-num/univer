@@ -150,7 +150,6 @@ export { customNameCharacterCheck, nameCharacterCheck } from './shared/name';
 export { type BBox, type IRTreeItem, RBush, RTree } from './shared/r-tree';
 export { getIntersectRange } from './shared/range';
 export { afterTime, bufferDebounceTime, convertObservableToBehaviorSubject, fromCallback, takeAfter } from './shared/rxjs';
-export { textDiff } from './shared/text-diff';
 export { awaitTime, delayAnimationFrame } from './shared/timer';
 export { isNodeEnv } from './shared/tools';
 export * from './sheets/clone';

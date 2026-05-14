@@ -32,7 +32,7 @@ const getAnotherBooleanNumber = (v: BooleanNumber | undefined) => {
     return [BooleanNumber.FALSE, undefined].includes(v) ? BooleanNumber.TRUE : BooleanNumber.FALSE;
 };
 const getBooleanFromNumber = (v: BooleanNumber) => v !== BooleanNumber.FALSE;
-export const ConditionalStyleEditor = (props: IConditionalStyleEditorProps) => {
+export function ConditionalStyleEditor(props: IConditionalStyleEditorProps) {
     const { style, onChange, className } = props;
 
     const [isBold, setIsBold] = useState<BooleanNumber | undefined>(() => {

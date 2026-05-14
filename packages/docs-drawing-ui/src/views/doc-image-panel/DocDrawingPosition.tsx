@@ -38,11 +38,9 @@ import { UpdateDrawingDocTransformCommand } from '../../commands/commands/update
 const MIN_OFFSET = -1000;
 const MAX_OFFSET = 1000;
 
-export interface IDocDrawingPositionProps {
+export function DocDrawingPosition(props: {
     drawings: IDrawingParam[];
-}
-
-export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
+}) {
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const drawingManagerService = useDependency(IDrawingManagerService);

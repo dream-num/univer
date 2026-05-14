@@ -28,7 +28,7 @@ import { ConditionalStyleEditor } from '../../conditional-style-editor';
 import { Preview } from '../../preview';
 import { previewClassName } from './styles';
 
-export const FormulaStyleEditor = (props: IStyleEditorProps) => {
+export function FormulaStyleEditor(props: IStyleEditorProps) {
     const { onChange, interceptorManager } = props;
     const localeService = useDependency(LocaleService);
     const univerInstanceService = useDependency(IUniverInstanceService);

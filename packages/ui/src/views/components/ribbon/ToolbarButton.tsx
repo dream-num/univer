@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
+import type { CSSProperties, ReactNode } from 'react';
 import { clsx } from '@univerjs/design';
 
 export interface IBaseToolbarButtonProps {
-    children?: React.ReactNode;
+    children?: ReactNode;
 
     /** Semantic DOM class */
     className?: string;
 
     /** Semantic DOM style */
-    style?: React.CSSProperties;
+    style?: CSSProperties;
 
     /**
      * Disabled state of button

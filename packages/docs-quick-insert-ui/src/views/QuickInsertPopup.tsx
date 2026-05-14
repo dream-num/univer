@@ -64,7 +64,7 @@ function translateMenus(menus: DocPopupMenu[], localeService: LocaleService) {
 
 const interceptKeys = [KeyCode.ARROW_UP, KeyCode.ARROW_DOWN, KeyCode.ENTER];
 
-export const QuickInsertPopup = () => {
+export function QuickInsertPopup() {
     const localeService = useDependency(LocaleService);
     const docQuickInsertPopupService = useDependency(DocQuickInsertPopupService);
     const componentManager = useDependency(ComponentManager);

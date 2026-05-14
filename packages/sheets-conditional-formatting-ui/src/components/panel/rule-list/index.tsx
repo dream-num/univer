@@ -104,7 +104,7 @@ const getRuleDescribe = (rule: IConditionFormattingRule, localeService: LocaleSe
     }
 };
 
-export const RuleList = (props: IRuleListProps) => {
+export function RuleList(props: IRuleListProps) {
     const { onClick } = props;
     const conditionalFormattingRuleModel = useDependency(ConditionalFormattingRuleModel);
     const univerInstanceService = useDependency(IUniverInstanceService);

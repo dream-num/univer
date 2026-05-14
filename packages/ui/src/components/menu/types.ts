@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { CSSProperties } from 'react';
 import type { IValueOption } from '../../services/menu/menu';
 
 export interface IBaseMenuProps {
@@ -28,5 +29,5 @@ export interface IBaseMenuProps {
      */
     overViewport?: 'scroll';
     onOptionSelect?: (option: IValueOption) => void;
-    style?: React.CSSProperties;
+    style?: CSSProperties;
 }

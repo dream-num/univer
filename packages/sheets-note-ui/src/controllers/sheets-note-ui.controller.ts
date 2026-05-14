@@ -20,7 +20,7 @@ import { ComponentManager, IMenuManagerService } from '@univerjs/ui';
 import { AddNotePopupOperation } from '../commands/operations/add-note-popup.operation';
 import { menuSchema } from '../menu/schema';
 import { SHEET_NOTE_COMPONENT } from '../views/config';
-import { SheetsNote } from '../views/note';
+import { SheetsNote } from '../views/Note';
 
 export class SheetsNoteUIController extends Disposable {
     constructor(

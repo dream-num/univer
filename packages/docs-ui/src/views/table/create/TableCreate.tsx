@@ -28,10 +28,10 @@ interface IDocCreateTableConfirmProps {
     };
 }
 
-export const DocCreateTableConfirm = ({
+export function DocCreateTableConfirm({
     handleRowColChange,
     tableCreateParams,
-}: IDocCreateTableConfirmProps) => {
+}: IDocCreateTableConfirmProps) {
     const localeService = useDependency(LocaleService);
 
     const [rowCount, setRowCount] = useState(3);

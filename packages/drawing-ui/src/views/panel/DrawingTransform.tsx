@@ -32,7 +32,7 @@ export interface IDrawingTransformProps {
 
 const INPUT_DEBOUNCE_TIME = 300;
 
-export const DrawingTransform = (props: IDrawingTransformProps) => {
+export function DrawingTransform(props: IDrawingTransformProps) {
     const localeService = useDependency(LocaleService);
     const drawingManagerService = useDependency(IDrawingManagerService);
     const renderManagerService = useDependency(IRenderManagerService);

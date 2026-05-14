@@ -17,6 +17,7 @@
 import type { DocumentDataModel, IDisposable, Nullable } from '@univerjs/core';
 import type { IInsertCommandParams } from '@univerjs/docs-ui';
 import type { Documents, DocumentSkeleton, IBoundRectNoAngle, IDocumentSkeletonGlyph, ITextRangeWithStyle } from '@univerjs/engine-render';
+import type { ComponentType } from 'react';
 import type { Observable } from 'rxjs';
 import { Disposable, ICommandService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
@@ -46,7 +47,7 @@ export type DocPopupMenu = IDocPopupGroupItem | IDocPopupMenuItem;
 export interface IDocPopup {
     keyword: string;
     menus$: Observable<DocPopupMenu[]>;
-    Placeholder?: React.ComponentType;
+    Placeholder?: ComponentType;
     preconditions?: (params: IInsertCommandParams) => boolean;
 }
 

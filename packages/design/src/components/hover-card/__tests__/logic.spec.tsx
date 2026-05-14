@@ -15,9 +15,9 @@
  */
 
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { forwardRef } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { HoverCard } from '../HoverCard';
-
 import '@testing-library/jest-dom/vitest';
 
 vi.mock('../HoverCardPrimitive', async () => {
@@ -35,7 +35,7 @@ vi.mock('../HoverCardPrimitive', async () => {
         ),
         HoverCardTrigger: ({ children }: any) => <div data-testid="hover-trigger">{children}</div>,
         HoverCardPortal: ({ children }: any) => <div>{children}</div>,
-        HoverCardContent: React.forwardRef<HTMLDivElement, any>(({ children }, ref) => (
+        HoverCardContent: forwardRef<HTMLDivElement, any>(({ children }, ref) => (
             <div ref={ref} data-testid="hover-content">{children}</div>
         )),
     };

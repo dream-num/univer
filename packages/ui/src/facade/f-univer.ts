@@ -353,7 +353,7 @@ export interface IFUniverUIMixin {
      * @param component the react component
      * @example
      * ```ts
-     * univerAPI.registerUIPart(univerAPI.Enum.BuiltInUIPart.CUSTOM_HEADER, () => React.createElement('h1', null, 'Custom Header'));
+     * univerAPI.registerUIPart(univerAPI.Enum.BuiltInUIPart.CUSTOM_HEADER, () => createElement('h1', null, 'Custom Header'));
      * ```
      */
     registerUIPart(key: BuiltInUIPart, component: any): IDisposable;

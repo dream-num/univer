@@ -51,7 +51,7 @@ export interface IRichTextEditorProps {
     noStyle?: boolean;
 }
 
-export const RichTextEditor = (props: IRichTextEditorProps) => {
+export function RichTextEditor(props: IRichTextEditorProps) {
     const {
         className,
         autoFocus,

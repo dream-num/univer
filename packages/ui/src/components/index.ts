@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-export * from './common-label';
 export * from './custom-label';
 export * from './heading-item';
 

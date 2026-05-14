@@ -32,7 +32,7 @@ interface ISheetPermissionPanelDetailProps {
     oldRule?: IPermissionPanelRule;
 }
 
-export const SheetPermissionPanelDetail = (props: ISheetPermissionPanelDetailProps) => {
+export function SheetPermissionPanelDetail(props: ISheetPermissionPanelDetailProps) {
     const { fromSheetBar, rule, oldRule } = props;
     const injector = useDependency(Injector);
     const componentManager = useDependency(ComponentManager);

@@ -21,7 +21,7 @@ import { useMemo } from 'react';
 import { filter } from 'rxjs';
 import { CellPopupManagerService } from '../../services/cell-popup-manager.service';
 
-export const CellPopup = (props: { popup: IPopup<ISheetLocationBase & { direction: 'horizontal' | 'vertical' }> }) => {
+export function CellPopup(props: { popup: IPopup<ISheetLocationBase & { direction: 'horizontal' | 'vertical' }> }) {
     const { popup } = props;
     const location = popup.extraProps!;
     const { row, col, direction, unitId, subUnitId } = location;

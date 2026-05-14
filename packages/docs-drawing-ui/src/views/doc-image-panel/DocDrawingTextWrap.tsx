@@ -40,10 +40,6 @@ import {
 const MIN_MARGIN = 0;
 const MAX_MARGIN = 100;
 
-export interface IDocDrawingTextWrapProps {
-    drawings: IDrawingParam[];
-}
-
 interface IDistToText {
     distT: number;
     distL: number;
@@ -51,7 +47,9 @@ interface IDistToText {
     distR: number;
 }
 
-export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
+export function DocDrawingTextWrap(props: {
+    drawings: IDrawingParam[];
+}) {
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const drawingManagerService = useDependency(IDrawingManagerService);

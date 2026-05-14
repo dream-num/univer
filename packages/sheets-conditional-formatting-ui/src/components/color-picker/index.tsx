@@ -28,7 +28,7 @@ interface IColorPickerProps {
     className?: string;
 };
 
-export const ColorPicker = (props: IColorPickerProps) => {
+export function ColorPicker(props: IColorPickerProps) {
     const { color, onChange, disable = false, Icon = PaintBucketDoubleIcon, className } = props;
 
     const colorKit = useMemo(() => new ColorKit(color), [color]);

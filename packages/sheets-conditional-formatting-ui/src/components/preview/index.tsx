@@ -21,7 +21,7 @@ import { SlashDoubleIcon } from '@univerjs/icons';
 import { CFRuleType, DEFAULT_BG_COLOR, DEFAULT_FONT_COLOR, defaultDataBarNativeColor, defaultDataBarPositiveColor, getColorScaleFromValue, iconMap } from '@univerjs/sheets-conditional-formatting';
 import { useMemo } from 'react';
 
-export const Preview = (props: { rule?: IConditionalFormattingRuleConfig }) => {
+export function Preview(props: { rule?: IConditionalFormattingRuleConfig }) {
     const rule = props.rule;
 
     if (!rule) return null;

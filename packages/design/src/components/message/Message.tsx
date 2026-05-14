@@ -89,50 +89,52 @@ const createMessageId = () => {
     return id;
 };
 
-export const Messager = ({ className, ...props }: IMessagerProps) => (
-    <Sonner
-        id={MESSAGE_TOASTER_ID}
-        position="top-center"
-        visibleToasts={4}
-        closeButton={false}
-        expand={false}
-        icons={{ loading: loadingIcon }}
-        offset={{ top: 16 }}
-        className={clsx(
-            `
-              [&_[data-sonner-toast]]:univer-bg-white/95
-              dark:[&_[data-sonner-toast]]:!univer-bg-gray-800/95
-              [&_[data-sonner-toast]]:univer-rounded-2xl [&_[data-sonner-toast]]:univer-border
-              [&_[data-sonner-toast]]:univer-border-solid [&_[data-sonner-toast]]:univer-border-gray-200
-              [&_[data-sonner-toast]]:univer-shadow-[0_16px_40px_-20px_rgba(15,23,42,0.55)]
-              [&_[data-sonner-toast]]:univer-backdrop-blur-sm
-              dark:[&_[data-sonner-toast]]:!univer-border-gray-600
-            `,
-            className
-        )}
-        toastOptions={{
-            duration: DEFAULT_MESSAGE_DURATION,
-            classNames: {
-                toast: `
-                  univer-group univer-min-h-0 univer-min-w-[320px] univer-max-w-[520px] univer-px-3.5 univer-py-3
-                  univer-font-sans univer-transition-all univer-duration-300
+export function Messager({ className, ...props }: IMessagerProps) {
+    return (
+        <Sonner
+            id={MESSAGE_TOASTER_ID}
+            position="top-center"
+            visibleToasts={4}
+            closeButton={false}
+            expand={false}
+            icons={{ loading: loadingIcon }}
+            offset={{ top: 16 }}
+            className={clsx(
+                `
+                  [&_[data-sonner-toast]]:univer-bg-white/95
+                  dark:[&_[data-sonner-toast]]:!univer-bg-gray-800/95
+                  [&_[data-sonner-toast]]:univer-rounded-2xl [&_[data-sonner-toast]]:univer-border
+                  [&_[data-sonner-toast]]:univer-border-solid [&_[data-sonner-toast]]:univer-border-gray-200
+                  [&_[data-sonner-toast]]:univer-shadow-[0_16px_40px_-20px_rgba(15,23,42,0.55)]
+                  [&_[data-sonner-toast]]:univer-backdrop-blur-sm
+                  dark:[&_[data-sonner-toast]]:!univer-border-gray-600
                 `,
-                title: `
-                  univer-m-0 univer-font-sans univer-text-sm univer-font-medium univer-leading-5 univer-text-gray-700
-                  dark:!univer-text-gray-100
-                `,
-                content: 'univer-gap-2.5',
-                icon: '[&>svg]:univer-block [&>svg]:univer-size-4',
-                success: typeClassMap[MessageType.Success],
-                info: typeClassMap[MessageType.Info],
-                warning: typeClassMap[MessageType.Warning],
-                error: typeClassMap[MessageType.Error],
-                loading: typeClassMap[MessageType.Loading],
-            },
-        }}
-        {...props}
-    />
-);
+                className
+            )}
+            toastOptions={{
+                duration: DEFAULT_MESSAGE_DURATION,
+                classNames: {
+                    toast: `
+                      univer-group univer-min-h-0 univer-min-w-[320px] univer-max-w-[520px] univer-px-3.5 univer-py-3
+                      univer-font-sans univer-transition-all univer-duration-300
+                    `,
+                    title: `
+                      univer-m-0 univer-font-sans univer-text-sm univer-font-medium univer-leading-5 univer-text-gray-700
+                      dark:!univer-text-gray-100
+                    `,
+                    content: 'univer-gap-2.5',
+                    icon: '[&>svg]:univer-block [&>svg]:univer-size-4',
+                    success: typeClassMap[MessageType.Success],
+                    info: typeClassMap[MessageType.Info],
+                    warning: typeClassMap[MessageType.Warning],
+                    error: typeClassMap[MessageType.Error],
+                    loading: typeClassMap[MessageType.Loading],
+                },
+            }}
+            {...props}
+        />
+    );
+}
 
 export const message = ({ content, duration, id, onClose, type = MessageType.Info }: IMessageProps) => {
     const messageId = id ?? createMessageId();

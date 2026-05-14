@@ -21,7 +21,7 @@ import { RuleList } from './rule-list';
 
 interface IConditionFormattingPanelProps { rule?: IConditionFormattingRule };
 
-export const ConditionFormattingPanel = (props: IConditionFormattingPanelProps) => {
+export function ConditionFormattingPanel(props: IConditionFormattingPanelProps) {
     const [currentEditRule, setCurrentEditRule] = useState<IConditionFormattingRule | undefined>(props.rule);
     const [isShowRuleEditor, setIsShowRuleEditor] = useState(!!props.rule);
 

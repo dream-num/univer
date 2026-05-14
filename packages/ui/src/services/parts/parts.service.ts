@@ -80,7 +80,7 @@ export class UIPartsService extends Disposable implements IUIPartsService {
         return this._uiVisible.get(part) ?? true;
     }
 
-    registerComponent<T>(part: ComponentPartKey, componentFactory: () => React.ComponentType<T>): IDisposable {
+    registerComponent<T>(part: ComponentPartKey, componentFactory: () => ComponentType<T>): IDisposable {
         const componentType = componentFactory();
         const components = (
             this._componentsByPart.get(part)

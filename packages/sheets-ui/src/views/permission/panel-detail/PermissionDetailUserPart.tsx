@@ -34,7 +34,7 @@ export interface IPermissionDetailUserPartProps {
     permissionId: string;
 }
 
-export const PermissionDetailUserPart = (props: IPermissionDetailUserPartProps) => {
+export function PermissionDetailUserPart(props: IPermissionDetailUserPartProps) {
     const { editState, onEditStateChange, viewState, onViewStateChange, permissionId } = props;
     const localeService = useDependency(LocaleService);
     const dialogService = useDependency(IDialogService);

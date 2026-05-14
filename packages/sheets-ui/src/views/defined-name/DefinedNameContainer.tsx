@@ -35,7 +35,7 @@ import { useDependency, useVirtualList } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
 import { DefinedNameInput } from './DefinedNameInput';
 
-export const DefinedNameContainer = () => {
+export function DefinedNameContainer() {
     const commandService = useDependency(ICommandService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const localeService = useDependency(LocaleService);

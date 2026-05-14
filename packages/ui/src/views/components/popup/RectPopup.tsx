@@ -241,21 +241,23 @@ function RectPopup(props: IRectPopupProps) {
     });
 
     useEffect(() => {
-        let observer: ResizeObserver | null;
-        if (nodeRef.current) {
-            observer = new ResizeObserver(() => {
-                if (!autoRelayout) return;
-                if (!anchorRectRef.current) return;
-                updatePosition(anchorRectRef.current);
-            });
-
-            observer.observe(nodeRef.current);
+        const node = nodeRef.current;
+        if (!node) {
+            return;
         }
 
+        const observer = new ResizeObserver(() => {
+            if (!autoRelayout) return;
+            if (!anchorRectRef.current) return;
+            updatePosition(anchorRectRef.current);
+        });
+
+        observer.observe(node);
+
         return () => {
-            observer?.disconnect();
+            observer.disconnect();
         };
-    }, [nodeRef.current, autoRelayout]);
+    }, [autoRelayout]);
 
     useEffect(() => {
         const anchorRectSub = anchorRect$.subscribe((anchorRect) => {

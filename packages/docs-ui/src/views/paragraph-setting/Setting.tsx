@@ -62,6 +62,7 @@ const AutoFocusInputNumber = (props: {
         />
     );
 };
+
 export function ParagraphSetting() {
     const localeService = useDependency(LocaleService);
 
@@ -94,10 +95,12 @@ export function ParagraphSetting() {
 
     return (
         <div>
-            <div className="univer-t-4 univer-text-sm univer-font-medium">{localeService.t('doc.paragraphSetting.alignment')}</div>
+            <div className="univer-mt-4 univer-text-sm univer-font-medium">
+                {localeService.t('doc.paragraphSetting.alignment')}
+            </div>
             <div
                 className={clsx(`
-                  univer-mt-4 univer-box-border univer-flex univer-w-full univer-items-center univer-justify-between
+                  univer-mt-2 univer-box-border univer-flex univer-w-full univer-items-center univer-justify-between
                   univer-gap-1 univer-rounded-md univer-p-1
                 `, borderClassName)}
             >
@@ -121,78 +124,88 @@ export function ParagraphSetting() {
                     );
                 })}
             </div>
-            <div className="univer-t-4 univer-text-sm univer-font-medium">{localeService.t('doc.paragraphSetting.indentation')}</div>
-            <div>
-                <div className="univer-item-center univer-flex univer-justify-between">
-                    <div className="univer-mt-3 univer-text-xs">
-                        {localeService.t('doc.paragraphSetting.left')}
-                        (px)
-                    </div>
-                    <AutoFocusInputNumber className="univer-mt-4" value={indentStart} onChange={(v) => setIndentStart(v ?? 0)} />
-                </div>
-                <div className="univer-item-center univer-flex univer-justify-between">
 
-                    <div className="univer-mt-3 univer-text-xs">
-                        {localeService.t('doc.paragraphSetting.right')}
-                        (px)
+            <div className="univer-mt-5 univer-text-sm univer-font-medium">
+                {localeService.t('doc.paragraphSetting.indentation')}
+            </div>
+            <div className="univer-mt-2 univer-flex univer-flex-col univer-gap-2.5">
+                <div className="univer-flex univer-gap-2.5">
+                    <div className="univer-flex univer-flex-1 univer-flex-col univer-gap-2">
+                        <label className="univer-text-xs">
+                            {localeService.t('doc.paragraphSetting.left')}
+                            (px)
+                        </label>
+                        <AutoFocusInputNumber value={indentStart} onChange={(v) => setIndentStart(v ?? 0)} />
                     </div>
-                    <AutoFocusInputNumber className="univer-mt-4" value={indentEnd} onChange={(v) => setIndentEnd(v ?? 0)} />
+                    <div className="univer-flex univer-flex-1 univer-flex-col univer-gap-2">
+                        <label className="univer-text-xs">
+                            {localeService.t('doc.paragraphSetting.right')}
+                            (px)
+                        </label>
+                        <AutoFocusInputNumber value={indentEnd} onChange={(v) => setIndentEnd(v ?? 0)} />
+                    </div>
                 </div>
-                <div className="univer-item-center univer-flex univer-justify-between">
-
-                    <div className="univer-mt-3 univer-text-xs">
-                        {localeService.t('doc.paragraphSetting.firstLine')}
-                        (px)
+                <div className="univer-flex univer-gap-2.5">
+                    <div className="univer-flex univer-flex-1 univer-flex-col univer-gap-2">
+                        <label className="univer-text-xs">
+                            {localeService.t('doc.paragraphSetting.firstLine')}
+                            (px)
+                        </label>
+                        <AutoFocusInputNumber value={indentFirstLine} onChange={(v) => setIndentFirstLine(v ?? 0)} />
                     </div>
-                    <AutoFocusInputNumber className="univer-mt-4" value={indentFirstLine} onChange={(v) => setIndentFirstLine(v ?? 0)} />
-                </div>
-                <div className="univer-item-center univer-flex univer-justify-between">
-
-                    <div className="univer-mt-3 univer-text-xs">
-                        {localeService.t('doc.paragraphSetting.hanging')}
-                        (px)
+                    <div className="univer-flex univer-flex-1 univer-flex-col univer-gap-2">
+                        <label className="univer-text-xs">
+                            {localeService.t('doc.paragraphSetting.hanging')}
+                            (px)
+                        </label>
+                        <AutoFocusInputNumber value={hanging} onChange={(v) => setHanging(v ?? 0)} />
                     </div>
-                    <AutoFocusInputNumber className="univer-mt-4" value={hanging} onChange={(v) => setHanging(v ?? 0)} />
                 </div>
             </div>
-            <div className="univer-t-4 univer-text-sm univer-font-medium">{localeService.t('doc.paragraphSetting.spacing')}</div>
-            <div>
-                <div className="univer-justify-betweenuniver-item-center univer-flex">
 
-                    <div className="univer-mt-3 univer-text-xs">
-                        {localeService.t('doc.paragraphSetting.before')}
-                        (px)
+            <div className="univer-mt-5 univer-text-sm univer-font-medium">
+                {localeService.t('doc.paragraphSetting.spacing')}
+            </div>
+            <div className="univer-mt-2 univer-flex univer-flex-col univer-gap-2.5">
+                <div className="univer-flex univer-gap-2.5">
+                    <div className="univer-flex univer-flex-1 univer-flex-col univer-gap-2">
+                        <label className="univer-text-xs">
+                            {localeService.t('doc.paragraphSetting.before')}
+                            (px)
+                        </label>
+                        <AutoFocusInputNumber value={spaceAbove} onChange={(v) => setSpaceAbove(v ?? 0)} />
                     </div>
-                    <AutoFocusInputNumber className="univer-mt-4" value={spaceAbove} onChange={(v) => setSpaceAbove(v ?? 0)} />
+                    <div className="univer-flex univer-flex-1 univer-flex-col univer-gap-2">
+                        <label className="univer-text-xs">
+                            {localeService.t('doc.paragraphSetting.after')}
+                            (px)
+                        </label>
+                        <AutoFocusInputNumber value={spaceBelow} onChange={(v) => setSpaceBelow(v ?? 0)} />
+                    </div>
                 </div>
-                <div className="univer-item-center univer-flex univer-justify-between">
-
-                    <div className="univer-mt-3 univer-text-xs">
-                        {localeService.t('doc.paragraphSetting.after')}
-                        (px)
+                <div className="univer-flex univer-flex-col univer-gap-2">
+                    <label className="univer-text-xs">{localeService.t('doc.paragraphSetting.lineSpace')}</label>
+                    <div className="univer-flex univer-gap-2.5">
+                        <div className="univer-flex-1">
+                            <Select
+                                className="univer-w-full"
+                                value={`${spacingRule}`}
+                                options={[
+                                    { label: localeService.t('doc.paragraphSetting.multiSpace'), value: `${SpacingRule.AUTO}` },
+                                    { label: localeService.t('doc.paragraphSetting.fixedValue'), value: `${SpacingRule.AT_LEAST}` },
+                                ]}
+                                onChange={(v) => setSpacingRule(Number(v))}
+                            />
+                        </div>
+                        <div className="univer-flex-1">
+                            <AutoFocusInputNumber
+                                className="univer-w-full"
+                                {...lineSpaceConfig}
+                                value={lineSpacing}
+                                onChange={(v) => setLineSpacing(v ?? 0)}
+                            />
+                        </div>
                     </div>
-                    <AutoFocusInputNumber className="univer-mt-4" value={spaceBelow} onChange={(v) => setSpaceBelow(v ?? 0)} />
-                </div>
-                <div className="item-center univer-flex univer-justify-between">
-                    <div className="univer-mt-3 univer-text-xs">{localeService.t('doc.paragraphSetting.lineSpace')}</div>
-                    <div
-                        className="univer-mt-4 univer-flex univer-w-[162px] univer-flex-col univer-gap-1.5"
-                    >
-                        <Select
-                            value={`${spacingRule}`}
-                            options={[
-                                { label: localeService.t('doc.paragraphSetting.multiSpace'), value: `${SpacingRule.AUTO}` },
-                                { label: localeService.t('doc.paragraphSetting.fixedValue'), value: `${SpacingRule.AT_LEAST}` },
-                            ]}
-                            onChange={(v) => setSpacingRule(Number(v))}
-                        />
-                        <AutoFocusInputNumber
-                            {...lineSpaceConfig}
-                            value={lineSpacing}
-                            onChange={(v) => setLineSpacing(v ?? 0)}
-                        />
-                    </div>
-
                 </div>
             </div>
         </div>

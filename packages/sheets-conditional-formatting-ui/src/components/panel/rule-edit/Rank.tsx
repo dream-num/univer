@@ -25,7 +25,7 @@ import { ConditionalStyleEditor } from '../../conditional-style-editor';
 import { Preview } from '../../preview';
 import { previewClassName } from './styles';
 
-export const RankStyleEditor = (props: IStyleEditorProps) => {
+export function RankStyleEditor(props: IStyleEditorProps) {
     const { onChange, interceptorManager } = props;
     const localeService = useDependency(LocaleService);
 

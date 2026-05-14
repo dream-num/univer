@@ -34,7 +34,7 @@ export interface IDataValidationDetailProps {
     disable?: boolean;
 }
 
-export const DataValidationItem = (props: IDataValidationDetailProps) => {
+export function DataValidationItem(props: IDataValidationDetailProps) {
     const { rule, onClick, unitId, subUnitId, disable } = props;
     const validatorRegistry = useDependency(DataValidatorRegistryService);
     const commandService = useDependency(ICommandService);

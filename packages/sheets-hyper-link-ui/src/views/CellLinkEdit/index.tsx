@@ -52,7 +52,7 @@ import { SheetsHyperLinkSidePanelService } from '../../services/side-panel.servi
 import { HyperLinkEditSourceType } from '../../types/enums/edit-source';
 import { isBlankInput, resolveRangePayload } from './utils';
 
-export const CellLinkEdit = () => {
+export function CellLinkEdit() {
     const [id, setId] = useState('');
     const [hide, setHide] = useState(false);
     const [display, _setDisplay] = useState('');

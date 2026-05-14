@@ -15,7 +15,6 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-
 import type { ICollaborator, UnitAction } from '@univerjs/protocol';
 import { IAuthzIoService, ICommandService, IPermissionService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { borderTopClassName, Button, clsx, Switch } from '@univerjs/design';
@@ -24,7 +23,7 @@ import { getAllWorksheetPermissionPoint, SetWorksheetPermissionPointsCommand, Wo
 import { IDialogService, useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 import { defaultWorksheetUnitActionList, subUnitPermissionTypeMap, UNIVER_SHEET_PERMISSION_DIALOG_ID } from '../../../consts/permission';
-import Spin from '../spin';
+import { Spin } from '../spin';
 
 interface IPermissionMap {
     [key: string]: {
@@ -33,7 +32,7 @@ interface IPermissionMap {
     };
 }
 
-export const SheetPermissionDialog = () => {
+export function SheetPermissionDialog() {
     const localeService = useDependency(LocaleService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const authzIoService = useDependency(IAuthzIoService);

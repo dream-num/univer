@@ -230,7 +230,7 @@ const getOperatorOptions = (type: CFSubRuleType.duplicateValues | CFSubRuleType.
         }
     }
 };
-export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHighlightCell | INumberHighlightCell | ITimePeriodHighlightCell>) => {
+export function HighlightCellStyleEditor(props: IStyleEditorProps<any, ITextHighlightCell | INumberHighlightCell | ITimePeriodHighlightCell>) {
     const { interceptorManager, onChange } = props;
     const localeService = useDependency(LocaleService);
 

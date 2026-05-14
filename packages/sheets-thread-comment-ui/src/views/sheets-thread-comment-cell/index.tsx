@@ -21,7 +21,7 @@ import { ThreadCommentTree, ThreadCommentTreeLocation } from '@univerjs/thread-c
 import { useDependency, useObservable } from '@univerjs/ui';
 import { SheetsThreadCommentPopupService } from '../../services/sheets-thread-comment-popup.service';
 
-export const SheetsThreadCommentCell = () => {
+export function SheetsThreadCommentCell() {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const sheetsThreadCommentPopupService = useDependency(SheetsThreadCommentPopupService);
     const activePopup = useObservable(sheetsThreadCommentPopupService.activePopup$);

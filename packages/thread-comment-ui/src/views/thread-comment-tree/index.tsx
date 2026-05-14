@@ -17,6 +17,7 @@
 import type { IUser, UniverInstanceType } from '@univerjs/core';
 import type { IAddCommentCommandParams, IThreadComment, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
 import type { IUniverUIConfig } from '@univerjs/ui';
+import type { CSSProperties } from 'react';
 import type { IThreadCommentEditorInstance } from '../thread-comment-editor';
 import { DOCS_COMMENT_EDITOR_UNIT_ID_KEY, generateRandomId, ICommandService, LocaleService, UserManagerService } from '@univerjs/core';
 import { borderClassName, clsx, Dropdown, scrollbarClassName, Tooltip } from '@univerjs/design';
@@ -61,7 +62,7 @@ export interface IThreadCommentTreeProps {
     onAddComment?: (comment: IThreadComment) => boolean;
     onDeleteComment?: (comment: IThreadComment) => boolean;
     onResolve?: (resolved: boolean) => void;
-    style?: React.CSSProperties;
+    style?: CSSProperties;
 }
 
 export interface IThreadCommentItemProps {
@@ -270,7 +271,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
     );
 };
 
-export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
+export function ThreadCommentTree(props: IThreadCommentTreeProps) {
     const {
         id,
         unitId,

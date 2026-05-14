@@ -20,7 +20,7 @@ import { InputNumber } from '@univerjs/design';
 import { IContextMenuService, useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 
-export const MenuItemInput = (props: IMenuItemInputProps) => {
+export function MenuItemInput(props: IMenuItemInputProps) {
     const {
         prefix,
         suffix,

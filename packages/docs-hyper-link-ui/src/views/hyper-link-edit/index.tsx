@@ -39,7 +39,7 @@ function transformUrl(urlStr: string) {
     return hasProtocol(urlStr) ? urlStr : isEmail(urlStr) ? `mailto://${urlStr}` : `https://${urlStr}`;
 }
 
-export const DocHyperLinkEdit = () => {
+export function DocHyperLinkEdit() {
     const hyperLinkService = useDependency(DocHyperLinkPopupService);
     const localeService = useDependency(LocaleService);
     const editing = useObservable(hyperLinkService.editingLink$);

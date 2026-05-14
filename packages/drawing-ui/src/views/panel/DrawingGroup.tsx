@@ -24,12 +24,10 @@ import { useEffect, useState } from 'react';
 import { CancelDrawingGroupOperation, SetDrawingGroupOperation } from '../../commands/operations/drawing-group.operation';
 import { getUpdateParams } from '../../utils/get-update-params';
 
-export interface IDrawingGroupProps {
+export function DrawingGroup(props: {
     drawings: IDrawingParam[];
     hasGroup: boolean;
-}
-
-export const DrawingGroup = (props: IDrawingGroupProps) => {
+}) {
     const localeService = useDependency(LocaleService);
     const renderManagerService = useDependency(IRenderManagerService);
     const drawingManagerService = useDependency(IDrawingManagerService);

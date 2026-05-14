@@ -14,10 +14,17 @@
  * limitations under the License.
  */
 
+import type { ISuperTable } from '../../../basics/common';
+import type { IFunctionNames } from '../../../basics/function';
+import type { IDefinedNamesServiceParam } from '../../../services/defined-names.service';
 import type { LexerNode } from '../lexer-node';
 import { AbsoluteRefType } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../basics/error-type';
+import { FUNCTION_NAMES_LOGICAL } from '../../../functions/logical/function-names';
+import { FUNCTION_NAMES_LOOKUP } from '../../../functions/lookup/function-names';
+import { FUNCTION_NAMES_MATH } from '../../../functions/math/function-names';
+import { FUNCTION_NAMES_STATISTICAL } from '../../../functions/statistical/function-names';
 import { LexerTreeBuilder } from '../lexer-tree-builder';
 
 describe('lexer nodeMaker test', () => {
@@ -789,6 +796,182 @@ describe('lexer nodeMaker test', () => {
                     ],
                 }
             );
+        });
+    });
+
+    describe('lexer nodeMaker test', () => {
+        const lexerTreeBuilder = new LexerTreeBuilder();
+
+        describe('getNewFormulaWithPrefix', () => {
+            const hasFunction = (functionToken: IFunctionNames) => {
+                const functionList = [
+                    FUNCTION_NAMES_STATISTICAL.MAX,
+                    FUNCTION_NAMES_LOGICAL.LAMBDA,
+                    FUNCTION_NAMES_MATH.SUM,
+                    FUNCTION_NAMES_LOOKUP.OFFSET,
+                    FUNCTION_NAMES_LOOKUP.INDIRECT,
+                    FUNCTION_NAMES_STATISTICAL.CHISQ_DIST,
+                    FUNCTION_NAMES_STATISTICAL.CHISQ_DIST_RT,
+                    FUNCTION_NAMES_LOOKUP.XLOOKUP,
+                    FUNCTION_NAMES_STATISTICAL.MAXIFS,
+                    FUNCTION_NAMES_MATH.ACOT,
+                    FUNCTION_NAMES_LOGICAL.LET,
+                ] as IFunctionNames[];
+
+                if (functionList.includes(functionToken)) {
+                    return true;
+                }
+
+                return false;
+            };
+            it('lambda prefix simple1', () => {
+                const newFunctionString = lexerTreeBuilder.getNewFormulaWithPrefix('=lambda(x,y, x*y*x)(sum(1,(1+2)*3),2)+1-max(100,200)', hasFunction);
+                expect(newFunctionString).toStrictEqual('=_xlfn.lambda(_xlpm.x,_xlpm.y,_xlpm.x*_xlpm.y*_xlpm.x)(sum(1,(1+2)*3),2)+1-max(100,200)');
+            });
+
+            it('lambda prefix no parameters', () => {
+                const newFunctionString = lexerTreeBuilder.getNewFormulaWithPrefix('=lambda(x,y, x*y*x)', hasFunction);
+                expect(newFunctionString).toStrictEqual('=_xlfn.lambda(_xlpm.x,_xlpm.y,_xlpm.x*_xlpm.y*_xlpm.x)');
+            });
+
+            it('lambda prefix mixed2', () => {
+                const newFunctionString = lexerTreeBuilder.getNewFormulaWithPrefix('=(-(1+2)--@A1:B2 + 5)/2 + -sum(indirect(A5):B10# + B6# + A1:offset(C5, 1, 1)  ,  100) + {1,2,3;4,5,6;7,8,10} + lambda(x,y,z, x*y*z)(sum(1,(1+2)*3),2,lambda(x,y, @offset(A1:B0,x#*y#))(1,2):C20) + sum((1+2%)*30%, 1+2)%', hasFunction);
+                expect(newFunctionString).toStrictEqual('=(-(1+2)--@A1:B2 +5)/2 +-sum(indirect(A5):B10#+B6#+A1:offset(C5,1,1),100)+{1,2,3;4,5,6;7,8,10}+_xlfn.lambda(_xlpm.x,_xlpm.y,_xlpm.z,_xlpm.x*_xlpm.y*_xlpm.z)(sum(1,(1+2)*3),2,_xlfn.lambda(_xlpm.x,_xlpm.y,@offset(A1:B0,_xlpm.x#*_xlpm.y#))(1,2):C20)+sum((1+2%)*30%,1+2)%');
+            });
+
+            it('normal prefix', () => {
+                const newFunctionString = lexerTreeBuilder.getNewFormulaWithPrefix('=MAXIFS(D18:D27,E18:E27,ACOT(XLOOKUP(A18:A27, B18:B27, C18:C27)))', hasFunction);
+                expect(newFunctionString).toStrictEqual('=_xlfn.MAXIFS(D18:D27,E18:E27,_xlfn.ACOT(_xlfn.XLOOKUP(A18:A27,B18:B27,C18:C27)))');
+            });
+
+            it('let prefix simple1', () => {
+                const newFunctionString = lexerTreeBuilder.getNewFormulaWithPrefix('=let(x,5,y,4,sum(x,y)+x)', hasFunction);
+                expect(newFunctionString).toStrictEqual('=_xlfn.let(_xlpm.x,5,_xlpm.y,4,sum(_xlpm.x,_xlpm.y)+_xlpm.x)');
+            });
+        });
+
+        describe('getFormulaExprTree', () => {
+            const hasFunction = (functionToken: IFunctionNames) => {
+                const functionList = [
+                    FUNCTION_NAMES_STATISTICAL.MAX,
+                    FUNCTION_NAMES_LOGICAL.LAMBDA,
+                    FUNCTION_NAMES_MATH.SUM,
+                    FUNCTION_NAMES_LOOKUP.OFFSET,
+                    FUNCTION_NAMES_LOOKUP.INDIRECT,
+                    FUNCTION_NAMES_STATISTICAL.CHISQ_DIST,
+                    FUNCTION_NAMES_STATISTICAL.CHISQ_DIST_RT,
+                    FUNCTION_NAMES_LOOKUP.XLOOKUP,
+                    FUNCTION_NAMES_STATISTICAL.MAXIFS,
+                    FUNCTION_NAMES_MATH.ACOT,
+                    FUNCTION_NAMES_LOGICAL.LET,
+                ] as IFunctionNames[];
+
+                if (functionList.includes(functionToken)) {
+                    return true;
+                }
+
+                return false;
+            };
+
+            const getDefinedNameName = (unitId: string, name: string) => {
+                const mockDefinedNameMap = new Map<string, Map<string, IDefinedNamesServiceParam>>();
+                const nameMap = new Map();
+                mockDefinedNameMap.set('mockUnitId', nameMap);
+                nameMap.set('defineName1', {
+                    id: 'defineName1',
+                    name: 'defineName1',
+                    value: 'A1:B10',
+                    comment: 'mock defined name 1',
+                });
+
+                nameMap.set('defineName2', {
+                    id: 'defineName2',
+                    name: 'defineName2',
+                    value: 'C5:D15',
+                    comment: 'mock defined name 2',
+                });
+
+                nameMap.set('defineName3', {
+                    id: 'defineName3',
+                    name: 'defineName3',
+                    value: 'E10:F20',
+                    comment: 'mock defined name 3',
+                });
+
+                return mockDefinedNameMap.get(unitId)?.get(name);
+            };
+
+            const getTable = (unitId: string, tableName: string) => {
+                const mockTableMap = new Map<string, Map<string, ISuperTable>>();
+                const tableNameMap = new Map<string, ISuperTable>();
+                mockTableMap.set('mockUnitId', tableNameMap);
+                tableNameMap.set('Table1', {
+                    sheetId: 'sheet1',
+                    titleMap: new Map([
+                        ['Column1', 0],
+                        ['Column2', 1],
+                    ]),
+                    range: {
+                        startRow: 1,
+                        endRow: 10,
+                        startColumn: 0,
+                        endColumn: 1,
+                    },
+                });
+
+                tableNameMap.set('Table2', {
+                    sheetId: 'sheet2',
+                    titleMap: new Map([
+                        ['ColumnA', 0],
+                        ['ColumnB', 1],
+                        ['ColumnC', 2],
+                    ]),
+                    range: {
+                        startRow: 5,
+                        endRow: 20,
+                        startColumn: 2,
+                        endColumn: 4,
+                    },
+                });
+
+                return mockTableMap.get(unitId)?.get(tableName);
+            };
+
+            it('builds ExprTree with correct precedence: complexity', () => {
+                const exprTreeNode = lexerTreeBuilder.getFormulaExprTree('=(-(1+2)--@A1:B2 + 5)/2 + -sum(indirect(A5):B10# + B6# + A1:offset(C5, 1, 1)  ,  100) + {1,2,3;4,5,6;7,8,10} + lambda(x,y,z, x*y*z)(sum(1,(1+2)*3),2,lambda(x,y, @offset(A1:B0,x#*y#))(1,2):C20) + sum((1+2%)*30%, 1+2)%', 'mockUnitId', hasFunction, getDefinedNameName, getTable) || {};
+
+                expect(JSON.stringify(exprTreeNode)).toStrictEqual('{"value":"(-(1+2)--@A1:B2 +5)/2 +-sum(indirect(A5):B10#+B6#+A1:offset(C5,1,1),100)+{1,2,3;4,5,6;7,8,10}+lambda(x,y,z,x*y*z)(sum(1,(1+2)*3),2,lambda(x,y,@offset(A1:B0,x#*y#))(1,2):C20)+sum((1+2%)*30%,1+2)%","children":[{"value":"-(1+2)","children":[{"value":"1+2","children":[],"startIndex":-1}],"startIndex":1},{"value":"-@A1:B2 ","children":[{"value":"@A1:B2 ","children":[{"value":"A1:B2 ","children":[],"startIndex":10}],"startIndex":9}],"startIndex":8},{"value":"-sum(indirect(A5):B10#+B6#+A1:offset(C5,1,1),100)","children":[{"value":"indirect(A5):B10#+B6#+A1:offset(C5,1,1)","children":[{"value":"indirect(A5):B10#","children":[{"value":"indirect(A5):B10","children":[{"value":"indirect(A5)","children":[{"value":"A5","children":[],"startIndex":-1}],"startIndex":30}],"startIndex":30}],"startIndex":-1},{"value":"B6#","children":[{"value":"B6","children":[],"startIndex":-1}],"startIndex":51},{"value":"A1:offset(C5,1,1)","children":[{"value":"offset(C5,1,1)","children":[{"value":"C5","children":[],"startIndex":-1}],"startIndex":59}],"startIndex":56}],"startIndex":26}],"startIndex":25},{"value":"{1,2,3;4,5,6;7,8,10}","children":[],"startIndex":-1},{"value":"lambda(x,y,z,x*y*z)(sum(1,(1+2)*3),2,lambda(x,y,@offset(A1:B0,x#*y#))(1,2):C20)","children":[{"value":"sum(1,(1+2)*3)","children":[{"value":"(1+2)*3","children":[],"startIndex":133}],"startIndex":131},{"value":"lambda(x,y,@offset(A1:B0,x#*y#))(1,2):C20","children":[{"value":"lambda(x,y,@offset(A1:B0,x#*y#))(1,2)","children":[],"startIndex":148}],"startIndex":148}],"startIndex":110},{"value":"sum((1+2%)*30%,1+2)%","children":[{"value":"sum((1+2%)*30%,1+2)","children":[{"value":"(1+2%)*30%","children":[],"startIndex":194},{"value":"1+2","children":[],"startIndex":205}],"startIndex":194}],"startIndex":194}],"startIndex":-1}');
+            });
+
+            it('builds ExprTree with correct precedence: normal max', () => {
+                const exprTreeNode = lexerTreeBuilder.getFormulaExprTree('=MAXIFS(D18:D27,E18:E27,ACOT(XLOOKUP(A18:A27, B18:B27, C18:C27)))', 'mockUnitId', hasFunction, getDefinedNameName, getTable) || {};
+
+                expect(JSON.stringify(exprTreeNode)).toStrictEqual('{"value":"MAXIFS(D18:D27,E18:E27,ACOT(XLOOKUP(A18:A27,B18:B27,C18:C27)))","children":[{"value":"D18:D27","children":[],"startIndex":7},{"value":"E18:E27","children":[],"startIndex":15},{"value":"ACOT(XLOOKUP(A18:A27,B18:B27,C18:C27))","children":[{"value":"XLOOKUP(A18:A27,B18:B27,C18:C27)","children":[{"value":"A18:A27","children":[],"startIndex":36},{"value":"B18:B27","children":[],"startIndex":45},{"value":"C18:C27","children":[],"startIndex":54}],"startIndex":28}],"startIndex":23}],"startIndex":0}');
+            });
+
+            it('builds ExprTree with correct precedence: normal let', () => {
+                const exprTreeNode = lexerTreeBuilder.getFormulaExprTree('=let(x,sum(A1,B1,A1:B10),y,offset(A1:B10,0,1),sum(x,y)+x) + 1', 'mockUnitId', hasFunction, getDefinedNameName, getTable) || {};
+
+                expect(JSON.stringify(exprTreeNode)).toStrictEqual('{"value":"let(x,sum(A1,B1,A1:B10),y,offset(A1:B10,0,1),sum(x,y)+x)+1","children":[{"value":"let(x,sum(A1,B1,A1:B10),y,offset(A1:B10,0,1),sum(x,y)+x)","children":[{"value":"sum(A1,B1,A1:B10)","children":[{"value":"A1","children":[],"startIndex":-1},{"value":"B1","children":[],"startIndex":-1},{"value":"A1:B10","children":[],"startIndex":16}],"startIndex":6},{"value":"offset(A1:B10,0,1)","children":[{"value":"A1:B10","children":[],"startIndex":33}],"startIndex":26}],"startIndex":0}],"startIndex":-1}');
+            });
+
+            it('builds ExprTree with defined names', () => {
+                const exprTreeNode = lexerTreeBuilder.getFormulaExprTree('=SUM(defineName1, defineName2) + MAX(defineName3)', 'mockUnitId', hasFunction, getDefinedNameName, getTable) || {};
+
+                expect(JSON.stringify(exprTreeNode)).toStrictEqual('{"value":"SUM(defineName1,defineName2)+MAX(defineName3)","children":[{"value":"SUM(defineName1,defineName2)","children":[{"value":"defineName1","children":[],"startIndex":-1},{"value":"defineName2","children":[],"startIndex":-1}],"startIndex":0},{"value":"MAX(defineName3)","children":[{"value":"defineName3","children":[],"startIndex":-1}],"startIndex":32}],"startIndex":-1}');
+            });
+
+            it('builds ExprTree with super table references', () => {
+                const exprTreeNode = lexerTreeBuilder.getFormulaExprTree('=SUM(Table1[Column1]) + MAX(Table2[ColumnA], Table2[ColumnB])', 'mockUnitId', hasFunction, getDefinedNameName, getTable) || {};
+
+                expect(JSON.stringify(exprTreeNode)).toStrictEqual('{"value":"SUM(Table1[Column1])+MAX(Table2[ColumnA],Table2[ColumnB])","children":[{"value":"SUM(Table1[Column1])","children":[{"value":"Table1[Column1]","children":[],"startIndex":-1}],"startIndex":0},{"value":"MAX(Table2[ColumnA],Table2[ColumnB])","children":[{"value":"Table2[ColumnA]","children":[],"startIndex":-1},{"value":"Table2[ColumnB]","children":[],"startIndex":-1}],"startIndex":23}],"startIndex":-1}');
+            });
+
+            it('builds ExprTree with mixed defined names and table references', () => {
+                const exprTreeNode = lexerTreeBuilder.getFormulaExprTree('=SUM(defineName1, Table1[Column1]) + OFFSET(Table2[ColumnC], defineName2, 0)', 'mockUnitId', hasFunction, getDefinedNameName, getTable) || {};
+
+                expect(JSON.stringify(exprTreeNode)).toStrictEqual('{"value":"SUM(defineName1,Table1[Column1])+OFFSET(Table2[ColumnC],defineName2,0)","children":[{"value":"SUM(defineName1,Table1[Column1])","children":[{"value":"defineName1","children":[],"startIndex":-1},{"value":"Table1[Column1]","children":[],"startIndex":-1}],"startIndex":0},{"value":"OFFSET(Table2[ColumnC],defineName2,0)","children":[{"value":"Table2[ColumnC]","children":[],"startIndex":-1},{"value":"defineName2","children":[],"startIndex":-1}],"startIndex":36}],"startIndex":-1}');
+            });
         });
     });
 });

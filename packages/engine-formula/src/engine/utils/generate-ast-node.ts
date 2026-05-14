@@ -35,7 +35,9 @@ export function generateAstNode(unitId: string, formulaString: string, lexer: Le
     // refOffsetX and refOffsetY are separated by -, otherwise x:1 y:10 will be repeated with x:11 y:0
     let astNode: Nullable<AstRootNode> = FORMULA_AST_CACHE.get(`${unitId}${formulaString}`);
 
-    if (astNode && !isDirtyDefinedForNode(astNode, currentConfigService)) {
+    const noCache = checkIsChangedByDefinedName(unitId, formulaString, currentConfigService);
+
+    if (!noCache && astNode && !isDirtyDefinedForNode(astNode, currentConfigService)) {
         // astNode.setRefOffset(refOffsetX, refOffsetY);
         return astNode;
     }
@@ -56,10 +58,37 @@ export function generateAstNode(unitId: string, formulaString: string, lexer: Le
     }
 
     // astNode.setRefOffset(refOffsetX, refOffsetY);
-
-    FORMULA_AST_CACHE.set(`${unitId}${formulaString}`, astNode);
+    if (!noCache) {
+        FORMULA_AST_CACHE.set(`${unitId}${formulaString}`, astNode);
+    }
 
     return astNode;
+}
+
+// Dirty defined names can make formula AST nodes inaccurate, so when a defined name is modified,
+// related formulas must regenerate AST nodes and cannot use cache.
+function checkIsChangedByDefinedName(unitId: string, formula: string, currentConfigService: IFormulaCurrentConfigService): boolean {
+    const changedDefinedNameMap = currentConfigService.getDirtyDefinedNameMap();
+    const unitDefinedNameMap = changedDefinedNameMap[unitId];
+
+    if (unitDefinedNameMap == null) {
+        return false;
+    }
+
+    const formulaText = normalizeFormulaText(formula);
+    const names = Object.keys(unitDefinedNameMap);
+    for (let i = 0, len = names.length; i < len; i++) {
+        // Dirty defined-name entries use the changed formula text as the key.
+        if (normalizeFormulaText(names[i]) === formulaText) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function normalizeFormulaText(formula: string): string {
+    return formula.startsWith('=') ? formula.slice(1) : formula;
 }
 
 function isDirtyDefinedForNode(node: BaseAstNode, currentConfigService: IFormulaCurrentConfigService) {

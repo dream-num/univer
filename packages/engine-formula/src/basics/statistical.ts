@@ -1151,6 +1151,8 @@ function isRowHidden(rowData: IObjectArrayPrimitiveType<Partial<IRowData>>, rowI
     return row.hd === BooleanNumber.TRUE;
 }
 
+const NESTED_AGGREGATE_FORMULA_CACHE = new WeakMap<FormulaDataModel, Map<string, boolean>>();
+
 // Check if the cell is a nested SUBTOTAL or AGGREGATE result
 function isNestedAggregateOrSubtotal(
     cellData: ObjectMatrix<ICellData>,
@@ -1161,14 +1163,43 @@ function isNestedAggregateOrSubtotal(
     formulaDataModel: FormulaDataModel
 ): boolean {
     const cellValue = cellData.getValue(rowIndex, columnIndex);
-    if (cellValue?.f || cellValue?.si) {
-        const formulaString = formulaDataModel.getFormulaStringByCell(rowIndex, columnIndex, sheetId, unitId);
-        // match 'SUBTOTAL(' or 'AGGREGATE(' for simple check
-        if (formulaString && (formulaString.indexOf(`${FUNCTION_NAMES_MATH.SUBTOTAL}(`) > -1 || formulaString.indexOf(`${FUNCTION_NAMES_MATH.AGGREGATE}(`) > -1)) {
-            return true;
-        }
+
+    if (!cellValue?.f && !cellValue?.si) {
+        return false;
     }
-    return false;
+
+    if (typeof cellValue.f === 'string') {
+        return hasNestedAggregateFormula(cellValue.f);
+    }
+
+    if (cellValue.si == null) {
+        return false;
+    }
+
+    let cache = NESTED_AGGREGATE_FORMULA_CACHE.get(formulaDataModel);
+    if (cache == null) {
+        cache = new Map<string, boolean>();
+        NESTED_AGGREGATE_FORMULA_CACHE.set(formulaDataModel, cache);
+    }
+
+    const cacheKey = `${unitId}\0${sheetId}\0${cellValue.si}`;
+    const cached = cache.get(cacheKey);
+    if (cached != null) {
+        return cached;
+    }
+
+    const formulaString = formulaDataModel.getFormulaStringByCell(rowIndex, columnIndex, sheetId, unitId);
+    const result = hasNestedAggregateFormula(formulaString);
+    cache.set(cacheKey, result);
+
+    return result;
+}
+
+function hasNestedAggregateFormula(formulaString: Nullable<string>): boolean {
+    return !!formulaString && (
+        formulaString.indexOf(`${FUNCTION_NAMES_MATH.SUBTOTAL}(`) > -1 ||
+        formulaString.indexOf(`${FUNCTION_NAMES_MATH.AGGREGATE}(`) > -1
+    );
 }
 
 export type modeSnglValueCountMapType = Record<number, {
@@ -1305,47 +1336,57 @@ export function getAggregateResult(
         }
     }
 
+    let result: BaseValueObject;
+
     switch (type) {
         case AggregateFunctionType.AVERAGE:
-            if (n === 0) return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
-            return NumberValueObject.create(sum / n);
+            result = n === 0 ? ErrorValueObject.create(ErrorType.DIV_BY_ZERO) : NumberValueObject.create(sum / n);
+            break;
         case AggregateFunctionType.COUNT:
-            return NumberValueObject.create(count);
+            result = NumberValueObject.create(count);
+            break;
         case AggregateFunctionType.COUNTA:
-            return NumberValueObject.create(counta);
+            result = NumberValueObject.create(counta);
+            break;
         case AggregateFunctionType.MAX:
-            return NumberValueObject.create(max);
+            result = NumberValueObject.create(max);
+            break;
         case AggregateFunctionType.MIN:
-            return NumberValueObject.create(min);
+            result = NumberValueObject.create(min);
+            break;
         case AggregateFunctionType.PRODUCT:
-            return NumberValueObject.create(n === 0 ? 0 : product);
+            result = NumberValueObject.create(n === 0 ? 0 : product);
+            break;
         case AggregateFunctionType.STDEV:
         case AggregateFunctionType.STDEV_S:
-            if (n < 2) return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
-            return createNewArray([valueObjects], 1, n).std(1);
+            result = n < 2 ? ErrorValueObject.create(ErrorType.DIV_BY_ZERO) : createNewArray([valueObjects], 1, n).std(1);
+            break;
         case AggregateFunctionType.STDEVP:
         case AggregateFunctionType.STDEV_P:
-            if (n === 0) return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
-            return createNewArray([valueObjects], 1, n).std();
+            result = n === 0 ? ErrorValueObject.create(ErrorType.DIV_BY_ZERO) : createNewArray([valueObjects], 1, n).std();
+            break;
         case AggregateFunctionType.SUM:
-            return NumberValueObject.create(sum);
+            result = NumberValueObject.create(sum);
+            break;
         case AggregateFunctionType.VAR:
         case AggregateFunctionType.VAR_S:
-            if (n < 2) return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
-            return createNewArray([valueObjects], 1, n).var(1);
+            result = n < 2 ? ErrorValueObject.create(ErrorType.DIV_BY_ZERO) : createNewArray([valueObjects], 1, n).var(1);
+            break;
         case AggregateFunctionType.VARP:
         case AggregateFunctionType.VAR_P:
-            if (n === 0) return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
-            return createNewArray([valueObjects], 1, n).var();
+            result = n === 0 ? ErrorValueObject.create(ErrorType.DIV_BY_ZERO) : createNewArray([valueObjects], 1, n).var();
+            break;
         case AggregateFunctionType.MEDIAN:
-            if (n === 0) return ErrorValueObject.create(ErrorType.NUM);
-            return getMedianResult(valueObjects.map((vo) => +vo.getValue()));
+            result = n === 0 ? ErrorValueObject.create(ErrorType.NUM) : getMedianResult(valueObjects.map((vo) => +vo.getValue()));
+            break;
         case AggregateFunctionType.MODE_SNGL:
-            if (valueCountOrder === 0 || valueMaxCount === 1) return ErrorValueObject.create(ErrorType.NA);
-            return getModeSnglResult(valueCountMap, valueMaxCount);
+            result = valueCountOrder === 0 || valueMaxCount === 1 ? ErrorValueObject.create(ErrorType.NA) : getModeSnglResult(valueCountMap, valueMaxCount);
+            break;
         default:
-            return ErrorValueObject.create(ErrorType.VALUE);
+            result = ErrorValueObject.create(ErrorType.VALUE);
     }
+
+    return result;
 }
 
 // eslint-disable-next-line max-lines-per-function,complexity

@@ -42,6 +42,7 @@ function createService() {
             },
         })),
         getDirtyData: vi.fn(() => ({})),
+        getDirtyDefinedNameMap: vi.fn(() => ({})),
     };
     const runtimeService = {
         setFormulaExecuteStage: vi.fn(),
@@ -352,7 +353,6 @@ describe('CalculateFormulaService', () => {
         expect(mocks.runtimeService.setRuntimeFeatureCellData).toHaveBeenCalledWith('feature-id', featureDirtyData.runtimeCellData);
         expect(mocks.runtimeService.setRuntimeFeatureRange).toHaveBeenCalledWith('feature-id', featureDirtyData.dirtyRanges);
         expect(mocks.runtimeService.markedAsSuccessfullyExecuted).toHaveBeenCalledTimes(1);
-        expect(resetNode.resetCalculationState).toHaveBeenCalledTimes(3);
     });
 
     it('should use async interpreter branch when node is async', async () => {

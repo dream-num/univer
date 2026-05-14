@@ -35,6 +35,7 @@ export type {
     IUnitImageFormulaDataType,
     IUnitSheetNameMap,
 } from './basics/common';
+
 export { BooleanValue } from './basics/common';
 export { type IOtherFormulaData } from './basics/common';
 export type { IExprTreeNode, ISuperTable, IUnitRowData } from './basics/common';
@@ -44,6 +45,7 @@ export { ERROR_TYPE_SET, ErrorType } from './basics/error-type';
 export { type ISheetFormulaError } from './basics/error-type';
 export { FunctionType, type IFunctionInfo, type IFunctionParam } from './basics/function';
 export { type IFunctionNames } from './basics/function';
+export { CELL_INVERTED_INDEX_CACHE } from './basics/inverted-index-cache';
 export { includeFormulaLexerToken, isFormulaLexerToken, normalizeSheetName } from './basics/match-token';
 export { matchRefDrawToken } from './basics/match-token';
 export { isReferenceString } from './basics/regex';
@@ -87,7 +89,7 @@ export { type ISetImageFormulaDataMutationParams, SetImageFormulaDataMutation } 
 export { type IRemoveOtherFormulaMutationParams, type ISetOtherFormulaMutationParams, RemoveOtherFormulaMutation, SetOtherFormulaMutation } from './commands/mutations/set-other-formula.mutation';
 export { RemoveSuperTableMutation, SetSuperTableMutation, SetSuperTableOptionMutation } from './commands/mutations/set-super-table.mutation';
 export type { ISetSuperTableMutationParam, ISetSuperTableMutationSearchParam } from './commands/mutations/set-super-table.mutation';
-export { ENGINE_FORMULA_CYCLE_REFERENCE_COUNT, ENGINE_FORMULA_PLUGIN_CONFIG_KEY, ENGINE_FORMULA_RETURN_DEPENDENCY_TREE, type IUniverEngineFormulaConfig } from './config/config';
+export { DEFAULT_CYCLE_REFERENCE_COUNT, ENGINE_FORMULA_CYCLE_REFERENCE_COUNT, ENGINE_FORMULA_PLUGIN_CONFIG_KEY, ENGINE_FORMULA_RETURN_DEPENDENCY_TREE, type IUniverEngineFormulaConfig } from './config/config';
 export { CalculateController } from './controllers/calculate.controller';
 export { Lexer } from './engine/analysis/lexer';
 export { LexerNode } from './engine/analysis/lexer-node';
@@ -111,7 +113,7 @@ export { FormulaDependencyGenerator, IFormulaDependencyGenerator } from './engin
 export { generateRandomDependencyTreeId } from './engine/dependency/formula-dependency';
 export { Interpreter } from './engine/interpreter/interpreter';
 export { BaseReferenceObject, type FunctionVariantType } from './engine/reference-object/base-reference-object';
-export { AsyncArrayObject, AsyncObject } from './engine/reference-object/base-reference-object';
+export { AsyncArrayObject, AsyncObject, FORMULA_REF_TO_ARRAY_CACHE } from './engine/reference-object/base-reference-object';
 export { RangeReferenceObject } from './engine/reference-object/range-reference-object';
 export { generateExecuteAstNodeData } from './engine/utils/ast-node-tool';
 export { extractFormulaError } from './engine/utils/cell';

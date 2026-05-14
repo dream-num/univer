@@ -33,7 +33,7 @@ function createTree(treeId: number, row: number, column: number) {
                 startRow: row,
                 startColumn: column,
                 endRow: row,
-                endColumn: column,
+                endColumn: column + 1,
             },
         },
     ];
@@ -41,10 +41,34 @@ function createTree(treeId: number, row: number, column: number) {
 }
 
 describe('DependencyManagerService', () => {
-    it('should track formula dependencies and clear by location', () => {
+    it('should track formula dependencies and remove their search cache by location', () => {
         const service = new DependencyManagerService();
         const treeA = createTree(1, 0, 0);
         const treeB = createTree(2, 1, 1);
+        const searchA = [
+            {
+                unitId: 'unit-1',
+                sheetId: 'sheet-1',
+                range: {
+                    startRow: 0,
+                    startColumn: 0,
+                    endRow: 0,
+                    endColumn: 1,
+                },
+            },
+        ];
+        const searchB = [
+            {
+                unitId: 'unit-1',
+                sheetId: 'sheet-1',
+                range: {
+                    startRow: 1,
+                    startColumn: 1,
+                    endRow: 1,
+                    endColumn: 2,
+                },
+            },
+        ];
 
         service.addFormulaDependency('unit-1', 'sheet-1', 0, 0, treeA);
         service.addFormulaDependency('unit-1', 'sheet-1', 1, 1, treeB);
@@ -53,15 +77,17 @@ describe('DependencyManagerService', () => {
 
         expect(service.getFormulaDependency('unit-1', 'sheet-1', 0, 0)).toBe(1);
         expect(service.getFormulaDependency('unit-1', 'sheet-1', 1, 1)).toBe(2);
-        expect(service.getTreeById(1)).toBe(treeA);
-        expect(service.getTreeById(2)).toBe(treeB);
+        expect(service.searchDependency(searchA)).toEqual(new Set([1]));
+        expect(service.searchDependency(searchB)).toEqual(new Set([2]));
 
         service.removeFormulaDependency('unit-1', 'sheet-1', 0, 0);
         expect(service.getFormulaDependency('unit-1', 'sheet-1', 0, 0)).toBeUndefined();
-        expect(service.getTreeById(1)).toBeUndefined();
+        expect(service.searchDependency(searchA)).toEqual(new Set());
+        expect(service.searchDependency(searchB)).toEqual(new Set([2]));
 
         service.clearFormulaDependency('unit-1', 'sheet-1');
-        expect(service.getTreeById(2)).toBeUndefined();
+        expect(service.getFormulaDependency('unit-1', 'sheet-1', 1, 1)).toBeUndefined();
+        expect(service.searchDependency(searchB)).toEqual(new Set());
     });
 
     it('should manage other-formula dependency matrices and main-data flag', () => {
@@ -95,6 +121,18 @@ describe('DependencyManagerService', () => {
     it('should clear dependencies by defined name', () => {
         const service = new DependencyManagerService();
         const tree = createTree(30, 3, 3);
+        const search = [
+            {
+                unitId: 'unit-1',
+                sheetId: 'sheet-1',
+                range: {
+                    startRow: 3,
+                    startColumn: 3,
+                    endRow: 3,
+                    endColumn: 4,
+                },
+            },
+        ];
         service.addFormulaDependency('unit-1', 'sheet-1', 3, 3, tree);
         service.addDependencyRTreeCache(tree);
 
@@ -103,63 +141,33 @@ describe('DependencyManagerService', () => {
         } as AstRootNode;
         service.addFormulaDependencyByDefinedName(tree, node);
 
+        expect(service.searchDependency(search)).toEqual(new Set([30]));
+
         service.removeFormulaDependencyByDefinedName('unit-1', 'MY_NAME');
-        expect(service.getTreeById(30)).toBeUndefined();
+        expect(service.searchDependency(search)).toEqual(new Set());
     });
 
-    it('should build dependency graph and reverse dependencies', () => {
-        const service = new DependencyManagerService();
-        const dependantTree = createTree(40, 0, 0);
-        dependantTree.rangeList = [
-            {
-                unitId: 'unit-1',
-                sheetId: 'sheet-1',
-                range: {
-                    startRow: 0,
-                    startColumn: 1,
-                    endRow: 0,
-                    endColumn: 1,
-                },
-            },
-        ];
-
-        const sourceTree = createTree(41, 0, 1);
-
-        service.addDependencyRTreeCache(dependantTree);
-        service.addDependencyRTreeCache(sourceTree);
-
-        service.buildDependencyTree([dependantTree], [dependantTree]);
-
-        expect(dependantTree.children.has(41)).toBe(true);
-        expect(sourceTree.parents.has(40)).toBe(true);
-    });
-
-    it('should clear parent-child links when tree is removed', () => {
-        const service = new DependencyManagerService();
-        const parent = createTree(50, 5, 5);
-        const child = createTree(51, 5, 6);
-        parent.pushChildren(child);
-
-        service.addDependencyRTreeCache(parent);
-        service.addDependencyRTreeCache(child);
-
-        service.clearDependencyForTree(child);
-        expect(parent.children.has(51)).toBe(false);
-        expect(child.rangeList).toEqual([]);
-    });
-
-    it('should support tree id allocation, dirty state update and reset', () => {
+    it('should support tree id allocation and reset', () => {
         const service = new DependencyManagerService();
         expect(service.getLastTreeId()).toBe(0);
         expect(service.getLastTreeId()).toBe(1);
 
         const tree = createTree(60, 6, 6);
         service.addDependencyRTreeCache(tree);
-        service.updateDependencyTreeDirtyState(60, true);
-        expect(service.getTreeById(60)?.isDirty).toBe(true);
 
         service.reset();
-        expect(service.getTreeById(60)).toBeUndefined();
+        expect(service.searchDependency([
+            {
+                unitId: 'unit-1',
+                sheetId: 'sheet-1',
+                range: {
+                    startRow: 6,
+                    startColumn: 6,
+                    endRow: 6,
+                    endColumn: 7,
+                },
+            },
+        ])).toEqual(new Set());
         expect(service.getLastTreeId()).toBe(0);
     });
 });

@@ -123,6 +123,10 @@ export class RegisterOtherFormulaService extends Disposable {
             };
 
             this._commandService.executeCommand(SetOtherFormulaMutation.id, params, { onlyLocal: true }).then(() => {
+                if (this._disposed) {
+                    return;
+                }
+
                 this._commandService.executeCommand(
                     OtherFormulaMarkDirty.id,
                     { [unitId]: { [subUnitId]: { [formulaId]: true } } },

@@ -30,7 +30,7 @@ export function useRTL() {
     }, [localeService]);
 
     const onSelect = () => {
-        const current = document.documentElement.getAttribute('dir');
+        const current = localeService.getDirection();
         const nextDirection = current === 'rtl' ? 'ltr' : 'rtl';
 
         localeService.setDirection(nextDirection);

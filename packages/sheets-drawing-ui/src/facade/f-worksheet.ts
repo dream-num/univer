@@ -21,7 +21,7 @@ import type { IFComponentKey } from '@univerjs/sheets-ui/facade';
 import type { FRange } from '@univerjs/sheets/facade';
 import type { ISaveCellImagesOptions } from './f-range';
 import { SheetSkeletonService } from '@univerjs/sheets';
-import { ISheetDrawingService, RemoveSheetDrawingCommand, SetSheetDrawingCommand, transformToAxisAlignPosition, transformToDrawingPosition } from '@univerjs/sheets-drawing';
+import { ISheetDrawingService, SetSheetDrawingCommand, transformToAxisAlignPosition, transformToDrawingPosition } from '@univerjs/sheets-drawing';
 import { FileNamePart, IBatchSaveImagesService, SheetCanvasFloatDomManagerService } from '@univerjs/sheets-drawing-ui';
 import { transformComponentKey } from '@univerjs/sheets-ui/facade';
 import { FWorksheet } from '@univerjs/sheets/facade';
@@ -580,28 +580,7 @@ export class FWorksheetDrawingUIMixin extends FWorksheet implements IFWorksheetD
 
     override removeFloatDom(id: string): this {
         const floatDomService = this._injector.get(SheetCanvasFloatDomManagerService);
-        const info = floatDomService.getFloatDomInfo(id);
-        if (!info) return this;
-
-        const { unitId, subUnitId } = info;
-        const drawingService = this._injector.get(ISheetDrawingService);
-        const drawing = drawingService.getDrawingByParam({
-            unitId,
-            subUnitId,
-            drawingId: id,
-        });
-
-        if (!drawing) return this;
-
-        // Then delete it
-        const res = this._commandService.syncExecuteCommand(RemoveSheetDrawingCommand.id, {
-            unitId,
-            drawings: [drawing],
-        });
-
-        if (!res) {
-            throw new Error('removeFloatDom failed');
-        }
+        floatDomService.removeFloatDom(id);
         return this;
     }
 

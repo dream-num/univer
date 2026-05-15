@@ -751,6 +751,10 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         }
     }
 
+    removeFloatDom(id: string, removeDrawing = true) {
+        this._removeDom(id, removeDrawing);
+    }
+
     // eslint-disable-next-line max-lines-per-function, complexity
     addFloatDomToRange(range: IRange, config: ICanvasFloatDom, domAnchor: Partial<IDOMAnchor>, propId?: string) {
         const target = getSheetCommandTarget(this._univerInstanceService, {
@@ -908,6 +912,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 domAnchor,
                 unitId,
                 subUnitId,
+                id: drawingId,
             } as unknown as ICanvasFloatDomInfo;
 
             const initedPosition = calcSheetFloatDomPosition(domRect, renderObject.renderUnit.scene, skeletonParam.skeleton, target.worksheet, floatDomInfo);
@@ -1149,6 +1154,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 // position$,
                 unitId,
                 subUnitId,
+                id: drawingId,
                 boundsOfViewArea,
                 domAnchor: domLayoutParam,
                 scrollDirectionResponse: ScrollDirectionResponse.HORIZONTAL,

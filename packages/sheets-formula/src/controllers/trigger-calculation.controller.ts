@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IUnitRange, Nullable } from '@univerjs/core';
+import type { ICommandInfo, IUnitRange, Nullable, Workbook } from '@univerjs/core';
 import type {
     IDirtyUnitFeatureMap,
     IDirtyUnitOtherFormulaMap,
@@ -26,7 +26,7 @@ import type {
 } from '@univerjs/engine-formula';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import type { IUniverSheetsFormulaBaseConfig } from '../config/config';
-import { Disposable, ICommandService, IConfigService, ILogService, Inject, LocaleService } from '@univerjs/core';
+import { Disposable, ICommandService, IConfigService, ILogService, Inject, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import {
     ENGINE_FORMULA_CYCLE_REFERENCE_COUNT,
     ENGINE_FORMULA_RETURN_DEPENDENCY_TREE,
@@ -136,6 +136,7 @@ export class TriggerCalculationController extends Disposable {
 
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IActiveDirtyManagerService private readonly _activeDirtyManagerService: IActiveDirtyManagerService,
         @ILogService private readonly _logService: ILogService,
         @IConfigService private readonly _configService: IConfigService,
@@ -147,7 +148,14 @@ export class TriggerCalculationController extends Disposable {
 
         this._commandExecutedListener();
         this._initialExecuteFormulaProcessListener();
+
         this._initialExecuteFormula();
+
+        this.disposeWithMe(
+            this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe(() => {
+                this._initialExecuteFormula();
+            })
+        );
     }
 
     override dispose(): void {

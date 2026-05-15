@@ -57,7 +57,7 @@ export function DefaultMenu({
             overlay={(
                 <div className="univer-grid univer-gap-1 univer-px-2 univer-py-1">
                     {ribbon.map((group) => {
-                        const Icon = iconMap[group.key as RibbonPosition];
+                        const Icon = iconMap[group.key as RibbonPosition] ?? MoreFunctionIcon;
 
                         return (
                             <a

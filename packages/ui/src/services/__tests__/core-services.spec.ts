@@ -19,7 +19,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { MenuItemType } from '../menu/menu';
 import { MenuManagerService } from '../menu/menu-manager.service';
-import { RibbonPosition, RibbonStartGroup } from '../menu/types';
+import { MenuManagerPosition, RibbonPosition, RibbonStartGroup } from '../menu/types';
 import { UIPartsService } from '../parts/parts.service';
 import { DesktopRibbonService } from '../ribbon/ribbon.service';
 
@@ -69,9 +69,26 @@ describe('MenuManagerService', () => {
             },
         });
 
+        service.appendRootMenu({
+            [MenuManagerPosition.RIBBON]: {
+                contextualTab: {
+                    order: 99,
+                    contextual: true,
+                    contextualGroup: {
+                        order: 0,
+                        customItem: {
+                            order: 1,
+                            menuItemFactory: customFactory,
+                        },
+                    },
+                },
+            },
+        });
+
         const historyMenu = service.getMenuByPositionKey(RibbonStartGroup.HISTORY);
         const flatHistory = service.getFlatMenuByPositionKey(RibbonStartGroup.HISTORY);
         const customRoot = service.getMenuByPositionKey('customRoot');
+        const ribbonMenu = service.getMenuByPositionKey(MenuManagerPosition.RIBBON);
         const mergedCustomItem = flatHistory.find((item) => item.item?.id === 'customItem');
 
         expect(changed).toHaveBeenCalled();
@@ -80,6 +97,7 @@ describe('MenuManagerService', () => {
         expect(flatHistory.length).toBeGreaterThanOrEqual(historyMenu.length);
         expect(mergedCustomItem?.item?.tooltip).toBe('tooltip-from-config');
         expect(customRoot.length).toBe(1);
+        expect(ribbonMenu.find((item) => item.key === 'contextualTab')?.contextual).toBe(true);
 
         const complete = vi.fn();
         service.menuChanged$.subscribe({ complete });
@@ -164,6 +182,118 @@ describe('DesktopRibbonService', () => {
         ];
         menuChanged$.next();
         expect(currentRibbon[0].key).toBe('plain');
+
+        service.dispose();
+    });
+
+    it('should show, activate, and restore contextual ribbon tabs', () => {
+        const ribbonData: any[] = [
+            {
+                key: RibbonPosition.START,
+                order: 0,
+                children: [
+                    {
+                        key: RibbonStartGroup.HISTORY,
+                        order: 0,
+                        children: [
+                            {
+                                key: 'home-child',
+                                order: 0,
+                                item: {
+                                    id: 'home-child',
+                                    type: MenuItemType.BUTTON,
+                                },
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                key: RibbonPosition.INSERT,
+                order: 1,
+                children: [
+                    {
+                        key: 'insert-group',
+                        order: 0,
+                        children: [
+                            {
+                                key: 'insert-child',
+                                order: 0,
+                                item: {
+                                    id: 'insert-child',
+                                    type: MenuItemType.BUTTON,
+                                },
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                key: 'contextual.shape',
+                order: 100,
+                contextual: true,
+                children: [
+                    {
+                        key: 'contextual-group',
+                        order: 0,
+                        children: [
+                            {
+                                key: 'contextual-child',
+                                order: 0,
+                                item: {
+                                    id: 'contextual-child',
+                                    type: MenuItemType.BUTTON,
+                                },
+                            },
+                        ],
+                    },
+                ],
+            },
+        ];
+
+        const menuChanged$ = new Subject<void>();
+        const focused$ = new Subject<any>();
+        const menuManagerService = {
+            menuChanged$,
+            getMenuByPositionKey: vi.fn(() => ribbonData),
+        };
+        const univerInstanceService = {
+            focused$,
+        };
+
+        const service = new DesktopRibbonService(menuManagerService as any, univerInstanceService as any);
+
+        let activatedTab = '';
+        let currentRibbon: any[] = [];
+
+        service.activatedTab$.subscribe((v) => (activatedTab = v));
+        service.ribbon$.subscribe((v) => (currentRibbon = v));
+
+        expect(currentRibbon.map((item) => item.key)).toEqual([RibbonPosition.START, RibbonPosition.INSERT]);
+
+        service.setActivatedTab(RibbonPosition.INSERT);
+        service.showContextualTab('contextual.shape', { activate: true });
+
+        expect(currentRibbon.map((item) => item.key)).toEqual([
+            RibbonPosition.START,
+            RibbonPosition.INSERT,
+            'contextual.shape',
+        ]);
+        expect(activatedTab).toBe('contextual.shape');
+
+        service.hideContextualTab('contextual.shape');
+
+        expect(currentRibbon.map((item) => item.key)).toEqual([RibbonPosition.START, RibbonPosition.INSERT]);
+        expect(activatedTab).toBe(RibbonPosition.INSERT);
+
+        service.showContextualTab('contextual.shape');
+        expect(activatedTab).toBe(RibbonPosition.INSERT);
+
+        service.setActivatedTab('contextual.shape');
+        service.hideAllContextualTabs();
+
+        expect(currentRibbon.map((item) => item.key)).toEqual([RibbonPosition.START, RibbonPosition.INSERT]);
+        expect(activatedTab).toBe(RibbonPosition.INSERT);
 
         service.dispose();
     });

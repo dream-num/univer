@@ -138,4 +138,43 @@ describe('marker extension', () => {
         marker.draw(ctx, { scaleX: 1, scaleY: 1 } as any, skeleton, [{ startRow: 2, endRow: 2, startColumn: 2, endColumn: 2 }]);
         expect(ctx.fill).toHaveBeenCalledTimes(1);
     });
+
+    it('only visits diff range cells while drawing incremental scroll markers', () => {
+        const marker = new Marker();
+        const ctx = createCtx();
+
+        const worksheet = {
+            getRowVisible: vi.fn(() => true),
+            getColVisible: vi.fn(() => true),
+            getCell: vi.fn((row: number) => row === 5
+                ? {
+                    markers: {
+                        tr: { size: 2, color: '#f00' },
+                    },
+                }
+                : undefined),
+        };
+        const skeleton = {
+            worksheet,
+            rowColumnSegment: { startRow: 0, endRow: 9, startColumn: 0, endColumn: 0 },
+            getCellWithCoordByIndex: vi.fn((row: number) => createCellInfo({
+                mergeInfo: {
+                    startRow: row,
+                    endRow: row,
+                    startColumn: 0,
+                    endColumn: 0,
+                    startX: 0,
+                    startY: row * 20,
+                    endX: 10,
+                    endY: row * 20 + 20,
+                },
+            })),
+        } as any;
+
+        marker.draw(ctx, { scaleX: 1, scaleY: 1 } as any, skeleton, [{ startRow: 5, endRow: 5, startColumn: 0, endColumn: 0 }]);
+
+        expect(worksheet.getCell).toHaveBeenCalledTimes(1);
+        expect(worksheet.getCell).toHaveBeenCalledWith(5, 0);
+        expect(ctx.fill).toHaveBeenCalledTimes(1);
+    });
 });

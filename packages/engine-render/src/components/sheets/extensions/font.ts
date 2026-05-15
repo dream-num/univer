@@ -137,6 +137,13 @@ export class Font extends SheetExtension {
 
         const scale = this._getScale(parentScale);
         const { viewRanges = [], checkOutOfViewBound } = moreBoundsInfo;
+        const lastRowIndex = spreadsheetSkeleton.getRowCount() - 1;
+        const lastColIndex = spreadsheetSkeleton.getColumnCount() - 1;
+        const expandedViewRanges = viewRanges.map((range) => clampRange({
+            ...range,
+            startColumn: range.startColumn - EXPAND_SIZE_FOR_RENDER_OVERFLOW,
+            endColumn: range.endColumn + EXPAND_SIZE_FOR_RENDER_OVERFLOW,
+        }, lastRowIndex, lastColIndex));
         const renderFontContext = {
             ctx,
             scale,
@@ -144,7 +151,7 @@ export class Font extends SheetExtension {
             columnTotalWidth,
             // columnWidthAccumulation,
             rowTotalHeight,
-            viewRanges,
+            viewRanges: expandedViewRanges,
             checkOutOfViewBound: checkOutOfViewBound || true,
             diffRanges,
             spreadsheetSkeleton,
@@ -154,15 +161,8 @@ export class Font extends SheetExtension {
         const uniqueMergeRanges: IRange[] = [];
         const mergeRangeIDSet = new Set();
 
-        const lastRowIndex = spreadsheetSkeleton.getRowCount() - 1;
-        const lastColIndex = spreadsheetSkeleton.getColumnCount() - 1;
-
         // Currently, viewRanges has only one range.
-        viewRanges.forEach((range) => {
-            range.startColumn -= EXPAND_SIZE_FOR_RENDER_OVERFLOW;
-            range.endColumn += EXPAND_SIZE_FOR_RENDER_OVERFLOW;
-            range = clampRange(range, lastRowIndex, lastColIndex);
-
+        expandedViewRanges.forEach((range) => {
             // collect unique merge ranges intersect with view range.
             // The ranges in mergeRanges must be unique. Otherwise, the font will render, text redrawing causes jagged edges or artifacts.
             const intersectMergeRangesWithViewRanges = spreadsheetSkeleton.worksheet.getMergedCellRange(range.startRow, range.startColumn, range.endRow, range.endColumn);
@@ -180,7 +180,9 @@ export class Font extends SheetExtension {
                     return;
                 }
                 const cellInfo = spreadsheetSkeleton.getCellWithCoordByIndex(row, col, false);
-                if (!cellInfo) return;
+                if (!cellInfo) {
+                    return;
+                }
 
                 renderFontContext.cellInfo = cellInfo;
                 this._renderFontEachCell(renderFontContext, row, col, fontMatrix);

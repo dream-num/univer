@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellDataForSheetInterceptor, IScale } from '@univerjs/core';
+import type { ICellDataForSheetInterceptor, IRange, IScale } from '@univerjs/core';
 import type { SpreadsheetSkeleton, UniverRenderingContext } from '@univerjs/engine-render';
 import type { ICellPermission } from '@univerjs/sheets';
 import { Range } from '@univerjs/core';
@@ -71,7 +71,8 @@ export abstract class RangeProtectionRenderExtension extends SheetExtension {
     override draw(
         ctx: UniverRenderingContext,
         _parentScale: IScale,
-        spreadsheetSkeleton: SpreadsheetSkeleton
+        spreadsheetSkeleton: SpreadsheetSkeleton,
+        diffRanges?: IRange[]
     ) {
         const { worksheet } = spreadsheetSkeleton;
 
@@ -83,33 +84,36 @@ export abstract class RangeProtectionRenderExtension extends SheetExtension {
             this._pattern = ctx.createPattern(this._img, 'repeat');
         }
         this.renderCache.clear();
-        Range.foreach(spreadsheetSkeleton.rowColumnSegment, (row, col) => {
-            if (!worksheet.getRowVisible(row) || !worksheet.getColVisible(col)) {
-                return;
-            }
-            const { selectionProtection = [] } = worksheet.getCell(row, col) as IRangeProtectionRenderCellData || {};
-            if (!this._pattern) {
-                return;
-            }
-
-            ctx.fillStyle = this._pattern;
-
-            selectionProtection.forEach((config) => {
-                if (!config.ruleId) {
+        const renderRanges = diffRanges?.length ? diffRanges : [spreadsheetSkeleton.rowColumnSegment];
+        renderRanges.forEach((range) => {
+            Range.foreach(range, (row, col) => {
+                if (!worksheet.getRowVisible(row) || !worksheet.getColVisible(col)) {
+                    return;
+                }
+                const { selectionProtection = [] } = worksheet.getCell(row, col) as IRangeProtectionRenderCellData || {};
+                if (!this._pattern) {
                     return;
                 }
 
-                if (this.shouldRender(config)) {
-                    if (this.renderCache.has(config.ruleId)) {
+                ctx.fillStyle = this._pattern;
+
+                selectionProtection.forEach((config) => {
+                    if (!config.ruleId) {
                         return;
                     }
-                    this.renderCache.add(config.ruleId);
-                    config.ranges!.forEach((range) => {
-                        const start = spreadsheetSkeleton.getCellWithCoordByIndex(range.startRow, range.startColumn, false);
-                        const end = spreadsheetSkeleton.getCellWithCoordByIndex(range.endRow, range.endColumn, false);
-                        ctx.fillRect(start.startX, start.startY, end.endX - start.startX, end.endY - start.startY);
-                    });
-                }
+
+                    if (this.shouldRender(config)) {
+                        if (this.renderCache.has(config.ruleId)) {
+                            return;
+                        }
+                        this.renderCache.add(config.ruleId);
+                        config.ranges!.forEach((range) => {
+                            const start = spreadsheetSkeleton.getCellWithCoordByIndex(range.startRow, range.startColumn, false);
+                            const end = spreadsheetSkeleton.getCellWithCoordByIndex(range.endRow, range.endColumn, false);
+                            ctx.fillRect(start.startX, start.startY, end.endX - start.startX, end.endY - start.startY);
+                        });
+                    }
+                });
             });
         });
         ctx.restore();

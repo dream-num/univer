@@ -600,4 +600,26 @@ describe('font extension', () => {
         expect(ctx.save).toHaveBeenCalled();
         expect(ctx.restore).toHaveBeenCalled();
     });
+
+    it('does not mutate shared view ranges when expanding text overflow bounds', () => {
+        const font = new Font() as any;
+        const ctx = createCtx();
+        const spreadsheetSkeleton = createSpreadsheetSkeleton();
+        const fontMatrix = new ObjectMatrix<any>();
+        fontMatrix.setValue(0, 0, createFontCache());
+        spreadsheetSkeleton.stylesCache = { fontMatrix };
+        spreadsheetSkeleton.columnTotalWidth = 120;
+        spreadsheetSkeleton.rowTotalHeight = 60;
+        vi.spyOn(font, '_renderFontEachCell').mockReturnValue(true);
+
+        const viewRanges = [{ startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 }];
+
+        font.draw(ctx, { scaleX: 1, scaleY: 1 } as any, spreadsheetSkeleton, [], {
+            viewRanges,
+            checkOutOfViewBound: true,
+            viewportKey: 'viewMain',
+        } as any);
+
+        expect(viewRanges).toEqual([{ startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 }]);
+    });
 });

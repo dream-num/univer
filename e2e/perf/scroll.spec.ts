@@ -17,6 +17,7 @@
 /* eslint-disable no-console */
 import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
+import { sheetData as denseTextData } from '../__testing__/dense-text-scroll';
 import { sheetData as emptySheetData } from '../__testing__/emptysheet';
 import { sheetData as freezeData } from '../__testing__/freezesheet';
 import { sheetData as mergeCellData } from '../__testing__/mergecell';
@@ -29,7 +30,7 @@ export interface IFPSData {
 }
 
 interface IJsonObject {
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 interface IMeasureFPSParam { testDuration: number; deltaX: number; deltaY: number }
@@ -49,16 +50,16 @@ interface IFPSResult {
  * @param deltaY scroll step of Y
  * @returns {Promise<IFPSResult>} avg FPS value of test time.
  */
-async function measureFPS(page: Page, testDuration = 5, deltaX: number, deltaY: number) {
+async function measureFPS(page: Page, testDuration: number, deltaX: number, deltaY: number) {
     const fpsCounterPromise = await page.evaluate(({ testDuration, deltaX, deltaY }: IMeasureFPSParam) => {
-        let intervalID;
+        let intervalID: number | undefined;
         // dispatch wheel event
         const dispatchWheelEvent = () => {
             const canvasElements = document.querySelectorAll('canvas[data-u-comp=render-canvas]') as unknown as HTMLElement[];
             const filteredCanvasElements = Array.from(canvasElements).filter((canvas) => canvas.offsetHeight > 500);
 
             const interval = 30;
-            const dispatchSimulateWheelEvent = (element) => {
+            const dispatchSimulateWheelEvent = (element: HTMLElement) => {
                 const event = new WheelEvent('wheel', {
                     bubbles: true,
                     cancelable: true,
@@ -71,8 +72,8 @@ async function measureFPS(page: Page, testDuration = 5, deltaX: number, deltaY: 
             };
 
             // mock wheel event.
-            const continuousWheelSimulation = (element, interval) => {
-                intervalID = setInterval(function () {
+            const continuousWheelSimulation = (element: HTMLElement, interval: number) => {
+                intervalID = window.setInterval(function () {
                     dispatchSimulateWheelEvent(element);
                 }, interval);
             };
@@ -85,11 +86,11 @@ async function measureFPS(page: Page, testDuration = 5, deltaX: number, deltaY: 
             }
         };
 
-        const getMaxFrameTimes = (arr, n) => {
+        const getMaxFrameTimes = (arr: number[], n: number) => {
             return arr.slice().sort((a, b) => b - a).slice(0, n);
         };
 
-        const calculateMedian = (arr) => {
+        const calculateMedian = (arr: number[]) => {
             if (arr.length === 0) return 0;
             const sorted = arr.slice().sort((a, b) => a - b);
             const mid = Math.floor(sorted.length / 2);
@@ -99,12 +100,12 @@ async function measureFPS(page: Page, testDuration = 5, deltaX: number, deltaY: 
         dispatchWheelEvent();
 
         let frameCount = 0;
-        const frameTimes = [];
+        const frameTimes: number[] = [];
         const startTime = performance.now();
         let lastFrameTime = performance.now();
 
         return new Promise((resolve) => {
-            function countFrames(_timestamp) {
+            function countFrames(_timestamp: number) {
                 frameCount++;
                 const currentFrameTime = performance.now();
                 const deltaTime = currentFrameTime - lastFrameTime;
@@ -116,7 +117,9 @@ async function measureFPS(page: Page, testDuration = 5, deltaX: number, deltaY: 
                 if (performance.now() - startTime < testDuration * 1000) {
                     requestAnimationFrame(countFrames);
                 } else {
-                    clearInterval(intervalID);
+                    if (intervalID !== undefined) {
+                        window.clearInterval(intervalID);
+                    }
 
                     const elapsedTime = (performance.now() - startTime) / 1000;
                     const fps = Math.round(frameCount / elapsedTime * 100) / 100;
@@ -139,12 +142,11 @@ const createTest = (title: string, telemetryName: string, sheetData: IJsonObject
         await page.goto('http://localhost:3000/sheets/');
         await page.waitForTimeout(2000);
 
-        const windowOfPage = await page.evaluateHandle('window');
         await test.step('create univer', async () => {
-            await page.evaluate(({ sheetData, window }: any) => {
-                window.E2EControllerAPI.disposeCurrSheetUnit();
+            await page.evaluate(async (sheetData) => {
+                await window.E2EControllerAPI.disposeCurrSheetUnit();
                 window.univerAPI.createWorkbook(sheetData);
-            }, { sheetData, window: windowOfPage });
+            }, sheetData);
             // wait for canvas has data
             await page.waitForTimeout(2000);
         });
@@ -161,6 +163,7 @@ const createTest = (title: string, telemetryName: string, sheetData: IJsonObject
             });
         } catch (error) {
             console.error('error when exec scrolling test', error);
+            throw error;
         } finally {
             // if you want to debug, use `await page.pause();` to pause browser
             console.log('Test case completed.');
@@ -168,7 +171,8 @@ const createTest = (title: string, telemetryName: string, sheetData: IJsonObject
     });
 };
 
-createTest('sheet scroll empty', 'perf.sheet.scroll.empty', emptySheetData, 50, 10, 100);
-createTest('sheet scroll after freeze', 'perf.sheet.scroll.freeze', freezeData, 10, 10, 100);
-createTest('sheet scroll in a lots of merge cell', 'perf.sheet.scroll.mergeCell', mergeCellData, 10, 10, 50);
-createTest('sheet X scroll in a lots of overflow', 'perf.sheet.scroll.overflow', overflowData, 10, 50, 5);
+createTest('sheet scroll empty', 'perf.sheet.scroll.empty', emptySheetData, 60, 10, 100);
+createTest('sheet scroll after freeze', 'perf.sheet.scroll.freeze', freezeData, 40, 10, 100);
+createTest('sheet scroll in a lots of merge cell', 'perf.sheet.scroll.mergeCell', mergeCellData, 20, 10, 50);
+createTest('sheet X scroll in a lots of overflow', 'perf.sheet.scroll.overflow', overflowData, 60, 50, 5);
+createTest('sheet scroll in dense styled text', 'perf.sheet.scroll.denseText', denseTextData, 30, 0, 100);

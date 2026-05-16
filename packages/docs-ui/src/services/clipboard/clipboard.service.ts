@@ -35,6 +35,7 @@ import {
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     PositionedObjectLayoutType,
+    SHEET_EDITOR_UNITS,
     SliceBodyType,
     toDisposable,
     Tools,
@@ -70,7 +71,7 @@ export interface IDocClipboardHook {
     onCopyProperty?(start: number, end: number): IClipboardPropertyItem;
     onCopyContent?(start: number, end: number): string;
     onBeforePaste?: (body: IDocumentBody) => IDocumentBody;
-    onBeforePasteImage?: (file: File) => Promise<{ source: string; imageSourceType: ImageSourceType } | null>;
+    onBeforePasteImage?: (file: File) => Promise<{ source: string; imageSourceType: ImageSourceType } | null | undefined>;
 }
 
 export interface IDocClipboardService {
@@ -168,7 +169,10 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         let { html, text, files } = options;
         const currentDocInstance = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC);
         const docUnitId = currentDocInstance?.getUnitId() || '';
-        if (!html && !text && files.length) {
+        if (files.length && SHEET_EDITOR_UNITS.includes(docUnitId)) {
+            html = await this._createImagePasteHtml(files);
+            text = '';
+        } else if (!html && !text && files.length) {
             html = await this._createImagePasteHtml(files);
         }
         if (!html && !text) {
@@ -556,7 +560,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         };
         // clipboardHooks should be redesigned to handle the ability of multiple hooks processing the same node
         // Refer to interceptor
-        const onBeforePasteImage = this._clipboardHooks.find((e) => e.onBeforePasteImage)?.onBeforePasteImage ?? fileToBase64;
+        const onBeforePasteImage = (file: File) => this._runBeforePasteImageHooks(file, fileToBase64);
 
         await Promise.all(files.map(async (file, index) => {
             const image = await onBeforePasteImage(file);
@@ -594,5 +598,16 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         }));
         const html = this._umdToHtml.convert([doc]);
         return html;
+    }
+
+    private async _runBeforePasteImageHooks(file: File, fallback: (file: File) => Promise<{ source: string; imageSourceType: ImageSourceType }>) {
+        for (const hook of this._clipboardHooks) {
+            const image = await hook.onBeforePasteImage?.(file);
+            if (image !== undefined) {
+                return image;
+            }
+        }
+
+        return fallback(file);
     }
 }

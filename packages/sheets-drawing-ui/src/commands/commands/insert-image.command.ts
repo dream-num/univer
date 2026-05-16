@@ -51,19 +51,30 @@ export const InsertFloatImageCommand: ICommand<IInsertImageCommandParams> = {
     },
 };
 
-export const InsertCellImageCommand: ICommand = {
+export const InsertCellImageCommand: ICommand<IInsertImageCommandParams> = {
     id: 'sheet.command.insert-cell-image',
     type: CommandType.COMMAND,
-    handler: (accessor) => {
+    handler: async (accessor, params) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const renderManagerService = accessor.get(IRenderManagerService);
-
-        return getCurrentTypeOfRenderer(
+        const sheetDrawingUpdateController = getCurrentTypeOfRenderer(
             UniverInstanceType.UNIVER_SHEET,
             univerInstanceService,
             renderManagerService
         )
-            ?.with(SheetDrawingUpdateController)
-            .insertCellImage() ?? false;
+            ?.with(SheetDrawingUpdateController);
+
+        if (!sheetDrawingUpdateController) {
+            return false;
+        }
+
+        const files = params?.files;
+        if (files) {
+            const awaitFiles = files.map((file) => sheetDrawingUpdateController.insertCellImageByFile(file));
+
+            return (await Promise.all(awaitFiles)).every((result) => result);
+        }
+
+        return sheetDrawingUpdateController.insertCellImage() ?? false;
     },
 };

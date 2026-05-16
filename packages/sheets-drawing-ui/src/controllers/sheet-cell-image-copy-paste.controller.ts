@@ -16,27 +16,69 @@
 
 import type { DocumentDataModel, IDocDrawingBase } from '@univerjs/core';
 import type { IInnerPasteCommandParams } from '@univerjs/docs-ui';
-import { BuildTextUtils, createDocumentModelWithStyle, Disposable, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_ZEN_EDITOR_UNIT_ID_KEY, ICommandService, Inject, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
-import { InnerPasteCommand } from '@univerjs/docs-ui';
+import { BuildTextUtils, createDocumentModelWithStyle, Disposable, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_ZEN_EDITOR_UNIT_ID_KEY, ICommandService, Inject, Injector, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
+import { IDocClipboardService, InnerPasteCommand } from '@univerjs/docs-ui';
 import { getCurrentTypeOfRenderer, IRenderManagerService } from '@univerjs/engine-render';
 import { EditingRenderController, SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
 import { IDialogService } from '@univerjs/ui';
+import { InsertCellImageCommand } from '../commands/commands/insert-image.command';
 
 const DISABLE_UNITS = [
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_ZEN_EDITOR_UNIT_ID_KEY,
 ];
+
+let suppressFloatImagePasteUntil = 0;
+
+export function suppressFloatImagePasteOnce() {
+    suppressFloatImagePasteUntil = Date.now() + 1000;
+}
+
+export function shouldSuppressFloatImagePasteOnce() {
+    if (Date.now() > suppressFloatImagePasteUntil) {
+        return false;
+    }
+
+    suppressFloatImagePasteUntil = 0;
+    return true;
+}
+
 export class SheetCellImageCopyPasteController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @Inject(Injector) private readonly _injector: Injector,
         @IDialogService private readonly _dialogService: IDialogService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         super();
+        this._initDocImageUploadHook();
         this._initDocImageCopyPasteHooks();
+    }
+
+    private _initDocImageUploadHook() {
+        if (!this._injector.has(IDocClipboardService)) {
+            return;
+        }
+
+        const docClipboardService = this._injector.get(IDocClipboardService);
+        this.disposeWithMe(docClipboardService.addClipboardHook({
+            onBeforePasteImage: async (file) => {
+                const currentDoc = this._univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+                const docUnitId = currentDoc?.getUnitId();
+                if (!docUnitId || !DISABLE_UNITS.includes(docUnitId) || docUnitId === DOCS_ZEN_EDITOR_UNIT_ID_KEY) {
+                    return undefined;
+                }
+
+                suppressFloatImagePasteOnce();
+                this._commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, { visible: false });
+                await this._commandService.executeCommand(InsertCellImageCommand.id, { files: [file] });
+
+                return null;
+            },
+        }));
     }
 
     private _setCellImage(drwaing: IDocDrawingBase) {

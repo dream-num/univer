@@ -26,12 +26,14 @@ import { attachRangeWithCoord, discreteRangeToRange, SheetSkeletonService } from
 import { DrawingApplyType, RemoveSheetDrawingCommand, SetDrawingApplyMutation, SheetDrawingAnchorType, transformToAxisAlignPosition, transformToDrawingPosition } from '@univerjs/sheets-drawing';
 import {
     COPY_TYPE,
+    IEditorBridgeService,
     ISheetClipboardService,
     PREDEFINED_HOOK_NAME_PASTE,
     virtualizeDiscreteRanges,
 } from '@univerjs/sheets-ui';
 import { IClipboardInterfaceService } from '@univerjs/ui';
 import { InsertFloatImageCommand } from '../commands/commands/insert-image.command';
+import { shouldSuppressFloatImagePasteOnce } from './sheet-cell-image-copy-paste.controller';
 
 const IMAGE_PNG_MIME_TYPE = 'image/png';
 
@@ -101,7 +103,8 @@ export class SheetsDrawingCopyPasteController extends Disposable {
         @Inject(SheetSkeletonService) private readonly _sheetSkeletonService: SheetSkeletonService,
         @IDrawingManagerService private readonly _drawingService: IDrawingManagerService,
         @IClipboardInterfaceService private readonly _clipboardInterfaceService: IClipboardInterfaceService,
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService
     ) {
         super();
         this._initCopyPaste();
@@ -182,7 +185,7 @@ export class SheetsDrawingCopyPasteController extends Disposable {
                 return mutations;
             },
 
-            onPastePlainText: (pasteTo: ISheetDiscreteRangeLocation, clipText: string) => {
+            onPastePlainText: (_pasteTo: ISheetDiscreteRangeLocation, _clipText: string) => {
                 return { undos: [], redos: [] };
             },
 
@@ -195,6 +198,10 @@ export class SheetsDrawingCopyPasteController extends Disposable {
             },
 
             onPasteFiles: (pasteTo: ISheetDiscreteRangeLocation, files) => {
+                if (this._editorBridgeService.isVisible().visible || shouldSuppressFloatImagePasteOnce()) {
+                    return { undos: [], redos: [] };
+                }
+
                 if (this._copyInfo) {
                     return this._generateSingleDrawingPasteMutations({ pasteTo, pasteType: PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE }, COPY_TYPE.COPY);
                 } else {

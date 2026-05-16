@@ -16,8 +16,8 @@
 
 import type { DocumentDataModel, ICustomRangeForInterceptor, IDocumentData, IInterceptor } from '@univerjs/core';
 import type { IRenderContext } from '@univerjs/engine-render';
-
 import {
+    awaitTime,
     CustomRangeType,
     ICommandService,
     IUniverInstanceService,
@@ -29,7 +29,6 @@ import {
 } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-
 import { DocsRenameMutation } from '../commands/mutations/docs-rename.mutation';
 import { SetTextSelectionsOperation } from '../commands/operations/text-selection.operation';
 import { UniverDocsPlugin } from '../plugin';
@@ -41,10 +40,6 @@ import { DocStateEmitService } from '../services/doc-state-emit.service';
 import { DocViewModelManagerService } from '../services/doc-view-model-manager.service';
 import { addCustomRangeBySelectionFactory, deleteCustomRangeFactory } from '../utils/custom-range-factory';
 import { replaceSelectionFactory } from '../utils/replace-selection-factory';
-
-function waitNextTick() {
-    return new Promise<void>((resolve) => setTimeout(resolve, 0));
-}
 
 function registerRenderManagerForDoc(
     injector: ReturnType<Univer['__getInjector']>,
@@ -197,7 +192,7 @@ describe('docs integration', () => {
             { unitId: doc.getUnitId(), subUnitId: doc.getUnitId() }
         );
 
-        await waitNextTick();
+        await awaitTime(0);
         expect(executed.some((e) => e.id === SetTextSelectionsOperation.id)).toBe(true);
         dispose.dispose();
     });
@@ -250,7 +245,7 @@ describe('docs integration', () => {
             trigger: 'integration-spec' as never,
         });
 
-        await waitNextTick();
+        await awaitTime(0);
 
         expect(ok).toBeTruthy();
         expect(doc.getBody()?.dataStream).toBe('Hello world\r\n');

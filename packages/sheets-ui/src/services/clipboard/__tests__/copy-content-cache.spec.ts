@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
+import { generateRandomId } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
-import { CopyContentCache, extractId, genId } from '../copy-content-cache';
+import { CopyContentCache, extractId } from '../copy-content-cache';
 
 describe('copy-content-cache', () => {
     it('should generate id with expected length and extract id from html', () => {
-        const id = genId();
+        const id = generateRandomId(6);
         expect(typeof id).toBe('string');
         expect(id.length).toBe(6);
 

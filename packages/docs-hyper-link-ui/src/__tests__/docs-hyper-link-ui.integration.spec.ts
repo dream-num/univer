@@ -16,6 +16,7 @@
 
 import type { DocumentDataModel, ICommand, IDisposable, IDocumentData, Injector } from '@univerjs/core';
 import {
+    awaitTime,
     CustomRangeType,
     ICommandService,
     IUniverInstanceService,
@@ -31,10 +32,6 @@ import { ClickDocHyperLinkOperation } from '../commands/operations/popup.operati
 import { DocHyperLinkSelectionController } from '../controllers/doc-hyper-link-selection.controller';
 import { DocHyperLinkPopupService } from '../services/hyper-link-popup.service';
 import { createDocUiTestBed } from './create-doc-ui-test-bed';
-
-function waitNextTick() {
-    return new Promise<void>((resolve) => setTimeout(resolve, 0));
-}
 
 function createDocData(): IDocumentData {
     return {
@@ -134,7 +131,7 @@ describe('docs-hyper-link-ui integration', () => {
             unitId: 'test-doc',
             payload: 'https://added.invalid',
         })).toBeTruthy();
-        await waitNextTick();
+        await awaitTime(0);
 
         const addedLink = getBody(get)?.customRanges?.find((range) => range.properties?.url === 'https://added.invalid');
         expect(addedLink).toBeDefined();
@@ -160,7 +157,7 @@ describe('docs-hyper-link-ui integration', () => {
             label: 'planet',
             segmentId: '',
         })).toBeTruthy();
-        await waitNextTick();
+        await awaitTime(0);
 
         expect(getBody(get)?.dataStream).toBe('Hello planet\r\n');
         expect(getBody(get)?.customRanges?.find((range) => range.rangeId === 'link-1')?.properties).toEqual({
@@ -175,7 +172,7 @@ describe('docs-hyper-link-ui integration', () => {
             unitId: 'test-doc',
             linkId: 'link-1',
         })).toBeTruthy();
-        await waitNextTick();
+        await awaitTime(0);
 
         expect(getBody(get)?.dataStream).toBe('Hello world\r\n');
         expect(getBody(get)?.customRanges?.some((range) => range.rangeId === 'link-1')).toBe(false);

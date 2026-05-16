@@ -18,6 +18,7 @@ import type { IDocumentBody, Injector, IWorkbookData } from '@univerjs/core';
 import type { IThreadComment } from '../../types/interfaces/i-thread-comment';
 import type { CommentUpdate } from '../thread-comment.model';
 import {
+    awaitTime,
     IUniverInstanceService,
     LifecycleService,
     LifecycleStages,
@@ -134,8 +135,8 @@ describe('ThreadCommentModel', () => {
         expect(listComments).not.toHaveBeenCalled();
 
         lifecycleService.stage = LifecycleStages.Rendered;
-        await new Promise((resolve) => setTimeout(resolve, 0));
-        await new Promise((resolve) => setTimeout(resolve, 0));
+        await awaitTime(0);
+        await awaitTime(0);
 
         subscription.unsubscribe();
 

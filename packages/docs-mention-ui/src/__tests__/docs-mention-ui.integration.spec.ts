@@ -15,7 +15,7 @@
  */
 
 import type { ICommand, IDisposable, IDocumentData, Univer } from '@univerjs/core';
-import { CustomRangeType, Direction, ICommandService, IUniverInstanceService } from '@univerjs/core';
+import { awaitTime, CustomRangeType, Direction, ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
 import { DocCanvasPopManagerService, InsertCommand, MoveCursorOperation } from '@univerjs/docs-ui';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -28,10 +28,6 @@ import { DocMentionTriggerController } from '../controllers/doc-mention-trigger.
 import { DocMentionPopupService } from '../services/doc-mention-popup.service';
 import { DocMentionService } from '../services/doc-mention.service';
 import { createDocUiTestBed } from './create-doc-ui-test-bed';
-
-function waitNextTick() {
-    return new Promise<void>((resolve) => setTimeout(resolve, 0));
-}
 
 function createTriggerDocData(): IDocumentData {
     return {
@@ -236,7 +232,7 @@ describe('docs-mention-ui integration', () => {
                 },
             },
         })).toBeTruthy();
-        await waitNextTick();
+        await awaitTime(0);
 
         const documentBody = testBed.get(IUniverInstanceService)
             .getCurrentUniverDocInstance()
@@ -288,7 +284,7 @@ describe('docs-mention-ui integration', () => {
             unitId: 'test-doc',
             mentionId: 'mention-1',
         })).toBeTruthy();
-        await waitNextTick();
+        await awaitTime(0);
 
         const docBody = testBed.get(IUniverInstanceService)
             .getCurrentUniverDocInstance()

@@ -19,7 +19,7 @@ import type { IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui';
 import type { IOpenFilterPanelOperationParams } from '../../commands/operations/sheets-filter.operation';
 import type { IFilterConditionFormParams } from '../../models/conditions';
 import type { IFilterByValueWithTreeItem } from '../sheets-filter-panel.service';
-import { CommandType, ICommandService, Inject, Injector, LocaleService, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
+import { awaitTime, CommandType, ICommandService, Inject, Injector, LocaleService, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import { ActiveDirtyManagerService, IActiveDirtyManagerService, ISheetRowFilteredService, SheetRowFilteredService } from '@univerjs/engine-formula';
 import { MarkDirtyFilterChangeMutation, RefRangeService, SheetInterceptorService, SheetRangeThemeModel, SheetsSelectionsService, ZebraCrossingCacheController } from '@univerjs/sheets';
 import { CustomFilterOperator, FilterBy, SheetsFilterService, UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
@@ -262,7 +262,7 @@ describe('test "SheetsFilterPanelService"', () => {
                 subUnitId: 'sheet1',
                 col: 0,
             } as IOpenFilterPanelOperationParams)).toBeTruthy();
-            await await tick();
+            await tick();
 
             expect(sheetsFilterPanelService.filterBy).toBe(FilterBy.VALUES);
             const filterByModel = sheetsFilterPanelService.filterByModel as ByValuesModel;
@@ -520,7 +520,7 @@ describe('test "SheetsFilterPanelService"', () => {
 });
 
 function tick(milliseconds: number = 0): Promise<void> {
-    const result = new Promise<void>((resolve) => setTimeout(resolve, milliseconds));
+    const result = awaitTime(milliseconds);
     vitest.advanceTimersByTime(milliseconds + 1);
     return result;
 }

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import { awaitTime } from '@univerjs/core';
 import { IWatermarkTypeEnum, UNIVER_WATERMARK_STORAGE_KEY } from '@univerjs/engine-render';
 import { Subject } from 'rxjs';
-
 import { describe, expect, it, vi } from 'vitest';
 import { WatermarkRenderController } from './watermark.render.controller';
 
@@ -45,12 +45,6 @@ vi.mock('@univerjs/engine-render', async () => {
         WatermarkLayer,
     };
 });
-
-function waitNextTick() {
-    return new Promise<void>((resolve) => {
-        setTimeout(resolve, 0);
-    });
-}
 
 describe('WatermarkRenderController', () => {
     it('should init layer, load config and react to updates', async () => {
@@ -88,7 +82,7 @@ describe('WatermarkRenderController', () => {
         expect(scene.addLayer).toHaveBeenCalledTimes(1);
         expect(localStorageService.getItem).toHaveBeenCalledWith(UNIVER_WATERMARK_STORAGE_KEY);
 
-        await waitNextTick();
+        await awaitTime(0);
         expect(updateWatermarkConfig).toHaveBeenCalledWith({
             type: IWatermarkTypeEnum.Text,
             config: { text: { content: 'init' } },
@@ -142,7 +136,7 @@ describe('WatermarkRenderController', () => {
         );
         expect(_controller).toBeDefined();
 
-        await waitNextTick();
+        await awaitTime(0);
         expect(updateWatermarkConfig).not.toHaveBeenCalled();
         expect(makeDirty).not.toHaveBeenCalled();
     });

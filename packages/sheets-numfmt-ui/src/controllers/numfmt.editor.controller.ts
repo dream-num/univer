@@ -337,10 +337,6 @@ export class NumfmtEditorController extends Disposable {
     }
 }
 
-function isNumeric(str: string) {
-    return /^-?\d+(\.\d+)?$/.test(str);
-}
-
 function canConvertRichTextToNumfmt(body: IDocumentBody): boolean {
     const { textRuns = [], paragraphs = [], customRanges, customBlocks = [] } = body;
 

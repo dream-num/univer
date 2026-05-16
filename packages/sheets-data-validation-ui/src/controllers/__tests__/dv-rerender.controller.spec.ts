@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { awaitTime } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { SheetsDataValidationReRenderController } from '../dv-rerender.controller';
@@ -42,7 +43,7 @@ describe('SheetsDataValidationReRenderController', () => {
         validStatusChange$.next({ subUnitId: 'sheet-1' });
         expect(controller).toBeTruthy();
 
-        await new Promise((resolve) => setTimeout(resolve, 30));
+        await awaitTime(30);
 
         expect(makeDirty1).toHaveBeenCalledTimes(1);
         expect(makeDirty2).toHaveBeenCalledTimes(1);

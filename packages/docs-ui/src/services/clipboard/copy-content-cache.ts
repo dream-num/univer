@@ -15,14 +15,9 @@
  */
 
 import type { IDocumentData } from '@univerjs/core';
-import { generateRandomId, LRUMap } from '@univerjs/core';
+import { LRUMap } from '@univerjs/core';
 
 const COPY_CONTENT_CACHE_LIMIT = 10;
-const ID_LENGTH = 6;
-
-export function genId() {
-    return generateRandomId(ID_LENGTH);
-}
 
 export function extractId(html: string) {
     const match = html.match(/data-copy-id="([^\s]+)"/);

@@ -16,7 +16,7 @@
 
 import type { Editor } from '@univerjs/docs-ui';
 import type { IFunctionParam } from '@univerjs/engine-formula';
-import { LocaleService } from '@univerjs/core';
+import { LocaleService, noop } from '@univerjs/core';
 import { borderClassName, borderTopClassName, clsx, scrollbarClassName } from '@univerjs/design';
 import { CloseIcon, MoreIcon } from '@univerjs/icons';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
@@ -91,7 +91,6 @@ interface IHelpFunctionProps {
     formulaText: string;
 };
 
-const noop = () => { };
 export function HelpFunction(props: IHelpFunctionProps) {
     const { onParamsSwitch = noop, onClose: propColose = noop, isFocus, editor, formulaText } = props;
     const { functionInfo, paramIndex, reset } = useFormulaDescribe(isFocus, formulaText, editor);

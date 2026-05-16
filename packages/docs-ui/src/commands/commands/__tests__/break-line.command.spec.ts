@@ -15,15 +15,11 @@
  */
 
 import type { DocumentDataModel, ICommand, IDocumentData, Injector, Univer } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, NamedStyleType, UniverInstanceType } from '@univerjs/core';
+import { awaitTime, ICommandService, IUniverInstanceService, NamedStyleType, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { BreakLineCommand } from '../break-line.command';
 import { createCommandTestBed } from './create-command-test-bed';
-
-function waitNextTick() {
-    return new Promise<void>((resolve) => setTimeout(resolve, 0));
-}
 
 function getDocumentData(): IDocumentData {
     return {
@@ -89,7 +85,7 @@ describe('break line command', () => {
     it('splits a heading paragraph and resets heading style for the new paragraph', async () => {
         await commandService.executeCommand(BreakLineCommand.id);
 
-        await waitNextTick();
+        await awaitTime(0);
 
         expect(getParagraphs()).toHaveLength(2);
         expect(getParagraphs()[0].paragraphStyle?.namedStyleType).toBe(NamedStyleType.HEADING_1);

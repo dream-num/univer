@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
+import { awaitTime } from '@univerjs/core';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { IMEInputCommand } from '../../commands/commands/ime-input.command';
 import { DocIMEInputController } from '../render-controllers/doc-ime-input.controller';
-
-function waitNextTick() {
-    return new Promise<void>((resolve) => setTimeout(resolve, 0));
-}
 
 function createRange() {
     return {
@@ -81,12 +78,12 @@ describe('doc ime input controller', () => {
             event: { data: '한' },
             activeRange,
         });
-        await waitNextTick();
+        await awaitTime(0);
         onCompositionend$.next({
             event: { data: '한' },
             activeRange,
         });
-        await waitNextTick();
+        await awaitTime(0);
 
         expect(commandService.executeCommand).toHaveBeenCalledTimes(1);
         expect(commandService.executeCommand).toHaveBeenCalledWith(IMEInputCommand.id, {
@@ -161,12 +158,12 @@ describe('doc ime input controller', () => {
             event: { data: 'ㅎ' },
             activeRange,
         });
-        await waitNextTick();
+        await awaitTime(0);
         onCompositionend$.next({
             event: { data: '한' },
             activeRange,
         });
-        await waitNextTick();
+        await awaitTime(0);
 
         expect(commandService.executeCommand).toHaveBeenCalledTimes(2);
         expect(commandService.executeCommand).toHaveBeenNthCalledWith(2, IMEInputCommand.id, {

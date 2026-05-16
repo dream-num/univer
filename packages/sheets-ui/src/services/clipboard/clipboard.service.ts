@@ -24,7 +24,12 @@ import type {
     Workbook,
     Worksheet,
 } from '@univerjs/core';
-import type { IDiscreteRange, ISetRangeValuesMutationParams, ISetSelectionsOperationParams, ISetWorksheetRowAutoHeightMutationParams } from '@univerjs/sheets';
+import type {
+    IDiscreteRange,
+    ISetRangeValuesMutationParams,
+    ISetSelectionsOperationParams,
+    ISetWorksheetRowAutoHeightMutationParams,
+} from '@univerjs/sheets';
 import type { Observable } from 'rxjs';
 import type {
     ICellDataWithSpanInfo,
@@ -46,6 +51,7 @@ import {
     Disposable,
     ErrorService,
     extractPureTextFromCell,
+    generateRandomId,
     getEmptyCell,
     ICommandService,
     ILogService,
@@ -71,21 +77,40 @@ import {
     SetWorksheetRowAutoHeightMutationFactory,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import { FILE__BMP_CLIPBOARD_MIME_TYPE, FILE__JPEG_CLIPBOARD_MIME_TYPE, FILE__WEBP_CLIPBOARD_MIME_TYPE, FILE_PNG_CLIPBOARD_MIME_TYPE, HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, imageMimeTypeSet, INotificationService, IPlatformService, PLAIN_TEXT_CLIPBOARD_MIME_TYPE } from '@univerjs/ui';
+import {
+    FILE__BMP_CLIPBOARD_MIME_TYPE,
+    FILE__JPEG_CLIPBOARD_MIME_TYPE,
+    FILE__WEBP_CLIPBOARD_MIME_TYPE,
+    FILE_PNG_CLIPBOARD_MIME_TYPE,
+    HTML_CLIPBOARD_MIME_TYPE,
+    IClipboardInterfaceService,
+    imageMimeTypeSet,
+    INotificationService,
+    IPlatformService,
+    PLAIN_TEXT_CLIPBOARD_MIME_TYPE,
+} from '@univerjs/ui';
 import { BehaviorSubject } from 'rxjs';
 import { virtualizeDiscreteRanges } from '../../controllers/utils/range-tools';
 import { IMarkSelectionService } from '../mark-selection/mark-selection.service';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { createCopyPasteSelectionStyle } from '../utils/selection-util';
 import { cloneCellDataWithSpanInfo } from './clone';
-import { CopyContentCache, extractId, genId } from './copy-content-cache';
+import { CopyContentCache, extractId } from './copy-content-cache';
 import { HtmlToUSMService } from './html-to-usm/converter';
 import { LarkPastePlugin } from './html-to-usm/paste-plugins/plugin-lark';
 import { UniverPastePlugin } from './html-to-usm/paste-plugins/plugin-univer';
 import { WordPastePlugin } from './html-to-usm/paste-plugins/plugin-word';
 import { COPY_TYPE } from './type';
 import { USMToHtmlService } from './usm-to-html/convertor';
-import { convertTextToTable, discreteRangeContainsRange, htmlContainsImage, htmlIsFromExcel, mergeSetRangeValues, rangeIntersectWithDiscreteRange, spilitLargeSetRangeValuesMutations } from './utils';
+import {
+    convertTextToTable,
+    discreteRangeContainsRange,
+    htmlContainsImage,
+    htmlIsFromExcel,
+    mergeSetRangeValues,
+    rangeIntersectWithDiscreteRange,
+    spilitLargeSetRangeValuesMutations,
+} from './utils';
 
 export const PREDEFINED_HOOK_NAME_COPY = {
     DEFAULT_COPY: 'default-copy',
@@ -498,7 +523,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         }
 
         // convert matrix to html
-        const copyId = genId();
+        const copyId = generateRandomId(6);
         const html = this._usmToHtml.convert(matrix, discreteRange, hooks, copyId);
         const plain = getMatrixPlainText(plainMatrix);
 

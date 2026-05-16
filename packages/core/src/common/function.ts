@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+/**
+ * A no-op (no operation) function that does nothing.
+ * Use this as a default placeholder for callbacks or optional handlers.
+ */
+export function noop(): void {}
+
 export function throttle<T extends (...args: any[]) => any>(fn: T, wait: number = 16): T {
     let lastTime = 0;
     let timer: number | null = null;

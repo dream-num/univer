@@ -17,7 +17,17 @@
 import type { IRange, Nullable, Styles, Workbook, Worksheet } from '@univerjs/core';
 import type { FilterColumn } from '@univerjs/sheets-filter';
 import type { IFilterByValueItem, IFilterByValueWithTreeItem } from '../services/sheets-filter-panel.service';
-import { createIdentifier, Disposable, extractPureTextFromCell, ILogService, Inject, IUniverInstanceService, LocaleService, numfmt } from '@univerjs/core';
+import {
+    createIdentifier,
+    Disposable,
+    extractPureTextFromCell,
+    ILogService,
+    Inject,
+    isNumeric,
+    IUniverInstanceService,
+    LocaleService,
+    numfmt,
+} from '@univerjs/core';
 import { FilterBy } from '@univerjs/sheets-filter';
 
 export interface ISheetsGenerateFilterValuesService {
@@ -334,8 +344,6 @@ function generateFilterTreeBySort(tree: IFilterByValueWithTreeItem[]) {
         return yearItem;
     });
 }
-
-const isNumeric = (str: string) => !Number.isNaN(Number(str)) && !Number.isNaN(Number.parseFloat(str)); ;
 
 function compare(strA: string, strB: string) {
     const aIsNumeric = isNumeric(strA);

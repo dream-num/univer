@@ -15,13 +15,12 @@
  */
 
 import type { IDisposable, Nullable } from '@univerjs/core';
-
 import type { CURSOR_TYPE } from './basics/const';
 import type { IEvent, IKeyboardEvent, IPointerEvent } from './basics/i-events';
 import type { ITimeMetric, ITransformChangeState } from './basics/interfaces';
 import type { IBasicFrameInfo } from './basics/performance-monitor';
 import type { Scene } from './scene';
-import { Disposable, EventSubject, toDisposable, Tools } from '@univerjs/core';
+import { Disposable, EventSubject, noop, toDisposable, Tools } from '@univerjs/core';
 import { Observable, shareReplay, Subject } from 'rxjs';
 import { RENDER_CLASS_TYPE } from './basics/const';
 import { DeviceType, PointerInput } from './basics/i-events';
@@ -989,7 +988,6 @@ export class Engine extends Disposable {
         // IE11 only supports captureEvent:boolean, not options:object, and it defaults to false.
         // Feature detection technique copied from: https://github.com/github/eventlistener-polyfill (MIT license)
         let passiveSupported = false;
-        const noop = () => { /* empty */ };
 
         try {
             const options: object = {

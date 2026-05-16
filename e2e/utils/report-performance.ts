@@ -38,6 +38,10 @@ export async function reportToPosthog(event: string, properties: Record<string |
 
     if (!client) {
         const POSTHOG_API_KEY = process.env.POSTHOG_API_KEY;
+        if (!POSTHOG_API_KEY) {
+            return;
+        }
+
         client = new PostHog(POSTHOG_API_KEY, { host: 'https://us.i.posthog.com' });
     }
 

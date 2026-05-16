@@ -47,114 +47,118 @@ export class Marker extends SheetExtension {
         }
 
         const mergeCellRendered = new Set<string>();
+        const renderRanges = diffRanges?.length ? diffRanges : [rowColumnSegment];
 
         // eslint-disable-next-line max-lines-per-function
-        Range.foreach(rowColumnSegment, (row, col) => {
-            if (!worksheet.getRowVisible(row) || !worksheet.getColVisible(col)) {
-                return;
-            }
-
-            let cellData = worksheet.getCell(row, col);
-            const cellInfo = skeleton.getCellWithCoordByIndex(row, col, false);
-            const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
-            let { startY, endY, startX, endX } = cellInfo;
-
-            if (isMergedMainCell || isMerged) {
-                startY = mergeInfo.startY;
-                endY = mergeInfo.endY;
-                startX = mergeInfo.startX;
-                endX = mergeInfo.endX;
-            }
-
-            if (isMerged) {
-                const mainCell = {
-                    row: mergeInfo.startRow,
-                    col: mergeInfo.startColumn,
-                };
-
-                cellData = worksheet.getCell(mainCell.row, mainCell.col);
-            }
-
-            if (!this.isRenderDiffRangesByRow(mergeInfo.startRow, mergeInfo.endRow, diffRanges)) {
-                return true;
-            }
-
-            if (cellInfo.isMerged || cellInfo.isMergedMainCell) {
-                const rangeStr = stringifyRange(mergeInfo);
-                if (mergeCellRendered.has(rangeStr)) {
+        renderRanges.forEach((range) => {
+            // eslint-disable-next-line max-lines-per-function
+            Range.foreach(range, (row, col) => {
+                if (!worksheet.getRowVisible(row) || !worksheet.getColVisible(col)) {
                     return;
                 }
 
-                mergeCellRendered.add(rangeStr);
-            }
+                let cellData = worksheet.getCell(row, col);
+                const cellInfo = skeleton.getCellWithCoordByIndex(row, col, false);
+                const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
+                let { startY, endY, startX, endX } = cellInfo;
 
-            if (!cellData) {
-                return;
-            }
+                if (isMergedMainCell || isMerged) {
+                    startY = mergeInfo.startY;
+                    endY = mergeInfo.endY;
+                    startX = mergeInfo.startX;
+                    endX = mergeInfo.endX;
+                }
 
-            if (cellData.markers?.tr) {
-                ctx.save();
-                const marker = cellData.markers.tr;
-                const x = endX;
-                const y = startY;
-                ctx.fillStyle = marker.color;
-                ctx.moveTo(x, y);
-                ctx.beginPath();
-                ctx.lineTo(x - marker.size, y);
-                ctx.lineTo(x, y + marker.size);
-                ctx.lineTo(x, y);
-                ctx.closePath();
-                ctx.fill();
-                ctx.restore();
-            }
+                if (isMerged) {
+                    const mainCell = {
+                        row: mergeInfo.startRow,
+                        col: mergeInfo.startColumn,
+                    };
 
-            if (cellData.markers?.tl) {
-                ctx.save();
-                const marker = cellData.markers.tl;
-                const x = startX;
-                const y = startY;
-                ctx.fillStyle = marker.color;
-                ctx.moveTo(x, y);
-                ctx.beginPath();
-                ctx.lineTo(x + marker.size, y);
-                ctx.lineTo(x, y + marker.size);
-                ctx.lineTo(x, y);
-                ctx.closePath();
-                ctx.fill();
-                ctx.restore();
-            }
+                    cellData = worksheet.getCell(mainCell.row, mainCell.col);
+                }
 
-            if (cellData.markers?.br) {
-                ctx.save();
-                const marker = cellData.markers.br;
-                const x = endX;
-                const y = endY;
-                ctx.fillStyle = marker.color;
-                ctx.moveTo(x, y);
-                ctx.beginPath();
-                ctx.lineTo(x - marker.size, y);
-                ctx.lineTo(x, y - marker.size);
-                ctx.lineTo(x, y);
-                ctx.closePath();
-                ctx.fill();
-                ctx.restore();
-            }
+                if (!this.isRenderDiffRangesByRow(mergeInfo.startRow, mergeInfo.endRow, diffRanges)) {
+                    return true;
+                }
 
-            if (cellData.markers?.bl) {
-                ctx.save();
-                const marker = cellData.markers.bl;
-                const x = startX;
-                const y = endY;
-                ctx.fillStyle = marker.color;
-                ctx.moveTo(x, y);
-                ctx.beginPath();
-                ctx.lineTo(x + marker.size, y);
-                ctx.lineTo(x, y - marker.size);
-                ctx.lineTo(x, y);
-                ctx.closePath();
-                ctx.fill();
-                ctx.restore();
-            }
+                if (cellInfo.isMerged || cellInfo.isMergedMainCell) {
+                    const rangeStr = stringifyRange(mergeInfo);
+                    if (mergeCellRendered.has(rangeStr)) {
+                        return;
+                    }
+
+                    mergeCellRendered.add(rangeStr);
+                }
+
+                if (!cellData) {
+                    return;
+                }
+
+                if (cellData.markers?.tr) {
+                    ctx.save();
+                    const marker = cellData.markers.tr;
+                    const x = endX;
+                    const y = startY;
+                    ctx.fillStyle = marker.color;
+                    ctx.moveTo(x, y);
+                    ctx.beginPath();
+                    ctx.lineTo(x - marker.size, y);
+                    ctx.lineTo(x, y + marker.size);
+                    ctx.lineTo(x, y);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.restore();
+                }
+
+                if (cellData.markers?.tl) {
+                    ctx.save();
+                    const marker = cellData.markers.tl;
+                    const x = startX;
+                    const y = startY;
+                    ctx.fillStyle = marker.color;
+                    ctx.moveTo(x, y);
+                    ctx.beginPath();
+                    ctx.lineTo(x + marker.size, y);
+                    ctx.lineTo(x, y + marker.size);
+                    ctx.lineTo(x, y);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.restore();
+                }
+
+                if (cellData.markers?.br) {
+                    ctx.save();
+                    const marker = cellData.markers.br;
+                    const x = endX;
+                    const y = endY;
+                    ctx.fillStyle = marker.color;
+                    ctx.moveTo(x, y);
+                    ctx.beginPath();
+                    ctx.lineTo(x - marker.size, y);
+                    ctx.lineTo(x, y - marker.size);
+                    ctx.lineTo(x, y);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.restore();
+                }
+
+                if (cellData.markers?.bl) {
+                    ctx.save();
+                    const marker = cellData.markers.bl;
+                    const x = startX;
+                    const y = endY;
+                    ctx.fillStyle = marker.color;
+                    ctx.moveTo(x, y);
+                    ctx.beginPath();
+                    ctx.lineTo(x + marker.size, y);
+                    ctx.lineTo(x, y - marker.size);
+                    ctx.lineTo(x, y);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.restore();
+                }
+            });
         });
     }
 }

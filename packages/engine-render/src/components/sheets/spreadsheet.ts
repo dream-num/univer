@@ -120,22 +120,36 @@ export class Spreadsheet extends SheetComponent {
             ? viewportInfo.diffBounds?.map((bound) => spreadsheetSkeleton.getRangeByViewBound(bound))
             : [];
 
-        const viewRanges = [spreadsheetSkeleton.getCacheRangeByViewport(viewportInfo, this.isPrinting)];
+        const cacheRange = spreadsheetSkeleton.getCacheRangeByViewport(viewportInfo, this.isPrinting);
+        const viewRanges = this._refreshIncrementalState && diffRanges.length > 0
+            ? diffRanges
+            : [cacheRange];
+        const overflowSafeViewRanges = this._refreshIncrementalState && diffRanges.length > 0
+            ? diffRanges.map((range) => ({
+                ...range,
+                startColumn: cacheRange.startColumn,
+                endColumn: cacheRange.endColumn,
+            }))
+            : viewRanges;
         const extensions = this.getExtensionsByOrder();
         // At this moment, ctx.transform is at topLeft of sheet content, cell(0, 0)
 
         const scene = this.getScene();
         for (const extension of extensions) {
+            const extensionViewRanges = extension === this._fontExtension || extension === this._borderExtension
+                ? overflowSafeViewRanges
+                : viewRanges;
             const timeKey = `${SHEET_EXTENSION_PREFIX}${extension.uKey}`;
             const st = Tools.now();
             extension.draw(ctx, parentScale, spreadsheetSkeleton, diffRanges, {
-                viewRanges,
+                viewRanges: extensionViewRanges,
                 checkOutOfViewBound: true,
                 viewportKey: viewportInfo.viewportKey,
                 viewBound: viewportInfo.cacheBound,
                 diffBounds: viewportInfo.diffBounds,
             } as IDrawInfo);
-            this.addRenderFrameTimeMetricToScene(timeKey, Tools.now() - st, scene);
+            const cost = Tools.now() - st;
+            this.addRenderFrameTimeMetricToScene(timeKey, cost, scene);
         }
     }
 

@@ -42,60 +42,63 @@ export class Custom extends SheetExtension {
         }
         const mergeCellRendered = new Set<string>();
         const subUnitId = worksheet.getSheetId();
+        const renderRanges = diffRanges?.length ? diffRanges : [rowColumnSegment];
 
-        Range.foreach(rowColumnSegment, (row, col) => {
-            if (!worksheet.getRowVisible(row) || !worksheet.getColVisible(col)) {
-                return;
-            }
-
-            let primaryWithCoord = skeleton.getCellWithCoordByIndex(row, col, false);
-            const { mergeInfo } = primaryWithCoord;
-
-            let cellData = worksheet.getCell(row, col);
-            if (primaryWithCoord.isMerged) {
-                cellData = worksheet.getCell(mergeInfo.startRow, mergeInfo.startColumn);
-            }
-
-            if (!cellData?.customRender) {
-                return;
-            }
-
-            if (!this.isRenderDiffRangesByRow(mergeInfo.startRow, mergeInfo.endRow, diffRanges)) {
-                return true;
-            }
-
-            if (primaryWithCoord.isMerged || primaryWithCoord.isMergedMainCell) {
-                const rangeStr = stringifyRange(mergeInfo);
-                if (mergeCellRendered.has(rangeStr)) {
+        renderRanges.forEach((range) => {
+            Range.foreach(range, (row, col) => {
+                if (!worksheet.getRowVisible(row) || !worksheet.getColVisible(col)) {
                     return;
                 }
 
-                mergeCellRendered.add(rangeStr);
-            }
+                let primaryWithCoord = skeleton.getCellWithCoordByIndex(row, col, false);
+                const { mergeInfo } = primaryWithCoord;
 
-            if (primaryWithCoord.isMerged) {
-                primaryWithCoord = skeleton.getCellWithCoordByIndex(mergeInfo.startRow, mergeInfo.startColumn, false);
-            }
+                let cellData = worksheet.getCell(row, col);
+                if (primaryWithCoord.isMerged) {
+                    cellData = worksheet.getCell(mergeInfo.startRow, mergeInfo.startColumn);
+                }
 
-            const renderInfo = {
-                data: cellData,
-                style: skeleton.getStyles().getStyleByCell(cellData),
-                primaryWithCoord,
-                subUnitId,
-                row,
-                col,
-                worksheet,
-                unitId: worksheet.unitId,
-            };
+                if (!cellData?.customRender) {
+                    return;
+                }
 
-            const customRender = cellData.customRender.sort(sortRules);
+                if (!this.isRenderDiffRangesByRow(mergeInfo.startRow, mergeInfo.endRow, diffRanges)) {
+                    return true;
+                }
 
-            ctx.save();
+                if (primaryWithCoord.isMerged || primaryWithCoord.isMergedMainCell) {
+                    const rangeStr = stringifyRange(mergeInfo);
+                    if (mergeCellRendered.has(rangeStr)) {
+                        return;
+                    }
 
-            customRender.forEach((item) => {
-                item.drawWith(ctx, renderInfo, skeleton, this.parent);
+                    mergeCellRendered.add(rangeStr);
+                }
+
+                if (primaryWithCoord.isMerged) {
+                    primaryWithCoord = skeleton.getCellWithCoordByIndex(mergeInfo.startRow, mergeInfo.startColumn, false);
+                }
+
+                const renderInfo = {
+                    data: cellData,
+                    style: skeleton.getStyles().getStyleByCell(cellData),
+                    primaryWithCoord,
+                    subUnitId,
+                    row,
+                    col,
+                    worksheet,
+                    unitId: worksheet.unitId,
+                };
+
+                const customRender = cellData.customRender.sort(sortRules);
+
+                ctx.save();
+
+                customRender.forEach((item) => {
+                    item.drawWith(ctx, renderInfo, skeleton, this.parent);
+                });
+                ctx.restore();
             });
-            ctx.restore();
         });
     }
 }

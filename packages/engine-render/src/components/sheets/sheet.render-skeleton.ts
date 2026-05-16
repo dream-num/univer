@@ -347,6 +347,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
      * Set border background and font to this._stylesCache by visible range, which derives from bounds)
      * @param vpInfo viewBounds
      */
+    // eslint-disable-next-line max-lines-per-function, complexity
     setStylesCache(vpInfo?: IViewportInfo): Nullable<SpreadsheetSkeleton> {
         if (!this._worksheetData) return;
         if (!this.rowHeightAccumulation || !this.columnWidthAccumulation) return;
@@ -355,67 +356,79 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
 
         const rowColumnSegment = this._drawingRange;
         const columnWidthAccumulation = this.columnWidthAccumulation;
-        const { startRow: visibleStartRow, endRow: visibleEndRow, startColumn: visibleStartColumn, endColumn: visibleEndColumn } = rowColumnSegment;
+        const isIncrementalScroll = !!vpInfo && !vpInfo.isDirty && !vpInfo.isForceDirty && (
+            !!vpInfo.diffBounds?.length ||
+            !!vpInfo.diffCacheBounds?.length ||
+            !!vpInfo.diffX ||
+            !!vpInfo.diffY
+        );
+        const styleRanges = isIncrementalScroll
+            ? (vpInfo.shouldCacheUpdate ? (vpInfo.diffCacheBounds?.map((bound) => this.getRangeByViewBound(bound)) ?? []) : [])
+            : [rowColumnSegment];
 
         // clear cache out of visible range
         // this._clearCacheOutOfVisibleRange(visibleStartRow, visibleEndRow, visibleStartColumn, visibleEndColumn);
 
-        if (visibleEndColumn === -1 || visibleEndRow === -1) return;
+        for (const styleRange of styleRanges) {
+            const { startRow: visibleStartRow, endRow: visibleEndRow, startColumn: visibleStartColumn, endColumn: visibleEndColumn } = styleRange;
 
-        const mergeVisibleRanges: IRange[] = [];
-        let mergeVisibleRangeStartRow = visibleStartRow;
+            if (visibleEndColumn === -1 || visibleEndRow === -1) continue;
 
-        // expandStartCol & expandEndCol is slightly expand curr col range. This is for calculating text for overflow situations.
-        const expandStartCol = Math.max(0, visibleStartColumn - EXPAND_SIZE_FOR_RENDER_OVERFLOW);
-        const expandEndCol = Math.min(columnWidthAccumulation.length - 1, visibleEndColumn + EXPAND_SIZE_FOR_RENDER_OVERFLOW);
-        for (let r = visibleStartRow; r <= visibleEndRow; r++) {
-            if (this.worksheet.getRowVisible(r) === false) {
-                if (mergeVisibleRangeStartRow < r) {
+            const mergeVisibleRanges: IRange[] = [];
+            let mergeVisibleRangeStartRow = visibleStartRow;
+
+            // expandStartCol & expandEndCol is slightly expand curr col range. This is for calculating text for overflow situations.
+            const expandStartCol = Math.max(0, visibleStartColumn - EXPAND_SIZE_FOR_RENDER_OVERFLOW);
+            const expandEndCol = Math.min(columnWidthAccumulation.length - 1, visibleEndColumn + EXPAND_SIZE_FOR_RENDER_OVERFLOW);
+            for (let r = visibleStartRow; r <= visibleEndRow; r++) {
+                if (this.worksheet.getRowVisible(r) === false) {
+                    if (mergeVisibleRangeStartRow < r) {
+                        mergeVisibleRanges.push({
+                            startRow: mergeVisibleRangeStartRow,
+                            endRow: r - 1,
+                            startColumn: visibleStartColumn,
+                            endColumn: visibleEndColumn,
+                        });
+                    }
+                    mergeVisibleRangeStartRow = r + 1;
+                    continue;
+                };
+
+                if (r === visibleEndRow) {
                     mergeVisibleRanges.push({
                         startRow: mergeVisibleRangeStartRow,
-                        endRow: r - 1,
+                        endRow: r,
                         startColumn: visibleStartColumn,
                         endColumn: visibleEndColumn,
                     });
                 }
-                mergeVisibleRangeStartRow = r + 1;
-                continue;
-            };
 
-            if (r === visibleEndRow) {
-                mergeVisibleRanges.push({
-                    startRow: mergeVisibleRangeStartRow,
-                    endRow: r,
-                    startColumn: visibleStartColumn,
-                    endColumn: visibleEndColumn,
+                for (let c = visibleStartColumn; c <= visibleEndColumn; c++) {
+                    this._setStylesCacheForOneCell(r, c, { cacheItem: { bg: true, border: true } });
+                }
+
+                // Calculate the text length for overflow situations, focusing on the leftmost column within the visible range.
+                for (let c = expandStartCol; c < visibleEndColumn; c++) {
+                    this._setStylesCacheForOneCell(r, c, { cacheItem: { bg: false, border: false } });
+                }
+                if (visibleEndColumn === 0) continue;
+
+                // Calculate the text length for overflow situations, focusing on the rightmost column within the visible range.
+                for (let c = visibleEndColumn + 1; c < expandEndCol; c++) {
+                    this._setStylesCacheForOneCell(r, c, { cacheItem: { bg: false, border: false } });
+                }
+            }
+
+            const mergeRanges: IRange[] = [];
+            for (const mergeVisibleRange of mergeVisibleRanges) {
+                const mergeRangeInVisible = this.getCurrentRowColumnSegmentMergeData(mergeVisibleRange);
+                mergeRanges.push(...mergeRangeInVisible);
+            }
+            for (const mergeRange of mergeRanges) {
+                this._setStylesCacheForOneCell(mergeRange.startRow, mergeRange.startColumn, {
+                    mergeRange,
                 });
             }
-
-            for (let c = visibleStartColumn; c <= visibleEndColumn; c++) {
-                this._setStylesCacheForOneCell(r, c, { cacheItem: { bg: true, border: true } });
-            }
-
-            // Calculate the text length for overflow situations, focusing on the leftmost column within the visible range.
-            for (let c = expandStartCol; c < visibleEndColumn; c++) {
-                this._setStylesCacheForOneCell(r, c, { cacheItem: { bg: false, border: false } });
-            }
-            if (visibleEndColumn === 0) continue;
-
-            // Calculate the text length for overflow situations, focusing on the rightmost column within the visible range.
-            for (let c = visibleEndColumn + 1; c < expandEndCol; c++) {
-                this._setStylesCacheForOneCell(r, c, { cacheItem: { bg: false, border: false } });
-            }
-        }
-
-        const mergeRanges: IRange[] = [];
-        for (const mergeVisibleRange of mergeVisibleRanges) {
-            const mergeRangeInVisible = this.getCurrentRowColumnSegmentMergeData(mergeVisibleRange);
-            mergeRanges.push(...mergeRangeInVisible);
-        }
-        for (const mergeRange of mergeRanges) {
-            this._setStylesCacheForOneCell(mergeRange.startRow, mergeRange.startColumn, {
-                mergeRange,
-            });
         }
 
         return this;

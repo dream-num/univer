@@ -323,6 +323,63 @@ describe('Test formula data model', () => {
                 const formulaData = formulaDataModel.getArrayFormulaCellData();
                 expect(formulaData).toStrictEqual(result);
             });
+
+            it('should clear only edited array formula cell data when editing a spill cell', () => {
+                const unitId = 'test';
+                const sheetId = 'sheet1';
+
+                formulaDataModel.setArrayFormulaRange({
+                    [unitId]: {
+                        [sheetId]: {
+                            0: {
+                                3: {
+                                    startRow: 0,
+                                    startColumn: 3,
+                                    endRow: 1,
+                                    endColumn: 3,
+                                },
+                            },
+                        },
+                    },
+                });
+
+                formulaDataModel.setArrayFormulaCellData({
+                    [unitId]: {
+                        [sheetId]: {
+                            0: {
+                                3: {
+                                    v: 1,
+                                },
+                            },
+                            1: {
+                                3: {
+                                    v: 2,
+                                },
+                            },
+                        },
+                    },
+                });
+
+                formulaDataModel.updateArrayFormulaCellData(unitId, sheetId, {
+                    1: {
+                        3: {
+                            v: 111,
+                        },
+                    },
+                });
+
+                expect(formulaDataModel.getArrayFormulaCellData()).toStrictEqual({
+                    [unitId]: {
+                        [sheetId]: {
+                            0: {
+                                3: {
+                                    v: 1,
+                                },
+                            },
+                        },
+                    },
+                });
+            });
         });
 
         describe('getFormulaStringByCell', () => {
@@ -397,16 +454,7 @@ describe('Test formula data model', () => {
                     },
                 });
 
-                expect(formulaDataModel.getArrayFormulaCellData().test?.sheet1).toEqual({
-                    0: {
-                        0: null,
-                        1: null,
-                    },
-                    1: {
-                        0: null,
-                        1: null,
-                    },
-                });
+                expect(formulaDataModel.getArrayFormulaCellData().test?.sheet1).toEqual({});
             });
 
             it('should merge array formula range and cell data', () => {

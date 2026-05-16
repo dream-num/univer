@@ -93,10 +93,21 @@ export function updateFormulaDataByCellValue(sheetFormulaDataMatrix: ObjectMatri
 
 export function clearArrayFormulaCellDataByCell(arrayFormulaRangeMatrix: ObjectMatrix<IRange>, arrayFormulaCellDataMatrix: ObjectMatrix<Nullable<ICellData>>, r: number, c: number) {
     const arrayFormulaRangeValue = arrayFormulaRangeMatrix?.getValue(r, c);
+
     if (arrayFormulaRangeValue == null) {
-        return true;
+        let changed = false;
+        arrayFormulaRangeMatrix.forValue((_, __, range) => {
+            if (Rectangle.contains(range, cellToRange(r, c))) {
+                arrayFormulaCellDataMatrix.realDeleteValue(r, c);
+                changed = true;
+                return false;
+            }
+        });
+
+        return changed;
     }
 
+    const targetArrayFormulaRange = arrayFormulaRangeValue;
     const intersection: IRange[] = [];
     arrayFormulaRangeMatrix.forValue((rangeRow, rangeCol, range) => {
         // skip the current range
@@ -104,12 +115,12 @@ export function clearArrayFormulaCellDataByCell(arrayFormulaRangeMatrix: ObjectM
             return;
         }
 
-        if (Rectangle.intersects(range, arrayFormulaRangeValue)) {
+        if (Rectangle.intersects(range, targetArrayFormulaRange)) {
             intersection.push(range);
         }
     });
 
-    const { startRow, startColumn, endRow, endColumn } = arrayFormulaRangeValue;
+    const { startRow, startColumn, endRow, endColumn } = targetArrayFormulaRange;
 
     for (let row = startRow; row <= endRow; row++) {
         for (let col = startColumn; col <= endColumn; col++) {
@@ -131,4 +142,6 @@ export function clearArrayFormulaCellDataByCell(arrayFormulaRangeMatrix: ObjectM
             }
         }
     }
+
+    return true;
 }

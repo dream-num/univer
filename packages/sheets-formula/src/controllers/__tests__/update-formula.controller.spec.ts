@@ -255,6 +255,59 @@ describe('UpdateFormulaController', () => {
         expect(executeCommandSpy.mock.calls.filter(([id]) => id === SetFormulaDataMutation.id)).toHaveLength(formulaSyncCallCount);
     });
 
+    it('should sync array formula data when editing a spill cell without formula data changes', async () => {
+        const executeCommandSpy = vi.spyOn(commandService, 'executeCommand');
+        formulaDataModel.setArrayFormulaRange({
+            test: {
+                sheet1: {
+                    5: {
+                        5: {
+                            startRow: 5,
+                            startColumn: 5,
+                            endRow: 6,
+                            endColumn: 6,
+                        },
+                    },
+                },
+            },
+        });
+        formulaDataModel.setArrayFormulaCellData({
+            test: {
+                sheet1: {
+                    5: {
+                        5: { v: 1 },
+                        6: { v: 2 },
+                    },
+                    6: {
+                        5: { v: 3 },
+                        6: { v: 4 },
+                    },
+                },
+            },
+        });
+
+        await commandService.executeCommand(SetRangeValuesMutation.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            cellValue: {
+                6: {
+                    6: { v: 111 },
+                },
+            },
+        });
+
+        expect(formulaDataModel.getArrayFormulaCellData().test?.sheet1).toEqual({
+            5: {
+                5: { v: 1 },
+                6: { v: 2 },
+            },
+            6: {
+                5: { v: 3 },
+            },
+        });
+        expect(executeCommandSpy.mock.calls.some(([id]) => id === SetArrayFormulaDataMutation.id)).toBe(true);
+    });
+
     it('should initialize formula data for added sheets and workbooks, then clear removed sheets', async () => {
         const configService = testBed.injector.get(IConfigService);
         const executeCommandSpy = vi.spyOn(commandService, 'executeCommand');

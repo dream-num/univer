@@ -143,8 +143,24 @@ export class UpdateFormulaController extends Disposable {
         }
 
         const newSheetFormulaData = this._formulaDataModel.updateFormulaData(unitId, sheetId, cellValue);
+        const arrayFormulaCellDataChanged = this._formulaDataModel.updateArrayFormulaCellData(unitId, sheetId, cellValue);
+        const arrayFormulaRangeChanged = this._formulaDataModel.updateArrayFormulaRange(unitId, sheetId, cellValue);
 
         if (Object.keys(newSheetFormulaData).length === 0) {
+            if (arrayFormulaCellDataChanged || arrayFormulaRangeChanged) {
+                this._commandService.executeCommand(
+                    SetArrayFormulaDataMutation.id,
+                    {
+                        arrayFormulaRange: this._formulaDataModel.getArrayFormulaRange(),
+                        arrayFormulaCellData: this._formulaDataModel.getArrayFormulaCellData(),
+                    },
+                    {
+                        onlyLocal: true,
+                        remove: true, // remove array formula range shape
+                    }
+                );
+            }
+
             return;
         }
 
@@ -167,10 +183,6 @@ export class UpdateFormulaController extends Disposable {
                 fromFormula: true,
             }
         );
-
-        // update formula model
-        this._formulaDataModel.updateArrayFormulaCellData(unitId, sheetId, cellValue);
-        this._formulaDataModel.updateArrayFormulaRange(unitId, sheetId, cellValue);
 
         // update image formula data
         this._formulaDataModel.updateImageFormulaData(unitId, sheetId, cellValue);

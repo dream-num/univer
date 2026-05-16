@@ -171,8 +171,8 @@ const createTest = (title: string, telemetryName: string, sheetData: IJsonObject
     });
 };
 
-createTest('sheet scroll empty', 'perf.sheet.scroll.empty', emptySheetData, 60, 10, 100);
-createTest('sheet scroll after freeze', 'perf.sheet.scroll.freeze', freezeData, 40, 10, 100);
+createTest('sheet scroll empty', 'perf.sheet.scroll.empty', emptySheetData, 50, 10, 100);
+createTest('sheet scroll after freeze', 'perf.sheet.scroll.freeze', freezeData, 30, 10, 100);
 createTest('sheet scroll in a lots of merge cell', 'perf.sheet.scroll.mergeCell', mergeCellData, 20, 10, 50);
-createTest('sheet X scroll in a lots of overflow', 'perf.sheet.scroll.overflow', overflowData, 60, 50, 5);
-createTest('sheet scroll in dense styled text', 'perf.sheet.scroll.denseText', denseTextData, 30, 0, 100);
+createTest('sheet X scroll in a lots of overflow', 'perf.sheet.scroll.overflow', overflowData, 50, 50, 5);
+createTest('sheet scroll in dense styled text', 'perf.sheet.scroll.denseText', denseTextData, 25, 0, 100);

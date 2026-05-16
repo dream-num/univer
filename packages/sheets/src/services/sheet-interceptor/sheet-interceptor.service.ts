@@ -31,7 +31,7 @@ import type {
     Workbook,
     Worksheet,
 } from '@univerjs/core';
-import type { ISheetLocation } from './utils/interceptor';
+import type { ISheetLocation, ISheetRowLocation } from './utils/interceptor';
 
 import {
     composeInterceptors,
@@ -87,6 +87,9 @@ interface ISheetLocationForEditor extends ISheetLocation {
     origin: Nullable<ICellData>;
 }
 
+type ICellContentComposedInterceptor = ReturnType<IComposeInterceptors<ICellDataForSheetInterceptor, ISheetLocation & { rawData: Nullable<ICellData> }>>;
+type IRowFilteredComposedInterceptor = ReturnType<IComposeInterceptors<boolean, ISheetRowLocation>>;
+
 export const BEFORE_CELL_EDIT = createInterceptorKey<ICellDataForSheetInterceptor, ISheetLocationForEditor>('BEFORE_CELL_EDIT');
 export const AFTER_CELL_EDIT = createInterceptorKey<ICellDataForSheetInterceptor, ISheetLocationForEditor>('AFTER_CELL_EDIT');
 export const VALIDATE_CELL = createInterceptorKey<Promise<boolean>, ISheetLocation>('VALIDATE_CELL');
@@ -106,9 +109,8 @@ export class SheetInterceptorService extends Disposable {
     private readonly _workbookDisposables = new Map<string, IDisposable>();
     private readonly _worksheetDisposables = new Map<string, IDisposable>();
 
-    private _interceptorsDirty = false;
     private _composedInterceptorByKey: Map<string, ReturnType<IComposeInterceptors<any, any>>> = new Map();
-    private _composedInterceptorsLengthByKey: Map<string, number> = new Map();
+    private _composedInterceptorVersion = 0;
 
     readonly writeCellInterceptor = new InterceptorManager({
         BEFORE_CELL_EDIT,
@@ -164,6 +166,7 @@ export class SheetInterceptorService extends Disposable {
         this._worksheetDisposables.clear();
 
         this._interceptorsByName.clear();
+        this._composedInterceptorByKey.clear();
     }
 
     // #region intercept command execution
@@ -349,7 +352,7 @@ export class SheetInterceptorService extends Disposable {
         interceptors.push(interceptor);
         const sortedInterceptors = interceptors.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
 
-        this._interceptorsDirty = true;
+        this._invalidateComposedInterceptors();
 
         if (key === INTERCEPTOR_POINT.CELL_CONTENT as unknown as string) {
             const JOINED_EFFECT = InterceptorEffectEnum.Style | InterceptorEffectEnum.Value;
@@ -370,10 +373,14 @@ export class SheetInterceptorService extends Disposable {
                 remove(this._interceptorsByName.get(`${key}-${JOINED_EFFECT}`)!, interceptor);
                 remove(this._interceptorsByName.get(`${key}-${(InterceptorEffectEnum.Style)}`)!, interceptor);
                 remove(this._interceptorsByName.get(`${key}-${(InterceptorEffectEnum.Value)}`)!, interceptor);
+                this._invalidateComposedInterceptors();
             }));
         } else {
             this._interceptorsByName.set(key, sortedInterceptors);
-            return this.disposeWithMe(toDisposable(() => remove(this._interceptorsByName.get(key)!, interceptor)));
+            return this.disposeWithMe(toDisposable(() => {
+                remove(this._interceptorsByName.get(key)!, interceptor);
+                this._invalidateComposedInterceptors();
+            }));
         }
     }
 
@@ -386,9 +393,8 @@ export class SheetInterceptorService extends Disposable {
         const byNamesKey = effect === undefined ? name as unknown as string : `${name as unknown as string}-${effect}`;
         const key = _key ?? byNamesKey;
         let composed = this._composedInterceptorByKey.get(key);
-        const composedInterceptorsLength = this._composedInterceptorsLengthByKey.get(key) || 0;
 
-        if (!composed || !this._interceptorsDirty || composedInterceptorsLength !== (this._interceptorsByName.get(byNamesKey)?.length || 0)) {
+        if (!composed) {
             let interceptors = this._interceptorsByName.get(byNamesKey) as unknown as Array<IInterceptor<any, any>> | undefined;
             if (interceptors && filter) {
                 interceptors = interceptors.filter(filter);
@@ -396,10 +402,35 @@ export class SheetInterceptorService extends Disposable {
 
             composed = composeInterceptors<T, C>(interceptors || []);
             this._composedInterceptorByKey.set(key, composed);
-            this._composedInterceptorsLengthByKey.set(key, interceptors?.length || 0);
         }
 
         return composed;
+    }
+
+    private _invalidateComposedInterceptors(): void {
+        this._composedInterceptorVersion += 1;
+        this._composedInterceptorByKey.clear();
+    }
+
+    private _getCommonCellContentInterceptor(
+        effect: InterceptorEffectEnum,
+        cache: Map<InterceptorEffectEnum, ICellContentComposedInterceptor>
+    ): ICellContentComposedInterceptor {
+        let composed = cache.get(effect);
+        if (!composed) {
+            composed = this.fetchThroughInterceptors(INTERCEPTOR_POINT.CELL_CONTENT, effect);
+            cache.set(effect, composed);
+        }
+
+        return composed;
+    }
+
+    private _getCommonRowFilteredInterceptor(cache: { interceptor: Nullable<IRowFilteredComposedInterceptor> }): IRowFilteredComposedInterceptor {
+        if (!cache.interceptor) {
+            cache.interceptor = this.fetchThroughInterceptors(INTERCEPTOR_POINT.ROW_FILTERED);
+        }
+
+        return cache.interceptor;
     }
 
     private _interceptWorkbook(workbook: Workbook): void {
@@ -412,6 +443,11 @@ export class SheetInterceptorService extends Disposable {
             const subUnitId = worksheet.getSheetId();
             worksheet.__interceptViewModel((viewModel) => {
                 const sheetDisposables = new DisposableCollection();
+                const commonCellContentInterceptors = new Map<InterceptorEffectEnum, ICellContentComposedInterceptor>();
+                const commonRowFilteredInterceptor: { interceptor: Nullable<IRowFilteredComposedInterceptor> } = { interceptor: null };
+                let commonCellContentInterceptorsVersion = -1;
+                let commonRowFilteredInterceptorVersion = -1;
+
                 sheetInterceptorService._worksheetDisposables.set(getWorksheetDisposableID(unitId, worksheet), sheetDisposables);
 
                 sheetDisposables.add(viewModel.registerCellContentInterceptor({
@@ -423,32 +459,39 @@ export class SheetInterceptorService extends Disposable {
                         filter?: (interceptor: IInterceptor<any, any>) => boolean
                     ): Nullable<ICellData> {
                         const rawData = worksheet.getCellRaw(row, col);
-                        return sheetInterceptorService.fetchThroughInterceptors(INTERCEPTOR_POINT.CELL_CONTENT, effect, key, filter)(
+                        const context = {
+                            unitId,
+                            subUnitId,
+                            row,
+                            col,
+                            worksheet,
+                            workbook,
                             rawData,
-                            {
-                                unitId,
-                                subUnitId,
-                                row,
-                                col,
-                                worksheet,
-                                workbook,
-                                rawData,
+                        };
+
+                        if (key === undefined && filter === undefined) {
+                            if (commonCellContentInterceptorsVersion !== sheetInterceptorService._composedInterceptorVersion) {
+                                commonCellContentInterceptors.clear();
+                                commonCellContentInterceptorsVersion = sheetInterceptorService._composedInterceptorVersion;
                             }
-                        );
+
+                            return sheetInterceptorService._getCommonCellContentInterceptor(effect, commonCellContentInterceptors)(rawData, context);
+                        }
+
+                        return sheetInterceptorService.fetchThroughInterceptors(INTERCEPTOR_POINT.CELL_CONTENT, effect, key, filter)(rawData, context);
                     },
                 }));
 
                 sheetDisposables.add(viewModel.registerRowFilteredInterceptor({
                     getRowFiltered(row: number): boolean {
-                        return !!sheetInterceptorService.fetchThroughInterceptors(INTERCEPTOR_POINT.ROW_FILTERED)(
+                        if (commonRowFilteredInterceptorVersion !== sheetInterceptorService._composedInterceptorVersion) {
+                            commonRowFilteredInterceptor.interceptor = null;
+                            commonRowFilteredInterceptorVersion = sheetInterceptorService._composedInterceptorVersion;
+                        }
+
+                        return !!sheetInterceptorService._getCommonRowFilteredInterceptor(commonRowFilteredInterceptor)(
                             false,
-                            {
-                                unitId,
-                                subUnitId,
-                                row,
-                                workbook,
-                                worksheet,
-                            }
+                            { unitId, subUnitId, row, workbook, worksheet }
                         );
                     },
                 }));

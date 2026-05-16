@@ -17,7 +17,7 @@
 import type { ICellData, IInterceptor, Injector, Nullable, Univer, Workbook } from '@univerjs/core';
 import type { ISheetLocation } from '../utils/interceptor';
 import { createInterceptorKey, InterceptorEffectEnum, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { INTERCEPTOR_POINT } from '../interceptor-const';
 import { SheetInterceptorService } from '../sheet-interceptor.service';
 import { createSheetTestBed } from './create-core-test-bed';
@@ -27,6 +27,7 @@ describe('Test SheetInterceptorService', () => {
     let get: Injector['get'];
     const stringIntercept = createInterceptorKey<string, null>('stringIntercept');
     const numberIntercept = createInterceptorKey<number, { step: number }>('numberIntercept');
+    type ICellContentTestLocation = ISheetLocation & { rawData: Nullable<ICellData> };
 
     beforeEach(() => {
         const testBed = createSheetTestBed(undefined, [[SheetInterceptorService]]);
@@ -154,6 +155,35 @@ describe('Test SheetInterceptorService', () => {
             expect(getRowFiltered(2)).toBeFalsy();
             expect(getRowVisible(2)).toBeTruthy();
         });
+
+        it('should reuse row filtered composed interceptors while registrations are stable', () => {
+            const interceptorService = get(SheetInterceptorService);
+            const fetchThroughInterceptorsSpy = vi.spyOn(interceptorService, 'fetchThroughInterceptors');
+
+            getRowFiltered(1);
+            getRowFiltered(2);
+            getRowFiltered(3);
+
+            expect(fetchThroughInterceptorsSpy).toHaveBeenCalledTimes(1);
+
+            const disposable = interceptorService.intercept(INTERCEPTOR_POINT.ROW_FILTERED, {
+                handler(filtered, _, next) {
+                    return next(filtered);
+                },
+            });
+
+            getRowFiltered(4);
+            getRowFiltered(5);
+
+            expect(fetchThroughInterceptorsSpy).toHaveBeenCalledTimes(2);
+
+            disposable.dispose();
+
+            getRowFiltered(6);
+            getRowFiltered(7);
+
+            expect(fetchThroughInterceptorsSpy).toHaveBeenCalledTimes(3);
+        });
     });
 
     describe('Test intercept in general case', () => {
@@ -229,6 +259,87 @@ describe('Test SheetInterceptorService', () => {
             const result = get(SheetInterceptorService).fetchThroughInterceptors(stringIntercept)('zero', null);
 
             expect(result).toBe('zero');
+        });
+
+        it('should rebuild cached cell content effect interceptors after dispose and same-length replacement', () => {
+            const interceptorService = get(SheetInterceptorService);
+            const calls: string[] = [];
+
+            interceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
+                effect: InterceptorEffectEnum.Style,
+                priority: 100,
+                handler(value, _, next) {
+                    calls.push('first');
+                    return next({ ...value, v: `${value?.v} first` });
+                },
+            });
+
+            const staleDisposable = interceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
+                effect: InterceptorEffectEnum.Style,
+                priority: 0,
+                handler(value, _, next) {
+                    calls.push('stale');
+                    return next({ ...value, v: `${value?.v} stale` });
+                },
+            });
+
+            expect(
+                interceptorService.fetchThroughInterceptors<ICellData, ICellContentTestLocation>(
+                    INTERCEPTOR_POINT.CELL_CONTENT,
+                    InterceptorEffectEnum.Style
+                )({ v: 'zero' }, null as unknown as ICellContentTestLocation)
+            ).toEqual({ v: 'zero first stale' });
+
+            staleDisposable.dispose();
+
+            interceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
+                effect: InterceptorEffectEnum.Style,
+                priority: 0,
+                handler(value, _, next) {
+                    calls.push('fresh');
+                    return next({ ...value, v: `${value?.v} fresh` });
+                },
+            });
+
+            calls.length = 0;
+
+            expect(
+                interceptorService.fetchThroughInterceptors<ICellData, ICellContentTestLocation>(
+                    INTERCEPTOR_POINT.CELL_CONTENT,
+                    InterceptorEffectEnum.Style
+                )({ v: 'zero' }, null as unknown as ICellContentTestLocation)
+            ).toEqual({ v: 'zero first fresh' });
+            expect(calls).toEqual(['first', 'fresh']);
+        });
+
+        it('should reuse common cell content composed interceptors while registrations are stable', () => {
+            const interceptorService = get(SheetInterceptorService);
+            const fetchThroughInterceptorsSpy = vi.spyOn(interceptorService, 'fetchThroughInterceptors');
+
+            getCell(0, 0);
+            getCell(0, 1);
+            getCell(1, 0);
+
+            expect(fetchThroughInterceptorsSpy).toHaveBeenCalledTimes(1);
+
+            const disposable = interceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
+                effect: InterceptorEffectEnum.Style | InterceptorEffectEnum.Value,
+                handler(value, _, next) {
+                    return next(value);
+                },
+            });
+
+            getCell(1, 1);
+            getCell(2, 0);
+
+            expect(fetchThroughInterceptorsSpy).toHaveBeenCalledTimes(2);
+
+            disposable.dispose();
+
+            getCell(2, 1);
+            getCell(3, 0);
+
+            expect(fetchThroughInterceptorsSpy).toHaveBeenCalledTimes(3);
         });
     });
 });

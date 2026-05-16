@@ -439,7 +439,7 @@ export class FFormulaSheetsMixin extends FFormula implements IFFormulaSheetsMixi
             if (command.id === SetFormulaCalculationResultMutation.id) {
                 setFormulaCalculationResult = true;
                 result = command.params as ISetFormulaCalculationResultMutation;
-                applyFormulaCalculationResult = !this._hasFormulaResultToApply(result);
+                applyFormulaCalculationResult = applyFormulaCalculationResult || !this._hasFormulaResultToApply(result);
             }
 
             if (command.id === SetRangeValuesMutation.id && options?.applyFormulaCalculationResult) {

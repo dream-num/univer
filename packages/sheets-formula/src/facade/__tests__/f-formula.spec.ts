@@ -149,6 +149,52 @@ describe('sheets-formula facade mixins', () => {
         });
     });
 
+    it('fires calculationResultApplied when range update is observed before the result mutation', async () => {
+        vi.stubGlobal('requestIdleCallback', ((callback: IdleRequestCallback) => {
+            callback({ didTimeout: false, timeRemaining: () => 16 } as IdleDeadline);
+            return 1;
+        }) as typeof requestIdleCallback);
+
+        const commandService = get(ICommandService);
+        commandService.registerCommand(SetFormulaCalculationResultMutation);
+        commandService.registerCommand(SetRangeValuesMutation);
+
+        const formula = univerAPI.getFormula();
+        const resultPayload = {
+            unitData: {
+                unit1: {
+                    sheet1: {
+                        0: {
+                            0: { v: 1 },
+                        },
+                    },
+                },
+            },
+            unitOtherData: {},
+        };
+
+        await new Promise<void>((resolve) => {
+            const disposable = formula.calculationResultApplied((result) => {
+                expect(result).toEqual(resultPayload);
+                disposable.dispose();
+                resolve();
+            });
+
+            void commandService.executeCommand(
+                SetRangeValuesMutation.id,
+                {
+                    unitId: 'unit1',
+                    subUnitId: 'sheet1',
+                    cellValue: {},
+                },
+                {
+                    applyFormulaCalculationResult: true,
+                }
+            );
+            void commandService.executeCommand(SetFormulaCalculationResultMutation.id, resultPayload);
+        });
+    });
+
     it('resolves onCalculationResultApplied when no calculation actually starts', async () => {
         vi.useFakeTimers();
 

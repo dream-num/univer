@@ -439,6 +439,7 @@ export class FFormulaSheetsMixin extends FFormula implements IFFormulaSheetsMixi
             if (command.id === SetFormulaCalculationResultMutation.id) {
                 setFormulaCalculationResult = true;
                 result = command.params as ISetFormulaCalculationResultMutation;
+                applyFormulaCalculationResult = applyFormulaCalculationResult || !this._hasFormulaResultToApply(result);
             }
 
             if (command.id === SetRangeValuesMutation.id && options?.applyFormulaCalculationResult) {
@@ -453,6 +454,13 @@ export class FFormulaSheetsMixin extends FFormula implements IFFormulaSheetsMixi
                 callback(result!);
             });
         });
+    }
+
+    private _hasFormulaResultToApply(result: ISetFormulaCalculationResultMutation): boolean {
+        const { unitData } = result;
+        return Object.values(unitData ?? {}).some((sheetData) =>
+            sheetData != null && Object.values(sheetData).some((cellData) => cellData != null)
+        );
     }
 
     override onCalculationResultApplied(): Promise<void> {

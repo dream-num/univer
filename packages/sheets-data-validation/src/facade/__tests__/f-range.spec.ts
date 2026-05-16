@@ -19,9 +19,12 @@
 import type { Injector } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
 import { DataValidationType, ICommandService } from '@univerjs/core';
-import { AddSheetDataValidationCommand } from '@univerjs/sheets-data-validation';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { FormulaExecuteStageType, SetFormulaCalculationResultMutation } from '@univerjs/engine-formula';
+import { AddSheetDataValidationCommand, DataValidationCustomFormulaService } from '@univerjs/sheets-data-validation';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createFacadeTestBed } from './create-test-bed';
+
+import '@univerjs/sheets-formula/facade';
 
 describe('Test FRange', () => {
     let get: Injector['get'];
@@ -36,6 +39,12 @@ describe('Test FRange', () => {
 
         commandService = get(ICommandService);
         commandService.registerCommand(AddSheetDataValidationCommand);
+        commandService.registerCommand(SetFormulaCalculationResultMutation);
+
+        vi.stubGlobal('requestIdleCallback', ((callback: IdleRequestCallback) => {
+            callback({ didTimeout: false, timeRemaining: () => 16 } as IdleDeadline);
+            return 1;
+        }) as typeof requestIdleCallback);
     });
 
     it('Range set data validation', async () => {
@@ -60,5 +69,56 @@ describe('Test FRange', () => {
         expect(range3?.getDataValidations().length).toEqual(2);
 
         expect(activeSheet?.getDataValidations().length).toEqual(2);
+    });
+
+    it('resolves onCalculationResultApplied after data-validation custom formula results are emitted', async () => {
+        const workbook = univerAPI.getActiveWorkbook()!;
+        const activeSheet = workbook.getActiveSheet();
+        const unitId = workbook.getId();
+        const subUnitId = activeSheet.getSheetId();
+        const range = activeSheet.getRange(0, 0, 1, 1);
+        const formula = univerAPI.getFormula();
+
+        vi.spyOn(formula, 'calculationProcessing').mockImplementation((callback) => {
+            callback({
+                stage: FormulaExecuteStageType.START_CALCULATION,
+                completedFormulasCount: 0,
+                completedArrayFormulasCount: 0,
+                formulaCycleIndex: 0,
+                totalArrayFormulasToCalculate: 0,
+                totalFormulasToCalculate: 1,
+            });
+
+            return { dispose: () => {} };
+        });
+
+        const rule = univerAPI.newDataValidation()
+            .requireFormulaSatisfied('=A1>0')
+            .build();
+
+        await range.setDataValidation(rule);
+
+        const customFormulaService = get(DataValidationCustomFormulaService);
+        const registeredFormula = customFormulaService.getRuleFormulaInfo(unitId, subUnitId, rule.rule.uid);
+        expect(registeredFormula?.formula).toBe('=A1>0');
+
+        const waitForResult = formula.onCalculationResultApplied();
+
+        await commandService.executeCommand(SetFormulaCalculationResultMutation.id, {
+            unitData: {},
+            unitOtherData: {
+                [unitId]: {
+                    [subUnitId]: {
+                        [registeredFormula!.formulaId]: {
+                            0: {
+                                0: [[{ v: true }]],
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
+        await expect(waitForResult).resolves.toBeUndefined();
     });
 });

@@ -160,6 +160,50 @@ describe('sheets-formula facade mixins', () => {
         await expect(waitForResult).resolves.toBeUndefined();
     });
 
+    it('resolves onCalculationResultApplied for other-formula-only results without range value application', async () => {
+        vi.useFakeTimers();
+        vi.stubGlobal('requestIdleCallback', ((callback: IdleRequestCallback) => {
+            callback({ didTimeout: false, timeRemaining: () => 16 } as IdleDeadline);
+            return 1;
+        }) as typeof requestIdleCallback);
+
+        const commandService = get(ICommandService);
+        commandService.registerCommand(SetFormulaCalculationResultMutation);
+
+        const formula = univerAPI.getFormula();
+        vi.spyOn(formula, 'calculationProcessing').mockImplementation((callback) => {
+            callback({
+                stage: FormulaExecuteStageType.START_CALCULATION,
+                completedFormulasCount: 0,
+                completedArrayFormulasCount: 0,
+                formulaCycleIndex: 0,
+                totalArrayFormulasToCalculate: 0,
+                totalFormulasToCalculate: 1,
+            });
+
+            return { dispose: () => {} };
+        });
+
+        const waitForResult = formula.onCalculationResultApplied();
+
+        await commandService.executeCommand(SetFormulaCalculationResultMutation.id, {
+            unitData: {},
+            unitOtherData: {
+                unit1: {
+                    sheet1: {
+                        'formula.cf-1': {
+                            0: {
+                                0: { v: true },
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
+        await expect(waitForResult).resolves.toBeUndefined();
+    });
+
     it('rejects onCalculationResultApplied when the wait exceeds the global timeout', async () => {
         vi.useFakeTimers();
 

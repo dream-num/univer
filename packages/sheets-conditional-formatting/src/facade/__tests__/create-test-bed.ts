@@ -33,7 +33,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
-import { ActiveDirtyManagerService, DefinedNamesService, FormulaDataModel, IActiveDirtyManagerService, IDefinedNamesService, ISheetRowFilteredService, LexerTreeBuilder, RegisterOtherFormulaService, SheetRowFilteredService } from '@univerjs/engine-formula';
+import { ActiveDirtyManagerService, DefinedNamesService, FormulaDataModel, FunctionService, IActiveDirtyManagerService, IDefinedNamesService, IFunctionService, ISheetRowFilteredService, ISuperTableService, LexerTreeBuilder, RegisterOtherFormulaService, SheetRowFilteredService, SuperTableService } from '@univerjs/engine-formula';
 import { Engine, IRenderingEngine, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import {
     RefRangeService,
@@ -42,6 +42,7 @@ import {
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { ConditionalFormattingFormulaService, ConditionalFormattingRuleModel, ConditionalFormattingService, ConditionalFormattingViewModel } from '@univerjs/sheets-conditional-formatting';
+import { DescriptionService, IDescriptionService, IRegisterFunctionService, RegisterFunctionService } from '@univerjs/sheets-formula';
 import enUS from '@univerjs/sheets/locale/en-US';
 import zhCN from '@univerjs/sheets/locale/zh-CN';
 
@@ -141,7 +142,11 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
             injector.add([FormulaDataModel]);
             injector.add([LexerTreeBuilder]);
             injector.add([RefRangeService]);
+            injector.add([IFunctionService, { useClass: FunctionService }]);
             injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
+            injector.add([ISuperTableService, { useClass: SuperTableService }]);
+            injector.add([IDescriptionService, { useClass: DescriptionService }]);
+            injector.add([IRegisterFunctionService, { useClass: RegisterFunctionService }]);
 
             // register feature modules
             ([

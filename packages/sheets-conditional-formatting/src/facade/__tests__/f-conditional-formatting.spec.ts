@@ -17,11 +17,12 @@
 import type { Injector, Univer } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
 import { ICommandService } from '@univerjs/core/services/command/command.service.js';
-import { RemoveOtherFormulaMutation } from '@univerjs/engine-formula';
+import { FormulaExecuteStageType, RemoveOtherFormulaMutation, SetFormulaCalculationResultMutation } from '@univerjs/engine-formula';
 import { SetSelectionsOperation } from '@univerjs/sheets';
 import {
     AddCfCommand,
     AddConditionalRuleMutation,
+    ConditionalFormattingFormulaService,
     ConditionalFormattingViewModel,
     DeleteCfCommand,
     DeleteConditionalRuleMutation,
@@ -30,8 +31,10 @@ import {
     SetCfCommand,
     SetConditionalRuleMutation,
 } from '@univerjs/sheets-conditional-formatting';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createFacadeTestBed } from './create-test-bed';
+
+import '@univerjs/sheets-formula/facade';
 
 describe('Test conditional formatting facade', () => {
     let get: Injector['get'];
@@ -60,9 +63,15 @@ describe('Test conditional formatting facade', () => {
             SetCfCommand,
             SetSelectionsOperation,
             RemoveOtherFormulaMutation,
+            SetFormulaCalculationResultMutation,
         ].forEach((m) => {
             commandService.registerCommand(m);
         });
+
+        vi.stubGlobal('requestIdleCallback', ((callback: IdleRequestCallback) => {
+            callback({ didTimeout: false, timeRemaining: () => 16 } as IdleDeadline);
+            return 1;
+        }) as typeof requestIdleCallback);
     });
     it('Gets all the conditional formatting for the current sheet', () => {
         const rules = univerAPI.getActiveWorkbook()?.getActiveSheet().getConditionalFormattingRules();
@@ -146,6 +155,82 @@ describe('Test conditional formatting facade', () => {
 
         ]);
         expect(cell5?.map((e) => e.result)).toEqual([{}]);
+    });
+
+    it('resolves onCalculationResultApplied after conditional-formatting custom formula results are emitted', async () => {
+        const workbook = univerAPI.getActiveWorkbook()!;
+        const worksheet = workbook.getActiveSheet();
+        const unitId = workbook.getId();
+        const subUnitId = worksheet.getSheetId();
+        const formula = univerAPI.getFormula();
+
+        vi.spyOn(formula, 'calculationProcessing').mockImplementation((callback) => {
+            callback({
+                stage: FormulaExecuteStageType.START_CALCULATION,
+                completedFormulasCount: 0,
+                completedArrayFormulasCount: 0,
+                formulaCycleIndex: 0,
+                totalArrayFormulasToCalculate: 0,
+                totalFormulasToCalculate: 1,
+            });
+
+            return { dispose: () => {} };
+        });
+
+        await univerAPI.executeCommand('sheet.mutation.add-conditional-rule', {
+            unitId,
+            subUnitId,
+            rule: {
+                cfId: 'cf-1',
+                stopIfTrue: false,
+                ranges: [
+                    {
+                        startRow: 0,
+                        startColumn: 0,
+                        endRow: 9,
+                        endColumn: 0,
+                        startAbsoluteRefType: 0,
+                        endAbsoluteRefType: 0,
+                        rangeType: 0,
+                        unitId,
+                        sheetId: subUnitId,
+                    },
+                ],
+                rule: {
+                    type: 'highlightCell',
+                    subType: 'formula',
+                    operator: 'containsText',
+                    value: '=VALUE($A1)<=3',
+                    style: {
+                        bg: { rgb: 'rgb(254,243,199)' },
+                    },
+                },
+            },
+        });
+
+        const formulaService = get(ConditionalFormattingFormulaService);
+        const registeredFormula = formulaService.getSubUnitFormulaMap(unitId, subUnitId)?.getValues()[0];
+        expect(registeredFormula?.cfId).toBe('cf-1');
+        expect(registeredFormula?.formulaText).toBe('=VALUE($A1)<=3');
+
+        const waitForResult = formula.onCalculationResultApplied();
+
+        await commandService.executeCommand(SetFormulaCalculationResultMutation.id, {
+            unitData: {},
+            unitOtherData: {
+                [unitId]: {
+                    [subUnitId]: {
+                        [registeredFormula!.formulaId]: {
+                            0: {
+                                0: [[{ v: true }]],
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
+        await expect(waitForResult).resolves.toBeUndefined();
     });
 
     it('Delete conditional format according to cfId', async () => {

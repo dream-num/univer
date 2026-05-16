@@ -62,25 +62,24 @@ export const composeInterceptors = <T, C>(interceptors: Array<IInterceptor<T, C>
     function (initialValue: Nullable<T>, context: C) {
         let index = -1;
         let value: Nullable<T> = initialValue;
+        let nextCalled = false;
 
-        for (let i = 0; i <= interceptors.length; i++) {
+        const next = (nextValue: Nullable<T>) => {
+            nextCalled = true;
+            return nextValue;
+        };
+
+        for (let i = 0; i < interceptors.length; i++) {
             if (i <= index) {
                 throw new Error('[SheetInterceptorService]: next() called multiple times!');
             }
 
             index = i;
 
-            if (i === interceptors.length) {
-                return value;
-            }
-
             const interceptor = interceptors[i];
-            let nextCalled = false;
+            nextCalled = false;
 
-            value = interceptor.handler!(value, context, (nextValue) => {
-                nextCalled = true;
-                return nextValue;
-            });
+            value = interceptor.handler!(value, context, next);
 
             if (!nextCalled) {
                 break;

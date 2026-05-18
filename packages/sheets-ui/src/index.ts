@@ -108,6 +108,7 @@ export { SheetPermissionCheckUIController } from './controllers/permission/sheet
 export { HeaderFreezeRenderController } from './controllers/render-controllers/freeze.render-controller';
 export { HeaderMoveRenderController } from './controllers/render-controllers/header-move.render-controller';
 export { HeaderResizeRenderController } from './controllers/render-controllers/header-resize.render-controller';
+export { HEADER_UNHIDE_RANGE_VISIBLE_CHECK, HeaderUnhideRenderController } from './controllers/render-controllers/header-unhide.render-controller';
 export { SheetsScrollRenderController } from './controllers/render-controllers/scroll.render-controller';
 export { type ITelemetryData, SheetRenderController } from './controllers/render-controllers/sheet.render-controller';
 export { SheetUIController } from './controllers/sheet-ui.controller';
@@ -138,6 +139,7 @@ export { SheetCellEditorResizeService } from './services/editor/cell-editor-resi
 export { IFormulaEditorManagerService } from './services/editor/formula-editor-manager.service';
 export { FormatPainterStatus, IFormatPainterService } from './services/format-painter/format-painter.service';
 export type { IFormatPainterBeforeApplyHookParams, IFormatPainterHook } from './services/format-painter/format-painter.service';
+export { HeaderUnhideRangeService, type HeaderUnhideRangeVisibleHandler, type IHeaderUnhideRangeVisibleCheck } from './services/header-unhide-range.service';
 export { HoverManagerService } from './services/hover-manager.service';
 export type { ICellPosWithEvent, IHoverCellPosition, IHoverRichTextInfo, IHoverRichTextPosition } from './services/hover-manager.service';
 export { IMarkSelectionService, MarkSelectionService } from './services/mark-selection/mark-selection.service';

@@ -54,4 +54,35 @@ describe('HeaderResizeRenderController', () => {
 
         testBed.univer.dispose();
     });
+
+    it('positions resize handles in the base header area when outline gutter expands headers', () => {
+        const testBed = createRenderTestBed();
+        const { context, injector, skeleton } = testBed;
+
+        skeleton.rowHeaderWidth = 86;
+        skeleton.columnHeaderHeight = 60;
+        (skeleton.worksheet as any).getConfig = () => ({
+            rowHeader: { width: 46 },
+            columnHeader: { height: 20 },
+        });
+
+        const controller = injector.createInstance(HeaderResizeRenderController, context as any);
+        controller.interceptor.intercept(controller.interceptor.getInterceptPoints().HEADER_RESIZE_PERMISSION_CHECK, {
+            handler: () => true,
+        });
+
+        const rowHeader = context.components.get(SHEET_VIEW_KEY.ROW) as any;
+        rowHeader.onPointerMove$.emit({ offsetX: 70, offsetY: 19, button: 0 }, {});
+        const rowResizeRect = (controller as any)._rowResizeRect;
+        expect(rowResizeRect.left).toBeCloseTo(40 + 46 / 2 - (46 / 3) / 2);
+        expect(rowResizeRect.size).toBeCloseTo(46 / 3);
+
+        const columnHeader = context.components.get(SHEET_VIEW_KEY.COLUMN) as any;
+        columnHeader.onPointerMove$.emit({ offsetX: 99, offsetY: 52, button: 0 }, {});
+        const columnResizeRect = (controller as any)._columnResizeRect;
+        expect(columnResizeRect.top).toBeCloseTo(40 + 20 / 2 - (20 * 0.7) / 2);
+        expect(columnResizeRect.size).toBeCloseTo(20 * 0.7);
+
+        testBed.univer.dispose();
+    });
 });

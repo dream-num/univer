@@ -17,9 +17,12 @@
 import type { Workbook, Worksheet } from '@univerjs/core';
 import type { IRenderContext } from '@univerjs/engine-render';
 import type { ISetSpecificColsVisibleCommandParams, ISetSpecificRowsVisibleCommandParams } from '@univerjs/sheets';
+import type { IHeaderUnhideRangeVisibleCheck } from '../../services/header-unhide-range.service';
 import {
+    createInterceptorKey,
     ICommandService,
     Inject,
+    InterceptorManager,
     RxDisposable,
 } from '@univerjs/core';
 import {
@@ -29,11 +32,15 @@ import {
 import { takeUntil } from 'rxjs';
 
 import { SHEET_COMPONENT_UNHIDE_LAYER_INDEX } from '../../common/keys';
+import { HeaderUnhideRangeService } from '../../services/header-unhide-range.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { HeaderUnhideShape, HeaderUnhideShapeType, UNHIDE_ICON_SIZE } from '../../views/header-unhide-shape';
 import { getCoordByCell, getSheetObject } from '../utils/component-tools';
 
 const HEADER_UNHIDE_CONTROLLER_SHAPE = '__SpreadsheetHeaderUnhideSHAPEControllerShape__';
+
+export type { IHeaderUnhideRangeVisibleCheck };
+export const HEADER_UNHIDE_RANGE_VISIBLE_CHECK = createInterceptorKey<boolean, IHeaderUnhideRangeVisibleCheck>('headerUnhideRangeVisibleCheck');
 
 /**
  * This controller controls rendering of the buttons to unhide hidden rows and columns.
@@ -42,9 +49,12 @@ export class HeaderUnhideRenderController extends RxDisposable {
     private _shapes: { cols: HeaderUnhideShape[]; rows: HeaderUnhideShape[] } = { cols: [], rows: [] };
     private get _workbook(): Workbook { return this._context.unit; }
 
+    public interceptor = new InterceptorManager({ HEADER_UNHIDE_RANGE_VISIBLE_CHECK });
+
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
+        @Inject(HeaderUnhideRangeService) private readonly _headerUnhideRangeService: HeaderUnhideRangeService,
         @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
@@ -94,8 +104,23 @@ export class HeaderUnhideRenderController extends RxDisposable {
 
         // steps to render the unhide button for the current worksheet
         // 1. and get hidden rows and columns
-        const hiddenRowRanges = worksheet.getHiddenRows();
-        const hiddenColRanges = worksheet.getHiddenCols();
+        const visibleCheck = this.interceptor.fetchThroughInterceptors(HEADER_UNHIDE_RANGE_VISIBLE_CHECK);
+        const shouldRenderRange = (payload: IHeaderUnhideRangeVisibleCheck) => (
+            this._headerUnhideRangeService.shouldRenderRange(visibleCheck(true, payload) ?? true, payload)
+        );
+
+        const hiddenRowRanges = worksheet.getHiddenRows().filter((range) => shouldRenderRange({
+            axis: 'row',
+            range,
+            workbook,
+            worksheet,
+        }));
+        const hiddenColRanges = worksheet.getHiddenCols().filter((range) => shouldRenderRange({
+            axis: 'column',
+            range,
+            workbook,
+            worksheet,
+        }));
 
         // First just let me render a unhide button of the column header!.
         const sheetObject = this._getSheetObject();
@@ -142,7 +167,7 @@ export class HeaderUnhideRenderController extends RxDisposable {
                     hovered: false,
                     hasPrevious,
                     hasNext,
-                    top: 20 - UNHIDE_ICON_SIZE,
+                    top: skeleton.columnHeaderHeight - UNHIDE_ICON_SIZE,
                     left: position.startX - (hasPrevious ? UNHIDE_ICON_SIZE : 0),
                 },
                 () => this._commandService.executeCommand<ISetSpecificColsVisibleCommandParams>(

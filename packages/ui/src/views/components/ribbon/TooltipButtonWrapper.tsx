@@ -170,10 +170,19 @@ export function DropdownMenuWrapper({
 
     const menuManagerService = useDependency(IMenuManagerService);
     const [hiddenStates, setHiddenStates] = useState<Record<string, boolean>>({});
+    const [menuVersion, setMenuVersion] = useState(0);
+
+    useEffect(() => {
+        const subscription = menuManagerService.menuChanged$.subscribe(() => {
+            setMenuVersion((version) => version + 1);
+        });
+
+        return () => subscription.unsubscribe();
+    }, [menuManagerService]);
 
     const menuItems = useMemo(() => {
         return menuId ? menuManagerService.getMenuByPositionKey(menuId) : [];
-    }, [menuId]);
+    }, [menuId, menuManagerService, menuVersion]);
 
     const filteredMenuItems = useMemo(() => {
         return menuItems.filter((item) => {

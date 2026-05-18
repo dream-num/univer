@@ -23,6 +23,7 @@ import { SheetInterceptorService, SheetsSelectionsService } from '@univerjs/shee
 import { BehaviorSubject, Subject } from 'rxjs';
 import { SHEET_VIEW_KEY } from '../../../common/keys';
 import enUS from '../../../locale/en-US';
+import { HeaderUnhideRangeService } from '../../../services/header-unhide-range.service';
 import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
 
 export interface ITestEvent<TEvent, TState = { stopPropagation: () => void }> {
@@ -413,6 +414,7 @@ export function createRenderTestBed(options?: { workbookData?: IWorkbookData; de
         override onStarting(): void {
             this._injector.add([SheetsSelectionsService]);
             this._injector.add([SheetInterceptorService]);
+            this._injector.add([HeaderUnhideRangeService]);
             options?.dependencies?.forEach((d) => this._injector.add(d));
         }
     }

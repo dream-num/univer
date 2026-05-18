@@ -262,10 +262,21 @@ describe('Array formula SPILL with worker formula calculation', () => {
         testBed.workerInjector.get(CalculateController);
 
         const calculationEnd = testBed.workerFormulaEngine.onCalculationEnd();
+
+        // Also wait for the calculation result to be synced back to the main thread.
+        const resultSyncedToMain = new Promise<void>((resolve) => {
+            const disposable = commandService.onCommandExecuted((commandInfo) => {
+                if (commandInfo.id === SetFormulaCalculationResultMutation.id) {
+                    disposable.dispose();
+                    resolve();
+                }
+            });
+        });
+
         testBed.workerCommandService.syncExecuteCommand(SetFormulaCalculationStartMutation.id, { forceCalculation: true }, { onlyLocal: true });
         await calculationEnd;
-        await new Promise<void>((resolve) => setTimeout(resolve, 0));
-        await waitForMicrotasks(12);
+        await resultSyncedToMain;
+        await waitForMicrotasks(2);
     }
 
     async function setCell(row: number, column: number, value: number) {

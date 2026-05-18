@@ -139,9 +139,9 @@ export { SheetCellEditorResizeService } from './services/editor/cell-editor-resi
 export { IFormulaEditorManagerService } from './services/editor/formula-editor-manager.service';
 export { FormatPainterStatus, IFormatPainterService } from './services/format-painter/format-painter.service';
 export type { IFormatPainterBeforeApplyHookParams, IFormatPainterHook } from './services/format-painter/format-painter.service';
+export { HeaderUnhideRangeService, type HeaderUnhideRangeVisibleHandler, type IHeaderUnhideRangeVisibleCheck } from './services/header-unhide-range.service';
 export { HoverManagerService } from './services/hover-manager.service';
 export type { ICellPosWithEvent, IHoverCellPosition, IHoverRichTextInfo, IHoverRichTextPosition } from './services/hover-manager.service';
-export { HeaderUnhideRangeService, type HeaderUnhideRangeVisibleHandler, type IHeaderUnhideRangeVisibleCheck } from './services/header-unhide-range.service';
 export { IMarkSelectionService, MarkSelectionService } from './services/mark-selection/mark-selection.service';
 export { type ProtectedRangeShadowStrategy, SheetPermissionRenderManagerService } from './services/permission/sheet-permission-render-manager.service';
 export { SheetPermissionUserManagerService } from './services/permission/sheet-permission-user-list.service';

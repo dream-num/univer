@@ -15,6 +15,7 @@
  */
 
 export const hsvToRgb = (h: number, s: number, v: number): [number, number, number] => {
+    h = h % 360; // Normalize hue to [0, 360)
     s = s / 100; // Normalize saturation to [0, 1]
     v = v / 100; // Normalize value to [0, 1]
 

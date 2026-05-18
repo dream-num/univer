@@ -28,6 +28,7 @@ export function AlphaSlider({ hsv, alpha, onChange, onChanged }: IAlphaSliderPro
     const [isDragging, setIsDragging] = useState(false);
     const sliderRef = useRef<HTMLDivElement>(null);
     const thumbRef = useRef<HTMLDivElement>(null);
+    const alphaRef = useRef(alpha);
 
     const calculateAlpha = useCallback((clientX: number) => {
         const slider = sliderRef.current;
@@ -51,10 +52,14 @@ export function AlphaSlider({ hsv, alpha, onChange, onChanged }: IAlphaSliderPro
         calculateAlpha(e.clientX);
     }, [isDragging, calculateAlpha]);
 
+    useEffect(() => {
+        alphaRef.current = alpha;
+    }, [alpha]);
+
     const handlePointerUp = useCallback(() => {
         setIsDragging(false);
-        onChanged?.(alpha);
-    }, [alpha]);
+        onChanged?.(alphaRef.current);
+    }, [onChanged]);
 
     useEffect(() => {
         if (isDragging) {
@@ -82,7 +87,7 @@ export function AlphaSlider({ hsv, alpha, onChange, onChanged }: IAlphaSliderPro
     const color = hsvToRgb(...hsv);
 
     return (
-        <div className="univer-relative univer-w-full univer-select-none">
+        <div data-u-comp="color-picker-alpha-slider" className="univer-relative univer-w-full univer-select-none">
             {/* Chessboard background */}
             <div
                 className="univer-absolute univer-inset-0 univer-rounded-full"
@@ -95,6 +100,7 @@ export function AlphaSlider({ hsv, alpha, onChange, onChanged }: IAlphaSliderPro
             {/* Slider */}
             <div
                 ref={sliderRef}
+                data-u-comp="color-picker-alpha-slider-track"
                 className={`
                   univer-relative univer-h-2 univer-w-full univer-cursor-pointer univer-rounded-full univer-shadow-inner
                 `}
@@ -109,6 +115,7 @@ export function AlphaSlider({ hsv, alpha, onChange, onChanged }: IAlphaSliderPro
                 {/* Indicator */}
                 <div
                     ref={thumbRef}
+                    data-u-comp="color-picker-alpha-slider-thumb"
                     className={`
                       univer-absolute univer-top-1/2 univer-box-border univer-size-2 univer-rounded-full
                       univer-bg-transparent univer-shadow-md univer-ring-2 univer-ring-white univer-transition-transform

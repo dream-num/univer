@@ -30,8 +30,8 @@ describe('AlphaSlider', () => {
             <AlphaSlider hsv={[0, 100, 100]} alpha={0.3} onChange={onChange} onChanged={onChanged} />
         );
 
-        const slider = container.querySelector('.univer-h-2') as HTMLDivElement;
-        const thumb = container.querySelector('.univer-size-2') as HTMLDivElement;
+        const slider = container.querySelector('[data-u-comp="color-picker-alpha-slider-track"]') as HTMLDivElement;
+        const thumb = container.querySelector('[data-u-comp="color-picker-alpha-slider-thumb"]') as HTMLDivElement;
         expect(slider).toBeInTheDocument();
         expect(thumb).toBeInTheDocument();
 
@@ -54,6 +54,52 @@ describe('AlphaSlider', () => {
 
         expect(onChange).toHaveBeenCalled();
         expect(onChanged).toHaveBeenCalledWith(0.3);
+    });
+
+    it('should emit latest alpha on pointer up after prop update', () => {
+        const onChange = vi.fn();
+        const onChanged = vi.fn();
+
+        function Wrapper() {
+            const [alpha, setAlpha] = useState(0.3);
+            return (
+                <AlphaSlider
+                    hsv={[0, 100, 100]}
+                    alpha={alpha}
+                    onChange={(a) => {
+                        setAlpha(a);
+                        onChange(a);
+                    }}
+                    onChanged={onChanged}
+                />
+            );
+        }
+
+        const { container } = render(<Wrapper />);
+        const slider = container.querySelector('[data-u-comp="color-picker-alpha-slider-track"]') as HTMLDivElement;
+        const thumb = container.querySelector('[data-u-comp="color-picker-alpha-slider-thumb"]') as HTMLDivElement;
+
+        Object.defineProperty(thumb, 'clientWidth', { value: 10, configurable: true });
+        vi.spyOn(slider, 'getBoundingClientRect').mockReturnValue({
+            x: 0,
+            y: 0,
+            top: 0,
+            left: 0,
+            width: 100,
+            height: 8,
+            right: 100,
+            bottom: 8,
+            toJSON: () => ({}),
+        } as DOMRect);
+
+        fireEvent.pointerDown(slider, { clientX: 50 });
+        fireEvent.pointerMove(window, { clientX: 80 });
+        fireEvent.pointerUp(window);
+
+        expect(onChange).toHaveBeenCalled();
+        expect(onChanged).toHaveBeenCalled();
+        const lastCall = onChanged.mock.calls[onChanged.mock.calls.length - 1];
+        expect(lastCall[0]).toBeGreaterThan(0.3);
     });
 });
 

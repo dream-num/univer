@@ -46,7 +46,7 @@ export function ColorSpectrum({ hsv, onChange, onChanged }: IColorSpectrumProps)
         gradientV.addColorStop(1, 'rgba(0, 0, 0, 1)');
         ctx.fillStyle = gradientV;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-    }, [hsv]);
+    }, [hsv[0]]);
 
     const handlePointerEvent = (e: PointerEvent) => {
         e.stopPropagation();
@@ -66,7 +66,7 @@ export function ColorSpectrum({ hsv, onChange, onChanged }: IColorSpectrumProps)
 
     const handlePointerUp = useCallback(() => {
         setIsDragging(false);
-    }, [hsv]);
+    }, []);
 
     function handleChange() {
         onChanged?.(hsv[0], hsv[1], hsv[2]);
@@ -123,6 +123,7 @@ export function ColorSpectrum({ hsv, onChange, onChanged }: IColorSpectrumProps)
         >
             <canvas
                 ref={canvasRef}
+                data-u-comp="color-picker-spectrum-canvas"
                 className="univer-size-full univer-cursor-crosshair univer-rounded"
                 onPointerDown={(e) => {
                     setIsDragging(true);

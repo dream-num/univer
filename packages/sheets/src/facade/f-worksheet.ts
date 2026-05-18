@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type { CellValue, CustomData, ICellData, IColumnData, IColumnRange, IDisposable, IFreeze, IObjectArrayPrimitiveType, IRange, IRowData, IRowRange, IStyleData, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import type { ISetColDataCommandParams, ISetGridlinesColorCommandParams, ISetRangeValuesMutationParams, ISetRowDataCommandParams, ISetTextWrapCommandParams, IToggleGridlinesCommandParams } from '@univerjs/sheets';
+import type { CellValue, CustomData, ICellData, IColumnData, IColumnRange, IFreeze, IObjectArrayPrimitiveType, IRange, IRowData, IRowRange, IStyleData, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { ISetColDataCommandParams, ISetGridlinesColorCommandParams, ISetRowDataCommandParams, ISetTextWrapCommandParams, IToggleGridlinesCommandParams } from '@univerjs/sheets';
 import type { FDefinedName } from './f-defined-name';
 import type { FWorkbook } from './f-workbook';
 import { BooleanNumber, covertCellValue, Direction, generateIntervalsByPoints, ICommandService, ILogService, Inject, Injector, ObjectMatrix, RANGE_TYPE, WrapStrategy } from '@univerjs/core';
 import { FBaseInitialable } from '@univerjs/core/facade';
 import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
-import { AppendRowCommand, CancelFrozenCommand, ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand, copyRangeStyles, InsertColByRangeCommand, InsertRowByRangeCommand, MoveColsCommand, MoveRowsCommand, RemoveColByRangeCommand, RemoveRowByRangeCommand, SetColDataCommand, SetColHiddenCommand, SetColWidthCommand, SetFrozenCommand, SetGridlinesColorCommand, SetRangeValuesMutation, SetRowDataCommand, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetTabColorCommand, SetTextWrapCommand, SetWorksheetColumnCountCommand, SetWorksheetDefaultStyleMutation, SetWorksheetHideCommand, SetWorksheetNameCommand, SetWorksheetRowCountCommand, SetWorksheetRowIsAutoHeightCommand, SetWorksheetRowIsAutoHeightMutation, SetWorksheetShowCommand, SheetsSelectionsService, ToggleGridlinesCommand } from '@univerjs/sheets';
+import { AppendRowCommand, CancelFrozenCommand, ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand, copyRangeStyles, InsertColByRangeCommand, InsertRowByRangeCommand, MoveColsCommand, MoveRowsCommand, RemoveColByRangeCommand, RemoveRowByRangeCommand, SetColDataCommand, SetColHiddenCommand, SetColWidthCommand, SetFrozenCommand, SetGridlinesColorCommand, SetRowDataCommand, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetTabColorCommand, SetTextWrapCommand, SetWorksheetColumnCountCommand, SetWorksheetDefaultStyleMutation, SetWorksheetHideCommand, SetWorksheetNameCommand, SetWorksheetRowCountCommand, SetWorksheetRowIsAutoHeightCommand, SetWorksheetRowIsAutoHeightMutation, SetWorksheetShowCommand, SheetsSelectionsService, ToggleGridlinesCommand } from '@univerjs/sheets';
 import { FDefinedNameBuilder } from './f-defined-name';
 import { FRange } from './f-range';
 import { FSelection } from './f-selection';
@@ -1686,7 +1686,6 @@ export class FWorksheet extends FBaseInitialable {
      * Sets the frozen state of the current sheet.
      * @param {IFreeze} freeze - the scrolling viewport start range and count of freezed rows and columns.
      * that means if you want to freeze the first 3 rows and 2 columns, you should set freeze as { startRow: 3, startColumn: 2, xSplit: 2, ySplit: 3 }
-     * @deprecated use `setFrozenRows` and `setFrozenColumns` instead.
      * @returns {FWorksheet} This worksheet instance for chaining
      * @example
      * ```typescript
@@ -1701,7 +1700,6 @@ export class FWorksheet extends FBaseInitialable {
      * ```
      */
     setFreeze(freeze: IFreeze): FWorksheet {
-        this._logService.warn('setFreeze is deprecated, use setFrozenRows and setFrozenColumns instead');
         this._commandService.syncExecuteCommand(SetFrozenCommand.id, {
             ...freeze,
             unitId: this._workbook.getUnitId(),
@@ -2039,40 +2037,6 @@ export class FWorksheet extends FBaseInitialable {
     }
 
     /**
-     * @deprecated use `univerAPI.addEvent(univerAPI.Event.SheetValueChanged, (params) => {})` instead
-     */
-    onCellDataChange(callback: (cellValue: ObjectMatrix<Nullable<ICellData>>) => void): IDisposable {
-        const commandService = this._injector.get(ICommandService);
-        return commandService.onCommandExecuted((command) => {
-            if (command.id === SetRangeValuesMutation.id) {
-                const params = command.params as ISetRangeValuesMutationParams;
-                if (
-                    params.unitId === this._workbook.getUnitId() &&
-                    params.subUnitId === this._worksheet.getSheetId() &&
-                    params.cellValue
-                ) {
-                    callback(new ObjectMatrix(params.cellValue));
-                }
-            }
-        });
-    }
-
-    /**
-     * @deprecated use `univerAPI.addEvent(univerAPI.Event.BeforeSheetEditEnd, (params) => {})` instead
-     */
-    onBeforeCellDataChange(callback: (cellValue: ObjectMatrix<Nullable<ICellData>>) => void): IDisposable {
-        const commandService = this._injector.get(ICommandService);
-        return commandService.beforeCommandExecuted((command) => {
-            if (command.id === SetRangeValuesMutation.id) {
-                const params = command.params as ISetRangeValuesMutationParams;
-                if (params.unitId === this._workbook.getUnitId() && params.subUnitId === this._worksheet.getSheetId() && params.cellValue) {
-                    callback(new ObjectMatrix(params.cellValue));
-                }
-            }
-        });
-    }
-
-    /**
      * Hides this sheet. Has no effect if the sheet is already hidden. If this method is called on the only visible sheet, it throws an exception.
      * @returns {FWorksheet} Returns the current worksheet instance for method chaining
      * @example
@@ -2299,7 +2263,7 @@ export class FWorksheet extends FBaseInitialable {
 
     /**
      * Returns a Range corresponding to the dimensions in which data is present.
-     * This is functionally equivalent to creating a Range bounded by A1 and (Sheet.getLastColumn(), Sheet.getLastRow()).
+     * Empty cells with style or formatting will also be included in the data range. If there is no data on the sheet, returns a Range corresponding to the top-left cell of the sheet (A1).
      * @returns {FRange} The range of the data in the sheet.
      * @example
      * ```ts
@@ -2317,15 +2281,6 @@ export class FWorksheet extends FBaseInitialable {
     }
 
     /**
-     * @deprecated use `getLastColumn` instead.
-     * Returns the column index of the last column that contains content.
-     * @returns {number} the column index of the last column that contains content.
-     */
-    getLastColumns(): number {
-        return this._worksheet.getLastColumnWithContent();
-    }
-
-    /**
      * Returns the column index of the last column that contains content.
      * @returns {number} the column index of the last column that contains content.
      * @example
@@ -2340,15 +2295,6 @@ export class FWorksheet extends FBaseInitialable {
      */
     getLastColumn(): number {
         return this._worksheet.getLastColumnWithContent();
-    }
-
-    /**
-     * @deprecated use `getLastRow` instead.
-     * Returns the row index of the last row that contains content.
-     * @returns {number} the row index of the last row that contains content.
-     */
-    getLastRows(): number {
-        return this._worksheet.getLastRowWithContent();
     }
 
     /**

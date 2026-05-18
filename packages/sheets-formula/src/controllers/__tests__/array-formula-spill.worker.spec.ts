@@ -42,6 +42,7 @@ import {
 import { SetRangeValuesMutation, UniverSheetsPlugin } from '@univerjs/sheets';
 import { ReplaySubject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import formulaEnUS from '../../locale/en-US';
 import { UniverRemoteSheetsFormulaPlugin, UniverSheetsFormulaPlugin } from '../../plugin';
 
 import '@univerjs/engine-formula/facade';
@@ -186,6 +187,9 @@ function createWorkerFormulaTestBed() {
 
     const workerUniver = new Univer({
         locale: LocaleType.EN_US,
+        locales: {
+            [LocaleType.EN_US]: formulaEnUS,
+        },
         logLevel: LogLevel.SILENT,
     });
     workerUniver.registerPlugins([
@@ -197,6 +201,9 @@ function createWorkerFormulaTestBed() {
 
     const mainUniver = new Univer({
         locale: LocaleType.EN_US,
+        locales: {
+            [LocaleType.EN_US]: formulaEnUS,
+        },
         logLevel: LogLevel.SILENT,
     });
     mainUniver.registerPlugins([

@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/slides",
-    "version": "0.22.1",
+    "version": "0.23.0",
     "private": false,
     "description": "Core presentation model and services for Univer Slides.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

@@ -1,5 +1,30 @@
 # Changelog
 
+# [0.23.0](https://github.com/dream-num/univer/compare/v0.22.1...v0.23.0) (2026-05-18)
+
+
+### Bug Fixes
+
+* **core:** skip command execution after disposal ([#6898](https://github.com/dream-num/univer/issues/6898)) ([28fcb8d](https://github.com/dream-num/univer/commit/28fcb8d766430d73f30e2e2140b365e3fd22e3ca))
+* **facade:** fix FWorksheet.removeFloatDom api ([#6904](https://github.com/dream-num/univer/issues/6904)) ([1b4edb9](https://github.com/dream-num/univer/commit/1b4edb9156fec5b93cd7e42d3976f302abd78afd))
+* **facade:** resolve onCalculationResultApplied api wait for other formula (cf, data validation, .etc) results ([#6907](https://github.com/dream-num/univer/issues/6907)) ([2720250](https://github.com/dream-num/univer/commit/27202507656742c1c74fd123163382fe34339908))
+* **formula:** fix formula calculations should be performed when a workbook is created ([#6903](https://github.com/dream-num/univer/issues/6903)) ([907405d](https://github.com/dream-num/univer/commit/907405d5cecb7a164324f7a6c682a82bca9383c6))
+* **formula:** preserve array formula spill blockers ([#6909](https://github.com/dream-num/univer/issues/6909)) ([f15d008](https://github.com/dream-num/univer/commit/f15d008a964efef66047197b43b639829835557c))
+* properly dispose RxJS subscriptions to prevent memory leaks ([#6896](https://github.com/dream-num/univer/issues/6896)) ([630c324](https://github.com/dream-num/univer/commit/630c3242de52138e079715b19c0d27e1bb1908b2))
+
+
+### Features
+
+* add RTL direction support for UI ([#6893](https://github.com/dream-num/univer/issues/6893)) ([7f53a7e](https://github.com/dream-num/univer/commit/7f53a7edd3561c9274eed5c42618e83f337bd6c1))
+* **ui:** add contextual ribbon tabs support ([#6902](https://github.com/dream-num/univer/issues/6902)) ([0a0a81a](https://github.com/dream-num/univer/commit/0a0a81ac42ffb51971b918b41e3f4e0123a6668b))
+
+
+### Performance Improvements
+
+* **formula:** formula engine dependency 1 ([#6889](https://github.com/dream-num/univer/issues/6889)) ([89772af](https://github.com/dream-num/univer/commit/89772afba4b0dbd72cc5268b6d7f56c15ecf0cf9))
+* **render:** optimize sheet interceptor hot paths ([#6906](https://github.com/dream-num/univer/issues/6906)) ([e3719cb](https://github.com/dream-num/univer/commit/e3719cb0be25d2ac32055982f71023e4ae6b7d6d))
+* **render:** scroll slow ([#6905](https://github.com/dream-num/univer/issues/6905)) ([45d873a](https://github.com/dream-num/univer/commit/45d873a87b17f88af7c3e5d16a1b740169348f29))
+
 ## [0.22.1](https://github.com/dream-num/univer/compare/v0.22.0...v0.22.1) (2026-05-13)
 
 

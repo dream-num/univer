@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/network",
-    "version": "0.22.1",
+    "version": "0.23.0",
     "private": false,
     "description": "Network service abstractions for Univer runtime integrations.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

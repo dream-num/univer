@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/protocol",
-    "version": "0.22.1",
+    "version": "0.23.0",
     "private": false,
     "description": "Shared protocol types, generated service interfaces, and data contracts for Univer.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

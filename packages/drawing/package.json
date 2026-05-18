@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/drawing",
-    "version": "0.22.1",
+    "version": "0.23.0",
     "private": false,
     "description": "Shared drawing models, commands, and services for Univer.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

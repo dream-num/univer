@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/rpc-node",
-    "version": "0.22.1",
+    "version": "0.23.0",
     "private": false,
     "description": "Node.js RPC plugins for Univer main-thread and worker communication.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

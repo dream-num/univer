@@ -26,6 +26,7 @@ export function HueSlider({ hsv, onChange, onChanged }: IHueSliderProps) {
     const [isDragging, setIsDragging] = useState(false);
     const sliderRef = useRef<HTMLDivElement>(null);
     const thumbRef = useRef<HTMLDivElement>(null);
+    const hsvRef = useRef(hsv);
 
     const calculateHue = useCallback((clientX: number) => {
         const slider = sliderRef.current;
@@ -52,10 +53,15 @@ export function HueSlider({ hsv, onChange, onChanged }: IHueSliderProps) {
         calculateHue(e.clientX);
     }, [isDragging, calculateHue]);
 
+    useEffect(() => {
+        hsvRef.current = hsv;
+    }, [hsv]);
+
     const handlePointerUp = useCallback(() => {
         setIsDragging(false);
-        onChanged?.(hsv[0], hsv[1], hsv[2]);
-    }, [hsv, onChanged]);
+        const [h, s, v] = hsvRef.current;
+        onChanged?.(h, s, v);
+    }, [onChanged]);
 
     useEffect(() => {
         if (isDragging) {
@@ -107,6 +113,7 @@ export function HueSlider({ hsv, onChange, onChanged }: IHueSliderProps) {
             >
                 <div
                     ref={thumbRef}
+                    data-u-comp="color-picker-hue-slider-thumb"
                     className={`
                       univer-absolute univer-top-1/2 univer-box-border univer-size-2 univer-rounded-full
                       univer-bg-transparent univer-shadow-md univer-ring-2 univer-ring-white univer-transition-transform

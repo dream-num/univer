@@ -15,6 +15,7 @@
  */
 
 import { cleanup, fireEvent, render } from '@testing-library/react';
+import { useState } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { HueSlider } from '../HueSlider';
 import '@testing-library/jest-dom/vitest';
@@ -30,7 +31,7 @@ describe('HueSlider extra', () => {
         const onChanged = vi.fn();
         const { container } = render(<HueSlider hsv={[120, 60, 70]} onChange={onChange} onChanged={onChanged} />);
         const slider = container.querySelector('[data-u-comp="color-picker-hue-slider"] > div') as HTMLDivElement;
-        const thumb = container.querySelector('.univer-size-2') as HTMLDivElement;
+        const thumb = container.querySelector('[data-u-comp="color-picker-hue-slider-thumb"]') as HTMLDivElement;
 
         Object.defineProperty(thumb, 'clientWidth', { value: 10, configurable: true });
         Object.defineProperty((slider.parentElement as HTMLDivElement), 'clientWidth', { value: 100, configurable: true });
@@ -53,5 +54,51 @@ describe('HueSlider extra', () => {
 
         expect(onChange).toHaveBeenCalled();
         expect(onChanged).toHaveBeenCalledWith(120, 60, 70);
+    });
+
+    it('should emit latest hsv on pointer up after prop update', () => {
+        const onChange = vi.fn();
+        const onChanged = vi.fn();
+
+        function Wrapper() {
+            const [hsv, setHsv] = useState<[number, number, number]>([120, 60, 70]);
+            return (
+                <HueSlider
+                    hsv={hsv}
+                    onChange={(h, s, v) => {
+                        setHsv([h, s, v]);
+                        onChange(h, s, v);
+                    }}
+                    onChanged={onChanged}
+                />
+            );
+        }
+
+        const { container } = render(<Wrapper />);
+        const slider = container.querySelector('[data-u-comp="color-picker-hue-slider"] > div') as HTMLDivElement;
+        const thumb = container.querySelector('[data-u-comp="color-picker-hue-slider-thumb"]') as HTMLDivElement;
+
+        Object.defineProperty(thumb, 'clientWidth', { value: 10, configurable: true });
+        Object.defineProperty((slider.parentElement as HTMLDivElement), 'clientWidth', { value: 100, configurable: true });
+        slider.getBoundingClientRect = vi.fn(() => ({
+            left: 0,
+            top: 0,
+            width: 100,
+            height: 8,
+            right: 100,
+            bottom: 8,
+            x: 0,
+            y: 0,
+            toJSON: () => {},
+        }));
+
+        fireEvent.pointerDown(slider, { clientX: 40 });
+        fireEvent.pointerMove(window, { clientX: 70 });
+        fireEvent.pointerUp(window);
+
+        expect(onChange).toHaveBeenCalled();
+        expect(onChanged).toHaveBeenCalled();
+        const lastCall = onChanged.mock.calls[onChanged.mock.calls.length - 1];
+        expect(lastCall[0]).not.toBe(120);
     });
 });

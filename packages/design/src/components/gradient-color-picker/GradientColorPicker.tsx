@@ -15,7 +15,7 @@
  */
 
 import { DeleteIcon } from '@univerjs/icons';
-import { useContext, useMemo, useRef, useState } from 'react';
+import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { clsx } from '../../helper/clsx';
 import { Button } from '../button/Button';
 import { ColorPicker } from '../color-picker/ColorPicker';
@@ -57,6 +57,22 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
     const { locale } = useContext(ConfigContext);
     const [selectedIndex, setSelectedIndex] = useState<number>(0);
     const barRef = useRef<HTMLDivElement>(null);
+    const cleanupRef = useRef<(() => void) | null>(null);
+
+    useEffect(() => {
+        setSelectedIndex((prev) => {
+            if (prev >= value.stops.length) {
+                return Math.max(0, value.stops.length - 1);
+            }
+            return prev;
+        });
+    }, [value.stops.length]);
+
+    useEffect(() => {
+        return () => {
+            cleanupRef.current?.();
+        };
+    }, []);
 
     const stops = useMemo(() => {
         return [...value.stops].sort((a, b) => a.offset - b.offset);
@@ -155,6 +171,7 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
             />
 
             <div
+                data-u-comp="gradient-color-picker-preview"
                 className={`
                   univer-h-32 univer-w-full univer-rounded-md univer-border univer-border-gray-200
                   dark:!univer-border-gray-600
@@ -165,6 +182,7 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
             <div className="univer-relative univer-mt-4 univer-h-6">
                 <div
                     ref={barRef}
+                    data-u-comp="gradient-color-picker-bar"
                     className={`
                       univer-absolute univer-inset-x-0 univer-top-1/2 univer-h-2 -univer-translate-y-1/2
                       univer-cursor-crosshair univer-rounded-full
@@ -175,6 +193,8 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
                 {value.stops.map((stop, index) => (
                     <div
                         key={index}
+                        data-u-comp="gradient-color-picker-stop"
+                        data-selected={selectedIndex === index}
                         className={clsx(
                             `
                               univer-absolute univer-top-1/2 univer-size-4 -univer-translate-x-1/2
@@ -210,8 +230,10 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
                             const handlePointerUp = () => {
                                 window.removeEventListener('pointermove', handlePointerMove);
                                 window.removeEventListener('pointerup', handlePointerUp);
+                                cleanupRef.current = null;
                             };
 
+                            cleanupRef.current = handlePointerUp;
                             window.addEventListener('pointermove', handlePointerMove);
                             window.addEventListener('pointerup', handlePointerUp);
                         }}
@@ -243,6 +265,7 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
                 <div className="univer-flex univer-gap-1">
                     <Tooltip title={locale?.GradientColorPicker.delete}>
                         <Button
+                            data-u-comp="gradient-color-picker-delete"
                             variant="danger"
                             onClick={handleRemoveStop}
                             disabled={value.stops.length <= 2}

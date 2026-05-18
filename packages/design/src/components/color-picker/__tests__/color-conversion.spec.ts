@@ -27,6 +27,12 @@ describe('color-conversion', () => {
         expect(hsvToRgb(300, 100, 100)).toEqual([255, 0, 255]);
     });
 
+    it('should normalize hue values >= 360 to equivalent hue in [0, 360)', () => {
+        expect(hsvToRgb(360, 100, 100)).toEqual([255, 0, 0]);
+        expect(hsvToRgb(720, 100, 100)).toEqual([255, 0, 0]);
+        expect(hsvToRgb(420, 100, 100)).toEqual([255, 255, 0]);
+    });
+
     it('should convert rgb and hsv values', () => {
         expect(rgbToHex(255, 0, 16)).toBe('#ff0010');
         expect(hsvToHex(0, 100, 100)).toBe('#ff0000');

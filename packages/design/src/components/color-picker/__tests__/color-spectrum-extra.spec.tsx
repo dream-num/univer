@@ -41,7 +41,7 @@ describe('ColorSpectrum extra', () => {
         const onChanged = vi.fn();
         const { container } = render(<ColorSpectrum hsv={[120, 20, 80]} onChange={onChange} onChanged={onChanged} />);
 
-        const canvas = container.querySelector('canvas') as HTMLCanvasElement;
+        const canvas = container.querySelector('[data-u-comp="color-picker-spectrum-canvas"]') as HTMLCanvasElement;
         const wrapper = container.querySelector('[data-u-comp="color-picker-spectrum"]') as HTMLDivElement;
         Object.defineProperty(wrapper, 'clientWidth', { value: 100, configurable: true });
         Object.defineProperty(wrapper, 'clientHeight', { value: 100, configurable: true });

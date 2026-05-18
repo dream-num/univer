@@ -25,6 +25,7 @@ export interface ICreateUmdConfigOptions {
     baseConfig: Partial<UserConfig>;
     enableObfuscation: boolean;
     entry: IEntryConfig;
+    obfuscatorIgnorePatterns?: RegExp[];
     outDir: string;
     packageDir: string;
     packageName: string;
@@ -87,7 +88,7 @@ function getGlobalName(packageName: string, entryKey: string) {
  * Creates the browser-oriented UMD bundle config for a single package entry.
  */
 export function createUmdConfig(options: ICreateUmdConfigOptions): UserConfig {
-    const { baseConfig, enableObfuscation, entry, outDir, packageDir, packageName, plugins } = options;
+    const { baseConfig, enableObfuscation, entry, obfuscatorIgnorePatterns, outDir, packageDir, packageName, plugins } = options;
 
     return defineConfig({
         ...baseConfig,
@@ -109,7 +110,7 @@ export function createUmdConfig(options: ICreateUmdConfigOptions): UserConfig {
         platform: 'browser',
         plugins: [
             ...plugins,
-            ...(enableObfuscation ? [createOutputObfuscatorPlugin()] : []),
+            ...(enableObfuscation ? [createOutputObfuscatorPlugin(obfuscatorIgnorePatterns)] : []),
             createOutputAliasPlugin({
                 copyToRoot: false,
                 keepRootIndexCss: false,

@@ -22,6 +22,7 @@ export interface IBuildOptions {
     ignorePackages?: string[];
     nodeFirst?: boolean;
     tsdownConfigPath?: string;
+    obfuscatorIgnorePatterns?: RegExp[];
 }
 
 export type TEntryType = 'facade' | 'index' | 'locale';

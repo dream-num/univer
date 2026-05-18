@@ -23,7 +23,7 @@ interface IBundleOutput {
     fileName?: string;
 }
 
-export function createOutputObfuscatorPlugin() {
+export function createOutputObfuscatorPlugin(ignorePatterns?: RegExp[]) {
     const obfuscationOptions: ObfuscatorOptions = {
         ignoreImports: true,
     };
@@ -38,11 +38,16 @@ export function createOutputObfuscatorPlugin() {
             const outDir = outputOptions.dir;
 
             for (const output of Object.values(bundle)) {
-                if (!output.fileName || !output.fileName.endsWith('.js') || output.fileName.endsWith('.map')) {
+                const fileName = output.fileName;
+                if (!fileName || !fileName.endsWith('.js') || fileName.endsWith('.map')) {
                     continue;
                 }
 
-                const targetPath = path.resolve(outDir, output.fileName);
+                if (ignorePatterns?.some((pattern) => pattern.test(fileName))) {
+                    continue;
+                }
+
+                const targetPath = path.resolve(outDir, fileName);
                 const sourceCode = readFileSync(targetPath, 'utf8');
                 const obfuscatedCode = JavaScriptObfuscator.obfuscate(sourceCode, obfuscationOptions).getObfuscatedCode();
 

@@ -29,6 +29,7 @@ export interface ICreateModuleConfigOptions {
     externalPackages: string[];
     facadeExternalPackages: string[];
     format: TModuleFormat;
+    obfuscatorIgnorePatterns?: RegExp[];
     outDir: string;
     packageDir: string;
     plugins: any[];
@@ -38,7 +39,7 @@ export interface ICreateModuleConfigOptions {
  * Creates the common ESM/CJS bundle config for a single package entry.
  */
 export function createModuleConfig(options: ICreateModuleConfigOptions): UserConfig {
-    const { baseConfig, enableObfuscation, entry, externalPackages, facadeExternalPackages, format, outDir, packageDir, plugins } = options;
+    const { baseConfig, enableObfuscation, entry, externalPackages, facadeExternalPackages, format, obfuscatorIgnorePatterns, outDir, packageDir, plugins } = options;
     const neverBundle = entry.type === 'facade' ? facadeExternalPackages : externalPackages;
     const copyToRoot = format === 'esm';
     const keepRootIndexCss = entry.type === 'index' && format === 'esm';
@@ -53,12 +54,12 @@ export function createModuleConfig(options: ICreateModuleConfigOptions): UserCon
         format,
         outputOptions: {
             codeSplitting: true,
-            minify: false,
+            minify: enableObfuscation,
         },
         outDir,
         plugins: [
             ...plugins,
-            ...(enableObfuscation ? [createOutputObfuscatorPlugin()] : []),
+            ...(enableObfuscation ? [createOutputObfuscatorPlugin(obfuscatorIgnorePatterns)] : []),
             createOutputAliasPlugin({
                 copyToRoot,
                 keepRootIndexCss,

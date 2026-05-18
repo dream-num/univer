@@ -10,8 +10,8 @@ on:
             - 'v*.*.*-rc.*'
 
 concurrency:
-    group: ${{ github.workflow }}-${{ github.ref }}
-    cancel-in-progress: true
+    group: github-pages
+    cancel-in-progress: false
 
 permissions:
     contents: write

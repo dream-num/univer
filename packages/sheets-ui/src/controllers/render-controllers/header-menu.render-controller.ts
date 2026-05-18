@@ -44,6 +44,11 @@ enum HEADER_HOVER_TYPE {
     COLUMN,
 }
 
+interface IHeaderBaseLayout {
+    columnBaseHeight: number;
+    columnGutterHeight: number;
+}
+
 /**
  * header highlight
  * column menu: show, hover and mousedown event
@@ -129,7 +134,8 @@ export class HeaderMenuRenderController extends Disposable implements IRenderMod
                 return;
             }
 
-            const { rowHeaderWidth, columnHeaderHeight } = skeleton;
+            const { rowHeaderWidth } = skeleton;
+            const { columnBaseHeight, columnGutterHeight } = getHeaderBaseLayout(skeleton);
 
             const { startX, startY, endX, endY, column } = getCoordByOffset(
                 evt.offsetX,
@@ -150,25 +156,25 @@ export class HeaderMenuRenderController extends Disposable implements IRenderMod
 
                 this._hoverRect?.transformByState({
                     width: endX - startX,
-                    height: columnHeaderHeight,
+                    height: columnBaseHeight,
                     left: startX,
-                    top: 0,
+                    top: columnGutterHeight,
                 });
 
                 if (this._hoverMenu == null) {
                     return;
                 }
 
-                if (endX - startX < columnHeaderHeight * 2) {
+                if (endX - startX < columnBaseHeight * 2) {
                     this._hoverMenu.hide();
                     return;
                 }
 
-                const menuSize = columnHeaderHeight * 0.8;
+                const menuSize = columnBaseHeight * 0.8;
 
                 this._hoverMenu.transformByState({
-                    left: endX - columnHeaderHeight,
-                    top: columnHeaderHeight / 2 - menuSize / 2,
+                    left: endX - columnBaseHeight,
+                    top: columnGutterHeight + columnBaseHeight / 2 - menuSize / 2,
                 });
 
                 this._hoverMenu.setShapeProps({ size: menuSize });
@@ -298,4 +304,19 @@ export class HeaderMenuRenderController extends Disposable implements IRenderMod
             ],
         };
     }
+}
+
+function getHeaderBaseLayout(skeleton: {
+    columnHeaderHeight: number;
+    worksheet: { getConfig?: () => { columnHeader?: { height?: number } } };
+}): IHeaderBaseLayout {
+    const configuredColumnHeight = skeleton.worksheet.getConfig?.()?.columnHeader?.height;
+    const columnBaseHeight = typeof configuredColumnHeight === 'number' && configuredColumnHeight > 0
+        ? Math.min(configuredColumnHeight, skeleton.columnHeaderHeight)
+        : skeleton.columnHeaderHeight;
+
+    return {
+        columnBaseHeight,
+        columnGutterHeight: Math.max(0, skeleton.columnHeaderHeight - columnBaseHeight),
+    };
 }

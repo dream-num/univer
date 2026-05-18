@@ -72,6 +72,13 @@ enum HEADER_RESIZE_TYPE {
 
 export const HEADER_RESIZE_PERMISSION_CHECK = createInterceptorKey<boolean, { row?: number; col?: number }>('headerResizePermissionCheck');
 
+interface IHeaderBaseLayout {
+    rowBaseWidth: number;
+    rowGutterWidth: number;
+    columnBaseHeight: number;
+    columnGutterHeight: number;
+}
+
 export class HeaderResizeRenderController extends Disposable implements IRenderModule {
     private _currentRow: number = 0;
 
@@ -167,7 +174,7 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
                 return;
             }
 
-            const { rowHeaderWidth, columnHeaderHeight } = skeleton;
+            const { rowBaseWidth, rowGutterWidth, columnBaseHeight, columnGutterHeight } = getHeaderBaseLayout(skeleton);
 
             const { startX, startY, endX, endY, row, column } = getCoordByOffset(
                 evt.offsetX,
@@ -216,10 +223,10 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
                     return false;
                 }
 
-                const rowSize = Math.min(MAX_HEADER_MENU_SHAPE_SIZE, rowHeaderWidth / 3);
+                const rowSize = Math.min(MAX_HEADER_MENU_SHAPE_SIZE, rowBaseWidth / 3);
 
                 this._rowResizeRect.transformByState({
-                    left: rowHeaderWidth / 2 - rowSize / 2,
+                    left: rowGutterWidth + rowBaseWidth / 2 - rowSize / 2,
                     top,
                 });
 
@@ -259,11 +266,11 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
                 }
 
                 // TODO: @jocs remove magic number.
-                const columnSize = columnHeaderHeight * 0.7;
+                const columnSize = columnBaseHeight * 0.7;
 
                 this._columnResizeRect.transformByState({
                     left,
-                    top: columnHeaderHeight / 2 - columnSize / 2,
+                    top: columnGutterHeight + columnBaseHeight / 2 - columnSize / 2,
                 });
                 this._columnResizeRect.setShapeProps({
                     size: columnSize,
@@ -560,4 +567,27 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
         this._scenePointerMoveSub = null;
         this._scenePointerUpSub = null;
     }
+}
+
+function getHeaderBaseLayout(skeleton: {
+    rowHeaderWidth: number;
+    columnHeaderHeight: number;
+    worksheet: { getConfig?: () => { rowHeader?: { width?: number }; columnHeader?: { height?: number } } };
+}): IHeaderBaseLayout {
+    const config = skeleton.worksheet.getConfig?.();
+    const configuredRowWidth = config?.rowHeader?.width;
+    const configuredColumnHeight = config?.columnHeader?.height;
+    const rowBaseWidth = typeof configuredRowWidth === 'number' && configuredRowWidth > 0
+        ? Math.min(configuredRowWidth, skeleton.rowHeaderWidth)
+        : skeleton.rowHeaderWidth;
+    const columnBaseHeight = typeof configuredColumnHeight === 'number' && configuredColumnHeight > 0
+        ? Math.min(configuredColumnHeight, skeleton.columnHeaderHeight)
+        : skeleton.columnHeaderHeight;
+
+    return {
+        rowBaseWidth,
+        rowGutterWidth: Math.max(0, skeleton.rowHeaderWidth - rowBaseWidth),
+        columnBaseHeight,
+        columnGutterHeight: Math.max(0, skeleton.columnHeaderHeight - columnBaseHeight),
+    };
 }

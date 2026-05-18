@@ -46,6 +46,7 @@ interface IContextMenuPanelProps {
 
 interface IContextMenuMenuProps {
     menuSchemas: IMenuSchema[];
+    menuSessionVersion: number;
     submenuPortalContainer: HTMLElement | null;
     maxMenuHeight: number;
     onOptionSelect?: (option: IValueOption) => void;
@@ -54,6 +55,7 @@ interface IContextMenuMenuProps {
 interface IContextMenuMenuItemProps {
     menuKey: string;
     menuItem: IDisplayMenuItem<IMenuItem>;
+    menuSessionVersion: number;
     submenuPortalContainer: HTMLElement | null;
     maxMenuHeight: number;
     onOptionSelect?: (option: IValueOption) => void;
@@ -157,6 +159,7 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
         >
             <ContextMenuMenu
                 menuSchemas={menuItems}
+                menuSessionVersion={menuSessionVersion}
                 submenuPortalContainer={submenuPortalContainer}
                 onOptionSelect={onOptionSelect}
                 maxMenuHeight={maxMenuHeight}
@@ -166,7 +169,7 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
 }
 
 function ContextMenuMenu(props: IContextMenuMenuProps) {
-    const { menuSchemas, submenuPortalContainer, onOptionSelect, maxMenuHeight } = props;
+    const { menuSchemas, menuSessionVersion, submenuPortalContainer, onOptionSelect, maxMenuHeight } = props;
     const localeService = useDependency(LocaleService);
     const hiddenGroupStates = useContextGroupHiddenStates(menuSchemas);
 
@@ -191,6 +194,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                             key={menuSchema.key}
                             menuKey={menuSchema.key}
                             menuItem={menuSchema.item as IDisplayMenuItem<IMenuItem>}
+                            menuSessionVersion={menuSessionVersion}
                             submenuPortalContainer={submenuPortalContainer}
                             onOptionSelect={onOptionSelect}
                             maxMenuHeight={maxMenuHeight}
@@ -252,6 +256,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                                     key={childSchema.key}
                                     menuKey={childSchema.key}
                                     menuItem={childSchema.item as IDisplayMenuItem<IMenuItem>}
+                                    menuSessionVersion={menuSessionVersion}
                                     submenuPortalContainer={submenuPortalContainer}
                                     onOptionSelect={onOptionSelect}
                                     maxMenuHeight={maxMenuHeight}
@@ -266,7 +271,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
 }
 
 function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
-    const { menuKey, menuItem, submenuPortalContainer, onOptionSelect, maxMenuHeight } = props;
+    const { menuKey, menuItem, menuSessionVersion, submenuPortalContainer, onOptionSelect, maxMenuHeight } = props;
     const { direction } = useContext(ConfigContext);
     const menuManagerService = useDependency(IMenuManagerService);
     const disabled = useObservable<boolean>(menuItem.disabled$, false);
@@ -309,7 +314,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
         }
 
         return menuManagerService.getMenuByPositionKey(menuItem.id);
-    }, [menuItem.id, menuItem.type, menuManagerService]);
+    }, [menuItem.id, menuItem.type, menuManagerService, menuSessionVersion]);
 
     const hasSelectionSubmenu = selections.length > 0;
     const hasSubItemSubmenu = subMenuItems.length > 0;
@@ -625,6 +630,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                                 {hasSubItemSubmenu && (
                                     <ContextMenuMenu
                                         menuSchemas={subMenuItems}
+                                        menuSessionVersion={menuSessionVersion}
                                         submenuPortalContainer={submenuPortalContainer}
                                         onOptionSelect={onSubmenuOptionSelect}
                                         maxMenuHeight={maxMenuHeight}

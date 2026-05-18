@@ -79,6 +79,7 @@ import { SheetCellEditorResizeService } from './services/editor/cell-editor-resi
 import { FormulaEditorManagerService, IFormulaEditorManagerService } from './services/editor/formula-editor-manager.service';
 import { FormatPainterService, IFormatPainterService } from './services/format-painter/format-painter.service';
 import { HoverManagerService } from './services/hover-manager.service';
+import { HeaderUnhideRangeService } from './services/header-unhide-range.service';
 import { IMarkSelectionService, MarkSelectionService } from './services/mark-selection/mark-selection.service';
 import { SheetPermissionPanelModel } from './services/permission/sheet-permission-panel.model';
 import { SheetPermissionUserManagerService } from './services/permission/sheet-permission-user-list.service';
@@ -153,6 +154,7 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
             [IStatusBarService, { useClass: StatusBarService }],
             [IMarkSelectionService, { useClass: MarkSelectionService }],
             [HoverManagerService],
+            [HeaderUnhideRangeService],
             [DragManagerService],
             [SheetCanvasPopManagerService],
             [CellPopupManagerService],

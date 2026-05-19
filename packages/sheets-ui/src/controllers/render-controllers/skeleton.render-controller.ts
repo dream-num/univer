@@ -60,27 +60,27 @@ export class SheetSkeletonRenderController extends Disposable implements IRender
             height: columnHeaderHeightAndMarginTop + rowTotalHeight,
         });
         scene.getMainViewport().setMargin(rowHeaderWidthAndMarginLeft, columnHeaderHeightAndMarginTop);
-        scene.getMainViewport().setViewportSize({
+        scene.getMainViewport().resizeWhenFreezeChange({
             left: rowHeaderWidthAndMarginLeft,
             top: columnHeaderHeightAndMarginTop,
         });
-        scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_COLUMN_LEFT)?.setViewportSize({
-            left: rowHeaderWidthAndMarginLeft,
-            height: columnHeaderHeightAndMarginTop,
-        });
-        scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_COLUMN_RIGHT)?.setViewportSize({
+        scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_COLUMN_LEFT)?.resizeWhenFreezeChange({
             left: rowHeaderWidthAndMarginLeft,
             height: columnHeaderHeightAndMarginTop,
         });
-        scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_ROW_BOTTOM)?.setViewportSize({
+        scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_COLUMN_RIGHT)?.resizeWhenFreezeChange({
+            left: rowHeaderWidthAndMarginLeft,
+            height: columnHeaderHeightAndMarginTop,
+        });
+        scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_ROW_BOTTOM)?.resizeWhenFreezeChange({
             width: rowHeaderWidthAndMarginLeft,
             top: columnHeaderHeightAndMarginTop,
         });
-        scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_ROW_TOP)?.setViewportSize({
+        scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_ROW_TOP)?.resizeWhenFreezeChange({
             width: rowHeaderWidthAndMarginLeft,
             top: columnHeaderHeightAndMarginTop,
         });
-        scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_LEFT_TOP)?.setViewportSize({
+        scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_LEFT_TOP)?.resizeWhenFreezeChange({
             width: rowHeaderWidthAndMarginLeft,
             height: columnHeaderHeightAndMarginTop,
         });

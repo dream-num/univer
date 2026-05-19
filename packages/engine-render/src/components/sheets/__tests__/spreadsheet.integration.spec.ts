@@ -355,6 +355,26 @@ describe('spreadsheet integration', () => {
         skeleton.dispose();
     });
 
+    it('renders sheet content from the header plus outline margin origin', () => {
+        const { spreadsheet, skeleton, scene, cacheCanvas, mainCanvas } = fixture;
+        const mainCtx = mainCanvas.getContext() as any;
+        const translateSpy = vi.spyOn(mainCtx, 'translateWithPrecision');
+        const transformerSpy = vi.spyOn(scene, 'updateTransformerZero');
+
+        skeleton.setMarginLeft(20);
+        skeleton.setMarginTop(16);
+
+        spreadsheet.render(mainCtx, createViewportInfo(scene, cacheCanvas, {
+            isDirty: 1,
+            isForceDirty: false,
+        }));
+
+        expect(translateSpy).toHaveBeenCalledWith(66, 44);
+        expect(transformerSpy).toHaveBeenCalledWith(66, 44);
+        expect(spreadsheet.isHit(Vector2.FromArray([65, 44]))).toBe(false);
+        expect(spreadsheet.isHit(Vector2.FromArray([67, 45]))).toBe(true);
+    });
+
     it('covers spreadsheet draw helpers and utility branches', () => {
         const { spreadsheet, skeleton, scene, cacheCanvas, mainCanvas } = fixture;
         const context = mainCanvas.getContext() as any;
@@ -418,8 +438,8 @@ describe('spreadsheet integration', () => {
             leftOrigin: 0,
             bufferEdgeX: 8,
             bufferEdgeY: 6,
-            rowHeaderWidth: skeleton.rowHeaderWidth,
-            columnHeaderHeight: skeleton.columnHeaderHeight,
+            rowHeaderWidthAndMarginLeft: skeleton.rowHeaderWidthAndMarginLeft,
+            columnHeaderHeightAndMarginTop: skeleton.columnHeaderHeightAndMarginTop,
             scaleX: 1,
             scaleY: 1,
         } as any);

@@ -18,7 +18,7 @@ import type { Nullable, Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { ISheetSkeletonManagerParam } from '@univerjs/sheets';
 import { Disposable, Inject } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { IRenderManagerService, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 
 export class SheetSkeletonRenderController extends Disposable implements IRenderModule {
@@ -60,5 +60,29 @@ export class SheetSkeletonRenderController extends Disposable implements IRender
             height: columnHeaderHeightAndMarginTop + rowTotalHeight,
         });
         scene.getMainViewport().setMargin(rowHeaderWidthAndMarginLeft, columnHeaderHeightAndMarginTop);
+        scene.getMainViewport().resizeWhenFreezeChange({
+            left: rowHeaderWidthAndMarginLeft,
+            top: columnHeaderHeightAndMarginTop,
+        });
+        scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_COLUMN_LEFT)?.resizeWhenFreezeChange({
+            left: rowHeaderWidthAndMarginLeft,
+            height: columnHeaderHeightAndMarginTop,
+        });
+        scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_COLUMN_RIGHT)?.resizeWhenFreezeChange({
+            left: rowHeaderWidthAndMarginLeft,
+            height: columnHeaderHeightAndMarginTop,
+        });
+        scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_ROW_BOTTOM)?.resizeWhenFreezeChange({
+            width: rowHeaderWidthAndMarginLeft,
+            top: columnHeaderHeightAndMarginTop,
+        });
+        scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_ROW_TOP)?.resizeWhenFreezeChange({
+            width: rowHeaderWidthAndMarginLeft,
+            top: columnHeaderHeightAndMarginTop,
+        });
+        scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_LEFT_TOP)?.resizeWhenFreezeChange({
+            width: rowHeaderWidthAndMarginLeft,
+            height: columnHeaderHeightAndMarginTop,
+        });
     }
 }

@@ -45,6 +45,8 @@ enum HEADER_HOVER_TYPE {
 }
 
 interface IHeaderBaseLayout {
+    rowBaseWidth: number;
+    rowGutterWidth: number;
     columnBaseHeight: number;
     columnGutterHeight: number;
 }
@@ -134,8 +136,7 @@ export class HeaderMenuRenderController extends Disposable implements IRenderMod
                 return;
             }
 
-            const { rowHeaderWidth } = skeleton;
-            const { columnBaseHeight, columnGutterHeight } = getHeaderBaseLayout(skeleton);
+            const { rowBaseWidth, rowGutterWidth, columnBaseHeight, columnGutterHeight } = getHeaderBaseLayout(skeleton);
 
             const { startX, startY, endX, endY, column } = getCoordByOffset(
                 evt.offsetX,
@@ -146,9 +147,9 @@ export class HeaderMenuRenderController extends Disposable implements IRenderMod
 
             if (initialType === HEADER_HOVER_TYPE.ROW) {
                 this._hoverRect?.transformByState({
-                    width: rowHeaderWidth,
+                    width: rowBaseWidth,
                     height: endY - startY,
-                    left: 0,
+                    left: rowGutterWidth,
                     top: startY,
                 });
             } else {
@@ -307,16 +308,26 @@ export class HeaderMenuRenderController extends Disposable implements IRenderMod
 }
 
 function getHeaderBaseLayout(skeleton: {
+    rowHeaderWidth: number;
+    rowHeaderWidthAndMarginLeft: number;
     columnHeaderHeight: number;
-    worksheet: { getConfig?: () => { columnHeader?: { height?: number } } };
+    columnHeaderHeightAndMarginTop: number;
+    worksheet: { getConfig?: () => { rowHeader?: { width?: number }; columnHeader?: { height?: number } } };
 }): IHeaderBaseLayout {
-    const configuredColumnHeight = skeleton.worksheet.getConfig?.()?.columnHeader?.height;
+    const config = skeleton.worksheet.getConfig?.();
+    const configuredRowWidth = config?.rowHeader?.width;
+    const configuredColumnHeight = config?.columnHeader?.height;
+    const rowBaseWidth = typeof configuredRowWidth === 'number' && configuredRowWidth > 0
+        ? Math.min(configuredRowWidth, skeleton.rowHeaderWidth)
+        : skeleton.rowHeaderWidth;
     const columnBaseHeight = typeof configuredColumnHeight === 'number' && configuredColumnHeight > 0
         ? Math.min(configuredColumnHeight, skeleton.columnHeaderHeight)
         : skeleton.columnHeaderHeight;
 
     return {
+        rowBaseWidth,
+        rowGutterWidth: Math.max(0, skeleton.rowHeaderWidthAndMarginLeft - rowBaseWidth),
         columnBaseHeight,
-        columnGutterHeight: Math.max(0, skeleton.columnHeaderHeight - columnBaseHeight),
+        columnGutterHeight: Math.max(0, skeleton.columnHeaderHeightAndMarginTop - columnBaseHeight),
     };
 }

@@ -349,15 +349,15 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
                 let moveChangeX = 0;
                 let moveChangeY = 0;
 
-                const { columnTotalWidth, rowHeaderWidth, rowTotalHeight, columnHeaderHeight } = skeleton;
+                const { columnTotalWidth, rowHeaderWidthAndMarginLeft, rowTotalHeight, columnHeaderHeightAndMarginTop } = skeleton;
 
-                const shapeWidth = canvasMaxWidth > columnTotalWidth + rowHeaderWidth
+                const shapeWidth = canvasMaxWidth > columnTotalWidth + rowHeaderWidthAndMarginLeft
                     ? canvasMaxWidth
-                    : columnTotalWidth + rowHeaderWidth;
+                    : columnTotalWidth + rowHeaderWidthAndMarginLeft;
 
-                const shapeHeight = canvasMaxHeight > rowTotalHeight + columnHeaderHeight
+                const shapeHeight = canvasMaxHeight > rowTotalHeight + columnHeaderHeightAndMarginTop
                     ? canvasMaxHeight
-                    : rowTotalHeight + columnHeaderHeight;
+                    : rowTotalHeight + columnHeaderHeightAndMarginTop;
 
                 const scale = Math.max(scaleX, scaleY);
 
@@ -571,7 +571,9 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
 
 function getHeaderBaseLayout(skeleton: {
     rowHeaderWidth: number;
+    rowHeaderWidthAndMarginLeft: number;
     columnHeaderHeight: number;
+    columnHeaderHeightAndMarginTop: number;
     worksheet: { getConfig?: () => { rowHeader?: { width?: number }; columnHeader?: { height?: number } } };
 }): IHeaderBaseLayout {
     const config = skeleton.worksheet.getConfig?.();
@@ -586,8 +588,8 @@ function getHeaderBaseLayout(skeleton: {
 
     return {
         rowBaseWidth,
-        rowGutterWidth: Math.max(0, skeleton.rowHeaderWidth - rowBaseWidth),
+        rowGutterWidth: Math.max(0, skeleton.rowHeaderWidthAndMarginLeft - rowBaseWidth),
         columnBaseHeight,
-        columnGutterHeight: Math.max(0, skeleton.columnHeaderHeight - columnBaseHeight),
+        columnGutterHeight: Math.max(0, skeleton.columnHeaderHeightAndMarginTop - columnBaseHeight),
     };
 }

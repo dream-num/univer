@@ -67,6 +67,8 @@ export interface IFakeViewport {
     transScroll2ViewportScrollValue(viewportScrollX: number, viewportScrollY: number): { x: number; y: number };
     enable(): void;
     disable(): void;
+    setMargin(marginLeft: number, marginTop: number): void;
+    setViewportSize(params: Partial<{ left: number; top: number; width: number; height: number }>): void;
     setPadding(padding: { startX: number; endX: number; startY: number; endY: number }): void;
     resetPadding(): void;
     resizeWhenFreezeChange(params: { left?: number; top?: number; right?: number; bottom?: number; width?: number; height?: number }): void;
@@ -118,6 +120,13 @@ export function createFakeViewport(viewportKey: string, options?: Partial<IFakeV
         disable: () => {
             viewport.isActive = false;
         },
+        setMargin: () => { },
+        setViewportSize: ({ left, top, width, height }) => {
+            if (typeof left === 'number') viewport.left = left;
+            if (typeof top === 'number') viewport.top = top;
+            if (typeof width === 'number') viewport.width = width;
+            if (typeof height === 'number') viewport.height = height;
+        },
         setPadding: (padding) => {
             viewport.padding = padding;
         },
@@ -155,6 +164,7 @@ export interface IFakeScene {
     enableLayerCache(...layers: number[]): void;
     makeDirty(dirty: boolean): void;
     getViewport(key: unknown): IFakeViewport | null;
+    getMainViewport(): IFakeViewport;
     getViewports(): IFakeViewport[];
     getActiveViewportByCoord(_coord: Vector2): IFakeViewport | null;
     findViewportByPosToScene(_coord: Vector2): IFakeViewport | null;
@@ -210,6 +220,7 @@ export function createFakeScene(
         enableLayerCache: () => { },
         makeDirty: () => { },
         getViewport: (key) => viewportMap.get(key) ?? null,
+        getMainViewport: () => viewportMap.get(SHEET_VIEWPORT_KEY.VIEW_MAIN)!,
         getViewports: () => Array.from(viewportMap.values()),
         getActiveViewportByCoord: () => viewportMap.get(SHEET_VIEWPORT_KEY.VIEW_MAIN) ?? null,
         findViewportByPosToScene: () => viewportMap.get(SHEET_VIEWPORT_KEY.VIEW_MAIN) ?? null,

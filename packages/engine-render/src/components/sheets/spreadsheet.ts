@@ -181,8 +181,8 @@ export class Spreadsheet extends SheetComponent {
         if (!skeleton) {
             return false;
         }
-        const { rowHeaderWidth, columnHeaderHeight } = skeleton;
-        if (oCoord.x > rowHeaderWidth && oCoord.y > columnHeaderHeight) {
+        const { rowHeaderWidthAndMarginLeft, columnHeaderHeightAndMarginTop } = skeleton;
+        if (oCoord.x > rowHeaderWidthAndMarginLeft && oCoord.y > columnHeaderHeightAndMarginTop) {
             return true;
         }
         return false;
@@ -253,7 +253,7 @@ export class Spreadsheet extends SheetComponent {
 
     renderByViewports(mainCtx: UniverRenderingContext2D, viewportInfo: IViewportInfo, spreadsheetSkeleton: SpreadsheetSkeleton) {
         const { diffBounds, diffX, diffY, viewPortPosition, cacheCanvas, leftOrigin, topOrigin, bufferEdgeX, bufferEdgeY, isDirty: isViewportDirty, isForceDirty: isViewportForceDirty } = viewportInfo as Required<IViewportInfo>;
-        const { rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
+        const { rowHeaderWidthAndMarginLeft, columnHeaderHeightAndMarginTop } = spreadsheetSkeleton;
         const { a: scaleX = 1, d: scaleY = 1 } = mainCtx.getTransform();
         const bufferEdgeSizeX = bufferEdgeX * scaleX / window.devicePixelRatio;
         const bufferEdgeSizeY = bufferEdgeY * scaleY / window.devicePixelRatio;
@@ -281,22 +281,22 @@ export class Spreadsheet extends SheetComponent {
                 bufferEdgeY,
                 scaleX,
                 scaleY,
-                columnHeaderHeight,
-                rowHeaderWidth,
+                columnHeaderHeightAndMarginTop,
+                rowHeaderWidthAndMarginLeft,
             });
         }
         // support for browser native zoom (only windows has this problem)
         const sourceLeft = bufferEdgeSizeX * Math.min(1, window.devicePixelRatio);
         const sourceTop = bufferEdgeSizeY * Math.min(1, window.devicePixelRatio);
         const { left, top, right, bottom } = viewPortPosition;
-        const dw = right - left + rowHeaderWidth;
-        const dh = bottom - top + columnHeaderHeight;
+        const dw = right - left + rowHeaderWidthAndMarginLeft;
+        const dh = bottom - top + columnHeaderHeightAndMarginTop;
         this._applyCache(cacheCanvas, mainCtx, sourceLeft, sourceTop, dw, dh, left, top, dw, dh);
         cacheCtx.restore();
     }
 
     paintNewAreaForScrolling(viewportInfo: IViewportInfo, param: IPaintForScrolling) {
-        const { cacheCanvas, cacheCtx, mainCtx, topOrigin, leftOrigin, bufferEdgeX, bufferEdgeY, scaleX, scaleY, columnHeaderHeight, rowHeaderWidth } = param;
+        const { cacheCanvas, cacheCtx, mainCtx, topOrigin, leftOrigin, bufferEdgeX, bufferEdgeY, scaleX, scaleY, columnHeaderHeightAndMarginTop, rowHeaderWidthAndMarginLeft } = param;
         const { shouldCacheUpdate, diffCacheBounds, diffX, diffY } = viewportInfo;
         cacheCtx.save();
         cacheCtx.setTransform(1, 0, 0, 1, 0, 0);
@@ -320,8 +320,8 @@ export class Spreadsheet extends SheetComponent {
 
                 // When this.draw, ctx.translate cell offset is relative to spreadsheet content
                 // But diffBounds includes rowHeader columnWidth, so the offset of row header and column header needs to be subtracted before drawing
-                const x = diffLeft - rowHeaderWidth;
-                const y = diffTop - columnHeaderHeight;
+                const x = diffLeft - rowHeaderWidthAndMarginLeft;
+                const y = diffTop - columnHeaderHeightAndMarginTop;
                 const w = diffRight - diffLeft;
                 const h = diffBottom - diffTop; // w and h must exactly match the diffarea size, otherwise when scrolling back, the clear area will be too large, causing valid content from the previous frame to be erased
 
@@ -399,10 +399,10 @@ export class Spreadsheet extends SheetComponent {
 
         mainCtx.save();
 
-        const { rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
-        mainCtx.translateWithPrecision(rowHeaderWidth, columnHeaderHeight);
+        const { rowHeaderWidthAndMarginLeft, columnHeaderHeightAndMarginTop } = spreadsheetSkeleton;
+        mainCtx.translateWithPrecision(rowHeaderWidthAndMarginLeft, columnHeaderHeightAndMarginTop);
 
-        this.getScene()?.updateTransformerZero(spreadsheetSkeleton.rowHeaderWidth, spreadsheetSkeleton.columnHeaderHeight);
+        this.getScene()?.updateTransformerZero(rowHeaderWidthAndMarginLeft, columnHeaderHeightAndMarginTop);
 
         const { viewportKey } = viewportInfo;
         // scene --> layer, getObjects --> viewport.render(object) --> spreadsheet

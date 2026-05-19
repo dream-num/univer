@@ -55,12 +55,14 @@ describe('HeaderResizeRenderController', () => {
         testBed.univer.dispose();
     });
 
-    it('positions resize handles in the base header area when outline gutter expands headers', () => {
+    it('positions resize handles in the base header area when outline uses margins', () => {
         const testBed = createRenderTestBed();
         const { context, injector, skeleton } = testBed;
 
-        skeleton.rowHeaderWidth = 86;
-        skeleton.columnHeaderHeight = 60;
+        skeleton.rowHeaderWidth = 46;
+        skeleton.columnHeaderHeight = 20;
+        skeleton.rowHeaderWidthAndMarginLeft = 86;
+        skeleton.columnHeaderHeightAndMarginTop = 60;
         (skeleton.worksheet as any).getConfig = () => ({
             rowHeader: { width: 46 },
             columnHeader: { height: 20 },

@@ -101,8 +101,8 @@ export interface IPaintForScrolling {
     leftOrigin: number;
     bufferEdgeX: number;
     bufferEdgeY: number;
-    rowHeaderWidth: number;
-    columnHeaderHeight: number;
+    rowHeaderWidthAndMarginLeft: number;
+    columnHeaderHeightAndMarginTop: number;
     scaleX: number;
     scaleY: number;
 }

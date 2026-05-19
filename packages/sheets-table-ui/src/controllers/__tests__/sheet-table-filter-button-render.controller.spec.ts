@@ -58,6 +58,9 @@ describe('SheetsTableFilterButtonRenderController', () => {
                 getSheetFilterRangeWithState: vi.fn(() => []),
             } as any,
             {
+                getRangeThemeStyle: vi.fn(),
+            } as any,
+            {
                 onCommandExecuted: vi.fn(() => ({ dispose: vi.fn() })),
             } as any
         );

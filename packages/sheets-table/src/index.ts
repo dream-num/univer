@@ -23,7 +23,7 @@ export { RemoveTableThemeCommand } from './commands/commands/remove-table-theme.
 export { SetSheetTableCommand } from './commands/commands/set-sheet-table.command';
 export type { ISetSheetTableCommandParams } from './commands/commands/set-sheet-table.command';
 export { SetSheetTableFilterCommand } from './commands/commands/set-table-filter.command';
-export { SheetTableInsertColCommand, SheetTableInsertRowCommand, SheetTableRemoveColCommand, SheetTableRemoveRowCommand } from './commands/commands/sheet-table-row-col.command';
+export { SheetTableInsertColCommand, SheetTableInsertColumnAtCommand, SheetTableInsertRowAtCommand, SheetTableInsertRowCommand, SheetTableRemoveColCommand, SheetTableRemoveColumnAtCommand, SheetTableRemoveRowCommand } from './commands/commands/sheet-table-row-col.command';
 export { AddSheetTableMutation } from './commands/mutations/add-sheet-table.mutation';
 export type { IAddSheetTableParams } from './commands/mutations/add-sheet-table.mutation';
 export { DeleteSheetTableMutation } from './commands/mutations/delete-sheet-table.mutation';
@@ -42,4 +42,6 @@ export { SheetTableService } from './services/table-service';
 export { SheetsTableButtonStateEnum, SheetsTableSortStateEnum, TableColumnDataTypeEnum, TableColumnFilterTypeEnum, TableConditionTypeEnum, TableDateCompareTypeEnum, TableNumberCompareTypeEnum, TableStringCompareTypeEnum } from './types/enum';
 export type { ITableColumnJson, ITableConditionFilterItem, ITableData, ITableFilterItem, ITableInfo, ITableInfoWithUnitId, ITableManualFilterItem, ITableOptions, ITableRange, ITableRangeWithState, TableMetaType, TableRelationTupleType } from './types/type';
 export type { ITableJson, ITableSetConfig } from './types/type';
-export { isConditionFilter, isManualTableFilter } from './util';
+export { getExistingNamesSet, isConditionFilter, isManualTableFilter } from './util';
+export { validateSheetTableName } from './util/table-name';
+export type { ISheetTableNameValidationResult, SheetTableNameValidationReason } from './util/table-name';

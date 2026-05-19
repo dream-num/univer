@@ -18,7 +18,7 @@
 
 import { ICommandService, IPermissionService, LocaleService } from '@univerjs/core';
 import { SortRangeCommand, SortType } from '@univerjs/sheets-sort';
-import { SheetsTableSortStateEnum, TableColumnFilterTypeEnum, TableConditionTypeEnum, TableDateCompareTypeEnum, TableManager } from '@univerjs/sheets-table';
+import { SheetsTableSortStateEnum, SheetTableInsertColumnAtCommand, SheetTableRemoveColumnAtCommand, TableColumnFilterTypeEnum, TableConditionTypeEnum, TableDateCompareTypeEnum, TableManager } from '@univerjs/sheets-table';
 import { createElement } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { SheetsTableComponentController } from '../../../controllers/sheet-table-component.controller';
@@ -83,7 +83,10 @@ vi.mock('@univerjs/icons', async () => {
     return {
         ...actual,
         AscendingIcon: () => null,
+        DeleteColumnDoubleIcon: () => null,
         DescendingIcon: () => null,
+        LeftInsertColumnDoubleIcon: () => null,
+        RightInsertColumnDoubleIcon: () => null,
     };
 });
 
@@ -160,6 +163,7 @@ describe('SheetTableFilterPanel', () => {
                             getSortState: () => ({ columnIndex: -1, sortState: SheetsTableSortStateEnum.None }),
                             setSortState: vi.fn(),
                         }),
+                        getRange: () => ({ startRow: 0, endRow: 5, startColumn: 0, endColumn: 2 }),
                         getTableFilterColumn: () => undefined,
                     }),
                 };
@@ -216,6 +220,7 @@ describe('SheetTableFilterPanel', () => {
                             getSortState: () => ({ columnIndex: 2, sortState: SheetsTableSortStateEnum.Desc }),
                             setSortState,
                         }),
+                        getRange: () => ({ startRow: 0, endRow: 5, startColumn: 5, endColumn: 6 }),
                         getTableFilterRange: () => ({ startRow: 0, endRow: 5, startColumn: 5, endColumn: 6 }),
                         getTableFilterColumn: () => undefined,
                     }),
@@ -282,6 +287,7 @@ describe('SheetTableFilterPanel', () => {
                             getSortState: () => ({ columnIndex: -1, sortState: SheetsTableSortStateEnum.None }),
                             setSortState: vi.fn(),
                         }),
+                        getRange: () => ({ startRow: 0, endRow: 5, startColumn: 0, endColumn: 2 }),
                         getTableFilterColumn: () => undefined,
                     }),
                 };
@@ -310,5 +316,63 @@ describe('SheetTableFilterPanel', () => {
             }),
         }));
         expect(closeFilterPanel).toHaveBeenCalledTimes(1);
+    });
+
+    it('should run table column operations from column menu', () => {
+        const closeFilterPanel = vi.fn();
+        const executeCommand = vi.fn();
+
+        mocks.useDependency.mockImplementation((token: unknown) => {
+            if (token === LocaleService) return localeService;
+            if (token === SheetsTableUiService) {
+                return {
+                    getTableFilterPanelInitProps: () => ({
+                        unitId: 'u1',
+                        subUnitId: 's1',
+                        tableId: 't1',
+                        columnIndex: 1,
+                        tableFilter: undefined,
+                        currentFilterBy: FilterByEnum.Items,
+                    }),
+                    getTableFilterItems: () => ({ data: [] }),
+                    getTableFilterCheckedItems: () => [],
+                    setTableFilter: vi.fn(),
+                };
+            }
+            if (token === TableManager) {
+                return {
+                    getTable: () => ({
+                        getTableFilters: () => ({
+                            getSortState: () => ({ columnIndex: -1, sortState: SheetsTableSortStateEnum.None }),
+                            setSortState: vi.fn(),
+                        }),
+                        getRange: () => ({ startRow: 0, endRow: 5, startColumn: 3, endColumn: 5 }),
+                        getTableFilterColumn: () => undefined,
+                    }),
+                };
+            }
+            if (token === ICommandService) return { executeCommand };
+            if (token === IPermissionService) return { getPermissionPoint: () => ({ value: true }) };
+            if (token === SheetsTableComponentController) {
+                return {
+                    getCurrentTableFilterInfo: () => ({ unitId: 'u1', subUnitId: 's1', tableId: 't1', column: 4 }),
+                    closeFilterPanel,
+                };
+            }
+            return null;
+        });
+
+        const tree = renderPanel();
+        const menuButtons = findAll(tree, (n) => n.type === 'button');
+
+        menuButtons[0].props.onClick();
+        expect(executeCommand).toHaveBeenLastCalledWith(SheetTableInsertColumnAtCommand.id, expect.objectContaining({ index: 4 }));
+
+        menuButtons[1].props.onClick();
+        expect(executeCommand).toHaveBeenLastCalledWith(SheetTableInsertColumnAtCommand.id, expect.objectContaining({ index: 5 }));
+
+        menuButtons[2].props.onClick();
+        expect(executeCommand).toHaveBeenLastCalledWith(SheetTableRemoveColumnAtCommand.id, expect.objectContaining({ index: 4 }));
+        expect(closeFilterPanel).toHaveBeenCalledTimes(3);
     });
 });

@@ -21,6 +21,7 @@ const locale: typeof enUS = {
         title: '表格',
         selectRange: '選擇表格範圍',
         rename: '重命名表格',
+        renamePlaceholder: 'Enter table name',
         updateRange: '更新表格範圍',
         tableRangeWithMergeError: '表格範圍不能與合併儲存格重疊',
         tableRangeWithOtherTableError: '表格範圍不能與其他表格重疊',
@@ -41,6 +42,11 @@ const locale: typeof enUS = {
         columnPrefix: '列',
         tablePrefix: '表格',
         tableNameError: '表格名稱不能包含空格， 不能以數字開頭，不能和已有表格名稱重複',
+        columnMenu: {
+            'insert-left': '向左插入 1 個表格欄',
+            'insert-right': '向右插入 1 個表格欄',
+            delete: '刪除表格欄',
+        },
 
         insert: {
             main: '表格插入',

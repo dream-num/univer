@@ -24,7 +24,7 @@ import { OpenTableFilterPanelOperation } from './commands/operations/open-table-
 import { OpenTableSelectorOperation } from './commands/operations/open-table-selector.operation';
 import { defaultPluginConfig, SHEETS_TABLE_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { PLUGIN_NAME } from './const';
-import { SheetTableAnchorController } from './controllers/sheet-table-anchor.controller';
+import { SheetTableControlsRenderController } from './controllers/sheet-table-controls-render.controller';
 import { SheetsTableComponentController } from './controllers/sheet-table-component.controller';
 import { SheetsTableFilterButtonRenderController } from './controllers/sheet-table-filter-button-render.controller';
 import { SheetsTableRenderController } from './controllers/sheet-table-render.controller';
@@ -87,13 +87,14 @@ export class UniverSheetsTableUIPlugin extends Plugin {
     }
 
     private _registerRenderModules(): void {
-        const renderDependencies: Dependency[] = [
-            [SheetsTableFilterButtonRenderController],
-            [SheetsTableRenderController],
-        ];
+        const renderDependencies: Dependency[] = [];
         if (this._config.hideAnchor !== true) {
-            renderDependencies.push([SheetTableAnchorController]);
+            renderDependencies.push([SheetTableControlsRenderController]);
         }
+        renderDependencies.push(
+            [SheetsTableFilterButtonRenderController],
+            [SheetsTableRenderController]
+        );
 
         renderDependencies.forEach((m) => {
             this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, m));

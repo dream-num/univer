@@ -19,10 +19,10 @@ import type { ITableConditionFilterItem, ITableManualFilterItem } from '@univerj
 import type { IConditionInfo } from './type';
 import { ICommandService, IPermissionService, LocaleService } from '@univerjs/core';
 import { Button, ButtonGroup, Segmented } from '@univerjs/design';
-import { AscendingIcon, DescendingIcon } from '@univerjs/icons';
+import { AscendingIcon, DeleteColumnDoubleIcon, DescendingIcon, LeftInsertColumnDoubleIcon, RightInsertColumnDoubleIcon } from '@univerjs/icons';
 import { WorkbookEditablePermission } from '@univerjs/sheets';
 import { SortRangeCommand, SortType } from '@univerjs/sheets-sort';
-import { SheetsTableSortStateEnum, TableColumnFilterTypeEnum, TableDateCompareTypeEnum, TableManager } from '@univerjs/sheets-table';
+import { SheetsTableSortStateEnum, SheetTableInsertColumnAtCommand, SheetTableRemoveColumnAtCommand, TableColumnFilterTypeEnum, TableDateCompareTypeEnum, TableManager } from '@univerjs/sheets-table';
 import { useDependency } from '@univerjs/ui';
 import { useMemo, useState } from 'react';
 import { SheetsTableComponentController } from '../../controllers/sheet-table-component.controller';
@@ -61,9 +61,12 @@ export function SheetTableFilterPanel() {
     if (!table) return null;
 
     const tableFilters = table.getTableFilters();
+    const tableRange = table.getRange();
     const sortState = tableFilters.getSortState();
     const isAsc = sortState.columnIndex === columnIndex && sortState.sortState === SheetsTableSortStateEnum.Asc;
     const isDesc = sortState.columnIndex === columnIndex && sortState.sortState === SheetsTableSortStateEnum.Desc;
+    const absoluteColumn = tableFilterPanelInfo.column;
+    const canDeleteColumn = tableRange.endColumn > tableRange.startColumn;
 
     const closeDialog = (): void => {
         sheetsTableComponentController.closeFilterPanel();
@@ -84,6 +87,32 @@ export function SheetTableFilterPanel() {
         });
 
         tableFilters.setSortState(columnIndex, asc ? SheetsTableSortStateEnum.Asc : SheetsTableSortStateEnum.Desc);
+        closeDialog();
+    };
+
+    const insertColumn = (side: 'left' | 'right') => {
+        commandService.executeCommand(SheetTableInsertColumnAtCommand.id, {
+            unitId,
+            subUnitId,
+            tableId,
+            index: side === 'left' ? absoluteColumn : absoluteColumn + 1,
+            count: 1,
+        });
+        closeDialog();
+    };
+
+    const deleteColumn = () => {
+        if (!canDeleteColumn) {
+            return;
+        }
+
+        commandService.executeCommand(SheetTableRemoveColumnAtCommand.id, {
+            unitId,
+            subUnitId,
+            tableId,
+            index: absoluteColumn,
+            count: 1,
+        });
         closeDialog();
     };
 
@@ -152,18 +181,76 @@ export function SheetTableFilterPanel() {
             `}
         >
             {editable && (
-                <div className="univer-mb-3 univer-flex">
-                    <ButtonGroup className="univer-mb-3 !univer-flex univer-w-full">
-                        <Button className="univer-w-1/2" onClick={() => applySort(true)}>
-                            <AscendingIcon className="univer-mr-1" />
-                            {localeService.t('sheets-sort.general.sort-asc')}
-                        </Button>
-                        <Button className="univer-w-1/2" onClick={() => applySort(false)}>
-                            <DescendingIcon className="univer-mr-1" />
-                            {localeService.t('sheets-sort.general.sort-desc')}
-                        </Button>
-                    </ButtonGroup>
-                </div>
+                <>
+                    <div
+                        className={`
+                          -univer-mx-4 -univer-mt-2 univer-mb-3 univer-border-0 univer-border-b univer-border-solid
+                          univer-border-gray-200 univer-py-1
+                        `}
+                    >
+                        <button
+                            type="button"
+                            className={`
+                              univer-box-border univer-flex univer-h-10 univer-w-full univer-cursor-pointer
+                              univer-items-center univer-gap-3 univer-border-none univer-bg-transparent univer-px-4
+                              univer-text-left univer-text-sm univer-text-gray-900
+                              hover:univer-bg-gray-100
+                              disabled:univer-cursor-not-allowed disabled:univer-text-gray-400
+                              dark:!univer-text-white
+                              dark:hover:!univer-bg-gray-600
+                            `}
+                            onClick={() => insertColumn('left')}
+                        >
+                            <LeftInsertColumnDoubleIcon className="univer-size-5" extend={{ colorChannel1: 'var(--univer-primary-600)' }} />
+                            <span>{localeService.t('sheets-table.columnMenu.insert-left')}</span>
+                        </button>
+                        <button
+                            type="button"
+                            className={`
+                              univer-box-border univer-flex univer-h-10 univer-w-full univer-cursor-pointer
+                              univer-items-center univer-gap-3 univer-border-none univer-bg-transparent univer-px-4
+                              univer-text-left univer-text-sm univer-text-gray-900
+                              hover:univer-bg-gray-100
+                              disabled:univer-cursor-not-allowed disabled:univer-text-gray-400
+                              dark:!univer-text-white
+                              dark:hover:!univer-bg-gray-600
+                            `}
+                            onClick={() => insertColumn('right')}
+                        >
+                            <RightInsertColumnDoubleIcon className="univer-size-5" extend={{ colorChannel1: 'var(--univer-primary-600)' }} />
+                            <span>{localeService.t('sheets-table.columnMenu.insert-right')}</span>
+                        </button>
+                        <button
+                            type="button"
+                            className={`
+                              univer-box-border univer-flex univer-h-10 univer-w-full univer-cursor-pointer
+                              univer-items-center univer-gap-3 univer-border-none univer-bg-transparent univer-px-4
+                              univer-text-left univer-text-sm univer-text-gray-900
+                              hover:univer-bg-gray-100
+                              disabled:univer-cursor-not-allowed disabled:univer-text-gray-400
+                              dark:!univer-text-white
+                              dark:hover:!univer-bg-gray-600
+                            `}
+                            disabled={!canDeleteColumn}
+                            onClick={deleteColumn}
+                        >
+                            <DeleteColumnDoubleIcon className="univer-size-5" extend={{ colorChannel1: 'var(--univer-primary-600)' }} />
+                            <span>{localeService.t('sheets-table.columnMenu.delete')}</span>
+                        </button>
+                    </div>
+                    <div className="univer-mb-3 univer-flex">
+                        <ButtonGroup className="univer-mb-3 !univer-flex univer-w-full">
+                            <Button className="univer-w-1/2" onClick={() => applySort(true)}>
+                                <AscendingIcon className="univer-mr-1" />
+                                {localeService.t('sheets-sort.general.sort-asc')}
+                            </Button>
+                            <Button className="univer-w-1/2" onClick={() => applySort(false)}>
+                                <DescendingIcon className="univer-mr-1" />
+                                {localeService.t('sheets-sort.general.sort-desc')}
+                            </Button>
+                        </ButtonGroup>
+                    </div>
+                </>
             )}
             <div className="univer-w-full">
                 <Segmented

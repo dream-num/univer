@@ -55,5 +55,6 @@ describe('table-theme.factory', () => {
         expect(tableThemeConfig[5].name).toBe('table-default-5');
         expect(tableThemeConfig[0].style.headerRowStyle?.bd?.t).toEqual(tableDefaultBorderStyle);
         expect(tableThemeConfig[0].style.lastColumnStyle?.bd?.r).toEqual(tableDefaultBorderStyle);
+        expect(tableThemeConfig[0].style.secondRowStyle?.bg?.rgb).toBe('#EEF2FF');
     });
 });

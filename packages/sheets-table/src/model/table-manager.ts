@@ -327,8 +327,9 @@ export class TableManager extends Disposable {
             }
         } else if (newRange.endColumn > oldRange.endColumn) {
             const diff = newRange.endColumn - oldRange.endColumn;
+            const columnPrefix = this._localeService.t('sheets-table.columnPrefix');
             for (let i = 0; i < diff; i++) {
-                table.insertColumn(oldRange.endColumn, new TableColumn(generateRandomId(), getColumnName(table.getColumnsCount() + 1, 'Column')));
+                table.insertColumn(oldRange.endColumn, new TableColumn(generateRandomId(), getColumnName(table.getColumnsCount() + 1, columnPrefix)));
             }
         }
 

@@ -21,6 +21,7 @@ const locale: typeof enUS = {
         title: 'Tabla',
         selectRange: 'Seleccionar rango de tabla',
         rename: 'Renombrar tabla',
+        renamePlaceholder: 'Enter table name',
         updateRange: 'Actualizar rango de tabla',
         tableRangeWithMergeError: 'El rango de la tabla no puede superponerse con celdas combinadas',
         tableRangeWithOtherTableError: 'El rango de la tabla no puede superponerse con otras tablas',
@@ -41,6 +42,11 @@ const locale: typeof enUS = {
         columnPrefix: 'Columna',
         tablePrefix: 'Tabla',
         tableNameError: 'El nombre de la tabla no puede contener espacios, no puede comenzar con un número y no puede ser idéntico a un nombre de tabla existente',
+        columnMenu: {
+            'insert-left': 'Insert 1 table column left',
+            'insert-right': 'Insert 1 table column right',
+            delete: 'Delete table column',
+        },
 
         insert: {
             main: 'Insertar tabla',

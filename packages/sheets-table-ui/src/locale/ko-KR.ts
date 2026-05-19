@@ -21,6 +21,7 @@ const locale: typeof enUS = {
         title: '표',
         selectRange: '표 범위 선택',
         rename: '표 이름 바꾸기',
+        renamePlaceholder: 'Enter table name',
         updateRange: '표 범위 업데이트',
         tableRangeWithMergeError: '표 범위는 병합된 셀과 겹칠 수 없습니다',
         tableRangeWithOtherTableError: '표 범위는 다른 표와 겹칠 수 없습니다',
@@ -41,6 +42,11 @@ const locale: typeof enUS = {
         columnPrefix: '열',
         tablePrefix: '표',
         tableNameError: '표 이름은 공백을 포함할 수 없으며 숫자로 시작할 수 없고 기존 표 이름과 중복될 수 없습니다',
+        columnMenu: {
+            'insert-left': 'Insert 1 table column left',
+            'insert-right': 'Insert 1 table column right',
+            delete: 'Delete table column',
+        },
 
         insert: {
             main: '표 삽입',

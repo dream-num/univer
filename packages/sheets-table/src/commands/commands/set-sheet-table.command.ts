@@ -17,11 +17,12 @@
 import type { ICommand } from '@univerjs/core';
 import type { ITableSetConfig } from '../../types/type';
 import type { ISetSheetTableMutationParams } from '../mutations/set-sheet-table.mutation';
-import { CommandType, customNameCharacterCheck, ICommandService, ILogService, IUndoRedoService, IUniverInstanceService, LocaleService } from '@univerjs/core';
+import { CommandType, ICommandService, ILogService, IUndoRedoService, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
 import { TableManager } from '../../model/table-manager';
 import { IRangeOperationTypeEnum } from '../../types/type';
 import { getExistingNamesSet } from '../../util';
+import { validateSheetTableName } from '../../util/table-name';
 import { SetSheetTableMutation } from '../mutations/set-sheet-table.mutation';
 
 export interface ISetSheetTableCommandParams extends ITableSetConfig {
@@ -54,8 +55,8 @@ export const SetSheetTableCommand: ICommand<ISetSheetTableCommandParams> = {
         });
 
         if (name) {
-            const isValidName = customNameCharacterCheck(name.toLowerCase(), existingNamesSet);
-            if (!isValidName) {
+            const tableNameValidation = validateSheetTableName(name, existingNamesSet);
+            if (!tableNameValidation.valid) {
                 const logService = accessor.get(ILogService);
                 logService.warn(localeService.t('sheets-table.tableNameError'));
                 return false;

@@ -15,9 +15,8 @@
  */
 
 import type { ICommand } from '@univerjs/core';
-import { CommandType, IContextService } from '@univerjs/core';
+import { CommandType } from '@univerjs/core';
 import { TableManager } from '@univerjs/sheets-table';
-import { SHEETS_TABLE_FILTER_PANEL_OPENED_KEY } from '../../const';
 import { SheetsTableComponentController } from '../../controllers/sheet-table-component.controller';
 
 export interface IOpenTableFilterPanelOperationParams {
@@ -37,17 +36,14 @@ export const OpenTableFilterPanelOperation: ICommand<IOpenTableFilterPanelOperat
 
         const { row, col, unitId, subUnitId, tableId } = params;
         const tableManager = accessor.get(TableManager);
-        const contextService = accessor.get(IContextService);
         const sheetsTableComponentController = accessor.get(SheetsTableComponentController);
 
         const table = tableManager.getTable(unitId, tableId);
         if (!table) {
             return false;
         }
-        if (!contextService.getContextValue(SHEETS_TABLE_FILTER_PANEL_OPENED_KEY)) {
-            sheetsTableComponentController.setCurrentTableFilterInfo({ unitId, subUnitId, row, tableId, column: col });
-            contextService.setContextValue(SHEETS_TABLE_FILTER_PANEL_OPENED_KEY, true);
-        }
+
+        sheetsTableComponentController.openOrToggleFilterPanel({ unitId, subUnitId, row, tableId, column: col });
 
         return true;
 

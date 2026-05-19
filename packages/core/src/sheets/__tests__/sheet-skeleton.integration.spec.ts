@@ -334,8 +334,8 @@ describe('SheetSkeleton integration', () => {
         const baseColor = themeService.getColorFromTheme('primary.500');
         const { r, g, b } = new ColorKit(baseColor).toRgb();
 
-        expect(skeleton.gapConfig.defaultBackgroundColor).toBe(`rgba(${r}, ${g}, ${b}, 0.08)`);
-        expect(skeleton.gapConfig.defaultStripeColor).toBe(`rgba(${r}, ${g}, ${b}, 0.25)`);
+        expect(skeleton.gapConfig.defaultBackgroundColor).toBe(`rgba(${r}, ${g}, ${b}, 0.025)`);
+        expect(skeleton.gapConfig.defaultStripeColor).toBe(`rgba(${r}, ${g}, ${b}, 0.08)`);
         expect(skeleton.getRowGapSize(1)).toBe(5);
         expect(skeleton.getColGapSize(2)).toBe(7);
 
@@ -490,12 +490,12 @@ describe('SheetSkeleton integration', () => {
             defaultBackgroundColor: '#abcdef',
         });
         expect(skeleton.gapConfig.defaultBackgroundColor).toBe('#abcdef');
-        expect(skeleton.gapConfig.defaultStripeColor).toBe(`rgba(${r}, ${g}, ${b}, 0.25)`);
+        expect(skeleton.gapConfig.defaultStripeColor).toBe(`rgba(${r}, ${g}, ${b}, 0.08)`);
 
         skeleton.setGapConfig({
             defaultStripeColor: '#fedcba',
         });
         expect(skeleton.gapConfig.defaultStripeColor).toBe('#fedcba');
-        expect(skeleton.gapConfig.defaultBackgroundColor).toBe(`rgba(${r}, ${g}, ${b}, 0.08)`);
+        expect(skeleton.gapConfig.defaultBackgroundColor).toBe(`rgba(${r}, ${g}, ${b}, 0.025)`);
     });
 });

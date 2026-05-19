@@ -22,8 +22,11 @@ import { SheetsTableController } from '../../../controllers/sheets-table.control
 import { TableManager } from '../../../model/table-manager';
 import {
     SheetTableInsertColCommand,
+    SheetTableInsertColumnAtCommand,
+    SheetTableInsertRowAtCommand,
     SheetTableInsertRowCommand,
     SheetTableRemoveColCommand,
+    SheetTableRemoveColumnAtCommand,
     SheetTableRemoveRowCommand,
 } from '../sheet-table-row-col.command';
 
@@ -102,5 +105,135 @@ describe('sheet-table-row-col commands', () => {
 
         expect(SheetTableRemoveRowCommand.handler(accessor, { unitId: 'u1', subUnitId: 's1', tableId: 't1' } as any)).toBe(false);
         expect(SheetTableRemoveColCommand.handler(accessor, { unitId: 'u1', subUnitId: 's1', tableId: 't1' } as any)).toBe(false);
+    });
+
+    it('direct row insert should update table range and move trailing table rows', () => {
+        sheetsMocks.getSheetCommandTarget.mockReturnValue({
+            unitId: 'u1',
+            subUnitId: 's1',
+            worksheet: {
+                getRowCount: () => 100,
+                getColumnCount: () => 100,
+                getCellMatrix: () => ({ getDataRange: () => ({ endRow: 10, endColumn: 10 }) }),
+            },
+            workbook: {},
+        });
+        sheetsMocks.getMoveRangeUndoRedoMutations.mockReturnValue({
+            redos: [{ id: 'move-redo', params: {} }],
+            undos: [{ id: 'move-undo', params: {} }],
+        });
+
+        const syncExecuteCommand = vi.fn(() => true);
+        const pushUndoRedo = vi.fn();
+        const table = {
+            getId: () => 't1',
+            getSubunitId: () => 's1',
+            getRange: () => ({ startRow: 0, endRow: 4, startColumn: 1, endColumn: 3 }),
+        };
+        const accessor = createAccessor([
+            [IUniverInstanceService, {}],
+            [TableManager, { getTableById: () => table }],
+            [ICommandService, { syncExecuteCommand }],
+            [IUndoRedoService, { pushUndoRedo }],
+        ]);
+
+        expect(SheetTableInsertRowAtCommand.handler(accessor, {
+            unitId: 'u1',
+            subUnitId: 's1',
+            tableId: 't1',
+            index: 2,
+            count: 1,
+        })).toBe(true);
+        expect(syncExecuteCommand).toHaveBeenCalled();
+        expect(pushUndoRedo).toHaveBeenCalledWith(expect.objectContaining({ unitID: 'u1' }));
+    });
+
+    it('direct column insert should update table columns and move trailing table columns', () => {
+        sheetsMocks.getSheetCommandTarget.mockReturnValue({
+            unitId: 'u1',
+            subUnitId: 's1',
+            worksheet: {
+                getRowCount: () => 100,
+                getColumnCount: () => 100,
+                getCellMatrix: () => ({ getDataRange: () => ({ endRow: 10, endColumn: 10 }) }),
+            },
+            workbook: {},
+        });
+        sheetsMocks.getMoveRangeUndoRedoMutations.mockReturnValue({
+            redos: [{ id: 'move-redo', params: {} }],
+            undos: [{ id: 'move-undo', params: {} }],
+        });
+
+        const syncExecuteCommand = vi.fn(() => true);
+        const pushUndoRedo = vi.fn();
+        const table = {
+            getId: () => 't1',
+            getSubunitId: () => 's1',
+            getRange: () => ({ startRow: 0, endRow: 4, startColumn: 1, endColumn: 3 }),
+        };
+        const accessor = createAccessor([
+            [IUniverInstanceService, {}],
+            [TableManager, { getTableById: () => table }],
+            [ICommandService, { syncExecuteCommand }],
+            [IUndoRedoService, { pushUndoRedo }],
+        ]);
+
+        expect(SheetTableInsertColumnAtCommand.handler(accessor, {
+            unitId: 'u1',
+            subUnitId: 's1',
+            tableId: 't1',
+            index: 2,
+            count: 1,
+        })).toBe(true);
+        expect(syncExecuteCommand).toHaveBeenCalled();
+        expect(pushUndoRedo).toHaveBeenCalledWith(expect.objectContaining({ unitID: 'u1' }));
+    });
+
+    it('direct column remove should update table columns and move trailing table columns', () => {
+        sheetsMocks.getSheetCommandTarget.mockReturnValue({
+            unitId: 'u1',
+            subUnitId: 's1',
+            worksheet: {
+                getRowCount: () => 100,
+                getColumnCount: () => 100,
+                getCellMatrix: () => ({ getDataRange: () => ({ endRow: 10, endColumn: 10 }) }),
+            },
+            workbook: {},
+        });
+        sheetsMocks.getMoveRangeUndoRedoMutations.mockReturnValue({
+            redos: [{ id: 'move-redo', params: {} }],
+            undos: [{ id: 'move-undo', params: {} }],
+        });
+
+        const syncExecuteCommand = vi.fn(() => true);
+        const pushUndoRedo = vi.fn();
+        const table = {
+            getId: () => 't1',
+            getSubunitId: () => 's1',
+            getRange: () => ({ startRow: 0, endRow: 4, startColumn: 1, endColumn: 3 }),
+            getTableInfo: () => ({
+                columns: [
+                    { id: 'c1', displayName: 'Column 1' },
+                    { id: 'c2', displayName: 'Column 2' },
+                    { id: 'c3', displayName: 'Column 3' },
+                ],
+            }),
+        };
+        const accessor = createAccessor([
+            [IUniverInstanceService, {}],
+            [TableManager, { getTableById: () => table }],
+            [ICommandService, { syncExecuteCommand }],
+            [IUndoRedoService, { pushUndoRedo }],
+        ]);
+
+        expect(SheetTableRemoveColumnAtCommand.handler(accessor, {
+            unitId: 'u1',
+            subUnitId: 's1',
+            tableId: 't1',
+            index: 2,
+            count: 1,
+        })).toBe(true);
+        expect(syncExecuteCommand).toHaveBeenCalled();
+        expect(pushUndoRedo).toHaveBeenCalledWith(expect.objectContaining({ unitID: 'u1' }));
     });
 });

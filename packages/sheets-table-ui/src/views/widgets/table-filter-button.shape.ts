@@ -15,21 +15,22 @@
  */
 
 import type { IMouseEvent, IPointerEvent, IShapeProps, UniverRenderingContext2D } from '@univerjs/engine-render';
+import type { SheetsTableButtonStateEnum } from '@univerjs/sheets-table';
 import type { IOpenTableFilterPanelOperationParams } from '../../commands/operations/open-table-filter-dialog.opration';
-import { ICommandService, IContextService, Inject, ThemeService } from '@univerjs/core';
+import { ICommandService } from '@univerjs/core';
 import { Shape } from '@univerjs/engine-render';
-import { SheetsTableButtonStateEnum } from '@univerjs/sheets-table';
 import { OpenTableFilterPanelOperation } from '../../commands/operations/open-table-filter-dialog.opration';
-import { SHEETS_TABLE_FILTER_PANEL_OPENED_KEY } from '../../const';
-import { TableButton } from './drawings';
-import { filteredSortAsc, filteredSortDesc, filterNoneSortAsc, filterNoneSortDesc, filterPartial } from './icons';
 
 export const FILTER_ICON_SIZE = 16;
 export const FILTER_ICON_PADDING = 1;
+const FILTER_TRIGGER_HOVER_RADIUS = 4;
 
 export interface ISheetsTableFilterButtonShapeProps extends IShapeProps {
     cellWidth: number;
     cellHeight: number;
+    iconColor: string;
+    hoverBackground: string;
+    hoverIconColor: string;
     filterParams: { row: number; col: number; unitId: string; subUnitId: string; buttonState: SheetsTableButtonStateEnum; tableId: string };
 }
 
@@ -41,15 +42,16 @@ export class SheetsTableFilterButtonShape extends Shape<ISheetsTableFilterButton
     private _cellHeight: number = 0;
 
     private _filterParams?: { row: number; col: number; unitId: string; subUnitId: string; buttonState: SheetsTableButtonStateEnum; tableId: string };
+    private _iconColor = '#fff';
+    private _hoverBackground = 'rgba(255, 255, 255, 0.92)';
+    private _hoverIconColor = '#202124';
 
     private _hovered = false;
 
     constructor(
         key: string,
         props: ISheetsTableFilterButtonShapeProps,
-        @IContextService private readonly _contextService: IContextService,
-        @ICommandService private readonly _commandService: ICommandService,
-        @Inject(ThemeService) private readonly _themeService: ThemeService
+        @ICommandService private readonly _commandService: ICommandService
     ) {
         super(key, props);
 
@@ -74,6 +76,18 @@ export class SheetsTableFilterButtonShape extends Shape<ISheetsTableFilterButton
             this._filterParams = props.filterParams;
         }
 
+        if (typeof props.iconColor !== 'undefined') {
+            this._iconColor = props.iconColor;
+        }
+
+        if (typeof props.hoverBackground !== 'undefined') {
+            this._hoverBackground = props.hoverBackground;
+        }
+
+        if (typeof props.hoverIconColor !== 'undefined') {
+            this._hoverIconColor = props.hoverIconColor;
+        }
+
         this.transformByState({
             width: props.width!,
             height: props.height!,
@@ -93,41 +107,36 @@ export class SheetsTableFilterButtonShape extends Shape<ISheetsTableFilterButton
         cellRegion.rect(left, top, cellWidth, cellHeight);
         ctx.clip(cellRegion);
 
-        const { buttonState } = this._filterParams!;
-
-        const fgColor = this._themeService.getColorFromTheme('primary.600');
-        const bgColor = this._hovered
-            ? this._themeService.getColorFromTheme('gray.50')
-            : 'rgba(255, 255, 255, 1.0)';
-
-        let icons;
-        switch (buttonState) {
-            case SheetsTableButtonStateEnum.FilteredSortNone:
-                icons = filterPartial;
-                break;
-
-            case SheetsTableButtonStateEnum.FilteredSortAsc:
-                icons = filteredSortAsc;
-                break;
-            case SheetsTableButtonStateEnum.FilteredSortDesc:
-                icons = filteredSortDesc;
-                break;
-            case SheetsTableButtonStateEnum.FilterNoneSortNone:
-
-                break;
-            case SheetsTableButtonStateEnum.FilterNoneSortAsc:
-                icons = filterNoneSortAsc;
-                break;
-            case SheetsTableButtonStateEnum.FilterNoneSortDesc:
-                icons = filterNoneSortDesc;
-                break;
-        }
-        if (icons) {
-            TableButton.drawIconByPath(ctx, icons, fgColor, bgColor);
-        } else if (buttonState !== undefined) {
-            TableButton.drawNoSetting(ctx, FILTER_ICON_SIZE, fgColor, bgColor);
+        if (this._hovered) {
+            ctx.save();
+            ctx.fillStyle = this._hoverBackground;
+            ctx.beginPath();
+            ctx.roundRect?.(0, 0, FILTER_ICON_SIZE, FILTER_ICON_SIZE, FILTER_TRIGGER_HOVER_RADIUS);
+            if (!ctx.roundRect) {
+                ctx.rect(0, 0, FILTER_ICON_SIZE, FILTER_ICON_SIZE);
+            }
+            ctx.fill();
+            ctx.restore();
         }
 
+        this._drawChevron(ctx, this._hovered ? this._hoverIconColor : this._iconColor);
+        ctx.restore();
+    }
+
+    private _drawChevron(ctx: UniverRenderingContext2D, color: string): void {
+        const centerX = FILTER_ICON_SIZE / 2;
+        const centerY = FILTER_ICON_SIZE / 2 + 1;
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1.8;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.moveTo(centerX - 4.5, centerY - 2.5);
+        ctx.lineTo(centerX, centerY + 2);
+        ctx.lineTo(centerX + 4.5, centerY - 2.5);
+        ctx.stroke();
         ctx.restore();
     }
 
@@ -138,8 +147,7 @@ export class SheetsTableFilterButtonShape extends Shape<ISheetsTableFilterButton
         }
 
         const { row, col, unitId, subUnitId, tableId } = this._filterParams!;
-        const opened = this._contextService.getContextValue(SHEETS_TABLE_FILTER_PANEL_OPENED_KEY);
-        if (opened || !this._commandService.hasCommand(OpenTableFilterPanelOperation.id)) {
+        if (!this._commandService.hasCommand(OpenTableFilterPanelOperation.id)) {
             return;
         }
 

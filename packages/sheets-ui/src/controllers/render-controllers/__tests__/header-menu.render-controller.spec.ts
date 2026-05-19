@@ -21,7 +21,7 @@ import { HeaderMenuRenderController } from '../header-menu.render-controller';
 import { createRenderTestBed, createTestEvent } from './render-test-bed';
 
 describe('HeaderMenuRenderController', () => {
-    it('positions the column menu arrow in the base column header area when outline gutter expands headers', () => {
+    it('positions the column menu arrow in the base column header area when outline uses margins', () => {
         const testBed = createRenderTestBed({
             dependencies: [
                 [IContextMenuService, { useValue: { triggerContextMenu: vi.fn() } }],
@@ -29,7 +29,8 @@ describe('HeaderMenuRenderController', () => {
         });
         const { context, injector, skeleton } = testBed;
 
-        skeleton.columnHeaderHeight = 60;
+        skeleton.columnHeaderHeight = 20;
+        skeleton.columnHeaderHeightAndMarginTop = 60;
         (skeleton.worksheet as any).getConfig = () => ({
             columnHeader: { height: 20 },
         });

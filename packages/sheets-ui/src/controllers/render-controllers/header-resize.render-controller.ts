@@ -79,13 +79,6 @@ interface IHeaderBaseLayout {
     columnGutterHeight: number;
 }
 
-interface IOutlineHeaderBaseSize {
-    rowHeaderWidth?: number;
-    columnHeaderHeight?: number;
-}
-
-const OUTLINE_HEADER_BASE_SIZE_KEY = '__univerSheetsOutlineHeaderBaseSize';
-
 export class HeaderResizeRenderController extends Disposable implements IRenderModule {
     private _currentRow: number = 0;
 
@@ -356,15 +349,15 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
                 let moveChangeX = 0;
                 let moveChangeY = 0;
 
-                const { columnTotalWidth, rowHeaderWidth, rowTotalHeight, columnHeaderHeight } = skeleton;
+                const { columnTotalWidth, rowHeaderWidthAndMarginLeft, rowTotalHeight, columnHeaderHeightAndMarginTop } = skeleton;
 
-                const shapeWidth = canvasMaxWidth > columnTotalWidth + rowHeaderWidth
+                const shapeWidth = canvasMaxWidth > columnTotalWidth + rowHeaderWidthAndMarginLeft
                     ? canvasMaxWidth
-                    : columnTotalWidth + rowHeaderWidth;
+                    : columnTotalWidth + rowHeaderWidthAndMarginLeft;
 
-                const shapeHeight = canvasMaxHeight > rowTotalHeight + columnHeaderHeight
+                const shapeHeight = canvasMaxHeight > rowTotalHeight + columnHeaderHeightAndMarginTop
                     ? canvasMaxHeight
-                    : rowTotalHeight + columnHeaderHeight;
+                    : rowTotalHeight + columnHeaderHeightAndMarginTop;
 
                 const scale = Math.max(scaleX, scaleY);
 
@@ -578,13 +571,14 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
 
 function getHeaderBaseLayout(skeleton: {
     rowHeaderWidth: number;
+    rowHeaderWidthAndMarginLeft: number;
     columnHeaderHeight: number;
+    columnHeaderHeightAndMarginTop: number;
     worksheet: { getConfig?: () => { rowHeader?: { width?: number }; columnHeader?: { height?: number } } };
 }): IHeaderBaseLayout {
     const config = skeleton.worksheet.getConfig?.();
-    const outlineBaseSize = getOutlineHeaderBaseSize(config);
-    const configuredRowWidth = outlineBaseSize?.rowHeaderWidth ?? config?.rowHeader?.width;
-    const configuredColumnHeight = outlineBaseSize?.columnHeaderHeight ?? config?.columnHeader?.height;
+    const configuredRowWidth = config?.rowHeader?.width;
+    const configuredColumnHeight = config?.columnHeader?.height;
     const rowBaseWidth = typeof configuredRowWidth === 'number' && configuredRowWidth > 0
         ? Math.min(configuredRowWidth, skeleton.rowHeaderWidth)
         : skeleton.rowHeaderWidth;
@@ -594,16 +588,8 @@ function getHeaderBaseLayout(skeleton: {
 
     return {
         rowBaseWidth,
-        rowGutterWidth: Math.max(0, skeleton.rowHeaderWidth - rowBaseWidth),
+        rowGutterWidth: Math.max(0, skeleton.rowHeaderWidthAndMarginLeft - rowBaseWidth),
         columnBaseHeight,
-        columnGutterHeight: Math.max(0, skeleton.columnHeaderHeight - columnBaseHeight),
+        columnGutterHeight: Math.max(0, skeleton.columnHeaderHeightAndMarginTop - columnBaseHeight),
     };
-}
-
-function getOutlineHeaderBaseSize(config: unknown): IOutlineHeaderBaseSize | undefined {
-    if (!config || typeof config !== 'object') {
-        return undefined;
-    }
-
-    return (config as Record<string, IOutlineHeaderBaseSize | undefined>)[OUTLINE_HEADER_BASE_SIZE_KEY];
 }

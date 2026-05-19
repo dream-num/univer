@@ -531,6 +531,10 @@ export class Documents extends DocComponent {
                 this._drawLiquid?.translate(0, rowTop);
 
                 for (const cell of cells) {
+                    if ((cell as IDocumentSkeletonPage & { isMergedCellCovered?: boolean }).isMergedCellCovered) {
+                        continue;
+                    }
+
                     const { left: cellLeft } = cell;
                     this._drawLiquid?.translateSave();
                     this._drawLiquid?.translate(cellLeft, 0);

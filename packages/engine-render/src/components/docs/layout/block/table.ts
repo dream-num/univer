@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { INumberUnit, ITable, ITableRow, Nullable } from '@univerjs/core';
+import type { INumberUnit, ITable, ITableCell, ITableRow, Nullable } from '@univerjs/core';
 import type { IDocumentSkeletonPage, IDocumentSkeletonRow, IDocumentSkeletonTable, IParagraphList, ISectionBreakConfig } from '../../../../basics';
 import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../view-model/document-view-model';
@@ -54,6 +54,16 @@ export function createTableSkeleton(
 
         for (const cellNode of cellNodes) {
             const col = cellNodes.indexOf(cellNode);
+            const cellConfig = rowSource.tableCells[col];
+
+            if (isCoveredTableCell(cellConfig)) {
+                const cellPageSkeleton = createMergedCoveredCellPage(ctx, sectionBreakConfig, table, row, col, rowSkeleton);
+                cellPageSkeleton.left = left;
+                left += cellPageSkeleton.pageWidth;
+                rowSkeleton.cells.push(cellPageSkeleton);
+                continue;
+            }
+
             const cellPageSkeleton = createSkeletonCellPages(
                 ctx,
                 viewModel,
@@ -292,6 +302,23 @@ function dealWithTableRow(
 
     for (const cellNode of cellNodes) {
         const col = cellNodes.indexOf(cellNode);
+        const cellConfig = rowSource.tableCells[col];
+        if (isCoveredTableCell(cellConfig)) {
+            if (rowSkeletons.length === 0) {
+                rowSkeletons.push(createNullRowSkeletonWithCells(
+                    ctx,
+                    sectionBreakConfig,
+                    table,
+                    row,
+                    startIndex,
+                    endIndex,
+                    rowSource,
+                    isRepeatRow
+                ));
+            }
+            continue;
+        }
+
         const cellPageSkeletons = createSkeletonCellPages(
             ctx,
             viewModel,
@@ -305,25 +332,16 @@ function dealWithTableRow(
         );
 
         while (rowSkeletons.length < cellPageSkeletons.length) {
-            const rowSkeleton = _getNullTableRowSkeleton(startIndex, endIndex, row, rowSource, isRepeatRow);
-            const colCount = cellNodes.length;
-
-            // Fill the row with null cell pages.
-            rowSkeleton.cells = [...new Array(colCount)].map((_, i) => {
-                const cellSkeleton = createNullCellPage(
-                    ctx,
-                    sectionBreakConfig,
-                    table,
-                    row,
-                    i
-                ).page;
-
-                cellSkeleton.parent = rowSkeleton;
-
-                return cellSkeleton;
-            });
-
-            rowSkeletons.push(rowSkeleton);
+            rowSkeletons.push(createNullRowSkeletonWithCells(
+                ctx,
+                sectionBreakConfig,
+                table,
+                row,
+                startIndex,
+                endIndex,
+                rowSource,
+                isRepeatRow
+            ));
         }
 
         while (rowHeights.length < cellPageSkeletons.length) {
@@ -463,6 +481,65 @@ function _verticalAlignInCell(
 
         cellPageSkeleton.marginTop = marginTop;
     }
+}
+
+function createNullRowSkeletonWithCells(
+    ctx: ILayoutContext,
+    sectionBreakConfig: ISectionBreakConfig,
+    table: ITable,
+    row: number,
+    startIndex: number,
+    endIndex: number,
+    rowSource: ITableRow,
+    isRepeatRow = false
+): IDocumentSkeletonRow {
+    const rowSkeleton = _getNullTableRowSkeleton(startIndex, endIndex, row, rowSource, isRepeatRow);
+    const colCount = rowSource.tableCells.length;
+
+    rowSkeleton.cells = [...new Array(colCount)].map((_, col) =>
+        createMergedAwareNullCellPage(ctx, sectionBreakConfig, table, row, col, rowSkeleton)
+    );
+
+    return rowSkeleton;
+}
+
+function createMergedCoveredCellPage(
+    ctx: ILayoutContext,
+    sectionBreakConfig: ISectionBreakConfig,
+    table: ITable,
+    row: number,
+    col: number,
+    rowSkeleton: IDocumentSkeletonRow
+): IDocumentSkeletonPage {
+    return createMergedAwareNullCellPage(ctx, sectionBreakConfig, table, row, col, rowSkeleton);
+}
+
+function createMergedAwareNullCellPage(
+    ctx: ILayoutContext,
+    sectionBreakConfig: ISectionBreakConfig,
+    table: ITable,
+    row: number,
+    col: number,
+    rowSkeleton: IDocumentSkeletonRow
+): IDocumentSkeletonPage {
+    const cellSkeleton = createNullCellPage(
+        ctx,
+        sectionBreakConfig,
+        table,
+        row,
+        col
+    ).page;
+
+    cellSkeleton.parent = rowSkeleton;
+    if (isCoveredTableCell(table.tableRows[row].tableCells[col])) {
+        Object.assign(cellSkeleton, { isMergedCellCovered: true });
+    }
+
+    return cellSkeleton;
+}
+
+function isCoveredTableCell(cellConfig: ITableCell | undefined): boolean {
+    return cellConfig?.rowSpan === 0 || cellConfig?.columnSpan === 0;
 }
 
 function _getTableLeft(pageWidth: number, tableWidth: number, align: TableAlignmentType, indent: INumberUnit = { v: 0 }) {

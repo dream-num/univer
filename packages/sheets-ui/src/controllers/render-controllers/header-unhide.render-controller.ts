@@ -167,7 +167,7 @@ export class HeaderUnhideRenderController extends RxDisposable {
                     hovered: false,
                     hasPrevious,
                     hasNext,
-                    top: skeleton.columnHeaderHeight - UNHIDE_ICON_SIZE,
+                    top: Math.max(skeleton.columnHeaderHeight, skeleton.columnHeaderHeightAndMarginTop) - UNHIDE_ICON_SIZE,
                     left: position.startX - (hasPrevious ? UNHIDE_ICON_SIZE : 0),
                 },
                 () => this._commandService.executeCommand<ISetSpecificColsVisibleCommandParams>(

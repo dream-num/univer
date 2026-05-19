@@ -379,13 +379,13 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
             const spreadsheetColumnHeader = components.get(SHEET_VIEW_KEY.COLUMN) as SpreadsheetColumnHeader;
             const spreadsheetLeftTopPlaceholder = components.get(SHEET_VIEW_KEY.LEFT_TOP) as Rect;
 
-            const { rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
+            const leftTopPlaceholderSize = getLeftTopPlaceholderSize(spreadsheetSkeleton);
             spreadsheet?.updateSkeleton(spreadsheetSkeleton);
             spreadsheetRowHeader?.updateSkeleton(spreadsheetSkeleton);
             spreadsheetColumnHeader?.updateSkeleton(spreadsheetSkeleton);
             spreadsheetLeftTopPlaceholder?.transformByState({
-                width: rowHeaderWidth,
-                height: columnHeaderHeight,
+                width: leftTopPlaceholderSize.width,
+                height: leftTopPlaceholderSize.height,
             });
 
             // no need to update freezelineRect, freeze render controller has handled.
@@ -566,4 +566,16 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
     private _spreadsheetViewports(scene: Scene) {
         return scene.getViewports().filter((v) => ['viewMain', 'viewMainLeftTop', 'viewMainTop', 'viewMainLeft'].includes(v.viewportKey));
     }
+}
+
+export function getLeftTopPlaceholderSize(skeleton: {
+    rowHeaderWidth: number;
+    columnHeaderHeight: number;
+    rowHeaderWidthAndMarginLeft?: number;
+    columnHeaderHeightAndMarginTop?: number;
+}): { width: number; height: number } {
+    return {
+        width: skeleton.rowHeaderWidthAndMarginLeft ?? skeleton.rowHeaderWidth,
+        height: skeleton.columnHeaderHeightAndMarginTop ?? skeleton.columnHeaderHeight,
+    };
 }

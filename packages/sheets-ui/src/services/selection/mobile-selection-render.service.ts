@@ -386,16 +386,23 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
      */
     override newSelectionControl(scene: Scene, skeleton: SpreadsheetSkeleton, selection: ISelectionWithStyle): MobileSelectionControl {
         const selectionControls = this.getSelectionControls();
-        const { rowHeaderWidth, columnHeaderHeight } = skeleton;
+        const {
+            rowHeaderWidth,
+            rowHeaderWidthAndMarginLeft,
+            columnHeaderHeight,
+            columnHeaderHeightAndMarginTop,
+        } = skeleton;
         const rangeType = selection.range.rangeType;
         const control = new MobileSelectionControl(scene, selectionControls.length, this._themeService, {
             highlightHeader: this._highlightHeader,
             rowHeaderWidth,
             columnHeaderHeight,
+            rowHeaderOffsetX: Math.max(0, rowHeaderWidthAndMarginLeft - rowHeaderWidth),
+            columnHeaderOffsetY: Math.max(0, columnHeaderHeightAndMarginTop - columnHeaderHeight),
             rangeType,
         });
         const selectionWithCoord = attachSelectionWithCoord(selection, skeleton);
-        control.updateRangeBySelectionWithCoord(selectionWithCoord);
+        control.updateRangeBySelectionWithCoord(selectionWithCoord, skeleton);
         this._selectionControls.push(control);
 
         const { expandingModeForTopLeft, expandingModeForBottomRight } = (() => {

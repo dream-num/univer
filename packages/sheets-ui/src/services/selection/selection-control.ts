@@ -131,6 +131,8 @@ export class SelectionControl extends Disposable {
     private _currentStyle: ISelectionStyle;
     protected _rowHeaderWidth: number = 0;
     protected _columnHeaderHeight: number = 0;
+    protected _rowHeaderOffsetX: number = 0;
+    protected _columnHeaderOffsetY: number = 0;
 
     protected _widgetRects: Rect[] = [];
     protected _controlExtension: Nullable<SelectionShapeExtension>;
@@ -160,6 +162,8 @@ export class SelectionControl extends Disposable {
             enableAutoFill?: boolean;
             rowHeaderWidth: number;
             columnHeaderHeight: number;
+            rowHeaderOffsetX?: number;
+            columnHeaderOffsetY?: number;
             rangeType?: RANGE_TYPE;
         }
     ) {
@@ -168,6 +172,8 @@ export class SelectionControl extends Disposable {
         this._highlightHeader = options?.highlightHeader ?? true;
         this._rowHeaderWidth = options?.rowHeaderWidth ?? 0;
         this._columnHeaderHeight = options?.columnHeaderHeight ?? 0;
+        this._rowHeaderOffsetX = options?.rowHeaderOffsetX ?? 0;
+        this._columnHeaderOffsetY = options?.columnHeaderOffsetY ?? 0;
         this._initializeSheetBody();
         this._initialHeader();
     }
@@ -697,6 +703,8 @@ export class SelectionControl extends Disposable {
             // if row is over one million, row header width would be bigger than default value.
             this._rowHeaderWidth = sk.rowHeaderWidth;
             this._columnHeaderHeight = sk.columnHeaderHeight;
+            this._rowHeaderOffsetX = Math.max(0, sk.rowHeaderWidthAndMarginLeft - sk.rowHeaderWidth);
+            this._columnHeaderOffsetY = Math.max(0, sk.columnHeaderHeightAndMarginTop - sk.columnHeaderHeight);
         }
         this._selectionRenderModel.setValue(selectionWthCoord.rangeWithCoord, selectionWthCoord.primaryWithCoord);
         // if primaryWithCoord is undefined, that means keeps the previous value.
@@ -725,6 +733,8 @@ export class SelectionControl extends Disposable {
     ): void {
         this._rowHeaderWidth = rowHeaderWidth;
         this._columnHeaderHeight = columnHeaderHeight;
+        this._rowHeaderOffsetX = 0;
+        this._columnHeaderOffsetY = 0;
         this.updateRangeBySelectionWithCoord({
             rangeWithCoord: newSelectionRange,
             primaryWithCoord: primaryCell,
@@ -882,6 +892,8 @@ export class SelectionControl extends Disposable {
         columnHeaderStrokeWidth /= scale;
         const rowHeaderWidth = this._rowHeaderWidth;
         const columnHeaderHeight = this._columnHeaderHeight;
+        const rowHeaderOffsetX = this._rowHeaderOffsetX;
+        const columnHeaderOffsetY = this._columnHeaderOffsetY;
 
         if (this._highlightHeader && columnHeaderHeight > 0) {
             let highlightTitleColor = columnHeaderFill;
@@ -903,7 +915,7 @@ export class SelectionControl extends Disposable {
             });
 
             this._columnHeaderGroup.show();
-            this._columnHeaderGroup.translate(startX, 0);
+            this._columnHeaderGroup.translate(startX, columnHeaderOffsetY);
         } else {
             this._columnHeaderGroup.hide();
         }
@@ -930,7 +942,7 @@ export class SelectionControl extends Disposable {
             });
 
             this._rowHeaderGroup.show();
-            this._rowHeaderGroup.translate(0, startY);
+            this._rowHeaderGroup.translate(rowHeaderOffsetX, startY);
         } else {
             this._rowHeaderGroup.hide();
         }

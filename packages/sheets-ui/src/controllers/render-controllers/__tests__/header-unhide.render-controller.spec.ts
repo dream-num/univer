@@ -52,6 +52,32 @@ describe('HeaderUnhideRenderController', () => {
         testBed.univer.dispose();
     });
 
+    it('keeps hidden column icons at the bottom of column headers when outline adds top padding', () => {
+        const testBed = createRenderTestBed();
+        const { context, injector, sheet, sheetSkeletonManagerService, skeleton } = testBed;
+        const worksheet = sheet.getActiveSheet()!;
+
+        skeleton.columnHeaderHeight = 20;
+        skeleton.columnHeaderHeightAndMarginTop = 60;
+        vi.spyOn(worksheet, 'getHiddenRows').mockReturnValue([]);
+        vi.spyOn(worksheet, 'getHiddenCols').mockReturnValue([
+            { startColumn: 6, endColumn: 6, startRow: 0, endRow: 0 },
+        ]);
+
+        const controller = injector.createInstance(HeaderUnhideRenderController, context as any);
+
+        sheetSkeletonManagerService.emitCurrentSkeleton({
+            unitId: sheet.getUnitId(),
+            sheetId: worksheet.getSheetId(),
+        });
+
+        const shapes = (controller as any)._shapes;
+        expect(shapes.cols).toHaveLength(1);
+        expect(shapes.cols[0].top).toBe(60 - 12);
+
+        testBed.univer.dispose();
+    });
+
     it('filters hidden row ranges through the shared unhide range service', () => {
         const testBed = createRenderTestBed();
         const { context, injector, sheet, sheetSkeletonManagerService, skeleton } = testBed;

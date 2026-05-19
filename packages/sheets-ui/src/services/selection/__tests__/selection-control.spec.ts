@@ -15,7 +15,7 @@
  */
 
 import type { ThemeService } from '@univerjs/core';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { SelectionControl } from '../selection-control';
 
 function createFakeScene() {
@@ -34,6 +34,13 @@ function createFakeThemeService() {
 }
 
 describe('SelectionControl', () => {
+    beforeAll(() => {
+        vi.stubGlobal('window', {
+            cancelAnimationFrame: vi.fn(),
+            requestAnimationFrame: vi.fn(() => 1),
+        });
+    });
+
     it('updates range and shows/hides autofill based on primary', () => {
         const scene = createFakeScene();
         const themeService = createFakeThemeService();
@@ -85,5 +92,39 @@ describe('SelectionControl', () => {
         expect(control.fillControl.visible).toBe(true);
 
         // Avoid disposing here: engine-render shapes expect a real Scene tree.
+    });
+
+    it('keeps header highlights aligned with outline header padding', () => {
+        const scene = createFakeScene();
+        const themeService = createFakeThemeService();
+        const control = new SelectionControl(scene, 1, themeService, {
+            rowHeaderWidth: 46,
+            columnHeaderHeight: 20,
+        });
+
+        control.updateRangeBySelectionWithCoord({
+            rangeWithCoord: {
+                startRow: 3,
+                endRow: 5,
+                startColumn: 1,
+                endColumn: 2,
+                startX: 126,
+                startY: 108,
+                endX: 246,
+                endY: 168,
+            },
+            primaryWithCoord: null,
+            style: null,
+        }, {
+            rowHeaderWidth: 46,
+            rowHeaderWidthAndMarginLeft: 86,
+            columnHeaderHeight: 20,
+            columnHeaderHeightAndMarginTop: 60,
+        } as any);
+
+        expect((control as any)._rowHeaderGroup.left).toBe(40);
+        expect((control as any)._rowHeaderGroup.top).toBe(108);
+        expect((control as any)._columnHeaderGroup.left).toBe(126);
+        expect((control as any)._columnHeaderGroup.top).toBe(40);
     });
 });

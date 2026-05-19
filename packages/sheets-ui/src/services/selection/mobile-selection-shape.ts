@@ -44,6 +44,8 @@ export class MobileSelectionControl extends SelectionControl {
             enableAutoFill?: boolean;
             rowHeaderWidth: number;
             columnHeaderHeight: number;
+            rowHeaderOffsetX?: number;
+            columnHeaderOffsetY?: number;
             rangeType?: RANGE_TYPE;
         }
     ) {

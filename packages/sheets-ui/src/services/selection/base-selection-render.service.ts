@@ -240,11 +240,18 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
 
     newSelectionControl(scene: Scene, skeleton: SpreadsheetSkeleton, selection: ISelectionWithStyle): SelectionControl {
         const zIndex = this.getSelectionControls().length;
-        const { rowHeaderWidth, columnHeaderHeight } = skeleton;
+        const {
+            rowHeaderWidth,
+            rowHeaderWidthAndMarginLeft,
+            columnHeaderHeight,
+            columnHeaderHeightAndMarginTop,
+        } = skeleton;
         const control = new SelectionControl(scene, zIndex, this._selectionTheme, {
             highlightHeader: this._highlightHeader,
             rowHeaderWidth,
             columnHeaderHeight,
+            rowHeaderOffsetX: Math.max(0, rowHeaderWidthAndMarginLeft - rowHeaderWidth),
+            columnHeaderOffsetY: Math.max(0, columnHeaderHeightAndMarginTop - columnHeaderHeight),
         });
         this._selectionControls.push(control);
         const selectionWithCoord = attachSelectionWithCoord(selection, skeleton);

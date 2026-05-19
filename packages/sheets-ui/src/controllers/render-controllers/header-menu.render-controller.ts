@@ -49,6 +49,12 @@ interface IHeaderBaseLayout {
     columnGutterHeight: number;
 }
 
+interface IOutlineHeaderBaseSize {
+    columnHeaderHeight?: number;
+}
+
+const OUTLINE_HEADER_BASE_SIZE_KEY = '__univerSheetsOutlineHeaderBaseSize';
+
 /**
  * header highlight
  * column menu: show, hover and mousedown event
@@ -310,7 +316,9 @@ function getHeaderBaseLayout(skeleton: {
     columnHeaderHeight: number;
     worksheet: { getConfig?: () => { columnHeader?: { height?: number } } };
 }): IHeaderBaseLayout {
-    const configuredColumnHeight = skeleton.worksheet.getConfig?.()?.columnHeader?.height;
+    const config = skeleton.worksheet.getConfig?.();
+    const outlineBaseSize = getOutlineHeaderBaseSize(config);
+    const configuredColumnHeight = outlineBaseSize?.columnHeaderHeight ?? config?.columnHeader?.height;
     const columnBaseHeight = typeof configuredColumnHeight === 'number' && configuredColumnHeight > 0
         ? Math.min(configuredColumnHeight, skeleton.columnHeaderHeight)
         : skeleton.columnHeaderHeight;
@@ -319,4 +327,12 @@ function getHeaderBaseLayout(skeleton: {
         columnBaseHeight,
         columnGutterHeight: Math.max(0, skeleton.columnHeaderHeight - columnBaseHeight),
     };
+}
+
+function getOutlineHeaderBaseSize(config: unknown): IOutlineHeaderBaseSize | undefined {
+    if (!config || typeof config !== 'object') {
+        return undefined;
+    }
+
+    return (config as Record<string, IOutlineHeaderBaseSize | undefined>)[OUTLINE_HEADER_BASE_SIZE_KEY];
 }

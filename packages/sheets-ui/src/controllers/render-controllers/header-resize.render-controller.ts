@@ -79,6 +79,13 @@ interface IHeaderBaseLayout {
     columnGutterHeight: number;
 }
 
+interface IOutlineHeaderBaseSize {
+    rowHeaderWidth?: number;
+    columnHeaderHeight?: number;
+}
+
+const OUTLINE_HEADER_BASE_SIZE_KEY = '__univerSheetsOutlineHeaderBaseSize';
+
 export class HeaderResizeRenderController extends Disposable implements IRenderModule {
     private _currentRow: number = 0;
 
@@ -575,8 +582,9 @@ function getHeaderBaseLayout(skeleton: {
     worksheet: { getConfig?: () => { rowHeader?: { width?: number }; columnHeader?: { height?: number } } };
 }): IHeaderBaseLayout {
     const config = skeleton.worksheet.getConfig?.();
-    const configuredRowWidth = config?.rowHeader?.width;
-    const configuredColumnHeight = config?.columnHeader?.height;
+    const outlineBaseSize = getOutlineHeaderBaseSize(config);
+    const configuredRowWidth = outlineBaseSize?.rowHeaderWidth ?? config?.rowHeader?.width;
+    const configuredColumnHeight = outlineBaseSize?.columnHeaderHeight ?? config?.columnHeader?.height;
     const rowBaseWidth = typeof configuredRowWidth === 'number' && configuredRowWidth > 0
         ? Math.min(configuredRowWidth, skeleton.rowHeaderWidth)
         : skeleton.rowHeaderWidth;
@@ -590,4 +598,12 @@ function getHeaderBaseLayout(skeleton: {
         columnBaseHeight,
         columnGutterHeight: Math.max(0, skeleton.columnHeaderHeight - columnBaseHeight),
     };
+}
+
+function getOutlineHeaderBaseSize(config: unknown): IOutlineHeaderBaseSize | undefined {
+    if (!config || typeof config !== 'object') {
+        return undefined;
+    }
+
+    return (config as Record<string, IOutlineHeaderBaseSize | undefined>)[OUTLINE_HEADER_BASE_SIZE_KEY];
 }

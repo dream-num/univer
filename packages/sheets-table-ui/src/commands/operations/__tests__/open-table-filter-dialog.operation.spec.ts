@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-import { IContextService } from '@univerjs/core';
 import { TableManager } from '@univerjs/sheets-table';
 import { describe, expect, it, vi } from 'vitest';
-import { SHEETS_TABLE_FILTER_PANEL_OPENED_KEY } from '../../../const';
 import { SheetsTableComponentController } from '../../../controllers/sheet-table-component.controller';
 import { OpenTableFilterPanelOperation } from '../open-table-filter-dialog.opration';
 
@@ -37,8 +35,7 @@ describe('OpenTableFilterPanelOperation', () => {
     it('should return false for missing params or missing table', async () => {
         const accessor = createAccessor([
             [TableManager, { getTable: () => undefined }],
-            [IContextService, { getContextValue: () => false, setContextValue: vi.fn() }],
-            [SheetsTableComponentController, { setCurrentTableFilterInfo: vi.fn() }],
+            [SheetsTableComponentController, { openOrToggleFilterPanel: vi.fn() }],
         ]);
 
         await expect(OpenTableFilterPanelOperation.handler(accessor, undefined as any)).resolves.toBe(false);
@@ -51,18 +48,13 @@ describe('OpenTableFilterPanelOperation', () => {
         })).resolves.toBe(false);
     });
 
-    it('should open filter panel context only when panel is currently closed', async () => {
-        const setCurrentTableFilterInfo = vi.fn();
-        const setContextValue = vi.fn();
+    it('should delegate panel toggle to component controller', async () => {
+        const openOrToggleFilterPanel = vi.fn();
 
         const accessor = createAccessor([
             [TableManager, { getTable: () => ({ id: 't1' }) }],
-            [IContextService, {
-                getContextValue: () => false,
-                setContextValue,
-            }],
             [SheetsTableComponentController, {
-                setCurrentTableFilterInfo,
+                openOrToggleFilterPanel,
             }],
         ]);
 
@@ -75,35 +67,6 @@ describe('OpenTableFilterPanelOperation', () => {
         });
 
         expect(result).toBe(true);
-        expect(setCurrentTableFilterInfo).toHaveBeenCalledWith({ unitId: 'u1', subUnitId: 's1', row: 6, tableId: 't1', column: 3 });
-        expect(setContextValue).toHaveBeenCalledWith(SHEETS_TABLE_FILTER_PANEL_OPENED_KEY, true);
-    });
-
-    it('should not reopen the panel when context indicates already opened', async () => {
-        const setCurrentTableFilterInfo = vi.fn();
-        const setContextValue = vi.fn();
-
-        const accessor = createAccessor([
-            [TableManager, { getTable: () => ({ id: 't1' }) }],
-            [IContextService, {
-                getContextValue: () => true,
-                setContextValue,
-            }],
-            [SheetsTableComponentController, {
-                setCurrentTableFilterInfo,
-            }],
-        ]);
-
-        const result = await OpenTableFilterPanelOperation.handler(accessor, {
-            unitId: 'u1',
-            subUnitId: 's1',
-            tableId: 't1',
-            row: 6,
-            col: 3,
-        });
-
-        expect(result).toBe(true);
-        expect(setCurrentTableFilterInfo).not.toHaveBeenCalled();
-        expect(setContextValue).not.toHaveBeenCalled();
+        expect(openOrToggleFilterPanel).toHaveBeenCalledWith({ unitId: 'u1', subUnitId: 's1', row: 6, tableId: 't1', column: 3 });
     });
 });

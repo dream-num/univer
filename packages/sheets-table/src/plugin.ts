@@ -23,7 +23,7 @@ import { DeleteSheetTableCommand } from './commands/commands/delete-sheet-table.
 import { RemoveTableThemeCommand } from './commands/commands/remove-table-theme.command';
 import { SetSheetTableCommand } from './commands/commands/set-sheet-table.command';
 import { SetSheetTableFilterCommand } from './commands/commands/set-table-filter.command';
-import { SheetTableInsertColCommand, SheetTableInsertRowCommand, SheetTableRemoveColCommand, SheetTableRemoveRowCommand } from './commands/commands/sheet-table-row-col.command';
+import { SheetTableInsertColCommand, SheetTableInsertColumnAtCommand, SheetTableInsertRowAtCommand, SheetTableInsertRowCommand, SheetTableRemoveColCommand, SheetTableRemoveColumnAtCommand, SheetTableRemoveRowCommand } from './commands/commands/sheet-table-row-col.command';
 import { AddSheetTableMutation } from './commands/mutations/add-sheet-table.mutation';
 import { DeleteSheetTableMutation } from './commands/mutations/delete-sheet-table.mutation';
 import { SetSheetTableMutation } from './commands/mutations/set-sheet-table.mutation';
@@ -106,8 +106,11 @@ export class UniverSheetsTablePlugin extends Plugin {
             RemoveTableThemeCommand,
             SheetTableInsertRowCommand,
             SheetTableInsertColCommand,
+            SheetTableInsertRowAtCommand,
+            SheetTableInsertColumnAtCommand,
             SheetTableRemoveRowCommand,
             SheetTableRemoveColCommand,
+            SheetTableRemoveColumnAtCommand,
         ].forEach((m) => this._commandService.registerCommand(m));
     }
 }

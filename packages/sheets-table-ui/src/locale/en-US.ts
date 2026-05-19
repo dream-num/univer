@@ -19,6 +19,7 @@ const locale = {
         title: 'Table',
         selectRange: 'Select Table Range',
         rename: 'Rename Table',
+        renamePlaceholder: 'Enter table name',
         updateRange: 'Update Table Range',
         tableRangeWithMergeError: 'Table range cannot overlap with merged cells',
         tableRangeWithOtherTableError: 'Table range cannot overlap with other tables',
@@ -39,6 +40,11 @@ const locale = {
         columnPrefix: 'Column',
         tablePrefix: 'Table',
         tableNameError: 'Table name cannot contain spaces, cannot start with a number, and cannot be identical to an existing table name',
+        columnMenu: {
+            'insert-left': 'Insert 1 table column left',
+            'insert-right': 'Insert 1 table column right',
+            delete: 'Delete table column',
+        },
 
         insert: {
             main: 'Insert Table',

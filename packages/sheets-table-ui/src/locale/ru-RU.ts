@@ -21,6 +21,7 @@ const locale: typeof enUS = {
         title: 'Таблица',
         selectRange: 'Выбрать диапазон таблицы',
         rename: 'Переименовать таблицу',
+        renamePlaceholder: 'Enter table name',
         updateRange: 'Обновить диапазон таблицы',
         tableRangeWithMergeError: 'Диапазон таблицы не может перекрываться с объединенными ячейками',
         tableRangeWithOtherTableError: 'Диапазон таблицы не может перекрываться с другими таблицами',
@@ -41,6 +42,11 @@ const locale: typeof enUS = {
         columnPrefix: 'Столбец',
         tablePrefix: 'Таблица',
         tableNameError: 'Имя таблицы не может содержать пробелы, не может начинаться с цифры и не может совпадать с именем существующей таблицы',
+        columnMenu: {
+            'insert-left': 'Insert 1 table column left',
+            'insert-right': 'Insert 1 table column right',
+            delete: 'Delete table column',
+        },
 
         insert: {
             main: 'Вставить таблицу',

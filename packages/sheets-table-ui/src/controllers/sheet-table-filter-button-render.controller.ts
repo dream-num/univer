@@ -19,7 +19,7 @@ import type { IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univer
 import type { ITableRangeWithState } from '@univerjs/sheets-table';
 import type { ISheetsTableFilterButtonShapeProps } from '../views/widgets/table-filter-button.shape';
 import { ICommandService, Inject, Injector, InterceptorEffectEnum, RxDisposable, VerticalAlign } from '@univerjs/core';
-import { INTERCEPTOR_POINT, SetVerticalTextAlignCommand, SheetInterceptorService } from '@univerjs/sheets';
+import { INTERCEPTOR_POINT, SetVerticalTextAlignCommand, SheetInterceptorService, SheetRangeThemeModel } from '@univerjs/sheets';
 import { TableManager } from '@univerjs/sheets-table';
 import { getCoordByCell, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { map, merge, of, startWith, switchMap, takeUntil } from 'rxjs';
@@ -64,6 +64,7 @@ export class SheetsTableFilterButtonRenderController extends RxDisposable implem
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
         @Inject(TableManager) private _tableManager: TableManager,
+        @Inject(SheetRangeThemeModel) private readonly _rangeThemeModel: SheetRangeThemeModel,
         @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
@@ -155,6 +156,10 @@ export class SheetsTableFilterButtonRenderController extends RxDisposable implem
 
         for (const { range, states, tableId } of tableFilterRanges) {
             const { startRow, startColumn, endColumn } = range;
+            const table = this._tableManager.getTableById(unitId, tableId);
+            const headerStyle = table ? this._rangeThemeModel.getRangeThemeStyle(unitId, table.getTableStyleId())?.getHeaderRowStyle() : null;
+            const iconColor = headerStyle?.cl?.rgb ?? '#fff';
+            const hoverIconColor = headerStyle?.bg?.rgb ?? '#202124';
             this._interceptCellContent(unitId, worksheetId, range);
             for (let col = startColumn; col <= endColumn; col++) {
                 const key = `sheets-table-filter-button-${startRow}-${col}`;
@@ -176,6 +181,9 @@ export class SheetsTableFilterButtonRenderController extends RxDisposable implem
                     height: FILTER_ICON_SIZE,
                     width: FILTER_ICON_SIZE,
                     zIndex: SHEETS_FILTER_BUTTON_Z_INDEX,
+                    iconColor,
+                    hoverBackground: iconColor,
+                    hoverIconColor,
                     cellHeight,
                     cellWidth,
                     filterParams: { unitId, subUnitId: worksheetId, row: startRow, col, buttonState: state, tableId },

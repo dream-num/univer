@@ -32,6 +32,7 @@ describe('SheetsTableComponentController', () => {
             { register: vi.fn(() => ({ dispose: vi.fn() })) } as any,
             {
                 subscribeContextValue$: () => context$,
+                getContextValue: () => false,
                 setContextValue,
             } as any,
             { attachPopupToCell } as any,
@@ -68,6 +69,60 @@ describe('SheetsTableComponentController', () => {
 
         controller.closeFilterPanel();
         expect(setContextValue).toHaveBeenCalledWith(SHEETS_TABLE_FILTER_PANEL_OPENED_KEY, false);
+
+        controller.dispose();
+    });
+
+    it('should toggle the same filter panel and switch directly to another column', () => {
+        const context$ = new Subject<boolean | undefined>();
+        let opened = false;
+        const setContextValue = vi.fn((_key, value) => {
+            opened = value;
+        });
+
+        const firstPopupDispose = vi.fn();
+        const secondPopupDispose = vi.fn();
+        const attachPopupToCell = vi
+            .fn()
+            .mockReturnValueOnce({ dispose: firstPopupDispose })
+            .mockReturnValueOnce({ dispose: secondPopupDispose });
+
+        const controller = new SheetsTableComponentController(
+            { register: vi.fn(() => ({ dispose: vi.fn() })) } as any,
+            {
+                subscribeContextValue$: () => context$,
+                getContextValue: () => opened,
+                setContextValue,
+            } as any,
+            { attachPopupToCell } as any,
+            { close: vi.fn() } as any
+        );
+
+        const firstInfo = {
+            unitId: 'u1',
+            subUnitId: 's1',
+            tableId: 't1',
+            column: 2,
+            row: 4,
+        };
+        const secondInfo = {
+            ...firstInfo,
+            column: 3,
+        };
+
+        controller.openOrToggleFilterPanel(firstInfo);
+        expect(setContextValue).toHaveBeenCalledWith(SHEETS_TABLE_FILTER_PANEL_OPENED_KEY, true);
+
+        context$.next(true);
+        expect(attachPopupToCell).toHaveBeenCalledWith(4, 2, expect.any(Object));
+
+        controller.openOrToggleFilterPanel(secondInfo);
+        expect(firstPopupDispose).toHaveBeenCalledTimes(1);
+        expect(attachPopupToCell).toHaveBeenLastCalledWith(4, 3, expect.any(Object));
+        expect(controller.getCurrentTableFilterInfo()).toEqual(secondInfo);
+
+        controller.openOrToggleFilterPanel(secondInfo);
+        expect(setContextValue).toHaveBeenLastCalledWith(SHEETS_TABLE_FILTER_PANEL_OPENED_KEY, false);
 
         controller.dispose();
     });

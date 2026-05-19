@@ -21,6 +21,7 @@ const locale: typeof enUS = {
         title: 'Bảng',
         selectRange: 'Chọn phạm vi bảng',
         rename: 'Đổi tên bảng',
+        renamePlaceholder: 'Enter table name',
         updateRange: 'Cập nhật phạm vi bảng',
         tableRangeWithMergeError: 'Phạm vi bảng không thể chồng lấp với các ô đã được hợp nhất',
         tableRangeWithOtherTableError: 'Phạm vi bảng không thể chồng lấp với các bảng khác',
@@ -41,6 +42,11 @@ const locale: typeof enUS = {
         columnPrefix: 'Cột',
         tablePrefix: 'Bảng',
         tableNameError: 'Tên bảng không thể chứa khoảng trắng, không được bắt đầu bằng số và không được trùng với tên bảng đã có',
+        columnMenu: {
+            'insert-left': 'Insert 1 table column left',
+            'insert-right': 'Insert 1 table column right',
+            delete: 'Delete table column',
+        },
 
         insert: {
             main: 'Chèn bảng',

@@ -83,7 +83,7 @@ export const processStyleWithBorderStyle = (key: keyof Omit<IRangeThemeStyleJSON
 };
 
 const tableDefaultThemeStyleArr = [
-    [['#6280F9', '#FFFFFF', '#BAC6F8', '#D2DAFA'], ['#fff']],
+    [['#6280F9', '#FFFFFF', '#EEF2FF', '#DCE4FF'], ['#fff']],
     [['#16BDCA', '#FFFFFF', '#EDFAFA', '#AFECEF'], ['#000']],
     [['#31C48D', '#FFFFFF', '#F3FAF7', '#BCF0DA'], ['#fff']],
     [['#AC94FA', '#FFFFFF', '#F6F5FF', '#EDEBFE'], ['#fff']],

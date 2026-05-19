@@ -19,8 +19,9 @@ import { Disposable, IContextService, Inject } from '@univerjs/core';
 import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import { ComponentManager, IDialogService } from '@univerjs/ui';
 import { distinctUntilChanged, startWith } from 'rxjs';
-import { SHEETS_TABLE_FILTER_PANEL_OPENED_KEY, UNIVER_SHEET_TABLE_FILTER_PANEL_ID } from '../const';
+import { SHEETS_TABLE_FILTER_PANEL_OPENED_KEY, SHEET_TABLE_RENAME_DIALOG, UNIVER_SHEET_TABLE_FILTER_PANEL_ID } from '../const';
 import { SheetTableFilterPanel } from '../views/components/SheetTableFilterPanel';
+import { SheetTableRenameDialog } from '../views/components/SheetTableRenameDialog';
 
 interface ITableFilterPanelInfo {
     unitId: string;
@@ -49,6 +50,26 @@ export class SheetsTableComponentController extends Disposable {
         this._currentTableFilterInfo = info;
     }
 
+    public openOrToggleFilterPanel(info: ITableFilterPanelInfo): void {
+        const opened = this._contextService.getContextValue(SHEETS_TABLE_FILTER_PANEL_OPENED_KEY);
+
+        if (opened && this._isSameFilterPanelInfo(this._currentTableFilterInfo, info)) {
+            this.closeFilterPanel();
+            return;
+        }
+
+        this.setCurrentTableFilterInfo(info);
+
+        if (opened) {
+            this._popupDisposable?.dispose();
+            this._popupDisposable = null;
+            this._openFilterPopup();
+            return;
+        }
+
+        this._contextService.setContextValue(SHEETS_TABLE_FILTER_PANEL_OPENED_KEY, true);
+    }
+
     public clearCurrentTableFilterInfo(): void {
         this._currentTableFilterInfo = null;
     }
@@ -60,6 +81,7 @@ export class SheetsTableComponentController extends Disposable {
     private _initComponents() {
         ([
             [SHEETS_TABLE_FILTER_PANEL_OPENED_KEY, SheetTableFilterPanel],
+            [SHEET_TABLE_RENAME_DIALOG, SheetTableRenameDialog],
         ] as const).forEach(([key, comp]) => {
             this.disposeWithMe(this._componentManager.register(key, comp));
         });
@@ -105,5 +127,9 @@ export class SheetsTableComponentController extends Disposable {
         this._popupDisposable?.dispose();
         this._popupDisposable = null;
         this.clearCurrentTableFilterInfo();
+    }
+
+    private _isSameFilterPanelInfo(a: Nullable<ITableFilterPanelInfo>, b: ITableFilterPanelInfo): boolean {
+        return Boolean(a && a.unitId === b.unitId && a.subUnitId === b.subUnitId && a.tableId === b.tableId && a.column === b.column && a.row === b.row);
     }
 }

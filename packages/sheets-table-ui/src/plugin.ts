@@ -87,13 +87,14 @@ export class UniverSheetsTableUIPlugin extends Plugin {
     }
 
     private _registerRenderModules(): void {
-        const renderDependencies: Dependency[] = [
-            [SheetsTableFilterButtonRenderController],
-            [SheetsTableRenderController],
-        ];
+        const renderDependencies: Dependency[] = [];
         if (this._config.hideAnchor !== true) {
             renderDependencies.push([SheetTableControlsRenderController]);
         }
+        renderDependencies.push(
+            [SheetsTableFilterButtonRenderController],
+            [SheetsTableRenderController]
+        );
 
         renderDependencies.forEach((m) => {
             this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, m));

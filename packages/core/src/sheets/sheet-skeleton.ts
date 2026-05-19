@@ -318,8 +318,8 @@ export class SheetSkeleton extends Skeleton {
 
         return {
             ...config,
-            defaultBackgroundColor: config.defaultBackgroundColor ?? `rgba(${r}, ${g}, ${b}, 0.08)`,
-            defaultStripeColor: config.defaultStripeColor ?? `rgba(${r}, ${g}, ${b}, 0.25)`,
+            defaultBackgroundColor: config.defaultBackgroundColor ?? `rgba(${r}, ${g}, ${b}, 0.025)`,
+            defaultStripeColor: config.defaultStripeColor ?? `rgba(${r}, ${g}, ${b}, 0.08)`,
         };
     }
 

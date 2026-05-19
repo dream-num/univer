@@ -18,7 +18,7 @@
 
 import { ICommandService, IPermissionService, LocaleService } from '@univerjs/core';
 import { SortRangeCommand, SortType } from '@univerjs/sheets-sort';
-import { SheetTableInsertColumnAtCommand, SheetTableRemoveColumnAtCommand, SheetsTableSortStateEnum, TableColumnFilterTypeEnum, TableConditionTypeEnum, TableDateCompareTypeEnum, TableManager } from '@univerjs/sheets-table';
+import { SheetsTableSortStateEnum, SheetTableInsertColumnAtCommand, SheetTableRemoveColumnAtCommand, TableColumnFilterTypeEnum, TableConditionTypeEnum, TableDateCompareTypeEnum, TableManager } from '@univerjs/sheets-table';
 import { createElement } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { SheetsTableComponentController } from '../../../controllers/sheet-table-component.controller';
@@ -83,10 +83,10 @@ vi.mock('@univerjs/icons', async () => {
     return {
         ...actual,
         AscendingIcon: () => null,
-        DeleteIcon: () => null,
+        DeleteColumnDoubleIcon: () => null,
         DescendingIcon: () => null,
-        MoreLeftIcon: () => null,
-        MoreRightIcon: () => null,
+        LeftInsertColumnDoubleIcon: () => null,
+        RightInsertColumnDoubleIcon: () => null,
     };
 });
 

@@ -76,7 +76,11 @@ export function SheetTableRenameDialog(props: ISheetTableRenameDialogProps) {
     };
 
     return (
-        <div className="univer-box-border univer-flex univer-w-full univer-flex-col univer-gap-4 univer-pb-3 univer-pt-2">
+        <div
+            className={`
+              univer-box-border univer-flex univer-w-full univer-flex-col univer-gap-4 univer-pb-3 univer-pt-2
+            `}
+        >
             <Input
                 size="middle"
                 value={value}

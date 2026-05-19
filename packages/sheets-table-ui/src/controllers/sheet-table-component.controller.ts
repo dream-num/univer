@@ -19,7 +19,7 @@ import { Disposable, IContextService, Inject } from '@univerjs/core';
 import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import { ComponentManager, IDialogService } from '@univerjs/ui';
 import { distinctUntilChanged, startWith } from 'rxjs';
-import { SHEETS_TABLE_FILTER_PANEL_OPENED_KEY, SHEET_TABLE_RENAME_DIALOG, UNIVER_SHEET_TABLE_FILTER_PANEL_ID } from '../const';
+import { SHEET_TABLE_RENAME_DIALOG, SHEETS_TABLE_FILTER_PANEL_OPENED_KEY, UNIVER_SHEET_TABLE_FILTER_PANEL_ID } from '../const';
 import { SheetTableFilterPanel } from '../views/components/SheetTableFilterPanel';
 import { SheetTableRenameDialog } from '../views/components/SheetTableRenameDialog';
 

@@ -19,10 +19,10 @@ import type { ITableConditionFilterItem, ITableManualFilterItem } from '@univerj
 import type { IConditionInfo } from './type';
 import { ICommandService, IPermissionService, LocaleService } from '@univerjs/core';
 import { Button, ButtonGroup, Segmented } from '@univerjs/design';
-import { AscendingIcon, DeleteIcon, DescendingIcon, MoreLeftIcon, MoreRightIcon } from '@univerjs/icons';
+import { AscendingIcon, DeleteColumnDoubleIcon, DescendingIcon, LeftInsertColumnDoubleIcon, RightInsertColumnDoubleIcon } from '@univerjs/icons';
 import { WorkbookEditablePermission } from '@univerjs/sheets';
 import { SortRangeCommand, SortType } from '@univerjs/sheets-sort';
-import { SheetTableInsertColumnAtCommand, SheetTableRemoveColumnAtCommand, SheetsTableSortStateEnum, TableColumnFilterTypeEnum, TableDateCompareTypeEnum, TableManager } from '@univerjs/sheets-table';
+import { SheetsTableSortStateEnum, SheetTableInsertColumnAtCommand, SheetTableRemoveColumnAtCommand, TableColumnFilterTypeEnum, TableDateCompareTypeEnum, TableManager } from '@univerjs/sheets-table';
 import { useDependency } from '@univerjs/ui';
 import { useMemo, useState } from 'react';
 import { SheetsTableComponentController } from '../../controllers/sheet-table-component.controller';
@@ -182,61 +182,72 @@ export function SheetTableFilterPanel() {
         >
             {editable && (
                 <>
-                    <div className="-univer-mx-4 -univer-mt-2 univer-mb-3 univer-border-0 univer-border-b univer-border-solid univer-border-gray-200 univer-py-1">
+                    <div
+                        className={`
+                          -univer-mx-4 -univer-mt-2 univer-mb-3 univer-border-0 univer-border-b univer-border-solid
+                          univer-border-gray-200 univer-py-1
+                        `}
+                    >
                         <button
                             type="button"
                             className={`
-                              univer-box-border univer-flex univer-h-10 univer-w-full univer-cursor-pointer univer-items-center
-                              univer-gap-3 univer-border-none univer-bg-transparent univer-px-4 univer-text-left univer-text-sm
-                              univer-text-gray-900 hover:univer-bg-gray-100
+                              univer-box-border univer-flex univer-h-10 univer-w-full univer-cursor-pointer
+                              univer-items-center univer-gap-3 univer-border-none univer-bg-transparent univer-px-4
+                              univer-text-left univer-text-sm univer-text-gray-900
+                              hover:univer-bg-gray-100
                               disabled:univer-cursor-not-allowed disabled:univer-text-gray-400
-                              dark:!univer-text-white dark:hover:!univer-bg-gray-600
+                              dark:!univer-text-white
+                              dark:hover:!univer-bg-gray-600
                             `}
                             onClick={() => insertColumn('left')}
                         >
-                            <MoreLeftIcon className="univer-size-5" />
+                            <LeftInsertColumnDoubleIcon className="univer-size-5" extend={{ colorChannel1: 'var(--univer-primary-600)' }} />
                             <span>{localeService.t('sheets-table.columnMenu.insert-left')}</span>
                         </button>
                         <button
                             type="button"
                             className={`
-                              univer-box-border univer-flex univer-h-10 univer-w-full univer-cursor-pointer univer-items-center
-                              univer-gap-3 univer-border-none univer-bg-transparent univer-px-4 univer-text-left univer-text-sm
-                              univer-text-gray-900 hover:univer-bg-gray-100
+                              univer-box-border univer-flex univer-h-10 univer-w-full univer-cursor-pointer
+                              univer-items-center univer-gap-3 univer-border-none univer-bg-transparent univer-px-4
+                              univer-text-left univer-text-sm univer-text-gray-900
+                              hover:univer-bg-gray-100
                               disabled:univer-cursor-not-allowed disabled:univer-text-gray-400
-                              dark:!univer-text-white dark:hover:!univer-bg-gray-600
+                              dark:!univer-text-white
+                              dark:hover:!univer-bg-gray-600
                             `}
                             onClick={() => insertColumn('right')}
                         >
-                            <MoreRightIcon className="univer-size-5" />
+                            <RightInsertColumnDoubleIcon className="univer-size-5" extend={{ colorChannel1: 'var(--univer-primary-600)' }} />
                             <span>{localeService.t('sheets-table.columnMenu.insert-right')}</span>
                         </button>
                         <button
                             type="button"
                             className={`
-                              univer-box-border univer-flex univer-h-10 univer-w-full univer-cursor-pointer univer-items-center
-                              univer-gap-3 univer-border-none univer-bg-transparent univer-px-4 univer-text-left univer-text-sm
-                              univer-text-gray-900 hover:univer-bg-gray-100
+                              univer-box-border univer-flex univer-h-10 univer-w-full univer-cursor-pointer
+                              univer-items-center univer-gap-3 univer-border-none univer-bg-transparent univer-px-4
+                              univer-text-left univer-text-sm univer-text-gray-900
+                              hover:univer-bg-gray-100
                               disabled:univer-cursor-not-allowed disabled:univer-text-gray-400
-                              dark:!univer-text-white dark:hover:!univer-bg-gray-600
+                              dark:!univer-text-white
+                              dark:hover:!univer-bg-gray-600
                             `}
                             disabled={!canDeleteColumn}
                             onClick={deleteColumn}
                         >
-                            <DeleteIcon className="univer-size-5" />
+                            <DeleteColumnDoubleIcon className="univer-size-5" extend={{ colorChannel1: 'var(--univer-primary-600)' }} />
                             <span>{localeService.t('sheets-table.columnMenu.delete')}</span>
                         </button>
                     </div>
                     <div className="univer-mb-3 univer-flex">
                         <ButtonGroup className="univer-mb-3 !univer-flex univer-w-full">
-                        <Button className="univer-w-1/2" onClick={() => applySort(true)}>
-                            <AscendingIcon className="univer-mr-1" />
-                            {localeService.t('sheets-sort.general.sort-asc')}
-                        </Button>
-                        <Button className="univer-w-1/2" onClick={() => applySort(false)}>
-                            <DescendingIcon className="univer-mr-1" />
-                            {localeService.t('sheets-sort.general.sort-desc')}
-                        </Button>
+                            <Button className="univer-w-1/2" onClick={() => applySort(true)}>
+                                <AscendingIcon className="univer-mr-1" />
+                                {localeService.t('sheets-sort.general.sort-asc')}
+                            </Button>
+                            <Button className="univer-w-1/2" onClick={() => applySort(false)}>
+                                <DescendingIcon className="univer-mr-1" />
+                                {localeService.t('sheets-sort.general.sort-desc')}
+                            </Button>
                         </ButtonGroup>
                     </div>
                 </>

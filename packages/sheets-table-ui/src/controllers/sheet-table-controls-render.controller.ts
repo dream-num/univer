@@ -21,7 +21,7 @@ import { CommandType, Disposable, fromCallback, ICommandService, Inject, Injecto
 import { CURSOR_TYPE } from '@univerjs/engine-render';
 import { SheetRangeThemeModel, SheetsSelectionsService, WorkbookEditablePermission, WorkbookPermissionService } from '@univerjs/sheets';
 import { DeleteSheetTableCommand, SetSheetTableCommand, SheetTableInsertColumnAtCommand, SheetTableInsertRowAtCommand, TableManager } from '@univerjs/sheets-table';
-import { getTransformCoord, SetScrollOperation, SetZoomRatioOperation, SHEET_VIEW_KEY, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { getTransformCoord, ISheetSelectionRenderService, SetScrollOperation, SetZoomRatioOperation, SHEET_VIEW_KEY, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { IDialogService, ISidebarService } from '@univerjs/ui';
 import { filter, merge } from 'rxjs';
 import { openRangeSelector } from '../commands/operations/open-table-selector.operation';
@@ -38,9 +38,19 @@ const TABLE_RENDER_REFRESH_COMMANDS = new Set([
     SetZoomRatioOperation.id,
 ]);
 
+type TopGapSnapshot = { size: number; color?: string; stripeColor?: string } | null;
+
+function isSameTopGap(left: TopGapSnapshot, right: TopGapSnapshot): boolean {
+    if (left === null || right === null) {
+        return left === right;
+    }
+
+    return left.size === right.size && left.color === right.color && left.stripeColor === right.stripeColor;
+}
+
 export class SheetTableControlsRenderController extends Disposable implements IRenderModule {
     private readonly _shape: SheetTableControlsShape;
-    private _ownsTopGap = false;
+    private readonly _topGapBaseBySkeleton = new WeakMap<SpreadsheetSkeleton, TopGapSnapshot>();
 
     constructor(
         private readonly _context: IRenderContext<Workbook>,
@@ -52,6 +62,7 @@ export class SheetTableControlsRenderController extends Disposable implements IR
         @Inject(WorkbookPermissionService) private readonly _workbookPermissionService: WorkbookPermissionService,
         @Inject(IPermissionService) private readonly _permissionService: IPermissionService,
         @Inject(SheetsSelectionsService) private readonly _sheetsSelectionsService: SheetsSelectionsService,
+        @ISheetSelectionRenderService private readonly _selectionRenderService: ISheetSelectionRenderService,
         @Inject(SheetTableThemeUIController) private readonly _sheetTableThemeUIController: SheetTableThemeUIController,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @IDialogService private readonly _dialogService: IDialogService,
@@ -403,20 +414,50 @@ export class SheetTableControlsRenderController extends Disposable implements IR
             .getTablesBySubunitId(unitId, subUnitId)
             .some((table) => table.getRange().startRow === 0);
         const current = skeleton.gapConfig;
-        const rowGaps = { ...(current.rowGaps ?? {}) };
+        const rowGaps = { ...current.rowGaps };
+        const previousTopGap = rowGaps[TABLE_CONTROL_GAP_ROW] ? { ...rowGaps[TABLE_CONTROL_GAP_ROW] } : null;
+        let shouldSync = false;
 
         if (hasTopTable) {
+            if (!this._topGapBaseBySkeleton.has(skeleton)) {
+                this._topGapBaseBySkeleton.set(
+                    skeleton,
+                    rowGaps[TABLE_CONTROL_GAP_ROW] ? { ...rowGaps[TABLE_CONTROL_GAP_ROW] } : null
+                );
+            }
+
+            const baseGap = this._topGapBaseBySkeleton.get(skeleton);
             rowGaps[TABLE_CONTROL_GAP_ROW] = {
-                ...(rowGaps[TABLE_CONTROL_GAP_ROW] ?? {}),
-                size: Math.max(rowGaps[TABLE_CONTROL_GAP_ROW]?.size ?? 0, TABLE_CONTROL_TOP_GAP_SIZE),
+                ...(baseGap ?? rowGaps[TABLE_CONTROL_GAP_ROW]),
+                size: (baseGap?.size ?? 0) + TABLE_CONTROL_TOP_GAP_SIZE,
             };
-            this._ownsTopGap = true;
-        } else if (this._ownsTopGap && rowGaps[TABLE_CONTROL_GAP_ROW]?.size === TABLE_CONTROL_TOP_GAP_SIZE) {
-            delete rowGaps[TABLE_CONTROL_GAP_ROW];
-            this._ownsTopGap = false;
+            shouldSync = true;
+        } else if (this._topGapBaseBySkeleton.has(skeleton)) {
+            const baseGap = this._topGapBaseBySkeleton.get(skeleton);
+            if (baseGap) {
+                rowGaps[TABLE_CONTROL_GAP_ROW] = { ...baseGap };
+            } else {
+                delete rowGaps[TABLE_CONTROL_GAP_ROW];
+            }
+            this._topGapBaseBySkeleton.delete(skeleton);
+            shouldSync = true;
+        }
+
+        if (!shouldSync) {
+            return;
+        }
+
+        const nextTopGap = rowGaps[TABLE_CONTROL_GAP_ROW] ? { ...rowGaps[TABLE_CONTROL_GAP_ROW] } : null;
+        if (isSameTopGap(previousTopGap, nextTopGap)) {
+            return;
         }
 
         skeleton.setGapConfig({ ...current, rowGaps });
+        this._refreshSelections();
+    }
+
+    private _refreshSelections(): void {
+        this._selectionRenderService.resetSelectionsByModelData(this._sheetsSelectionsService.getCurrentSelections());
     }
 
     private _closeFloatingControls(): void {

@@ -15,10 +15,10 @@
  */
 
 import type { IMouseEvent, IPointerEvent, IShapeProps, UniverRenderingContext2D } from '@univerjs/engine-render';
+import type { SheetsTableButtonStateEnum } from '@univerjs/sheets-table';
 import type { IOpenTableFilterPanelOperationParams } from '../../commands/operations/open-table-filter-dialog.opration';
 import { ICommandService } from '@univerjs/core';
 import { Shape } from '@univerjs/engine-render';
-import { SheetsTableButtonStateEnum } from '@univerjs/sheets-table';
 import { OpenTableFilterPanelOperation } from '../../commands/operations/open-table-filter-dialog.opration';
 
 export const FILTER_ICON_SIZE = 16;

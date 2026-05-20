@@ -21,11 +21,12 @@ import { HorizontalLineCommand, InsertHorizontalLineBellowCommand } from '../../
 import { BulletListCommand, CheckListCommand, InsertBulletListBellowCommand, InsertCheckListBellowCommand, InsertOrderListBellowCommand, OrderListCommand } from '../../commands/commands/list.command';
 import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignOperationCommand, AlignRightCommand } from '../../commands/commands/paragraph-align.command';
 import { H1HeadingCommand, NormalTextHeadingCommand, SetParagraphNamedStyleCommand, SubtitleHeadingCommand, TitleHeadingCommand } from '../../commands/commands/set-heading.command';
+import { SwitchDocModeCommand } from '../../commands/commands/switch-doc-mode.command';
 import { CreateDocTableCommand } from '../../commands/commands/table/doc-table-create.command';
 import { DocTableDeleteTableCommand } from '../../commands/commands/table/doc-table-delete.command';
 import { DocCreateTableOperation } from '../../commands/operations/doc-create-table.operation';
 import { DocParagraphSettingPanelOperation } from '../../commands/operations/doc-paragraph-setting-panel.operation';
-import { AlignMenuItemFactory, FLOAT_TEXT_STYLE_MENU_ID, FLOAT_TOOLBAR_MENU_POSITION, FloatTextStyleMenuItemFactory, InsertDefaultTableMenuFactory, InsertTableMenuFactory } from '../menu';
+import { AlignMenuItemFactory, DocSwitchModeMenuItemFactory, FLOAT_TEXT_STYLE_MENU_ID, FLOAT_TOOLBAR_MENU_POSITION, FloatTextStyleMenuItemFactory, InsertDefaultTableMenuFactory, InsertTableMenuFactory } from '../menu';
 import { DOC_CONTENT_INSERT_MENU_ID, DOC_TABLE_BLOCK_MENU_ID, EMPTY_PARAGRAPH_MENU_ID, INSERT_BELLOW_MENU_ID } from '../paragraph-menu';
 import { menuSchema } from '../schema';
 
@@ -57,6 +58,13 @@ describe('docs ui ribbon schema', () => {
         expect(layout[CheckListCommand.id]).toBeUndefined();
         expect(media[HorizontalLineCommand.id].menuItemFactory).toBeDefined();
         expect(media[CheckListCommand.id].menuItemFactory).toBeDefined();
+    });
+
+    it('keeps the doc mode switch beside page settings', () => {
+        const layout = (menuSchema as any)[RibbonStartGroup.LAYOUT];
+
+        expect(layout[SwitchDocModeCommand.id].order).toBe(11);
+        expect(layout[SwitchDocModeCommand.id].menuItemFactory).toBe(DocSwitchModeMenuItemFactory);
     });
 
     it('adds a text style menu for the floating toolbar', () => {

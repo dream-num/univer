@@ -25,6 +25,7 @@ import { ResetInlineFormatTextBackgroundColorCommand, SetInlineFormatBoldCommand
 import { BulletListCommand, CheckListCommand, InsertBulletListBellowCommand, InsertCheckListBellowCommand, InsertOrderListBellowCommand, OrderListCommand } from '../commands/commands/list.command';
 import { AlignOperationCommand } from '../commands/commands/paragraph-align.command';
 import { H1HeadingCommand, H2HeadingCommand, H3HeadingCommand, H4HeadingCommand, H5HeadingCommand, NormalTextHeadingCommand, SetParagraphNamedStyleCommand, SubtitleHeadingCommand, TitleHeadingCommand } from '../commands/commands/set-heading.command';
+import { SwitchDocModeCommand } from '../commands/commands/switch-doc-mode.command';
 import { DocTableDeleteColumnsCommand, DocTableDeleteRowsCommand, DocTableDeleteTableCommand } from '../commands/commands/table/doc-table-delete.command';
 import { DocTableInsertColumnLeftCommand, DocTableInsertColumnRightCommand, DocTableInsertRowAboveCommand, DocTableInsertRowBellowCommand } from '../commands/commands/table/doc-table-insert.command';
 import { DocCreateTableOperation } from '../commands/operations/doc-create-table.operation';
@@ -54,6 +55,7 @@ import {
     BoldMenuItemFactory,
     BulletListMenuItemFactory,
     CheckListMenuItemFactory,
+    DocSwitchModeMenuItemFactory,
     FLOAT_TEXT_STYLE_MENU_ID,
     FLOAT_TOOLBAR_MENU_POSITION,
     FloatTextStyleMenuItemFactory,
@@ -155,6 +157,10 @@ export const menuSchema: MenuSchemaType = {
         [OpenHeaderFooterPanelCommand.id]: {
             order: 10,
             menuItemFactory: HeaderFooterMenuItemFactory,
+        },
+        [SwitchDocModeCommand.id]: {
+            order: 11,
+            menuItemFactory: DocSwitchModeMenuItemFactory,
         },
         [DocOpenPageSettingCommand.id]: {
             order: 12,

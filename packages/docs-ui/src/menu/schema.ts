@@ -23,7 +23,7 @@ import { HorizontalLineCommand, InsertHorizontalLineBellowCommand } from '../com
 
 import { ResetInlineFormatTextBackgroundColorCommand, SetInlineFormatBoldCommand, SetInlineFormatFontFamilyCommand, SetInlineFormatFontSizeCommand, SetInlineFormatItalicCommand, SetInlineFormatStrikethroughCommand, SetInlineFormatSubscriptCommand, SetInlineFormatSuperscriptCommand, SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand, SetInlineFormatUnderlineCommand } from '../commands/commands/inline-format.command';
 import { BulletListCommand, CheckListCommand, InsertBulletListBellowCommand, InsertCheckListBellowCommand, InsertOrderListBellowCommand, OrderListCommand } from '../commands/commands/list.command';
-import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignRightCommand } from '../commands/commands/paragraph-align.command';
+import { AlignOperationCommand } from '../commands/commands/paragraph-align.command';
 import { H1HeadingCommand, H2HeadingCommand, H3HeadingCommand, H4HeadingCommand, H5HeadingCommand, NormalTextHeadingCommand, SetParagraphNamedStyleCommand } from '../commands/commands/set-heading.command';
 import { SwitchDocModeCommand } from '../commands/commands/switch-doc-mode.command';
 import { DocTableDeleteColumnsCommand, DocTableDeleteRowsCommand, DocTableDeleteTableCommand } from '../commands/commands/table/doc-table-delete.command';
@@ -50,10 +50,7 @@ import {
     TableInsertMenuItemFactory,
 } from './context-menu';
 import {
-    AlignCenterMenuItemFactory,
-    AlignJustifyMenuItemFactory,
-    AlignLeftMenuItemFactory,
-    AlignRightMenuItemFactory,
+    AlignMenuItemFactory,
     BackgroundColorSelectorMenuItemFactory,
     BoldMenuItemFactory,
     BulletListMenuItemFactory,
@@ -131,25 +128,9 @@ export const menuSchema: MenuSchemaType = {
         },
     },
     [RibbonStartGroup.LAYOUT]: {
-        [AlignLeftCommand.id]: {
+        [AlignOperationCommand.id]: {
             order: 2,
-            menuItemFactory: AlignLeftMenuItemFactory,
-        },
-        [AlignCenterCommand.id]: {
-            order: 3,
-            menuItemFactory: AlignCenterMenuItemFactory,
-        },
-        [AlignRightCommand.id]: {
-            order: 4,
-            menuItemFactory: AlignRightMenuItemFactory,
-        },
-        [AlignJustifyCommand.id]: {
-            order: 5,
-            menuItemFactory: AlignJustifyMenuItemFactory,
-        },
-        [HorizontalLineCommand.id]: {
-            order: 6,
-            menuItemFactory: HorizontalLineFactory,
+            menuItemFactory: AlignMenuItemFactory,
         },
         [OrderListCommand.id]: {
             order: 7,
@@ -158,10 +139,6 @@ export const menuSchema: MenuSchemaType = {
         [BulletListCommand.id]: {
             order: 8,
             menuItemFactory: BulletListMenuItemFactory,
-        },
-        [CheckListCommand.id]: {
-            order: 9,
-            menuItemFactory: CheckListMenuItemFactory,
         },
         [OpenHeaderFooterPanelCommand.id]: {
             order: 10,
@@ -184,6 +161,14 @@ export const menuSchema: MenuSchemaType = {
                 order: 0,
                 menuItemFactory: InsertTableMenuFactory,
             },
+        },
+        [HorizontalLineCommand.id]: {
+            order: 3,
+            menuItemFactory: HorizontalLineFactory,
+        },
+        [CheckListCommand.id]: {
+            order: 4,
+            menuItemFactory: CheckListMenuItemFactory,
         },
     },
     [ContextMenuPosition.MAIN_AREA]: {

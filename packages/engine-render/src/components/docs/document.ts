@@ -24,7 +24,7 @@ import type { Scene } from '../../scene';
 import type { ComponentExtension, IDrawInfo, IExtensionConfig } from '../extension';
 import type { IDocumentsConfig, IPageMarginLayout } from './doc-component';
 import type { DocumentSkeleton } from './layout/doc-skeleton';
-import { CellValueType, HorizontalAlign, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import { CellValueType, DashStyleType, HorizontalAlign, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { BORDER_TYPE as BORDER_LTRB, drawLineByBorderType } from '../../basics';
 import { calculateRectRotate, getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
@@ -807,50 +807,35 @@ export class Documents extends DocComponent {
             ctx.restore();
         }
 
-        ctx.save();
-        ctx.setLineWidthByPrecision (1);
-
-        ctx.save();
-        ctx.strokeStyle = borderLeft.color.rgb ?? DEFAULT_BORDER_COLOR.color.rgb!;
-        drawLineByBorderType(ctx, BORDER_LTRB.LEFT, 0, {
+        const position = {
             startX: x,
             startY: y,
             endX: x + pageWidth,
             endY: y + pageHeight,
-        });
-        ctx.restore();
+        };
+        this._drawTableCellBorder(ctx, borderLeft, BORDER_LTRB.LEFT, position);
+        this._drawTableCellBorder(ctx, borderTop, BORDER_LTRB.TOP, position);
+        this._drawTableCellBorder(ctx, borderRight, BORDER_LTRB.RIGHT, position);
+        this._drawTableCellBorder(ctx, borderBottom, BORDER_LTRB.BOTTOM, position);
+    }
+
+    private _drawTableCellBorder(
+        ctx: UniverRenderingContext,
+        border: ITableCellBorder,
+        type: BORDER_LTRB,
+        position: { startX: number; startY: number; endX: number; endY: number }
+    ) {
+        const lineWidth = border.width?.v ?? 1;
+        const color = border.color.rgb ?? DEFAULT_BORDER_COLOR.color.rgb!;
+        if (lineWidth <= 0 || color === 'transparent') {
+            return;
+        }
 
         ctx.save();
-        ctx.strokeStyle = borderTop.color.rgb ?? DEFAULT_BORDER_COLOR.color.rgb!;
-        drawLineByBorderType(ctx, BORDER_LTRB.TOP, 0, {
-            startX: x,
-            startY: y,
-            endX: x + pageWidth,
-            endY: y + pageHeight,
-        });
-        ctx.restore();
-
-        ctx.save();
-        ctx.strokeStyle = borderRight.color.rgb ?? DEFAULT_BORDER_COLOR.color.rgb!;
-        drawLineByBorderType(ctx, BORDER_LTRB.RIGHT, 0, {
-            startX: x,
-            startY: y,
-            endX: x + pageWidth,
-            endY: y + pageHeight,
-        });
-        ctx.restore();
-
-        ctx.save();
-        ctx.strokeStyle = borderBottom.color.rgb ?? DEFAULT_BORDER_COLOR.color.rgb!;
-        drawLineByBorderType(ctx, BORDER_LTRB.BOTTOM, 0, {
-            startX: x,
-            startY: y,
-            endX: x + pageWidth,
-            endY: y + pageHeight,
-        });
-        ctx.restore();
-
-        // restore setLineWidthByPrecision.
+        ctx.setLineWidthByPrecision(lineWidth);
+        setTableCellBorderDash(ctx, border.dashStyle);
+        ctx.strokeStyle = color;
+        drawLineByBorderType(ctx, type, 0, position);
         ctx.restore();
     }
 
@@ -1114,4 +1099,18 @@ export class Documents extends DocComponent {
             this.register(extension);
         });
     }
+}
+
+function setTableCellBorderDash(ctx: UniverRenderingContext, dashStyle?: DashStyleType) {
+    if (dashStyle === DashStyleType.DOT) {
+        ctx.setLineDash([2]);
+        return;
+    }
+
+    if (dashStyle === DashStyleType.DASH) {
+        ctx.setLineDash([6]);
+        return;
+    }
+
+    ctx.setLineDash([0]);
 }

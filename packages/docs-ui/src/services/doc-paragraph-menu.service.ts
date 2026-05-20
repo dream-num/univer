@@ -139,12 +139,14 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
 
         this.hideParagraphMenu(true);
         const dataStream = this._context.unit.getBody()?.dataStream ?? '';
+        if (isParagraphInTable(this._context.unit, paragraph.paragraphStart)) {
+            return;
+        }
+
         const paragraphDataStream = paragraph ? dataStream.slice(paragraph.paragraphStart, paragraph.paragraphEnd) : '';
         const isOnlyImage = paragraphDataStream === '\b';
-        const isEmptyParagraph = paragraphDataStream === '';
-        const shouldHidden = isOnlyImage || isEmptyParagraph;
 
-        if (shouldHidden) {
+        if (isOnlyImage) {
             return;
         }
 
@@ -178,4 +180,10 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
             this._paragrahMenu = null;
         }
     }
+}
+
+function isParagraphInTable(documentDataModel: DocumentDataModel, paragraphStart: number): boolean {
+    const tables = documentDataModel.getBody()?.tables ?? [];
+
+    return tables.some((table) => paragraphStart > table.startIndex && paragraphStart < table.endIndex);
 }

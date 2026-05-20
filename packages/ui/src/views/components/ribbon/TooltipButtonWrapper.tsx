@@ -199,6 +199,11 @@ export function DropdownMenuWrapper({
         setDropdownVisible(visible);
     }
 
+    function handleOptionSelect(option: IValueOption) {
+        onOptionSelect(option);
+        setDropdownVisible(false);
+    }
+
     useEffect(() => {
         const subscriptions: Subscription[] = [];
 
@@ -243,7 +248,7 @@ export function DropdownMenuWrapper({
                         key={index}
                         value={value}
                         option={option}
-                        onOptionSelect={onOptionSelect}
+                        onOptionSelect={handleOptionSelect}
                     />
                 ))}
             >
@@ -264,14 +269,14 @@ export function DropdownMenuWrapper({
                     icon={option.icon}
                     value={value}
                     option={option}
-                    onOptionSelect={onOptionSelect}
+                    onOptionSelect={handleOptionSelect}
                 />
             ),
             disabled: option.disabled,
             onSelect: () => {
                 if (typeof option.value === 'undefined') return;
 
-                onOptionSelect?.({
+                handleOptionSelect({
                     ...option,
                 });
             },
@@ -301,7 +306,7 @@ export function DropdownMenuWrapper({
                     />
                 ),
                 onSelect: () => {
-                    onOptionSelect?.({
+                    handleOptionSelect({
                         commandId,
                         id,
                     });
@@ -346,7 +351,7 @@ export function DropdownMenuWrapper({
                         />
                     ),
                     onSelect: () => {
-                        onOptionSelect?.({
+                        handleOptionSelect({
                             commandId,
                             id,
                         });

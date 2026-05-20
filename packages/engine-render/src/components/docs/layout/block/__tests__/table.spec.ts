@@ -291,6 +291,12 @@ describe('docs table layout', () => {
 
     it('keeps covered merged cells as non-rendering layout placeholders', () => {
         const { ctx, curPage, viewModel, tableNode, sectionBreakConfig, tableSource } = createContextAndTable();
+        createSkeletonCellPagesMock.mockImplementation(
+            (_ctx: unknown, _viewModel: unknown, _cellNode: unknown, _section: unknown, table: any, row: number, col: number) => {
+                const columnSpan = Math.max(1, table.tableRows[row].tableCells[col].columnSpan ?? 1);
+                return [makeCellPage(60 * columnSpan, 20)];
+            }
+        );
         tableSource.tableRows[0].tableCells = [
             { columnSpan: 2, vAlign: VerticalAlignmentType.TOP },
             { rowSpan: 0, columnSpan: 0, vAlign: VerticalAlignmentType.TOP },
@@ -306,6 +312,45 @@ describe('docs table layout', () => {
         expect(createSkeletonCellPagesMock.mock.calls.some((call) => call[5] === 0 && call[6] === 1)).toBe(false);
     });
 
+    it('does not shift cells after a same-row horizontally covered merged cell', () => {
+        const { ctx, curPage, viewModel, tableNode, sectionBreakConfig, tableSource } = createContextAndTable();
+        createSkeletonCellPagesMock.mockImplementation(
+            (_ctx: unknown, _viewModel: unknown, _cellNode: unknown, _section: unknown, table: any, row: number, col: number) => {
+                const columnSpan = Math.max(1, table.tableRows[row].tableCells[col].columnSpan ?? 1);
+                return [makeCellPage(60 * columnSpan, 20)];
+            }
+        );
+        tableSource.tableRows[0].tableCells = [
+            { vAlign: VerticalAlignmentType.TOP },
+            { columnSpan: 2, vAlign: VerticalAlignmentType.TOP },
+            { rowSpan: 0, columnSpan: 0, vAlign: VerticalAlignmentType.TOP },
+            { vAlign: VerticalAlignmentType.TOP },
+        ];
+        tableNode.children[0] = createRowNode(1, 30, 4) as any;
+
+        const skeleton = createTableSkeleton(ctx, curPage, viewModel, tableNode, sectionBreakConfig);
+
+        expect(skeleton?.rows[0].cells[3].left).toBe(180);
+    });
+
+    it('expands merged master cell height across spanned rows', () => {
+        const { ctx, curPage, viewModel, tableNode, sectionBreakConfig, tableSource } = createContextAndTable();
+        tableSource.tableRows[0].tableCells = [
+            { rowSpan: 2, columnSpan: 2, vAlign: VerticalAlignmentType.TOP },
+            { rowSpan: 0, columnSpan: 0, vAlign: VerticalAlignmentType.TOP },
+        ];
+        tableSource.tableRows[1].tableCells = [
+            { rowSpan: 0, columnSpan: 0, vAlign: VerticalAlignmentType.TOP },
+            { rowSpan: 0, columnSpan: 0, vAlign: VerticalAlignmentType.TOP },
+        ];
+
+        const skeleton = createTableSkeleton(ctx, curPage, viewModel, tableNode, sectionBreakConfig);
+
+        expect(skeleton?.rows[0].cells[0].pageHeight).toBe(
+            skeleton!.rows[0].height + skeleton!.rows[1].height
+        );
+    });
+
     it('creates sliced tables when available height is limited', () => {
         const { ctx, curPage, viewModel, tableNode, sectionBreakConfig } = createContextAndTable();
 
@@ -317,6 +362,45 @@ describe('docs table layout', () => {
         if (result.skeTables.length > 1) {
             expect(result.skeTables[1].tableId).toContain('#-#');
         }
+    });
+
+    it('repeats multiple leading header rows on sliced table pages', () => {
+        const { ctx, curPage, viewModel, tableNode, sectionBreakConfig, tableSource } = createContextAndTable();
+        tableSource.tableRows[1].repeatHeaderRow = BooleanNumber.TRUE;
+        tableSource.tableRows.push(
+            {
+                repeatHeaderRow: BooleanNumber.FALSE,
+                trHeight: {
+                    hRule: TableRowHeightRule.EXACT,
+                    val: { v: 70 },
+                },
+                cantSplit: BooleanNumber.FALSE,
+                tableCells: [
+                    { vAlign: VerticalAlignmentType.TOP },
+                    { vAlign: VerticalAlignmentType.TOP },
+                ],
+            },
+            {
+                repeatHeaderRow: BooleanNumber.FALSE,
+                trHeight: {
+                    hRule: TableRowHeightRule.EXACT,
+                    val: { v: 40 },
+                },
+                cantSplit: BooleanNumber.FALSE,
+                tableCells: [
+                    { vAlign: VerticalAlignmentType.TOP },
+                    { vAlign: VerticalAlignmentType.TOP },
+                ],
+            }
+        );
+        tableNode.children.push(createRowNode(41, 60, 2) as any, createRowNode(61, 80, 2) as any);
+
+        const result = createTableSkeletons(ctx, curPage, viewModel, tableNode, sectionBreakConfig, 110);
+
+        expect(result.skeTables.length).toBeGreaterThan(1);
+        expect(result.skeTables[1].rows[0]).toMatchObject({ index: 0, isRepeatRow: true });
+        expect(result.skeTables[1].rows[1]).toMatchObject({ index: 1, isRepeatRow: true });
+        expect(result.skeTables[1].rows[2]).toMatchObject({ index: 2, isRepeatRow: false });
     });
 
     it('returns an empty slice result when the table is missing', () => {

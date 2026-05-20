@@ -276,6 +276,59 @@ describe('documents render', () => {
         vi.restoreAllMocks();
     });
 
+    it('uses explicit table cell border width and skips no-border markers', () => {
+        const skeleton = { getSkeletonData: () => ({ pages: [] }) } as any;
+        const documents = new Documents('docs-border', skeleton, {
+            pageLayoutType: PageLayoutType.VERTICAL,
+            pageMarginLeft: 0,
+            pageMarginTop: 0,
+        });
+        const cell = createPage(DocumentSkeletonPageType.CELL, 'cell-seg');
+        cell.marginLeft = 0;
+        cell.marginTop = 0;
+        cell.pageWidth = 120;
+        cell.pageHeight = 60;
+        const row = {
+            cells: [cell],
+            rowSource: {
+                tableCells: [{
+                    borderTop: { color: { rgb: '#ff0000' }, width: { v: 5 } },
+                    borderBottom: { color: { rgb: 'transparent' }, width: { v: 0 } },
+                    borderLeft: { color: { rgb: 'transparent' }, width: { v: 0 } },
+                    borderRight: { color: { rgb: 'transparent' }, width: { v: 0 } },
+                }],
+            },
+        } as any;
+        cell.parent = row;
+        (documents as any)._drawLiquid = { x: 0, y: 0 };
+
+        const lineWidths: number[] = [];
+        const strokeStyles: string[] = [];
+        const ctx = {
+            save: vi.fn(),
+            restore: vi.fn(),
+            fillRectByPrecision: vi.fn(),
+            setLineWidthByPrecision: vi.fn((width: number) => lineWidths.push(width)),
+            beginPath: vi.fn(),
+            moveToByPrecision: vi.fn(),
+            lineToByPrecision: vi.fn(),
+            setLineDash: vi.fn(),
+            stroke: vi.fn(),
+            closePathByEnv: vi.fn(),
+            set strokeStyle(value: string) {
+                strokeStyles.push(value);
+            },
+        } as any;
+
+        (documents as any)._drawTableCellBordersAndBg(ctx, { marginLeft: 0, marginTop: 0 }, cell);
+
+        expect(lineWidths).toEqual([5]);
+        expect(strokeStyles).toEqual(['#ff0000']);
+        expect(ctx.stroke).toHaveBeenCalledTimes(1);
+
+        documents.dispose();
+    });
+
     it('draws body/header/footer/table flows with extension dispatch and page events', () => {
         const bodyPage = createPage(DocumentSkeletonPageType.BODY, '');
         const headerPage = createPage(DocumentSkeletonPageType.HEADER, 'header-main');

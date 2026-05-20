@@ -859,6 +859,64 @@ export function AlignJustifyMenuItemFactory(accessor: IAccessor): IMenuButtonIte
     };
 }
 
+const HORIZONTAL_ALIGN_OPTIONS = [
+    {
+        id: AlignLeftCommand.id,
+        value: HorizontalAlign.LEFT,
+        label: 'toolbar.alignLeft',
+        icon: 'LeftJustifyingIcon',
+    },
+    {
+        id: AlignCenterCommand.id,
+        value: HorizontalAlign.CENTER,
+        label: 'toolbar.alignCenter',
+        icon: 'HorizontallyIcon',
+    },
+    {
+        id: AlignRightCommand.id,
+        value: HorizontalAlign.RIGHT,
+        label: 'toolbar.alignRight',
+        icon: 'RightJustifyingIcon',
+    },
+    {
+        id: AlignJustifyCommand.id,
+        value: HorizontalAlign.JUSTIFIED,
+        label: 'toolbar.alignJustify',
+        icon: 'AlignTextBothIcon',
+    },
+];
+
+export function AlignMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<HorizontalAlign, HorizontalAlign> {
+    const commandService = accessor.get(ICommandService);
+
+    const value$ = new Observable<HorizontalAlign>((subscriber) => {
+        const calc = () => {
+            const paragraph = getParagraphStyleAtCursor(accessor);
+
+            subscriber.next(paragraph?.paragraphStyle?.horizontalAlign ?? HorizontalAlign.LEFT);
+        };
+        const disposable = commandService.onCommandExecuted((c) => {
+            if (c.id === SetTextSelectionsOperation.id || c.id === AlignOperationCommand.id) {
+                calc();
+            }
+        });
+
+        calc();
+        return disposable.dispose;
+    });
+
+    return {
+        id: AlignOperationCommand.id,
+        type: MenuItemType.SELECTOR,
+        icon: value$.pipe(map((alignType) => HORIZONTAL_ALIGN_OPTIONS.find((option) => option.value === alignType)?.icon ?? 'LeftJustifyingIcon')),
+        tooltip: 'toolbar.alignLeft',
+        selections: HORIZONTAL_ALIGN_OPTIONS,
+        value$,
+        disabled$: disableMenuWhenNoDocRange(accessor),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC, undefined, DOCS_ZEN_EDITOR_UNIT_ID_KEY),
+    };
+}
+
 export function HorizontalLineFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: HorizontalLineCommand.id,

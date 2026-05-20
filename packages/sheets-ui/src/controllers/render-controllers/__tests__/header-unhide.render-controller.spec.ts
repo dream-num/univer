@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import { HeaderUnhideRangeService } from '../../../services/header-unhide-range.service';
+import { HeaderUnhideRangeAxis, HeaderUnhideRangeService } from '../../../services/header-unhide-range.service';
 import { HeaderUnhideRenderController } from '../header-unhide.render-controller';
 import { createRenderTestBed } from './render-test-bed';
 
@@ -36,7 +36,7 @@ describe('HeaderUnhideRenderController', () => {
 
         const controller = injector.createInstance(HeaderUnhideRenderController, context as any);
         controller.interceptor.intercept(controller.interceptor.getInterceptPoints().HEADER_UNHIDE_RANGE_VISIBLE_CHECK, {
-            handler: (_visible, range) => range.axis !== 'row' || range.range.startRow !== 5,
+            handler: (_visible, range) => range.axis !== HeaderUnhideRangeAxis.ROW || range.range.startRow !== 5,
         });
 
         sheetSkeletonManagerService.emitCurrentSkeleton({
@@ -91,7 +91,7 @@ describe('HeaderUnhideRenderController', () => {
         vi.spyOn(worksheet, 'getHiddenCols').mockReturnValue([]);
 
         injector.get(HeaderUnhideRangeService).registerRangeVisibleHandler((visible, payload) => (
-            visible && !(payload.axis === 'row' && payload.range.startRow === 13 && payload.range.endRow === 21)
+            visible && !(payload.axis === HeaderUnhideRangeAxis.ROW && payload.range.startRow === 13 && payload.range.endRow === 21)
         ));
 
         const controller = injector.createInstance(HeaderUnhideRenderController, context as any);

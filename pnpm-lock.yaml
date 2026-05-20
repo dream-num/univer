@@ -127,8 +127,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/engine-render
       '@univerjs/icons':
-        specifier: ^1.2.0
-        version: 1.2.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+        specifier: 1.3.0
+        version: 1.3.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@univerjs/mockdata':
         specifier: workspace:*
         version: link:../mockdata
@@ -379,8 +379,8 @@ importers:
         specifier: ^11.0.4
         version: 11.0.4
       '@univerjs/icons':
-        specifier: ^1.2.0
-        version: 1.2.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+        specifier: 1.3.0
+        version: 1.3.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@univerjs/icons-svg':
         specifier: ^1.2.0
         version: 1.2.0
@@ -533,8 +533,8 @@ importers:
         specifier: workspace:*
         version: link:../packages/find-replace
       '@univerjs/icons':
-        specifier: 1.2.0
-        version: 1.2.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+        specifier: 1.3.0
+        version: 1.3.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@univerjs/mockdata':
         specifier: workspace:*
         version: link:../common/mockdata
@@ -735,8 +735,8 @@ importers:
         specifier: workspace:*
         version: link:../design
       '@univerjs/icons':
-        specifier: ^1.2.0
-        version: 1.2.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+        specifier: 1.3.0
+        version: 1.3.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -876,8 +876,8 @@ importers:
         specifier: ^1.2.4
         version: 1.2.4(@types/react@19.2.14)(react@19.2.6)
       '@univerjs/icons':
-        specifier: ^1.2.0
-        version: 1.2.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+        specifier: 1.3.0
+        version: 1.3.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -1058,8 +1058,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^1.2.0
-        version: 1.2.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+        specifier: 1.3.0
+        version: 1.3.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
@@ -1159,8 +1159,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^1.2.0
-        version: 1.2.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+        specifier: 1.3.0
+        version: 1.3.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
@@ -1202,8 +1202,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^1.2.0
-        version: 1.2.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+        specifier: 1.3.0
+        version: 1.3.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@univerjs/thread-comment':
         specifier: workspace:*
         version: link:../thread-comment
@@ -1254,8 +1254,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^1.2.0
-        version: 1.2.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+        specifier: 1.3.0
+        version: 1.3.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
@@ -1328,8 +1328,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^1.2.0
-        version: 1.2.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+        specifier: 1.3.0
+        version: 1.3.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
@@ -1442,8 +1442,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^1.2.0
-        version: 1.2.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+        specifier: 1.3.0
+        version: 1.3.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
@@ -1632,8 +1632,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^1.2.0
-        version: 1.2.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+        specifier: 1.3.0
+        version: 1.3.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -1687,8 +1687,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^1.2.0
-        version: 1.2.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+        specifier: 1.3.0
+        version: 1.3.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -1773,8 +1773,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^1.2.0
-        version: 1.2.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+        specifier: 1.3.0
+        version: 1.3.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -1942,8 +1942,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^1.2.0
-        version: 1.2.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+        specifier: 1.3.0
+        version: 1.3.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@univerjs/rpc':
         specifier: workspace:*
         version: link:../rpc
@@ -2071,8 +2071,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^1.2.0
-        version: 1.2.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+        specifier: 1.3.0
+        version: 1.3.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2179,8 +2179,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^1.2.0
-        version: 1.2.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+        specifier: 1.3.0
+        version: 1.3.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2265,8 +2265,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^1.2.0
-        version: 1.2.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+        specifier: 1.3.0
+        version: 1.3.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2342,8 +2342,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^1.2.0
-        version: 1.2.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+        specifier: 1.3.0
+        version: 1.3.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2413,8 +2413,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-formula
       '@univerjs/icons':
-        specifier: ^1.2.0
-        version: 1.2.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+        specifier: 1.3.0
+        version: 1.3.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2493,8 +2493,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^1.2.0
-        version: 1.2.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+        specifier: 1.3.0
+        version: 1.3.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2576,8 +2576,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^1.2.0
-        version: 1.2.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+        specifier: 1.3.0
+        version: 1.3.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2640,8 +2640,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^1.2.0
-        version: 1.2.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+        specifier: 1.3.0
+        version: 1.3.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@univerjs/protocol':
         specifier: workspace:*
         version: link:../protocol
@@ -2698,8 +2698,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^1.2.0
-        version: 1.2.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+        specifier: 1.3.0
+        version: 1.3.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2775,8 +2775,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^1.2.0
-        version: 1.2.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+        specifier: 1.3.0
+        version: 1.3.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@univerjs/slides':
         specifier: workspace:*
         version: link:../slides
@@ -2859,8 +2859,8 @@ importers:
         specifier: workspace:*
         version: link:../docs-ui
       '@univerjs/icons':
-        specifier: ^1.2.0
-        version: 1.2.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+        specifier: 1.3.0
+        version: 1.3.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@univerjs/thread-comment':
         specifier: workspace:*
         version: link:../thread-comment
@@ -2902,8 +2902,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^1.2.0
-        version: 1.2.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+        specifier: 1.3.0
+        version: 1.3.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@wendellhu/redi':
         specifier: 1.1.1
         version: 1.1.1(react@19.2.6)
@@ -6391,8 +6391,8 @@ packages:
   '@univerjs/icons-svg@1.2.0':
     resolution: {integrity: sha512-Tm0cYbTQwP2VfpiZClyzff5HO7w9UCZ/Qi0YWZ/YWi16QBTLqsc47a80VPAZTwOgUPqejuGxpBKViz6Welht6w==}
 
-  '@univerjs/icons@1.2.0':
-    resolution: {integrity: sha512-+rw4sSNGjyn4FI6LWa2Z7cMtc5MzBMr7cAaAfeh66d/aqT60CCrBbuF3x+nuC/fvDMXQzEjOqywXUZ4HE+MwLw==}
+  '@univerjs/icons@1.3.0':
+    resolution: {integrity: sha512-Bc+l4YzO033j4U5FcOsixhrnkkPkZlkmtPeGQBDdup5z55fQsjDK2hgedf5DpuUNwNe3GEIcyuWT3hmHznb3VA==}
     peerDependencies:
       react: 19.2.6
       react-dom: 19.2.6
@@ -14492,7 +14492,7 @@ snapshots:
 
   '@univerjs/icons-svg@1.2.0': {}
 
-  '@univerjs/icons@1.2.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)':
+  '@univerjs/icons@1.3.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)':
     dependencies:
       react: 19.2.6
       react-dom: 19.2.6(react@19.2.6)

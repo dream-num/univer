@@ -32,7 +32,7 @@ import {
 import { takeUntil } from 'rxjs';
 
 import { SHEET_COMPONENT_UNHIDE_LAYER_INDEX } from '../../common/keys';
-import { HeaderUnhideRangeService } from '../../services/header-unhide-range.service';
+import { HeaderUnhideRangeAxis, HeaderUnhideRangeService } from '../../services/header-unhide-range.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { HeaderUnhideShape, HeaderUnhideShapeType, UNHIDE_ICON_SIZE } from '../../views/header-unhide-shape';
 import { getCoordByCell, getSheetObject } from '../utils/component-tools';
@@ -110,13 +110,13 @@ export class HeaderUnhideRenderController extends RxDisposable {
         );
 
         const hiddenRowRanges = worksheet.getHiddenRows().filter((range) => shouldRenderRange({
-            axis: 'row',
+            axis: HeaderUnhideRangeAxis.ROW,
             range,
             workbook,
             worksheet,
         }));
         const hiddenColRanges = worksheet.getHiddenCols().filter((range) => shouldRenderRange({
-            axis: 'column',
+            axis: HeaderUnhideRangeAxis.COLUMN,
             range,
             workbook,
             worksheet,

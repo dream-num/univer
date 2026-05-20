@@ -51,7 +51,7 @@
     },
     "devDependencies": {
         "@types/fs-extra": "^11.0.4",
-        "@univerjs/icons": "^1.2.0",
+        "@univerjs/icons": "1.3.0",
         "@univerjs/icons-svg": "^1.2.0",
         "@univerjs/protocol": "workspace:*",
         "typescript": "^6.0.3",

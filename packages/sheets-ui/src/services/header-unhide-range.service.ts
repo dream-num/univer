@@ -16,8 +16,13 @@
 
 import type { IDisposable, IRange, Workbook, Worksheet } from '@univerjs/core';
 
+export enum HeaderUnhideRangeAxis {
+    ROW = 'row',
+    COLUMN = 'column',
+}
+
 export interface IHeaderUnhideRangeVisibleCheck {
-    axis: 'row' | 'column';
+    axis: HeaderUnhideRangeAxis;
     range: IRange;
     workbook: Workbook;
     worksheet: Worksheet;

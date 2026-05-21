@@ -720,7 +720,7 @@ export class FOverGridImage extends FBase {
      * ```
      */
     toBuilder(): FOverGridImageBuilder {
-        const builder = this._injector.createInstance(FOverGridImageBuilder);
+        const builder = this._injector.createInstance(FOverGridImageBuilder, this._image.unitId, this._image.subUnitId);
         builder.setImage(this._image);
         return builder;
     }

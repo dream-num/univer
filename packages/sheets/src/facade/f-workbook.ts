@@ -18,6 +18,7 @@ import type { CommandListener, CustomData, ICommandInfo, IDisposable, IRange, IS
 import type { ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import type { IRangeThemeStyleJSON, ISetSelectionsOperationParams, ISheetCommandSharedParams } from '@univerjs/sheets';
 import type { FontLine as _FontLine } from './f-range';
+import type { FRangeList } from './f-range-list';
 import {
     ICommandService,
     ILogService,
@@ -199,6 +200,24 @@ export class FWorkbook extends FBaseInitialable {
     getActiveSheet(): FWorksheet {
         const activeSheet = this._workbook.getActiveSheet();
         return this._injector.createInstance(FWorksheet, this, this._workbook, activeSheet);
+    }
+
+    /**
+     * Returns a range list. Unqualified ranges are resolved against the active sheet.
+     * Sheet-qualified ranges may target another worksheet.
+     * This API currently documents A1 notation only; R1C1 notation is not claimed.
+     * @param {string[]} a1Notations A non-empty list of ranges in A1 notation.
+     * @returns {FRangeList} A range list representing the specified ranges.
+     * @example
+     * ```ts
+     * const workbook = univerAPI.getActiveWorkbook();
+     * workbook.getRangeList(['A1:D4', 'F1:H4'])
+     *   .setBackgroundColor('#fce4d6')
+     *   .setFontWeight('bold');
+     * ```
+     */
+    getRangeList(a1Notations: string[]): FRangeList {
+        return this.getActiveSheet().getRangeList(a1Notations);
     }
 
     /**

@@ -20,7 +20,8 @@ import type { Injector } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
 import { DataValidationType, ICommandService } from '@univerjs/core';
 import { FormulaExecuteStageType, SetFormulaCalculationResultMutation } from '@univerjs/engine-formula';
-import { AddSheetDataValidationCommand, DataValidationCustomFormulaService } from '@univerjs/sheets-data-validation';
+import { SetRangeValuesCommand, SetRangeValuesMutation } from '@univerjs/sheets';
+import { AddSheetDataValidationCommand, ClearRangeDataValidationCommand, DataValidationCustomFormulaService } from '@univerjs/sheets-data-validation';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createFacadeTestBed } from './create-test-bed';
 
@@ -39,6 +40,9 @@ describe('Test FRange', () => {
 
         commandService = get(ICommandService);
         commandService.registerCommand(AddSheetDataValidationCommand);
+        commandService.registerCommand(ClearRangeDataValidationCommand);
+        commandService.registerCommand(SetRangeValuesCommand);
+        commandService.registerCommand(SetRangeValuesMutation);
         commandService.registerCommand(SetFormulaCalculationResultMutation);
 
         vi.stubGlobal('requestIdleCallback', ((callback: IdleRequestCallback) => {
@@ -69,6 +73,51 @@ describe('Test FRange', () => {
         expect(range3?.getDataValidations().length).toEqual(2);
 
         expect(activeSheet?.getDataValidations().length).toEqual(2);
+    });
+
+    it('RangeList set and clear data validations', async () => {
+        const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet()!;
+        const rule = univerAPI.newDataValidation().requireCheckbox().build();
+
+        activeSheet.getRangeList(['A1:A10', 'C1:C10']).setDataValidation(rule);
+
+        expect(activeSheet.getRange('A1').getDataValidation()?.getCriteriaType()).toEqual(DataValidationType.CHECKBOX);
+        expect(activeSheet.getRange('C1').getDataValidation()?.getCriteriaType()).toEqual(DataValidationType.CHECKBOX);
+        expect(activeSheet.getRange('A1:C10').getDataValidations().length).toEqual(1);
+
+        activeSheet.getRangeList(['A1:A10', 'C1:C10']).clearDataValidations();
+
+        expect(activeSheet.getRange('A1:C10').getDataValidations().length).toEqual(0);
+    });
+
+    it('RangeList inserts, checks, unchecks, and removes checkboxes', () => {
+        const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet()!;
+
+        activeSheet.getRangeList(['A1:A2', 'C1:C2'])
+            .insertCheckboxes('Yes', 'No')
+            .check();
+
+        expect(activeSheet.getRange('A1').getValue()).toBe('Yes');
+        expect(activeSheet.getRange('C2').getValue()).toBe('Yes');
+        expect(activeSheet.getRange('A1').getDataValidation()?.getCriteriaType()).toBe(DataValidationType.CHECKBOX);
+
+        activeSheet.getRangeList(['A1:A2', 'C1:C2']).uncheck();
+
+        expect(activeSheet.getRange('A2').getValue()).toBe('No');
+        expect(activeSheet.getRange('C1').getValue()).toBe('No');
+
+        activeSheet.getRangeList(['A1:A2', 'C1:C2']).removeCheckboxes();
+
+        expect(activeSheet.getRange('A1:C2').getDataValidations()).toHaveLength(0);
+    });
+
+    it('RangeList refuses to remove non-checkbox data validations as checkboxes', () => {
+        const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet()!;
+        const rule = univerAPI.newDataValidation().requireNumberEqualTo(1).build();
+
+        activeSheet.getRangeList(['A1']).setDataValidation(rule);
+
+        expect(() => activeSheet.getRangeList(['A1']).removeCheckboxes()).toThrow('Cannot remove checkboxes because the range contains non-checkbox data validation');
     });
 
     it('resolves onCalculationResultApplied after data-validation custom formula results are emitted', async () => {

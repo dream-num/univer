@@ -41,6 +41,7 @@ interface IContextMenuPanelProps {
     menuType: string;
     menuSessionVersion?: number;
     className?: string;
+    activeItemIds?: string[];
     onOptionSelect?: (option: IValueOption) => void;
 }
 
@@ -49,6 +50,7 @@ interface IContextMenuMenuProps {
     menuSessionVersion: number;
     submenuPortalContainer: HTMLElement | null;
     maxMenuHeight: number;
+    activeItemIds?: string[];
     onOptionSelect?: (option: IValueOption) => void;
 }
 
@@ -58,6 +60,7 @@ interface IContextMenuMenuItemProps {
     menuSessionVersion: number;
     submenuPortalContainer: HTMLElement | null;
     maxMenuHeight: number;
+    activeItemIds?: string[];
     onOptionSelect?: (option: IValueOption) => void;
 }
 
@@ -78,7 +81,7 @@ function isNonHoverableLabel(label?: MenuLabel) {
 }
 
 export function ContextMenuPanel(props: IContextMenuPanelProps) {
-    const { menuType, menuSessionVersion = 0, className, onOptionSelect } = props;
+    const { menuType, menuSessionVersion = 0, className, activeItemIds, onOptionSelect } = props;
     const menuManagerService = useDependency(IMenuManagerService);
     const layoutService = useDependency(ILayoutService);
     const [menuElement, setMenuElement] = useState<HTMLDivElement | null>(null);
@@ -161,6 +164,7 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
                 menuSchemas={menuItems}
                 menuSessionVersion={menuSessionVersion}
                 submenuPortalContainer={submenuPortalContainer}
+                activeItemIds={activeItemIds}
                 onOptionSelect={onOptionSelect}
                 maxMenuHeight={maxMenuHeight}
             />
@@ -169,7 +173,7 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
 }
 
 function ContextMenuMenu(props: IContextMenuMenuProps) {
-    const { menuSchemas, menuSessionVersion, submenuPortalContainer, onOptionSelect, maxMenuHeight } = props;
+    const { menuSchemas, menuSessionVersion, submenuPortalContainer, activeItemIds, onOptionSelect, maxMenuHeight } = props;
     const localeService = useDependency(LocaleService);
     const hiddenGroupStates = useContextGroupHiddenStates(menuSchemas);
 
@@ -219,12 +223,14 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                                 ? (
                                     <UIQuickTileMenuGroup
                                         item={menuSchema}
+                                        activeItemIds={activeItemIds}
                                         onOptionSelect={onOptionSelect}
                                     />
                                 )
                                 : (
                                     <UITinyMenuGroup
                                         item={menuSchema}
+                                        activeItemIds={activeItemIds}
                                         onOptionSelect={onOptionSelect}
                                     />
                                 )}
@@ -258,6 +264,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                                     menuItem={childSchema.item as IDisplayMenuItem<IMenuItem>}
                                     menuSessionVersion={menuSessionVersion}
                                     submenuPortalContainer={submenuPortalContainer}
+                                    activeItemIds={activeItemIds}
                                     onOptionSelect={onOptionSelect}
                                     maxMenuHeight={maxMenuHeight}
                                 />
@@ -271,7 +278,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
 }
 
 function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
-    const { menuKey, menuItem, menuSessionVersion, submenuPortalContainer, onOptionSelect, maxMenuHeight } = props;
+    const { menuKey, menuItem, menuSessionVersion, submenuPortalContainer, activeItemIds, onOptionSelect, maxMenuHeight } = props;
     const localeService = useDependency(LocaleService);
     const direction = useObservable(localeService.direction$);
     const menuManagerService = useDependency(IMenuManagerService);
@@ -397,7 +404,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
               hover:univer-bg-gray-50
               dark:hover:!univer-bg-gray-600
             `,
-        activated && `
+        (activated || activeItemIds?.includes(menuItem.id ?? '')) && `
           univer-bg-gray-200
           dark:!univer-bg-gray-600
         `
@@ -634,6 +641,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                                         menuSchemas={subMenuItems}
                                         menuSessionVersion={menuSessionVersion}
                                         submenuPortalContainer={submenuPortalContainer}
+                                        activeItemIds={activeItemIds}
                                         onOptionSelect={onSubmenuOptionSelect}
                                         maxMenuHeight={maxMenuHeight}
                                     />

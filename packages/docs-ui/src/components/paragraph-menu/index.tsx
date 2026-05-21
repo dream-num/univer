@@ -67,6 +67,19 @@ const HEADING_COMMAND_VALUES: Record<string, NamedStyleType> = {
     [NormalTextHeadingCommand.id]: NamedStyleType.NORMAL_TEXT,
 };
 
+const NAMED_STYLE_HEADING_COMMAND_IDS: Partial<Record<NamedStyleType, string>> = {
+    [NamedStyleType.HEADING_1]: H1HeadingCommand.id,
+    [NamedStyleType.HEADING_2]: H2HeadingCommand.id,
+    [NamedStyleType.HEADING_3]: H3HeadingCommand.id,
+    [NamedStyleType.HEADING_4]: H4HeadingCommand.id,
+    [NamedStyleType.HEADING_5]: H5HeadingCommand.id,
+    [NamedStyleType.NORMAL_TEXT]: NormalTextHeadingCommand.id,
+};
+
+export function getParagraphMenuActiveHeadingCommandId(namedStyleType?: NamedStyleType): string {
+    return NAMED_STYLE_HEADING_COMMAND_IDS[namedStyleType ?? NamedStyleType.NORMAL_TEXT] ?? NormalTextHeadingCommand.id;
+}
+
 export function getParagraphMenuCommand(params: IValueOption, targetRange?: ITextRangeWithStyle | null): { commandId?: string; params?: object } {
     const commandId = params.commandId ?? params.id ?? (typeof params.label === 'string' ? params.label : undefined);
     if (commandId && targetRange && commandId in HEADING_COMMAND_VALUES) {
@@ -133,6 +146,7 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
     const isInTable = useMemo(() => doc?.getBody()?.tables?.some((table) => startIndex != null && startIndex > table.startIndex && startIndex < table.endIndex), [doc, startIndex]);
     const isEmptyParagraph = isEmptyParagraphMenuTarget(dataStream, activeParagraphBound);
     const namedStyleType = paragraphObj?.paragraphStyle?.namedStyleType;
+    const activeHeadingCommandId = getParagraphMenuActiveHeadingCommandId(namedStyleType);
     const icon = HEADING_ICON_MAP[namedStyleType ?? NamedStyleType.NORMAL_TEXT];
     const anchorRect$ = useMemo(() => new BehaviorSubject({
         left: 0,
@@ -234,6 +248,7 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
                         <ContextMenuPanel
                             className="univer-w-[212px]"
                             menuType={emptyMode ? EMPTY_PARAGRAPH_MENU_ID : ContextMenuPosition.PARAGRAPH}
+                            activeItemIds={[activeHeadingCommandId]}
                             onOptionSelect={(params) => {
                                 const targetRange = targetRangeRef.current ?? getParagraphMenuTargetRange(activeParagraphBound);
                                 const { commandId, params: commandParams } = getParagraphMenuCommand(params, targetRange);

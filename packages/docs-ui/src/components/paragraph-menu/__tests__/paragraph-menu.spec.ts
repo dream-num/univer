@@ -17,16 +17,24 @@
 import { NamedStyleType } from '@univerjs/core';
 
 import { describe, expect, it } from 'vitest';
-import { getParagraphMenuCommand, getParagraphMenuIconSizeClass, getParagraphMenuTargetRange, isEmptyParagraphMenuTarget } from '..';
+import { getParagraphMenuActiveHeadingCommandId, getParagraphMenuCommand, getParagraphMenuIconSizeClass, getParagraphMenuTargetRange, isEmptyParagraphMenuTarget } from '..';
 import { HorizontalLineCommand } from '../../../commands/commands/doc-horizontal-line.command';
 import { BulletListCommand, OrderListCommand } from '../../../commands/commands/list.command';
-import { H1HeadingCommand, SetParagraphNamedStyleCommand } from '../../../commands/commands/set-heading.command';
+import { H1HeadingCommand, H3HeadingCommand, NormalTextHeadingCommand, SetParagraphNamedStyleCommand } from '../../../commands/commands/set-heading.command';
 import { CreateDocTableCommand } from '../../../commands/commands/table/doc-table-create.command';
 
 describe('ParagraphMenu', () => {
     it('uses a smaller icon for normal text paragraph triggers', () => {
         expect(getParagraphMenuIconSizeClass('TextTypeIcon')).toBe('univer-size-3');
         expect(getParagraphMenuIconSizeClass('H1Icon')).toBe('univer-size-4');
+    });
+
+    it('maps paragraph named styles to the active heading menu item', () => {
+        expect(getParagraphMenuActiveHeadingCommandId(NamedStyleType.HEADING_1)).toBe(H1HeadingCommand.id);
+        expect(getParagraphMenuActiveHeadingCommandId(NamedStyleType.HEADING_3)).toBe(H3HeadingCommand.id);
+        expect(getParagraphMenuActiveHeadingCommandId(NamedStyleType.NORMAL_TEXT)).toBe(NormalTextHeadingCommand.id);
+        expect(getParagraphMenuActiveHeadingCommandId(undefined)).toBe(NormalTextHeadingCommand.id);
+        expect(getParagraphMenuActiveHeadingCommandId(NamedStyleType.TITLE)).toBe(NormalTextHeadingCommand.id);
     });
 
     it('detects empty paragraph menu targets', () => {

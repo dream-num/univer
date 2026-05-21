@@ -16,6 +16,7 @@
 
 import type { DocumentDataModel } from '@univerjs/core';
 import type { IPopup } from '@univerjs/ui';
+import type { ComponentType } from 'react';
 import type { IMutiPageParagraphBound } from '../../services/doc-event-manager.service';
 import { ICommandService, IUniverInstanceService, LocaleService, NamedStyleType, UniverInstanceType } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
@@ -43,7 +44,13 @@ export function isEmptyParagraphMenuTarget(dataStream: string, paragraph?: IMuti
     return dataStream.slice(paragraph.paragraphStart, paragraph.paragraphEnd) === '';
 }
 
-export const EMPTY_PARAGRAPH_MENU_ACTIONS = [
+interface IEmptyParagraphMenuAction {
+    icon: ComponentType<{ className: string }>;
+    id: string;
+    title: string;
+}
+
+export const EMPTY_PARAGRAPH_MENU_ACTIONS: IEmptyParagraphMenuAction[] = [
     { id: H1HeadingCommand.id, title: 'toolbar.heading.1', icon: HEADING_ICON_MAP[NamedStyleType.HEADING_1].component },
     { id: H2HeadingCommand.id, title: 'toolbar.heading.2', icon: HEADING_ICON_MAP[NamedStyleType.HEADING_2].component },
     { id: H3HeadingCommand.id, title: 'toolbar.heading.3', icon: HEADING_ICON_MAP[NamedStyleType.HEADING_3].component },

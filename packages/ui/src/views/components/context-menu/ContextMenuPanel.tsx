@@ -31,7 +31,7 @@ import { createPortal } from 'react-dom';
 import { combineLatest, isObservable, of, scan, startWith } from 'rxjs';
 import { CustomLabel } from '../../../components/custom-label/CustomLabel';
 import { useScrollYOverContainer } from '../../../components/hooks/layout';
-import { UIQuickTileMenuGroup, UITinyMenuGroup } from '../../../components/menu/desktop/TinyMenuGroup';
+import { resolveMenuItemActiveState, UIQuickTileMenuGroup, UITinyMenuGroup } from '../../../components/menu/desktop/TinyMenuGroup';
 import { ILayoutService } from '../../../services/layout/layout.service';
 import { MenuItemType } from '../../../services/menu/menu';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
@@ -404,7 +404,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
               hover:univer-bg-gray-50
               dark:hover:!univer-bg-gray-600
             `,
-        (activated || activeItemIds?.includes(menuItem.id ?? '')) && `
+        resolveMenuItemActiveState(menuItem.id, activated, activeItemIds) && `
           univer-bg-gray-200
           dark:!univer-bg-gray-600
         `

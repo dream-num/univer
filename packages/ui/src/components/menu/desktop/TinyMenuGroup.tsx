@@ -36,6 +36,14 @@ interface IUIQuickTileMenuItemProps {
     onOptionSelect?: (option: IValueOption) => void;
 }
 
+export function resolveMenuItemActiveState(itemId: string | undefined, observableActive: boolean, activeItemIds?: string[]): boolean {
+    if (activeItemIds) {
+        return Boolean(itemId && activeItemIds.includes(itemId));
+    }
+
+    return observableActive;
+}
+
 function QuickTileMenuItem(props: IUIQuickTileMenuItemProps) {
     const { menuSchema, activeItemIds, onOptionSelect } = props;
     const componentManager = useDependency(ComponentManager);
@@ -70,7 +78,7 @@ function QuickTileMenuItem(props: IUIQuickTileMenuItemProps) {
                       hover:univer-bg-gray-50
                       dark:hover:!univer-bg-gray-600
                     `,
-                (activated || activeItemIds?.includes(menuItem.id ?? '')) && `
+                resolveMenuItemActiveState(menuItem.id, activated, activeItemIds) && `
                   univer-bg-primary-50 univer-text-primary-700 univer-ring-1 univer-ring-primary-600
                   dark:!univer-bg-primary-900 dark:!univer-text-primary-100
                 `
@@ -147,7 +155,7 @@ export function UITinyMenuGroup(props: IUIQuickMenuGroupProps) {
                 className: '',
                 iconClassName: child.item?.icon === 'TextTypeIcon' ? '!univer-size-3.5' : undefined,
                 Icon: componentManager.get(child.item!.icon as string)!,
-                active: activeItems.includes(child.item?.id ?? '') || activeItemIds?.includes(child.item?.id ?? ''),
+                active: resolveMenuItemActiveState(child.item?.id, activeItems.includes(child.item?.id ?? ''), activeItemIds),
             }))}
         />
     );

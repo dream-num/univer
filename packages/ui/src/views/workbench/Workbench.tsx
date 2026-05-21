@@ -27,7 +27,6 @@ import { ThemeSwitcherService } from '../../services/theme-switcher/theme-switch
 import { useDependency } from '../../utils/di';
 import { ComponentContainer, useComponentsOfPart } from '../components/ComponentContainer';
 import { DesktopContextMenu } from '../components/context-menu/ContextMenu';
-import { GlobalZone } from '../components/global-zone/GlobalZone';
 import { Sidebar } from '../components/sidebar/Sidebar';
 import { ZenZone } from '../components/zen-zone/ZenZone';
 
@@ -232,12 +231,11 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
                         </footer>
                     )}
                     <ZenZone />
-
                 </section>
             </div>
+
             <div dir={direction}>
                 <ComponentContainer key="global" components={globalComponents} />
-                <GlobalZone />
                 {contextMenu && <DesktopContextMenu />}
                 <FloatingContainer />
                 <div id={popupRootId} />

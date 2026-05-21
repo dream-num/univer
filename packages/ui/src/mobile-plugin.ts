@@ -37,8 +37,6 @@ import { CanvasFloatDomService } from './services/dom/canvas-dom-layer.service';
 import { FontService, IFontService } from './services/font.service';
 import { DesktopGalleryService } from './services/gallery/desktop-gallery.service';
 import { IGalleryService } from './services/gallery/gallery.service';
-import { DesktopGlobalZoneService } from './services/global-zone/desktop-global-zone.service';
-import { IGlobalZoneService } from './services/global-zone/global-zone.service';
 import { DesktopLayoutService, ILayoutService } from './services/layout/layout.service';
 import { DesktopLocalFileService } from './services/local-file/desktop-local-file.service';
 import { ILocalFileService } from './services/local-file/local-file.service';
@@ -118,7 +116,6 @@ export class UniverMobileUIPlugin extends Plugin {
             [IConfirmService, { useClass: DesktopConfirmService, lazy: true }],
             [ISidebarService, { useClass: DesktopSidebarService, lazy: true }],
             [IZenZoneService, { useClass: DesktopZenZoneService, lazy: true }],
-            [IGlobalZoneService, { useClass: DesktopGlobalZoneService, lazy: true }],
             [IMessageService, { useClass: DesktopMessageService, lazy: true }],
             [ILocalStorageService, { useClass: DesktopLocalStorageService, lazy: true }],
             [IBeforeCloseService, { useClass: DesktopBeforeCloseService }],

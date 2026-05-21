@@ -23,7 +23,6 @@ import { ThemeSwitcherService } from '../../services/theme-switcher/theme-switch
 import { useDependency } from '../../utils/di';
 import { ComponentContainer, useComponentsOfPart } from '../components/ComponentContainer';
 import { MobileContextMenu } from '../components/context-menu/MobileContextMenu';
-import { GlobalZone } from '../components/global-zone/GlobalZone';
 import { Sidebar } from '../components/sidebar/Sidebar';
 import { ZenZone } from '../components/zen-zone/ZenZone';
 
@@ -199,7 +198,6 @@ export function MobileWorkbench(props: IUniverAppProps) {
                             <ComponentContainer key="footer" components={footerComponents} />
                         </footer>
                     )}
-                    <GlobalZone />
                     <ZenZone />
                 </section>
             </div>

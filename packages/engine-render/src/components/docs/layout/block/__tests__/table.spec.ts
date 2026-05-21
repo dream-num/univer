@@ -353,6 +353,23 @@ describe('docs table layout', () => {
         );
     });
 
+    it('treats explicit row height as a minimum so wrapped cell content remains visible', () => {
+        const { ctx, curPage, viewModel, tableNode, sectionBreakConfig, tableSource } = createContextAndTable();
+        tableSource.tableRows[0].trHeight = {
+            hRule: TableRowHeightRule.EXACT,
+            val: { v: 18 },
+        };
+        createSkeletonCellPagesMock.mockImplementation(
+            (_ctx: unknown, _viewModel: unknown, _cellNode: unknown, _section: unknown, _table: unknown, row: number) =>
+                [makeCellPage(60, row === 0 ? 48 : 20)]
+        );
+
+        const skeleton = createTableSkeleton(ctx, curPage, viewModel, tableNode, sectionBreakConfig);
+
+        expect(skeleton?.rows[0].height).toBe(50);
+        expect(skeleton?.rows[0].cells[0].pageHeight).toBe(50);
+    });
+
     it('creates sliced tables when available height is limited', () => {
         const { ctx, curPage, viewModel, tableNode, sectionBreakConfig } = createContextAndTable();
 

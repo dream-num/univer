@@ -24,6 +24,7 @@ import type { Scene } from '../../scene';
 import type { ComponentExtension, IDrawInfo, IExtensionConfig } from '../extension';
 import type { IDocumentsConfig, IPageMarginLayout } from './doc-component';
 import type { DocumentSkeleton } from './layout/doc-skeleton';
+import type { IDocsTableRenderViewport } from './table-render-viewport';
 import { CellValueType, DashStyleType, HorizontalAlign, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { BORDER_TYPE as BORDER_LTRB, drawLineByBorderType } from '../../basics';
@@ -42,7 +43,7 @@ import './extensions';
 
 const DEFAULT_BORDER_COLOR: ITableCellBorder = {
     color: {
-        rgb: '#dee0e3',
+        rgb: '#c7c9cc',
     },
 };
 
@@ -522,15 +523,22 @@ export class Documents extends DocComponent {
         renderConfig: IDocumentRenderConfig,
         parentScale: IScale
     ) {
+        const drawLiquid = this._drawLiquid;
+        if (drawLiquid == null) {
+            return;
+        }
+
+        const renderUnitId = this._getRenderUnitId();
+
         for (const [tableId, tableSkeleton] of skeTables) {
             const { top: tableTop, left: tableLeft, rows } = tableSkeleton;
             const sourceTableId = getTableIdAndSliceIndex(tableId).tableId;
-            const viewport = getDocsTableRenderViewport(this.oKey, sourceTableId);
-            this._drawLiquid?.translateSave();
-            this._drawLiquid?.translate(tableLeft, tableTop);
+            const viewport = this._getTableViewport(page, tableSkeleton, renderUnitId, sourceTableId);
+            drawLiquid.translateSave();
+            drawLiquid.translate(tableLeft, tableTop);
 
             if (viewport && viewport.contentWidth > viewport.viewportWidth) {
-                const { x, y } = this._drawLiquid;
+                const { x, y } = drawLiquid;
                 ctx.save();
                 ctx.beginPath();
                 ctx.rectByPrecision(
@@ -541,13 +549,13 @@ export class Documents extends DocComponent {
                 );
                 ctx.closePath();
                 ctx.clip();
-                this._drawLiquid?.translate(-viewport.scrollLeft, 0);
+                drawLiquid.translate(-viewport.scrollLeft, 0);
             }
 
             for (const row of rows) {
                 const { top: rowTop, cells } = row;
-                this._drawLiquid?.translateSave();
-                this._drawLiquid?.translate(0, rowTop);
+                drawLiquid.translateSave();
+                drawLiquid.translate(0, rowTop);
 
                 for (const cell of cells) {
                     if ((cell as IDocumentSkeletonPage & { isMergedCellCovered?: boolean }).isMergedCellCovered) {
@@ -555,8 +563,8 @@ export class Documents extends DocComponent {
                     }
 
                     const { left: cellLeft } = cell;
-                    this._drawLiquid?.translateSave();
-                    this._drawLiquid?.translate(cellLeft, 0);
+                    drawLiquid.translateSave();
+                    drawLiquid.translate(cellLeft, 0);
 
                     this._drawTableCell(
                         ctx,
@@ -572,18 +580,60 @@ export class Documents extends DocComponent {
                         parentScale
                     );
 
-                    this._drawLiquid?.translateRestore();
+                    drawLiquid.translateRestore();
                 }
 
-                this._drawLiquid?.translateRestore();
+                drawLiquid.translateRestore();
             }
 
             if (viewport && viewport.contentWidth > viewport.viewportWidth) {
                 ctx.restore();
             }
 
-            this._drawLiquid?.translateRestore();
+            drawLiquid.translateRestore();
         }
+    }
+
+    private _getTableViewport(
+        page: IDocumentSkeletonPage,
+        tableSkeleton: IDocumentSkeletonTable,
+        unitId: string,
+        tableId: string
+    ): Nullable<IDocsTableRenderViewport> {
+        const viewport = getDocsTableRenderViewport(unitId, tableId);
+        if (viewport) {
+            return viewport;
+        }
+
+        const { pageWidth, marginLeft = 0, marginRight = 0 } = page;
+        if (!Number.isFinite(pageWidth)) {
+            return null;
+        }
+
+        const viewportWidth = Math.max(0, pageWidth - marginLeft - marginRight - tableSkeleton.left);
+        if (viewportWidth <= 0 || tableSkeleton.width <= viewportWidth) {
+            return null;
+        }
+
+        return {
+            contentWidth: tableSkeleton.width,
+            scrollLeft: 0,
+            viewportWidth,
+        };
+    }
+
+    private _getRenderUnitId(): string {
+        const skeleton = this.getSkeleton() as {
+            getViewModel?: () => {
+                getDataModel?: () => {
+                    getUnitId?: () => string;
+                };
+            };
+        } | undefined;
+        const viewModel = skeleton?.getViewModel?.();
+        const dataModel = viewModel?.getDataModel?.();
+
+        return dataModel?.getUnitId?.() ?? this.oKey;
     }
 
     private _drawBorderBottom(

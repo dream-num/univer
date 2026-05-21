@@ -88,7 +88,7 @@ export function createTableSkeleton(
         if (hRule === TableRowHeightRule.AT_LEAST) {
             rowHeight = Math.max(rowHeight, val.v);
         } else if (hRule === TableRowHeightRule.EXACT) {
-            rowHeight = val.v;
+            rowHeight = Math.max(rowHeight, val.v);
         }
 
         // Set row height to cell page height.
@@ -372,7 +372,7 @@ function dealWithTableRow(
         if (hRule === TableRowHeightRule.AT_LEAST) {
             rowHeights[rowIndex] = Math.max(rowHeights[rowIndex], val.v);
         } else if (hRule === TableRowHeightRule.EXACT) {
-            rowHeights[rowIndex] = val.v;
+            rowHeights[rowIndex] = Math.max(rowHeights[rowIndex], val.v);
         }
 
         rowHeights[rowIndex] = Math.min(rowHeights[rowIndex], pageContentHeight);

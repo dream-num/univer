@@ -61,6 +61,7 @@ import {
     HeaderFooterMenuItemFactory,
     HeadingSelectorMenuItemFactory,
     HorizontalLineFactory,
+    InsertDefaultTableMenuFactory,
     InsertTableMenuFactory,
     ItalicMenuItemFactory,
     OrderListMenuItemFactory,
@@ -74,7 +75,7 @@ import {
     TextColorSelectorMenuItemFactory,
     UnderlineMenuItemFactory,
 } from './menu';
-import { CopyCurrentParagraphMenuItemFactory, CutCurrentParagraphMenuItemFactory, DeleteCurrentParagraphMenuItemFactory, DocInsertBellowMenuItemFactory, H1HeadingMenuItemFactory, H2HeadingMenuItemFactory, H3HeadingMenuItemFactory, H4HeadingMenuItemFactory, H5HeadingMenuItemFactory, INSERT_BELLOW_MENU_ID, InsertBulletListBellowMenuItemFactory, InsertCheckListBellowMenuItemFactory, InsertHorizontalLineBellowMenuItemFactory, InsertOrderListBellowMenuItemFactory, NormalTextHeadingMenuItemFactory } from './paragraph-menu';
+import { CopyCurrentParagraphMenuItemFactory, CutCurrentParagraphMenuItemFactory, DeleteCurrentParagraphMenuItemFactory, DocInsertBellowMenuItemFactory, EMPTY_PARAGRAPH_MENU_ID, EmptyParagraphBulletListMenuItemFactory, EmptyParagraphCheckListMenuItemFactory, EmptyParagraphH1MenuItemFactory, EmptyParagraphH2MenuItemFactory, EmptyParagraphH3MenuItemFactory, EmptyParagraphH4MenuItemFactory, EmptyParagraphH5MenuItemFactory, EmptyParagraphHorizontalLineMenuItemFactory, EmptyParagraphNormalTextMenuItemFactory, EmptyParagraphOrderListMenuItemFactory, H1HeadingMenuItemFactory, H2HeadingMenuItemFactory, H3HeadingMenuItemFactory, H4HeadingMenuItemFactory, H5HeadingMenuItemFactory, INSERT_BELLOW_MENU_ID, InsertBulletListBellowMenuItemFactory, InsertCheckListBellowMenuItemFactory, InsertHorizontalLineBellowMenuItemFactory, InsertOrderListBellowMenuItemFactory, NormalTextHeadingMenuItemFactory } from './paragraph-menu';
 
 export const menuSchema: MenuSchemaType = {
     [RibbonStartGroup.FORMAT]: {
@@ -262,18 +263,6 @@ export const menuSchema: MenuSchemaType = {
                 order: 5,
                 menuItemFactory: NormalTextHeadingMenuItemFactory,
             },
-            [OrderListCommand.id]: {
-                order: 6,
-                menuItemFactory: OrderListMenuItemFactory,
-            },
-            [BulletListCommand.id]: {
-                order: 7,
-                menuItemFactory: BulletListMenuItemFactory,
-            },
-            [CheckListCommand.id]: {
-                order: 8,
-                menuItemFactory: CheckListMenuItemFactory,
-            },
         },
         [ContextMenuGroup.FORMAT]: {
             [DocCopyCurrentParagraphCommand.id]: {
@@ -308,6 +297,63 @@ export const menuSchema: MenuSchemaType = {
                 [InsertHorizontalLineBellowCommand.id]: {
                     order: 3,
                     menuItemFactory: InsertHorizontalLineBellowMenuItemFactory,
+                },
+                [DocCreateTableOperation.id]: {
+                    order: 4,
+                    menuItemFactory: InsertDefaultTableMenuFactory,
+                },
+            },
+        },
+        [EMPTY_PARAGRAPH_MENU_ID]: {
+            [ContextMenuGroup.QUICK]: {
+                order: -1,
+                quickLayout: 'icon',
+                [H1HeadingCommand.id]: {
+                    order: 0,
+                    menuItemFactory: EmptyParagraphH1MenuItemFactory,
+                },
+                [H2HeadingCommand.id]: {
+                    order: 1,
+                    menuItemFactory: EmptyParagraphH2MenuItemFactory,
+                },
+                [H3HeadingCommand.id]: {
+                    order: 2,
+                    menuItemFactory: EmptyParagraphH3MenuItemFactory,
+                },
+                [H4HeadingCommand.id]: {
+                    order: 3,
+                    menuItemFactory: EmptyParagraphH4MenuItemFactory,
+                },
+                [H5HeadingCommand.id]: {
+                    order: 4,
+                    menuItemFactory: EmptyParagraphH5MenuItemFactory,
+                },
+                [NormalTextHeadingCommand.id]: {
+                    order: 5,
+                    menuItemFactory: EmptyParagraphNormalTextMenuItemFactory,
+                },
+            },
+            [ContextMenuGroup.LAYOUT]: {
+                order: 1,
+                [BulletListCommand.id]: {
+                    order: 0,
+                    menuItemFactory: EmptyParagraphBulletListMenuItemFactory,
+                },
+                [OrderListCommand.id]: {
+                    order: 1,
+                    menuItemFactory: EmptyParagraphOrderListMenuItemFactory,
+                },
+                [CheckListCommand.id]: {
+                    order: 2,
+                    menuItemFactory: EmptyParagraphCheckListMenuItemFactory,
+                },
+                [HorizontalLineCommand.id]: {
+                    order: 3,
+                    menuItemFactory: EmptyParagraphHorizontalLineMenuItemFactory,
+                },
+                [DocCreateTableOperation.id]: {
+                    order: 4,
+                    menuItemFactory: InsertDefaultTableMenuFactory,
                 },
             },
         },

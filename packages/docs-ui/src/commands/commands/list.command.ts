@@ -345,6 +345,7 @@ export const ToggleCheckListCommand: ICommand<IToggleCheckListCommandParams> = {
 
 interface IOrderListCommandParams {
     value?: PresetListType;
+    docRange?: ITextRangeWithStyle[];
 }
 
 export const OrderListCommand: ICommand<IOrderListCommandParams> = {
@@ -357,11 +358,13 @@ export const OrderListCommand: ICommand<IOrderListCommandParams> = {
         if (params?.value) {
             return commandService.syncExecuteCommand(ChangeListTypeCommand.id, {
                 listType: params.value,
+                docRange: params.docRange,
             });
         }
 
         return commandService.syncExecuteCommand(ListOperationCommand.id, {
             listType: PresetListType.ORDER_LIST,
+            docRange: params?.docRange,
         });
     },
 };

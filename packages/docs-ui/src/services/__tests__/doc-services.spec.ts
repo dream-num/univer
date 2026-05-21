@@ -15,7 +15,7 @@
  */
 
 import type { IDocumentData, Injector, ITextStyle, Univer } from '@univerjs/core';
-import { CustomRangeType, IUniverInstanceService } from '@univerjs/core';
+import { CustomRangeType, DocumentFlavor, IUniverInstanceService } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocumentEditArea } from '@univerjs/engine-render';
 import { Subject } from 'rxjs';
@@ -197,10 +197,19 @@ describe('docs ui services', () => {
         const created$ = new Subject<Record<string, unknown>>();
         const added$ = new Subject<{ unit: Record<string, unknown> }>();
         const disposed$ = new Subject<Record<string, unknown>>();
-        const existingDoc = { getUnitId: () => 'doc-1' };
-        const addedDoc = { getUnitId: () => 'doc-2' };
+        const existingDoc = {
+            getUnitId: () => 'doc-1',
+            getSnapshot: () => ({ documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL } }),
+        };
+        const addedDoc = {
+            getUnitId: () => 'doc-2',
+            getSnapshot: () => ({ documentStyle: { documentFlavor: DocumentFlavor.MODERN } }),
+        };
         const removedDoc = { getUnitId: () => 'doc-3' };
-        const canvas = { setId: vi.fn() };
+        const canvasElement = { style: {} as Record<string, string> };
+        const canvas = { setId: vi.fn(), getCanvasEle: vi.fn(() => canvasElement) };
+        const modernCanvasElement = { style: {} as Record<string, string> };
+        const modernCanvas = { setId: vi.fn(), getCanvasEle: vi.fn(() => modernCanvasElement) };
         const context = { setId: vi.fn() };
         const renderManagerService = {
             createRender$,
@@ -233,8 +242,22 @@ describe('docs ui services', () => {
 
         expect(canvas.setId).toHaveBeenCalledWith('univer-doc-main-canvas');
         expect(context.setId).toHaveBeenCalledWith('univer-doc-main-canvas');
+        expect(canvasElement.style.backgroundColor).toBe('#fafafa');
 
         added$.next({ unit: addedDoc });
+        created$.next({
+            unitId: 'doc-2',
+            engine: {
+                getCanvas: () => ({
+                    ...modernCanvas,
+                    getContext: () => context,
+                }),
+            },
+        });
+
+        expect(modernCanvas.setId).toHaveBeenCalledWith('univer-doc-main-canvas');
+        expect(modernCanvasElement.style.backgroundColor).toBe('#fff');
+
         createRender$.next('doc-4');
         disposed$.next(removedDoc);
 

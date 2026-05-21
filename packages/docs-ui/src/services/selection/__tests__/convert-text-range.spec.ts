@@ -14,11 +14,17 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
-import { compareNodePosition, compareNodePositionLogic, getOneTextSelectionRange, pushToPoints } from '../convert-text-range';
+import type { INodePosition } from '@univerjs/engine-render';
+import { DocumentSkeletonPageType, setDocsTableRenderViewportProvider } from '@univerjs/engine-render';
+import { afterEach, describe, expect, it } from 'vitest';
+import { compareNodePosition, compareNodePositionLogic, getOneTextSelectionRange, NodePositionConvertToCursor, pushToPoints } from '../convert-text-range';
 import { getAnchorBounding, getLineBounding } from '../text-range';
 
 describe('selection convert text range helpers', () => {
+    afterEach(() => {
+        setDocsTableRenderViewportProvider(null);
+    });
+
     it('compares node positions in document order', () => {
         const start = { page: 0, section: 0, column: 0, line: 0, divide: 0, glyph: 0 } as never;
         const end = { page: 0, section: 0, column: 0, line: 1, divide: 0, glyph: 0 } as never;
@@ -79,5 +85,110 @@ describe('selection convert text range helpers', () => {
             { left: 10, right: 30, top: 20, bottom: 40 },
             { left: 0, right: 4, top: 0, bottom: 2 },
         ]);
+    });
+
+    it('projects cell cursors through the table horizontal viewport', () => {
+        setDocsTableRenderViewportProvider((unitId, tableId) => {
+            if (unitId !== 'unit-1' || tableId !== 'table-1') {
+                return null;
+            }
+
+            return {
+                contentWidth: 400,
+                scrollLeft: 50,
+                viewportWidth: 120,
+            };
+        });
+
+        const glyph = {
+            bBox: { ba: 8, bd: 2 },
+            count: 1,
+            glyphType: 'LETTER',
+            left: 20,
+            width: 10,
+        };
+        const cell = {
+            left: 100,
+            marginLeft: 0,
+            marginTop: 0,
+            sections: [{
+                columns: [{
+                    left: 0,
+                    lines: [{
+                        asc: 10,
+                        divides: [{
+                            glyphGroup: [glyph],
+                            left: 0,
+                            paddingLeft: 0,
+                        }],
+                        lineHeight: 20,
+                        marginBottom: 0,
+                        marginTop: 0,
+                        paddingTop: 0,
+                        top: 0,
+                    }],
+                }],
+                top: 0,
+            }],
+        };
+        const row = {
+            cells: [cell],
+            height: 20,
+            index: 0,
+            top: 0,
+        };
+        const table = {
+            left: 0,
+            rows: [row],
+            tableId: 'table-1',
+            top: 0,
+        };
+        const page = {
+            marginLeft: 0,
+            marginTop: 0,
+            pageHeight: 500,
+            pageWidth: 500,
+            skeTables: new Map([['table-1', table]]),
+        };
+
+        (cell as { parent?: unknown }).parent = row;
+        (row as { parent?: unknown }).parent = table;
+
+        const skeleton = {
+            getSkeletonData: () => ({
+                pages: [page],
+                skeFooters: new Map(),
+                skeHeaders: new Map(),
+            }),
+            getViewModel: () => ({
+                getDataModel: () => ({
+                    getUnitId: () => 'unit-1',
+                }),
+            }),
+        };
+        const position: INodePosition = {
+            column: 0,
+            divide: 0,
+            glyph: 0,
+            isBack: false,
+            line: 0,
+            page: 0,
+            pageType: DocumentSkeletonPageType.CELL,
+            path: ['pages', 0, 'skeTables', 'table-1', 'rows', 0, 'cells', 0],
+            section: 0,
+            segmentPage: 0,
+        };
+
+        const convertor = new NodePositionConvertToCursor({
+            docsLeft: 0,
+            docsTop: 0,
+            pageLayoutType: 0,
+            pageMarginLeft: 0,
+            pageMarginTop: 0,
+        } as never, skeleton as never);
+
+        const result = convertor.getRangePointData(position, position);
+
+        expect(getAnchorBounding(result.contentBoxPointGroup).left).toBe(70);
     });
 });

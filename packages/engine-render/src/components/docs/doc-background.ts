@@ -26,6 +26,7 @@ import { Liquid } from './liquid';
 
 const PAGE_STROKE_COLOR = 'rgba(198, 198, 198, 1)';
 const PAGE_FILL_COLOR = 'rgba(255, 255, 255, 1)';
+const DOCS_WORKSPACE_FILL_COLOR = '#fafafa';
 const MARGIN_STROKE_COLOR = 'rgba(158, 158, 158, 1)';
 
 export class DocBackground extends DocComponent {
@@ -52,6 +53,9 @@ export class DocBackground extends DocComponent {
         }
 
         const { documentFlavor } = docDataModel.getSnapshot().documentStyle;
+
+        const workspaceFill = documentFlavor === DocumentFlavor.MODERN ? PAGE_FILL_COLOR : DOCS_WORKSPACE_FILL_COLOR;
+        this._drawWorkspaceBackground(ctx, workspaceFill, bounds);
 
         if (documentFlavor !== DocumentFlavor.TRADITIONAL) {
             return;
@@ -152,6 +156,28 @@ export class DocBackground extends DocComponent {
             pageLeft += x;
             pageTop += y;
         }
+    }
+
+    private _drawWorkspaceBackground(ctx: UniverRenderingContext, fill: string, bounds?: IViewportInfo) {
+        const visibleBound = bounds?.cacheBound ?? bounds?.viewBound;
+        const left = visibleBound?.left ?? 0;
+        const top = visibleBound?.top ?? 0;
+        const width = visibleBound == null ? this.width : visibleBound.right - visibleBound.left;
+        const height = visibleBound == null ? this.height : visibleBound.bottom - visibleBound.top;
+
+        if (width <= 0 || height <= 0) {
+            return;
+        }
+
+        ctx.save();
+        ctx.translate(left, top);
+        Rect.drawWith(ctx, {
+            width,
+            height,
+            fill,
+            zIndex: 0,
+        });
+        ctx.restore();
     }
 
     changeSkeleton(newSkeleton: DocumentSkeleton) {

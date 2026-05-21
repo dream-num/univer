@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
-import { MenuItemType, RibbonInsertGroup, RibbonStartGroup } from '@univerjs/ui';
+import { ContextMenuGroup, ContextMenuPosition, MenuItemType, RibbonInsertGroup, RibbonStartGroup } from '@univerjs/ui';
 import { describe, expect, it } from 'vitest';
-import { HorizontalLineCommand } from '../../commands/commands/doc-horizontal-line.command';
-import { CheckListCommand } from '../../commands/commands/list.command';
+import { HorizontalLineCommand, InsertHorizontalLineBellowCommand } from '../../commands/commands/doc-horizontal-line.command';
+import { BulletListCommand, CheckListCommand, InsertBulletListBellowCommand, InsertCheckListBellowCommand, InsertOrderListBellowCommand, OrderListCommand } from '../../commands/commands/list.command';
 import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignOperationCommand, AlignRightCommand } from '../../commands/commands/paragraph-align.command';
-import { AlignMenuItemFactory } from '../menu';
+import { H1HeadingCommand, NormalTextHeadingCommand } from '../../commands/commands/set-heading.command';
+import { CreateDocTableCommand } from '../../commands/commands/table/doc-table-create.command';
+import { DocCreateTableOperation } from '../../commands/operations/doc-create-table.operation';
+import { AlignMenuItemFactory, InsertDefaultTableMenuFactory, InsertTableMenuFactory } from '../menu';
+import { EMPTY_PARAGRAPH_MENU_ID, INSERT_BELLOW_MENU_ID } from '../paragraph-menu';
 import { menuSchema } from '../schema';
 
 describe('docs ui ribbon schema', () => {
@@ -50,5 +54,50 @@ describe('docs ui ribbon schema', () => {
         expect(layout[CheckListCommand.id]).toBeUndefined();
         expect(media[HorizontalLineCommand.id].menuItemFactory).toBeDefined();
         expect(media[CheckListCommand.id].menuItemFactory).toBeDefined();
+    });
+
+    it('uses current-paragraph first-level actions for empty paragraph menus', () => {
+        const paragraph = (menuSchema as any)[ContextMenuPosition.PARAGRAPH];
+        const insertBelow = paragraph[ContextMenuGroup.LAYOUT][INSERT_BELLOW_MENU_ID];
+        const emptyMenu = paragraph[EMPTY_PARAGRAPH_MENU_ID];
+        const quick = emptyMenu[ContextMenuGroup.QUICK];
+        const layout = emptyMenu[ContextMenuGroup.LAYOUT];
+
+        expect(quick.order).toBe(-1);
+        expect(layout.order).toBe(1);
+        expect(quick[H1HeadingCommand.id].menuItemFactory).toBeDefined();
+        expect(quick[NormalTextHeadingCommand.id].menuItemFactory).toBeDefined();
+        expect(paragraph[ContextMenuGroup.QUICK][OrderListCommand.id]).toBeUndefined();
+        expect(paragraph[ContextMenuGroup.QUICK][BulletListCommand.id]).toBeUndefined();
+        expect(paragraph[ContextMenuGroup.QUICK][CheckListCommand.id]).toBeUndefined();
+
+        expect(insertBelow[InsertOrderListBellowCommand.id].menuItemFactory).toBeDefined();
+        expect(insertBelow[InsertBulletListBellowCommand.id].menuItemFactory).toBeDefined();
+        expect(insertBelow[InsertCheckListBellowCommand.id].menuItemFactory).toBeDefined();
+        expect(insertBelow[InsertHorizontalLineBellowCommand.id].menuItemFactory).toBeDefined();
+        expect(insertBelow[DocCreateTableOperation.id].menuItemFactory).toBe(InsertDefaultTableMenuFactory);
+
+        expect(layout[OrderListCommand.id].menuItemFactory).toBeDefined();
+        expect(layout[BulletListCommand.id].menuItemFactory).toBeDefined();
+        expect(layout[CheckListCommand.id].menuItemFactory).toBeDefined();
+        expect(layout[HorizontalLineCommand.id].menuItemFactory).toBeDefined();
+        expect(layout[DocCreateTableOperation.id].menuItemFactory).toBe(InsertDefaultTableMenuFactory);
+        expect(emptyMenu[ContextMenuGroup.FORMAT]).toBeUndefined();
+        expect(emptyMenu[INSERT_BELLOW_MENU_ID]).toBeUndefined();
+        expect(layout[InsertHorizontalLineBellowCommand.id]).toBeUndefined();
+    });
+
+    it('uses the same table icon in paragraph insert menus', () => {
+        const item = InsertTableMenuFactory({ get: () => undefined } as never);
+
+        expect(item.icon).toBe('GridIcon');
+    });
+
+    it('uses direct table creation for paragraph insert table actions', () => {
+        const item = InsertDefaultTableMenuFactory({ get: () => undefined } as never);
+
+        expect(item.commandId).toBe(CreateDocTableCommand.id);
+        expect(item.params).toEqual({ rowCount: 3, colCount: 5 });
+        expect(item.icon).toBe('GridIcon');
     });
 });

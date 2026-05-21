@@ -15,20 +15,21 @@
  */
 
 import type { DocumentDataModel } from '@univerjs/core';
-import type { IPopup } from '@univerjs/ui';
-import type { ComponentType } from 'react';
+import type { ITextRangeWithStyle } from '@univerjs/engine-render';
+import type { IPopup, IValueOption } from '@univerjs/ui';
 import type { IMutiPageParagraphBound } from '../../services/doc-event-manager.service';
-import { ICommandService, IUniverInstanceService, LocaleService, NamedStyleType, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, NamedStyleType, UniverInstanceType } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
+import { DocSelectionManagerService } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { DownIcon, OrderIcon, ReduceIcon, TodoListDoubleIcon, UnorderIcon } from '@univerjs/icons';
+import { DownIcon } from '@univerjs/icons';
 import { ContextMenuPanel, ContextMenuPosition, ILayoutService, RectPopup, useDependency, useObservable } from '@univerjs/ui';
 import { useMemo, useRef, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { HorizontalLineCommand } from '../../commands/commands/doc-horizontal-line.command';
 import { BulletListCommand, CheckListCommand, OrderListCommand } from '../../commands/commands/list.command';
-import { H1HeadingCommand, H2HeadingCommand, H3HeadingCommand, H4HeadingCommand, H5HeadingCommand, NormalTextHeadingCommand } from '../../commands/commands/set-heading.command';
-import { HEADING_ICON_MAP } from '../../menu/paragraph-menu';
+import { H1HeadingCommand, H2HeadingCommand, H3HeadingCommand, H4HeadingCommand, H5HeadingCommand, NormalTextHeadingCommand, SetParagraphNamedStyleCommand } from '../../commands/commands/set-heading.command';
+import { EMPTY_PARAGRAPH_MENU_ID, HEADING_ICON_MAP } from '../../menu/paragraph-menu';
 import { DocEventManagerService } from '../../services/doc-event-manager.service';
 import { DocParagraphMenuService } from '../../services/doc-paragraph-menu.service';
 
@@ -41,34 +42,79 @@ export function isEmptyParagraphMenuTarget(dataStream: string, paragraph?: IMuti
         return false;
     }
 
-    return dataStream.slice(paragraph.paragraphStart, paragraph.paragraphEnd) === '';
+    return dataStream.slice(paragraph.paragraphStart, paragraph.paragraphEnd).replace(/[\r\n]/g, '') === '';
 }
 
-interface IEmptyParagraphMenuAction {
-    icon: ComponentType<{ className: string }>;
-    id: string;
-    title: string;
+export function getParagraphMenuTargetRange(paragraph?: IMutiPageParagraphBound | null | void): ITextRangeWithStyle | null {
+    if (!paragraph) {
+        return null;
+    }
+
+    return {
+        startOffset: paragraph.paragraphStart,
+        endOffset: paragraph.paragraphStart,
+        collapsed: true,
+        segmentId: paragraph.segmentId,
+    };
 }
 
-export const EMPTY_PARAGRAPH_MENU_ACTIONS: IEmptyParagraphMenuAction[] = [
-    { id: H1HeadingCommand.id, title: 'toolbar.heading.1', icon: HEADING_ICON_MAP[NamedStyleType.HEADING_1].component },
-    { id: H2HeadingCommand.id, title: 'toolbar.heading.2', icon: HEADING_ICON_MAP[NamedStyleType.HEADING_2].component },
-    { id: H3HeadingCommand.id, title: 'toolbar.heading.3', icon: HEADING_ICON_MAP[NamedStyleType.HEADING_3].component },
-    { id: H4HeadingCommand.id, title: 'toolbar.heading.4', icon: HEADING_ICON_MAP[NamedStyleType.HEADING_4].component },
-    { id: H5HeadingCommand.id, title: 'toolbar.heading.5', icon: HEADING_ICON_MAP[NamedStyleType.HEADING_5].component },
-    { id: NormalTextHeadingCommand.id, title: 'toolbar.heading.normal', icon: HEADING_ICON_MAP[NamedStyleType.NORMAL_TEXT].component },
-    { id: OrderListCommand.id, title: 'rightClick.orderList', icon: OrderIcon },
-    { id: BulletListCommand.id, title: 'rightClick.bulletList', icon: UnorderIcon },
-    { id: CheckListCommand.id, title: 'rightClick.checkList', icon: TodoListDoubleIcon },
-    { id: HorizontalLineCommand.id, title: 'toolbar.horizontalLine', icon: ReduceIcon },
-];
+const HEADING_COMMAND_VALUES: Record<string, NamedStyleType> = {
+    [H1HeadingCommand.id]: NamedStyleType.HEADING_1,
+    [H2HeadingCommand.id]: NamedStyleType.HEADING_2,
+    [H3HeadingCommand.id]: NamedStyleType.HEADING_3,
+    [H4HeadingCommand.id]: NamedStyleType.HEADING_4,
+    [H5HeadingCommand.id]: NamedStyleType.HEADING_5,
+    [NormalTextHeadingCommand.id]: NamedStyleType.NORMAL_TEXT,
+};
+
+export function getParagraphMenuCommand(params: IValueOption, targetRange?: ITextRangeWithStyle | null): { commandId?: string; params?: object } {
+    const commandId = params.commandId ?? params.id ?? (typeof params.label === 'string' ? params.label : undefined);
+    if (commandId && targetRange && commandId in HEADING_COMMAND_VALUES) {
+        return {
+            commandId: SetParagraphNamedStyleCommand.id,
+            params: {
+                value: HEADING_COMMAND_VALUES[commandId],
+                textRanges: [targetRange],
+            },
+        };
+    }
+
+    if (commandId && targetRange && (commandId === BulletListCommand.id || commandId === OrderListCommand.id || commandId === CheckListCommand.id)) {
+        return {
+            commandId,
+            params: {
+                docRange: [targetRange],
+            },
+        };
+    }
+
+    if (commandId === HorizontalLineCommand.id && targetRange) {
+        return {
+            commandId,
+            params: {
+                insertRange: targetRange,
+            },
+        };
+    }
+
+    const fallbackParams = typeof params.params === 'function' ? params.params() : params.params;
+    const commandParams = typeof params.value === 'undefined'
+        ? fallbackParams
+        : { value: params.value };
+
+    return {
+        commandId,
+        params: commandParams && typeof commandParams === 'object' ? commandParams : undefined,
+    };
+}
 
 export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
     const [visible, setVisible] = useState(false);
     const [emptyMode, setEmptyMode] = useState(false);
     const contentRef = useRef<HTMLDivElement>(null);
+    const targetRangeRef = useRef<ITextRangeWithStyle | null>(null);
     const commandService = useDependency(ICommandService);
-    const localeService = useDependency(LocaleService);
+    const docSelectionManagerService = useDependency(DocSelectionManagerService);
     const layoutService = useDependency(ILayoutService);
     const anchorRef = useRef<HTMLDivElement>(null);
     const isMouseOver = useRef(false);
@@ -95,8 +141,19 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
         bottom: 0,
     }), []);
 
+    const updateAnchorRect = () => {
+        const boundingRect = anchorRef.current?.getBoundingClientRect();
+        anchorRect$.next({
+            left: (boundingRect?.left ?? 0) - 4,
+            right: boundingRect?.right ?? 0,
+            top: boundingRect?.top ?? 0,
+            bottom: boundingRect?.bottom ?? 0,
+        });
+    };
+
     const handleHideMenu = () => {
         setVisible(false);
+        targetRangeRef.current = null;
         docParagraphMenuService?.hideParagraphMenu(true);
     };
 
@@ -122,19 +179,19 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
                 onMouseEnter={(e) => {
                     popup.onPointerEnter?.(e);
                     isMouseOver.current = true;
-                    const boundingRect = anchorRef.current?.getBoundingClientRect();
-                    anchorRect$.next({
-                        left: (boundingRect?.left ?? 0) - 4,
-                        right: boundingRect?.right ?? 0,
-                        top: boundingRect?.top ?? 0,
-                        bottom: boundingRect?.bottom ?? 0,
-                    });
+                    updateAnchorRect();
                 }}
                 onMouseLeave={() => {
                     isMouseOver.current = false;
                 }}
                 onClick={() => {
+                    const targetRange = getParagraphMenuTargetRange(activeParagraphBound);
+                    targetRangeRef.current = targetRange;
+                    if (targetRange) {
+                        docSelectionManagerService.replaceTextRanges([targetRange], false);
+                    }
                     docParagraphMenuService?.setParagraphMenuActive(true);
+                    updateAnchorRect();
                     setEmptyMode(isEmptyParagraph);
                     setVisible(true);
                 }}
@@ -174,63 +231,21 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
                             isMouseOver.current = false;
                         }}
                     >
-                        {emptyMode
-                            ? (
-                                <div
-                                    className={`
-                                      univer-box-border univer-grid univer-min-w-52 univer-gap-1 univer-rounded-md
-                                      univer-border univer-border-gray-200 univer-bg-white univer-px-2 univer-py-1
-                                      univer-text-sm univer-text-gray-900 univer-shadow-md
-                                      dark:!univer-border-gray-600 dark:!univer-bg-gray-700 dark:!univer-text-white
-                                    `}
-                                >
-                                    {EMPTY_PARAGRAPH_MENU_ACTIONS.map((action) => {
-                                        const Icon = action.icon;
+                        <ContextMenuPanel
+                            className="univer-w-[212px]"
+                            menuType={emptyMode ? EMPTY_PARAGRAPH_MENU_ID : ContextMenuPosition.PARAGRAPH}
+                            onOptionSelect={(params) => {
+                                const targetRange = targetRangeRef.current ?? getParagraphMenuTargetRange(activeParagraphBound);
+                                const { commandId, params: commandParams } = getParagraphMenuCommand(params, targetRange);
 
-                                        return (
-                                            <button
-                                                key={action.id}
-                                                type="button"
-                                                className={`
-                                                  univer-flex univer-h-8 univer-w-full univer-items-center univer-gap-2
-                                                  univer-rounded univer-px-2 univer-text-left univer-transition-colors
-                                                  hover:univer-bg-gray-100
-                                                  dark:hover:!univer-bg-gray-600
-                                                `}
-                                                onClick={() => {
-                                                    commandService.executeCommand(action.id);
-                                                    layoutService.focus();
-                                                    handleHideMenu();
-                                                }}
-                                            >
-                                                <Icon
-                                                    className="
-                                                      univer-size-4 univer-shrink-0 univer-text-gray-700
-                                                      dark:!univer-text-white
-                                                    "
-                                                />
-                                                <span className="univer-truncate">{localeService.t(action.title)}</span>
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            )
-                            : (
-                                <ContextMenuPanel
-                                    className="univer-w-[212px]"
-                                    menuType={ContextMenuPosition.PARAGRAPH}
-                                    onOptionSelect={(params) => {
-                                        const { label: id, commandId, value } = params;
+                                if (commandService && commandId) {
+                                    commandService.executeCommand(commandId, commandParams);
+                                }
 
-                                        if (commandService) {
-                                            commandService.executeCommand(commandId ?? id as string, { value });
-                                        }
-
-                                        layoutService.focus();
-                                        handleHideMenu();
-                                    }}
-                                />
-                            )}
+                                layoutService.focus();
+                                handleHideMenu();
+                            }}
+                        />
                     </section>
                 </RectPopup>
             )}

@@ -15,7 +15,7 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
-import type { IMenuItem, IMenuSelectorItem } from '@univerjs/ui';
+import type { IMenuButtonItem, IMenuItem, IMenuSelectorItem } from '@univerjs/ui';
 import { ICommandService, NamedStyleType, UniverInstanceType } from '@univerjs/core';
 import { SetTextSelectionsOperation } from '@univerjs/docs';
 import { H1Icon, H2Icon, H3Icon, H4Icon, H5Icon, TextTypeIcon } from '@univerjs/icons';
@@ -23,9 +23,9 @@ import { ComponentManager, getMenuHiddenObservable, MenuItemType } from '@univer
 import { Observable } from 'rxjs';
 import { DocCopyCurrentParagraphCommand, DocCutCurrentParagraphCommand } from '../commands/commands/clipboard.command';
 import { DeleteCurrentParagraphCommand } from '../commands/commands/doc-delete.command';
-import { InsertHorizontalLineBellowCommand } from '../commands/commands/doc-horizontal-line.command';
+import { HorizontalLineCommand, InsertHorizontalLineBellowCommand } from '../commands/commands/doc-horizontal-line.command';
 import { SetInlineFormatFontSizeCommand } from '../commands/commands/inline-format.command';
-import { InsertBulletListBellowCommand, InsertCheckListBellowCommand, InsertOrderListBellowCommand } from '../commands/commands/list.command';
+import { BulletListCommand, CheckListCommand, InsertBulletListBellowCommand, InsertCheckListBellowCommand, InsertOrderListBellowCommand, OrderListCommand } from '../commands/commands/list.command';
 import { H1HeadingCommand, H2HeadingCommand, H3HeadingCommand, H4HeadingCommand, H5HeadingCommand, NormalTextHeadingCommand, SubtitleHeadingCommand, TitleHeadingCommand } from '../commands/commands/set-heading.command';
 import { disableMenuWhenNoDocRange, getParagraphStyleAtCursor } from './menu';
 
@@ -39,6 +39,15 @@ const HEADING_MAP: Record<NamedStyleType, ICommand> = {
     [NamedStyleType.TITLE]: TitleHeadingCommand,
     [NamedStyleType.SUBTITLE]: SubtitleHeadingCommand,
     [NamedStyleType.NAMED_STYLE_TYPE_UNSPECIFIED]: NormalTextHeadingCommand,
+};
+
+const HEADING_TITLE_MAP: Partial<Record<NamedStyleType, string>> = {
+    [NamedStyleType.HEADING_1]: 'toolbar.heading.1',
+    [NamedStyleType.HEADING_2]: 'toolbar.heading.2',
+    [NamedStyleType.HEADING_3]: 'toolbar.heading.3',
+    [NamedStyleType.HEADING_4]: 'toolbar.heading.4',
+    [NamedStyleType.HEADING_5]: 'toolbar.heading.5',
+    [NamedStyleType.NORMAL_TEXT]: 'toolbar.heading.normal',
 };
 
 export const HEADING_ICON_MAP: Record<NamedStyleType, { key: string; component: React.ComponentType<{ className: string }> }> = {
@@ -65,6 +74,7 @@ const createHeadingSelectorMenuItemFactory = (headingType: NamedStyleType) => (a
         id: HEADING_MAP[headingType]!.id,
         type: MenuItemType.BUTTON,
         icon: icon.key,
+        title: HEADING_TITLE_MAP[headingType],
         tooltip: 'docs-ui.toolbar.heading.tooltip',
         disabled$: disableMenuWhenNoDocRange(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
@@ -103,6 +113,37 @@ export const H5HeadingMenuItemFactory = createHeadingSelectorMenuItemFactory(Nam
 export const NormalTextHeadingMenuItemFactory = createHeadingSelectorMenuItemFactory(NamedStyleType.NORMAL_TEXT);
 export const TitleHeadingMenuItemFactory = createHeadingSelectorMenuItemFactory(NamedStyleType.TITLE);
 export const SubtitleHeadingMenuItemFactory = createHeadingSelectorMenuItemFactory(NamedStyleType.SUBTITLE);
+
+const createEmptyParagraphButtonFactory = (
+    command: ICommand,
+    icon: string,
+    title: string
+) => (accessor: IAccessor): IMenuButtonItem => {
+    const componentManager = accessor.get(ComponentManager);
+    const headingIcon = Object.values(HEADING_ICON_MAP).find((item) => item.key === icon);
+    if (headingIcon && !componentManager.get(headingIcon.key)) {
+        componentManager.register(headingIcon.key, headingIcon.component);
+    }
+
+    return {
+        id: command.id,
+        type: MenuItemType.BUTTON,
+        icon,
+        title,
+    };
+};
+
+export const EMPTY_PARAGRAPH_MENU_ID = 'doc.menu.empty-paragraph';
+export const EmptyParagraphH1MenuItemFactory = createEmptyParagraphButtonFactory(H1HeadingCommand, 'H1Icon', 'toolbar.heading.1');
+export const EmptyParagraphH2MenuItemFactory = createEmptyParagraphButtonFactory(H2HeadingCommand, 'H2Icon', 'toolbar.heading.2');
+export const EmptyParagraphH3MenuItemFactory = createEmptyParagraphButtonFactory(H3HeadingCommand, 'H3Icon', 'toolbar.heading.3');
+export const EmptyParagraphH4MenuItemFactory = createEmptyParagraphButtonFactory(H4HeadingCommand, 'H4Icon', 'toolbar.heading.4');
+export const EmptyParagraphH5MenuItemFactory = createEmptyParagraphButtonFactory(H5HeadingCommand, 'H5Icon', 'toolbar.heading.5');
+export const EmptyParagraphNormalTextMenuItemFactory = createEmptyParagraphButtonFactory(NormalTextHeadingCommand, 'TextTypeIcon', 'toolbar.heading.normal');
+export const EmptyParagraphOrderListMenuItemFactory = createEmptyParagraphButtonFactory(OrderListCommand, 'OrderIcon', 'rightClick.orderList');
+export const EmptyParagraphBulletListMenuItemFactory = createEmptyParagraphButtonFactory(BulletListCommand, 'UnorderIcon', 'rightClick.bulletList');
+export const EmptyParagraphCheckListMenuItemFactory = createEmptyParagraphButtonFactory(CheckListCommand, 'TodoListDoubleIcon', 'rightClick.checkList');
+export const EmptyParagraphHorizontalLineMenuItemFactory = createEmptyParagraphButtonFactory(HorizontalLineCommand, 'ReduceIcon', 'toolbar.horizontalLine');
 
 export const CopyCurrentParagraphMenuItemFactory = (accessor: IAccessor): IMenuItem => {
     return {

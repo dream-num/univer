@@ -479,6 +479,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                             const item = menuItem as IDisplayMenuItem<IMenuButtonItem>;
                             onOptionSelect?.({
                                 commandId: item.commandId,
+                                params: item.params,
                                 value: inputValue,
                                 id: item.id,
                                 label: menuKey,

@@ -61,6 +61,7 @@ import { BulletListCommand, CheckListCommand, OrderListCommand } from '../comman
 import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignOperationCommand, AlignRightCommand } from '../commands/commands/paragraph-align.command';
 import { SetParagraphNamedStyleCommand } from '../commands/commands/set-heading.command';
 import { SwitchDocModeCommand } from '../commands/commands/switch-doc-mode.command';
+import { CreateDocTableCommand } from '../commands/commands/table/doc-table-create.command';
 import { DocCreateTableOperation } from '../commands/operations/doc-create-table.operation';
 import { DocOpenPageSettingCommand } from '../commands/operations/open-page-setting.operation';
 import { getCommandSkeleton } from '../commands/util';
@@ -719,6 +720,22 @@ export function InsertTableMenuFactory(_accessor: IAccessor): IMenuButtonItem {
         id: DocCreateTableOperation.id,
         title: 'docs-ui.toolbar.table.insert',
         type: MenuItemType.BUTTON,
+        icon: TableIcon,
+        hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_DOC),
+    };
+}
+
+export function InsertDefaultTableMenuFactory(_accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: DocCreateTableOperation.id,
+        commandId: CreateDocTableCommand.id,
+        params: {
+            rowCount: 3,
+            colCount: 5,
+        },
+        title: 'toolbar.table.insert',
+        type: MenuItemType.BUTTON,
+        icon: TableIcon,
         hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_DOC),
     };
 }

@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
+import { NamedStyleType } from '@univerjs/core';
 
-import { EMPTY_PARAGRAPH_MENU_ACTIONS, getParagraphMenuIconSizeClass, isEmptyParagraphMenuTarget } from '..';
-import { HorizontalLineCommand, InsertHorizontalLineBellowCommand } from '../../../commands/commands/doc-horizontal-line.command';
-import { CheckListCommand } from '../../../commands/commands/list.command';
-import { INSERT_BELLOW_MENU_ID } from '../../../menu/paragraph-menu';
+import { describe, expect, it } from 'vitest';
+import { getParagraphMenuCommand, getParagraphMenuIconSizeClass, getParagraphMenuTargetRange, isEmptyParagraphMenuTarget } from '..';
+import { HorizontalLineCommand } from '../../../commands/commands/doc-horizontal-line.command';
+import { BulletListCommand, OrderListCommand } from '../../../commands/commands/list.command';
+import { H1HeadingCommand, SetParagraphNamedStyleCommand } from '../../../commands/commands/set-heading.command';
+import { CreateDocTableCommand } from '../../../commands/commands/table/doc-table-create.command';
 
 describe('ParagraphMenu', () => {
     it('uses a smaller icon for normal text paragraph triggers', () => {
@@ -38,15 +40,72 @@ describe('ParagraphMenu', () => {
         };
 
         expect(isEmptyParagraphMenuTarget('a\r\r', paragraph as never)).toBe(true);
+        expect(isEmptyParagraphMenuTarget('a\r\r', { paragraphStart: 1, paragraphEnd: 2 } as never)).toBe(true);
+        expect(isEmptyParagraphMenuTarget('a\n\n', { paragraphStart: 1, paragraphEnd: 2 } as never)).toBe(true);
         expect(isEmptyParagraphMenuTarget('a\rb\r', nonEmptyParagraph as never)).toBe(false);
     });
 
-    it('uses direct first-level actions for empty paragraphs', () => {
-        const actionIds = EMPTY_PARAGRAPH_MENU_ACTIONS.map((action) => action.id);
+    it('builds a collapsed selection range for the hovered paragraph', () => {
+        expect(getParagraphMenuTargetRange({
+            paragraphStart: 3,
+            paragraphEnd: 8,
+            segmentId: 'header-1',
+        } as never)).toEqual({
+            collapsed: true,
+            endOffset: 3,
+            segmentId: 'header-1',
+            startOffset: 3,
+        });
+    });
 
-        expect(actionIds).toContain(CheckListCommand.id);
-        expect(actionIds).toContain(HorizontalLineCommand.id);
-        expect(actionIds).not.toContain(InsertHorizontalLineBellowCommand.id);
-        expect(actionIds).not.toContain(INSERT_BELLOW_MENU_ID);
+    it('preserves context menu command params for paragraph menu actions', () => {
+        expect(getParagraphMenuCommand({
+            commandId: CreateDocTableCommand.id,
+            id: 'doc.operation.create-table',
+            label: 'doc.operation.create-table',
+            params: { rowCount: 3, colCount: 5 },
+        })).toEqual({
+            commandId: CreateDocTableCommand.id,
+            params: { rowCount: 3, colCount: 5 },
+        });
+
+        expect(getParagraphMenuCommand({
+            label: 'doc.command.h1-heading',
+        }, { startOffset: 3, endOffset: 3, collapsed: true })).toEqual({
+            commandId: SetParagraphNamedStyleCommand.id,
+            params: {
+                value: NamedStyleType.HEADING_1,
+                textRanges: [{ startOffset: 3, endOffset: 3, collapsed: true }],
+            },
+        });
+    });
+
+    it('passes the hovered paragraph range to current-paragraph menu commands', () => {
+        const targetRange = { startOffset: 3, endOffset: 3, collapsed: true };
+
+        expect(getParagraphMenuCommand({
+            label: BulletListCommand.id,
+        }, targetRange)).toEqual({
+            commandId: BulletListCommand.id,
+            params: { docRange: [targetRange] },
+        });
+        expect(getParagraphMenuCommand({
+            label: OrderListCommand.id,
+        }, targetRange)).toEqual({
+            commandId: OrderListCommand.id,
+            params: { docRange: [targetRange] },
+        });
+        expect(getParagraphMenuCommand({
+            label: HorizontalLineCommand.id,
+        }, targetRange)).toEqual({
+            commandId: HorizontalLineCommand.id,
+            params: { insertRange: targetRange },
+        });
+        expect(getParagraphMenuCommand({
+            label: H1HeadingCommand.id,
+        }, null)).toEqual({
+            commandId: H1HeadingCommand.id,
+            params: undefined,
+        });
     });
 });

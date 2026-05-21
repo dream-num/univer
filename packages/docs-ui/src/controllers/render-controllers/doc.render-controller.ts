@@ -22,6 +22,7 @@ import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/do
 import { DocBackground, Documents, IRenderManagerService, Layer, PageLayoutType, ScrollBar, Viewport } from '@univerjs/engine-render';
 import { takeUntil } from 'rxjs';
 import { DOCS_COMPONENT_BACKGROUND_LAYER_INDEX, DOCS_COMPONENT_DEFAULT_Z_INDEX, DOCS_COMPONENT_HEADER_LAYER_INDEX, DOCS_COMPONENT_MAIN_LAYER_INDEX, DOCS_VIEW_KEY, VIEWPORT_KEY } from '../../basics/docs-view-key';
+import { getDocsCanvasBackgroundColor } from '../../services/docs-render.service';
 import { IEditorService } from '../../services/editor/editor-manager.service';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
 
@@ -184,6 +185,7 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
 
         docsComponent.changeSkeleton(skeleton);
         docBackground.changeSkeleton(skeleton);
+        this._syncCanvasBackground();
 
         const { unitId } = this._context;
 
@@ -230,6 +232,7 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         const docDataModel = this._context.unit;
 
         const documentFlavor = docDataModel.getSnapshot().documentStyle.documentFlavor;
+        this._syncCanvasBackground(documentFlavor);
 
         for (let i = 0, len = pages.length; i < len; i++) {
             const page = pages[i];
@@ -272,6 +275,10 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         if (!this._editorService.isEditor(unitId) || editor?.params.scrollBar) {
             scene.resize(width, height);
         }
+    }
+
+    private _syncCanvasBackground(documentFlavor = this._context.unit.getSnapshot().documentStyle.documentFlavor) {
+        this._context.engine.getCanvas().getCanvasEle().style.backgroundColor = getDocsCanvasBackgroundColor(documentFlavor);
     }
 }
 

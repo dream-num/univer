@@ -24,9 +24,9 @@ import type {
 } from '../../../services/menu/menu';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import { isRealNum, LocaleService } from '@univerjs/core';
-import { borderBottomClassName, borderClassName, clsx, ConfigContext, scrollbarClassName } from '@univerjs/design';
+import { borderBottomClassName, borderClassName, clsx, scrollbarClassName } from '@univerjs/design';
 import { CheckMarkIcon, MoreIcon } from '@univerjs/icons';
-import { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { combineLatest, isObservable, of, scan, startWith } from 'rxjs';
 import { CustomLabel } from '../../../components/custom-label/CustomLabel';
@@ -272,7 +272,8 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
 
 function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
     const { menuKey, menuItem, menuSessionVersion, submenuPortalContainer, onOptionSelect, maxMenuHeight } = props;
-    const { direction } = useContext(ConfigContext);
+    const localeService = useDependency(LocaleService);
+    const direction = useObservable(localeService.direction$);
     const menuManagerService = useDependency(IMenuManagerService);
     const disabled = useObservable<boolean>(menuItem.disabled$, false);
     const activated = useObservable<boolean>(menuItem.activated$, false);

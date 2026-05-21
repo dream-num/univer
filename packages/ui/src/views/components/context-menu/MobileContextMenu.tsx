@@ -25,7 +25,7 @@ import { IContextMenuHostService } from '../../../services/contextmenu/contextme
 import { IContextMenuService } from '../../../services/contextmenu/contextmenu.service';
 import { ILayoutService } from '../../../services/layout/layout.service';
 import { ContextMenuPosition } from '../../../services/menu/types';
-import { useDependency } from '../../../utils/di';
+import { useDependency, useObservable } from '../../../utils/di';
 
 const MOBILE_CONTEXT_MENU_HOST_ID = 'mobile-context-menu';
 
@@ -38,7 +38,8 @@ export function MobileContextMenu() {
     const commandService = useDependency(ICommandService);
     const layoutService = useDependency(ILayoutService);
     const localeService = useDependency(LocaleService);
-    const { mountContainer, direction } = useContext(ConfigContext);
+    const direction = useObservable(localeService.direction$);
+    const { mountContainer } = useContext(ConfigContext);
 
     visibleRef.current = visible;
 

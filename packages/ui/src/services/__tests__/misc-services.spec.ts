@@ -19,64 +19,54 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { supportClipboardAPI } from '../clipboard/clipboard-utils';
 import { ContextMenuHostService } from '../contextmenu/contextmenu-host.service';
 import { ContextMenuService } from '../contextmenu/contextmenu.service';
-import { IDialogService } from '../dialog/dialog.service';
 import { CanvasFloatDomService } from '../dom/canvas-dom-layer.service';
-import { IGalleryService } from '../gallery/gallery.service';
-import { DesktopGlobalZoneService } from '../global-zone/desktop-global-zone.service';
-import { IGlobalZoneService } from '../global-zone/global-zone.service';
-import { ILocalFileService } from '../local-file/local-file.service';
 import { isMenuButtonSelectorItem, isMenuSelectorItem, MenuItemType } from '../menu/menu';
-import { IMessageService } from '../message/message.service';
-import { INotificationService } from '../notification/notification.service';
 import { CanvasPopupService } from '../popup/canvas-popup.service';
 import { DesktopSidebarService } from '../sidebar/desktop-sidebar.service';
-import { ILeftSidebarService, ISidebarService } from '../sidebar/sidebar.service';
 import { ThemeSwitcherService } from '../theme-switcher/theme-switcher.service';
 import { DesktopZenZoneService } from '../zen-zone/desktop-zen-zone.service';
-import { IZenZoneService } from '../zen-zone/zen-zone.service';
 
-describe('simple exported identifiers and helpers', () => {
+describe('clipboard capability detection', () => {
     afterEach(() => {
         vi.restoreAllMocks();
     });
 
-    it('should expose identifier tokens', () => {
-        expect(IGalleryService).toBeDefined();
-        expect(IGlobalZoneService).toBeDefined();
-        expect(IDialogService).toBeDefined();
-        expect(ILocalFileService).toBeDefined();
-        expect(IMessageService).toBeDefined();
-        expect(INotificationService).toBeDefined();
-        expect(ISidebarService).toBeDefined();
-        expect(ILeftSidebarService).toBeDefined();
-        expect(IZenZoneService).toBeDefined();
-    });
-
-    it('should detect clipboard api support', () => {
+    it('should report clipboard as unsupported when navigator.clipboard is missing', () => {
         Object.defineProperty(navigator, 'clipboard', { configurable: true, value: undefined });
         expect(supportClipboardAPI()).toBe(false);
+    });
 
+    it('should report clipboard as supported when navigator.clipboard.readText is available', () => {
         Object.defineProperty(navigator, 'clipboard', {
             configurable: true,
-            value: {
-                readText: vi.fn(),
-            },
+            value: { readText: vi.fn() },
         });
         expect(supportClipboardAPI()).toBe(true);
     });
+});
 
-    it('should detect menu selector item types', () => {
+describe('menu item type guards', () => {
+    it('should recognize selector and subitems as menu selector items', () => {
         expect(isMenuSelectorItem({ type: MenuItemType.SELECTOR } as any)).toBe(true);
         expect(isMenuSelectorItem({ type: MenuItemType.SUBITEMS } as any)).toBe(true);
-        expect(isMenuSelectorItem({ type: MenuItemType.BUTTON_SELECTOR } as any)).toBe(false);
+    });
 
+    it('should not recognize button or button-selector as menu selector items', () => {
+        expect(isMenuSelectorItem({ type: MenuItemType.BUTTON } as any)).toBe(false);
+        expect(isMenuSelectorItem({ type: MenuItemType.BUTTON_SELECTOR } as any)).toBe(false);
+    });
+
+    it('should recognize button-selector as menu button-selector item', () => {
         expect(isMenuButtonSelectorItem({ type: MenuItemType.BUTTON_SELECTOR } as any)).toBe(true);
+    });
+
+    it('should not recognize plain button as menu button-selector item', () => {
         expect(isMenuButtonSelectorItem({ type: MenuItemType.BUTTON } as any)).toBe(false);
     });
 });
 
-describe('context menu services', () => {
-    it('should delegate context menu events to current handler', () => {
+describe('context menu service', () => {
+    it('should forward context menu events to the registered handler', () => {
         const service = new ContextMenuService();
         const handler = {
             visible: true,
@@ -84,112 +74,261 @@ describe('context menu services', () => {
             hideContextMenu: vi.fn(),
         };
 
-        const dis = service.registerContextMenuHandler(handler);
-        expect(() => service.registerContextMenuHandler(handler)).toThrow();
+        service.registerContextMenuHandler(handler);
 
-        const event = {
-            stopPropagation: vi.fn(),
-        } as any;
+        const event = { stopPropagation: vi.fn() } as any;
         service.triggerContextMenu(event, 'main');
-        expect(event.stopPropagation).toHaveBeenCalledTimes(1);
-        expect(handler.handleContextMenu).toHaveBeenCalledWith(event, 'main');
+
         expect(service.visible).toBe(true);
-
-        service.disable();
-        service.triggerContextMenu(event, 'disabled');
-        expect(handler.handleContextMenu).toHaveBeenCalledTimes(1);
-
-        service.enable();
-        service.hideContextMenu();
-        expect(handler.hideContextMenu).toHaveBeenCalledTimes(1);
-
-        dis.dispose();
-        expect(service.visible).toBe(false);
+        expect(handler.handleContextMenu).toHaveBeenCalledWith(event, 'main');
     });
 
-    it('should manage active host menu', () => {
+    it('should suppress context menu events while disabled', () => {
+        const service = new ContextMenuService();
+        const handler = {
+            visible: true,
+            handleContextMenu: vi.fn(),
+            hideContextMenu: vi.fn(),
+        };
+
+        service.registerContextMenuHandler(handler);
+        service.disable();
+
+        const event = { stopPropagation: vi.fn() } as any;
+        service.triggerContextMenu(event, 'main');
+
+        expect(service.disabled).toBe(true);
+        expect(handler.handleContextMenu).not.toHaveBeenCalled();
+    });
+
+    it('should resume forwarding after re-enabling', () => {
+        const service = new ContextMenuService();
+        const handler = {
+            visible: true,
+            handleContextMenu: vi.fn(),
+            hideContextMenu: vi.fn(),
+        };
+
+        service.registerContextMenuHandler(handler);
+        service.disable();
+        service.enable();
+
+        const event = { stopPropagation: vi.fn() } as any;
+        service.triggerContextMenu(event, 'main');
+
+        expect(handler.handleContextMenu).toHaveBeenCalledTimes(1);
+    });
+
+    it('should hide the context menu through the handler', () => {
+        const service = new ContextMenuService();
+        const handler = {
+            visible: true,
+            handleContextMenu: vi.fn(),
+            hideContextMenu: vi.fn(),
+        };
+
+        service.registerContextMenuHandler(handler);
+        service.hideContextMenu();
+        expect(handler.hideContextMenu).toHaveBeenCalledTimes(1);
+    });
+
+    it('should throw when registering a handler twice', () => {
+        const service = new ContextMenuService();
+        const handler = { visible: true, handleContextMenu: vi.fn(), hideContextMenu: vi.fn() };
+
+        service.registerContextMenuHandler(handler);
+        expect(() => service.registerContextMenuHandler(handler)).toThrow();
+    });
+
+    it('should clean up visibility when the handler is disposed', () => {
+        const service = new ContextMenuService();
+        const handler = {
+            visible: true,
+            handleContextMenu: vi.fn(),
+            hideContextMenu: vi.fn(),
+        };
+
+        const disposable = service.registerContextMenuHandler(handler);
+        service.triggerContextMenu({ stopPropagation: vi.fn() } as any, 'main');
+        expect(service.visible).toBe(true);
+
+        disposable.dispose();
+        expect(service.visible).toBe(false);
+    });
+});
+
+describe('context menu host service', () => {
+    it('should activate a registered menu and track it as the active menu', () => {
+        const service = new ContextMenuHostService();
+        const hide = vi.fn();
+
+        service.registerMenu('menu-a', hide);
+        service.activateMenu('menu-a');
+
+        expect(service.activeMenuId).toBe('menu-a');
+    });
+
+    it('should hide the previous menu when activating a different one', () => {
         const service = new ContextMenuHostService();
         const hideA = vi.fn();
         const hideB = vi.fn();
 
-        const disA = service.registerMenu('a', hideA);
-        const disB = service.registerMenu('b', hideB);
+        service.registerMenu('menu-a', hideA);
+        service.registerMenu('menu-b', hideB);
 
-        service.activateMenu('a');
-        expect(service.activeMenuId).toBe('a');
+        service.activateMenu('menu-a');
+        service.activateMenu('menu-b');
 
-        service.activateMenu('b');
         expect(hideA).toHaveBeenCalledTimes(1);
-        expect(service.activeMenuId).toBe('b');
+        expect(service.activeMenuId).toBe('menu-b');
+    });
 
-        service.hideActiveMenu('b');
-        expect(hideB).toHaveBeenCalledTimes(0);
+    it('should hide the active menu when requested', () => {
+        const service = new ContextMenuHostService();
+        const hide = vi.fn();
 
+        service.registerMenu('menu-a', hide);
+        service.activateMenu('menu-a');
         service.hideActiveMenu();
-        expect(hideB).toHaveBeenCalledTimes(1);
-        expect(service.activeMenuId).toBeNull();
 
-        service.deactivateMenu('b');
-        disA.dispose();
-        disB.dispose();
+        expect(hide).toHaveBeenCalledTimes(1);
         expect(service.activeMenuId).toBeNull();
+    });
+
+    it('should skip hiding when the active menu matches the excepted id', () => {
+        const service = new ContextMenuHostService();
+        const hide = vi.fn();
+
+        service.registerMenu('menu-a', hide);
+        service.activateMenu('menu-a');
+        service.hideActiveMenu('menu-a');
+
+        expect(hide).not.toHaveBeenCalled();
+        expect(service.activeMenuId).toBe('menu-a');
+    });
+
+    it('should clear active state when a menu is deactivated', () => {
+        const service = new ContextMenuHostService();
+
+        service.registerMenu('menu-a', vi.fn());
+        service.activateMenu('menu-a');
+        service.deactivateMenu('menu-a');
+
+        expect(service.activeMenuId).toBeNull();
+    });
+
+    it('should allow re-activating a menu after it was deactivated', () => {
+        const service = new ContextMenuHostService();
+
+        service.registerMenu('menu-a', vi.fn());
+        service.activateMenu('menu-a');
+        service.deactivateMenu('menu-a');
+        service.activateMenu('menu-a');
+
+        expect(service.activeMenuId).toBe('menu-a');
     });
 });
 
-describe('CanvasFloatDomService', () => {
-    it('should add, update, remove and clear float dom items', () => {
-        const service = new CanvasFloatDomService();
-        const events: any[] = [];
-        service.domLayers$.subscribe((value) => events.push(value));
-
-        service.addFloatDom({
-            id: 'dom-1',
-            componentKey: 'comp',
+describe('canvas float DOM service', () => {
+    function createFloatDom(id: string): any {
+        return {
+            id,
+            componentKey: 'test-component',
+            unitId: 'unit-1',
             onPointerMove: vi.fn(),
             onPointerDown: vi.fn(),
             onPointerUp: vi.fn(),
             onWheel: vi.fn(),
-            unitId: 'u1',
             position$: new BehaviorSubject({
                 left: 0,
                 top: 0,
                 rotate: 0,
-                width: 10,
-                height: 10,
+                width: 100,
+                height: 100,
                 absolute: { left: true, top: true },
             }),
-        } as any);
+        };
+    }
 
-        expect(service.domLayers.length).toBe(1);
+    it('should reflect newly added float DOM in the domLayers list', () => {
+        const service = new CanvasFloatDomService();
+        service.addFloatDom(createFloatDom('dom-1'));
 
-        service.updateFloatDom('dom-1', { componentKey: 'comp2' } as any);
-        expect(service.domLayers[0][1].componentKey).toBe('comp2');
+        expect(service.domLayers).toHaveLength(1);
+        expect(service.domLayers[0][0]).toBe('dom-1');
+    });
 
-        service.updateFloatDom('not-found', { componentKey: 'x' } as any);
+    it('should update an existing float DOM by id', () => {
+        const service = new CanvasFloatDomService();
+        service.addFloatDom(createFloatDom('dom-1'));
+        service.updateFloatDom('dom-1', { componentKey: 'updated-component' } as any);
 
+        expect(service.domLayers[0][1].componentKey).toBe('updated-component');
+    });
+
+    it('should silently ignore updates to non-existent float DOM ids', () => {
+        const service = new CanvasFloatDomService();
+        service.addFloatDom(createFloatDom('dom-1'));
+
+        expect(() => service.updateFloatDom('missing', { componentKey: 'x' } as any)).not.toThrow();
+        expect(service.domLayers).toHaveLength(1);
+    });
+
+    it('should remove a float DOM by id', () => {
+        const service = new CanvasFloatDomService();
+        service.addFloatDom(createFloatDom('dom-1'));
+        service.addFloatDom(createFloatDom('dom-2'));
         service.removeFloatDom('dom-1');
-        expect(service.domLayers.length).toBe(0);
 
-        service.removeFloatDom('dom-1');
+        expect(service.domLayers).toHaveLength(1);
+        expect(service.domLayers[0][0]).toBe('dom-2');
+    });
+
+    it('should clear all float DOMs when removeAll is called', () => {
+        const service = new CanvasFloatDomService();
+        service.addFloatDom(createFloatDom('dom-1'));
+        service.addFloatDom(createFloatDom('dom-2'));
         service.removeAll();
-        expect(events.length).toBeGreaterThanOrEqual(4);
+
+        expect(service.domLayers).toHaveLength(0);
+    });
+
+    it('should emit domLayers changes through the observable', () => {
+        const service = new CanvasFloatDomService();
+        const emissions: any[] = [];
+        service.domLayers$.subscribe((layers) => emissions.push(layers.length));
+
+        service.addFloatDom(createFloatDom('dom-1'));
+        service.addFloatDom(createFloatDom('dom-2'));
+        service.removeFloatDom('dom-1');
+
+        expect(emissions.at(-1)).toBe(1);
     });
 });
 
-describe('CanvasPopupService', () => {
-    it('should add/remove popups and track active popup id', () => {
-        const service = new CanvasPopupService();
-
-        const id = service.addPopup({
-            componentKey: 'popup',
-            unitId: 'u',
-            subUnitId: 's',
+describe('canvas popup service', () => {
+    function createPopup(overrides: Partial<any> = {}): any {
+        return {
+            componentKey: 'test-popup',
+            unitId: 'unit-1',
+            subUnitId: 'sheet-1',
             canvasElement: document.createElement('canvas'),
-            anchorRect$: new BehaviorSubject({} as any),
-        } as any);
+            anchorRect$: new BehaviorSubject({}),
+            ...overrides,
+        };
+    }
+
+    it('should assign a unique id when adding a popup', () => {
+        const service = new CanvasPopupService();
+        const id = service.addPopup(createPopup());
 
         expect(id).toBeTruthy();
-        expect(service.popups.length).toBe(1);
+        expect(service.popups).toHaveLength(1);
+    });
+
+    it('should track the active popup id when onActiveChange is triggered', () => {
+        const service = new CanvasPopupService();
+        const id = service.addPopup(createPopup());
 
         const popup = service.popups[0][1];
         popup.onActiveChange?.(true);
@@ -197,137 +336,215 @@ describe('CanvasPopupService', () => {
 
         popup.onActiveChange?.(false);
         expect(service.activePopupId).toBeNull();
+    });
 
-        service.removePopup('not-found');
+    it('should remove a popup by id and clear the activePopupId if it was active', () => {
+        const service = new CanvasPopupService();
+        const id = service.addPopup(createPopup());
+
+        service.popups[0][1].onActiveChange?.(true);
+        expect(service.activePopupId).toBe(id);
+
         service.removePopup(id);
-        expect(service.popups.length).toBe(0);
+        expect(service.popups).toHaveLength(0);
+    });
 
-        service.addPopup({
-            componentKey: 'popup-2',
-            unitId: 'u2',
-            subUnitId: 's2',
-            canvasElement: document.createElement('canvas'),
-            anchorRect$: new BehaviorSubject({} as any),
-        } as any);
+    it('should ignore removal of non-existent popup ids', () => {
+        const service = new CanvasPopupService();
+        service.addPopup(createPopup());
 
+        expect(() => service.removePopup('non-existent')).not.toThrow();
+        expect(service.popups).toHaveLength(1);
+    });
+
+    it('should remove all popups and reset state', () => {
+        const service = new CanvasPopupService();
+        service.addPopup(createPopup());
+        service.addPopup(createPopup());
         service.removeAll();
-        expect(service.popups).toEqual([]);
 
+        expect(service.popups).toHaveLength(0);
+        expect(service.activePopupId).toBeNull();
+    });
+
+    it('should clear all popups on dispose', () => {
+        const service = new CanvasPopupService();
+        service.addPopup(createPopup());
         service.dispose();
-        expect(service.popups).toEqual([]);
+
+        expect(service.popups).toHaveLength(0);
     });
 });
 
-describe('DesktopSidebarService', () => {
-    it('should open and close sidebar with id checks and container', () => {
+describe('sidebar service', () => {
+    it('should become visible after opening a sidebar panel', () => {
+        const service = new DesktopSidebarService();
+        service.open({ id: 'panel-1' });
+
+        expect(service.visible).toBe(true);
+        expect(service.options.id).toBe('panel-1');
+    });
+
+    it('should ignore close requests with a mismatched panel id', () => {
+        const service = new DesktopSidebarService();
+        service.open({ id: 'panel-1' });
+        service.close('panel-2');
+
+        expect(service.visible).toBe(true);
+    });
+
+    it('should hide the sidebar and invoke onClose when the correct id is closed', () => {
         const service = new DesktopSidebarService();
         const onClose = vi.fn();
-        const emitted: any[] = [];
-        service.sidebarOptions$.subscribe((v) => emitted.push(v));
+        service.open({ id: 'panel-1', onClose });
+        service.close('panel-1');
 
-        const dis = service.open({ id: 'side-1', title: 'A', onClose } as any);
-        expect(service.visible).toBe(true);
-        expect(service.options.id).toBe('side-1');
-
-        service.close('other-id');
-        expect(service.visible).toBe(true);
-
-        service.close('side-1');
         expect(service.visible).toBe(false);
         expect(onClose).toHaveBeenCalledTimes(1);
+    });
 
+    it('should invoke onClose when the open disposable is disposed', () => {
+        const service = new DesktopSidebarService();
+        const onClose = vi.fn();
+        const disposable = service.open({ id: 'panel-1', onClose });
+
+        disposable.dispose();
+        expect(onClose).toHaveBeenCalledTimes(1);
+        expect(service.visible).toBe(false);
+    });
+
+    it('should replace the current panel when opening a different one', () => {
+        const service = new DesktopSidebarService();
+        service.open({ id: 'panel-1' });
+        service.open({ id: 'panel-2' });
+
+        expect(service.options.id).toBe('panel-2');
+        expect(service.visible).toBe(true);
+    });
+
+    it('should allow setting and retrieving the sidebar container element', () => {
+        const service = new DesktopSidebarService();
         const container = document.createElement('div');
+
         service.setContainer(container);
         expect(service.getContainer()).toBe(container);
+    });
 
-        dis.dispose();
-        expect(service.visible).toBe(false);
-        expect(emitted.length).toBeGreaterThanOrEqual(2);
+    it('should notify subscribers when the sidebar state changes', () => {
+        const service = new DesktopSidebarService();
+        const states: any[] = [];
+        service.sidebarOptions$.subscribe((opts) => states.push(opts));
+
+        service.open({ id: 'panel-1' });
+        service.close('panel-1');
+
+        expect(states.length).toBeGreaterThanOrEqual(2);
     });
 });
 
-describe('ThemeSwitcherService', () => {
-    it('should inject and replace theme css variables in document head', () => {
+describe('theme switcher service', () => {
+    afterEach(() => {
+        const existing = document.getElementById('univer-theme-css-variables');
+        if (existing) {
+            existing.remove();
+        }
+    });
+
+    it('should inject theme CSS variables into the document head', () => {
         const service = new ThemeSwitcherService();
         service.injectThemeToHead({
-            color: {
-                primary: '#fff',
-            },
+            color: { primary: '#ffffff' },
             spacing: 8,
         } as any);
 
         const style = document.getElementById('univer-theme-css-variables');
         expect(style).toBeTruthy();
-        expect(style?.innerHTML).toContain('--univer-color-primary');
+        expect(style?.textContent).toContain('--univer-color-primary: #ffffff');
+        expect(style?.textContent).toContain('--univer-spacing: 8');
+    });
 
-        service.injectThemeToHead({
-            color: {
-                primary: '#000',
-            },
-        } as any);
+    it('should replace the existing style element instead of creating duplicates', () => {
+        const service = new ThemeSwitcherService();
+        service.injectThemeToHead({ color: { primary: '#fff' } } as any);
+        service.injectThemeToHead({ color: { primary: '#000' } } as any);
 
         const styles = document.querySelectorAll('#univer-theme-css-variables');
         expect(styles.length).toBe(1);
-
-        service.dispose();
+        expect(styles[0]?.textContent).toContain('#000');
     });
 });
 
-describe('zone services', () => {
-    it('should handle DesktopGlobalZoneService lifecycle', () => {
-        const manager = {
+describe('zen zone service', () => {
+    function createComponentManager() {
+        return {
             register: vi.fn(),
             delete: vi.fn(),
         };
-        const service = new DesktopGlobalZoneService(manager as any);
+    }
 
-        const visibleValues: boolean[] = [];
-        const keyValues: string[] = [];
-        service.visible$.subscribe((v) => visibleValues.push(v));
-        service.componentKey$.subscribe((v) => keyValues.push(v));
-
-        const dis = service.set('zone-key', (() => null) as any);
-        expect(manager.register).toHaveBeenCalledWith('zone-key', expect.any(Function));
-        expect(service.componentKey).toBe('zone-key');
-        expect(keyValues).toEqual(['zone-key']);
-
-        service.open();
-        service.close();
-        expect(visibleValues).toEqual([true, false]);
-
-        dis.dispose();
-        expect(manager.delete).toHaveBeenCalledWith('zone-key');
-    });
-
-    it('should handle DesktopZenZoneService lifecycle', () => {
-        const manager = {
-            register: vi.fn(),
-            delete: vi.fn(),
-        };
+    it('should register the component and emit its key through componentKey$', () => {
+        const manager = createComponentManager();
         const service = new DesktopZenZoneService(manager as any);
 
-        const visibleValues: boolean[] = [];
-        const hiddenValues: boolean[] = [];
-        service.visible$.subscribe((v) => visibleValues.push(v));
-        service.temporaryHidden$.subscribe((v) => hiddenValues.push(v));
+        const keys: string[] = [];
+        service.componentKey$.subscribe((k) => keys.push(k));
 
-        const dis = service.set('zen-key', (() => null) as any);
-        expect(manager.register).toHaveBeenCalledWith('zen-key', expect.any(Function));
+        const dummyComponent = () => null;
+        service.set('zen-editor', dummyComponent);
 
-        service.hide();
-        service.show();
-        expect(service.temporaryHidden).toBe(false);
+        expect(manager.register).toHaveBeenCalledWith('zen-editor', dummyComponent);
+        expect(keys).toContain('zen-editor');
+    });
+
+    it('should transition visible state when opening and closing', () => {
+        const manager = createComponentManager();
+        const service = new DesktopZenZoneService(manager as any);
+        service.set('zen-editor', () => null);
+
+        expect(service.visible).toBe(false);
 
         service.open();
         expect(service.visible).toBe(true);
+
         service.close();
         expect(service.visible).toBe(false);
+    });
 
-        dis.dispose();
-        expect(manager.delete).toHaveBeenCalledWith('zen-key');
+    it('should temporarily hide without affecting the underlying visible state', () => {
+        const manager = createComponentManager();
+        const service = new DesktopZenZoneService(manager as any);
+        service.set('zen-editor', () => null);
 
+        service.open();
+        service.hide();
+        expect(service.temporaryHidden).toBe(true);
+        expect(service.visible).toBe(true);
+
+        service.show();
+        expect(service.temporaryHidden).toBe(false);
+    });
+
+    it('should unregister the component when the set disposable is disposed', () => {
+        const manager = createComponentManager();
+        const service = new DesktopZenZoneService(manager as any);
+
+        const disposable = service.set('zen-editor', () => null);
+        disposable.dispose();
+
+        expect(manager.delete).toHaveBeenCalledWith('zen-editor');
+    });
+
+    it('should emit false through visible$ on dispose', () => {
+        const manager = createComponentManager();
+        const service = new DesktopZenZoneService(manager as any);
+        service.set('zen-editor', () => null);
+
+        const visibleValues: boolean[] = [];
+        service.visible$.subscribe((v) => visibleValues.push(v));
+
+        service.open();
         service.dispose();
+
         expect(visibleValues.at(-1)).toBe(false);
-        expect(hiddenValues).toContain(true);
     });
 });

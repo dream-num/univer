@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import { ThemeService } from '@univerjs/core';
-import { ConfigContext, Messager } from '@univerjs/design';
-import { useContext } from 'react';
+import { LocaleService, ThemeService } from '@univerjs/core';
+import { Messager } from '@univerjs/design';
 import { useDependency, useObservable } from '../../utils/di';
 
 export function MessageContainer() {
+    const localeService = useDependency(LocaleService);
     const themeService = useDependency(ThemeService);
     const darkMode = useObservable(themeService.darkMode$);
-    const { direction } = useContext(ConfigContext);
+    const direction = useObservable(localeService.direction$);
 
     return <Messager theme={darkMode ? 'dark' : 'light'} dir={direction} />;
 }

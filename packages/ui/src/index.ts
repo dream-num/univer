@@ -72,8 +72,6 @@ export { CanvasFloatDomService, type IFloatDom, type IFloatDomLayout } from './s
 export { type IFontConfig, IFontService } from './services/font.service';
 export { DesktopGalleryService } from './services/gallery/desktop-gallery.service';
 export { IGalleryService } from './services/gallery/gallery.service';
-export { DesktopGlobalZoneService } from './services/global-zone/desktop-global-zone.service';
-export { IGlobalZoneService } from './services/global-zone/global-zone.service';
 export { DesktopLayoutService, ILayoutService } from './services/layout/layout.service';
 export { DesktopLocalFileService } from './services/local-file/desktop-local-file.service';
 export { ILocalFileService, type IOpenFileOptions } from './services/local-file/local-file.service';
@@ -134,7 +132,6 @@ export { type IDialogPartMethodOptions } from './views/components/dialog-part/in
 export { FloatDomSingle } from './views/components/dom/FloatDom';
 export { FloatDom } from './views/components/dom/FloatDom';
 export { PrintFloatDomSingle } from './views/components/dom/Print';
-export { GlobalZone } from './views/components/global-zone/GlobalZone';
 export { CanvasPopup, SingleCanvasPopup } from './views/components/popup/CanvasPopup';
 export { RectPopup, type RectPopupDirection } from './views/components/popup/RectPopup';
 export { useToolbarItemStatus } from './views/components/ribbon/hook';

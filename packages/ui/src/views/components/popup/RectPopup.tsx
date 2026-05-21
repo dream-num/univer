@@ -18,13 +18,13 @@ import type { Nullable } from '@univerjs/core';
 import type { ReactNode, RefObject } from 'react';
 import type { Observable } from 'rxjs';
 import type { IUniverUIConfig } from '../../../config/config';
-import { IConfigService } from '@univerjs/core';
-import { clsx, ConfigContext } from '@univerjs/design';
+import { IConfigService, LocaleService } from '@univerjs/core';
+import { clsx } from '@univerjs/design';
 import { createContext, useContext, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useEvent } from '../../../components/hooks/event';
 import { UI_PLUGIN_CONFIG_KEY } from '../../../config/config';
-import { useDependency } from '../../../utils/di';
+import { useDependency, useObservable } from '../../../utils/di';
 
 interface IAbsolutePosition {
     left: number;
@@ -311,7 +311,8 @@ function RectPopup(props: IRectPopupProps) {
         };
     }, [contextMenuFn]);
 
-    const { direction: dir } = useContext(ConfigContext);
+    const localeService = useDependency(LocaleService);
+    const dir = useObservable(localeService.direction$);
 
     const ele = (
         <>

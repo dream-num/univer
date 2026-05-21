@@ -49,6 +49,7 @@ interface IContextMenuMenuProps {
     menuSessionVersion: number;
     submenuPortalContainer: HTMLElement | null;
     maxMenuHeight: number;
+    reserveIconSpace?: boolean;
     onOptionSelect?: (option: IValueOption) => void;
 }
 
@@ -58,6 +59,7 @@ interface IContextMenuMenuItemProps {
     menuSessionVersion: number;
     submenuPortalContainer: HTMLElement | null;
     maxMenuHeight: number;
+    reserveIconSpace?: boolean;
     onOptionSelect?: (option: IValueOption) => void;
 }
 
@@ -68,6 +70,19 @@ const submenuVisualGap = 20;
 export const CONTEXT_MENU_SUBMENU_PORTAL_ATTR = 'data-u-context-menu-submenu';
 
 type MenuLabel = IMenuItem['label'] | IValueOption['label'];
+
+export function ContextMenuIconPlaceholder({ visible }: { visible: boolean }) {
+    if (!visible) {
+        return null;
+    }
+
+    return (
+        <span
+            aria-hidden="true"
+            className="univer-size-4 univer-shrink-0"
+        />
+    );
+}
 
 function isNonSelectableLabel(label?: MenuLabel) {
     return typeof label === 'object' && label?.selectable === false;
@@ -163,13 +178,14 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
                 submenuPortalContainer={submenuPortalContainer}
                 onOptionSelect={onOptionSelect}
                 maxMenuHeight={maxMenuHeight}
+                reserveIconSpace
             />
         </div>
     );
 }
 
 function ContextMenuMenu(props: IContextMenuMenuProps) {
-    const { menuSchemas, menuSessionVersion, submenuPortalContainer, onOptionSelect, maxMenuHeight } = props;
+    const { menuSchemas, menuSessionVersion, submenuPortalContainer, onOptionSelect, maxMenuHeight, reserveIconSpace = false } = props;
     const localeService = useDependency(LocaleService);
     const hiddenGroupStates = useContextGroupHiddenStates(menuSchemas);
 
@@ -198,6 +214,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                             submenuPortalContainer={submenuPortalContainer}
                             onOptionSelect={onOptionSelect}
                             maxMenuHeight={maxMenuHeight}
+                            reserveIconSpace={reserveIconSpace}
                         />
                     );
                 }
@@ -260,6 +277,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                                     submenuPortalContainer={submenuPortalContainer}
                                     onOptionSelect={onOptionSelect}
                                     maxMenuHeight={maxMenuHeight}
+                                    reserveIconSpace={reserveIconSpace}
                                 />
                             )
                         ))}
@@ -271,7 +289,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
 }
 
 function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
-    const { menuKey, menuItem, menuSessionVersion, submenuPortalContainer, onOptionSelect, maxMenuHeight } = props;
+    const { menuKey, menuItem, menuSessionVersion, submenuPortalContainer, onOptionSelect, maxMenuHeight, reserveIconSpace = false } = props;
     const { direction } = useContext(ConfigContext);
     const menuManagerService = useDependency(IMenuManagerService);
     const disabled = useObservable<boolean>(menuItem.disabled$, false);
@@ -404,6 +422,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
 
     const contentNode = (
         <span className={contentClassName}>
+            <ContextMenuIconPlaceholder visible={reserveIconSpace && !menuItem.icon} />
             <CustomLabel
                 value={inputValue}
                 title={menuItem.title}

@@ -96,7 +96,7 @@ import {
 } from '../commands/commands/worksheet-protection.command';
 import { RenameSheetOperation } from '../commands/operations/rename-sheet.operation';
 import { CellBorderSelectorMenuItemFactory } from './border.menu';
-import { CLEAR_SELECTION_MENU_ID, ClearSelectionAllMenuItemFactory, ClearSelectionContentMenuItemFactory, ClearSelectionFormatMenuItemFactory, ClearSelectionMenuItemFactory } from './clear.menu';
+import { CLEAR_SELECTION_MENU_ID, ClearSelectionAllMenuItemFactory, ClearSelectionAllToolbarMenuItemFactory, ClearSelectionContentMenuItemFactory, ClearSelectionFormatMenuItemFactory, ClearSelectionMenuItemFactory } from './clear.menu';
 import { DELETE_RANGE_MENU_ID, DeleteRangeMenuItemFactory, DeleteRangeMoveLeftMenuItemFactory, DeleteRangeMoveUpMenuItemFactory, RemoveColMenuItemFactory, RemoveRowMenuItemFactory } from './delete.menu';
 import { FontSizeDecreaseMenuItemFactory, FontSizeIncreaseMenuItemFactory, FontSizeSelectorMenuItemFactory } from './font.menu';
 import {
@@ -194,7 +194,7 @@ export const menuSchema: MenuSchemaType = {
             },
             [ClearSelectionAllCommand.id]: {
                 order: 3,
-                menuItemFactory: ClearSelectionAllMenuItemFactory,
+                menuItemFactory: ClearSelectionAllToolbarMenuItemFactory,
             },
         },
         [RibbonStartGroup.FORMAT]: {

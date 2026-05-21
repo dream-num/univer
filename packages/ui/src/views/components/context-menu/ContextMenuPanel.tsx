@@ -327,6 +327,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
     const hasSelectionSubmenu = selections.length > 0;
     const hasSubItemSubmenu = subMenuItems.length > 0;
     const hasSubmenu = hasSelectionSubmenu || hasSubItemSubmenu;
+    const selectionsCommandId = selectorItem.selectionsCommandId;
 
     useEffect(() => {
         setInputValue(value);
@@ -474,6 +475,18 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                         disabled={disabled}
                         onClick={() => {
                             if (hasSubmenu) {
+                                if (canExecuteItem) {
+                                    const item = menuItem as IDisplayMenuItem<IMenuButtonItem>;
+                                    onOptionSelect?.({
+                                        commandId: item.commandId,
+                                        params: item.params,
+                                        value: inputValue,
+                                        id: item.id,
+                                        label: menuKey,
+                                    });
+                                    return;
+                                }
+
                                 setSubmenuPositionReady(false);
                                 setSubmenuVisible(true);
                                 return;
@@ -595,7 +608,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                                                                     value: optionValue,
                                                                     id: menuItem.id,
                                                                     label: menuKey,
-                                                                    commandId: option.commandId,
+                                                                    commandId: option.commandId ?? selectionsCommandId,
                                                                 });
                                                             }}
                                                         />
@@ -616,7 +629,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                                                                     ...option,
                                                                     id: menuItem.id,
                                                                     label: menuKey,
-                                                                    commandId: option.commandId,
+                                                                    commandId: option.commandId ?? selectionsCommandId,
                                                                 });
                                                             }}
                                                         >

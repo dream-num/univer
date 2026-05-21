@@ -195,4 +195,40 @@ describe('DocQuickInsertPopupService', () => {
 
         service.dispose();
     });
+
+    it('should safely close popup when no popup is active', () => {
+        const { service } = createServiceTestBed();
+        expect(() => service.closePopup()).not.toThrow();
+        expect(service.editPopup).toBeUndefined();
+    });
+
+    it('should return early when paragraph bound cannot be found', () => {
+        const { service, popupEntries } = createServiceTestBed();
+        const popup = { keyword: '/', menus$: of([]) };
+
+        service.showPopup({ popup, index: 999, unitId: 'doc-1' });
+        expect(popupEntries).toHaveLength(0);
+        expect(service.editPopup).toBeUndefined();
+    });
+
+    it('should allow unregistering menu selected callbacks', () => {
+        vi.useFakeTimers();
+
+        const { service } = createServiceTestBed();
+        const onSelected = vi.fn();
+        const unregister = service.onMenuSelected(onSelected);
+
+        service.setInputOffset({ start: 0, end: 1 });
+        service.emitMenuSelected({ id: 'menu-1', title: 'Text' } as never);
+        vi.runAllTimers();
+        expect(onSelected).toHaveBeenCalledTimes(1);
+
+        onSelected.mockClear();
+        unregister();
+        service.emitMenuSelected({ id: 'menu-2', title: 'Divider' } as never);
+        vi.runAllTimers();
+        expect(onSelected).not.toHaveBeenCalled();
+
+        vi.useRealTimers();
+    });
 });

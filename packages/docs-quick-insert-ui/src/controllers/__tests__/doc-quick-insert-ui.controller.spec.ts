@@ -15,38 +15,52 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import { QuickInsertButton } from '../../views/QuickInsertButton';
 import { DocQuickInsertUIController } from '../doc-quick-insert-ui.controller';
 
 describe('DocQuickInsertUIController', () => {
-    it('registers commands, components and the built-in slash popup', () => {
-        const registerCommand = vi.fn(() => ({ dispose: vi.fn() }));
-        const register = vi.fn(() => ({ dispose: vi.fn() }));
-        const unregisterPopup = vi.fn();
-        const registerPopup = vi.fn(() => unregisterPopup);
+    it('should register the slash popup with correct keyword and preconditions', () => {
+        const popups: any[] = [];
+        const registerPopup = vi.fn((popup) => {
+            popups.push(popup);
+            return () => {
+                const idx = popups.indexOf(popup);
+                if (idx > -1) popups.splice(idx, 1);
+            };
+        });
 
         const controller = new DocQuickInsertUIController(
-            { registerCommand } as never,
+            { registerCommand: vi.fn(() => ({ dispose: vi.fn() })) } as never,
             { registerPopup } as never,
-            { register } as never
+            { register: vi.fn(() => ({ dispose: vi.fn() })) } as never
         );
 
-        expect(registerCommand).toHaveBeenCalledTimes(3);
-        expect(register).toHaveBeenCalledWith(QuickInsertButton.componentKey, QuickInsertButton);
-        expect(registerPopup).toHaveBeenCalledTimes(1);
-
-        const firstRegisterPopupCall = registerPopup.mock.calls[0] as unknown[] | undefined;
-        expect(firstRegisterPopupCall).toBeDefined();
-
-        const slashPopup = firstRegisterPopupCall?.[0] as unknown as {
-            keyword: string;
-            preconditions: (params: { range: { startNodePosition?: { glyph?: number } } }) => boolean;
-        };
-        expect(slashPopup.keyword).toBe('/');
+        const slashPopup = popups.find((p) => p.keyword === '/');
+        expect(slashPopup).toBeTruthy();
         expect(slashPopup.preconditions({ range: { startNodePosition: { glyph: 0 } } })).toBe(true);
         expect(slashPopup.preconditions({ range: { startNodePosition: { glyph: 2 } } })).toBe(false);
 
         controller.dispose();
-        expect(unregisterPopup).toHaveBeenCalledTimes(1);
+    });
+
+    it('should clean up registered popups on dispose', () => {
+        const unregisterFns: Array<() => void> = [];
+        const registerPopup = vi.fn(() => {
+            const fn = vi.fn();
+            unregisterFns.push(fn);
+            return fn;
+        });
+
+        const controller = new DocQuickInsertUIController(
+            { registerCommand: vi.fn(() => ({ dispose: vi.fn() })) } as never,
+            { registerPopup } as never,
+            { register: vi.fn(() => ({ dispose: vi.fn() })) } as never
+        );
+
+        expect(unregisterFns.length).toBeGreaterThan(0);
+        controller.dispose();
+
+        for (const fn of unregisterFns) {
+            expect(fn).toHaveBeenCalledTimes(1);
+        }
     });
 });

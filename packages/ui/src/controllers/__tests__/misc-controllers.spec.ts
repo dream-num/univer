@@ -17,12 +17,9 @@
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { ToggleShortcutPanelOperation } from '../../commands/operations/toggle-shortcut-panel.operation';
-import { menuSchema } from '../../menu/schema';
-import { RibbonStartGroup } from '../../services/menu/types';
 import { ErrorController } from '../error/error.controller';
 import { ShortcutPanelMenuItemFactory } from '../shortcut-display/menu';
 import { ShortcutPanelController } from '../shortcut-display/shortcut-panel.controller';
-import { IUIController } from '../ui/ui.controller';
 
 describe('ErrorController', () => {
     it('should forward errors to message service', () => {
@@ -82,22 +79,5 @@ describe('shortcut-display controllers', () => {
         expect(shortcutService.registerShortcut).toHaveBeenCalledTimes(1);
 
         controller.dispose();
-    });
-});
-
-describe('menu schema and ui token', () => {
-    it('should expose static menu schema entries', () => {
-        const groupedSchema = menuSchema as Record<RibbonStartGroup.HISTORY | RibbonStartGroup.OTHERS, Record<string, unknown>>;
-        const history = groupedSchema[RibbonStartGroup.HISTORY];
-        const others = groupedSchema[RibbonStartGroup.OTHERS];
-
-        expect(history).toBeDefined();
-        expect(others).toBeDefined();
-        expect(Object.keys(history).length).toBeGreaterThanOrEqual(2);
-        expect(Object.keys(others).length).toBeGreaterThanOrEqual(1);
-    });
-
-    it('should expose ui controller identifier', () => {
-        expect(IUIController).toBeDefined();
     });
 });

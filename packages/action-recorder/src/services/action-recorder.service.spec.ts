@@ -103,4 +103,73 @@ describe('ActionRecorderService', () => {
         expect(panelStates[panelStates.length - 1]).toBe(false);
         expect(recordingStates[recordingStates.length - 1]).toBe(false);
     });
+
+    it('should handle replaceId gracefully when unit or sheet is not found', () => {
+        let commandCallback: ((commandInfo: { id: string; type: CommandType; params?: Record<string, unknown> }) => void) | undefined;
+        const onCommandExecuted = vi.fn((callback: typeof commandCallback) => {
+            commandCallback = callback;
+            return { dispose: vi.fn() };
+        });
+
+        const service = new ActionRecorderService(
+            { onCommandExecuted } as never,
+            { error: vi.fn() } as never,
+            { downloadFile: vi.fn() } as never,
+            {
+                getFocusedUnit: vi.fn(() => ({ getUnitId: () => 'unit-1' })),
+                getUnit: vi.fn(() => ({
+                    getSheetBySheetId: vi.fn(() => null),
+                })),
+            } as never
+        );
+
+        service.registerRecordedCommand({ id: 'cmd-1', type: CommandType.COMMAND } as never);
+
+        const recordedCommands: string[][] = [];
+        service.recordedCommands$.subscribe((v) => recordedCommands.push(v.map((cmd) => cmd.id)));
+
+        service.startRecording(true);
+        commandCallback?.({
+            id: 'cmd-1',
+            type: CommandType.COMMAND,
+            params: { unitId: 'unit-1', subUnitId: 'sheet-1' },
+        });
+
+        expect(recordedCommands[recordedCommands.length - 1]).toEqual(['cmd-1']);
+    });
+
+    it('should reset all recorded states when stopRecording is called directly', () => {
+        let commandCallback: ((commandInfo: { id: string; type: CommandType; params?: Record<string, unknown> }) => void) | undefined;
+        const recorderDisposable = { dispose: vi.fn() };
+        const onCommandExecuted = vi.fn((callback: typeof commandCallback) => {
+            commandCallback = callback;
+            return recorderDisposable;
+        });
+
+        const service = new ActionRecorderService(
+            { onCommandExecuted } as never,
+            { error: vi.fn() } as never,
+            { downloadFile: vi.fn() } as never,
+            {
+                getFocusedUnit: vi.fn(() => ({ getUnitId: () => 'unit-1' })),
+                getUnit: vi.fn(),
+            } as never
+        );
+
+        service.registerRecordedCommand({ id: 'cmd-1', type: CommandType.COMMAND } as never);
+
+        const recordingStates: boolean[] = [];
+        const recordedCommands: string[][] = [];
+        service.recording$.subscribe((v) => recordingStates.push(v));
+        service.recordedCommands$.subscribe((v) => recordedCommands.push(v.map((cmd) => cmd.id)));
+
+        service.startRecording();
+        commandCallback?.({ id: 'cmd-1', type: CommandType.COMMAND, params: {} });
+        expect(recordedCommands[recordedCommands.length - 1]).toEqual(['cmd-1']);
+
+        service.stopRecording();
+        expect(recordingStates[recordingStates.length - 1]).toBe(false);
+        expect(recordedCommands[recordedCommands.length - 1]).toEqual([]);
+        expect(recorderDisposable.dispose).toHaveBeenCalled();
+    });
 });

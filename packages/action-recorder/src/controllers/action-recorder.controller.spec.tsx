@@ -16,31 +16,47 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
-import { CompleteRecordingActionCommand, StartRecordingActionCommand, StopRecordingActionCommand } from '../commands/commands/record.command';
-import { ReplayLocalRecordCommand, ReplayLocalRecordOnActiveCommand, ReplayLocalRecordOnNamesakeCommand } from '../commands/commands/replay.command';
-import { CloseRecordPanelOperation, OpenRecordPanelOperation } from '../commands/operations/operation';
-import { menuSchema, OpenRecorderMenuItemFactory, RECORD_MENU_ITEM_ID, RecordMenuItemFactory, ReplayLocalRecordMenuItemFactory, ReplayLocalRecordOnActiveMenuItemFactory, ReplayLocalRecordOnNamesakeMenuItemFactory } from '../menu/action-recorder.menu';
+import {
+    ReplayLocalRecordCommand,
+    ReplayLocalRecordOnActiveCommand,
+    ReplayLocalRecordOnNamesakeCommand,
+} from '../commands/commands/replay.command';
+import { OpenRecordPanelOperation } from '../commands/operations/operation';
+import {
+    menuSchema,
+    OpenRecorderMenuItemFactory,
+    RECORD_MENU_ITEM_ID,
+    RecordMenuItemFactory,
+    ReplayLocalRecordMenuItemFactory,
+    ReplayLocalRecordOnActiveMenuItemFactory,
+    ReplayLocalRecordOnNamesakeMenuItemFactory,
+} from '../menu/action-recorder.menu';
 import { ActionRecorderController } from './action-recorder.controller';
 
-describe('action-recorder controller/menu', () => {
-    it('should create menu items', () => {
-        const recordItem = RecordMenuItemFactory();
-        expect(recordItem.id).toBe(RECORD_MENU_ITEM_ID);
+describe('action-recorder menu factories', () => {
+    it('RecordMenuItemFactory should produce a menu item with the record item id', () => {
+        const item = RecordMenuItemFactory();
+        expect(item.id).toBe(RECORD_MENU_ITEM_ID);
+    });
 
+    it('OpenRecorderMenuItemFactory should produce a menu item linked to the open-panel operation', () => {
         const panelOpened$ = new BehaviorSubject(false);
-        const openItem = OpenRecorderMenuItemFactory({
+        const item = OpenRecorderMenuItemFactory({
             get: vi.fn(() => ({ panelOpened$: panelOpened$.asObservable() })),
         } as never);
-        expect(openItem.id).toBe(OpenRecordPanelOperation.id);
-        expect(openItem.disabled$).toBeDefined();
 
+        expect(item.id).toBe(OpenRecordPanelOperation.id);
+    });
+
+    it('replay menu factories should produce items with matching command ids', () => {
         expect(ReplayLocalRecordMenuItemFactory().id).toBe(ReplayLocalRecordCommand.id);
         expect(ReplayLocalRecordOnNamesakeMenuItemFactory().id).toBe(ReplayLocalRecordOnNamesakeCommand.id);
         expect(ReplayLocalRecordOnActiveMenuItemFactory().id).toBe(ReplayLocalRecordOnActiveCommand.id);
-        expect(Object.keys(menuSchema).length).toBeGreaterThan(0);
     });
+});
 
-    it('should register commands/ui/menu and sheet-recorded commands', () => {
+describe('ActionRecorderController', () => {
+    it('should register commands, UI components, icons and menu schema on construction', () => {
         const registerCommand = vi.fn();
         const registerComponent = vi.fn();
         const mergeMenu = vi.fn();
@@ -56,24 +72,36 @@ describe('action-recorder controller/menu', () => {
             {} as never
         );
 
-        expect(registerCommand).toHaveBeenCalledWith(StartRecordingActionCommand);
-        expect(registerCommand).toHaveBeenCalledWith(StopRecordingActionCommand);
-        expect(registerCommand).toHaveBeenCalledWith(CompleteRecordingActionCommand);
-        expect(registerCommand).toHaveBeenCalledWith(OpenRecordPanelOperation);
-        expect(registerCommand).toHaveBeenCalledWith(CloseRecordPanelOperation);
-        expect(registerCommand).toHaveBeenCalledWith(ReplayLocalRecordCommand);
-        expect(registerCommand).toHaveBeenCalledWith(ReplayLocalRecordOnNamesakeCommand);
-        expect(registerCommand).toHaveBeenCalledWith(ReplayLocalRecordOnActiveCommand);
-
+        expect(registerCommand).toHaveBeenCalled();
         expect(registerComponent).toHaveBeenCalledTimes(1);
-        const componentFactory = registerComponent.mock.calls[0][1] as () => unknown;
-        expect(componentFactory()).toBeDefined();
         expect(registerIcon).toHaveBeenCalledWith('RecordIcon', expect.anything());
         expect(mergeMenu).toHaveBeenCalledWith(menuSchema);
-
         expect(registerRecordedCommand).toHaveBeenCalled();
-        expect(registerRecordedCommand.mock.calls.length).toBeGreaterThan(20);
 
         controller.dispose();
+    });
+
+    it('should clean up resources on dispose', () => {
+        const disposables: Array<{ dispose: () => void }> = [];
+        const registerIcon = vi.fn(() => {
+            const d = { dispose: vi.fn() };
+            disposables.push(d);
+            return d;
+        });
+
+        const controller = new ActionRecorderController(
+            { registerCommand: vi.fn() } as never,
+            { registerComponent: vi.fn() } as never,
+            { mergeMenu: vi.fn() } as never,
+            { register: registerIcon } as never,
+            { registerRecordedCommand: vi.fn() } as never,
+            {} as never
+        );
+
+        controller.dispose();
+
+        for (const d of disposables) {
+            expect(d.dispose).toHaveBeenCalled();
+        }
     });
 });

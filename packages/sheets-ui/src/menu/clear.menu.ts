@@ -54,6 +54,7 @@ export function ClearSelectionContentMenuItemFactory(accessor: IAccessor): IMenu
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
+
 export function ClearSelectionFormatMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: ClearSelectionFormatCommand.id,
@@ -67,6 +68,22 @@ export function ClearSelectionFormatMenuItemFactory(accessor: IAccessor): IMenuB
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
+
+export function ClearSelectionAllToolbarMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: ClearSelectionAllCommand.id,
+        type: MenuItemType.BUTTON,
+        icon: 'ClearFormatDoubleIcon',
+        tooltip: 'rightClick.clearAll',
+        disabled$: getObservableWithExclusiveRange$(accessor, getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission, WorksheetSetCellStylePermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        })),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+    };
+}
+
 export function ClearSelectionAllMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: ClearSelectionAllCommand.id,

@@ -523,9 +523,8 @@ function createNullRowSkeletonWithCells(
     const rowSkeleton = _getNullTableRowSkeleton(startIndex, endIndex, row, rowSource, isRepeatRow);
     const colCount = rowSource.tableCells.length;
 
-    rowSkeleton.cells = [...new Array(colCount)].map((_, col) =>
-        createMergedAwareNullCellPage(ctx, sectionBreakConfig, table, row, col, rowSkeleton)
-    );
+    rowSkeleton.cells = Array.from({ length: colCount }, (_, col) =>
+        createMergedAwareNullCellPage(ctx, sectionBreakConfig, table, row, col, rowSkeleton));
 
     return rowSkeleton;
 }

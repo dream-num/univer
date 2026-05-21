@@ -306,9 +306,11 @@ describe('docs table layout', () => {
 
         const skeleton = createTableSkeleton(ctx, curPage, viewModel, tableNode, sectionBreakConfig);
 
-        expect(skeleton?.rows[0].cells).toHaveLength(3);
-        expect((skeleton?.rows[0].cells[1] as any).isMergedCellCovered).toBe(true);
-        expect(skeleton?.rows[0].cells[2].left).toBe(120);
+        expect(skeleton).not.toBeNull();
+        const cells = skeleton!.rows[0].cells;
+        expect(cells).toHaveLength(3);
+        expect((cells[1] as any).isMergedCellCovered).toBe(true);
+        expect(cells[2].left).toBe(120);
         expect(createSkeletonCellPagesMock.mock.calls.some((call) => call[5] === 0 && call[6] === 1)).toBe(false);
     });
 

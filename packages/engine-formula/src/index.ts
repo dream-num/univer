@@ -120,7 +120,7 @@ export { extractFormulaError } from './engine/utils/cell';
 export { generateAstNode } from './engine/utils/generate-ast-node';
 export { strip, stripErrorMargin } from './engine/utils/math-kit';
 export { handleNumfmtInCell } from './engine/utils/numfmt-kit';
-export { deserializeRangeForR1C1 } from './engine/utils/r1c1-reference';
+export { deserializeRangeForR1C1, normalizeFormulaR1C1ToA1 } from './engine/utils/r1c1-reference';
 export {
     deserializeRangeWithSheet,
     getAbsoluteRefTypeWithSingleString,

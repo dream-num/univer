@@ -17,7 +17,7 @@
 import type { IRange } from '@univerjs/core';
 import { AbsoluteRefType } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
-import { deserializeRangeForR1C1, serializeRangeToR1C1 } from '../r1c1-reference';
+import { deserializeRangeForR1C1, normalizeFormulaR1C1ToA1, serializeRangeToR1C1 } from '../r1c1-reference';
 
 describe('Test Reference R1C1', () => {
     it('deserializeRangeForR1C1', () => {
@@ -58,6 +58,38 @@ describe('Test Reference R1C1', () => {
             },
             sheetName: 'sheet1',
             unitId: 'workbook1',
+        });
+
+        expect(deserializeRangeForR1C1('RC:R[1]C[2]', 4, 5)).toStrictEqual({
+            range: {
+                endAbsoluteRefType: 0,
+                endColumn: 7,
+                endRow: 5,
+                startAbsoluteRefType: 0,
+                startColumn: 5,
+                startRow: 4,
+            },
+            sheetName: '',
+            unitId: '',
+        });
+    });
+
+    describe('normalizeFormulaR1C1ToA1', () => {
+        it('converts absolute, relative, and mixed R1C1 references', () => {
+            expect(normalizeFormulaR1C1ToA1('=R1C1+R[1]C[-1]', 1, 1)).toBe('=$A$1+A3');
+            expect(normalizeFormulaR1C1ToA1('=R1C[-1]+R[1]C2', 2, 2)).toBe('=B$1+$B4');
+            expect(normalizeFormulaR1C1ToA1('=SUM(R[-1]C:R[-1]C[2])', 4, 1)).toBe('=SUM(B4:D4)');
+        });
+
+        it('converts sheet-qualified references and preserves string literals', () => {
+            expect(normalizeFormulaR1C1ToA1('="R1C1"&R1C1', 0, 0)).toBe('="R1C1"&$A$1');
+            expect(normalizeFormulaR1C1ToA1("='Other Sheet'!R1C1+[book]Sheet1!R2C3", 0, 0)).toBe("='Other Sheet'!$A$1+[book]Sheet1!$C$2");
+            expect(normalizeFormulaR1C1ToA1("='O''Brien'!R1C1", 0, 0)).toBe("='O''Brien'!$A$1");
+        });
+
+        it('does not convert R1C1-looking text in structured references or names', () => {
+            expect(normalizeFormulaR1C1ToA1('=Table1[R1C1]+R1C1', 0, 0)).toBe('=Table1[R1C1]+$A$1');
+            expect(normalizeFormulaR1C1ToA1('=Table1[[#All],[R1C1]]+R1C1Name+NameR1C1+R1C1', 0, 0)).toBe('=Table1[[#All],[R1C1]]+R1C1Name+NameR1C1+$A$1');
         });
     });
 
@@ -107,7 +139,7 @@ describe('Test Reference R1C1', () => {
             };
             expect(serializeRangeToR1C1(range)).toEqual('R2C2:R3C3');
         });
-        it('should handle all absolute references', () => {
+        it('should handle relative row and column references', () => {
             const range: IRange = {
                 startRow: 1,
                 startColumn: 1,
@@ -118,7 +150,7 @@ describe('Test Reference R1C1', () => {
             };
             expect(serializeRangeToR1C1(range)).toEqual('R[2]C[2]:R[3]C[3]');
         });
-        it('should handle all absolute references', () => {
+        it('should default omitted absolute ref types to all absolute references', () => {
             const range: IRange = {
                 startRow: 1,
                 startColumn: 1,

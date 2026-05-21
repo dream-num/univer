@@ -34,7 +34,7 @@ import type { IFacadeClearOptions } from './f-worksheet';
 import type { FHorizontalAlignment, FVerticalAlignment } from './utils';
 import { BooleanNumber, covertCellValue, covertCellValues, DEFAULT_STYLES, Dimension, ICommandService, Inject, Injector, isNullCell, Rectangle, RichTextValue, TextStyleValue, WrapStrategy } from '@univerjs/core';
 import { FBaseInitialable } from '@univerjs/core/facade';
-import { FormulaDataModel, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
+import { FormulaDataModel, normalizeFormulaR1C1ToA1, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import {
     addMergeCellsUtil,
     AutoFillCommand,
@@ -2658,6 +2658,26 @@ export class FRange extends FBaseInitialable {
     }
 
     /**
+     * Updates the formula for this range using R1C1 notation.
+     * Relative references are resolved against each target cell in the range.
+     * @param {string} formula - A string representing the R1C1 formula to set for the cell.
+     * @returns {FRange} This range instance for chaining.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('B2');
+     * fRange.setFormulaR1C1('=SUM(R[-1]C:R[-1]C[2])');
+     * console.log(fRange.getFormula()); // '=SUM(B1:D1)'
+     * ```
+     */
+    setFormulaR1C1(formula: string): FRange {
+        return this.setFormulasR1C1(
+            Array.from({ length: this.getHeight() }, () => Array.from({ length: this.getWidth() }, () => formula))
+        );
+    }
+
+    /**
      * Sets a rectangular grid of formulas (must match dimensions of this range). The given formulas must be in A1 notation.
      * @param {string[][]} formulas - A two-dimensional string array of formulas.
      * @returns {FRange} This range instance for chaining.
@@ -2675,6 +2695,32 @@ export class FRange extends FBaseInitialable {
      */
     setFormulas(formulas: string[][]): FRange {
         return this.setValues(formulas.map((row) => row.map((formula) => ({ f: formula }))));
+    }
+
+    /**
+     * Sets a rectangular grid of formulas using R1C1 notation. Each formula is resolved against its target cell in this range.
+     * @param {string[][]} formulas - A two-dimensional string array of R1C1 formulas.
+     * @returns {FRange} This range instance for chaining.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('B2:C3');
+     * fRange.setFormulasR1C1([
+     *   ['=R[-1]C', '=R[-1]C'],
+     *   ['=R[-1]C', '=R[-1]C'],
+     * ]);
+     * console.log(fRange.getFormulas()); // [['=B1', '=C1'], ['=B2', '=C2']]
+     * ```
+     */
+    setFormulasR1C1(formulas: string[][]): FRange {
+        if (formulas.length !== this.getHeight() || formulas.some((row) => row.length !== this.getWidth())) {
+            throw new Error('The number of rows and columns in formulas must match the range dimensions');
+        }
+
+        return this.setFormulas(formulas.map((formulaRow, row) => formulaRow.map((formula, column) =>
+            normalizeFormulaR1C1ToA1(formula, this.getRow() + row, this.getColumn() + column)
+        )));
     }
 
     /**

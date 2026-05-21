@@ -302,6 +302,49 @@ describe('Test FRange', () => {
         ]);
     });
 
+    it('Range setFormulaR1C1 resolves references against target cells', () => {
+        const activeSheet = univerAPI.getActiveWorkbook()!.getActiveSheet();
+
+        activeSheet.getRange('B2').setFormulaR1C1('=SUM(R[-1]C:R[-1]C[2])');
+        expect(activeSheet.getRange('B2').getFormula()).toBe('=SUM(B1:D1)');
+
+        activeSheet.getRange('C3:D4').setFormulaR1C1('=R1C1+R[-1]C[-1]');
+        expect(activeSheet.getRange('C3:D4').getFormulas()).toEqual([
+            ['=$A$1+B2', '=$A$1+C2'],
+            ['=$A$1+B3', '=$A$1+C3'],
+        ]);
+    });
+
+    it('Range setFormulaR1C1 preserves string literals and sheet-qualified references', () => {
+        const activeSheet = univerAPI.getActiveWorkbook()!.getActiveSheet();
+
+        activeSheet.getRange('A1').setFormulaR1C1('="R1C1"&Sheet2!R2C3');
+
+        expect(activeSheet.getRange('A1').getFormula()).toBe('="R1C1"&Sheet2!$C$2');
+    });
+
+    it('Range setFormulasR1C1 resolves each formula against its target cell', () => {
+        const activeSheet = univerAPI.getActiveWorkbook()!.getActiveSheet();
+
+        activeSheet.getRange('B2:C3').setFormulasR1C1([
+            ['=R[-1]C', '=R[-1]C[-1]'],
+            ['=R[-1]C', '=R[-1]C[-1]'],
+        ]);
+
+        expect(activeSheet.getRange('B2:C3').getFormulas()).toEqual([
+            ['=B1', '=B1'],
+            ['=B2', '=B2'],
+        ]);
+    });
+
+    it('Range setFormulasR1C1 requires matching range dimensions', () => {
+        const activeSheet = univerAPI.getActiveWorkbook()!.getActiveSheet();
+
+        expect(() => activeSheet.getRange('B2:C3').setFormulasR1C1([
+            ['=R[-1]C'],
+        ])).toThrow('The number of rows and columns in formulas must match the range dimensions');
+    });
+
     it('Range getWrap', async () => {
         const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
         const range = activeSheet?.getRange(0, 0);

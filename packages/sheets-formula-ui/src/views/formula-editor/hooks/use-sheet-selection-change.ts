@@ -21,9 +21,25 @@ import type { Editor } from '@univerjs/docs-ui';
 import type { ISelectionWithCoord, ISetSelectionsOperationParams } from '@univerjs/sheets';
 import type { RefObject } from 'react';
 import type { IRefSelection } from './use-highlight';
-import { DisposableCollection, ICommandService, IUniverInstanceService, Rectangle, ThemeService, UniverInstanceType } from '@univerjs/core';
+import {
+    DisposableCollection,
+    ICommandService,
+    IUniverInstanceService,
+    noop,
+    Rectangle,
+    ThemeService,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
-import { deserializeRangeWithSheet, generateStringWithSequence, LexerTreeBuilder, sequenceNodeType, serializeRange, serializeRangeWithSheet, serializeRangeWithSpreadsheet } from '@univerjs/engine-formula';
+import {
+    deserializeRangeWithSheet,
+    generateStringWithSequence,
+    LexerTreeBuilder,
+    sequenceNodeType,
+    serializeRange,
+    serializeRangeWithSheet,
+    serializeRangeWithSpreadsheet,
+} from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService, SetSelectionsOperation } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
@@ -60,7 +76,6 @@ const prepareSelectionChangeContext = (opts: { editor?: Editor; lexerTreeBuilder
     };
 };
 
-const noop = (() => { }) as any;
 export const useSheetSelectionChange = (
     isNeed: boolean,
     isFocus: boolean,
@@ -71,7 +86,7 @@ export const useSheetSelectionChange = (
     isSupportAcrossSheet: boolean,
     listenSelectionSet: boolean,
     editor?: Editor,
-    handleRangeChange: ((refString: string, offset: number, isEnd: boolean, isModify?: boolean) => void) = noop
+    handleRangeChange: ((refString: string, offset: number, isEnd: boolean, isModify?: boolean) => void) = noop as any
 ) => {
     const renderManagerService = useDependency(IRenderManagerService);
     const univerInstanceService = useDependency(IUniverInstanceService);

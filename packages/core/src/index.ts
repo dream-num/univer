@@ -25,9 +25,22 @@ export * from './common/const';
 export * from './common/di';
 export { shallowEqual } from './common/equal';
 export { CanceledError, CustomCommandExecutionError } from './common/error';
-export { throttle } from './common/function';
-export type { IAsyncInterceptor, ICellInterceptor, IComposeInterceptors, IInterceptor, InterceptorHandler } from './common/interceptor';
-export { AsyncInterceptorManager, composeInterceptors, createAsyncInterceptorKey, createInterceptorKey, InterceptorEffectEnum, InterceptorManager } from './common/interceptor';
+export { noop, throttle } from './common/function';
+export type {
+    IAsyncInterceptor,
+    ICellInterceptor,
+    IComposeInterceptors,
+    IInterceptor,
+    InterceptorHandler,
+} from './common/interceptor';
+export {
+    AsyncInterceptorManager,
+    composeInterceptors,
+    createAsyncInterceptorKey,
+    createInterceptorKey,
+    InterceptorEffectEnum,
+    InterceptorManager,
+} from './common/interceptor';
 export { invertColorByHSL } from './common/invert-color/invert-hsl';
 // invert color utils
 export { invertColorByMatrix } from './common/invert-color/invert-rgb';
@@ -47,7 +60,15 @@ export * from './docs/data-model';
 export { JSON1, JSONX } from './docs/data-model/json-x/json-x';
 export type { JSONXActions, JSONXPath } from './docs/data-model/json-x/json-x';
 export { replaceInDocumentBody } from './docs/data-model/replacement';
-export { ParagraphStyleBuilder, ParagraphStyleValue, RichTextBuilder, RichTextValue, TextDecorationBuilder, TextStyleBuilder, TextStyleValue } from './docs/data-model/rich-text-builder';
+export {
+    ParagraphStyleBuilder,
+    ParagraphStyleValue,
+    RichTextBuilder,
+    RichTextValue,
+    TextDecorationBuilder,
+    TextStyleBuilder,
+    TextStyleValue,
+} from './docs/data-model/rich-text-builder';
 export { DEFAULT_DOCUMENT_SUB_COMPONENT_ID } from './docs/data-model/subdocument';
 export { ActionIterator } from './docs/data-model/text-x/action-iterator';
 export {
@@ -119,7 +140,12 @@ export { PermissionService } from './services/permission/permission.service';
 export { IPermissionService, PermissionStatus } from './services/permission/type';
 export type { IPermissionParam } from './services/permission/type';
 export type { IPermissionPoint } from './services/permission/type';
-export type { IPermissionTypes, RangePermissionPointConstructor, WorkbookPermissionPointConstructor, WorkSheetPermissionPointConstructor } from './services/permission/type';
+export type {
+    IPermissionTypes,
+    RangePermissionPointConstructor,
+    WorkbookPermissionPointConstructor,
+    WorkSheetPermissionPointConstructor,
+} from './services/permission/type';
 export { type DependencyOverride, mergeOverrideWithDependencies } from './services/plugin/plugin-override';
 export type { PluginCtor } from './services/plugin/plugin.service';
 export { DependentOn, Plugin, PluginService } from './services/plugin/plugin.service';
@@ -150,7 +176,6 @@ export { customNameCharacterCheck, nameCharacterCheck } from './shared/name';
 export { type BBox, type IRTreeItem, RBush, RTree } from './shared/r-tree';
 export { getIntersectRange } from './shared/range';
 export { afterTime, bufferDebounceTime, convertObservableToBehaviorSubject, fromCallback, takeAfter } from './shared/rxjs';
-export { textDiff } from './shared/text-diff';
 export { awaitTime, delayAnimationFrame } from './shared/timer';
 export { isNodeEnv } from './shared/tools';
 export * from './sheets/clone';
@@ -194,5 +219,11 @@ export { DataValidationStatus } from './types/enum/data-validation-status';
 export { DataValidationType } from './types/enum/data-validation-type';
 export * from './types/interfaces';
 export type { ICellCustomRender, ICellRenderContext } from './types/interfaces/i-cell-custom-render';
-export type { IDataValidationRule, IDataValidationRuleBase, IDataValidationRuleInfo, IDataValidationRuleOptions, ISheetDataValidationRule } from './types/interfaces/i-data-validation';
+export type {
+    IDataValidationRule,
+    IDataValidationRuleBase,
+    IDataValidationRuleInfo,
+    IDataValidationRuleOptions,
+    ISheetDataValidationRule,
+} from './types/interfaces/i-data-validation';
 export { type IUniverConfig, Univer } from './univer';

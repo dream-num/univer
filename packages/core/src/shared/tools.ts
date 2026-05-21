@@ -19,35 +19,6 @@ import type { Nullable } from './types';
 import { customAlphabet, nanoid } from 'nanoid';
 import { isLegalUrl, normalizeUrl, topLevelDomainSet } from '../common/url';
 
-const alphabets = [
-    'A',
-    'B',
-    'C',
-    'D',
-    'E',
-    'F',
-    'G',
-    'H',
-    'I',
-    'J',
-    'K',
-    'L',
-    'M',
-    'N',
-    'O',
-    'P',
-    'Q',
-    'R',
-    'S',
-    'T',
-    'U',
-    'V',
-    'W',
-    'X',
-    'Y',
-    'Z',
-];
-
 /**
  * Deep diff between two object
  * @param oneValue The first test value

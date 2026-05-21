@@ -15,6 +15,7 @@
  */
 
 import type { IChannel, IMessageProtocol } from '../rpc.service';
+import { awaitTime } from '@univerjs/core';
 import { Observable, Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { ChannelClient, ChannelServer, fromModule, toModule } from '../rpc.service';
@@ -30,12 +31,6 @@ const CALL_FAILURE = 202;
 const SUBSCRIBE_NEXT = 300;
 const SUBSCRIBE_ERROR = 301;
 const SUBSCRIBE_COMPLETE = 302;
-
-function flushPromises() {
-    return new Promise<void>((resolve) => {
-        setTimeout(() => resolve(), 0);
-    });
-}
 
 function getType(value: unknown): number | undefined {
     if (typeof value !== 'object' || value === null) {
@@ -128,7 +123,7 @@ describe('rpc.service edge cases', () => {
         lazySubscription.unsubscribe();
 
         protocol.emit({ seq: -1, type: INITIALIZE });
-        await flushPromises();
+        await awaitTime(0);
 
         const callRequest = protocol.sent.find((msg) => getType(msg) === CALL);
         expect(callRequest).toBeDefined();
@@ -198,7 +193,7 @@ describe('rpc.service edge cases', () => {
         protocol.emit({ type: 999, seq: 1, channelName: '', method: '' });
 
         protocol.emit({ type: CALL, seq: 10, channelName: 'missing', method: 'm' });
-        await flushPromises();
+        await awaitTime(0);
         expect(protocol.sent).toContainEqual({
             seq: 10,
             type: CALL_FAILURE,
@@ -213,7 +208,7 @@ describe('rpc.service edge cases', () => {
             subscribe: () => new Observable(),
         } as IChannel);
         protocol.emit({ type: CALL, seq: 11, channelName: 'bad-call', method: 'm', args: [] });
-        await flushPromises();
+        await awaitTime(0);
         expect(protocol.sent).toContainEqual({
             seq: 11,
             type: CALL_FAILURE,
@@ -225,7 +220,7 @@ describe('rpc.service edge cases', () => {
             subscribe: () => new Observable(),
         } as IChannel);
         protocol.emit({ type: CALL, seq: 12, channelName: 'no-args', method: 'm' });
-        await flushPromises();
+        await awaitTime(0);
         expect(protocol.sent).toContainEqual({
             seq: 12,
             type: CALL_SUCCESS,

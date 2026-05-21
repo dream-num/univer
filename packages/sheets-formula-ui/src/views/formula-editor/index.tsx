@@ -21,7 +21,15 @@ import type { CSSProperties, ReactNode, Ref } from 'react';
 import type { IUniverSheetsFormulaUIConfig } from '../../config/config';
 import type { FormulaSelectingType } from './hooks/use-formula-selection';
 import type { IRefSelection } from './hooks/use-highlight';
-import { BuildTextUtils, createInternalEditorID, generateRandomId, IConfigService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import {
+    BuildTextUtils,
+    createInternalEditorID,
+    generateRandomId,
+    IConfigService,
+    IUniverInstanceService,
+    noop,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { clsx } from '@univerjs/design';
 import { DocBackScrollRenderController, DocSelectionRenderService, IEditorService, useKeyboardEvent, useResize } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -73,8 +81,6 @@ export interface IFormulaEditorProps {
     disableContextMenu?: boolean;
     style?: CSSProperties;
 }
-
-const noop = () => { };
 
 export interface IFormulaEditorRef {
     isClickOutSide: (e: MouseEvent) => boolean;

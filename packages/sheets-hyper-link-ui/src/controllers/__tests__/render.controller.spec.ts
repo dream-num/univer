@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { awaitTime } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { SheetsHyperLinkRenderController } from '../render-controllers/render.controller';
@@ -30,7 +31,7 @@ describe('SheetsHyperLinkRenderController', () => {
         linkUpdate$.next();
 
         // debounced by 16ms
-        await new Promise((resolve) => setTimeout(resolve, 30));
+        await awaitTime(30);
         expect(makeForceDirty).toHaveBeenCalledTimes(1);
 
         controller.dispose();

@@ -21,8 +21,8 @@ import type { CustomRangeType, IDocumentBody, ITextRun } from '../../../../types
 import type { DocumentDataModel } from '../../document-data-model';
 import type { TextXAction } from '../action-types';
 import type { TextXSelection } from '../text-x';
+import fastDiff from 'fast-diff';
 import { Tools, UpdateDocsAttributeType } from '../../../../shared';
-import { textDiff } from '../../../../shared/text-diff';
 import { TextXActionType } from '../action-types';
 import { TextX } from '../text-x';
 import { getBodySlice, getTextRunSlice } from '../utils';
@@ -284,7 +284,7 @@ export const replaceSelectionTextX = (params: IReplaceSelectionTextXParams) => {
     if (!body) return false;
 
     const oldBody = selection.collapsed ? null : getBodySlice(body, selection.startOffset, selection.endOffset);
-    const diffs = textDiff(oldBody ? oldBody.dataStream : '', insertBody.dataStream);
+    const diffs = fastDiff(oldBody ? oldBody.dataStream : '', insertBody.dataStream);
     let cursor = 0;
     const actions = diffs.map(([type, text]) => {
         switch (type) {
@@ -350,7 +350,7 @@ export const replaceSelectionTextRuns = (params: IReplaceSelectionTextRunsParams
     if (!body) return false;
 
     const oldBody = selection.collapsed ? null : getBodySlice(body, selection.startOffset, selection.endOffset);
-    const diffs = textDiff(oldBody ? oldBody.dataStream : '', insertBody.dataStream);
+    const diffs = fastDiff(oldBody ? oldBody.dataStream : '', insertBody.dataStream);
     let cursor = 0;
     const actions = diffs.map(([type, text]) => {
         switch (type) {

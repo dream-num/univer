@@ -16,6 +16,7 @@
 
 import type { DocumentDataModel, ICommand, IDocumentData, Injector, IStyleBase, Univer } from '@univerjs/core';
 import {
+    awaitTime,
     BooleanNumber,
     CustomRangeType,
     ICommandService,
@@ -28,10 +29,6 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { DeleteDirection } from '../../../types/delete-direction';
 import { DeleteCommand, InsertCommand, UpdateCommand } from '../core-editing.command';
 import { createCommandTestBed } from './create-command-test-bed';
-
-function waitNextTick() {
-    return new Promise<void>((resolve) => setTimeout(resolve, 0));
-}
 
 function getDocumentData(): IDocumentData {
     return {
@@ -124,7 +121,7 @@ describe('core editing commands', () => {
             },
         });
 
-        await waitNextTick();
+        await awaitTime(0);
 
         expect(getDataStream()).toBe('Hello, brave world\r\n');
     });
@@ -137,7 +134,7 @@ describe('core editing commands', () => {
             direction: DeleteDirection.RIGHT,
         });
 
-        await waitNextTick();
+        await awaitTime(0);
 
         expect(getDataStream()).toBe('Hello \r\n');
         expect(getBody()?.customRanges).toEqual([]);
@@ -166,7 +163,7 @@ describe('core editing commands', () => {
             }],
         });
 
-        await waitNextTick();
+        await awaitTime(0);
 
         expect(getDataStream()).toBe('Hello world\r\n');
         expect(getFormatValueAt('bl', 1)).toBe(BooleanNumber.TRUE);

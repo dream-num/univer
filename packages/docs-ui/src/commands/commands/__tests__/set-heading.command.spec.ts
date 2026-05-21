@@ -15,15 +15,11 @@
  */
 
 import type { DocumentDataModel, ICommand, IDocumentData, Injector, Univer } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, NamedStyleType, UniverInstanceType } from '@univerjs/core';
+import { awaitTime, ICommandService, IUniverInstanceService, NamedStyleType, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { H1HeadingCommand, QuickHeadingCommand, SetParagraphNamedStyleCommand } from '../set-heading.command';
 import { createCommandTestBed } from './create-command-test-bed';
-
-function waitNextTick() {
-    return new Promise<void>((resolve) => setTimeout(resolve, 0));
-}
 
 function getHeadingDocumentData(): IDocumentData {
     return {
@@ -106,7 +102,7 @@ describe('set heading commands', () => {
 
         await commandService.executeCommand(H1HeadingCommand.id);
 
-        await waitNextTick();
+        await awaitTime(0);
 
         expect(getBody()?.paragraphs?.[0].paragraphStyle?.namedStyleType).toBe(NamedStyleType.HEADING_1);
         expect(getBody()?.paragraphs?.[0].paragraphStyle?.headingId).toBeDefined();
@@ -136,7 +132,7 @@ describe('set heading commands', () => {
             value: NamedStyleType.HEADING_2,
         });
 
-        await waitNextTick();
+        await awaitTime(0);
 
         expect(getBody()?.dataStream.startsWith('Heading')).toBe(true);
         expect(getBody()?.paragraphs?.[0].paragraphStyle?.namedStyleType).toBe(NamedStyleType.HEADING_2);

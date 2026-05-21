@@ -16,11 +16,11 @@
 
 import type { HTTPHandlerFn } from '../interceptor';
 import type { HTTPRequest } from '../request';
+import { noop } from '@univerjs/core';
 import { Observable } from 'rxjs';
 import { HTTPEventType, HTTPResponse } from '../response';
 
 const createDefaultFetchCheck = (time = 300) => {
-    const noop = () => { };
     let cancel = noop;
     return (_currentConfig: HTTPRequest) => {
         return new Promise<boolean>((res) => {

@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, ICommand, IDocumentData, Injector, Univer } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, PRESET_LIST_TYPE, PresetListType, UniverInstanceType } from '@univerjs/core';
+import { awaitTime, ICommandService, IUniverInstanceService, PRESET_LIST_TYPE, PresetListType, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
@@ -30,10 +30,6 @@ import {
     QuickListCommand,
 } from '../list.command';
 import { createCommandTestBed } from './create-command-test-bed';
-
-function waitNextTick() {
-    return new Promise<void>((resolve) => setTimeout(resolve, 0));
-}
 
 function getDocumentData(): IDocumentData {
     return {
@@ -107,7 +103,7 @@ describe('list commands', () => {
         ]);
 
         await commandService.executeCommand(BulletListCommand.id);
-        await waitNextTick();
+        await awaitTime(0);
 
         const paragraphs = getBody()?.paragraphs ?? [];
         expect(paragraphs[0].bullet?.listType).toBe(PresetListType.BULLET_LIST);
@@ -128,7 +124,7 @@ describe('list commands', () => {
         await commandService.executeCommand(ChangeListNestingLevelCommand.id, {
             type: ChangeListNestingLevelType.increase,
         });
-        await waitNextTick();
+        await awaitTime(0);
 
         const paragraphs = getBody()?.paragraphs ?? [];
         expect(paragraphs[0].bullet?.listType).toBe(PresetListType.CHECK_LIST_CHECKED);
@@ -139,7 +135,7 @@ describe('list commands', () => {
         setSelections([{ startOffset: 0, endOffset: 4, collapsed: false }]);
 
         await commandService.executeCommand(CheckListCommand.id);
-        await waitNextTick();
+        await awaitTime(0);
 
         expect(getBody()?.paragraphs?.[0].bullet?.listType).toBe(PresetListType.CHECK_LIST);
 
@@ -154,7 +150,7 @@ describe('list commands', () => {
             listType: PresetListType.ORDER_LIST,
             paragraph,
         });
-        await waitNextTick();
+        await awaitTime(0);
 
         expect(getBody()?.paragraphs?.[0].bullet?.listType).toBe(PresetListType.ORDER_LIST);
         expect(getBody()?.paragraphs?.[0].bullet?.listId).toBeDefined();

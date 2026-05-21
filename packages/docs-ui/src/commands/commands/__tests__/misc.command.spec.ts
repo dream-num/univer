@@ -17,6 +17,7 @@
 import type { DocumentDataModel, ICommand, IDocumentData, Injector, Univer } from '@univerjs/core';
 import type { IAutoFormat } from '../../../services/doc-auto-format.service';
 import {
+    awaitTime,
     CommandType,
     CustomRangeType,
     HorizontalAlign,
@@ -40,10 +41,6 @@ import { ReplaceSelectionCommand } from '../replace-content.command';
 import { SetDocZoomRatioCommand } from '../set-doc-zoom-ratio.command';
 import { genEmptyTable } from '../table/table';
 import { createCommandTestBed } from './create-command-test-bed';
-
-function waitNextTick() {
-    return new Promise<void>((resolve) => setTimeout(resolve, 0));
-}
 
 function createBaseDoc(dataStream = 'Hello world\r\n'): IDocumentData {
     return {
@@ -218,7 +215,7 @@ describe('misc document commands', () => {
             wholeEntity: true,
         });
 
-        await waitNextTick();
+        await awaitTime(0);
 
         expect(getBody()?.dataStream).toBe('Hello@OpenAI\r\n');
         expect(getBody()?.customRanges).toEqual([expect.objectContaining({
@@ -248,7 +245,7 @@ describe('misc document commands', () => {
             },
         });
 
-        await waitNextTick();
+        await awaitTime(0);
 
         expect(getBody()?.paragraphs?.[0].paragraphStyle).toEqual(expect.objectContaining({
             namedStyleType: NamedStyleType.HEADING_1,
@@ -277,7 +274,7 @@ describe('misc document commands', () => {
         });
 
         const result = await commandService.executeCommand(DocSelectAllCommand.id);
-        await waitNextTick();
+        await awaitTime(0);
 
         expect(result).toBe(true);
         expect(refreshEvents.at(-1)).toEqual(expect.objectContaining({
@@ -308,7 +305,7 @@ describe('misc document commands', () => {
         });
 
         const result = await commandService.executeCommand(DocSelectAllCommand.id);
-        await waitNextTick();
+        await awaitTime(0);
 
         expect(result).toBe(true);
         expect(refreshEvents.at(-1)).toEqual(expect.objectContaining({
@@ -352,7 +349,7 @@ describe('misc document commands', () => {
             },
         });
 
-        await waitNextTick();
+        await awaitTime(0);
         expect(getBody()?.paragraphs).toHaveLength(3);
         expect(getBody()?.paragraphs?.[0].paragraphStyle?.borderBottom).toEqual(expect.objectContaining({
             width: 1,
@@ -371,7 +368,7 @@ describe('misc document commands', () => {
 
         await commandService.executeCommand(InsertHorizontalLineBellowCommand.id);
 
-        await waitNextTick();
+        await awaitTime(0);
         expect(getBody()?.paragraphs).toHaveLength(3);
         expect(getBody()?.paragraphs?.[1].paragraphStyle?.borderBottom).toEqual(expect.objectContaining({
             width: 1,
@@ -389,19 +386,19 @@ describe('misc document commands', () => {
         setCollapsedSelection(0, 10);
 
         await commandService.executeCommand(AlignCenterCommand.id);
-        await waitNextTick();
+        await awaitTime(0);
 
         expect(getBody()?.paragraphs?.[0].paragraphStyle?.horizontalAlign).toBe(HorizontalAlign.CENTER);
         expect(getBody()?.paragraphs?.[1].paragraphStyle?.horizontalAlign).toBe(HorizontalAlign.CENTER);
 
         await commandService.executeCommand(AlignCenterCommand.id);
-        await waitNextTick();
+        await awaitTime(0);
 
         expect(getBody()?.paragraphs?.[0].paragraphStyle?.horizontalAlign).toBe(HorizontalAlign.UNSPECIFIED);
         expect(getBody()?.paragraphs?.[1].paragraphStyle?.horizontalAlign).toBe(HorizontalAlign.UNSPECIFIED);
 
         await commandService.executeCommand(AlignJustifyCommand.id);
-        await waitNextTick();
+        await awaitTime(0);
 
         expect(getBody()?.paragraphs?.[0].paragraphStyle?.horizontalAlign).toBe(HorizontalAlign.JUSTIFIED);
         expect(getBody()?.paragraphs?.[1].paragraphStyle?.horizontalAlign).toBe(HorizontalAlign.JUSTIFIED);

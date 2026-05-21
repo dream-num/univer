@@ -53,7 +53,7 @@ import {
 } from '@univerjs/ui';
 import { CutContentCommand, InnerPasteCommand } from '../../commands/commands/clipboard.inner.command';
 import { getCursorWhenDelete } from '../../commands/commands/doc-delete.command';
-import { copyContentCache, extractId, genId } from './copy-content-cache';
+import { copyContentCache, extractId } from './copy-content-cache';
 import { HtmlToUDMService } from './html-to-udm/converter';
 import LarkPastePlugin from './html-to-udm/paste-plugins/plugin-lark';
 import UniverPastePlugin from './html-to-udm/paste-plugins/plugin-univer';
@@ -327,7 +327,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
     }
 
     private async _setClipboardData(documentList: IDocumentData[], needCache = true): Promise<void> {
-        const copyId = genId();
+        const copyId = generateRandomId(6);
         const text =
             (documentList.length > 1
                 ? documentList.map((doc) => doc.body?.dataStream || '').join('\n')

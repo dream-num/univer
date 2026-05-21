@@ -16,11 +16,10 @@
 
 import type { Dependency, IWorkbookData, Workbook, Worksheet } from '@univerjs/core';
 import type { IImageFormulaInfo } from '@univerjs/engine-formula';
-import { CellValueType, ICommandService, InterceptorEffectEnum, LocaleType, ObjectMatrix } from '@univerjs/core';
+import { awaitTime, CellValueType, ICommandService, InterceptorEffectEnum, LocaleType, ObjectMatrix } from '@univerjs/core';
 import { ErrorType, FormulaDataModel, SetImageFormulaDataMutation } from '@univerjs/engine-formula';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-
 import { createFacadeTestBed } from '../../facade/__tests__/create-test-bed';
 import { ImageFormulaCellInterceptorController } from '../image-formula-cell-interceptor.controller';
 
@@ -75,7 +74,7 @@ async function waitForAssertion(assertion: () => void, timeout = 1000, interval 
             assertion();
             return;
         } catch {
-            await new Promise((resolve) => setTimeout(resolve, interval));
+            await awaitTime(interval);
         }
     }
 

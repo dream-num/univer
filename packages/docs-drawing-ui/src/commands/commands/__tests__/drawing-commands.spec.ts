@@ -16,6 +16,7 @@
 
 import type { DocumentDataModel, ICommand, IDocumentData, Injector } from '@univerjs/core';
 import {
+    awaitTime,
     Direction,
     ICommandService,
     IUniverInstanceService,
@@ -36,10 +37,6 @@ import { InsertDocDrawingCommand } from '../insert-doc-drawing.command';
 import { MoveDocDrawingsCommand } from '../move-drawings.command';
 import { RemoveDocDrawingCommand } from '../remove-doc-drawing.command';
 import { UpdateDocDrawingDistanceCommand, UpdateDocDrawingWrapTextCommand, UpdateDrawingDocTransformCommand } from '../update-doc-drawing.command';
-
-function waitNextTick() {
-    return new Promise<void>((resolve) => setTimeout(resolve, 0));
-}
 
 function createBaseDocData(): IDocumentData {
     return {
@@ -197,7 +194,7 @@ describe('docs drawing commands integration', () => {
                 },
             }],
         })).toBe(true);
-        await waitNextTick();
+        await awaitTime(0);
 
         const doc = testBed.get(IUniverInstanceService)
             .getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC)!;
@@ -220,7 +217,7 @@ describe('docs drawing commands integration', () => {
         testBed.docDrawingService.focusDrawing([{ unitId: 'test-doc', subUnitId: 'test-doc', drawingId: 'shape-1' }]);
 
         expect(await testBed.commandService.executeCommand(DeleteDocDrawingsCommand.id)).toBe(true);
-        await waitNextTick();
+        await awaitTime(0);
 
         const doc = testBed.get(IUniverInstanceService)
             .getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC)!;
@@ -243,7 +240,7 @@ describe('docs drawing commands integration', () => {
         expect(await testBed.commandService.executeCommand(MoveDocDrawingsCommand.id, {
             direction: Direction.RIGHT,
         })).toBe(true);
-        await waitNextTick();
+        await awaitTime(0);
 
         const doc = testBed.get(IUniverInstanceService)
             .getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC)!;
@@ -270,7 +267,7 @@ describe('docs drawing commands integration', () => {
                 distR: 10,
             },
         })).toBe(true);
-        await waitNextTick();
+        await awaitTime(0);
 
         const doc = testBed.get(IUniverInstanceService)
             .getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC)!;
@@ -296,7 +293,7 @@ describe('docs drawing commands integration', () => {
             }],
             wrapText: WrapTextType.RIGHT,
         })).toBe(true);
-        await waitNextTick();
+        await awaitTime(0);
 
         const doc = testBed.get(IUniverInstanceService)
             .getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC)!;
@@ -320,7 +317,7 @@ describe('docs drawing commands integration', () => {
                 },
             }],
         })).toBe(true);
-        await waitNextTick();
+        await awaitTime(0);
 
         const doc = testBed.get(IUniverInstanceService)
             .getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC)!;

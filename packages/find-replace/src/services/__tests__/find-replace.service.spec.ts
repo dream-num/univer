@@ -15,8 +15,9 @@
  */
 
 import type { FindModel, IFindMatch } from '../find-replace.service';
-import { Subject } from 'rxjs';
+import { awaitTime } from '@univerjs/core';
 
+import { Subject } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { FindBy, FindDirection, FindReplaceModel, FindReplaceService, FindScope } from '../find-replace.service';
 
@@ -78,7 +79,7 @@ describe('FindReplaceService', () => {
 
         service.find();
         // wait for provider find to resolve
-        await new Promise((r) => setTimeout(r, 0));
+        await awaitTime(0);
 
         service.moveToNextMatch();
         expect(service.getCurrentMatch()).toEqual(match1);

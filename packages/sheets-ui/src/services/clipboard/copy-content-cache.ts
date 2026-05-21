@@ -17,11 +17,10 @@
 import type { Nullable, ObjectMatrix } from '@univerjs/core';
 import type { IDiscreteRange } from '@univerjs/sheets';
 import type { COPY_TYPE, ICellDataWithSpanInfo } from './type';
-import { generateRandomId, LRUMap } from '@univerjs/core';
+import { LRUMap } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
 
 const COPY_CONTENT_CACHE_LIMIT = 10;
-const ID_LENGTH = 6;
 
 export interface ICopyContentCacheData {
     subUnitId: string;
@@ -29,10 +28,6 @@ export interface ICopyContentCacheData {
     range: IDiscreteRange;
     copyType: COPY_TYPE;
     matrix: Nullable<ObjectMatrix<ICellDataWithSpanInfo>>;
-}
-
-export function genId() {
-    return generateRandomId(ID_LENGTH);
 }
 
 export function extractId(html: string) {

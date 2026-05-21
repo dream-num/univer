@@ -35,7 +35,9 @@ import { Vector2 } from '../../basics/vector2';
 import { DocumentsSpanAndLineExtensionRegistry } from '../extension';
 import { DocComponent } from './doc-component';
 import { DOCS_EXTENSION_TYPE } from './doc-extension';
+import { getTableIdAndSliceIndex } from './layout/block/table';
 import { Liquid } from './liquid';
+import { getDocsTableRenderViewport } from './table-render-viewport';
 import './extensions';
 
 const DEFAULT_BORDER_COLOR: ITableCellBorder = {
@@ -520,10 +522,27 @@ export class Documents extends DocComponent {
         renderConfig: IDocumentRenderConfig,
         parentScale: IScale
     ) {
-        for (const [_tableId, tableSkeleton] of skeTables) {
+        for (const [tableId, tableSkeleton] of skeTables) {
             const { top: tableTop, left: tableLeft, rows } = tableSkeleton;
+            const sourceTableId = getTableIdAndSliceIndex(tableId).tableId;
+            const viewport = getDocsTableRenderViewport(this.oKey, sourceTableId);
             this._drawLiquid?.translateSave();
             this._drawLiquid?.translate(tableLeft, tableTop);
+
+            if (viewport && viewport.contentWidth > viewport.viewportWidth) {
+                const { x, y } = this._drawLiquid;
+                ctx.save();
+                ctx.beginPath();
+                ctx.rectByPrecision(
+                    x + page.marginLeft,
+                    y + page.marginTop,
+                    viewport.viewportWidth,
+                    tableSkeleton.height
+                );
+                ctx.closePath();
+                ctx.clip();
+                this._drawLiquid?.translate(-viewport.scrollLeft, 0);
+            }
 
             for (const row of rows) {
                 const { top: rowTop, cells } = row;
@@ -557,6 +576,10 @@ export class Documents extends DocComponent {
                 }
 
                 this._drawLiquid?.translateRestore();
+            }
+
+            if (viewport && viewport.contentWidth > viewport.viewportWidth) {
+                ctx.restore();
             }
 
             this._drawLiquid?.translateRestore();

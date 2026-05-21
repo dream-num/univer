@@ -30,6 +30,8 @@ export type { IFindNodeRestrictions } from './components/docs/layout/doc-skeleto
 export { getCharSpaceApply, getLastLine, getNumberUnitValue, getPageFromPath, glyphIterator, lineIterator } from './components/docs/layout/tools';
 export { getLastColumn } from './components/docs/layout/tools';
 export { Liquid } from './components/docs/liquid';
+export type { DocsTableRenderViewportProvider, IDocsTableRenderViewport } from './components/docs/table-render-viewport';
+export { getDocsTableRenderViewport, setDocsTableRenderViewportProvider } from './components/docs/table-render-viewport';
 export { DataStreamTreeNode } from './components/docs/view-model/data-stream-tree-node';
 export { DocumentViewModel } from './components/docs/view-model/document-view-model';
 export { DocumentEditArea } from './components/docs/view-model/document-view-model';

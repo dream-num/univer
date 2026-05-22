@@ -47,7 +47,7 @@ import { useDependency, useEvent, useObservable } from '@univerjs/ui';
 import { useEffect, useMemo } from 'react';
 import { merge } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
-import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
+import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render.service';
 import { findIndexFromSequenceNodes, findRefSequenceIndex } from '../../range-selector/utils/find-index-from-sequence-nodes';
 import { getOffsetFromSequenceNodes } from '../../range-selector/utils/get-offset-from-sequence-nodes';
 import { sequenceNodeToText } from '../../range-selector/utils/sequence-node-to-text';

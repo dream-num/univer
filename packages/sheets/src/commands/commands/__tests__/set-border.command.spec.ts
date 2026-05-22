@@ -29,7 +29,7 @@ import {
     SetBorderCommand,
     SetBorderPositionCommand,
     SetBorderStyleCommand,
-} from '../set-border-command';
+} from '../set-border.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
 describe('Test style commands', () => {

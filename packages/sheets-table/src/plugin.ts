@@ -37,7 +37,7 @@ import { SheetsTableThemeController } from './controllers/sheet-table-theme.cont
 import { SheetsTableController } from './controllers/sheets-table.controller';
 import { TableFilterController } from './controllers/table-filter.controller';
 import { TableManager } from './model/table-manager';
-import { SheetTableService } from './services/table-service';
+import { SheetTableService } from './services/table.service';
 
 export class UniverSheetsTablePlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;

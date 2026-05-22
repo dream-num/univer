@@ -20,7 +20,7 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { useDependency } from '@univerjs/ui';
 import { useEffect } from 'react';
-import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
+import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render.service';
 
 export const useSwitchSheet = (
     isNeed: boolean,

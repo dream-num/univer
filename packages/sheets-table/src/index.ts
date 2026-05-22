@@ -38,7 +38,7 @@ export { SheetsTableController } from './controllers/sheets-table.controller';
 export { customEmptyThemeWithBorderStyle, processStyleWithBorderStyle } from './controllers/table-theme.factory';
 export { TableManager } from './model/table-manager';
 export { UniverSheetsTablePlugin } from './plugin';
-export { SheetTableService } from './services/table-service';
+export { SheetTableService } from './services/table.service';
 export { SheetsTableButtonStateEnum, SheetsTableSortStateEnum, TableColumnDataTypeEnum, TableColumnFilterTypeEnum, TableConditionTypeEnum, TableDateCompareTypeEnum, TableNumberCompareTypeEnum, TableStringCompareTypeEnum } from './types/enum';
 export type { ITableColumnJson, ITableConditionFilterItem, ITableData, ITableFilterItem, ITableInfo, ITableInfoWithUnitId, ITableManualFilterItem, ITableOptions, ITableRange, ITableRangeWithState, TableMetaType, TableRelationTupleType } from './types/type';
 export type { ITableJson, ITableSetConfig } from './types/type';

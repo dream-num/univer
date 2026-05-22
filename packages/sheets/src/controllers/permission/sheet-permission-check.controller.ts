@@ -28,7 +28,7 @@ import type { IInsertColCommandParams, IInsertRowCommandParams } from '../../com
 import type { IMoveRangeCommandParams } from '../../commands/commands/move-range.command';
 import type { IMoveColsCommandParams, IMoveRowsCommandParams } from '../../commands/commands/move-rows-cols.command';
 import type { IRemoveColByRangeCommandParams, IRemoveRowByRangeCommandParams } from '../../commands/commands/remove-row-col.command';
-import type { ISetBorderCommandParams } from '../../commands/commands/set-border-command';
+import type { ISetBorderCommandParams } from '../../commands/commands/set-border.command';
 import type { ISetSpecificColsVisibleCommandParams } from '../../commands/commands/set-col-visible.command';
 import type { ISetRangeValuesCommandParams } from '../../commands/commands/set-range-values.command';
 import type { ISetSpecificRowsVisibleCommandParams } from '../../commands/commands/set-row-visible.command';
@@ -71,7 +71,7 @@ import { MoveRangeCommand } from '../../commands/commands/move-range.command';
 import { MoveColsCommand, MoveRowsCommand } from '../../commands/commands/move-rows-cols.command';
 import { RemoveDefinedNameCommand } from '../../commands/commands/remove-defined-name.command';
 import { RemoveColByRangeCommand, RemoveRowByRangeCommand } from '../../commands/commands/remove-row-col.command';
-import { SetBorderCommand } from '../../commands/commands/set-border-command';
+import { SetBorderCommand } from '../../commands/commands/set-border.command';
 import { SetSelectedColsVisibleCommand, SetSpecificColsVisibleCommand } from '../../commands/commands/set-col-visible.command';
 import { SetDefinedNameCommand } from '../../commands/commands/set-defined-name.command';
 import { SetRangeValuesCommand } from '../../commands/commands/set-range-values.command';

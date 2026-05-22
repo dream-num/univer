@@ -16,7 +16,7 @@
 
 import { describe, expect, it, vi } from 'vitest';
 import { TableManager } from '../../../model/table-manager';
-import { SheetTableService } from '../../../services/table-service';
+import { SheetTableService } from '../../../services/table.service';
 import { AddSheetTableMutation } from '../add-sheet-table.mutation';
 import { DeleteSheetTableMutation } from '../delete-sheet-table.mutation';
 import { SetSheetTableMutation } from '../set-sheet-table.mutation';

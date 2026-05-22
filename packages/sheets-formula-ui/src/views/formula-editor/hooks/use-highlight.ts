@@ -29,7 +29,7 @@ import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { useDependency, useEvent, useObservable } from '@univerjs/ui';
 import { useEffect, useMemo } from 'react';
 import { genFormulaRefSelectionStyle } from '../../../common/selection';
-import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
+import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render.service';
 
 export interface IRefSelection {
     refIndex: number;

@@ -24,7 +24,7 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { useDependency, useEvent } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
 import { filter } from 'rxjs';
-import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
+import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render.service';
 import { useStateRef } from './use-state-ref';
 
 function getCurrentBodyDataStreamAndOffset(accssor: IAccessor) {

@@ -18,7 +18,7 @@
 
 import { LocaleService } from '@univerjs/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { SheetsTableUiService } from '../../../services/sheets-table-ui-service';
+import { SheetsTableUiService } from '../../../services/sheets-table-ui.service';
 import { SheetTableItemsFilterPanel } from '../SheetTableItemsFilterPanel';
 
 const mocks = vi.hoisted(() => ({

@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export * from './services/telemetry-service';
+export * from './services/telemetry.service';

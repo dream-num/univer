@@ -16,7 +16,7 @@
 
 import type { IMutation } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
-import { SheetTableService } from '../../services/table-service';
+import { SheetTableService } from '../../services/table.service';
 
 export interface IDeleteSheetTableParams {
     unitId: string;

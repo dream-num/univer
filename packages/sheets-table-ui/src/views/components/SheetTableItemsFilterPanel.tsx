@@ -20,7 +20,7 @@ import { LocaleService } from '@univerjs/core';
 import { borderClassName, Checkbox, clsx, Input, scrollbarClassName } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
 import { useCallback, useMemo, useState } from 'react';
-import { SheetsTableUiService } from '../../services/sheets-table-ui-service';
+import { SheetsTableUiService } from '../../services/sheets-table-ui.service';
 
 interface ISheetTableItemsFilterPanelProps {
     unitId: string;

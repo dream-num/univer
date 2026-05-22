@@ -65,7 +65,7 @@ import {
     SetBorderCommand,
     SetBorderPositionCommand,
     SetBorderStyleCommand,
-} from '../commands/commands/set-border-command';
+} from '../commands/commands/set-border.command';
 import { SetColDataCommand } from '../commands/commands/set-col-data.command';
 import {
     SetColHiddenCommand,
@@ -133,7 +133,7 @@ import { InsertSheetMutation } from '../commands/mutations/insert-sheet.mutation
 import { MarkDirtyFilterChangeMutation } from '../commands/mutations/mark-dirty-filter-change.mutation';
 import { MoveRangeMutation } from '../commands/mutations/move-range.mutation';
 import { MoveColsMutation, MoveRowsMutation } from '../commands/mutations/move-rows-cols.mutation';
-import { RemoveNumfmtMutation, SetNumfmtMutation } from '../commands/mutations/numfmt-mutation';
+import { RemoveNumfmtMutation, SetNumfmtMutation } from '../commands/mutations/numfmt.mutation';
 import { RegisterWorksheetRangeThemeStyleMutation } from '../commands/mutations/register-range-theme.mutation';
 import { RemoveRangeThemeMutation } from '../commands/mutations/remove-range-theme.mutation';
 import { RemoveColMutation, RemoveRowMutation } from '../commands/mutations/remove-row-col.mutation';

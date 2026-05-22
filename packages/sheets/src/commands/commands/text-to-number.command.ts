@@ -15,7 +15,7 @@
  */
 
 import type { IAccessor, ICellData, ICommand, IRange } from '@univerjs/core';
-import type { IRemoveNumfmtMutationParams } from '../mutations/numfmt-mutation';
+import type { IRemoveNumfmtMutationParams } from '../mutations/numfmt.mutation';
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 import type { ISheetCommandSharedParams } from '../utils/interface';
 import {
@@ -30,7 +30,7 @@ import {
     sequenceExecute,
 } from '@univerjs/core';
 import { SheetsSelectionsService } from '../../services/selections/selection.service';
-import { factoryRemoveNumfmtUndoMutation, RemoveNumfmtMutation } from '../mutations/numfmt-mutation';
+import { factoryRemoveNumfmtUndoMutation, RemoveNumfmtMutation } from '../mutations/numfmt.mutation';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
 import { getSheetCommandTarget } from './utils/target-util';
 

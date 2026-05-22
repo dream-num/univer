@@ -27,6 +27,6 @@ export { FormulaReorderController } from './controllers/formula-reorder.controll
 export { UniverSheetsFormulaUIPlugin } from './plugin';
 export { FORMULA_PROMPT_ACTIVATED } from './services/prompt.service';
 export { GlobalRangeSelectorService, type IShowRangeSelectorDialogOptions } from './services/range-selector.service';
-export { RefSelectionsRenderService } from './services/render-services/ref-selections.render-service';
+export { RefSelectionsRenderService } from './services/render-services/ref-selections.render.service';
 export { FormulaEditor, type IFormulaEditorRef } from './views/formula-editor/index';
 export { type IRangeSelectorInstance, type IRangeSelectorProps, RangeSelector } from './views/range-selector/index';

@@ -17,7 +17,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import * as conditionUtil from '../../model/filter-util/condition';
 import { TableConditionTypeEnum } from '../../types/enum';
-import { SheetTableService } from '../table-service';
+import { SheetTableService } from '../table.service';
 
 describe('SheetTableService', () => {
     it('should proxy table CRUD and metadata calls to table manager', () => {

@@ -27,7 +27,7 @@ import {
 } from '@univerjs/core';
 import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
-import { getRemoveRangeMutations } from '../utils/handle-range-mutation';
+import { getRemoveRangeMutations } from '../utils/handle-range.mutation';
 import { followSelectionOperation } from './utils/selection-utils';
 import { getSheetCommandTarget } from './utils/target-util';
 

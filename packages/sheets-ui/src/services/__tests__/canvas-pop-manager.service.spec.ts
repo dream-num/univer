@@ -115,7 +115,6 @@ function createService() {
         { getRenderById: () => currentRender } as any,
         {
             getCurrentUnitOfType: () => workbook,
-            getCurrentUnitOfType: () => workbook,
             getUnit: () => workbook,
         } as any,
         {

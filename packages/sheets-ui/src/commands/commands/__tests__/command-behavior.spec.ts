@@ -275,7 +275,6 @@ describe('sheets-ui command behaviors', () => {
         };
         const univerInstanceService = {
             getCurrentUnitOfType: () => workbook,
-            getCurrentUnitOfType: () => workbook,
         };
 
         const accessor = createAccessor([
@@ -324,7 +323,7 @@ describe('sheets-ui command behaviors', () => {
     it('guards scroll commands when params or targets are missing', async () => {
         const accessor = createAccessor([
             [ICommandService, { executeCommand: vi.fn(), syncExecuteCommand: vi.fn() }],
-            [IUniverInstanceService, { getCurrentUnitOfType: () => null, getCurrentUnitOfType: () => null }],
+            [IUniverInstanceService, { getCurrentUnitOfType: () => null }],
             [IRenderManagerService, { getRenderById: vi.fn() }],
         ]);
 

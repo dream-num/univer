@@ -43,6 +43,7 @@ export { type IInputProps, Input } from './components/input/Input';
 export { type IKBDProps, KBD } from './components/kbd/Kbd';
 export { type IMessageProps, message, Messager, MessageType, removeMessage } from './components/message/Message';
 export { type IPagerProps, Pager } from './components/pager/Pager';
+export { type IPanelFieldProps, type IPanelProps, type IPanelSectionProps, Panel, PanelField, PanelSection } from './components/panel/Panel';
 export { type IPopupProps, Popup } from './components/popup';
 export { type IRadioGroupProps, RadioGroup } from './components/radio-group/RadioGroup';
 export { type IRadioProps, Radio } from './components/radio/Radio';

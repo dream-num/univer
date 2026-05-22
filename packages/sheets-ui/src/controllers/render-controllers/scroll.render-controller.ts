@@ -41,7 +41,7 @@ import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manag
 import { getSheetObject } from '../utils/component-tools';
 
 const MOUSE_WHEEL_SPEED_SMOOTHING_FACTOR = 3;
-const WHEEL_CROSS_AXIS_LOCK_RATIO = 3;
+const WHEEL_CROSS_AXIS_LOCK_RATIO = 2;
 /**
  * This controller handles scroll logic in sheet interaction.
  */

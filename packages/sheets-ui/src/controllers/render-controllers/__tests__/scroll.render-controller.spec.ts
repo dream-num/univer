@@ -62,11 +62,11 @@ describe('SheetsScrollRenderController', () => {
 
         const preventDefault = vi.fn();
         scene.onMouseWheel$.emit(
-            { ctrlKey: false, shiftKey: false, deltaX: 5, deltaY: 10, preventDefault },
+            { ctrlKey: false, shiftKey: false, deltaX: 7, deltaY: 10, preventDefault },
             { stopPropagation: () => { } }
         );
 
-        expect(executeSpy).toHaveBeenCalledWith(SetScrollRelativeCommand.id, { offsetX: 5, offsetY: 10 });
+        expect(executeSpy).toHaveBeenCalledWith(SetScrollRelativeCommand.id, { offsetX: 7, offsetY: 10 });
 
         // Avoid disposing here: faked render context does not implement all IDisposable contracts.
         void _controller;
@@ -119,11 +119,11 @@ describe('SheetsScrollRenderController', () => {
         const preventDefault = vi.fn();
 
         scene.onMouseWheel$.emit(
-            { ctrlKey: false, shiftKey: false, deltaX: 8, deltaY: 20, preventDefault },
+            { ctrlKey: false, shiftKey: false, deltaX: 12, deltaY: 20, preventDefault },
             { stopPropagation: () => { } }
         );
 
-        expect(executeSpy).toHaveBeenCalledWith(SetScrollRelativeCommand.id, { offsetX: 4, offsetY: 10 });
+        expect(executeSpy).toHaveBeenCalledWith(SetScrollRelativeCommand.id, { offsetX: 6, offsetY: 10 });
 
         void controller;
     });
@@ -143,11 +143,11 @@ describe('SheetsScrollRenderController', () => {
         const preventDefault = vi.fn();
 
         scene.onMouseWheel$.emit(
-            { ctrlKey: false, shiftKey: false, deltaX: 2, deltaY: 20, preventDefault },
+            { ctrlKey: false, shiftKey: false, deltaX: 8, deltaY: 20, preventDefault },
             { stopPropagation: () => { } }
         );
         scene.onMouseWheel$.emit(
-            { ctrlKey: false, shiftKey: false, deltaX: 20, deltaY: 2, preventDefault },
+            { ctrlKey: false, shiftKey: false, deltaX: 20, deltaY: 8, preventDefault },
             { stopPropagation: () => { } }
         );
 

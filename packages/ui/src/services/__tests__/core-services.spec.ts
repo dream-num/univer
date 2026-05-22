@@ -17,6 +17,7 @@
 import type { IMenuButtonItem } from '../menu/menu';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { hasRenderableContextMenuSchema } from '../../views/components/context-menu/ContextMenuPanel';
 import { MenuItemType } from '../menu/menu';
 import { MenuManagerService } from '../menu/menu-manager.service';
 import { ContextMenuGroup, ContextMenuPosition, MenuManagerPosition, RibbonPosition, RibbonStartGroup } from '../menu/types';
@@ -145,6 +146,33 @@ describe('MenuManagerService', () => {
             ContextMenuGroup.QUICK,
             ContextMenuGroup.LAYOUT,
         ]);
+    });
+
+    it('ignores nested context menu containers that have no direct renderable items', () => {
+        expect(hasRenderableContextMenuSchema({
+            key: 'emptyParagraph',
+            children: [{
+                key: ContextMenuGroup.QUICK,
+                children: [{
+                    key: 'h1',
+                    item: {
+                        id: 'h1',
+                        type: MenuItemType.BUTTON,
+                    } as any,
+                }],
+            }],
+        } as any)).toBe(false);
+
+        expect(hasRenderableContextMenuSchema({
+            key: ContextMenuGroup.LAYOUT,
+            children: [{
+                key: 'insertBelow',
+                item: {
+                    id: 'insertBelow',
+                    type: MenuItemType.SUBITEMS,
+                } as any,
+            }],
+        } as any)).toBe(true);
     });
 });
 

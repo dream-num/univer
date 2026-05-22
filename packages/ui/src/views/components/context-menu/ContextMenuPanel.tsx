@@ -82,6 +82,18 @@ function isNonHoverableLabel(label?: MenuLabel) {
     return typeof label === 'object' && label?.hoverable === false;
 }
 
+export function hasRenderableContextMenuSchema(menuSchema: IMenuSchema): boolean {
+    if (menuSchema.item) {
+        return true;
+    }
+
+    if (!menuSchema.children?.length) {
+        return false;
+    }
+
+    return menuSchema.children.some((childSchema) => Boolean(childSchema.item));
+}
+
 export function ContextMenuPanel(props: IContextMenuPanelProps) {
     const { menuType, menuSessionVersion = 0, className, activeItemIds, hiddenItemIds, onOptionSelect } = props;
     const menuManagerService = useDependency(IMenuManagerService);
@@ -182,6 +194,10 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
 
     const visibleSchemas = useMemo(() => {
         return menuSchemas.filter((item) => {
+            if (!hasRenderableContextMenuSchema(item)) {
+                return false;
+            }
+
             if (!item.children) {
                 return true;
             }

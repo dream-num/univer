@@ -19,10 +19,17 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 
 function getProductionDependencyNames(packageJson: IPackageJson) {
-    return [...new Set([
+    const names = new Set([
         ...Object.keys(packageJson.dependencies ?? {}),
         ...Object.keys(packageJson.peerDependencies ?? {}),
-    ])].sort((left, right) => left.localeCompare(right));
+    ]);
+
+    const devDeps = packageJson.devDependencies ?? {};
+    if ('react' in devDeps) {
+        names.add('react');
+    }
+
+    return [...names].sort((left, right) => left.localeCompare(right));
 }
 
 function normalizeIgnoredPackages(ignorePackages: string[] = []) {

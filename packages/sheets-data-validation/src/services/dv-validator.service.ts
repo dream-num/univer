@@ -15,19 +15,7 @@
  */
 
 import type { IDataValidationRule, IRange, Nullable, ObjectMatrix, Workbook, Worksheet } from '@univerjs/core';
-import {
-    bufferDebounceTime,
-    DataValidationStatus,
-    Disposable,
-    getIntersectRange,
-    Inject,
-    IUniverInstanceService,
-    LifecycleService,
-    LifecycleStages,
-    Range,
-    Tools,
-    UniverInstanceType,
-} from '@univerjs/core';
+import { bufferDebounceTime, DataValidationStatus, Disposable, getIntersectRange, Inject, IUniverInstanceService, LifecycleService, LifecycleStages, Range, Tools, UniverInstanceType } from '@univerjs/core';
 import { bufferWhen, filter, skip } from 'rxjs';
 import { SheetDataValidationModel } from '../models/sheet-data-validation-model';
 import { DataValidationCacheService } from './dv-cache.service';
@@ -82,20 +70,8 @@ export class SheetsDataValidationValidatorService extends Disposable {
             });
         };
 
-        this.disposeWithMe(
-            this._dataValidationCacheService.dirtyRanges$.pipe(
-                bufferWhen(() => this._lifecycleService.lifecycle$.pipe(
-                    skip(1),
-                    filter((stage) => stage === LifecycleStages.Rendered)
-                ))
-            ).subscribe(handleDirtyRanges)
-        );
-        this.disposeWithMe(
-            this._dataValidationCacheService.dirtyRanges$.pipe(
-                filter(() => this._lifecycleService.stage >= LifecycleStages.Rendered),
-                bufferDebounceTime(20)
-            ).subscribe(handleDirtyRanges)
-        );
+        this.disposeWithMe(this._dataValidationCacheService.dirtyRanges$.pipe(bufferWhen(() => this._lifecycleService.lifecycle$.pipe(skip(1), filter((stage) => stage === LifecycleStages.Rendered)))).subscribe(handleDirtyRanges));
+        this.disposeWithMe(this._dataValidationCacheService.dirtyRanges$.pipe(filter(() => this._lifecycleService.stage >= LifecycleStages.Rendered), bufferDebounceTime(20)).subscribe(handleDirtyRanges));
     }
 
     private async _validatorByCell(workbook: Workbook, worksheet: Worksheet, row: number, col: number) {
@@ -120,14 +96,7 @@ export class SheetsDataValidationValidatorService extends Disposable {
         }
 
         return new Promise<DataValidationStatus>((resolve) => {
-            this._sheetDataValidationModel.validator(rule, {
-                unitId,
-                subUnitId,
-                row: _row,
-                col: _col,
-                worksheet,
-                workbook,
-            }, (status) => {
+            this._sheetDataValidationModel.validator(rule, { unitId, subUnitId, row: _row, col: _col, worksheet, workbook }, (status) => {
                 resolve(status);
             });
         });
@@ -214,12 +183,7 @@ export class SheetsDataValidationValidatorService extends Disposable {
         if (mergeCells.length) {
             mergeCells.forEach(({ resultRowIndex, resultColIndex, row, col }) => {
                 if (result[resultRowIndex][resultColIndex] === DataValidationStatus.VALIDATING) {
-                    result[resultRowIndex][resultColIndex] = this._dataValidationCacheService.getValue(
-                        unitId,
-                        subUnitId,
-                        row,
-                        col
-                    ) ?? DataValidationStatus.VALID;
+                    result[resultRowIndex][resultColIndex] = this._dataValidationCacheService.getValue(unitId, subUnitId, row, col) ?? DataValidationStatus.VALID;
                 }
             });
         }

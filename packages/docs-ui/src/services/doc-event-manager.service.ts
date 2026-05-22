@@ -227,6 +227,9 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
     private readonly _clickBullet$ = new Subject<IBulletActive>();
     readonly clickBullets$ = this._clickBullet$.asObservable();
 
+    private readonly _contextMenuBullet$ = new Subject<IBulletActive & { x: number; y: number }>();
+    readonly contextMenuBullets$ = this._contextMenuBullet$.asObservable();
+
     private readonly _hoverParagraph$ = new BehaviorSubject<Nullable<IMutiPageParagraphBound>>(null);
     readonly hoverParagraph$ = this._hoverParagraph$.pipe(distinctUntilChanged((pre, aft) => pre?.startIndex === aft?.startIndex && pre?.segmentId === aft?.segmentId && pre?.pageIndex === aft?.pageIndex));
     readonly hoverParagraphRealTime$ = this._hoverParagraph$.asObservable();
@@ -380,10 +383,21 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
             switchMap((down) => onPointerUp$.pipe(take(1), map((up) => ({ down, up })))),
             filter(({ down, up }) => down.target === up.target && up.timeStamp - down.timeStamp < 300)
         ).subscribe(({ down }) => {
+            const point = transformOffset2Bound(down.offsetX, down.offsetY, this._context.scene);
+
             if (down.button === 2) {
+                const bullet = this._calcActiveBullet(point);
+                if (bullet) {
+                    this._contextMenuBullet$.next({
+                        ...bullet,
+                        x: down.offsetX,
+                        y: down.offsetY,
+                    });
+                }
+
                 return;
             }
-            const point = transformOffset2Bound(down.offsetX, down.offsetY, this._context.scene);
+
             const ranges = this._calcActiveRanges(point);
             if (ranges.length) {
                 this._clickCustomRanges$.next(ranges.pop()!);
@@ -394,6 +408,10 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
                 this._clickBullet$.next(bullet);
             }
         }));
+    }
+
+    isPointerOnBullet(offsetX: number, offsetY: number): boolean {
+        return Boolean(this._calcActiveBullet(transformOffset2Bound(offsetX, offsetY, this._context.scene)));
     }
 
     private _buildCustomRangeBoundsBySegment(segmentId?: string, segmentPage = -1) {
@@ -463,7 +481,7 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
 
     private _buildBulletBoundsBySegment(segmentId?: string, segmentPage = -1): IBulletBound[] {
         const body = this._context.unit.getSelfOrHeaderFooterModel(segmentId)?.getBody();
-        const paragraphs = (body?.paragraphs ?? []).filter((p) => p.bullet && p.bullet.listType.indexOf('CHECK_LIST') === 0);
+        const paragraphs = (body?.paragraphs ?? []).filter((p) => p.bullet);
         const bounds: IBulletBound[] = [];
         const skeletonData = this._skeleton.getSkeletonData();
         if (!skeletonData) {

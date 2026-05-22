@@ -23,9 +23,11 @@ import {
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     DOCS_ZEN_EDITOR_UNIT_ID_KEY,
     ICommandService,
+    Inject,
 } from '@univerjs/core';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { ContextMenuPosition, IContextMenuService } from '@univerjs/ui';
+import { DocEventManagerService } from '../../services/doc-event-manager.service';
 
 const SKIP_UNIT_IDS = [
     DEFAULT_EMPTY_DOCUMENT_VALUE,
@@ -42,7 +44,8 @@ export class DocContextMenuRenderController extends Disposable implements IRende
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @IContextMenuService private readonly _contextMenuService: IContextMenuService,
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @Inject(DocEventManagerService) private readonly _docEventManagerService: DocEventManagerService
     ) {
         super();
 
@@ -57,6 +60,10 @@ export class DocContextMenuRenderController extends Disposable implements IRende
         // Content range context menu
         const documentsSubscription = documentsPointerDownObserver.subscribeEvent((event) => {
             if (event.button === 2) {
+                if (this._docEventManagerService.isPointerOnBullet(event.offsetX, event.offsetY)) {
+                    return;
+                }
+
                 this._contextMenuService.triggerContextMenu(event, ContextMenuPosition.MAIN_AREA);
             }
         });

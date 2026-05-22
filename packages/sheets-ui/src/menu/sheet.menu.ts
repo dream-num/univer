@@ -149,7 +149,7 @@ export function UnHideSheetMenuItemFactory(accessor: IAccessor): IMenuSelectorIt
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const commandService = accessor.get(ICommandService);
 
-    const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+    const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const hiddenList = workbook.getHiddenWorksheets().map((s) => ({
         label: workbook.getSheetBySheetId(s)?.getName() || '',
         value: s,
@@ -203,7 +203,7 @@ export function ShowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         title: 'sheetConfig.unhide',
         disabled$: new Observable<boolean>((subscriber) => {
             function disableFunction() {
-                const worksheets = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getWorksheets();
+                const worksheets = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getWorksheets();
                     // loop through all worksheets Map to see if there is more than one sheet
                 const visibleSheets = Array.from(worksheets.values());
 
@@ -232,7 +232,7 @@ export function ShowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 }
 
 function disableFunction(univerInstanceService: IUniverInstanceService, subscriber: Subscriber<boolean>) {
-    const worksheets = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getWorksheets();
+    const worksheets = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getWorksheets();
         // loop through all worksheets Map to see if there is more than one visible sheet
     const visibleSheets = Array.from(worksheets.values()).filter(
         (sheet) => sheet.getConfig().hidden === BooleanNumber.FALSE

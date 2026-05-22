@@ -35,13 +35,13 @@ describe('Test moving rows & cols', () => {
     let has: Injector['has'];
     const getWorksheet = () => {
         const univerInstanceService = get(IUniverInstanceService);
-        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet()!;
         return worksheet;
     };
     const getId = () => {
         const univerInstanceService = get(IUniverInstanceService);
-        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet()!;
         return {
             unitId: workbook.getUnitId(),

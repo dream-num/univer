@@ -44,7 +44,7 @@ export const PermissionDetailUserPart = (props: IPermissionDetailUserPartProps) 
     const univerInstanceService = useDependency(IUniverInstanceService);
     const selectUserList = useObservable(sheetPermissionUserManagerService.selectUserList$, sheetPermissionUserManagerService.selectUserList);
 
-    const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+    const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
     const worksheet = workbook?.getActiveSheet();
     if (!workbook || !worksheet) {
         return null;

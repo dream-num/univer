@@ -55,7 +55,7 @@ export class SheetPermissionInterceptorClipboardController extends Disposable {
                         endColumn: startRange.startColumn + ranges.endColumn,
                     };
 
-                    const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+                    const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                     const worksheet = workbook.getActiveSheet();
                     if (!worksheet) {
                         return false;

@@ -75,7 +75,7 @@ export class AutoHeightController extends Disposable {
 
     getUndoRedoParamsOfAutoHeight(ranges: IRange[], subUnitIdParam?: string, currentCellHeights?: ObjectMatrix<number>): { redos: IMutationInfo[]; undos: IMutationInfo[] } {
         const { _univerInstanceService: univerInstanceService } = this;
-        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
 
         // Better NOT use `getActiveWorksheet` method, because users may manipulate another worksheet in active sheet.
         const unitId = workbook.getUnitId();

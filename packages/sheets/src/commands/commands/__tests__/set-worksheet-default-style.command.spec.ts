@@ -42,7 +42,7 @@ describe('Test set worksheet default style commands', () => {
 
     describe('set worksheet default style', () => {
         it('correct situation', async () => {
-            const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+            const workbook = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
             const worksheet = workbook.getSheetBySheetId('sheet1');
             if (!workbook) throw new Error('This is an error');
 

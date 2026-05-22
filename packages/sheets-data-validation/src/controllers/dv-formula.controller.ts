@@ -42,7 +42,7 @@ export class DataValidationFormulaController extends Disposable {
             }
             const { token } = node;
             const sequenceGrid = deserializeRangeWithSheetWithCache(token);
-            const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+            const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
             let targetSheet: Nullable<Worksheet> = workbook.getActiveSheet();
             const unitId = workbook.getUnitId();
             if (sequenceGrid.sheetName) {

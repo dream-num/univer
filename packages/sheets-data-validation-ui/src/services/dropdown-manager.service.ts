@@ -128,7 +128,7 @@ export class DataValidationDropdownManagerService extends Disposable {
     private _getDropdownByCell(unitId: string | undefined, subUnitId: string | undefined, row: number, col: number) {
         const workbook = unitId ?
             this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)
-            : this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+            : this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!workbook) {
             return;
         }

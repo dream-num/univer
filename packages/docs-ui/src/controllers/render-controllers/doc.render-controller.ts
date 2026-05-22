@@ -82,7 +82,7 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         scene.attachControl();
 
         scene.onMouseWheel$.subscribeEvent((evt: unknown, state: EventState) => {
-            const currentDocUnit = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC);
+            const currentDocUnit = this._univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_DOC);
             if (currentDocUnit?.getUnitId() !== this._context.unitId) {
                 return;
             }

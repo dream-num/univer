@@ -149,7 +149,7 @@ function createMenuAccessor(option: Partial<IMenuAccessorOption> = {}) {
     };
 
     const pairs: Array<[unknown, unknown]> = [
-        [IUniverInstanceService, { getCurrentTypeOfUnit$: () => of(workbook), getCurrentUnitForType: () => workbook }],
+        [IUniverInstanceService, { getCurrentTypeOfUnit$: () => of(workbook), getCurrentUnitOfType: () => workbook }],
         [SheetsSelectionsService, selectionService],
         [RangeProtectionRuleModel, rangeProtectionRuleModel],
         [WorksheetProtectionRuleModel, worksheetProtectionRuleModel],

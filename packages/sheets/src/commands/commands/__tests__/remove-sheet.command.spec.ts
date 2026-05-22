@@ -59,7 +59,7 @@ describe('Test remove worksheet commands', () => {
                 ).toBeFalsy();
             });
             it('will be working if there are more than one sheet', async () => {
-                const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+                const workbook = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                 if (!workbook) throw new Error('This is an error');
 
                 const targetActiveSheet = workbook.getActiveSheet();

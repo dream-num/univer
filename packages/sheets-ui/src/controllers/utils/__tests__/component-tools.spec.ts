@@ -35,7 +35,7 @@ function createSheetComponents() {
 describe('component tools', () => {
     it('getSheetObject returns null when no workbook or render is available', () => {
         const noWorkbookInstance = {
-            getCurrentUnitForType: vi.fn(() => null),
+            getCurrentUnitOfType: vi.fn(() => null),
         };
         const renderManager = {
             getRenderById: vi.fn(),
@@ -45,7 +45,7 @@ describe('component tools', () => {
 
         const workbook = { getUnitId: () => 'unit-1' };
         const noRenderInstance = {
-            getCurrentUnitForType: () => workbook,
+            getCurrentUnitOfType: () => workbook,
         };
         expect(getSheetObject(noRenderInstance as any, renderManager as any)).toBeNull();
         expect(renderManager.getRenderById).toHaveBeenCalledWith('unit-1');
@@ -61,7 +61,7 @@ describe('component tools', () => {
             engine: { id: 'engine' },
         };
         const instance = {
-            getCurrentUnitForType: () => workbook,
+            getCurrentUnitOfType: () => workbook,
         };
         const renderManager = {
             getRenderById: () => render,
@@ -89,7 +89,7 @@ describe('component tools', () => {
             engine: { id: 'engine' },
         };
         const instance = {
-            getCurrentUnitForType: () => workbook,
+            getCurrentUnitOfType: () => workbook,
         };
 
         const sheetObject = getSheetObject(instance as any, renderContext as any);

@@ -33,7 +33,7 @@ export const DocParagraphSettingCommand: ICommand<IDocParagraphSettingCommandPar
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
 
-        const docDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         const docRanges = docSelectionManagerService.getDocRanges();
 
         if (!docDataModel || docRanges.length === 0 || !config) {

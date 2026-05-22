@@ -32,7 +32,7 @@ export function DefinedNameOverlay({ search, isInputEvent }: { search: string; i
     const univerInstanceService = useDependency(IUniverInstanceService);
     const sidebarService = useDependency(ISidebarService);
 
-    const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+    const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const unitId = workbook.getUnitId();
 
     const getDefinedNameMap = () => {

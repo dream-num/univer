@@ -75,7 +75,7 @@ export class SlidePopupMenuController extends RxDisposable {
 
     // eslint-disable-next-line max-lines-per-function
     private _popupMenuListener(unitId: string) {
-        const model = this._univerInstanceService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
+        const model = this._univerInstanceService.getCurrentUnitOfType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
         const pages = model?.getPages() ?? {};
 
         // eslint-disable-next-line max-lines-per-function

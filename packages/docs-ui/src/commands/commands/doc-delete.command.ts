@@ -153,7 +153,7 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
             return false;
         }
         const { segmentId, style } = activeRange;
-        const docDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         const originBody = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getBody();
         if (docDataModel == null || originBody == null) {
             return false;
@@ -273,7 +273,7 @@ export const RemoveHorizontalLineCommand: ICommand = {
             return false;
         }
         const { segmentId, style } = activeRange;
-        const docDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         const originBody = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getBody();
         if (docDataModel == null || originBody == null) {
             return false;

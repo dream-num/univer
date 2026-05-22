@@ -33,7 +33,7 @@ export class ConditionalFormattingViewportController extends Disposable {
     }
 
     private _init() {
-        const unit = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        const unit = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         const bindUnit = (unit: Workbook) => {
             this._unitDisposable.dispose();
             this._unitDisposable = new DisposableCollection();

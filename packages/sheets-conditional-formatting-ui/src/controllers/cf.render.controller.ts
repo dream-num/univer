@@ -41,7 +41,7 @@ export class SheetsCfRenderController extends Disposable {
     }
 
     private _markDirtySkeleton() {
-        const unitId = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
+        const unitId = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
         this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService).reCalculate();
         this._renderManagerService.getRenderById(unitId)?.mainComponent?.makeDirty();
     }
@@ -52,7 +52,7 @@ export class SheetsCfRenderController extends Disposable {
                 bufferTime(16),
                 filter((v) => !!v.length),
                 filter((v) => {
-                    const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+                    const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
                     if (!workbook) return false;
 
                     const worksheet = workbook.getActiveSheet();

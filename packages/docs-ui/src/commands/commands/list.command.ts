@@ -52,7 +52,7 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
 
         const listType: string = params.listType;
 
-        const docDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         const docRanges = params.docRange ?? docSelectionManagerService.getDocRanges() ?? [];
 
         if (docDataModel == null || docRanges.length === 0) {
@@ -118,7 +118,7 @@ export const ChangeListTypeCommand: ICommand<IChangeListTypeCommandParams> = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
         const { listType } = params;
-        const docDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         const activeRanges = params.docRange ?? docSelectionManagerService.getDocRanges();
         if (docDataModel == null || activeRanges == null || !activeRanges.length) {
             return false;
@@ -189,7 +189,7 @@ export const ChangeListNestingLevelCommand: ICommand<IChangeListNestingLevelComm
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
-        const docDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         const activeRange = docSelectionManagerService.getActiveTextRange();
         if (docDataModel == null || activeRange == null) {
             return false;
@@ -301,7 +301,7 @@ export const ToggleCheckListCommand: ICommand<IToggleCheckListCommandParams> = {
         const commandService = accessor.get(ICommandService);
         const { index, segmentId, textRanges } = params;
 
-        const docDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         if (docDataModel == null) {
             return false;
         }
@@ -382,7 +382,7 @@ export const QuickListCommand: ICommand<IQuickListCommandParams> = {
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
-        const docDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         const activeRange = docSelectionManagerService.getActiveTextRange();
         if (docDataModel == null || activeRange == null) {
             return false;

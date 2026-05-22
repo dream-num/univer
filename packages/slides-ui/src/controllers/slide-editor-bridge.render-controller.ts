@@ -136,7 +136,7 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
             }));
         };
 
-        // const model = this._instanceSrv.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
+        // const model = this._instanceSrv.getCurrentUnitOfType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
         // const pagesMap = model?.getPages() ?? {};
         // const pages = Object.values(pagesMap);
 
@@ -172,7 +172,7 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
         this.setEditorVisible(false);
         const curRichText = this._curRichText;
 
-        const slideData = this._instanceSrv.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
+        const slideData = this._instanceSrv.getCurrentUnitOfType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
         if (!slideData) return false;
         curRichText.refreshDocumentByDocData();
         curRichText.resizeToContentSize();

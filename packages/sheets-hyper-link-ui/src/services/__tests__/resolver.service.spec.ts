@@ -42,7 +42,7 @@ describe('SheetsHyperLinkResolverService', () => {
 
         const resolver = new SheetsHyperLinkResolverService(
             {
-                getCurrentUnitForType: () => workbook,
+                getCurrentUnitOfType: () => workbook,
                 getUnit: () => workbook,
             } as any,
             { executeCommand } as any,
@@ -87,7 +87,7 @@ describe('SheetsHyperLinkResolverService', () => {
 
         const resolver = new SheetsHyperLinkResolverService(
             {
-                getCurrentUnitForType: () => workbook,
+                getCurrentUnitOfType: () => workbook,
                 getUnit: () => workbook,
             } as any,
             { executeCommand } as any,
@@ -121,7 +121,7 @@ describe('SheetsHyperLinkResolverService', () => {
 
         const resolver = new SheetsHyperLinkResolverService(
             {
-                getCurrentUnitForType: () => null,
+                getCurrentUnitOfType: () => null,
                 getUnit: () => null,
             } as any,
             { executeCommand: vi.fn() } as any,
@@ -161,7 +161,7 @@ describe('SheetsHyperLinkResolverService', () => {
         };
         const resolver = new SheetsHyperLinkResolverService(
             {
-                getCurrentUnitForType: () => workbook,
+                getCurrentUnitOfType: () => workbook,
                 getUnit: () => workbook,
             } as any,
             { executeCommand } as any,

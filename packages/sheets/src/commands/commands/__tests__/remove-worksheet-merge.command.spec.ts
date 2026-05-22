@@ -90,7 +90,7 @@ describe('remove-worksheet-merge.command', () => {
     });
 
     function getActiveWorksheet() {
-        return get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet();
+        return get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet();
     }
 
     it('returns false for empty ranges or no merge intersection', async () => {

@@ -245,7 +245,7 @@ describe('Test format painter rules in controller', () => {
     describe('format painter', () => {
         describe('format painter the numbers', async () => {
             it('correct situation', async () => {
-                const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+                const workbook = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                 if (!workbook) throw new Error('This is an error');
                 await commandService.executeCommand(SetSelectionsOperation.id, {
                     unitId: 'workbook-01',
@@ -366,7 +366,7 @@ describe('Test format painter rules in controller', () => {
                     subUnitId: 'sheet-0011',
                 })).toBeTruthy();
 
-                const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+                const workbook = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                 if (!workbook) throw new Error('This is an error');
                 expect(workbook.getSheetBySheetId('sheet-0011')?.getCell(5, 0)?.s).toBe('yifA1t');
                 expect(workbook.getSheetBySheetId('sheet-0011')?.getCell(5, 1)?.s).toBe('M5JbP2');
@@ -402,7 +402,7 @@ describe('Test format painter rules in controller', () => {
                         subUnitId: 'sheet-0011',
                     })).toBeTruthy();
 
-                    const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+                    const workbook = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                     if (!workbook) throw new Error('This is an error');
                     expect(workbook.getSheetBySheetId('sheet-0011')?.getCell(0, 0)?.s).toBe(undefined);
                 });

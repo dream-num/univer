@@ -41,19 +41,19 @@ describe('Test SheetInterceptorService', () => {
     function getCell(row: number, col: number, key: string, filter: (interceptor: IInterceptor<any, any>) => boolean): Nullable<ICellData>;
     function getCell(row: number, col: number, key?: string, filter?: (interceptor: IInterceptor<any, any>) => boolean): Nullable<ICellData> {
         const cus = get(IUniverInstanceService);
-        const sheet = cus.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()!;
+        const sheet = cus.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()!;
         return (key && filter) ? sheet.getCellWithFilteredInterceptors(row, col, key, filter) : sheet.getCell(row, col);
     }
 
     function getRowFiltered(row: number): boolean {
         const cus = get(IUniverInstanceService);
-        const sheet = cus.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()!;
+        const sheet = cus.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()!;
         return sheet.getRowFiltered(row);
     }
 
     function getRowVisible(row: number): boolean {
         const cus = get(IUniverInstanceService);
-        const sheet = cus.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()!;
+        const sheet = cus.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()!;
         return sheet.getRowVisible(row);
     }
 

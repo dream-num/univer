@@ -82,7 +82,7 @@ export class FormulaRefRangeService extends Disposable {
 
     transformFormulaByEffectCommand(unitId: string, subUnitId: string, formula: string, params: EffectRefRangeParams) {
         const sequenceNodes = this._lexerTreeBuilder.sequenceNodesBuilder(formula);
-        const currentUnit = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const currentUnit = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const currentSheet = currentUnit.getActiveSheet();
         const currentUnitId = currentUnit.getUnitId();
         const currentSheetId = currentSheet.getSheetId();
@@ -137,7 +137,7 @@ export class FormulaRefRangeService extends Disposable {
         const sequenceNodes = this._lexerTreeBuilder.sequenceNodesBuilder(formula);
         const disposableCollection = new DisposableCollection();
         const handleChange = (params: EffectRefRangeParams) => {
-            const currentUnit = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+            const currentUnit = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
             const currentSheet = currentUnit.getActiveSheet();
             const currentUnitId = currentUnit.getUnitId();
             const currentSheetId = currentSheet.getSheetId();

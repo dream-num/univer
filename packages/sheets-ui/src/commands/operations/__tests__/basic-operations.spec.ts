@@ -121,7 +121,7 @@ describe('sheets-ui basic operations', () => {
     it('ScrollToRangeOperation should guard params and call scroll controller', () => {
         const scrollToRange = vi.fn(() => true);
         const accessor = createAccessor([
-            [IUniverInstanceService, { getCurrentUnitForType: () => ({ getUnitId: () => 'u1' }) }],
+            [IUniverInstanceService, { getCurrentUnitOfType: () => ({ getUnitId: () => 'u1' }) }],
             [IRenderManagerService, { getRenderById: () => ({ with: () => ({ scrollToRange }) }) }],
         ]);
 

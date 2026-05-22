@@ -78,8 +78,6 @@ export interface IUniverInstanceService {
     /** Get the currently focused unit. */
     getFocusedUnit(): Nullable<UnitModel>;
 
-    /** @deprecated Use `getCurrentUnitOfType` instead. */
-    getCurrentUnitForType<T extends UnitModel>(type: UniverInstanceType): Nullable<T>;
     getCurrentUnitOfType<T extends UnitModel>(type: UniverInstanceType): Nullable<T>;
     setCurrentUnitForType(unitId: string): void;
     getCurrentTypeOfUnit$<T extends UnitModel>(type: UniverInstanceType): Observable<Nullable<T>>;
@@ -168,12 +166,8 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         return this.currentUnits$.pipe(map((units) => units.get(type) ?? null), distinctUntilChanged()) as Observable<Nullable<T>>;
     }
 
-    getCurrentUnitForType<T extends UnitModel>(type: UniverInstanceType): Nullable<T> {
-        return this._currentUnits.get(type) as Nullable<T>;
-    }
-
     getCurrentUnitOfType<T extends UnitModel>(type: UniverInstanceType): Nullable<T> {
-        return this.getCurrentUnitForType(type);
+        return this._currentUnits.get(type) as Nullable<T>;
     }
 
     setCurrentUnitForType(unitId: string): void {
@@ -232,7 +226,7 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
     }
 
     getCurrentUniverDocInstance(): Nullable<DocumentDataModel> {
-        return this.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC) as Nullable<DocumentDataModel>;
+        return this.getCurrentUnitOfType(UniverInstanceType.UNIVER_DOC) as Nullable<DocumentDataModel>;
     }
 
     getUniverDocInstance(unitId: string): Nullable<DocumentDataModel> {
@@ -333,7 +327,7 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
     }
 
     private _tryResetCurrentOnRemoval(unitId: string, type: UniverInstanceType): void {
-        const current = this.getCurrentUnitForType(type);
+        const current = this.getCurrentUnitOfType(type);
         if (current?.getUnitId() === unitId) {
             this._currentUnits.set(type, null);
             this._currentUnits$.next(this._currentUnits);

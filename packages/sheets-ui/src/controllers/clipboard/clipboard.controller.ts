@@ -740,7 +740,7 @@ export class SheetClipboardController extends RxDisposable {
                 label: 'specialPaste.besidesBorder',
             },
             onPasteCells: (pasteFrom, pasteTo, matrix, payload) => {
-                const workbook = self._instanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+                const workbook = self._instanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                 const redoMutationsInfo: IMutationInfo[] = [];
                 const undoMutationsInfo: IMutationInfo[] = [];
                 const { range, unitId, subUnitId } = pasteTo;

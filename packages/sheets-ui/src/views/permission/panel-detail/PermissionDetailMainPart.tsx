@@ -43,7 +43,7 @@ export const PermissionDetailMainPart = (props: IPermissionDetailMainPartProps) 
     const localeService = useDependency(LocaleService);
     const injector = useDependency(Injector);
 
-    const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+    const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
     const worksheet = workbook?.getActiveSheet();
     if (!workbook || !worksheet) {
         return null;
@@ -57,7 +57,7 @@ export const PermissionDetailMainPart = (props: IPermissionDetailMainPartProps) 
             return;
         }
 
-        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         const worksheet = workbook?.getActiveSheet();
         if (!workbook || !worksheet) {
             return;

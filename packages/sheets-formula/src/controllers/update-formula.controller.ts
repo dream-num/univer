@@ -314,7 +314,7 @@ export class UpdateFormulaController extends Disposable {
     }
 
     private _getUpdateFormula(command: ICommandInfo) {
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
 
         if (!workbook) {
             return {

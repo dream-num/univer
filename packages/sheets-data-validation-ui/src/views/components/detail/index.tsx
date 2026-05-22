@@ -42,7 +42,7 @@ function getSheetIdByName(univerInstanceService: IUniverInstanceService, unitId:
     if (unitId) {
         return univerInstanceService.getUnit<Workbook>(unitId)?.getSheetBySheetName(name)?.getSheetId() || '';
     }
-    return univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetName(name)?.getSheetId() || '';
+    return univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetName(name)?.getSheetId() || '';
 }
 
 export function DataValidationDetail() {

@@ -236,7 +236,7 @@ export class Editor extends Disposable implements IEditor {
      * @deprecated use `IEditorService.focus` as instead. this is for internal usage.
      */
     focus() {
-        const curDoc = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC);
+        const curDoc = this._univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_DOC);
         const editorUnitId = this.getEditorId();
         // Step 1: set current editor to currentDocUnit.
         if (curDoc == null || curDoc.getUnitId() !== editorUnitId) {

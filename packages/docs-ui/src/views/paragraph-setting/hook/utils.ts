@@ -49,7 +49,7 @@ const useDocRanges = () => {
 
 export const useCurrentParagraph = () => {
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const docDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+    const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
     const docRanges = useDocRanges();
 
     if (!docDataModel || docRanges.length === 0) {
@@ -68,7 +68,7 @@ export const useCurrentParagraph = () => {
 
 export const useCurrentSections = (currentParagraphs: IParagraph[]) => {
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const docDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+    const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
     const docRanges = useDocRanges();
 
     if (!docDataModel || docRanges.length === 0) {
@@ -237,7 +237,7 @@ export const useFirstParagraphLineSpacing = (paragraph: IParagraph[]) => {
     const univerInstanceService = useDependency(IUniverInstanceService);
 
     const skeleton = useMemo(() => {
-        const docDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         if (!docDataModel) {
             return undefined;
         }

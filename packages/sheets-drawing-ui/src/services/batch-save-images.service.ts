@@ -269,7 +269,7 @@ export class BatchSaveImagesService extends Disposable implements IBatchSaveImag
     }
 
     getCellImagesInSelection(): ICellImageInfo[] {
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!workbook) return [];
 
         const worksheet = workbook.getActiveSheet();
@@ -346,7 +346,7 @@ export class BatchSaveImagesService extends Disposable implements IBatchSaveImag
     }
 
     getDataColumns(): Array<{ index: number; label: string }> {
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!workbook) return [];
 
         const worksheet = workbook.getActiveSheet();
@@ -505,7 +505,7 @@ export class BatchSaveImagesService extends Disposable implements IBatchSaveImag
     }
 
     generateFileName(imageInfo: ICellImageInfo, config: IBatchSaveImagesConfig): string {
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         const extension = getFileExtension(imageInfo.source, imageInfo.imageSourceType);
         const parts: string[] = [];
 

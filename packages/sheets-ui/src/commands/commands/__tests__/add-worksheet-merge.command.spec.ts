@@ -359,7 +359,7 @@ describe('Test add worksheet merge commands', () => {
         it('test clear util', () => {
             const commandService = get(ICommandService);
             const univerInstanceService = get(IUniverInstanceService);
-            const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+            const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
             const worksheet = workbook.getActiveSheet();
             if (!worksheet) throw new Error('No active sheet found');
 
@@ -446,7 +446,7 @@ describe('Test add worksheet merge commands', () => {
 
         it('test merge range first cell is blank, second cell is percent number format', async () => {
             const univerInstanceService = get(IUniverInstanceService);
-            const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+            const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
             const worksheet = workbook.getActiveSheet();
             if (!worksheet) throw new Error('No active sheet found');
 
@@ -510,7 +510,7 @@ describe('Test add worksheet merge commands', () => {
             ]);
             const commandService = get(ICommandService);
             const univerInstanceService = get(IUniverInstanceService);
-            const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+            const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
             const worksheet = workbook.getActiveSheet();
             if (!worksheet) throw new Error('No active sheet found');
             const mergeData = worksheet.getConfig().mergeData;
@@ -606,7 +606,7 @@ describe('Test add worksheet merge commands', () => {
             ]);
             const commandService = get(ICommandService);
             const univerInstanceService = get(IUniverInstanceService);
-            const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+            const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
             const worksheet = workbook.getActiveSheet();
             if (!worksheet) throw new Error('No active sheet found');
             const mergeData = worksheet.getConfig().mergeData;

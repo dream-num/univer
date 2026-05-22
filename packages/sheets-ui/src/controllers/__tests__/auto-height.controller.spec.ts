@@ -39,7 +39,7 @@ describe('AutoHeightController', () => {
         } as unknown as Workbook;
 
         const univerInstanceService = {
-            getCurrentUnitForType: () => workbook,
+            getCurrentUnitOfType: () => workbook,
             getUnit: () => workbook,
         } as unknown as IUniverInstanceService;
 

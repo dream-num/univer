@@ -265,7 +265,7 @@ export class SheetDrawingPermissionController extends Disposable {
                     },
                     complete: () => {
                         this._sheetDrawingService.setDrawingVisible(true);
-                        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+                        const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
                         const sheet = workbook?.getActiveSheet();
                         const unitId = workbook?.getUnitId();
                         const subUnitId = sheet?.getSheetId();
@@ -366,7 +366,7 @@ export class SheetDrawingPermissionController extends Disposable {
                         }
                     },
                     complete: () => {
-                        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+                        const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
                         if (!workbook) {
                             return;
                         }

@@ -111,14 +111,14 @@ describe('Test commands used for change selections', () => {
 
     function getRowCount(): number {
         const currentService = get(IUniverInstanceService);
-        const workbook = currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const workbook = currentService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet()!;
         return worksheet.getRowCount();
     }
 
     function getColCount(): number {
         const currentService = get(IUniverInstanceService);
-        const workbook = currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const workbook = currentService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet()!;
         return worksheet.getColumnCount();
     }
@@ -525,7 +525,7 @@ describe('Test commands used for change selections', () => {
 
         it('should return false when there is no active workbook target', async () => {
             const univerInstanceService = get(IUniverInstanceService);
-            vi.spyOn(univerInstanceService, 'getCurrentUnitForType').mockReturnValue(null as never);
+            vi.spyOn(univerInstanceService, 'getCurrentUnitOfType').mockReturnValue(null as never);
 
             await expect(commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
                 direction: Direction.RIGHT,

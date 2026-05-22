@@ -33,7 +33,7 @@ export function ToggleGridlinesMenuFactory(accessor: IAccessor): IMenuButtonItem
         icon: 'HideGridlinesDoubleIcon',
         activated$: new Observable<boolean>((observer) => {
             const getValue = () => {
-                const workbook = instanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+                const workbook = instanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
                 if (workbook) return workbook.getActiveSheet().getConfig().showGridlines === BooleanNumber.TRUE;
                 return false;
             };

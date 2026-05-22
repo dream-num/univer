@@ -52,7 +52,7 @@ export class FUniverDocsUIMixin extends FUniver implements IFUniverDocsUIMixin {
     }
 
     override getActiveDocument(): FDocument | null {
-        const document = this._univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        const document = this._univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         if (!document) {
             return null;
         }

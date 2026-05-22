@@ -61,7 +61,7 @@ describe('Test copy worksheet commands', () => {
     describe('copy sheet', () => {
         describe('copy the only sheet', async () => {
             it('correct situation', async () => {
-                const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+                const workbook = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                 if (!workbook) throw new Error('This is an error');
                 function getSheetCopyPart(sheet: Worksheet) {
                     const config = sheet.getConfig();
@@ -109,7 +109,7 @@ describe('Test copy worksheet commands', () => {
             });
 
             it('Function getCopyUniqueSheetName', async () => {
-                const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+                const workbook = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                 if (!workbook) throw new Error('This is an error');
 
                 const localeService = get(LocaleService);
@@ -124,7 +124,7 @@ describe('Test copy worksheet commands', () => {
             });
 
             it('split large sheet copy should schedule remaining mutations and disable redo', async () => {
-                const sourceWorkbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+                const sourceWorkbook = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                 const sourceSheet = sourceWorkbook.getActiveSheet();
                 sourceSheet.getCellMatrix().setValue(1, 0, { v: 'B1' });
                 expect(sourceSheet.getConfig().cellData[1]).toBeDefined();
@@ -148,7 +148,7 @@ describe('Test copy worksheet commands', () => {
                     })
                 ).toBeTruthy();
 
-                const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+                const workbook = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                 expect(workbook.getSheetSize()).toBe(2);
                 expect(scheduleSpy).toHaveBeenCalledTimes(1);
 

@@ -101,7 +101,7 @@ export const CancelZenEditCommand: ICommand = {
         }
         zenZoneEditorService.close();
 
-        const currentSheetInstance = univerInstanceManager.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        const currentSheetInstance = univerInstanceManager.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (currentSheetInstance) {
             univerInstanceManager.focusUnit(currentSheetInstance.getUnitId());
             editorBridgeService.refreshEditCellState();
@@ -139,7 +139,7 @@ export const ConfirmZenEditCommand: ICommand = {
 
         const renderManagerService = accessor.get(IRenderManagerService);
 
-        const currentSheetInstance = univerInstanceManager.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        const currentSheetInstance = univerInstanceManager.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (currentSheetInstance) {
             const currentSheetId = currentSheetInstance.getUnitId();
 

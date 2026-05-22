@@ -259,7 +259,7 @@ export class SheetCanvasPopManagerService extends Disposable {
      * @returns disposable
      */
     attachPopupToObject(targetObject: BaseObject, popup: ICanvasPopup): INeedCheckDisposable {
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
         if (!worksheet || (this._isSelectionMoving && !popup.showOnSelectionMoving)) {
             return {
@@ -328,7 +328,7 @@ export class SheetCanvasPopManagerService extends Disposable {
 
     // #region attach to position
     attachPopupByPosition(bound: IBoundRectNoAngle, popup: ICanvasPopup, location: ISheetLocationBase): Nullable<INeedCheckDisposable> {
-        let workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        let workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         let worksheet = workbook.getActiveSheet();
         if (!worksheet) {
             return null;
@@ -387,7 +387,7 @@ export class SheetCanvasPopManagerService extends Disposable {
 
     // #region attach to absolute position
     attachPopupToAbsolutePosition(bound: IBoundRectNoAngle, popup: ICanvasPopup, _unitId?: string, _subUnitId?: string) {
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
         if (!worksheet) {
             return null;
@@ -530,7 +530,7 @@ export class SheetCanvasPopManagerService extends Disposable {
      * @param showOnSelectionMoving
      */
     attachRangePopup(range: IRange, popup: ICanvasPopup, _unitId?: string, _subUnitId?: string, viewport?: Viewport, showOnSelectionMoving = false): Nullable<INeedCheckDisposable> {
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
         if (!worksheet) {
             return null;

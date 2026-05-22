@@ -80,7 +80,7 @@ export class DocAutoFormatService extends Disposable {
 
     onAutoFormat(id: string, params: Nullable<object>): ICommandInfo[] {
         const autoFormats = this._matches.get(id) ?? [];
-        const unit = this._univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        const unit = this._univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         const docRanges = this._textSelectionManagerService.getDocRanges();
         const selection = docRanges.find((range) => range.isActive) ?? docRanges[0];
 

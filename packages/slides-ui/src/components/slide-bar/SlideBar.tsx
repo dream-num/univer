@@ -35,7 +35,7 @@ export function SlideSideBar() {
     const localeService = useDependency(LocaleService);
 
     const slideBarRef = useRef<HTMLDivElement>(null);
-    const currentSlide = univerInstanceService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
+    const currentSlide = univerInstanceService.getCurrentUnitOfType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
 
     // const currentSlide = useObservable(
     //     () => univerInstanceService.getCurrentTypeOfUnit$<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE),

@@ -40,7 +40,7 @@ export const SheetPermissionDialog = () => {
     const worksheetProtectionPointRuleModel = useDependency(WorksheetProtectionPointModel);
     const dialogService = useDependency(IDialogService);
     const permissionService = useDependency(IPermissionService);
-    const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+    const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const worksheet = workbook.getActiveSheet();
     if (!worksheet) {
         throw new Error('No active sheet found');
@@ -107,7 +107,7 @@ export const SheetPermissionDialog = () => {
     }, []);
 
     const handleChangeActionPermission = async () => {
-        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook?.getActiveSheet();
         if (!worksheet) {
             throw new Error('No active sheet found');

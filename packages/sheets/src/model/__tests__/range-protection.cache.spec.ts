@@ -79,7 +79,7 @@ describe('RangeProtectionCache', () => {
         ruleModel = get(RangeProtectionRuleModel);
         permissionService = get(IPermissionService);
 
-        const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const workbook = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         unitId = workbook.getUnitId();
         subUnitId = workbook.getActiveSheet()!.getSheetId();
     });

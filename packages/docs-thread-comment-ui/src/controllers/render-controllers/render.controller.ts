@@ -48,7 +48,7 @@ export class DocThreadCommentRenderController extends Disposable implements IRen
                 return;
             }
 
-            const unitId = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC)?.getUnitId();
+            const unitId = this._univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_DOC)?.getUnitId();
             if (unitId) {
                 this._docRenderController.reRender(unitId);
             }

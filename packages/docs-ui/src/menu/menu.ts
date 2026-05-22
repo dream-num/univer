@@ -983,13 +983,13 @@ export function DocSwitchModeMenuItemFactory(accessor: IAccessor): IMenuButtonIt
         activated$: new Observable<boolean>((subscriber) => {
             const subscription = commandService.onCommandExecuted((c) => {
                 if (c.id === RichTextEditingMutation.id) {
-                    const instance = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+                    const instance = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
 
                     subscriber.next(instance?.getSnapshot()?.documentStyle.documentFlavor === DocumentFlavor.MODERN);
                 }
             });
 
-            const instance = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+            const instance = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
 
             subscriber.next(instance?.getSnapshot()?.documentStyle.documentFlavor === DocumentFlavor.MODERN);
 
@@ -1072,7 +1072,7 @@ function getFontStyleAtCursor(accessor: IAccessor) {
     const textSelectionService = accessor.get(DocSelectionManagerService);
     const docMenuStyleService = accessor.get(DocMenuStyleService);
 
-    const docDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+    const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
     const docRanges = textSelectionService.getDocRanges();
     const activeRange = docRanges.find((r) => r.isActive) ?? docRanges[0];
 

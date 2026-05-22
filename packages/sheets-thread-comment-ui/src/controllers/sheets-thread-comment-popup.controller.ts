@@ -150,7 +150,7 @@ export class SheetsThreadCommentPopupController extends Disposable {
                     return;
                 }
 
-                const currentUnit = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+                const currentUnit = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
                 if (!currentUnit) {
                     return;
                 }
@@ -236,7 +236,7 @@ export class SheetsThreadCommentPopupController extends Disposable {
                 return null;
             }
 
-            const worksheet = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetId(subUnitId);
+            const worksheet = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetId(subUnitId);
 
             const mergeInfo = worksheet?.getMergedCell(row, column) ?? {
                 startColumn: column,

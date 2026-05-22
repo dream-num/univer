@@ -139,7 +139,7 @@ export const CellLinkEdit = () => {
                         column: col,
                     };
                 } else {
-                    const doc = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+                    const doc = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
                     const currentSelection = textSelectionService.getActiveTextRange();
                     const body = doc?.getBody();
                     const selection = currentSelection && body ? currentSelection : null;

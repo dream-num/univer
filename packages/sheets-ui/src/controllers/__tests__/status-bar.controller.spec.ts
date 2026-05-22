@@ -122,7 +122,7 @@ describe('StatusBarController', () => {
     });
 
     it('updates status bar values on selection changes and cell updates within selection', () => {
-        const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const workbook = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet()!;
 
         const statusBarService = get(IStatusBarService);

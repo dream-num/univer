@@ -44,7 +44,7 @@ function createService(options?: { hasFocusEditor?: boolean }) {
         },
         univerInstanceService: {
             getTypeOfUnitDisposed$: vi.fn(() => unitDisposed$.asObservable()),
-            getCurrentUnitForType: vi.fn(() => workbook),
+            getCurrentUnitOfType: vi.fn(() => workbook),
         },
         editorService: {
             getFocusEditor: vi.fn(() => (options?.hasFocusEditor ? { id: 'existing' } : null)),

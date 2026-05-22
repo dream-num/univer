@@ -44,7 +44,7 @@ describe('DocThreadCommentRenderController', () => {
         };
 
         const univerInstanceService = {
-            getCurrentUnitForType: vi.fn(() => ({ getUnitId: () => 'doc-1' })),
+            getCurrentUnitOfType: vi.fn(() => ({ getUnitId: () => 'doc-1' })),
         };
 
         const commentUpdate$ = new Subject<any>();

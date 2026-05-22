@@ -92,7 +92,7 @@ export class FormatPainterController extends Disposable {
         const range = selection?.range;
         if (!range) return null;
         const { startRow, endRow, startColumn, endColumn } = range;
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook?.getActiveSheet();
         if (!worksheet) return null;
         const cellData = worksheet.getCellMatrix();

@@ -80,7 +80,7 @@ export class SheetsDefinedNameController extends Disposable {
         }
 
         const lastSelection = params[params.length - 1];
-        const workbook = this._instanceSrv.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        const workbook = this._instanceSrv.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         const worksheet = workbook?.getActiveSheet();
         if (!worksheet) {
             return;

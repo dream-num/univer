@@ -341,7 +341,7 @@ export class UniverDocsUIPlugin extends Plugin {
         const currentService = this._injector.get(IUniverInstanceService);
         const editorService = this._injector.get(IEditorService);
         try {
-            const doc = currentService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC);
+            const doc = currentService.getCurrentUnitOfType(UniverInstanceType.UNIVER_DOC);
             if (!doc) return;
 
             const id = doc.getUnitId();

@@ -66,7 +66,7 @@ describe('hyper-link utils', () => {
         expect(getShouldDisableCellLink(createAccessor([]), worksheet as any, 0, 0)).toBe(DisableLinkType.ALLOW_ON_EDITING);
 
         const currentAccessor = createAccessor([
-            [IUniverInstanceService, { getCurrentUnitForType: () => ({ getActiveSheet: () => worksheet }) }],
+            [IUniverInstanceService, { getCurrentUnitOfType: () => ({ getActiveSheet: () => worksheet }) }],
             [SheetsSelectionsService, { getCurrentSelections: () => [{ range: { startRow: 0, startColumn: 0 } }] }],
         ]);
 
@@ -76,14 +76,14 @@ describe('hyper-link utils', () => {
     it('should disable add-link when editor selection is missing and allow it with valid rich text context', () => {
         const noSelectionAccessor = createAccessor([
             [DocSelectionManagerService, { getTextRanges: () => [] }],
-            [IUniverInstanceService, { getCurrentUnitForType: () => null }],
+            [IUniverInstanceService, { getCurrentUnitOfType: () => null }],
         ]);
         expect(shouldDisableAddLink(noSelectionAccessor)).toBe(true);
 
         const validAccessor = createAccessor([
             [DocSelectionManagerService, { getTextRanges: () => [{ collapsed: false, segmentId: 'body' }] }],
             [IUniverInstanceService, {
-                getCurrentUnitForType: () => ({
+                getCurrentUnitOfType: () => ({
                     getSelfOrHeaderFooterModel: () => ({ getBody: () => ({ dataStream: 'hello\r\n' }) }),
                 }),
             }],

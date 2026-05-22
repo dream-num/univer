@@ -35,8 +35,8 @@ const TextInput = (props: { id: number; type: CFValueType; value: number | strin
     const { error, type, onChange } = props;
 
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const unitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
-    const subUnitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()?.getSheetId();
+    const unitId = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
+    const subUnitId = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()?.getSheetId();
 
     const formulaEditorRef = useRef<IFormulaEditorRef>(null);
     const [isFocusFormulaEditor, setIsFocusFormulaEditor] = useState(false);

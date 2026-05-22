@@ -686,7 +686,7 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
     }
 
     override getActiveWorkbook(): FWorkbook | null {
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!workbook) {
             return null;
         }

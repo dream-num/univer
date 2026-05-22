@@ -40,7 +40,7 @@ describe('cell edit operations', () => {
         const changeVisible = vi.fn();
         const accessor = createAccessor([
             [IConfigService, { getConfig: vi.fn(() => ({ disableEdit: true })) }],
-            [IUniverInstanceService, { getCurrentUnitForType: vi.fn(() => ({ getUnitId: () => 'u1' })) }],
+            [IUniverInstanceService, { getCurrentUnitOfType: vi.fn(() => ({ getUnitId: () => 'u1' })) }],
             [IEditorBridgeService, { changeVisible }],
         ]);
 
@@ -52,7 +52,7 @@ describe('cell edit operations', () => {
     it('SetCellEditVisibleOperation returns false when no active workbook', () => {
         const accessor = createAccessor([
             [IConfigService, { getConfig: vi.fn(() => ({ disableEdit: false })) }],
-            [IUniverInstanceService, { getCurrentUnitForType: vi.fn(() => null) }],
+            [IUniverInstanceService, { getCurrentUnitOfType: vi.fn(() => null) }],
             [IEditorBridgeService, { changeVisible: vi.fn() }],
         ]);
 
@@ -63,7 +63,7 @@ describe('cell edit operations', () => {
         const changeVisible = vi.fn();
         const accessor = createAccessor([
             [IConfigService, { getConfig: vi.fn(() => ({ disableEdit: false })) }],
-            [IUniverInstanceService, { getCurrentUnitForType: vi.fn(() => ({ getUnitId: () => 'workbook-u1' })) }],
+            [IUniverInstanceService, { getCurrentUnitOfType: vi.fn(() => ({ getUnitId: () => 'workbook-u1' })) }],
             [IEditorBridgeService, { changeVisible }],
         ]);
 
@@ -75,7 +75,7 @@ describe('cell edit operations', () => {
         const syncExecuteCommand = vi.fn(() => true);
         const commandAccessor = createAccessor([
             [ICommandService, { syncExecuteCommand }],
-            [IUniverInstanceService, { getCurrentUnitForType: vi.fn(() => ({ getUnitId: () => 'wb-u2' })) }],
+            [IUniverInstanceService, { getCurrentUnitOfType: vi.fn(() => ({ getUnitId: () => 'wb-u2' })) }],
         ]);
 
         expect(SetCellEditVisibleWithF2Operation.handler(commandAccessor, { visible: true } as any)).toBe(true);
@@ -86,7 +86,7 @@ describe('cell edit operations', () => {
 
         const noWorkbookAccessor = createAccessor([
             [ICommandService, { syncExecuteCommand: vi.fn() }],
-            [IUniverInstanceService, { getCurrentUnitForType: vi.fn(() => null) }],
+            [IUniverInstanceService, { getCurrentUnitOfType: vi.fn(() => null) }],
         ]);
         expect(SetCellEditVisibleWithF2Operation.handler(noWorkbookAccessor, { visible: true } as any)).toBe(false);
     });

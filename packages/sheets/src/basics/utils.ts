@@ -137,7 +137,7 @@ export function generateNullCellStyle(ranges: IRange[]): IObjectMatrixPrimitiveT
 }
 
 export function getActiveWorksheet(instanceService: UniverInstanceService): [Nullable<Workbook>, Nullable<Worksheet>] {
-    const workbook = instanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+    const workbook = instanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
     const worksheet = workbook?.getActiveSheet();
     return [workbook, worksheet];
 }
@@ -156,7 +156,7 @@ export function rangeToDiscreteRange(range: IRange, accessor: IAccessor, unitId?
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const workbook = unitId
         ? univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)
-        : univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        : univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
     const worksheet = subUnitId ? workbook?.getSheetBySheetId(subUnitId) : workbook?.getActiveSheet();
     if (!worksheet) {
         return null;

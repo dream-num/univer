@@ -32,7 +32,7 @@ function createService() {
 
     const workbookById = new Map<string, unknown>();
     const univerInstanceService = {
-        getCurrentUnitForType: vi.fn(() => workbookForCurrentType),
+        getCurrentUnitOfType: vi.fn(() => workbookForCurrentType),
         getUnit: vi.fn((unitId: string) => workbookById.get(unitId)),
     };
     const localeService = {

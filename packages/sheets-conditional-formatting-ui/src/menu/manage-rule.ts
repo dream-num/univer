@@ -122,7 +122,7 @@ export const FactoryManageConditionalFormattingRule = (accessor: IAccessor): IMe
         new Observable<null>((commandSubscribe) => {
             const disposable = commandService.onCommandExecuted((commandInfo) => {
                 const { id, params } = commandInfo;
-                const unitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getUnitId();
+                const unitId = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getUnitId();
                 if (commandList.includes(id) && (params as { unitId: string }).unitId === unitId) {
                     commandSubscribe.next(null);
                 }
@@ -131,7 +131,7 @@ export const FactoryManageConditionalFormattingRule = (accessor: IAccessor): IMe
         })
     ).pipe(debounceTime(16)).subscribe(() => {
         const ranges = selectionManagerService.getCurrentSelections()?.map((selection) => selection.range) || [];
-        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!workbook) return;
         const worksheet = workbook.getActiveSheet();
         if (!worksheet) return;
@@ -147,14 +147,14 @@ export const FactoryManageConditionalFormattingRule = (accessor: IAccessor): IMe
         new Observable<null>((commandSubscribe) => {
             const disposable = commandService.onCommandExecuted((commandInfo) => {
                 const { id, params } = commandInfo;
-                const unitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getUnitId();
+                const unitId = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getUnitId();
                 if (commandList.includes(id) && (params as { unitId: string }).unitId === unitId) {
                     commandSubscribe.next(null);
                 }
             });
             return () => disposable.dispose();
         }).pipe(debounceTime(16)).subscribe(() => {
-            const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+            const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
             if (!workbook) return;
             const worksheet = workbook.getActiveSheet();
             if (!worksheet) return;

@@ -53,7 +53,7 @@ export const DocHyperLinkEdit = () => {
     const isLegal = Tools.isLegalUrl(link);
     const doc = editing
         ? univerInstanceService.getUnit<DocumentDataModel>(editing.unitId, UniverInstanceType.UNIVER_DOC) :
-        univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
 
     useEffect(() => {
         const activeRange = docSelectionManagerService.getActiveTextRange();

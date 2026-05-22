@@ -65,7 +65,7 @@ export function ZoomSlider() {
 
     function handleChange(value: number) {
         setZoom(value);
-        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook?.getActiveSheet();
         if (worksheet == null) {
             return;

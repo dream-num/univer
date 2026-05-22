@@ -262,7 +262,7 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
 
         const { segmentId } = docRanges[0];
 
-        const docDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         if (docDataModel == null) {
             return false;
         }

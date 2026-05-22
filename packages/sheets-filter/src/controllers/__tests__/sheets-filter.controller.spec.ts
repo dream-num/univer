@@ -234,7 +234,7 @@ describe('test controller of sheets filter', () => {
             expect(result).toBeTruthy();
             expect((sheetsFilterService as SheetsFilterService).getFilterModel('test', 'sheet1')!.getRange())
                 .toEqual({ startRow: 3, startColumn: 0, endRow: 5, endColumn: 5 });
-            const workbook = instanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+            const workbook = instanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
             expect(workbook.getSheetBySheetId('sheet1')?.getCell(0, 0)?.v).toBe('A2');
             expect(workbook.getSheetBySheetId('sheet1')?.getCell(1, 0)?.v).toBe('A1');
         });
@@ -388,7 +388,7 @@ describe('test controller of sheets filter', () => {
                 subUnitId: 'sheet1',
             });
             expect(res).toBeTruthy();
-            const workbook = instanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+            const workbook = instanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
             const sheet2 = workbook.getSheets()[1];
             const filterModel = (sheetsFilterService as SheetsFilterService).getFilterModel('test', sheet2.getSheetId());
             expect(filterModel).toBeTruthy();

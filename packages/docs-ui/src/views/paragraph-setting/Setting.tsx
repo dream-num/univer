@@ -141,7 +141,7 @@ export function ParagraphSetting() {
             <ParagraphSettingSection title={localeService.t('docs-ui.doc.paragraphSetting.alignment')} first>
                 <div
                     className={clsx(`
-                      univer-grid univer-h-12 univer-grid-cols-4 univer-items-stretch univer-gap-1 univer-rounded-lg
+                      univer-grid univer-h-10 univer-grid-cols-4 univer-items-stretch univer-gap-1 univer-rounded-lg
                       univer-bg-white univer-p-1
                       dark:!univer-bg-gray-900
                     `, borderClassName)}
@@ -166,7 +166,7 @@ export function ParagraphSetting() {
                                     <span
                                         className="
                                           univer-flex univer-size-5 univer-items-center univer-justify-center
-                                          univer-text-xl
+                                          univer-text-lg
                                         "
                                     >
                                         {item.icon}

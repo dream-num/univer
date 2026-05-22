@@ -140,7 +140,7 @@ describe('Test utils', () => {
             getActiveSheet: () => worksheet,
         };
         const instanceService = {
-            getCurrentUnitForType: () => workbook,
+            getCurrentUnitOfType: () => workbook,
         };
 
         const [currentWorkbook, currentWorksheet] = getActiveWorksheet(instanceService as never);
@@ -172,7 +172,7 @@ describe('Test utils', () => {
         };
         const instanceService = {
             getUnit: () => workbook,
-            getCurrentUnitForType: () => workbook,
+            getCurrentUnitOfType: () => workbook,
         };
         const accessor = createAccessor((token) => {
             if (token === IUniverInstanceService) {
@@ -197,7 +197,7 @@ describe('Test utils', () => {
     it('Test rangeToDiscreteRange returns null without worksheet', () => {
         const instanceService = {
             getUnit: () => null,
-            getCurrentUnitForType: () => null,
+            getCurrentUnitOfType: () => null,
         };
         const accessor = createAccessor((token) => {
             if (token === IUniverInstanceService) {

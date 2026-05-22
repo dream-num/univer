@@ -27,7 +27,7 @@ export const DocSelectAllCommand: ICommand<ISelectAllCommandParams> = {
     handler: async (accessor) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
-        const docDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         const docRanges = docSelectionManagerService.getDocRanges();
         const activeRange = docRanges.find((range) => range.isActive) ?? docRanges[0];
         if (docDataModel == null || activeRange == null) {

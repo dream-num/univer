@@ -230,7 +230,7 @@ describe('Test FWorksheet', () => {
         const sheet = await activeSheet?.hideRow(range);
         expect(sheet).toBeDefined();
 
-        const currentWorksheet = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getActiveSheet();
+        const currentWorksheet = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getActiveSheet();
         const hiddenRows = currentWorksheet?.getHiddenRows();
         expect(hiddenRows).toStrictEqual([{
             startRow: 0,
@@ -253,7 +253,7 @@ describe('Test FWorksheet', () => {
         const sheet = await activeSheet?.hideRows(0, 2);
         expect(sheet).toBeDefined();
 
-        const currentWorksheet = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getActiveSheet();
+        const currentWorksheet = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getActiveSheet();
         const hiddenRows = currentWorksheet?.getHiddenRows();
         expect(hiddenRows).toStrictEqual([{
             startRow: 0,
@@ -276,7 +276,7 @@ describe('Test FWorksheet', () => {
         const sheet = await activeSheet?.setRowHeight(0, 100);
         expect(sheet).toBeDefined();
 
-        const currentWorksheet = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getActiveSheet();
+        const currentWorksheet = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getActiveSheet();
         const currentRowHeight = currentWorksheet?.getRowManager().getRowHeight(0);
         expect(currentRowHeight).toBe(100);
     });
@@ -287,7 +287,7 @@ describe('Test FWorksheet', () => {
         const sheet = await activeSheet?.setRowHeights(0, 2, 100);
         expect(sheet).toBeDefined();
 
-        const currentWorksheet = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getActiveSheet();
+        const currentWorksheet = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getActiveSheet();
         const currentRowHeight = currentWorksheet?.getRowManager().getRowHeight(0, 2);
         expect(currentRowHeight).toBe(200);
     });
@@ -298,7 +298,7 @@ describe('Test FWorksheet', () => {
         const sheet = await activeSheet?.setRowHeightsForced(0, 2, 100);
         expect(sheet).toBeDefined();
 
-        const currentWorksheet = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getActiveSheet();
+        const currentWorksheet = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getActiveSheet();
         const currentRowHeight = currentWorksheet?.getRowManager().getRowHeight(0, 2);
         expect(currentRowHeight).toBe(200);
     });
@@ -313,7 +313,7 @@ describe('Test FWorksheet', () => {
         });
         expect(sheet).toBeDefined();
 
-        const currentWorksheet = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getActiveSheet();
+        const currentWorksheet = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getActiveSheet();
         const currentRowCustom = currentWorksheet?.getRowManager().getRow(0)?.custom;
         expect(currentRowCustom).toEqual({ color: 'red' });
     });
@@ -398,7 +398,7 @@ describe('Test FWorksheet', () => {
         const sheet = await activeSheet?.hideColumn(range);
         expect(sheet).toBeDefined();
 
-        const currentWorksheet = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getActiveSheet();
+        const currentWorksheet = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getActiveSheet();
         const hiddenCols = currentWorksheet?.getHiddenCols();
         expect(hiddenCols).toStrictEqual([{
             startRow: 0,
@@ -421,7 +421,7 @@ describe('Test FWorksheet', () => {
         const sheet = await activeSheet?.hideColumns(0, 2);
         expect(sheet).toBeDefined();
 
-        const currentWorksheet = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getActiveSheet();
+        const currentWorksheet = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getActiveSheet();
         const hiddenCols = currentWorksheet?.getHiddenCols();
         expect(hiddenCols).toStrictEqual([{
             startRow: 0,
@@ -444,7 +444,7 @@ describe('Test FWorksheet', () => {
         const sheet = await activeSheet?.setColumnWidth(0, 100);
         expect(sheet).toBeDefined();
 
-        const currentWorksheet = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getActiveSheet();
+        const currentWorksheet = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getActiveSheet();
         const currentColWidth = currentWorksheet?.getColumnManager().getColumnWidth(0);
         expect(currentColWidth).toBe(100);
     });
@@ -455,7 +455,7 @@ describe('Test FWorksheet', () => {
         const sheet = await activeSheet?.setColumnWidths(0, 2, 100);
         expect(sheet).toBeDefined();
 
-        const currentWorksheet = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getActiveSheet();
+        const currentWorksheet = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getActiveSheet();
         const currentColWidth = currentWorksheet?.getColumnManager().getColumnWidth(0);
         expect(currentColWidth).toBe(100);
         const currentColWidth2 = currentWorksheet?.getColumnManager().getColumnWidth(1);
@@ -472,7 +472,7 @@ describe('Test FWorksheet', () => {
         });
         expect(sheet).toBeDefined();
 
-        const currentWorksheet = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getActiveSheet();
+        const currentWorksheet = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getActiveSheet();
         const currentColCustom = currentWorksheet?.getColumnManager().getColumn(0)?.custom;
         expect(currentColCustom).toEqual({ color: 'red' });
     });

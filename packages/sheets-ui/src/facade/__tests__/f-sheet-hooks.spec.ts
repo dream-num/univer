@@ -137,7 +137,7 @@ describe('Test FSheetHooks', () => {
         ]);
         get = testBed.get;
         injector = testBed.injector;
-        workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        workbook = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
 
         commandService = get(ICommandService);
         commandService.registerCommand(SetRangeValuesCommand);

@@ -30,7 +30,7 @@ export const SheetsThreadCommentPanel = () => {
     const markSelectionService = useDependency(IMarkSelectionService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const sheetsThreadCommentPopupService = useDependency(SheetsThreadCommentPopupService);
-    const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+    const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const unitId = workbook.getUnitId();
     const commandService = useDependency(ICommandService);
     const subUnitId$ = useMemo(() => workbook.activeSheet$.pipe(map((i) => i?.getSheetId())), [workbook.activeSheet$]);

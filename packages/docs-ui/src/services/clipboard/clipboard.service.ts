@@ -166,7 +166,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         files: File[];
     }): Promise<boolean> {
         let { html, text, files } = options;
-        const currentDocInstance = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC);
+        const currentDocInstance = this._univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_DOC);
         const docUnitId = currentDocInstance?.getUnitId() || '';
         if (!html && !text && files.length) {
             html = await this._createImagePasteHtml(files);
@@ -257,7 +257,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
 
         let body = normalizeBody(_body);
 
-        const unitId = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC)?.getUnitId();
+        const unitId = this._univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_DOC)?.getUnitId();
         if (!unitId) {
             return false;
         }
@@ -507,7 +507,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         }
 
         if (!_unitId) {
-            const currentDocInstance = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC);
+            const currentDocInstance = this._univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_DOC);
             const docUnitId = currentDocInstance?.getUnitId() || '';
             _unitId = docUnitId;
         }

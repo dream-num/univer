@@ -38,7 +38,7 @@ export const SheetsThreadCommentCell = () => {
     };
 
     const getSubUnitName = (id: string) => {
-        return univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetId(id)?.getName() ?? '';
+        return univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetId(id)?.getName() ?? '';
     };
 
     return (

@@ -147,7 +147,7 @@ export class SlideRenderController extends RxDisposable implements IRenderModule
      * @param mainScene
      */
     private _createSlide(mainScene: Scene) {
-        const model = this._univerInstanceService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE)!;
+        const model = this._univerInstanceService.getCurrentUnitOfType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE)!;
 
         const { width: sceneWidth, height: sceneHeight } = mainScene;
 
@@ -173,7 +173,7 @@ export class SlideRenderController extends RxDisposable implements IRenderModule
     }
 
     private _addBackgroundRect(scene: Scene, fill: IColorStyle) {
-        const model = this._univerInstanceService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE)!;
+        const model = this._univerInstanceService.getCurrentUnitOfType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE)!;
 
         const pageSize = model.getPageSize();
 
@@ -275,7 +275,7 @@ export class SlideRenderController extends RxDisposable implements IRenderModule
      * SlideDataModel is UnitModel
      */
     private _getCurrUnitModel() {
-        // return this._univerInstanceService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE)!;
+        // return this._univerInstanceService.getCurrentUnitOfType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE)!;
 
         return this._renderContext.unit as SlideDataModel;
     }

@@ -50,7 +50,7 @@ export class DocsRenderService extends RxDisposable {
 
     private _createRenderer(doc: DocumentDataModel) {
         const unitId = doc.getUnitId();
-        const workbookId = this._instanceSrv.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_DOC)?.getUnitId();
+        const workbookId = this._instanceSrv.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_DOC)?.getUnitId();
         this._renderManagerService.created$.subscribe((renderer) => {
             if (renderer.unitId === workbookId) {
                 renderer.engine.getCanvas().setId(DOC_MAIN_CANVAS_ID);

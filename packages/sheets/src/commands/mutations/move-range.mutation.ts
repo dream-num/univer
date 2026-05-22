@@ -42,7 +42,7 @@ export const MoveRangeMutation: IMutation<IMoveRangeMutationParams, boolean> = {
         }
 
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!workbook) {
             return false;
         }

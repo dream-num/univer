@@ -48,7 +48,7 @@ describe('Test insert worksheet commands', () => {
 
     describe('insert sheet', () => {
         it('should auto-generate incremental names when name is not provided', async () => {
-            const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+            const workbook = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
             const localeService = get(LocaleService);
             const sheetPrefix = localeService.t('sheets.tabs.sheet');
             expect(workbook.getSheetSize()).toBe(1);
@@ -71,7 +71,7 @@ describe('Test insert worksheet commands', () => {
         });
 
         it('should use provided name directly when it is unique', async () => {
-            const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+            const workbook = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
 
             await commandService.executeCommand(InsertSheetCommand.id, {
                 unitId: 'test',
@@ -83,7 +83,7 @@ describe('Test insert worksheet commands', () => {
         });
 
         it('should deduplicate name when provided name already exists', async () => {
-            const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+            const workbook = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
 
             await commandService.executeCommand(InsertSheetCommand.id, {
                 unitId: 'test',
@@ -95,7 +95,7 @@ describe('Test insert worksheet commands', () => {
         });
 
         it('should not be affected by mergeWorksheetSnapshotWithDefault default name', async () => {
-            const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+            const workbook = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
             const initialSize = workbook.getSheetSize();
 
             await commandService.executeCommand(InsertSheetCommand.id, {

@@ -71,7 +71,7 @@ function createService() {
     } as unknown as DataValidationCacheService;
     const univerInstanceService = {
         getUnit: vi.fn((unitId: string) => (unitId === 'unit-1' ? workbook : null)),
-        getCurrentUnitForType: vi.fn(() => workbook),
+        getCurrentUnitOfType: vi.fn(() => workbook),
     } as unknown as IUniverInstanceService;
     const lifecycleService = {
         lifecycle$,

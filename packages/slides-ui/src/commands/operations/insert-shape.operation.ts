@@ -45,7 +45,7 @@ export const InsertSlideShapeRectangleOperation: ICommand<IInsertShapeOperationP
         const id = generateRandomId(6);
 
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        // const slideData = univerInstanceService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
+        // const slideData = univerInstanceService.getCurrentUnitOfType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
 
         const unitId = params.unitId;
         const slideData = univerInstanceService.getUnit<SlideDataModel>(unitId);
@@ -149,7 +149,7 @@ export const InsertSlideShapeEllipseOperation: ICommand<IInsertShapeOperationPar
         const id = generateRandomId(6);
 
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        // const slideData = univerInstanceService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
+        // const slideData = univerInstanceService.getCurrentUnitOfType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
 
         const unitId = params.unitId;
         const slideData = univerInstanceService.getUnit<SlideDataModel>(unitId);

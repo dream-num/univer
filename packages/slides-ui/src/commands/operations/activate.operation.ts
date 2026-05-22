@@ -30,7 +30,7 @@ export const ActivateSlidePageOperation: IOperation<IActiveSlidePageOperationPar
         const unitId = params.unitId;
         const canvasView = accessor.get(CanvasView);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        // const model = univerInstanceService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
+        // const model = univerInstanceService.getCurrentUnitOfType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
 
         const model = univerInstanceService.getUnit<SlideDataModel>(unitId);
         const pageId = model?.getActivePage()?.id;

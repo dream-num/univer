@@ -98,7 +98,7 @@ describe('AutoFillController copy-fill shortcuts', () => {
         univer = testBed.univer;
         commandService = testBed.get(ICommandService);
         selectionService = testBed.get(SheetsSelectionsService);
-        workbook = testBed.get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        workbook = testBed.get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
 
         testBed.get(AutoFillController);
 

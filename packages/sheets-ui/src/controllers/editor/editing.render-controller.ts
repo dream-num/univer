@@ -230,7 +230,7 @@ export class EditingRenderController extends Disposable {
 
     private _initialCursorSync(d: DisposableCollection) {
         d.add(this._cellEditorManagerService.focus$.pipe(filter((f) => !!f)).subscribe(() => {
-            const currentDoc = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC);
+            const currentDoc = this._univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_DOC);
             if (!currentDoc) return;
 
             const docSelectionRenderManager = this._renderManagerService.getRenderById(currentDoc?.getUnitId())?.with(DocSelectionRenderService);

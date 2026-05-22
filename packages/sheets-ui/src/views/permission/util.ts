@@ -83,7 +83,7 @@ export const checkRangesIsWholeSheet = (ranges: IRange[], sheet: Worksheet) => {
 export const generateDefaultRule = (injector: Injector, fromSheetBar: boolean) => {
     const univerInstanceService = injector.get(IUniverInstanceService);
     const selectionManagerService = injector.get(SheetsSelectionsService);
-    const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+    const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const worksheet = workbook.getActiveSheet();
 
     let unitType = UnitObject.SelectRange;
@@ -115,7 +115,7 @@ export const generateDefaultRule = (injector: Injector, fromSheetBar: boolean) =
 
 export const generateRuleByUnitType = (injector: Injector, rule: IPermissionPanelRule) => {
     const univerInstanceService = injector.get(IUniverInstanceService);
-    const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+    const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const worksheet = workbook.getActiveSheet();
     const { unitType } = rule;
 

@@ -76,7 +76,7 @@ export function DataValidationList(props: { workbook: Workbook }) {
     };
 
     const getDvRulesByPermissionCorrect = (rules: ISheetDataValidationRule[]) => {
-        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();

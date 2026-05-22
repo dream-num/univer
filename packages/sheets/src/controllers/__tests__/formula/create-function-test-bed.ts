@@ -251,7 +251,7 @@ export function createFunctionTestBed(workbookData?: IWorkbookData, dependencies
     logService.setLogLevel(LogLevel.SILENT); // change this to `true` to debug tests via logs
 
     const sheetData: ISheetData = {};
-    const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+    const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const unitId = workbook.getUnitId();
     const sheetId = workbook.getActiveSheet()!.getSheetId();
     workbook.getSheets().forEach((sheet) => {

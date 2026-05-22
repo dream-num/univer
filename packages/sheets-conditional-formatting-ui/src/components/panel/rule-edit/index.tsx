@@ -39,8 +39,8 @@ interface IRuleEditProps {
     onCancel: () => void;
 }
 
-const getUnitId = (univerInstanceService: IUniverInstanceService) => univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
-const getSubUnitId = (univerInstanceService: IUniverInstanceService) => univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()?.getSheetId();
+const getUnitId = (univerInstanceService: IUniverInstanceService) => univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
+const getSubUnitId = (univerInstanceService: IUniverInstanceService) => univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()?.getSheetId();
 
 export const RuleEdit = (props: IRuleEditProps) => {
     const localeService = useDependency(LocaleService);
@@ -179,7 +179,7 @@ export const RuleEdit = (props: IRuleEditProps) => {
             return;
         }
         const getRanges = () => {
-            const worksheet = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet();
+            const worksheet = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet();
             if (!worksheet) {
                 throw new Error('No active sheet found');
             }

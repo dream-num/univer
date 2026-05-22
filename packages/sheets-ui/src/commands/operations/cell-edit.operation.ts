@@ -38,7 +38,7 @@ export const SetCellEditVisibleOperation: IOperation<IEditorBridgeServiceVisible
 
         const { unitId } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!workbook) {
             return false;
         }
@@ -58,7 +58,7 @@ export const SetCellEditVisibleWithF2Operation: IOperation<IEditorBridgeServiceV
     handler: (accessor, params) => {
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!workbook) {
             return false;
         }

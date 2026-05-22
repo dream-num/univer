@@ -762,7 +762,7 @@ describe("Test commands used for updating cells' styles", () => {
 
     describe('set style with specific range', () => {
         it('should use the correct unitId and subUnitId when range is provided', async () => {
-            const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+            const workbook = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
 
             // Insert a new sheet
             expect(await commandService.executeCommand(InsertSheetCommand.id)).toBeTruthy();

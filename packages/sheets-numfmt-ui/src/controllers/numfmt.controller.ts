@@ -105,7 +105,7 @@ export class SheetNumfmtUIController extends Disposable {
             return false;
         }
 
-        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const sheet = workbook.getActiveSheet();
         if (!sheet) {
             return false;
@@ -170,7 +170,7 @@ export class SheetNumfmtUIController extends Disposable {
 
     private _forceUpdate(unitId?: string): void {
         const renderUnit = this._renderManagerService.getRenderById(
-            unitId ?? this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId()
+            unitId ?? this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId()
         );
 
         renderUnit?.with(SheetSkeletonManagerService).reCalculate();
@@ -239,7 +239,7 @@ export class SheetNumfmtUIController extends Disposable {
                         })
                     )
                     .subscribe(({ disposableCollection, selectionRanges }) => {
-                        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+                        const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                         this.openPanel();
                         disposableCollection.add(
                             this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {

@@ -102,7 +102,7 @@ export class FShortcut extends FBase {
      * ```
      */
     triggerShortcut(e: KeyboardEvent): IShortcutItem<object> | undefined {
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!workbook) {
             return;
         }

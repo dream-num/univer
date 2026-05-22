@@ -65,7 +65,7 @@ function createUniverInstanceService(options?: {
 }) {
     return {
         getCurrentUnitOfType: () => options?.workbook ?? null,
-        getCurrentUnitForType: () => options?.workbook ?? null,
+        getCurrentUnitOfType: () => options?.workbook ?? null,
         getFocusedUnit: () => options?.focusedUnitId ? { getUnitId: () => options.focusedUnitId } : null,
     };
 }

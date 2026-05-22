@@ -482,7 +482,7 @@ describe('Test set range values commands', () => {
                     return params;
                 }
 
-                const unit = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+                const unit = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
                 const subUnitId = unit?.getActiveSheet()?.getSheetId();
 
                 // current sheet is sheet1

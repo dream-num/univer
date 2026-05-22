@@ -166,7 +166,7 @@ export const ScrollToCellCommand: ICommand<IScrollToCellCommandParams> = {
         const instanceService = accessor.get(IUniverInstanceService);
         const renderManagerService = accessor.get(IRenderManagerService);
         const scrollController = renderManagerService
-            .getRenderById(instanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET)!.getUnitId())!
+            .getRenderById(instanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_SHEET)!.getUnitId())!
             .with(SheetsScrollRenderController);
         return scrollController.scrollToRange(params!.range, params!.forceTop, params!.forceLeft);
     },

@@ -67,7 +67,7 @@ function createService() {
 
     return new BatchSaveImagesService(
         {
-            getCurrentUnitForType: (type: UniverInstanceType) => (type === UniverInstanceType.UNIVER_SHEET ? workbook : null),
+            getCurrentUnitOfType: (type: UniverInstanceType) => (type === UniverInstanceType.UNIVER_SHEET ? workbook : null),
             getUnit: () => workbook,
         } as never,
         {

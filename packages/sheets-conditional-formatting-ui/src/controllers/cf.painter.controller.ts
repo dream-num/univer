@@ -297,8 +297,8 @@ export class ConditionalFormattingPainterController extends Disposable {
                 switch (status) {
                     case FormatPainterStatus.INFINITE:
                     case FormatPainterStatus.ONCE: {
-                        const unitId = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getUnitId();
-                        const subUnitId = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getActiveSheet()?.getSheetId();
+                        const unitId = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getUnitId();
+                        const subUnitId = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getActiveSheet()?.getSheetId();
                         const selection = this._sheetsSelectionsService.getCurrentLastSelection();
                         const range = selection?.range;
                         if (unitId && subUnitId && range) {

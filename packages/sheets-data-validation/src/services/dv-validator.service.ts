@@ -37,7 +37,7 @@ export class SheetsDataValidationValidatorService extends Disposable {
                 return;
             }
 
-            const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+            const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
             const worksheet = workbook?.getActiveSheet();
 
             const map: Record<string, Record<string, IRange[]>> = {};

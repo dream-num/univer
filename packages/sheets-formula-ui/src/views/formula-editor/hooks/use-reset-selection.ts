@@ -27,7 +27,7 @@ export const useResetSelection = (isNeed: boolean, unitId: string, subUnitId: st
     const resetSelection = useCallback(() => {
         if (isNeed) {
             const selections = [...sheetsSelectionsService.getWorkbookSelections(unitId).getSelectionsOfWorksheet(subUnitId)];
-            const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+            const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
             const currentSheet = workbook?.getActiveSheet();
             if (workbook?.getUnitId() !== unitId) {
                 univerInstanceService.setCurrentUnitForType(unitId);

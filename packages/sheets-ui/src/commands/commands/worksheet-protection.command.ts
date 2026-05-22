@@ -33,7 +33,7 @@ export const DeleteWorksheetProtectionFormSheetBarCommand: ICommand = {
         const worksheetProtectionRuleModel = accessor.get(WorksheetProtectionRuleModel);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook?.getActiveSheet();
         const unitId = workbook.getUnitId();
 

@@ -51,7 +51,7 @@ export const SlideAddTextOperation: ICommand<ISlideAddTextParam> = {
         const textContent = params?.text || 'A New Text';
 
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        // const slideData = univerInstanceService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
+        // const slideData = univerInstanceService.getCurrentUnitOfType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
 
         const slideData = univerInstanceService.getUnit<SlideDataModel>(unitId);
         if (!slideData) return false;

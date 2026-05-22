@@ -46,8 +46,8 @@ export class ConditionalFormattingAutoFillController extends Disposable {
             matrixMap: Map<string, ObjectMatrix<1>>,
             mapFunc: (row: number, col: number) => ({ row: number; col: number })
         ) => {
-            const unitId = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
-            const subUnitId = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()?.getSheetId();
+            const unitId = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
+            const subUnitId = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()?.getSheetId();
             if (!unitId || !subUnitId) {
                 return;
             }
@@ -141,8 +141,8 @@ export class ConditionalFormattingAutoFillController extends Disposable {
         };
 
         const generalApplyFunc = (sourceRange: IDiscreteRange, targetRange: IDiscreteRange) => {
-            const unitId = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getUnitId();
-            const subUnitId = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getActiveSheet()?.getSheetId();
+            const unitId = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getUnitId();
+            const subUnitId = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getActiveSheet()?.getSheetId();
             const matrixMap: Map<string, ObjectMatrix<1>> = new Map();
 
             const redos: IMutationInfo[] = [];

@@ -93,7 +93,7 @@ export const DeleteRangeProtectionFromContextMenuCommand: ICommand = {
         const selectionManagerService = accessor.get(SheetsSelectionsService);
         const worksheetRuleModel = accessor.get(WorksheetProtectionRuleModel);
 
-        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet()!;
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
@@ -144,7 +144,7 @@ export const SetRangeProtectionFromContextMenuCommand: ICommand = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const selectionManagerService = accessor.get(SheetsSelectionsService);
         const worksheetRuleModel = accessor.get(WorksheetProtectionRuleModel);
-        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet()!;
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();

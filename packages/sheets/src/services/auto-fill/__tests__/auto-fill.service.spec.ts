@@ -44,7 +44,7 @@ describe('AutoFillService', () => {
         commandService = get(ICommandService);
         commandService.registerCommand(SetSelectionsOperation);
 
-        const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const workbook = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         unitId = workbook.getUnitId();
         subUnitId = workbook.getActiveSheet()!.getSheetId();
     });
@@ -188,7 +188,7 @@ describe('AutoFillService', () => {
     });
 
     it('should skip auto-height mutation generation in NO_FORMAT mode', () => {
-        const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const workbook = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet()!;
         service.applyType = AUTO_FILL_APPLY_TYPE.NO_FORMAT;
 

@@ -65,7 +65,7 @@ export class DocMenuStyleService extends Disposable {
 
     getDefaultStyle(): ITextStyle {
         const docDataModel = this._univerInstanceService
-            .getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+            .getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
 
         if (docDataModel == null) {
             return {

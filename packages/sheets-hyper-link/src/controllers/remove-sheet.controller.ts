@@ -38,7 +38,7 @@ export class SheetsHyperLinkRemoveSheetController extends Disposable {
                 getMutations: (commandInfo) => {
                     if (commandInfo.id === RemoveSheetCommand.id) {
                         const params = commandInfo.params as IRemoveSheetCommandParams;
-                        const workbook = params.unitId ? this._univerInstanceService.getUnit<Workbook>(params.unitId) : this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+                        const workbook = params.unitId ? this._univerInstanceService.getUnit<Workbook>(params.unitId) : this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
                         if (!workbook) {
                             return { redos: [], undos: [] };
                         }

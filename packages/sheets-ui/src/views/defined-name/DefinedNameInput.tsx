@@ -51,7 +51,7 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
         id,
     } = props;
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+    const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const localeService = useDependency(LocaleService);
     const definedNamesService = useDependency(IDefinedNamesService);
     const superTableService = useDependency(ISuperTableService);

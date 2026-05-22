@@ -45,7 +45,7 @@ describe('test numfmt service', () => {
 
         univerInstanceService = get(IUniverInstanceService);
         numfmtService = get(INumfmtService);
-        workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         styles = workbook.getStyles();
         sheet = workbook.getActiveSheet()!;
         unitId = workbook.getUnitId();

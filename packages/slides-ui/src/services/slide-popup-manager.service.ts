@@ -120,7 +120,7 @@ export class SlideCanvasPopMangerService extends Disposable {
     }
 
     attachPopupToObject(targetObject: BaseObject, popup: ISlideCanvasPopup): IDisposable {
-        const workbook = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SLIDE)!;
+        const workbook = this._univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_SLIDE)!;
         const unitId = workbook.getUnitId();
         // const subUnitId =
 

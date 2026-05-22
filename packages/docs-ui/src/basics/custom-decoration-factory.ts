@@ -63,7 +63,7 @@ export function addCustomDecorationBySelectionFactory(accessor: IAccessor, param
 
     const documentDataModel = propUnitId ?
         univerInstanceService.getUnit<DocumentDataModel>(propUnitId, UniverInstanceType.UNIVER_DOC)
-        : univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        : univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
     if (!documentDataModel) {
         return false;
     }

@@ -111,7 +111,7 @@ describe('zen-editor commands', () => {
             [IZenZoneService, { close: vi.fn() }],
             [IEditorBridgeService, { refreshEditCellState }],
             [IUniverInstanceService, {
-                getCurrentUnitForType: () => ({ getUnitId: () => 'sheet-unit' }),
+                getCurrentUnitOfType: () => ({ getUnitId: () => 'sheet-unit' }),
                 focusUnit,
             }],
             [ISidebarService, { visible: false }],
@@ -126,7 +126,7 @@ describe('zen-editor commands', () => {
         const result = await CancelZenEditCommand.handler(createAccessor([
             [IZenZoneService, { close: vi.fn() }],
             [IEditorBridgeService, { refreshEditCellState: vi.fn() }],
-            [IUniverInstanceService, { getCurrentUnitForType: () => null, focusUnit: vi.fn() }],
+            [IUniverInstanceService, { getCurrentUnitOfType: () => null, focusUnit: vi.fn() }],
             [ISidebarService, { visible: false }],
         ]));
 
@@ -142,7 +142,7 @@ describe('zen-editor commands', () => {
             [IZenZoneService, { close: vi.fn() }],
             [IEditorBridgeService, { refreshEditCellState }],
             [IUniverInstanceService, {
-                getCurrentUnitForType: () => ({ getUnitId: () => 'sheet-unit' }),
+                getCurrentUnitOfType: () => ({ getUnitId: () => 'sheet-unit' }),
                 focusUnit,
             }],
             [IEditorService, {
@@ -180,7 +180,7 @@ describe('zen-editor commands', () => {
             [IZenZoneService, { close: vi.fn() }],
             [IEditorBridgeService, { refreshEditCellState: vi.fn() }],
             [IUniverInstanceService, {
-                getCurrentUnitForType: () => ({ getUnitId: () => 'sheet-unit' }),
+                getCurrentUnitOfType: () => ({ getUnitId: () => 'sheet-unit' }),
                 focusUnit: vi.fn(),
             }],
             [IEditorService, { getEditor: () => null }],

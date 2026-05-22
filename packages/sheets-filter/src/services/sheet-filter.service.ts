@@ -113,7 +113,7 @@ export class SheetsFilterService extends Disposable {
     private _updateActiveFilterModel(): void {
         let workbook: Nullable<Workbook>;
         try {
-            workbook = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET);
+            workbook = this._univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_SHEET);
             if (!workbook) {
                 this._activeFilterModel$.next(null);
                 return;

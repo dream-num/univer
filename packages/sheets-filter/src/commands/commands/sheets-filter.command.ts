@@ -129,7 +129,7 @@ export const SmartToggleSheetsFilterCommand: ICommand = {
         const sheetsFilterService = accessor.get(SheetsFilterService);
         const commandService = accessor.get(ICommandService);
 
-        const currentWorkbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        const currentWorkbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         const currentWorksheet = currentWorkbook?.getActiveSheet();
         if (!currentWorksheet || !currentWorkbook) return false;
 

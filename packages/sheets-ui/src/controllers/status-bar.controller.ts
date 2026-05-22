@@ -308,7 +308,7 @@ export class StatusBarController extends Disposable {
 
     // eslint-disable-next-line max-lines-per-function
     private _calculateSelection(selections: IRange[], primary: Nullable<ISelectionCell>) {
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!workbook) {
             return this._clearResult();
         }
@@ -322,7 +322,7 @@ export class StatusBarController extends Disposable {
         const sheetData: ISheetData = {};
 
         this._univerInstanceService
-            .getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!
+            .getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!
             .getSheets()
             .forEach((sheet) => {
                 const sheetConfig = sheet.getConfig();

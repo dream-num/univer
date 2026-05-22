@@ -228,7 +228,7 @@ export class SheetsSortUIService extends Disposable {
     }
 
     private async _detectSortLocation(extend?: boolean): Promise<Nullable<ISheetSortLocation>> {
-        const workbook = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET) as Workbook;
+        const workbook = this._univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_SHEET) as Workbook;
         const worksheet = workbook.getActiveSheet() as Worksheet;
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();

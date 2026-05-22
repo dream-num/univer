@@ -114,7 +114,7 @@ function createService() {
         popupService as any,
         { getRenderById: () => currentRender } as any,
         {
-            getCurrentUnitForType: () => workbook,
+            getCurrentUnitOfType: () => workbook,
             getCurrentUnitOfType: () => workbook,
             getUnit: () => workbook,
         } as any,

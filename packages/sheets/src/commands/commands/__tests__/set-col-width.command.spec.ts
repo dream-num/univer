@@ -31,12 +31,12 @@ describe('Test set col width commands', () => {
     let selectionsService: SheetsSelectionsService;
 
     function getColumnWidth(col: number): number {
-        const worksheet = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()!;
+        const worksheet = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()!;
         return worksheet.getColumnWidth(col);
     }
 
     function setSelection(start: number, end: number): void {
-        const worksheet = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()!;
+        const worksheet = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()!;
         const maxRow = worksheet.getMaxRows() - 1;
 
         selectionsService.setSelections([
@@ -58,7 +58,7 @@ describe('Test set col width commands', () => {
     }
 
     function addSelection(start: number, end: number): void {
-        const worksheet = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()!;
+        const worksheet = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()!;
         const maxRow = worksheet.getMaxRows() - 1;
 
         selectionsService.addSelections([
@@ -80,7 +80,7 @@ describe('Test set col width commands', () => {
         commandService.registerCommand(SetColWidthCommand);
         commandService.registerCommand(SetWorksheetColWidthMutation);
 
-        const worksheet = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()!;
+        const worksheet = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()!;
         const maxRow = worksheet.getMaxRows() - 1;
         selectionsService = get(SheetsSelectionsService);
 

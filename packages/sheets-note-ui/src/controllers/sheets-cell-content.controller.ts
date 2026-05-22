@@ -68,7 +68,7 @@ export class SheetsCellContentController extends Disposable {
 
     private _initSkeletonChange() {
         const markSkeletonDirty = () => {
-            const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+            const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
             if (!workbook) return;
             const unitId = workbook.getUnitId();
             const currentRender = this._renderManagerService.getRenderById(unitId);

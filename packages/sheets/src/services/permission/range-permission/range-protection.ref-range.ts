@@ -71,7 +71,7 @@ export class RangeProtectionRefRangeService extends Disposable {
 
     private _onRefRangeChange() {
         const registerRefRange = (unitId: string, subUnitId: string) => {
-            const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+            const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
             if (!workbook) {
                 return;
             }
@@ -117,7 +117,7 @@ export class RangeProtectionRefRangeService extends Disposable {
             })
         );
 
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         if (workbook) {
             const sheet = workbook.getActiveSheet();
             if (!sheet) return;
@@ -389,7 +389,7 @@ export class RangeProtectionRefRangeService extends Disposable {
         this.disposeWithMe(this._commandService.onCommandExecuted((command: ICommandInfo) => {
             if (mutationIdArrByMove.includes(command.id)) {
                 if (!command.params) return;
-                const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+                const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                 if (!workbook) return;
                 const worksheet = workbook.getSheetBySheetId((command.params as IMoveRowsMutationParams).subUnitId);
                 if (!worksheet) return;

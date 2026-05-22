@@ -62,7 +62,7 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
     }
 
     addShape(selection: ISelectionWithStyle, exits: string[] = [], zIndex: number = DEFAULT_Z_INDEX): string | null {
-        const workbook = this._currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const workbook = this._currentService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const subUnitId = workbook.getActiveSheet()?.getSheetId();
         if (!subUnitId) return null;
         const id = generateRandomId();
@@ -82,7 +82,7 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
     }
 
     addShapeWithNoFresh(selection: ISelectionWithStyle, exits: string[] = [], zIndex: number = DEFAULT_Z_INDEX): string | null {
-        const workbook = this._currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const workbook = this._currentService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const subUnitId = workbook.getActiveSheet()?.getSheetId();
         if (!subUnitId) return null;
         const id = generateRandomId();
@@ -99,7 +99,7 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
     }
 
     refreshShapes(): void {
-        const currentSheet = this._currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        const currentSheet = this._currentService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!currentSheet) return;
 
         const currentUnitId = currentSheet.getUnitId();

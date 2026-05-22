@@ -222,7 +222,7 @@ export function getBaseRangeMenuHidden$(accessor: IAccessor) {
             const range = selectionManagerService.getCurrentLastSelection()?.range;
             if (!range) return true;
 
-            const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+            const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
             const worksheet = workbook?.getActiveSheet();
             if (!workbook || !worksheet) {
                 return true;
@@ -256,7 +256,7 @@ export function getInsertAfterMenuHidden$(accessor: IAccessor, type: 'row' | 'co
             const range = selectionManagerService.getCurrentLastSelection()?.range;
             if (!range) return true;
 
-            const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+            const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
             const worksheet = workbook?.getActiveSheet();
             if (!workbook || !worksheet) {
                 return true;
@@ -298,7 +298,7 @@ export function getInsertBeforeMenuHidden$(accessor: IAccessor, type: 'row' | 'c
             const range = selectionManagerService.getCurrentLastSelection()?.range;
             if (!range) return true;
 
-            const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+            const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
             const worksheet = workbook?.getActiveSheet();
             if (!workbook || !worksheet) {
                 return true;
@@ -341,7 +341,7 @@ export function getDeleteMenuHidden$(accessor: IAccessor, type: 'row' | 'col') {
             const range = selectionManagerService.getCurrentLastSelection()?.range;
             if (!range) return true;
 
-            const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+            const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
             const worksheet = workbook?.getActiveSheet();
             if (!workbook || !worksheet) {
                 return true;
@@ -386,7 +386,7 @@ export function getCellMenuHidden$(accessor: IAccessor, type: 'row' | 'col') {
             const range = selectionManagerService.getCurrentLastSelection()?.range;
             if (!range) return true;
 
-            const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+            const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
             const worksheet = workbook?.getActiveSheet();
             if (!workbook || !worksheet) {
                 return true;

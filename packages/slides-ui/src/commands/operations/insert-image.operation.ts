@@ -27,7 +27,7 @@ export const InsertSlideFloatImageCommand: ICommand<{}> = {
     type: CommandType.COMMAND,
     handler: async (accessor, params) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const unitId = univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SLIDE)?.getUnitId();
+        const unitId = univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_SLIDE)?.getUnitId();
         if (!unitId) return false;
 
         const fileOpenerService = accessor.get(ILocalFileService);

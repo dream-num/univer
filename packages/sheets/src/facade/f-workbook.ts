@@ -551,7 +551,7 @@ export class FWorkbook extends FBaseInitialable {
     onSelectionChange(callback: (selections: IRange[]) => void): IDisposable {
         return toDisposable(
             this._selectionManagerService.selectionMoveEnd$.subscribe((selections) => {
-                if (this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId() !== this.id) {
+                if (this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId() !== this.id) {
                     return;
                 }
 

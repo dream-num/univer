@@ -67,7 +67,7 @@ export class DragManagerService extends Disposable {
     }
 
     private _calcActiveCell(offsetX: number, offsetY: number): Nullable<IHoverCellPosition> {
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!workbook) {
             return null;
         }

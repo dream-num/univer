@@ -29,7 +29,7 @@ vi.mock('../../common/utils', () => ({
     getHoverCellPosition: vi.fn(),
 }));
 
-type DragManagerInstanceServiceStub = Pick<IUniverInstanceService, 'getCurrentTypeOfUnit$' | 'getCurrentUnitForType'>;
+type DragManagerInstanceServiceStub = Pick<IUniverInstanceService, 'getCurrentTypeOfUnit$' | 'getCurrentUnitOfType'>;
 type DragManagerRenderManagerStub = Pick<IRenderManagerService, 'getRenderById'>;
 
 function createRender() {
@@ -60,7 +60,7 @@ function createUniverInstanceService(
         getCurrentTypeOfUnit$<T extends UnitModel<object, number>>(): Observable<Nullable<T>> {
             return currentType$.asObservable() as Observable<Nullable<T>>;
         },
-        getCurrentUnitForType<T extends UnitModel<object, number>>(): Nullable<T> {
+        getCurrentUnitOfType<T extends UnitModel<object, number>>(): Nullable<T> {
             return workbook as Nullable<T>;
         },
     };

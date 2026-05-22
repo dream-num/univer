@@ -28,7 +28,7 @@ export const shouldDisableAddLink = (accessor: IAccessor) => {
     }
 
     const activeRange = textRanges[0];
-    const doc = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+    const doc = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
     if (!doc || !activeRange || activeRange.collapsed) {
         return true;
     }
@@ -57,7 +57,7 @@ export const ShowDocHyperLinkEditPopupOperation: ICommand<IShowDocHyperLinkEditP
             return false;
         }
         const hyperLinkService = accessor.get(DocHyperLinkPopupService);
-        const unitId = linkInfo?.unitId || univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC)?.getUnitId();
+        const unitId = linkInfo?.unitId || univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_DOC)?.getUnitId();
 
         if (!unitId) {
             return false;

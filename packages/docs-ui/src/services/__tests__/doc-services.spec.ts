@@ -172,7 +172,7 @@ describe('docs ui services', () => {
         const fallbackService = new DocMenuStyleService(
             selectionManager,
             {
-                getCurrentUnitForType: () => null,
+                getCurrentUnitOfType: () => null,
             } as never,
             {
                 getRenderById: vi.fn(() => null),
@@ -211,7 +211,7 @@ describe('docs ui services', () => {
         };
         const instanceService = {
             getAllUnitsForType: vi.fn(() => [existingDoc]),
-            getCurrentUnitForType: vi.fn(() => existingDoc),
+            getCurrentUnitOfType: vi.fn(() => existingDoc),
             getTypeOfUnitAdded$: vi.fn(() => added$),
             getTypeOfUnitDisposed$: vi.fn(() => disposed$),
         };

@@ -49,7 +49,7 @@ export const PermissionDetailFooterPart = (props: IPermissionDetailFooterPartPro
     const sheetPermissionUserManagerService = useDependency(SheetPermissionUserManagerService);
     const univerInstanceService = useDependency(IUniverInstanceService);
 
-    const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+    const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
     const worksheet = workbook?.getActiveSheet();
     if (!workbook || !worksheet) {
         return null;

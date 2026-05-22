@@ -55,7 +55,7 @@ export const getShouldDisableCellLink = (accessor: IAccessor, worksheet: Workshe
 };
 
 export const getShouldDisableCurrentCellLink = (accessor: IAccessor) => {
-    const unit = accessor.get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+    const unit = accessor.get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
     if (!unit) {
         return true;
     }
@@ -77,7 +77,7 @@ export const shouldDisableAddLink = (accessor: IAccessor) => {
         return true;
     }
 
-    const doc = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+    const doc = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
     if (!doc || textRanges.every((range) => range.collapsed)) {
         return true;
     }

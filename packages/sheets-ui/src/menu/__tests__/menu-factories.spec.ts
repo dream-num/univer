@@ -208,7 +208,7 @@ describe('menu factories', () => {
         commandService.registerCommand(ToggleGridlinesMutation);
 
         const menuItem = injector.invoke(ToggleGridlinesMenuFactory);
-        const worksheet = instanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet();
+        const worksheet = instanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet();
         const initial = await firstValueFrom(menuItem.activated$!.pipe(take(1)));
         expect(await firstValueFrom(menuItem.disabled$!.pipe(take(1)))).toBeTypeOf('boolean');
 

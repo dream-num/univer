@@ -70,7 +70,7 @@ describe('test set row data commands', () => {
     let commandService: ICommandService;
 
     function getRowData(row: number) {
-        const worksheet = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()!;
+        const worksheet = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()!;
         return worksheet.getRowManager().getRow(row);
     }
 

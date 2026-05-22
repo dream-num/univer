@@ -268,7 +268,7 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
     }
 
     getSheetsInfo() {
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const { id, sheetOrder } = workbook.getSnapshot();
 
         return {
@@ -502,7 +502,7 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
     }
 
     private _loadSheetData() {
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook?.getActiveSheet();
 
         this._executeUnitId = workbook?.getUnitId();

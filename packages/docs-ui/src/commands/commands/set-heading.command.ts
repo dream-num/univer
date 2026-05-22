@@ -91,7 +91,7 @@ export const QuickHeadingCommand: ICommand<ISetParagraphNamedStyleCommandParams>
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
-        const docDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         const activeRange = docSelectionManagerService.getActiveTextRange();
         if (docDataModel == null || activeRange == null || !activeRange.collapsed) {
             return false;

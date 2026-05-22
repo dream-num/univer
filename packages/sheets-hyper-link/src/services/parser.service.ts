@@ -76,7 +76,7 @@ export class SheetsHyperLinkParserService {
         const { gid, range, rangeid, unitid } = params;
         const workbook = unitid ?
             this._univerInstanceService.getUnit<Workbook>(unitid, UniverInstanceType.UNIVER_SHEET)
-            : this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+            : this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         const invalidLink = {
             type: SheetHyperLinkType.INVALID,
             name: this._localeService.t('hyperLink.message.refError'),

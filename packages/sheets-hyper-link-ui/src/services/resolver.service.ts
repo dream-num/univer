@@ -77,7 +77,7 @@ export class SheetsHyperLinkResolverService {
         // NOTE: should we always use current unit and active worksheet?
 
         const { gid, range, rangeid } = params;
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!workbook) {
             return;
         }

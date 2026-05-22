@@ -275,7 +275,7 @@ describe('sheets-ui command behaviors', () => {
         };
         const univerInstanceService = {
             getCurrentUnitOfType: () => workbook,
-            getCurrentUnitForType: () => workbook,
+            getCurrentUnitOfType: () => workbook,
         };
 
         const accessor = createAccessor([
@@ -306,7 +306,7 @@ describe('sheets-ui command behaviors', () => {
 
         const scrollToRange = vi.fn(() => true);
         const scrollAccessor = createAccessor([
-            [IUniverInstanceService, { getCurrentUnitForType: () => ({ getUnitId: () => 'unit-1' }) }],
+            [IUniverInstanceService, { getCurrentUnitOfType: () => ({ getUnitId: () => 'unit-1' }) }],
             [IRenderManagerService, { getRenderById: () => ({ with: () => ({ scrollToRange }) }) }],
         ]);
         expect(ScrollToCellCommand.handler(scrollAccessor, { range: { startRow: 1, endRow: 1, startColumn: 2, endColumn: 2 } as any })).toBe(true);
@@ -324,7 +324,7 @@ describe('sheets-ui command behaviors', () => {
     it('guards scroll commands when params or targets are missing', async () => {
         const accessor = createAccessor([
             [ICommandService, { executeCommand: vi.fn(), syncExecuteCommand: vi.fn() }],
-            [IUniverInstanceService, { getCurrentUnitOfType: () => null, getCurrentUnitForType: () => null }],
+            [IUniverInstanceService, { getCurrentUnitOfType: () => null, getCurrentUnitOfType: () => null }],
             [IRenderManagerService, { getRenderById: vi.fn() }],
         ]);
 
@@ -477,7 +477,7 @@ describe('sheets-ui command behaviors', () => {
             [ICommandService, { executeCommand }],
             [IUndoRedoService, { pushUndoRedo }],
             [WorksheetProtectionRuleModel, { getRule: () => ({ permissionId: 'perm-1' }) }],
-            [IUniverInstanceService, { getCurrentUnitForType: () => workbook }],
+            [IUniverInstanceService, { getCurrentUnitOfType: () => workbook }],
         ]);
 
         expect(await DeleteWorksheetProtectionFormSheetBarCommand.handler(accessor, { ok: true } as any)).toBe(true);
@@ -494,7 +494,7 @@ describe('sheets-ui command behaviors', () => {
             [ICommandService, { executeCommand: vi.fn() }],
             [IUndoRedoService, { pushUndoRedo: vi.fn() }],
             [WorksheetProtectionRuleModel, { getRule: vi.fn() }],
-            [IUniverInstanceService, { getCurrentUnitForType: () => ({ getUnitId: () => 'unit-1', getActiveSheet: () => null }) }],
+            [IUniverInstanceService, { getCurrentUnitOfType: () => ({ getUnitId: () => 'unit-1', getActiveSheet: () => null }) }],
         ]);
         expect(await DeleteWorksheetProtectionFormSheetBarCommand.handler(noWorksheetAccessor, { ok: true } as any)).toBe(false);
         expect(await DeleteWorksheetProtectionFormSheetBarCommand.handler(noWorksheetAccessor, undefined as any)).toBe(false);
@@ -532,7 +532,7 @@ describe('sheets-ui command behaviors', () => {
 
         const accessorWithWorksheetRule = createAccessor([
             [ICommandService, { executeCommand }],
-            [IUniverInstanceService, { getCurrentUnitForType: () => workbook }],
+            [IUniverInstanceService, { getCurrentUnitOfType: () => workbook }],
             [IUndoRedoService, { pushUndoRedo }],
             [SheetsSelectionsService, { getCurrentLastSelection: () => ({ range: { startRow: 1, endRow: 1, startColumn: 1, endColumn: 1 } }) }],
             [WorksheetProtectionRuleModel, { getRule: () => ({ permissionId: 'sheet-perm' }) }],
@@ -554,7 +554,7 @@ describe('sheets-ui command behaviors', () => {
 
         const accessorWithRangeRule = createAccessor([
             [ICommandService, { executeCommand }],
-            [IUniverInstanceService, { getCurrentUnitForType: () => workbook }],
+            [IUniverInstanceService, { getCurrentUnitOfType: () => workbook }],
             [IUndoRedoService, { pushUndoRedo }],
             [SheetsSelectionsService, { getCurrentLastSelection: () => ({ range: { startRow: 1, endRow: 1, startColumn: 1, endColumn: 1 } }) }],
             [WorksheetProtectionRuleModel, { getRule: () => null }],
@@ -577,7 +577,7 @@ describe('sheets-ui command behaviors', () => {
 
         const accessorNoSelection = createAccessor([
             [ICommandService, { executeCommand }],
-            [IUniverInstanceService, { getCurrentUnitForType: () => workbook }],
+            [IUniverInstanceService, { getCurrentUnitOfType: () => workbook }],
             [IUndoRedoService, { pushUndoRedo }],
             [SheetsSelectionsService, { getCurrentLastSelection: () => null }],
             [WorksheetProtectionRuleModel, { getRule: () => null }],

@@ -121,7 +121,7 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
             }
 
             // FIXME:@Jocs: editor status should not be coupled with the instance service.
-            const docDataModel = this._instanceSrv.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC);
+            const docDataModel = this._instanceSrv.getCurrentUnitOfType(UniverInstanceType.UNIVER_DOC);
             if (docDataModel?.getUnitId() !== unitId) {
                 this._instanceSrv.setCurrentUnitForType(unitId);
             }

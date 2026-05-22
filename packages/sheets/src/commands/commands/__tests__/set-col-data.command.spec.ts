@@ -71,7 +71,7 @@ describe('test set column data commands', () => {
     let commandService: ICommandService;
 
     function getColumnData(column: number) {
-        const worksheet = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()!;
+        const worksheet = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()!;
         const columnManager = worksheet.getColumnManager();
         return columnManager.getColumn(column);
     }

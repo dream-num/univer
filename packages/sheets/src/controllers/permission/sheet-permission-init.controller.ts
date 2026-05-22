@@ -169,7 +169,7 @@ export class SheetPermissionInitController extends Disposable {
     }
 
     public async initWorkbookPermissionChange(_unitId?: string) {
-        const unitId = _unitId || this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getUnitId();
+        const unitId = _unitId || this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getUnitId();
         if (!unitId) {
             return;
         }

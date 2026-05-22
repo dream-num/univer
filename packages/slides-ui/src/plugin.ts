@@ -131,7 +131,7 @@ export class UniverSlidesUIPlugin extends Plugin {
     private _markSlideAsFocused() {
         const currentService = this._univerInstanceService;
         try {
-            const slideDataModel = currentService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE)!;
+            const slideDataModel = currentService.getCurrentUnitOfType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE)!;
             currentService.focusUnit(slideDataModel.getUnitId());
         } catch (e) {
         }

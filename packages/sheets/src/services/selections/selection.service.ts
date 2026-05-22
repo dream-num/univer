@@ -29,7 +29,7 @@ import { SelectionMoveType } from './type';
  */
 export class SheetsSelectionsService extends RxDisposable {
     private get _currentSelectionPos(): Nullable<ISelectionManagerSearchParam> {
-        const workbook = this._instanceSrv.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        const workbook = this._instanceSrv.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!workbook) return null;
 
         const worksheet = workbook.getActiveSheet();
@@ -295,7 +295,7 @@ export class SheetsSelectionsService extends RxDisposable {
         isAllValuesSame: boolean;
         value: Nullable<IStyleData[keyof IStyleData]>;
     } {
-        const worksheet = this._instanceSrv.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getActiveSheet();
+        const worksheet = this._instanceSrv.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getActiveSheet();
         const selections = this.getCurrentSelections();
         if (!worksheet || selections.length === 0) {
             return {

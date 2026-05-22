@@ -39,7 +39,7 @@ describe('SheetRangeThemeModel', () => {
         get = testBed.get;
         model = get(SheetRangeThemeModel);
 
-        const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const workbook = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         unitId = workbook.getUnitId();
         subUnitId = workbook.getActiveSheet()!.getSheetId();
     });

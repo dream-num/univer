@@ -133,7 +133,7 @@ export class E2EController extends Disposable {
     }
 
     private async _disposeDefaultSheetUnit(disposingTimeout: number = AWAIT_DISPOSING_TIMEOUT): Promise<void> {
-        const unit = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET);
+        const unit = this._univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_SHEET);
         const unitId = unit?.getUnitId();
         await this._univerInstanceService.disposeUnit(unitId || '');
         await awaitTime(disposingTimeout);

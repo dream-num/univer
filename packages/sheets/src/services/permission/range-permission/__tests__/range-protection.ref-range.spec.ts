@@ -81,7 +81,7 @@ describe('RangeProtectionRefRangeService', () => {
         ruleModel = get(RangeProtectionRuleModel);
         sheetInterceptorService = get(SheetInterceptorService);
 
-        const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const workbook = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         unitId = workbook.getUnitId();
         subUnitId = workbook.getActiveSheet()!.getSheetId();
 

@@ -19,6 +19,7 @@ import {
     awaitTime,
     BooleanNumber,
     CustomRangeType,
+    HorizontalAlign,
     ICommandService,
     IUniverInstanceService,
     UniverInstanceType,
@@ -48,6 +49,36 @@ function getDocumentData(): IDocumentData {
                 rangeId: 'range-world',
                 rangeType: CustomRangeType.HYPERLINK,
                 wholeEntity: true,
+            }],
+        },
+        documentStyle: {
+            pageSize: {
+                width: 594.3,
+                height: 840.51,
+            },
+            marginTop: 72,
+            marginBottom: 72,
+            marginRight: 90,
+            marginLeft: 90,
+        },
+    };
+}
+
+function getCenteredSingleCharacterDocumentData(): IDocumentData {
+    return {
+        id: 'test-doc',
+        body: {
+            dataStream: 'A\r\n',
+            textRuns: [{
+                st: 0,
+                ed: 1,
+                ts: {},
+            }],
+            paragraphs: [{
+                startIndex: 1,
+                paragraphStyle: {
+                    horizontalAlign: HorizontalAlign.CENTER,
+                },
             }],
         },
         documentStyle: {
@@ -138,6 +169,52 @@ describe('core editing commands', () => {
 
         expect(getDataStream()).toBe('Hello \r\n');
         expect(getBody()?.customRanges).toEqual([]);
+    });
+
+    it('resets a centered paragraph to left alignment when deleting its last character', async () => {
+        univer.dispose();
+        const testBed = createCommandTestBed(getCenteredSingleCharacterDocumentData());
+        univer = testBed.univer;
+        get = testBed.get;
+        commandService = get(ICommandService);
+        commandService.registerCommand(DeleteCommand);
+        commandService.registerCommand(SetTextSelectionsOperation);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+
+        await commandService.executeCommand(DeleteCommand.id, {
+            unitId: 'test-doc',
+            segmentId: '',
+            range: { startOffset: 0, endOffset: 0, collapsed: true },
+            direction: DeleteDirection.RIGHT,
+        });
+
+        await awaitTime(0);
+
+        expect(getDataStream()).toBe('\r\n');
+        expect(getBody()?.paragraphs?.[0].paragraphStyle?.horizontalAlign).toBe(HorizontalAlign.LEFT);
+    });
+
+    it('resets a centered paragraph to left alignment when backspacing its last character', async () => {
+        univer.dispose();
+        const testBed = createCommandTestBed(getCenteredSingleCharacterDocumentData());
+        univer = testBed.univer;
+        get = testBed.get;
+        commandService = get(ICommandService);
+        commandService.registerCommand(DeleteCommand);
+        commandService.registerCommand(SetTextSelectionsOperation);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+
+        await commandService.executeCommand(DeleteCommand.id, {
+            unitId: 'test-doc',
+            segmentId: '',
+            range: { startOffset: 1, endOffset: 1, collapsed: true },
+            direction: DeleteDirection.LEFT,
+        });
+
+        await awaitTime(0);
+
+        expect(getDataStream()).toBe('\r\n');
+        expect(getBody()?.paragraphs?.[0].paragraphStyle?.horizontalAlign).toBe(HorizontalAlign.LEFT);
     });
 
     it('updates text styles through the shared rich text mutation flow', async () => {

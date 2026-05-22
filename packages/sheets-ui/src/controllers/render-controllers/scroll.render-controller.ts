@@ -41,6 +41,7 @@ import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manag
 import { getSheetObject } from '../utils/component-tools';
 
 const MOUSE_WHEEL_SPEED_SMOOTHING_FACTOR = 3;
+const WHEEL_CROSS_AXIS_LOCK_RATIO = 3;
 /**
  * This controller handles scroll logic in sheet interaction.
  */
@@ -92,6 +93,14 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                     offsetX = ((evt.deltaY || evt.deltaX) * MOUSE_WHEEL_SPEED_SMOOTHING_FACTOR) / scaleX;
                 } else {
                     offsetY = evt.deltaY / scaleY;
+
+                    const absOffsetX = Math.abs(offsetX);
+                    const absOffsetY = Math.abs(offsetY);
+                    if (absOffsetY >= absOffsetX * WHEEL_CROSS_AXIS_LOCK_RATIO) {
+                        offsetX = 0;
+                    } else if (absOffsetX >= absOffsetY * WHEEL_CROSS_AXIS_LOCK_RATIO) {
+                        offsetY = 0;
+                    }
                 }
                 this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetX, offsetY });
                 this._context.scene.makeDirty(true);

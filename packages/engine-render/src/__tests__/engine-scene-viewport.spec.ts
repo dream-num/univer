@@ -211,6 +211,30 @@ describe('engine scene viewport extra', () => {
         container.remove();
     });
 
+    it('locks vertical wheel jitter by raw delta before doc scrollbar scaling', () => {
+        const { engine, scene, viewport, container } = createFixture();
+        scene.transformByState({
+            width: 700,
+            height: 2400,
+            scaleX: 1,
+            scaleY: 1,
+        });
+        viewport.resetCanvasSizeAndUpdateScroll();
+        viewport.scrollToViewportPos({ viewportScrollX: 20, viewportScrollY: 20 });
+
+        viewport.onMouseWheel(
+            createInputEvent('wheel', { deltaX: 8, deltaY: 20 }),
+            { stopPropagation: vi.fn() } as any
+        );
+
+        expect(viewport.viewportScrollX).toBeCloseTo(20, 3);
+        expect(viewport.viewportScrollY).toBeGreaterThan(20);
+
+        scene.dispose();
+        engine.dispose();
+        container.remove();
+    });
+
     it('covers scene, viewport, layer and render loop flows', () => {
         const { engine, scene, viewport, container } = createFixture();
 

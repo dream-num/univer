@@ -414,6 +414,12 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
         return Boolean(this._calcActiveBullet(transformOffset2Bound(offsetX, offsetY, this._context.scene)));
     }
 
+    getBulletBounds(): IBulletBound[] {
+        this._buildBulletBounds();
+
+        return [...this._bulletBounds];
+    }
+
     private _buildCustomRangeBoundsBySegment(segmentId?: string, segmentPage = -1) {
         const customRanges = this._context.unit.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.customRanges ?? [];
         const layouts: ICustomRangeBound[] = [];

@@ -127,7 +127,7 @@ export * from './services';
 export { IDocClipboardService } from './services/clipboard/clipboard.service';
 export { convertBodyToHtml } from './services/clipboard/udm-to-html/convertor';
 export { DocAutoFormatService } from './services/doc-auto-format.service';
-export { DocEventManagerService } from './services/doc-event-manager.service';
+export { DocEventManagerService, type IBulletBound } from './services/doc-event-manager.service';
 export { DocIMEInputManagerService } from './services/doc-ime-input-manager.service';
 export { calcDocRangePositions, DocCanvasPopManagerService } from './services/doc-popup-manager.service';
 export { DocPrintInterceptorService, type IDocPrintComponentContext, type IDocPrintContext } from './services/doc-print-interceptor.service';

@@ -16,6 +16,7 @@
 
 import type { Mock } from 'vitest';
 import { DataStreamTreeTokenType, DOC_RANGE_TYPE } from '@univerjs/core';
+import { GlyphType } from '@univerjs/engine-render';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DocSelectionRenderService } from '../doc-selection-render.service';
 import { TextRange } from '../text-range';
@@ -23,11 +24,13 @@ import { TextRange } from '../text-range';
 const {
     getCanvasOffsetByEngineMock,
     getRangeListFromCharIndexMock,
+    getRangeListFromSelectionMock,
     getRectRangeFromCharIndexMock,
     getTextRangeFromCharIndexMock,
 } = vi.hoisted(() => ({
     getCanvasOffsetByEngineMock: vi.fn(),
     getRangeListFromCharIndexMock: vi.fn(),
+    getRangeListFromSelectionMock: vi.fn(),
     getRectRangeFromCharIndexMock: vi.fn(),
     getTextRangeFromCharIndexMock: vi.fn(),
 }));
@@ -39,6 +42,7 @@ vi.mock('../selection-utils', async () => {
         ...actual,
         getCanvasOffsetByEngine: getCanvasOffsetByEngineMock,
         getRangeListFromCharIndex: getRangeListFromCharIndexMock,
+        getRangeListFromSelection: getRangeListFromSelectionMock,
         getRectRangeFromCharIndex: getRectRangeFromCharIndexMock,
         getTextRangeFromCharIndex: getTextRangeFromCharIndexMock,
     };
@@ -95,6 +99,7 @@ interface IServiceHarness {
     _createTextRangeByAnchorPosition(position: Record<string, unknown>): void;
     _isEmpty(): boolean;
     _getCanvasOffset(): { left: number; top: number };
+    _moving(moveOffsetX: number, moveOffsetY: number): void;
     _updateInputPosition(): void;
     addDocRanges(ranges: Array<Record<string, unknown>>, isEditing?: boolean, options?: Record<string, boolean>): void;
     setCursorManually(evtOffsetX: number, evtOffsetY: number): void;
@@ -125,7 +130,7 @@ function createRectRange(overrides: Partial<IFakeRectRange> = {}): IFakeRectRang
 }
 
 function createService() {
-    const engine = { name: 'engine' };
+    const engine = { name: 'engine', setCapture: vi.fn() };
     const skeleton = { name: 'skeleton' };
     const mainComponent = { name: 'doc-component' };
     const scene = {
@@ -145,6 +150,9 @@ function createService() {
             scene,
             mainComponent,
             unitId: 'unit-1',
+        },
+        _container: {
+            style: {},
         },
         _docSkeletonManagerService: {
             getSkeleton: vi.fn(() => skeleton),
@@ -176,6 +184,7 @@ describe('doc selection render service internals', () => {
         vi.clearAllMocks();
         getCanvasOffsetByEngineMock.mockReturnValue({ left: 8, top: 16 });
         getRangeListFromCharIndexMock.mockReturnValue(null);
+        getRangeListFromSelectionMock.mockReturnValue(null);
         getRectRangeFromCharIndexMock.mockReturnValue(null);
         getTextRangeFromCharIndexMock.mockReturnValue(null);
         vi.spyOn(TextRange.prototype as unknown as Record<'_anchorBlink', () => void>, '_anchorBlink').mockImplementation(() => {});
@@ -273,6 +282,7 @@ describe('doc selection render service internals', () => {
 
         expect(collapsedRange.dispose).toHaveBeenCalledTimes(1);
         expect(expandedRange.dispose).not.toHaveBeenCalled();
+        expect(service._rangeList).toEqual([expandedRange]);
         expect(service.focus).toHaveBeenCalledTimes(1);
     });
 
@@ -446,6 +456,111 @@ describe('doc selection render service internals', () => {
             style: service._selectionStyle,
             isEditing: false,
         });
+    });
+
+    it('snaps reverse drag focus to the start of the first glyph so the first character remains selectable', () => {
+        const { engine, mainComponent, scene, service, skeleton } = createService();
+        const firstGlyph = {
+            content: 'D',
+            count: 1,
+            glyphType: GlyphType.WORD,
+        };
+        const secondGlyph = {
+            content: 'o',
+            count: 1,
+            glyphType: GlyphType.WORD,
+        };
+        const divide = {
+            glyphGroup: [firstGlyph, secondGlyph],
+        };
+        firstGlyph.parent = divide;
+        secondGlyph.parent = divide;
+
+        const anchorPosition = {
+            page: 0,
+            section: 0,
+            column: 0,
+            line: 1,
+            divide: 0,
+            glyph: 4,
+            isBack: false,
+        };
+        const focusPosition = {
+            page: 0,
+            section: 0,
+            column: 0,
+            line: 0,
+            divide: 0,
+            glyph: 0,
+            isBack: false,
+        };
+        const textRange = createTextRange({ collapsed: false });
+
+        service._anchorNodePosition = anchorPosition;
+        service._findNodeByCoord.mockReturnValue({ node: firstGlyph });
+        service._getNodePosition.mockReturnValue(focusPosition);
+        getRangeListFromSelectionMock.mockReturnValue({
+            textRanges: [textRange],
+            rectRanges: [],
+        });
+
+        service._moving(120, 80);
+
+        expect(focusPosition.isBack).toBe(true);
+        expect(getRangeListFromSelectionMock).toHaveBeenCalledWith(
+            anchorPosition,
+            expect.objectContaining({
+                glyph: 0,
+                isBack: true,
+            }),
+            scene,
+            mainComponent,
+            skeleton,
+            service._selectionStyle,
+            'segment-1',
+            2
+        );
+        expect(service._rangeListCache).toEqual([textRange]);
+        expect(engine.setCapture).toHaveBeenCalledTimes(1);
+    });
+
+    it('disposes collapsed transient ranges while moving so they do not leak as extra cursors', () => {
+        const { engine, service } = createService();
+        const glyph = {
+            content: 'D',
+            count: 1,
+            glyphType: GlyphType.WORD,
+            parent: {
+                glyphGroup: [] as unknown[],
+            },
+        };
+        glyph.parent.glyphGroup = [glyph];
+        const anchorPosition = {
+            page: 0,
+            section: 0,
+            column: 0,
+            line: 0,
+            divide: 0,
+            glyph: 0,
+            isBack: true,
+        };
+        const focusPosition = { ...anchorPosition };
+        const collapsedTextRange = createTextRange({ collapsed: true });
+
+        service._anchorNodePosition = anchorPosition;
+        service._findNodeByCoord.mockReturnValue({ node: glyph });
+        service._getNodePosition.mockReturnValue(focusPosition);
+        getRangeListFromSelectionMock.mockReturnValue({
+            textRanges: [collapsedTextRange],
+            rectRanges: [],
+        });
+
+        service._moving(120, 80);
+
+        expect(collapsedTextRange.dispose).toHaveBeenCalledTimes(1);
+        expect(service._focusNodePosition).toBeUndefined();
+        expect(service._rangeListCache).toEqual([]);
+        expect(engine.setCapture).not.toHaveBeenCalled();
     });
 
     it('clears ranges when manual cursor placement cannot resolve a node position', () => {

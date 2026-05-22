@@ -17,16 +17,35 @@
 import { NamedStyleType } from '@univerjs/core';
 
 import { describe, expect, it } from 'vitest';
-import { getParagraphMenuActiveHeadingCommandId, getParagraphMenuCommand, getParagraphMenuIconSizeClass, getParagraphMenuTargetRange, isEmptyParagraphMenuTarget } from '..';
+import { getParagraphMenuActiveHeadingCommandId, getParagraphMenuCommand, getParagraphMenuHiddenHeadingCommandIds, getParagraphMenuIconSizeClass, getParagraphMenuTargetRange, isEmptyParagraphMenuTarget } from '..';
 import { HorizontalLineCommand } from '../../../commands/commands/doc-horizontal-line.command';
 import { BulletListCommand, OrderListCommand } from '../../../commands/commands/list.command';
-import { H1HeadingCommand, H3HeadingCommand, NormalTextHeadingCommand, SetParagraphNamedStyleCommand } from '../../../commands/commands/set-heading.command';
+import { H1HeadingCommand, H3HeadingCommand, H5HeadingCommand, NormalTextHeadingCommand, SetParagraphNamedStyleCommand, SubtitleHeadingCommand, TitleHeadingCommand } from '../../../commands/commands/set-heading.command';
 import { CreateDocTableCommand } from '../../../commands/commands/table/doc-table-create.command';
+import { HEADING_ICON_MAP, shouldShowParagraphHeadingOption } from '../../../menu/paragraph-menu';
 
 describe('ParagraphMenu', () => {
     it('uses a smaller icon for normal text paragraph triggers', () => {
         expect(getParagraphMenuIconSizeClass('TextTypeIcon')).toBe('univer-size-3');
+        expect(getParagraphMenuIconSizeClass('TitleTypeIcon')).toBe('univer-size-4');
+        expect(getParagraphMenuIconSizeClass('SubtitleTypeIcon')).toBe('univer-size-4');
         expect(getParagraphMenuIconSizeClass('H1Icon')).toBe('univer-size-4');
+        expect(HEADING_ICON_MAP[NamedStyleType.TITLE].key).toBe('TitleTypeIcon');
+        expect(HEADING_ICON_MAP[NamedStyleType.SUBTITLE].key).toBe('SubtitleTypeIcon');
+    });
+
+    it('shows title and subtitle heading shortcuts only when they are the current paragraph style', () => {
+        expect(shouldShowParagraphHeadingOption(NamedStyleType.HEADING_5, NamedStyleType.NORMAL_TEXT)).toBe(true);
+        expect(shouldShowParagraphHeadingOption(NamedStyleType.TITLE, NamedStyleType.NORMAL_TEXT)).toBe(false);
+        expect(shouldShowParagraphHeadingOption(NamedStyleType.SUBTITLE, NamedStyleType.NORMAL_TEXT)).toBe(false);
+
+        expect(shouldShowParagraphHeadingOption(NamedStyleType.HEADING_5, NamedStyleType.TITLE)).toBe(false);
+        expect(shouldShowParagraphHeadingOption(NamedStyleType.TITLE, NamedStyleType.TITLE)).toBe(true);
+        expect(shouldShowParagraphHeadingOption(NamedStyleType.SUBTITLE, NamedStyleType.TITLE)).toBe(false);
+
+        expect(shouldShowParagraphHeadingOption(NamedStyleType.HEADING_5, NamedStyleType.SUBTITLE)).toBe(false);
+        expect(shouldShowParagraphHeadingOption(NamedStyleType.TITLE, NamedStyleType.SUBTITLE)).toBe(false);
+        expect(shouldShowParagraphHeadingOption(NamedStyleType.SUBTITLE, NamedStyleType.SUBTITLE)).toBe(true);
     });
 
     it('maps paragraph named styles to the active heading menu item', () => {
@@ -34,7 +53,23 @@ describe('ParagraphMenu', () => {
         expect(getParagraphMenuActiveHeadingCommandId(NamedStyleType.HEADING_3)).toBe(H3HeadingCommand.id);
         expect(getParagraphMenuActiveHeadingCommandId(NamedStyleType.NORMAL_TEXT)).toBe(NormalTextHeadingCommand.id);
         expect(getParagraphMenuActiveHeadingCommandId(undefined)).toBe(NormalTextHeadingCommand.id);
-        expect(getParagraphMenuActiveHeadingCommandId(NamedStyleType.TITLE)).toBe(NormalTextHeadingCommand.id);
+        expect(getParagraphMenuActiveHeadingCommandId(NamedStyleType.TITLE)).toBe(TitleHeadingCommand.id);
+        expect(getParagraphMenuActiveHeadingCommandId(NamedStyleType.SUBTITLE)).toBe(SubtitleHeadingCommand.id);
+    });
+
+    it('hides the alternate title shortcuts for the hovered paragraph style', () => {
+        expect(getParagraphMenuHiddenHeadingCommandIds(NamedStyleType.TITLE)).toEqual([
+            H5HeadingCommand.id,
+            SubtitleHeadingCommand.id,
+        ]);
+        expect(getParagraphMenuHiddenHeadingCommandIds(NamedStyleType.SUBTITLE)).toEqual([
+            H5HeadingCommand.id,
+            TitleHeadingCommand.id,
+        ]);
+        expect(getParagraphMenuHiddenHeadingCommandIds(NamedStyleType.NORMAL_TEXT)).toEqual([
+            TitleHeadingCommand.id,
+            SubtitleHeadingCommand.id,
+        ]);
     });
 
     it('detects empty paragraph menu targets', () => {

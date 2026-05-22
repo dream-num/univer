@@ -24,7 +24,7 @@ import { HorizontalLineCommand, InsertHorizontalLineBellowCommand } from '../com
 import { ResetInlineFormatTextBackgroundColorCommand, SetInlineFormatBoldCommand, SetInlineFormatFontFamilyCommand, SetInlineFormatFontSizeCommand, SetInlineFormatItalicCommand, SetInlineFormatStrikethroughCommand, SetInlineFormatSubscriptCommand, SetInlineFormatSuperscriptCommand, SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand, SetInlineFormatUnderlineCommand } from '../commands/commands/inline-format.command';
 import { BulletListCommand, CheckListCommand, InsertBulletListBellowCommand, InsertCheckListBellowCommand, InsertOrderListBellowCommand, OrderListCommand } from '../commands/commands/list.command';
 import { AlignOperationCommand } from '../commands/commands/paragraph-align.command';
-import { H1HeadingCommand, H2HeadingCommand, H3HeadingCommand, H4HeadingCommand, H5HeadingCommand, NormalTextHeadingCommand, SetParagraphNamedStyleCommand } from '../commands/commands/set-heading.command';
+import { H1HeadingCommand, H2HeadingCommand, H3HeadingCommand, H4HeadingCommand, H5HeadingCommand, NormalTextHeadingCommand, SetParagraphNamedStyleCommand, SubtitleHeadingCommand, TitleHeadingCommand } from '../commands/commands/set-heading.command';
 import { SwitchDocModeCommand } from '../commands/commands/switch-doc-mode.command';
 import { DocTableDeleteColumnsCommand, DocTableDeleteRowsCommand, DocTableDeleteTableCommand } from '../commands/commands/table/doc-table-delete.command';
 import { DocTableInsertColumnLeftCommand, DocTableInsertColumnRightCommand, DocTableInsertRowAboveCommand, DocTableInsertRowBellowCommand } from '../commands/commands/table/doc-table-insert.command';
@@ -75,7 +75,7 @@ import {
     TextColorSelectorMenuItemFactory,
     UnderlineMenuItemFactory,
 } from './menu';
-import { CopyCurrentParagraphMenuItemFactory, CutCurrentParagraphMenuItemFactory, DeleteCurrentParagraphMenuItemFactory, DocInsertBellowMenuItemFactory, EMPTY_PARAGRAPH_MENU_ID, EmptyParagraphBulletListMenuItemFactory, EmptyParagraphCheckListMenuItemFactory, EmptyParagraphH1MenuItemFactory, EmptyParagraphH2MenuItemFactory, EmptyParagraphH3MenuItemFactory, EmptyParagraphH4MenuItemFactory, EmptyParagraphH5MenuItemFactory, EmptyParagraphHorizontalLineMenuItemFactory, EmptyParagraphNormalTextMenuItemFactory, EmptyParagraphOrderListMenuItemFactory, H1HeadingMenuItemFactory, H2HeadingMenuItemFactory, H3HeadingMenuItemFactory, H4HeadingMenuItemFactory, H5HeadingMenuItemFactory, INSERT_BELLOW_MENU_ID, InsertBulletListBellowMenuItemFactory, InsertCheckListBellowMenuItemFactory, InsertHorizontalLineBellowMenuItemFactory, InsertOrderListBellowMenuItemFactory, NormalTextHeadingMenuItemFactory } from './paragraph-menu';
+import { CopyCurrentParagraphMenuItemFactory, CutCurrentParagraphMenuItemFactory, DeleteCurrentParagraphMenuItemFactory, DocInsertBellowMenuItemFactory, EMPTY_PARAGRAPH_MENU_ID, EmptyParagraphBulletListMenuItemFactory, EmptyParagraphCheckListMenuItemFactory, EmptyParagraphH1MenuItemFactory, EmptyParagraphH2MenuItemFactory, EmptyParagraphH3MenuItemFactory, EmptyParagraphH4MenuItemFactory, EmptyParagraphH5MenuItemFactory, EmptyParagraphHorizontalLineMenuItemFactory, EmptyParagraphNormalTextMenuItemFactory, EmptyParagraphOrderListMenuItemFactory, H1HeadingMenuItemFactory, H2HeadingMenuItemFactory, H3HeadingMenuItemFactory, H4HeadingMenuItemFactory, H5HeadingMenuItemFactory, INSERT_BELLOW_MENU_ID, InsertBulletListBellowMenuItemFactory, InsertCheckListBellowMenuItemFactory, InsertHorizontalLineBellowMenuItemFactory, InsertOrderListBellowMenuItemFactory, NormalTextHeadingMenuItemFactory, SubtitleHeadingMenuItemFactory, TitleHeadingMenuItemFactory } from './paragraph-menu';
 
 export const menuSchema: MenuSchemaType = {
     [RibbonStartGroup.FORMAT]: {
@@ -258,6 +258,14 @@ export const menuSchema: MenuSchemaType = {
             [H5HeadingCommand.id]: {
                 order: 4,
                 menuItemFactory: H5HeadingMenuItemFactory,
+            },
+            [TitleHeadingCommand.id]: {
+                order: -1,
+                menuItemFactory: TitleHeadingMenuItemFactory,
+            },
+            [SubtitleHeadingCommand.id]: {
+                order: -1,
+                menuItemFactory: SubtitleHeadingMenuItemFactory,
             },
             [NormalTextHeadingCommand.id]: {
                 order: 5,

@@ -18,7 +18,7 @@ import type { IDisplayMenuItem, IMenuItem, IValueOption } from '../../../service
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import { convertObservableToBehaviorSubject, LocaleService } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { combineLatest, of } from 'rxjs';
 import { ComponentManager } from '../../../common';
 import { useDependency, useObservable } from '../../../utils/di';
@@ -27,6 +27,7 @@ import { DesignTinyMenuGroup } from './DesignTinyMenuGroup';
 interface IUIQuickMenuGroupProps {
     item: IMenuSchema;
     activeItemIds?: string[];
+    hiddenItemIds?: string[];
     onOptionSelect?: (option: IValueOption) => void;
 }
 
@@ -36,12 +37,23 @@ interface IUIQuickTileMenuItemProps {
     onOptionSelect?: (option: IValueOption) => void;
 }
 
+const EMPTY_HIDDEN_ITEM_IDS: string[] = [];
+
 export function resolveMenuItemActiveState(itemId: string | undefined, observableActive: boolean, activeItemIds?: string[]): boolean {
     if (activeItemIds) {
         return Boolean(itemId && activeItemIds.includes(itemId));
     }
 
     return observableActive;
+}
+
+function getTinyMenuChildStateKey(child: IMenuSchema): string {
+    return child.item?.id ?? child.key;
+}
+
+export function getVisibleTinyMenuChildren(children: IMenuSchema[], hiddenItemKeys: string[]): IMenuSchema[] {
+    const hiddenSet = new Set(hiddenItemKeys);
+    return children.filter((child) => !hiddenSet.has(getTinyMenuChildStateKey(child)));
 }
 
 function QuickTileMenuItem(props: IUIQuickTileMenuItemProps) {
@@ -113,8 +125,9 @@ function QuickTileMenuItem(props: IUIQuickTileMenuItemProps) {
 }
 
 export function UITinyMenuGroup(props: IUIQuickMenuGroupProps) {
-    const { item, activeItemIds, onOptionSelect } = props;
+    const { item, activeItemIds, hiddenItemIds = EMPTY_HIDDEN_ITEM_IDS, onOptionSelect } = props;
     const [activeItems, setActiveItems] = useState<string[]>([]);
+    const [hiddenItems, setHiddenItems] = useState<string[]>([]);
     const componentManager = useDependency(ComponentManager);
     const localeService = useDependency(LocaleService);
 
@@ -122,7 +135,9 @@ export function UITinyMenuGroup(props: IUIQuickMenuGroupProps) {
         if (!item.children) return;
         const observables = item.children.map((child) => convertObservableToBehaviorSubject(child.item?.activated$ ?? of(false), false));
         const subscription = combineLatest(observables).subscribe((activedArr) => {
-            const actived = activedArr.map((actived, index) => ({ actived, item: item.children![index].item!.id })).filter((actived) => actived.actived);
+            const actived = activedArr
+                .map((actived, index) => ({ actived, item: getTinyMenuChildStateKey(item.children![index]) }))
+                .filter((actived) => actived.actived);
             if (actived.length === 0) {
                 setActiveItems([]);
             } else {
@@ -138,11 +153,38 @@ export function UITinyMenuGroup(props: IUIQuickMenuGroupProps) {
         };
     }, [item]);
 
+    useEffect(() => {
+        if (!item.children) return;
+        const observables = item.children.map((child) => convertObservableToBehaviorSubject(child.item?.hidden$ ?? of(false), false));
+        const subscription = combineLatest(observables).subscribe((hiddenArr) => {
+            const hidden = hiddenArr
+                .map((hidden, index) => ({ hidden, item: getTinyMenuChildStateKey(item.children![index]) }))
+                .filter((hidden) => hidden.hidden);
+            if (hidden.length === 0) {
+                setHiddenItems([]);
+            } else {
+                setHiddenItems(hidden.map((hidden) => hidden.item));
+            }
+        });
+
+        return () => {
+            subscription.unsubscribe();
+            observables.forEach((observable) => {
+                observable.complete();
+            });
+        };
+    }, [item]);
+
+    const visibleChildren = useMemo(
+        () => getVisibleTinyMenuChildren(item.children ?? [], [...hiddenItems, ...hiddenItemIds]),
+        [hiddenItemIds, hiddenItems, item.children]
+    );
+
     if (!item.children) return null;
 
     return (
         <DesignTinyMenuGroup
-            items={item.children.map((child) => ({
+            items={visibleChildren.map((child) => ({
                 key: child.key,
                 onClick: () => {
                     onOptionSelect?.({
@@ -162,7 +204,7 @@ export function UITinyMenuGroup(props: IUIQuickMenuGroupProps) {
 }
 
 export function UIQuickTileMenuGroup(props: IUIQuickMenuGroupProps) {
-    const { item, activeItemIds, onOptionSelect } = props;
+    const { item, activeItemIds, hiddenItemIds = EMPTY_HIDDEN_ITEM_IDS, onOptionSelect } = props;
 
     if (!item.children?.length) {
         return null;
@@ -170,7 +212,7 @@ export function UIQuickTileMenuGroup(props: IUIQuickMenuGroupProps) {
 
     return (
         <div className="univer-item-center univer-grid univer-grid-cols-3 univer-gap-1.5 univer-py-1">
-            {item.children.map((menuSchema) => (
+            {getVisibleTinyMenuChildren(item.children, hiddenItemIds).map((menuSchema) => (
                 <QuickTileMenuItem
                     key={menuSchema.key}
                     menuSchema={menuSchema}

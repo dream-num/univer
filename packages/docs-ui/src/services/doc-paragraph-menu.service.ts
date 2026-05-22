@@ -150,8 +150,10 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
             return;
         }
 
+        const getFirstLine = () => this._docEventManagerService.findParagraphBoundByIndex(paragraph.startIndex)?.firstLine ?? paragraph.firstLine;
+
         const disposable = this._docPopupManagerService.attachPopupToRect(
-            paragraph.firstLine,
+            getFirstLine,
             {
                 componentKey: 'doc.paragraph.menu',
                 direction: 'left-center',

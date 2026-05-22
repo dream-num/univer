@@ -42,6 +42,7 @@ interface IContextMenuPanelProps {
     menuSessionVersion?: number;
     className?: string;
     activeItemIds?: string[];
+    hiddenItemIds?: string[];
     onOptionSelect?: (option: IValueOption) => void;
 }
 
@@ -51,6 +52,7 @@ interface IContextMenuMenuProps {
     submenuPortalContainer: HTMLElement | null;
     maxMenuHeight: number;
     activeItemIds?: string[];
+    hiddenItemIds?: string[];
     onOptionSelect?: (option: IValueOption) => void;
 }
 
@@ -81,7 +83,7 @@ function isNonHoverableLabel(label?: MenuLabel) {
 }
 
 export function ContextMenuPanel(props: IContextMenuPanelProps) {
-    const { menuType, menuSessionVersion = 0, className, activeItemIds, onOptionSelect } = props;
+    const { menuType, menuSessionVersion = 0, className, activeItemIds, hiddenItemIds, onOptionSelect } = props;
     const menuManagerService = useDependency(IMenuManagerService);
     const layoutService = useDependency(ILayoutService);
     const [menuElement, setMenuElement] = useState<HTMLDivElement | null>(null);
@@ -165,6 +167,7 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
                 menuSessionVersion={menuSessionVersion}
                 submenuPortalContainer={submenuPortalContainer}
                 activeItemIds={activeItemIds}
+                hiddenItemIds={hiddenItemIds}
                 onOptionSelect={onOptionSelect}
                 maxMenuHeight={maxMenuHeight}
             />
@@ -173,7 +176,7 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
 }
 
 function ContextMenuMenu(props: IContextMenuMenuProps) {
-    const { menuSchemas, menuSessionVersion, submenuPortalContainer, activeItemIds, onOptionSelect, maxMenuHeight } = props;
+    const { menuSchemas, menuSessionVersion, submenuPortalContainer, activeItemIds, hiddenItemIds, onOptionSelect, maxMenuHeight } = props;
     const localeService = useDependency(LocaleService);
     const hiddenGroupStates = useContextGroupHiddenStates(menuSchemas);
 
@@ -224,6 +227,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                                     <UIQuickTileMenuGroup
                                         item={menuSchema}
                                         activeItemIds={activeItemIds}
+                                        hiddenItemIds={hiddenItemIds}
                                         onOptionSelect={onOptionSelect}
                                     />
                                 )
@@ -231,6 +235,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                                     <UITinyMenuGroup
                                         item={menuSchema}
                                         activeItemIds={activeItemIds}
+                                        hiddenItemIds={hiddenItemIds}
                                         onOptionSelect={onOptionSelect}
                                     />
                                 )}

@@ -748,6 +748,48 @@ describe('selection utils', () => {
         expect(missing).toBeUndefined();
     });
 
+    it('falls back to original boundary positions when the first character index cannot be resolved back to a node', () => {
+        const focusPosition = createNodePosition(['body'], 0);
+        focusPosition.isBack = true;
+        const anchorPosition = createNodePosition(['body'], 4);
+        const endNode = createNodePosition(['char', 468], 4);
+        const paragraph = {
+            startIndex: 0,
+            endIndex: 500,
+            children: [],
+        };
+        const skeleton = {
+            findCharIndexByPosition: vi
+                .fn()
+                .mockReturnValueOnce(468)
+                .mockReturnValueOnce(0),
+            findNodePositionByCharIndex: vi
+                .fn()
+                .mockReturnValueOnce(undefined)
+                .mockReturnValueOnce(endNode),
+            getViewModel: () => ({
+                getSelfOrHeaderFooterViewModel: () => ({
+                    getChildren: () => [{ children: [paragraph] }],
+                }),
+            }),
+        } as never;
+
+        const result = getRangeListFromSelection(
+            anchorPosition,
+            focusPosition,
+            {} as never,
+            createDocument(),
+            skeleton,
+            {} as never,
+            '',
+            -1
+        );
+
+        expect(result?.textRanges).toHaveLength(1);
+        expect(result?.textRanges[0].anchorNodePosition).toBe(endNode);
+        expect(result?.textRanges[0].focusNodePosition).toBe(focusPosition);
+    });
+
     it('reads canvas offsets, paragraph glyph info, and serializes ranges', () => {
         vi.mocked(getOffsetRectForDom).mockReturnValue({ left: 12, top: 34 } as never);
 

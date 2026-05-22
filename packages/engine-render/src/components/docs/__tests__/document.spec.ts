@@ -382,6 +382,44 @@ describe('documents render', () => {
         docBackground.dispose();
     });
 
+    it('treats unspecified document flavor as traditional when drawing the page background', () => {
+        const page = createPage(DocumentSkeletonPageType.BODY, '');
+        const skeleton = {
+            getSkeletonData: () => ({ pages: [page] }),
+            getViewModel: () => ({
+                getDataModel: () => ({
+                    getSnapshot: () => ({
+                        documentStyle: {
+                            documentFlavor: DocumentFlavor.UNSPECIFIED,
+                        },
+                    }),
+                }),
+            }),
+        } as any;
+        const docBackground = new DocBackground('docs-background-unspecified', skeleton, {
+            pageLayoutType: PageLayoutType.VERTICAL,
+            pageMarginLeft: 20,
+            pageMarginTop: 20,
+        });
+        docBackground.resize(260, 480);
+
+        const rectDraw = vi.spyOn(Rect, 'drawWith').mockImplementation(() => {});
+        vi.spyOn(Path, 'drawWith').mockImplementation(() => {});
+
+        docBackground.draw({
+            restore: vi.fn(),
+            save: vi.fn(),
+            translate: vi.fn(),
+        } as any);
+
+        expect(rectDraw.mock.calls.map(([, props]) => props.fill)).toEqual([
+            '#fafafa',
+            'rgba(255, 255, 255, 1)',
+        ]);
+
+        docBackground.dispose();
+    });
+
     it('draws the docs workspace background for modern documents', () => {
         const page = createPage(DocumentSkeletonPageType.BODY, '');
         const skeleton = {

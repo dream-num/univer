@@ -57,7 +57,7 @@ export class DocBackground extends DocComponent {
         const workspaceFill = documentFlavor === DocumentFlavor.MODERN ? PAGE_FILL_COLOR : DOCS_WORKSPACE_FILL_COLOR;
         this._drawWorkspaceBackground(ctx, workspaceFill, bounds);
 
-        if (documentFlavor !== DocumentFlavor.TRADITIONAL) {
+        if (documentFlavor === DocumentFlavor.MODERN) {
             return;
         }
 

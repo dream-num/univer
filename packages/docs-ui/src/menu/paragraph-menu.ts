@@ -16,10 +16,12 @@
 
 import type { IAccessor, ICommand } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuItem, IMenuSelectorItem } from '@univerjs/ui';
+import type { ComponentType } from 'react';
 import { ICommandService, NamedStyleType, UniverInstanceType } from '@univerjs/core';
 import { SetTextSelectionsOperation } from '@univerjs/docs';
 import { H1Icon, H2Icon, H3Icon, H4Icon, H5Icon, TextTypeIcon } from '@univerjs/icons';
 import { ComponentManager, getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
+import { createElement } from 'react';
 import { Observable } from 'rxjs';
 import { DocCopyCurrentParagraphCommand, DocCutCurrentParagraphCommand } from '../commands/commands/clipboard.command';
 import { DeleteCurrentParagraphCommand } from '../commands/commands/doc-delete.command';
@@ -48,19 +50,82 @@ const HEADING_TITLE_MAP: Partial<Record<NamedStyleType, string>> = {
     [NamedStyleType.HEADING_4]: 'toolbar.heading.4',
     [NamedStyleType.HEADING_5]: 'toolbar.heading.5',
     [NamedStyleType.NORMAL_TEXT]: 'toolbar.heading.normal',
+    [NamedStyleType.TITLE]: 'toolbar.heading.title',
+    [NamedStyleType.SUBTITLE]: 'toolbar.heading.subTitle',
 };
 
-export const HEADING_ICON_MAP: Record<NamedStyleType, { key: string; component: React.ComponentType<{ className: string }> }> = {
+function TitleTypeIcon({ className }: { className: string }) {
+    return createElement(
+        'svg',
+        {
+            className,
+            viewBox: '0 0 24 24',
+            fill: 'currentColor',
+            'aria-hidden': true,
+        },
+        createElement('text', {
+            x: 2,
+            y: 19,
+            fontFamily: 'Arial, sans-serif',
+            fontSize: 19,
+            fontWeight: 500,
+        }, 'T'),
+        createElement('text', {
+            x: 15,
+            y: 19,
+            fontFamily: 'Arial, sans-serif',
+            fontSize: 13,
+            fontWeight: 500,
+        }, 't')
+    );
+}
+
+function SubtitleTypeIcon({ className }: { className: string }) {
+    return createElement(
+        'svg',
+        {
+            className,
+            viewBox: '0 0 24 24',
+            fill: 'currentColor',
+            'aria-hidden': true,
+        },
+        createElement('text', {
+            x: 5,
+            y: 19,
+            fontFamily: 'Arial, sans-serif',
+            fontSize: 19,
+            fontWeight: 500,
+        }, 'S')
+    );
+}
+
+export const HEADING_ICON_MAP: Record<NamedStyleType, { key: string; component: ComponentType<{ className: string }> }> = {
     [NamedStyleType.HEADING_1]: { key: 'H1Icon', component: H1Icon },
     [NamedStyleType.HEADING_2]: { key: 'H2Icon', component: H2Icon },
     [NamedStyleType.HEADING_3]: { key: 'H3Icon', component: H3Icon },
     [NamedStyleType.HEADING_4]: { key: 'H4Icon', component: H4Icon },
     [NamedStyleType.HEADING_5]: { key: 'H5Icon', component: H5Icon },
     [NamedStyleType.NORMAL_TEXT]: { key: 'TextTypeIcon', component: TextTypeIcon },
-    [NamedStyleType.TITLE]: { key: 'TextTypeIcon', component: TextTypeIcon },
-    [NamedStyleType.SUBTITLE]: { key: 'TextTypeIcon', component: TextTypeIcon },
+    [NamedStyleType.TITLE]: { key: 'TitleTypeIcon', component: TitleTypeIcon },
+    [NamedStyleType.SUBTITLE]: { key: 'SubtitleTypeIcon', component: SubtitleTypeIcon },
     [NamedStyleType.NAMED_STYLE_TYPE_UNSPECIFIED]: { key: 'TextTypeIcon', component: TextTypeIcon },
 };
+
+export function shouldShowParagraphHeadingOption(headingType: NamedStyleType, currentType = NamedStyleType.NORMAL_TEXT): boolean {
+    if (headingType === NamedStyleType.HEADING_5) {
+        return currentType !== NamedStyleType.TITLE && currentType !== NamedStyleType.SUBTITLE;
+    }
+
+    if (headingType === NamedStyleType.TITLE) {
+        return currentType === NamedStyleType.TITLE;
+    }
+
+    if (headingType === NamedStyleType.SUBTITLE) {
+        return currentType === NamedStyleType.SUBTITLE;
+    }
+
+    return true;
+}
 
 const createHeadingSelectorMenuItemFactory = (headingType: NamedStyleType) => (accessor: IAccessor): IMenuItem => {
     const commandService = accessor.get(ICommandService);

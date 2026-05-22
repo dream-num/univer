@@ -17,6 +17,7 @@
 import type { Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
 import { Disposable, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, FOCUSING_SHEET, ICommandService, IContextService, Inject, Optional } from '@univerjs/core';
+import { getNextWheelZoomRatio } from '@univerjs/engine-render';
 import { SetZoomRatioCommand } from '../../commands/commands/set-zoom-ratio.command';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
@@ -68,23 +69,15 @@ export class SheetsZoomRenderController extends Disposable implements IRenderMod
                     }
                 }
 
-                const deltaFactor = Math.abs(e.deltaX);
-                let ratioDelta = deltaFactor < 40 ? 0.2 : deltaFactor < 80 ? 0.4 : 0.2;
-                ratioDelta *= e.deltaY > 0 ? -1 : 1;
-                if (scene.scaleX < 1) {
-                    ratioDelta /= 2;
-                }
-
                 const workbook = this._context.unit;
                 const sheet = workbook.getActiveSheet();
                 if (!sheet) return;
 
                 const currentRatio = sheet.getZoomRatio();
-                let nextRatio = +Number.parseFloat(`${currentRatio + ratioDelta}`).toFixed(1);
-                nextRatio = nextRatio >= 4 ? 4 : nextRatio <= 0.1 ? 0.1 : nextRatio;
+                const nextRatio = getNextWheelZoomRatio(currentRatio, e);
 
                 this._commandService.executeCommand(SetZoomRatioCommand.id, {
-                    zoomRatio: Math.round(nextRatio * 10) / 10,
+                    zoomRatio: nextRatio,
                     unitId: workbook.getUnitId(),
                     subUnitId: sheet.getSheetId(),
                 });

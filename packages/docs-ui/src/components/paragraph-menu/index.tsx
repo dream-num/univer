@@ -28,7 +28,7 @@ import { useMemo, useRef, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { HorizontalLineCommand } from '../../commands/commands/doc-horizontal-line.command';
 import { BulletListCommand, CheckListCommand, OrderListCommand } from '../../commands/commands/list.command';
-import { H1HeadingCommand, H2HeadingCommand, H3HeadingCommand, H4HeadingCommand, H5HeadingCommand, NormalTextHeadingCommand, SetParagraphNamedStyleCommand } from '../../commands/commands/set-heading.command';
+import { H1HeadingCommand, H2HeadingCommand, H3HeadingCommand, H4HeadingCommand, H5HeadingCommand, NormalTextHeadingCommand, SetParagraphNamedStyleCommand, SubtitleHeadingCommand, TitleHeadingCommand } from '../../commands/commands/set-heading.command';
 import { EMPTY_PARAGRAPH_MENU_ID, HEADING_ICON_MAP } from '../../menu/paragraph-menu';
 import { DocEventManagerService } from '../../services/doc-event-manager.service';
 import { DocParagraphMenuService } from '../../services/doc-paragraph-menu.service';
@@ -65,6 +65,8 @@ const HEADING_COMMAND_VALUES: Record<string, NamedStyleType> = {
     [H4HeadingCommand.id]: NamedStyleType.HEADING_4,
     [H5HeadingCommand.id]: NamedStyleType.HEADING_5,
     [NormalTextHeadingCommand.id]: NamedStyleType.NORMAL_TEXT,
+    [TitleHeadingCommand.id]: NamedStyleType.TITLE,
+    [SubtitleHeadingCommand.id]: NamedStyleType.SUBTITLE,
 };
 
 const NAMED_STYLE_HEADING_COMMAND_IDS: Partial<Record<NamedStyleType, string>> = {
@@ -74,10 +76,24 @@ const NAMED_STYLE_HEADING_COMMAND_IDS: Partial<Record<NamedStyleType, string>> =
     [NamedStyleType.HEADING_4]: H4HeadingCommand.id,
     [NamedStyleType.HEADING_5]: H5HeadingCommand.id,
     [NamedStyleType.NORMAL_TEXT]: NormalTextHeadingCommand.id,
+    [NamedStyleType.TITLE]: TitleHeadingCommand.id,
+    [NamedStyleType.SUBTITLE]: SubtitleHeadingCommand.id,
 };
 
 export function getParagraphMenuActiveHeadingCommandId(namedStyleType?: NamedStyleType): string {
     return NAMED_STYLE_HEADING_COMMAND_IDS[namedStyleType ?? NamedStyleType.NORMAL_TEXT] ?? NormalTextHeadingCommand.id;
+}
+
+export function getParagraphMenuHiddenHeadingCommandIds(namedStyleType?: NamedStyleType): string[] {
+    if (namedStyleType === NamedStyleType.TITLE) {
+        return [H5HeadingCommand.id, SubtitleHeadingCommand.id];
+    }
+
+    if (namedStyleType === NamedStyleType.SUBTITLE) {
+        return [H5HeadingCommand.id, TitleHeadingCommand.id];
+    }
+
+    return [TitleHeadingCommand.id, SubtitleHeadingCommand.id];
 }
 
 export function getParagraphMenuCommand(params: IValueOption, targetRange?: ITextRangeWithStyle | null): { commandId?: string; params?: object } {
@@ -147,6 +163,7 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
     const isEmptyParagraph = isEmptyParagraphMenuTarget(dataStream, activeParagraphBound);
     const namedStyleType = paragraphObj?.paragraphStyle?.namedStyleType;
     const activeHeadingCommandId = getParagraphMenuActiveHeadingCommandId(namedStyleType);
+    const hiddenHeadingCommandIds = useMemo(() => getParagraphMenuHiddenHeadingCommandIds(namedStyleType), [namedStyleType]);
     const icon = HEADING_ICON_MAP[namedStyleType ?? NamedStyleType.NORMAL_TEXT];
     const anchorRect$ = useMemo(() => new BehaviorSubject({
         left: 0,
@@ -249,6 +266,7 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
                             className="univer-w-[212px]"
                             menuType={emptyMode ? EMPTY_PARAGRAPH_MENU_ID : ContextMenuPosition.PARAGRAPH}
                             activeItemIds={[activeHeadingCommandId]}
+                            hiddenItemIds={hiddenHeadingCommandIds}
                             onOptionSelect={(params) => {
                                 const targetRange = targetRangeRef.current ?? getParagraphMenuTargetRange(activeParagraphBound);
                                 const { commandId, params: commandParams } = getParagraphMenuCommand(params, targetRange);

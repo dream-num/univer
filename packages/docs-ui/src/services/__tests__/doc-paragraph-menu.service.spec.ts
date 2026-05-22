@@ -52,11 +52,34 @@ describe('DocParagraphMenuService', () => {
 
         expect(attachPopupToRect).not.toHaveBeenCalled();
     });
+
+    it('anchors paragraph menu to the latest paragraph bound after layout changes', () => {
+        const latestFirstLine = { bottom: 30, left: 20, right: 120, top: 10 };
+        const attachPopupToRect = vi.fn(() => ({ canDispose: () => true, dispose: vi.fn() }));
+        const service = createService({
+            attachPopupToRect,
+            dataStream: 'Title\r',
+            findParagraphBoundByIndex: () => ({
+                firstLine: latestFirstLine,
+            }),
+        });
+
+        service.showParagraphMenu(createParagraphBound({
+            paragraphStart: 0,
+            paragraphEnd: 5,
+            startIndex: 5,
+        }));
+
+        const [anchor] = attachPopupToRect.mock.calls[0];
+        expect(typeof anchor).toBe('function');
+        expect(anchor()).toBe(latestFirstLine);
+    });
 });
 
 function createService(options: {
     attachPopupToRect: ReturnType<typeof vi.fn>;
     dataStream: string;
+    findParagraphBoundByIndex?: ReturnType<typeof vi.fn>;
 }) {
     return new DocParagraphMenuService(
         {
@@ -85,6 +108,7 @@ function createService(options: {
             hoverParagraphRealTime$: new BehaviorSubject(null),
             hoverParagraphLeft$: new BehaviorSubject(null),
             clickCustomRanges$: new Subject(),
+            findParagraphBoundByIndex: options.findParagraphBoundByIndex ?? vi.fn(() => null),
         } as never,
         {
             attachPopupToRect: options.attachPopupToRect,

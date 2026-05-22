@@ -330,6 +330,16 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
                 this._paragraphDirty = true;
             })
         );
+
+        this.disposeWithMe(
+            fromEventSubject(this._context.scene.onTransformChange$).pipe(
+                filter((evt) => evt.type === TRANSFORM_CHANGE_OBSERVABLE_TYPE.scale)
+            ).subscribe(() => {
+                this._customRangeDirty = true;
+                this._bulletDirty = true;
+                this._paragraphDirty = true;
+            })
+        );
     }
 
     private _initEvents() {

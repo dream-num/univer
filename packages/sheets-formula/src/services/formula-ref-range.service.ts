@@ -275,7 +275,13 @@ export class FormulaRefRangeService extends Disposable {
                     const offsetColumn = currentStartColumn - originStartColumn;
 
                     for (const range of effectedRanges.ranges) {
-                        const intersectedRange = ranges.map((r) => getIntersectRange(range, r)).filter(Boolean) as IRange[];
+                        const intersectedRange: IRange[] = [];
+                        for (const r of ranges) {
+                            const intersect = getIntersectRange(range, r);
+                            if (intersect) {
+                                intersectedRange.push(intersect);
+                            }
+                        }
                         if (intersectedRange.length > 0) {
                             intersectedRanges.push(...intersectedRange);
                         }

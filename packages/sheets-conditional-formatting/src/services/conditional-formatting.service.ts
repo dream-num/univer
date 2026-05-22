@@ -32,7 +32,19 @@ import type { IAddConditionalRuleMutationParams } from '../commands/mutations/ad
 import type { IDeleteConditionalRuleMutationParams } from '../commands/mutations/delete-conditional-rule.mutation';
 import type { IConditionFormattingRule, IHighlightCell, IRuleModelJson } from '../models/type';
 import type { IDataBarCellData, IDataBarRenderParams, IIconSetCellData, IIconSetRenderParams } from '../render/type';
-import { Disposable, ICommandService, Inject, Injector, IResourceManagerService, isInternalEditorID, IUniverInstanceService, merge, ObjectMatrix, Rectangle, UniverInstanceType } from '@univerjs/core';
+import {
+    Disposable,
+    ICommandService,
+    Inject,
+    Injector,
+    IResourceManagerService,
+    isInternalEditorID,
+    IUniverInstanceService,
+    merge,
+    ObjectMatrix,
+    Rectangle,
+    UniverInstanceType,
+} from '@univerjs/core';
 import {
     CopySheetCommand,
     getSheetCommandTarget,
@@ -301,7 +313,14 @@ export class ConditionalFormattingService extends Disposable {
                         const ruleItem = this._conditionalFormattingViewModelV2.getCellCfs(unitId, subUnitId, row, col);
                         ruleItem?.forEach((item) => ruleIds.add(item.cfId));
                     });
-                    return [...ruleIds].map((cfId) => this._conditionalFormattingRuleModel.getRule(unitId, subUnitId, cfId) as IConditionFormattingRule).filter((rule) => !!rule);
+                    const rules: IConditionFormattingRule[] = [];
+                    for (const cfId of ruleIds) {
+                        const rule = this._conditionalFormattingRuleModel.getRule(unitId, subUnitId, cfId);
+                        if (rule) {
+                            rules.push(rule);
+                        }
+                    }
+                    return rules;
                 };
 
                 switch (commandInfo.id) {

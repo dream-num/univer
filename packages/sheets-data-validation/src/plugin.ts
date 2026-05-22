@@ -50,7 +50,7 @@ import { DataValidationCacheService } from './services/dv-cache.service';
 import { DataValidationCustomFormulaService } from './services/dv-custom-formula.service';
 import { DataValidationFormulaService } from './services/dv-formula.service';
 import { DataValidationListCacheService } from './services/dv-list-cache.service';
-import { SheetsDataValidationValidatorService } from './services/dv-validator-service';
+import { SheetsDataValidationValidatorService } from './services/dv-validator.service';
 
 @DependentOn(UniverSheetsFormulaPlugin, UniverDataValidationPlugin)
 export class UniverSheetsDataValidationPlugin extends Plugin {

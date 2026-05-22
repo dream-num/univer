@@ -21,7 +21,7 @@ import type { DataValidationCacheService } from '../dv-cache.service';
 import { ObjectMatrix as CoreObjectMatrix, DataValidationStatus, LifecycleStages } from '@univerjs/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { SheetsDataValidationValidatorService } from '../dv-validator-service';
+import { SheetsDataValidationValidatorService } from '../dv-validator.service';
 
 function createRule(uid: string, ranges: IRange[]): IDataValidationRule {
     return { uid, ranges } as IDataValidationRule;

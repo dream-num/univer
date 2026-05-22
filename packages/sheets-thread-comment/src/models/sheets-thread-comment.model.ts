@@ -240,7 +240,14 @@ export class SheetsThreadCommentModel extends Disposable {
             return [];
         }
 
-        return Array.from(current).map((id) => this.getComment(unitId, subUnitId, id)).filter(Boolean) as IThreadComment[];
+        const comments: IThreadComment[] = [];
+        for (const id of current) {
+            const comment = this.getComment(unitId, subUnitId, id);
+            if (comment) {
+                comments.push(comment);
+            }
+        }
+        return comments;
     }
 
     getComment(unitId: string, subUnitId: string, commentId: string) {

@@ -140,7 +140,11 @@ export function ParagraphSetting() {
         <div className="univer-box-border univer-w-full">
             <ParagraphSettingSection title={localeService.t('docs-ui.doc.paragraphSetting.alignment')} first>
                 <div
-                    className={clsx('univer-grid univer-grid-cols-4 univer-gap-1 univer-rounded-lg univer-p-1', borderClassName)}
+                    className={clsx(`
+                      univer-grid univer-h-12 univer-grid-cols-4 univer-items-stretch univer-gap-1 univer-rounded-lg
+                      univer-bg-white univer-p-1
+                      dark:!univer-bg-gray-900
+                    `, borderClassName)}
                 >
                     {alignmentOptions.map((item) => {
                         return (
@@ -148,17 +152,25 @@ export function ParagraphSetting() {
                                 <button
                                     type="button"
                                     className={clsx(`
-                                      univer-flex univer-h-8 univer-cursor-pointer univer-items-center
+                                      univer-flex univer-h-full univer-w-full univer-cursor-pointer univer-items-center
                                       univer-justify-center univer-rounded-md univer-border-none univer-bg-transparent
-                                      univer-p-0
+                                      univer-p-0 univer-text-gray-900 univer-transition-colors
                                       hover:univer-bg-gray-100
-                                      dark:hover:!univer-bg-gray-600
+                                      dark:!univer-text-gray-100
+                                      dark:hover:!univer-bg-gray-700
                                     `, {
-                                        'univer-bg-gray-200 dark:!univer-bg-gray-500': horizontalAlignValue === item.value,
+                                        'univer-bg-gray-200 dark:!univer-bg-gray-700': horizontalAlignValue === item.value,
                                     })}
                                     onClick={() => setHorizontalAlign(item.value)}
                                 >
-                                    {item.icon}
+                                    <span
+                                        className="
+                                          univer-flex univer-size-5 univer-items-center univer-justify-center
+                                          univer-text-xl
+                                        "
+                                    >
+                                        {item.icon}
+                                    </span>
                                 </button>
                             </Tooltip>
                         );

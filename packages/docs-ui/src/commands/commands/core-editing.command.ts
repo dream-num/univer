@@ -21,10 +21,11 @@ import type {
     IDocumentData,
     IMutationInfo,
     ITextRange,
+    UpdateDocsAttributeType,
 } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
-import { BuildTextUtils, CommandType, HorizontalAlign, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType, UniverInstanceType, UpdateDocsAttributeType } from '@univerjs/core';
+import { BuildTextUtils, CommandType, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { DeleteDirection } from '../../types/delete-direction';
 import { getRichTextEditPath } from '../util';
@@ -189,26 +190,6 @@ export const DeleteCommand: ICommand<IDeleteCommandParams> = {
             len: end - start + 1,
         });
 
-        const emptiedCenteredParagraph = getEmptiedCenteredParagraph(body, start, end);
-        if (emptiedCenteredParagraph != null) {
-            textX.push({
-                t: TextXActionType.RETAIN,
-                len: 1,
-                coverType: UpdateDocsAttributeType.REPLACE,
-                body: {
-                    dataStream: '',
-                    paragraphs: [{
-                        ...emptiedCenteredParagraph,
-                        startIndex: 0,
-                        paragraphStyle: {
-                            ...emptiedCenteredParagraph.paragraphStyle,
-                            horizontalAlign: HorizontalAlign.LEFT,
-                        },
-                    }],
-                },
-            });
-        }
-
         const path = getRichTextEditPath(docDataModel, segmentId);
         doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
 
@@ -220,25 +201,6 @@ export const DeleteCommand: ICommand<IDeleteCommandParams> = {
         return Boolean(result);
     },
 };
-
-function getEmptiedCenteredParagraph(body: IDocumentBody, deleteStart: number, deleteEnd: number) {
-    const paragraphs = body.paragraphs ?? [];
-    for (let i = 0; i < paragraphs.length; i++) {
-        const paragraph = paragraphs[i];
-        const paragraphTextStart = i === 0 ? 0 : paragraphs[i - 1].startIndex + 1;
-        const paragraphTextEnd = paragraph.startIndex - 1;
-        const paragraphTextLength = paragraph.startIndex - paragraphTextStart;
-
-        if (
-            paragraphTextLength > 0 &&
-            paragraph.paragraphStyle?.horizontalAlign === HorizontalAlign.CENTER &&
-            deleteStart <= paragraphTextStart &&
-            deleteEnd >= paragraphTextEnd
-        ) {
-            return paragraph;
-        }
-    }
-}
 
 export interface IUpdateCommandParams {
     unitId: string;

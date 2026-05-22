@@ -25,10 +25,11 @@ import {
     UniverInstanceType,
     UpdateDocsAttributeType,
 } from '@univerjs/core';
-import { DocSelectionManagerService, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
+import { DocSelectionManagerService, DocSkeletonManagerService, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { DeleteDirection } from '../../../types/delete-direction';
 import { DeleteCommand, InsertCommand, UpdateCommand } from '../core-editing.command';
+import { DeleteLeftCommand, DeleteRightCommand } from '../doc-delete.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
 function getDocumentData(): IDocumentData {
@@ -94,6 +95,31 @@ function getCenteredSingleCharacterDocumentData(): IDocumentData {
     };
 }
 
+function getCenteredEmptyParagraphDocumentData(): IDocumentData {
+    return {
+        id: 'test-doc',
+        body: {
+            dataStream: '\r\n',
+            paragraphs: [{
+                startIndex: 0,
+                paragraphStyle: {
+                    horizontalAlign: HorizontalAlign.CENTER,
+                },
+            }],
+        },
+        documentStyle: {
+            pageSize: {
+                width: 594.3,
+                height: 840.51,
+            },
+            marginTop: 72,
+            marginBottom: 72,
+            marginRight: 90,
+            marginLeft: 90,
+        },
+    };
+}
+
 describe('core editing commands', () => {
     let univer: Univer;
     let get: Injector['get'];
@@ -116,6 +142,28 @@ describe('core editing commands', () => {
                 return ts[key];
             }
         }
+    }
+
+    function setActiveSelection(offset: number) {
+        const selectionManager = get(DocSelectionManagerService);
+        selectionManager.__TEST_ONLY_setCurrentSelection({
+            unitId: 'test-doc',
+            subUnitId: 'test-doc',
+        });
+        selectionManager.__TEST_ONLY_add([{ startOffset: offset, endOffset: offset, collapsed: true, isActive: true, segmentId: '', style: null as never }]);
+    }
+
+    function mockSkeleton() {
+        const skeletonManager = get(DocSkeletonManagerService) as unknown as { getSkeleton: () => unknown };
+        skeletonManager.getSkeleton = () => ({});
+    }
+
+    function registerDeleteKeyCommands() {
+        commandService.registerCommand(DeleteLeftCommand);
+        commandService.registerCommand(DeleteRightCommand);
+        commandService.registerCommand(UpdateCommand);
+        commandService.registerCommand(SetTextSelectionsOperation);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
     }
 
     beforeEach(() => {
@@ -171,7 +219,7 @@ describe('core editing commands', () => {
         expect(getBody()?.customRanges).toEqual([]);
     });
 
-    it('resets a centered paragraph to left alignment when deleting its last character', async () => {
+    it('keeps center alignment when deleting the last character from a centered paragraph', async () => {
         univer.dispose();
         const testBed = createCommandTestBed(getCenteredSingleCharacterDocumentData());
         univer = testBed.univer;
@@ -191,10 +239,10 @@ describe('core editing commands', () => {
         await awaitTime(0);
 
         expect(getDataStream()).toBe('\r\n');
-        expect(getBody()?.paragraphs?.[0].paragraphStyle?.horizontalAlign).toBe(HorizontalAlign.LEFT);
+        expect(getBody()?.paragraphs?.[0].paragraphStyle?.horizontalAlign).toBe(HorizontalAlign.CENTER);
     });
 
-    it('resets a centered paragraph to left alignment when backspacing its last character', async () => {
+    it('keeps center alignment when backspacing the last character from a centered paragraph', async () => {
         univer.dispose();
         const testBed = createCommandTestBed(getCenteredSingleCharacterDocumentData());
         univer = testBed.univer;
@@ -210,6 +258,42 @@ describe('core editing commands', () => {
             range: { startOffset: 1, endOffset: 1, collapsed: true },
             direction: DeleteDirection.LEFT,
         });
+
+        await awaitTime(0);
+
+        expect(getDataStream()).toBe('\r\n');
+        expect(getBody()?.paragraphs?.[0].paragraphStyle?.horizontalAlign).toBe(HorizontalAlign.CENTER);
+    });
+
+    it('resets an empty centered paragraph to left alignment on a second delete', async () => {
+        univer.dispose();
+        const testBed = createCommandTestBed(getCenteredEmptyParagraphDocumentData());
+        univer = testBed.univer;
+        get = testBed.get;
+        commandService = get(ICommandService);
+        registerDeleteKeyCommands();
+        mockSkeleton();
+        setActiveSelection(0);
+
+        await commandService.executeCommand(DeleteRightCommand.id);
+
+        await awaitTime(0);
+
+        expect(getDataStream()).toBe('\r\n');
+        expect(getBody()?.paragraphs?.[0].paragraphStyle?.horizontalAlign).toBe(HorizontalAlign.LEFT);
+    });
+
+    it('resets an empty centered paragraph to left alignment on a second backspace', async () => {
+        univer.dispose();
+        const testBed = createCommandTestBed(getCenteredEmptyParagraphDocumentData());
+        univer = testBed.univer;
+        get = testBed.get;
+        commandService = get(ICommandService);
+        registerDeleteKeyCommands();
+        mockSkeleton();
+        setActiveSelection(0);
+
+        await commandService.executeCommand(DeleteLeftCommand.id);
 
         await awaitTime(0);
 

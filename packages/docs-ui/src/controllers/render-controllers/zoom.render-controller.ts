@@ -155,6 +155,13 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
                     return;
                 }
 
+                const { documentFlavor } = documentModel.getSnapshot().documentStyle;
+
+                if (documentFlavor === DocumentFlavor.MODERN) {
+                    e.preventDefault();
+                    return;
+                }
+
                 const currentRatio = documentModel.zoomRatio || 1;
                 const nextRatio = getNextWheelZoomRatio(currentRatio, e);
 

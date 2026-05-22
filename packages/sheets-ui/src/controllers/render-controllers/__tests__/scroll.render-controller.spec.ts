@@ -103,6 +103,31 @@ describe('SheetsScrollRenderController', () => {
         void controller;
     });
 
+    it('normalizes wheel scroll offsets by sheet zoom ratio', () => {
+        const scrollManagerService = createScrollManagerServiceMock();
+        const testBed = createRenderTestBed({
+            dependencies: [[SheetScrollManagerService, { useValue: scrollManagerService }]],
+        });
+        const { context, scene, contextService } = testBed;
+        const commandService = testBed.get(ICommandService);
+        const executeSpy = vi.spyOn(commandService, 'executeCommand');
+
+        contextService.setContextValue(FOCUSING_SHEET, true);
+        scene.scale(2, 2);
+
+        const controller = testBed.injector.createInstance(SheetsScrollRenderController, context as any);
+        const preventDefault = vi.fn();
+
+        scene.onMouseWheel$.emit(
+            { ctrlKey: false, shiftKey: false, deltaX: 8, deltaY: 20, preventDefault },
+            { stopPropagation: () => { } }
+        );
+
+        expect(executeSpy).toHaveBeenCalledWith(SetScrollRelativeCommand.id, { offsetX: 4, offsetY: 10 });
+
+        void controller;
+    });
+
     it('updates scroll state from viewport events and executes ScrollCommand when scrolling bar', () => {
         const scrollManagerService = createScrollManagerServiceMock();
         const testBed = createRenderTestBed({

@@ -142,6 +142,53 @@ describe('engine scene viewport extra', () => {
         document.body.innerHTML = '';
     });
 
+    it('keeps wheel scrolling visually consistent when the scene is scaled', () => {
+        const getViewportWheelDelta = (scale: number) => {
+            const container = document.createElement('div');
+            document.body.appendChild(container);
+
+            const engine = new Engine('unit-wheel', { elementWidth: 320, elementHeight: 180, dpr: 1 });
+            engine.mount(container, false);
+
+            const scene = new Scene('scene-wheel', engine);
+            scene.transformByState({
+                width: 700,
+                height: 500,
+                scaleX: 1,
+                scaleY: 1,
+            });
+
+            const viewport = new Viewport('doc-like-vp', scene, {
+                left: 0,
+                top: 0,
+                right: 0,
+                bottom: 0,
+                active: true,
+            });
+
+            new ScrollBar(viewport);
+            scene.scale(scale, scale);
+            viewport.resetCanvasSizeAndUpdateScroll();
+
+            viewport.onMouseWheel(
+                createInputEvent('wheel', { deltaY: 60 }),
+                { stopPropagation: vi.fn() } as any
+            );
+
+            const delta = viewport.viewportScrollY;
+            scene.dispose();
+            engine.dispose();
+            container.remove();
+
+            return delta;
+        };
+
+        const normalScaleDelta = getViewportWheelDelta(1);
+        const doubleScaleDelta = getViewportWheelDelta(2);
+
+        expect(doubleScaleDelta * 2).toBeCloseTo(normalScaleDelta, 3);
+    });
+
     it('covers scene, viewport, layer and render loop flows', () => {
         const { engine, scene, viewport, container } = createFixture();
 

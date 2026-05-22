@@ -510,6 +510,149 @@ describe('documents render', () => {
         documents.dispose();
     });
 
+    it('draws each physical table grid line only once', () => {
+        const skeleton = { getSkeletonData: () => ({ pages: [] }) } as any;
+        const documents = new Documents('docs-border-canonical', skeleton, {
+            pageLayoutType: PageLayoutType.VERTICAL,
+            pageMarginLeft: 0,
+            pageMarginTop: 0,
+        });
+        const cells = Array.from({ length: 4 }, (_, index) => {
+            const cell = createPage(DocumentSkeletonPageType.CELL, `cell-${index}`);
+            cell.marginLeft = 0;
+            cell.marginTop = 0;
+            cell.pageWidth = 50;
+            cell.pageHeight = 30;
+            return cell;
+        });
+        const row0 = {
+            cells: [cells[0], cells[1]],
+            index: 0,
+            rowSource: { tableCells: [{}, {}] },
+        } as any;
+        const row1 = {
+            cells: [cells[2], cells[3]],
+            index: 1,
+            rowSource: { tableCells: [{}, {}] },
+        } as any;
+        const table = { rows: [row0, row1] } as any;
+        row0.parent = table;
+        row1.parent = table;
+        cells[0].parent = row0;
+        cells[1].parent = row0;
+        cells[2].parent = row1;
+        cells[3].parent = row1;
+
+        let currentSegment = '';
+        const drawnSegments: string[] = [];
+        const ctx = {
+            save: vi.fn(),
+            restore: vi.fn(),
+            fillRectByPrecision: vi.fn(),
+            setLineWidthByPrecision: vi.fn(),
+            beginPath: vi.fn(),
+            moveToByPrecision: vi.fn((x: number, y: number) => {
+                currentSegment = `${x},${y}`;
+            }),
+            lineToByPrecision: vi.fn((x: number, y: number) => {
+                currentSegment += `-${x},${y}`;
+                drawnSegments.push(currentSegment);
+            }),
+            setLineDash: vi.fn(),
+            stroke: vi.fn(),
+            closePathByEnv: vi.fn(),
+            set strokeStyle(_value: string) {},
+        } as any;
+
+        [
+            { cell: cells[0], x: 0, y: 0 },
+            { cell: cells[1], x: 50, y: 0 },
+            { cell: cells[2], x: 0, y: 30 },
+            { cell: cells[3], x: 50, y: 30 },
+        ].forEach(({ cell, x, y }) => {
+            (documents as any)._drawLiquid = { x, y };
+            (documents as any)._drawTableCellBordersAndBg(ctx, { marginLeft: 0, marginTop: 0 }, cell);
+        });
+
+        expect(ctx.stroke).toHaveBeenCalledTimes(12);
+        expect(new Set(drawnSegments).size).toBe(12);
+
+        documents.dispose();
+    });
+
+    it('uses neighboring table cell borders for internal canonical edges', () => {
+        const skeleton = { getSkeletonData: () => ({ pages: [] }) } as any;
+        const documents = new Documents('docs-border-neighbor', skeleton, {
+            pageLayoutType: PageLayoutType.VERTICAL,
+            pageMarginLeft: 0,
+            pageMarginTop: 0,
+        });
+        const cells = Array.from({ length: 2 }, (_, index) => {
+            const cell = createPage(DocumentSkeletonPageType.CELL, `neighbor-cell-${index}`);
+            cell.marginLeft = 0;
+            cell.marginTop = 0;
+            cell.pageWidth = 50;
+            cell.pageHeight = 30;
+            return cell;
+        });
+        const noBorder = { color: { rgb: 'transparent' }, width: { v: 0 } };
+        const row = {
+            cells,
+            index: 0,
+            rowSource: {
+                tableCells: [
+                    {
+                        borderTop: noBorder,
+                        borderBottom: noBorder,
+                        borderLeft: noBorder,
+                    },
+                    {
+                        borderTop: noBorder,
+                        borderBottom: noBorder,
+                        borderLeft: { color: { rgb: '#ff0000' }, width: { v: 3 } },
+                        borderRight: noBorder,
+                    },
+                ],
+            },
+        } as any;
+        const table = { rows: [row] } as any;
+        row.parent = table;
+        cells[0].parent = row;
+        cells[1].parent = row;
+
+        const strokeStyles: string[] = [];
+        const lineWidths: number[] = [];
+        const ctx = {
+            save: vi.fn(),
+            restore: vi.fn(),
+            fillRectByPrecision: vi.fn(),
+            setLineWidthByPrecision: vi.fn((width: number) => lineWidths.push(width)),
+            beginPath: vi.fn(),
+            moveToByPrecision: vi.fn(),
+            lineToByPrecision: vi.fn(),
+            setLineDash: vi.fn(),
+            stroke: vi.fn(),
+            closePathByEnv: vi.fn(),
+            set strokeStyle(value: string) {
+                strokeStyles.push(value);
+            },
+        } as any;
+
+        [
+            { cell: cells[0], x: 0 },
+            { cell: cells[1], x: 50 },
+        ].forEach(({ cell, x }) => {
+            (documents as any)._drawLiquid = { x, y: 0 };
+            (documents as any)._drawTableCellBordersAndBg(ctx, { marginLeft: 0, marginTop: 0 }, cell);
+        });
+
+        expect(ctx.stroke).toHaveBeenCalledTimes(1);
+        expect(lineWidths).toEqual([3]);
+        expect(strokeStyles).toEqual(['#ff0000']);
+
+        documents.dispose();
+    });
+
     it('uses the document unit id to apply table horizontal viewport while drawing', () => {
         const bodyPage = createPage(DocumentSkeletonPageType.BODY, '');
         attachTable(bodyPage);

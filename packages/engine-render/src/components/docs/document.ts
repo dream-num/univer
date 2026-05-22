@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDocumentRenderConfig, IScale, ITableCellBorder, Nullable } from '@univerjs/core';
+import type { IDocumentRenderConfig, IScale, ITableCell, ITableCellBorder, Nullable } from '@univerjs/core';
 
 import type { IDocumentSkeletonGlyph, IDocumentSkeletonLine, IDocumentSkeletonPage, IDocumentSkeletonRow, IDocumentSkeletonTable } from '../../basics/i-document-skeleton-cached';
 import type { Transform } from '../../basics/transform';
@@ -854,15 +854,19 @@ export class Documents extends DocComponent {
         const { pageWidth, pageHeight } = cell;
         const rowSke = cell.parent as IDocumentSkeletonRow;
         const index = rowSke.cells.indexOf(cell);
-        const cellSource = rowSke.rowSource.tableCells[index];
 
-        const {
-            borderTop = DEFAULT_BORDER_COLOR,
-            borderBottom = DEFAULT_BORDER_COLOR,
-            borderLeft = DEFAULT_BORDER_COLOR,
-            borderRight = DEFAULT_BORDER_COLOR,
-            backgroundColor,
-        } = cellSource;
+        if (index < 0) {
+            return;
+        }
+
+        const cellSource = rowSke.rowSource.tableCells[index];
+        const tableSke = rowSke.parent as IDocumentSkeletonTable | undefined;
+        const rowIndexInTable = tableSke?.rows.indexOf(rowSke);
+        const rowIndex = rowIndexInTable == null || rowIndexInTable < 0 ? rowSke.index ?? 0 : rowIndexInTable;
+
+        if (!cellSource || cellSource.rowSpan === 0 || cellSource.columnSpan === 0) {
+            return;
+        }
 
         if (this._drawLiquid == null) {
             return;
@@ -873,9 +877,9 @@ export class Documents extends DocComponent {
         y += marginTop;
 
         // Draw cell bg.
-        if (backgroundColor && backgroundColor.rgb) {
+        if (cellSource.backgroundColor?.rgb) {
             ctx.save();
-            ctx.fillStyle = backgroundColor.rgb;
+            ctx.fillStyle = cellSource.backgroundColor.rgb;
             ctx.fillRectByPrecision(x, y, pageWidth, pageHeight);
             ctx.restore();
         }
@@ -886,20 +890,63 @@ export class Documents extends DocComponent {
             endX: x + pageWidth,
             endY: y + pageHeight,
         };
-        this._drawTableCellBorder(ctx, borderLeft, BORDER_LTRB.LEFT, position);
-        this._drawTableCellBorder(ctx, borderTop, BORDER_LTRB.TOP, position);
-        this._drawTableCellBorder(ctx, borderRight, BORDER_LTRB.RIGHT, position);
-        this._drawTableCellBorder(ctx, borderBottom, BORDER_LTRB.BOTTOM, position);
+
+        const rightCellSource = this._getTableCellSource(rowSke, index + 1);
+        const bottomCellSource = tableSke ? this._getTableCellSource(tableSke.rows[rowIndex + 1], index) : undefined;
+        this._drawTableCellBorder(ctx, this._resolveTableCellBorder(cellSource.borderRight, rightCellSource?.borderLeft), BORDER_LTRB.RIGHT, position);
+        this._drawTableCellBorder(ctx, this._resolveTableCellBorder(cellSource.borderBottom, bottomCellSource?.borderTop), BORDER_LTRB.BOTTOM, position);
+
+        if (rowIndex <= 0) {
+            this._drawTableCellBorder(ctx, this._resolveTableCellBorder(cellSource.borderTop), BORDER_LTRB.TOP, position);
+        }
+
+        if (index <= 0) {
+            this._drawTableCellBorder(ctx, this._resolveTableCellBorder(cellSource.borderLeft), BORDER_LTRB.LEFT, position);
+        }
+    }
+
+    private _getTableCellSource(row: Nullable<IDocumentSkeletonRow>, column: number): Nullable<ITableCell> {
+        return row?.rowSource.tableCells[column] ?? null;
+    }
+
+    private _resolveTableCellBorder(primary?: ITableCellBorder, secondary?: ITableCellBorder): Nullable<ITableCellBorder> {
+        if (this._isDrawableTableCellBorder(primary)) {
+            return primary!;
+        }
+
+        if (this._isDrawableTableCellBorder(secondary)) {
+            return secondary!;
+        }
+
+        if (primary || secondary) {
+            return null;
+        }
+
+        return DEFAULT_BORDER_COLOR;
+    }
+
+    private _isDrawableTableCellBorder(border?: ITableCellBorder): boolean {
+        if (!border) {
+            return false;
+        }
+
+        const lineWidth = border.width?.v ?? 1;
+        const color = border.color?.rgb ?? DEFAULT_BORDER_COLOR.color.rgb!;
+        return lineWidth > 0 && color !== 'transparent';
     }
 
     private _drawTableCellBorder(
         ctx: UniverRenderingContext,
-        border: ITableCellBorder,
+        border: Nullable<ITableCellBorder>,
         type: BORDER_LTRB,
         position: { startX: number; startY: number; endX: number; endY: number }
     ) {
+        if (!border) {
+            return;
+        }
+
         const lineWidth = border.width?.v ?? 1;
-        const color = border.color.rgb ?? DEFAULT_BORDER_COLOR.color.rgb!;
+        const color = border.color?.rgb ?? DEFAULT_BORDER_COLOR.color.rgb!;
         if (lineWidth <= 0 || color === 'transparent') {
             return;
         }

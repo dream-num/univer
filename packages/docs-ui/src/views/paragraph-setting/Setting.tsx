@@ -82,12 +82,14 @@ const AutoFocusInputNumber = (props: {
     min?: number;
     max?: number;
     step?: number;
+    precision?: number;
 }) => {
-    const { value, onChange, className = '', min = 0, max = 100, step = 1 } = props;
+    const { value, onChange, className = '', min = 0, max = 100, step = 0.1, precision = 1 } = props;
     const ref = useRef<HTMLInputElement>(null);
     return (
         <InputNumber
             step={step}
+            precision={precision}
             ref={ref}
             min={min}
             max={max}
@@ -131,10 +133,10 @@ export function ParagraphSetting() {
 
     const lineSpaceConfig = useMemo(() => {
         if (spacingRule === SpacingRule.AUTO) {
-            return { min: 1, max: 5, step: lineSpacing < 2 ? 0.5 : 1 };
+            return { min: 1, max: 5, step: 0.1 };
         }
         return { min: 1, max: 100 };
-    }, [spacingRule, lineSpacing]);
+    }, [spacingRule]);
 
     return (
         <div className="univer-box-border univer-w-full">

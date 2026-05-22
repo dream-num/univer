@@ -249,9 +249,9 @@ export const useFirstParagraphLineSpacing = (paragraph: IParagraph[]) => {
     const [lineSpacing, setLineSpacingInternal] = useState(() => {
         const firstParagraph = paragraph[0];
         if (!firstParagraph) {
-            return 1;
+            return 1.5;
         }
-        return firstParagraph.paragraphStyle?.lineSpacing ?? 1;
+        return firstParagraph.paragraphStyle?.lineSpacing ?? 1.5;
     });
 
     const lineSpacingCache = useRef<number>(lineSpacing);

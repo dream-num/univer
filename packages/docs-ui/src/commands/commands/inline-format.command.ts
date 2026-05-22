@@ -253,7 +253,10 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const docMenuStyleService = accessor.get(DocMenuStyleService);
 
-        const docRanges = docSelectionManagerService.getDocRanges();
+        const textRanges = docSelectionManagerService.getTextRanges() ?? [];
+        const docRanges = textRanges.length > 0
+            ? textRanges.filter((range) => range.startOffset != null && range.endOffset != null)
+            : docSelectionManagerService.getDocRanges();
         const activeRange = docRanges.find((r) => r.isActive) ?? docRanges[0];
 
         if (docRanges.length === 0) {

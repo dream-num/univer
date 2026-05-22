@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, ICommand, Injector, IStyleBase, Univer } from '@univerjs/core';
-import { BooleanNumber, ICommandService, IUniverInstanceService, RedoCommand, UndoCommand, UniverInstanceType } from '@univerjs/core';
+import { BooleanNumber, DOC_RANGE_TYPE, ICommandService, IUniverInstanceService, RedoCommand, UndoCommand, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
@@ -115,6 +115,51 @@ describe('Test inline format commands', () => {
             expect(getFormatValueAt('bl', 1)).toBe(BooleanNumber.TRUE);
             expect(getFormatValueAt('bl', 21)).toBe(BooleanNumber.TRUE);
             expect(getFormatValueAt('bl', 25)).toBe(BooleanNumber.TRUE);
+        });
+
+        it('formats text ranges without applying stale table rect ranges', async () => {
+            const selectionManager = get(DocSelectionManagerService);
+            selectionManager.__replaceTextRangesWithNoRefresh({
+                textRanges: [{
+                    startOffset: 0,
+                    endOffset: 5,
+                    collapsed: false,
+                    isActive: true,
+                    rangeType: DOC_RANGE_TYPE.TEXT,
+                }],
+                rectRanges: [{
+                    startOffset: 20,
+                    endOffset: 30,
+                    collapsed: false,
+                    rangeType: DOC_RANGE_TYPE.RECT,
+                    tableId: 'table-1',
+                    startRow: 0,
+                    endRow: 0,
+                    startColumn: 0,
+                    endColumn: 0,
+                }],
+                segmentId: '',
+                segmentPage: -1,
+                isEditing: true,
+                style: {},
+            } as never, {
+                unitId: 'test-doc',
+                subUnitId: 'test-doc',
+            });
+
+            expect(getFormatValueAt('ff', 1)).toBe(undefined);
+            expect(getFormatValueAt('ff', 21)).toBe(undefined);
+
+            await commandService.executeCommand(SetInlineFormatCommand.id, {
+                segmentId: '',
+                preCommandId: SetInlineFormatFontFamilyCommand.id,
+                value: 'Arial',
+            });
+
+            expect(getFormatValueAt('ff', 1)).toBe('Arial');
+            expect(getFormatValueAt('ff', 21)).toBe(undefined);
+
+            await commandService.executeCommand(UndoCommand.id);
         });
     });
 

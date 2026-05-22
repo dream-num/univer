@@ -36,7 +36,7 @@ import { FormulaUIController } from './controllers/formula-ui.controller';
 import { ImageFormulaRenderController } from './controllers/image-formula-render.controller';
 import { FormulaPromptService, IFormulaPromptService } from './services/prompt.service';
 import { GlobalRangeSelectorService } from './services/range-selector.service';
-import { RefSelectionsRenderService } from './services/render-services/ref-selections.render-service';
+import { RefSelectionsRenderService } from './services/render-services/ref-selections.render.service';
 import { FormulaEditor } from './views/formula-editor/index';
 import { RangeSelector } from './views/range-selector';
 import { GlobalRangeSelector } from './views/range-selector/Global';

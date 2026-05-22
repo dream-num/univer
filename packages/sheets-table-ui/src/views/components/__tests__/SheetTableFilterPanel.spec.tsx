@@ -22,7 +22,7 @@ import { SheetsTableSortStateEnum, SheetTableInsertColumnAtCommand, SheetTableRe
 import { createElement } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { SheetsTableComponentController } from '../../../controllers/sheet-table-component.controller';
-import { SheetsTableUiService } from '../../../services/sheets-table-ui-service';
+import { SheetsTableUiService } from '../../../services/sheets-table-ui.service';
 import { FilterByEnum } from '../../../types';
 import { SheetTableFilterPanel } from '../SheetTableFilterPanel';
 

@@ -39,7 +39,7 @@ import { RangeProtectionCache } from './model/range-protection.cache';
 import { SheetRangeThemeModel } from './model/range-theme-model';
 import { AutoFillService, IAutoFillService } from './services/auto-fill/auto-fill.service';
 import { BorderStyleManagerService } from './services/border-style-manager.service';
-import { ExclusiveRangeService, IExclusiveRangeService } from './services/exclusive-range/exclusive-range-service';
+import { ExclusiveRangeService, IExclusiveRangeService } from './services/exclusive-range/exclusive-range.service';
 import { SheetLazyExecuteScheduleService } from './services/lazy-execute-schedule.service';
 import { NumfmtService } from './services/numfmt/numfmt.service';
 import { INumfmtService } from './services/numfmt/type';
@@ -47,7 +47,7 @@ import { RangeProtectionRefRangeService } from './services/permission/range-perm
 import { RangeProtectionService } from './services/permission/range-permission/range-protection.service';
 import { WorkbookPermissionService } from './services/permission/workbook-permission/workbook-permission.service';
 import { WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from './services/permission/worksheet-permission';
-import { SheetRangeThemeService } from './services/range-theme-service';
+import { SheetRangeThemeService } from './services/range-theme.service';
 import { RefRangeService } from './services/ref-range/ref-range.service';
 import { SheetsSelectionsService } from './services/selections/selection.service';
 import { SheetInterceptorService } from './services/sheet-interceptor/sheet-interceptor.service';

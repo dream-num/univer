@@ -23,7 +23,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createCommandTestBed } from '../../commands/commands/__tests__/create-command-test-bed';
 import { DocAutoFormatService } from '../doc-auto-format.service';
 import { DocMenuStyleService } from '../doc-menu-style.service';
-import { DocPrintInterceptorService } from '../doc-print-interceptor-service';
+import { DocPrintInterceptorService } from '../doc-print-interceptor.service';
 import { DocsRenderService } from '../docs-render.service';
 
 function createDocData(): IDocumentData {

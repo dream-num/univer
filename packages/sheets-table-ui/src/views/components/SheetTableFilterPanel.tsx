@@ -26,7 +26,7 @@ import { SheetsTableSortStateEnum, SheetTableInsertColumnAtCommand, SheetTableRe
 import { useDependency } from '@univerjs/ui';
 import { useMemo, useState } from 'react';
 import { SheetsTableComponentController } from '../../controllers/sheet-table-component.controller';
-import { SheetsTableUiService } from '../../services/sheets-table-ui-service';
+import { SheetsTableUiService } from '../../services/sheets-table-ui.service';
 import { FilterByEnum } from '../../types';
 import { SheetTableConditionPanel } from './SheetTableConditionPanel';
 import { SheetTableItemsFilterPanel } from './SheetTableItemsFilterPanel';

@@ -15,7 +15,7 @@
  */
 
 import type { IAccessor } from '@univerjs/core';
-import type { IRemoveNumfmtMutationParams, ISetNumfmtMutationParams } from '../numfmt-mutation';
+import type { IRemoveNumfmtMutationParams, ISetNumfmtMutationParams } from '../numfmt.mutation';
 import { cellToRange } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { INumfmtService } from '../../../services/numfmt/type';
@@ -26,7 +26,7 @@ import {
     RemoveNumfmtMutation,
     SetNumfmtMutation,
     transformCellsToRange,
-} from '../numfmt-mutation';
+} from '../numfmt.mutation';
 
 function createAccessor(numfmtService: {
     getValue: ReturnType<typeof vi.fn>;
@@ -45,7 +45,7 @@ function createAccessor(numfmtService: {
     } as unknown as IAccessor;
 }
 
-describe('numfmt-mutation', () => {
+describe('numfmt.mutation', () => {
     it('transformCellsToRange groups cells by pattern', () => {
         const result = transformCellsToRange('unit-1', 'sheet-1', [
             { pattern: '0%', row: 1, col: 1 },

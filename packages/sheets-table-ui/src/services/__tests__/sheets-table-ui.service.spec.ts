@@ -18,7 +18,7 @@ import { SetRangeValuesMutation } from '@univerjs/sheets';
 import { SetSheetTableFilterCommand, TableColumnFilterTypeEnum } from '@univerjs/sheets-table';
 import { describe, expect, it, vi } from 'vitest';
 import { FilterByEnum } from '../../types';
-import { SheetsTableUiService } from '../sheets-table-ui-service';
+import { SheetsTableUiService } from '../sheets-table-ui.service';
 
 describe('SheetsTableUiService', () => {
     it('should build panel props, compute cached filter items and clear cache on related commands', () => {

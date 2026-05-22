@@ -18,7 +18,7 @@ import type { Injector, Styles, Univer, Workbook, Worksheet } from '@univerjs/co
 import type { IRemoveNumfmtMutationParams, ISetNumfmtMutationParams } from '@univerjs/sheets';
 import { cellToRange, CellValueType, DEFAULT_TEXT_FORMAT_EXCEL, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { RemoveNumfmtMutation, SetNumfmtMutation } from '../../commands/mutations/numfmt-mutation';
+import { RemoveNumfmtMutation, SetNumfmtMutation } from '../../commands/mutations/numfmt.mutation';
 import { NumfmtService } from '../numfmt/numfmt.service';
 import { INumfmtService } from '../numfmt/type';
 import { createTestBase } from './util';

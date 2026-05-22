@@ -37,7 +37,7 @@ import { SheetsSelectionsService } from '../../services/selections/selection.ser
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { InsertColMutation, InsertColMutationUndoFactory } from '../mutations/insert-row-col.mutation';
 import { RemoveColMutation } from '../mutations/remove-row-col.mutation';
-import { getInsertRangeMutations } from '../utils/handle-range-mutation';
+import { getInsertRangeMutations } from '../utils/handle-range.mutation';
 import { followSelectionOperation } from './utils/selection-utils';
 import { getSheetCommandTarget } from './utils/target-util';
 

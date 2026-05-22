@@ -21,7 +21,7 @@ import { IRefSelectionsService, REF_SELECTIONS_ENABLED } from '@univerjs/sheets'
 import { IContextMenuService, useDependency, useObservable } from '@univerjs/ui';
 
 import { useEffect, useLayoutEffect, useMemo } from 'react';
-import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
+import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render.service';
 
 export const useRefactorEffect = (isNeed: boolean, selecting: boolean, unitId: string, editorId: string, disableContextMenu = true) => {
     const renderManagerService = useDependency(IRenderManagerService);

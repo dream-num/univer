@@ -17,7 +17,7 @@
 import type { IMutation } from '@univerjs/core';
 import type { ITableOptions, ITableRange } from '../../types/type';
 import { CommandType } from '@univerjs/core';
-import { SheetTableService } from '../../services/table-service';
+import { SheetTableService } from '../../services/table.service';
 
 export interface IAddSheetTableParams {
     unitId: string;

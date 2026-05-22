@@ -66,7 +66,7 @@ export interface IExclusiveRangeService {
      */
     getInterestGroupId(selections: ISelectionWithStyle[]): string[];
 }
-export const IExclusiveRangeService = createIdentifier<IExclusiveRangeService>('univer.exclusive-range-service');
+export const IExclusiveRangeService = createIdentifier<IExclusiveRangeService>('univer.exclusive-range.service');
 
 export class ExclusiveRangeService extends Disposable implements IExclusiveRangeService {
     /**

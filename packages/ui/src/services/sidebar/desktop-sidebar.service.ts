@@ -28,6 +28,7 @@ export class DesktopSidebarService extends Disposable implements ISidebarService
 
     private _container?: HTMLElement;
     private _openAnimationFrameId: number | null = null;
+    private _width?: number;
 
     get visible(): boolean {
         return this._sidebarOptions.visible || false;
@@ -35,6 +36,14 @@ export class DesktopSidebarService extends Disposable implements ISidebarService
 
     get options() {
         return this._sidebarOptions;
+    }
+
+    get width(): number | undefined {
+        return this._width;
+    }
+
+    setWidth(value: number): void {
+        this._width = value;
     }
 
     override dispose(): void {

@@ -32,6 +32,9 @@ export interface ISidebarService {
 
     getContainer(): HTMLElement | undefined;
     setContainer(element?: HTMLElement): void;
+
+    get width(): number | undefined;
+    setWidth(value: number): void;
 }
 
 export const ILeftSidebarService = createIdentifier<ISidebarService>('ui.left-sidebar.service');

@@ -20,6 +20,7 @@ import './f-enum';
 export * from './f-enum';
 export * from './f-event';
 export { FRange } from './f-range';
+export { FRangeList } from './f-range-list';
 export { FSelection } from './f-selection';
 export { FSheetHooks } from './f-sheet-hooks';
 export { FWorkbook } from './f-workbook';

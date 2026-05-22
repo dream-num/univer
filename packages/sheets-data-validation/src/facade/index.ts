@@ -15,6 +15,7 @@
  */
 
 import './f-range';
+import './f-range-list';
 import './f-univer';
 import './f-workbook';
 import './f-worksheet';
@@ -25,6 +26,7 @@ export { FDataValidationBuilder } from './f-data-validation-builder';
 
 export type * from './f-event';
 export type * from './f-range';
+export type * from './f-range-list';
 export type * from './f-univer';
 export type * from './f-workbook';
 export type * from './f-worksheet';

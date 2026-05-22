@@ -18,6 +18,7 @@ import type { FUniver } from '@univerjs/core/facade';
 import { LifecycleStages } from '@univerjs/core';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { createFacadeTestBed } from './create-test-bed';
+import '../index';
 
 describe('Test FRange', () => {
     let univerAPI: FUniver;
@@ -36,6 +37,20 @@ describe('Test FRange', () => {
                 range.setValue(1234.5678);
                 range.setNumberFormat('#,###');
                 expect(range.getValue()).toBe('1,234.5678');
+            }
+        });
+    });
+
+    it('RangeList setNumberFormat', () => {
+        univerAPI.addEvent(univerAPI.Event.LifeCycleChanged, ({ stage }) => {
+            if (stage === LifecycleStages.Rendered) {
+                const activeSheet = univerAPI.getActiveWorkbook()!.getActiveSheet();
+                activeSheet.getRange('A1').setValue(1234.5678);
+                activeSheet.getRange('C1').setValue(9876.5432);
+                activeSheet.getRangeList(['A1', 'C1']).setNumberFormat('#,###');
+
+                expect(activeSheet.getRange('A1').getValue()).toBe('1,234.5678');
+                expect(activeSheet.getRange('C1').getValue()).toBe('9,876.5432');
             }
         });
     });

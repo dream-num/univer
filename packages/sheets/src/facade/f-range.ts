@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { AbsoluteRefType, BorderStyleTypes, BorderType, CellValue, CustomData, ICellData, IColorStyle, IDocumentData, IObjectMatrixPrimitiveType, IRange, IStyleData, ITextDecoration, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { AbsoluteRefType, BorderStyleTypes, BorderType, CellValue, CustomData, ICellData, IColorStyle, IDocumentData, IObjectMatrixPrimitiveType, IRange, IStyleData, ITextDecoration, Nullable, TextDirection, Workbook, Worksheet } from '@univerjs/core';
 import type {
     AUTO_FILL_APPLY_TYPE,
     IMergeCellsUtilOptions,
@@ -1185,6 +1185,32 @@ export class FRange extends FBaseInitialable {
             range: this._range,
             value: rotation,
         } as ISetTextRotationCommandParams);
+        return this;
+    }
+
+    /**
+     * Sets the text direction for the given range.
+     * @param {TextDirection} direction The text direction.
+     * @returns {FRange} This range, for chaining.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:B2');
+     * fRange.setTextDirection(univerAPI.Enum.TextDirection.RIGHT_TO_LEFT);
+     * ```
+     */
+    setTextDirection(direction: TextDirection): FRange {
+        this._commandService.syncExecuteCommand(SetStyleCommand.id, {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            range: this._range,
+            style: {
+                type: 'td',
+                value: direction,
+            },
+        } as ISetStyleCommandParams<TextDirection>);
+
         return this;
     }
 

@@ -16,10 +16,12 @@
 
 import './f-event';
 import './f-range';
+import './f-range-list';
 import './f-univer';
 import './f-worksheet';
 
 export * from './f-event';
 export * from './f-range';
+export * from './f-range-list';
 export * from './f-univer';
 export * from './f-worksheet';

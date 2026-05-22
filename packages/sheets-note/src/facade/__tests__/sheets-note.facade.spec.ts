@@ -175,5 +175,29 @@ describe('sheets-note facade mixins', () => {
         range.deleteNote();
         expect(range.getNote()).toBeUndefined();
         expect(sheet.getNotes()).toHaveLength(0);
+
+        range.setNote('alias note');
+        expect(range.getNote()?.note).toBe('alias note');
+
+        range.clearNote();
+        expect(range.getNote()).toBeUndefined();
+    });
+
+    it('sets and clears notes through FRangeList', () => {
+        const workbook = univerAPI.getActiveWorkbook();
+        expect(workbook).toBeTruthy();
+        const sheet = workbook!.getActiveSheet();
+
+        sheet.getRangeList(['A1', 'C1']).setNote('range list note');
+
+        expect(sheet.getRange('A1').getNote()?.note).toBe('range list note');
+        expect(sheet.getRange('C1').getNote()?.note).toBe('range list note');
+        expect(sheet.getNotes()).toHaveLength(2);
+
+        sheet.getRangeList(['A1', 'C1']).clearNote();
+
+        expect(sheet.getRange('A1').getNote()).toBeUndefined();
+        expect(sheet.getRange('C1').getNote()).toBeUndefined();
+        expect(sheet.getNotes()).toHaveLength(0);
     });
 });

@@ -24,6 +24,7 @@ import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
 import { AppendRowCommand, CancelFrozenCommand, ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand, copyRangeStyles, InsertColByRangeCommand, InsertRowByRangeCommand, MoveColsCommand, MoveRowsCommand, RemoveColByRangeCommand, RemoveRowByRangeCommand, SetColDataCommand, SetColHiddenCommand, SetColWidthCommand, SetFrozenCommand, SetGridlinesColorCommand, SetRowDataCommand, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetTabColorCommand, SetTextWrapCommand, SetWorksheetColumnCountCommand, SetWorksheetDefaultStyleMutation, SetWorksheetHideCommand, SetWorksheetNameCommand, SetWorksheetRowCountCommand, SetWorksheetRowIsAutoHeightCommand, SetWorksheetRowIsAutoHeightMutation, SetWorksheetShowCommand, SheetsSelectionsService, ToggleGridlinesCommand } from '@univerjs/sheets';
 import { FDefinedNameBuilder } from './f-defined-name';
 import { FRange } from './f-range';
+import { FRangeList } from './f-range-list';
 import { FSelection } from './f-selection';
 import { FWorksheetPermission } from './permission/f-worksheet-permission';
 import { covertToColRange, covertToRowRange } from './utils';
@@ -418,6 +419,29 @@ export class FWorksheet extends FBaseInitialable {
         }
 
         return this._injector.createInstance(FRange, this._workbook, sheet, range);
+    }
+
+    /**
+     * Returns a range list containing the ranges specified by A1 notation.
+     * This API currently documents A1 notation only; R1C1 notation is not claimed.
+     * Unqualified ranges are resolved against this worksheet. Sheet-qualified ranges may target another worksheet.
+     * @param {string[]} a1Notations A non-empty list of ranges in A1 notation.
+     * @returns {FRangeList} A range list representing the specified ranges.
+     * @example
+     * ```ts
+     * const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * sheet.getRangeList(['A1:D4', 'F1:H4'])
+     *   .setBackgroundColor('#fce4d6')
+     *   .setFontWeight('bold');
+     * ```
+     */
+    getRangeList(a1Notations: string[]): FRangeList {
+        if (a1Notations.length === 0) {
+            throw new Error('Range list cannot be empty');
+        }
+
+        const ranges = a1Notations.map((a1Notation) => this.getRange(a1Notation));
+        return this._injector.createInstance(FRangeList, this._workbook, ranges);
     }
 
     /**

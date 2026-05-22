@@ -77,6 +77,17 @@ describe('Test FWorkbook', () => {
         expect(activeSheet).not.toBeNull();
     });
 
+    it('Workbook getRangeList uses the active sheet', () => {
+        const workbook = univerAPI.getActiveWorkbook()!;
+
+        const rangeList = workbook.getRangeList(['A1:B2', 'D1:E2']);
+        rangeList.setBackgroundColor('#fce4d6');
+
+        expect(rangeList.getRanges().map((range) => range.getA1Notation())).toEqual(['A1:B2', 'D1:E2']);
+        expect(getValueByPosition(0, 0, 0, 0)?.s).not.toBeUndefined();
+        expect(getValueByPosition(0, 3, 0, 3)?.s).not.toBeUndefined();
+    });
+
     it('Workbook insertSheet, deleteSheet, and setActiveSheet', async () => {
         const workbook = univerAPI.getActiveWorkbook();
 

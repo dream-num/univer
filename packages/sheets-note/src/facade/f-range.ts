@@ -16,6 +16,7 @@
 
 import type { Nullable } from '@univerjs/core';
 import type { ISheetNote } from '@univerjs/sheets-note';
+import { generateRandomId } from '@univerjs/core';
 import { RemoveNoteMutation, SheetsNoteModel, UpdateNoteMutation } from '@univerjs/sheets-note';
 import { FRange } from '@univerjs/sheets/facade';
 
@@ -54,6 +55,20 @@ export interface IFRangeSheetsNoteMixin {
      * ```
      */
     createOrUpdateNote(note: ISheetNote): FRange;
+
+    /**
+     * Set a plain text note on the top-left cell in the range.
+     * @param {string} note The note text.
+     * @returns {FRange} This range for method chaining.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * fWorksheet.getRange('A1').setNote('Needs review');
+     * ```
+     */
+    setNote(note: string): FRange;
+
     /**
      * Delete the annotation of the top-left cell in the range
      * @returns {FRange} This range for method chaining
@@ -72,9 +87,32 @@ export interface IFRangeSheetsNoteMixin {
      * ```
      */
     deleteNote(): FRange;
+
+    /**
+     * Clear the note on the top-left cell in the range.
+     * @returns {FRange} This range for method chaining.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * fWorksheet.getRange('A1').clearNote();
+     * ```
+     */
+    clearNote(): FRange;
 }
 
 export class FRangeSheetsNoteMixin extends FRange implements IFRangeSheetsNoteMixin {
+    override setNote(note: string): FRange {
+        return this.createOrUpdateNote({
+            id: generateRandomId(),
+            row: this.getRow(),
+            col: this.getColumn(),
+            width: 160,
+            height: 72,
+            note,
+        });
+    }
+
     override createOrUpdateNote(note: ISheetNote): FRange {
         this._commandService.syncExecuteCommand(
             UpdateNoteMutation.id,
@@ -102,6 +140,10 @@ export class FRangeSheetsNoteMixin extends FRange implements IFRangeSheetsNoteMi
         );
 
         return this;
+    }
+
+    override clearNote(): FRange {
+        return this.deleteNote();
     }
 
     override getNote(): Nullable<ISheetNote> {

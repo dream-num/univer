@@ -189,6 +189,28 @@ describe('engine scene viewport extra', () => {
         expect(doubleScaleDelta * 2).toBeCloseTo(normalScaleDelta, 3);
     });
 
+    it('locks out minor cross-axis wheel jitter in viewport scrolling', () => {
+        const { engine, scene, viewport, container } = createFixture();
+        viewport.scrollToViewportPos({ viewportScrollX: 20, viewportScrollY: 20 });
+
+        viewport.onMouseWheel(
+            createInputEvent('wheel', { deltaX: 8, deltaY: 20 }),
+            { stopPropagation: vi.fn() } as any
+        );
+        expect(viewport.viewportScrollX).toBeCloseTo(20, 3);
+        expect(viewport.viewportScrollY).toBeGreaterThan(20);
+
+        viewport.onMouseWheel(
+            createInputEvent('wheel', { deltaX: 20, deltaY: 8 }),
+            { stopPropagation: vi.fn() } as any
+        );
+        expect(viewport.viewportScrollX).toBeGreaterThan(20);
+
+        scene.dispose();
+        engine.dispose();
+        container.remove();
+    });
+
     it('covers scene, viewport, layer and render loop flows', () => {
         const { engine, scene, viewport, container } = createFixture();
 

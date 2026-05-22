@@ -108,6 +108,7 @@ export interface IViewportReSizeParam {
 }
 
 const MOUSE_WHEEL_SPEED_SMOOTHING_FACTOR = 3;
+const WHEEL_CROSS_AXIS_LOCK_RATIO = 2;
 
 export class Viewport {
     private _viewportKey: string = '';
@@ -984,6 +985,14 @@ export class Viewport {
             offsetX = ((viewHeight / allHeight) * evt.deltaY * MOUSE_WHEEL_SPEED_SMOOTHING_FACTOR) / scaleX;
         } else {
             offsetY = ((viewHeight / allHeight) * evt.deltaY) / scaleY;
+
+            const absOffsetX = Math.abs(offsetX);
+            const absOffsetY = Math.abs(offsetY);
+            if (absOffsetY >= absOffsetX * WHEEL_CROSS_AXIS_LOCK_RATIO) {
+                offsetX = 0;
+            } else if (absOffsetX >= absOffsetY * WHEEL_CROSS_AXIS_LOCK_RATIO) {
+                offsetY = 0;
+            }
         }
 
         const isLimitedStore = this.scrollByBarDeltaValue({

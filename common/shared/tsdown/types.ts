@@ -36,6 +36,7 @@ export interface IEntryConfig {
 export interface IPackageJson {
     [key: string]: unknown;
     dependencies?: Record<string, string>;
+    devDependencies?: Record<string, string>;
     name: string;
     peerDependencies?: Record<string, string>;
 }

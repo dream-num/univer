@@ -356,6 +356,14 @@ function deriveDependencyGroups(packageDir: string, packageJson: IPackageJson): 
         }
     }
 
+    const declaredDevDependencies: Record<string, string> = (packageJson as CleanupPackageJson).devDependencies ?? {};
+    if ('react' in declaredDevDependencies && !('react' in peerDeps)) {
+        const reactPeerDep = peerDepsMap.react;
+        if (reactPeerDep) {
+            peerDeps.react = reactPeerDep.version;
+        }
+    }
+
     return {
         dependencies: deps,
         devDependencies: devDeps,

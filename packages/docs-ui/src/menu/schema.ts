@@ -287,8 +287,12 @@ export const menuSchema: MenuSchemaType = {
             },
         },
         [ContextMenuGroup.LAYOUT]: {
-            // title: 'docs-ui.rightClick.insertBellow',
+            [DocParagraphSettingPanelOperation.id]: {
+                order: 0,
+                menuItemFactory: ParagraphSettingMenuFactory,
+            },
             [INSERT_BELLOW_MENU_ID]: {
+                order: 1,
                 menuItemFactory: DocInsertBellowMenuItemFactory,
                 [InsertBulletListBellowCommand.id]: {
                     order: 0,
@@ -343,24 +347,28 @@ export const menuSchema: MenuSchemaType = {
             },
             [ContextMenuGroup.LAYOUT]: {
                 order: 1,
-                [BulletListCommand.id]: {
+                [DocParagraphSettingPanelOperation.id]: {
                     order: 0,
+                    menuItemFactory: ParagraphSettingMenuFactory,
+                },
+                [BulletListCommand.id]: {
+                    order: 1,
                     menuItemFactory: EmptyParagraphBulletListMenuItemFactory,
                 },
                 [OrderListCommand.id]: {
-                    order: 1,
+                    order: 2,
                     menuItemFactory: EmptyParagraphOrderListMenuItemFactory,
                 },
                 [CheckListCommand.id]: {
-                    order: 2,
+                    order: 3,
                     menuItemFactory: EmptyParagraphCheckListMenuItemFactory,
                 },
                 [HorizontalLineCommand.id]: {
-                    order: 3,
+                    order: 4,
                     menuItemFactory: EmptyParagraphHorizontalLineMenuItemFactory,
                 },
                 [DocCreateTableOperation.id]: {
-                    order: 4,
+                    order: 5,
                     menuItemFactory: InsertDefaultTableMenuFactory,
                 },
             },

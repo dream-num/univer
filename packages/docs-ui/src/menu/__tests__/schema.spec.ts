@@ -22,6 +22,7 @@ import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignOperati
 import { H1HeadingCommand, NormalTextHeadingCommand, SubtitleHeadingCommand, TitleHeadingCommand } from '../../commands/commands/set-heading.command';
 import { CreateDocTableCommand } from '../../commands/commands/table/doc-table-create.command';
 import { DocCreateTableOperation } from '../../commands/operations/doc-create-table.operation';
+import { DocParagraphSettingPanelOperation } from '../../commands/operations/doc-paragraph-setting-panel.operation';
 import { AlignMenuItemFactory, InsertDefaultTableMenuFactory, InsertTableMenuFactory } from '../menu';
 import { EMPTY_PARAGRAPH_MENU_ID, INSERT_BELLOW_MENU_ID } from '../paragraph-menu';
 import { menuSchema } from '../schema';
@@ -65,6 +66,9 @@ describe('docs ui ribbon schema', () => {
 
         expect(quick.order).toBe(-1);
         expect(layout.order).toBe(1);
+        expect(quick[DocParagraphSettingPanelOperation.id]).toBeUndefined();
+        expect(layout[DocParagraphSettingPanelOperation.id].order).toBeLessThan(layout[BulletListCommand.id].order);
+        expect(paragraph[ContextMenuGroup.LAYOUT][DocParagraphSettingPanelOperation.id].order).toBeLessThan(insertBelow.order);
         expect(quick[H1HeadingCommand.id].menuItemFactory).toBeDefined();
         expect(paragraph[ContextMenuGroup.QUICK][TitleHeadingCommand.id].menuItemFactory).toBeDefined();
         expect(paragraph[ContextMenuGroup.QUICK][SubtitleHeadingCommand.id].menuItemFactory).toBeDefined();

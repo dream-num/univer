@@ -35,6 +35,16 @@ describe('FunctionService', () => {
         expect(service.hasExecutor('AVERAGE')).toBe(false);
     });
 
+    it('should resolve Excel compatibility prefixed executors', () => {
+        const service = new FunctionService();
+        const stdevExecutor = { name: 'STDEV.S' };
+
+        service.registerExecutors(stdevExecutor as never);
+
+        expect(service.hasExecutor('_xlfn.STDEV.S')).toBe(true);
+        expect(service.getExecutor('_xlfn.STDEV.S')).toBe(stdevExecutor);
+    });
+
     it('should register descriptions and cleanup by disposable', () => {
         const service = new FunctionService();
         const sumDescription = {
@@ -55,6 +65,8 @@ describe('FunctionService', () => {
         const disposable = service.registerDescriptions(sumDescription as never, avgDescription as never);
         expect(service.hasDescription('SUM')).toBe(true);
         expect(service.getDescription('AVERAGE')?.description).toBe('avg');
+        expect(service.hasDescription('_xlfn.AVERAGE')).toBe(true);
+        expect(service.getDescription('_xlfn.AVERAGE')?.description).toBe('avg');
         expect(service.getDescriptions().size).toBe(2);
 
         disposable.dispose();

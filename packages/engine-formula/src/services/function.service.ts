@@ -20,6 +20,16 @@ import type { BaseFunction } from '../functions/base-function';
 import { createIdentifier, Disposable, toDisposable } from '@univerjs/core';
 import { FORMULA_AST_CACHE } from '../engine/utils/generate-ast-node';
 
+const COMPATIBILITY_FUNCTION_PREFIXES = ['_xlfn.', '_xlws.', '_xludf.'];
+
+function normalizeFunctionToken(functionToken: IFunctionNames): IFunctionNames {
+    const token = `${functionToken}`;
+    const lowerToken = token.toLowerCase();
+    const prefix = COMPATIBILITY_FUNCTION_PREFIXES.find((prefix) => lowerToken.startsWith(prefix));
+
+    return (prefix ? token.slice(prefix.length) : token) as IFunctionNames;
+}
+
 export interface IFunctionService {
     /**
      * Use register to register a function, new CustomFunction(inject, name)
@@ -83,11 +93,11 @@ export class FunctionService extends Disposable implements IFunctionService {
     }
 
     getExecutor(functionToken: IFunctionNames) {
-        return this._functionExecutors.get(functionToken);
+        return this._functionExecutors.get(functionToken) ?? this._functionExecutors.get(normalizeFunctionToken(functionToken));
     }
 
     hasExecutor(functionToken: IFunctionNames) {
-        return this._functionExecutors.has(functionToken);
+        return this._functionExecutors.has(functionToken) || this._functionExecutors.has(normalizeFunctionToken(functionToken));
     }
 
     unregisterExecutors(...functionTokens: IFunctionNames[]) {
@@ -116,11 +126,11 @@ export class FunctionService extends Disposable implements IFunctionService {
     }
 
     getDescription(functionToken: IFunctionNames) {
-        return this._functionDescriptions.get(functionToken);
+        return this._functionDescriptions.get(functionToken) ?? this._functionDescriptions.get(normalizeFunctionToken(functionToken));
     }
 
     hasDescription(functionToken: IFunctionNames) {
-        return this._functionDescriptions.has(functionToken);
+        return this._functionDescriptions.has(functionToken) || this._functionDescriptions.has(normalizeFunctionToken(functionToken));
     }
 
     unregisterDescriptions(...functionTokens: IFunctionNames[]) {

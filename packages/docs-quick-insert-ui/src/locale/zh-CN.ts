@@ -17,7 +17,7 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    docQuickInsert: {
+    'docs-quick-insert-ui': {
         menu: {
             numberedList: '有序列表',
             bulletedList: '无序列表',

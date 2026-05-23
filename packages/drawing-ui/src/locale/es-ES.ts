@@ -17,15 +17,10 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    'image-popup': {
-        replace: 'Reemplazar',
-        delete: 'Eliminar',
-        edit: 'Editar',
-        crop: 'Recortar',
-        reset: 'Restablecer tamaño',
-    },
-    'image-cropper': {
-        error: 'No se pueden recortar objetos que no sean imágenes.',
+    'drawing-ui': {
+        'image-cropper': {
+            error: 'No se pueden recortar objetos que no sean imágenes.',
+        },
     },
     'image-panel': {
         arrange: {

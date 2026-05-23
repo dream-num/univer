@@ -17,7 +17,7 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    slide: {
+    'slides-ui': {
         append: 'Pridať snímku',
 
         text: {

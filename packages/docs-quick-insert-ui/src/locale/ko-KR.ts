@@ -17,7 +17,7 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    docQuickInsert: {
+    'docs-quick-insert-ui': {
         menu: {
             numberedList: '번호가 매겨진 목록',
             bulletedList: '글머리 기호 목록',

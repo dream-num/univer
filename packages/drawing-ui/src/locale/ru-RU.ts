@@ -17,15 +17,10 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    'image-popup': {
-        replace: 'Заменить',
-        delete: 'Удалить',
-        edit: 'Редактировать',
-        crop: 'Обрезать',
-        reset: 'Сбросить размер',
-    },
-    'image-cropper': {
-        error: 'Невозможно обрезать не изображения.',
+    'drawing-ui': {
+        'image-cropper': {
+            error: 'Невозможно обрезать не изображения.',
+        },
     },
     'image-panel': {
         arrange: {

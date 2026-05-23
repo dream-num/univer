@@ -26,7 +26,7 @@ export function UniscriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: ToggleScriptPanelOperation.id,
         title: 'toggle-script-panel',
-        tooltip: 'script-panel.tooltip.menu-button',
+        tooltip: 'uniscript.tooltip.menu-button',
         icon: 'CodeIcon',
         type: MenuItemType.BUTTON,
         // FIXME hidden$ and disabled$ are not correctly in doc

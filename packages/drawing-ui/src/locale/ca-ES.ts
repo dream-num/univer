@@ -17,15 +17,10 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    'image-popup': {
-        replace: 'Reemplaçar',
-        delete: 'Eliminar',
-        edit: 'Editar',
-        crop: 'Retalla',
-        reset: 'Restableix la mida',
-    },
-    'image-cropper': {
-        error: 'No es poden retallar objectes que no siguin imatges.',
+    'drawing-ui': {
+        'image-cropper': {
+            error: 'No es poden retallar objectes que no siguin imatges.',
+        },
     },
     'image-panel': {
         arrange: {

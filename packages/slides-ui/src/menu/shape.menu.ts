@@ -27,7 +27,7 @@ export function SlideShapeMenuFactory(accessor: IAccessor): IMenuItem {
         id: SHAPE_MENU_ID,
         type: MenuItemType.SUBITEMS,
         icon: 'GraphIcon',
-        tooltip: 'slide.shape.insert.title',
+        tooltip: 'slides-ui.shape.insert.title',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SLIDE),
         // disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
     };
@@ -36,7 +36,7 @@ export function SlideShapeMenuFactory(accessor: IAccessor): IMenuItem {
 export function UploadSlideFloatRectangleShapeMenuFactory(_accessor: IAccessor): IMenuButtonItem {
     return {
         id: InsertSlideShapeRectangleCommand.id,
-        title: 'slide.shape.insert.rectangle',
+        title: 'slides-ui.shape.insert.rectangle',
         type: MenuItemType.BUTTON,
         hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_SLIDE),
     };
@@ -45,7 +45,7 @@ export function UploadSlideFloatRectangleShapeMenuFactory(_accessor: IAccessor):
 export function UploadSlideFloatEllipseShapeMenuFactory(_accessor: IAccessor): IMenuButtonItem {
     return {
         id: InsertSlideShapeEllipseCommand.id,
-        title: 'slide.shape.insert.ellipse',
+        title: 'slides-ui.shape.insert.ellipse',
         type: MenuItemType.BUTTON,
         hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_SLIDE),
     };

@@ -17,15 +17,10 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    'image-popup': {
-        replace: '替换',
-        delete: '删除',
-        edit: '编辑',
-        crop: '裁剪',
-        reset: '重置大小',
-    },
-    'image-cropper': {
-        error: '无法裁剪非图片元素',
+    'drawing-ui': {
+        'image-cropper': {
+            error: '无法裁剪非图片元素',
+        },
     },
     'image-panel': {
         arrange: {

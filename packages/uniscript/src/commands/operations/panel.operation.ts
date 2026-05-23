@@ -37,7 +37,7 @@ export const ToggleScriptPanelOperation: IOperation = {
         } else {
             scriptPanelService.open();
             sidebarService.open({
-                header: { title: 'script-panel.title' },
+                header: { title: 'uniscript.title' },
                 children: { label: ScriptPanelComponentName },
                 width: 600,
             });

@@ -15,7 +15,7 @@
  */
 
 const locale = {
-    slide: {
+    'slides-ui': {
         append: 'Append Slide',
 
         text: {

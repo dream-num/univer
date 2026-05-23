@@ -17,13 +17,15 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    rightClick: {
-        zenEditor: '禅模式编辑',
-    },
-    shortcut: {
-        sheet: {
-            'zen-edit-cancel': '取消编辑（禅模式状态）',
-            'zen-edit-confirm': '放弃编辑（禅模式状态）',
+    'sheets-zen-editor': {
+        rightClick: {
+            zenEditor: '禅模式编辑',
+        },
+        shortcut: {
+            sheet: {
+                'zen-edit-cancel': '取消编辑（禅模式状态）',
+                'zen-edit-confirm': '放弃编辑（禅模式状态）',
+            },
         },
     },
 };

@@ -105,13 +105,13 @@ export const ToggleSlideEditSidebarOperation: ICommand = {
         let title = '';
         let children = '';
         if (objectType === ObjectType.RECT) {
-            title = 'slide.sidebar.shape';
+            title = 'slides-ui.sidebar.shape';
             children = COMPONENT_SLIDE_SIDEBAR;
         } else if (objectType === ObjectType.IMAGE) {
-            title = 'slide.sidebar.image';
+            title = 'slides-ui.sidebar.image';
             children = COMPONENT_SLIDE_SIDEBAR;
         } else if (objectType === ObjectType.RICH_TEXT) {
-            title = 'slide.sidebar.text';
+            title = 'slides-ui.sidebar.text';
             children = COMPONENT_SLIDE_SIDEBAR;
         }
 

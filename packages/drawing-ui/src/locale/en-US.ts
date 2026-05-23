@@ -15,15 +15,10 @@
  */
 
 const locale = {
-    'image-popup': {
-        replace: 'Replace',
-        delete: 'Delete',
-        edit: 'Edit',
-        crop: 'Crop',
-        reset: 'Reset Size',
-    },
-    'image-cropper': {
-        error: 'Cannot crop non-image objects.',
+    'drawing-ui': {
+        'image-cropper': {
+            error: 'Cannot crop non-image objects.',
+        },
     },
     'image-panel': {
         arrange: {

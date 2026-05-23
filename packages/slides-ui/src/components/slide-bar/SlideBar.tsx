@@ -105,7 +105,7 @@ export function SlideSideBar() {
                         `, borderClassName)}
                         onClick={handleAppendSlide}
                     >
-                        {localeService.t('slide.append')}
+                        {localeService.t('slides-ui.append')}
                     </a>
                 </header>
 

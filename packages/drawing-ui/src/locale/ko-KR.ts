@@ -17,15 +17,10 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    'image-popup': {
-        replace: '교체',
-        delete: '삭제',
-        edit: '편집',
-        crop: '자르기',
-        reset: '크기 초기화',
-    },
-    'image-cropper': {
-        error: '이미지가 아닌 객체는 자를 수 없습니다.',
+    'drawing-ui': {
+        'image-cropper': {
+            error: '이미지가 아닌 객체는 자를 수 없습니다.',
+        },
     },
     'image-panel': {
         arrange: {

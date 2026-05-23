@@ -17,15 +17,10 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    'image-popup': {
-        replace: 'تعویض',
-        delete: 'حذف',
-        edit: 'ویرایش',
-        crop: 'کراپ',
-        reset: 'بازنشانی اندازه',
-    },
-    'image-cropper': {
-        error: 'کراپ کردن اشیاء غیرتصویری امکان‌پذیر نیست.',
+    'drawing-ui': {
+        'image-cropper': {
+            error: 'کراپ کردن اشیاء غیرتصویری امکان‌پذیر نیست.',
+        },
     },
     'image-panel': {
         arrange: {

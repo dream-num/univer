@@ -17,15 +17,10 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    'image-popup': {
-        replace: 'Nahradiť',
-        delete: 'Odstrániť',
-        edit: 'Upraviť',
-        crop: 'Orezať',
-        reset: 'Obnoviť veľkosť',
-    },
-    'image-cropper': {
-        error: 'Nedá sa orezať neobrázkový objekt.',
+    'drawing-ui': {
+        'image-cropper': {
+            error: 'Nedá sa orezať neobrázkový objekt.',
+        },
     },
     'image-panel': {
         arrange: {

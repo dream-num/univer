@@ -17,15 +17,10 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    'image-popup': {
-        replace: 'Thay thế',
-        delete: 'Xóa',
-        edit: 'Chỉnh sửa',
-        crop: 'Cắt',
-        reset: 'Đặt lại kích thước',
-    },
-    'image-cropper': {
-        error: 'Không thể cắt phần tử không phải hình ảnh',
+    'drawing-ui': {
+        'image-cropper': {
+            error: 'Không thể cắt phần tử không phải hình ảnh',
+        },
     },
     'image-panel': {
         arrange: {

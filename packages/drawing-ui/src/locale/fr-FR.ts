@@ -17,15 +17,10 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    'image-popup': {
-        replace: 'Remplacer',
-        delete: 'Supprimer',
-        edit: 'Modifier',
-        crop: 'Rogner',
-        reset: 'Réinitialiser la taille',
-    },
-    'image-cropper': {
-        error: 'Impossible de rogner des objets non image.',
+    'drawing-ui': {
+        'image-cropper': {
+            error: 'Impossible de rogner des objets non image.',
+        },
     },
     'image-panel': {
         arrange: {

@@ -53,13 +53,18 @@ export interface ICheckboxGroupProps {
      * The callback function triggered when switching options
      */
     onChange: (value: Array<string | number | boolean>) => void;
+
+    /**
+     * The aria-label of the checkbox group
+     */
+    ariaLabel?: string;
 }
 
 /**
  * CheckboxGroup Component
  */
 export function CheckboxGroup(props: ICheckboxGroupProps) {
-    const { children, className, style, value, disabled, direction = 'horizontal', onChange } = props;
+    const { children, className, style, value, disabled, direction = 'horizontal', onChange, ariaLabel } = props;
 
     const handleChange = (item: string | number | boolean) => {
         if (value.includes(item)) {
@@ -71,6 +76,8 @@ export function CheckboxGroup(props: ICheckboxGroupProps) {
 
     return (
         <div
+            role="group"
+            aria-label={ariaLabel}
             className={clsx('univer-flex univer-gap-2', {
                 'univer-flex-col': direction === 'vertical',
             }, className)}

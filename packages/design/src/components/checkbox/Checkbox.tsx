@@ -101,9 +101,12 @@ export function Checkbox(props: ICheckboxProps) {
                     type="checkbox"
                     checked={checked}
                     disabled={disabled}
+                    aria-indeterminate={indeterminate}
                     onChange={handleChange}
                 />
                 <span
+                    role="checkbox"
+                    aria-checked={checked}
                     className={clsx(`
                       univer-relative univer-box-border univer-flex univer-size-4 univer-items-center
                       univer-justify-center univer-overflow-hidden univer-rounded univer-border univer-border-solid

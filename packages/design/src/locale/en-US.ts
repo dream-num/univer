@@ -40,6 +40,8 @@ const locale = {
                 'Nov',
                 'Dec',
             ],
+            previousMonth: 'Previous Month',
+            nextMonth: 'Next Month',
         },
         Select: {
             empty: 'None',
@@ -58,6 +60,19 @@ const locale = {
             angle: 'Angle',
             flip: 'Flip',
             delete: 'Delete',
+        },
+        Badge: {
+            close: 'Close badge',
+        },
+        Gallery: {
+            imageGallery: 'Image gallery',
+            zoomIn: 'Zoom in',
+            zoomOut: 'Zoom out',
+            resetZoom: 'Reset zoom',
+        },
+        InputNumber: {
+            increment: 'increment',
+            decrement: 'decrement',
         },
     },
 };

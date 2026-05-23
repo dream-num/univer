@@ -159,7 +159,7 @@ export function Calendar(props: ICalendarProps) {
                       univer-text-lg univer-text-gray-500
                       dark:!univer-text-gray-200
                     `}
-                    aria-label="Previous Month"
+                    aria-label={locale?.Calendar?.previousMonth}
                     onClick={prevMonth}
                 >
                     <MoreRightIcon className="univer-rotate-180" />
@@ -174,7 +174,7 @@ export function Calendar(props: ICalendarProps) {
                       univer-text-lg univer-text-gray-500
                       dark:!univer-text-gray-200
                     `}
-                    aria-label="Next Month"
+                    aria-label={locale?.Calendar?.nextMonth}
                     onClick={nextMonth}
                 >
                     <MoreRightIcon />

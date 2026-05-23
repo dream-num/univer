@@ -42,6 +42,8 @@ const locale: typeof enUS = {
                 'بهمن',
                 'اسفند',
             ],
+            previousMonth: 'ماه قبل',
+            nextMonth: 'ماه بعد',
         },
         Select: {
             empty: 'هیچ‌کدام',
@@ -60,6 +62,19 @@ const locale: typeof enUS = {
             angle: 'زاویه',
             flip: 'برگردان',
             delete: 'حذف',
+        },
+        Badge: {
+            close: 'بستن نشان',
+        },
+        Gallery: {
+            imageGallery: 'گالری تصاویر',
+            zoomIn: 'بزرگنمایی',
+            zoomOut: 'کوچکنمایی',
+            resetZoom: 'بازنشانی بزرگنمایی',
+        },
+        InputNumber: {
+            increment: 'افزایش',
+            decrement: 'کاهش',
         },
     },
 };

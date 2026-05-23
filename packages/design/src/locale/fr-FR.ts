@@ -42,6 +42,8 @@ const locale: typeof enUS = {
                 'Novembre',
                 'Décembre',
             ],
+            previousMonth: 'Mois précédent',
+            nextMonth: 'Mois suivant',
         },
         Select: {
             empty: 'Aucun',
@@ -60,6 +62,19 @@ const locale: typeof enUS = {
             angle: 'Angle',
             flip: 'Retourner',
             delete: 'Supprimer',
+        },
+        Badge: {
+            close: 'Fermer le badge',
+        },
+        Gallery: {
+            imageGallery: "Galerie d'images",
+            zoomIn: 'Zoom avant',
+            zoomOut: 'Zoom arrière',
+            resetZoom: 'Réinitialiser le zoom',
+        },
+        InputNumber: {
+            increment: 'incrémenter',
+            decrement: 'décrémenter',
         },
     },
 };

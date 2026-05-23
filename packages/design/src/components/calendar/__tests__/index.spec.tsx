@@ -67,16 +67,17 @@ describe('Calendar', () => {
 
     it('should switch year when navigating across month boundaries', () => {
         const date = new Date(2023, 0, 15);
-        const { getByLabelText, getByText } = render(
+        const { container, getByText } = render(
             <ConfigProvider mountContainer={null} locale={{ Calendar: enUS.design.Calendar }}>
                 <Calendar value={date} onValueChange={onChange} />
             </ConfigProvider>
         );
 
-        fireEvent.click(getByLabelText('Previous Month'));
+        const navButtons = container.querySelectorAll('nav button');
+        fireEvent.click(navButtons[0]);
         expect(getByText('2022')).toBeInTheDocument();
 
-        fireEvent.click(getByLabelText('Next Month'));
+        fireEvent.click(navButtons[1]);
         expect(getByText('2023')).toBeInTheDocument();
     });
 

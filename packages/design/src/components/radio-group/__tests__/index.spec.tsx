@@ -18,6 +18,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { Radio } from '../../radio/Radio';
 import { RadioGroup } from '../RadioGroup';
+import '@testing-library/jest-dom/vitest';
 
 afterEach(cleanup);
 
@@ -41,5 +42,17 @@ describe('RadioGroup', () => {
         fireEvent.click(screen.getByText('1'));
 
         expect(active).toBe('1');
+    });
+
+    it('should have correct a11y attributes', () => {
+        const { container } = render(
+            <RadioGroup value="0" ariaLabel="Test Group" onChange={() => {}}>
+                <Radio value="0">0</Radio>
+                <Radio value="1">1</Radio>
+            </RadioGroup>
+        );
+        const group = container.querySelector('[role="radiogroup"]');
+        expect(group).toBeInTheDocument();
+        expect(group).toHaveAttribute('aria-label', 'Test Group');
     });
 });

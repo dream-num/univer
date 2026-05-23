@@ -37,7 +37,11 @@ const Switch = (props: ISwitchProps) => {
 
     return (
         <div className="univer-h-4">
-            <label className="univer-relative univer-inline-block univer-h-4 univer-w-7">
+            <label
+                className="univer-relative univer-inline-block univer-h-4 univer-w-7"
+                role="switch"
+                aria-checked={checked}
+            >
                 <input
                     className="univer-size-0 univer-opacity-0"
                     type="checkbox"

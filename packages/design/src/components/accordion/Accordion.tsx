@@ -16,7 +16,7 @@
 
 import type { ReactNode } from 'react';
 import { DownIcon } from '@univerjs/icons';
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { clsx } from '../../helper/clsx';
 
 interface IAccordionItem {
@@ -32,6 +32,7 @@ export interface IAccordionProps {
 export function Accordion(props: IAccordionProps) {
     const { className, items } = props;
     const [openIndex, setOpenIndex] = useState<number | null>(null);
+    const baseId = useId();
 
     const toggleItem = (index: number) => {
         setOpenIndex(openIndex === index ? null : index);
@@ -45,42 +46,54 @@ export function Accordion(props: IAccordionProps) {
               dark:!univer-divide-gray-600
             `, className)}
         >
-            {items.map((item, index) => (
-                <div key={index}>
-                    <button
-                        className={`
-                          univer-box-border univer-flex univer-w-full univer-cursor-pointer univer-items-center
-                          univer-gap-1.5 univer-border-none univer-bg-transparent univer-p-4 univer-text-left
-                          univer-text-gray-700
-                          hover:univer-text-gray-900
-                          focus:univer-outline-none
-                          dark:!univer-text-gray-200
-                          dark:hover:!univer-text-white
-                        `}
-                        type="button"
-                        onClick={() => toggleItem(index)}
-                    >
-                        <DownIcon
-                            className={clsx('univer-size-2.5 univer-flex-shrink-0 univer-transition-transform', {
-                                '-univer-rotate-90': openIndex !== index,
-                                'univer-rotate-0': openIndex === index,
+            {items.map((item, index) => {
+                const headerId = `${baseId}-header-${index}`;
+                const contentId = `${baseId}-content-${index}`;
+                const expanded = openIndex === index;
+
+                return (
+                    <div key={index}>
+                        <button
+                            id={headerId}
+                            className={`
+                              univer-box-border univer-flex univer-w-full univer-cursor-pointer univer-items-center
+                              univer-gap-1.5 univer-border-none univer-bg-transparent univer-p-4 univer-text-left
+                              univer-text-gray-700
+                              hover:univer-text-gray-900
+                              focus:univer-outline-none
+                              dark:!univer-text-gray-200
+                              dark:hover:!univer-text-white
+                            `}
+                            type="button"
+                            aria-expanded={expanded}
+                            aria-controls={contentId}
+                            onClick={() => toggleItem(index)}
+                        >
+                            <DownIcon
+                                className={clsx('univer-size-2.5 univer-flex-shrink-0 univer-transition-transform', {
+                                    '-univer-rotate-90': !expanded,
+                                    'univer-rotate-0': expanded,
+                                })}
+                            />
+                            <span className="univer-font-medium">{item.label}</span>
+                        </button>
+                        <div
+                            id={contentId}
+                            role="region"
+                            aria-labelledby={headerId}
+                            className={clsx(`
+                              univer-overflow-hidden univer-transition-[max-height,opacity] univer-duration-500
+                              univer-ease-in-out
+                            `, {
+                                'univer-max-h-screen': expanded,
+                                'univer-max-h-0': !expanded,
                             })}
-                        />
-                        <span className="univer-font-medium">{item.label}</span>
-                    </button>
-                    <div
-                        className={clsx(`
-                          univer-overflow-hidden univer-transition-[max-height,opacity] univer-duration-500
-                          univer-ease-in-out
-                        `, {
-                            'univer-max-h-screen': openIndex === index,
-                            'univer-max-h-0': openIndex !== index,
-                        })}
-                    >
-                        <div className="univer-box-border univer-px-4 univer-py-1.5">{item.children}</div>
+                        >
+                            <div className="univer-box-border univer-px-4 univer-py-1.5">{item.children}</div>
+                        </div>
                     </div>
-                </div>
-            ))}
+                );
+            })}
         </div>
     );
 }

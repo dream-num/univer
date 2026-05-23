@@ -17,6 +17,7 @@
 import { cleanup, fireEvent, render } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { Radio } from '../Radio';
+import '@testing-library/jest-dom/vitest';
 
 afterEach(cleanup);
 
@@ -31,5 +32,12 @@ describe('Radio', () => {
         const $input = container.querySelector('input');
 
         expect($input?.checked).toBe(true);
+    });
+
+    it('should have correct a11y attributes', () => {
+        const { container } = render(<Radio value="0">text</Radio>);
+        const label = container.querySelector('label');
+        expect(label).toHaveAttribute('aria-checked', 'false');
+        expect(label).toHaveAttribute('data-u-comp', 'radio');
     });
 });

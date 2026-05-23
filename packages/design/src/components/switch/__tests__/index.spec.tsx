@@ -17,6 +17,7 @@
 import { cleanup, render } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { Switch } from '../Switch';
+import '@testing-library/jest-dom/vitest';
 
 afterEach(cleanup);
 
@@ -44,5 +45,18 @@ describe('Switch', () => {
         checkboxElement.click();
 
         expect(checkboxElement.checked).toBeFalsy();
+    });
+
+    it('should have correct a11y attributes', () => {
+        const { container } = render(<Switch />);
+        const label = container.querySelector('label');
+        expect(label).toHaveAttribute('role', 'switch');
+        expect(label).toHaveAttribute('aria-checked', 'false');
+    });
+
+    it('should update aria-checked when checked changes', () => {
+        const { container } = render(<Switch defaultChecked />);
+        const label = container.querySelector('label');
+        expect(label).toHaveAttribute('aria-checked', 'true');
     });
 });

@@ -42,6 +42,8 @@ const locale: typeof enUS = {
                 'Nov',
                 'Dec',
             ],
+            previousMonth: 'Predchádzajúci mesiac',
+            nextMonth: 'Nasledujúci mesiac',
         },
         Select: {
             empty: 'Žiadne',
@@ -60,6 +62,19 @@ const locale: typeof enUS = {
             angle: 'Uhol',
             flip: 'Prevrátiť',
             delete: 'Odstrániť',
+        },
+        Badge: {
+            close: 'Zavrieť odznak',
+        },
+        Gallery: {
+            imageGallery: 'Galéria obrázkov',
+            zoomIn: 'Priblížiť',
+            zoomOut: 'Oddialiť',
+            resetZoom: 'Obnoviť priblíženie',
+        },
+        InputNumber: {
+            increment: 'zvýšiť',
+            decrement: 'znížiť',
         },
     },
 };

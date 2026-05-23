@@ -42,6 +42,8 @@ const locale: typeof enUS = {
                 '11月',
                 '12月',
             ],
+            previousMonth: '前月',
+            nextMonth: '翌月',
         },
         Select: {
             empty: '該当なし',
@@ -60,6 +62,19 @@ const locale: typeof enUS = {
             angle: '角度',
             flip: '反転',
             delete: '削除',
+        },
+        Badge: {
+            close: 'バッジを閉じる',
+        },
+        Gallery: {
+            imageGallery: '画像ギャラリー',
+            zoomIn: '拡大',
+            zoomOut: '縮小',
+            resetZoom: 'ズームをリセット',
+        },
+        InputNumber: {
+            increment: '増加',
+            decrement: '減少',
         },
     },
 };

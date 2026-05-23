@@ -45,6 +45,8 @@ const locale: typeof enUS = {
                 'Ноябрь',
                 'Декабрь',
             ],
+            previousMonth: 'Предыдущий месяц',
+            nextMonth: 'Следующий месяц',
         },
         ColorPicker: {
             more: 'Больше цветов',
@@ -60,6 +62,19 @@ const locale: typeof enUS = {
             angle: 'угол',
             flip: 'перевернуть',
             delete: 'удалить',
+        },
+        Badge: {
+            close: 'Закрыть значок',
+        },
+        Gallery: {
+            imageGallery: 'Галерея изображений',
+            zoomIn: 'Увеличить',
+            zoomOut: 'Уменьшить',
+            resetZoom: 'Сбросить масштаб',
+        },
+        InputNumber: {
+            increment: 'увеличить',
+            decrement: 'уменьшить',
         },
     },
 };

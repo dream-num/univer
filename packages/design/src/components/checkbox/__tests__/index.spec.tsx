@@ -18,6 +18,7 @@ import { cleanup, fireEvent, render } from '@testing-library/react';
 import { useState } from 'react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { Checkbox } from '../Checkbox';
+import '@testing-library/jest-dom/vitest';
 
 afterEach(cleanup);
 
@@ -42,5 +43,21 @@ describe('Checkbox', () => {
         expect($input?.checked).toBe(true);
 
         root.unmount();
+    });
+
+    it('should have correct a11y attributes', () => {
+        const { container } = render(<Checkbox checked={false}>text</Checkbox>);
+        const label = container.querySelector('label');
+        const checkbox = container.querySelector('[role="checkbox"]');
+        expect(checkbox).toHaveAttribute('aria-checked', 'false');
+        expect(label).toHaveAttribute('data-u-comp', 'checkbox');
+    });
+
+    it('should have aria-indeterminate when indeterminate', () => {
+        const { container } = render(<Checkbox checked indeterminate>text</Checkbox>);
+        const checkbox = container.querySelector('[role="checkbox"]');
+        const input = container.querySelector('input');
+        expect(checkbox).toHaveAttribute('aria-checked', 'true');
+        expect(input).toHaveAttribute('aria-indeterminate', 'true');
     });
 });

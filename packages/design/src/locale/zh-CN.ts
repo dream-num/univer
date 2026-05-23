@@ -42,6 +42,8 @@ const locale: typeof enUS = {
                 '十一月',
                 '十二月',
             ],
+            previousMonth: '上个月',
+            nextMonth: '下个月',
         },
         Select: {
             empty: '无',
@@ -60,6 +62,19 @@ const locale: typeof enUS = {
             angle: '角度',
             flip: '翻转',
             delete: '删除',
+        },
+        Badge: {
+            close: '关闭标签',
+        },
+        Gallery: {
+            imageGallery: '图片画廊',
+            zoomIn: '放大',
+            zoomOut: '缩小',
+            resetZoom: '重置缩放',
+        },
+        InputNumber: {
+            increment: '增加',
+            decrement: '减少',
         },
     },
 };

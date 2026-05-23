@@ -308,8 +308,7 @@ describe('InputNumber', () => {
             </div>
         );
 
-        const incrementButton = container.querySelector('[aria-label="increment"]') as HTMLElement;
-        const decrementButton = container.querySelector('[aria-label="decrement"]') as HTMLElement;
+        const [incrementButton, decrementButton] = Array.from(container.querySelectorAll('[role="button"]')) as HTMLElement[];
         const controlsWrapper = incrementButton.parentElement as HTMLElement;
 
         expect(controlsWrapper.className).toContain('rtl:univer-left-px');

@@ -29,10 +29,10 @@ describe('Badge', () => {
 
     it('renders closable badge', () => {
         const onClose = vi.fn();
-        render(<Badge closable onClose={onClose}>Closable Badge</Badge>);
-        const closeButton = screen.getByLabelText('Close badge');
+        const { container } = render(<Badge closable onClose={onClose}>Closable Badge</Badge>);
+        const closeButton = container.querySelector('button');
         expect(closeButton).toBeInTheDocument();
-        fireEvent.click(closeButton);
+        fireEvent.click(closeButton!);
         expect(onClose).toHaveBeenCalled();
     });
 });

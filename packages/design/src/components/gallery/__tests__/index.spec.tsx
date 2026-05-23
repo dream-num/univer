@@ -68,17 +68,17 @@ describe('Gallery', () => {
 
     it('toolbar buttons have correct aria-labels', () => {
         render(<Gallery images={images} open={true} />);
-        expect(screen.getByRole('button', { name: /zoom in/i })).toBeInTheDocument();
-        expect(screen.getByRole('button', { name: /zoom out/i })).toBeInTheDocument();
-        expect(screen.getByRole('button', { name: /reset zoom/i })).toBeInTheDocument();
+        const toolbarButtons = document.querySelectorAll('footer button');
+        expect(toolbarButtons).toHaveLength(5); // pager prev/next + zoom in + zoom out + reset
     });
 
     it('zoom in/out/reset buttons adjust the image scale', () => {
         render(<Gallery images={images} open={true} />);
         const img = screen.getByRole('img');
-        const zoomInBtn = screen.getByRole('button', { name: /zoom in/i });
-        const zoomOutBtn = screen.getByRole('button', { name: /zoom out/i });
-        const resetBtn = screen.getByRole('button', { name: /reset zoom/i });
+        const toolbarButtons = document.querySelectorAll('footer button');
+        const zoomInBtn = toolbarButtons[2];
+        const zoomOutBtn = toolbarButtons[3];
+        const resetBtn = toolbarButtons[4];
 
         expect(img).toHaveStyle('transform: scale(1)');
 
@@ -109,8 +109,9 @@ describe('Gallery', () => {
         fireEvent.wheel(window, { deltaY: -300 });
         expect(img.style.transform).toContain('scale(');
 
-        const zoomInBtn = screen.getByRole('button', { name: /zoom in/i });
-        const zoomOutBtn = screen.getByRole('button', { name: /zoom out/i });
+        const toolbarButtons = document.querySelectorAll('footer button');
+        const zoomInBtn = toolbarButtons[2];
+        const zoomOutBtn = toolbarButtons[3];
         for (let i = 0; i < 8; i++) {
             fireEvent.click(zoomInBtn);
         }

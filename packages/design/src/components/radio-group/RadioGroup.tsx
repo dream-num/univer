@@ -53,13 +53,18 @@ export interface IRadioGroupProps {
      * The callback function triggered when switching options
      */
     onChange: (value: string | number | boolean) => void;
+
+    /**
+     * The aria-label of the radio group
+     */
+    ariaLabel?: string;
 }
 
 /**
  * RadioGroup Component
  */
 export function RadioGroup(props: IRadioGroupProps) {
-    const { children, className, style, value, disabled = false, direction = 'horizontal', onChange } = props;
+    const { children, className, style, value, disabled = false, direction = 'horizontal', onChange, ariaLabel } = props;
 
     const handleChange = (value: string | number | boolean) => {
         onChange(value);
@@ -67,6 +72,8 @@ export function RadioGroup(props: IRadioGroupProps) {
 
     return (
         <div
+            role="radiogroup"
+            aria-label={ariaLabel}
             className={clsx('univer-flex univer-gap-2', {
                 'univer-flex-col': direction === 'vertical',
             }, className)}

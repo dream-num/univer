@@ -42,6 +42,8 @@ const locale: typeof enUS = {
                 'Tháng 11',
                 'Tháng 12',
             ],
+            previousMonth: 'Tháng trước',
+            nextMonth: 'Tháng sau',
         },
         Select: {
             empty: 'Không có',
@@ -60,6 +62,19 @@ const locale: typeof enUS = {
             angle: 'Góc',
             flip: 'Lật',
             delete: 'Xóa',
+        },
+        Badge: {
+            close: 'Đóng huy hiệu',
+        },
+        Gallery: {
+            imageGallery: 'Thư viện ảnh',
+            zoomIn: 'Phóng to',
+            zoomOut: 'Thu nhỏ',
+            resetZoom: 'Đặt lại thu phóng',
+        },
+        InputNumber: {
+            increment: 'tăng',
+            decrement: 'giảm',
         },
     },
 };

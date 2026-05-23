@@ -17,6 +17,7 @@
 import { cleanup, fireEvent, render } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { Accordion } from '../Accordion';
+import '@testing-library/jest-dom/vitest';
 
 afterEach(cleanup);
 
@@ -49,5 +50,28 @@ describe('Accordion', () => {
         // Should collapse the second item
         fireEvent.click(getByText('Item 2'));
         expect(queryByText('Content 2')?.parentElement?.parentElement?.className).toContain('univer-max-h-0');
+    });
+
+    it('should have correct a11y attributes', () => {
+        const items = [
+            { label: 'Item 1', children: <div>Content 1</div> },
+            { label: 'Item 2', children: <div>Content 2</div> },
+        ];
+        const { container } = render(<Accordion items={items} />);
+
+        const buttons = container.querySelectorAll('button');
+        expect(buttons[0]).toHaveAttribute('aria-expanded', 'false');
+        expect(buttons[0]).toHaveAttribute('aria-controls');
+        expect(buttons[1]).toHaveAttribute('aria-expanded', 'false');
+        expect(buttons[1]).toHaveAttribute('aria-controls');
+
+        const regions = container.querySelectorAll('[role="region"]');
+        expect(regions).toHaveLength(2);
+        expect(regions[0]).toHaveAttribute('aria-labelledby', buttons[0].id);
+        expect(regions[1]).toHaveAttribute('aria-labelledby', buttons[1].id);
+
+        // Expand first item
+        fireEvent.click(buttons[0]);
+        expect(buttons[0]).toHaveAttribute('aria-expanded', 'true');
     });
 });

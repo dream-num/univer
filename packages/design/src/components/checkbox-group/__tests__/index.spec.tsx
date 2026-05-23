@@ -19,6 +19,7 @@ import { useState } from 'react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { Checkbox } from '../../checkbox/Checkbox';
 import { CheckboxGroup } from '../CheckboxGroup';
+import '@testing-library/jest-dom/vitest';
 
 afterEach(cleanup);
 
@@ -64,5 +65,17 @@ describe('CheckboxGroup', () => {
         fireEvent.click(getByText('y'));
 
         expect(result).toEqual(['0', '1']);
+    });
+
+    it('should have correct a11y attributes', () => {
+        const { container } = render(
+            <CheckboxGroup value={['0']} ariaLabel="Test Group" onChange={() => {}}>
+                <Checkbox value="0">x</Checkbox>
+                <Checkbox value="1">y</Checkbox>
+            </CheckboxGroup>
+        );
+        const group = container.querySelector('[role="group"]');
+        expect(group).toBeInTheDocument();
+        expect(group).toHaveAttribute('aria-label', 'Test Group');
     });
 });

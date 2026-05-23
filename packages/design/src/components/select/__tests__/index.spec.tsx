@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { MultipleSelect } from '../MultipleSelect';
 import { Select } from '../Select';
@@ -114,9 +114,9 @@ describe('MultipleSelect', () => {
 
     it('should remove badge value when close icon is clicked', () => {
         const handleChange = vi.fn();
-        render(<MultipleSelect value={['1', '2']} options={options} onChange={handleChange} />);
+        const { container } = render(<MultipleSelect value={['1', '2']} options={options} onChange={handleChange} />);
 
-        const closeButtons = screen.getAllByLabelText('Close badge');
+        const closeButtons = container.querySelectorAll('[data-u-comp="badge"] button');
         fireEvent.click(closeButtons[0]);
         expect(handleChange).toHaveBeenCalledWith(['2']);
     });

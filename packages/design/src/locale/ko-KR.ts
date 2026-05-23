@@ -42,6 +42,8 @@ const locale: typeof enUS = {
                 '11월',
                 '12월',
             ],
+            previousMonth: '이전 달',
+            nextMonth: '다음 달',
         },
         Select: {
             empty: '없음',
@@ -60,6 +62,19 @@ const locale: typeof enUS = {
             angle: '각도',
             flip: '뒤집기',
             delete: '삭제',
+        },
+        Badge: {
+            close: '배지 닫기',
+        },
+        Gallery: {
+            imageGallery: '이미지 갤러리',
+            zoomIn: '확대',
+            zoomOut: '축소',
+            resetZoom: '확대/축소 재설정',
+        },
+        InputNumber: {
+            increment: '증가',
+            decrement: '감소',
         },
     },
 };

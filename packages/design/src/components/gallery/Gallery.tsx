@@ -39,7 +39,7 @@ export function Gallery(props: IGalleryProps) {
     const [isVisible, setIsVisible] = useState(false);
     const [activeImageIndex, setActiveImageIndex] = useState(0);
     const [zoomLevel, setZoomLevel] = useState(1);
-    const { direction } = useContext(ConfigContext);
+    const { direction, locale } = useContext(ConfigContext);
 
     const dialogRef = useRef<HTMLDivElement>(null);
 
@@ -110,7 +110,7 @@ export function Gallery(props: IGalleryProps) {
             dir={direction}
             role="dialog"
             aria-modal="true"
-            aria-label="Image gallery"
+            aria-label={locale?.Gallery?.imageGallery}
             tabIndex={-1}
             ref={dialogRef}
             className={clsx(
@@ -169,7 +169,7 @@ export function Gallery(props: IGalleryProps) {
                 />
                 <button
                     type="button"
-                    aria-label="Zoom in"
+                    aria-label={locale?.Gallery?.zoomIn}
                     className={buttonClassName}
                     onClick={() => handleToggleZoom(0.25)}
                 >
@@ -177,7 +177,7 @@ export function Gallery(props: IGalleryProps) {
                 </button>
                 <button
                     type="button"
-                    aria-label="Zoom out"
+                    aria-label={locale?.Gallery?.zoomOut}
                     className={buttonClassName}
                     onClick={() => handleToggleZoom(-0.25)}
                 >
@@ -185,7 +185,7 @@ export function Gallery(props: IGalleryProps) {
                 </button>
                 <button
                     type="button"
-                    aria-label="Reset zoom"
+                    aria-label={locale?.Gallery?.resetZoom}
                     className={buttonClassName}
                     onClick={() => handleToggleZoom('reset')}
                 >

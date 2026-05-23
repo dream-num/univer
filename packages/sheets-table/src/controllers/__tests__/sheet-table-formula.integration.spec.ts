@@ -214,6 +214,12 @@ function createWorkbookData(): IWorkbookData {
                         7: { f: '=Table[2]' },
                         8: { f: '="Table[1]"' },
                     },
+                    6: {
+                        4: { f: '=SUM(Orders[amount],Orders[amount])' },
+                    },
+                    7: {
+                        4: { f: '=SUM(Orders[amount])' },
+                    },
                 },
             },
             sheet2: {
@@ -224,6 +230,12 @@ function createWorkbookData(): IWorkbookData {
                 cellData: {
                     2: {
                         0: { f: '=SUM(Orders)' },
+                    },
+                    3: {
+                        0: { f: '=SUM(Orders[amount])' },
+                    },
+                    4: {
+                        0: { f: '=SUM(Orders[amount],Orders[tax])' },
                     },
                 },
             },
@@ -428,6 +440,144 @@ describe('Sheet table formula integration', () => {
         expect(getFormula('test', 'sheet1', 5, 4)).toBe('=SUM(Sales[amount])');
         expect(getCellFormula('sheet1', 5, 4)).toBe('=SUM(Sales[amount])');
         expect(calculateCellFormula('test', 'sheet1', 5, 4)).toBe(60);
+    });
+
+    it('should sync wrapped repeated table references when a table is renamed, removed, and has a referenced column removed', async () => {
+        expect(calculateCellFormula('test', 'sheet1', 6, 4)).toBe(120);
+
+        expect(await commandService.executeCommand(SetSheetTableCommand.id, {
+            unitId: 'test',
+            tableId: 'orders-table',
+            name: 'Sales',
+        })).toBe(true);
+
+        expect(getFormula('test', 'sheet1', 6, 4)).toBe('=SUM(Sales[amount],Sales[amount])');
+        expect(getCellFormula('sheet1', 6, 4)).toBe('=SUM(Sales[amount],Sales[amount])');
+        expect(calculateCellFormula('test', 'sheet1', 6, 4)).toBe(120);
+
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(getFormula('test', 'sheet1', 6, 4)).toBe('=SUM(Orders[amount],Orders[amount])');
+        expect(getCellFormula('sheet1', 6, 4)).toBe('=SUM(Orders[amount],Orders[amount])');
+
+        expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+        expect(getFormula('test', 'sheet1', 6, 4)).toBe('=SUM(Sales[amount],Sales[amount])');
+        expect(getCellFormula('sheet1', 6, 4)).toBe('=SUM(Sales[amount],Sales[amount])');
+
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(getFormula('test', 'sheet1', 6, 4)).toBe('=SUM(Orders[amount],Orders[amount])');
+
+        expect(await commandService.executeCommand(SheetTableRemoveColumnAtCommand.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            tableId: 'orders-table',
+            index: 1,
+            count: 1,
+        })).toBe(true);
+
+        expect(getFormula('test', 'sheet1', 6, 4)).toBe('=SUM(#REF!,#REF!)');
+        expect(getCellFormula('sheet1', 6, 4)).toBe('=SUM(#REF!,#REF!)');
+
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(getFormula('test', 'sheet1', 6, 4)).toBe('=SUM(Orders[amount],Orders[amount])');
+        expect(getCellFormula('sheet1', 6, 4)).toBe('=SUM(Orders[amount],Orders[amount])');
+
+        expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+        expect(getFormula('test', 'sheet1', 6, 4)).toBe('=SUM(#REF!,#REF!)');
+        expect(getCellFormula('sheet1', 6, 4)).toBe('=SUM(#REF!,#REF!)');
+
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(getFormula('test', 'sheet1', 6, 4)).toBe('=SUM(Orders[amount],Orders[amount])');
+
+        expect(await commandService.executeCommand(DeleteSheetTableCommand.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            tableId: 'orders-table',
+        })).toBe(true);
+
+        expect(getFormula('test', 'sheet1', 6, 4)).toBe('=SUM(#REF!,#REF!)');
+        expect(getCellFormula('sheet1', 6, 4)).toBe('=SUM(#REF!,#REF!)');
+
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(getFormula('test', 'sheet1', 6, 4)).toBe('=SUM(Orders[amount],Orders[amount])');
+        expect(getCellFormula('sheet1', 6, 4)).toBe('=SUM(Orders[amount],Orders[amount])');
+
+        expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+        expect(getFormula('test', 'sheet1', 6, 4)).toBe('=SUM(#REF!,#REF!)');
+        expect(getCellFormula('sheet1', 6, 4)).toBe('=SUM(#REF!,#REF!)');
+    });
+
+    it('should sync multiple table formulas across sheets when a table changes, then undo and redo', async () => {
+        expect(calculateCellFormula('test', 'sheet1', 7, 4)).toBe(60);
+        expect(calculateCellFormula('test', 'sheet2', 3, 0)).toBe(60);
+        expect(calculateCellFormula('test', 'sheet2', 4, 0)).toBe(66);
+
+        expect(await commandService.executeCommand(SetSheetTableCommand.id, {
+            unitId: 'test',
+            tableId: 'orders-table',
+            name: 'Sales',
+        })).toBe(true);
+
+        expect(getFormula('test', 'sheet1', 7, 4)).toBe('=SUM(Sales[amount])');
+        expect(getFormula('test', 'sheet2', 3, 0)).toBe('=SUM(Sales[amount])');
+        expect(getFormula('test', 'sheet2', 4, 0)).toBe('=SUM(Sales[amount],Sales[tax])');
+
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(getFormula('test', 'sheet1', 7, 4)).toBe('=SUM(Orders[amount])');
+        expect(getFormula('test', 'sheet2', 3, 0)).toBe('=SUM(Orders[amount])');
+        expect(getFormula('test', 'sheet2', 4, 0)).toBe('=SUM(Orders[amount],Orders[tax])');
+
+        expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+        expect(getFormula('test', 'sheet1', 7, 4)).toBe('=SUM(Sales[amount])');
+        expect(getFormula('test', 'sheet2', 3, 0)).toBe('=SUM(Sales[amount])');
+        expect(getFormula('test', 'sheet2', 4, 0)).toBe('=SUM(Sales[amount],Sales[tax])');
+
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(getFormula('test', 'sheet1', 7, 4)).toBe('=SUM(Orders[amount])');
+
+        expect(await commandService.executeCommand(SheetTableRemoveColumnAtCommand.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            tableId: 'orders-table',
+            index: 1,
+            count: 1,
+        })).toBe(true);
+
+        expect(getFormula('test', 'sheet1', 7, 4)).toBe('=SUM(#REF!)');
+        expect(getFormula('test', 'sheet2', 3, 0)).toBe('=SUM(#REF!)');
+        expect(getFormula('test', 'sheet2', 4, 0)).toBe('=SUM(#REF!,Orders[tax])');
+
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(getFormula('test', 'sheet1', 7, 4)).toBe('=SUM(Orders[amount])');
+        expect(getFormula('test', 'sheet2', 3, 0)).toBe('=SUM(Orders[amount])');
+        expect(getFormula('test', 'sheet2', 4, 0)).toBe('=SUM(Orders[amount],Orders[tax])');
+
+        expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+        expect(getFormula('test', 'sheet1', 7, 4)).toBe('=SUM(#REF!)');
+        expect(getFormula('test', 'sheet2', 3, 0)).toBe('=SUM(#REF!)');
+        expect(getFormula('test', 'sheet2', 4, 0)).toBe('=SUM(#REF!,Orders[tax])');
+
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(getFormula('test', 'sheet1', 7, 4)).toBe('=SUM(Orders[amount])');
+
+        expect(await commandService.executeCommand(DeleteSheetTableCommand.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            tableId: 'orders-table',
+        })).toBe(true);
+
+        expect(getFormula('test', 'sheet1', 7, 4)).toBe('=SUM(#REF!)');
+        expect(getFormula('test', 'sheet2', 3, 0)).toBe('=SUM(#REF!)');
+        expect(getFormula('test', 'sheet2', 4, 0)).toBe('=SUM(#REF!,#REF!)');
+
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(getFormula('test', 'sheet1', 7, 4)).toBe('=SUM(Orders[amount])');
+        expect(getFormula('test', 'sheet2', 3, 0)).toBe('=SUM(Orders[amount])');
+        expect(getFormula('test', 'sheet2', 4, 0)).toBe('=SUM(Orders[amount],Orders[tax])');
+
+        expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+        expect(getFormula('test', 'sheet1', 7, 4)).toBe('=SUM(#REF!)');
+        expect(getFormula('test', 'sheet2', 3, 0)).toBe('=SUM(#REF!)');
+        expect(getFormula('test', 'sheet2', 4, 0)).toBe('=SUM(#REF!,#REF!)');
     });
 
     it('should recalculate table formulas when table columns shrink, then undo and redo the column insertion', async () => {

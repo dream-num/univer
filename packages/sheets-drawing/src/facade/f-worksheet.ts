@@ -15,11 +15,20 @@
  */
 
 import type { IFBlobSource } from '@univerjs/core/facade';
-import type { ISheetImage } from '@univerjs/sheets-drawing';
-import { DrawingTypeEnum, ImageSourceType } from '@univerjs/core';
-import { InsertSheetDrawingCommand, ISheetDrawingService, RemoveSheetDrawingCommand, SetSheetDrawingCommand } from '@univerjs/sheets-drawing';
+import type { IDrawingParam } from '@univerjs/core';
+import type { IDrawingGroupUpdateParam, IDrawingJsonUndo1 } from '@univerjs/drawing';
+import type { ISheetDrawing, ISheetImage } from '@univerjs/sheets-drawing';
+import { DrawingTypeEnum, generateRandomId, ImageSourceType, IUndoRedoService } from '@univerjs/core';
+import { getGroupState, transformObjectOutOfGroup } from '@univerjs/engine-render';
+import { DrawingApplyType, InsertSheetDrawingCommand, ISheetDrawingService, RemoveSheetDrawingCommand, SetDrawingApplyMutation, SetSheetDrawingCommand } from '@univerjs/sheets-drawing';
 import { FWorksheet } from '@univerjs/sheets/facade';
 import { FOverGridImage, FOverGridImageBuilder } from './f-over-grid-image';
+
+const GROUPABLE_DRAWING_TYPES = new Set([
+    DrawingTypeEnum.DRAWING_IMAGE,
+    DrawingTypeEnum.DRAWING_SHAPE,
+    DrawingTypeEnum.DRAWING_GROUP,
+]);
 
 /**
  * @ignore
@@ -207,6 +216,43 @@ export interface IFWorksheetDrawingMixin {
      * ```
      */
     newOverGridImage(): FOverGridImageBuilder;
+
+    /**
+     * Group drawings on the current sheet.
+     * @param {string[]} drawingIds - The drawing ids to group. At least two drawings are required.
+     * @param {string} [groupId] - Optional group drawing id. If omitted, a new id will be generated.
+     * @returns {string | null} The group id if the operation succeeds, otherwise null.
+     */
+    groupDrawings(drawingIds: string[], groupId?: string): string | null;
+
+    /**
+     * Ungroup drawing groups on the current sheet.
+     * @param {string[]} groupIds - The group drawing ids to ungroup.
+     * @returns {boolean} true if the operation succeeds, otherwise false.
+     */
+    ungroupDrawings(groupIds: string[]): boolean;
+
+    /**
+     * Get children of a drawing group on the current sheet.
+     * @param {string} groupId - The group drawing id.
+     * @param {boolean} [recursive] - Whether to return all descendants.
+     * @returns {ISheetDrawing[]} The child drawings.
+     */
+    getDrawingGroupChildren(groupId: string, recursive?: boolean): ISheetDrawing[];
+
+    /**
+     * Get the parent group of a drawing on the current sheet.
+     * @param {string} drawingId - The child drawing id.
+     * @returns {ISheetDrawing | null} The parent group drawing, or null if the drawing is not grouped.
+     */
+    getDrawingParentGroup(drawingId: string): ISheetDrawing | null;
+
+    /**
+     * Returns whether a drawing is inside a group on the current sheet.
+     * @param {string} drawingId - The drawing id.
+     * @returns {boolean} true if the drawing has a parent group.
+     */
+    isDrawingGrouped(drawingId: string): boolean;
 }
 
 export class FWorksheetDrawingMixin extends FWorksheet implements IFWorksheetDrawingMixin {
@@ -318,6 +364,199 @@ export class FWorksheetDrawingMixin extends FWorksheet implements IFWorksheetDra
         const unitId = this._fWorkbook.getId();
         const subUnitId = this.getSheetId();
         return this._injector.createInstance(FOverGridImageBuilder, unitId, subUnitId);
+    }
+
+    override groupDrawings(drawingIds: string[], groupId = generateRandomId(10)): string | null {
+        const uniqueDrawingIds = Array.from(new Set(drawingIds));
+        if (uniqueDrawingIds.length < 2) return null;
+
+        const unitId = this._fWorkbook.getId();
+        const subUnitId = this.getSheetId();
+        const sheetDrawingService = this._injector.get(ISheetDrawingService);
+        if (sheetDrawingService.getDrawingByParam({ unitId, subUnitId, drawingId: groupId })) return null;
+
+        const drawings = uniqueDrawingIds.map((drawingId) => sheetDrawingService.getDrawingByParam({ unitId, subUnitId, drawingId }));
+
+        if (drawings.some((drawing) => !drawing)) return null;
+        if (drawings.some((drawing) => !GROUPABLE_DRAWING_TYPES.has(drawing!.drawingType))) return null;
+
+        const validDrawings = drawings as ISheetDrawing[];
+        const groupTransform = getGroupState(0, 0, validDrawings.map((drawing) => drawing.transform || {}));
+        const groupParam = {
+            unitId,
+            subUnitId,
+            drawingId: groupId,
+            drawingType: DrawingTypeEnum.DRAWING_GROUP,
+            transform: groupTransform,
+            groupBaseBound: {
+                left: groupTransform.left,
+                top: groupTransform.top,
+                width: groupTransform.width,
+                height: groupTransform.height,
+            },
+        } as IDrawingParam;
+        const children = validDrawings.map((drawing) => ({
+            ...drawing,
+            groupId,
+        })) as IDrawingParam[];
+
+        const result = this._applyGroupDrawingOperation([{
+            parent: groupParam,
+            children,
+        }], DrawingApplyType.GROUP);
+
+        return result ? groupId : null;
+    }
+
+    override ungroupDrawings(groupIds: string[]): boolean {
+        const unitId = this._fWorkbook.getId();
+        const subUnitId = this.getSheetId();
+        const sheetDrawingService = this._injector.get(ISheetDrawingService);
+        const groupParams: IDrawingGroupUpdateParam[] = [];
+
+        for (const groupId of groupIds) {
+            const groupDrawing = sheetDrawingService.getDrawingByParam({ unitId, subUnitId, drawingId: groupId });
+            if (!groupDrawing || groupDrawing.drawingType !== DrawingTypeEnum.DRAWING_GROUP) continue;
+
+            const groupTransform = groupDrawing.transform || { width: 0, height: 0 };
+            const children = sheetDrawingService.getDrawingsByGroup({ unitId, subUnitId, drawingId: groupId })
+                .map((drawing) => {
+                    const newTransform = transformObjectOutOfGroup(
+                        drawing.transform || {},
+                        groupTransform,
+                        groupTransform.width || 0,
+                        groupTransform.height || 0,
+                        groupDrawing.groupBaseBound
+                    );
+
+                    return {
+                        ...drawing,
+                        transform: {
+                            ...drawing.transform,
+                            ...newTransform,
+                        },
+                        groupId: undefined,
+                    };
+                });
+
+            if (children.length > 0) {
+                groupParams.push({
+                    parent: groupDrawing,
+                    children,
+                });
+            }
+        }
+
+        return this._applyGroupDrawingOperation(groupParams, DrawingApplyType.UNGROUP);
+    }
+
+    override getDrawingGroupChildren(groupId: string, recursive = false): ISheetDrawing[] {
+        const unitId = this._fWorkbook.getId();
+        const subUnitId = this.getSheetId();
+        const sheetDrawingService = this._injector.get(ISheetDrawingService);
+
+        if (!recursive) {
+            return sheetDrawingService.getDrawingsByGroup({ unitId, subUnitId, drawingId: groupId }) as ISheetDrawing[];
+        }
+
+        const nested = sheetDrawingService.getDrawingsByGroupNested({ unitId, subUnitId, drawingId: groupId });
+        if (!nested) return [];
+
+        return [
+            ...(nested.flatChildren || []),
+            ...nested.groups.filter((group) => group.drawingId !== groupId),
+        ] as ISheetDrawing[];
+    }
+
+    override getDrawingParentGroup(drawingId: string): ISheetDrawing | null {
+        const unitId = this._fWorkbook.getId();
+        const subUnitId = this.getSheetId();
+        const sheetDrawingService = this._injector.get(ISheetDrawingService);
+        const drawing = sheetDrawingService.getDrawingByParam({ unitId, subUnitId, drawingId });
+
+        if (!drawing?.groupId) return null;
+
+        const groupDrawing = sheetDrawingService.getDrawingByParam({ unitId, subUnitId, drawingId: drawing.groupId });
+        if (!groupDrawing || groupDrawing.drawingType !== DrawingTypeEnum.DRAWING_GROUP) return null;
+
+        return groupDrawing;
+    }
+
+    override isDrawingGrouped(drawingId: string): boolean {
+        return this.getDrawingParentGroup(drawingId) !== null;
+    }
+
+    private _applyGroupDrawingOperation(groupParams: IDrawingGroupUpdateParam[], type: DrawingApplyType.GROUP | DrawingApplyType.UNGROUP): boolean {
+        if (groupParams.length === 0) return false;
+
+        const sheetDrawingService = this._injector.get(ISheetDrawingService);
+        const commandService = this._commandService;
+        const undoRedoService = this._injector.get(IUndoRedoService);
+        const jsonOp = (type === DrawingApplyType.GROUP
+            ? sheetDrawingService.getGroupDrawingOp(groupParams)
+            : sheetDrawingService.getUngroupDrawingOp(groupParams)) as IDrawingJsonUndo1;
+
+        const { unitId, subUnitId, undo, redo, objects } = jsonOp;
+        const result = commandService.syncExecuteCommand(SetDrawingApplyMutation.id, { op: redo, unitId, subUnitId, objects, type });
+
+        if (result) {
+            const inverseType = type === DrawingApplyType.GROUP ? DrawingApplyType.UNGROUP : DrawingApplyType.GROUP;
+            undoRedoService.pushUndoRedo({
+                unitID: unitId,
+                undoMutations: [
+                    { id: SetDrawingApplyMutation.id, params: { op: undo, unitId, subUnitId, objects: this._invertGroupOperationObjects(objects as IDrawingGroupUpdateParam[], type), type: inverseType } },
+                ],
+                redoMutations: [
+                    { id: SetDrawingApplyMutation.id, params: { op: redo, unitId, subUnitId, objects, type } },
+                ],
+            });
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private _invertGroupOperationObjects(groupParams: IDrawingGroupUpdateParam[], type: DrawingApplyType.GROUP | DrawingApplyType.UNGROUP): IDrawingGroupUpdateParam[] {
+        return type === DrawingApplyType.GROUP
+            ? groupParams.map((groupParam) => {
+                const { parent, children } = groupParam;
+                const groupTransform = parent.transform || { width: 0, height: 0 };
+                return {
+                    parent: {
+                        ...parent,
+                        transform: {
+                            left: 0,
+                            top: 0,
+                        },
+                    },
+                    children: children.map((child) => ({
+                        ...child,
+                        transform: transformObjectOutOfGroup(
+                            child.transform || {},
+                            groupTransform,
+                            groupTransform.width || 0,
+                            groupTransform.height || 0,
+                            parent.groupBaseBound
+                        ),
+                        groupId: undefined,
+                    })),
+                };
+            })
+            : groupParams.map((groupParam) => {
+                const { parent, children } = groupParam;
+                const groupTransform = getGroupState(0, 0, children.map((child) => child.transform || {}));
+                return {
+                    parent: {
+                        ...parent,
+                        transform: groupTransform,
+                    },
+                    children: children.map((child) => ({
+                        ...child,
+                        groupId: parent.drawingId,
+                    })),
+                };
+            });
     }
 }
 

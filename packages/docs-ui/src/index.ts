@@ -119,6 +119,7 @@ export type { IUniverDocsUIConfig } from './config/config';
 export { DocUIController } from './controllers/doc-ui.controller';
 export { DocBackScrollRenderController } from './controllers/render-controllers/back-scroll.render-controller';
 export { DocRenderController } from './controllers/render-controllers/doc.render-controller';
+export { FLOAT_TEXT_STYLE_MENU_ID, FLOAT_TOOLBAR_MENU_POSITION } from './menu/menu';
 export { EMPTY_PARAGRAPH_MENU_ID, INSERT_BELLOW_MENU_ID } from './menu/paragraph-menu';
 export { menuSchema as DocsUIMenuSchema } from './menu/schema';
 export { UniverDocsUIPlugin } from './plugin';

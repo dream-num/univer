@@ -282,6 +282,12 @@ export function DropdownMenuWrapper({
             },
         }));
 
+        if (filteredMenuItems.length) {
+            items.push({
+                type: 'separator',
+            });
+        }
+
         for (const menuItem of filteredMenuItems) {
             if (!menuItem.item) continue;
 

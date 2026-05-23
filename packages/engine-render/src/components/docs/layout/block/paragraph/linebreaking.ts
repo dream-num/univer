@@ -106,6 +106,22 @@ function _withMinSpacing(style: IParagraphStyle, key: 'spaceAbove' | 'spaceBelow
     };
 }
 
+function _getNextAdjacentBlockRange(blockRanges: IDocumentBody['blockRanges'], blockRange: NonNullable<IDocumentBody['blockRanges']>[number]) {
+    return blockRanges
+        ?.filter((range) => range.startIndex > blockRange.endIndex)
+        .sort((left, right) => left.startIndex - right.startIndex)[0];
+}
+
+function _hasNextAdjacentLayoutBlockRange(blockRanges: IDocumentBody['blockRanges'], blockRange: NonNullable<IDocumentBody['blockRanges']>[number]): boolean {
+    const nextBlockRange = _getNextAdjacentBlockRange(blockRanges, blockRange);
+
+    return (
+        nextBlockRange != null &&
+        BLOCK_LAYOUT_OUTER_SPACING_MAP.has(nextBlockRange.blockType) &&
+        nextBlockRange.startIndex === blockRange.endIndex + 1
+    );
+}
+
 function _applyDefaultLayoutParagraphStyle(style: IParagraphStyle, hasBlockRange: boolean) {
     if (style.lineSpacing == null) {
         style.lineSpacing = DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING;
@@ -161,7 +177,7 @@ function _applyBlockRangeLayoutParagraphStyle(
         _withMinSpacing(style, 'spaceAbove', outerSpacing);
     }
 
-    if (lastParagraph?.startIndex === paragraph.startIndex) {
+    if (lastParagraph?.startIndex === paragraph.startIndex && !_hasNextAdjacentLayoutBlockRange(blockRanges, blockRange)) {
         _withMinSpacing(style, 'spaceBelow', outerSpacing);
     }
 

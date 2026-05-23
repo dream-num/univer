@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IAccessor, PresetListType } from '@univerjs/core';
+import type { DocumentDataModel, IAccessor } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IMenuButtonItem, IMenuItem, IMenuSelectorItem } from '@univerjs/ui';
 import {
@@ -29,6 +29,7 @@ import {
     IUniverInstanceService,
     NAMED_STYLE_MAP,
     NamedStyleType,
+    PresetListType,
     ThemeService,
     Tools,
     UniverInstanceType,
@@ -40,9 +41,11 @@ import {
     SetTextSelectionsOperation,
 } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
+import { H1Icon, H2Icon, H3Icon, H4Icon, H5Icon, TextTypeIcon } from '@univerjs/icons';
 import {
     COLOR_PICKER_COMPONENT,
     COMMON_LABEL_COMPONENT,
+    ComponentManager,
     FONT_FAMILY_COMPONENT,
     FONT_FAMILY_ITEM_COMPONENT,
     FONT_SIZE_COMPONENT,
@@ -618,6 +621,133 @@ export function HeadingSelectorMenuItemFactory(accessor: IAccessor): IMenuSelect
 
             calc();
 
+            return disposable.dispose;
+        }),
+        disabled$: disableMenuWhenNoDocRange(accessor),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+    };
+}
+
+export const FLOAT_TEXT_STYLE_MENU_ID = 'doc.menu.float-text-style';
+export const FLOAT_TOOLBAR_MENU_POSITION = 'doc.menu.float-toolbar';
+
+const FLOAT_TEXT_STYLE_OPTIONS = [
+    {
+        icon: 'TextTypeIcon',
+        label: 'toolbar.heading.normal',
+        value: NamedStyleType.NORMAL_TEXT,
+    },
+    {
+        icon: 'H1Icon',
+        label: 'toolbar.heading.1',
+        value: NamedStyleType.HEADING_1,
+    },
+    {
+        icon: 'H2Icon',
+        label: 'toolbar.heading.2',
+        value: NamedStyleType.HEADING_2,
+    },
+    {
+        icon: 'H3Icon',
+        label: 'toolbar.heading.3',
+        value: NamedStyleType.HEADING_3,
+    },
+    {
+        icon: 'H4Icon',
+        label: 'toolbar.heading.4',
+        value: NamedStyleType.HEADING_4,
+    },
+    {
+        icon: 'H5Icon',
+        label: 'toolbar.heading.5',
+        value: NamedStyleType.HEADING_5,
+    },
+    {
+        id: OrderListCommand.id,
+        icon: 'OrderIcon',
+        label: 'toolbar.order',
+        value: PresetListType.ORDER_LIST,
+    },
+    {
+        id: BulletListCommand.id,
+        icon: 'UnorderIcon',
+        label: 'toolbar.unorder',
+        value: PresetListType.BULLET_LIST,
+    },
+    {
+        id: CheckListCommand.id,
+        icon: 'TodoListDoubleIcon',
+        label: 'toolbar.checklist',
+        value: PresetListType.CHECK_LIST,
+    },
+];
+
+function registerFloatingTextStyleIcons(componentManager: ComponentManager): void {
+    ([
+        ['TextTypeIcon', TextTypeIcon],
+        ['H1Icon', H1Icon],
+        ['H2Icon', H2Icon],
+        ['H3Icon', H3Icon],
+        ['H4Icon', H4Icon],
+        ['H5Icon', H5Icon],
+    ] as const).forEach(([key, component]) => {
+        if (!componentManager.get(key)) {
+            componentManager.register(key, component);
+        }
+    });
+}
+
+function normalizeFloatingTextStyleValue(paragraph: ReturnType<typeof getParagraphStyleAtCursor>): string | number {
+    const listType = paragraph?.bullet?.listType;
+
+    if (listType?.startsWith(PresetListType.ORDER_LIST)) {
+        return PresetListType.ORDER_LIST;
+    }
+
+    if (listType?.startsWith(PresetListType.BULLET_LIST)) {
+        return PresetListType.BULLET_LIST;
+    }
+
+    if (listType === PresetListType.CHECK_LIST || listType === PresetListType.CHECK_LIST_CHECKED) {
+        return PresetListType.CHECK_LIST;
+    }
+
+    return paragraph?.paragraphStyle?.namedStyleType ?? NamedStyleType.NORMAL_TEXT;
+}
+
+export function FloatTextStyleMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string | number> {
+    const commandService = accessor.get(ICommandService);
+    const componentManager = accessor.get(ComponentManager);
+
+    registerFloatingTextStyleIcons(componentManager);
+
+    return {
+        id: FLOAT_TEXT_STYLE_MENU_ID,
+        commandId: SetParagraphNamedStyleCommand.id,
+        type: MenuItemType.SELECTOR,
+        icon: 'TextTypeIcon',
+        tooltip: 'toolbar.heading.tooltip',
+        selections: FLOAT_TEXT_STYLE_OPTIONS,
+        value$: new Observable((subscriber) => {
+            const calc = () => {
+                subscriber.next(normalizeFloatingTextStyleValue(getParagraphStyleAtCursor(accessor)));
+            };
+
+            const disposable = commandService.onCommandExecuted((c) => {
+                const id = c.id;
+
+                if (
+                    id === SetTextSelectionsOperation.id ||
+                    id === SetParagraphNamedStyleCommand.id ||
+                    id === OrderListCommand.id ||
+                    id === BulletListCommand.id ||
+                    id === CheckListCommand.id
+                ) {
+                    calc();
+                }
+            });
+
+            calc();
             return disposable.dispose;
         }),
         disabled$: disableMenuWhenNoDocRange(accessor),

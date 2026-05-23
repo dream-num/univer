@@ -27,6 +27,7 @@ import {
     IUniverInstanceService,
     JSONX,
     PositionedObjectLayoutType,
+    sequenceExecuteAsync,
     TextX,
     TextXActionType,
     Tools,
@@ -36,6 +37,7 @@ import {
 
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { getParagraphByGlyph, hasListGlyph, isFirstGlyph, isIndentByGlyph } from '@univerjs/engine-render';
+import { DocAutoFormatService } from '../../services/doc-auto-format.service';
 import { DeleteDirection } from '../../types/delete-direction';
 import { getCommandSkeleton, getRichTextEditPath } from '../util';
 import { CutContentCommand } from './clipboard.inner.command';
@@ -450,6 +452,11 @@ export const DeleteLeftCommand: ICommand = {
             return false;
         }
 
+        const autoFormatResult = await executeDeleteAutoFormat(accessor, DeleteLeftCommand.id);
+        if (autoFormatResult != null) {
+            return autoFormatResult;
+        }
+
         const { segmentId, style, segmentPage } = activeRange;
 
         const body = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody();
@@ -677,6 +684,11 @@ export const DeleteRightCommand: ICommand = {
             return false;
         }
 
+        const autoFormatResult = await executeDeleteAutoFormat(accessor, DeleteRightCommand.id);
+        if (autoFormatResult != null) {
+            return autoFormatResult;
+        }
+
         const { segmentId, style, segmentPage } = activeRange;
 
         const body = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getBody();
@@ -789,6 +801,20 @@ export const DeleteRightCommand: ICommand = {
         return result;
     },
 };
+
+async function executeDeleteAutoFormat(accessor: Parameters<ICommand['handler']>[0], commandId: string): Promise<boolean | null> {
+    if (!accessor.has(DocAutoFormatService)) {
+        return null;
+    }
+
+    const commandService = accessor.get(ICommandService);
+    const mutations = accessor.get(DocAutoFormatService).onAutoFormat(commandId);
+    if (!mutations.length) {
+        return null;
+    }
+
+    return (await sequenceExecuteAsync(mutations, commandService)).result;
+}
 
 // get cursor position when BACKSPACE/DELETE excuse the CutContentCommand.
 function getTextRangesWhenDelete(activeRange: ITextRangeWithStyle, ranges: readonly ITextRange[]) {

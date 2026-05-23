@@ -266,7 +266,7 @@ export class NodePositionConvertToCursor {
 
         // eslint-disable-next-line complexity
         this._selectionIterator(start, end, (start_sp, end_sp, isFirst, isLast, divide, line) => {
-            const { lineHeight, asc, paddingTop, marginTop, marginBottom } = line;
+            const { lineHeight, asc, paddingTop, paddingBottom, contentHeight, marginTop, marginBottom } = line;
             const { glyphGroup, st } = divide;
             if (glyphGroup.length === 0) {
                 // The divide is empty, and no need to set selection.
@@ -298,13 +298,17 @@ export class NodePositionConvertToCursor {
 
             const collapsed = start === end;
             const anchorGlyph = isStartBack ? (preGlyph ?? firstGlyph) : firstGlyph;
+            const borderBoxStartY = startY;
+            const borderBoxEndY = contentHeight == null
+                ? startY + lineHeight - marginTop - marginBottom
+                : startY + paddingTop + contentHeight + paddingBottom;
 
             if (start_sp === 0 && end_sp === glyphGroup.length - 1) {
                 borderBoxPosition = {
                     startX: startX + firstGlyphLeft + (isCurrentList ? firstGlyphWidth : 0),
-                    startY,
+                    startY: borderBoxStartY,
                     endX: startX + lastGlyphLeft + (isEndBack ? 0 : lastGlyphWidth),
-                    endY: startY + lineHeight - marginTop - marginBottom,
+                    endY: borderBoxEndY,
                 };
 
                 contentBoxPosition = {
@@ -318,9 +322,9 @@ export class NodePositionConvertToCursor {
 
                 borderBoxPosition = {
                     startX: startX + firstGlyphLeft + (isStartBackFin ? 0 : firstGlyphWidth),
-                    startY,
+                    startY: borderBoxStartY,
                     endX: startX + lastGlyphLeft + (isEndBack ? 0 : lastGlyphWidth),
-                    endY: startY + lineHeight - marginTop - marginBottom,
+                    endY: borderBoxEndY,
                 };
 
                 contentBoxPosition = {

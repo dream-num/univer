@@ -191,4 +191,77 @@ describe('selection convert text range helpers', () => {
 
         expect(getAnchorBounding(result.contentBoxPointGroup).left).toBe(70);
     });
+
+    it('excludes layout-only paragraph spacing from text selection height', () => {
+        const glyph = {
+            bBox: { ba: 10, bd: 3 },
+            count: 1,
+            glyphType: 'LETTER',
+            left: 0,
+            width: 20,
+        };
+        const line = {
+            asc: 13,
+            contentHeight: 16,
+            divides: [{
+                glyphGroup: [glyph],
+                left: 0,
+                paddingLeft: 0,
+            }],
+            lineHeight: 92,
+            marginBottom: 34,
+            marginTop: 0,
+            paddingBottom: 4,
+            paddingTop: 4,
+            top: 0,
+        };
+        const page = {
+            marginLeft: 0,
+            marginTop: 0,
+            pageHeight: 500,
+            pageWidth: 500,
+            sections: [{
+                columns: [{
+                    left: 0,
+                    lines: [line],
+                }],
+                top: 0,
+            }],
+        };
+        const skeleton = {
+            getSkeletonData: () => ({
+                pages: [page],
+                skeFooters: new Map(),
+                skeHeaders: new Map(),
+            }),
+        };
+        const position: INodePosition = {
+            column: 0,
+            divide: 0,
+            glyph: 0,
+            isBack: false,
+            line: 0,
+            page: 0,
+            pageType: DocumentSkeletonPageType.BODY,
+            path: ['pages', 0],
+            section: 0,
+            segmentPage: -1,
+        };
+        const convertor = new NodePositionConvertToCursor({
+            docsLeft: 0,
+            docsTop: 0,
+            pageLayoutType: 0,
+            pageMarginLeft: 0,
+            pageMarginTop: 0,
+        } as never, skeleton as never);
+
+        const result = convertor.getRangePointData(position, position);
+
+        expect(getLineBounding(result.borderBoxPointGroup)[0]).toEqual({
+            bottom: 24,
+            left: 0,
+            right: 20,
+            top: 0,
+        });
+    });
 });

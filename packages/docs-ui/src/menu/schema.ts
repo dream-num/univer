@@ -56,6 +56,9 @@ import {
     BulletListMenuItemFactory,
     CheckListMenuItemFactory,
     DocSwitchModeMenuItemFactory,
+    FLOAT_TEXT_STYLE_MENU_ID,
+    FLOAT_TOOLBAR_MENU_POSITION,
+    FloatTextStyleMenuItemFactory,
     FontFamilySelectorMenuItemFactory,
     FontSizeSelectorMenuItemFactory,
     HeaderFooterMenuItemFactory,
@@ -77,7 +80,17 @@ import {
 } from './menu';
 import { CopyCurrentParagraphMenuItemFactory, CutCurrentParagraphMenuItemFactory, DeleteCurrentParagraphMenuItemFactory, DocInsertBellowMenuItemFactory, EMPTY_PARAGRAPH_MENU_ID, EmptyParagraphBulletListMenuItemFactory, EmptyParagraphCheckListMenuItemFactory, EmptyParagraphH1MenuItemFactory, EmptyParagraphH2MenuItemFactory, EmptyParagraphH3MenuItemFactory, EmptyParagraphH4MenuItemFactory, EmptyParagraphH5MenuItemFactory, EmptyParagraphHorizontalLineMenuItemFactory, EmptyParagraphNormalTextMenuItemFactory, EmptyParagraphOrderListMenuItemFactory, H1HeadingMenuItemFactory, H2HeadingMenuItemFactory, H3HeadingMenuItemFactory, H4HeadingMenuItemFactory, H5HeadingMenuItemFactory, INSERT_BELLOW_MENU_ID, InsertBulletListBellowMenuItemFactory, InsertCheckListBellowMenuItemFactory, InsertHorizontalLineBellowMenuItemFactory, InsertOrderListBellowMenuItemFactory, NormalTextHeadingMenuItemFactory, SubtitleHeadingMenuItemFactory, TitleHeadingMenuItemFactory } from './paragraph-menu';
 
+export const floatToolbarMenuSchema: MenuSchemaType = {
+    [FLOAT_TOOLBAR_MENU_POSITION]: {
+        [FLOAT_TEXT_STYLE_MENU_ID]: {
+            order: 0,
+            menuItemFactory: FloatTextStyleMenuItemFactory,
+        },
+    },
+};
+
 export const menuSchema: MenuSchemaType = {
+    ...floatToolbarMenuSchema,
     [RibbonStartGroup.FORMAT]: {
         [SetInlineFormatBoldCommand.id]: {
             order: 0,

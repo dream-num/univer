@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
+import { NamedStyleType, PresetListType } from '@univerjs/core';
 import { ContextMenuGroup, ContextMenuPosition, MenuItemType, RibbonInsertGroup, RibbonStartGroup } from '@univerjs/ui';
 import { describe, expect, it } from 'vitest';
 import { HorizontalLineCommand, InsertHorizontalLineBellowCommand } from '../../commands/commands/doc-horizontal-line.command';
 import { BulletListCommand, CheckListCommand, InsertBulletListBellowCommand, InsertCheckListBellowCommand, InsertOrderListBellowCommand, OrderListCommand } from '../../commands/commands/list.command';
 import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignOperationCommand, AlignRightCommand } from '../../commands/commands/paragraph-align.command';
-import { H1HeadingCommand, NormalTextHeadingCommand, SubtitleHeadingCommand, TitleHeadingCommand } from '../../commands/commands/set-heading.command';
+import { H1HeadingCommand, NormalTextHeadingCommand, SetParagraphNamedStyleCommand, SubtitleHeadingCommand, TitleHeadingCommand } from '../../commands/commands/set-heading.command';
 import { CreateDocTableCommand } from '../../commands/commands/table/doc-table-create.command';
 import { DocCreateTableOperation } from '../../commands/operations/doc-create-table.operation';
 import { DocParagraphSettingPanelOperation } from '../../commands/operations/doc-paragraph-setting-panel.operation';
-import { AlignMenuItemFactory, InsertDefaultTableMenuFactory, InsertTableMenuFactory } from '../menu';
+import { AlignMenuItemFactory, FLOAT_TEXT_STYLE_MENU_ID, FLOAT_TOOLBAR_MENU_POSITION, FloatTextStyleMenuItemFactory, InsertDefaultTableMenuFactory, InsertTableMenuFactory } from '../menu';
 import { EMPTY_PARAGRAPH_MENU_ID, INSERT_BELLOW_MENU_ID } from '../paragraph-menu';
 import { menuSchema } from '../schema';
 
@@ -55,6 +56,29 @@ describe('docs ui ribbon schema', () => {
         expect(layout[CheckListCommand.id]).toBeUndefined();
         expect(media[HorizontalLineCommand.id].menuItemFactory).toBeDefined();
         expect(media[CheckListCommand.id].menuItemFactory).toBeDefined();
+    });
+
+    it('adds a text style menu for the floating toolbar', () => {
+        const format = (menuSchema as any)[RibbonStartGroup.FORMAT];
+        const floatToolbar = (menuSchema as any)[FLOAT_TOOLBAR_MENU_POSITION];
+
+        expect(format[FLOAT_TEXT_STYLE_MENU_ID]).toBeUndefined();
+        expect(floatToolbar[FLOAT_TEXT_STYLE_MENU_ID].order).toBe(0);
+
+        const item = FloatTextStyleMenuItemFactory({ get: () => ({ get: () => undefined, register: () => undefined }) } as never);
+        expect(item.type).toBe(MenuItemType.SELECTOR);
+        expect(item.commandId).toBe(SetParagraphNamedStyleCommand.id);
+        expect((item.selections as Array<{ id?: string; value?: string | number }>).map((option) => [option.id, option.value])).toEqual([
+            [undefined, NamedStyleType.NORMAL_TEXT],
+            [undefined, NamedStyleType.HEADING_1],
+            [undefined, NamedStyleType.HEADING_2],
+            [undefined, NamedStyleType.HEADING_3],
+            [undefined, NamedStyleType.HEADING_4],
+            [undefined, NamedStyleType.HEADING_5],
+            [OrderListCommand.id, PresetListType.ORDER_LIST],
+            [BulletListCommand.id, PresetListType.BULLET_LIST],
+            [CheckListCommand.id, PresetListType.CHECK_LIST],
+        ]);
     });
 
     it('uses current-paragraph first-level actions for empty paragraph menus', () => {

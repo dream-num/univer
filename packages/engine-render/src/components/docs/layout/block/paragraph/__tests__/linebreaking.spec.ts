@@ -135,6 +135,67 @@ describe('linebreaking', () => {
         expect(paragraphStyle).toEqual({ indentStart: { v: 60 }, indentEnd: { v: 20 } });
     });
 
+    it('removes bottom outer spacing between adjacent layout block ranges', () => {
+        const ctx = createContext();
+        const firstCalloutParagraph = {
+            startIndex: 1,
+            paragraphStyle: {},
+        };
+        const secondCalloutParagraph = {
+            startIndex: 4,
+            paragraphStyle: {},
+        };
+        const body = {
+            paragraphs: [firstCalloutParagraph, secondCalloutParagraph],
+            blockRanges: [
+                {
+                    blockId: 'callout-1',
+                    blockType: 'callout',
+                    startIndex: 0,
+                    endIndex: 2,
+                },
+                {
+                    blockId: 'quote-1',
+                    blockType: 'quote',
+                    startIndex: 3,
+                    endIndex: 5,
+                },
+            ],
+        };
+        const viewModel = {
+            getParagraph: vi.fn(() => firstCalloutParagraph),
+            getBody: vi.fn(() => body),
+            getCustomBlock: vi.fn(() => null),
+        } as any;
+
+        lineBreaking(
+            ctx,
+            viewModel,
+            [],
+            {
+                segmentId: 'segment-1',
+                pageNumber: 1,
+            } as any,
+            {
+                endIndex: 1,
+                startIndex: 0,
+                blocks: [],
+                children: [],
+            } as any,
+            {
+                lists: [],
+                localeService: {} as any,
+                drawings: {},
+            } as any,
+            null
+        );
+
+        expect(ctx.paragraphConfigCache.get('segment-1')?.get(1)?.paragraphStyle).toEqual({
+            lineSpacing: 1.5,
+            spaceAbove: { v: 34 },
+        });
+    });
+
     it('applies quote outer spacing with the same temporary layout rule', () => {
         const ctx = createContext();
         const firstParagraphStyle = { indentStart: { v: 22 } };

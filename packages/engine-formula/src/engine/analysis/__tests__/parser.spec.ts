@@ -24,6 +24,7 @@ import { ErrorType } from '../../../basics/error-type';
 import { FUNCTION_NAMES_MATH } from '../../../functions/math/function-names';
 import { Pi } from '../../../functions/math/pi';
 import { Sum } from '../../../functions/math/sum';
+import { Compare } from '../../../functions/meta/compare';
 import { Divided } from '../../../functions/meta/divided';
 import { FUNCTION_NAMES_META } from '../../../functions/meta/function-names';
 import { Minus } from '../../../functions/meta/minus';
@@ -94,6 +95,7 @@ describe('Test indirect', () => {
             new Plus(FUNCTION_NAMES_META.PLUS),
             new Minus(FUNCTION_NAMES_META.MINUS),
             new Divided(FUNCTION_NAMES_META.DIVIDED),
+            new Compare(FUNCTION_NAMES_META.COMPARE),
             new Pi(FUNCTION_NAMES_MATH.PI),
             new Countif(FUNCTION_NAMES_STATISTICAL.COUNTIF)
         );
@@ -174,6 +176,16 @@ describe('Test indirect', () => {
             const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
 
             expect((result as ArrayValueObject).getFirstCell().getValue()).toStrictEqual(1);
+        });
+
+        it('should compare quoted date literals as strings', async () => {
+            const lexerNode = lexer.treeBuilder('=A5>="2026-01-01"');
+
+            const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
+
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
+
+            expect((result as ArrayValueObject).getFirstCell().getValue()).toBe(false);
         });
 
         it('Minus Minus Minus ref', async () => {

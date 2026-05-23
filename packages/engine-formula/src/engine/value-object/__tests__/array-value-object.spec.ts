@@ -426,6 +426,11 @@ describe('arrayValueObject test', () => {
             stringValueObject = ValueObjectFactory.create(' ');
 
             expect(stringValueObject.isString()).toBeTruthy();
+
+            stringValueObject = ValueObjectFactory.create('"2026-01-01"');
+
+            expect(stringValueObject.isString()).toBeTruthy();
+            expect(stringValueObject.getValue()).toBe('2026-01-01');
         });
 
         it('ValueObjectFactory create ErrorValueObject ', () => {

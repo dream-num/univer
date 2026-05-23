@@ -336,10 +336,12 @@ const stringToNumberPatternCache = new FormulaAstLRU<{
 }>(100000);
 
 export function stringIsNumberPattern(input: string) {
-    let _input = input;
+    const _input = input;
 
     if (_input.startsWith('"') && _input.endsWith('"')) {
-        _input = _input.slice(1, -1);
+        return {
+            isNumberPattern: false,
+        };
     }
 
     const cacheValue = stringToNumberPatternCache.get(_input);

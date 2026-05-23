@@ -68,6 +68,8 @@ const TEST_WORKBOOK_DATA: IWorkbookData = {
         sheet1: {
             id: 'sheet1',
             name: 'Main',
+            rowCount: 5,
+            columnCount: 5,
             cellData: {
                 0: {
                     0: {
@@ -139,6 +141,12 @@ const TEST_WORKBOOK_DATA: IWorkbookData = {
                     4: {
                         v: -3,
                         t: CellValueType.NUMBER,
+                    },
+                },
+                4: {
+                    0: {
+                        v: '2025-01-01',
+                        t: CellValueType.STRING,
                     },
                 },
             },

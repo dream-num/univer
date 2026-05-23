@@ -86,7 +86,7 @@ describe('data validation operations', () => {
         expect(panelService.setActiveRule).toHaveBeenCalledWith({ unitId: 'book-1', subUnitId: 'sheet-1', rule });
         expect(sidebarService.open).toHaveBeenCalledWith(expect.objectContaining({
             id: DATA_VALIDATION_PANEL,
-            header: { title: 'dataValidation.panel.addTitle' },
+            header: { title: 'sheets-data-validation-ui.panel.addTitle' },
             children: { label: DATA_VALIDATION_PANEL },
             width: 312,
         }));

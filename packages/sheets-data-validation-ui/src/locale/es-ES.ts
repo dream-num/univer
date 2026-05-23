@@ -17,7 +17,7 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    dataValidation: {
+    'sheets-data-validation-ui': {
         title: 'Validación de datos',
         validFail: {
             value: 'Por favor, introduce un valor',
@@ -55,78 +55,12 @@ const locale: typeof enUS = {
             rangeError: 'Los rangos no son válidos',
             allowBlank: 'Permitir valores en blanco',
         },
-        operators: {
-            between: 'entre',
-            greaterThan: 'mayor que',
-            greaterThanOrEqual: 'mayor o igual que',
-            lessThan: 'menor que',
-            lessThanOrEqual: 'menor o igual que',
-            equal: 'igual',
-            notEqual: 'no igual',
-            notBetween: 'no entre',
-            legal: 'es tipo legal',
-        },
-        ruleName: {
-            between: 'Está entre {FORMULA1} y {FORMULA2}',
-            greaterThan: 'Es mayor que {FORMULA1}',
-            greaterThanOrEqual: 'Es mayor o igual que {FORMULA1}',
-            lessThan: 'Es menor que {FORMULA1}',
-            lessThanOrEqual: 'Es menor o igual que {FORMULA1}',
-            equal: 'Es igual a {FORMULA1}',
-            notEqual: 'No es igual a {FORMULA1}',
-            notBetween: 'No está entre {FORMULA1} y {FORMULA2}',
-            legal: 'Es un {TYPE} legal',
-        },
-        errorMsg: {
-            between: 'El valor debe estar entre {FORMULA1} y {FORMULA2}',
-            greaterThan: 'El valor debe ser mayor que {FORMULA1}',
-            greaterThanOrEqual: 'El valor debe ser mayor o igual que {FORMULA1}',
-            lessThan: 'El valor debe ser menor que {FORMULA1}',
-            lessThanOrEqual: 'El valor debe ser menor o igual que {FORMULA1}',
-            equal: 'El valor debe ser igual a {FORMULA1}',
-            notEqual: 'El valor no debe ser igual a {FORMULA1}',
-            notBetween: 'El valor no debe estar entre {FORMULA1} y {FORMULA2}',
-            legal: 'El valor debe ser un {TYPE} legal',
-        },
         any: {
             title: 'Cualquier valor',
             error: 'El contenido de esta celda viola la regla de validación',
         },
         date: {
             title: 'Fecha',
-            operators: {
-                between: 'entre',
-                greaterThan: 'después de',
-                greaterThanOrEqual: 'en o después de',
-                lessThan: 'antes de',
-                lessThanOrEqual: 'en o antes de',
-                equal: 'igual',
-                notEqual: 'no igual',
-                notBetween: 'no entre',
-                legal: 'es una fecha legal',
-            },
-            ruleName: {
-                between: 'está entre {FORMULA1} y {FORMULA2}',
-                greaterThan: 'es después de {FORMULA1}',
-                greaterThanOrEqual: 'es en o después de {FORMULA1}',
-                lessThan: 'es antes de {FORMULA1}',
-                lessThanOrEqual: 'es en o antes de {FORMULA1}',
-                equal: 'es {FORMULA1}',
-                notEqual: 'no es {FORMULA1}',
-                notBetween: 'no está entre {FORMULA1}',
-                legal: 'es una fecha legal',
-            },
-            errorMsg: {
-                between: 'El valor debe ser una fecha legal y estar entre {FORMULA1} y {FORMULA2}',
-                greaterThan: 'El valor debe ser una fecha legal y después de {FORMULA1}',
-                greaterThanOrEqual: 'El valor debe ser una fecha legal y en o después de {FORMULA1}',
-                lessThan: 'El valor debe ser una fecha legal y antes de {FORMULA1}',
-                lessThanOrEqual: 'El valor debe ser una fecha legal y en o antes de {FORMULA1}',
-                equal: 'El valor debe ser una fecha legal y {FORMULA1}',
-                notEqual: 'El valor debe ser una fecha legal y no {FORMULA1}',
-                notBetween: 'El valor debe ser una fecha legal y no estar entre {FORMULA1}',
-                legal: 'El valor debe ser una fecha legal',
-            },
         },
         list: {
             title: 'Desplegable',
@@ -147,16 +81,6 @@ const locale: typeof enUS = {
         },
         textLength: {
             title: 'Longitud del texto',
-            errorMsg: {
-                between: 'La longitud del texto debe estar entre {FORMULA1} y {FORMULA2}',
-                greaterThan: 'La longitud del texto debe ser mayor que {FORMULA1}',
-                greaterThanOrEqual: 'La longitud del texto debe ser mayor o igual que {FORMULA1}',
-                lessThan: 'La longitud del texto debe ser menor que {FORMULA1}',
-                lessThanOrEqual: 'La longitud del texto debe ser menor o igual que {FORMULA1}',
-                equal: 'La longitud del texto debe ser {FORMULA1}',
-                notEqual: 'La longitud del texto no debe ser {FORMULA1}',
-                notBetween: 'La longitud del texto no debe estar entre {FORMULA1}',
-            },
         },
         decimal: {
             title: 'Número',
@@ -175,7 +99,6 @@ const locale: typeof enUS = {
             title: 'Fórmula personalizada',
             error: 'El contenido de esta celda viola su regla de validación',
             validFail: 'Por favor, introduce una fórmula válida',
-            ruleName: 'La fórmula personalizada es {FORMULA1}',
         },
         alert: {
             title: 'Error',

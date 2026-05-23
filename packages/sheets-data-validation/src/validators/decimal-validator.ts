@@ -18,12 +18,12 @@ import type { CellValue, IDataValidationRule, IDataValidationRuleBase, ISheetDat
 import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
 import type { ISheetLocationBase } from '@univerjs/sheets';
 import { DataValidationOperator, DataValidationType, isFormulaString, Tools } from '@univerjs/core';
-import { BaseDataValidator } from '@univerjs/data-validation';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { DataValidationCustomFormulaService } from '../services/dv-custom-formula.service';
 import { OperatorErrorTitleMap } from '../types';
 import { TWO_FORMULA_OPERATOR_COUNT } from '../types/const/two-formula-operators';
 import { isLegalFormulaResult } from '../utils/formula';
+import { BaseSheetValidator } from './base-sheet-validator';
 import { FORMULA1, FORMULA2 } from './const';
 import { getTransformedFormula } from './util';
 
@@ -31,11 +31,11 @@ export function getCellValueNumber(cellValue: CellValue) {
     return +cellValue;
 }
 
-export class DecimalValidator extends BaseDataValidator {
+export class DecimalValidator extends BaseSheetValidator {
     private readonly _customFormulaService = this.injector.get(DataValidationCustomFormulaService);
     id: string = DataValidationType.DECIMAL;
     private readonly _lexerTreeBuilder = this.injector.get(LexerTreeBuilder);
-    title: string = 'dataValidation.decimal.title';
+    title: string = 'sheets-data-validation.decimal.title';
     order = 20;
 
     operators: DataValidationOperator[] = [
@@ -103,7 +103,7 @@ export class DecimalValidator extends BaseDataValidator {
         const formula1Success = Tools.isDefine(rule.formula1) && this._isFormulaOrNumber(rule.formula1);
         const formula2Success = Tools.isDefine(rule.formula2) && this._isFormulaOrNumber(rule.formula2);
         const isTwoFormula = TWO_FORMULA_OPERATOR_COUNT.includes(operator);
-        const errorMsg = this.localeService.t('dataValidation.validFail.number');
+        const errorMsg = this.localeService.t('sheets-data-validation.validFail.number');
         if (isTwoFormula) {
             return {
                 success: formula1Success && formula2Success,

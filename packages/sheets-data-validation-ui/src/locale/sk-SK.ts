@@ -17,7 +17,7 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    dataValidation: {
+    'sheets-data-validation-ui': {
         title: 'Overenie údajov',
         validFail: {
             value: 'Zadajte hodnotu',
@@ -55,78 +55,12 @@ const locale: typeof enUS = {
             rangeError: 'Rozsahy nie sú platné',
             allowBlank: 'Povoliť prázdne hodnoty',
         },
-        operators: {
-            between: 'medzi',
-            greaterThan: 'väčšie ako',
-            greaterThanOrEqual: 'väčšie alebo rovné',
-            lessThan: 'menšie ako',
-            lessThanOrEqual: 'menšie alebo rovné',
-            equal: 'rovné',
-            notEqual: 'nerovné',
-            notBetween: 'nie medzi',
-            legal: 'je platný typ',
-        },
-        ruleName: {
-            between: 'Je medzi {FORMULA1} a {FORMULA2}',
-            greaterThan: 'Je väčšie ako {FORMULA1}',
-            greaterThanOrEqual: 'Je väčšie alebo rovné {FORMULA1}',
-            lessThan: 'Je menšie ako {FORMULA1}',
-            lessThanOrEqual: 'Je menšie alebo rovné {FORMULA1}',
-            equal: 'Je rovné {FORMULA1}',
-            notEqual: 'Nie je rovné {FORMULA1}',
-            notBetween: 'Nie je medzi {FORMULA1} a {FORMULA2}',
-            legal: 'Je platný {TYPE}',
-        },
-        errorMsg: {
-            between: 'Hodnota musí byť medzi {FORMULA1} a {FORMULA2}',
-            greaterThan: 'Hodnota musí byť väčšia ako {FORMULA1}',
-            greaterThanOrEqual: 'Hodnota musí byť väčšia alebo rovná {FORMULA1}',
-            lessThan: 'Hodnota musí byť menšia ako {FORMULA1}',
-            lessThanOrEqual: 'Hodnota musí byť menšia alebo rovná {FORMULA1}',
-            equal: 'Hodnota musí byť rovná {FORMULA1}',
-            notEqual: 'Hodnota nesmie byť rovná {FORMULA1}',
-            notBetween: 'Hodnota nesmie byť medzi {FORMULA1} a {FORMULA2}',
-            legal: 'Hodnota musí byť platný {TYPE}',
-        },
         any: {
             title: 'Ľubovoľná hodnota',
             error: 'Obsah tejto bunky porušuje pravidlo overenia',
         },
         date: {
             title: 'Dátum',
-            operators: {
-                between: 'medzi',
-                greaterThan: 'po',
-                greaterThanOrEqual: 'v alebo po',
-                lessThan: 'pred',
-                lessThanOrEqual: 'v alebo pred',
-                equal: 'rovné',
-                notEqual: 'nerovné',
-                notBetween: 'nie medzi',
-                legal: 'je platný dátum',
-            },
-            ruleName: {
-                between: 'je medzi {FORMULA1} a {FORMULA2}',
-                greaterThan: 'je po {FORMULA1}',
-                greaterThanOrEqual: 'je v alebo po {FORMULA1}',
-                lessThan: 'je pred {FORMULA1}',
-                lessThanOrEqual: 'je v alebo pred {FORMULA1}',
-                equal: 'je {FORMULA1}',
-                notEqual: 'nie je {FORMULA1}',
-                notBetween: 'nie je medzi {FORMULA1}',
-                legal: 'je platný dátum',
-            },
-            errorMsg: {
-                between: 'Hodnota musí byť platný dátum a medzi {FORMULA1} a {FORMULA2}',
-                greaterThan: 'Hodnota musí byť platný dátum a po {FORMULA1}',
-                greaterThanOrEqual: 'Hodnota musí byť platný dátum a v alebo po {FORMULA1}',
-                lessThan: 'Hodnota musí byť platný dátum a pred {FORMULA1}',
-                lessThanOrEqual: 'Hodnota musí byť platný dátum a v alebo pred {FORMULA1}',
-                equal: 'Hodnota musí byť platný dátum a {FORMULA1}',
-                notEqual: 'Hodnota musí byť platný dátum a nie {FORMULA1}',
-                notBetween: 'Hodnota musí byť platný dátum a nie medzi {FORMULA1}',
-                legal: 'Hodnota musí byť platný dátum',
-            },
         },
         list: {
             title: 'Rozbaľovací zoznam',
@@ -147,16 +81,6 @@ const locale: typeof enUS = {
         },
         textLength: {
             title: 'Dĺžka textu',
-            errorMsg: {
-                between: 'Dĺžka textu musí byť medzi {FORMULA1} a {FORMULA2}',
-                greaterThan: 'Dĺžka textu musí byť po {FORMULA1}',
-                greaterThanOrEqual: 'Dĺžka textu musí byť v alebo po {FORMULA1}',
-                lessThan: 'Dĺžka textu musí byť pred {FORMULA1}',
-                lessThanOrEqual: 'Dĺžka textu musí byť v alebo pred {FORMULA1}',
-                equal: 'Dĺžka textu musí byť {FORMULA1}',
-                notEqual: 'Dĺžka textu nesmie byť {FORMULA1}',
-                notBetween: 'Dĺžka textu nesmie byť medzi {FORMULA1}',
-            },
         },
         decimal: {
             title: 'Číslo',
@@ -175,7 +99,6 @@ const locale: typeof enUS = {
             title: 'Vlastný vzorec',
             error: 'Obsah tejto bunky porušuje pravidlo overenia',
             validFail: 'Zadajte platný vzorec',
-            ruleName: 'Vlastný vzorec je {FORMULA1}',
         },
         alert: {
             title: 'Chyba',

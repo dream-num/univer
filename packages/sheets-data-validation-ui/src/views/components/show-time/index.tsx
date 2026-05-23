@@ -43,7 +43,7 @@ export function DateShowTimeOption(props: IDateShowTimeOptionProps) {
                     });
                 }}
             >
-                {localeService.t('dataValidation.showTime.label')}
+                {localeService.t('sheets-data-validation-ui.showTime.label')}
             </Checkbox>
         </FormLayout>
     );

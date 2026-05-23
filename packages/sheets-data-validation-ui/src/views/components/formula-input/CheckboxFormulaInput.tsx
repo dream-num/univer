@@ -46,15 +46,15 @@ export function CheckboxFormulaInput(props: IFormulaInputProps) {
                         }
                     }}
                 >
-                    {localeService.t('dataValidation.checkbox.tips')}
+                    {localeService.t('sheets-data-validation-ui.checkbox.tips')}
                 </Checkbox>
             </FormLayout>
             {checked
                 ? (
-                    <FormLayout label={localeService.t('dataValidation.checkbox.checked')} error={formula1Res}>
+                    <FormLayout label={localeService.t('sheets-data-validation-ui.checkbox.checked')} error={formula1Res}>
                         <Input
                             className="univer-w-full"
-                            placeholder={localeService.t('dataValidation.panel.valuePlaceholder')}
+                            placeholder={localeService.t('sheets-data-validation-ui.panel.valuePlaceholder')}
                             value={value?.formula1}
                             onChange={(newValue) => {
                                 onChange?.({
@@ -68,10 +68,10 @@ export function CheckboxFormulaInput(props: IFormulaInputProps) {
                 : null}
             {checked
                 ? (
-                    <FormLayout label={localeService.t('dataValidation.checkbox.unchecked')} error={formula2Res}>
+                    <FormLayout label={localeService.t('sheets-data-validation-ui.checkbox.unchecked')} error={formula2Res}>
                         <Input
                             className="univer-w-full"
-                            placeholder={localeService.t('dataValidation.panel.valuePlaceholder')}
+                            placeholder={localeService.t('sheets-data-validation-ui.panel.valuePlaceholder')}
                             value={value?.formula2}
                             onChange={(newValue) => {
                                 onChange?.({

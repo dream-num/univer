@@ -17,7 +17,7 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    dataValidation: {
+    'sheets-data-validation-ui': {
         title: 'اعتبارسنجی داده',
         validFail: {
             value: 'لطفا یک مقدار وارد کنید',
@@ -55,78 +55,12 @@ const locale: typeof enUS = {
             rangeError: 'محدوده‌ها نامعتبر هستند',
             allowBlank: 'رد سلول خالی',
         },
-        operators: {
-            between: 'بین',
-            greaterThan: 'بزرگتر از',
-            greaterThanOrEqual: 'بزرگتر از یا برابر با',
-            lessThan: 'کوچکتر از',
-            lessThanOrEqual: 'کوچکتر از یا برابر با',
-            equal: 'برابر با',
-            notEqual: 'نابرابر با',
-            notBetween: 'بین نیست',
-            legal: 'نوع قانونی است',
-        },
-        ruleName: {
-            between: 'بین {FORMULA1} و {FORMULA2} است',
-            greaterThan: 'بزرگتر از {FORMULA1} است',
-            greaterThanOrEqual: 'بزرگتر از یا برابر با {FORMULA1} است',
-            lessThan: 'کوچکتر از {FORMULA1} است',
-            lessThanOrEqual: 'کوچکتر از یا برابر با {FORMULA1} است',
-            equal: 'برابر است با {FORMULA1}',
-            notEqual: 'برابر نیست با {FORMULA1}',
-            notBetween: 'بین {FORMULA1} و {FORMULA2} نیست',
-            legal: 'یک {TYPE} قانونی است',
-        },
-        errorMsg: {
-            between: 'مقدار باید بین {FORMULA1} و {FORMULA2} باشد',
-            greaterThan: 'مقدار باید بزرگتر از {FORMULA1} باشد',
-            greaterThanOrEqual: 'مقدار باید بزرگتر از یا برابر با {FORMULA1} باشد',
-            lessThan: 'مقدار باید کوچکتر از {FORMULA1} باشد',
-            lessThanOrEqual: 'مقدار باید کوچکتر از یا برابر با {FORMULA1} باشد',
-            equal: 'مقدار باید برابر با {FORMULA1} باشد',
-            notEqual: 'مقدار باید برابر نیست با {FORMULA1}',
-            notBetween: 'مقدار باید بین {FORMULA1} و {FORMULA2} نباشد',
-            legal: 'مقدار باید یک {TYPE} قانونی باشد',
-        },
         any: {
             title: 'هر مقدار',
             error: 'محتوای این سلول نقض قانون اعتبارسنجی است',
         },
         date: {
             title: 'تاریخ',
-            operators: {
-                between: 'بین',
-                greaterThan: 'بعد از',
-                greaterThanOrEqual: 'روی یا بعد از',
-                lessThan: 'قبل از',
-                lessThanOrEqual: 'روی یا قبل از',
-                equal: 'برابر است با',
-                notEqual: 'برابر نیست با',
-                notBetween: 'بین ... و ... نیست',
-                legal: 'یک تاریخ قانونی است',
-            },
-            ruleName: {
-                between: 'بین {FORMULA1} و {FORMULA2} است',
-                greaterThan: 'بعد از {FORMULA1} است',
-                greaterThanOrEqual: 'روی یا بعد از {FORMULA1} است',
-                lessThan: 'قبل از {FORMULA1} است',
-                lessThanOrEqual: 'روی یا قبل از {FORMULA1} است',
-                equal: 'برابر است با {FORMULA1}',
-                notEqual: 'برابر نیست با {FORMULA1}',
-                notBetween: 'بین {FORMULA1} و {FORMULA2} نیست',
-                legal: 'یک تاریخ قانونی است',
-            },
-            errorMsg: {
-                between: 'مقدار باید یک تاریخ معتبر و بین {FORMULA1} و {FORMULA2} باشد',
-                greaterThan: 'مقدار باید یک تاریخ معتبر و بعد از {FORMULA1} باشد',
-                greaterThanOrEqual: 'مقدار باید یک تاریخ معتبر و روی یا بعد از {FORMULA1} باشد',
-                lessThan: 'مقدار باید یک تاریخ معتبر و قبل از {FORMULA1} باشد',
-                lessThanOrEqual: 'مقدار باید یک تاریخ معتبر و روی یا قبل از {FORMULA1} باشد',
-                equal: 'مقدار باید یک تاریخ معتبر و {FORMULA1} باشد',
-                notEqual: 'مقدار باید یک تاریخ معتبر و نه {FORMULA1} باشد',
-                notBetween: 'مقدار باید یک تاریخ معتبر و بین {FORMULA1} و {FORMULA2} نباشد',
-                legal: 'مقدار باید یک تاریخ قانونی باشد',
-            },
         },
         list: {
             title: 'لیست کشویی',
@@ -147,16 +81,6 @@ const locale: typeof enUS = {
         },
         textLength: {
             title: 'طول متن',
-            errorMsg: {
-                between: 'طول متن باید بین {FORMULA1} و {FORMULA2} باشد',
-                greaterThan: 'طول متن باید بعد از {FORMULA1} باشد',
-                greaterThanOrEqual: 'طول متن باید روی یا بعد از {FORMULA1} باشد',
-                lessThan: 'طول متن باید قبل از {FORMULA1} باشد',
-                lessThanOrEqual: 'طول متن باید روی یا قبل از {FORMULA1} باشد',
-                equal: 'طول متن باید {FORMULA1} باشد',
-                notEqual: 'طول متن باید {FORMULA1} نباشد',
-                notBetween: 'طول متن باید بین {FORMULA1} و {FORMULA2} نباشد',
-            },
         },
         decimal: {
             title: 'عدد',
@@ -175,7 +99,6 @@ const locale: typeof enUS = {
             title: 'فرمول سفارشی ',
             error: 'محتوای این سلول با قانون اعتبارسنجی آن نقض می‌شود',
             validFail: 'لطفا یک فرمول معتبر وارد کنید',
-            ruleName: 'فرمول سفارشی {FORMULA1}',
         },
         alert: {
             title: 'خطا',

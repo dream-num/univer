@@ -17,11 +17,11 @@
 import type { CellValue, DataValidationOperator, IDataValidationRule, IDataValidationRuleBase } from '@univerjs/core';
 import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
 import { DataValidationType } from '@univerjs/core';
-import { BaseDataValidator } from '@univerjs/data-validation';
+import { BaseSheetValidator } from './base-sheet-validator';
 
-export class AnyValidator extends BaseDataValidator {
+export class AnyValidator extends BaseSheetValidator {
     override id: string = DataValidationType.ANY;
-    override title: string = 'dataValidation.any.title';
+    override title: string = 'sheets-data-validation.any.title';
     override operators: DataValidationOperator[] = [];
     override scopes: string | string[] = ['sheet'];
     order = 0;
@@ -47,6 +47,6 @@ export class AnyValidator extends BaseDataValidator {
     }
 
     override generateRuleErrorMessage(rule: IDataValidationRuleBase): string {
-        return this.localeService.t('dataValidation.any.error');
+        return this.localeService.t('sheets-data-validation.any.error');
     }
 }

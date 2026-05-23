@@ -17,7 +17,7 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    dataValidation: {
+    'sheets-data-validation-ui': {
         title: 'データの入力規則',
         validFail: {
             value: '値を入力してください',
@@ -55,78 +55,12 @@ const locale: typeof enUS = {
             rangeError: '範囲が正しくありません',
             allowBlank: '空白を無視する',
         },
-        operators: {
-            between: '次の値の間',
-            greaterThan: '次の値より大きい',
-            greaterThanOrEqual: '次の値以上',
-            lessThan: '次の値より小さい',
-            lessThanOrEqual: '次の値以下',
-            equal: '次の値に等しい',
-            notEqual: '次の値に等しくない',
-            notBetween: '次の値の間以外',
-            legal: '有効な形式',
-        },
-        ruleName: {
-            between: '{FORMULA1} と {FORMULA2} の間',
-            greaterThan: '{FORMULA1} より大きい',
-            greaterThanOrEqual: '{FORMULA1} 以上',
-            lessThan: '{FORMULA1} より小さい',
-            lessThanOrEqual: '{FORMULA1} 以下',
-            equal: '{FORMULA1} に等しい',
-            notEqual: '{FORMULA1} に等しくない',
-            notBetween: '{FORMULA1} と {FORMULA2} の間以外',
-            legal: '有効な {TYPE} 形式',
-        },
-        errorMsg: {
-            between: '値は {FORMULA1} と {FORMULA2} の間である必要があります',
-            greaterThan: '値は {FORMULA1} より大きい必要があります',
-            greaterThanOrEqual: '値は {FORMULA1} 以上である必要があります',
-            lessThan: '値は {FORMULA1} より小さい必要があります',
-            lessThanOrEqual: '値は {FORMULA1} 以下である必要があります',
-            equal: '値は {FORMULA1} に等しい必要があります',
-            notEqual: '値は {FORMULA1} に等しくない必要があります',
-            notBetween: '値は {FORMULA1} と {FORMULA2} の間以外である必要があります',
-            legal: '値は有効な {TYPE} 形式である必要があります',
-        },
         any: {
             title: 'すべての値',
             error: 'このセルの内容は入力規則に違反しています',
         },
         date: {
             title: '日付',
-            operators: {
-                between: '次の値の間',
-                greaterThan: '次の値より大きい',
-                greaterThanOrEqual: '次の値以上',
-                lessThan: '次の値より小さい',
-                lessThanOrEqual: '次の値以下',
-                equal: '次の値に等しい',
-                notEqual: '次の値に等しくない',
-                notBetween: '次の値の間以外',
-                legal: '有効な日付',
-            },
-            ruleName: {
-                between: '{FORMULA1} と {FORMULA2} の間',
-                greaterThan: '{FORMULA1} より後',
-                greaterThanOrEqual: '{FORMULA1} 以降',
-                lessThan: '{FORMULA1} より前',
-                lessThanOrEqual: '{FORMULA1} 以前',
-                equal: '{FORMULA1} に等しい',
-                notEqual: '{FORMULA1} に等しくない',
-                notBetween: '{FORMULA1} と {FORMULA2} の間以外',
-                legal: '有効な日付',
-            },
-            errorMsg: {
-                between: '値は有効な日付で、{FORMULA1} と {FORMULA2} の間である必要があります',
-                greaterThan: '値は有効な日付で、{FORMULA1} より後である必要があります',
-                greaterThanOrEqual: '値は有効な日付で、{FORMULA1} 以降である必要があります',
-                lessThan: '値は有効な日付で、{FORMULA1} より前である必要があります',
-                lessThanOrEqual: '値は有効な日付で、{FORMULA1} 以前である必要があります',
-                equal: '値は有効な日付で、{FORMULA1} に等しい必要があります',
-                notEqual: '値は有効な日付で、{FORMULA1} に等しくない必要があります',
-                notBetween: '値は有効な日付で、{FORMULA1} と {FORMULA2} の間以外である必要があります',
-                legal: '値は有効な日付である必要があります',
-            },
         },
         list: {
             title: 'リスト',
@@ -147,16 +81,6 @@ const locale: typeof enUS = {
         },
         textLength: {
             title: '文字列の長さ',
-            errorMsg: {
-                between: '文字列の長さは {FORMULA1} と {FORMULA2} の間である必要があります',
-                greaterThan: '文字列の長さは {FORMULA1} より長い必要があります',
-                greaterThanOrEqual: '文字列の長さは {FORMULA1} 以上である必要があります',
-                lessThan: '文字列の長さは {FORMULA1} より短い必要があります',
-                lessThanOrEqual: '文字列の長さは {FORMULA1} 以下である必要があります',
-                equal: '文字列の長さは {FORMULA1} に等しい必要があります',
-                notEqual: '文字列の長さは {FORMULA1} に等しくない必要があります',
-                notBetween: '文字列の長さは {FORMULA1} と {FORMULA2} の間以外である必要があります',
-            },
         },
         decimal: {
             title: '小数点数',
@@ -175,7 +99,6 @@ const locale: typeof enUS = {
             title: 'ユーザー設定',
             error: 'このセルの内容は入力規則に違反しています',
             validFail: '有効な数式を入力してください',
-            ruleName: 'ユーザー設定数式: {FORMULA1}',
         },
         alert: {
             title: 'エラー',

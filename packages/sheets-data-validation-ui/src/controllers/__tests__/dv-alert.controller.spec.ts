@@ -54,7 +54,7 @@ describe('DataValidationAlertController', () => {
 
         expect(showAlert).toHaveBeenCalledWith(expect.objectContaining({
             key: 'SHEET_DATA_VALIDATION_ALERT',
-            title: 'dataValidation.error.title',
+            title: 'sheets-data-validation-ui.error.title',
             message: 'invalid list value',
             location,
         }));

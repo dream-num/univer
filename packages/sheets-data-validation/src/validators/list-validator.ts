@@ -17,13 +17,13 @@
 import type { CellValue, DataValidationOperator, ICellData, IDataValidationRule, IRange, ISheetDataValidationRule, IStyleData, Nullable, Workbook } from '@univerjs/core';
 import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
 import { DataValidationRenderMode, DataValidationType, isFormulaString, IUniverInstanceService, numfmt, Rectangle, Tools, UniverInstanceType, WrapStrategy } from '@univerjs/core';
-import { BaseDataValidator } from '@univerjs/data-validation';
 import { deserializeRangeWithSheet, isReferenceString, LexerTreeBuilder, sequenceNodeType } from '@univerjs/engine-formula';
 import { deserializeListOptions } from '@univerjs/sheets';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { DataValidationListCacheService } from '../services/dv-list-cache.service';
 import { getFormulaResult, isLegalFormulaResult } from '../utils/formula';
 import { getCellValueOrigin } from '../utils/get-cell-data-origin';
+import { BaseSheetValidator } from './base-sheet-validator';
 
 // Keep getRuleFormulaResultSet for backward compatibility (used in isValidType)
 export function getRuleFormulaResultSet(result: Nullable<Nullable<ICellData>[][]>): string[] {
@@ -93,7 +93,7 @@ function isRuleIntersects(rule: IDataValidationRule, sheetName: string) {
     return false;
 }
 
-export class ListValidator extends BaseDataValidator {
+export class ListValidator extends BaseSheetValidator {
     protected formulaService = this.injector.get(DataValidationFormulaService);
     private _lexer = this.injector.get(LexerTreeBuilder);
     private _univerInstanceService = this.injector.get(IUniverInstanceService);
@@ -103,7 +103,7 @@ export class ListValidator extends BaseDataValidator {
     override readonly offsetFormulaByRange = false;
 
     id: string = DataValidationType.LIST;
-    title: string = 'dataValidation.list.title';
+    title: string = 'sheets-data-validation.list.title';
     operators: DataValidationOperator[] = [];
     scopes: string | string[] = ['sheet'];
 
@@ -123,9 +123,9 @@ export class ListValidator extends BaseDataValidator {
                 ? valid
                     ? !isIntersects ?
                         undefined :
-                        this.localeService.t('dataValidation.validFail.listIntersects') :
-                    this.localeService.t('dataValidation.validFail.listInvalid')
-                : this.localeService.t('dataValidation.validFail.list'),
+                        this.localeService.t('sheets-data-validation.validFail.listIntersects') :
+                    this.localeService.t('sheets-data-validation.validFail.listInvalid')
+                : this.localeService.t('sheets-data-validation.validFail.list'),
         };
     }
 
@@ -182,11 +182,11 @@ export class ListValidator extends BaseDataValidator {
     }
 
     override generateRuleName() {
-        return this.localeService.t('dataValidation.list.name');
+        return this.localeService.t('sheets-data-validation.list.name');
     }
 
     override generateRuleErrorMessage(): string {
-        return this.localeService.t('dataValidation.list.error');
+        return this.localeService.t('sheets-data-validation.list.error');
     }
 
     private _getUnitAndSubUnit(currentUnitId?: string, currentSubUnitId?: string): { unitId: string; subUnitId: string } | null {

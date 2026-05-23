@@ -17,7 +17,7 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    dataValidation: {
+    'sheets-data-validation-ui': {
         title: '資料驗證',
         validFail: {
             value: '請輸入一個合法值',
@@ -55,78 +55,12 @@ const locale: typeof enUS = {
             showInfo: '顯示所選儲存格的提示文字',
             allowBlank: '忽略空值',
         },
-        operators: {
-            between: '介於',
-            greaterThan: '大於',
-            greaterThanOrEqual: '大於或等於',
-            lessThan: '小於',
-            lessThanOrEqual: '小於或等於',
-            equal: '等於',
-            notEqual: '不等於',
-            notBetween: '未介於',
-            legal: '是合法類型',
-        },
-        ruleName: {
-            between: '介於 {FORMULA1} 和 {FORMULA2} 之間',
-            greaterThan: '大於 {FORMULA1}',
-            greaterThanOrEqual: '大於或等於 {FORMULA1}',
-            lessThan: '小於 {FORMULA1}',
-            lessThanOrEqual: '小於或等於 {FORMULA1}',
-            equal: '等於 {FORMULA1}',
-            notEqual: '不等於 {FORMULA1}',
-            notBetween: '在 {FORMULA1} 和 {FORMULA2} 範圍之外',
-            legal: '是一個合法的 {TYPE}',
-        },
-        errorMsg: {
-            between: '值必須介於 {FORMULA1} 和 {FORMULA2} 之間',
-            greaterThan: '值必須大於 {FORMULA1}',
-            greaterThanOrEqual: '值必須大於或等於 {FORMULA1}',
-            lessThan: '值必須小於 {FORMULA1}',
-            lessThanOrEqual: '值必須小於或等於 {FORMULA1}',
-            equal: '值必須等於 {FORMULA1}',
-            notEqual: '值必須不等於 {FORMULA1}',
-            notBetween: '值必須在 {FORMULA1} 和 {FORMULA2} 範圍之外',
-            legal: '值必須是一個合法的 {TYPE}',
-        },
         any: {
             title: '任意值',
             error: '此儲存格的內容違反了驗證規則',
         },
         date: {
             title: '日期',
-            operators: {
-                between: '介於',
-                greaterThan: '晚於',
-                greaterThanOrEqual: '晚於或等於',
-                lessThan: '早於',
-                lessThanOrEqual: '早於或等於',
-                equal: '等於',
-                notEqual: '不等於',
-                notBetween: '未介於',
-                legal: '是合法日期',
-            },
-            ruleName: {
-                between: '介於 {FORMULA1} 和 {FORMULA2} 之間',
-                greaterThan: '晚於 {FORMULA1}',
-                greaterThanOrEqual: '晚於或等於 {FORMULA1}',
-                lessThan: '早於 {FORMULA1}',
-                lessThanOrEqual: '早於或等於 {FORMULA1}',
-                equal: '等於 {FORMULA1}',
-                notEqual: '不等於 {FORMULA1}',
-                notBetween: '在 {FORMULA1} 和 {FORMULA2} 範圍之外',
-                legal: '是一個合法的日期',
-            },
-            errorMsg: {
-                between: '日期必須介於 {FORMULA1} 和 {FORMULA2} 之間',
-                greaterThan: '日期必須晚於 {FORMULA1}',
-                greaterThanOrEqual: '日期必須晚於或等於 {FORMULA1}',
-                lessThan: '日期必須早於 {FORMULA1}',
-                lessThanOrEqual: '早於或等於 {FORMULA1}',
-                equal: '日期必須等於 {FORMULA1}',
-                notEqual: '日期必須不等於 {FORMULA1}',
-                notBetween: '日期必須在 {FORMULA1} 和 {FORMULA2} 範圍之外',
-                legal: '值必須是一個合法的日期',
-            },
         },
         list: {
             title: '下拉選單',
@@ -147,16 +81,6 @@ const locale: typeof enUS = {
         },
         textLength: {
             title: '文字長度',
-            errorMsg: {
-                between: '文字長度必須介於 {FORMULA1} 和 {FORMULA2} 之間',
-                greaterThan: '文字長度必須大於 {FORMULA1}',
-                greaterThanOrEqual: '文字長度必須大於或等於 {FORMULA1}',
-                lessThan: '文字長度必須小於 {FORMULA1}',
-                lessThanOrEqual: '文字長度必須小於或等於 {FORMULA1}',
-                equal: '文字長度必須等於 {FORMULA1}',
-                notEqual: '文字長度必須不等於 {FORMULA1}',
-                notBetween: '文字長度必須在 {FORMULA1} 和 {FORMULA2} 範圍之外',
-            },
         },
         decimal: {
             title: '數字',
@@ -175,7 +99,6 @@ const locale: typeof enUS = {
             title: '自訂公式',
             error: '此儲存格的內容違反了驗證規則',
             validFail: '請輸入合法的公式',
-            ruleName: '自訂公式 {FORMULA1}',
         },
         alert: {
             title: '提示',

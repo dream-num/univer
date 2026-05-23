@@ -15,7 +15,7 @@
  */
 
 const locale = {
-    dataValidation: {
+    'sheets-data-validation-ui': {
         title: 'Data validation',
         validFail: {
             value: 'Please input a value',
@@ -53,78 +53,12 @@ const locale = {
             rangeError: 'Ranges are not legal',
             allowBlank: 'Allow blank values',
         },
-        operators: {
-            between: 'between',
-            greaterThan: 'greater than',
-            greaterThanOrEqual: 'greater than or equal',
-            lessThan: 'less than',
-            lessThanOrEqual: 'less than or equal',
-            equal: 'equal',
-            notEqual: 'not equal',
-            notBetween: 'not between',
-            legal: 'is legal type',
-        },
-        ruleName: {
-            between: 'Is between {FORMULA1} and {FORMULA2}',
-            greaterThan: 'Is greater than {FORMULA1}',
-            greaterThanOrEqual: 'Is greater than or equal to {FORMULA1}',
-            lessThan: 'Is less than {FORMULA1}',
-            lessThanOrEqual: 'Is less than or equal to {FORMULA1}',
-            equal: 'Is equal to {FORMULA1}',
-            notEqual: 'Is not equal to {FORMULA1}',
-            notBetween: 'Is not between {FORMULA1} and {FORMULA2}',
-            legal: 'Is a legal {TYPE}',
-        },
-        errorMsg: {
-            between: 'Value must be between {FORMULA1} and {FORMULA2}',
-            greaterThan: 'Value must be greater than {FORMULA1}',
-            greaterThanOrEqual: 'Value must be greater than or equal to {FORMULA1}',
-            lessThan: 'Value must be less than {FORMULA1}',
-            lessThanOrEqual: 'Value must be less than or equal to {FORMULA1}',
-            equal: 'Value must be equal to {FORMULA1}',
-            notEqual: 'Value must be not equal to {FORMULA1}',
-            notBetween: 'Value must be not between {FORMULA1} and {FORMULA2}',
-            legal: 'Value must be a legal {TYPE}',
-        },
         any: {
             title: 'Any value',
             error: 'The content of this cell violates the validation rule',
         },
         date: {
             title: 'Date',
-            operators: {
-                between: 'between',
-                greaterThan: 'after',
-                greaterThanOrEqual: 'on or after',
-                lessThan: 'before',
-                lessThanOrEqual: 'on or before',
-                equal: 'equal',
-                notEqual: 'not equal',
-                notBetween: 'not between',
-                legal: 'is a legal date',
-            },
-            ruleName: {
-                between: 'is between {FORMULA1} and {FORMULA2}',
-                greaterThan: 'is after {FORMULA1}',
-                greaterThanOrEqual: 'is on or after {FORMULA1}',
-                lessThan: 'is before {FORMULA1}',
-                lessThanOrEqual: 'is on or before {FORMULA1}',
-                equal: 'is {FORMULA1}',
-                notEqual: 'is not {FORMULA1}',
-                notBetween: 'is not between {FORMULA1}',
-                legal: 'is a legal date',
-            },
-            errorMsg: {
-                between: 'Value must be a legal date and between {FORMULA1} and {FORMULA2}',
-                greaterThan: 'Value must be a legal date and after {FORMULA1}',
-                greaterThanOrEqual: 'Value must be a legal date and on or after {FORMULA1}',
-                lessThan: 'Value must be a legal date and before {FORMULA1}',
-                lessThanOrEqual: 'Value must be a legal date and on or before {FORMULA1}',
-                equal: 'Value must be a legal date and {FORMULA1}',
-                notEqual: 'Value must be a legal date and not {FORMULA1}',
-                notBetween: 'Value must be a legal date and not between {FORMULA1}',
-                legal: 'Value must be a legal date',
-            },
         },
         list: {
             title: 'Dropdown',
@@ -145,16 +79,6 @@ const locale = {
         },
         textLength: {
             title: 'Text length',
-            errorMsg: {
-                between: 'Text length must be between {FORMULA1} and {FORMULA2}',
-                greaterThan: 'Text length must be after {FORMULA1}',
-                greaterThanOrEqual: 'Text length must be on or after {FORMULA1}',
-                lessThan: 'Text length must be before {FORMULA1}',
-                lessThanOrEqual: 'Text length must be on or before {FORMULA1}',
-                equal: 'Text length must be {FORMULA1}',
-                notEqual: 'Text length must be not {FORMULA1}',
-                notBetween: 'Text length must be not between {FORMULA1}',
-            },
         },
         decimal: {
             title: 'Number',
@@ -173,7 +97,6 @@ const locale = {
             title: 'Custom formula',
             error: 'This cell\'s contents violate its validation rule',
             validFail: 'Please input a valid formula',
-            ruleName: 'Custom formula is {FORMULA1}',
         },
         alert: {
             title: 'Error',

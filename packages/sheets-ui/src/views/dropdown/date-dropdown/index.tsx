@@ -76,7 +76,7 @@ export function DateDropdown(props: { popup: IPopup<IDateDropdownProps & IBaseDr
                 className={clsx('univer-mt-2 univer-flex univer-justify-end univer-pt-2', borderTopClassName)}
             >
                 <Button size="small" variant="primary" onClick={handleSave} disabled={!date || !date.isValid()}>
-                    {localeService.t('dataValidation.alert.ok')}
+                    {localeService.t('sheets-data-validation-ui.alert.ok')}
                 </Button>
             </footer>
         </div>

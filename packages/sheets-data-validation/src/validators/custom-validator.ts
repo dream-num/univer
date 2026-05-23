@@ -17,14 +17,14 @@
 import type { CellValue, DataValidationOperator, IDataValidationRule, IDataValidationRuleBase } from '@univerjs/core';
 import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
 import { CellValueType, DataValidationType, isFormulaString, Tools } from '@univerjs/core';
-import { BaseDataValidator } from '@univerjs/data-validation';
 import { LexerTreeBuilder, operatorToken } from '@univerjs/engine-formula';
 import { DataValidationCustomFormulaService } from '../services/dv-custom-formula.service';
 import { isLegalFormulaResult } from '../utils/formula';
+import { BaseSheetValidator } from './base-sheet-validator';
 
-export class CustomFormulaValidator extends BaseDataValidator {
+export class CustomFormulaValidator extends BaseSheetValidator {
     override id: string = DataValidationType.CUSTOM;
-    override title: string = 'dataValidation.custom.title';
+    override title: string = 'sheets-data-validation.custom.title';
     override operators: DataValidationOperator[] = [];
     override scopes: string | string[] = ['sheet'];
     order = 60;
@@ -40,7 +40,7 @@ export class CustomFormulaValidator extends BaseDataValidator {
 
         return {
             success: success && valid,
-            formula1: success && valid ? '' : this.localeService.t('dataValidation.validFail.formula'),
+            formula1: success && valid ? '' : this.localeService.t('sheets-data-validation.validFail.formula'),
         };
     }
 
@@ -85,10 +85,10 @@ export class CustomFormulaValidator extends BaseDataValidator {
     }
 
     override generateRuleErrorMessage(rule: IDataValidationRuleBase): string {
-        return this.localeService.t('dataValidation.custom.error');
+        return this.localeService.t('sheets-data-validation.custom.error');
     }
 
     override generateRuleName(rule: IDataValidationRuleBase): string {
-        return (this.localeService.t('dataValidation.custom.ruleName')).replace('{FORMULA1}', rule.formula1 ?? '');
+        return (this.localeService.t('sheets-data-validation.custom.ruleName')).replace('{FORMULA1}', rule.formula1 ?? '');
     }
 }

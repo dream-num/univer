@@ -76,7 +76,7 @@ export class DataValidationAlertController extends Disposable {
                     }
                     this._cellAlertManagerService.showAlert({
                         type: CellAlertType.ERROR,
-                        title: this._localeService.t('dataValidation.error.title'),
+                        title: this._localeService.t('sheets-data-validation-ui.error.title'),
                         message: validator?.getRuleFinalError(rule, cellPos.location),
                         location: cellPos.location,
                         width: 200,

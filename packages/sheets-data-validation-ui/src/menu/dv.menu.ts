@@ -30,7 +30,7 @@ export function dataValidationMenuFactory(accessor: IAccessor): IMenuItem {
         id: DATA_VALIDATION_MENU_ID,
         type: MenuItemType.SUBITEMS,
         icon: 'DataValidationIcon',
-        tooltip: 'dataValidation.title',
+        tooltip: 'sheets-data-validation-ui.title',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetSetCellStylePermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
     };
@@ -39,7 +39,7 @@ export function dataValidationMenuFactory(accessor: IAccessor): IMenuItem {
 export function openDataValidationMenuFactory(_accessor: IAccessor): IMenuItem {
     return {
         id: OpenValidationPanelOperation.id,
-        title: 'dataValidation.panel.title',
+        title: 'sheets-data-validation-ui.panel.title',
         type: MenuItemType.BUTTON,
     };
 }
@@ -47,7 +47,7 @@ export function openDataValidationMenuFactory(_accessor: IAccessor): IMenuItem {
 export function addDataValidationMenuFactory(_accessor: IAccessor): IMenuItem {
     return {
         id: AddSheetDataValidationAndOpenCommand.id,
-        title: 'dataValidation.panel.add',
+        title: 'sheets-data-validation-ui.panel.add',
         type: MenuItemType.BUTTON,
     };
 }

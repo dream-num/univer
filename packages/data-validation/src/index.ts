@@ -28,7 +28,6 @@ export { DataValidationResourceController } from './controllers/dv-resource.cont
 export { type DataValidationChangeSource, type DataValidationChangeType, DataValidationModel, type IRuleChange } from './models/data-validation-model';
 export { UniverDataValidationPlugin } from './plugin';
 export { DataValidatorRegistryScope, DataValidatorRegistryService } from './services/data-validator-registry.service';
-export { TextLengthErrorTitleMap } from './types/const/operator-text-map';
 export { TWO_FORMULA_OPERATOR_COUNT } from './types/const/two-formula-operators';
 export { UpdateRuleType } from './types/enum/update-rule-type';
 export type { IDataValidationDropdownProps } from './types/interfaces/i-data-validation-drop-down';

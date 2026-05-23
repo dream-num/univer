@@ -270,8 +270,8 @@ export function DataValidationDetail() {
     return (
         <div data-u-comp="data-validation-detail" className="univer-py-2">
             <FormLayout
-                label={localeService.t('dataValidation.panel.range')}
-                error={(!localRule.ranges.length || isRangeError) ? localeService.t('dataValidation.panel.rangeError') : ''}
+                label={localeService.t('sheets-data-validation-ui.panel.range')}
+                error={(!localRule.ranges.length || isRangeError) ? localeService.t('sheets-data-validation-ui.panel.rangeError') : ''}
             >
                 <RangeSelector
                     selectorRef={rangeSelectorInstance}
@@ -292,7 +292,7 @@ export function DataValidationDetail() {
                     onVerify={(isValid) => setIsRangeError(!isValid)}
                 />
             </FormLayout>
-            <FormLayout label={localeService.t('dataValidation.panel.type')}>
+            <FormLayout label={localeService.t('sheets-data-validation-ui.panel.type')}>
                 <Select
                     className="univer-w-full"
                     value={localRule.type}
@@ -305,14 +305,14 @@ export function DataValidationDetail() {
             </FormLayout>
             {operators?.length
                 ? (
-                    <FormLayout label={localeService.t('dataValidation.panel.operator')}>
+                    <FormLayout label={localeService.t('sheets-data-validation-ui.panel.operator')}>
                         <Select
                             className="univer-w-full"
                             value={`${localRule.operator}`}
                             options={[
                                 {
                                     value: '',
-                                    label: localeService.t('dataValidation.operators.legal'),
+                                    label: localeService.t('data-validation.operators.legal'),
                                 },
                                 ...operators.map((op, i) => ({
                                     value: `${op}`,
@@ -360,16 +360,16 @@ export function DataValidationDetail() {
                         allowBlank: !(localRule.allowBlank ?? true),
                     })}
                 >
-                    {localeService.t('dataValidation.panel.allowBlank')}
+                    {localeService.t('sheets-data-validation-ui.panel.allowBlank')}
                 </Checkbox>
             </FormLayout>
             <DataValidationOptions value={options} onChange={handleUpdateRuleOptions} extraComponent={validator.optionsInput} />
             <div className="univer-mt-5 univer-flex univer-flex-row univer-justify-end">
                 <Button className="univer-ml-3" onClick={handleDelete}>
-                    {localeService.t('dataValidation.panel.removeRule')}
+                    {localeService.t('sheets-data-validation-ui.panel.removeRule')}
                 </Button>
                 <Button className="univer-ml-3" variant="primary" onClick={handleOk}>
-                    {localeService.t('dataValidation.panel.done')}
+                    {localeService.t('sheets-data-validation-ui.panel.done')}
                 </Button>
             </div>
         </div>

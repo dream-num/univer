@@ -30,16 +30,16 @@ export function ListRenderModeInput(props: IListRenderModeInputProps) {
     const localeService = useDependency(LocaleService);
 
     return (
-        <FormLayout label={localeService.t('dataValidation.renderMode.label')}>
+        <FormLayout label={localeService.t('sheets-data-validation-ui.renderMode.label')}>
             <RadioGroup value={`${value.renderMode ?? DataValidationRenderMode.CUSTOM}`} onChange={(renderMode) => onChange({ ...value, renderMode: +renderMode })}>
                 <Radio value={`${DataValidationRenderMode.CUSTOM}`}>
-                    {localeService.t('dataValidation.renderMode.chip')}
+                    {localeService.t('sheets-data-validation-ui.renderMode.chip')}
                 </Radio>
                 <Radio value={`${DataValidationRenderMode.ARROW}`}>
-                    {localeService.t('dataValidation.renderMode.arrow')}
+                    {localeService.t('sheets-data-validation-ui.renderMode.arrow')}
                 </Radio>
                 <Radio value={`${DataValidationRenderMode.TEXT}`}>
-                    {localeService.t('dataValidation.renderMode.text')}
+                    {localeService.t('sheets-data-validation-ui.renderMode.text')}
                 </Radio>
             </RadioGroup>
         </FormLayout>

@@ -222,6 +222,29 @@ export interface IFWorksheetDrawingMixin {
      * @param {string[]} drawingIds - The drawing ids to group. At least two drawings are required.
      * @param {string} [groupId] - Optional group drawing id. If omitted, a new id will be generated.
      * @returns {string | null} The group id if the operation succeeds, otherwise null.
+     * @example
+     * ```ts
+     * // Group two over-grid images on the active sheet.
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const image1 = await fWorksheet.newOverGridImage()
+     *   .setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4', univerAPI.Enum.ImageSourceType.URL)
+     *   .setColumn(1)
+     *   .setRow(1)
+     *   .setWidth(100)
+     *   .setHeight(100)
+     *   .buildAsync();
+     * const image2 = await fWorksheet.newOverGridImage()
+     *   .setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4', univerAPI.Enum.ImageSourceType.URL)
+     *   .setColumn(3)
+     *   .setRow(1)
+     *   .setWidth(100)
+     *   .setHeight(100)
+     *   .buildAsync();
+     * fWorksheet.insertImages([image1, image2]);
+     * const groupId = fWorksheet.groupDrawings([image1.drawingId, image2.drawingId]);
+     * console.log(groupId);
+     * ```
      */
     groupDrawings(drawingIds: string[], groupId?: string): string | null;
 
@@ -229,6 +252,32 @@ export interface IFWorksheetDrawingMixin {
      * Ungroup drawing groups on the current sheet.
      * @param {string[]} groupIds - The group drawing ids to ungroup.
      * @returns {boolean} true if the operation succeeds, otherwise false.
+     * @example
+     * ```ts
+     * // Group two images, then ungroup the generated group.
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const image1 = await fWorksheet.newOverGridImage()
+     *   .setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4', univerAPI.Enum.ImageSourceType.URL)
+     *   .setColumn(1)
+     *   .setRow(1)
+     *   .setWidth(100)
+     *   .setHeight(100)
+     *   .buildAsync();
+     * const image2 = await fWorksheet.newOverGridImage()
+     *   .setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4', univerAPI.Enum.ImageSourceType.URL)
+     *   .setColumn(3)
+     *   .setRow(1)
+     *   .setWidth(100)
+     *   .setHeight(100)
+     *   .buildAsync();
+     * fWorksheet.insertImages([image1, image2]);
+     * const groupId = fWorksheet.groupDrawings([image1.drawingId, image2.drawingId]);
+     * if (groupId) {
+     *   const result = fWorksheet.ungroupDrawings([groupId]);
+     *   console.log(result);
+     * }
+     * ```
      */
     ungroupDrawings(groupIds: string[]): boolean;
 
@@ -237,6 +286,32 @@ export interface IFWorksheetDrawingMixin {
      * @param {string} groupId - The group drawing id.
      * @param {boolean} [recursive] - Whether to return all descendants.
      * @returns {ISheetDrawing[]} The child drawings.
+     * @example
+     * ```ts
+     * // Get the direct children of a drawing group.
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const image1 = await fWorksheet.newOverGridImage()
+     *   .setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4', univerAPI.Enum.ImageSourceType.URL)
+     *   .setColumn(1)
+     *   .setRow(1)
+     *   .setWidth(100)
+     *   .setHeight(100)
+     *   .buildAsync();
+     * const image2 = await fWorksheet.newOverGridImage()
+     *   .setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4', univerAPI.Enum.ImageSourceType.URL)
+     *   .setColumn(3)
+     *   .setRow(1)
+     *   .setWidth(100)
+     *   .setHeight(100)
+     *   .buildAsync();
+     * fWorksheet.insertImages([image1, image2]);
+     * const groupId = fWorksheet.groupDrawings([image1.drawingId, image2.drawingId]);
+     * if (groupId) {
+     *   const children = fWorksheet.getDrawingGroupChildren(groupId);
+     *   console.log(children.map((drawing) => drawing.drawingId));
+     * }
+     * ```
      */
     getDrawingGroupChildren(groupId: string, recursive?: boolean): ISheetDrawing[];
 
@@ -244,6 +319,30 @@ export interface IFWorksheetDrawingMixin {
      * Get the parent group of a drawing on the current sheet.
      * @param {string} drawingId - The child drawing id.
      * @returns {ISheetDrawing | null} The parent group drawing, or null if the drawing is not grouped.
+     * @example
+     * ```ts
+     * // Get the parent group of a drawing.
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const image1 = await fWorksheet.newOverGridImage()
+     *   .setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4', univerAPI.Enum.ImageSourceType.URL)
+     *   .setColumn(1)
+     *   .setRow(1)
+     *   .setWidth(100)
+     *   .setHeight(100)
+     *   .buildAsync();
+     * const image2 = await fWorksheet.newOverGridImage()
+     *   .setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4', univerAPI.Enum.ImageSourceType.URL)
+     *   .setColumn(3)
+     *   .setRow(1)
+     *   .setWidth(100)
+     *   .setHeight(100)
+     *   .buildAsync();
+     * fWorksheet.insertImages([image1, image2]);
+     * fWorksheet.groupDrawings([image1.drawingId, image2.drawingId]);
+     * const parentGroup = fWorksheet.getDrawingParentGroup(image1.drawingId);
+     * console.log(parentGroup?.drawingId);
+     * ```
      */
     getDrawingParentGroup(drawingId: string): ISheetDrawing | null;
 
@@ -251,6 +350,30 @@ export interface IFWorksheetDrawingMixin {
      * Returns whether a drawing is inside a group on the current sheet.
      * @param {string} drawingId - The drawing id.
      * @returns {boolean} true if the drawing has a parent group.
+     * @example
+     * ```ts
+     * // Check whether a drawing is inside a group.
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const image1 = await fWorksheet.newOverGridImage()
+     *   .setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4', univerAPI.Enum.ImageSourceType.URL)
+     *   .setColumn(1)
+     *   .setRow(1)
+     *   .setWidth(100)
+     *   .setHeight(100)
+     *   .buildAsync();
+     * const image2 = await fWorksheet.newOverGridImage()
+     *   .setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4', univerAPI.Enum.ImageSourceType.URL)
+     *   .setColumn(3)
+     *   .setRow(1)
+     *   .setWidth(100)
+     *   .setHeight(100)
+     *   .buildAsync();
+     * fWorksheet.insertImages([image1, image2]);
+     * fWorksheet.groupDrawings([image1.drawingId, image2.drawingId]);
+     * const isGrouped = fWorksheet.isDrawingGrouped(image1.drawingId);
+     * console.log(isGrouped);
+     * ```
      */
     isDrawingGrouped(drawingId: string): boolean;
 }

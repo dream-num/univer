@@ -383,7 +383,7 @@ export const ITEMS = [
         key: '2022',
         children: [
             {
-                title: 'sheets-filter.date.11',
+                title: 'sheets-filter-ui.date.11',
                 key: '2022-11',
                 children: [
                     {
@@ -531,7 +531,7 @@ export const ITEMS_WITH_EMPTY = [
         count: 1,
     },
     {
-        title: 'sheets-filter.panel.empty',
+        title: 'sheets-filter-ui.panel.empty',
         count: 1,
         leaf: true,
         checked: true,
@@ -559,7 +559,7 @@ export const E_ITEMS = [
         key: '2022',
         children: [
             {
-                title: 'sheets-filter.date.11',
+                title: 'sheets-filter-ui.date.11',
                 key: '2022-11',
                 children: [
                     {

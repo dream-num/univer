@@ -302,7 +302,7 @@ describe('test "SheetsFilterPanelService"', () => {
             const filterItems = filterByModel.filterItems;
             const emptyItem = filterItems.find((item) => item.key === 'empty');
             expect(emptyItem).toEqual({
-                title: 'sheets-filter.panel.empty',
+                title: 'sheets-filter-ui.panel.empty',
                 count: 4,
                 leaf: true,
                 checked: true,
@@ -347,7 +347,7 @@ describe('test "SheetsFilterPanelService"', () => {
                     count: 1,
                 },
                 {
-                    title: 'sheets-filter.panel.empty',
+                    title: 'sheets-filter-ui.panel.empty',
                     count: 3,
                     leaf: true,
                     checked: true,
@@ -386,7 +386,7 @@ describe('test "SheetsFilterPanelService"', () => {
                     count: 1,
                 },
                 {
-                    title: 'sheets-filter.panel.empty',
+                    title: 'sheets-filter-ui.panel.empty',
                     count: 3,
                     leaf: true,
                     checked: true,

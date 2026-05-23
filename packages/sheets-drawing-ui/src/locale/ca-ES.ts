@@ -17,7 +17,7 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    sheetImage: {
+    'sheets-drawing-ui': {
         title: 'Imatge',
 
         upload: {
@@ -42,32 +42,32 @@ const locale: typeof enUS = {
             saving: 'Desant...',
             error: 'No s\'han pogut desar les imatges de cel·la',
         },
-    },
-    'image-popup': {
-        replace: 'Reemplaça',
-        delete: 'Elimina',
-        edit: 'Edita',
-        crop: 'Retalla',
-        reset: 'Restableix la mida',
-        flipH: 'Gira horizontalmente',
-        flipV: 'Gira verticalmente',
-    },
-    'drawing-anchor': {
-        title: 'Propietats d’ancoratge',
-        both: 'Mou i canvia la mida amb les cel·les',
-        position: 'Mou però no canviïs la mida amb les cel·les',
-        none: 'No moguis ni canviïs la mida amb les cel·les',
-    },
-    'update-status': {
-        exceedMaxSize: 'La mida de la imatge supera el límit, el límit és {0}M',
-        invalidImageType: 'Tipus d’imatge no vàlid',
-        exceedMaxCount: 'Només es poden pujar {0} imatges alhora',
-        invalidImage: 'Imatge no vàlida',
-    },
-    'cell-image': {
-        pasteTitle: 'Enganxa com a imatge de cel·la',
-        pasteContent: 'Enganxar una imatge de cel·la sobreescriurà el contingut existent de la cel·la, continuar enganxant',
-        pasteError: 'La còpia i enganxat d’imatges de cel·la de full no està suportada en aquesta unitat',
+        'image-popup': {
+            replace: 'Reemplaça',
+            delete: 'Elimina',
+            edit: 'Edita',
+            crop: 'Retalla',
+            reset: 'Restableix la mida',
+            flipH: 'Gira horizontalmente',
+            flipV: 'Gira verticalmente',
+        },
+        'update-status': {
+            exceedMaxSize: 'La mida de la imatge supera el límit, el límit és {0}M',
+            invalidImageType: 'Tipus d’imatge no vàlid',
+            exceedMaxCount: 'Només es poden pujar {0} imatges alhora',
+            invalidImage: 'Imatge no vàlida',
+        },
+        'drawing-anchor': {
+            title: 'Propietats d’ancoratge',
+            both: 'Mou i canvia la mida amb les cel·les',
+            position: 'Mou però no canviïs la mida amb les cel·les',
+            none: 'No moguis ni canviïs la mida amb les cel·les',
+        },
+        'cell-image': {
+            pasteTitle: 'Enganxa com a imatge de cel·la',
+            pasteContent: 'Enganxar una imatge de cel·la sobreescriurà el contingut existent de la cel·la, continuar enganxant',
+            pasteError: 'La còpia i enganxat d’imatges de cel·la de full no està suportada en aquesta unitat',
+        },
     },
 };
 

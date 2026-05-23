@@ -88,10 +88,10 @@ export class SheetCellImageCopyPasteController extends Disposable {
                                 this._dialogService.open({
                                     id: 'sheet-cell-image-copy-paste',
                                     title: {
-                                        label: this._localeService.t('cell-image.pasteTitle'),
+                                        label: this._localeService.t('sheets-drawing-ui.cell-image.pasteTitle'),
                                     },
                                     children: {
-                                        label: this._localeService.t('cell-image.pasteContent'),
+                                        label: this._localeService.t('sheets-drawing-ui.cell-image.pasteContent'),
                                     },
                                     width: 320,
                                     destroyOnClose: true,

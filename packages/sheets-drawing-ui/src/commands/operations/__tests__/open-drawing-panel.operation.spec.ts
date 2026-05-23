@@ -53,7 +53,7 @@ describe('SidebarSheetDrawingOperation', () => {
 
         await expect(SidebarSheetDrawingOperation.handler(accessor, { value: 'open' })).resolves.toBe(true);
         expect(sidebarService.open).toHaveBeenCalledWith(expect.objectContaining({
-            header: { title: 'sheetImage.panel.title' },
+            header: { title: 'sheets-drawing-ui.panel.title' },
             children: { label: COMPONENT_SHEET_DRAWING_PANEL },
             width: 360,
         }));

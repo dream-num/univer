@@ -79,7 +79,7 @@ export class SheetsHyperLinkParserService {
             : this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         const invalidLink = {
             type: SheetHyperLinkType.INVALID,
-            name: this._localeService.t('hyperLink.message.refError'),
+            name: this._localeService.t('sheets-hyper-link.message.refError'),
         };
 
         if (!workbook) {

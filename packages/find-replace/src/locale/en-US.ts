@@ -60,6 +60,10 @@ const locale = {
                 title: 'Are you sure to replace all matches?',
             },
         },
+        button: {
+            confirm: 'OK',
+            cancel: 'Cancel',
+        },
     },
     'find-replace-shortcuts': 'Find & Replace',
 };

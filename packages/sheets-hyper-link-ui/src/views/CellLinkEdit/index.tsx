@@ -303,19 +303,19 @@ export const CellLinkEdit = () => {
         value: SheetHyperLinkType | string;
     }> = [
         {
-            label: localeService.t('hyperLink.form.link'),
+            label: localeService.t('sheets-hyper-link-ui.form.link'),
             value: SheetHyperLinkType.URL,
         },
         {
-            label: localeService.t('hyperLink.form.range'),
+            label: localeService.t('sheets-hyper-link-ui.form.range'),
             value: SheetHyperLinkType.RANGE,
         },
         {
-            label: localeService.t('hyperLink.form.worksheet'),
+            label: localeService.t('sheets-hyper-link-ui.form.worksheet'),
             value: SheetHyperLinkType.SHEET,
         },
         {
-            label: localeService.t('hyperLink.form.definedName'),
+            label: localeService.t('sheets-hyper-link-ui.form.definedName'),
             value: SheetHyperLinkType.DEFINE_NAME,
         },
         ...sidePanelOptions,
@@ -438,8 +438,8 @@ export const CellLinkEdit = () => {
             {showLabel
                 ? (
                     <FormLayout
-                        label={localeService.t('hyperLink.form.label')}
-                        error={showError && isBlankInput(display) ? localeService.t('hyperLink.form.inputError') : ''}
+                        label={localeService.t('sheets-hyper-link-ui.form.label')}
+                        error={showError && isBlankInput(display) ? localeService.t('sheets-hyper-link-ui.form.inputError') : ''}
                     >
                         <Input
                             value={display}
@@ -447,7 +447,7 @@ export const CellLinkEdit = () => {
                                 setDisplay(v);
                                 setByPayload.current = false;
                             }}
-                            placeholder={localeService.t('hyperLink.form.labelPlaceholder')}
+                            placeholder={localeService.t('sheets-hyper-link-ui.form.labelPlaceholder')}
                             autoFocus
                             onKeyDown={(e) => {
                                 if (e.keyCode === KeyCode.ENTER) {
@@ -458,7 +458,7 @@ export const CellLinkEdit = () => {
                     </FormLayout>
                 )
                 : null}
-            <FormLayout label={localeService.t('hyperLink.form.type')}>
+            <FormLayout label={localeService.t('sheets-hyper-link-ui.form.type')}>
                 <Select
                     className="univer-w-full"
                     options={linkTypeOptions}
@@ -471,7 +471,7 @@ export const CellLinkEdit = () => {
             </FormLayout>
             {type === SheetHyperLinkType.URL && (
                 <FormLayout
-                    error={showError ? !payload ? localeService.t('hyperLink.form.inputError') : !isLegalLink(payload) ? localeService.t('hyperLink.form.linkError') : '' : ''}
+                    error={showError ? !payload ? localeService.t('sheets-hyper-link-ui.form.inputError') : !isLegalLink(payload) ? localeService.t('sheets-hyper-link-ui.form.linkError') : '' : ''}
                 >
                     <Input
                         value={payload}
@@ -482,7 +482,7 @@ export const CellLinkEdit = () => {
                                 setByPayload.current = true;
                             }
                         }}
-                        placeholder={localeService.t('hyperLink.form.linkPlaceholder')}
+                        placeholder={localeService.t('sheets-hyper-link-ui.form.linkPlaceholder')}
                         autoFocus
                         onKeyDown={(e) => {
                             if (e.keyCode === KeyCode.ENTER) {
@@ -493,7 +493,7 @@ export const CellLinkEdit = () => {
                 </FormLayout>
             )}
             {type === SheetHyperLinkType.RANGE && (
-                <FormLayout error={showError && !payload ? localeService.t('hyperLink.form.inputError') : ''}>
+                <FormLayout error={showError && !payload ? localeService.t('sheets-hyper-link-ui.form.inputError') : ''}>
                     <RangeSelector
                         unitId={workbook.getUnitId()}
                         subUnitId={subUnitId}
@@ -541,7 +541,7 @@ export const CellLinkEdit = () => {
                 </FormLayout>
             )}
             {type === SheetHyperLinkType.SHEET && (
-                <FormLayout error={showError && !payload ? localeService.t('hyperLink.form.selectError') : ''}>
+                <FormLayout error={showError && !payload ? localeService.t('sheets-hyper-link-ui.form.selectError') : ''}>
                     <Select
                         className="univer-w-full"
                         options={sheetsOption}
@@ -559,7 +559,7 @@ export const CellLinkEdit = () => {
                 </FormLayout>
             )}
             {type === SheetHyperLinkType.DEFINE_NAME && (
-                <FormLayout error={showError && !payload ? localeService.t('hyperLink.form.selectError') : ''}>
+                <FormLayout error={showError && !payload ? localeService.t('sheets-hyper-link-ui.form.selectError') : ''}>
                     <Select
                         className="univer-w-full"
                         options={definedNames}
@@ -599,7 +599,7 @@ export const CellLinkEdit = () => {
                         commandService.executeCommand(CloseHyperLinkPopupOperation.id);
                     }}
                 >
-                    {localeService.t('hyperLink.form.cancel')}
+                    {localeService.t('sheets-hyper-link-ui.form.cancel')}
                 </Button>
                 <Button
                     variant="primary"
@@ -607,7 +607,7 @@ export const CellLinkEdit = () => {
                         handleSubmit();
                     }}
                 >
-                    {localeService.t('hyperLink.form.ok')}
+                    {localeService.t('sheets-hyper-link-ui.form.ok')}
                 </Button>
             </div>
         </div>

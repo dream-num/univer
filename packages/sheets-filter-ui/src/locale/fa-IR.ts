@@ -17,14 +17,11 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    'sheets-filter': {
+    'sheets-filter-ui': {
         toolbar: {
             'smart-toggle-filter-tooltip': 'تغییر حالت فیلتر',
             'clear-filter-criteria': 'پاک کردن شرایط فیلتر',
             're-calc-filter-conditions': 'بازمحاسبه شرایط فیلتر',
-        },
-        command: {
-            'not-valid-filter-range': 'محدوده انتخاب شده فقط یک ردیف دارد و برای فیلتر معتبر نیست.',
         },
         shortcut: {
             'smart-toggle-filter': 'تغییر حالت فیلتر',
@@ -67,9 +64,6 @@ const locale: typeof enUS = {
             between: 'بین',
             'not-between': 'بین نیست',
             custom: 'سفارشی',
-        },
-        msg: {
-            'filter-header-forbidden': 'شما نمی‌توانید ردیف هدر یک فیلتر را جابه‌جا کنید.',
         },
         date: {
             1: 'ژانویه',

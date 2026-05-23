@@ -17,14 +17,11 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    'sheets-filter': {
+    'sheets-filter-ui': {
         toolbar: {
             'smart-toggle-filter-tooltip': '篩選',
             'clear-filter-criteria': '清除篩選條件',
             're-calc-filter-conditions': '重新計算',
-        },
-        command: {
-            'not-valid-filter-range': '選取的區域只有一列，無法進行篩選',
         },
         shortcut: {
             'smart-toggle-filter': '切換篩選',
@@ -67,9 +64,6 @@ const locale: typeof enUS = {
             between: '介於',
             'not-between': '不介於',
             custom: '自訂',
-        },
-        msg: {
-            'filter-header-forbidden': '無法移動篩選列頭',
         },
         date: {
             1: '1月',

@@ -43,8 +43,8 @@ export const ReplaceAllMatchesCommand: ICommand = {
         if (!await confirmService.confirm({
             id: CONFIRM_REPLACE_ALL_ID,
             title: { title: localeService.t('find-replace.replace.confirm.title') },
-            cancelText: localeService.t('button.cancel'),
-            confirmText: localeService.t('button.confirm'),
+            cancelText: localeService.t('find-replace.button.cancel'),
+            confirmText: localeService.t('find-replace.button.confirm'),
         })) {
             return false;
         }

@@ -15,7 +15,7 @@
  */
 
 const locale = {
-    crosshair: {
+    'sheets-crosshair-highlight': {
         button: {
             tooltip: 'Crosshair Highlight',
         },

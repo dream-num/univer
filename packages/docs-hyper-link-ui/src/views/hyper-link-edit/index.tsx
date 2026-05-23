@@ -125,8 +125,8 @@ export const DocHyperLinkEdit = () => {
                 {editing
                     ? (
                         <FormLayout
-                            label={localeService.t('docLink.edit.label')}
-                            error={showError && isBlankInput(label) ? localeService.t('docLink.edit.labelError') : ''}
+                            label={localeService.t('docs-hyper-link-ui.edit.label')}
+                            error={showError && isBlankInput(label) ? localeService.t('docs-hyper-link-ui.edit.labelError') : ''}
                         >
                             <Input
                                 value={label}
@@ -142,8 +142,8 @@ export const DocHyperLinkEdit = () => {
                     )
                     : null}
                 <FormLayout
-                    label={localeService.t('docLink.edit.address')}
-                    error={showError && !isLegal ? localeService.t('docLink.edit.addressError') : ''}
+                    label={localeService.t('docs-hyper-link-ui.edit.address')}
+                    error={showError && !isLegal ? localeService.t('docs-hyper-link-ui.edit.addressError') : ''}
                 >
                     <Input
                         value={link}
@@ -159,14 +159,14 @@ export const DocHyperLinkEdit = () => {
             </div>
             <div className="univer-flex univer-justify-end univer-gap-3">
                 <Button onClick={handleCancel}>
-                    {localeService.t('docLink.edit.cancel')}
+                    {localeService.t('docs-hyper-link-ui.edit.cancel')}
                 </Button>
                 <Button
                     variant="primary"
                     disabled={isBlankInput(link)}
                     onClick={handleConfirm}
                 >
-                    {localeService.t('docLink.edit.confirm')}
+                    {localeService.t('docs-hyper-link-ui.edit.confirm')}
                 </Button>
             </div>
         </div>

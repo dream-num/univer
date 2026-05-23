@@ -41,7 +41,7 @@ export const SidebarSheetDrawingOperation: ICommand = {
         switch (params.value) {
             case 'open':
                 sidebarService.open({
-                    header: { title: localeService.t('sheetImage.panel.title') },
+                    header: { title: localeService.t('sheets-drawing-ui.panel.title') },
                     children: { label: COMPONENT_SHEET_DRAWING_PANEL },
                     onClose: () => {
                         commandService.syncExecuteCommand(SetDrawingSelectedOperation.id, []);

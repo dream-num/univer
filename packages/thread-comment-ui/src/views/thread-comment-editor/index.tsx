@@ -119,7 +119,7 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
                 editorId={editorId}
                 autoFocus={autoFocus}
                 keyboardEventConfig={keyboardEventConfig}
-                placeholder={localeService.t('threadCommentUI.editor.placeholder')}
+                placeholder={localeService.t('thread-comment-ui.editor.placeholder')}
                 initialValue={comment?.text && getSnapshot(comment.text)}
                 onFocusChange={(isFocus) => isFocus && setEditing(isFocus)}
                 isSingle={false}
@@ -141,14 +141,14 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
                                 commandService.executeCommand(SetActiveCommentOperation.id);
                             }}
                         >
-                            {localeService.t('threadCommentUI.editor.cancel')}
+                            {localeService.t('thread-comment-ui.editor.cancel')}
                         </Button>
                         <Button
                             variant="primary"
                             disabled={!canSubmit}
                             onClick={handleSave}
                         >
-                            {localeService.t(id ? 'threadCommentUI.editor.save' : 'threadCommentUI.editor.reply')}
+                            {localeService.t(id ? 'thread-comment-ui.editor.save' : 'thread-comment-ui.editor.reply')}
                         </Button>
                     </div>
                 )

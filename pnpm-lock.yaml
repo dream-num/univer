@@ -199,6 +199,9 @@ importers:
       '@univerjs/docs-quick-insert-ui':
         specifier: workspace:*
         version: link:../../packages/docs-quick-insert-ui
+      '@univerjs/docs-thread-comment-ui':
+        specifier: workspace:*
+        version: link:../../packages/docs-thread-comment-ui
       '@univerjs/docs-ui':
         specifier: workspace:*
         version: link:../../packages/docs-ui

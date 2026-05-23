@@ -81,7 +81,7 @@ export const ToggleSheetCommentPanelOperation: IOperation = {
             panelService.setPanelVisible(false);
         } else {
             sidebarService.open({
-                header: { title: 'threadCommentUI.panel.title' },
+                header: { title: 'sheets-thread-comment-ui.panel.title' },
                 children: { label: SHEETS_THREAD_COMMENT_PANEL },
                 width: 360,
             });

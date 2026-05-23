@@ -186,42 +186,42 @@ export class DrawingPopupMenuController extends RxDisposable {
     private _getImageMenuItems(unitId: string, subUnitId: string, drawingId: string, drawingType: number) {
         return [
             {
-                label: 'image-popup.edit',
+                label: 'sheets-drawing-ui.image-popup.edit',
                 index: 0,
                 commandId: EditSheetDrawingOperation.id,
                 commandParams: { unitId, subUnitId, drawingId },
                 disable: drawingType === DrawingTypeEnum.DRAWING_DOM,
             },
             {
-                label: 'image-popup.delete',
+                label: 'sheets-drawing-ui.image-popup.delete',
                 index: 1,
                 commandId: RemoveSheetDrawingCommand.id,
                 commandParams: { unitId, drawings: [{ unitId, subUnitId, drawingId }] },
                 disable: false,
             },
             {
-                label: 'image-popup.crop',
+                label: 'sheets-drawing-ui.image-popup.crop',
                 index: 2,
                 commandId: OpenImageCropOperation.id,
                 commandParams: { unitId, subUnitId, drawingId },
                 disable: drawingType === DrawingTypeEnum.DRAWING_DOM,
             },
             {
-                label: 'image-popup.flipH',
+                label: 'sheets-drawing-ui.image-popup.flipH',
                 index: 2,
                 commandId: FlipSheetDrawingCommand.id,
                 commandParams: { unitId, flipH: true, drawings: [{ unitId, subUnitId, drawingId }] },
                 disable: drawingType === DrawingTypeEnum.DRAWING_DOM,
             },
             {
-                label: 'image-popup.flipV',
+                label: 'sheets-drawing-ui.image-popup.flipV',
                 index: 2,
                 commandId: FlipSheetDrawingCommand.id,
                 commandParams: { unitId, flipV: true, drawings: [{ unitId, subUnitId, drawingId }] },
                 disable: drawingType === DrawingTypeEnum.DRAWING_DOM,
             },
             {
-                label: 'image-popup.reset',
+                label: 'sheets-drawing-ui.image-popup.reset',
                 index: 3,
                 commandId: ImageResetSizeOperation.id,
                 commandParams: [{ unitId, subUnitId, drawingId }],

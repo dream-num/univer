@@ -17,7 +17,7 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    sheetImage: {
+    'sheets-drawing-ui': {
         title: 'Image',
 
         upload: {
@@ -42,33 +42,32 @@ const locale: typeof enUS = {
             saving: 'Enregistrement...',
             error: 'Échec de l\'enregistrement des images de cellule',
         },
-    },
-    'image-popup': {
-        replace: 'Remplacer',
-        delete: 'Supprimer',
-        edit: 'Éditer',
-        crop: 'Rogner',
-        reset: 'Réinitialiser la taille',
-        flipH: 'Retournement horizontal',
-        flipV: 'Retournement vertical',
-
-    },
-    'drawing-anchor': {
-        title: 'Propriétés de l\'ancre',
-        both: 'Déplacer et redimensionner avec les cellules',
-        position: 'Déplacer mais ne pas redimensionner avec les cellules',
-        none: 'Ne pas déplacer ni redimensionner avec les cellules',
-    },
-    'update-status': {
-        exceedMaxSize: 'La taille de l\'image dépasse la limite, la limite est de {0}M',
-        invalidImageType: 'Type d\'image invalide',
-        exceedMaxCount: 'Seulement {0} images peuvent être téléchargées à la fois',
-        invalidImage: 'Image invalide',
-    },
-    'cell-image': {
-        pasteTitle: 'Coller comme image de cellule',
-        pasteContent: 'Coller une image de cellule écrasera le contenu existant de la cellule, continuer le collage',
-        pasteError: 'Le copier-coller d\'image de cellule n\'est pas pris en charge dans cette unité',
+        'image-popup': {
+            replace: 'Remplacer',
+            delete: 'Supprimer',
+            edit: 'Éditer',
+            crop: 'Rogner',
+            reset: 'Réinitialiser la taille',
+            flipH: 'Retournement horizontal',
+            flipV: 'Retournement vertical',
+        },
+        'update-status': {
+            exceedMaxSize: 'La taille de l\'image dépasse la limite, la limite est de {0}M',
+            invalidImageType: 'Type d\'image invalide',
+            exceedMaxCount: 'Seulement {0} images peuvent être téléchargées à la fois',
+            invalidImage: 'Image invalide',
+        },
+        'drawing-anchor': {
+            title: 'Propriétés de l\'ancre',
+            both: 'Déplacer et redimensionner avec les cellules',
+            position: 'Déplacer mais ne pas redimensionner avec les cellules',
+            none: 'Ne pas déplacer ni redimensionner avec les cellules',
+        },
+        'cell-image': {
+            pasteTitle: 'Coller comme image de cellule',
+            pasteContent: 'Coller une image de cellule écrasera le contenu existant de la cellule, continuer le collage',
+            pasteError: 'Le copier-coller d\'image de cellule n\'est pas pris en charge dans cette unité',
+        },
     },
 };
 

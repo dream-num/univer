@@ -15,7 +15,7 @@
  */
 
 const locale = {
-    threadCommentUI: {
+    'thread-comment-ui': {
         panel: {
             title: 'Comment Management',
             empty: 'No comments yet',

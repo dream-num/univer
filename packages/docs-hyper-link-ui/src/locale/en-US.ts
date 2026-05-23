@@ -15,7 +15,7 @@
  */
 
 const locale = {
-    docLink: {
+    'docs-hyper-link-ui': {
         edit: {
             confirm: 'Confirm',
             cancel: 'Cancel',

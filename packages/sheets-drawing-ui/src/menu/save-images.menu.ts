@@ -106,7 +106,7 @@ export function SaveCellImagesMenuFactory(accessor: IAccessor): IMenuItem {
         id: SaveCellImagesCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'DownloadImageIcon',
-        title: 'sheetImage.save.menuLabel',
+        title: 'sheets-drawing-ui.save.menuLabel',
         hidden$,
     };
 }

@@ -94,7 +94,7 @@ export class SheetsHyperLinkResolverService {
 
             if (!worksheet) {
                 this._messageService.show({
-                    content: this._localeService.t('hyperLink.message.refError'),
+                    content: this._localeService.t('sheets-hyper-link-ui.message.refError'),
                     type: MessageType.Error,
                 });
                 return;
@@ -105,7 +105,7 @@ export class SheetsHyperLinkResolverService {
             // The worksheet may be hidden
             if (isHidden) {
                 this._messageService.show({
-                    content: this._localeService.t('hyperLink.message.hiddenSheet'),
+                    content: this._localeService.t('sheets-hyper-link-ui.message.hiddenSheet'),
                     type: MessageType.Error,
                 });
                 return;
@@ -170,7 +170,7 @@ export class SheetsHyperLinkResolverService {
 
         if (!targetSheet) {
             this._messageService.show({
-                content: this._localeService.t('hyperLink.message.noSheet'),
+                content: this._localeService.t('sheets-hyper-link-ui.message.noSheet'),
                 type: MessageType.Error,
             });
             return false;
@@ -178,7 +178,7 @@ export class SheetsHyperLinkResolverService {
 
         if (workbook.getHiddenWorksheets().indexOf(subUnitId) > -1) {
             this._messageService.show({
-                content: this._localeService.t('hyperLink.message.hiddenSheet'),
+                content: this._localeService.t('sheets-hyper-link-ui.message.hiddenSheet'),
                 type: MessageType.Error,
             });
             return false;

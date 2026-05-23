@@ -35,7 +35,7 @@ export const SidebarDocDrawingOperation: ICommand = {
         switch (params.value) {
             case 'open':
                 sidebarService.open({
-                    header: { title: localeService.t('docImage.panel.title') },
+                    header: { title: localeService.t('docs-drawing-ui.panel.title') },
                     children: { label: COMPONENT_DOC_DRAWING_PANEL },
                     onClose: () => {
                         drawingManagerService.focusDrawing(null);

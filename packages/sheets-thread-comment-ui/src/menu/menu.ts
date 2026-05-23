@@ -27,7 +27,7 @@ export const threadCommentMenuFactory = (accessor: IAccessor) => {
         id: ShowAddSheetCommentModalOperation.id,
         type: MenuItemType.BUTTON,
         icon: 'CommentIcon',
-        title: 'sheetThreadComment.menu.addComment',
+        title: 'sheets-thread-comment-ui.menu.addComment',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentRangeDisable$(accessor, {
             workbookTypes: [WorkbookCommentPermission],
@@ -42,7 +42,7 @@ export const threadPanelMenuFactory = (accessor: IAccessor) => {
         id: ToggleSheetCommentPanelOperation.id,
         type: MenuItemType.BUTTON,
         icon: 'CommentIcon',
-        tooltip: 'sheetThreadComment.menu.commentManagement',
+        tooltip: 'sheets-thread-comment-ui.menu.commentManagement',
         disabled$: getCurrentRangeDisable$(accessor, {
             workbookTypes: [WorkbookCommentPermission],
             worksheetTypes: [WorksheetViewPermission],

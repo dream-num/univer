@@ -31,7 +31,7 @@ export function FilterByValue(props: { model: ByValuesModel }) {
 
     const searchText = useObservable(model.searchString$, '', true);
     const items = useObservable(model.filterItems$, undefined, true);
-    const filterOnly = localeService.t('sheets-filter.panel.filter-only');
+    const filterOnly = localeService.t('sheets-filter-ui.panel.filter-only');
 
     const stat = statisticFilterByValueItems(items);
     const allChecked = stat.checked > 0 && stat.unchecked === 0;
@@ -68,7 +68,7 @@ export function FilterByValue(props: { model: ByValuesModel }) {
             <Input
                 autoFocus
                 value={searchText}
-                placeholder={localeService.t('sheets-filter.panel.search-placeholder')}
+                placeholder={localeService.t('sheets-filter-ui.panel.search-placeholder')}
                 onChange={onSearchValueChange}
             />
             <div
@@ -103,7 +103,7 @@ export function FilterByValue(props: { model: ByValuesModel }) {
                               dark:!univer-text-white
                             `}
                         >
-                            {`${localeService.t('sheets-filter.panel.select-all')}`}
+                            {`${localeService.t('sheets-filter-ui.panel.select-all')}`}
                         </span>
                         <span
                             data-u-comp="sheets-filter-panel-values-item-count"

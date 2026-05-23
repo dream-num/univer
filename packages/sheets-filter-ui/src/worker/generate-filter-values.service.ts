@@ -145,7 +145,7 @@ export function getFilterByValueItems(
     const initialBlankChecked = filters ? blankChecked : true;
     if (emptyCount > 0) {
         const item: IFilterByValueItem = {
-            value: localeService.t('sheets-filter.panel.empty'),
+            value: localeService.t('sheets-filter-ui.panel.empty'),
             checked: initialBlankChecked,
             count: emptyCount,
             index,
@@ -239,7 +239,7 @@ export function getFilterTreeByValueItems(
                 let monthItem = yearItem.children?.find((item) => item.key === `${year}-${month}`);
                 if (!monthItem) {
                     monthItem = {
-                        title: localeService.t(`sheets-filter.date.${month}`),
+                        title: localeService.t(`sheets-filter-ui.date.${month}`),
                         key: `${year}-${month}`,
                         children: [],
                         count: 0,
@@ -304,7 +304,7 @@ export function getFilterTreeByValueItems(
             : true;
     if (emptyCount > 0) {
         const item: IFilterByValueWithTreeItem = {
-            title: localeService.t('sheets-filter.panel.empty'),
+            title: localeService.t('sheets-filter-ui.panel.empty'),
             count: emptyCount,
             leaf: true,
             checked: initialBlankChecked,

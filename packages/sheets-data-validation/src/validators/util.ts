@@ -50,10 +50,19 @@ export function getSheetRangeValueSet(grid: IUnitRangeName, univerInstanceServic
 }
 
 export function serializeListOptions(options: string[]) {
-    return options.filter(Boolean).join(',');
+    return JSON.stringify(options.filter(Boolean));
 }
 
 export function deserializeListOptions(optionsStr: string) {
+    try {
+        const options = JSON.parse(optionsStr);
+        if (Array.isArray(options) && options.every((option) => typeof option === 'string')) {
+            return options.filter(Boolean);
+        }
+    } catch {
+        // Fallback for data saved by older versions.
+    }
+
     return optionsStr.split(',').filter(Boolean);
 }
 

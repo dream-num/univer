@@ -119,7 +119,7 @@ export class SheetsSortUIController extends RxDisposable {
             id: CUSTOM_SORT_DIALOG_ID,
             draggable: true,
             width: CUSTOM_SORT_PANEL_WIDTH,
-            title: { title: `${this._localeService.t('sheets-sort.general.sort-custom')}: ${serializeRange(location.range)}` },
+            title: { title: `${this._localeService.t('sheets-sort-ui.general.sort-custom')}: ${serializeRange(location.range)}` },
             children: { label: 'CustomSortPanel' },
             destroyOnClose: true,
             defaultPosition: getCustomSortDialogDefaultPosition(),

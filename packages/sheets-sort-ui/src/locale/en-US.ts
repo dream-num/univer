@@ -15,7 +15,7 @@
  */
 
 const locale = {
-    'sheets-sort': {
+    'sheets-sort-ui': {
         general: {
             sort: 'Sort',
             'sort-asc': 'Ascending',

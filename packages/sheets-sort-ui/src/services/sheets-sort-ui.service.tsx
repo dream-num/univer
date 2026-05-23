@@ -49,10 +49,10 @@ export interface ISheetSortLocation extends ISheetRangeLocation {
 }
 
 const SORT_ERROR_MESSAGE = {
-    MERGE_ERROR: 'sheets-sort.error.merge-size',
-    EMPTY_ERROR: 'sheets-sort.error.empty',
-    SINGLE_ERROR: 'sheets-sort.error.single',
-    FORMULA_ARRAY: 'sheets-sort.error.formula-array',
+    MERGE_ERROR: 'sheets-sort-ui.error.merge-size',
+    EMPTY_ERROR: 'sheets-sort-ui.error.empty',
+    SINGLE_ERROR: 'sheets-sort-ui.error.single',
+    FORMULA_ARRAY: 'sheets-sort-ui.error.formula-array',
 };
 
 export class SheetsSortUIService extends Disposable {
@@ -161,8 +161,8 @@ export class SheetsSortUIService extends Disposable {
             children: {
                 title: <div>{this._localeService.t(content)}</div>,
             },
-            cancelText: this._localeService.t('sheets-sort.dialog.cancel'),
-            confirmText: this._localeService.t('sheets-sort.dialog.confirm'),
+            cancelText: this._localeService.t('sheets-sort-ui.dialog.cancel'),
+            confirmText: this._localeService.t('sheets-sort-ui.dialog.confirm'),
         });
     }
 
@@ -171,7 +171,7 @@ export class SheetsSortUIService extends Disposable {
         const confirm = await this._confirmService.confirm({
             id: 'extend-sort-range-dialog',
             title: {
-                title: this._localeService.t('sheets-sort.dialog.sort-reminder'),
+                title: this._localeService.t('sheets-sort-ui.dialog.sort-reminder'),
             },
             children: {
                 title: (
@@ -183,8 +183,8 @@ export class SheetsSortUIService extends Disposable {
                 ),
             },
             width: 400,
-            cancelText: this._localeService.t('sheets-sort.dialog.cancel'),
-            confirmText: this._localeService.t('sheets-sort.dialog.confirm'),
+            cancelText: this._localeService.t('sheets-sort-ui.dialog.cancel'),
+            confirmText: this._localeService.t('sheets-sort-ui.dialog.confirm'),
         });
         if (confirm) {
             return shouldExtend ? EXTEND_TYPE.EXTEND : EXTEND_TYPE.KEEP;

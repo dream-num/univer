@@ -19,7 +19,7 @@
 import type { IAccessor, ICommand, IMutationInfo } from '@univerjs/core';
 import type { ITableColumnJson } from '../../types/type';
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecute } from '@univerjs/core';
-import { getMoveRangeUndoRedoMutations, getSheetCommandTarget, InsertColMutation, InsertRowMutation, RemoveColMutation, RemoveRowMutation, SheetsSelectionsService } from '@univerjs/sheets';
+import { getMoveRangeUndoRedoMutations, getSheetCommandTarget, InsertColMutation, InsertRowMutation, RemoveColMutation, RemoveRowMutation, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import { SheetsTableController } from '../../controllers/sheets-table.controller';
 import { TableManager } from '../../model/table-manager';
 import { IRangeOperationTypeEnum, IRowColTypeEnum } from '../../types/type';
@@ -599,48 +599,67 @@ export const SheetTableRemoveColumnAtCommand: ICommand<ISheetTableInsertAtComman
             return false;
         }
 
+        const tableInfo = table.getTableInfo();
         const columns: ITableColumnJson[] = [];
         const gap = index - oldRange.startColumn;
         for (let i = 0; i < count; i++) {
-            const column = table.getTableInfo().columns[gap + i];
+            const column = tableInfo.columns[gap + i];
             if (column) {
                 columns.push(column);
             }
         }
 
-        const redos: IMutationInfo[] = [{
-            id: SetSheetTableMutation.id,
+        const sheetInterceptorService = accessor.get(SheetInterceptorService);
+        const interceptorCommands = sheetInterceptorService.onCommandExecute({
+            id: SheetTableRemoveColumnAtCommand.id,
             params: {
-                unitId,
-                subUnitId,
-                tableId,
-                config: {
-                    rowColOperation: {
-                        operationType: IRangeOperationTypeEnum.Delete,
-                        rowColType: IRowColTypeEnum.Col,
-                        index,
-                        count,
+                ...params,
+                tableName: tableInfo.name,
+                removedColumnNames: columns.map((column) => column.displayName),
+            },
+        });
+
+        const redos: IMutationInfo[] = [
+            ...(interceptorCommands.preRedos ?? []),
+            {
+                id: SetSheetTableMutation.id,
+                params: {
+                    unitId,
+                    subUnitId,
+                    tableId,
+                    config: {
+                        rowColOperation: {
+                            operationType: IRangeOperationTypeEnum.Delete,
+                            rowColType: IRowColTypeEnum.Col,
+                            index,
+                            count,
+                        },
                     },
                 },
             },
-        }];
-        const undos: IMutationInfo[] = [{
-            id: SetSheetTableMutation.id,
-            params: {
-                unitId,
-                subUnitId,
-                tableId,
-                config: {
-                    rowColOperation: {
-                        operationType: IRangeOperationTypeEnum.Insert,
-                        rowColType: IRowColTypeEnum.Col,
-                        index,
-                        count,
-                        columnsJson: columns,
+            ...interceptorCommands.redos,
+        ];
+        const undos: IMutationInfo[] = [
+            ...(interceptorCommands.preUndos ?? []),
+            {
+                id: SetSheetTableMutation.id,
+                params: {
+                    unitId,
+                    subUnitId,
+                    tableId,
+                    config: {
+                        rowColOperation: {
+                            operationType: IRangeOperationTypeEnum.Insert,
+                            rowColType: IRowColTypeEnum.Col,
+                            index,
+                            count,
+                            columnsJson: columns,
+                        },
                     },
                 },
             },
-        }];
+            ...interceptorCommands.undos,
+        ];
 
         const colContentIndex = target.worksheet.getCellMatrix().getDataRange().endColumn;
         if (index + count <= colContentIndex) {
@@ -831,14 +850,27 @@ export const SheetTableRemoveColCommand: ICommand<ISheetTableRowColOperationComm
             },
         });
 
+        const tableInfo = table.getTableInfo();
         const columns: ITableColumnJson[] = [];
         const gap = range.startColumn - oldRange.startColumn;
         for (let i = 0; i < removeColCount; i++) {
-            const column = table.getTableInfo().columns[gap + i];
+            const column = tableInfo.columns[gap + i];
             if (column) {
                 columns.push(column);
             }
         }
+        const sheetInterceptorService = accessor.get(SheetInterceptorService);
+        const interceptorCommands = sheetInterceptorService.onCommandExecute({
+            id: SheetTableRemoveColCommand.id,
+            params: {
+                ...params,
+                tableName: tableInfo.name,
+                removedColumnNames: columns.map((column) => column.displayName),
+            },
+        });
+        redos.unshift(...(interceptorCommands.preRedos ?? []));
+        redos.push(...interceptorCommands.redos);
+        undos.unshift(...(interceptorCommands.preUndos ?? []));
         undos.push({
             id: SetSheetTableMutation.id,
             params: {
@@ -856,6 +888,7 @@ export const SheetTableRemoveColCommand: ICommand<ISheetTableRowColOperationComm
                 },
             },
         });
+        undos.push(...interceptorCommands.undos);
 
         const worksheet = target.worksheet;
         const colContentIndex = worksheet.getCellMatrix().getDataRange().endColumn;

@@ -19,7 +19,7 @@
 
 import type { IMutationInfo, Workbook } from '@univerjs/core';
 import type { IInsertColCommandParams, IInsertRowCommandParams, IInsertRowMutationParams, IRemoveRowColCommandParams } from '@univerjs/sheets';
-import type { ITableColumnJson } from '../types/type';
+import type { ITableColumnJson, ITableJson } from '../types/type';
 import { Disposable, ICommandService, Inject, Injector, IUniverInstanceService, LocaleService, Rectangle } from '@univerjs/core';
 import { getSheetCommandTarget, InsertColCommand, InsertColMutation, InsertRowCommand, InsertRowMutation, RefRangeService, RemoveColCommand, RemoveColMutation, RemoveRowCommand, RemoveRowMutation, SheetInterceptorService } from '@univerjs/sheets';
 import { AddSheetTableMutation } from '../commands/mutations/add-sheet-table.mutation';
@@ -28,6 +28,9 @@ import { SetSheetTableMutation } from '../commands/mutations/set-sheet-table.mut
 import { TableManager } from '../model/table-manager';
 import { IRangeOperationTypeEnum, IRowColTypeEnum } from '../types/type';
 import { convertCellDataToString, getColumnName } from '../util';
+
+const SHEET_TABLE_REMOVE_COL_COMMAND_ID = 'sheet.command.table-remove-col';
+const DELETE_SHEET_TABLE_COMMAND_ID = 'sheet.command.delete-table';
 
 export class SheetTableRefRangeController extends Disposable {
     constructor(
@@ -48,6 +51,7 @@ export class SheetTableRefRangeController extends Disposable {
     private _initCommandInterceptor() {
         const self = this;
         this._sheetInterceptorService.interceptCommand({
+            priority: -1,
             getMutations(commandInfo) {
                 const defaultReturn = { redos: [], undos: [] };
                 const { id, params } = commandInfo;
@@ -318,6 +322,17 @@ export class SheetTableRefRangeController extends Disposable {
             const tableRange = table.getRange();
             if (Rectangle.intersects(tableRange, range)) {
                 if (range.startColumn <= tableRange.startColumn && range.endColumn >= tableRange.endColumn) {
+                    const tableInfo = table.getTableInfo();
+                    const formulaMutations = this._sheetInterceptorService.onCommandExecute({
+                        id: DELETE_SHEET_TABLE_COMMAND_ID,
+                        params: {
+                            unitId,
+                            subUnitId,
+                            tableId: table.getId(),
+                            tableName: tableInfo.name,
+                        },
+                    });
+                    preRedos.push(...(formulaMutations.preRedos ?? []), ...formulaMutations.redos);
                     preRedos.push({
                         id: DeleteSheetTableMutation.id,
                         params: {
@@ -349,7 +364,9 @@ export class SheetTableRefRangeController extends Disposable {
                             options: tableJson.options,
                         },
                     });
+                    undos.push(...(formulaMutations.preUndos ?? []), ...formulaMutations.undos);
                 } else if (range.startColumn <= tableRange.startColumn && range.endColumn >= tableRange.startColumn) {
+                    const tableJson = table.toJSON();
                     const removeColumnCount = range.endColumn - tableRange.startColumn + 1;
                     redos.push({
                         id: SetSheetTableMutation.id,
@@ -374,24 +391,18 @@ export class SheetTableRefRangeController extends Disposable {
                             columns.push(column.toJSON());
                         }
                     }
-                    undos.push({
-                        id: SetSheetTableMutation.id,
-                        params: {
-                            unitId,
-                            subUnitId,
-                            tableId: table.getId(),
-                            config: {
-                                rowColOperation: {
-                                    operationType: IRangeOperationTypeEnum.Insert,
-                                    rowColType: IRowColTypeEnum.Col,
-                                    index: tableRange.startColumn,
-                                    count: removeColumnCount,
-                                    columnsJson: columns,
-                                },
-                            },
-                        },
+                    preUndos.push(this._getDeleteTableMutation(unitId, subUnitId, table.getId()));
+                    undos.push(this._getAddTableMutation(unitId, subUnitId, tableJson));
+                    this._appendTableColumnFormulaMutations(redos, undos, {
+                        unitId,
+                        subUnitId,
+                        tableId: table.getId(),
+                        tableName: table.getTableInfo().name,
+                        range,
+                        columns,
                     });
                 } else if (range.startColumn > tableRange.startColumn && range.endColumn > tableRange.endColumn) {
+                    const tableJson = table.toJSON();
                     const removeColumnCount = tableRange.endColumn - range.startColumn + 1;
                     redos.push({
                         id: SetSheetTableMutation.id,
@@ -418,25 +429,18 @@ export class SheetTableRefRangeController extends Disposable {
                             columns.push(column.toJSON());
                         }
                     }
-
-                    undos.push({
-                        id: SetSheetTableMutation.id,
-                        params: {
-                            unitId,
-                            subUnitId,
-                            tableId: table.getId(),
-                            config: {
-                                rowColOperation: {
-                                    operationType: IRangeOperationTypeEnum.Insert,
-                                    rowColType: IRowColTypeEnum.Col,
-                                    index: range.startColumn,
-                                    count: removeColCount,
-                                    columnsJson: columns,
-                                },
-                            },
-                        },
+                    preUndos.push(this._getDeleteTableMutation(unitId, subUnitId, table.getId()));
+                    undos.push(this._getAddTableMutation(unitId, subUnitId, tableJson));
+                    this._appendTableColumnFormulaMutations(redos, undos, {
+                        unitId,
+                        subUnitId,
+                        tableId: table.getId(),
+                        tableName: table.getTableInfo().name,
+                        range,
+                        columns,
                     });
                 } else if (range.startColumn > tableRange.startColumn && range.endColumn <= tableRange.endColumn) {
+                    const tableJson = table.toJSON();
                     redos.push({
                         id: SetSheetTableMutation.id,
                         params: {
@@ -462,28 +466,86 @@ export class SheetTableRefRangeController extends Disposable {
                             columns.push(column.toJSON());
                         }
                     }
-                    undos.push({
-                        id: SetSheetTableMutation.id,
-                        params: {
-                            unitId,
-                            subUnitId,
-                            tableId: table.getId(),
-                            config: {
-                                rowColOperation: {
-                                    operationType: IRangeOperationTypeEnum.Insert,
-                                    rowColType: IRowColTypeEnum.Col,
-                                    index: range.startColumn,
-                                    count: removeColCount,
-                                    columnsJson: columns,
-                                },
-                            },
-                        },
+                    preUndos.push(this._getDeleteTableMutation(unitId, subUnitId, table.getId()));
+                    undos.push(this._getAddTableMutation(unitId, subUnitId, tableJson));
+                    this._appendTableColumnFormulaMutations(redos, undos, {
+                        unitId,
+                        subUnitId,
+                        tableId: table.getId(),
+                        tableName: table.getTableInfo().name,
+                        range,
+                        columns,
                     });
                 }
             }
         });
 
         return { undos, redos, preRedos, preUndos };
+    }
+
+    private _getDeleteTableMutation(unitId: string, subUnitId: string, tableId: string): IMutationInfo {
+        return {
+            id: DeleteSheetTableMutation.id,
+            params: {
+                unitId,
+                subUnitId,
+                tableId,
+            },
+        };
+    }
+
+    private _getAddTableMutation(unitId: string, subUnitId: string, tableJson: ITableJson): IMutationInfo {
+        const header = tableJson.columns.map((column) => column.displayName);
+
+        return {
+            id: AddSheetTableMutation.id,
+            params: {
+                unitId,
+                subUnitId,
+                tableId: tableJson.id,
+                name: tableJson.name,
+                header,
+                range: tableJson.range,
+                options: {
+                    ...tableJson.options,
+                    columns: tableJson.columns,
+                    filters: tableJson.filters.tableColumnFilterList,
+                },
+            },
+        };
+    }
+
+    private _appendTableColumnFormulaMutations(
+        redos: IMutationInfo[],
+        undos: IMutationInfo[],
+        info: {
+            unitId: string;
+            subUnitId: string;
+            tableId: string;
+            tableName: string;
+            range: IRemoveRowColCommandParams['range'];
+            columns: ITableColumnJson[];
+        }
+    ) {
+        const removedColumnNames = info.columns.map((column) => column.displayName);
+        if (!removedColumnNames.length) {
+            return;
+        }
+
+        const formulaMutations = this._sheetInterceptorService.onCommandExecute({
+            id: SHEET_TABLE_REMOVE_COL_COMMAND_ID,
+            params: {
+                unitId: info.unitId,
+                subUnitId: info.subUnitId,
+                tableId: info.tableId,
+                tableName: info.tableName,
+                range: info.range,
+                removedColumnNames,
+            },
+        });
+
+        redos.splice(Math.max(redos.length - 1, 0), 0, ...(formulaMutations.preRedos ?? []), ...formulaMutations.redos);
+        undos.push(...(formulaMutations.preUndos ?? []), ...formulaMutations.undos);
     }
 
     private _initCommandListener() {

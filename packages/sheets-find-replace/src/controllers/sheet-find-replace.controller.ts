@@ -33,6 +33,7 @@ import {
     CommandType,
     Disposable,
     EDITOR_ACTIVATED,
+    escapeRegExp,
     fromCallback,
     groupBy,
     ICommandService,
@@ -955,10 +956,6 @@ export class SheetFindModel extends FindModel {
         const newContent = currentContent.v!.toString().replace(new RegExp(escapeRegExp(findString), replaceFlag), replaceString!);
         return { v: newContent };
     }
-}
-
-function escapeRegExp(text: string) {
-    return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
 }
 
 /**

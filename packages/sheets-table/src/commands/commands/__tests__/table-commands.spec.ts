@@ -16,7 +16,7 @@
 
 import { ICommandService, ILogService, IUndoRedoService, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
-import { AddRangeThemeMutation, RemoveRangeThemeMutation, SheetRangeThemeModel } from '@univerjs/sheets';
+import { AddRangeThemeMutation, RemoveRangeThemeMutation, SheetInterceptorService, SheetRangeThemeModel } from '@univerjs/sheets';
 import { describe, expect, it, vi } from 'vitest';
 import { TableManager } from '../../../model/table-manager';
 import { IRangeOperationTypeEnum, IRowColTypeEnum } from '../../../types/type';
@@ -99,6 +99,12 @@ describe('sheets-table commands', () => {
     it('DeleteSheetTableCommand should build undo mutations from table snapshot', () => {
         const syncExecuteCommand = vi.fn(() => true);
         const pushUndoRedo = vi.fn();
+        const onCommandExecute = vi.fn(() => ({
+            preRedos: [{ id: 'formula.redo.before', params: { phase: 'pre' } }],
+            redos: [{ id: 'formula.redo.after', params: { phase: 'post' } }],
+            preUndos: [{ id: 'formula.undo.before', params: { phase: 'pre' } }],
+            undos: [{ id: 'formula.undo.after', params: { phase: 'post' } }],
+        }));
         const tableSnapshot = {
             id: 't1',
             name: 'Table1',
@@ -113,15 +119,30 @@ describe('sheets-table commands', () => {
             [ICommandService, { syncExecuteCommand }],
             [TableManager, tableManager],
             [ILogService, { error: vi.fn() }],
+            [SheetInterceptorService, { onCommandExecute }],
         ]);
 
         const result = DeleteSheetTableCommand.handler(accessor, { unitId: 'u1', subUnitId: 's1', tableId: 't1' });
 
         expect(result).toBe(true);
-        expect(syncExecuteCommand).toHaveBeenCalledWith(DeleteSheetTableMutation.id, { unitId: 'u1', subUnitId: 's1', tableId: 't1' }, undefined);
+        expect(onCommandExecute).toHaveBeenCalledWith({
+            id: DeleteSheetTableCommand.id,
+            params: {
+                unitId: 'u1',
+                subUnitId: 's1',
+                tableId: 't1',
+                tableName: 'Table1',
+            },
+        });
+        expect((syncExecuteCommand.mock.calls as unknown as Array<[string, unknown, unknown?]>).map(([id]) => id)).toEqual([
+            'formula.redo.before',
+            DeleteSheetTableMutation.id,
+            'formula.redo.after',
+        ]);
         expect(pushUndoRedo).toHaveBeenCalledWith(expect.objectContaining({
             unitID: 'u1',
             undoMutations: [
+                expect.objectContaining({ id: 'formula.undo.before' }),
                 expect.objectContaining({
                     id: AddSheetTableMutation.id,
                     params: expect.objectContaining({
@@ -129,6 +150,12 @@ describe('sheets-table commands', () => {
                         name: 'Table1',
                     }),
                 }),
+                expect.objectContaining({ id: 'formula.undo.after' }),
+            ],
+            redoMutations: [
+                expect.objectContaining({ id: 'formula.redo.before' }),
+                expect.objectContaining({ id: DeleteSheetTableMutation.id }),
+                expect.objectContaining({ id: 'formula.redo.after' }),
             ],
         }));
     });
@@ -182,6 +209,12 @@ describe('sheets-table commands', () => {
     it('SetSheetTableCommand should execute mutation and build inverse undo config', () => {
         const executeCommand = vi.fn();
         const pushUndoRedo = vi.fn();
+        const onCommandExecute = vi.fn(() => ({
+            preRedos: [{ id: 'formula.redo.before', params: { phase: 'pre' } }],
+            redos: [{ id: 'formula.redo.after', params: { phase: 'post' } }],
+            preUndos: [{ id: 'formula.undo.before', params: { phase: 'pre' } }],
+            undos: [{ id: 'formula.undo.after', params: { phase: 'post' } }],
+        }));
         const table = {
             getDisplayName: () => 'OldName',
             getRange: () => ({ startRow: 1, endRow: 4, startColumn: 1, endColumn: 3 }),
@@ -197,6 +230,7 @@ describe('sheets-table commands', () => {
             [ICommandService, { executeCommand }],
             [IUndoRedoService, { pushUndoRedo }],
             [ILogService, { warn: vi.fn() }],
+            [SheetInterceptorService, { onCommandExecute }],
         ]);
 
         const result = SetSheetTableCommand.handler(accessor, {
@@ -216,21 +250,24 @@ describe('sheets-table commands', () => {
         });
 
         expect(result).toBe(true);
-        expect(executeCommand).toHaveBeenCalledWith(
-            SetSheetTableMutation.id,
-            expect.objectContaining({
+        expect(onCommandExecute).toHaveBeenCalledWith({
+            id: SetSheetTableCommand.id,
+            params: expect.objectContaining({
                 unitId: 'u1',
-                subUnitId: 's1',
                 tableId: 't1',
-                config: expect.objectContaining({
-                    name: 'NewName',
-                    theme: 'theme-new',
-                }),
-            })
-        );
+                name: 'NewName',
+                oldTableName: 'OldName',
+            }),
+        });
+        expect(executeCommand.mock.calls.map(([id]) => id)).toEqual([
+            'formula.redo.before',
+            SetSheetTableMutation.id,
+            'formula.redo.after',
+        ]);
 
         expect(pushUndoRedo).toHaveBeenCalledWith(expect.objectContaining({
             undoMutations: [
+                expect.objectContaining({ id: 'formula.undo.before' }),
                 expect.objectContaining({
                     id: SetSheetTableMutation.id,
                     params: expect.objectContaining({
@@ -241,6 +278,12 @@ describe('sheets-table commands', () => {
                         }),
                     }),
                 }),
+                expect.objectContaining({ id: 'formula.undo.after' }),
+            ],
+            redoMutations: [
+                expect.objectContaining({ id: 'formula.redo.before' }),
+                expect.objectContaining({ id: SetSheetTableMutation.id }),
+                expect.objectContaining({ id: 'formula.redo.after' }),
             ],
         }));
     });

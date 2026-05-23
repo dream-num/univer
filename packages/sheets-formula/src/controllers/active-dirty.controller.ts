@@ -15,7 +15,7 @@
  */
 
 import type { ICellData, ICommandInfo, IObjectMatrixPrimitiveType, IRange, IUnitRange, Nullable } from '@univerjs/core';
-import type { IDirtyUnitSheetDefinedNameMap, IDirtyUnitSheetNameMap, IFormulaDirtyData, ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
+import type { IDirtyUnitDefinedNameMap, IDirtyUnitSheetNameMap, IFormulaDirtyData, ISetDefinedNameMutationParam, ISetSuperTableMutationParam } from '@univerjs/engine-formula';
 import type {
     IInsertColMutationParams,
     IInsertRowMutationParams,
@@ -37,7 +37,7 @@ import {
     IUniverInstanceService,
     ObjectMatrix,
 } from '@univerjs/core';
-import { FormulaDataModel, IActiveDirtyManagerService, RemoveDefinedNameMutation, SetDefinedNameMutation, SetTriggerFormulaCalculationStartMutation } from '@univerjs/engine-formula';
+import { FormulaDataModel, IActiveDirtyManagerService, RemoveDefinedNameMutation, SetDefinedNameMutation, SetSuperTableMutation, SetTriggerFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import {
     InsertColMutation,
     InsertRowMutation,
@@ -98,6 +98,8 @@ export class ActiveDirtyController extends Disposable {
         this._initialSheet();
 
         this._initialDefinedName();
+
+        this._initialSuperTable();
     }
 
     private _initialMove() {
@@ -309,17 +311,42 @@ export class ActiveDirtyController extends Disposable {
         });
     }
 
-    private _getDefinedNameMutation(definedName: ISetDefinedNameMutationParam) {
-        const { unitId, name, formulaOrRefString } = definedName;
-        const result: IDirtyUnitSheetDefinedNameMap = {};
+    private _initialSuperTable() {
+        this._activeDirtyManagerService.register(SetSuperTableMutation.id, {
+            commandId: SetSuperTableMutation.id,
+            getDirtyData: (command: ICommandInfo) => {
+                const params = command.params as ISetSuperTableMutationParam;
+                const { unitId, reference } = params;
+                const { sheetId, range } = reference;
+
+                return {
+                    dirtyRanges: [{ unitId, sheetId, range }],
+                    dirtySuperTableMap: {
+                        [unitId]: {
+                            [params.tableName]: '1',
+                        },
+                    },
+                    clearDependencyTreeCache: {
+                        [unitId]: {
+                            [sheetId]: '1',
+                        },
+                    },
+                };
+            },
+        });
+    }
+
+    private _getDefinedNameMutation(definedName: ISetDefinedNameMutationParam | null | undefined): IDirtyUnitDefinedNameMap {
         if (definedName == null) {
             return {};
         }
 
-        result[unitId] = {};
-
-        result[unitId]![name] = formulaOrRefString;
-
+        const { unitId, name: definedNameName, formulaOrRefString } = definedName;
+        const result: IDirtyUnitDefinedNameMap = {
+            [unitId]: {
+                [definedNameName]: formulaOrRefString,
+            },
+        };
         return result;
     }
 

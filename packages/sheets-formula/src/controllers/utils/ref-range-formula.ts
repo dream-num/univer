@@ -38,6 +38,9 @@ export enum FormulaReferenceMoveType {
     RemoveSheet,
     SetDefinedName, // update defined name
     RemoveDefinedName, // remove defined name
+    SetSuperTableName, // update super table name
+    RemoveSuperTableName, // remove super table name
+    RemoveSuperTableColumn, // remove super table column
 }
 
 export interface IFormulaReferenceMoveParam {
@@ -59,6 +62,9 @@ export interface IFormulaReferenceMoveParam {
      * new defined name
      */
     definedName?: string;
+    oldTableName?: string;
+    tableName?: string;
+    tableColumnNames?: string[];
     /**
      * The filtered rows contained in the range, used for remove rows operation, etc.
      */
@@ -70,12 +76,14 @@ const formulaReferenceSheetList = [
     FormulaReferenceMoveType.RemoveSheet,
     FormulaReferenceMoveType.SetDefinedName,
     FormulaReferenceMoveType.RemoveDefinedName,
+    FormulaReferenceMoveType.SetSuperTableName,
+    FormulaReferenceMoveType.RemoveSuperTableName,
 ];
 
 export function getFormulaReferenceMoveUndoRedo(oldFormulaData: IFormulaData, newFormulaData: IFormulaData, formulaReferenceMoveParam: IFormulaReferenceMoveParam) {
     const { type } = formulaReferenceMoveParam;
 
-    if (formulaReferenceSheetList.includes(type)) {
+    if (formulaReferenceSheetList.includes(type) || (type === FormulaReferenceMoveType.RemoveSuperTableColumn && formulaReferenceMoveParam.range == null)) {
         return getFormulaReferenceSheet(oldFormulaData, newFormulaData);
     } else {
         return getFormulaReferenceRange(oldFormulaData, newFormulaData, formulaReferenceMoveParam);
@@ -366,6 +374,7 @@ function handleInsertDelete(oldCell: IRange, formulaReferenceMoveParam: IFormula
             newCell = handleRefRemoveRow(range, oldCell, rangeFilteredRows);
             break;
         case FormulaReferenceMoveType.RemoveColumn:
+        case FormulaReferenceMoveType.RemoveSuperTableColumn:
             newCell = handleRefRemoveCol(range, oldCell);
             break;
         case FormulaReferenceMoveType.DeleteMoveLeft:

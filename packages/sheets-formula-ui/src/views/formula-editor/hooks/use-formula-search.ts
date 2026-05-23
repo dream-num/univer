@@ -26,6 +26,26 @@ import { findIndexFromSequenceNodes } from '../../range-selector/utils/find-inde
 import { sequenceNodeToText } from '../../range-selector/utils/sequence-node-to-text';
 import { useStateRef } from './use-state-ref';
 
+function shouldAppendOpenBracket(functionType: FunctionType): boolean {
+    return functionType !== FunctionType.DefinedName && functionType !== FunctionType.Table;
+}
+
+export function getFormulaReplaceResult(nodes: INode[], index: number, formulaName: string, functionType: FunctionType) {
+    const cloneNodes = [...nodes];
+    if (index !== -1) {
+        const lastNodes = cloneNodes.splice(index + 1);
+        const oldNode = cloneNodes.pop() || '';
+        let offset = (typeof oldNode === 'string' ? oldNode.length : oldNode.token.length) - formulaName.length;
+        cloneNodes.push(formulaName);
+        if (lastNodes[0] !== matchToken.OPEN_BRACKET && shouldAppendOpenBracket(functionType)) {
+            cloneNodes.push(matchToken.OPEN_BRACKET);
+            offset--;
+        }
+        const text = sequenceNodeToText([...cloneNodes, ...lastNodes]);
+        return { text, offset };
+    }
+}
+
 export const useFormulaSearch = (isNeed: boolean, nodes: INode[] = [], editor?: Editor) => {
     const descriptionService = useDependency(IDescriptionService);
 
@@ -85,19 +105,7 @@ export const useFormulaSearch = (isNeed: boolean, nodes: INode[] = [], editor?: 
     }, [isNeed]);
 
     const handlerFormulaReplace = (formulaName: string, functionType: FunctionType) => {
-        const cloneNodes = [...stateRef.current.nodes];
-        if (indexRef.current !== -1) {
-            const lastNodes = cloneNodes.splice(indexRef.current + 1);
-            const oldNode = cloneNodes.pop() || '';
-            let offset = (typeof oldNode === 'string' ? oldNode.length : oldNode.token.length) - formulaName.length;
-            cloneNodes.push(formulaName);
-            if (lastNodes[0] !== matchToken.OPEN_BRACKET && functionType !== FunctionType.DefinedName) {
-                cloneNodes.push(matchToken.OPEN_BRACKET);
-                offset--;
-            }
-            const text = sequenceNodeToText([...cloneNodes, ...lastNodes]);
-            return { text, offset };
-        }
+        return getFormulaReplaceResult(stateRef.current.nodes, indexRef.current, formulaName, functionType);
     };
     return {
         searchList,

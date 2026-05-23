@@ -17,7 +17,7 @@
 import type { ICommand, IMutationInfo } from '@univerjs/core';
 import type { IDeleteSheetTableParams } from '../mutations/delete-sheet-table.mutation';
 import { CommandType, ICommandService, ILogService, IUndoRedoService, sequenceExecute } from '@univerjs/core';
-
+import { SheetInterceptorService } from '@univerjs/sheets';
 import { TableManager } from '../../model/table-manager';
 import { AddSheetTableMutation } from '../mutations/add-sheet-table.mutation';
 import { DeleteSheetTableMutation } from '../mutations/delete-sheet-table.mutation';
@@ -45,7 +45,19 @@ export const DeleteSheetTableCommand: ICommand<IDeleteSheetTableParams> = {
             return false;
         }
 
+        const sheetInterceptorService = accessor.get(SheetInterceptorService);
+        const interceptorCommands = sheetInterceptorService.onCommandExecute({
+            id: DeleteSheetTableCommand.id,
+            params: {
+                ...params,
+                tableName: tableConfig.name,
+            },
+        });
+
+        redos.push(...(interceptorCommands.preRedos ?? []));
         redos.push({ id: DeleteSheetTableMutation.id, params: { ...params } });
+        redos.push(...interceptorCommands.redos);
+        undos.push(...(interceptorCommands.preUndos ?? []));
         undos.push({
             id: AddSheetTableMutation.id,
             params: {
@@ -57,6 +69,7 @@ export const DeleteSheetTableCommand: ICommand<IDeleteSheetTableParams> = {
                 options: tableConfig.options,
             },
         });
+        undos.push(...interceptorCommands.undos);
 
         const res = sequenceExecute(redos, commandService);
 

@@ -15,7 +15,7 @@
  */
 
 import { ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
-import { SheetsSelectionsService } from '@univerjs/sheets';
+import { SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 
 import { describe, expect, it, vi } from 'vitest';
 import { SheetsTableController } from '../../../controllers/sheets-table.controller';
@@ -207,15 +207,22 @@ describe('sheet-table-row-col commands', () => {
 
         const syncExecuteCommand = vi.fn(() => true);
         const pushUndoRedo = vi.fn();
+        const onCommandExecute = vi.fn(() => ({
+            preRedos: [{ id: 'formula.redo.before', params: { phase: 'pre' } }],
+            redos: [{ id: 'formula.redo.after', params: { phase: 'post' } }],
+            preUndos: [{ id: 'formula.undo.before', params: { phase: 'pre' } }],
+            undos: [{ id: 'formula.undo.after', params: { phase: 'post' } }],
+        }));
         const table = {
             getId: () => 't1',
             getSubunitId: () => 's1',
             getRange: () => ({ startRow: 0, endRow: 4, startColumn: 1, endColumn: 3 }),
             getTableInfo: () => ({
+                name: 'Table',
                 columns: [
-                    { id: 'c1', displayName: 'Column 1' },
-                    { id: 'c2', displayName: 'Column 2' },
-                    { id: 'c3', displayName: 'Column 3' },
+                    { id: 'c1', displayName: '1' },
+                    { id: 'c2', displayName: '2' },
+                    { id: 'c3', displayName: '3' },
                 ],
             }),
         };
@@ -224,6 +231,7 @@ describe('sheet-table-row-col commands', () => {
             [TableManager, { getTableById: () => table }],
             [ICommandService, { syncExecuteCommand }],
             [IUndoRedoService, { pushUndoRedo }],
+            [SheetInterceptorService, { onCommandExecute }],
         ]);
 
         expect(SheetTableRemoveColumnAtCommand.handler(accessor, {
@@ -233,7 +241,32 @@ describe('sheet-table-row-col commands', () => {
             index: 2,
             count: 1,
         })).toBe(true);
-        expect(syncExecuteCommand).toHaveBeenCalled();
-        expect(pushUndoRedo).toHaveBeenCalledWith(expect.objectContaining({ unitID: 'u1' }));
+        expect(onCommandExecute).toHaveBeenCalledWith({
+            id: SheetTableRemoveColumnAtCommand.id,
+            params: expect.objectContaining({
+                unitId: 'u1',
+                subUnitId: 's1',
+                tableId: 't1',
+                tableName: 'Table',
+                removedColumnNames: ['2'],
+            }),
+        });
+        expect((syncExecuteCommand.mock.calls as unknown as Array<[string, unknown, unknown?]>).map(([id]) => id)).toEqual([
+            'formula.redo.before',
+            'sheet.mutation.set-sheet-table',
+            'formula.redo.after',
+            'move-redo',
+        ]);
+        expect(pushUndoRedo).toHaveBeenCalledWith(expect.objectContaining({
+            unitID: 'u1',
+            undoMutations: expect.arrayContaining([
+                expect.objectContaining({ id: 'formula.undo.before' }),
+                expect.objectContaining({ id: 'formula.undo.after' }),
+            ]),
+            redoMutations: expect.arrayContaining([
+                expect.objectContaining({ id: 'formula.redo.before' }),
+                expect.objectContaining({ id: 'formula.redo.after' }),
+            ]),
+        }));
     });
 });

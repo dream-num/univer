@@ -100,8 +100,12 @@ export interface IDirtyUnitSheetNameMap {
     [unitId: string]: Nullable<{ [sheetId: string]: string }>;
 }
 
-export interface IDirtyUnitSheetDefinedNameMap {
-    [unitId: string]: Nullable<{ [name: string]: string }>;
+export interface IDirtyUnitDefinedNameMap {
+    [unitId: string]: Nullable<{ [definedName: string]: string }>;
+}
+
+export interface IDirtyUnitSuperTableMap {
+    [unitId: string]: Nullable<{ [tableName: string]: string }>;
 }
 
 export interface IDirtyUnitFeatureMap {
@@ -215,7 +219,8 @@ export interface IFormulaDatasetConfig {
     forceCalculate: boolean;
     dirtyRanges: IUnitRange[];
     dirtyNameMap: IDirtyUnitSheetNameMap;
-    dirtyDefinedNameMap: IDirtyUnitSheetNameMap;
+    dirtyDefinedNameMap: IDirtyUnitDefinedNameMap;
+    dirtySuperTableMap?: IDirtyUnitSuperTableMap;
     dirtyUnitFeatureMap: IDirtyUnitFeatureMap;
     dirtyUnitOtherFormulaMap: IDirtyUnitOtherFormulaMap;
     clearDependencyTreeCache?: IUnitSheetIdToNameMap;

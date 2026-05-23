@@ -16,9 +16,9 @@
 
 import type { ICommand } from '@univerjs/core';
 import type { ITableSetConfig } from '../../types/type';
-import type { ISetSheetTableMutationParams } from '../mutations/set-sheet-table.mutation';
 import { CommandType, ICommandService, ILogService, IUndoRedoService, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
+import { SheetInterceptorService } from '@univerjs/sheets';
 import { TableManager } from '../../model/table-manager';
 import { IRangeOperationTypeEnum } from '../../types/type';
 import { getExistingNamesSet } from '../../util';
@@ -28,6 +28,7 @@ import { SetSheetTableMutation } from '../mutations/set-sheet-table.mutation';
 export interface ISetSheetTableCommandParams extends ITableSetConfig {
     unitId: string;
     tableId: string;
+    oldTableName?: string;
 }
 
 export const SetSheetTableCommand: ICommand<ISetSheetTableCommandParams> = {
@@ -94,30 +95,42 @@ export const SetSheetTableCommand: ICommand<ISetSheetTableCommandParams> = {
             tableId,
             config: newTableConfig,
         };
+        const undoParams = {
+            unitId,
+            subUnitId: table.getSubunitId(),
+            tableId,
+            config: oldTableConfig,
+        };
+
+        const sheetInterceptorService = accessor.get(SheetInterceptorService);
+        const interceptorCommands = sheetInterceptorService.onCommandExecute({
+            id: SetSheetTableCommand.id,
+            params: {
+                ...params,
+                oldTableName: oldTableConfig.name,
+            },
+        });
+        const redos = [
+            ...(interceptorCommands.preRedos ?? []),
+            { id: SetSheetTableMutation.id, params: redoParams },
+            ...interceptorCommands.redos,
+        ];
+        const undos = [
+            ...(interceptorCommands.preUndos ?? []),
+            { id: SetSheetTableMutation.id, params: undoParams },
+            ...interceptorCommands.undos,
+        ];
 
         const commandService = accessor.get(ICommandService);
-        commandService.executeCommand<ISetSheetTableMutationParams>(SetSheetTableMutation.id, redoParams);
+        redos.forEach((mutation) => {
+            commandService.executeCommand(mutation.id, mutation.params);
+        });
 
         const undoRedoService = accessor.get(IUndoRedoService);
         undoRedoService.pushUndoRedo({
             unitID: unitId,
-            undoMutations: [
-                {
-                    id: SetSheetTableMutation.id,
-                    params: {
-                        unitId,
-                        subUnitId: table.getSubunitId(),
-                        tableId,
-                        config: oldTableConfig,
-                    },
-                },
-            ],
-            redoMutations: [
-                {
-                    id: SetSheetTableMutation.id,
-                    params: redoParams,
-                },
-            ],
+            undoMutations: undos,
+            redoMutations: redos,
         });
 
         return true;

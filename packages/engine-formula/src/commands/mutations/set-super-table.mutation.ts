@@ -27,6 +27,7 @@ export interface ISetSuperTableMutationSearchParam {
 }
 
 export interface ISetSuperTableMutationParam extends ISetSuperTableMutationSearchParam {
+    oldTableName?: string;
     reference: ISuperTable;
 }
 /**

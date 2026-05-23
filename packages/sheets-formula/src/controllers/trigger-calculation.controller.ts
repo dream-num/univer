@@ -16,9 +16,11 @@
 
 import type { ICommandInfo, IUnitRange, Nullable, Workbook } from '@univerjs/core';
 import type {
+    IDirtyUnitDefinedNameMap,
     IDirtyUnitFeatureMap,
     IDirtyUnitOtherFormulaMap,
     IDirtyUnitSheetNameMap,
+    IDirtyUnitSuperTableMap,
     IExecutionInProgressParams,
     IFormulaDirtyData,
     ISetFormulaCalculationNotificationMutation,
@@ -66,6 +68,8 @@ const NilProgress: ICalculationProgress = { done: 0, count: 0 };
 
 const lo = { onlyLocal: true };
 
+type IDirtyUnitStringMap = Record<string, Nullable<Record<string, string>>>;
+
 export class TriggerCalculationController extends Disposable {
     private _waitingCommandQueue: ICommandInfo[] = [];
 
@@ -74,6 +78,7 @@ export class TriggerCalculationController extends Disposable {
         dirtyRanges: [],
         dirtyNameMap: {},
         dirtyDefinedNameMap: {},
+        dirtySuperTableMap: {},
         dirtyUnitFeatureMap: {},
         dirtyUnitOtherFormulaMap: {},
         clearDependencyTreeCache: {},
@@ -232,7 +237,8 @@ export class TriggerCalculationController extends Disposable {
     private _generateDirty(commands: ICommandInfo[]) {
         const allDirtyRanges: IUnitRange[] = [];
         const allDirtyNameMap: IDirtyUnitSheetNameMap = {};
-        const allDirtyDefinedNameMap: IDirtyUnitSheetNameMap = {};
+        const allDirtyDefinedNameMap: IDirtyUnitDefinedNameMap = {};
+        const allDirtySuperTableMap: IDirtyUnitSuperTableMap = {};
         const allDirtyUnitFeatureMap: IDirtyUnitFeatureMap = {};
         const allDirtyUnitOtherFormulaMap: IDirtyUnitOtherFormulaMap = {};
         const allClearDependencyTreeCache: IDirtyUnitSheetNameMap = {};
@@ -249,18 +255,22 @@ export class TriggerCalculationController extends Disposable {
 
             const params = conversion.getDirtyData(command);
 
-            const { dirtyRanges, dirtyNameMap, dirtyDefinedNameMap, dirtyUnitFeatureMap, dirtyUnitOtherFormulaMap, clearDependencyTreeCache, forceCalculation = false } = params;
+            const { dirtyRanges, dirtyNameMap, dirtyDefinedNameMap, dirtySuperTableMap, dirtyUnitFeatureMap, dirtyUnitOtherFormulaMap, clearDependencyTreeCache, forceCalculation = false } = params;
 
             if (dirtyRanges != null) {
                 this._mergeDirtyRanges(allDirtyRanges, dirtyRanges);
             }
 
             if (dirtyNameMap != null) {
-                this._mergeDirtyNameMap(allDirtyNameMap, dirtyNameMap);
+                this._mergeDirtyUnitStringMap(allDirtyNameMap, dirtyNameMap);
             }
 
             if (dirtyDefinedNameMap != null) {
-                this._mergeDirtyNameMap(allDirtyDefinedNameMap, dirtyDefinedNameMap);
+                this._mergeDirtyUnitStringMap(allDirtyDefinedNameMap, dirtyDefinedNameMap);
+            }
+
+            if (dirtySuperTableMap != null) {
+                this._mergeDirtyUnitStringMap(allDirtySuperTableMap, dirtySuperTableMap);
             }
 
             if (dirtyUnitFeatureMap != null) {
@@ -272,7 +282,7 @@ export class TriggerCalculationController extends Disposable {
             }
 
             if (clearDependencyTreeCache != null) {
-                this._mergeDirtyNameMap(allClearDependencyTreeCache, clearDependencyTreeCache);
+                this._mergeDirtyUnitStringMap(allClearDependencyTreeCache, clearDependencyTreeCache);
             }
 
             allForceCalculation = allForceCalculation || forceCalculation;
@@ -282,6 +292,7 @@ export class TriggerCalculationController extends Disposable {
             dirtyRanges: allDirtyRanges,
             dirtyNameMap: allDirtyNameMap,
             dirtyDefinedNameMap: allDirtyDefinedNameMap,
+            dirtySuperTableMap: allDirtySuperTableMap,
             dirtyUnitFeatureMap: allDirtyUnitFeatureMap,
             dirtyUnitOtherFormulaMap: allDirtyUnitOtherFormulaMap,
             forceCalculation: allForceCalculation,
@@ -293,16 +304,18 @@ export class TriggerCalculationController extends Disposable {
     private _mergeDirty(dirtyData1: IFormulaDirtyData, dirtyData2: IFormulaDirtyData) {
         const allDirtyRanges: IUnitRange[] = [...dirtyData1.dirtyRanges, ...dirtyData2.dirtyRanges];
         const allDirtyNameMap: IDirtyUnitSheetNameMap = { ...dirtyData1.dirtyNameMap };
-        const allDirtyDefinedNameMap: IDirtyUnitSheetNameMap = { ...dirtyData1.dirtyDefinedNameMap };
+        const allDirtyDefinedNameMap: IDirtyUnitDefinedNameMap = { ...dirtyData1.dirtyDefinedNameMap };
+        const allDirtySuperTableMap: IDirtyUnitSuperTableMap = { ...dirtyData1.dirtySuperTableMap };
         const allDirtyUnitFeatureMap: IDirtyUnitFeatureMap = { ...dirtyData1.dirtyUnitFeatureMap };
         const allDirtyUnitOtherFormulaMap: IDirtyUnitOtherFormulaMap = { ...dirtyData1.dirtyUnitOtherFormulaMap };
         const allClearDependencyTreeCache: IDirtyUnitSheetNameMap = { ...dirtyData1.clearDependencyTreeCache };
 
-        this._mergeDirtyNameMap(allDirtyNameMap, dirtyData2.dirtyNameMap);
-        this._mergeDirtyNameMap(allDirtyDefinedNameMap, dirtyData2.dirtyDefinedNameMap);
+        this._mergeDirtyUnitStringMap(allDirtyNameMap, dirtyData2.dirtyNameMap);
+        this._mergeDirtyUnitStringMap(allDirtyDefinedNameMap, dirtyData2.dirtyDefinedNameMap);
+        this._mergeDirtyUnitStringMap(allDirtySuperTableMap, dirtyData2.dirtySuperTableMap || {});
         this._mergeDirtyUnitFeatureOrOtherFormulaMap(allDirtyUnitFeatureMap, dirtyData2.dirtyUnitFeatureMap);
         this._mergeDirtyUnitFeatureOrOtherFormulaMap(allDirtyUnitOtherFormulaMap, dirtyData2.dirtyUnitOtherFormulaMap);
-        this._mergeDirtyNameMap(allClearDependencyTreeCache, dirtyData2.clearDependencyTreeCache);
+        this._mergeDirtyUnitStringMap(allClearDependencyTreeCache, dirtyData2.clearDependencyTreeCache);
 
         const allForceCalculating = dirtyData1.forceCalculation || dirtyData2.forceCalculation;
 
@@ -310,6 +323,7 @@ export class TriggerCalculationController extends Disposable {
             dirtyRanges: allDirtyRanges,
             dirtyNameMap: allDirtyNameMap,
             dirtyDefinedNameMap: allDirtyDefinedNameMap,
+            dirtySuperTableMap: allDirtySuperTableMap,
             dirtyUnitFeatureMap: allDirtyUnitFeatureMap,
             dirtyUnitOtherFormulaMap: allDirtyUnitOtherFormulaMap,
             forceCalculation: allForceCalculating,
@@ -348,15 +362,15 @@ export class TriggerCalculationController extends Disposable {
         }
     }
 
-    private _mergeDirtyNameMap(allDirtyNameMap: IDirtyUnitSheetNameMap, dirtyNameMap: IDirtyUnitSheetNameMap) {
-        Object.keys(dirtyNameMap).forEach((unitId) => {
-            if (allDirtyNameMap[unitId] == null) {
-                allDirtyNameMap[unitId] = {};
+    private _mergeDirtyUnitStringMap(allDirtyMap: IDirtyUnitStringMap, dirtyMap: IDirtyUnitStringMap) {
+        Object.keys(dirtyMap).forEach((unitId) => {
+            if (allDirtyMap[unitId] == null) {
+                allDirtyMap[unitId] = {};
             }
 
-            Object.keys(dirtyNameMap[unitId]!).forEach((sheetId) => {
-                if (dirtyNameMap[unitId]?.[sheetId]) {
-                    allDirtyNameMap[unitId]![sheetId] = dirtyNameMap[unitId]![sheetId];
+            Object.keys(dirtyMap[unitId]!).forEach((dirtyKey) => {
+                if (dirtyMap[unitId]?.[dirtyKey]) {
+                    allDirtyMap[unitId]![dirtyKey] = dirtyMap[unitId]![dirtyKey];
                 }
             });
         });
@@ -522,6 +536,7 @@ export class TriggerCalculationController extends Disposable {
             dirtyRanges: [],
             dirtyNameMap: {},
             dirtyDefinedNameMap: {},
+            dirtySuperTableMap: {},
             dirtyUnitFeatureMap: {},
             dirtyUnitOtherFormulaMap: {},
             forceCalculation: false,
@@ -544,7 +559,8 @@ export class TriggerCalculationController extends Disposable {
         const dirtyRanges: IUnitRange[] = calculationMode === CalculationMode.WHEN_EMPTY ? this._formulaDataModel.getFormulaDirtyRanges() : [];
 
         const dirtyNameMap: IDirtyUnitSheetNameMap = {};
-        const dirtyDefinedNameMap: IDirtyUnitSheetNameMap = {};
+        const dirtyDefinedNameMap: IDirtyUnitDefinedNameMap = {};
+        const dirtySuperTableMap: IDirtyUnitSuperTableMap = {};
         const dirtyUnitFeatureMap: IDirtyUnitFeatureMap = {};
         const dirtyUnitOtherFormulaMap: IDirtyUnitOtherFormulaMap = {};
         const clearDependencyTreeCache: IDirtyUnitSheetNameMap = {};
@@ -554,6 +570,7 @@ export class TriggerCalculationController extends Disposable {
             dirtyRanges,
             dirtyNameMap,
             dirtyDefinedNameMap,
+            dirtySuperTableMap,
             dirtyUnitFeatureMap,
             dirtyUnitOtherFormulaMap,
             clearDependencyTreeCache,

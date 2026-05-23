@@ -15,11 +15,18 @@
  */
 
 import type { Dependency, ICellData, IWorkbookData, Nullable, Workbook } from '@univerjs/core';
-import { CellValueType, ICommandService, IConfigService, IUniverInstanceService, LocaleType, UniverInstanceType } from '@univerjs/core';
-import { FormulaDataModel, SetArrayFormulaDataMutation, SetFormulaDataMutation, SetTriggerFormulaCalculationStartMutation } from '@univerjs/engine-formula';
-import { InsertSheetMutation, MoveRangeCommand, MoveRangeMutation, RemoveSheetCommand, RemoveSheetMutation, SetRangeValuesCommand, SetRangeValuesMutation, SetSelectionsOperation, SetStyleCommand, SetWorksheetNameCommand, SheetInterceptorService } from '@univerjs/sheets';
+import { CellValueType, ICommandService, IConfigService, IUniverInstanceService, LocaleType, RedoCommand, UndoCommand, UniverInstanceType } from '@univerjs/core';
+import {
+    FormulaDataModel,
+    IDefinedNamesService,
+    RemoveDefinedNameMutation,
+    SetArrayFormulaDataMutation,
+    SetDefinedNameMutation,
+    SetFormulaDataMutation,
+    SetTriggerFormulaCalculationStartMutation,
+} from '@univerjs/engine-formula';
+import { InsertSheetMutation, MoveRangeCommand, MoveRangeMutation, RemoveDefinedNameCommand, RemoveSheetCommand, RemoveSheetMutation, SetDefinedNameCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetSelectionsOperation, SetStyleCommand, SetWorksheetNameCommand, SheetInterceptorService } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-
 import { CalculationMode, PLUGIN_CONFIG_KEY_BASE } from '../../config/config';
 import { createFacadeTestBed } from '../../facade/__tests__/create-test-bed';
 import { UpdateFormulaController } from '../update-formula.controller';
@@ -50,6 +57,10 @@ function createWorkbookData(): IWorkbookData {
                         2: { f: '=SUM(A1:B2)' },
                         3: { v: 1, t: CellValueType.NUMBER },
                     },
+                    6: {
+                        0: { f: '=SUM(RANGE_NAME)' },
+                        1: { f: '=RANGE_NAME' },
+                    },
                 },
             },
             sheet2: {
@@ -62,6 +73,10 @@ function createWorkbookData(): IWorkbookData {
                         0: { f: '=Sheet1!A1:B2' },
                         1: { f: '=RANGE_NAME' },
                     },
+                    1: {
+                        0: { f: '=RANGE_NAME' },
+                        1: { f: '=RANGE_NAME+SUM(RANGE_NAME)' },
+                    },
                 },
             },
         },
@@ -70,7 +85,9 @@ function createWorkbookData(): IWorkbookData {
 }
 
 function createControllerTestBed() {
-    const dependencies: Dependency[] = [[UpdateFormulaController]];
+    const dependencies: Dependency[] = [
+        [UpdateFormulaController],
+    ];
 
     return createFacadeTestBed(createWorkbookData(), dependencies);
 }
@@ -79,11 +96,13 @@ describe('UpdateFormulaController', () => {
     let testBed: ReturnType<typeof createControllerTestBed>;
     let commandService: ICommandService;
     let formulaDataModel: FormulaDataModel;
+    let definedNamesService: IDefinedNamesService;
 
     beforeEach(() => {
         testBed = createControllerTestBed();
         commandService = testBed.injector.get(ICommandService);
         formulaDataModel = testBed.injector.get(FormulaDataModel);
+        definedNamesService = testBed.injector.get(IDefinedNamesService);
 
         commandService.registerCommand(MoveRangeCommand);
         commandService.registerCommand(MoveRangeMutation);
@@ -92,8 +111,20 @@ describe('UpdateFormulaController', () => {
         commandService.registerCommand(SetSelectionsOperation);
         commandService.registerCommand(SetRangeValuesCommand);
         commandService.registerCommand(SetRangeValuesMutation);
+        commandService.registerCommand(SetDefinedNameCommand);
+        commandService.registerCommand(RemoveDefinedNameCommand);
+        commandService.registerCommand(SetDefinedNameMutation);
+        commandService.registerCommand(RemoveDefinedNameMutation);
         commandService.registerCommand(SetFormulaDataMutation);
         commandService.registerCommand(SetArrayFormulaDataMutation);
+
+        definedNamesService.registerDefinedName('test', {
+            id: 'range-name',
+            name: 'RANGE_NAME',
+            formulaOrRefString: 'Sheet1!$A$1:$B$2',
+            localSheetId: 'AllDefaultWorkbook',
+            comment: '',
+        });
 
         testBed.injector.get(UpdateFormulaController);
     });
@@ -222,6 +253,424 @@ describe('UpdateFormulaController', () => {
                 }),
             }),
         ]));
+    });
+
+    it('should sync defined-name formulas when a defined name is renamed, undone, and redone', async () => {
+        const getFormula = () => formulaDataModel.getFormulaData().test?.sheet2?.[0]?.[1]?.f;
+        const getCellFormula = () => testBed.injector
+            .get(IUniverInstanceService)
+            .getUnit<Workbook>('test')
+            ?.getSheetBySheetId('sheet2')
+            ?.getRange(0, 1, 0, 1)
+            .getValue()
+            ?.f;
+
+        expect(await commandService.executeCommand(SetDefinedNameCommand.id, {
+            unitId: 'test',
+            id: 'range-name',
+            name: 'RENAMED_RANGE',
+            formulaOrRefString: 'Sheet1!$A$1:$B$2',
+            localSheetId: 'AllDefaultWorkbook',
+        })).toBe(true);
+
+        expect(getFormula()).toBe('=RENAMED_RANGE');
+        expect(getCellFormula()).toBe('=RENAMED_RANGE');
+
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(getFormula()).toBe('=RANGE_NAME');
+        expect(getCellFormula()).toBe('=RANGE_NAME');
+
+        expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+        expect(getFormula()).toBe('=RENAMED_RANGE');
+        expect(getCellFormula()).toBe('=RENAMED_RANGE');
+    });
+
+    it('should sync defined-name formulas when a defined name is removed, undone, and redone', async () => {
+        const getFormula = () => formulaDataModel.getFormulaData().test?.sheet2?.[0]?.[1]?.f;
+        const getCellFormula = () => testBed.injector
+            .get(IUniverInstanceService)
+            .getUnit<Workbook>('test')
+            ?.getSheetBySheetId('sheet2')
+            ?.getRange(0, 1, 0, 1)
+            .getValue()
+            ?.f;
+
+        expect(await commandService.executeCommand(RemoveDefinedNameCommand.id, {
+            unitId: 'test',
+            id: 'range-name',
+            name: 'RANGE_NAME',
+            formulaOrRefString: 'Sheet1!$A$1:$B$2',
+            localSheetId: 'AllDefaultWorkbook',
+        })).toBe(true);
+
+        expect(getFormula()).toBe('=#REF!');
+        expect(getCellFormula()).toBe('=#REF!');
+
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(getFormula()).toBe('=RANGE_NAME');
+        expect(getCellFormula()).toBe('=RANGE_NAME');
+
+        expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+        expect(getFormula()).toBe('=#REF!');
+        expect(getCellFormula()).toBe('=#REF!');
+    });
+
+    it('should keep defined-name formulas synchronized when the defined name range changes, then undo and redo', async () => {
+        const getFormula = () => formulaDataModel.getFormulaData().test?.sheet2?.[0]?.[1]?.f;
+        const getCellFormula = () => testBed.injector
+            .get(IUniverInstanceService)
+            .getUnit<Workbook>('test')
+            ?.getSheetBySheetId('sheet2')
+            ?.getRange(0, 1, 0, 1)
+            .getValue()
+            ?.f;
+        const getDefinedNameRef = () => definedNamesService.getValueById('test', 'range-name')?.formulaOrRefString;
+
+        expect(await commandService.executeCommand(SetDefinedNameCommand.id, {
+            unitId: 'test',
+            id: 'range-name',
+            name: 'RANGE_NAME',
+            formulaOrRefString: '=SUM(Sheet1!$C$1:$C$2)',
+            localSheetId: 'AllDefaultWorkbook',
+        })).toBe(true);
+
+        expect(getDefinedNameRef()).toBe('=SUM(Sheet1!$C$1:$C$2)');
+        expect(getFormula()).toBe('=RANGE_NAME');
+        expect(getCellFormula()).toBe('=RANGE_NAME');
+
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(getDefinedNameRef()).toBe('Sheet1!$A$1:$B$2');
+        expect(getFormula()).toBe('=RANGE_NAME');
+        expect(getCellFormula()).toBe('=RANGE_NAME');
+
+        expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+        expect(getDefinedNameRef()).toBe('=SUM(Sheet1!$C$1:$C$2)');
+        expect(getFormula()).toBe('=RANGE_NAME');
+        expect(getCellFormula()).toBe('=RANGE_NAME');
+    });
+
+    it('should sync defined-name formulas wrapped by functions when renamed, undone, and redone', async () => {
+        const getFormula = () => formulaDataModel.getFormulaData().test?.sheet1?.[6]?.[0]?.f;
+        const getCellFormula = () => testBed.injector
+            .get(IUniverInstanceService)
+            .getUnit<Workbook>('test')
+            ?.getSheetBySheetId('sheet1')
+            ?.getRange(6, 0, 6, 0)
+            .getValue()
+            ?.f;
+
+        expect(await commandService.executeCommand(SetDefinedNameCommand.id, {
+            unitId: 'test',
+            id: 'range-name',
+            name: 'RENAMED_RANGE',
+            formulaOrRefString: 'Sheet1!$A$1:$B$2',
+            localSheetId: 'AllDefaultWorkbook',
+        })).toBe(true);
+
+        expect(getFormula()).toBe('=SUM(RENAMED_RANGE)');
+        expect(getCellFormula()).toBe('=SUM(RENAMED_RANGE)');
+
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(getFormula()).toBe('=SUM(RANGE_NAME)');
+        expect(getCellFormula()).toBe('=SUM(RANGE_NAME)');
+
+        expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+        expect(getFormula()).toBe('=SUM(RENAMED_RANGE)');
+        expect(getCellFormula()).toBe('=SUM(RENAMED_RANGE)');
+    });
+
+    it('should sync defined-name formulas wrapped by functions when removed, undone, and redone', async () => {
+        const getFormula = () => formulaDataModel.getFormulaData().test?.sheet1?.[6]?.[0]?.f;
+        const getCellFormula = () => testBed.injector
+            .get(IUniverInstanceService)
+            .getUnit<Workbook>('test')
+            ?.getSheetBySheetId('sheet1')
+            ?.getRange(6, 0, 6, 0)
+            .getValue()
+            ?.f;
+
+        expect(await commandService.executeCommand(RemoveDefinedNameCommand.id, {
+            unitId: 'test',
+            id: 'range-name',
+            name: 'RANGE_NAME',
+            formulaOrRefString: 'Sheet1!$A$1:$B$2',
+            localSheetId: 'AllDefaultWorkbook',
+        })).toBe(true);
+
+        expect(getFormula()).toBe('=SUM(#REF!)');
+        expect(getCellFormula()).toBe('=SUM(#REF!)');
+
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(getFormula()).toBe('=SUM(RANGE_NAME)');
+        expect(getCellFormula()).toBe('=SUM(RANGE_NAME)');
+
+        expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+        expect(getFormula()).toBe('=SUM(#REF!)');
+        expect(getCellFormula()).toBe('=SUM(#REF!)');
+    });
+
+    it('should keep function-wrapped defined-name formulas synchronized when the defined name range changes, then undo and redo', async () => {
+        const getFormula = () => formulaDataModel.getFormulaData().test?.sheet1?.[6]?.[0]?.f;
+        const getCellFormula = () => testBed.injector
+            .get(IUniverInstanceService)
+            .getUnit<Workbook>('test')
+            ?.getSheetBySheetId('sheet1')
+            ?.getRange(6, 0, 6, 0)
+            .getValue()
+            ?.f;
+        const getDefinedNameRef = () => definedNamesService.getValueById('test', 'range-name')?.formulaOrRefString;
+
+        expect(await commandService.executeCommand(SetDefinedNameCommand.id, {
+            unitId: 'test',
+            id: 'range-name',
+            name: 'RANGE_NAME',
+            formulaOrRefString: '=SUM(Sheet1!$C$1:$C$2)',
+            localSheetId: 'AllDefaultWorkbook',
+        })).toBe(true);
+
+        expect(getDefinedNameRef()).toBe('=SUM(Sheet1!$C$1:$C$2)');
+        expect(getFormula()).toBe('=SUM(RANGE_NAME)');
+        expect(getCellFormula()).toBe('=SUM(RANGE_NAME)');
+
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(getDefinedNameRef()).toBe('Sheet1!$A$1:$B$2');
+        expect(getFormula()).toBe('=SUM(RANGE_NAME)');
+        expect(getCellFormula()).toBe('=SUM(RANGE_NAME)');
+
+        expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+        expect(getDefinedNameRef()).toBe('=SUM(Sheet1!$C$1:$C$2)');
+        expect(getFormula()).toBe('=SUM(RANGE_NAME)');
+        expect(getCellFormula()).toBe('=SUM(RANGE_NAME)');
+    });
+
+    it('should sync multiple defined-name formulas across sheets when renamed, undone, and redone', async () => {
+        const getSheet1Formula = () => formulaDataModel.getFormulaData().test?.sheet1?.[6]?.[1]?.f;
+        const getSheet2Formula = () => formulaDataModel.getFormulaData().test?.sheet2?.[1]?.[0]?.f;
+        const getSheet1CellFormula = () => testBed.injector
+            .get(IUniverInstanceService)
+            .getUnit<Workbook>('test')
+            ?.getSheetBySheetId('sheet1')
+            ?.getRange(6, 1, 6, 1)
+            .getValue()
+            ?.f;
+        const getSheet2CellFormula = () => testBed.injector
+            .get(IUniverInstanceService)
+            .getUnit<Workbook>('test')
+            ?.getSheetBySheetId('sheet2')
+            ?.getRange(1, 0, 1, 0)
+            .getValue()
+            ?.f;
+
+        expect(await commandService.executeCommand(SetDefinedNameCommand.id, {
+            unitId: 'test',
+            id: 'range-name',
+            name: 'RENAMED_RANGE',
+            formulaOrRefString: 'Sheet1!$A$1:$B$2',
+            localSheetId: 'AllDefaultWorkbook',
+        })).toBe(true);
+
+        expect(getSheet1Formula()).toBe('=RENAMED_RANGE');
+        expect(getSheet2Formula()).toBe('=RENAMED_RANGE');
+        expect(getSheet1CellFormula()).toBe('=RENAMED_RANGE');
+        expect(getSheet2CellFormula()).toBe('=RENAMED_RANGE');
+
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(getSheet1Formula()).toBe('=RANGE_NAME');
+        expect(getSheet2Formula()).toBe('=RANGE_NAME');
+        expect(getSheet1CellFormula()).toBe('=RANGE_NAME');
+        expect(getSheet2CellFormula()).toBe('=RANGE_NAME');
+
+        expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+        expect(getSheet1Formula()).toBe('=RENAMED_RANGE');
+        expect(getSheet2Formula()).toBe('=RENAMED_RANGE');
+        expect(getSheet1CellFormula()).toBe('=RENAMED_RANGE');
+        expect(getSheet2CellFormula()).toBe('=RENAMED_RANGE');
+    });
+
+    it('should sync multiple defined-name formulas across sheets when removed, undone, and redone', async () => {
+        const getSheet1Formula = () => formulaDataModel.getFormulaData().test?.sheet1?.[6]?.[1]?.f;
+        const getSheet2Formula = () => formulaDataModel.getFormulaData().test?.sheet2?.[1]?.[0]?.f;
+        const getSheet1CellFormula = () => testBed.injector
+            .get(IUniverInstanceService)
+            .getUnit<Workbook>('test')
+            ?.getSheetBySheetId('sheet1')
+            ?.getRange(6, 1, 6, 1)
+            .getValue()
+            ?.f;
+        const getSheet2CellFormula = () => testBed.injector
+            .get(IUniverInstanceService)
+            .getUnit<Workbook>('test')
+            ?.getSheetBySheetId('sheet2')
+            ?.getRange(1, 0, 1, 0)
+            .getValue()
+            ?.f;
+
+        expect(await commandService.executeCommand(RemoveDefinedNameCommand.id, {
+            unitId: 'test',
+            id: 'range-name',
+            name: 'RANGE_NAME',
+            formulaOrRefString: 'Sheet1!$A$1:$B$2',
+            localSheetId: 'AllDefaultWorkbook',
+        })).toBe(true);
+
+        expect(getSheet1Formula()).toBe('=#REF!');
+        expect(getSheet2Formula()).toBe('=#REF!');
+        expect(getSheet1CellFormula()).toBe('=#REF!');
+        expect(getSheet2CellFormula()).toBe('=#REF!');
+
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(getSheet1Formula()).toBe('=RANGE_NAME');
+        expect(getSheet2Formula()).toBe('=RANGE_NAME');
+        expect(getSheet1CellFormula()).toBe('=RANGE_NAME');
+        expect(getSheet2CellFormula()).toBe('=RANGE_NAME');
+
+        expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+        expect(getSheet1Formula()).toBe('=#REF!');
+        expect(getSheet2Formula()).toBe('=#REF!');
+        expect(getSheet1CellFormula()).toBe('=#REF!');
+        expect(getSheet2CellFormula()).toBe('=#REF!');
+    });
+
+    it('should keep multiple defined-name formulas across sheets synchronized when the defined name range changes, then undo and redo', async () => {
+        const getSheet1Formula = () => formulaDataModel.getFormulaData().test?.sheet1?.[6]?.[1]?.f;
+        const getSheet2Formula = () => formulaDataModel.getFormulaData().test?.sheet2?.[1]?.[0]?.f;
+        const getSheet1CellFormula = () => testBed.injector
+            .get(IUniverInstanceService)
+            .getUnit<Workbook>('test')
+            ?.getSheetBySheetId('sheet1')
+            ?.getRange(6, 1, 6, 1)
+            .getValue()
+            ?.f;
+        const getSheet2CellFormula = () => testBed.injector
+            .get(IUniverInstanceService)
+            .getUnit<Workbook>('test')
+            ?.getSheetBySheetId('sheet2')
+            ?.getRange(1, 0, 1, 0)
+            .getValue()
+            ?.f;
+        const getDefinedNameRef = () => definedNamesService.getValueById('test', 'range-name')?.formulaOrRefString;
+
+        expect(await commandService.executeCommand(SetDefinedNameCommand.id, {
+            unitId: 'test',
+            id: 'range-name',
+            name: 'RANGE_NAME',
+            formulaOrRefString: '=SUM(Sheet1!$C$1:$C$2)',
+            localSheetId: 'AllDefaultWorkbook',
+        })).toBe(true);
+
+        expect(getDefinedNameRef()).toBe('=SUM(Sheet1!$C$1:$C$2)');
+        expect(getSheet1Formula()).toBe('=RANGE_NAME');
+        expect(getSheet2Formula()).toBe('=RANGE_NAME');
+        expect(getSheet1CellFormula()).toBe('=RANGE_NAME');
+        expect(getSheet2CellFormula()).toBe('=RANGE_NAME');
+
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(getDefinedNameRef()).toBe('Sheet1!$A$1:$B$2');
+        expect(getSheet1Formula()).toBe('=RANGE_NAME');
+        expect(getSheet2Formula()).toBe('=RANGE_NAME');
+        expect(getSheet1CellFormula()).toBe('=RANGE_NAME');
+        expect(getSheet2CellFormula()).toBe('=RANGE_NAME');
+
+        expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+        expect(getDefinedNameRef()).toBe('=SUM(Sheet1!$C$1:$C$2)');
+        expect(getSheet1Formula()).toBe('=RANGE_NAME');
+        expect(getSheet2Formula()).toBe('=RANGE_NAME');
+        expect(getSheet1CellFormula()).toBe('=RANGE_NAME');
+        expect(getSheet2CellFormula()).toBe('=RANGE_NAME');
+    });
+
+    it('should sync every occurrence of a defined name in one formula when renamed, undone, and redone', async () => {
+        const getFormula = () => formulaDataModel.getFormulaData().test?.sheet2?.[1]?.[1]?.f;
+        const getCellFormula = () => testBed.injector
+            .get(IUniverInstanceService)
+            .getUnit<Workbook>('test')
+            ?.getSheetBySheetId('sheet2')
+            ?.getRange(1, 1, 1, 1)
+            .getValue()
+            ?.f;
+
+        expect(await commandService.executeCommand(SetDefinedNameCommand.id, {
+            unitId: 'test',
+            id: 'range-name',
+            name: 'RENAMED_RANGE',
+            formulaOrRefString: 'Sheet1!$A$1:$B$2',
+            localSheetId: 'AllDefaultWorkbook',
+        })).toBe(true);
+
+        expect(getFormula()).toBe('=RENAMED_RANGE+SUM(RENAMED_RANGE)');
+        expect(getCellFormula()).toBe('=RENAMED_RANGE+SUM(RENAMED_RANGE)');
+
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(getFormula()).toBe('=RANGE_NAME+SUM(RANGE_NAME)');
+        expect(getCellFormula()).toBe('=RANGE_NAME+SUM(RANGE_NAME)');
+
+        expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+        expect(getFormula()).toBe('=RENAMED_RANGE+SUM(RENAMED_RANGE)');
+        expect(getCellFormula()).toBe('=RENAMED_RANGE+SUM(RENAMED_RANGE)');
+    });
+
+    it('should sync every occurrence of a defined name in one formula when removed, undone, and redone', async () => {
+        const getFormula = () => formulaDataModel.getFormulaData().test?.sheet2?.[1]?.[1]?.f;
+        const getCellFormula = () => testBed.injector
+            .get(IUniverInstanceService)
+            .getUnit<Workbook>('test')
+            ?.getSheetBySheetId('sheet2')
+            ?.getRange(1, 1, 1, 1)
+            .getValue()
+            ?.f;
+
+        expect(await commandService.executeCommand(RemoveDefinedNameCommand.id, {
+            unitId: 'test',
+            id: 'range-name',
+            name: 'RANGE_NAME',
+            formulaOrRefString: 'Sheet1!$A$1:$B$2',
+            localSheetId: 'AllDefaultWorkbook',
+        })).toBe(true);
+
+        expect(getFormula()).toBe('=#REF!+SUM(#REF!)');
+        expect(getCellFormula()).toBe('=#REF!+SUM(#REF!)');
+
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(getFormula()).toBe('=RANGE_NAME+SUM(RANGE_NAME)');
+        expect(getCellFormula()).toBe('=RANGE_NAME+SUM(RANGE_NAME)');
+
+        expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+        expect(getFormula()).toBe('=#REF!+SUM(#REF!)');
+        expect(getCellFormula()).toBe('=#REF!+SUM(#REF!)');
+    });
+
+    it('should keep every occurrence of a defined name in one formula synchronized when the defined name range changes, then undo and redo', async () => {
+        const getFormula = () => formulaDataModel.getFormulaData().test?.sheet2?.[1]?.[1]?.f;
+        const getCellFormula = () => testBed.injector
+            .get(IUniverInstanceService)
+            .getUnit<Workbook>('test')
+            ?.getSheetBySheetId('sheet2')
+            ?.getRange(1, 1, 1, 1)
+            .getValue()
+            ?.f;
+        const getDefinedNameRef = () => definedNamesService.getValueById('test', 'range-name')?.formulaOrRefString;
+
+        expect(await commandService.executeCommand(SetDefinedNameCommand.id, {
+            unitId: 'test',
+            id: 'range-name',
+            name: 'RANGE_NAME',
+            formulaOrRefString: '=SUM(Sheet1!$C$1:$C$2)',
+            localSheetId: 'AllDefaultWorkbook',
+        })).toBe(true);
+
+        expect(getDefinedNameRef()).toBe('=SUM(Sheet1!$C$1:$C$2)');
+        expect(getFormula()).toBe('=RANGE_NAME+SUM(RANGE_NAME)');
+        expect(getCellFormula()).toBe('=RANGE_NAME+SUM(RANGE_NAME)');
+
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(getDefinedNameRef()).toBe('Sheet1!$A$1:$B$2');
+        expect(getFormula()).toBe('=RANGE_NAME+SUM(RANGE_NAME)');
+        expect(getCellFormula()).toBe('=RANGE_NAME+SUM(RANGE_NAME)');
+
+        expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+        expect(getDefinedNameRef()).toBe('=SUM(Sheet1!$C$1:$C$2)');
+        expect(getFormula()).toBe('=RANGE_NAME+SUM(RANGE_NAME)');
+        expect(getCellFormula()).toBe('=RANGE_NAME+SUM(RANGE_NAME)');
     });
 
     it('should sync formula data for value mutations and ignore style-only updates', async () => {

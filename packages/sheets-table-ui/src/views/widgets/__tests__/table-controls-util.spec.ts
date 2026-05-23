@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { buildTableMenuRegions, hitTestTableControl, TABLE_CONTROL_INSERT_BUTTON_SIZE } from '../table-controls-util';
+import { buildCenteredPlusSegments, buildTableMenuRegions, hitTestTableControl, TABLE_CONTROL_INSERT_BUTTON_SIZE } from '../table-controls-util';
 
 describe('table controls geometry', () => {
     it('hit-tests the topmost region first', () => {
@@ -38,5 +38,14 @@ describe('table controls geometry', () => {
 
         expect(regions.map((item) => item.action)).toEqual(['rename', 'update-range', 'set-theme', 'delete']);
         expect(regions[0]).toMatchObject({ left: 20, top: 30 });
+    });
+
+    it('builds centered plus segments around the insert button center', () => {
+        const segments = buildCenteredPlusSegments(20, 30, 8);
+
+        expect(segments).toEqual([
+            { fromX: 16, fromY: 30, toX: 24, toY: 30 },
+            { fromX: 20, fromY: 26, toX: 20, toY: 34 },
+        ]);
     });
 });

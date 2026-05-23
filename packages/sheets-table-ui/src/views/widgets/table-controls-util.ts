@@ -41,6 +41,13 @@ export interface ITableControlHitRegion {
     index?: number;
 }
 
+export interface ITableControlLineSegment {
+    fromX: number;
+    fromY: number;
+    toX: number;
+    toY: number;
+}
+
 export const TABLE_CONTROL_MENU_ACTIONS: TableControlMenuAction[] = ['rename', 'update-range', 'set-theme', 'delete'];
 
 export function isPointInTableControlRegion(region: ITableControlHitRegion, x: number, y: number): boolean {
@@ -67,4 +74,13 @@ export function buildTableMenuRegions(tableId: string, left: number, top: number
         width: TABLE_CONTROL_MENU_WIDTH,
         height: TABLE_CONTROL_MENU_ITEM_HEIGHT,
     }));
+}
+
+export function buildCenteredPlusSegments(centerX: number, centerY: number, size: number): [ITableControlLineSegment, ITableControlLineSegment] {
+    const halfSize = size / 2;
+
+    return [
+        { fromX: centerX - halfSize, fromY: centerY, toX: centerX + halfSize, toY: centerY },
+        { fromX: centerX, fromY: centerY - halfSize, toX: centerX, toY: centerY + halfSize },
+    ];
 }

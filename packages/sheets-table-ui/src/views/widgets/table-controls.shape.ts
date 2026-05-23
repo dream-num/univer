@@ -18,6 +18,7 @@ import type { IShapeProps, SpreadsheetSkeleton, UniverRenderingContext, Vector2 
 import type { ITableControlHitRegion, TableControlMenuAction } from './table-controls-util';
 import { DEFAULT_FONTFACE_PLANE, Rect, Shape } from '@univerjs/engine-render';
 import {
+    buildCenteredPlusSegments,
     buildTableMenuRegions,
     hitTestTableControl,
     TABLE_CONTROL_ANCHOR_HEIGHT,
@@ -38,7 +39,7 @@ const MENU_RADIUS = 8;
 const MENU_BORDER = '#d9dee7';
 const MENU_HOVER_BG = '#f1f3f4';
 const INSERT_BUTTON_VISUAL_SIZE = 18;
-const INSERT_BUTTON_TEXT_OFFSET_Y = -1;
+const INSERT_BUTTON_PLUS_SIZE = 8;
 
 export interface ITableControlRenderItem {
     tableId: string;
@@ -322,10 +323,15 @@ export class SheetTableControlsShape extends Shape<IShapeProps> {
         ctx.fill();
         ctx.strokeStyle = fill;
         ctx.stroke();
-        ctx.font = `12px ${DEFAULT_FONTFACE_PLANE}`;
-        ctx.fillStyle = fill;
-        ctx.textAlign = 'center';
-        ctx.fillText('+', centerX, centerY + INSERT_BUTTON_TEXT_OFFSET_Y);
+        ctx.beginPath();
+        ctx.strokeStyle = fill;
+        ctx.lineWidth = 1;
+        ctx.lineCap = 'round';
+        for (const segment of buildCenteredPlusSegments(centerX, centerY, INSERT_BUTTON_PLUS_SIZE)) {
+            ctx.moveTo(segment.fromX, segment.fromY);
+            ctx.lineTo(segment.toX, segment.toY);
+        }
+        ctx.stroke();
         ctx.restore();
     }
 

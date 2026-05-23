@@ -142,7 +142,7 @@ export const SheetsNote = (props: { popup: IPopup<{ location: INotePopupLocation
               dark:!univer-bg-gray-800
             `)}
             value={note?.note}
-            placeholder={localeService.t('note.placeholder')}
+            placeholder={localeService.t('sheets-note-ui.note.placeholder')}
             onResize={handleResize}
             onValueChange={handleNoteChange}
             onWheel={(e) => {

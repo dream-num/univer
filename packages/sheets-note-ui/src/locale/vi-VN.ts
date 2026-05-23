@@ -17,13 +17,15 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    rightClick: {
-        addNote: 'Thêm ghi chú',
-        deleteNote: 'Xóa ghi chú',
-        toggleNote: 'Hiện/Ẩn ghi chú',
-    },
-    note: {
-        placeholder: 'Nhập tại đây',
+    'sheets-note-ui': {
+        note: {
+            placeholder: 'Nhập tại đây',
+        },
+        rightClick: {
+            addNote: 'Thêm ghi chú',
+            deleteNote: 'Xóa ghi chú',
+            toggleNote: 'Hiện/Ẩn ghi chú',
+        },
     },
 };
 

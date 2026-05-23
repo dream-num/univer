@@ -14,20 +14,25 @@
  * limitations under the License.
  */
 
-import type { IBullet, IDocDrawingBase, IDrawings, IParagraph, Nullable } from '@univerjs/core';
+import type { IBullet, IDocDrawingBase, IDocumentBody, IDrawings, IParagraph, IParagraphStyle, Nullable } from '@univerjs/core';
 import type { IDocumentSkeletonBullet, IDocumentSkeletonDrawing, IDocumentSkeletonPage, IDocumentSkeletonTable, IParagraphList } from '../../../../../basics/i-document-skeleton-cached';
 import type { IParagraphConfig, ISectionBreakConfig } from '../../../../../basics/interfaces';
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../../view-model/document-view-model';
 import type { ILayoutContext } from '../../tools';
 import type { IShapedText } from './shaping';
-import { DataStreamTreeTokenType, PositionedObjectLayoutType, Tools } from '@univerjs/core';
+import { DataStreamTreeTokenType, DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING, DEFAULT_DOCUMENT_PARAGRAPH_SPACE_ABOVE, DEFAULT_DOCUMENT_PARAGRAPH_SPACE_BELOW, PositionedObjectLayoutType, Tools } from '@univerjs/core';
 import { BreakType } from '../../../../../basics/i-document-skeleton-cached';
 import { createSkeletonPage } from '../../model/page';
 import { setColumnFullState } from '../../model/section';
 import { getLastNotFullColumnInfo } from '../../tools';
 import { dealWithBullet } from './bullet';
 import { layoutParagraph } from './layout-ruler';
+
+const BLOCK_LAYOUT_OUTER_SPACING_MAP = new Map([
+    ['callout', 34],
+    ['quote', 24],
+]);
 
 function _getListLevelAncestors(
     bullet?: IBullet,
@@ -89,6 +94,78 @@ function _updateListLevelAncestors(
     cacheItem.splice(nestingLevel + 1); // Document renders from top to bottom, if a level is updated, the startIndex of data below it needs to be reset
 
     listLevel?.set(listId, cacheItem);
+}
+
+function _withMinSpacing(style: IParagraphStyle, key: 'spaceAbove' | 'spaceBelow', value: number) {
+    const current = style[key];
+    const nextValue = Math.max(current?.v ?? 0, value);
+
+    style[key] = {
+        ...current,
+        v: nextValue,
+    };
+}
+
+function _applyDefaultLayoutParagraphStyle(style: IParagraphStyle, hasBlockRange: boolean) {
+    if (style.lineSpacing == null) {
+        style.lineSpacing = DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING;
+    }
+
+    if (hasBlockRange) {
+        return;
+    }
+
+    if (style.spaceAbove == null) {
+        style.spaceAbove = { v: DEFAULT_DOCUMENT_PARAGRAPH_SPACE_ABOVE };
+    }
+
+    if (style.spaceBelow == null) {
+        style.spaceBelow = { v: DEFAULT_DOCUMENT_PARAGRAPH_SPACE_BELOW };
+    }
+}
+
+function _applyBlockRangeLayoutParagraphStyle(
+    body: Nullable<IDocumentBody>,
+    paragraph: IParagraph,
+    paragraphStyle: IParagraphStyle
+): IParagraphStyle {
+    const style = Tools.deepClone(paragraphStyle);
+    const blockRanges = body?.blockRanges;
+
+    if (!blockRanges?.length) {
+        _applyDefaultLayoutParagraphStyle(style, false);
+        return style;
+    }
+
+    const blockRange = blockRanges.find((range) =>
+        BLOCK_LAYOUT_OUTER_SPACING_MAP.has(range.blockType) &&
+        paragraph.startIndex > range.startIndex &&
+        paragraph.startIndex < range.endIndex
+    );
+
+    if (!blockRange) {
+        _applyDefaultLayoutParagraphStyle(style, false);
+        return style;
+    }
+
+    _applyDefaultLayoutParagraphStyle(style, true);
+
+    const blockParagraphs = (body?.paragraphs ?? [])
+        .filter((item) => item.startIndex > blockRange.startIndex && item.startIndex < blockRange.endIndex)
+        .sort((left, right) => left.startIndex - right.startIndex);
+    const firstParagraph = blockParagraphs[0];
+    const lastParagraph = blockParagraphs[blockParagraphs.length - 1];
+    const outerSpacing = BLOCK_LAYOUT_OUTER_SPACING_MAP.get(blockRange.blockType) ?? 0;
+
+    if (firstParagraph?.startIndex === paragraph.startIndex) {
+        _withMinSpacing(style, 'spaceAbove', outerSpacing);
+    }
+
+    if (lastParagraph?.startIndex === paragraph.startIndex) {
+        _withMinSpacing(style, 'spaceBelow', outerSpacing);
+    }
+
+    return style;
 }
 
 function _changeDrawingToSkeletonFormat(
@@ -164,8 +241,7 @@ export function lineBreaking(
 
     const paragraphConfig: IParagraphConfig = {
         paragraphIndex: endIndex,
-        // TODO optimize this deepClone
-        paragraphStyle: Tools.deepClone(paragraphStyle),
+        paragraphStyle: _applyBlockRangeLayoutParagraphStyle(viewModel.getBody?.() ?? null, paragraph, paragraphStyle),
         paragraphNonInlineSkeDrawings,
         paragraphInlineSkeDrawings,
         skeTablesInParagraph: tableSkeleton

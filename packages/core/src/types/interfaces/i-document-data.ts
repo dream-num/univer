@@ -131,6 +131,8 @@ export interface IDocumentBody {
 
     tables?: ICustomTable[]; // Table
 
+    blockRanges?: IDocumentBlockRange[]; // Generic structured block range, e.g. callout, quote, code.
+
     // tableOfContents?: { [index: number]: ITableOfContent }; // tableOfContents
     // links?: { [index: number]: IHyperlink }; // links
 
@@ -362,6 +364,13 @@ export interface ICustomRange<T extends Record<string, any> = Record<string, any
 export type IHyperLinkCustomRange = ICustomRange<{ url: string }>;
 
 export type IMentionCustomRange = ICustomRange<IMention>;
+
+export interface IDocumentBlockRange {
+    startIndex: number;
+    endIndex: number;
+    blockId: string;
+    blockType: string;
+}
 
 export enum CustomRangeType {
     HYPERLINK,

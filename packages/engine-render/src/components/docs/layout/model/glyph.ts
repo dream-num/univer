@@ -155,6 +155,8 @@ export function _createSkeletonWordOrLetter(
         DT.TABLE_ROW_END,
         DT.TABLE_CELL_START,
         DT.TABLE_CELL_END,
+        DT.BLOCK_START,
+        DT.BLOCK_END,
         DT.CUSTOM_RANGE_START,
         DT.CUSTOM_RANGE_END,
         DT.COLUMN_BREAK,

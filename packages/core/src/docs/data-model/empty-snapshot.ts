@@ -16,6 +16,7 @@
 
 import type { IDocumentData } from '../../types/interfaces';
 import { generateRandomId } from '../../shared/tools';
+import { DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING, DEFAULT_DOCUMENT_PARAGRAPH_SPACE_ABOVE, DEFAULT_DOCUMENT_PARAGRAPH_SPACE_BELOW } from '../../types/const';
 import { BooleanNumber } from '../../types/enum';
 import { LocaleType } from '../../types/enum/locale-type';
 import { DocumentFlavor } from '../../types/interfaces';
@@ -43,9 +44,9 @@ export function getEmptySnapshot(
                 {
                     startIndex: 0,
                     paragraphStyle: {
-                        spaceAbove: { v: 5 },
-                        lineSpacing: 1.5,
-                        spaceBelow: { v: 0 },
+                        spaceAbove: { v: DEFAULT_DOCUMENT_PARAGRAPH_SPACE_ABOVE },
+                        lineSpacing: DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING,
+                        spaceBelow: { v: DEFAULT_DOCUMENT_PARAGRAPH_SPACE_BELOW },
                     },
                 },
             ],

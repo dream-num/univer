@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICustomBlock, ICustomDecoration, ICustomRange, IDocumentBody, IParagraph, ISectionBreak, ITextRun } from '../../../types/interfaces/i-document-data';
+import type { ICustomBlock, ICustomDecoration, ICustomRange, IDocumentBlockRange, IDocumentBody, IParagraph, ISectionBreak, ITextRun } from '../../../types/interfaces/i-document-data';
 import type { IRetainAction } from './action-types';
 import { UpdateDocsAttributeType } from '../../../shared/command-enum';
 import { Tools } from '../../../shared/tools';
@@ -101,6 +101,30 @@ export function getTableSlice(
         }
     }
     return newTables;
+}
+
+export function getBlockRangeSlice(
+    body: IDocumentBody,
+    startOffset: number,
+    endOffset: number
+) {
+    const { blockRanges = [] } = body;
+    const newBlockRanges: IDocumentBlockRange[] = [];
+
+    for (const blockRange of blockRanges) {
+        const clonedBlockRange = Tools.deepClone(blockRange);
+        const { startIndex, endIndex } = clonedBlockRange;
+
+        if (startIndex >= startOffset && endIndex < endOffset) {
+            newBlockRanges.push({
+                ...clonedBlockRange,
+                startIndex: startIndex - startOffset,
+                endIndex: endIndex - startOffset,
+            });
+        }
+    }
+
+    return newBlockRanges;
 }
 
 export function getParagraphsSlice(
@@ -193,6 +217,11 @@ export function getBodySlice(
         docBody.tables = newTables;
     }
 
+    const newBlockRanges = getBlockRangeSlice(body, startOffset, endOffset);
+    if (newBlockRanges.length) {
+        docBody.blockRanges = newBlockRanges;
+    }
+
     docBody.paragraphs = getParagraphsSlice(body, startOffset, endOffset);
 
     if (type === SliceBodyType.cut) {
@@ -216,7 +245,7 @@ export function getBodySlice(
 }
 
 export function normalizeBody(body: IDocumentBody): IDocumentBody {
-    const { dataStream, textRuns, paragraphs, customRanges, customDecorations, tables } = body;
+    const { dataStream, textRuns, paragraphs, customRanges, customDecorations, tables, blockRanges } = body;
     let leftOffset = 0;
     let rightOffset = 0;
 
@@ -274,6 +303,7 @@ export function normalizeBody(body: IDocumentBody): IDocumentBody {
         customRanges,
         customDecorations,
         tables,
+        blockRanges,
     };
 }
 
@@ -409,12 +439,14 @@ export function composeBody(
         paragraphs: thisParagraphs = [],
         customRanges: thisCustomRanges,
         customDecorations: thisCustomDecorations = [],
+        blockRanges: thisBlockRanges = [],
     } = thisBody;
     const {
         textRuns: otherTextRuns,
         paragraphs: otherParagraphs = [],
         customRanges: otherCustomRanges,
         customDecorations: otherCustomDecorations = [],
+        blockRanges: otherBlockRanges = [],
     } = otherBody;
 
     retBody.textRuns = composeTextRuns(otherTextRuns, thisTextRuns, coverType);
@@ -463,7 +495,30 @@ export function composeBody(
         retBody.paragraphs = paragraphs;
     }
 
+    const blockRanges = composeDocumentBlockRanges(thisBlockRanges, otherBlockRanges);
+    if (blockRanges.length) {
+        retBody.blockRanges = blockRanges;
+    }
+
     return retBody;
+}
+
+function composeDocumentBlockRanges(
+    thisRanges: IDocumentBlockRange[],
+    otherRanges: IDocumentBlockRange[]
+): IDocumentBlockRange[] {
+    if (!thisRanges.length) {
+        return otherRanges;
+    }
+
+    if (!otherRanges.length) {
+        return thisRanges;
+    }
+
+    const byId = new Map(thisRanges.map((range) => [range.blockId, Tools.deepClone(range)]));
+    otherRanges.forEach((range) => byId.set(range.blockId, Tools.deepClone(range)));
+
+    return Array.from(byId.values()).sort((left, right) => left.startIndex - right.startIndex);
 }
 
 export function isUselessRetainAction(action: IRetainAction): boolean {
@@ -473,9 +528,9 @@ export function isUselessRetainAction(action: IRetainAction): boolean {
         return true;
     }
 
-    const { textRuns, paragraphs, customRanges, customBlocks, customDecorations, tables } = body;
+    const { textRuns, paragraphs, customRanges, customBlocks, customDecorations, tables, blockRanges } = body;
 
-    if (textRuns == null && paragraphs == null && customRanges == null && customBlocks == null && customDecorations == null && tables == null) {
+    if (textRuns == null && paragraphs == null && customRanges == null && customBlocks == null && customDecorations == null && tables == null && blockRanges == null) {
         return true;
     }
 

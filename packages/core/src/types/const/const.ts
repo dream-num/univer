@@ -184,6 +184,10 @@ export const NAMED_STYLE_MAP: Record<NamedStyleType, Nullable<ITextStyle>> = {
 
 const BOTTOM_P = 4;
 
+export const DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING = 1.5;
+export const DEFAULT_DOCUMENT_PARAGRAPH_SPACE_ABOVE = 0;
+export const DEFAULT_DOCUMENT_PARAGRAPH_SPACE_BELOW = 8;
+
 export const NAMED_STYLE_SPACE_MAP: Record<NamedStyleType, Nullable<IParagraphStyle>> = {
     [NamedStyleType.HEADING_1]: {
         spaceAbove: {
@@ -227,10 +231,10 @@ export const NAMED_STYLE_SPACE_MAP: Record<NamedStyleType, Nullable<IParagraphSt
     },
     [NamedStyleType.NORMAL_TEXT]: {
         spaceAbove: {
-            v: 0,
+            v: DEFAULT_DOCUMENT_PARAGRAPH_SPACE_ABOVE,
         },
         spaceBelow: {
-            v: 0,
+            v: DEFAULT_DOCUMENT_PARAGRAPH_SPACE_BELOW,
         },
     },
     [NamedStyleType.TITLE]: {

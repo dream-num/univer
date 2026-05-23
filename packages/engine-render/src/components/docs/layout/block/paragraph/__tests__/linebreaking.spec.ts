@@ -80,4 +80,160 @@ describe('linebreaking', () => {
 
         expect(result.length).toBe(1);
     });
+
+    it('applies callout outer spacing as a temporary layout style without mutating the paragraph model', () => {
+        const ctx = createContext();
+        const paragraphStyle = { indentStart: { v: 60 }, indentEnd: { v: 20 } };
+        const paragraph = {
+            startIndex: 2,
+            paragraphStyle,
+        };
+        const body = {
+            paragraphs: [paragraph],
+            blockRanges: [{
+                blockId: 'callout-1',
+                blockType: 'callout',
+                startIndex: 0,
+                endIndex: 6,
+            }],
+        };
+        const viewModel = {
+            getParagraph: vi.fn(() => paragraph),
+            getBody: vi.fn(() => body),
+            getCustomBlock: vi.fn(() => null),
+        } as any;
+
+        lineBreaking(
+            ctx,
+            viewModel,
+            [],
+            {
+                segmentId: 'segment-1',
+                pageNumber: 1,
+            } as any,
+            {
+                endIndex: 5,
+                startIndex: 2,
+                blocks: [],
+                children: [],
+            } as any,
+            {
+                lists: [],
+                localeService: {} as any,
+                drawings: {},
+            } as any,
+            null
+        );
+
+        expect(ctx.paragraphConfigCache.get('segment-1')?.get(5)?.paragraphStyle).toEqual({
+            indentStart: { v: 60 },
+            indentEnd: { v: 20 },
+            lineSpacing: 1.5,
+            spaceAbove: { v: 34 },
+            spaceBelow: { v: 34 },
+        });
+        expect(paragraphStyle).toEqual({ indentStart: { v: 60 }, indentEnd: { v: 20 } });
+    });
+
+    it('applies quote outer spacing with the same temporary layout rule', () => {
+        const ctx = createContext();
+        const firstParagraphStyle = { indentStart: { v: 22 } };
+        const lastParagraphStyle = { indentStart: { v: 22 } };
+        const firstParagraph = {
+            startIndex: 2,
+            paragraphStyle: firstParagraphStyle,
+        };
+        const lastParagraph = {
+            startIndex: 4,
+            paragraphStyle: lastParagraphStyle,
+        };
+        const body = {
+            paragraphs: [firstParagraph, lastParagraph],
+            blockRanges: [{
+                blockId: 'quote-1',
+                blockType: 'quote',
+                startIndex: 0,
+                endIndex: 6,
+            }],
+        };
+        const viewModel = {
+            getParagraph: vi.fn(() => firstParagraph),
+            getBody: vi.fn(() => body),
+            getCustomBlock: vi.fn(() => null),
+        } as any;
+
+        lineBreaking(
+            ctx,
+            viewModel,
+            [],
+            {
+                segmentId: 'segment-1',
+                pageNumber: 1,
+            } as any,
+            {
+                endIndex: 2,
+                startIndex: 0,
+                blocks: [],
+                children: [],
+            } as any,
+            {
+                lists: [],
+                localeService: {} as any,
+                drawings: {},
+            } as any,
+            null
+        );
+
+        expect(ctx.paragraphConfigCache.get('segment-1')?.get(2)?.paragraphStyle).toEqual({
+            indentStart: { v: 22 },
+            lineSpacing: 1.5,
+            spaceAbove: { v: 24 },
+        });
+        expect(firstParagraphStyle).toEqual({ indentStart: { v: 22 } });
+    });
+
+    it('applies comfortable default spacing to normal paragraphs as layout-only style', () => {
+        const ctx = createContext();
+        const paragraphStyle = {};
+        const paragraph = {
+            startIndex: 3,
+            paragraphStyle,
+        };
+        const viewModel = {
+            getParagraph: vi.fn(() => paragraph),
+            getBody: vi.fn(() => ({
+                paragraphs: [paragraph],
+            })),
+            getCustomBlock: vi.fn(() => null),
+        } as any;
+
+        lineBreaking(
+            ctx,
+            viewModel,
+            [],
+            {
+                segmentId: 'segment-1',
+                pageNumber: 1,
+            } as any,
+            {
+                endIndex: 3,
+                startIndex: 0,
+                blocks: [],
+                children: [],
+            } as any,
+            {
+                lists: [],
+                localeService: {} as any,
+                drawings: {},
+            } as any,
+            null
+        );
+
+        expect(ctx.paragraphConfigCache.get('segment-1')?.get(3)?.paragraphStyle).toEqual({
+            spaceAbove: { v: 0 },
+            lineSpacing: 1.5,
+            spaceBelow: { v: 8 },
+        });
+        expect(paragraphStyle).toEqual({});
+    });
 });

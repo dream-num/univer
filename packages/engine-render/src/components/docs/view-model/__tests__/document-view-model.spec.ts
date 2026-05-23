@@ -123,6 +123,65 @@ describe('DocumentViewModel', () => {
                 .find((paragraph) => paragraph.blocks.length > 0);
             expect(paragraphWithCustomBlock?.blocks.length).toBe(1);
         });
+
+        it('should ignore block range tokens while preserving inner paragraphs', () => {
+            const ds = [
+                DataStreamTreeTokenType.BLOCK_START,
+                'Callout',
+                DataStreamTreeTokenType.PARAGRAPH,
+                'Content',
+                DataStreamTreeTokenType.PARAGRAPH,
+                DataStreamTreeTokenType.BLOCK_END,
+                DataStreamTreeTokenType.SECTION_BREAK,
+            ].join('');
+
+            const { sectionList } = parseDataStreamToTree(ds);
+            const paragraphs = sectionList[0].children;
+
+            expect(paragraphs.map((paragraph) => paragraph.content)).toEqual([
+                `${DataStreamTreeTokenType.BLOCK_START}Callout${DataStreamTreeTokenType.PARAGRAPH}`,
+                `Content${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.BLOCK_END}${DataStreamTreeTokenType.SECTION_BREAK}`,
+            ]);
+        });
+
+        it('keeps hidden block tokens in paragraph content so following offsets stay aligned', () => {
+            const ds = [
+                'A',
+                DataStreamTreeTokenType.PARAGRAPH,
+                DataStreamTreeTokenType.BLOCK_START,
+                'B',
+                DataStreamTreeTokenType.PARAGRAPH,
+                DataStreamTreeTokenType.BLOCK_END,
+                'C',
+                DataStreamTreeTokenType.PARAGRAPH,
+                DataStreamTreeTokenType.SECTION_BREAK,
+            ].join('');
+
+            const { sectionList } = parseDataStreamToTree(ds);
+            const paragraphs = sectionList[0].children;
+
+            expect(paragraphs.map((paragraph) => ({
+                content: paragraph.content,
+                startIndex: paragraph.startIndex,
+                endIndex: paragraph.endIndex,
+            }))).toEqual([
+                {
+                    content: `A${DataStreamTreeTokenType.PARAGRAPH}`,
+                    startIndex: 0,
+                    endIndex: 1,
+                },
+                {
+                    content: `${DataStreamTreeTokenType.BLOCK_START}B${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.BLOCK_END}`,
+                    startIndex: 2,
+                    endIndex: 4,
+                },
+                {
+                    content: `C${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`,
+                    startIndex: 6,
+                    endIndex: 7,
+                },
+            ]);
+        });
     });
 
     describe('DocumentViewModel class', () => {

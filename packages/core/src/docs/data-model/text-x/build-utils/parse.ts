@@ -28,6 +28,8 @@ const tags = [
     DataStreamTreeTokenType.TABLE_CELL_END, // table start
     DataStreamTreeTokenType.TABLE_ROW_END, // table start
     DataStreamTreeTokenType.TABLE_END, // table end
+    DataStreamTreeTokenType.BLOCK_START, // block start
+    DataStreamTreeTokenType.BLOCK_END, // block end
     // DataStreamTreeTokenType.COLUMN_BREAK, // column break
     // DataStreamTreeTokenType.PAGE_BREAK, // page break
     // DataStreamTreeTokenType.DOCS_END, // document end
@@ -36,8 +38,8 @@ const tags = [
 ];
 
 export const getPlainText = (dataStream: string) => {
-    const text = dataStream.endsWith('\r\n') ? dataStream.slice(0, -2) : dataStream;
-    return tags.reduce((res, curr) => res.replaceAll(curr, ''), text);
+    const text = tags.reduce((res, curr) => res.replaceAll(curr, ''), dataStream);
+    return text.endsWith('\r\n') ? text.slice(0, -2) : text;
 };
 
 export const isEmptyDocument = (dataStream?: string) => {

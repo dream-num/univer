@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/uniscript",
-    "version": "0.23.0",
+    "version": "0.24.0",
     "private": false,
     "description": "Monaco-based scripting editor for operating Univer through Facade APIs.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

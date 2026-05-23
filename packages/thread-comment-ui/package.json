@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/thread-comment-ui",
-    "version": "0.23.0",
+    "version": "0.24.0",
     "private": false,
     "description": "Shared thread comment UI components and services for Univer.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

@@ -1,5 +1,23 @@
 # Changelog
 
+# [0.24.0](https://github.com/dream-num/univer/compare/v0.23.0...v0.24.0) (2026-05-23)
+
+
+### Bug Fixes
+
+* **design:** normalize hue values >= 360 and fix stale closure in event handlers ([#6912](https://github.com/dream-num/univer/issues/6912)) ([42dcf43](https://github.com/dream-num/univer/commit/42dcf43d450a6bdb2e2add86b27c1fdaffbb765d))
+* **sheet:** outline header overlays ([#6922](https://github.com/dream-num/univer/issues/6922)) ([2dba093](https://github.com/dream-num/univer/commit/2dba093a3e3d2b9db422b6ca84ea221febab9eb0))
+* **sheets-drawing:** pass image ids to builder ([#6929](https://github.com/dream-num/univer/issues/6929)) ([d1e62ba](https://github.com/dream-num/univer/commit/d1e62ba8002be415fa0461891ee0509936124b6f))
+* **sheets-table-ui:** draw insert row icon as vector ([#6939](https://github.com/dream-num/univer/issues/6939)) ([fb50a7c](https://github.com/dream-num/univer/commit/fb50a7cf83a5baa5aa671d94df3adc7fcfefcf8d))
+* **sheets-ui:** use clear all icon in toolbar ([#6928](https://github.com/dream-num/univer/issues/6928)) ([331242a](https://github.com/dream-num/univer/commit/331242a4ee6da8672274a27ffbc0ba374685c6ad))
+
+
+### Features
+
+* **design,ui:** add Panel component and enhance Sidebar with accessibility and resize ([#6938](https://github.com/dream-num/univer/issues/6938)) ([0a2654e](https://github.com/dream-num/univer/commit/0a2654ec5f57c988198809400b870c6d6192bebd))
+* **outline:** dimension transform ([#6920](https://github.com/dream-num/univer/issues/6920)) ([f4cc58b](https://github.com/dream-num/univer/commit/f4cc58b15786c65ecaeda65d1866891521824d65))
+* **outline:** fit for outline feature ([#6914](https://github.com/dream-num/univer/issues/6914)) ([d8dda08](https://github.com/dream-num/univer/commit/d8dda0872fa68240c91a1857a229b3d7ec194648))
+
 # [0.23.0](https://github.com/dream-num/univer/compare/v0.22.1...v0.23.0) (2026-05-18)
 
 

@@ -16,11 +16,13 @@
 
 import type { Injector } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
-import { CommandType, ICommandService, IConfigService, LifecycleService, LifecycleStages } from '@univerjs/core';
-import { FormulaExecuteStageType, IFunctionService, ISuperTableService, SetFormulaCalculationResultMutation, SetTriggerFormulaCalculationStartMutation, SuperTableService } from '@univerjs/engine-formula';
+import { ICommandService, IConfigService, LifecycleService, LifecycleStages } from '@univerjs/core';
+import { FormulaExecutedStateType, FormulaExecuteStageType, IFunctionService, ISuperTableService, SetFormulaCalculationNotificationMutation, SetFormulaCalculationResultMutation, SetFormulaCalculationStartMutation, SetTriggerFormulaCalculationStartMutation, SuperTableService } from '@univerjs/engine-formula';
 import { SetRangeValuesMutation } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { FormulaCalculationSessionController } from '../../controllers/formula-calculation-session.controller';
 import { CalculationMode, DescriptionService, IDescriptionService, IRegisterFunctionService, PLUGIN_CONFIG_KEY_BASE, RegisterFunctionService } from '../../index';
+import { FormulaCalculationSessionService } from '../../services/formula-calculation-session.service';
 import { createFacadeTestBed } from './create-test-bed';
 
 import '@univerjs/engine-formula/facade';
@@ -30,6 +32,7 @@ import '../../facade';
 describe('sheets-formula facade mixins', () => {
     let get: Injector['get'];
     let univerAPI: FUniver;
+    let commandService: ICommandService;
     let disposeUniver: () => void;
 
     beforeEach(() => {
@@ -37,10 +40,20 @@ describe('sheets-formula facade mixins', () => {
         testBed.injector.add([IDescriptionService, { useClass: DescriptionService }]);
         testBed.injector.add([ISuperTableService, { useClass: SuperTableService }]);
         testBed.injector.add([IRegisterFunctionService, { useClass: RegisterFunctionService }]);
+        testBed.injector.add([FormulaCalculationSessionService]);
+        testBed.injector.add([FormulaCalculationSessionController]);
+        testBed.injector.get(FormulaCalculationSessionService);
+        testBed.injector.get(FormulaCalculationSessionController);
 
         get = testBed.get;
         univerAPI = testBed.univerAPI;
         disposeUniver = () => testBed.univer.dispose();
+
+        commandService = get(ICommandService);
+        commandService.registerCommand(SetFormulaCalculationStartMutation);
+        commandService.registerCommand(SetFormulaCalculationNotificationMutation);
+        commandService.registerCommand(SetFormulaCalculationResultMutation);
+        commandService.registerCommand(SetRangeValuesMutation);
     });
 
     afterEach(() => {
@@ -52,7 +65,6 @@ describe('sheets-formula facade mixins', () => {
     it('registers functions through FUniver and FFormula and triggers a debounced recalculation command', async () => {
         vi.useFakeTimers();
 
-        const commandService = get(ICommandService);
         const functionService = get(IFunctionService);
         const executeCommandSpy = vi.spyOn(commandService, 'executeCommand').mockResolvedValue(true);
 
@@ -118,10 +130,6 @@ describe('sheets-formula facade mixins', () => {
             return 1;
         }) as typeof requestIdleCallback);
 
-        const commandService = get(ICommandService);
-        commandService.registerCommand(SetFormulaCalculationResultMutation);
-        commandService.registerCommand(SetRangeValuesMutation);
-
         const formula = univerAPI.getFormula();
         const resultPayload = {
             unitData: {},
@@ -154,10 +162,6 @@ describe('sheets-formula facade mixins', () => {
             callback({ didTimeout: false, timeRemaining: () => 16 } as IdleDeadline);
             return 1;
         }) as typeof requestIdleCallback);
-
-        const commandService = get(ICommandService);
-        commandService.registerCommand(SetFormulaCalculationResultMutation);
-        commandService.registerCommand(SetRangeValuesMutation);
 
         const formula = univerAPI.getFormula();
         const resultPayload = {
@@ -195,6 +199,58 @@ describe('sheets-formula facade mixins', () => {
         });
     });
 
+    it('fires calculationResultApplied once for repeated range apply notifications', async () => {
+        vi.stubGlobal('requestIdleCallback', ((callback: IdleRequestCallback) => {
+            callback({ didTimeout: false, timeRemaining: () => 16 } as IdleDeadline);
+            return 1;
+        }) as typeof requestIdleCallback);
+
+        const formula = univerAPI.getFormula();
+        const resultPayload = {
+            unitData: {
+                unit1: {
+                    sheet1: {
+                        0: {
+                            0: { v: 1 },
+                        },
+                    },
+                },
+            },
+            unitOtherData: {},
+        };
+        const callback = vi.fn();
+        const disposable = formula.calculationResultApplied(callback);
+
+        await commandService.executeCommand(SetFormulaCalculationResultMutation.id, resultPayload);
+        await commandService.executeCommand(
+            SetRangeValuesMutation.id,
+            {
+                unitId: 'unit1',
+                subUnitId: 'sheet1',
+                cellValue: {},
+            },
+            {
+                applyFormulaCalculationResult: true,
+            }
+        );
+        await commandService.executeCommand(
+            SetRangeValuesMutation.id,
+            {
+                unitId: 'unit1',
+                subUnitId: 'sheet1',
+                cellValue: {},
+            },
+            {
+                applyFormulaCalculationResult: true,
+            }
+        );
+
+        expect(callback).toHaveBeenCalledTimes(1);
+        expect(callback).toHaveBeenCalledWith(resultPayload);
+
+        disposable.dispose();
+    });
+
     it('resolves onCalculationResultApplied when no calculation actually starts', async () => {
         vi.useFakeTimers();
 
@@ -213,24 +269,20 @@ describe('sheets-formula facade mixins', () => {
             return 1;
         }) as typeof requestIdleCallback);
 
-        const commandService = get(ICommandService);
-        commandService.registerCommand(SetFormulaCalculationResultMutation);
-
         const formula = univerAPI.getFormula();
-        vi.spyOn(formula, 'calculationProcessing').mockImplementation((callback) => {
-            callback({
+        const waitForResult = formula.onCalculationResultApplied();
+
+        await commandService.executeCommand(SetFormulaCalculationStartMutation.id, {}, { onlyLocal: true });
+        await commandService.executeCommand(SetFormulaCalculationNotificationMutation.id, {
+            stageInfo: {
                 stage: FormulaExecuteStageType.START_CALCULATION,
                 completedFormulasCount: 0,
                 completedArrayFormulasCount: 0,
                 formulaCycleIndex: 0,
                 totalArrayFormulasToCalculate: 0,
                 totalFormulasToCalculate: 1,
-            });
-
-            return { dispose: () => {} };
+            },
         });
-
-        const waitForResult = formula.onCalculationResultApplied();
 
         await commandService.executeCommand(SetFormulaCalculationResultMutation.id, {
             unitData: {},
@@ -253,32 +305,84 @@ describe('sheets-formula facade mixins', () => {
     it('rejects onCalculationResultApplied when the wait exceeds the global timeout', async () => {
         vi.useFakeTimers();
 
-        const commandService = get(ICommandService);
-        commandService.registerCommand({
-            id: SetFormulaCalculationResultMutation.id,
-            type: CommandType.MUTATION,
-            handler: () => true,
-        });
-
         const formula = univerAPI.getFormula();
-        vi.spyOn(formula, 'calculationProcessing').mockImplementation((callback) => {
-            callback({
+
+        const waitForResult = expect(formula.onCalculationResultApplied()).rejects.toThrowError('Calculation end timeout');
+
+        await commandService.executeCommand(SetFormulaCalculationStartMutation.id, {}, { onlyLocal: true });
+        await commandService.executeCommand(SetFormulaCalculationNotificationMutation.id, {
+            stageInfo: {
                 stage: FormulaExecuteStageType.START_CALCULATION,
                 completedFormulasCount: 0,
                 completedArrayFormulasCount: 0,
                 formulaCycleIndex: 0,
                 totalArrayFormulasToCalculate: 1,
                 totalFormulasToCalculate: 1,
-            });
-
-            return { dispose: () => {} };
+            },
         });
-        vi.spyOn(formula, 'calculationResultApplied').mockReturnValue({ dispose: () => {} });
-
-        const waitForResult = expect(formula.onCalculationResultApplied()).rejects.toThrowError('Calculation end timeout');
 
         await vi.advanceTimersByTimeAsync(60_000);
 
         await waitForResult;
+    });
+
+    it('resolves onCalculationResultApplied after the latest restarted calculation is applied', async () => {
+        vi.useFakeTimers();
+
+        const formula = univerAPI.getFormula();
+        const waitForResult = formula.onCalculationResultApplied();
+        let resolved = false;
+        void waitForResult.then(() => {
+            resolved = true;
+        });
+
+        await commandService.executeCommand(SetFormulaCalculationStartMutation.id, {}, { onlyLocal: true });
+        await commandService.executeCommand(SetFormulaCalculationNotificationMutation.id, {
+            stageInfo: {
+                stage: FormulaExecuteStageType.CURRENTLY_CALCULATING,
+                completedFormulasCount: 0,
+                completedArrayFormulasCount: 0,
+                formulaCycleIndex: 0,
+                totalArrayFormulasToCalculate: 0,
+                totalFormulasToCalculate: 1,
+            },
+        });
+        await commandService.executeCommand(SetFormulaCalculationNotificationMutation.id, {
+            functionsExecutedState: FormulaExecutedStateType.STOP_EXECUTION,
+        });
+
+        await Promise.resolve();
+        expect(resolved).toBe(false);
+
+        await commandService.executeCommand(SetFormulaCalculationStartMutation.id, {}, { onlyLocal: true });
+        await commandService.executeCommand(SetFormulaCalculationResultMutation.id, {
+            unitData: {
+                unit1: {
+                    sheet1: {
+                        0: {
+                            0: { v: 1 },
+                        },
+                    },
+                },
+            },
+            unitOtherData: {},
+        });
+
+        await Promise.resolve();
+        expect(resolved).toBe(false);
+
+        await commandService.executeCommand(
+            SetRangeValuesMutation.id,
+            {
+                unitId: 'unit1',
+                subUnitId: 'sheet1',
+                cellValue: {},
+            },
+            {
+                applyFormulaCalculationResult: true,
+            }
+        );
+
+        await expect(waitForResult).resolves.toBeUndefined();
     });
 });

@@ -32,6 +32,7 @@ import { ActiveDirtyController } from './controllers/active-dirty.controller';
 import { ArrayFormulaCellInterceptorController } from './controllers/array-formula-cell-interceptor.controller';
 import { DefinedNameController } from './controllers/defined-name.controller';
 import { FormulaAutoFillController } from './controllers/formula-auto-fill.controller';
+import { FormulaCalculationSessionController } from './controllers/formula-calculation-session.controller';
 import { FormulaController } from './controllers/formula.controller';
 import { ImageFormulaCellInterceptorController } from './controllers/image-formula-cell-interceptor.controller';
 import { SuperTableController } from './controllers/super-table.controller';
@@ -39,6 +40,7 @@ import { TriggerCalculationController } from './controllers/trigger-calculation.
 import { UpdateDefinedNameController } from './controllers/update-defined-name.controller';
 import { UpdateFormulaController } from './controllers/update-formula.controller';
 import { DescriptionService, IDescriptionService } from './services/description.service';
+import { FormulaCalculationSessionService } from './services/formula-calculation-session.service';
 import { FormulaRefRangeService } from './services/formula-ref-range.service';
 import { IRegisterFunctionService, RegisterFunctionService } from './services/register-function.service';
 import { IRemoteRegisterFunctionService, RemoteRegisterFunctionService, RemoteRegisterFunctionServiceName } from './services/remote/remote-register-function.service';
@@ -103,6 +105,8 @@ export class UniverSheetsFormulaPlugin extends Plugin {
         const dependencies: Dependency[] = [
             [IRegisterFunctionService, { useClass: RegisterFunctionService }],
             [IDescriptionService, { useClass: DescriptionService }],
+            [FormulaCalculationSessionService],
+            [FormulaCalculationSessionController],
             [FormulaController],
             [FormulaRefRangeService],
             [ArrayFormulaCellInterceptorController],
@@ -143,6 +147,7 @@ export class UniverSheetsFormulaPlugin extends Plugin {
         if (isNodeEnv()) {
             touchDependencies(this._injector, [
                 [TriggerCalculationController],
+                [FormulaCalculationSessionController],
             ]);
         }
     }
@@ -157,6 +162,7 @@ export class UniverSheetsFormulaPlugin extends Plugin {
         if (!isNodeEnv()) {
             touchDependencies(this._injector, [
                 [TriggerCalculationController],
+                [FormulaCalculationSessionController],
             ]);
         }
     }

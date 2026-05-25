@@ -15,49 +15,16 @@
  */
 
 import type enUS from './en-US';
-import array from './function-list/array/ru-RU';
-import compatibility from './function-list/compatibility/ru-RU';
-import cube from './function-list/cube/ru-RU';
-import database from './function-list/database/ru-RU';
-import date from './function-list/date/ru-RU';
-import engineering from './function-list/engineering/ru-RU';
-import financial from './function-list/financial/ru-RU';
-import information from './function-list/information/ru-RU';
-import logical from './function-list/logical/ru-RU';
-import lookup from './function-list/lookup/ru-RU';
-import math from './function-list/math/ru-RU';
-import statistical from './function-list/statistical/ru-RU';
-import text from './function-list/text/ru-RU';
-import univer from './function-list/univer/ru-RU';
-import web from './function-list/web/ru-RU';
 
 const locale: typeof enUS = {
-    shortcut: {
-        'sheets-formula-ui': {
+    'sheets-formula-ui': {
+        shortcut: {
             'quick-sum': 'Быстрая сумма',
         },
-    },
-    formula: {
+
         insert: {
             tooltip: 'Функции',
             common: 'Часто используемые функции',
-        },
-        functionList: {
-            ...financial,
-            ...date,
-            ...math,
-            ...statistical,
-            ...lookup,
-            ...database,
-            ...text,
-            ...logical,
-            ...information,
-            ...engineering,
-            ...cube,
-            ...compatibility,
-            ...web,
-            ...array,
-            ...univer,
         },
         prompt: {
             helpExample: 'ПРИМЕР',

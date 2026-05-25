@@ -98,8 +98,8 @@ export class FormulaAlertRenderController extends Disposable implements IRenderM
 
                     this._cellAlertManagerService.showAlert({
                         type: CellAlertType.ERROR,
-                        title: this._localeService.t('formula.error.title'),
-                        message: this._localeService.t(`formula.error.${ErrorTypeToMessageMap[errorType]}`),
+                        title: this._localeService.t('sheets-formula-ui.error.title'),
+                        message: this._localeService.t(`sheets-formula-ui.error.${ErrorTypeToMessageMap[errorType]}`),
                         location: cellPos.location,
                         width: 200,
                         height: 74,

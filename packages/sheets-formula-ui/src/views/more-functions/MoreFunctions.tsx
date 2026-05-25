@@ -77,12 +77,12 @@ export function MoreFunctions() {
                         onClick={handleClickNextPrev}
                         className="univer-mb-5 univer-ml-4 univer-mr-0 univer-mt-0"
                     >
-                        {localeService.t('formula.moreFunctions.next')}
+                        {localeService.t('sheets-formula-ui.moreFunctions.next')}
                     </Button>
                 )}
                 {inputParams && (
                     <Button onClick={handleClickNextPrev} className="univer-mb-5 univer-ml-4 univer-mr-0 univer-mt-0">
-                        {localeService.t('formula.moreFunctions.prev')}
+                        {localeService.t('sheets-formula-ui.moreFunctions.prev')}
                     </Button>
                 )}
                 {selectFunction && !!workbook && (
@@ -92,7 +92,7 @@ export function MoreFunctions() {
                         onClick={handleConfirm}
                         className="univer-mb-5 univer-ml-4 univer-mr-0 univer-mt-0"
                     >
-                        {localeService.t('formula.moreFunctions.confirm')}
+                        {localeService.t('sheets-formula-ui.moreFunctions.confirm')}
                     </Button>
                 )}
             </div>

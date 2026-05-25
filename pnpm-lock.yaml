@@ -274,6 +274,9 @@ importers:
       '@univerjs/sheets-sort-ui':
         specifier: workspace:*
         version: link:../../packages/sheets-sort-ui
+      '@univerjs/sheets-table':
+        specifier: workspace:*
+        version: link:../../packages/sheets-table
       '@univerjs/sheets-table-ui':
         specifier: workspace:*
         version: link:../../packages/sheets-table-ui

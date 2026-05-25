@@ -59,7 +59,7 @@ describe('formula UI operations', () => {
 
         await expect(MoreFunctionsOperation.handler(accessor)).resolves.toBe(true);
         expect(sidebarService.open).toHaveBeenCalledWith({
-            header: { title: 'formula.insert.tooltip' },
+            header: { title: 'sheets-formula-ui.insert.tooltip' },
             children: { label: MORE_FUNCTIONS_COMPONENT },
         });
     });

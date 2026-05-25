@@ -61,6 +61,7 @@
         "@univerjs/sheets-numfmt-ui": "workspace:*",
         "@univerjs/sheets-sort": "workspace:*",
         "@univerjs/sheets-sort-ui": "workspace:*",
+        "@univerjs/sheets-table": "workspace:*",
         "@univerjs/sheets-table-ui": "workspace:*",
         "@univerjs/sheets-thread-comment": "workspace:*",
         "@univerjs/sheets-thread-comment-ui": "workspace:*",

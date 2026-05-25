@@ -26,7 +26,7 @@ export function getFunctionTypeValues(
     return Object.keys(FunctionType)
         .filter((key) => isNaN(Number(key)) && key !== 'DefinedName' && key !== 'Table' && (customFormula || key !== 'User'))
         .map((key) => ({
-            label: localeService.t(`formula.functionType.${key.toLocaleLowerCase()}`),
+            label: localeService.t(`sheets-formula-ui.functionType.${key.toLocaleLowerCase()}`),
             value: `${FunctionType[key as keyof typeof FunctionType]}`,
         }));
 }

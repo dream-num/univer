@@ -56,12 +56,12 @@ export function SelectFunction(props: ISelectFunctionProps) {
         );
 
     options.unshift({
-        label: localeService.t('formula.moreFunctions.allFunctions'),
+        label: localeService.t('sheets-formula-ui.moreFunctions.allFunctions'),
         value: allTypeValue,
     });
 
-    const required = localeService.t('formula.prompt.required');
-    const optional = localeService.t('formula.prompt.optional');
+    const required = localeService.t('sheets-formula-ui.prompt.required');
+    const optional = localeService.t('sheets-formula-ui.prompt.optional');
 
     useEffect(() => {
         handleSelectChange(allTypeValue);
@@ -161,7 +161,7 @@ export function SelectFunction(props: ISelectFunctionProps) {
                 <Select value={typeSelected} options={options} onChange={handleSelectChange} />
 
                 <Input
-                    placeholder={localeService.t('formula.moreFunctions.searchFunctionPlaceholder')}
+                    placeholder={localeService.t('sheets-formula-ui.moreFunctions.searchFunctionPlaceholder')}
                     onKeyDown={handleSelectListKeyDown}
                     value={searchText}
                     onChange={handleSearchInputChange}
@@ -212,12 +212,12 @@ export function SelectFunction(props: ISelectFunctionProps) {
                     <FunctionParams title={functionInfo.functionName} value={functionInfo.description} />
 
                     <FunctionParams
-                        title={localeService.t('formula.moreFunctions.syntax')}
+                        title={localeService.t('sheets-formula-ui.moreFunctions.syntax')}
                         value={<FunctionHelp prefix={functionInfo.functionName} value={functionInfo.functionParameter} />}
                     />
 
                     <FunctionParams
-                        title={localeService.t('formula.prompt.helpExample')}
+                        title={localeService.t('sheets-formula-ui.prompt.helpExample')}
                         value={`${functionInfo.functionName}(${functionInfo.functionParameter
                             .map((item) => item.example)
                             .join(',')})`}

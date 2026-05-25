@@ -38,7 +38,7 @@ export interface IInsertCommandParams {
     cursorOffset?: number;
 }
 
-export const EditorInsertTextCommandId = 'docs-ui.doc.command.insert-text';
+export const EditorInsertTextCommandId = 'doc.command.insert-text';
 
 /**
  * The command to insert text. The changed range could be non-collapsed, mainly use in line break and normal input.
@@ -138,7 +138,7 @@ export interface IDeleteCommandParams {
  * The command to delete text, mainly used in BACKSPACE and DELETE when collapsed is true. ONLY handle collapsed range!!!
  */
 export const DeleteCommand: ICommand<IDeleteCommandParams> = {
-    id: 'docs-ui.doc.command.delete-text',
+    id: 'doc.command.delete-text',
     type: CommandType.COMMAND,
 
     handler: async (accessor, params: IDeleteCommandParams) => {
@@ -215,7 +215,7 @@ export interface IUpdateCommandParams {
  * The command to update text properties, mainly used in BACKSPACE.
  */
 export const UpdateCommand: ICommand<IUpdateCommandParams> = {
-    id: 'docs-ui.doc.command.update-text',
+    id: 'doc.command.update-text',
 
     type: CommandType.COMMAND,
 

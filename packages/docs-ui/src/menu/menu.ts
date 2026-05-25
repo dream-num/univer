@@ -698,7 +698,7 @@ export function HeaderFooterMenuItemFactory(accessor: IAccessor): IMenuButtonIte
 }
 
 export const TableIcon = 'GridIcon';
-export const TABLE_MENU_ID = 'docs-ui.doc.menu.table';
+export const TABLE_MENU_ID = 'doc.menu.table';
 
 export function TableMenuFactory(accessor: IAccessor): IMenuItem {
     return {

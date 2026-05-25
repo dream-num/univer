@@ -85,7 +85,7 @@ export interface IInnerPasteCommandParams {
 const UNITS = SHEET_EDITOR_UNITS;
 // Actually, the command is to handle paste event.
 export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
-    id: 'docs-ui.doc.command.inner-paste',
+    id: 'doc.command.inner-paste',
     type: CommandType.COMMAND,
 
     // eslint-disable-next-line max-lines-per-function, complexity
@@ -479,7 +479,7 @@ export interface IInnerCutCommandParams {
 }
 
 export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
-    id: 'docs-ui.doc.command.inner-cut',
+    id: 'doc.command.inner-cut',
 
     type: CommandType.COMMAND,
 

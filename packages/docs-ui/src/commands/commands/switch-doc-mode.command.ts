@@ -24,7 +24,7 @@ import { DocSelectionRenderService } from '../../services/selection/doc-selectio
 export interface ISwitchDocModeCommandParams { }
 
 export const SwitchDocModeCommand: ICommand<ISwitchDocModeCommandParams> = {
-    id: 'docs-ui.doc.command.switch-mode',
+    id: 'doc.command.switch-mode',
 
     type: CommandType.COMMAND,
 

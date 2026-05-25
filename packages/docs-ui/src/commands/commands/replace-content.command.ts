@@ -30,7 +30,7 @@ export interface IReplaceSnapshotCommandParams {
 }
 
 export const ReplaceSnapshotCommand: ICommand<IReplaceSnapshotCommandParams> = {
-    id: 'docs-ui.doc.command-replace-snapshot',
+    id: 'doc.command-replace-snapshot',
     type: CommandType.COMMAND,
     // eslint-disable-next-line max-lines-per-function, complexity
     handler: (accessor, params: IReplaceSnapshotCommandParams) => {
@@ -171,7 +171,7 @@ interface IReplaceContentCommandParams {
  * @deprecated please use ReplaceSnapshotCommand instead.
  */
 export const ReplaceContentCommand: ICommand<IReplaceContentCommandParams> = {
-    id: 'docs-ui.doc.command-replace-content',
+    id: 'doc.command-replace-content',
 
     type: CommandType.COMMAND,
 
@@ -223,7 +223,7 @@ interface ICoverContentCommandParams {
 
 // Cover all content with new body, and clear undo/redo stack.
 export const CoverContentCommand: ICommand<ICoverContentCommandParams> = {
-    id: 'docs-ui.doc.command-cover-content',
+    id: 'doc.command-cover-content',
 
     type: CommandType.COMMAND,
 
@@ -309,7 +309,7 @@ export interface IReplaceSelectionCommandParams {
 }
 
 export const ReplaceSelectionCommand: ICommand<IReplaceSelectionCommandParams> = {
-    id: 'docs-ui.doc.command.replace-selection',
+    id: 'doc.command.replace-selection',
     type: CommandType.COMMAND,
     handler(accessor, params) {
         if (!params) {
@@ -350,7 +350,7 @@ export const ReplaceSelectionCommand: ICommand<IReplaceSelectionCommandParams> =
 };
 
 export const ReplaceTextRunsCommand: ICommand<IReplaceContentCommandParams> = {
-    id: 'docs-ui.doc.command.replace-text-runs',
+    id: 'doc.command.replace-text-runs',
     type: CommandType.COMMAND,
 
     handler: (accessor, params: IReplaceContentCommandParams) => {

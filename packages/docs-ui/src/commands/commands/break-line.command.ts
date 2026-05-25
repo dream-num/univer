@@ -75,7 +75,7 @@ interface IBreakLineCommandParams {
 }
 
 export const BreakLineCommand: ICommand<IBreakLineCommandParams> = {
-    id: 'docs-ui.doc.command.break-line',
+    id: 'doc.command.break-line',
 
     type: CommandType.COMMAND,
 

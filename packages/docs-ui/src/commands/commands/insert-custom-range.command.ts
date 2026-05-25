@@ -30,7 +30,7 @@ export interface IInsertCustomRangeCommandParams {
 }
 
 export const InsertCustomRangeCommand: ICommand<IInsertCustomRangeCommandParams> = {
-    id: 'docs-ui.doc.command.insert-custom-range',
+    id: 'doc.command.insert-custom-range',
     type: CommandType.COMMAND,
     handler: (accessor, params) => {
         if (!params) return false;

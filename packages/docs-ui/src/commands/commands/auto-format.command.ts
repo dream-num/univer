@@ -18,7 +18,7 @@ import type { ICommand } from '@univerjs/core';
 import { CommandType, ICommandService, sequenceExecuteAsync } from '@univerjs/core';
 import { DocAutoFormatService } from '../../services/doc-auto-format.service';
 
-const TabCommandId = 'docs-ui.doc.command.tab';
+const TabCommandId = 'doc.command.tab';
 
 export interface ITabCommandParams {
     shift?: boolean;
@@ -35,7 +35,7 @@ export const TabCommand: ICommand<ITabCommandParams> = {
     },
 };
 
-const AfterSpaceCommandId = 'docs-ui.doc.command.after-space';
+const AfterSpaceCommandId = 'doc.command.after-space';
 
 export const AfterSpaceCommand: ICommand = {
     id: AfterSpaceCommandId,
@@ -49,7 +49,7 @@ export const AfterSpaceCommand: ICommand = {
 };
 
 export const EnterCommand: ICommand = {
-    id: 'docs-ui.doc.command.enter',
+    id: 'doc.command.enter',
     type: CommandType.COMMAND,
     async handler(accessor) {
         const autoFormatService = accessor.get(DocAutoFormatService);

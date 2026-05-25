@@ -50,7 +50,7 @@ export interface IDeleteCustomBlockParams {
 
 // The activeRange need collapsed.
 export const DeleteCustomBlockCommand: ICommand<IDeleteCustomBlockParams> = {
-    id: 'docs-ui.doc.command.delete-custom-block',
+    id: 'doc.command.delete-custom-block',
     type: CommandType.COMMAND,
     handler: async (accessor, params: IDeleteCustomBlockParams) => {
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
@@ -136,7 +136,7 @@ interface IMergeTwoParagraphParams {
 }
 
 export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
-    id: 'docs-ui.doc.command.merge-two-paragraph',
+    id: 'doc.command.merge-two-paragraph',
     type: CommandType.COMMAND,
     // eslint-disable-next-line max-lines-per-function
     handler: async (accessor, params: IMergeTwoParagraphParams) => {
@@ -258,7 +258,7 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
 };
 
 export const RemoveHorizontalLineCommand: ICommand = {
-    id: 'docs-ui.doc.command.remove-horizontal-line',
+    id: 'doc.command.remove-horizontal-line',
     type: CommandType.COMMAND,
     // eslint-disable-next-line max-lines-per-function
     handler: async (accessor) => {
@@ -403,7 +403,7 @@ export function getCursorWhenDelete(textRanges: Readonly<Nullable<ITextRangeWith
 
 // Handle BACKSPACE key.
 export const DeleteLeftCommand: ICommand = {
-    id: 'docs-ui.doc.command.delete-left',
+    id: 'doc.command.delete-left',
 
     type: CommandType.COMMAND,
     // eslint-disable-next-line max-lines-per-function, complexity
@@ -630,7 +630,7 @@ export const DeleteLeftCommand: ICommand = {
 
 // handle Delete key
 export const DeleteRightCommand: ICommand = {
-    id: 'docs-ui.doc.command.delete-right',
+    id: 'doc.command.delete-right',
     type: CommandType.COMMAND,
 
     // eslint-disable-next-line max-lines-per-function, complexity
@@ -803,7 +803,7 @@ function getTextRangesWhenDelete(activeRange: ITextRangeWithStyle, ranges: reado
 }
 
 export const DeleteCurrentParagraphCommand: ICommand = {
-    id: 'docs-ui.doc.command.delete-current-paragraph',
+    id: 'doc.command.delete-current-paragraph',
     type: CommandType.COMMAND,
     handler: async (accessor) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);

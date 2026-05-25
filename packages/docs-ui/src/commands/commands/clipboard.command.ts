@@ -35,7 +35,7 @@ const DOC_CLIPBOARD_PRIORITY = 999;
 
 export const DocCopyCommand: IMultiCommand = {
     id: CopyCommand.id,
-    name: 'docs-ui.doc.command.copy',
+    name: 'doc.command.copy',
     type: CommandType.COMMAND,
     multi: true,
     priority: DOC_CLIPBOARD_PRIORITY,
@@ -47,7 +47,7 @@ export const DocCopyCommand: IMultiCommand = {
 };
 
 export const DocCopyCurrentParagraphCommand = {
-    id: 'docs-ui.doc.command.copy-current-paragraph',
+    id: 'doc.command.copy-current-paragraph',
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor) => {
         const docClipboardService = accessor.get(IDocClipboardService);
@@ -69,7 +69,7 @@ export const DocCopyCurrentParagraphCommand = {
 
 export const DocCutCommand: IMultiCommand = {
     id: CutCommand.id,
-    name: 'docs-ui.doc.command.cut',
+    name: 'doc.command.cut',
     type: CommandType.COMMAND,
     multi: true,
     priority: DOC_CLIPBOARD_PRIORITY,
@@ -81,7 +81,7 @@ export const DocCutCommand: IMultiCommand = {
 };
 
 export const DocCutCurrentParagraphCommand = {
-    id: 'docs-ui.doc.command.cut-current-paragraph',
+    id: 'doc.command.cut-current-paragraph',
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor) => {
         const docClipboardService = accessor.get(IDocClipboardService);
@@ -103,7 +103,7 @@ export const DocCutCurrentParagraphCommand = {
 
 export const DocPasteCommand: IMultiCommand = {
     id: PasteCommand.id,
-    name: 'docs-ui.doc.command.paste',
+    name: 'doc.command.paste',
     type: CommandType.COMMAND,
     multi: true,
     priority: DOC_CLIPBOARD_PRIORITY,

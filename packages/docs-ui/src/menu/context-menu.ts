@@ -150,7 +150,7 @@ export const DeleteMenuFactory = (accessor: IAccessor): IMenuButtonItem => {
     };
 };
 
-export const TABLE_INSERT_MENU_ID = 'docs-ui.doc.menu.table-insert';
+export const TABLE_INSERT_MENU_ID = 'doc.menu.table-insert';
 export function TableInsertMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     return {
         id: TABLE_INSERT_MENU_ID,
@@ -207,7 +207,7 @@ export function InsertColumnRightMenuItemFactory(accessor: IAccessor): IMenuButt
     };
 }
 
-export const TABLE_DELETE_MENU_ID = 'docs-ui.doc.menu.table-delete';
+export const TABLE_DELETE_MENU_ID = 'doc.menu.table-delete';
 export function TableDeleteMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     return {
         id: TABLE_DELETE_MENU_ID,

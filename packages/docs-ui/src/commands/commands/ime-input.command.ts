@@ -34,7 +34,7 @@ export interface IIMEInputCommandParams {
 }
 
 export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
-    id: 'docs-ui.doc.command.ime-input',
+    id: 'doc.command.ime-input',
 
     type: CommandType.COMMAND,
 

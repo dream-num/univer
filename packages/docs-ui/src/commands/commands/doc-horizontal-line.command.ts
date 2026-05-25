@@ -24,7 +24,7 @@ interface IHorizontalCommandParams {
 }
 
 export const HorizontalLineCommand: ICommand<IHorizontalCommandParams> = {
-    id: 'docs-ui.doc.command.horizontal-line',
+    id: 'doc.command.horizontal-line',
 
     type: CommandType.COMMAND,
 
@@ -46,7 +46,7 @@ export const HorizontalLineCommand: ICommand<IHorizontalCommandParams> = {
 };
 
 export const InsertHorizontalLineBellowCommand: ICommand<IHorizontalCommandParams> = {
-    id: 'docs-ui.doc.command.insert-horizontal-line-bellow',
+    id: 'doc.command.insert-horizontal-line-bellow',
     type: CommandType.COMMAND,
     handler: (accessor) => {
         const commandService = accessor.get(ICommandService);

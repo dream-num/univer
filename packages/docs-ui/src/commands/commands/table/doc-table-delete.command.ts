@@ -25,7 +25,7 @@ import { getDeleteColumnsActionParams, getDeleteRowsActionsParams, getDeleteTabl
 export interface IDocTableDeleteRowsCommandParams {}
 
 export const DocTableDeleteRowsCommand: ICommand<IDocTableDeleteRowsCommandParams> = {
-    id: 'docs-ui.doc.table.delete-rows',
+    id: 'doc.table.delete-rows',
     type: CommandType.COMMAND,
     // eslint-disable-next-line max-lines-per-function
     handler: async (accessor) => {
@@ -128,7 +128,7 @@ export const DocTableDeleteRowsCommand: ICommand<IDocTableDeleteRowsCommandParam
 export interface IDocTableDeleteColumnsCommandParams {}
 
 export const DocTableDeleteColumnsCommand: ICommand<IDocTableDeleteColumnsCommandParams> = {
-    id: 'docs-ui.doc.table.delete-columns',
+    id: 'doc.table.delete-columns',
     type: CommandType.COMMAND,
     // eslint-disable-next-line max-lines-per-function
     handler: async (accessor) => {
@@ -242,7 +242,7 @@ export const DocTableDeleteColumnsCommand: ICommand<IDocTableDeleteColumnsComman
 export interface IDocTableDeleteTableCommandParams {}
 
 export const DocTableDeleteTableCommand: ICommand<IDocTableDeleteTableCommandParams> = {
-    id: 'docs-ui.doc.table.delete-table',
+    id: 'doc.table.delete-table',
     type: CommandType.COMMAND,
     // eslint-disable-next-line max-lines-per-function
     handler: async (accessor) => {

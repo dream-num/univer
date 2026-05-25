@@ -36,7 +36,7 @@ export const SetDocZoomRatioUndoMutationFactory = (
 };
 
 export const SetDocZoomRatioOperation: IOperation<ISetDocZoomRatioOperationParams> = {
-    id: 'docs-ui.doc.operation.set-zoom-ratio',
+    id: 'doc.operation.set-zoom-ratio',
 
     type: CommandType.OPERATION,
 

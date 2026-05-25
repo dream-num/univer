@@ -22,7 +22,7 @@ import { DocSelectionManagerService } from '@univerjs/docs';
 interface ISelectAllCommandParams { }
 
 export const DocSelectAllCommand: ICommand<ISelectAllCommandParams> = {
-    id: 'docs-ui.doc.command.select-all',
+    id: 'doc.command.select-all',
     type: CommandType.COMMAND,
     handler: async (accessor) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);

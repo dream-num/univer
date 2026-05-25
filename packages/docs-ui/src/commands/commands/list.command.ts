@@ -42,7 +42,7 @@ interface IListOperationCommandParams {
 }
 
 export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
-    id: 'docs-ui.doc.command.list-operation',
+    id: 'doc.command.list-operation',
     type: CommandType.COMMAND,
 
     handler: (accessor, params: IListOperationCommandParams) => {
@@ -110,7 +110,7 @@ interface IChangeListTypeCommandParams {
 }
 
 export const ChangeListTypeCommand: ICommand<IChangeListTypeCommandParams> = {
-    id: 'docs-ui.doc.command.change-list-type',
+    id: 'doc.command.change-list-type',
     type: CommandType.COMMAND,
 
     handler: (accessor, params: IChangeListTypeCommandParams) => {
@@ -177,7 +177,7 @@ interface IChangeListNestingLevelCommandParams {
 }
 
 export const ChangeListNestingLevelCommand: ICommand<IChangeListNestingLevelCommandParams> = {
-    id: 'docs-ui.doc.command.change-list-nesting-level',
+    id: 'doc.command.change-list-nesting-level',
 
     type: CommandType.COMMAND,
 
@@ -241,7 +241,7 @@ interface IBulletListCommandParams {
 }
 
 export const BulletListCommand: ICommand<IBulletListCommandParams> = {
-    id: 'docs-ui.doc.command.bullet-list',
+    id: 'doc.command.bullet-list',
 
     type: CommandType.COMMAND,
 
@@ -263,7 +263,7 @@ export const BulletListCommand: ICommand<IBulletListCommandParams> = {
 };
 
 export const CheckListCommand: ICommand<IBulletListCommandParams> = {
-    id: 'docs-ui.doc.command.check-list',
+    id: 'doc.command.check-list',
     type: CommandType.COMMAND,
     handler: (accessor, params) => {
         const commandService = accessor.get(ICommandService);
@@ -289,7 +289,7 @@ export interface IToggleCheckListCommandParams {
 }
 
 export const ToggleCheckListCommand: ICommand<IToggleCheckListCommandParams> = {
-    id: 'docs-ui.doc.command.toggle-check-list',
+    id: 'doc.command.toggle-check-list',
 
     type: CommandType.COMMAND,
 
@@ -348,7 +348,7 @@ interface IOrderListCommandParams {
 }
 
 export const OrderListCommand: ICommand<IOrderListCommandParams> = {
-    id: 'docs-ui.doc.command.order-list',
+    id: 'doc.command.order-list',
 
     type: CommandType.COMMAND,
 
@@ -372,7 +372,7 @@ interface IQuickListCommandParams {
 }
 
 export const QuickListCommand: ICommand<IQuickListCommandParams> = {
-    id: 'docs-ui.doc.command.quick-list',
+    id: 'doc.command.quick-list',
     type: CommandType.COMMAND,
     // eslint-disable-next-line max-lines-per-function
     handler(accessor, params) {
@@ -541,7 +541,7 @@ function insertList(accessor: IAccessor, listType: PresetListType) {
 }
 
 export const InsertBulletListBellowCommand: ICommand<IQuickListCommandParams> = {
-    id: 'docs-ui.doc.command.insert-bullet-list-bellow',
+    id: 'doc.command.insert-bullet-list-bellow',
     type: CommandType.COMMAND,
     handler: (accessor) => {
         return insertList(accessor, PresetListType.BULLET_LIST);
@@ -549,7 +549,7 @@ export const InsertBulletListBellowCommand: ICommand<IQuickListCommandParams> = 
 };
 
 export const InsertOrderListBellowCommand: ICommand<IQuickListCommandParams> = {
-    id: 'docs-ui.doc.command.insert-order-list-bellow',
+    id: 'doc.command.insert-order-list-bellow',
     type: CommandType.COMMAND,
     handler: (accessor) => {
         return insertList(accessor, PresetListType.ORDER_LIST);
@@ -557,7 +557,7 @@ export const InsertOrderListBellowCommand: ICommand<IQuickListCommandParams> = {
 };
 
 export const InsertCheckListBellowCommand: ICommand<IQuickListCommandParams> = {
-    id: 'docs-ui.doc.command.insert-check-list-bellow',
+    id: 'doc.command.insert-check-list-bellow',
     type: CommandType.COMMAND,
     handler: (accessor) => {
         return insertList(accessor, PresetListType.CHECK_LIST);

@@ -124,7 +124,7 @@ export function PageSettings(props: IConfirmChildrenProps) {
                     value={settings.paperSize}
                     onChange={handlePaperSizeChange}
                     options={PAPER_TYPES.map((p) => ({
-                        label: localeService.t(`docs-ui.docs-ui.page-settings.page-size.${p.toLocaleLowerCase()}`),
+                        label: localeService.t(`docs-ui.page-settings.page-size.${p.toLocaleLowerCase()}`),
                         value: p,
                     }))}
                 />

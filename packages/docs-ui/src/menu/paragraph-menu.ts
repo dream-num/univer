@@ -167,7 +167,7 @@ export const InsertHorizontalLineBellowMenuItemFactory = (accessor: IAccessor): 
     };
 };
 
-export const INSERT_BELLOW_MENU_ID = 'docs-ui.doc.menu.insert-bellow';
+export const INSERT_BELLOW_MENU_ID = 'doc.menu.insert-bellow';
 
 export function DocInsertBellowMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     return {

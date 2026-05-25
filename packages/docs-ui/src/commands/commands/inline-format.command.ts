@@ -63,7 +63,7 @@ export interface ISetInlineFormatCommandParams {
     value?: string;
 }
 
-const SetInlineFormatBoldCommandId = 'docs-ui.doc.command.set-inline-format-bold';
+const SetInlineFormatBoldCommandId = 'doc.command.set-inline-format-bold';
 export const SetInlineFormatBoldCommand: ICommand = {
     id: SetInlineFormatBoldCommandId,
     type: CommandType.COMMAND,
@@ -78,7 +78,7 @@ export const SetInlineFormatBoldCommand: ICommand = {
     },
 };
 
-const SetInlineFormatItalicCommandId = 'docs-ui.doc.command.set-inline-format-italic';
+const SetInlineFormatItalicCommandId = 'doc.command.set-inline-format-italic';
 export const SetInlineFormatItalicCommand: ICommand = {
     id: SetInlineFormatItalicCommandId,
     type: CommandType.COMMAND,
@@ -93,7 +93,7 @@ export const SetInlineFormatItalicCommand: ICommand = {
     },
 };
 
-const SetInlineFormatUnderlineCommandId = 'docs-ui.doc.command.set-inline-format-underline';
+const SetInlineFormatUnderlineCommandId = 'doc.command.set-inline-format-underline';
 export const SetInlineFormatUnderlineCommand: ICommand = {
     id: SetInlineFormatUnderlineCommandId,
     type: CommandType.COMMAND,
@@ -108,7 +108,7 @@ export const SetInlineFormatUnderlineCommand: ICommand = {
     },
 };
 
-const SetInlineFormatStrikethroughCommandId = 'docs-ui.doc.command.set-inline-format-strikethrough';
+const SetInlineFormatStrikethroughCommandId = 'doc.command.set-inline-format-strikethrough';
 export const SetInlineFormatStrikethroughCommand: ICommand = {
     id: SetInlineFormatStrikethroughCommandId,
     type: CommandType.COMMAND,
@@ -123,7 +123,7 @@ export const SetInlineFormatStrikethroughCommand: ICommand = {
     },
 };
 
-const SetInlineFormatSubscriptCommandId = 'docs-ui.doc.command.set-inline-format-subscript';
+const SetInlineFormatSubscriptCommandId = 'doc.command.set-inline-format-subscript';
 export const SetInlineFormatSubscriptCommand: ICommand = {
     id: SetInlineFormatSubscriptCommandId,
     type: CommandType.COMMAND,
@@ -138,7 +138,7 @@ export const SetInlineFormatSubscriptCommand: ICommand = {
     },
 };
 
-const SetInlineFormatSuperscriptCommandId = 'docs-ui.doc.command.set-inline-format-superscript';
+const SetInlineFormatSuperscriptCommandId = 'doc.command.set-inline-format-superscript';
 export const SetInlineFormatSuperscriptCommand: ICommand = {
     id: SetInlineFormatSuperscriptCommandId,
     type: CommandType.COMMAND,
@@ -153,7 +153,7 @@ export const SetInlineFormatSuperscriptCommand: ICommand = {
     },
 };
 
-const SetInlineFormatFontSizeCommandId = 'docs-ui.doc.command.set-inline-format-fontsize';
+const SetInlineFormatFontSizeCommandId = 'doc.command.set-inline-format-fontsize';
 export const SetInlineFormatFontSizeCommand: ICommand = {
     id: SetInlineFormatFontSizeCommandId,
     type: CommandType.COMMAND,
@@ -168,7 +168,7 @@ export const SetInlineFormatFontSizeCommand: ICommand = {
     },
 };
 
-const SetInlineFormatFontFamilyCommandId = 'docs-ui.doc.command.set-inline-format-font-family';
+const SetInlineFormatFontFamilyCommandId = 'doc.command.set-inline-format-font-family';
 export const SetInlineFormatFontFamilyCommand: ICommand = {
     id: SetInlineFormatFontFamilyCommandId,
     type: CommandType.COMMAND,
@@ -183,7 +183,7 @@ export const SetInlineFormatFontFamilyCommand: ICommand = {
     },
 };
 
-const SetInlineFormatTextColorCommandId = 'docs-ui.doc.command.set-inline-format-text-color';
+const SetInlineFormatTextColorCommandId = 'doc.command.set-inline-format-text-color';
 export const SetInlineFormatTextColorCommand: ICommand = {
     id: SetInlineFormatTextColorCommandId,
     type: CommandType.COMMAND,
@@ -198,7 +198,7 @@ export const SetInlineFormatTextColorCommand: ICommand = {
     },
 };
 
-const SetInlineFormatTextBackgroundColorCommandId = 'docs-ui.doc.command.set-inline-format-text-background-color';
+const SetInlineFormatTextBackgroundColorCommandId = 'doc.command.set-inline-format-text-background-color';
 export const SetInlineFormatTextBackgroundColorCommand: ICommand = {
     id: SetInlineFormatTextBackgroundColorCommandId,
     type: CommandType.COMMAND,
@@ -213,7 +213,7 @@ export const SetInlineFormatTextBackgroundColorCommand: ICommand = {
     },
 };
 
-const ResetInlineFormatTextBackgroundColorCommandId = 'docs-ui.doc.command.reset-inline-format-text-background-color';
+const ResetInlineFormatTextBackgroundColorCommandId = 'doc.command.reset-inline-format-text-background-color';
 export const ResetInlineFormatTextBackgroundColorCommand: ICommand = {
     id: ResetInlineFormatTextBackgroundColorCommandId,
     type: CommandType.COMMAND,
@@ -243,7 +243,7 @@ const COMMAND_ID_TO_FORMAT_KEY_MAP: Record<string, keyof IStyleBase> = {
 };
 
 export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
-    id: 'docs-ui.doc.command.set-inline-format',
+    id: 'doc.command.set-inline-format',
     type: CommandType.COMMAND,
     // eslint-disable-next-line max-lines-per-function, complexity
     handler: async (accessor, params: ISetInlineFormatCommandParams) => {

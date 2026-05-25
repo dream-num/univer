@@ -30,7 +30,7 @@ export interface ISetDocZoomRatioCommandParams {
 
 export const SetDocZoomRatioCommand: ICommand = {
     type: CommandType.COMMAND,
-    id: 'docs-ui.doc.command.set-zoom-ratio',
+    id: 'doc.command.set-zoom-ratio',
 
     handler: async (accessor: IAccessor, params?: ISetDocZoomRatioCommandParams) => {
         const commandService = accessor.get(ICommandService);

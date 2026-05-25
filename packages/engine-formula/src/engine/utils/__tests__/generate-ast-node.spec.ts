@@ -22,7 +22,10 @@ describe('generateAstNode defined name cache invalidation', () => {
         FORMULA_AST_CACHE.clear();
     });
 
-    function createHarness(dirtyDefinedNameMap: Record<string, Record<string, string>>) {
+    function createHarness(
+        dirtyDefinedNameMap: Record<string, Record<string, string>>,
+        dirtySuperTableMap: Record<string, Record<string, string>> = {}
+    ) {
         let parseCount = 0;
         const node = {
             hasDefinedName: () => false,
@@ -39,6 +42,7 @@ describe('generateAstNode defined name cache invalidation', () => {
         };
         const currentConfigService = {
             getDirtyDefinedNameMap: () => dirtyDefinedNameMap,
+            getDirtySuperTableMap: () => dirtySuperTableMap,
             getExecuteUnitId: () => 'unit-1',
         };
 
@@ -142,6 +146,56 @@ describe('generateAstNode defined name cache invalidation', () => {
         generateAstNode(
             'unit-1',
             '=SUM(A1)',
+            harness.lexer as never,
+            harness.astTreeBuilder as never,
+            harness.currentConfigService as never
+        );
+
+        expect(harness.getParseCount()).toBe(1);
+    });
+
+    it('does not reuse cache when formula references a dirty super table in the same unit', () => {
+        const harness = createHarness({}, {
+            'unit-1': {
+                Table1: '1',
+            },
+        });
+
+        generateAstNode(
+            'unit-1',
+            '=SUM(Table1[col1])',
+            harness.lexer as never,
+            harness.astTreeBuilder as never,
+            harness.currentConfigService as never
+        );
+        generateAstNode(
+            'unit-1',
+            '=SUM(Table1[col1])',
+            harness.lexer as never,
+            harness.astTreeBuilder as never,
+            harness.currentConfigService as never
+        );
+
+        expect(harness.getParseCount()).toBe(2);
+    });
+
+    it('reuses cache when formula references a dirty super table in another unit', () => {
+        const harness = createHarness({}, {
+            'unit-2': {
+                Table1: '1',
+            },
+        });
+
+        generateAstNode(
+            'unit-1',
+            '=SUM(Table1[col1])',
+            harness.lexer as never,
+            harness.astTreeBuilder as never,
+            harness.currentConfigService as never
+        );
+        generateAstNode(
+            'unit-1',
+            '=SUM(Table1[col1])',
             harness.lexer as never,
             harness.astTreeBuilder as never,
             harness.currentConfigService as never

@@ -22,7 +22,7 @@ import type {
     Nullable,
     Workbook,
 } from '@univerjs/core';
-import type { IDirtyUnitFeatureMap, IDirtyUnitOtherFormulaMap, IDirtyUnitSheetNameMap, IFormulaData, IFormulaDataItem, IFormulaDirtyData, IUnitSheetNameMap } from '@univerjs/engine-formula';
+import type { IDirtyUnitDefinedNameMap, IDirtyUnitFeatureMap, IDirtyUnitOtherFormulaMap, IDirtyUnitSheetNameMap, IFormulaData, IFormulaDataItem, IFormulaDirtyData, IUnitSheetNameMap } from '@univerjs/engine-formula';
 import type {
     IInsertSheetMutationParams,
     IRemoveSheetMutationParams,
@@ -43,7 +43,7 @@ import {
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
-import { deserializeRangeWithSheetWithCache, ErrorType, FormulaDataModel, generateStringWithSequence, IDefinedNamesService, initSheetFormulaData, LexerTreeBuilder, sequenceNodeType, serializeRangeToRefString, SetArrayFormulaDataMutation, SetFormulaDataMutation, SetTriggerFormulaCalculationStartMutation } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheetWithCache, ErrorType, FormulaDataModel, generateStringWithSequence, IDefinedNamesService, initSheetFormulaData, LexerTreeBuilder, sequenceNodeType, serializeRangeToRefString, SetArrayFormulaDataMutation, SetFormulaDataMutation, SetTriggerFormulaCalculationStartMutation, splitTableStructuredRef } from '@univerjs/engine-formula';
 import {
     ClearSelectionFormatCommand,
     InsertSheetMutation,
@@ -297,7 +297,7 @@ export class UpdateFormulaController extends Disposable {
         const dirtyRanges: IUnitRange[] = calculationMode === CalculationMode.WHEN_EMPTY ? this._formulaDataModel.getFormulaDirtyRanges() : [];
 
         const dirtyNameMap: IDirtyUnitSheetNameMap = {};
-        const dirtyDefinedNameMap: IDirtyUnitSheetNameMap = {};
+        const dirtyDefinedNameMap: IDirtyUnitDefinedNameMap = {};
         const dirtyUnitFeatureMap: IDirtyUnitFeatureMap = {};
         const dirtyUnitOtherFormulaMap: IDirtyUnitOtherFormulaMap = {};
         const clearDependencyTreeCache: IDirtyUnitSheetNameMap = {};
@@ -454,6 +454,33 @@ export class UpdateFormulaController extends Disposable {
                                 ...node,
                                 token: type === FormulaReferenceMoveType.SetDefinedName ? definedName : ErrorType.REF,
                             };
+                            shouldModify = true;
+                            refChangeIds.push(i);
+
+                            continue;
+                        } else if ((type === FormulaReferenceMoveType.SetSuperTableName || type === FormulaReferenceMoveType.RemoveSuperTableName || type === FormulaReferenceMoveType.RemoveSuperTableColumn) && (nodeType === sequenceNodeType.TABLE || nodeType === sequenceNodeType.FUNCTION)) {
+                            const { oldTableName, tableName, tableColumnNames } = formulaReferenceMoveParam;
+                            if (oldTableName === undefined || (type === FormulaReferenceMoveType.SetSuperTableName && tableName === undefined)) {
+                                continue;
+                            }
+
+                            const { tableName: tokenTableName, columnStruct = '' } = splitTableStructuredRef(token);
+                            if (tokenTableName !== oldTableName) {
+                                continue;
+                            }
+
+                            if (type === FormulaReferenceMoveType.RemoveSuperTableColumn && !tableReferenceContainsColumn(columnStruct, tableColumnNames)) {
+                                continue;
+                            }
+
+                            sequenceNodes[i] = {
+                                ...node,
+                                token: type === FormulaReferenceMoveType.SetSuperTableName ? `${tableName}${columnStruct}` : ErrorType.REF,
+                            };
+                            const nextNode = sequenceNodes[i + 1];
+                            if ((type === FormulaReferenceMoveType.RemoveSuperTableName || type === FormulaReferenceMoveType.RemoveSuperTableColumn) && typeof nextNode === 'string' && nextNode.startsWith(']')) {
+                                sequenceNodes[i + 1] = nextNode.slice(1);
+                            }
                             shouldModify = true;
                             refChangeIds.push(i);
 
@@ -657,4 +684,23 @@ export class UpdateFormulaController extends Disposable {
 
         return { newFormulaData };
     }
+}
+
+function tableReferenceContainsColumn(columnStruct: string, columnNames: string[] | undefined): boolean {
+    if (!columnNames?.length || columnStruct.length === 0) {
+        return false;
+    }
+
+    const columnNameSet = new Set(columnNames);
+    const completedColumnStruct = columnStruct.endsWith(']') ? columnStruct : `${columnStruct}]`;
+    const columnMatches = completedColumnStruct.matchAll(/\[([^\]]+)\]/g);
+
+    for (const match of columnMatches) {
+        const columnName = match[1].replace(/^\[/, '').trim();
+        if (!columnName.startsWith('#') && columnNameSet.has(columnName)) {
+            return true;
+        }
+    }
+
+    return false;
 }

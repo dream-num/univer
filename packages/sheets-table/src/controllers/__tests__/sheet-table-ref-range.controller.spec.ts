@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { InsertRowMutation } from '@univerjs/sheets';
+import { InsertRowMutation, RemoveColCommand } from '@univerjs/sheets';
 import { describe, expect, it, vi } from 'vitest';
 import { SheetTableRefRangeController } from '../sheet-table-ref-range.controller';
 
@@ -72,6 +72,90 @@ describe('SheetTableRefRangeController', () => {
                 endColumn: 3,
             },
         });
+
+        controller.dispose();
+    });
+
+    it('should include table formula reference mutations when worksheet column removal deletes table columns', () => {
+        let interceptCommandConfig: any;
+        const tableColumn = {
+            toJSON: () => ({ id: 'c1', displayName: '1' }),
+        };
+        const table = {
+            getId: () => 't1',
+            getRange: () => ({ startRow: 0, endRow: 5, startColumn: 1, endColumn: 3 }),
+            getTableInfo: () => ({ name: 'Table' }),
+            getTableColumnByIndex: vi.fn(() => tableColumn),
+            toJSON: () => ({
+                id: 't1',
+                name: 'Table',
+                range: { startRow: 0, endRow: 5, startColumn: 1, endColumn: 3 },
+                options: { showHeader: true },
+                filters: {},
+                columns: [{ id: 'c1', displayName: '1' }, { id: 'c2', displayName: '2' }, { id: 'c3', displayName: '3' }],
+            }),
+        };
+        const workbook = {
+            getUnitId: () => 'u1',
+            getActiveSheet: () => ({ getSheetId: () => 's1' }),
+        };
+        const onCommandExecute = vi.fn(() => ({
+            preRedos: [{ id: 'formula.pre-redo', params: {} }],
+            redos: [{ id: 'formula.redo', params: {} }],
+            preUndos: [{ id: 'formula.pre-undo', params: {} }],
+            undos: [{ id: 'formula.undo', params: {} }],
+        }));
+
+        const controller = new SheetTableRefRangeController(
+            { onCommandExecuted: vi.fn(() => ({ dispose: vi.fn() })) } as any,
+            {} as any,
+            { getCurrentUnitOfType: () => workbook } as any,
+            {} as any,
+            {
+                interceptCommand: vi.fn((config: any) => {
+                    interceptCommandConfig = config;
+                    return { dispose: vi.fn() };
+                }),
+                onCommandExecute,
+            } as any,
+            {
+                getTablesBySubunitId: vi.fn(() => [table]),
+            } as any,
+            { t: () => 'Column' } as any
+        );
+
+        const result = interceptCommandConfig.getMutations({
+            id: RemoveColCommand.id,
+            params: {
+                range: { startRow: 0, endRow: 99, startColumn: 1, endColumn: 1 },
+            },
+        });
+
+        expect(onCommandExecute).toHaveBeenCalledWith({
+            id: 'sheet.command.table-remove-col',
+            params: {
+                unitId: 'u1',
+                subUnitId: 's1',
+                tableId: 't1',
+                tableName: 'Table',
+                range: { startRow: 0, endRow: 99, startColumn: 1, endColumn: 1 },
+                removedColumnNames: ['1'],
+            },
+        });
+        expect(result.preRedos.map((mutation: any) => mutation.id)).toEqual([]);
+        expect(result.redos.map((mutation: any) => mutation.id)).toEqual([
+            'formula.pre-redo',
+            'formula.redo',
+            'sheet.mutation.set-sheet-table',
+        ]);
+        expect(result.preUndos.map((mutation: any) => mutation.id)).toEqual([
+            'sheet.mutation.delete-table',
+        ]);
+        expect(result.undos.map((mutation: any) => mutation.id)).toEqual([
+            'sheet.mutation.add-table',
+            'formula.pre-undo',
+            'formula.undo',
+        ]);
 
         controller.dispose();
     });

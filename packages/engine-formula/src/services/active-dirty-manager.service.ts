@@ -15,7 +15,7 @@
  */
 
 import type { ICommandInfo, IUnitRange, Nullable } from '@univerjs/core';
-import type { IDirtyUnitFeatureMap, IDirtyUnitOtherFormulaMap, IDirtyUnitSheetDefinedNameMap, IDirtyUnitSheetNameMap } from '../basics/common';
+import type { IDirtyUnitDefinedNameMap, IDirtyUnitFeatureMap, IDirtyUnitOtherFormulaMap, IDirtyUnitSheetNameMap, IDirtyUnitSuperTableMap } from '../basics/common';
 import { createIdentifier, Disposable } from '@univerjs/core';
 
 export interface IDirtyConversionManagerParams {
@@ -24,7 +24,8 @@ export interface IDirtyConversionManagerParams {
         forceCalculation?: boolean;
         dirtyRanges?: IUnitRange[];
         dirtyNameMap?: IDirtyUnitSheetNameMap;
-        dirtyDefinedNameMap?: IDirtyUnitSheetDefinedNameMap;
+        dirtyDefinedNameMap?: IDirtyUnitDefinedNameMap;
+        dirtySuperTableMap?: IDirtyUnitSuperTableMap;
         dirtyUnitFeatureMap?: IDirtyUnitFeatureMap;
         dirtyUnitOtherFormulaMap?: IDirtyUnitOtherFormulaMap;
         clearDependencyTreeCache?: IDirtyUnitSheetNameMap;

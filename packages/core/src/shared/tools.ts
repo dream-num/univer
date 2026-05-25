@@ -540,7 +540,15 @@ export const isNodeEnv = () => {
  * @returns {RegExp} The generated regular expression
  */
 export function createREGEXFromWildChar(wildChar: string): RegExp {
-    const escaped = wildChar.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const escaped = escapeRegExp(wildChar);
     const regexpStr = escaped.replace(/\\\*/g, '.*').replace(/\\\?/g, '.');
     return new RegExp(`^${regexpStr}$`, 'i');
+}
+
+/**
+ * Escapes characters that have special meaning in a regular expression so the
+ * returned string can be safely embedded in a RegExp pattern as literal text.
+ */
+export function escapeRegExp(str: string): string {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }

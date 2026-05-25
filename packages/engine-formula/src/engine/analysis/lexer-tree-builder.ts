@@ -15,7 +15,7 @@
  */
 
 import type { IRange, Nullable } from '@univerjs/core';
-import type { IDirtyUnitSheetDefinedNameMap, IExprTreeNode, ISuperTable } from '../../basics/common';
+import type { IDirtyUnitDefinedNameMap, IExprTreeNode, ISuperTable } from '../../basics/common';
 
 import type { IFunctionNames } from '../../basics/function';
 import type { IDefinedNamesServiceParam } from '../../services/defined-names.service';
@@ -78,7 +78,7 @@ export const FormulaSequenceNodeCache = new FormulaAstLRU<Array<string | ISequen
 interface IInjectDefinedNameParam {
     unitId: Nullable<string>;
     getValueByName(unitId: string, name: string): Nullable<IDefinedNamesServiceParam>;
-    getDirtyDefinedNameMap(): IDirtyUnitSheetDefinedNameMap;
+    getDirtyDefinedNameMap(): IDirtyUnitDefinedNameMap;
     getSheetName: (unitId: string, sheetId: string) => string;
 }
 

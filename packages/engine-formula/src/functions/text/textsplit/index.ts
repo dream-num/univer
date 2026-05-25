@@ -15,6 +15,7 @@
  */
 
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { escapeRegExp } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
@@ -261,10 +262,6 @@ export class Textsplit extends BaseFunction {
 
         value += '';
 
-        return this._escapeRegExp(value);
-    }
-
-    private _escapeRegExp(string: string): string {
-        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        return escapeRegExp(value);
     }
 }

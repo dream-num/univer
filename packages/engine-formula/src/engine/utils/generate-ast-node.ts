@@ -23,6 +23,7 @@ import type { AstTreeBuilder } from '../analysis/parser';
 import type { AstRootNode } from '../ast-node/ast-root-node';
 import type { BaseAstNode } from '../ast-node/base-ast-node';
 import type { IFormulaDependencyTree } from '../dependency/dependency-tree';
+import { escapeRegExp } from '@univerjs/core';
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import { ERROR_TYPE_SET } from '../../basics/error-type';
 import { ErrorNode } from '../ast-node/base-ast-node';
@@ -31,11 +32,16 @@ const FORMULA_CACHE_LRU_COUNT = 5000;
 
 export const FORMULA_AST_CACHE = new FormulaAstLRU<AstRootNode>(FORMULA_CACHE_LRU_COUNT);
 
+type IDirtyStringMap = Record<string, string>;
+
+const DIRTY_DEFINED_NAME_SET_CACHE = new WeakMap<IDirtyStringMap, Set<string>>();
+const DIRTY_SUPER_TABLE_PATTERN_CACHE = new WeakMap<IDirtyStringMap, RegExp | null>();
+
 export function generateAstNode(unitId: string, formulaString: string, lexer: Lexer, astTreeBuilder: AstTreeBuilder, currentConfigService: IFormulaCurrentConfigService): AstRootNode {
     // refOffsetX and refOffsetY are separated by -, otherwise x:1 y:10 will be repeated with x:11 y:0
     let astNode: Nullable<AstRootNode> = FORMULA_AST_CACHE.get(`${unitId}${formulaString}`);
 
-    const noCache = checkIsChangedByDefinedName(unitId, formulaString, currentConfigService);
+    const noCache = checkIsChangedByDefinedName(unitId, formulaString, currentConfigService) || checkIsChangedBySuperTable(unitId, formulaString, currentConfigService);
 
     if (!noCache && astNode && !isDirtyDefinedForNode(astNode, currentConfigService)) {
         // astNode.setRefOffset(refOffsetX, refOffsetY);
@@ -75,20 +81,51 @@ function checkIsChangedByDefinedName(unitId: string, formula: string, currentCon
         return false;
     }
 
-    const formulaText = normalizeFormulaText(formula);
-    const names = Object.keys(unitDefinedNameMap);
-    for (let i = 0, len = names.length; i < len; i++) {
-        // Dirty defined-name entries use the changed formula text as the key.
-        if (normalizeFormulaText(names[i]) === formulaText) {
-            return true;
-        }
-    }
-
-    return false;
+    // Dirty defined-name entries use the changed formula text as the key.
+    return getNormalizedDirtyDefinedNameSet(unitDefinedNameMap).has(normalizeFormulaText(formula));
 }
 
 function normalizeFormulaText(formula: string): string {
     return formula.startsWith('=') ? formula.slice(1) : formula;
+}
+
+function checkIsChangedBySuperTable(unitId: string, formula: string, currentConfigService: IFormulaCurrentConfigService): boolean {
+    const getDirtySuperTableMap = currentConfigService.getDirtySuperTableMap?.bind(currentConfigService);
+    const changedSuperTableMap = getDirtySuperTableMap?.();
+    const unitSuperTableMap = changedSuperTableMap?.[unitId];
+
+    if (unitSuperTableMap == null) {
+        return false;
+    }
+
+    const tableReferencePattern = getDirtySuperTableReferencePattern(unitSuperTableMap);
+    return tableReferencePattern?.test(normalizeFormulaText(formula)) ?? false;
+}
+
+function getNormalizedDirtyDefinedNameSet(unitDefinedNameMap: IDirtyStringMap): Set<string> {
+    let normalizedNameSet = DIRTY_DEFINED_NAME_SET_CACHE.get(unitDefinedNameMap);
+    if (normalizedNameSet == null) {
+        normalizedNameSet = new Set(Object.keys(unitDefinedNameMap).map(normalizeFormulaText));
+        DIRTY_DEFINED_NAME_SET_CACHE.set(unitDefinedNameMap, normalizedNameSet);
+    }
+
+    return normalizedNameSet;
+}
+
+function getDirtySuperTableReferencePattern(unitSuperTableMap: IDirtyStringMap): RegExp | null {
+    let tableReferencePattern = DIRTY_SUPER_TABLE_PATTERN_CACHE.get(unitSuperTableMap);
+    if (tableReferencePattern === undefined) {
+        const escapedTableNames = Object.keys(unitSuperTableMap)
+            .filter((tableName) => tableName.length > 0)
+            .map(escapeRegExp);
+
+        tableReferencePattern = escapedTableNames.length > 0
+            ? new RegExp(`(^|[^A-Za-z0-9_])(?:${escapedTableNames.join('|')})(\\s*\\[|$|[^A-Za-z0-9_])`, 'i')
+            : null;
+        DIRTY_SUPER_TABLE_PATTERN_CACHE.set(unitSuperTableMap, tableReferencePattern);
+    }
+
+    return tableReferencePattern;
 }
 
 function isDirtyDefinedForNode(node: BaseAstNode, currentConfigService: IFormulaCurrentConfigService) {

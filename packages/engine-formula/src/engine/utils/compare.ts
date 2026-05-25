@@ -48,7 +48,7 @@ export function isWildcard(str: string) {
 }
 
 export function isMatchWildcard(currentValue: string, value: string) {
-    const pattern = escapeRegExp(value).replace(/~?[*?]/g, (match) => {
+    const pattern = escapeRegExpForWildcard(value).replace(/~?[*?]/g, (match) => {
         if (match.startsWith('~')) {
             return `\\${match.substring(1)}`;
         }
@@ -101,7 +101,8 @@ export function compareWithWildcard(currentValue: string, value: string, operato
     return result;
 }
 
-export function escapeRegExp(str: string) {
+function escapeRegExpForWildcard(str: string) {
+    // Keep * and ? unescaped so wildcard replacement can handle them below.
     return str.replace(/[.+^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
 }
 

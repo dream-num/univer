@@ -2468,6 +2468,12 @@ importers:
       '@univerjs-infra/shared':
         specifier: workspace:*
         version: link:../../common/shared
+      '@univerjs/engine-render':
+        specifier: workspace:*
+        version: link:../engine-render
+      '@univerjs/sheets-formula':
+        specifier: workspace:*
+        version: link:../sheets-formula
       rxjs:
         specifier: ^7.8.2
         version: 7.8.2

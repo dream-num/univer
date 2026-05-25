@@ -26,7 +26,7 @@ import {
 } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { DocDrawingController as CoreDocDrawingController, DocDrawingService, IDocDrawingService } from '@univerjs/docs-drawing';
-import { DocSelectionRenderService } from '@univerjs/docs-ui';
+import { DocContentInsertService, DocSelectionRenderService } from '@univerjs/docs-ui';
 import { DrawingManagerService, IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -127,6 +127,7 @@ function setupDrawingTestBed(docData: IDocumentData) {
     injector.add([DocDrawingService]);
     injector.add([IDocDrawingService, { useClass: DocDrawingService }]);
     injector.add([IDrawingManagerService, { useClass: DrawingManagerService }]);
+    injector.add([DocContentInsertService]);
     injector.add([CoreDocDrawingController]);
     injector.add([DocDrawingAddRemoveController]);
 
@@ -207,6 +208,48 @@ describe('docs drawing commands integration', () => {
             drawingId: 'shape-1',
         });
         expect(testBed.drawingManagerService.getDrawingOrder('test-doc', 'test-doc')).toEqual(['shape-1']);
+
+        testBed.univer.dispose();
+    });
+
+    it('uses the explicit content insert range for drawing insertion', async () => {
+        const insertOffset = 5;
+        const testBed = setupDrawingTestBed(createBaseDocData());
+
+        testBed.selectionManager.__TEST_ONLY_add([{
+            startOffset: 0,
+            endOffset: 0,
+            collapsed: true,
+            isActive: true,
+            segmentId: '',
+            style: null as never,
+        }]);
+        testBed.get(DocContentInsertService).setInsertRange({
+            unitId: 'test-doc',
+            startOffset: insertOffset,
+            endOffset: insertOffset,
+        });
+
+        expect(await testBed.commandService.executeCommand(InsertDocDrawingCommand.id, {
+            drawings: [{
+                drawingId: 'shape-1',
+                unitId: 'test-doc',
+                subUnitId: 'test-doc',
+                drawingType: 'image',
+                layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
+                docTransform: {
+                    positionH: { posOffset: 1 },
+                    positionV: { posOffset: 2 },
+                },
+            }],
+        })).toBe(true);
+        await awaitTime(0);
+
+        const doc = testBed.get(IUniverInstanceService)
+            .getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC)!;
+
+        expect(doc.getBody()?.dataStream).toBe('Hello\b\r\n');
+        expect(doc.getBody()?.customBlocks).toEqual([{ startIndex: insertOffset, blockId: 'shape-1' }]);
 
         testBed.univer.dispose();
     });

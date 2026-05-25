@@ -36,6 +36,11 @@ import { SetDocDrawingArrangeCommand } from '../../commands/commands/set-drawing
 import { UngroupDocDrawingCommand } from '../../commands/commands/ungroup-doc-drawing.command';
 import { DocRefreshDrawingsService } from '../../services/doc-refresh-drawings.service';
 
+interface IImageInsertPosition {
+    left: number;
+    top: number;
+}
+
 export class DocDrawingUpdateRenderController extends Disposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
@@ -68,6 +73,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
     }
 
     async insertDocImage(): Promise<boolean> {
+        const insertPosition = this._getCurrentImageInsertPosition();
         const files = await this._fileOpenerService.openFile({
             multiple: true,
             accept: DRAWING_IMAGE_ALLOW_IMAGE_LIST.map((image) => `.${image.replace('image/', '')}`).join(','),
@@ -84,12 +90,12 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
             return false;
         }
 
-        await this._insertFloatImages(files);
+        await this._insertFloatImages(files, insertPosition);
         return true;
     }
 
     // eslint-disable-next-line max-lines-per-function
-    private async _insertFloatImages(files: File[]) {
+    private async _insertFloatImages(files: File[], insertPosition: Nullable<IImageInsertPosition>) {
         let imageParams: Nullable<IImageIoServiceParam>[] = [];
 
         try {
@@ -141,10 +147,16 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
                 scale = Math.min(scaleWidth, scaleHeight);
             }
 
-            const docTransform = this._getImagePosition(width * scale, height * scale);
+            const imagePosition = insertPosition ?? this._getCurrentImageInsertPosition();
+            const docTransform = this._getImagePosition(width * scale, height * scale, imagePosition);
 
             if (docTransform == null) {
                 return;
+            }
+
+            const transform = docDrawingPositionToTransform(docTransform);
+            if (transform != null && imagePosition != null) {
+                transform.top = imagePosition.top;
             }
 
             const docDrawingParam: IDocDrawing = {
@@ -154,7 +166,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
                 drawingType: DrawingTypeEnum.DRAWING_IMAGE,
                 imageSourceType,
                 source,
-                transform: docDrawingPositionToTransform(docTransform),
+                transform,
                 docTransform,
                 behindDoc: BooleanNumber.FALSE,
                 title: '',
@@ -196,11 +208,11 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
 
     private _getImagePosition(
         imageWidth: number,
-        imageHeight: number
+        imageHeight: number,
+        insertPosition?: Nullable<IImageInsertPosition>
     ): Nullable<IDocDrawingPosition> {
-        const activeTextRange = this._docSelectionRenderService.getActiveTextRange();
         // TODO: NO need to get the cursor position, because the insert image is inline.
-        const position = activeTextRange?.getAbsolutePosition() || {
+        const position = insertPosition ?? this._getCurrentImageInsertPosition() ?? {
             left: 0,
             top: 0,
         };
@@ -219,6 +231,19 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
                 posOffset: 0,
             },
             angle: 0,
+        };
+    }
+
+    private _getCurrentImageInsertPosition(): Nullable<IImageInsertPosition> {
+        const position = this._docSelectionRenderService.getActiveTextRange()?.getAbsolutePosition();
+
+        if (position == null) {
+            return null;
+        }
+
+        return {
+            left: position.left,
+            top: position.top,
         };
     }
 

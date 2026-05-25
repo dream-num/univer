@@ -191,8 +191,7 @@ export class DocDrawingPopupMenuController extends RxDisposable {
                 index: 0,
                 commandId: EditDocDrawingOperation.id,
                 commandParams: { unitId, subUnitId, drawingId },
-                // disable: !!SHEET_EDITOR_UNITS.includes(unitId) || drawingType === DrawingTypeEnum.DRAWING_DOM,
-                disable: true,
+                disable: drawingType === DrawingTypeEnum.DRAWING_DOM,
             },
             {
                 label: 'docs-drawing-ui.image-popup.delete',

@@ -95,13 +95,13 @@ describe('docs ui services', () => {
         }]);
 
         const lowPriority = service.registerAutoFormat({
-            id: 'doc.command.tab',
+            id: 'docs-ui.doc.command.tab',
             priority: 1,
             match: () => true,
             getMutations: () => [{ id: 'low-priority' }],
         });
         const highPriority = service.registerAutoFormat({
-            id: 'doc.command.tab',
+            id: 'docs-ui.doc.command.tab',
             priority: 10,
             match: (context) => {
                 highPriorityContext = {
@@ -115,7 +115,7 @@ describe('docs ui services', () => {
             getMutations: () => [{ id: 'high-priority' }],
         });
 
-        expect(service.onAutoFormat('doc.command.tab', { shift: false })).toEqual([{ id: 'high-priority' }]);
+        expect(service.onAutoFormat('docs-ui.doc.command.tab', { shift: false })).toEqual([{ id: 'high-priority' }]);
         expect(highPriorityContext).toEqual({
             isBody: true,
             paragraphCount: 2,
@@ -124,17 +124,17 @@ describe('docs ui services', () => {
         });
 
         highPriority.dispose();
-        expect(service.onAutoFormat('doc.command.tab', null)).toEqual([{ id: 'low-priority' }]);
+        expect(service.onAutoFormat('docs-ui.doc.command.tab', null)).toEqual([{ id: 'low-priority' }]);
 
         lowPriority.dispose();
-        expect(service.onAutoFormat('doc.command.tab', null)).toEqual([]);
+        expect(service.onAutoFormat('docs-ui.doc.command.tab', null)).toEqual([]);
     });
 
     it('returns no auto-format mutations when the current selection is unavailable', () => {
         ({ univer, get } = createCommandTestBed(createDocData()));
         const service = new DocAutoFormatService(get(IUniverInstanceService), get(DocSelectionManagerService));
 
-        expect(service.onAutoFormat('doc.command.tab', null)).toEqual([]);
+        expect(service.onAutoFormat('docs-ui.doc.command.tab', null)).toEqual([]);
     });
 
     it('merges cached menu styles, clears them on selection changes, and derives body/header defaults', () => {

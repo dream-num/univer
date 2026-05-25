@@ -33,7 +33,7 @@ export const SidebarDocHeaderFooterPanelOperation: ICommand = {
         switch (params.value) {
             case 'open':
                 sidebarService.open({
-                    header: { title: localeService.t('headerFooter.panel') },
+                    header: { title: localeService.t('docs-ui.headerFooter.panel') },
                     children: { label: COMPONENT_DOC_HEADER_FOOTER_PANEL },
                     onClose: () => {},
                     width: 400,

@@ -25,7 +25,7 @@ import { getCommandSkeleton, getRichTextEditPath } from '../../util';
 import { generateParagraphs } from '../break-line.command';
 import { genEmptyTable, genTableSource } from './table';
 
-export const CreateDocTableCommandId = 'doc.command.create-table';
+export const CreateDocTableCommandId = 'docs-ui.doc.command.create-table';
 
 export interface ICreateDocTableCommandParams {
     rowCount: number;

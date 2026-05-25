@@ -73,7 +73,7 @@ export class DocUIController extends Disposable {
             [BULLET_LIST_TYPE_COMPONENT, BulletListTypePicker],
             [ORDER_LIST_TYPE_COMPONENT, OrderListTypePicker],
             ['TodoListDoubleIcon', TodoListDoubleIcon],
-            ['doc.paragraph.menu', ParagraphMenu],
+            ['docs-ui.doc.paragraph.menu', ParagraphMenu],
             ['DeleteIcon', DeleteIcon],
             [PAGE_SETTING_COMPONENT_ID, PageSettings],
             ['DocumentSettingIcon', DocSettingIcon],

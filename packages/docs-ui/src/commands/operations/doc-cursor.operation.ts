@@ -27,7 +27,7 @@ export interface IMoveCursorOperationParams {
  * The operation to move cursor in the current document.
  */
 export const MoveCursorOperation: IOperation<IMoveCursorOperationParams> = {
-    id: 'doc.operation.move-cursor',
+    id: 'docs-ui.doc.operation.move-cursor',
 
     type: CommandType.OPERATION,
 
@@ -44,7 +44,7 @@ export const MoveCursorOperation: IOperation<IMoveCursorOperationParams> = {
  * The operation to move selection in the current document.
  */
 export const MoveSelectionOperation: IOperation<IMoveCursorOperationParams> = {
-    id: 'doc.operation.move-selection',
+    id: 'docs-ui.doc.operation.move-selection',
 
     type: CommandType.OPERATION,
 

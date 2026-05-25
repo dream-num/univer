@@ -65,7 +65,7 @@ const createHeadingSelectorMenuItemFactory = (headingType: NamedStyleType) => (a
         id: HEADING_MAP[headingType]!.id,
         type: MenuItemType.BUTTON,
         icon: icon.key,
-        tooltip: 'toolbar.heading.tooltip',
+        tooltip: 'docs-ui.toolbar.heading.tooltip',
         disabled$: disableMenuWhenNoDocRange(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
         activated$: new Observable((subscriber) => {
@@ -109,7 +109,7 @@ export const CopyCurrentParagraphMenuItemFactory = (accessor: IAccessor): IMenuI
         id: DocCopyCurrentParagraphCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'CopyDoubleIcon',
-        title: 'rightClick.copy',
+        title: 'docs-ui.rightClick.copy',
     };
 };
 
@@ -118,7 +118,7 @@ export const CutCurrentParagraphMenuItemFactory = (accessor: IAccessor): IMenuIt
         id: DocCutCurrentParagraphCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'CutIcon',
-        title: 'rightClick.cut',
+        title: 'docs-ui.rightClick.cut',
     };
 };
 
@@ -127,7 +127,7 @@ export const DeleteCurrentParagraphMenuItemFactory = (accessor: IAccessor): IMen
         id: DeleteCurrentParagraphCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'DeleteIcon',
-        title: 'rightClick.delete',
+        title: 'docs-ui.rightClick.delete',
     };
 };
 
@@ -136,7 +136,7 @@ export const InsertBulletListBellowMenuItemFactory = (accessor: IAccessor): IMen
         id: InsertBulletListBellowCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'UnorderIcon',
-        title: 'rightClick.bulletList',
+        title: 'docs-ui.rightClick.bulletList',
     };
 };
 
@@ -145,7 +145,7 @@ export const InsertOrderListBellowMenuItemFactory = (accessor: IAccessor): IMenu
         id: InsertOrderListBellowCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'OrderIcon',
-        title: 'rightClick.orderList',
+        title: 'docs-ui.rightClick.orderList',
     };
 };
 
@@ -154,7 +154,7 @@ export const InsertCheckListBellowMenuItemFactory = (accessor: IAccessor): IMenu
         id: InsertCheckListBellowCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'TodoListDoubleIcon',
-        title: 'rightClick.checkList',
+        title: 'docs-ui.rightClick.checkList',
     };
 };
 
@@ -163,16 +163,16 @@ export const InsertHorizontalLineBellowMenuItemFactory = (accessor: IAccessor): 
         id: InsertHorizontalLineBellowCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'ReduceIcon',
-        title: 'toolbar.horizontalLine',
+        title: 'docs-ui.toolbar.horizontalLine',
     };
 };
 
-export const INSERT_BELLOW_MENU_ID = 'doc.menu.insert-bellow';
+export const INSERT_BELLOW_MENU_ID = 'docs-ui.doc.menu.insert-bellow';
 
 export function DocInsertBellowMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     return {
         id: INSERT_BELLOW_MENU_ID,
         type: MenuItemType.SUBITEMS,
-        title: 'rightClick.insertBellow',
+        title: 'docs-ui.rightClick.insertBellow',
     };
 }

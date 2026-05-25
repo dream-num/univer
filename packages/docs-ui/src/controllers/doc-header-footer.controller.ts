@@ -411,12 +411,12 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
 
                             ctx.translate(0, marginTop + 1);
                             TextBubbleShape.drawWith(ctx, {
-                                text: localeService.t('headerFooter.header'),
+                                text: localeService.t('docs-ui.headerFooter.header'),
                                 color: HEADER_FOOTER_FILL_COLOR,
                             });
                             ctx.translate(0, pageHeight - marginTop - marginBottom);
                             TextBubbleShape.drawWith(ctx, {
-                                text: localeService.t('headerFooter.footer'),
+                                text: localeService.t('docs-ui.headerFooter.footer'),
                                 color: HEADER_FOOTER_FILL_COLOR,
                             });
                         }

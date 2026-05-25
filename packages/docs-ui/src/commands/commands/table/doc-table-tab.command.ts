@@ -28,7 +28,7 @@ export interface IDocTableTabCommandParams {
 
 export const DocTableTabCommand: ICommand<IDocTableTabCommandParams> = {
 
-    id: 'doc.table.tab-in-table',
+    id: 'docs-ui.doc.table.tab-in-table',
 
     type: CommandType.COMMAND,
 

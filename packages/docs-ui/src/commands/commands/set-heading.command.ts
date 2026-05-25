@@ -27,7 +27,7 @@ export interface ISetParagraphNamedStyleCommandParams {
 }
 
 export const SetParagraphNamedStyleCommand: ICommand<ISetParagraphNamedStyleCommandParams> = {
-    id: 'doc.command.set-paragraph-named-style',
+    id: 'docs-ui.doc.command.set-paragraph-named-style',
     type: CommandType.COMMAND,
     handler(accessor, params) {
         if (!params) {
@@ -80,7 +80,7 @@ export const SetParagraphNamedStyleCommand: ICommand<ISetParagraphNamedStyleComm
 };
 
 export const QuickHeadingCommand: ICommand<ISetParagraphNamedStyleCommandParams> = {
-    id: 'doc.command.quick-heading',
+    id: 'docs-ui.doc.command.quick-heading',
     type: CommandType.COMMAND,
 
     handler(accessor, params) {
@@ -159,7 +159,7 @@ export const QUICK_HEADING_MAP = {
 };
 
 export const H1HeadingCommand: ICommand<ISetParagraphNamedStyleCommandParams> = {
-    id: 'doc.command.h1-heading',
+    id: 'docs-ui.doc.command.h1-heading',
     type: CommandType.COMMAND,
     handler: (accessor) => {
         const commandService = accessor.get(ICommandService);
@@ -170,7 +170,7 @@ export const H1HeadingCommand: ICommand<ISetParagraphNamedStyleCommandParams> = 
 };
 
 export const H2HeadingCommand: ICommand<ISetParagraphNamedStyleCommandParams> = {
-    id: 'doc.command.h2-heading',
+    id: 'docs-ui.doc.command.h2-heading',
     type: CommandType.COMMAND,
     handler: (accessor) => {
         const commandService = accessor.get(ICommandService);
@@ -181,7 +181,7 @@ export const H2HeadingCommand: ICommand<ISetParagraphNamedStyleCommandParams> = 
 };
 
 export const H3HeadingCommand: ICommand<ISetParagraphNamedStyleCommandParams> = {
-    id: 'doc.command.h3-heading',
+    id: 'docs-ui.doc.command.h3-heading',
     type: CommandType.COMMAND,
     handler: (accessor) => {
         const commandService = accessor.get(ICommandService);
@@ -192,7 +192,7 @@ export const H3HeadingCommand: ICommand<ISetParagraphNamedStyleCommandParams> = 
 };
 
 export const H4HeadingCommand: ICommand<ISetParagraphNamedStyleCommandParams> = {
-    id: 'doc.command.h4-heading',
+    id: 'docs-ui.doc.command.h4-heading',
     type: CommandType.COMMAND,
     handler: (accessor) => {
         const commandService = accessor.get(ICommandService);
@@ -203,7 +203,7 @@ export const H4HeadingCommand: ICommand<ISetParagraphNamedStyleCommandParams> = 
 };
 
 export const H5HeadingCommand: ICommand<ISetParagraphNamedStyleCommandParams> = {
-    id: 'doc.command.h5-heading',
+    id: 'docs-ui.doc.command.h5-heading',
     type: CommandType.COMMAND,
     handler: (accessor) => {
         const commandService = accessor.get(ICommandService);
@@ -214,7 +214,7 @@ export const H5HeadingCommand: ICommand<ISetParagraphNamedStyleCommandParams> = 
 };
 
 export const NormalTextHeadingCommand: ICommand<ISetParagraphNamedStyleCommandParams> = {
-    id: 'doc.command.normal-text-heading',
+    id: 'docs-ui.doc.command.normal-text-heading',
     type: CommandType.COMMAND,
     handler: (accessor) => {
         const commandService = accessor.get(ICommandService);
@@ -225,7 +225,7 @@ export const NormalTextHeadingCommand: ICommand<ISetParagraphNamedStyleCommandPa
 };
 
 export const TitleHeadingCommand: ICommand<ISetParagraphNamedStyleCommandParams> = {
-    id: 'doc.command.title',
+    id: 'docs-ui.doc.command.title',
     type: CommandType.COMMAND,
     handler: (accessor) => {
         const commandService = accessor.get(ICommandService);
@@ -236,7 +236,7 @@ export const TitleHeadingCommand: ICommand<ISetParagraphNamedStyleCommandParams>
 };
 
 export const SubtitleHeadingCommand: ICommand<ISetParagraphNamedStyleCommandParams> = {
-    id: 'doc.command.subtitle-heading',
+    id: 'docs-ui.doc.command.subtitle-heading',
     type: CommandType.COMMAND,
     handler: (accessor) => {
         const commandService = accessor.get(ICommandService);

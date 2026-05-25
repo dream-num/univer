@@ -39,7 +39,7 @@ export class DocParagraphSettingController extends Disposable {
 
     public openPanel() {
         const props = {
-            header: { title: 'doc.slider.paragraphSetting' },
+            header: { title: 'docs-ui.doc.slider.paragraphSetting' },
             id: this._id,
             children: {
                 label: paragraphSettingIndexKey,

@@ -133,7 +133,7 @@ export interface ICoreHeaderFooterParams {
     headerFooterProps?: IHeaderFooterProps;
 }
 
-export const CoreHeaderFooterCommandId = 'doc.command.core-header-footer';
+export const CoreHeaderFooterCommandId = 'docs-ui.doc.command.core-header-footer';
 
 /**
  * The command to update header and footer or create them.
@@ -235,7 +235,7 @@ export const CoreHeaderFooterCommand: ICommand<ICoreHeaderFooterParams> = {
 interface IOpenHeaderFooterPanelParams { }
 
 export const OpenHeaderFooterPanelCommand: ICommand<IOpenHeaderFooterPanelParams> = {
-    id: 'doc.command.open-header-footer-panel',
+    id: 'docs-ui.doc.command.open-header-footer-panel',
     type: CommandType.COMMAND,
 
     handler: async (accessor, _params: IOpenHeaderFooterPanelParams) => {
@@ -250,7 +250,7 @@ interface ICloseHeaderFooterParams {
 }
 
 export const CloseHeaderFooterCommand: ICommand<ICloseHeaderFooterParams> = {
-    id: 'doc.command.close-header-footer',
+    id: 'docs-ui.doc.command.close-header-footer',
 
     type: CommandType.COMMAND,
 

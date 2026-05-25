@@ -24,17 +24,17 @@ import { getColumnWidths, getEmptyTableCell, getEmptyTableRow, getInsertColumnAc
 
 // Insert rows and columns are in this file.
 
-export const DocTableInsertRowCommandId = 'doc.command.table-insert-row';
+export const DocTableInsertRowCommandId = 'docs-ui.doc.command.table-insert-row';
 
-export const DocTableInsertColumnCommandId = 'doc.command.table-insert-column';
+export const DocTableInsertColumnCommandId = 'docs-ui.doc.command.table-insert-column';
 
-export const DocTableInsertRowAboveCommandId = 'doc.command.table-insert-row-above';
+export const DocTableInsertRowAboveCommandId = 'docs-ui.doc.command.table-insert-row-above';
 
-export const DocTableInsertRowBellowCommandId = 'doc.command.table-insert-row-bellow';
+export const DocTableInsertRowBellowCommandId = 'docs-ui.doc.command.table-insert-row-bellow';
 
-export const DocTableInsertColumnLeftCommandId = 'doc.command.table-insert-column-left';
+export const DocTableInsertColumnLeftCommandId = 'docs-ui.doc.command.table-insert-column-left';
 
-export const DocTableInsertColumnRightCommandId = 'doc.command.table-insert-column-right';
+export const DocTableInsertColumnRightCommandId = 'docs-ui.doc.command.table-insert-column-right';
 
 export interface IDocTableInsertRowAboveCommandParams {}
 

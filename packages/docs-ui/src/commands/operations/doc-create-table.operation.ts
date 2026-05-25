@@ -19,10 +19,10 @@ import { CommandType, ICommandService, IConfirmService, LocaleService } from '@u
 import { COMPONENT_DOC_CREATE_TABLE_CONFIRM } from '../../views/table/create/component-name';
 import { CreateDocTableCommand } from '../commands/table/doc-table-create.command';
 
-const COMPONENT_DOC_CREATE_TABLE_CONFIRM_ID = 'doc.component.create-table-confirm';
+const COMPONENT_DOC_CREATE_TABLE_CONFIRM_ID = 'docs-ui.doc.component.create-table-confirm';
 
 export const DocCreateTableOperation: ICommand = {
-    id: 'doc.operation.create-table',
+    id: 'docs-ui.doc.operation.create-table',
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor) => {
         const localeService = accessor.get(LocaleService);
@@ -51,7 +51,7 @@ export const DocCreateTableOperation: ICommand = {
                 },
             },
             width: 'auto',
-            title: { title: localeService.t('toolbar.table.insert') },
+            title: { title: localeService.t('docs-ui.toolbar.table.insert') },
             onConfirm: () => {
                 commandService.executeCommand(CreateDocTableCommand.id, tableCreateParams);
                 confirmService.close(COMPONENT_DOC_CREATE_TABLE_CONFIRM_ID);

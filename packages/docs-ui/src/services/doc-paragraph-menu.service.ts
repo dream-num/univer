@@ -151,7 +151,7 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
         const disposable = this._docPopupManagerService.attachPopupToRect(
             paragraph.firstLine,
             {
-                componentKey: 'doc.paragraph.menu',
+                componentKey: 'docs-ui.doc.paragraph.menu',
                 direction: 'left-center',
                 onClickOutside: () => {
                     this._docSelectionManagerService.textSelection$.pipe(first()).subscribe(() => {

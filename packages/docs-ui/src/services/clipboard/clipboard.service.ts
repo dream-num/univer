@@ -113,7 +113,7 @@ function getTableSlice(body: IDocumentBody, start: number, end: number): IDocume
     return bodySlice;
 }
 
-export const IDocClipboardService = createIdentifier<IDocClipboardService>('doc.clipboard-service');
+export const IDocClipboardService = createIdentifier<IDocClipboardService>('docs-ui.doc.clipboard-service');
 
 export class DocClipboardService extends Disposable implements IDocClipboardService {
     private _clipboardHooks: IDocClipboardHook[] = [];

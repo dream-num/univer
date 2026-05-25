@@ -26,7 +26,7 @@ interface IInsertBulletBelowCommandParams {
 
 export const InsertBulletBelowCommand: ICommand<IInsertBulletBelowCommandParams> = {
     type: CommandType.COMMAND,
-    id: 'doc.command.insert-bullet-below',
+    id: 'docs-ui.doc.command.insert-bullet-below',
     handler: (accessor, params) => {
         if (!params) {
             return false;

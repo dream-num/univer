@@ -37,7 +37,7 @@ interface IAlignOperationCommandParams {
 }
 
 export const AlignOperationCommand: ICommand<IAlignOperationCommandParams> = {
-    id: 'doc.command.align-action',
+    id: 'docs-ui.doc.command.align-action',
 
     type: CommandType.COMMAND,
 
@@ -136,7 +136,7 @@ export const AlignOperationCommand: ICommand<IAlignOperationCommandParams> = {
 interface IAlignLeftCommandParams { }
 
 export const AlignLeftCommand: ICommand<IAlignLeftCommandParams> = {
-    id: 'doc.command.align-left',
+    id: 'docs-ui.doc.command.align-left',
 
     type: CommandType.COMMAND,
 
@@ -152,7 +152,7 @@ export const AlignLeftCommand: ICommand<IAlignLeftCommandParams> = {
 interface IAlignCenterCommandParams { }
 
 export const AlignCenterCommand: ICommand<IAlignCenterCommandParams> = {
-    id: 'doc.command.align-center',
+    id: 'docs-ui.doc.command.align-center',
 
     type: CommandType.COMMAND,
 
@@ -168,7 +168,7 @@ export const AlignCenterCommand: ICommand<IAlignCenterCommandParams> = {
 interface IAlignRightCommandParams { }
 
 export const AlignRightCommand: ICommand<IAlignRightCommandParams> = {
-    id: 'doc.command.align-right',
+    id: 'docs-ui.doc.command.align-right',
 
     type: CommandType.COMMAND,
 
@@ -184,7 +184,7 @@ export const AlignRightCommand: ICommand<IAlignRightCommandParams> = {
 interface IAlignJustifyCommandParams { }
 
 export const AlignJustifyCommand: ICommand<IAlignJustifyCommandParams> = {
-    id: 'doc.command.align-justify',
+    id: 'docs-ui.doc.command.align-justify',
 
     type: CommandType.COMMAND,
 

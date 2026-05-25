@@ -140,7 +140,7 @@ export const DrawingCommonPanel = (props: IDrawingCommonPanelProps) => {
             >
                 <div className="univer-flex univer-h-full univer-items-center univer-justify-center">
                     <span>
-                        {localeService.t('image-panel.null')}
+                        {localeService.t('drawing-ui.image-panel.null')}
                     </span>
                 </div>
             </div>

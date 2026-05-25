@@ -68,25 +68,25 @@ export const DrawingArrange = (props: IDrawingArrangeProps) => {
                   dark:!univer-text-gray-200
                 `}
             >
-                <div>{localeService.t('image-panel.arrange.title')}</div>
+                <div>{localeService.t('drawing-ui.image-panel.arrange.title')}</div>
             </header>
 
             <div className="univer-grid univer-grid-cols-2 univer-gap-2">
                 <Button onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.forward); }}>
                     <MoveUpIcon />
-                    {localeService.t('image-panel.arrange.forward')}
+                    {localeService.t('drawing-ui.image-panel.arrange.forward')}
                 </Button>
                 <Button onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.backward); }}>
                     <MoveDownIcon />
-                    {localeService.t('image-panel.arrange.backward')}
+                    {localeService.t('drawing-ui.image-panel.arrange.backward')}
                 </Button>
                 <Button onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.front); }}>
                     <TopmostIcon />
-                    {localeService.t('image-panel.arrange.front')}
+                    {localeService.t('drawing-ui.image-panel.arrange.front')}
                 </Button>
                 <Button onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.back); }}>
                     <BottomIcon />
-                    {localeService.t('image-panel.arrange.back')}
+                    {localeService.t('drawing-ui.image-panel.arrange.back')}
                 </Button>
             </div>
         </div>

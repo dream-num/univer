@@ -77,7 +77,7 @@ export function DrawingGroupContextMenuItemFactory(accessor: IAccessor): IMenuSe
         id: DRAWING_GROUP_CONTEXT_MENU_ID,
         type: MenuItemType.SUBITEMS,
         icon: 'GroupIcon',
-        title: 'image-panel.group.title',
+        title: 'drawing-ui.image-panel.group.title',
         hidden$: getMenuStateByDrawingFocusChangedObservable$(accessor),
     };
 }
@@ -87,7 +87,7 @@ export function SetDrawingGroupMenuItemFactory(accessor: IAccessor): IMenuButton
         id: SetDrawingGroupOperation.id,
         type: MenuItemType.BUTTON,
         icon: 'GroupIcon',
-        title: 'image-panel.group.group',
+        title: 'drawing-ui.image-panel.group.group',
         disabled$: getMenuStateByDrawingFocusChangedObservable$(accessor, 'group'),
     };
 }
@@ -97,7 +97,7 @@ export function CancelDrawingGroupMenuItemFactory(accessor: IAccessor): IMenuBut
         id: CancelDrawingGroupOperation.id,
         type: MenuItemType.BUTTON,
         icon: 'UngroupIcon',
-        title: 'image-panel.group.unGroup',
+        title: 'drawing-ui.image-panel.group.unGroup',
         disabled$: getMenuStateByDrawingFocusChangedObservable$(accessor, 'unGroup'),
     };
 }

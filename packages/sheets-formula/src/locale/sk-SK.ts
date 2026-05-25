@@ -17,7 +17,7 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    formula: {
+    'sheets-formula': {
         progress: {
             analyzing: 'Analyzovanie',
             calculating: 'Výpočet',

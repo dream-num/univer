@@ -15,7 +15,7 @@
  */
 
 const locale = {
-    formula: {
+    'sheets-formula': {
         progress: {
             analyzing: 'Analyzing',
             calculating: 'Calculating',

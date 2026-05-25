@@ -342,11 +342,11 @@ describe('TriggerCalculationController', () => {
             functionsExecutedState: FormulaExecutedStateType.SUCCESS,
         });
 
-        expect(progressValues).toContainEqual({ done: 0, count: 1, label: 'formula.progress.analyzing' });
-        expect(progressValues).toContainEqual({ done: 3, count: 8, label: 'formula.progress.calculating' });
-        expect(progressValues).toContainEqual({ done: 3, count: 8, label: 'formula.progress.array-analysis' });
-        expect(progressValues).toContainEqual({ done: 6, count: 8, label: 'formula.progress.array-calculation' });
-        expect(progressValues).toContainEqual({ done: 1, count: 1, label: 'formula.progress.done' });
+        expect(progressValues).toContainEqual({ done: 0, count: 1, label: 'sheets-formula.progress.analyzing' });
+        expect(progressValues).toContainEqual({ done: 3, count: 8, label: 'sheets-formula.progress.calculating' });
+        expect(progressValues).toContainEqual({ done: 3, count: 8, label: 'sheets-formula.progress.array-analysis' });
+        expect(progressValues).toContainEqual({ done: 6, count: 8, label: 'sheets-formula.progress.array-calculation' });
+        expect(progressValues).toContainEqual({ done: 1, count: 1, label: 'sheets-formula.progress.done' });
 
         subscription.unsubscribe();
         testBed.executedDisposable.dispose();

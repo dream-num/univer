@@ -79,8 +79,6 @@ const locale = {
             confirm: 'OK',
             cancel: 'Cancel',
             close: 'Close',
-            update: 'Update',
-            delete: 'Delete',
             insert: 'Insert',
             prevPage: 'Previous',
             nextPage: 'Next',
@@ -452,18 +450,6 @@ const locale = {
                 confirm: 'Confirm',
                 cancel: 'Cancel',
                 addNewPermission: 'Add new permission',
-                'data-validation': {
-                    alert: {
-                        ok: 'OK',
-                    },
-                    list: {
-                        edit: 'Edit',
-                        dropdown: 'Dropdown',
-                    },
-                    listMultiple: {
-                        dropdown: 'Multiple select',
-                    },
-                },
             },
         },
     },

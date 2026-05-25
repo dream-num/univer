@@ -81,8 +81,6 @@ const locale: typeof enUS = {
             confirm: 'OK',
             cancel: 'Zrušiť',
             close: 'Zavrieť',
-            update: 'Aktualizovať',
-            delete: 'Odstrániť',
             insert: 'Vložiť',
             prevPage: 'Predchádzajúce',
             nextPage: 'Nasledujúce',
@@ -454,18 +452,6 @@ const locale: typeof enUS = {
                 confirm: 'Potvrdiť',
                 cancel: 'Zrušiť',
                 addNewPermission: 'Pridať nové povolenie',
-                'data-validation': {
-                    alert: {
-                        ok: 'OK',
-                    },
-                    list: {
-                        edit: 'Edit',
-                        dropdown: 'Dropdown',
-                    },
-                    listMultiple: {
-                        dropdown: 'Multiple select',
-                    },
-                },
             },
         },
     },

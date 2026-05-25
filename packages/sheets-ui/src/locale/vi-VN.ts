@@ -81,8 +81,6 @@ const locale: typeof enUS = {
             confirm: 'Xác nhận',
             cancel: 'Hủy',
             close: 'Đóng',
-            update: 'Cập nhật',
-            delete: 'Xóa',
             insert: 'Thêm mới',
             prevPage: 'Trang trước',
             nextPage: 'Trang sau',
@@ -454,18 +452,6 @@ const locale: typeof enUS = {
                 confirm: 'Xác nhận',
                 cancel: 'Hủy',
                 addNewPermission: 'Thêm quyền hạn mới',
-                'data-validation': {
-                    alert: {
-                        ok: 'OK',
-                    },
-                    list: {
-                        edit: 'Edit',
-                        dropdown: 'Dropdown',
-                    },
-                    listMultiple: {
-                        dropdown: 'Multiple select',
-                    },
-                },
             },
         },
     },

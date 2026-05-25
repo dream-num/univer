@@ -81,8 +81,6 @@ const locale: typeof enUS = {
             confirm: 'تایید',
             cancel: 'انصراف',
             close: 'بستن',
-            update: 'به‌روزرسانی',
-            delete: 'حذف',
             insert: 'درج',
             prevPage: 'قبلی',
             nextPage: 'بعدی',
@@ -454,18 +452,6 @@ const locale: typeof enUS = {
                 confirm: 'تایید',
                 cancel: 'انصراف',
                 addNewPermission: 'اضافه کردن مجوز جدید',
-                'data-validation': {
-                    alert: {
-                        ok: 'OK',
-                    },
-                    list: {
-                        edit: 'Edit',
-                        dropdown: 'Dropdown',
-                    },
-                    listMultiple: {
-                        dropdown: 'Multiple select',
-                    },
-                },
             },
         },
     },

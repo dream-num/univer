@@ -81,8 +81,6 @@ const locale: typeof enUS = {
             confirm: 'D\'acord',
             cancel: 'Cancel·lar',
             close: 'Tancar',
-            update: 'Actualitzar',
-            delete: 'Suprimir',
             insert: 'Inserir',
             prevPage: 'Anterior',
             nextPage: 'Següent',
@@ -454,18 +452,6 @@ const locale: typeof enUS = {
                 confirm: 'Confirmar',
                 cancel: 'Cancel·lar',
                 addNewPermission: 'Afegir nou permís',
-                'data-validation': {
-                    alert: {
-                        ok: 'OK',
-                    },
-                    list: {
-                        edit: 'Edit',
-                        dropdown: 'Dropdown',
-                    },
-                    listMultiple: {
-                        dropdown: 'Multiple select',
-                    },
-                },
             },
         },
     },

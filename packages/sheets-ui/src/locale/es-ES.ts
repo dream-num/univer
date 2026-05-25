@@ -81,8 +81,6 @@ const locale: typeof enUS = {
             confirm: 'Aceptar',
             cancel: 'Cancelar',
             close: 'Cerrar',
-            update: 'Actualizar',
-            delete: 'Eliminar',
             insert: 'Insertar',
             prevPage: 'Anterior',
             nextPage: 'Siguiente',
@@ -454,18 +452,6 @@ const locale: typeof enUS = {
                 confirm: 'Confirmar',
                 cancel: 'Cancelar',
                 addNewPermission: 'Añadir nuevo permiso',
-                'data-validation': {
-                    alert: {
-                        ok: 'OK',
-                    },
-                    list: {
-                        edit: 'Edit',
-                        dropdown: 'Dropdown',
-                    },
-                    listMultiple: {
-                        dropdown: 'Multiple select',
-                    },
-                },
             },
         },
     },

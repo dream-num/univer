@@ -81,8 +81,6 @@ const locale: typeof enUS = {
             confirm: 'ОК',
             cancel: 'Отмена',
             close: 'Закрыть',
-            update: 'Обновить',
-            delete: 'Удалить',
             insert: 'Вставить',
             prevPage: 'Предыдущая',
             nextPage: 'Следующая',
@@ -454,18 +452,6 @@ const locale: typeof enUS = {
                 confirm: 'Подтвердить',
                 cancel: 'Отменить',
                 addNewPermission: 'Добавить новое разрешение',
-                'data-validation': {
-                    alert: {
-                        ok: 'OK',
-                    },
-                    list: {
-                        edit: 'Edit',
-                        dropdown: 'Dropdown',
-                    },
-                    listMultiple: {
-                        dropdown: 'Multiple select',
-                    },
-                },
             },
         },
     },

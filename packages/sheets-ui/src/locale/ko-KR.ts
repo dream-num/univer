@@ -81,8 +81,6 @@ const locale: typeof enUS = {
             confirm: '확인',
             cancel: '취소',
             close: '닫기',
-            update: '업데이트',
-            delete: '삭제',
             insert: '삽입',
             prevPage: '이전',
             nextPage: '다음',
@@ -454,18 +452,6 @@ const locale: typeof enUS = {
                 confirm: '확인',
                 cancel: '취소',
                 addNewPermission: '새 권한 추가',
-                'data-validation': {
-                    alert: {
-                        ok: 'OK',
-                    },
-                    list: {
-                        edit: 'Edit',
-                        dropdown: 'Dropdown',
-                    },
-                    listMultiple: {
-                        dropdown: 'Multiple select',
-                    },
-                },
             },
         },
     },

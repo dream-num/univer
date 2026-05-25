@@ -81,8 +81,6 @@ const locale: typeof enUS = {
             confirm: '确定',
             cancel: '取消',
             close: '关闭',
-            update: 'Update',
-            delete: 'Delete',
             insert: '新建',
             prevPage: '上一页',
             nextPage: '下一页',
@@ -454,18 +452,6 @@ const locale: typeof enUS = {
                 confirm: '确认',
                 cancel: '取消',
                 addNewPermission: '添加新权限',
-                'data-validation': {
-                    alert: {
-                        ok: 'OK',
-                    },
-                    list: {
-                        edit: 'Edit',
-                        dropdown: 'Dropdown',
-                    },
-                    listMultiple: {
-                        dropdown: 'Multiple select',
-                    },
-                },
             },
         },
     },

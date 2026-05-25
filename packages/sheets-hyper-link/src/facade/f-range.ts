@@ -21,8 +21,8 @@ import { FRange } from '@univerjs/sheets/facade';
 
 export interface ICellHyperLink {
     id: string;
-    startIndex: number;
-    endIndex: number;
+    row: number;
+    column: number;
     url: string;
     label: string;
 }
@@ -32,7 +32,13 @@ export interface ICellHyperLink {
  */
 export interface IFRangeSheetsHyperlinkMixin {
     /**
-     * @deprecated use `range.setRichTextValueForCell(univerAPI.newRichText().insertLink(label, url))` instead
+     * Set a hyperlink for this range top left cell.
+     * The hyperlink can be a URL, a range link, or a sheet link.
+     * When the hyperlink is a range link or a sheet link, the url should be the url of the target range or sheet.
+     * @param {string} url - The hyperlink url, can be a URL, a range link, or a sheet link.
+     * @param {string} [label] - The display text of the hyperlink. If not provided, the url will be used as the display text.
+     * @return {Promise<boolean>} A promise that resolves to true if the hyperlink is set successfully, otherwise false.
+     *
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -40,14 +46,42 @@ export interface IFRangeSheetsHyperlinkMixin {
      *
      * // Create a hyperlink to Univer on cell A1
      * const fRange = fWorksheet.getRange('A1');
-     * const richText = univerAPI.newRichText().insertLink('Univer', 'https://univer.ai/');
-     * fRange.setRichTextValueForCell(richText);
+     * await fRange.setHyperLink('https://univer.ai/', 'Univer');
+     *
+     * // Create a hyperlink to active sheet range B2:D4 on cell A2
+     * const fRange2 = fWorksheet.getRange('A2');
+     * const rangeUrl = fWorksheet.getRange('B2:D4').getUrl();
+     * await fRange2.setHyperLink(rangeUrl, 'Link to B2:D4');
+     *
+     * // Create a hyperlink to another sheet range on cell A3
+     * const anotherSheet = fWorkbook.getSheetByName('Another Sheet');
+     * if (anotherSheet) {
+     *   const anotherSheetUrl = anotherSheet.getUrl();
+     *   const fRange3 = fWorksheet.getRange('A3');
+     *   await fRange3.setHyperLink(anotherSheetUrl, 'Link to Another Sheet');
+     * }
      * ```
      */
     setHyperLink(url: string, label?: string): Promise<boolean>;
 
     /**
-     * @deprecated use `range.setRichTextValueForCell(range.getValue(true).getLinks())` instead
+     * Get all hyperlinks in this range.
+     * @return {ICellHyperLink[]} An array of hyperlinks in this range.
+     *
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * console.log(fWorksheet.getRange('A1:T100').getHyperLinks());
+     * ```
+     */
+    getHyperLinks(): ICellHyperLink[];
+
+    /**
+     * Update the hyperlink of this range top left cell.
+     * @param {string} url - The new hyperlink url, can be a URL, a range link, or a sheet link.
+     * @param {string} [label] - The new display text of the hyperlink. If not provided, the url will be used as the display text.
+     *
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -55,63 +89,49 @@ export interface IFRangeSheetsHyperlinkMixin {
      *
      * // Create a hyperlink to Univer on cell A1
      * const fRange = fWorksheet.getRange('A1');
-     * const richText = univerAPI.newRichText().insertLink('Univer', 'https://univer.ai/');
-     * fRange.setRichTextValueForCell(richText);
-     *
-     * // Get hyperlinks from cell A1
-     * console.log(fRange.getValue(true).getLinks());
-     * ```
-     */
-    getHyperLinks(): ICellHyperLink[];
-
-    /**
-     * @deprecated use `range.setRichTextValueForCell(range.getValue(true).copy().updateLink(id, url))` instead
-     * @example
-     * ```ts
-     * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
-     * const fRange = fWorksheet.getRange('A1');
-     * const richText = univerAPI.newRichText().insertLink('Univer', 'https://univer.ai/');
-     * fRange.setRichTextValueForCell(richText);
+     * await fRange.setHyperLink('https://univer.ai/', 'Univer');
      *
      * // Update hyperlink after 3 seconds
-     * setTimeout(() => {
-     *   const cellValue = fRange.getValue(true);
-     *   const hyperlinks = cellValue.getLinks();
-     *   const id = hyperlinks[0].rangeId;
-     *   const newUrl = 'https://insight.univer.ai/';
-     *   const newRichText = cellValue.copy().updateLink(id, newUrl);
-     *   fRange.setRichTextValueForCell(newRichText);
-     * }, 3000);
+     * await new Promise((resolve) => setTimeout(resolve, 3000));
+     *
+     * const rangeUrl = fWorksheet.getRange('B2:D4').getUrl();
+     * await fRange.updateHyperLink(rangeUrl, 'Link to B2:D4');
      * ```
      */
-    updateHyperLink(id: string, url: string, label?: string): Promise<boolean>;
+    updateHyperLink(url: string, label?: string): Promise<boolean>;
 
     /**
-     * @deprecated use `range.setRichTextValueForCell(range.getValue(true).copy().cancelLink(id))` instead
+     * Cancel all hyperlinks in this range. If a hyperlink is provided, only cancel the specified hyperlink.
+     * @param {ICellHyperLink} [hyperlink] - The hyperlink to be cancelled. If not provided, all hyperlinks in this range will be cancelled.
+     * @return {boolean} True if the hyperlink(s) is cancelled successfully, otherwise false.
+     *
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
-     * const fRange = fWorksheet.getRange('A1');
-     * const richText = univerAPI.newRichText().insertLink('Univer', 'https://univer.ai/');
-     * fRange.setRichTextValueForCell(richText);
      *
-     * // Cancel hyperlink after 3 seconds
-     * setTimeout(() => {
-     *   const cellValue = fRange.getValue(true);
-     *   const hyperlinks = cellValue.getLinks();
-     *   const id = hyperlinks[0].rangeId;
-     *   const newRichText = cellValue.copy().cancelLink(id);
-     *   fRange.setRichTextValueForCell(newRichText);
-     * }, 3000);
+     * // Cancel the hyperlink in cell A1
+     * const fRange = fWorksheet.getRange('A1');
+     * fRange.cancelHyperLink();
+     *
+     * // Cancel all hyperlinks in range A2:B4
+     * const fRange2 = fWorksheet.getRange('A2:B4');
+     * fRange2.cancelHyperLink();
+     *
+     * // Cancel a specific hyperlink in range A1:T100
+     * const fRange3 = fWorksheet.getRange('A1:T100');
+     * const hyperlinks = fRange3.getHyperLinks();
+     * if (hyperlinks.length > 1) {
+     *   fRange3.cancelHyperLink(hyperlinks[1]);
+     * }
      * ```
      */
-    cancelHyperLink(id: string): boolean;
+    cancelHyperLink(hyperlink?: ICellHyperLink): boolean;
 
     /**
      * Create a hyperlink url to this range
      * @returns {string} The url of this range
+     *
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -125,75 +145,107 @@ export interface IFRangeSheetsHyperlinkMixin {
 }
 
 export class FRangeSheetsHyperlinkMixin extends FRange implements IFRangeSheetsHyperlinkMixin {
-    // #region hyperlink
-
     override setHyperLink(url: string, label?: string): Promise<boolean> {
-        const params: IAddHyperLinkCommandParams = {
+        return this._commandService.executeCommand<IAddHyperLinkCommandParams>(AddHyperLinkCommand.id, {
             unitId: this.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
             link: {
+                id: generateRandomId(),
                 row: this._range.startRow,
                 column: this._range.startColumn,
                 payload: url,
                 display: label,
-                id: generateRandomId(),
             },
-        };
-
-        return this._commandService.executeCommand(AddHyperLinkCommand.id, params);
+        });
     }
 
     override getHyperLinks(): ICellHyperLink[] {
-        const cellValue = this._worksheet.getCellRaw(this._range.startRow, this._range.startColumn);
-        if (!cellValue?.p) {
-            return [];
-        }
+        const hyperlinks: ICellHyperLink[] = [];
 
-        return cellValue.p.body?.customRanges
-            ?.filter((range) => range.rangeType === CustomRangeType.HYPERLINK)
-            .map((range) => ({
-                id: `${range.rangeId}`,
-                startIndex: range.startIndex,
-                endIndex: range.endIndex,
-                url: range.properties?.url ?? '',
-                label: cellValue.p?.body?.dataStream.slice(range.startIndex, range.endIndex + 1).replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_START, '').replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_END, '') ?? '',
-            })) ?? [];
+        this.forEach((row, column, cell) => {
+            if (!cell.p) {
+                return;
+            }
+
+            const ranges = cell.p.body?.customRanges?.filter((range) => range.rangeType === CustomRangeType.HYPERLINK) ?? [];
+
+            if (ranges.length > 0) {
+                const dataStream = cell.p?.body?.dataStream;
+                const { rangeId, properties, startIndex, endIndex } = ranges[0];
+                const url = properties?.url ?? '';
+                const label = dataStream?.slice(startIndex, endIndex + 1).replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_START, '').replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_END, '') ?? '';
+
+                hyperlinks.push({
+                    id: `${rangeId}`,
+                    row,
+                    column,
+                    url,
+                    label,
+                });
+            }
+        });
+
+        return hyperlinks;
     }
 
-    override updateHyperLink(id: string, url: string, label?: string): Promise<boolean> {
-        const params: IUpdateHyperLinkCommandParams = {
+    override updateHyperLink(url: string, label?: string): Promise<boolean> {
+        const hyperlink = this.getHyperLinks().find((link) => link.row === this._range.startRow && link.column === this._range.startColumn);
+
+        if (!hyperlink) {
+            return Promise.reject(new Error('No hyperlink found in the top left cell of the range'));
+        }
+
+        const { id, row, column } = hyperlink;
+
+        return this._commandService.executeCommand<IUpdateHyperLinkCommandParams>(UpdateHyperLinkCommand.id, {
             unitId: this.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
-            row: this._range.startRow,
-            column: this._range.startColumn,
             id,
+            row,
+            column,
             payload: {
                 payload: url,
                 display: label,
             },
-        };
-
-        return this._commandService.executeCommand(UpdateHyperLinkCommand.id, params);
+        });
     }
 
-    override cancelHyperLink(id: string): boolean {
-        const params: ICancelHyperLinkCommandParams = {
-            unitId: this.getUnitId(),
-            subUnitId: this._worksheet.getSheetId(),
-            row: this._range.startRow,
-            column: this._range.startColumn,
-            id,
-        };
+    override cancelHyperLink(hyperlink?: ICellHyperLink): boolean {
+        if (hyperlink) {
+            const { id, row, column } = hyperlink;
 
-        return this._commandService.syncExecuteCommand(CancelHyperLinkCommand.id, params);
+            return this._commandService.syncExecuteCommand<ICancelHyperLinkCommandParams>(CancelHyperLinkCommand.id, {
+                unitId: this.getUnitId(),
+                subUnitId: this._worksheet.getSheetId(),
+                id,
+                row,
+                column,
+            });
+        } else {
+            const hyperlinks = this.getHyperLinks();
+
+            if (hyperlinks.length === 0) {
+                return true;
+            }
+
+            return hyperlinks.every((link) => {
+                const { id, row, column } = link;
+
+                return this._commandService.syncExecuteCommand<ICancelHyperLinkCommandParams>(CancelHyperLinkCommand.id, {
+                    unitId: this.getUnitId(),
+                    subUnitId: this._worksheet.getSheetId(),
+                    id,
+                    row,
+                    column,
+                });
+            });
+        }
     }
 
     override getUrl(): string {
         const parserService = this._injector.get(SheetsHyperLinkParserService);
         return parserService.buildHyperLink(this.getUnitId(), this.getSheetId(), this.getRange());
     }
-
-    // #endregion
 }
 
 FRange.extend(FRangeSheetsHyperlinkMixin);

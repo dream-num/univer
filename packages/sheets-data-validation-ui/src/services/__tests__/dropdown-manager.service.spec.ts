@@ -19,8 +19,7 @@ import type { SheetDataValidationModel } from '@univerjs/sheets-data-validation'
 import type { IDropdownParam, IEditorBridgeService } from '@univerjs/sheets-ui';
 import { DataValidationRenderMode } from '@univerjs/core';
 import { DataValidatorDropdownType } from '@univerjs/data-validation';
-import { SetRangeValuesCommand } from '@univerjs/sheets';
-import { serializeListOptions } from '@univerjs/sheets-data-validation';
+import { serializeListOptions, SetRangeValuesCommand } from '@univerjs/sheets';
 import { SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';

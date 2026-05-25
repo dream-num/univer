@@ -21,7 +21,8 @@ import { awaitTime, DataValidationType, generateRandomId, isFormulaString, Local
 import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { borderClassName, clsx, DraggableList, Dropdown, FormLayout, Input, Radio, RadioGroup } from '@univerjs/design';
 import { DeleteIcon, IncreaseIcon, MoreDownIcon, SequenceIcon } from '@univerjs/icons';
-import { DataValidationFormulaController, deserializeListOptions, serializeListOptions } from '@univerjs/sheets-data-validation';
+import { deserializeListOptions, serializeListOptions } from '@univerjs/sheets';
+import { DataValidationFormulaController } from '@univerjs/sheets-data-validation';
 import { FormulaEditor } from '@univerjs/sheets-formula-ui';
 import { useDependency, useEvent, useObservable, useSidebarClick } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';

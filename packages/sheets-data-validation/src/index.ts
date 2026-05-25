@@ -50,7 +50,7 @@ export { DateValidator } from './validators/date-validator';
 export { getCellValueNumber } from './validators/decimal-validator';
 export { ListMultipleValidator } from './validators/list-multiple-validator';
 export { ListValidator } from './validators/list-validator';
-export { deserializeListOptions, getDataValidationCellValue, serializeListOptions } from './validators/util';
+export { getDataValidationCellValue } from './validators/util';
 export { getTransformedFormula } from './validators/util';
 export const CUSTOM_FORMULA_INPUT_NAME = 'data-validation.custom-formula-input';
 export const BASE_FORMULA_INPUT_NAME = 'data-validation.formula-input';

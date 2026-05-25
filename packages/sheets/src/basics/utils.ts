@@ -240,3 +240,20 @@ export function getVisibleRanges(ranges: IRange[], accessor: IAccessor, unitId?:
 
     return visibleRanges;
 }
+
+export function serializeListOptions(options: string[]) {
+    return JSON.stringify(options.filter(Boolean));
+}
+
+export function deserializeListOptions(optionsStr: string) {
+    try {
+        const options = JSON.parse(optionsStr);
+        if (Array.isArray(options) && options.every((option) => typeof option === 'string')) {
+            return options.filter(Boolean);
+        }
+    } catch {
+        // Fallback for data saved by older versions.
+    }
+
+    return optionsStr.split(',').filter(Boolean);
+}

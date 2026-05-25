@@ -19,11 +19,11 @@ import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@u
 import { DataValidationRenderMode, DataValidationType, isFormulaString, IUniverInstanceService, numfmt, Rectangle, Tools, UniverInstanceType, WrapStrategy } from '@univerjs/core';
 import { BaseDataValidator } from '@univerjs/data-validation';
 import { deserializeRangeWithSheet, isReferenceString, LexerTreeBuilder, sequenceNodeType } from '@univerjs/engine-formula';
+import { deserializeListOptions } from '@univerjs/sheets';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { DataValidationListCacheService } from '../services/dv-list-cache.service';
 import { getFormulaResult, isLegalFormulaResult } from '../utils/formula';
 import { getCellValueOrigin } from '../utils/get-cell-data-origin';
-import { deserializeListOptions } from './util';
 
 // Keep getRuleFormulaResultSet for backward compatibility (used in isValidType)
 export function getRuleFormulaResultSet(result: Nullable<Nullable<ICellData>[][]>): string[] {

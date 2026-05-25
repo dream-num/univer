@@ -56,7 +56,7 @@ export {
 } from './basics/selection';
 export { SplitDelimiterEnum, splitRangeText } from './basics/split-range-text';
 export { findFirstNonEmptyCell } from './basics/utils';
-export { discreteRangeToRange, generateNullCell, generateNullCellValue, getVisibleRanges, rangeToDiscreteRange } from './basics/utils';
+export { deserializeListOptions, discreteRangeToRange, generateNullCell, generateNullCellValue, getVisibleRanges, rangeToDiscreteRange, serializeListOptions } from './basics/utils';
 export { AddRangeProtectionCommand, type IAddRangeProtectionCommandParams } from './commands/commands/add-range-protection.command';
 export {
     addMergeCellsUtil,

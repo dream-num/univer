@@ -25,21 +25,15 @@ import {
 import { borderClassName, borderTopClassName, clsx, scrollbarClassName } from '@univerjs/design';
 import { CheckMarkIcon } from '@univerjs/icons';
 import {
+    deserializeListOptions,
     RangeProtectionPermissionEditPoint,
+    serializeListOptions,
     SheetPermissionCheckController,
     WorkbookEditablePermission,
     WorksheetEditPermission,
 } from '@univerjs/sheets';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
-
-function serializeListOptions(options: string[]) {
-    return options.filter(Boolean).join(',');
-}
-
-function deserializeListOptions(optionsStr: string) {
-    return optionsStr.split(',').filter(Boolean);
-}
 
 interface ISelectListProps {
     value: string[];

@@ -791,7 +791,7 @@ export class FDataValidationBuilder {
      */
     requireValueInList(values: string[], multiple?: boolean, showDropdown?: boolean): FDataValidationBuilder {
         this._rule.type = multiple ? DataValidationType.LIST_MULTIPLE : DataValidationType.LIST;
-        this._rule.formula1 = values.join(',');
+        this._rule.formula1 = JSON.stringify(values.filter(Boolean));
         this._rule.formula2 = undefined;
         this._rule.showDropDown = showDropdown ?? true;
 

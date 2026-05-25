@@ -17,6 +17,7 @@
 import type { FUniver } from '@univerjs/core/facade';
 import { DataValidationOperator, DataValidationType } from '@univerjs/core';
 import { FDataValidationBuilder } from '@univerjs/sheets-data-validation/facade/f-data-validation-builder.js';
+import { deserializeListOptions } from '@univerjs/sheets-data-validation/validators/util.js';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { createFacadeTestBed } from './create-test-bed';
 
@@ -187,14 +188,26 @@ describe('Test FDataValidationBuilder', () => {
         const builder = new FDataValidationBuilder();
         builder.requireValueInList(['1', '2', '3']);
         expect(builder.build().getCriteriaType()).toEqual(DataValidationType.LIST);
-        expect(builder.getCriteriaValues()).toEqual([undefined, '1,2,3', undefined]);
+        expect(builder.getCriteriaValues()).toEqual([undefined, '["1","2","3"]', undefined]);
     });
 
     it('should build value in list-multiple', () => {
         const builder = new FDataValidationBuilder();
         builder.requireValueInList(['1', '2', '3'], true);
         expect(builder.build().getCriteriaType()).toEqual(DataValidationType.LIST_MULTIPLE);
-        expect(builder.getCriteriaValues()).toEqual([undefined, '1,2,3', undefined]);
+        expect(builder.getCriteriaValues()).toEqual([undefined, '["1","2","3"]', undefined]);
+    });
+
+    it('should keep commas inside list values', () => {
+        const builder = new FDataValidationBuilder();
+        builder.requireValueInList(['Part 1 (blue)', 'Part 2 (green, short)']);
+        const [, formula1] = builder.getCriteriaValues();
+
+        expect(deserializeListOptions(formula1!)).toEqual(['Part 1 (blue)', 'Part 2 (green, short)']);
+    });
+
+    it('should deserialize legacy comma separated list values', () => {
+        expect(deserializeListOptions('1,2,3')).toEqual(['1', '2', '3']);
     });
 
     it('should build value in range', () => {

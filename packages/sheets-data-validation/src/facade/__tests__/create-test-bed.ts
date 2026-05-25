@@ -39,7 +39,7 @@ import {
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { DataValidationCacheService, DataValidationCustomFormulaService, DataValidationFormulaService, DataValidationListCacheService, SheetDataValidationModel, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
-import { DescriptionService, IDescriptionService, IRegisterFunctionService, RegisterFunctionService } from '@univerjs/sheets-formula';
+import { DescriptionService, FormulaCalculationSessionController, FormulaCalculationSessionService, IDescriptionService, IRegisterFunctionService, RegisterFunctionService } from '@univerjs/sheets-formula';
 import enUS from '@univerjs/sheets/locale/en-US';
 import zhCN from '@univerjs/sheets/locale/zh-CN';
 import { DataValidationController } from '../../controllers/dv.controller';
@@ -130,6 +130,8 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
             injector.add([ISuperTableService, { useClass: SuperTableService }]);
             injector.add([IDescriptionService, { useClass: DescriptionService }]);
             injector.add([IRegisterFunctionService, { useClass: RegisterFunctionService }]);
+            injector.add([FormulaCalculationSessionService]);
+            injector.add([FormulaCalculationSessionController]);
 
             // register feature modules
             ([
@@ -151,6 +153,7 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
             dependencies?.forEach((d) => injector.add(d));
 
             this._injector.get(SheetInterceptorService);
+            this._injector.get(FormulaCalculationSessionController);
             this._injector.get(DataValidationController);
         }
 

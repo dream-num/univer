@@ -17,7 +17,7 @@
 import type { Injector, Univer } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
 import { ICommandService } from '@univerjs/core/services/command/command.service.js';
-import { FormulaExecuteStageType, RemoveOtherFormulaMutation, SetFormulaCalculationResultMutation } from '@univerjs/engine-formula';
+import { FormulaExecuteStageType, RemoveOtherFormulaMutation, SetFormulaCalculationNotificationMutation, SetFormulaCalculationResultMutation, SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import { SetSelectionsOperation } from '@univerjs/sheets';
 import {
     AddCfCommand,
@@ -63,6 +63,8 @@ describe('Test conditional formatting facade', () => {
             SetCfCommand,
             SetSelectionsOperation,
             RemoveOtherFormulaMutation,
+            SetFormulaCalculationStartMutation,
+            SetFormulaCalculationNotificationMutation,
             SetFormulaCalculationResultMutation,
         ].forEach((m) => {
             commandService.registerCommand(m);
@@ -164,19 +166,6 @@ describe('Test conditional formatting facade', () => {
         const subUnitId = worksheet.getSheetId();
         const formula = univerAPI.getFormula();
 
-        vi.spyOn(formula, 'calculationProcessing').mockImplementation((callback) => {
-            callback({
-                stage: FormulaExecuteStageType.START_CALCULATION,
-                completedFormulasCount: 0,
-                completedArrayFormulasCount: 0,
-                formulaCycleIndex: 0,
-                totalArrayFormulasToCalculate: 0,
-                totalFormulasToCalculate: 1,
-            });
-
-            return { dispose: () => {} };
-        });
-
         await univerAPI.executeCommand('sheet.mutation.add-conditional-rule', {
             unitId,
             subUnitId,
@@ -214,6 +203,18 @@ describe('Test conditional formatting facade', () => {
         expect(registeredFormula?.formulaText).toBe('=VALUE($A1)<=3');
 
         const waitForResult = formula.onCalculationResultApplied();
+
+        await commandService.executeCommand(SetFormulaCalculationStartMutation.id, {}, { onlyLocal: true });
+        await commandService.executeCommand(SetFormulaCalculationNotificationMutation.id, {
+            stageInfo: {
+                stage: FormulaExecuteStageType.START_CALCULATION,
+                completedFormulasCount: 0,
+                completedArrayFormulasCount: 0,
+                formulaCycleIndex: 0,
+                totalArrayFormulasToCalculate: 0,
+                totalFormulasToCalculate: 1,
+            },
+        });
 
         await commandService.executeCommand(SetFormulaCalculationResultMutation.id, {
             unitData: {},

@@ -86,7 +86,7 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
 
     const handleAddCustomTheme = () => {
         if (customRangeThemes.length >= 11) {
-            errorService.emit(localeService.t('sheets-table.customTooMore'));
+            errorService.emit(localeService.t('sheets-table-ui.customTooMore'));
             return;
         }
         const lastCustomTheme = customRangeThemes[customRangeThemes.length - 1];
@@ -133,7 +133,7 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
 
     return (
         <div>
-            <h5>{localeService.t('sheets-table.defaultStyle')}</h5>
+            <h5>{localeService.t('sheets-table-ui.defaultStyle')}</h5>
             <div className="univer-flex univer-gap-2">
                 {defaultRangeThemes.map((item) => {
                     const rangeThemeItem = rangeThemeModel.getDefaultRangeThemeStyle(item);
@@ -163,7 +163,7 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                 })}
             </div>
 
-            <h5>{localeService.t('sheets-table.customStyle')}</h5>
+            <h5>{localeService.t('sheets-table-ui.customStyle')}</h5>
             <div className={clsx('univer-w-full univer-rounded-sm', borderClassName)}>
                 <div className="univer-flex univer-flex-wrap univer-gap-2 univer-p-2">
                     <div
@@ -235,7 +235,7 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                                         background: headerBg,
                                     }}
                                 >
-                                    {localeService.t('sheets-table.header')}
+                                    {localeService.t('sheets-table-ui.header')}
                                 </div>
                                 <Dropdown
                                     overlay={(
@@ -289,7 +289,7 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                                         background: firstRowBg,
                                     }}
                                 >
-                                    {localeService.t('sheets-table.firstLine')}
+                                    {localeService.t('sheets-table-ui.firstLine')}
                                 </div>
                                 <Dropdown
                                     overlay={(
@@ -339,7 +339,7 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                                         background: secondRowBg,
                                     }}
                                 >
-                                    {localeService.t('sheets-table.secondLine')}
+                                    {localeService.t('sheets-table-ui.secondLine')}
                                 </div>
                                 <Dropdown
                                     overlay={(
@@ -387,7 +387,7 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                                         background: lastRowBg,
                                     }}
                                 >
-                                    {localeService.t('sheets-table.footer')}
+                                    {localeService.t('sheets-table-ui.footer')}
                                 </div>
                                 <Dropdown
                                     overlay={(

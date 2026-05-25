@@ -63,7 +63,7 @@ export function SheetTableRenameDialog(props: ISheetTableRenameDialogProps) {
 
         const validation = validateSheetTableName(nextName, existingNames);
         if (!validation.valid) {
-            setError(localeService.t('sheets-table.tableNameError'));
+            setError(localeService.t('sheets-table-ui.tableNameError'));
             return;
         }
 
@@ -84,7 +84,7 @@ export function SheetTableRenameDialog(props: ISheetTableRenameDialogProps) {
             <Input
                 size="middle"
                 value={value}
-                placeholder={localeService.t('sheets-table.renamePlaceholder')}
+                placeholder={localeService.t('sheets-table-ui.renamePlaceholder')}
                 onChange={(nextValue) => {
                     setValue(nextValue);
                     setError('');
@@ -98,8 +98,8 @@ export function SheetTableRenameDialog(props: ISheetTableRenameDialogProps) {
             />
             {error ? <div className="-univer-mt-2 univer-text-sm univer-text-red-500">{error}</div> : null}
             <div className="univer-flex univer-w-full univer-items-center univer-justify-end univer-gap-2">
-                <Button className="univer-min-w-16" onClick={onClose}>{localeService.t('sheets-table.cancel')}</Button>
-                <Button className="univer-min-w-16" variant="primary" onClick={handleConfirm}>{localeService.t('sheets-table.confirm')}</Button>
+                <Button className="univer-min-w-16" onClick={onClose}>{localeService.t('sheets-table-ui.cancel')}</Button>
+                <Button className="univer-min-w-16" variant="primary" onClick={handleConfirm}>{localeService.t('sheets-table-ui.confirm')}</Button>
             </div>
         </div>
     );

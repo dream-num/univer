@@ -155,11 +155,11 @@ describe('SheetTableSelector', () => {
         let tree = renderSelector(props);
         getRangeSelector(tree).props.onChange(undefined, 'B2:C4');
         tree = renderSelector(props);
-        expect(getErrorText(tree)).toBe('sheets-table.tableRangeWithMergeError');
+        expect(getErrorText(tree)).toBe('sheets-table-ui.tableRangeWithMergeError');
 
         getRangeSelector(tree).props.onChange(undefined, 'A6:C9');
         tree = renderSelector(props);
-        expect(getErrorText(tree)).toBe('sheets-table.tableRangeWithOtherTableError');
+        expect(getErrorText(tree)).toBe('sheets-table-ui.tableRangeWithOtherTableError');
 
         getButtons(tree)[1].props.onClick();
         expect(onConfirm).not.toHaveBeenCalled();
@@ -181,7 +181,7 @@ describe('SheetTableSelector', () => {
         let tree = renderSelector(props);
         getRangeSelector(tree).props.onChange(undefined, 'A2:B2');
         tree = renderSelector(props);
-        expect(getErrorText(tree)).toBe('sheets-table.tableRangeSingleRowError');
+        expect(getErrorText(tree)).toBe('sheets-table-ui.tableRangeSingleRowError');
 
         getRangeSelector(tree).props.onChange(undefined, 'A2:B5');
         tree = renderSelector(props);
@@ -234,7 +234,7 @@ describe('SheetTableSelector', () => {
         let tree = renderSelector(props);
         getRangeSelector(tree).props.onChange(undefined, 'A4:B8');
         tree = renderSelector(props);
-        expect(getErrorText(tree)).toBe('sheets-table.updateError');
+        expect(getErrorText(tree)).toBe('sheets-table-ui.updateError');
 
         getRangeSelector(tree).props.onChange(undefined, 'A3:B7');
         expect(onConfirm).toHaveBeenCalledWith(expect.objectContaining({

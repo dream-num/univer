@@ -17,7 +17,7 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    'sheets-table': {
+    'sheets-table-ui': {
         title: '표',
         selectRange: '표 범위 선택',
         rename: '표 이름 바꾸기',

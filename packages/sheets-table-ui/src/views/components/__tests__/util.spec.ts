@@ -34,7 +34,7 @@ describe('table filter util', () => {
         expect(cascaderOptions).toHaveLength(3);
         expect(cascaderOptions[0]).toEqual(expect.objectContaining({
             value: TableConditionTypeEnum.String,
-            label: 't:sheets-table.condition.string',
+            label: 't:sheets-table-ui.condition.string',
         }));
         expect(cascaderOptions[1]?.children).toEqual(expect.arrayContaining([
             expect.objectContaining({ value: TableNumberCompareTypeEnum.Between }),

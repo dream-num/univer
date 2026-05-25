@@ -27,7 +27,8 @@
     "exports": {
         ".": "./src/index.ts",
         "./*": "./src/*",
-        "./facade": "./src/facade/index.ts"
+        "./facade": "./src/facade/index.ts",
+        "./locale/*": "./src/locale/*.ts"
     },
     "main": "./src/index.ts",
     "types": "./lib/types/index.d.ts",

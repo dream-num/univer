@@ -88,7 +88,7 @@ export async function openRangeSelector(
         };
         dialogService.open({
             id: TABLE_SELECTOR_DIALOG,
-            title: { title: localeService.t('sheets-table.selectRange') },
+            title: { title: localeService.t('sheets-table-ui.selectRange') },
             draggable: true,
             destroyOnClose: true,
             mask: false,

@@ -15,7 +15,7 @@
  */
 
 const locale = {
-    'sheets-table': {
+    'sheets-table-ui': {
         title: 'Table',
         selectRange: 'Select Table Range',
         rename: 'Rename Table',

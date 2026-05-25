@@ -152,7 +152,7 @@ export class SheetsTableUiService extends Disposable {
             let stringItem = this._sheetTableService.getCellValueWithConditionType(worksheet, row, column) as string;
 
             if (stringItem === undefined) {
-                stringItem = this._localeService.t('sheets-table.condition.empty');
+                stringItem = this._localeService.t('sheets-table-ui.condition.empty');
             }
 
             if (!map.has(stringItem)) {

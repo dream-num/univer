@@ -76,7 +76,7 @@ describe('SheetsTableUiService', () => {
             { getCellValueWithConditionType } as any,
             univerInstanceService as any,
             commandService as any,
-            { t: (key: string) => (key === 'sheets-table.condition.empty' ? '(empty)' : key) } as any
+            { t: (key: string) => (key === 'sheets-table-ui.condition.empty' ? '(empty)' : key) } as any
         );
 
         expect(service.getTableFilterPanelInitProps('u1', 's1', 't1', 1)).toEqual({

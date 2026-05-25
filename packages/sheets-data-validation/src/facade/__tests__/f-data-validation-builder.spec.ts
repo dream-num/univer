@@ -16,8 +16,8 @@
 
 import type { FUniver } from '@univerjs/core/facade';
 import { DataValidationOperator, DataValidationType } from '@univerjs/core';
+import { deserializeListOptions } from '@univerjs/sheets';
 import { FDataValidationBuilder } from '@univerjs/sheets-data-validation/facade/f-data-validation-builder.js';
-import { deserializeListOptions } from '@univerjs/sheets-data-validation/validators/util.js';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { createFacadeTestBed } from './create-test-bed';
 

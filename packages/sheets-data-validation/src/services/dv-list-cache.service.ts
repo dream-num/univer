@@ -18,9 +18,9 @@ import type { ICellData, IDataValidationRule, Nullable } from '@univerjs/core';
 import type { IOtherFormulaResult } from '@univerjs/engine-formula';
 import { Disposable, Inject, Injector, isFormulaString, numfmt } from '@univerjs/core';
 import { DataValidationModel } from '@univerjs/data-validation';
+import { deserializeListOptions } from '@univerjs/sheets';
 import { isLegalFormulaResult } from '../utils/formula';
 import { getCellValueOrigin } from '../utils/get-cell-data-origin';
-import { deserializeListOptions } from '../validators/util';
 import { DataValidationFormulaService } from './dv-formula.service';
 
 export interface IListCacheItem {

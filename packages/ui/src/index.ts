@@ -28,7 +28,6 @@ export { FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT, type IFontFamilyProp
 export { FontSize } from './components/font-size/FontSize';
 export { FONT_SIZE_COMPONENT, FONT_SIZE_LIST, HEADING_LIST } from './components/font-size/interface';
 export * from './components/hooks';
-export { t } from './components/hooks/locale';
 export { type INotificationOptions } from './components/notification/Notification';
 export { ProgressBar } from './components/progress-bar/ProgressBar';
 export { type IUniverUIConfig, UI_PLUGIN_CONFIG_KEY } from './config/config';

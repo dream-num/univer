@@ -303,6 +303,9 @@ export interface IFFormulaSheetsMixin {
      * calculation is stopped and immediately restarted, the promise waits for
      * the restarted session to apply its results.
      *
+     * @param {number} [timeout] Optional timeout in milliseconds. If omitted,
+     * the promise waits until calculation results are applied or no calculation
+     * occurs within the start-detection window.
      * @returns {Promise<void>} A promise that resolves when calculation results are applied
      * or when no calculation occurs within the start-detection window.
      *
@@ -317,7 +320,7 @@ export interface IFFormulaSheetsMixin {
      * console.log("Updated value:", value);
      * ```
      */
-    onCalculationResultApplied(): Promise<void>;
+    onCalculationResultApplied(timeout?: number): Promise<void>;
 }
 
 export class FFormulaSheetsMixin extends FFormula implements IFFormulaSheetsMixin {
@@ -430,8 +433,8 @@ export class FFormulaSheetsMixin extends FFormula implements IFFormulaSheetsMixi
         };
     }
 
-    override onCalculationResultApplied(): Promise<void> {
-        return this._injector.get(FormulaCalculationSessionService).waitForLatestApplied();
+    override onCalculationResultApplied(timeout?: number): Promise<void> {
+        return this._injector.get(FormulaCalculationSessionService).waitForLatestApplied(timeout);
     }
 }
 

@@ -302,30 +302,6 @@ describe('sheets-formula facade mixins', () => {
         await expect(waitForResult).resolves.toBeUndefined();
     });
 
-    it('rejects onCalculationResultApplied when the wait exceeds the global timeout', async () => {
-        vi.useFakeTimers();
-
-        const formula = univerAPI.getFormula();
-
-        const waitForResult = expect(formula.onCalculationResultApplied()).rejects.toThrowError('Calculation end timeout');
-
-        await commandService.executeCommand(SetFormulaCalculationStartMutation.id, {}, { onlyLocal: true });
-        await commandService.executeCommand(SetFormulaCalculationNotificationMutation.id, {
-            stageInfo: {
-                stage: FormulaExecuteStageType.START_CALCULATION,
-                completedFormulasCount: 0,
-                completedArrayFormulasCount: 0,
-                formulaCycleIndex: 0,
-                totalArrayFormulasToCalculate: 1,
-                totalFormulasToCalculate: 1,
-            },
-        });
-
-        await vi.advanceTimersByTimeAsync(60_000);
-
-        await waitForResult;
-    });
-
     it('resolves onCalculationResultApplied after the latest restarted calculation is applied', async () => {
         vi.useFakeTimers();
 
@@ -384,5 +360,28 @@ describe('sheets-formula facade mixins', () => {
         );
 
         await expect(waitForResult).resolves.toBeUndefined();
+    });
+
+    it('rejects onCalculationResultApplied when an explicit timeout is exceeded', async () => {
+        vi.useFakeTimers();
+
+        const formula = univerAPI.getFormula();
+        const waitForResult = expect(formula.onCalculationResultApplied(1000)).rejects.toThrowError('Calculation end timeout');
+
+        await commandService.executeCommand(SetFormulaCalculationStartMutation.id, {}, { onlyLocal: true });
+        await commandService.executeCommand(SetFormulaCalculationNotificationMutation.id, {
+            stageInfo: {
+                stage: FormulaExecuteStageType.START_CALCULATION,
+                completedFormulasCount: 0,
+                completedArrayFormulasCount: 0,
+                formulaCycleIndex: 0,
+                totalArrayFormulasToCalculate: 1,
+                totalFormulasToCalculate: 1,
+            },
+        });
+
+        await vi.advanceTimersByTimeAsync(1000);
+
+        await waitForResult;
     });
 });

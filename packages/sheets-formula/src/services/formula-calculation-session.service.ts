@@ -150,7 +150,7 @@ export class FormulaCalculationSessionService extends Disposable {
     }
 
     // eslint-disable-next-line max-lines-per-function
-    waitForLatestApplied(timeout = 60_000, startWatchdog = 500): Promise<void> {
+    waitForLatestApplied(timeout?: number, startWatchdog = 500): Promise<void> {
         const initialState = this.state;
         const initialId = initialState.id;
         const waitForInitialization = !initialState.initialized;
@@ -161,9 +161,13 @@ export class FormulaCalculationSessionService extends Disposable {
             let settled = false;
             let pendingResolveId: number | null = null;
             let stoppedResolveTimer: ReturnType<typeof setTimeout> | null = null;
+            let timeoutTimer: ReturnType<typeof setTimeout> | null = null;
 
             const cleanup = () => {
-                clearTimeout(timeoutTimer);
+                if (timeoutTimer != null) {
+                    clearTimeout(timeoutTimer);
+                    timeoutTimer = null;
+                }
                 clearStartTimer();
                 if (stoppedResolveTimer != null) {
                     clearTimeout(stoppedResolveTimer);
@@ -214,9 +218,11 @@ export class FormulaCalculationSessionService extends Disposable {
                 Promise.resolve().then(resolveIfStillLatest);
             };
 
-            const timeoutTimer = setTimeout(() => {
-                settleReject(new Error('Calculation end timeout'));
-            }, timeout);
+            if (timeout != null) {
+                timeoutTimer = setTimeout(() => {
+                    settleReject(new Error('Calculation end timeout'));
+                }, timeout);
+            }
 
             let startTimer: ReturnType<typeof setTimeout> | null = null;
 

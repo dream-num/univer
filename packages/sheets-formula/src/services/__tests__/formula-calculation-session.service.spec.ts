@@ -253,4 +253,41 @@ describe('FormulaCalculationSessionService', () => {
         await vi.advanceTimersByTimeAsync(1);
         await expect(waitForApplied).resolves.toBeUndefined();
     });
+
+    it('does not reject long-running calculations unless a timeout is provided', async () => {
+        vi.useFakeTimers();
+
+        const service = new FormulaCalculationSessionService();
+        service.initialize();
+        service.start();
+
+        const waitForApplied = service.waitForLatestApplied();
+        let settled = false;
+        void waitForApplied.then(() => {
+            settled = true;
+        });
+
+        await vi.advanceTimersByTimeAsync(60_000);
+        await Promise.resolve();
+
+        expect(settled).toBe(false);
+
+        service.markResultEmitted({ unitData: {}, unitOtherData: {} }, false);
+
+        await expect(waitForApplied).resolves.toBeUndefined();
+    });
+
+    it('rejects long-running calculations when a timeout is provided', async () => {
+        vi.useFakeTimers();
+
+        const service = new FormulaCalculationSessionService();
+        service.initialize();
+        service.start();
+
+        const waitForApplied = expect(service.waitForLatestApplied(1000)).rejects.toThrow('Calculation end timeout');
+
+        await vi.advanceTimersByTimeAsync(1000);
+
+        await waitForApplied;
+    });
 });

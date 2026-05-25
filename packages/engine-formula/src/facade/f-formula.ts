@@ -204,7 +204,7 @@ export class FFormula extends FBase {
     }
 
     /**
-     * @deprecated Use `onCalculationEnd` instead.
+     * @deprecated Use `onCalculationResultApplied` instead.
      */
     whenComputingCompleteAsync(timeout?: number): Promise<boolean> {
         const gcss = this._injector.get(GlobalComputingStatusService);
@@ -217,8 +217,7 @@ export class FFormula extends FBase {
     }
 
     /**
-     * Waits for the formula calculation to complete.
-     * @returns {Promise<void>} This method returns a promise that resolves when the calculation is complete.
+     * @deprecated Use `onCalculationResultApplied` instead.
      */
     onCalculationEnd(): Promise<void> {
         return new Promise((resolve, reject) => {

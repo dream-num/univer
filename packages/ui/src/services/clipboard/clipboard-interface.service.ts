@@ -285,8 +285,8 @@ export class BrowserClipboardService extends Disposable implements IClipboardInt
     private _showClipboardAuthenticationNotification(): void {
         this._notificationService?.show({
             type: 'warning',
-            title: this._localeService.t('clipboard.authentication.title'),
-            content: this._localeService.t('clipboard.authentication.content'),
+            title: this._localeService.t('ui.clipboard.authentication.title'),
+            content: this._localeService.t('ui.clipboard.authentication.content'),
         });
     }
 }

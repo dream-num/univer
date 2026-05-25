@@ -46,55 +46,55 @@ export interface IFontConfig {
 
 const DEFAULT_FONT_LIST: IFontConfig[] = [{
     value: 'Arial',
-    label: 'fontFamily.arial',
+    label: 'ui.fontFamily.arial',
     category: 'sans-serif',
 }, {
     value: 'Times New Roman',
-    label: 'fontFamily.times-new-roman',
+    label: 'ui.fontFamily.times-new-roman',
     category: 'serif',
 }, {
     value: 'Tahoma',
-    label: 'fontFamily.tahoma',
+    label: 'ui.fontFamily.tahoma',
     category: 'sans-serif',
 }, {
     value: 'Verdana',
-    label: 'fontFamily.verdana',
+    label: 'ui.fontFamily.verdana',
     category: 'sans-serif',
 }, {
     value: 'Microsoft YaHei',
-    label: 'fontFamily.microsoft-yahei',
+    label: 'ui.fontFamily.microsoft-yahei',
     category: 'sans-serif',
 }, {
     value: 'SimSun',
-    label: 'fontFamily.simsun',
+    label: 'ui.fontFamily.simsun',
     category: 'serif',
 }, {
     value: 'SimHei',
-    label: 'fontFamily.simhei',
+    label: 'ui.fontFamily.simhei',
     category: 'sans-serif',
 }, {
     value: 'Kaiti',
-    label: 'fontFamily.kaiti',
+    label: 'ui.fontFamily.kaiti',
     category: 'serif',
 }, {
     value: 'FangSong',
-    label: 'fontFamily.fangsong',
+    label: 'ui.fontFamily.fangsong',
     category: 'serif',
 }, {
     value: 'NSimSun',
-    label: 'fontFamily.nsimsun',
+    label: 'ui.fontFamily.nsimsun',
     category: 'serif',
 }, {
     value: 'STXinwei',
-    label: 'fontFamily.stxinwei',
+    label: 'ui.fontFamily.stxinwei',
     category: 'serif',
 }, {
     value: 'STXingkai',
-    label: 'fontFamily.stxingkai',
+    label: 'ui.fontFamily.stxingkai',
     category: 'serif',
 }, {
     value: 'STLiti',
-    label: 'fontFamily.stliti',
+    label: 'ui.fontFamily.stliti',
     category: 'serif',
 }];
 

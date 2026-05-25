@@ -96,35 +96,35 @@ export const FONT_SIZE_LIST = [
 
 export const HEADING_LIST = [
     {
-        label: 'toolbar.heading.normal',
+        label: 'ui.toolbar.heading.normal',
         value: NamedStyleType.NORMAL_TEXT,
     },
     {
-        label: 'toolbar.heading.title',
+        label: 'ui.toolbar.heading.title',
         value: NamedStyleType.TITLE,
     },
     {
-        label: 'toolbar.heading.subTitle',
+        label: 'ui.toolbar.heading.subTitle',
         value: NamedStyleType.SUBTITLE,
     },
     {
-        label: 'toolbar.heading.1',
+        label: 'ui.toolbar.heading.1',
         value: NamedStyleType.HEADING_1,
     },
     {
-        label: 'toolbar.heading.2',
+        label: 'ui.toolbar.heading.2',
         value: NamedStyleType.HEADING_2,
     },
     {
-        label: 'toolbar.heading.3',
+        label: 'ui.toolbar.heading.3',
         value: NamedStyleType.HEADING_3,
     },
     {
-        label: 'toolbar.heading.4',
+        label: 'ui.toolbar.heading.4',
         value: NamedStyleType.HEADING_4,
     },
     {
-        label: 'toolbar.heading.5',
+        label: 'ui.toolbar.heading.5',
         value: NamedStyleType.HEADING_5,
     },
 ];

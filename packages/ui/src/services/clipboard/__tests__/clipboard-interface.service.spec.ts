@@ -140,8 +140,8 @@ describe('BrowserClipboardService', () => {
         expect(logService.error).toHaveBeenCalledTimes(2);
         expect(notificationService.show).toHaveBeenCalledWith({
             type: 'warning',
-            title: 'clipboard.authentication.title',
-            content: 'clipboard.authentication.content',
+            title: 'ui.clipboard.authentication.title',
+            content: 'ui.clipboard.authentication.content',
         });
     });
 

@@ -17,7 +17,7 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    'sheets-table': {
+    'sheets-table-ui': {
         title: 'Bảng',
         selectRange: 'Chọn phạm vi bảng',
         rename: 'Đổi tên bảng',

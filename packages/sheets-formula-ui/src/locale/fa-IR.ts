@@ -15,49 +15,16 @@
  */
 
 import type enUS from './en-US';
-import array from './function-list/array/fa-IR';
-import compatibility from './function-list/compatibility/fa-IR';
-import cube from './function-list/cube/fa-IR';
-import database from './function-list/database/fa-IR';
-import date from './function-list/date/fa-IR';
-import engineering from './function-list/engineering/fa-IR';
-import financial from './function-list/financial/fa-IR';
-import information from './function-list/information/fa-IR';
-import logical from './function-list/logical/fa-IR';
-import lookup from './function-list/lookup/fa-IR';
-import math from './function-list/math/fa-IR';
-import statistical from './function-list/statistical/fa-IR';
-import text from './function-list/text/fa-IR';
-import univer from './function-list/univer/fa-IR';
-import web from './function-list/web/fa-IR';
 
 const locale: typeof enUS = {
-    shortcut: {
-        'sheets-formula-ui': {
+    'sheets-formula-ui': {
+        shortcut: {
             'quick-sum': 'جمع سریع',
         },
-    },
-    formula: {
+
         insert: {
             tooltip: 'توابع',
             common: 'توابع پرکاربرد',
-        },
-        functionList: {
-            ...financial,
-            ...date,
-            ...math,
-            ...statistical,
-            ...lookup,
-            ...database,
-            ...text,
-            ...logical,
-            ...information,
-            ...engineering,
-            ...cube,
-            ...compatibility,
-            ...web,
-            ...array,
-            ...univer,
         },
         prompt: {
             helpExample: 'مثال',
@@ -111,6 +78,15 @@ const locale: typeof enUS = {
         operation: {
             copyFormulaOnly: 'کپی فقط فرمول',
             pasteFormula: 'چسباندن فرمول',
+        },
+
+        rangeSelector: {
+            title: 'انتخاب محدوده داده',
+            addAnotherRange: 'افزودن محدوده',
+            buttonTooltip: 'انتخاب محدوده داده',
+            placeHolder: 'انتخاب محدوده یا وارد کردن.',
+            confirm: 'تایید',
+            cancel: 'انصراف',
         },
     },
 };

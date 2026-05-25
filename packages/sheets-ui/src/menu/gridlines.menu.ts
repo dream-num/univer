@@ -29,7 +29,7 @@ export function ToggleGridlinesMenuFactory(accessor: IAccessor): IMenuButtonItem
     return {
         id: ToggleGridlinesCommand.id,
         type: MenuItemType.BUTTON,
-        tooltip: 'toolbar.toggleGridlines',
+        tooltip: 'sheets-ui.toolbar.toggleGridlines',
         icon: 'HideGridlinesDoubleIcon',
         activated$: new Observable<boolean>((observer) => {
             const getValue = () => {

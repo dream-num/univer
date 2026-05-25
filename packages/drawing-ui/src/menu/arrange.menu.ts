@@ -29,7 +29,7 @@ export function DrawingArrangeContextMenuItemFactory(): IMenuSelectorItem<string
         id: DRAWING_ARRANGE_CONTEXT_MENU_ID,
         type: MenuItemType.SUBITEMS,
         icon: 'TopmostIcon',
-        title: 'image-panel.arrange.title',
+        title: 'drawing-ui.image-panel.arrange.title',
     };
 }
 
@@ -38,7 +38,7 @@ export function SetDrawingArrangeFrontMenuItemFactory(): IMenuButtonItem {
         id: SetDrawingArrangeFrontOperation.id,
         type: MenuItemType.BUTTON,
         icon: 'TopmostIcon',
-        title: 'image-panel.arrange.front',
+        title: 'drawing-ui.image-panel.arrange.front',
     };
 }
 
@@ -47,7 +47,7 @@ export function SetDrawingArrangeForwardMenuItemFactory(): IMenuButtonItem {
         id: SetDrawingArrangeForwardOperation.id,
         type: MenuItemType.BUTTON,
         icon: 'MoveUpIcon',
-        title: 'image-panel.arrange.forward',
+        title: 'drawing-ui.image-panel.arrange.forward',
     };
 }
 
@@ -56,7 +56,7 @@ export function SetDrawingArrangeBackMenuItemFactory(): IMenuButtonItem {
         id: SetDrawingArrangeBackOperation.id,
         type: MenuItemType.BUTTON,
         icon: 'BottomIcon',
-        title: 'image-panel.arrange.back',
+        title: 'drawing-ui.image-panel.arrange.back',
     };
 }
 
@@ -65,6 +65,6 @@ export function SetDrawingArrangeBackwardMenuItemFactory(): IMenuButtonItem {
         id: SetDrawingArrangeBackwardOperation.id,
         type: MenuItemType.BUTTON,
         icon: 'MoveDownIcon',
-        title: 'image-panel.arrange.backward',
+        title: 'drawing-ui.image-panel.arrange.backward',
     };
 }

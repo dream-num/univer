@@ -115,14 +115,14 @@ export function FilterPanel() {
                 `}
             >
                 <Button variant="link" onClick={onClearCriteria} disabled={clearFilterDisabled}>
-                    {localeService.t('sheets-filter.panel.clear-filter')}
+                    {localeService.t('sheets-filter-ui.panel.clear-filter')}
                 </Button>
                 <span className="univer-flex univer-gap-2">
                     <Button variant="default" onClick={onCancel}>
-                        {localeService.t('sheets-filter.panel.cancel')}
+                        {localeService.t('sheets-filter-ui.panel.cancel')}
                     </Button>
                     <Button disabled={!canApply} variant="primary" onClick={onApply}>
-                        {localeService.t('sheets-filter.panel.confirm')}
+                        {localeService.t('sheets-filter-ui.panel.confirm')}
                     </Button>
                 </span>
             </div>
@@ -133,8 +133,8 @@ export function FilterPanel() {
 function useFilterByOptions(localeService: LocaleService) {
     const locale = localeService.getCurrentLocale();
     return useMemo(() => [
-        { label: localeService.t('sheets-filter.panel.by-values'), value: FilterBy.VALUES },
-        { label: localeService.t('sheets-filter.panel.by-colors'), value: FilterBy.COLORS },
-        { label: localeService.t('sheets-filter.panel.by-conditions'), value: FilterBy.CONDITIONS },
+        { label: localeService.t('sheets-filter-ui.panel.by-values'), value: FilterBy.VALUES },
+        { label: localeService.t('sheets-filter-ui.panel.by-colors'), value: FilterBy.COLORS },
+        { label: localeService.t('sheets-filter-ui.panel.by-conditions'), value: FilterBy.CONDITIONS },
     ], [locale, localeService]);
 }

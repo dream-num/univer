@@ -29,7 +29,7 @@ export function ImageMenuFactory(accessor: IAccessor): IMenuItem {
         id: SHEETS_IMAGE_MENU_ID,
         type: MenuItemType.SUBITEMS,
         icon: 'AddImageIcon',
-        tooltip: 'sheetImage.title',
+        tooltip: 'sheets-drawing-ui.title',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
     };
@@ -38,7 +38,7 @@ export function ImageMenuFactory(accessor: IAccessor): IMenuItem {
 export function UploadFloatImageMenuFactory(_accessor: IAccessor): IMenuItem {
     return {
         id: InsertFloatImageCommand.id,
-        title: 'sheetImage.upload.float',
+        title: 'sheets-drawing-ui.upload.float',
         type: MenuItemType.BUTTON,
         hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_SHEET),
     };
@@ -47,7 +47,7 @@ export function UploadFloatImageMenuFactory(_accessor: IAccessor): IMenuItem {
 export function UploadCellImageMenuFactory(_accessor: IAccessor): IMenuItem {
     return {
         id: InsertCellImageCommand.id,
-        title: 'sheetImage.upload.cell',
+        title: 'sheets-drawing-ui.upload.cell',
         type: MenuItemType.BUTTON,
         hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_SHEET),
     };

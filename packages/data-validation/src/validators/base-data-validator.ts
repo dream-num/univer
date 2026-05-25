@@ -26,14 +26,14 @@ export const FORMULA2 = '{FORMULA2}';
 export const TYPE = '{TYPE}';
 
 const operatorNameMap: Record<DataValidationOperator, string> = {
-    [DataValidationOperator.BETWEEN]: 'dataValidation.operators.between',
-    [DataValidationOperator.EQUAL]: 'dataValidation.operators.equal',
-    [DataValidationOperator.GREATER_THAN]: 'dataValidation.operators.greaterThan',
-    [DataValidationOperator.GREATER_THAN_OR_EQUAL]: 'dataValidation.operators.greaterThanOrEqual',
-    [DataValidationOperator.LESS_THAN]: 'dataValidation.operators.lessThan',
-    [DataValidationOperator.LESS_THAN_OR_EQUAL]: 'dataValidation.operators.lessThanOrEqual',
-    [DataValidationOperator.NOT_BETWEEN]: 'dataValidation.operators.notBetween',
-    [DataValidationOperator.NOT_EQUAL]: 'dataValidation.operators.notEqual',
+    [DataValidationOperator.BETWEEN]: 'data-validation.operators.between',
+    [DataValidationOperator.EQUAL]: 'data-validation.operators.equal',
+    [DataValidationOperator.GREATER_THAN]: 'data-validation.operators.greaterThan',
+    [DataValidationOperator.GREATER_THAN_OR_EQUAL]: 'data-validation.operators.greaterThanOrEqual',
+    [DataValidationOperator.LESS_THAN]: 'data-validation.operators.lessThan',
+    [DataValidationOperator.LESS_THAN_OR_EQUAL]: 'data-validation.operators.lessThanOrEqual',
+    [DataValidationOperator.NOT_BETWEEN]: 'data-validation.operators.notBetween',
+    [DataValidationOperator.NOT_EQUAL]: 'data-validation.operators.notEqual',
 };
 
 export interface IValidatorCellInfo<DataType = Nullable<CellValue>> {

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import { merge } from '../common/lodash';
-
 export type LanguageValue = string | string[] | ILanguagePack | ILanguagePack[] | boolean;
 
 export interface ILanguagePack {
@@ -28,6 +26,7 @@ export interface ILocales {
 
 // eslint-disable-next-line ts/no-explicit-any
 type MergeLocalesInput = Record<string, any>;
+
 /**
  * Merges multiple locale objects into a single locale object.
  * It can accept either multiple locale objects as arguments or a single array of locale objects.
@@ -41,5 +40,5 @@ export function mergeLocales(...locales: (MergeLocalesInput | MergeLocalesInput[
     } else {
         mergedLocales = locales as MergeLocalesInput[];
     }
-    return merge({}, ...mergedLocales);
+    return Object.assign({}, ...mergedLocales);
 }

@@ -115,7 +115,7 @@ export const DrawingGroup = (props: IDrawingGroupProps) => {
                   dark:!univer-text-gray-200
                 `}
             >
-                <div>{localeService.t('image-panel.group.title')}</div>
+                <div>{localeService.t('drawing-ui.image-panel.group.title')}</div>
             </header>
 
             <div className="univer-flex univer-items-center univer-justify-center univer-gap-2">
@@ -126,7 +126,7 @@ export const DrawingGroup = (props: IDrawingGroupProps) => {
                     onClick={onGroupBtnClick}
                 >
                     <GroupIcon />
-                    {localeService.t('image-panel.group.group')}
+                    {localeService.t('drawing-ui.image-panel.group.group')}
                 </Button>
                 <Button
                     className={clsx({
@@ -135,7 +135,7 @@ export const DrawingGroup = (props: IDrawingGroupProps) => {
                     onClick={onUngroupBtnClick}
                 >
                     <UngroupIcon />
-                    {localeService.t('image-panel.group.unGroup')}
+                    {localeService.t('drawing-ui.image-panel.group.unGroup')}
                 </Button>
             </div>
         </div>

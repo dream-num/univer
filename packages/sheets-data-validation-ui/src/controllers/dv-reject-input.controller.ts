@@ -64,7 +64,7 @@ export class DataValidationRejectInputController extends Disposable {
                     this._dialogService.open({
                         width: 368,
                         title: {
-                            title: this._localeService.t('dataValidation.alert.title'),
+                            title: this._localeService.t('sheets-data-validation-ui.alert.title'),
                         },
                         id: 'reject-input-dialog',
                         children: {
@@ -77,7 +77,7 @@ export class DataValidationRejectInputController extends Disposable {
                                     variant: 'primary',
                                     onClick: () => this._dialogService.close('reject-input-dialog'),
                                 },
-                                this._localeService.t('dataValidation.alert.ok')
+                                this._localeService.t('sheets-data-validation-ui.alert.ok')
                             ),
                         },
                         onClose: () => {
@@ -95,7 +95,7 @@ export class DataValidationRejectInputController extends Disposable {
         this._dialogService.open({
             width: 368,
             title: {
-                title: this._localeService.t('dataValidation.alert.title'),
+                title: this._localeService.t('sheets-data-validation-ui.alert.title'),
             },
             id: 'reject-input-dialog',
             children: {
@@ -108,7 +108,7 @@ export class DataValidationRejectInputController extends Disposable {
                         variant: 'primary',
                         onClick: () => this._dialogService.close('reject-input-dialog'),
                     },
-                    this._localeService.t('dataValidation.alert.ok')
+                    this._localeService.t('sheets-data-validation-ui.alert.ok')
                 ),
             },
             onClose: () => {

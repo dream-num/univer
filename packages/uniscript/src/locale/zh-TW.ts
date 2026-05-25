@@ -17,7 +17,7 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    'script-panel': {
+    uniscript: {
         title: 'Uniscript',
         tooltip: {
             'menu-button': '打開收起 Uniscript 面板',
@@ -25,8 +25,6 @@ const locale: typeof enUS = {
         panel: {
             execute: '執行 Uniscript',
         },
-    },
-    uniscript: {
         message: {
             success: '執行成功',
             failed: '執行失敗',

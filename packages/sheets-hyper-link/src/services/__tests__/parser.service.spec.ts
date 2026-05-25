@@ -67,7 +67,7 @@ describe('SheetsHyperLinkParserService', () => {
         localeService = injector.get(LocaleService);
         localeService.load({
             [LocaleType.EN_US]: {
-                hyperLink: {
+                'sheets-hyper-link': {
                     message: {
                         refError: 'Invalid Range',
                     },

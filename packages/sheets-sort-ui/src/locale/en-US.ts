@@ -15,7 +15,7 @@
  */
 
 const locale = {
-    'sheets-sort': {
+    'sheets-sort-ui': {
         general: {
             sort: 'Sort',
             'sort-asc': 'Ascending',
@@ -41,6 +41,9 @@ const locale = {
             'add-condition': 'Add condition',
             cancel: 'Cancel',
             confirm: 'Confirm',
+        },
+        info: {
+            tooltip: 'Tooltip',
         },
     },
 };

@@ -17,7 +17,7 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    sheetImage: {
+    'sheets-drawing-ui': {
         title: '画像',
 
         upload: {
@@ -42,32 +42,37 @@ const locale: typeof enUS = {
             saving: '保存中...',
             error: 'セル画像の保存に失敗しました',
         },
-    },
-    'image-popup': {
-        replace: '画像の変更',
-        delete: '削除',
-        edit: '編集',
-        crop: 'トリミング',
-        reset: '元のサイズに戻す',
-        flipH: '左右反転',
-        flipV: '上下反転',
-    },
-    'drawing-anchor': {
-        title: 'プロパティ',
-        both: 'セルに合わせて移動やサイズ変更をする',
-        position: 'セルに合わせて移動するがサイズ変更はしない',
-        none: 'セルに合わせて移動やサイズ変更をしない',
-    },
-    'update-status': {
-        exceedMaxSize: '画像サイズが制限（{0}MB）を超えています',
-        invalidImageType: 'サポートされていない画像形式です',
-        exceedMaxCount: '一度にアップロードできるのは {0} 個までです',
-        invalidImage: '無効な画像です',
-    },
-    'cell-image': {
-        pasteTitle: 'セル内画像として貼り付け',
-        pasteContent: 'セル内画像を貼り付けると、既存のセル内容が上書きされます。続行しますか？',
-        pasteError: 'この箇所では、シートのセル内画像のコピー＆ペーストはサポートされていません',
+        'image-popup': {
+            replace: '画像の変更',
+            delete: '削除',
+            edit: '編集',
+            crop: 'トリミング',
+            reset: '元のサイズに戻す',
+            flipH: '左右反転',
+            flipV: '上下反転',
+        },
+        'update-status': {
+            exceedMaxSize: '画像サイズが制限（{0}MB）を超えています',
+            invalidImageType: 'サポートされていない画像形式です',
+            exceedMaxCount: '一度にアップロードできるのは {0} 個までです',
+            invalidImage: '無効な画像です',
+        },
+        'drawing-anchor': {
+            title: 'プロパティ',
+            both: 'セルに合わせて移動やサイズ変更をする',
+            position: 'セルに合わせて移動するがサイズ変更はしない',
+            none: 'セルに合わせて移動やサイズ変更をしない',
+        },
+        'cell-image': {
+            pasteTitle: 'セル内画像として貼り付け',
+            pasteContent: 'セル内画像を貼り付けると、既存のセル内容が上書きされます。続行しますか？',
+            pasteError: 'この箇所では、シートのセル内画像のコピー＆ペーストはサポートされていません',
+        },
+        permission: {
+            dialog: {
+                editErr: 'この範囲は保護されており、編集権限がありません。編集するには作成者に連絡してください。',
+            },
+        },
     },
 };
 

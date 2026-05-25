@@ -16,14 +16,40 @@
 
 import type enUS from './en-US';
 
+import array from './function-list/array/ja-JP';
+import compatibility from './function-list/compatibility/ja-JP';
+import cube from './function-list/cube/ja-JP';
+import database from './function-list/database/ja-JP';
+import date from './function-list/date/ja-JP';
+import engineering from './function-list/engineering/ja-JP';
+import financial from './function-list/financial/ja-JP';
+import information from './function-list/information/ja-JP';
+import logical from './function-list/logical/ja-JP';
+import lookup from './function-list/lookup/ja-JP';
+import math from './function-list/math/ja-JP';
+import statistical from './function-list/statistical/ja-JP';
+import text from './function-list/text/ja-JP';
+import univer from './function-list/univer/ja-JP';
+import web from './function-list/web/ja-JP';
+
 const locale: typeof enUS = {
-    formula: {
-        progress: {
-            analyzing: '解析中',
-            calculating: '計算中',
-            'array-analysis': '配列の解析',
-            'array-calculation': '配列の計算',
-            done: '完了',
+    'sheets-formula': {
+        functionList: {
+            ...array,
+            ...compatibility,
+            ...cube,
+            ...database,
+            ...date,
+            ...engineering,
+            ...financial,
+            ...information,
+            ...logical,
+            ...lookup,
+            ...math,
+            ...statistical,
+            ...text,
+            ...univer,
+            ...web,
         },
     },
 };

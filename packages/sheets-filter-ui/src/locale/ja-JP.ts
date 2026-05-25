@@ -17,14 +17,11 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    'sheets-filter': {
+    'sheets-filter-ui': {
         toolbar: {
             'smart-toggle-filter-tooltip': 'フィルタの切替',
             'clear-filter-criteria': 'フィルタ条件をクリア',
             're-calc-filter-conditions': 'フィルタ条件を再計算',
-        },
-        command: {
-            'not-valid-filter-range': '選択範囲に1行しか含まれていないため、フィルタを適用できません。',
         },
         shortcut: {
             'smart-toggle-filter': 'フィルタの切替',
@@ -67,9 +64,6 @@ const locale: typeof enUS = {
             between: '範囲内',
             'not-between': '範囲外',
             custom: 'カスタム',
-        },
-        msg: {
-            'filter-header-forbidden': 'フィルタヘッダー行は移動できません。',
         },
         date: {
             1: '1月',

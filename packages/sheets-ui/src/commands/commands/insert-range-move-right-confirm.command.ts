@@ -58,10 +58,10 @@ export const InsertRangeMoveRightConfirmCommand: ICommand = {
 
         const result = await confirmService.confirm({
             id: InsertRangeMoveRightConfirmCommand.id,
-            title: { title: localeService.t('merge.confirm.warning') },
-            children: { title: localeService.t('merge.confirm.dismantleMergeCellWarning') },
-            cancelText: localeService.t('button.cancel'),
-            confirmText: localeService.t('button.confirm'),
+            title: { title: localeService.t('sheets-ui.merge.confirm.warning') },
+            children: { title: localeService.t('sheets-ui.merge.confirm.dismantleMergeCellWarning') },
+            cancelText: localeService.t('sheets-ui.button.cancel'),
+            confirmText: localeService.t('sheets-ui.button.confirm'),
         });
         if (result) {
             return commandService.executeCommand(InsertRangeMoveRightCommand.id);

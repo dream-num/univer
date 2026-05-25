@@ -32,7 +32,7 @@ interface IValidateDefinedNameOptions {
 
 export function validateDefinedName(name: string, options: IValidateDefinedNameOptions): true | string {
     if (name.length === 0) {
-        return 'definedName.nameEmpty';
+        return 'sheets.definedName.nameEmpty';
     }
 
     const { unitId, formulaOrRefString, univerInstanceService, definedNamesService, superTableService, functionService, id } = options;
@@ -46,12 +46,12 @@ export function validateDefinedName(name: string, options: IValidateDefinedNameO
         existingDefinedName &&
         (id === null || id === undefined || id.length === 0 || existingDefinedName.id !== id)
     ) {
-        return 'definedName.nameDuplicate';
+        return 'sheets.definedName.nameDuplicate';
     }
 
     // The defined name can't be duplicate with existing table names.
     if (superTableService.hasTable(unitId, name)) {
-        return 'definedName.nameDuplicate';
+        return 'sheets.definedName.nameDuplicate';
     }
 
     // The defined name can't be a reference string with effective column, which will cause confusion.
@@ -60,7 +60,7 @@ export function validateDefinedName(name: string, options: IValidateDefinedNameO
         isReferenceStringWithEffectiveColumn(name) ||
         (!Tools.isStartValidPosition(name) && !hasCJKText(name.substring(0, 1)))
     ) {
-        return 'definedName.nameInvalid';
+        return 'sheets.definedName.nameInvalid';
     }
 
     const workbook = univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
@@ -72,16 +72,16 @@ export function validateDefinedName(name: string, options: IValidateDefinedNameO
 
     // The defined name can't be duplicate with existing sheet names.
     if (worksheets.some((sheet) => sheet.getName() === name)) {
-        return 'definedName.nameSheetConflict';
+        return 'sheets.definedName.nameSheetConflict';
     }
 
     if (formulaOrRefString.length === 0) {
-        return 'definedName.formulaOrRefStringEmpty';
+        return 'sheets.definedName.formulaOrRefStringEmpty';
     }
 
     // The defined name can't be duplicate with existing function names.
     if (functionService.hasExecutor(name.toUpperCase())) {
-        return 'definedName.nameConflict';
+        return 'sheets.definedName.nameConflict';
     }
 
     return true;

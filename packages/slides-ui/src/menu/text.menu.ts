@@ -25,7 +25,7 @@ export function SlideAddTextMenuItemFactory(_accessor: IAccessor): IMenuButtonIt
         id: SlideAddTextCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'TextIcon',
-        tooltip: 'slide.text.insert.title',
+        tooltip: 'slides-ui.text.insert.title',
         hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_SLIDE),
     };
 }

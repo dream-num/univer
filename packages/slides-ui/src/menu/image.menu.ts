@@ -27,7 +27,7 @@ export function SlideImageMenuFactory(accessor: IAccessor): IMenuItem {
         id: SLIDES_IMAGE_MENU_ID,
         type: MenuItemType.SUBITEMS,
         icon: 'AddImageIcon',
-        tooltip: 'slide.image.insert.title',
+        tooltip: 'slides-ui.image.insert.title',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SLIDE),
     };
 }
@@ -35,7 +35,7 @@ export function SlideImageMenuFactory(accessor: IAccessor): IMenuItem {
 export function UploadSlideFloatImageMenuFactory(_accessor: IAccessor): IMenuItem {
     return {
         id: InsertSlideFloatImageCommand.id,
-        title: 'slide.image.insert.float',
+        title: 'slides-ui.image.insert.float',
         type: MenuItemType.BUTTON,
         hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_SLIDE),
     };

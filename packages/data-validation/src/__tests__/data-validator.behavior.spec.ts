@@ -129,7 +129,7 @@ describe('data validator behavior', () => {
                 validator: {
                     number: 'Number',
                 },
-                dataValidation: {
+                'data-validation': {
                     operators: {
                         between: 'between',
                         equal: 'equal',

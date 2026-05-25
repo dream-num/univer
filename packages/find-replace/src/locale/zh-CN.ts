@@ -62,6 +62,10 @@ const locale: typeof enUS = {
                 title: '确定要替换所有的匹配项吗？',
             },
         },
+        button: {
+            confirm: '确定',
+            cancel: '取消',
+        },
     },
     'find-replace-shortcuts': '查找替换',
 };

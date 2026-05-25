@@ -15,51 +15,17 @@
  */
 
 import type enUS from './en-US';
-import array from './function-list/array/zh-TW';
-import compatibility from './function-list/compatibility/zh-TW';
-import cube from './function-list/cube/zh-TW';
-import database from './function-list/database/zh-TW';
-import date from './function-list/date/zh-TW';
-import engineering from './function-list/engineering/zh-TW';
-import financial from './function-list/financial/zh-TW';
-import information from './function-list/information/zh-TW';
-import logical from './function-list/logical/zh-TW';
-import lookup from './function-list/lookup/zh-TW';
-import math from './function-list/math/zh-TW';
-import statistical from './function-list/statistical/zh-TW';
-import text from './function-list/text/zh-TW';
-import univer from './function-list/univer/zh-TW';
-import web from './function-list/web/zh-TW';
 
 const locale: typeof enUS = {
-    shortcut: {
-        'sheets-formula-ui': {
+    'sheets-formula-ui': {
+        shortcut: {
             'quick-sum': '快速求和',
         },
-    },
-    formula: {
+
         insert: {
             tooltip: '函數',
             common: '常用函數',
         },
-        functionList: {
-            ...financial,
-            ...date,
-            ...math,
-            ...statistical,
-            ...lookup,
-            ...database,
-            ...text,
-            ...logical,
-            ...information,
-            ...engineering,
-            ...cube,
-            ...compatibility,
-            ...web,
-            ...array,
-            ...univer,
-        },
-
         prompt: {
             helpExample: '範例',
             helpAbstract: '簡介',
@@ -115,6 +81,15 @@ const locale: typeof enUS = {
         operation: {
             copyFormulaOnly: '僅複製公式',
             pasteFormula: '僅貼上公式',
+        },
+
+        rangeSelector: {
+            title: '選擇一個資料範圍',
+            addAnotherRange: '新增範圍',
+            buttonTooltip: '選擇資料範圍',
+            placeHolder: '框選範圍或輸入',
+            confirm: '確認',
+            cancel: '取消',
         },
     },
 };

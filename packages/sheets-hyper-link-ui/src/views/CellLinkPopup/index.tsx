@@ -128,12 +128,12 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
                                 navigator.clipboard.writeText(linkObj.url);
                             }
                             messageService.show({
-                                content: localeService.t('hyperLink.message.coped'),
+                                content: localeService.t('sheets-hyper-link-ui.message.coped'),
                                 type: MessageType.Info,
                             });
                         }}
                     >
-                        <Tooltip placement="bottom" title={localeService.t('hyperLink.popup.copy')}>
+                        <Tooltip placement="bottom" title={localeService.t('sheets-hyper-link-ui.popup.copy')}>
                             <CopyIcon className="dark:!univer-text-white" />
                         </Tooltip>
                     </div>
@@ -158,7 +158,7 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
                                 });
                             }}
                         >
-                            <Tooltip placement="bottom" title={localeService.t('hyperLink.popup.edit')}>
+                            <Tooltip placement="bottom" title={localeService.t('sheets-hyper-link-ui.popup.edit')}>
                                 <WriteIcon className="dark:!univer-text-white" />
                             </Tooltip>
                         </div>
@@ -185,7 +185,7 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
                                 }
                             }}
                         >
-                            <Tooltip placement="bottom" title={localeService.t('hyperLink.popup.cancel')}>
+                            <Tooltip placement="bottom" title={localeService.t('sheets-hyper-link-ui.popup.cancel')}>
                                 <UnlinkIcon className="dark:!univer-text-white" />
                             </Tooltip>
                         </div>

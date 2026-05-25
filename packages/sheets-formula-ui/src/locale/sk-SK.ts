@@ -15,49 +15,16 @@
  */
 
 import type enUS from './en-US';
-import array from './function-list/array/sk-SK';
-import compatibility from './function-list/compatibility/sk-SK';
-import cube from './function-list/cube/sk-SK';
-import database from './function-list/database/sk-SK';
-import date from './function-list/date/sk-SK';
-import engineering from './function-list/engineering/sk-SK';
-import financial from './function-list/financial/sk-SK';
-import information from './function-list/information/sk-SK';
-import logical from './function-list/logical/sk-SK';
-import lookup from './function-list/lookup/sk-SK';
-import math from './function-list/math/sk-SK';
-import statistical from './function-list/statistical/sk-SK';
-import text from './function-list/text/sk-SK';
-import univer from './function-list/univer/sk-SK';
-import web from './function-list/web/sk-SK';
 
 const locale: typeof enUS = {
-    shortcut: {
-        'sheets-formula-ui': {
+    'sheets-formula-ui': {
+        shortcut: {
             'quick-sum': 'Rýchly súčet',
         },
-    },
-    formula: {
+
         insert: {
             tooltip: 'Funkcie',
             common: 'Bežné funkcie',
-        },
-        functionList: {
-            ...financial,
-            ...date,
-            ...math,
-            ...statistical,
-            ...lookup,
-            ...database,
-            ...text,
-            ...logical,
-            ...information,
-            ...engineering,
-            ...cube,
-            ...compatibility,
-            ...web,
-            ...array,
-            ...univer,
         },
         prompt: {
             helpExample: 'PRÍKLAD',
@@ -111,6 +78,15 @@ const locale: typeof enUS = {
         operation: {
             copyFormulaOnly: 'Kopírovať iba vzorec',
             pasteFormula: 'Prilepiť vzorec',
+        },
+
+        rangeSelector: {
+            title: 'Vyberte rozsah údajov',
+            addAnotherRange: 'Pridať rozsah',
+            buttonTooltip: 'Vybrať rozsah údajov',
+            placeHolder: 'Vyberte rozsah alebo zadajte.',
+            confirm: 'Potvrdiť',
+            cancel: 'Zrušiť',
         },
     },
 };

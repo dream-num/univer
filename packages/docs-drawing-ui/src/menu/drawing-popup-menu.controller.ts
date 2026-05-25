@@ -187,7 +187,7 @@ export class DocDrawingPopupMenuController extends RxDisposable {
     private _getImageMenuItems(unitId: string, subUnitId: string, drawingId: string, drawingType: number) {
         return [
             {
-                label: 'image-popup.edit',
+                label: 'docs-drawing-ui.image-popup.edit',
                 index: 0,
                 commandId: EditDocDrawingOperation.id,
                 commandParams: { unitId, subUnitId, drawingId },
@@ -195,21 +195,21 @@ export class DocDrawingPopupMenuController extends RxDisposable {
                 disable: true,
             },
             {
-                label: 'image-popup.delete',
+                label: 'docs-drawing-ui.image-popup.delete',
                 index: 1,
                 commandId: RemoveDocDrawingCommand.id,
                 commandParams: { unitId, drawings: [{ unitId, subUnitId, drawingId }] },
                 disable: false,
             },
             {
-                label: 'image-popup.crop',
+                label: 'docs-drawing-ui.image-popup.crop',
                 index: 2,
                 commandId: OpenImageCropOperation.id,
                 commandParams: { unitId, subUnitId, drawingId },
                 disable: true, // TODO: @JOCS, feature is not ready.
             },
             {
-                label: 'image-popup.reset',
+                label: 'docs-drawing-ui.image-popup.reset',
                 index: 3,
                 commandId: ImageResetSizeOperation.id,
                 commandParams: [{ unitId, subUnitId, drawingId }],

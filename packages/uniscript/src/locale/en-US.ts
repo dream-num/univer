@@ -15,7 +15,7 @@
  */
 
 const locale = {
-    'script-panel': {
+    uniscript: {
         title: 'Uniscript',
         tooltip: {
             'menu-button': 'Toggle Uniscript Panel',
@@ -23,8 +23,6 @@ const locale = {
         panel: {
             execute: 'Execute Script',
         },
-    },
-    uniscript: {
         message: {
             success: 'Execution Success',
             failed: 'Execution Failed',

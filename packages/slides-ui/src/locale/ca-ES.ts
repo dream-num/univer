@@ -17,7 +17,7 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    slide: {
+    'slides-ui': {
         append: 'Afegeix diapositiva',
 
         text: {
@@ -52,6 +52,23 @@ const locale: typeof enUS = {
             image: 'Edita imatge',
         },
 
+        'image-panel': {
+            arrange: {
+                title: 'Organitza',
+                forward: 'Porta endavant',
+                backward: 'Envia enrere',
+                front: 'Porta al davant',
+                back: 'Envia al fons',
+            },
+            transform: {
+                title: 'Transforma',
+                width: 'Amplada (px)',
+                height: 'Alçada (px)',
+                x: 'X (px)',
+                y: 'Y (px)',
+                rotate: 'Gira (°)',
+            },
+        },
         panel: {
             fill: {
                 title: 'Color de farciment',

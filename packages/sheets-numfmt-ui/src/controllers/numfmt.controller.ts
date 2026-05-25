@@ -154,7 +154,7 @@ export class SheetNumfmtUIController extends Disposable {
         };
 
         this._sidebarDisposable = sidebarService.open({
-            header: { title: localeService.t('sheet.numfmt.title') },
+            header: { title: localeService.t('sheets-numfmt-ui.title') },
             children: {
                 label: SHEET_NUMFMT_PANEL,
                 ...(props as any), // need passthrough to react props.

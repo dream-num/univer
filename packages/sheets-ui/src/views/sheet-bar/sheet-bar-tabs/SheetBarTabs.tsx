@@ -151,10 +151,10 @@ export function SheetBarTabs() {
     const openSheetNameErrorDialog = useCallback((id: string, description: string) => {
         confirmService.open({
             id,
-            title: { title: localeService.t('sheetConfig.sheetNameErrorTitle') },
+            title: { title: localeService.t('sheets-ui.sheetConfig.sheetNameErrorTitle') },
             children: { title: description },
-            cancelText: localeService.t('button.cancel'),
-            confirmText: localeService.t('button.confirm'),
+            cancelText: localeService.t('sheets-ui.button.cancel'),
+            confirmText: localeService.t('sheets-ui.button.confirm'),
             onClose() {
                 focusTabEditor();
                 confirmService.close(id);
@@ -171,7 +171,7 @@ export function SheetBarTabs() {
             return false;
         }
 
-        openSheetNameErrorDialog('sheetNameEmptyAlert', localeService.t('sheetConfig.sheetNameCannotIsEmptyError'));
+        openSheetNameErrorDialog('sheetNameEmptyAlert', localeService.t('sheets-ui.sheetConfig.sheetNameCannotIsEmptyError'));
         return true;
     }, [localeService, openSheetNameErrorDialog]);
 
@@ -180,7 +180,7 @@ export function SheetBarTabs() {
             return false;
         }
 
-        openSheetNameErrorDialog('sheetNameSpecCharAlert', localeService.t('sheetConfig.sheetNameSpecCharError'));
+        openSheetNameErrorDialog('sheetNameSpecCharAlert', localeService.t('sheets-ui.sheetConfig.sheetNameSpecCharError'));
         return true;
     }, [localeService, openSheetNameErrorDialog]);
 
@@ -198,10 +198,10 @@ export function SheetBarTabs() {
         const id = 'sheetNameRepeatAlert';
         confirmService.open({
             id,
-            title: { title: localeService.t('sheetConfig.sheetNameErrorTitle') },
-            children: { title: localeService.t('sheetConfig.sheetNameAlreadyExistsError') },
-            cancelText: localeService.t('button.cancel'),
-            confirmText: localeService.t('button.confirm'),
+            title: { title: localeService.t('sheets-ui.sheetConfig.sheetNameErrorTitle') },
+            children: { title: localeService.t('sheets-ui.sheetConfig.sheetNameAlreadyExistsError') },
+            cancelText: localeService.t('sheets-ui.button.cancel'),
+            confirmText: localeService.t('sheets-ui.button.confirm'),
             onClose() {
                 confirmService.close(id);
                 focusTabEditor();

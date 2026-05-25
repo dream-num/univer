@@ -56,7 +56,7 @@ export function ThousandthPercentilePanel(props: IBusinessComponentProps) {
 
     return (
         <div>
-            <div className="univer-mt-4 univer-text-sm univer-text-gray-400">{localeService.t('sheet.numfmt.decimalLength')}</div>
+            <div className="univer-mt-4 univer-text-sm univer-text-gray-400">{localeService.t('sheets-numfmt-ui.decimalLength')}</div>
             <div className="univer-mt-2">
                 <InputNumber
                     disabled={isInputDisable}
@@ -68,7 +68,7 @@ export function ThousandthPercentilePanel(props: IBusinessComponentProps) {
             </div>
             <div className="univer-mt-4 univer-text-sm univer-text-gray-400">
                 {' '}
-                {localeService.t('sheet.numfmt.negType')}
+                {localeService.t('sheets-numfmt-ui.negType')}
             </div>
             <div className="univer-mt-2">
                 <SelectList onChange={handleClick} options={options} value={suffix} />
@@ -79,7 +79,7 @@ export function ThousandthPercentilePanel(props: IBusinessComponentProps) {
                   dark:!univer-text-gray-200
                 `}
             >
-                {localeService.t('sheet.numfmt.thousandthPercentileDes')}
+                {localeService.t('sheets-numfmt-ui.thousandthPercentileDes')}
             </div>
         </div>
     );

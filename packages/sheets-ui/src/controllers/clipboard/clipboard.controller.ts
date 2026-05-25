@@ -351,7 +351,7 @@ export class SheetClipboardController extends RxDisposable {
                 if (maxConfig && endRow * endColumn > maxConfig) {
                     self._messageService.show({
                         type: MessageType.Error,
-                        content: self._localService.t('clipboard.paste.exceedMaxCells'),
+                        content: self._localService.t('sheets-ui.clipboard.paste.exceedMaxCells'),
                     }); // TODO: show error info
                     return false;
                 }

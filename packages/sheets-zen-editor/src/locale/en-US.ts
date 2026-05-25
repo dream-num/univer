@@ -15,13 +15,15 @@
  */
 
 const locale = {
-    rightClick: {
-        zenEditor: 'Full Screen Editor',
-    },
-    shortcut: {
-        sheet: {
-            'zen-edit-cancel': 'Cancel Zen Edit',
-            'zen-edit-confirm': 'Confirm Zen Edit',
+    'sheets-zen-editor': {
+        rightClick: {
+            zenEditor: 'Full Screen Editor',
+        },
+        shortcut: {
+            sheet: {
+                'zen-edit-cancel': 'Cancel Zen Edit',
+                'zen-edit-confirm': 'Confirm Zen Edit',
+            },
         },
     },
 };

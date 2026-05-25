@@ -17,7 +17,7 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    crosshair: {
+    'sheets-crosshair-highlight': {
         button: {
             tooltip: 'Перекрестный выделение',
         },

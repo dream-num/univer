@@ -59,7 +59,7 @@ export function DatePanel(props: IBusinessComponentProps) {
 
     return (
         <div>
-            <div className="univer-mt-4 univer-text-sm univer-text-gray-400">{localeService.t('sheet.numfmt.dateType')}</div>
+            <div className="univer-mt-4 univer-text-sm univer-text-gray-400">{localeService.t('sheets-numfmt-ui.dateType')}</div>
             <div className="univer-mt-2">
                 <SelectList value={suffix} options={options} onChange={handleChange} />
             </div>
@@ -69,7 +69,7 @@ export function DatePanel(props: IBusinessComponentProps) {
                   dark:!univer-text-gray-200
                 `}
             >
-                {localeService.t('sheet.numfmt.dateDes')}
+                {localeService.t('sheets-numfmt-ui.dateDes')}
             </div>
         </div>
     );

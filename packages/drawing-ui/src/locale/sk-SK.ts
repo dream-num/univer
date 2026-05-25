@@ -17,66 +17,58 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    'image-popup': {
-        replace: 'Nahradiť',
-        delete: 'Odstrániť',
-        edit: 'Upraviť',
-        crop: 'Orezať',
-        reset: 'Obnoviť veľkosť',
-    },
-    'image-cropper': {
-        error: 'Nedá sa orezať neobrázkový objekt.',
-    },
-    'image-panel': {
-        arrange: {
-            title: 'Usporiadať',
-            forward: 'Posunúť dopredu',
-            backward: 'Posunúť dozadu',
-            front: 'Presunúť do popredia',
-            back: 'Presunúť do pozadia',
+    'drawing-ui': {
+        'image-cropper': {
+            error: 'Nedá sa orezať neobrázkový objekt.',
         },
-        transform: {
-            title: 'Transformovať',
-            rotate: 'Otočiť (°)',
-            x: 'X (px)',
-            y: 'Y (px)',
-            width: 'Šírka (px)',
-            height: 'Výška (px)',
-            lock: 'Uzamknúť pomer (%)',
+        'image-panel': {
+            arrange: {
+                title: 'Usporiadať',
+                forward: 'Posunúť dopredu',
+                backward: 'Posunúť dozadu',
+                front: 'Presunúť do popredia',
+                back: 'Presunúť do pozadia',
+            },
+            transform: {
+                title: 'Transformovať',
+                rotate: 'Otočiť (°)',
+                x: 'X (px)',
+                y: 'Y (px)',
+                width: 'Šírka (px)',
+                height: 'Výška (px)',
+                lock: 'Uzamknúť pomer (%)',
+            },
+            crop: {
+                title: 'Orezanie',
+                start: 'Začať orezanie',
+                mode: 'Voľne',
+            },
+            group: {
+                title: 'Zoskupiť',
+                group: 'Zoskupiť',
+                unGroup: 'Zrušiť zoskupenie',
+            },
+            align: {
+                title: 'Zarovnať',
+                default: 'Vyberte typ zarovnania',
+                left: 'Zarovnať doľava',
+                center: 'Zarovnať na stred',
+                right: 'Zarovnať doprava',
+                top: 'Zarovnať hore',
+                middle: 'Zarovnať na stred',
+                bottom: 'Zarovnať dole',
+                horizon: 'Rozložiť vodorovne',
+                vertical: 'Rozložiť zvisle',
+            },
+            null: 'Nie je vybraný žiadny objekt',
         },
-        crop: {
-            title: 'Orezanie',
-            start: 'Začať orezanie',
-            mode: 'Voľne',
-            shape: 'Oříznout podle tvaru',
+        shortcut: {
+            'drawing-move-down': 'Posunúť kresbu nadol',
+            'drawing-move-up': 'Posunúť kresbu nahor',
+            'drawing-move-left': 'Posunúť kresbu doľava',
+            'drawing-move-right': 'Posunúť kresbu doprava',
+            'drawing-delete': 'Odstrániť kresbu',
         },
-        group: {
-            title: 'Zoskupiť',
-            group: 'Zoskupiť',
-            reGroup: 'Znovu zoskupiť',
-            unGroup: 'Zrušiť zoskupenie',
-        },
-        align: {
-            title: 'Zarovnať',
-            default: 'Vyberte typ zarovnania',
-            left: 'Zarovnať doľava',
-            center: 'Zarovnať na stred',
-            right: 'Zarovnať doprava',
-            top: 'Zarovnať hore',
-            middle: 'Zarovnať na stred',
-            bottom: 'Zarovnať dole',
-            horizon: 'Rozložiť vodorovne',
-            vertical: 'Rozložiť zvisle',
-        },
-        null: 'Nie je vybraný žiadny objekt',
-    },
-    'drawing-view': 'Kresba',
-    shortcut: {
-        'drawing-move-down': 'Posunúť kresbu nadol',
-        'drawing-move-up': 'Posunúť kresbu nahor',
-        'drawing-move-left': 'Posunúť kresbu doľava',
-        'drawing-move-right': 'Posunúť kresbu doprava',
-        'drawing-delete': 'Odstrániť kresbu',
     },
 };
 

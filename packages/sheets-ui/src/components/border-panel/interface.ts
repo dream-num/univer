@@ -24,78 +24,78 @@ export interface IBorderPanelProps extends ICustomComponentProps<IBorderInfo> {}
 
 export const BORDER_LINE_CHILDREN = [
     {
-        label: 'borderLine.borderTop',
+        label: 'sheets-ui.borderLine.borderTop',
         icon: 'UpBorderDoubleIcon',
         value: 'top',
     },
     {
-        label: 'borderLine.borderBottom',
+        label: 'sheets-ui.borderLine.borderBottom',
         icon: 'DownBorderDoubleIcon',
         value: 'bottom',
     },
     {
-        label: 'borderLine.borderLeft',
+        label: 'sheets-ui.borderLine.borderLeft',
         icon: 'LeftBorderDoubleIcon',
         value: 'left',
     },
     {
-        label: 'borderLine.borderRight',
+        label: 'sheets-ui.borderLine.borderRight',
         icon: 'RightBorderDoubleIcon',
         value: 'right',
     },
     {
-        label: 'borderLine.borderNone',
+        label: 'sheets-ui.borderLine.borderNone',
         icon: 'NoBorderIcon',
         value: 'none',
     },
     {
-        label: 'borderLine.borderAll',
+        label: 'sheets-ui.borderLine.borderAll',
         icon: 'AllBorderIcon',
         value: 'all',
     },
     {
-        label: 'borderLine.borderOutside',
+        label: 'sheets-ui.borderLine.borderOutside',
         icon: 'OuterBorderDoubleIcon',
         value: 'outside',
     },
     {
-        label: 'borderLine.borderInside',
+        label: 'sheets-ui.borderLine.borderInside',
         icon: 'InnerBorderDoubleIcon',
         value: 'inside',
     },
     {
-        label: 'borderLine.borderHorizontal',
+        label: 'sheets-ui.borderLine.borderHorizontal',
         icon: 'HorizontalBorderDoubleIcon',
         value: 'horizontal',
     },
     {
-        label: 'borderLine.borderVertical',
+        label: 'sheets-ui.borderLine.borderVertical',
         icon: 'VerticalBorderDoubleIcon',
         value: 'vertical',
     },
 
     {
-        label: 'borderLine.borderTlbr',
+        label: 'sheets-ui.borderLine.borderTlbr',
         icon: 'BackSlashDoubleIcon',
         value: 'tlbr',
     },
     {
-        label: 'borderLine.borderTlbcTlmr',
+        label: 'sheets-ui.borderLine.borderTlbcTlmr',
         icon: 'LeftDoubleDiagonalDoubleIcon',
         value: 'tlbc_tlmr',
     },
     {
-        label: 'borderLine.borderTlbrTlbcTlmr',
+        label: 'sheets-ui.borderLine.borderTlbrTlbcTlmr',
         icon: 'LeftTridiagonalDoubleIcon',
         value: 'tlbr_tlbc_tlmr',
     },
     {
-        label: 'borderLine.borderBlTr',
+        label: 'sheets-ui.borderLine.borderBlTr',
         icon: 'SlashDoubleIcon',
         value: 'bltr',
     },
     {
-        label: 'borderLine.borderMltrBctr',
+        label: 'sheets-ui.borderLine.borderMltrBctr',
         icon: 'RightDoubleDiagonalDoubleIcon',
         value: 'mltr_bctr',
     },

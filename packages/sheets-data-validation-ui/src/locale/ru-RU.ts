@@ -17,7 +17,7 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    dataValidation: {
+    'sheets-data-validation-ui': {
         title: 'Проверка данных',
         validFail: {
             value: 'Пожалуйста, введите значение',
@@ -55,78 +55,12 @@ const locale: typeof enUS = {
             showInfo: 'Показать текст помощи для выбранной ячейки',
             allowBlank: 'Игнорировать пустые значения',
         },
-        operators: {
-            between: 'между',
-            greaterThan: 'больше чем',
-            greaterThanOrEqual: 'больше или равно',
-            lessThan: 'меньше чем',
-            lessThanOrEqual: 'меньше или равно',
-            equal: 'равно',
-            notEqual: 'не равно',
-            notBetween: 'не между',
-            legal: 'является допустимым типом',
-        },
-        ruleName: {
-            between: 'между {FORMULA1} и {FORMULA2}',
-            greaterThan: 'больше чем {FORMULA1}',
-            greaterThanOrEqual: 'больше или равно {FORMULA1}',
-            lessThan: 'меньше чем {FORMULA1}',
-            lessThanOrEqual: 'меньше или равно {FORMULA1}',
-            equal: 'равно {FORMULA1}',
-            notEqual: 'не равно {FORMULA1}',
-            notBetween: 'не между {FORMULA1} и {FORMULA2}',
-            legal: 'является допустимым {TYPE}',
-        },
-        errorMsg: {
-            between: 'Значение должно быть между {FORMULA1} и {FORMULA2}',
-            greaterThan: 'Значение должно быть больше {FORMULA1}',
-            greaterThanOrEqual: 'Значение должно быть больше или равно {FORMULA1}',
-            lessThan: 'Значение должно быть меньше {FORMULA1}',
-            lessThanOrEqual: 'Значение должно быть меньше или равно {FORMULA1}',
-            equal: 'Значение должно быть равно {FORMULA1}',
-            notEqual: 'Значение должно быть не равно {FORMULA1}',
-            notBetween: 'Значение должно быть не между {FORMULA1} и {FORMULA2}',
-            legal: 'Значение должно быть допустимым {TYPE}',
-        },
         any: {
             title: 'Любое значение',
             error: 'Содержимое этой ячейки нарушает правило проверки',
         },
         date: {
             title: 'Дата',
-            operators: {
-                between: 'между',
-                greaterThan: 'после',
-                greaterThanOrEqual: 'в или после',
-                lessThan: 'до',
-                lessThanOrEqual: 'в или до',
-                equal: 'равно',
-                notEqual: 'не равно',
-                notBetween: 'не между',
-                legal: 'является допустимой датой',
-            },
-            ruleName: {
-                between: 'между {FORMULA1} и {FORMULA2}',
-                greaterThan: 'после {FORMULA1}',
-                greaterThanOrEqual: 'в или после {FORMULA1}',
-                lessThan: 'до {FORMULA1}',
-                lessThanOrEqual: 'в или до {FORMULA1}',
-                equal: 'равно {FORMULA1}',
-                notEqual: 'не равно {FORMULA1}',
-                notBetween: 'не между {FORMULA1} и {FORMULA2}',
-                legal: 'является допустимой датой',
-            },
-            errorMsg: {
-                between: 'Значение должно быть между {FORMULA1} и {FORMULA2}',
-                greaterThan: 'Значение должно быть после {FORMULA1}',
-                greaterThanOrEqual: 'Значение должно быть в или после {FORMULA1}',
-                lessThan: 'Значение должно быть до {FORMULA1}',
-                lessThanOrEqual: 'Значение должно быть в или до {FORMULA1}',
-                equal: 'Значение должно быть {FORMULA1}',
-                notEqual: 'Значение должно быть не {FORMULA1}',
-                notBetween: 'Значение должно быть не между {FORMULA1} и {FORMULA2}',
-                legal: 'Значение должно быть допустимой датой',
-            },
         },
         list: {
             title: 'Выпадающий список',
@@ -147,16 +81,6 @@ const locale: typeof enUS = {
         },
         textLength: {
             title: 'Длина текста',
-            errorMsg: {
-                between: 'Длина текста должна быть между {FORMULA1} и {FORMULA2}',
-                greaterThan: 'Длина текста должна быть больше {FORMULA1}',
-                greaterThanOrEqual: 'Длина текста должна быть больше или равна {FORMULA1}',
-                lessThan: 'Длина текста должна быть меньше {FORMULA1}',
-                lessThanOrEqual: 'Длина текста должна быть меньше или равна {FORMULA1}',
-                equal: 'Длина текста должна быть равна {FORMULA1}',
-                notEqual: 'Длина текста должна быть не равна {FORMULA1}',
-                notBetween: 'Длина текста должна быть не между {FORMULA1} и {FORMULA2}',
-            },
         },
         decimal: {
             title: 'Число',
@@ -175,7 +99,6 @@ const locale: typeof enUS = {
             title: 'Пользовательская формула',
             error: 'Содержимое этой ячейки нарушает правило проверки',
             validFail: 'Пожалуйста, введите допустимую формулу',
-            ruleName: 'Пользовательская формула {FORMULA1}',
         },
         alert: {
             title: 'Ошибка',
@@ -192,6 +115,11 @@ const locale: typeof enUS = {
         },
         showTime: {
             label: 'Показать выбор времени',
+        },
+        permission: {
+            dialog: {
+                setStyleErr: 'Диапазон защищен, и у вас нет разрешения на установку стилей. Для установки стилей свяжитесь с создателем.',
+            },
         },
     },
 };

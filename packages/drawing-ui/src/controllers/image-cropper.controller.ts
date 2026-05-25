@@ -94,7 +94,7 @@ export class ImageCropperController extends Disposable {
                 if (!(imageShape instanceof Image)) {
                     this._messageService.show({
                         type: MessageType.Error,
-                        content: this._localeService.t('image-cropper.error'),
+                        content: this._localeService.t('drawing-ui.image-cropper.error'),
                     });
                     return;
                 }
@@ -240,7 +240,7 @@ export class ImageCropperController extends Disposable {
                 if (!(imageShape instanceof Image)) {
                     this._messageService.show({
                         type: MessageType.Error,
-                        content: this._localeService.t('image-cropper.error'),
+                        content: this._localeService.t('drawing-ui.image-cropper.error'),
                     });
                     return;
                 }

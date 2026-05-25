@@ -82,9 +82,9 @@ export const SheetTableConditionPanel = (props: IConditionFilterProps) => {
 
     let selectType = '';
     if (conditionInfo.compare) {
-        selectType = `${localeService.t(`sheets-table.condition.${conditionInfo.type}`)} - ${localeService.t(`sheets-table.${conditionInfo.type}.compare.${conditionInfo.compare}`)}`;
+        selectType = `${localeService.t(`sheets-table-ui.condition.${conditionInfo.type}`)} - ${localeService.t(`sheets-table-ui.${conditionInfo.type}.compare.${conditionInfo.compare}`)}`;
     } else {
-        selectType = localeService.t(`sheets-table.condition.${conditionInfo.type}`);
+        selectType = localeService.t(`sheets-table-ui.condition.${conditionInfo.type}`);
     }
 
     const conditionDateOptions = getConditionDateSelect(injector, conditionInfo.compare as TableDateCompareTypeEnum);

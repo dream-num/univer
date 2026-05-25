@@ -17,7 +17,7 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    'sheets-table': {
+    'sheets-table-ui': {
         title: '表格',
         selectRange: '选择表格范围',
         rename: '重命名表格',

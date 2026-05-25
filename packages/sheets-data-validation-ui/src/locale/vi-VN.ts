@@ -17,7 +17,7 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    dataValidation: {
+    'sheets-data-validation-ui': {
         title: 'Xác thực dữ liệu',
         validFail: {
             value: 'Vui lòng nhập một giá trị hợp lệ',
@@ -55,78 +55,12 @@ const locale: typeof enUS = {
             showInfo: 'Hiển thị thông báo cho ô đã chọn',
             allowBlank: 'Bỏ qua giá trị rỗng',
         },
-        operators: {
-            between: 'Giữa',
-            greaterThan: 'Lớn hơn',
-            greaterThanOrEqual: 'Lớn hơn hoặc bằng',
-            lessThan: 'Nhỏ hơn',
-            lessThanOrEqual: 'Nhỏ hơn hoặc bằng',
-            equal: 'Bằng',
-            notEqual: 'Không bằng',
-            notBetween: 'Không nằm giữa',
-            legal: 'là kiểu hợp lệ',
-        },
-        ruleName: {
-            between: 'Giữa {FORMULA1} và {FORMULA2}',
-            greaterThan: 'Lớn hơn {FORMULA1}',
-            greaterThanOrEqual: 'Lớn hơn hoặc bằng {FORMULA1}',
-            lessThan: 'Nhỏ hơn {FORMULA1}',
-            lessThanOrEqual: 'Nhỏ hơn hoặc bằng {FORMULA1}',
-            equal: 'Bằng {FORMULA1}',
-            notEqual: 'Không bằng {FORMULA1}',
-            notBetween: 'Không nằm giữa {FORMULA1} và {FORMULA2}',
-            legal: 'là một {TYPE} hợp lệ',
-        },
-        errorMsg: {
-            between: 'Giá trị phải nằm giữa {FORMULA1} và {FORMULA2}',
-            greaterThan: 'Giá trị phải lớn hơn {FORMULA1}',
-            greaterThanOrEqual: 'Giá trị phải lớn hơn hoặc bằng {FORMULA1}',
-            lessThan: 'Giá trị phải nhỏ hơn {FORMULA1}',
-            lessThanOrEqual: 'Giá trị phải nhỏ hơn hoặc bằng {FORMULA1}',
-            equal: 'Giá trị phải bằng {FORMULA1}',
-            notEqual: 'Giá trị phải không bằng {FORMULA1}',
-            notBetween: 'Giá trị phải không nằm giữa {FORMULA1} và {FORMULA2}',
-            legal: 'Giá trị phải là một {TYPE} hợp lệ',
-        },
         any: {
             title: 'Bất kỳ giá trị',
             error: 'Nội dung của ô này vi phạm quy tắc xác thực',
         },
         date: {
             title: 'Ngày',
-            operators: {
-                between: 'Giữa',
-                greaterThan: 'Sau',
-                greaterThanOrEqual: 'Sau hoặc bằng',
-                lessThan: 'Trước',
-                lessThanOrEqual: 'Trước hoặc bằng',
-                equal: 'Bằng',
-                notEqual: 'Không bằng',
-                notBetween: 'Không nằm giữa',
-                legal: 'là ngày hợp lệ',
-            },
-            ruleName: {
-                between: 'Giữa {FORMULA1} và {FORMULA2}',
-                greaterThan: 'Sau {FORMULA1}',
-                greaterThanOrEqual: 'Sau hoặc bằng {FORMULA1}',
-                lessThan: 'Trước {FORMULA1}',
-                lessThanOrEqual: 'Trước hoặc bằng {FORMULA1}',
-                equal: 'Bằng {FORMULA1}',
-                notEqual: 'Không bằng {FORMULA1}',
-                notBetween: 'Không nằm giữa {FORMULA1} và {FORMULA2}',
-                legal: 'là một ngày hợp lệ',
-            },
-            errorMsg: {
-                between: 'Ngày phải nằm giữa {FORMULA1} và {FORMULA2}',
-                greaterThan: 'Ngày phải sau {FORMULA1}',
-                greaterThanOrEqual: 'Ngày phải sau hoặc bằng {FORMULA1}',
-                lessThan: 'Ngày phải trước {FORMULA1}',
-                lessThanOrEqual: 'Ngày phải trước hoặc bằng {FORMULA1}',
-                equal: 'Ngày phải bằng {FORMULA1}',
-                notEqual: 'Ngày phải không bằng {FORMULA1}',
-                notBetween: 'Ngày phải không nằm giữa {FORMULA1} và {FORMULA2}',
-                legal: 'Giá trị phải là một ngày hợp lệ',
-            },
         },
         list: {
             title: 'Danh sách thả xuống',
@@ -147,16 +81,6 @@ const locale: typeof enUS = {
         },
         textLength: {
             title: 'Độ dài văn bản',
-            errorMsg: {
-                between: 'Độ dài văn bản phải nằm giữa {FORMULA1} và {FORMULA2}',
-                greaterThan: 'Độ dài văn bản phải lớn hơn {FORMULA1}',
-                greaterThanOrEqual: 'Độ dài văn bản phải lớn hơn hoặc bằng {FORMULA1}',
-                lessThan: 'Độ dài văn bản phải nhỏ hơn {FORMULA1}',
-                lessThanOrEqual: 'Độ dài văn bản phải nhỏ hơn hoặc bằng {FORMULA1}',
-                equal: 'Độ dài văn bản phải bằng {FORMULA1}',
-                notEqual: 'Độ dài văn bản phải không bằng {FORMULA1}',
-                notBetween: 'Độ dài văn bản phải không nằm giữa {FORMULA1} và {FORMULA2}',
-            },
         },
         decimal: {
             title: 'Số thập phân',
@@ -175,7 +99,6 @@ const locale: typeof enUS = {
             title: 'Công thức tùy chỉnh',
             error: 'Nội dung của ô này vi phạm quy tắc xác thực',
             validFail: 'Vui lòng nhập một công thức hợp lệ',
-            ruleName: 'Công thức tùy chỉnh {FORMULA1}',
         },
         alert: {
             title: 'Thông báo',
@@ -192,6 +115,11 @@ const locale: typeof enUS = {
         },
         showTime: {
             label: 'Hiển thị lựa chọn thởi gian',
+        },
+        permission: {
+            dialog: {
+                setStyleErr: 'Phạm vi này đã được bảo vệ, hiện không có quyền thiết lập kiểu. Nếu cần thiết lập kiểu, vui lòng liên hệ với người tạo.',
+            },
         },
     },
 };

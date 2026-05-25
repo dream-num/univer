@@ -37,7 +37,7 @@ export const ToggleShortcutPanelOperation: IOperation = {
         } else {
             shortcutPanelService.open();
             sidebarService.open({
-                header: { title: 'shortcut-panel.title' },
+                header: { title: 'ui.shortcut-panel.title' },
                 children: { label: ShortcutPanelComponentName },
             });
         }

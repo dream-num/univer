@@ -110,13 +110,13 @@ describe('validators', () => {
         expect(decimal.validatorFormula({ operator: DataValidationOperator.BETWEEN, formula1: '1', formula2: 'x' } as never, 'u', 's')).toEqual({
             success: false,
             formula1: undefined,
-            formula2: 'dataValidation.validFail.number',
+            formula2: 'sheets-data-validation.validFail.number',
         });
         expect(decimal.validatorFormula({ operator: DataValidationOperator.EQUAL, formula1: 'x' } as never, 'u', 's')).toEqual({
             success: false,
-            formula1: 'dataValidation.validFail.number',
+            formula1: 'sheets-data-validation.validFail.number',
         });
-        expect(decimal.generateRuleErrorMessage({ operator: DataValidationOperator.EQUAL, formula1: '=A1', ranges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }] } as never, { row: 2, col: 3 } as never)).toBe('dataValidation.errorMsg.equal');
+        expect(decimal.generateRuleErrorMessage({ operator: DataValidationOperator.EQUAL, formula1: '=A1', ranges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }] } as never, { row: 2, col: 3 } as never)).toBe('sheets-data-validation.errorMsg.equal');
 
         expect(await whole.isValidType({ value: 3 } as never, {} as never, {} as never)).toBe(true);
         expect(await whole.isValidType({ value: 3.2 } as never, {} as never, {} as never)).toBe(false);
@@ -140,7 +140,7 @@ describe('validators', () => {
         expect(textLength.transform({ value: 1234 } as never, {} as never, {} as never).value).toBe(4);
         expect(await textLength.isValidType({ value: true } as never, {} as never, {} as never)).toBe(false);
         expect(await textLength.isValidType({ value: 'abcd' } as never, {} as never, {} as never)).toBe(true);
-        expect(textLength.generateRuleErrorMessage({ operator: DataValidationOperator.EQUAL, formula1: '=A1', ranges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }] } as never, { row: 1, col: 1 } as never)).toBe('dataValidation.textLength.errorMsg.equal');
+        expect(textLength.generateRuleErrorMessage({ operator: DataValidationOperator.EQUAL, formula1: '=A1', ranges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }] } as never, { row: 1, col: 1 } as never)).toBe('sheets-data-validation.textLength.errorMsg.equal');
         expect(lexerTreeBuilder.moveFormulaRefOffset).toHaveBeenCalled();
     });
 
@@ -161,15 +161,15 @@ describe('validators', () => {
         expect(date.validatorFormula({ operator: DataValidationOperator.BETWEEN, formula1: '2024-01-01', formula2: '' } as never, 'u', 's')).toEqual({
             success: false,
             formula1: undefined,
-            formula2: 'dataValidation.validFail.date',
+            formula2: 'sheets-data-validation.validFail.date',
         });
         expect(date.normalizeFormula({ formula1: '45293', formula2: 'invalid', bizInfo: { showTime: false } } as never, 'u', 's')).toEqual({
             formula1: '2024-01-02',
             formula2: '',
         });
         expect(date.transform({ value: '2024-01-02' } as never, {} as never, {} as never).value).toBeTypeOf('number');
-        expect(date.generateRuleName({ operator: DataValidationOperator.EQUAL, formula1: '2024-01-02' } as never)).toContain('dataValidation.date.title');
-        expect(date.generateRuleErrorMessage({ operator: DataValidationOperator.EQUAL, formula1: '=A1', ranges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }] } as never, { row: 0, col: 0 } as never)).toBe('dataValidation.date.errorMsg.equal');
+        expect(date.generateRuleName({ operator: DataValidationOperator.EQUAL, formula1: '2024-01-02' } as never)).toContain('sheets-data-validation.date.title');
+        expect(date.generateRuleErrorMessage({ operator: DataValidationOperator.EQUAL, formula1: '=A1', ranges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }] } as never, { row: 0, col: 0 } as never)).toBe('sheets-data-validation.date.errorMsg.equal');
         expect(lexerTreeBuilder.moveFormulaRefOffset).toHaveBeenCalled();
     });
 
@@ -187,8 +187,8 @@ describe('validators', () => {
         expect(checkbox.validatorFormula({ formula1: '', formula2: '' } as never, 'u', 's')).toEqual({ success: true });
         expect(checkbox.validatorFormula({ formula1: '1', formula2: '1' } as never, 'u', 's')).toEqual({
             success: false,
-            formula1: 'dataValidation.validFail.checkboxEqual',
-            formula2: 'dataValidation.validFail.checkboxEqual',
+            formula1: 'sheets-data-validation.validFail.checkboxEqual',
+            formula2: 'sheets-data-validation.validFail.checkboxEqual',
         });
         expect(await checkbox.parseFormula({ uid: 'rule-1', formula1: '=A1', formula2: '=B1' } as never, 'u', 's')).toEqual({
             formula1: '1',
@@ -207,12 +207,12 @@ describe('validators', () => {
         expect(checkbox.skipDefaultFontRender!({ uid: 'rule-1', formula1: '=A1', formula2: '=B1' } as never, '0', { unitId: 'u', subUnitId: 's', row: 0, column: 0 })).toBe(true);
         expect(await checkbox.isValidType({ value: false, unitId: 'u', subUnitId: 's' } as never, {} as never, { uid: 'rule-1', formula1: '=A1', formula2: '=B1' } as never)).toBe(true);
         expect(checkbox.getExtraStyle({} as never, null)).toEqual({ tb: WrapStrategy.CLIP });
-        expect(checkbox.generateRuleErrorMessage({} as never)).toBe('dataValidation.checkbox.error');
+        expect(checkbox.generateRuleErrorMessage({} as never)).toBe('sheets-data-validation.checkbox.error');
 
         lexerTreeBuilder.checkIfAddBracket.mockReturnValueOnce(1);
         expect(custom.validatorFormula({ formula1: 'A1' } as never, 'u', 's')).toEqual({
             success: false,
-            formula1: 'dataValidation.validFail.formula',
+            formula1: 'sheets-data-validation.validFail.formula',
         });
         lexerTreeBuilder.checkIfAddBracket.mockReturnValueOnce(0);
         expect(custom.validatorFormula({ formula1: '=A1' } as never, 'u', 's')).toEqual({
@@ -224,15 +224,15 @@ describe('validators', () => {
         expect(await custom.isValidType({ unitId: 'u', subUnitId: 's', row: 0, column: 0 } as never, {} as never, { uid: 'rule-2' } as never)).toBe(true);
         (injector.get(DataValidationCustomFormulaService) as any).getCellFormulaValue.mockResolvedValueOnce({ v: '#VALUE!' });
         expect(await custom.isValidType({ unitId: 'u', subUnitId: 's', row: 0, column: 0 } as never, {} as never, { uid: 'rule-2' } as never)).toBe(false);
-        expect(custom.generateRuleName({ formula1: '=A1' } as never)).toBe('dataValidation.custom.ruleName');
+        expect(custom.generateRuleName({ formula1: '=A1' } as never)).toBe('sheets-data-validation.custom.ruleName');
 
         await expect(any.parseFormula({ formula1: '1', formula2: '2' } as never, 'u', 's')).resolves.toEqual({ formula1: '1', formula2: '2', isFormulaValid: true });
         expect(any.validatorFormula({} as never, 'u', 's')).toEqual({ success: true });
         expect(await any.isValidType({} as never, {} as never, {} as never)).toBe(true);
-        expect(any.generateRuleErrorMessage({} as never)).toBe('dataValidation.any.error');
+        expect(any.generateRuleErrorMessage({} as never)).toBe('sheets-data-validation.any.error');
 
         expect(listMultiple.id).toBe('listMultiple');
-        expect(listMultiple.title).toBe('dataValidation.listMultiple.title');
+        expect(listMultiple.title).toBe('sheets-data-validation.listMultiple.title');
         expect(listMultiple.offsetFormulaByRange).toBe(false);
         expect(listMultiple.skipDefaultFontRender!()).toBe(true);
         expect(formulaService.getRuleFormulaResult).toHaveBeenCalled();

@@ -18,12 +18,12 @@ import type { CellValue, IDataValidationRule, IDataValidationRuleBase, ISheetDat
 import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
 import type { ISheetLocationBase } from '@univerjs/sheets';
 import { DataValidationOperator, DataValidationType, dateKit, isFormulaString, numfmt, Tools } from '@univerjs/core';
-import { BaseDataValidator } from '@univerjs/data-validation';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { DateOperatorErrorTitleMap, DateOperatorNameMap, DateOperatorTitleMap } from '../common/date-text-map';
 import { DataValidationCustomFormulaService } from '../services/dv-custom-formula.service';
 import { TWO_FORMULA_OPERATOR_COUNT } from '../types/const/two-formula-operators';
 import { isLegalFormulaResult } from '../utils/formula';
+import { BaseSheetValidator } from './base-sheet-validator';
 import { FORMULA1, FORMULA2 } from './const';
 import { getTransformedFormula } from './util';
 
@@ -46,9 +46,9 @@ const transformDate2SerialNumber = (value: Nullable<CellValue>) => {
     return numfmt.parseDate(dateKit(value).format('YYYY-MM-DD HH:mm:ss'))?.v as number | undefined;
 };
 
-export class DateValidator extends BaseDataValidator {
+export class DateValidator extends BaseSheetValidator {
     id: string = DataValidationType.DATE;
-    title: string = 'dataValidation.date.title';
+    title: string = 'sheets-data-validation.date.title';
     order = 40;
     operators: DataValidationOperator[] = [
         DataValidationOperator.BETWEEN,
@@ -106,7 +106,7 @@ export class DateValidator extends BaseDataValidator {
         }
 
         const formula1Success = this._validatorSingleFormula(rule.formula1);
-        const errorMsg = this.localeService.t('dataValidation.validFail.date');
+        const errorMsg = this.localeService.t('sheets-data-validation.validFail.date');
         const isTwoFormula = TWO_FORMULA_OPERATOR_COUNT.includes(operator);
         if (isTwoFormula) {
             const formula2Success = this._validatorSingleFormula(rule.formula2);

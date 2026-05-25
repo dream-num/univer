@@ -56,7 +56,7 @@ export const SheetPermissionUserDialog = () => {
             <div>
                 <Input
                     className="univer-w-full"
-                    placeholder={localeService.t('permission.dialog.search')}
+                    placeholder={localeService.t('sheets-ui.permission.dialog.search')}
                     value={inputValue}
                     onChange={(v) => setInputValue(v)}
                 />
@@ -75,7 +75,7 @@ export const SheetPermissionUserDialog = () => {
                                 >
                                     <Avatar src={item.subject?.avatar} size={24} />
                                     <div className="univer-mx-1.5 univer-flex-1">{item.subject?.name}</div>
-                                    <div className="univer-text-xs univer-text-rose-600">{localeService.t('permission.dialog.ownerInherit')}</div>
+                                    <div className="univer-text-xs univer-text-rose-600">{localeService.t('sheets-ui.permission.dialog.ownerInherit')}</div>
                                 </div>
                             );
                         }
@@ -92,7 +92,7 @@ export const SheetPermissionUserDialog = () => {
                                 <Avatar src={item.subject?.avatar} size={24} />
                                 <div className="univer-mx-1.5 univer-flex-1">{item.subject?.name}</div>
                                 {item.role === UnitRole.Owner && (
-                                    <div className="univer-text-xs univer-text-rose-600">{localeService.t('permission.dialog.ownerWithoutInherit')}</div>
+                                    <div className="univer-text-xs univer-text-rose-600">{localeService.t('sheets-ui.permission.dialog.ownerWithoutInherit')}</div>
                                 )}
                                 {selectUserInfo?.findIndex((v) => v.subject?.userID === item.subject?.userID) !== -1 && (
                                     <div>
@@ -113,7 +113,7 @@ export const SheetPermissionUserDialog = () => {
                                 draggable={false}
                             />
                             <p className="univer-text-sm univer-text-gray-400">
-                                {localeService.t('permission.dialog.userEmpty')}
+                                {localeService.t('sheets-ui.permission.dialog.userEmpty')}
                             </p>
                         </div>
                     )}
@@ -123,7 +123,7 @@ export const SheetPermissionUserDialog = () => {
                 <Button
                     onClick={() => dialogService.close(UNIVER_SHEET_PERMISSION_USER_DIALOG_ID)}
                 >
-                    {localeService.t('permission.button.cancel')}
+                    {localeService.t('sheets-ui.permission.button.cancel')}
                 </Button>
                 <Button
                     variant="primary"
@@ -132,7 +132,7 @@ export const SheetPermissionUserDialog = () => {
                         dialogService.close(UNIVER_SHEET_PERMISSION_USER_DIALOG_ID);
                     }}
                 >
-                    {localeService.t('permission.button.confirm')}
+                    {localeService.t('sheets-ui.permission.button.confirm')}
                 </Button>
             </div>
         </div>

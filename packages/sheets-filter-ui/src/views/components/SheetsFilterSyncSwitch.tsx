@@ -37,11 +37,11 @@ export function FilterSyncSwitch() {
             `}
         >
             <div className="univer-flex univer-items-center univer-gap-1">
-                <span>{localeService.t('sheets-filter.sync.title')}</span>
+                <span>{localeService.t('sheets-filter-ui.sync.title')}</span>
                 <Tooltip
                     title={enabled
-                        ? localeService.t('sheets-filter.sync.statusTips.off')
-                        : localeService.t('sheets-filter.sync.statusTips.on')}
+                        ? localeService.t('sheets-filter-ui.sync.statusTips.off')
+                        : localeService.t('sheets-filter-ui.sync.statusTips.on')}
                     asChild
                 >
                     <InfoIcon className="univer-block" />
@@ -51,8 +51,8 @@ export function FilterSyncSwitch() {
                 defaultChecked={enabled}
                 onChange={(checked) => {
                     const message = checked
-                        ? localeService.t('sheets-filter.sync.switchTips.on')
-                        : localeService.t('sheets-filter.sync.switchTips.off');
+                        ? localeService.t('sheets-filter-ui.sync.switchTips.on')
+                        : localeService.t('sheets-filter-ui.sync.switchTips.off');
                     sheetsFilterSyncController.setEnabled(checked);
                     messageService.show({
                         content: message,

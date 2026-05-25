@@ -36,7 +36,7 @@ export function ClearSelectionMenuItemFactory(accessor: IAccessor): IMenuSelecto
         id: CLEAR_SELECTION_MENU_ID,
         type: MenuItemType.SUBITEMS,
         icon: 'ClearFormatDoubleIcon',
-        title: 'rightClick.clearSelection',
+        title: 'sheets-ui.rightClick.clearSelection',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
@@ -45,7 +45,7 @@ export function ClearSelectionContentMenuItemFactory(accessor: IAccessor): IMenu
     return {
         id: ClearSelectionContentCommand.id,
         type: MenuItemType.BUTTON,
-        title: 'rightClick.clearContent',
+        title: 'sheets-ui.rightClick.clearContent',
         disabled$: getObservableWithExclusiveRange$(accessor, getCurrentRangeDisable$(accessor, {
             workbookTypes: [WorkbookEditablePermission],
             worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission],
@@ -59,7 +59,7 @@ export function ClearSelectionFormatMenuItemFactory(accessor: IAccessor): IMenuB
     return {
         id: ClearSelectionFormatCommand.id,
         type: MenuItemType.BUTTON,
-        title: 'rightClick.clearFormat',
+        title: 'sheets-ui.rightClick.clearFormat',
         disabled$: getCurrentRangeDisable$(accessor, {
             workbookTypes: [WorkbookEditablePermission],
             worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
@@ -74,7 +74,7 @@ export function ClearSelectionAllToolbarMenuItemFactory(accessor: IAccessor): IM
         id: ClearSelectionAllCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'ClearFormatDoubleIcon',
-        tooltip: 'rightClick.clearAll',
+        tooltip: 'sheets-ui.rightClick.clearAll',
         disabled$: getObservableWithExclusiveRange$(accessor, getCurrentRangeDisable$(accessor, {
             workbookTypes: [WorkbookEditablePermission],
             worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission, WorksheetSetCellStylePermission],
@@ -88,8 +88,8 @@ export function ClearSelectionAllMenuItemFactory(accessor: IAccessor): IMenuButt
     return {
         id: ClearSelectionAllCommand.id,
         type: MenuItemType.BUTTON,
-        title: 'rightClick.clearAll',
-        tooltip: 'rightClick.clearAll',
+        title: 'sheets-ui.rightClick.clearAll',
+        tooltip: 'sheets-ui.rightClick.clearAll',
         disabled$: getObservableWithExclusiveRange$(accessor, getCurrentRangeDisable$(accessor, {
             workbookTypes: [WorkbookEditablePermission],
             worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission, WorksheetSetCellStylePermission],

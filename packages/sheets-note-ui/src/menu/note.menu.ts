@@ -45,7 +45,7 @@ export function sheetNoteContextMenuFactory(accessor: IAccessor): IMenuItem {
     return {
         id: AddNotePopupOperation.id,
         type: MenuItemType.BUTTON,
-        title: 'rightClick.addNote',
+        title: 'sheets-note-ui.rightClick.addNote',
         icon: 'AddNoteIcon',
         hidden$: combineLatest([getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET), getHasNote$(accessor)])
             .pipe(map(([hidden, hasNote]) => hidden || hasNote)),
@@ -58,7 +58,7 @@ export function sheetDeleteNoteMenuFactory(accessor: IAccessor): IMenuItem {
     return {
         id: SheetDeleteNoteCommand.id,
         type: MenuItemType.BUTTON,
-        title: 'rightClick.deleteNote',
+        title: 'sheets-note-ui.rightClick.deleteNote',
         icon: 'DeleteNoteIcon',
         hidden$: getHasNote$(accessor).pipe(map((hasNote) => !hasNote)),
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission] }),
@@ -68,7 +68,7 @@ export function sheetNoteToggleMenuFactory(accessor: IAccessor): IMenuItem {
     return {
         id: SheetToggleNotePopupCommand.id,
         type: MenuItemType.BUTTON,
-        title: 'rightClick.toggleNote',
+        title: 'sheets-note-ui.rightClick.toggleNote',
         icon: 'HideNoteIcon',
         hidden$: getHasNote$(accessor).pipe(map((hasNote) => !hasNote)),
     };

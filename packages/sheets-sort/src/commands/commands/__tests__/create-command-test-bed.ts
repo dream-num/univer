@@ -15,11 +15,10 @@
  */
 
 import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
-import { BooleanNumber, ILogService, Inject, Injector, IUniverInstanceService, LocaleService, LocaleType, LogLevel, Plugin, Tools, Univer, UniverInstanceType } from '@univerjs/core';
+import { BooleanNumber, ILogService, Inject, Injector, IUniverInstanceService, LocaleType, LogLevel, Plugin, Tools, Univer, UniverInstanceType } from '@univerjs/core';
 import { FormulaDataModel } from '@univerjs/engine-formula';
 import { SheetInterceptorService, SheetSkeletonService, SheetsSelectionsService } from '@univerjs/sheets';
 import { SheetsSortController } from '../../../controllers/sheets-sort.controller';
-import enUS from '../../../locale/en-US';
 import { SheetsSortService } from '../../../services/sheets-sort.service';
 
 const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
@@ -162,9 +161,6 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
     const logService = injector.get(ILogService);
 
     logService.setLogLevel(LogLevel.SILENT); // change this to `LogLevel.VERBOSE` to debug tests via logs
-
-    const localeService = injector.get(LocaleService);
-    localeService.load({ enUS });
 
     return {
         univer,

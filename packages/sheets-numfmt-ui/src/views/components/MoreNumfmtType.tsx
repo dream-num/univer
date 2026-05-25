@@ -30,13 +30,13 @@ import { useMemo } from 'react';
 import { OpenNumfmtPanelOperator } from '../../commands/operations/open.numfmt.panel.operation';
 import { MENU_OPTIONS } from '../../menu/menu';
 
-export const MORE_NUMFMT_TYPE_KEY = 'sheet.numfmt.moreNumfmtType';
-export const OPTIONS_KEY = 'sheet.numfmt.moreNumfmtType.options';
+export const MORE_NUMFMT_TYPE_KEY = 'sheets-numfmt-ui.moreNumfmtType';
+export const OPTIONS_KEY = 'sheets-numfmt-ui.moreNumfmtType.options';
 
 export function MoreNumfmtType(props: { value?: string }) {
     const { value } = props;
     const localeService = useDependency(LocaleService);
-    const text = value ?? localeService.t('sheet.numfmt.general');
+    const text = value ?? localeService.t('sheets-numfmt-ui.general');
 
     return <span className="univer-text-sm">{text}</span>;
 };

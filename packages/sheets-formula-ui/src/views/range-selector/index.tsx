@@ -159,13 +159,13 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
         <Dialog
             width="328px"
             open={visible}
-            title={localeService.t('rangeSelector.title')}
+            title={localeService.t('sheets-formula-ui.rangeSelector.title')}
             draggable
             mask={false}
             maskClosable={false}
             footer={(
                 <footer className="univer-flex univer-gap-2">
-                    <Button onClick={onClose}>{localeService.t('rangeSelector.cancel')}</Button>
+                    <Button onClick={onClose}>{localeService.t('sheets-formula-ui.rangeSelector.cancel')}</Button>
                     <Button
                         variant="primary"
                         onClick={() => {
@@ -179,7 +179,7 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
                             );
                         }}
                     >
-                        {localeService.t('rangeSelector.confirm')}
+                        {localeService.t('sheets-formula-ui.rangeSelector.confirm')}
                     </Button>
                 </footer>
             )}
@@ -198,7 +198,7 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
                             className={clsx('univer-w-full', {
                                 'univer-border-primary-600': focusIndex === index,
                             })}
-                            placeholder={localeService.t('rangeSelector.placeHolder')}
+                            placeholder={localeService.t('sheets-formula-ui.rangeSelector.placeHolder')}
                             onFocus={() => setFocusIndex(index)}
                             value={text}
                             onChange={(value) => handleRangeInput(index, value)}
@@ -215,7 +215,7 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
                     <div>
                         <Button variant="link" onClick={handleRangeAdd}>
                             <IncreaseIcon />
-                            <span>{localeService.t('rangeSelector.addAnotherRange')}</span>
+                            <span>{localeService.t('sheets-formula-ui.rangeSelector.addAnotherRange')}</span>
                         </Button>
                     </div>
                 )}
@@ -337,7 +337,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
                             onClickOutside?.();
                         }}
                         icon={(
-                            <Tooltip title={localeService.t('rangeSelector.buttonTooltip')} placement="bottom">
+                            <Tooltip title={localeService.t('sheets-formula-ui.rangeSelector.buttonTooltip')} placement="bottom">
                                 <SelectRangeIcon
                                     className={`
                                       univer-cursor-pointer

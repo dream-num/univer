@@ -37,12 +37,12 @@ const allowPatternFunctions: IFunctionNames[] = [
 ];
 
 export const functionDisplayNames: IFunctionNameMap = {
-    [FUNCTION_NAMES_MATH.SUM]: 'statusbar.sum',
-    [FUNCTION_NAMES_STATISTICAL.AVERAGE]: 'statusbar.average',
-    [FUNCTION_NAMES_STATISTICAL.MIN]: 'statusbar.min',
-    [FUNCTION_NAMES_STATISTICAL.MAX]: 'statusbar.max',
-    [FUNCTION_NAMES_STATISTICAL.COUNT]: 'statusbar.count',
-    [FUNCTION_NAMES_STATISTICAL.COUNTA]: 'statusbar.countA',
+    [FUNCTION_NAMES_MATH.SUM]: 'sheets-ui.statusbar.sum',
+    [FUNCTION_NAMES_STATISTICAL.AVERAGE]: 'sheets-ui.statusbar.average',
+    [FUNCTION_NAMES_STATISTICAL.MIN]: 'sheets-ui.statusbar.min',
+    [FUNCTION_NAMES_STATISTICAL.MAX]: 'sheets-ui.statusbar.max',
+    [FUNCTION_NAMES_STATISTICAL.COUNT]: 'sheets-ui.statusbar.count',
+    [FUNCTION_NAMES_STATISTICAL.COUNTA]: 'sheets-ui.statusbar.countA',
     [FUNCTION_NAMES_TEXT.CONCATENATE]: 'concatenate',
 };
 
@@ -61,11 +61,11 @@ export const CopyableStatisticItem: FC<IStatisticItem> = (item: IStatisticItem) 
         await clipboardService.writeText(item.value.toString());
         messageService.show({
             type: MessageType.Success,
-            content: localeService.t('statusbar.copied'),
+            content: localeService.t('sheets-ui.statusbar.copied'),
         });
     };
     return (
-        <Tooltip title={localeService.t('statusbar.clickToCopy')} placement="top">
+        <Tooltip title={localeService.t('sheets-ui.statusbar.clickToCopy')} placement="top">
             <div
                 key={item.name}
                 className={`

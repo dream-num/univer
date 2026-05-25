@@ -17,13 +17,15 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    rightClick: {
-        addNote: 'コメントを追加',
-        deleteNote: 'コメントを削除',
-        toggleNote: 'コメントの表示/非表示',
-    },
-    note: {
-        placeholder: 'ここに入力',
+    'sheets-note-ui': {
+        note: {
+            placeholder: 'ここに入力',
+        },
+        rightClick: {
+            addNote: 'コメントを追加',
+            deleteNote: 'コメントを削除',
+            toggleNote: 'コメントの表示/非表示',
+        },
     },
 };
 

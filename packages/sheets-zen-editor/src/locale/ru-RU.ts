@@ -17,13 +17,15 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    rightClick: {
-        zenEditor: 'Редактор на весь экран',
-    },
-    shortcut: {
-        sheet: {
-            'zen-edit-cancel': 'Отменить Zen редактирование',
-            'zen-edit-confirm': 'Подтвердить Zen редактирование',
+    'sheets-zen-editor': {
+        rightClick: {
+            zenEditor: 'Редактор на весь экран',
+        },
+        shortcut: {
+            sheet: {
+                'zen-edit-cancel': 'Отменить Zen редактирование',
+                'zen-edit-confirm': 'Подтвердить Zen редактирование',
+            },
         },
     },
 };

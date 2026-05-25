@@ -66,7 +66,7 @@ export function DrawingAlignContextMenuItemFactory(accessor: IAccessor): IMenuSe
         id: DRAWING_ALIGN_CONTEXT_MENU_ID,
         type: MenuItemType.SUBITEMS,
         icon: 'HorizontallyIcon',
-        title: 'image-panel.align.title',
+        title: 'drawing-ui.image-panel.align.title',
         hidden$: getMenuStateByDrawingFocusChangedObservable$(accessor),
     };
 }
@@ -76,7 +76,7 @@ export function SetDrawingAlignLeftMenuItemFactory(): IMenuButtonItem {
         id: SetDrawingAlignLeftOperation.id,
         type: MenuItemType.BUTTON,
         icon: 'LeftJustifyingIcon',
-        title: 'image-panel.align.left',
+        title: 'drawing-ui.image-panel.align.left',
     };
 }
 
@@ -85,7 +85,7 @@ export function SetDrawingAlignCenterMenuItemFactory(): IMenuButtonItem {
         id: SetDrawingAlignCenterOperation.id,
         type: MenuItemType.BUTTON,
         icon: 'HorizontallyIcon',
-        title: 'image-panel.align.center',
+        title: 'drawing-ui.image-panel.align.center',
     };
 }
 
@@ -94,7 +94,7 @@ export function SetDrawingAlignRightMenuItemFactory(): IMenuButtonItem {
         id: SetDrawingAlignRightOperation.id,
         type: MenuItemType.BUTTON,
         icon: 'RightJustifyingIcon',
-        title: 'image-panel.align.right',
+        title: 'drawing-ui.image-panel.align.right',
     };
 }
 
@@ -103,7 +103,7 @@ export function SetDrawingAlignTopMenuItemFactory(): IMenuButtonItem {
         id: SetDrawingAlignTopOperation.id,
         type: MenuItemType.BUTTON,
         icon: 'AlignTopIcon',
-        title: 'image-panel.align.top',
+        title: 'drawing-ui.image-panel.align.top',
     };
 }
 
@@ -112,7 +112,7 @@ export function SetDrawingAlignMiddleMenuItemFactory(): IMenuButtonItem {
         id: SetDrawingAlignMiddleOperation.id,
         type: MenuItemType.BUTTON,
         icon: 'VerticalCenterIcon',
-        title: 'image-panel.align.middle',
+        title: 'drawing-ui.image-panel.align.middle',
     };
 }
 
@@ -121,7 +121,7 @@ export function SetDrawingAlignBottomMenuItemFactory(): IMenuButtonItem {
         id: SetDrawingAlignBottomOperation.id,
         type: MenuItemType.BUTTON,
         icon: 'AlignBottomIcon',
-        title: 'image-panel.align.bottom',
+        title: 'drawing-ui.image-panel.align.bottom',
     };
 }
 
@@ -130,7 +130,7 @@ export function SetDrawingAlignHorizonMenuItemFactory(): IMenuButtonItem {
         id: SetDrawingAlignHorizonOperation.id,
         type: MenuItemType.BUTTON,
         icon: 'HorizontallyIcon',
-        title: 'image-panel.align.horizon',
+        title: 'drawing-ui.image-panel.align.horizon',
     };
 }
 
@@ -139,6 +139,6 @@ export function SetDrawingAlignVerticalMenuItemFactory(): IMenuButtonItem {
         id: SetDrawingAlignVerticalOperation.id,
         type: MenuItemType.BUTTON,
         icon: 'VerticalCenterIcon',
-        title: 'image-panel.align.vertical',
+        title: 'drawing-ui.image-panel.align.vertical',
     };
 }

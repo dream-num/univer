@@ -41,7 +41,7 @@ export function CellMergeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem
     return {
         id: AddWorksheetMergeCommand.id,
         icon: 'MergeAllIcon',
-        tooltip: 'toolbar.mergeCell.main',
+        tooltip: 'sheets-ui.toolbar.mergeCell.main',
         type: MenuItemType.SUBITEMS,
         // selections: [...MERGE_CHILDREN],
         hidden$: combineLatest([
@@ -59,7 +59,7 @@ export function CellMergeAllMenuItemFactory(accessor: IAccessor): IMenuButtonIte
     return {
         id: AddWorksheetMergeAllCommand.id,
         type: MenuItemType.BUTTON,
-        title: 'merge.all',
+        title: 'sheets-ui.merge.all',
         icon: 'MergeAllIcon',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
@@ -69,7 +69,7 @@ export function CellMergeVerticalMenuItemFactory(accessor: IAccessor): IMenuButt
     return {
         id: AddWorksheetMergeVerticalCommand.id,
         type: MenuItemType.BUTTON,
-        title: 'merge.vertical',
+        title: 'sheets-ui.merge.vertical',
         icon: 'VerticalIntegrationIcon',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
@@ -79,7 +79,7 @@ export function CellMergeHorizontalMenuItemFactory(accessor: IAccessor): IMenuBu
     return {
         id: AddWorksheetMergeHorizontalCommand.id,
         type: MenuItemType.BUTTON,
-        title: 'merge.horizontal',
+        title: 'sheets-ui.merge.horizontal',
         icon: 'HorizontalMergeIcon',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
@@ -89,7 +89,7 @@ export function CellMergeCancelMenuItemFactory(accessor: IAccessor): IMenuButton
     return {
         id: RemoveWorksheetMergeCommand.id,
         type: MenuItemType.BUTTON,
-        title: 'merge.cancel',
+        title: 'sheets-ui.merge.cancel',
         icon: 'CancelMergeIcon',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };

@@ -17,7 +17,7 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    'sheets-sort': {
+    'sheets-sort-ui': {
         general: {
             sort: 'Sắp xếp',
             'sort-asc': 'Tăng dần',
@@ -43,6 +43,9 @@ const locale: typeof enUS = {
             'add-condition': 'Thêm điều kiện sắp xếp',
             cancel: 'Hủy bỏ',
             confirm: 'Xác nhận',
+        },
+        info: {
+            tooltip: 'Tooltip',
         },
     },
 

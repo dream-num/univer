@@ -29,7 +29,7 @@ export const SheetPermissionOpenDialogOperation: ICommand = {
 
         dialogService.open({
             id: UNIVER_SHEET_PERMISSION_DIALOG_ID,
-            title: { title: 'permission.dialog.allowedPermissionType' },
+            title: { title: 'sheets-ui.permission.dialog.allowedPermissionType' },
             children: { label: UNIVER_SHEET_PERMISSION_DIALOG },
             width: 393,
             destroyOnClose: true,

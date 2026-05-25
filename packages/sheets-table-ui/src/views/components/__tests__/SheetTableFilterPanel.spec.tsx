@@ -180,7 +180,7 @@ describe('SheetTableFilterPanel', () => {
         });
 
         const tree = renderPanel();
-        const [confirm] = findAll(tree, (n) => n.type === design.Button && n.props?.children === 'sheets-table.filter.confirm');
+        const [confirm] = findAll(tree, (n) => n.type === design.Button && n.props?.children === 'sheets-table-ui.filter.confirm');
 
         confirm.props.onClick();
 
@@ -304,7 +304,7 @@ describe('SheetTableFilterPanel', () => {
         });
 
         const tree = renderPanel();
-        const [confirm] = findAll(tree, (n) => n.type === design.Button && n.props?.children === 'sheets-table.filter.confirm');
+        const [confirm] = findAll(tree, (n) => n.type === design.Button && n.props?.children === 'sheets-table-ui.filter.confirm');
 
         confirm.props.onClick();
 

@@ -59,7 +59,7 @@ describe('ToggleShortcutPanelOperation', () => {
         expect(ToggleShortcutPanelOperation.handler!(accessor, {})).toBe(true);
         expect(shortcutPanelService.open).toHaveBeenCalledOnce();
         expect(sidebarService.open).toHaveBeenCalledWith({
-            header: { title: 'shortcut-panel.title' },
+            header: { title: 'ui.shortcut-panel.title' },
             children: { label: ShortcutPanelComponentName },
         });
     });

@@ -44,7 +44,7 @@ export function DataValidationOptions(props: IDataValidationOptionsParams) {
                 `}
                 onClick={() => setShow(!show)}
             >
-                {localeService.t('dataValidation.panel.options')}
+                {localeService.t('sheets-data-validation-ui.panel.options')}
                 {show
                     ? (
                         <MoreUpIcon className="univer-ml-1" />
@@ -57,22 +57,22 @@ export function DataValidationOptions(props: IDataValidationOptionsParams) {
                 <>
                     {ExtraOptions ? <ExtraOptions value={value} onChange={onChange} /> : null}
                     <FormLayout
-                        label={localeService.t('dataValidation.panel.invalid')}
+                        label={localeService.t('sheets-data-validation-ui.panel.invalid')}
                     >
                         <RadioGroup
                             value={`${value.errorStyle ?? DataValidationErrorStyle.WARNING}`}
                             onChange={(errorStyle) => onChange({ ...value, errorStyle: +errorStyle })}
                         >
                             <Radio value={`${DataValidationErrorStyle.WARNING}`}>
-                                {localeService.t('dataValidation.panel.showWarning')}
+                                {localeService.t('sheets-data-validation-ui.panel.showWarning')}
                             </Radio>
                             <Radio value={`${DataValidationErrorStyle.STOP}`}>
-                                {localeService.t('dataValidation.panel.rejectInput')}
+                                {localeService.t('sheets-data-validation-ui.panel.rejectInput')}
                             </Radio>
                         </RadioGroup>
                     </FormLayout>
                     <FormLayout
-                        label={localeService.t('dataValidation.panel.messageInfo')}
+                        label={localeService.t('sheets-data-validation-ui.panel.messageInfo')}
                     >
                         <Checkbox
                             checked={value.showErrorMessage}
@@ -81,7 +81,7 @@ export function DataValidationOptions(props: IDataValidationOptionsParams) {
                                 showErrorMessage: !value.showErrorMessage,
                             })}
                         >
-                            {localeService.t('dataValidation.panel.showInfo')}
+                            {localeService.t('sheets-data-validation-ui.panel.showInfo')}
                         </Checkbox>
                     </FormLayout>
                     {value.showErrorMessage

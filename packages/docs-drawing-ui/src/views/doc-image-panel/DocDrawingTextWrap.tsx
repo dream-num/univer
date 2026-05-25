@@ -285,7 +285,7 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
                   dark:!univer-text-gray-200
                 `}
             >
-                <div>{localeService.t('image-text-wrap.title')}</div>
+                <div>{localeService.t('docs-drawing-ui.image-text-wrap.title')}</div>
             </header>
 
             <div
@@ -294,16 +294,16 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
                   dark:!univer-text-gray-200
                 `}
             >
-                <div>{localeService.t('image-text-wrap.wrappingStyle')}</div>
+                <div>{localeService.t('docs-drawing-ui.image-text-wrap.wrappingStyle')}</div>
             </div>
 
             <div>
                 <RadioGroup value={wrappingStyle} onChange={handleWrappingStyleChange} direction="vertical">
-                    <Radio value={TextWrappingStyle.INLINE}>{localeService.t('image-text-wrap.inline')}</Radio>
-                    <Radio value={TextWrappingStyle.WRAP_SQUARE}>{localeService.t('image-text-wrap.square')}</Radio>
-                    <Radio value={TextWrappingStyle.WRAP_TOP_AND_BOTTOM}>{localeService.t('image-text-wrap.topAndBottom')}</Radio>
-                    <Radio value={TextWrappingStyle.BEHIND_TEXT}>{localeService.t('image-text-wrap.behindText')}</Radio>
-                    <Radio value={TextWrappingStyle.IN_FRONT_OF_TEXT}>{localeService.t('image-text-wrap.inFrontText')}</Radio>
+                    <Radio value={TextWrappingStyle.INLINE}>{localeService.t('docs-drawing-ui.image-text-wrap.inline')}</Radio>
+                    <Radio value={TextWrappingStyle.WRAP_SQUARE}>{localeService.t('docs-drawing-ui.image-text-wrap.square')}</Radio>
+                    <Radio value={TextWrappingStyle.WRAP_TOP_AND_BOTTOM}>{localeService.t('docs-drawing-ui.image-text-wrap.topAndBottom')}</Radio>
+                    <Radio value={TextWrappingStyle.BEHIND_TEXT}>{localeService.t('docs-drawing-ui.image-text-wrap.behindText')}</Radio>
+                    <Radio value={TextWrappingStyle.IN_FRONT_OF_TEXT}>{localeService.t('docs-drawing-ui.image-text-wrap.inFrontText')}</Radio>
                 </RadioGroup>
             </div>
 
@@ -313,14 +313,14 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
                   dark:!univer-text-gray-200
                 `}
             >
-                <div>{localeService.t('image-text-wrap.wrapText')}</div>
+                <div>{localeService.t('docs-drawing-ui.image-text-wrap.wrapText')}</div>
             </div>
 
             <div>
                 <RadioGroup disabled={disableWrapText} value={wrapText} onChange={handleWrapTextChange} direction="horizontal">
-                    <Radio value={WrapTextType.BOTH_SIDES}>{localeService.t('image-text-wrap.bothSide')}</Radio>
-                    <Radio value={WrapTextType.LEFT}>{localeService.t('image-text-wrap.leftOnly')}</Radio>
-                    <Radio value={WrapTextType.RIGHT}>{localeService.t('image-text-wrap.rightOnly')}</Radio>
+                    <Radio value={WrapTextType.BOTH_SIDES}>{localeService.t('docs-drawing-ui.image-text-wrap.bothSide')}</Radio>
+                    <Radio value={WrapTextType.LEFT}>{localeService.t('docs-drawing-ui.image-text-wrap.leftOnly')}</Radio>
+                    <Radio value={WrapTextType.RIGHT}>{localeService.t('docs-drawing-ui.image-text-wrap.rightOnly')}</Radio>
                 </RadioGroup>
             </div>
 
@@ -330,7 +330,7 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
                   dark:!univer-text-gray-200
                 `}
             >
-                <div>{localeService.t('image-text-wrap.distanceFromText')}</div>
+                <div>{localeService.t('docs-drawing-ui.image-text-wrap.distanceFromText')}</div>
             </div>
 
             <div
@@ -340,7 +340,7 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
                 `}
             >
                 <div>
-                    <span>{localeService.t('image-text-wrap.top')}</span>
+                    <span>{localeService.t('docs-drawing-ui.image-text-wrap.top')}</span>
                     <InputNumber
                         min={MIN_MARGIN}
                         max={MAX_MARGIN}
@@ -351,7 +351,7 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
                     />
                 </div>
                 <div>
-                    <span>{localeService.t('image-text-wrap.left')}</span>
+                    <span>{localeService.t('docs-drawing-ui.image-text-wrap.left')}</span>
                     <InputNumber
                         min={MIN_MARGIN}
                         max={MAX_MARGIN}
@@ -370,7 +370,7 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
                 `}
             >
                 <div>
-                    <span>{localeService.t('image-text-wrap.bottom')}</span>
+                    <span>{localeService.t('docs-drawing-ui.image-text-wrap.bottom')}</span>
                     <InputNumber
                         min={MIN_MARGIN}
                         max={MAX_MARGIN}
@@ -381,7 +381,7 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
                     />
                 </div>
                 <div>
-                    <span>{localeService.t('image-text-wrap.right')}</span>
+                    <span>{localeService.t('docs-drawing-ui.image-text-wrap.right')}</span>
                     <InputNumber
                         min={MIN_MARGIN}
                         max={MAX_MARGIN}

@@ -17,7 +17,7 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    docQuickInsert: {
+    'docs-quick-insert-ui': {
         menu: {
             numberedList: 'Danh sách được đánh số',
             bulletedList: 'Danh sách không được đánh số',

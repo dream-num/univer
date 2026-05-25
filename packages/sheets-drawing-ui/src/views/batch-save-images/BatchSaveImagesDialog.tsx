@@ -102,7 +102,7 @@ export function BatchSaveImagesDialog() {
             dialogService.close(BATCH_SAVE_IMAGES_DIALOG_ID);
         } catch (err) {
             console.error('Failed to save images:', err);
-            setError(localeService.t('sheetImage.save.error'));
+            setError(localeService.t('sheets-drawing-ui.save.error'));
         } finally {
             setSaving(false);
         }
@@ -112,25 +112,25 @@ export function BatchSaveImagesDialog() {
 
     return (
         <div className="univer-flex univer-flex-col">
-            <FormLayout label={localeService.t('sheetImage.save.imageCount')}>
+            <FormLayout label={localeService.t('sheets-drawing-ui.save.imageCount')}>
                 <div className="univer-text-sm univer-text-gray-600">{images.length}</div>
             </FormLayout>
 
-            <FormLayout label={localeService.t('sheetImage.save.fileNameConfig')}>
+            <FormLayout label={localeService.t('sheets-drawing-ui.save.fileNameConfig')}>
                 <CheckboxGroup value={fileNameParts} onChange={handleFileNamePartsChange} direction="vertical">
                     <Checkbox value={FileNamePart.CELL_ADDRESS} disabled={!hasAvailableColumns}>
-                        {localeService.t('sheetImage.save.useRowCol')}
+                        {localeService.t('sheets-drawing-ui.save.useRowCol')}
                     </Checkbox>
                     {hasAvailableColumns && (
                         <Checkbox value={FileNamePart.COLUMN_VALUE}>
-                            {localeService.t('sheetImage.save.useColumnValue')}
+                            {localeService.t('sheets-drawing-ui.save.useColumnValue')}
                         </Checkbox>
                     )}
                 </CheckboxGroup>
             </FormLayout>
 
             {showColumnSelect && (
-                <FormLayout label={localeService.t('sheetImage.save.selectColumn')}>
+                <FormLayout label={localeService.t('sheets-drawing-ui.save.selectColumn')}>
                     <Select
                         value={selectedColumn}
                         options={columnOptions}
@@ -149,14 +149,14 @@ export function BatchSaveImagesDialog() {
                 `}
             >
                 <Button onClick={handleCancel} disabled={saving}>
-                    {localeService.t('sheetImage.save.cancel')}
+                    {localeService.t('sheets-drawing-ui.save.cancel')}
                 </Button>
                 <Button
                     variant="primary"
                     onClick={handleConfirm}
                     disabled={saving || images.length === 0}
                 >
-                    {saving ? localeService.t('sheetImage.save.saving') : localeService.t('sheetImage.save.confirm')}
+                    {saving ? localeService.t('sheets-drawing-ui.save.saving') : localeService.t('sheets-drawing-ui.save.confirm')}
                 </Button>
             </div>
         </div>

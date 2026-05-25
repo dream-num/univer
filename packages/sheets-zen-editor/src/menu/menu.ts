@@ -27,7 +27,7 @@ export function ZenEditorMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: OpenZenEditorCommand.id,
         type: MenuItemType.BUTTON,
-        title: 'rightClick.zenEditor',
+        title: 'sheets-zen-editor.rightClick.zenEditor',
         icon: 'AmplifyIcon',
         hidden$: getCurrentExclusiveRangeInterest$(accessor),
         disabled$: editorBridgeService.currentEditCell$.pipe(

@@ -305,7 +305,7 @@ export const menuSchema: MenuSchemaType = {
             },
         },
         [ContextMenuGroup.LAYOUT]: {
-            // title: 'rightClick.insertBellow',
+            // title: 'docs-ui.rightClick.insertBellow',
             [INSERT_BELLOW_MENU_ID]: {
                 menuItemFactory: DocInsertBellowMenuItemFactory,
                 [InsertBulletListBellowCommand.id]: {

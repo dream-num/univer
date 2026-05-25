@@ -17,7 +17,7 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    slide: {
+    'slides-ui': {
         append: 'Pridať snímku',
 
         text: {
@@ -52,6 +52,23 @@ const locale: typeof enUS = {
             image: 'Upraviť obrázok',
         },
 
+        'image-panel': {
+            arrange: {
+                title: 'Usporiadať',
+                forward: 'Posunúť dopredu',
+                backward: 'Posunúť dozadu',
+                front: 'Presunúť do popredia',
+                back: 'Presunúť do pozadia',
+            },
+            transform: {
+                title: 'Transformovať',
+                width: 'Šírka (px)',
+                height: 'Výška (px)',
+                x: 'X (px)',
+                y: 'Y (px)',
+                rotate: 'Otočiť (°)',
+            },
+        },
         panel: {
             fill: {
                 title: 'Farba výplne',

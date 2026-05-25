@@ -28,7 +28,7 @@ import { ColorPicker } from '../../color-picker';
 import { Preview } from '../../preview';
 import { previewClassName } from './styles';
 
-const createOptionItem = (text: string, localeService: LocaleService) => ({ label: localeService.t(`sheet.cf.valueType.${text}`), value: text });
+const createOptionItem = (text: string, localeService: LocaleService) => ({ label: localeService.t(`sheets-conditional-formatting-ui.valueType.${text}`), value: text });
 
 const TextInput = (props: { id: string; type: CFValueType | 'none'; value: number | string; onChange: (v: number | string) => void; className: string }) => {
     const { type, className, onChange, id, value } = props;
@@ -230,7 +230,7 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                   dark:!univer-text-gray-200
                 `}
             >
-                {localeService.t('sheet.cf.panel.styleRule')}
+                {localeService.t('sheets-conditional-formatting-ui.panel.styleRule')}
             </div>
             <div className={previewClassName}>
                 <Preview rule={getResult({ minType, medianType, maxType, minValue, medianValue, maxValue, minColor, medianColor, maxColor }) as IConditionalFormattingRuleConfig} />
@@ -241,7 +241,7 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                   dark:!univer-text-gray-200
                 `}
             >
-                {localeService.t('sheet.cf.valueType.min')}
+                {localeService.t('sheets-conditional-formatting-ui.valueType.min')}
             </div>
             <div className="univer-mt-3 univer-flex univer-h-8 univer-items-center">
                 <Select
@@ -310,7 +310,7 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                   dark:!univer-text-gray-200
                 `}
             >
-                {localeService.t('sheet.cf.panel.medianValue')}
+                {localeService.t('sheets-conditional-formatting-ui.panel.medianValue')}
             </div>
             <div className="univer-mt-3 univer-flex univer-h-8 univer-items-center">
                 <Select
@@ -383,7 +383,7 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                   dark:!univer-text-gray-200
                 `}
             >
-                {localeService.t('sheet.cf.valueType.max')}
+                {localeService.t('sheets-conditional-formatting-ui.valueType.max')}
             </div>
             <div className="univer-mt-3 univer-flex univer-h-8 univer-items-center">
                 <Select

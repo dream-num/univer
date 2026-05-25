@@ -51,7 +51,7 @@ describe('SidebarDocDrawingOperation', () => {
         const { accessor, sidebarService, drawingManagerService } = createAccessor();
         await expect(SidebarDocDrawingOperation.handler(accessor, { value: 'open' })).resolves.toBe(true);
         expect(sidebarService.open).toHaveBeenCalledWith(expect.objectContaining({
-            header: { title: 'docImage.panel.title' },
+            header: { title: 'docs-drawing-ui.panel.title' },
             children: { label: COMPONENT_DOC_DRAWING_PANEL },
             width: 360,
         }));

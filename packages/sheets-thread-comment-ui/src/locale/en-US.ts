@@ -15,7 +15,7 @@
  */
 
 const locale = {
-    sheetThreadComment: {
+    'sheets-thread-comment-ui': {
         menu: {
             addComment: 'Add Comment',
             commentManagement: 'Comment Management',

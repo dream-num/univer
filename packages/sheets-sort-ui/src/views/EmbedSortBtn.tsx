@@ -52,11 +52,11 @@ export default function EmbedSortBtn(props: IEmbedSortBtnProps) {
         <ButtonGroup className="univer-mb-3 univer-w-full univer-grid-cols-2">
             <Button onClick={() => apply(true)}>
                 <AscendingIcon />
-                {localeService.t('sheets-sort.general.sort-asc')}
+                {localeService.t('sheets-sort-ui.general.sort-asc')}
             </Button>
             <Button onClick={() => apply(false)}>
                 <DescendingIcon />
-                {localeService.t('sheets-sort.general.sort-desc')}
+                {localeService.t('sheets-sort-ui.general.sort-desc')}
             </Button>
         </ButtonGroup>
     );

@@ -24,9 +24,9 @@ describe('formula service utils', () => {
     const localeService = {
         t: (key: string) => {
             const dictionary: Record<string, string> = {
-                'formula.functionType.math': 'Math',
-                'formula.functionType.logical': 'Logical',
-                'formula.alias.sum': '求和',
+                'sheets-formula-ui.functionType.math': 'Math',
+                'sheets-formula-ui.functionType.logical': 'Logical',
+                'sheets-formula-ui.alias.sum': '求和',
             };
 
             return dictionary[key] ?? key;
@@ -47,8 +47,8 @@ describe('formula service utils', () => {
     });
 
     it('prefers localized aliases but falls back to the raw function name', () => {
-        expect(getFunctionName({ functionName: 'SUM', aliasFunctionName: 'formula.alias.sum' } as IFunctionInfo, localeService)).toBe('求和');
-        expect(getFunctionName({ functionName: 'COUNTIF', aliasFunctionName: 'formula.alias.unknown' } as IFunctionInfo, localeService)).toBe('COUNTIF');
+        expect(getFunctionName({ functionName: 'SUM', aliasFunctionName: 'sheets-formula-ui.alias.sum' } as IFunctionInfo, localeService)).toBe('求和');
+        expect(getFunctionName({ functionName: 'COUNTIF', aliasFunctionName: 'sheets-formula-ui.alias.unknown' } as IFunctionInfo, localeService)).toBe('COUNTIF');
         expect(getFunctionName({ functionName: 'MAX' } as IFunctionInfo, localeService)).toBe('MAX');
     });
 

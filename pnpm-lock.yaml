@@ -199,6 +199,9 @@ importers:
       '@univerjs/docs-quick-insert-ui':
         specifier: workspace:*
         version: link:../../packages/docs-quick-insert-ui
+      '@univerjs/docs-thread-comment-ui':
+        specifier: workspace:*
+        version: link:../../packages/docs-thread-comment-ui
       '@univerjs/docs-ui':
         specifier: workspace:*
         version: link:../../packages/docs-ui
@@ -271,6 +274,9 @@ importers:
       '@univerjs/sheets-sort-ui':
         specifier: workspace:*
         version: link:../../packages/sheets-sort-ui
+      '@univerjs/sheets-table':
+        specifier: workspace:*
+        version: link:../../packages/sheets-table
       '@univerjs/sheets-table-ui':
         specifier: workspace:*
         version: link:../../packages/sheets-table-ui

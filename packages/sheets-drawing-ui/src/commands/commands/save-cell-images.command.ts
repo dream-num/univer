@@ -43,7 +43,7 @@ export const SaveCellImagesCommand: ICommand = {
         // Multiple images: open batch save dialog
         const localeService = accessor.get(LocaleService);
         const selectionRange = batchSaveService.getSelectionRangeNotation();
-        const titleText = `${localeService.t('sheetImage.save.title')} (${selectionRange})`;
+        const titleText = `${localeService.t('sheets-drawing-ui.save.title')} (${selectionRange})`;
 
         dialogService.open({
             id: BATCH_SAVE_IMAGES_DIALOG_ID,

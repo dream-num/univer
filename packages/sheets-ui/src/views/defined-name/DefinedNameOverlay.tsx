@@ -169,10 +169,10 @@ export function DefinedNameOverlay({ search, isInputEvent }: { search: string; i
                       dark:!univer-text-gray-200
                     `}
                 >
-                    {localeService.t('definedName.managerTitle')}
+                    {localeService.t('sheets-ui.definedName.managerTitle')}
                 </div>
                 <div className="univer-text-xs univer-text-gray-400">
-                    {localeService.t('definedName.managerDescription')}
+                    {localeService.t('sheets-ui.definedName.managerDescription')}
                 </div>
             </div>
         </div>

@@ -177,7 +177,7 @@ export class SlidePopupMenuController extends RxDisposable {
 
     private _getMenuItemsByObjectType(objectType: ObjectType, oKey: string, unitId: string) {
         const menuItems = [{
-            label: 'slide.popup.edit',
+            label: 'slides-ui.popup.edit',
             index: 0,
             commandId: ToggleSlideEditSidebarOperation.id,
             commandParams: {
@@ -186,7 +186,7 @@ export class SlidePopupMenuController extends RxDisposable {
             },
             disable: false,
         }, {
-            label: 'slide.popup.delete',
+            label: 'slides-ui.popup.delete',
             index: 5,
             commandId: DeleteSlideElementOperation.id,
             commandParams: {

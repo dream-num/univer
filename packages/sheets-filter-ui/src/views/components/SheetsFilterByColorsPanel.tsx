@@ -58,7 +58,7 @@ export function FilterByColor(props: { model: ByColorsModel }) {
                               dark:!univer-text-white
                             `}
                         >
-                            {localeService.t('sheets-filter.panel.filter-by-cell-fill-color')}
+                            {localeService.t('sheets-filter-ui.panel.filter-by-cell-fill-color')}
                         </div>
                         <div
                             className={`
@@ -110,7 +110,7 @@ export function FilterByColor(props: { model: ByColorsModel }) {
                               dark:!univer-text-white
                             `}
                         >
-                            {localeService.t('sheets-filter.panel.filter-by-cell-text-color')}
+                            {localeService.t('sheets-filter-ui.panel.filter-by-cell-text-color')}
                         </div>
                         <div
                             className={`
@@ -150,7 +150,7 @@ export function FilterByColor(props: { model: ByColorsModel }) {
                           dark:!univer-text-gray-200
                         `}
                     >
-                        {localeService.t('sheets-filter.panel.filter-by-color-none')}
+                        {localeService.t('sheets-filter-ui.panel.filter-by-color-none')}
                     </div>
                 )}
             </div>

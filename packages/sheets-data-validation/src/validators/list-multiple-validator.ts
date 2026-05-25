@@ -19,7 +19,7 @@ import { ListValidator } from './list-validator';
 
 export class ListMultipleValidator extends ListValidator {
     override id: string = DataValidationType.LIST_MULTIPLE;
-    override title: string = 'dataValidation.listMultiple.title';
+    override title: string = 'sheets-data-validation.listMultiple.title';
     override readonly offsetFormulaByRange = false;
 
     override skipDefaultFontRender = () => {

@@ -52,7 +52,7 @@ export const DocHeaderFooterPanel = () => {
         <div className="univer-text-sm">
             {isEditHeaderFooter
                 ? <DocHeaderFooterOptions unitId={unitId} />
-                : <div className="univer-text-gray-400">{localeService.t('headerFooter.disableText')}</div>}
+                : <div className="univer-text-gray-400">{localeService.t('docs-ui.headerFooter.disableText')}</div>}
         </div>
     );
 };

@@ -21,19 +21,19 @@ export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_INFORMATION.CELL,
         functionType: FunctionType.Information,
-        description: 'formula.functionList.CELL.description',
-        abstract: 'formula.functionList.CELL.abstract',
+        description: 'sheets-formula.functionList.CELL.description',
+        abstract: 'sheets-formula.functionList.CELL.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.CELL.functionParameter.infoType.name',
-                detail: 'formula.functionList.CELL.functionParameter.infoType.detail',
+                name: 'sheets-formula.functionList.CELL.functionParameter.infoType.name',
+                detail: 'sheets-formula.functionList.CELL.functionParameter.infoType.detail',
                 example: '"type"',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'formula.functionList.CELL.functionParameter.reference.name',
-                detail: 'formula.functionList.CELL.functionParameter.reference.detail',
+                name: 'sheets-formula.functionList.CELL.functionParameter.reference.name',
+                detail: 'sheets-formula.functionList.CELL.functionParameter.reference.detail',
                 example: 'A1',
                 require: 1,
                 repeat: 0,
@@ -43,12 +43,12 @@ export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_INFORMATION.ERROR_TYPE,
         functionType: FunctionType.Information,
-        description: 'formula.functionList.ERROR_TYPE.description',
-        abstract: 'formula.functionList.ERROR_TYPE.abstract',
+        description: 'sheets-formula.functionList.ERROR_TYPE.description',
+        abstract: 'sheets-formula.functionList.ERROR_TYPE.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.ERROR_TYPE.functionParameter.errorVal.name',
-                detail: 'formula.functionList.ERROR_TYPE.functionParameter.errorVal.detail',
+                name: 'sheets-formula.functionList.ERROR_TYPE.functionParameter.errorVal.name',
+                detail: 'sheets-formula.functionList.ERROR_TYPE.functionParameter.errorVal.detail',
                 example: '"#NULL!"',
                 require: 1,
                 repeat: 0,
@@ -58,19 +58,19 @@ export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_INFORMATION.INFO,
         functionType: FunctionType.Information,
-        description: 'formula.functionList.INFO.description',
-        abstract: 'formula.functionList.INFO.abstract',
+        description: 'sheets-formula.functionList.INFO.description',
+        abstract: 'sheets-formula.functionList.INFO.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.INFO.functionParameter.number1.name',
-                detail: 'formula.functionList.INFO.functionParameter.number1.detail',
+                name: 'sheets-formula.functionList.INFO.functionParameter.number1.name',
+                detail: 'sheets-formula.functionList.INFO.functionParameter.number1.detail',
                 example: 'A1:A20',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'formula.functionList.INFO.functionParameter.number2.name',
-                detail: 'formula.functionList.INFO.functionParameter.number2.detail',
+                name: 'sheets-formula.functionList.INFO.functionParameter.number2.name',
+                detail: 'sheets-formula.functionList.INFO.functionParameter.number2.detail',
                 example: 'A1:A20',
                 require: 1,
                 repeat: 0,
@@ -80,40 +80,40 @@ export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_INFORMATION.ISBETWEEN,
         functionType: FunctionType.Information,
-        description: 'formula.functionList.ISBETWEEN.description',
-        abstract: 'formula.functionList.ISBETWEEN.abstract',
+        description: 'sheets-formula.functionList.ISBETWEEN.description',
+        abstract: 'sheets-formula.functionList.ISBETWEEN.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.ISBETWEEN.functionParameter.valueToCompare.name',
-                detail: 'formula.functionList.ISBETWEEN.functionParameter.valueToCompare.detail',
+                name: 'sheets-formula.functionList.ISBETWEEN.functionParameter.valueToCompare.name',
+                detail: 'sheets-formula.functionList.ISBETWEEN.functionParameter.valueToCompare.detail',
                 example: '7.9',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'formula.functionList.ISBETWEEN.functionParameter.lowerValue.name',
-                detail: 'formula.functionList.ISBETWEEN.functionParameter.lowerValue.detail',
+                name: 'sheets-formula.functionList.ISBETWEEN.functionParameter.lowerValue.name',
+                detail: 'sheets-formula.functionList.ISBETWEEN.functionParameter.lowerValue.detail',
                 example: '1.2',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'formula.functionList.ISBETWEEN.functionParameter.upperValue.name',
-                detail: 'formula.functionList.ISBETWEEN.functionParameter.upperValue.detail',
+                name: 'sheets-formula.functionList.ISBETWEEN.functionParameter.upperValue.name',
+                detail: 'sheets-formula.functionList.ISBETWEEN.functionParameter.upperValue.detail',
                 example: '12.45',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'formula.functionList.ISBETWEEN.functionParameter.lowerValueIsInclusive.name',
-                detail: 'formula.functionList.ISBETWEEN.functionParameter.lowerValueIsInclusive.detail',
+                name: 'sheets-formula.functionList.ISBETWEEN.functionParameter.lowerValueIsInclusive.name',
+                detail: 'sheets-formula.functionList.ISBETWEEN.functionParameter.lowerValueIsInclusive.detail',
                 example: 'true',
                 require: 0,
                 repeat: 0,
             },
             {
-                name: 'formula.functionList.ISBETWEEN.functionParameter.upperValueIsInclusive.name',
-                detail: 'formula.functionList.ISBETWEEN.functionParameter.upperValueIsInclusive.detail',
+                name: 'sheets-formula.functionList.ISBETWEEN.functionParameter.upperValueIsInclusive.name',
+                detail: 'sheets-formula.functionList.ISBETWEEN.functionParameter.upperValueIsInclusive.detail',
                 example: 'true',
                 require: 0,
                 repeat: 0,
@@ -123,12 +123,12 @@ export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_INFORMATION.ISBLANK,
         functionType: FunctionType.Information,
-        description: 'formula.functionList.ISBLANK.description',
-        abstract: 'formula.functionList.ISBLANK.abstract',
+        description: 'sheets-formula.functionList.ISBLANK.description',
+        abstract: 'sheets-formula.functionList.ISBLANK.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.ISBLANK.functionParameter.value.name',
-                detail: 'formula.functionList.ISBLANK.functionParameter.value.detail',
+                name: 'sheets-formula.functionList.ISBLANK.functionParameter.value.name',
+                detail: 'sheets-formula.functionList.ISBLANK.functionParameter.value.detail',
                 example: 'A1',
                 require: 1,
                 repeat: 0,
@@ -138,12 +138,12 @@ export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_INFORMATION.ISDATE,
         functionType: FunctionType.Information,
-        description: 'formula.functionList.ISDATE.description',
-        abstract: 'formula.functionList.ISDATE.abstract',
+        description: 'sheets-formula.functionList.ISDATE.description',
+        abstract: 'sheets-formula.functionList.ISDATE.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.ISDATE.functionParameter.value.name',
-                detail: 'formula.functionList.ISDATE.functionParameter.value.detail',
+                name: 'sheets-formula.functionList.ISDATE.functionParameter.value.name',
+                detail: 'sheets-formula.functionList.ISDATE.functionParameter.value.detail',
                 example: 'A1',
                 require: 1,
                 repeat: 0,
@@ -153,12 +153,12 @@ export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_INFORMATION.ISEMAIL,
         functionType: FunctionType.Information,
-        description: 'formula.functionList.ISEMAIL.description',
-        abstract: 'formula.functionList.ISEMAIL.abstract',
+        description: 'sheets-formula.functionList.ISEMAIL.description',
+        abstract: 'sheets-formula.functionList.ISEMAIL.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.ISEMAIL.functionParameter.value.name',
-                detail: 'formula.functionList.ISEMAIL.functionParameter.value.detail',
+                name: 'sheets-formula.functionList.ISEMAIL.functionParameter.value.name',
+                detail: 'sheets-formula.functionList.ISEMAIL.functionParameter.value.detail',
                 example: '"developer@univer.ai"',
                 require: 1,
                 repeat: 0,
@@ -168,12 +168,12 @@ export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_INFORMATION.ISERR,
         functionType: FunctionType.Information,
-        description: 'formula.functionList.ISERR.description',
-        abstract: 'formula.functionList.ISERR.abstract',
+        description: 'sheets-formula.functionList.ISERR.description',
+        abstract: 'sheets-formula.functionList.ISERR.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.ISERR.functionParameter.value.name',
-                detail: 'formula.functionList.ISERR.functionParameter.value.detail',
+                name: 'sheets-formula.functionList.ISERR.functionParameter.value.name',
+                detail: 'sheets-formula.functionList.ISERR.functionParameter.value.detail',
                 example: 'A1',
                 require: 1,
                 repeat: 0,
@@ -183,12 +183,12 @@ export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_INFORMATION.ISERROR,
         functionType: FunctionType.Information,
-        description: 'formula.functionList.ISERROR.description',
-        abstract: 'formula.functionList.ISERROR.abstract',
+        description: 'sheets-formula.functionList.ISERROR.description',
+        abstract: 'sheets-formula.functionList.ISERROR.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.ISERROR.functionParameter.value.name',
-                detail: 'formula.functionList.ISERROR.functionParameter.value.detail',
+                name: 'sheets-formula.functionList.ISERROR.functionParameter.value.name',
+                detail: 'sheets-formula.functionList.ISERROR.functionParameter.value.detail',
                 example: 'A1',
                 require: 1,
                 repeat: 0,
@@ -198,12 +198,12 @@ export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_INFORMATION.ISEVEN,
         functionType: FunctionType.Information,
-        description: 'formula.functionList.ISEVEN.description',
-        abstract: 'formula.functionList.ISEVEN.abstract',
+        description: 'sheets-formula.functionList.ISEVEN.description',
+        abstract: 'sheets-formula.functionList.ISEVEN.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.ISEVEN.functionParameter.value.name',
-                detail: 'formula.functionList.ISEVEN.functionParameter.value.detail',
+                name: 'sheets-formula.functionList.ISEVEN.functionParameter.value.name',
+                detail: 'sheets-formula.functionList.ISEVEN.functionParameter.value.detail',
                 example: 'A1:A20',
                 require: 1,
                 repeat: 0,
@@ -213,12 +213,12 @@ export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_INFORMATION.ISFORMULA,
         functionType: FunctionType.Information,
-        description: 'formula.functionList.ISFORMULA.description',
-        abstract: 'formula.functionList.ISFORMULA.abstract',
+        description: 'sheets-formula.functionList.ISFORMULA.description',
+        abstract: 'sheets-formula.functionList.ISFORMULA.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.ISFORMULA.functionParameter.reference.name',
-                detail: 'formula.functionList.ISFORMULA.functionParameter.reference.detail',
+                name: 'sheets-formula.functionList.ISFORMULA.functionParameter.reference.name',
+                detail: 'sheets-formula.functionList.ISFORMULA.functionParameter.reference.detail',
                 example: 'A1',
                 require: 1,
                 repeat: 0,
@@ -228,12 +228,12 @@ export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_INFORMATION.ISLOGICAL,
         functionType: FunctionType.Information,
-        description: 'formula.functionList.ISLOGICAL.description',
-        abstract: 'formula.functionList.ISLOGICAL.abstract',
+        description: 'sheets-formula.functionList.ISLOGICAL.description',
+        abstract: 'sheets-formula.functionList.ISLOGICAL.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.ISLOGICAL.functionParameter.value.name',
-                detail: 'formula.functionList.ISLOGICAL.functionParameter.value.detail',
+                name: 'sheets-formula.functionList.ISLOGICAL.functionParameter.value.name',
+                detail: 'sheets-formula.functionList.ISLOGICAL.functionParameter.value.detail',
                 example: 'A1',
                 require: 1,
                 repeat: 0,
@@ -243,12 +243,12 @@ export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_INFORMATION.ISNA,
         functionType: FunctionType.Information,
-        description: 'formula.functionList.ISNA.description',
-        abstract: 'formula.functionList.ISNA.abstract',
+        description: 'sheets-formula.functionList.ISNA.description',
+        abstract: 'sheets-formula.functionList.ISNA.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.ISNA.functionParameter.value.name',
-                detail: 'formula.functionList.ISNA.functionParameter.value.detail',
+                name: 'sheets-formula.functionList.ISNA.functionParameter.value.name',
+                detail: 'sheets-formula.functionList.ISNA.functionParameter.value.detail',
                 example: 'A1',
                 require: 1,
                 repeat: 0,
@@ -258,12 +258,12 @@ export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_INFORMATION.ISNONTEXT,
         functionType: FunctionType.Information,
-        description: 'formula.functionList.ISNONTEXT.description',
-        abstract: 'formula.functionList.ISNONTEXT.abstract',
+        description: 'sheets-formula.functionList.ISNONTEXT.description',
+        abstract: 'sheets-formula.functionList.ISNONTEXT.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.ISNONTEXT.functionParameter.value.name',
-                detail: 'formula.functionList.ISNONTEXT.functionParameter.value.detail',
+                name: 'sheets-formula.functionList.ISNONTEXT.functionParameter.value.name',
+                detail: 'sheets-formula.functionList.ISNONTEXT.functionParameter.value.detail',
                 example: 'A1',
                 require: 1,
                 repeat: 0,
@@ -273,12 +273,12 @@ export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_INFORMATION.ISNUMBER,
         functionType: FunctionType.Information,
-        description: 'formula.functionList.ISNUMBER.description',
-        abstract: 'formula.functionList.ISNUMBER.abstract',
+        description: 'sheets-formula.functionList.ISNUMBER.description',
+        abstract: 'sheets-formula.functionList.ISNUMBER.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.ISNUMBER.functionParameter.value.name',
-                detail: 'formula.functionList.ISNUMBER.functionParameter.value.detail',
+                name: 'sheets-formula.functionList.ISNUMBER.functionParameter.value.name',
+                detail: 'sheets-formula.functionList.ISNUMBER.functionParameter.value.detail',
                 example: 'A1',
                 require: 1,
                 repeat: 0,
@@ -288,12 +288,12 @@ export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_INFORMATION.ISODD,
         functionType: FunctionType.Information,
-        description: 'formula.functionList.ISODD.description',
-        abstract: 'formula.functionList.ISODD.abstract',
+        description: 'sheets-formula.functionList.ISODD.description',
+        abstract: 'sheets-formula.functionList.ISODD.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.ISODD.functionParameter.value.name',
-                detail: 'formula.functionList.ISODD.functionParameter.value.detail',
+                name: 'sheets-formula.functionList.ISODD.functionParameter.value.name',
+                detail: 'sheets-formula.functionList.ISODD.functionParameter.value.detail',
                 example: 'A1:A20',
                 require: 1,
                 repeat: 0,
@@ -303,19 +303,19 @@ export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_INFORMATION.ISOMITTED,
         functionType: FunctionType.Information,
-        description: 'formula.functionList.ISOMITTED.description',
-        abstract: 'formula.functionList.ISOMITTED.abstract',
+        description: 'sheets-formula.functionList.ISOMITTED.description',
+        abstract: 'sheets-formula.functionList.ISOMITTED.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.ISOMITTED.functionParameter.number1.name',
-                detail: 'formula.functionList.ISOMITTED.functionParameter.number1.detail',
+                name: 'sheets-formula.functionList.ISOMITTED.functionParameter.number1.name',
+                detail: 'sheets-formula.functionList.ISOMITTED.functionParameter.number1.detail',
                 example: 'A1:A20',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'formula.functionList.ISOMITTED.functionParameter.number2.name',
-                detail: 'formula.functionList.ISOMITTED.functionParameter.number2.detail',
+                name: 'sheets-formula.functionList.ISOMITTED.functionParameter.number2.name',
+                detail: 'sheets-formula.functionList.ISOMITTED.functionParameter.number2.detail',
                 example: 'A1:A20',
                 require: 1,
                 repeat: 0,
@@ -325,12 +325,12 @@ export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_INFORMATION.ISREF,
         functionType: FunctionType.Information,
-        description: 'formula.functionList.ISREF.description',
-        abstract: 'formula.functionList.ISREF.abstract',
+        description: 'sheets-formula.functionList.ISREF.description',
+        abstract: 'sheets-formula.functionList.ISREF.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.ISREF.functionParameter.value.name',
-                detail: 'formula.functionList.ISREF.functionParameter.value.detail',
+                name: 'sheets-formula.functionList.ISREF.functionParameter.value.name',
+                detail: 'sheets-formula.functionList.ISREF.functionParameter.value.detail',
                 example: 'A1',
                 require: 1,
                 repeat: 0,
@@ -340,12 +340,12 @@ export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_INFORMATION.ISTEXT,
         functionType: FunctionType.Information,
-        description: 'formula.functionList.ISTEXT.description',
-        abstract: 'formula.functionList.ISTEXT.abstract',
+        description: 'sheets-formula.functionList.ISTEXT.description',
+        abstract: 'sheets-formula.functionList.ISTEXT.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.ISTEXT.functionParameter.value.name',
-                detail: 'formula.functionList.ISTEXT.functionParameter.value.detail',
+                name: 'sheets-formula.functionList.ISTEXT.functionParameter.value.name',
+                detail: 'sheets-formula.functionList.ISTEXT.functionParameter.value.detail',
                 example: 'A1',
                 require: 1,
                 repeat: 0,
@@ -355,12 +355,12 @@ export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_INFORMATION.ISURL,
         functionType: FunctionType.Information,
-        description: 'formula.functionList.ISURL.description',
-        abstract: 'formula.functionList.ISURL.abstract',
+        description: 'sheets-formula.functionList.ISURL.description',
+        abstract: 'sheets-formula.functionList.ISURL.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.ISURL.functionParameter.value.name',
-                detail: 'formula.functionList.ISURL.functionParameter.value.detail',
+                name: 'sheets-formula.functionList.ISURL.functionParameter.value.name',
+                detail: 'sheets-formula.functionList.ISURL.functionParameter.value.detail',
                 example: '"univer.ai"',
                 require: 1,
                 repeat: 0,
@@ -370,12 +370,12 @@ export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_INFORMATION.N,
         functionType: FunctionType.Information,
-        description: 'formula.functionList.N.description',
-        abstract: 'formula.functionList.N.abstract',
+        description: 'sheets-formula.functionList.N.description',
+        abstract: 'sheets-formula.functionList.N.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.N.functionParameter.value.name',
-                detail: 'formula.functionList.N.functionParameter.value.detail',
+                name: 'sheets-formula.functionList.N.functionParameter.value.name',
+                detail: 'sheets-formula.functionList.N.functionParameter.value.detail',
                 example: '7',
                 require: 1,
                 repeat: 0,
@@ -385,20 +385,20 @@ export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_INFORMATION.NA,
         functionType: FunctionType.Information,
-        description: 'formula.functionList.NA.description',
-        abstract: 'formula.functionList.NA.abstract',
+        description: 'sheets-formula.functionList.NA.description',
+        abstract: 'sheets-formula.functionList.NA.abstract',
         functionParameter: [
         ],
     },
     {
         functionName: FUNCTION_NAMES_INFORMATION.SHEET,
         functionType: FunctionType.Information,
-        description: 'formula.functionList.SHEET.description',
-        abstract: 'formula.functionList.SHEET.abstract',
+        description: 'sheets-formula.functionList.SHEET.description',
+        abstract: 'sheets-formula.functionList.SHEET.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.SHEET.functionParameter.value.name',
-                detail: 'formula.functionList.SHEET.functionParameter.value.detail',
+                name: 'sheets-formula.functionList.SHEET.functionParameter.value.name',
+                detail: 'sheets-formula.functionList.SHEET.functionParameter.value.detail',
                 example: 'A1',
                 require: 1,
                 repeat: 0,
@@ -408,20 +408,20 @@ export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
     {
         functionName: FUNCTION_NAMES_INFORMATION.SHEETS,
         functionType: FunctionType.Information,
-        description: 'formula.functionList.SHEETS.description',
-        abstract: 'formula.functionList.SHEETS.abstract',
+        description: 'sheets-formula.functionList.SHEETS.description',
+        abstract: 'sheets-formula.functionList.SHEETS.abstract',
         functionParameter: [
         ],
     },
     {
         functionName: FUNCTION_NAMES_INFORMATION.TYPE,
         functionType: FunctionType.Information,
-        description: 'formula.functionList.TYPE.description',
-        abstract: 'formula.functionList.TYPE.abstract',
+        description: 'sheets-formula.functionList.TYPE.description',
+        abstract: 'sheets-formula.functionList.TYPE.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.TYPE.functionParameter.value.name',
-                detail: 'formula.functionList.TYPE.functionParameter.value.detail',
+                name: 'sheets-formula.functionList.TYPE.functionParameter.value.name',
+                detail: 'sheets-formula.functionList.TYPE.functionParameter.value.detail',
                 example: 'A2',
                 require: 1,
                 repeat: 0,

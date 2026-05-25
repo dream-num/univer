@@ -72,7 +72,7 @@ export const FontFamilyItem = ({ id, value }: { id: string; value: string }) => 
                         {localeService.t(font.label)}
 
                         {!fontService.isFontSupported(font.value) && (
-                            <Tooltip title={localeService.t('fontFamily.not-supported')}>
+                            <Tooltip title={localeService.t('ui.fontFamily.not-supported')}>
                                 <InfoIcon
                                     className={`
                                       univer-text-gray-300

@@ -17,68 +17,59 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    'image-popup': {
-        replace: 'Thay thế',
-        delete: 'Xóa',
-        edit: 'Chỉnh sửa',
-        crop: 'Cắt',
-        reset: 'Đặt lại kích thước',
+    'drawing-ui': {
+        'image-cropper': {
+            error: 'Không thể cắt phần tử không phải hình ảnh',
+        },
+        'image-panel': {
+            arrange: {
+                title: 'Sắp xếp',
+                forward: 'Di chuyển lên một lớp',
+                backward: 'Di chuyển xuống một lớp',
+                front: 'Đưa lên trên cùng',
+                back: 'Đưa xuống dưới cùng',
+            },
+            transform: {
+                title: 'Biến đổi',
+                rotate: 'Xoay (°)',
+                x: 'X (px)',
+                y: 'Y (px)',
+                width: 'Chiều rộng (px)',
+                height: 'Chiều cao (px)',
+                lock: 'Khóa tỷ lệ (%)',
+            },
+            crop: {
+                title: 'Cắt',
+                start: 'Bắt đầu cắt',
+                mode: 'Cắt tự do tỷ lệ',
+            },
+            group: {
+                title: 'Nhóm',
+                group: 'Nhóm',
+                unGroup: 'Hủy nhóm',
+            },
+            align: {
+                title: 'Căn chỉnh',
+                default: 'Chọn cách căn chỉnh',
+                left: 'Căn trái',
+                center: 'Căn giữa theo chiều ngang',
+                right: 'Căn phải',
+                top: 'Căn trên',
+                middle: 'Căn giữa theo chiều dọc',
+                bottom: 'Căn dưới',
+                horizon: 'Phân phối theo chiều ngang',
+                vertical: 'Phân phối theo chiều dọc',
+            },
+            null: 'Không có đối tượng nào được chọn',
+        },
+        shortcut: {
+            'drawing-move-down': 'Move Drawing down',
+            'drawing-move-up': 'Move Drawing up',
+            'drawing-move-left': 'Move Drawing left',
+            'drawing-move-right': 'Move Drawing right',
+            'drawing-delete': 'Delete Drawing',
+        },
     },
-    'image-cropper': {
-        error: 'Không thể cắt phần tử không phải hình ảnh',
-    },
-    'image-panel': {
-        arrange: {
-            title: 'Sắp xếp',
-            forward: 'Di chuyển lên một lớp',
-            backward: 'Di chuyển xuống một lớp',
-            front: 'Đưa lên trên cùng',
-            back: 'Đưa xuống dưới cùng',
-        },
-        transform: {
-            title: 'Biến đổi',
-            rotate: 'Xoay (°)',
-            x: 'X (px)',
-            y: 'Y (px)',
-            width: 'Chiều rộng (px)',
-            height: 'Chiều cao (px)',
-            lock: 'Khóa tỷ lệ (%)',
-        },
-        crop: {
-            title: 'Cắt',
-            start: 'Bắt đầu cắt',
-            mode: 'Cắt tự do tỷ lệ',
-            shape: 'Cắt theo hình dạng',
-        },
-        group: {
-            title: 'Nhóm',
-            group: 'Nhóm',
-            reGroup: 'Nhóm lại',
-            unGroup: 'Hủy nhóm',
-        },
-        align: {
-            title: 'Căn chỉnh',
-            default: 'Chọn cách căn chỉnh',
-            left: 'Căn trái',
-            center: 'Căn giữa theo chiều ngang',
-            right: 'Căn phải',
-            top: 'Căn trên',
-            middle: 'Căn giữa theo chiều dọc',
-            bottom: 'Căn dưới',
-            horizon: 'Phân phối theo chiều ngang',
-            vertical: 'Phân phối theo chiều dọc',
-        },
-        null: 'Không có đối tượng nào được chọn',
-    },
-    'drawing-view': 'Drawing',
-    shortcut: {
-        'drawing-move-down': 'Move Drawing down',
-        'drawing-move-up': 'Move Drawing up',
-        'drawing-move-left': 'Move Drawing left',
-        'drawing-move-right': 'Move Drawing right',
-        'drawing-delete': 'Delete Drawing',
-    },
-}
-;
+};
 
 export default locale;

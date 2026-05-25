@@ -34,8 +34,8 @@ export function sheetTableToolbarInsertMenuFactory(accessor: IAccessor): IMenuIt
         id: OpenTableSelectorOperation.id,
         type: MenuItemType.BUTTON,
         icon: TABLE_TOOLBAR_BUTTON,
-        tooltip: 'sheets-table.title',
-        title: 'sheets-table.title',
+        tooltip: 'sheets-table-ui.title',
+        title: 'sheets-table-ui.title',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentRangeDisable$(accessor, {}, true),
     };
@@ -46,7 +46,7 @@ export function SheetTableInsertContextMenuFactory(accessor: IAccessor): IMenuSe
         id: SHEET_TABLE_CONTEXT_INSERT_MENU_ID,
         type: MenuItemType.SUBITEMS,
         icon: 'InsertDoubleIcon',
-        title: 'sheets-table.insert.main',
+        title: 'sheets-table-ui.insert.main',
         hidden$: getSheetTableRowColOperationHidden$(accessor),
     };
 }
@@ -56,7 +56,7 @@ export function SheetTableRemoveContextMenuFactory(accessor: IAccessor): IMenuSe
         id: SHEET_TABLE_CONTEXT_REMOVE_MENU_ID,
         type: MenuItemType.SUBITEMS,
         icon: 'ReduceDoubleIcon',
-        title: 'sheets-table.remove.main',
+        title: 'sheets-table-ui.remove.main',
         hidden$: getSheetTableRowColOperationHidden$(accessor),
     };
 }
@@ -65,7 +65,7 @@ export function SheetTableInsertRowMenuFactory(accessor: IAccessor) {
     return {
         id: SheetTableInsertRowCommand.id,
         type: MenuItemType.BUTTON,
-        title: 'sheets-table.insert.row',
+        title: 'sheets-table-ui.insert.row',
         hidden$: getSheetTableHeaderOperationHidden$(accessor),
     };
 }
@@ -73,7 +73,7 @@ export function SheetTableInsertRowMenuFactory(accessor: IAccessor) {
 export function SheetTableInsertColMenuFactory(accessor: IAccessor) {
     return {
         id: SheetTableInsertColCommand.id,
-        title: 'sheets-table.insert.col',
+        title: 'sheets-table-ui.insert.col',
         type: MenuItemType.BUTTON,
     };
 }
@@ -82,7 +82,7 @@ export function SheetTableRemoveRowMenuFactory(accessor: IAccessor) {
     return {
         id: SheetTableRemoveRowCommand.id,
         type: MenuItemType.BUTTON,
-        title: 'sheets-table.remove.row',
+        title: 'sheets-table-ui.remove.row',
         hidden$: getSheetTableHeaderOperationHidden$(accessor),
     };
 }
@@ -90,7 +90,7 @@ export function SheetTableRemoveRowMenuFactory(accessor: IAccessor) {
 export function SheetTableRemoveColMenuFactory(accessor: IAccessor) {
     return {
         id: SheetTableRemoveColCommand.id,
-        title: 'sheets-table.remove.col',
+        title: 'sheets-table-ui.remove.col',
         type: MenuItemType.BUTTON,
     };
 }

@@ -66,7 +66,7 @@ export function ImageMenuFactory(accessor: IAccessor): IMenuItem {
         id: DOCS_IMAGE_MENU_ID,
         type: MenuItemType.SUBITEMS,
         icon: 'AddImageIcon',
-        tooltip: 'docImage.title',
+        tooltip: 'docs-drawing-ui.title',
         disabled$: getDisableWhenSelectionInTableObservable(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC, undefined, DOCS_ZEN_EDITOR_UNIT_ID_KEY),
     };
@@ -75,7 +75,7 @@ export function ImageMenuFactory(accessor: IAccessor): IMenuItem {
 export function UploadFloatImageMenuFactory(_accessor: IAccessor): IMenuItem {
     return {
         id: IMAGE_MENU_UPLOAD_FLOAT_ID,
-        title: 'docImage.upload.float',
+        title: 'docs-drawing-ui.upload.float',
         type: MenuItemType.BUTTON,
         hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_DOC, undefined, DOCS_ZEN_EDITOR_UNIT_ID_KEY),
     };

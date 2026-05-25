@@ -22,7 +22,7 @@ import { KeyCode, MetaKeys } from '@univerjs/ui';
 export const SmartToggleFilterShortcut: IShortcutItem = {
     id: SmartToggleSheetsFilterCommand.id,
     binding: KeyCode.L | MetaKeys.CTRL_COMMAND | MetaKeys.SHIFT,
-    description: 'sheets-filter.shortcut.smart-toggle-filter',
+    description: 'sheets-filter-ui.shortcut.smart-toggle-filter',
     preconditions: whenSheetEditorFocused,
     group: '4_sheet-edit',
 };

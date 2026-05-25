@@ -17,7 +17,7 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    'sheets-sort': {
+    'sheets-sort-ui': {
         general: {
             sort: 'Triediť',
             'sort-asc': 'Vzostupne',
@@ -43,6 +43,9 @@ const locale: typeof enUS = {
             'add-condition': 'Pridať podmienku',
             cancel: 'Zrušiť',
             confirm: 'Potvrdiť',
+        },
+        info: {
+            tooltip: 'Bublinový tip',
         },
     },
 };

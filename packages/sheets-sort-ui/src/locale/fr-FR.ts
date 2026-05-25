@@ -17,7 +17,7 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    'sheets-sort': {
+    'sheets-sort-ui': {
         general: {
             sort: 'Trier',
             'sort-asc': 'Croissant',
@@ -43,6 +43,9 @@ const locale: typeof enUS = {
             'add-condition': 'Ajouter une condition',
             cancel: 'Annuler',
             confirm: 'Confirmer',
+        },
+        info: {
+            tooltip: 'Info-bulle',
         },
     },
 };

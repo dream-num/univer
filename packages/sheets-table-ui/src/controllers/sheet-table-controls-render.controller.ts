@@ -26,8 +26,8 @@ import { IDialogService, ISidebarService } from '@univerjs/ui';
 import { filter, merge } from 'rxjs';
 import { openRangeSelector } from '../commands/operations/open-table-selector.operation';
 import { SHEET_TABLE_RENAME_DIALOG, SHEET_TABLE_RENAME_DIALOG_ID, SHEET_TABLE_THEME_PANEL, SHEET_TABLE_THEME_PANEL_ID } from '../const';
-import { SheetTableControlsShape } from '../views/widgets/table-controls.shape';
 import { TABLE_CONTROL_INSERT_BUTTON_SIZE, TABLE_CONTROL_TOP_GAP_SIZE } from '../views/widgets/table-controls-util';
+import { SheetTableControlsShape } from '../views/widgets/table-controls.shape';
 import { SheetTableThemeUIController } from './sheet-table-theme-ui.controller';
 
 const TABLE_CONTROLS_LAYER_INDEX = 5002;
@@ -144,10 +144,10 @@ export class SheetTableControlsRenderController extends Disposable implements IR
 
         this._syncTopTableGap(skeleton);
         this._shape.setMenuLabels({
-            rename: this._localeService.t('sheets-table.rename'),
-            'update-range': this._localeService.t('sheets-table.updateRange'),
-            'set-theme': this._localeService.t('sheets-table.setTheme'),
-            delete: this._localeService.t('sheets-table.removeTable'),
+            rename: this._localeService.t('sheets-table-ui.rename'),
+            'update-range': this._localeService.t('sheets-table-ui.updateRange'),
+            'set-theme': this._localeService.t('sheets-table-ui.setTheme'),
+            delete: this._localeService.t('sheets-table-ui.removeTable'),
         });
 
         const unitId = this._context.unit.getUnitId();
@@ -288,7 +288,7 @@ export class SheetTableControlsRenderController extends Disposable implements IR
     private _openRenameDialog(unitId: string, tableId: string): void {
         this._dialogService.open({
             id: SHEET_TABLE_RENAME_DIALOG_ID,
-            title: { title: this._localeService.t('sheets-table.rename') },
+            title: { title: this._localeService.t('sheets-table-ui.rename') },
             draggable: true,
             destroyOnClose: true,
             mask: true,
@@ -335,7 +335,7 @@ export class SheetTableControlsRenderController extends Disposable implements IR
 
         this._sidebarService.open({
             id: SHEET_TABLE_THEME_PANEL_ID,
-            header: { title: this._localeService.t('sheets-table.tableStyle') },
+            header: { title: this._localeService.t('sheets-table-ui.tableStyle') },
             children: {
                 label: SHEET_TABLE_THEME_PANEL,
                 oldConfig: table.getTableConfig(),

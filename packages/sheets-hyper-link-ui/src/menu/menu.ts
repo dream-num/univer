@@ -103,7 +103,7 @@ const getLinkDisable$ = (accessor: IAccessor) => {
 const linkMenu = {
     commandId: InsertHyperLinkOperation.id,
     type: MenuItemType.BUTTON,
-    title: 'hyperLink.menu.add',
+    title: 'sheets-hyper-link-ui.menu.add',
     icon: 'LinkIcon',
 };
 
@@ -129,7 +129,7 @@ export const zenEditorInsertLinkMenuFactory = (accessor: IAccessor) => {
 };
 
 const linkToolbarMenu = {
-    tooltip: 'hyperLink.form.addTitle',
+    tooltip: 'sheets-hyper-link-ui.form.addTitle',
     commandId: InsertHyperLinkToolbarOperation.id,
     type: MenuItemType.BUTTON,
     icon: 'LinkIcon',

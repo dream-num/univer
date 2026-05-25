@@ -17,9 +17,9 @@
 import type { CellValue, DataValidationOperator, IDataValidationRule, IDataValidationRuleBase, ISheetDataValidationRule, LocaleService, Nullable } from '@univerjs/core';
 import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
 import { DataValidationType, isFormulaString, Tools, WrapStrategy } from '@univerjs/core';
-import { BaseDataValidator } from '@univerjs/data-validation';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { getFormulaResult, isLegalFormulaResult } from '../utils/formula';
+import { BaseSheetValidator } from './base-sheet-validator';
 
 export const CHECKBOX_FORMULA_1 = 1;
 export const CHECKBOX_FORMULA_2 = 0;
@@ -31,11 +31,11 @@ interface ICheckboxFormulaResult extends IFormulaResult {
 
 function getFailMessage(formula: string | undefined, localeService: LocaleService) {
     if (Tools.isBlank(formula)) {
-        return localeService.t('dataValidation.validFail.value');
+        return localeService.t('sheets-data-validation.validFail.value');
     }
 
     if (isFormulaString(formula)) {
-        return localeService.t('dataValidation.validFail.primitive');
+        return localeService.t('sheets-data-validation.validFail.primitive');
     }
 
     return '';
@@ -48,9 +48,9 @@ export const transformCheckboxValue = (value: Nullable<CellValue>) =>
             ? '0'
             : value;
 
-export class CheckboxValidator extends BaseDataValidator {
+export class CheckboxValidator extends BaseSheetValidator {
     override id: string = DataValidationType.CHECKBOX;
-    override title: string = 'dataValidation.checkbox.title';
+    override title: string = 'sheets-data-validation.checkbox.title';
     override operators: DataValidationOperator[] = [];
     override scopes: string | string[] = ['sheet'];
     order = 41;
@@ -81,8 +81,8 @@ export class CheckboxValidator extends BaseDataValidator {
         if (isEqual) {
             return {
                 success: false,
-                formula1: this.localeService.t('dataValidation.validFail.checkboxEqual'),
-                formula2: this.localeService.t('dataValidation.validFail.checkboxEqual'),
+                formula1: this.localeService.t('sheets-data-validation.validFail.checkboxEqual'),
+                formula2: this.localeService.t('sheets-data-validation.validFail.checkboxEqual'),
             };
         }
 
@@ -151,7 +151,7 @@ export class CheckboxValidator extends BaseDataValidator {
     }
 
     override generateRuleErrorMessage(rule: IDataValidationRuleBase): string {
-        return this.localeService.t('dataValidation.checkbox.error');
+        return this.localeService.t('sheets-data-validation.checkbox.error');
     }
 
     override generateRuleName(rule: IDataValidationRuleBase): string {

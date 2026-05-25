@@ -64,8 +64,8 @@ export function InsertCommonFunctionMenuItemFactory(accessor: IAccessor): IMenuI
     return {
         id: `${InsertFunctionOperation.id}.common`,
         commandId: InsertFunctionOperation.id,
-        title: 'formula.insert.common',
-        tooltip: 'formula.insert.tooltip',
+        title: 'sheets-formula-ui.insert.common',
+        tooltip: 'sheets-formula-ui.insert.tooltip',
         icon: 'FunctionIcon',
         type: MenuItemType.SELECTOR,
         selections,
@@ -93,8 +93,8 @@ function createInsertFunctionCategoryMenuItemFactory(functionType: FunctionType,
         return {
             id: `${InsertFunctionOperation.id}.${categoryKey}`,
             commandId: InsertFunctionOperation.id,
-            title: `formula.functionType.${categoryKey}`,
-            tooltip: 'formula.insert.tooltip',
+            title: `sheets-formula-ui.functionType.${categoryKey}`,
+            tooltip: 'sheets-formula-ui.insert.tooltip',
             icon,
             type: MenuItemType.SELECTOR,
             selections,
@@ -118,8 +118,8 @@ export const InsertDatabaseFunctionMenuItemFactory = createInsertFunctionCategor
 export function AllFunctionsMenuItemFactory(accessor: IAccessor): IMenuItem {
     return {
         id: MoreFunctionsOperation.id,
-        title: 'formula.moreFunctions.allFunctions',
-        tooltip: 'formula.insert.tooltip',
+        title: 'sheets-formula-ui.moreFunctions.allFunctions',
+        tooltip: 'sheets-formula-ui.insert.tooltip',
         type: MenuItemType.BUTTON,
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentRangeDisable$(accessor, {
@@ -135,7 +135,7 @@ export function CopyFormulaOnlyMenuItemFactory(accessor: IAccessor): IMenuItem {
     return {
         id: SheetCopyFormulaOnlyCommand.id,
         type: MenuItemType.BUTTON,
-        title: 'formula.operation.copyFormulaOnly',
+        title: 'sheets-formula-ui.operation.copyFormulaOnly',
         disabled$: getCurrentRangeDisable$(accessor, {
             workbookTypes: [WorkbookCopyPermission],
             worksheetTypes: [WorksheetCopyPermission],
@@ -150,7 +150,7 @@ export function PasteFormulaMenuItemFactory(accessor: IAccessor): IMenuItem {
     return {
         id: SheetOnlyPasteFormulaCommand.id,
         type: MenuItemType.BUTTON,
-        title: 'formula.operation.pasteFormula',
+        title: 'sheets-formula-ui.operation.pasteFormula',
         disabled$: menuClipboardDisabledObservable(accessor).pipe(
             combineLatestWith(getCurrentRangeDisable$(accessor, {
                 workbookTypes: [WorkbookEditablePermission],

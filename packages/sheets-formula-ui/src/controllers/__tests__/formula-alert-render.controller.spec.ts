@@ -58,8 +58,8 @@ describe('FormulaAlertRenderController', () => {
 
         expect(showAlert).toHaveBeenCalledWith(expect.objectContaining({
             key: 'SHEET_FORMULA_ALERT',
-            title: 'formula.error.title',
-            message: 'formula.error.divByZero',
+            title: 'sheets-formula-ui.error.title',
+            message: 'sheets-formula-ui.error.divByZero',
             location,
         }));
 

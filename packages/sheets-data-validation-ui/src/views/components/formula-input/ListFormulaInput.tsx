@@ -317,7 +317,7 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                 formula2,
             });
             setFormulaStr('=');
-            setLocalError(localeService.t('dataValidation.validFail.formulaError'));
+            setLocalError(localeService.t('sheets-data-validation-ui.validFail.formulaError'));
         }
     });
 
@@ -339,7 +339,7 @@ export function ListFormulaInput(props: IFormulaInputProps) {
 
     return (
         <>
-            <FormLayout label={localeService.t('dataValidation.list.options')}>
+            <FormLayout label={localeService.t('sheets-data-validation-ui.list.options')}>
                 <RadioGroup
                     value={isFormulaStr}
                     onChange={(v) => {
@@ -353,8 +353,8 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                         }
                     }}
                 >
-                    <Radio value="0">{localeService.t('dataValidation.list.customOptions')}</Radio>
-                    <Radio value="1">{localeService.t('dataValidation.list.refOptions')}</Radio>
+                    <Radio value="0">{localeService.t('sheets-data-validation-ui.list.customOptions')}</Radio>
+                    <Radio value="1">{localeService.t('sheets-data-validation-ui.list.refOptions')}</Radio>
                 </RadioGroup>
             </FormLayout>
             {isFormulaStr === '1'
@@ -429,7 +429,7 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                                 onClick={handleAdd}
                             >
                                 <IncreaseIcon className="univer-mr-1" />
-                                {localeService.t('dataValidation.list.add')}
+                                {localeService.t('sheets-data-validation-ui.list.add')}
                             </a>
                         </div>
                     </FormLayout>

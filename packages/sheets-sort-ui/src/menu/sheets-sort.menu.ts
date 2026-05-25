@@ -36,7 +36,7 @@ export function sortRangeMenuFactory(accessor: IAccessor): IMenuItem {
         id: SHEETS_SORT_MENU_ID,
         type: MenuItemType.SUBITEMS,
         icon: SHEETS_SORT_ASC_ICON,
-        tooltip: 'sheets-sort.general.sort',
+        tooltip: 'sheets-sort-ui.general.sort',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetSortPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
     };
@@ -46,7 +46,7 @@ export function sortRangeAscMenuFactory(_accessor: IAccessor): IMenuItem {
     return {
         id: SortRangeAscCommand.id,
         icon: SHEETS_SORT_ASC_ICON,
-        title: 'sheets-sort.general.sort-asc-cur',
+        title: 'sheets-sort-ui.general.sort-asc-cur',
         type: MenuItemType.BUTTON,
         hidden$: getCurrentExclusiveRangeInterest$(_accessor),
     };
@@ -55,7 +55,7 @@ export function sortRangeAscMenuFactory(_accessor: IAccessor): IMenuItem {
 export function sortRangeAscExtMenuFactory(_accessor: IAccessor): IMenuItem {
     return {
         id: SortRangeAscExtCommand.id,
-        title: 'sheets-sort.general.sort-asc-ext',
+        title: 'sheets-sort-ui.general.sort-asc-ext',
         icon: SHEETS_SORT_ASC_EXT_ICON,
         type: MenuItemType.BUTTON,
     };
@@ -64,7 +64,7 @@ export function sortRangeAscExtMenuFactory(_accessor: IAccessor): IMenuItem {
 export function sortRangeDescMenuFactory(_accessor: IAccessor): IMenuItem {
     return {
         id: SortRangeDescCommand.id,
-        title: 'sheets-sort.general.sort-desc-cur',
+        title: 'sheets-sort-ui.general.sort-desc-cur',
         icon: SHEETS_SORT_DESC_ICON,
         type: MenuItemType.BUTTON,
     };
@@ -73,7 +73,7 @@ export function sortRangeDescMenuFactory(_accessor: IAccessor): IMenuItem {
 export function sortRangeDescExtMenuFactory(_accessor: IAccessor): IMenuItem {
     return {
         id: SortRangeDescExtCommand.id,
-        title: 'sheets-sort.general.sort-desc-ext',
+        title: 'sheets-sort-ui.general.sort-desc-ext',
         icon: SHEETS_SORT_DESC_EXT_ICON,
         type: MenuItemType.BUTTON,
     };
@@ -82,7 +82,7 @@ export function sortRangeDescExtMenuFactory(_accessor: IAccessor): IMenuItem {
 export function sortRangeCustomMenuFactory(_accessor: IAccessor): IMenuItem {
     return {
         id: SortRangeCustomCommand.id,
-        title: 'sheets-sort.general.sort-custom',
+        title: 'sheets-sort-ui.general.sort-custom',
         type: MenuItemType.BUTTON,
         icon: SHEETS_SORT_CUSTOM_ICON,
     };
@@ -91,7 +91,7 @@ export function sortRangeCustomMenuFactory(_accessor: IAccessor): IMenuItem {
 export function sortRangeCtxMenuFactory(accessor: IAccessor): IMenuItem {
     return {
         id: SHEETS_SORT_CTX_MENU_ID,
-        title: 'sheets-sort.general.sort',
+        title: 'sheets-sort-ui.general.sort',
         type: MenuItemType.SUBITEMS,
         icon: SHEETS_SORT_ASC_ICON,
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
@@ -106,7 +106,7 @@ export function sortRangeCtxMenuFactory(accessor: IAccessor): IMenuItem {
 export function sortRangeAscCtxMenuFactory(_accessor: IAccessor): IMenuItem {
     return {
         id: SortRangeAscInCtxMenuCommand.id,
-        title: 'sheets-sort.general.sort-asc-cur',
+        title: 'sheets-sort-ui.general.sort-asc-cur',
         type: MenuItemType.BUTTON,
         icon: SHEETS_SORT_ASC_ICON,
         disabled$: getCurrentRangeDisable$(_accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetSortPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
@@ -116,7 +116,7 @@ export function sortRangeAscCtxMenuFactory(_accessor: IAccessor): IMenuItem {
 export function sortRangeAscExtCtxMenuFactory(_accessor: IAccessor): IMenuItem {
     return {
         id: SortRangeAscExtInCtxMenuCommand.id,
-        title: 'sheets-sort.general.sort-asc-ext',
+        title: 'sheets-sort-ui.general.sort-asc-ext',
         type: MenuItemType.BUTTON,
         icon: SHEETS_SORT_ASC_EXT_ICON,
         disabled$: getCurrentRangeDisable$(_accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetSortPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
@@ -126,7 +126,7 @@ export function sortRangeAscExtCtxMenuFactory(_accessor: IAccessor): IMenuItem {
 export function sortRangeDescCtxMenuFactory(_accessor: IAccessor): IMenuItem {
     return {
         id: SortRangeDescInCtxMenuCommand.id,
-        title: 'sheets-sort.general.sort-desc-cur',
+        title: 'sheets-sort-ui.general.sort-desc-cur',
         type: MenuItemType.BUTTON,
         icon: SHEETS_SORT_DESC_ICON,
         disabled$: getCurrentRangeDisable$(_accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetSortPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
@@ -136,7 +136,7 @@ export function sortRangeDescCtxMenuFactory(_accessor: IAccessor): IMenuItem {
 export function sortRangeDescExtCtxMenuFactory(_accessor: IAccessor): IMenuItem {
     return {
         id: SortRangeDescExtInCtxMenuCommand.id,
-        title: 'sheets-sort.general.sort-desc-ext',
+        title: 'sheets-sort-ui.general.sort-desc-ext',
         type: MenuItemType.BUTTON,
         icon: SHEETS_SORT_DESC_EXT_ICON,
         disabled$: getCurrentRangeDisable$(_accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetSortPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
@@ -146,7 +146,7 @@ export function sortRangeDescExtCtxMenuFactory(_accessor: IAccessor): IMenuItem 
 export function sortRangeCustomCtxMenuFactory(_accessor: IAccessor): IMenuItem {
     return {
         id: SortRangeCustomInCtxMenuCommand.id,
-        title: 'sheets-sort.general.sort-custom',
+        title: 'sheets-sort-ui.general.sort-custom',
         type: MenuItemType.BUTTON,
         icon: SHEETS_SORT_CUSTOM_ICON,
         disabled$: getCurrentRangeDisable$(_accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetSortPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),

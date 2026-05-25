@@ -52,8 +52,8 @@ export function AddDocCommentMenuItemFactory(accessor: IAccessor): IMenuButtonIt
         id: StartAddCommentOperation.id,
         type: MenuItemType.BUTTON,
         icon: 'CommentIcon',
-        title: 'threadCommentUI.panel.addComment',
-        tooltip: 'threadCommentUI.panel.addComment',
+        title: 'docs-thread-comment-ui.panel.addComment',
+        tooltip: 'docs-thread-comment-ui.panel.addComment',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC, undefined, SHEET_EDITOR_UNITS),
         disabled$: new Observable(function (subscribe) {
             const textSelectionService = accessor.get(DocSelectionManagerService);
@@ -73,8 +73,8 @@ export function ToolbarDocCommentMenuItemFactory(accessor: IAccessor): IMenuButt
         id: ToggleCommentPanelOperation.id,
         type: MenuItemType.BUTTON,
         icon: 'CommentIcon',
-        title: 'threadCommentUI.panel.addComment',
-        tooltip: 'threadCommentUI.panel.addComment',
+        title: 'docs-thread-comment-ui.panel.addComment',
+        tooltip: 'docs-thread-comment-ui.panel.addComment',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }

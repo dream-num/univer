@@ -17,14 +17,11 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    'sheets-filter': {
+    'sheets-filter-ui': {
         toolbar: {
             'smart-toggle-filter-tooltip': '필터 토글',
             'clear-filter-criteria': '필터 조건 지우기',
             're-calc-filter-conditions': '필터 조건 재계산',
-        },
-        command: {
-            'not-valid-filter-range': '선택한 범위에 한 행만 있어 필터를 적용할 수 없습니다.',
         },
         shortcut: {
             'smart-toggle-filter': '필터 토글',
@@ -67,9 +64,6 @@ const locale: typeof enUS = {
             between: '범위 내',
             'not-between': '범위 밖',
             custom: '사용자 지정',
-        },
-        msg: {
-            'filter-header-forbidden': '필터 헤더 행은 이동할 수 없습니다.',
         },
         date: {
             1: '1월',

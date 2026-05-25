@@ -1,0 +1,160 @@
+/**
+ * Copyright 2023-present DreamNum Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
+    'sheets-data-validation': {
+        operators: {
+            between: '介於',
+            greaterThan: '大於',
+            greaterThanOrEqual: '大於或等於',
+            lessThan: '小於',
+            lessThanOrEqual: '小於或等於',
+            equal: '等於',
+            notEqual: '不等於',
+            notBetween: '未介於',
+            legal: '是合法類型',
+        },
+        ruleName: {
+            between: '介於 {FORMULA1} 和 {FORMULA2} 之間',
+            greaterThan: '大於 {FORMULA1}',
+            greaterThanOrEqual: '大於或等於 {FORMULA1}',
+            lessThan: '小於 {FORMULA1}',
+            lessThanOrEqual: '小於或等於 {FORMULA1}',
+            equal: '等於 {FORMULA1}',
+            notEqual: '不等於 {FORMULA1}',
+            notBetween: '在 {FORMULA1} 和 {FORMULA2} 範圍之外',
+            legal: '是一個合法的 {TYPE}',
+        },
+        errorMsg: {
+            between: '值必須介於 {FORMULA1} 和 {FORMULA2} 之間',
+            greaterThan: '值必須大於 {FORMULA1}',
+            greaterThanOrEqual: '值必須大於或等於 {FORMULA1}',
+            lessThan: '值必須小於 {FORMULA1}',
+            lessThanOrEqual: '值必須小於或等於 {FORMULA1}',
+            equal: '值必須等於 {FORMULA1}',
+            notEqual: '值必須不等於 {FORMULA1}',
+            notBetween: '值必須在 {FORMULA1} 和 {FORMULA2} 範圍之外',
+            legal: '值必須是一個合法的 {TYPE}',
+        },
+        date: {
+            operators: {
+                between: '介於',
+                greaterThan: '晚於',
+                greaterThanOrEqual: '晚於或等於',
+                lessThan: '早於',
+                lessThanOrEqual: '早於或等於',
+                equal: '等於',
+                notEqual: '不等於',
+                notBetween: '未介於',
+                legal: '是合法日期',
+            },
+            ruleName: {
+                between: '介於 {FORMULA1} 和 {FORMULA2} 之間',
+                greaterThan: '晚於 {FORMULA1}',
+                greaterThanOrEqual: '晚於或等於 {FORMULA1}',
+                lessThan: '早於 {FORMULA1}',
+                lessThanOrEqual: '早於或等於 {FORMULA1}',
+                equal: '等於 {FORMULA1}',
+                notEqual: '不等於 {FORMULA1}',
+                notBetween: '在 {FORMULA1} 和 {FORMULA2} 範圍之外',
+                legal: '是一個合法的日期',
+            },
+            errorMsg: {
+                between: '日期必須介於 {FORMULA1} 和 {FORMULA2} 之間',
+                greaterThan: '日期必須晚於 {FORMULA1}',
+                greaterThanOrEqual: '日期必須晚於或等於 {FORMULA1}',
+                lessThan: '日期必須早於 {FORMULA1}',
+                lessThanOrEqual: '早於或等於 {FORMULA1}',
+                equal: '日期必須等於 {FORMULA1}',
+                notEqual: '日期必須不等於 {FORMULA1}',
+                notBetween: '日期必須在 {FORMULA1} 和 {FORMULA2} 範圍之外',
+                legal: '值必須是一個合法的日期',
+            },
+            title: '日期',
+        },
+        textLength: {
+            errorMsg: {
+                between: '文字長度必須介於 {FORMULA1} 和 {FORMULA2} 之間',
+                greaterThan: '文字長度必須大於 {FORMULA1}',
+                greaterThanOrEqual: '文字長度必須大於或等於 {FORMULA1}',
+                lessThan: '文字長度必須小於 {FORMULA1}',
+                lessThanOrEqual: '文字長度必須小於或等於 {FORMULA1}',
+                equal: '文字長度必須等於 {FORMULA1}',
+                notEqual: '文字長度必須不等於 {FORMULA1}',
+                notBetween: '文字長度必須在 {FORMULA1} 和 {FORMULA2} 範圍之外',
+            },
+            title: '文字長度',
+        },
+        custom: {
+            ruleName: '自訂公式 {FORMULA1}',
+            title: '自訂公式',
+            validFail: '請輸入合法的公式',
+            error: '此儲存格的內容違反了驗證規則',
+        },
+        validFail: {
+            value: '請輸入一個合法值',
+            common: '請輸入數值或公式',
+            number: '請輸入合法的數字或公式',
+            formula: '請輸入合法的公式',
+            integer: '請輸入合法的整數或公式',
+            date: '請輸入合法的日期或公式',
+            list: '請輸入至少一個合法選項',
+            listInvalid: '清單來源必須是分隔清單或單列或欄的參考。 ',
+            checkboxEqual: '為勾選和未勾選的儲存格內容輸入不同的值。 ',
+            formulaError: '引用範圍內包含不可見的數據，請重新調整範圍',
+            listIntersects: '所選範圍不能和規則範圍相交',
+            primitive: '自訂勾選和未勾選值不允許使用公式。 ',
+        },
+        any: {
+            title: '任意值',
+            error: '此儲存格的內容違反了驗證規則',
+        },
+        list: {
+            title: '下拉選單',
+            name: '值必須是列表中的值',
+            error: '輸入必須在指定的範圍內',
+            emptyError: '請輸入一個值',
+            add: '新增選項',
+            dropdown: '單選',
+            options: '選項來源',
+            customOptions: '自訂',
+            refOptions: '引用資料',
+            formulaError: '列表來源必須是劃定分界後的資料列表,或是對單一列或欄的引用。',
+            edit: '編輯',
+        },
+        listMultiple: {
+            title: '下拉式選單-多選',
+            dropdown: '多選',
+        },
+        decimal: {
+            title: '數字',
+        },
+        whole: {
+            title: '整數',
+        },
+        checkbox: {
+            title: '複選框',
+            error: '此儲存格的內容違反了驗證規則',
+            tips: '在儲存格內使用自訂值',
+            checked: '選取值',
+            unchecked: '未選取值',
+        },
+    },
+};
+
+export default locale;

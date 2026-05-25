@@ -79,9 +79,9 @@ export function MobileContextMenu() {
     const sheetTitle = useMemo(() => {
         switch (menuType) {
             case ContextMenuPosition.ROW_HEADER:
-                return localeService.t('row');
+                return localeService.t('ui.row');
             case ContextMenuPosition.COL_HEADER:
-                return localeService.t('column');
+                return localeService.t('ui.column');
             default:
                 return '';
         }
@@ -95,7 +95,7 @@ export function MobileContextMenu() {
         <div dir={direction} className="univer-fixed univer-inset-0 univer-z-[1080] univer-flex univer-items-end">
             <button
                 type="button"
-                aria-label={localeService.t('rangeSelector.cancel')}
+                aria-label={localeService.t('ui.rangeSelector.cancel')}
                 className="univer-absolute univer-inset-0 univer-bg-[rgba(15,23,42,0.32)] univer-backdrop-blur-[2px]"
                 onClick={handleClose}
             />
@@ -126,7 +126,7 @@ export function MobileContextMenu() {
                         </div>
                         <button
                             type="button"
-                            aria-label={localeService.t('rangeSelector.cancel')}
+                            aria-label={localeService.t('ui.rangeSelector.cancel')}
                             className="
                               univer-flex univer-size-8 univer-shrink-0 univer-appearance-none univer-items-center
                               univer-justify-center univer-rounded-full univer-border-0 univer-bg-white univer-p-0

@@ -46,12 +46,12 @@ export const SheetNumfmtPanel: FC<ISheetNumfmtPanelProps> = (props) => {
     const typeOptions = useMemo(
         () =>
             [
-                { label: 'sheet.numfmt.general', component: GeneralPanel },
-                { label: 'sheet.numfmt.accounting', component: AccountingPanel },
-                { label: 'sheet.numfmt.currency', component: CurrencyPanel },
-                { label: 'sheet.numfmt.date', component: DatePanel },
-                { label: 'sheet.numfmt.thousandthPercentile', component: ThousandthPercentilePanel },
-                { label: 'sheet.numfmt.customFormat', component: CustomFormat },
+                { label: 'sheets-numfmt-ui.general', component: GeneralPanel },
+                { label: 'sheets-numfmt-ui.accounting', component: AccountingPanel },
+                { label: 'sheets-numfmt-ui.currency', component: CurrencyPanel },
+                { label: 'sheets-numfmt-ui.date', component: DatePanel },
+                { label: 'sheets-numfmt-ui.thousandthPercentile', component: ThousandthPercentilePanel },
+                { label: 'sheets-numfmt-ui.customFormat', component: CustomFormat },
             ].map((item) => ({ ...item, label: t(item.label) })),
         []
     );
@@ -116,7 +116,7 @@ export const SheetNumfmtPanel: FC<ISheetNumfmtPanelProps> = (props) => {
             `, scrollbarClassName)}
         >
             <div>
-                <div className="univer-mt-3.5 univer-text-sm univer-text-gray-400">{t('sheet.numfmt.numfmtType')}</div>
+                <div className="univer-mt-3.5 univer-text-sm univer-text-gray-400">{t('sheets-numfmt-ui.numfmtType')}</div>
                 <div className="univer-mt-2">
                     <Select className="univer-w-full" value={type} options={selectOptions} onChange={handleSelect} />
                 </div>
@@ -131,10 +131,10 @@ export const SheetNumfmtPanel: FC<ISheetNumfmtPanelProps> = (props) => {
 
             <div className="univer-mb-5 univer-mt-3.5 univer-flex univer-justify-end">
                 <Button onClick={handleCancel} className="univer-mr-3">
-                    {t('sheet.numfmt.cancel')}
+                    {t('sheets-numfmt-ui.cancel')}
                 </Button>
                 <Button variant="primary" onClick={handleConfirm}>
-                    {t('sheet.numfmt.confirm')}
+                    {t('sheets-numfmt-ui.confirm')}
                 </Button>
             </div>
         </div>

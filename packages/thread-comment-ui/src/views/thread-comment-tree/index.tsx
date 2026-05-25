@@ -171,7 +171,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                                                             className="hover:univer-bg-gray-200"
                                                             onClick={() => onEditingChange?.(true)}
                                                         >
-                                                            {localeService.t('threadCommentUI.item.edit')}
+                                                            {localeService.t('thread-comment-ui.item.edit')}
                                                         </a>
                                                     </li>
                                                     <li>
@@ -179,7 +179,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                                                             className="hover:univer-bg-gray-200"
                                                             onClick={handleDeleteItem}
                                                         >
-                                                            {localeService.t('threadCommentUI.item.delete')}
+                                                            {localeService.t('thread-comment-ui.item.delete')}
                                                         </a>
                                                     </li>
                                                 </ul>

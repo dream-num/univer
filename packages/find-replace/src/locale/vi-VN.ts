@@ -20,51 +20,54 @@ const locale: typeof enUS = {
     'find-replace': {
         toolbar: 'Tìm kiếm và Thay thế',
         shortcut: {
-            'open-find-dialog': 'Mở hộp thoại tìm kiếm',
-            'open-replace-dialog': 'Mở hộp thoại thay thế',
-            'close-dialog': 'Đóng hộp thoại tìm kiếm và thay thế',
-            'go-to-next-match': 'Đến mục khớp tiếp theo',
-            'go-to-previous-match': 'Đến mục khớp trước đó',
-            'focus-selection': 'Tập trung vào lựa chọn',
+            'open-find-dialog': 'Mở hộp thoại Tìm kiếm',
+            'open-replace-dialog': 'Mở hộp thoại Thay thế',
+            'close-dialog': 'Đóng hộp thoại Tìm kiếm & Thay thế',
+            'go-to-next-match': 'Chuyển đến kết quả tiếp theo',
+            'go-to-previous-match': 'Chuyển đến kết quả trước đó',
+            'focus-selection': 'Tập trung vào vùng chọn',
         },
         dialog: {
             title: 'Tìm kiếm',
             find: 'Tìm kiếm',
             replace: 'Thay thế',
-            'replace-all': 'Thay thế tất cả',
-            'find-placeholder': 'Nhập nội dung tìm kiếm',
-            'advanced-finding': 'Thay thế / Tìm kiếm nâng cao',
-            'replace-placeholder': 'Nhập nội dung thay thế',
+            'replace-all': 'Thay thế Tất cả',
             'case-sensitive': 'Phân biệt chữ hoa chữ thường',
+            'find-placeholder': 'Tìm trong Trang tính này',
+            'advanced-finding': 'Tìm kiếm & Thay thế Nâng cao',
+            'replace-placeholder': 'Nhập chuỗi thay thế',
             'match-the-whole-cell': 'Khớp toàn bộ ô',
+            'find-direction': {
+                title: 'Hướng tìm kiếm',
+                row: 'Tìm theo hàng',
+                column: 'Tìm theo cột',
+            },
             'find-scope': {
                 title: 'Phạm vi tìm kiếm',
-                'current-sheet': 'Bảng hiện tại',
-                workbook: 'Toàn bộ sổ làm việc',
-            },
-            'find-direction': {
-                title: 'Thứ tự tìm kiếm',
-                column: 'Tìm theo cột',
-                row: 'Tìm theo hàng',
+                'current-sheet': 'Trang tính hiện tại',
+                workbook: 'Sổ làm việc',
             },
             'find-by': {
-                title: 'Phương thức tìm kiếm',
+                title: 'Tìm theo',
+                value: 'Tìm theo giá trị',
                 formula: 'Tìm công thức',
-                value: 'Tìm giá trị',
             },
-            'no-match': 'Đã hoàn thành tìm kiếm nhưng không tìm thấy mục nào khớp',
+            'no-match': 'Đã hoàn thành tìm kiếm nhưng không tìm thấy kết quả phù hợp.',
             'no-result': 'Không có kết quả',
         },
         replace: {
-            'all-success': 'Đã thay thế tất cả {0} mục khớp',
+            'all-success': 'Đã thay thế tất cả {0} kết quả phù hợp',
             'all-failure': 'Thay thế thất bại',
             confirm: {
-                title: 'Bạn có chắc muốn thay thế tất cả các mục khớp không?',
+                title: 'Bạn có chắc chắn muốn thay thế tất cả các kết quả phù hợp không?',
             },
+        },
+        button: {
+            confirm: 'Xác nhận',
+            cancel: 'Hủy',
         },
     },
     'find-replace-shortcuts': 'Tìm kiếm và Thay thế',
-}
-;
+};
 
 export default locale;

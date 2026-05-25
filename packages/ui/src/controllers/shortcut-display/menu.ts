@@ -21,8 +21,8 @@ import { MenuItemType } from '../../services/menu/menu';
 export function ShortcutPanelMenuItemFactory(): IMenuButtonItem {
     return {
         id: ToggleShortcutPanelOperation.id,
-        title: 'toggle-shortcut-panel',
-        tooltip: 'toggle-shortcut-panel',
+        title: 'ui.toggle-shortcut-panel',
+        tooltip: 'ui.toggle-shortcut-panel',
         icon: 'ShortcutIcon',
         type: MenuItemType.BUTTON,
     };

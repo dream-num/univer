@@ -73,7 +73,7 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
         const dispose = interceptorManager.intercept(interceptorManager.getInterceptPoints().beforeSubmit, {
             handler: (v, _c, next) => {
                 if (formulaError || formula.length === 1 || !formula.startsWith('=')) {
-                    setFormulaError(localeService.t('sheet.cf.errorMessage.formulaError'));
+                    setFormulaError(localeService.t('sheets-conditional-formatting-ui.errorMessage.formulaError'));
                     return false;
                 }
                 return next(v);
@@ -102,7 +102,7 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
                   dark:!univer-text-gray-200
                 `}
             >
-                {localeService.t('sheet.cf.panel.styleRule')}
+                {localeService.t('sheets-conditional-formatting-ui.panel.styleRule')}
             </div>
             <div className="univer-mt-3">
                 <FormulaEditor
@@ -127,7 +127,7 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
                     }}
                     onVerify={(result, formula) => {
                         if (!result || formula.length === 1) {
-                            setFormulaError(localeService.t('sheet.cf.errorMessage.formulaError'));
+                            setFormulaError(localeService.t('sheets-conditional-formatting-ui.errorMessage.formulaError'));
                         } else {
                             setFormulaError(undefined);
                         }

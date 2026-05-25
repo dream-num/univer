@@ -17,7 +17,7 @@
 import type { ICommand, IDisposable, IDocumentData, Univer } from '@univerjs/core';
 import { awaitTime, CustomRangeType, Direction, ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
-import { DocCanvasPopManagerService, InsertCommand, MoveCursorOperation } from '@univerjs/docs-ui';
+import { DeleteLeftCommand, DocCanvasPopManagerService, InsertCommand, MoveCursorOperation } from '@univerjs/docs-ui';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { AddDocMentionCommand, DeleteDocMentionCommand } from '../commands/commands/doc-mention.command';
 import {
@@ -134,7 +134,7 @@ function setupMentionTestBed(docData: IDocumentData) {
     commandService.registerCommand(DeleteDocMentionCommand);
     commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
     commandService.registerCommand({
-        id: 'doc.command.delete-left',
+        id: DeleteLeftCommand.id,
         type: DeleteDocMentionCommand.type,
         handler: () => true,
     });
@@ -277,7 +277,7 @@ describe('docs-mention-ui integration', () => {
             style: null as never,
         }]);
 
-        expect(await testBed.commandService.executeCommand('doc.command.delete-left')).toBe(true);
+        expect(await testBed.commandService.executeCommand(DeleteLeftCommand.id)).toBe(true);
         expect(testBed.popupService.editPopup).toBeNull();
 
         expect(await testBed.commandService.executeCommand(DeleteDocMentionCommand.id, {

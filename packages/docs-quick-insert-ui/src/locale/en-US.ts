@@ -15,7 +15,7 @@
  */
 
 const locale = {
-    docQuickInsert: {
+    'docs-quick-insert-ui': {
         menu: {
             numberedList: 'Numbered List',
             bulletedList: 'Bulleted List',

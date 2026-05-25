@@ -214,7 +214,7 @@ export const SheetPermissionDialog = () => {
                             dialogService.close(UNIVER_SHEET_PERMISSION_DIALOG_ID);
                         }}
                     >
-                        {localeService.t('permission.button.cancel')}
+                        {localeService.t('sheets-ui.permission.button.cancel')}
                     </Button>
                     <Button
                         variant="primary"
@@ -223,7 +223,7 @@ export const SheetPermissionDialog = () => {
                             dialogService.close(UNIVER_SHEET_PERMISSION_DIALOG_ID);
                         }}
                     >
-                        {localeService.t('permission.button.confirm')}
+                        {localeService.t('sheets-ui.permission.button.confirm')}
                     </Button>
                 </div>
             </div>

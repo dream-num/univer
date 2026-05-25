@@ -50,15 +50,15 @@ export function FilterByCondition(props: { model: ByConditionsModel }) {
         model.onConditionFormChange(diffParams);
     }, [model]);
 
-    const placeholder = localeService.t('sheets-filter.panel.input-values-placeholder');
+    const placeholder = localeService.t('sheets-filter-ui.panel.input-values-placeholder');
     function renderSecondaryCondition(operator: FilterOperator, val: string, name: 'operator1' | 'operator2') {
         const shouldRenderInput = FilterConditionItems.getItemByOperator(operator).numOfParameters === 1;
         return (
             <>
                 {name === 'operator2' && (
                     <RadioGroup value={radioValue} onChange={onRadioChange}>
-                        <Radio value="AND">{localeService.t('sheets-filter.panel.and')}</Radio>
-                        <Radio value="OR">{localeService.t('sheets-filter.panel.or')}</Radio>
+                        <Radio value="AND">{localeService.t('sheets-filter-ui.panel.and')}</Radio>
+                        <Radio value="OR">{localeService.t('sheets-filter-ui.panel.or')}</Radio>
                     </RadioGroup>
                 )}
                 <Select
@@ -103,9 +103,9 @@ export function FilterByCondition(props: { model: ByConditionsModel }) {
                                     data-u-comp="sheets-filter-panel-conditions-desc"
                                     className="univer-mt-2 univer-text-xs univer-text-gray-500"
                                 >
-                                    {localeService.t('sheets-filter.panel.?')}
+                                    {localeService.t('sheets-filter-ui.panel.?')}
                                     <br />
-                                    {localeService.t('sheets-filter.panel.*')}
+                                    {localeService.t('sheets-filter-ui.panel.*')}
                                 </div>
                             </div>
                         )

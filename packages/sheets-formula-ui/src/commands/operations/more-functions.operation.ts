@@ -27,7 +27,7 @@ export const MoreFunctionsOperation: ICommand = {
         const sidebarService = accessor.get(ISidebarService);
 
         sidebarService.open({
-            header: { title: 'formula.insert.tooltip' },
+            header: { title: 'sheets-formula-ui.insert.tooltip' },
             children: { label: MORE_FUNCTIONS_COMPONENT },
         });
 

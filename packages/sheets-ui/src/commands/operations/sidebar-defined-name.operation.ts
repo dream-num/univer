@@ -42,7 +42,7 @@ export const SidebarDefinedNameOperation: ICommand = {
             case 'open':
                 sidebarService.open({
                     id: DEFINED_NAME_CONTAINER,
-                    header: { title: localeService.t('definedName.featureTitle') },
+                    header: { title: localeService.t('sheets-ui.definedName.featureTitle') },
                     children: { label: DEFINED_NAME_CONTAINER },
                     onClose: () => {
                     },

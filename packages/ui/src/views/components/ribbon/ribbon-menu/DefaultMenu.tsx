@@ -92,10 +92,10 @@ export function DefaultMenu({
                                           dark:!univer-text-gray-200
                                         `}
                                     >
-                                        {localeService.t(group.key)}
+                                        {localeService.t(`ui.${group.key}`)}
                                     </strong>
                                     <span className="univer-text-xs univer-text-gray-400">
-                                        {localeService.t(`${group.key}Desc`)}
+                                        {localeService.t(`ui.${group.key}Desc`)}
                                     </span>
                                 </span>
                             </a>
@@ -114,7 +114,7 @@ export function DefaultMenu({
                 `}
                 onClick={() => setGroupSelectorVisible(true)}
             >
-                {localeService.t(activatedTab)}
+                {localeService.t(`ui.${activatedTab}`)}
                 <MoreDownIcon
                     className={`
                       univer-text-gray-200

@@ -15,7 +15,7 @@
  */
 
 const locale = {
-    hyperLink: {
+    'sheets-hyper-link-ui': {
         form: {
             editTitle: 'Edit Link',
             addTitle: 'Insert Link',

@@ -17,7 +17,7 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    sheetThreadComment: {
+    'sheets-thread-comment-ui': {
         menu: {
             addComment: 'Thêm bình luận',
             commentManagement: 'Quản lý bình luận',

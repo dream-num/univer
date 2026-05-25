@@ -154,3 +154,87 @@ export const ResolveCommentCommand: ICommand<IResolveCommentCommandParams> = {
 ## Id
 
 All IDs should be in pascal case: `id` or `Id`.
+
+## Locale Keys
+
+### Syntax
+
+A locale key is a dot-separated path. The first segment is the **package namespace** and MUST match the package name.
+
+```typescript
+// ✅
+'find-replace.button.confirm'
+'sheets-filter-ui.permission.filterErr'
+
+// 🚫
+'button.confirm'                         // missing package namespace
+'hyperLink.message.refError'             // namespace does not match package name
+```
+
+### Package namespace
+
+Each package owns exactly one namespace and it MUST be identical to the package name.
+
+| Package | Namespace |
+|---|---|
+| `@univerjs/find-replace` | `find-replace` |
+| `@univerjs/sheets-filter` | `sheets-filter` |
+| `@univerjs/sheets-filter-ui` | `sheets-filter-ui` |
+| `@univerjs/sheets-hyper-link` | `sheets-hyper-link` |
+| `@univerjs/sheets-hyper-link-ui` | `sheets-hyper-link-ui` |
+
+Core and UI layers of the same feature MUST use **different** namespaces. For example, `sheets-filter` and `sheets-filter-ui` MUST NOT share `sheets-filter`.
+
+### No cross-package references
+
+A package MUST NOT reference a key whose first segment is another package's namespace.
+
+```typescript
+// In @univerjs/sheets-filter
+// 🚫 references a key from the UI package
+localeService.t('sheets-filter-ui.panel.empty')
+
+// In @univerjs/sheets-filter-ui
+// 🚫 references a key from a common/utility package
+localeService.t('sheets-ui.permission.dialog.filterErr')
+
+// ✅ sink the key into your own locale file
+localeService.t('sheets-filter-ui.permission.filterErr')
+```
+
+### Namespace must be the single root key
+
+The exported locale object MUST contain exactly one root key: the package namespace. All translations MUST be nested under it.
+
+```typescript
+// 🚫
+const locale = {
+    button: { confirm: 'OK' },            // unrelated top-level key
+    'find-replace': { toolbar: '...' },
+};
+
+// ✅
+const locale = {
+    'find-replace': {
+        toolbar: '...',
+        button: { confirm: 'OK' },        // nested under the package namespace
+    },
+};
+```
+
+### No shared/common locale buckets
+
+Do NOT create a "common" or "shared" namespace (e.g. `button.*`, `permission.dialog.*`) in a utility package for other packages to consume. Every package that needs a key defines it under its own namespace.
+
+```typescript
+// 🚫 defined in @univerjs/sheets-ui for others to reuse
+'permission.dialog.filterErr'
+
+// ✅ defined locally in @univerjs/sheets-filter-ui
+'sheets-filter-ui.permission.filterErr'
+
+// ✅ defined locally in @univerjs/sheets-hyper-link-ui
+'sheets-hyper-link-ui.permission.hyperLinkErr'
+```
+
+Duplication across namespaces is acceptable.

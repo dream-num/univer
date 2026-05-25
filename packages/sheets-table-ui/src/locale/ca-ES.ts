@@ -17,7 +17,7 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    'sheets-table': {
+    'sheets-table-ui': {
         title: 'Taula',
         selectRange: 'Selecciona el rang de la taula',
         rename: 'Reanomena la taula',

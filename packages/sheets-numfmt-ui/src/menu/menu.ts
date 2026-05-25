@@ -36,63 +36,63 @@ import { MORE_NUMFMT_TYPE_KEY, OPTIONS_KEY } from '../views/components/MoreNumfm
 export const MENU_OPTIONS = (currencySymbol: string): Array<{ label: string; pattern: string | null } | '|'> => {
     return [
         {
-            label: 'sheet.numfmt.general',
+            label: 'sheets-numfmt-ui.general',
             pattern: null,
         },
         {
-            label: 'sheet.numfmt.text',
+            label: 'sheets-numfmt-ui.text',
             pattern: DEFAULT_TEXT_FORMAT_EXCEL,
         },
         '|',
         {
-            label: 'sheet.numfmt.number',
+            label: 'sheets-numfmt-ui.number',
             pattern: '0',
         },
         {
-            label: 'sheet.numfmt.percent',
+            label: 'sheets-numfmt-ui.percent',
             pattern: '0.00%',
         },
         {
-            label: 'sheet.numfmt.scientific',
+            label: 'sheets-numfmt-ui.scientific',
             pattern: '0.00E+00',
         },
         '|',
         {
-            label: 'sheet.numfmt.accounting',
+            label: 'sheets-numfmt-ui.accounting',
             pattern: `"${currencySymbol}" #,##0.00_);[Red]("${currencySymbol}"#,##0.00)`,
         },
         {
-            label: 'sheet.numfmt.financialValue',
+            label: 'sheets-numfmt-ui.financialValue',
             pattern: '#,##0.00;[Red]#,##0.00',
         },
         {
-            label: 'sheet.numfmt.currency',
+            label: 'sheets-numfmt-ui.currency',
             pattern: `"${currencySymbol}"#,##0.00_);[Red]("${currencySymbol}"#,##0.00)`,
         },
         {
-            label: 'sheet.numfmt.roundingCurrency',
+            label: 'sheets-numfmt-ui.roundingCurrency',
             pattern: `"${currencySymbol}"#,##0;[Red]"${currencySymbol}"#,##0`,
         },
         '|',
         {
-            label: 'sheet.numfmt.date',
+            label: 'sheets-numfmt-ui.date',
             pattern: 'yyyy-mm-dd;@',
         },
         {
-            label: 'sheet.numfmt.time',
+            label: 'sheets-numfmt-ui.time',
             pattern: 'am/pm h":"mm":"ss',
         },
         {
-            label: 'sheet.numfmt.dateTime',
+            label: 'sheets-numfmt-ui.dateTime',
             pattern: 'yyyy-m-d am/pm h:mm',
         },
         {
-            label: 'sheet.numfmt.timeDuration',
+            label: 'sheets-numfmt-ui.timeDuration',
             pattern: 'h:mm:ss',
         },
         '|',
         {
-            label: 'sheet.numfmt.moreFmt',
+            label: 'sheets-numfmt-ui.moreFmt',
             pattern: '',
         },
     ] as Array<{ label: string; pattern: string | null } | '|'>;
@@ -108,8 +108,8 @@ export const CurrencySymbolIconMenuItem = (accessor: IAccessor) => {
             });
         }),
         id: SetCurrencyCommand.id,
-        title: 'sheet.numfmt.currency',
-        tooltip: 'sheet.numfmt.currency',
+        title: 'sheets-numfmt-ui.currency',
+        tooltip: 'sheets-numfmt-ui.currency',
         type: MenuItemType.BUTTON,
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
@@ -120,8 +120,8 @@ export const AddDecimalMenuItem = (accessor: IAccessor) => {
     return {
         icon: 'AddDigitsIcon',
         id: AddDecimalCommand.id,
-        title: 'sheet.numfmt.addDecimal',
-        tooltip: 'sheet.numfmt.addDecimal',
+        title: 'sheets-numfmt-ui.addDecimal',
+        tooltip: 'sheets-numfmt-ui.addDecimal',
         type: MenuItemType.BUTTON,
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
@@ -132,8 +132,8 @@ export const SubtractDecimalMenuItem = (accessor: IAccessor) => {
     return {
         icon: 'ReduceDigitsIcon',
         id: SubtractDecimalCommand.id,
-        title: 'sheet.numfmt.subtractDecimal',
-        tooltip: 'sheet.numfmt.subtractDecimal',
+        title: 'sheets-numfmt-ui.subtractDecimal',
+        tooltip: 'sheets-numfmt-ui.subtractDecimal',
         type: MenuItemType.BUTTON,
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
@@ -144,8 +144,8 @@ export const PercentMenuItem = (accessor: IAccessor) => {
     return {
         icon: 'PercentIcon',
         id: SetPercentCommand.id,
-        title: 'sheet.numfmt.percent',
-        tooltip: 'sheet.numfmt.percent',
+        title: 'sheets-numfmt-ui.percent',
+        tooltip: 'sheets-numfmt-ui.percent',
         type: MenuItemType.BUTTON,
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
@@ -180,7 +180,7 @@ export const FactoryOtherMenuItem = (accessor: IAccessor): IMenuSelectorItem => 
                     const currencySymbol = getCurrencySymbolByLocale(localeService.getCurrentLocale());
 
                     // Adapts the 'General' obtained during import, or the 'General' set manually
-                    let value: string = localeService.t('sheet.numfmt.general');
+                    let value: string = localeService.t('sheets-numfmt-ui.general');
 
                     if (isDefaultFormat(pattern)) {
                         subscribe.next(value);
@@ -194,7 +194,7 @@ export const FactoryOtherMenuItem = (accessor: IAccessor): IMenuSelectorItem => 
                         if (item && typeof item === 'object' && item.pattern) {
                             value = localeService.t(item.label);
                         } else {
-                            value = localeService.t('sheet.numfmt.moreFmt');
+                            value = localeService.t('sheets-numfmt-ui.moreFmt');
                         }
                     }
 
@@ -207,7 +207,7 @@ export const FactoryOtherMenuItem = (accessor: IAccessor): IMenuSelectorItem => 
     return {
         label: MORE_NUMFMT_TYPE_KEY,
         id: OpenNumfmtPanelOperator.id,
-        tooltip: 'sheet.numfmt.title',
+        tooltip: 'sheets-numfmt-ui.title',
         type: MenuItemType.SELECTOR,
         slot: true,
         selections: [{

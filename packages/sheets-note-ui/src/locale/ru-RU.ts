@@ -17,13 +17,15 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    rightClick: {
-        addNote: 'Добавить примечание',
-        deleteNote: 'Удалить примечание',
-        toggleNote: 'Показать/Скрыть примечание',
-    },
-    note: {
-        placeholder: 'Введите текст здесь',
+    'sheets-note-ui': {
+        note: {
+            placeholder: 'Введите текст здесь',
+        },
+        rightClick: {
+            addNote: 'Добавить примечание',
+            deleteNote: 'Удалить примечание',
+            toggleNote: 'Показать/Скрыть примечание',
+        },
     },
 };
 

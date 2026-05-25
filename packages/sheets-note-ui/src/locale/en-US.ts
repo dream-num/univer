@@ -15,13 +15,15 @@
  */
 
 const locale = {
-    rightClick: {
-        addNote: 'Add Note',
-        deleteNote: 'Delete Note',
-        toggleNote: 'Show/Hide Note',
-    },
-    note: {
-        placeholder: 'Type here',
+    'sheets-note-ui': {
+        note: {
+            placeholder: 'Type here',
+        },
+        rightClick: {
+            addNote: 'Add Note',
+            deleteNote: 'Delete Note',
+            toggleNote: 'Show/Hide Note',
+        },
     },
 };
 

@@ -89,7 +89,7 @@ export default function ArrangePanel(props: IProps) {
                           dark:!univer-text-gray-200
                         `}
                     >
-                        <div>{localeService.t('slide.panel.fill.title')}</div>
+                        <div>{localeService.t('slides-ui.panel.fill.title')}</div>
                     </div>
                 </div>
                 <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">

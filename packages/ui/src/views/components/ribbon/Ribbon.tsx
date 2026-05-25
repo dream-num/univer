@@ -247,7 +247,7 @@ export function Ribbon(props: IRibbonProps) {
                         'univer-justify-center': ribbonType === 'classic',
                     })}
                     role="toolbar"
-                    aria-label={localeService.t(activatedTab)}
+                    aria-label={localeService.t(`ui.${activatedTab}`)}
                 >
                     {activeGroup.visibleGroups.map((groupItem) => (groupItem.children?.length || groupItem.item) && (
                         <Fragment key={groupItem.key}>
@@ -300,7 +300,7 @@ export function Ribbon(props: IRibbonProps) {
                                 <button
                                     type="button"
                                     className={toolbarButtonClassName}
-                                    aria-label={localeService.t('ribbon.more')}
+                                    aria-label={localeService.t('ui.ribbon.more')}
                                     aria-haspopup="true"
                                 >
                                     <MoreFunctionIcon />

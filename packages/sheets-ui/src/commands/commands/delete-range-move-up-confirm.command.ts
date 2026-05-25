@@ -44,9 +44,9 @@ export const DeleteRangeMoveUpConfirmCommand: ICommand = {
             if (worksheet.getRowFiltered(i)) {
                 const result = await confirmService.confirm({
                     id: DeleteRangeMoveUpConfirmCommand.id,
-                    title: { title: localeService.t('filter.confirm.error') },
-                    children: { title: localeService.t('filter.confirm.notAllowedToInsertRange') },
-                    confirmText: localeService.t('button.confirm'),
+                    title: { title: localeService.t('sheets-ui.filter.confirm.error') },
+                    children: { title: localeService.t('sheets-ui.filter.confirm.notAllowedToInsertRange') },
+                    confirmText: localeService.t('sheets-ui.button.confirm'),
                 });
                 if (result) {
                     return false;
@@ -66,10 +66,10 @@ export const DeleteRangeMoveUpConfirmCommand: ICommand = {
 
         const result = await confirmService.confirm({
             id: DeleteRangeMoveUpConfirmCommand.id,
-            title: { title: localeService.t('merge.confirm.warning') },
-            children: { title: localeService.t('merge.confirm.dismantleMergeCellWarning') },
-            cancelText: localeService.t('button.cancel'),
-            confirmText: localeService.t('button.confirm'),
+            title: { title: localeService.t('sheets-ui.merge.confirm.warning') },
+            children: { title: localeService.t('sheets-ui.merge.confirm.dismantleMergeCellWarning') },
+            cancelText: localeService.t('sheets-ui.button.cancel'),
+            confirmText: localeService.t('sheets-ui.button.confirm'),
         });
         if (result) {
             return commandService.executeCommand(DeleteRangeMoveUpCommand.id);

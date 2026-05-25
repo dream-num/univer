@@ -17,7 +17,7 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    sheetImage: {
+    'sheets-drawing-ui': {
         title: '이미지',
 
         upload: {
@@ -42,32 +42,37 @@ const locale: typeof enUS = {
             saving: '저장 중...',
             error: '셀 이미지 저장 실패',
         },
-    },
-    'image-popup': {
-        replace: '바꾸기',
-        delete: '삭제',
-        edit: '편집',
-        crop: '자르기',
-        reset: '원래 크기',
-        flipH: '가로 뒤집기',
-        flipV: '세로 뒤집기',
-    },
-    'drawing-anchor': {
-        title: '고정 위치 설정',
-        both: '셀과 함께 이동 및 크기 조절',
-        position: '셀과 함께 이동하되 크기 변경 안 함',
-        none: '셀과 함께 이동 및 크기 조절 안 함',
-    },
-    'update-status': {
-        exceedMaxSize: '이미지 크기가 제한({0}MB)을 초과했습니다',
-        invalidImageType: '지원하지 않는 이미지 형식입니다',
-        exceedMaxCount: '한 번에 {0}개까지만 업로드할 수 있습니다',
-        invalidImage: '유효하지 않은 이미지입니다',
-    },
-    'cell-image': {
-        pasteTitle: '셀 이미지로 붙여넣기',
-        pasteContent: '셀 이미지 붙여넣기는 기존 셀 내용을 덮어씁니다. 계속 진행하시겠습니까?',
-        pasteError: '이 단위에서는 시트 셀 이미지 복사 붙여넣기를 지원하지 않습니다',
+        'image-popup': {
+            replace: '바꾸기',
+            delete: '삭제',
+            edit: '편집',
+            crop: '자르기',
+            reset: '원래 크기',
+            flipH: '가로 뒤집기',
+            flipV: '세로 뒤집기',
+        },
+        'update-status': {
+            exceedMaxSize: '이미지 크기가 제한({0}MB)을 초과했습니다',
+            invalidImageType: '지원하지 않는 이미지 형식입니다',
+            exceedMaxCount: '한 번에 {0}개까지만 업로드할 수 있습니다',
+            invalidImage: '유효하지 않은 이미지입니다',
+        },
+        'drawing-anchor': {
+            title: '고정 위치 설정',
+            both: '셀과 함께 이동 및 크기 조절',
+            position: '셀과 함께 이동하되 크기 변경 안 함',
+            none: '셀과 함께 이동 및 크기 조절 안 함',
+        },
+        'cell-image': {
+            pasteTitle: '셀 이미지로 붙여넣기',
+            pasteContent: '셀 이미지 붙여넣기는 기존 셀 내용을 덮어씁니다. 계속 진행하시겠습니까?',
+            pasteError: '이 단위에서는 시트 셀 이미지 복사 붙여넣기를 지원하지 않습니다',
+        },
+        permission: {
+            dialog: {
+                editErr: '해당 범위는 보호되어 있어 편집 권한이 없습니다. 편집하려면 작성자에게 문의하세요.',
+            },
+        },
     },
 };
 

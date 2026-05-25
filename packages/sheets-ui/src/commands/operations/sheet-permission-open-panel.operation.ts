@@ -40,7 +40,7 @@ export const SheetPermissionOpenPanelOperation: ICommand<IPermissionOpenPanelPar
         const { showDetail = true, fromSheetBar = false, rule, oldRule } = _params;
 
         const sidebarProps = {
-            header: { title: 'permission.panel.title' },
+            header: { title: 'sheets-ui.permission.panel.title' },
             children: {
                 label: UNIVER_SHEET_PERMISSION_PANEL,
                 showDetail,

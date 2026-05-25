@@ -40,7 +40,7 @@ export class SheetsHyperLinkPermissionController extends Disposable {
                         worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission, WorksheetInsertHyperlinkPermission],
                     });
                     if (!permission) {
-                        this._sheetPermissionCheckController.blockExecuteWithoutPermission(this._localeService.t('permission.dialog.hyperLinkErr'));
+                        this._sheetPermissionCheckController.blockExecuteWithoutPermission(this._localeService.t('sheets-hyper-link-ui.permission.hyperLinkErr'));
                     }
                 }
             })

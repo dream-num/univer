@@ -48,56 +48,56 @@ const getRuleDescribe = (rule: IConditionFormattingRule, localeService: LocaleSe
     const ruleConfig = rule.rule;
     switch (ruleConfig.type) {
         case CFRuleType.colorScale: {
-            return localeService.t('sheet.cf.ruleType.colorScale');
+            return localeService.t('sheets-conditional-formatting-ui.ruleType.colorScale');
         }
         case CFRuleType.dataBar: {
-            return localeService.t('sheet.cf.ruleType.dataBar');
+            return localeService.t('sheets-conditional-formatting-ui.ruleType.dataBar');
         }
         case CFRuleType.iconSet: {
-            return localeService.t('sheet.cf.ruleType.iconSet');
+            return localeService.t('sheets-conditional-formatting-ui.ruleType.iconSet');
         }
         case CFRuleType.highlightCell: {
             switch (ruleConfig.subType) {
                 case CFSubRuleType.average: {
                     const operator = ruleConfig.operator;
-                    return localeService.t(`sheet.cf.preview.describe.${operator}`, localeService.t('sheet.cf.subRuleType.average'));
+                    return localeService.t(`sheets-conditional-formatting-ui.preview.describe.${operator}`, localeService.t('sheets-conditional-formatting-ui.subRuleType.average'));
                 }
                 case CFSubRuleType.duplicateValues: {
-                    return localeService.t('sheet.cf.subRuleType.duplicateValues');
+                    return localeService.t('sheets-conditional-formatting-ui.subRuleType.duplicateValues');
                 }
                 case CFSubRuleType.uniqueValues: {
-                    return localeService.t('sheet.cf.subRuleType.uniqueValues');
+                    return localeService.t('sheets-conditional-formatting-ui.subRuleType.uniqueValues');
                 }
                 case CFSubRuleType.number: {
                     const operator = ruleConfig.operator;
-                    return localeService.t(`sheet.cf.preview.describe.${operator}`, ...Array.isArray(ruleConfig.value) ? (ruleConfig.value.map((e) => String(e))) : [String(ruleConfig.value || '')]);
+                    return localeService.t(`sheets-conditional-formatting-ui.preview.describe.${operator}`, ...Array.isArray(ruleConfig.value) ? (ruleConfig.value.map((e) => String(e))) : [String(ruleConfig.value || '')]);
                 }
                 case CFSubRuleType.text: {
                     const operator = ruleConfig.operator;
-                    return localeService.t(`sheet.cf.preview.describe.${operator}`, ruleConfig.value || '');
+                    return localeService.t(`sheets-conditional-formatting-ui.preview.describe.${operator}`, ruleConfig.value || '');
                 }
 
                 case CFSubRuleType.timePeriod: {
                     const operator = ruleConfig.operator;
-                    return localeService.t(`sheet.cf.preview.describe.${operator}`);
+                    return localeService.t(`sheets-conditional-formatting-ui.preview.describe.${operator}`);
                 }
                 case CFSubRuleType.rank: {
                     if (ruleConfig.isPercent) {
                         if (ruleConfig.isBottom) {
-                            return localeService.t('sheet.cf.preview.describe.bottomNPercent', String(ruleConfig.value));
+                            return localeService.t('sheets-conditional-formatting-ui.preview.describe.bottomNPercent', String(ruleConfig.value));
                         } else {
-                            return localeService.t('sheet.cf.preview.describe.topNPercent', String(ruleConfig.value));
+                            return localeService.t('sheets-conditional-formatting-ui.preview.describe.topNPercent', String(ruleConfig.value));
                         }
                     } else {
                         if (ruleConfig.isBottom) {
-                            return localeService.t('sheet.cf.preview.describe.bottomN', String(ruleConfig.value));
+                            return localeService.t('sheets-conditional-formatting-ui.preview.describe.bottomN', String(ruleConfig.value));
                         } else {
-                            return localeService.t('sheet.cf.preview.describe.topN', String(ruleConfig.value));
+                            return localeService.t('sheets-conditional-formatting-ui.preview.describe.topN', String(ruleConfig.value));
                         }
                     }
                 }
                 case CFSubRuleType.formula: {
-                    return localeService.t('sheet.cf.ruleType.formula');
+                    return localeService.t('sheets-conditional-formatting-ui.ruleType.formula');
                 }
             }
         }
@@ -130,8 +130,8 @@ export const RuleList = (props: IRuleListProps) => {
     const [draggingId, setDraggingId] = useState<string>('');
 
     const selectOption = [
-        { label: localeService.t('sheet.cf.panel.workSheet'), value: '2' },
-        { label: localeService.t('sheet.cf.panel.selectedRange'), value: '1' },
+        { label: localeService.t('sheets-conditional-formatting-ui.panel.workSheet'), value: '2' },
+        { label: localeService.t('sheets-conditional-formatting-ui.panel.selectedRange'), value: '1' },
     ];
 
     const getRuleList = () => {
@@ -281,7 +281,7 @@ export const RuleList = (props: IRuleListProps) => {
             >
                 <div className="univer-flex univer-items-center univer-gap-2">
                     {conditionalFormattingI18nController.tWithReactNode(
-                        'sheet.cf.panel.managerRuleSelect',
+                        'sheets-conditional-formatting-ui.panel.managerRuleSelect',
                         <Select
                             className="univer-w-36"
                             options={selectOption}
@@ -291,7 +291,7 @@ export const RuleList = (props: IRuleListProps) => {
                     ).map((ele, index) => <span key={index}>{ele}</span>)}
                 </div>
                 <div className="univer-flex univer-justify-end univer-space-x-2">
-                    <Tooltip title={localeService.t('sheet.cf.panel.createRule')} placement="bottom">
+                    <Tooltip title={localeService.t('sheets-conditional-formatting-ui.panel.createRule')} placement="bottom">
                         <a
                             className="univer-size-5 univer-cursor-pointer"
                             onClick={handleCreate}
@@ -301,7 +301,7 @@ export const RuleList = (props: IRuleListProps) => {
                     </Tooltip>
                     {(ruleList.length && isHasAllRuleEditPermission)
                         ? (
-                            <Tooltip title={localeService.t('sheet.cf.panel.clear')} placement="bottom">
+                            <Tooltip title={localeService.t('sheets-conditional-formatting-ui.panel.clear')} placement="bottom">
                                 <a
                                     className="univer-size-5 univer-cursor-pointer"
                                     onClick={handleClear}

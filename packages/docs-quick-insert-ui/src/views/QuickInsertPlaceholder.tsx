@@ -28,7 +28,7 @@ export const QuickInsertPlaceholder = () => {
               univer-px-12 univer-py-6 univer-text-gray-400 univer-shadow-lg
             `}
         >
-            <span>{localeService.t('docQuickInsert.placeholder')}</span>
+            <span>{localeService.t('docs-quick-insert-ui.placeholder')}</span>
         </div>
     );
 };

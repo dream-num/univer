@@ -17,7 +17,7 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    dataValidation: {
+    'sheets-data-validation-ui': {
         title: '데이터 유효성 검사',
         validFail: {
             value: '값을 입력하세요',
@@ -55,78 +55,12 @@ const locale: typeof enUS = {
             rangeError: '범위가 올바르지 않습니다',
             allowBlank: '빈 셀 허용',
         },
-        operators: {
-            between: '사이',
-            greaterThan: '초과',
-            greaterThanOrEqual: '이상',
-            lessThan: '미만',
-            lessThanOrEqual: '이하',
-            equal: '같음',
-            notEqual: '같지 않음',
-            notBetween: '사이가 아님',
-            legal: '유효한 형식',
-        },
-        ruleName: {
-            between: '{FORMULA1}와 {FORMULA2} 사이',
-            greaterThan: '{FORMULA1} 초과',
-            greaterThanOrEqual: '{FORMULA1} 이상',
-            lessThan: '{FORMULA1} 미만',
-            lessThanOrEqual: '{FORMULA1} 이하',
-            equal: '{FORMULA1}와 같음',
-            notEqual: '{FORMULA1}와 다름',
-            notBetween: '{FORMULA1}와 {FORMULA2} 사이 아님',
-            legal: '유효한 {TYPE} 형식',
-        },
-        errorMsg: {
-            between: '값은 {FORMULA1}와 {FORMULA2} 사이여야 합니다',
-            greaterThan: '값은 {FORMULA1} 초과여야 합니다',
-            greaterThanOrEqual: '값은 {FORMULA1} 이상이어야 합니다',
-            lessThan: '값은 {FORMULA1} 미만이어야 합니다',
-            lessThanOrEqual: '값은 {FORMULA1} 이하이어야 합니다',
-            equal: '값은 {FORMULA1}와 같아야 합니다',
-            notEqual: '값은 {FORMULA1}와 달라야 합니다',
-            notBetween: '값은 {FORMULA1}와 {FORMULA2} 사이가 아니어야 합니다',
-            legal: '값은 유효한 {TYPE} 형식이어야 합니다',
-        },
         any: {
             title: '모든 값',
             error: '이 셀의 내용이 유효성 검사 규칙을 위반했습니다',
         },
         date: {
             title: '날짜',
-            operators: {
-                between: '사이',
-                greaterThan: '이후',
-                greaterThanOrEqual: '이거나 이후',
-                lessThan: '이전',
-                lessThanOrEqual: '이거나 이전',
-                equal: '같음',
-                notEqual: '다름',
-                notBetween: '사이가 아님',
-                legal: '유효한 날짜',
-            },
-            ruleName: {
-                between: '{FORMULA1}와 {FORMULA2} 사이',
-                greaterThan: '{FORMULA1} 이후',
-                greaterThanOrEqual: '{FORMULA1} 이거나 이후',
-                lessThan: '{FORMULA1} 이전',
-                lessThanOrEqual: '{FORMULA1} 이거나 이전',
-                equal: '{FORMULA1}와 같음',
-                notEqual: '{FORMULA1}와 다름',
-                notBetween: '{FORMULA1}와 {FORMULA2} 사이 아님',
-                legal: '유효한 날짜',
-            },
-            errorMsg: {
-                between: '값은 유효한 날짜이며 {FORMULA1}와 {FORMULA2} 사이여야 합니다',
-                greaterThan: '값은 유효한 날짜이며 {FORMULA1} 이후여야 합니다',
-                greaterThanOrEqual: '값은 유효한 날짜이며 {FORMULA1} 이거나 이후여야 합니다',
-                lessThan: '값은 유효한 날짜이며 {FORMULA1} 이전이어야 합니다',
-                lessThanOrEqual: '값은 유효한 날짜이며 {FORMULA1} 이거나 이전이어야 합니다',
-                equal: '값은 유효한 날짜이며 {FORMULA1}와 같아야 합니다',
-                notEqual: '값은 유효한 날짜이며 {FORMULA1}와 달라야 합니다',
-                notBetween: '값은 유효한 날짜이며 {FORMULA1}와 {FORMULA2} 사이가 아니어야 합니다',
-                legal: '값은 유효한 날짜여야 합니다',
-            },
         },
         list: {
             title: '목록',
@@ -147,16 +81,6 @@ const locale: typeof enUS = {
         },
         textLength: {
             title: '텍스트 길이',
-            errorMsg: {
-                between: '텍스트 길이는 {FORMULA1}와 {FORMULA2} 사이여야 합니다',
-                greaterThan: '텍스트 길이는 {FORMULA1} 초과여야 합니다',
-                greaterThanOrEqual: '텍스트 길이는 {FORMULA1} 이상이어야 합니다',
-                lessThan: '텍스트 길이는 {FORMULA1} 미만이어야 합니다',
-                lessThanOrEqual: '텍스트 길이는 {FORMULA1} 이하이어야 합니다',
-                equal: '텍스트 길이는 {FORMULA1}와 같아야 합니다',
-                notEqual: '텍스트 길이는 {FORMULA1}와 달라야 합니다',
-                notBetween: '텍스트 길이는 {FORMULA1}와 {FORMULA2} 사이가 아니어야 합니다',
-            },
         },
         decimal: {
             title: '숫자',
@@ -175,7 +99,6 @@ const locale: typeof enUS = {
             title: '사용자 지정 수식',
             error: '이 셀의 내용이 유효성 검사 규칙을 위반했습니다',
             validFail: '유효한 수식을 입력하세요',
-            ruleName: '사용자 지정 수식: {FORMULA1}',
         },
         alert: {
             title: '오류',
@@ -192,6 +115,11 @@ const locale: typeof enUS = {
         },
         showTime: {
             label: '시간 선택기 표시',
+        },
+        permission: {
+            dialog: {
+                setStyleErr: '해당 범위는 보호되어 있어 스타일 지정 권한이 없습니다. 스타일을 변경하려면 작성자에게 문의하세요.',
+            },
         },
     },
 };

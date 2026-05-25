@@ -51,8 +51,8 @@ describe('shortcut-display controllers', () => {
     it('should return shortcut panel menu item', () => {
         expect(ShortcutPanelMenuItemFactory()).toEqual({
             id: ToggleShortcutPanelOperation.id,
-            title: 'toggle-shortcut-panel',
-            tooltip: 'toggle-shortcut-panel',
+            title: 'ui.toggle-shortcut-panel',
+            tooltip: 'ui.toggle-shortcut-panel',
             icon: 'ShortcutIcon',
             type: 0,
         });

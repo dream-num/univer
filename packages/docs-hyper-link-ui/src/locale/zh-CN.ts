@@ -17,7 +17,7 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    docLink: {
+    'docs-hyper-link-ui': {
         edit: {
             confirm: '确认',
             cancel: '取消',

@@ -118,13 +118,13 @@ export function PageSettings(props: IConfirmChildrenProps) {
                       dark:!univer-text-white
                     `}
                 >
-                    {localeService.t('page-settings.paper-size')}
+                    {localeService.t('docs-ui.page-settings.paper-size')}
                 </label>
                 <Select
                     value={settings.paperSize}
                     onChange={handlePaperSizeChange}
                     options={PAPER_TYPES.map((p) => ({
-                        label: localeService.t(`page-settings.page-size.${p.toLocaleLowerCase()}`),
+                        label: localeService.t(`docs-ui.page-settings.page-size.${p.toLocaleLowerCase()}`),
                         value: p,
                     }))}
                 />
@@ -137,13 +137,13 @@ export function PageSettings(props: IConfirmChildrenProps) {
                       dark:!univer-text-white
                     `}
                 >
-                    {localeService.t('page-settings.custom-paper-size')}
+                    {localeService.t('docs-ui.page-settings.custom-paper-size')}
                 </label>
                 <div className="univer-flex univer-flex-col univer-gap-2.5">
                     <div className="univer-flex univer-gap-2.5">
                         <div className="univer-flex univer-flex-1 univer-flex-col univer-gap-2">
                             <label className="univer-text-sm univer-font-medium univer-text-gray-500">
-                                {localeService.t('page-settings.top')}
+                                {localeService.t('docs-ui.page-settings.top')}
                             </label>
                             <InputNumber
                                 precision={2}
@@ -155,7 +155,7 @@ export function PageSettings(props: IConfirmChildrenProps) {
                         </div>
                         <div className="univer-flex univer-flex-1 univer-flex-col univer-gap-2">
                             <label className="univer-text-sm univer-font-medium univer-text-gray-500">
-                                {localeService.t('page-settings.bottom')}
+                                {localeService.t('docs-ui.page-settings.bottom')}
                             </label>
                             <InputNumber
                                 precision={2}
@@ -169,7 +169,7 @@ export function PageSettings(props: IConfirmChildrenProps) {
                     <div className="univer-flex univer-gap-2.5">
                         <div className="univer-flex univer-flex-1 univer-flex-col univer-gap-2">
                             <label className="univer-text-sm univer-font-medium univer-text-gray-500">
-                                {localeService.t('page-settings.left')}
+                                {localeService.t('docs-ui.page-settings.left')}
                             </label>
                             <InputNumber
                                 precision={2}
@@ -181,7 +181,7 @@ export function PageSettings(props: IConfirmChildrenProps) {
                         </div>
                         <div className="univer-flex univer-flex-1 univer-flex-col univer-gap-2">
                             <label className="univer-text-sm univer-font-medium univer-text-gray-500">
-                                {localeService.t('page-settings.right')}
+                                {localeService.t('docs-ui.page-settings.right')}
                             </label>
                             <InputNumber
                                 precision={2}

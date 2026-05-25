@@ -17,7 +17,7 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    hyperLink: {
+    'sheets-hyper-link-ui': {
         form: {
             editTitle: '링크 편집',
             addTitle: '링크 삽입',

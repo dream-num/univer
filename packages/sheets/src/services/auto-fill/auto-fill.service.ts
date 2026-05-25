@@ -101,22 +101,22 @@ export class AutoFillService extends Disposable implements IAutoFillService {
 
     private readonly _menu$: BehaviorSubject<IApplyMenuItem[]> = new BehaviorSubject<IApplyMenuItem[]>([
         {
-            label: 'autoFill.copy',
+            label: 'sheets.autoFill.copy',
             value: AUTO_FILL_APPLY_TYPE.COPY,
             disable: false,
         },
         {
-            label: 'autoFill.series',
+            label: 'sheets.autoFill.series',
             value: AUTO_FILL_APPLY_TYPE.SERIES,
             disable: false,
         },
         {
-            label: 'autoFill.formatOnly',
+            label: 'sheets.autoFill.formatOnly',
             value: AUTO_FILL_APPLY_TYPE.ONLY_FORMAT,
             disable: false,
         },
         {
-            label: 'autoFill.noFormat',
+            label: 'sheets.autoFill.noFormat',
             value: AUTO_FILL_APPLY_TYPE.NO_FORMAT,
             disable: false,
         },

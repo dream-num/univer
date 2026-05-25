@@ -79,7 +79,7 @@ export function Text2NumberToolbarMenuItemFactory(accessor: IAccessor): IMenuBut
         id: TEXT_TO_NUMBER_TOOLBAR_MENU_ID,
         commandId: TextToNumberCommand.id,
         type: MenuItemType.BUTTON,
-        title: 'toolbar.textToNumber',
+        title: 'sheets-ui.toolbar.textToNumber',
         disabled$: getObservableWithExclusiveRange$(accessor, getCurrentRangeDisable$(accessor, {
             workbookTypes: [WorkbookEditablePermission],
             worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission],
@@ -95,7 +95,7 @@ export function Text2NumberContextMenuItemFactory(accessor: IAccessor): IMenuBut
         id: TEXT_TO_NUMBER_CONTEXT_MENU_ID,
         commandId: TextToNumberCommand.id,
         type: MenuItemType.BUTTON,
-        title: 'rightClick.textToNumber',
+        title: 'sheets-ui.rightClick.textToNumber',
         icon: 'PipingIcon',
         disabled$: getObservableWithExclusiveRange$(accessor, getCurrentRangeDisable$(accessor, {
             workbookTypes: [WorkbookEditablePermission],

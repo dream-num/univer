@@ -16,14 +16,40 @@
 
 import type enUS from './en-US';
 
+import array from './function-list/array/fa-IR';
+import compatibility from './function-list/compatibility/fa-IR';
+import cube from './function-list/cube/fa-IR';
+import database from './function-list/database/fa-IR';
+import date from './function-list/date/fa-IR';
+import engineering from './function-list/engineering/fa-IR';
+import financial from './function-list/financial/fa-IR';
+import information from './function-list/information/fa-IR';
+import logical from './function-list/logical/fa-IR';
+import lookup from './function-list/lookup/fa-IR';
+import math from './function-list/math/fa-IR';
+import statistical from './function-list/statistical/fa-IR';
+import text from './function-list/text/fa-IR';
+import univer from './function-list/univer/fa-IR';
+import web from './function-list/web/fa-IR';
+
 const locale: typeof enUS = {
-    formula: {
-        progress: {
-            analyzing: 'در حال تحلیل',
-            calculating: 'در حال محاسبه',
-            'array-analysis': 'تحلیل آرایه',
-            'array-calculation': 'محاسبه آرایه',
-            done: 'تمام',
+    'sheets-formula': {
+        functionList: {
+            ...array,
+            ...compatibility,
+            ...cube,
+            ...database,
+            ...date,
+            ...engineering,
+            ...financial,
+            ...information,
+            ...logical,
+            ...lookup,
+            ...math,
+            ...statistical,
+            ...text,
+            ...univer,
+            ...web,
         },
     },
 };

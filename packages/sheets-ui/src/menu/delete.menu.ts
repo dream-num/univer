@@ -32,7 +32,7 @@ export function DeleteRangeMenuItemFactory(accessor: IAccessor): IMenuSelectorIt
     return {
         id: DELETE_RANGE_MENU_ID,
         type: MenuItemType.SUBITEMS,
-        title: 'rightClick.delete',
+        title: 'sheets-ui.rightClick.delete',
         icon: 'ReduceDoubleIcon',
         hidden$: getObservableWithExclusiveRange$(accessor, getBaseRangeMenuHidden$(accessor)),
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission] }),
@@ -44,7 +44,7 @@ export function RemoveColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         id: RemoveColConfirmCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'DeleteColumnDoubleIcon',
-        title: 'rightClick.deleteSelectedColumn',
+        title: 'sheets-ui.rightClick.deleteSelectedColumn',
         hidden$: getDeleteMenuHidden$(accessor, 'col'),
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission, WorkbookDeleteColumnPermission], worksheetTypes: [WorksheetEditPermission, WorksheetDeleteColumnPermission] }),
     };
@@ -55,7 +55,7 @@ export function RemoveRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         id: RemoveRowConfirmCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'DeleteRowDoubleIcon',
-        title: 'rightClick.deleteSelectedRow',
+        title: 'sheets-ui.rightClick.deleteSelectedRow',
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission, WorkbookDeleteRowPermission], worksheetTypes: [WorksheetEditPermission, WorksheetDeleteRowPermission] }),
         hidden$: getDeleteMenuHidden$(accessor, 'row'),
     };
@@ -65,7 +65,7 @@ export function DeleteRangeMoveLeftMenuItemFactory(accessor: IAccessor): IMenuBu
     return {
         id: DeleteRangeMoveLeftConfirmCommand.id,
         type: MenuItemType.BUTTON,
-        title: 'rightClick.moveLeft',
+        title: 'sheets-ui.rightClick.moveLeft',
         icon: 'DeleteCellShiftLeftDoubleIcon',
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
         hidden$: getCellMenuHidden$(accessor, 'col'),
@@ -76,7 +76,7 @@ export function DeleteRangeMoveUpMenuItemFactory(accessor: IAccessor): IMenuButt
     return {
         id: DeleteRangeMoveUpConfirmCommand.id,
         type: MenuItemType.BUTTON,
-        title: 'rightClick.moveUp',
+        title: 'sheets-ui.rightClick.moveUp',
         icon: 'DeleteCellShiftUpDoubleIcon',
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
         hidden$: getCellMenuHidden$(accessor, 'row'),

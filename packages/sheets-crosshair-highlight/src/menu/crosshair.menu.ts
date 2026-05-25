@@ -28,7 +28,7 @@ export function CrosshairHighlightMenuItemFactory(accessor: IAccessor): IMenuSel
 
     return {
         id: ToggleCrosshairHighlightOperation.id,
-        tooltip: 'crosshair.button.tooltip',
+        tooltip: 'sheets-crosshair-highlight.button.tooltip',
         type: MenuItemType.BUTTON_SELECTOR,
         icon: 'CrossHighlightingIcon',
         selections: [

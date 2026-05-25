@@ -28,6 +28,46 @@ const locale: typeof enUS = {
             partOfCell: 'Només una part d\'una cel·la combinada està seleccionada',
             hideSheet: 'No hi ha fulls visibles després d\'ocultar aquest',
         },
+        definedName: {
+            nameEmpty: '名称不能为空',
+            nameDuplicate: '名称已存在',
+            nameInvalid: '名称无效',
+            nameSheetConflict: '名称与工作表名称冲突',
+            formulaOrRefStringEmpty: '公式或引用字符串不能为空',
+            nameConflict: '名称与函数名称冲突',
+            defaultName: 'NomDefinit',
+        },
+        permission: {
+            dialog: {
+                autoFillErr: 'L\'interval està protegit i no teniu permís per a l\'emplenament automàtic. Per utilitzar l\'emplenament automàtic, contacteu amb el creador.',
+                editErr: 'L\'interval està protegit i no teniu permís d\'edició. Per editar, contacteu amb el creador.',
+                formulaErr: 'L\'interval o l\'interval referenciat està protegit, i no teniu permís d\'edició. Per editar, contacteu amb el creador.',
+                insertOrDeleteMoveRangeErr: 'L\'interval inserit o suprimit s\'interseca amb l\'interval protegit, i aquesta operació no és compatible per ara.',
+                insertRowColErr: 'L\'interval está protegido y no tienes permiso para insertar filas y columnas. Para insertar filas y columnas, contacta con el creador.',
+                moveRangeErr: 'L\'interval està protegit i no teniu permís per moure la selecció. Per moure la selecció, contacteu amb el creador.',
+                moveRowColErr: 'L\'interval està protegit i no teniu permís per moure files i columnes. Per moure files i columnes, contacteu amb el creador.',
+                operatorSheetErr: 'El full de càlcul està protegit i no teniu permís per operar-hi. Per operar al full de càlcul, contacteu amb el creador.',
+                removeRowColErr: 'L\'interval está protegido y no tienes permiso para eliminar filas y columnas. Para eliminar filas y columnas, contacta con el creador.',
+                setRowColStyleErr: 'L\'interval està protegit i no teniu permís per establir estils de fila i columna. Per establir estils de fila i columna, contacteu amb el creador.',
+                setStyleErr: 'L\'interval està protegit i no teniu permís per establir estils. Per establir estils, contacteu amb el creador.',
+            },
+        },
+
+        autoFill: {
+            copy: '复制单元格',
+            series: '填充序列',
+            formatOnly: '仅格式',
+            noFormat: '无格式',
+        },
+        merge: {
+            confirm: {
+                title: 'Continuar la fusió només conservarà el valor de la cel·la superior esquerra, descartant els altres valors. Estàs segur de continuar?',
+                cancel: 'Cancel·lar fusió',
+                confirm: 'Continuar fusió',
+                warning: 'Avís',
+                dismantleMergeCellWarning: 'Això dividirà algunes cel·les fusionades. Vols continuar?',
+            },
+        },
     },
 };
 

@@ -29,7 +29,7 @@ export const ExtendConfirm = (props: IExtendConfirmProps) => {
     return (
         <div className="univer-text-sm">
             <div className="extend-confirm-desc">
-                {localeService.t('sheets-sort.dialog.sort-reminder-desc')}
+                {localeService.t('sheets-sort-ui.dialog.sort-reminder-desc')}
             </div>
 
             <RadioGroup
@@ -42,10 +42,10 @@ export const ExtendConfirm = (props: IExtendConfirmProps) => {
                 }}
             >
                 <Radio value="0">
-                    {localeService.t('sheets-sort.dialog.sort-reminder-no')}
+                    {localeService.t('sheets-sort-ui.dialog.sort-reminder-no')}
                 </Radio>
                 <Radio value="1">
-                    {localeService.t('sheets-sort.dialog.sort-reminder-ext')}
+                    {localeService.t('sheets-sort-ui.dialog.sort-reminder-ext')}
                 </Radio>
             </RadioGroup>
         </div>

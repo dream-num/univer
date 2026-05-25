@@ -17,7 +17,7 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    threadCommentUI: {
+    'thread-comment-ui': {
         panel: {
             title: 'Quản lý Bình luận',
             empty: 'Chưa có bình luận',

@@ -15,49 +15,16 @@
  */
 
 import type enUS from './en-US';
-import array from './function-list/array/ko-KR';
-import compatibility from './function-list/compatibility/ko-KR';
-import cube from './function-list/cube/ko-KR';
-import database from './function-list/database/ko-KR';
-import date from './function-list/date/ko-KR';
-import engineering from './function-list/engineering/ko-KR';
-import financial from './function-list/financial/ko-KR';
-import information from './function-list/information/ko-KR';
-import logical from './function-list/logical/ko-KR';
-import lookup from './function-list/lookup/ko-KR';
-import math from './function-list/math/ko-KR';
-import statistical from './function-list/statistical/ko-KR';
-import text from './function-list/text/ko-KR';
-import univer from './function-list/univer/ko-KR';
-import web from './function-list/web/ko-KR';
 
 const locale: typeof enUS = {
-    shortcut: {
-        'sheets-formula-ui': {
+    'sheets-formula-ui': {
+        shortcut: {
             'quick-sum': '빠른 합계',
         },
-    },
-    formula: {
+
         insert: {
             tooltip: '함수',
             common: '자주 쓰는 함수',
-        },
-        functionList: {
-            ...financial,
-            ...date,
-            ...math,
-            ...statistical,
-            ...lookup,
-            ...database,
-            ...text,
-            ...logical,
-            ...information,
-            ...engineering,
-            ...cube,
-            ...compatibility,
-            ...web,
-            ...array,
-            ...univer,
         },
         prompt: {
             helpExample: '예제',
@@ -111,6 +78,15 @@ const locale: typeof enUS = {
         operation: {
             copyFormulaOnly: '수식만 복사',
             pasteFormula: '수식 붙여넣기',
+        },
+
+        rangeSelector: {
+            title: '데이터 범위 선택',
+            addAnotherRange: '범위 추가',
+            buttonTooltip: '데이터 범위 선택',
+            placeHolder: '범위를 선택하거나 입력하세요.',
+            confirm: '확인',
+            cancel: '취소',
         },
     },
 };

@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IDisposable, ILocales } from '@univerjs/core';
+import type { IDisposable, ILocales } from '@univerjs/core';
 import type { IFunctionInfo, ISetFormulaCalculationResultMutation } from '@univerjs/engine-formula';
 import type { CalculationMode, IRegisterAsyncFunction, IRegisterFunction, ISingleFunctionRegisterParams, IUniverSheetsFormulaBaseConfig } from '@univerjs/sheets-formula';
 import { debounce, IConfigService, ILogService, LifecycleService, LifecycleStages } from '@univerjs/core';
-import { FormulaExecuteStageType, SetFormulaCalculationResultMutation, SetTriggerFormulaCalculationStartMutation } from '@univerjs/engine-formula';
+import { SetTriggerFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import { FFormula } from '@univerjs/engine-formula/facade';
-import { SetRangeValuesMutation } from '@univerjs/sheets';
-import { IRegisterFunctionService, PLUGIN_CONFIG_KEY_BASE, RegisterFunctionService } from '@univerjs/sheets-formula';
+import { FormulaCalculationSessionService, IRegisterFunctionService, PLUGIN_CONFIG_KEY_BASE, RegisterFunctionService } from '@univerjs/sheets-formula';
 
 /**
  * @ignore
@@ -300,17 +299,13 @@ export interface IFFormulaSheetsMixin {
     /**
      * Waits for formula-calculation results to be applied.
      *
-     * This method resolves under three conditions:
-     * 1. A real calculation runs and the engine emits a "calculation started" signal,
-     *    followed by a "calculation result applied" signal.
-     * 2. No calculation actually starts within 500 ms — the method assumes there is
-     *    nothing to wait for and resolves automatically.
-     * 3. A global 30 s timeout triggers, in which case the promise rejects.
+     * The API follows the latest formula-calculation session. If a running
+     * calculation is stopped and immediately restarted, the promise waits for
+     * the restarted session to apply its results.
      *
-     * The API internally listens to both “calculation in progress” events and
-     * “calculation result applied” events, ensuring it behaves correctly whether
-     * formulas are recalculated or skipped due to cache/state.
-     *
+     * @param {number} [timeout] Optional timeout in milliseconds. If omitted,
+     * the promise waits until calculation results are applied or no calculation
+     * occurs within the start-detection window.
      * @returns {Promise<void>} A promise that resolves when calculation results are applied
      * or when no calculation occurs within the start-detection window.
      *
@@ -325,7 +320,7 @@ export interface IFFormulaSheetsMixin {
      * console.log("Updated value:", value);
      * ```
      */
-    onCalculationResultApplied(): Promise<void>;
+    onCalculationResultApplied(timeout?: number): Promise<void>;
 }
 
 export class FFormulaSheetsMixin extends FFormula implements IFFormulaSheetsMixin {
@@ -427,95 +422,19 @@ export class FFormulaSheetsMixin extends FFormula implements IFFormulaSheetsMixi
     }
 
     override calculationResultApplied(callback: (result: ISetFormulaCalculationResultMutation) => void): IDisposable {
-        let setFormulaCalculationResult = false;
-        let applyFormulaCalculationResult = false;
-        let result: ISetFormulaCalculationResultMutation | null = null;
-
-        return this._commandService.onCommandExecuted((command: ICommandInfo, options) => {
-            if (command.id !== SetFormulaCalculationResultMutation.id && command.id !== SetRangeValuesMutation.id) {
-                return;
-            }
-
-            if (command.id === SetFormulaCalculationResultMutation.id) {
-                setFormulaCalculationResult = true;
-                result = command.params as ISetFormulaCalculationResultMutation;
-                applyFormulaCalculationResult = applyFormulaCalculationResult || !this._hasFormulaResultToApply(result);
-            }
-
-            if (command.id === SetRangeValuesMutation.id && options?.applyFormulaCalculationResult) {
-                applyFormulaCalculationResult = true;
-            }
-
-            if (!setFormulaCalculationResult || !applyFormulaCalculationResult) {
-                return;
-            }
-
+        const subscription = this._injector.get(FormulaCalculationSessionService).resultApplied$.subscribe((result) => {
             requestIdleCallback(() => {
-                callback(result!);
+                callback(result);
             });
         });
+
+        return {
+            dispose: () => subscription.unsubscribe(),
+        };
     }
 
-    private _hasFormulaResultToApply(result: ISetFormulaCalculationResultMutation): boolean {
-        const { unitData } = result;
-        return Object.values(unitData ?? {}).some((sheetData) =>
-            sheetData != null && Object.values(sheetData).some((cellData) => cellData != null)
-        );
-    }
-
-    override onCalculationResultApplied(): Promise<void> {
-        return new Promise((resolve, reject) => {
-            let started = false;
-            let finished = false;
-
-            // Global timeout: reject if the whole calculation hangs
-            const mainTimer = setTimeout(() => {
-                cleanup();
-                reject(new Error('Calculation end timeout'));
-            }, 60_000);
-
-            // Watchdog: if no "calculation started" signal is received within 500ms,
-            // assume there is no real calculation running and resolve immediately.
-            const startWatchdog = setTimeout(() => {
-                if (!started) {
-                    cleanup();
-                    resolve();
-                }
-            }, 500);
-
-            // Listen for "calculation in progress" signal (stageInfo)
-            const processingDisposable = this.calculationProcessing((stageInfo) => {
-                // If no formulas to calculate, resolve immediately
-                const { stage, totalArrayFormulasToCalculate, totalFormulasToCalculate } = stageInfo;
-                if (stage === FormulaExecuteStageType.START_CALCULATION && totalArrayFormulasToCalculate + totalFormulasToCalculate === 0) {
-                    cleanup();
-                    resolve();
-                    return;
-                }
-
-                if (started) return;
-                started = true;
-
-                // A start signal is received → no need for the watchdog anymore
-                clearTimeout(startWatchdog);
-            });
-
-            // Listen for the "calculation completed" signal
-            const endDisposable = this.calculationResultApplied(() => {
-                if (finished) return;
-                finished = true;
-
-                cleanup();
-                resolve();
-            });
-
-            function cleanup(): void {
-                clearTimeout(mainTimer);
-                clearTimeout(startWatchdog);
-                processingDisposable.dispose();
-                endDisposable.dispose();
-            }
-        });
+    override onCalculationResultApplied(timeout?: number): Promise<void> {
+        return this._injector.get(FormulaCalculationSessionService).waitForLatestApplied(timeout);
     }
 }
 

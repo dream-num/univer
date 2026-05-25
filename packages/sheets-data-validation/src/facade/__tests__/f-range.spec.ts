@@ -19,7 +19,7 @@
 import type { Injector } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
 import { DataValidationType, ICommandService } from '@univerjs/core';
-import { FormulaExecuteStageType, SetFormulaCalculationResultMutation } from '@univerjs/engine-formula';
+import { FormulaExecuteStageType, SetFormulaCalculationNotificationMutation, SetFormulaCalculationResultMutation, SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import { AddSheetDataValidationCommand, DataValidationCustomFormulaService } from '@univerjs/sheets-data-validation';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createFacadeTestBed } from './create-test-bed';
@@ -39,6 +39,8 @@ describe('Test FRange', () => {
 
         commandService = get(ICommandService);
         commandService.registerCommand(AddSheetDataValidationCommand);
+        commandService.registerCommand(SetFormulaCalculationStartMutation);
+        commandService.registerCommand(SetFormulaCalculationNotificationMutation);
         commandService.registerCommand(SetFormulaCalculationResultMutation);
 
         vi.stubGlobal('requestIdleCallback', ((callback: IdleRequestCallback) => {
@@ -79,19 +81,6 @@ describe('Test FRange', () => {
         const range = activeSheet.getRange(0, 0, 1, 1);
         const formula = univerAPI.getFormula();
 
-        vi.spyOn(formula, 'calculationProcessing').mockImplementation((callback) => {
-            callback({
-                stage: FormulaExecuteStageType.START_CALCULATION,
-                completedFormulasCount: 0,
-                completedArrayFormulasCount: 0,
-                formulaCycleIndex: 0,
-                totalArrayFormulasToCalculate: 0,
-                totalFormulasToCalculate: 1,
-            });
-
-            return { dispose: () => {} };
-        });
-
         const rule = univerAPI.newDataValidation()
             .requireFormulaSatisfied('=A1>0')
             .build();
@@ -103,6 +92,18 @@ describe('Test FRange', () => {
         expect(registeredFormula?.formula).toBe('=A1>0');
 
         const waitForResult = formula.onCalculationResultApplied();
+
+        await commandService.executeCommand(SetFormulaCalculationStartMutation.id, {}, { onlyLocal: true });
+        await commandService.executeCommand(SetFormulaCalculationNotificationMutation.id, {
+            stageInfo: {
+                stage: FormulaExecuteStageType.START_CALCULATION,
+                completedFormulasCount: 0,
+                completedArrayFormulasCount: 0,
+                formulaCycleIndex: 0,
+                totalArrayFormulasToCalculate: 0,
+                totalFormulasToCalculate: 1,
+            },
+        });
 
         await commandService.executeCommand(SetFormulaCalculationResultMutation.id, {
             unitData: {},

@@ -42,6 +42,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { CalculationMode, PLUGIN_CONFIG_KEY_BASE } from '../../config/config';
 import { createFacadeTestBed } from '../../facade/__tests__/create-test-bed';
+import { FormulaCalculationSessionService } from '../../services/formula-calculation-session.service';
+import { FormulaCalculationSessionController } from '../formula-calculation-session.controller';
 import { TriggerCalculationController } from '../trigger-calculation.controller';
 
 function createWorkbookData(): IWorkbookData {
@@ -72,6 +74,8 @@ function createControllerTestBed() {
     const dependencies: Dependency[] = [
         [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
         [RegisterOtherFormulaService],
+        [FormulaCalculationSessionService],
+        [FormulaCalculationSessionController],
         [TriggerCalculationController],
     ];
 
@@ -118,6 +122,7 @@ function createControllerTestBed() {
         });
     });
 
+    injector.get(FormulaCalculationSessionController);
     const controller = injector.get(TriggerCalculationController);
 
     return {

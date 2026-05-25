@@ -333,8 +333,7 @@ const locale: typeof enUS = {
             deleteConfirmText: 'Êtes-vous sûr de vouloir supprimer ce nom défini?',
         },
         uploadLoading: {
-            loading: 'Chargement..., restant', // 正在上传，当前剩余
-            error: 'Erreur', // 加载失败
+            loading: 'Chargement..., restant',
         },
         permission: {
             toolbarMenu: 'Protection',

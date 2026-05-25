@@ -334,7 +334,6 @@ const locale: typeof enUS = {
         },
         uploadLoading: {
             loading: '正在上傳，目前剩餘',
-            error: '載入失敗',
         },
         permission: {
             toolbarMenu: '保護',

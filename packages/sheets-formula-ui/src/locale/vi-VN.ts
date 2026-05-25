@@ -82,6 +82,14 @@ const locale: typeof enUS = {
             copyFormulaOnly: 'Chỉ sao chép công thức',
             pasteFormula: 'Chỉ dán công thức',
         },
+        rangeSelector: {
+            title: 'Chọn một phạm vi dữ liệu',
+            addAnotherRange: 'Thêm phạm vi',
+            buttonTooltip: 'Chọn phạm vi dữ liệu',
+            placeHolder: 'Chọn phạm vi hoặc nhập',
+            confirm: 'Xác nhận',
+            cancel: 'Hủy',
+        },
     },
 
 };

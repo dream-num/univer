@@ -333,8 +333,7 @@ const locale: typeof enUS = {
             deleteConfirmText: 'آیا مطمئن هستید که می‌خواهید این نام تعریف شده را حذف کنید؟',
         },
         uploadLoading: {
-            loading: 'در حال بارگیری...، باقی مانده', // 正在上传，当前剩余
-            error: 'خطا', // 加载失败
+            loading: 'در حال بارگیری...، باقی مانده',
         },
         permission: {
             toolbarMenu: 'محافظت',

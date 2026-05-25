@@ -334,7 +334,6 @@ const locale: typeof enUS = {
         },
         uploadLoading: {
             loading: 'Đang tải lên, hiện còn lại',
-            error: 'Tải thất bại',
         },
         permission: {
             toolbarMenu: 'Bảo vệ',

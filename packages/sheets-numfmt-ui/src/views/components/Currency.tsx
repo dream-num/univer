@@ -74,7 +74,7 @@ export const CurrencyPanel: FC<IBusinessComponentProps> = (props) => {
         <div>
             <div className="univer-mt-4 univer-flex univer-justify-between">
                 <div className="option">
-                    <div className="univer-text-sm univer-text-gray-400">{t('sheet.numfmt.decimalLength')}</div>
+                    <div className="univer-text-sm univer-text-gray-400">{t('sheets-numfmt-ui.decimalLength')}</div>
                     <div className="univer-mt-2 univer-w-32">
                         <InputNumber
                             value={decimal}
@@ -85,7 +85,7 @@ export const CurrencyPanel: FC<IBusinessComponentProps> = (props) => {
                     </div>
                 </div>
                 <div className="option">
-                    <div className="univer-text-sm univer-text-gray-400">{t('sheet.numfmt.currencyType')}</div>
+                    <div className="univer-text-sm univer-text-gray-400">{t('sheets-numfmt-ui.currencyType')}</div>
                     <div className="univer-mt-2 univer-w-36">
                         <Select
                             value={suffix}
@@ -96,14 +96,14 @@ export const CurrencyPanel: FC<IBusinessComponentProps> = (props) => {
                 </div>
             </div>
             <div className="label univer-mt-4">
-                {t('sheet.numfmt.negType')}
+                {t('sheets-numfmt-ui.negType')}
             </div>
 
             <div className="univer-mt-2">
                 <SelectList value={pattern} options={negativeOptions} onChange={onChange} />
             </div>
 
-            <div className="univer-mt-4 univer-text-sm univer-text-gray-400">{t('sheet.numfmt.currencyDes')}</div>
+            <div className="univer-mt-4 univer-text-sm univer-text-gray-400">{t('sheets-numfmt-ui.currencyDes')}</div>
         </div>
     );
 };

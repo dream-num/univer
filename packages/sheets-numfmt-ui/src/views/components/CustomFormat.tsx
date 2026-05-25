@@ -70,9 +70,9 @@ export function CustomFormat(props: IBusinessComponentProps) {
 
     return (
         <div>
-            <div className="univer-mt-4 univer-text-sm univer-text-gray-400">{localeService.t('sheet.numfmt.customFormat')}</div>
+            <div className="univer-mt-4 univer-text-sm univer-text-gray-400">{localeService.t('sheets-numfmt-ui.customFormat')}</div>
             <Input
-                placeholder={localeService.t('sheet.numfmt.customFormat')}
+                placeholder={localeService.t('sheets-numfmt-ui.customFormat')}
                 onBlur={handleBlur}
                 value={pattern}
                 onChange={setPattern}
@@ -105,7 +105,7 @@ export function CustomFormat(props: IBusinessComponentProps) {
                   dark:!univer-text-gray-200
                 `}
             >
-                {localeService.t('sheet.numfmt.customFormatDes')}
+                {localeService.t('sheets-numfmt-ui.customFormatDes')}
             </div>
         </div>
     );

@@ -28,7 +28,7 @@ import { ColorPicker } from '../../color-picker';
 import { Preview } from '../../preview';
 import { previewClassName } from './styles';
 
-const createOptionItem = (text: CFValueType, localeService: LocaleService) => ({ label: localeService.t(`sheet.cf.valueType.${text}`), value: text });
+const createOptionItem = (text: CFValueType, localeService: LocaleService) => ({ label: localeService.t(`sheets-conditional-formatting-ui.valueType.${text}`), value: text });
 
 const InputText = (props: { disabled?: boolean; id: string; className: string; type: CFValueType; value: string | number; onChange: (v: string | number) => void }) => {
     const { onChange, className, value, type, id, disabled = false } = props;
@@ -261,7 +261,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                   dark:!univer-text-gray-200
                 `}
             >
-                {localeService.t('sheet.cf.panel.styleRule')}
+                {localeService.t('sheets-conditional-formatting-ui.panel.styleRule')}
             </div>
             <div className={previewClassName}>
                 <Preview
@@ -284,7 +284,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                       dark:!univer-text-gray-200
                     `}
                 >
-                    {localeService.t('sheet.cf.panel.fillType')}
+                    {localeService.t('sheets-conditional-formatting-ui.panel.fillType')}
                 </div>
 
                 <div className="univer-ml-1 univer-mt-3 univer-flex univer-items-center">
@@ -305,10 +305,10 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                         }}
                     >
                         <Radio value="0">
-                            <span className="univer-text-xs">{localeService.t('sheet.cf.panel.pureColor')}</span>
+                            <span className="univer-text-xs">{localeService.t('sheets-conditional-formatting-ui.panel.pureColor')}</span>
                         </Radio>
                         <Radio value="1">
-                            <span className="univer-text-xs">{localeService.t('sheet.cf.panel.gradient')}</span>
+                            <span className="univer-text-xs">{localeService.t('sheets-conditional-formatting-ui.panel.gradient')}</span>
                         </Radio>
                     </RadioGroup>
                     <div className="univer-ml-6 univer-flex univer-items-center univer-text-xs">
@@ -328,7 +328,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                                 });
                             }}
                         />
-                        {localeService.t('sheet.cf.panel.onlyShowDataBar')}
+                        {localeService.t('sheets-conditional-formatting-ui.panel.onlyShowDataBar')}
                     </div>
                 </div>
             </div>
@@ -339,12 +339,12 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                       dark:!univer-text-gray-200
                     `}
                 >
-                    {localeService.t('sheet.cf.panel.colorSet')}
+                    {localeService.t('sheets-conditional-formatting-ui.panel.colorSet')}
                 </div>
                 <div className="univer-ml-1 univer-mt-3 univer-flex univer-items-center">
                     <div className="univer-flex univer-items-center">
                         <div className="univer-text-xs">
-                            {localeService.t('sheet.cf.panel.native')}
+                            {localeService.t('sheets-conditional-formatting-ui.panel.native')}
                         </div>
                         <ColorPicker
                             color={nativeColor}
@@ -353,7 +353,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                     </div>
                     <div className="univer-ml-3 univer-flex univer-items-center">
                         <div className="univer-text-xs">
-                            {localeService.t('sheet.cf.panel.positive')}
+                            {localeService.t('sheets-conditional-formatting-ui.panel.positive')}
                         </div>
                         <ColorPicker
                             color={positiveColor}
@@ -370,7 +370,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                       dark:!univer-text-gray-200
                     `}
                 >
-                    {localeService.t('sheet.cf.valueType.min')}
+                    {localeService.t('sheets-conditional-formatting-ui.valueType.min')}
                 </div>
                 <div className="univer-mt-3 univer-flex univer-items-center">
                     <Select
@@ -421,7 +421,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                       dark:!univer-text-gray-200
                     `}
                 >
-                    {localeService.t('sheet.cf.valueType.max')}
+                    {localeService.t('sheets-conditional-formatting-ui.valueType.max')}
                 </div>
                 <div className="univer-mt-3 univer-flex univer-items-center">
                     <Select

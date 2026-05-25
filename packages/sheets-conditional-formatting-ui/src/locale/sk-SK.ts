@@ -172,6 +172,11 @@ const locale: typeof enUS = {
             formulaError: 'Nesprávny vzorec',
             rangeError: 'Nesprávny výber',
         },
+        permission: {
+            dialog: {
+                setStyleErr: 'Rozsah je chránený a nemáte oprávnenie nastavovať štýly. Ak chcete nastavovať štýly, kontaktujte autora.',
+            },
+        },
     },
 };
 

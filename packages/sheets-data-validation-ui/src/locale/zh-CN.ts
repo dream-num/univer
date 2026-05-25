@@ -116,6 +116,11 @@ const locale: typeof enUS = {
         showTime: {
             label: '展示时间选择',
         },
+        permission: {
+            dialog: {
+                setStyleErr: '该范围已被保护，目前无设置样式权限。如需设置样式，请联系创建者。',
+            },
+        },
     },
 };
 

@@ -116,6 +116,11 @@ const locale: typeof enUS = {
         showTime: {
             label: 'Afficher le sélecteur de temps',
         },
+        permission: {
+            dialog: {
+                setStyleErr: 'La plage est protégée, et vous n\'avez pas la permission de définir les styles. Pour définir les styles, veuillez contacter le créateur.',
+            },
+        },
     },
 };
 

@@ -68,6 +68,11 @@ const locale: typeof enUS = {
             pasteContent: '粘贴单元格图片将覆盖单元格中的现有内容，继续粘贴',
             pasteError: '此单元中不支持单元格图片复制粘贴',
         },
+        permission: {
+            dialog: {
+                editErr: '该范围已被保护，目前无编辑权限。如需编辑，请联系创建者。',
+            },
+        },
     },
 };
 

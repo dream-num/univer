@@ -68,6 +68,11 @@ const locale: typeof enUS = {
             pasteContent: '貼上儲存格圖片將覆蓋儲存格中的現有內容，繼續貼上',
             pasteError: '此儲存格不支援儲存格圖片複製貼上',
         },
+        permission: {
+            dialog: {
+                editErr: '該範圍已被保護，目前無編輯權限。如需編輯，請聯絡創建者。 ',
+            },
+        },
     },
 };
 

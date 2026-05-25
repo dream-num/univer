@@ -430,7 +430,7 @@ export class SheetDrawingPermissionController extends Disposable {
                     worksheetTypes: [WorksheetEditPermission],
                 }, unitId, subUnitId);
                 if (!permission) {
-                    this._sheetPermissionCheckController.blockExecuteWithoutPermission(this._localeService.t('permission.dialog.editErr'));
+                    this._sheetPermissionCheckController.blockExecuteWithoutPermission(this._localeService.t('sheets-drawing-ui.permission.dialog.editErr'));
                 }
             })
         );

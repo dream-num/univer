@@ -68,6 +68,11 @@ const locale: typeof enUS = {
             pasteContent: 'Pegar una imagen de celda sobrescribirá el contenido existente de la celda, continuar pegando',
             pasteError: 'La copia y pegado de imágenes de celda de hoja no está soportada en esta unidad',
         },
+        permission: {
+            dialog: {
+                editErr: 'El rango está protegido y no tienes permiso de edición. Para editar, contacta al creador.',
+            },
+        },
     },
 };
 

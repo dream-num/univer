@@ -171,6 +171,11 @@ const locale: typeof enUS = {
             formulaError: 'فرمول اشتباه',
             rangeError: 'Bad selection',
         },
+        permission: {
+            dialog: {
+                setStyleErr: 'محدوده محافظت شده است و شما مجوز تنظیم سبک‌ها را ندارید. برای تنظیم سبک‌ها، لطفا با سازنده تماس بگیرید.',
+            },
+        },
     },
 };
 

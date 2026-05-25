@@ -33,6 +33,22 @@ const locale = {
             nameSheetConflict: 'The name conflicts with the sheet name',
             formulaOrRefStringEmpty: 'Formula or reference string cannot be empty',
             nameConflict: 'The name conflicts with the function name',
+            defaultName: 'DefinedName',
+        },
+        permission: {
+            dialog: {
+                autoFillErr: 'The range is protected, and you do not have permission for auto-fill. To use auto-fill, please contact the creator.',
+                editErr: 'The range is protected, and you do not have edit permission. To edit, please contact the creator.',
+                formulaErr: 'The range or the referenced range is protected, and you do not have edit permission. To edit, please contact the creator.',
+                insertOrDeleteMoveRangeErr: 'The inserted or deleted range intersects with the protected range, and this operation is not supported for now.',
+                insertRowColErr: 'The range is protected, and you do not have permission to insert rows and columns. To insert rows and columns, please contact the creator.',
+                moveRangeErr: 'The range is protected, and you do not have permission to move the selection. To move the selection, please contact the creator.',
+                moveRowColErr: 'The range is protected, and you do not have permission to move rows and columns. To move rows and columns, please contact the creator.',
+                operatorSheetErr: 'The worksheet is protected, and you do not have permission to operate the worksheet. To operate the worksheet, please contact the creator.',
+                removeRowColErr: 'The range is protected, and you do not have permission to delete rows and columns. To delete rows and columns, please contact the creator.',
+                setRowColStyleErr: 'The range is protected, and you do not have permission to set row and column styles. To set row and column styles, please contact the creator.',
+                setStyleErr: 'The range is protected, and you do not have permission to set styles. To set styles, please contact the creator.',
+            },
         },
         autoFill: {
             copy: 'Copy Cell',

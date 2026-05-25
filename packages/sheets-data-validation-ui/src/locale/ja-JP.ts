@@ -116,6 +116,11 @@ const locale: typeof enUS = {
         showTime: {
             label: '時間セレクターを表示',
         },
+        permission: {
+            dialog: {
+                setStyleErr: 'この範囲は保護されており、スタイルを変更する権限がありません。変更するには作成者に連絡してください。',
+            },
+        },
     },
 };
 

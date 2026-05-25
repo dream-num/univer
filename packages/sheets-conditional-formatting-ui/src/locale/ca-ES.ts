@@ -171,6 +171,11 @@ const locale: typeof enUS = {
             formulaError: 'Fórmula incorrecta',
             rangeError: 'Selecció incorrecta',
         },
+        permission: {
+            dialog: {
+                setStyleErr: 'L\'interval està protegit i no teniu permís per establir estils. Per establir estils, contacteu amb el creador.',
+            },
+        },
     },
 };
 

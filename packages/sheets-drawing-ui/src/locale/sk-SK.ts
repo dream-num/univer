@@ -68,6 +68,11 @@ const locale: typeof enUS = {
             pasteContent: 'Prilepením obrázka bunky sa prepíše existujúci obsah bunky, pokračovať',
             pasteError: 'Kopírovanie a prilepovanie obrázkov buniek v tomto module nie je podporované',
         },
+        permission: {
+            dialog: {
+                editErr: 'Rozsah je chránený a nemáte oprávnenie na úpravy. Ak chcete upravovať, kontaktujte autora.',
+            },
+        },
     },
 };
 

@@ -171,6 +171,11 @@ const locale: typeof enUS = {
             formulaError: '数式が正しくありません。',
             rangeError: '範囲が正しくありません。',
         },
+        permission: {
+            dialog: {
+                setStyleErr: 'この範囲は保護されており、スタイルを変更する権限がありません。変更するには作成者に連絡してください。',
+            },
+        },
     },
 };
 

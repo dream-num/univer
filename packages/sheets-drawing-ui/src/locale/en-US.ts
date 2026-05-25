@@ -66,6 +66,11 @@ const locale = {
             pasteContent: 'Pasting a cell image will overwrite the existing content of the cell, continue pasting',
             pasteError: 'Sheet cell image copy paste is not supported in this unit',
         },
+        permission: {
+            dialog: {
+                editErr: 'The range is protected, and you do not have edit permission. To edit, please contact the creator.',
+            },
+        },
     },
 };
 

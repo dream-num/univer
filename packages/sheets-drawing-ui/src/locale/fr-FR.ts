@@ -68,6 +68,11 @@ const locale: typeof enUS = {
             pasteContent: 'Coller une image de cellule écrasera le contenu existant de la cellule, continuer le collage',
             pasteError: 'Le copier-coller d\'image de cellule n\'est pas pris en charge dans cette unité',
         },
+        permission: {
+            dialog: {
+                editErr: 'La plage est protégée, et vous n\'avez pas la permission de modifier. Pour modifier, veuillez contacter le créateur.',
+            },
+        },
     },
 };
 

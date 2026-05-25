@@ -116,6 +116,11 @@ const locale: typeof enUS = {
         showTime: {
             label: '시간 선택기 표시',
         },
+        permission: {
+            dialog: {
+                setStyleErr: '해당 범위는 보호되어 있어 스타일 지정 권한이 없습니다. 스타일을 변경하려면 작성자에게 문의하세요.',
+            },
+        },
     },
 };
 

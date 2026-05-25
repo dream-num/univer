@@ -31,18 +31,18 @@ import { RangeProtectionRuleModel, RemoveDefinedNameCommand, SCOPE_WORKBOOK_VALU
 function getDefinedNameFieldName(unitId: string, localeService: LocaleService, definedNamesService: IDefinedNamesService): string {
     const definedNameMap = definedNamesService.getDefinedNameMap(unitId);
     if (definedNameMap == null) {
-        return localeService.t('definedName.defaultName') + 1;
+        return localeService.t('sheets.definedName.defaultName') + 1;
     }
     const definedNames = Array.from(Object.values(definedNameMap));
     const count = definedNames.length + 1;
-    const name = localeService.t('definedName.defaultName') + count;
+    const name = localeService.t('sheets.definedName.defaultName') + count;
     if (definedNamesService.getValueByName(unitId, name) == null) {
         return name;
     }
 
     let i = count + 1;
     while (true) {
-        const newName = localeService.t('definedName.defaultName') + i;
+        const newName = localeService.t('sheets.definedName.defaultName') + i;
         if (definedNamesService.getValueByName(unitId, newName) == null) {
             return newName;
         }

@@ -57,6 +57,6 @@ describe('DataValidationPermissionController', () => {
 
         expect(permissionCheckWithRanges).toHaveBeenCalledTimes(2);
         expect(blockExecuteWithoutPermission).toHaveBeenCalledTimes(2);
-        expect(blockExecuteWithoutPermission).toHaveBeenCalledWith('permission.dialog.setStyleErr');
+        expect(blockExecuteWithoutPermission).toHaveBeenCalledWith('sheets-data-validation-ui.permission.dialog.setStyleErr');
     });
 });

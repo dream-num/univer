@@ -173,6 +173,11 @@ const locale: typeof enUS = {
             rangeError: '选区错误',
             formulaError: '公式错误',
         },
+        permission: {
+            dialog: {
+                setStyleErr: '该范围已被保护，目前无设置样式权限。如需设置样式，请联系创建者。',
+            },
+        },
     },
 };
 

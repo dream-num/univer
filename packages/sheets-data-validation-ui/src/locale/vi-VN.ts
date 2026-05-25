@@ -116,6 +116,11 @@ const locale: typeof enUS = {
         showTime: {
             label: 'Hiển thị lựa chọn thởi gian',
         },
+        permission: {
+            dialog: {
+                setStyleErr: 'Phạm vi này đã được bảo vệ, hiện không có quyền thiết lập kiểu. Nếu cần thiết lập kiểu, vui lòng liên hệ với người tạo.',
+            },
+        },
     },
 };
 

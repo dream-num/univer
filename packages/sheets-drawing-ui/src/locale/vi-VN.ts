@@ -68,6 +68,11 @@ const locale: typeof enUS = {
             pasteContent: 'Dán hình ảnh ô sẽ ghi đè lên nội dung hiện có của ô, tiếp tục dán',
             pasteError: 'Sao chép và dán hình ảnh ô không được hỗ trợ trong đơn vị này',
         },
+        permission: {
+            dialog: {
+                editErr: 'Phạm vi này đã được bảo vệ, hiện không có quyền chỉnh sửa. Nếu cần chỉnh sửa, vui lòng liên hệ với người tạo.',
+            },
+        },
     },
 };
 

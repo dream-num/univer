@@ -35,6 +35,22 @@ const locale: typeof enUS = {
             nameSheetConflict: '名稱與工作表名稱衝突',
             formulaOrRefStringEmpty: '公式或引用字串不能為空',
             nameConflict: '名稱與函數名稱衝突',
+            defaultName: 'DefinedName',
+        },
+        permission: {
+            dialog: {
+                autoFillErr: '範圍已被保護，目前無自動填入權限。如需自動填充，請聯絡建立者。 ',
+                editErr: '該範圍已被保護，目前無編輯權限。如需編輯，請聯絡創建者。 ',
+                formulaErr: '該範圍或引用範圍已被保護，目前無編輯權限。如需編輯，請聯絡創建者。 ',
+                insertOrDeleteMoveRangeErr: '插入、刪除區域與保護範圍相交，暫不支援此操作。 ',
+                insertRowColErr: '該範圍已被保護，目前無插入欄列權限。如需插入欄列，請聯絡創作者。 ',
+                moveRangeErr: '該範圍已被保護，目前無移動選取範圍權限。如需移動選區，請聯絡創作者。 ',
+                moveRowColErr: '該範圍已被保護，目前無移動欄列權限。如需行動欄列，請聯絡創作者。 ',
+                operatorSheetErr: '該工作表已被保護，目前無操作工作表權限。如需操作工作表，請聯絡創建者。 ',
+                removeRowColErr: '該範圍已被保護，目前無刪除欄列權限。如需刪除欄列，請聯絡創作者。 ',
+                setRowColStyleErr: '該範圍已被保護，目前無設定欄列樣式權限。如需設定欄列樣式，請聯絡建立者。 ',
+                setStyleErr: '該範圍已被保護，目前無設定樣式權限。如需設定樣式，請聯絡建立者。 ',
+            },
         },
         autoFill: {
             copy: '複製儲存格',

@@ -68,6 +68,11 @@ const locale: typeof enUS = {
             pasteContent: '셀 이미지 붙여넣기는 기존 셀 내용을 덮어씁니다. 계속 진행하시겠습니까?',
             pasteError: '이 단위에서는 시트 셀 이미지 복사 붙여넣기를 지원하지 않습니다',
         },
+        permission: {
+            dialog: {
+                editErr: '해당 범위는 보호되어 있어 편집 권한이 없습니다. 편집하려면 작성자에게 문의하세요.',
+            },
+        },
     },
 };
 

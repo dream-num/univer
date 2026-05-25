@@ -35,6 +35,22 @@ const locale: typeof enUS = {
             nameSheetConflict: '이름이 시트 이름과 충돌합니다',
             formulaOrRefStringEmpty: '수식 또는 참조 문자열은 비워 둘 수 없습니다',
             nameConflict: '이름이 함수 이름과 충돌합니다',
+            defaultName: '기본값',
+        },
+        permission: {
+            dialog: {
+                autoFillErr: '해당 범위는 보호되어 있어 자동 채우기 기능을 사용할 수 없습니다. 사용하려면 작성자에게 문의하세요.',
+                editErr: '해당 범위는 보호되어 있어 편집 권한이 없습니다. 편집하려면 작성자에게 문의하세요.',
+                formulaErr: '이 범위 또는 참조된 범위는 보호되어 있어 수식을 편집할 수 없습니다. 편집하려면 작성자에게 문의하세요.',
+                insertOrDeleteMoveRangeErr: '삽입 또는 삭제한 범위가 보호된 범위와 겹치므로, 이 작업은 현재 지원되지 않습니다.',
+                insertRowColErr: '해당 범위는 보호되어 있어 행이나 열을 삽입할 수 없습니다. 삽입하려면 작성자에게 문의하세요.',
+                moveRangeErr: '해당 범위는 보호되어 있어 선택 영역을 이동할 수 없습니다. 이동하려면 작성자에게 문의하세요.',
+                moveRowColErr: '해당 범위는 보호되어 있어 행이나 열을 이동할 수 없습니다. 이동하려면 작성자에게 문의하세요.',
+                operatorSheetErr: '이 워크시트는 보호되어 있어 작업할 수 없습니다. 작업하려면 작성자에게 문의하세요.',
+                removeRowColErr: '해당 범위는 보호되어 있어 행이나 열을 삭제할 수 없습니다. 삭제하려면 작성자에게 문의하세요.',
+                setRowColStyleErr: '해당 범위는 보호되어 있어 행/열 스타일 지정 권한이 없습니다. 스타일을 변경하려면 작성자에게 문의하세요.',
+                setStyleErr: '해당 범위는 보호되어 있어 스타일 지정 권한이 없습니다. 스타일을 변경하려면 작성자에게 문의하세요.',
+            },
         },
         autoFill: {
             copy: '셀 복사',

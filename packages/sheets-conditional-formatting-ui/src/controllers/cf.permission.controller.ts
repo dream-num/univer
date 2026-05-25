@@ -43,7 +43,7 @@ export class ConditionalFormattingPermissionController extends Disposable {
                         worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
                     }, ranges, unitId, subUnitId);
                     if (!permission) {
-                        this._sheetPermissionCheckController.blockExecuteWithoutPermission(this._localeService.t('permission.dialog.setStyleErr'));
+                        this._sheetPermissionCheckController.blockExecuteWithoutPermission(this._localeService.t('sheets-conditional-formatting-ui.permission.dialog.setStyleErr'));
                     }
                 }
             })

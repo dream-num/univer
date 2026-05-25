@@ -116,6 +116,11 @@ const locale: typeof enUS = {
         showTime: {
             label: 'Mostra el selector d’hora',
         },
+        permission: {
+            dialog: {
+                setStyleErr: 'L\'interval està protegit i no teniu permís per establir estils. Per establir estils, contacteu amb el creador.',
+            },
+        },
     },
 };
 

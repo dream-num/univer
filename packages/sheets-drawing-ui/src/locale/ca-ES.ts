@@ -68,6 +68,11 @@ const locale: typeof enUS = {
             pasteContent: 'Enganxar una imatge de cel·la sobreescriurà el contingut existent de la cel·la, continuar enganxant',
             pasteError: 'La còpia i enganxat d’imatges de cel·la de full no està suportada en aquesta unitat',
         },
+        permission: {
+            dialog: {
+                editErr: 'L\'interval està protegit i no teniu permís d\'edició. Per editar, contacteu amb el creador.',
+            },
+        },
     },
 };
 

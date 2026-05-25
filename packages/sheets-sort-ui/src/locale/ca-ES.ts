@@ -44,6 +44,9 @@ const locale: typeof enUS = {
             cancel: 'Cancel·lar',
             confirm: 'Confirmar',
         },
+        info: {
+            tooltip: 'Informació sobre l\'eina',
+        },
     },
 };
 

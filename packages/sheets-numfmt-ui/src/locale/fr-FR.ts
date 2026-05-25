@@ -51,6 +51,10 @@ const locale: typeof enUS = {
         subtractDecimal: 'Diminuer les décimales',
         customFormat: 'Format personnalisé',
         customFormatDes: 'Générer des formats de nombre personnalisés basés sur des formats existants.',
+        info: {
+            error: 'Erreur',
+            forceStringInfo: 'Nombre stocké en tant que texte',
+        },
     },
 };
 

@@ -108,19 +108,8 @@ const locale: typeof enUS = {
             cancel: '取消合併',
             overlappingError: '不能合併重疊區域',
             partiallyError: '無法對部分合併儲存格執行此操作',
-            confirm: {
-                title: '合併儲存格僅儲存左上角儲存格的值，是否繼續？ ',
-                cancel: '取消合併',
-                confirm: '繼續合併',
-                warning: '警告',
-                dismantleMergeCellWarning: '此操作會導致一些合併儲存格被拆散，是否繼續?',
-            },
         },
         filter: {
-            confirm: {
-                error: '出現了一個問題',
-                notAllowedToInsertRange: '要移動這些儲存格，請清除該區域的篩選器',
-            },
         },
         textWrap: {
             overflow: '溢出',
@@ -246,8 +235,6 @@ const locale: typeof enUS = {
             textToNumber: '文字轉數字',
         },
         info: {
-            tooltip: '提示',
-            error: '錯誤',
             notChangeMerge: '不能對合併儲存格做部分更改',
             detailUpdate: '新開啟',
             detailSave: '已恢復本機快取',
@@ -269,7 +256,6 @@ const locale: typeof enUS = {
             tipRowHeightLimit: '列高必須在 0 ~ 545 之間',
             tipColumnWidthLimit: '欄寬必須在 0 ~ 2038 之間',
             problem: '出現了一個問題',
-            forceStringInfo: '以文字形式儲存的數字',
         },
         clipboard: {
             paste: {

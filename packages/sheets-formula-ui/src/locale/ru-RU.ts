@@ -79,6 +79,15 @@ const locale: typeof enUS = {
             copyFormulaOnly: 'Копировать только формулу',
             pasteFormula: 'Вставить Формулу',
         },
+
+        rangeSelector: {
+            title: 'Выберите диапазон данных',
+            addAnotherRange: 'Добавить диапазон',
+            buttonTooltip: 'Выбрать диапазон данных',
+            placeHolder: 'Выберите диапазон или введите.',
+            confirm: 'Подтвердить',
+            cancel: 'Отменить',
+        },
     },
 };
 

@@ -108,19 +108,8 @@ const locale: typeof enUS = {
             cancel: 'لغو ادغام',
             overlappingError: 'نمی‌توان نواحی هم‌پوشان را ادغام کرد',
             partiallyError: 'نمی‌توان این عملیات را روی سلول‌های ادغام‌شده جزئی انجام داد',
-            confirm: {
-                title: 'ادامه ادغام فقط مقدار سلول بالا-چپ را نگه می‌دارد و مقادیر دیگر حذف خواهند شد. آیا مطمئن هستید که می‌خواهید ادامه دهید؟',
-                cancel: 'لغو ادغام',
-                confirm: 'ادامه ادغام',
-                warning: 'هشدار',
-                dismantleMergeCellWarning: 'این باعث شکستن برخی از سلول‌های ادغام‌شده می‌شود. آیا می‌خواهید ادامه دهید؟',
-            },
         },
         filter: {
-            confirm: {
-                error: 'مشکلی پیش آمد',
-                notAllowedToInsertRange: 'تا زمانی که فیلتر پاک نشود، اجازه حرکت سلول‌ها به اینجا داده نمی‌شود',
-            },
         },
         textWrap: {
             overflow: 'سرریز',
@@ -246,8 +235,6 @@ const locale: typeof enUS = {
             textToNumber: 'متن به عدد',
         },
         info: {
-            tooltip: 'راهنما',
-            error: 'خطا',
             notChangeMerge: 'شما نمی‌توانید تغییرات جزئی در سلول‌های ادغام شده ایجاد کنید',
             detailUpdate: 'جدید باز شد',
             detailSave: 'پنهانگاه محلی بازیابی شد',
@@ -269,7 +256,6 @@ const locale: typeof enUS = {
             tipRowHeightLimit: 'ارتفاع سطر باید بین 0 ~ 545 باشد',
             tipColumnWidthLimit: 'عرض ستون باید بین 0 ~ 2038 باشد',
             problem: 'مشکلی پیش آمد',
-            forceStringInfo: 'عدد به عنوان متن ذخیره شده',
         },
         clipboard: {
             paste: {

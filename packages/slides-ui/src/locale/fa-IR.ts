@@ -52,6 +52,23 @@ const locale: typeof enUS = {
             image: 'ویرایش تصویر',
         },
 
+        'image-panel': {
+            arrange: {
+                title: 'ترتیب‌دهی',
+                forward: 'آوردن به جلو',
+                backward: 'فرستادن به عقب',
+                front: 'آوردن به جلوی همه',
+                back: 'فرستادن به پشت همه',
+            },
+            transform: {
+                title: 'تبدیل',
+                width: 'عرض (px)',
+                height: 'ارتفاع (px)',
+                x: 'X (px)',
+                y: 'Y (px)',
+                rotate: 'چرخش (°)',
+            },
+        },
         panel: {
             fill: {
                 title: 'رنگ پر کردن',

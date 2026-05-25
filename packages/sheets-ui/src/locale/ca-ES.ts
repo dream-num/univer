@@ -108,19 +108,8 @@ const locale: typeof enUS = {
             cancel: 'Descombinar cel·les',
             overlappingError: 'No es poden combinar àrees superposades',
             partiallyError: 'No es pot realitzar aquesta operació en cel·les parcialment combinades',
-            confirm: {
-                title: 'Si continueu combinant, només es conservarà el valor de la cel·la superior esquerra i es descartaran els altres valors. N\'esteu segur que voleu continuar?',
-                cancel: 'Cancel·lar combinació',
-                confirm: 'Continuar combinant',
-                warning: 'Avís',
-                dismantleMergeCellWarning: 'Això farà que algunes cel·les combinades se separin. Voleu continuar?',
-            },
         },
         filter: {
-            confirm: {
-                error: 'Hi ha hagut un problema',
-                notAllowedToInsertRange: 'No es permet moure cel·les aquí fins que no s\'esborri el filtre',
-            },
         },
         textWrap: {
             overflow: 'Desbordament',
@@ -246,8 +235,6 @@ const locale: typeof enUS = {
             textToNumber: 'Text a número',
         },
         info: {
-            tooltip: 'Informació sobre l\'eina',
-            error: 'Error',
             notChangeMerge: 'No podeu fer canvis parcials a les cel·les combinades',
             detailUpdate: 'Obert de nou',
             detailSave: 'Memòria cau local restaurada',
@@ -269,7 +256,6 @@ const locale: typeof enUS = {
             tipRowHeightLimit: 'L\'alçada de la fila ha d\'estar entre 0 i 545',
             tipColumnWidthLimit: 'L\'amplada de la columna ha d\'estar entre 0 i 2038',
             problem: 'Hi ha hagut un problema',
-            forceStringInfo: 'Número emmagatzemat com a text',
         },
         clipboard: {
             paste: {
@@ -348,7 +334,6 @@ const locale: typeof enUS = {
         },
         uploadLoading: {
             loading: 'S\'està carregant..., restant',
-            error: 'Error',
         },
         permission: {
             toolbarMenu: 'Protecció',

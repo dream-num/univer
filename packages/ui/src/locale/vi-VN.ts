@@ -98,6 +98,8 @@ const locale: typeof enUS = {
         'zoom-slider': {
             resetTo: 'Khôi phục đến',
         },
+        row: 'Hàng',
+        column: 'Cột',
     },
 };
 

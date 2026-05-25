@@ -58,6 +58,15 @@ const locale: typeof enUS = {
             formatOnly: '僅格式',
             noFormat: '無格式',
         },
+        merge: {
+            confirm: {
+                title: '繼續合併將只保留左上角儲存格的值，捨棄其他值。您確定要繼續嗎？',
+                cancel: '取消合併',
+                confirm: '繼續合併',
+                warning: '警告',
+                dismantleMergeCellWarning: '這將導致一些合併儲存格被拆分。您要繼續嗎？',
+            },
+        },
     },
 };
 

@@ -51,6 +51,10 @@ const locale: typeof enUS = {
         subtractDecimal: 'Znížiť počet desatinných miest',
         customFormat: 'Vlastný formát',
         customFormatDes: 'Vytvorte vlastné formáty čísiel na základe existujúcich formátov.',
+        info: {
+            error: 'Chyba',
+            forceStringInfo: 'Číslo uložené ako text',
+        },
     },
 };
 

@@ -52,6 +52,23 @@ const locale: typeof enUS = {
             image: '画像編集',
         },
 
+        'image-panel': {
+            arrange: {
+                title: '配置',
+                forward: '前面へ移動',
+                backward: '背面へ移動',
+                front: '最前面へ移動',
+                back: '最背面へ移動',
+            },
+            transform: {
+                title: '変形',
+                width: '幅 (px)',
+                height: '高さ (px)',
+                x: 'X座標 (px)',
+                y: 'Y座標 (px)',
+                rotate: '回転 (°)',
+            },
+        },
         panel: {
             fill: {
                 title: '塗りつぶしの色',

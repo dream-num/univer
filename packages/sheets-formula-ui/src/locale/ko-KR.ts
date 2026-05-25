@@ -79,6 +79,15 @@ const locale: typeof enUS = {
             copyFormulaOnly: '수식만 복사',
             pasteFormula: '수식 붙여넣기',
         },
+
+        rangeSelector: {
+            title: '데이터 범위 선택',
+            addAnotherRange: '범위 추가',
+            buttonTooltip: '데이터 범위 선택',
+            placeHolder: '범위를 선택하거나 입력하세요.',
+            confirm: '확인',
+            cancel: '취소',
+        },
     },
 };
 

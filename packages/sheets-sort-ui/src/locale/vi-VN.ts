@@ -44,6 +44,9 @@ const locale: typeof enUS = {
             cancel: 'Hủy bỏ',
             confirm: 'Xác nhận',
         },
+        info: {
+            tooltip: 'Tooltip',
+        },
     },
 
 };

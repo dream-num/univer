@@ -82,6 +82,15 @@ const locale: typeof enUS = {
             copyFormulaOnly: '仅复制公式',
             pasteFormula: '仅粘贴公式',
         },
+
+        rangeSelector: {
+            title: '选择一个数据范围',
+            addAnotherRange: '添加范围',
+            buttonTooltip: '选择数据范围',
+            placeHolder: '框选范围或输入',
+            confirm: '确认',
+            cancel: '取消',
+        },
     },
 };
 

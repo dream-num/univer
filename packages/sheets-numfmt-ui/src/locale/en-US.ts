@@ -49,6 +49,10 @@ const locale = {
         subtractDecimal: 'Decreasing decimal places',
         customFormat: 'Custom Format',
         customFormatDes: 'Generate custom number formats based on existing formats.',
+        info: {
+            error: 'Error',
+            forceStringInfo: 'Number stored as text',
+        },
     },
 };
 

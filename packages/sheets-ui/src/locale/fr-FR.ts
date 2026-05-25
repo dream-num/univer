@@ -108,19 +108,8 @@ const locale: typeof enUS = {
             cancel: 'Annuler la fusion',
             overlappingError: 'Impossible de fusionner des zones qui se chevauchent',
             partiallyError: 'Impossible d\'effectuer cette opération sur des cellules partiellement fusionnées',
-            confirm: {
-                title: 'Continuer la fusion ne conserverait que la valeur de la cellule en haut à gauche, les autres valeurs seront supprimées. Voulez-vous continuer ?',
-                cancel: 'Annuler la fusion',
-                confirm: 'Continuer la fusion',
-                warning: 'Avertissement',
-                dismantleMergeCellWarning: 'Cela entraînera la division de certaines cellules fusionnées. Voulez-vous continuer ?',
-            },
         },
         filter: {
-            confirm: {
-                error: 'Il y a eu un problème',
-                notAllowedToInsertRange: 'Déplacement des cellules non autorisé ici tant que le filtre n\'est pas effacé',
-            },
         },
         textWrap: {
             overflow: 'Débordement',
@@ -246,8 +235,6 @@ const locale: typeof enUS = {
             textToNumber: 'Texte en nombre',
         },
         info: {
-            tooltip: 'Info-bulle',
-            error: 'Erreur',
             notChangeMerge: 'Vous ne pouvez pas apporter de modifications partielles aux cellules fusionnées',
             detailUpdate: 'Nouvellement ouvert',
             detailSave: 'Cache local restauré',
@@ -269,7 +256,6 @@ const locale: typeof enUS = {
             tipRowHeightLimit: 'La hauteur de la ligne doit être comprise entre 0 et 545',
             tipColumnWidthLimit: 'La largeur de la colonne doit être comprise entre 0 et 2038',
             problem: 'Il y a eu un problème',
-            forceStringInfo: 'Nombre stocké en tant que texte',
         },
         clipboard: {
             paste: {

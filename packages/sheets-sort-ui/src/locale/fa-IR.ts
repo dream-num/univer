@@ -44,6 +44,9 @@ const locale: typeof enUS = {
             cancel: 'انصراف',
             confirm: 'تایید',
         },
+        info: {
+            tooltip: 'راهنما',
+        },
     },
 };
 

@@ -79,9 +79,9 @@ export function MobileContextMenu() {
     const sheetTitle = useMemo(() => {
         switch (menuType) {
             case ContextMenuPosition.ROW_HEADER:
-                return localeService.t('row');
+                return localeService.t('ui.row');
             case ContextMenuPosition.COL_HEADER:
-                return localeService.t('column');
+                return localeService.t('ui.column');
             default:
                 return '';
         }

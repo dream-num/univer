@@ -58,6 +58,15 @@ const locale: typeof enUS = {
             formatOnly: 'Chỉ định dạng',
             noFormat: 'Không định dạng',
         },
+        merge: {
+            confirm: {
+                title: 'Tiếp tục hợp nhất chỉ giữ lại giá trị của ô trên cùng bên trái, loại bỏ các giá trị khác. Bạn có chắc chắn muốn tiếp tục không?',
+                cancel: 'Hủy hợp nhất',
+                confirm: 'Tiếp tục hợp nhất',
+                warning: 'Cảnh báo',
+                dismantleMergeCellWarning: 'Điều này sẽ khiến một số ô đã hợp nhất bị tách ra. Bạn có muốn tiếp tục không?',
+            },
+        },
     },
 };
 

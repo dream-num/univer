@@ -77,6 +77,15 @@ const locale = {
             copyFormulaOnly: 'Copy Formula Only',
             pasteFormula: 'Paste Formula',
         },
+
+        rangeSelector: {
+            title: 'Select a data range',
+            addAnotherRange: 'Add range',
+            buttonTooltip: 'Select data range',
+            placeHolder: 'Select range or enter.',
+            confirm: 'Confirm',
+            cancel: 'Cancel',
+        },
     },
 };
 

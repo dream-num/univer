@@ -97,7 +97,7 @@ export default function ArrangePanel(props: IProps) {
                       dark:!univer-text-gray-200
                     `}
                 >
-                    <div>{localeService.t('image-panel.arrange.title')}</div>
+                    <div>{localeService.t('slides-ui.image-panel.arrange.title')}</div>
                 </div>
             </div>
             <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
@@ -105,7 +105,7 @@ export default function ArrangePanel(props: IProps) {
                     <Button onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.forward); }}>
                         <span className="univer-flex univer-items-center univer-gap-1">
                             <MoveUpIcon />
-                            {localeService.t('image-panel.arrange.forward')}
+                            {localeService.t('slides-ui.image-panel.arrange.forward')}
                         </span>
 
                     </Button>
@@ -114,7 +114,7 @@ export default function ArrangePanel(props: IProps) {
                     <Button onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.backward); }}>
                         <span className="univer-flex univer-items-center univer-gap-1">
                             <MoveDownIcon />
-                            {localeService.t('image-panel.arrange.backward')}
+                            {localeService.t('slides-ui.image-panel.arrange.backward')}
                         </span>
 
                     </Button>
@@ -125,7 +125,7 @@ export default function ArrangePanel(props: IProps) {
                     <Button onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.front); }}>
                         <span className="univer-flex univer-items-center univer-gap-1">
                             <TopmostIcon />
-                            {localeService.t('image-panel.arrange.front')}
+                            {localeService.t('slides-ui.image-panel.arrange.front')}
                         </span>
 
                     </Button>
@@ -134,7 +134,7 @@ export default function ArrangePanel(props: IProps) {
                     <Button onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.back); }}>
                         <span className="univer-flex univer-items-center univer-gap-1">
                             <BottomIcon />
-                            {localeService.t('image-panel.arrange.back')}
+                            {localeService.t('slides-ui.image-panel.arrange.back')}
                         </span>
 
                     </Button>

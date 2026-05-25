@@ -98,6 +98,8 @@ const locale: typeof enUS = {
         'zoom-slider': {
             resetTo: 'بازنشانی به',
         },
+        row: 'سطر',
+        column: 'ستون',
     },
 };
 

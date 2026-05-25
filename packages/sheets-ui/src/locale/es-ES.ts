@@ -108,19 +108,8 @@ const locale: typeof enUS = {
             cancel: 'Separar celdas',
             overlappingError: 'No se pueden combinar áreas superpuestas',
             partiallyError: 'No se puede realizar esta operación en celdas parcialmente combinadas',
-            confirm: {
-                title: 'Al continuar, solo se conservará el valor de la celda superior izquierda y se descartarán los demás valores. ¿Seguro que quieres continuar?',
-                cancel: 'Cancelar combinación',
-                confirm: 'Continuar combinando',
-                warning: 'Advertencia',
-                dismantleMergeCellWarning: 'Esto hará que algunas celdas combinadas se separen. ¿Desea continuar?',
-            },
         },
         filter: {
-            confirm: {
-                error: 'Ha habido un problema',
-                notAllowedToInsertRange: 'No se permite mover celdas aquí hasta que se borre el filtro',
-            },
         },
         textWrap: {
             overflow: 'Desbordamiento',
@@ -246,8 +235,6 @@ const locale: typeof enUS = {
             textToNumber: 'Texto a número',
         },
         info: {
-            tooltip: 'Información sobre la herramienta',
-            error: 'Error',
             notChangeMerge: 'No puedes realizar cambios parciales en las celdas combinadas',
             detailUpdate: 'Nuevo abierto',
             detailSave: 'Caché local restaurada',
@@ -269,7 +256,6 @@ const locale: typeof enUS = {
             tipRowHeightLimit: 'La altura de la fila debe estar entre 0 y 545',
             tipColumnWidthLimit: 'El ancho de la columna debe estar entre 0 y 2038',
             problem: 'Ha habido un problema',
-            forceStringInfo: 'Número almacenado como texto',
         },
         clipboard: {
             paste: {
@@ -348,7 +334,6 @@ const locale: typeof enUS = {
         },
         uploadLoading: {
             loading: 'Cargando..., restante',
-            error: 'Error',
         },
         permission: {
             toolbarMenu: 'Protección',

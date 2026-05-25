@@ -108,19 +108,8 @@ const locale: typeof enUS = {
             cancel: 'Отменить объединение',
             overlappingError: 'Невозможно объединить перекрывающиеся области',
             partiallyError: 'Невозможно выполнить эту операцию на частично объединенных ячейках',
-            confirm: {
-                title: 'Продолжение объединения сохранит только значение в верхней левой ячейке, остальные значения будут удалены. Вы уверены, что хотите продолжить?',
-                cancel: 'Отменить объединение',
-                confirm: 'Продолжить объединение',
-                warning: 'Предупреждение',
-                dismantleMergeCellWarning: 'Это приведет к разделению некоторых объединенных ячеек. Продолжить?',
-            },
         },
         filter: {
-            confirm: {
-                error: 'Произошла ошибка',
-                notAllowedToInsertRange: 'Нельзя перемещать ячейки сюда, пока фильтр не будет очищен',
-            },
         },
         textWrap: {
             overflow: 'Переполнение',
@@ -246,8 +235,6 @@ const locale: typeof enUS = {
             textToNumber: 'Преобразовать текст в число',
         },
         info: {
-            tooltip: 'Подсказка',
-            error: 'Ошибка',
             notChangeMerge: 'Вы не можете частично изменить объединенные ячейки',
             detailUpdate: 'Новый открытый',
             detailSave: 'Восстановлено из локального кэша',
@@ -269,7 +256,6 @@ const locale: typeof enUS = {
             tipRowHeightLimit: 'Высота строки должна быть в пределах от 0 до 545',
             tipColumnWidthLimit: 'Ширина столбца должна быть в пределах от 0 до 2038',
             problem: 'Произошла проблема',
-            forceStringInfo: 'Число хранится как текст',
         },
         clipboard: {
             paste: {
@@ -348,7 +334,6 @@ const locale: typeof enUS = {
         },
         uploadLoading: {
             loading: 'Загрузка...',
-            error: 'Ошибка',
         },
         permission: {
             toolbarMenu: 'Защита',

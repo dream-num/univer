@@ -44,6 +44,9 @@ const locale: typeof enUS = {
             cancel: 'Zrušiť',
             confirm: 'Potvrdiť',
         },
+        info: {
+            tooltip: 'Bublinový tip',
+        },
     },
 };
 

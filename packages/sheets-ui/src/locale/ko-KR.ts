@@ -108,19 +108,8 @@ const locale: typeof enUS = {
             cancel: '병합 해제',
             overlappingError: '겹치는 영역은 병합할 수 없습니다',
             partiallyError: '부분 병합된 셀에서는 작업할 수 없습니다',
-            confirm: {
-                title: '병합 시 왼쪽 위 셀 외의 값은 삭제됩니다. 계속하시겠습니까?',
-                cancel: '병합 취소',
-                confirm: '계속 병합',
-                warning: '경고',
-                dismantleMergeCellWarning: '일부 병합된 셀이 해제됩니다. 계속하시겠습니까?',
-            },
         },
         filter: {
-            confirm: {
-                error: 'There was a problem',
-                notAllowedToInsertRange: 'Not allowed to move cells here until filter is cleared',
-            },
         },
         textWrap: {
             overflow: '넘침',
@@ -246,8 +235,6 @@ const locale: typeof enUS = {
             textToNumber: '텍스트를 숫자로 변환',
         },
         info: {
-            tooltip: '툴팁',
-            error: '오류',
             notChangeMerge: '병합된 셀에 대해 부분적인 변경을 할 수 없습니다',
             detailUpdate: '새로 열림',
             detailSave: '로컬 캐시 복원',
@@ -269,7 +256,6 @@ const locale: typeof enUS = {
             tipRowHeightLimit: '행 높이는 0 ~ 545 사이여야 합니다',
             tipColumnWidthLimit: '열 너비는 0 ~ 2038 사이여야 합니다',
             problem: '문제가 발생했습니다',
-            forceStringInfo: '숫자가 텍스트로 저장되었습니다',
         },
         clipboard: {
             paste: {
@@ -348,7 +334,6 @@ const locale: typeof enUS = {
         },
         uploadLoading: {
             loading: '로딩중...',
-            error: '오류',
         },
         permission: {
             toolbarMenu: '보호',

@@ -58,6 +58,15 @@ const locale: typeof enUS = {
             formatOnly: '仅格式',
             noFormat: '无格式',
         },
+        merge: {
+            confirm: {
+                title: '继续合并将只保留左上角单元格的值，丢弃其他值。您确定要继续吗？',
+                cancel: '取消合并',
+                confirm: '继续合并',
+                warning: '警告',
+                dismantleMergeCellWarning: '这将导致一些合并单元格被拆分。您要继续吗？',
+            },
+        },
     },
 };
 

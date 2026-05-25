@@ -108,19 +108,8 @@ const locale: typeof enUS = {
             cancel: 'Zrušiť zlúčenie',
             overlappingError: 'Nedá sa zlúčiť prekrývajúce sa oblasti',
             partiallyError: 'Túto operáciu nemožno vykonať na čiastočne zlúčených bunkách',
-            confirm: {
-                title: 'Pokračovanie v zlúčení ponechá iba hodnotu ľavej hornej bunky, ostatné hodnoty budú odstránené. Chcete pokračovať?',
-                cancel: 'Zrušiť zlúčenie',
-                confirm: 'Pokračovať v zlúčení',
-                warning: 'Upozornenie',
-                dismantleMergeCellWarning: 'Týmto sa niektoré zlúčené bunky rozdelia. Chcete pokračovať?',
-            },
         },
         filter: {
-            confirm: {
-                error: 'Vyskytol sa problém',
-                notAllowedToInsertRange: 'Nie je možné presúvať bunky sem, kým sa filter nevyčistí',
-            },
         },
         textWrap: {
             overflow: 'Pretečenie',
@@ -246,8 +235,6 @@ const locale: typeof enUS = {
             textToNumber: 'Text na číslo',
         },
         info: {
-            tooltip: 'Bublinový tip',
-            error: 'Chyba',
             notChangeMerge: 'Nie je možné vykonať čiastočné zmeny v zlúčených bunkách',
             detailUpdate: 'Práve otvorené',
             detailSave: 'Obnovená miestna vyrovnávacia pamäť',
@@ -269,7 +256,6 @@ const locale: typeof enUS = {
             tipRowHeightLimit: 'Výška riadku musí byť medzi 0 ~ 545',
             tipColumnWidthLimit: 'Šírka stĺpca musí byť medzi 0 ~ 2038',
             problem: 'Vyskytol sa problém',
-            forceStringInfo: 'Číslo uložené ako text',
         },
         clipboard: {
             paste: {
@@ -348,7 +334,6 @@ const locale: typeof enUS = {
         },
         uploadLoading: {
             loading: 'Načítava sa..., zostáva',
-            error: 'Chyba',
         },
         permission: {
             toolbarMenu: 'Ochrana',

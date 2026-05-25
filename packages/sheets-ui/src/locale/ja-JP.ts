@@ -108,19 +108,8 @@ const locale: typeof enUS = {
             cancel: '結合解除',
             overlappingError: '重なっている範囲は結合できません',
             partiallyError: '部分的に結合されたセルには操作できません',
-            confirm: {
-                title: '結合すると左上セル以外の値は削除されます。続行しますか？',
-                cancel: '結合をキャンセル',
-                confirm: '結合を続行',
-                warning: '警告',
-                dismantleMergeCellWarning: '一部の結合セルが解除されます。続行しますか？',
-            },
         },
         filter: {
-            confirm: {
-                error: '問題が発生しました',
-                notAllowedToInsertRange: 'フィルターがクリアされるまで、ここにセルを移動できません',
-            },
         },
         textWrap: {
             overflow: 'オーバーフロー',
@@ -246,8 +235,6 @@ const locale: typeof enUS = {
             textToNumber: 'テキストを数値に変換',
         },
         info: {
-            tooltip: 'ツールチップ',
-            error: 'エラー',
             notChangeMerge: '結合セルに対して部分的な変更はできません',
             detailUpdate: '再読み込み',
             detailSave: 'ローカルキャッシュを復元',
@@ -269,7 +256,6 @@ const locale: typeof enUS = {
             tipRowHeightLimit: '行の高さは0〜545の範囲である必要があります',
             tipColumnWidthLimit: '列幅は0〜2038の範囲である必要があります',
             problem: '問題が発生しました',
-            forceStringInfo: '数値がテキストとして保存されました',
         },
         clipboard: {
             paste: {
@@ -348,7 +334,6 @@ const locale: typeof enUS = {
         },
         uploadLoading: {
             loading: '読み込み中...',
-            error: 'エラー',
         },
         permission: {
             toolbarMenu: '保護',

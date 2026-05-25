@@ -59,6 +59,15 @@ const locale: typeof enUS = {
             formatOnly: '仅格式',
             noFormat: '无格式',
         },
+        merge: {
+            confirm: {
+                title: 'Continuar la fusió només conservarà el valor de la cel·la superior esquerra, descartant els altres valors. Estàs segur de continuar?',
+                cancel: 'Cancel·lar fusió',
+                confirm: 'Continuar fusió',
+                warning: 'Avís',
+                dismantleMergeCellWarning: 'Això dividirà algunes cel·les fusionades. Vols continuar?',
+            },
+        },
     },
 };
 

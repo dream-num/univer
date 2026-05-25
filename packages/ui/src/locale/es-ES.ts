@@ -98,6 +98,8 @@ const locale: typeof enUS = {
         'zoom-slider': {
             resetTo: 'Restablecer a',
         },
+        row: 'Fila',
+        column: 'Columna',
     },
 };
 

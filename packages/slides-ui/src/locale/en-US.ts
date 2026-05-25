@@ -50,6 +50,23 @@ const locale = {
             image: 'Edit Image',
         },
 
+        'image-panel': {
+            arrange: {
+                title: 'Arrange',
+                forward: 'Bring Forward',
+                backward: 'Send Backward',
+                front: 'Bring to Front',
+                back: 'Send to Back',
+            },
+            transform: {
+                title: 'Transform',
+                width: 'Width (px)',
+                height: 'Height (px)',
+                x: 'X (px)',
+                y: 'Y (px)',
+                rotate: 'Rotate (°)',
+            },
+        },
         panel: {
             fill: {
                 title: 'Fill Color',

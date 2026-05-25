@@ -51,6 +51,10 @@ const locale: typeof enUS = {
         subtractDecimal: 'کاهش اعشار',
         customFormat: 'قالب‌بندی سفارشی',
         customFormatDes: 'ایجاد قالب‌بندی‌های عددی سفارشی بر اساس قالب‌بندی‌های موجود.',
+        info: {
+            error: 'خطا',
+            forceStringInfo: 'عدد به عنوان متن ذخیره شده',
+        },
     },
 };
 

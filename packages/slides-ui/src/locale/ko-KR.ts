@@ -52,6 +52,23 @@ const locale: typeof enUS = {
             image: '이미지 편집',
         },
 
+        'image-panel': {
+            arrange: {
+                title: '정렬',
+                forward: '앞으로 가져오기',
+                backward: '뒤로 보내기',
+                front: '맨 앞으로 가져오기',
+                back: '맨 뒤로 보내기',
+            },
+            transform: {
+                title: '변형',
+                width: '너비 (px)',
+                height: '높이 (px)',
+                x: 'X 좌표 (px)',
+                y: 'Y 좌표 (px)',
+                rotate: '회전 (°)',
+            },
+        },
         panel: {
             fill: {
                 title: '채우기 색상',

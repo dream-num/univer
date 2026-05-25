@@ -106,19 +106,8 @@ const locale = {
             cancel: 'Cancel merge',
             overlappingError: 'Cannot merge overlapping areas',
             partiallyError: 'Cannot perform this operation on partially merged cells',
-            confirm: {
-                title: 'Continue merging would only keep the upper-left cell value, discard other values. Are you sure to continue?',
-                cancel: 'Cancel merging',
-                confirm: 'Continue merging',
-                warning: 'Warning',
-                dismantleMergeCellWarning: 'This will cause some merged cells to be split. Do you want to continue?',
-            },
         },
         filter: {
-            confirm: {
-                error: 'There was a problem',
-                notAllowedToInsertRange: 'Not allowed to move cells here until filter is cleared',
-            },
         },
         textWrap: {
             overflow: 'Overflow',
@@ -244,8 +233,6 @@ const locale = {
             textToNumber: 'Text to Number',
         },
         info: {
-            tooltip: 'Tooltip',
-            error: 'Error',
             notChangeMerge: 'You cannot make partial changes to the merged cells',
             detailUpdate: 'New opened',
             detailSave: 'Local cache restored',
@@ -267,7 +254,6 @@ const locale = {
             tipRowHeightLimit: 'Row height must be between 0 ~ 545',
             tipColumnWidthLimit: 'The column width must be between 0 ~ 2038',
             problem: 'There was a problem',
-            forceStringInfo: 'Number stored as text',
         },
         clipboard: {
             paste: {
@@ -346,7 +332,6 @@ const locale = {
         },
         uploadLoading: {
             loading: 'Loading..., remaining', // 正在上传，当前剩余
-            error: 'Error', // 加载失败
         },
         permission: {
             toolbarMenu: 'Protection',

@@ -58,6 +58,15 @@ const locale: typeof enUS = {
             formatOnly: 'Iba formát',
             noFormat: 'Žiadny formát',
         },
+        merge: {
+            confirm: {
+                title: 'Pokračovanie v zlúčení zachová iba hodnotu hornej ľavej bunky, ostatné hodnoty sa zahodia. Ste si istí, že chcete pokračovať?',
+                cancel: 'Zrušiť zlúčenie',
+                confirm: 'Pokračovať v zlúčení',
+                warning: 'Varovanie',
+                dismantleMergeCellWarning: 'To spôsobí rozdelenie niektorých zlúčených buniek. Chcete pokračovať?',
+            },
+        },
     },
 };
 

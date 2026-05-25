@@ -52,6 +52,23 @@ const locale: typeof enUS = {
             image: '编辑图片',
         },
 
+        'image-panel': {
+            arrange: {
+                title: '排列',
+                forward: '上移一层',
+                backward: '下移一层',
+                front: '置于顶层',
+                back: '置于底层',
+            },
+            transform: {
+                title: '变换',
+                width: '宽度 (px)',
+                height: '高度 (px)',
+                x: 'X (px)',
+                y: 'Y (px)',
+                rotate: '旋转 (°)',
+            },
+        },
         panel: {
             fill: {
                 title: '填充',

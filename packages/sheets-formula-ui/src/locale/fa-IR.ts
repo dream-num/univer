@@ -79,6 +79,15 @@ const locale: typeof enUS = {
             copyFormulaOnly: 'کپی فقط فرمول',
             pasteFormula: 'چسباندن فرمول',
         },
+
+        rangeSelector: {
+            title: 'انتخاب محدوده داده',
+            addAnotherRange: 'افزودن محدوده',
+            buttonTooltip: 'انتخاب محدوده داده',
+            placeHolder: 'انتخاب محدوده یا وارد کردن.',
+            confirm: 'تایید',
+            cancel: 'انصراف',
+        },
     },
 };
 

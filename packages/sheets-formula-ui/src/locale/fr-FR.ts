@@ -79,6 +79,15 @@ const locale: typeof enUS = {
             copyFormulaOnly: 'Copier uniquement la formule',
             pasteFormula: 'Coller la formule',
         },
+
+        rangeSelector: {
+            title: 'Sélectionner une plage de données',
+            addAnotherRange: 'Ajouter une plage',
+            buttonTooltip: 'Sélectionner une plage de données',
+            placeHolder: 'Sélectionner une plage ou entrer.',
+            confirm: 'Confirmer',
+            cancel: 'Annuler',
+        },
     },
 };
 

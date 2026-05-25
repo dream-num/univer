@@ -44,6 +44,9 @@ const locale: typeof enUS = {
             cancel: '取消',
             confirm: '确认',
         },
+        info: {
+            tooltip: '提示',
+        },
     },
 };
 

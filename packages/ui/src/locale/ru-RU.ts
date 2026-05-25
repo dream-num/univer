@@ -98,6 +98,8 @@ const locale: typeof enUS = {
         'zoom-slider': {
             resetTo: 'Сбросить до',
         },
+        row: 'Строка',
+        column: 'Столбец',
     },
 };
 

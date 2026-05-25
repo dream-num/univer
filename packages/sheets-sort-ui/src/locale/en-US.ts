@@ -42,6 +42,9 @@ const locale = {
             cancel: 'Cancel',
             confirm: 'Confirm',
         },
+        info: {
+            tooltip: 'Tooltip',
+        },
     },
 };
 

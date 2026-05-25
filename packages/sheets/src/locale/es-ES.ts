@@ -58,6 +58,15 @@ const locale: typeof enUS = {
             formatOnly: 'Solo formato',
             noFormat: 'Sin formato',
         },
+        merge: {
+            confirm: {
+                title: 'Continuar la fusión solo conservará el valor de la celda superior izquierda, descartando los otros valores. ¿Estás seguro de continuar?',
+                cancel: 'Cancelar fusión',
+                confirm: 'Continuar fusión',
+                warning: 'Advertencia',
+                dismantleMergeCellWarning: 'Esto dividirá algunas celdas fusionadas. ¿Quieres continuar?',
+            },
+        },
     },
 };
 

@@ -58,6 +58,15 @@ const locale: typeof enUS = {
             formatOnly: '書式のみ',
             noFormat: '書式なし',
         },
+        merge: {
+            confirm: {
+                title: '結合を続行すると、左上のセルの値のみが保持され、他の値は破棄されます。続行しますか？',
+                cancel: '結合をキャンセル',
+                confirm: '結合を続行',
+                warning: '警告',
+                dismantleMergeCellWarning: 'これにより、一部の結合セルが分割されます。続行しますか？',
+            },
+        },
     },
 };
 

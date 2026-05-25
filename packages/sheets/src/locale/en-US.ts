@@ -56,6 +56,15 @@ const locale = {
             formatOnly: 'Format Only',
             noFormat: 'No Format',
         },
+        merge: {
+            confirm: {
+                title: 'Continue merging would only keep the upper-left cell value, discard other values. Are you sure to continue?',
+                cancel: 'Cancel merging',
+                confirm: 'Continue merging',
+                warning: 'Warning',
+                dismantleMergeCellWarning: 'This will cause some merged cells to be split. Do you want to continue?',
+            },
+        },
     },
 };
 

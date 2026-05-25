@@ -96,6 +96,8 @@ const locale = {
         'zoom-slider': {
             resetTo: 'Reset to',
         },
+        row: 'Row',
+        column: 'Column',
     },
 };
 

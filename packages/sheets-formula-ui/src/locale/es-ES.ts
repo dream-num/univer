@@ -79,6 +79,15 @@ const locale: typeof enUS = {
             copyFormulaOnly: 'Copiar solo fórmula',
             pasteFormula: 'Pegar fórmula',
         },
+
+        rangeSelector: {
+            title: 'Selecciona un rango de datos',
+            addAnotherRange: 'Agregar rango',
+            buttonTooltip: 'Seleccionar rango de datos',
+            placeHolder: 'Selecciona un rango o escribe.',
+            confirm: 'Confirmar',
+            cancel: 'Cancelar',
+        },
     },
 };
 

@@ -51,6 +51,10 @@ const locale: typeof enUS = {
         subtractDecimal: '小数点以下の桁数を減らす',
         customFormat: 'ユーザー定義表示形式',
         customFormatDes: '既存の表示形式を基にユーザー定義の数値表示形式を作成します。',
+        info: {
+            error: 'エラー',
+            forceStringInfo: '数値がテキストとして保存されました',
+        },
     },
 };
 

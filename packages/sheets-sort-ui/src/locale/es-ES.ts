@@ -44,6 +44,9 @@ const locale: typeof enUS = {
             cancel: 'Cancelar',
             confirm: 'Confirmar',
         },
+        info: {
+            tooltip: 'Información sobre la herramienta',
+        },
     },
 };
 

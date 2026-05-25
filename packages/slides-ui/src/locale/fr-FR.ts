@@ -52,6 +52,23 @@ const locale: typeof enUS = {
             image: 'Éditer l\'image',
         },
 
+        'image-panel': {
+            arrange: {
+                title: 'Arranger',
+                forward: 'Avancer',
+                backward: 'Reculer',
+                front: 'Mettre au premier plan',
+                back: 'Mettre à l\'arrière-plan',
+            },
+            transform: {
+                title: 'Transformer',
+                width: 'Largeur (px)',
+                height: 'Hauteur (px)',
+                x: 'X (px)',
+                y: 'Y (px)',
+                rotate: 'Pivoter (°)',
+            },
+        },
         panel: {
             fill: {
                 title: 'Couleur de remplissage',

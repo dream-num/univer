@@ -156,7 +156,7 @@ export class SheetsSortUIService extends Disposable {
         return await this._confirmService.confirm({
             id: 'sort-range-check-error',
             title: {
-                title: this._localeService.t('info.tooltip'),
+                title: this._localeService.t('sheets-sort-ui.info.tooltip'),
             },
             children: {
                 title: <div>{this._localeService.t(content)}</div>,

@@ -98,6 +98,8 @@ const locale: typeof enUS = {
         'zoom-slider': {
             resetTo: 'Obnoviť na',
         },
+        row: 'Riadok',
+        column: 'Stĺpec',
     },
 };
 

@@ -79,6 +79,15 @@ const locale: typeof enUS = {
             copyFormulaOnly: '数式のみをコピー',
             pasteFormula: '数式を貼り付け',
         },
+
+        rangeSelector: {
+            title: 'データ範囲の選択',
+            addAnotherRange: '範囲を追加',
+            buttonTooltip: 'データ範囲を選択',
+            placeHolder: '範囲を選択または入力してください。',
+            confirm: '確認',
+            cancel: 'キャンセル',
+        },
     },
 };
 

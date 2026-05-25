@@ -51,6 +51,10 @@ const locale: typeof enUS = {
         subtractDecimal: '소수점 자리수 줄이기',
         customFormat: '사용자 지정 서식',
         customFormatDes: '기존 서식을 기반으로 사용자 지정 숫자 서식을 만듭니다.',
+        info: {
+            error: '오류',
+            forceStringInfo: '숫자가 텍스트로 저장되었습니다',
+        },
     },
 };
 

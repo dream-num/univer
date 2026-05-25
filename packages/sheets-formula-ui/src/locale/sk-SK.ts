@@ -79,6 +79,15 @@ const locale: typeof enUS = {
             copyFormulaOnly: 'Kopírovať iba vzorec',
             pasteFormula: 'Prilepiť vzorec',
         },
+
+        rangeSelector: {
+            title: 'Vyberte rozsah údajov',
+            addAnotherRange: 'Pridať rozsah',
+            buttonTooltip: 'Vybrať rozsah údajov',
+            placeHolder: 'Vyberte rozsah alebo zadajte.',
+            confirm: 'Potvrdiť',
+            cancel: 'Zrušiť',
+        },
     },
 };
 

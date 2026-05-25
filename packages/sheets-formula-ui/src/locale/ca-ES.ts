@@ -79,6 +79,15 @@ const locale: typeof enUS = {
             copyFormulaOnly: 'Copia només la fórmula',
             pasteFormula: 'Enganxa la fórmula',
         },
+
+        rangeSelector: {
+            title: 'Selecciona un interval de dades',
+            addAnotherRange: 'Afegeix interval',
+            buttonTooltip: 'Selecciona interval de dades',
+            placeHolder: 'Selecciona un interval o escriu.',
+            confirm: 'Confirma',
+            cancel: 'Cancel·la',
+        },
     },
 };
 

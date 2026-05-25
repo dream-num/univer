@@ -51,6 +51,10 @@ const locale: typeof enUS = {
         subtractDecimal: '減少小數位',
         customFormat: '自訂格式',
         customFormatDes: '基於現有格式產生自訂數字格式。',
+        info: {
+            error: '錯誤',
+            forceStringInfo: '以文字形式儲存的數字',
+        },
     },
 };
 

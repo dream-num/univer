@@ -108,19 +108,8 @@ const locale: typeof enUS = {
             cancel: '取消合并',
             overlappingError: '不能合并重叠区域',
             partiallyError: '无法对部分合并单元格执行此操作',
-            confirm: {
-                title: '合并单元格仅保存左上角单元格的值，是否继续？',
-                cancel: '取消合并',
-                confirm: '继续合并',
-                warning: '警告',
-                dismantleMergeCellWarning: '此操作会导致一些合并单元格被拆散，是否继续?',
-            },
         },
         filter: {
-            confirm: {
-                error: '出现了一个问题',
-                notAllowedToInsertRange: '要移动这些单元格，请清除该区域的筛选器',
-            },
         },
         textWrap: {
             overflow: '溢出',
@@ -246,8 +235,6 @@ const locale: typeof enUS = {
             textToNumber: '文本转数字',
         },
         info: {
-            tooltip: '提示',
-            error: '错误',
             notChangeMerge: '不能对合并单元格做部分更改',
             detailUpdate: '新打开',
             detailSave: '已恢复本地缓存',
@@ -269,7 +256,6 @@ const locale: typeof enUS = {
             tipRowHeightLimit: '行高必须在0 ~ 545之间',
             tipColumnWidthLimit: '列宽必须在0 ~ 2038之间',
             problem: '出现了一个问题',
-            forceStringInfo: '以文本形式存储的数字',
         },
         clipboard: {
             paste: {

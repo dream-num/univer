@@ -98,6 +98,8 @@ const locale: typeof enUS = {
         'zoom-slider': {
             resetTo: '恢复至',
         },
+        row: '行',
+        column: '列',
     },
 };
 

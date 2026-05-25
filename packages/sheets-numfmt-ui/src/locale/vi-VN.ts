@@ -51,6 +51,10 @@ const locale: typeof enUS = {
         subtractDecimal: 'Giảm chữ số thập phân',
         customFormat: 'Custom Format',
         customFormatDes: 'Generate custom number formats based on existing formats.',
+        info: {
+            error: 'Lỗi',
+            forceStringInfo: 'Số được lưu trữ dưới dạng văn bản',
+        },
     },
 };
 

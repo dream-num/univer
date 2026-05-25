@@ -108,19 +108,8 @@ const locale: typeof enUS = {
             cancel: 'Hủy hợp nhất',
             overlappingError: 'Không thể hợp nhất vùng chồng chéo',
             partiallyError: 'Không thể thực hiện thao tác này trên ô đã hợp nhất',
-            confirm: {
-                title: 'Hợp nhất ô chỉ giữ giá trị của ô trên cùng bên trái, bạn có muốn tiếp tục không?',
-                cancel: 'Hủy hợp nhất',
-                confirm: 'Tiếp tục hợp nhất',
-                warning: 'Cảnh báo',
-                dismantleMergeCellWarning: 'Thao tác này sẽ làm rời một số ô đã hợp nhất, bạn có muốn tiếp tục không?',
-            },
         },
         filter: {
-            confirm: {
-                error: 'Đã xảy ra sự cố',
-                notAllowedToInsertRange: 'Để di chuyển các ô này, hãy xóa bộ lọc khỏi vùng này trước',
-            },
         },
         textWrap: {
             overflow: 'Tràn',
@@ -246,8 +235,6 @@ const locale: typeof enUS = {
             textToNumber: 'Chuyển văn bản thành số',
         },
         info: {
-            tooltip: 'Gợi ý',
-            error: 'Lỗi',
             notChangeMerge: 'Không thể thay đổi một phần của ô hợp nhất',
             detailUpdate: 'Mở mới',
             detailSave: 'Đã khôi phục từ bộ nhớ đệm cục bộ',
@@ -269,7 +256,6 @@ const locale: typeof enUS = {
             tipRowHeightLimit: 'Chiều cao hàng phải từ 0 ~ 545',
             tipColumnWidthLimit: 'Độ rộng cột phải từ 0 ~ 2038',
             problem: 'Đã xảy ra một vấn đề',
-            forceStringInfo: 'Số được lưu trữ dưới dạng văn bản',
         },
         clipboard: {
             paste: {

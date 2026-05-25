@@ -58,6 +58,15 @@ const locale: typeof enUS = {
             formatOnly: '서식만',
             noFormat: '서식 없음',
         },
+        merge: {
+            confirm: {
+                title: '병합을 계속하면 왼쪽 상단 셀의 값만 유지되고 다른 값은 삭제됩니다. 계속하시겠습니까?',
+                cancel: '병합 취소',
+                confirm: '병합 계속',
+                warning: '경고',
+                dismantleMergeCellWarning: '일부 병합된 셀이 분할됩니다. 계속하시겠습니까?',
+            },
+        },
     },
 };
 

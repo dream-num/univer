@@ -98,6 +98,8 @@ const locale: typeof enUS = {
         'zoom-slider': {
             resetTo: '초기화',
         },
+        row: '행',
+        column: '열',
     },
 };
 

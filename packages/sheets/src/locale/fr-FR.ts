@@ -59,6 +59,15 @@ const locale: typeof enUS = {
             formatOnly: 'Format uniquement',
             noFormat: 'Aucun format',
         },
+        merge: {
+            confirm: {
+                title: 'Continuer la fusion ne conservera que la valeur de la cellule en haut à gauche, en supprimant les autres valeurs. Êtes-vous sûr de vouloir continuer ?',
+                cancel: 'Annuler la fusion',
+                confirm: 'Continuer la fusion',
+                warning: 'Avertissement',
+                dismantleMergeCellWarning: 'Cela divisera certaines cellules fusionnées. Voulez-vous continuer ?',
+            },
+        },
     },
 };
 

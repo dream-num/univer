@@ -28,6 +28,20 @@ const locale: typeof enUS = {
             partOfCell: 'Выделена только часть объединенной ячейки',
             hideSheet: 'После скрытия этого листа не будет видно ни одного листа',
         },
+        definedName: {
+            nameEmpty: 'Имя не может быть пустым',
+            nameDuplicate: 'Имя уже существует',
+            nameInvalid: 'Недопустимое имя',
+            nameSheetConflict: 'Имя конфликтует с именем листа',
+            formulaOrRefStringEmpty: 'Формула или ссылочная строка не может быть пустой',
+            nameConflict: 'Имя конфликтует с именем функции',
+        },
+        autoFill: {
+            copy: 'Копировать ячейку',
+            series: 'Заполнить ряд',
+            formatOnly: 'Только формат',
+            noFormat: 'Без формата',
+        },
     },
 };
 

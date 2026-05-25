@@ -28,6 +28,20 @@ const locale: typeof enUS = {
             partOfCell: 'فقط بخشی از سلول ادغام شده انتخاب شده است',
             hideSheet: 'پس از پنهان کردن این برگ، هیچ برگی قابل مشاهده نخواهد بود',
         },
+        definedName: {
+            nameEmpty: 'نام نمی‌تواند خالی باشد',
+            nameDuplicate: 'نام از قبل وجود دارد',
+            nameInvalid: 'نام نامعتبر است',
+            nameSheetConflict: 'نام با نام برگه تداخل دارد',
+            formulaOrRefStringEmpty: 'فرمول یا رشته مرجع نمی‌تواند خالی باشد',
+            nameConflict: 'نام با نام تابع تداخل دارد',
+        },
+        autoFill: {
+            copy: 'کپی سلول',
+            series: 'پر کردن سری',
+            formatOnly: 'فقط قالب',
+            noFormat: 'بدون قالب',
+        },
     },
 };
 

@@ -28,6 +28,20 @@ const locale: typeof enUS = {
             partOfCell: 'Je vybraná iba časť zlúčenej bunky',
             hideSheet: 'Po skrytí tohto hárka nebude viditeľný žiadny hárok',
         },
+        definedName: {
+            nameEmpty: 'Názov nemôže byť prázdny',
+            nameDuplicate: 'Názov už existuje',
+            nameInvalid: 'Názov je neplatný',
+            nameSheetConflict: 'Názov je v konflikte s názvom hárka',
+            formulaOrRefStringEmpty: 'Vzorec alebo referenčný reťazec nemôže byť prázdny',
+            nameConflict: 'Názov je v konflikte s názvom funkcie',
+        },
+        autoFill: {
+            copy: 'Kopírovať bunku',
+            series: 'Vyplniť sériu',
+            formatOnly: 'Iba formát',
+            noFormat: 'Žiadny formát',
+        },
     },
 };
 

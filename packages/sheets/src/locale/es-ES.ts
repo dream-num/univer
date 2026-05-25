@@ -28,6 +28,20 @@ const locale: typeof enUS = {
             partOfCell: 'Solo una parte de una celda combinada está seleccionada',
             hideSheet: 'No hay hojas visibles después de ocultar esta',
         },
+        definedName: {
+            nameEmpty: 'El nombre no puede estar vacío',
+            nameDuplicate: 'El nombre ya existe',
+            nameInvalid: 'El nombre no es válido',
+            nameSheetConflict: 'El nombre entra en conflicto con el nombre de la hoja',
+            formulaOrRefStringEmpty: 'La fórmula o la cadena de referencia no pueden estar vacías',
+            nameConflict: 'El nombre entra en conflicto con el nombre de la función',
+        },
+        autoFill: {
+            copy: 'Copiar celda',
+            series: 'Rellenar serie',
+            formatOnly: 'Solo formato',
+            noFormat: 'Sin formato',
+        },
     },
 };
 

@@ -28,6 +28,20 @@ const locale: typeof enUS = {
             partOfCell: '結合セルの一部が選択されています',
             hideSheet: '表示されるシートがなくなるため、このシートを非表示にできません。',
         },
+        definedName: {
+            nameEmpty: '名前を空白にすることはできません',
+            nameDuplicate: '名前が既に存在します',
+            nameInvalid: '名前が無効です',
+            nameSheetConflict: '名前がシート名と競合しています',
+            formulaOrRefStringEmpty: '数式または参照文字列を空白にすることはできません',
+            nameConflict: '名前が関数名と競合しています',
+        },
+        autoFill: {
+            copy: 'セルをコピー',
+            series: '系列を入力',
+            formatOnly: '書式のみ',
+            noFormat: '書式なし',
+        },
     },
 };
 

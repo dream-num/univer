@@ -28,6 +28,20 @@ const locale: typeof enUS = {
             partOfCell: '병합된 셀의 일부만 선택됨',
             hideSheet: '이 시트를 숨기면 표시되는 시트가 없습니다.',
         },
+        definedName: {
+            nameEmpty: '이름은 비워 둘 수 없습니다',
+            nameDuplicate: '이미 존재하는 이름입니다',
+            nameInvalid: '잘못된 이름입니다',
+            nameSheetConflict: '이름이 시트 이름과 충돌합니다',
+            formulaOrRefStringEmpty: '수식 또는 참조 문자열은 비워 둘 수 없습니다',
+            nameConflict: '이름이 함수 이름과 충돌합니다',
+        },
+        autoFill: {
+            copy: '셀 복사',
+            series: '시리즈 채우기',
+            formatOnly: '서식만',
+            noFormat: '서식 없음',
+        },
     },
 };
 

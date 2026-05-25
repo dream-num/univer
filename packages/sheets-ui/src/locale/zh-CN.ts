@@ -291,12 +291,6 @@ const locale: typeof enUS = {
             clickToCopy: '点击复制数值',
             copied: '已复制',
         },
-        autoFill: {
-            copy: '复制单元格',
-            series: '填充序列',
-            formatOnly: '仅填充格式',
-            noFormat: '不带格式填充',
-        },
         shortcut: {
             sheet: {
                 'zoom-in': '放大',
@@ -346,17 +340,11 @@ const locale: typeof enUS = {
             inputCommentPlaceholder: '请输入备注',
             inputRangePlaceholder: '请输入范围（必填）',
             inputFormulaPlaceholder: '请输入公式（必填）',
-            nameEmpty: '名称不能为空',
-            nameDuplicate: '名称重复',
-            formulaOrRefStringEmpty: '公式或引用字符串不能为空',
             formulaOrRefStringInvalid: '公式或引用字符串无效',
             defaultName: 'DefinedName',
             updateButton: '修改',
             deleteButton: '删除',
             deleteConfirmText: '确定删除定义名称？',
-            nameConflict: '与函数名称冲突',
-            nameInvalid: '名称不包含空格或不允许的字符',
-            nameSheetConflict: '名称与工作表名称冲突',
         },
         uploadLoading: {
             loading: '正在上传，当前剩余',

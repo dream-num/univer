@@ -28,6 +28,20 @@ const locale: typeof enUS = {
             partOfCell: '僅選擇了合併儲存格的一部份',
             hideSheet: '隱藏後無可見工作表',
         },
+        definedName: {
+            nameEmpty: '名稱不能為空',
+            nameDuplicate: '名稱已存在',
+            nameInvalid: '名稱無效',
+            nameSheetConflict: '名稱與工作表名稱衝突',
+            formulaOrRefStringEmpty: '公式或引用字串不能為空',
+            nameConflict: '名稱與函數名稱衝突',
+        },
+        autoFill: {
+            copy: '複製儲存格',
+            series: '填入數列',
+            formatOnly: '僅格式',
+            noFormat: '無格式',
+        },
     },
 };
 

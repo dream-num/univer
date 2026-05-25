@@ -26,6 +26,20 @@ const locale = {
             partOfCell: 'Only part of a merged cell is selected',
             hideSheet: 'No visible sheet after you hide this',
         },
+        definedName: {
+            nameEmpty: 'Name cannot be empty',
+            nameDuplicate: 'Name already exists',
+            nameInvalid: 'The name is invalid',
+            nameSheetConflict: 'The name conflicts with the sheet name',
+            formulaOrRefStringEmpty: 'Formula or reference string cannot be empty',
+            nameConflict: 'The name conflicts with the function name',
+        },
+        autoFill: {
+            copy: 'Copy Cell',
+            series: 'Fill Series',
+            formatOnly: 'Format Only',
+            noFormat: 'No Format',
+        },
     },
 };
 

@@ -291,12 +291,6 @@ const locale: typeof enUS = {
             clickToCopy: 'クリックしてコピー',
             copied: 'コピーしました',
         },
-        autoFill: {
-            copy: 'セルのコピー',
-            series: '連続データの入力',
-            formatOnly: '書式のみをコピー',
-            noFormat: '書式なし',
-        },
         shortcut: {
             sheet: {
                 'zoom-in': '拡大',
@@ -346,17 +340,11 @@ const locale: typeof enUS = {
             inputCommentPlaceholder: 'コメントを入力してください',
             inputRangePlaceholder: '範囲を入力してください（空白不可）',
             inputFormulaPlaceholder: '数式を入力してください（空白不可）',
-            nameEmpty: '名前は空にできません',
-            nameDuplicate: '名前は既に存在します',
-            formulaOrRefStringEmpty: '数式または参照文字列は空にできません',
             formulaOrRefStringInvalid: '無効な数式または参照文字列',
             defaultName: 'デフォルト',
             updateButton: '更新',
             deleteButton: '削除',
             deleteConfirmText: 'この名前を削除しますか？',
-            nameConflict: '名前が関数名と衝突しています',
-            nameInvalid: '名前が無効です',
-            nameSheetConflict: '名前がシート名と衝突しています',
         },
         uploadLoading: {
             loading: '読み込み中...',

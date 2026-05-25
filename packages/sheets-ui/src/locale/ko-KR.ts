@@ -291,12 +291,6 @@ const locale: typeof enUS = {
             clickToCopy: '클릭하여 복사',
             copied: '복사됨',
         },
-        autoFill: {
-            copy: '셀 복사',
-            series: '시리즈 채우기',
-            formatOnly: '서식만 채우기',
-            noFormat: '서식 없음',
-        },
         shortcut: {
             sheet: {
                 'zoom-in': '확대',
@@ -346,17 +340,11 @@ const locale: typeof enUS = {
             inputCommentPlaceholder: '주석을 입력해주세요',
             inputRangePlaceholder: '범위를 입력해주세요(공백 불가)',
             inputFormulaPlaceholder: '수식을 입력해주세요(공백 불가)',
-            nameEmpty: '이름은 비어 있을 수 없습니다',
-            nameDuplicate: '이름이 이미 존재합니다',
-            formulaOrRefStringEmpty: '수식이나 참조 문자열은 비어 있을 수 없습니다',
             formulaOrRefStringInvalid: '잘못된 수식이나 참조 문자열',
             defaultName: '기본값',
             updateButton: '업데이트',
             deleteButton: '삭제',
             deleteConfirmText: '이 이름을 삭제하시겠습니까?',
-            nameConflict: '이름이 함수 이름과 충돌합니다',
-            nameInvalid: '이름이 잘못되었습니다',
-            nameSheetConflict: '이름이 시트 이름과 충돌합니다',
         },
         uploadLoading: {
             loading: '로딩중...',

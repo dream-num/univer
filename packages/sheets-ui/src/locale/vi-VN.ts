@@ -291,12 +291,6 @@ const locale: typeof enUS = {
             clickToCopy: 'Nhấp để sao chép giá trị',
             copied: 'Đã sao chép',
         },
-        autoFill: {
-            copy: 'Sao chép ô',
-            series: 'Điền chuỗi',
-            formatOnly: 'Chỉ điền định dạng',
-            noFormat: 'Điền không định dạng',
-        },
         shortcut: {
             sheet: {
                 'zoom-in': 'Phóng to',
@@ -346,17 +340,11 @@ const locale: typeof enUS = {
             inputCommentPlaceholder: 'Vui lòng nhập ghi chú',
             inputRangePlaceholder: 'Vui lòng nhập phạm vi (bắt buộc)',
             inputFormulaPlaceholder: 'Vui lòng nhập công thức (bắt buộc)',
-            nameEmpty: 'Tên không được để trống',
-            nameDuplicate: 'Tên trùng lặp',
-            formulaOrRefStringEmpty: 'Công thức hoặc chuỗi tham chiếu không được để trống',
             formulaOrRefStringInvalid: 'Công thức hoặc chuỗi tham chiếu không hợp lệ',
             defaultName: 'Tên xác định',
             updateButton: 'Cập nhật',
             deleteButton: 'Xóa',
             deleteConfirmText: 'Xác nhận xóa tên xác định?',
-            nameConflict: 'Xung đột với tên hàm',
-            nameInvalid: 'Tên không chứa khoảng trắng hoặc ký tự không hợp lệ',
-            nameSheetConflict: 'Tên xung đột với tên bảng tính',
         },
         uploadLoading: {
             loading: 'Đang tải lên, hiện còn lại',

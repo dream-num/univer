@@ -291,12 +291,6 @@ const locale: typeof enUS = {
             clickToCopy: 'Hacer clic para copiar',
             copied: 'Copiado',
         },
-        autoFill: {
-            copy: 'Copiar celda',
-            series: 'Rellenar serie',
-            formatOnly: 'Solo formato',
-            noFormat: 'Sin formato',
-        },
         shortcut: {
             sheet: {
                 'zoom-in': 'Acercar',
@@ -346,17 +340,11 @@ const locale: typeof enUS = {
             inputCommentPlaceholder: 'Por favor, introduce un comentario',
             inputRangePlaceholder: 'Por favor, introduce un rango (sin espacios)',
             inputFormulaPlaceholder: 'Por favor, introduce una fórmula (sin espacios)',
-            nameEmpty: 'El nombre no puede estar vacío',
-            nameDuplicate: 'El nombre ya existe',
-            formulaOrRefStringEmpty: 'La fórmula o la cadena de referencia no puede estar vacía',
             formulaOrRefStringInvalid: 'Fórmula o cadena de referencia no válida',
             defaultName: 'NombreDefinido',
             updateButton: 'Actualizar',
             deleteButton: 'Eliminar',
             deleteConfirmText: '¿Estás seguro de que quieres eliminar este nombre definido?',
-            nameConflict: 'El nombre entra en conflicto con el nombre de la función',
-            nameInvalid: 'El nombre no es válido',
-            nameSheetConflict: 'El nombre entra en conflicto con el nombre de la hoja',
         },
         uploadLoading: {
             loading: 'Cargando..., restante',

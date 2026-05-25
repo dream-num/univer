@@ -291,12 +291,6 @@ const locale: typeof enUS = {
             clickToCopy: 'کلیک کنید تا کپی کنید',
             copied: 'کپی شد',
         },
-        autoFill: {
-            copy: 'کپی سلول',
-            series: 'پر کردن سری',
-            formatOnly: 'فقط قالب',
-            noFormat: 'بدون قالب',
-        },
         shortcut: {
             sheet: {
                 'zoom-in': 'بزرگنمایی',
@@ -346,17 +340,11 @@ const locale: typeof enUS = {
             inputCommentPlaceholder: 'لطفا یک نظر وارد کنید',
             inputRangePlaceholder: 'لطفا محدوده را وارد کنید (فاصله مجاز نیست)',
             inputFormulaPlaceholder: 'لطفا یک فرمول وارد کنید (فاصله مجاز نیست)',
-            nameEmpty: 'نام نمی‌تواند خالی باشد',
-            nameDuplicate: 'نام قبلاً وجود دارد',
-            formulaOrRefStringEmpty: 'فرمول یا رشته مرجع نمی‌تواند خالی باشد',
             formulaOrRefStringInvalid: 'فرمول یا رشته مرجع نامعتبر است',
             defaultName: 'DefinedName',
             updateButton: 'به‌روزرسانی',
             deleteButton: 'حذف',
             deleteConfirmText: 'آیا مطمئن هستید که می‌خواهید این نام تعریف شده را حذف کنید؟',
-            nameConflict: 'نام با نام تابع در تضاد است',
-            nameInvalid: 'نام نامعتبر است',
-            nameSheetConflict: 'نام با نام برگه در تضاد است',
         },
         uploadLoading: {
             loading: 'در حال بارگیری...، باقی مانده', // 正在上传，当前剩余

@@ -28,6 +28,20 @@ const locale: typeof enUS = {
             partOfCell: 'Chỉ chọn một phần của ô đã hợp nhất',
             hideSheet: 'Không có bảng tính nào hiển thị sau khi ẩn',
         },
+        definedName: {
+            nameEmpty: 'Tên không được để trống',
+            nameDuplicate: 'Tên đã tồn tại',
+            nameInvalid: 'Tên không hợp lệ',
+            nameSheetConflict: 'Tên xung đột với tên trang tính',
+            formulaOrRefStringEmpty: 'Công thức hoặc chuỗi tham chiếu không được để trống',
+            nameConflict: 'Tên xung đột với tên hàm',
+        },
+        autoFill: {
+            copy: 'Sao chép ô',
+            series: 'Điền chuỗi',
+            formatOnly: 'Chỉ định dạng',
+            noFormat: 'Không định dạng',
+        },
     },
 };
 

@@ -291,12 +291,6 @@ const locale: typeof enUS = {
             clickToCopy: 'Kliknite pre kopírovanie',
             copied: 'Skopírované',
         },
-        autoFill: {
-            copy: 'Kopírovať bunku',
-            series: 'Vyplniť rad',
-            formatOnly: 'Len formát',
-            noFormat: 'Bez formátu',
-        },
         shortcut: {
             sheet: {
                 'zoom-in': 'Priblížiť',
@@ -346,17 +340,11 @@ const locale: typeof enUS = {
             inputCommentPlaceholder: 'Zadajte komentár',
             inputRangePlaceholder: 'Zadajte rozsah (bez medzier)',
             inputFormulaPlaceholder: 'Zadajte vzorec (bez medzier)',
-            nameEmpty: 'Názov nesmie byť prázdny',
-            nameDuplicate: 'Názov už existuje',
-            formulaOrRefStringEmpty: 'Vzorec alebo referenčný reťazec nesmie byť prázdny',
             formulaOrRefStringInvalid: 'Neplatný vzorec alebo referenčný reťazec',
             defaultName: 'DefinovanýNázov',
             updateButton: 'Aktualizovať',
             deleteButton: 'Odstrániť',
             deleteConfirmText: 'Naozaj chcete odstrániť tento definovaný názov?',
-            nameConflict: 'Názov je v konflikte s názvom funkcie',
-            nameInvalid: 'Názov je neplatný',
-            nameSheetConflict: 'Názov je v konflikte s názvom hárka',
         },
         uploadLoading: {
             loading: 'Načítava sa..., zostáva',

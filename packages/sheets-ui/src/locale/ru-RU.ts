@@ -291,12 +291,6 @@ const locale: typeof enUS = {
             clickToCopy: 'Нажмите, чтобы скопировать',
             copied: 'Скопировано',
         },
-        autoFill: {
-            copy: 'Копировать ячейку',
-            series: 'Заполнить серию',
-            formatOnly: 'Только формат',
-            noFormat: 'Без формата',
-        },
         shortcut: {
             sheet: {
                 'zoom-in': 'Увеличить',
@@ -346,17 +340,11 @@ const locale: typeof enUS = {
             inputCommentPlaceholder: 'Введите комментарий',
             inputRangePlaceholder: 'Введите диапазон (без пробелов)',
             inputFormulaPlaceholder: 'Введите формулу (без пробелов)',
-            nameEmpty: 'Имя не может быть пустым',
-            nameDuplicate: 'Имя уже существует',
-            formulaOrRefStringEmpty: 'Формула или строка ссылки не может быть пустой',
             formulaOrRefStringInvalid: 'Неверная формула или строка ссылки',
             defaultName: 'ОпределенноеИмя',
             updateButton: 'Обновить',
             deleteButton: 'Удалить',
             deleteConfirmText: 'Вы уверены, что хотите удалить это определенное имя?',
-            nameConflict: 'Имя конфликтует с именем функции',
-            nameInvalid: 'Имя недействительно',
-            nameSheetConflict: 'Имя конфликтует с именем листа',
         },
         uploadLoading: {
             loading: 'Загрузка...',

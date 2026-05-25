@@ -289,12 +289,6 @@ const locale = {
             clickToCopy: 'Click to Copy',
             copied: 'Copied',
         },
-        autoFill: {
-            copy: 'Copy Cell',
-            series: 'Fill Series',
-            formatOnly: 'Format Only',
-            noFormat: 'No Format',
-        },
         shortcut: {
             sheet: {
                 'zoom-in': 'Zoom in',
@@ -344,17 +338,11 @@ const locale = {
             inputCommentPlaceholder: 'Please enter a comment',
             inputRangePlaceholder: 'Please input range(No space allowed)',
             inputFormulaPlaceholder: 'Please input a formula(No space allowed)',
-            nameEmpty: 'Name cannot be empty',
-            nameDuplicate: 'Name already exists',
-            formulaOrRefStringEmpty: 'Formula or reference string cannot be empty',
             formulaOrRefStringInvalid: 'Invalid formula or reference string',
             defaultName: 'DefinedName',
             updateButton: 'Update',
             deleteButton: 'Delete',
             deleteConfirmText: 'Are you sure you want to delete this defined name?',
-            nameConflict: 'The name conflicts with the function name',
-            nameInvalid: 'The name is invalid',
-            nameSheetConflict: 'The name conflicts with the sheet name',
         },
         uploadLoading: {
             loading: 'Loading..., remaining', // 正在上传，当前剩余

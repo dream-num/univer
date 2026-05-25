@@ -291,12 +291,6 @@ const locale: typeof enUS = {
             clickToCopy: 'Feu clic per copiar',
             copied: 'Copiat',
         },
-        autoFill: {
-            copy: 'Copiar cel·la',
-            series: 'Emplenar sèries',
-            formatOnly: 'Només format',
-            noFormat: 'Sense format',
-        },
         shortcut: {
             sheet: {
                 'zoom-in': 'Apropar',
@@ -346,17 +340,11 @@ const locale: typeof enUS = {
             inputCommentPlaceholder: 'Si us plau, introduïu un comentari',
             inputRangePlaceholder: 'Si us plau, introduïu un interval (sense espais)',
             inputFormulaPlaceholder: 'Si us plau, introduïu una fórmula (sense espais)',
-            nameEmpty: 'El nom no pot estar buit',
-            nameDuplicate: 'El nom ja existeix',
-            formulaOrRefStringEmpty: 'La fórmula o la cadena de referència no pot estar buida',
             formulaOrRefStringInvalid: 'Fórmula o cadena de referència no vàlida',
             defaultName: 'NomDefinit',
             updateButton: 'Actualitzar',
             deleteButton: 'Suprimir',
             deleteConfirmText: 'Esteu segur que voleu suprimir aquest nom definit?',
-            nameConflict: 'El nom entra en conflicte amb el nom de la funció',
-            nameInvalid: 'El nom no és vàlid',
-            nameSheetConflict: 'El nom entra en conflicte amb el nom del full',
         },
         uploadLoading: {
             loading: 'S\'està carregant..., restant',

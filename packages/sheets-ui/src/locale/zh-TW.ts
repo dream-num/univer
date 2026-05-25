@@ -291,12 +291,6 @@ const locale: typeof enUS = {
             clickToCopy: '點選複製數值',
             copied: '已複製',
         },
-        autoFill: {
-            copy: '複製儲存格',
-            series: '填滿數列',
-            formatOnly: '僅以格式填滿',
-            noFormat: '填滿但不填入格式',
-        },
         shortcut: {
             sheet: {
                 'zoom-in': '放大',
@@ -346,17 +340,11 @@ const locale: typeof enUS = {
             inputCommentPlaceholder: '請輸入備註',
             inputRangePlaceholder: '請輸入範圍（必填）',
             inputFormulaPlaceholder: '請輸入公式（必填）',
-            nameEmpty: '名稱不能為空',
-            nameDuplicate: '名稱重複',
-            formulaOrRefStringEmpty: '公式或引用字串不能為空',
             formulaOrRefStringInvalid: '公式或引用字串無效',
             defaultName: 'DefinedName',
             updateButton: '修改',
             deleteButton: '刪除',
             deleteConfirmText: '確定刪除定義名稱？ ',
-            nameConflict: '與函數名稱衝突',
-            nameInvalid: '名稱不包含空格或不允許的字元',
-            nameSheetConflict: '名稱與工作表名稱衝突',
         },
         uploadLoading: {
             loading: '正在上傳，目前剩餘',

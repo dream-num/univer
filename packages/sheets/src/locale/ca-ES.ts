@@ -28,6 +28,20 @@ const locale: typeof enUS = {
             partOfCell: 'Només una part d\'una cel·la combinada està seleccionada',
             hideSheet: 'No hi ha fulls visibles després d\'ocultar aquest',
         },
+        definedName: {
+            nameEmpty: '名称不能为空',
+            nameDuplicate: '名称已存在',
+            nameInvalid: '名称无效',
+            nameSheetConflict: '名称与工作表名称冲突',
+            formulaOrRefStringEmpty: '公式或引用字符串不能为空',
+            nameConflict: '名称与函数名称冲突',
+        },
+        autoFill: {
+            copy: '复制单元格',
+            series: '填充序列',
+            formatOnly: '仅格式',
+            noFormat: '无格式',
+        },
     },
 };
 

@@ -28,6 +28,20 @@ const locale: typeof enUS = {
             partOfCell: 'Seule une partie d\'une cellule fusionnée est sélectionnée',
             hideSheet: 'Aucune feuille visible après avoir masqué celle-ci',
         },
+        definedName: {
+            nameEmpty: 'Le nom ne peut pas être vide',
+            nameDuplicate: 'Le nom existe déjà',
+            nameInvalid: 'Le nom est invalide',
+            nameSheetConflict: 'Le nom entre en conflit avec le nom de la feuille',
+            formulaOrRefStringEmpty: 'La formule ou la chaîne de référence ne peut pas être vide',
+            nameConflict: 'Le nom entre en conflit avec le nom de la fonction',
+        },
+        autoFill: {
+            copy: 'Copier la cellule',
+            series: 'Remplir la série',
+            formatOnly: 'Format uniquement',
+            noFormat: 'Aucun format',
+        },
     },
 };
 

@@ -83,7 +83,7 @@ describe('SheetsHyperLinkParserService', () => {
         univer.dispose();
     });
 
-    it('should build hyperlinks for sheet, named range and range object', () => {
+    it('should build hyperlinks for sheet, defined name and range object', () => {
         const range: IRange = {
             startRow: 0,
             endRow: 1,
@@ -91,9 +91,9 @@ describe('SheetsHyperLinkParserService', () => {
             endColumn: 1,
         };
 
-        expect(service.buildHyperLink('book-1', 'sheet-1')).toBe('#gid=sheet-1');
-        expect(service.buildHyperLink('book-1', 'sheet-1', 'name-1')).toBe('#gid=sheet-1&rangeid=name-1');
-        expect(service.buildHyperLink('book-1', 'sheet-1', range)).toBe('#gid=sheet-1&range=A1:B2');
+        expect(service.buildHyperLink(null, 'sheet-1')).toBe('#gid=sheet-1');
+        expect(service.buildHyperLink('name-1')).toBe('#rangeid=name-1');
+        expect(service.buildHyperLink(range, 'sheet-1')).toBe('#gid=sheet-1&range=A1:B2');
     });
 
     it('should parse external URLs as url links', () => {
@@ -146,6 +146,32 @@ describe('SheetsHyperLinkParserService', () => {
                 range: '',
                 rangeid: 'name-1',
                 unitid: workbook.getUnitId(),
+            },
+        });
+    });
+
+    it('should parse defined name links from the focused workbook when unitid is absent', () => {
+        const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, createWorkbookData());
+        const univerInstanceService = univer.__getInjector().get(IUniverInstanceService);
+        const definedNamesService = univer.__getInjector().get(IDefinedNamesService);
+
+        univerInstanceService.focusUnit(workbook.getUnitId());
+        definedNamesService.registerDefinedName(workbook.getUnitId(), {
+            id: 'name-1',
+            name: 'Total',
+            formulaOrRefString: 'Sheet1!A1:B2',
+        });
+
+        const url = service.buildHyperLink('name-1');
+        expect(service.parseHyperLink(url)).toEqual({
+            type: SheetHyperLinkType.DEFINE_NAME,
+            name: 'Sheet1!A1:B2',
+            url,
+            searchObj: {
+                gid: '',
+                range: '',
+                rangeid: 'name-1',
+                unitid: '',
             },
         });
     });

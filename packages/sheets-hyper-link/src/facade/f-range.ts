@@ -60,6 +60,11 @@ export interface IFRangeSheetsHyperlinkMixin {
      *   const fRange3 = fWorksheet.getRange('A3');
      *   await fRange3.setHyperLink(anotherSheetUrl, 'Link to Another Sheet');
      * }
+     *
+     * // Create a hyperlink to a defined name on cell A4
+     * const fRange4 = fWorksheet.getRange('A4');
+     * const definedNameHyperlinkUrl = fWorkbook.getUrlOfDefineName('MyDefinedName');
+     * await fRange4.setHyperLink(definedNameHyperlinkUrl, 'Link to MyDefinedName');
      * ```
      */
     setHyperLink(url: string, label?: string): Promise<boolean>;
@@ -130,7 +135,7 @@ export interface IFRangeSheetsHyperlinkMixin {
 
     /**
      * Create a hyperlink url to this range
-     * @returns {string} The url of this range
+     * @returns {string} The hyperlink url of this range
      *
      * @example
      * ```ts
@@ -244,7 +249,7 @@ export class FRangeSheetsHyperlinkMixin extends FRange implements IFRangeSheetsH
 
     override getUrl(): string {
         const parserService = this._injector.get(SheetsHyperLinkParserService);
-        return parserService.buildHyperLink(this.getUnitId(), this.getSheetId(), this.getRange());
+        return parserService.buildHyperLink(this.getRange(), this.getSheetId());
     }
 }
 

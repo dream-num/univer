@@ -23,7 +23,7 @@ export const AlertDialog = ({ errorMsg }: { errorMsg: string }) => {
     return (
         <div>
             <p className="univer-m-0">
-                {errorMsg || localeService.t('permission.dialog.alertContent')}
+                {errorMsg || localeService.t('sheets-ui.permission.dialog.alertContent')}
             </p>
         </div>
     );

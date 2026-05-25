@@ -76,7 +76,7 @@ export class SheetPermissionInterceptorClipboardController extends Disposable {
                     }
 
                     if (!hasPermission) {
-                        this._sheetPermissionCheckController.blockExecuteWithoutPermission(this._localService.t('permission.dialog.pasteErr'));
+                        this._sheetPermissionCheckController.blockExecuteWithoutPermission(this._localService.t('sheets-ui.permission.dialog.pasteErr'));
                     }
 
                     return hasPermission;

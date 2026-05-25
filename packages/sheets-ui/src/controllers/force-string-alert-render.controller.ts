@@ -103,8 +103,8 @@ export class ForceStringAlertRenderController extends Disposable implements IRen
 
                     this._cellAlertManagerService.showAlert({
                         type: CellAlertType.ERROR,
-                        title: this._localeService.t('info.error'),
-                        message: this._localeService.t('info.forceStringInfo'),
+                        title: this._localeService.t('sheets-ui.info.error'),
+                        message: this._localeService.t('sheets-ui.info.forceStringInfo'),
                         location,
                         width: 200,
                         height: 74,

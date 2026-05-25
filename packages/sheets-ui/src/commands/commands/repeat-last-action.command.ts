@@ -36,7 +36,7 @@ const permissionCheckMap = {
             worksheetTypes: [WorksheetEditPermission],
             rangeTypes: [RangeProtectionPermissionEditPoint],
         },
-        errorMessageKey: 'permission.dialog.editErr',
+        errorMessageKey: 'sheets-ui.permission.dialog.editErr',
     },
     [RepeatLastActionPermission.CellStyle]: {
         permissionTypes: {
@@ -44,7 +44,7 @@ const permissionCheckMap = {
             worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
             rangeTypes: [RangeProtectionPermissionEditPoint],
         },
-        errorMessageKey: 'permission.dialog.setStyleErr',
+        errorMessageKey: 'sheets-ui.permission.dialog.setStyleErr',
     },
     [RepeatLastActionPermission.CellValue]: {
         permissionTypes: {
@@ -52,7 +52,7 @@ const permissionCheckMap = {
             worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission],
             rangeTypes: [RangeProtectionPermissionEditPoint],
         },
-        errorMessageKey: 'permission.dialog.editErr',
+        errorMessageKey: 'sheets-ui.permission.dialog.editErr',
     },
     [RepeatLastActionPermission.RowStyle]: {
         permissionTypes: {
@@ -60,7 +60,7 @@ const permissionCheckMap = {
             worksheetTypes: [WorksheetEditPermission, WorksheetSetRowStylePermission],
             rangeTypes: [RangeProtectionPermissionEditPoint],
         },
-        errorMessageKey: 'permission.dialog.setRowColStyleErr',
+        errorMessageKey: 'sheets-ui.permission.dialog.setRowColStyleErr',
     },
     [RepeatLastActionPermission.ColumnStyle]: {
         permissionTypes: {
@@ -68,7 +68,7 @@ const permissionCheckMap = {
             worksheetTypes: [WorksheetEditPermission, WorksheetSetColumnStylePermission],
             rangeTypes: [RangeProtectionPermissionEditPoint],
         },
-        errorMessageKey: 'permission.dialog.setRowColStyleErr',
+        errorMessageKey: 'sheets-ui.permission.dialog.setRowColStyleErr',
     },
 };
 

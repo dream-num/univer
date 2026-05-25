@@ -51,11 +51,11 @@ export const RemoveSheetConfirmCommand: ICommand = {
         const result = await confirmService.confirm({
             id: 'sheet.confirm.remove-sheet',
             title: {
-                title: localeService.t('sheetConfig.deleteSheet'),
+                title: localeService.t('sheets-ui.sheetConfig.deleteSheet'),
             },
-            children: { title: isLargeSheet ? localeService.t('sheetConfig.deleteLargeSheetContent') : localeService.t('sheetConfig.deleteSheetContent') },
-            cancelText: localeService.t('button.cancel'),
-            confirmText: localeService.t('button.confirm'),
+            children: { title: isLargeSheet ? localeService.t('sheets-ui.sheetConfig.deleteLargeSheetContent') : localeService.t('sheets-ui.sheetConfig.deleteSheetContent') },
+            cancelText: localeService.t('sheets-ui.button.cancel'),
+            confirmText: localeService.t('sheets-ui.button.confirm'),
         });
 
         if (!result) {

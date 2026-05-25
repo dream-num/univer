@@ -61,9 +61,9 @@ export const MenuItemFrozen = (props: IMenuItemFrozenProps) => {
 
     return (
         <>
-            {type === 'row' && localeService.t('rightClick.freezeRow', value.row)}
-            {type === 'col' && localeService.t('rightClick.freezeCol', value.col)}
-            {type === 'all' && localeService.t('rightClick.freezeCell', value.row, value.col)}
+            {type === 'row' && localeService.t('sheets-ui.rightClick.freezeRow', value.row)}
+            {type === 'col' && localeService.t('sheets-ui.rightClick.freezeCol', value.col)}
+            {type === 'all' && localeService.t('sheets-ui.rightClick.freezeCell', value.row, value.col)}
         </>
     );
 };

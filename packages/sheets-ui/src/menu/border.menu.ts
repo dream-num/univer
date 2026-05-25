@@ -55,7 +55,7 @@ export function CellBorderSelectorMenuItemFactory(accessor: IAccessor): IMenuSel
 
             return disposable.dispose;
         }),
-        tooltip: 'toolbar.border.main',
+        tooltip: 'sheets-ui.toolbar.border.main',
         type: MenuItemType.BUTTON_SELECTOR,
         slot: true,
         selections: [

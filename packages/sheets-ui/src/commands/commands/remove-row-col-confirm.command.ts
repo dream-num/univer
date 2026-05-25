@@ -51,11 +51,11 @@ export const RemoveRowConfirmCommand: ICommand = {
             await confirmService.confirm({
                 id: 'sheet.confirm.remove-row',
                 title: {
-                    title: localeService.t('info.problem'),
+                    title: localeService.t('sheets-ui.info.problem'),
                 },
-                children: { title: localeService.t('rightClick.deleteAllRowsAlert') },
-                cancelText: localeService.t('button.cancel'),
-                confirmText: localeService.t('button.confirm'),
+                children: { title: localeService.t('sheets-ui.rightClick.deleteAllRowsAlert') },
+                cancelText: localeService.t('sheets-ui.button.cancel'),
+                confirmText: localeService.t('sheets-ui.button.confirm'),
             });
 
             return false;
@@ -96,11 +96,11 @@ export const RemoveColConfirmCommand: ICommand = {
             await confirmService.confirm({
                 id: 'sheet.confirm.remove-col',
                 title: {
-                    title: localeService.t('info.problem'),
+                    title: localeService.t('sheets-ui.info.problem'),
                 },
-                children: { title: localeService.t('rightClick.deleteAllColumnsAlert') },
-                cancelText: localeService.t('button.cancel'),
-                confirmText: localeService.t('button.confirm'),
+                children: { title: localeService.t('sheets-ui.rightClick.deleteAllColumnsAlert') },
+                cancelText: localeService.t('sheets-ui.button.cancel'),
+                confirmText: localeService.t('sheets-ui.button.confirm'),
             });
 
             return false;

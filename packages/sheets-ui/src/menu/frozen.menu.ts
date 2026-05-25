@@ -69,7 +69,7 @@ export function SheetFrozenMenuItemFactory(accessor: IAccessor): IMenuSelectorIt
     return {
         id: SHEET_FROZEN_MENU_ID,
         type: MenuItemType.SUBITEMS,
-        title: 'rightClick.freeze',
+        title: 'sheets-ui.rightClick.freeze',
         icon: 'FreezeToSelectedIcon',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
@@ -81,7 +81,7 @@ export function SheetFrozenColumnHeaderMenuItemFactory(accessor: IAccessor): IMe
     return {
         id: SHEET_FROZEN_COLUMN_HEADER_MENU_ID,
         type: MenuItemType.SUBITEMS,
-        title: 'rightClick.freeze',
+        title: 'sheets-ui.rightClick.freeze',
         icon: 'FreezeToSelectedIcon',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
@@ -93,7 +93,7 @@ export function SheetFrozenRowHeaderMenuItemFactory(accessor: IAccessor): IMenuS
     return {
         id: SHEET_FROZEN_ROW_HEADER_MENU_ID,
         type: MenuItemType.SUBITEMS,
-        title: 'rightClick.freeze',
+        title: 'sheets-ui.rightClick.freeze',
         icon: 'FreezeToSelectedIcon',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
@@ -154,7 +154,7 @@ export function FrozenFirstRowMenuItemFactory(accessor: IAccessor): IMenuButtonI
     return {
         id: SetFirstRowFrozenCommand.id,
         type: MenuItemType.BUTTON,
-        title: 'rightClick.freezeFirstRow',
+        title: 'sheets-ui.rightClick.freezeFirstRow',
         icon: 'FreezeRowIcon',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
@@ -164,7 +164,7 @@ export function FrozenFirstColMenuItemFactory(accessor: IAccessor): IMenuButtonI
     return {
         id: SetFirstColumnFrozenCommand.id,
         type: MenuItemType.BUTTON,
-        title: 'rightClick.freezeFirstCol',
+        title: 'sheets-ui.rightClick.freezeFirstCol',
         icon: 'FreezeColumnIcon',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
@@ -174,7 +174,7 @@ export function CancelFrozenMenuItemFactory(accessor: IAccessor): IMenuButtonIte
     return {
         id: CancelFrozenCommand.id,
         type: MenuItemType.BUTTON,
-        title: 'rightClick.cancelFreeze',
+        title: 'sheets-ui.rightClick.cancelFreeze',
         icon: 'CancelFreezeIcon',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };

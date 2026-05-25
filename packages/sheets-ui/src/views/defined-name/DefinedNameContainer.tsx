@@ -173,14 +173,14 @@ export const DefinedNameContainer = () => {
 
     const getInsertDefinedName = () => {
         const count = definedNames.length + 1;
-        const name = localeService.t('definedName.defaultName') + count;
+        const name = localeService.t('sheets-ui.definedName.defaultName') + count;
         if (definedNamesService.getValueByName(unitId, name) == null) {
             return name;
         }
 
         let i = count + 1;
         while (true) {
-            const newName = localeService.t('definedName.defaultName') + i;
+            const newName = localeService.t('sheets-ui.definedName.defaultName') + i;
             if (definedNamesService.getValueByName(unitId, newName) == null) {
                 return newName;
             }
@@ -247,7 +247,7 @@ export const DefinedNameContainer = () => {
                     onClick={openInsertCloseKeyEditor}
                 >
                     <IncreaseIcon />
-                    <span className="univer-ml-1">{localeService.t('definedName.addButton')}</span>
+                    <span className="univer-ml-1">{localeService.t('sheets-ui.definedName.addButton')}</span>
                 </Button>
                 {editState && (
                     <DefinedNameInput
@@ -322,7 +322,7 @@ export const DefinedNameContainer = () => {
                                               dark:hover:!univer-bg-gray-600
                                             `}
                                         >
-                                            <Tooltip title={localeService.t('definedName.updateButton')} placement="top">
+                                            <Tooltip title={localeService.t('sheets-ui.definedName.updateButton')} placement="top">
                                                 <a
                                                     className={`
                                                       univer-rounded univer-p-1
@@ -336,7 +336,7 @@ export const DefinedNameContainer = () => {
                                                     <PenIcon />
                                                 </a>
                                             </Tooltip>
-                                            <Tooltip title={localeService.t('definedName.deleteButton')} placement="top">
+                                            <Tooltip title={localeService.t('sheets-ui.definedName.deleteButton')} placement="top">
                                                 <a
                                                     className={`
                                                       univer-rounded univer-p-1 univer-text-red-600
@@ -359,7 +359,7 @@ export const DefinedNameContainer = () => {
                                     onClose={handleDeleteClose}
                                     onConfirm={() => { handleDeleteConfirm(definedName.id); }}
                                 >
-                                    {localeService.t('definedName.deleteConfirmText')}
+                                    {localeService.t('sheets-ui.definedName.deleteConfirmText')}
                                 </Confirm>
 
                                 {definedName.id === editorKey && (

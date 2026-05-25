@@ -201,7 +201,7 @@ function SelectList(props: ISelectListProps) {
                         `}
                         onClick={onEdit}
                     >
-                        {localeService.t('sheets-data-validation-ui.list.edit')}
+                        {localeService.t('sheets-ui.data-validation.list.edit')}
                     </a>
                 </div>
             )}
@@ -233,7 +233,7 @@ export function ListDropDown(props: { popup: IPopup<IListDropdownProps & IBaseDr
     return (
         <SelectList
             style={{ minWidth: cellWidth, maxWidth: Math.max(cellWidth, 200) }}
-            title={multiple ? localeService.t('sheets-data-validation-ui.listMultiple.dropdown') : localeService.t('sheets-data-validation-ui.list.dropdown')}
+            title={multiple ? localeService.t('sheets-ui.data-validation.listMultiple.dropdown') : localeService.t('sheets-ui.data-validation.list.dropdown')}
             value={deserializeListOptions(localValue ?? '')}
             multiple={multiple}
             onChange={async (newValue) => {

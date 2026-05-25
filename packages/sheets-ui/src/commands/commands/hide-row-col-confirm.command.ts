@@ -45,11 +45,11 @@ export const HideRowConfirmCommand: ICommand = {
             await confirmService.confirm({
                 id: 'sheet.confirm.hide-row',
                 title: {
-                    title: localeService.t('info.problem'),
+                    title: localeService.t('sheets-ui.info.problem'),
                 },
-                children: { title: localeService.t('rightClick.hideAllRowsAlert') },
-                cancelText: localeService.t('button.cancel'),
-                confirmText: localeService.t('button.confirm'),
+                children: { title: localeService.t('sheets-ui.rightClick.hideAllRowsAlert') },
+                cancelText: localeService.t('sheets-ui.button.cancel'),
+                confirmText: localeService.t('sheets-ui.button.confirm'),
             });
 
             return false;
@@ -87,11 +87,11 @@ export const HideColConfirmCommand: ICommand = {
             await confirmService.confirm({
                 id: 'sheet.confirm.hide-col',
                 title: {
-                    title: localeService.t('info.problem'),
+                    title: localeService.t('sheets-ui.info.problem'),
                 },
-                children: { title: localeService.t('rightClick.hideAllColumnsAlert') },
-                cancelText: localeService.t('button.cancel'),
-                confirmText: localeService.t('button.confirm'),
+                children: { title: localeService.t('sheets-ui.rightClick.hideAllColumnsAlert') },
+                cancelText: localeService.t('sheets-ui.button.cancel'),
+                confirmText: localeService.t('sheets-ui.button.confirm'),
             });
 
             return false;

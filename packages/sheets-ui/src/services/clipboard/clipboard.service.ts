@@ -337,8 +337,8 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             if (this._platformService.isWindows && htmlIsFromExcel(html)) {
                 this._notificationService.show({
                     type: 'warning',
-                    title: this._localeService.t('clipboard.shortCutNotify.title'),
-                    content: this._localeService.t('clipboard.shortCutNotify.useShortCutInstead'),
+                    title: this._localeService.t('sheets-ui.clipboard.shortCutNotify.title'),
+                    content: this._localeService.t('sheets-ui.clipboard.shortCutNotify.useShortCutInstead'),
                 });
                 // Pasting should not be allowed here.
                 // After the pop-up window prompts, can paste the contents of the clipboard as much as possible.
@@ -666,7 +666,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                 return rangeIntersectWithDiscreteRange(m, pasteTarget.pastedRange) && !discreteRangeContainsRange(pasteTarget.pastedRange, m);
             });
             if (pastedRangeLapWithMergedCell) {
-                this._errorService.emit(this._localeService.t('clipboard.paste.overlappingMergedCells'));
+                this._errorService.emit(this._localeService.t('sheets-ui.clipboard.paste.overlappingMergedCells'));
                 return false;
             }
         }
@@ -742,7 +742,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                 return rangeIntersectWithDiscreteRange(m, pasteTarget.pastedRange) && !discreteRangeContainsRange(pasteTarget.pastedRange, m);
             });
             if (pastedRangeLapWithMergedCell) {
-                this._errorService.emit(this._localeService.t('clipboard.paste.overlappingMergedCells'));
+                this._errorService.emit(this._localeService.t('sheets-ui.clipboard.paste.overlappingMergedCells'));
                 return false;
             }
         }

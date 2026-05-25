@@ -83,7 +83,7 @@ describe('defined-name.utils', () => {
             functionService,
         });
 
-        expect(error).toBe('definedName.nameDuplicate');
+        expect(error).toBe('sheets-ui.definedName.nameDuplicate');
     });
 
     it('should resolve Enter on an existing defined name to focus the name', () => {

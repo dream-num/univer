@@ -66,7 +66,7 @@ export class DrawingPopupMenuController extends RxDisposable {
                 messageDisposable = this._messageService.show({
                     id: MESSAGE_ID,
                     type: MessageType.Loading,
-                    content: `${this._localeService.t('uploadLoading.loading')}: ${status}`,
+                    content: `${this._localeService.t('sheets-ui.uploadLoading.loading')}: ${status}`,
                     duration: 0,
                 });
             } else if (status === 0) {

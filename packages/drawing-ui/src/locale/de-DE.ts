@@ -1,0 +1,75 @@
+/**
+ * Copyright 2023-present DreamNum Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
+    'drawing-ui': {
+        'image-cropper': {
+            error: 'Nicht-Bildobjekte können nicht zugeschnitten werden.',
+        },
+        'image-panel': {
+            arrange: {
+                title: 'Anordnen',
+                forward: 'Eine Ebene nach vorne',
+                backward: 'Eine Ebene nach hinten',
+                front: 'In den Vordergrund',
+                back: 'In den Hintergrund',
+            },
+            transform: {
+                title: 'Transformieren',
+                rotate: 'Drehen (°)',
+                x: 'X (px)',
+                y: 'Y (px)',
+                width: 'Breite (px)',
+                height: 'Höhe (px)',
+                lock: 'Verhältnis sperren (%)',
+            },
+            crop: {
+                title: 'Zuschneiden',
+                start: 'Zuschneiden starten',
+                mode: 'Frei',
+            },
+            group: {
+                title: 'Gruppe',
+                group: 'Gruppieren',
+                unGroup: 'Gruppierung aufheben',
+            },
+            align: {
+                title: 'Ausrichten',
+                default: 'Ausrichtungstyp auswählen',
+                left: 'Linksbündig',
+                center: 'Zentriert',
+                right: 'Rechtsbündig',
+                top: 'Oben bündig',
+                middle: 'Mittig',
+                bottom: 'Unten bündig',
+                horizon: 'Horizontal verteilen',
+                vertical: 'Vertikal verteilen',
+            },
+            null: 'Keine Objektauswahl',
+        },
+        shortcut: {
+            'drawing-move-down': 'Zeichnung nach unten verschieben',
+            'drawing-move-up': 'Zeichnung nach oben verschieben',
+            'drawing-move-left': 'Zeichnung nach links verschieben',
+            'drawing-move-right': 'Zeichnung nach rechts verschieben',
+            'drawing-delete': 'Zeichnung löschen',
+        },
+    },
+};
+
+export default locale;

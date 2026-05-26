@@ -26,6 +26,7 @@ const locales = [
     'ru-RU',
     'zh-CN',
     'zh-TW',
+    'zh-HK',
     'vi-VN',
     'fa-IR',
     'ko-KR',
@@ -33,6 +34,12 @@ const locales = [
     'es-ES',
     'ca-ES',
     'sk-SK',
+    'pt-BR',
+    'de-DE',
+    'it-IT',
+    'id-ID',
+    'pl-PL',
+    'ar-SA',
 ];
 
 /**

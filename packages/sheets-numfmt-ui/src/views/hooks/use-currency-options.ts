@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { currencySymbols } from '@univerjs/sheets-numfmt';
+import { currencySymbols } from '@univerjs/core';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 import { UserHabitController } from '../../controllers/user-habit.controller';

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { currencySymbols } from '../base/const/currency-symbols';
+import { currencySymbols } from '@univerjs/core';
 
 export const getCurrencyType = (pattern: string) => {
     const item = currencySymbols.find((code) => pattern.includes(code));

@@ -16,60 +16,38 @@
 
 import { LocaleType } from '@univerjs/core';
 
-export const currencySymbols = [
-    '$',
-    '£',
-    '¥',
-    '¤',
-    '֏',
-    '؋',
-    '৳',
-    '฿',
-    '៛',
-    '₡',
-    '₦',
-    '₩',
-    '₪',
-    '₫',
-    '€',
-    '₭',
-    '₮',
-    '₱',
-    '₲',
-    '₴',
-    '₸',
-    '₹',
-    '₺',
-    '₼',
-    '₽',
-    '₾',
-    '₿',
-    '﷼',
-];
-
 export const localeCurrencySymbolMap = new Map<LocaleType, string>([
     [LocaleType.EN_US, '$'],
     [LocaleType.RU_RU, '₽'],
     [LocaleType.VI_VN, '₫'],
     [LocaleType.ZH_CN, '¥'],
     [LocaleType.ZH_TW, 'NT$'],
+    [LocaleType.ZH_HK, 'HK$'],
     [LocaleType.FR_FR, '€'],
     [LocaleType.FA_IR, '﷼'],
     [LocaleType.KO_KR, '₩'],
     [LocaleType.ES_ES, '€'],
     [LocaleType.CA_ES, '€'],
     [LocaleType.SK_SK, '€'],
+    [LocaleType.JA_JP, '¥'],
+    [LocaleType.PT_BR, 'R$'],
+    [LocaleType.DE_DE, '€'],
+    [LocaleType.IT_IT, '€'],
+    [LocaleType.ID_ID, 'Rp'],
+    [LocaleType.PL_PL, 'zł'],
+    [LocaleType.AR_SA, '﷼'],
 ]);
 
 /**
  * Get the currency symbol icon based on the locale.
- * TODO@wpxp123456: supplement more currency symbols icons. missing icons: ₩, ₫, NT$, ﷼.
  */
 export function getCurrencySymbolIconByLocale(locale: LocaleType) {
     switch (locale) {
         case LocaleType.CA_ES:
+        case LocaleType.DE_DE:
         case LocaleType.ES_ES:
         case LocaleType.FR_FR:
+        case LocaleType.IT_IT:
         case LocaleType.SK_SK:
             return {
                 icon: 'EuroIcon',
@@ -82,18 +60,28 @@ export function getCurrencySymbolIconByLocale(locale: LocaleType) {
                 symbol: localeCurrencySymbolMap.get(locale) || '₽',
                 locale,
             };
+        case LocaleType.JA_JP:
         case LocaleType.ZH_CN:
             return {
                 icon: 'RmbIcon',
                 symbol: localeCurrencySymbolMap.get(locale) || '¥',
                 locale,
             };
+        case LocaleType.AR_SA:
         case LocaleType.EN_US:
+        case LocaleType.FA_IR:
+        case LocaleType.ID_ID:
+        case LocaleType.KO_KR:
+        case LocaleType.PL_PL:
+        case LocaleType.PT_BR:
+        case LocaleType.VI_VN:
+        case LocaleType.ZH_HK:
+        case LocaleType.ZH_TW:
         default:
             return {
                 icon: 'DollarIcon',
-                symbol: '$',
-                locale: LocaleType.EN_US,
+                symbol: localeCurrencySymbolMap.get(locale) || '$',
+                locale,
             };
     }
 }

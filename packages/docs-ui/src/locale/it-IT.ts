@@ -1,0 +1,138 @@
+/**
+ * Copyright 2023-present DreamNum Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
+    'docs-ui': {
+        toolbar: {
+            undo: 'Annulla',
+            redo: 'Ripristina',
+            font: 'Carattere',
+            fontSize: 'Dimensione carattere',
+            bold: 'Grassetto',
+            italic: 'Corsivo',
+            strikethrough: 'Barrato',
+            subscript: 'Pedice',
+            superscript: 'Apice',
+            underline: 'Sottolineato',
+            textColor: {
+                main: 'Colore testo',
+            },
+            fillColor: {
+                main: 'Colore sfondo testo',
+            },
+            table: {
+                main: 'Tabella',
+                insert: 'Inserisci Tabella',
+                colCount: 'Numero colonne',
+                rowCount: 'Numero righe',
+            },
+            resetColor: 'Reimposta',
+            order: 'Elenco ordinato',
+            unorder: 'Elenco puntato',
+            checklist: 'Elenco attività',
+            documentFlavor: 'Modalità Moderna',
+            alignLeft: 'Allinea a Sinistra',
+            alignCenter: 'Allinea al Centro',
+            alignRight: 'Allinea a Destra',
+            alignJustify: 'Giustifica',
+            horizontalLine: 'Linea orizzontale',
+            headerFooter: 'Intestazione e Piè di Pagina',
+            pageSetup: 'Impostazione Pagina',
+        },
+        table: {
+            insert: 'Inserisci',
+            insertRowAbove: 'Inserisci riga sopra',
+            insertRowBelow: 'Inserisci riga sotto',
+            insertColumnLeft: 'Inserisci colonna a sinistra',
+            insertColumnRight: 'Inserisci colonna a destra',
+            delete: 'Elimina tabella',
+            deleteRows: 'Elimina riga',
+            deleteColumns: 'Elimina colonna',
+            deleteTable: 'Elimina tabella',
+        },
+        headerFooter: {
+            header: 'Intestazione',
+            footer: 'Piè di pagina',
+            panel: 'Impostazioni Intestazione e Piè di Pagina',
+            firstPageCheckBox: 'Prima pagina diversa',
+            oddEvenCheckBox: 'Pagine pari e dispari diverse',
+            headerTopMargin: 'Margine superiore intestazione (px)',
+            footerBottomMargin: 'Margine inferiore piè di pagina (px)',
+            closeHeaderFooter: 'Chiudi intestazione e piè di pagina',
+            disableText: 'Le impostazioni di intestazione e piè di pagina sono disabilitate',
+        },
+        doc: {
+            menu: {
+                paragraphSetting: 'Impostazioni Paragrafo',
+            },
+            slider: {
+                paragraphSetting: 'Impostazioni Paragrafo',
+            },
+            paragraphSetting: {
+                alignment: 'Allineamento',
+                indentation: 'Rientro',
+                left: 'Sinistra',
+                right: 'Destra',
+                firstLine: 'Prima riga',
+                hanging: 'Rientro sporgente',
+                spacing: 'Spaziatura',
+                before: 'Prima',
+                after: 'Dopo',
+                lineSpace: 'Interlinea',
+                multiSpace: 'Spaziatura multipla',
+                fixedValue: 'Valore fisso (px)',
+            },
+        },
+        rightClick: {
+            copy: 'Copia',
+            cut: 'Taglia',
+            paste: 'Incolla',
+            delete: 'Elimina',
+            bulletList: 'Elenco puntato',
+            orderList: 'Elenco ordinato',
+            checkList: 'Elenco attività',
+            insertBellow: 'Inserisci sotto',
+        },
+        'page-settings': {
+            'document-setting': 'Impostazione Documento',
+            'paper-size': 'Dimensione carta',
+            'page-size': {
+                a4: 'A4',
+                a3: 'A3',
+                a5: 'A5',
+                b4: 'B4',
+                b5: 'B5',
+                letter: 'Letter',
+                legal: 'Legal',
+                tabloid: 'Tabloid',
+                statement: 'Statement',
+                executive: 'Executive',
+                folio: 'Folio',
+            },
+            'custom-paper-size': 'Dimensione carta personalizzata',
+            top: 'Superiore',
+            bottom: 'Inferiore',
+            left: 'Sinistra',
+            right: 'Destra',
+            cancel: 'Annulla',
+            confirm: 'Conferma',
+        },
+    },
+};
+
+export default locale;

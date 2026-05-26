@@ -1,0 +1,75 @@
+/**
+ * Copyright 2023-present DreamNum Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
+    'drawing-ui': {
+        'image-cropper': {
+            error: 'Impossibile ritagliare oggetti non immagine.',
+        },
+        'image-panel': {
+            arrange: {
+                title: 'Disponi',
+                forward: 'Porta avanti',
+                backward: 'Porta indietro',
+                front: 'Porta in primo piano',
+                back: 'Porta in secondo piano',
+            },
+            transform: {
+                title: 'Trasforma',
+                rotate: 'Ruota (°)',
+                x: 'X (px)',
+                y: 'Y (px)',
+                width: 'Larghezza (px)',
+                height: 'Altezza (px)',
+                lock: 'Blocca proporzioni (%)',
+            },
+            crop: {
+                title: 'Ritaglia',
+                start: 'Inizia ritaglio',
+                mode: 'Libero',
+            },
+            group: {
+                title: 'Raggruppa',
+                group: 'Raggruppa',
+                unGroup: 'Separa',
+            },
+            align: {
+                title: 'Allinea',
+                default: 'Seleziona tipo allineamento',
+                left: 'Allinea a sinistra',
+                center: 'Allinea al centro',
+                right: 'Allinea a destra',
+                top: 'Allinea in alto',
+                middle: 'Allinea al centro',
+                bottom: 'Allinea in basso',
+                horizon: 'Distribuisci orizzontalmente ',
+                vertical: 'Distribuisci verticalmente ',
+            },
+            null: 'Nessun oggetto selezionato',
+        },
+        shortcut: {
+            'drawing-move-down': 'Sposta disegno in basso',
+            'drawing-move-up': 'Sposta disegno in alto',
+            'drawing-move-left': 'Sposta disegno a sinistra',
+            'drawing-move-right': 'Sposta disegno a destra',
+            'drawing-delete': 'Elimina disegno',
+        },
+    },
+};
+
+export default locale;

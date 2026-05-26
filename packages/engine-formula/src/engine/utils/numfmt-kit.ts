@@ -15,39 +15,9 @@
  */
 
 import type { ICellData, Nullable, Styles } from '@univerjs/core';
-import { getNumfmtParseValueFilter, LocaleType, numfmt } from '@univerjs/core';
+import { currencySymbols, getNumfmtParseValueFilter, LocaleType, numfmt } from '@univerjs/core';
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import { operatorToken } from '../../basics/token';
-
-const currencySymbols = [
-    '$',
-    '£',
-    '¥',
-    '¤',
-    '֏',
-    '؋',
-    '৳',
-    '฿',
-    '៛',
-    '₡',
-    '₦',
-    '₩',
-    '₪',
-    '₫',
-    '€',
-    '₭',
-    '₮',
-    '₱',
-    '₲',
-    '₴',
-    '₸',
-    '₹',
-    '₺',
-    '₼',
-    '₽',
-    '₾',
-    '₿',
-];
 
 type FormatType =
     | 'currency'
@@ -290,11 +260,20 @@ const localeCurrencySymbolMap = new Map<LocaleType, string>([
     [LocaleType.VI_VN, '₫'],
     [LocaleType.ZH_CN, '¥'],
     [LocaleType.ZH_TW, 'NT$'],
+    [LocaleType.ZH_HK, 'HK$'],
     [LocaleType.FR_FR, '€'],
     [LocaleType.FA_IR, '﷼'],
     [LocaleType.KO_KR, '₩'],
     [LocaleType.ES_ES, '€'],
     [LocaleType.CA_ES, '€'],
+    [LocaleType.SK_SK, '€'],
+    [LocaleType.JA_JP, '¥'],
+    [LocaleType.PT_BR, 'R$'],
+    [LocaleType.DE_DE, '€'],
+    [LocaleType.IT_IT, '€'],
+    [LocaleType.ID_ID, 'Rp'],
+    [LocaleType.PL_PL, 'zł'],
+    [LocaleType.AR_SA, '﷼'],
 ]);
 
 function getCurrencySymbol(locale: LocaleType): string {

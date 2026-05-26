@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { cellToRange, DEFAULT_NUMBER_FORMAT, isPatternEqualWithoutDecimal, LocaleType } from '@univerjs/core';
+import { cellToRange, currencySymbols, DEFAULT_NUMBER_FORMAT, isPatternEqualWithoutDecimal, LocaleType } from '@univerjs/core';
 import { RemoveNumfmtMutation, SetNumfmtMutation } from '@univerjs/sheets';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { currencySymbols, getCurrencyFormat, getCurrencySymbolByLocale, getCurrencySymbolIconByLocale } from '../base/const/currency-symbols';
+import { getCurrencyFormat, getCurrencySymbolByLocale, getCurrencySymbolIconByLocale } from '../base/const/currency-symbols';
 import { getCurrencyType } from '../utils/currency';
 import { getDecimalFromPattern, getDecimalString, isPatternHasDecimal, setPatternDecimal } from '../utils/decimal';
 import { mergeNumfmtMutations } from '../utils/mutation';
@@ -30,9 +30,9 @@ describe('test numfmt utils function', () => {
     });
 
     it('getCurrencyType', () => {
-        expect(getCurrencyType(`_(${currencySymbols[3]} 123123`)).toBe(currencySymbols[3]);
+        expect(getCurrencyType(`_(${currencySymbols[7]} 123123`)).toBe(currencySymbols[7]);
         expect(getCurrencyType('_(# 123123')).toBeUndefined();
-        expect(getCurrencyType(`_(${currencySymbols[3]} 123123 ${currencySymbols[4]}`)).toBe(currencySymbols[3]);
+        expect(getCurrencyType(`_(${currencySymbols[7]} 123123 ${currencySymbols[8]}`)).toBe(currencySymbols[7]);
     });
     it('getDecimalFromPattern', () => {
         expect(getDecimalFromPattern('_(###0.000);--###0.00')).toBe(3);
@@ -74,15 +74,15 @@ describe('test numfmt utils function', () => {
         });
         expect(getCurrencySymbolIconByLocale(LocaleType.KO_KR)).toEqual({
             icon: 'DollarIcon',
-            symbol: '$',
-            locale: LocaleType.EN_US,
+            symbol: '₩',
+            locale: LocaleType.KO_KR,
         });
         expect(getCurrencyFormat(LocaleType.ZH_CN, 3)).toContain('"¥"#,##0.000');
         expect(getCurrencyFormat(LocaleType.EN_US, 200)).toContain(`.${'0'.repeat(127)}`);
     });
 
     it('option helpers expose formatted labels and values', () => {
-        expect(getCurrencyOptions()[0]).toEqual({ label: '$', value: '$' });
+        expect(getCurrencyOptions()[0]).toEqual({ label: 'Rp', value: 'Rp' });
         expect(getCurrencyFormatOptions('€')[0]).toMatchObject({
             label: expect.stringContaining('€'),
             value: expect.stringContaining('€'),

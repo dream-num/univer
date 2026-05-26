@@ -89,11 +89,27 @@ export class SheetsNumfmtCellContentController extends Disposable {
                 return 'ko';
             case LocaleType.ZH_TW:
                 return 'zh-TW';
+            case LocaleType.ZH_HK:
+                return 'zh-HK';
             case LocaleType.ES_ES:
             case LocaleType.CA_ES:
                 return 'es';
             case LocaleType.SK_SK:
                 return 'sk';
+            case LocaleType.JA_JP:
+                return 'ja';
+            case LocaleType.PT_BR:
+                return 'pt';
+            case LocaleType.DE_DE:
+                return 'de';
+            case LocaleType.IT_IT:
+                return 'it';
+            case LocaleType.ID_ID:
+                return 'id';
+            case LocaleType.PL_PL:
+                return 'pl';
+            case LocaleType.AR_SA:
+                return 'ar';
             case LocaleType.EN_US:
             case LocaleType.FA_IR:
             default: {

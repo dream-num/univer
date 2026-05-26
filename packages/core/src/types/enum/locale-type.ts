@@ -23,6 +23,7 @@ export enum LocaleType {
     ZH_CN = 'zhCN',
     RU_RU = 'ruRU',
     ZH_TW = 'zhTW',
+    ZH_HK = 'zhHK',
     VI_VN = 'viVN',
     FA_IR = 'faIR',
     JA_JP = 'jaJP',
@@ -30,4 +31,10 @@ export enum LocaleType {
     ES_ES = 'esES',
     CA_ES = 'caES',
     SK_SK = 'skSK',
+    PT_BR = 'ptBR',
+    DE_DE = 'deDE',
+    IT_IT = 'itIT',
+    ID_ID = 'idID',
+    PL_PL = 'plPL',
+    AR_SA = 'arSA',
 }

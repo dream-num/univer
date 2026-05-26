@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { currencySymbols } from '../base/const/currency-symbols';
+import { currencySymbols } from '@univerjs/core';
 import { CURRENCYFORMAT, DATEFMTLISG, NUMBERFORMAT } from '../base/const/formatdetail';
 
 export const getCurrencyOptions = () => currencySymbols.map((item) => ({ label: item, value: item }));

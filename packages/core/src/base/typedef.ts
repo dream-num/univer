@@ -435,11 +435,25 @@ export interface GalleryCardSelection {
 export type BaseHitTestResult =
     | { type: 'empty'; x: number; y: number }
     | {
+        type: 'grid-fill-handle';
+        tableId: TableId;
+        viewId: ViewId;
+        recordId: RecordId;
+        fieldId: FieldId;
+    }
+    | {
         type: 'grid-freeze-handle';
         tableId: TableId;
         viewId: ViewId;
         frozenFieldCount: number;
         x: number;
+    }
+    | {
+        type: 'grid-stat';
+        tableId: TableId;
+        viewId: ViewId;
+        fieldId: FieldId;
+        fieldIndex: number;
     }
     | BaseSelection;
 

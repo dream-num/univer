@@ -20,7 +20,7 @@ import { AuthzIoLocalService, DisposableCollection, IAuthzIoService, ICommandSer
 import { ActiveDirtyManagerService, IActiveDirtyManagerService, ISheetRowFilteredService, SheetRowFilteredService } from '@univerjs/engine-formula';
 import { ExclusiveRangeService, IExclusiveRangeService, RangeProtectionRuleModel, RefRangeService, SetWorksheetActiveOperation, SheetInterceptorService, SheetRangeThemeModel, SheetsSelectionsService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel, ZebraCrossingCacheController } from '@univerjs/sheets';
 import { RemoveSheetsFilterMutation, SetSheetsFilterCriteriaMutation, SetSheetsFilterRangeMutation, UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
-import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand, SmartToggleSheetsFilterCommand } from '@univerjs/sheets-filter/commands/commands/sheets-filter.command.js';
+import { SmartToggleSheetsFilterCommand } from '@univerjs/sheets-filter/commands/commands/sheets-filter.command.js';
 import { IMenuManagerService, IPlatformService, IShortcutService, MenuManagerService, PlatformService, ShortcutService } from '@univerjs/ui';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { CloseFilterPanelOperation, OpenFilterPanelOperation } from '../../commands/operations/sheets-filter.operation';
@@ -86,8 +86,6 @@ function createSheetsFilterMenuTestBed() {
             const commandService = injector.get(ICommandService);
             [
                 SmartToggleSheetsFilterCommand,
-                ClearSheetsFilterCriteriaCommand,
-                ReCalcSheetsFilterCommand,
                 OpenFilterPanelOperation,
                 CloseFilterPanelOperation,
             ].forEach((command) => commandService.registerCommand(command));

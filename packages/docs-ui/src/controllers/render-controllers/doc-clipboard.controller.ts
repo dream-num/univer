@@ -31,6 +31,7 @@ import {
 import { takeUntil } from 'rxjs';
 import { whenDocOrEditor } from '../../commands/commands/clipboard.command';
 import { IDocClipboardService } from '../../services/clipboard/clipboard.service';
+import { DOC_INTERNAL_FRAGMENT_MIME } from '../../services/clipboard/internal-fragment';
 import { IEditorService } from '../../services/editor/editor-manager.service';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
 
@@ -62,6 +63,7 @@ export class DocClipboardController extends RxDisposable implements IRenderModul
             config!.event.preventDefault();
             const clipboardEvent = config!.event as ClipboardEvent;
             let htmlContent = clipboardEvent.clipboardData?.getData(HTML_CLIPBOARD_MIME_TYPE);
+            const internalJson = clipboardEvent.clipboardData?.getData(DOC_INTERNAL_FRAGMENT_MIME);
             const textContent = clipboardEvent.clipboardData?.getData(PLAIN_TEXT_CLIPBOARD_MIME_TYPE);
 
             const files = [...(clipboardEvent.clipboardData?.items || [])]
@@ -78,7 +80,7 @@ export class DocClipboardController extends RxDisposable implements IRenderModul
                 htmlContent = '';
             }
 
-            this._docClipboardService.legacyPaste({ html: htmlContent, text: textContent, files });
+            this._docClipboardService.legacyPaste({ html: htmlContent, internalJson, text: textContent, files });
         });
     }
 }

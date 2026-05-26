@@ -23,7 +23,7 @@ import { getParagraphStyle } from '../utils';
 const WordPastePlugin: IPastePlugin = {
     name: 'univer-doc-paste-plugin-word',
     checkPasteType(html: string) {
-        return /word|mso/i.test(html);
+        return /word|mso|wps|kingsoft/i.test(html);
     },
 
     stylesRules: [

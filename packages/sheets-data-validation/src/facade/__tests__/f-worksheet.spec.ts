@@ -31,8 +31,8 @@ describe('Test FWorksheet', () => {
         expect(activeSheet?.getDataValidations()).toBeDefined();
     });
 
-    it('Worksheet getValidatorStatus', async () => {
+    it('Worksheet getValidatorStatusAsync', async () => {
         const activeSheet = univerAPI.getActiveWorkbook()?.getSheetByName('sheet1');
-        expect(activeSheet?.getValidatorStatus()).toBeDefined();
+        expect(activeSheet?.getValidatorStatusAsync()).toBeDefined();
     });
 });

@@ -38,7 +38,7 @@ export interface IFWorksheetHyperlinkMixin {
 export class FWorksheetHyperlinkMixin extends FWorksheet implements IFWorksheetHyperlinkMixin {
     override getUrl(): string {
         const parserService = this._injector.get(SheetsHyperLinkParserService);
-        return parserService.buildHyperLink(this._worksheet.getSheetId());
+        return parserService.buildHyperLink(null, this._worksheet.getSheetId());
     }
 }
 

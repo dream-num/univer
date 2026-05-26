@@ -31,6 +31,10 @@ export interface IPageMarginLayout {
 
 export interface IDocumentsConfig extends IPageMarginLayout {
     hasEditor?: boolean;
+    backgroundFillColor?: string;
+    pageFillColor?: string;
+    pageStrokeColor?: string;
+    marginStrokeColor?: string;
 }
 
 export abstract class DocComponent extends RenderComponent<

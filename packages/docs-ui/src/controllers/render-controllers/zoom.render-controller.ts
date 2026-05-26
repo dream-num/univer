@@ -17,6 +17,7 @@
 import type { DocumentDataModel, ICommandInfo, Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
 
+import type { IDocPageSetupCommandParams } from '../../commands/commands/doc-page-setup.command';
 import type { ISetDocZoomRatioOperationParams } from '../../commands/operations/set-doc-zoom-ratio.operation';
 import {
     Disposable,
@@ -33,6 +34,7 @@ import {
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import { getNextWheelZoomRatio, IRenderManagerService } from '@univerjs/engine-render';
 import { neoGetDocObject } from '../../basics/component-tools';
+import { DocPageSetupCommand } from '../../commands/commands/doc-page-setup.command';
 import { SetDocZoomRatioCommand } from '../../commands/commands/set-doc-zoom-ratio.command';
 import { SwitchDocModeCommand } from '../../commands/commands/switch-doc-mode.command';
 import { SetDocZoomRatioOperation } from '../../commands/operations/set-doc-zoom-ratio.operation';
@@ -107,7 +109,10 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
 
         this.disposeWithMe(
             this._commandService.beforeCommandExecuted((command: ICommandInfo) => {
-                if (command.id === SwitchDocModeCommand.id) {
+                const shouldResetZoom = command.id === SwitchDocModeCommand.id ||
+                    (command.id === DocPageSetupCommand.id && (command.params as IDocPageSetupCommandParams | undefined)?.documentFlavor === DocumentFlavor.MODERN);
+
+                if (shouldResetZoom) {
                     this._commandService.executeCommand(SetDocZoomRatioCommand.id, {
                         zoomRatio: 1,
                         unitId: this._context.unitId,
@@ -147,13 +152,6 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
 
                 const documentModel = this._univerInstanceService.getCurrentUniverDocInstance();
                 if (!documentModel) {
-                    return;
-                }
-
-                const { documentFlavor } = documentModel.getSnapshot().documentStyle;
-
-                if (documentFlavor === DocumentFlavor.MODERN) {
-                    e.preventDefault();
                     return;
                 }
 

@@ -25,7 +25,6 @@ import { ResetInlineFormatTextBackgroundColorCommand, SetInlineFormatBoldCommand
 import { BulletListCommand, CheckListCommand, InsertBulletListBellowCommand, InsertCheckListBellowCommand, InsertOrderListBellowCommand, OrderListCommand } from '../commands/commands/list.command';
 import { AlignOperationCommand } from '../commands/commands/paragraph-align.command';
 import { H1HeadingCommand, H2HeadingCommand, H3HeadingCommand, H4HeadingCommand, H5HeadingCommand, NormalTextHeadingCommand, SetParagraphNamedStyleCommand, SubtitleHeadingCommand, TitleHeadingCommand } from '../commands/commands/set-heading.command';
-import { SwitchDocModeCommand } from '../commands/commands/switch-doc-mode.command';
 import { DocTableDeleteColumnsCommand, DocTableDeleteRowsCommand, DocTableDeleteTableCommand } from '../commands/commands/table/doc-table-delete.command';
 import { DocTableInsertColumnLeftCommand, DocTableInsertColumnRightCommand, DocTableInsertRowAboveCommand, DocTableInsertRowBellowCommand } from '../commands/commands/table/doc-table-insert.command';
 import { DocCreateTableOperation } from '../commands/operations/doc-create-table.operation';
@@ -55,7 +54,6 @@ import {
     BoldMenuItemFactory,
     BulletListMenuItemFactory,
     CheckListMenuItemFactory,
-    DocSwitchModeMenuItemFactory,
     FLOAT_TEXT_STYLE_MENU_ID,
     FLOAT_TOOLBAR_MENU_POSITION,
     FloatTextStyleMenuItemFactory,
@@ -78,7 +76,7 @@ import {
     TextColorSelectorMenuItemFactory,
     UnderlineMenuItemFactory,
 } from './menu';
-import { CopyCurrentParagraphMenuItemFactory, CutCurrentParagraphMenuItemFactory, DeleteCurrentParagraphMenuItemFactory, DocInsertBellowMenuItemFactory, EMPTY_PARAGRAPH_MENU_ID, EmptyParagraphBulletListMenuItemFactory, EmptyParagraphCheckListMenuItemFactory, EmptyParagraphH1MenuItemFactory, EmptyParagraphH2MenuItemFactory, EmptyParagraphH3MenuItemFactory, EmptyParagraphH4MenuItemFactory, EmptyParagraphH5MenuItemFactory, EmptyParagraphHorizontalLineMenuItemFactory, EmptyParagraphNormalTextMenuItemFactory, EmptyParagraphOrderListMenuItemFactory, H1HeadingMenuItemFactory, H2HeadingMenuItemFactory, H3HeadingMenuItemFactory, H4HeadingMenuItemFactory, H5HeadingMenuItemFactory, INSERT_BELLOW_MENU_ID, InsertBulletListBellowMenuItemFactory, InsertCheckListBellowMenuItemFactory, InsertHorizontalLineBellowMenuItemFactory, InsertOrderListBellowMenuItemFactory, NormalTextHeadingMenuItemFactory, SubtitleHeadingMenuItemFactory, TitleHeadingMenuItemFactory } from './paragraph-menu';
+import { CopyCurrentParagraphMenuItemFactory, CutCurrentParagraphMenuItemFactory, DeleteCurrentParagraphMenuItemFactory, DOC_CONTENT_INSERT_MENU_ID, DOC_TABLE_BLOCK_MENU_ID, DocInsertBellowMenuItemFactory, EMPTY_PARAGRAPH_MENU_ID, EmptyParagraphBulletListMenuItemFactory, EmptyParagraphCheckListMenuItemFactory, EmptyParagraphH1MenuItemFactory, EmptyParagraphH2MenuItemFactory, EmptyParagraphH3MenuItemFactory, EmptyParagraphH4MenuItemFactory, EmptyParagraphH5MenuItemFactory, EmptyParagraphHorizontalLineMenuItemFactory, EmptyParagraphNormalTextMenuItemFactory, EmptyParagraphOrderListMenuItemFactory, H1HeadingMenuItemFactory, H2HeadingMenuItemFactory, H3HeadingMenuItemFactory, H4HeadingMenuItemFactory, H5HeadingMenuItemFactory, INSERT_BELLOW_MENU_ID, InsertBulletListBellowMenuItemFactory, InsertCheckListBellowMenuItemFactory, InsertHorizontalLineBellowMenuItemFactory, InsertOrderListBellowMenuItemFactory, NormalTextHeadingMenuItemFactory, SubtitleHeadingMenuItemFactory, TableBlockCopyMenuItemFactory, TableBlockDeleteMenuItemFactory, TableBlockPasteMenuItemFactory, TitleHeadingMenuItemFactory } from './paragraph-menu';
 
 export const floatToolbarMenuSchema: MenuSchemaType = {
     [FLOAT_TOOLBAR_MENU_POSITION]: {
@@ -157,10 +155,6 @@ export const menuSchema: MenuSchemaType = {
         [OpenHeaderFooterPanelCommand.id]: {
             order: 10,
             menuItemFactory: HeaderFooterMenuItemFactory,
-        },
-        [SwitchDocModeCommand.id]: {
-            order: 11,
-            menuItemFactory: DocSwitchModeMenuItemFactory,
         },
         [DocOpenPageSettingCommand.id]: {
             order: 12,
@@ -329,6 +323,59 @@ export const menuSchema: MenuSchemaType = {
                 },
             },
         },
+        [DOC_CONTENT_INSERT_MENU_ID]: {
+            [ContextMenuGroup.QUICK]: {
+                order: -2,
+                quickLayout: 'icon',
+                [H1HeadingCommand.id]: {
+                    order: 0,
+                    menuItemFactory: H1HeadingMenuItemFactory,
+                },
+                [H2HeadingCommand.id]: {
+                    order: 1,
+                    menuItemFactory: H2HeadingMenuItemFactory,
+                },
+                [H3HeadingCommand.id]: {
+                    order: 2,
+                    menuItemFactory: H3HeadingMenuItemFactory,
+                },
+                [H4HeadingCommand.id]: {
+                    order: 3,
+                    menuItemFactory: H4HeadingMenuItemFactory,
+                },
+                [H5HeadingCommand.id]: {
+                    order: 4,
+                    menuItemFactory: H5HeadingMenuItemFactory,
+                },
+                [NormalTextHeadingCommand.id]: {
+                    order: 5,
+                    menuItemFactory: NormalTextHeadingMenuItemFactory,
+                },
+            },
+            [ContextMenuGroup.LAYOUT]: {
+                order: 1,
+                [InsertBulletListBellowCommand.id]: {
+                    order: 0,
+                    menuItemFactory: InsertBulletListBellowMenuItemFactory,
+                },
+                [InsertOrderListBellowCommand.id]: {
+                    order: 1,
+                    menuItemFactory: InsertOrderListBellowMenuItemFactory,
+                },
+                [InsertCheckListBellowCommand.id]: {
+                    order: 2,
+                    menuItemFactory: InsertCheckListBellowMenuItemFactory,
+                },
+                [InsertHorizontalLineBellowCommand.id]: {
+                    order: 3,
+                    menuItemFactory: InsertHorizontalLineBellowMenuItemFactory,
+                },
+                [DocCreateTableOperation.id]: {
+                    order: 4,
+                    menuItemFactory: InsertDefaultTableMenuFactory,
+                },
+            },
+        },
         [EMPTY_PARAGRAPH_MENU_ID]: {
             [ContextMenuGroup.QUICK]: {
                 order: -1,
@@ -383,6 +430,48 @@ export const menuSchema: MenuSchemaType = {
                 [DocCreateTableOperation.id]: {
                     order: 5,
                     menuItemFactory: InsertDefaultTableMenuFactory,
+                },
+            },
+        },
+        [DOC_TABLE_BLOCK_MENU_ID]: {
+            [ContextMenuGroup.FORMAT]: {
+                [DocCopyCommand.name]: {
+                    order: 0,
+                    menuItemFactory: TableBlockCopyMenuItemFactory,
+                },
+                [DocPasteCommand.id]: {
+                    order: 1,
+                    menuItemFactory: TableBlockPasteMenuItemFactory,
+                },
+                [DocTableDeleteTableCommand.id]: {
+                    order: 2,
+                    menuItemFactory: TableBlockDeleteMenuItemFactory,
+                },
+            },
+            [ContextMenuGroup.LAYOUT]: {
+                [INSERT_BELLOW_MENU_ID]: {
+                    order: 0,
+                    menuItemFactory: DocInsertBellowMenuItemFactory,
+                    [InsertBulletListBellowCommand.id]: {
+                        order: 0,
+                        menuItemFactory: InsertBulletListBellowMenuItemFactory,
+                    },
+                    [InsertOrderListBellowCommand.id]: {
+                        order: 1,
+                        menuItemFactory: InsertOrderListBellowMenuItemFactory,
+                    },
+                    [InsertCheckListBellowCommand.id]: {
+                        order: 2,
+                        menuItemFactory: InsertCheckListBellowMenuItemFactory,
+                    },
+                    [InsertHorizontalLineBellowCommand.id]: {
+                        order: 3,
+                        menuItemFactory: InsertHorizontalLineBellowMenuItemFactory,
+                    },
+                    [DocCreateTableOperation.id]: {
+                        order: 4,
+                        menuItemFactory: InsertDefaultTableMenuFactory,
+                    },
                 },
             },
         },

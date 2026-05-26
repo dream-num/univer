@@ -253,6 +253,60 @@ describe('linebreaking', () => {
         expect(firstParagraphStyle).toEqual({ indentStart: { v: 22 } });
     });
 
+    it('applies code outer spacing with the same temporary layout rule', () => {
+        const ctx = createContext();
+        const paragraphStyle = { indentStart: { v: 20 }, indentEnd: { v: 20 } };
+        const paragraph = {
+            startIndex: 2,
+            paragraphStyle,
+        };
+        const body = {
+            paragraphs: [paragraph],
+            blockRanges: [{
+                blockId: 'code-1',
+                blockType: 'code',
+                startIndex: 0,
+                endIndex: 6,
+            }],
+        };
+        const viewModel = {
+            getParagraph: vi.fn(() => paragraph),
+            getBody: vi.fn(() => body),
+            getCustomBlock: vi.fn(() => null),
+        } as any;
+
+        lineBreaking(
+            ctx,
+            viewModel,
+            [],
+            {
+                segmentId: 'segment-1',
+                pageNumber: 1,
+            } as any,
+            {
+                endIndex: 5,
+                startIndex: 2,
+                blocks: [],
+                children: [],
+            } as any,
+            {
+                lists: [],
+                localeService: {} as any,
+                drawings: {},
+            } as any,
+            null
+        );
+
+        expect(ctx.paragraphConfigCache.get('segment-1')?.get(5)?.paragraphStyle).toEqual({
+            indentStart: { v: 20 },
+            indentEnd: { v: 20 },
+            lineSpacing: 1.5,
+            spaceAbove: { v: 32 },
+            spaceBelow: { v: 32 },
+        });
+        expect(paragraphStyle).toEqual({ indentStart: { v: 20 }, indentEnd: { v: 20 } });
+    });
+
     it('applies comfortable default spacing to normal paragraphs as layout-only style', () => {
         const ctx = createContext();
         const paragraphStyle = {};

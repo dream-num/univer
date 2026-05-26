@@ -108,6 +108,10 @@ export class DocFloatMenuService extends Disposable implements IRenderModule {
             return;
         }
 
+        if (isRangeInCodeBlock(documentDataModel, range)) {
+            return;
+        }
+
         const token = documentDataModel.getBody()?.dataStream[range.startOffset];
         if (range.endOffset - range.startOffset === 1 && token && SKIP_SYMBOLS.includes(token)) {
             return;
@@ -133,4 +137,13 @@ export class DocFloatMenuService extends Disposable implements IRenderModule {
 
         return toDisposable(() => this._hideFloatMenu());
     }
+}
+
+function isRangeInCodeBlock(documentDataModel: DocumentDataModel, range: ITextRangeParam): boolean {
+    const blockRanges = documentDataModel.getBody()?.blockRanges ?? [];
+
+    return blockRanges.some((blockRange) => (
+        blockRange.blockType === 'code' &&
+        Math.max(range.startOffset, blockRange.startIndex) <= Math.min(range.endOffset, blockRange.endIndex)
+    ));
 }

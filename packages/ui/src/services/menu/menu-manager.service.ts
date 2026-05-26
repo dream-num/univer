@@ -55,6 +55,7 @@ export type MenuSchemaType = {
     title?: string;
     contextual?: boolean;
     quickLayout?: ContextMenuQuickLayout;
+    tiny?: boolean;
 } | {
     [key: string]: MenuSchemaType;
 };
@@ -293,6 +294,7 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
                 title: value.title,
                 contextual: value.contextual,
                 quickLayout: value.quickLayout,
+                tiny: value.tiny,
             };
 
             if (value.menuItemFactory) {

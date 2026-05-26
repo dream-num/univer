@@ -163,6 +163,61 @@ function createTableDoc(): IDocumentData {
     };
 }
 
+function createTableDocWithParagraphsBeforeTable(): IDocumentData {
+    const table = genEmptyTable(2, 2);
+    const prefix = 'Title\rBody\r';
+    const suffix = 'Tail\r\n';
+    const dataStream = `${prefix}${table.dataStream}${suffix}`;
+
+    return {
+        id: 'test-doc',
+        body: {
+            dataStream,
+            textRuns: [{
+                st: 0,
+                ed: dataStream.length - 2,
+                ts: {},
+            }],
+            paragraphs: [
+                { startIndex: 5 },
+                { startIndex: 10 },
+                ...table.paragraphs.map((paragraph) => ({
+                    ...paragraph,
+                    startIndex: paragraph.startIndex + prefix.length,
+                })),
+                {
+                    startIndex: dataStream.length - 2,
+                },
+            ],
+            sectionBreaks: [
+                ...table.sectionBreaks.map((sectionBreak) => ({
+                    ...sectionBreak,
+                    startIndex: sectionBreak.startIndex + prefix.length,
+                })),
+                {
+                    startIndex: dataStream.length - 1,
+                },
+            ],
+            tables: [{
+                startIndex: prefix.length,
+                endIndex: prefix.length + table.dataStream.length,
+                tableId: 'table-1',
+            }],
+            customBlocks: [],
+        },
+        documentStyle: {
+            pageSize: {
+                width: 594.3,
+                height: 840.51,
+            },
+            marginTop: 72,
+            marginBottom: 72,
+            marginRight: 90,
+            marginLeft: 90,
+        },
+    };
+}
+
 describe('misc document commands', () => {
     let univer: Univer;
     let get: Injector['get'];
@@ -290,7 +345,7 @@ describe('misc document commands', () => {
         subscription.unsubscribe();
     });
 
-    it('selects text and table ranges when tables are present', async () => {
+    it('selects the current paragraph first when tables are present', async () => {
         ({ univer, get } = createCommandTestBed(createTableDoc()));
         commandService = get(ICommandService);
         commandService.registerCommand(DocSelectAllCommand);
@@ -317,15 +372,135 @@ describe('misc document commands', () => {
                     startOffset: 0,
                     endOffset: 1,
                 }),
+            ],
+        }));
+
+        subscription.unsubscribe();
+    });
+
+    it('expands to the whole body when the current paragraph selection is split into visual ranges', async () => {
+        ({ univer, get } = createCommandTestBed(createTableDoc()));
+        commandService = get(ICommandService);
+        commandService.registerCommand(DocSelectAllCommand);
+
+        const selectionManager = get(DocSelectionManagerService);
+        selectionManager.__TEST_ONLY_setCurrentSelection({
+            unitId: 'test-doc',
+            subUnitId: 'test-doc',
+        });
+        selectionManager.__TEST_ONLY_add([{
+            startOffset: 0,
+            endOffset: 0,
+            collapsed: false,
+            isActive: true,
+            segmentId: '',
+            style: null as never,
+        }, {
+            startOffset: 1,
+            endOffset: 1,
+            collapsed: false,
+            isActive: false,
+            segmentId: '',
+            style: null as never,
+        }], false);
+
+        const refreshEvents: Array<unknown> = [];
+        const subscription = selectionManager.refreshSelection$.subscribe((event) => {
+            if (event) {
+                refreshEvents.push(event);
+            }
+        });
+
+        const result = await commandService.executeCommand(DocSelectAllCommand.id);
+        await awaitTime(0);
+
+        expect(result).toBe(true);
+        expect(refreshEvents.at(-1)).toEqual(expect.objectContaining({
+            unitId: 'test-doc',
+            subUnitId: 'test-doc',
+            isEditing: false,
+            docRanges: [
+                expect.objectContaining({ startOffset: 0, endOffset: 1 }),
+                expect.objectContaining({ startOffset: 5, endOffset: 19, rangeType: 'RECT' }),
+                expect.objectContaining({ startOffset: 24, endOffset: 26 }),
+            ],
+        }));
+
+        subscription.unsubscribe();
+    });
+
+    it('expands to the whole body by keeping text before tables selectable across paragraphs', async () => {
+        ({ univer, get } = createCommandTestBed(createTableDocWithParagraphsBeforeTable()));
+        commandService = get(ICommandService);
+        commandService.registerCommand(DocSelectAllCommand);
+
+        const selectionManager = get(DocSelectionManagerService);
+        selectionManager.__TEST_ONLY_setCurrentSelection({
+            unitId: 'test-doc',
+            subUnitId: 'test-doc',
+        });
+        selectionManager.__TEST_ONLY_add([{
+            startOffset: 0,
+            endOffset: 5,
+            collapsed: false,
+            isActive: true,
+            segmentId: '',
+            style: null as never,
+        }], false);
+
+        const refreshEvents: Array<unknown> = [];
+        const subscription = selectionManager.refreshSelection$.subscribe((event) => {
+            if (event) {
+                refreshEvents.push(event);
+            }
+        });
+
+        const result = await commandService.executeCommand(DocSelectAllCommand.id);
+        await awaitTime(0);
+
+        expect(result).toBe(true);
+        expect(refreshEvents.at(-1)).toEqual(expect.objectContaining({
+            unitId: 'test-doc',
+            subUnitId: 'test-doc',
+            isEditing: false,
+            docRanges: [
+                expect.objectContaining({ startOffset: 0, endOffset: 5 }),
+                expect.objectContaining({ startOffset: 6, endOffset: 10 }),
+                expect.objectContaining({ rangeType: 'RECT' }),
+                expect.objectContaining({ startOffset: expect.any(Number), endOffset: expect.any(Number), rangeType: 'TEXT' }),
+            ],
+        }));
+
+        subscription.unsubscribe();
+    });
+
+    it('selects the current table first when the cursor is inside a table', async () => {
+        ({ univer, get } = createCommandTestBed(createTableDoc()));
+        commandService = get(ICommandService);
+        commandService.registerCommand(DocSelectAllCommand);
+        setCollapsedSelection(6);
+
+        const selectionManager = get(DocSelectionManagerService);
+        const refreshEvents: Array<unknown> = [];
+        const subscription = selectionManager.refreshSelection$.subscribe((event) => {
+            if (event) {
+                refreshEvents.push(event);
+            }
+        });
+
+        const result = await commandService.executeCommand(DocSelectAllCommand.id);
+        await awaitTime(0);
+
+        expect(result).toBe(true);
+        expect(refreshEvents.at(-1)).toEqual(expect.objectContaining({
+            unitId: 'test-doc',
+            subUnitId: 'test-doc',
+            isEditing: false,
+            docRanges: [
                 expect.objectContaining({
                     startOffset: 5,
                     endOffset: 19,
                     rangeType: 'RECT',
-                }),
-                expect.objectContaining({
-                    startOffset: 24,
-                    endOffset: 26,
-                    rangeType: 'TEXT',
                 }),
             ],
         }));

@@ -31,6 +31,7 @@ import { layoutParagraph } from './layout-ruler';
 
 const BLOCK_LAYOUT_OUTER_SPACING_MAP = new Map([
     ['callout', 34],
+    ['code', 32],
     ['quote', 24],
 ]);
 

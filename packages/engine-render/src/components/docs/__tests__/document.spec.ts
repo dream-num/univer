@@ -465,6 +465,50 @@ describe('documents render', () => {
         docBackground.dispose();
     });
 
+    it('uses configured transparent fills for embedded editor backgrounds', () => {
+        const page = createPage(DocumentSkeletonPageType.BODY, '');
+        const skeleton = {
+            getSkeletonData: () => ({ pages: [page] }),
+            getViewModel: () => ({
+                getDataModel: () => ({
+                    getSnapshot: () => ({
+                        documentStyle: {
+                            documentFlavor: DocumentFlavor.TRADITIONAL,
+                        },
+                    }),
+                }),
+            }),
+        } as any;
+        const docBackground = new DocBackground('docs-background-editor', skeleton, {
+            pageLayoutType: PageLayoutType.VERTICAL,
+            pageMarginLeft: 20,
+            pageMarginTop: 20,
+            backgroundFillColor: 'transparent',
+            pageFillColor: 'transparent',
+            pageStrokeColor: 'transparent',
+            marginStrokeColor: 'transparent',
+        });
+        docBackground.resize(260, 480);
+
+        const rectDraw = vi.spyOn(Rect, 'drawWith').mockImplementation(() => {});
+        vi.spyOn(Path, 'drawWith').mockImplementation(() => {});
+
+        docBackground.draw({
+            restore: vi.fn(),
+            save: vi.fn(),
+            translate: vi.fn(),
+        } as any);
+
+        expect(rectDraw.mock.calls.map(([, props]) => props.fill)).toEqual([
+            'transparent',
+            'transparent',
+        ]);
+        expect(rectDraw.mock.calls[1][1].stroke).toBe('transparent');
+        expect((Path.drawWith as any).mock.calls[0][1].stroke).toBe('transparent');
+
+        docBackground.dispose();
+    });
+
     it('draws unspecified table borders with the default table grid color', () => {
         const skeleton = { getSkeletonData: () => ({ pages: [] }) } as any;
         const documents = new Documents('docs-border-default', skeleton, {
@@ -718,6 +762,7 @@ describe('documents render', () => {
 
         expect(queriedUnitIds).toEqual(['doc-unit-1:table-1']);
         expect(ctx.clip).toHaveBeenCalledTimes(1);
+        expect(ctx.rectByPrecision).toHaveBeenCalledWith(20, 32, 124, 60);
         expect(translateCalls).toContainEqual([-80, 0]);
 
         documents.dispose();
@@ -764,7 +809,7 @@ describe('documents render', () => {
         );
 
         expect(ctx.clip).toHaveBeenCalledTimes(1);
-        expect(ctx.rectByPrecision).toHaveBeenCalledWith(22, 32, 168, 60);
+        expect(ctx.rectByPrecision).toHaveBeenCalledWith(20, 32, 172, 60);
 
         documents.dispose();
     });

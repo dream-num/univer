@@ -46,6 +46,7 @@ const DEFAULT_BORDER_COLOR: ITableCellBorder = {
         rgb: '#c7c9cc',
     },
 };
+const TABLE_VIEWPORT_BORDER_CLIP_PADDING = 2;
 
 export interface IPageRenderConfig {
     page: IDocumentSkeletonPage;
@@ -542,9 +543,9 @@ export class Documents extends DocComponent {
                 ctx.save();
                 ctx.beginPath();
                 ctx.rectByPrecision(
-                    x + page.marginLeft,
+                    x + page.marginLeft - TABLE_VIEWPORT_BORDER_CLIP_PADDING,
                     y + page.marginTop,
-                    viewport.viewportWidth,
+                    viewport.viewportWidth + TABLE_VIEWPORT_BORDER_CLIP_PADDING * 2,
                     tableSkeleton.height
                 );
                 ctx.closePath();

@@ -234,6 +234,9 @@ export class EditorService extends Disposable implements IEditorService, IDispos
             );
 
             this._editors.set(editorUnitId, editor);
+            if (canvasStyle.backgroundColor != null) {
+                render.engine.getCanvas().getCanvasEle().style.backgroundColor = canvasStyle.backgroundColor;
+            }
 
             // Delete scroll bar
             if (!config.scrollBar) {

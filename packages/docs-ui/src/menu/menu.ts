@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IAccessor } from '@univerjs/core';
+import type { DocumentDataModel, IAccessor, ITextRangeParam, Nullable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IMenuButtonItem, IMenuItem, IMenuSelectorItem } from '@univerjs/ui';
 import {
@@ -220,6 +220,7 @@ function getTableDisabledObservable(accessor: IAccessor): Observable<boolean> {
 
 export function disableMenuWhenNoDocRange(accessor: IAccessor): Observable<boolean> {
     const docSelectionManagerService = accessor.get(DocSelectionManagerService);
+    const univerInstanceService = accessor.get(IUniverInstanceService);
 
     return new Observable((subscriber) => {
         const subscription = docSelectionManagerService.textSelection$.subscribe((selection) => {
@@ -235,8 +236,49 @@ export function disableMenuWhenNoDocRange(accessor: IAccessor): Observable<boole
                 return;
             }
 
+            const document = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+            const codeBlockRanges = document?.getBody()?.blockRanges?.filter((range) => range.blockType === 'code') ?? [];
+            if (codeBlockRanges.some((blockRange) => textRanges.some((range) => (
+                Math.max(range.startOffset, blockRange.startIndex) <= Math.min(range.endOffset, blockRange.endIndex)
+            )))) {
+                subscriber.next(true);
+                return;
+            }
+
             subscriber.next(false);
         });
+
+        return () => subscription.unsubscribe();
+    });
+}
+
+export function isTextRangeInAnyBlockRange(document: Nullable<DocumentDataModel>, range: ITextRangeParam): boolean {
+    const blockRanges = document?.getBody()?.blockRanges ?? [];
+    const startOffset = range.startOffset;
+    const endOffset = range.collapsed ? range.startOffset : range.endOffset - 1;
+
+    return blockRanges.some((blockRange) => (
+        Math.max(startOffset, blockRange.startIndex) <= Math.min(endOffset, blockRange.endIndex)
+    ));
+}
+
+export function hideMenuWhenSelectionInBlockRange(accessor: IAccessor): Observable<boolean> {
+    const docSelectionManagerService = accessor.get(DocSelectionManagerService);
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+
+    return new Observable((subscriber) => {
+        const calc = (selection?: { textRanges?: ITextRangeParam[]; unitId?: string }) => {
+            const currentSelection = (docSelectionManagerService as { __getCurrentSelection?: () => { unitId?: string } | null }).__getCurrentSelection?.();
+            const textRanges = selection?.textRanges ?? [...(docSelectionManagerService.getTextRanges() ?? [])];
+            const unitId = selection?.unitId ?? currentSelection?.unitId;
+            const document = unitId
+                ? univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC)
+                : univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+            subscriber.next(textRanges.some((range) => isTextRangeInAnyBlockRange(document, range)));
+        };
+
+        calc();
+        const subscription = docSelectionManagerService.textSelection$.subscribe((selection) => calc(selection));
 
         return () => subscription.unsubscribe();
     });

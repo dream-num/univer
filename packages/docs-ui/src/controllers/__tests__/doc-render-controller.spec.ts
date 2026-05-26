@@ -153,7 +153,7 @@ function createControllerFixture() {
             })),
         },
         {
-            getCurrentUnitForType: vi.fn(() => ({
+            getCurrentUnitOfType: vi.fn(() => ({
                 getUnitId: vi.fn(() => 'doc-unit'),
             })),
         },

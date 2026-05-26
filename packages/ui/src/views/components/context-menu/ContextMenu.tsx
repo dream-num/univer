@@ -79,9 +79,11 @@ export function DesktopContextMenu() {
             onRequestClose={handleClose}
             onOptionSelect={(params) => {
                 const { label: id, commandId, value } = params;
+                const rawParams = typeof params.params === 'function' ? params.params() : params.params;
+                const commandParams = typeof rawParams === 'undefined' ? { value } : rawParams;
 
                 if (commandService) {
-                    commandService.executeCommand(commandId ?? id as string, { value });
+                    commandService.executeCommand(commandId ?? id as string, commandParams);
                 }
 
                 const layoutService = injector.get(ILayoutService);

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { EMPTY_PARAGRAPH_MENU_ID, INSERT_BELLOW_MENU_ID } from '@univerjs/docs-ui';
+import { DOC_CONTENT_INSERT_MENU_ID, EMPTY_PARAGRAPH_MENU_ID, INSERT_BELLOW_MENU_ID } from '@univerjs/docs-ui';
 import { ContextMenuGroup, ContextMenuPosition } from '@univerjs/ui';
 import { describe, expect, it } from 'vitest';
 import { InsertDocImageCommand } from '../../commands/commands/insert-image.command';
@@ -27,6 +27,7 @@ describe('docs drawing menu schema', () => {
 
         expect(paragraph[ContextMenuGroup.LAYOUT][INSERT_BELLOW_MENU_ID][InsertDocImageCommand.id].menuItemFactory).toBeDefined();
         expect(paragraph[EMPTY_PARAGRAPH_MENU_ID][ContextMenuGroup.LAYOUT][InsertDocImageCommand.id].menuItemFactory).toBeDefined();
+        expect(paragraph[DOC_CONTENT_INSERT_MENU_ID][ContextMenuGroup.LAYOUT][InsertDocImageCommand.id].menuItemFactory).toBeDefined();
     });
 
     it('uses the same image icon in paragraph insert menus', () => {

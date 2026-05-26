@@ -15,7 +15,8 @@
  */
 
 import type { ICommand, ITextRangeParam } from '@univerjs/core';
-import { CommandType, DashStyleType, ICommandService } from '@univerjs/core';
+import { CommandType, DashStyleType, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { DocContentInsertService } from '../../services/doc-content-insert.service';
 import { BreakLineCommand } from './break-line.command';
 import { getCurrentParagraph } from './util';
 
@@ -50,6 +51,22 @@ export const InsertHorizontalLineBellowCommand: ICommand<IHorizontalCommandParam
     type: CommandType.COMMAND,
     handler: (accessor) => {
         const commandService = accessor.get(ICommandService);
+        const doc = accessor.get(IUniverInstanceService).getCurrentUnitOfType(UniverInstanceType.UNIVER_DOC);
+        let contentInsertRange: ReturnType<DocContentInsertService['consumeInsertRange']> = null;
+        try {
+            contentInsertRange = accessor.get(DocContentInsertService).consumeInsertRange(doc?.getUnitId());
+        } catch {
+            contentInsertRange = null;
+        }
+        if (contentInsertRange) {
+            return commandService.syncExecuteCommand(HorizontalLineCommand.id, {
+                insertRange: {
+                    startOffset: contentInsertRange.startOffset,
+                    endOffset: contentInsertRange.endOffset,
+                },
+            });
+        }
+
         const paragraph = getCurrentParagraph(accessor);
         if (!paragraph) {
             return false;

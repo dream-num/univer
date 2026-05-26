@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { ICommand, PaperType } from '@univerjs/core';
+import type { ICommand, ModernDocumentWidthMode, PaperType } from '@univerjs/core';
 import type { IConfirmPartMethodOptions } from '@univerjs/ui';
 import type { IDocPageSetupCommandParams } from '../commands/doc-page-setup.command';
-import { CommandType, ICommandService, IConfirmService, LocaleService, PAGE_SIZE } from '@univerjs/core';
+import { CommandType, DocumentFlavor, ICommandService, IConfirmService, LocaleService, MODERN_DOCUMENT_WIDTH, PAGE_SIZE } from '@univerjs/core';
 import { PAGE_SETTING_COMPONENT_ID } from '../../views/page-settings';
 import { DocPageSetupCommand } from '../commands/doc-page-setup.command';
 
@@ -43,8 +43,16 @@ export const DocOpenPageSettingCommand: ICommand = {
             onConfirm: (result) => {
                 disposable.dispose();
                 if (!result) return;
-                const paperSize = PAGE_SIZE[result.paperSize as PaperType];
+
+                const paperSize = result.mode === DocumentFlavor.MODERN
+                    ? {
+                        width: MODERN_DOCUMENT_WIDTH[result.modernWidth as ModernDocumentWidthMode],
+                        height: PAGE_SIZE.A4.height,
+                    }
+                    : PAGE_SIZE[result.paperSize as PaperType];
+
                 commandService.executeCommand(DocPageSetupCommand.id, {
+                    documentFlavor: result.mode,
                     pageOrient: result.orientation,
                     marginTop: result.margins.top,
                     marginBottom: result.margins.bottom,

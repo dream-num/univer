@@ -152,6 +152,7 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         const config = {
             pageMarginLeft: DEFAULT_PAGE_MARGIN_LEFT,
             pageMarginTop: DEFAULT_PAGE_MARGIN_TOP,
+            ...this._getEditorBackgroundConfig(),
         };
 
         const documents = new Documents(DOCS_VIEW_KEY.MAIN, undefined, config);
@@ -292,7 +293,23 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
     }
 
     private _syncCanvasBackground(documentFlavor = this._context.unit.getSnapshot().documentStyle.documentFlavor) {
-        this._context.engine.getCanvas().getCanvasEle().style.backgroundColor = getDocsCanvasBackgroundColor(documentFlavor);
+        const editor = this._editorService.getEditor(this._context.unitId);
+        const editorBackgroundColor = editor?.params.canvasStyle?.backgroundColor;
+        this._context.engine.getCanvas().getCanvasEle().style.backgroundColor = editorBackgroundColor ?? getDocsCanvasBackgroundColor(documentFlavor);
+        const docBackground = this._context.components.get(DOCS_VIEW_KEY.BACKGROUND) as DocBackground | undefined;
+        docBackground?.setFillColors?.(editorBackgroundColor, editorBackgroundColor, editorBackgroundColor, editorBackgroundColor);
+    }
+
+    private _getEditorBackgroundConfig() {
+        const editorBackgroundColor = this._editorService.getEditor(this._context.unitId)?.params.canvasStyle?.backgroundColor;
+        return editorBackgroundColor == null
+            ? {}
+            : {
+                backgroundFillColor: editorBackgroundColor,
+                pageFillColor: editorBackgroundColor,
+                pageStrokeColor: editorBackgroundColor,
+                marginStrokeColor: editorBackgroundColor,
+            };
     }
 }
 

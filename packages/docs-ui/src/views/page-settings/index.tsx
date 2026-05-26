@@ -16,8 +16,9 @@
 
 import type { DocumentDataModel, ISize, PaperType } from '@univerjs/core';
 import type { IConfirmChildrenProps } from '@univerjs/ui';
-import { IUniverInstanceService, LocaleService, PAGE_SIZE, PageOrientType, PAPER_TYPES, UniverInstanceType } from '@univerjs/core';
-import { InputNumber, Select } from '@univerjs/design';
+import type { ReactNode } from 'react';
+import { DocumentFlavor, IUniverInstanceService, LocaleService, MODERN_DOCUMENT_WIDTH, ModernDocumentWidthMode, PAGE_SIZE, PageOrientType, PAPER_TYPES, UniverInstanceType } from '@univerjs/core';
+import { clsx, InputNumber, Select } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 
@@ -27,6 +28,8 @@ export interface IPageSettingsProps {
 }
 
 export interface IPageSettings {
+    mode: DocumentFlavor.TRADITIONAL | DocumentFlavor.MODERN;
+    modernWidth: ModernDocumentWidthMode;
     paperSize: string;
     orientation: PageOrientType;
     margins: {
@@ -35,11 +38,17 @@ export interface IPageSettings {
         left: number;
         right: number;
     };
-    pageSise: {
+    pageSize: {
         width: number;
         height: number;
     };
 }
+
+const MODERN_WIDTH_OPTIONS = [
+    ModernDocumentWidthMode.NARROW,
+    ModernDocumentWidthMode.MEDIUM,
+    ModernDocumentWidthMode.WIDE,
+];
 
 const getPaperSize = (size: ISize) => {
     const keys = Object.keys(PAGE_SIZE);
@@ -56,6 +65,34 @@ const getPaperSize = (size: ISize) => {
     return result ?? 'A4';
 };
 
+const getModernWidthMode = (size?: ISize) => {
+    const width = size?.width ?? MODERN_DOCUMENT_WIDTH[ModernDocumentWidthMode.MEDIUM];
+
+    return MODERN_WIDTH_OPTIONS.reduce((nearest, option) => {
+        const nearestDistance = Math.abs(MODERN_DOCUMENT_WIDTH[nearest] - width);
+        const currentDistance = Math.abs(MODERN_DOCUMENT_WIDTH[option] - width);
+
+        return currentDistance < nearestDistance ? option : nearest;
+    }, ModernDocumentWidthMode.MEDIUM);
+};
+
+function SettingsLabel(props: { children: ReactNode; muted?: boolean }) {
+    const { children, muted } = props;
+
+    return (
+        <label
+            className={clsx('univer-text-sm univer-font-medium', muted
+                ? 'univer-text-gray-500'
+                : `
+                  univer-text-gray-900
+                  dark:!univer-text-white
+                `)}
+        >
+            {children}
+        </label>
+    );
+}
+
 export function PageSettings(props: IConfirmChildrenProps) {
     const { hooks } = props;
     const univerInstanceService = useDependency(IUniverInstanceService);
@@ -63,8 +100,10 @@ export function PageSettings(props: IConfirmChildrenProps) {
     const documentStyle = currentDoc.getDocumentStyle();
     const localeService = useDependency(LocaleService);
     const [settings, setSettings] = useState<IPageSettings>(() => ({
-        paperSize: getPaperSize(documentStyle.pageSize!),
-        pageSise: {
+        mode: documentStyle.documentFlavor === DocumentFlavor.TRADITIONAL ? DocumentFlavor.TRADITIONAL : DocumentFlavor.MODERN,
+        modernWidth: getModernWidthMode(documentStyle.pageSize),
+        paperSize: getPaperSize(documentStyle.pageSize ?? PAGE_SIZE.A4),
+        pageSize: {
             width: documentStyle.pageSize?.width ?? 0,
             height: documentStyle.pageSize?.height ?? 0,
         },
@@ -78,6 +117,7 @@ export function PageSettings(props: IConfirmChildrenProps) {
     }));
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/immutability
         hooks.beforeClose = () => {
             return settings;
         };
@@ -88,15 +128,7 @@ export function PageSettings(props: IConfirmChildrenProps) {
     }, [settings]);
 
     const handlePaperSizeChange = (value: string) => {
-        setSettings((prev) => ({ ...prev, paperSize: value, pageSise: PAGE_SIZE[value as PaperType] }));
-    };
-
-    const handleOrientationChange = (value: PageOrientType) => {
-        setSettings((prev) => ({
-            ...prev,
-            orientation: value,
-            pageSise: { width: settings.pageSise.height, height: settings.pageSise.width },
-        }));
+        setSettings((prev) => ({ ...prev, paperSize: value, pageSize: PAGE_SIZE[value as PaperType] }));
     };
 
     const handleMarginChange = (position: keyof IPageSettings['margins'], value: number | null) => {
@@ -109,91 +141,138 @@ export function PageSettings(props: IConfirmChildrenProps) {
         }));
     };
 
+    const handleModeChange = (mode: IPageSettings['mode']) => {
+        setSettings((prev) => ({ ...prev, mode }));
+    };
+
+    const handleModernWidthChange = (modernWidth: ModernDocumentWidthMode) => {
+        setSettings((prev) => ({ ...prev, modernWidth }));
+    };
+
     return (
         <div className="univer-flex univer-flex-col univer-gap-4">
-            <div className="univer-flex univer-flex-col univer-gap-2">
-                <label
-                    className={`
-                      univer-text-sm univer-font-medium univer-text-gray-900
-                      dark:!univer-text-white
-                    `}
-                >
-                    {localeService.t('docs-ui.page-settings.paper-size')}
-                </label>
-                <Select
-                    value={settings.paperSize}
-                    onChange={handlePaperSizeChange}
-                    options={PAPER_TYPES.map((p) => ({
-                        label: localeService.t(`docs-ui.page-settings.page-size.${p.toLocaleLowerCase()}`),
-                        value: p,
-                    }))}
-                />
+            <div
+                className="
+                  univer-grid univer-grid-cols-2 univer-rounded-lg univer-bg-gray-100 univer-p-1
+                  dark:!univer-bg-gray-800
+                "
+            >
+                {([DocumentFlavor.MODERN, DocumentFlavor.TRADITIONAL] as const).map((mode) => (
+                    <button
+                        key={mode}
+                        type="button"
+                        className={clsx(`
+                          univer-h-8 univer-cursor-pointer univer-rounded-md univer-border-none univer-bg-transparent
+                          univer-text-sm univer-font-medium univer-text-gray-600 univer-transition-colors
+                          hover:univer-bg-white hover:univer-text-gray-900
+                          dark:!univer-text-gray-200
+                          dark:hover:!univer-bg-gray-700
+                        `, {
+                            'univer-bg-white univer-text-gray-900 univer-shadow-sm dark:!univer-bg-gray-700 dark:!univer-text-white': settings.mode === mode,
+                        })}
+                        onClick={() => handleModeChange(mode)}
+                    >
+                        {localeService.t(mode === DocumentFlavor.MODERN ? 'page-settings.modern-mode' : 'page-settings.classic-mode')}
+                    </button>
+                ))}
             </div>
 
-            <div className="univer-flex univer-flex-col univer-gap-2">
-                <label
-                    className={`
-                      univer-text-sm univer-font-medium univer-text-gray-900
-                      dark:!univer-text-white
-                    `}
-                >
-                    {localeService.t('docs-ui.page-settings.custom-paper-size')}
-                </label>
-                <div className="univer-flex univer-flex-col univer-gap-2.5">
-                    <div className="univer-flex univer-gap-2.5">
-                        <div className="univer-flex univer-flex-1 univer-flex-col univer-gap-2">
-                            <label className="univer-text-sm univer-font-medium univer-text-gray-500">
-                                {localeService.t('docs-ui.page-settings.top')}
-                            </label>
-                            <InputNumber
-                                precision={2}
-                                min={0}
-                                max={settings.pageSise.height / 2}
-                                value={settings.margins.top}
-                                onChange={(e) => handleMarginChange('top', e)}
-                            />
-                        </div>
-                        <div className="univer-flex univer-flex-1 univer-flex-col univer-gap-2">
-                            <label className="univer-text-sm univer-font-medium univer-text-gray-500">
-                                {localeService.t('docs-ui.page-settings.bottom')}
-                            </label>
-                            <InputNumber
-                                precision={2}
-                                min={0}
-                                max={settings.pageSise.height / 2}
-                                value={settings.margins.bottom}
-                                onChange={(e) => handleMarginChange('bottom', e)}
-                            />
+            {settings.mode === DocumentFlavor.MODERN
+                ? (
+                    <div className="univer-flex univer-flex-col univer-gap-2.5">
+                        <SettingsLabel>{localeService.t('page-settings.modern-width')}</SettingsLabel>
+                        <div className="univer-grid univer-grid-cols-3 univer-gap-2">
+                            {MODERN_WIDTH_OPTIONS.map((option) => (
+                                <button
+                                    key={option}
+                                    type="button"
+                                    className={clsx(`
+                                      univer-flex univer-h-16 univer-cursor-pointer univer-flex-col univer-items-center
+                                      univer-justify-center univer-gap-1 univer-rounded-lg univer-border
+                                      univer-border-solid univer-border-gray-200 univer-bg-white univer-text-sm
+                                      univer-font-medium univer-text-gray-700 univer-transition-colors
+                                      hover:univer-border-primary-500 hover:univer-text-primary-600
+                                      dark:!univer-border-gray-600 dark:!univer-bg-gray-900 dark:!univer-text-gray-100
+                                    `, {
+                                        '!univer-border-primary-500 !univer-bg-primary-50 !univer-text-primary-600 dark:!univer-bg-primary-900': settings.modernWidth === option,
+                                    })}
+                                    onClick={() => handleModernWidthChange(option)}
+                                >
+                                    <span>{localeService.t(`page-settings.modern-width-${option}`)}</span>
+                                    <span className="univer-text-xs univer-font-normal univer-text-gray-400">
+                                        {MODERN_DOCUMENT_WIDTH[option]}
+                                        px
+                                    </span>
+                                </button>
+                            ))}
                         </div>
                     </div>
-                    <div className="univer-flex univer-gap-2.5">
-                        <div className="univer-flex univer-flex-1 univer-flex-col univer-gap-2">
-                            <label className="univer-text-sm univer-font-medium univer-text-gray-500">
-                                {localeService.t('docs-ui.page-settings.left')}
-                            </label>
-                            <InputNumber
-                                precision={2}
-                                min={0}
-                                max={settings.pageSise.width / 2}
-                                value={settings.margins.left}
-                                onChange={(e) => handleMarginChange('left', e)}
+                )
+                : (
+                    <>
+                        <div className="univer-flex univer-flex-col univer-gap-2">
+                            <SettingsLabel>{localeService.t('page-settings.paper-size')}</SettingsLabel>
+                            <Select
+                                value={settings.paperSize}
+                                onChange={handlePaperSizeChange}
+                                options={PAPER_TYPES.map((p) => ({
+                                    label: localeService.t(`page-settings.page-size.${p.toLocaleLowerCase()}`),
+                                    value: p,
+                                }))}
                             />
                         </div>
-                        <div className="univer-flex univer-flex-1 univer-flex-col univer-gap-2">
-                            <label className="univer-text-sm univer-font-medium univer-text-gray-500">
-                                {localeService.t('docs-ui.page-settings.right')}
-                            </label>
-                            <InputNumber
-                                precision={2}
-                                min={0}
-                                max={settings.pageSise.width / 2}
-                                value={settings.margins.right}
-                                onChange={(e) => handleMarginChange('right', e)}
-                            />
+
+                        <div className="univer-flex univer-flex-col univer-gap-2">
+                            <SettingsLabel>{localeService.t('page-settings.custom-paper-size')}</SettingsLabel>
+                            <div className="univer-flex univer-flex-col univer-gap-2.5">
+                                <div className="univer-flex univer-gap-2.5">
+                                    <div className="univer-flex univer-flex-1 univer-flex-col univer-gap-2">
+                                        <SettingsLabel muted>{localeService.t('page-settings.top')}</SettingsLabel>
+                                        <InputNumber
+                                            precision={2}
+                                            min={0}
+                                            max={settings.pageSize.height / 2}
+                                            value={settings.margins.top}
+                                            onChange={(e) => handleMarginChange('top', e)}
+                                        />
+                                    </div>
+                                    <div className="univer-flex univer-flex-1 univer-flex-col univer-gap-2">
+                                        <SettingsLabel muted>{localeService.t('page-settings.bottom')}</SettingsLabel>
+                                        <InputNumber
+                                            precision={2}
+                                            min={0}
+                                            max={settings.pageSize.height / 2}
+                                            value={settings.margins.bottom}
+                                            onChange={(e) => handleMarginChange('bottom', e)}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="univer-flex univer-gap-2.5">
+                                    <div className="univer-flex univer-flex-1 univer-flex-col univer-gap-2">
+                                        <SettingsLabel muted>{localeService.t('page-settings.left')}</SettingsLabel>
+                                        <InputNumber
+                                            precision={2}
+                                            min={0}
+                                            max={settings.pageSize.width / 2}
+                                            value={settings.margins.left}
+                                            onChange={(e) => handleMarginChange('left', e)}
+                                        />
+                                    </div>
+                                    <div className="univer-flex univer-flex-1 univer-flex-col univer-gap-2">
+                                        <SettingsLabel muted>{localeService.t('page-settings.right')}</SettingsLabel>
+                                        <InputNumber
+                                            precision={2}
+                                            min={0}
+                                            max={settings.pageSize.width / 2}
+                                            value={settings.margins.right}
+                                            onChange={(e) => handleMarginChange('right', e)}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </div>
-            </div>
+                    </>
+                )}
         </div>
     );
 }

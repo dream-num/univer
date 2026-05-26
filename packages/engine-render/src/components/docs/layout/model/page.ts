@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ITable, Nullable } from '@univerjs/core';
+import type { IDocumentBody, ITable, Nullable } from '@univerjs/core';
 import type {
     IDocumentSkeletonHeaderFooter,
     IDocumentSkeletonPage,
@@ -386,9 +386,39 @@ export function createSkeletonCellPages(
 
     updateBlockIndex(pages, cellNode.startIndex);
 
+    applyTrailingCellBlockRangeSpaceBelow(pages, ctx.dataModel?.getBody?.(), cellNode.endIndex);
+
     updateInlineDrawingCoordsAndBorder(ctx, pages);
 
     return pages;
+}
+
+function applyTrailingCellBlockRangeSpaceBelow(pages: IDocumentSkeletonPage[], body: Nullable<IDocumentBody>, cellEndIndex: number) {
+    const blockRanges = body?.blockRanges;
+    const trailingBlockRangeSpace = 28;
+    if (!blockRanges?.length) {
+        return;
+    }
+
+    for (const page of pages) {
+        const lastLine = page.sections.at(-1)?.columns.at(-1)?.lines.at(-1);
+        if (!lastLine) {
+            continue;
+        }
+
+        const paragraphIndex = lastLine.paragraphIndex;
+        const isBlockRangeParagraph = blockRanges.some((range) => range.startIndex < paragraphIndex && paragraphIndex < range.endIndex);
+        if (!isBlockRangeParagraph) {
+            continue;
+        }
+
+        const hasLaterParagraphInCell = body?.paragraphs?.some((paragraph) => paragraph.startIndex > paragraphIndex && paragraph.startIndex < cellEndIndex);
+        if (hasLaterParagraphInCell) {
+            continue;
+        }
+
+        page.height += lastLine.spaceBelowApply || trailingBlockRangeSpace;
+    }
 }
 
 function _getVerticalMargin(

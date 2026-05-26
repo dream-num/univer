@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Workbook } from '@univerjs/core';
+import type { DocumentDataModel, ITextRangeParam, Workbook } from '@univerjs/core';
 import type { Documents, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import {
     DEFAULT_EMPTY_DOCUMENT_VALUE,
@@ -24,8 +24,10 @@ import {
     DOCS_ZEN_EDITOR_UNIT_ID_KEY,
     ICommandService,
     Inject,
+    IUniverInstanceService,
+    UniverInstanceType,
 } from '@univerjs/core';
-import { RichTextEditingMutation } from '@univerjs/docs';
+import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { ContextMenuPosition, IContextMenuService } from '@univerjs/ui';
 import { DocEventManagerService } from '../../services/doc-event-manager.service';
 
@@ -45,7 +47,9 @@ export class DocContextMenuRenderController extends Disposable implements IRende
         private readonly _context: IRenderContext<Workbook>,
         @IContextMenuService private readonly _contextMenuService: IContextMenuService,
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(DocEventManagerService) private readonly _docEventManagerService: DocEventManagerService
+        @Inject(DocEventManagerService) private readonly _docEventManagerService: DocEventManagerService,
+        @Inject(DocSelectionManagerService) private readonly _docSelectionManagerService: DocSelectionManagerService,
+        @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
 
@@ -61,6 +65,9 @@ export class DocContextMenuRenderController extends Disposable implements IRende
         const documentsSubscription = documentsPointerDownObserver.subscribeEvent((event) => {
             if (event.button === 2) {
                 if (this._docEventManagerService.isPointerOnBullet(event.offsetX, event.offsetY)) {
+                    return;
+                }
+                if (this._isSelectionInCodeBlock()) {
                     return;
                 }
 
@@ -81,4 +88,19 @@ export class DocContextMenuRenderController extends Disposable implements IRende
             })
         );
     }
+
+    private _isSelectionInCodeBlock(): boolean {
+        const documentDataModel = this._univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        const blockRanges = documentDataModel?.getBody()?.blockRanges?.filter((range) => range.blockType === 'code') ?? [];
+        const textRanges = this._docSelectionManagerService.getTextRanges() ?? [];
+        if (!blockRanges.length || !textRanges.length) {
+            return false;
+        }
+
+        return blockRanges.some((blockRange) => textRanges.some((range) => isRangeIntersectingBlock(range, blockRange.startIndex, blockRange.endIndex)));
+    }
+}
+
+function isRangeIntersectingBlock(range: ITextRangeParam, startIndex: number, endIndex: number): boolean {
+    return Math.max(range.startOffset, startIndex) <= Math.min(range.endOffset, endIndex);
 }

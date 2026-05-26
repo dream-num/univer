@@ -84,6 +84,7 @@ export interface IEditorStateParams extends Partial<IPosition> {
 
 export interface IEditorCanvasStyle {
     fontSize?: number;
+    backgroundColor?: string;
 }
 
 export interface IEditorConfigParams {

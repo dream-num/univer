@@ -206,12 +206,24 @@ export interface ITableCellBound {
     tableId: string;
 }
 
+const TABLE_BLOCK_MENU_HOVER_GUTTER_LEFT = 72;
+const TABLE_BLOCK_MENU_HOVER_GUTTER_TOP = 42;
+
 function isPointInRect(x: number, y: number, rect: IBoundRectNoAngle) {
     const { left, right, top, bottom } = rect;
     if (x >= left && x <= right && y >= top && y <= bottom) {
         return true;
     }
     return false;
+}
+
+export function getTableBlockMenuHoverRect(tableRect: IBoundRectNoAngle): IBoundRectNoAngle {
+    return {
+        bottom: tableRect.bottom,
+        left: tableRect.left - TABLE_BLOCK_MENU_HOVER_GUTTER_LEFT,
+        right: tableRect.right,
+        top: tableRect.top - TABLE_BLOCK_MENU_HOVER_GUTTER_TOP,
+    };
 }
 
 export class DocEventManagerService extends Disposable implements IRenderModule {
@@ -738,7 +750,7 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
 
         const { x, y } = evt;
 
-        const table = Array.from(this._tableBounds.values()).find((bound) => isPointInRect(x, y, bound.rect));
+        const table = Array.from(this._tableBounds.values()).find((bound) => isPointInRect(x, y, getTableBlockMenuHoverRect(bound.rect)));
         this._hoverTable$.next(table);
 
         if (table) {
@@ -779,6 +791,11 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
     get paragraphBounds() {
         this._buildParagraphBounds();
         return this._paragraphBounds;
+    }
+
+    get tableBounds() {
+        this._buildParagraphBounds();
+        return this._tableBounds;
     }
 
     findParagraphBoundByIndex(index: number) {

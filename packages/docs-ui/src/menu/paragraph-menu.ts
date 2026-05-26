@@ -23,12 +23,13 @@ import { H1Icon, H2Icon, H3Icon, H4Icon, H5Icon, TextTypeIcon } from '@univerjs/
 import { ComponentManager, getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { createElement } from 'react';
 import { Observable } from 'rxjs';
-import { DocCopyCurrentParagraphCommand, DocCutCurrentParagraphCommand } from '../commands/commands/clipboard.command';
+import { DocCopyCommand, DocCopyCurrentParagraphCommand, DocCutCurrentParagraphCommand, DocPasteCommand } from '../commands/commands/clipboard.command';
 import { DeleteCurrentParagraphCommand } from '../commands/commands/doc-delete.command';
 import { HorizontalLineCommand, InsertHorizontalLineBellowCommand } from '../commands/commands/doc-horizontal-line.command';
 import { SetInlineFormatFontSizeCommand } from '../commands/commands/inline-format.command';
 import { BulletListCommand, CheckListCommand, InsertBulletListBellowCommand, InsertCheckListBellowCommand, InsertOrderListBellowCommand, OrderListCommand } from '../commands/commands/list.command';
 import { H1HeadingCommand, H2HeadingCommand, H3HeadingCommand, H4HeadingCommand, H5HeadingCommand, NormalTextHeadingCommand, SubtitleHeadingCommand, TitleHeadingCommand } from '../commands/commands/set-heading.command';
+import { DocTableDeleteTableCommand } from '../commands/commands/table/doc-table-delete.command';
 import { disableMenuWhenNoDocRange, getParagraphStyleAtCursor } from './menu';
 
 const HEADING_MAP: Record<NamedStyleType, ICommand> = {
@@ -274,6 +275,40 @@ export const InsertHorizontalLineBellowMenuItemFactory = (accessor: IAccessor): 
 };
 
 export const INSERT_BELLOW_MENU_ID = 'doc.menu.insert-bellow';
+export const DOC_CONTENT_INSERT_MENU_ID = 'doc.menu.content-insert';
+export const DOC_TABLE_BLOCK_MENU_ID = 'doc.menu.table-block';
+
+export function getDocBlockRangeMenuId(blockType: string): string {
+    return `doc.block-range.${blockType}.menu`;
+}
+
+export const TableBlockCopyMenuItemFactory = (accessor: IAccessor): IMenuItem => {
+    return {
+        id: DocCopyCommand.name,
+        commandId: DocCopyCommand.id,
+        type: MenuItemType.BUTTON,
+        icon: 'CopyDoubleIcon',
+        title: 'rightClick.copy',
+    };
+};
+
+export const TableBlockPasteMenuItemFactory = (accessor: IAccessor): IMenuItem => {
+    return {
+        id: DocPasteCommand.id,
+        type: MenuItemType.BUTTON,
+        icon: 'PasteSpecialDoubleIcon',
+        title: 'rightClick.paste',
+    };
+};
+
+export const TableBlockDeleteMenuItemFactory = (accessor: IAccessor): IMenuItem => {
+    return {
+        id: DocTableDeleteTableCommand.id,
+        type: MenuItemType.BUTTON,
+        icon: 'DeleteIcon',
+        title: 'rightClick.delete',
+    };
+};
 
 export function DocInsertBellowMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     return {

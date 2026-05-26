@@ -63,6 +63,8 @@ interface IContextMenuMenuItemProps {
     submenuPortalContainer: HTMLElement | null;
     maxMenuHeight: number;
     activeItemIds?: string[];
+    hiddenItemIds?: string[];
+    compact?: boolean;
     onOptionSelect?: (option: IValueOption) => void;
 }
 
@@ -221,6 +223,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                             submenuPortalContainer={submenuPortalContainer}
                             onOptionSelect={onOptionSelect}
                             maxMenuHeight={maxMenuHeight}
+                            hiddenItemIds={hiddenItemIds}
                         />
                     );
                 }
@@ -259,6 +262,35 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                     );
                 }
 
+                if (menuSchema.tiny) {
+                    return (
+                        <div
+                            key={menuSchema.key}
+                            className={clsx(
+                                'univer-flex univer-items-center univer-gap-1 univer-py-1',
+                                hasSeparator && borderBottomClassName
+                            )}
+                        >
+                            {menuSchema.children.map((childSchema) => (
+                                childSchema.item && (
+                                    <ContextMenuMenuItem
+                                        key={childSchema.key}
+                                        menuKey={childSchema.key}
+                                        menuItem={childSchema.item as IDisplayMenuItem<IMenuItem>}
+                                        menuSessionVersion={menuSessionVersion}
+                                        submenuPortalContainer={submenuPortalContainer}
+                                        activeItemIds={activeItemIds}
+                                        hiddenItemIds={hiddenItemIds}
+                                        onOptionSelect={onOptionSelect}
+                                        maxMenuHeight={maxMenuHeight}
+                                        compact
+                                    />
+                                )
+                            ))}
+                        </div>
+                    );
+                }
+
                 return (
                     <div
                         key={menuSchema.key}
@@ -286,6 +318,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                                     menuSessionVersion={menuSessionVersion}
                                     submenuPortalContainer={submenuPortalContainer}
                                     activeItemIds={activeItemIds}
+                                    hiddenItemIds={hiddenItemIds}
                                     onOptionSelect={onOptionSelect}
                                     maxMenuHeight={maxMenuHeight}
                                 />
@@ -299,7 +332,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
 }
 
 function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
-    const { menuKey, menuItem, menuSessionVersion, submenuPortalContainer, activeItemIds, onOptionSelect, maxMenuHeight } = props;
+    const { menuKey, menuItem, menuSessionVersion, submenuPortalContainer, activeItemIds, hiddenItemIds = [], compact = false, onOptionSelect, maxMenuHeight } = props;
     const localeService = useDependency(LocaleService);
     const direction = useObservable(localeService.direction$);
     const menuManagerService = useDependency(IMenuManagerService);
@@ -398,7 +431,9 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
         };
     }, [submenuVisible, hasSelectionSubmenu, hasSubItemSubmenu]);
 
-    if (hidden) {
+    const hiddenById = (menuItem.id != null && hiddenItemIds.includes(menuItem.id)) || hiddenItemIds.includes(menuKey);
+
+    if (hidden || hiddenById) {
         return null;
     }
 
@@ -413,12 +448,18 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
     };
 
     const itemClassName = clsx(
-        `
-          univer-relative univer-flex univer-min-h-8 univer-w-full univer-items-center univer-justify-between
-          univer-gap-3 univer-rounded-md univer-border-none univer-bg-transparent univer-px-2 univer-text-left
-          univer-text-sm
-          dark:!univer-text-white
-        `,
+        compact
+            ? `
+              univer-relative univer-flex univer-size-8 univer-items-center univer-justify-center univer-rounded-md
+              univer-border-none univer-bg-transparent univer-p-0 univer-text-left univer-text-sm
+              dark:!univer-text-white
+            `
+            : `
+              univer-relative univer-flex univer-min-h-8 univer-w-full univer-items-center univer-justify-between
+              univer-gap-3 univer-rounded-md univer-border-none univer-bg-transparent univer-px-2 univer-text-left
+              univer-text-sm
+              dark:!univer-text-white
+            `,
         disabled
             ? 'univer-cursor-not-allowed univer-opacity-60'
             : `
@@ -436,7 +477,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
         <span className={contentClassName}>
             <CustomLabel
                 value={inputValue}
-                title={menuItem.title}
+                title={compact ? undefined : menuItem.title}
                 label={menuItem.label}
                 icon={menuItem.icon}
                 onChange={onChange}
@@ -494,6 +535,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                         type="button"
                         className={interactiveItemClassName}
                         disabled={disabled}
+                        title={compact && typeof menuItem.tooltip === 'string' ? localeService.t(menuItem.tooltip) : undefined}
                         onClick={() => {
                             if (hasSubmenu) {
                                 if (canExecuteItem) {
@@ -528,7 +570,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                         }}
                     >
                         {contentNode}
-                        {hasSubmenu && (
+                        {hasSubmenu && !compact && (
                             <MoreIcon
                                 className={`
                                   univer-size-3.5 univer-text-gray-400
@@ -676,6 +718,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                                         menuSessionVersion={menuSessionVersion}
                                         submenuPortalContainer={submenuPortalContainer}
                                         activeItemIds={activeItemIds}
+                                        hiddenItemIds={hiddenItemIds}
                                         onOptionSelect={onSubmenuOptionSelect}
                                         maxMenuHeight={maxMenuHeight}
                                     />

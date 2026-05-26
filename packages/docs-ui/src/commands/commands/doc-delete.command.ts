@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommand, IDocumentBody, IMutationInfo, IParagraph, ITextRange, JSONXActions, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, ICommand, IDocumentBlockRange, IDocumentBody, IMutationInfo, IParagraph, ITextRange, JSONXActions, Nullable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
 import {
@@ -404,6 +404,21 @@ export function getCursorWhenDelete(textRanges: Readonly<Nullable<ITextRangeWith
     return cursor;
 }
 
+function getBlockRangeEndTokenOffset(body: IDocumentBody, blockRange: Pick<IDocumentBlockRange, 'endIndex'>): number {
+    return body.dataStream[blockRange.endIndex] === DataStreamTreeTokenType.BLOCK_END
+        ? blockRange.endIndex
+        : body.dataStream[blockRange.endIndex + 1] === DataStreamTreeTokenType.BLOCK_END
+            ? blockRange.endIndex + 1
+            : blockRange.endIndex;
+}
+
+export function isDeleteOffsetInsideBlockRange(body: IDocumentBody, offset: number): boolean {
+    return body.blockRanges?.some((blockRange) => {
+        const endTokenOffset = getBlockRangeEndTokenOffset(body, blockRange);
+        return blockRange.startIndex < offset && offset < endTokenOffset;
+    }) ?? false;
+}
+
 // Handle BACKSPACE key.
 export const DeleteLeftCommand: ICommand = {
     id: 'doc.command.delete-left',
@@ -485,9 +500,10 @@ export const DeleteLeftCommand: ICommand = {
 
         // Get the deleted glyph. It maybe null or undefined when the curGlyph is first glyph in skeleton.
         const preGlyph = skeleton.findNodeByCharIndex(startOffset - 1, segmentId, segmentPage);
+        const isInBlockRange = isDeleteOffsetInsideBlockRange(body, startOffset);
 
         const isUpdateParagraph =
-            isFirstGlyph(curGlyph) && preGlyph !== curGlyph && (isBullet === true || isIndent === true);
+            !isInBlockRange && isFirstGlyph(curGlyph) && preGlyph !== curGlyph && (isBullet === true || isIndent === true);
 
         if (isUpdateParagraph && collapsed) {
             const paragraph = getParagraphByGlyph(curGlyph, body);

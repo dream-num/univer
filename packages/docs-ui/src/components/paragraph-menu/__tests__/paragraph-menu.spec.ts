@@ -17,12 +17,12 @@
 import { NamedStyleType } from '@univerjs/core';
 
 import { describe, expect, it } from 'vitest';
-import { getParagraphMenuActiveHeadingCommandId, getParagraphMenuCommand, getParagraphMenuHiddenHeadingCommandIds, getParagraphMenuIconSizeClass, getParagraphMenuTargetRange, isEmptyParagraphMenuTarget } from '..';
+import { getParagraphMenuActiveHeadingCommandId, getParagraphMenuCommand, getParagraphMenuHiddenHeadingCommandIds, getParagraphMenuIconSizeClass, getParagraphMenuPopupDirection, getParagraphMenuTargetRange, isEmptyParagraphMenuTarget, shouldShowParagraphSettingMenu, shouldUseInsertBelowRange } from '..';
 import { HorizontalLineCommand } from '../../../commands/commands/doc-horizontal-line.command';
-import { BulletListCommand, OrderListCommand } from '../../../commands/commands/list.command';
+import { BulletListCommand, InsertBulletListBellowCommand, OrderListCommand } from '../../../commands/commands/list.command';
 import { H1HeadingCommand, H3HeadingCommand, H5HeadingCommand, NormalTextHeadingCommand, SetParagraphNamedStyleCommand, SubtitleHeadingCommand, TitleHeadingCommand } from '../../../commands/commands/set-heading.command';
 import { CreateDocTableCommand } from '../../../commands/commands/table/doc-table-create.command';
-import { HEADING_ICON_MAP, shouldShowParagraphHeadingOption } from '../../../menu/paragraph-menu';
+import { HEADING_ICON_MAP, INSERT_BELLOW_MENU_ID, shouldShowParagraphHeadingOption } from '../../../menu/paragraph-menu';
 
 describe('ParagraphMenu', () => {
     it('uses a smaller icon for normal text paragraph triggers', () => {
@@ -32,6 +32,11 @@ describe('ParagraphMenu', () => {
         expect(getParagraphMenuIconSizeClass('H1Icon')).toBe('univer-size-4');
         expect(HEADING_ICON_MAP[NamedStyleType.TITLE].key).toBe('TitleTypeIcon');
         expect(HEADING_ICON_MAP[NamedStyleType.SUBTITLE].key).toBe('SubtitleTypeIcon');
+    });
+
+    it('opens the popup away from the drag handle when there is not enough left space', () => {
+        expect(getParagraphMenuPopupDirection(170)).toBe('right');
+        expect(getParagraphMenuPopupDirection(260)).toBe('left');
     });
 
     it('shows title and subtitle heading shortcuts only when they are the current paragraph style', () => {
@@ -70,6 +75,15 @@ describe('ParagraphMenu', () => {
             TitleHeadingCommand.id,
             SubtitleHeadingCommand.id,
         ]);
+    });
+
+    it('shows paragraph settings only for paragraph and list menu targets', () => {
+        expect(shouldShowParagraphSettingMenu(null)).toBe(true);
+        expect(shouldShowParagraphSettingMenu({ kind: 'paragraph' } as never)).toBe(true);
+        expect(shouldShowParagraphSettingMenu({ kind: 'paragraph', icon: 'OrderIcon' } as never)).toBe(true);
+        expect(shouldShowParagraphSettingMenu({ kind: 'blockRange' } as never)).toBe(false);
+        expect(shouldShowParagraphSettingMenu({ kind: 'table' } as never)).toBe(false);
+        expect(shouldShowParagraphSettingMenu({ kind: 'customBlock' } as never)).toBe(false);
     });
 
     it('detects empty paragraph menu targets', () => {
@@ -150,5 +164,26 @@ describe('ParagraphMenu', () => {
             commandId: H1HeadingCommand.id,
             params: undefined,
         });
+    });
+
+    it('detects menu commands that should use the hovered block insert-below anchor', () => {
+        expect(shouldUseInsertBelowRange(InsertBulletListBellowCommand.id, {
+            id: InsertBulletListBellowCommand.id,
+        })).toBe(true);
+        expect(shouldUseInsertBelowRange('docs-callout.command.insert-below', {
+            id: 'docs-callout.command.insert-below',
+        })).toBe(true);
+        expect(shouldUseInsertBelowRange('doc.command.insert-float-image', {
+            id: 'doc.command.insert-float-image',
+        })).toBe(true);
+        expect(shouldUseInsertBelowRange(CreateDocTableCommand.id, {
+            id: 'doc.operation.create-table',
+        })).toBe(true);
+        expect(shouldUseInsertBelowRange(H1HeadingCommand.id, {
+            id: H1HeadingCommand.id,
+        })).toBe(false);
+        expect(shouldUseInsertBelowRange(H1HeadingCommand.id, {
+            id: INSERT_BELLOW_MENU_ID,
+        })).toBe(true);
     });
 });

@@ -434,6 +434,12 @@ export function hasTibetan(text: string) {
     return pattern.test(text);
 }
 
+export function hasThai(text: string) {
+    const pattern = /[\u0E00-\u0E7F]/;
+
+    return pattern.test(text);
+}
+
 export function hasSpace(text: string) {
     const pattern = /\s+/g;
 

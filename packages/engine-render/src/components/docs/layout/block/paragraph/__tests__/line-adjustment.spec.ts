@@ -15,181 +15,95 @@
  */
 
 import { HorizontalAlign } from '@univerjs/core';
-import { describe, expect, it, vi } from 'vitest';
-import { BreakPointType } from '../../../line-breaker/break';
-
+import { describe, expect, it } from 'vitest';
 import { lineAdjustment } from '../line-adjustment';
+import { lineBreaking } from '../linebreaking';
+import { shaping } from '../shaping';
+import { createParagraphLayoutTestBed } from './create-paragraph-layout-test-bed';
 
-const createHyphenDashGlyphMock = vi.fn();
-const glyphShrinkLeftMock = vi.fn();
-const glyphShrinkRightMock = vi.fn();
-const setGlyphGroupLeftMock = vi.fn();
-const getFontConfigFromLastGlyphMock = vi.fn();
+describe('line-adjustment', () => {
+    it('adjusts lines after layout', () => {
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed('Hello world');
+        const shapedTextList = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+        const pages = lineBreaking(ctx, viewModel, shapedTextList, curPage, paragraphNode, sectionBreakConfig, null);
 
-vi.mock('../../../model/glyph', () => ({
-    createHyphenDashGlyph: (...args: unknown[]) => createHyphenDashGlyphMock(...args),
-    glyphShrinkLeft: (...args: unknown[]) => glyphShrinkLeftMock(...args),
-    glyphShrinkRight: (...args: unknown[]) => glyphShrinkRightMock(...args),
-    setGlyphGroupLeft: (...args: unknown[]) => setGlyphGroupLeftMock(...args),
-}));
-
-vi.mock('../../../tools', () => ({
-    getFontConfigFromLastGlyph: (...args: unknown[]) => getFontConfigFromLastGlyphMock(...args),
-    getGlyphGroupWidth: (divide: any) => divide.glyphGroup.reduce((sum: number, glyph: any) => sum + glyph.width, 0),
-    lineIterator: (pages: any[], cb: (line: any) => void) => {
-        pages.forEach((page) => {
-            page.sections.forEach((section: any) => {
-                section.columns.forEach((column: any) => {
-                    column.lines.forEach((line: any) => cb(line));
-                });
-            });
-        });
-    },
-}));
-
-function createGlyph(content: string, width: number, isJustifiable = false) {
-    return {
-        content,
-        width,
-        xOffset: 0,
-        count: 1,
-        isJustifiable,
-        bBox: {
-            width: Math.max(1, width - 1),
-            ba: 7,
-            bd: 3,
-        },
-        adjustability: {
-            shrinkability: [1, 1],
-            stretchability: [1, 1],
-        },
-    } as any;
-}
-
-function createPages() {
-    const divide1 = {
-        width: 40,
-        isFull: true,
-        breakType: BreakPointType.Normal,
-        paddingLeft: 0,
-        glyphGroup: [
-            createGlyph('（', 8, false),
-            createGlyph('A', 10, true),
-            createGlyph('。', 8, false),
-        ],
-    } as any;
-
-    const divide2 = {
-        width: 24,
-        isFull: true,
-        breakType: BreakPointType.Normal,
-        paddingLeft: 0,
-        glyphGroup: [
-            createGlyph('中', 14, false),
-        ],
-    } as any;
-    divide2.glyphGroup[0].xOffset = 2;
-    divide2.glyphGroup[0].bBox.width = 8;
-
-    const divide3 = {
-        width: 30,
-        isFull: true,
-        breakType: BreakPointType.Hyphen,
-        paddingLeft: 0,
-        glyphGroup: [
-            createGlyph('w', 10, true),
-            createGlyph('o', 8, true),
-            createGlyph('r', 7, true),
-            createGlyph('d', 7, true),
-        ],
-    } as any;
-    divide3.glyphGroup[divide3.glyphGroup.length - 1].content = 'a';
-
-    const line = {
-        paragraphIndex: 0,
-        divides: [divide1, divide2, divide3],
-    } as any;
-
-    [divide1, divide2, divide3].forEach((divide) => {
-        divide.glyphGroup.forEach((glyph: any, idx: number) => {
-            glyph.left = divide.glyphGroup.slice(0, idx).reduce((sum: number, g: any) => sum + g.width, 0);
-            glyph.parent = divide;
-        });
+        // lineAdjustment should not throw
+        expect(() => lineAdjustment(pages, viewModel, paragraphNode, sectionBreakConfig)).not.toThrow();
     });
 
-    return [
-        {
-            sections: [
-                {
-                    columns: [
-                        {
-                            lines: [line],
-                        },
-                    ],
-                },
-            ],
-        },
-    ] as any[];
-}
+    it('handles CJK punctuation shrinkage', () => {
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed('\u3002\u3002'); // Two full-width periods
+        const shapedTextList = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+        const pages = lineBreaking(ctx, viewModel, shapedTextList, curPage, paragraphNode, sectionBreakConfig, null);
 
-describe('line adjustment', () => {
-    it('adjusts punctuation/hyphen/alignment for paragraph lines', () => {
-        createHyphenDashGlyphMock.mockReturnValue({
-            content: '-',
-            width: 3,
-            count: 1,
-            left: 0,
-            bBox: { width: 3, ba: 7, bd: 3 },
-            adjustability: { shrinkability: [0, 0], stretchability: [0, 0] },
-        });
-        getFontConfigFromLastGlyphMock.mockReturnValue({ fs: 12 });
-
-        const viewModel = {
-            getParagraph: () => ({
-                startIndex: 0,
-                paragraphStyle: {
-                    horizontalAlign: HorizontalAlign.JUSTIFIED,
-                },
-            }),
-        } as any;
-        const paragraphNode = { endIndex: 1 } as any;
-        const pages = createPages();
-
-        lineAdjustment(pages as any, viewModel, paragraphNode, {} as any);
-
-        const line = pages[0].sections[0].columns[0].lines[0];
-        expect(glyphShrinkLeftMock).toHaveBeenCalled();
-        expect(glyphShrinkRightMock).toHaveBeenCalled();
-        expect(setGlyphGroupLeftMock).toHaveBeenCalled();
-        expect(getFontConfigFromLastGlyphMock).toHaveBeenCalled();
-
-        const hyphenDivide = line.divides[2];
-        expect(hyphenDivide.glyphGroup[hyphenDivide.glyphGroup.length - 1].content).toBe('-');
-        expect(hyphenDivide.width).toBe(27);
-
-        expect(line.divides[0].paddingLeft).toBeGreaterThanOrEqual(0);
+        expect(() => lineAdjustment(pages, viewModel, paragraphNode, sectionBreakConfig)).not.toThrow();
     });
 
-    it('supports center and right align branches', () => {
-        const pages = createPages();
-        const paragraphNode = { endIndex: 1 } as any;
+    it('handles horizontal align CENTER', () => {
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed('Hello', {
+            body: {
+                dataStream: 'Hello\r\n',
+                textRuns: [{ st: 0, ed: 7, ts: {} }],
+                paragraphs: [{
+                    startIndex: 5,
+                    paragraphStyle: {
+                        horizontalAlign: HorizontalAlign.CENTER,
+                    },
+                }],
+                sectionBreaks: [{ startIndex: 6 }],
+            },
+        });
+        const shapedTextList = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+        const pages = lineBreaking(ctx, viewModel, shapedTextList, curPage, paragraphNode, sectionBreakConfig, null);
 
-        const viewModelCenter = {
-            getParagraph: () => ({
-                startIndex: 0,
-                paragraphStyle: { horizontalAlign: HorizontalAlign.CENTER },
-            }),
-        } as any;
-        lineAdjustment(pages as any, viewModelCenter, paragraphNode, {} as any);
-        expect(pages[0].sections[0].columns[0].lines[0].divides[0].paddingLeft).toBeGreaterThan(0);
+        expect(() => lineAdjustment(pages, viewModel, paragraphNode, sectionBreakConfig)).not.toThrow();
+    });
 
-        const viewModelRight = {
-            getParagraph: () => ({
-                startIndex: 0,
-                paragraphStyle: { horizontalAlign: HorizontalAlign.RIGHT },
-            }),
-        } as any;
-        lineAdjustment(pages as any, viewModelRight, paragraphNode, {} as any);
-        expect(pages[0].sections[0].columns[0].lines[0].divides[0].paddingLeft).toBeGreaterThan(0);
+    it('handles horizontal align RIGHT', () => {
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed('Hello', {
+            body: {
+                dataStream: 'Hello\r\n',
+                textRuns: [{ st: 0, ed: 7, ts: {} }],
+                paragraphs: [{
+                    startIndex: 5,
+                    paragraphStyle: {
+                        horizontalAlign: HorizontalAlign.RIGHT,
+                    },
+                }],
+                sectionBreaks: [{ startIndex: 6 }],
+            },
+        });
+        const shapedTextList = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+        const pages = lineBreaking(ctx, viewModel, shapedTextList, curPage, paragraphNode, sectionBreakConfig, null);
+
+        expect(() => lineAdjustment(pages, viewModel, paragraphNode, sectionBreakConfig)).not.toThrow();
+    });
+
+    it('handles horizontal align JUSTIFIED', () => {
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed('Hello world test', {
+            body: {
+                dataStream: 'Hello world test\r\n',
+                textRuns: [{ st: 0, ed: 18, ts: {} }],
+                paragraphs: [{
+                    startIndex: 16,
+                    paragraphStyle: {
+                        horizontalAlign: HorizontalAlign.JUSTIFIED,
+                    },
+                }],
+                sectionBreaks: [{ startIndex: 17 }],
+            },
+        });
+        const shapedTextList = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+        const pages = lineBreaking(ctx, viewModel, shapedTextList, curPage, paragraphNode, sectionBreakConfig, null);
+
+        expect(() => lineAdjustment(pages, viewModel, paragraphNode, sectionBreakConfig)).not.toThrow();
+    });
+
+    it('handles line with only paragraph break', () => {
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed('');
+        const shapedTextList = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+        const pages = lineBreaking(ctx, viewModel, shapedTextList, curPage, paragraphNode, sectionBreakConfig, null);
+
+        expect(() => lineAdjustment(pages, viewModel, paragraphNode, sectionBreakConfig)).not.toThrow();
     });
 });

@@ -14,61 +14,63 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     'sheets-drawing-ui': {
-        title: 'Image',
+        title: 'Immagine',
 
         upload: {
-            float: 'Float Image',
-            cell: 'Cell Image',
+            float: 'Immagine fluttuante',
+            cell: 'Immagine cella',
         },
 
         panel: {
-            title: 'Edit Image',
+            title: 'Modifica immagine',
         },
 
         save: {
-            title: 'Save Cell Images',
-            menuLabel: 'Save Cell Images',
-            imageCount: 'Image Count',
-            fileNameConfig: 'File Name',
-            useRowCol: 'Use Cell Address (A1, B2...)',
-            useColumnValue: 'Use Column Value',
-            selectColumn: 'Select Column',
-            cancel: 'Cancel',
-            confirm: 'Save',
-            saving: 'Saving...',
-            error: 'Failed to save cell images',
+            title: 'Salva immagini celle',
+            menuLabel: 'Salva immagini celle',
+            imageCount: 'Numero immagini',
+            fileNameConfig: 'Nome file',
+            useRowCol: 'Usa indirizzo cella (A1, B2...)',
+            useColumnValue: 'Usa valore colonna',
+            selectColumn: 'Seleziona colonna',
+            cancel: 'Annulla',
+            confirm: 'Salva',
+            saving: 'Salvataggio...',
+            error: 'Salvataggio immagini celle non riuscito',
         },
         'image-popup': {
-            replace: 'Replace',
-            delete: 'Delete',
-            edit: 'Edit',
-            crop: 'Crop',
-            reset: 'Reset Size',
-            flipH: 'Flip Horizontal',
-            flipV: 'Flip Vertical',
+            replace: 'Sostituisci',
+            delete: 'Elimina',
+            edit: 'Modifica',
+            crop: 'Ritaglia',
+            reset: 'Reimposta dimensione',
+            flipH: 'Capovolgi orizzontalmente',
+            flipV: 'Capovolgi verticalmente',
         },
         'update-status': {
-            exceedMaxSize: 'Image size exceeds limit, limit is {0}M',
-            invalidImageType: 'Invalid image type',
-            exceedMaxCount: 'Only {0} images can be uploaded at a time',
-            invalidImage: 'Invalid image',
+            exceedMaxSize: 'La dimensione dell\'immagine supera il limite, il limite è {0}M',
+            invalidImageType: 'Tipo di immagine non valido',
+            exceedMaxCount: 'È possibile caricare solo {0} immagini alla volta',
+            invalidImage: 'Immagine non valida',
         },
         'drawing-anchor': {
-            title: 'Anchor Properties',
-            both: 'Move and size with cells',
-            position: "Move but don't size with cells",
-            none: "Don't move or size with cells",
+            title: 'Proprietà ancoraggio',
+            both: 'Sposta e ridimensiona con le celle',
+            position: "Sposta ma non ridimensionare con le celle",
+            none: "Non spostare né ridimensionare con le celle",
         },
         'cell-image': {
-            pasteTitle: 'Paste as cell image',
-            pasteContent: 'Pasting a cell image will overwrite the existing content of the cell, continue pasting',
-            pasteError: 'Sheet cell image copy paste is not supported in this unit',
+            pasteTitle: 'Incolla come immagine cella',
+            pasteContent: "L'incollaggio di un'immagine cella sovrascriverà il contenuto esistente della cella, continuare con l'incollaggio",
+            pasteError: "Copia e incolla di immagine cella non supportato in questa unità",
         },
         permission: {
             dialog: {
-                editErr: 'The range is protected, and you do not have edit permission. To edit, please contact the creator.',
+                editErr: "L'intervallo è protetto e non hai l'autorizzazione di modifica. Per modificare, contatta il creatore.",
             },
         },
     },

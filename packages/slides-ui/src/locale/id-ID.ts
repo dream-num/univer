@@ -14,62 +14,64 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     'slides-ui': {
-        append: 'Append Slide',
+        append: 'Tambah Slide',
 
         text: {
             insert: {
-                title: 'Insert Text',
+                title: 'Sisipkan Teks',
             },
         },
 
         shape: {
             insert: {
-                title: 'Insert Shape',
-                rectangle: 'Insert Rectangle',
-                ellipse: 'Insert Ellipse',
+                title: 'Sisipkan Bentuk',
+                rectangle: 'Sisipkan Persegi Panjang',
+                ellipse: 'Sisipkan Elips',
             },
         },
 
         image: {
             insert: {
-                title: 'Insert Image',
-                float: 'Insert Float Image',
+                title: 'Sisipkan Gambar',
+                float: 'Sisipkan Gambar Mengambang',
             },
         },
 
         popup: {
             edit: 'Edit',
-            delete: 'Delete',
+            delete: 'Hapus',
         },
 
         sidebar: {
-            text: 'Edit Text',
-            shape: 'Edit Shape',
-            image: 'Edit Image',
+            text: 'Edit Teks',
+            shape: 'Edit Bentuk',
+            image: 'Edit Gambar',
         },
 
         'image-panel': {
             arrange: {
-                title: 'Arrange',
-                forward: 'Bring Forward',
-                backward: 'Send Backward',
-                front: 'Bring to Front',
-                back: 'Send to Back',
+                title: 'Atur',
+                forward: 'Bawa ke Depan',
+                backward: 'Kirim ke Belakang',
+                front: 'Bawa ke Paling Depan',
+                back: 'Kirim ke Paling Belakang',
             },
             transform: {
-                title: 'Transform',
-                width: 'Width (px)',
-                height: 'Height (px)',
+                title: 'Transformasi',
+                width: 'Lebar (px)',
+                height: 'Tinggi (px)',
                 x: 'X (px)',
                 y: 'Y (px)',
-                rotate: 'Rotate (°)',
+                rotate: 'Putar (°)',
             },
         },
         panel: {
             fill: {
-                title: 'Fill Color',
+                title: 'Warna Isi',
             },
         },
     },

@@ -14,33 +14,35 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     'sheets-sort-ui': {
         general: {
-            sort: 'Sort',
-            'sort-asc': 'Ascending',
-            'sort-desc': 'Descending',
-            'sort-custom': 'Custom Sort',
-            'sort-asc-ext': 'Expand Ascending',
-            'sort-desc-ext': 'Expand Descending',
-            'sort-asc-cur': 'Ascending',
-            'sort-desc-cur': 'Descending',
+            sort: 'Urutkan',
+            'sort-asc': 'Menaik',
+            'sort-desc': 'Menurun',
+            'sort-custom': 'Urutan Kustom',
+            'sort-asc-ext': 'Perluas Menaik',
+            'sort-desc-ext': 'Perluas Menurun',
+            'sort-asc-cur': 'Menaik',
+            'sort-desc-cur': 'Menurun',
         },
         error: {
-            'merge-size': 'The selected range contains merged cells of different sizes, which cannot be sorted.',
-            empty: 'The selected range has no content and cannot be sorted.',
-            single: 'The selected range has only one row and cannot be sorted.',
-            'formula-array': 'The selected range has array formulas and cannot be sorted.',
+            'merge-size': 'Rentang yang dipilih mengandung sel yang digabungkan dengan ukuran berbeda, yang tidak dapat diurutkan.',
+            empty: 'Rentang yang dipilih tidak memiliki konten dan tidak dapat diurutkan.',
+            single: 'Rentang yang dipilih hanya memiliki satu baris dan tidak dapat diurutkan.',
+            'formula-array': 'Rentang yang dipilih memiliki rumus array dan tidak dapat diurutkan.',
         },
         dialog: {
-            'sort-reminder': 'Sort Reminder',
-            'sort-reminder-desc': 'Extend range sorting or keep range sorting?',
-            'sort-reminder-ext': 'Extend range sorting',
-            'sort-reminder-no': 'Keep range sorting',
-            'first-row-check': 'First row does not participate in sorting',
-            'add-condition': 'Add condition',
-            cancel: 'Cancel',
-            confirm: 'Confirm',
+            'sort-reminder': 'Pengingat Urutan',
+            'sort-reminder-desc': 'Perluas pengurutan rentang atau pertahankan pengurutan rentang?',
+            'sort-reminder-ext': 'Perluas pengurutan rentang',
+            'sort-reminder-no': 'Pertahankan pengurutan rentang',
+            'first-row-check': 'Baris pertama tidak ikut dalam pengurutan',
+            'add-condition': 'Tambah kondisi',
+            cancel: 'Batal',
+            confirm: 'Konfirmasi',
         },
         info: {
             tooltip: 'Tooltip',

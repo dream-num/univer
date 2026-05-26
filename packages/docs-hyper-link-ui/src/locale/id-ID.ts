@@ -14,26 +14,28 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     'docs-hyper-link-ui': {
         edit: {
-            confirm: 'Confirm',
-            cancel: 'Cancel',
-            title: 'Link',
-            address: 'Link',
-            placeholder: 'Please input a link url',
-            addressError: 'Url is illegal!',
+            confirm: 'Konfirmasi',
+            cancel: 'Batal',
+            title: 'Tautan',
+            address: 'Tautan',
+            placeholder: 'Silakan masukkan URL tautan',
+            addressError: 'URL tidak valid!',
             label: 'Label',
-            labelError: 'Please input label of link',
+            labelError: 'Silakan masukkan label tautan',
         },
         info: {
-            copy: 'Copy',
+            copy: 'Salin',
             edit: 'Edit',
-            cancel: 'Cancel link',
-            coped: 'Link copied to clipboard',
+            cancel: 'Batalkan tautan',
+            coped: 'Tautan disalin ke clipboard',
         },
         menu: {
-            tooltip: 'Add link',
+            tooltip: 'Tambah tautan',
         },
     },
 };

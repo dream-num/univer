@@ -14,61 +14,63 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     'sheets-drawing-ui': {
-        title: 'Image',
+        title: 'Bild',
 
         upload: {
-            float: 'Float Image',
-            cell: 'Cell Image',
+            float: 'Schwebendes Bild',
+            cell: 'Zellenbild',
         },
 
         panel: {
-            title: 'Edit Image',
+            title: 'Bild bearbeiten',
         },
 
         save: {
-            title: 'Save Cell Images',
-            menuLabel: 'Save Cell Images',
-            imageCount: 'Image Count',
-            fileNameConfig: 'File Name',
-            useRowCol: 'Use Cell Address (A1, B2...)',
-            useColumnValue: 'Use Column Value',
-            selectColumn: 'Select Column',
-            cancel: 'Cancel',
-            confirm: 'Save',
-            saving: 'Saving...',
-            error: 'Failed to save cell images',
+            title: 'Zellenbilder speichern',
+            menuLabel: 'Zellenbilder speichern',
+            imageCount: 'Bildanzahl',
+            fileNameConfig: 'Dateiname',
+            useRowCol: 'Zellenadresse verwenden (A1, B2...)',
+            useColumnValue: 'Spaltenwert verwenden',
+            selectColumn: 'Spalte auswählen',
+            cancel: 'Abbrechen',
+            confirm: 'Speichern',
+            saving: 'Speichern...',
+            error: 'Zellenbilder konnten nicht gespeichert werden',
         },
         'image-popup': {
-            replace: 'Replace',
-            delete: 'Delete',
-            edit: 'Edit',
-            crop: 'Crop',
-            reset: 'Reset Size',
-            flipH: 'Flip Horizontal',
-            flipV: 'Flip Vertical',
+            replace: 'Ersetzen',
+            delete: 'Löschen',
+            edit: 'Bearbeiten',
+            crop: 'Zuschneiden',
+            reset: 'Größe zurücksetzen',
+            flipH: 'Horizontal spiegeln',
+            flipV: 'Vertikal spiegeln',
         },
         'update-status': {
-            exceedMaxSize: 'Image size exceeds limit, limit is {0}M',
-            invalidImageType: 'Invalid image type',
-            exceedMaxCount: 'Only {0} images can be uploaded at a time',
-            invalidImage: 'Invalid image',
+            exceedMaxSize: 'Bildgröße überschreitet das Limit, Limit ist {0}M',
+            invalidImageType: 'Ungültiger Bildtyp',
+            exceedMaxCount: 'Es können nur {0} Bilder gleichzeitig hochgeladen werden',
+            invalidImage: 'Ungültiges Bild',
         },
         'drawing-anchor': {
-            title: 'Anchor Properties',
-            both: 'Move and size with cells',
-            position: "Move but don't size with cells",
-            none: "Don't move or size with cells",
+            title: 'Anker-Eigenschaften',
+            both: 'Mit Zellen verschieben und skalieren',
+            position: 'Mit Zellen verschieben, aber nicht skalieren',
+            none: 'Weder verschieben noch skalieren mit Zellen',
         },
         'cell-image': {
-            pasteTitle: 'Paste as cell image',
-            pasteContent: 'Pasting a cell image will overwrite the existing content of the cell, continue pasting',
-            pasteError: 'Sheet cell image copy paste is not supported in this unit',
+            pasteTitle: 'Als Zellenbild einfügen',
+            pasteContent: 'Das Einfügen eines Zellenbilds überschreibt den bestehenden Inhalt der Zelle, mit dem Einfügen fortfahren?',
+            pasteError: 'Kopieren und Einfügen von Zellenbildern wird in dieser Einheit nicht unterstützt',
         },
         permission: {
             dialog: {
-                editErr: 'The range is protected, and you do not have edit permission. To edit, please contact the creator.',
+                editErr: 'Der Bereich ist geschützt, und Sie haben keine Bearbeitungsberechtigung. Um zu bearbeiten, wenden Sie sich bitte an den Ersteller.',
             },
         },
     },

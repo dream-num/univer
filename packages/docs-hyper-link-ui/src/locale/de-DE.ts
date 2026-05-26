@@ -14,26 +14,28 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     'docs-hyper-link-ui': {
         edit: {
-            confirm: 'Confirm',
-            cancel: 'Cancel',
+            confirm: 'Bestätigen',
+            cancel: 'Abbrechen',
             title: 'Link',
             address: 'Link',
-            placeholder: 'Please input a link url',
-            addressError: 'Url is illegal!',
-            label: 'Label',
-            labelError: 'Please input label of link',
+            placeholder: 'Bitte eine Link-URL eingeben',
+            addressError: 'URL ist ungültig!',
+            label: 'Bezeichnung',
+            labelError: 'Bitte die Bezeichnung des Links eingeben',
         },
         info: {
-            copy: 'Copy',
-            edit: 'Edit',
-            cancel: 'Cancel link',
-            coped: 'Link copied to clipboard',
+            copy: 'Kopieren',
+            edit: 'Bearbeiten',
+            cancel: 'Link abbrechen',
+            coped: 'Link in die Zwischenablage kopiert',
         },
         menu: {
-            tooltip: 'Add link',
+            tooltip: 'Link hinzufügen',
         },
     },
 };

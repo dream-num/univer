@@ -14,61 +14,63 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     'sheets-drawing-ui': {
-        title: 'Image',
+        title: 'Imagem',
 
         upload: {
-            float: 'Float Image',
-            cell: 'Cell Image',
+            float: 'Imagem flutuante',
+            cell: 'Imagem de célula',
         },
 
         panel: {
-            title: 'Edit Image',
+            title: 'Editar imagem',
         },
 
         save: {
-            title: 'Save Cell Images',
-            menuLabel: 'Save Cell Images',
-            imageCount: 'Image Count',
-            fileNameConfig: 'File Name',
-            useRowCol: 'Use Cell Address (A1, B2...)',
-            useColumnValue: 'Use Column Value',
-            selectColumn: 'Select Column',
-            cancel: 'Cancel',
-            confirm: 'Save',
-            saving: 'Saving...',
-            error: 'Failed to save cell images',
+            title: 'Salvar imagens de célula',
+            menuLabel: 'Salvar imagens de célula',
+            imageCount: 'Contagem de imagens',
+            fileNameConfig: 'Nome do arquivo',
+            useRowCol: 'Usar endereço da célula (A1, B2...)',
+            useColumnValue: 'Usar valor da coluna',
+            selectColumn: 'Selecionar coluna',
+            cancel: 'Cancelar',
+            confirm: 'Salvar',
+            saving: 'Salvando...',
+            error: 'Falha ao salvar imagens de célula',
         },
         'image-popup': {
-            replace: 'Replace',
-            delete: 'Delete',
-            edit: 'Edit',
-            crop: 'Crop',
-            reset: 'Reset Size',
-            flipH: 'Flip Horizontal',
-            flipV: 'Flip Vertical',
+            replace: 'Substituir',
+            delete: 'Excluir',
+            edit: 'Editar',
+            crop: 'Cortar',
+            reset: 'Redefinir tamanho',
+            flipH: 'Inverter horizontalmente',
+            flipV: 'Inverter verticalmente',
         },
         'update-status': {
-            exceedMaxSize: 'Image size exceeds limit, limit is {0}M',
-            invalidImageType: 'Invalid image type',
-            exceedMaxCount: 'Only {0} images can be uploaded at a time',
-            invalidImage: 'Invalid image',
+            exceedMaxSize: 'O tamanho da imagem excede o limite, o limite é {0}M',
+            invalidImageType: 'Tipo de imagem inválido',
+            exceedMaxCount: 'Apenas {0} imagens podem ser enviadas de cada vez',
+            invalidImage: 'Imagem inválida',
         },
         'drawing-anchor': {
-            title: 'Anchor Properties',
-            both: 'Move and size with cells',
-            position: "Move but don't size with cells",
-            none: "Don't move or size with cells",
+            title: 'Propriedades da âncora',
+            both: 'Mover e dimensionar com as células',
+            position: 'Mover, mas não dimensionar com as células',
+            none: 'Não mover nem dimensionar com as células',
         },
         'cell-image': {
-            pasteTitle: 'Paste as cell image',
-            pasteContent: 'Pasting a cell image will overwrite the existing content of the cell, continue pasting',
-            pasteError: 'Sheet cell image copy paste is not supported in this unit',
+            pasteTitle: 'Colar como imagem de célula',
+            pasteContent: 'Colar uma imagem de célula substituirá o conteúdo existente da célula, continuar colando',
+            pasteError: 'Copiar e colar imagem de célula da planilha não é suportado nesta unidade',
         },
         permission: {
             dialog: {
-                editErr: 'The range is protected, and you do not have edit permission. To edit, please contact the creator.',
+                editErr: 'O intervalo está protegido e você não tem permissão de edição. Para editar, entre em contato com o criador.',
             },
         },
     },

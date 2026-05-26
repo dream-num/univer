@@ -14,38 +14,40 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     'sheets-hyper-link-ui': {
         form: {
-            editTitle: 'Edit Link',
-            addTitle: 'Insert Link',
-            label: 'Label',
-            type: 'Type',
-            link: 'Link',
-            linkPlaceholder: 'Enter link',
-            range: 'Range',
-            worksheet: 'Worksheet',
-            definedName: 'Defined Name',
-            ok: 'Confirm',
-            cancel: 'Cancel',
-            labelPlaceholder: 'Enter label',
-            inputError: 'Please enter',
-            selectError: 'Please select',
-            linkError: 'Please enter a legal link',
+            editTitle: 'Modifica collegamento',
+            addTitle: 'Inserisci collegamento',
+            label: 'Etichetta',
+            type: 'Tipo',
+            link: 'Collegamento',
+            linkPlaceholder: 'Inserisci collegamento',
+            range: 'Intervallo',
+            worksheet: 'Foglio di lavoro',
+            definedName: 'Nome definito',
+            ok: 'Conferma',
+            cancel: 'Annulla',
+            labelPlaceholder: 'Inserisci etichetta',
+            inputError: 'Inserisci',
+            selectError: 'Seleziona',
+            linkError: 'Inserisci un collegamento valido',
         },
         menu: {
-            add: 'Insert Link',
+            add: 'Inserisci collegamento',
         },
         message: {
-            noSheet: 'Target sheet has been delete',
-            refError: 'Invalid Range',
-            hiddenSheet: 'Cannot open the link because the linked sheet is hidden',
-            coped: 'Link copied to clipboard',
+            noSheet: 'Il foglio di destinazione è stato eliminato',
+            refError: 'Intervallo non valido',
+            hiddenSheet: 'Impossibile aprire il collegamento perché il foglio collegato è nascosto',
+            coped: 'Collegamento copiato negli appunti',
         },
         popup: {
-            copy: 'Copy Link',
-            edit: 'Edit Link',
-            cancel: 'Cancel Link',
+            copy: 'Copia collegamento',
+            edit: 'Modifica collegamento',
+            cancel: 'Annulla collegamento',
         },
     },
 };

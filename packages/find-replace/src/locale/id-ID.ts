@@ -14,58 +14,60 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     'find-replace': {
-        toolbar: 'Find & Replace',
+        toolbar: 'Cari & Ganti',
         shortcut: {
-            'open-find-dialog': 'Open Find Dialog',
-            'open-replace-dialog': 'Open Replace Dialog',
-            'close-dialog': 'Close Find & Replace Dialog',
-            'go-to-next-match': 'Go to Next Match',
-            'go-to-previous-match': 'Go to Previous Match',
-            'focus-selection': 'Focus Selection',
+            'open-find-dialog': 'Buka Dialog Cari',
+            'open-replace-dialog': 'Buka Dialog Ganti',
+            'close-dialog': 'Tutup Dialog Cari & Ganti',
+            'go-to-next-match': 'Ke Hasil Berikutnya',
+            'go-to-previous-match': 'Ke Hasil Sebelumnya',
+            'focus-selection': 'Fokus Pilihan',
         },
         dialog: {
-            title: 'Find',
-            find: 'Find',
-            replace: 'Replace',
-            'replace-all': 'Replace All',
-            'case-sensitive': 'Case Sensitive',
-            'find-placeholder': 'Find in this Sheet',
-            'advanced-finding': 'Advanced Searching & Replace',
-            'replace-placeholder': 'Input Replace String',
-            'match-the-whole-cell': 'Match the Whole Cell',
+            title: 'Cari',
+            find: 'Cari',
+            replace: 'Ganti',
+            'replace-all': 'Ganti Semua',
+            'case-sensitive': 'Sensitif Huruf',
+            'find-placeholder': 'Cari di Lembar ini',
+            'advanced-finding': 'Pencarian & Penggantian Lanjutan',
+            'replace-placeholder': 'Masukkan String Pengganti',
+            'match-the-whole-cell': 'Cocokkan Seluruh Sel',
             'find-direction': {
-                title: 'Find Direction',
-                row: 'Search by Row',
-                column: 'Search by Column',
+                title: 'Arah Cari',
+                row: 'Cari per Baris',
+                column: 'Cari per Kolom',
             },
             'find-scope': {
-                title: 'Find Range',
-                'current-sheet': 'Current Sheet',
-                workbook: 'Workbook',
+                title: 'Rentang Cari',
+                'current-sheet': 'Lembar Saat Ini',
+                workbook: 'Buku Kerja',
             },
             'find-by': {
-                title: 'Find By',
-                value: 'Find by Value',
-                formula: 'Find Formula',
+                title: 'Cari Berdasarkan',
+                value: 'Cari berdasarkan Nilai',
+                formula: 'Cari Rumus',
             },
-            'no-match': 'Finding completed but no match found.',
-            'no-result': 'No Result',
+            'no-match': 'Pencarian selesai tetapi tidak ditemukan kecocokan.',
+            'no-result': 'Tidak Ada Hasil',
         },
         replace: {
-            'all-success': 'Replaced all {0} matches',
-            'all-failure': 'Replace failed',
+            'all-success': 'Berhasil mengganti {0} kecocokan',
+            'all-failure': 'Penggantian gagal',
             confirm: {
-                title: 'Are you sure to replace all matches?',
+                title: 'Apakah Anda yakin ingin mengganti semua kecocokan?',
             },
         },
         button: {
             confirm: 'OK',
-            cancel: 'Cancel',
+            cancel: 'Batal',
         },
     },
-    'find-replace-shortcuts': 'Find & Replace',
+    'find-replace-shortcuts': 'Cari & Ganti',
 };
 
 export default locale;

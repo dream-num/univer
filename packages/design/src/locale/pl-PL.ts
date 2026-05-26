@@ -14,50 +14,52 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     design: {
         Confirm: {
-            cancel: 'cancel',
+            cancel: 'anuluj',
             confirm: 'ok',
         },
         CascaderList: {
-            empty: 'None',
+            empty: 'Brak',
         },
         Calendar: {
             year: '',
-            weekDays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+            weekDays: ['nd', 'pn', 'wt', 'śr', 'cz', 'pt', 'so'],
             months: [
-                'Jan',
-                'Feb',
-                'Mar',
-                'Apr',
-                'May',
-                'Jun',
-                'Jul',
-                'Aug',
-                'Sep',
-                'Oct',
-                'Nov',
-                'Dec',
+                'sty',
+                'lut',
+                'mar',
+                'kwi',
+                'maj',
+                'cze',
+                'lip',
+                'sie',
+                'wrz',
+                'paź',
+                'lis',
+                'gru',
             ],
         },
         Select: {
-            empty: 'None',
+            empty: 'Brak',
         },
         ColorPicker: {
-            more: 'More Colors',
-            cancel: 'cancel',
+            more: 'Więcej kolorów',
+            cancel: 'anuluj',
             confirm: 'ok',
         },
         GradientColorPicker: {
-            linear: 'Linear',
-            radial: 'Radial',
-            angular: 'Angular',
-            diamond: 'Diamond',
-            offset: 'Offset',
-            angle: 'Angle',
-            flip: 'Flip',
-            delete: 'Delete',
+            linear: 'Liniowy',
+            radial: 'Radialny',
+            angular: 'Kątowy',
+            diamond: 'Diamentowy',
+            offset: 'Przesunięcie',
+            angle: 'Kąt',
+            flip: 'Obrót',
+            delete: 'Usuń',
         },
     },
 };

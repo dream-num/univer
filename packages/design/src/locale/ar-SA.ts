@@ -14,50 +14,52 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     design: {
         Confirm: {
-            cancel: 'cancel',
-            confirm: 'ok',
+            cancel: 'إلغاء',
+            confirm: 'موافق',
         },
         CascaderList: {
-            empty: 'None',
+            empty: 'لا شيء',
         },
         Calendar: {
             year: '',
-            weekDays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+            weekDays: ['ح', 'ن', 'ث', 'ر', 'خ', 'ج', 'س'],
             months: [
-                'Jan',
-                'Feb',
-                'Mar',
-                'Apr',
-                'May',
-                'Jun',
-                'Jul',
-                'Aug',
-                'Sep',
-                'Oct',
-                'Nov',
-                'Dec',
+                'يناير',
+                'فبراير',
+                'مارس',
+                'أبريل',
+                'مايو',
+                'يونيو',
+                'يوليو',
+                'أغسطس',
+                'سبتمبر',
+                'أكتوبر',
+                'نوفمبر',
+                'ديسمبر',
             ],
         },
         Select: {
-            empty: 'None',
+            empty: 'لا شيء',
         },
         ColorPicker: {
-            more: 'More Colors',
-            cancel: 'cancel',
-            confirm: 'ok',
+            more: 'المزيد من الألوان',
+            cancel: 'إلغاء',
+            confirm: 'موافق',
         },
         GradientColorPicker: {
-            linear: 'Linear',
-            radial: 'Radial',
-            angular: 'Angular',
-            diamond: 'Diamond',
-            offset: 'Offset',
-            angle: 'Angle',
-            flip: 'Flip',
-            delete: 'Delete',
+            linear: 'خطي',
+            radial: 'شعاعي',
+            angular: 'زاوي',
+            diamond: 'ماسي',
+            offset: 'إزاحة',
+            angle: 'زاوية',
+            flip: 'قلب',
+            delete: 'حذف',
         },
     },
 };

@@ -14,58 +14,60 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     'find-replace': {
-        toolbar: 'Find & Replace',
+        toolbar: 'بحث واستبدال',
         shortcut: {
-            'open-find-dialog': 'Open Find Dialog',
-            'open-replace-dialog': 'Open Replace Dialog',
-            'close-dialog': 'Close Find & Replace Dialog',
-            'go-to-next-match': 'Go to Next Match',
-            'go-to-previous-match': 'Go to Previous Match',
-            'focus-selection': 'Focus Selection',
+            'open-find-dialog': 'فتح مربع حوار البحث',
+            'open-replace-dialog': 'فتح مربع حوار الاستبدال',
+            'close-dialog': 'إغلاق مربع حوار البحث والاستبدال',
+            'go-to-next-match': 'الانتقال إلى التطابق التالي',
+            'go-to-previous-match': 'الانتقال إلى التطابق السابق',
+            'focus-selection': 'تركيز التحديد',
         },
         dialog: {
-            title: 'Find',
-            find: 'Find',
-            replace: 'Replace',
-            'replace-all': 'Replace All',
-            'case-sensitive': 'Case Sensitive',
-            'find-placeholder': 'Find in this Sheet',
-            'advanced-finding': 'Advanced Searching & Replace',
-            'replace-placeholder': 'Input Replace String',
-            'match-the-whole-cell': 'Match the Whole Cell',
+            title: 'بحث',
+            find: 'بحث',
+            replace: 'استبدال',
+            'replace-all': 'استبدال الكل',
+            'case-sensitive': 'حساس لحالة الأحرف',
+            'find-placeholder': 'البحث في هذه الورقة',
+            'advanced-finding': 'بحث واستبدال متقدم',
+            'replace-placeholder': 'أدخل نص الاستبدال',
+            'match-the-whole-cell': 'تطابق الخلية بأكملها',
             'find-direction': {
-                title: 'Find Direction',
-                row: 'Search by Row',
-                column: 'Search by Column',
+                title: 'اتجاه البحث',
+                row: 'البحث حسب الصف',
+                column: 'البحث حسب العمود',
             },
             'find-scope': {
-                title: 'Find Range',
-                'current-sheet': 'Current Sheet',
-                workbook: 'Workbook',
+                title: 'نطاق البحث',
+                'current-sheet': 'الورقة الحالية',
+                workbook: 'المصنف',
             },
             'find-by': {
-                title: 'Find By',
-                value: 'Find by Value',
-                formula: 'Find Formula',
+                title: 'البحث حسب',
+                value: 'البحث حسب القيمة',
+                formula: 'البحث في الصيغ',
             },
-            'no-match': 'Finding completed but no match found.',
-            'no-result': 'No Result',
+            'no-match': 'اكتمل البحث ولكن لم يتم العثور على أي تطابق.',
+            'no-result': 'لا توجد نتائج',
         },
         replace: {
-            'all-success': 'Replaced all {0} matches',
-            'all-failure': 'Replace failed',
+            'all-success': 'تم استبدال {0} تطابقات',
+            'all-failure': 'فشل الاستبدال',
             confirm: {
-                title: 'Are you sure to replace all matches?',
+                title: 'هل أنت متأكد من استبدال جميع التطابقات؟',
             },
         },
         button: {
-            confirm: 'OK',
-            cancel: 'Cancel',
+            confirm: 'موافق',
+            cancel: 'إلغاء',
         },
     },
-    'find-replace-shortcuts': 'Find & Replace',
+    'find-replace-shortcuts': 'بحث واستبدال',
 };
 
 export default locale;

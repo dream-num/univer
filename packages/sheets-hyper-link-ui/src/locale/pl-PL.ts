@@ -14,38 +14,40 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     'sheets-hyper-link-ui': {
         form: {
-            editTitle: 'Edit Link',
-            addTitle: 'Insert Link',
-            label: 'Label',
-            type: 'Type',
-            link: 'Link',
-            linkPlaceholder: 'Enter link',
-            range: 'Range',
-            worksheet: 'Worksheet',
-            definedName: 'Defined Name',
-            ok: 'Confirm',
-            cancel: 'Cancel',
-            labelPlaceholder: 'Enter label',
-            inputError: 'Please enter',
-            selectError: 'Please select',
-            linkError: 'Please enter a legal link',
+            editTitle: 'Edytuj łącze',
+            addTitle: 'Wstaw łącze',
+            label: 'Etykieta',
+            type: 'Typ',
+            link: 'Łącze',
+            linkPlaceholder: 'Wprowadź łącze',
+            range: 'Zakres',
+            worksheet: 'Arkusz',
+            definedName: 'Nazwa zdefiniowana',
+            ok: 'Potwierdź',
+            cancel: 'Anuluj',
+            labelPlaceholder: 'Wprowadź etykietę',
+            inputError: 'Wprowadź wartość',
+            selectError: 'Wybierz wartość',
+            linkError: 'Wprowadź prawidłowe łącze',
         },
         menu: {
-            add: 'Insert Link',
+            add: 'Wstaw łącze',
         },
         message: {
-            noSheet: 'Target sheet has been delete',
-            refError: 'Invalid Range',
-            hiddenSheet: 'Cannot open the link because the linked sheet is hidden',
-            coped: 'Link copied to clipboard',
+            noSheet: 'Arkusz docelowy został usunięty',
+            refError: 'Nieprawidłowy zakres',
+            hiddenSheet: 'Nie można otworzyć łącza, ponieważ połączony arkusz jest ukryty',
+            coped: 'Łącze skopiowane do schowka',
         },
         popup: {
-            copy: 'Copy Link',
-            edit: 'Edit Link',
-            cancel: 'Cancel Link',
+            copy: 'Kopiuj łącze',
+            edit: 'Edytuj łącze',
+            cancel: 'Anuluj łącze',
         },
     },
 };

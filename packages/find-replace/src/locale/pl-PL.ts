@@ -14,58 +14,60 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     'find-replace': {
-        toolbar: 'Find & Replace',
+        toolbar: 'Znajdź i zamień',
         shortcut: {
-            'open-find-dialog': 'Open Find Dialog',
-            'open-replace-dialog': 'Open Replace Dialog',
-            'close-dialog': 'Close Find & Replace Dialog',
-            'go-to-next-match': 'Go to Next Match',
-            'go-to-previous-match': 'Go to Previous Match',
-            'focus-selection': 'Focus Selection',
+            'open-find-dialog': 'Otwórz okno Znajdź',
+            'open-replace-dialog': 'Otwórz okno Zamień',
+            'close-dialog': 'Zamknij okno Znajdź i zamień',
+            'go-to-next-match': 'Przejdź do następnego dopasowania',
+            'go-to-previous-match': 'Przejdź do poprzedniego dopasowania',
+            'focus-selection': 'Skup na zaznaczeniu',
         },
         dialog: {
-            title: 'Find',
-            find: 'Find',
-            replace: 'Replace',
-            'replace-all': 'Replace All',
-            'case-sensitive': 'Case Sensitive',
-            'find-placeholder': 'Find in this Sheet',
-            'advanced-finding': 'Advanced Searching & Replace',
-            'replace-placeholder': 'Input Replace String',
-            'match-the-whole-cell': 'Match the Whole Cell',
+            title: 'Znajdź',
+            find: 'Znajdź',
+            replace: 'Zamień',
+            'replace-all': 'Zamień wszystko',
+            'case-sensitive': 'Rozróżniaj wielkość liter',
+            'find-placeholder': 'Znajdź w tym arkuszu',
+            'advanced-finding': 'Zaawansowane wyszukiwanie i zastępowanie',
+            'replace-placeholder': 'Wprowadź ciąg zastępujący',
+            'match-the-whole-cell': 'Dopasuj całą komórkę',
             'find-direction': {
-                title: 'Find Direction',
-                row: 'Search by Row',
-                column: 'Search by Column',
+                title: 'Kierunek wyszukiwania',
+                row: 'Szukaj według wierszy',
+                column: 'Szukaj według kolumn',
             },
             'find-scope': {
-                title: 'Find Range',
-                'current-sheet': 'Current Sheet',
-                workbook: 'Workbook',
+                title: 'Zakres wyszukiwania',
+                'current-sheet': 'Bieżący arkusz',
+                workbook: 'Skoroszyt',
             },
             'find-by': {
-                title: 'Find By',
-                value: 'Find by Value',
-                formula: 'Find Formula',
+                title: 'Szukaj według',
+                value: 'Szukaj według wartości',
+                formula: 'Szukaj formuły',
             },
-            'no-match': 'Finding completed but no match found.',
-            'no-result': 'No Result',
+            'no-match': 'Wyszukiwanie zakończone, ale nie znaleziono dopasowania.',
+            'no-result': 'Brak wyników',
         },
         replace: {
-            'all-success': 'Replaced all {0} matches',
-            'all-failure': 'Replace failed',
+            'all-success': 'Zastąpiono wszystkie dopasowania: {0}',
+            'all-failure': 'Zastępowanie nie powiodło się',
             confirm: {
-                title: 'Are you sure to replace all matches?',
+                title: 'Czy na pewno chcesz zastąpić wszystkie dopasowania?',
             },
         },
         button: {
             confirm: 'OK',
-            cancel: 'Cancel',
+            cancel: 'Anuluj',
         },
     },
-    'find-replace-shortcuts': 'Find & Replace',
+    'find-replace-shortcuts': 'Znajdź i zamień',
 };
 
 export default locale;

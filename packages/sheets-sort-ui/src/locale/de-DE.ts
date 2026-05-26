@@ -14,33 +14,35 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     'sheets-sort-ui': {
         general: {
-            sort: 'Sort',
-            'sort-asc': 'Ascending',
-            'sort-desc': 'Descending',
-            'sort-custom': 'Custom Sort',
-            'sort-asc-ext': 'Expand Ascending',
-            'sort-desc-ext': 'Expand Descending',
-            'sort-asc-cur': 'Ascending',
-            'sort-desc-cur': 'Descending',
+            sort: 'Sortieren',
+            'sort-asc': 'Aufsteigend',
+            'sort-desc': 'Absteigend',
+            'sort-custom': 'Benutzerdefiniertes Sortieren',
+            'sort-asc-ext': 'Aufsteigend erweitern',
+            'sort-desc-ext': 'Absteigend erweitern',
+            'sort-asc-cur': 'Aufsteigend',
+            'sort-desc-cur': 'Absteigend',
         },
         error: {
-            'merge-size': 'The selected range contains merged cells of different sizes, which cannot be sorted.',
-            empty: 'The selected range has no content and cannot be sorted.',
-            single: 'The selected range has only one row and cannot be sorted.',
-            'formula-array': 'The selected range has array formulas and cannot be sorted.',
+            'merge-size': 'Der ausgewählte Bereich enthält verbundene Zellen unterschiedlicher Größe und kann nicht sortiert werden.',
+            empty: 'Der ausgewählte Bereich hat keinen Inhalt und kann nicht sortiert werden.',
+            single: 'Der ausgewählte Bereich hat nur eine Zeile und kann nicht sortiert werden.',
+            'formula-array': 'Der ausgewählte Bereich enthält Matrixformeln und kann nicht sortiert werden.',
         },
         dialog: {
-            'sort-reminder': 'Sort Reminder',
-            'sort-reminder-desc': 'Extend range sorting or keep range sorting?',
-            'sort-reminder-ext': 'Extend range sorting',
-            'sort-reminder-no': 'Keep range sorting',
-            'first-row-check': 'First row does not participate in sorting',
-            'add-condition': 'Add condition',
-            cancel: 'Cancel',
-            confirm: 'Confirm',
+            'sort-reminder': 'Sortierhinweis',
+            'sort-reminder-desc': 'Bereichssortierung erweitern oder beibehalten?',
+            'sort-reminder-ext': 'Bereichssortierung erweitern',
+            'sort-reminder-no': 'Bereichssortierung beibehalten',
+            'first-row-check': 'Erste Zeile nimmt nicht am Sortieren teil',
+            'add-condition': 'Bedingung hinzufügen',
+            cancel: 'Abbrechen',
+            confirm: 'Bestätigen',
         },
         info: {
             tooltip: 'Tooltip',

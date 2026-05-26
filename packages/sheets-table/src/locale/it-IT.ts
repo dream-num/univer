@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     'sheets-table': {
-        columnPrefix: 'Column',
-        tablePrefix: 'Table',
-        tableNameError: 'Table name cannot contain spaces, cannot start with a number, and cannot be identical to an existing table name',
+        columnPrefix: 'Colonna',
+        tablePrefix: 'Tabella',
+        tableNameError: 'Il nome della tabella non può contenere spazi, non può iniziare con un numero e non può essere identico a un nome di tabella esistente',
     },
 };
 

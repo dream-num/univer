@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     'sheets-note-ui': {
         note: {
-            placeholder: 'Type here',
+            placeholder: 'Wpisz tutaj',
         },
         rightClick: {
-            addNote: 'Add Note',
-            deleteNote: 'Delete Note',
-            toggleNote: 'Show/Hide Note',
+            addNote: 'Dodaj notatkę',
+            deleteNote: 'Usuń notatkę',
+            toggleNote: 'Pokaż/Ukryj notatkę',
         },
     },
 };

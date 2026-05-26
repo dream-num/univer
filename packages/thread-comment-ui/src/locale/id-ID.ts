@@ -14,36 +14,38 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     'thread-comment-ui': {
         panel: {
-            title: 'Comment Management',
-            empty: 'No comments yet',
-            filterEmpty: 'No match result',
-            reset: 'Reset Filter',
-            addComment: 'Add Comment',
-            solved: 'Solved',
+            title: 'Manajemen Komentar',
+            empty: 'Belum ada komentar',
+            filterEmpty: 'Tidak ada hasil yang cocok',
+            reset: 'Atur Ulang Filter',
+            addComment: 'Tambah Komentar',
+            solved: 'Terselesaikan',
         },
         editor: {
-            placeholder: 'Reply or add others with @',
-            reply: 'Comment',
-            cancel: 'Cancel',
-            save: 'Save',
+            placeholder: 'Balas atau tambahkan orang lain dengan @',
+            reply: 'Komentar',
+            cancel: 'Batal',
+            save: 'Simpan',
         },
         item: {
             edit: 'Edit',
-            delete: 'Delete This Comment',
+            delete: 'Hapus Komentar Ini',
         },
         filter: {
             sheet: {
-                all: 'All sheet',
-                current: 'Current sheet',
+                all: 'Semua lembar',
+                current: 'Lembar saat ini',
             },
             status: {
-                all: 'All comments',
-                resolved: 'Resolved',
-                unsolved: 'Not resolved',
-                concernMe: 'Concern me',
+                all: 'Semua komentar',
+                resolved: 'Terselesaikan',
+                unsolved: 'Belum terselesaikan',
+                concernMe: 'Yang menyangkut saya',
             },
         },
     },

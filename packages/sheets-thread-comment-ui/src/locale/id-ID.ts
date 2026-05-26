@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     'sheets-thread-comment-ui': {
         menu: {
-            addComment: 'Add Comment',
-            commentManagement: 'Comment Management',
+            addComment: 'Tambah Komentar',
+            commentManagement: 'Manajemen Komentar',
         },
     },
 };

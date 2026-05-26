@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     'sheets-hyper-link': {
         message: {
-            refError: 'Invalid Range',
+            refError: 'Ungültiger Bereich',
         },
     },
 };

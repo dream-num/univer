@@ -14,62 +14,64 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     'slides-ui': {
-        append: 'Append Slide',
+        append: 'Dodaj slajd',
 
         text: {
             insert: {
-                title: 'Insert Text',
+                title: 'Wstaw tekst',
             },
         },
 
         shape: {
             insert: {
-                title: 'Insert Shape',
-                rectangle: 'Insert Rectangle',
-                ellipse: 'Insert Ellipse',
+                title: 'Wstaw kształt',
+                rectangle: 'Wstaw prostokąt',
+                ellipse: 'Wstaw elipsę',
             },
         },
 
         image: {
             insert: {
-                title: 'Insert Image',
-                float: 'Insert Float Image',
+                title: 'Wstaw obraz',
+                float: 'Wstaw obraz swobodny',
             },
         },
 
         popup: {
-            edit: 'Edit',
-            delete: 'Delete',
+            edit: 'Edytuj',
+            delete: 'Usuń',
         },
 
         sidebar: {
-            text: 'Edit Text',
-            shape: 'Edit Shape',
-            image: 'Edit Image',
+            text: 'Edytuj tekst',
+            shape: 'Edytuj kształt',
+            image: 'Edytuj obraz',
         },
 
         'image-panel': {
             arrange: {
-                title: 'Arrange',
-                forward: 'Bring Forward',
-                backward: 'Send Backward',
-                front: 'Bring to Front',
-                back: 'Send to Back',
+                title: 'Rozmieść',
+                forward: 'Przesuń do przodu',
+                backward: 'Przesuń do tyłu',
+                front: 'Przesuń na wierzch',
+                back: 'Przesuń na spód',
             },
             transform: {
-                title: 'Transform',
-                width: 'Width (px)',
-                height: 'Height (px)',
+                title: 'Przekształć',
+                width: 'Szerokość (px)',
+                height: 'Wysokość (px)',
                 x: 'X (px)',
                 y: 'Y (px)',
-                rotate: 'Rotate (°)',
+                rotate: 'Obrót (°)',
             },
         },
         panel: {
             fill: {
-                title: 'Fill Color',
+                title: 'Kolor wypełnienia',
             },
         },
     },

@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     'sheets-zen-editor': {
         rightClick: {
-            zenEditor: 'Full Screen Editor',
+            zenEditor: 'Editor Layar Penuh',
         },
         shortcut: {
             sheet: {
-                'zen-edit-cancel': 'Cancel Zen Edit',
-                'zen-edit-confirm': 'Confirm Zen Edit',
+                'zen-edit-cancel': 'Batalkan Edit Zen',
+                'zen-edit-confirm': 'Konfirmasi Edit Zen',
             },
         },
     },

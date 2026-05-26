@@ -14,36 +14,38 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     'sheets-sort-ui': {
         general: {
-            sort: 'Sort',
-            'sort-asc': 'Ascending',
-            'sort-desc': 'Descending',
-            'sort-custom': 'Custom Sort',
-            'sort-asc-ext': 'Expand Ascending',
-            'sort-desc-ext': 'Expand Descending',
-            'sort-asc-cur': 'Ascending',
-            'sort-desc-cur': 'Descending',
+            sort: 'Ordinamento',
+            'sort-asc': 'Crescente',
+            'sort-desc': 'Decrescente',
+            'sort-custom': 'Ordinamento personalizzato',
+            'sort-asc-ext': 'Espandi crescente',
+            'sort-desc-ext': 'Espandi decrescente',
+            'sort-asc-cur': 'Crescente',
+            'sort-desc-cur': 'Decrescente',
         },
         error: {
-            'merge-size': 'The selected range contains merged cells of different sizes, which cannot be sorted.',
-            empty: 'The selected range has no content and cannot be sorted.',
-            single: 'The selected range has only one row and cannot be sorted.',
-            'formula-array': 'The selected range has array formulas and cannot be sorted.',
+            'merge-size': "L'intervallo selezionato contiene celle unite di dimensioni diverse e non può essere ordinato.",
+            empty: "L'intervallo selezionato non ha contenuto e non può essere ordinato.",
+            single: "L'intervallo selezionato ha una sola riga e non può essere ordinato.",
+            'formula-array': "L'intervallo selezionato contiene formule matriciali e non può essere ordinato.",
         },
         dialog: {
-            'sort-reminder': 'Sort Reminder',
-            'sort-reminder-desc': 'Extend range sorting or keep range sorting?',
-            'sort-reminder-ext': 'Extend range sorting',
-            'sort-reminder-no': 'Keep range sorting',
-            'first-row-check': 'First row does not participate in sorting',
-            'add-condition': 'Add condition',
-            cancel: 'Cancel',
-            confirm: 'Confirm',
+            'sort-reminder': 'Promemoria ordinamento',
+            'sort-reminder-desc': 'Estendere l\'ordinamento all\'intervallo o mantenerlo?',
+            'sort-reminder-ext': 'Estendi ordinamento intervallo',
+            'sort-reminder-no': 'Mantieni ordinamento intervallo',
+            'first-row-check': 'La prima riga non partecipa all\'ordinamento',
+            'add-condition': 'Aggiungi condizione',
+            cancel: 'Annulla',
+            confirm: 'Conferma',
         },
         info: {
-            tooltip: 'Tooltip',
+            tooltip: 'Suggerimento',
         },
     },
 };

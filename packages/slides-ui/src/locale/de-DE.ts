@@ -14,62 +14,64 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     'slides-ui': {
-        append: 'Append Slide',
+        append: 'Folie anhängen',
 
         text: {
             insert: {
-                title: 'Insert Text',
+                title: 'Text einfügen',
             },
         },
 
         shape: {
             insert: {
-                title: 'Insert Shape',
-                rectangle: 'Insert Rectangle',
-                ellipse: 'Insert Ellipse',
+                title: 'Form einfügen',
+                rectangle: 'Rechteck einfügen',
+                ellipse: 'Ellipse einfügen',
             },
         },
 
         image: {
             insert: {
-                title: 'Insert Image',
-                float: 'Insert Float Image',
+                title: 'Bild einfügen',
+                float: 'Schwebendes Bild einfügen',
             },
         },
 
         popup: {
-            edit: 'Edit',
-            delete: 'Delete',
+            edit: 'Bearbeiten',
+            delete: 'Löschen',
         },
 
         sidebar: {
-            text: 'Edit Text',
-            shape: 'Edit Shape',
-            image: 'Edit Image',
+            text: 'Text bearbeiten',
+            shape: 'Form bearbeiten',
+            image: 'Bild bearbeiten',
         },
 
         'image-panel': {
             arrange: {
-                title: 'Arrange',
-                forward: 'Bring Forward',
-                backward: 'Send Backward',
-                front: 'Bring to Front',
-                back: 'Send to Back',
+                title: 'Anordnen',
+                forward: 'Nach vorne',
+                backward: 'Nach hinten',
+                front: 'In den Vordergrund',
+                back: 'In den Hintergrund',
             },
             transform: {
-                title: 'Transform',
-                width: 'Width (px)',
-                height: 'Height (px)',
+                title: 'Transformieren',
+                width: 'Breite (px)',
+                height: 'Höhe (px)',
                 x: 'X (px)',
                 y: 'Y (px)',
-                rotate: 'Rotate (°)',
+                rotate: 'Drehen (°)',
             },
         },
         panel: {
             fill: {
-                title: 'Fill Color',
+                title: 'Füllfarbe',
             },
         },
     },

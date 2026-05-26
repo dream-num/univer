@@ -14,36 +14,38 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     'sheets-sort-ui': {
         general: {
-            sort: 'Sort',
-            'sort-asc': 'Ascending',
-            'sort-desc': 'Descending',
-            'sort-custom': 'Custom Sort',
-            'sort-asc-ext': 'Expand Ascending',
-            'sort-desc-ext': 'Expand Descending',
-            'sort-asc-cur': 'Ascending',
-            'sort-desc-cur': 'Descending',
+            sort: 'Sortuj',
+            'sort-asc': 'Rosnąco',
+            'sort-desc': 'Malejąco',
+            'sort-custom': 'Sortowanie niestandardowe',
+            'sort-asc-ext': 'Rozszerz rosnąco',
+            'sort-desc-ext': 'Rozszerz malejąco',
+            'sort-asc-cur': 'Rosnąco',
+            'sort-desc-cur': 'Malejąco',
         },
         error: {
-            'merge-size': 'The selected range contains merged cells of different sizes, which cannot be sorted.',
-            empty: 'The selected range has no content and cannot be sorted.',
-            single: 'The selected range has only one row and cannot be sorted.',
-            'formula-array': 'The selected range has array formulas and cannot be sorted.',
+            'merge-size': 'Wybrany zakres zawiera scalone komórki o różnych rozmiarach, których nie można sortować.',
+            empty: 'Wybrany zakres nie zawiera treści i nie można go sortować.',
+            single: 'Wybrany zakres ma tylko jeden wiersz i nie można go sortować.',
+            'formula-array': 'Wybrany zakres zawiera formuły tablicowe i nie można go sortować.',
         },
         dialog: {
-            'sort-reminder': 'Sort Reminder',
-            'sort-reminder-desc': 'Extend range sorting or keep range sorting?',
-            'sort-reminder-ext': 'Extend range sorting',
-            'sort-reminder-no': 'Keep range sorting',
-            'first-row-check': 'First row does not participate in sorting',
-            'add-condition': 'Add condition',
-            cancel: 'Cancel',
-            confirm: 'Confirm',
+            'sort-reminder': 'Przypomnienie o sortowaniu',
+            'sort-reminder-desc': 'Rozszerzyć sortowanie zakresu czy zachować sortowanie zakresu?',
+            'sort-reminder-ext': 'Rozszerz sortowanie zakresu',
+            'sort-reminder-no': 'Zachowaj sortowanie zakresu',
+            'first-row-check': 'Pierwszy wiersz nie bierze udziału w sortowaniu',
+            'add-condition': 'Dodaj warunek',
+            cancel: 'Anuluj',
+            confirm: 'Potwierdź',
         },
         info: {
-            tooltip: 'Tooltip',
+            tooltip: 'Podpowiedź',
         },
     },
 };

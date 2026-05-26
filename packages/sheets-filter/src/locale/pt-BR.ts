@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     'sheets-filter': {
         command: {
-            'not-valid-filter-range': 'The selected range only has one row and not valid for filter.',
+            'not-valid-filter-range': 'O intervalo selecionado possui apenas uma linha e não é válido para filtro.',
         },
         msg: {
-            'filter-header-forbidden': 'You can\'t move the header row of a filter.',
+            'filter-header-forbidden': 'Você não pode mover a linha de cabeçalho de um filtro.',
         },
     },
 };

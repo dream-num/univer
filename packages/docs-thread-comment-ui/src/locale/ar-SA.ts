@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     'docs-thread-comment-ui': {
         panel: {
-            title: 'Comment Management',
-            addComment: 'Add Comment',
+            title: 'إدارة التعليقات',
+            addComment: 'إضافة تعليق',
         },
     },
 };

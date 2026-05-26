@@ -14,58 +14,60 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     'find-replace': {
-        toolbar: 'Find & Replace',
+        toolbar: 'Suchen & Ersetzen',
         shortcut: {
-            'open-find-dialog': 'Open Find Dialog',
-            'open-replace-dialog': 'Open Replace Dialog',
-            'close-dialog': 'Close Find & Replace Dialog',
-            'go-to-next-match': 'Go to Next Match',
-            'go-to-previous-match': 'Go to Previous Match',
-            'focus-selection': 'Focus Selection',
+            'open-find-dialog': 'Suchdialog öffnen',
+            'open-replace-dialog': 'Ersetzungsdialog öffnen',
+            'close-dialog': 'Suchen & Ersetzen-Dialog schließen',
+            'go-to-next-match': 'Zum nächsten Treffer springen',
+            'go-to-previous-match': 'Zum vorherigen Treffer springen',
+            'focus-selection': 'Auswahl fokussieren',
         },
         dialog: {
-            title: 'Find',
-            find: 'Find',
-            replace: 'Replace',
-            'replace-all': 'Replace All',
-            'case-sensitive': 'Case Sensitive',
-            'find-placeholder': 'Find in this Sheet',
-            'advanced-finding': 'Advanced Searching & Replace',
-            'replace-placeholder': 'Input Replace String',
-            'match-the-whole-cell': 'Match the Whole Cell',
+            title: 'Suchen',
+            find: 'Suchen',
+            replace: 'Ersetzen',
+            'replace-all': 'Alle ersetzen',
+            'case-sensitive': 'Groß-/Kleinschreibung beachten',
+            'find-placeholder': 'In diesem Blatt suchen',
+            'advanced-finding': 'Erweitertes Suchen & Ersetzen',
+            'replace-placeholder': 'Ersetzungstext eingeben',
+            'match-the-whole-cell': 'Ganze Zelle vergleichen',
             'find-direction': {
-                title: 'Find Direction',
-                row: 'Search by Row',
-                column: 'Search by Column',
+                title: 'Suchrichtung',
+                row: 'Nach Zeile suchen',
+                column: 'Nach Spalte suchen',
             },
             'find-scope': {
-                title: 'Find Range',
-                'current-sheet': 'Current Sheet',
-                workbook: 'Workbook',
+                title: 'Suchbereich',
+                'current-sheet': 'Aktuelles Blatt',
+                workbook: 'Arbeitsmappe',
             },
             'find-by': {
-                title: 'Find By',
-                value: 'Find by Value',
-                formula: 'Find Formula',
+                title: 'Suchen nach',
+                value: 'Nach Wert suchen',
+                formula: 'Formel suchen',
             },
-            'no-match': 'Finding completed but no match found.',
-            'no-result': 'No Result',
+            'no-match': 'Suche abgeschlossen, aber kein Treffer gefunden.',
+            'no-result': 'Kein Ergebnis',
         },
         replace: {
-            'all-success': 'Replaced all {0} matches',
-            'all-failure': 'Replace failed',
+            'all-success': 'Alle {0} Treffer ersetzt',
+            'all-failure': 'Ersetzen fehlgeschlagen',
             confirm: {
-                title: 'Are you sure to replace all matches?',
+                title: 'Sollen alle Treffer ersetzt werden?',
             },
         },
         button: {
             confirm: 'OK',
-            cancel: 'Cancel',
+            cancel: 'Abbrechen',
         },
     },
-    'find-replace-shortcuts': 'Find & Replace',
+    'find-replace-shortcuts': 'Suchen & Ersetzen',
 };
 
 export default locale;

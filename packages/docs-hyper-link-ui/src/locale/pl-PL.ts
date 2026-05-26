@@ -14,26 +14,28 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     'docs-hyper-link-ui': {
         edit: {
-            confirm: 'Confirm',
-            cancel: 'Cancel',
-            title: 'Link',
-            address: 'Link',
-            placeholder: 'Please input a link url',
-            addressError: 'Url is illegal!',
-            label: 'Label',
-            labelError: 'Please input label of link',
+            confirm: 'Potwierdź',
+            cancel: 'Anuluj',
+            title: 'Łącze',
+            address: 'Łącze',
+            placeholder: 'Wprowadź adres URL',
+            addressError: 'Adres URL jest nieprawidłowy!',
+            label: 'Etykieta',
+            labelError: 'Wprowadź etykietę łącza',
         },
         info: {
-            copy: 'Copy',
-            edit: 'Edit',
-            cancel: 'Cancel link',
-            coped: 'Link copied to clipboard',
+            copy: 'Kopiuj',
+            edit: 'Edytuj',
+            cancel: 'Usuń łącze',
+            coped: 'Łącze skopiowane do schowka',
         },
         menu: {
-            tooltip: 'Add link',
+            tooltip: 'Dodaj łącze',
         },
     },
 };

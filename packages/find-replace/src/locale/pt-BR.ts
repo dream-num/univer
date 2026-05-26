@@ -14,58 +14,60 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     'find-replace': {
-        toolbar: 'Find & Replace',
+        toolbar: 'Localizar e Substituir',
         shortcut: {
-            'open-find-dialog': 'Open Find Dialog',
-            'open-replace-dialog': 'Open Replace Dialog',
-            'close-dialog': 'Close Find & Replace Dialog',
-            'go-to-next-match': 'Go to Next Match',
-            'go-to-previous-match': 'Go to Previous Match',
-            'focus-selection': 'Focus Selection',
+            'open-find-dialog': 'Abrir Caixa de Localização',
+            'open-replace-dialog': 'Abrir Caixa de Substituição',
+            'close-dialog': 'Fechar Caixa de Localizar e Substituir',
+            'go-to-next-match': 'Ir para Próxima Correspondência',
+            'go-to-previous-match': 'Ir para Correspondência Anterior',
+            'focus-selection': 'Focar Seleção',
         },
         dialog: {
-            title: 'Find',
-            find: 'Find',
-            replace: 'Replace',
-            'replace-all': 'Replace All',
-            'case-sensitive': 'Case Sensitive',
-            'find-placeholder': 'Find in this Sheet',
-            'advanced-finding': 'Advanced Searching & Replace',
-            'replace-placeholder': 'Input Replace String',
-            'match-the-whole-cell': 'Match the Whole Cell',
+            title: 'Localizar',
+            find: 'Localizar',
+            replace: 'Substituir',
+            'replace-all': 'Substituir Tudo',
+            'case-sensitive': 'Diferenciar Maiúsculas/Minúsculas',
+            'find-placeholder': 'Localizar nesta Planilha',
+            'advanced-finding': 'Pesquisa e Substituição Avançadas',
+            'replace-placeholder': 'Digite o Texto de Substituição',
+            'match-the-whole-cell': 'Corresponder à Célula Inteira',
             'find-direction': {
-                title: 'Find Direction',
-                row: 'Search by Row',
-                column: 'Search by Column',
+                title: 'Direção da Pesquisa',
+                row: 'Pesquisar por Linha',
+                column: 'Pesquisar por Coluna',
             },
             'find-scope': {
-                title: 'Find Range',
-                'current-sheet': 'Current Sheet',
-                workbook: 'Workbook',
+                title: 'Intervalo da Pesquisa',
+                'current-sheet': 'Planilha Atual',
+                workbook: 'Pasta de Trabalho',
             },
             'find-by': {
-                title: 'Find By',
-                value: 'Find by Value',
-                formula: 'Find Formula',
+                title: 'Pesquisar Por',
+                value: 'Pesquisar por Valor',
+                formula: 'Localizar Fórmula',
             },
-            'no-match': 'Finding completed but no match found.',
-            'no-result': 'No Result',
+            'no-match': 'Pesquisa concluída, mas nenhuma correspondência foi encontrada.',
+            'no-result': 'Nenhum Resultado',
         },
         replace: {
-            'all-success': 'Replaced all {0} matches',
-            'all-failure': 'Replace failed',
+            'all-success': 'Substituídas todas as {0} correspondências',
+            'all-failure': 'Falha na substituição',
             confirm: {
-                title: 'Are you sure to replace all matches?',
+                title: 'Tem certeza de que deseja substituir todas as correspondências?',
             },
         },
         button: {
             confirm: 'OK',
-            cancel: 'Cancel',
+            cancel: 'Cancelar',
         },
     },
-    'find-replace-shortcuts': 'Find & Replace',
+    'find-replace-shortcuts': 'Localizar e Substituir',
 };
 
 export default locale;

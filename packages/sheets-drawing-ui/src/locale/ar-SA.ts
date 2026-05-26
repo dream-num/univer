@@ -14,61 +14,63 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     'sheets-drawing-ui': {
-        title: 'Image',
+        title: 'صورة',
 
         upload: {
-            float: 'Float Image',
-            cell: 'Cell Image',
+            float: 'صورة عائمة',
+            cell: 'صورة خلية',
         },
 
         panel: {
-            title: 'Edit Image',
+            title: 'تحرير الصورة',
         },
 
         save: {
-            title: 'Save Cell Images',
-            menuLabel: 'Save Cell Images',
-            imageCount: 'Image Count',
-            fileNameConfig: 'File Name',
-            useRowCol: 'Use Cell Address (A1, B2...)',
-            useColumnValue: 'Use Column Value',
-            selectColumn: 'Select Column',
-            cancel: 'Cancel',
-            confirm: 'Save',
-            saving: 'Saving...',
-            error: 'Failed to save cell images',
+            title: 'حفظ صور الخلايا',
+            menuLabel: 'حفظ صور الخلايا',
+            imageCount: 'عدد الصور',
+            fileNameConfig: 'اسم الملف',
+            useRowCol: 'استخدام عنوان الخلية (A1، B2...)',
+            useColumnValue: 'استخدام قيمة العمود',
+            selectColumn: 'تحديد العمود',
+            cancel: 'إلغاء',
+            confirm: 'حفظ',
+            saving: 'جارٍ الحفظ...',
+            error: 'فشل في حفظ صور الخلايا',
         },
         'image-popup': {
-            replace: 'Replace',
-            delete: 'Delete',
-            edit: 'Edit',
-            crop: 'Crop',
-            reset: 'Reset Size',
-            flipH: 'Flip Horizontal',
-            flipV: 'Flip Vertical',
+            replace: 'استبدال',
+            delete: 'حذف',
+            edit: 'تحرير',
+            crop: 'قص',
+            reset: 'إعادة تعيين الحجم',
+            flipH: 'قلب أفقي',
+            flipV: 'قلب عمودي',
         },
         'update-status': {
-            exceedMaxSize: 'Image size exceeds limit, limit is {0}M',
-            invalidImageType: 'Invalid image type',
-            exceedMaxCount: 'Only {0} images can be uploaded at a time',
-            invalidImage: 'Invalid image',
+            exceedMaxSize: 'حجم الصورة يتجاوز الحد، الحد هو {0}م',
+            invalidImageType: 'نوع الصورة غير صالح',
+            exceedMaxCount: 'يمكن رفع {0} صور فقط في المرة الواحدة',
+            invalidImage: 'صورة غير صالحة',
         },
         'drawing-anchor': {
-            title: 'Anchor Properties',
-            both: 'Move and size with cells',
-            position: "Move but don't size with cells",
-            none: "Don't move or size with cells",
+            title: 'خصائص المرساة',
+            both: 'النقل والتحجيم مع الخلايا',
+            position: 'النقل دون التحجيم مع الخلايا',
+            none: 'عدم النقل أو التحجيم مع الخلايا',
         },
         'cell-image': {
-            pasteTitle: 'Paste as cell image',
-            pasteContent: 'Pasting a cell image will overwrite the existing content of the cell, continue pasting',
-            pasteError: 'Sheet cell image copy paste is not supported in this unit',
+            pasteTitle: 'لصق كصورة خلية',
+            pasteContent: 'سيؤدي لصق صورة خلية إلى استبدال المحتوى الموجود في الخلية، هل تريد المتابعة؟',
+            pasteError: 'نسخ ولصق صورة خلية الورقة غير مدعوم في هذه الوحدة',
         },
         permission: {
             dialog: {
-                editErr: 'The range is protected, and you do not have edit permission. To edit, please contact the creator.',
+                editErr: 'النطاق محمي، وليس لديك إذن التحرير. للتحرير، يرجى التواصل مع المنشئ.',
             },
         },
     },

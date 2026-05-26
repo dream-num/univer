@@ -14,38 +14,40 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     'sheets-hyper-link-ui': {
         form: {
-            editTitle: 'Edit Link',
-            addTitle: 'Insert Link',
-            label: 'Label',
-            type: 'Type',
-            link: 'Link',
-            linkPlaceholder: 'Enter link',
-            range: 'Range',
-            worksheet: 'Worksheet',
-            definedName: 'Defined Name',
-            ok: 'Confirm',
-            cancel: 'Cancel',
-            labelPlaceholder: 'Enter label',
-            inputError: 'Please enter',
-            selectError: 'Please select',
-            linkError: 'Please enter a legal link',
+            editTitle: 'تحرير الارتباط',
+            addTitle: 'إدراج ارتباط تشعبي',
+            label: 'التسمية',
+            type: 'النوع',
+            link: 'الرابط',
+            linkPlaceholder: 'أدخل الرابط',
+            range: 'النطاق',
+            worksheet: 'ورقة العمل',
+            definedName: 'الاسم المعرف',
+            ok: 'تأكيد',
+            cancel: 'إلغاء',
+            labelPlaceholder: 'أدخل التسمية',
+            inputError: 'الرجاء الإدخال',
+            selectError: 'الرجاء التحديد',
+            linkError: 'الرجاء إدخال رابط صالح',
         },
         menu: {
-            add: 'Insert Link',
+            add: 'إدراج ارتباط تشعبي',
         },
         message: {
-            noSheet: 'Target sheet has been delete',
-            refError: 'Invalid Range',
-            hiddenSheet: 'Cannot open the link because the linked sheet is hidden',
-            coped: 'Link copied to clipboard',
+            noSheet: 'تم حذف الورقة المستهدفة',
+            refError: 'نطاق غير صالح',
+            hiddenSheet: 'تعذر فتح الرابط لأن الورقة المرتبطة مخفية',
+            coped: 'تم نسخ الرابط إلى الحافظة',
         },
         popup: {
-            copy: 'Copy Link',
-            edit: 'Edit Link',
-            cancel: 'Cancel Link',
+            copy: 'نسخ الرابط',
+            edit: 'تحرير الرابط',
+            cancel: 'إلغاء الارتباط',
         },
     },
 };

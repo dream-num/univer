@@ -14,50 +14,52 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     design: {
         Confirm: {
-            cancel: 'cancel',
+            cancel: 'annulla',
             confirm: 'ok',
         },
         CascaderList: {
-            empty: 'None',
+            empty: 'Nessuno',
         },
         Calendar: {
             year: '',
-            weekDays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+            weekDays: ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'],
             months: [
-                'Jan',
+                'Gen',
                 'Feb',
                 'Mar',
                 'Apr',
-                'May',
-                'Jun',
-                'Jul',
-                'Aug',
-                'Sep',
-                'Oct',
+                'Mag',
+                'Giu',
+                'Lug',
+                'Ago',
+                'Set',
+                'Ott',
                 'Nov',
-                'Dec',
+                'Dic',
             ],
         },
         Select: {
-            empty: 'None',
+            empty: 'Nessuno',
         },
         ColorPicker: {
-            more: 'More Colors',
-            cancel: 'cancel',
+            more: 'Altri Colori',
+            cancel: 'annulla',
             confirm: 'ok',
         },
         GradientColorPicker: {
-            linear: 'Linear',
-            radial: 'Radial',
-            angular: 'Angular',
-            diamond: 'Diamond',
+            linear: 'Lineare',
+            radial: 'Radiale',
+            angular: 'Angolare',
+            diamond: 'Diamante',
             offset: 'Offset',
-            angle: 'Angle',
-            flip: 'Flip',
-            delete: 'Delete',
+            angle: 'Angolo',
+            flip: 'Capovolgi',
+            delete: 'Elimina',
         },
     },
 };

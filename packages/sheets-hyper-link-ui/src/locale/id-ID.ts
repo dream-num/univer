@@ -14,38 +14,40 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     'sheets-hyper-link-ui': {
         form: {
-            editTitle: 'Edit Link',
-            addTitle: 'Insert Link',
+            editTitle: 'Edit Tautan',
+            addTitle: 'Sisipkan Tautan',
             label: 'Label',
-            type: 'Type',
-            link: 'Link',
-            linkPlaceholder: 'Enter link',
-            range: 'Range',
-            worksheet: 'Worksheet',
-            definedName: 'Defined Name',
-            ok: 'Confirm',
-            cancel: 'Cancel',
-            labelPlaceholder: 'Enter label',
-            inputError: 'Please enter',
-            selectError: 'Please select',
-            linkError: 'Please enter a legal link',
+            type: 'Tipe',
+            link: 'Tautan',
+            linkPlaceholder: 'Masukkan tautan',
+            range: 'Rentang',
+            worksheet: 'Lembar Kerja',
+            definedName: 'Nama yang Ditentukan',
+            ok: 'Konfirmasi',
+            cancel: 'Batal',
+            labelPlaceholder: 'Masukkan label',
+            inputError: 'Silakan masukkan',
+            selectError: 'Silakan pilih',
+            linkError: 'Silakan masukkan tautan yang valid',
         },
         menu: {
-            add: 'Insert Link',
+            add: 'Sisipkan Tautan',
         },
         message: {
-            noSheet: 'Target sheet has been delete',
-            refError: 'Invalid Range',
-            hiddenSheet: 'Cannot open the link because the linked sheet is hidden',
-            coped: 'Link copied to clipboard',
+            noSheet: 'Lembar target telah dihapus',
+            refError: 'Rentang Tidak Valid',
+            hiddenSheet: 'Tidak dapat membuka tautan karena lembar yang ditautkan tersembunyi',
+            coped: 'Tautan disalin ke clipboard',
         },
         popup: {
-            copy: 'Copy Link',
-            edit: 'Edit Link',
-            cancel: 'Cancel Link',
+            copy: 'Salin Tautan',
+            edit: 'Edit Tautan',
+            cancel: 'Batalkan Tautan',
         },
     },
 };

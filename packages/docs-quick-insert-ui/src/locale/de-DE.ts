@@ -14,21 +14,23 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     'docs-quick-insert-ui': {
         menu: {
-            numberedList: 'Numbered List',
-            bulletedList: 'Bulleted List',
-            divider: 'Divider',
+            numberedList: 'Nummerierte Liste',
+            bulletedList: 'Aufzählungsliste',
+            divider: 'Trennlinie',
             text: 'Text',
-            table: 'Table',
-            image: 'Image',
+            table: 'Tabelle',
+            image: 'Bild',
         },
         group: {
-            basics: 'Basics',
+            basics: 'Grundlagen',
         },
-        placeholder: 'No results found',
-        keywordInputPlaceholder: 'Enter keywords',
+        placeholder: 'Keine Ergebnisse gefunden',
+        keywordInputPlaceholder: 'Stichwörter eingeben',
     },
 };
 

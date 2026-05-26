@@ -14,36 +14,38 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     'thread-comment-ui': {
         panel: {
-            title: 'Comment Management',
-            empty: 'No comments yet',
-            filterEmpty: 'No match result',
-            reset: 'Reset Filter',
-            addComment: 'Add Comment',
-            solved: 'Solved',
+            title: 'Zarządzanie komentarzami',
+            empty: 'Brak komentarzy',
+            filterEmpty: 'Brak wyników',
+            reset: 'Resetuj filtr',
+            addComment: 'Dodaj komentarz',
+            solved: 'Rozwiązane',
         },
         editor: {
-            placeholder: 'Reply or add others with @',
-            reply: 'Comment',
-            cancel: 'Cancel',
-            save: 'Save',
+            placeholder: 'Odpowiedz lub dodaj innych za pomocą @',
+            reply: 'Komentarz',
+            cancel: 'Anuluj',
+            save: 'Zapisz',
         },
         item: {
-            edit: 'Edit',
-            delete: 'Delete This Comment',
+            edit: 'Edytuj',
+            delete: 'Usuń ten komentarz',
         },
         filter: {
             sheet: {
-                all: 'All sheet',
-                current: 'Current sheet',
+                all: 'Wszystkie arkusze',
+                current: 'Bieżący arkusz',
             },
             status: {
-                all: 'All comments',
-                resolved: 'Resolved',
-                unsolved: 'Not resolved',
-                concernMe: 'Concern me',
+                all: 'Wszystkie komentarze',
+                resolved: 'Rozwiązane',
+                unsolved: 'Nierozwiązane',
+                concernMe: 'Dotyczące mnie',
             },
         },
     },

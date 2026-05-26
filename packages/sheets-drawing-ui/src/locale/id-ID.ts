@@ -14,61 +14,63 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     'sheets-drawing-ui': {
-        title: 'Image',
+        title: 'Gambar',
 
         upload: {
-            float: 'Float Image',
-            cell: 'Cell Image',
+            float: 'Gambar Mengambang',
+            cell: 'Gambar Sel',
         },
 
         panel: {
-            title: 'Edit Image',
+            title: 'Edit Gambar',
         },
 
         save: {
-            title: 'Save Cell Images',
-            menuLabel: 'Save Cell Images',
-            imageCount: 'Image Count',
-            fileNameConfig: 'File Name',
-            useRowCol: 'Use Cell Address (A1, B2...)',
-            useColumnValue: 'Use Column Value',
-            selectColumn: 'Select Column',
-            cancel: 'Cancel',
-            confirm: 'Save',
-            saving: 'Saving...',
-            error: 'Failed to save cell images',
+            title: 'Simpan Gambar Sel',
+            menuLabel: 'Simpan Gambar Sel',
+            imageCount: 'Jumlah Gambar',
+            fileNameConfig: 'Nama File',
+            useRowCol: 'Gunakan Alamat Sel (A1, B2...)',
+            useColumnValue: 'Gunakan Nilai Kolom',
+            selectColumn: 'Pilih Kolom',
+            cancel: 'Batal',
+            confirm: 'Simpan',
+            saving: 'Menyimpan...',
+            error: 'Gagal menyimpan gambar sel',
         },
         'image-popup': {
-            replace: 'Replace',
-            delete: 'Delete',
+            replace: 'Ganti',
+            delete: 'Hapus',
             edit: 'Edit',
-            crop: 'Crop',
-            reset: 'Reset Size',
-            flipH: 'Flip Horizontal',
-            flipV: 'Flip Vertical',
+            crop: 'Pangkas',
+            reset: 'Atur Ulang Ukuran',
+            flipH: 'Balik Horizontal',
+            flipV: 'Balik Vertikal',
         },
         'update-status': {
-            exceedMaxSize: 'Image size exceeds limit, limit is {0}M',
-            invalidImageType: 'Invalid image type',
-            exceedMaxCount: 'Only {0} images can be uploaded at a time',
-            invalidImage: 'Invalid image',
+            exceedMaxSize: 'Ukuran gambar melebihi batas, batasnya adalah {0}M',
+            invalidImageType: 'Tipe gambar tidak valid',
+            exceedMaxCount: 'Hanya {0} gambar yang dapat diunggah dalam satu waktu',
+            invalidImage: 'Gambar tidak valid',
         },
         'drawing-anchor': {
-            title: 'Anchor Properties',
-            both: 'Move and size with cells',
-            position: "Move but don't size with cells",
-            none: "Don't move or size with cells",
+            title: 'Properti Jangkar',
+            both: 'Pindah dan ukur bersama sel',
+            position: "Pindah tapi tidak ukur bersama sel",
+            none: "Jangan pindah atau ukur bersama sel",
         },
         'cell-image': {
-            pasteTitle: 'Paste as cell image',
-            pasteContent: 'Pasting a cell image will overwrite the existing content of the cell, continue pasting',
-            pasteError: 'Sheet cell image copy paste is not supported in this unit',
+            pasteTitle: 'Tempel sebagai gambar sel',
+            pasteContent: 'Menempel gambar sel akan menimpa konten yang ada di sel, lanjutkan menempel',
+            pasteError: 'Salin tempel gambar sel lembar kerja tidak didukung dalam unit ini',
         },
         permission: {
             dialog: {
-                editErr: 'The range is protected, and you do not have edit permission. To edit, please contact the creator.',
+                editErr: 'Rentang ini dilindungi, dan Anda tidak memiliki izin edit. Untuk mengedit, silakan hubungi pembuatnya.',
             },
         },
     },

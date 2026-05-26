@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     'action-recorder': {
         menu: {
-            title: 'Record Actions',
-            record: 'Record Actions...',
-            'replay-local': 'Replace Local Record...',
-            'replay-local-name': 'Replace Local Record by Subunit...',
-            'replay-local-active': 'Replace Local Record by Current Subunit...',
+            title: 'Registra Azioni',
+            record: 'Registra Azioni...',
+            'replay-local': 'Riproduci Registrazione Locale...',
+            'replay-local-name': 'Riproduci Registrazione Locale per Sottoelemento...',
+            'replay-local-active': 'Riproduci Registrazione Locale per Sottoelemento Corrente...',
         },
     },
 };

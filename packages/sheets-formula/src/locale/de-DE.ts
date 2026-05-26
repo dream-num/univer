@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type enUS from './en-US';
+
 import array from './function-list/array/en-US';
 import compatibility from './function-list/compatibility/en-US';
 import cube from './function-list/cube/en-US';
@@ -30,7 +32,7 @@ import text from './function-list/text/en-US';
 import univer from './function-list/univer/en-US';
 import web from './function-list/web/en-US';
 
-const locale = {
+const locale: typeof enUS = {
     'sheets-formula': {
         functionList: {
             ...array,

@@ -14,62 +14,64 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     'slides-ui': {
-        append: 'Append Slide',
+        append: 'إلحاق شريحة',
 
         text: {
             insert: {
-                title: 'Insert Text',
+                title: 'إدراج نص',
             },
         },
 
         shape: {
             insert: {
-                title: 'Insert Shape',
-                rectangle: 'Insert Rectangle',
-                ellipse: 'Insert Ellipse',
+                title: 'إدراج شكل',
+                rectangle: 'إدراج مستطيل',
+                ellipse: 'إدراج قطع ناقص',
             },
         },
 
         image: {
             insert: {
-                title: 'Insert Image',
-                float: 'Insert Float Image',
+                title: 'إدراج صورة',
+                float: 'إدراج صورة عائمة',
             },
         },
 
         popup: {
-            edit: 'Edit',
-            delete: 'Delete',
+            edit: 'تحرير',
+            delete: 'حذف',
         },
 
         sidebar: {
-            text: 'Edit Text',
-            shape: 'Edit Shape',
-            image: 'Edit Image',
+            text: 'تحرير النص',
+            shape: 'تحرير الشكل',
+            image: 'تحرير الصورة',
         },
 
         'image-panel': {
             arrange: {
-                title: 'Arrange',
-                forward: 'Bring Forward',
-                backward: 'Send Backward',
-                front: 'Bring to Front',
-                back: 'Send to Back',
+                title: 'ترتيب',
+                forward: 'إحضار إلى الأمام',
+                backward: 'إرسال إلى الخلف',
+                front: 'إحضار إلى المقدمة',
+                back: 'إرسال إلى المؤخرة',
             },
             transform: {
-                title: 'Transform',
-                width: 'Width (px)',
-                height: 'Height (px)',
-                x: 'X (px)',
-                y: 'Y (px)',
-                rotate: 'Rotate (°)',
+                title: 'تحويل',
+                width: 'العرض (بكسل)',
+                height: 'الارتفاع (بكسل)',
+                x: 'X (بكسل)',
+                y: 'Y (بكسل)',
+                rotate: 'تدوير (°)',
             },
         },
         panel: {
             fill: {
-                title: 'Fill Color',
+                title: 'لون التعبئة',
             },
         },
     },

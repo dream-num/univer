@@ -14,50 +14,52 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     design: {
         Confirm: {
-            cancel: 'cancel',
-            confirm: 'ok',
+            cancel: 'Batal',
+            confirm: 'OK',
         },
         CascaderList: {
-            empty: 'None',
+            empty: 'Tidak ada',
         },
         Calendar: {
             year: '',
-            weekDays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+            weekDays: ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'],
             months: [
                 'Jan',
                 'Feb',
                 'Mar',
                 'Apr',
-                'May',
+                'Mei',
                 'Jun',
                 'Jul',
-                'Aug',
+                'Agu',
                 'Sep',
-                'Oct',
+                'Okt',
                 'Nov',
-                'Dec',
+                'Des',
             ],
         },
         Select: {
-            empty: 'None',
+            empty: 'Tidak ada',
         },
         ColorPicker: {
-            more: 'More Colors',
-            cancel: 'cancel',
-            confirm: 'ok',
+            more: 'Warna Lainnya',
+            cancel: 'Batal',
+            confirm: 'OK',
         },
         GradientColorPicker: {
             linear: 'Linear',
             radial: 'Radial',
             angular: 'Angular',
-            diamond: 'Diamond',
+            diamond: 'Berlian',
             offset: 'Offset',
-            angle: 'Angle',
-            flip: 'Flip',
-            delete: 'Delete',
+            angle: 'Sudut',
+            flip: 'Balik',
+            delete: 'Hapus',
         },
     },
 };

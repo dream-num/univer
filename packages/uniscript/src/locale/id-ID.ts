@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     uniscript: {
         title: 'Uniscript',
         tooltip: {
-            'menu-button': 'Toggle Uniscript Panel',
+            'menu-button': 'Alihkan Panel Uniscript',
         },
         panel: {
-            execute: 'Execute Script',
+            execute: 'Jalankan Skrip',
         },
         message: {
-            success: 'Execution Success',
-            failed: 'Execution Failed',
+            success: 'Eksekusi Berhasil',
+            failed: 'Eksekusi Gagal',
         },
     },
 };

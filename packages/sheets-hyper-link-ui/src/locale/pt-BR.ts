@@ -14,38 +14,40 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     'sheets-hyper-link-ui': {
         form: {
-            editTitle: 'Edit Link',
-            addTitle: 'Insert Link',
-            label: 'Label',
-            type: 'Type',
+            editTitle: 'Editar Link',
+            addTitle: 'Inserir Link',
+            label: 'Rótulo',
+            type: 'Tipo',
             link: 'Link',
-            linkPlaceholder: 'Enter link',
-            range: 'Range',
-            worksheet: 'Worksheet',
-            definedName: 'Defined Name',
-            ok: 'Confirm',
-            cancel: 'Cancel',
-            labelPlaceholder: 'Enter label',
-            inputError: 'Please enter',
-            selectError: 'Please select',
-            linkError: 'Please enter a legal link',
+            linkPlaceholder: 'Digite o link',
+            range: 'Intervalo',
+            worksheet: 'Planilha',
+            definedName: 'Nome Definido',
+            ok: 'Confirmar',
+            cancel: 'Cancelar',
+            labelPlaceholder: 'Digite o rótulo',
+            inputError: 'Por favor, digite',
+            selectError: 'Por favor, selecione',
+            linkError: 'Por favor, digite um link válido',
         },
         menu: {
-            add: 'Insert Link',
+            add: 'Inserir Link',
         },
         message: {
-            noSheet: 'Target sheet has been delete',
-            refError: 'Invalid Range',
-            hiddenSheet: 'Cannot open the link because the linked sheet is hidden',
-            coped: 'Link copied to clipboard',
+            noSheet: 'A planilha de destino foi excluída',
+            refError: 'Intervalo Inválido',
+            hiddenSheet: 'Não é possível abrir o link porque a planilha vinculada está oculta',
+            coped: 'Link copiado para a área de transferência',
         },
         popup: {
-            copy: 'Copy Link',
-            edit: 'Edit Link',
-            cancel: 'Cancel Link',
+            copy: 'Copiar Link',
+            edit: 'Editar Link',
+            cancel: 'Cancelar Link',
         },
     },
 };

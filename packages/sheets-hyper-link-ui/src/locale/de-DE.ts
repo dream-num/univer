@@ -14,38 +14,40 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     'sheets-hyper-link-ui': {
         form: {
-            editTitle: 'Edit Link',
-            addTitle: 'Insert Link',
-            label: 'Label',
-            type: 'Type',
+            editTitle: 'Link bearbeiten',
+            addTitle: 'Link einfügen',
+            label: 'Beschriftung',
+            type: 'Typ',
             link: 'Link',
-            linkPlaceholder: 'Enter link',
-            range: 'Range',
-            worksheet: 'Worksheet',
-            definedName: 'Defined Name',
-            ok: 'Confirm',
-            cancel: 'Cancel',
-            labelPlaceholder: 'Enter label',
-            inputError: 'Please enter',
-            selectError: 'Please select',
-            linkError: 'Please enter a legal link',
+            linkPlaceholder: 'Link eingeben',
+            range: 'Bereich',
+            worksheet: 'Arbeitsblatt',
+            definedName: 'Definierter Name',
+            ok: 'Bestätigen',
+            cancel: 'Abbrechen',
+            labelPlaceholder: 'Beschriftung eingeben',
+            inputError: 'Bitte eingeben',
+            selectError: 'Bitte auswählen',
+            linkError: 'Bitte einen gültigen Link eingeben',
         },
         menu: {
-            add: 'Insert Link',
+            add: 'Link einfügen',
         },
         message: {
-            noSheet: 'Target sheet has been delete',
-            refError: 'Invalid Range',
-            hiddenSheet: 'Cannot open the link because the linked sheet is hidden',
-            coped: 'Link copied to clipboard',
+            noSheet: 'Zielblatt wurde gelöscht',
+            refError: 'Ungültiger Bereich',
+            hiddenSheet: 'Der Link kann nicht geöffnet werden, da das verknüpfte Blatt ausgeblendet ist',
+            coped: 'Link in Zwischenablage kopiert',
         },
         popup: {
-            copy: 'Copy Link',
-            edit: 'Edit Link',
-            cancel: 'Cancel Link',
+            copy: 'Link kopieren',
+            edit: 'Link bearbeiten',
+            cancel: 'Link aufheben',
         },
     },
 };

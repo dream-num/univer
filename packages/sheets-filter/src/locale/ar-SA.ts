@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     'sheets-filter': {
         command: {
-            'not-valid-filter-range': 'The selected range only has one row and not valid for filter.',
+            'not-valid-filter-range': 'يحتوي النطاق المحدد على صف واحد فقط وهو غير صالح للتصفية.',
         },
         msg: {
-            'filter-header-forbidden': 'You can\'t move the header row of a filter.',
+            'filter-header-forbidden': 'لا يمكنك نقل صف الرأس الخاص بالتصفية.',
         },
     },
 };

@@ -352,7 +352,10 @@ export function shaping(
     }
 
     // Add some spacing between Han characters and western characters.
-    addCJKLatinSpacing(shapedTextList);
+    // Skip for spreadsheet cells to avoid excessive spacing in cell editing and rendering.
+    if (sectionBreakConfig.renderConfig?.cellValueType == null) {
+        addCJKLatinSpacing(shapedTextList);
+    }
 
     return shapedTextList;
 }

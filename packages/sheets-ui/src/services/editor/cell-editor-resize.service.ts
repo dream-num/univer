@@ -204,7 +204,6 @@ export class SheetCellEditorResizeService extends Disposable {
          */
         documentDataModel?.updateDocumentRenderConfig({
             horizontalAlign: HorizontalAlign.UNSPECIFIED,
-            cellValueType: undefined,
         });
 
         return {

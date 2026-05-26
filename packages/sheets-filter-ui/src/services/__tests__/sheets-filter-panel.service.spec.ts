@@ -23,7 +23,6 @@ import { awaitTime, CommandType, ICommandService, Inject, Injector, LocaleServic
 import { ActiveDirtyManagerService, IActiveDirtyManagerService, ISheetRowFilteredService, SheetRowFilteredService } from '@univerjs/engine-formula';
 import { MarkDirtyFilterChangeMutation, RefRangeService, SheetInterceptorService, SheetRangeThemeModel, SheetsSelectionsService, ZebraCrossingCacheController } from '@univerjs/sheets';
 import { CustomFilterOperator, FilterBy, SheetsFilterService, UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
-import { SetSheetsFilterCriteriaCommand } from '@univerjs/sheets-filter/commands/commands/sheets-filter.command.js';
 import { afterEach, beforeEach, describe, expect, it, vitest } from 'vitest';
 import { E_ITEMS, ITEMS, ITEMS_WITH_EMPTY, WithCustomFilterModelFactory, WithMergedCellFilterFactory, WithMultiEmptyCellsModelFactory, WithTwoFilterColumnsFactory, WithValuesAndEmptyFilterModelFactory, WithValuesFilterModelFactory } from '../../__testing__/data';
 import { CloseFilterPanelOperation, OpenFilterPanelOperation } from '../../commands/operations/sheets-filter.operation';
@@ -115,7 +114,6 @@ function createSheetsFilterPanelServiceTestBed(workbookData: IWorkbookData) {
     [
         OpenFilterPanelOperation,
         CloseFilterPanelOperation,
-        SetSheetsFilterCriteriaCommand,
         SetCellEditVisibleOperation,
         MarkDirtyFilterChangeMutation,
     ].forEach((command) => commandService.registerCommand(command));

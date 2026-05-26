@@ -19,7 +19,7 @@ import { ICommandService, IContextService, Inject, Injector, LocaleService } fro
 import { MessageType } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { FilterIcon } from '@univerjs/icons';
-import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand, RemoveSheetFilterCommand, SetSheetFilterRangeCommand, SetSheetsFilterCriteriaCommand, SheetsFilterService, SmartToggleSheetsFilterCommand } from '@univerjs/sheets-filter';
+import { SheetsFilterService, SmartToggleSheetsFilterCommand } from '@univerjs/sheets-filter';
 import { SheetCanvasPopManagerService, SheetsRenderService } from '@univerjs/sheets-ui';
 import { ComponentManager, IMenuManagerService, IMessageService, IShortcutService } from '@univerjs/ui';
 import { distinctUntilChanged } from 'rxjs';
@@ -76,11 +76,6 @@ export class SheetsFilterUIDesktopController extends SheetsFilterUIMobileControl
     private _initCommands(): void {
         [
             SmartToggleSheetsFilterCommand,
-            RemoveSheetFilterCommand,
-            SetSheetFilterRangeCommand,
-            SetSheetsFilterCriteriaCommand,
-            ClearSheetsFilterCriteriaCommand,
-            ReCalcSheetsFilterCommand,
             ChangeFilterByOperation,
             OpenFilterPanelOperation,
             CloseFilterPanelOperation,

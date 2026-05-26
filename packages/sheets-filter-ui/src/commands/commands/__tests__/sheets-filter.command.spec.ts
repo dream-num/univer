@@ -22,7 +22,7 @@ import { AuthzIoLocalService, IAuthzIoService, ICommandService, Inject, Injector
 import { ActiveDirtyManagerService, IActiveDirtyManagerService, ISheetRowFilteredService, SheetRowFilteredService } from '@univerjs/engine-formula';
 import { MarkDirtyFilterChangeMutation, RangeProtectionRuleModel, RefRangeService, SetRangeValuesCommand, SetRangeValuesMutation, SheetInterceptorService, SheetRangeThemeModel, SheetsSelectionsService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel, ZebraCrossingCacheController } from '@univerjs/sheets';
 import { SetSheetsFilterRangeMutation, SheetsFilterService, UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
-import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand, RemoveSheetFilterCommand, SetSheetFilterRangeCommand, SetSheetsFilterCriteriaCommand, SmartToggleSheetsFilterCommand } from '@univerjs/sheets-filter/commands/commands/sheets-filter.command.js';
+import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand, SetSheetsFilterCriteriaCommand, SmartToggleSheetsFilterCommand } from '@univerjs/sheets-filter/commands/commands/sheets-filter.command.js';
 import { IMessageService } from '@univerjs/ui';
 import { MockMessageService } from '@univerjs/ui/services/message/__testing__/mock-message.service.js';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -121,12 +121,7 @@ function createFilterCommandTestBed() {
     [
         SetRangeValuesCommand,
         SetRangeValuesMutation,
-        RemoveSheetFilterCommand,
-        SetSheetFilterRangeCommand,
         SmartToggleSheetsFilterCommand,
-        SetSheetsFilterCriteriaCommand,
-        ClearSheetsFilterCriteriaCommand,
-        ReCalcSheetsFilterCommand,
         MarkDirtyFilterChangeMutation,
     ].forEach((command) => commandService.registerCommand(command));
 
@@ -137,7 +132,6 @@ function createFilterCommandTestBed() {
 }
 
 describe('test sheets filter commands', () => {
-    let univer: Univer;
     let get: Injector['get'];
     let commandService: ICommandService;
     let sheetsFilterService: SheetsFilterService;
@@ -145,7 +139,6 @@ describe('test sheets filter commands', () => {
 
     beforeEach(() => {
         const testBed = createFilterCommandTestBed();
-        univer = testBed.univer;
         get = testBed.get;
 
         commandService = get(ICommandService);

@@ -1458,6 +1458,15 @@ export class Viewport {
         if (!prevBound) {
             return [currBound];
         }
+        if (
+            prevBound.right <= currBound.left ||
+            currBound.right <= prevBound.left ||
+            prevBound.bottom <= currBound.top ||
+            currBound.bottom <= prevBound.top
+        ) {
+            return [currBound];
+        }
+
         const additionalAreas: IBoundRectNoAngle[] = [];
 
         // curr has an extra part on the left compared to prev.

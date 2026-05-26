@@ -263,8 +263,12 @@ export class Spreadsheet extends SheetComponent {
 
         const isForceDirty = isViewportForceDirty || this.isForceDirty();
         const isDirty = isViewportDirty || this.isDirty();
-        if (diffBounds.length === 0 || (diffX === 0 && diffY === 0) || isForceDirty || isDirty) {
-            if (isDirty || isForceDirty) {
+        const isScrollJumpOutsideCache =
+            Math.abs(diffX) * scaleX >= cacheCanvas.getWidth() ||
+            Math.abs(diffY) * scaleY >= cacheCanvas.getHeight();
+        const shouldRefreshCache = isDirty || isForceDirty || isScrollJumpOutsideCache;
+        if (diffBounds.length === 0 || (diffX === 0 && diffY === 0) || shouldRefreshCache) {
+            if (shouldRefreshCache) {
                 this.addRenderTagToScene('scrolling', false);
                 this.refreshCacheCanvas(viewportInfo, { cacheCanvas, cacheCtx, mainCtx, topOrigin, leftOrigin, bufferEdgeX, bufferEdgeY });
             }

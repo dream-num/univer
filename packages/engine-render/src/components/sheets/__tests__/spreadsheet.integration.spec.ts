@@ -496,6 +496,30 @@ describe('spreadsheet integration', () => {
         expect(skeleton.rowColumnSegment).toEqual(skeleton.getCacheRangeByViewport(viewportInfo));
     });
 
+    it('refreshes cache instead of incremental painting for large scroll jumps', () => {
+        const { spreadsheet, skeleton, mainCanvas, cacheCanvas, scene } = fixture;
+        const context = mainCanvas.getContext();
+        const viewportInfo = createViewportInfo(scene, cacheCanvas, {
+            diffBounds: [createBound(0, 10000, 460, 10280)],
+            diffCacheBounds: [createBound(0, 10000, 460, 10280)],
+            diffX: 0,
+            diffY: -10000,
+            isDirty: 0,
+            isForceDirty: false,
+            shouldCacheUpdate: 1,
+        });
+        spreadsheet.makeDirty(false);
+        spreadsheet.makeForceDirty(false);
+
+        const paintSpy = vi.spyOn(spreadsheet, 'paintNewAreaForScrolling');
+        const refreshSpy = vi.spyOn(spreadsheet, 'refreshCacheCanvas');
+
+        spreadsheet.renderByViewports(context, viewportInfo, skeleton);
+
+        expect(refreshSpy).toHaveBeenCalledOnce();
+        expect(paintSpy).not.toHaveBeenCalled();
+    });
+
     it('draws row and column gap areas using defaults from gapConfig', () => {
         const { spreadsheet, skeleton, mainCanvas } = fixture;
         const context = mainCanvas.getContext() as any;

@@ -634,4 +634,18 @@ describe('engine scene viewport extra', () => {
         scene.dispose();
         engine.dispose();
     });
+
+    it('does not bridge non-overlapping cache bounds when calculating cache diff', () => {
+        const { engine, scene, viewport } = createFixture();
+        const currentBound = { left: 0, top: 10000, right: 460, bottom: 10280 };
+        const diffBounds = (viewport as any)._calcDiffCacheBound(
+            { left: 0, top: 0, right: 460, bottom: 280 },
+            currentBound
+        );
+
+        expect(diffBounds).toEqual([currentBound]);
+
+        scene.dispose();
+        engine.dispose();
+    });
 });

@@ -455,6 +455,12 @@ export type BaseHitTestResult =
         fieldId: FieldId;
         fieldIndex: number;
     }
+    | {
+        type: 'grid-record-open';
+        tableId: TableId;
+        viewId: ViewId;
+        recordId: RecordId;
+    }
     | BaseSelection;
 
 export interface BaseInvalidation {

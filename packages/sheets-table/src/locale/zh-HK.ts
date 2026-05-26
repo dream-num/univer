@@ -14,27 +14,14 @@
  * limitations under the License.
  */
 
-/**
- * Built-in locales.
- */
-export enum LocaleType {
-    EN_US = 'enUS',
-    FR_FR = 'frFR',
-    ZH_CN = 'zhCN',
-    RU_RU = 'ruRU',
-    ZH_TW = 'zhTW',
-    ZH_HK = 'zhHK',
-    VI_VN = 'viVN',
-    FA_IR = 'faIR',
-    JA_JP = 'jaJP',
-    KO_KR = 'koKR',
-    ES_ES = 'esES',
-    CA_ES = 'caES',
-    SK_SK = 'skSK',
-    PT_BR = 'ptBR',
-    DE_DE = 'deDE',
-    IT_IT = 'itIT',
-    ID_ID = 'idID',
-    PL_PL = 'plPL',
-    AR_SA = 'arSA',
-}
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
+    'sheets-table': {
+        columnPrefix: '列',
+        tablePrefix: '表格',
+        tableNameError: '表格名稱不能包含空格， 不能以數字開頭，不能和已有表格名稱重複',
+    },
+};
+
+export default locale;

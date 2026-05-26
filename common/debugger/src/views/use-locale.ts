@@ -56,8 +56,12 @@ const locales = [
         value: LocaleType.ZH_CN,
     },
     {
-        label: '繁體中文',
+        label: '繁體中文（台灣）',
         value: LocaleType.ZH_TW,
+    },
+    {
+        label: '繁體中文（香港）',
+        value: LocaleType.ZH_HK,
     },
     {
         label: '日本語',
@@ -105,6 +109,9 @@ export function useLocale() {
                 break;
             case LocaleType.ZH_TW:
                 locales = await import('@univerjs/mockdata/locales/zh-TW');
+                break;
+            case LocaleType.ZH_HK:
+                locales = await import('@univerjs/mockdata/locales/zh-HK');
                 break;
             case LocaleType.FR_FR:
                 locales = await import('@univerjs/mockdata/locales/fr-FR');

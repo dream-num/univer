@@ -33,6 +33,7 @@ export function isDefaultFormat(pattern?: string | null) {
 export type INumfmtLocaleTag =
     | 'zh-CN'
     | 'zh-TW'
+    | 'zh-HK'
     | 'ar'
     | 'cs'
     | 'da'
@@ -123,7 +124,7 @@ export const isPatternEqualWithoutDecimal = (patternA: string, patternB: string)
 
 const ignoreCommonPatterns = new Set(['m d']);
 const ignoreAMPMPatterns = new Set(['h:mm AM/PM', 'hh:mm AM/PM']);
-export const currencySymbols = ['Rp', 'zł', 'NT$', 'R$', '$', '£', '¥', '¤', '֏', '؋', '৳', '฿', '៛', '₡', '₦', '₩', '₪', '₫', '€', '₭', '₮', '₱', '₲', '₴', '₸', '₹', '₺', '₼', '₽', '₾', '₿', '﷼'];
+export const currencySymbols = ['Rp', 'zł', 'NT$', 'R$', 'HK$', '$', '£', '¥', '¤', '֏', '؋', '৳', '฿', '៛', '₡', '₦', '₩', '₪', '₫', '€', '₭', '₮', '₱', '₲', '₴', '₸', '₹', '₺', '₼', '₽', '₾', '₿', '﷼'];
 
 const currencySymbolSet = new Set(currencySymbols);
 

@@ -14,27 +14,24 @@
  * limitations under the License.
  */
 
-/**
- * Built-in locales.
- */
-export enum LocaleType {
-    EN_US = 'enUS',
-    FR_FR = 'frFR',
-    ZH_CN = 'zhCN',
-    RU_RU = 'ruRU',
-    ZH_TW = 'zhTW',
-    ZH_HK = 'zhHK',
-    VI_VN = 'viVN',
-    FA_IR = 'faIR',
-    JA_JP = 'jaJP',
-    KO_KR = 'koKR',
-    ES_ES = 'esES',
-    CA_ES = 'caES',
-    SK_SK = 'skSK',
-    PT_BR = 'ptBR',
-    DE_DE = 'deDE',
-    IT_IT = 'itIT',
-    ID_ID = 'idID',
-    PL_PL = 'plPL',
-    AR_SA = 'arSA',
-}
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
+    'docs-quick-insert-ui': {
+        menu: {
+            numberedList: '有序列表',
+            bulletedList: '無序列表',
+            divider: '分隔線',
+            text: '文本',
+            table: '表格',
+            image: '圖片',
+        },
+        group: {
+            basics: '基礎',
+        },
+        placeholder: '無結果',
+        keywordInputPlaceholder: '輸入關鍵詞',
+    },
+};
+
+export default locale;

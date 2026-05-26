@@ -14,27 +14,18 @@
  * limitations under the License.
  */
 
-/**
- * Built-in locales.
- */
-export enum LocaleType {
-    EN_US = 'enUS',
-    FR_FR = 'frFR',
-    ZH_CN = 'zhCN',
-    RU_RU = 'ruRU',
-    ZH_TW = 'zhTW',
-    ZH_HK = 'zhHK',
-    VI_VN = 'viVN',
-    FA_IR = 'faIR',
-    JA_JP = 'jaJP',
-    KO_KR = 'koKR',
-    ES_ES = 'esES',
-    CA_ES = 'caES',
-    SK_SK = 'skSK',
-    PT_BR = 'ptBR',
-    DE_DE = 'deDE',
-    IT_IT = 'itIT',
-    ID_ID = 'idID',
-    PL_PL = 'plPL',
-    AR_SA = 'arSA',
-}
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
+    'action-recorder': {
+        menu: {
+            title: '操作錄製',
+            record: '錄製操作...',
+            'replay-local': '回放本地錄製...',
+            'replay-local-name': '根據子表名回放本地錄製...',
+            'replay-local-active': '根據當前子表回放本地錄製...',
+        },
+    },
+};
+
+export default locale;

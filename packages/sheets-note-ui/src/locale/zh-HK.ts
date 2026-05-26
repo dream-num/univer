@@ -14,27 +14,19 @@
  * limitations under the License.
  */
 
-/**
- * Built-in locales.
- */
-export enum LocaleType {
-    EN_US = 'enUS',
-    FR_FR = 'frFR',
-    ZH_CN = 'zhCN',
-    RU_RU = 'ruRU',
-    ZH_TW = 'zhTW',
-    ZH_HK = 'zhHK',
-    VI_VN = 'viVN',
-    FA_IR = 'faIR',
-    JA_JP = 'jaJP',
-    KO_KR = 'koKR',
-    ES_ES = 'esES',
-    CA_ES = 'caES',
-    SK_SK = 'skSK',
-    PT_BR = 'ptBR',
-    DE_DE = 'deDE',
-    IT_IT = 'itIT',
-    ID_ID = 'idID',
-    PL_PL = 'plPL',
-    AR_SA = 'arSA',
-}
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
+    'sheets-note-ui': {
+        note: {
+            placeholder: '在此輸入',
+        },
+        rightClick: {
+            addNote: '添加批註',
+            deleteNote: '刪除批註',
+            toggleNote: '顯示/隱藏批註',
+        },
+    },
+};
+
+export default locale;

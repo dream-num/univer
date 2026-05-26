@@ -22,6 +22,7 @@ export const localeCurrencySymbolMap = new Map<LocaleType, string>([
     [LocaleType.VI_VN, '₫'],
     [LocaleType.ZH_CN, '¥'],
     [LocaleType.ZH_TW, 'NT$'],
+    [LocaleType.ZH_HK, 'HK$'],
     [LocaleType.FR_FR, '€'],
     [LocaleType.FA_IR, '﷼'],
     [LocaleType.KO_KR, '₩'],
@@ -74,6 +75,7 @@ export function getCurrencySymbolIconByLocale(locale: LocaleType) {
         case LocaleType.PL_PL:
         case LocaleType.PT_BR:
         case LocaleType.VI_VN:
+        case LocaleType.ZH_HK:
         case LocaleType.ZH_TW:
         default:
             return {

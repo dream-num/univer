@@ -26,6 +26,7 @@ const locales = [
     'ru-RU',
     'zh-CN',
     'zh-TW',
+    'zh-HK',
     'vi-VN',
     'fa-IR',
     'ko-KR',

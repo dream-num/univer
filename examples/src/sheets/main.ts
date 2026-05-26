@@ -39,6 +39,7 @@ import ruRU from '@univerjs/mockdata/locales/ru-RU';
 import skSK from '@univerjs/mockdata/locales/sk-SK';
 import viVN from '@univerjs/mockdata/locales/vi-VN';
 import zhCN from '@univerjs/mockdata/locales/zh-CN';
+import zhHK from '@univerjs/mockdata/locales/zh-HK';
 import zhTW from '@univerjs/mockdata/locales/zh-TW';
 import { UniverNetworkPlugin } from '@univerjs/network';
 import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
@@ -127,6 +128,7 @@ function createNewInstance() {
             [LocaleType.SK_SK]: skSK,
             [LocaleType.VI_VN]: viVN,
             [LocaleType.ZH_CN]: zhCN,
+            [LocaleType.ZH_HK]: zhHK,
             [LocaleType.ZH_TW]: zhTW,
         },
         logLevel: LogLevel.VERBOSE,

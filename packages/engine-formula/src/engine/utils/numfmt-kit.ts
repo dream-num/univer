@@ -260,6 +260,7 @@ const localeCurrencySymbolMap = new Map<LocaleType, string>([
     [LocaleType.VI_VN, '₫'],
     [LocaleType.ZH_CN, '¥'],
     [LocaleType.ZH_TW, 'NT$'],
+    [LocaleType.ZH_HK, 'HK$'],
     [LocaleType.FR_FR, '€'],
     [LocaleType.FA_IR, '﷼'],
     [LocaleType.KO_KR, '₩'],

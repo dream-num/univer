@@ -67,6 +67,7 @@ describe('DocCanvasPopManagerService', () => {
         scale = 1.5;
         onTransformChange$.emitEvent({} as never);
 
-        expect(popup?.anchorRect$?.value).toEqual({ left: 25, right: 175, top: 50, bottom: 80 });
+        const anchorRect$ = popup?.anchorRect$ as { value?: unknown } | undefined;
+        expect(anchorRect$?.value).toEqual({ left: 25, right: 175, top: 50, bottom: 80 });
     });
 });

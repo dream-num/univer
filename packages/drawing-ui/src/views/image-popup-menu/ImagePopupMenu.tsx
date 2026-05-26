@@ -26,7 +26,7 @@ export interface IImagePopupMenuItem {
     label: string;
     index: number;
     commandId: string;
-    commandParams?: unknown;
+    commandParams?: object;
     disable: boolean;
 }
 

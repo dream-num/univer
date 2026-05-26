@@ -21,7 +21,7 @@ import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-no
 import type { DocumentViewModel } from '../../../view-model/document-view-model';
 import type { ILayoutContext } from '../../tools';
 import type { IShapedText } from './shaping';
-import { DataStreamTreeTokenType, DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING, DEFAULT_DOCUMENT_PARAGRAPH_SPACE_ABOVE, DEFAULT_DOCUMENT_PARAGRAPH_SPACE_BELOW, PositionedObjectLayoutType, Tools } from '@univerjs/core';
+import { DataStreamTreeTokenType, DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING, DEFAULT_DOCUMENT_PARAGRAPH_SPACE_ABOVE, DEFAULT_DOCUMENT_PARAGRAPH_SPACE_BELOW, DocumentFlavor, PositionedObjectLayoutType, Tools } from '@univerjs/core';
 import { BreakType } from '../../../../../basics/i-document-skeleton-cached';
 import { createSkeletonPage } from '../../model/page';
 import { setColumnFullState } from '../../model/section';
@@ -144,13 +144,16 @@ function _applyDefaultLayoutParagraphStyle(style: IParagraphStyle, hasBlockRange
 function _applyBlockRangeLayoutParagraphStyle(
     body: Nullable<IDocumentBody>,
     paragraph: IParagraph,
-    paragraphStyle: IParagraphStyle
+    paragraphStyle: IParagraphStyle,
+    shouldApplyDocumentDefaults: boolean
 ): IParagraphStyle {
     const style = Tools.deepClone(paragraphStyle);
     const blockRanges = body?.blockRanges;
 
     if (!blockRanges?.length) {
-        _applyDefaultLayoutParagraphStyle(style, false);
+        if (shouldApplyDocumentDefaults) {
+            _applyDefaultLayoutParagraphStyle(style, false);
+        }
         return style;
     }
 
@@ -161,7 +164,9 @@ function _applyBlockRangeLayoutParagraphStyle(
     );
 
     if (!blockRange) {
-        _applyDefaultLayoutParagraphStyle(style, false);
+        if (shouldApplyDocumentDefaults) {
+            _applyDefaultLayoutParagraphStyle(style, false);
+        }
         return style;
     }
 
@@ -183,6 +188,17 @@ function _applyBlockRangeLayoutParagraphStyle(
     }
 
     return style;
+}
+
+function _shouldApplyDocumentDefaultParagraphStyle(viewModel: DocumentViewModel): boolean {
+    const snapshot = viewModel.getSnapshot?.();
+    const documentFlavor = snapshot?.documentStyle.documentFlavor;
+
+    if (snapshot == null) {
+        return true;
+    }
+
+    return documentFlavor != null && documentFlavor !== DocumentFlavor.UNSPECIFIED;
 }
 
 function _changeDrawingToSkeletonFormat(
@@ -258,7 +274,12 @@ export function lineBreaking(
 
     const paragraphConfig: IParagraphConfig = {
         paragraphIndex: endIndex,
-        paragraphStyle: _applyBlockRangeLayoutParagraphStyle(viewModel.getBody?.() ?? null, paragraph, paragraphStyle),
+        paragraphStyle: _applyBlockRangeLayoutParagraphStyle(
+            viewModel.getBody?.() ?? null,
+            paragraph,
+            paragraphStyle,
+            _shouldApplyDocumentDefaultParagraphStyle(viewModel)
+        ),
         paragraphNonInlineSkeDrawings,
         paragraphInlineSkeDrawings,
         skeTablesInParagraph: tableSkeleton

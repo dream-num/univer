@@ -401,7 +401,7 @@ describe('core editing commands', () => {
         });
 
         const originalExecuteCommand = commandService.executeCommand.bind(commandService);
-        const executeSpy = vi.spyOn(commandService, 'executeCommand').mockImplementation(async (id: string, params?: unknown) => {
+        const executeSpy = vi.spyOn(commandService, 'executeCommand').mockImplementation(async (id: string, params?: object) => {
             if (id === DeleteLeftCommand.id) {
                 return originalExecuteCommand(id, params);
             }

@@ -54,7 +54,7 @@ const noopDisposable = {
     dispose: () => {},
 };
 
-interface IKeywordInputPlaceholderExtraProps {
+interface IKeywordInputPlaceholderExtraProps extends Record<string, unknown> {
     fontSize?: number;
     fontString?: string;
     fontFamily?: string;

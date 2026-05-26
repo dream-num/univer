@@ -14,10 +14,23 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
+import { DocumentFlavor } from '@univerjs/core';
+import { describe, expect, it, vi } from 'vitest';
 import { lineBreaking } from '../linebreaking';
 import { shaping } from '../shaping';
 import { createParagraphLayoutTestBed } from './create-paragraph-layout-test-bed';
+
+function createContext() {
+    return {
+        paragraphConfigCache: new Map(),
+        skeletonResourceReference: {
+            skeHeaders: new Map(),
+            skeFooters: new Map(),
+            skeListLevel: new Map(),
+            drawingAnchor: new Map(),
+        },
+    } as any;
+}
 
 describe('linebreaking', () => {
     it('lays out short text on a single page', () => {
@@ -349,6 +362,96 @@ describe('linebreaking', () => {
             lineSpacing: 1.5,
             spaceBelow: { v: 8 },
         });
+        expect(paragraphStyle).toEqual({});
+    });
+
+    it('keeps embedded sheet cell documents on their explicit paragraph style only', () => {
+        const ctx = createContext();
+        const paragraphStyle = {};
+        const paragraph = {
+            startIndex: 3,
+            paragraphStyle,
+        };
+        const viewModel = {
+            getParagraph: vi.fn(() => paragraph),
+            getBody: vi.fn(() => ({
+                paragraphs: [paragraph],
+            })),
+            getSnapshot: vi.fn(() => ({
+                documentStyle: {
+                    documentFlavor: DocumentFlavor.UNSPECIFIED,
+                },
+            })),
+            getCustomBlock: vi.fn(() => null),
+        } as any;
+
+        lineBreaking(
+            ctx,
+            viewModel,
+            [],
+            {
+                segmentId: 'segment-1',
+                pageNumber: 1,
+            } as any,
+            {
+                endIndex: 3,
+                startIndex: 0,
+                blocks: [],
+                children: [],
+            } as any,
+            {
+                lists: [],
+                localeService: {} as any,
+                drawings: {},
+            } as any,
+            null
+        );
+
+        expect(ctx.paragraphConfigCache.get('segment-1')?.get(3)?.paragraphStyle).toEqual({});
+        expect(paragraphStyle).toEqual({});
+    });
+
+    it('keeps embedded sheet rich text documents without a flavor on their explicit paragraph style only', () => {
+        const ctx = createContext();
+        const paragraphStyle = {};
+        const paragraph = {
+            startIndex: 3,
+            paragraphStyle,
+        };
+        const viewModel = {
+            getParagraph: vi.fn(() => paragraph),
+            getBody: vi.fn(() => ({
+                paragraphs: [paragraph],
+            })),
+            getSnapshot: vi.fn(() => ({
+                documentStyle: {},
+            })),
+            getCustomBlock: vi.fn(() => null),
+        } as any;
+
+        lineBreaking(
+            ctx,
+            viewModel,
+            [],
+            {
+                segmentId: 'segment-1',
+                pageNumber: 1,
+            } as any,
+            {
+                endIndex: 3,
+                startIndex: 0,
+                blocks: [],
+                children: [],
+            } as any,
+            {
+                lists: [],
+                localeService: {} as any,
+                drawings: {},
+            } as any,
+            null
+        );
+
+        expect(ctx.paragraphConfigCache.get('segment-1')?.get(3)?.paragraphStyle).toEqual({});
         expect(paragraphStyle).toEqual({});
     });
 });

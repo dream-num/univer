@@ -53,7 +53,8 @@ export class DocDrawingPopupMenuController extends RxDisposable {
                     this._clearPopups();
                 }
                 if (command.id === SidebarDocDrawingOperation.id) {
-                    this._isDrawingPanelOpen = command.params?.value === 'open';
+                    const params = command.params as { value?: string } | undefined;
+                    this._isDrawingPanelOpen = params?.value === 'open';
                     if (this._isDrawingPanelOpen) {
                         this._clearPopups();
                     }

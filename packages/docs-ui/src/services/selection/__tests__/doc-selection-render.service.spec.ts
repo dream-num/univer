@@ -76,6 +76,8 @@ interface IFakeRectRange {
 }
 
 interface IServiceHarness {
+    _anchorNodePosition?: unknown;
+    _focusNodePosition?: unknown;
     _rangeList: IFakeTextRange[];
     _rangeListCache: IFakeTextRange[];
     _rectRangeList: IFakeRectRange[];
@@ -460,12 +462,22 @@ describe('doc selection render service internals', () => {
 
     it('snaps reverse drag focus to the start of the first glyph so the first character remains selectable', () => {
         const { engine, mainComponent, scene, service, skeleton } = createService();
-        const firstGlyph = {
+        const firstGlyph: {
+            content: string;
+            count: number;
+            glyphType: GlyphType;
+            parent?: unknown;
+        } = {
             content: 'D',
             count: 1,
             glyphType: GlyphType.WORD,
         };
-        const secondGlyph = {
+        const secondGlyph: {
+            content: string;
+            count: number;
+            glyphType: GlyphType;
+            parent?: unknown;
+        } = {
             content: 'o',
             count: 1,
             glyphType: GlyphType.WORD,

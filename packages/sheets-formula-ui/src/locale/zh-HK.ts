@@ -61,7 +61,7 @@ const locale: typeof enUS = {
             information: '訊息',
             engineering: '工程',
             cube: '多維資料集',
-            compatibility: '相容性',
+            compatibility: '兼容性',
             web: 'Web',
             array: '陣列',
             univer: 'Univer',

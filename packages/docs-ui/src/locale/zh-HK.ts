@@ -21,7 +21,7 @@ const locale: typeof enUS = {
         toolbar: {
             undo: '撤銷',
             redo: '重做',
-            font: '字體',
+            font: '字型',
             fontSize: '字號',
             bold: '粗體',
             italic: '斜體',

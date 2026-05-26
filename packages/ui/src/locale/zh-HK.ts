@@ -48,7 +48,7 @@ const locale: typeof enUS = {
             more: '更多',
         },
         fontFamily: {
-            'not-supported': '系統中未找到該字體，使用預設字體。',
+            'not-supported': '系統中未找到該字型，使用預設字型。',
             arial: 'Arial',
             'times-new-roman': 'Times New Roman',
             tahoma: 'Tahoma',

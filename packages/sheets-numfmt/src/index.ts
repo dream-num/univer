@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export { currencySymbols, getCurrencyFormat, getCurrencySymbolByLocale, getCurrencySymbolIconByLocale, localeCurrencySymbolMap } from './base/const/currency-symbols';
+export { getCurrencyFormat, getCurrencySymbolByLocale, getCurrencySymbolIconByLocale, localeCurrencySymbolMap } from './base/const/currency-symbols';
 export { CURRENCYFORMAT, DATEFMTLISG, NUMBERFORMAT } from './base/const/formatdetail';
 export { AddDecimalCommand } from './commands/commands/add-decimal.command';
 export { SetCurrencyCommand } from './commands/commands/set-currency.command';

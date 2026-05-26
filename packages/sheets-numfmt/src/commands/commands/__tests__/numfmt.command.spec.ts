@@ -42,7 +42,6 @@ import {
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-
 import { getCurrencyFormat } from '../../../base/const/currency-symbols';
 import { AddDecimalCommand } from '../add-decimal.command';
 import { SetCurrencyCommand } from '../set-currency.command';

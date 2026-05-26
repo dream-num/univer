@@ -25,7 +25,6 @@ import {
 } from '@univerjs/core';
 import {
     HTML_CLIPBOARD_MIME_TYPE,
-    imageMimeTypeSet,
     PLAIN_TEXT_CLIPBOARD_MIME_TYPE,
 } from '@univerjs/ui';
 import { takeUntil } from 'rxjs';
@@ -54,31 +53,66 @@ export class DocClipboardController extends RxDisposable implements IRenderModul
     }
 
     private _initLegacyPasteCommand(): void {
-        this._docSelectionRenderService?.onPaste$.pipe(takeUntil(this.dispose$)).subscribe((config) => {
-            if (!whenDocOrEditor(this._contextService)) {
-                return;
+        this._docSelectionRenderService?.onPaste$
+            .pipe(takeUntil(this.dispose$))
+            .subscribe(async (config) => {
+                if (!whenDocOrEditor(this._contextService)) {
+                    return;
+                }
+
+                config!.event.preventDefault();
+                const clipboardEvent = config!.event as ClipboardEvent;
+                let htmlContent = clipboardEvent.clipboardData?.getData(HTML_CLIPBOARD_MIME_TYPE);
+                const textContent = clipboardEvent.clipboardData?.getData(PLAIN_TEXT_CLIPBOARD_MIME_TYPE);
+
+                const files = [...(clipboardEvent.clipboardData?.items || [])]
+                    .filter((item) => item.kind === 'file' && item.type?.startsWith('image/'))
+                    .map((item) => {
+                        const blob = item.getAsFile();
+                        if (!blob) return null;
+                        const ext = item.type.split('/')[1]?.split('+')[0] || 'png';
+                        return new File([blob], `pasted_image_${Date.now()}.${ext}`, { type: item.type });
+                    })
+                    .filter((e): e is File => !!e);
+
+                if (!files.length && htmlContent) {
+                    const extractedFiles = await this._extractImagesFromHtml(htmlContent);
+                    if (extractedFiles.length) {
+                        files.push(...extractedFiles);
+                    }
+                }
+
+                const editor = this._editorService.getEditor(this._context.unitId);
+                if (!!editor && (htmlContent ?? '').indexOf('</table>') > -1) {
+                    htmlContent = '';
+                }
+
+                this._docClipboardService.legacyPaste({ html: htmlContent, text: textContent, files });
+            });
+    }
+
+    private async _extractImagesFromHtml(html: string): Promise<File[]> {
+        const files: File[] = [];
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const images = doc.querySelectorAll('img');
+
+        for (const img of images) {
+            const src = img.src || img.getAttribute('data-src');
+            if (!src || !src.startsWith('http')) continue;
+
+            try {
+                const response = await fetch(src, { mode: 'cors' });
+                if (!response.ok) continue;
+                const blob = await response.blob();
+                const contentType = blob.type || 'image/png';
+                const ext = contentType.split('/')[1]?.split('+')[0] || 'png';
+                const file = new File([blob], `extracted_${Date.now()}.${ext}`, { type: contentType });
+                files.push(file);
+            } catch (e) {
+                console.warn('[DocClipboardController] Failed to fetch image from HTML', src, e);
             }
-
-            config!.event.preventDefault();
-            const clipboardEvent = config!.event as ClipboardEvent;
-            let htmlContent = clipboardEvent.clipboardData?.getData(HTML_CLIPBOARD_MIME_TYPE);
-            const textContent = clipboardEvent.clipboardData?.getData(PLAIN_TEXT_CLIPBOARD_MIME_TYPE);
-
-            const files = [...(clipboardEvent.clipboardData?.items || [])]
-                .filter((item) => imageMimeTypeSet.has(item.type))
-                .map((item) => item.getAsFile()!)
-                .filter((e) => !!e);
-
-            // TODO: @JOCS, work around to fix https://github.com/dream-num/univer-pro/issues/2006. and then when you paste it,
-            // you need to distinguish between different editors,
-            // because different editors have different pasting effects. For example, when editing a state, you can't paste a table
-            const editor = this._editorService.getEditor(this._context.unitId);
-
-            if (!!editor && (htmlContent ?? '').indexOf('</table>') > -1) {
-                htmlContent = '';
-            }
-
-            this._docClipboardService.legacyPaste({ html: htmlContent, text: textContent, files });
-        });
+        }
+        return files;
     }
 }

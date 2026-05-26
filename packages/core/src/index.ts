@@ -19,6 +19,7 @@ import { installShims } from './common/shims';
 installShims();
 
 export { dedupe, dedupeBy, groupBy, makeArray, remove, rotate } from './common/array';
+export * from './base';
 export * from './common/async';
 export { isBooleanString } from './common/boolean';
 export * from './common/const';

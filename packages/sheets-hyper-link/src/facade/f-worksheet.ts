@@ -23,7 +23,7 @@ import { FWorksheet } from '@univerjs/sheets/facade';
 export interface IFWorksheetHyperlinkMixin {
     /**
      * Create a hyperlink url to this sheet
-     * @returns {string} The url of this sheet
+     * @returns {string} The hyperlink url of this sheet
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -38,7 +38,7 @@ export interface IFWorksheetHyperlinkMixin {
 export class FWorksheetHyperlinkMixin extends FWorksheet implements IFWorksheetHyperlinkMixin {
     override getUrl(): string {
         const parserService = this._injector.get(SheetsHyperLinkParserService);
-        return parserService.buildHyperLink(this._workbook.getUnitId(), this._worksheet.getSheetId());
+        return parserService.buildHyperLink(this._worksheet.getSheetId());
     }
 }
 

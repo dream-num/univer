@@ -14,26 +14,13 @@
  * limitations under the License.
  */
 
-/**
- * Built-in locales.
- */
-export enum LocaleType {
-    EN_US = 'enUS',
-    FR_FR = 'frFR',
-    ZH_CN = 'zhCN',
-    RU_RU = 'ruRU',
-    ZH_TW = 'zhTW',
-    VI_VN = 'viVN',
-    FA_IR = 'faIR',
-    JA_JP = 'jaJP',
-    KO_KR = 'koKR',
-    ES_ES = 'esES',
-    CA_ES = 'caES',
-    SK_SK = 'skSK',
-    PT_BR = 'ptBR',
-    DE_DE = 'deDE',
-    IT_IT = 'itIT',
-    ID_ID = 'idID',
-    PL_PL = 'plPL',
-    AR_SA = 'arSA',
-}
+const locale = {
+    'docs-thread-comment-ui': {
+        panel: {
+            title: 'Comment Management',
+            addComment: 'Add Comment',
+        },
+    },
+};
+
+export default locale;

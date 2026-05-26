@@ -41,6 +41,7 @@ export function DefaultMenu({
     onSelectTab: (tab: IMenuSchema) => void;
 }) {
     const localeService = useDependency(LocaleService);
+    const activatedTabTitle = ribbon.find((group) => group.key === activatedTab)?.title || activatedTab;
 
     const [groupSelectorVisible, setGroupSelectorVisible] = useState(false);
 
@@ -92,10 +93,10 @@ export function DefaultMenu({
                                           dark:!univer-text-gray-200
                                         `}
                                     >
-                                        {localeService.t(`ui.${group.key}`)}
+                                        {localeService.t(group.title || group.key)}
                                     </strong>
                                     <span className="univer-text-xs univer-text-gray-400">
-                                        {localeService.t(`ui.${group.key}Desc`)}
+                                        {localeService.t(`${group.title || group.key}Desc`)}
                                     </span>
                                 </span>
                             </a>
@@ -114,7 +115,7 @@ export function DefaultMenu({
                 `}
                 onClick={() => setGroupSelectorVisible(true)}
             >
-                {localeService.t(`ui.${activatedTab}`)}
+                {localeService.t(activatedTabTitle)}
                 <MoreDownIcon
                     className={`
                       univer-text-gray-200

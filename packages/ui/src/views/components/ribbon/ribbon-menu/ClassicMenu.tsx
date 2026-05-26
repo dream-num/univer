@@ -47,7 +47,7 @@ export function ClassicMenu({
                         type="button"
                         role="tab"
                         aria-selected={isActive}
-                        title={localeService.t(`ui.${group.key}`)}
+                        title={localeService.t(group.title || group.key)}
                         onClick={() => onSelectTab(group)}
                         className={clsx(`
                           univer-focus:outline-none univer-focus:ring-2 univer-focus:ring-primary-500
@@ -67,7 +67,7 @@ export function ClassicMenu({
                               dark:!univer-text-gray-200
                             `)}
                     >
-                        {localeService.t(`ui.${group.key}`)}
+                        {localeService.t(group.title || group.key)}
                     </button>
                 );
             })}

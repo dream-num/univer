@@ -184,7 +184,7 @@ export function MobileRibbon(props: IMobileRibbonProps) {
                                     `)}
                                 onClick={() => selectTab(index)}
                             >
-                                {localeService.t(`ui.${group.key}`)}
+                                {localeService.t(group.title || group.key)}
                                 {active && (
                                     <span
                                         className="

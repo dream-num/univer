@@ -29,11 +29,10 @@ import type { BaseReferenceObject, FunctionVariantType } from '../engine/referen
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../engine/value-object/base-value-object';
 import type { StringValueObject } from '../engine/value-object/primitive-object';
-import { createIdentifier, Disposable, ObjectMatrix } from '@univerjs/core';
+import { createIdentifier, Disposable, isNullCell, ObjectMatrix } from '@univerjs/core';
 import { isInDirtyRange } from '../basics/dirty';
 import { ErrorType } from '../basics/error-type';
 import { CELL_INVERTED_INDEX_CACHE } from '../basics/inverted-index-cache';
-import { isNullCellForFormula } from '../basics/is-null-cell';
 import { FORMULA_REF_TO_ARRAY_CACHE } from '../engine/reference-object/base-reference-object';
 import { getRuntimeFeatureCell } from '../engine/utils/get-runtime-feature-cell';
 import { clearNumberFormatTypeCache, clearStringToNumberPatternCache } from '../engine/utils/numfmt-kit';
@@ -853,10 +852,10 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
                 const isPreviousCellOfCurrentArrayFormula = this._arrayCellHasData(arrayDataCell) &&
                     this._isInArrayFormulaRange(previousArrayFormulaRange, r, c) &&
                     (currentCell == null || this._isSameCellValue(currentCell, arrayDataCell));
-                const hasRuntimeCell = !isNullCellForFormula(cell);
+                const hasRuntimeCell = !isNullCell(cell);
                 const isInOtherArrayFormulaRange = this._isInOtherArrayFormulaRange(formulaUnitId, formulaSheetId, formulaRow, formulaColumn, r, c);
-                const currentCellBlocks = !isNullCellForFormula(currentCell) && !isPreviousCellOfCurrentArrayFormula;
-                const featureCellBlocks = !isNullCellForFormula(featureCell);
+                const currentCellBlocks = !isNullCell(currentCell) && !isPreviousCellOfCurrentArrayFormula;
+                const featureCellBlocks = !isNullCell(featureCell);
 
                 // arrayDataCell may display 0 as {v: null}. Although it is an empty cell, it is considered to have a value.
                 if (

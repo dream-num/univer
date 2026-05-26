@@ -14,34 +14,12 @@
  * limitations under the License.
  */
 
-import type { IDataValidationRule, IDisposable, IExecutionOptions, IRange, Nullable, ObjectMatrix } from '@univerjs/core';
-import type { IRuleChange } from '@univerjs/data-validation';
-import type {
-    IAddSheetDataValidationCommandParams,
-    IRemoveSheetAllDataValidationCommandParams,
-    IRemoveSheetDataValidationCommandParams,
-    IUpdateSheetDataValidationOptionsCommandParams,
-    IUpdateSheetDataValidationRangeCommandParams,
-    IUpdateSheetDataValidationSettingCommandParams,
-    IValidStatusChange,
-} from '@univerjs/sheets-data-validation';
-import { DataValidationStatus, toDisposable } from '@univerjs/core';
-
-import {
-    AddSheetDataValidationCommand,
-    RemoveSheetAllDataValidationCommand,
-    RemoveSheetDataValidationCommand,
-    SheetDataValidationModel,
-    SheetsDataValidationValidatorService,
-    UpdateSheetDataValidationOptionsCommand,
-    UpdateSheetDataValidationRangeCommand,
-    UpdateSheetDataValidationSettingCommand,
-} from '@univerjs/sheets-data-validation';
+import type { IDataValidationRule, IRange, Nullable, ObjectMatrix } from '@univerjs/core';
+import { DataValidationStatus } from '@univerjs/core';
+import { SheetDataValidationModel, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
 import { FWorkbook } from '@univerjs/sheets/facade';
-import { filter } from 'rxjs';
 
 export interface IDataValidationError {
-
     sheetName: string;
 
     /** The row of the cell that triggered the error */
@@ -85,68 +63,6 @@ export interface IFWorkbookSheetsDataValidationMixin {
      * ```
      */
     getAllDataValidationErrorAsync(): Promise<IDataValidationError[]>;
-
-    /**
-     * @deprecated Use `univerAPI.addEvent(univerAPI.Event.SheetDataValidationChanged, (event) => { ... })` instead
-     */
-    onDataValidationChange(
-        callback: (ruleChange: IRuleChange) => void
-    ): IDisposable;
-
-    /**
-     * @deprecated Use `univerAPI.addEvent(univerAPI.Event.SheetDataValidatorStatusChanged, (event) => { ... })` instead
-     */
-    onDataValidationStatusChange(
-        callback: (statusChange: IValidStatusChange) => void
-    ): IDisposable;
-
-    /**
-     * @deprecated Use `univerAPI.addEvent(univerAPI.Event.BeforeSheetDataValidationAdd, (event) => { ... })` instead
-     */
-    onBeforeAddDataValidation(
-        this: FWorkbook,
-        callback: (params: IAddSheetDataValidationCommandParams, options: IExecutionOptions | undefined) => void | false
-    ): IDisposable;
-
-    /**
-     * @deprecated Use `univerAPI.addEvent(univerAPI.Event.BeforeSheetDataValidationCriteriaUpdate, (event) => { ... })` instead
-     */
-    onBeforeUpdateDataValidationCriteria(
-        this: FWorkbook,
-        callback: (params: IUpdateSheetDataValidationSettingCommandParams, options: IExecutionOptions | undefined) => void | false
-    ): IDisposable;
-
-    /**
-     * @deprecated Use `univerAPI.addEvent(univerAPI.Event.BeforeSheetDataValidationRangeUpdate, (event) => { ... })` instead
-     */
-    onBeforeUpdateDataValidationRange(
-        this: FWorkbook,
-        callback: (params: IUpdateSheetDataValidationRangeCommandParams, options: IExecutionOptions | undefined) => void | false
-    ): IDisposable;
-
-    /**
-     * @deprecated Use `univerAPI.addEvent(univerAPI.Event.BeforeSheetDataValidationOptionsUpdate, (event) => { ... })` instead
-     */
-    onBeforeUpdateDataValidationOptions(
-        this: FWorkbook,
-        callback: (params: IUpdateSheetDataValidationOptionsCommandParams, options: IExecutionOptions | undefined) => void | false
-    ): IDisposable;
-
-    /**
-     * @deprecated Use `univerAPI.addEvent(univerAPI.Event.BeforeSheetDataValidationDelete, (event) => { ... })` instead
-     */
-    onBeforeDeleteDataValidation(
-        this: FWorkbook,
-        callback: (params: IRemoveSheetDataValidationCommandParams, options: IExecutionOptions | undefined) => void | false
-    ): IDisposable;
-
-    /**
-     * @deprecated Use `univerAPI.addEvent(univerAPI.Event.BeforeSheetDataValidationDeleteAll, (event) => { ... })` instead
-     */
-    onBeforeDeleteAllDataValidation(
-        this: FWorkbook,
-        callback: (params: IRemoveSheetAllDataValidationCommandParams, options: IExecutionOptions | undefined) => void | false
-    ): IDisposable;
 }
 
 /**
@@ -261,115 +177,6 @@ export class FWorkbookSheetsDataValidationMixin extends FWorkbook implements IFW
             inputValue,
             rule,
         };
-    }
-
-    // region DataValidationHooks
-    override onDataValidationChange(
-        callback: (ruleChange: IRuleChange) => void
-    ): IDisposable {
-        return toDisposable(this._dataValidationModel.ruleChange$
-
-            .pipe(filter((change) => change.unitId === this._workbook.getUnitId()))
-            .subscribe(callback));
-    }
-
-    override onDataValidationStatusChange(
-        callback: (statusChange: IValidStatusChange) => void
-    ): IDisposable {
-        return toDisposable(this._dataValidationModel.validStatusChange$
-            .pipe(filter((change) => change.unitId === this._workbook.getUnitId()))
-            .subscribe(callback));
-    }
-
-    override onBeforeAddDataValidation(
-        callback: (params: IAddSheetDataValidationCommandParams, options: IExecutionOptions | undefined) => void | false
-    ): IDisposable {
-        return toDisposable(this._commandService.beforeCommandExecuted((commandInfo, options) => {
-            const params = commandInfo.params as IAddSheetDataValidationCommandParams;
-            if (commandInfo.id === AddSheetDataValidationCommand.id) {
-                if (params.unitId !== this._workbook.getUnitId()) {
-                    return;
-                }
-                if (callback(params, options) === false) {
-                    throw new Error('Command is stopped by the hook onBeforeAddDataValidation');
-                }
-            }
-        }));
-    }
-
-    override onBeforeUpdateDataValidationCriteria(
-        callback: (params: IUpdateSheetDataValidationSettingCommandParams, options: IExecutionOptions | undefined) => void | false
-    ): IDisposable {
-        return toDisposable(this._commandService.beforeCommandExecuted((commandInfo, options) => {
-            const params = commandInfo.params as IUpdateSheetDataValidationSettingCommandParams;
-            if (commandInfo.id === UpdateSheetDataValidationSettingCommand.id) {
-                if (params.unitId !== this._workbook.getUnitId()) {
-                    return;
-                }
-
-                if (callback(params, options) === false) {
-                    throw new Error('Command is stopped by the hook onBeforeUpdateDataValidationCriteria');
-                }
-            }
-        }));
-    }
-
-    override onBeforeUpdateDataValidationRange(callback: (params: IUpdateSheetDataValidationRangeCommandParams, options: IExecutionOptions | undefined) => void | false): IDisposable {
-        return toDisposable(this._commandService.beforeCommandExecuted((commandInfo, options) => {
-            const params = commandInfo.params as IUpdateSheetDataValidationRangeCommandParams;
-            if (commandInfo.id === UpdateSheetDataValidationRangeCommand.id) {
-                if (params.unitId !== this._workbook.getUnitId()) {
-                    return;
-                }
-
-                if (callback(params, options) === false) {
-                    throw new Error('Command is stopped by the hook onBeforeUpdateDataValidationRange');
-                }
-            }
-        }));
-    }
-
-    override onBeforeUpdateDataValidationOptions(callback: (params: IUpdateSheetDataValidationOptionsCommandParams, options: IExecutionOptions | undefined) => void | false): IDisposable {
-        return toDisposable(this._commandService.beforeCommandExecuted((commandInfo, options) => {
-            const params = commandInfo.params as IUpdateSheetDataValidationOptionsCommandParams;
-            if (commandInfo.id === UpdateSheetDataValidationOptionsCommand.id) {
-                if (params.unitId !== this._workbook.getUnitId()) {
-                    return;
-                }
-
-                if (callback(params, options) === false) {
-                    throw new Error('Command is stopped by the hook onBeforeUpdateDataValidationOptions');
-                }
-            }
-        }));
-    }
-
-    override onBeforeDeleteDataValidation(callback: (params: IRemoveSheetDataValidationCommandParams, options: IExecutionOptions | undefined) => void | false): IDisposable {
-        return toDisposable(this._commandService.beforeCommandExecuted((commandInfo, options) => {
-            const params = commandInfo.params as IRemoveSheetDataValidationCommandParams;
-            if (commandInfo.id === RemoveSheetDataValidationCommand.id) {
-                if (params.unitId !== this._workbook.getUnitId()) {
-                    return;
-                }
-                if (callback(params, options) === false) {
-                    throw new Error('Command is stopped by the hook onBeforeDeleteDataValidation');
-                }
-            }
-        }));
-    }
-
-    override onBeforeDeleteAllDataValidation(callback: (params: IRemoveSheetAllDataValidationCommandParams, options: IExecutionOptions | undefined) => void | false): IDisposable {
-        return toDisposable(this._commandService.beforeCommandExecuted((commandInfo, options) => {
-            const params = commandInfo.params as IRemoveSheetAllDataValidationCommandParams;
-            if (commandInfo.id === RemoveSheetAllDataValidationCommand.id) {
-                if (params.unitId !== this._workbook.getUnitId()) {
-                    return;
-                }
-                if (callback(params, options) === false) {
-                    throw new Error('Command is stopped by the hook onBeforeDeleteAllDataValidation');
-                }
-            }
-        }));
     }
 }
 

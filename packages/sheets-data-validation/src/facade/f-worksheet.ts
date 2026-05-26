@@ -39,11 +39,6 @@ export interface IFWorksheetDataValidationMixin {
     getDataValidations(): FDataValidation[];
 
     /**
-     * @deprecated use `getValidatorStatusAsync` instead
-     */
-    getValidatorStatus(): Promise<ObjectMatrix<Nullable<DataValidationStatus>>>;
-
-    /**
      * Get data validation validator status for current sheet.
      * @returns {Promise<ObjectMatrix<Nullable<DataValidationStatus>>>} matrix of validator status
      * ```ts
@@ -91,16 +86,12 @@ export class FWorksheetDataValidationMixin extends FWorksheet implements IFWorks
         return dataValidationModel.getRules(this._workbook.getUnitId(), this._worksheet.getSheetId()).map((rule) => new FDataValidation(rule, this._worksheet, this._injector));
     }
 
-    override getValidatorStatus(): Promise<ObjectMatrix<Nullable<DataValidationStatus>>> {
+    override getValidatorStatusAsync(): Promise<ObjectMatrix<Nullable<DataValidationStatus>>> {
         const validatorService = this._injector.get(SheetsDataValidationValidatorService);
         return validatorService.validatorWorksheet(
             this._workbook.getUnitId(),
             this._worksheet.getSheetId()
         );
-    }
-
-    override getValidatorStatusAsync(): Promise<ObjectMatrix<Nullable<DataValidationStatus>>> {
-        return this.getValidatorStatus();
     }
 
     override getDataValidation(ruleId: string): Nullable<FDataValidation> {

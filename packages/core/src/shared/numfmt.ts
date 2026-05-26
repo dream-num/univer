@@ -33,6 +33,7 @@ export function isDefaultFormat(pattern?: string | null) {
 export type INumfmtLocaleTag =
     | 'zh-CN'
     | 'zh-TW'
+    | 'ar'
     | 'cs'
     | 'da'
     | 'nl'
@@ -122,7 +123,9 @@ export const isPatternEqualWithoutDecimal = (patternA: string, patternB: string)
 
 const ignoreCommonPatterns = new Set(['m d']);
 const ignoreAMPMPatterns = new Set(['h:mm AM/PM', 'hh:mm AM/PM']);
-const currencySymbols = new Set(['$', '¥', '₽', '₫', 'NT$', '€', '₩', '﷼']);
+export const currencySymbols = ['Rp', 'zł', 'NT$', 'R$', '$', '£', '¥', '¤', '֏', '؋', '৳', '฿', '៛', '₡', '₦', '₩', '₪', '₫', '€', '₭', '₮', '₱', '₲', '₴', '₸', '₹', '₺', '₼', '₽', '₾', '₿', '﷼'];
+
+const currencySymbolSet = new Set(currencySymbols);
 
 /**
  * Get the numfmt parse value, and filter out the parse error.
@@ -158,7 +161,7 @@ export const getNumfmtParseValueFilter = (value: string): numfmt.ParseData | nul
         if (z.includes('#,##0')) {
             if (/[.,]$/.test(value)) return null;
 
-            const normalized = value.replace(new RegExp(`^[${[...currencySymbols].join('')}]+`), '').trim();
+            const normalized = value.replace(new RegExp(`^[${[...currencySymbolSet].join('')}]+`), '').trim();
 
             if (normalized.includes(',')) {
                 const validGrouping = /^-?\d{1,3}(,\d{3})*(\.\d+)?$/.test(normalized);

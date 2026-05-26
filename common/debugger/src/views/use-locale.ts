@@ -67,6 +67,30 @@ const locales = [
         label: '한국어',
         value: LocaleType.KO_KR,
     },
+    {
+        label: 'Português (Brasil)',
+        value: LocaleType.PT_BR,
+    },
+    {
+        label: 'Deutsch',
+        value: LocaleType.DE_DE,
+    },
+    {
+        label: 'Italiano',
+        value: LocaleType.IT_IT,
+    },
+    {
+        label: 'Bahasa Indonesia',
+        value: LocaleType.ID_ID,
+    },
+    {
+        label: 'Polski',
+        value: LocaleType.PL_PL,
+    },
+    {
+        label: 'العربية',
+        value: LocaleType.AR_SA,
+    },
 ];
 
 // eslint-disable-next-line max-lines-per-function
@@ -108,6 +132,24 @@ export function useLocale() {
                 break;
             case LocaleType.SK_SK:
                 locales = await import('@univerjs/mockdata/locales/sk-SK');
+                break;
+            case LocaleType.PT_BR:
+                locales = await import('@univerjs/mockdata/locales/pt-BR');
+                break;
+            case LocaleType.DE_DE:
+                locales = await import('@univerjs/mockdata/locales/de-DE');
+                break;
+            case LocaleType.IT_IT:
+                locales = await import('@univerjs/mockdata/locales/it-IT');
+                break;
+            case LocaleType.ID_ID:
+                locales = await import('@univerjs/mockdata/locales/id-ID');
+                break;
+            case LocaleType.PL_PL:
+                locales = await import('@univerjs/mockdata/locales/pl-PL');
+                break;
+            case LocaleType.AR_SA:
+                locales = await import('@univerjs/mockdata/locales/ar-SA');
                 break;
             case LocaleType.EN_US:
             default:

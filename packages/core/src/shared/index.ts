@@ -34,6 +34,7 @@ export { LRUHelper, LRUMap } from './lru/lru-map';
 export * from './max-row-column';
 export type { INumfmtLocaleTag } from './numfmt';
 export {
+    currencySymbols,
     DEFAULT_NUMBER_FORMAT,
     DEFAULT_TEXT_FORMAT,
     DEFAULT_TEXT_FORMAT_EXCEL,

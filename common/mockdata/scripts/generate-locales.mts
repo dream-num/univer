@@ -33,6 +33,12 @@ const locales = [
     'es-ES',
     'ca-ES',
     'sk-SK',
+    'pt-BR',
+    'de-DE',
+    'it-IT',
+    'id-ID',
+    'pl-PL',
+    'ar-SA',
 ];
 
 /**

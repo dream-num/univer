@@ -102,6 +102,7 @@ describe('Test cell data', () => {
         expect(isNullCell({ si: null })).toBeTruthy();
         expect(isNullCell({ si: undefined })).toBeTruthy();
         expect(isNullCell({ si: '' })).toBeTruthy();
+        expect(isNullCell({ custom: { key: 'value' } })).toBeTruthy();
 
         expect(isNullCell({ v: 1 })).toBeFalsy();
         expect(isNullCell({ p: DOCUMENT_DATA })).toBeFalsy();

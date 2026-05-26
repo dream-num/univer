@@ -356,7 +356,7 @@ export function isNullCell(cell: Nullable<ICellData>) {
         return true;
     }
 
-    const { v, f, si, p, custom } = cell;
+    const { v, f, si, p } = cell;
 
     if (!(v == null || (typeof v === 'string' && v.length === 0))) {
         return false;
@@ -367,10 +367,6 @@ export function isNullCell(cell: Nullable<ICellData>) {
     }
 
     if (p != null) {
-        return false;
-    }
-
-    if (custom != null) {
         return false;
     }
 

@@ -91,6 +91,7 @@ const workbookDataFactory = (): IWorkbookData => ({
                     0: { v: 'A1' },
                     1: { v: 'very-long-text-for-overflow-path', s: 'style-bg-border' },
                     2: { v: 'wrapped line text', s: 'style-bg-border' },
+                    4: { s: 'style-bg-border', custom: { key: 'value' } },
                 },
                 1: {
                     1: { v: 'rotate-text', s: 'style-rotate' },
@@ -255,6 +256,9 @@ describe('spreadsheet integration', () => {
         }));
         expect(skeleton.rowColumnSegment.endRow).toBeGreaterThanOrEqual(0);
         expect(skeleton.stylesCache.fontMatrix.getSizeOf()).toBeGreaterThan(0);
+        expect(skeleton.stylesCache.border?.getValue(0, 4)).toBeTruthy();
+        expect(skeleton.stylesCache.fontMatrix.getValue(0, 4)).toBeUndefined();
+        expect(skeleton.overflowCache.getValue(0, 4)).toBeUndefined();
 
         const autoHeights = skeleton.calculateAutoHeightInRange([{ startRow: 0, endRow: 6, startColumn: 0, endColumn: 3, rangeType: RANGE_TYPE.NORMAL }]);
         expect(autoHeights.length).toBeGreaterThan(0);

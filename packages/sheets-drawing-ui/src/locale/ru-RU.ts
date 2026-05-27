@@ -73,6 +73,9 @@ const locale: typeof enUS = {
                 editErr: 'Диапазон защищен, и у вас нет разрешения на редактирование. Для редактирования свяжитесь с создателем.',
             },
         },
+        shortcut: {
+            'drawing-view': 'Drawing View',
+        },
     },
 };
 

@@ -73,6 +73,9 @@ const locale: typeof enUS = {
                 editErr: 'O intervalo está protegido e você não tem permissão de edição. Para editar, entre em contato com o criador.',
             },
         },
+        shortcut: {
+            'drawing-view': 'Drawing View',
+        },
     },
 };
 

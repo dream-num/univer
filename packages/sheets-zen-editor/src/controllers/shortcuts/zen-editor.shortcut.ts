@@ -24,6 +24,7 @@ export const ZenEditorConfirmShortcut: IShortcutItem = {
     id: ConfirmZenEditCommand.id,
     description: 'sheets-zen-editor.shortcut.sheet.zen-edit-confirm',
     group: '4_sheet-edit',
+    groupTitle: 'sheets-ui.shortcut.sheet-edit',
     preconditions: (contextService) => whenZenEditorActivated(contextService),
     binding: KeyCode.ENTER | MetaKeys.ALT,
 };
@@ -32,6 +33,7 @@ export const ZenEditorCancelShortcut: IShortcutItem = {
     id: CancelZenEditCommand.id,
     description: 'sheets-zen-editor.shortcut.sheet.zen-edit-cancel',
     group: '4_sheet-edit',
+    groupTitle: 'sheets-ui.shortcut.sheet-edit',
     preconditions: (contextService) => whenZenEditorActivated(contextService),
     binding: KeyCode.ESC,
 };

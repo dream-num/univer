@@ -78,6 +78,7 @@ export const StartEditWithF2Shortcut: IShortcutItem = {
     binding: KeyCode.F2,
     description: 'sheets-ui.shortcut.sheet.start-editing',
     group: '4_sheet-edit',
+    groupTitle: 'sheets-ui.shortcut.sheet-edit',
     preconditions: whenSheetEditorFocused,
     staticParameters: {
         visible: true,
@@ -91,6 +92,7 @@ export const RepeatLastActionShortcut: IShortcutItem = {
     binding: KeyCode.F4,
     description: 'sheets-ui.shortcut.sheet.repeat-last-action',
     group: '4_sheet-edit',
+    groupTitle: 'sheets-ui.shortcut.sheet-edit',
     preconditions: whenSheetEditorFocused,
 };
 
@@ -99,6 +101,7 @@ export const EditorCursorEnterShortcut: IShortcutItem = {
     binding: KeyCode.ENTER,
     description: 'sheets-ui.shortcut.sheet.toggle-editing',
     group: '4_sheet-edit',
+    groupTitle: 'sheets-ui.shortcut.sheet-edit',
     preconditions: (contextService) => whenEditorDidNotInputFormulaActivated(contextService),
     staticParameters: {
         visible: false,
@@ -123,6 +126,7 @@ export const EditorCursorEscShortcut: IShortcutItem = {
     binding: KeyCode.ESC,
     description: 'sheets-ui.shortcut.sheet.abort-editing',
     group: '4_sheet-edit',
+    groupTitle: 'sheets-ui.shortcut.sheet-edit',
     preconditions: (contextService) => whenEditorDidNotInputFormulaActivated(contextService),
     staticParameters: {
         visible: false,
@@ -147,6 +151,7 @@ export const EditorBreakLineShortcut: IShortcutItem = {
     id: BreakLineCommand.id,
     description: 'sheets-ui.shortcut.sheet.break-line',
     group: '4_sheet-edit',
+    groupTitle: 'sheets-ui.shortcut.sheet-edit',
     preconditions: (contextService) => whenSheetEditorActivated(contextService),
     binding: KeyCode.ENTER | MetaKeys.ALT,
 };
@@ -176,6 +181,7 @@ export const EditorDeleteLeftShortcutInActive: IShortcutItem = {
     id: SetCellEditVisibleOperation.id,
     description: 'sheets-ui.shortcut.sheet.delete-and-start-editing',
     group: '4_sheet-edit',
+    groupTitle: 'sheets-ui.shortcut.sheet-edit',
     preconditions: (contextService) => whenSheetEditorFocused(contextService) && !whenFormulaEditorFocused(contextService),
     binding: KeyCode.BACKSPACE,
     staticParameters: {

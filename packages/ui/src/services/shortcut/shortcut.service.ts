@@ -73,6 +73,15 @@ export interface IShortcutItem<P extends object = object> {
     group?: string;
 
     /**
+     * The locale key for the group title displayed in the shortcut panel.
+     * If not specified, the group name (without the sequence prefix) will be used as the locale key.
+     * It supports dot-notation paths for namespaced locale keys.
+     *
+     * @example { groupTitle: 'ui.global-shortcut' }
+     */
+    groupTitle?: string;
+
+    /**
      * Static parameters of this shortcut. Would be send to {@link ICommandService.executeCommand} as the second
      * parameter when the corresponding command is executed.
      *

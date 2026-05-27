@@ -73,6 +73,9 @@ const locale: typeof enUS = {
                 editErr: 'El rango está protegido y no tienes permiso de edición. Para editar, contacta al creador.',
             },
         },
+        shortcut: {
+            'drawing-view': 'Drawing View',
+        },
     },
 };
 

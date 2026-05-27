@@ -276,6 +276,8 @@ const locale = {
             copied: 'Copied',
         },
         shortcut: {
+            'sheet-view': 'Sheet View',
+            'sheet-edit': 'Sheet Edit',
             sheet: {
                 'zoom-in': 'Zoom in',
                 'zoom-out': 'Zoom out',

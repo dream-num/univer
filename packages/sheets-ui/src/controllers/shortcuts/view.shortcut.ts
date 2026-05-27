@@ -25,6 +25,7 @@ export const ZoomInShortcutItem: IShortcutItem = {
     description: 'sheets-ui.shortcut.sheet.zoom-in',
     binding: KeyCode.EQUAL | MetaKeys.CTRL_COMMAND,
     group: '3_sheet-view',
+    groupTitle: 'sheets-ui.shortcut.sheet-view',
     preconditions: whenSheetEditorFocused,
     priority: 1,
     staticParameters: {
@@ -41,6 +42,7 @@ export const ZoomOutShortcutItem: IShortcutItem = {
     description: 'sheets-ui.shortcut.sheet.zoom-out',
     binding: KeyCode.MINUS | MetaKeys.CTRL_COMMAND,
     group: '3_sheet-view',
+    groupTitle: 'sheets-ui.shortcut.sheet-view',
     preconditions: whenSheetEditorFocused,
     priority: 1,
     staticParameters: {
@@ -58,6 +60,7 @@ export const ResetZoomShortcutItem: IShortcutItem = {
     binding: KeyCode.Digit0 | MetaKeys.CTRL_COMMAND,
     preconditions: whenSheetEditorFocused,
     group: '3_sheet-view',
+    groupTitle: 'sheets-ui.shortcut.sheet-view',
     priority: 1,
     staticParameters: {
         reset: true,

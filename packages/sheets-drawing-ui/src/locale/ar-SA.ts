@@ -73,6 +73,9 @@ const locale: typeof enUS = {
                 editErr: 'النطاق محمي، وليس لديك إذن التحرير. للتحرير، يرجى التواصل مع المنشئ.',
             },
         },
+        shortcut: {
+            'drawing-view': 'Drawing View',
+        },
     },
 };
 

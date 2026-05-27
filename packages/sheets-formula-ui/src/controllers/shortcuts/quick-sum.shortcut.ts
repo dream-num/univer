@@ -26,4 +26,5 @@ export const QuickSumShortcut: IShortcutItem = {
     mac: MetaKeys.CTRL_COMMAND | MetaKeys.ALT | KeyCode.EQUAL,
     description: 'sheets-formula-ui.shortcut.quick-sum',
     group: '4_sheet-edit',
+    groupTitle: 'sheets-ui.shortcut.sheet-edit',
 };

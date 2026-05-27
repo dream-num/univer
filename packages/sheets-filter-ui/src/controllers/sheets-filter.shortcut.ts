@@ -25,4 +25,5 @@ export const SmartToggleFilterShortcut: IShortcutItem = {
     description: 'sheets-filter-ui.shortcut.smart-toggle-filter',
     preconditions: whenSheetEditorFocused,
     group: '4_sheet-edit',
+    groupTitle: 'sheets-ui.shortcut.sheet-edit',
 };

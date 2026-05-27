@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
+import { BooleanNumber, DataStreamTreeTokenType, PositionedObjectLayoutType } from '@univerjs/core';
+import { describe, expect, it, vi } from 'vitest';
+import { Lang } from '../../../hyphenation/lang';
+import { fontLibrary } from '../../../shaping-engine/font-library';
+import * as textShapingModule from '../../../shaping-engine/text-shaping';
 import { shaping } from '../shaping';
 import { createParagraphLayoutTestBed } from './create-paragraph-layout-test-bed';
 
@@ -101,5 +105,237 @@ describe('shaping', () => {
         for (const shapedText of result) {
             expect(shapedText.breakPointType).toBeDefined();
         }
+    });
+
+    it('shapes Tibetan text', () => {
+        const tibetanText = '\u0F40\u0F41';
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed(tibetanText);
+
+        const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+
+        expect(result.length).toBeGreaterThan(0);
+        const allGlyphs = result.flatMap((r) => r.glyphs);
+        expect(allGlyphs.length).toBeGreaterThan(0);
+    });
+
+    it('shapes Thai text', () => {
+        const thaiText = '\u0E01\u0E02';
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed(thaiText);
+
+        const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+
+        expect(result.length).toBeGreaterThan(0);
+        const allGlyphs = result.flatMap((r) => r.glyphs);
+        expect(allGlyphs.length).toBeGreaterThan(0);
+    });
+
+    it('applies punctuation space adjustment for consecutive CJK punctuation', () => {
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('，。');
+
+        const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+
+        const allGlyphs = result.flatMap((r) => r.glyphs);
+        expect(allGlyphs.some((g) => g.content === '，')).toBe(true);
+        expect(allGlyphs.some((g) => g.content === '。')).toBe(true);
+    });
+
+    it('adds CJK Latin spacing for mixed text', () => {
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('A好B');
+
+        const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+
+        expect(result.length).toBeGreaterThan(0);
+        const allGlyphs = result.flatMap((r) => r.glyphs);
+        expect(allGlyphs.length).toBeGreaterThan(0);
+    });
+
+    it('shapes paragraph break with zero width when configured', () => {
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('Hello');
+        sectionBreakConfig.renderConfig = {
+            ...sectionBreakConfig.renderConfig,
+            zeroWidthParagraphBreak: BooleanNumber.TRUE,
+        };
+
+        const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+
+        const allGlyphs = result.flatMap((r) => r.glyphs);
+        const paragraphGlyph = allGlyphs.find((g) => g.content === '\r');
+        expect(paragraphGlyph).toBeDefined();
+        expect(paragraphGlyph!.width).toBe(0);
+    });
+
+    it('shapes custom block when drawing is not found', () => {
+        const content = `A${DataStreamTreeTokenType.CUSTOM_BLOCK}B`;
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed(content);
+
+        const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+
+        const allGlyphs = result.flatMap((r) => r.glyphs);
+        expect(allGlyphs.length).toBeGreaterThan(0);
+    });
+
+    it('shapes inline custom block and splits shaped texts', () => {
+        const content = `A${DataStreamTreeTokenType.CUSTOM_BLOCK}B`;
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed(content, {
+            body: {
+                customBlocks: [{ startIndex: 1, blockId: 'b1' }],
+            },
+            drawings: {
+                b1: {
+                    drawingId: 'd1',
+                    layoutType: PositionedObjectLayoutType.INLINE,
+                    docTransform: {
+                        angle: 0,
+                        size: { width: 100, height: 100 },
+                    },
+                },
+            },
+        });
+
+        const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+
+        const allGlyphs = result.flatMap((r) => r.glyphs);
+        const customBlockGlyph = allGlyphs.find((g) => g.streamType === DataStreamTreeTokenType.CUSTOM_BLOCK);
+        expect(customBlockGlyph).toBeDefined();
+        expect(customBlockGlyph!.width).toBeGreaterThan(0);
+        expect(result.length).toBeGreaterThan(1);
+    });
+
+    it('shapes floating custom block without splitting', () => {
+        const content = `A${DataStreamTreeTokenType.CUSTOM_BLOCK}B`;
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed(content, {
+            body: {
+                customBlocks: [{ startIndex: 1, blockId: 'b1' }],
+            },
+            drawings: {
+                b1: {
+                    drawingId: 'd1',
+                    layoutType: PositionedObjectLayoutType.WRAP_NONE,
+                    docTransform: {
+                        angle: 0,
+                        size: { width: 100, height: 100 },
+                    },
+                },
+            },
+        });
+
+        const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+
+        const allGlyphs = result.flatMap((r) => r.glyphs);
+        const customBlockGlyph = allGlyphs.find((g) => g.streamType === DataStreamTreeTokenType.CUSTOM_BLOCK);
+        expect(customBlockGlyph).toBeDefined();
+        expect(customBlockGlyph!.width).toBe(0);
+    });
+
+    it('shapes text with useOpenType when font library is ready', () => {
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('Hello');
+        const originalIsReady = fontLibrary.isReady;
+        fontLibrary.isReady = true;
+
+        try {
+            const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig, true);
+            expect(result.length).toBeGreaterThan(0);
+        } finally {
+            fontLibrary.isReady = originalIsReady;
+        }
+    });
+
+    it('shapes tab with useOpenType when font library is ready', () => {
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('Hello\tworld');
+        const originalIsReady = fontLibrary.isReady;
+        fontLibrary.isReady = true;
+
+        const spy = vi.spyOn(textShapingModule, 'textShape').mockReturnValue([
+            { char: 'H', start: 0, end: 1, glyph: null, font: null, kerning: 0, boundingBox: null },
+            { char: 'e', start: 1, end: 2, glyph: null, font: null, kerning: 0, boundingBox: null },
+            { char: 'l', start: 2, end: 3, glyph: null, font: null, kerning: 0, boundingBox: null },
+            { char: 'l', start: 3, end: 4, glyph: null, font: null, kerning: 0, boundingBox: null },
+            { char: 'o', start: 4, end: 5, glyph: null, font: null, kerning: 0, boundingBox: null },
+            { char: '\t', start: 5, end: 6, glyph: null, font: null, kerning: 0, boundingBox: null },
+            { char: 'w', start: 6, end: 7, glyph: null, font: null, kerning: 0, boundingBox: null },
+            { char: 'o', start: 7, end: 8, glyph: null, font: null, kerning: 0, boundingBox: null },
+            { char: 'r', start: 8, end: 9, glyph: null, font: null, kerning: 0, boundingBox: null },
+            { char: 'l', start: 9, end: 10, glyph: null, font: null, kerning: 0, boundingBox: null },
+            { char: 'd', start: 10, end: 11, glyph: null, font: null, kerning: 0, boundingBox: null },
+            { char: '\r', start: 11, end: 12, glyph: null, font: null, kerning: 0, boundingBox: null },
+        ]);
+
+        try {
+            const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig, true);
+            const allGlyphs = result.flatMap((r) => r.glyphs);
+            const tabGlyph = allGlyphs.find((g) => g.content === '\t');
+            expect(tabGlyph).toBeDefined();
+        } finally {
+            spy.mockRestore();
+            fontLibrary.isReady = originalIsReady;
+        }
+    });
+
+    it('shapes emoji with useOpenType when font library is ready', () => {
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('Hello \uD83D\uDE00');
+        const originalIsReady = fontLibrary.isReady;
+        fontLibrary.isReady = true;
+
+        const spy = vi.spyOn(textShapingModule, 'textShape').mockReturnValue([
+            { char: 'H', start: 0, end: 1, glyph: null, font: null, kerning: 0, boundingBox: null },
+            { char: 'e', start: 1, end: 2, glyph: null, font: null, kerning: 0, boundingBox: null },
+            { char: 'l', start: 2, end: 3, glyph: null, font: null, kerning: 0, boundingBox: null },
+            { char: 'l', start: 3, end: 4, glyph: null, font: null, kerning: 0, boundingBox: null },
+            { char: 'o', start: 4, end: 5, glyph: null, font: null, kerning: 0, boundingBox: null },
+            { char: ' ', start: 5, end: 6, glyph: null, font: null, kerning: 0, boundingBox: null },
+            { char: '\uD83D\uDE00', start: 6, end: 8, glyph: null, font: null, kerning: 0, boundingBox: null },
+            { char: '\r', start: 8, end: 9, glyph: null, font: null, kerning: 0, boundingBox: null },
+        ]);
+
+        try {
+            const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig, true);
+            const allGlyphs = result.flatMap((r) => r.glyphs);
+            const emojiGlyph = allGlyphs.find((g) => g.content === '\uD83D\uDE00');
+            expect(emojiGlyph).toBeDefined();
+        } finally {
+            spy.mockRestore();
+            fontLibrary.isReady = originalIsReady;
+        }
+    });
+
+    it('loads hyphen pattern when language pattern is not available', () => {
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('test');
+        sectionBreakConfig.autoHyphenation = BooleanNumber.TRUE;
+        const paragraph = viewModel.getParagraph(paragraphNode.endIndex)!;
+        paragraph.paragraphStyle = { ...paragraph.paragraphStyle, suppressHyphenation: BooleanNumber.FALSE };
+
+        const fakeHyphen = {
+            hasPattern: vi.fn(() => false),
+            loadPattern: vi.fn(() => Promise.resolve()),
+            fetchHyphenCache: vi.fn(),
+            hyphenate: vi.fn(),
+            dispose: vi.fn(),
+        };
+        ctx.hyphen = fakeHyphen as any;
+        ctx.languageDetector = { detect: vi.fn(() => Lang.Fr), dispose: vi.fn() } as any;
+
+        shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+        expect(fakeHyphen.loadPattern).toHaveBeenCalledWith(Lang.Fr);
+    });
+
+    it('uses hyphen enhancer when hyphenation is enabled and pattern exists', () => {
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('hyphenation');
+        sectionBreakConfig.autoHyphenation = BooleanNumber.TRUE;
+        const paragraph = viewModel.getParagraph(paragraphNode.endIndex)!;
+        paragraph.paragraphStyle = { ...paragraph.paragraphStyle, suppressHyphenation: BooleanNumber.FALSE };
+
+        const fakeHyphen = {
+            hasPattern: vi.fn(() => true),
+            loadPattern: vi.fn(() => Promise.resolve()),
+            fetchHyphenCache: vi.fn(),
+            hyphenate: vi.fn((word: string) => [word]),
+            dispose: vi.fn(),
+        };
+        ctx.hyphen = fakeHyphen as any;
+        ctx.languageDetector = { detect: vi.fn(() => Lang.EnUs), dispose: vi.fn() } as any;
+
+        const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+        expect(result.length).toBeGreaterThan(0);
+        expect(fakeHyphen.loadPattern).not.toHaveBeenCalled();
     });
 });

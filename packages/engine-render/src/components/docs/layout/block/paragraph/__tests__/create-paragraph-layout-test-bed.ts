@@ -49,6 +49,9 @@ function createDocModel(
     const documentStyleOverride = (overrides.documentStyle ?? {}) as Record<string, unknown>;
     const documentData = {
         id: 'test-doc',
+        drawings: {},
+        drawingsOrder: [] as string[],
+        ...overrides,
         body: {
             dataStream,
             textRuns: [{ st: 0, ed: dataStream.length, ts: {} }],
@@ -64,9 +67,6 @@ function createDocModel(
             marginRight: 20,
             ...documentStyleOverride,
         },
-        drawings: {},
-        drawingsOrder: [] as string[],
-        ...overrides,
     };
     return new DocumentDataModel(documentData as unknown as Partial<IDocumentData>);
 }
@@ -171,6 +171,9 @@ export function createSectionLayoutTestBed(
     const documentStyleOverride = (overrides.documentStyle ?? {}) as Record<string, unknown>;
     const documentData = {
         id: 'test-doc',
+        drawings: {},
+        drawingsOrder: [] as string[],
+        ...overrides,
         body: {
             dataStream,
             textRuns: [{ st: 0, ed: dataStream.length, ts: {} }],
@@ -186,9 +189,6 @@ export function createSectionLayoutTestBed(
             marginRight: 20,
             ...documentStyleOverride,
         },
-        drawings: {},
-        drawingsOrder: [] as string[],
-        ...overrides,
     };
 
     const dataModel = new DocumentDataModel(documentData as unknown as Partial<IDocumentData>);

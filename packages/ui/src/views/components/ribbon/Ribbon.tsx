@@ -203,7 +203,7 @@ export function Ribbon(props: IRibbonProps) {
                     'univer-h-9': ribbonType === 'classic' || (headerMenuComponents && headerMenuComponents.size > 0),
                 })}
             >
-                {ribbonType === 'classic' && ribbon.length > 1 && (
+                {ribbonType === 'classic' && ribbon.length >= 1 && (
                     <ClassicMenu
                         ribbon={ribbon}
                         activatedTab={activatedTab}
@@ -231,12 +231,11 @@ export function Ribbon(props: IRibbonProps) {
                   univer-box-border univer-grid univer-h-10 univer-grid-flow-col univer-items-center univer-px-3
                   univer-text-sm
                 `, {
-                    'univer-grid-cols-[1fr] univer-justify-center': ribbonType === 'classic',
+                    'univer-grid-cols-[1fr] univer-justify-center': ribbonType === 'classic' || ribbon.length === 1,
                     'univer-grid-cols-[auto,1fr]': ribbon.length > 1 && ribbonType !== 'classic',
-                    'univer-grid-cols-none': ribbon.length === 1,
                 }, borderBottomClassName)}
             >
-                {ribbonType === 'collapsed' && ribbon.length > 1 && (
+                {ribbonType === 'collapsed' && ribbon.length >= 1 && (
                     <DefaultMenu
                         ribbon={ribbon}
                         activatedTab={activatedTab}

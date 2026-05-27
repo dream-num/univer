@@ -46,11 +46,12 @@ export function getMenuHiddenObservable(
         const focusedUniverInstance = univerInstanceService.getFocusedUnit();
 
         if (focusedUniverInstance == null) {
-            return subscriber.next(true);
+            const currentUnit = univerInstanceService.getCurrentUnitOfType(targetUniverType);
+            subscriber.next(currentUnit == null);
+        } else {
+            const univerType = univerInstanceService.getUnitType(focusedUniverInstance.getUnitId());
+            subscriber.next(univerType !== targetUniverType);
         }
-
-        const univerType = univerInstanceService.getUnitType(focusedUniverInstance.getUnitId());
-        subscriber.next(univerType !== targetUniverType);
 
         return () => subscription.unsubscribe();
     });
@@ -75,11 +76,11 @@ export function getHeaderFooterMenuHiddenObservable(
         const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
 
         if (docDataModel == null) {
-            return subscriber.next(true);
+            subscriber.next(true);
+        } else {
+            const documentFlavor = docDataModel?.getSnapshot().documentStyle.documentFlavor;
+            subscriber.next(documentFlavor !== DocumentFlavor.TRADITIONAL);
         }
-
-        const documentFlavor = docDataModel?.getSnapshot().documentStyle.documentFlavor;
-        subscriber.next(documentFlavor !== DocumentFlavor.TRADITIONAL);
 
         return () => subscription.unsubscribe();
     });

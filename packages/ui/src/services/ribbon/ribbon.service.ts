@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Observable } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
 import type { IMenuSchema } from '../menu/menu-manager.service';
 import { createIdentifier, Disposable, IUniverInstanceService } from '@univerjs/core';
 import { BehaviorSubject, combineLatest } from 'rxjs';
@@ -54,6 +54,7 @@ export class DesktopRibbonService extends Disposable implements IRibbonService {
     private readonly _visibleContextualTabs = new Set<string>();
     private readonly _contextualTabs = new Set<string>();
     private _lastNonContextualActivatedTab: string = RibbonPosition.START;
+    private _hiddenSubscription: Subscription | null = null;
 
     constructor(
         @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
@@ -144,8 +145,9 @@ export class DesktopRibbonService extends Disposable implements IRibbonService {
             return;
         }
 
-        // Only get the current value once, not continuously subscribe
-        combineLatest(hiddenObservableMap)
+        this._hiddenSubscription?.unsubscribe();
+
+        this._hiddenSubscription = combineLatest(hiddenObservableMap)
             .pipe(startWith(new Array(hiddenObservableMap.length).fill(false)))
             .subscribe((hiddenMap) => {
                 const newRibbon: IMenuSchema[] = [];
@@ -189,8 +191,7 @@ export class DesktopRibbonService extends Disposable implements IRibbonService {
                 }
 
                 this._setRibbon(newRibbon);
-            })
-            .unsubscribe();
+            });
     }
 
     private _filterContextualTabs(ribbon: IMenuSchema[]): IMenuSchema[] {
@@ -217,6 +218,12 @@ export class DesktopRibbonService extends Disposable implements IRibbonService {
             if (fallbackTab) {
                 this._activatedTab$.next(fallbackTab.key);
             }
+        } else if (!activeGroup && ribbon.some((group) => group.key === RibbonPosition.START)) {
+            const fallbackTab = ribbon.find((group) => group.key === RibbonPosition.START)!;
+            this._activatedTab$.next(fallbackTab.key);
+            if (!fallbackTab.contextual) {
+                this._lastNonContextualActivatedTab = fallbackTab.key;
+            }
         } else if (activeGroup && !activeGroup.contextual) {
             this._lastNonContextualActivatedTab = activeGroup.key;
         }
@@ -226,5 +233,11 @@ export class DesktopRibbonService extends Disposable implements IRibbonService {
 
     private _isContextualTab(tab: string): boolean {
         return this._contextualTabs.has(tab) || this._ribbon$.getValue().some((group) => group.key === tab && group.contextual);
+    }
+
+    override dispose(): void {
+        this._hiddenSubscription?.unsubscribe();
+        this._hiddenSubscription = null;
+        super.dispose();
     }
 }

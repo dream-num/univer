@@ -16,6 +16,7 @@
 
 import { CellValueType } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
+import { TABLE_FILTER_EMPTY_VALUE } from '../../const';
 import {
     SheetsTableButtonStateEnum,
     SheetsTableSortStateEnum,
@@ -108,6 +109,7 @@ describe('TableFilters', () => {
                     [{ v: 'East' }, { v: 12, t: CellValueType.NUMBER }],
                     [{ v: 'West' }, { v: 5, t: CellValueType.NUMBER }],
                     [{ v: 'East' }, { v: 20, t: CellValueType.NUMBER }],
+                    [null, { v: 30, t: CellValueType.NUMBER }],
                 ];
 
                 return cells[row]?.[column] ?? null;
@@ -116,11 +118,11 @@ describe('TableFilters', () => {
                 return this.getCell(row, column);
             },
         };
-        const range = { startRow: 0, endRow: 2, startColumn: 0, endColumn: 1 };
+        const range = { startRow: 0, endRow: 3, startColumn: 0, endColumn: 1 };
 
         filters.setColumnFilter(0, {
             filterType: TableColumnFilterTypeEnum.manual,
-            values: ['East'],
+            values: ['East', TABLE_FILTER_EMPTY_VALUE],
         } as never);
         filters.setColumnFilter(1, {
             filterType: TableColumnFilterTypeEnum.condition,
@@ -137,7 +139,7 @@ describe('TableFilters', () => {
         expect([...filteredOutRows]).toEqual([1]);
         expect(filters.getColumnFilter(0)).toEqual({
             filterType: TableColumnFilterTypeEnum.manual,
-            values: ['East'],
+            values: ['East', TABLE_FILTER_EMPTY_VALUE],
         });
         expect(filters.getFilterState(0)).toBe(SheetsTableButtonStateEnum.FilteredSortAsc);
         expect(filters.getFilterStates(range)).toEqual([
@@ -147,7 +149,7 @@ describe('TableFilters', () => {
         expect(filters.getFilterOutRows()).toBe(filteredOutRows);
         expect(filters.toJSON()).toEqual({
             tableColumnFilterList: [
-                { filterType: TableColumnFilterTypeEnum.manual, values: ['East'] },
+                { filterType: TableColumnFilterTypeEnum.manual, values: ['East', TABLE_FILTER_EMPTY_VALUE] },
                 {
                     filterType: TableColumnFilterTypeEnum.condition,
                     filterInfo: {

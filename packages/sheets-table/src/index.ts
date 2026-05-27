@@ -33,7 +33,7 @@ export type { ISetSheetTableMutationParams } from './commands/mutations/set-shee
 export { SetSheetTableFilterMutation } from './commands/mutations/set-table-filter.mutation';
 export type { ISetSheetTableParams } from './commands/mutations/set-table-filter.mutation';
 export type { IUniverSheetsTableConfig } from './config/config';
-export { SHEET_TABLE_CUSTOM_THEME_PREFIX } from './const';
+export { SHEET_TABLE_CUSTOM_THEME_PREFIX, TABLE_FILTER_EMPTY_VALUE } from './const';
 export { SheetsTableController } from './controllers/sheets-table.controller';
 export { customEmptyThemeWithBorderStyle, processStyleWithBorderStyle } from './controllers/table-theme.factory';
 export { TableManager } from './model/table-manager';

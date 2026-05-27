@@ -20,7 +20,7 @@ import type { ISetSheetTableParams, ITableFilterItem } from '@univerjs/sheets-ta
 import type { IFilterByValueWithTreeItem, ITableFilterItemList } from '../types';
 import { cellToRange, Disposable, ICommandService, Inject, IUniverInstanceService, LocaleService, ObjectMatrix, Rectangle } from '@univerjs/core';
 import { SetRangeValuesMutation } from '@univerjs/sheets';
-import { isConditionFilter, isManualTableFilter, SetSheetTableFilterCommand, SheetTableService, TableManager } from '@univerjs/sheets-table';
+import { isConditionFilter, isManualTableFilter, SetSheetTableFilterCommand, SheetTableService, TABLE_FILTER_EMPTY_VALUE, TableManager } from '@univerjs/sheets-table';
 import { FilterByEnum } from '../types';
 
 interface ISheetTableFilterPanelProps {
@@ -104,7 +104,7 @@ export class SheetsTableUiService extends Disposable {
         if (table) {
             const filter = table.getTableFilterColumn(columnIndex);
             if (filter && isManualTableFilter(filter)) {
-                checkedItems.push(...filter.values);
+                checkedItems.push(...filter.values.map((value) => value === TABLE_FILTER_EMPTY_VALUE ? this._localeService.t('sheets-table-ui.condition.empty') : value));
             }
         }
         return checkedItems;
@@ -143,15 +143,23 @@ export class SheetsTableUiService extends Disposable {
         const data: IFilterByValueWithTreeItem[] = [];
 
         const map = new Map<string, number>();
+        const filteredRowsByOtherColumns = new Set<number>();
+        const tableFilters = table.getTableFilters();
+        for (let i = tableRange.startColumn; i <= tableRange.endColumn; i++) {
+            const currentColumnIndex = i - tableRange.startColumn;
+            if (currentColumnIndex !== columnIndex && table.getTableFilterColumn(currentColumnIndex)) {
+                tableFilters.doColumnFilter(worksheet, tableRange, currentColumnIndex, filteredRowsByOtherColumns);
+            }
+        }
+
         let allItemsCount = 0;
         for (let row = startRow; row <= endRow; row++) {
-            const isFiltered = worksheet.isRowFiltered(row);
-            if (isFiltered) {
+            if (filteredRowsByOtherColumns.has(row)) {
                 continue;
             }
             let stringItem = this._sheetTableService.getCellValueWithConditionType(worksheet, row, column) as string;
 
-            if (stringItem === undefined) {
+            if (stringItem == null) {
                 stringItem = this._localeService.t('sheets-table-ui.condition.empty');
             }
 

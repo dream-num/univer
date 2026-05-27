@@ -129,7 +129,6 @@ export class DependencyManagerBaseService extends Disposable implements IDepende
     }
 
     removeFormulaDependencyByDefinedName(unitId: string, definedName: string): void {
-        throw new Error('Method not implemented.');
     }
 
     searchDependency(search: IUnitRange[], exceptTreeIds?: Set<number>): Set<number> {

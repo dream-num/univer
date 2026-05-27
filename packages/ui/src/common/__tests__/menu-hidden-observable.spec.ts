@@ -55,6 +55,15 @@ function createMenuAccessor(options?: {
             const flavor = docFlavorByUnitId[unitId];
             return flavor == null ? null : createDocModel(flavor);
         }),
+        getCurrentUnitOfType: vi.fn((type: UniverInstanceType) => {
+            if (type !== TARGET_TYPE) {
+                return null;
+            }
+            if (focusedUnitId == null) {
+                return null;
+            }
+            return { getUnitId: () => focusedUnitId };
+        }),
         getCurrentUniverDocInstance: vi.fn(() => {
             if (currentDocFlavor == null) {
                 return null;

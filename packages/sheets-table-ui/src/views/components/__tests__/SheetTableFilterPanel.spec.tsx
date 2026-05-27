@@ -18,7 +18,7 @@
 
 import { ICommandService, IPermissionService, LocaleService } from '@univerjs/core';
 import { SortRangeCommand, SortType } from '@univerjs/sheets-sort';
-import { SheetsTableSortStateEnum, SheetTableInsertColumnAtCommand, SheetTableRemoveColumnAtCommand, TableColumnFilterTypeEnum, TableConditionTypeEnum, TableDateCompareTypeEnum, TableManager } from '@univerjs/sheets-table';
+import { SheetsTableSortStateEnum, SheetTableInsertColumnAtCommand, SheetTableRemoveColumnAtCommand, TABLE_FILTER_EMPTY_VALUE, TableColumnFilterTypeEnum, TableConditionTypeEnum, TableDateCompareTypeEnum, TableManager } from '@univerjs/sheets-table';
 import { createElement } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { SheetsTableComponentController } from '../../../controllers/sheet-table-component.controller';
@@ -189,6 +189,63 @@ describe('SheetTableFilterPanel', () => {
             values: ['A'],
         });
         expect(closeFilterPanel).toHaveBeenCalledTimes(1);
+    });
+
+    it('should store blank items with the table empty sentinel when applying a manual filter', () => {
+        const closeFilterPanel = vi.fn();
+        const setTableFilter = vi.fn();
+
+        mocks.useDependency.mockImplementation((token: unknown) => {
+            if (token === LocaleService) return localeService;
+            if (token === SheetsTableUiService) {
+                return {
+                    getTableFilterPanelInitProps: () => ({
+                        unitId: 'u1',
+                        subUnitId: 's1',
+                        tableId: 't1',
+                        columnIndex: 0,
+                        tableFilter: undefined,
+                        currentFilterBy: FilterByEnum.Items,
+                    }),
+                    getTableFilterItems: () => ({
+                        data: [{ title: 'A' }, { title: 'sheets-table-ui.condition.empty' }],
+                    }),
+                    getTableFilterCheckedItems: () => ['A', 'sheets-table-ui.condition.empty'],
+                    setTableFilter,
+                };
+            }
+            if (token === TableManager) {
+                return {
+                    getTable: () => ({
+                        getTableFilters: () => ({
+                            getSortState: () => ({ columnIndex: -1, sortState: SheetsTableSortStateEnum.None }),
+                            setSortState: vi.fn(),
+                        }),
+                        getRange: () => ({ startRow: 0, endRow: 5, startColumn: 0, endColumn: 2 }),
+                        getTableFilterColumn: () => undefined,
+                    }),
+                };
+            }
+            if (token === ICommandService) return { executeCommand: vi.fn() };
+            if (token === IPermissionService) return { getPermissionPoint: () => ({ value: false }) };
+            if (token === SheetsTableComponentController) {
+                return {
+                    getCurrentTableFilterInfo: () => ({ unitId: 'u1', subUnitId: 's1', tableId: 't1', column: 0 }),
+                    closeFilterPanel,
+                };
+            }
+            return null;
+        });
+
+        const tree = renderPanel();
+        const [confirm] = findAll(tree, (n) => n.type === design.Button && n.props?.children === 'sheets-table-ui.filter.confirm');
+
+        confirm.props.onClick();
+
+        expect(setTableFilter).toHaveBeenCalledWith('u1', 't1', 0, {
+            filterType: TableColumnFilterTypeEnum.manual,
+            values: ['A', TABLE_FILTER_EMPTY_VALUE],
+        });
     });
 
     it('should apply sort and update table sort state', () => {

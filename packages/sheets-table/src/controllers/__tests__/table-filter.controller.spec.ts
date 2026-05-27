@@ -79,23 +79,19 @@ describe('TableFilterController', () => {
             zebraCrossingCacheController as any
         );
 
-        controller.tableFilteredOutRows = new Set([10]);
-        expect(rowFilteredHandler(false, { row: 10 }, vi.fn(() => false))).toBe(true);
-        expect(rowFilteredHandler(false, { row: 11 }, vi.fn(() => false))).toBe(false);
-
         tableFilterChanged$.next({ unitId: 'u1', subUnitId: 's1', tableId: 't1' });
 
         expect(mainFilter.doFilter).toHaveBeenCalledWith({ id: 'sheet1' }, { startRow: 1, endRow: 10, startColumn: 1, endColumn: 2 });
-        expect(controller.tableFilteredOutRows.has(4)).toBe(true);
-        expect(controller.tableFilteredOutRows.has(8)).toBe(true);
         expect(zebraCrossingCacheController.updateZebraCrossingCache).toHaveBeenCalledWith('u1', 's1');
+        expect(rowFilteredHandler(false, { unitId: 'u1', subUnitId: 's1', row: 4 }, vi.fn(() => false))).toBe(true);
+        expect(rowFilteredHandler(false, { unitId: 'u1', subUnitId: 's2', row: 4 }, vi.fn(() => false))).toBe(false);
+        expect(rowFilteredHandler(false, { unitId: 'u1', subUnitId: 's1', row: 9 }, vi.fn(() => false))).toBe(false);
 
         tableInitStatus$.next(true);
         workbookType$.next(workbook);
         activeSheet$.next({ getSheetId: () => 's1' });
 
-        expect(controller.tableFilteredOutRows.has(4)).toBe(true);
-        expect(controller.tableFilteredOutRows.has(8)).toBe(true);
+        expect(rowFilteredHandler(false, { unitId: 'u1', subUnitId: 's1', row: 8 }, vi.fn(() => false))).toBe(true);
 
         controller.dispose();
     });

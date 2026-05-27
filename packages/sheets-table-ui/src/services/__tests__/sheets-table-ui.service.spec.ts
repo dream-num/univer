@@ -15,7 +15,7 @@
  */
 
 import { SetRangeValuesMutation } from '@univerjs/sheets';
-import { SetSheetTableFilterCommand, TableColumnFilterTypeEnum } from '@univerjs/sheets-table';
+import { SetSheetTableFilterCommand, TABLE_FILTER_EMPTY_VALUE, TableColumnFilterTypeEnum } from '@univerjs/sheets-table';
 import { describe, expect, it, vi } from 'vitest';
 import { FilterByEnum } from '../../types';
 import { SheetsTableUiService } from '../sheets-table-ui.service';
@@ -33,6 +33,10 @@ describe('SheetsTableUiService', () => {
             executeCommand,
         };
 
+        const tableFilters = {
+            doColumnFilter: vi.fn(),
+        };
+
         const table = {
             getId: () => 't1',
             getSubunitId: () => 's1',
@@ -42,8 +46,9 @@ describe('SheetsTableUiService', () => {
                 if (index === 0) {
                     return { filterType: TableColumnFilterTypeEnum.condition, condition: [] };
                 }
-                return { filterType: TableColumnFilterTypeEnum.manual, values: ['A', 'B'] };
+                return { filterType: TableColumnFilterTypeEnum.manual, values: ['A', 'B', TABLE_FILTER_EMPTY_VALUE] };
             },
+            getTableFilters: () => tableFilters,
         };
 
         const tableManager = {
@@ -88,13 +93,26 @@ describe('SheetsTableUiService', () => {
             columnIndex: 0,
         });
 
-        expect(service.getTableFilterCheckedItems('u1', 't1', 1)).toEqual(['A', 'B']);
+        expect(service.getTableFilterCheckedItems('u1', 't1', 1)).toEqual(['A', 'B', '(empty)']);
 
         const first = service.getTableFilterItems('u1', 's1', 't1', 1);
-        expect(first.allItemsCount).toBe(2);
-        expect(first.data.map((item) => item.title)).toEqual(['A', '(empty)']);
+        expect(first.allItemsCount).toBe(3);
+        expect(first.data.map((item) => item.title)).toEqual(['A', 'B', '(empty)']);
         expect(first.itemsCountMap.get('A')).toBe(1);
+        expect(first.itemsCountMap.get('B')).toBe(1);
         expect(first.itemsCountMap.get('(empty)')).toBe(1);
+        expect(tableFilters.doColumnFilter).toHaveBeenCalledWith(
+            worksheet,
+            { startRow: 1, endRow: 3, startColumn: 1, endColumn: 2 },
+            0,
+            expect.any(Set)
+        );
+        expect(tableFilters.doColumnFilter).not.toHaveBeenCalledWith(
+            worksheet,
+            { startRow: 1, endRow: 3, startColumn: 1, endColumn: 2 },
+            1,
+            expect.any(Set)
+        );
         const countAfterFirstBuild = getCellValueWithConditionType.mock.calls.length;
 
         const second = service.getTableFilterItems('u1', 's1', 't1', 1);

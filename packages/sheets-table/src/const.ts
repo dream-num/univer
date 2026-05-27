@@ -18,3 +18,4 @@ export const PLUGIN_NAME = 'SHEET_TABLE_PLUGIN';
 export const FEATURE_TABLE_ID = 'SHEET_TABLE';
 export const DEFAULT_COLUMN_NAME_PREFIX = 'Column';
 export const SHEET_TABLE_CUSTOM_THEME_PREFIX = 'table-custom';
+export const TABLE_FILTER_EMPTY_VALUE = '__UNIVER_TABLE_FILTER_EMPTY__';

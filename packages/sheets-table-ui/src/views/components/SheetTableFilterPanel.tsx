@@ -22,7 +22,7 @@ import { Button, ButtonGroup, Segmented } from '@univerjs/design';
 import { AscendingIcon, DeleteColumnDoubleIcon, DescendingIcon, LeftInsertColumnDoubleIcon, RightInsertColumnDoubleIcon } from '@univerjs/icons';
 import { WorkbookEditablePermission } from '@univerjs/sheets';
 import { SortRangeCommand, SortType } from '@univerjs/sheets-sort';
-import { SheetsTableSortStateEnum, SheetTableInsertColumnAtCommand, SheetTableRemoveColumnAtCommand, TableColumnFilterTypeEnum, TableDateCompareTypeEnum, TableManager } from '@univerjs/sheets-table';
+import { SheetsTableSortStateEnum, SheetTableInsertColumnAtCommand, SheetTableRemoveColumnAtCommand, TABLE_FILTER_EMPTY_VALUE, TableColumnFilterTypeEnum, TableDateCompareTypeEnum, TableManager } from '@univerjs/sheets-table';
 import { useDependency } from '@univerjs/ui';
 import { useMemo, useState } from 'react';
 import { SheetsTableComponentController } from '../../controllers/sheet-table-component.controller';
@@ -120,9 +120,10 @@ export function SheetTableFilterPanel() {
         if (filterBy === FilterByEnum.Items) {
             // do items
             const filteredItems: string[] = [];
+            const emptyLabel = localeService.t('sheets-table-ui.condition.empty');
             for (const itemInfo of data) {
                 if (checkedItemSet.has(itemInfo.title)) {
-                    filteredItems.push(itemInfo.title);
+                    filteredItems.push(itemInfo.title === emptyLabel ? TABLE_FILTER_EMPTY_VALUE : itemInfo.title);
                 }
             }
             const originFilter = table.getTableFilterColumn(columnIndex) as ITableManualFilterItem | undefined;

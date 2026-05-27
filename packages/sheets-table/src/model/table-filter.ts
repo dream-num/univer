@@ -17,6 +17,7 @@
 import type { ICellData, Nullable, Worksheet } from '@univerjs/core';
 import type { SheetsTableButtonStateEnum } from '../types/enum';
 import type { ICalculatedOptions, ITableFilterItem, ITableFilterJSON, ITableRange } from '../types/type';
+import { TABLE_FILTER_EMPTY_VALUE } from '../const';
 import { SheetsTableSortStateEnum, TableColumnFilterTypeEnum, TableConditionTypeEnum } from '../types/enum';
 import { getTableFilterState, isConditionFilter } from '../util';
 import { getCellValueWithConditionType, getConditionExecuteFunc, isNumberDynamicFilter } from './filter-util/condition';
@@ -90,7 +91,7 @@ export class TableFilters {
                 // const cellValue = sheet.getCell(row, column);
                 const conditionType = isConditionFilter(filter) ? filter.filterInfo.conditionType : TableConditionTypeEnum.String;
                 const cellValue = getCellValueWithConditionType(sheet, row, column, conditionType);
-                if (cellValue === null) {
+                if (cellValue === null && !executeFunc(cellValue)) {
                     filterOutRows.add(row);
                 } else if (!executeFunc(getCellValueWithConditionType(sheet, row, column, conditionType))) {
                     filterOutRows.add(row);
@@ -123,6 +124,9 @@ export class TableFilters {
         if (filter.filterType === TableColumnFilterTypeEnum.manual) {
             const valuesSet = new Set(filter.values);
             return (value: string) => {
+                if (value == null) {
+                    return valuesSet.has(TABLE_FILTER_EMPTY_VALUE);
+                }
                 return valuesSet.has(value);
             };
         } else if (filter.filterType === TableColumnFilterTypeEnum.condition) {

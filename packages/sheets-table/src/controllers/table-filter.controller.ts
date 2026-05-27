@@ -16,15 +16,13 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { Subscription } from 'rxjs';
-
 import { Disposable, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { getSheetCommandTarget, INTERCEPTOR_POINT, SheetInterceptorService, ZebraCrossingCacheController } from '@univerjs/sheets';
-import { BehaviorSubject, filter, switchMap } from 'rxjs';
+import { filter, switchMap } from 'rxjs';
 import { TableManager } from '../model/table-manager';
 
 export class TableFilterController extends Disposable {
-    private readonly _tableFilteredOutRows$ = new BehaviorSubject<Readonly<Set<number>>>(new Set());
-    readonly tableFilteredOutRows$ = this._tableFilteredOutRows$.asObservable();
+    private readonly _tableFilteredOutRows = new Map<string, Set<number>>();
 
     private _subscription: Subscription | null = null;
     constructor(
@@ -39,21 +37,13 @@ export class TableFilterController extends Disposable {
         this._initFilteredOutRows();
     }
 
-    get tableFilteredOutRows() {
-        return this._tableFilteredOutRows$.value;
-    }
-
-    set tableFilteredOutRows(value: Set<number>) {
-        this._tableFilteredOutRows$.next(value);
-    }
-
     initTableHiddenRowIntercept() {
         this.disposeWithMe(this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.ROW_FILTERED, {
             // Priority must be higher than sheet filtering, because filtering has no next, and those below filtering will not trigger interceptor
             priority: 100,
             handler: (filtered, rowLocation, next) => {
                 if (filtered) return true;
-                const isTableFiltered = this.tableFilteredOutRows.has(rowLocation.row);
+                const isTableFiltered = this._getTableFilteredOutRows(rowLocation.unitId, rowLocation.subUnitId).has(rowLocation.row);
                 return isTableFiltered ? true : next(isTableFiltered);
             },
         }));
@@ -74,17 +64,7 @@ export class TableFilterController extends Disposable {
                 return;
             }
             const { unitId, subUnitId } = target;
-            this.tableFilteredOutRows.clear();
-            const tables = this._tableManager.getTablesBySubunitId(unitId, subUnitId);
-            tables.forEach((table) => {
-                const tableFilteredRows = table.getTableFilters().getFilterOutRows();
-                if (!tableFilteredRows) {
-                    return;
-                }
-                for (const row of tableFilteredRows) {
-                    this.tableFilteredOutRows.add(row);
-                }
-            });
+            this._refreshTableFilteredOutRows(unitId, subUnitId);
         });
     }
 
@@ -98,25 +78,38 @@ export class TableFilterController extends Disposable {
                     return;
                 }
 
-                this.tableFilteredOutRows.clear();
-
                 const tableFilter = table.getTableFilters();
                 tableFilter.doFilter(worksheet, table.getTableFilterRange());
 
-                const tables = this._tableManager.getTablesBySubunitId(unitId, subUnitId);
-                tables.forEach((table) => {
-                    const tableFilteredRows = table.getTableFilters().getFilterOutRows();
-                    if (!tableFilteredRows) {
-                        return;
-                    }
-                    for (const row of tableFilteredRows) {
-                        this.tableFilteredOutRows.add(row);
-                    }
-                });
+                this._refreshTableFilteredOutRows(unitId, subUnitId);
 
                 this._zebraCrossingCacheController.updateZebraCrossingCache(unitId, subUnitId);
             })
         );
+    }
+
+    private _refreshTableFilteredOutRows(unitId: string, subUnitId: string): void {
+        const filteredOutRows = new Set<number>();
+        const tables = this._tableManager.getTablesBySubunitId(unitId, subUnitId);
+        tables.forEach((table) => {
+            const tableFilteredRows = table.getTableFilters().getFilterOutRows();
+            if (!tableFilteredRows) {
+                return;
+            }
+            for (const row of tableFilteredRows) {
+                filteredOutRows.add(row);
+            }
+        });
+
+        this._tableFilteredOutRows.set(this._getSheetKey(unitId, subUnitId), filteredOutRows);
+    }
+
+    private _getTableFilteredOutRows(unitId: string, subUnitId: string): Set<number> {
+        return this._tableFilteredOutRows.get(this._getSheetKey(unitId, subUnitId)) ?? new Set();
+    }
+
+    private _getSheetKey(unitId: string, subUnitId: string): string {
+        return `${unitId}|${subUnitId}`;
     }
 
     override dispose(): void {

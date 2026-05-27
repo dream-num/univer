@@ -15,7 +15,7 @@
  */
 
 import type { IDocDrawingBase, IDocDrawingPosition, Nullable } from '@univerjs/core';
-import type { BaseObject, Documents, IDocumentSkeletonGlyph, IDocumentSkeletonPage, Image, INodeSearch, IPoint, Viewport } from '@univerjs/engine-render';
+import type { BaseObject, Documents, IDocumentSkeletonGlyph, IDocumentSkeletonPage, IDocumentSkeletonRow, IDocumentSkeletonTable, Image, IPoint, Viewport } from '@univerjs/engine-render';
 import type { IDrawingDocTransform } from '../commands/commands/update-doc-drawing.command';
 import {
     BooleanNumber,
@@ -36,6 +36,7 @@ import { DocSelectionRenderService, getAnchorBounding, getDocObject, getOneTextS
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { DocumentSkeletonPageType, getColor, IRenderManagerService, Liquid, PageLayoutType, Rect, Vector2 } from '@univerjs/engine-render';
 import { IMoveInlineDrawingCommand, ITransformNonInlineDrawingCommand, UpdateDrawingDocTransformCommand } from '../commands/commands/update-doc-drawing.command';
+import { getDocsTableCellDrawingOffset } from './render-controllers/doc-drawing-transform-update.controller';
 
 const INLINE_DRAWING_ANCHOR_KEY_PREFIX = '__InlineDrawingAnchor__';
 
@@ -56,10 +57,33 @@ interface IDrawingAnchor {
     contentBoxPointGroup?: IPoint[][];
 }
 
-function isInTableCell(nodePosition: INodeSearch) {
-    const { path } = nodePosition;
+export interface IDocsTableCellAnchorContext {
+    cell: IDocumentSkeletonPage;
+    hostPage: IDocumentSkeletonPage;
+    offset: {
+        left: number;
+        top: number;
+    };
+    row: IDocumentSkeletonRow;
+    table: IDocumentSkeletonTable;
+}
 
-    return path.some((p) => p === 'cells');
+export function getDocsTableCellAnchorContext(unitId: string, cell: IDocumentSkeletonPage): Nullable<IDocsTableCellAnchorContext> {
+    const row = cell.parent as IDocumentSkeletonRow | undefined;
+    const table = row?.parent as IDocumentSkeletonTable | undefined;
+    const hostPage = table?.parent as IDocumentSkeletonPage | undefined;
+
+    if (!row || !table || !hostPage || !row.cells?.includes(cell)) {
+        return null;
+    }
+
+    return {
+        cell,
+        hostPage,
+        offset: getDocsTableCellDrawingOffset(unitId, table, row, cell),
+        row,
+        table,
+    };
 }
 
 // Listen doc drawing transformer change, and update drawing data.
@@ -434,11 +458,6 @@ export class DocDrawingTransformerController extends Disposable {
             return;
         }
 
-        // TODO: @JOCS, table cell do not support drawings now. so need to disable it.
-        if (isInTableCell(nodePosition)) {
-            return;
-        }
-
         const positionWithIsBack = {
             ...nodePosition,
             isBack,
@@ -534,7 +553,9 @@ export class DocDrawingTransformerController extends Disposable {
 
         this._liquid.reset();
 
-        const pageType = page.type;
+        const tableCellContext = page.type === DocumentSkeletonPageType.CELL ? getDocsTableCellAnchorContext(drawing.unitId, page) : null;
+        const anchorPage = tableCellContext?.hostPage ?? page;
+        const pageType = anchorPage.type;
 
         for (const p of pages) {
             const { headerId, footerId, pageHeight, pageWidth, marginLeft, marginBottom } = p;
@@ -571,18 +592,27 @@ export class DocDrawingTransformerController extends Disposable {
 
                         break;
                     }
+
+                    default: {
+                        this._liquid.translatePagePadding(p);
+                        break;
+                    }
                 }
 
                 break;
             }
 
             this._liquid.translatePagePadding(p);
-            if (p === page) {
+            if (p === anchorPage) {
                 break;
             }
 
             this._liquid.restorePagePadding(p);
             this._liquid.translatePage(p, pageLayoutType, pageMarginLeft, pageMarginTop);
+        }
+
+        if (tableCellContext) {
+            this._liquid.translate(tableCellContext.offset.left, tableCellContext.offset.top);
         }
 
         if (positionV.relativeFrom === ObjectRelativeFromV.LINE) {
@@ -634,11 +664,6 @@ export class DocDrawingTransformerController extends Disposable {
         const nodePosition = skeleton?.findPositionByGlyph(glyphAnchor, segmentPage);
         const docObject = this._getDocObject();
         if (nodePosition == null || skeleton == null || docObject == null) {
-            return;
-        }
-
-        // TODO: @JOCS, table cell do not support drawings now. so need to disable it.
-        if (isInTableCell(nodePosition)) {
             return;
         }
 

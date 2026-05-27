@@ -112,10 +112,10 @@ export function ParagraphSetting() {
     const localeService = useDependency(LocaleService);
 
     const alignmentOptions = useMemo(() => [
-        { label: localeService.t('toolbar.alignLeft'), value: String(HorizontalAlign.LEFT), icon: <LeftJustifyingIcon /> },
-        { label: localeService.t('toolbar.alignCenter'), value: String(HorizontalAlign.CENTER), icon: <HorizontallyIcon /> },
-        { label: localeService.t('toolbar.alignRight'), value: String(HorizontalAlign.RIGHT), icon: <RightJustifyingIcon /> },
-        { label: localeService.t('toolbar.alignJustify'), value: String(HorizontalAlign.JUSTIFIED), icon: <AlignTextBothIcon /> },
+        { label: localeService.t('docs-ui.toolbar.alignLeft'), value: String(HorizontalAlign.LEFT), icon: <LeftJustifyingIcon /> },
+        { label: localeService.t('docs-ui.toolbar.alignCenter'), value: String(HorizontalAlign.CENTER), icon: <HorizontallyIcon /> },
+        { label: localeService.t('docs-ui.toolbar.alignRight'), value: String(HorizontalAlign.RIGHT), icon: <RightJustifyingIcon /> },
+        { label: localeService.t('docs-ui.toolbar.alignJustify'), value: String(HorizontalAlign.JUSTIFIED), icon: <AlignTextBothIcon /> },
     ], []);
 
     const currentParagraph = useCurrentParagraph();

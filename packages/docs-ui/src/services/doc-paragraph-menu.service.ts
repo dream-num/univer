@@ -253,7 +253,7 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
         const blockRange = target.blockRange;
 
         const getFirstLine = () => blockRange
-            ? getBlockRangeAnchorRect(this._docEventManagerService, this._context.scene.getViewport(VIEWPORT_KEY.VIEW_MAIN) as { viewportScrollY?: number; height?: number | null; viewportHeight?: number | null } | undefined, blockRange, paragraph)
+            ? getBlockRangeAnchorRect(this._docEventManagerService, blockRange, paragraph)
             : this._docEventManagerService.findParagraphBoundByIndex(paragraph.startIndex)?.firstLine ?? paragraph.firstLine;
 
         const disposable = this._docPopupManagerService.attachPopupToRect(
@@ -702,25 +702,21 @@ function getParagraphBlockRange(documentDataModel: DocumentDataModel, paragraph:
 
 function getBlockRangeAnchorRect(
     docEventManagerService: DocEventManagerService,
-    viewMain: { viewportScrollY?: number; height?: number | null; viewportHeight?: number | null } | undefined,
     blockRange: IDocumentBlockRange,
     fallbackParagraph: IMutiPageParagraphBound
 ) {
-    const bounds = [...docEventManagerService.paragraphBounds.values()]
-        .filter((bound) => Math.max(bound.paragraphStart, blockRange.startIndex) <= Math.min(bound.paragraphEnd, blockRange.endIndex))
-        .sort((left, right) => left.firstLine.top - right.firstLine.top);
-    const viewportTop = viewMain?.viewportScrollY ?? Number.NEGATIVE_INFINITY;
-    const viewportBottom = Number.isFinite(viewportTop)
-        ? viewportTop + (viewMain?.viewportHeight ?? viewMain?.height ?? Number.POSITIVE_INFINITY)
-        : Number.POSITIVE_INFINITY;
-    const visibleBound = bounds.find((bound) => bound.firstLine.bottom >= viewportTop && bound.firstLine.top <= viewportBottom);
-    const anchor = visibleBound?.firstLine ?? bounds[0]?.firstLine ?? fallbackParagraph.firstLine;
-    const height = Math.max(1, anchor.bottom - anchor.top);
-    const top = Number.isFinite(viewportTop) && anchor.top < viewportTop ? viewportTop : anchor.top;
+    const bounds = docEventManagerService
+        .findParagraphBoundsInRange(blockRange.startIndex, blockRange.endIndex)
+        .sort((left, right) => left.firstLine.top - right.firstLine.top || left.firstLine.left - right.firstLine.left);
+    const anchor = bounds[0]?.firstLine ?? fallbackParagraph.firstLine;
+    const left = Math.min(...(bounds.length ? bounds : [fallbackParagraph]).map((bound) => bound.firstLine.left));
+    const top = anchor.top;
 
     return {
         ...anchor,
+        left,
+        right: left,
         top,
-        bottom: top + height,
+        bottom: top,
     };
 }

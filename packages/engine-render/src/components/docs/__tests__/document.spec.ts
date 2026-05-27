@@ -762,7 +762,7 @@ describe('documents render', () => {
 
         expect(queriedUnitIds).toEqual(['doc-unit-1:table-1']);
         expect(ctx.clip).toHaveBeenCalledTimes(1);
-        expect(ctx.rectByPrecision).toHaveBeenCalledWith(20, 32, 124, 60);
+        expect(ctx.rectByPrecision).toHaveBeenCalledWith(20, 30, 124, 64);
         expect(translateCalls).toContainEqual([-80, 0]);
 
         documents.dispose();
@@ -809,7 +809,7 @@ describe('documents render', () => {
         );
 
         expect(ctx.clip).toHaveBeenCalledTimes(1);
-        expect(ctx.rectByPrecision).toHaveBeenCalledWith(20, 32, 172, 60);
+        expect(ctx.rectByPrecision).toHaveBeenCalledWith(20, 30, 172, 64);
 
         documents.dispose();
     });

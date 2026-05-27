@@ -16,7 +16,7 @@
 
 import { describe, expect, it } from 'vitest';
 import { BaselineOffset, BooleanNumber, HorizontalAlign, VerticalAlign, WrapStrategy } from '../../types/enum';
-import { CustomRangeType } from '../../types/interfaces';
+import { CustomRangeType, DocumentFlavor } from '../../types/interfaces';
 import {
     addLinkToDocumentModel,
     createDocumentModelWithStyle,
@@ -48,6 +48,8 @@ describe('sheet util helpers', () => {
             marginRight: 4,
             marginBottom: 3,
             marginLeft: 2,
+            documentFlavor: DocumentFlavor.UNSPECIFIED,
+            paragraphLineGapDefault: 0,
             renderConfig: {
                 horizontalAlign: HorizontalAlign.CENTER,
                 verticalAlign: VerticalAlign.MIDDLE,

@@ -26,7 +26,7 @@ import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import { isRealNum, LocaleService } from '@univerjs/core';
 import { borderBottomClassName, borderClassName, clsx, scrollbarClassName } from '@univerjs/design';
 import { CheckMarkIcon, MoreIcon } from '@univerjs/icons';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { combineLatest, isObservable, of, scan, startWith } from 'rxjs';
 import { CustomLabel } from '../../../components/custom-label/CustomLabel';
@@ -72,6 +72,7 @@ const contentClassName = 'univer-inline-flex univer-items-center univer-gap-2';
 const menuViewportPadding = 8;
 const submenuOverlapOffset = 2;
 const submenuVisualGap = 20;
+export const CONTEXT_MENU_SUBMENU_CLOSE_DELAY = 500;
 export const CONTEXT_MENU_SUBMENU_PORTAL_ATTR = 'data-u-context-menu-submenu';
 
 type MenuLabel = IMenuItem['label'] | IValueOption['label'];
@@ -357,6 +358,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
     const [submenuPlacement, setSubmenuPlacement] = useState<'left' | 'right'>('right');
     const menuItemElementRef = useRef<HTMLDivElement | null>(null);
     const submenuElementRef = useRef<HTMLDivElement | null>(null);
+    const submenuCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const selections = useMemo(() => {
         if (menuItem.type !== MenuItemType.SELECTOR && menuItem.type !== MenuItemType.BUTTON_SELECTOR) {
@@ -383,9 +385,28 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
     const hasSubmenu = hasSelectionSubmenu || hasSubItemSubmenu;
     const selectionsCommandId = selectorItem.selectionsCommandId;
 
+    const clearSubmenuCloseTimer = useCallback(() => {
+        if (submenuCloseTimerRef.current == null) {
+            return;
+        }
+
+        clearTimeout(submenuCloseTimerRef.current);
+        submenuCloseTimerRef.current = null;
+    }, []);
+
+    const scheduleSubmenuClose = useCallback(() => {
+        clearSubmenuCloseTimer();
+        submenuCloseTimerRef.current = setTimeout(() => {
+            submenuCloseTimerRef.current = null;
+            setSubmenuVisible(false);
+        }, CONTEXT_MENU_SUBMENU_CLOSE_DELAY);
+    }, [clearSubmenuCloseTimer]);
+
     useEffect(() => {
         setInputValue(value);
     }, [value]);
+
+    useEffect(() => () => clearSubmenuCloseTimer(), [clearSubmenuCloseTimer]);
 
     useEffect(() => {
         if (!submenuVisible) {
@@ -444,6 +465,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
 
     const onSubmenuOptionSelect = (option: IValueOption) => {
         onOptionSelect?.(option);
+        clearSubmenuCloseTimer();
         setSubmenuVisible(false);
     };
 
@@ -498,6 +520,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
             ref={menuItemElementRef}
             className="univer-relative"
             onMouseEnter={() => {
+                clearSubmenuCloseTimer();
                 if (hasSubmenu && !disabled) {
                     setSubmenuPositionReady(false);
                     setSubmenuVisible(true);
@@ -509,7 +532,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                     if (nextTarget && submenuElementRef.current?.contains(nextTarget)) {
                         return;
                     }
-                    setSubmenuVisible(false);
+                    scheduleSubmenuClose();
                 }
             }}
         >
@@ -537,6 +560,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                         disabled={disabled}
                         title={compact && typeof menuItem.tooltip === 'string' ? localeService.t(menuItem.tooltip) : undefined}
                         onClick={() => {
+                            clearSubmenuCloseTimer();
                             if (hasSubmenu) {
                                 if (canExecuteItem) {
                                     const item = menuItem as IDisplayMenuItem<IMenuButtonItem>;
@@ -599,13 +623,14 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                                 visibility: submenuPositionReady ? 'visible' : 'hidden',
                                 pointerEvents: submenuPositionReady ? 'auto' : 'none',
                             }}
+                            onMouseEnter={clearSubmenuCloseTimer}
                             onMouseLeave={(event) => {
                                 const nextTarget = event.relatedTarget as Node | null;
                                 if (nextTarget && menuItemElementRef.current?.contains(nextTarget)) {
                                     return;
                                 }
 
-                                setSubmenuVisible(false);
+                                scheduleSubmenuClose();
                             }}
                             onWheel={(event) => event.stopPropagation()}
                         >

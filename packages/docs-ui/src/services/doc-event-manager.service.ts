@@ -19,6 +19,7 @@ import type {
     Documents,
     DocumentSkeleton,
     IBoundRectNoAngle,
+    IDocsTableRenderViewport,
     IDocumentSkeletonGlyph,
     IDocumentSkeletonPage,
     IDocumentSkeletonSection,
@@ -27,7 +28,7 @@ import type {
 } from '@univerjs/engine-render';
 import { Disposable, fromEventSubject, Inject } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
-import { CURSOR_TYPE, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
+import { CURSOR_TYPE, getDocsTableRenderViewport, getTableIdAndSliceIndex, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
 import { BehaviorSubject, distinctUntilChanged, filter, map, Subject, switchMap, take, throttleTime } from 'rxjs';
 import { DOC_VERTICAL_PADDING } from '../types/const/padding';
 import { transformOffset2Bound } from './doc-popup-manager.service';
@@ -145,6 +146,9 @@ export const calcDocGlyphPosition = (glyph: IDocumentSkeletonGlyph, documents: D
     const { borderBoxPointGroup } = convertor.getRangePointData(startPosition, startPosition);
     const bounds = getLineBounding(borderBoxPointGroup);
     const rect = bounds[0];
+    if (!rect) {
+        return;
+    }
 
     return {
         top: rect.top + documentOffsetConfig.docsTop,
@@ -226,6 +230,16 @@ export function getTableBlockMenuHoverRect(tableRect: IBoundRectNoAngle): IBound
     };
 }
 
+export function getTableHorizontalViewportGeometry(tableLeft: number, tableWidth: number, viewport: Nullable<IDocsTableRenderViewport>) {
+    const hasHorizontalViewport = viewport != null && viewport.contentWidth > viewport.viewportWidth;
+
+    return {
+        scrollLeft: hasHorizontalViewport ? viewport.scrollLeft : 0,
+        visibleLeft: tableLeft,
+        visibleRight: tableLeft + (hasHorizontalViewport ? viewport.viewportWidth : tableWidth),
+    };
+}
+
 export class DocEventManagerService extends Disposable implements IRenderModule {
     private readonly _hoverCustomRanges$ = new BehaviorSubject<ICustomRangeActive[]>([]);
     readonly hoverCustomRanges$ = this._hoverCustomRanges$.pipe(distinctUntilChanged((pre, aft) => pre.length === aft.length && pre.every((item, i) => aft[i].range.rangeId === item.range.rangeId && aft[i].segmentId === item.segmentId && aft[i].segmentPageIndex === item.segmentPageIndex && aft[i].range.startIndex === item.range.startIndex)));
@@ -288,6 +302,7 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
     private _paragraphLeftBounds: IMutiPageParagraphBound[] = [];
     private _tableParagraphBounds: Map<string, ITableParagraphBound[]> = new Map();
     private _segmentParagraphBounds: Map<string, Map<number, IMutiPageParagraphBound[]>> = new Map();
+    private _tableViewportSignature = '';
 
     private _tableCellBounds: Map<string, ITableCellBound[]> = new Map();
     private _tableBounds: Map<string, ITableBound> = new Map();
@@ -632,7 +647,13 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
                     Array.from(page.skeTables.values()).forEach((table) => {
                         const tableLeft = table.left + left;
                         const tableTop = table.top + top;
-                        const tableRight = tableLeft + table.width;
+                        const sourceTableId = getTableIdAndSliceIndex(table.tableId).tableId;
+                        const tableViewport = getTableHorizontalViewportGeometry(
+                            tableLeft,
+                            table.width,
+                            getDocsTableRenderViewport(this._context.unitId, sourceTableId)
+                        );
+                        const tableRight = tableViewport.visibleRight;
                         const tableBottom = tableTop + table.height;
                         const tableId = table.tableId;
                         this._tableBounds.set(tableId, {
@@ -649,8 +670,18 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
                         table.rows.forEach((row, rowIndex) => {
                             row.cells.forEach((cell, colIndex) => {
                                 const top = (((page.pageHeight === Infinity ? 0 : page.pageHeight) + documentOffsetConfig.pageMarginTop) * i) + table.top + documentOffsetConfig.docsTop + page.marginTop + row.top + cell.marginTop;
-                                const left = table.left + documentOffsetConfig.docsLeft + page.marginLeft + cell.left + cell.marginLeft;
-                                const bounds = calcDocParagraphPositions(cell.sections, top, left, cell.pageWidth - cell.marginLeft - cell.marginRight);
+                                const cellLeft = tableLeft + cell.left - tableViewport.scrollLeft + cell.marginLeft;
+                                const cellContentWidth = cell.pageWidth - cell.marginLeft - cell.marginRight;
+                                const cellRight = cellLeft + cellContentWidth;
+                                const visibleCellLeft = Math.max(cellLeft, tableViewport.visibleLeft);
+                                const visibleCellRight = Math.min(cellRight, tableViewport.visibleRight);
+                                if (visibleCellRight <= visibleCellLeft) {
+                                    return;
+                                }
+
+                                const bounds = calcDocParagraphPositions(cell.sections, top, cellLeft, cellContentWidth)
+                                    .map((bound) => clipParagraphBoundHorizontally(bound, tableViewport.visibleLeft, tableViewport.visibleRight))
+                                    .filter((bound): bound is ICustomRangeBoundBase => bound != null);
                                 let arr = this._tableParagraphBounds.get(tableId);
                                 if (!arr) {
                                     arr = [];
@@ -681,8 +712,8 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
                                 cellBounds.push({
                                     rect: {
                                         top,
-                                        left,
-                                        right: left + cell.pageWidth - cell.marginLeft - cell.marginRight,
+                                        left: visibleCellLeft,
+                                        right: visibleCellRight,
                                         bottom: top + cell.pageHeight - cell.marginBottom - cell.marginTop,
                                     },
                                     pageIndex: i,
@@ -713,10 +744,12 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
     }
 
     private _buildParagraphBounds() {
-        if (!this._paragraphDirty) {
+        const tableViewportSignature = this._getTableViewportSignature();
+        if (!this._paragraphDirty && this._tableViewportSignature === tableViewportSignature) {
             return;
         }
         this._paragraphDirty = false;
+        this._tableViewportSignature = tableViewportSignature;
         this._tableParagraphBounds = new Map();
         this._tableCellBounds = new Map();
         this._tableBounds = new Map();
@@ -800,12 +833,97 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
 
     findParagraphBoundByIndex(index: number) {
         this._buildParagraphBounds();
+        const tableParagraph = Array.from(this._tableParagraphBounds.values()).flat().find((bound) => bound.startIndex === index);
+        if (tableParagraph) {
+            return tableParagraph;
+        }
+
         const paragraph = this._paragraphBounds.get(index);
         if (paragraph) {
             return paragraph;
         }
-
-        const tableParagraph = Array.from(this._tableParagraphBounds.values()).flat().find((bound) => bound.startIndex === index);
-        return tableParagraph;
     }
+
+    findParagraphBoundsInRange(startIndex: number, endIndex: number): IMutiPageParagraphBound[] {
+        this._buildParagraphBounds();
+
+        const bodyBounds = [...this._paragraphBounds.values()];
+        const tableBounds = Array.from(this._tableParagraphBounds.values()).flat().map((bound) => ({
+            rect: bound.rect,
+            paragraphStart: bound.paragraphStart,
+            paragraphEnd: bound.paragraphEnd,
+            startIndex: bound.startIndex,
+            rects: [bound.rect],
+            pageIndex: bound.pageIndex,
+            segmentId: bound.segmentId,
+            firstLine: bound.firstLine,
+        }));
+
+        return getPreferredParagraphBoundsInRange(bodyBounds, tableBounds, startIndex, endIndex);
+    }
+
+    private _getTableViewportSignature(): string {
+        const pages = this._skeleton.getSkeletonData()?.pages ?? [];
+        const signatures: string[] = [];
+
+        pages.forEach((page) => {
+            page.skeTables?.forEach((table) => {
+                const tableId = getTableIdAndSliceIndex(table.tableId).tableId;
+                const viewport = getDocsTableRenderViewport(this._context.unitId, tableId);
+                if (!viewport) {
+                    signatures.push(`${tableId}:none`);
+                    return;
+                }
+
+                signatures.push(`${tableId}:${viewport.contentWidth}:${viewport.viewportWidth}:${viewport.scrollLeft}`);
+            });
+        });
+
+        return signatures.join('|');
+    }
+}
+
+export function getPreferredParagraphBoundsInRange(
+    bodyBounds: IMutiPageParagraphBound[],
+    tableBounds: IMutiPageParagraphBound[],
+    startIndex: number,
+    endIndex: number
+): IMutiPageParagraphBound[] {
+    const matchedTableBounds = tableBounds.filter((bound) => isRangeOverlappingParagraph(bound, startIndex, endIndex));
+    if (matchedTableBounds.length) {
+        return matchedTableBounds;
+    }
+
+    return bodyBounds.filter((bound) => isRangeOverlappingParagraph(bound, startIndex, endIndex));
+}
+
+function isRangeOverlappingParagraph(bound: Pick<IMutiPageParagraphBound, 'paragraphEnd' | 'paragraphStart'>, startIndex: number, endIndex: number): boolean {
+    return Math.max(bound.paragraphStart, startIndex) <= Math.min(bound.paragraphEnd, endIndex);
+}
+
+function clipParagraphBoundHorizontally(bound: ICustomRangeBoundBase, visibleLeft: number, visibleRight: number): ICustomRangeBoundBase | null {
+    const rect = clipRectHorizontally(bound.rect, visibleLeft, visibleRight);
+    if (!rect) {
+        return null;
+    }
+
+    return {
+        ...bound,
+        rect,
+        fisrtLine: clipRectHorizontally(bound.fisrtLine, visibleLeft, visibleRight) ?? rect,
+    };
+}
+
+function clipRectHorizontally(rect: IBoundRectNoAngle, visibleLeft: number, visibleRight: number): IBoundRectNoAngle | null {
+    const left = Math.max(rect.left, visibleLeft);
+    const right = Math.min(rect.right, visibleRight);
+    if (right <= left) {
+        return null;
+    }
+
+    return {
+        ...rect,
+        left,
+        right,
+    };
 }

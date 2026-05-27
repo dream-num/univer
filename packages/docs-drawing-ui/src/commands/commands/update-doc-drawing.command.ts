@@ -17,6 +17,7 @@
 import type { DocumentDataModel, IAccessor, ICommand, IDocDrawingBase, IDocDrawingPosition, IMutationInfo, IObjectPositionH, IObjectPositionV, ISize, JSONXActions, WrapTextType } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
+import type { IDocumentSkeletonDrawing, IDocumentSkeletonHeaderFooter, IDocumentSkeletonPage } from '@univerjs/engine-render';
 import {
     BooleanNumber,
     CommandType,
@@ -50,6 +51,41 @@ const WRAPPING_STYLE_TO_LAYOUT_TYPE = {
     [TextWrappingStyle.IN_FRONT_OF_TEXT]: PositionedObjectLayoutType.WRAP_NONE,
     [TextWrappingStyle.BEHIND_TEXT]: PositionedObjectLayoutType.WRAP_NONE,
 };
+
+interface IDrawingAnchorInPage {
+    skeDrawing: IDocumentSkeletonDrawing;
+    pageMarginTop: number;
+    pageMarginLeft: number;
+}
+
+export function findDrawingAnchorInPage(
+    page: IDocumentSkeletonPage | IDocumentSkeletonHeaderFooter,
+    drawingId: string,
+    pageMarginTop: number,
+    pageMarginLeft: number
+): IDrawingAnchorInPage | null {
+    const skeDrawing = page.skeDrawings.get(drawingId);
+    if (skeDrawing) {
+        return {
+            skeDrawing,
+            pageMarginTop,
+            pageMarginLeft,
+        };
+    }
+
+    for (const table of page.skeTables.values()) {
+        for (const row of table.rows) {
+            for (const cell of row.cells) {
+                const cellAnchor = findDrawingAnchorInPage(cell, drawingId, cell.marginTop, cell.marginLeft);
+                if (cellAnchor) {
+                    return cellAnchor;
+                }
+            }
+        }
+    }
+
+    return null;
+}
 
 // eslint-disable-next-line max-lines-per-function
 function getDeleteAndInsertCustomBlockActions(
@@ -280,9 +316,7 @@ export const UpdateDocDrawingWrappingStyleCommand: ICommand = {
             }
 
             // Update positionH and positionV if layoutType is not inline.
-            let skeDrawing = null;
-            let pageMarginTop = 0;
-            let pageMarginLeft = 0;
+            let drawingAnchor: IDrawingAnchorInPage | null = null;
             for (const page of pages) {
                 const { headerId, footerId, marginTop, marginLeft, marginBottom, pageWidth, pageHeight } = page;
 
@@ -290,10 +324,8 @@ export const UpdateDocDrawingWrappingStyleCommand: ICommand = {
                     case DocumentEditArea.HEADER: {
                         const headerSke = skeHeaders.get(headerId)?.get(pageWidth);
 
-                        if (headerSke != null && headerSke.skeDrawings.has(drawingId)) {
-                            skeDrawing = headerSke.skeDrawings.get(drawingId);
-                            pageMarginTop = headerSke.marginTop;
-                            pageMarginLeft = marginLeft;
+                        if (headerSke != null) {
+                            drawingAnchor = findDrawingAnchorInPage(headerSke, drawingId, headerSke.marginTop, marginLeft);
                         }
 
                         break;
@@ -301,30 +333,25 @@ export const UpdateDocDrawingWrappingStyleCommand: ICommand = {
 
                     case DocumentEditArea.FOOTER: {
                         const footerSke = skeFooters.get(footerId)?.get(pageWidth);
-                        if (footerSke != null && footerSke.skeDrawings.has(drawingId)) {
-                            skeDrawing = footerSke.skeDrawings.get(drawingId);
-                            pageMarginTop = pageHeight - marginBottom + footerSke.marginTop;
-                            pageMarginLeft = marginLeft;
+                        if (footerSke != null) {
+                            drawingAnchor = findDrawingAnchorInPage(footerSke, drawingId, pageHeight - marginBottom + footerSke.marginTop, marginLeft);
                         }
                         break;
                     }
 
                     case DocumentEditArea.BODY: {
-                        if (page.skeDrawings.has(drawingId)) {
-                            skeDrawing = page.skeDrawings.get(drawingId);
-                            pageMarginTop = marginTop;
-                            pageMarginLeft = marginLeft;
-                        }
+                        drawingAnchor = findDrawingAnchorInPage(page, drawingId, marginTop, marginLeft);
                         break;
                     }
                 }
 
-                if (skeDrawing != null) {
+                if (drawingAnchor != null) {
                     break;
                 }
             }
 
-            if (skeDrawing != null) {
+            if (drawingAnchor != null) {
+                const { skeDrawing, pageMarginTop, pageMarginLeft } = drawingAnchor;
                 const { aTop, aLeft } = skeDrawing;
                 const oldPositionH = oldDrawings[drawingId].docTransform.positionH;
                 let posOffsetH = aLeft;

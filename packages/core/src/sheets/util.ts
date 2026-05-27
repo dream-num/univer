@@ -24,7 +24,7 @@ import { TextX } from '../docs/data-model/text-x/text-x';
 import { convertTextRotation } from '../docs/data-model/utils';
 import { Rectangle } from '../shared';
 import { HorizontalAlign, VerticalAlign, WrapStrategy } from '../types/enum';
-import { CustomRangeType } from '../types/interfaces';
+import { CustomRangeType, DocumentFlavor } from '../types/interfaces';
 
 export interface IFontLocale {
     fontList: string[];
@@ -109,10 +109,12 @@ export function createDocumentModelWithStyle(content: string, textStyle: ITextSt
                 width: Number.POSITIVE_INFINITY,
                 height: Number.POSITIVE_INFINITY,
             },
+            documentFlavor: DocumentFlavor.UNSPECIFIED,
             marginTop,
             marginBottom,
             marginRight,
             marginLeft,
+            paragraphLineGapDefault: 0,
             renderConfig: {
                 horizontalAlign,
                 verticalAlign,

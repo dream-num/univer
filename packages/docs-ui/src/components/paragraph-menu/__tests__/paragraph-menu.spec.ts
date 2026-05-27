@@ -22,7 +22,17 @@ import { HorizontalLineCommand } from '../../../commands/commands/doc-horizontal
 import { BulletListCommand, InsertBulletListBellowCommand, OrderListCommand } from '../../../commands/commands/list.command';
 import { H1HeadingCommand, H3HeadingCommand, H5HeadingCommand, NormalTextHeadingCommand, SetParagraphNamedStyleCommand, SubtitleHeadingCommand, TitleHeadingCommand } from '../../../commands/commands/set-heading.command';
 import { CreateDocTableCommand } from '../../../commands/commands/table/doc-table-create.command';
-import { HEADING_ICON_MAP, INSERT_BELLOW_MENU_ID, shouldShowParagraphHeadingOption } from '../../../menu/paragraph-menu';
+import {
+    EmptyParagraphBulletListMenuItemFactory,
+    EmptyParagraphH1MenuItemFactory,
+    EmptyParagraphHorizontalLineMenuItemFactory,
+    HEADING_ICON_MAP,
+    INSERT_BELLOW_MENU_ID,
+    shouldShowParagraphHeadingOption,
+    TableBlockCopyMenuItemFactory,
+    TableBlockDeleteMenuItemFactory,
+    TableBlockPasteMenuItemFactory,
+} from '../../../menu/paragraph-menu';
 
 describe('ParagraphMenu', () => {
     it('uses a smaller icon for normal text paragraph triggers', () => {
@@ -32,6 +42,22 @@ describe('ParagraphMenu', () => {
         expect(getParagraphMenuIconSizeClass('H1Icon')).toBe('univer-size-4');
         expect(HEADING_ICON_MAP[NamedStyleType.TITLE].key).toBe('TitleTypeIcon');
         expect(HEADING_ICON_MAP[NamedStyleType.SUBTITLE].key).toBe('SubtitleTypeIcon');
+    });
+
+    it('uses fully-qualified locale keys for paragraph context menu labels', () => {
+        const accessor = {
+            get: () => ({
+                get: () => undefined,
+                register: () => undefined,
+            }),
+        } as never;
+
+        expect(EmptyParagraphH1MenuItemFactory(accessor).title).toBe('ui.toolbar.heading.1');
+        expect(EmptyParagraphBulletListMenuItemFactory(accessor).title).toBe('docs-ui.rightClick.bulletList');
+        expect(EmptyParagraphHorizontalLineMenuItemFactory(accessor).title).toBe('docs-ui.toolbar.horizontalLine');
+        expect(TableBlockCopyMenuItemFactory(accessor).title).toBe('docs-ui.rightClick.copy');
+        expect(TableBlockPasteMenuItemFactory(accessor).title).toBe('docs-ui.rightClick.paste');
+        expect(TableBlockDeleteMenuItemFactory(accessor).title).toBe('docs-ui.rightClick.delete');
     });
 
     it('opens the popup away from the drag handle when there is not enough left space', () => {

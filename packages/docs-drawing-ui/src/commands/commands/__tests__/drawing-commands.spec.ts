@@ -20,15 +20,17 @@ import {
     Direction,
     ICommandService,
     IUniverInstanceService,
+    ObjectRelativeFromH,
+    ObjectRelativeFromV,
     PositionedObjectLayoutType,
     UniverInstanceType,
     WrapTextType,
 } from '@univerjs/core';
-import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { DocSelectionManagerService, DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { DocDrawingController as CoreDocDrawingController, DocDrawingService, IDocDrawingService } from '@univerjs/docs-drawing';
 import { DocContentInsertService, DocSelectionRenderService } from '@univerjs/docs-ui';
 import { DrawingManagerService, IDrawingManagerService } from '@univerjs/drawing';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createDocUiTestBed } from '../../../__tests__/create-doc-ui-test-bed';
 import { DocDrawingAddRemoveController } from '../../../controllers/doc-drawing-notification.controller';
@@ -36,7 +38,7 @@ import { DeleteDocDrawingsCommand } from '../delete-doc-drawing.command';
 import { InsertDocDrawingCommand } from '../insert-doc-drawing.command';
 import { MoveDocDrawingsCommand } from '../move-drawings.command';
 import { RemoveDocDrawingCommand } from '../remove-doc-drawing.command';
-import { UpdateDocDrawingDistanceCommand, UpdateDocDrawingWrapTextCommand, UpdateDrawingDocTransformCommand } from '../update-doc-drawing.command';
+import { TextWrappingStyle, UpdateDocDrawingDistanceCommand, UpdateDocDrawingWrappingStyleCommand, UpdateDocDrawingWrapTextCommand, UpdateDrawingDocTransformCommand } from '../update-doc-drawing.command';
 
 function createBaseDocData(): IDocumentData {
     return {
@@ -138,6 +140,7 @@ function setupDrawingTestBed(docData: IDocumentData) {
         DeleteDocDrawingsCommand,
         MoveDocDrawingsCommand,
         UpdateDocDrawingDistanceCommand,
+        UpdateDocDrawingWrappingStyleCommand,
         UpdateDocDrawingWrapTextCommand,
         UpdateDrawingDocTransformCommand,
         RichTextEditingMutation as unknown as ICommand,
@@ -342,6 +345,96 @@ describe('docs drawing commands integration', () => {
             .getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC)!;
 
         expect(doc.getSnapshot().drawings?.['shape-1'].wrapText).toBe(WrapTextType.RIGHT);
+
+        testBed.univer.dispose();
+    });
+
+    it('keeps table cell drawing position when switching from inline to floating layout', async () => {
+        const docData = createDrawingDocData();
+        docData.drawings!['shape-1'].layoutType = PositionedObjectLayoutType.INLINE;
+        docData.drawings!['shape-1'].docTransform = {
+            size: {
+                width: 40,
+                height: 24,
+            },
+            positionH: {
+                relativeFrom: ObjectRelativeFromH.PAGE,
+                posOffset: 999,
+            },
+            positionV: {
+                relativeFrom: ObjectRelativeFromV.PARAGRAPH,
+                posOffset: 999,
+            },
+            angle: 0,
+        } as never;
+        const testBed = setupDrawingTestBed(docData);
+        const skeletonManager = testBed.injector.get(DocSkeletonManagerService);
+        vi.spyOn(skeletonManager, 'getViewModel').mockReturnValue({
+            getEditArea: () => DocumentEditArea.BODY,
+            reset: vi.fn(),
+        } as never);
+        vi.spyOn(skeletonManager, 'getSkeleton').mockReturnValue({
+            getSkeletonData: () => ({
+                pages: [{
+                    marginTop: 72,
+                    marginLeft: 90,
+                    marginBottom: 72,
+                    pageHeight: 800,
+                    pageWidth: 600,
+                    headerId: '',
+                    footerId: '',
+                    skeDrawings: new Map(),
+                    skeTables: new Map([
+                        ['table-1', {
+                            rows: [{
+                                cells: [{
+                                    marginTop: 4,
+                                    marginLeft: 5,
+                                    skeDrawings: new Map([
+                                        ['shape-1', {
+                                            drawingId: 'shape-1',
+                                            aLeft: 12,
+                                            aTop: 20,
+                                            columnLeft: 3,
+                                            lineTop: 7,
+                                            blockAnchorTop: 15,
+                                            drawingOrigin: docData.drawings!['shape-1'],
+                                        }],
+                                    ]),
+                                    skeTables: new Map(),
+                                }],
+                            }],
+                        }],
+                    ]),
+                }],
+                skeHeaders: new Map(),
+                skeFooters: new Map(),
+            }),
+        } as never);
+
+        expect(await testBed.commandService.executeCommand(UpdateDocDrawingWrappingStyleCommand.id, {
+            unitId: 'test-doc',
+            subUnitId: 'test-doc',
+            drawings: [{
+                drawingId: 'shape-1',
+            }],
+            wrappingStyle: TextWrappingStyle.WRAP_SQUARE,
+        })).toBe(true);
+        await awaitTime(0);
+
+        const doc = testBed.get(IUniverInstanceService)
+            .getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC)!;
+        const drawing = doc.getSnapshot().drawings?.['shape-1'];
+
+        expect(drawing?.layoutType).toBe(PositionedObjectLayoutType.WRAP_SQUARE);
+        expect(drawing?.docTransform.positionH).toEqual({
+            relativeFrom: ObjectRelativeFromH.PAGE,
+            posOffset: 12,
+        });
+        expect(drawing?.docTransform.positionV).toEqual({
+            relativeFrom: ObjectRelativeFromV.PARAGRAPH,
+            posOffset: 5,
+        });
 
         testBed.univer.dispose();
     });

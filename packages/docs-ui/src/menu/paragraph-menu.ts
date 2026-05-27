@@ -45,14 +45,14 @@ const HEADING_MAP: Record<NamedStyleType, ICommand> = {
 };
 
 const HEADING_TITLE_MAP: Partial<Record<NamedStyleType, string>> = {
-    [NamedStyleType.HEADING_1]: 'toolbar.heading.1',
-    [NamedStyleType.HEADING_2]: 'toolbar.heading.2',
-    [NamedStyleType.HEADING_3]: 'toolbar.heading.3',
-    [NamedStyleType.HEADING_4]: 'toolbar.heading.4',
-    [NamedStyleType.HEADING_5]: 'toolbar.heading.5',
-    [NamedStyleType.NORMAL_TEXT]: 'toolbar.heading.normal',
-    [NamedStyleType.TITLE]: 'toolbar.heading.title',
-    [NamedStyleType.SUBTITLE]: 'toolbar.heading.subTitle',
+    [NamedStyleType.HEADING_1]: 'ui.toolbar.heading.1',
+    [NamedStyleType.HEADING_2]: 'ui.toolbar.heading.2',
+    [NamedStyleType.HEADING_3]: 'ui.toolbar.heading.3',
+    [NamedStyleType.HEADING_4]: 'ui.toolbar.heading.4',
+    [NamedStyleType.HEADING_5]: 'ui.toolbar.heading.5',
+    [NamedStyleType.NORMAL_TEXT]: 'ui.toolbar.heading.normal',
+    [NamedStyleType.TITLE]: 'ui.toolbar.heading.title',
+    [NamedStyleType.SUBTITLE]: 'ui.toolbar.heading.subTitle',
 };
 
 function TitleTypeIcon({ className }: { className: string }) {
@@ -141,7 +141,7 @@ const createHeadingSelectorMenuItemFactory = (headingType: NamedStyleType) => (a
         type: MenuItemType.BUTTON,
         icon: icon.key,
         title: HEADING_TITLE_MAP[headingType],
-        tooltip: 'docs-ui.toolbar.heading.tooltip',
+        tooltip: 'ui.toolbar.heading.tooltip',
         disabled$: disableMenuWhenNoDocRange(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
         activated$: new Observable((subscriber) => {
@@ -200,16 +200,16 @@ const createEmptyParagraphButtonFactory = (
 };
 
 export const EMPTY_PARAGRAPH_MENU_ID = 'doc.menu.empty-paragraph';
-export const EmptyParagraphH1MenuItemFactory = createEmptyParagraphButtonFactory(H1HeadingCommand, 'H1Icon', 'toolbar.heading.1');
-export const EmptyParagraphH2MenuItemFactory = createEmptyParagraphButtonFactory(H2HeadingCommand, 'H2Icon', 'toolbar.heading.2');
-export const EmptyParagraphH3MenuItemFactory = createEmptyParagraphButtonFactory(H3HeadingCommand, 'H3Icon', 'toolbar.heading.3');
-export const EmptyParagraphH4MenuItemFactory = createEmptyParagraphButtonFactory(H4HeadingCommand, 'H4Icon', 'toolbar.heading.4');
-export const EmptyParagraphH5MenuItemFactory = createEmptyParagraphButtonFactory(H5HeadingCommand, 'H5Icon', 'toolbar.heading.5');
-export const EmptyParagraphNormalTextMenuItemFactory = createEmptyParagraphButtonFactory(NormalTextHeadingCommand, 'TextTypeIcon', 'toolbar.heading.normal');
-export const EmptyParagraphOrderListMenuItemFactory = createEmptyParagraphButtonFactory(OrderListCommand, 'OrderIcon', 'rightClick.orderList');
-export const EmptyParagraphBulletListMenuItemFactory = createEmptyParagraphButtonFactory(BulletListCommand, 'UnorderIcon', 'rightClick.bulletList');
-export const EmptyParagraphCheckListMenuItemFactory = createEmptyParagraphButtonFactory(CheckListCommand, 'TodoListDoubleIcon', 'rightClick.checkList');
-export const EmptyParagraphHorizontalLineMenuItemFactory = createEmptyParagraphButtonFactory(HorizontalLineCommand, 'ReduceIcon', 'toolbar.horizontalLine');
+export const EmptyParagraphH1MenuItemFactory = createEmptyParagraphButtonFactory(H1HeadingCommand, 'H1Icon', 'ui.toolbar.heading.1');
+export const EmptyParagraphH2MenuItemFactory = createEmptyParagraphButtonFactory(H2HeadingCommand, 'H2Icon', 'ui.toolbar.heading.2');
+export const EmptyParagraphH3MenuItemFactory = createEmptyParagraphButtonFactory(H3HeadingCommand, 'H3Icon', 'ui.toolbar.heading.3');
+export const EmptyParagraphH4MenuItemFactory = createEmptyParagraphButtonFactory(H4HeadingCommand, 'H4Icon', 'ui.toolbar.heading.4');
+export const EmptyParagraphH5MenuItemFactory = createEmptyParagraphButtonFactory(H5HeadingCommand, 'H5Icon', 'ui.toolbar.heading.5');
+export const EmptyParagraphNormalTextMenuItemFactory = createEmptyParagraphButtonFactory(NormalTextHeadingCommand, 'TextTypeIcon', 'ui.toolbar.heading.normal');
+export const EmptyParagraphOrderListMenuItemFactory = createEmptyParagraphButtonFactory(OrderListCommand, 'OrderIcon', 'docs-ui.rightClick.orderList');
+export const EmptyParagraphBulletListMenuItemFactory = createEmptyParagraphButtonFactory(BulletListCommand, 'UnorderIcon', 'docs-ui.rightClick.bulletList');
+export const EmptyParagraphCheckListMenuItemFactory = createEmptyParagraphButtonFactory(CheckListCommand, 'TodoListDoubleIcon', 'docs-ui.rightClick.checkList');
+export const EmptyParagraphHorizontalLineMenuItemFactory = createEmptyParagraphButtonFactory(HorizontalLineCommand, 'ReduceIcon', 'docs-ui.toolbar.horizontalLine');
 
 export const CopyCurrentParagraphMenuItemFactory = (accessor: IAccessor): IMenuItem => {
     return {
@@ -288,7 +288,7 @@ export const TableBlockCopyMenuItemFactory = (accessor: IAccessor): IMenuItem =>
         commandId: DocCopyCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'CopyDoubleIcon',
-        title: 'rightClick.copy',
+        title: 'docs-ui.rightClick.copy',
     };
 };
 
@@ -297,7 +297,7 @@ export const TableBlockPasteMenuItemFactory = (accessor: IAccessor): IMenuItem =
         id: DocPasteCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'PasteSpecialDoubleIcon',
-        title: 'rightClick.paste',
+        title: 'docs-ui.rightClick.paste',
     };
 };
 
@@ -306,7 +306,7 @@ export const TableBlockDeleteMenuItemFactory = (accessor: IAccessor): IMenuItem 
         id: DocTableDeleteTableCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'DeleteIcon',
-        title: 'rightClick.delete',
+        title: 'docs-ui.rightClick.delete',
     };
 };
 

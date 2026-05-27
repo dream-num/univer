@@ -623,7 +623,7 @@ export function HeadingSelectorMenuItemFactory(accessor: IAccessor): IMenuSelect
     return {
         id: SetParagraphNamedStyleCommand.id,
         type: MenuItemType.SELECTOR,
-        tooltip: 'docs-ui.toolbar.heading.tooltip',
+        tooltip: 'ui.toolbar.heading.tooltip',
         label: {
             name: COMMON_LABEL_COMPONENT,
             props: {
@@ -676,50 +676,50 @@ export const FLOAT_TOOLBAR_MENU_POSITION = 'doc.menu.float-toolbar';
 const FLOAT_TEXT_STYLE_OPTIONS = [
     {
         icon: 'TextTypeIcon',
-        label: 'toolbar.heading.normal',
+        label: 'ui.toolbar.heading.normal',
         value: NamedStyleType.NORMAL_TEXT,
     },
     {
         icon: 'H1Icon',
-        label: 'toolbar.heading.1',
+        label: 'ui.toolbar.heading.1',
         value: NamedStyleType.HEADING_1,
     },
     {
         icon: 'H2Icon',
-        label: 'toolbar.heading.2',
+        label: 'ui.toolbar.heading.2',
         value: NamedStyleType.HEADING_2,
     },
     {
         icon: 'H3Icon',
-        label: 'toolbar.heading.3',
+        label: 'ui.toolbar.heading.3',
         value: NamedStyleType.HEADING_3,
     },
     {
         icon: 'H4Icon',
-        label: 'toolbar.heading.4',
+        label: 'ui.toolbar.heading.4',
         value: NamedStyleType.HEADING_4,
     },
     {
         icon: 'H5Icon',
-        label: 'toolbar.heading.5',
+        label: 'ui.toolbar.heading.5',
         value: NamedStyleType.HEADING_5,
     },
     {
         id: OrderListCommand.id,
         icon: 'OrderIcon',
-        label: 'toolbar.order',
+        label: 'docs-ui.toolbar.order',
         value: PresetListType.ORDER_LIST,
     },
     {
         id: BulletListCommand.id,
         icon: 'UnorderIcon',
-        label: 'toolbar.unorder',
+        label: 'docs-ui.toolbar.unorder',
         value: PresetListType.BULLET_LIST,
     },
     {
         id: CheckListCommand.id,
         icon: 'TodoListDoubleIcon',
-        label: 'toolbar.checklist',
+        label: 'docs-ui.toolbar.checklist',
         value: PresetListType.CHECK_LIST,
     },
 ];
@@ -768,7 +768,7 @@ export function FloatTextStyleMenuItemFactory(accessor: IAccessor): IMenuSelecto
         commandId: SetParagraphNamedStyleCommand.id,
         type: MenuItemType.SELECTOR,
         icon: 'TextTypeIcon',
-        tooltip: 'toolbar.heading.tooltip',
+        tooltip: 'ui.toolbar.heading.tooltip',
         selections: FLOAT_TEXT_STYLE_OPTIONS,
         value$: new Observable((subscriber) => {
             const calc = () => {
@@ -905,7 +905,7 @@ export function InsertDefaultTableMenuFactory(_accessor: IAccessor): IMenuButton
             rowCount: 3,
             colCount: 5,
         },
-        title: 'toolbar.table.insert',
+        title: 'docs-ui.toolbar.table.insert',
         type: MenuItemType.BUTTON,
         icon: TableIcon,
         hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_DOC),
@@ -1052,25 +1052,25 @@ const HORIZONTAL_ALIGN_OPTIONS = [
     {
         id: AlignLeftCommand.id,
         value: HorizontalAlign.LEFT,
-        label: 'toolbar.alignLeft',
+        label: 'docs-ui.toolbar.alignLeft',
         icon: 'LeftJustifyingIcon',
     },
     {
         id: AlignCenterCommand.id,
         value: HorizontalAlign.CENTER,
-        label: 'toolbar.alignCenter',
+        label: 'docs-ui.toolbar.alignCenter',
         icon: 'HorizontallyIcon',
     },
     {
         id: AlignRightCommand.id,
         value: HorizontalAlign.RIGHT,
-        label: 'toolbar.alignRight',
+        label: 'docs-ui.toolbar.alignRight',
         icon: 'RightJustifyingIcon',
     },
     {
         id: AlignJustifyCommand.id,
         value: HorizontalAlign.JUSTIFIED,
-        label: 'toolbar.alignJustify',
+        label: 'docs-ui.toolbar.alignJustify',
         icon: 'AlignTextBothIcon',
     },
 ];
@@ -1098,7 +1098,7 @@ export function AlignMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<Hor
         id: AlignOperationCommand.id,
         type: MenuItemType.SELECTOR,
         icon: value$.pipe(map((alignType) => HORIZONTAL_ALIGN_OPTIONS.find((option) => option.value === alignType)?.icon ?? 'LeftJustifyingIcon')),
-        tooltip: 'toolbar.alignLeft',
+        tooltip: 'docs-ui.toolbar.alignLeft',
         selections: HORIZONTAL_ALIGN_OPTIONS,
         value$,
         disabled$: disableMenuWhenNoDocRange(accessor),

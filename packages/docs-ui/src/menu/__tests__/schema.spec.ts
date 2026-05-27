@@ -48,6 +48,12 @@ describe('docs ui ribbon schema', () => {
             AlignRightCommand.id,
             AlignJustifyCommand.id,
         ]);
+        expect((item.selections as Array<{ label?: string }>).map((option) => option.label)).toEqual([
+            'docs-ui.toolbar.alignLeft',
+            'docs-ui.toolbar.alignCenter',
+            'docs-ui.toolbar.alignRight',
+            'docs-ui.toolbar.alignJustify',
+        ]);
     });
 
     it('moves horizontal line and checklist to the insert tab', () => {
@@ -87,6 +93,17 @@ describe('docs ui ribbon schema', () => {
             [OrderListCommand.id, PresetListType.ORDER_LIST],
             [BulletListCommand.id, PresetListType.BULLET_LIST],
             [CheckListCommand.id, PresetListType.CHECK_LIST],
+        ]);
+        expect((item.selections as Array<{ label?: string }>).map((option) => option.label)).toEqual([
+            'ui.toolbar.heading.normal',
+            'ui.toolbar.heading.1',
+            'ui.toolbar.heading.2',
+            'ui.toolbar.heading.3',
+            'ui.toolbar.heading.4',
+            'ui.toolbar.heading.5',
+            'docs-ui.toolbar.order',
+            'docs-ui.toolbar.unorder',
+            'docs-ui.toolbar.checklist',
         ]);
     });
 
@@ -164,5 +181,6 @@ describe('docs ui ribbon schema', () => {
         expect(item.commandId).toBe(CreateDocTableCommand.id);
         expect(item.params).toEqual({ rowCount: 3, colCount: 5 });
         expect(item.icon).toBe('GridIcon');
+        expect(item.title).toBe('docs-ui.toolbar.table.insert');
     });
 });

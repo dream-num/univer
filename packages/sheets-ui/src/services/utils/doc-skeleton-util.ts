@@ -74,6 +74,9 @@ const calcDocGlyphPosition = (glyph: IDocumentSkeletonGlyph, skeleton: DocumentS
     const { borderBoxPointGroup } = convertor.getRangePointData(startPosition, startPosition);
     const bounds = getLineBounding(borderBoxPointGroup);
     const rect = bounds[0];
+    if (!rect) {
+        return;
+    }
 
     return {
         top: rect.top,

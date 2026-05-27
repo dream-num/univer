@@ -17,7 +17,7 @@
 import type { IMenuButtonItem } from '../menu/menu';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { hasRenderableContextMenuSchema } from '../../views/components/context-menu/ContextMenuPanel';
+import { CONTEXT_MENU_SUBMENU_CLOSE_DELAY, hasRenderableContextMenuSchema } from '../../views/components/context-menu/ContextMenuPanel';
 import { MenuItemType } from '../menu/menu';
 import { MenuManagerService } from '../menu/menu-manager.service';
 import { ContextMenuGroup, ContextMenuPosition, MenuManagerPosition, RibbonPosition, RibbonStartGroup } from '../menu/types';
@@ -173,6 +173,10 @@ describe('MenuManagerService', () => {
                 } as any,
             }],
         } as any)).toBe(true);
+    });
+
+    it('keeps nested context menus open long enough for pointer travel', () => {
+        expect(CONTEXT_MENU_SUBMENU_CLOSE_DELAY).toBeGreaterThanOrEqual(400);
     });
 });
 

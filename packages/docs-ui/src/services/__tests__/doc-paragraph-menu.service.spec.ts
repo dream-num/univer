@@ -19,7 +19,7 @@ import { DataStreamTreeTokenType, PresetListType } from '@univerjs/core';
 import { DocumentEditArea } from '@univerjs/engine-render';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
-import { getTableBlockMenuHoverRect } from '../doc-event-manager.service';
+import { getPreferredParagraphBoundsInRange, getTableBlockMenuHoverRect, getTableHorizontalViewportGeometry } from '../doc-event-manager.service';
 import { DocParagraphMenuService } from '../doc-paragraph-menu.service';
 
 describe('DocParagraphMenuService', () => {
@@ -100,36 +100,41 @@ describe('DocParagraphMenuService', () => {
         expect(attachPopupToRect).toHaveBeenCalledTimes(1);
     });
 
-    it('anchors a block range menu to the visible paragraph top', () => {
+    it('anchors a block range menu to the block top-left instead of the visible paragraph', () => {
         const attachPopupToRect = vi.fn(() => ({ canDispose: () => true, dispose: vi.fn() }));
         const blockText = `${DataStreamTreeTokenType.BLOCK_START}A\rB\r${DataStreamTreeTokenType.BLOCK_END}`;
-        const firstHidden = createParagraphBound({
+        const firstBlockParagraph = createParagraphBound({
             paragraphStart: 1,
             paragraphEnd: 3,
             startIndex: 2,
         });
-        firstHidden.firstLine = { bottom: 20, left: 10, right: 100, top: 0 };
-        const secondVisible = createParagraphBound({
+        firstBlockParagraph.firstLine = { bottom: 20, left: 10, right: 100, top: 0 };
+        const secondBlockParagraph = createParagraphBound({
             paragraphStart: 3,
             paragraphEnd: 5,
             startIndex: 4,
         });
-        secondVisible.firstLine = { bottom: 90, left: 10, right: 100, top: 70 };
+        secondBlockParagraph.firstLine = { bottom: 90, left: 20, right: 100, top: 70 };
         const service = createService({
             attachPopupToRect,
             dataStream: blockText,
             blockRanges: [{ blockId: 'block-1', blockType: 'quote', startIndex: 0, endIndex: blockText.length - 1 }],
             paragraphBounds: new Map([
-                [2, firstHidden],
-                [4, secondVisible],
+                [2, firstBlockParagraph],
+                [4, secondBlockParagraph],
             ]),
             viewportScrollY: 60,
         });
 
-        service.showParagraphMenu(secondVisible);
+        service.showParagraphMenu(secondBlockParagraph);
 
-        const [anchor] = attachPopupToRect.mock.calls[0] as unknown as [() => { top: number }];
-        expect(anchor().top).toBe(70);
+        const [anchor] = attachPopupToRect.mock.calls[0] as unknown as [() => { bottom: number; left: number; right: number; top: number }];
+        expect(anchor()).toMatchObject({
+            bottom: 0,
+            left: 10,
+            right: 10,
+            top: 0,
+        });
     });
 
     it('anchors the table menu at the table top-left drag handle position', () => {
@@ -242,6 +247,35 @@ describe('DocParagraphMenuService', () => {
         });
     });
 
+    it('projects table cell block-menu geometry through the horizontal table viewport', () => {
+        expect(getTableHorizontalViewportGeometry(100, 600, {
+            contentWidth: 600,
+            scrollLeft: 160,
+            viewportWidth: 240,
+        })).toEqual({
+            scrollLeft: 160,
+            visibleLeft: 100,
+            visibleRight: 340,
+        });
+    });
+
+    it('prefers table paragraph bounds over body bounds for block range anchors', () => {
+        const bodyBound = createParagraphBound({
+            paragraphStart: 1,
+            paragraphEnd: 3,
+            startIndex: 2,
+        });
+        bodyBound.firstLine = { bottom: 20, left: 10, right: 100, top: 0 };
+        const tableBound = createParagraphBound({
+            paragraphStart: 1,
+            paragraphEnd: 3,
+            startIndex: 2,
+        });
+        tableBound.firstLine = { bottom: 20, left: 140, right: 240, top: 0 };
+
+        expect(getPreferredParagraphBoundsInRange([bodyBound], [tableBound], 0, 4)).toEqual([tableBound]);
+    });
+
     it('keeps the current menu mounted while block dragging is locked', () => {
         const dispose = vi.fn();
         const attachPopupToRect = vi.fn(() => ({ canDispose: () => true, dispose }));
@@ -317,6 +351,8 @@ function createService(options: {
             hoverParagraphLeft$: new BehaviorSubject(null),
             clickCustomRanges$: new Subject(),
             findParagraphBoundByIndex: options.findParagraphBoundByIndex ?? vi.fn(() => null),
+            findParagraphBoundsInRange: vi.fn((startIndex: number, endIndex: number) => [...(options.paragraphBounds ?? new Map()).values()]
+                .filter((bound) => Math.max(bound.paragraphStart, startIndex) <= Math.min(bound.paragraphEnd, endIndex))),
             paragraphBounds: options.paragraphBounds ?? new Map(),
             tableBounds: new Map(),
         } as never,

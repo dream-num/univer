@@ -24,7 +24,7 @@ import type { ISectionBreakConfig } from '../../../../basics/interfaces';
 import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../view-model/document-view-model';
 import type { ILayoutContext } from '../tools';
-import { BooleanNumber, PageOrientType } from '@univerjs/core';
+import { BooleanNumber, PageOrientType, PositionedObjectLayoutType } from '@univerjs/core';
 import { BreakType, DocumentSkeletonPageType } from '../../../../basics/i-document-skeleton-cached';
 import { dealWithSection } from '../block/section';
 import { resetContext, updateBlockIndex, updateInlineDrawingCoordsAndBorder } from '../tools';
@@ -389,8 +389,24 @@ export function createSkeletonCellPages(
     applyTrailingCellBlockRangeSpaceBelow(pages, ctx.dataModel?.getBody?.(), cellNode.endIndex);
 
     updateInlineDrawingCoordsAndBorder(ctx, pages);
+    expandCellPageHeightForInlineDrawings(pages);
 
     return pages;
+}
+
+export function expandCellPageHeightForInlineDrawings(pages: IDocumentSkeletonPage[]) {
+    for (const page of pages) {
+        page.skeDrawings?.forEach((drawing) => {
+            if (drawing.drawingOrigin?.layoutType !== PositionedObjectLayoutType.INLINE) {
+                return;
+            }
+
+            const drawingBottom = (drawing.aTop ?? 0) + (drawing.height ?? 0);
+            if (drawingBottom > page.height) {
+                page.height = drawingBottom;
+            }
+        });
+    }
 }
 
 function applyTrailingCellBlockRangeSpaceBelow(pages: IDocumentSkeletonPage[], body: Nullable<IDocumentBody>, cellEndIndex: number) {

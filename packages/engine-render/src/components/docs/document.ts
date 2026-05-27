@@ -544,9 +544,9 @@ export class Documents extends DocComponent {
                 ctx.beginPath();
                 ctx.rectByPrecision(
                     x + page.marginLeft - TABLE_VIEWPORT_BORDER_CLIP_PADDING,
-                    y + page.marginTop,
+                    y + page.marginTop - TABLE_VIEWPORT_BORDER_CLIP_PADDING,
                     viewport.viewportWidth + TABLE_VIEWPORT_BORDER_CLIP_PADDING * 2,
-                    tableSkeleton.height
+                    tableSkeleton.height + TABLE_VIEWPORT_BORDER_CLIP_PADDING * 2
                 );
                 ctx.closePath();
                 ctx.clip();

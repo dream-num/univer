@@ -60,8 +60,8 @@ const locale: typeof enUS = {
         'drawing-anchor': {
             title: 'Właściwości kotwicy',
             both: 'Przesuwaj i zmieniaj rozmiar razem z komórkami',
-            position: "Przesuwaj, ale nie zmieniaj rozmiaru razem z komórkami",
-            none: "Nie przesuwaj ani nie zmieniaj rozmiaru razem z komórkami",
+            position: 'Przesuwaj, ale nie zmieniaj rozmiaru razem z komórkami',
+            none: 'Nie przesuwaj ani nie zmieniaj rozmiaru razem z komórkami',
         },
         'cell-image': {
             pasteTitle: 'Wklej jako obraz w komórce',
@@ -72,6 +72,9 @@ const locale: typeof enUS = {
             dialog: {
                 editErr: 'Zakres jest chroniony i nie masz uprawnień do edycji. Aby edytować, skontaktuj się z twórcą.',
             },
+        },
+        shortcut: {
+            'drawing-view': 'Drawing View',
         },
     },
 };

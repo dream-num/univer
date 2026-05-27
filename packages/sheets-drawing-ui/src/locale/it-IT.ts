@@ -60,18 +60,21 @@ const locale: typeof enUS = {
         'drawing-anchor': {
             title: 'Proprietà ancoraggio',
             both: 'Sposta e ridimensiona con le celle',
-            position: "Sposta ma non ridimensionare con le celle",
-            none: "Non spostare né ridimensionare con le celle",
+            position: 'Sposta ma non ridimensionare con le celle',
+            none: 'Non spostare né ridimensionare con le celle',
         },
         'cell-image': {
             pasteTitle: 'Incolla come immagine cella',
             pasteContent: "L'incollaggio di un'immagine cella sovrascriverà il contenuto esistente della cella, continuare con l'incollaggio",
-            pasteError: "Copia e incolla di immagine cella non supportato in questa unità",
+            pasteError: 'Copia e incolla di immagine cella non supportato in questa unità',
         },
         permission: {
             dialog: {
                 editErr: "L'intervallo è protetto e non hai l'autorizzazione di modifica. Per modificare, contatta il creatore.",
             },
+        },
+        shortcut: {
+            'drawing-view': 'Drawing View',
         },
     },
 };

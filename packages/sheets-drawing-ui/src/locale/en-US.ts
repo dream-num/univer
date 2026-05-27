@@ -71,6 +71,9 @@ const locale = {
                 editErr: 'The range is protected, and you do not have edit permission. To edit, please contact the creator.',
             },
         },
+        shortcut: {
+            'drawing-view': 'Drawing View',
+        },
     },
 };
 

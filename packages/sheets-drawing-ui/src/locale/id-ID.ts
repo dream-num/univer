@@ -60,8 +60,8 @@ const locale: typeof enUS = {
         'drawing-anchor': {
             title: 'Properti Jangkar',
             both: 'Pindah dan ukur bersama sel',
-            position: "Pindah tapi tidak ukur bersama sel",
-            none: "Jangan pindah atau ukur bersama sel",
+            position: 'Pindah tapi tidak ukur bersama sel',
+            none: 'Jangan pindah atau ukur bersama sel',
         },
         'cell-image': {
             pasteTitle: 'Tempel sebagai gambar sel',
@@ -72,6 +72,9 @@ const locale: typeof enUS = {
             dialog: {
                 editErr: 'Rentang ini dilindungi, dan Anda tidak memiliki izin edit. Untuk mengedit, silakan hubungi pembuatnya.',
             },
+        },
+        shortcut: {
+            'drawing-view': 'Drawing View',
         },
     },
 };

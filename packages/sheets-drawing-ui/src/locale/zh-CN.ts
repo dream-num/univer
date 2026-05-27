@@ -73,6 +73,9 @@ const locale: typeof enUS = {
                 editErr: '该范围已被保护，目前无编辑权限。如需编辑，请联系创建者。',
             },
         },
+        shortcut: {
+            'drawing-view': '绘图视图',
+        },
     },
 };
 

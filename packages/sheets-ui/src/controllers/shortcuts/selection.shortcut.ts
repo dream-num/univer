@@ -36,6 +36,7 @@ export const MoveSelectionDownShortcutItem: IShortcutItem<IMoveSelectionCommandP
     id: MoveSelectionCommand.id,
     description: 'sheets-ui.shortcut.sheet.select-below-cell',
     group: '3_sheet-view',
+    groupTitle: 'sheets-ui.shortcut.sheet-view',
     binding: KeyCode.ARROW_DOWN,
     priority: 100,
     preconditions: whenSheetEditorFocused,
@@ -48,6 +49,7 @@ export const MoveSelectionUpShortcutItem: IShortcutItem<IMoveSelectionCommandPar
     id: MoveSelectionCommand.id,
     description: 'sheets-ui.shortcut.sheet.select-up-cell',
     group: '3_sheet-view',
+    groupTitle: 'sheets-ui.shortcut.sheet-view',
     binding: KeyCode.ARROW_UP,
     priority: 100,
     preconditions: whenSheetEditorFocused,
@@ -60,6 +62,7 @@ export const MoveSelectionLeftShortcutItem: IShortcutItem<IMoveSelectionCommandP
     id: MoveSelectionCommand.id,
     description: 'sheets-ui.shortcut.sheet.select-left-cell',
     group: '3_sheet-view',
+    groupTitle: 'sheets-ui.shortcut.sheet-view',
     binding: KeyCode.ARROW_LEFT,
     priority: 100,
     preconditions: whenSheetEditorFocusedAndFxNotFocused,
@@ -72,6 +75,7 @@ export const MoveSelectionRightShortcutItem: IShortcutItem<IMoveSelectionCommand
     id: MoveSelectionCommand.id,
     description: 'sheets-ui.shortcut.sheet.select-right-cell',
     group: '3_sheet-view',
+    groupTitle: 'sheets-ui.shortcut.sheet-view',
     binding: KeyCode.ARROW_RIGHT,
     priority: 100,
     preconditions: whenSheetEditorFocusedAndFxNotFocused,
@@ -84,6 +88,7 @@ export const MoveSelectionTabShortcutItem: IShortcutItem<IMoveSelectionEnterAndT
     id: MoveSelectionEnterAndTabCommand.id,
     description: 'sheets-ui.shortcut.sheet.select-next-cell',
     group: '3_sheet-view',
+    groupTitle: 'sheets-ui.shortcut.sheet-view',
     binding: KeyCode.TAB,
     priority: 100,
     preconditions: whenSheetEditorFocused,
@@ -97,6 +102,7 @@ export const MoveSelectionTabLeftShortcutItem: IShortcutItem<IMoveSelectionEnter
     id: MoveSelectionEnterAndTabCommand.id,
     description: 'sheets-ui.shortcut.sheet.select-previous-cell',
     group: '3_sheet-view',
+    groupTitle: 'sheets-ui.shortcut.sheet-view',
     binding: KeyCode.TAB | MetaKeys.SHIFT,
     priority: 100,
     preconditions: whenSheetEditorFocused,
@@ -110,6 +116,7 @@ export const MoveSelectionEnterShortcutItem: IShortcutItem<IMoveSelectionEnterAn
     id: MoveSelectionEnterAndTabCommand.id,
     description: 'sheets-ui.shortcut.sheet.select-below-cell',
     group: '3_sheet-view',
+    groupTitle: 'sheets-ui.shortcut.sheet-view',
     binding: KeyCode.ENTER,
     priority: 100,
     preconditions: whenSheetEditorFocused,
@@ -123,6 +130,7 @@ export const MoveSelectionEnterUpShortcutItem: IShortcutItem<IMoveSelectionEnter
     id: MoveSelectionEnterAndTabCommand.id,
     description: 'sheets-ui.shortcut.sheet.select-up-cell',
     group: '3_sheet-view',
+    groupTitle: 'sheets-ui.shortcut.sheet-view',
     binding: KeyCode.ENTER | MetaKeys.SHIFT,
     priority: 100,
     preconditions: whenSheetEditorFocused,
@@ -150,6 +158,7 @@ export const MoveSelectionEndDownShortcutItem: IShortcutItem<IMoveSelectionComma
     id: MoveSelectionCommand.id,
     description: 'sheets-ui.shortcut.sheet.select-below-value-cell',
     group: '3_sheet-view',
+    groupTitle: 'sheets-ui.shortcut.sheet-view',
     binding: KeyCode.ARROW_DOWN | MetaKeys.CTRL_COMMAND,
     preconditions: whenSheetEditorFocused,
     staticParameters: {
@@ -162,6 +171,7 @@ export const MoveSelectionEndUpShortcutItem: IShortcutItem<IMoveSelectionCommand
     id: MoveSelectionCommand.id,
     description: 'sheets-ui.shortcut.sheet.select-up-value-cell',
     group: '3_sheet-view',
+    groupTitle: 'sheets-ui.shortcut.sheet-view',
     binding: KeyCode.ARROW_UP | MetaKeys.CTRL_COMMAND,
     preconditions: whenSheetEditorFocused,
     staticParameters: {
@@ -174,6 +184,7 @@ export const MoveSelectionEndLeftShortcutItem: IShortcutItem<IMoveSelectionComma
     id: MoveSelectionCommand.id,
     description: 'sheets-ui.shortcut.sheet.select-left-value-cell',
     group: '3_sheet-view',
+    groupTitle: 'sheets-ui.shortcut.sheet-view',
     binding: KeyCode.ARROW_LEFT | MetaKeys.CTRL_COMMAND,
     preconditions: whenSheetEditorFocused,
     staticParameters: {
@@ -186,6 +197,7 @@ export const MoveSelectionEndRightShortcutItem: IShortcutItem<IMoveSelectionComm
     id: MoveSelectionCommand.id,
     description: 'sheets-ui.shortcut.sheet.select-right-value-cell',
     group: '3_sheet-view',
+    groupTitle: 'sheets-ui.shortcut.sheet-view',
     binding: KeyCode.ARROW_RIGHT | MetaKeys.CTRL_COMMAND,
     preconditions: whenSheetEditorFocused,
     staticParameters: {
@@ -198,6 +210,7 @@ export const ExpandSelectionDownShortcutItem: IShortcutItem<IExpandSelectionComm
     id: ExpandSelectionCommand.id,
     description: 'sheets-ui.shortcut.sheet.expand-selection-down',
     group: '3_sheet-view',
+    groupTitle: 'sheets-ui.shortcut.sheet-view',
     binding: KeyCode.ARROW_DOWN | MetaKeys.SHIFT,
     preconditions: whenSheetEditorFocused,
     staticParameters: {
@@ -209,6 +222,7 @@ export const ExpandSelectionUpShortcutItem: IShortcutItem<IExpandSelectionComman
     id: ExpandSelectionCommand.id,
     description: 'sheets-ui.shortcut.sheet.expand-selection-up',
     group: '3_sheet-view',
+    groupTitle: 'sheets-ui.shortcut.sheet-view',
     binding: KeyCode.ARROW_UP | MetaKeys.SHIFT,
     preconditions: whenSheetEditorFocused,
     staticParameters: {
@@ -220,6 +234,7 @@ export const ExpandSelectionLeftShortcutItem: IShortcutItem<IExpandSelectionComm
     id: ExpandSelectionCommand.id,
     description: 'sheets-ui.shortcut.sheet.expand-selection-left',
     group: '3_sheet-view',
+    groupTitle: 'sheets-ui.shortcut.sheet-view',
     binding: KeyCode.ARROW_LEFT | MetaKeys.SHIFT,
     preconditions: whenSheetEditorFocused,
     staticParameters: {
@@ -231,6 +246,7 @@ export const ExpandSelectionRightShortcutItem: IShortcutItem<IExpandSelectionCom
     id: ExpandSelectionCommand.id,
     description: 'sheets-ui.shortcut.sheet.expand-selection-right',
     group: '3_sheet-view',
+    groupTitle: 'sheets-ui.shortcut.sheet-view',
     binding: KeyCode.ARROW_RIGHT | MetaKeys.SHIFT,
     preconditions: whenSheetEditorFocused,
     staticParameters: {
@@ -244,6 +260,7 @@ export const ExpandSelectionEndDownShortcutItem: IShortcutItem<IExpandSelectionC
     id: ExpandSelectionCommand.id,
     description: 'sheets-ui.shortcut.sheet.expand-selection-to-below-gap',
     group: '3_sheet-view',
+    groupTitle: 'sheets-ui.shortcut.sheet-view',
     binding: KeyCode.ARROW_DOWN | MetaKeys.SHIFT | MetaKeys.CTRL_COMMAND,
     preconditions: whenSheetEditorFocused,
     staticParameters: {
@@ -256,6 +273,7 @@ export const ExpandSelectionEndUpShortcutItem: IShortcutItem<IExpandSelectionCom
     id: ExpandSelectionCommand.id,
     description: 'sheets-ui.shortcut.sheet.expand-selection-to-up-gap',
     group: '3_sheet-view',
+    groupTitle: 'sheets-ui.shortcut.sheet-view',
     binding: KeyCode.ARROW_UP | MetaKeys.SHIFT | MetaKeys.CTRL_COMMAND,
     preconditions: whenSheetEditorFocused,
     staticParameters: {
@@ -268,6 +286,7 @@ export const ExpandSelectionEndLeftShortcutItem: IShortcutItem<IExpandSelectionC
     id: ExpandSelectionCommand.id,
     description: 'sheets-ui.shortcut.sheet.expand-selection-to-left-gap',
     group: '3_sheet-view',
+    groupTitle: 'sheets-ui.shortcut.sheet-view',
     binding: KeyCode.ARROW_LEFT | MetaKeys.SHIFT | MetaKeys.CTRL_COMMAND,
     preconditions: whenSheetEditorFocused,
     staticParameters: {
@@ -280,6 +299,7 @@ export const ExpandSelectionEndRightShortcutItem: IShortcutItem<IExpandSelection
     id: ExpandSelectionCommand.id,
     description: 'sheets-ui.shortcut.sheet.expand-selection-to-right-gap',
     group: '3_sheet-view',
+    groupTitle: 'sheets-ui.shortcut.sheet-view',
     binding: KeyCode.ARROW_RIGHT | MetaKeys.SHIFT | MetaKeys.CTRL_COMMAND,
     preconditions: whenSheetEditorFocused,
     staticParameters: {
@@ -292,6 +312,7 @@ export const SelectAllShortcutItem: IShortcutItem<ISelectAllCommandParams> = {
     id: SelectAllCommand.id,
     description: 'sheets-ui.shortcut.sheet.select-all',
     group: '3_sheet-view',
+    groupTitle: 'sheets-ui.shortcut.sheet-view',
     binding: KeyCode.A | MetaKeys.CTRL_COMMAND,
     preconditions: whenSheetEditorFocused,
     staticParameters: {

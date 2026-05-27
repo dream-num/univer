@@ -278,6 +278,8 @@ const locale: typeof enUS = {
             copied: 'Tersalin',
         },
         shortcut: {
+            'sheet-view': 'Sheet View',
+            'sheet-edit': 'Sheet Edit',
             sheet: {
                 'zoom-in': 'Perbesar',
                 'zoom-out': 'Perkecil',

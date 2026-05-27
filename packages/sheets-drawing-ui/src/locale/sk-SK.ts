@@ -73,6 +73,9 @@ const locale: typeof enUS = {
                 editErr: 'Rozsah je chránený a nemáte oprávnenie na úpravy. Ak chcete upravovať, kontaktujte autora.',
             },
         },
+        shortcut: {
+            'drawing-view': 'Drawing View',
+        },
     },
 };
 

@@ -73,6 +73,9 @@ const locale: typeof enUS = {
                 editErr: 'この範囲は保護されており、編集権限がありません。編集するには作成者に連絡してください。',
             },
         },
+        shortcut: {
+            'drawing-view': '図形表示',
+        },
     },
 };
 

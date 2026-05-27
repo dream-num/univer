@@ -31,6 +31,7 @@ const ToggleShortcutPanelShortcut: IShortcutItem = {
     binding: MetaKeys.CTRL_COMMAND | KeyCode.BACK_SLASH,
     description: 'ui.shortcut.shortcut-panel',
     group: '10_global-shortcut',
+    groupTitle: 'ui.global-shortcut',
 };
 
 /**

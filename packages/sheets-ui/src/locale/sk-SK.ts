@@ -278,6 +278,8 @@ const locale: typeof enUS = {
             copied: 'Skopírované',
         },
         shortcut: {
+            'sheet-view': 'Sheet View',
+            'sheet-edit': 'Sheet Edit',
             sheet: {
                 'zoom-in': 'Priblížiť',
                 'zoom-out': 'Oddialiť',

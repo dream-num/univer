@@ -29,6 +29,7 @@ export const SetBoldShortcutItem: IShortcutItem = {
     id: SetRangeBoldCommand.id,
     description: 'sheets-ui.shortcut.sheet.set-bold',
     group: '4_sheet-edit',
+    groupTitle: 'sheets-ui.shortcut.sheet-edit',
     preconditions: (contextService) => whenSheetFocusedInlineFormat(contextService),
     binding: KeyCode.B | MetaKeys.CTRL_COMMAND,
 };
@@ -37,6 +38,7 @@ export const SetItalicShortcutItem: IShortcutItem = {
     id: SetRangeItalicCommand.id,
     description: 'sheets-ui.shortcut.sheet.set-italic',
     group: '4_sheet-edit',
+    groupTitle: 'sheets-ui.shortcut.sheet-edit',
     preconditions: (contextService) => whenSheetFocusedInlineFormat(contextService),
     binding: KeyCode.I | MetaKeys.CTRL_COMMAND,
 };
@@ -45,6 +47,7 @@ export const SetUnderlineShortcutItem: IShortcutItem = {
     id: SetRangeUnderlineCommand.id,
     description: 'sheets-ui.shortcut.sheet.set-underline',
     group: '4_sheet-edit',
+    groupTitle: 'sheets-ui.shortcut.sheet-edit',
     preconditions: (contextService) => whenSheetFocusedInlineFormat(contextService),
     binding: KeyCode.U | MetaKeys.CTRL_COMMAND,
 };
@@ -53,6 +56,7 @@ export const SetStrikeThroughShortcutItem: IShortcutItem = {
     id: SetRangeStrickThroughCommand.id,
     description: 'sheets-ui.shortcut.sheet.set-strike-through',
     group: '4_sheet-edit',
+    groupTitle: 'sheets-ui.shortcut.sheet-edit',
     preconditions: (contextService) => whenSheetFocusedInlineFormat(contextService),
     binding: KeyCode.X | MetaKeys.SHIFT | MetaKeys.CTRL_COMMAND,
 };

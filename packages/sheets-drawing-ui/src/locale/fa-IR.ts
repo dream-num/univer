@@ -73,6 +73,9 @@ const locale: typeof enUS = {
                 editErr: 'محدوده محافظت شده است و شما مجوز ویرایش را ندارید. برای ویرایش، لطفا با سازنده تماس بگیرید.',
             },
         },
+        shortcut: {
+            'drawing-view': 'Drawing View',
+        },
     },
 };
 

@@ -15,7 +15,6 @@
  */
 
 import { dedupeBy, LocaleService } from '@univerjs/core';
-
 import { clsx, divideYClassName, KBD } from '@univerjs/design';
 import { useCallback, useEffect, useState } from 'react';
 import { IShortcutService } from '../../../services/shortcut/shortcut.service';
@@ -46,6 +45,8 @@ export function ShortcutPanel() {
         const shortcutGroups = new Map<string, IRenderShortcutItem[]>();
 
         const shortcuts = shortcutService.getAllShortcuts().filter((item) => !!item.group);
+        const groupTitles = new Map<string, string>();
+
         for (const shortcut of shortcuts) {
             const group = shortcut.group!;
             const shortcutItem: IRenderShortcutItem = {
@@ -53,8 +54,16 @@ export function ShortcutPanel() {
                 shortcut: shortcutService.getShortcutDisplay(shortcut),
             };
 
-            if (!/\d+_[a-zA-Z0-9]/.test(group)) {
+            if (!/^\d+_/.test(group)) {
                 throw new Error(`[ShortcutPanel]: Invalid shortcut group: ${group}!`);
+            }
+
+            if (!shortcut.groupTitle) {
+                throw new Error(`[ShortcutPanel]: Shortcut group "${group}" must provide a groupTitle!`);
+            }
+
+            if (!groupTitles.has(group)) {
+                groupTitles.set(group, shortcut.groupTitle);
             }
 
             if (!shortcutGroups.has(group)) {
@@ -67,11 +76,11 @@ export function ShortcutPanel() {
         const toRender = Array.from(shortcutGroups.entries())
             .map(([name, items]) => {
                 const groupSequence = name.split('_')[0];
-                const groupName = name.slice(groupSequence.length + 1);
+                const localeKey = groupTitles.get(name)!;
 
                 return {
                     sequence: +groupSequence,
-                    name: localeService.t(groupName),
+                    name: localeService.t(localeKey),
                     items: dedupeBy(items, (item) => item.title + item.shortcut),
                 };
             })

@@ -73,6 +73,9 @@ const locale: typeof enUS = {
                 editErr: '해당 범위는 보호되어 있어 편집 권한이 없습니다. 편집하려면 작성자에게 문의하세요.',
             },
         },
+        shortcut: {
+            'drawing-view': '그리기 보기',
+        },
     },
 };
 

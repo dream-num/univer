@@ -73,6 +73,9 @@ const locale: typeof enUS = {
                 editErr: 'Der Bereich ist geschützt, und Sie haben keine Bearbeitungsberechtigung. Um zu bearbeiten, wenden Sie sich bitte an den Ersteller.',
             },
         },
+        shortcut: {
+            'drawing-view': 'Drawing View',
+        },
     },
 };
 

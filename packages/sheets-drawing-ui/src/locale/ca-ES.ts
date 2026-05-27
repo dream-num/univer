@@ -73,6 +73,9 @@ const locale: typeof enUS = {
                 editErr: 'L\'interval està protegit i no teniu permís d\'edició. Per editar, contacteu amb el creador.',
             },
         },
+        shortcut: {
+            'drawing-view': 'Drawing View',
+        },
     },
 };
 

@@ -41,6 +41,7 @@ export const CopyShortcutItem: IShortcutItem = {
     id: CopyCommand.id,
     description: 'ui.shortcut.copy',
     group: '1_common-edit',
+    groupTitle: 'ui.common-edit',
     binding: KeyCode.C | MetaKeys.CTRL_COMMAND,
     preconditions: whenEditorFocused,
 };
@@ -49,6 +50,7 @@ export const CutShortcutItem: IShortcutItem = {
     id: CutCommand.id,
     description: 'ui.shortcut.cut',
     group: '1_common-edit',
+    groupTitle: 'ui.common-edit',
     binding: KeyCode.X | MetaKeys.CTRL_COMMAND,
     preconditions: whenEditorFocused,
 };
@@ -60,6 +62,7 @@ export const OnlyDisplayPasteShortcutItem: IShortcutItem = {
     id: PasteCommand.id,
     description: 'ui.shortcut.paste',
     group: '1_common-edit',
+    groupTitle: 'ui.common-edit',
     binding: KeyCode.V | MetaKeys.CTRL_COMMAND,
     preconditions: () => false,
 };
@@ -78,6 +81,7 @@ export const UndoShortcutItem: IShortcutItem = {
     id: UndoCommand.id,
     description: 'ui.shortcut.undo',
     group: '1_common-edit',
+    groupTitle: 'ui.common-edit',
     binding: KeyCode.Z | MetaKeys.CTRL_COMMAND,
     preconditions: whenEditorFocusedButNotCellEditor,
 };
@@ -86,6 +90,7 @@ export const RedoShortcutItem: IShortcutItem = {
     id: RedoCommand.id,
     description: 'ui.shortcut.redo',
     group: '1_common-edit',
+    groupTitle: 'ui.common-edit',
     binding: KeyCode.Y | MetaKeys.CTRL_COMMAND,
     preconditions: whenEditorFocusedButNotCellEditor,
 };

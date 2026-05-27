@@ -46,6 +46,11 @@ const locale = {
             delete: 'Delete table column',
         },
 
+        sort: {
+            'sort-asc': 'Ascending',
+            'sort-desc': 'Descending',
+        },
+
         insert: {
             main: 'Insert Table',
             row: 'Insert Table Row',

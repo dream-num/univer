@@ -48,6 +48,11 @@ const locale: typeof enUS = {
             delete: '刪除表格欄',
         },
 
+        sort: {
+            'sort-asc': '升序',
+            'sort-desc': '降序',
+        },
+
         insert: {
             main: '表格插入',
             row: '插入表格行',

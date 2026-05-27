@@ -243,11 +243,11 @@ export function SheetTableFilterPanel() {
                         <ButtonGroup className="univer-mb-3 !univer-flex univer-w-full">
                             <Button className="univer-w-1/2" onClick={() => applySort(true)}>
                                 <AscendingIcon className="univer-mr-1" />
-                                {localeService.t('sheets-sort.general.sort-asc')}
+                                {localeService.t('sheets-table-ui.sort.sort-asc')}
                             </Button>
                             <Button className="univer-w-1/2" onClick={() => applySort(false)}>
                                 <DescendingIcon className="univer-mr-1" />
-                                {localeService.t('sheets-sort.general.sort-desc')}
+                                {localeService.t('sheets-table-ui.sort.sort-desc')}
                             </Button>
                         </ButtonGroup>
                     </div>

@@ -48,6 +48,11 @@ const locale: typeof enUS = {
             delete: 'حذف عمود الجدول',
         },
 
+        sort: {
+            'sort-asc': 'تصاعدي',
+            'sort-desc': 'تنازلي',
+        },
+
         insert: {
             main: 'إدراج جدول',
             row: 'إدراج صف جدول',

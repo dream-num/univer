@@ -48,6 +48,11 @@ const locale: typeof enUS = {
             delete: 'Delete table column',
         },
 
+        sort: {
+            'sort-asc': 'Ascendent',
+            'sort-desc': 'Descendent',
+        },
+
         insert: {
             main: 'Insereix una taula',
             row: 'Insereix una fila de taula',

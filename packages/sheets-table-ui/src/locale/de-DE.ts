@@ -48,6 +48,11 @@ const locale: typeof enUS = {
             delete: 'Tabellenspalte löschen',
         },
 
+        sort: {
+            'sort-asc': 'Aufsteigend',
+            'sort-desc': 'Absteigend',
+        },
+
         insert: {
             main: 'Tabelle einfügen',
             row: 'Tabellenzeile einfügen',

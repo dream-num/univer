@@ -48,6 +48,11 @@ const locale: typeof enUS = {
             delete: 'Elimina colonna tabella',
         },
 
+        sort: {
+            'sort-asc': 'Crescente',
+            'sort-desc': 'Decrescente',
+        },
+
         insert: {
             main: 'Inserisci Tabella',
             row: 'Inserisci Riga Tabella',

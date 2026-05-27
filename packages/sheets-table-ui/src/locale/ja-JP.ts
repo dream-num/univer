@@ -48,6 +48,11 @@ const locale: typeof enUS = {
             delete: 'Delete table column',
         },
 
+        sort: {
+            'sort-asc': '昇順',
+            'sort-desc': '降順',
+        },
+
         insert: {
             main: '表を挿入',
             row: '表の行を挿入',

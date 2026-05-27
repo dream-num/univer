@@ -16,8 +16,8 @@
 
 import { NamedStyleType } from '@univerjs/core';
 
-import { describe, expect, it } from 'vitest';
-import { getParagraphMenuActiveHeadingCommandId, getParagraphMenuCommand, getParagraphMenuHiddenHeadingCommandIds, getParagraphMenuIconSizeClass, getParagraphMenuPopupDirection, getParagraphMenuTargetRange, isEmptyParagraphMenuTarget, shouldShowParagraphSettingMenu, shouldUseInsertBelowRange } from '..';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { createParagraphMenuHoverOpenScheduler, getParagraphMenuActiveHeadingCommandId, getParagraphMenuCommand, getParagraphMenuHiddenHeadingCommandIds, getParagraphMenuIconSizeClass, getParagraphMenuPopupDirection, getParagraphMenuTargetRange, isEmptyParagraphMenuTarget, PARAGRAPH_MENU_HOVER_OPEN_DELAY, shouldShowParagraphSettingMenu, shouldUseInsertBelowRange } from '..';
 import { HorizontalLineCommand } from '../../../commands/commands/doc-horizontal-line.command';
 import { BulletListCommand, InsertBulletListBellowCommand, OrderListCommand } from '../../../commands/commands/list.command';
 import { H1HeadingCommand, H3HeadingCommand, H5HeadingCommand, NormalTextHeadingCommand, SetParagraphNamedStyleCommand, SubtitleHeadingCommand, TitleHeadingCommand } from '../../../commands/commands/set-heading.command';
@@ -35,6 +35,10 @@ import {
 } from '../../../menu/paragraph-menu';
 
 describe('ParagraphMenu', () => {
+    afterEach(() => {
+        vi.useRealTimers();
+    });
+
     it('uses a smaller icon for normal text paragraph triggers', () => {
         expect(getParagraphMenuIconSizeClass('TextTypeIcon')).toBe('univer-size-3');
         expect(getParagraphMenuIconSizeClass('TitleTypeIcon')).toBe('univer-size-4');
@@ -63,6 +67,43 @@ describe('ParagraphMenu', () => {
     it('opens the popup away from the drag handle when there is not enough left space', () => {
         expect(getParagraphMenuPopupDirection(170)).toBe('right');
         expect(getParagraphMenuPopupDirection(260)).toBe('left');
+    });
+
+    it('delays opening the paragraph popup for hover and cancels before the delay elapses', () => {
+        vi.useFakeTimers();
+        const openMenu = vi.fn();
+        const scheduler = createParagraphMenuHoverOpenScheduler(openMenu);
+
+        scheduler.schedule();
+        vi.advanceTimersByTime(PARAGRAPH_MENU_HOVER_OPEN_DELAY - 1);
+
+        expect(openMenu).not.toHaveBeenCalled();
+
+        vi.advanceTimersByTime(1);
+
+        expect(openMenu).toHaveBeenCalledTimes(1);
+
+        openMenu.mockClear();
+        scheduler.schedule();
+        scheduler.cancel();
+        vi.advanceTimersByTime(PARAGRAPH_MENU_HOVER_OPEN_DELAY);
+
+        expect(openMenu).not.toHaveBeenCalled();
+    });
+
+    it('opens the paragraph popup immediately for click', () => {
+        vi.useFakeTimers();
+        const openMenu = vi.fn();
+        const scheduler = createParagraphMenuHoverOpenScheduler(openMenu);
+
+        scheduler.schedule();
+        scheduler.openNow();
+
+        expect(openMenu).toHaveBeenCalledTimes(1);
+
+        vi.advanceTimersByTime(PARAGRAPH_MENU_HOVER_OPEN_DELAY);
+
+        expect(openMenu).toHaveBeenCalledTimes(1);
     });
 
     it('shows title and subtitle heading shortcuts only when they are the current paragraph style', () => {

@@ -41,6 +41,14 @@ import { SetDocZoomRatioOperation } from '../../commands/operations/set-doc-zoom
 import { DocPageLayoutService } from '../../services/doc-page-layout.service';
 import { IEditorService } from '../../services/editor/editor-manager.service';
 
+export function shouldHandleDocWheelZoom(
+    event: Pick<IWheelEvent, 'ctrlKey' | 'metaKey'>,
+    focusingDoc: boolean,
+    _documentFlavor?: DocumentFlavor
+): boolean {
+    return focusingDoc && (event.ctrlKey || event.metaKey);
+}
+
 export class DocZoomRenderController extends Disposable implements IRenderModule {
     private _isSheetEditor = false;
     private _initTimer: number;
@@ -146,19 +154,13 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
         this.disposeWithMe(
             // hold ctrl & mousewheel ---> zoom
             scene.onMouseWheel$.subscribeEvent((e: IWheelEvent) => {
-                if (!e.ctrlKey || !this._contextService.getContextValue(FOCUSING_DOC)) {
-                    return;
-                }
-
                 const documentModel = this._univerInstanceService.getCurrentUniverDocInstance();
                 if (!documentModel) {
                     return;
                 }
 
                 const { documentFlavor } = documentModel.getSnapshot().documentStyle;
-
-                if (documentFlavor === DocumentFlavor.MODERN) {
-                    e.preventDefault();
+                if (!shouldHandleDocWheelZoom(e, Boolean(this._contextService.getContextValue(FOCUSING_DOC)), documentFlavor)) {
                     return;
                 }
 

@@ -48,6 +48,11 @@ const locale: typeof enUS = {
             delete: 'Hapus kolom tabel',
         },
 
+        sort: {
+            'sort-asc': 'Menaik',
+            'sort-desc': 'Menurun',
+        },
+
         insert: {
             main: 'Sisipkan Tabel',
             row: 'Sisipkan Baris Tabel',

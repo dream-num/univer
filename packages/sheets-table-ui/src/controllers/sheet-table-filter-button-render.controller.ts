@@ -219,7 +219,7 @@ export class SheetsTableFilterButtonRenderController extends RxDisposable implem
 
                 cell.fontRenderExtension = {
                     ...cell?.fontRenderExtension,
-                    rightOffset: FILTER_ICON_SIZE,
+                    rightOffset: FILTER_ICON_SIZE + FILTER_ICON_PADDING + 2,
                 };
 
                 return next(cell);

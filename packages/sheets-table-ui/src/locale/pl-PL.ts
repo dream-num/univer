@@ -48,6 +48,11 @@ const locale: typeof enUS = {
             delete: 'Usuń kolumnę tabeli',
         },
 
+        sort: {
+            'sort-asc': 'Rosnąco',
+            'sort-desc': 'Malejąco',
+        },
+
         insert: {
             main: 'Wstaw tabelę',
             row: 'Wstaw wiersz tabeli',

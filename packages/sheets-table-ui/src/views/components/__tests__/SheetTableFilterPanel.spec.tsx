@@ -295,7 +295,7 @@ describe('SheetTableFilterPanel', () => {
         });
 
         const tree = renderPanel();
-        const [sortAsc] = findAll(tree, (n) => n.type === design.Button && n.props?.children?.includes?.('sheets-sort.general.sort-asc'));
+        const [sortAsc] = findAll(tree, (n) => n.type === design.Button && n.props?.children?.includes?.('sheets-table-ui.sort.sort-asc'));
 
         sortAsc.props.onClick();
 

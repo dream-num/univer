@@ -48,6 +48,11 @@ const locale: typeof enUS = {
             delete: 'Delete table column',
         },
 
+        sort: {
+            'sort-asc': 'صعودی',
+            'sort-desc': 'نزولی',
+        },
+
         insert: {
             main: 'درج جدول',
             row: 'درج ردیف جدول',

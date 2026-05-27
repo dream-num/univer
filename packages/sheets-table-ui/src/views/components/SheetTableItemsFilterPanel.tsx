@@ -125,18 +125,20 @@ export function SheetTableItemsFilterPanel(props: ISheetTableItemsFilterPanelPro
                 `, borderClassName)}
             >
                 <div
-                    className={clsx('univer-h-40 univer-overflow-y-auto univer-py-1 univer-pl-2', scrollbarClassName)}
+                    className={clsx('univer-h-40 univer-min-w-0 univer-overflow-y-auto univer-py-1 univer-pl-2', scrollbarClassName)}
                 >
                     <div className="univer-h-full">
                         <div className="univer-flex univer-items-center univer-px-2 univer-py-1">
                             <Checkbox
+                                className="univer-min-w-0 univer-flex-1"
+                                contentClassName="univer-flex-1 univer-min-w-0"
                                 indeterminate={indeterminate}
                                 disabled={items.length === 0}
                                 checked={allChecked}
                                 onChange={onCheckAllToggled}
                             >
                                 <div className="univer-flex univer-h-5 univer-flex-1 univer-items-center univer-text-sm">
-                                    <span className="univer-inline-block univer-truncate">{`${localeService.t('sheets-table-ui.filter.select-all')}`}</span>
+                                    <span className="univer-flex-1 univer-truncate">{`${localeService.t('sheets-table-ui.filter.select-all')}`}</span>
                                     <span className="univer-ml univer-text-gray-400">{`(${checkedCount}/${searchText ? displayItems.length : allItemsCount})`}</span>
                                 </div>
                             </Checkbox>
@@ -148,13 +150,28 @@ export function SheetTableItemsFilterPanel(props: ISheetTableItemsFilterPanelPro
                                     className="univer-flex univer-items-center univer-px-2 univer-py-1"
                                 >
                                     <Checkbox
+                                        className="univer-min-w-0 univer-flex-1"
+                                        contentClassName="univer-flex-1 univer-min-w-0"
                                         checked={allChecked || checkedItemSet.has(item.title)}
                                         onChange={() => { onCheckItemToggled(item.title); }}
                                     >
-                                        <div className="univer-flex univer-h-5 univer-flex-1 univer-text-sm">
-                                            <span className="univer-inline-block univer-truncate">{item.title}</span>
-                                            <span className="univer-ml-1 univer-text-gray-400">{`(${itemsCountMap.get(item.title) || 0})`}</span>
-                                        </div>
+                                        <span
+                                            className={`
+                                              univer-flex univer-h-5 univer-flex-1 univer-items-center univer-text-sm
+                                            `}
+                                        >
+                                            <span className="univer-flex-1 univer-truncate">
+                                                {item.title}
+                                            </span>
+                                            <span
+                                                className={`
+                                                  univer-ml-1 univer-inline-flex univer-h-full univer-items-center
+                                                  univer-text-gray-400
+                                                `}
+                                            >
+                                                {`(${itemsCountMap.get(item.title) || 0})`}
+                                            </span>
+                                        </span>
                                     </Checkbox>
                                 </div>
                             );

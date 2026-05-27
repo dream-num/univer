@@ -71,6 +71,10 @@ export function Ribbon(props: IRibbonProps) {
         return ribbonData;
     }, [ribbonType, ribbonData]);
 
+    const activatedTabTitle = useMemo(() => {
+        return ribbon.find((group) => group.key === activatedTab)?.title || activatedTab;
+    }, [ribbon, activatedTab]);
+
     const handleSelectTab = useCallback((group: IMenuSchema) => {
         toolbarItemRefs.current = {};
         ribbonService.setActivatedTab(group.key);
@@ -247,7 +251,7 @@ export function Ribbon(props: IRibbonProps) {
                         'univer-justify-center': ribbonType === 'classic',
                     })}
                     role="toolbar"
-                    aria-label={localeService.t(`ui.${activatedTab}`)}
+                    aria-label={localeService.t(activatedTabTitle)}
                 >
                     {activeGroup.visibleGroups.map((groupItem) => (groupItem.children?.length || groupItem.item) && (
                         <Fragment key={groupItem.key}>

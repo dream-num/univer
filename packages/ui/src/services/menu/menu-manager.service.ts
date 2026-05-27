@@ -66,6 +66,7 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
         [MenuManagerPosition.RIBBON]: {
             [RibbonPosition.START]: {
                 order: 0,
+                title: 'ui.ribbon.start',
                 [RibbonStartGroup.HISTORY]: {
                     order: 0,
                 },
@@ -81,6 +82,7 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
             },
             [RibbonPosition.INSERT]: {
                 order: 1,
+                title: 'ui.ribbon.insert',
                 [RibbonInsertGroup.EDIT]: {
                     order: 0,
                 },
@@ -93,6 +95,7 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
             },
             [RibbonPosition.FORMULAS]: {
                 order: 2,
+                title: 'ui.ribbon.formulas',
                 [RibbonFormulasGroup.BASIC]: {
                     order: 0,
                 },
@@ -102,6 +105,7 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
             },
             [RibbonPosition.DATA]: {
                 order: 3,
+                title: 'ui.ribbon.data',
                 [RibbonDataGroup.FORMULAS]: {
                     order: 0,
                 },
@@ -117,6 +121,7 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
             },
             [RibbonPosition.VIEW]: {
                 order: 4,
+                title: 'ui.ribbon.view',
                 [RibbonViewGroup.DISPLAY]: {
                     order: 0,
                 },
@@ -129,6 +134,7 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
             },
             [RibbonPosition.OTHERS]: {
                 order: 5,
+                title: 'ui.ribbon.others',
                 [RibbonOthersGroup.OTHERS]: {
                     order: 0,
                 },

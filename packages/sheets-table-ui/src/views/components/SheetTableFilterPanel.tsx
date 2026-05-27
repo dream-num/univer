@@ -176,7 +176,7 @@ export function SheetTableFilterPanel() {
     return (
         <div
             className={`
-              univer-box-border univer-flex univer-min-w-[312px] univer-flex-col univer-rounded-[10px] univer-bg-white
+              univer-box-border univer-flex univer-w-[400px] univer-flex-col univer-rounded-[10px] univer-bg-white
               univer-p-4 univer-shadow-lg
               dark:!univer-border-gray-600 dark:!univer-bg-gray-700
             `}

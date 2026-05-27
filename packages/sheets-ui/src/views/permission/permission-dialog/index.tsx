@@ -56,7 +56,7 @@ export const SheetPermissionDialog = () => {
     const [permissionMap, setPermissionMap] = useState(() => {
         return Object.keys(subUnitPermissionTypeMap).reduce((acc, action) => {
             acc[action] = {
-                text: localeService.t(`permission.panel.${subUnitPermissionTypeMap[Number(action) as UnitAction]}`),
+                text: localeService.t(`sheets-ui.permission.panel.${subUnitPermissionTypeMap[Number(action) as UnitAction]}`),
                 allowed: true,
             };
             return acc;
@@ -175,19 +175,16 @@ export const SheetPermissionDialog = () => {
 
     return (
         <Spin loading={loading}>
-            <div className={clsx('univer-flex univer-flex-col', borderTopClassName)}>
+            <div className={clsx('univer-flex univer-flex-col univer-gap-2 univer-pt-2', borderTopClassName)}>
                 {Object.keys(permissionMap).map((action) => {
                     const actionItem = permissionMap[action];
                     const { text, allowed } = actionItem;
                     return (
                         <div
                             key={text}
-                            className={`
-                              univer-my-1.5 univer-flex univer-h-5 univer-items-center univer-justify-between
-                              univer-leading-5
-                            `}
+                            className="univer-flex univer-h-5 univer-items-center univer-justify-between"
                         >
-                            <div>{text}</div>
+                            <span className="univer-text-sm">{text}</span>
                             <Switch
                                 defaultChecked={allowed}
                                 onChange={() => {

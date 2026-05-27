@@ -16,7 +16,7 @@
 
 import type { DocumentDataModel, IDisposable, Nullable } from '@univerjs/core';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
-import { DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, IContextService, Inject, isInternalEditorID, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import { DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, Inject, isInternalEditorID, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { COMPONENT_IMAGE_POPUP_MENU, ImageCropperObject, ImageResetSizeOperation, OpenImageCropOperation } from '@univerjs/drawing-ui';
@@ -24,17 +24,20 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { takeUntil } from 'rxjs';
 import { RemoveDocDrawingCommand } from '../commands/commands/remove-doc-drawing.command';
 import { EditDocDrawingOperation } from '../commands/operations/edit-doc-drawing.operation';
+import { SidebarDocDrawingOperation } from '../commands/operations/open-drawing-panel.operation';
 
 export class DocDrawingPopupMenuController extends RxDisposable {
     private _initImagePopupMenu = new Set<string>();
     private _disposePopups: IDisposable[] = [];
+    private _isDrawingPanelOpen = false;
 
     constructor(
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @Inject(DocCanvasPopManagerService) private readonly _canvasPopManagerService: DocCanvasPopManagerService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @IContextService private readonly _contextService: IContextService
+        @IContextService private readonly _contextService: IContextService,
+        @ICommandService private readonly _commandService: ICommandService
 
     ) {
         super();
@@ -43,6 +46,29 @@ export class DocDrawingPopupMenuController extends RxDisposable {
     }
 
     private _init(): void {
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((command) => {
+                if (command.id === EditDocDrawingOperation.id) {
+                    this._isDrawingPanelOpen = true;
+                    this._clearPopups();
+                }
+                if (command.id === SidebarDocDrawingOperation.id) {
+                    const params = command.params as { value?: string } | undefined;
+                    this._isDrawingPanelOpen = params?.value === 'open';
+                    if (this._isDrawingPanelOpen) {
+                        this._clearPopups();
+                    }
+                }
+            })
+        );
+        this.disposeWithMe(
+            this._drawingManagerService.focus$.subscribe((params) => {
+                if (params.length === 0) {
+                    this._isDrawingPanelOpen = false;
+                }
+            })
+        );
+
         this.disposeWithMe(
             this._univerInstanceService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC).pipe(takeUntil(this.dispose$)).subscribe((documentDataModel) => this._create(documentDataModel))
         );
@@ -56,11 +82,13 @@ export class DocDrawingPopupMenuController extends RxDisposable {
 
     private _dispose(documentDataModel: DocumentDataModel) {
         const unitId = documentDataModel.getUnitId();
-        if (this._disposePopups.length) {
-            this._disposePopups.forEach((dispose) => dispose.dispose());
-            this._disposePopups.length = 0;
-        }
+        this._clearPopups();
         this._renderManagerService.removeRender(unitId);
+    }
+
+    private _clearPopups() {
+        this._disposePopups.forEach((dispose) => dispose.dispose());
+        this._disposePopups.length = 0;
     }
 
     private _create(documentDataModel: Nullable<DocumentDataModel>) {
@@ -112,6 +140,9 @@ export class DocDrawingPopupMenuController extends RxDisposable {
                 const selectedObjects = transformer.getSelectedObjectMap();
                 disposePopups.forEach((dispose) => dispose.dispose());
                 disposePopups.length = 0;
+                if (this._isDrawingPanelOpen) {
+                    return;
+                }
                 if (selectedObjects.size > 1) {
                     return;
                 }
@@ -123,19 +154,28 @@ export class DocDrawingPopupMenuController extends RxDisposable {
 
                 const oKey = object.oKey;
                 const drawingParam = this._drawingManagerService.getDrawingOKey(oKey);
-                if (!drawingParam || drawingParam.drawingType === DrawingTypeEnum.DRAWING_DOM) {
+                if (
+                    !drawingParam ||
+                    drawingParam.drawingType === DrawingTypeEnum.DRAWING_DOM ||
+                    drawingParam.drawingType === DrawingTypeEnum.DRAWING_SHAPE
+                ) {
                     return;
                 }
 
                 const { unitId, subUnitId, drawingId, drawingType } = drawingParam;
+                const isImage = drawingType === DrawingTypeEnum.DRAWING_IMAGE;
                 const popup = this._canvasPopManagerService.attachPopupToObject(
                     object,
                     {
                         componentKey: COMPONENT_IMAGE_POPUP_MENU,
-                        direction: 'horizontal',
-                        offset: [2, 0],
+                        direction: isImage ? 'top-center' : 'horizontal',
+                        offset: isImage ? [0, 8] : [2, 0],
                         extraProps: {
                             menuItems: this._getImageMenuItems(unitId, subUnitId, drawingId, drawingType),
+                            variant: isImage ? 'doc-floating-toolbar' : undefined,
+                            unitId,
+                            subUnitId,
+                            drawingId,
                         },
                     },
                     unitId
@@ -191,8 +231,7 @@ export class DocDrawingPopupMenuController extends RxDisposable {
                 index: 0,
                 commandId: EditDocDrawingOperation.id,
                 commandParams: { unitId, subUnitId, drawingId },
-                // disable: !!SHEET_EDITOR_UNITS.includes(unitId) || drawingType === DrawingTypeEnum.DRAWING_DOM,
-                disable: true,
+                disable: drawingType === DrawingTypeEnum.DRAWING_DOM,
             },
             {
                 label: 'docs-drawing-ui.image-popup.delete',
@@ -206,7 +245,7 @@ export class DocDrawingPopupMenuController extends RxDisposable {
                 index: 2,
                 commandId: OpenImageCropOperation.id,
                 commandParams: { unitId, subUnitId, drawingId },
-                disable: true, // TODO: @JOCS, feature is not ready.
+                disable: drawingType === DrawingTypeEnum.DRAWING_DOM,
             },
             {
                 label: 'docs-drawing-ui.image-popup.reset',

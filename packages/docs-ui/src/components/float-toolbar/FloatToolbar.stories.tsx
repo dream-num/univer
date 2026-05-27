@@ -36,6 +36,7 @@ import {
 } from '../../commands/commands/inline-format.command';
 import enUS from '../../locale/en-US';
 import zhCN from '../../locale/zh-CN';
+import { FLOAT_TEXT_STYLE_MENU_ID } from '../../menu/menu';
 import { menuSchema } from '../../menu/schema';
 import { FloatToolbar } from './FloatToolbar';
 
@@ -95,6 +96,7 @@ export const Playground = {
                 <div>
                     <FloatToolbar
                         avaliableMenus={[
+                            FLOAT_TEXT_STYLE_MENU_ID,
                             SetInlineFormatFontFamilyCommand.id,
                             SetInlineFormatFontSizeCommand.id,
                             SetInlineFormatBoldCommand.id,

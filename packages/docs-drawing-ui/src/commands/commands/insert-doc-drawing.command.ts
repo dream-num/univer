@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand, IMutationInfo, JSONXActions } from '@univerjs/core';
+import type { IAccessor, ICommand, IMutationInfo, ITextRangeParam, JSONXActions } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IInsertDrawingCommandParams } from './interfaces';
 import {
@@ -27,7 +27,7 @@ import {
     TextXActionType,
 } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
-import { getCustomBlockIdsInSelections, getRichTextEditPath } from '@univerjs/docs-ui';
+import { DocContentInsertService, getCustomBlockIdsInSelections, getRichTextEditPath } from '@univerjs/docs-ui';
 
 /**
  * The command to insert new drawings
@@ -48,13 +48,28 @@ export const InsertDocDrawingCommand: ICommand = {
 
         const activeTextRange = docSelectionManagerService.getActiveTextRange();
         const documentDataModel = univerInstanceService.getCurrentUniverDocInstance();
-        if (activeTextRange == null || documentDataModel == null) {
+        if (documentDataModel == null) {
             return false;
         }
 
         const unitId = documentDataModel.getUnitId();
+        const contentInsertRange = getContentInsertRange(accessor, unitId);
+        const targetTextRange = contentInsertRange
+            ? {
+                ...activeTextRange,
+                startOffset: contentInsertRange.startOffset,
+                endOffset: contentInsertRange.endOffset,
+                collapsed: contentInsertRange.startOffset === contentInsertRange.endOffset,
+                segmentId: contentInsertRange.segmentId ?? activeTextRange?.segmentId ?? '',
+            }
+            : activeTextRange;
+
+        if (targetTextRange == null) {
+            return false;
+        }
+
         const { drawings } = params;
-        const { collapsed, startOffset, segmentId } = activeTextRange;
+        const { collapsed, startOffset, segmentId = '' } = targetTextRange;
         const body = documentDataModel.getSelfOrHeaderFooterModel(segmentId).getBody();
 
         if (body == null) {
@@ -76,10 +91,10 @@ export const InsertDocDrawingCommand: ICommand = {
                 });
             }
         } else {
-            const dos = BuildTextUtils.selection.delete([activeTextRange], body, 0, null, false);
+            const dos = BuildTextUtils.selection.delete([targetTextRange], body, 0, null, false);
             textX.push(...dos);
 
-            const removedCustomBlockIds = getCustomBlockIdsInSelections(body, [activeTextRange]);
+            const removedCustomBlockIds = getCustomBlockIdsInSelections(body, [targetTextRange]);
             const drawings = documentDataModel.getDrawings() ?? {};
             const drawingOrder = documentDataModel.getDrawingsOrder() ?? [];
             const sortedRemovedCustomBlockIds = removedCustomBlockIds.sort((a, b) => {
@@ -159,3 +174,21 @@ export const InsertDocDrawingCommand: ICommand = {
         return Boolean(result);
     },
 };
+
+function getContentInsertRange(accessor: IAccessor, unitId: string): ITextRangeParam | null {
+    try {
+        const range = accessor.get(DocContentInsertService).consumeInsertRange(unitId);
+        if (range == null) {
+            return null;
+        }
+
+        return {
+            startOffset: range.startOffset,
+            endOffset: range.endOffset,
+            collapsed: range.startOffset === range.endOffset,
+            segmentId: range.segmentId,
+        };
+    } catch {
+        return null;
+    }
+}

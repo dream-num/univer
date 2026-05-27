@@ -17,9 +17,24 @@
 import type { ITable } from '@univerjs/core';
 import type { IParagraphList } from '../../../../../basics/i-document-skeleton-cached';
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
-import { TableAlignmentType, TableSizeType } from '@univerjs/core';
-import { describe, expect, it } from 'vitest';
-import { getNullTableSkeleton, getTableIdAndSliceIndex, getTableSliceId, rollbackListCache } from '../table';
+import { BooleanNumber, TableAlignmentType, TableRowHeightRule, TableSizeType, VerticalAlignmentType } from '@univerjs/core';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+    createTableSkeleton,
+    createTableSkeletons,
+    getNullTableSkeleton,
+    getTableIdAndSliceIndex,
+    getTableSliceId,
+    rollbackListCache,
+} from '../table';
+
+const createSkeletonCellPagesMock = vi.fn();
+const createNullCellPageMock = vi.fn();
+
+vi.mock('../../model/page', () => ({
+    createSkeletonCellPages: (...args: unknown[]) => createSkeletonCellPagesMock(...args),
+    createNullCellPage: (...args: unknown[]) => createNullCellPageMock(...args),
+}));
 
 function createMockTable(overrides: Partial<ITable> = {}): ITable {
     return {
@@ -34,6 +49,97 @@ function createMockTable(overrides: Partial<ITable> = {}): ITable {
         size: { type: TableSizeType.UNSPECIFIED, width: { v: 100 } },
         ...overrides,
     } as ITable;
+}
+
+function createRowNode(startIndex: number, endIndex: number, cellCount: number) {
+    return {
+        startIndex,
+        endIndex,
+        children: new Array(cellCount).fill(0).map((_, i) => ({
+            startIndex: startIndex + i * 5,
+            endIndex: startIndex + i * 5 + 4,
+            children: [],
+        })),
+    };
+}
+
+function createContextAndTable() {
+    const tableSource = {
+        tableId: 'table-1',
+        align: TableAlignmentType.START,
+        indent: { v: 8 },
+        tableRows: [
+            {
+                repeatHeaderRow: BooleanNumber.TRUE,
+                trHeight: {
+                    hRule: TableRowHeightRule.AUTO,
+                    val: { v: 16 },
+                },
+                cantSplit: BooleanNumber.FALSE,
+                tableCells: [
+                    { vAlign: VerticalAlignmentType.TOP },
+                    { vAlign: VerticalAlignmentType.CENTER },
+                ],
+            },
+            {
+                repeatHeaderRow: BooleanNumber.FALSE,
+                trHeight: {
+                    hRule: TableRowHeightRule.AT_LEAST,
+                    val: { v: 28 },
+                },
+                cantSplit: BooleanNumber.TRUE,
+                tableCells: [
+                    { vAlign: VerticalAlignmentType.BOTTOM },
+                    { vAlign: VerticalAlignmentType.TOP },
+                ],
+            },
+        ],
+    } as any;
+
+    const viewModel = {
+        getTableByStartIndex: vi.fn(() => ({ tableSource })),
+    } as any;
+
+    const tableNode = {
+        startIndex: 0,
+        endIndex: 80,
+        children: [
+            createRowNode(1, 20, 2),
+            createRowNode(21, 40, 2),
+        ],
+    } as any;
+
+    const curPage = {
+        pageWidth: 400,
+        pageHeight: 300,
+        marginTop: 20,
+        marginBottom: 20,
+        marginLeft: 10,
+        marginRight: 10,
+    } as any;
+
+    return {
+        ctx: {} as any,
+        sectionBreakConfig: {} as any,
+        tableSource,
+        viewModel,
+        tableNode,
+        curPage,
+    };
+}
+
+function makeCellPage(width: number, height: number) {
+    return {
+        width,
+        height,
+        pageWidth: width,
+        pageHeight: height,
+        marginTop: 1,
+        marginBottom: 1,
+        originMarginTop: 1,
+        originMarginBottom: 1,
+        sections: [],
+    };
 }
 
 describe('table utilities', () => {
@@ -147,5 +253,184 @@ describe('table utilities', () => {
 
             expect(() => rollbackListCache(listLevel, tableNode)).not.toThrow();
         });
+    });
+});
+
+describe('docs table layout', () => {
+    beforeEach(() => {
+        createSkeletonCellPagesMock.mockReset();
+        createNullCellPageMock.mockReset();
+
+        createNullCellPageMock.mockImplementation(() => ({
+            page: makeCellPage(60, 10),
+        }));
+
+        createSkeletonCellPagesMock.mockImplementation(
+            (_ctx: unknown, _viewModel: unknown, _cellNode: unknown, _section: unknown, _table: unknown, row: number, col: number, availableHeight?: number) => {
+                const baseHeight = row === 0 ? 20 : 24;
+                if (row === 1 && col === 0 && typeof availableHeight === 'number' && availableHeight < 40) {
+                    return [makeCellPage(60, baseHeight), makeCellPage(60, 16)];
+                }
+                return [makeCellPage(60, baseHeight)];
+            }
+        );
+    });
+
+    it('creates table skeleton and applies row/cell alignment data', () => {
+        const { ctx, curPage, viewModel, tableNode, sectionBreakConfig } = createContextAndTable();
+
+        const skeleton = createTableSkeleton(ctx, curPage, viewModel, tableNode, sectionBreakConfig);
+        expect(skeleton).toBeTruthy();
+        expect(skeleton?.rows.length).toBe(2);
+        expect(skeleton?.width).toBeGreaterThan(0);
+        expect(skeleton?.height).toBeGreaterThan(0);
+        expect(skeleton?.left).toBeGreaterThanOrEqual(0);
+        expect(skeleton?.rows[0].cells[0].marginTop).toBeGreaterThanOrEqual(1);
+        expect(skeleton?.rows[0].cells[1].marginTop).toBeGreaterThanOrEqual(1);
+    });
+
+    it('keeps covered merged cells as non-rendering layout placeholders', () => {
+        const { ctx, curPage, viewModel, tableNode, sectionBreakConfig, tableSource } = createContextAndTable();
+        createSkeletonCellPagesMock.mockImplementation(
+            (_ctx: unknown, _viewModel: unknown, _cellNode: unknown, _section: unknown, table: any, row: number, col: number) => {
+                const columnSpan = Math.max(1, table.tableRows[row].tableCells[col].columnSpan ?? 1);
+                return [makeCellPage(60 * columnSpan, 20)];
+            }
+        );
+        tableSource.tableRows[0].tableCells = [
+            { columnSpan: 2, vAlign: VerticalAlignmentType.TOP },
+            { rowSpan: 0, columnSpan: 0, vAlign: VerticalAlignmentType.TOP },
+            { vAlign: VerticalAlignmentType.TOP },
+        ];
+        tableNode.children[0] = createRowNode(1, 30, 3) as any;
+
+        const skeleton = createTableSkeleton(ctx, curPage, viewModel, tableNode, sectionBreakConfig);
+
+        expect(skeleton).not.toBeNull();
+        const cells = skeleton!.rows[0].cells;
+        expect(cells).toHaveLength(3);
+        expect((cells[1] as any).isMergedCellCovered).toBe(true);
+        expect(cells[2].left).toBe(120);
+        expect(createSkeletonCellPagesMock.mock.calls.some((call) => call[5] === 0 && call[6] === 1)).toBe(false);
+    });
+
+    it('does not shift cells after a same-row horizontally covered merged cell', () => {
+        const { ctx, curPage, viewModel, tableNode, sectionBreakConfig, tableSource } = createContextAndTable();
+        createSkeletonCellPagesMock.mockImplementation(
+            (_ctx: unknown, _viewModel: unknown, _cellNode: unknown, _section: unknown, table: any, row: number, col: number) => {
+                const columnSpan = Math.max(1, table.tableRows[row].tableCells[col].columnSpan ?? 1);
+                return [makeCellPage(60 * columnSpan, 20)];
+            }
+        );
+        tableSource.tableRows[0].tableCells = [
+            { vAlign: VerticalAlignmentType.TOP },
+            { columnSpan: 2, vAlign: VerticalAlignmentType.TOP },
+            { rowSpan: 0, columnSpan: 0, vAlign: VerticalAlignmentType.TOP },
+            { vAlign: VerticalAlignmentType.TOP },
+        ];
+        tableNode.children[0] = createRowNode(1, 30, 4) as any;
+
+        const skeleton = createTableSkeleton(ctx, curPage, viewModel, tableNode, sectionBreakConfig);
+
+        expect(skeleton?.rows[0].cells[3].left).toBe(180);
+    });
+
+    it('expands merged master cell height across spanned rows', () => {
+        const { ctx, curPage, viewModel, tableNode, sectionBreakConfig, tableSource } = createContextAndTable();
+        tableSource.tableRows[0].tableCells = [
+            { rowSpan: 2, columnSpan: 2, vAlign: VerticalAlignmentType.TOP },
+            { rowSpan: 0, columnSpan: 0, vAlign: VerticalAlignmentType.TOP },
+        ];
+        tableSource.tableRows[1].tableCells = [
+            { rowSpan: 0, columnSpan: 0, vAlign: VerticalAlignmentType.TOP },
+            { rowSpan: 0, columnSpan: 0, vAlign: VerticalAlignmentType.TOP },
+        ];
+
+        const skeleton = createTableSkeleton(ctx, curPage, viewModel, tableNode, sectionBreakConfig);
+
+        expect(skeleton?.rows[0].cells[0].pageHeight).toBe(
+            skeleton!.rows[0].height + skeleton!.rows[1].height
+        );
+    });
+
+    it('treats explicit row height as a minimum so wrapped cell content remains visible', () => {
+        const { ctx, curPage, viewModel, tableNode, sectionBreakConfig, tableSource } = createContextAndTable();
+        tableSource.tableRows[0].trHeight = {
+            hRule: TableRowHeightRule.EXACT,
+            val: { v: 18 },
+        };
+        createSkeletonCellPagesMock.mockImplementation(
+            (_ctx: unknown, _viewModel: unknown, _cellNode: unknown, _section: unknown, _table: unknown, row: number) =>
+                [makeCellPage(60, row === 0 ? 48 : 20)]
+        );
+
+        const skeleton = createTableSkeleton(ctx, curPage, viewModel, tableNode, sectionBreakConfig);
+
+        expect(skeleton?.rows[0].height).toBe(50);
+        expect(skeleton?.rows[0].cells[0].pageHeight).toBe(50);
+    });
+
+    it('creates sliced tables when available height is limited', () => {
+        const { ctx, curPage, viewModel, tableNode, sectionBreakConfig } = createContextAndTable();
+
+        const result = createTableSkeletons(ctx, curPage, viewModel, tableNode, sectionBreakConfig, 90);
+        expect(result.skeTables.length).toBeGreaterThan(0);
+        expect(typeof result.fromCurrentPage).toBe('boolean');
+        expect(result.skeTables[0].rows.length).toBeGreaterThan(0);
+
+        if (result.skeTables.length > 1) {
+            expect(result.skeTables[1].tableId).toContain('#-#');
+        }
+    });
+
+    it('repeats multiple leading header rows on sliced table pages', () => {
+        const { ctx, curPage, viewModel, tableNode, sectionBreakConfig, tableSource } = createContextAndTable();
+        tableSource.tableRows[1].repeatHeaderRow = BooleanNumber.TRUE;
+        tableSource.tableRows.push(
+            {
+                repeatHeaderRow: BooleanNumber.FALSE,
+                trHeight: {
+                    hRule: TableRowHeightRule.EXACT,
+                    val: { v: 70 },
+                },
+                cantSplit: BooleanNumber.FALSE,
+                tableCells: [
+                    { vAlign: VerticalAlignmentType.TOP },
+                    { vAlign: VerticalAlignmentType.TOP },
+                ],
+            },
+            {
+                repeatHeaderRow: BooleanNumber.FALSE,
+                trHeight: {
+                    hRule: TableRowHeightRule.EXACT,
+                    val: { v: 40 },
+                },
+                cantSplit: BooleanNumber.FALSE,
+                tableCells: [
+                    { vAlign: VerticalAlignmentType.TOP },
+                    { vAlign: VerticalAlignmentType.TOP },
+                ],
+            }
+        );
+        tableNode.children.push(createRowNode(41, 60, 2) as any, createRowNode(61, 80, 2) as any);
+
+        const result = createTableSkeletons(ctx, curPage, viewModel, tableNode, sectionBreakConfig, 110);
+
+        expect(result.skeTables.length).toBeGreaterThan(1);
+        expect(result.skeTables[1].rows[0]).toMatchObject({ index: 0, isRepeatRow: true });
+        expect(result.skeTables[1].rows[1]).toMatchObject({ index: 1, isRepeatRow: true });
+        expect(result.skeTables[1].rows[2]).toMatchObject({ index: 2, isRepeatRow: false });
+    });
+
+    it('returns an empty slice result when the table is missing', () => {
+        const { ctx, curPage, tableNode, sectionBreakConfig } = createContextAndTable();
+        const noTableViewModel = {
+            getTableByStartIndex: vi.fn(() => null),
+        };
+
+        expect(createTableSkeleton(ctx, curPage, noTableViewModel as any, tableNode, sectionBreakConfig)).toBeNull();
+        const sliced = createTableSkeletons(ctx, curPage, noTableViewModel as any, tableNode, sectionBreakConfig, 100);
+        expect(sliced.skeTables).toEqual([]);
+        expect(sliced.fromCurrentPage).toBe(false);
     });
 });

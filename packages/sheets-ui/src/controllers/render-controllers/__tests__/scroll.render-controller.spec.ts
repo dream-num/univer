@@ -62,11 +62,11 @@ describe('SheetsScrollRenderController', () => {
 
         const preventDefault = vi.fn();
         scene.onMouseWheel$.emit(
-            { ctrlKey: false, shiftKey: false, deltaX: 5, deltaY: 10, preventDefault },
+            { ctrlKey: false, shiftKey: false, deltaX: 7, deltaY: 10, preventDefault },
             { stopPropagation: () => { } }
         );
 
-        expect(executeSpy).toHaveBeenCalledWith(SetScrollRelativeCommand.id, { offsetX: 5, offsetY: 10 });
+        expect(executeSpy).toHaveBeenCalledWith(SetScrollRelativeCommand.id, { offsetX: 7, offsetY: 10 });
 
         // Avoid disposing here: faked render context does not implement all IDisposable contracts.
         void _controller;
@@ -99,6 +99,59 @@ describe('SheetsScrollRenderController', () => {
         expect(executeSpy).toHaveBeenCalledWith(SetScrollRelativeCommand.id, { offsetX: 21, offsetY: 0 });
         expect(preventDefault).toHaveBeenCalled();
         expect(stopPropagation).toHaveBeenCalled();
+
+        void controller;
+    });
+
+    it('normalizes wheel scroll offsets by sheet zoom ratio', () => {
+        const scrollManagerService = createScrollManagerServiceMock();
+        const testBed = createRenderTestBed({
+            dependencies: [[SheetScrollManagerService, { useValue: scrollManagerService }]],
+        });
+        const { context, scene, contextService } = testBed;
+        const commandService = testBed.get(ICommandService);
+        const executeSpy = vi.spyOn(commandService, 'executeCommand');
+
+        contextService.setContextValue(FOCUSING_SHEET, true);
+        scene.scale(2, 2);
+
+        const controller = testBed.injector.createInstance(SheetsScrollRenderController, context as any);
+        const preventDefault = vi.fn();
+
+        scene.onMouseWheel$.emit(
+            { ctrlKey: false, shiftKey: false, deltaX: 12, deltaY: 20, preventDefault },
+            { stopPropagation: () => { } }
+        );
+
+        expect(executeSpy).toHaveBeenCalledWith(SetScrollRelativeCommand.id, { offsetX: 6, offsetY: 10 });
+        void controller;
+    });
+
+    it('locks out minor cross-axis touchpad jitter while wheel scrolling', () => {
+        const scrollManagerService = createScrollManagerServiceMock();
+        const testBed = createRenderTestBed({
+            dependencies: [[SheetScrollManagerService, { useValue: scrollManagerService }]],
+        });
+        const { context, scene, contextService } = testBed;
+        const commandService = testBed.get(ICommandService);
+        const executeSpy = vi.spyOn(commandService, 'executeCommand');
+
+        contextService.setContextValue(FOCUSING_SHEET, true);
+
+        const controller = testBed.injector.createInstance(SheetsScrollRenderController, context as any);
+        const preventDefault = vi.fn();
+
+        scene.onMouseWheel$.emit(
+            { ctrlKey: false, shiftKey: false, deltaX: 8, deltaY: 20, preventDefault },
+            { stopPropagation: () => { } }
+        );
+        scene.onMouseWheel$.emit(
+            { ctrlKey: false, shiftKey: false, deltaX: 20, deltaY: 8, preventDefault },
+            { stopPropagation: () => { } }
+        );
+
+        expect(executeSpy).toHaveBeenNthCalledWith(1, SetScrollRelativeCommand.id, { offsetX: 0, offsetY: 20 });
+        expect(executeSpy).toHaveBeenNthCalledWith(2, SetScrollRelativeCommand.id, { offsetX: 20, offsetY: 0 });
 
         void controller;
     });

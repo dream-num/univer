@@ -15,7 +15,8 @@
  */
 
 import type { MenuSchemaType } from '@univerjs/ui';
-import { RibbonInsertGroup } from '@univerjs/ui';
+import { DOC_CONTENT_INSERT_MENU_ID, EMPTY_PARAGRAPH_MENU_ID, INSERT_BELLOW_MENU_ID } from '@univerjs/docs-ui';
+import { ContextMenuGroup, ContextMenuPosition, RibbonInsertGroup } from '@univerjs/ui';
 import {
     DOCS_IMAGE_MENU_ID,
     IMAGE_MENU_UPLOAD_FLOAT_ID,
@@ -31,6 +32,32 @@ export const menuSchema: MenuSchemaType = {
             [IMAGE_MENU_UPLOAD_FLOAT_ID]: {
                 order: 0,
                 menuItemFactory: UploadFloatImageMenuFactory,
+            },
+        },
+    },
+    [ContextMenuPosition.PARAGRAPH]: {
+        [ContextMenuGroup.LAYOUT]: {
+            [INSERT_BELLOW_MENU_ID]: {
+                [IMAGE_MENU_UPLOAD_FLOAT_ID]: {
+                    order: 5,
+                    menuItemFactory: UploadFloatImageMenuFactory,
+                },
+            },
+        },
+        [EMPTY_PARAGRAPH_MENU_ID]: {
+            [ContextMenuGroup.LAYOUT]: {
+                [IMAGE_MENU_UPLOAD_FLOAT_ID]: {
+                    order: 5,
+                    menuItemFactory: UploadFloatImageMenuFactory,
+                },
+            },
+        },
+        [DOC_CONTENT_INSERT_MENU_ID]: {
+            [ContextMenuGroup.LAYOUT]: {
+                [IMAGE_MENU_UPLOAD_FLOAT_ID]: {
+                    order: 5,
+                    menuItemFactory: UploadFloatImageMenuFactory,
+                },
             },
         },
     },

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
-import type { DocumentSkeleton, IDocumentOffsetConfig, IDocumentSkeletonPage, IDocumentSkeletonRow, INodePosition, IPoint } from '@univerjs/engine-render';
+import type { ITable, Nullable } from '@univerjs/core';
+import type { DocumentSkeleton, IDocsTableRenderViewport, IDocumentOffsetConfig, IDocumentSkeletonPage, IDocumentSkeletonRow, IDocumentSkeletonTable, INodePosition, IPoint } from '@univerjs/engine-render';
 import { Tools } from '@univerjs/core';
-import { DocumentSkeletonPageType, getPageFromPath, getTableIdAndSliceIndex, Liquid } from '@univerjs/engine-render';
+import { DocumentSkeletonPageType, getDocsTableRenderViewport, getPageFromPath, getTableIdAndSliceIndex, Liquid } from '@univerjs/engine-render';
 import { compareNodePositionLogic, pushToPoints } from './convert-text-range';
 
 // The anchor and focus need to be in the same table,
@@ -166,6 +166,62 @@ function findNonEmptyCellPages(
     }
 }
 
+function getColumnBoundary(table: IDocumentSkeletonTable, column: number): Nullable<number> {
+    const columns = table.tableSource?.tableColumns;
+    if (columns && column >= 0 && column <= columns.length) {
+        return columns
+            .slice(0, column)
+            .reduce((total, tableColumn) => total + (tableColumn.size?.width?.v ?? 0), 0);
+    }
+
+    const row = table.rows[0];
+    const cell = row?.cells[column];
+    if (cell) {
+        return cell.left;
+    }
+
+    const previousCell = row?.cells[column - 1];
+    if (previousCell) {
+        return previousCell.left + previousCell.pageWidth;
+    }
+
+    return null;
+}
+
+function getDocumentUnitId(docSkeleton: DocumentSkeleton): string {
+    const viewModel = docSkeleton.getViewModel() as {
+        getDataModel?: () => {
+            getUnitId?: () => string;
+        };
+    };
+
+    return viewModel.getDataModel?.().getUnitId?.() ?? '';
+}
+
+function pushViewportClippedPoints(
+    pointGroup: IPoint[][],
+    position: { endX: number; endY: number; startX: number; startY: number },
+    viewport: Nullable<IDocsTableRenderViewport>,
+    tableLeft: number
+): void {
+    const scrollLeft = viewport && viewport.contentWidth > viewport.viewportWidth ? viewport.scrollLeft : 0;
+    const viewportWidth = viewport && viewport.contentWidth > viewport.viewportWidth ? viewport.viewportWidth : null;
+    const startX = position.startX - scrollLeft;
+    const endX = position.endX - scrollLeft;
+    const clippedStartX = viewportWidth == null ? startX : Math.max(startX, tableLeft);
+    const clippedEndX = viewportWidth == null ? endX : Math.min(endX, tableLeft + viewportWidth);
+
+    if (clippedEndX <= clippedStartX) {
+        return;
+    }
+
+    pointGroup.push(pushToPoints({
+        ...position,
+        startX: clippedStartX,
+        endX: clippedEndX,
+    }));
+}
+
 interface IRectRangeNodePositions {
     anchor: INodePosition;
     focus: INodePosition;
@@ -208,11 +264,14 @@ export class NodePositionConvertToRectRange {
             startColumnIndex: startColumn,
             endRowIndex: endRow,
             endColumnIndex: endColumn,
+            intersectsMergedCell,
         } = rectInfo;
 
         this._liquid.reset();
 
         const { pageLayoutType, pageMarginLeft, pageMarginTop } = this._documentOffsetConfig;
+        const unitId = getDocumentUnitId(docSkeleton);
+        const sourceTableId = getTableIdAndSliceIndex(tableId).tableId;
 
         const skipPageIndex = pageType === DocumentSkeletonPageType.BODY || pageType === DocumentSkeletonPageType.CELL ? startPage : startSegmentPage;
 
@@ -247,6 +306,29 @@ export class NodePositionConvertToRectRange {
 
             const { x, y } = this._liquid;
             const { left: tableLeft } = table;
+            const viewport = getDocsTableRenderViewport(unitId, sourceTableId);
+
+            if (intersectsMergedCell) {
+                const rows = table.rows.filter((row) => row.index >= startRow && row.index <= endRow);
+                const firstRow = rows[0];
+                const lastRow = rows[rows.length - 1];
+                const startX = getColumnBoundary(table, startColumn);
+                const endX = getColumnBoundary(table, endColumn + 1);
+
+                if (firstRow && lastRow && startX != null && endX != null) {
+                    pushViewportClippedPoints(pointGroup, {
+                        startX: x + tableLeft + startX,
+                        startY: y + firstRow.top,
+                        endX: x + tableLeft + endX,
+                        endY: y + lastRow.top + lastRow.height,
+                    }, viewport, x + tableLeft);
+                }
+
+                this._liquid.translateRestore();
+                this._liquid.restorePagePadding(page);
+                this._liquid.translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
+                continue;
+            }
 
             for (const row of table.rows) {
                 if (row.index >= startRow && row.index <= endRow) {
@@ -265,7 +347,7 @@ export class NodePositionConvertToRectRange {
                         endY: y + row.top + row.height,
                     };
 
-                    pointGroup.push(pushToPoints(position));
+                    pushViewportClippedPoints(pointGroup, position, viewport, x + tableLeft);
                 }
             }
 
@@ -305,7 +387,14 @@ export class NodePositionConvertToRectRange {
             return;
         }
 
-        const { tableId, startRowIndex, startColumnIndex, endRowIndex, endColumnIndex } = rectInfo;
+        const { tableId, startRowIndex, startColumnIndex, endRowIndex, endColumnIndex, intersectsMergedCell } = rectInfo;
+
+        if (intersectsMergedCell) {
+            return [{
+                anchor: anchorNodePosition,
+                focus: focusNodePosition,
+            }];
+        }
 
         const tableNode = this._docSkeleton.getViewModel().findTableNodeById(tableId);
 
@@ -381,19 +470,123 @@ export class NodePositionConvertToRectRange {
         const focusRow = (focusCell?.parent as IDocumentSkeletonRow).index;
         const focusColumn = (focusCell?.parent as IDocumentSkeletonRow).cells.indexOf(focusCell);
 
-        const startRowIndex = Math.min(anchorRow, focusRow);
-        const endRowIndex = Math.max(anchorRow, focusRow);
-
-        const startColumnIndex = Math.min(anchorColumn, focusColumn);
-        const endColumnIndex = Math.max(anchorColumn, focusColumn);
+        const sourceTableId = getTableIdAndSliceIndex(tableId).tableId;
+        const tableSource = docSkeleton.getViewModel().getSnapshot().tableSource?.[sourceTableId];
+        const rawRange = {
+            startRowIndex: Math.min(anchorRow, focusRow),
+            endRowIndex: Math.max(anchorRow, focusRow),
+            startColumnIndex: Math.min(anchorColumn, focusColumn),
+            endColumnIndex: Math.max(anchorColumn, focusColumn),
+        };
+        const intersectsMergedCell = rangeIntersectsMergedCell(tableSource, rawRange);
+        const range = expandRangeByMergedCells(tableSource, rawRange);
 
         return {
             pages,
             tableId,
-            startRowIndex,
-            startColumnIndex,
-            endRowIndex,
-            endColumnIndex,
+            intersectsMergedCell,
+            ...range,
         };
     }
+}
+
+interface ITableRange {
+    startRowIndex: number;
+    endRowIndex: number;
+    startColumnIndex: number;
+    endColumnIndex: number;
+}
+
+function expandRangeByMergedCells(table: Nullable<ITable>, range: ITableRange): ITableRange {
+    if (!table) {
+        return range;
+    }
+
+    let expanded = normalizeRange(range);
+    let changed = true;
+
+    while (changed) {
+        changed = false;
+
+        table.tableRows.forEach((row, rowIndex) => {
+            row.tableCells.forEach((cell, columnIndex) => {
+                const rowSpan = cell.rowSpan ?? 1;
+                const columnSpan = cell.columnSpan ?? 1;
+                if (rowSpan <= 0 || columnSpan <= 0 || (rowSpan === 1 && columnSpan === 1)) {
+                    return;
+                }
+
+                const mergedRange = {
+                    startRowIndex: rowIndex,
+                    endRowIndex: rowIndex + rowSpan - 1,
+                    startColumnIndex: columnIndex,
+                    endColumnIndex: columnIndex + columnSpan - 1,
+                };
+
+                if (!rangesIntersect(expanded, mergedRange)) {
+                    return;
+                }
+
+                const next = {
+                    startRowIndex: Math.min(expanded.startRowIndex, mergedRange.startRowIndex),
+                    endRowIndex: Math.max(expanded.endRowIndex, mergedRange.endRowIndex),
+                    startColumnIndex: Math.min(expanded.startColumnIndex, mergedRange.startColumnIndex),
+                    endColumnIndex: Math.max(expanded.endColumnIndex, mergedRange.endColumnIndex),
+                };
+
+                if (!rangesEqual(expanded, next)) {
+                    expanded = next;
+                    changed = true;
+                }
+            });
+        });
+    }
+
+    return expanded;
+}
+
+function rangeIntersectsMergedCell(table: Nullable<ITable>, range: ITableRange): boolean {
+    if (!table) {
+        return false;
+    }
+
+    const normalized = normalizeRange(range);
+
+    return table.tableRows.some((row, rowIndex) => row.tableCells.some((cell, columnIndex) => {
+        const rowSpan = cell.rowSpan ?? 1;
+        const columnSpan = cell.columnSpan ?? 1;
+        if (rowSpan <= 0 || columnSpan <= 0 || (rowSpan === 1 && columnSpan === 1)) {
+            return false;
+        }
+
+        return rangesIntersect(normalized, {
+            startRowIndex: rowIndex,
+            endRowIndex: rowIndex + rowSpan - 1,
+            startColumnIndex: columnIndex,
+            endColumnIndex: columnIndex + columnSpan - 1,
+        });
+    }));
+}
+
+function normalizeRange(range: ITableRange): ITableRange {
+    return {
+        startRowIndex: Math.min(range.startRowIndex, range.endRowIndex),
+        endRowIndex: Math.max(range.startRowIndex, range.endRowIndex),
+        startColumnIndex: Math.min(range.startColumnIndex, range.endColumnIndex),
+        endColumnIndex: Math.max(range.startColumnIndex, range.endColumnIndex),
+    };
+}
+
+function rangesIntersect(left: ITableRange, right: ITableRange): boolean {
+    return left.startRowIndex <= right.endRowIndex &&
+        left.endRowIndex >= right.startRowIndex &&
+        left.startColumnIndex <= right.endColumnIndex &&
+        left.endColumnIndex >= right.startColumnIndex;
+}
+
+function rangesEqual(left: ITableRange, right: ITableRange): boolean {
+    return left.startRowIndex === right.startRowIndex &&
+        left.endRowIndex === right.endRowIndex &&
+        left.startColumnIndex === right.startColumnIndex &&
+        left.endColumnIndex === right.endColumnIndex;
 }

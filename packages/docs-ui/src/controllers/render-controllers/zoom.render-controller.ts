@@ -17,6 +17,7 @@
 import type { DocumentDataModel, ICommandInfo, Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
 
+import type { IDocPageSetupCommandParams } from '../../commands/commands/doc-page-setup.command';
 import type { ISetDocZoomRatioOperationParams } from '../../commands/operations/set-doc-zoom-ratio.operation';
 import {
     Disposable,
@@ -31,8 +32,9 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { getNextWheelZoomRatio, IRenderManagerService } from '@univerjs/engine-render';
 import { neoGetDocObject } from '../../basics/component-tools';
+import { DocPageSetupCommand } from '../../commands/commands/doc-page-setup.command';
 import { SetDocZoomRatioCommand } from '../../commands/commands/set-doc-zoom-ratio.command';
 import { SwitchDocModeCommand } from '../../commands/commands/switch-doc-mode.command';
 import { SetDocZoomRatioOperation } from '../../commands/operations/set-doc-zoom-ratio.operation';
@@ -59,7 +61,6 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
 
         this._initSkeletonListener();
         this._initCommandExecutedListener();
-        this._initRenderRefresher();
         this._isSheetEditor = this._context.unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY;
         const currentSheet = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         const sheetRenderer = currentSheet && this._renderManagerService.getRenderById(currentSheet.getUnitId());
@@ -74,56 +75,6 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
     override dispose() {
         window.clearTimeout(this._initTimer);
         window.clearTimeout(this._updateTimer);
-    }
-
-    private _initRenderRefresher() {
-        this._docSkeletonManagerService.currentSkeleton$.subscribe((param) => {
-            if (param == null) {
-                return;
-            }
-
-            const { unitId, scene } = this._context;
-            if (this._editorService.isEditor(unitId)) {
-                return;
-            }
-
-            this.disposeWithMe(scene.onMouseWheel$.subscribeEvent((e: IWheelEvent) => {
-                if (!e.ctrlKey || !this._contextService.getContextValue(FOCUSING_DOC)) {
-                    return;
-                }
-
-                const documentModel = this._univerInstanceService.getCurrentUniverDocInstance();
-                if (!documentModel) {
-                    return;
-                }
-
-                const { documentFlavor } = documentModel.getSnapshot().documentStyle;
-
-                // Modern document does not support zooming.
-                if (documentFlavor === DocumentFlavor.MODERN) {
-                    return;
-                }
-
-                const deltaFactor = Math.abs(e.deltaX);
-                let ratioDelta = deltaFactor < 40 ? 0.2 : deltaFactor < 80 ? 0.4 : 0.2;
-                ratioDelta *= e.deltaY > 0 ? -1 : 1;
-                if (scene.scaleX < 1) {
-                    ratioDelta /= 2;
-                }
-
-                const currentRatio = documentModel.zoomRatio;
-
-                let nextRatio = +Number.parseFloat(`${currentRatio + ratioDelta}`).toFixed(1);
-                nextRatio = nextRatio >= 4 ? 4 : nextRatio <= 0.1 ? 0.1 : nextRatio;
-
-                this._commandService.executeCommand(SetDocZoomRatioCommand.id, {
-                    zoomRatio: nextRatio,
-                    unitId: documentModel.getUnitId(),
-                });
-
-                e.preventDefault();
-            }));
-        });
     }
 
     private _initSkeletonListener() {
@@ -158,7 +109,10 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
 
         this.disposeWithMe(
             this._commandService.beforeCommandExecuted((command: ICommandInfo) => {
-                if (command.id === SwitchDocModeCommand.id) {
+                const shouldResetZoom = command.id === SwitchDocModeCommand.id ||
+                    (command.id === DocPageSetupCommand.id && (command.params as IDocPageSetupCommandParams | undefined)?.documentFlavor === DocumentFlavor.MODERN);
+
+                if (shouldResetZoom) {
                     this._commandService.executeCommand(SetDocZoomRatioCommand.id, {
                         zoomRatio: 1,
                         unitId: this._context.unitId,
@@ -192,24 +146,28 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
         this.disposeWithMe(
             // hold ctrl & mousewheel ---> zoom
             scene.onMouseWheel$.subscribeEvent((e: IWheelEvent) => {
-                if (!e.ctrlKey) {
+                if (!e.ctrlKey || !this._contextService.getContextValue(FOCUSING_DOC)) {
                     return;
                 }
 
-                const deltaFactor = Math.abs(e.deltaX);
-                let ratioDelta = deltaFactor < 40 ? 0.2 : deltaFactor < 80 ? 0.4 : 0.2;
-                ratioDelta *= e.deltaY > 0 ? -1 : 1;
-                if (scene.scaleX < 1) {
-                    ratioDelta /= 2;
+                const documentModel = this._univerInstanceService.getCurrentUniverDocInstance();
+                if (!documentModel) {
+                    return;
                 }
 
-                const currentRatio = this._context.unit.zoomRatio;
-                let nextRatio = +Number.parseFloat(`${currentRatio + ratioDelta}`).toFixed(1);
-                nextRatio = nextRatio >= 4 ? 4 : nextRatio <= 0.1 ? 0.1 : nextRatio;
+                const { documentFlavor } = documentModel.getSnapshot().documentStyle;
+
+                if (documentFlavor === DocumentFlavor.MODERN) {
+                    e.preventDefault();
+                    return;
+                }
+
+                const currentRatio = documentModel.zoomRatio || 1;
+                const nextRatio = getNextWheelZoomRatio(currentRatio, e);
 
                 this._commandService.executeCommand(SetDocZoomRatioCommand.id, {
-                    zoomRatio: Math.round(nextRatio * 10) / 10,
-                    documentId: this._context.unitId,
+                    zoomRatio: nextRatio,
+                    documentId: documentModel.getUnitId(),
                 });
 
                 e.preventDefault();

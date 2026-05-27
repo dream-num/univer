@@ -203,6 +203,7 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
                     }}
                     disableSelectionOnClick
                     disableContextMenu={false}
+                    canvasStyle={{ backgroundColor: 'transparent' }}
                 />
             )}
         </div>

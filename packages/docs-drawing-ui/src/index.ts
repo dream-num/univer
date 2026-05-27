@@ -31,3 +31,5 @@ export { type IUniverDocsDrawingUIConfig } from './config/config';
 export { DocFloatDomController } from './controllers/doc-float-dom.controller';
 export { DOCS_IMAGE_MENU_ID } from './menu/image.menu';
 export { UniverDocsDrawingUIPlugin } from './plugin';
+export { DocDrawingPosition } from './views/doc-image-panel/DocDrawingPosition';
+export { DocDrawingTextWrap } from './views/doc-image-panel/DocDrawingTextWrap';

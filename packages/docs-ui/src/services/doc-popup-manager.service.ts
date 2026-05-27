@@ -86,7 +86,7 @@ export function transformOffset2Bound(offsetX: number, offsetY: number, scene: S
 
 export interface IDocCanvasPopup extends Omit<IPopup, 'anchorRect$' | 'children' | 'unitId' | 'subUnitId' | 'canvasElement'> {
     mask?: boolean;
-    extraProps?: Record<string, any>;
+    extraProps?: Record<string, unknown>;
     multipleDirection?: IPopup['direction'];
 }
 
@@ -175,6 +175,10 @@ export class DocCanvasPopManagerService extends Disposable {
             }));
         }
 
+        disposable.add(currentRender.scene.onTransformChange$.subscribeEvent(() => {
+            position$.next(calc());
+        }));
+
         return {
             position,
             position$,
@@ -227,6 +231,13 @@ export class DocCanvasPopManagerService extends Disposable {
             }));
         }
 
+        disposable.add(currentRender.scene.onTransformChange$.subscribeEvent(() => {
+            const position = calcDocRangePositions(range, currentRender);
+            if (position) {
+                positions$.next(position);
+            }
+        }));
+
         return {
             positions,
             positions$,
@@ -234,7 +245,7 @@ export class DocCanvasPopManagerService extends Disposable {
         };
     }
 
-    attachPopupToRect(rect: IBoundRectNoAngle, popup: IDocCanvasPopup, unitId: string): INeedCheckDisposable {
+    attachPopupToRect(rect: IBoundRectNoAngle | (() => IBoundRectNoAngle), popup: IDocCanvasPopup, unitId: string): INeedCheckDisposable {
         const currentRender = this._renderManagerService.getRenderById(unitId);
         if (!currentRender) {
             throw new Error(`Current render not found, unitId: ${unitId}`);

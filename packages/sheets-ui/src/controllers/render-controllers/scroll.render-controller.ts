@@ -41,6 +41,7 @@ import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manag
 import { getSheetObject } from '../utils/component-tools';
 
 const MOUSE_WHEEL_SPEED_SMOOTHING_FACTOR = 3;
+const WHEEL_CROSS_AXIS_LOCK_RATIO = 2;
 /**
  * This controller handles scroll logic in sheet interaction.
  */
@@ -77,19 +78,29 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
 
                 let offsetX = 0;
                 let offsetY = 0;
+                const scaleX = Math.abs(scene.scaleX) || 1;
+                const scaleY = Math.abs(scene.scaleY) || 1;
 
                 // what????
                 // const scrollNum = Math.abs(evt.deltaX);
                 // offsetX = evt.deltaX > 0 ? scrollNum : -scrollNum;
-                offsetX = evt.deltaX;
+                offsetX = evt.deltaX / scaleX;
 
                 // with shift, scrollY will be scrollX
                 if (evt.shiftKey) {
                     // mac is weird, when using track pad, scroll vertical with shift key, should get delta value from deltaY.
                     // but when using with mousewheel, scroll with shift key, only deltaX has value.
-                    offsetX = (evt.deltaY || evt.deltaX) * MOUSE_WHEEL_SPEED_SMOOTHING_FACTOR;
+                    offsetX = ((evt.deltaY || evt.deltaX) * MOUSE_WHEEL_SPEED_SMOOTHING_FACTOR) / scaleX;
                 } else {
-                    offsetY = evt.deltaY;
+                    offsetY = evt.deltaY / scaleY;
+
+                    const absOffsetX = Math.abs(offsetX);
+                    const absOffsetY = Math.abs(offsetY);
+                    if (absOffsetY >= absOffsetX * WHEEL_CROSS_AXIS_LOCK_RATIO) {
+                        offsetX = 0;
+                    } else if (absOffsetX >= absOffsetY * WHEEL_CROSS_AXIS_LOCK_RATIO) {
+                        offsetY = 0;
+                    }
                 }
                 this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetX, offsetY });
                 this._context.scene.makeDirty(true);

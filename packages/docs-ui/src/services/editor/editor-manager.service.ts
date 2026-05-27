@@ -15,13 +15,14 @@
  */
 
 import type { DocumentDataModel, IDisposable, IDocumentBody, IDocumentData, Nullable } from '@univerjs/core';
-import type { ISuccinctDocRangeParam, Scene } from '@univerjs/engine-render';
+import type { DocBackground, ISuccinctDocRangeParam, Scene } from '@univerjs/engine-render';
 import type { Observable } from 'rxjs';
 import type { IEditorConfigParams } from './editor';
 import { createIdentifier, DEFAULT_EMPTY_DOCUMENT_VALUE, Disposable, EDITOR_ACTIVATED, FOCUSING_COMMENT_EDITOR, FOCUSING_EDITOR_STANDALONE, HorizontalAlign, ICommandService, IContextService, Inject, Injector, isCommentEditorID, isInternalEditorID, IUndoRedoService, IUniverInstanceService, toDisposable, UniverInstanceType, VerticalAlign } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { fromEvent, Subject } from 'rxjs';
+import { DOCS_VIEW_KEY } from '../../basics/docs-view-key';
 import { Editor } from './editor';
 
 /**
@@ -234,6 +235,16 @@ export class EditorService extends Disposable implements IEditorService, IDispos
             );
 
             this._editors.set(editorUnitId, editor);
+            if (canvasStyle.backgroundColor != null) {
+                render.engine.getCanvas().getCanvasEle().style.backgroundColor = canvasStyle.backgroundColor;
+                const docBackground = render.components.get(DOCS_VIEW_KEY.BACKGROUND) as DocBackground | undefined;
+                docBackground?.setFillColors(
+                    canvasStyle.backgroundColor,
+                    canvasStyle.backgroundColor,
+                    canvasStyle.backgroundColor,
+                    canvasStyle.backgroundColor
+                );
+            }
 
             // Delete scroll bar
             if (!config.scrollBar) {

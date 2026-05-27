@@ -19,15 +19,18 @@ import {
     awaitTime,
     BooleanNumber,
     CustomRangeType,
+    DataStreamTreeTokenType,
+    HorizontalAlign,
     ICommandService,
     IUniverInstanceService,
     UniverInstanceType,
     UpdateDocsAttributeType,
 } from '@univerjs/core';
-import { DocSelectionManagerService, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { DocSelectionManagerService, DocSkeletonManagerService, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DeleteDirection } from '../../../types/delete-direction';
 import { DeleteCommand, InsertCommand, UpdateCommand } from '../core-editing.command';
+import { DeleteLeftCommand, DeleteRightCommand, isDeleteOffsetInsideBlockRange } from '../doc-delete.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
 function getDocumentData(): IDocumentData {
@@ -63,6 +66,108 @@ function getDocumentData(): IDocumentData {
     };
 }
 
+function getCenteredSingleCharacterDocumentData(): IDocumentData {
+    return {
+        id: 'test-doc',
+        body: {
+            dataStream: 'A\r\n',
+            textRuns: [{
+                st: 0,
+                ed: 1,
+                ts: {},
+            }],
+            paragraphs: [{
+                startIndex: 1,
+                paragraphStyle: {
+                    horizontalAlign: HorizontalAlign.CENTER,
+                },
+            }],
+        },
+        documentStyle: {
+            pageSize: {
+                width: 594.3,
+                height: 840.51,
+            },
+            marginTop: 72,
+            marginBottom: 72,
+            marginRight: 90,
+            marginLeft: 90,
+        },
+    };
+}
+
+function getCenteredEmptyParagraphDocumentData(): IDocumentData {
+    return {
+        id: 'test-doc',
+        body: {
+            dataStream: '\r\n',
+            paragraphs: [{
+                startIndex: 0,
+                paragraphStyle: {
+                    horizontalAlign: HorizontalAlign.CENTER,
+                },
+            }],
+        },
+        documentStyle: {
+            pageSize: {
+                width: 594.3,
+                height: 840.51,
+            },
+            marginTop: 72,
+            marginBottom: 72,
+            marginRight: 90,
+            marginLeft: 90,
+        },
+    };
+}
+
+function getIndentedBlockRangeDocumentData(): IDocumentData {
+    return {
+        id: 'test-doc',
+        body: {
+            dataStream: `${DataStreamTreeTokenType.BLOCK_START}A${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.BLOCK_END}\n`,
+            paragraphs: [{
+                startIndex: 2,
+                paragraphStyle: {
+                    indentStart: { v: 22 },
+                },
+            }],
+            blockRanges: [{
+                blockId: 'quote-1',
+                blockType: 'quote',
+                startIndex: 0,
+                endIndex: 3,
+            }],
+        },
+        documentStyle: {
+            pageSize: {
+                width: 594.3,
+                height: 840.51,
+            },
+            marginTop: 72,
+            marginBottom: 72,
+            marginRight: 90,
+            marginLeft: 90,
+        },
+    };
+}
+
+function createFirstGlyph(paragraphIndex: number, content: string) {
+    const line = { paragraphIndex, divides: [] as any[] };
+    const divide = { parent: line, glyphGroup: [] as any[] };
+    const glyph = {
+        parent: divide,
+        content,
+        streamType: content,
+        count: 1,
+    };
+
+    divide.glyphGroup.push(glyph);
+    line.divides.push(divide);
+
+    return glyph;
+}
+
 describe('core editing commands', () => {
     let univer: Univer;
     let get: Injector['get'];
@@ -85,6 +190,28 @@ describe('core editing commands', () => {
                 return ts[key];
             }
         }
+    }
+
+    function setActiveSelection(offset: number) {
+        const selectionManager = get(DocSelectionManagerService);
+        selectionManager.__TEST_ONLY_setCurrentSelection({
+            unitId: 'test-doc',
+            subUnitId: 'test-doc',
+        });
+        selectionManager.__TEST_ONLY_add([{ startOffset: offset, endOffset: offset, collapsed: true, isActive: true, segmentId: '', style: null as never }]);
+    }
+
+    function mockSkeleton() {
+        const skeletonManager = get(DocSkeletonManagerService) as unknown as { getSkeleton: () => unknown };
+        skeletonManager.getSkeleton = () => ({});
+    }
+
+    function registerDeleteKeyCommands() {
+        commandService.registerCommand(DeleteLeftCommand);
+        commandService.registerCommand(DeleteRightCommand);
+        commandService.registerCommand(UpdateCommand);
+        commandService.registerCommand(SetTextSelectionsOperation);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
     }
 
     beforeEach(() => {
@@ -138,6 +265,156 @@ describe('core editing commands', () => {
 
         expect(getDataStream()).toBe('Hello \r\n');
         expect(getBody()?.customRanges).toEqual([]);
+    });
+
+    it('keeps center alignment when deleting the last character from a centered paragraph', async () => {
+        univer.dispose();
+        const testBed = createCommandTestBed(getCenteredSingleCharacterDocumentData());
+        univer = testBed.univer;
+        get = testBed.get;
+        commandService = get(ICommandService);
+        commandService.registerCommand(DeleteCommand);
+        commandService.registerCommand(SetTextSelectionsOperation);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+
+        await commandService.executeCommand(DeleteCommand.id, {
+            unitId: 'test-doc',
+            segmentId: '',
+            range: { startOffset: 0, endOffset: 0, collapsed: true },
+            direction: DeleteDirection.RIGHT,
+        });
+
+        await awaitTime(0);
+
+        expect(getDataStream()).toBe('\r\n');
+        expect(getBody()?.paragraphs?.[0].paragraphStyle?.horizontalAlign).toBe(HorizontalAlign.CENTER);
+    });
+
+    it('keeps center alignment when backspacing the last character from a centered paragraph', async () => {
+        univer.dispose();
+        const testBed = createCommandTestBed(getCenteredSingleCharacterDocumentData());
+        univer = testBed.univer;
+        get = testBed.get;
+        commandService = get(ICommandService);
+        commandService.registerCommand(DeleteCommand);
+        commandService.registerCommand(SetTextSelectionsOperation);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+
+        await commandService.executeCommand(DeleteCommand.id, {
+            unitId: 'test-doc',
+            segmentId: '',
+            range: { startOffset: 1, endOffset: 1, collapsed: true },
+            direction: DeleteDirection.LEFT,
+        });
+
+        await awaitTime(0);
+
+        expect(getDataStream()).toBe('\r\n');
+        expect(getBody()?.paragraphs?.[0].paragraphStyle?.horizontalAlign).toBe(HorizontalAlign.CENTER);
+    });
+
+    it('resets an empty centered paragraph to left alignment on a second delete', async () => {
+        univer.dispose();
+        const testBed = createCommandTestBed(getCenteredEmptyParagraphDocumentData());
+        univer = testBed.univer;
+        get = testBed.get;
+        commandService = get(ICommandService);
+        registerDeleteKeyCommands();
+        mockSkeleton();
+        setActiveSelection(0);
+
+        await commandService.executeCommand(DeleteRightCommand.id);
+
+        await awaitTime(0);
+
+        expect(getDataStream()).toBe('\r\n');
+        expect(getBody()?.paragraphs?.[0].paragraphStyle?.horizontalAlign).toBe(HorizontalAlign.LEFT);
+    });
+
+    it('resets an empty centered paragraph to left alignment on a second backspace', async () => {
+        univer.dispose();
+        const testBed = createCommandTestBed(getCenteredEmptyParagraphDocumentData());
+        univer = testBed.univer;
+        get = testBed.get;
+        commandService = get(ICommandService);
+        registerDeleteKeyCommands();
+        mockSkeleton();
+        setActiveSelection(0);
+
+        await commandService.executeCommand(DeleteLeftCommand.id);
+
+        await awaitTime(0);
+
+        expect(getDataStream()).toBe('\r\n');
+        expect(getBody()?.paragraphs?.[0].paragraphStyle?.horizontalAlign).toBe(HorizontalAlign.LEFT);
+    });
+
+    it('detects delete offsets inside block ranges so backspace does not clear block paragraph indent', () => {
+        const dataStream = `${DataStreamTreeTokenType.BLOCK_START}A${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.BLOCK_END}\n`;
+        const body = {
+            dataStream,
+            blockRanges: [{
+                blockId: 'block-1',
+                blockType: 'quote',
+                startIndex: 0,
+                endIndex: 3,
+            }],
+        };
+
+        expect(isDeleteOffsetInsideBlockRange(body, 1)).toBe(true);
+        expect(isDeleteOffsetInsideBlockRange(body, 2)).toBe(true);
+        expect(isDeleteOffsetInsideBlockRange(body, 0)).toBe(false);
+        expect(isDeleteOffsetInsideBlockRange(body, 3)).toBe(false);
+    });
+
+    it('detects block ranges whose endIndex points before the block end token', () => {
+        const dataStream = `${DataStreamTreeTokenType.BLOCK_START}A${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.BLOCK_END}\n`;
+        const body = {
+            dataStream,
+            blockRanges: [{
+                blockId: 'block-1',
+                blockType: 'callout',
+                startIndex: 0,
+                endIndex: 2,
+            }],
+        };
+
+        expect(isDeleteOffsetInsideBlockRange(body, 1)).toBe(true);
+        expect(isDeleteOffsetInsideBlockRange(body, 2)).toBe(true);
+        expect(isDeleteOffsetInsideBlockRange(body, 3)).toBe(false);
+    });
+
+    it('does not clear paragraph indent when backspacing at the start of a block range paragraph', async () => {
+        univer.dispose();
+        const testBed = createCommandTestBed(getIndentedBlockRangeDocumentData());
+        univer = testBed.univer;
+        get = testBed.get;
+        commandService = get(ICommandService);
+        registerDeleteKeyCommands();
+        setActiveSelection(1);
+
+        const curGlyph = createFirstGlyph(2, 'A');
+        const preGlyph = createFirstGlyph(2, DataStreamTreeTokenType.BLOCK_START);
+        const skeletonManager = get(DocSkeletonManagerService) as unknown as { getSkeleton: () => unknown };
+        skeletonManager.getSkeleton = () => ({
+            findNodeByCharIndex: (offset: number) => offset === 1 ? curGlyph : preGlyph,
+        });
+
+        const originalExecuteCommand = commandService.executeCommand.bind(commandService);
+        const executeSpy = vi.spyOn(commandService, 'executeCommand').mockImplementation(async (id: string, params?: object) => {
+            if (id === DeleteLeftCommand.id) {
+                return originalExecuteCommand(id, params);
+            }
+
+            return true;
+        });
+
+        await commandService.executeCommand(DeleteLeftCommand.id);
+
+        expect(executeSpy).not.toHaveBeenCalledWith(UpdateCommand.id, expect.anything());
+        expect(executeSpy).toHaveBeenCalledWith(DeleteCommand.id, expect.objectContaining({
+            direction: DeleteDirection.LEFT,
+        }));
     });
 
     it('updates text styles through the shared rich text mutation flow', async () => {

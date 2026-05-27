@@ -31,3 +31,4 @@ export * from './text-rotation';
 export * from './tools';
 export * from './transform';
 export * from './vector2';
+export * from './zoom';

@@ -148,7 +148,7 @@ export interface IClipboardInterfaceService {
      * @param text
      * @param html
      */
-    write(text: string, html: string): Promise<void>;
+    write(text: string, html: string, customData?: Record<string, string>): Promise<void>;
 
     /**
      * Read plain text from clipboard. Use read() to read both plain text and html.
@@ -184,7 +184,7 @@ export class BrowserClipboardService extends Disposable implements IClipboardInt
         super();
     }
 
-    async write(text: string, html: string): Promise<void> {
+    async write(text: string, html: string, customData?: Record<string, string>): Promise<void> {
         if (!this.supportClipboard) {
             return this._legacyCopyHtml(html);
         }
@@ -195,9 +195,24 @@ export class BrowserClipboardService extends Disposable implements IClipboardInt
                 new ClipboardItem({
                     [PLAIN_TEXT_CLIPBOARD_MIME_TYPE]: new Blob([text], { type: PLAIN_TEXT_CLIPBOARD_MIME_TYPE }),
                     [HTML_CLIPBOARD_MIME_TYPE]: new Blob([html], { type: HTML_CLIPBOARD_MIME_TYPE }),
+                    ...Object.fromEntries(Object.entries(customData ?? {}).map(([type, value]) => [type, new Blob([value], { type })])),
                 }),
             ]);
         } catch (error) {
+            if (customData && Object.keys(customData).length) {
+                try {
+                    return await navigator.clipboard.write([
+                        new ClipboardItem({
+                            [PLAIN_TEXT_CLIPBOARD_MIME_TYPE]: new Blob([text], { type: PLAIN_TEXT_CLIPBOARD_MIME_TYPE }),
+                            [HTML_CLIPBOARD_MIME_TYPE]: new Blob([html], { type: HTML_CLIPBOARD_MIME_TYPE }),
+                        }),
+                    ]);
+                } catch (fallbackError) {
+                    this._logService.error('[BrowserClipboardService]', fallbackError);
+                    this._showClipboardAuthenticationNotification();
+                    return;
+                }
+            }
             this._logService.error('[BrowserClipboardService]', error);
             this._showClipboardAuthenticationNotification();
         }

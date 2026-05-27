@@ -16,7 +16,7 @@
 
 import type { DocumentDataModel, ICommandInfo, IDrawingParam, ITransformState } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import type { Documents, DocumentSkeleton, IDocumentSkeletonHeaderFooter, IDocumentSkeletonPage, Image, IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import type { Documents, DocumentSkeleton, IDocumentSkeletonHeaderFooter, IDocumentSkeletonPage, IDocumentSkeletonRow, IDocumentSkeletonTable, Image, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import {
     BooleanNumber,
     Disposable,
@@ -32,7 +32,7 @@ import {
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { IEditorService, SetDocZoomRatioOperation } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
-import { Liquid, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
+import { getDocsTableRenderViewport, getTableIdAndSliceIndex, Liquid, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
 import { debounceTime, filter } from 'rxjs';
 import { DocRefreshDrawingsService } from '../../services/doc-refresh-drawings.service';
 
@@ -46,6 +46,23 @@ interface IDrawingParamsWithBehindText {
     // The same drawing render in different place, like image in header and footer.
     // The default value is BooleanNumber.FALSE. if it's true, Please use transforms.
     isMultiTransform: BooleanNumber;
+}
+
+export function getDocsTableCellDrawingOffset(
+    unitId: string,
+    table: IDocumentSkeletonTable,
+    row: IDocumentSkeletonRow,
+    cell: IDocumentSkeletonPage
+) {
+    const sourceTableId = getTableIdAndSliceIndex(table.tableId).tableId;
+    const viewport = getDocsTableRenderViewport(unitId, sourceTableId);
+    const hasHorizontalViewport = viewport && viewport.contentWidth > viewport.viewportWidth;
+    const scrollLeft = hasHorizontalViewport ? viewport.scrollLeft : 0;
+
+    return {
+        left: table.left + cell.left - scrollLeft + cell.marginLeft,
+        top: table.top + row.top + cell.marginTop,
+    };
 }
 
 export class DocDrawingTransformUpdateController extends Disposable implements IRenderModule {
@@ -178,6 +195,15 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
                         headerPage.marginTop,
                         page.marginLeft
                     );
+                    this._calculateTableCellDrawingPositions(
+                        unitId,
+                        headerPage,
+                        docsLeft,
+                        docsTop,
+                        updateDrawingMap,
+                        headerPage.marginTop,
+                        page.marginLeft
+                    );
                 }
             }
 
@@ -185,19 +211,30 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
                 const footerPage = skeFooters.get(footerId)?.get(pageWidth);
 
                 if (footerPage) {
+                    const footerTop = page.pageHeight - page.marginBottom + footerPage.marginTop;
                     this._calculateDrawingPosition(
                         unitId,
                         footerPage,
                         docsLeft,
                         docsTop,
                         updateDrawingMap,
-                        page.pageHeight - page.marginBottom + footerPage.marginTop,
+                        footerTop,
+                        page.marginLeft
+                    );
+                    this._calculateTableCellDrawingPositions(
+                        unitId,
+                        footerPage,
+                        docsLeft,
+                        docsTop,
+                        updateDrawingMap,
+                        footerTop,
                         page.marginLeft
                     );
                 }
             }
 
             this._calculateDrawingPosition(unitId, page, docsLeft, docsTop, updateDrawingMap, page.marginTop, page.marginLeft);
+            this._calculateTableCellDrawingPositions(unitId, page, docsLeft, docsTop, updateDrawingMap, page.marginTop, page.marginLeft);
             this._liquid.translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
         }
 
@@ -296,6 +333,45 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
             marginTop,
             marginLeft,
         } as IDocumentSkeletonPage);
+    }
+
+    private _calculateTableCellDrawingPositions(
+        unitId: string,
+        page: IDocumentSkeletonPage | IDocumentSkeletonHeaderFooter,
+        docsLeft: number,
+        docsTop: number,
+        updateDrawingMap: Record<string, IDrawingParamsWithBehindText>,
+        baseMarginTop: number,
+        baseMarginLeft: number
+    ) {
+        page.skeTables?.forEach((table) => {
+            table.rows.forEach((row) => {
+                row.cells.forEach((cell) => {
+                    const cellOffset = getDocsTableCellDrawingOffset(unitId, table, row, cell);
+                    const marginTop = baseMarginTop + cellOffset.top;
+                    const marginLeft = baseMarginLeft + cellOffset.left;
+
+                    this._calculateDrawingPosition(
+                        unitId,
+                        cell,
+                        docsLeft,
+                        docsTop,
+                        updateDrawingMap,
+                        marginTop,
+                        marginLeft
+                    );
+                    this._calculateTableCellDrawingPositions(
+                        unitId,
+                        cell,
+                        docsLeft,
+                        docsTop,
+                        updateDrawingMap,
+                        marginTop,
+                        marginLeft
+                    );
+                });
+            });
+        });
     }
 
     private _drawingInitializeListener() {

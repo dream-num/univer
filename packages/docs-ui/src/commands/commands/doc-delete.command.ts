@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommand, IMutationInfo, IParagraph, ITextRange, JSONXActions, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, ICommand, IDocumentBlockRange, IDocumentBody, IMutationInfo, IParagraph, ITextRange, JSONXActions, Nullable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
 import {
@@ -22,10 +22,12 @@ import {
     BuildTextUtils,
     CommandType,
     DataStreamTreeTokenType,
+    HorizontalAlign,
     ICommandService,
     IUniverInstanceService,
     JSONX,
     PositionedObjectLayoutType,
+    sequenceExecuteAsync,
     TextX,
     TextXActionType,
     Tools,
@@ -35,6 +37,7 @@ import {
 
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { getParagraphByGlyph, hasListGlyph, isFirstGlyph, isIndentByGlyph } from '@univerjs/engine-render';
+import { DocAutoFormatService } from '../../services/doc-auto-format.service';
 import { DeleteDirection } from '../../types/delete-direction';
 import { getCommandSkeleton, getRichTextEditPath } from '../util';
 import { CutContentCommand } from './clipboard.inner.command';
@@ -401,6 +404,21 @@ export function getCursorWhenDelete(textRanges: Readonly<Nullable<ITextRangeWith
     return cursor;
 }
 
+function getBlockRangeEndTokenOffset(body: IDocumentBody, blockRange: Pick<IDocumentBlockRange, 'endIndex'>): number {
+    return body.dataStream[blockRange.endIndex] === DataStreamTreeTokenType.BLOCK_END
+        ? blockRange.endIndex
+        : body.dataStream[blockRange.endIndex + 1] === DataStreamTreeTokenType.BLOCK_END
+            ? blockRange.endIndex + 1
+            : blockRange.endIndex;
+}
+
+export function isDeleteOffsetInsideBlockRange(body: IDocumentBody, offset: number): boolean {
+    return body.blockRanges?.some((blockRange) => {
+        const endTokenOffset = getBlockRangeEndTokenOffset(body, blockRange);
+        return blockRange.startIndex < offset && offset < endTokenOffset;
+    }) ?? false;
+}
+
 // Handle BACKSPACE key.
 export const DeleteLeftCommand: ICommand = {
     id: 'doc.command.delete-left',
@@ -449,6 +467,11 @@ export const DeleteLeftCommand: ICommand = {
             return false;
         }
 
+        const autoFormatResult = await executeDeleteAutoFormat(accessor, DeleteLeftCommand.id);
+        if (autoFormatResult != null) {
+            return autoFormatResult;
+        }
+
         const { segmentId, style, segmentPage } = activeRange;
 
         const body = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody();
@@ -459,6 +482,13 @@ export const DeleteLeftCommand: ICommand = {
 
         const actualRange = activeRange;
         const { startOffset, collapsed } = actualRange;
+        if (collapsed) {
+            const emptyCenteredParagraph = getEmptyCenteredParagraphAtOffset(body, startOffset);
+            if (emptyCenteredParagraph != null) {
+                return resetEmptyCenteredParagraphAlignment(commandService, docDataModel, segmentId ?? '', emptyCenteredParagraph, style);
+            }
+        }
+
         const curGlyph = skeleton.findNodeByCharIndex(startOffset, segmentId, segmentPage);
 
         // is in bullet list?
@@ -470,9 +500,10 @@ export const DeleteLeftCommand: ICommand = {
 
         // Get the deleted glyph. It maybe null or undefined when the curGlyph is first glyph in skeleton.
         const preGlyph = skeleton.findNodeByCharIndex(startOffset - 1, segmentId, segmentPage);
+        const isInBlockRange = isDeleteOffsetInsideBlockRange(body, startOffset);
 
         const isUpdateParagraph =
-            isFirstGlyph(curGlyph) && preGlyph !== curGlyph && (isBullet === true || isIndent === true);
+            !isInBlockRange && isFirstGlyph(curGlyph) && preGlyph !== curGlyph && (isBullet === true || isIndent === true);
 
         if (isUpdateParagraph && collapsed) {
             const paragraph = getParagraphByGlyph(curGlyph, body);
@@ -669,6 +700,11 @@ export const DeleteRightCommand: ICommand = {
             return false;
         }
 
+        const autoFormatResult = await executeDeleteAutoFormat(accessor, DeleteRightCommand.id);
+        if (autoFormatResult != null) {
+            return autoFormatResult;
+        }
+
         const { segmentId, style, segmentPage } = activeRange;
 
         const body = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getBody();
@@ -678,6 +714,13 @@ export const DeleteRightCommand: ICommand = {
 
         const actualRange = activeRange;
         const { startOffset, endOffset, collapsed } = actualRange;
+        if (collapsed) {
+            const emptyCenteredParagraph = getEmptyCenteredParagraphAtOffset(body, startOffset);
+            if (emptyCenteredParagraph != null) {
+                return resetEmptyCenteredParagraphAlignment(commandService, docDataModel, segmentId ?? '', emptyCenteredParagraph, style);
+            }
+        }
+
         // No need to delete when the cursor is at the last position of the last paragraph.
         if (startOffset === body.dataStream.length - 2 && collapsed) {
             return true;
@@ -775,6 +818,20 @@ export const DeleteRightCommand: ICommand = {
     },
 };
 
+async function executeDeleteAutoFormat(accessor: Parameters<ICommand['handler']>[0], commandId: string): Promise<boolean | null> {
+    if (!accessor.has(DocAutoFormatService)) {
+        return null;
+    }
+
+    const commandService = accessor.get(ICommandService);
+    const mutations = accessor.get(DocAutoFormatService).onAutoFormat(commandId);
+    if (!mutations.length) {
+        return null;
+    }
+
+    return (await sequenceExecuteAsync(mutations, commandService)).result;
+}
+
 // get cursor position when BACKSPACE/DELETE excuse the CutContentCommand.
 function getTextRangesWhenDelete(activeRange: ITextRangeWithStyle, ranges: readonly ITextRange[]) {
     let cursor = activeRange.endOffset;
@@ -800,6 +857,56 @@ function getTextRangesWhenDelete(activeRange: ITextRangeWithStyle, ranges: reado
     ];
 
     return textRanges;
+}
+
+function getEmptyCenteredParagraphAtOffset(body: IDocumentBody, offset: number) {
+    const paragraphs = body.paragraphs ?? [];
+    for (let i = 0; i < paragraphs.length; i++) {
+        const paragraph = paragraphs[i];
+        const paragraphTextStart = i === 0 ? 0 : paragraphs[i - 1].startIndex + 1;
+        if (
+            paragraph.startIndex === paragraphTextStart &&
+            paragraph.startIndex === offset &&
+            paragraph.paragraphStyle?.horizontalAlign === HorizontalAlign.CENTER
+        ) {
+            return paragraph;
+        }
+    }
+}
+
+function resetEmptyCenteredParagraphAlignment(
+    commandService: ICommandService,
+    docDataModel: DocumentDataModel,
+    segmentId: string,
+    paragraph: IParagraph,
+    style: ITextRangeWithStyle['style']
+) {
+    return commandService.executeCommand(UpdateCommand.id, {
+        unitId: docDataModel.getUnitId(),
+        updateBody: {
+            dataStream: '',
+            paragraphs: [{
+                ...paragraph,
+                startIndex: 0,
+                paragraphStyle: {
+                    ...paragraph.paragraphStyle,
+                    horizontalAlign: HorizontalAlign.LEFT,
+                },
+            }],
+        },
+        range: {
+            startOffset: paragraph.startIndex,
+            endOffset: paragraph.startIndex + 1,
+        },
+        textRanges: [{
+            startOffset: paragraph.startIndex,
+            endOffset: paragraph.startIndex,
+            collapsed: true,
+            style,
+        }],
+        coverType: UpdateDocsAttributeType.REPLACE,
+        segmentId,
+    });
 }
 
 export const DeleteCurrentParagraphCommand: ICommand = {

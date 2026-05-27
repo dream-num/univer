@@ -39,6 +39,7 @@ import { BreakLineCommand } from './commands/commands/break-line.command';
 import { DocCopyCommand, DocCopyCurrentParagraphCommand, DocCutCommand, DocCutCurrentParagraphCommand, DocPasteCommand } from './commands/commands/clipboard.command';
 import { CutContentCommand, InnerPasteCommand } from './commands/commands/clipboard.inner.command';
 import { DeleteCommand, InsertCommand, UpdateCommand } from './commands/commands/core-editing.command';
+import { MoveDocBlockCommand } from './commands/commands/doc-block-move.command';
 import { DeleteCurrentParagraphCommand, DeleteCustomBlockCommand, DeleteLeftCommand, DeleteRightCommand, MergeTwoParagraphCommand, RemoveHorizontalLineCommand } from './commands/commands/doc-delete.command';
 import { CloseHeaderFooterCommand } from './commands/commands/doc-header-footer.command';
 import { HorizontalLineCommand, InsertHorizontalLineBellowCommand } from './commands/commands/doc-horizontal-line.command';
@@ -114,6 +115,7 @@ import { DocRenderController } from './controllers/render-controllers/doc.render
 import { DocZoomRenderController } from './controllers/render-controllers/zoom.render-controller';
 import { DocClipboardService, IDocClipboardService } from './services/clipboard/clipboard.service';
 import { DocAutoFormatService } from './services/doc-auto-format.service';
+import { DocContentInsertService } from './services/doc-content-insert.service';
 import { DocEventManagerService } from './services/doc-event-manager.service';
 import { DocIMEInputManagerService } from './services/doc-ime-input-manager.service';
 import { DocMenuStyleService } from './services/doc-menu-style.service';
@@ -220,6 +222,7 @@ export class UniverDocsUIPlugin extends Plugin {
             InsertCommand,
             DeleteCommand,
             DeleteCustomBlockCommand,
+            MoveDocBlockCommand,
             UpdateCommand,
             MergeTwoParagraphCommand,
             RemoveHorizontalLineCommand,
@@ -331,6 +334,7 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocsRenderService],
             [DocStateChangeManagerService],
             [DocAutoFormatService],
+            [DocContentInsertService],
             [DocMenuStyleService],
 
         ], this._config.override);

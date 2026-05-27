@@ -14,15 +14,19 @@
  * limitations under the License.
  */
 
+import { DocumentFlavor } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { setupRenderTestEnv } from '../../../__tests__/render-test-utils';
 import { DocumentSkeletonPageType, GlyphType, LineType, PageLayoutType } from '../../../basics/i-document-skeleton-cached';
 import { Canvas } from '../../../canvas';
 import { Engine } from '../../../engine';
 import { MAIN_VIEW_PORT_KEY, Scene } from '../../../scene';
+import { Path, Rect } from '../../../shape';
 import { Viewport } from '../../../viewport';
+import { DocBackground } from '../doc-background';
 import { DOCS_EXTENSION_TYPE } from '../doc-extension';
 import { Documents } from '../document';
+import { setDocsTableRenderViewportProvider } from '../table-render-viewport';
 
 function createGlyph(content: string, left: number, width = 16) {
     return {
@@ -274,6 +278,593 @@ describe('documents render', () => {
         container.remove();
         document.body.innerHTML = '';
         vi.restoreAllMocks();
+        setDocsTableRenderViewportProvider(null);
+    });
+
+    it('uses explicit table cell border width and skips no-border markers', () => {
+        const skeleton = { getSkeletonData: () => ({ pages: [] }) } as any;
+        const documents = new Documents('docs-border', skeleton, {
+            pageLayoutType: PageLayoutType.VERTICAL,
+            pageMarginLeft: 0,
+            pageMarginTop: 0,
+        });
+        const cell = createPage(DocumentSkeletonPageType.CELL, 'cell-seg');
+        cell.marginLeft = 0;
+        cell.marginTop = 0;
+        cell.pageWidth = 120;
+        cell.pageHeight = 60;
+        const row = {
+            cells: [cell],
+            rowSource: {
+                tableCells: [{
+                    borderTop: { color: { rgb: '#ff0000' }, width: { v: 5 } },
+                    borderBottom: { color: { rgb: 'transparent' }, width: { v: 0 } },
+                    borderLeft: { color: { rgb: 'transparent' }, width: { v: 0 } },
+                    borderRight: { color: { rgb: 'transparent' }, width: { v: 0 } },
+                }],
+            },
+        } as any;
+        cell.parent = row;
+        (documents as any)._drawLiquid = { x: 0, y: 0 };
+
+        const lineWidths: number[] = [];
+        const strokeStyles: string[] = [];
+        const ctx = {
+            save: vi.fn(),
+            restore: vi.fn(),
+            fillRectByPrecision: vi.fn(),
+            setLineWidthByPrecision: vi.fn((width: number) => lineWidths.push(width)),
+            beginPath: vi.fn(),
+            moveToByPrecision: vi.fn(),
+            lineToByPrecision: vi.fn(),
+            setLineDash: vi.fn(),
+            stroke: vi.fn(),
+            closePathByEnv: vi.fn(),
+            set strokeStyle(value: string) {
+                strokeStyles.push(value);
+            },
+        } as any;
+
+        (documents as any)._drawTableCellBordersAndBg(ctx, { marginLeft: 0, marginTop: 0 }, cell);
+
+        expect(lineWidths).toEqual([5]);
+        expect(strokeStyles).toEqual(['#ff0000']);
+        expect(ctx.stroke).toHaveBeenCalledTimes(1);
+
+        documents.dispose();
+    });
+
+    it('draws a docs workspace background behind traditional pages', () => {
+        const page = createPage(DocumentSkeletonPageType.BODY, '');
+        const skeleton = {
+            getSkeletonData: () => ({ pages: [page] }),
+            getViewModel: () => ({
+                getDataModel: () => ({
+                    getSnapshot: () => ({
+                        documentStyle: {
+                            documentFlavor: DocumentFlavor.TRADITIONAL,
+                        },
+                    }),
+                }),
+            }),
+        } as any;
+        const docBackground = new DocBackground('docs-background', skeleton, {
+            pageLayoutType: PageLayoutType.VERTICAL,
+            pageMarginLeft: 20,
+            pageMarginTop: 20,
+        });
+        docBackground.resize(260, 480);
+
+        const rectDraw = vi.spyOn(Rect, 'drawWith').mockImplementation(() => {});
+        vi.spyOn(Path, 'drawWith').mockImplementation(() => {});
+
+        const translate = vi.fn();
+        docBackground.draw({
+            restore: vi.fn(),
+            save: vi.fn(),
+            translate,
+        } as any, {
+            viewBound: { left: 100, top: 50, right: 700, bottom: 450 },
+            cacheBound: { left: 80, top: 30, right: 760, bottom: 490 },
+        } as any);
+
+        expect(rectDraw.mock.calls.map(([, props]) => props.fill)).toEqual([
+            '#fafafa',
+            'rgba(255, 255, 255, 1)',
+        ]);
+        expect(rectDraw.mock.calls[0][1]).toMatchObject({
+            width: 680,
+            height: 460,
+            fill: '#fafafa',
+        });
+        expect(translate.mock.calls[0]).toEqual([80, 30]);
+
+        docBackground.dispose();
+    });
+
+    it('treats unspecified document flavor as traditional when drawing the page background', () => {
+        const page = createPage(DocumentSkeletonPageType.BODY, '');
+        const skeleton = {
+            getSkeletonData: () => ({ pages: [page] }),
+            getViewModel: () => ({
+                getDataModel: () => ({
+                    getSnapshot: () => ({
+                        documentStyle: {
+                            documentFlavor: DocumentFlavor.UNSPECIFIED,
+                        },
+                    }),
+                }),
+            }),
+        } as any;
+        const docBackground = new DocBackground('docs-background-unspecified', skeleton, {
+            pageLayoutType: PageLayoutType.VERTICAL,
+            pageMarginLeft: 20,
+            pageMarginTop: 20,
+        });
+        docBackground.resize(260, 480);
+
+        const rectDraw = vi.spyOn(Rect, 'drawWith').mockImplementation(() => {});
+        vi.spyOn(Path, 'drawWith').mockImplementation(() => {});
+
+        docBackground.draw({
+            restore: vi.fn(),
+            save: vi.fn(),
+            translate: vi.fn(),
+        } as any);
+
+        expect(rectDraw.mock.calls.map(([, props]) => props.fill)).toEqual([
+            '#fafafa',
+            'rgba(255, 255, 255, 1)',
+        ]);
+
+        docBackground.dispose();
+    });
+
+    it('draws the docs workspace background for modern documents', () => {
+        const page = createPage(DocumentSkeletonPageType.BODY, '');
+        const skeleton = {
+            getSkeletonData: () => ({ pages: [page] }),
+            getViewModel: () => ({
+                getDataModel: () => ({
+                    getSnapshot: () => ({
+                        documentStyle: {
+                            documentFlavor: DocumentFlavor.MODERN,
+                        },
+                    }),
+                }),
+            }),
+        } as any;
+        const docBackground = new DocBackground('docs-background-modern', skeleton, {
+            pageLayoutType: PageLayoutType.VERTICAL,
+            pageMarginLeft: 20,
+            pageMarginTop: 20,
+        });
+        docBackground.resize(260, 480);
+
+        const rectDraw = vi.spyOn(Rect, 'drawWith').mockImplementation(() => {});
+        vi.spyOn(Path, 'drawWith').mockImplementation(() => {});
+
+        const translate = vi.fn();
+        docBackground.draw({
+            restore: vi.fn(),
+            save: vi.fn(),
+            translate,
+        } as any, {
+            viewBound: { left: 120, top: 60, right: 640, bottom: 420 },
+            cacheBound: { left: 90, top: 40, right: 700, bottom: 480 },
+        } as any);
+
+        expect(rectDraw.mock.calls.map(([, props]) => props.fill)).toEqual(['rgba(255, 255, 255, 1)']);
+        expect(rectDraw.mock.calls[0][1]).toMatchObject({
+            width: 610,
+            height: 440,
+            fill: 'rgba(255, 255, 255, 1)',
+        });
+        expect(translate.mock.calls[0]).toEqual([90, 40]);
+
+        docBackground.dispose();
+    });
+
+    it('uses configured transparent fills for embedded editor backgrounds', () => {
+        const page = createPage(DocumentSkeletonPageType.BODY, '');
+        const skeleton = {
+            getSkeletonData: () => ({ pages: [page] }),
+            getViewModel: () => ({
+                getDataModel: () => ({
+                    getSnapshot: () => ({
+                        documentStyle: {
+                            documentFlavor: DocumentFlavor.TRADITIONAL,
+                        },
+                    }),
+                }),
+            }),
+        } as any;
+        const docBackground = new DocBackground('docs-background-editor', skeleton, {
+            pageLayoutType: PageLayoutType.VERTICAL,
+            pageMarginLeft: 20,
+            pageMarginTop: 20,
+            backgroundFillColor: 'transparent',
+            pageFillColor: 'transparent',
+            pageStrokeColor: 'transparent',
+            marginStrokeColor: 'transparent',
+        });
+        docBackground.resize(260, 480);
+
+        const rectDraw = vi.spyOn(Rect, 'drawWith').mockImplementation(() => {});
+        vi.spyOn(Path, 'drawWith').mockImplementation(() => {});
+
+        docBackground.draw({
+            restore: vi.fn(),
+            save: vi.fn(),
+            translate: vi.fn(),
+        } as any);
+
+        expect(rectDraw.mock.calls.map(([, props]) => props.fill)).toEqual([
+            'transparent',
+            'transparent',
+        ]);
+        expect(rectDraw.mock.calls[1][1].stroke).toBe('transparent');
+        expect((Path.drawWith as any).mock.calls[0][1].stroke).toBe('transparent');
+
+        docBackground.dispose();
+    });
+
+    it('draws unspecified table borders with the default table grid color', () => {
+        const skeleton = { getSkeletonData: () => ({ pages: [] }) } as any;
+        const documents = new Documents('docs-border-default', skeleton, {
+            pageLayoutType: PageLayoutType.VERTICAL,
+            pageMarginLeft: 0,
+            pageMarginTop: 0,
+        });
+        const cell = createPage(DocumentSkeletonPageType.CELL, 'cell-seg');
+        cell.marginLeft = 0;
+        cell.marginTop = 0;
+        cell.pageWidth = 120;
+        cell.pageHeight = 60;
+        const row = {
+            cells: [cell],
+            rowSource: {
+                tableCells: [{}],
+            },
+        } as any;
+        cell.parent = row;
+        (documents as any)._drawLiquid = { x: 0, y: 0 };
+
+        const strokeStyles: string[] = [];
+        const ctx = {
+            save: vi.fn(),
+            restore: vi.fn(),
+            fillRectByPrecision: vi.fn(),
+            setLineWidthByPrecision: vi.fn(),
+            beginPath: vi.fn(),
+            moveToByPrecision: vi.fn(),
+            lineToByPrecision: vi.fn(),
+            setLineDash: vi.fn(),
+            stroke: vi.fn(),
+            closePathByEnv: vi.fn(),
+            set strokeStyle(value: string) {
+                strokeStyles.push(value);
+            },
+        } as any;
+
+        (documents as any)._drawTableCellBordersAndBg(ctx, { marginLeft: 0, marginTop: 0 }, cell);
+
+        expect(strokeStyles).toEqual(['#c7c9cc', '#c7c9cc', '#c7c9cc', '#c7c9cc']);
+
+        documents.dispose();
+    });
+
+    it('draws each physical table grid line only once', () => {
+        const skeleton = { getSkeletonData: () => ({ pages: [] }) } as any;
+        const documents = new Documents('docs-border-canonical', skeleton, {
+            pageLayoutType: PageLayoutType.VERTICAL,
+            pageMarginLeft: 0,
+            pageMarginTop: 0,
+        });
+        const cells = Array.from({ length: 4 }, (_, index) => {
+            const cell = createPage(DocumentSkeletonPageType.CELL, `cell-${index}`);
+            cell.marginLeft = 0;
+            cell.marginTop = 0;
+            cell.pageWidth = 50;
+            cell.pageHeight = 30;
+            return cell;
+        });
+        const row0 = {
+            cells: [cells[0], cells[1]],
+            index: 0,
+            rowSource: { tableCells: [{}, {}] },
+        } as any;
+        const row1 = {
+            cells: [cells[2], cells[3]],
+            index: 1,
+            rowSource: { tableCells: [{}, {}] },
+        } as any;
+        const table = { rows: [row0, row1] } as any;
+        row0.parent = table;
+        row1.parent = table;
+        cells[0].parent = row0;
+        cells[1].parent = row0;
+        cells[2].parent = row1;
+        cells[3].parent = row1;
+
+        let currentSegment = '';
+        const drawnSegments: string[] = [];
+        const ctx = {
+            save: vi.fn(),
+            restore: vi.fn(),
+            fillRectByPrecision: vi.fn(),
+            setLineWidthByPrecision: vi.fn(),
+            beginPath: vi.fn(),
+            moveToByPrecision: vi.fn((x: number, y: number) => {
+                currentSegment = `${x},${y}`;
+            }),
+            lineToByPrecision: vi.fn((x: number, y: number) => {
+                currentSegment += `-${x},${y}`;
+                drawnSegments.push(currentSegment);
+            }),
+            setLineDash: vi.fn(),
+            stroke: vi.fn(),
+            closePathByEnv: vi.fn(),
+            set strokeStyle(_value: string) {},
+        } as any;
+
+        [
+            { cell: cells[0], x: 0, y: 0 },
+            { cell: cells[1], x: 50, y: 0 },
+            { cell: cells[2], x: 0, y: 30 },
+            { cell: cells[3], x: 50, y: 30 },
+        ].forEach(({ cell, x, y }) => {
+            (documents as any)._drawLiquid = { x, y };
+            (documents as any)._drawTableCellBordersAndBg(ctx, { marginLeft: 0, marginTop: 0 }, cell);
+        });
+
+        expect(ctx.stroke).toHaveBeenCalledTimes(12);
+        expect(new Set(drawnSegments).size).toBe(12);
+
+        documents.dispose();
+    });
+
+    it('uses neighboring table cell borders for internal canonical edges', () => {
+        const skeleton = { getSkeletonData: () => ({ pages: [] }) } as any;
+        const documents = new Documents('docs-border-neighbor', skeleton, {
+            pageLayoutType: PageLayoutType.VERTICAL,
+            pageMarginLeft: 0,
+            pageMarginTop: 0,
+        });
+        const cells = Array.from({ length: 2 }, (_, index) => {
+            const cell = createPage(DocumentSkeletonPageType.CELL, `neighbor-cell-${index}`);
+            cell.marginLeft = 0;
+            cell.marginTop = 0;
+            cell.pageWidth = 50;
+            cell.pageHeight = 30;
+            return cell;
+        });
+        const noBorder = { color: { rgb: 'transparent' }, width: { v: 0 } };
+        const row = {
+            cells,
+            index: 0,
+            rowSource: {
+                tableCells: [
+                    {
+                        borderTop: noBorder,
+                        borderBottom: noBorder,
+                        borderLeft: noBorder,
+                    },
+                    {
+                        borderTop: noBorder,
+                        borderBottom: noBorder,
+                        borderLeft: { color: { rgb: '#ff0000' }, width: { v: 3 } },
+                        borderRight: noBorder,
+                    },
+                ],
+            },
+        } as any;
+        const table = { rows: [row] } as any;
+        row.parent = table;
+        cells[0].parent = row;
+        cells[1].parent = row;
+
+        const strokeStyles: string[] = [];
+        const lineWidths: number[] = [];
+        const ctx = {
+            save: vi.fn(),
+            restore: vi.fn(),
+            fillRectByPrecision: vi.fn(),
+            setLineWidthByPrecision: vi.fn((width: number) => lineWidths.push(width)),
+            beginPath: vi.fn(),
+            moveToByPrecision: vi.fn(),
+            lineToByPrecision: vi.fn(),
+            setLineDash: vi.fn(),
+            stroke: vi.fn(),
+            closePathByEnv: vi.fn(),
+            set strokeStyle(value: string) {
+                strokeStyles.push(value);
+            },
+        } as any;
+
+        [
+            { cell: cells[0], x: 0 },
+            { cell: cells[1], x: 50 },
+        ].forEach(({ cell, x }) => {
+            (documents as any)._drawLiquid = { x, y: 0 };
+            (documents as any)._drawTableCellBordersAndBg(ctx, { marginLeft: 0, marginTop: 0 }, cell);
+        });
+
+        expect(ctx.stroke).toHaveBeenCalledTimes(1);
+        expect(lineWidths).toEqual([3]);
+        expect(strokeStyles).toEqual(['#ff0000']);
+
+        documents.dispose();
+    });
+
+    it('uses the document unit id to apply table horizontal viewport while drawing', () => {
+        const bodyPage = createPage(DocumentSkeletonPageType.BODY, '');
+        attachTable(bodyPage);
+
+        const skeleton = {
+            getViewModel: () => ({
+                getDataModel: () => ({
+                    getUnitId: () => 'doc-unit-1',
+                }),
+            }),
+        } as any;
+        const documents = new Documents('not-the-unit-id', skeleton, {
+            pageLayoutType: PageLayoutType.VERTICAL,
+            pageMarginLeft: 0,
+            pageMarginTop: 0,
+        });
+
+        const queriedUnitIds: string[] = [];
+        setDocsTableRenderViewportProvider((unitId, tableId) => {
+            queriedUnitIds.push(`${unitId}:${tableId}`);
+            if (unitId !== 'doc-unit-1' || tableId !== 'table-1') {
+                return null;
+            }
+
+            return {
+                contentWidth: 240,
+                scrollLeft: 80,
+                viewportWidth: 120,
+            };
+        });
+
+        const ctx = {
+            save: vi.fn(),
+            restore: vi.fn(),
+            beginPath: vi.fn(),
+            rectByPrecision: vi.fn(),
+            closePath: vi.fn(),
+            clip: vi.fn(),
+        } as any;
+
+        const translateCalls: Array<[number | undefined, number | undefined]> = [];
+        const liquid = (documents as any)._drawLiquid;
+        vi.spyOn(liquid, 'translate').mockImplementation((...args: unknown[]) => {
+            const [x, y] = args as [number | undefined, number | undefined];
+            translateCalls.push([x, y]);
+            liquid.translateBy(liquid.x + (x ?? 0), liquid.y + (y ?? 0));
+        });
+        vi.spyOn(documents as any, '_drawTableCell').mockImplementation(() => {});
+
+        (documents as any)._drawTable(
+            ctx,
+            bodyPage,
+            bodyPage.skeTables,
+            [],
+            null,
+            [],
+            {} as any,
+            0,
+            0,
+            {},
+            { scaleX: 1, scaleY: 1 }
+        );
+
+        expect(queriedUnitIds).toEqual(['doc-unit-1:table-1']);
+        expect(ctx.clip).toHaveBeenCalledTimes(1);
+        expect(ctx.rectByPrecision).toHaveBeenCalledWith(20, 30, 124, 64);
+        expect(translateCalls).toContainEqual([-80, 0]);
+
+        documents.dispose();
+    });
+
+    it('clips oversized tables on first render before a table viewport state exists', () => {
+        const bodyPage = createPage(DocumentSkeletonPageType.BODY, '');
+        attachTable(bodyPage);
+        const table = bodyPage.skeTables.get('table-1')!;
+        table.width = 260;
+        table.rows[0].cells[0].pageWidth = 260;
+
+        const documents = new Documents('docs-main', {
+            getSkeletonData: () => ({ pages: [bodyPage] }),
+        } as any, {
+            pageLayoutType: PageLayoutType.VERTICAL,
+            pageMarginLeft: 0,
+            pageMarginTop: 0,
+        });
+
+        const ctx = {
+            save: vi.fn(),
+            restore: vi.fn(),
+            beginPath: vi.fn(),
+            rectByPrecision: vi.fn(),
+            closePath: vi.fn(),
+            clip: vi.fn(),
+        } as any;
+
+        vi.spyOn(documents as any, '_drawTableCell').mockImplementation(() => {});
+
+        (documents as any)._drawTable(
+            ctx,
+            bodyPage,
+            bodyPage.skeTables,
+            [],
+            null,
+            [],
+            {} as any,
+            0,
+            0,
+            {},
+            { scaleX: 1, scaleY: 1 }
+        );
+
+        expect(ctx.clip).toHaveBeenCalledTimes(1);
+        expect(ctx.rectByPrecision).toHaveBeenCalledWith(20, 30, 172, 64);
+
+        documents.dispose();
+    });
+
+    it('uses explicit table cell border width and skips no-border markers', () => {
+        const skeleton = { getSkeletonData: () => ({ pages: [] }) } as any;
+        const documents = new Documents('docs-border', skeleton, {
+            pageLayoutType: PageLayoutType.VERTICAL,
+            pageMarginLeft: 0,
+            pageMarginTop: 0,
+        });
+        const cell = createPage(DocumentSkeletonPageType.CELL, 'cell-seg');
+        cell.marginLeft = 0;
+        cell.marginTop = 0;
+        cell.pageWidth = 120;
+        cell.pageHeight = 60;
+        const row = {
+            cells: [cell],
+            rowSource: {
+                tableCells: [{
+                    borderTop: { color: { rgb: '#ff0000' }, width: { v: 5 } },
+                    borderBottom: { color: { rgb: 'transparent' }, width: { v: 0 } },
+                    borderLeft: { color: { rgb: 'transparent' }, width: { v: 0 } },
+                    borderRight: { color: { rgb: 'transparent' }, width: { v: 0 } },
+                }],
+            },
+        } as any;
+        cell.parent = row;
+        (documents as any)._drawLiquid = { x: 0, y: 0 };
+
+        const lineWidths: number[] = [];
+        const strokeStyles: string[] = [];
+        const ctx = {
+            save: vi.fn(),
+            restore: vi.fn(),
+            fillRectByPrecision: vi.fn(),
+            setLineWidthByPrecision: vi.fn((width: number) => lineWidths.push(width)),
+            beginPath: vi.fn(),
+            moveToByPrecision: vi.fn(),
+            lineToByPrecision: vi.fn(),
+            setLineDash: vi.fn(),
+            stroke: vi.fn(),
+            closePathByEnv: vi.fn(),
+            set strokeStyle(value: string) {
+                strokeStyles.push(value);
+            },
+        } as any;
+
+        (documents as any)._drawTableCellBordersAndBg(ctx, { marginLeft: 0, marginTop: 0 }, cell);
+
+        expect(lineWidths).toEqual([5]);
+        expect(strokeStyles).toEqual(['#ff0000']);
+        expect(ctx.stroke).toHaveBeenCalledTimes(1);
+
+        documents.dispose();
     });
 
     it('draws body/header/footer/table flows with extension dispatch and page events', () => {

@@ -14,10 +14,23 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
+import { DocumentFlavor } from '@univerjs/core';
+import { describe, expect, it, vi } from 'vitest';
 import { lineBreaking } from '../linebreaking';
 import { shaping } from '../shaping';
 import { createParagraphLayoutTestBed } from './create-paragraph-layout-test-bed';
+
+function createContext() {
+    return {
+        paragraphConfigCache: new Map(),
+        skeletonResourceReference: {
+            skeHeaders: new Map(),
+            skeFooters: new Map(),
+            skeListLevel: new Map(),
+            drawingAnchor: new Map(),
+        },
+    } as any;
+}
 
 describe('linebreaking', () => {
     it('lays out short text on a single page', () => {
@@ -79,5 +92,366 @@ describe('linebreaking', () => {
         const result = lineBreaking(ctx, viewModel, [], curPage, paragraphNode, sectionBreakConfig, null);
 
         expect(result.length).toBe(1);
+    });
+
+    it('applies callout outer spacing as a temporary layout style without mutating the paragraph model', () => {
+        const ctx = createContext();
+        const paragraphStyle = { indentStart: { v: 60 }, indentEnd: { v: 20 } };
+        const paragraph = {
+            startIndex: 2,
+            paragraphStyle,
+        };
+        const body = {
+            paragraphs: [paragraph],
+            blockRanges: [{
+                blockId: 'callout-1',
+                blockType: 'callout',
+                startIndex: 0,
+                endIndex: 6,
+            }],
+        };
+        const viewModel = {
+            getParagraph: vi.fn(() => paragraph),
+            getBody: vi.fn(() => body),
+            getCustomBlock: vi.fn(() => null),
+        } as any;
+
+        lineBreaking(
+            ctx,
+            viewModel,
+            [],
+            {
+                segmentId: 'segment-1',
+                pageNumber: 1,
+            } as any,
+            {
+                endIndex: 5,
+                startIndex: 2,
+                blocks: [],
+                children: [],
+            } as any,
+            {
+                lists: [],
+                localeService: {} as any,
+                drawings: {},
+            } as any,
+            null
+        );
+
+        expect(ctx.paragraphConfigCache.get('segment-1')?.get(5)?.paragraphStyle).toEqual({
+            indentStart: { v: 60 },
+            indentEnd: { v: 20 },
+            lineSpacing: 1.5,
+            spaceAbove: { v: 34 },
+            spaceBelow: { v: 34 },
+        });
+        expect(paragraphStyle).toEqual({ indentStart: { v: 60 }, indentEnd: { v: 20 } });
+    });
+
+    it('removes bottom outer spacing between adjacent layout block ranges', () => {
+        const ctx = createContext();
+        const firstCalloutParagraph = {
+            startIndex: 1,
+            paragraphStyle: {},
+        };
+        const secondCalloutParagraph = {
+            startIndex: 4,
+            paragraphStyle: {},
+        };
+        const body = {
+            paragraphs: [firstCalloutParagraph, secondCalloutParagraph],
+            blockRanges: [
+                {
+                    blockId: 'callout-1',
+                    blockType: 'callout',
+                    startIndex: 0,
+                    endIndex: 2,
+                },
+                {
+                    blockId: 'quote-1',
+                    blockType: 'quote',
+                    startIndex: 3,
+                    endIndex: 5,
+                },
+            ],
+        };
+        const viewModel = {
+            getParagraph: vi.fn(() => firstCalloutParagraph),
+            getBody: vi.fn(() => body),
+            getCustomBlock: vi.fn(() => null),
+        } as any;
+
+        lineBreaking(
+            ctx,
+            viewModel,
+            [],
+            {
+                segmentId: 'segment-1',
+                pageNumber: 1,
+            } as any,
+            {
+                endIndex: 1,
+                startIndex: 0,
+                blocks: [],
+                children: [],
+            } as any,
+            {
+                lists: [],
+                localeService: {} as any,
+                drawings: {},
+            } as any,
+            null
+        );
+
+        expect(ctx.paragraphConfigCache.get('segment-1')?.get(1)?.paragraphStyle).toEqual({
+            lineSpacing: 1.5,
+            spaceAbove: { v: 34 },
+        });
+    });
+
+    it('applies quote outer spacing with the same temporary layout rule', () => {
+        const ctx = createContext();
+        const firstParagraphStyle = { indentStart: { v: 22 } };
+        const lastParagraphStyle = { indentStart: { v: 22 } };
+        const firstParagraph = {
+            startIndex: 2,
+            paragraphStyle: firstParagraphStyle,
+        };
+        const lastParagraph = {
+            startIndex: 4,
+            paragraphStyle: lastParagraphStyle,
+        };
+        const body = {
+            paragraphs: [firstParagraph, lastParagraph],
+            blockRanges: [{
+                blockId: 'quote-1',
+                blockType: 'quote',
+                startIndex: 0,
+                endIndex: 6,
+            }],
+        };
+        const viewModel = {
+            getParagraph: vi.fn(() => firstParagraph),
+            getBody: vi.fn(() => body),
+            getCustomBlock: vi.fn(() => null),
+        } as any;
+
+        lineBreaking(
+            ctx,
+            viewModel,
+            [],
+            {
+                segmentId: 'segment-1',
+                pageNumber: 1,
+            } as any,
+            {
+                endIndex: 2,
+                startIndex: 0,
+                blocks: [],
+                children: [],
+            } as any,
+            {
+                lists: [],
+                localeService: {} as any,
+                drawings: {},
+            } as any,
+            null
+        );
+
+        expect(ctx.paragraphConfigCache.get('segment-1')?.get(2)?.paragraphStyle).toEqual({
+            indentStart: { v: 22 },
+            lineSpacing: 1.5,
+            spaceAbove: { v: 24 },
+        });
+        expect(firstParagraphStyle).toEqual({ indentStart: { v: 22 } });
+    });
+
+    it('applies code outer spacing with the same temporary layout rule', () => {
+        const ctx = createContext();
+        const paragraphStyle = { indentStart: { v: 20 }, indentEnd: { v: 20 } };
+        const paragraph = {
+            startIndex: 2,
+            paragraphStyle,
+        };
+        const body = {
+            paragraphs: [paragraph],
+            blockRanges: [{
+                blockId: 'code-1',
+                blockType: 'code',
+                startIndex: 0,
+                endIndex: 6,
+            }],
+        };
+        const viewModel = {
+            getParagraph: vi.fn(() => paragraph),
+            getBody: vi.fn(() => body),
+            getCustomBlock: vi.fn(() => null),
+        } as any;
+
+        lineBreaking(
+            ctx,
+            viewModel,
+            [],
+            {
+                segmentId: 'segment-1',
+                pageNumber: 1,
+            } as any,
+            {
+                endIndex: 5,
+                startIndex: 2,
+                blocks: [],
+                children: [],
+            } as any,
+            {
+                lists: [],
+                localeService: {} as any,
+                drawings: {},
+            } as any,
+            null
+        );
+
+        expect(ctx.paragraphConfigCache.get('segment-1')?.get(5)?.paragraphStyle).toEqual({
+            indentStart: { v: 20 },
+            indentEnd: { v: 20 },
+            lineSpacing: 1.5,
+            spaceAbove: { v: 32 },
+            spaceBelow: { v: 32 },
+        });
+        expect(paragraphStyle).toEqual({ indentStart: { v: 20 }, indentEnd: { v: 20 } });
+    });
+
+    it('applies comfortable default spacing to normal paragraphs as layout-only style', () => {
+        const ctx = createContext();
+        const paragraphStyle = {};
+        const paragraph = {
+            startIndex: 3,
+            paragraphStyle,
+        };
+        const viewModel = {
+            getParagraph: vi.fn(() => paragraph),
+            getBody: vi.fn(() => ({
+                paragraphs: [paragraph],
+            })),
+            getCustomBlock: vi.fn(() => null),
+        } as any;
+
+        lineBreaking(
+            ctx,
+            viewModel,
+            [],
+            {
+                segmentId: 'segment-1',
+                pageNumber: 1,
+            } as any,
+            {
+                endIndex: 3,
+                startIndex: 0,
+                blocks: [],
+                children: [],
+            } as any,
+            {
+                lists: [],
+                localeService: {} as any,
+                drawings: {},
+            } as any,
+            null
+        );
+
+        expect(ctx.paragraphConfigCache.get('segment-1')?.get(3)?.paragraphStyle).toEqual({
+            spaceAbove: { v: 0 },
+            lineSpacing: 1.5,
+            spaceBelow: { v: 8 },
+        });
+        expect(paragraphStyle).toEqual({});
+    });
+
+    it('keeps embedded sheet cell documents on their explicit paragraph style only', () => {
+        const ctx = createContext();
+        const paragraphStyle = {};
+        const paragraph = {
+            startIndex: 3,
+            paragraphStyle,
+        };
+        const viewModel = {
+            getParagraph: vi.fn(() => paragraph),
+            getBody: vi.fn(() => ({
+                paragraphs: [paragraph],
+            })),
+            getSnapshot: vi.fn(() => ({
+                documentStyle: {
+                    documentFlavor: DocumentFlavor.UNSPECIFIED,
+                },
+            })),
+            getCustomBlock: vi.fn(() => null),
+        } as any;
+
+        lineBreaking(
+            ctx,
+            viewModel,
+            [],
+            {
+                segmentId: 'segment-1',
+                pageNumber: 1,
+            } as any,
+            {
+                endIndex: 3,
+                startIndex: 0,
+                blocks: [],
+                children: [],
+            } as any,
+            {
+                lists: [],
+                localeService: {} as any,
+                drawings: {},
+            } as any,
+            null
+        );
+
+        expect(ctx.paragraphConfigCache.get('segment-1')?.get(3)?.paragraphStyle).toEqual({});
+        expect(paragraphStyle).toEqual({});
+    });
+
+    it('keeps embedded sheet rich text documents without a flavor on their explicit paragraph style only', () => {
+        const ctx = createContext();
+        const paragraphStyle = {};
+        const paragraph = {
+            startIndex: 3,
+            paragraphStyle,
+        };
+        const viewModel = {
+            getParagraph: vi.fn(() => paragraph),
+            getBody: vi.fn(() => ({
+                paragraphs: [paragraph],
+            })),
+            getSnapshot: vi.fn(() => ({
+                documentStyle: {},
+            })),
+            getCustomBlock: vi.fn(() => null),
+        } as any;
+
+        lineBreaking(
+            ctx,
+            viewModel,
+            [],
+            {
+                segmentId: 'segment-1',
+                pageNumber: 1,
+            } as any,
+            {
+                endIndex: 3,
+                startIndex: 0,
+                blocks: [],
+                children: [],
+            } as any,
+            {
+                lists: [],
+                localeService: {} as any,
+                drawings: {},
+            } as any,
+            null
+        );
+
+        expect(ctx.paragraphConfigCache.get('segment-1')?.get(3)?.paragraphStyle).toEqual({});
+        expect(paragraphStyle).toEqual({});
     });
 });

@@ -17,7 +17,7 @@
 /* eslint-disable no-param-reassign */
 
 import type { Nullable } from '../../../shared';
-import type { ICustomDecoration, ICustomRange, IDocumentBody, IParagraph, IParagraphStyle, ITextRun, ITextStyle } from '../../../types/interfaces';
+import type { ICustomDecoration, ICustomRange, IDocumentBlockRange, IDocumentBody, IParagraph, IParagraphStyle, ITextRun, ITextStyle } from '../../../types/interfaces';
 import type { IRetainAction } from './action-types';
 import { Tools, UpdateDocsAttributeType } from '../../../shared';
 import { CustomDecorationType } from '../../../types/interfaces';
@@ -422,12 +422,14 @@ export function transformBody(
     const {
         textRuns: thisTextRuns,
         paragraphs: thisParagraphs = [],
+        blockRanges: thisBlockRanges = [],
         customRanges: thisCustomRanges,
         customDecorations: thisCustomDecorations,
     } = thisBody;
     const {
         textRuns: otherTextRuns,
         paragraphs: otherParagraphs = [],
+        blockRanges: otherBlockRanges = [],
         customRanges: otherCustomRanges,
         customDecorations: otherCustomDecorations,
     } = otherBody;
@@ -521,8 +523,28 @@ export function transformBody(
         retBody.paragraphs = paragraphs;
     }
 
+    const blockRanges = transformBlockRanges(thisBlockRanges, otherBlockRanges, priority);
+    if (blockRanges.length) {
+        retBody.blockRanges = blockRanges;
+    }
+
     return {
         coverType,
         body: retBody,
     };
+}
+
+function transformBlockRanges(thisBlockRanges: IDocumentBlockRange[], otherBlockRanges: IDocumentBlockRange[], priority: boolean): IDocumentBlockRange[] {
+    if (!thisBlockRanges.length) {
+        return otherBlockRanges;
+    }
+
+    if (!otherBlockRanges.length) {
+        return [];
+    }
+
+    return otherBlockRanges.map((otherBlockRange) => {
+        const thisBlockRange = thisBlockRanges.find((blockRange) => blockRange.blockId === otherBlockRange.blockId);
+        return thisBlockRange && priority ? Tools.deepMerge(otherBlockRange, thisBlockRange) : otherBlockRange;
+    });
 }

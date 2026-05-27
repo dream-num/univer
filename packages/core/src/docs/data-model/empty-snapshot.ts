@@ -16,6 +16,7 @@
 
 import type { IDocumentData } from '../../types/interfaces';
 import { generateRandomId } from '../../shared/tools';
+import { DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING, DEFAULT_DOCUMENT_PARAGRAPH_SPACE_ABOVE, DEFAULT_DOCUMENT_PARAGRAPH_SPACE_BELOW, MODERN_DOCUMENT_WIDTH, ModernDocumentWidthMode } from '../../types/const';
 import { BooleanNumber } from '../../types/enum';
 import { LocaleType } from '../../types/enum/locale-type';
 import { DocumentFlavor } from '../../types/interfaces';
@@ -43,9 +44,9 @@ export function getEmptySnapshot(
                 {
                     startIndex: 0,
                     paragraphStyle: {
-                        spaceAbove: { v: 5 },
-                        lineSpacing: 1,
-                        spaceBelow: { v: 0 },
+                        spaceAbove: { v: DEFAULT_DOCUMENT_PARAGRAPH_SPACE_ABOVE },
+                        lineSpacing: DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING,
+                        spaceBelow: { v: DEFAULT_DOCUMENT_PARAGRAPH_SPACE_BELOW },
                     },
                 },
             ],
@@ -57,10 +58,10 @@ export function getEmptySnapshot(
         },
         documentStyle: {
             pageSize: {
-                width: 595 / 0.75,
+                width: MODERN_DOCUMENT_WIDTH[ModernDocumentWidthMode.MEDIUM],
                 height: 842 / 0.75,
             },
-            documentFlavor: DocumentFlavor.TRADITIONAL,
+            documentFlavor: DocumentFlavor.MODERN,
             marginTop: 50,
             marginBottom: 50,
             marginRight: 50,

@@ -39,6 +39,7 @@ export {
     type IUpdateCommandParams,
     UpdateCommand,
 } from './commands/commands/core-editing.command';
+export { buildMoveDocBlockActions, type IMoveDocBlockCommandParams, MoveDocBlockCommand } from './commands/commands/doc-block-move.command';
 export { DeleteCustomBlockCommand, DeleteLeftCommand, DeleteRightCommand, type IDeleteCustomBlockParams, MergeTwoParagraphCommand } from './commands/commands/doc-delete.command';
 export { getCursorWhenDelete } from './commands/commands/doc-delete.command';
 export { HorizontalLineCommand } from './commands/commands/doc-horizontal-line.command';
@@ -119,15 +120,19 @@ export type { IUniverDocsUIConfig } from './config/config';
 export { DocUIController } from './controllers/doc-ui.controller';
 export { DocBackScrollRenderController } from './controllers/render-controllers/back-scroll.render-controller';
 export { DocRenderController } from './controllers/render-controllers/doc.render-controller';
+export { FLOAT_TEXT_STYLE_MENU_ID, FLOAT_TOOLBAR_MENU_POSITION, hideMenuWhenSelectionInBlockRange, isTextRangeInAnyBlockRange } from './menu/menu';
+export { DOC_CONTENT_INSERT_MENU_ID, EMPTY_PARAGRAPH_MENU_ID, getDocBlockRangeMenuId, INSERT_BELLOW_MENU_ID } from './menu/paragraph-menu';
 export { menuSchema as DocsUIMenuSchema } from './menu/schema';
 export { UniverDocsUIPlugin } from './plugin';
 export * from './services';
-
 export { IDocClipboardService } from './services/clipboard/clipboard.service';
+
 export { convertBodyToHtml } from './services/clipboard/udm-to-html/convertor';
 export { DocAutoFormatService } from './services/doc-auto-format.service';
-export { DocEventManagerService } from './services/doc-event-manager.service';
+export { DocContentInsertService, type IDocContentInsertRange } from './services/doc-content-insert.service';
+export { DocEventManagerService, type IBulletBound } from './services/doc-event-manager.service';
 export { DocIMEInputManagerService } from './services/doc-ime-input-manager.service';
+export { DocParagraphMenuService } from './services/doc-paragraph-menu.service';
 export { calcDocRangePositions, DocCanvasPopManagerService } from './services/doc-popup-manager.service';
 export { DocPrintInterceptorService, type IDocPrintComponentContext, type IDocPrintContext } from './services/doc-print-interceptor.service';
 export { DocStateChangeManagerService } from './services/doc-state-change-manager.service';

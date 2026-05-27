@@ -21,6 +21,7 @@ export interface ITinyMenuItem {
     onClick: () => void;
     className: string;
     Icon: ComponentType<{ className?: string }>;
+    iconClassName?: string;
     key: string;
     active?: boolean;
     tooltip?: string;
@@ -50,10 +51,13 @@ export function DesignTinyMenuGroup({ items }: ITinyMenuGroupProps) {
                         onClick={() => item.onClick()}
                     >
                         <item.Icon
-                            className={`
-                              univer-size-4 univer-text-gray-900
-                              dark:!univer-text-gray-200
-                            `}
+                            className={clsx(
+                                `
+                                  univer-size-4 univer-text-gray-900
+                                  dark:!univer-text-gray-200
+                                `,
+                                item.iconClassName
+                            )}
                         />
                     </div>
                 );

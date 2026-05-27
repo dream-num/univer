@@ -18,10 +18,12 @@ import type { DocumentDataModel, EventState, ICommandInfo, Nullable } from '@uni
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { DocumentSkeleton, IDocumentSkeletonPage, IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
 import { DocumentFlavor, ICommandService, Inject, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
-import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { DocSelectionManagerService, DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { DocBackground, Documents, IRenderManagerService, Layer, PageLayoutType, ScrollBar, Viewport } from '@univerjs/engine-render';
 import { takeUntil } from 'rxjs';
 import { DOCS_COMPONENT_BACKGROUND_LAYER_INDEX, DOCS_COMPONENT_DEFAULT_Z_INDEX, DOCS_COMPONENT_HEADER_LAYER_INDEX, DOCS_COMPONENT_MAIN_LAYER_INDEX, DOCS_VIEW_KEY, VIEWPORT_KEY } from '../../basics/docs-view-key';
+import { DocPageLayoutService } from '../../services/doc-page-layout.service';
+import { getDocsCanvasBackgroundColor } from '../../services/docs-render.service';
 import { IEditorService } from '../../services/editor/editor-manager.service';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
 
@@ -33,7 +35,9 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @IEditorService private readonly _editorService: IEditorService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @Inject(DocPageLayoutService) private readonly _docPageLayoutService: DocPageLayoutService,
+        @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService
     ) {
         super();
 
@@ -66,6 +70,7 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         }
 
         this._recalculateSizeBySkeleton(skeleton);
+        this._refreshPagePositionAndSelection();
     }
 
     private _addNewRender() {
@@ -147,6 +152,7 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         const config = {
             pageMarginLeft: DEFAULT_PAGE_MARGIN_LEFT,
             pageMarginTop: DEFAULT_PAGE_MARGIN_TOP,
+            ...this._getEditorBackgroundConfig(),
         };
 
         const documents = new Documents(DOCS_VIEW_KEY.MAIN, undefined, config);
@@ -184,6 +190,7 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
 
         docsComponent.changeSkeleton(skeleton);
         docBackground.changeSkeleton(skeleton);
+        this._syncCanvasBackground();
 
         const { unitId } = this._context;
 
@@ -196,6 +203,7 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         }
 
         this._recalculateSizeBySkeleton(skeleton);
+        this._refreshPagePositionAndSelection();
     }
 
     private _initCommandListener() {
@@ -210,6 +218,15 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
                 this.reRender(unitId);
             }
         }));
+    }
+
+    private _refreshPagePositionAndSelection() {
+        if (this._editorService.isEditor(this._context.unitId)) {
+            return;
+        }
+
+        this._docPageLayoutService.calculatePagePosition();
+        this._textSelectionManagerService.refreshSelection();
     }
 
     private _recalculateSizeBySkeleton(skeleton: DocumentSkeleton) {
@@ -230,6 +247,7 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         const docDataModel = this._context.unit;
 
         const documentFlavor = docDataModel.getSnapshot().documentStyle.documentFlavor;
+        this._syncCanvasBackground(documentFlavor);
 
         for (let i = 0, len = pages.length; i < len; i++) {
             const page = pages[i];
@@ -272,6 +290,26 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         if (!this._editorService.isEditor(unitId) || editor?.params.scrollBar) {
             scene.resize(width, height);
         }
+    }
+
+    private _syncCanvasBackground(documentFlavor = this._context.unit.getSnapshot().documentStyle.documentFlavor) {
+        const editor = this._editorService.getEditor(this._context.unitId);
+        const editorBackgroundColor = editor?.params.canvasStyle?.backgroundColor;
+        this._context.engine.getCanvas().getCanvasEle().style.backgroundColor = editorBackgroundColor ?? getDocsCanvasBackgroundColor(documentFlavor);
+        const docBackground = this._context.components.get(DOCS_VIEW_KEY.BACKGROUND) as DocBackground | undefined;
+        docBackground?.setFillColors?.(editorBackgroundColor, editorBackgroundColor, editorBackgroundColor, editorBackgroundColor);
+    }
+
+    private _getEditorBackgroundConfig() {
+        const editorBackgroundColor = this._editorService.getEditor(this._context.unitId)?.params.canvasStyle?.backgroundColor;
+        return editorBackgroundColor == null
+            ? {}
+            : {
+                backgroundFillColor: editorBackgroundColor,
+                pageFillColor: editorBackgroundColor,
+                pageStrokeColor: editorBackgroundColor,
+                marginStrokeColor: editorBackgroundColor,
+            };
     }
 }
 

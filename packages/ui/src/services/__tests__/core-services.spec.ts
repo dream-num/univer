@@ -17,9 +17,10 @@
 import type { IMenuButtonItem } from '../menu/menu';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { CONTEXT_MENU_SUBMENU_CLOSE_DELAY, hasRenderableContextMenuSchema } from '../../views/components/context-menu/ContextMenuPanel';
 import { MenuItemType } from '../menu/menu';
 import { MenuManagerService } from '../menu/menu-manager.service';
-import { MenuManagerPosition, RibbonPosition, RibbonStartGroup } from '../menu/types';
+import { ContextMenuGroup, ContextMenuPosition, MenuManagerPosition, RibbonPosition, RibbonStartGroup } from '../menu/types';
 import { UIPartsService } from '../parts/parts.service';
 import { DesktopRibbonService } from '../ribbon/ribbon.service';
 
@@ -103,6 +104,79 @@ describe('MenuManagerService', () => {
         service.menuChanged$.subscribe({ complete });
         service.dispose();
         expect(complete).toHaveBeenCalledTimes(1);
+    });
+
+    it('sorts menu groups by order after independent merges', () => {
+        const service = new MenuManagerService({ invoke: vi.fn((factory: any) => factory({})) } as any, { getConfig: vi.fn() } as any);
+
+        service.mergeMenu({
+            [ContextMenuPosition.PARAGRAPH]: {
+                emptyParagraph: {
+                    [ContextMenuGroup.LAYOUT]: {
+                        order: 1,
+                        layoutItem: {
+                            order: 0,
+                            menuItemFactory: () => ({
+                                id: 'layoutItem',
+                                type: MenuItemType.BUTTON,
+                            } as IMenuButtonItem),
+                        },
+                    },
+                },
+            },
+        });
+        service.mergeMenu({
+            [ContextMenuPosition.PARAGRAPH]: {
+                emptyParagraph: {
+                    [ContextMenuGroup.QUICK]: {
+                        order: -1,
+                        quickItem: {
+                            order: 0,
+                            menuItemFactory: () => ({
+                                id: 'quickItem',
+                                type: MenuItemType.BUTTON,
+                            } as IMenuButtonItem),
+                        },
+                    },
+                },
+            },
+        });
+
+        expect(service.getMenuByPositionKey('emptyParagraph').map((item) => item.key)).toEqual([
+            ContextMenuGroup.QUICK,
+            ContextMenuGroup.LAYOUT,
+        ]);
+    });
+
+    it('ignores nested context menu containers that have no direct renderable items', () => {
+        expect(hasRenderableContextMenuSchema({
+            key: 'emptyParagraph',
+            children: [{
+                key: ContextMenuGroup.QUICK,
+                children: [{
+                    key: 'h1',
+                    item: {
+                        id: 'h1',
+                        type: MenuItemType.BUTTON,
+                    } as any,
+                }],
+            }],
+        } as any)).toBe(false);
+
+        expect(hasRenderableContextMenuSchema({
+            key: ContextMenuGroup.LAYOUT,
+            children: [{
+                key: 'insertBelow',
+                item: {
+                    id: 'insertBelow',
+                    type: MenuItemType.SUBITEMS,
+                } as any,
+            }],
+        } as any)).toBe(true);
+    });
+
+    it('keeps nested context menus open long enough for pointer travel', () => {
+        expect(CONTEXT_MENU_SUBMENU_CLOSE_DELAY).toBeGreaterThanOrEqual(400);
     });
 });
 

@@ -31,7 +31,6 @@ export interface IDocumentSkeletonFontStyle {
     fontCache: string;
 }
 
-// eslint-disable-next-line max-lines-per-function
 export function getFontStyleString(
     textStyle?: IStyleBase
 ): IDocumentSkeletonFontStyle {
@@ -72,26 +71,7 @@ export function getFontStyleString(
         originFontSize = Math.ceil(textStyle.fs);
     }
 
-    let fontFamilyResult = defaultFont;
-    if (textStyle.ff) {
-        let fontFamily = textStyle.ff;
-
-        fontFamily = fontFamily.replace(/"/g, '').replace(/'/g, '');
-
-        if (fontFamily.indexOf(' ') > -1) {
-            fontFamily = `"${fontFamily}"`;
-        }
-
-      // if (fontFamily != null && document.fonts && !document.fonts.check('12px ' + fontFamily)) {
-      //     menuButton.addFontToList(fontFamily);
-      // }
-
-        if (fontFamily == null) {
-            fontFamily = defaultFont;
-        }
-
-        fontFamilyResult = fontFamily;
-    }
+    const fontFamilyResult = normalizeFontFamily(textStyle.ff, defaultFont);
 
     const { va: baselineOffset } = textStyle;
 
@@ -117,6 +97,21 @@ export function getFontStyleString(
         originFontSize,
         fontFamily: fontFamilyResult,
     };
+}
+
+function normalizeFontFamily(fontFamily: string | null | undefined | void, defaultFont: string): string {
+    if (!fontFamily?.trim()) {
+        return defaultFont;
+    }
+
+    return fontFamily
+        .split(',')
+        .map((item) => {
+            const family = item.trim().replace(/^['"]|['"]$/g, '');
+            return family.includes(' ') ? `"${family}"` : family;
+        })
+        .filter(Boolean)
+        .join(', ');
 }
 
 export function getBaselineOffsetInfo(_fontFamily: string, fontSize: number) {

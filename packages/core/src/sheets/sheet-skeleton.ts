@@ -46,6 +46,7 @@ import { ImageCacheMap } from '../shared/cache/image-cache';
 import { getIntersectRange } from '../shared/range';
 import { Skeleton } from '../skeleton';
 import { BooleanNumber, HorizontalAlign } from '../types/enum';
+import { DocumentFlavor } from '../types/interfaces';
 
 /**
  * Configuration for a single gap (visual separator between rows or columns).
@@ -1174,6 +1175,8 @@ export class SheetSkeleton extends Skeleton {
             width: Number.POSITIVE_INFINITY,
             height: Number.POSITIVE_INFINITY,
         };
+        documentData.documentStyle.documentFlavor = DocumentFlavor.UNSPECIFIED;
+        documentData.documentStyle.paragraphLineGapDefault = 0;
 
         documentData.documentStyle.renderConfig = {
             ...documentData.documentStyle.renderConfig,

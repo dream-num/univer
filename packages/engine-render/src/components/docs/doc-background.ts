@@ -26,21 +26,47 @@ import { Liquid } from './liquid';
 
 const PAGE_STROKE_COLOR = 'rgba(198, 198, 198, 1)';
 const PAGE_FILL_COLOR = 'rgba(255, 255, 255, 1)';
+const DOCS_WORKSPACE_FILL_COLOR = '#fafafa';
 const MARGIN_STROKE_COLOR = 'rgba(158, 158, 158, 1)';
 
 export class DocBackground extends DocComponent {
     private _drawLiquid: Liquid;
+    private _backgroundFillColor?: string;
+    private _pageFillColor?: string;
+    private _pageStrokeColor?: string;
+    private _marginStrokeColor?: string;
 
     constructor(oKey: string, documentSkeleton?: DocumentSkeleton, config?: IDocumentsConfig) {
         super(oKey, documentSkeleton, config);
 
         this._drawLiquid = new Liquid();
+        this._backgroundFillColor = config?.backgroundFillColor;
+        this._pageFillColor = config?.pageFillColor;
+        this._pageStrokeColor = config?.pageStrokeColor;
+        this._marginStrokeColor = config?.marginStrokeColor;
 
         this.makeDirty(true);
     }
 
     static create(oKey: string, documentSkeleton?: DocumentSkeleton, config?: IDocumentsConfig) {
         return new DocBackground(oKey, documentSkeleton, config);
+    }
+
+    setFillColors(backgroundFillColor?: string, pageFillColor?: string, pageStrokeColor?: string, marginStrokeColor?: string) {
+        if (
+            this._backgroundFillColor === backgroundFillColor &&
+            this._pageFillColor === pageFillColor &&
+            this._pageStrokeColor === pageStrokeColor &&
+            this._marginStrokeColor === marginStrokeColor
+        ) {
+            return;
+        }
+
+        this._backgroundFillColor = backgroundFillColor;
+        this._pageFillColor = pageFillColor;
+        this._pageStrokeColor = pageStrokeColor;
+        this._marginStrokeColor = marginStrokeColor;
+        this.makeDirty(true);
     }
 
     override draw(ctx: UniverRenderingContext, bounds?: IViewportInfo) {
@@ -53,7 +79,10 @@ export class DocBackground extends DocComponent {
 
         const { documentFlavor } = docDataModel.getSnapshot().documentStyle;
 
-        if (documentFlavor !== DocumentFlavor.TRADITIONAL) {
+        const workspaceFill = this._backgroundFillColor ?? (documentFlavor === DocumentFlavor.MODERN ? PAGE_FILL_COLOR : DOCS_WORKSPACE_FILL_COLOR);
+        this._drawWorkspaceBackground(ctx, workspaceFill, bounds);
+
+        if (documentFlavor === DocumentFlavor.MODERN) {
             return;
         }
 
@@ -90,8 +119,8 @@ export class DocBackground extends DocComponent {
                 width: pageWidth ?? width,
                 height: pageHeight ?? height,
                 strokeWidth: 1,
-                stroke: PAGE_STROKE_COLOR,
-                fill: PAGE_FILL_COLOR,
+                stroke: this._pageStrokeColor ?? PAGE_STROKE_COLOR,
+                fill: this._pageFillColor ?? PAGE_FILL_COLOR,
                 zIndex: 3,
             };
 
@@ -137,7 +166,7 @@ export class DocBackground extends DocComponent {
                     points: [pageWidth - marginRight, pageHeight - originMarginBottom + IDENTIFIER_WIDTH],
                 }] as unknown as IPathProps['dataArray'],
                 strokeWidth: 1.5,
-                stroke: MARGIN_STROKE_COLOR,
+                stroke: this._marginStrokeColor ?? MARGIN_STROKE_COLOR,
             };
             Path.drawWith(ctx, marginIdentification);
             ctx.restore();
@@ -152,6 +181,28 @@ export class DocBackground extends DocComponent {
             pageLeft += x;
             pageTop += y;
         }
+    }
+
+    private _drawWorkspaceBackground(ctx: UniverRenderingContext, fill: string, bounds?: IViewportInfo) {
+        const visibleBound = bounds?.cacheBound ?? bounds?.viewBound;
+        const left = visibleBound?.left ?? 0;
+        const top = visibleBound?.top ?? 0;
+        const width = visibleBound == null ? this.width : visibleBound.right - visibleBound.left;
+        const height = visibleBound == null ? this.height : visibleBound.bottom - visibleBound.top;
+
+        if (width <= 0 || height <= 0) {
+            return;
+        }
+
+        ctx.save();
+        ctx.translate(left, top);
+        Rect.drawWith(ctx, {
+            width,
+            height,
+            fill,
+            zIndex: 0,
+        });
+        ctx.restore();
     }
 
     changeSkeleton(newSkeleton: DocumentSkeleton) {

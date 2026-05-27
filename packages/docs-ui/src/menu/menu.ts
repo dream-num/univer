@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IAccessor, PresetListType } from '@univerjs/core';
+import type { DocumentDataModel, IAccessor, ITextRangeParam, Nullable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IMenuButtonItem, IMenuItem, IMenuSelectorItem } from '@univerjs/ui';
 import {
@@ -29,6 +29,7 @@ import {
     IUniverInstanceService,
     NAMED_STYLE_MAP,
     NamedStyleType,
+    PresetListType,
     ThemeService,
     Tools,
     UniverInstanceType,
@@ -40,9 +41,11 @@ import {
     SetTextSelectionsOperation,
 } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
+import { H1Icon, H2Icon, H3Icon, H4Icon, H5Icon, TextTypeIcon } from '@univerjs/icons';
 import {
     COLOR_PICKER_COMPONENT,
     COMMON_LABEL_COMPONENT,
+    ComponentManager,
     FONT_FAMILY_COMPONENT,
     FONT_FAMILY_ITEM_COMPONENT,
     FONT_SIZE_COMPONENT,
@@ -61,6 +64,7 @@ import { BulletListCommand, CheckListCommand, OrderListCommand } from '../comman
 import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignOperationCommand, AlignRightCommand } from '../commands/commands/paragraph-align.command';
 import { SetParagraphNamedStyleCommand } from '../commands/commands/set-heading.command';
 import { SwitchDocModeCommand } from '../commands/commands/switch-doc-mode.command';
+import { CreateDocTableCommand } from '../commands/commands/table/doc-table-create.command';
 import { DocCreateTableOperation } from '../commands/operations/doc-create-table.operation';
 import { DocOpenPageSettingCommand } from '../commands/operations/open-page-setting.operation';
 import { getCommandSkeleton } from '../commands/util';
@@ -216,6 +220,7 @@ function getTableDisabledObservable(accessor: IAccessor): Observable<boolean> {
 
 export function disableMenuWhenNoDocRange(accessor: IAccessor): Observable<boolean> {
     const docSelectionManagerService = accessor.get(DocSelectionManagerService);
+    const univerInstanceService = accessor.get(IUniverInstanceService);
 
     return new Observable((subscriber) => {
         const subscription = docSelectionManagerService.textSelection$.subscribe((selection) => {
@@ -231,8 +236,49 @@ export function disableMenuWhenNoDocRange(accessor: IAccessor): Observable<boole
                 return;
             }
 
+            const document = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+            const codeBlockRanges = document?.getBody()?.blockRanges?.filter((range) => range.blockType === 'code') ?? [];
+            if (codeBlockRanges.some((blockRange) => textRanges.some((range) => (
+                Math.max(range.startOffset, blockRange.startIndex) <= Math.min(range.endOffset, blockRange.endIndex)
+            )))) {
+                subscriber.next(true);
+                return;
+            }
+
             subscriber.next(false);
         });
+
+        return () => subscription.unsubscribe();
+    });
+}
+
+export function isTextRangeInAnyBlockRange(document: Nullable<DocumentDataModel>, range: ITextRangeParam): boolean {
+    const blockRanges = document?.getBody()?.blockRanges ?? [];
+    const startOffset = range.startOffset;
+    const endOffset = range.collapsed ? range.startOffset : range.endOffset - 1;
+
+    return blockRanges.some((blockRange) => (
+        Math.max(startOffset, blockRange.startIndex) <= Math.min(endOffset, blockRange.endIndex)
+    ));
+}
+
+export function hideMenuWhenSelectionInBlockRange(accessor: IAccessor): Observable<boolean> {
+    const docSelectionManagerService = accessor.get(DocSelectionManagerService);
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+
+    return new Observable((subscriber) => {
+        const calc = (selection?: { textRanges?: ITextRangeParam[]; unitId?: string }) => {
+            const currentSelection = (docSelectionManagerService as { __getCurrentSelection?: () => { unitId?: string } | null }).__getCurrentSelection?.();
+            const textRanges = selection?.textRanges ?? [...(docSelectionManagerService.getTextRanges() ?? [])];
+            const unitId = selection?.unitId ?? currentSelection?.unitId;
+            const document = unitId
+                ? univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC)
+                : univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+            subscriber.next(textRanges.some((range) => isTextRangeInAnyBlockRange(document, range)));
+        };
+
+        calc();
+        const subscription = docSelectionManagerService.textSelection$.subscribe((selection) => calc(selection));
 
         return () => subscription.unsubscribe();
     });
@@ -577,7 +623,7 @@ export function HeadingSelectorMenuItemFactory(accessor: IAccessor): IMenuSelect
     return {
         id: SetParagraphNamedStyleCommand.id,
         type: MenuItemType.SELECTOR,
-        tooltip: 'docs-ui.toolbar.heading.tooltip',
+        tooltip: 'ui.toolbar.heading.tooltip',
         label: {
             name: COMMON_LABEL_COMPONENT,
             props: {
@@ -617,6 +663,133 @@ export function HeadingSelectorMenuItemFactory(accessor: IAccessor): IMenuSelect
 
             calc();
 
+            return disposable.dispose;
+        }),
+        disabled$: disableMenuWhenNoDocRange(accessor),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+    };
+}
+
+export const FLOAT_TEXT_STYLE_MENU_ID = 'doc.menu.float-text-style';
+export const FLOAT_TOOLBAR_MENU_POSITION = 'doc.menu.float-toolbar';
+
+const FLOAT_TEXT_STYLE_OPTIONS = [
+    {
+        icon: 'TextTypeIcon',
+        label: 'ui.toolbar.heading.normal',
+        value: NamedStyleType.NORMAL_TEXT,
+    },
+    {
+        icon: 'H1Icon',
+        label: 'ui.toolbar.heading.1',
+        value: NamedStyleType.HEADING_1,
+    },
+    {
+        icon: 'H2Icon',
+        label: 'ui.toolbar.heading.2',
+        value: NamedStyleType.HEADING_2,
+    },
+    {
+        icon: 'H3Icon',
+        label: 'ui.toolbar.heading.3',
+        value: NamedStyleType.HEADING_3,
+    },
+    {
+        icon: 'H4Icon',
+        label: 'ui.toolbar.heading.4',
+        value: NamedStyleType.HEADING_4,
+    },
+    {
+        icon: 'H5Icon',
+        label: 'ui.toolbar.heading.5',
+        value: NamedStyleType.HEADING_5,
+    },
+    {
+        id: OrderListCommand.id,
+        icon: 'OrderIcon',
+        label: 'docs-ui.toolbar.order',
+        value: PresetListType.ORDER_LIST,
+    },
+    {
+        id: BulletListCommand.id,
+        icon: 'UnorderIcon',
+        label: 'docs-ui.toolbar.unorder',
+        value: PresetListType.BULLET_LIST,
+    },
+    {
+        id: CheckListCommand.id,
+        icon: 'TodoListDoubleIcon',
+        label: 'docs-ui.toolbar.checklist',
+        value: PresetListType.CHECK_LIST,
+    },
+];
+
+function registerFloatingTextStyleIcons(componentManager: ComponentManager): void {
+    ([
+        ['TextTypeIcon', TextTypeIcon],
+        ['H1Icon', H1Icon],
+        ['H2Icon', H2Icon],
+        ['H3Icon', H3Icon],
+        ['H4Icon', H4Icon],
+        ['H5Icon', H5Icon],
+    ] as const).forEach(([key, component]) => {
+        if (!componentManager.get(key)) {
+            componentManager.register(key, component);
+        }
+    });
+}
+
+function normalizeFloatingTextStyleValue(paragraph: ReturnType<typeof getParagraphStyleAtCursor>): string | number {
+    const listType = paragraph?.bullet?.listType;
+
+    if (listType?.startsWith(PresetListType.ORDER_LIST)) {
+        return PresetListType.ORDER_LIST;
+    }
+
+    if (listType?.startsWith(PresetListType.BULLET_LIST)) {
+        return PresetListType.BULLET_LIST;
+    }
+
+    if (listType === PresetListType.CHECK_LIST || listType === PresetListType.CHECK_LIST_CHECKED) {
+        return PresetListType.CHECK_LIST;
+    }
+
+    return paragraph?.paragraphStyle?.namedStyleType ?? NamedStyleType.NORMAL_TEXT;
+}
+
+export function FloatTextStyleMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string | number> {
+    const commandService = accessor.get(ICommandService);
+    const componentManager = accessor.get(ComponentManager);
+
+    registerFloatingTextStyleIcons(componentManager);
+
+    return {
+        id: FLOAT_TEXT_STYLE_MENU_ID,
+        commandId: SetParagraphNamedStyleCommand.id,
+        type: MenuItemType.SELECTOR,
+        icon: 'TextTypeIcon',
+        tooltip: 'ui.toolbar.heading.tooltip',
+        selections: FLOAT_TEXT_STYLE_OPTIONS,
+        value$: new Observable((subscriber) => {
+            const calc = () => {
+                subscriber.next(normalizeFloatingTextStyleValue(getParagraphStyleAtCursor(accessor)));
+            };
+
+            const disposable = commandService.onCommandExecuted((c) => {
+                const id = c.id;
+
+                if (
+                    id === SetTextSelectionsOperation.id ||
+                    id === SetParagraphNamedStyleCommand.id ||
+                    id === OrderListCommand.id ||
+                    id === BulletListCommand.id ||
+                    id === CheckListCommand.id
+                ) {
+                    calc();
+                }
+            });
+
+            calc();
             return disposable.dispose;
         }),
         disabled$: disableMenuWhenNoDocRange(accessor),
@@ -719,6 +892,22 @@ export function InsertTableMenuFactory(_accessor: IAccessor): IMenuButtonItem {
         id: DocCreateTableOperation.id,
         title: 'docs-ui.toolbar.table.insert',
         type: MenuItemType.BUTTON,
+        icon: TableIcon,
+        hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_DOC),
+    };
+}
+
+export function InsertDefaultTableMenuFactory(_accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: DocCreateTableOperation.id,
+        commandId: CreateDocTableCommand.id,
+        params: {
+            rowCount: 3,
+            colCount: 5,
+        },
+        title: 'docs-ui.toolbar.table.insert',
+        type: MenuItemType.BUTTON,
+        icon: TableIcon,
         hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
@@ -854,6 +1043,64 @@ export function AlignJustifyMenuItemFactory(accessor: IAccessor): IMenuButtonIte
 
             return disposable.dispose;
         }),
+        disabled$: disableMenuWhenNoDocRange(accessor),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC, undefined, DOCS_ZEN_EDITOR_UNIT_ID_KEY),
+    };
+}
+
+const HORIZONTAL_ALIGN_OPTIONS = [
+    {
+        id: AlignLeftCommand.id,
+        value: HorizontalAlign.LEFT,
+        label: 'docs-ui.toolbar.alignLeft',
+        icon: 'LeftJustifyingIcon',
+    },
+    {
+        id: AlignCenterCommand.id,
+        value: HorizontalAlign.CENTER,
+        label: 'docs-ui.toolbar.alignCenter',
+        icon: 'HorizontallyIcon',
+    },
+    {
+        id: AlignRightCommand.id,
+        value: HorizontalAlign.RIGHT,
+        label: 'docs-ui.toolbar.alignRight',
+        icon: 'RightJustifyingIcon',
+    },
+    {
+        id: AlignJustifyCommand.id,
+        value: HorizontalAlign.JUSTIFIED,
+        label: 'docs-ui.toolbar.alignJustify',
+        icon: 'AlignTextBothIcon',
+    },
+];
+
+export function AlignMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<HorizontalAlign, HorizontalAlign> {
+    const commandService = accessor.get(ICommandService);
+
+    const value$ = new Observable<HorizontalAlign>((subscriber) => {
+        const calc = () => {
+            const paragraph = getParagraphStyleAtCursor(accessor);
+
+            subscriber.next(paragraph?.paragraphStyle?.horizontalAlign ?? HorizontalAlign.LEFT);
+        };
+        const disposable = commandService.onCommandExecuted((c) => {
+            if (c.id === SetTextSelectionsOperation.id || c.id === AlignOperationCommand.id) {
+                calc();
+            }
+        });
+
+        calc();
+        return disposable.dispose;
+    });
+
+    return {
+        id: AlignOperationCommand.id,
+        type: MenuItemType.SELECTOR,
+        icon: value$.pipe(map((alignType) => HORIZONTAL_ALIGN_OPTIONS.find((option) => option.value === alignType)?.icon ?? 'LeftJustifyingIcon')),
+        tooltip: 'docs-ui.toolbar.alignLeft',
+        selections: HORIZONTAL_ALIGN_OPTIONS,
+        value$,
         disabled$: disableMenuWhenNoDocRange(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC, undefined, DOCS_ZEN_EDITOR_UNIT_ID_KEY),
     };

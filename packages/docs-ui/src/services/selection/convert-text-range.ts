@@ -28,7 +28,7 @@ import type {
     INodePosition,
     IPoint,
 } from '@univerjs/engine-render';
-import { DocumentSkeletonPageType, getPageFromPath, GlyphType, Liquid } from '@univerjs/engine-render';
+import { DocumentSkeletonPageType, getDocsTableRenderViewport, getPageFromPath, getTableIdAndSliceIndex, GlyphType, Liquid } from '@univerjs/engine-render';
 
 export enum NodePositionStateType {
     NORMAL,
@@ -212,6 +212,7 @@ export function pushToPoints(position: IPosition) {
 
 export class NodePositionConvertToCursor {
     private _liquid = new Liquid();
+    private _horizontalClip: Nullable<{ left: number; right: number }> = null;
 
     private _currentStartState: ICurrentNodePositionState = {
         page: NodePositionStateType.NORMAL,
@@ -265,7 +266,7 @@ export class NodePositionConvertToCursor {
 
         // eslint-disable-next-line complexity
         this._selectionIterator(start, end, (start_sp, end_sp, isFirst, isLast, divide, line) => {
-            const { lineHeight, asc, paddingTop, marginTop, marginBottom } = line;
+            const { lineHeight, asc, paddingTop, paddingBottom, contentHeight, marginTop, marginBottom } = line;
             const { glyphGroup, st } = divide;
             if (glyphGroup.length === 0) {
                 // The divide is empty, and no need to set selection.
@@ -297,13 +298,17 @@ export class NodePositionConvertToCursor {
 
             const collapsed = start === end;
             const anchorGlyph = isStartBack ? (preGlyph ?? firstGlyph) : firstGlyph;
+            const borderBoxStartY = startY;
+            const borderBoxEndY = contentHeight == null
+                ? startY + lineHeight - marginTop - marginBottom
+                : startY + paddingTop + contentHeight + paddingBottom;
 
             if (start_sp === 0 && end_sp === glyphGroup.length - 1) {
                 borderBoxPosition = {
                     startX: startX + firstGlyphLeft + (isCurrentList ? firstGlyphWidth : 0),
-                    startY,
+                    startY: borderBoxStartY,
                     endX: startX + lastGlyphLeft + (isEndBack ? 0 : lastGlyphWidth),
-                    endY: startY + lineHeight - marginTop - marginBottom,
+                    endY: borderBoxEndY,
                 };
 
                 contentBoxPosition = {
@@ -317,9 +322,9 @@ export class NodePositionConvertToCursor {
 
                 borderBoxPosition = {
                     startX: startX + firstGlyphLeft + (isStartBackFin ? 0 : firstGlyphWidth),
-                    startY,
+                    startY: borderBoxStartY,
                     endX: startX + lastGlyphLeft + (isEndBack ? 0 : lastGlyphWidth),
-                    endY: startY + lineHeight - marginTop - marginBottom,
+                    endY: borderBoxEndY,
                 };
 
                 contentBoxPosition = {
@@ -330,8 +335,15 @@ export class NodePositionConvertToCursor {
                 };
             }
 
-            borderBoxPointGroup.push(pushToPoints(borderBoxPosition));
-            contentBoxPointGroup.push(pushToPoints(contentBoxPosition));
+            const clippedBorderBoxPosition = clipPositionToHorizontalRange(borderBoxPosition, this._horizontalClip);
+            const clippedContentBoxPosition = clipPositionToHorizontalRange(contentBoxPosition, this._horizontalClip);
+
+            if (clippedBorderBoxPosition) {
+                borderBoxPointGroup.push(pushToPoints(clippedBorderBoxPosition));
+            }
+            if (clippedContentBoxPosition) {
+                contentBoxPointGroup.push(pushToPoints(clippedContentBoxPosition));
+            }
 
             cursorList.push({
                 startOffset: isStartBack ? startOffset : startOffset + firstGlyph.count,
@@ -549,6 +561,8 @@ export class NodePositionConvertToCursor {
                 pageType === DocumentSkeletonPageType.BODY || pageType === DocumentSkeletonPageType.CELL ? p : 0
             );
             this._liquid.translateSave();
+            const previousHorizontalClip = this._horizontalClip;
+            this._horizontalClip = null;
 
             switch (pageType) {
                 case DocumentSkeletonPageType.HEADER:
@@ -569,8 +583,20 @@ export class NodePositionConvertToCursor {
                     const { left: cellLeft } = segmentPage;
                     const { top: tableTop, left: tableLeft } = tableSke;
                     const { top: rowTop } = rowSke;
+                    const sourceTableId = getTableIdAndSliceIndex(tableSke.tableId).tableId;
+                    const viewport = getDocsTableRenderViewport(getDocumentUnitId(skeleton), sourceTableId);
+                    const hasHorizontalViewport = viewport && viewport.contentWidth > viewport.viewportWidth;
+                    const scrollLeft = hasHorizontalViewport ? viewport.scrollLeft : 0;
 
-                    this._liquid.translate(tableLeft + cellLeft, tableTop + rowTop);
+                    if (hasHorizontalViewport) {
+                        const visibleLeft = this._liquid.x + tableLeft;
+                        this._horizontalClip = {
+                            left: visibleLeft,
+                            right: visibleLeft + viewport.viewportWidth,
+                        };
+                    }
+
+                    this._liquid.translate(tableLeft + cellLeft - scrollLeft, tableTop + rowTop);
                     this._liquid.translatePagePadding(segmentPage);
                     break;
                 }
@@ -655,8 +681,43 @@ export class NodePositionConvertToCursor {
                 }
             }
             this._liquid.translateRestore();
+            this._horizontalClip = previousHorizontalClip;
 
             this._liquid.translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
         }
     }
+}
+
+function clipPositionToHorizontalRange(position: IPosition, clip: Nullable<{ left: number; right: number }>): Nullable<IPosition> {
+    if (!clip) {
+        return position;
+    }
+
+    const startX = Math.max(position.startX, clip.left);
+    const endX = Math.min(position.endX, clip.right);
+    const collapsed = position.startX === position.endX;
+
+    if (collapsed) {
+        return position.startX >= clip.left && position.startX <= clip.right ? position : null;
+    }
+
+    if (endX <= startX) {
+        return null;
+    }
+
+    return {
+        ...position,
+        startX,
+        endX,
+    };
+}
+
+function getDocumentUnitId(docSkeleton: DocumentSkeleton): string {
+    const viewModel = docSkeleton.getViewModel() as {
+        getDataModel?: () => {
+            getUnitId?: () => string;
+        };
+    };
+
+    return viewModel.getDataModel?.().getUnitId?.() ?? '';
 }

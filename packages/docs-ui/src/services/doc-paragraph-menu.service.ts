@@ -14,27 +14,110 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, INeedCheckDisposable, IParagraphRange, Nullable } from '@univerjs/core';
-import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import type { IMutiPageParagraphBound } from './doc-event-manager.service';
-import { Disposable, Inject, isInternalEditorID } from '@univerjs/core';
+import type { DocumentDataModel, ICustomBlock, ICustomTable, IDocumentBlockRange, INeedCheckDisposable, Nullable } from '@univerjs/core';
+import type { IBoundRectNoAngle, IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import type { IMutiPageParagraphBound, ITableBound } from './doc-event-manager.service';
+import { BlockType, DataStreamTreeTokenType, Disposable, Inject, isInternalEditorID, PresetListType } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import { DocumentEditArea } from '@univerjs/engine-render';
-import { combineLatest, first, throttleTime } from 'rxjs';
+import { BehaviorSubject, combineLatest, first, throttleTime } from 'rxjs';
 import { VIEWPORT_KEY } from '../basics/docs-view-key';
 import { DocEventManagerService } from './doc-event-manager.service';
-import { DocCanvasPopManagerService } from './doc-popup-manager.service';
+import { DocCanvasPopManagerService, transformBound2OffsetBound, transformOffset2Bound } from './doc-popup-manager.service';
 import { DocFloatMenuService } from './float-menu.service';
+
+export type DocBlockMenuTargetKind = 'paragraph' | 'blockRange' | 'table' | 'customBlock';
+
+export interface IDocBlockMenuTarget {
+    kind: DocBlockMenuTargetKind;
+    key: string;
+    paragraph?: IMutiPageParagraphBound;
+    blockRange?: IDocumentBlockRange;
+    table?: ICustomTable;
+    customBlock?: ICustomBlock;
+    icon?: string;
+    cellRange?: {
+        startOffset: number;
+        endOffset: number;
+    };
+    menuRange: {
+        startOffset: number;
+        endOffset: number;
+        collapsed: boolean;
+    };
+    moveRange: {
+        startOffset: number;
+        endOffset: number;
+    };
+    emptyMode: boolean;
+    draggable: boolean;
+}
+
+export interface IDocBlockDropTarget {
+    targetOffset: number;
+    rect: {
+        left: number;
+        right: number;
+        top: number;
+        bottom: number;
+    };
+}
+
+const BLOCK_RANGE_ICON_MAP: Record<string, string> = {
+    code: 'DocsCodeBlockIcon',
+    quote: 'DocsQuoteBlockIcon',
+    callout: 'DocsCalloutBlockIcon',
+};
+
+const LIST_ICON_MAP: Partial<Record<PresetListType, string>> = {
+    [PresetListType.ORDER_LIST]: 'OrderIcon',
+    [PresetListType.ORDER_LIST_1]: 'OrderIcon',
+    [PresetListType.ORDER_LIST_2]: 'OrderIcon',
+    [PresetListType.ORDER_LIST_3]: 'OrderIcon',
+    [PresetListType.ORDER_LIST_4]: 'OrderIcon',
+    [PresetListType.ORDER_LIST_5]: 'OrderIcon',
+    [PresetListType.ORDER_LIST_QUICK_2]: 'OrderIcon',
+    [PresetListType.ORDER_LIST_QUICK_3]: 'OrderIcon',
+    [PresetListType.ORDER_LIST_QUICK_4]: 'OrderIcon',
+    [PresetListType.ORDER_LIST_QUICK_5]: 'OrderIcon',
+    [PresetListType.ORDER_LIST_QUICK_6]: 'OrderIcon',
+    [PresetListType.BULLET_LIST]: 'UnorderIcon',
+    [PresetListType.BULLET_LIST_1]: 'UnorderIcon',
+    [PresetListType.BULLET_LIST_2]: 'UnorderIcon',
+    [PresetListType.BULLET_LIST_3]: 'UnorderIcon',
+    [PresetListType.BULLET_LIST_4]: 'UnorderIcon',
+    [PresetListType.BULLET_LIST_5]: 'UnorderIcon',
+    [PresetListType.CHECK_LIST]: 'TodoListDoubleIcon',
+    [PresetListType.CHECK_LIST_CHECKED]: 'TodoListDoubleIcon',
+};
 
 export class DocParagraphMenuService extends Disposable implements IRenderModule {
     private _paragrahMenu: {
-        paragraph: IParagraphRange;
+        paragraph: IMutiPageParagraphBound;
+        target: IDocBlockMenuTarget;
+        blockRange?: IDocumentBlockRange;
         disposable: INeedCheckDisposable;
         active: boolean;
     } | null = null;
 
+    private readonly _activeTarget$ = new BehaviorSubject<IDocBlockMenuTarget | null>(null);
+    readonly activeTarget$ = this._activeTarget$.asObservable();
+    private _isBlockMenuDragging = false;
+
     get activeParagraph() {
         return this._paragrahMenu?.paragraph;
+    }
+
+    get activeTarget() {
+        return this._paragrahMenu?.target ?? null;
+    }
+
+    setBlockMenuDragging(isDragging: boolean) {
+        this._isBlockMenuDragging = isDragging;
+    }
+
+    get isBlockMenuDragging() {
+        return this._isBlockMenuDragging;
     }
 
     constructor(
@@ -88,7 +171,11 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
     }
 
     private _init() {
-        const handleHoverParagraph = (paragraph: Nullable<IMutiPageParagraphBound>) => {
+        const handleHoverTarget = (paragraph: Nullable<IMutiPageParagraphBound>, tableBound: Nullable<ITableBound>) => {
+            if (this._isBlockMenuDragging) {
+                return;
+            }
+
             const viewModel = this._docSkeletonManagerService.getViewModel();
             if (
                 viewModel.getEditArea() === DocumentEditArea.BODY &&
@@ -103,17 +190,26 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
                     this.showParagraphMenu(paragraph);
                     return;
                 }
+
+                if (tableBound) {
+                    this.showTableMenu(tableBound);
+                    return;
+                }
             }
 
             this.hideParagraphMenu(true);
         };
 
         this.disposeWithMe(
-            combineLatest([this._docEventManagerService.hoverParagraphRealTime$, this._docEventManagerService.hoverParagraphLeft$])
+            combineLatest([
+                this._docEventManagerService.hoverParagraphRealTime$,
+                this._docEventManagerService.hoverParagraphLeft$,
+                this._docEventManagerService.hoverTableRealTime$ ?? new BehaviorSubject<Nullable<ITableBound>>(null),
+            ])
                 .pipe(throttleTime(16))
-                .subscribe(([p, left]) => {
+                .subscribe(([p, left, table]) => {
                     const paragraph = p ?? left;
-                    handleHoverParagraph(paragraph);
+                    handleHoverTarget(paragraph, table);
                 })
         );
 
@@ -124,32 +220,44 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
             }
 
             lastScrollY = e.scrollY;
+            if (this._paragrahMenu?.blockRange) {
+                return;
+            }
+            if (this._isBlockMenuDragging) {
+                return;
+            }
             this.hideParagraphMenu(true);
         }));
 
         this.disposeWithMe(this._docEventManagerService.clickCustomRanges$.subscribe(() => {
+            if (this._isBlockMenuDragging) {
+                return;
+            }
             this.hideParagraphMenu(true);
         }));
     }
 
     showParagraphMenu(paragraph: IMutiPageParagraphBound) {
-        if (this._paragrahMenu?.paragraph.startIndex === paragraph.startIndex) {
+        const target = this._buildParagraphMenuTarget(paragraph);
+        if (!target) {
+            this.hideParagraphMenu(true);
+            return;
+        }
+
+        if (this._paragrahMenu?.target.key === target.key) {
             return;
         }
 
         this.hideParagraphMenu(true);
-        const dataStream = this._context.unit.getBody()?.dataStream ?? '';
-        const paragraphDataStream = paragraph ? dataStream.slice(paragraph.paragraphStart, paragraph.paragraphEnd) : '';
-        const isOnlyImage = paragraphDataStream === '\b';
-        const isEmptyParagraph = paragraphDataStream === '';
-        const shouldHidden = isOnlyImage || isEmptyParagraph;
+        const targetParagraph = target.paragraph ?? paragraph;
+        const blockRange = target.blockRange;
 
-        if (shouldHidden) {
-            return;
-        }
+        const getFirstLine = () => blockRange
+            ? getBlockRangeAnchorRect(this._docEventManagerService, blockRange, paragraph)
+            : this._docEventManagerService.findParagraphBoundByIndex(paragraph.startIndex)?.firstLine ?? paragraph.firstLine;
 
         const disposable = this._docPopupManagerService.attachPopupToRect(
-            paragraph.firstLine,
+            getFirstLine,
             {
                 componentKey: 'doc.paragraph.menu',
                 direction: 'left-center',
@@ -166,16 +274,449 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
         );
 
         this._paragrahMenu = {
-            paragraph,
+            paragraph: targetParagraph,
+            target,
+            blockRange,
             disposable,
             active: false,
+        };
+        this._activeTarget$.next(target);
+    }
+
+    showTableMenu(tableBound: ITableBound) {
+        const body = this._context.unit.getBody();
+        const table = body?.tables?.find((item) => item.tableId === tableBound.tableId);
+        if (!table) {
+            return;
+        }
+
+        const target: IDocBlockMenuTarget = {
+            kind: 'table',
+            key: `table:${table.tableId}`,
+            table,
+            icon: 'GridIcon',
+            menuRange: {
+                startOffset: table.startIndex,
+                endOffset: table.endIndex,
+                collapsed: false,
+            },
+            moveRange: {
+                startOffset: table.startIndex,
+                endOffset: table.endIndex,
+            },
+            emptyMode: false,
+            draggable: true,
+        };
+
+        if (this._paragrahMenu?.target.key === target.key) {
+            return;
+        }
+
+        const anchorRect = getTableAnchorRect(tableBound);
+        const paragraph: IMutiPageParagraphBound = {
+            rect: tableBound.rect,
+            rects: [tableBound.rect],
+            paragraphStart: table.startIndex,
+            paragraphEnd: table.endIndex,
+            startIndex: table.startIndex,
+            pageIndex: tableBound.pageIndex,
+            firstLine: anchorRect,
+        };
+
+        this.hideParagraphMenu(true);
+        const getFirstLine = () => getTableAnchorRect(this._docEventManagerService.tableBounds.get(table.tableId) ?? tableBound);
+        const disposable = this._docPopupManagerService.attachPopupToRect(
+            getFirstLine,
+            {
+                componentKey: 'doc.paragraph.menu',
+                direction: 'top-right',
+                onClickOutside: () => {
+                    this.hideParagraphMenu(true);
+                },
+                zIndex: 101,
+            },
+            this._context.unitId
+        );
+
+        this._paragrahMenu = {
+            paragraph,
+            target,
+            disposable,
+            active: false,
+        };
+        this._activeTarget$.next(target);
+    }
+
+    getDropTargetFromClientPoint(clientX: number, clientY: number, sourceRange: { startOffset: number; endOffset: number }): IDocBlockDropTarget | null {
+        const canvasRect = this._context.engine.getCanvasElement().getBoundingClientRect();
+        const point = transformOffset2Bound(clientX - canvasRect.left, clientY - canvasRect.top, this._context.scene);
+        const body = this._context.unit.getBody();
+        const sourceCellRange = body?.dataStream ? getContainingTableCellRange(body.dataStream, sourceRange.startOffset) : null;
+        const blocks = (sourceCellRange ? this._getCellBlockTargets(sourceCellRange) : this._getBodyBlockTargets())
+            .filter((block) => block.moveRange.startOffset !== sourceRange.startOffset || block.moveRange.endOffset !== sourceRange.endOffset)
+            .filter((block) => block.moveRange.endOffset <= sourceRange.startOffset || block.moveRange.startOffset >= sourceRange.endOffset)
+            .sort((left, right) => left.rect.top - right.rect.top || left.rect.left - right.rect.left);
+
+        if (!blocks.length) {
+            return null;
+        }
+
+        let nearest = blocks[0];
+        let nearestDistance = Number.POSITIVE_INFINITY;
+        for (const block of blocks) {
+            const middle = (block.rect.top + block.rect.bottom) / 2;
+            const distance = Math.abs(point.y - middle);
+            if (distance < nearestDistance) {
+                nearestDistance = distance;
+                nearest = block;
+            }
+        }
+
+        const before = point.y < (nearest.rect.top + nearest.rect.bottom) / 2;
+        const targetOffset = before ? nearest.moveRange.startOffset : nearest.moveRange.endOffset;
+        const docRect: IBoundRectNoAngle = {
+            left: nearest.rect.left,
+            right: nearest.rect.right,
+            top: before ? nearest.rect.top : nearest.rect.bottom,
+            bottom: before ? nearest.rect.top : nearest.rect.bottom,
+        };
+        const screenRect = transformBound2OffsetBound(docRect, this._context.scene);
+
+        return {
+            targetOffset,
+            rect: {
+                left: canvasRect.left + screenRect.left,
+                right: canvasRect.left + screenRect.right,
+                top: canvasRect.top + screenRect.top,
+                bottom: canvasRect.top + screenRect.bottom,
+            },
         };
     }
 
     hideParagraphMenu(force = false) {
+        if (this._isBlockMenuDragging) {
+            return;
+        }
+
         if (this._paragrahMenu && ((this._paragrahMenu.disposable.canDispose() || force))) {
             this._paragrahMenu.disposable.dispose();
             this._paragrahMenu = null;
+            this._activeTarget$.next(null);
         }
     }
+
+    private _buildParagraphMenuTarget(paragraph: IMutiPageParagraphBound): IDocBlockMenuTarget | null {
+        const body = this._context.unit.getBody();
+        const dataStream = body?.dataStream ?? '';
+        const cellRange = getContainingTableCellRange(dataStream, paragraph.paragraphStart);
+        const inTable = cellRange != null || isParagraphInTable(this._context.unit, paragraph.paragraphStart);
+        const blockRange = getParagraphBlockRange(this._context.unit, paragraph);
+        if (blockRange) {
+            const targetParagraph = {
+                ...paragraph,
+                paragraphStart: blockRange.startIndex,
+                paragraphEnd: blockRange.endIndex + 1,
+                startIndex: blockRange.startIndex,
+                blockRange,
+            } as IMutiPageParagraphBound;
+            return {
+                kind: 'blockRange',
+                key: `blockRange:${blockRange.blockId}`,
+                paragraph: targetParagraph,
+                blockRange,
+                icon: BLOCK_RANGE_ICON_MAP[blockRange.blockType],
+                cellRange: cellRange ?? undefined,
+                menuRange: {
+                    startOffset: blockRange.startIndex,
+                    endOffset: blockRange.endIndex + 1,
+                    collapsed: false,
+                },
+                moveRange: {
+                    startOffset: blockRange.startIndex,
+                    endOffset: blockRange.endIndex + 1,
+                },
+                emptyMode: false,
+                draggable: cellRange != null || !inTable,
+            };
+        }
+
+        const paragraphDataStream = dataStream.slice(paragraph.paragraphStart, paragraph.paragraphEnd);
+        const paragraphModel = body?.paragraphs?.find((item) => item.startIndex === paragraph.startIndex);
+        const listIcon = getListIcon(paragraphModel?.bullet?.listType);
+        const customBlock = body?.customBlocks?.find((item) => item.startIndex >= paragraph.paragraphStart && item.startIndex <= paragraph.paragraphEnd);
+        const isCustomBlockOnly = customBlock?.blockType === BlockType.CUSTOM && paragraphDataStream.replace(/[\b\r\n]/g, '') === '';
+        if (customBlock && customBlock.blockType === BlockType.CUSTOM && isCustomBlockOnly) {
+            return {
+                kind: 'customBlock',
+                key: `customBlock:${customBlock.blockId}`,
+                paragraph,
+                customBlock,
+                icon: 'TextTypeIcon',
+                cellRange: cellRange ?? undefined,
+                menuRange: {
+                    startOffset: customBlock.startIndex,
+                    endOffset: customBlock.startIndex,
+                    collapsed: true,
+                },
+                moveRange: getParagraphMoveRange(this._context.unit, paragraph, cellRange),
+                emptyMode: false,
+                draggable: cellRange != null || !inTable,
+            };
+        }
+
+        if (paragraphDataStream === '\b') {
+            return null;
+        }
+
+        return {
+            kind: 'paragraph',
+            key: `paragraph:${paragraph.startIndex}`,
+            paragraph,
+            icon: listIcon,
+            cellRange: cellRange ?? undefined,
+            menuRange: {
+                startOffset: paragraph.paragraphStart,
+                endOffset: paragraph.paragraphStart,
+                collapsed: true,
+            },
+            moveRange: getParagraphMoveRange(this._context.unit, paragraph, cellRange),
+            emptyMode: paragraphDataStream.replace(/[\r\n]/g, '') === '',
+            draggable: cellRange != null || !inTable,
+        };
+    }
+
+    private _getBodyBlockTargets(): Array<IDocBlockMenuTarget & { rect: IBoundRectNoAngle }> {
+        const body = this._context.unit.getBody();
+        if (!body) {
+            return [];
+        }
+
+        const tableRanges = body.tables ?? [];
+        const blockRanges = body.blockRanges ?? [];
+        const paragraphBounds = [...this._docEventManagerService.paragraphBounds.values()];
+        const targets: Array<IDocBlockMenuTarget & { rect: IBoundRectNoAngle }> = [];
+
+        for (const table of tableRanges) {
+            const tableBound = this._docEventManagerService.tableBounds.get(table.tableId);
+            if (!tableBound) {
+                continue;
+            }
+
+            targets.push({
+                kind: 'table',
+                key: `table:${table.tableId}`,
+                table,
+                icon: 'GridIcon',
+                menuRange: { startOffset: table.startIndex, endOffset: table.endIndex, collapsed: false },
+                moveRange: { startOffset: table.startIndex, endOffset: table.endIndex },
+                emptyMode: false,
+                draggable: true,
+                rect: tableBound.rect,
+            });
+        }
+
+        for (const blockRange of blockRanges) {
+            const bounds = paragraphBounds.filter((bound) => Math.max(bound.paragraphStart, blockRange.startIndex) <= Math.min(bound.paragraphEnd, blockRange.endIndex));
+            const rect = unionRects(bounds.map((bound) => bound.rect));
+            if (!rect) {
+                continue;
+            }
+
+            targets.push({
+                kind: 'blockRange',
+                key: `blockRange:${blockRange.blockId}`,
+                blockRange,
+                icon: BLOCK_RANGE_ICON_MAP[blockRange.blockType],
+                menuRange: { startOffset: blockRange.startIndex, endOffset: blockRange.endIndex + 1, collapsed: false },
+                moveRange: { startOffset: blockRange.startIndex, endOffset: blockRange.endIndex + 1 },
+                emptyMode: false,
+                draggable: true,
+                rect,
+            });
+        }
+
+        for (const paragraph of paragraphBounds) {
+            if (tableRanges.some((table) => paragraph.paragraphStart > table.startIndex && paragraph.paragraphStart < table.endIndex)) {
+                continue;
+            }
+
+            if (blockRanges.some((range) => Math.max(paragraph.paragraphStart, range.startIndex) <= Math.min(paragraph.paragraphEnd, range.endIndex))) {
+                continue;
+            }
+
+            const target = this._buildParagraphMenuTarget(paragraph);
+            if (!target) {
+                continue;
+            }
+
+            targets.push({
+                ...target,
+                rect: paragraph.rect,
+            });
+        }
+
+        return targets;
+    }
+
+    private _getCellBlockTargets(cellRange: { startOffset: number; endOffset: number }): Array<IDocBlockMenuTarget & { rect: IBoundRectNoAngle }> {
+        const body = this._context.unit.getBody();
+        if (!body) {
+            return [];
+        }
+
+        const blockRanges = body.blockRanges ?? [];
+        const paragraphBounds = [...this._docEventManagerService.paragraphBounds.values()]
+            .filter((paragraph) => paragraph.paragraphStart > cellRange.startOffset && paragraph.paragraphStart < cellRange.endOffset);
+        const targets: Array<IDocBlockMenuTarget & { rect: IBoundRectNoAngle }> = [];
+
+        for (const blockRange of blockRanges) {
+            if (blockRange.startIndex <= cellRange.startOffset || blockRange.endIndex >= cellRange.endOffset) {
+                continue;
+            }
+
+            const bounds = paragraphBounds.filter((bound) => Math.max(bound.paragraphStart, blockRange.startIndex) <= Math.min(bound.paragraphEnd, blockRange.endIndex));
+            const rect = unionRects(bounds.map((bound) => bound.rect));
+            if (!rect) {
+                continue;
+            }
+
+            targets.push({
+                kind: 'blockRange',
+                key: `blockRange:${blockRange.blockId}`,
+                blockRange,
+                icon: BLOCK_RANGE_ICON_MAP[blockRange.blockType],
+                cellRange,
+                menuRange: { startOffset: blockRange.startIndex, endOffset: blockRange.endIndex + 1, collapsed: false },
+                moveRange: { startOffset: blockRange.startIndex, endOffset: blockRange.endIndex + 1 },
+                emptyMode: false,
+                draggable: true,
+                rect,
+            });
+        }
+
+        for (const paragraph of paragraphBounds) {
+            if (blockRanges.some((range) => Math.max(paragraph.paragraphStart, range.startIndex) <= Math.min(paragraph.paragraphEnd, range.endIndex))) {
+                continue;
+            }
+
+            const target = this._buildParagraphMenuTarget(paragraph);
+            if (!target) {
+                continue;
+            }
+
+            targets.push({
+                ...target,
+                rect: paragraph.rect,
+            });
+        }
+
+        return targets;
+    }
+}
+
+function isParagraphInTable(documentDataModel: DocumentDataModel, paragraphStart: number): boolean {
+    const tables = documentDataModel.getBody()?.tables ?? [];
+
+    return tables.some((table) => paragraphStart > table.startIndex && paragraphStart < table.endIndex);
+}
+
+function getParagraphMoveRange(documentDataModel: DocumentDataModel, paragraph: IMutiPageParagraphBound, cellRange?: { startOffset: number; endOffset: number } | null) {
+    const paragraphs = [...(documentDataModel.getBody()?.paragraphs ?? [])].sort((left, right) => left.startIndex - right.startIndex);
+    const index = paragraphs.findIndex((item) => item.startIndex === paragraph.startIndex);
+    const previousParagraph = index > 0
+        ? paragraphs.slice(0, index).reverse().find((item) => {
+            if (!cellRange) {
+                return true;
+            }
+
+            return item.startIndex > cellRange.startOffset && item.startIndex < cellRange.endOffset;
+        })
+        : null;
+
+    return {
+        startOffset: previousParagraph ? previousParagraph.startIndex + 1 : (cellRange ? cellRange.startOffset + 1 : 0),
+        endOffset: paragraph.startIndex + 1,
+    };
+}
+
+function getListIcon(listType?: PresetListType | string): string | undefined {
+    if (!listType) {
+        return undefined;
+    }
+
+    return LIST_ICON_MAP[listType as PresetListType];
+}
+
+function getContainingTableCellRange(dataStream: string, offset: number): { startOffset: number; endOffset: number } | null {
+    const startOffset = dataStream.lastIndexOf(DataStreamTreeTokenType.TABLE_CELL_START, Math.max(0, offset));
+    if (startOffset < 0) {
+        return null;
+    }
+
+    const previousCellEnd = dataStream.lastIndexOf(DataStreamTreeTokenType.TABLE_CELL_END, Math.max(0, offset));
+    if (previousCellEnd > startOffset) {
+        return null;
+    }
+
+    const endOffset = dataStream.indexOf(DataStreamTreeTokenType.TABLE_CELL_END, startOffset + 1);
+    if (endOffset < 0 || offset > endOffset) {
+        return null;
+    }
+
+    return { startOffset, endOffset };
+}
+
+function getTableAnchorRect(tableBound: ITableBound) {
+    const gap = 4;
+    const left = tableBound.rect.left - gap;
+    const top = tableBound.rect.top - gap;
+
+    return {
+        left,
+        right: left,
+        top,
+        bottom: top,
+    };
+}
+
+function unionRects(rects: IBoundRectNoAngle[]): IBoundRectNoAngle | null {
+    if (!rects.length) {
+        return null;
+    }
+
+    return rects.reduce((acc, rect) => ({
+        left: Math.min(acc.left, rect.left),
+        right: Math.max(acc.right, rect.right),
+        top: Math.min(acc.top, rect.top),
+        bottom: Math.max(acc.bottom, rect.bottom),
+    }));
+}
+
+function getParagraphBlockRange(documentDataModel: DocumentDataModel, paragraph: IMutiPageParagraphBound): IDocumentBlockRange | undefined {
+    const blockRanges = documentDataModel.getBody()?.blockRanges ?? [];
+
+    return blockRanges.find((range) => (
+        Math.max(paragraph.paragraphStart, range.startIndex) <= Math.min(paragraph.paragraphEnd, range.endIndex)
+    ));
+}
+
+function getBlockRangeAnchorRect(
+    docEventManagerService: DocEventManagerService,
+    blockRange: IDocumentBlockRange,
+    fallbackParagraph: IMutiPageParagraphBound
+) {
+    const bounds = docEventManagerService
+        .findParagraphBoundsInRange(blockRange.startIndex, blockRange.endIndex)
+        .sort((left, right) => left.firstLine.top - right.firstLine.top || left.firstLine.left - right.firstLine.left);
+    const anchor = bounds[0]?.firstLine ?? fallbackParagraph.firstLine;
+    const left = Math.min(...(bounds.length ? bounds : [fallbackParagraph]).map((bound) => bound.firstLine.left));
+    const top = anchor.top;
+
+    return {
+        ...anchor,
+        left,
+        right: left,
+        top,
+        bottom: top,
+    };
 }

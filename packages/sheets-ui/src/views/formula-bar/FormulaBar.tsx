@@ -360,17 +360,18 @@ export function FormulaBar(props: IProps) {
                 <div className="univer-flex univer-w-full univer-flex-1 univer-overflow-hidden univer-pl-3">
                     <div
                         ref={ref}
-                        className="univer-relative univer-flex-1"
+                        className="
+                          univer-relative univer-flex-1 univer-bg-white
+                          dark:!univer-bg-gray-900
+                        "
                         onPointerDown={handlePointerDown}
                         onPointerUp={handlePointerUp}
                         style={{ pointerEvents: hideEditor ? 'none' : 'auto' }}
                     >
                         {FormulaEditor && (
                             <FormulaEditor
-                                className={`
-                                  univer-relative univer-size-full univer-break-words univer-outline-none
-                                  [&>div]:univer-ring-transparent
-                                `}
+                                className="univer-relative univer-size-full univer-break-words univer-outline-none"
+                                borderless
                                 disableSelectionOnClick
                                 editorId={DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY}
                                 initValue=""
@@ -393,6 +394,7 @@ export function FormulaBar(props: IProps) {
                                 }}
                                 autoScrollbar={false}
                                 disableContextMenu={false}
+                                canvasStyle={{ backgroundColor: '#fff' }}
                             />
                         )}
                         {/* When the editor is hidden, we just cover a div on the editor because re-instantiate

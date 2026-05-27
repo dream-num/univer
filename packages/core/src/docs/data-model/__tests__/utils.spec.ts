@@ -35,6 +35,10 @@ describe('document data-model utils', () => {
             it: BooleanNumber.FALSE,
             bl: BooleanNumber.FALSE,
         });
+        const fontStackStyle = getFontStyleString({
+            ff: '"SF Mono", "Cascadia Code", Consolas, monospace',
+            fs: 12,
+        });
 
         expect(defaultStyle).toEqual({
             fontCache: `${DEFAULT_STYLES.fs}pt  ${DEFAULT_STYLES.ff}`,
@@ -48,6 +52,8 @@ describe('document data-model utils', () => {
         expect(superscriptStyle.fontSize).toBeCloseTo(7.8);
         expect(superscriptStyle.fontString).toContain(DEFAULT_FONTFACE_PLANE);
         expect(normalStyle.fontCache).toBe('normal normal 14pt "Ping Fang"');
+        expect(fontStackStyle.fontFamily).toBe('"SF Mono", "Cascadia Code", Consolas, monospace');
+        expect(fontStackStyle.fontString).toContain('"SF Mono", "Cascadia Code", Consolas, monospace');
     });
 
     it('should expose baseline offsets and convert text rotation', () => {

@@ -142,6 +142,99 @@ describe('engine scene viewport extra', () => {
         document.body.innerHTML = '';
     });
 
+    it('keeps wheel scrolling visually consistent when the scene is scaled', () => {
+        const getViewportWheelDelta = (scale: number) => {
+            const container = document.createElement('div');
+            document.body.appendChild(container);
+
+            const engine = new Engine('unit-wheel', { elementWidth: 320, elementHeight: 180, dpr: 1 });
+            engine.mount(container, false);
+
+            const scene = new Scene('scene-wheel', engine);
+            scene.transformByState({
+                width: 700,
+                height: 500,
+                scaleX: 1,
+                scaleY: 1,
+            });
+
+            const viewport = new Viewport('doc-like-vp', scene, {
+                left: 0,
+                top: 0,
+                right: 0,
+                bottom: 0,
+                active: true,
+            });
+
+            new ScrollBar(viewport);
+            scene.scale(scale, scale);
+            viewport.resetCanvasSizeAndUpdateScroll();
+
+            viewport.onMouseWheel(
+                createInputEvent('wheel', { deltaY: 60 }),
+                { stopPropagation: vi.fn() } as any
+            );
+
+            const delta = viewport.viewportScrollY;
+            scene.dispose();
+            engine.dispose();
+            container.remove();
+
+            return delta;
+        };
+
+        const normalScaleDelta = getViewportWheelDelta(1);
+        const doubleScaleDelta = getViewportWheelDelta(2);
+
+        expect(doubleScaleDelta * 2).toBeCloseTo(normalScaleDelta, 3);
+    });
+
+    it('locks out minor cross-axis wheel jitter in viewport scrolling', () => {
+        const { engine, scene, viewport, container } = createFixture();
+        viewport.scrollToViewportPos({ viewportScrollX: 20, viewportScrollY: 20 });
+
+        viewport.onMouseWheel(
+            createInputEvent('wheel', { deltaX: 8, deltaY: 20 }),
+            { stopPropagation: vi.fn() } as any
+        );
+        expect(viewport.viewportScrollX).toBeCloseTo(20, 3);
+        expect(viewport.viewportScrollY).toBeGreaterThan(20);
+
+        viewport.onMouseWheel(
+            createInputEvent('wheel', { deltaX: 20, deltaY: 8 }),
+            { stopPropagation: vi.fn() } as any
+        );
+        expect(viewport.viewportScrollX).toBeGreaterThan(20);
+
+        scene.dispose();
+        engine.dispose();
+        container.remove();
+    });
+
+    it('locks vertical wheel jitter by raw delta before doc scrollbar scaling', () => {
+        const { engine, scene, viewport, container } = createFixture();
+        scene.transformByState({
+            width: 700,
+            height: 2400,
+            scaleX: 1,
+            scaleY: 1,
+        });
+        viewport.resetCanvasSizeAndUpdateScroll();
+        viewport.scrollToViewportPos({ viewportScrollX: 20, viewportScrollY: 20 });
+
+        viewport.onMouseWheel(
+            createInputEvent('wheel', { deltaX: 8, deltaY: 20 }),
+            { stopPropagation: vi.fn() } as any
+        );
+
+        expect(viewport.viewportScrollX).toBeCloseTo(20, 3);
+        expect(viewport.viewportScrollY).toBeGreaterThan(20);
+
+        scene.dispose();
+        engine.dispose();
+        container.remove();
+    });
+
     it('covers scene, viewport, layer and render loop flows', () => {
         const { engine, scene, viewport, container } = createFixture();
 

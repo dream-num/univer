@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { BooleanNumber, ColumnSeparatorType, PageOrientType } from '@univerjs/core';
+import { BooleanNumber, ColumnSeparatorType, PageOrientType, PositionedObjectLayoutType } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { DocumentSkeletonPageType } from '../../../../../basics/i-document-skeleton-cached';
 
@@ -22,6 +22,7 @@ import {
     createNullCellPage,
     createSkeletonCellPages,
     createSkeletonPage,
+    expandCellPageHeightForInlineDrawings,
 } from '../page';
 
 const dealWithSectionMock = vi.fn();
@@ -209,5 +210,135 @@ describe('page model', () => {
         expect(pages[0].segmentId).toBe('table-1');
         expect(updateBlockIndexMock).toHaveBeenCalled();
         expect(updateInlineDrawingCoordsAndBorderMock).toHaveBeenCalled();
+    });
+
+    it('adds trailing block range spacing to table cell height when the block range is the last cell element', () => {
+        dealWithSectionMock.mockImplementation((_ctx: any, _vm: any, _node: any, areaPage: any) => ({
+            pages: [{
+                ...areaPage,
+                height: 20,
+                sections: [
+                    {
+                        columns: [
+                            {
+                                lines: [{ paragraphIndex: 12, spaceBelowApply: 28 }],
+                            },
+                        ],
+                    },
+                ],
+                skeDrawings: new Map(),
+                skeTables: new Map(),
+            }],
+        }));
+
+        const ctx = {
+            dataModel: {
+                getBody: () => ({
+                    blockRanges: [{ blockId: 'callout-1', blockType: 'callout', startIndex: 10, endIndex: 14 }],
+                    paragraphs: [{ startIndex: 12 }],
+                }),
+            },
+            layoutStartPointer: {},
+            skeletonResourceReference: createSkeletonResourceReference(),
+            isDirty: false,
+        } as any;
+        const pages = createSkeletonCellPages(
+            ctx,
+            {} as any,
+            { startIndex: 9, endIndex: 16, children: [{}] } as any,
+            {
+                columnProperties: [],
+                columnSeparatorType: ColumnSeparatorType.NONE,
+                sectionType: 0,
+                startIndex: 0,
+            } as any,
+            {
+                tableId: 'table-1',
+                tableRows: [{ tableCells: [{}] }],
+                tableColumns: [{ size: { width: { v: 80 } } }],
+            } as any,
+            0,
+            0
+        );
+
+        expect(pages[0].height).toBe(48);
+    });
+
+    it('expands table cell height to include inline drawings', () => {
+        const page = {
+            height: 20,
+            skeDrawings: new Map([
+                ['shape-1', {
+                    aTop: 6,
+                    height: 48,
+                    drawingOrigin: {
+                        layoutType: PositionedObjectLayoutType.INLINE,
+                    },
+                }],
+                ['float-1', {
+                    aTop: 10,
+                    height: 100,
+                    drawingOrigin: {
+                        layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
+                    },
+                }],
+            ]),
+        };
+
+        expandCellPageHeightForInlineDrawings([page as never]);
+
+        expect(page.height).toBe(54);
+    });
+
+    it('does not add trailing block range spacing when content follows in the cell', () => {
+        dealWithSectionMock.mockImplementation((_ctx: any, _vm: any, _node: any, areaPage: any) => ({
+            pages: [{
+                ...areaPage,
+                height: 20,
+                sections: [
+                    {
+                        columns: [
+                            {
+                                lines: [{ paragraphIndex: 12, spaceBelowApply: 28 }],
+                            },
+                        ],
+                    },
+                ],
+                skeDrawings: new Map(),
+                skeTables: new Map(),
+            }],
+        }));
+
+        const ctx = {
+            dataModel: {
+                getBody: () => ({
+                    blockRanges: [{ blockId: 'callout-1', blockType: 'callout', startIndex: 10, endIndex: 14 }],
+                    paragraphs: [{ startIndex: 12 }, { startIndex: 15 }],
+                }),
+            },
+            layoutStartPointer: {},
+            skeletonResourceReference: createSkeletonResourceReference(),
+            isDirty: false,
+        } as any;
+        const pages = createSkeletonCellPages(
+            ctx,
+            {} as any,
+            { startIndex: 9, endIndex: 16, children: [{}] } as any,
+            {
+                columnProperties: [],
+                columnSeparatorType: ColumnSeparatorType.NONE,
+                sectionType: 0,
+                startIndex: 0,
+            } as any,
+            {
+                tableId: 'table-1',
+                tableRows: [{ tableCells: [{}] }],
+                tableColumns: [{ size: { width: { v: 80 } } }],
+            } as any,
+            0,
+            0
+        );
+
+        expect(pages[0].height).toBe(20);
     });
 });

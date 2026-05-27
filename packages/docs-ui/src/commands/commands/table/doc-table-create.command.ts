@@ -20,6 +20,7 @@ import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import { CommandType, DataStreamTreeTokenType, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { getTextRunAtPosition } from '../../../basics/paragraph';
+import { DocContentInsertService } from '../../../services/doc-content-insert.service';
 import { DocMenuStyleService } from '../../../services/doc-menu-style.service';
 import { getCommandSkeleton, getRichTextEditPath } from '../../util';
 import { generateParagraphs } from '../break-line.command';
@@ -46,14 +47,25 @@ export const CreateDocTableCommand: ICommand<ICreateDocTableCommandParams> = {
         const commandService = accessor.get(ICommandService);
         const docMenuStyleService = accessor.get(DocMenuStyleService);
 
-        const activeRange = docSelectionManagerService.getActiveTextRange();
-        if (activeRange == null) {
+        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        if (docDataModel == null) {
             return false;
         }
-        const { segmentId, segmentPage } = activeRange;
-        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        let contentInsertRange: ReturnType<DocContentInsertService['consumeInsertRange']> = null;
+        try {
+            contentInsertRange = accessor.get(DocContentInsertService).consumeInsertRange(docDataModel.getUnitId());
+        } catch {
+            contentInsertRange = null;
+        }
+
+        const activeRange = docSelectionManagerService.getActiveTextRange();
+        if (activeRange == null && contentInsertRange == null) {
+            return false;
+        }
+        const segmentId = contentInsertRange?.segmentId ?? activeRange?.segmentId ?? '';
+        const segmentPage = activeRange?.segmentPage;
         const body = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getBody();
-        if (docDataModel == null || body == null) {
+        if (body == null) {
             return false;
         }
 
@@ -64,7 +76,7 @@ export const CreateDocTableCommand: ICommand<ICreateDocTableCommandParams> = {
         if (skeleton == null) {
             return false;
         }
-        const { startOffset } = activeRange;
+        const startOffset = contentInsertRange?.startOffset ?? activeRange!.startOffset;
 
         const paragraphs = body.paragraphs ?? [];
         const prevParagraph = paragraphs.find((p) => p.startIndex >= startOffset);

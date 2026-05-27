@@ -16,7 +16,7 @@
 
 import type { ICellData, IDocumentData, Univer, Workbook } from '@univerjs/core';
 import type { IFunctionService } from '@univerjs/engine-formula';
-import { CellValueType, DEFAULT_TEXT_FORMAT_EXCEL, IConfigService, IContextService, Injector, LocaleService, LocaleType, Tools } from '@univerjs/core';
+import { CellValueType, DEFAULT_TEXT_FORMAT_EXCEL, DocumentFlavor, IConfigService, IContextService, Injector, LocaleService, LocaleType, Tools } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -56,6 +56,7 @@ const richTextDemo: IDocumentData = {
             width: Number.POSITIVE_INFINITY,
             height: Number.POSITIVE_INFINITY,
         },
+        documentFlavor: DocumentFlavor.UNSPECIFIED,
         renderConfig: {
             centerAngle: 0,
             horizontalAlign: 0,
@@ -68,6 +69,7 @@ const richTextDemo: IDocumentData = {
         marginBottom: 2,
         marginRight: 2,
         marginLeft: 2,
+        paragraphLineGapDefault: 0,
     },
 };
 
@@ -332,10 +334,12 @@ describe('Test EndEditController', () => {
                             width: Infinity,
                             height: Infinity,
                         },
+                        documentFlavor: DocumentFlavor.UNSPECIFIED,
                         marginTop: 0,
                         marginBottom: 2,
                         marginRight: 2,
                         marginLeft: 2,
+                        paragraphLineGapDefault: 0,
                         renderConfig: {
                             horizontalAlign: 0,
                             verticalAlign: 0,

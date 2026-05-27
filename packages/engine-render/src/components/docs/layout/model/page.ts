@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ITable, Nullable } from '@univerjs/core';
+import type { IDocumentBody, ITable, Nullable } from '@univerjs/core';
 import type {
     IDocumentSkeletonHeaderFooter,
     IDocumentSkeletonPage,
@@ -24,7 +24,7 @@ import type { ISectionBreakConfig } from '../../../../basics/interfaces';
 import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../view-model/document-view-model';
 import type { ILayoutContext } from '../tools';
-import { BooleanNumber, PageOrientType } from '@univerjs/core';
+import { BooleanNumber, PageOrientType, PositionedObjectLayoutType } from '@univerjs/core';
 import { BreakType, DocumentSkeletonPageType } from '../../../../basics/i-document-skeleton-cached';
 import { dealWithSection } from '../block/section';
 import { resetContext, updateBlockIndex, updateInlineDrawingCoordsAndBorder } from '../tools';
@@ -305,7 +305,10 @@ export function createNullCellPage(
         top = { v: 5 },
         bottom = { v: 5 },
     } = cellConfig.margin ?? cellMargin ?? {};
-    const pageWidth = tableColumns[col].size.width.v;
+    const columnSpan = Math.max(1, cellConfig.columnSpan ?? 1);
+    const pageWidth = tableColumns
+        .slice(col, col + columnSpan)
+        .reduce((sum, column) => sum + column.size.width.v, 0);
     const pageHeight = maxCellPageHeight;
 
     const cellSectionBreakConfig: ISectionBreakConfig = {
@@ -383,9 +386,55 @@ export function createSkeletonCellPages(
 
     updateBlockIndex(pages, cellNode.startIndex);
 
+    applyTrailingCellBlockRangeSpaceBelow(pages, ctx.dataModel?.getBody?.(), cellNode.endIndex);
+
     updateInlineDrawingCoordsAndBorder(ctx, pages);
+    expandCellPageHeightForInlineDrawings(pages);
 
     return pages;
+}
+
+export function expandCellPageHeightForInlineDrawings(pages: IDocumentSkeletonPage[]) {
+    for (const page of pages) {
+        page.skeDrawings?.forEach((drawing) => {
+            if (drawing.drawingOrigin?.layoutType !== PositionedObjectLayoutType.INLINE) {
+                return;
+            }
+
+            const drawingBottom = (drawing.aTop ?? 0) + (drawing.height ?? 0);
+            if (drawingBottom > page.height) {
+                page.height = drawingBottom;
+            }
+        });
+    }
+}
+
+function applyTrailingCellBlockRangeSpaceBelow(pages: IDocumentSkeletonPage[], body: Nullable<IDocumentBody>, cellEndIndex: number) {
+    const blockRanges = body?.blockRanges;
+    const trailingBlockRangeSpace = 28;
+    if (!blockRanges?.length) {
+        return;
+    }
+
+    for (const page of pages) {
+        const lastLine = page.sections.at(-1)?.columns.at(-1)?.lines.at(-1);
+        if (!lastLine) {
+            continue;
+        }
+
+        const paragraphIndex = lastLine.paragraphIndex;
+        const isBlockRangeParagraph = blockRanges.some((range) => range.startIndex < paragraphIndex && paragraphIndex < range.endIndex);
+        if (!isBlockRangeParagraph) {
+            continue;
+        }
+
+        const hasLaterParagraphInCell = body?.paragraphs?.some((paragraph) => paragraph.startIndex > paragraphIndex && paragraph.startIndex < cellEndIndex);
+        if (hasLaterParagraphInCell) {
+            continue;
+        }
+
+        page.height += lastLine.spaceBelowApply || trailingBlockRangeSpace;
+    }
 }
 
 function _getVerticalMargin(

@@ -77,6 +77,7 @@ export function UploadFloatImageMenuFactory(_accessor: IAccessor): IMenuItem {
         id: IMAGE_MENU_UPLOAD_FLOAT_ID,
         title: 'docs-drawing-ui.upload.float',
         type: MenuItemType.BUTTON,
+        icon: 'AddImageIcon',
         hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_DOC, undefined, DOCS_ZEN_EDITOR_UNIT_ID_KEY),
     };
 }

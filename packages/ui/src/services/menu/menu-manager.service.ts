@@ -55,6 +55,7 @@ export type MenuSchemaType = {
     title?: string;
     contextual?: boolean;
     quickLayout?: ContextMenuQuickLayout;
+    tiny?: boolean;
 } | {
     [key: string]: MenuSchemaType;
 };
@@ -293,6 +294,7 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
                 title: value.title,
                 contextual: value.contextual,
                 quickLayout: value.quickLayout,
+                tiny: value.tiny,
             };
 
             if (value.menuItemFactory) {
@@ -321,7 +323,7 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
             }
         }
 
-        return result;
+        return result.sort((a, b) => normalizeMenuOrder(a.order) - normalizeMenuOrder(b.order));
     }
 
     /**
@@ -370,4 +372,8 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
 
         return flatMenuItems(menu);
     }
+}
+
+function normalizeMenuOrder(order: number | undefined): number {
+    return order ?? 0;
 }

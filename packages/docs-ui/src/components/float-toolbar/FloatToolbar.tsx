@@ -29,12 +29,14 @@ import {
     SetInlineFormatTextColorCommand,
     SetInlineFormatUnderlineCommand,
 } from '../../commands/commands/inline-format.command';
+import { FLOAT_TEXT_STYLE_MENU_ID, FLOAT_TOOLBAR_MENU_POSITION } from '../../menu/menu';
 
 interface IFloatToolbarProps {
     avaliableMenus?: string[];
 }
 
 const DEFAULT_AVALIABLE_MENUS: string[] = [
+    FLOAT_TEXT_STYLE_MENU_ID,
     SetInlineFormatFontSizeCommand.id,
     SetInlineFormatBoldCommand.id,
     SetInlineFormatItalicCommand.id,
@@ -56,7 +58,10 @@ export function FloatToolbar(props: IFloatToolbarProps) {
     // subscribe to menu changes
     useEffect(() => {
         function getRibbon(): void {
-            const flatMenus = menuManagerService.getFlatMenuByPositionKey(MenuManagerPosition.RIBBON);
+            const flatMenus = [
+                ...menuManagerService.getFlatMenuByPositionKey(FLOAT_TOOLBAR_MENU_POSITION),
+                ...menuManagerService.getFlatMenuByPositionKey(MenuManagerPosition.RIBBON),
+            ];
 
             const menus: IMenuSchema[] = [];
             for (const key of avaliableMenus) {

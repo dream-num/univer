@@ -26,12 +26,12 @@ import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import { isRealNum, LocaleService } from '@univerjs/core';
 import { borderBottomClassName, borderClassName, clsx, scrollbarClassName } from '@univerjs/design';
 import { CheckMarkIcon, MoreIcon } from '@univerjs/icons';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { combineLatest, isObservable, of, scan, startWith } from 'rxjs';
 import { CustomLabel } from '../../../components/custom-label/CustomLabel';
 import { useScrollYOverContainer } from '../../../components/hooks/layout';
-import { UIQuickTileMenuGroup, UITinyMenuGroup } from '../../../components/menu/desktop/TinyMenuGroup';
+import { resolveMenuItemActiveState, UIQuickTileMenuGroup, UITinyMenuGroup } from '../../../components/menu/desktop/TinyMenuGroup';
 import { ILayoutService } from '../../../services/layout/layout.service';
 import { MenuItemType } from '../../../services/menu/menu';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
@@ -41,6 +41,8 @@ interface IContextMenuPanelProps {
     menuType: string;
     menuSessionVersion?: number;
     className?: string;
+    activeItemIds?: string[];
+    hiddenItemIds?: string[];
     onOptionSelect?: (option: IValueOption) => void;
 }
 
@@ -49,6 +51,8 @@ interface IContextMenuMenuProps {
     menuSessionVersion: number;
     submenuPortalContainer: HTMLElement | null;
     maxMenuHeight: number;
+    activeItemIds?: string[];
+    hiddenItemIds?: string[];
     onOptionSelect?: (option: IValueOption) => void;
 }
 
@@ -58,6 +62,9 @@ interface IContextMenuMenuItemProps {
     menuSessionVersion: number;
     submenuPortalContainer: HTMLElement | null;
     maxMenuHeight: number;
+    activeItemIds?: string[];
+    hiddenItemIds?: string[];
+    compact?: boolean;
     onOptionSelect?: (option: IValueOption) => void;
 }
 
@@ -65,6 +72,7 @@ const contentClassName = 'univer-inline-flex univer-items-center univer-gap-2';
 const menuViewportPadding = 8;
 const submenuOverlapOffset = 2;
 const submenuVisualGap = 20;
+export const CONTEXT_MENU_SUBMENU_CLOSE_DELAY = 500;
 export const CONTEXT_MENU_SUBMENU_PORTAL_ATTR = 'data-u-context-menu-submenu';
 
 type MenuLabel = IMenuItem['label'] | IValueOption['label'];
@@ -77,8 +85,20 @@ function isNonHoverableLabel(label?: MenuLabel) {
     return typeof label === 'object' && label?.hoverable === false;
 }
 
+export function hasRenderableContextMenuSchema(menuSchema: IMenuSchema): boolean {
+    if (menuSchema.item) {
+        return true;
+    }
+
+    if (!menuSchema.children?.length) {
+        return false;
+    }
+
+    return menuSchema.children.some((childSchema) => Boolean(childSchema.item));
+}
+
 export function ContextMenuPanel(props: IContextMenuPanelProps) {
-    const { menuType, menuSessionVersion = 0, className, onOptionSelect } = props;
+    const { menuType, menuSessionVersion = 0, className, activeItemIds, hiddenItemIds, onOptionSelect } = props;
     const menuManagerService = useDependency(IMenuManagerService);
     const layoutService = useDependency(ILayoutService);
     const [menuElement, setMenuElement] = useState<HTMLDivElement | null>(null);
@@ -161,6 +181,8 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
                 menuSchemas={menuItems}
                 menuSessionVersion={menuSessionVersion}
                 submenuPortalContainer={submenuPortalContainer}
+                activeItemIds={activeItemIds}
+                hiddenItemIds={hiddenItemIds}
                 onOptionSelect={onOptionSelect}
                 maxMenuHeight={maxMenuHeight}
             />
@@ -169,12 +191,16 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
 }
 
 function ContextMenuMenu(props: IContextMenuMenuProps) {
-    const { menuSchemas, menuSessionVersion, submenuPortalContainer, onOptionSelect, maxMenuHeight } = props;
+    const { menuSchemas, menuSessionVersion, submenuPortalContainer, activeItemIds, hiddenItemIds, onOptionSelect, maxMenuHeight } = props;
     const localeService = useDependency(LocaleService);
     const hiddenGroupStates = useContextGroupHiddenStates(menuSchemas);
 
     const visibleSchemas = useMemo(() => {
         return menuSchemas.filter((item) => {
+            if (!hasRenderableContextMenuSchema(item)) {
+                return false;
+            }
+
             if (!item.children) {
                 return true;
             }
@@ -198,6 +224,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                             submenuPortalContainer={submenuPortalContainer}
                             onOptionSelect={onOptionSelect}
                             maxMenuHeight={maxMenuHeight}
+                            hiddenItemIds={hiddenItemIds}
                         />
                     );
                 }
@@ -219,15 +246,48 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                                 ? (
                                     <UIQuickTileMenuGroup
                                         item={menuSchema}
+                                        activeItemIds={activeItemIds}
+                                        hiddenItemIds={hiddenItemIds}
                                         onOptionSelect={onOptionSelect}
                                     />
                                 )
                                 : (
                                     <UITinyMenuGroup
                                         item={menuSchema}
+                                        activeItemIds={activeItemIds}
+                                        hiddenItemIds={hiddenItemIds}
                                         onOptionSelect={onOptionSelect}
                                     />
                                 )}
+                        </div>
+                    );
+                }
+
+                if (menuSchema.tiny) {
+                    return (
+                        <div
+                            key={menuSchema.key}
+                            className={clsx(
+                                'univer-flex univer-items-center univer-gap-1 univer-py-1',
+                                hasSeparator && borderBottomClassName
+                            )}
+                        >
+                            {menuSchema.children.map((childSchema) => (
+                                childSchema.item && (
+                                    <ContextMenuMenuItem
+                                        key={childSchema.key}
+                                        menuKey={childSchema.key}
+                                        menuItem={childSchema.item as IDisplayMenuItem<IMenuItem>}
+                                        menuSessionVersion={menuSessionVersion}
+                                        submenuPortalContainer={submenuPortalContainer}
+                                        activeItemIds={activeItemIds}
+                                        hiddenItemIds={hiddenItemIds}
+                                        onOptionSelect={onOptionSelect}
+                                        maxMenuHeight={maxMenuHeight}
+                                        compact
+                                    />
+                                )
+                            ))}
                         </div>
                     );
                 }
@@ -258,6 +318,8 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                                     menuItem={childSchema.item as IDisplayMenuItem<IMenuItem>}
                                     menuSessionVersion={menuSessionVersion}
                                     submenuPortalContainer={submenuPortalContainer}
+                                    activeItemIds={activeItemIds}
+                                    hiddenItemIds={hiddenItemIds}
                                     onOptionSelect={onOptionSelect}
                                     maxMenuHeight={maxMenuHeight}
                                 />
@@ -271,7 +333,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
 }
 
 function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
-    const { menuKey, menuItem, menuSessionVersion, submenuPortalContainer, onOptionSelect, maxMenuHeight } = props;
+    const { menuKey, menuItem, menuSessionVersion, submenuPortalContainer, activeItemIds, hiddenItemIds = [], compact = false, onOptionSelect, maxMenuHeight } = props;
     const localeService = useDependency(LocaleService);
     const direction = useObservable(localeService.direction$);
     const menuManagerService = useDependency(IMenuManagerService);
@@ -296,6 +358,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
     const [submenuPlacement, setSubmenuPlacement] = useState<'left' | 'right'>('right');
     const menuItemElementRef = useRef<HTMLDivElement | null>(null);
     const submenuElementRef = useRef<HTMLDivElement | null>(null);
+    const submenuCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const selections = useMemo(() => {
         if (menuItem.type !== MenuItemType.SELECTOR && menuItem.type !== MenuItemType.BUTTON_SELECTOR) {
@@ -320,10 +383,30 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
     const hasSelectionSubmenu = selections.length > 0;
     const hasSubItemSubmenu = subMenuItems.length > 0;
     const hasSubmenu = hasSelectionSubmenu || hasSubItemSubmenu;
+    const selectionsCommandId = selectorItem.selectionsCommandId;
+
+    const clearSubmenuCloseTimer = useCallback(() => {
+        if (submenuCloseTimerRef.current == null) {
+            return;
+        }
+
+        clearTimeout(submenuCloseTimerRef.current);
+        submenuCloseTimerRef.current = null;
+    }, []);
+
+    const scheduleSubmenuClose = useCallback(() => {
+        clearSubmenuCloseTimer();
+        submenuCloseTimerRef.current = setTimeout(() => {
+            submenuCloseTimerRef.current = null;
+            setSubmenuVisible(false);
+        }, CONTEXT_MENU_SUBMENU_CLOSE_DELAY);
+    }, [clearSubmenuCloseTimer]);
 
     useEffect(() => {
         setInputValue(value);
     }, [value]);
+
+    useEffect(() => () => clearSubmenuCloseTimer(), [clearSubmenuCloseTimer]);
 
     useEffect(() => {
         if (!submenuVisible) {
@@ -369,7 +452,9 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
         };
     }, [submenuVisible, hasSelectionSubmenu, hasSubItemSubmenu]);
 
-    if (hidden) {
+    const hiddenById = (menuItem.id != null && hiddenItemIds.includes(menuItem.id)) || hiddenItemIds.includes(menuKey);
+
+    if (hidden || hiddenById) {
         return null;
     }
 
@@ -380,16 +465,23 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
 
     const onSubmenuOptionSelect = (option: IValueOption) => {
         onOptionSelect?.(option);
+        clearSubmenuCloseTimer();
         setSubmenuVisible(false);
     };
 
     const itemClassName = clsx(
-        `
-          univer-relative univer-flex univer-min-h-8 univer-w-full univer-items-center univer-justify-between
-          univer-gap-3 univer-rounded-md univer-border-none univer-bg-transparent univer-px-2 univer-text-left
-          univer-text-sm
-          dark:!univer-text-white
-        `,
+        compact
+            ? `
+              univer-relative univer-flex univer-size-8 univer-items-center univer-justify-center univer-rounded-md
+              univer-border-none univer-bg-transparent univer-p-0 univer-text-left univer-text-sm
+              dark:!univer-text-white
+            `
+            : `
+              univer-relative univer-flex univer-min-h-8 univer-w-full univer-items-center univer-justify-between
+              univer-gap-3 univer-rounded-md univer-border-none univer-bg-transparent univer-px-2 univer-text-left
+              univer-text-sm
+              dark:!univer-text-white
+            `,
         disabled
             ? 'univer-cursor-not-allowed univer-opacity-60'
             : `
@@ -397,7 +489,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
               hover:univer-bg-gray-50
               dark:hover:!univer-bg-gray-600
             `,
-        activated && `
+        resolveMenuItemActiveState(menuItem.id, activated, activeItemIds) && `
           univer-bg-gray-200
           dark:!univer-bg-gray-600
         `
@@ -407,7 +499,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
         <span className={contentClassName}>
             <CustomLabel
                 value={inputValue}
-                title={menuItem.title}
+                title={compact ? undefined : menuItem.title}
                 label={menuItem.label}
                 icon={menuItem.icon}
                 onChange={onChange}
@@ -428,6 +520,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
             ref={menuItemElementRef}
             className="univer-relative"
             onMouseEnter={() => {
+                clearSubmenuCloseTimer();
                 if (hasSubmenu && !disabled) {
                     setSubmenuPositionReady(false);
                     setSubmenuVisible(true);
@@ -439,7 +532,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                     if (nextTarget && submenuElementRef.current?.contains(nextTarget)) {
                         return;
                     }
-                    setSubmenuVisible(false);
+                    scheduleSubmenuClose();
                 }
             }}
         >
@@ -465,8 +558,22 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                         type="button"
                         className={interactiveItemClassName}
                         disabled={disabled}
+                        title={compact && typeof menuItem.tooltip === 'string' ? localeService.t(menuItem.tooltip) : undefined}
                         onClick={() => {
+                            clearSubmenuCloseTimer();
                             if (hasSubmenu) {
+                                if (canExecuteItem) {
+                                    const item = menuItem as IDisplayMenuItem<IMenuButtonItem>;
+                                    onOptionSelect?.({
+                                        commandId: item.commandId,
+                                        params: item.params,
+                                        value: inputValue,
+                                        id: item.id,
+                                        label: menuKey,
+                                    });
+                                    return;
+                                }
+
                                 setSubmenuPositionReady(false);
                                 setSubmenuVisible(true);
                                 return;
@@ -479,6 +586,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                             const item = menuItem as IDisplayMenuItem<IMenuButtonItem>;
                             onOptionSelect?.({
                                 commandId: item.commandId,
+                                params: item.params,
                                 value: inputValue,
                                 id: item.id,
                                 label: menuKey,
@@ -486,7 +594,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                         }}
                     >
                         {contentNode}
-                        {hasSubmenu && (
+                        {hasSubmenu && !compact && (
                             <MoreIcon
                                 className={`
                                   univer-size-3.5 univer-text-gray-400
@@ -515,13 +623,14 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                                 visibility: submenuPositionReady ? 'visible' : 'hidden',
                                 pointerEvents: submenuPositionReady ? 'auto' : 'none',
                             }}
+                            onMouseEnter={clearSubmenuCloseTimer}
                             onMouseLeave={(event) => {
                                 const nextTarget = event.relatedTarget as Node | null;
                                 if (nextTarget && menuItemElementRef.current?.contains(nextTarget)) {
                                     return;
                                 }
 
-                                setSubmenuVisible(false);
+                                scheduleSubmenuClose();
                             }}
                             onWheel={(event) => event.stopPropagation()}
                         >
@@ -587,7 +696,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                                                                     value: optionValue,
                                                                     id: menuItem.id,
                                                                     label: menuKey,
-                                                                    commandId: option.commandId,
+                                                                    commandId: option.commandId ?? selectionsCommandId,
                                                                 });
                                                             }}
                                                         />
@@ -608,7 +717,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                                                                     ...option,
                                                                     id: menuItem.id,
                                                                     label: menuKey,
-                                                                    commandId: option.commandId,
+                                                                    commandId: option.commandId ?? selectionsCommandId,
                                                                 });
                                                             }}
                                                         >
@@ -633,6 +742,8 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                                         menuSchemas={subMenuItems}
                                         menuSessionVersion={menuSessionVersion}
                                         submenuPortalContainer={submenuPortalContainer}
+                                        activeItemIds={activeItemIds}
+                                        hiddenItemIds={hiddenItemIds}
                                         onOptionSelect={onSubmenuOptionSelect}
                                         maxMenuHeight={maxMenuHeight}
                                     />

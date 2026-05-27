@@ -46,6 +46,7 @@ exports[`Test clipboard > Test paste > test convert util func from excel 1`] = `
           ],
         },
         "documentStyle": {
+          "documentFlavor": 0,
           "marginBottom": 2,
           "marginLeft": 2,
           "marginRight": 2,
@@ -54,6 +55,7 @@ exports[`Test clipboard > Test paste > test convert util func from excel 1`] = `
             "height": Infinity,
             "width": Infinity,
           },
+          "paragraphLineGapDefault": 0,
           "renderConfig": {
             "cellValueType": undefined,
             "centerAngle": 0,
@@ -680,6 +682,7 @@ exports[`Test clipboard > Test paste > test convert util func from excel 1`] = `
           ],
         },
         "documentStyle": {
+          "documentFlavor": 0,
           "marginBottom": 2,
           "marginLeft": 2,
           "marginRight": 2,
@@ -688,6 +691,7 @@ exports[`Test clipboard > Test paste > test convert util func from excel 1`] = `
             "height": Infinity,
             "width": Infinity,
           },
+          "paragraphLineGapDefault": 0,
           "renderConfig": {
             "cellValueType": undefined,
             "centerAngle": 0,
@@ -3368,6 +3372,7 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
           ],
         },
         "documentStyle": {
+          "documentFlavor": 0,
           "marginBottom": 2,
           "marginLeft": 2,
           "marginRight": 2,
@@ -3376,6 +3381,7 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
             "height": Infinity,
             "width": Infinity,
           },
+          "paragraphLineGapDefault": 0,
           "renderConfig": {
             "cellValueType": undefined,
             "centerAngle": 0,
@@ -3574,6 +3580,7 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
           "textRuns": [],
         },
         "documentStyle": {
+          "documentFlavor": 0,
           "marginBottom": 2,
           "marginLeft": 2,
           "marginRight": 2,
@@ -3582,6 +3589,7 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
             "height": Infinity,
             "width": Infinity,
           },
+          "paragraphLineGapDefault": 0,
           "renderConfig": {
             "cellValueType": undefined,
             "centerAngle": 0,
@@ -4134,6 +4142,7 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
           "textRuns": [],
         },
         "documentStyle": {
+          "documentFlavor": 0,
           "marginBottom": 2,
           "marginLeft": 2,
           "marginRight": 2,
@@ -4142,6 +4151,7 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
             "height": Infinity,
             "width": Infinity,
           },
+          "paragraphLineGapDefault": 0,
           "renderConfig": {
             "cellValueType": undefined,
             "centerAngle": 0,
@@ -4233,6 +4243,7 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
           ],
         },
         "documentStyle": {
+          "documentFlavor": 0,
           "marginBottom": 2,
           "marginLeft": 2,
           "marginRight": 2,
@@ -4241,6 +4252,7 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
             "height": Infinity,
             "width": Infinity,
           },
+          "paragraphLineGapDefault": 0,
           "renderConfig": {
             "cellValueType": undefined,
             "centerAngle": 0,
@@ -4678,6 +4690,7 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
           "textRuns": [],
         },
         "documentStyle": {
+          "documentFlavor": 0,
           "marginBottom": 2,
           "marginLeft": 2,
           "marginRight": 2,
@@ -4686,6 +4699,7 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
             "height": Infinity,
             "width": Infinity,
           },
+          "paragraphLineGapDefault": 0,
           "renderConfig": {
             "cellValueType": undefined,
             "centerAngle": 0,
@@ -4780,6 +4794,7 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
           ],
         },
         "documentStyle": {
+          "documentFlavor": 0,
           "marginBottom": 2,
           "marginLeft": 2,
           "marginRight": 2,
@@ -4788,6 +4803,7 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
             "height": Infinity,
             "width": Infinity,
           },
+          "paragraphLineGapDefault": 0,
           "renderConfig": {
             "cellValueType": undefined,
             "centerAngle": 0,

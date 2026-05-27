@@ -19,7 +19,7 @@ import type { IParagraph } from '@univerjs/core';
 import type { ISectionBreakConfig } from '../../../../../basics/interfaces';
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../../view-model/document-view-model';
-import { getFirstGrapheme, hasArabic, hasSpace, hasTibetan, startWithEmoji } from '../../../../../basics/tools';
+import { getFirstGrapheme, hasArabic, hasSpace, hasThai, hasTibetan, startWithEmoji } from '../../../../../basics/tools';
 import { createSkeletonLetterGlyph, createSkeletonWordGlyph } from '../../model/glyph';
 import { getFontCreateConfig } from '../../tools';
 
@@ -125,6 +125,34 @@ export function TibetanHandler(
     for (let i = 0; i < charArray.length; i++) {
         const newChar = charArray[i];
         if (hasTibetan(newChar)) {
+            glyph.push(newChar);
+            step++;
+        } else {
+            break;
+        }
+    }
+
+    return {
+        step,
+        glyphGroup: [createSkeletonWordGlyph(glyph.join(''), config)],
+    };
+}
+
+export function ThaiHandler(
+    index: number,
+    charArray: string,
+    viewModel: DocumentViewModel,
+    paragraphNode: DataStreamTreeNode,
+    sectionBreakConfig: ISectionBreakConfig,
+    paragraph: IParagraph
+) {
+    // Combine Thai phrases so complex text layout works correctly.
+    const config = getFontCreateConfig(index, viewModel, paragraphNode, sectionBreakConfig, paragraph);
+    const glyph = [];
+    let step = 0;
+    for (let i = 0; i < charArray.length; i++) {
+        const newChar = charArray[i];
+        if (hasThai(newChar)) {
             glyph.push(newChar);
             step++;
         } else {

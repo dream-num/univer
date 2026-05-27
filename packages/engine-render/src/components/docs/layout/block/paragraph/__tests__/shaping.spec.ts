@@ -14,326 +14,328 @@
  * limitations under the License.
  */
 
-import { BooleanNumber, DataStreamTreeTokenType, GridType, PositionedObjectLayoutType } from '@univerjs/core';
+import { BooleanNumber, DataStreamTreeTokenType, PositionedObjectLayoutType } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { Lang } from '../../../hyphenation/lang';
-
+import { fontLibrary } from '../../../shaping-engine/font-library';
+import * as textShapingModule from '../../../shaping-engine/text-shaping';
 import { shaping } from '../shaping';
+import { createParagraphLayoutTestBed } from './create-paragraph-layout-test-bed';
 
-const h = vi.hoisted(() => ({
-    createSkeletonCustomBlockGlyphMock: vi.fn(),
-    createSkeletonLetterGlyphMock: vi.fn(),
-    createSkeletonTabGlyphMock: vi.fn(),
-    glyphShrinkLeftMock: vi.fn(),
-    glyphShrinkRightMock: vi.fn(),
-    getBoundingBoxMock: vi.fn(() => ({
-        width: 12,
-        height: 6,
-    })),
-    textShapeMock: vi.fn(),
-    prepareParagraphBodyMock: vi.fn(() => 'paragraph-body'),
-    getCharSpaceApplyMock: vi.fn(() => 2),
-    getFontCreateConfigMock: vi.fn((index: number) => ({ index })),
-    emojiHandlerMock: vi.fn(),
-    arabicHandlerMock: vi.fn(),
-    tibetanHandlerMock: vi.fn(),
-    otherHandlerMock: vi.fn(),
-    hyphenEnhancerCtorMock: vi.fn(),
-    fontLibraryMock: {
-        isReady: false,
-    },
-}));
+describe('shaping', () => {
+    it('shapes plain English text', () => {
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('Hello world');
 
-function createGlyph(content: string, width = 8, streamType?: string) {
-    return {
-        content,
-        width,
-        xOffset: 0,
-        streamType,
-        adjustability: {
-            shrinkability: [6, 6],
-            stretchability: [1, 1],
-        },
-        bBox: {
-            width: Math.max(width - 1, 1),
-        },
-    } as any;
-}
+        const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
 
-vi.mock('../../../../../../basics/tools', () => ({
-    hasArabic: (char: string) => char === 'ع',
-    hasCJK: (char: string) => char === '中' || char === '，',
-    hasCJKPunctuation: (char: string) => char === '，',
-    hasCJKText: (char: string) => char === '中' || char === '，',
-    hasTibetan: (char: string) => char === 'ཀ',
-    startWithEmoji: (src: string) => src.startsWith('😀'),
-}));
-
-vi.mock('../../../line-breaker', () => ({
-    LineBreaker: class {
-        private _used = false;
-
-        constructor(private _content: string) {}
-
-        nextBreakPoint() {
-            if (this._used) {
-                return null;
-            }
-            this._used = true;
-            return {
-                position: this._content.length,
-                type: 0,
-            };
-        }
-    },
-}));
-
-vi.mock('../../../line-breaker/enhancers/link-enhancer', () => ({
-    LineBreakerLinkEnhancer: class {
-        constructor(private _breaker: any) {}
-
-        nextBreakPoint() {
-            return this._breaker.nextBreakPoint();
-        }
-    },
-}));
-
-vi.mock('../../../line-breaker/enhancers/hyphen-enhancer', () => ({
-    LineBreakerHyphenEnhancer: class {
-        constructor(private _breaker: any) {
-            h.hyphenEnhancerCtorMock();
-        }
-
-        nextBreakPoint() {
-            return this._breaker.nextBreakPoint();
-        }
-    },
-}));
-
-vi.mock('../../../line-breaker/extensions/tab-linebreak-extension', () => ({
-    tabLineBreakExtension: vi.fn(),
-}));
-
-vi.mock('../../../line-breaker/extensions/custom-block-linebreak-extension', () => ({
-    customBlockLineBreakExtension: vi.fn(),
-}));
-
-vi.mock('../../../model/glyph', () => ({
-    createSkeletonCustomBlockGlyph: (...args: any[]) => (h.createSkeletonCustomBlockGlyphMock as any)(...args),
-    createSkeletonLetterGlyph: (...args: any[]) => (h.createSkeletonLetterGlyphMock as any)(...args),
-    createSkeletonTabGlyph: (...args: any[]) => (h.createSkeletonTabGlyphMock as any)(...args),
-    glyphShrinkLeft: (...args: any[]) => (h.glyphShrinkLeftMock as any)(...args),
-    glyphShrinkRight: (...args: any[]) => (h.glyphShrinkRightMock as any)(...args),
-}));
-
-vi.mock('../../../model/line', () => ({
-    getBoundingBox: (...args: any[]) => (h.getBoundingBoxMock as any)(...args),
-}));
-
-vi.mock('../../../shaping-engine/text-shaping', () => ({
-    textShape: (...args: any[]) => (h.textShapeMock as any)(...args),
-}));
-
-vi.mock('../../../shaping-engine/utils', () => ({
-    prepareParagraphBody: (...args: any[]) => (h.prepareParagraphBodyMock as any)(...args),
-}));
-
-vi.mock('../../../shaping-engine/font-library', () => ({
-    fontLibrary: h.fontLibraryMock,
-}));
-
-vi.mock('../../../tools', () => ({
-    getCharSpaceApply: (...args: any[]) => (h.getCharSpaceApplyMock as any)(...args),
-    getFontCreateConfig: (...args: any[]) => (h.getFontCreateConfigMock as any)(...args),
-}));
-
-vi.mock('../language-ruler', () => ({
-    emojiHandler: (...args: any[]) => (h.emojiHandlerMock as any)(...args),
-    ArabicHandler: (...args: any[]) => (h.arabicHandlerMock as any)(...args),
-    TibetanHandler: (...args: any[]) => (h.tibetanHandlerMock as any)(...args),
-    otherHandler: (...args: any[]) => (h.otherHandlerMock as any)(...args),
-}));
-
-describe('paragraph shaping', () => {
-    it('handles custom blocks, language handlers, punctuation and hyphen pattern loading', () => {
-        h.fontLibraryMock.isReady = false;
-        h.hyphenEnhancerCtorMock.mockClear();
-        h.textShapeMock.mockReset();
-
-        h.createSkeletonLetterGlyphMock.mockImplementation((char: string, _config: any, width?: number) => {
-            if (char === DataStreamTreeTokenType.PARAGRAPH && width === 0) {
-                return createGlyph(char, 0);
-            }
-            return createGlyph(char, 8);
-        });
-        h.createSkeletonTabGlyphMock.mockImplementation(() => createGlyph(DataStreamTreeTokenType.TAB, 4));
-        h.createSkeletonCustomBlockGlyphMock.mockImplementation((_config: any, width: number, _height: number, _drawingId: string) => {
-            return createGlyph(DataStreamTreeTokenType.CUSTOM_BLOCK, width, DataStreamTreeTokenType.CUSTOM_BLOCK);
-        });
-        h.glyphShrinkLeftMock.mockImplementation((glyph: any, delta: number) => {
-            glyph.width -= delta;
-        });
-        h.glyphShrinkRightMock.mockImplementation((glyph: any, delta: number) => {
-            glyph.width -= delta;
-        });
-
-        h.emojiHandlerMock.mockImplementation((_i: number, _src: string) => ({
-            step: '😀'.length,
-            glyphGroup: [createGlyph('😀', 10)],
-        }));
-        h.arabicHandlerMock.mockImplementation(() => ({
-            step: 1,
-            glyphGroup: [createGlyph('ع', 9)],
-        }));
-        h.tibetanHandlerMock.mockImplementation(() => ({
-            step: 1,
-            glyphGroup: [createGlyph('ཀ', 9)],
-        }));
-        h.otherHandlerMock.mockImplementation(() => ({
-            step: 1,
-            glyphGroup: [createGlyph('x', 7)],
-        }));
-
-        const ctx = {
-            hyphen: {
-                hasPattern: vi.fn(() => false),
-                loadPattern: vi.fn(),
-            },
-            languageDetector: {
-                detect: vi.fn(() => Lang.EnUs),
-            },
-        } as any;
-
-        const viewModel = {
-            getParagraph: vi.fn(() => ({
-                startIndex: 0,
-                paragraphStyle: {
-                    snapToGrid: BooleanNumber.TRUE,
-                    suppressHyphenation: BooleanNumber.FALSE,
-                },
-            })),
-            getBody: vi.fn(() => ({ dataStream: '' })),
-            getCustomBlockWithoutSetCurrentIndex: vi.fn((index: number) => {
-                if (index === 0) {
-                    return { blockId: 'inline-block' };
-                }
-                if (index === 1) {
-                    return { blockId: 'float-block' };
-                }
-                return null;
-            }),
-        } as any;
-
-        const paragraphNode = {
-            startIndex: 0,
-            endIndex: 1,
-        } as any;
-
-        const sectionBreakConfig = {
-            gridType: GridType.LINES,
-            charSpace: 1,
-            defaultTabStop: 10.5,
-            drawings: {
-                'inline-block': {
-                    drawingId: 'inline-block',
-                    layoutType: PositionedObjectLayoutType.INLINE,
-                    docTransform: {
-                        angle: 30,
-                        size: {
-                            width: 20,
-                            height: 10,
-                        },
-                    },
-                },
-                'float-block': {
-                    drawingId: 'float-block',
-                    layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
-                    docTransform: {
-                        angle: 0,
-                        size: {
-                            width: 20,
-                            height: 10,
-                        },
-                    },
-                },
-            },
-            autoHyphenation: BooleanNumber.TRUE,
-            doNotHyphenateCaps: BooleanNumber.FALSE,
-            renderConfig: {
-                zeroWidthParagraphBreak: BooleanNumber.TRUE,
-            },
-        } as any;
-
-        const content = `${DataStreamTreeTokenType.CUSTOM_BLOCK}${DataStreamTreeTokenType.CUSTOM_BLOCK}\t${DataStreamTreeTokenType.PARAGRAPH}中😀عཀx，，中a中`;
-        const shaped = shaping(ctx, content, viewModel, paragraphNode, sectionBreakConfig, false);
-
-        expect(shaped.length).toBeGreaterThan(0);
-        expect(h.getBoundingBoxMock).toHaveBeenCalled();
-        expect(h.createSkeletonCustomBlockGlyphMock).toHaveBeenCalledTimes(2);
-        expect(h.emojiHandlerMock).toHaveBeenCalled();
-        expect(h.arabicHandlerMock).toHaveBeenCalled();
-        expect(h.tibetanHandlerMock).toHaveBeenCalled();
-        expect(h.otherHandlerMock).toHaveBeenCalled();
-        expect(h.glyphShrinkLeftMock).toHaveBeenCalled();
-        expect(h.glyphShrinkRightMock).toHaveBeenCalled();
-        expect(ctx.hyphen.loadPattern).toHaveBeenCalledWith(Lang.EnUs);
-        expect(h.hyphenEnhancerCtorMock).not.toHaveBeenCalled();
+        expect(result.length).toBeGreaterThan(0);
+        expect(result[0].text).toBeDefined();
+        expect(result[0].glyphs.length).toBeGreaterThan(0);
     });
 
-    it('uses openType shaping path and hyphen enhancer when pattern exists', () => {
-        h.fontLibraryMock.isReady = true;
-        h.hyphenEnhancerCtorMock.mockClear();
+    it('shapes text with spaces', () => {
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('Hello world test');
 
-        h.createSkeletonLetterGlyphMock.mockImplementation((char: string, _config: any, _width?: number, glyphInfo?: any) => {
-            return createGlyph(glyphInfo ? `${char}-ot` : char, 8);
+        const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+
+        expect(result.length).toBeGreaterThan(0);
+        const allGlyphs = result.flatMap((r) => r.glyphs);
+        expect(allGlyphs.length).toBeGreaterThan(0);
+    });
+
+    it('shapes text with tab characters', () => {
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('Hello\tworld');
+
+        const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+
+        expect(result.length).toBeGreaterThan(0);
+        const allGlyphs = result.flatMap((r) => r.glyphs);
+        const tabGlyph = allGlyphs.find((g) => g.content === '\t');
+        expect(tabGlyph).toBeDefined();
+    });
+
+    it('shapes CJK text', () => {
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('你好世界');
+
+        const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+
+        expect(result.length).toBeGreaterThan(0);
+        const allGlyphs = result.flatMap((r) => r.glyphs);
+        expect(allGlyphs.length).toBeGreaterThan(0);
+    });
+
+    it('shapes mixed CJK and Latin text', () => {
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('Hello你好');
+
+        const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+
+        expect(result.length).toBeGreaterThan(0);
+        const allGlyphs = result.flatMap((r) => r.glyphs);
+        expect(allGlyphs.length).toBeGreaterThan(0);
+    });
+
+    it('shapes text with emoji', () => {
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('Hello \uD83D\uDE00');
+
+        const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+
+        expect(result.length).toBeGreaterThan(0);
+        const allGlyphs = result.flatMap((r) => r.glyphs);
+        const emojiGlyph = allGlyphs.find((g) => g.content === '\uD83D\uDE00');
+        expect(emojiGlyph).toBeDefined();
+    });
+
+    it('shapes text with Arabic characters', () => {
+        const arabicText = '\u0645\u0631\u062D\u0628\u0627'; // 'مرحبا'
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed(arabicText);
+
+        const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+
+        expect(result.length).toBeGreaterThan(0);
+        const allGlyphs = result.flatMap((r) => r.glyphs);
+        expect(allGlyphs.length).toBeGreaterThan(0);
+    });
+
+    it('returns breakPointType for each shaped text', () => {
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('Hello world');
+
+        const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+
+        expect(result.length).toBeGreaterThan(0);
+        for (const shapedText of result) {
+            expect(shapedText.breakPointType).toBeDefined();
+        }
+    });
+
+    it('shapes Tibetan text', () => {
+        const tibetanText = '\u0F40\u0F41';
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed(tibetanText);
+
+        const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+
+        expect(result.length).toBeGreaterThan(0);
+        const allGlyphs = result.flatMap((r) => r.glyphs);
+        expect(allGlyphs.length).toBeGreaterThan(0);
+    });
+
+    it('shapes Thai text', () => {
+        const thaiText = '\u0E01\u0E02';
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed(thaiText);
+
+        const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+
+        expect(result.length).toBeGreaterThan(0);
+        const allGlyphs = result.flatMap((r) => r.glyphs);
+        expect(allGlyphs.length).toBeGreaterThan(0);
+    });
+
+    it('applies punctuation space adjustment for consecutive CJK punctuation', () => {
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('，。');
+
+        const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+
+        const allGlyphs = result.flatMap((r) => r.glyphs);
+        expect(allGlyphs.some((g) => g.content === '，')).toBe(true);
+        expect(allGlyphs.some((g) => g.content === '。')).toBe(true);
+    });
+
+    it('adds CJK Latin spacing for mixed text', () => {
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('A好B');
+
+        const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+
+        expect(result.length).toBeGreaterThan(0);
+        const allGlyphs = result.flatMap((r) => r.glyphs);
+        expect(allGlyphs.length).toBeGreaterThan(0);
+    });
+
+    it('shapes paragraph break with zero width when configured', () => {
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('Hello');
+        sectionBreakConfig.renderConfig = {
+            ...sectionBreakConfig.renderConfig,
+            zeroWidthParagraphBreak: BooleanNumber.TRUE,
+        };
+
+        const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+
+        const allGlyphs = result.flatMap((r) => r.glyphs);
+        const paragraphGlyph = allGlyphs.find((g) => g.content === '\r');
+        expect(paragraphGlyph).toBeDefined();
+        expect(paragraphGlyph!.width).toBe(0);
+    });
+
+    it('shapes custom block when drawing is not found', () => {
+        const content = `A${DataStreamTreeTokenType.CUSTOM_BLOCK}B`;
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed(content);
+
+        const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+
+        const allGlyphs = result.flatMap((r) => r.glyphs);
+        expect(allGlyphs.length).toBeGreaterThan(0);
+    });
+
+    it('shapes inline custom block and splits shaped texts', () => {
+        const content = `A${DataStreamTreeTokenType.CUSTOM_BLOCK}B`;
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed(content, {
+            body: {
+                customBlocks: [{ startIndex: 1, blockId: 'b1' }],
+            },
+            drawings: {
+                b1: {
+                    drawingId: 'd1',
+                    layoutType: PositionedObjectLayoutType.INLINE,
+                    docTransform: {
+                        angle: 0,
+                        size: { width: 100, height: 100 },
+                    },
+                },
+            },
         });
-        h.createSkeletonTabGlyphMock.mockImplementation(() => createGlyph(DataStreamTreeTokenType.TAB, 4));
-        h.textShapeMock.mockReturnValue([
-            { start: 0, end: 1, char: 'A' },
-            { start: 1, end: 2, char: DataStreamTreeTokenType.TAB },
-            { start: 2, end: 4, char: '😀' },
+
+        const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+
+        const allGlyphs = result.flatMap((r) => r.glyphs);
+        const customBlockGlyph = allGlyphs.find((g) => g.streamType === DataStreamTreeTokenType.CUSTOM_BLOCK);
+        expect(customBlockGlyph).toBeDefined();
+        expect(customBlockGlyph!.width).toBeGreaterThan(0);
+        expect(result.length).toBeGreaterThan(1);
+    });
+
+    it('shapes floating custom block without splitting', () => {
+        const content = `A${DataStreamTreeTokenType.CUSTOM_BLOCK}B`;
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed(content, {
+            body: {
+                customBlocks: [{ startIndex: 1, blockId: 'b1' }],
+            },
+            drawings: {
+                b1: {
+                    drawingId: 'd1',
+                    layoutType: PositionedObjectLayoutType.WRAP_NONE,
+                    docTransform: {
+                        angle: 0,
+                        size: { width: 100, height: 100 },
+                    },
+                },
+            },
+        });
+
+        const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+
+        const allGlyphs = result.flatMap((r) => r.glyphs);
+        const customBlockGlyph = allGlyphs.find((g) => g.streamType === DataStreamTreeTokenType.CUSTOM_BLOCK);
+        expect(customBlockGlyph).toBeDefined();
+        expect(customBlockGlyph!.width).toBe(0);
+    });
+
+    it('shapes text with useOpenType when font library is ready', () => {
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('Hello');
+        const originalIsReady = fontLibrary.isReady;
+        fontLibrary.isReady = true;
+
+        try {
+            const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig, true);
+            expect(result.length).toBeGreaterThan(0);
+        } finally {
+            fontLibrary.isReady = originalIsReady;
+        }
+    });
+
+    it('shapes tab with useOpenType when font library is ready', () => {
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('Hello\tworld');
+        const originalIsReady = fontLibrary.isReady;
+        fontLibrary.isReady = true;
+
+        const spy = vi.spyOn(textShapingModule, 'textShape').mockReturnValue([
+            { char: 'H', start: 0, end: 1, glyph: null, font: null, kerning: 0, boundingBox: null },
+            { char: 'e', start: 1, end: 2, glyph: null, font: null, kerning: 0, boundingBox: null },
+            { char: 'l', start: 2, end: 3, glyph: null, font: null, kerning: 0, boundingBox: null },
+            { char: 'l', start: 3, end: 4, glyph: null, font: null, kerning: 0, boundingBox: null },
+            { char: 'o', start: 4, end: 5, glyph: null, font: null, kerning: 0, boundingBox: null },
+            { char: '\t', start: 5, end: 6, glyph: null, font: null, kerning: 0, boundingBox: null },
+            { char: 'w', start: 6, end: 7, glyph: null, font: null, kerning: 0, boundingBox: null },
+            { char: 'o', start: 7, end: 8, glyph: null, font: null, kerning: 0, boundingBox: null },
+            { char: 'r', start: 8, end: 9, glyph: null, font: null, kerning: 0, boundingBox: null },
+            { char: 'l', start: 9, end: 10, glyph: null, font: null, kerning: 0, boundingBox: null },
+            { char: 'd', start: 10, end: 11, glyph: null, font: null, kerning: 0, boundingBox: null },
+            { char: '\r', start: 11, end: 12, glyph: null, font: null, kerning: 0, boundingBox: null },
         ]);
 
-        const ctx = {
-            hyphen: {
-                hasPattern: vi.fn(() => true),
-                loadPattern: vi.fn(),
-            },
-            languageDetector: {
-                detect: vi.fn(() => Lang.EnUs),
-            },
-        } as any;
+        try {
+            const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig, true);
+            const allGlyphs = result.flatMap((r) => r.glyphs);
+            const tabGlyph = allGlyphs.find((g) => g.content === '\t');
+            expect(tabGlyph).toBeDefined();
+        } finally {
+            spy.mockRestore();
+            fontLibrary.isReady = originalIsReady;
+        }
+    });
 
-        const viewModel = {
-            getParagraph: vi.fn(() => ({
-                startIndex: 0,
-                paragraphStyle: {
-                    suppressHyphenation: BooleanNumber.FALSE,
-                },
-            })),
-            getBody: vi.fn(() => ({ dataStream: '' })),
-            getCustomBlockWithoutSetCurrentIndex: vi.fn(() => null),
-        } as any;
+    it('shapes emoji with useOpenType when font library is ready', () => {
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('Hello \uD83D\uDE00');
+        const originalIsReady = fontLibrary.isReady;
+        fontLibrary.isReady = true;
 
-        const shaped = shaping(
-            ctx,
-            `A${DataStreamTreeTokenType.TAB}😀`,
-            viewModel,
-            { startIndex: 0, endIndex: 1 } as any,
-            {
-                autoHyphenation: BooleanNumber.TRUE,
-                doNotHyphenateCaps: BooleanNumber.TRUE,
-                drawings: {},
-            } as any,
-            true
-        );
+        const spy = vi.spyOn(textShapingModule, 'textShape').mockReturnValue([
+            { char: 'H', start: 0, end: 1, glyph: null, font: null, kerning: 0, boundingBox: null },
+            { char: 'e', start: 1, end: 2, glyph: null, font: null, kerning: 0, boundingBox: null },
+            { char: 'l', start: 2, end: 3, glyph: null, font: null, kerning: 0, boundingBox: null },
+            { char: 'l', start: 3, end: 4, glyph: null, font: null, kerning: 0, boundingBox: null },
+            { char: 'o', start: 4, end: 5, glyph: null, font: null, kerning: 0, boundingBox: null },
+            { char: ' ', start: 5, end: 6, glyph: null, font: null, kerning: 0, boundingBox: null },
+            { char: '\uD83D\uDE00', start: 6, end: 8, glyph: null, font: null, kerning: 0, boundingBox: null },
+            { char: '\r', start: 8, end: 9, glyph: null, font: null, kerning: 0, boundingBox: null },
+        ]);
 
-        expect(shaped.length).toBeGreaterThan(0);
-        expect(h.prepareParagraphBodyMock).toHaveBeenCalled();
-        expect(h.textShapeMock).toHaveBeenCalled();
-        expect(h.createSkeletonTabGlyphMock).toHaveBeenCalled();
-        expect(h.createSkeletonLetterGlyphMock).toHaveBeenCalled();
-        expect(h.hyphenEnhancerCtorMock).toHaveBeenCalled();
-        expect(ctx.hyphen.loadPattern).not.toHaveBeenCalled();
+        try {
+            const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig, true);
+            const allGlyphs = result.flatMap((r) => r.glyphs);
+            const emojiGlyph = allGlyphs.find((g) => g.content === '\uD83D\uDE00');
+            expect(emojiGlyph).toBeDefined();
+        } finally {
+            spy.mockRestore();
+            fontLibrary.isReady = originalIsReady;
+        }
+    });
+
+    it('loads hyphen pattern when language pattern is not available', () => {
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('test');
+        sectionBreakConfig.autoHyphenation = BooleanNumber.TRUE;
+        const paragraph = viewModel.getParagraph(paragraphNode.endIndex)!;
+        paragraph.paragraphStyle = { ...paragraph.paragraphStyle, suppressHyphenation: BooleanNumber.FALSE };
+
+        const fakeHyphen = {
+            hasPattern: vi.fn(() => false),
+            loadPattern: vi.fn(() => Promise.resolve()),
+            fetchHyphenCache: vi.fn(),
+            hyphenate: vi.fn(),
+            dispose: vi.fn(),
+        };
+        ctx.hyphen = fakeHyphen as any;
+        ctx.languageDetector = { detect: vi.fn(() => Lang.Fr), dispose: vi.fn() } as any;
+
+        shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+        expect(fakeHyphen.loadPattern).toHaveBeenCalledWith(Lang.Fr);
+    });
+
+    it('uses hyphen enhancer when hyphenation is enabled and pattern exists', () => {
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('hyphenation');
+        sectionBreakConfig.autoHyphenation = BooleanNumber.TRUE;
+        const paragraph = viewModel.getParagraph(paragraphNode.endIndex)!;
+        paragraph.paragraphStyle = { ...paragraph.paragraphStyle, suppressHyphenation: BooleanNumber.FALSE };
+
+        const fakeHyphen = {
+            hasPattern: vi.fn(() => true),
+            loadPattern: vi.fn(() => Promise.resolve()),
+            fetchHyphenCache: vi.fn(),
+            hyphenate: vi.fn((word: string) => [word]),
+            dispose: vi.fn(),
+        };
+        ctx.hyphen = fakeHyphen as any;
+        ctx.languageDetector = { detect: vi.fn(() => Lang.EnUs), dispose: vi.fn() } as any;
+
+        const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+        expect(result.length).toBeGreaterThan(0);
+        expect(fakeHyphen.loadPattern).not.toHaveBeenCalled();
     });
 });

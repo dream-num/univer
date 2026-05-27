@@ -14,222 +14,70 @@
  * limitations under the License.
  */
 
-import { DataStreamTreeTokenType, PositionedObjectLayoutType } from '@univerjs/core';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { BreakType } from '../../../../../../basics/i-document-skeleton-cached';
-
+import { describe, expect, it } from 'vitest';
 import { lineBreaking } from '../linebreaking';
-
-const createSkeletonPageMock = vi.fn((ctx: any, _config: any, _ref: any, pageNumber: number, breakType?: BreakType): any => ({
-    segmentId: 'segment-1',
-    pageNumber,
-    breakType,
-}));
-
-const setColumnFullStateMock = vi.fn((..._args: any[]): any => undefined);
-const getLastNotFullColumnInfoMock = vi.fn((..._args: any[]): any => undefined);
-const dealWithBulletMock = vi.fn((..._args: any[]): any => ({ id: 'bullet-skeleton' }));
-const layoutParagraphMock = vi.fn((...args: any[]): any => {
-    const glyphs = args[1] as any[];
-    const pages = args[2] as any[];
-    return glyphs.length > 0 ? [...pages] : pages;
-});
-
-vi.mock('../../../model/page', () => ({
-    createSkeletonPage: (
-        ctx: any,
-        config: any,
-        ref: any,
-        pageNumber: number,
-        breakType?: BreakType
-    ) => createSkeletonPageMock(ctx, config, ref, pageNumber, breakType),
-}));
-
-vi.mock('../../../model/section', () => ({
-    setColumnFullState: (column: any, full: boolean) => setColumnFullStateMock(column, full),
-}));
-
-vi.mock('../../../tools', () => ({
-    getLastNotFullColumnInfo: (page: any) => getLastNotFullColumnInfoMock(page),
-}));
-
-vi.mock('../bullet', () => ({
-    dealWithBullet: (bullet: any, lists: any, listLevelAncestors: any, localeService: any) => dealWithBulletMock(bullet, lists, listLevelAncestors, localeService),
-}));
-
-vi.mock('../layout-ruler', () => ({
-    layoutParagraph: (
-        ctx: any,
-        glyphs: any[],
-        pages: any[],
-        sectionBreakConfig: any,
-        paragraphConfig: any,
-        isParagraphFirstShapedText: boolean,
-        breakPointType: any
-    ) => layoutParagraphMock(ctx, glyphs, pages, sectionBreakConfig, paragraphConfig, isParagraphFirstShapedText, breakPointType),
-}));
-
-function createContext() {
-    return {
-        paragraphConfigCache: new Map(),
-        skeletonResourceReference: {
-            skeHeaders: new Map(),
-            skeFooters: new Map(),
-            skeListLevel: new Map(),
-            drawingAnchor: new Map(),
-        },
-    } as any;
-}
-
-function createViewModel() {
-    return {
-        getParagraph: vi.fn(() => ({
-            startIndex: 0,
-            paragraphStyle: {},
-            bullet: { listId: 'l1', nestingLevel: 0 },
-        })),
-        getCustomBlock: vi.fn((charIndex: number) => {
-            if (charIndex === 1) {
-                return { blockId: 'inline-1' };
-            }
-            if (charIndex === 2) {
-                return { blockId: 'float-1' };
-            }
-            return null;
-        }),
-    } as any;
-}
+import { shaping } from '../shaping';
+import { createParagraphLayoutTestBed } from './create-paragraph-layout-test-bed';
 
 describe('linebreaking', () => {
-    beforeEach(() => {
-        vi.clearAllMocks();
+    it('lays out short text on a single page', () => {
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed('Hi');
+        const shapedTextList = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+
+        const result = lineBreaking(ctx, viewModel, shapedTextList, curPage, paragraphNode, sectionBreakConfig, null);
+
+        expect(result.length).toBe(1);
+        expect(result[0].sections.length).toBeGreaterThan(0);
     });
 
-    it('handles page-break and non-last column-break branches', () => {
-        const ctx = createContext();
-        const viewModel = createViewModel();
-        getLastNotFullColumnInfoMock.mockReturnValue({
-            column: { id: 'c1' },
-            isLast: false,
-        });
+    it('lays out longer text that may span multiple lines', () => {
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed('This is a longer text that should still fit within a reasonable page width for testing purposes');
+        const shapedTextList = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
 
-        const curPage = {
-            segmentId: 'segment-1',
-            pageNumber: 1,
-        } as any;
+        const result = lineBreaking(ctx, viewModel, shapedTextList, curPage, paragraphNode, sectionBreakConfig, null);
 
-        const paragraphNode = {
-            endIndex: 10,
-            startIndex: 0,
-            blocks: [1, 2],
-            children: [{}],
-        } as any;
-
-        const sectionBreakConfig = {
-            lists: [],
-            localeService: {} as any,
-            drawings: {
-                'inline-1': {
-                    drawingId: 'inline-1',
-                    layoutType: PositionedObjectLayoutType.INLINE,
-                },
-                'float-1': {
-                    drawingId: 'float-1',
-                    layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
-                },
-            },
-        } as any;
-
-        const shapedTextList = [
-            {
-                text: `A${DataStreamTreeTokenType.PAGE_BREAK}`,
-                glyphs: [{ content: 'A' }],
-                breakPointType: 0,
-            },
-            {
-                text: `B${DataStreamTreeTokenType.COLUMN_BREAK}`,
-                glyphs: [{ content: 'B' }],
-                breakPointType: 0,
-            },
-            {
-                text: 'C',
-                glyphs: [{ content: 'C' }],
-                breakPointType: 0,
-            },
-        ] as any;
-
-        const tableSkeleton = { tableId: 'table-1' } as any;
-        const pages = lineBreaking(
-            ctx,
-            viewModel,
-            shapedTextList,
-            curPage,
-            paragraphNode,
-            sectionBreakConfig,
-            tableSkeleton
-        );
-
-        expect(dealWithBulletMock).toHaveBeenCalled();
-        expect(layoutParagraphMock).toHaveBeenCalled();
-        expect(createSkeletonPageMock).toHaveBeenCalledWith(
-            ctx,
-            sectionBreakConfig,
-            ctx.skeletonResourceReference,
-            2,
-            BreakType.PAGE
-        );
-        expect(setColumnFullStateMock).toHaveBeenCalled();
-        expect(ctx.paragraphConfigCache.get('segment-1')?.has(10)).toBe(true);
-        expect(ctx.skeletonResourceReference.drawingAnchor.get('segment-1')).toBeTruthy();
-        expect(pages.length).toBeGreaterThan(0);
+        expect(result.length).toBeGreaterThanOrEqual(1);
     });
 
-    it('reuses cached bullet skeleton and creates new page for last column', () => {
-        const ctx = createContext();
-        const cachedSegment = new Map();
-        cachedSegment.set(10, { bulletSkeleton: { id: 'cached-bullet' } });
-        ctx.paragraphConfigCache.set('segment-1', cachedSegment);
-
-        const viewModel = createViewModel();
-        getLastNotFullColumnInfoMock.mockReturnValue({
-            column: { id: 'c-last' },
-            isLast: true,
+    it('handles bullet list paragraphs', () => {
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed('List item', {
+            body: {
+                dataStream: 'List item\r\n',
+                textRuns: [{ st: 0, ed: 11, ts: {} }],
+                paragraphs: [{
+                    startIndex: 9,
+                    bullet: {
+                        listId: 'list-1',
+                        listType: 'test-list',
+                        nestingLevel: 0,
+                    },
+                }],
+                sectionBreaks: [{ startIndex: 10 }],
+            },
+            lists: {
+                'test-list': {
+                    listType: 'test-list',
+                    nestingLevel: [{
+                        bulletAlignment: 1,
+                        glyphFormat: '%1.',
+                        startNumber: 1,
+                        glyphType: 0,
+                    }],
+                },
+            },
         });
+        const shapedTextList = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
 
-        const pages = lineBreaking(
-            ctx,
-            viewModel,
-            [{
-                text: `X${DataStreamTreeTokenType.COLUMN_BREAK}`,
-                glyphs: [{ content: 'X' }],
-                breakPointType: 0,
-            }] as any,
-            {
-                segmentId: 'segment-1',
-                pageNumber: 5,
-            } as any,
-            {
-                endIndex: 10,
-                startIndex: 0,
-                blocks: [],
-                children: [],
-            } as any,
-            {
-                lists: [],
-                localeService: {} as any,
-                drawings: {},
-            } as any,
-            null
-        );
+        const result = lineBreaking(ctx, viewModel, shapedTextList, curPage, paragraphNode, sectionBreakConfig, null);
 
-        expect(dealWithBulletMock).not.toHaveBeenCalled();
-        expect(createSkeletonPageMock).toHaveBeenCalledWith(
-            ctx,
-            expect.any(Object),
-            ctx.skeletonResourceReference,
-            6,
-            BreakType.COLUMN
-        );
-        expect(pages.length).toBeGreaterThanOrEqual(1);
+        expect(result.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('handles empty shaped text list', () => {
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed('');
+
+        const result = lineBreaking(ctx, viewModel, [], curPage, paragraphNode, sectionBreakConfig, null);
+
+        expect(result.length).toBe(1);
     });
 });

@@ -47,6 +47,7 @@ import {
     hasLatinExtendedB,
     hasLatinOneSupplement,
     hasSpace,
+    hasThai,
     hasTibetan,
     hasUnMergedCellInRow,
     injectStyle,
@@ -264,6 +265,9 @@ describe('tools extra', () => {
             startColumn: 0,
             endColumn: 6,
         });
+
+        expect(hasThai('สร้างงานใหม่')).toBe(true);
+        expect(hasThai('hello')).toBe(false);
     });
 
     it('handles style insertion and DOM size helpers', () => {

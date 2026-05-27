@@ -48,6 +48,11 @@ const locale: typeof enUS = {
             delete: 'Delete table column',
         },
 
+        sort: {
+            'sort-asc': '오름차순',
+            'sort-desc': '내림차순',
+        },
+
         insert: {
             main: '표 삽입',
             row: '표 행 삽입',

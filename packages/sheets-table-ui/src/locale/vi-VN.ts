@@ -48,6 +48,11 @@ const locale: typeof enUS = {
             delete: 'Delete table column',
         },
 
+        sort: {
+            'sort-asc': 'Tăng dần',
+            'sort-desc': 'Giảm dần',
+        },
+
         insert: {
             main: 'Chèn bảng',
             row: 'Chèn hàng bảng',

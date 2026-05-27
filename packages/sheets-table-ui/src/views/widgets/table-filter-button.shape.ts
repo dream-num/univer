@@ -125,7 +125,7 @@ export class SheetsTableFilterButtonShape extends Shape<ISheetsTableFilterButton
 
     private _drawChevron(ctx: UniverRenderingContext2D, color: string): void {
         const centerX = FILTER_ICON_SIZE / 2;
-        const centerY = FILTER_ICON_SIZE / 2 + 1;
+        const centerY = FILTER_ICON_SIZE / 2;
 
         ctx.save();
         ctx.beginPath();

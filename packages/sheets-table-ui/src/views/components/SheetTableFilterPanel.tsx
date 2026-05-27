@@ -176,7 +176,7 @@ export function SheetTableFilterPanel() {
     return (
         <div
             className={`
-              univer-box-border univer-flex univer-min-w-[312px] univer-flex-col univer-rounded-[10px] univer-bg-white
+              univer-box-border univer-flex univer-w-[400px] univer-flex-col univer-rounded-[10px] univer-bg-white
               univer-p-4 univer-shadow-lg
               dark:!univer-border-gray-600 dark:!univer-bg-gray-700
             `}
@@ -243,11 +243,11 @@ export function SheetTableFilterPanel() {
                         <ButtonGroup className="univer-mb-3 !univer-flex univer-w-full">
                             <Button className="univer-w-1/2" onClick={() => applySort(true)}>
                                 <AscendingIcon className="univer-mr-1" />
-                                {localeService.t('sheets-sort.general.sort-asc')}
+                                {localeService.t('sheets-table-ui.sort.sort-asc')}
                             </Button>
                             <Button className="univer-w-1/2" onClick={() => applySort(false)}>
                                 <DescendingIcon className="univer-mr-1" />
-                                {localeService.t('sheets-sort.general.sort-desc')}
+                                {localeService.t('sheets-table-ui.sort.sort-desc')}
                             </Button>
                         </ButtonGroup>
                     </div>

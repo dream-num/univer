@@ -40,8 +40,9 @@ function DocFooterContent() {
 export function DocFooter() {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), undefined, undefined, []);
+    const slide = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SLIDE), undefined, undefined, []);
 
-    if (workbook) {
+    if (workbook || slide) {
         return null;
     }
 

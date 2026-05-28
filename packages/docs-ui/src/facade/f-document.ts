@@ -29,6 +29,13 @@ import {
 import { DocSelectionRenderService, InsertCommand } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 
+export interface IDocumentInsertTextFacadeOptions {
+    startOffset?: number;
+    endOffset?: number;
+    segmentId?: string;
+    cursorOffset?: number;
+}
+
 /**
  * @hideconstructor
  */
@@ -76,8 +83,6 @@ export class FDocument {
      * @param text - The text to be added to the end of this text region.
      */
     appendText(text: string): Promise<boolean> {
-        const unitId = this.id;
-
         const { body } = this.getSnapshot();
 
         if (!body) {
@@ -86,14 +91,35 @@ export class FDocument {
 
         const lastPosition = body.dataStream.length - 2;
 
-        const activeRange = {
+        return this.insertText(text, {
             startOffset: lastPosition,
             endOffset: lastPosition,
-            collapsed: true,
             segmentId: '',
-        };
+        });
+    }
 
-        const { segmentId } = activeRange;
+    /**
+     * Inserts text at the provided document range. Defaults to appending before the final section break.
+     * @param text - The text to insert.
+     * @param options - Optional target range, segment id, and cursor offset.
+     */
+    insertText(text: string, options: IDocumentInsertTextFacadeOptions = {}): Promise<boolean> {
+        const unitId = this.id;
+        const { body } = this.getSnapshot();
+
+        if (!body) {
+            throw new Error('The document body is empty');
+        }
+
+        const startOffset = options.startOffset ?? Math.max(0, body.dataStream.length - 2);
+        const endOffset = options.endOffset ?? startOffset;
+        const segmentId = options.segmentId ?? '';
+        const activeRange = {
+            startOffset,
+            endOffset,
+            collapsed: startOffset === endOffset,
+            segmentId,
+        };
 
         return this._commandService.executeCommand(InsertCommand.id, {
             unitId,
@@ -102,6 +128,21 @@ export class FDocument {
             },
             range: activeRange,
             segmentId,
+            ...(options.cursorOffset == null ? {} : { cursorOffset: options.cursorOffset }),
+        });
+    }
+
+    /**
+     * Inserts one or more plain-text paragraphs at the provided document range.
+     * @param text - Paragraph text. Newlines are normalized to document paragraph separators.
+     * @param options - Optional target range, segment id, and cursor offset.
+     */
+    insertParagraph(text = '', options: IDocumentInsertTextFacadeOptions = {}): Promise<boolean> {
+        const dataStream = `${text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n').join('\r\n')}\r\n`;
+
+        return this.insertText(dataStream, {
+            ...options,
+            cursorOffset: options.cursorOffset ?? dataStream.length,
         });
     }
 

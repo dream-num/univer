@@ -47,6 +47,34 @@ export function getParagraphMenuPopupDirection(anchorLeft: number, menuWidth = 2
     return anchorLeft - menuWidth < viewportPadding ? 'right' : 'left';
 }
 
+export const PARAGRAPH_MENU_HOVER_OPEN_DELAY = 260;
+
+export function createParagraphMenuHoverOpenScheduler(openMenu: () => void, delay = PARAGRAPH_MENU_HOVER_OPEN_DELAY) {
+    let openTimer: number | null = null;
+
+    const cancel = () => {
+        if (openTimer != null) {
+            window.clearTimeout(openTimer);
+            openTimer = null;
+        }
+    };
+
+    return {
+        schedule() {
+            cancel();
+            openTimer = window.setTimeout(() => {
+                openTimer = null;
+                openMenu();
+            }, delay);
+        },
+        cancel,
+        openNow() {
+            cancel();
+            openMenu();
+        },
+    };
+}
+
 export function isEmptyParagraphMenuTarget(dataStream: string, paragraph?: IMutiPageParagraphBound | null | void): boolean {
     if (!paragraph) {
         return false;
@@ -179,6 +207,8 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
     const dragTargetOffsetRef = useRef<number | null>(null);
     const dragRangeRef = useRef<{ startOffset: number; endOffset: number } | null>(null);
     const isDraggingRef = useRef(false);
+    const openMenuRef = useRef<() => void>(() => undefined);
+    const hoverOpenSchedulerRef = useRef(createParagraphMenuHoverOpenScheduler(() => openMenuRef.current()));
     const commandService = useDependency(ICommandService);
     const docSelectionManagerService = useDependency(DocSelectionManagerService);
     const docClipboardService = useDependency(IDocClipboardService);
@@ -271,8 +301,24 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
         setEmptyMode(isEmptyParagraph);
         setVisible(true);
     };
+    openMenuRef.current = handleOpenMenu;
 
-    useEffect(() => () => clearHideTimer(), []);
+    const scheduleOpenMenu = () => {
+        clearHideTimer();
+        hoverOpenSchedulerRef.current.schedule();
+    };
+
+    const cancelOpenMenu = () => {
+        hoverOpenSchedulerRef.current.cancel();
+    };
+
+    useEffect(() => () => {
+        if (hideTimerRef.current != null) {
+            window.clearTimeout(hideTimerRef.current);
+            hideTimerRef.current = null;
+        }
+        hoverOpenSchedulerRef.current.cancel();
+    }, []);
 
     return (
         <>
@@ -292,17 +338,18 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
                 onMouseEnter={(e) => {
                     popup.onPointerEnter?.(e);
                     isMouseOver.current = true;
-                    handleOpenMenu();
+                    scheduleOpenMenu();
                 }}
                 onMouseLeave={() => {
                     isMouseOver.current = false;
+                    cancelOpenMenu();
                     scheduleHideMenu();
                 }}
                 onClick={(event) => {
                     event.preventDefault();
                     event.stopPropagation();
                     isMouseOver.current = true;
-                    handleOpenMenu();
+                    hoverOpenSchedulerRef.current.openNow();
                 }}
             >
                 <TargetIcon

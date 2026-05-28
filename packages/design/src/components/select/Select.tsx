@@ -146,7 +146,7 @@ export function Select(props: ISelectProps) {
 
     return (
         <DropdownMenu
-            className="max-h univer-w-[--radix-popper-anchor-width] univer-min-w-36"
+            className="univer-max-h-80 univer-w-[--radix-popper-anchor-width] univer-min-w-36 univer-overflow-auto"
             align="start"
             open={open}
             items={items}

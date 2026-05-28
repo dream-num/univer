@@ -56,6 +56,8 @@ export interface IFakeViewport {
     top: number;
     width: number;
     height: number;
+    marginLeft: number;
+    marginTop: number;
     scrollAnimationFrameId: number | null;
     isWheelPreventDefaultX: boolean;
     isWheelPreventDefaultY: boolean;
@@ -92,6 +94,8 @@ export function createFakeViewport(viewportKey: string, options?: Partial<IFakeV
         top: 0,
         width: 800,
         height: 600,
+        marginLeft: 0,
+        marginTop: 0,
         scrollAnimationFrameId: null,
         isWheelPreventDefaultX: false,
         isWheelPreventDefaultY: false,
@@ -120,7 +124,10 @@ export function createFakeViewport(viewportKey: string, options?: Partial<IFakeV
         disable: () => {
             viewport.isActive = false;
         },
-        setMargin: () => { },
+        setMargin: (marginLeft, marginTop) => {
+            viewport.marginLeft = marginLeft;
+            viewport.marginTop = marginTop;
+        },
         setViewportSize: ({ left, top, width, height }) => {
             if (typeof left === 'number') viewport.left = left;
             if (typeof top === 'number') viewport.top = top;
@@ -156,6 +163,8 @@ export function createFakeViewport(viewportKey: string, options?: Partial<IFakeV
 }
 
 export interface IFakeScene {
+    width?: number;
+    height?: number;
     scaleX: number;
     scaleY: number;
     onMouseWheel$: ITestEvent<any>;
@@ -232,7 +241,10 @@ export function createFakeScene(
         getCoordRelativeToViewport: (vec: any) => ({ x: vec?.x ?? vec?.[0] ?? 0, y: vec?.y ?? vec?.[1] ?? 0 }),
         getScrollXYInfoByViewport: (_coords, viewport) => ({ x: viewport?.viewportScrollX ?? 0, y: viewport?.viewportScrollY ?? 0 }),
         getAncestorScale: () => ({ scaleX: scene.scaleX, scaleY: scene.scaleY }),
-        transformByState: () => { },
+        transformByState: ({ width, height }) => {
+            scene.width = width;
+            scene.height = height;
+        },
         scale: (x, y) => {
             scene.scaleX = x;
             scene.scaleY = y;

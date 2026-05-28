@@ -179,6 +179,7 @@ export class MockRenderManagerService implements Pick<IRenderManagerService, 'ge
     getRenderById(_unitId: string): Nullable<IRender> {
         return {
             with: <T>(identifier: DependencyIdentifier<T>) => this._injector.get(identifier),
+            isDisposed: () => false,
         } as unknown as IRender;
     }
 }

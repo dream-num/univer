@@ -49,7 +49,7 @@ export const useResize = (editor?: Editor, isSingle = true, autoScrollbar?: bool
         // eslint-disable-next-line complexity
         return debounce(() => {
             if (!autoScrollbar) return;
-            if (!editor || !autoScrollbar) {
+            if (!editor || !autoScrollbar || editor.render.isDisposed()) {
                 return;
             }
 

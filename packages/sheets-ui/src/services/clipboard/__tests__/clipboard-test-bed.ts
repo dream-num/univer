@@ -623,6 +623,7 @@ export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: De
         activated$: new BehaviorSubject(true),
         activate: () => {},
         deactivate: () => {},
+        isDisposed: () => false,
     });
 
     return {

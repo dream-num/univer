@@ -31,7 +31,7 @@ import type {
     Workbook,
 } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import type { ISetRangeValuesCommandParams, MutationsAffectRange } from '@univerjs/sheets';
+import type { ISetRangeValuesCommandParams, ISetWorksheetActivateCommandParams, MutationsAffectRange } from '@univerjs/sheets';
 import type { IUniverSheetsUIConfig } from '../../config/config';
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import {
@@ -557,7 +557,7 @@ export class EditingRenderController extends Disposable {
          */
         if (workbookId === unitId && sheetId !== worksheetId) {
             // SetWorksheetActivateCommand handler uses Promise
-            await this._commandService.executeCommand(SetWorksheetActivateCommand.id, {
+            await this._commandService.executeCommand<ISetWorksheetActivateCommandParams>(SetWorksheetActivateCommand.id, {
                 subUnitId: sheetId,
                 unitId,
             });

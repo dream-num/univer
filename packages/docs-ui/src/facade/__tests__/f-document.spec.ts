@@ -79,6 +79,51 @@ describe('Test FDocument', () => {
         });
     });
 
+    it('inserts text at an explicit document range', async () => {
+        await expect(document.insertText('Docs', {
+            endOffset: 4,
+            segmentId: '',
+            startOffset: 2,
+        })).resolves.toBe(true);
+
+        expect(commandService.executeCommand).toHaveBeenCalledWith(InsertCommand.id, {
+            unitId: 'test',
+            body: {
+                dataStream: 'Docs',
+            },
+            range: {
+                startOffset: 2,
+                endOffset: 4,
+                collapsed: false,
+                segmentId: '',
+            },
+            segmentId: '',
+        });
+    });
+
+    it('inserts paragraphs at an explicit document range', async () => {
+        await expect(document.insertParagraph('Line 1\nLine 2', {
+            endOffset: 6,
+            segmentId: '',
+            startOffset: 6,
+        })).resolves.toBe(true);
+
+        expect(commandService.executeCommand).toHaveBeenCalledWith(InsertCommand.id, {
+            unitId: 'test',
+            body: {
+                dataStream: 'Line 1\r\nLine 2\r\n',
+            },
+            range: {
+                startOffset: 6,
+                endOffset: 6,
+                collapsed: true,
+                segmentId: '',
+            },
+            segmentId: '',
+            cursorOffset: 'Line 1\r\nLine 2\r\n'.length,
+        });
+    });
+
     it('throws when appending text to a document without a body', () => {
         const emptyDocument = new FDocument(
             {

@@ -32,7 +32,8 @@ export interface IFWorksheetCommentMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const comments = fWorksheet.getComments();
      * comments.forEach((comment) => {
      *   const isRoot = comment.getIsRoot();
@@ -56,7 +57,8 @@ export interface IFWorksheetCommentMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const result = await fWorksheet.clearComments();
      * console.log(result);
      * ```
@@ -68,7 +70,8 @@ export interface IFWorksheetCommentMixin {
      * @param {string} commentId comment id
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Create a new comment
      * const richText = univerAPI.newRichText().insertText('hello univer');

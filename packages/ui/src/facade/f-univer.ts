@@ -53,7 +53,8 @@ export interface IFUniverUIMixin {
      *
      * // Trigger a shortcut
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const fRange = fWorksheet.getRange('A1');
      * fRange.activate();
      * fRange.setValue('Hello Univer');
@@ -81,7 +82,8 @@ export interface IFUniverUIMixin {
      * // this example listens for the cell click event and executes the copy and paste code.
      * univerAPI.addEvent(univerAPI.Event.CellClicked, async (params) => {
      *   const fWorkbook = univerAPI.getActiveWorkbook();
-     *   const fWorksheet = fWorkbook.getActiveSheet();
+     *   const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     *   if (!fWorksheet) return;
      *
      *   // Copy the range A1:B2 to the clipboard
      *   const fRange = fWorksheet.getRange('A1:B2');
@@ -112,7 +114,8 @@ export interface IFUniverUIMixin {
      * // this example listens for the cell click event and executes the copy and paste code.
      * univerAPI.addEvent(univerAPI.Event.CellClicked, async (params) => {
      *   const fWorkbook = univerAPI.getActiveWorkbook();
-     *   const fWorksheet = fWorkbook.getActiveSheet();
+     *   const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     *   if (!fWorksheet) return;
      *
      *   // Copy the range A1:B2 to the clipboard
      *   const fRange = fWorksheet.getRange('A1:B2');
@@ -366,7 +369,8 @@ export interface IFUniverUIMixin {
      * @returns {IDisposable} The disposable object.
      * @example
      * ```ts
-     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const fWorksheet = univerAPI.getActiveWorkbook().getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Register a range loading component
      * const RangeLoading = () => {

@@ -31,7 +31,8 @@ export interface IFWorksheetDataValidationMixin {
      * @returns {FDataValidation[]} All data validation rules
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const rules = fWorksheet.getDataValidations();
      * console.log(rules);
      * ```
@@ -43,7 +44,8 @@ export interface IFWorksheetDataValidationMixin {
      * @returns {Promise<ObjectMatrix<Nullable<DataValidationStatus>>>} matrix of validator status
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const status = await fWorksheet.getValidatorStatusAsync();
      * console.log(status);
      * ```
@@ -56,7 +58,8 @@ export interface IFWorksheetDataValidationMixin {
      * @returns {Nullable<FDataValidation>} data validation rule
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const rules = fWorksheet.getDataValidations();
      * console.log(fWorksheet.getDataValidation(rules[0]?.rule.uid));
      * ```
@@ -69,7 +72,8 @@ export interface IFWorksheetDataValidationMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const errors = await fWorksheet.getAllDataValidationError();
      * console.log(errors);
      * ```

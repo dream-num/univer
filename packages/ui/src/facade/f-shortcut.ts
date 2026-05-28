@@ -79,7 +79,8 @@ export class FShortcut extends FBase {
      * ```typescript
      * // Assum the current sheet is empty sheet.
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const fRange = fWorksheet.getRange('A1');
      *
      * // Set A1 cell active and set value to 'Hello Univer'.

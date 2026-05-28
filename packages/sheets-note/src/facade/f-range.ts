@@ -29,7 +29,8 @@ export interface IFRangeSheetsNoteMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const fRange = fWorksheet.getRange('A1:D10');
      * const note = fRange.getNote();
      * console.log(note);
@@ -43,7 +44,8 @@ export interface IFRangeSheetsNoteMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const fRange = fWorksheet.getRange('A1');
      * fRange.createOrUpdateNote({
      *   note: 'This is a note',
@@ -60,7 +62,8 @@ export interface IFRangeSheetsNoteMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const notes = fWorksheet.getNotes();
      * console.log(notes);
      *

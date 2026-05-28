@@ -32,7 +32,8 @@ export interface IFRangeSheetsFilterMixin {
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const fRange = fWorksheet.getRange('A1:D14');
      * let fFilter = fRange.createFilter();
      *
@@ -53,7 +54,8 @@ export interface IFRangeSheetsFilterMixin {
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const fRange = fWorksheet.getRange('A1:D14');
      * let fFilter = fRange.getFilter();
      *

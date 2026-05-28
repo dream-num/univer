@@ -237,7 +237,8 @@ export interface IFWorkbookSheetsUIMixin {
      * @example
      * ``` ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // scroll to cell D10
      * fWorksheet.scrollToCell(9, 3);

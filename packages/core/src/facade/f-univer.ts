@@ -530,7 +530,9 @@ export class FUniver extends Disposable {
      * @example
      * ```ts
      * const richText = univerAPI.newRichText({ body: { dataStream: 'Hello World\r\n' } });
-     * const range = univerAPI.getActiveWorkbook().getActiveSheet().getRange('A1');
+     * const fWorksheet = univerAPI.getActiveWorkbook().getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
+     * const range = fWorksheet.getRange('A1');
      * range.setRichTextValueForCell(richText);
      * ```
      */
@@ -545,7 +547,9 @@ export class FUniver extends Disposable {
      * @example
      * ```ts
      * const richTextValue = univerAPI.newRichTextValue({ body: { dataStream: 'Hello World\r\n' } });
-     * const range = univerAPI.getActiveWorkbook().getActiveSheet().getRange('A1');
+     * const fWorksheet = univerAPI.getActiveWorkbook().getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
+     * const range = fWorksheet.getRange('A1');
      * range.setRichTextValueForCell(richTextValue);
      * ```
      */
@@ -562,7 +566,9 @@ export class FUniver extends Disposable {
      * const richText = univerAPI.newRichText({ body: { dataStream: 'Hello World\r\n' } });
      * const paragraphStyle = univerAPI.newParagraphStyle({ textStyle: { ff: 'Arial', fs: 12, it: univerAPI.Enum.BooleanNumber.TRUE, bl: univerAPI.Enum.BooleanNumber.TRUE } });
      * richText.insertParagraph(paragraphStyle);
-     * const range = univerAPI.getActiveWorkbook().getActiveSheet().getRange('A1');
+     * const fWorksheet = univerAPI.getActiveWorkbook().getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
+     * const range = fWorksheet.getRange('A1');
      * range.setRichTextValueForCell(richText);
      * ```
      */

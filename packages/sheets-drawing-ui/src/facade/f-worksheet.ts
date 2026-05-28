@@ -47,7 +47,8 @@ export interface IFWorksheetDrawingUIMixin {
      * @returns {IFCanvasFloatDomResult | null} float dom info or null if not found
      * @example
      * ```ts
-     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const fWorksheet = univerAPI.getActiveWorkbook().getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const floatDom = fWorksheet.getFloatDomById('myFloatDomId');
      * if (floatDom) {
      *   console.log('Float dom position:', floatDom.position);
@@ -63,7 +64,8 @@ export interface IFWorksheetDrawingUIMixin {
      * @returns {IFCanvasFloatDomResult[]} array of float dom info
      * @example
      * ```ts
-     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const fWorksheet = univerAPI.getActiveWorkbook().getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const allFloatDoms = fWorksheet.getAllFloatDoms();
      * allFloatDoms.forEach(floatDom => {
      *   console.log('Float dom ID:', floatDom.id);
@@ -80,7 +82,8 @@ export interface IFWorksheetDrawingUIMixin {
      * @returns {FWorksheet} The worksheet instance for chaining
      * @example
      * ```ts
-     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const fWorksheet = univerAPI.getActiveWorkbook().getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const firstFloatDom = fWorksheet.getAllFloatDoms()[0];
      *
      * if (!firstFloatDom) return;
@@ -118,7 +121,8 @@ export interface IFWorksheetDrawingUIMixin {
      * @returns {FWorksheet} The worksheet instance for chaining
      * @example
      * ```ts
-     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const fWorksheet = univerAPI.getActiveWorkbook().getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Update multiple float doms at once
      * const allFloatDoms = fWorksheet.getAllFloatDoms();
@@ -158,7 +162,8 @@ export interface IFWorksheetDrawingUIMixin {
      * @returns {FWorksheet} The worksheet instance for chaining
      * @example
      * ```ts
-     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const fWorksheet = univerAPI.getActiveWorkbook().getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const firstFloatDom = fWorksheet.getAllFloatDoms()[0];
      *
      * if (!firstFloatDom) return;
@@ -176,7 +181,8 @@ export interface IFWorksheetDrawingUIMixin {
      * @returns float dom id and dispose function
      * @example
      * ```tsx
-     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const fWorksheet = univerAPI.getActiveWorkbook().getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // You should register components at an appropriate time (e.g., when Univer is loaded)
      * // This is a React component. For Vue3 components, the third parameter should be `{ framework: 'vue3' }`
@@ -229,7 +235,8 @@ export interface IFWorksheetDrawingUIMixin {
      * @returns float dom id and dispose function
      * @example
      * ```tsx
-     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const fWorksheet = univerAPI.getActiveWorkbook().getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Register a range loading component
      * const RangeLoading = () => {
@@ -324,7 +331,8 @@ export interface IFWorksheetDrawingUIMixin {
      * @returns float dom id and dispose function
      * @example
      * ```ts
-     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const fWorksheet = univerAPI.getActiveWorkbook().getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Register a float button component
      * const FloatButton = () => {
@@ -392,7 +400,8 @@ export interface IFWorksheetDrawingUIMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Save cell images from multiple ranges
      * const range1 = fWorksheet.getRange('A1:B10');

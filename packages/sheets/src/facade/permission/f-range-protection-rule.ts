@@ -80,7 +80,8 @@ export class FRangeProtectionRule {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const rules = await fWorksheet.getWorksheetPermission().listRangeProtectionRules();
      * // Update the ranges to A1:C3 for the first rule
      * if (rules.length > 0) {
@@ -141,7 +142,8 @@ export class FRangeProtectionRule {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const rules = await fWorksheet.getWorksheetPermission().listRangeProtectionRules();
      * // Remove the first protection rule
      * if (rules.length > 0) {
@@ -185,7 +187,8 @@ export class FRangeProtectionRule {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const fRange = fWorksheet.getRange('A1:B2');
      * // First, create a protection rule
      * const rule = await fRange.getRangePermission().protect({ name: 'My Range', allowEdit: true });
@@ -235,7 +238,8 @@ export class FRangeProtectionRule {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const rules = await fWorksheet.getWorksheetPermission().listRangeProtectionRules();
      * // Check if the first rule allows editing
      * if (rules.length > 0) {
@@ -267,7 +271,8 @@ export class FRangeProtectionRule {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const rules = await fWorksheet.getWorksheetPermission().listRangeProtectionRules();
      * // Check if the first rule allows editing
      * const rule = rules[0];
@@ -288,7 +293,8 @@ export class FRangeProtectionRule {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const rules = await fWorksheet.getWorksheetPermission().listRangeProtectionRules();
      * // Check if the first rule allows viewing
      * const rule = rules[0];
@@ -309,7 +315,8 @@ export class FRangeProtectionRule {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const rules = await fWorksheet.getWorksheetPermission().listRangeProtectionRules();
      * // Check if the first rule allows managing collaborators
      * const rule = rules[0];
@@ -330,7 +337,8 @@ export class FRangeProtectionRule {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const rules = await fWorksheet.getWorksheetPermission().listRangeProtectionRules();
      * // Check if the first rule allows deleting the rule
      * const rule = rules[0];
@@ -351,7 +359,8 @@ export class FRangeProtectionRule {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const rules = await fWorksheet.getWorksheetPermission().listRangeProtectionRules();
      * // Get the permission snapshot of the first rule
      * if (rules.length > 0) {

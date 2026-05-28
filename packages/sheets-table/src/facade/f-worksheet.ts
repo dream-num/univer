@@ -51,7 +51,8 @@ export interface IFWorksheetTableMixin {
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Insert a table in the range B2:F11
      * const fRange = fWorksheet.getRange('B2:F11');
@@ -94,7 +95,8 @@ export interface IFWorksheetTableMixin {
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Insert a table in the range B2:F11
      * const fRange = fWorksheet.getRange('B2:F11');
@@ -132,7 +134,8 @@ export interface IFWorksheetTableMixin {
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const tableInfo = fWorkbook.getTableInfo('id-1');
      * console.log('debugger tableInfo', tableInfo);
      *
@@ -152,7 +155,8 @@ export interface IFWorksheetTableMixin {
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Insert a table in the range B2:F11
      * const fRange = fWorksheet.getRange('B2:F11');
@@ -187,7 +191,8 @@ export interface IFWorksheetTableMixin {
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Insert a table in the range B2:F11
      * const fRange = fWorksheet.getRange('B2:F11');
@@ -219,7 +224,8 @@ export interface IFWorksheetTableMixin {
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const tables = fWorksheet.getSubTableInfos();
      * console.log('debugger tables', tables);
      * ```
@@ -234,7 +240,8 @@ export interface IFWorksheetTableMixin {
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Insert a table in the range B2:F11
      * const fRange = fWorksheet.getRange('B2:F11');
@@ -278,7 +285,8 @@ export interface IFWorksheetTableMixin {
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * const cellB2 = fWorksheet.getRange('B2');
      * const row = cellB2.getRow();
@@ -308,7 +316,8 @@ export interface IFWorksheetTableMixin {
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Insert a table in the range B2:F11
      * const fRange = fWorksheet.getRange('B2:F11');

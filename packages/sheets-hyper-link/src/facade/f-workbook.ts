@@ -32,7 +32,8 @@ export interface IFWorkbookHyperlinkMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Create a defined name "TestRange" for the range A1:B10 of the active sheet
      * const definedNameParam = fWorkbook.newDefinedNameBuilder()
@@ -67,7 +68,8 @@ export interface IFWorkbookHyperlinkMixin {
      * ``` ts
      * // Create a hyperlink to the range A1:D10 of the current sheet
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const fRange = fWorksheet.getRange('A1:D10');
      * const hyperlink = fRange.getUrl();
      *

@@ -56,7 +56,8 @@ export interface IFFormulaSheetsMixin {
      *
      * // Use the function in a cell
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const cellA1 = fWorksheet.getRange('A1');
      * cellA1.setValue('World');
      * const cellA2 = fWorksheet.getRange('A2');
@@ -81,7 +82,8 @@ export interface IFFormulaSheetsMixin {
      *
      * // Use the function in a cell
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const cellA1 = fWorksheet.getRange('A1');
      * cellA1.setValue(100);
      * const cellA2 = fWorksheet.getRange('A2');
@@ -121,7 +123,8 @@ export interface IFFormulaSheetsMixin {
      *
      * // Use the function in a cell
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const cellA1 = fWorksheet.getRange('A1');
      * cellA1.setValue(1);
      * const cellA2 = fWorksheet.getRange('A2');
@@ -176,7 +179,8 @@ export interface IFFormulaSheetsMixin {
      *
      * // Use the function in a cell
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const cellA1 = fWorksheet.getRange('A1');
      * cellA1.setValue('World');
      * const cellA2 = fWorksheet.getRange('A2');
@@ -212,7 +216,8 @@ export interface IFFormulaSheetsMixin {
      *
      * // Use the function in a cell
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const cellA1 = fWorksheet.getRange('A1');
      * cellA1.setValue({ f: '=RANDOM_DELAYED()' });
      *
@@ -262,7 +267,8 @@ export interface IFFormulaSheetsMixin {
      *
      * // Use the function in a cell
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const cellA1 = fWorksheet.getRange('A1');
      * cellA1.setValue({ f: '=FETCH_USER_SCORE(42)' });
      *

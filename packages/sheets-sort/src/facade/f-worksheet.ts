@@ -32,7 +32,8 @@ export interface IFWorksheetSortMixin {
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Sorts the worksheet by the column A in ascending order.
      * fWorksheet.sort(0);

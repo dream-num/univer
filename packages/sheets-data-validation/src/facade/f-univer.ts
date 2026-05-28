@@ -57,7 +57,8 @@ export interface IFUniverSheetsDataValidationMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Create a new data validation rule that requires a number between 1 and 10 fot the range A1:B10
      * const fRange = fWorksheet.getRange('A1:B10');

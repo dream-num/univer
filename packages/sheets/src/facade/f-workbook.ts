@@ -193,6 +193,7 @@ export class FWorkbook extends FBaseInitialable {
      * // The code below gets the active sheet of the workbook
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
+     * if (!fWorksheet) return;
      * console.log(fWorksheet);
      * ```
      */
@@ -594,7 +595,9 @@ export class FWorkbook extends FBaseInitialable {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const range = fWorkbook.getActiveSheet().getRange('A10:B10');
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
+     * const range = fWorksheet.getRange('A10:B10');
      * fWorkbook.setActiveRange(range);
      * ```
      */
@@ -694,7 +697,8 @@ export class FWorkbook extends FBaseInitialable {
      * ```ts
      * // The code below duplicates the given worksheet
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const activeSheet = fWorkbook.getActiveSheet();
+     * const activeSheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!activeSheet) return;
      * const duplicatedSheet = fWorkbook.duplicateSheet(activeSheet);
      * console.log(duplicatedSheet);
      * ```
@@ -800,7 +804,8 @@ export class FWorkbook extends FBaseInitialable {
      * ```ts
      * // The code below moves the sheet to the specified index
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const sheet = fWorkbook.getActiveSheet();
+     * const sheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!sheet) return;
      * fWorkbook.moveSheet(sheet, 1);
      * ```
      */
@@ -1144,7 +1149,8 @@ export class FWorkbook extends FBaseInitialable {
      * fWorkbook.addStyles(styles);
      *
      * // Set values with the new styles
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const fRange = fWorksheet.getRange('A1:B2');
      * fRange.setValues([
      *   [{ v: 'Hello', s: 'custom-style-1' }, { v: 'Univer', s: 'custom-style-1' }],
@@ -1180,7 +1186,8 @@ export class FWorkbook extends FBaseInitialable {
      * fWorkbook.addStyles(styles);
      *
      * // Set values with the new styles
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const fRange = fWorksheet.getRange('A1:B2');
      * fRange.setValues([
      *   [{ v: 'Hello', s: 'custom-style-1' }, { v: 'Univer', s: 'custom-style-1' }],

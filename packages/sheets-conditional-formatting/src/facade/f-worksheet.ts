@@ -45,7 +45,8 @@ export interface IFWorksheetConditionalFormattingMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const rules = fWorksheet.getConditionalFormattingRules();
      * console.log(rules);
      * ```
@@ -67,7 +68,8 @@ export interface IFWorksheetConditionalFormattingMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Create a conditional formatting rule that sets the cell format to italic, red background, and green font color when the cell is not empty.
      * const fRange = fWorksheet.getRange('A1:T100');
@@ -91,7 +93,8 @@ export interface IFWorksheetConditionalFormattingMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Create a conditional formatting rule that sets the cell format to italic, red background, and green font color when the cell is not empty.
      * const fRange = fWorksheet.getRange('A1:T100');
@@ -115,7 +118,8 @@ export interface IFWorksheetConditionalFormattingMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const rules = fWorksheet.getConditionalFormattingRules();
      *
      * // Delete the first rule
@@ -134,7 +138,8 @@ export interface IFWorksheetConditionalFormattingMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const rules = fWorksheet.getConditionalFormattingRules();
      *
      * // Move the third rule before the first rule
@@ -154,7 +159,8 @@ export interface IFWorksheetConditionalFormattingMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Create a conditional formatting rule that sets the cell format to italic, red background, and green font color when the cell is not empty.
      * const fRange = fWorksheet.getRange('A1:T100');
@@ -182,7 +188,8 @@ export interface IFWorksheetConditionalFormattingMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * fWorksheet.clearConditionalFormatRules();
      * console.log(fWorksheet.getConditionalFormattingRules()); // []
      * ```

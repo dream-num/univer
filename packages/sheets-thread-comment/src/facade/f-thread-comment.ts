@@ -161,7 +161,8 @@ export class FTheadCommentBuilder extends FTheadCommentItem {
      *
      * // Add the comment to the cell A1
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const cell = fWorksheet.getRange('A1');
      * const result = await cell.addCommentAsync(commentBuilder);
      * console.log(result);
@@ -191,7 +192,8 @@ export class FTheadCommentBuilder extends FTheadCommentItem {
      *
      * // Add the comment to the cell A1
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const cell = fWorksheet.getRange('A1');
      * const result = await cell.addCommentAsync(commentBuilder);
      * console.log(result);
@@ -217,7 +219,8 @@ export class FTheadCommentBuilder extends FTheadCommentItem {
      *
      * // Add the comment to the cell A1
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const cell = fWorksheet.getRange('A1');
      * const result = await cell.addCommentAsync(commentBuilder);
      * console.log(result);
@@ -243,7 +246,8 @@ export class FTheadCommentBuilder extends FTheadCommentItem {
      *
      * // Add the comment to the cell A1
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const cell = fWorksheet.getRange('A1');
      * const result = await cell.addCommentAsync(commentBuilder);
      * console.log(result);
@@ -269,7 +273,8 @@ export class FTheadCommentBuilder extends FTheadCommentItem {
      *
      * // Add the comment to the cell A1
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const cell = fWorksheet.getRange('A1');
      * const result = await cell.addCommentAsync(commentBuilder);
      * console.log(result);
@@ -332,7 +337,8 @@ export class FThreadComment {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const comments = fWorksheet.getComments();
      * comments.forEach((comment) => {
      *   console.log(comment.getIsRoot());
@@ -349,7 +355,8 @@ export class FThreadComment {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const comments = fWorksheet.getComments();
      * comments.forEach((comment) => {
      *   console.log(comment.getCommentData());
@@ -367,7 +374,8 @@ export class FThreadComment {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const comments = fWorksheet.getComments();
      * comments.forEach((comment) => {
      *   if (comment.getIsRoot()) {
@@ -392,7 +400,8 @@ export class FThreadComment {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const comments = fWorksheet.getComments();
      * comments.forEach((comment) => {
      *   console.log(comment.getRange().getA1Notation());
@@ -425,7 +434,8 @@ export class FThreadComment {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const comments = fWorksheet.getComments();
      * comments.forEach((comment) => {
      *   console.log(comment.getRichText());
@@ -443,7 +453,8 @@ export class FThreadComment {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const comments = fWorksheet.getComments();
      *
      * // Delete the first comment
@@ -483,7 +494,8 @@ export class FThreadComment {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Create a new comment
      * const richText = univerAPI.newRichText().insertText('hello univer');
@@ -536,7 +548,8 @@ export class FThreadComment {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Create a new comment
      * const richText = univerAPI.newRichText().insertText('hello univer');
@@ -573,7 +586,8 @@ export class FThreadComment {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Create a new comment
      * const richText = univerAPI.newRichText().insertText('hello univer');

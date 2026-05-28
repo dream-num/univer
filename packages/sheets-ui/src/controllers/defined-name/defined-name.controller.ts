@@ -15,7 +15,7 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import type { ISelectionWithStyle } from '@univerjs/sheets';
+import type { ISelectionWithStyle, ISetWorksheetActivateCommandParams } from '@univerjs/sheets';
 import { Disposable, ICommandService, Inject, IUniverInstanceService, ThemeService, UniverInstanceType } from '@univerjs/core';
 import { deserializeRangeWithSheet, IDefinedNamesService, isReferenceStrings, operatorToken } from '@univerjs/engine-formula';
 import { getPrimaryForRange, ScrollToCellOperation, SetWorksheetActivateCommand, SheetsSelectionsService } from '@univerjs/sheets';
@@ -114,7 +114,7 @@ export class SheetsDefinedNameController extends Disposable {
                 const worksheetCache = workbook.getSheetBySheetName(unitRange.sheetName);
                 if (worksheetCache && worksheet.getSheetId() !== worksheetCache.getSheetId()) {
                     worksheet = worksheetCache;
-                    await this._cmdSrv.executeCommand(SetWorksheetActivateCommand.id, {
+                    await this._cmdSrv.executeCommand<ISetWorksheetActivateCommandParams>(SetWorksheetActivateCommand.id, {
                         subUnitId: worksheet.getSheetId(),
                         unitId,
                     });

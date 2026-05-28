@@ -16,6 +16,10 @@
 
 import type { ICommandInfo, Workbook } from '@univerjs/core';
 import type { IDropdownMenuProps } from '@univerjs/design';
+import type {
+    ISetWorksheetActivateCommandParams,
+    ISetWorksheetShowCommandParams,
+} from '@univerjs/sheets';
 import type { ReactNode } from 'react';
 import { BooleanNumber, DisposableCollection, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { clsx, DropdownMenu } from '@univerjs/design';
@@ -33,7 +37,6 @@ import {
 } from '@univerjs/sheets';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-
 import { ISheetBarService } from '../../../services/sheet-bar/sheet-bar.service';
 import { SheetBarButton } from '../sheet-bar-button/SheetBarButton';
 
@@ -60,13 +63,12 @@ export function SheetBarMenu() {
         if (!sheetId || !workbook) return;
 
         if (item.hidden) {
-            commandService.executeCommand(SetWorksheetShowCommand.id, {
+            commandService.executeCommand<ISetWorksheetShowCommandParams>(SetWorksheetShowCommand.id, {
                 unitId: workbook.getUnitId(),
                 subUnitId: sheetId,
-                value: sheetId,
             });
         } else if (!item.selected) {
-            commandService.executeCommand(SetWorksheetActivateCommand.id, {
+            commandService.executeCommand<ISetWorksheetActivateCommandParams>(SetWorksheetActivateCommand.id, {
                 unitId: workbook.getUnitId(),
                 subUnitId: sheetId,
             });

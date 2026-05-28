@@ -598,16 +598,31 @@ export class SheetFindModel extends FindModel {
         return getSheetObject(this._univerInstanceService, this._renderManagerService);
     }
 
-    private _focusMatch(match: ISheetCellMatch): void {
-        const subUnitId = match.range.subUnitId;
+    private async _focusMatch(match: ISheetCellMatch) {
+        const { subUnitId, range } = match.range;
+
         if (subUnitId !== this._workbook.getActiveSheet()?.getSheetId()) {
-            this._commandService.executeCommand(SetWorksheetActivateCommand.id, { unitId: this._workbook.getUnitId(), subUnitId } as ISetWorksheetActivateCommandParams, { fromFindReplace: true });
+            const unitId = this._workbook.getUnitId();
+            await this._commandService.executeCommand<ISetWorksheetActivateCommandParams>(
+                SetWorksheetActivateCommand.id,
+                {
+                    unitId,
+                    subUnitId,
+                },
+                {
+                    fromFindReplace: true,
+                }
+            );
         }
 
-        this._commandService.executeCommand(
+        this._commandService.executeCommand<IScrollToCellCommandParams>(
             ScrollToCellCommand.id,
-            { range: match.range.range } as IScrollToCellCommandParams,
-            { fromFindReplace: true }
+            {
+                range,
+            },
+            {
+                fromFindReplace: true,
+            }
         );
     }
 
@@ -650,9 +665,8 @@ export class SheetFindModel extends FindModel {
             }
 
             if (!noFocus) this._focusMatch(match);
-            if (this._workbook.getActiveSheet()?.getSheetId() === match.range.subUnitId) {
-                this._updateCurrentHighlightShape(this._activeHighlightIndex);
-            }
+
+            this._updateCurrentHighlightShape(this._activeHighlightIndex);
 
             return match;
         }
@@ -684,9 +698,8 @@ export class SheetFindModel extends FindModel {
             }
 
             if (!noFocus) this._focusMatch(match);
-            if (this._workbook.getActiveSheet()?.getSheetId() === match.range.subUnitId) {
-                this._updateCurrentHighlightShape(this._activeHighlightIndex);
-            }
+
+            this._updateCurrentHighlightShape(this._activeHighlightIndex);
 
             return match;
         }

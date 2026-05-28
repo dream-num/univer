@@ -27,7 +27,8 @@ export interface IFWorkbookSheetsNumfmtMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const fRange = fWorksheet.getRange('A1');
      * fRange.setValue(1234.567).setNumberFormat('#,##0.00');
      *

@@ -36,7 +36,8 @@ export interface IFWorksheetUIMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * fWorksheet.refreshCanvas();
      * ```
      */
@@ -51,7 +52,8 @@ export interface IFWorksheetUIMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const ranges = [fWorksheet.getRange('A1:B2'), fWorksheet.getRange('D4:E5')];
      * const disposable = fWorksheet.highlightRanges(ranges, { fill: 'yellow' });
      *
@@ -68,7 +70,8 @@ export interface IFWorksheetUIMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Set zoom ratio to 200%
      * fWorksheet.zoom(2);
@@ -84,7 +87,8 @@ export interface IFWorksheetUIMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const zoomRatio = fWorksheet.getZoom();
      * console.log(zoomRatio);
      * ```
@@ -97,7 +101,8 @@ export interface IFWorksheetUIMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const visibleRange = fWorksheet.getVisibleRange();
      * console.log(visibleRange);
      * console.log(fWorksheet.getRange(visibleRange).getA1Notation());
@@ -111,7 +116,8 @@ export interface IFWorksheetUIMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const visibleRanges = fWorksheet.getVisibleRangesOfAllViewports();
      * console.log(visibleRanges);
      * const mainLeftTopViewportRange = visibleRanges?.get(univerAPI.Enum.SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP);
@@ -130,7 +136,8 @@ export interface IFWorksheetUIMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Scroll to cell D10
      * const fRange = fWorksheet.getRange('D10');
@@ -147,7 +154,8 @@ export interface IFWorksheetUIMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Scroll to cell D10
      * const fRange = fWorksheet.getRange('D10');
@@ -169,7 +177,8 @@ export interface IFWorksheetUIMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const skeleton = fWorksheet.getSkeleton();
      * console.log(skeleton);
      * ```
@@ -183,7 +192,8 @@ export interface IFWorksheetUIMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Set the long text value in cell A1
      * const fRange = fWorksheet.getRange('A1');
@@ -203,7 +213,8 @@ export interface IFWorksheetUIMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Set the A:C columns to a width that fits their text.
      * fWorksheet.autoResizeColumns(0, 3);
@@ -228,7 +239,8 @@ export interface IFWorksheetUIMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Set the first 3 rows to a height that fits their text.
      * fWorksheet.autoResizeRows(0, 3);
@@ -242,7 +254,8 @@ export interface IFWorksheetUIMixin {
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * fWorksheet.customizeColumnHeader({
      *   headerStyle: {
      *     fontColor: '#fff',
@@ -272,7 +285,8 @@ export interface IFWorksheetUIMixin {
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * fWorksheet.customizeRowHeader({
      *   headerStyle: {
      *     backgroundColor: 'pink',
@@ -297,7 +311,8 @@ export interface IFWorksheetUIMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * fWorksheet.setColumnHeaderHeight(100);
      * ```
      */
@@ -310,7 +325,8 @@ export interface IFWorksheetUIMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * fWorksheet.setRowHeaderWidth(100);
      * ```
      */

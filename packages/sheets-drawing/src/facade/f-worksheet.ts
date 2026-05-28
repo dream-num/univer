@@ -32,7 +32,8 @@ export interface IFWorksheetDrawingMixin {
      * @example
      * ```ts
      * // Insert an image to the sheet, default position is A1
-     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const fWorksheet = univerAPI.getActiveWorkbook().getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const result = await fWorksheet.insertImage('https://avatars.githubusercontent.com/u/61444807?s=48&v=4');
      * console.log(result);
      * ```
@@ -46,7 +47,8 @@ export interface IFWorksheetDrawingMixin {
      * @example
      * ```ts
      * // Insert an image to the sheet, position is F6
-     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const fWorksheet = univerAPI.getActiveWorkbook().getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const result = await fWorksheet.insertImage('https://avatars.githubusercontent.com/u/61444807?s=48&v=4', 5, 5);
      * console.log(result);
      * ```
@@ -62,7 +64,8 @@ export interface IFWorksheetDrawingMixin {
      * @example
      * ```ts
      * // Insert an image to the sheet, position is F6, offset is 10px
-     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const fWorksheet = univerAPI.getActiveWorkbook().getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const result = await fWorksheet.insertImage('https://avatars.githubusercontent.com/u/61444807?s=48&v=4', 5, 5, 10, 10);
      * console.log(result);
      * ```
@@ -82,7 +85,8 @@ export interface IFWorksheetDrawingMixin {
      * // create a new image builder and set image source.
      * // then build `ISheetImage` and insert it into the sheet, position is start from F6 cell, width is 500px, height is 300px
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const image = await fWorksheet.newOverGridImage()
      *   .setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4', univerAPI.Enum.ImageSourceType.URL)
      *   .setColumn(5)
@@ -107,7 +111,8 @@ export interface IFWorksheetDrawingMixin {
      * @returns {FOverGridImage[]} The FOverGridImage instances
      * @example
      * ```ts
-     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const fWorksheet = univerAPI.getActiveWorkbook().getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const images = fWorksheet.getImages();
      * images.forEach((image) => {
      *   console.log(image, image.getId());
@@ -122,7 +127,8 @@ export interface IFWorksheetDrawingMixin {
      * @returns {FOverGridImage | null} The FOverGridImage instance
      * @example
      * ```ts
-     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const fWorksheet = univerAPI.getActiveWorkbook().getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const image = fWorksheet.getImageById('xxxx');
      * console.log(image);
      * ```
@@ -135,7 +141,8 @@ export interface IFWorksheetDrawingMixin {
      * @returns {FWorksheet} The FWorksheet instance for chaining
      * @example
      * ```ts
-     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const fWorksheet = univerAPI.getActiveWorkbook().getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const image = fWorksheet.getImages()[0];
      *
      * // Delete the first image of the sheet
@@ -153,7 +160,8 @@ export interface IFWorksheetDrawingMixin {
      * // create a new image builder and set image source.
      * // then build `ISheetImage` and insert it into the sheet, position is start from F6 cell, width is 500px, height is 300px
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const image = await fWorksheet.newOverGridImage()
      *   .setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4', univerAPI.Enum.ImageSourceType.URL)
      *   .setColumn(5)
@@ -178,7 +186,8 @@ export interface IFWorksheetDrawingMixin {
      * @returns {FOverGridImage[]} The FOverGridImage instances
      * @example
      * ```ts
-     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const fWorksheet = univerAPI.getActiveWorkbook().getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const images = fWorksheet.getActiveImages();
      * images.forEach((image) => {
      *   console.log(image, image.getId());
@@ -195,7 +204,8 @@ export interface IFWorksheetDrawingMixin {
      * // create a new image builder and set image source.
      * // then build `ISheetImage` and insert it into the sheet, position is start from F6 cell, width is 500px, height is 300px
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const image = await fWorksheet.newOverGridImage()
      *   .setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4', univerAPI.Enum.ImageSourceType.URL)
      *   .setColumn(5)

@@ -27,7 +27,8 @@ import { FDataValidation } from './f-data-validation';
  * ```typescript
  * // Set the data validation for cell A1 to require a value from B1:B10
  * const fWorkbook = univerAPI.getActiveWorkbook();
- * const fWorksheet = fWorkbook.getActiveSheet();
+ * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+ * if (!fWorksheet) return;
  * const fRange = fWorksheet.getRange('B1:B2');
  * fRange.setValues([
  *   ['Yes'],
@@ -64,7 +65,8 @@ export class FDataValidationBuilder {
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Create a new data validation rule that requires a number between 1 and 10 for the range A1:B10
      * const fRange = fWorksheet.getRange('A1:B10');
@@ -89,7 +91,8 @@ export class FDataValidationBuilder {
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Create a new data validation rule that requires a number between 1 and 10 for the range A1:B10
      * const fRange = fWorksheet.getRange('A1:B10');
@@ -188,7 +191,8 @@ export class FDataValidationBuilder {
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Set the data validation for cell A1:A10 to require a checkbox with default 1 and 0 values
      * const fRange = fWorksheet.getRange('A1:A10');
@@ -220,7 +224,8 @@ export class FDataValidationBuilder {
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Set some date values in the range A1:B2
      * const fRange = fWorksheet.getRange('A1:B2');
@@ -255,7 +260,8 @@ export class FDataValidationBuilder {
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Set some date values in the range A1:B2
      * const fRange = fWorksheet.getRange('A1:B2');
@@ -292,7 +298,8 @@ export class FDataValidationBuilder {
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Set some date values in the range A1:B2
      * const fRange = fWorksheet.getRange('A1:B2');
@@ -328,7 +335,8 @@ export class FDataValidationBuilder {
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Set some date values in the range A1:B2
      * const fRange = fWorksheet.getRange('A1:B2');
@@ -369,7 +377,8 @@ export class FDataValidationBuilder {
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Set some date values in the range A1:B2
      * const fRange = fWorksheet.getRange('A1:B2');
@@ -405,7 +414,8 @@ export class FDataValidationBuilder {
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Set some date values in the range A1:B2
      * const fRange = fWorksheet.getRange('A1:B2');
@@ -441,7 +451,8 @@ export class FDataValidationBuilder {
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Set some date values in the range A1:B2
      * const fRange = fWorksheet.getRange('A1:B2');
@@ -477,7 +488,8 @@ export class FDataValidationBuilder {
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Set some values in the range A1:B2 and C1:D2
      * const cell = fWorksheet.getRange('A1:B2');
@@ -522,7 +534,8 @@ export class FDataValidationBuilder {
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Create a new data validation rule that requires a number between 1 and 10 for the range A1:B10
      * const fRange = fWorksheet.getRange('A1:B10');
@@ -554,7 +567,8 @@ export class FDataValidationBuilder {
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Create a new data validation rule that requires a number equal to 10 for the range A1:B10
      * const fRange = fWorksheet.getRange('A1:B10');
@@ -585,7 +599,8 @@ export class FDataValidationBuilder {
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Create a new data validation rule that requires a number greater than 10 for the range A1:B10
      * const fRange = fWorksheet.getRange('A1:B10');
@@ -616,7 +631,8 @@ export class FDataValidationBuilder {
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Create a new data validation rule that requires a number greater than 10 or equal to 10 for the range A1:B10
      * const fRange = fWorksheet.getRange('A1:B10');
@@ -647,7 +663,8 @@ export class FDataValidationBuilder {
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Create a new data validation rule that requires a number less than 10 for the range A1:B10
      * const fRange = fWorksheet.getRange('A1:B10');
@@ -678,7 +695,8 @@ export class FDataValidationBuilder {
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Create a new data validation rule that requires a number less than 10 or equal to 10 for the range A1:B10
      * const fRange = fWorksheet.getRange('A1:B10');
@@ -710,7 +728,8 @@ export class FDataValidationBuilder {
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Create a new data validation rule that requires a number not between 1 and 10 for the range A1:B10
      * const fRange = fWorksheet.getRange('A1:B10');
@@ -742,7 +761,8 @@ export class FDataValidationBuilder {
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Create a new data validation rule that requires a number not equal to 10 for the range A1:B10
      * const fRange = fWorksheet.getRange('A1:B10');
@@ -775,7 +795,8 @@ export class FDataValidationBuilder {
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Create a new data validation rule that requires the user to enter a value from the list ['Yes', 'No'] for the range A1:B10
      * const fRange = fWorksheet.getRange('A1:B10');
@@ -809,7 +830,8 @@ export class FDataValidationBuilder {
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Set the values in the range B1:B2
      * const fRange = fWorksheet.getRange('B1:B2');
@@ -853,7 +875,8 @@ export class FDataValidationBuilder {
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Set the data validation for cell A1:B2 to allow invalid data, so A1:B2 will display a warning when invalid data is entered
      * const fRange = fWorksheet.getRange('A1:B2');
@@ -885,7 +908,8 @@ export class FDataValidationBuilder {
      * ```typescript
      * // Assume current sheet is empty data
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Set the data validation for cell A1:B2 to allow blank values
      * const fRange = fWorksheet.getRange('A1:B2');
@@ -916,7 +940,8 @@ export class FDataValidationBuilder {
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Create a new data validation rule that requires the user to enter a value from the list ['Yes', 'No'] for the range A1:B10
      * const fRange = fWorksheet.getRange('A1:B10');

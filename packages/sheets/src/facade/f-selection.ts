@@ -29,7 +29,8 @@ import { FWorksheet } from './f-worksheet';
  * @example
  * ```ts
  * const fWorkbook = univerAPI.getActiveWorkbook()
- * const fWorksheet = fWorkbook.getActiveSheet()
+ * const fWorksheet = fWorkbook.getSheetByName('Sheet1')
+ * if (!fWorksheet) return;
  * const fSelection = fWorksheet.getSelection();
  * const activeRange = fSelection.getActiveRange();
  * console.log(activeRange);
@@ -52,7 +53,8 @@ export class FSelection {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const fRange = fWorksheet.getRange('A10:B11');
      * fRange.activate();
      * const fSelection = fWorksheet.getSelection();
@@ -74,7 +76,8 @@ export class FSelection {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const fSelection = fWorksheet.getSelection();
      * const activeRangeList = fSelection.getActiveRangeList();
      * activeRangeList.forEach((range) => {
@@ -94,7 +97,8 @@ export class FSelection {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const fRange = fWorksheet.getRange('A10:B11');
      * fRange.activate();
      * const fSelection = fWorksheet.getSelection();
@@ -119,10 +123,11 @@ export class FSelection {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const fSelection = fWorksheet.getSelection();
      * const activeSheet = fSelection.getActiveSheet();
-     * console.log(activeSheet.equalTo(fWorksheet)); // true
+     * console.log(activeSheet.equalTo(fWorksheet));
      * ```
      */
     getActiveSheet(): FWorksheet {
@@ -137,7 +142,8 @@ export class FSelection {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const fRange = fWorksheet.getRange('A10:B11');
      * fRange.activate();
      * const cell = fWorksheet.getRange('B11');
@@ -200,7 +206,8 @@ export class FSelection {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * // make sure the active cell is A1 and selection is A1:B2
      * const fRange = fWorksheet.getRange('A1:B2');
      * fRange.activate();

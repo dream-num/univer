@@ -44,7 +44,8 @@ export interface IFRangeSheetsDrawingUIMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Insert an image into the cell A10
      * const fRange = fWorksheet.getRange('A10');
@@ -63,7 +64,8 @@ export interface IFRangeSheetsDrawingUIMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Save all cell images in range A1:D10
      * const fRange = fWorksheet.getRange('A1:D10');

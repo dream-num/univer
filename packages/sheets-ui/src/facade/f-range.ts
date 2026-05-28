@@ -49,7 +49,8 @@ interface IFRangeSheetsUIMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const fRange = fWorksheet.getRange('H6');
      * console.log(fRange.getCell());
      * ```
@@ -62,7 +63,8 @@ interface IFRangeSheetsUIMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const fRange = fWorksheet.getRange('H6');
      * console.log(fRange.getCellRect());
      * ```
@@ -75,7 +77,8 @@ interface IFRangeSheetsUIMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const fRange = fWorksheet.getRange('A1:B2');
      * fRange.setValues([
      *   [1, 2],
@@ -107,7 +110,8 @@ interface IFRangeSheetsUIMixin {
      *
      * // Attach the popup to the start cell of range C3:E5
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const fRange = fWorksheet.getRange('C3:E5');
      * const disposable = fRange.attachPopup({
      *   componentKey: 'myPopup'
@@ -129,7 +133,8 @@ interface IFRangeSheetsUIMixin {
      * ```ts
      * // Attach an alert popup to the start cell of range C3:E5
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const fRange = fWorksheet.getRange('C3:E5');
      *
      * const disposable = fRange.attachAlertPopup({
@@ -165,7 +170,8 @@ interface IFRangeSheetsUIMixin {
      *
      * // Attach the popup to the range C3:E5
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const fRange = fWorksheet.getRange('C3:E5');
      * const disposable = fRange.attachRangePopup({
      *   componentKey: 'myPopup',
@@ -183,7 +189,8 @@ interface IFRangeSheetsUIMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Highlight the range C3:E5 with default style
      * const fRange = fWorksheet.getRange('C3:E5');
@@ -219,7 +226,8 @@ interface IFRangeSheetsUIMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const fRange = fWorksheet.getRange('C3:E5');
      * fRange.showDropdown({ type: 'list', props: { options: [{ label: 'Option 1', value: 'option1' }, { label: 'Option 2', value: 'option2' }] } });
      * ```
@@ -311,8 +319,9 @@ class FRangeSheetsUIMixin extends FRange implements IFRangeSheetsUIMixin {
      * @returns {IDisposable} disposable
      * @example
      * ```typescript
-     * let sheet = univerAPI.getActiveWorkbook().getActiveSheet();
-     * let range = sheet.getRange(2, 2, 3, 3);
+     * let fWorksheet = univerAPI.getActiveWorkbook().getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
+     * let range = fWorksheet.getRange(2, 2, 3, 3);
      * univerAPI.getActiveWorkbook().setActiveRange(range);
      * let disposable = range.attachRangePopup({
      *   componentKey: 'univer.sheet.single-dom-popup',

@@ -33,7 +33,8 @@ export interface IFRangeSheetsDataValidationMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Create a data validation rule that requires a number between 1 and 10 for the range A1:B10
      * const fRange = fWorksheet.getRange('A1:B10');
@@ -56,7 +57,8 @@ export interface IFRangeSheetsDataValidationMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Create a data validation rule that requires a number equal to 20 for the range A1:B10
      * const fRange = fWorksheet.getRange('A1:B10');
@@ -84,7 +86,8 @@ export interface IFRangeSheetsDataValidationMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Create a data validation rule that requires a number equal to 20 for the range A1:B10
      * const fRange1 = fWorksheet.getRange('A1:B10');
@@ -114,7 +117,8 @@ export interface IFRangeSheetsDataValidationMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Set some values in the range A1:B10
      * const fRange = fWorksheet.getRange('A1:B10');
@@ -153,7 +157,8 @@ export interface IFRangeSheetsDataValidationMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const fRange = fWorksheet.getRange('A1:B10');
      * const errors = await fRange.getDataValidationErrorAsync();
      *

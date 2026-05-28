@@ -34,7 +34,8 @@ export interface IFTextFinder {
      * ```typescript
      * // Assume the current sheet is empty sheet.
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const fRange = fWorksheet.getRange('A1:D10');
      * fRange.setValues([
      *   [1, 2, 3, 4],
@@ -70,7 +71,8 @@ export interface IFTextFinder {
      * ```typescript
      * // Assume the current sheet is empty sheet.
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const fRange = fWorksheet.getRange('A1:D10');
      * fRange.setValues([
      *   [1, 2, 3, 4],
@@ -106,7 +108,8 @@ export interface IFTextFinder {
      * ```typescript
      * // Assume the current sheet is empty sheet.
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const fRange = fWorksheet.getRange('A1:D10');
      * fRange.setValues([
      *   [1, 2, 3, 4],
@@ -142,7 +145,8 @@ export interface IFTextFinder {
      * ```typescript
      * // Assume the current sheet is empty sheet.
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const fRange = fWorksheet.getRange('A1:D10');
      * fRange.setValues([
      *   [1, 2, 3, 4],
@@ -176,7 +180,8 @@ export interface IFTextFinder {
      * ```typescript
      * // Assume the current sheet is empty sheet.
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const fRange = fWorksheet.getRange('A1:D1');
      * fRange.setValues([
      *   ['hello univer', 'hello UNIVER', 'HELLO UNIVER', 'HELLO univer'],
@@ -208,7 +213,8 @@ export interface IFTextFinder {
      * ```typescript
      * // Assume the current sheet is empty sheet.
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const fRange = fWorksheet.getRange('A1:D1');
      * fRange.setValues([
      *   ['hello univer', 'hello univer 1', 'hello univer 2', 'hello univer 3'],
@@ -240,7 +246,8 @@ export interface IFTextFinder {
      * ```typescript
      * // Assume the current sheet is empty sheet.
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const fRange = fWorksheet.getRange('A1:D1');
      * fRange.setValues([
      *   ['sum', '1', '=SUM(2)', '3'],
@@ -273,7 +280,8 @@ export interface IFTextFinder {
      * ```typescript
      * // Assume the current sheet is empty sheet.
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const fRange = fWorksheet.getRange('A1:D1');
      * fRange.setValues([
      *   ['hello', 'hello', 'hello', 'hello'],
@@ -300,7 +308,8 @@ export interface IFTextFinder {
      * ```typescript
      * // Assume the current sheet is empty sheet.
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const fRange = fWorksheet.getRange('B1:E1');
      * fRange.setValues([
      *   ['hello', 'hello', 'hello', 'hello'],

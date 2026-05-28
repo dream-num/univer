@@ -31,9 +31,9 @@ export interface IFRangeSheetsThreadCommentMixin {
      * @returns {FThreadComment | null} The comment of the start cell in the current range. If the cell does not have a comment, return `null`.
      * @example
      * ```ts
-     * const range = univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange();
+     * const fWorksheet = univerAPI.getActiveWorkbook().getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
+     * const range = fWorksheet.getActiveRange();
      * const comment = range.getComment();
      * ```
      */
@@ -44,9 +44,9 @@ export interface IFRangeSheetsThreadCommentMixin {
      * @returns {FThreadComment[]} The comments in the current range.
      * @example
      * ```ts
-     * const range = univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange();
+     * const fWorksheet = univerAPI.getActiveWorkbook().getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
+     * const range = fWorksheet.getActiveRange();
      * const comments = range.getComments();
      * comments.forEach((comment) => {
      *   console.log(comment.getContent());
@@ -74,7 +74,8 @@ export interface IFRangeSheetsThreadCommentMixin {
      *
      * // Add the comment to the cell A1
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const cell = fWorksheet.getRange('A1');
      * const result = await cell.addCommentAsync(commentBuilder);
      * console.log(result);
@@ -103,9 +104,9 @@ export interface IFRangeSheetsThreadCommentMixin {
      * @returns Whether the comments are cleared successfully.
      * @example
      * ```ts
-     * const range = univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange();
+     * const fWorksheet = univerAPI.getActiveWorkbook().getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
+     * const range = fWorksheet.getActiveRange();
      * const success = await range.clearCommentsAsync();
      * ```
      */

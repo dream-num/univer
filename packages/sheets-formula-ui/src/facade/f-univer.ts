@@ -28,7 +28,8 @@ export interface IFUniverSheetsFormulaUIMixin {
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const unitId = fWorkbook.getId();
      *
      * await univerAPI.showRangeSelectorDialog({

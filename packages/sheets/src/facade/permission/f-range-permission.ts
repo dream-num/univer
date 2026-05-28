@@ -52,7 +52,8 @@ export class FRangePermission extends FBase {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const fRange = fWorksheet.getRange('A1:B2');
      * // Check if the A1:B2 range is protected
      * const isProtected = fRange.getRangePermission().isProtected();
@@ -77,7 +78,8 @@ export class FRangePermission extends FBase {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const fRange = fWorksheet.getRange('A1:B2');
      * const rule = await fRange.getRangePermission().protect({
      *   name: 'My protected range',
@@ -172,7 +174,8 @@ export class FRangePermission extends FBase {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const fRange = fWorksheet.getRange('A1:B2');
      * const result = await fRange.getRangePermission().unprotect();
      * console.log(result);
@@ -200,7 +203,8 @@ export class FRangePermission extends FBase {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const fRange = fWorksheet.getRange('A1:B2');
      * const rules = await fRange.getRangePermission().listRules();
      * console.log(rules);

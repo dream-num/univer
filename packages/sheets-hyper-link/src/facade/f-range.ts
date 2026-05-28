@@ -42,7 +42,8 @@ export interface IFRangeSheetsHyperlinkMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Create a hyperlink to Univer on cell A1
      * const fRange = fWorksheet.getRange('A1');
@@ -76,7 +77,8 @@ export interface IFRangeSheetsHyperlinkMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * console.log(fWorksheet.getRange('A1:T100').getHyperLinks());
      * ```
      */
@@ -90,7 +92,8 @@ export interface IFRangeSheetsHyperlinkMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Create a hyperlink to Univer on cell A1
      * const fRange = fWorksheet.getRange('A1');
@@ -113,7 +116,8 @@ export interface IFRangeSheetsHyperlinkMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Cancel the hyperlink in cell A1
      * const fRange = fWorksheet.getRange('A1');
@@ -140,7 +144,8 @@ export interface IFRangeSheetsHyperlinkMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const fRange = fWorksheet.getRange('A1');
      * const url = fRange.getUrl();
      * console.log(url);

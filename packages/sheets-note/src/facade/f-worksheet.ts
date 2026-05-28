@@ -28,7 +28,8 @@ export interface IFWorksheetNoteMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const notes = fWorksheet.getNotes();
      * console.log(notes);
      *

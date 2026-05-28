@@ -30,7 +30,8 @@ export interface IFUniverSheetsFindReplaceMixin {
      * ```typescript
      * // Assume the current sheet is empty sheet.
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Set some values to the range A1:D10.
      * const fRange = fWorksheet.getRange('A1:D10');

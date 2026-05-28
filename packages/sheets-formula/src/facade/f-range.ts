@@ -27,9 +27,9 @@ export interface IFRangeEngineFormulaMixin {
      * @returns {ISheetFormulaError[]} Array of formula errors in the range
      * @example
      * ```typescript
-     * const range = univerAPI.getActiveWorkbook()
-     *   .getActiveSheet()
-     *   .getRange('A1:B10');
+     * const fWorksheet = univerAPI.getActiveWorkbook().getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
+     * const range = fWorksheet.getRange('A1:B10');
      * const errors = range.getFormulaError();
      * console.log('Formula errors in range:', errors);
      * ```

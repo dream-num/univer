@@ -52,7 +52,8 @@ export interface IFUniverSheetsThreadCommentMixin {
      *
      * // Add the comment to the cell A1
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const cell = fWorksheet.getRange('A1');
      * const result = await cell.addCommentAsync(commentBuilder);
      * console.log(result);

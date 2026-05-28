@@ -31,7 +31,8 @@ export interface IFRangeSheetsSortMixin {
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      * const fRange = fWorksheet.getRange('D1:G10');
      *
      * // Sorts the range by the first column in ascending order.

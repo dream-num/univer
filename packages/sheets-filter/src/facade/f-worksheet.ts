@@ -31,7 +31,8 @@ export interface IFWorksheetFilterMixin {
      * @example
      * ```typescript
      * const workbook = univerAPI.getActiveWorkbook();
-     * const worksheet = workbook.getActiveSheet();
+     * const worksheet = workbook.getSheetByName('Sheet1');
+     * if (!worksheet) return;
      * const filter = worksheet.getFilter();
      * console.log(filter, filter?.getRange().getA1Notation());
      * ```

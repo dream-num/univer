@@ -31,7 +31,8 @@ export interface IFRangeSheetsNumfmtMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Set the number format of the A1 cell to '#,##0.00'.
      * const fRange = fWorksheet.getRange('A1');
@@ -48,7 +49,8 @@ export interface IFRangeSheetsNumfmtMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Set the number formats of the A1:B2 range.
      * const fRange = fWorksheet.getRange('A1:B2');
@@ -70,7 +72,8 @@ export interface IFRangeSheetsNumfmtMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Get the number format of the top-left cell of the A1:B2 range.
      * const fRange = fWorksheet.getRange('A1:B2');
@@ -85,7 +88,8 @@ export interface IFRangeSheetsNumfmtMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
+     * if (!fWorksheet) return;
      *
      * // Get the number formats of the A1:B2 range.
      * const fRange = fWorksheet.getRange('A1:B2');

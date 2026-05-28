@@ -226,6 +226,7 @@ export function createFrozenCommandTestBed(workbookData?: IWorkbookData) {
         activated$: new BehaviorSubject(true),
         activate: () => {},
         deactivate: () => {},
+        isDisposed: () => false,
     });
 
     return {

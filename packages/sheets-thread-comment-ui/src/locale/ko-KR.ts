@@ -25,6 +25,9 @@ const locale: typeof enUS = {
             addComment: '댓글 추가',
             commentManagement: '댓글 관리',
         },
+        panel: {
+            title: '댓글',
+        },
     },
 };
 

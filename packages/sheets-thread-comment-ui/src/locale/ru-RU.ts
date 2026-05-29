@@ -25,6 +25,9 @@ const locale: typeof enUS = {
             addComment: 'Добавить комментарий',
             commentManagement: 'Управление комментариями',
         },
+        panel: {
+            title: 'Комментарий',
+        },
     },
 };
 

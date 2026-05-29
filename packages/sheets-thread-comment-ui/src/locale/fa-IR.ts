@@ -25,6 +25,9 @@ const locale: typeof enUS = {
             addComment: 'افزودن نظر',
             commentManagement: 'مدیریت نظر',
         },
+        panel: {
+            title: 'نظر',
+        },
     },
 };
 

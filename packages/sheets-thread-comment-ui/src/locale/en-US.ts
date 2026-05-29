@@ -23,6 +23,9 @@ const locale = {
             addComment: 'Add Comment',
             commentManagement: 'Comment Management',
         },
+        panel: {
+            title: 'Comment',
+        },
     },
 };
 

@@ -25,6 +25,9 @@ const locale: typeof enUS = {
             addComment: 'コメントを追加',
             commentManagement: 'コメント管理',
         },
+        panel: {
+            title: 'コメント',
+        },
     },
 };
 

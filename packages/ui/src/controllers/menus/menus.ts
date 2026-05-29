@@ -40,7 +40,7 @@ export function UndoMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         type: MenuItemType.BUTTON,
         icon: 'UndoIcon',
         title: 'Undo',
-        tooltip: 'ui.toolbar.undo',
+        tooltip: 'ui.shortcut.undo',
         disabled$: undoRedoDisableFactory$(accessor, true),
     };
 }
@@ -51,7 +51,7 @@ export function RedoMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         type: MenuItemType.BUTTON,
         icon: 'RedoIcon',
         title: 'Redo',
-        tooltip: 'ui.toolbar.redo',
+        tooltip: 'ui.shortcut.redo',
         disabled$: undoRedoDisableFactory$(accessor, false),
     };
 }

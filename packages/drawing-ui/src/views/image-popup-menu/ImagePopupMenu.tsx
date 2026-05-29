@@ -323,15 +323,15 @@ function DocImageFloatingToolbar(props: IDocImageFloatingToolbarProps) {
     const [hidden, setHidden] = useState(false);
 
     const getMenuItem = (label: string) => props.menuItems.find((item) => item.label === label);
-    const editItem = getMenuItem('image-popup.edit');
-    const cropItem = getMenuItem('image-popup.crop');
-    const deleteItem = getMenuItem('image-popup.delete');
+    const editItem = getMenuItem('drawing-ui.image-popup.edit');
+    const cropItem = getMenuItem('drawing-ui.image-popup.crop');
+    const deleteItem = getMenuItem('drawing-ui.image-popup.delete');
     const wrappingStyleOptions = [
-        { label: localeService.t('image-text-wrap.inline'), value: TextWrappingStyle.INLINE, icon: <TextWrapShapeIcon /> },
-        { label: localeService.t('image-text-wrap.square'), value: TextWrappingStyle.WRAP_SQUARE, icon: <TextWrapShapeIcon /> },
-        { label: localeService.t('image-text-wrap.topAndBottom'), value: TextWrappingStyle.WRAP_TOP_AND_BOTTOM, icon: <TextWrapShapeIcon /> },
-        { label: localeService.t('image-text-wrap.behindText'), value: TextWrappingStyle.BEHIND_TEXT, icon: <TextWrapShapeIcon /> },
-        { label: localeService.t('image-text-wrap.inFrontText'), value: TextWrappingStyle.IN_FRONT_OF_TEXT, icon: <TextWrapShapeIcon /> },
+        { label: localeService.t('drawing-ui.image-text-wrap.inline'), value: TextWrappingStyle.INLINE, icon: <TextWrapShapeIcon /> },
+        { label: localeService.t('drawing-ui.image-text-wrap.square'), value: TextWrappingStyle.WRAP_SQUARE, icon: <TextWrapShapeIcon /> },
+        { label: localeService.t('drawing-ui.image-text-wrap.topAndBottom'), value: TextWrappingStyle.WRAP_TOP_AND_BOTTOM, icon: <TextWrapShapeIcon /> },
+        { label: localeService.t('drawing-ui.image-text-wrap.behindText'), value: TextWrappingStyle.BEHIND_TEXT, icon: <TextWrapShapeIcon /> },
+        { label: localeService.t('drawing-ui.image-text-wrap.inFrontText'), value: TextWrappingStyle.IN_FRONT_OF_TEXT, icon: <TextWrapShapeIcon /> },
     ];
 
     const executeMenuItem = (item: IImagePopupMenuItem | undefined) => {
@@ -370,7 +370,7 @@ function DocImageFloatingToolbar(props: IDocImageFloatingToolbarProps) {
         >
             <ToolbarGroup>
                 <ToolbarDropdownButton
-                    title={wrappingStyleOptions.find((option) => option.value === wrappingStyle)?.label ?? localeService.t('image-text-wrap.inline')}
+                    title={wrappingStyleOptions.find((option) => option.value === wrappingStyle)?.label ?? localeService.t('drawing-ui.image-text-wrap.inline')}
                     value={wrappingStyle}
                     options={wrappingStyleOptions}
                     onChange={updateWrappingStyle}
@@ -379,7 +379,7 @@ function DocImageFloatingToolbar(props: IDocImageFloatingToolbarProps) {
             <Divider />
             <ToolbarGroup>
                 <ToolbarButton
-                    title={editItem ? localeService.t(editItem.label) : localeService.t('image-popup.edit')}
+                    title={editItem ? localeService.t(editItem.label) : localeService.t('drawing-ui.image-popup.edit')}
                     disabled={!editItem || editItem.disable}
                     onClick={() => {
                         setHidden(true);
@@ -389,7 +389,7 @@ function DocImageFloatingToolbar(props: IDocImageFloatingToolbarProps) {
                     <DocSettingIcon />
                 </ToolbarButton>
                 <ToolbarButton
-                    title={cropItem ? localeService.t(cropItem.label) : localeService.t('image-popup.crop')}
+                    title={cropItem ? localeService.t(cropItem.label) : localeService.t('drawing-ui.image-popup.crop')}
                     disabled={!cropItem || cropItem.disable}
                     onClick={() => executeMenuItem(cropItem)}
                 >
@@ -399,7 +399,7 @@ function DocImageFloatingToolbar(props: IDocImageFloatingToolbarProps) {
             <Divider />
             <ToolbarGroup>
                 <ToolbarButton
-                    title={deleteItem ? localeService.t(deleteItem.label) : localeService.t('image-popup.delete')}
+                    title={deleteItem ? localeService.t(deleteItem.label) : localeService.t('drawing-ui.image-popup.delete')}
                     disabled={!deleteItem || deleteItem.disable}
                     onClick={() => executeMenuItem(deleteItem)}
                 >

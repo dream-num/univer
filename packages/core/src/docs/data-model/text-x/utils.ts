@@ -130,10 +130,30 @@ export function getBlockRangeSlice(
 export function getParagraphsSlice(
     body: IDocumentBody,
     startOffset: number,
-    endOffset: number
+    endOffset: number,
+    type = SliceBodyType.cut
 ) {
     const { paragraphs = [] } = body;
     const newParagraphs: IParagraph[] = [];
+
+    if (type === SliceBodyType.cut) {
+        for (const paragraph of paragraphs) {
+            const { startIndex } = paragraph;
+            if (startIndex >= startOffset && startIndex < endOffset) {
+                newParagraphs.push(Tools.deepClone(paragraph));
+            }
+        }
+
+        if (newParagraphs.length) {
+            return newParagraphs.map((p) => ({
+                ...p,
+                startIndex: p.startIndex - startOffset,
+            }));
+        }
+
+        return;
+    }
+
     const sortedParagraphs = [...paragraphs].sort((a, b) => a.startIndex - b.startIndex);
 
     for (let index = 0; index < sortedParagraphs.length; index++) {
@@ -229,7 +249,7 @@ export function getBodySlice(
         docBody.blockRanges = newBlockRanges;
     }
 
-    docBody.paragraphs = getParagraphsSlice(body, startOffset, endOffset);
+    docBody.paragraphs = getParagraphsSlice(body, startOffset, endOffset, type);
 
     if (type === SliceBodyType.cut) {
         const customDecorations = getCustomDecorationSlice(body, startOffset, endOffset);

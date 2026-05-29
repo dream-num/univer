@@ -21,7 +21,7 @@ import { awaitTime, DataValidationType, generateRandomId, isFormulaString, Local
 import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { borderClassName, clsx, DraggableList, Dropdown, FormLayout, Input, Radio, RadioGroup } from '@univerjs/design';
 import { DeleteIcon, IncreaseIcon, MoreDownIcon, SequenceIcon } from '@univerjs/icons';
-import { deserializeListOptions, serializeListOptions } from '@univerjs/sheets';
+import { deserializeListOptions } from '@univerjs/sheets';
 import { DataValidationFormulaController } from '@univerjs/sheets-data-validation';
 import { FormulaEditor } from '@univerjs/sheets-formula-ui';
 import { useDependency, useEvent, useObservable, useSidebarClick } from '@univerjs/ui';
@@ -29,6 +29,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { debounceTime } from 'rxjs';
 import { DROP_DOWN_DEFAULT_COLOR } from '../../../const';
 import { DataValidationPanelService } from '../../../services/data-validation-panel.service';
+import { buildCustomListFormulaPayload } from './utils';
 
 const DEFAULT_COLOR_PRESET = [
     '#FFFFFF',
@@ -163,8 +164,10 @@ const Template = (props: { item: IDropdownItem; commonProps: any; className?: st
     );
 };
 
+const NOOP = () => { /* empty */ };
+
 export function ListFormulaInput(props: IFormulaInputProps) {
-    const { value, onChange: _onChange = () => { /* empty */ }, unitId, subUnitId, validResult, showError, ruleId } = props;
+    const { value, onChange: _onChange = NOOP, unitId, subUnitId, validResult, showError, ruleId } = props;
     const { formula1 = '', formula2 = '' } = value || {};
     const [isFormulaStr, setIsFormulaStr] = useState(() => isFormulaString(formula1) ? '1' : '0');
     const [formulaStr, setFormulaStr] = useState(isFormulaStr === '1' ? formula1 : '=');
@@ -235,14 +238,12 @@ export function ListFormulaInput(props: IFormulaInputProps) {
         }
     };
 
-    const colorList = formula2.split(',');
-
     const refFinalList: IDropdownItem[] = useMemo(() => refOptions.map((label, i) => ({
         label,
-        color: colorList[i] || DROP_DOWN_DEFAULT_COLOR,
+        color: refColors[i] || DROP_DOWN_DEFAULT_COLOR,
         id: `${i}`,
         isRef: true,
-    })), [colorList, refOptions]);
+    })), [refColors, refOptions]);
 
     const handleRefItemChange = (id: string, value: string, color: string) => {
         const newColors = [...refColors];
@@ -271,31 +272,8 @@ export function ListFormulaInput(props: IFormulaInputProps) {
         if (isFormulaStr === '1') {
             return;
         }
-        const labelSet = new Set<string>();
-        const finalList: { color: string; label: string }[] = [];
-        strList.map((item) => {
-            const labelList = item.label.split(',');
-            return {
-                labelList,
-                item,
-            };
-        }).forEach(({ item, labelList }) => {
-            labelList.forEach((labelItem) => {
-                if (!labelSet.has(labelItem)) {
-                    labelSet.add(labelItem);
-                    finalList.push({
-                        label: labelItem,
-                        color: item.color,
-                    });
-                }
-            });
-        });
-
-        onChange({
-            formula1: serializeListOptions(finalList.map((item) => item.label)),
-            formula2: finalList.map((item) => item.color === DROP_DOWN_DEFAULT_COLOR ? '' : item.color).join(','),
-        });
-    }, [strList, onChange, isFormulaStr, formulaStrCopy, refColors]);
+        onChange(buildCustomListFormulaPayload(strList, DROP_DOWN_DEFAULT_COLOR));
+    }, [strList, onChange, isFormulaStr]);
 
     const updateFormula = useEvent(async (str: string) => {
         if (!isFormulaString(str)) {

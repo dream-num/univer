@@ -66,6 +66,7 @@ export interface IFakeViewport {
     scrollToViewportPos(params: { viewportScrollX: number; viewportScrollY: number }): void;
     updateScrollVal(params: { scrollX?: number; scrollY?: number; viewportScrollX?: number; viewportScrollY?: number }): void;
     scrollByViewportDeltaVal(params: { viewportScrollX: number; viewportScrollY: number }): boolean;
+    transViewportScroll2ScrollValue(viewportScrollX: number, viewportScrollY: number): { x: number; y: number };
     transScroll2ViewportScrollValue(viewportScrollX: number, viewportScrollY: number): { x: number; y: number };
     enable(): void;
     disable(): void;
@@ -117,6 +118,7 @@ export function createFakeViewport(viewportKey: string, options?: Partial<IFakeV
             viewport.viewportScrollY += viewportScrollY;
             return true;
         },
+        transViewportScroll2ScrollValue: (viewportScrollX, viewportScrollY) => ({ x: viewportScrollX, y: viewportScrollY }),
         transScroll2ViewportScrollValue: (viewportScrollX, viewportScrollY) => ({ x: viewportScrollX, y: viewportScrollY }),
         enable: () => {
             viewport.isActive = true;

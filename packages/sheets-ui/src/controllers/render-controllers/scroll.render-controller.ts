@@ -102,11 +102,18 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                         offsetY = 0;
                     }
                 }
+                // add offset on scroll position to check whether scrolling is reaching limit
+                const targetViewportScrollX = viewMain.viewportScrollX + offsetX;
+                const targetViewportScrollY = viewMain.viewportScrollY + offsetY;
+                const { x: targetScrollX, y: targetScrollY } = viewMain.transViewportScroll2ScrollValue(
+                    targetViewportScrollX,
+                    targetViewportScrollY
+                );
+
                 this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetX, offsetY });
                 this._context.scene.makeDirty(true);
 
-                // add offset on scroll position to check whether scrolling is reaching limit
-                const isLimitedStore = viewMain.limitedScroll(viewMain.scrollX + offsetX, viewMain.scrollY + offsetY);
+                const isLimitedStore = viewMain.limitedScroll(targetScrollX, targetScrollY);
 
                 // if viewport still have space to scroll, prevent default event. (DO NOT move canvas element)
                 // if scrolling is reaching limit, let scrolling event do the default behavior.

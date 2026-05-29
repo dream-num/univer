@@ -646,7 +646,7 @@ function normalizeTextNode(node: ChildNode): string {
         return value
             .replace(/[\t\u00A0]+/g, ' ')
             .replace(/[ \r\n]+/g, ' ')
-            .replace(new RegExp(` *${WORD_SPACE_PLACEHOLDER}+ *`, 'g'), (match) => ' '.repeat(Array.from(match).filter((char) => char === WORD_SPACE_PLACEHOLDER).length));
+            .replace(/ *\uE000+ */g, (match) => ' '.repeat(Array.from(match).filter((char) => char === WORD_SPACE_PLACEHOLDER).length));
     }
 
     const hasExplicitSpacing = /[\t\u00A0]/.test(value);
@@ -881,11 +881,17 @@ function normalizeCssColor(value: string | null | undefined): string | undefined
 }
 
 function readCssValue(style: string, property: string): string | undefined {
-    return style.match(new RegExp(`${property}\\s*:\\s*([^;]+)`, 'i'))?.[1]?.trim();
+    const normalizedProperty = property.toLowerCase();
+    const declaration = style
+        .split(';')
+        .map((part) => part.split(':'))
+        .find(([name]) => name?.trim().toLowerCase() === normalizedProperty);
+
+    return declaration?.slice(1).join(':').trim() || undefined;
 }
 
 function readCssSize(attributeValue: string | null, style: string | null, property: 'height' | 'width'): number | undefined {
-    const styleMatch = style?.match(new RegExp(`(?:^|;)\\s*${property}\\s*:\\s*([0-9.]+)\\s*(px|pt|in|cm|mm)?`, 'i'));
+    const styleMatch = readCssValue(style ?? '', property)?.match(/^([0-9.]+)\s*(px|pt|in|cm|mm)?$/i);
     if (styleMatch) {
         return toPixels(Number(styleMatch[1]), styleMatch[2]);
     }

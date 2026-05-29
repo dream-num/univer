@@ -24,16 +24,7 @@ import { DocClipboardService, getTableClipboardBodySlice } from '../clipboard.se
 describe('DocClipboardService table copy helpers', () => {
     it('should keep table metadata when copying an entire selected docs table', () => {
         const tokens = DataStreamTreeTokenType;
-        const tableStream = tokens.TABLE_START +
-            tokens.TABLE_ROW_START +
-            tokens.TABLE_CELL_START +
-            'A\r\n' +
-            tokens.TABLE_CELL_END +
-            tokens.TABLE_CELL_START +
-            'B\r\n' +
-            tokens.TABLE_CELL_END +
-            tokens.TABLE_ROW_END +
-            tokens.TABLE_END;
+        const tableStream = `${tokens.TABLE_START}${tokens.TABLE_ROW_START}${tokens.TABLE_CELL_START}A\r\n${tokens.TABLE_CELL_END}${tokens.TABLE_CELL_START}B\r\n${tokens.TABLE_CELL_END}${tokens.TABLE_ROW_END}${tokens.TABLE_END}`;
         const dataStream = `Intro\r${tableStream}Tail\r`;
         const tableStart = 'Intro\r'.length;
         const tableEnd = tableStart + tableStream.length;

@@ -33,6 +33,7 @@ import { createIdentifier, Disposable, isNullCell, ObjectMatrix } from '@univerj
 import { isInDirtyRange } from '../basics/dirty';
 import { ErrorType } from '../basics/error-type';
 import { CELL_INVERTED_INDEX_CACHE } from '../basics/inverted-index-cache';
+import { FormulaDependencyTreeType } from '../engine/dependency/dependency-tree';
 import { FORMULA_REF_TO_ARRAY_CACHE } from '../engine/reference-object/base-reference-object';
 import { getRuntimeFeatureCell } from '../engine/utils/get-runtime-feature-cell';
 import { clearNumberFormatTypeCache, clearStringToNumberPatternCache } from '../engine/utils/numfmt-kit';
@@ -112,7 +113,8 @@ export interface IFormulaRuntimeService {
         rowCount: number,
         columnCount: number,
         sheetId: string,
-        unitId: string
+        unitId: string,
+        formulaType?: FormulaDependencyTreeType
     ): void;
 
     registerFunctionDefinitionPrivacyVar(lambdaId: string, lambdaVar: Map<string, Nullable<BaseAstNode>>): void;
@@ -211,6 +213,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
     private _currentSubUnitId: string = '';
     private _currentUnitId: string = '';
+    private _currentFormulaType: FormulaDependencyTreeType = FormulaDependencyTreeType.NORMAL_FORMULA;
 
     private _runtimeData: IRuntimeUnitDataType = {};
 
@@ -405,13 +408,22 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         clearReferenceToRangeCache();
     }
 
-    setCurrent(row: number, column: number, rowCount: number, columnCount: number, sheetId: string, unitId: string) {
+    setCurrent(
+        row: number,
+        column: number,
+        rowCount: number,
+        columnCount: number,
+        sheetId: string,
+        unitId: string,
+        formulaType: FormulaDependencyTreeType = FormulaDependencyTreeType.NORMAL_FORMULA
+    ) {
         this._currentRow = row;
         this._currentColumn = column;
         this._currentRowCount = rowCount;
         this._currentColumnCount = columnCount;
         this._currentSubUnitId = sheetId;
         this._currentUnitId = unitId;
+        this._currentFormulaType = formulaType;
     }
 
     clearFunctionDefinitionPrivacyVar() {
@@ -722,6 +734,11 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         const sheetId = this._currentSubUnitId;
         const rowIndex = this._currentRow;
         const columnIndex = this._currentColumn;
+
+        // Embedded array refs are worksheet cell metadata; other formula results stay in unitOtherData.
+        if (this._currentFormulaType !== FormulaDependencyTreeType.NORMAL_FORMULA) {
+            return;
+        }
 
         const arrayFormulaEmbeddedMap = this._unitArrayFormulaEmbeddedMap;
         if (arrayFormulaEmbeddedMap[unitId] == null) {

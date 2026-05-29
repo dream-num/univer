@@ -720,7 +720,8 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
                 tree.rowCount,
                 tree.columnCount,
                 tree.subUnitId,
-                tree.unitId
+                tree.unitId,
+                tree.type
             );
 
             const rangeList = await this._getRangeListByNode({
@@ -1039,7 +1040,8 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
             tree.rowCount,
             tree.columnCount,
             tree.subUnitId,
-            tree.unitId
+            tree.unitId,
+            tree.type
         );
 
         const dirtyRanges: IUnitRange[] = [];
@@ -1092,7 +1094,8 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
                 tree.rowCount,
                 tree.columnCount,
                 tree.subUnitId,
-                tree.unitId
+                tree.unitId,
+                tree.type
             );
 
             let value: FunctionVariantType;

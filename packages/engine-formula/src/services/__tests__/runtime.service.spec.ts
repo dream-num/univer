@@ -17,6 +17,7 @@
 import { ObjectMatrix } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../basics/error-type';
+import { FormulaDependencyTreeType } from '../../engine/dependency/dependency-tree';
 import { createNewArray } from '../../engine/utils/array-object';
 import { NumberValueObject, StringValueObject } from '../../engine/value-object/primitive-object';
 import { FormulaExecutedStateType, FormulaExecuteStageType, FormulaRuntimeService } from '../runtime.service';
@@ -400,6 +401,18 @@ describe('FormulaRuntimeService', () => {
         expect(runtime.getRuntimeFeatureRange()['feature-a']).toEqual({ unit: { sheet: [] } });
         expect(runtime.getRuntimeFeatureCellData()['feature-a']).toEqual({ unit: {} });
         expect(runtime.getDependencyTreeModelData()).toEqual([{ treeId: 1 }]);
+    });
+
+    it('should collect embedded array refs only for normal worksheet formulas', () => {
+        const { runtime } = createRuntimeService();
+
+        runtime.setCurrent(1, 2, 20, 20, 'sheet', 'unit', FormulaDependencyTreeType.OTHER_FORMULA);
+        runtime.setUnitArrayFormulaEmbeddedMap();
+        expect(runtime.getUnitArrayFormulaEmbeddedMap().unit?.sheet?.[1]?.[2]).toBeUndefined();
+
+        runtime.setCurrent(4, 5, 20, 20, 'sheet', 'unit', FormulaDependencyTreeType.NORMAL_FORMULA);
+        runtime.setUnitArrayFormulaEmbeddedMap();
+        expect(runtime.getUnitArrayFormulaEmbeddedMap().unit?.sheet?.[4]?.[5]).toBe(true);
     });
 
     it('should evaluate helper methods for range, overlap and dirty checks', () => {

@@ -341,7 +341,8 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
                 tree.rowCount,
                 tree.columnCount,
                 tree.subUnitId,
-                tree.unitId
+                tree.unitId,
+                tree.type
             );
 
             let value: FunctionVariantType;

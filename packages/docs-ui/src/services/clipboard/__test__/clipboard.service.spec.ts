@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody } from '@univerjs/core';
+import type { IDocumentBody, IDocumentData } from '@univerjs/core';
 import type { IRectRangeWithStyle } from '@univerjs/engine-render';
 import { DataStreamTreeTokenType, DOC_RANGE_TYPE } from '@univerjs/core';
-import { describe, expect, it } from 'vitest';
-import { getTableClipboardBodySlice } from '../clipboard.service';
+import { ImageSourceType } from '@univerjs/drawing';
+import { describe, expect, it, vi } from 'vitest';
+import { DocClipboardService, getTableClipboardBodySlice } from '../clipboard.service';
 
 describe('DocClipboardService table copy helpers', () => {
     it('should keep table metadata when copying an entire selected docs table', () => {
@@ -74,5 +75,48 @@ describe('DocClipboardService table copy helpers', () => {
             endIndex: tableStream.length,
             tableId: 'table-1',
         }]);
+    });
+
+    it('should upload base64 images embedded in pasted html before converting to docs drawings', async () => {
+        let pastedDoc: Partial<IDocumentData> | undefined;
+        const executeCommand = vi.fn(async (_id, params) => {
+            pastedDoc = params.doc;
+            return true;
+        });
+        const uploadImage = vi.fn(async (file: File) => {
+            expect(file.type).toBe('image/png');
+
+            return {
+                imageSourceType: ImageSourceType.UUID,
+                source: 'remote-file-id',
+            };
+        });
+        const service = new DocClipboardService(
+            { getCurrentUnitOfType: () => ({ getUnitId: () => 'doc-1' }) } as any,
+            { error: vi.fn(), warn: vi.fn() } as any,
+            { executeCommand } as any,
+            {} as any,
+            {
+                getActiveTextRange: () => ({ segmentId: '', endOffset: 0 }),
+                getTextRanges: () => [{ startOffset: 0, endOffset: 0 }],
+            } as any
+        ) as DocClipboardService;
+        const source = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAFgwJ/lz6N4wAAAABJRU5ErkJggg==';
+
+        service.addClipboardHook({ onBeforePasteImage: uploadImage });
+        await service.legacyPaste({
+            html: `<p><img src="${source}" width="2" height="3"></p>`,
+            files: [],
+        });
+
+        const block = pastedDoc?.body?.customBlocks?.[0];
+        const drawing = block ? pastedDoc?.drawings?.[block.blockId] : undefined;
+
+        expect(uploadImage).toHaveBeenCalledTimes(1);
+        expect(drawing).toMatchObject({
+            imageSourceType: ImageSourceType.UUID,
+            source: 'remote-file-id',
+        });
+        expect(JSON.stringify(pastedDoc)).not.toContain('data:image');
     });
 });

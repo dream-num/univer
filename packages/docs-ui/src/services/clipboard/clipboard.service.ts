@@ -200,6 +200,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         } else if (html && files.length) {
             html += await this._createImagePasteHtml(files);
         }
+        html = await this._uploadBase64ImagesInHtml(html);
         if (!html && !text) {
             this._logService.warn('[DocClipboardController] html and text cannot be both empty!');
             return false;
@@ -502,6 +503,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
             if (!html && !text && files.length) {
                 html = await this._createImagePasteHtml(files);
             }
+            html = await this._uploadBase64ImagesInHtml(html) ?? '';
 
             return this._genDocDataFromHtmlAndText(html, text, undefined, internalJson);
         } catch (e) {
@@ -545,6 +547,46 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
             copyContentCache.set(copyId, doc);
         }
         return doc;
+    }
+
+    private async _uploadBase64ImagesInHtml(html?: string): Promise<string | undefined> {
+        if (!html || !html.includes('data:image/')) {
+            return html;
+        }
+
+        const onBeforePasteImage = this._clipboardHooks.find((e) => e.onBeforePasteImage)?.onBeforePasteImage;
+        if (!onBeforePasteImage) {
+            return html;
+        }
+
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        const images = Array.from(doc.querySelectorAll<HTMLImageElement>('img[src^="data:image/"]'));
+        if (images.length === 0) {
+            return html;
+        }
+
+        await Promise.all(images.map(async (image, index) => {
+            if (image.dataset.imageSourceType && image.dataset.imageSourceType !== ImageSourceType.BASE64) {
+                return;
+            }
+
+            const file = dataUrlToFile(image.getAttribute('src') || image.src, `pasted_image_${index}`);
+            const uploaded = await onBeforePasteImage(file);
+            if (!uploaded) {
+                return;
+            }
+
+            image.dataset.imageSourceType = uploaded.imageSourceType;
+            if (uploaded.imageSourceType === ImageSourceType.UUID) {
+                image.dataset.source = uploaded.source;
+                image.setAttribute('src', uploaded.source);
+            } else {
+                image.removeAttribute('data-source');
+                image.setAttribute('src', uploaded.source);
+            }
+        }));
+
+        return doc.documentElement.outerHTML;
     }
 
     private async _createImagePasteHtml(files: File[]) {
@@ -622,4 +664,19 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         const html = this._umdToHtml.convert([doc]);
         return html;
     }
+}
+
+function dataUrlToFile(dataUrl: string, fallbackName: string): File {
+    const match = /^data:([^;,]+)(;base64)?,(.*)$/i.exec(dataUrl);
+    if (!match) {
+        throw new Error('[DocClipboardService] invalid image data url.');
+    }
+
+    const [, mimeType, base64Marker, payload] = match;
+    const bytes = base64Marker
+        ? Uint8Array.from(atob(payload), (char) => char.charCodeAt(0))
+        : new TextEncoder().encode(decodeURIComponent(payload));
+    const extension = mimeType.split('/')[1] || 'png';
+
+    return new File([bytes], `${fallbackName}.${extension}`, { type: mimeType });
 }

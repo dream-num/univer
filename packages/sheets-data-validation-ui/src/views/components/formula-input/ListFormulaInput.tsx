@@ -378,7 +378,7 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                 )
                 : (
                     <FormLayout error={formula1Res}>
-                        <div className="-univer-mt-3">
+                        <div>
                             <DraggableList
                                 list={strList}
                                 onListChange={setStrList}

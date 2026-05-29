@@ -138,7 +138,8 @@ export function extractNodeStyle(node: HTMLElement): ITextStyle {
                 break;
             }
 
-            case 'background-color': {
+            case 'background-color':
+            case 'background': {
                 const color = new ColorKit(cssValue);
 
                 if (color.isValid) {

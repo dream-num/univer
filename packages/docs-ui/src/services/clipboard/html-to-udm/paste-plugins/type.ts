@@ -29,6 +29,7 @@ export interface IAfterProcessRule {
 export interface IPastePlugin {
     name: string;
     checkPasteType(html: string): boolean;
+    preprocessHtml?(html: string): string;
     stylesRules: IStyleRule[];
     afterProcessRules: IAfterProcessRule[];
 }

@@ -20,6 +20,7 @@ import { BooleanNumber, HorizontalAlign, TextDecoration, TextDirection } from '.
 import { DocumentDataModel } from '../document-data-model';
 import { JSONX } from '../json-x/json-x';
 import { ParagraphStyleBuilder, RichTextBuilder, TextDecorationBuilder, TextStyleBuilder } from '../rich-text-builder';
+import { DataStreamTreeTokenType } from '../types';
 
 function createDocSnapshot(id = 'doc-main'): IDocumentData {
     return {
@@ -148,6 +149,54 @@ describe('DocumentDataModel + RichTextBuilder integration', () => {
 
         expect(model.getPlainText()).toContain('Hello World');
         expect(model.sliceBody(0, 5)?.dataStream).toContain('Hello');
+
+        const partialParagraphModel = new DocumentDataModel({
+            id: 'partial-paragraph',
+            title: 'Partial Paragraph',
+            documentStyle: {},
+            body: {
+                dataStream: 'First\rSecond\r',
+                paragraphs: [
+                    { startIndex: 5, paragraphStyle: { horizontalAlign: HorizontalAlign.CENTER } },
+                    { startIndex: 12, paragraphStyle: { textStyle: { fs: 18 } } },
+                ],
+            },
+        });
+        expect(partialParagraphModel.sliceBody(0, 5)?.paragraphs?.[0]).toMatchObject({
+            startIndex: 5,
+            paragraphStyle: { horizontalAlign: HorizontalAlign.CENTER },
+        });
+        expect(partialParagraphModel.sliceBody(6, 12)?.paragraphs?.[0]).toMatchObject({
+            startIndex: 6,
+            paragraphStyle: { textStyle: { fs: 18 } },
+        });
+        partialParagraphModel.dispose();
+
+        const tableStream = [
+            DataStreamTreeTokenType.TABLE_START,
+            DataStreamTreeTokenType.TABLE_ROW_START,
+            DataStreamTreeTokenType.TABLE_CELL_START,
+            'Cell\r\n',
+            DataStreamTreeTokenType.TABLE_CELL_END,
+            DataStreamTreeTokenType.TABLE_ROW_END,
+            DataStreamTreeTokenType.TABLE_END,
+        ].join('');
+        const partialTableModel = new DocumentDataModel({
+            id: 'partial-table',
+            title: 'Partial Table',
+            documentStyle: {},
+            body: {
+                dataStream: tableStream,
+                tables: [{ startIndex: 0, endIndex: tableStream.length, tableId: 'table-1' }],
+                paragraphs: [{ startIndex: 7 }],
+            },
+        });
+        expect(partialTableModel.sliceBody(1, tableStream.length - 1)?.tables?.[0]).toMatchObject({
+            startIndex: 0,
+            endIndex: tableStream.length - 2,
+            tableId: 'table-1',
+        });
+        partialTableModel.dispose();
 
         model.resetDrawing({} as any, []);
         expect(model.getDrawingsOrder()).toEqual([]);

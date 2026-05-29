@@ -37,7 +37,6 @@ import {
     PositionedObjectLayoutType,
     SliceBodyType,
     toDisposable,
-    Tools,
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
@@ -59,6 +58,8 @@ import LarkPastePlugin from './html-to-udm/paste-plugins/plugin-lark';
 import UniverPastePlugin from './html-to-udm/paste-plugins/plugin-univer';
 import WordPastePlugin from './html-to-udm/paste-plugins/plugin-word';
 import {
+    createInternalClipboardDocData,
+    createInternalClipboardDocDataList,
     createInternalClipboardFragment,
     DOC_INTERNAL_FRAGMENT_MIME,
     embedInternalClipboardFragment,
@@ -89,7 +90,24 @@ export interface IDocClipboardService {
     addClipboardHook(hook: IDocClipboardHook): IDisposable;
 }
 
-function getTableSlice(body: IDocumentBody, start: number, end: number): IDocumentBody {
+export function getTableClipboardBodySlice(body: IDocumentBody, range: IRectRangeWithStyle): IDocumentBody {
+    const { startOffset, endOffset, spanEntireTable, tableId } = range;
+
+    if (startOffset == null || endOffset == null) {
+        return { dataStream: '' };
+    }
+
+    if (spanEntireTable) {
+        const tableRange = body.tables?.find((table) => table.tableId === tableId);
+        if (tableRange) {
+            return getBodySlice(body, tableRange.startIndex, tableRange.endIndex, false, SliceBodyType.copy);
+        }
+    }
+
+    return getTableCellContentClipboardBodySlice(body, startOffset, endOffset);
+}
+
+function getTableCellContentClipboardBodySlice(body: IDocumentBody, start: number, end: number): IDocumentBody {
     const bodySlice = getBodySlice(body, start, end + 2); // +2 for '\r\n in last cell'
 
     const dataStream = DataStreamTreeTokenType.TABLE_START +
@@ -179,6 +197,8 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         const docUnitId = currentDocInstance?.getUnitId() || '';
         if (!html && !text && files.length) {
             html = await this._createImagePasteHtml(files);
+        } else if (html && files.length) {
+            html += await this._createImagePasteHtml(files);
         }
         if (!html && !text) {
             this._logService.warn('[DocClipboardController] html and text cannot be both empty!');
@@ -347,8 +367,11 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
                 .replaceAll(DataStreamTreeTokenType.TABLE_ROW_END, '')
                 .replaceAll(DataStreamTreeTokenType.TABLE_CELL_START, '')
                 .replaceAll(DataStreamTreeTokenType.TABLE_CELL_END, '')
+                .replaceAll(DataStreamTreeTokenType.BLOCK_START, '')
+                .replaceAll(DataStreamTreeTokenType.BLOCK_END, '')
                 // Replace `\r\n` in table cell to white space.
-                .replaceAll('\r\n', ' ');
+                .replaceAll('\r\n', ' ')
+                .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '');
 
         let html = this._umdToHtml.convert(documentList);
         let internalJson = '';
@@ -358,32 +381,12 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         if (documentList.length === 1 && needCache) {
             html = html.replace(/(<[a-z]+)/, (_p0, p1) => `${p1} data-copy-id="${copyId}"`);
             const doc = documentList[0];
-            const cache: Partial<IDocumentData> = { body: doc.body };
-
-            if (doc.body?.customBlocks?.length) {
-                cache.drawings = {};
-
-                for (const block of doc.body.customBlocks) {
-                    const { blockId } = block;
-                    const drawing = doc.drawings?.[blockId];
-
-                    if (drawing) {
-                        const id = generateRandomId(6);
-
-                        block.blockId = id;
-
-                        cache.drawings[id] = {
-                            ...Tools.deepClone(drawing),
-                            drawingId: id,
-                        };
-                    }
-                }
-            }
+            const cache = createInternalClipboardDocData(doc);
 
             copyContentCache.set(copyId, cache);
             internalDocData = cache;
-        } else if (documentList.length === 1) {
-            internalDocData = { body: documentList[0].body };
+        } else {
+            internalDocData = createInternalClipboardDocDataList(documentList);
         }
 
         if (internalDocData) {
@@ -439,14 +442,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
             if (rangeType === DOC_RANGE_TYPE.RECT) {
                 needCache = false;
 
-                const { spanEntireRow } = range as IRectRangeWithStyle;
-                let bodySlice: IDocumentBody;
-
-                if (!spanEntireRow) {
-                    bodySlice = getTableSlice(body, startOffset, endOffset);
-                } else {
-                    bodySlice = getTableSlice(body, startOffset, endOffset);
-                }
+                const bodySlice = getTableClipboardBodySlice(body, range as IRectRangeWithStyle);
 
                 results.push(bodySlice);
 

@@ -92,11 +92,11 @@ export function getTableSlice(
         const clonedTable = Tools.deepClone(table);
         const { startIndex, endIndex } = clonedTable;
 
-        if (startIndex >= startOffset && endIndex <= endOffset) {
+        if (Math.max(startIndex, startOffset) < Math.min(endIndex, endOffset)) {
             newTables.push({
                 ...clonedTable,
-                startIndex: startIndex - startOffset,
-                endIndex: endIndex - startOffset,
+                startIndex: Math.max(startIndex, startOffset) - startOffset,
+                endIndex: Math.min(endIndex, endOffset) - startOffset,
             });
         }
     }
@@ -134,11 +134,18 @@ export function getParagraphsSlice(
 ) {
     const { paragraphs = [] } = body;
     const newParagraphs: IParagraph[] = [];
+    const sortedParagraphs = [...paragraphs].sort((a, b) => a.startIndex - b.startIndex);
 
-    for (const paragraph of paragraphs) {
-        const { startIndex } = paragraph;
-        if (startIndex >= startOffset && startIndex < endOffset) {
+    for (let index = 0; index < sortedParagraphs.length; index++) {
+        const paragraph = sortedParagraphs[index];
+        const paragraphStart = index > 0 ? sortedParagraphs[index - 1].startIndex + 1 : 0;
+        const paragraphEnd = paragraph.startIndex;
+        const paragraphMarkInRange = paragraphEnd >= startOffset && paragraphEnd < endOffset;
+        const paragraphTextIntersectsRange = Math.max(paragraphStart, startOffset) < Math.min(paragraphEnd, endOffset);
+
+        if (paragraphMarkInRange || paragraphTextIntersectsRange) {
             const copy = Tools.deepClone(paragraph);
+            copy.startIndex = Math.min(Math.max(paragraphEnd, startOffset), endOffset);
             newParagraphs.push(copy);
         }
     }

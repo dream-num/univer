@@ -15,7 +15,7 @@
  */
 
 import type { IDocumentBody } from '@univerjs/core';
-import { BooleanNumber } from '@univerjs/core';
+import { BooleanNumber, DataStreamTreeTokenType, NamedStyleType, TableRowHeightRule, TableSizeType } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { convertBodyToHtml, covertTextRunToHtml, getBodySliceHtml, UDMToHtmlService } from '../convertor';
 
@@ -87,12 +87,12 @@ describe('test case in html and udm convert', () => {
 
         const html = convertor.convert(bodyList.map((b) => ({ body: b, id: '', documentStyle: {} })));
 
-        expect(html).toBe('<p class="UniverNormal" >=SUM(<span style="color: #9e6de3;">F15:G18</span>)</p>');
+        expect(html).toBe('<p class="UniverNormal" >=SUM(<span style="font-family: Arial; color: #9e6de3;">F15:G18</span>)</p>');
     });
 
     it('Should convert textRun to Html', () => {
         const documentBody = getTestBody();
-        const expectedHtml = '<span style="font-family: Microsoft YaHei; color: rgb(0, 0, 0); font-size: 24pt;"><strong>塘月</strong></span>';
+        const expectedHtml = '<span style="font-family: Microsoft YaHei; color: #000000; font-size: 24pt;"><strong>塘月</strong></span>';
 
         expect(covertTextRunToHtml(documentBody.dataStream, documentBody.textRuns![0])).toBe(expectedHtml);
     });
@@ -102,21 +102,145 @@ describe('test case in html and udm convert', () => {
         let startIndex = 1;
         let endIndex = 3;
 
-        let expectedHtml = '<span style="font-family: Microsoft YaHei; color: rgb(0, 0, 0); font-size: 24pt;"><strong>塘月</strong></span>';
+        let expectedHtml = '<span style="font-family: Microsoft YaHei; color: #000000; font-size: 24pt;"><strong>塘月</strong></span>';
 
         expect(getBodySliceHtml({ body: documentBody, id: '', documentStyle: {} }, startIndex, endIndex)).toEqual(expectedHtml);
 
         startIndex = 0;
         endIndex = 4;
 
-        expectedHtml = '荷<span style="font-family: Microsoft YaHei; color: rgb(0, 0, 0); font-size: 24pt;"><strong>塘月</strong></span>色';
+        expectedHtml = '荷<span style="font-family: Microsoft YaHei; color: #000000; font-size: 24pt;"><strong>塘月</strong></span>色';
         expect(getBodySliceHtml({ body: documentBody, id: '', documentStyle: {} }, startIndex, endIndex)).toEqual(expectedHtml);
     });
 
     it('Should convert document body To Html(convertBodyToHtml)', () => {
         const documentBody = getTestBody();
-        const expectedHtml = '<p class="UniverNormal" style="margin-top: 10px; margin-bottom: 0px; line-height: 2;">荷<span style="font-family: Microsoft YaHei; color: rgb(0, 0, 0); font-size: 24pt;"><strong>塘月</strong></span>色</p><p class="UniverNormal" style="margin-top: 10px; margin-bottom: 0px; line-height: 2;">作者：朱自清</p>';
+        const expectedHtml = '<p class="UniverNormal" style="margin-top: 10px; margin-bottom: 0px; line-height: 2;">荷<span style="font-family: Microsoft YaHei; color: #000000; font-size: 24pt;"><strong>塘月</strong></span>色</p><p class="UniverNormal" style="margin-top: 10px; margin-bottom: 0px; line-height: 2;">作者：朱自清</p>';
 
         expect(convertBodyToHtml({ body: documentBody, id: '', documentStyle: {} })).toEqual(expectedHtml);
+    });
+    it('serializes embedded tables as paragraph siblings and strips data stream control chars', () => {
+        const tokens = DataStreamTreeTokenType;
+        const prefix = 'Intro\r';
+        const tableStart = prefix.length;
+        const cellText = 'Cell text';
+        const tableStream = tokens.TABLE_START +
+            tokens.TABLE_ROW_START +
+            tokens.TABLE_CELL_START +
+            `${cellText}\r\n` +
+            tokens.TABLE_CELL_END +
+            tokens.TABLE_ROW_END +
+            tokens.TABLE_END;
+        const tableEnd = tableStart + tableStream.length;
+        const dataStream = `${prefix}${tableStream}\r\n`;
+
+        const html = convertBodyToHtml({
+            id: '',
+            documentStyle: {},
+            tableSource: {
+                'table-1': {
+                    tableId: 'table-1',
+                    tableColumns: [{
+                        size: {
+                            type: TableSizeType.SPECIFIED,
+                            width: { v: 120 },
+                        },
+                    }],
+                    tableRows: [{
+                        trHeight: {
+                            hRule: TableRowHeightRule.AUTO,
+                            val: { v: 32 },
+                        },
+                        tableCells: [{}],
+                    }],
+                },
+            } as any,
+            body: {
+                dataStream,
+                paragraphs: [
+                    { startIndex: prefix.length - 1 },
+                    { startIndex: tableStart + tokens.TABLE_START.length + tokens.TABLE_ROW_START.length + tokens.TABLE_CELL_START.length + cellText.length },
+                ],
+                sectionBreaks: [],
+                tables: [{
+                    startIndex: tableStart,
+                    endIndex: tableEnd,
+                    tableId: 'table-1',
+                }],
+            },
+        });
+
+        expect(html).toContain('<p class="UniverNormal" >Intro</p><table');
+        expect(html).not.toMatch(/<p[^>]*>\s*<table/i);
+        expect(html).not.toContain(tokens.TABLE_START);
+        expect(html).not.toContain(tokens.TABLE_CELL_START);
+        expect(html).toContain('Cell text');
+    });
+
+    it('serializes title paragraphs as headings and hides block boundary tokens', () => {
+        const tokens = DataStreamTreeTokenType;
+        const title = 'Docs Table 2.0 playground';
+        const code = 'const cell = {};';
+        const blockStart = title.length + 1;
+        const dataStream = `${title}\r${tokens.BLOCK_START}${code}${tokens.BLOCK_END}\r\n`;
+
+        const html = convertBodyToHtml({
+            id: '',
+            documentStyle: {},
+            body: {
+                dataStream,
+                paragraphs: [
+                    {
+                        startIndex: title.length,
+                        paragraphStyle: {
+                            namedStyleType: NamedStyleType.TITLE,
+                        },
+                    },
+                    {
+                        startIndex: dataStream.length - 2,
+                    },
+                ],
+                sectionBreaks: [],
+                blockRanges: [{
+                    startIndex: blockStart,
+                    endIndex: blockStart + tokens.BLOCK_START.length + code.length - 1,
+                    blockType: 'code',
+                }] as any,
+            },
+        });
+
+        expect(html).toContain('<p class="UniverHeading" role="heading" aria-level="1" data-heading-level="1" >Docs Table 2.0 playground</p>');
+        expect(html).toContain('const cell = {};');
+        expect(html).not.toContain(tokens.BLOCK_START);
+        expect(html).not.toContain(tokens.BLOCK_END);
+    });
+
+    it('serializes paragraph-level text style for Word copy', () => {
+        const title = 'Styled paragraph';
+        const html = convertBodyToHtml({
+            id: '',
+            documentStyle: {},
+            body: {
+                dataStream: `${title}\r\n`,
+                paragraphs: [{
+                    startIndex: title.length,
+                    paragraphStyle: {
+                        textStyle: {
+                            fs: 22,
+                            bl: BooleanNumber.TRUE,
+                            cl: { rgb: '#4B5563' },
+                            ff: 'Arial',
+                        },
+                    },
+                }],
+                sectionBreaks: [],
+            },
+        });
+
+        expect(html).toContain('font-size: 22pt');
+        expect(html).toContain('font-weight: bold');
+        expect(html).toContain('color: #4B5563');
+        expect(html).toContain('font-family: Arial');
+        expect(html).toContain('<strong>Styled paragraph</strong>');
     });
 });

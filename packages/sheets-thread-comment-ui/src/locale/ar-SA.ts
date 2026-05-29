@@ -25,9 +25,6 @@ const locale: typeof enUS = {
             addComment: 'إضافة تعليق',
             commentManagement: 'إدارة التعليقات',
         },
-        panel: {
-            title: 'تعليق',
-        },
     },
 };
 

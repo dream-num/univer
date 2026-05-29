@@ -18,6 +18,9 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-thread-comment-ui': {
+        panel: {
+            title: 'Gestion des commentaires',
+        },
         menu: {
             addComment: 'Ajouter un commentaire',
             commentManagement: 'Gestion des commentaires',

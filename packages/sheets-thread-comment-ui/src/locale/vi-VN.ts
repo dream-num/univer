@@ -18,6 +18,9 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-thread-comment-ui': {
+        panel: {
+            title: 'Quản lý bình luận',
+        },
         menu: {
             addComment: 'Thêm bình luận',
             commentManagement: 'Quản lý bình luận',

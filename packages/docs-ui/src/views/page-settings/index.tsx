@@ -172,7 +172,7 @@ export function PageSettings(props: IConfirmChildrenProps) {
                         })}
                         onClick={() => handleModeChange(mode)}
                     >
-                        {localeService.t(mode === DocumentFlavor.MODERN ? 'page-settings.modern-mode' : 'page-settings.classic-mode')}
+                        {localeService.t(mode === DocumentFlavor.MODERN ? 'docs-ui.page-settings.modern-mode' : 'docs-ui.page-settings.classic-mode')}
                     </button>
                 ))}
             </div>
@@ -180,7 +180,7 @@ export function PageSettings(props: IConfirmChildrenProps) {
             {settings.mode === DocumentFlavor.MODERN
                 ? (
                     <div className="univer-flex univer-flex-col univer-gap-2.5">
-                        <SettingsLabel>{localeService.t('page-settings.modern-width')}</SettingsLabel>
+                        <SettingsLabel>{localeService.t('docs-ui.page-settings.modern-width')}</SettingsLabel>
                         <div className="univer-grid univer-grid-cols-3 univer-gap-2">
                             {MODERN_WIDTH_OPTIONS.map((option) => (
                                 <button
@@ -198,7 +198,7 @@ export function PageSettings(props: IConfirmChildrenProps) {
                                     })}
                                     onClick={() => handleModernWidthChange(option)}
                                 >
-                                    <span>{localeService.t(`page-settings.modern-width-${option}`)}</span>
+                                    <span>{localeService.t(`docs-ui.page-settings.modern-width-${option}`)}</span>
                                     <span className="univer-text-xs univer-font-normal univer-text-gray-400">
                                         {MODERN_DOCUMENT_WIDTH[option]}
                                         px
@@ -211,23 +211,23 @@ export function PageSettings(props: IConfirmChildrenProps) {
                 : (
                     <>
                         <div className="univer-flex univer-flex-col univer-gap-2">
-                            <SettingsLabel>{localeService.t('page-settings.paper-size')}</SettingsLabel>
+                            <SettingsLabel>{localeService.t('docs-ui.page-settings.paper-size')}</SettingsLabel>
                             <Select
                                 value={settings.paperSize}
                                 onChange={handlePaperSizeChange}
                                 options={PAPER_TYPES.map((p) => ({
-                                    label: localeService.t(`page-settings.page-size.${p.toLocaleLowerCase()}`),
+                                    label: localeService.t(`docs-ui.page-settings.page-size.${p.toLocaleLowerCase()}`),
                                     value: p,
                                 }))}
                             />
                         </div>
 
                         <div className="univer-flex univer-flex-col univer-gap-2">
-                            <SettingsLabel>{localeService.t('page-settings.custom-paper-size')}</SettingsLabel>
+                            <SettingsLabel>{localeService.t('docs-ui.page-settings.custom-paper-size')}</SettingsLabel>
                             <div className="univer-flex univer-flex-col univer-gap-2.5">
                                 <div className="univer-flex univer-gap-2.5">
                                     <div className="univer-flex univer-flex-1 univer-flex-col univer-gap-2">
-                                        <SettingsLabel muted>{localeService.t('page-settings.top')}</SettingsLabel>
+                                        <SettingsLabel muted>{localeService.t('docs-ui.page-settings.top')}</SettingsLabel>
                                         <InputNumber
                                             precision={2}
                                             min={0}
@@ -237,7 +237,7 @@ export function PageSettings(props: IConfirmChildrenProps) {
                                         />
                                     </div>
                                     <div className="univer-flex univer-flex-1 univer-flex-col univer-gap-2">
-                                        <SettingsLabel muted>{localeService.t('page-settings.bottom')}</SettingsLabel>
+                                        <SettingsLabel muted>{localeService.t('docs-ui.page-settings.bottom')}</SettingsLabel>
                                         <InputNumber
                                             precision={2}
                                             min={0}
@@ -249,7 +249,7 @@ export function PageSettings(props: IConfirmChildrenProps) {
                                 </div>
                                 <div className="univer-flex univer-gap-2.5">
                                     <div className="univer-flex univer-flex-1 univer-flex-col univer-gap-2">
-                                        <SettingsLabel muted>{localeService.t('page-settings.left')}</SettingsLabel>
+                                        <SettingsLabel muted>{localeService.t('docs-ui.page-settings.left')}</SettingsLabel>
                                         <InputNumber
                                             precision={2}
                                             min={0}
@@ -259,7 +259,7 @@ export function PageSettings(props: IConfirmChildrenProps) {
                                         />
                                     </div>
                                     <div className="univer-flex univer-flex-1 univer-flex-col univer-gap-2">
-                                        <SettingsLabel muted>{localeService.t('page-settings.right')}</SettingsLabel>
+                                        <SettingsLabel muted>{localeService.t('docs-ui.page-settings.right')}</SettingsLabel>
                                         <InputNumber
                                             precision={2}
                                             min={0}

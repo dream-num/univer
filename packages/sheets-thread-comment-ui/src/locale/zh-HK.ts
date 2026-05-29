@@ -22,6 +22,9 @@ const locale: typeof enUS = {
             addComment: '新增評論',
             commentManagement: '評論管理',
         },
+        panel: {
+            title: '評論',
+        },
     },
 };
 

@@ -186,7 +186,7 @@ export class BrowserClipboardService extends Disposable implements IClipboardInt
 
     async write(text: string, html: string, customData?: Record<string, string>): Promise<void> {
         if (!this.supportClipboard) {
-            return this._legacyCopyHtml(html);
+            return this._legacyCopyHtml(text, html);
         }
 
         try {
@@ -260,21 +260,45 @@ export class BrowserClipboardService extends Disposable implements IClipboardInt
         }
     }
 
-    private _legacyCopyHtml(html: string): void {
+    private _legacyCopyHtml(text: string, html: string): void {
         const activeElement = document.activeElement;
-        const container = createCopyHtmlContainer();
-        document.body.appendChild(container);
-        container.replaceChildren(sanitizeHtmlForClipboard(html));
+        const sanitizedHtml = serializeSanitizedHtmlForClipboard(html);
+        let handledByClipboardEvent = false;
+
+        const onCopy = (event: ClipboardEvent) => {
+            if (!event.clipboardData) {
+                return;
+            }
+
+            event.preventDefault();
+            event.clipboardData.setData(PLAIN_TEXT_CLIPBOARD_MIME_TYPE, text);
+            event.clipboardData.setData(HTML_CLIPBOARD_MIME_TYPE, sanitizedHtml);
+            handledByClipboardEvent = true;
+        };
+
+        document.addEventListener('copy', onCopy);
 
         try {
-            select(container);
             document.execCommand('copy');
+
+            if (!handledByClipboardEvent) {
+                const container = createCopyHtmlContainer();
+                document.body.appendChild(container);
+                container.innerHTML = sanitizedHtml;
+
+                try {
+                    select(container);
+                    document.execCommand('copy');
+                } finally {
+                    document.body.removeChild(container);
+                }
+            }
         } finally {
+            document.removeEventListener('copy', onCopy);
+
             if (activeElement instanceof HTMLElement) {
                 activeElement.focus();
             }
-
-            document.body.removeChild(container);
         }
     }
 
@@ -343,6 +367,12 @@ function sanitizeHtmlForClipboard(html: string): DocumentFragment {
     });
 
     return fragment;
+}
+
+function serializeSanitizedHtmlForClipboard(html: string): string {
+    const container = document.createElement('div');
+    container.appendChild(sanitizeHtmlForClipboard(html));
+    return container.innerHTML;
 }
 
 function sanitizeHtmlNode(node: Node): Node | null {

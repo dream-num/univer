@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody, IDocumentData, IParagraph, ITable, ITextStyle, Nullable } from '@univerjs/core';
+import type { IDocumentBody, IDocumentData, IParagraph, ITable, ITableCell, ITableCellBorder, ITextStyle, Nullable } from '@univerjs/core';
 import type { IAfterProcessRule, IPastePlugin, IStyleRule } from './paste-plugins/type';
 import {
+    ColorKit,
     CustomRangeType,
     DataStreamTreeTokenType,
     DrawingTypeEnum,
@@ -27,6 +28,8 @@ import {
     PositionedObjectLayoutType,
     PresetListType,
     skipParseTagNames,
+    TableRowHeightRule,
+    TableSizeType,
     Tools,
 } from '@univerjs/core';
 import { ImageSourceType } from '@univerjs/drawing';
@@ -50,6 +53,7 @@ function matchFilter(node: HTMLElement, filter: IStyleRule['filter']) {
 
 // TODO: get from page width.
 const DEFAULT_TABLE_WIDTH = 660;
+const WORD_SPACE_PLACEHOLDER = '\uE000';
 
 interface ITableCache {
     table: ITable;
@@ -60,6 +64,13 @@ interface IListContext {
     listId: string;
     listType: PresetListType;
     nestingLevel: number;
+}
+
+interface IParsedHtmlTableCell {
+    element: HTMLElement | null;
+    rowSpan: number;
+    colSpan: number;
+    covered?: boolean;
 }
 
 /**
@@ -91,7 +102,8 @@ export class HtmlToUDMService {
 
     convert(html: string, metaConfig: { unitId?: string } = {}): Partial<IDocumentData> {
         const pastePlugin = HtmlToUDMService._pluginList.find((plugin) => plugin.checkPasteType(html));
-        const dom = parseToDom(html)!;
+        const normalizedHtml = pastePlugin?.preprocessHtml?.(html) ?? html;
+        const dom = parseToDom(normalizedHtml)!;
 
         const body: IDocumentBody = {
             dataStream: '',
@@ -130,12 +142,11 @@ export class HtmlToUDMService {
         const body = doc.body!;
         for (const node of nodes) {
             if (node.nodeType === Node.TEXT_NODE) {
-                if (node.nodeValue?.trim() === '') {
+                const text = normalizeTextNode(node);
+                if (!text) {
                     continue;
                 }
 
-                // TODO: @JOCS, More characters need to be replaced, like `\b`
-                const text = node.nodeValue?.replace(/[\r\n]/g, '');
                 let style;
 
                 if (parent && this._styleCache.has(parent)) {
@@ -146,21 +157,21 @@ export class HtmlToUDMService {
 
                 if (style && Object.getOwnPropertyNames(style).length) {
                     body.textRuns!.push({
-                        st: body.dataStream.length - text!.length,
+                        st: body.dataStream.length - text.length,
                         ed: body.dataStream.length,
                         ts: style,
                     });
                 }
             } else if (node.nodeName === 'IMG') {
                 const element = node as HTMLImageElement;
-                const imageSourceType = element.dataset.imageSourceType;
+                const imageSourceType = element.dataset.imageSourceType ?? (element.src ? inferImageSourceType(element.src) : undefined);
                 const source = imageSourceType === ImageSourceType.UUID ? element.dataset.source : element.src;
 
                 if (source && imageSourceType) {
-                    const width = Number(element.dataset.width || 100);
-                    const height = Number(element.dataset.height || 100);
-                    const docTransformWidth = Number(element.dataset.docTransformWidth || width);
-                    const docTransformHeight = Number(element.dataset.docTransformHeight || height);
+                    const width = readImageSize(element, 'width') ?? 100;
+                    const height = readImageSize(element, 'height') ?? 100;
+                    const docTransformWidth = readCssSize(element.dataset.docTransformWidth || null, null, 'width') ?? width;
+                    const docTransformHeight = readCssSize(element.dataset.docTransformHeight || null, null, 'height') ?? height;
 
                     const id = generateRandomId(6);
                     doc.body?.customBlocks?.push({ startIndex: body.dataStream.length, blockId: id });
@@ -197,6 +208,11 @@ export class HtmlToUDMService {
                 continue;
             } else if (node.nodeType === Node.ELEMENT_NODE) {
                 const element = node as HTMLElement;
+                if (element.tagName.toUpperCase() === 'TABLE') {
+                    this._processHtmlTable(element, doc);
+                    continue;
+                }
+
                 if (this._processCodeBlock(element, doc)) {
                     continue;
                 }
@@ -307,7 +323,7 @@ export class HtmlToUDMService {
 
     private _processAfterDefaultBlock(node: HTMLElement, doc: Partial<IDocumentData>, paragraphAddedByPlugin: boolean): void {
         if (paragraphAddedByPlugin) {
-            this._applyWordListInfo(node, doc);
+            this._applyListInfo(node, doc);
             this._lastParagraphIndex = doc.body!.dataStream.length - 1;
             return;
         }
@@ -354,8 +370,10 @@ export class HtmlToUDMService {
         this._lastParagraphIndex = body.dataStream.length - 1;
     }
 
-    private _applyWordListInfo(node: HTMLElement, doc: Partial<IDocumentData>): void {
-        const listContext = extractWordListInfo(node);
+    private _applyListInfo(node: HTMLElement, doc: Partial<IDocumentData>): void {
+        const htmlListContext = this._listStack[this._listStack.length - 1];
+        const wordListContext = extractWordListInfo(node);
+        const listContext = htmlListContext ?? wordListContext;
         const paragraph = doc.body?.paragraphs?.[doc.body.paragraphs.length - 1];
         if (!listContext || !paragraph) {
             return;
@@ -366,7 +384,95 @@ export class HtmlToUDMService {
             listType: listContext.listType,
             nestingLevel: listContext.nestingLevel,
         };
-        paragraph.startIndex -= stripListMarkerFromCurrentParagraph(doc.body!);
+        if (wordListContext) {
+            paragraph.startIndex -= stripListMarkerFromCurrentParagraph(doc.body!);
+        }
+    }
+
+    private _processHtmlTable(node: HTMLElement, doc: Partial<IDocumentData>): void {
+        const body = doc.body!;
+        if (body.dataStream[body.dataStream.length - 1] !== '\r') {
+            body.dataStream += '\r';
+            body.paragraphs ??= [];
+            body.paragraphs.push({
+                startIndex: body.dataStream.length - 1,
+            });
+        }
+
+        doc.tableSource ??= {};
+        body.tables ??= [];
+        body.sectionBreaks ??= [];
+
+        const rows = collectHtmlTableRows(node);
+        const grid = buildHtmlTableGrid(rows);
+        const columnCount = Math.max(1, ...grid.map((row) => row.length));
+        const table = genTableSource(0, columnCount, DEFAULT_TABLE_WIDTH);
+        const tableWidth = readCssSize(node.getAttribute('width'), node.getAttribute('style'), 'width');
+        const columnWidths = resolveHtmlTableColumnWidths(node, grid, columnCount, tableWidth);
+        table.tableRows = [];
+        table.tableColumns = columnWidths.map((width) => getTableColumn(width));
+        table.size = {
+            type: TableSizeType.SPECIFIED,
+            width: { v: tableWidth ?? table.tableColumns.reduce((sum, column) => sum + column.size.width.v, 0) },
+        };
+
+        const startIndex = body.dataStream.length;
+        body.dataStream += DataStreamTreeTokenType.TABLE_START;
+
+        grid.forEach((row, rowIndex) => {
+            const tableRow = getEmptyTableRow(0);
+            const rowElement = rows[rowIndex];
+            const height = rowElement ? readCssSize(rowElement.getAttribute('height'), rowElement.getAttribute('style'), 'height') : undefined;
+            if (height != null) {
+                tableRow.trHeight = {
+                    val: { v: height },
+                    hRule: TableRowHeightRule.EXACT,
+                };
+            }
+
+            table.tableRows.push(tableRow);
+            body.dataStream += DataStreamTreeTokenType.TABLE_ROW_START;
+
+            for (let columnIndex = 0; columnIndex < columnCount; columnIndex++) {
+                const parsedCell = row[columnIndex] ?? { element: null, rowSpan: 1, colSpan: 1, covered: true };
+                const tableCell = parsedCell.covered
+                    ? { ...getEmptyTableCell(), rowSpan: 0, columnSpan: 0 }
+                    : createTableCellFromHtml(parsedCell.element!, parsedCell.rowSpan, parsedCell.colSpan);
+
+                tableRow.tableCells.push(tableCell);
+                this._appendHtmlTableCell(parsedCell, doc);
+            }
+
+            body.dataStream += DataStreamTreeTokenType.TABLE_ROW_END;
+        });
+
+        doc.tableSource[table.tableId] = table;
+        body.dataStream += DataStreamTreeTokenType.TABLE_END;
+        body.tables.push({
+            startIndex,
+            endIndex: body.dataStream.length,
+            tableId: table.tableId,
+        });
+    }
+
+    private _appendHtmlTableCell(cell: IParsedHtmlTableCell, doc: Partial<IDocumentData>): void {
+        const body = doc.body!;
+        body.dataStream += DataStreamTreeTokenType.TABLE_CELL_START;
+
+        if (cell.element && !cell.covered) {
+            this._process(cell.element, cell.element.childNodes, doc);
+        }
+
+        if (body.dataStream[body.dataStream.length - 1] !== '\r') {
+            this._appendParagraph(doc, cell.element ?? document.createElement('td'));
+        }
+
+        body.sectionBreaks ??= [];
+        body.sectionBreaks.push({
+            startIndex: body.dataStream.length,
+        });
+
+        body.dataStream += `\n${DataStreamTreeTokenType.TABLE_CELL_END}`;
     }
 
     private _processBeforeTable(node: HTMLElement, doc: Partial<IDocumentData>): void {
@@ -520,6 +626,313 @@ export class HtmlToUDMService {
     }
 }
 
+function collectHtmlTableRows(table: HTMLElement): HTMLElement[] {
+    const rows: HTMLElement[] = [];
+    Array.from(table.children).forEach((child) => {
+        const tagName = child.tagName.toUpperCase();
+        if (tagName === 'TR') {
+            rows.push(child as HTMLElement);
+        } else if (tagName === 'TBODY' || tagName === 'THEAD' || tagName === 'TFOOT') {
+            rows.push(...Array.from(child.children).filter((row) => row.tagName.toUpperCase() === 'TR') as HTMLElement[]);
+        }
+    });
+
+    return rows;
+}
+
+function normalizeTextNode(node: ChildNode): string {
+    const value = node.nodeValue ?? '';
+    if (value.includes(WORD_SPACE_PLACEHOLDER)) {
+        return value
+            .replace(/[\t\u00A0]+/g, ' ')
+            .replace(/[ \r\n]+/g, ' ')
+            .replace(/ *\uE000+ */g, (match) => ' '.repeat(Array.from(match).filter((char) => char === WORD_SPACE_PLACEHOLDER).length));
+    }
+
+    const hasExplicitSpacing = /[\t\u00A0]/.test(value);
+    const text = value
+        .replace(/[\t\u00A0]+/g, ' ')
+        .replace(/[ \r\n]+/g, ' ');
+
+    if (text.trim()) {
+        return text;
+    }
+
+    if (!hasExplicitSpacing) {
+        return '';
+    }
+
+    return hasTextSibling(node.previousSibling, 'previous') && hasTextSibling(node.nextSibling, 'next') ? ' ' : '';
+}
+
+function inferImageSourceType(src: string): ImageSourceType {
+    return src.startsWith('data:image/') ? ImageSourceType.BASE64 : ImageSourceType.URL;
+}
+
+function hasTextSibling(node: ChildNode | null, direction: 'previous' | 'next'): boolean {
+    let current = node;
+    while (current) {
+        if (current.nodeType === Node.TEXT_NODE && current.nodeValue?.trim()) {
+            return true;
+        }
+
+        if (current.nodeType === Node.ELEMENT_NODE && (current.textContent ?? '').trim()) {
+            return true;
+        }
+
+        current = direction === 'previous' ? current.previousSibling : current.nextSibling;
+    }
+
+    return false;
+}
+
+function buildHtmlTableGrid(rows: HTMLElement[]): IParsedHtmlTableCell[][] {
+    const grid: IParsedHtmlTableCell[][] = [];
+    const occupied = new Set<string>();
+
+    rows.forEach((row, rowIndex) => {
+        const parsedRow: IParsedHtmlTableCell[] = [];
+        let columnIndex = 0;
+
+        getHtmlTableCells(row).forEach((cellElement) => {
+            while (occupied.has(`${rowIndex}:${columnIndex}`)) {
+                parsedRow[columnIndex] = { element: null, rowSpan: 1, colSpan: 1, covered: true };
+                columnIndex++;
+            }
+
+            const rowSpan = Math.max(1, Number(cellElement.getAttribute('rowspan') ?? 1));
+            const colSpan = Math.max(1, Number(cellElement.getAttribute('colspan') ?? 1));
+            parsedRow[columnIndex] = { element: cellElement, rowSpan, colSpan };
+
+            for (let rowOffset = 0; rowOffset < rowSpan; rowOffset++) {
+                for (let columnOffset = 0; columnOffset < colSpan; columnOffset++) {
+                    if (rowOffset === 0 && columnOffset === 0) {
+                        continue;
+                    }
+
+                    occupied.add(`${rowIndex + rowOffset}:${columnIndex + columnOffset}`);
+                    if (rowOffset === 0) {
+                        parsedRow[columnIndex + columnOffset] = { element: null, rowSpan: 1, colSpan: 1, covered: true };
+                    }
+                }
+            }
+
+            columnIndex += colSpan;
+        });
+
+        while (occupied.has(`${rowIndex}:${columnIndex}`)) {
+            parsedRow[columnIndex] = { element: null, rowSpan: 1, colSpan: 1, covered: true };
+            columnIndex++;
+        }
+
+        grid.push(parsedRow);
+    });
+
+    const columnCount = Math.max(0, ...grid.map((row) => row.length));
+    grid.forEach((row) => {
+        while (row.length < columnCount) {
+            row.push({ element: null, rowSpan: 1, colSpan: 1, covered: true });
+        }
+    });
+
+    return grid.length ? grid : [[]];
+}
+
+function getHtmlTableCells(row: HTMLElement): HTMLElement[] {
+    return Array.from(row.children).filter((element) => {
+        const tagName = element.tagName.toUpperCase();
+        return tagName === 'TD' || tagName === 'TH';
+    }) as HTMLElement[];
+}
+
+function collectHtmlTableColumnWidths(table: HTMLElement, grid: IParsedHtmlTableCell[][], columnCount: number): Array<number | undefined> {
+    const widths: Array<number | undefined> = Array.from({ length: columnCount });
+    Array.from(table.querySelectorAll('col')).forEach((col, index) => {
+        if (index < widths.length) {
+            widths[index] = readCssSize(col.getAttribute('width'), col.getAttribute('style'), 'width');
+        }
+    });
+
+    grid.forEach((row) => {
+        row.forEach((cell, columnIndex) => {
+            if (!cell.element || widths[columnIndex] != null) {
+                return;
+            }
+
+            const width = readCssSize(cell.element.getAttribute('width'), cell.element.getAttribute('style'), 'width');
+            if (width != null && cell.colSpan <= 1) {
+                widths[columnIndex] = width;
+            }
+        });
+    });
+
+    return widths;
+}
+
+function resolveHtmlTableColumnWidths(table: HTMLElement, grid: IParsedHtmlTableCell[][], columnCount: number, tableWidth?: number): number[] {
+    const explicitWidths = collectHtmlTableColumnWidths(table, grid, columnCount);
+    const fallbackTableWidth = tableWidth ?? DEFAULT_TABLE_WIDTH;
+    const explicitTotal = explicitWidths.reduce<number>((sum, width) => sum + (width ?? 0), 0);
+    const missingCount = explicitWidths.filter((width) => width == null).length;
+    const fallbackColumnWidth = missingCount
+        ? Math.max((fallbackTableWidth - explicitTotal) / missingCount, 1)
+        : fallbackTableWidth / columnCount;
+
+    return explicitWidths.map((width) => width ?? roundCssNumber(fallbackColumnWidth));
+}
+
+function createTableCellFromHtml(element: HTMLElement, rowSpan: number, colSpan: number): ITableCell {
+    const cell = getEmptyTableCell();
+    if (rowSpan > 1) {
+        cell.rowSpan = rowSpan;
+    }
+    if (colSpan > 1) {
+        cell.columnSpan = colSpan;
+    }
+
+    const style = element.getAttribute('style') ?? '';
+    const width = readCssSize(element.getAttribute('width'), style, 'width');
+    const backgroundColor = readCssColor(style, 'background-color') ?? readCssColor(style, 'background') ?? readHtmlAttributeColor(element, 'bgcolor');
+    const borderTop = createTableCellBorder(style, 'top');
+    const borderRight = createTableCellBorder(style, 'right');
+    const borderBottom = createTableCellBorder(style, 'bottom');
+    const borderLeft = createTableCellBorder(style, 'left');
+
+    if (width != null) {
+        cell.size = {
+            type: TableSizeType.SPECIFIED,
+            width: { v: width },
+        };
+    }
+    if (backgroundColor) {
+        cell.backgroundColor = { rgb: backgroundColor };
+    }
+    if (borderTop) {
+        cell.borderTop = borderTop;
+    }
+    if (borderRight) {
+        cell.borderRight = borderRight;
+    }
+    if (borderBottom) {
+        cell.borderBottom = borderBottom;
+    }
+    if (borderLeft) {
+        cell.borderLeft = borderLeft;
+    }
+
+    return cell;
+}
+
+function createTableCellBorder(style: string, side: 'top' | 'right' | 'bottom' | 'left'): ITableCellBorder | undefined {
+    const sideStyle = readCssValue(style, `border-${side}`);
+    const color = readCssColor(style, `border-${side}-color`) ??
+        normalizeCssColor(sideStyle?.match(/(#[0-9a-f]{3,8}|rgb\([^)]+\))/i)?.[1]) ??
+        readCssColor(style, 'border-color') ??
+        normalizeCssColor(readCssValue(style, 'border')?.match(/(#[0-9a-f]{3,8}|rgb\([^)]+\))/i)?.[1]) ??
+        readNamedBorderColor(style);
+    const width = readCssLengthValue(readCssValue(style, `border-${side}-width`)) ??
+        readCssLengthValue(sideStyle) ??
+        readCssLengthValue(readCssValue(style, 'border-width')) ??
+        readCssLengthValue(readCssValue(style, 'border'));
+
+    if (!color && width == null) {
+        return undefined;
+    }
+
+    return {
+        color: { rgb: normalizeCssColor(color) ?? '#1f1f1f' },
+        width: { v: width ?? 1 },
+    };
+}
+
+function readNamedBorderColor(style: string): string | undefined {
+    const match = style.match(/border(?:-[a-z]+)?\s*:\s*([^;]+)/i);
+    if (!match) {
+        return undefined;
+    }
+
+    const keyword = match[1].split(/\s+/).find((part) => {
+        const normalized = part.toLowerCase();
+        return normalized && !/^[0-9.]+/.test(normalized) && !['none', 'hidden', 'dotted', 'dashed', 'solid', 'double', 'groove', 'ridge', 'inset', 'outset'].includes(normalized);
+    });
+
+    return normalizeCssColor(keyword);
+}
+
+function readHtmlAttributeColor(element: HTMLElement, attributeName: string): string | undefined {
+    return normalizeCssColor(element.getAttribute(attributeName));
+}
+
+function readCssColor(style: string, property: string): string | undefined {
+    return normalizeCssColor(readCssValue(style, property));
+}
+
+function normalizeCssColor(value: string | null | undefined): string | undefined {
+    if (!value) {
+        return undefined;
+    }
+
+    try {
+        const color = new ColorKit(value.trim());
+        return color.isValid ? color.toRgbString() : undefined;
+    } catch {
+        return undefined;
+    }
+}
+
+function readCssValue(style: string, property: string): string | undefined {
+    const normalizedProperty = property.toLowerCase();
+    const declaration = style
+        .split(';')
+        .map((part) => part.split(':'))
+        .find(([name]) => name?.trim().toLowerCase() === normalizedProperty);
+
+    return declaration?.slice(1).join(':').trim() || undefined;
+}
+
+function readCssSize(attributeValue: string | null, style: string | null, property: 'height' | 'width'): number | undefined {
+    const styleMatch = readCssValue(style ?? '', property)?.match(/^([0-9.]+)\s*(px|pt|in|cm|mm)?$/i);
+    if (styleMatch) {
+        return toPixels(Number(styleMatch[1]), styleMatch[2]);
+    }
+
+    const attrMatch = attributeValue?.match(/([0-9.]+)\s*(px|pt|in|cm|mm)?/i);
+    return attrMatch ? toPixels(Number(attrMatch[1]), attrMatch[2]) : undefined;
+}
+
+function readCssLengthValue(value: string | null | undefined): number | undefined {
+    const match = value?.match(/(?:^|\s)([0-9.]+)\s*(px|pt|in|cm|mm)(?=\s|$)/i) ??
+        value?.match(/^\s*([0-9.]+)\s*$/);
+
+    return match ? toPixels(Number(match[1]), match[2]) : undefined;
+}
+
+function readImageSize(element: HTMLImageElement, property: 'height' | 'width'): number | undefined {
+    const datasetValue = property === 'width' ? element.dataset.width : element.dataset.height;
+
+    return readCssSize(datasetValue || null, null, property) ??
+        readCssSize(element.getAttribute(property), element.getAttribute('style'), property);
+}
+
+function toPixels(value: number, unit?: string): number {
+    switch (unit?.toLowerCase()) {
+        case 'pt':
+            return roundCssNumber(value * 4 / 3);
+        case 'in':
+            return roundCssNumber(value * 96);
+        case 'cm':
+            return roundCssNumber(value * 96 / 2.54);
+        case 'mm':
+            return roundCssNumber(value * 96 / 25.4);
+        default:
+            return roundCssNumber(value);
+    }
+}
+
+function roundCssNumber(value: number): number {
+    return Math.round(value * 100) / 100;
+}
+
 function isSafeUrl(url: string): boolean {
     try {
         const parsed = new URL(url, window.location.origin);
@@ -574,20 +987,41 @@ function extractWordListInfo(node: HTMLElement): IListContext | null {
         return null;
     }
 
-    const marker = (node.textContent ?? '').trim().match(/^([0-9]+\.|[a-zA-Z]\.|[ivxlcdmIVXLCDM]+\.|[·•●○\-])/);
-    const ordered = Boolean(marker && !/[·•●○\-]/.test(marker[1]));
+    {
+        const marker = (node.textContent ?? '').trim().match(/^([0-9]+[.)]|[a-zA-Z][.)]|[ivxlcdmIVXLCDM]+[.)]|[\u2022\u00B7\u25CF\u25CB\u25AA\u25AB-])/);
+        const markerText = marker?.[1] ?? '';
+        const ordered = Boolean(markerText && !/^[\u2022\u00B7\u25CF\u25CB\u25AA\u25AB-]$/.test(markerText));
 
-    return {
-        listId: match?.[1] ?? 'mso-list',
-        listType: ordered ? PresetListType.ORDER_LIST : PresetListType.BULLET_LIST,
-        nestingLevel: Math.max(0, Number(match?.[2] ?? 1) - 1),
-    };
+        return {
+            listId: match?.[1] ?? 'mso-list',
+            listType: ordered ? PresetListType.ORDER_LIST : PresetListType.BULLET_LIST,
+            nestingLevel: Math.max(0, Number(match?.[2] ?? 1) - 1),
+        };
+    }
 }
 
 function stripListMarkerFromCurrentParagraph(body: IDocumentBody): number {
     const paragraphEnd = body.dataStream.endsWith('\r') ? body.dataStream.length - 1 : body.dataStream.length;
     const paragraphStart = Math.max(0, body.dataStream.lastIndexOf('\r', paragraphEnd - 1) + 1);
     const text = body.dataStream.slice(paragraphStart, paragraphEnd);
+    {
+        const marker = text.match(/^(\s*(?:[0-9]+[.)]|[a-zA-Z][.)]|[ivxlcdmIVXLCDM]+[.)]|[\u2022\u00B7\u25CF\u25CB\u25AA\u25AB-])\s*)/);
+        if (marker) {
+            const length = marker[1].length;
+            body.dataStream = body.dataStream.slice(0, paragraphStart) + body.dataStream.slice(paragraphStart + length);
+            body.textRuns?.forEach((textRun) => {
+                if (textRun.st >= paragraphStart + length) {
+                    textRun.st -= length;
+                    textRun.ed -= length;
+                } else if (textRun.ed > paragraphStart) {
+                    textRun.ed = Math.max(textRun.st, textRun.ed - length);
+                }
+            });
+
+            return length;
+        }
+    }
+
     const marker = text.match(/^(\s*(?:[0-9]+\.|[a-zA-Z]\.|[ivxlcdmIVXLCDM]+\.|[·•●○\-])\s*)/);
     if (!marker) {
         return 0;

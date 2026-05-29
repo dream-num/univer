@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody, IDocumentData, IParagraph, ITextRun } from '@univerjs/core';
+import type { IDocumentBody, IDocumentData, IParagraph, ITable, ITableCell, ITextRun, ITextStyle } from '@univerjs/core';
 import type { IDocImage } from '@univerjs/docs-drawing';
 import type { DataStreamTreeNode } from '@univerjs/engine-render';
-import { BaselineOffset, BooleanNumber, CustomRangeType, DataStreamTreeNodeType, DrawingTypeEnum, NamedStyleType, PresetListType, Tools } from '@univerjs/core';
+import { BaselineOffset, BooleanNumber, CustomRangeType, DataStreamTreeNodeType, DrawingTypeEnum, HorizontalAlign, NamedStyleType, PresetListType, Tools } from '@univerjs/core';
 import { ImageSourceType } from '@univerjs/drawing';
 import { parseDataStreamToTree } from '@univerjs/engine-render';
+
+const DEFAULT_CLIPBOARD_FONT_FAMILY = 'Arial';
 
 function covertImageToHtml(item: IDocImage) {
     const transformObjectToString = (obj: Record<string, string | number | undefined>) => {
@@ -47,7 +49,7 @@ export function covertTextRunToHtml(dataStream: string, textRun: ITextRun): stri
     const { st: start, ed, ts = {} } = textRun;
     const { ff, fs, it, bl, ul, st, ol, bg, cl, va } = ts;
 
-    let html = escapeHtml(dataStream.slice(start, ed));
+    let html = escapeInlineText(dataStream.slice(start, ed));
     const style: string[] = [];
 
     // italic
@@ -78,13 +80,11 @@ export function covertTextRunToHtml(dataStream: string, textRun: ITextRun): stri
     }
 
     // font family
-    if (ff) {
-        style.push(`font-family: ${ff}`);
-    }
+    style.push(`font-family: ${ff ?? DEFAULT_CLIPBOARD_FONT_FAMILY}`);
 
     // font color
-    if (cl) {
-        style.push(`color: ${cl.rgb}`);
+    if (cl?.rgb) {
+        style.push(`color: ${normalizeCssColor(cl.rgb)}`);
     }
 
     // font size
@@ -98,8 +98,8 @@ export function covertTextRunToHtml(dataStream: string, textRun: ITextRun): stri
     }
 
     // background color
-    if (bg) {
-        style.push(`background: ${bg.rgb}`);
+    if (bg?.rgb) {
+        style.push(`background: ${normalizeCssColor(bg.rgb)}`);
     }
 
     return style.length ? `<span style="${style.join('; ')};">${html}</span>` : html;
@@ -117,7 +117,7 @@ function getBodyInlineSlice(body: IDocumentBody, startIndex: number, endIndex: n
         const { st, ed } = textRun;
         if (Tools.hasIntersectionBetweenTwoRanges(startIndex, endIndex, st, ed)) {
             if (st > cursorIndex) {
-                spanList.push(escapeHtml(dataStream.slice(cursorIndex, st)));
+                spanList.push(escapeInlineText(dataStream.slice(cursorIndex, st)));
 
                 spanList.push(covertTextRunToHtml(dataStream, {
                     ...textRun,
@@ -136,7 +136,7 @@ function getBodyInlineSlice(body: IDocumentBody, startIndex: number, endIndex: n
     }
 
     if (cursorIndex !== endIndex) {
-        spanList.push(escapeHtml(dataStream.slice(cursorIndex, endIndex)));
+        spanList.push(escapeInlineText(dataStream.slice(cursorIndex, endIndex)));
     }
 
     return spanList.join('');
@@ -208,12 +208,20 @@ export function getBodySliceHtml(doc: IDocumentData, startIndex: number, endInde
 interface IHtmlResult {
     html: string;
     listStack?: IListHtmlContext[];
+    tableIndex?: number;
+    tableStack?: ITableHtmlContext[];
 }
 
 interface IListHtmlContext {
     tag: 'ol' | 'ul';
     level: number;
     listType: string;
+}
+
+interface ITableHtmlContext {
+    table?: ITable;
+    rowIndex: number;
+    columnIndex: number;
 }
 
 export function convertBodyToHtml(doc: IDocumentData): string {
@@ -265,8 +273,15 @@ function processNode(node: DataStreamTreeNode, doc: IDocumentData, result: IHtml
             const { children, startIndex, endIndex } = node;
             const paragraph = doc.body?.paragraphs?.find((p) => p.startIndex === endIndex) ?? {} as IParagraph;
             const { paragraphStyle = {} } = paragraph;
-            const { spaceAbove, spaceBelow, lineSpacing } = paragraphStyle;
+            const { horizontalAlign, spaceAbove, spaceBelow, lineSpacing } = paragraphStyle;
             const style = [];
+
+            if (horizontalAlign != null) {
+                const align = getTextAlign(horizontalAlign);
+                if (align) {
+                    style.push(`text-align: ${align}`);
+                }
+            }
 
             if (spaceAbove != null) {
                 if (typeof spaceAbove === 'number') {
@@ -288,18 +303,28 @@ function processNode(node: DataStreamTreeNode, doc: IDocumentData, result: IHtml
                 style.push(`line-height: ${lineSpacing}`);
             }
 
-            const innerHtml = (() => {
-                const childHtml = children.map((table) => {
-                    const childResult: IHtmlResult = { html: '' };
-                    processNode(table, doc, childResult);
-                    closeListStack(childResult);
-                    return childResult.html;
-                }).join('');
+            style.push(...serializeTextStyle(paragraphStyle.textStyle));
 
-                return `${childHtml}${getBodySliceHtml(doc, startIndex, endIndex)}`;
-            })();
+            const inlineHtml = applySemanticTextStyle(getBodySliceHtml(doc, startIndex, endIndex), paragraphStyle.textStyle);
+            const childHtml = children.map((table) => {
+                const childResult: IHtmlResult = { html: '' };
+                processNode(table, doc, childResult);
+                closeListStack(childResult);
+                return childResult.html;
+            }).join('');
 
-            renderParagraphNodeHtml(doc, paragraph, startIndex, endIndex, innerHtml, style, result);
+            if (childHtml) {
+                if (hasVisibleHtml(inlineHtml)) {
+                    renderParagraphNodeHtml(doc, paragraph, startIndex, endIndex, inlineHtml, style, result);
+                } else {
+                    closeListStack(result);
+                }
+
+                result.html += childHtml;
+                break;
+            }
+
+            renderParagraphNodeHtml(doc, paragraph, startIndex, endIndex, inlineHtml, style, result);
 
             break;
         }
@@ -308,21 +333,40 @@ function processNode(node: DataStreamTreeNode, doc: IDocumentData, result: IHtml
             const { children } = node;
 
             closeListStack(result);
-            result.html += '<table class="UniverTable" style="width: 100%; border-collapse: collapse;"><tbody>';
+            result.tableIndex ??= 0;
+            result.tableStack ??= [];
+            const tableRange = doc.body?.tables?.[result.tableIndex++];
+            const table = tableRange ? doc.tableSource?.[tableRange.tableId] : undefined;
+            const width = table?.tableColumns?.reduce((sum, column) => sum + (column.size?.width?.v ?? 0), 0);
+            const tableStyle = [
+                'border-collapse: collapse',
+                width ? `width: ${roundCssNumber(width)}px` : 'width: 100%',
+            ].join('; ');
+
+            result.tableStack.push({ table, rowIndex: -1, columnIndex: 0 });
+            result.html += `<table class="MsoNormalTable UniverTable" style="${tableStyle};"><tbody>`;
 
             for (const row of children) {
                 processNode(row, doc, result);
             }
 
             result.html += '</tbody></table>';
+            result.tableStack.pop();
 
             break;
         }
 
         case DataStreamTreeNodeType.TABLE_ROW: {
             const { children } = node;
+            const tableContext = result.tableStack?.[result.tableStack.length - 1];
+            if (tableContext) {
+                tableContext.rowIndex++;
+                tableContext.columnIndex = 0;
+            }
+            const row = tableContext?.table?.tableRows?.[tableContext.rowIndex];
+            const rowStyle = row?.trHeight?.val?.v != null ? ` style="height: ${roundCssNumber(row.trHeight.val.v)}px"` : '';
 
-            result.html += '<tr class="UniverTableRow">';
+            result.html += `<tr class="UniverTableRow"${rowStyle}>`;
             for (const cell of children) {
                 processNode(cell, doc, result);
             }
@@ -333,8 +377,18 @@ function processNode(node: DataStreamTreeNode, doc: IDocumentData, result: IHtml
 
         case DataStreamTreeNodeType.TABLE_CELL: {
             const { children } = node;
+            const tableContext = result.tableStack?.[result.tableStack.length - 1];
+            const row = tableContext?.table?.tableRows?.[tableContext.rowIndex];
+            const cell = row?.tableCells?.[tableContext?.columnIndex ?? 0];
+            if (tableContext) {
+                tableContext.columnIndex++;
+            }
 
-            result.html += '<td class="UniverTableCell">';
+            if (cell?.rowSpan === 0 || cell?.columnSpan === 0) {
+                break;
+            }
+
+            result.html += `<td class="UniverTableCell"${serializeTableCellAttributes(cell)}>`;
             for (const n of children) {
                 processNode(n, doc, result);
             }
@@ -362,6 +416,10 @@ function renderParagraphNodeHtml(doc: IDocumentData, paragraph: IParagraph, star
 
 function renderBlockParagraphHtml(doc: IDocumentData, paragraph: IParagraph, startIndex: number, endIndex: number, innerHtml: string, style: string[]): string {
     const blockRange = doc.body?.blockRanges?.find((range) => range.startIndex <= startIndex && endIndex <= range.endIndex + 1);
+    if (blockRange && !hasVisibleHtml(innerHtml)) {
+        return '';
+    }
+
     const paragraphHtml = renderHeadingParagraphHtml(paragraph, innerHtml, style)
         ?? `<p class="UniverNormal" ${style.length ? `style="${style.join('; ')};"` : ''}>${innerHtml}</p>`;
 
@@ -383,7 +441,7 @@ function renderHeadingParagraphHtml(paragraph: IParagraph, innerHtml: string, st
         return null;
     }
 
-    return `<h${headingLevel} class="UniverHeading" ${style.length ? `style="${style.join('; ')};"` : ''}>${innerHtml}</h${headingLevel}>`;
+    return `<p class="UniverHeading" role="heading" aria-level="${headingLevel}" data-heading-level="${headingLevel}" ${style.length ? `style="${style.join('; ')};"` : ''}>${innerHtml}</p>`;
 }
 
 function renderListParagraphItemHtml(doc: IDocumentData, paragraph: IParagraph, innerHtml: string, style: string[]): { tag: 'ol' | 'ul'; level: number; listType: string; listStyle: string | null; html: string } | null {
@@ -448,14 +506,154 @@ function closeListStack(result: IHtmlResult): void {
     }
 }
 
+function serializeTableCellAttributes(cell?: ITableCell): string {
+    if (!cell) {
+        return '';
+    }
+
+    const attributes: string[] = [];
+    const styles: string[] = [];
+
+    if ((cell.rowSpan ?? 1) > 1) {
+        attributes.push(`rowspan="${cell.rowSpan}"`);
+    }
+    if ((cell.columnSpan ?? 1) > 1) {
+        attributes.push(`colspan="${cell.columnSpan}"`);
+    }
+    if (cell.size?.width?.v != null) {
+        styles.push(`width: ${roundCssNumber(cell.size.width.v)}px`);
+    }
+    if (cell.backgroundColor?.rgb) {
+        styles.push(`background-color: ${cell.backgroundColor.rgb}`);
+    }
+
+    ([
+        ['top', cell.borderTop],
+        ['right', cell.borderRight],
+        ['bottom', cell.borderBottom],
+        ['left', cell.borderLeft],
+    ] as const).forEach(([side, border]) => {
+        if (!border) {
+            return;
+        }
+
+        styles.push(`border-${side}: ${roundCssNumber(border.width?.v ?? 1)}px solid ${border.color?.rgb ?? '#1f1f1f'}`);
+    });
+
+    if (styles.length) {
+        attributes.push(`style="${styles.join('; ')};"`);
+    }
+
+    return attributes.length ? ` ${attributes.join(' ')}` : '';
+}
+
+function serializeTextStyle(textStyle: ITextStyle | undefined): string[] {
+    if (!textStyle) {
+        return [];
+    }
+
+    const { ff, fs, it, bl, ul, st, ol, bg, cl } = textStyle;
+    const style: string[] = [];
+
+    style.push(`font-family: ${ff ?? DEFAULT_CLIPBOARD_FONT_FAMILY}`);
+
+    if (fs != null) {
+        style.push(`font-size: ${fs}pt`);
+    }
+
+    if (cl?.rgb) {
+        style.push(`color: ${normalizeCssColor(cl.rgb)}`);
+    }
+
+    if (bg?.rgb) {
+        style.push(`background-color: ${normalizeCssColor(bg.rgb)}`);
+    }
+
+    if (bl === BooleanNumber.TRUE) {
+        style.push('font-weight: bold');
+    }
+
+    if (it === BooleanNumber.TRUE) {
+        style.push('font-style: italic');
+    }
+
+    const textDecorations: string[] = [];
+    if (ul?.s === BooleanNumber.TRUE) {
+        textDecorations.push('underline');
+    }
+    if (st?.s === BooleanNumber.TRUE) {
+        textDecorations.push('line-through');
+    }
+    if (ol?.s === BooleanNumber.TRUE) {
+        textDecorations.push('overline');
+    }
+    if (textDecorations.length) {
+        style.push(`text-decoration: ${textDecorations.join(' ')}`);
+    }
+
+    return style;
+}
+
+function applySemanticTextStyle(html: string, textStyle: ITextStyle | undefined): string {
+    if (!textStyle || !hasVisibleHtml(html)) {
+        return html;
+    }
+
+    let result = html;
+    if (textStyle.it === BooleanNumber.TRUE) {
+        result = `<i>${result}</i>`;
+    }
+    if (textStyle.ul?.s === BooleanNumber.TRUE) {
+        result = `<u>${result}</u>`;
+    }
+    if (textStyle.st?.s === BooleanNumber.TRUE) {
+        result = `<s>${result}</s>`;
+    }
+    if (textStyle.bl === BooleanNumber.TRUE) {
+        result = `<strong>${result}</strong>`;
+    }
+
+    return result;
+}
+
+function normalizeCssColor(color: string): string {
+    const rgb = color.match(/^rgba?\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})(?:\s*,\s*[\d.]+)?\s*\)$/i);
+    if (!rgb) {
+        return color;
+    }
+
+    return `#${rgb.slice(1, 4).map((part) => Math.max(0, Math.min(255, Number(part))).toString(16).padStart(2, '0')).join('')}`;
+}
+
+function roundCssNumber(value: number): number {
+    return Math.round(value * 100) / 100;
+}
+
 function getHeadingLevel(namedStyleType?: NamedStyleType): number | null {
     switch (namedStyleType) {
+        case NamedStyleType.TITLE:
         case NamedStyleType.HEADING_1: return 1;
         case NamedStyleType.HEADING_2: return 2;
         case NamedStyleType.HEADING_3: return 3;
         case NamedStyleType.HEADING_4: return 4;
         case NamedStyleType.HEADING_5: return 5;
         default: return null;
+    }
+}
+
+function getTextAlign(horizontalAlign: HorizontalAlign): string | null {
+    switch (horizontalAlign) {
+        case HorizontalAlign.LEFT:
+            return 'left';
+        case HorizontalAlign.CENTER:
+            return 'center';
+        case HorizontalAlign.RIGHT:
+            return 'right';
+        case HorizontalAlign.JUSTIFIED:
+        case HorizontalAlign.BOTH:
+            return 'justify';
+        default:
+            return null;
     }
 }
 
@@ -480,6 +678,22 @@ function escapeHtml(value: string): string {
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;');
+}
+
+function escapeInlineText(value: string): string {
+    return escapeHtml(stripDataStreamControlChars(value)).replace(/\r\n|\r|\n/g, '<br>');
+}
+
+function stripDataStreamControlChars(value: string): string {
+    return value.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '');
+}
+
+function hasVisibleHtml(html: string): boolean {
+    return /<(?:img|br)\b/i.test(html) || html
+        .replace(/<[^>]+>/g, '')
+        .replace(/&nbsp;/gi, ' ')
+        .trim()
+        .length > 0;
 }
 
 export class UDMToHtmlService {

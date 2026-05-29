@@ -15,6 +15,7 @@
  */
 
 import type { IParagraphStyle, Nullable } from '@univerjs/core';
+import { HorizontalAlign } from '@univerjs/core';
 import { ptToPixel } from '@univerjs/engine-render';
 
 // TODO: @JOCS, Complete other missing attributes that exist in IParagraphStyle
@@ -51,6 +52,11 @@ export function getParagraphStyle(el: HTMLElement): Nullable<IParagraphStyle> {
                 break;
             }
 
+            case 'text-align': {
+                paragraphStyle.horizontalAlign = getHorizontalAlign(cssValue);
+                break;
+            }
+
             default: {
                 break;
             }
@@ -58,4 +64,21 @@ export function getParagraphStyle(el: HTMLElement): Nullable<IParagraphStyle> {
     }
 
     return Object.getOwnPropertyNames(paragraphStyle).length ? paragraphStyle : null;
+}
+
+function getHorizontalAlign(value: string): HorizontalAlign {
+    switch (value.trim().toLowerCase()) {
+        case 'center':
+            return HorizontalAlign.CENTER;
+        case 'right':
+        case 'end':
+            return HorizontalAlign.RIGHT;
+        case 'justify':
+            return HorizontalAlign.JUSTIFIED;
+        case 'left':
+        case 'start':
+            return HorizontalAlign.LEFT;
+        default:
+            return HorizontalAlign.UNSPECIFIED;
+    }
 }

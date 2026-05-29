@@ -177,7 +177,9 @@ export class ListValidator extends BaseSheetValidator {
                 rule
             ).list
             : deserializeListOptions(formula1);
-        const selected = this.parseCellValue(value!);
+        const selected = rule.type === DataValidationType.LIST
+            ? (value === undefined || value === null || value === '' ? [] : [`${value}`])
+            : this.parseCellValue(value!);
         return selected.every((i) => formula1Result.includes(i));
     }
 

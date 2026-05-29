@@ -25,9 +25,6 @@ const locale: typeof enUS = {
             addComment: 'Thêm bình luận',
             commentManagement: 'Quản lý bình luận',
         },
-        panel: {
-            title: 'Bình luận',
-        },
     },
 };
 

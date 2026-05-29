@@ -25,7 +25,6 @@ import {
 import { borderClassName, borderTopClassName, clsx, scrollbarClassName } from '@univerjs/design';
 import { CheckMarkIcon } from '@univerjs/icons';
 import {
-    deserializeListOptions,
     RangeProtectionPermissionEditPoint,
     serializeListOptions,
     SheetPermissionCheckController,
@@ -34,6 +33,7 @@ import {
 } from '@univerjs/sheets';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { getListDropdownValue } from './utils';
 
 interface ISelectListProps {
     value: string[];
@@ -234,10 +234,10 @@ export function ListDropDown(props: { popup: IPopup<IListDropdownProps & IBaseDr
         <SelectList
             style={{ minWidth: cellWidth, maxWidth: Math.max(cellWidth, 200) }}
             title={multiple ? localeService.t('sheets-ui.data-validation.listMultiple.dropdown') : localeService.t('sheets-ui.data-validation.list.dropdown')}
-            value={deserializeListOptions(localValue ?? '')}
+            value={getListDropdownValue(localValue, multiple)}
             multiple={multiple}
             onChange={async (newValue) => {
-                const str = serializeListOptions(newValue);
+                const str = multiple ? serializeListOptions(newValue) : (newValue[0] ?? '');
                 setLocalValue(str);
                 const success = await onChange?.(newValue);
                 if (!(success === false)) {

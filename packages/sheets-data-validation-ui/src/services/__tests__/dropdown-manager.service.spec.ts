@@ -19,7 +19,7 @@ import type { SheetDataValidationModel } from '@univerjs/sheets-data-validation'
 import type { IDropdownParam, IEditorBridgeService } from '@univerjs/sheets-ui';
 import { DataValidationRenderMode } from '@univerjs/core';
 import { DataValidatorDropdownType } from '@univerjs/data-validation';
-import { serializeListOptions, SetRangeValuesCommand } from '@univerjs/sheets';
+import { SetRangeValuesCommand } from '@univerjs/sheets';
 import { SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
@@ -154,7 +154,7 @@ describe('DataValidationDropdownManagerService', () => {
                 endRow: 1,
             },
             value: {
-                v: serializeListOptions(['Closed']),
+                v: 'Closed',
                 p: null,
                 f: null,
                 si: null,
@@ -188,5 +188,88 @@ describe('DataValidationDropdownManagerService', () => {
         service.showDataValidationDropdown('book-1', 'sheet-1', 1, 2, onHide);
         service.hideDropdown();
         expect(onHide).toHaveBeenCalledTimes(2);
+    });
+
+    it('serializes multiple list selections when saving to the cell', async () => {
+        let dropdownParam: IDropdownParam | undefined;
+        const worksheet = {
+            getSheetId: () => 'sheet-1',
+            getCellRaw: () => ({ v: '' }),
+        };
+        const workbook = {
+            getUnitId: () => 'book-1',
+            getSheetBySheetId: () => worksheet,
+        };
+        const rule = {
+            uid: 'rule-1',
+            type: 'list',
+            renderMode: DataValidationRenderMode.CUSTOM,
+        };
+        const commandService = {
+            executeCommand: vi.fn(() => Promise.resolve(true)),
+        };
+
+        const service = new DataValidationDropdownManagerService(
+            {
+                getUnit: () => workbook,
+            } as never,
+            {
+                getValidatorItem: vi.fn(() => ({
+                    dropdownType: DataValidatorDropdownType.MULTIPLE_LIST,
+                    getListWithColor: vi.fn(() => [
+                        { label: '1,2', color: '#0f0' },
+                        { label: '3', color: '#f00' },
+                    ]),
+                })),
+            } as never,
+            {
+                visible$: new Subject<boolean>(),
+            } as never,
+            {
+                getRuleByLocation: vi.fn(() => rule),
+            } as never,
+            {
+                selectionMoveEnd$: new Subject<ISelectionWithStyle[]>(),
+            } as unknown as SheetsSelectionsService,
+            {
+                showDropdown: vi.fn((param: IDropdownParam) => {
+                    dropdownParam = param;
+
+                    return {
+                        dispose: vi.fn(),
+                    };
+                }),
+            } as never,
+            {
+                getRuleByLocation: vi.fn(() => rule),
+            } as unknown as SheetDataValidationModel,
+            commandService as never,
+            {
+                isVisible: () => ({ visible: false }),
+            } as IEditorBridgeService,
+            {
+                has: () => false,
+            } as never,
+            {
+                getConfig: vi.fn(() => undefined),
+            } as never
+        );
+
+        service.showDataValidationDropdown('book-1', 'sheet-1', 1, 2);
+
+        const listProps = dropdownParam?.props as {
+            onChange?: (value: string[]) => Promise<boolean>;
+        } | undefined;
+
+        await expect(listProps?.onChange?.(['1,2', '3'])).resolves.toBe(false);
+
+        expect(commandService.executeCommand).toHaveBeenCalledWith(SetRangeValuesCommand.id, expect.objectContaining({
+            value: {
+                v: '["1,2","3"]',
+                p: null,
+                f: null,
+                si: null,
+            },
+        }));
     });
 });

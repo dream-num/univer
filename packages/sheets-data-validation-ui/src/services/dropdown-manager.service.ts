@@ -302,7 +302,7 @@ export class DataValidationDropdownManagerService extends Disposable {
             case DataValidatorDropdownType.MULTIPLE_LIST: {
                 const multiple = validator.dropdownType === DataValidatorDropdownType.MULTIPLE_LIST;
                 const handleSave = async (newValue: string[]) => {
-                    const str = serializeListOptions(newValue);
+                    const str = multiple ? serializeListOptions(newValue) : (newValue[0] ?? '');
                     const params: ISetRangeValuesCommandParams = {
                         unitId,
                         subUnitId,

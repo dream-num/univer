@@ -15,7 +15,7 @@
  */
 
 import type { Injector, LocaleService } from '@univerjs/core';
-import { CellValueType, DataValidationOperator, WrapStrategy } from '@univerjs/core';
+import { CellValueType, DataValidationOperator, DataValidationType, WrapStrategy } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { describe, expect, it, vi } from 'vitest';
 import { DataValidationCustomFormulaService } from '../../services/dv-custom-formula.service';
@@ -27,6 +27,7 @@ import { CustomFormulaValidator } from '../custom-validator';
 import { DateValidator } from '../date-validator';
 import { DecimalValidator, getCellValueNumber } from '../decimal-validator';
 import { ListMultipleValidator } from '../list-multiple-validator';
+import { ListValidator } from '../list-validator';
 import { TextLengthValidator } from '../text-length-validator';
 import { WholeValidator } from '../whole-validator';
 
@@ -236,5 +237,16 @@ describe('validators', () => {
         expect(listMultiple.offsetFormulaByRange).toBe(false);
         expect(listMultiple.skipDefaultFontRender!()).toBe(true);
         expect(formulaService.getRuleFormulaResult).toHaveBeenCalled();
+    });
+
+    it('treats comma-containing single list values as one selected value', async () => {
+        const { localeService, injector } = createContext();
+        const list = new ListValidator(localeService, injector);
+
+        await expect(list.isValidType(
+            { value: '1,2', unitId: 'u', subUnitId: 's' } as never,
+            {} as never,
+            { type: DataValidationType.LIST, formula1: '["1,2","3"]' } as never
+        )).resolves.toBe(true);
     });
 });

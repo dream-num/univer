@@ -32,7 +32,7 @@ export function createWebWorkerMessagePortOnWorker(): IMessageProtocol {
             };
             addEventListener('message', handler);
             return () => removeEventListener('message', handler);
-        }).pipe(shareReplay(1)),
+        }).pipe(shareReplay({ bufferSize: 1, refCount: true })),
     };
 }
 
@@ -52,6 +52,6 @@ export function createWebWorkerMessagePortOnMain(worker: Worker): IMessageProtoc
             };
             worker.addEventListener('message', handler);
             return () => worker.removeEventListener('message', handler);
-        }).pipe(shareReplay(1)),
+        }).pipe(shareReplay({ bufferSize: 1, refCount: true })),
     };
 }

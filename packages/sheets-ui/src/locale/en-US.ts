@@ -335,6 +335,18 @@ const locale = {
         uploadLoading: {
             loading: 'Loading..., remaining', // 正在上传，当前剩余
         },
+        'data-validation': {
+            alert: {
+                ok: 'OK',
+            },
+            list: {
+                edit: 'Edit',
+                dropdown: 'Select an item',
+            },
+            listMultiple: {
+                dropdown: 'Select items',
+            },
+        },
         permission: {
             toolbarMenu: 'Protection',
             panel: {

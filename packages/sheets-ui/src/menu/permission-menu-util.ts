@@ -215,11 +215,11 @@ export function getAddPermissionDisableBase$(accessor: IAccessor) {
     const contextService = accessor.get(IContextService);
     const formulaEditorFocus$ = contextService.subscribeContextValue$(FOCUSING_FX_BAR_EDITOR).pipe(
         startWith(false),
-        shareReplay(1)
+        shareReplay({ bufferSize: 1, refCount: true })
     );
     const editorVisible$ = editorBridgeService?.visible$.pipe(
         startWith(null),
-        shareReplay(1)
+        shareReplay({ bufferSize: 1, refCount: true })
     ) ?? of(null);
 
     return combineLatest([workbook$, userManagerService.currentUser$, editorVisible$, formulaEditorFocus$]).pipe(

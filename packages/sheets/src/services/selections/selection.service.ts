@@ -78,7 +78,7 @@ export class SheetsSelectionsService extends RxDisposable {
     }
 
     protected _init(): void {
-        const c$ = this._instanceSrv.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SHEET).pipe(shareReplay(1), takeUntil(this.dispose$));
+        const c$ = this._instanceSrv.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SHEET).pipe(shareReplay({ bufferSize: 1, refCount: true }), takeUntil(this.dispose$));
         // When workbook changed, unsubscribe the previous workbook selection$ and subscribe the new workbook selection$.
         this.selectionMoveStart$ = c$.pipe(
             switchMap((workbook) => !workbook ? of() : this._ensureWorkbookSelection(workbook.getUnitId()).selectionMoveStart$),

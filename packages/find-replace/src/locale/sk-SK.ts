@@ -26,6 +26,7 @@ const locale: typeof enUS = {
             'go-to-next-match': 'Prejsť na ďalšiu zhodu',
             'go-to-previous-match': 'Prejsť na predchádzajúcu zhodu',
             'focus-selection': 'Zamerať výber',
+            panel: 'Hľadať a nahradiť',
         },
         dialog: {
             title: 'Hľadať',
@@ -67,7 +68,6 @@ const locale: typeof enUS = {
             cancel: 'Zrušiť',
         },
     },
-    'find-replace-shortcuts': 'Hľadať a nahradiť',
 };
 
 export default locale;

@@ -26,6 +26,7 @@ const locale: typeof enUS = {
             'go-to-next-match': 'Ir para Próxima Correspondência',
             'go-to-previous-match': 'Ir para Correspondência Anterior',
             'focus-selection': 'Focar Seleção',
+            panel: 'Localizar e Substituir',
         },
         dialog: {
             title: 'Localizar',
@@ -67,7 +68,6 @@ const locale: typeof enUS = {
             cancel: 'Cancelar',
         },
     },
-    'find-replace-shortcuts': 'Localizar e Substituir',
 };
 
 export default locale;

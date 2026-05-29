@@ -337,6 +337,18 @@ const locale: typeof enUS = {
         uploadLoading: {
             loading: 'در حال بارگیری...، باقی مانده',
         },
+        'data-validation': {
+            alert: {
+                ok: 'تایید',
+            },
+            list: {
+                edit: 'ویرایش',
+                dropdown: 'انتخاب یک مورد',
+            },
+            listMultiple: {
+                dropdown: 'انتخاب موارد',
+            },
+        },
         permission: {
             toolbarMenu: 'محافظت',
             panel: {

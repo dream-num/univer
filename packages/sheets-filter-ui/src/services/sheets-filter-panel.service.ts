@@ -547,7 +547,7 @@ export class ByValuesModel extends Disposable implements IFilterByModel {
                 })
             ),
             this._manuallyUpdateFilterItems$
-        ).pipe(shareReplay(1));
+        ).pipe(shareReplay({ bufferSize: 1, refCount: true }));
 
         this.canApply$ = this.filterItems$.pipe(map((items) => {
             const stat = statisticFilterByValueItems(items);

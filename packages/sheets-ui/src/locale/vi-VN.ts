@@ -337,6 +337,18 @@ const locale: typeof enUS = {
         uploadLoading: {
             loading: 'Đang tải lên, hiện còn lại',
         },
+        'data-validation': {
+            alert: {
+                ok: 'OK',
+            },
+            list: {
+                edit: 'Chỉnh sửa',
+                dropdown: 'Chọn một mục',
+            },
+            listMultiple: {
+                dropdown: 'Chọn các mục',
+            },
+        },
         permission: {
             toolbarMenu: 'Bảo vệ',
             panel: {

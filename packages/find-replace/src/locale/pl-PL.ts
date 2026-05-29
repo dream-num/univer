@@ -26,6 +26,7 @@ const locale: typeof enUS = {
             'go-to-next-match': 'Przejdź do następnego dopasowania',
             'go-to-previous-match': 'Przejdź do poprzedniego dopasowania',
             'focus-selection': 'Skup na zaznaczeniu',
+            panel: 'Znajdź i zamień',
         },
         dialog: {
             title: 'Znajdź',
@@ -67,7 +68,6 @@ const locale: typeof enUS = {
             cancel: 'Anuluj',
         },
     },
-    'find-replace-shortcuts': 'Znajdź i zamień',
 };
 
 export default locale;

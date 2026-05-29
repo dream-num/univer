@@ -45,7 +45,7 @@ export class ComputingStatusReporterController extends Disposable {
         });
     }).pipe(
         distinctUntilChanged(),
-        shareReplay()
+        shareReplay({ refCount: true })
     );
 
     constructor(

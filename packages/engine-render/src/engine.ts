@@ -79,7 +79,7 @@ export class Engine extends Disposable {
                 sub.unsubscribe();
                 this._rect$ = null;
             };
-        })).pipe(shareReplay(1));
+        })).pipe(shareReplay({ bufferSize: 1, refCount: true }));
     }
 
     private _container: Nullable<HTMLElement>;

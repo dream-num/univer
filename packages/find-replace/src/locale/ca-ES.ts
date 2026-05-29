@@ -26,6 +26,7 @@ const locale: typeof enUS = {
             'go-to-next-match': 'Anar a la següent coincidència',
             'go-to-previous-match': 'Anar a la coincidència anterior',
             'focus-selection': 'Enfocar la selecció',
+            panel: 'Cerca i reemplaça',
         },
         dialog: {
             title: 'Cerca',
@@ -67,7 +68,6 @@ const locale: typeof enUS = {
             cancel: 'Cancel·lar',
         },
     },
-    'find-replace-shortcuts': 'Cerca i reemplaça',
 };
 
 export default locale;

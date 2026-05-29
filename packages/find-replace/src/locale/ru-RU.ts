@@ -26,6 +26,7 @@ const locale: typeof enUS = {
             'go-to-next-match': 'Перейти к следующему совпадению',
             'go-to-previous-match': 'Перейти к предыдущему совпадению',
             'focus-selection': 'Фокус на выделении',
+            panel: 'Найти и заменить',
         },
         dialog: {
             title: 'Найти',
@@ -67,7 +68,6 @@ const locale: typeof enUS = {
             cancel: 'Отмена',
         },
     },
-    'find-replace-shortcuts': 'Найти и заменить',
 };
 
 export default locale;

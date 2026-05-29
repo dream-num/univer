@@ -26,6 +26,7 @@ const locale: typeof enUS = {
             'go-to-next-match': 'Chuyển đến kết quả tiếp theo',
             'go-to-previous-match': 'Chuyển đến kết quả trước đó',
             'focus-selection': 'Tập trung vào vùng chọn',
+            panel: 'Tìm kiếm và Thay thế',
         },
         dialog: {
             title: 'Tìm kiếm',
@@ -67,7 +68,6 @@ const locale: typeof enUS = {
             cancel: 'Hủy',
         },
     },
-    'find-replace-shortcuts': 'Tìm kiếm và Thay thế',
 };
 
 export default locale;

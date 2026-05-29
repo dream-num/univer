@@ -337,6 +337,18 @@ const locale: typeof enUS = {
         uploadLoading: {
             loading: '正在上传，当前剩余',
         },
+        'data-validation': {
+            alert: {
+                ok: '确定',
+            },
+            list: {
+                edit: '编辑',
+                dropdown: '选择一项',
+            },
+            listMultiple: {
+                dropdown: '选择多项',
+            },
+        },
         permission: {
             toolbarMenu: '保护',
             panel: {

@@ -109,17 +109,17 @@ export function getCurrentRangeDisable$(accessor: IAccessor, permissionTypes: IP
 
     const editorVisible$ = _editorVisible$.pipe(
         startWith(null),
-        shareReplay(1)
+        shareReplay({ bufferSize: 1, refCount: true })
     );
 
     const formulaEditorFocus$ = contextService.subscribeContextValue$(FOCUSING_FX_BAR_EDITOR).pipe(
         startWith(false),
-        shareReplay(1)
+        shareReplay({ bufferSize: 1, refCount: true })
     );
 
     const focusingShapeTextEditor$ = contextService.subscribeContextValue$(FOCUSING_SHAPE_TEXT_EDITOR).pipe(
         startWith(false),
-        shareReplay(1)
+        shareReplay({ bufferSize: 1, refCount: true })
     );
 
     const observable = combineLatest([userManagerService.currentUser$, workbook$, editorVisible$, formulaEditorFocus$, focusingShapeTextEditor$]).pipe(

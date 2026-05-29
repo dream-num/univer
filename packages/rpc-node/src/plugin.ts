@@ -148,7 +148,7 @@ function createNodeMessagePortOnMain(injector: Injector, path: string): [IMessag
 
             child.on('message', handler);
             return () => child.off('message', handler);
-        }).pipe(shareReplay(1)),
+        }).pipe(shareReplay({ bufferSize: 1, refCount: true })),
     };
 
     return [messageProtocol, child];
@@ -166,6 +166,6 @@ function createNodeWorkerMessageProtocol(): IMessageProtocol {
 
             process.on('message', handler);
             return () => process.off('message', handler);
-        }).pipe(shareReplay(1)),
+        }).pipe(shareReplay({ bufferSize: 1, refCount: true })),
     };
 }

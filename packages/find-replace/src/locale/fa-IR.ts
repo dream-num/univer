@@ -26,6 +26,7 @@ const locale: typeof enUS = {
             'go-to-next-match': 'رفتن به مورد تطابق بعدی',
             'go-to-previous-match': 'رفتن به مورد تطابق قبلی',
             'focus-selection': 'تمرکز بر انتخاب',
+            panel: 'یافتن و جایگزینی',
         },
         dialog: {
             title: 'جستجو',
@@ -67,7 +68,6 @@ const locale: typeof enUS = {
             cancel: 'انصراف',
         },
     },
-    'find-replace-shortcuts': 'یافتن و جایگزینی',
 };
 
 export default locale;

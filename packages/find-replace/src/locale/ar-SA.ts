@@ -26,6 +26,7 @@ const locale: typeof enUS = {
             'go-to-next-match': 'الانتقال إلى التطابق التالي',
             'go-to-previous-match': 'الانتقال إلى التطابق السابق',
             'focus-selection': 'تركيز التحديد',
+            panel: 'بحث واستبدال',
         },
         dialog: {
             title: 'بحث',
@@ -67,7 +68,6 @@ const locale: typeof enUS = {
             cancel: 'إلغاء',
         },
     },
-    'find-replace-shortcuts': 'بحث واستبدال',
 };
 
 export default locale;

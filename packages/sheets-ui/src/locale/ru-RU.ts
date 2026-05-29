@@ -337,6 +337,18 @@ const locale: typeof enUS = {
         uploadLoading: {
             loading: 'Загрузка...',
         },
+        'data-validation': {
+            alert: {
+                ok: 'ОК',
+            },
+            list: {
+                edit: 'Редактировать',
+                dropdown: 'Выберите элемент',
+            },
+            listMultiple: {
+                dropdown: 'Выберите элементы',
+            },
+        },
         permission: {
             toolbarMenu: 'Защита',
             panel: {

@@ -337,6 +337,18 @@ const locale: typeof enUS = {
         uploadLoading: {
             loading: 'Načítava sa..., zostáva',
         },
+        'data-validation': {
+            alert: {
+                ok: 'OK',
+            },
+            list: {
+                edit: 'Upraviť',
+                dropdown: 'Vyberte položku',
+            },
+            listMultiple: {
+                dropdown: 'Vyberte položky',
+            },
+        },
         permission: {
             toolbarMenu: 'Ochrana',
             panel: {

@@ -103,6 +103,47 @@ describe('SheetsScrollRenderController', () => {
         void controller;
     });
 
+    it('prevents default when upward wheel scrolling remains inside viewport bounds', () => {
+        const scrollManagerService = createScrollManagerServiceMock();
+        const testBed = createRenderTestBed({
+            dependencies: [[SheetScrollManagerService, { useValue: scrollManagerService }]],
+        });
+        const { context, scene, contextService, viewportMap } = testBed;
+        const commandService = testBed.get(ICommandService);
+        const viewMain = viewportMap.get(SHEET_VIEWPORT_KEY.VIEW_MAIN) as any;
+
+        viewMain.viewportScrollY = 60;
+        viewMain.scrollY = 6;
+        viewMain._scrollBar = { ratioScrollX: 0.1, ratioScrollY: 0.1 };
+        viewMain.limitedScroll = vi.fn((_x, y) => ({
+            isLimitedX: false,
+            isLimitedY: y < 0,
+        }));
+
+        vi.spyOn(commandService, 'executeCommand').mockImplementation((id, params) => {
+            if (id === SetScrollRelativeCommand.id) {
+                viewMain.scrollY += (params as any).offsetY;
+                viewMain.viewportScrollY += (params as any).offsetY;
+            }
+            return true as any;
+        });
+
+        contextService.setContextValue(FOCUSING_SHEET, true);
+
+        const controller = testBed.injector.createInstance(SheetsScrollRenderController, context as any);
+        const preventDefault = vi.fn();
+
+        scene.onMouseWheel$.emit(
+            { ctrlKey: false, shiftKey: false, deltaX: 0, deltaY: -40, preventDefault },
+            { stopPropagation: () => { } }
+        );
+
+        expect(viewMain.limitedScroll).toHaveBeenCalledWith(0, 2);
+        expect(preventDefault).toHaveBeenCalled();
+
+        void controller;
+    });
+
     it('normalizes wheel scroll offsets by sheet zoom ratio', () => {
         const scrollManagerService = createScrollManagerServiceMock();
         const testBed = createRenderTestBed({

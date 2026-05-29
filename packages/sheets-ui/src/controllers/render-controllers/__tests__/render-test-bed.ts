@@ -18,7 +18,7 @@ import type { Dependency, IDisposable, Injector, IWorkbookData, Workbook } from 
 import type { IRenderContext, Vector2 } from '@univerjs/engine-render';
 import type { Observable } from 'rxjs';
 import { ICommandService, IContextService, ILogService, Inject, IUniverInstanceService, LocaleService, LocaleType, LogLevel, Plugin, Tools, Univer, Injector as UniverInjector, UniverInstanceType } from '@univerjs/core';
-import { IRenderManagerService, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
+import { IRenderManagerService, SHEET_VIEWPORT_KEY, Viewport } from '@univerjs/engine-render';
 import { SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { SHEET_VIEW_KEY } from '../../../common/keys';
@@ -61,11 +61,16 @@ export interface IFakeViewport {
     scrollAnimationFrameId: number | null;
     isWheelPreventDefaultX: boolean;
     isWheelPreventDefaultY: boolean;
+    scene?: IFakeScene;
+    _paddingStartX: number;
+    _paddingStartY: number;
+    _scrollBar: { ratioScrollX: number; ratioScrollY: number } | null;
     padding?: { startX: number; endX: number; startY: number; endY: number };
     limitedScroll(x: number, y: number): { isLimitedX: boolean; isLimitedY: boolean };
     scrollToViewportPos(params: { viewportScrollX: number; viewportScrollY: number }): void;
     updateScrollVal(params: { scrollX?: number; scrollY?: number; viewportScrollX?: number; viewportScrollY?: number }): void;
     scrollByViewportDeltaVal(params: { viewportScrollX: number; viewportScrollY: number }): boolean;
+    transViewportScroll2ScrollValue(viewportScrollX: number, viewportScrollY: number): { x: number; y: number };
     transScroll2ViewportScrollValue(viewportScrollX: number, viewportScrollY: number): { x: number; y: number };
     enable(): void;
     disable(): void;
@@ -99,6 +104,9 @@ export function createFakeViewport(viewportKey: string, options?: Partial<IFakeV
         scrollAnimationFrameId: null,
         isWheelPreventDefaultX: false,
         isWheelPreventDefaultY: false,
+        _paddingStartX: 0,
+        _paddingStartY: 0,
+        _scrollBar: { ratioScrollX: 1, ratioScrollY: 1 },
         onScrollAfter$: createTestEvent<any>(),
         onScrollByBar$: createTestEvent<any>(),
         limitedScroll: () => ({ isLimitedX: false, isLimitedY: false }),
@@ -116,6 +124,9 @@ export function createFakeViewport(viewportKey: string, options?: Partial<IFakeV
             viewport.viewportScrollX += viewportScrollX;
             viewport.viewportScrollY += viewportScrollY;
             return true;
+        },
+        transViewportScroll2ScrollValue(viewportScrollX, viewportScrollY) {
+            return Viewport.prototype.transViewportScroll2ScrollValue.call(this, viewportScrollX, viewportScrollY);
         },
         transScroll2ViewportScrollValue: (viewportScrollX, viewportScrollY) => ({ x: viewportScrollX, y: viewportScrollY }),
         enable: () => {
@@ -250,6 +261,9 @@ export function createFakeScene(
             scene.scaleY = y;
         },
     };
+    viewportMap.forEach((viewport) => {
+        viewport.scene = scene;
+    });
     return scene;
 }
 

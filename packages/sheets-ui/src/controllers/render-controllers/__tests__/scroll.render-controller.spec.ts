@@ -114,7 +114,7 @@ describe('SheetsScrollRenderController', () => {
 
         viewMain.viewportScrollY = 60;
         viewMain.scrollY = 6;
-        viewMain.transViewportScroll2ScrollValue = vi.fn((x, y) => ({ x: x * 0.1, y: y * 0.1 }));
+        viewMain._scrollBar = { ratioScrollX: 0.1, ratioScrollY: 0.1 };
         viewMain.limitedScroll = vi.fn((_x, y) => ({
             isLimitedX: false,
             isLimitedY: y < 0,
@@ -138,7 +138,6 @@ describe('SheetsScrollRenderController', () => {
             { stopPropagation: () => { } }
         );
 
-        expect(viewMain.transViewportScroll2ScrollValue).toHaveBeenCalledWith(0, 20);
         expect(viewMain.limitedScroll).toHaveBeenCalledWith(0, 2);
         expect(preventDefault).toHaveBeenCalled();
 

@@ -15,7 +15,7 @@
  */
 
 import type { IDocumentBody, IDocumentData, Nullable } from '@univerjs/core';
-import { BooleanNumber, DataStreamTreeTokenType, HorizontalAlign, NamedStyleType, PresetListType, TableSizeType } from '@univerjs/core';
+import { BooleanNumber, DataStreamTreeTokenType, HorizontalAlign, PresetListType, TableSizeType } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { HtmlToUDMService } from '../html-to-udm/converter';

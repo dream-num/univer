@@ -124,13 +124,7 @@ describe('test case in html and udm convert', () => {
         const prefix = 'Intro\r';
         const tableStart = prefix.length;
         const cellText = 'Cell text';
-        const tableStream = tokens.TABLE_START +
-            tokens.TABLE_ROW_START +
-            tokens.TABLE_CELL_START +
-            `${cellText}\r\n` +
-            tokens.TABLE_CELL_END +
-            tokens.TABLE_ROW_END +
-            tokens.TABLE_END;
+        const tableStream = `${tokens.TABLE_START}${tokens.TABLE_ROW_START}${tokens.TABLE_CELL_START}${cellText}\r\n${tokens.TABLE_CELL_END}${tokens.TABLE_ROW_END}${tokens.TABLE_END}`;
         const tableEnd = tableStart + tableStream.length;
         const dataStream = `${prefix}${tableStream}\r\n`;
 

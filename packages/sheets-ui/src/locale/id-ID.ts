@@ -337,6 +337,18 @@ const locale: typeof enUS = {
         uploadLoading: {
             loading: 'Memuat..., tersisa', // 正在上传，当前剩余
         },
+        'data-validation': {
+            alert: {
+                ok: 'OK',
+            },
+            list: {
+                edit: 'Edit',
+                dropdown: 'Pilih item',
+            },
+            listMultiple: {
+                dropdown: 'Pilih item',
+            },
+        },
         permission: {
             toolbarMenu: 'Perlindungan',
             panel: {

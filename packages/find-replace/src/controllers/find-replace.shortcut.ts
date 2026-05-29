@@ -56,6 +56,7 @@ export const OpenFindDialogShortcutItem: IShortcutItem = {
     description: 'find-replace.shortcut.open-find-dialog',
     binding: KeyCode.F | MetaKeys.CTRL_COMMAND,
     group: FIND_REPLACE_SHORTCUT_GROUP,
+    groupTitle: 'find-replace.shortcut.panel',
     preconditions(contextService) {
         return !whenFindReplaceDialogFocused(contextService) && whenSheetFocused(contextService) && whenEditorNotActivated(contextService);
     },
@@ -77,6 +78,7 @@ export const OpenReplaceDialogShortcutItem: IShortcutItem = {
     binding: KeyCode.H | MetaKeys.CTRL_COMMAND,
     mac: KeyCode.H | MetaKeys.MAC_CTRL,
     group: FIND_REPLACE_SHORTCUT_GROUP,
+    groupTitle: 'find-replace.shortcut.panel',
     preconditions(contextService) {
         return whenSheetFocused(contextService) && whenEditorNotActivated(contextService) && (!whenFindReplaceDialogFocused(contextService) || !whenReplaceRevealed(contextService));
     },
@@ -87,6 +89,7 @@ export const GoToNextFindMatchShortcutItem: IShortcutItem = {
     description: 'find-replace.shortcut.go-to-next-match',
     binding: KeyCode.ENTER,
     group: FIND_REPLACE_SHORTCUT_GROUP,
+    groupTitle: 'find-replace.shortcut.panel',
     priority: 1000,
     preconditions(contextService) {
         return whenFindReplaceInputFocused(contextService) && whenFindReplaceDialogFocused(contextService);
@@ -98,6 +101,7 @@ export const GoToPreviousFindMatchShortcutItem: IShortcutItem = {
     description: 'find-replace.shortcut.go-to-previous-match',
     binding: KeyCode.ENTER | MetaKeys.SHIFT,
     group: FIND_REPLACE_SHORTCUT_GROUP,
+    groupTitle: 'find-replace.shortcut.panel',
     priority: 1000,
     preconditions(contextService) {
         return whenFindReplaceInputFocused(contextService) && whenFindReplaceDialogFocused(contextService);
@@ -109,6 +113,7 @@ export const FocusSelectionShortcutItem: IShortcutItem = {
     description: 'find-replace.shortcut.focus-selection',
     binding: KeyCode.ESC,
     group: FIND_REPLACE_SHORTCUT_GROUP,
+    groupTitle: 'find-replace.shortcut.panel',
     priority: 1000,
     preconditions(contextService) {
         return whenFindReplaceDialogFocused(contextService);

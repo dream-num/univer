@@ -26,6 +26,7 @@ const locale: typeof enUS = {
             'go-to-next-match': 'Zum nächsten Treffer springen',
             'go-to-previous-match': 'Zum vorherigen Treffer springen',
             'focus-selection': 'Auswahl fokussieren',
+            panel: 'Suchen & Ersetzen',
         },
         dialog: {
             title: 'Suchen',
@@ -67,7 +68,6 @@ const locale: typeof enUS = {
             cancel: 'Abbrechen',
         },
     },
-    'find-replace-shortcuts': 'Suchen & Ersetzen',
 };
 
 export default locale;

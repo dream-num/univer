@@ -26,6 +26,7 @@ const locale: typeof enUS = {
             'go-to-next-match': 'Ke Hasil Berikutnya',
             'go-to-previous-match': 'Ke Hasil Sebelumnya',
             'focus-selection': 'Fokus Pilihan',
+            panel: 'Cari & Ganti',
         },
         dialog: {
             title: 'Cari',
@@ -67,7 +68,6 @@ const locale: typeof enUS = {
             cancel: 'Batal',
         },
     },
-    'find-replace-shortcuts': 'Cari & Ganti',
 };
 
 export default locale;

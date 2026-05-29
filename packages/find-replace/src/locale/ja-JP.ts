@@ -26,6 +26,7 @@ const locale: typeof enUS = {
             'go-to-next-match': '次の一致項目へ移動',
             'go-to-previous-match': '前の一致項目へ移動',
             'focus-selection': '選択範囲にフォーカス',
+            panel: '検索と置換',
         },
         dialog: {
             title: '検索',
@@ -67,7 +68,6 @@ const locale: typeof enUS = {
             cancel: 'キャンセル',
         },
     },
-    'find-replace-shortcuts': '検索と置換',
 };
 
 export default locale;

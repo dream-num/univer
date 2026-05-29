@@ -337,6 +337,18 @@ const locale: typeof enUS = {
         uploadLoading: {
             loading: 'جارٍ التحميل..., المتبقي',
         },
+        'data-validation': {
+            alert: {
+                ok: 'موافق',
+            },
+            list: {
+                edit: 'تحرير',
+                dropdown: 'اختر عنصراً',
+            },
+            listMultiple: {
+                dropdown: 'اختر عناصر',
+            },
+        },
         permission: {
             toolbarMenu: 'الحماية',
             panel: {

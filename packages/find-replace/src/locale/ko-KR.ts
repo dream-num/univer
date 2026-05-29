@@ -26,6 +26,7 @@ const locale: typeof enUS = {
             'go-to-next-match': '다음 일치 항목으로 이동',
             'go-to-previous-match': '이전 일치 항목으로 이동',
             'focus-selection': '선택 영역에 포커스',
+            panel: '찾기 및 바꾸기',
         },
         dialog: {
             title: '찾기',
@@ -67,7 +68,6 @@ const locale: typeof enUS = {
             cancel: '취소',
         },
     },
-    'find-replace-shortcuts': '찾기 및 바꾸기',
 };
 
 export default locale;

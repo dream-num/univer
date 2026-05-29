@@ -337,6 +337,18 @@ const locale: typeof enUS = {
         uploadLoading: {
             loading: '読み込み中...',
         },
+        'data-validation': {
+            alert: {
+                ok: 'OK',
+            },
+            list: {
+                edit: '編集',
+                dropdown: '項目を選択',
+            },
+            listMultiple: {
+                dropdown: '項目を選択',
+            },
+        },
         permission: {
             toolbarMenu: '保護',
             panel: {

@@ -26,6 +26,7 @@ const locale: typeof enUS = {
             'go-to-next-match': 'Vai alla corrispondenza successiva',
             'go-to-previous-match': 'Vai alla corrispondenza precedente',
             'focus-selection': 'Focus selezione',
+            panel: 'Trova e sostituisci',
         },
         dialog: {
             title: 'Trova',
@@ -67,7 +68,6 @@ const locale: typeof enUS = {
             cancel: 'Annulla',
         },
     },
-    'find-replace-shortcuts': 'Trova e sostituisci',
 };
 
 export default locale;

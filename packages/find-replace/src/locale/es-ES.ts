@@ -26,6 +26,7 @@ const locale: typeof enUS = {
             'go-to-next-match': 'Ir a la siguiente coincidencia',
             'go-to-previous-match': 'Ir a la coincidencia anterior',
             'focus-selection': 'Enfocar selección',
+            panel: 'Buscar y reemplazar',
         },
         dialog: {
             title: 'Buscar',
@@ -67,7 +68,6 @@ const locale: typeof enUS = {
             cancel: 'Cancelar',
         },
     },
-    'find-replace-shortcuts': 'Buscar y reemplazar',
 };
 
 export default locale;

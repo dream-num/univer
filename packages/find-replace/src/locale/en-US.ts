@@ -24,6 +24,7 @@ const locale = {
             'go-to-next-match': 'Go to Next Match',
             'go-to-previous-match': 'Go to Previous Match',
             'focus-selection': 'Focus Selection',
+            panel: 'Find & Replace',
         },
         dialog: {
             title: 'Find',
@@ -65,7 +66,6 @@ const locale = {
             cancel: 'Cancel',
         },
     },
-    'find-replace-shortcuts': 'Find & Replace',
 };
 
 export default locale;

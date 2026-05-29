@@ -26,6 +26,7 @@ const locale: typeof enUS = {
             'go-to-next-match': '下一个匹配项',
             'go-to-previous-match': '下一个匹配项',
             'focus-selection': '聚焦选区',
+            panel: '查找替换',
         },
         dialog: {
             title: '查找',
@@ -67,7 +68,6 @@ const locale: typeof enUS = {
             cancel: '取消',
         },
     },
-    'find-replace-shortcuts': '查找替换',
 };
 
 export default locale;

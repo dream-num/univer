@@ -58,6 +58,7 @@ const locale = {
             angle: 'Angle',
             flip: 'Flip',
             delete: 'Delete',
+            transparency: 'Transparency',
         },
     },
 };

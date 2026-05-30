@@ -90,6 +90,22 @@ describe('GradientColorPicker', () => {
         }));
     });
 
+    it('should call onChange when stop transparency changes', () => {
+        const onChange = vi.fn();
+        const { container } = render(<GradientColorPicker value={defaultValue} onChange={onChange} />);
+
+        const inputs = container.querySelectorAll('input');
+        const transparencyInput = inputs[2]; // Third input is stop transparency for linear
+
+        fireEvent.change(transparencyInput, { target: { value: '40' } });
+
+        expect(onChange).toHaveBeenCalledWith(expect.objectContaining({
+            stops: expect.arrayContaining([
+                expect.objectContaining({ opacity: 0.6 }),
+            ]),
+        }));
+    });
+
     it('should select stop when clicked', () => {
         const { container } = render(<GradientColorPicker value={defaultValue} />);
         const stops = container.querySelectorAll('[data-u-comp="gradient-color-picker-stop"]');

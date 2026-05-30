@@ -724,6 +724,7 @@ export interface IDocTextFillGradientStop {
      */
     offset: number;
     color: string;
+    opacity?: number;
 }
 
 export interface IDocTextFill {

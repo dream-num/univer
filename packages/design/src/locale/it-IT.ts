@@ -60,6 +60,7 @@ const locale: typeof enUS = {
             angle: 'Angolo',
             flip: 'Capovolgi',
             delete: 'Elimina',
+            transparency: 'Transparency',
         },
     },
 };

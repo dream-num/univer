@@ -29,6 +29,7 @@ export type GradientType = 'linear' | 'radial' | 'angular' | 'diamond';
 export interface IGradientStop {
     color: string;
     offset: number;
+    opacity?: number;
 }
 
 export interface IGradientValue {
@@ -52,6 +53,44 @@ const DEFAULT_VALUE: IGradientValue = {
     ],
     angle: 90,
 };
+
+function clamp(value: number, min: number, max: number): number {
+    return Math.max(min, Math.min(max, value));
+}
+
+function getStopOpacity(stop: IGradientStop | undefined): number {
+    return clamp(stop?.opacity ?? 1, 0, 1);
+}
+
+function getColorWithOpacity(color: string, opacity: number): string {
+    if (opacity >= 1) {
+        return color;
+    }
+
+    const value = color.trim();
+    if (/^#[0-9a-f]{3}$/i.test(value)) {
+        const [, r, g, b] = value;
+        return `rgba(${Number.parseInt(r + r, 16)}, ${Number.parseInt(g + g, 16)}, ${Number.parseInt(b + b, 16)}, ${opacity})`;
+    }
+
+    if (/^#[0-9a-f]{6}$/i.test(value)) {
+        return `rgba(${Number.parseInt(value.slice(1, 3), 16)}, ${Number.parseInt(value.slice(3, 5), 16)}, ${Number.parseInt(value.slice(5, 7), 16)}, ${opacity})`;
+    }
+
+    const rgba = /^rgba?\(([^)]+)\)$/i.exec(value);
+    if (rgba) {
+        const parts = rgba[1].split(',').map((part) => part.trim());
+        const baseAlpha = parts[3] === undefined ? 1 : Number.parseFloat(parts[3]);
+        const alpha = Number.isFinite(baseAlpha) ? clamp(baseAlpha * opacity, 0, 1) : opacity;
+        return `rgba(${parts[0]}, ${parts[1]}, ${parts[2]}, ${alpha})`;
+    }
+
+    return color;
+}
+
+function getStopColor(stop: IGradientStop): string {
+    return getColorWithOpacity(stop.color, getStopOpacity(stop));
+}
 
 export function GradientColorPicker(props: IGradientColorPickerProps) {
     const { className, compact = false, value = DEFAULT_VALUE, onChange } = props;
@@ -116,6 +155,16 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
         emitChange({ ...valueRef.current, stops: newStops });
     };
 
+    const handleStopTransparencyChange = (transparency: number | null) => {
+        const nextTransparency = clamp(transparency ?? 0, 0, 100);
+        const newStops = [...valueRef.current.stops];
+        newStops[selectedIndex] = {
+            ...newStops[selectedIndex],
+            opacity: (100 - nextTransparency) / 100,
+        };
+        emitChange({ ...valueRef.current, stops: newStops });
+    };
+
     // const handleFlip = () => {
     //     const newStops = value.stops.map((stop) => ({
     //         ...stop,
@@ -133,7 +182,7 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
         const leftStop = [...stops].reverse().find((s) => s.offset <= offset) || stops[0];
         // const rightStop = stops.find((s) => s.offset >= offset) || stops[stops.length - 1];
 
-        const newStop = { color: leftStop.color, offset };
+        const newStop = { color: leftStop.color, offset, opacity: getStopOpacity(leftStop) };
         const newStops = [...valueRef.current.stops, newStop];
         emitChange({ ...valueRef.current, stops: newStops });
         setSelectedIndex(newStops.length - 1);
@@ -147,12 +196,12 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
     };
 
     const gradientPreview = useMemo(() => {
-        const stopsStr = stops.map((s) => `${s.color} ${s.offset}%`).join(', ');
+        const stopsStr = stops.map((s) => `${getStopColor(s)} ${s.offset}%`).join(', ');
         return `linear-gradient(to right, ${stopsStr})`;
     }, [stops]);
 
     const mainPreview = useMemo(() => {
-        const stopsStr = stops.map((s) => `${s.color} ${s.offset}%`).join(', ');
+        const stopsStr = stops.map((s) => `${getStopColor(s)} ${s.offset}%`).join(', ');
         switch (draftValue.type) {
             case 'linear':
                 return `linear-gradient(${draftValue.angle}deg, ${stopsStr})`;
@@ -275,7 +324,7 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
                         )}
                         style={{
                             left: `${stop.offset}%`,
-                            backgroundColor: stop.color,
+                            backgroundColor: getStopColor(stop),
                         }}
                         onClick={(e) => {
                             e.stopPropagation();
@@ -336,6 +385,20 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
                         />
                     </div>
                 )}
+                <div className="univer-flex-1">
+                    <div className="univer-mb-0.5 univer-text-xs univer-text-gray-500">
+                        {locale?.GradientColorPicker.transparency ?? 'Transparency'}
+                    </div>
+                    <InputNumber
+                        value={Math.round((1 - getStopOpacity(draftValue.stops[selectedIndex])) * 100)}
+                        min={0}
+                        max={100}
+                        step={10}
+                        formatter={(v) => `${v}%`}
+                        parser={(v) => v?.replace('%', '') || ''}
+                        onChange={handleStopTransparencyChange}
+                    />
+                </div>
                 <div className="univer-flex univer-gap-1">
                     <Tooltip title={locale?.GradientColorPicker.delete}>
                         <Button

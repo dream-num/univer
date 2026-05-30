@@ -219,7 +219,8 @@ export class FontAndBaseLine extends docExtension {
         }
 
         for (const stop of stops) {
-            canvasGradient.addColorStop(stop.offset, this._colorWithOpacity(stop.color, textFill.opacity));
+            const opacity = (textFill.opacity ?? 1) * (stop.opacity ?? 1);
+            canvasGradient.addColorStop(stop.offset, this._colorWithOpacity(stop.color, opacity));
         }
 
         return canvasGradient;
@@ -299,6 +300,7 @@ export class FontAndBaseLine extends docExtension {
         return normalizedStops.map((stop) => ({
             color: stop.color,
             offset: this._clamp(stop.offset > 1 ? stop.offset / 100 : stop.offset, 0, 1),
+            opacity: stop.opacity,
         }));
     }
 

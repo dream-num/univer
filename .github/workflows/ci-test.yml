@@ -4,9 +4,15 @@ on:
     push:
         branches:
             - dev
+        paths-ignore:
+            - '**/*.md'
+            - 'docs/**'
     pull_request:
         branches:
             - dev
+        paths-ignore:
+            - '**/*.md'
+            - 'docs/**'
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
@@ -34,6 +40,8 @@ jobs:
 
             - name: 🧬 Report coverage
               uses: codecov/codecov-action@v3
+              with:
+                  files: ./coverage/lcov.info,./**/coverage/lcov.info
               env:
                   CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
@@ -49,8 +57,16 @@ jobs:
             - name: Setup Node.js
               uses: ./.github/actions/setup-node
 
+            - name: Restore ESLint cache
+              uses: actions/cache@v4
+              with:
+                  path: .cache/eslint
+                  key: ${{ runner.os }}-eslint-${{ hashFiles('pnpm-lock.yaml', 'package.json', 'eslint.config.ts', 'common/shared/eslint/**') }}
+                  restore-keys: |
+                      ${{ runner.os }}-eslint-
+
             - name: 🌡️ Run ESLint
-              run: pnpm lint --quiet
+              run: pnpm lint --quiet --cache --cache-strategy content --cache-location .cache/eslint/.eslintcache
 
     typecheck:
         runs-on: ubuntu-latest

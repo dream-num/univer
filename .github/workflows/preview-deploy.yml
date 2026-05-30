@@ -117,19 +117,19 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
               with:
                   repository: ${{ needs.setup.outputs.repo }}
                   ref: ${{ needs.setup.outputs.ref }}
                   persist-credentials: false
 
             - name: Setup pnpm
-              uses: pnpm/action-setup@v4
+              uses: pnpm/action-setup@v6
               with:
                   run_install: false
 
             - name: Setup Node.js
-              uses: actions/setup-node@v4
+              uses: actions/setup-node@v6
               with:
                   node-version: 24.3.0
                   cache: pnpm

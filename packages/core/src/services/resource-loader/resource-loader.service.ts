@@ -44,7 +44,7 @@ export class ResourceLoaderService extends Disposable implements IResourceLoader
             errorLabel: string
         ) => {
             const data = getResourceData(resources, hook.pluginName);
-            if (data) {
+            if (data !== undefined) {
                 try {
                     const model = hook.parseJson(data);
                     hook.onLoad(unitId, model);

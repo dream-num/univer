@@ -260,6 +260,26 @@ describe('Test resources service', () => {
         expect(loads).toEqual([['slide-object-resource', 'object']]);
     });
 
+    it('should load empty persisted resource payloads when hooks are registered later', () => {
+        const resourceManagerService = univer.__getInjector().get(IResourceManagerService);
+        const onLoad = vi.fn();
+
+        univer.createUnit(UniverInstanceType.UNIVER_DOC, createDocData('doc-empty-resource', [
+            { name: 'DOC_EMPTY_PLUGIN', data: '' },
+        ]));
+
+        resourceManagerService.registerPluginResource({
+            pluginName: 'DOC_EMPTY_PLUGIN',
+            businesses: [UniverInstanceType.UNIVER_DOC],
+            onLoad,
+            onUnLoad: () => undefined,
+            toJson: () => '{}',
+            parseJson: (bytes) => bytes ? JSON.parse(bytes) : {},
+        });
+
+        expect(onLoad).toHaveBeenCalledWith('doc-empty-resource', {});
+    });
+
     it('should ignore malformed persisted resource payloads when hooks are registered later', () => {
         const resourceManagerService = univer.__getInjector().get(IResourceManagerService);
         const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);

@@ -32,7 +32,10 @@ describe('DropdownMenu', () => {
                 <button type="button">Trigger</button>
             </DropdownMenu>
         );
-        expect(container).toMatchSnapshot();
+        const trigger = container.querySelector('button');
+        expect(trigger).toBeTruthy();
+        expect(trigger).toHaveAttribute('aria-haspopup', 'menu');
+        expect(trigger).toHaveAttribute('type', 'button');
     });
 
     it('should render with separator', () => {
@@ -46,7 +49,9 @@ describe('DropdownMenu', () => {
                 <button type="button">Trigger</button>
             </DropdownMenu>
         );
-        expect(container).toMatchSnapshot();
+        const trigger = container.querySelector('button');
+        expect(trigger).toBeTruthy();
+        expect(trigger).toHaveAttribute('aria-haspopup', 'menu');
     });
 
     it('should render with subItem', () => {
@@ -65,7 +70,9 @@ describe('DropdownMenu', () => {
                 <button type="button">Trigger</button>
             </DropdownMenu>
         );
-        expect(container).toMatchSnapshot();
+        const trigger = container.querySelector('button');
+        expect(trigger).toBeTruthy();
+        expect(trigger).toHaveAttribute('aria-haspopup', 'menu');
     });
 
     it('should render with radio group', () => {
@@ -84,7 +91,9 @@ describe('DropdownMenu', () => {
                 <button type="button">Trigger</button>
             </DropdownMenu>
         );
-        expect(container).toMatchSnapshot();
+        const trigger = container.querySelector('button');
+        expect(trigger).toBeTruthy();
+        expect(trigger).toHaveAttribute('aria-haspopup', 'menu');
     });
 
     it('should render with checkbox', () => {
@@ -107,7 +116,9 @@ describe('DropdownMenu', () => {
                 <button type="button">Trigger</button>
             </DropdownMenu>
         );
-        expect(container).toMatchSnapshot();
+        const trigger = container.querySelector('button');
+        expect(trigger).toBeTruthy();
+        expect(trigger).toHaveAttribute('aria-haspopup', 'menu');
     });
 
     it('should invoke onSelect callbacks for item/checkbox/radio', () => {

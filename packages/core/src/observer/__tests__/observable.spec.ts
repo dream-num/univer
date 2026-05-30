@@ -102,7 +102,7 @@ describe('EventSubject', () => {
         });
 
         subject.unsubscribe();
-        expect(() => subject.emitEvent('evt')).toThrowError(/closed subject/);
+        expect(() => subject.emitEvent('evt')).toThrow(/closed subject/);
     });
 
     it('should forward events through fromEventSubject and unsubscribe cleanly', () => {

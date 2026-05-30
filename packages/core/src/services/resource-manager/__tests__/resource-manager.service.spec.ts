@@ -83,7 +83,7 @@ describe('ResourceManagerService', () => {
             onUnLoad: () => {},
             toJson: () => 'sheet',
             parseJson: JSON.parse,
-        })).toThrowError(/registered/);
+        })).toThrow(/registered/);
 
         disposable.dispose();
         expect(service.getAllResourceHooks()).toHaveLength(0);

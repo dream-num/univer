@@ -144,7 +144,7 @@ describe('Test CommandService', () => {
                         return true;
                     },
                 });
-            }).toThrowError(`[CommandRegistry]: command "${commandID}" has been registered before.`);
+            }).toThrow(`[CommandRegistry]: command "${commandID}" has been registered before.`);
         });
 
         it('Should return an disposable to unregister command', async () => {
@@ -161,9 +161,9 @@ describe('Test CommandService', () => {
 
             expect(() => {
                 commandService.syncExecuteCommand(anotherCommandID);
-            }).toThrowError(`[CommandService]: command "${anotherCommandID}" is not registered.`);
+            }).toThrow(`[CommandService]: command "${anotherCommandID}" is not registered.`);
 
-            await expect(commandService.executeCommand(anotherCommandID)).rejects.toThrowError(
+            await expect(commandService.executeCommand(anotherCommandID)).rejects.toThrow(
                 `[CommandService]: command "${anotherCommandID}" is not registered.`
             );
         });
@@ -184,12 +184,12 @@ describe('Test CommandService', () => {
 
             const beforeListener = () => numbers.push(-1);
             const beforeDisposable = commandService.beforeCommandExecuted(beforeListener);
-            expect(() => commandService.beforeCommandExecuted(beforeListener)).toThrowError(
+            expect(() => commandService.beforeCommandExecuted(beforeListener)).toThrow(
                 '[CommandService]: could not add a listener twice.'
             );
             const listener = () => numbers.push(1);
             const disposable = commandService.onCommandExecuted(listener);
-            expect(() => commandService.onCommandExecuted(listener)).toThrowError(
+            expect(() => commandService.onCommandExecuted(listener)).toThrow(
                 '[CommandService]: could not add a listener twice.'
             );
 
@@ -303,7 +303,7 @@ describe('Test CommandService', () => {
             expect(str).toEqual(['A', 'B', 'B']);
 
             secondDisposable.dispose();
-            await expect(commandService.executeCommand(commandID)).rejects.toThrowError(
+            await expect(commandService.executeCommand(commandID)).rejects.toThrow(
                 `[CommandService]: command "${commandID}" is not registered.`
             );
         });

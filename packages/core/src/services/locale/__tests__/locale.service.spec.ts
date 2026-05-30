@@ -79,6 +79,6 @@ describe('LocaleService', () => {
         const t = () => {
             newLocaleService.t('greeting');
         };
-        expect(t).toThrowError('Locale not initialized');
+        expect(t).toThrow('Locale not initialized');
     });
 });

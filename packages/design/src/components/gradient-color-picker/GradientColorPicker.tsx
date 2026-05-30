@@ -318,9 +318,7 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
             {showAngleEditor && (
                 <div
                     data-u-comp="gradient-color-picker-angle"
-                    className="
-                      univer-flex univer-items-center univer-justify-between univer-gap-3
-                    "
+                    className="univer-flex univer-items-center univer-justify-between univer-gap-3"
                 >
                     <span className="univer-text-xs univer-text-gray-500">{locale?.GradientColorPicker.angle}</span>
                     <InputNumber

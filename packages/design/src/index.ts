@@ -35,6 +35,7 @@ export { DraggableList, type IDraggableListProps } from './components/draggable-
 export { DropdownMenu, type IDropdownMenuProps } from './components/dropdown-menu/DropdownMenu';
 export { Dropdown, type IDropdownProps } from './components/dropdown/Dropdown';
 export { FormDualColumnLayout, FormLayout, type IFormDualColumnLayoutProps, type IFormLayoutProps } from './components/form-layout';
+export { FillStyleTabsEditor, type FillStyleType, type IFillStyleTabsEditorLabels, type IFillStyleTabsEditorProps, type IFillStyleTypeValues } from './components/fill-style-tabs-editor/FillStyleTabsEditor';
 export { Gallery, type IGalleryProps } from './components/gallery/Gallery';
 export { GradientColorPicker, type GradientType, type IGradientColorPickerProps, type IGradientStop, type IGradientValue } from './components/gradient-color-picker/GradientColorPicker';
 export { HoverCard, type IHoverCardProps } from './components/hover-card/HoverCard';

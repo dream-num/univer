@@ -133,7 +133,7 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
             return String(formattedValue);
         }
 
-        function parseValue(val: string): number | null {
+        function parseNumberValue(val: string): number | null {
             if (!val) return null;
 
             let parsedValue = val;
@@ -178,29 +178,42 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
                     }
                 }
 
-                if (max !== undefined && result > max) {
-                    result = max;
-                }
-                if (min !== undefined && result < min) {
-                    result = min;
-                }
-
                 return result;
             } catch (e) {
                 return null;
             }
         }
 
-        function handleInputChange(value: string) {
-            setInputValue(value);
+        function clampValue(val: number | null): number | null {
+            if (val === null) return null;
 
+            if (max !== undefined && val > max) {
+                return max;
+            }
+            if (min !== undefined && val < min) {
+                return min;
+            }
+
+            return val;
+        }
+
+        function parseValue(val: string): number | null {
+            return clampValue(parseNumberValue(val));
+        }
+
+        function handleInputChange(value: string) {
             if (allowEmpty && value === '') {
+                setInputValue(value);
                 setInternalValue(null);
                 onChange?.(null);
                 return;
             }
 
-            const parsedValue = parseValue(value);
+            const parsedNumber = parseNumberValue(value);
+            const parsedValue = clampValue(parsedNumber);
+            const isOutOfRange = parsedNumber !== null && parsedValue !== parsedNumber;
+
+            setInputValue(isOutOfRange ? formatValue(parsedValue) : value);
             setInternalValue(parsedValue);
 
             onChange?.(parsedValue);

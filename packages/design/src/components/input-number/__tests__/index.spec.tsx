@@ -219,9 +219,11 @@ describe('InputNumber', () => {
 
         fireEvent.change(input, { target: { value: '9999' } });
         expect(onLocalChange).toHaveBeenCalledWith(10);
+        expect(input.value).toBe('10');
 
         fireEvent.change(input, { target: { value: '-9999' } });
         expect(onLocalChange).toHaveBeenCalledWith(0);
+        expect(input.value).toBe('0');
     });
 
     it('should restore last valid value on blur when current value is invalid', () => {

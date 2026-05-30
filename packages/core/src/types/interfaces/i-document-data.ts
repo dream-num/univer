@@ -16,6 +16,7 @@
 
 import type { ISize } from '../../shared/shape';
 import type { BooleanNumber, CellValueType, HorizontalAlign, LocaleType, TextDirection, VerticalAlign, WrapStrategy } from '../enum';
+import type { ImageSourceType } from '../../services/image-io/image-io.service';
 import type { IDrawingParam } from './i-drawing';
 import type { IMention } from './i-mention';
 import type { IColorStyle, IStyleBase } from './i-style-data';
@@ -710,11 +711,52 @@ export interface IChartProperties {}
 /**
  * Properties of text style
  */
+export type DocTextFillType = 'none' | 'solid' | 'gradient' | 'picture';
+
+export type DocTextFillGradientType = 'linear' | 'radial' | 'angular' | 'diamond';
+
+export type DocTextFillPictureMode = 'stretch' | 'tile';
+
+export interface IDocTextFillGradientStop {
+    /**
+     * Offset in percent. Values in the 0-1 range are also accepted by renderers
+     * for compatibility and normalized to percent.
+     */
+    offset: number;
+    color: string;
+}
+
+export interface IDocTextFill {
+    /**
+     * Hidden renderer-level text fill. Normal document UI does not expose it,
+     * but rich-text renderers honor it when present on a run style.
+     */
+    type: DocTextFillType;
+    color?: string;
+    opacity?: number;
+    gradient?: {
+        type?: DocTextFillGradientType;
+        angle?: number;
+        stops?: IDocTextFillGradientStop[];
+    };
+    picture?: {
+        source?: string;
+        sourceType?: ImageSourceType;
+        opacity?: number;
+        mode?: DocTextFillPictureMode;
+        scaleX?: number;
+        scaleY?: number;
+        offsetX?: number;
+        offsetY?: number;
+    };
+}
+
 export interface ITextStyle extends IStyleBase {
     // bo?: BaselineOffset; // BaselineOffset, sup, sub
     sc?: number; // spacing
     pos?: number; // position
     sa?: number; // scale
+    textFill?: IDocTextFill;
 }
 
 export interface IIndentStart {

@@ -100,7 +100,8 @@ export function Segmented<T extends ItemValue = ItemValue>({
             data-u-comp="segmented"
             ref={containerRef}
             className={clsx(`
-              univer-relative univer-box-border univer-flex univer-gap-4 univer-rounded-lg univer-bg-gray-100 univer-p-1
+              univer-relative univer-box-border univer-flex univer-min-w-0 univer-gap-1 univer-rounded-lg
+              univer-bg-gray-100 univer-p-1
               dark:!univer-bg-gray-800
             `, className)}
         >
@@ -120,7 +121,8 @@ export function Segmented<T extends ItemValue = ItemValue>({
                         if (el) itemRefs.current.set(item.value, el);
                     }}
                     className={clsx(`
-                      univer-relative univer-box-border univer-flex-1 univer-cursor-pointer univer-border-none
+                      univer-relative univer-box-border univer-min-w-0 univer-flex-1 univer-cursor-pointer univer-truncate
+                      univer-border-none
                       univer-bg-transparent univer-px-3 univer-py-1 univer-text-xs univer-font-medium
                       univer-transition-colors
                     `, {

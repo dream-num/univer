@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-formula",
-    "version": "0.24.0",
+    "version": "0.25.0",
     "private": false,
     "description": "Sheet formula services and calculation integration for Univer Sheets.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

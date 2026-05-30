@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-conditional-formatting",
-    "version": "0.24.0",
+    "version": "0.25.0",
     "private": false,
     "description": "Conditional formatting model, commands, and calculation support for Univer Sheets.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

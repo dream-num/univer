@@ -100,6 +100,16 @@ describe('Tools extra coverage', () => {
         expect(Tools.clamp(-1, 1, 10)).toBe(1);
     });
 
+    it('should reject prototype pollution keys in deepMerge', () => {
+        const payload = JSON.parse('{"startIndex":0,"__proto__":{"isAdmin":true,"polluted":true}}');
+        expect(({} as any).isAdmin).toBeUndefined();
+
+        Tools.deepMerge({}, payload);
+
+        expect(({} as any).isAdmin).toBeUndefined();
+        expect(({} as any).polluted).toBeUndefined();
+    });
+
     it('should read timing, ids and wildcard regex helpers', () => {
         vi.spyOn(globalThis.performance, 'now').mockReturnValue(123.456);
 

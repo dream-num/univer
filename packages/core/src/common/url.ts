@@ -374,6 +374,19 @@ export function normalizeUrl(urlStr: string) {
  * @param {string} baseURL - The base URL to use for resolution.
  * @returns {string} - The resolved URL.
  */
+export function isSafeUrl(url: string): boolean {
+    if (!url || typeof url !== 'string') {
+        return false;
+    }
+    try {
+        const base = typeof window !== 'undefined' && window.location ? window.location.origin : 'http://localhost';
+        const parsed = new URL(url, base);
+        return ['http:', 'https:', 'mailto:'].includes(parsed.protocol);
+    } catch {
+        return false;
+    }
+}
+
 export function resolveWithBasePath(url: string, baseURL: string): string {
     try {
         const base = new URL(baseURL);

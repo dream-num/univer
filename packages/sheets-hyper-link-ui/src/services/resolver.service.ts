@@ -18,7 +18,7 @@ import type { IRange, Workbook, Worksheet } from '@univerjs/core';
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import type { ISheetHyperLinkInfo, ISheetUrlParams } from '@univerjs/sheets-hyper-link';
 import type { IUniverSheetsHyperLinkUIConfig } from '../config/config';
-import { ICommandService, IConfigService, Inject, isValidRange, IUniverInstanceService, LocaleService, RANGE_TYPE, Rectangle, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, IConfigService, Inject, isSafeUrl, isValidRange, IUniverInstanceService, LocaleService, RANGE_TYPE, Rectangle, UniverInstanceType } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import { deserializeRangeWithSheet, IDefinedNamesService } from '@univerjs/engine-formula';
 import { SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/sheets';
@@ -196,6 +196,10 @@ export class SheetsHyperLinkResolverService {
     }
 
     async navigateToOtherWebsite(url: string) {
+        if (!isSafeUrl(url)) {
+            return;
+        }
+
         const config = this._configService.getConfig<IUniverSheetsHyperLinkUIConfig>(SHEETS_HYPER_LINK_UI_PLUGIN_CONFIG_KEY);
 
         if (config?.urlHandler?.navigateToOtherWebsite) {

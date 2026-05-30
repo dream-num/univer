@@ -248,7 +248,13 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
         >
             {compact
                 ? (
-                    <div className="univer-flex univer-min-w-0 univer-items-center univer-gap-4 univer-border-b univer-border-gray-100 dark:!univer-border-gray-700">
+                    <div
+                        className="
+                          univer-flex univer-min-w-0 univer-items-center univer-gap-4 univer-border-b
+                          univer-border-gray-100
+                          dark:!univer-border-gray-700
+                        "
+                    >
                         {[
                             { label: locale?.GradientColorPicker.linear, value: 'linear' },
                             { label: locale?.GradientColorPicker.radial, value: 'radial' },
@@ -268,14 +274,27 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
                                           univer-pb-2 univer-pt-0 univer-text-xs univer-transition-colors
                                         `,
                                         selected
-                                            ? 'univer-font-medium univer-text-primary-600 dark:!univer-text-primary-300'
-                                            : 'univer-text-gray-500 hover:univer-text-gray-900 dark:hover:!univer-text-white'
+                                            ? `
+                                              univer-font-medium univer-text-primary-600
+                                              dark:!univer-text-primary-300
+                                            `
+                                            : `
+                                              univer-text-gray-500
+                                              hover:univer-text-gray-900
+                                              dark:hover:!univer-text-white
+                                            `
                                     )}
                                     onClick={() => handleTypeChange(item.value as GradientType)}
                                 >
                                     {item.label}
                                     {selected && (
-                                        <span className="univer-absolute univer-inset-x-2 -univer-bottom-px univer-h-0.5 univer-rounded-full univer-bg-primary-600 dark:!univer-bg-primary-300" />
+                                        <span
+                                            className="
+                                              univer-absolute univer-inset-x-2 -univer-bottom-px univer-h-0.5
+                                              univer-rounded-full univer-bg-primary-600
+                                              dark:!univer-bg-primary-300
+                                            "
+                                        />
                                     )}
                                 </button>
                             );

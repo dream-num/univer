@@ -121,10 +121,9 @@ export function Segmented<T extends ItemValue = ItemValue>({
                         if (el) itemRefs.current.set(item.value, el);
                     }}
                     className={clsx(`
-                      univer-relative univer-box-border univer-min-w-0 univer-flex-1 univer-cursor-pointer univer-truncate
-                      univer-border-none
-                      univer-bg-transparent univer-px-3 univer-py-1 univer-text-xs univer-font-medium
-                      univer-transition-colors
+                      univer-relative univer-box-border univer-min-w-0 univer-flex-1 univer-cursor-pointer
+                      univer-truncate univer-border-none univer-bg-transparent univer-px-3 univer-py-1 univer-text-xs
+                      univer-font-medium univer-transition-colors
                     `, {
                         'univer-text-gray-900 dark:!univer-text-white': selectedItem === item.value,
                         'univer-text-gray-500 hover:univer-text-gray-900 dark:hover:!univer-text-white': selectedItem !== item.value,

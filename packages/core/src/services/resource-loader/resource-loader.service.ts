@@ -70,7 +70,11 @@ export class ResourceLoaderService extends Disposable implements IResourceLoader
 
             if (raw && typeof raw === 'object') {
                 const data = (raw as Record<string, unknown>).data;
-                return typeof data === 'string' ? data : undefined;
+                if (typeof data === 'string') {
+                    return data;
+                }
+
+                return JSON.stringify(raw);
             }
 
             return undefined;

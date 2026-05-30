@@ -260,6 +260,35 @@ describe('Test resources service', () => {
         expect(loads).toEqual([['slide-object-resource', 'object']]);
     });
 
+    it('should load direct object-shaped slide plugin resources through the unit lifecycle', () => {
+        const injector = univer.__getInjector();
+        const resourceManagerService = injector.get(IResourceManagerService);
+        const univerInstanceService = injector.get(IUniverInstanceService);
+        const pluginName = 'SLIDE_DIRECT_OBJECT_PLUGIN' as never;
+        const loads: Array<[string, string]> = [];
+
+        univerInstanceService.registerCtorForType(UniverInstanceType.UNIVER_SLIDE, MockSlideUnit as never);
+        resourceManagerService.registerPluginResource<{ kind: string }>({
+            pluginName,
+            businesses: [UniverInstanceType.UNIVER_SLIDE],
+            onLoad: (unitId, resource) => loads.push([unitId, resource.kind]),
+            onUnLoad: () => undefined,
+            toJson: () => '{}',
+            parseJson: (bytes) => JSON.parse(bytes),
+        });
+
+        univer.createUnit<ITestSlideData, MockSlideUnit>(UniverInstanceType.UNIVER_SLIDE, {
+            id: 'slide-direct-object-resource',
+            resources: {
+                [pluginName]: {
+                    kind: 'direct-object',
+                },
+            },
+        });
+
+        expect(loads).toEqual([['slide-direct-object-resource', 'direct-object']]);
+    });
+
     it('should load empty persisted resource payloads when hooks are registered later', () => {
         const resourceManagerService = univer.__getInjector().get(IResourceManagerService);
         const onLoad = vi.fn();

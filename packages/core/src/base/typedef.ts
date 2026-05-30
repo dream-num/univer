@@ -20,6 +20,8 @@ export type FieldId = string;
 export type RecordId = string;
 export type ViewId = string;
 
+import type { IDocumentData } from '../types/interfaces';
+
 export type PrimitiveCellValue = string | number | boolean;
 export type CellValue =
     | PrimitiveCellValue
@@ -27,6 +29,26 @@ export type CellValue =
     | Record<string, unknown>
     | Record<string, unknown>[]
     | null;
+
+export type BaseCellPrimitiveValue = string | number | boolean | null;
+export type BaseCellValueType = FieldType | 'string' | 'number' | 'boolean' | 'blank';
+
+export interface BaseCellData {
+    v?: BaseCellPrimitiveValue;
+    t?: BaseCellValueType | null;
+    p?: IDocumentData | null;
+    f?: string | null;
+    si?: string | null;
+}
+
+export type BaseCellMatrix = Record<number, Record<number, BaseCellData>>;
+
+export interface BaseResources {
+    multiValueSets?: Record<string, string[]>;
+    memberSets?: Record<string, string[]>;
+    attachmentSets?: Record<string, string[]>;
+    attachments?: Record<string, Record<string, unknown>>;
+}
 
 export type FieldType =
     | 'text'
@@ -54,6 +76,7 @@ export type FieldType =
     | 'twoWayLink'
     | 'recordId'
     | 'createdBy'
+    | 'updatedBy'
     | 'createdAt'
     | 'updatedAt'
     | 'summary';
@@ -69,11 +92,11 @@ export type ViewSpecificConfig =
     | GalleryViewConfig
     | Record<string, unknown>;
 
-export interface BaseSnapshot {
+export interface IBaseSnapshot {
     id: BaseId;
     name: string;
     schemaVersion: number;
-    tables: Record<TableId, TableSnapshot>;
+    tables: Record<TableId, ITableSnapshot>;
     tableOrder: TableId[];
     createdAt: number;
     updatedAt: number;
@@ -81,19 +104,26 @@ export interface BaseSnapshot {
     rev?: number;
 }
 
-export interface TableSnapshot {
+export interface ITableSnapshot {
     id: TableId;
     name: string;
-    fields: Record<FieldId, FieldSnapshot>;
+    fields: Record<FieldId, IFieldSnapshot>;
     fieldOrder: FieldId[];
-    records: Record<RecordId, RecordSnapshot>;
-    views: Record<ViewId, ViewSnapshot>;
+    records: Record<RecordId, IRecordSnapshot>;
+    recordOrder?: RecordId[];
+    rowIndex?: Record<RecordId, number>;
+    rowId?: Record<number, RecordId>;
+    colIndex?: Record<FieldId, number>;
+    colId?: Record<number, FieldId>;
+    cellData?: BaseCellMatrix;
+    resources?: BaseResources;
+    views: Record<ViewId, IViewSnapshot>;
     viewOrder: ViewId[];
     primaryFieldId: FieldId;
     deleted?: boolean;
 }
 
-export interface RecordSnapshot {
+export interface IRecordSnapshot {
     id: RecordId;
     values: Record<FieldId, CellValue>;
     orderKey: string;
@@ -104,9 +134,10 @@ export interface RecordSnapshot {
     deleted?: boolean;
 }
 
-export interface FieldSnapshot {
+export interface IFieldSnapshot {
     id: FieldId;
     name: string;
+    description?: string;
     type: FieldType;
     config: FieldConfig;
     defaultValue?: CellValue;
@@ -115,7 +146,7 @@ export interface FieldSnapshot {
     deleted?: boolean;
 }
 
-export interface ViewSnapshot<TConfig extends ViewSpecificConfig = ViewSpecificConfig> {
+export interface IViewSnapshot<TConfig extends ViewSpecificConfig = ViewSpecificConfig> {
     id: ViewId;
     tableId: TableId;
     name: string;
@@ -128,6 +159,12 @@ export interface ViewSnapshot<TConfig extends ViewSpecificConfig = ViewSpecificC
     config: TConfig;
     deleted?: boolean;
 }
+
+export type BaseSnapshot = IBaseSnapshot;
+export type TableSnapshot = ITableSnapshot;
+export type RecordSnapshot = IRecordSnapshot;
+export type FieldSnapshot = IFieldSnapshot;
+export type ViewSnapshot<TConfig extends ViewSpecificConfig = ViewSpecificConfig> = IViewSnapshot<TConfig>;
 
 export interface ViewFieldSetting {
     hidden?: boolean;
@@ -236,6 +273,7 @@ export interface GalleryViewConfig {
 export interface ProjectedField {
     id: FieldId;
     name: string;
+    description?: string;
     type: FieldType;
     config?: FieldConfig;
     width?: number;
@@ -468,5 +506,7 @@ export interface BaseInvalidation {
     viewId?: ViewId;
     recordId?: RecordId;
     fieldId?: FieldId;
+    row?: number;
+    column?: number;
     reason: 'cell' | 'field' | 'record' | 'view' | 'table' | 'unknown';
 }

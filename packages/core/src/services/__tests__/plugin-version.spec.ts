@@ -15,7 +15,7 @@
  */
 
 import type { Injector } from '../../common/di';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { UniverInstanceType } from '../../common/unit';
 import { Univer } from '../../univer';
 import { Plugin } from '../plugin/plugin.service';
@@ -35,7 +35,7 @@ describe('plugin version check', () => {
         expect(() => univer.registerPlugin(SameVersionPlugin)).not.toThrow();
     });
 
-    it('should throw with package name when plugin version mismatches', () => {
+    it('should log error with package name when plugin version mismatches', () => {
         class MismatchVersionPlugin extends Plugin {
             static override pluginName = 'mismatch-version-plugin';
             static override packageName = '@univerjs/mismatch-version-plugin';
@@ -46,8 +46,18 @@ describe('plugin version check', () => {
         }
 
         const univer = new Univer();
-        expect(() => univer.registerPlugin(MismatchVersionPlugin)).toThrowError(
-            /package "@univerjs\/mismatch-version-plugin" version mismatch/
+        const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+        expect(() => univer.registerPlugin(MismatchVersionPlugin)).not.toThrow();
+        expect(errorSpy).toHaveBeenCalledWith(
+            expect.stringContaining('[PluginService]'),
+            expect.stringContaining('Plugin version mismatch.')
         );
+        expect(errorSpy).toHaveBeenCalledWith(
+            expect.stringContaining('[PluginService]'),
+            expect.stringContaining('package: "@univerjs/mismatch-version-plugin"')
+        );
+
+        errorSpy.mockRestore();
     });
 });

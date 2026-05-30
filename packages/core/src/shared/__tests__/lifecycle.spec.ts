@@ -70,7 +70,7 @@ describe('lifecycle helpers', () => {
         disposable.dispose();
 
         expect(child.dispose).toHaveBeenCalledTimes(1);
-        expect(() => disposable.assertUsable()).toThrowError(/disposed/);
+        expect(() => disposable.assertUsable()).toThrow(/disposed/);
 
         const rxDisposable = new TestRxDisposable();
         const completed = vi.fn();
@@ -90,6 +90,6 @@ describe('lifecycle helpers', () => {
 
         rcDisposable.dec();
         expect(root.dispose).toHaveBeenCalledTimes(1);
-        expect(() => rcDisposable.inc()).toThrowError(/disposed/);
+        expect(() => rcDisposable.inc()).toThrow(/disposed/);
     });
 });

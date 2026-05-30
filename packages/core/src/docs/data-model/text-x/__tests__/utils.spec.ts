@@ -231,7 +231,7 @@ describe('test text-x utils', () => {
 
         expect(() => {
             composeBody(thisBody, otherBody);
-        }).toThrowError();
+        }).toThrow();
     });
 
     it('test composeBody both with paragraphs', () => {

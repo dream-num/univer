@@ -45,7 +45,7 @@ describe('makeSelection', () => {
     it('should throw an error when endOffset is less than startOffset', () => {
         const startOffset = 10;
         const endOffset = 5;
-        expect(() => makeSelection(startOffset, endOffset)).toThrowError(
+        expect(() => makeSelection(startOffset, endOffset)).toThrow(
             `Cannot make a doc selection when endOffset ${endOffset} is less than startOffset ${startOffset}.`
         );
     });

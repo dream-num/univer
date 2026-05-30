@@ -16,9 +16,10 @@
 
 import type { IDocumentData } from '../../types/interfaces';
 import type { Univer } from '../../univer';
+import { BehaviorSubject } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY } from '../../common/const';
-import { UniverInstanceType } from '../../common/unit';
+import { UnitModel, UniverInstanceType } from '../../common/unit';
 import { IUniverInstanceService } from '../instance/instance.service';
 import { IResourceLoaderService } from '../resource-loader/type';
 import { IResourceManagerService } from '../resource-manager/type';
@@ -39,6 +40,49 @@ function createDocData(id: string, resources?: NonNullable<IDocumentData['resour
             marginRight: 0,
         },
     };
+}
+
+interface ITestSlideData {
+    id: string;
+    name?: string;
+    resources?: unknown;
+}
+
+class MockSlideUnit extends UnitModel<ITestSlideData> {
+    override type = UniverInstanceType.UNIVER_SLIDE;
+    override name$ = new BehaviorSubject('');
+    private readonly _snapshot: ITestSlideData;
+
+    constructor(snapshot: Partial<ITestSlideData> = {}) {
+        super();
+        this._snapshot = {
+            id: 'slide-resource',
+            name: '',
+            ...snapshot,
+        };
+        this.name$.next(this._snapshot.name ?? '');
+    }
+
+    override getUnitId(): string {
+        return this._snapshot.id;
+    }
+
+    override setName(name: string): void {
+        this._snapshot.name = name;
+        this.name$.next(name);
+    }
+
+    override getSnapshot(): ITestSlideData {
+        return this._snapshot;
+    }
+
+    override getRev(): number {
+        return 1;
+    }
+
+    override incrementRev(): void { }
+
+    override setRev(): void { }
 }
 
 describe('Test resources service', () => {
@@ -123,6 +167,97 @@ describe('Test resources service', () => {
         expect(univerInstanceService.disposeUnit(doc.getUnitId())).toBe(true);
         expect(univerInstanceService.disposeUnit(internalDoc.getUnitId())).toBe(true);
         expect(unloads).toEqual(expect.arrayContaining(['doc-resource', DOCS_NORMAL_EDITOR_UNIT_ID_KEY]));
+    });
+
+    it('should load and unload slide resources through the real unit lifecycle', () => {
+        const injector = univer.__getInjector();
+        const resourceManagerService = injector.get(IResourceManagerService);
+        const resourceLoaderService = injector.get(IResourceLoaderService);
+        const univerInstanceService = injector.get(IUniverInstanceService);
+        const pluginName = 'SLIDE_TEST_PLUGIN' as never;
+        const loads: Array<[string, string]> = [];
+        const unloads: string[] = [];
+
+        univerInstanceService.registerCtorForType(UniverInstanceType.UNIVER_SLIDE, MockSlideUnit as never);
+        resourceManagerService.registerPluginResource<{ kind: string }>({
+            pluginName,
+            businesses: [UniverInstanceType.UNIVER_SLIDE],
+            onLoad: (unitId, resource) => loads.push([unitId, resource.kind]),
+            onUnLoad: (unitId) => unloads.push(unitId),
+            toJson: (unitId) => JSON.stringify({ kind: `saved:${unitId}` }),
+            parseJson: (bytes) => JSON.parse(bytes),
+        });
+
+        const slide = univer.createUnit<ITestSlideData, MockSlideUnit>(UniverInstanceType.UNIVER_SLIDE, {
+            id: 'slide-resource',
+            resources: [
+                { name: pluginName, data: '{"kind":"loaded"}' },
+            ],
+        });
+
+        expect(loads).toContainEqual(['slide-resource', 'loaded']);
+        expect(resourceLoaderService.saveUnit<ITestSlideData>('slide-resource')?.resources).toEqual([
+            { name: pluginName, data: '{"kind":"saved:slide-resource"}' },
+        ]);
+
+        expect(univerInstanceService.disposeUnit(slide.getUnitId())).toBe(true);
+        expect(unloads).toEqual(['slide-resource']);
+    });
+
+    it('should load resources for existing slide units when hooks register later', () => {
+        const injector = univer.__getInjector();
+        const resourceManagerService = injector.get(IResourceManagerService);
+        const univerInstanceService = injector.get(IUniverInstanceService);
+        const pluginName = 'SLIDE_LATE_PLUGIN' as never;
+        const loads: Array<[string, string]> = [];
+
+        univerInstanceService.registerCtorForType(UniverInstanceType.UNIVER_SLIDE, MockSlideUnit as never);
+        univer.createUnit<ITestSlideData, MockSlideUnit>(UniverInstanceType.UNIVER_SLIDE, {
+            id: 'slide-late-resource',
+            resources: [
+                { name: pluginName, data: '{"kind":"late"}' },
+            ],
+        });
+
+        resourceManagerService.registerPluginResource<{ kind: string }>({
+            pluginName,
+            businesses: [UniverInstanceType.UNIVER_SLIDE],
+            onLoad: (unitId, resource) => loads.push([unitId, resource.kind]),
+            onUnLoad: () => undefined,
+            toJson: () => '{}',
+            parseJson: (bytes) => JSON.parse(bytes),
+        });
+
+        expect(loads).toEqual([['slide-late-resource', 'late']]);
+    });
+
+    it('should load object-shaped slide plugin resources through the unit lifecycle', () => {
+        const injector = univer.__getInjector();
+        const resourceManagerService = injector.get(IResourceManagerService);
+        const univerInstanceService = injector.get(IUniverInstanceService);
+        const pluginName = 'SLIDE_OBJECT_PLUGIN' as never;
+        const loads: Array<[string, string]> = [];
+
+        univerInstanceService.registerCtorForType(UniverInstanceType.UNIVER_SLIDE, MockSlideUnit as never);
+        resourceManagerService.registerPluginResource<{ kind: string }>({
+            pluginName,
+            businesses: [UniverInstanceType.UNIVER_SLIDE],
+            onLoad: (unitId, resource) => loads.push([unitId, resource.kind]),
+            onUnLoad: () => undefined,
+            toJson: () => '{}',
+            parseJson: (bytes) => JSON.parse(bytes),
+        });
+
+        univer.createUnit<ITestSlideData, MockSlideUnit>(UniverInstanceType.UNIVER_SLIDE, {
+            id: 'slide-object-resource',
+            resources: {
+                [pluginName]: {
+                    data: '{"kind":"object"}',
+                },
+            },
+        });
+
+        expect(loads).toEqual([['slide-object-resource', 'object']]);
     });
 
     it('should ignore malformed persisted resource payloads when hooks are registered later', () => {

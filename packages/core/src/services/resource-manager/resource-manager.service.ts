@@ -81,7 +81,7 @@ export class ResourceManagerService extends Disposable implements IResourceManag
 
     public loadResources(unitId: string, resources?: IResources) {
         this.getAllResourceHooks().forEach((hook) => {
-            const data = resources?.find((resource) => resource.name === hook.pluginName)?.data;
+            const data = this._getResourceData(resources, hook.pluginName);
             if (data) {
                 try {
                     const model = hook.parseJson(data);
@@ -97,6 +97,29 @@ export class ResourceManagerService extends Disposable implements IResourceManag
         this.getAllResourceHooks().filter((hook) => hook.businesses.includes(type)).forEach((hook) => {
             hook.onUnLoad(unitId);
         });
+    }
+
+    private _getResourceData(resources: unknown, pluginName: IResourceName): string | undefined {
+        if (Array.isArray(resources)) {
+            const data = resources.find((resource) => resource.name === pluginName)?.data;
+            return typeof data === 'string' ? data : undefined;
+        }
+
+        if (!resources || typeof resources !== 'object') {
+            return undefined;
+        }
+
+        const raw = (resources as Record<string, unknown>)[pluginName];
+        if (typeof raw === 'string') {
+            return raw;
+        }
+
+        if (raw && typeof raw === 'object') {
+            const data = (raw as Record<string, unknown>).data;
+            return typeof data === 'string' ? data : undefined;
+        }
+
+        return undefined;
     }
 
     override dispose(): void {

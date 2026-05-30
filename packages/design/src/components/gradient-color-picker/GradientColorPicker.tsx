@@ -51,7 +51,7 @@ const DEFAULT_VALUE: IGradientValue = {
         { color: '#ffffff', offset: 0 },
         { color: '#000000', offset: 100 },
     ],
-    angle: 90,
+    angle: 0,
 };
 
 function clamp(value: number, min: number, max: number): number {
@@ -90,6 +90,14 @@ function getColorWithOpacity(color: string, opacity: number): string {
 
 function getStopColor(stop: IGradientStop): string {
     return getColorWithOpacity(stop.color, getStopOpacity(stop));
+}
+
+function getGradientAngle(value: IGradientValue): number {
+    return value.angle ?? DEFAULT_VALUE.angle ?? 0;
+}
+
+function getCssLinearGradientAngle(value: IGradientValue): number {
+    return (getGradientAngle(value) + 90) % 360;
 }
 
 export function GradientColorPicker(props: IGradientColorPickerProps) {
@@ -204,18 +212,20 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
         const stopsStr = stops.map((s) => `${getStopColor(s)} ${s.offset}%`).join(', ');
         switch (draftValue.type) {
             case 'linear':
-                return `linear-gradient(${draftValue.angle}deg, ${stopsStr})`;
+                return `linear-gradient(${getCssLinearGradientAngle(draftValue)}deg, ${stopsStr})`;
             case 'radial':
                 return `radial-gradient(circle, ${stopsStr})`;
             case 'angular':
-                return `conic-gradient(from ${draftValue.angle}deg, ${stopsStr})`;
+                return `conic-gradient(from ${getGradientAngle(draftValue)}deg, ${stopsStr})`;
             case 'diamond':
                 // Diamond is tricky in CSS, using a placeholder or approximation
                 return `radial-gradient(circle, ${stopsStr})`;
             default:
-                return `linear-gradient(${draftValue.angle}deg, ${stopsStr})`;
+                return `linear-gradient(${getCssLinearGradientAngle(draftValue)}deg, ${stopsStr})`;
         }
     }, [draftValue, stops]);
+
+    const showAngleEditor = draftValue.type === 'linear' || draftValue.type === 'angular';
 
     return (
         <div
@@ -285,6 +295,24 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
                         onChange={(v) => handleTypeChange(v as GradientType)}
                     />
                 )}
+
+            {showAngleEditor && (
+                <div
+                    data-u-comp="gradient-color-picker-angle"
+                    className="
+                      univer-flex univer-items-center univer-justify-between univer-gap-3
+                    "
+                >
+                    <span className="univer-text-xs univer-text-gray-500">{locale?.GradientColorPicker.angle}</span>
+                    <InputNumber
+                        className="univer-w-24"
+                        value={getGradientAngle(draftValue)}
+                        min={0}
+                        max={360}
+                        onChange={handleAngleChange}
+                    />
+                </div>
+            )}
 
             <div
                 data-u-comp="gradient-color-picker-preview"
@@ -374,17 +402,6 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
                         onChange={handleStopOffsetChange}
                     />
                 </div>
-                {(draftValue.type === 'linear' || draftValue.type === 'angular') && (
-                    <div className="univer-flex-1">
-                        <div className="univer-mb-0.5 univer-text-xs univer-text-gray-500">{locale?.GradientColorPicker.angle}</div>
-                        <InputNumber
-                            value={draftValue.angle}
-                            min={0}
-                            max={360}
-                            onChange={handleAngleChange}
-                        />
-                    </div>
-                )}
                 <div className="univer-flex-1">
                     <div className="univer-mb-0.5 univer-text-xs univer-text-gray-500">
                         {locale?.GradientColorPicker.transparency ?? 'Transparency'}

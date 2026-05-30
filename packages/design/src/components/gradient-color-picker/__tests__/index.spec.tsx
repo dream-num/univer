@@ -32,7 +32,7 @@ const defaultValue: IGradientValue = {
         { color: '#ffffff', offset: 0 },
         { color: '#000000', offset: 100 },
     ],
-    angle: 90,
+    angle: 0,
 };
 
 describe('GradientColorPicker', () => {
@@ -65,7 +65,7 @@ describe('GradientColorPicker', () => {
         const { container } = render(<GradientColorPicker value={defaultValue} onChange={onChange} />);
 
         const inputs = container.querySelectorAll('input');
-        const offsetInput = inputs[0]; // First input is offset
+        const offsetInput = inputs[1]; // Second input is offset
 
         fireEvent.change(offsetInput, { target: { value: '50' } });
 
@@ -81,7 +81,7 @@ describe('GradientColorPicker', () => {
         const { container } = render(<GradientColorPicker value={defaultValue} onChange={onChange} />);
 
         const inputs = container.querySelectorAll('input');
-        const angleInput = inputs[1]; // Second input is angle for linear
+        const angleInput = inputs[0]; // First input is angle for linear
 
         fireEvent.change(angleInput, { target: { value: '180' } });
 
@@ -177,7 +177,7 @@ describe('GradientColorPicker', () => {
         const onChange = vi.fn();
         const { container } = render(<GradientColorPicker value={defaultValue} onChange={onChange} />);
         const inputs = container.querySelectorAll('input');
-        const offsetInput = inputs[0] as HTMLInputElement;
+        const offsetInput = inputs[1] as HTMLInputElement;
 
         fireEvent.change(offsetInput, { target: { value: '' } });
         expect(onChange).not.toHaveBeenCalled();

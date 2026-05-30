@@ -38,7 +38,7 @@ export const Playground = {
                 { color: '#409eff', offset: 0 },
                 { color: '#67c23a', offset: 100 },
             ],
-            angle: 90,
+            angle: 0,
         });
 
         return (

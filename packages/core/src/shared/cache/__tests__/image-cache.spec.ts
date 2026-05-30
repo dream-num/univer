@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import type { IImageIoService as IImageIoServiceContract } from '../../../services/image-io/image-io.service';
+import type { IURLImageService as IURLImageServiceContract } from '../../../services/image-io/url-image.service';
+import { Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Injector } from '../../../common/di';
 import { IImageIoService, ImageSourceType } from '../../../services/image-io/image-io.service';
@@ -44,6 +47,32 @@ const flushTasks = async () => {
     await Promise.resolve();
 };
 
+function createImageIoService(getImage: IImageIoServiceContract['getImage']): IImageIoServiceContract {
+    return {
+        change$: new Subject<number>(),
+        setWaitCount: () => {},
+        getImage,
+        saveImage: async () => null,
+        getImageSourceCache: () => null,
+        addImageSourceCache: () => {},
+    };
+}
+
+function createUrlImageService(getImage: IURLImageServiceContract['getImage']): IURLImageServiceContract {
+    return {
+        getImage,
+        downloadImage: async () => new Blob(),
+        registerURLImageDownloader: () => ({
+            dispose: () => {},
+        }),
+    };
+}
+
+function expectCachedImage(image: HTMLImageElement | null): FakeImage {
+    expect(image).not.toBeNull();
+    return image as unknown as FakeImage;
+}
+
 afterEach(() => {
     vi.restoreAllMocks();
     vi.unstubAllGlobals();
@@ -55,9 +84,7 @@ describe('ImageCacheMap', () => {
 
         const injector = new Injector();
         injector.add([IImageIoService, {
-            useValue: {
-                getImage: async (source: string) => `blob:${source}`,
-            },
+            useValue: createImageIoService(async (source: string) => `blob:${source}`),
         }]);
 
         const cache = new ImageCacheMap(injector);
@@ -67,7 +94,7 @@ describe('ImageCacheMap', () => {
 
         await flushTasks();
 
-        const cached = cache.getImage(ImageSourceType.UUID, 'uuid-1', () => loadEvents.push('loaded')) as FakeImage;
+        const cached = expectCachedImage(cache.getImage(ImageSourceType.UUID, 'uuid-1', () => loadEvents.push('loaded')));
         expect(cached.src).toBe('blob:uuid-1');
 
         cached.onload?.();
@@ -80,11 +107,9 @@ describe('ImageCacheMap', () => {
 
         const injector = new Injector();
         injector.add([IURLImageService, {
-            useValue: {
-                getImage: async () => {
-                    throw new Error('network');
-                },
-            },
+            useValue: createUrlImageService(async () => {
+                throw new Error('network');
+            }),
         }]);
 
         const cache = new ImageCacheMap(injector);
@@ -94,7 +119,7 @@ describe('ImageCacheMap', () => {
 
         await flushTasks();
 
-        const cached = cache.getImage(ImageSourceType.URL, 'https://img.test/a.png') as FakeImage;
+        const cached = expectCachedImage(cache.getImage(ImageSourceType.URL, 'https://img.test/a.png'));
         expect(cached.src).toBe('https://img.test/a.png');
 
         cached.onerror?.();
@@ -107,11 +132,9 @@ describe('ImageCacheMap', () => {
 
         const injector = new Injector();
         injector.add([IImageIoService, {
-            useValue: {
-                getImage: async () => {
-                    throw new Error('uuid load failed');
-                },
-            },
+            useValue: createImageIoService(async () => {
+                throw new Error('uuid load failed');
+            }),
         }]);
 
         const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
@@ -122,8 +145,8 @@ describe('ImageCacheMap', () => {
 
         await flushTasks();
 
-        const uuidCached = cache.getImage(ImageSourceType.UUID, 'uuid-2') as FakeImage;
-        const base64Cached = cache.getImage(ImageSourceType.BASE64, 'data:image/png;base64,abc') as FakeImage;
+        const uuidCached = expectCachedImage(cache.getImage(ImageSourceType.UUID, 'uuid-2'));
+        const base64Cached = expectCachedImage(cache.getImage(ImageSourceType.BASE64, 'data:image/png;base64,abc'));
 
         expect(uuidCached.src).toBe('');
         expect(base64Cached.src).toBe('data:image/png;base64,abc');

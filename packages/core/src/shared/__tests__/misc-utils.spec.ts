@@ -28,18 +28,26 @@ afterEach(() => {
 
 describe('shared misc utils', () => {
     it('should convert code to a javascript blob url', async () => {
-        let capturedBlob: Blob | null = null;
-
-        vi.spyOn(window.URL, 'createObjectURL').mockImplementation((blob: Blob | MediaSource) => {
-            capturedBlob = blob as Blob;
+        const createObjectURLSpy = vi.spyOn(window.URL, 'createObjectURL').mockImplementation(() => {
             return 'blob:univer-test';
         });
 
         const url = codeToBlob('export default 1;');
 
         expect(url).toBe('blob:univer-test');
-        expect(capturedBlob?.type).toBe('text/javascript');
-        await expect(capturedBlob?.text()).resolves.toBe('export default 1;');
+        const firstCall = createObjectURLSpy.mock.calls[0];
+        if (firstCall == null) {
+            throw new Error('Expected createObjectURL to be called');
+        }
+
+        const [blobCandidate] = firstCall;
+        if (!(blobCandidate instanceof Blob)) {
+            throw new TypeError('Expected createObjectURL to receive a Blob');
+        }
+
+        const blob = blobCandidate;
+        expect(blob.type).toBe('text/javascript');
+        await expect(blob.text()).resolves.toBe('export default 1;');
     });
 
     it('should identify real numeric values across supported input types', () => {

@@ -43,8 +43,9 @@ describe('FUtil', () => {
 
         ExtendedUtil.extend(FeatureSource);
 
-        const extended = new ExtendedUtil() as ExtendedUtil & { speak(value: string): string } & { constructor: typeof ExtendedUtil & { label: string } };
+        const ExtendedUtilWithStatics = ExtendedUtil as typeof ExtendedUtil & { label: string };
+        const extended = new ExtendedUtil() as ExtendedUtil & { speak(value: string): string };
         expect(extended.speak('hello')).toBe('util:hello');
-        expect(ExtendedUtil.label).toBe('feature-source');
+        expect(ExtendedUtilWithStatics.label).toBe('feature-source');
     });
 });

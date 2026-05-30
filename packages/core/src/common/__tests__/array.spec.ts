@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { dedupeBy, rotate } from '../array';
+import { dedupe, dedupeBy, findLast, groupBy, makeArray, remove, rotate } from '../array';
 
 describe('test array utils', () => {
     it('should "rotate" function work correctly', () => {
@@ -51,5 +51,33 @@ describe('test array utils', () => {
         expect(deduped[1].name).toBe('b');
         expect(deduped[2].name).toBe('c');
         expect(deduped[0].id).toBe('1');
+    });
+
+    it('should remove, dedupe, findLast, groupBy and make arrays consistently', () => {
+        const raw = [1, 2, 2, 3, 4, 3];
+
+        expect(remove(raw, 2)).toBe(true);
+        expect(raw).toEqual([1, 2, 3, 4, 3]);
+        expect(remove(raw, 9)).toBe(false);
+
+        expect(dedupe(raw)).toEqual([1, 2, 3, 4]);
+        expect(findLast(raw, (item, index) => item % 2 === 1 && index > 2)).toBe(3);
+        expect(findLast(raw, (item) => item === 9)).toBeNull();
+
+        const grouped = groupBy([
+            { group: 'odd', value: 1 },
+            { group: 'even', value: 2 },
+            { group: 'odd', value: 3 },
+        ], (item) => item.group);
+
+        expect(grouped.get('odd')).toEqual([
+            { group: 'odd', value: 1 },
+            { group: 'odd', value: 3 },
+        ]);
+        expect(grouped.get('even')).toEqual([{ group: 'even', value: 2 }]);
+
+        expect(makeArray('single')).toEqual(['single']);
+        const arr = ['already'];
+        expect(makeArray(arr)).toBe(arr);
     });
 });

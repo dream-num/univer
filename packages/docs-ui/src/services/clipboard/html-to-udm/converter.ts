@@ -22,6 +22,7 @@ import {
     DataStreamTreeTokenType,
     DrawingTypeEnum,
     generateRandomId,
+    isSafeUrl,
     NamedStyleType,
     ObjectRelativeFromH,
     ObjectRelativeFromV,
@@ -931,15 +932,6 @@ function toPixels(value: number, unit?: string): number {
 
 function roundCssNumber(value: number): number {
     return Math.round(value * 100) / 100;
-}
-
-function isSafeUrl(url: string): boolean {
-    try {
-        const parsed = new URL(url, window.location.origin);
-        return ['http:', 'https:', 'mailto:'].includes(parsed.protocol);
-    } catch {
-        return false;
-    }
 }
 
 function getStructuredBlockType(node: HTMLElement): string | null {

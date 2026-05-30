@@ -26,7 +26,7 @@ import type {
     IUniverSheetCopyDataModel,
 } from '../type';
 import type { IAfterProcessRule, IPastePlugin } from './paste-plugins/type';
-import { CustomRangeType, DEFAULT_WORKSHEET_ROW_HEIGHT, generateRandomId, getNumfmtParseValueFilter, numfmt, ObjectMatrix, skipParseTagNames } from '@univerjs/core';
+import { CustomRangeType, DEFAULT_WORKSHEET_ROW_HEIGHT, generateRandomId, getNumfmtParseValueFilter, isSafeUrl, numfmt, ObjectMatrix, skipParseTagNames } from '@univerjs/core';
 import { handleStringToStyle, textTrim } from '@univerjs/ui';
 import { extractNodeStyle } from './parse-node-style';
 import parseToDom, { convertToCellStyle, generateParagraphs } from './utils';
@@ -723,13 +723,17 @@ export class HtmlToUSMService {
         const element = node as HTMLElement;
 
         if (element.tagName.toUpperCase() === 'A') {
+            const href = (element as HTMLAnchorElement).href;
+            if (!isSafeUrl(href)) {
+                return;
+            }
             body.customRanges = body.customRanges ?? [];
             body.customRanges.push({
                 startIndex: start,
                 endIndex: body.dataStream.length - 1,
                 rangeId: element.dataset.rangeid ?? generateRandomId(),
                 rangeType: CustomRangeType.HYPERLINK,
-                properties: { url: (element as HTMLAnchorElement).href },
+                properties: { url: href },
             });
         }
     }

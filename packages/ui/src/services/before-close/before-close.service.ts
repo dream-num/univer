@@ -15,7 +15,7 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
-import { createIdentifier } from '@univerjs/core';
+import { createIdentifier, Disposable } from '@univerjs/core';
 
 import { INotificationService } from '../notification/notification.service';
 
@@ -39,12 +39,51 @@ export interface IBeforeCloseService {
 
 export const IBeforeCloseService = createIdentifier<IBeforeCloseService>('univer.ui.before-close-service');
 
-export class DesktopBeforeCloseService implements IBeforeCloseService {
+export class DesktopBeforeCloseService extends Disposable implements IBeforeCloseService {
     private _beforeUnloadCallbacks: Array<() => string | undefined> = [];
     private _onCloseCallbacks: Array<() => void> = [];
 
+    private readonly _beforeUnloadHandler: (event: BeforeUnloadEvent) => string | undefined;
+    private readonly _unloadHandler: () => void;
+
     constructor(@INotificationService private readonly _notificationService: INotificationService) {
+        super();
+        this._beforeUnloadHandler = (_event: BeforeUnloadEvent) => {
+            let event = _event;
+            const message = this._beforeUnloadCallbacks
+                .map((callback) => callback())
+                .filter((m) => !!m)
+                .join('\n');
+
+            if (message) {
+                this._notificationService.show({
+                    type: 'error',
+                    title: 'Some changes are not saved',
+                    content: message,
+                });
+
+                if (typeof event === 'undefined') {
+                    event = window.event as BeforeUnloadEvent;
+                }
+
+                event.returnValue = message;
+                return message;
+            }
+        };
+
+        this._unloadHandler = () => {
+            this._onCloseCallbacks.forEach((callback) => callback());
+        };
+
         this._init();
+    }
+
+    override dispose(): void {
+        window.removeEventListener('beforeunload', this._beforeUnloadHandler);
+        window.removeEventListener('unload', this._unloadHandler);
+        this._beforeUnloadCallbacks = [];
+        this._onCloseCallbacks = [];
+        super.dispose();
     }
 
     registerBeforeClose(callback: () => string | undefined): IDisposable {
@@ -66,31 +105,7 @@ export class DesktopBeforeCloseService implements IBeforeCloseService {
     }
 
     private _init(): void {
-        window.addEventListener('beforeunload', (_event: BeforeUnloadEvent) => {
-            let event = _event;
-            const message = this._beforeUnloadCallbacks
-                .map((callback) => callback())
-                .filter((m) => !!m)
-                .join('\n');
-
-            if (message) {
-                this._notificationService.show({
-                    type: 'error',
-                    title: 'Some changes are not saved',
-                    content: message,
-                });
-
-                if (typeof event === 'undefined') {
-                    event = window.event as BeforeUnloadEvent;
-                }
-
-                event.returnValue = message;
-                return message;
-            }
-        });
-
-        window.addEventListener('unload', () => {
-            this._onCloseCallbacks.forEach((callback) => callback());
-        });
+        window.addEventListener('beforeunload', this._beforeUnloadHandler);
+        window.addEventListener('unload', this._unloadHandler);
     }
 }

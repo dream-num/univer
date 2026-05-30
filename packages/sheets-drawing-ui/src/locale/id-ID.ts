@@ -74,7 +74,12 @@ const locale: typeof enUS = {
             },
         },
         shortcut: {
-            'drawing-view': 'Drawing View',
+            'drawing-view': 'Tampilan Gambar',
+            'drawing-move-down': 'Pindahkan Gambar ke Bawah',
+            'drawing-move-up': 'Pindahkan Gambar ke Atas',
+            'drawing-move-left': 'Pindahkan Gambar ke Kiri',
+            'drawing-move-right': 'Pindahkan Gambar ke Kanan',
+            'drawing-delete': 'Hapus Gambar',
         },
     },
 };

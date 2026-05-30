@@ -74,7 +74,12 @@ const locale: typeof enUS = {
             },
         },
         shortcut: {
-            'drawing-view': 'Drawing View',
+            'drawing-view': 'Vista del dibuix',
+            'drawing-move-down': 'Mou el dibuix cap avall',
+            'drawing-move-up': 'Mou el dibuix cap amunt',
+            'drawing-move-left': 'Mou el dibuix a l’esquerra',
+            'drawing-move-right': 'Mou el dibuix a la dreta',
+            'drawing-delete': 'Elimina el dibuix',
         },
     },
 };

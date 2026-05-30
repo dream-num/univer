@@ -73,6 +73,14 @@ const locale: typeof enUS = {
             exceedMaxCount: 'Hanya {0} gambar yang dapat diunggah dalam satu waktu',
             invalidImage: 'Gambar tidak valid',
         },
+        shortcut: {
+            'drawing-view': 'Tampilan Gambar',
+            'drawing-move-down': 'Pindahkan Gambar ke Bawah',
+            'drawing-move-up': 'Pindahkan Gambar ke Atas',
+            'drawing-move-left': 'Pindahkan Gambar ke Kiri',
+            'drawing-move-right': 'Pindahkan Gambar ke Kanan',
+            'drawing-delete': 'Hapus Gambar',
+        },
     },
 };
 

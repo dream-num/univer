@@ -87,13 +87,6 @@ const locale: typeof enUS = {
             crop: 'トリミング',
             reset: 'サイズをリセット',
         },
-        shortcut: {
-            'drawing-move-down': '図形を下へ移動',
-            'drawing-move-up': '図形を上へ移動',
-            'drawing-move-left': '図形を左へ移動',
-            'drawing-move-right': '図形を右へ移動',
-            'drawing-delete': '図形を削除',
-        },
     },
 };
 

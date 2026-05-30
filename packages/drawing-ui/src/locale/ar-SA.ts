@@ -87,13 +87,6 @@ const locale: typeof enUS = {
             crop: 'قص',
             reset: 'إعادة تعيين الحجم',
         },
-        shortcut: {
-            'drawing-move-down': 'نقل الرسم لأسفل',
-            'drawing-move-up': 'نقل الرسم لأعلى',
-            'drawing-move-left': 'نقل الرسم لليسار',
-            'drawing-move-right': 'نقل الرسم لليمين',
-            'drawing-delete': 'حذف الرسم',
-        },
     },
 };
 

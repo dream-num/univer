@@ -87,13 +87,6 @@ const locale: typeof enUS = {
             crop: 'Pangkas',
             reset: 'Atur Ulang Ukuran',
         },
-        shortcut: {
-            'drawing-move-down': 'Pindahkan Gambar ke Bawah',
-            'drawing-move-up': 'Pindahkan Gambar ke Atas',
-            'drawing-move-left': 'Pindahkan Gambar ke Kiri',
-            'drawing-move-right': 'Pindahkan Gambar ke Kanan',
-            'drawing-delete': 'Hapus Gambar',
-        },
     },
 };
 

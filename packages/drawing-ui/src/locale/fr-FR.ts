@@ -87,13 +87,6 @@ const locale: typeof enUS = {
             crop: 'Rogner',
             reset: 'Réinitialiser la taille',
         },
-        shortcut: {
-            'drawing-move-down': 'Déplacer le dessin vers le bas',
-            'drawing-move-up': 'Déplacer le dessin vers le haut',
-            'drawing-move-left': 'Déplacer le dessin vers la gauche',
-            'drawing-move-right': 'Déplacer le dessin vers la droite',
-            'drawing-delete': 'Supprimer le dessin',
-        },
     },
 };
 

@@ -309,6 +309,7 @@ const locale: typeof enUS = {
                 'break-line': 'Xuống dòng',
                 'set-bold': 'Chuyển sang chữ đậm',
                 'start-editing': 'Bắt đầu chỉnh sửa (vùng chọn chuyển sang trình chỉnh sửa)',
+                'repeat-last-action': 'Lặp lại thao tác cuối cùng',
                 'set-italic': 'Chuyển sang chữ nghiêng',
                 'set-underline': 'Chuyển sang chữ gạch chân',
                 'set-strike-through': 'Chuyển sang chữ gạch ngang',

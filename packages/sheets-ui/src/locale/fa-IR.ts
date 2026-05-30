@@ -309,6 +309,7 @@ const locale: typeof enUS = {
                 'break-line': 'شکستن خط',
                 'set-bold': 'تغییر حالت پررنگ',
                 'start-editing': 'شروع ویرایش (انتخاب در ویرایشگر)',
+                'repeat-last-action': 'تکرار آخرین عملیات',
                 'set-italic': 'تغییر حالت مورب',
                 'set-underline': 'تغییر حالت خط زیرین',
                 'set-strike-through': 'تغییر حالت خط‌خورده',

@@ -73,6 +73,14 @@ const locale: typeof enUS = {
             exceedMaxCount: 'Naraz možno nahrať iba {0} obrázkov',
             invalidImage: 'Neplatný obrázok',
         },
+        shortcut: {
+            'drawing-view': 'Zobrazenie kresby',
+            'drawing-move-down': 'Posunúť kresbu nadol',
+            'drawing-move-up': 'Posunúť kresbu nahor',
+            'drawing-move-left': 'Posunúť kresbu doľava',
+            'drawing-move-right': 'Posunúť kresbu doprava',
+            'drawing-delete': 'Odstrániť kresbu',
+        },
     },
 };
 

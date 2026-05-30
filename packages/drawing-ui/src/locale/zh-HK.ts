@@ -87,13 +87,6 @@ const locale: typeof enUS = {
             crop: '裁切',
             reset: '重置大小',
         },
-        shortcut: {
-            'drawing-move-down': '下移繪圖',
-            'drawing-move-up': '上移繪圖',
-            'drawing-move-left': '左移繪圖',
-            'drawing-move-right': '右移繪圖',
-            'drawing-delete': '刪除繪圖',
-        },
     },
 };
 

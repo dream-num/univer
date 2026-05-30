@@ -309,6 +309,7 @@ const locale: typeof enUS = {
                 'break-line': 'Saut de ligne',
                 'set-bold': 'Basculer en gras',
                 'start-editing': 'Commencer l\'édition (Sélection dans l\'éditeur)',
+                'repeat-last-action': 'Répéter la dernière action',
                 'set-italic': 'Basculer en italique',
                 'set-underline': 'Basculer en souligné',
                 'set-strike-through': 'Basculer en barré',

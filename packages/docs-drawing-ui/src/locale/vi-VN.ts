@@ -73,6 +73,14 @@ const locale: typeof enUS = {
             exceedMaxCount: 'Chỉ có thể tải lên tối đa {0} hình ảnh một lần',
             invalidImage: 'Hình ảnh không hợp lệ',
         },
+        shortcut: {
+            'drawing-view': 'Chế độ xem bản vẽ',
+            'drawing-move-down': 'Move Drawing down',
+            'drawing-move-up': 'Move Drawing up',
+            'drawing-move-left': 'Move Drawing left',
+            'drawing-move-right': 'Move Drawing right',
+            'drawing-delete': 'Delete Drawing',
+        },
     },
 };
 

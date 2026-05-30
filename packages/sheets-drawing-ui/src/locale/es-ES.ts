@@ -74,7 +74,12 @@ const locale: typeof enUS = {
             },
         },
         shortcut: {
-            'drawing-view': 'Drawing View',
+            'drawing-view': 'Vista de dibujo',
+            'drawing-move-down': 'Mover dibujo hacia abajo',
+            'drawing-move-up': 'Mover dibujo hacia arriba',
+            'drawing-move-left': 'Mover dibujo a la izquierda',
+            'drawing-move-right': 'Mover dibujo a la derecha',
+            'drawing-delete': 'Eliminar dibujo',
         },
     },
 };

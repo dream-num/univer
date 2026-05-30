@@ -73,6 +73,14 @@ const locale: typeof enUS = {
             exceedMaxCount: 'Apenas {0} imagens podem ser enviadas de cada vez',
             invalidImage: 'Imagem inválida',
         },
+        shortcut: {
+            'drawing-view': 'Visualização do desenho',
+            'drawing-move-down': 'Mover desenho para baixo',
+            'drawing-move-up': 'Mover desenho para cima',
+            'drawing-move-left': 'Mover desenho para esquerda',
+            'drawing-move-right': 'Mover desenho para direita',
+            'drawing-delete': 'Excluir desenho',
+        },
     },
 };
 

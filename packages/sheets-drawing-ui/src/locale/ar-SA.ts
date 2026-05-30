@@ -74,7 +74,12 @@ const locale: typeof enUS = {
             },
         },
         shortcut: {
-            'drawing-view': 'Drawing View',
+            'drawing-view': 'عرض الرسم',
+            'drawing-move-down': 'نقل الرسم لأسفل',
+            'drawing-move-up': 'نقل الرسم لأعلى',
+            'drawing-move-left': 'نقل الرسم لليسار',
+            'drawing-move-right': 'نقل الرسم لليمين',
+            'drawing-delete': 'حذف الرسم',
         },
     },
 };

@@ -87,13 +87,6 @@ const locale: typeof enUS = {
             crop: 'Ritaglia',
             reset: 'Reimposta dimensione',
         },
-        shortcut: {
-            'drawing-move-down': 'Sposta disegno in basso',
-            'drawing-move-up': 'Sposta disegno in alto',
-            'drawing-move-left': 'Sposta disegno a sinistra',
-            'drawing-move-right': 'Sposta disegno a destra',
-            'drawing-delete': 'Elimina disegno',
-        },
     },
 };
 

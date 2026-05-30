@@ -94,12 +94,6 @@ export class DocThreadCommentRenderController extends Disposable implements IRen
         const unitId = this._context.unit.getUnitId();
         const subUnitId = DEFAULT_DOC_SUBUNIT_ID;
         const threadIds = this._context.unit.getBody()?.customDecorations?.filter((i) => i.type === CustomDecorationType.COMMENT).map((i) => i.id) ?? [];
-        threadIds.forEach((id) => {
-            const comment = this._threadCommentModel.getComment(unitId, subUnitId, id);
-            if (!comment) {
-                this._threadCommentModel.addComment(unitId, subUnitId, { id, threadId: id, ref: '', dT: '', personId: '', text: { dataStream: '' }, unitId, subUnitId });
-            }
-        });
         threadIds.length && this._threadCommentModel.syncThreadComments(this._context.unit.getUnitId(), DEFAULT_DOC_SUBUNIT_ID, threadIds);
 
         let prevThreadIds: string[] = threadIds.sort();
@@ -114,9 +108,7 @@ export class DocThreadCommentRenderController extends Disposable implements IRen
                 const currentThreadIdsSorted = currentThreadIds.sort();
                 if (JSON.stringify(prevThreadIds) !== JSON.stringify(currentThreadIdsSorted)) {
                     const preIds = new Set(prevThreadIds);
-                    const currentIds = new Set(currentThreadIdsSorted);
                     const addIds = new Set<string>();
-                    const deleteIds = new Set<string>();
 
                     currentThreadIds.forEach((id) => {
                         if (!preIds.has(id)) {
@@ -124,24 +116,7 @@ export class DocThreadCommentRenderController extends Disposable implements IRen
                         }
                     });
 
-                    prevThreadIds.forEach((id) => {
-                        if (!currentIds.has(id)) {
-                            deleteIds.add(id);
-                        }
-                    });
-
                     prevThreadIds = currentThreadIdsSorted;
-                    addIds.forEach((id) => {
-                        const comment = this._threadCommentModel.getComment(unitId, subUnitId, id);
-                        if (!comment) {
-                            this._threadCommentModel.addComment(unitId, subUnitId, { id, threadId: id, ref: '', dT: '', personId: '', text: { dataStream: '' }, unitId, subUnitId });
-                        }
-                    });
-
-                    // deleteIds.forEach((id) => {
-                    //     this._threadCommentModel.deleteThread(unitId, subUnitId, id);
-                    // });
-
                     this._threadCommentModel.syncThreadComments(unitId, subUnitId, [...addIds]);
                 }
             }

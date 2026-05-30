@@ -18,6 +18,14 @@ import type { IDocumentBody } from '@univerjs/core';
 import type { IThreadCommentMention } from '@univerjs/thread-comment';
 import { CustomRangeType, getBodySlice } from '@univerjs/core';
 
+interface IThreadCommentEditorFocusService {
+    focus: (editorId: string) => void;
+}
+
+interface IFocusableThreadCommentEditor {
+    focus: () => void;
+}
+
 export type TextNode = {
     type: 'text';
     content: string;
@@ -118,3 +126,12 @@ export const transformTextNodes2Document = (nodes: TextNode[]): IDocumentBody =>
         customRanges,
     };
 };
+
+export function focusThreadCommentEditor(
+    editorService: IThreadCommentEditorFocusService,
+    editorId: string,
+    editor?: IFocusableThreadCommentEditor | null
+) {
+    editorService.focus(editorId);
+    editor?.focus();
+}

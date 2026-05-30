@@ -20,7 +20,7 @@ import { debounce } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { ScrollBar } from '@univerjs/engine-render';
 import { useCallback, useEffect, useMemo } from 'react';
-import { VIEWPORT_KEY } from '../../../basics/docs-view-key';
+import { DOCS_VIEW_KEY, VIEWPORT_KEY } from '../../../basics/docs-view-key';
 
 interface IUseResizeReturn {
     resize: () => void;
@@ -42,6 +42,13 @@ export const useResize = (editor?: Editor, isSingle = true, autoScrollbar?: bool
             });
 
             mainComponent?.resize(width, height);
+            mainComponent?.translate(0, 0);
+            editor.render.components.get(DOCS_VIEW_KEY.BACKGROUND)?.translate(0, 0);
+
+            const selectionRanges = editor.getSelectionRanges();
+            if (selectionRanges.length > 0) {
+                editor.setSelectionRanges(selectionRanges, false);
+            }
         }
     }, [editor, isSingle]);
 

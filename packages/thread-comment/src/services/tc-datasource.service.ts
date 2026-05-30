@@ -105,10 +105,11 @@ export class ThreadCommentDataSourceService extends Disposable implements IThrea
     }
 
     async addComment(comment: IThreadComment) {
-        if (this._dataSource) {
-            return this._dataSource.addComment(comment);
-        }
-        return { ...comment, threadId: comment.threadId ?? comment.id };
+        const savedComment = this._dataSource
+            ? await this._dataSource.addComment(comment)
+            : comment;
+
+        return { ...savedComment, threadId: savedComment.threadId || savedComment.id };
     }
 
     async updateComment(comment: IThreadComment) {

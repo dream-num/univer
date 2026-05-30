@@ -248,7 +248,14 @@ export class EditorService extends Disposable implements IEditorService, IDispos
 
             // Delete scroll bar
             if (!config.scrollBar) {
-                (render.mainComponent?.getScene() as Scene)?.getViewports()?.[0].getScrollBar()?.dispose();
+                const viewport = (render.mainComponent?.getScene() as Scene)?.getViewports()?.[0];
+                viewport?.getScrollBar()?.dispose();
+                viewport?.updateScrollVal({
+                    scrollX: 0,
+                    scrollY: 0,
+                    viewportScrollX: 0,
+                    viewportScrollY: 0,
+                });
             }
         }
         return toDisposable(() => {

@@ -23,6 +23,7 @@ import { BreakLineCommand, IEditorService, RichTextEditor } from '@univerjs/docs
 import { KeyCode, useDependency } from '@univerjs/ui';
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { SetActiveCommentOperation } from '../../commands/operations/comment.operations';
+import { focusThreadCommentEditor } from './util';
 
 export interface IThreadCommentEditorProps {
     id?: string;
@@ -85,65 +86,92 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
             if (!editor.current) {
                 return;
             }
-            editorService.focus(editor.current!.getEditorId() ?? '');
+            focusThreadCommentEditor(editorService, editorId, editor.current);
             const documentData = getSnapshot(text);
             editor.current?.setDocumentData(documentData, [{
                 startOffset: documentData.body!.dataStream.length - 2,
                 endOffset: documentData.body!.dataStream.length - 2,
                 collapsed: true,
             }]);
+            setCanSubmit(BuildTextUtils.transform.getPlainText(documentData.body!.dataStream));
+            setEditing(true);
         },
     }));
 
     const handleSave = () => {
-        if (editor.current) {
-            const newText = Tools.deepClone(editor.current.getDocumentData().body);
+        const currentEditor = editor.current;
+        if (currentEditor) {
+            const newText = Tools.deepClone(currentEditor.getDocumentData().body);
+            currentEditor.blur();
+            currentEditor.replaceText('', false);
+            currentEditor.setSelectionRanges([], false);
+            setCanSubmit('');
             setEditing(false);
             onSave?.({
                 ...comment,
                 text: newText!,
             });
-            editor.current.replaceText('');
-            setTimeout(() => {
-                editor.current?.setSelectionRanges([]);
-                editor.current?.blur();
-            }, 10);
         }
     };
 
+    const handleEditorMouseDown = () => {
+        focusThreadCommentEditor(editorService, editorId, editor.current);
+        setEditing(true);
+    };
+
+    useEffect(() => {
+        if (!autoFocus) {
+            return;
+        }
+
+        const timer = setTimeout(() => {
+            focusThreadCommentEditor(editorService, editorId, editor.current);
+        });
+
+        return () => clearTimeout(timer);
+    }, [autoFocus, editorId, editorService]);
+
     return (
         <div onClick={(e) => e.preventDefault()}>
-            <RichTextEditor
-                className="univer-w-full"
-                editorRef={editor}
-                editorId={editorId}
-                autoFocus={autoFocus}
-                keyboardEventConfig={keyboardEventConfig}
-                placeholder={localeService.t('thread-comment-ui.editor.placeholder')}
-                initialValue={comment?.text && getSnapshot(comment.text)}
-                onFocusChange={(isFocus) => isFocus && setEditing(isFocus)}
-                isSingle={false}
-                maxHeight={64}
-                onClickOutside={() => {
-                    setTimeout(() => {
-                        editorService.focus(rootEditorId);
-                    }, 30);
-                }}
-            />
+            <div onMouseDown={handleEditorMouseDown}>
+                <RichTextEditor
+                    className="univer-w-full"
+                    editorRef={editor}
+                    editorId={editorId}
+                    autoFocus={autoFocus}
+                    keyboardEventConfig={keyboardEventConfig}
+                    placeholder={localeService.t('thread-comment-ui.editor.placeholder')}
+                    initialValue={comment?.text && getSnapshot(comment.text)}
+                    onFocusChange={(isFocus) => isFocus && setEditing(isFocus)}
+                    isSingle={false}
+                    maxHeight={64}
+                    onClickOutside={() => {
+                        setTimeout(() => {
+                            editorService.focus(rootEditorId);
+                        }, 30);
+                    }}
+                />
+            </div>
             {editing
                 ? (
                     <div className="univer-mt-3 univer-flex univer-flex-row univer-justify-end univer-gap-2">
                         <Button
+                            type="button"
                             onClick={() => {
+                                const currentEditor = editor.current;
+                                currentEditor?.blur();
+                                currentEditor?.replaceText('', false);
+                                currentEditor?.setSelectionRanges([], false);
+                                setCanSubmit('');
                                 onCancel?.();
                                 setEditing(false);
-                                editor.current?.replaceText('', true);
                                 commandService.executeCommand(SetActiveCommentOperation.id);
                             }}
                         >
                             {localeService.t('thread-comment-ui.editor.cancel')}
                         </Button>
                         <Button
+                            type="button"
                             variant="primary"
                             disabled={!canSubmit}
                             onClick={handleSave}

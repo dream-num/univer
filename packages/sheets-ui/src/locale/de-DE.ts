@@ -309,6 +309,7 @@ const locale: typeof enUS = {
                 'break-line': 'Zeilenumbruch',
                 'set-bold': 'Fett umschalten',
                 'start-editing': 'Bearbeitung beginnen (Auswahl in den Editor)',
+                'repeat-last-action': 'Letzte Aktion wiederholen',
                 'set-italic': 'Kursiv umschalten',
                 'set-underline': 'Unterstrichen umschalten',
                 'set-strike-through': 'Durchgestrichen umschalten',

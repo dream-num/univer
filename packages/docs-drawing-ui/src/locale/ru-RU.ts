@@ -73,6 +73,14 @@ const locale: typeof enUS = {
             exceedMaxCount: 'За один раз можно загрузить только {0} изображений',
             invalidImage: 'Недопустимое изображение',
         },
+        shortcut: {
+            'drawing-view': 'Вид изображения',
+            'drawing-move-down': 'Переместить изображение вниз',
+            'drawing-move-up': 'Переместить изображение вверх',
+            'drawing-move-left': 'Переместить изображение влево',
+            'drawing-move-right': 'Переместить изображение вправо',
+            'drawing-delete': 'Удалить изображение',
+        },
     },
 };
 

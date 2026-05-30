@@ -307,6 +307,7 @@ const locale = {
                 'break-line': 'Break line',
                 'set-bold': 'Toggle bold',
                 'start-editing': 'Start Editing (Selection into the Editor)',
+                'repeat-last-action': 'Repeat last action',
                 'set-italic': 'Toggle italic',
                 'set-underline': 'Toggle underline',
                 'set-strike-through': 'Toggle strike through',

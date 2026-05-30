@@ -309,6 +309,7 @@ const locale: typeof enUS = {
                 'break-line': '줄바꿈',
                 'set-bold': '굵게',
                 'start-editing': '편집 시작 (편집기 선택)',
+                'repeat-last-action': '마지막 작업 반복',
                 'set-italic': '기울임',
                 'set-underline': '밑줄',
                 'set-strike-through': '취소선',

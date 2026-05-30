@@ -74,7 +74,12 @@ const locale: typeof enUS = {
             },
         },
         shortcut: {
-            'drawing-view': 'Drawing View',
+            'drawing-view': 'Chế độ xem bản vẽ',
+            'drawing-move-down': 'Move Drawing down',
+            'drawing-move-up': 'Move Drawing up',
+            'drawing-move-left': 'Move Drawing left',
+            'drawing-move-right': 'Move Drawing right',
+            'drawing-delete': 'Delete Drawing',
         },
     },
 };

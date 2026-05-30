@@ -34,7 +34,7 @@ export function whenSheetDrawingFocused(contextService: IContextService): boolea
 
 export const MoveDrawingDownShortcutItem: IShortcutItem<IMoveDrawingsCommandParams> = {
     id: MoveDrawingsCommand.id,
-    description: 'drawing-ui.shortcut.drawing-move-down',
+    description: 'sheets-drawing-ui.shortcut.drawing-move-down',
     group: '4_drawing-view',
     groupTitle: 'sheets-drawing-ui.shortcut.drawing-view',
     binding: KeyCode.ARROW_DOWN,
@@ -47,7 +47,7 @@ export const MoveDrawingDownShortcutItem: IShortcutItem<IMoveDrawingsCommandPara
 
 export const MoveDrawingUpShortcutItem: IShortcutItem<IMoveDrawingsCommandParams> = {
     id: MoveDrawingsCommand.id,
-    description: 'drawing-ui.shortcut.drawing-move-up',
+    description: 'sheets-drawing-ui.shortcut.drawing-move-up',
     group: '4_drawing-view',
     groupTitle: 'sheets-drawing-ui.shortcut.drawing-view',
     binding: KeyCode.ARROW_UP,
@@ -60,7 +60,7 @@ export const MoveDrawingUpShortcutItem: IShortcutItem<IMoveDrawingsCommandParams
 
 export const MoveDrawingLeftShortcutItem: IShortcutItem<IMoveDrawingsCommandParams> = {
     id: MoveDrawingsCommand.id,
-    description: 'drawing-ui.shortcut.drawing-move-left',
+    description: 'sheets-drawing-ui.shortcut.drawing-move-left',
     group: '4_drawing-view',
     groupTitle: 'sheets-drawing-ui.shortcut.drawing-view',
     binding: KeyCode.ARROW_LEFT,
@@ -73,7 +73,7 @@ export const MoveDrawingLeftShortcutItem: IShortcutItem<IMoveDrawingsCommandPara
 
 export const MoveDrawingRightShortcutItem: IShortcutItem<IMoveDrawingsCommandParams> = {
     id: MoveDrawingsCommand.id,
-    description: 'drawing-ui.shortcut.drawing-move-right',
+    description: 'sheets-drawing-ui.shortcut.drawing-move-right',
     group: '4_drawing-view',
     groupTitle: 'sheets-drawing-ui.shortcut.drawing-view',
     binding: KeyCode.ARROW_RIGHT,
@@ -85,7 +85,7 @@ export const MoveDrawingRightShortcutItem: IShortcutItem<IMoveDrawingsCommandPar
 };
 export const DeleteDrawingsShortcutItem: IShortcutItem = {
     id: DeleteDrawingsCommand.id,
-    description: 'drawing-ui.shortcut.drawing-delete',
+    description: 'sheets-drawing-ui.shortcut.drawing-delete',
     group: '4_drawing-view',
     groupTitle: 'sheets-drawing-ui.shortcut.drawing-view',
     priority: 100,

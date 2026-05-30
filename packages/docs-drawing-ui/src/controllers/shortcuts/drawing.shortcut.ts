@@ -32,9 +32,9 @@ export function whenDocDrawingFocused(contextService: IContextService): boolean 
 
 export const MoveDrawingDownShortcutItem: IShortcutItem<IMoveDrawingsCommandParams> = {
     id: MoveDocDrawingsCommand.id,
-    description: 'drawing-ui.shortcut.drawing-move-down',
+    description: 'docs-drawing-ui.shortcut.drawing-move-down',
     group: '4_drawing-view',
-    groupTitle: 'sheets-drawing-ui.shortcut.drawing-view',
+    groupTitle: 'docs-drawing-ui.shortcut.drawing-view',
     binding: KeyCode.ARROW_DOWN,
     priority: 100,
     preconditions: whenDocDrawingFocused,
@@ -45,9 +45,9 @@ export const MoveDrawingDownShortcutItem: IShortcutItem<IMoveDrawingsCommandPara
 
 export const MoveDrawingUpShortcutItem: IShortcutItem<IMoveDrawingsCommandParams> = {
     id: MoveDocDrawingsCommand.id,
-    description: 'drawing-ui.shortcut.drawing-move-up',
+    description: 'docs-drawing-ui.shortcut.drawing-move-up',
     group: '4_drawing-view',
-    groupTitle: 'sheets-drawing-ui.shortcut.drawing-view',
+    groupTitle: 'docs-drawing-ui.shortcut.drawing-view',
     binding: KeyCode.ARROW_UP,
     priority: 100,
     preconditions: whenDocDrawingFocused,
@@ -58,9 +58,9 @@ export const MoveDrawingUpShortcutItem: IShortcutItem<IMoveDrawingsCommandParams
 
 export const MoveDrawingLeftShortcutItem: IShortcutItem<IMoveDrawingsCommandParams> = {
     id: MoveDocDrawingsCommand.id,
-    description: 'drawing-ui.shortcut.drawing-move-left',
+    description: 'docs-drawing-ui.shortcut.drawing-move-left',
     group: '4_drawing-view',
-    groupTitle: 'sheets-drawing-ui.shortcut.drawing-view',
+    groupTitle: 'docs-drawing-ui.shortcut.drawing-view',
     binding: KeyCode.ARROW_LEFT,
     priority: 100,
     preconditions: whenDocDrawingFocused,
@@ -71,9 +71,9 @@ export const MoveDrawingLeftShortcutItem: IShortcutItem<IMoveDrawingsCommandPara
 
 export const MoveDrawingRightShortcutItem: IShortcutItem<IMoveDrawingsCommandParams> = {
     id: MoveDocDrawingsCommand.id,
-    description: 'drawing-ui.shortcut.drawing-move-right',
+    description: 'docs-drawing-ui.shortcut.drawing-move-right',
     group: '4_drawing-view',
-    groupTitle: 'sheets-drawing-ui.shortcut.drawing-view',
+    groupTitle: 'docs-drawing-ui.shortcut.drawing-view',
     binding: KeyCode.ARROW_RIGHT,
     priority: 100,
     preconditions: whenDocDrawingFocused,
@@ -83,9 +83,9 @@ export const MoveDrawingRightShortcutItem: IShortcutItem<IMoveDrawingsCommandPar
 };
 export const DeleteDrawingsShortcutItem: IShortcutItem = {
     id: DeleteDocDrawingsCommand.id,
-    description: 'drawing-ui.shortcut.drawing-delete',
+    description: 'docs-drawing-ui.shortcut.drawing-delete',
     group: '4_drawing-view',
-    groupTitle: 'sheets-drawing-ui.shortcut.drawing-view',
+    groupTitle: 'docs-drawing-ui.shortcut.drawing-view',
     // when focusing on any other input tag do not trigger this shortcut
     preconditions: whenDocDrawingFocused,
     binding: KeyCode.DELETE,

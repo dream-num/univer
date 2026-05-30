@@ -73,6 +73,14 @@ const locale: typeof enUS = {
             exceedMaxCount: 'يمكن رفع {0} صور فقط في المرة الواحدة',
             invalidImage: 'صورة غير صالحة',
         },
+        shortcut: {
+            'drawing-view': 'عرض الرسم',
+            'drawing-move-down': 'نقل الرسم لأسفل',
+            'drawing-move-up': 'نقل الرسم لأعلى',
+            'drawing-move-left': 'نقل الرسم لليسار',
+            'drawing-move-right': 'نقل الرسم لليمين',
+            'drawing-delete': 'حذف الرسم',
+        },
     },
 };
 

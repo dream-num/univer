@@ -17,7 +17,6 @@
 import { CellValueType, LocaleType, LogLevel, Univer, UserManagerService } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import { UniverDocsPlugin } from '@univerjs/docs';
-import { UniverDocsDrawingUIPlugin } from '@univerjs/docs-drawing-ui';
 import { UniverDocsMentionUIPlugin } from '@univerjs/docs-mention-ui';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
@@ -87,7 +86,6 @@ univer.registerPlugin(UniverUIPlugin, {
     ribbonType: 'classic',
 });
 univer.registerPlugin(UniverDocsUIPlugin);
-univer.registerPlugin(UniverDocsDrawingUIPlugin);
 univer.registerPlugin(UniverDocsMentionUIPlugin);
 
 univer.registerPlugin(UniverSheetsPlugin);

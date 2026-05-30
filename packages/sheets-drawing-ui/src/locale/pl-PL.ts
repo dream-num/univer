@@ -74,7 +74,12 @@ const locale: typeof enUS = {
             },
         },
         shortcut: {
-            'drawing-view': 'Drawing View',
+            'drawing-view': 'Widok rysunku',
+            'drawing-move-down': 'Przesuń rysunek w dół',
+            'drawing-move-up': 'Przesuń rysunek w górę',
+            'drawing-move-left': 'Przesuń rysunek w lewo',
+            'drawing-move-right': 'Przesuń rysunek w prawo',
+            'drawing-delete': 'Usuń rysunek',
         },
     },
 };

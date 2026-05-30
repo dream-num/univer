@@ -87,13 +87,6 @@ const locale: typeof enUS = {
             crop: 'Zuschneiden',
             reset: 'Größe zurücksetzen',
         },
-        shortcut: {
-            'drawing-move-down': 'Zeichnung nach unten verschieben',
-            'drawing-move-up': 'Zeichnung nach oben verschieben',
-            'drawing-move-left': 'Zeichnung nach links verschieben',
-            'drawing-move-right': 'Zeichnung nach rechts verschieben',
-            'drawing-delete': 'Zeichnung löschen',
-        },
     },
 };
 

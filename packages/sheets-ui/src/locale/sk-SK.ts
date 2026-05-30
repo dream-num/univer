@@ -309,6 +309,7 @@ const locale: typeof enUS = {
                 'break-line': 'Zalomiť riadok',
                 'set-bold': 'Prepnúť tučné',
                 'start-editing': 'Začať upravovať (výber do editora)',
+                'repeat-last-action': 'Zopakovať poslednú akciu',
                 'set-italic': 'Prepnúť kurzívu',
                 'set-underline': 'Prepnúť podčiarknutie',
                 'set-strike-through': 'Prepnúť prečiarknutie',

@@ -87,13 +87,6 @@ const locale: typeof enUS = {
             crop: 'Cortar',
             reset: 'Redefinir tamanho',
         },
-        shortcut: {
-            'drawing-move-down': 'Mover desenho para baixo',
-            'drawing-move-up': 'Mover desenho para cima',
-            'drawing-move-left': 'Mover desenho para esquerda',
-            'drawing-move-right': 'Mover desenho para direita',
-            'drawing-delete': 'Excluir desenho',
-        },
     },
 };
 

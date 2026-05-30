@@ -73,6 +73,14 @@ const locale: typeof enUS = {
             exceedMaxCount: 'فقط {0} تصویر می‌توانند همزمان آپلود شوند',
             invalidImage: 'تصویر نامعتبر است',
         },
+        shortcut: {
+            'drawing-view': 'نمای طراحی',
+            'drawing-move-down': 'جابه‌جایی طراحی به پایین',
+            'drawing-move-up': 'جابه‌جایی طراحی به بالا',
+            'drawing-move-left': 'جابه‌جایی طراحی به چپ',
+            'drawing-move-right': 'جابه‌جایی طراحی به راست',
+            'drawing-delete': 'حذف طراحی',
+        },
     },
 };
 

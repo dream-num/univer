@@ -59,6 +59,7 @@ import {
     SetInlineFormatSuperscriptCommand,
     SetInlineFormatTextBackgroundColorCommand,
     SetInlineFormatTextColorCommand,
+    SetInlineFormatTextFillCommand,
     SetInlineFormatUnderlineCommand,
 } from './commands/commands/inline-format.command';
 import { InsertCustomRangeCommand } from './commands/commands/insert-custom-range.command';
@@ -215,6 +216,7 @@ export class UniverDocsUIPlugin extends Plugin {
             SetInlineFormatFontSizeCommand,
             SetInlineFormatFontFamilyCommand,
             SetInlineFormatTextColorCommand,
+            SetInlineFormatTextFillCommand,
             ResetInlineFormatTextBackgroundColorCommand,
             SetInlineFormatTextBackgroundColorCommand,
             SetInlineFormatCommand,

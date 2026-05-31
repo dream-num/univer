@@ -29,6 +29,7 @@ export type GradientType = 'linear' | 'radial' | 'angular' | 'diamond';
 export interface IGradientStop {
     color: string;
     offset: number;
+    opacity?: number;
 }
 
 export interface IGradientValue {
@@ -39,6 +40,7 @@ export interface IGradientValue {
 
 export interface IGradientColorPickerProps {
     className?: string;
+    compact?: boolean;
     value?: IGradientValue;
     onChange?: (value: IGradientValue) => void;
 }
@@ -49,24 +51,86 @@ const DEFAULT_VALUE: IGradientValue = {
         { color: '#ffffff', offset: 0 },
         { color: '#000000', offset: 100 },
     ],
-    angle: 90,
+    angle: 0,
 };
 
+function clamp(value: number, min: number, max: number): number {
+    return Math.max(min, Math.min(max, value));
+}
+
+function getStopOpacity(stop: IGradientStop | undefined): number {
+    return clamp(stop?.opacity ?? 1, 0, 1);
+}
+
+function getColorWithOpacity(color: string, opacity: number): string {
+    if (opacity >= 1) {
+        return color;
+    }
+
+    const value = color.trim();
+    if (/^#[0-9a-f]{3}$/i.test(value)) {
+        const [, r, g, b] = value;
+        return `rgba(${Number.parseInt(r + r, 16)}, ${Number.parseInt(g + g, 16)}, ${Number.parseInt(b + b, 16)}, ${opacity})`;
+    }
+
+    if (/^#[0-9a-f]{6}$/i.test(value)) {
+        return `rgba(${Number.parseInt(value.slice(1, 3), 16)}, ${Number.parseInt(value.slice(3, 5), 16)}, ${Number.parseInt(value.slice(5, 7), 16)}, ${opacity})`;
+    }
+
+    const rgba = /^rgba?\(([^)]+)\)$/i.exec(value);
+    if (rgba) {
+        const parts = rgba[1].split(',').map((part) => part.trim());
+        const baseAlpha = parts[3] === undefined ? 1 : Number.parseFloat(parts[3]);
+        const alpha = Number.isFinite(baseAlpha) ? clamp(baseAlpha * opacity, 0, 1) : opacity;
+        return `rgba(${parts[0]}, ${parts[1]}, ${parts[2]}, ${alpha})`;
+    }
+
+    return color;
+}
+
+function getStopColor(stop: IGradientStop): string {
+    return getColorWithOpacity(stop.color, getStopOpacity(stop));
+}
+
+function getGradientAngle(value: IGradientValue): number {
+    return value.angle ?? DEFAULT_VALUE.angle ?? 0;
+}
+
+function getCssLinearGradientAngle(value: IGradientValue): number {
+    return (getGradientAngle(value) + 90) % 360;
+}
+
 export function GradientColorPicker(props: IGradientColorPickerProps) {
-    const { className, value = DEFAULT_VALUE, onChange } = props;
+    const { className, compact = false, value = DEFAULT_VALUE, onChange } = props;
     const { locale } = useContext(ConfigContext);
+    const [draftValue, setDraftValue] = useState<IGradientValue>(value);
     const [selectedIndex, setSelectedIndex] = useState<number>(0);
     const barRef = useRef<HTMLDivElement>(null);
+    const valueRef = useRef<IGradientValue>(value);
     const cleanupRef = useRef<(() => void) | null>(null);
 
     useEffect(() => {
+        valueRef.current = draftValue;
+    }, [draftValue]);
+
+    useEffect(() => {
+        setDraftValue(value);
+    }, [value]);
+
+    const emitChange = (nextValue: IGradientValue) => {
+        valueRef.current = nextValue;
+        setDraftValue(nextValue);
+        onChange?.(nextValue);
+    };
+
+    useEffect(() => {
         setSelectedIndex((prev) => {
-            if (prev >= value.stops.length) {
-                return Math.max(0, value.stops.length - 1);
+            if (prev >= draftValue.stops.length) {
+                return Math.max(0, draftValue.stops.length - 1);
             }
             return prev;
         });
-    }, [value.stops.length]);
+    }, [draftValue.stops.length]);
 
     useEffect(() => {
         return () => {
@@ -75,28 +139,38 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
     }, []);
 
     const stops = useMemo(() => {
-        return [...value.stops].sort((a, b) => a.offset - b.offset);
-    }, [value.stops]);
+        return [...draftValue.stops].sort((a, b) => a.offset - b.offset);
+    }, [draftValue.stops]);
 
     const handleTypeChange = (type: GradientType) => {
-        onChange?.({ ...value, type });
+        emitChange({ ...valueRef.current, type });
     };
 
     const handleAngleChange = (angle: number | null) => {
-        onChange?.({ ...value, angle: angle ?? 0 });
+        emitChange({ ...valueRef.current, angle: angle ?? 0 });
     };
 
     const handleStopColorChange = (color: string) => {
-        const newStops = [...value.stops];
+        const newStops = [...valueRef.current.stops];
         newStops[selectedIndex] = { ...newStops[selectedIndex], color };
-        onChange?.({ ...value, stops: newStops });
+        emitChange({ ...valueRef.current, stops: newStops });
     };
 
     const handleStopOffsetChange = (offset: number | null) => {
         if (offset === null) return;
-        const newStops = [...value.stops];
+        const newStops = [...valueRef.current.stops];
         newStops[selectedIndex] = { ...newStops[selectedIndex], offset };
-        onChange?.({ ...value, stops: newStops });
+        emitChange({ ...valueRef.current, stops: newStops });
+    };
+
+    const handleStopTransparencyChange = (transparency: number | null) => {
+        const nextTransparency = clamp(transparency ?? 0, 0, 100);
+        const newStops = [...valueRef.current.stops];
+        newStops[selectedIndex] = {
+            ...newStops[selectedIndex],
+            opacity: (100 - nextTransparency) / 100,
+        };
+        emitChange({ ...valueRef.current, stops: newStops });
     };
 
     // const handleFlip = () => {
@@ -116,70 +190,160 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
         const leftStop = [...stops].reverse().find((s) => s.offset <= offset) || stops[0];
         // const rightStop = stops.find((s) => s.offset >= offset) || stops[stops.length - 1];
 
-        const newStop = { color: leftStop.color, offset };
-        const newStops = [...value.stops, newStop];
-        onChange?.({ ...value, stops: newStops });
+        const newStop = { color: leftStop.color, offset, opacity: getStopOpacity(leftStop) };
+        const newStops = [...valueRef.current.stops, newStop];
+        emitChange({ ...valueRef.current, stops: newStops });
         setSelectedIndex(newStops.length - 1);
     };
 
     const handleRemoveStop = () => {
-        if (value.stops.length <= 2) return;
-        const newStops = value.stops.filter((_, i) => i !== selectedIndex);
-        onChange?.({ ...value, stops: newStops });
+        if (draftValue.stops.length <= 2) return;
+        const newStops = valueRef.current.stops.filter((_, i) => i !== selectedIndex);
+        emitChange({ ...valueRef.current, stops: newStops });
         setSelectedIndex(0);
     };
 
     const gradientPreview = useMemo(() => {
-        const stopsStr = stops.map((s) => `${s.color} ${s.offset}%`).join(', ');
+        const stopsStr = stops.map((s) => `${getStopColor(s)} ${s.offset}%`).join(', ');
         return `linear-gradient(to right, ${stopsStr})`;
     }, [stops]);
 
     const mainPreview = useMemo(() => {
-        const stopsStr = stops.map((s) => `${s.color} ${s.offset}%`).join(', ');
-        switch (value.type) {
+        const stopsStr = stops.map((s) => `${getStopColor(s)} ${s.offset}%`).join(', ');
+        switch (draftValue.type) {
             case 'linear':
-                return `linear-gradient(${value.angle}deg, ${stopsStr})`;
+                return `linear-gradient(${getCssLinearGradientAngle(draftValue)}deg, ${stopsStr})`;
             case 'radial':
                 return `radial-gradient(circle, ${stopsStr})`;
             case 'angular':
-                return `conic-gradient(from ${value.angle}deg, ${stopsStr})`;
+                return `conic-gradient(from ${getGradientAngle(draftValue)}deg, ${stopsStr})`;
             case 'diamond':
                 // Diamond is tricky in CSS, using a placeholder or approximation
                 return `radial-gradient(circle, ${stopsStr})`;
             default:
-                return `linear-gradient(${value.angle}deg, ${stopsStr})`;
+                return `linear-gradient(${getCssLinearGradientAngle(draftValue)}deg, ${stopsStr})`;
         }
-    }, [value, stops]);
+    }, [draftValue, stops]);
+
+    const showAngleEditor = draftValue.type === 'linear' || draftValue.type === 'angular';
 
     return (
         <div
-            className={clsx(`
-              univer-flex univer-w-64 univer-flex-col univer-gap-4 univer-rounded-lg univer-bg-white univer-p-4
-              univer-shadow-lg
-              dark:!univer-bg-gray-800
-            `, className)}
+            className={clsx(
+                compact
+                    ? `
+                      univer-flex univer-w-full univer-min-w-0 univer-flex-col univer-gap-3 univer-rounded-md
+                      univer-bg-transparent univer-p-0
+                      dark:!univer-bg-transparent
+                    `
+                    : `
+                      univer-flex univer-w-full univer-min-w-0 univer-max-w-80 univer-flex-col univer-gap-4
+                      univer-rounded-lg univer-bg-white univer-p-4 univer-shadow-lg
+                      dark:!univer-bg-gray-800
+                    `,
+                className
+            )}
+            onClick={(e) => e.stopPropagation()}
+            onPointerDown={(e) => e.stopPropagation()}
         >
-            <Segmented
-                items={[
-                    { label: locale?.GradientColorPicker.linear, value: 'linear' },
-                    { label: locale?.GradientColorPicker.radial, value: 'radial' },
-                    { label: locale?.GradientColorPicker.angular, value: 'angular' },
-                    { label: locale?.GradientColorPicker.diamond, value: 'diamond' },
-                ]}
-                value={value.type}
-                onChange={(v) => handleTypeChange(v as GradientType)}
-            />
+            {compact
+                ? (
+                    <div
+                        className="
+                          univer-flex univer-min-w-0 univer-items-center univer-gap-4 univer-border-b
+                          univer-border-gray-100
+                          dark:!univer-border-gray-700
+                        "
+                    >
+                        {[
+                            { label: locale?.GradientColorPicker.linear, value: 'linear' },
+                            { label: locale?.GradientColorPicker.radial, value: 'radial' },
+                            { label: locale?.GradientColorPicker.angular, value: 'angular' },
+                            { label: locale?.GradientColorPicker.diamond, value: 'diamond' },
+                        ].map((item) => {
+                            const selected = draftValue.type === item.value;
+
+                            return (
+                                <button
+                                    key={item.value}
+                                    type="button"
+                                    className={clsx(
+                                        `
+                                          univer-relative univer-min-w-0 univer-flex-1 univer-cursor-pointer
+                                          univer-truncate univer-border-none univer-bg-transparent univer-px-0
+                                          univer-pb-2 univer-pt-0 univer-text-xs univer-transition-colors
+                                        `,
+                                        selected
+                                            ? `
+                                              univer-font-medium univer-text-primary-600
+                                              dark:!univer-text-primary-300
+                                            `
+                                            : `
+                                              univer-text-gray-500
+                                              hover:univer-text-gray-900
+                                              dark:hover:!univer-text-white
+                                            `
+                                    )}
+                                    onClick={() => handleTypeChange(item.value as GradientType)}
+                                >
+                                    {item.label}
+                                    {selected && (
+                                        <span
+                                            className="
+                                              univer-absolute univer-inset-x-2 -univer-bottom-px univer-h-0.5
+                                              univer-rounded-full univer-bg-primary-600
+                                              dark:!univer-bg-primary-300
+                                            "
+                                        />
+                                    )}
+                                </button>
+                            );
+                        })}
+                    </div>
+                )
+                : (
+                    <Segmented
+                        className="univer-w-full univer-min-w-0 univer-gap-1 univer-overflow-hidden"
+                        items={[
+                            { label: locale?.GradientColorPicker.linear, value: 'linear' },
+                            { label: locale?.GradientColorPicker.radial, value: 'radial' },
+                            { label: locale?.GradientColorPicker.angular, value: 'angular' },
+                            { label: locale?.GradientColorPicker.diamond, value: 'diamond' },
+                        ]}
+                        value={draftValue.type}
+                        onChange={(v) => handleTypeChange(v as GradientType)}
+                    />
+                )}
+
+            {showAngleEditor && (
+                <div
+                    data-u-comp="gradient-color-picker-angle"
+                    className="univer-flex univer-items-center univer-justify-between univer-gap-3"
+                >
+                    <span className="univer-text-xs univer-text-gray-500">{locale?.GradientColorPicker.angle}</span>
+                    <InputNumber
+                        className="univer-w-24"
+                        value={getGradientAngle(draftValue)}
+                        min={0}
+                        max={360}
+                        onChange={handleAngleChange}
+                    />
+                </div>
+            )}
 
             <div
                 data-u-comp="gradient-color-picker-preview"
-                className={`
-                  univer-h-32 univer-w-full univer-rounded-md univer-border univer-border-gray-200
-                  dark:!univer-border-gray-600
-                `}
+                className={clsx(
+                    `
+                      univer-w-full univer-rounded-md univer-border univer-border-gray-200
+                      dark:!univer-border-gray-600
+                    `,
+                    compact ? 'univer-h-20' : 'univer-h-32'
+                )}
                 style={{ background: mainPreview }}
             />
 
-            <div className="univer-relative univer-mt-4 univer-h-6">
+            <div className={clsx('univer-relative univer-h-6', compact ? 'univer-mt-1' : 'univer-mt-4')}>
                 <div
                     ref={barRef}
                     data-u-comp="gradient-color-picker-bar"
@@ -190,7 +354,7 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
                     style={{ background: gradientPreview }}
                     onClick={handleAddStop}
                 />
-                {value.stops.map((stop, index) => (
+                {draftValue.stops.map((stop, index) => (
                     <div
                         key={index}
                         data-u-comp="gradient-color-picker-stop"
@@ -205,26 +369,30 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
                         )}
                         style={{
                             left: `${stop.offset}%`,
-                            backgroundColor: stop.color,
+                            backgroundColor: getStopColor(stop),
                         }}
                         onClick={(e) => {
                             e.stopPropagation();
                             setSelectedIndex(index);
                         }}
                         onPointerDown={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
                             const startX = e.clientX;
                             const startOffset = stop.offset;
+                            setSelectedIndex(index);
 
                             const handlePointerMove = (moveEvent: PointerEvent) => {
                                 if (!barRef.current) return;
+                                moveEvent.preventDefault();
                                 const rect = barRef.current.getBoundingClientRect();
                                 const deltaX = moveEvent.clientX - startX;
                                 const deltaOffset = (deltaX / rect.width) * 100;
                                 const newOffset = Math.max(0, Math.min(100, Math.round(startOffset + deltaOffset)));
 
-                                const newStops = [...value.stops];
+                                const newStops = [...valueRef.current.stops];
                                 newStops[index] = { ...newStops[index], offset: newOffset };
-                                onChange?.({ ...value, stops: newStops });
+                                emitChange({ ...valueRef.current, stops: newStops });
                             };
 
                             const handlePointerUp = () => {
@@ -243,32 +411,35 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
 
             <div className="univer-flex univer-items-end univer-gap-2">
                 <div className="univer-flex-1">
-                    <div className="univer-mb-1 univer-text-xs univer-text-gray-500">{locale?.GradientColorPicker.offset}</div>
+                    <div className="univer-mb-0.5 univer-text-xs univer-text-gray-500">{locale?.GradientColorPicker.offset}</div>
                     <InputNumber
-                        value={value.stops[selectedIndex]?.offset}
+                        value={draftValue.stops[selectedIndex]?.offset}
                         min={0}
                         max={100}
                         onChange={handleStopOffsetChange}
                     />
                 </div>
-                {(value.type === 'linear' || value.type === 'angular') && (
-                    <div className="univer-flex-1">
-                        <div className="univer-mb-1 univer-text-xs univer-text-gray-500">{locale?.GradientColorPicker.angle}</div>
-                        <InputNumber
-                            value={value.angle}
-                            min={0}
-                            max={360}
-                            onChange={handleAngleChange}
-                        />
+                <div className="univer-flex-1">
+                    <div className="univer-mb-0.5 univer-text-xs univer-text-gray-500">
+                        {locale?.GradientColorPicker.transparency ?? 'Transparency'}
                     </div>
-                )}
+                    <InputNumber
+                        value={Math.round((1 - getStopOpacity(draftValue.stops[selectedIndex])) * 100)}
+                        min={0}
+                        max={100}
+                        step={10}
+                        formatter={(v) => `${v}%`}
+                        parser={(v) => v?.replace(/%/g, '') || ''}
+                        onChange={handleStopTransparencyChange}
+                    />
+                </div>
                 <div className="univer-flex univer-gap-1">
                     <Tooltip title={locale?.GradientColorPicker.delete}>
                         <Button
                             data-u-comp="gradient-color-picker-delete"
                             variant="danger"
                             onClick={handleRemoveStop}
-                            disabled={value.stops.length <= 2}
+                            disabled={draftValue.stops.length <= 2}
                         >
                             <DeleteIcon />
                         </Button>
@@ -277,13 +448,16 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
             </div>
 
             <div
-                className={`
-                  univer-border-t univer-border-gray-100 univer-pt-4
-                  dark:!univer-border-gray-700
-                `}
+                className={clsx(
+                    `
+                      univer-border-t univer-border-gray-100
+                      dark:!univer-border-gray-700
+                    `,
+                    compact ? 'univer-pt-3' : 'univer-pt-4'
+                )}
             >
                 <ColorPicker
-                    value={value.stops[selectedIndex]?.color}
+                    value={draftValue.stops[selectedIndex]?.color}
                     onChange={handleStopColorChange}
                 />
             </div>

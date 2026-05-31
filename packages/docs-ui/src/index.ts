@@ -57,7 +57,9 @@ export {
     SetInlineFormatSuperscriptCommand,
     SetInlineFormatTextBackgroundColorCommand,
     SetInlineFormatTextColorCommand,
+    SetInlineFormatTextFillCommand,
     SetInlineFormatUnderlineCommand,
+    getStyleInTextRange,
 } from './commands/commands/inline-format.command';
 export { type IInsertCustomRangeCommandParams, InsertCustomRangeCommand } from './commands/commands/insert-custom-range.command';
 export {

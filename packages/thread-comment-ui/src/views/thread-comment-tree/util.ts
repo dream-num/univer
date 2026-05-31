@@ -14,14 +14,19 @@
  * limitations under the License.
  */
 
-export function b64EncodeUnicode(str: string): string {
-    return btoa(
-        encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode(Number.parseInt(p1, 16)))
-    );
+import type { ThreadCommentTreeLocation } from '../thread-comment-tree';
+import { DOCS_COMMENT_EDITOR_UNIT_ID_KEY } from '@univerjs/core';
+
+interface IGetThreadCommentEditorIdParams {
+    location: ThreadCommentTreeLocation;
+    unitId: string;
+    subUnitId: string;
+    commentId?: string;
+    fallbackId: string;
 }
 
-export function b64DecodeUnicode(str: string): string {
-    return decodeURIComponent(
-        Array.prototype.map.call(atob(str), (c) => `%${`00${c.charCodeAt(0).toString(16)}`.slice(-2)}`).join('')
-    );
+export function getThreadCommentEditorId(params: IGetThreadCommentEditorIdParams) {
+    const { location, unitId, subUnitId, commentId, fallbackId } = params;
+
+    return `${DOCS_COMMENT_EDITOR_UNIT_ID_KEY}_${location}_${unitId}_${subUnitId}_${commentId || fallbackId}`;
 }

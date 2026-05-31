@@ -153,39 +153,42 @@ export class ThreadCommentModel extends Disposable {
         const commentMap = this._ensureCommentMap(unitId, subUnitId);
         const currentComment = commentMap.get(comment.id);
 
-        if (currentComment) {
-            const { children, ...rest } = comment;
-            const newComment = {
-                ...rest,
-                ref: currentComment.ref,
-            };
-            commentMap.set(comment.id, newComment);
+        if (!currentComment) {
+            this.addComment(unitId, subUnitId, comment as IThreadComment);
+            return;
+        }
 
-            children?.forEach((child) => {
-                commentMap.set(child.id, {
-                    ...child,
-                    ref: '',
-                });
+        const { children, ...rest } = comment;
+        const newComment = {
+            ...rest,
+            ref: currentComment.ref,
+        };
+        commentMap.set(comment.id, newComment);
+
+        children?.forEach((child) => {
+            commentMap.set(child.id, {
+                ...child,
+                ref: '',
             });
+        });
 
+        this._commentUpdate$.next({
+            unitId,
+            subUnitId,
+            type: 'syncUpdate',
+            payload: newComment,
+        });
+
+        if (Boolean(comment.resolved) !== Boolean(currentComment.resolved)) {
             this._commentUpdate$.next({
                 unitId,
                 subUnitId,
-                type: 'syncUpdate',
-                payload: newComment,
+                type: 'resolve',
+                payload: {
+                    commentId: comment.id,
+                    resolved: Boolean(comment.resolved),
+                },
             });
-
-            if (Boolean(comment.resolved) !== Boolean(currentComment.resolved)) {
-                this._commentUpdate$.next({
-                    unitId,
-                    subUnitId,
-                    type: 'resolve',
-                    payload: {
-                        commentId: comment.id,
-                        resolved: Boolean(comment.resolved),
-                    },
-                });
-            }
         }
     }
 
@@ -203,6 +206,10 @@ export class ThreadCommentModel extends Disposable {
         }
         const deleteThreads = new Set<string>(threadIds);
         comments.forEach((comment) => {
+            if (!deleteThreads.has(comment.threadId)) {
+                return;
+            }
+
             this._replaceComment(unitId, subUnitId, comment);
             deleteThreads.delete(comment.threadId);
         });

@@ -54,7 +54,19 @@ describe('AddDocCommentComment', () => {
 
     it('should add comment and attach decoration via sequenceExecute', async () => {
         const dataSource = new ThreadCommentDataSourceService();
-        vi.spyOn(dataSource, 'addComment').mockImplementation(async (c) => ({ ...c, id: 'comment-1', threadId: 'thread-1' }));
+        const addComment = vi.fn(async (c) => ({ ...c, id: 'comment-1', threadId: '' }));
+        dataSource.dataSource = {
+            addComment,
+            updateComment: vi.fn(async () => true),
+            resolveComment: vi.fn(async () => true),
+            deleteComment: vi.fn(async () => true),
+            listComments: vi.fn(async () => []),
+            saveCommentToSnapshot: vi.fn((comment) => ({
+                id: comment.id,
+                threadId: comment.threadId,
+                ref: comment.ref,
+            })),
+        };
 
         injector.add([IThreadCommentDataSourceService, { useValue: dataSource }]);
         injector.add([DocSelectionManagerService]);
@@ -100,7 +112,7 @@ describe('AddDocCommentComment', () => {
         });
 
         expect(ok).toBe(true);
-        expect(dataSource.addComment).toHaveBeenCalled();
+        expect(addComment).toHaveBeenCalled();
         expect(executed.map((command) => command.id)).toEqual([
             AddCommentMutation.id,
             RichTextEditingMutation.id,
@@ -108,9 +120,14 @@ describe('AddDocCommentComment', () => {
         ]);
         expect(executed[0].params).toEqual(expect.objectContaining({
             unitId: 'doc-1',
-            comment: expect.objectContaining({ id: 'comment-1', threadId: 'thread-1' }),
+            comment: expect.objectContaining({ id: 'comment-1', threadId: 'comment-1' }),
         }));
         expect(executed[1].params).toEqual(expect.objectContaining({ unitId: 'doc-1' }));
+        expect(executed[2].params).toEqual(expect.objectContaining({
+            unitId: 'doc-1',
+            subUnitId: 'default_doc',
+            commentId: 'comment-1',
+        }));
     });
 
     it('should return false when missing params', async () => {

@@ -24,7 +24,9 @@ afterEach(cleanup);
 describe('KBD', () => {
     it('should render with default props', () => {
         const { container } = render(<KBD keyboard="Ctrl" />);
-        expect(container).toMatchSnapshot();
+        const kbd = container.querySelector('kbd');
+        expect(kbd).toBeTruthy();
+        expect(kbd?.textContent).toBe('Ctrl');
     });
 
     it('should render with custom className', () => {
@@ -34,6 +36,15 @@ describe('KBD', () => {
 
     it('should render with multiple keys', () => {
         const { container } = render(<KBD keyboard="Ctrl + Alt + Del" />);
-        expect(container).toMatchSnapshot();
+        const kbds = container.querySelectorAll('kbd');
+        expect(kbds.length).toBe(3);
+        expect(kbds[0]?.textContent?.trim()).toBe('Ctrl');
+        expect(kbds[1]?.textContent?.trim()).toBe('Alt');
+        expect(kbds[2]?.textContent?.trim()).toBe('Del');
+
+        const separators = Array.from(container.querySelectorAll('span')).filter(
+            (span) => span.textContent === '+'
+        );
+        expect(separators.length).toBe(2);
     });
 });

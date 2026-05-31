@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/slides",
-    "version": "0.24.0",
+    "version": "0.25.0",
     "private": false,
     "description": "Core presentation model and services for Univer Slides.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",
@@ -74,6 +74,6 @@
         "@univerjs-infra/shared": "workspace:*",
         "rxjs": "^7.8.2",
         "typescript": "^6.0.3",
-        "vitest": "^4.1.5"
+        "vitest": "^4.1.7"
     }
 }

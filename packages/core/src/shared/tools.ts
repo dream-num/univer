@@ -177,8 +177,15 @@ export class Tools {
     static deepMerge(target: any, ...sources: any[]): any {
         sources.forEach((item) => item && deepItem(item));
 
+        function isDangerousKey(key: string): boolean {
+            return key === '__proto__' || key === 'constructor' || key === 'prototype';
+        }
+
         function deepArray(array: any[], to: any[]) {
             array.forEach((value, key) => {
+                if (typeof key === 'string' && isDangerousKey(key)) {
+                    return;
+                }
                 if (Tools.isArray(value)) {
                     const origin = to[key] ?? [];
                     to[key] = origin;
@@ -197,6 +204,9 @@ export class Tools {
 
         function deepObject(object: any, to: any) {
             Object.keys(object).forEach((key) => {
+                if (isDangerousKey(key)) {
+                    return;
+                }
                 const value = object[key];
                 if (Tools.isObject(value)) {
                     const origin = to[key] ?? {};
@@ -216,6 +226,9 @@ export class Tools {
 
         function deepItem(item: any) {
             Object.keys(item).forEach((key) => {
+                if (isDangerousKey(key)) {
+                    return;
+                }
                 const value = item[key];
                 if (Tools.isArray(value)) {
                     const origin = target[key] ?? [];

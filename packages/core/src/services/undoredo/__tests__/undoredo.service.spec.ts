@@ -203,7 +203,7 @@ describe('LocalUndoRedoService', () => {
         expect(undoRedoService.pitchTopUndoElement()?.id).toBe('fail');
 
         const batching = undoRedoService.__tempBatchingUndoRedo('unit-1');
-        expect(() => undoRedoService.__tempBatchingUndoRedo('unit-1')).toThrowError(/cannot batching undo redo twice/);
+        expect(() => undoRedoService.__tempBatchingUndoRedo('unit-1')).toThrow(/cannot batching undo redo twice/);
         batching.dispose();
     });
 });

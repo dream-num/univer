@@ -71,6 +71,16 @@ describe('ThreadCommentDataSourceService', () => {
         });
     });
 
+    it('normalizes an empty threadId to the comment id when no external data source is configured', async () => {
+        const service = new ThreadCommentDataSourceService();
+        const comment = createComment({ id: 'root-1', threadId: '' });
+
+        await expect(service.addComment(comment)).resolves.toEqual({
+            ...comment,
+            threadId: 'root-1',
+        });
+    });
+
     it('delegates CRUD, query and snapshot behavior to the configured data source', async () => {
         const service = new ThreadCommentDataSourceService();
         const comment = createComment({ id: 'root-1' });
@@ -126,5 +136,29 @@ describe('ThreadCommentDataSourceService', () => {
         expect(dataSource.listComments).toHaveBeenNthCalledWith(1, 'unit-1', 'sheet-1', ['root-1']);
         expect(dataSource.listComments).toHaveBeenNthCalledWith(2, 'unit-1', 'sheet-1', ['root-1']);
         expect(dataSource.saveCommentToSnapshot).toHaveBeenCalledWith(comment, 0, [comment]);
+    });
+
+    it('normalizes an empty threadId returned from an external data source to the returned comment id', async () => {
+        const service = new ThreadCommentDataSourceService();
+        const comment = createComment({ id: 'client-id', threadId: '' });
+        const dataSource = {
+            addComment: vi.fn(async (input: IThreadComment) => ({ ...input, id: 'server-id', threadId: '' })),
+            updateComment: vi.fn(async () => true),
+            resolveComment: vi.fn(async () => true),
+            deleteComment: vi.fn(async () => true),
+            listComments: vi.fn(async () => []),
+            saveCommentToSnapshot: vi.fn((input: IThreadComment) => ({
+                id: input.id,
+                threadId: input.threadId,
+                ref: input.ref,
+            })),
+        };
+        service.dataSource = dataSource;
+
+        await expect(service.addComment(comment)).resolves.toEqual({
+            ...comment,
+            id: 'server-id',
+            threadId: 'server-id',
+        });
     });
 });

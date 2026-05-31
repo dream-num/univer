@@ -309,6 +309,7 @@ const locale: typeof enUS = {
                 'break-line': 'Pisah baris',
                 'set-bold': 'Alihkan tebal',
                 'start-editing': 'Mulai Edit (Pilihan ke Editor)',
+                'repeat-last-action': 'Ulangi tindakan terakhir',
                 'set-italic': 'Alihkan miring',
                 'set-underline': 'Alihkan garis bawah',
                 'set-strike-through': 'Alihkan coret',

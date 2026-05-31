@@ -309,6 +309,7 @@ const locale: typeof enUS = {
                 'break-line': 'Interrompi riga',
                 'set-bold': 'Attiva/disattiva grassetto',
                 'start-editing': 'Inizia modifica (Selezione nell\'editor)',
+                'repeat-last-action': 'Ripeti ultima azione',
                 'set-italic': 'Attiva/disattiva corsivo',
                 'set-underline': 'Attiva/disattiva sottolineato',
                 'set-strike-through': 'Attiva/disattiva barrato',

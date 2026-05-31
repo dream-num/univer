@@ -309,6 +309,7 @@ const locale: typeof enUS = {
                 'break-line': '改行',
                 'set-bold': '太字',
                 'start-editing': '編集を開始（エディタ選択）',
+                'repeat-last-action': '前回の操作を繰り返す',
                 'set-italic': '斜体',
                 'set-underline': '下線',
                 'set-strike-through': '取り消し線',

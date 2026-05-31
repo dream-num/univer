@@ -73,6 +73,14 @@ const locale: typeof enUS = {
             exceedMaxCount: 'Es können nur {0} Bilder gleichzeitig hochgeladen werden',
             invalidImage: 'Ungültiges Bild',
         },
+        shortcut: {
+            'drawing-view': 'Zeichnungsansicht',
+            'drawing-move-down': 'Zeichnung nach unten verschieben',
+            'drawing-move-up': 'Zeichnung nach oben verschieben',
+            'drawing-move-left': 'Zeichnung nach links verschieben',
+            'drawing-move-right': 'Zeichnung nach rechts verschieben',
+            'drawing-delete': 'Zeichnung löschen',
+        },
     },
 };
 

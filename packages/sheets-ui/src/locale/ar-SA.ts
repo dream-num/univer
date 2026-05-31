@@ -309,6 +309,7 @@ const locale: typeof enUS = {
                 'break-line': 'فصل السطر',
                 'set-bold': 'تبديل الغامق',
                 'start-editing': 'بدء التحرير (الانتقال إلى المحرر)',
+                'repeat-last-action': 'تكرار آخر إجراء',
                 'set-italic': 'تبديل المائل',
                 'set-underline': 'تبديل التسطير',
                 'set-strike-through': 'تبديل الخط المشطوب',

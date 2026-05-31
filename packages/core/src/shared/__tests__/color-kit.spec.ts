@@ -60,8 +60,8 @@ describe('ColorKit', () => {
 
         expect(invalid.isValid).toBe(false);
         expect(invalid.toRgb()).toEqual({ r: 0, g: 0, b: 0, a: 0 });
-        expect(() => new ColorKit('#1')).toThrowError(/illegal hex color/);
-        expect(() => new ColorKit('rgb(1,2)')).toThrowError(/illegal rgb color/);
+        expect(() => new ColorKit('#1')).toThrow(/illegal hex color/);
+        expect(() => new ColorKit('rgb(1,2)')).toThrow(/illegal rgb color/);
     });
 
     it('should recognize black and white strings across formats', () => {

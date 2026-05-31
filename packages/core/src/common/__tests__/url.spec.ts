@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { isLegalUrl, normalizeUrl, resolveWithBasePath } from '../url';
+import { isLegalUrl, isSafeUrl, normalizeUrl, resolveWithBasePath } from '../url';
 
 describe('Test url utils', () => {
     it('should return true on legal url', () => {
@@ -35,6 +35,16 @@ describe('Test url utils', () => {
         expect(normalizeUrl('univer.ai')).toEqual('https://univer.ai');
         expect(normalizeUrl('https://univer.ai')).toEqual('https://univer.ai');
         expect(normalizeUrl('zhang@univer.ai')).toEqual('mailto://zhang@univer.ai');
+    });
+
+    it('should allow safe url schemes and reject dangerous ones', () => {
+        expect(isSafeUrl('https://univer.ai')).toBe(true);
+        expect(isSafeUrl('http://localhost:3000')).toBe(true);
+        expect(isSafeUrl('mailto:test@example.com')).toBe(true);
+        expect(isSafeUrl('javascript:alert(1)')).toBe(false);
+        expect(isSafeUrl('data:text/html,<script>alert(1)</script>')).toBe(false);
+        expect(isSafeUrl('vbscript:msgbox(1)')).toBe(false);
+        expect(isSafeUrl('')).toBe(false);
     });
 
     it('should resolve url with base path', () => {

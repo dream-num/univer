@@ -183,8 +183,8 @@ describe('UniverInstanceService', () => {
         service.createUnit<Partial<IWorkbookData>, WorkbookModel>(UniverInstanceType.UNIVER_SHEET, createWorkbookData('sheet-unit-2'));
         service.setCurrentUnitForType('sheet-unit-2');
 
-        expect(() => service.__addUnit(new WorkbookModel(createWorkbookData('sheet-unit-2'), logService))).toThrowError(/same unit id/);
-        expect(() => service.setCurrentUnitForType('missing')).toThrowError(/no document with unitId missing/);
+        expect(() => service.__addUnit(new WorkbookModel(createWorkbookData('sheet-unit-2'), logService))).toThrow(/same unit id/);
+        expect(() => service.setCurrentUnitForType('missing')).toThrow(/no document with unitId missing/);
         expect(currentIds).toContain('sheet-unit');
         expect(currentIds).toContain('sheet-unit-2');
     });

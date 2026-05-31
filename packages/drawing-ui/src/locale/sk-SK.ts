@@ -87,13 +87,6 @@ const locale: typeof enUS = {
             crop: 'Orezať',
             reset: 'Obnoviť veľkosť',
         },
-        shortcut: {
-            'drawing-move-down': 'Posunúť kresbu nadol',
-            'drawing-move-up': 'Posunúť kresbu nahor',
-            'drawing-move-left': 'Posunúť kresbu doľava',
-            'drawing-move-right': 'Posunúť kresbu doprava',
-            'drawing-delete': 'Odstrániť kresbu',
-        },
     },
 };
 

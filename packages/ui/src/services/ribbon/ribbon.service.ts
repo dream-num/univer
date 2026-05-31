@@ -238,6 +238,11 @@ export class DesktopRibbonService extends Disposable implements IRibbonService {
     override dispose(): void {
         this._hiddenSubscription?.unsubscribe();
         this._hiddenSubscription = null;
+        this._ribbon$.next([]);
+        this._ribbon$.complete();
+        this._activatedTab$.complete();
+        this._collapsedIds$.complete();
+        this._fakeToolbarVisible$.complete();
         super.dispose();
     }
 }

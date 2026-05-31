@@ -74,7 +74,12 @@ const locale: typeof enUS = {
             },
         },
         shortcut: {
-            'drawing-view': 'Drawing View',
+            'drawing-view': 'Zobrazenie kresby',
+            'drawing-move-down': 'Posunúť kresbu nadol',
+            'drawing-move-up': 'Posunúť kresbu nahor',
+            'drawing-move-left': 'Posunúť kresbu doľava',
+            'drawing-move-right': 'Posunúť kresbu doprava',
+            'drawing-delete': 'Odstrániť kresbu',
         },
     },
 };

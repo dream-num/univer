@@ -75,6 +75,11 @@ const locale: typeof enUS = {
         },
         shortcut: {
             'drawing-view': '그리기 보기',
+            'drawing-move-down': '그리기 아래로 이동',
+            'drawing-move-up': '그리기 위로 이동',
+            'drawing-move-left': '그리기 왼쪽으로 이동',
+            'drawing-move-right': '그리기 오른쪽으로 이동',
+            'drawing-delete': '그리기 삭제',
         },
     },
 };

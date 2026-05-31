@@ -73,6 +73,14 @@ const locale: typeof enUS = {
             exceedMaxCount: '一度にアップロードできる最大数は{0}件です',
             invalidImage: '無効な画像です',
         },
+        shortcut: {
+            'drawing-view': '図形表示',
+            'drawing-move-down': '図形を下へ移動',
+            'drawing-move-up': '図形を上へ移動',
+            'drawing-move-left': '図形を左へ移動',
+            'drawing-move-right': '図形を右へ移動',
+            'drawing-delete': '図形を削除',
+        },
     },
 };
 

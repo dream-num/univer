@@ -7,12 +7,10 @@
 #npm
 package-lock.json
 yarn.lock
-# pnpm-lock.yaml
 
 dist
 local
 lib
-docs/.vuepress/dist
 
 # Logs
 logs
@@ -121,3 +119,5 @@ typedoc.json
 
 # tsx
 **/tsx-0
+
+.pnpm-store

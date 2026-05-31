@@ -54,7 +54,7 @@ describe('Test LifecycleService', () => {
         // Cannot go backward
         expect(() => {
             lifecycleService.stage = LifecycleStages.Starting;
-        }).toThrowError('[LifecycleService]: lifecycle stage cannot go backward!');
+        }).toThrow('[LifecycleService]: lifecycle stage cannot go backward!');
 
         lifecycleService.stage = LifecycleStages.Rendered;
         expect(lifecycleStages).toEqual([LifecycleStages.Starting, LifecycleStages.Ready, LifecycleStages.Rendered]);
@@ -124,7 +124,7 @@ describe('Test LifecycleService', () => {
         lifecycleService.stage = LifecycleStages.Ready;
 
         injector.dispose();
-        await expect(lifecycleService.onStage(LifecycleStages.Rendered)).rejects.toThrowError(
+        await expect(lifecycleService.onStage(LifecycleStages.Rendered)).rejects.toThrow(
             '[LifecycleService]: lifecycle stage "Rendered" will never be reached!'
         );
     });

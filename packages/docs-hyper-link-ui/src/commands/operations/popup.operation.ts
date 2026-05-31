@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, IAccessor, ICommand } from '@univerjs/core';
-import { CommandType, CustomRangeType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { CommandType, CustomRangeType, isSafeUrl, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.service';
 
@@ -104,9 +104,10 @@ export const ClickDocHyperLinkOperation: ICommand<{ unitId: string; linkId: stri
         const body = doc?.getSelfOrHeaderFooterModel(segmentId).getBody();
         const link = body?.customRanges?.find((range) => range.rangeId === linkId && range.rangeType === CustomRangeType.HYPERLINK)?.properties?.url;
 
-        if (link) {
-            window.open(link, '_blank', 'noopener noreferrer');
+        if (!isSafeUrl(link)) {
+            return false;
         }
+        window.open(link, '_blank', 'noopener noreferrer');
         return true;
     },
 };

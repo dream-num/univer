@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-graphics",
-    "version": "0.24.0",
+    "version": "0.25.0",
     "private": false,
     "description": "In-cell graphics rendering support for Univer Sheets.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",
@@ -71,6 +71,6 @@
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
         "typescript": "^6.0.3",
-        "vitest": "^4.1.5"
+        "vitest": "^4.1.7"
     }
 }

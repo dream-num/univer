@@ -73,6 +73,14 @@ const locale: typeof enUS = {
             exceedMaxCount: '한 번에 최대 {0}개만 업로드할 수 있습니다',
             invalidImage: '유효하지 않은 이미지입니다',
         },
+        shortcut: {
+            'drawing-view': '그리기 보기',
+            'drawing-move-down': '그리기 아래로 이동',
+            'drawing-move-up': '그리기 위로 이동',
+            'drawing-move-left': '그리기 왼쪽으로 이동',
+            'drawing-move-right': '그리기 오른쪽으로 이동',
+            'drawing-delete': '그리기 삭제',
+        },
     },
 };
 

@@ -197,6 +197,38 @@ describe('ThreadCommentModel', () => {
         expect(threadCommentModel.getUnit('unit-1').map((thread) => thread.threadId)).toEqual(['keep-root']);
     });
 
+    it('adds synced thread comments even when no placeholder exists locally', async () => {
+        lifecycleService.stage = LifecycleStages.Rendered;
+
+        const root = createComment({ id: 'synced-root', threadId: 'synced-thread', ref: '' });
+        const reply = createComment({
+            id: 'synced-reply',
+            threadId: 'synced-thread',
+            parentId: 'synced-root',
+            ref: '',
+        });
+
+        dataSourceService.dataSource = {
+            addComment: vi.fn(),
+            updateComment: vi.fn(),
+            resolveComment: vi.fn(),
+            deleteComment: vi.fn(),
+            listComments: vi.fn(async () => [{ ...root, children: [reply] }]),
+            saveCommentToSnapshot: vi.fn(),
+        };
+
+        await threadCommentModel.syncThreadComments('unit-1', 'sheet-1', ['synced-thread']);
+
+        expect(threadCommentModel.getThread('unit-1', 'sheet-1', 'synced-thread')).toEqual({
+            unitId: 'unit-1',
+            subUnitId: 'sheet-1',
+            threadId: 'synced-thread',
+            root,
+            children: [reply],
+            relativeUsers: new Set(['user-1']),
+        });
+    });
+
     it('updates refs, exposes thread lookups, and deletes all comments in a unit', () => {
         lifecycleService.stage = LifecycleStages.Rendered;
 

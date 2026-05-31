@@ -73,6 +73,14 @@ const locale: typeof enUS = {
             exceedMaxCount: 'Només es poden pujar {0} imatges alhora',
             invalidImage: 'Imatge no vàlida',
         },
+        shortcut: {
+            'drawing-view': 'Vista del dibuix',
+            'drawing-move-down': 'Mou el dibuix cap avall',
+            'drawing-move-up': 'Mou el dibuix cap amunt',
+            'drawing-move-left': 'Mou el dibuix a l’esquerra',
+            'drawing-move-right': 'Mou el dibuix a la dreta',
+            'drawing-delete': 'Elimina el dibuix',
+        },
     },
 };
 

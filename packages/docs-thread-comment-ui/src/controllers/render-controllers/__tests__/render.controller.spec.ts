@@ -79,6 +79,8 @@ describe('DocThreadCommentRenderController', () => {
             commandService as any
         );
 
+        expect(threadCommentModel.addComment).not.toHaveBeenCalled();
+
         const next = (v: any) => v;
         const outActive = handler(
             { id: 'c2' },
@@ -139,6 +141,7 @@ describe('DocThreadCommentRenderController', () => {
         });
 
         onCommandExecuted({ id: RichTextEditingMutation.id, params: { unitId: 'doc-1' } });
+        expect(threadCommentModel.addComment).not.toHaveBeenCalled();
         expect(threadCommentModel.syncThreadComments).toHaveBeenCalledWith('doc-1', DEFAULT_DOC_SUBUNIT_ID, ['c3']);
 
         controller.dispose();

@@ -309,6 +309,7 @@ const locale: typeof enUS = {
                 'break-line': '换行',
                 'set-bold': '切换粗体',
                 'start-editing': '开始编辑（选区切换到编辑器）',
+                'repeat-last-action': '重复上次操作',
                 'set-italic': '切换斜体',
                 'set-underline': '切换下划线',
                 'set-strike-through': '切换删除线',

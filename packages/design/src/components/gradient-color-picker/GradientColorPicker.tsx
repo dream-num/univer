@@ -429,7 +429,7 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
                         max={100}
                         step={10}
                         formatter={(v) => `${v}%`}
-                        parser={(v) => v?.replace('%', '') || ''}
+                        parser={(v) => v?.replace(/%/g, '') || ''}
                         onChange={handleStopTransparencyChange}
                     />
                 </div>

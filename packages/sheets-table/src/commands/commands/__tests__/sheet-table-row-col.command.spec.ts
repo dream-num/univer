@@ -19,7 +19,7 @@ import { SheetInterceptorService, SheetsSelectionsService } from '@univerjs/shee
 
 import { describe, expect, it, vi } from 'vitest';
 import { SheetsTableController } from '../../../controllers/sheets-table.controller';
-import { TableManager } from '../../../model/table-manager';
+import { TableManager } from '../../../models/table-manager';
 import {
     SheetTableInsertColCommand,
     SheetTableInsertColumnAtCommand,

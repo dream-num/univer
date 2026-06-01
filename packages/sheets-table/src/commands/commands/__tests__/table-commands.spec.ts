@@ -18,7 +18,7 @@ import { ICommandService, ILogService, IUndoRedoService, IUniverInstanceService,
 import { IDefinedNamesService } from '@univerjs/engine-formula';
 import { AddRangeThemeMutation, RemoveRangeThemeMutation, SheetInterceptorService, SheetRangeThemeModel } from '@univerjs/sheets';
 import { describe, expect, it, vi } from 'vitest';
-import { TableManager } from '../../../model/table-manager';
+import { TableManager } from '../../../models/table-manager';
 import { IRangeOperationTypeEnum, IRowColTypeEnum } from '../../../types/type';
 import { AddSheetTableMutation } from '../../mutations/add-sheet-table.mutation';
 import { DeleteSheetTableMutation } from '../../mutations/delete-sheet-table.mutation';

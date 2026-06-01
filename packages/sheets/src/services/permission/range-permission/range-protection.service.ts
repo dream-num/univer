@@ -16,12 +16,12 @@
 
 import type { UnitAction } from '@univerjs/protocol';
 
-import type { IObjectModel } from '../../../model/range-protection-rule.model';
+import type { IObjectModel } from '../../../models/range-protection-rule.model';
 import { Disposable, Inject, IPermissionService, IResourceManagerService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { UnitObject } from '@univerjs/protocol';
-import { RangeProtectionRuleModel } from '../../../model/range-protection-rule.model';
+import { RangeProtectionRuleModel } from '../../../models/range-protection-rule.model';
 
-import { RangeProtectionCache } from '../../../model/range-protection.cache';
+import { RangeProtectionCache } from '../../../models/range-protection.cache';
 import { baseProtectionActions, getAllRangePermissionPoint } from './util';
 
 const PLUGIN_NAME = 'SHEET_RANGE_PROTECTION_PLUGIN';

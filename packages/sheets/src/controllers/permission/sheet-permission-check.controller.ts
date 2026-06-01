@@ -84,7 +84,7 @@ import { DeltaRowHeightCommand, SetRowHeightCommand, SetWorksheetRowIsAutoHeight
 import { SetWorksheetShowCommand } from '../../commands/commands/set-worksheet-show.command';
 import { getSheetCommandTarget } from '../../commands/commands/utils/target-util';
 import { SetWorksheetNameMutation } from '../../commands/mutations/set-worksheet-name.mutation';
-import { RangeProtectionRuleModel } from '../../model/range-protection-rule.model';
+import { RangeProtectionRuleModel } from '../../models/range-protection-rule.model';
 import {
     RangeProtectionPermissionEditPoint,
     WorkbookDeleteColumnPermission,

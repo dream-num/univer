@@ -15,10 +15,10 @@
  */
 
 import type { IAccessor, IMutation, IMutationInfo } from '@univerjs/core';
-import type { IRangeProtectionRule } from '../../model/range-protection-rule.model';
+import type { IRangeProtectionRule } from '../../models/range-protection-rule.model';
 
 import { CommandType } from '@univerjs/core';
-import { RangeProtectionRuleModel } from '../../model/range-protection-rule.model';
+import { RangeProtectionRuleModel } from '../../models/range-protection-rule.model';
 
 export interface ISetRangeProtectionMutationParams {
     rule: IRangeProtectionRule;

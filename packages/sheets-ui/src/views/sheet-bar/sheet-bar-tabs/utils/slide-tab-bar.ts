@@ -34,7 +34,7 @@ export interface ISlideTabBarConfig {
     onNameChangeCheck: () => boolean;
 }
 
-export interface SlideTabItemAnimate {
+export interface ISlideTabItemAnimate {
     translateX: (x: number) => void;
     cancel: () => void;
 }
@@ -219,7 +219,7 @@ export class SlideTabItem {
         return checkAlert;
     }
 
-    animate(): SlideTabItemAnimate {
+    animate(): ISlideTabItemAnimate {
         return {
             translateX: (x: number) => {
                 if (this._translateX !== x) {

@@ -19,7 +19,7 @@ import type { IObjectModel, IObjectPointModel } from '../type';
 import { ILogService, Inject, Injector, IPermissionService, IResourceManagerService, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 
 import { takeUntil } from 'rxjs/operators';
-import { RangeProtectionRuleModel } from '../../../model/range-protection-rule.model';
+import { RangeProtectionRuleModel } from '../../../models/range-protection-rule.model';
 import { getAllRangePermissionPoint } from '../range-permission/util';
 import { getAllWorkbookPermissionPoint } from '../workbook-permission';
 import { getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel } from './utils';

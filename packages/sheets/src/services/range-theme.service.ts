@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { IRangeThemeRangeInfo } from '../model/range-theme-model';
-import type { RangeThemeStyle } from '../model/range-theme-util';
+import type { IRangeThemeRangeInfo } from '../models/range-theme-model';
+import type { RangeThemeStyle } from '../models/range-theme-util';
 import { Disposable, Inject } from '@univerjs/core';
-import { SheetRangeThemeModel } from '../model/range-theme-model';
+import { SheetRangeThemeModel } from '../models/range-theme-model';
 
 export class SheetRangeThemeService extends Disposable {
     constructor(

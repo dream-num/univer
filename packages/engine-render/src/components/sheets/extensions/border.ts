@@ -17,7 +17,7 @@
 import type { IRange, IScale, ObjectMatrix } from '@univerjs/core';
 import type { UniverRenderingContext } from '../../../context';
 import type { IDrawInfo } from '../../extension';
-import type { BorderCache, BorderCacheItem } from '../interfaces';
+import type { IBorderCache, IBorderCacheItem } from '../interfaces';
 import type { SpreadsheetSkeleton } from '../sheet.render-skeleton';
 import { BorderStyleTypes, Range } from '@univerjs/core';
 import { BORDER_TYPE as BORDER_LTRB, COLOR_BLACK_RGB, FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics/const';
@@ -30,7 +30,7 @@ const BORDER_Z_INDEX = 50;
 
 interface IRenderBorderContext {
     ctx: UniverRenderingContext;
-    // border: BorderCacheItem;
+    // border: IBorderCacheItem;
     overflowCache: ObjectMatrix<IRange>;
     precisionScale: number;
     spreadsheetSkeleton: SpreadsheetSkeleton;
@@ -96,7 +96,7 @@ export class Border extends SheetExtension {
         ctx.restore();
     }
 
-    renderBorderByCell(renderBorderContext: IRenderBorderContext, row: number, col: number, borderCacheItem: BorderCache) {
+    renderBorderByCell(renderBorderContext: IRenderBorderContext, row: number, col: number, borderCacheItem: IBorderCache) {
         const { ctx, precisionScale, overflowCache, spreadsheetSkeleton, diffRanges } = renderBorderContext;
 
         const cellInfo = spreadsheetSkeleton.getCellWithCoordByIndex(row, col, false);
@@ -117,7 +117,7 @@ export class Border extends SheetExtension {
         }
 
         for (const key in borderCacheItem) {
-            const { type, style, color } = borderCacheItem[key] as BorderCacheItem;
+            const { type, style, color } = borderCacheItem[key] as IBorderCacheItem;
 
             if (style === BorderStyleTypes.NONE) {
                 continue;
@@ -455,7 +455,7 @@ export class Border extends SheetExtension {
         }
     }
 
-    private _getSpecificCellBorder(borderCache: ObjectMatrix<BorderCache>, row: number, col: number): Record<string, BorderCacheItem | null> {
+    private _getSpecificCellBorder(borderCache: ObjectMatrix<IBorderCache>, row: number, col: number): Record<string, IBorderCacheItem | null> {
         const cellBorder = borderCache.getValue(row, col);
 
         let left = null;
@@ -465,19 +465,19 @@ export class Border extends SheetExtension {
 
         if (cellBorder) {
             if (cellBorder[BORDER_LTRB.LEFT] && Object.prototype.hasOwnProperty.call(cellBorder[BORDER_LTRB.LEFT], 'type')) {
-                left = cellBorder[BORDER_LTRB.LEFT] as BorderCacheItem;
+                left = cellBorder[BORDER_LTRB.LEFT] as IBorderCacheItem;
             }
 
             if (cellBorder[BORDER_LTRB.RIGHT] && Object.prototype.hasOwnProperty.call(cellBorder[BORDER_LTRB.RIGHT], 'type')) {
-                right = cellBorder[BORDER_LTRB.RIGHT] as BorderCacheItem;
+                right = cellBorder[BORDER_LTRB.RIGHT] as IBorderCacheItem;
             }
 
             if (cellBorder[BORDER_LTRB.TOP] && Object.prototype.hasOwnProperty.call(cellBorder[BORDER_LTRB.TOP], 'type')) {
-                top = cellBorder[BORDER_LTRB.TOP] as BorderCacheItem;
+                top = cellBorder[BORDER_LTRB.TOP] as IBorderCacheItem;
             }
 
             if (cellBorder[BORDER_LTRB.BOTTOM] && Object.prototype.hasOwnProperty.call(cellBorder[BORDER_LTRB.BOTTOM], 'type')) {
-                bottom = cellBorder[BORDER_LTRB.BOTTOM] as BorderCacheItem;
+                bottom = cellBorder[BORDER_LTRB.BOTTOM] as IBorderCacheItem;
             }
         }
 

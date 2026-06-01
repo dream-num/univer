@@ -26,7 +26,7 @@ const Tween: Record<string, Function> = {
     },
 };
 
-export interface AnimateConfig {
+export interface IAnimateConfig {
     loop: boolean;
     begin: number;
     end: number;
@@ -39,7 +39,7 @@ export interface AnimateConfig {
     complete: (v: number) => void;
 }
 
-const CONFIG: AnimateConfig = {
+const CONFIG: IAnimateConfig = {
     loop: false,
     begin: 0,
     end: 0,
@@ -66,7 +66,7 @@ export enum AnimateStatus {
 }
 
 export class Animate {
-    protected _config: AnimateConfig;
+    protected _config: IAnimateConfig;
 
     protected _status: AnimateStatus = AnimateStatus.Request;
 
@@ -76,7 +76,7 @@ export class Animate {
 
     protected _delayHandle: NodeJS.Timeout | number | null = null;
 
-    constructor(config: Partial<AnimateConfig>) {
+    constructor(config: Partial<IAnimateConfig>) {
         this._config = {
             ...CONFIG,
             ...config,

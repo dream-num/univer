@@ -15,11 +15,11 @@
  */
 
 import type { ICommand, IRange } from '@univerjs/core';
-import type { IRangeProtectionRule } from '../../model/range-protection-rule.model';
+import type { IRangeProtectionRule } from '../../models/range-protection-rule.model';
 import type { IWorksheetProtectionRule } from '../../services/permission/type';
 import { CommandType, ICommandService, IUndoRedoService, sequenceExecute } from '@univerjs/core';
 import { UnitObject } from '@univerjs/protocol';
-import { RangeProtectionRuleModel } from '../../model/range-protection-rule.model';
+import { RangeProtectionRuleModel } from '../../models/range-protection-rule.model';
 import { AddRangeProtectionMutation } from '../mutations/add-range-protection.mutation';
 import { AddWorksheetProtectionMutation } from '../mutations/add-worksheet-protection.mutation';
 import { DeleteRangeProtectionMutation } from '../mutations/delete-range-protection.mutation';

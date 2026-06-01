@@ -91,11 +91,24 @@ export class BaseDataModel extends UnitModel<IBaseSnapshot, UniverInstanceType.U
 }
 
 function normalizeBaseSnapshot(snapshot: IBaseSnapshot): IBaseSnapshot {
+    delete (snapshot as IBaseSnapshot & { compress?: unknown }).compress;
+    delete (snapshot as IBaseSnapshot & { kind?: unknown }).kind;
     Object.values(snapshot.tables ?? {}).forEach(normalizeBaseTable);
     return snapshot;
 }
 
 function normalizeBaseTable(table: ITableSnapshot): void {
+    const compressedCellData = (table as ITableSnapshot & { cd?: Array<[number, number, BaseCellData & { c?: 1 }]> }).cd;
+    if (compressedCellData && !table.cellData) {
+        table.cellData = Object.create(null) as ITableSnapshot['cellData'];
+        compressedCellData.forEach(([row, col, cell]) => {
+            table.cellData![row] = table.cellData![row] ?? {};
+            const { c: _compressed, ...cellData } = cell;
+            table.cellData![row][col] = cellData;
+        });
+        delete (table as ITableSnapshot & { cd?: unknown }).cd;
+    }
+
     const records = table.records ?? {};
     const fields = table.fields ?? {};
     const sortedRecordIds = Object.values(records)

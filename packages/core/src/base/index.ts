@@ -15,6 +15,7 @@ export type {
     CalendarProjection,
     CalendarViewConfig,
     CardLayoutConfig,
+    BaseViewColorCondition,
     FieldCapabilities,
     FieldConfig,
     FieldId,

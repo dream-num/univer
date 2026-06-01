@@ -335,6 +335,7 @@ export { type ISheetCommandSharedParams } from './commands/utils/interface';
 export { getSelectionsService } from './commands/utils/selection-command-util';
 export { defaultLargeSheetOperationConfig, type ILargeSheetOperationConfig, type IUniverSheetsConfig, SHEETS_PLUGIN_CONFIG_KEY } from './config/config';
 export { AutoFillController } from './controllers/auto-fill.controller';
+export { CalculateResultApplyController } from './controllers/calculate-result-apply.controller';
 export { MAX_CELL_PER_SHEET_KEY } from './controllers/config/config';
 export { DefinedNameDataController } from './controllers/defined-name-data.controller';
 export { SCOPE_WORKBOOK_VALUE_DEFINED_NAME } from './controllers/defined-name-data.controller';

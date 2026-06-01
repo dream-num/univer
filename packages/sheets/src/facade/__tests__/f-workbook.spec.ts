@@ -109,8 +109,8 @@ describe('Test FWorkbook', () => {
         activeSpreadsheet.setActiveSheet(activeSpreadsheet.getSheets()[0]);
         await activeSpreadsheet.duplicateActiveSheet();
         expect(activeSpreadsheet.getNumSheets()).toBe(2);
-        activeSpreadsheet.setLocale(LocaleType.RU_RU);
-        expect(activeSpreadsheet.getLocale()).toBe(LocaleType.RU_RU);
+        univerAPI.setLocale(LocaleType.RU_RU);
+        expect(univerAPI.getCurrentLocale()).toBe(LocaleType.RU_RU);
         const worksheet = activeSpreadsheet.getActiveSheet();
         expect(worksheet.getIndex()).toBe(0);
         await activeSpreadsheet.moveActiveSheet(1);

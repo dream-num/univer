@@ -17,7 +17,6 @@
 import './f-univer';
 import './f-workbook';
 import './f-worksheet';
-import './f-workbook-permission';
 import './f-event';
 
 export * from './f-enum';

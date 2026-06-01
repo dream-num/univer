@@ -164,7 +164,7 @@ function registerRemoveColumnEvent(univer: Univer, univerAPI: FUniver) {
             () => commandService.onCommandExecuted((commandInfo) => {
                 if (commandInfo.id !== RemoveColByRangeCommand.id) return;
 
-                const target = univerAPI.getCommandSheetTarget(commandInfo);
+                const target = univerAPI.getSheetCommandTarget(commandInfo.params);
                 if (!target) return;
 
                 const { range } = commandInfo.params as IRemoveColByRangeCommandParams;
@@ -191,7 +191,7 @@ function registerBeforeRemoveColumnEvent(univer: Univer, univerAPI: FUniver) {
             () => commandService.beforeCommandExecuted((commandInfo) => {
                 if (commandInfo.id !== RemoveColByRangeCommand.id) return;
 
-                const target = univerAPI.getCommandSheetTarget(commandInfo);
+                const target = univerAPI.getSheetCommandTarget(commandInfo.params);
                 if (!target) return;
 
                 const { range } = commandInfo.params as IRemoveColByRangeCommandParams;

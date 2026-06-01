@@ -25,6 +25,7 @@ export class FUniverSheetsHyperlinkMixin extends FUniver {
     /**
      * @ignore
      */
+    // eslint-disable-next-line max-lines-per-function
     override _initialize(injector: Injector): void {
         const commandService = injector.get(ICommandService);
 
@@ -34,18 +35,23 @@ export class FUniverSheetsHyperlinkMixin extends FUniver {
                 () => commandService.beforeCommandExecuted((commandInfo) => {
                     if (commandInfo.id !== AddHyperLinkCommand.id) return;
 
-                    const eventTarget = this.getCommandSheetTarget(commandInfo);
-                    if (!eventTarget) return;
-
                     const params = commandInfo.params as IAddHyperLinkCommandParams;
+                    const target = this.getSheetCommandTarget(params);
+                    if (!target) return;
+
+                    const { workbook, worksheet } = target;
+                    const { link } = params;
+                    const { row, column: col } = link;
+
                     const eventParams: IBeforeSheetLinkAddEventParams = {
-                        workbook: eventTarget.workbook,
-                        worksheet: eventTarget.worksheet,
-                        row: params.link.row,
-                        col: params.link.column,
-                        link: params.link,
+                        workbook,
+                        worksheet,
+                        row,
+                        col,
+                        link,
                     };
                     this.fireEvent(this.Event.BeforeSheetLinkAdd, eventParams);
+
                     if (eventParams.cancel) {
                         throw new CanceledError();
                     }
@@ -59,19 +65,23 @@ export class FUniverSheetsHyperlinkMixin extends FUniver {
                 () => commandService.beforeCommandExecuted((commandInfo) => {
                     if (commandInfo.id !== UpdateHyperLinkCommand.id) return;
 
-                    const eventTarget = this.getCommandSheetTarget(commandInfo);
-                    if (!eventTarget) return;
-
                     const params = commandInfo.params as IUpdateHyperLinkCommandParams;
+                    const target = this.getSheetCommandTarget(params);
+                    if (!target) return;
+
+                    const { workbook, worksheet } = target;
+                    const { row, column, id, payload } = params;
+
                     const eventParams: IBeforeSheetLinkUpdateEventParams = {
-                        workbook: eventTarget.workbook,
-                        worksheet: eventTarget.worksheet,
-                        row: params.row,
-                        column: params.column,
-                        id: params.id,
-                        payload: params.payload,
+                        workbook,
+                        worksheet,
+                        row,
+                        column,
+                        id,
+                        payload,
                     };
                     this.fireEvent(this.Event.BeforeSheetLinkUpdate, eventParams);
+
                     if (eventParams.cancel) {
                         throw new CanceledError();
                     }
@@ -85,18 +95,22 @@ export class FUniverSheetsHyperlinkMixin extends FUniver {
                 () => commandService.beforeCommandExecuted((commandInfo) => {
                     if (commandInfo.id !== CancelHyperLinkCommand.id) return;
 
-                    const eventTarget = this.getCommandSheetTarget(commandInfo);
-                    if (!eventTarget) return;
-
                     const params = commandInfo.params as ICancelHyperLinkCommandParams;
+                    const target = this.getSheetCommandTarget(params);
+                    if (!target) return;
+
+                    const { workbook, worksheet } = target;
+                    const { row, column, id } = params;
+
                     const eventParams: IBeforeSheetLinkCancelEventParams = {
-                        workbook: eventTarget.workbook,
-                        worksheet: eventTarget.worksheet,
-                        row: params.row,
-                        column: params.column,
-                        id: params.id,
+                        workbook,
+                        worksheet,
+                        row,
+                        column,
+                        id,
                     };
                     this.fireEvent(this.Event.BeforeSheetLinkCancel, eventParams);
+
                     if (eventParams.cancel) {
                         throw new CanceledError();
                     }

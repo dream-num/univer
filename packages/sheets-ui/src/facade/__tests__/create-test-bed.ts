@@ -32,13 +32,10 @@ import {
 import { FUniver } from '@univerjs/core/facade';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { Engine, IRenderingEngine, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
-
 import {
     SheetInterceptorService,
     SheetSkeletonService,
 } from '@univerjs/sheets';
-
-import '../f-sheet-hooks';
 
 function getTestWorkbookDataDemo(): IWorkbookData {
     return {

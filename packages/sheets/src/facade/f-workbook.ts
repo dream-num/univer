@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { CommandListener, CustomData, ICommandInfo, IDisposable, IRange, IStyleData, IWorkbookData, IWorksheetData, LocaleType, Workbook } from '@univerjs/core';
+import type { CommandListener, CustomData, ICommandInfo, IDisposable, IRange, IStyleData, IWorkbookData, IWorksheetData, Workbook } from '@univerjs/core';
 import type { ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import type { IRangeThemeStyleJSON, ISetSelectionsOperationParams, ISheetCommandSharedParams } from '@univerjs/sheets';
 import type { FontLine as _FontLine } from './f-range';
@@ -26,7 +26,6 @@ import {
     IPermissionService,
     IResourceLoaderService,
     IUniverInstanceService,
-    LocaleService,
     mergeWorksheetSnapshotWithDefault,
     RANGE_TYPE,
     RedoCommand,
@@ -75,7 +74,6 @@ export class FWorkbook extends FBaseInitialable {
         @ICommandService protected readonly _commandService: ICommandService,
         @IPermissionService protected readonly _permissionService: IPermissionService,
         @ILogService protected readonly _logService: ILogService,
-        @Inject(LocaleService) protected readonly _localeService: LocaleService,
         @IDefinedNamesService protected readonly _definedNamesService: IDefinedNamesService
     ) {
         super(_injector);
@@ -167,22 +165,6 @@ export class FWorkbook extends FBaseInitialable {
     save(): IWorkbookData {
         const snapshot = this._resourceLoaderService.saveUnit<IWorkbookData>(this._workbook.getUnitId())!;
         return snapshot;
-    }
-
-    /**
-     * @deprecated use 'save' instead.
-     * @returns {IWorkbookData} Workbook snapshot data
-     * @memberof FWorkbook
-     * @example
-     * ```ts
-     * // The code below saves the workbook snapshot data
-     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
-     * const snapshot = activeSpreadsheet.getSnapshot();
-     * ```
-     */
-    getSnapshot(): IWorkbookData {
-        this._logService.warn('use \'save\' instead of \'getSnapshot\'');
-        return this.save();
     }
 
     /**
@@ -739,45 +721,6 @@ export class FWorkbook extends FBaseInitialable {
      */
     getNumSheets(): number {
         return this._workbook.getSheets().length;
-    }
-
-    /**
-     * Get the locale of the workbook.
-     * @returns {LocaleType} The locale of the workbook
-     * @example
-     * ```ts
-     * // The code below gets the locale of the workbook
-     * const fWorkbook = univerAPI.getActiveWorkbook();
-     * console.log(fWorkbook.getLocale());
-     * ```
-     */
-    getLocale(): LocaleType {
-        return this._localeService.getCurrentLocale();
-    }
-
-    /**
-     * @deprecated use `setSpreadsheetLocale` instead.
-     * @param {LocaleType} locale - The locale to set
-     */
-    setLocale(locale: LocaleType): void {
-        this._localeService.setLocale(locale);
-    }
-
-    /**
-     * Set the locale of the workbook.
-     * @param {LocaleType} locale The locale to set
-     * @returns {FWorkbook} This workbook, for chaining
-     * @example
-     * ```ts
-     * // The code below sets the locale of the workbook
-     * const fWorkbook = univerAPI.getActiveWorkbook();
-     * fWorkbook.setSpreadsheetLocale(univerAPI.Enum.LocaleType.EN_US);
-     * console.log(fWorkbook.getLocale());
-     * ```
-     */
-    setSpreadsheetLocale(locale: LocaleType): FWorkbook {
-        this._localeService.setLocale(locale);
-        return this;
     }
 
     /**

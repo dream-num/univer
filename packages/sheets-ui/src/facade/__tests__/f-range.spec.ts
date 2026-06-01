@@ -107,7 +107,7 @@ describe('FRange UI mixin', () => {
             })),
         };
         const renderManager: any = {
-            getRenderById: vi.fn(() => render),
+            getRenderUnitById: vi.fn(() => render),
         };
 
         tokens.set(IRenderManagerService, renderManager);
@@ -130,7 +130,7 @@ describe('FRange UI mixin', () => {
         });
         expect(typeof rect.toJSON).toBe('function');
 
-        renderManager.getRenderById = vi.fn(() => ({
+        renderManager.getRenderUnitById = vi.fn(() => ({
             with: vi.fn(() => ({
                 getSkeletonParam: vi.fn(() => null),
             })),

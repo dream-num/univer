@@ -382,6 +382,34 @@ export class FUniver extends Disposable {
     }
 
     /**
+     * Get the current locale.
+     * @returns {string} The current locale identifier.
+     * @example
+     * ```ts
+     * const currentLocale = univerAPI.getCurrentLocale();
+     * console.log(currentLocale);
+     * ```
+     */
+    getCurrentLocale(): string {
+        const localeService = this._injector.get(LocaleService);
+        return localeService.getCurrentLocale();
+    }
+
+    /**
+     * Get the locales for the current locale.
+     * @returns {ILanguagePack | undefined} The locales object for the current locale, it returns undefined if the locales is not loaded.
+     * @example
+     * ```ts
+     * const locales = univerAPI.getLocales();
+     * console.log(locales);
+     * ```
+     */
+    getLocales(): ILanguagePack | undefined {
+        const localeService = this._injector.get(LocaleService);
+        return localeService.getLocales();
+    }
+
+    /**
      * Register a callback that will be triggered before invoking a command.
      * @deprecated use `univerAPI.addEvent(univerAPI.Event.BeforeCommandExecute, (event) => {})` instead.
      * @param {CommandListener} callback The callback.

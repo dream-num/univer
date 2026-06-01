@@ -77,7 +77,7 @@ export class FUniverSheetsFilterMixin extends FUniver {
 
     private _beforeRangeFilter(commandInfo: Readonly<ICommandInfo<ISetSheetsFilterCriteriaCommandParams>>): void {
         const params = commandInfo.params!;
-        const fWorkbook = this.getUniverSheet(params.unitId)!;
+        const fWorkbook = this.getWorkbook(params.unitId)!;
         const eventParams: ISheetsRangeFilteredEventParams = {
             workbook: fWorkbook,
             worksheet: fWorkbook.getSheetBySheetId(params.subUnitId)!,
@@ -93,7 +93,7 @@ export class FUniverSheetsFilterMixin extends FUniver {
 
     private _onRangeFiltered(commandInfo: Readonly<ICommandInfo<ISetSheetsFilterCriteriaCommandParams>>): void {
         const params = commandInfo.params!;
-        const fWorkbook = this.getUniverSheet(params.unitId)!;
+        const fWorkbook = this.getWorkbook(params.unitId)!;
         const eventParams: ISheetsRangeFilteredEventParams = {
             workbook: fWorkbook,
             worksheet: fWorkbook.getSheetBySheetId(params.subUnitId)!,

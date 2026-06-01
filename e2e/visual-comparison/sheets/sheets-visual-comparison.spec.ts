@@ -168,7 +168,7 @@ test('diff facade sheet hooks', async () => {
     await page.evaluate(() => window.E2EControllerAPI.loadDefaultStyleSheet());
     await page.waitForTimeout(1000);
 
-    await page.evaluate(() => window.univerAPI.getSheetHooks().onCellRender([{
+    await page.evaluate(() => window.univerAPI.registerCellCustomRender([{
         drawWith: (ctx, info) => {
             const { row, col } = info;
             // Update to any cell location you want
@@ -258,7 +258,7 @@ test('diff set force string cell', async () => {
 
         activeWorkbook.startEditing();
         await window.univerAPI.getActiveDocument().appendText("'1");
-        activeWorkbook.endEditing(true);
+        activeWorkbook.endEditingAsync(true);
 
         activeSheet.getRange('I1').setValue({
             v: '001',

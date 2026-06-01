@@ -15,10 +15,10 @@
  */
 
 import type { IMutation } from '@univerjs/core';
-import type { IRangeThemeStyleJSON } from '../../model/range-theme-util';
+import type { IRangeThemeStyleJSON } from '../../models/range-theme-util';
 import { CommandType, IUniverInstanceService } from '@univerjs/core';
-import { SheetRangeThemeModel } from '../../model/range-theme-model';
-import { RangeThemeStyle } from '../../model/range-theme-util';
+import { SheetRangeThemeModel } from '../../models/range-theme-model';
+import { RangeThemeStyle } from '../../models/range-theme-util';
 import { getSheetCommandTarget } from '../commands/utils/target-util';
 
 export interface IRegisterWorksheetRangeThemeStyleMutationParams {

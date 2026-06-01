@@ -15,7 +15,7 @@
  */
 
 import type { Injector, IRange, Univer, Workbook } from '@univerjs/core';
-import type { IRangeProtectionRule } from '../../../../model/range-protection-rule.model';
+import type { IRangeProtectionRule } from '../../../../models/range-protection-rule.model';
 import { ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { UnitObject } from '@univerjs/protocol';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -25,9 +25,9 @@ import { DeleteRangeProtectionMutation } from '../../../../commands/mutations/de
 import { InsertColMutation, InsertRowMutation } from '../../../../commands/mutations/insert-row-col.mutation';
 import { MoveColsMutation, MoveRowsMutation } from '../../../../commands/mutations/move-rows-cols.mutation';
 import { SetRangeProtectionMutation } from '../../../../commands/mutations/set-range-protection.mutation';
-import { RangeProtectionRenderModel } from '../../../../model/range-protection-render.model';
-import { EditStateEnum, RangeProtectionRuleModel, ViewStateEnum } from '../../../../model/range-protection-rule.model';
-import { RangeProtectionCache } from '../../../../model/range-protection.cache';
+import { RangeProtectionRenderModel } from '../../../../models/range-protection-render.model';
+import { EditStateEnum, RangeProtectionRuleModel, ViewStateEnum } from '../../../../models/range-protection-rule.model';
+import { RangeProtectionCache } from '../../../../models/range-protection.cache';
 import { createTestBase, TEST_WORKBOOK_DATA_DEMO } from '../../../__tests__/util';
 import { RefRangeService } from '../../../ref-range/ref-range.service';
 import { SheetsSelectionsService } from '../../../selections/selection.service';

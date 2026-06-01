@@ -22,7 +22,7 @@ import { CopySheetCommand, INTERCEPTOR_POINT, RemoveSheetCommand, SheetIntercept
 import { AddSheetTableMutation } from '../commands/mutations/add-sheet-table.mutation';
 import { DeleteSheetTableMutation } from '../commands/mutations/delete-sheet-table.mutation';
 import { PLUGIN_NAME } from '../const';
-import { TableManager } from '../model/table-manager';
+import { TableManager } from '../models/table-manager';
 
 export class SheetsTableController extends Disposable {
     private _tableRangeRTree = new Map<string, RTree>();

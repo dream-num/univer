@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import * as conditionUtil from '../../model/filter-util/condition';
+import * as conditionUtil from '../../models/filter-util/condition';
 import { TableConditionTypeEnum } from '../../types/enum';
 import { SheetTableService } from '../table.service';
 

@@ -15,11 +15,11 @@
  */
 
 import type { IAccessor, IMutation, IMutationInfo } from '@univerjs/core';
-import type { IRangeProtectionRule } from '../../model/range-protection-rule.model';
+import type { IRangeProtectionRule } from '../../models/range-protection-rule.model';
 
 import type { IAddRangeProtectionMutationParams } from './add-range-protection.mutation';
 import { CommandType } from '@univerjs/core';
-import { RangeProtectionRuleModel } from '../../model/range-protection-rule.model';
+import { RangeProtectionRuleModel } from '../../models/range-protection-rule.model';
 import { AddRangeProtectionMutation } from './add-range-protection.mutation';
 
 export interface IDeleteRangeProtectionMutationParams {

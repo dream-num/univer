@@ -25,7 +25,7 @@ import { skip } from 'rxjs';
 import { AddRangeProtectionMutation } from '../../commands/mutations/add-range-protection.mutation';
 import { AddWorksheetProtectionMutation } from '../../commands/mutations/add-worksheet-protection.mutation';
 import { SetWorksheetPermissionPointsMutation } from '../../commands/mutations/set-worksheet-permission-points.mutation';
-import { RangeProtectionRuleModel } from '../../model/range-protection-rule.model';
+import { RangeProtectionRuleModel } from '../../models/range-protection-rule.model';
 import { defaultWorksheetPermissionPoint, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel } from '../../services/permission';
 import { baseProtectionActions, getAllRangePermissionPoint } from '../../services/permission/range-permission/util';
 import { defaultWorkbookPermissionPoints, getAllWorkbookPermissionPoint } from '../../services/permission/workbook-permission';

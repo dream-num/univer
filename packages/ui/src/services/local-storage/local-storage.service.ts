@@ -15,34 +15,34 @@
  */
 
 import type { ILocalStorageService } from '@univerjs/core';
-import localforage from 'localforage';
+import { browserStorage } from '../../utils/storage-driver';
 
 export class DesktopLocalStorageService implements ILocalStorageService {
     getItem<T>(key: string): Promise<T | null> {
-        return localforage.getItem<T>(key);
+        return browserStorage.getItem<T>(key);
     }
 
     setItem<T>(key: string, value: T): Promise<T> {
-        return localforage.setItem(key, value);
+        return browserStorage.setItem(key, value);
     }
 
     removeItem(key: string): Promise<void> {
-        return localforage.removeItem(key);
+        return browserStorage.removeItem(key);
     }
 
     clear(): Promise<void> {
-        return localforage.clear();
+        return browserStorage.clear();
     }
 
     key(index: number): Promise<string | null> {
-        return localforage.key(index);
+        return browserStorage.key(index);
     }
 
     keys(): Promise<string[]> {
-        return localforage.keys();
+        return browserStorage.keys();
     }
 
     iterate<T, U>(iteratee: (value: T, key: string, iterationNumber: number) => U): Promise<U> {
-        return localforage.iterate(iteratee);
+        return browserStorage.iterate(iteratee);
     }
 }

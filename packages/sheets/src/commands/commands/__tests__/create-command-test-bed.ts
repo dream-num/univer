@@ -30,7 +30,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import enUS from '../../../locale/en-US';
-import { RangeProtectionRuleModel } from '../../../model/range-protection-rule.model';
+import { RangeProtectionRuleModel } from '../../../models/range-protection-rule.model';
 import { BorderStyleManagerService } from '../../../services/border-style-manager.service';
 import { SheetLazyExecuteScheduleService } from '../../../services/lazy-execute-schedule.service';
 import { WorkbookPermissionService } from '../../../services/permission/workbook-permission/workbook-permission.service';

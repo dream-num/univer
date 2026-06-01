@@ -17,7 +17,7 @@
 import type { Workbook } from '@univerjs/core';
 import { Disposable, Inject, IPermissionService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
-import { RangeProtectionRuleModel } from '../../../model/range-protection-rule.model';
+import { RangeProtectionRuleModel } from '../../../models/range-protection-rule.model';
 import { getAllRangePermissionPoint } from '../range-permission/util';
 import { WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '../worksheet-permission';
 import { getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel } from '../worksheet-permission/utils';

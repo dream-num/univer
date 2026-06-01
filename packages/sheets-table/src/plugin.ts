@@ -36,7 +36,7 @@ import { SheetTableRefRangeController } from './controllers/sheet-table-ref-rang
 import { SheetsTableThemeController } from './controllers/sheet-table-theme.controller';
 import { SheetsTableController } from './controllers/sheets-table.controller';
 import { TableFilterController } from './controllers/table-filter.controller';
-import { TableManager } from './model/table-manager';
+import { TableManager } from './models/table-manager';
 import { SheetTableService } from './services/table.service';
 
 export class UniverSheetsTablePlugin extends Plugin {

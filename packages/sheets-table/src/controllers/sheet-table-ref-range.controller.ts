@@ -25,7 +25,7 @@ import { getSheetCommandTarget, InsertColCommand, InsertColMutation, InsertRowCo
 import { AddSheetTableMutation } from '../commands/mutations/add-sheet-table.mutation';
 import { DeleteSheetTableMutation } from '../commands/mutations/delete-sheet-table.mutation';
 import { SetSheetTableMutation } from '../commands/mutations/set-sheet-table.mutation';
-import { TableManager } from '../model/table-manager';
+import { TableManager } from '../models/table-manager';
 import { IRangeOperationTypeEnum, IRowColTypeEnum } from '../types/type';
 import { convertCellDataToString, getColumnName } from '../util';
 

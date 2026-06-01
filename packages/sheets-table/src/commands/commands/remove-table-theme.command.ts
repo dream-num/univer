@@ -18,7 +18,7 @@ import type { ICommand } from '@univerjs/core';
 import { CommandType, ICommandService, IUndoRedoService, sequenceExecute } from '@univerjs/core';
 import { AddRangeThemeMutation, RemoveRangeThemeMutation, SheetRangeThemeModel } from '@univerjs/sheets';
 import { SHEET_TABLE_CUSTOM_THEME_PREFIX } from '../../const';
-import { TableManager } from '../../model/table-manager';
+import { TableManager } from '../../models/table-manager';
 import { SetSheetTableMutation } from '../mutations/set-sheet-table.mutation';
 
 export interface IRemoveTableThemeCommandParams {

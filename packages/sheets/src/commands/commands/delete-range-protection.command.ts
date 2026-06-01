@@ -15,7 +15,7 @@
  */
 
 import type { ICommand } from '@univerjs/core';
-import type { IRangeProtectionRule } from '../../model/range-protection-rule.model';
+import type { IRangeProtectionRule } from '../../models/range-protection-rule.model';
 import { CommandType, ICommandService, IUndoRedoService } from '@univerjs/core';
 import { AddRangeProtectionMutation } from '../mutations/add-range-protection.mutation';
 import { DeleteRangeProtectionMutation } from '../mutations/delete-range-protection.mutation';

@@ -17,7 +17,7 @@
 import type { IMutation } from '@univerjs/core';
 import type { ITableFilterItem } from '../../types/type';
 import { CommandType } from '@univerjs/core';
-import { TableManager } from '../../model/table-manager';
+import { TableManager } from '../../models/table-manager';
 
 export interface ISetSheetTableParams {
     unitId: string;

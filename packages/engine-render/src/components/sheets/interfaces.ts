@@ -32,11 +32,11 @@ import type { Canvas } from '../../canvas';
 import type { UniverRenderingContext } from '../../context';
 import type { DocumentSkeleton } from '../docs/layout/doc-skeleton';
 
-export interface BorderCache {
-    [key: string]: BorderCacheItem | {};
+export interface IBorderCache {
+    [key: string]: IBorderCacheItem | {};
 }
 
-export interface BorderCacheItem {
+export interface IBorderCacheItem {
     type: BORDER_LTRB;
     style: BorderStyleTypes;
     color: string;
@@ -63,7 +63,7 @@ export interface IStylesCache {
      * Get value from getCell in skeleton and this value is used in font extension
      */
     fontMatrix: ObjectMatrix<IFontCacheItem>;
-    border?: ObjectMatrix<BorderCache>;
+    border?: ObjectMatrix<IBorderCache>;
 }
 
 export enum ShowGridlinesState {

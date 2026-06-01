@@ -16,7 +16,7 @@
 
 import type { IAccessor, IRange } from '@univerjs/core';
 import { IPermissionService, Rectangle } from '@univerjs/core';
-import { RangeProtectionRuleModel } from '../../model/range-protection-rule.model';
+import { RangeProtectionRuleModel } from '../../models/range-protection-rule.model';
 import { WorkbookEditablePermission, WorksheetEditPermission } from './permission-point';
 import { RangeProtectionPermissionEditPoint } from './permission-point/range/edit';
 

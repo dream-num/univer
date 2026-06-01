@@ -17,7 +17,7 @@
 import { Disposable, Inject } from '@univerjs/core';
 import { IExclusiveRangeService } from '@univerjs/sheets';
 import { FEATURE_TABLE_ID } from '../const';
-import { TableManager } from '../model/table-manager';
+import { TableManager } from '../models/table-manager';
 
 export class SheetTableRangeController extends Disposable {
     constructor(

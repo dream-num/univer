@@ -40,7 +40,7 @@ import type { IDocumentSkeletonColumn } from '../../basics/i-document-skeleton-c
 import type { ITransformChangeState } from '../../basics/interfaces';
 import type { IBoundRectNoAngle, IPoint, IViewportInfo } from '../../basics/vector2';
 import type { Scene } from '../../scene';
-import type { BorderCache, IFontCacheItem, IStylesCache } from './interfaces';
+import type { IBorderCache, IFontCacheItem, IStylesCache } from './interfaces';
 import {
     addLinkToDocumentModel,
     BooleanNumber,
@@ -153,7 +153,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         background: {},
         backgroundPositions: new ObjectMatrix<ICellWithCoord>(),
         fontMatrix: new ObjectMatrix<IFontCacheItem>(),
-        border: new ObjectMatrix<BorderCache>(),
+        border: new ObjectMatrix<IBorderCache>(),
     };
 
     private _clearTaskId: Nullable<number> = null;
@@ -259,7 +259,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             background: {},
             backgroundPositions: new ObjectMatrix<ICellWithCoord>(),
             fontMatrix: new ObjectMatrix<IFontCacheItem>(),
-            border: new ObjectMatrix<BorderCache>(),
+            border: new ObjectMatrix<IBorderCache>(),
         };
         this._handleBgMatrix.reset();
         this._handleBorderMatrix.reset();
@@ -1328,7 +1328,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             background: {},
             backgroundPositions: new ObjectMatrix<ICellWithCoord>(),
             fontMatrix: new ObjectMatrix<IFontCacheItem>(),
-            border: new ObjectMatrix<BorderCache>(),
+            border: new ObjectMatrix<IBorderCache>(),
         };
 
         this._handleBgMatrix?.reset();

@@ -17,8 +17,8 @@
 import type { IGalleryProps, IMessageProps } from '@univerjs/design';
 import type { IConfirmPartMethodOptions } from '../../views/components/confirm-part/interface';
 import type { IDialogPartMethodOptions } from '../../views/components/dialog-part/interface';
-import localforage from 'localforage';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { browserStorage } from '../../utils/storage-driver';
 import { DesktopBeforeCloseService } from '../before-close/before-close.service';
 import { DesktopConfirmService } from '../confirm/desktop-confirm.service';
 import { DesktopDialogService } from '../dialog/desktop-dialog.service';
@@ -45,8 +45,8 @@ vi.mock('../../components/notification/Notification', () => ({
     },
 }));
 
-vi.mock('localforage', () => ({
-    default: {
+vi.mock('../../utils/storage-driver', () => ({
+    browserStorage: {
         getItem: vi.fn(),
         setItem: vi.fn(),
         removeItem: vi.fn(),
@@ -290,14 +290,14 @@ describe('DesktopLocalStorageService', () => {
         vi.restoreAllMocks();
     });
 
-    it('should proxy localforage APIs', async () => {
-        vi.mocked(localforage.getItem).mockResolvedValue('v' as any);
-        vi.mocked(localforage.setItem).mockResolvedValue('saved' as any);
-        vi.mocked(localforage.removeItem).mockResolvedValue(undefined as any);
-        vi.mocked(localforage.clear).mockResolvedValue(undefined as any);
-        vi.mocked(localforage.key).mockResolvedValue('k' as any);
-        vi.mocked(localforage.keys).mockResolvedValue(['k1', 'k2']);
-        vi.mocked(localforage.iterate).mockResolvedValue('iter' as any);
+    it('should proxy browserStorage APIs', async () => {
+        vi.mocked(browserStorage.getItem).mockResolvedValue('v' as any);
+        vi.mocked(browserStorage.setItem).mockResolvedValue('saved' as any);
+        vi.mocked(browserStorage.removeItem).mockResolvedValue(undefined as any);
+        vi.mocked(browserStorage.clear).mockResolvedValue(undefined as any);
+        vi.mocked(browserStorage.key).mockResolvedValue('k' as any);
+        vi.mocked(browserStorage.keys).mockResolvedValue(['k1', 'k2']);
+        vi.mocked(browserStorage.iterate).mockResolvedValue('iter' as any);
 
         const service = new DesktopLocalStorageService();
 
@@ -309,7 +309,7 @@ describe('DesktopLocalStorageService', () => {
         await expect(service.keys()).resolves.toEqual(['k1', 'k2']);
         await expect(service.iterate((v) => v)).resolves.toBe('iter');
 
-        expect(localforage.getItem).toHaveBeenCalledWith('a');
-        expect(localforage.setItem).toHaveBeenCalledWith('a', 'b');
+        expect(browserStorage.getItem).toHaveBeenCalledWith('a');
+        expect(browserStorage.setItem).toHaveBeenCalledWith('a', 'b');
     });
 });

@@ -20,11 +20,10 @@ import {
     ICommandService,
     Inject,
     Injector,
-    IResourceManagerService,
+    IResourceLoaderService,
     IUniverInstanceService,
     RedoCommand,
     UndoCommand,
-    UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionRenderService, InsertCommand } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -45,26 +44,68 @@ export class FDocument {
     constructor(
         private readonly _documentDataModel: DocumentDataModel,
         @Inject(Injector) protected readonly _injector: Injector,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @IUniverInstanceService protected readonly _univerInstanceService: IUniverInstanceService,
+        @Inject(IResourceLoaderService) protected readonly _resourceLoaderService: IResourceLoaderService,
         @ICommandService private readonly _commandService: ICommandService,
-        @IResourceManagerService private readonly _resourceManagerService: IResourceManagerService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         this.id = this._documentDataModel.getUnitId();
     }
 
+    /**
+     * Get the document data model of the document.
+     * @returns {DocumentDataModel} The document data model.
+     * @example
+     * ```typescript
+     * const fDocument = univerAPI.getActiveDocument();
+     * const documentDataModel = fDocument.getDocumentDataModel();
+     * console.log(documentDataModel);
+     * ```
+     */
+    getDocumentDataModel(): DocumentDataModel {
+        return this._documentDataModel;
+    }
+
+    /**
+     * Get the document id.
+     * @returns {string} The document id.
+     * @example
+     * ```typescript
+     * const fDocument = univerAPI.getActiveDocument();
+     * const unitId = fDocument.getId();
+     * console.log(unitId);
+     * ```
+     */
     getId(): string {
-        return this._documentDataModel.getUnitId();
+        return this.id;
     }
 
+    /**
+     * Get the document name.
+     * @returns {string} The document name.
+     * @example
+     * ```typescript
+     * const fDocument = univerAPI.getActiveDocument();
+     * const name = fDocument.getName();
+     * console.log(name);
+     * ```
+     */
     getName(): string {
-        return this.getSnapshot().title || '';
+        return this._documentDataModel.getTitle() || '';
     }
 
-    getSnapshot(): IDocumentData {
-        const resources = this._resourceManagerService.getResourcesByType(this.id, UniverInstanceType.UNIVER_DOC);
-        const snapshot = this._documentDataModel.getSnapshot() as IDocumentData;
-        snapshot.resources = resources;
+    /**
+     * Save the document snapshot data, including the document content and resource data, etc.
+     * @returns {IDocumentData} The document snapshot data.
+     * @example
+     * ```typescript
+     * const fDocument = univerAPI.getActiveDocument();
+     * const snapshot = fDocument.save();
+     * console.log(snapshot);
+     * ```
+     */
+    save(): IDocumentData {
+        const snapshot = this._resourceLoaderService.saveUnit<IDocumentData>(this._documentDataModel.getUnitId())!;
         return snapshot;
     }
 
@@ -83,7 +124,7 @@ export class FDocument {
      * @param text - The text to be added to the end of this text region.
      */
     appendText(text: string): Promise<boolean> {
-        const { body } = this.getSnapshot();
+        const { body } = this.save();
 
         if (!body) {
             throw new Error('The document body is empty');
@@ -105,7 +146,7 @@ export class FDocument {
      */
     insertText(text: string, options: IDocumentInsertTextFacadeOptions = {}): Promise<boolean> {
         const unitId = this.id;
-        const { body } = this.getSnapshot();
+        const { body } = this.save();
 
         if (!body) {
             throw new Error('The document body is empty');

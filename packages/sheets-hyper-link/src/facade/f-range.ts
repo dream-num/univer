@@ -49,7 +49,7 @@ export interface IFRangeSheetsHyperlinkMixin {
      * const fRange = fWorksheet.getRange('A1');
      * await fRange.setHyperLink('https://univer.ai/', 'Univer');
      *
-     * // Create a hyperlink to active sheet range B2:D4 on cell A2
+     * // Create a hyperlink to Sheet1 range B2:D4 on cell A2
      * const fRange2 = fWorksheet.getRange('A2');
      * const rangeUrl = fWorksheet.getRange('B2:D4').getUrl();
      * await fRange2.setHyperLink(rangeUrl, 'Link to B2:D4');

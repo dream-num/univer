@@ -17,8 +17,8 @@
 import type { IGalleryProps, IMessageProps } from '@univerjs/design';
 import type { IConfirmPartMethodOptions } from '../../views/components/confirm-part/interface';
 import type { IDialogPartMethodOptions } from '../../views/components/dialog-part/interface';
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import { browserStorage } from '../../utils/storage-driver';
+import { ILocalStorageService, Injector } from '@univerjs/core';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DesktopBeforeCloseService } from '../before-close/before-close.service';
 import { DesktopConfirmService } from '../confirm/desktop-confirm.service';
 import { DesktopDialogService } from '../dialog/desktop-dialog.service';
@@ -42,18 +42,6 @@ vi.mock('../../components/notification/Notification', () => ({
     Notification: () => null,
     notification: {
         show: vi.fn(),
-    },
-}));
-
-vi.mock('../../utils/storage-driver', () => ({
-    browserStorage: {
-        getItem: vi.fn(),
-        setItem: vi.fn(),
-        removeItem: vi.fn(),
-        clear: vi.fn(),
-        key: vi.fn(),
-        keys: vi.fn(),
-        iterate: vi.fn(),
     },
 }));
 
@@ -285,31 +273,78 @@ describe('DesktopLocalFileService', () => {
     });
 });
 
+const STORAGE_PREFIX = 'UniverLocalStorage/';
+
+function clearOwnStorage() {
+    const toRemove: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i)!;
+        if (k.startsWith(STORAGE_PREFIX)) {
+            toRemove.push(k);
+        }
+    }
+    toRemove.forEach((k) => localStorage.removeItem(k));
+}
+
 describe('DesktopLocalStorageService', () => {
+    let injector: Injector;
+    let service: ILocalStorageService;
+
+    beforeEach(() => {
+        clearOwnStorage();
+        injector = new Injector();
+        injector.add([ILocalStorageService, { useClass: DesktopLocalStorageService }]);
+        service = injector.get(ILocalStorageService);
+    });
+
     afterEach(() => {
         vi.restoreAllMocks();
     });
 
-    it('should proxy browserStorage APIs', async () => {
-        vi.mocked(browserStorage.getItem).mockResolvedValue('v' as any);
-        vi.mocked(browserStorage.setItem).mockResolvedValue('saved' as any);
-        vi.mocked(browserStorage.removeItem).mockResolvedValue(undefined as any);
-        vi.mocked(browserStorage.clear).mockResolvedValue(undefined as any);
-        vi.mocked(browserStorage.key).mockResolvedValue('k' as any);
-        vi.mocked(browserStorage.keys).mockResolvedValue(['k1', 'k2']);
-        vi.mocked(browserStorage.iterate).mockResolvedValue('iter' as any);
+    it('should store and retrieve values', async () => {
+        await service.setItem('key', 'value');
+        const value = await service.getItem<string>('key');
+        expect(value).toBe('value');
+    });
 
-        const service = new DesktopLocalStorageService();
+    it('should remove items', async () => {
+        await service.setItem('key', 'value');
+        await service.removeItem('key');
+        const value = await service.getItem('key');
+        expect(value).toBeNull();
+    });
 
-        await expect(service.getItem('a')).resolves.toBe('v');
-        await expect(service.setItem('a', 'b')).resolves.toBe('saved');
-        await expect(service.removeItem('a')).resolves.toBeUndefined();
-        await expect(service.clear()).resolves.toBeUndefined();
-        await expect(service.key(0)).resolves.toBe('k');
-        await expect(service.keys()).resolves.toEqual(['k1', 'k2']);
-        await expect(service.iterate((v) => v)).resolves.toBe('iter');
+    it('should clear all items', async () => {
+        await service.setItem('a', 1);
+        await service.setItem('b', 2);
+        await service.clear();
+        expect(await service.getItem('a')).toBeNull();
+        expect(await service.getItem('b')).toBeNull();
+    });
 
-        expect(browserStorage.getItem).toHaveBeenCalledWith('a');
-        expect(browserStorage.setItem).toHaveBeenCalledWith('a', 'b');
+    it('should return keys', async () => {
+        await service.setItem('x', 1);
+        await service.setItem('y', 2);
+        const keys = await service.keys();
+        expect(keys).toContain('x');
+        expect(keys).toContain('y');
+    });
+
+    it('should support key by index', async () => {
+        await service.setItem('only', 1);
+        const key = await service.key(0);
+        expect(key).toBe('only');
+    });
+
+    it('should support iterate', async () => {
+        await service.setItem('a', 1);
+        await service.setItem('b', 2);
+
+        const collected: Array<{ value: number; key: string }> = [];
+        await service.iterate<number, void>((value, key) => {
+            collected.push({ value, key });
+        });
+
+        expect(collected).toHaveLength(2);
     });
 });

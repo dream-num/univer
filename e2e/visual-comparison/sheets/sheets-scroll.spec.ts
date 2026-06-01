@@ -196,7 +196,7 @@ test('status bar count with array formula selection', async () => {
         };
         window.univerAPI.dispose();
         setTimeout(() => {
-            window.univerAPI.createUniverSheet(snapshot);
+            window.univerAPI.createWorkbook(snapshot);
         }, 500);
     });
     await page.waitForTimeout(1000);

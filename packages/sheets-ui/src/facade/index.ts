@@ -18,15 +18,12 @@ import './f-univer';
 import './f-workbook';
 import './f-worksheet';
 import './f-workbook-permission';
-import './f-sheet-hooks';
 import './f-event';
 
 export * from './f-enum';
 
 export type * from './f-event';
 export { type IFComponentKey, transformComponentKey } from './f-range';
-export type * from './f-sheet-hooks';
 export type * from './f-univer';
 export type * from './f-workbook';
-export type * from './f-workbook-permission';
 export type * from './f-worksheet';

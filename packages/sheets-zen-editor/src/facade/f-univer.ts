@@ -16,12 +16,10 @@
 
 import type { DocumentDataModel, Injector } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import type { IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui';
 import type { IBeforeSheetEditEndEventParams, IBeforeSheetEditStartEventParams, ISheetEditChangingEventParams, ISheetEditEndedEventParams, ISheetEditStartedEventParams } from '@univerjs/sheets-ui/facade';
 import { CanceledError, DOCS_ZEN_EDITOR_UNIT_ID_KEY, ICommandService, IUniverInstanceService, RichTextValue } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import { RichTextEditingMutation } from '@univerjs/docs';
-
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { CancelZenEditCommand, ConfirmZenEditCommand, OpenZenEditorCommand } from '@univerjs/sheets-zen-editor';
 
@@ -41,26 +39,21 @@ export class FUniverSheetsZenEditorMixin extends FUniver implements IFUniverShee
                 this.Event.BeforeSheetEditStart,
                 () => commandService.beforeCommandExecuted((commandInfo) => {
                     if (commandInfo.id === OpenZenEditorCommand.id) {
-                        const target = this.getCommandSheetTarget(commandInfo);
-                        if (!target) {
-                            return;
-                        }
+                        const target = this.getSheetCommandTarget();
+                        if (!target) return;
+
                         const { workbook, worksheet } = target;
-                        const editorBridgeService = injector.get(IEditorBridgeService);
-                        const params = commandInfo.params as IEditorBridgeServiceVisibleParam;
-                        const { keycode, eventType } = params;
-                        const loc = editorBridgeService.getEditLocation()!;
+                        const loc = injector.get(IEditorBridgeService).getEditLocation()!;
 
                         const eventParams: IBeforeSheetEditStartEventParams = {
-                            row: loc.row,
-                            column: loc.column,
-                            eventType,
-                            keycode,
                             workbook,
                             worksheet,
+                            row: loc.row,
+                            column: loc.column,
                             isZenEditor: true,
                         };
                         this.fireEvent(this.Event.BeforeSheetEditStart, eventParams);
+
                         if (eventParams.cancel) {
                             throw new CanceledError();
                         }
@@ -73,33 +66,25 @@ export class FUniverSheetsZenEditorMixin extends FUniver implements IFUniverShee
             this.registerEventHandler(
                 this.Event.BeforeSheetEditEnd,
                 () => commandService.beforeCommandExecuted((commandInfo) => {
-                    if (
-                        commandInfo.id === CancelZenEditCommand.id ||
-                    commandInfo.id === ConfirmZenEditCommand.id
-                    ) {
-                        const target = this.getCommandSheetTarget(commandInfo);
-                        if (!target) {
-                            return;
-                        }
+                    if (commandInfo.id === CancelZenEditCommand.id || commandInfo.id === ConfirmZenEditCommand.id) {
+                        const target = this.getSheetCommandTarget();
+                        if (!target) return;
+
                         const { workbook, worksheet } = target;
-                        const editorBridgeService = injector.get(IEditorBridgeService);
-                        const univerInstanceService = injector.get(IUniverInstanceService);
-                        const params = commandInfo.params as IEditorBridgeServiceVisibleParam;
-                        const { keycode, eventType } = params;
-                        const loc = editorBridgeService.getEditLocation()!;
+                        const loc = injector.get(IEditorBridgeService).getEditLocation()!;
+                        const value = RichTextValue.create(injector.get(IUniverInstanceService).getUnit<DocumentDataModel>(DOCS_ZEN_EDITOR_UNIT_ID_KEY)!.getSnapshot());
 
                         const eventParams: IBeforeSheetEditEndEventParams = {
-                            row: loc.row,
-                            column: loc.column,
-                            eventType,
-                            keycode,
                             workbook,
                             worksheet,
+                            row: loc.row,
+                            column: loc.column,
                             isZenEditor: true,
-                            value: RichTextValue.create(univerInstanceService.getUnit<DocumentDataModel>(DOCS_ZEN_EDITOR_UNIT_ID_KEY)!.getSnapshot()),
+                            value,
                             isConfirm: commandInfo.id === ConfirmZenEditCommand.id,
                         };
                         this.fireEvent(this.Event.BeforeSheetEditEnd, eventParams);
+
                         if (eventParams.cancel) {
                             throw new CanceledError();
                         }
@@ -114,23 +99,17 @@ export class FUniverSheetsZenEditorMixin extends FUniver implements IFUniverShee
                 this.Event.SheetEditStarted,
                 () => commandService.onCommandExecuted((commandInfo) => {
                     if (commandInfo.id === OpenZenEditorCommand.id) {
-                        const target = this.getCommandSheetTarget(commandInfo);
-                        if (!target) {
-                            return;
-                        }
-                        const { workbook, worksheet } = target;
+                        const target = this.getSheetCommandTarget();
+                        if (!target) return;
 
-                        const editorBridgeService = injector.get(IEditorBridgeService);
-                        const params = commandInfo.params as IEditorBridgeServiceVisibleParam;
-                        const { keycode, eventType } = params;
-                        const loc = editorBridgeService.getEditLocation()!;
+                        const { workbook, worksheet } = target;
+                        const loc = injector.get(IEditorBridgeService).getEditLocation()!;
+
                         const eventParams: ISheetEditStartedEventParams = {
-                            row: loc.row,
-                            column: loc.column,
-                            eventType,
-                            keycode,
                             workbook,
                             worksheet,
+                            row: loc.row,
+                            column: loc.column,
                             isZenEditor: true,
                         };
                         this.fireEvent(this.Event.SheetEditStarted, eventParams);
@@ -143,28 +122,18 @@ export class FUniverSheetsZenEditorMixin extends FUniver implements IFUniverShee
             this.registerEventHandler(
                 this.Event.SheetEditEnded,
                 () => commandService.onCommandExecuted((commandInfo) => {
-                    if (
-                        commandInfo.id === CancelZenEditCommand.id ||
-                    commandInfo.id === ConfirmZenEditCommand.id
-                    ) {
-                        const target = this.getCommandSheetTarget(commandInfo);
-                        if (!target) {
-                            return;
-                        }
-                        const { workbook, worksheet } = target;
+                    if (commandInfo.id === CancelZenEditCommand.id || commandInfo.id === ConfirmZenEditCommand.id) {
+                        const target = this.getSheetCommandTarget();
+                        if (!target) return;
 
-                        const editorBridgeService = injector.get(IEditorBridgeService);
-                        const params = commandInfo.params as IEditorBridgeServiceVisibleParam;
-                        const { keycode, eventType } = params;
-                        const loc = editorBridgeService.getEditLocation()!;
+                        const { workbook, worksheet } = target;
+                        const loc = injector.get(IEditorBridgeService).getEditLocation()!;
 
                         const eventParams: ISheetEditEndedEventParams = {
-                            row: loc.row,
-                            column: loc.column,
-                            eventType,
-                            keycode,
                             workbook,
                             worksheet,
+                            row: loc.row,
+                            column: loc.column,
                             isZenEditor: true,
                             isConfirm: commandInfo.id === ConfirmZenEditCommand.id,
                         };

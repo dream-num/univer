@@ -15,11 +15,11 @@
  */
 
 import type { Injector } from '@univerjs/core';
-import type { IRemoveNoteMutationParams, IUpdateNoteMutationParams } from '@univerjs/sheets-note';
+import type { IUpdateNoteMutationParams } from '@univerjs/sheets-note';
 import type { ISheetNoteAddEventParams, ISheetNoteDeleteEventParams, ISheetNoteHideEventParams, ISheetNoteShowEventParams, ISheetNoteUpdateEventParams } from './f-event';
-import { CanceledError, ICommandService, IUniverInstanceService } from '@univerjs/core';
+import { CanceledError, ICommandService } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
-import { getSheetCommandTarget, SheetsSelectionsService } from '@univerjs/sheets';
+import { SheetsSelectionsService } from '@univerjs/sheets';
 import { SheetDeleteNoteCommand, SheetsNoteModel, SheetToggleNotePopupCommand, SheetUpdateNoteCommand } from '@univerjs/sheets-note';
 
 export class FUniverSheetsNoteMixin extends FUniver {
@@ -35,11 +35,11 @@ export class FUniverSheetsNoteMixin extends FUniver {
                     return model.change$.subscribe((change) => {
                         if (change.type === 'update' && !change.oldNote && change.newNote) {
                             const { unitId, subUnitId, newNote } = change;
-                            const target = this.getSheetTarget(unitId, subUnitId);
-                            if (!target) {
-                                return;
-                            }
+                            const target = this.getSheetCommandTarget({ unitId, subUnitId });
+                            if (!target) return;
+
                             const { workbook, worksheet } = target;
+
                             const eventParams: ISheetNoteAddEventParams = {
                                 workbook,
                                 worksheet,
@@ -62,11 +62,11 @@ export class FUniverSheetsNoteMixin extends FUniver {
                     return model.change$.subscribe((change) => {
                         if (change.type === 'update' && change.oldNote && !change.newNote) {
                             const { unitId, subUnitId, oldNote } = change;
-                            const target = this.getSheetTarget(unitId, subUnitId);
-                            if (!target) {
-                                return;
-                            }
+                            const target = this.getSheetCommandTarget({ unitId, subUnitId });
+                            if (!target) return;
+
                             const { workbook, worksheet } = target;
+
                             const eventParams: ISheetNoteDeleteEventParams = {
                                 workbook,
                                 worksheet,
@@ -89,11 +89,11 @@ export class FUniverSheetsNoteMixin extends FUniver {
                     return model.change$.subscribe((change) => {
                         if (change.type === 'update' && change.oldNote && change.newNote) {
                             const { unitId, subUnitId, oldNote, newNote } = change;
-                            const target = this.getSheetTarget(unitId, subUnitId);
-                            if (!target) {
-                                return;
-                            }
+                            const target = this.getSheetCommandTarget({ unitId, subUnitId });
+                            if (!target) return;
+
                             const { workbook, worksheet } = target;
+
                             const eventParams: ISheetNoteUpdateEventParams = {
                                 workbook,
                                 worksheet,
@@ -117,11 +117,11 @@ export class FUniverSheetsNoteMixin extends FUniver {
                     return model.change$.subscribe((change) => {
                         if (change.type === 'update' && change.oldNote && change.newNote && !change.oldNote.show && change.newNote.show) {
                             const { unitId, subUnitId, newNote } = change;
-                            const target = this.getSheetTarget(unitId, subUnitId);
-                            if (!target) {
-                                return;
-                            }
+                            const target = this.getSheetCommandTarget({ unitId, subUnitId });
+                            if (!target) return;
+
                             const { workbook, worksheet } = target;
+
                             const eventParams: ISheetNoteShowEventParams = {
                                 workbook,
                                 worksheet,
@@ -143,11 +143,11 @@ export class FUniverSheetsNoteMixin extends FUniver {
                     return model.change$.subscribe((change) => {
                         if (change.type === 'update' && change.oldNote && change.newNote && change.oldNote.show && !change.newNote.show) {
                             const { unitId, subUnitId, newNote } = change;
-                            const target = this.getSheetTarget(unitId, subUnitId);
-                            if (!target) {
-                                return;
-                            }
+                            const target = this.getSheetCommandTarget({ unitId, subUnitId });
+                            if (!target) return;
+
                             const { workbook, worksheet } = target;
+
                             const eventParams: ISheetNoteHideEventParams = {
                                 workbook,
                                 worksheet,
@@ -166,16 +166,16 @@ export class FUniverSheetsNoteMixin extends FUniver {
                 this.Event.BeforeSheetNoteAdd,
                 () => commandService.beforeCommandExecuted((command) => {
                     if (command.id === SheetUpdateNoteCommand.id) {
-                        const { unitId, sheetId, row, col, note } = command.params as IUpdateNoteMutationParams;
-
-                        const target = this.getSheetTarget(unitId, sheetId);
+                        const params = command.params as IUpdateNoteMutationParams;
+                        const target = this.getSheetCommandTarget(params);
                         if (!target) return;
 
-                        const model = injector.get(SheetsNoteModel);
-                        const oldNote = model.getNote(unitId, sheetId, { noteId: note.id, row, col });
+                        const { workbook, worksheet, unitId, subUnitId } = target;
+                        const { row, col, note } = params;
+
+                        const oldNote = injector.get(SheetsNoteModel).getNote(unitId, subUnitId, { noteId: note.id, row, col });
                         if (oldNote) return;
 
-                        const { workbook, worksheet } = target;
                         const eventParams: ISheetNoteAddEventParams = {
                             workbook,
                             worksheet,
@@ -184,6 +184,7 @@ export class FUniverSheetsNoteMixin extends FUniver {
                             note,
                         };
                         const cancel = this.fireEvent(this.Event.BeforeSheetNoteAdd, eventParams);
+
                         if (cancel) {
                             throw new CanceledError();
                         }
@@ -197,15 +198,18 @@ export class FUniverSheetsNoteMixin extends FUniver {
                 this.Event.BeforeSheetNoteDelete,
                 () => commandService.beforeCommandExecuted((command) => {
                     if (command.id === SheetDeleteNoteCommand.id) {
-                        const { unitId, sheetId, row, col } = command.params as IRemoveNoteMutationParams;
-                        const target = this.getSheetTarget(unitId, sheetId);
+                        const target = this.getSheetCommandTarget();
                         if (!target) return;
-                        if (row === undefined || col === undefined) return;
-                        const model = injector.get(SheetsNoteModel);
-                        const oldNote = model.getNote(unitId, sheetId, { row, col });
+
+                        const selection = injector.get(SheetsSelectionsService).getCurrentLastSelection();
+                        if (!selection?.primary) return;
+
+                        const { workbook, worksheet, unitId, subUnitId } = target;
+                        const { actualRow: row, actualColumn: col } = selection.primary;
+
+                        const oldNote = injector.get(SheetsNoteModel).getNote(unitId, subUnitId, { row, col });
                         if (!oldNote) return;
 
-                        const { workbook, worksheet } = target;
                         const eventParams: ISheetNoteDeleteEventParams = {
                             workbook,
                             worksheet,
@@ -228,16 +232,16 @@ export class FUniverSheetsNoteMixin extends FUniver {
                 this.Event.BeforeSheetNoteUpdate,
                 () => commandService.beforeCommandExecuted((command) => {
                     if (command.id === SheetUpdateNoteCommand.id) {
-                        const { unitId, sheetId, row, col, note } = command.params as IUpdateNoteMutationParams;
-
-                        const target = this.getSheetTarget(unitId, sheetId);
+                        const params = command.params as IUpdateNoteMutationParams;
+                        const target = this.getSheetCommandTarget(params);
                         if (!target) return;
 
-                        const model = injector.get(SheetsNoteModel);
-                        const oldNote = model.getNote(unitId, sheetId, { row, col });
+                        const { workbook, worksheet, unitId, subUnitId } = target;
+                        const { row, col, note } = params;
+
+                        const oldNote = injector.get(SheetsNoteModel).getNote(unitId, subUnitId, { row, col });
                         if (!oldNote) return;
 
-                        const { workbook, worksheet } = target;
                         const eventParams: ISheetNoteUpdateEventParams = {
                             workbook,
                             worksheet,
@@ -247,6 +251,7 @@ export class FUniverSheetsNoteMixin extends FUniver {
                             oldNote,
                         };
                         const cancel = this.fireEvent(this.Event.BeforeSheetNoteUpdate, eventParams);
+
                         if (cancel) {
                             throw new CanceledError();
                         }
@@ -260,30 +265,26 @@ export class FUniverSheetsNoteMixin extends FUniver {
                 this.Event.BeforeSheetNoteShow,
                 () => commandService.beforeCommandExecuted((command) => {
                     if (command.id === SheetToggleNotePopupCommand.id) {
-                        const target = getSheetCommandTarget(injector.get(IUniverInstanceService));
+                        const target = this.getSheetCommandTarget();
                         if (!target) return;
 
-                        const { unitId, subUnitId } = target;
-                        const workbook = this.getUniverSheet(unitId);
-                        if (!workbook) return;
-                        const worksheet = workbook.getSheetBySheetId(subUnitId);
-                        if (!worksheet) return;
-
-                        const sheetsSelectionsService = injector.get(SheetsSelectionsService);
-                        const selection = sheetsSelectionsService.getCurrentLastSelection();
+                        const selection = injector.get(SheetsSelectionsService).getCurrentLastSelection();
                         if (!selection?.primary) return;
 
-                        const sheetsNoteModel = injector.get(SheetsNoteModel);
-                        const { actualColumn, actualRow } = selection.primary;
-                        const note = sheetsNoteModel.getNote(unitId, subUnitId, { row: actualRow, col: actualColumn });
+                        const { workbook, worksheet, unitId, subUnitId } = target;
+                        const { actualRow: row, actualColumn: col } = selection.primary;
+
+                        const note = injector.get(SheetsNoteModel).getNote(unitId, subUnitId, { row, col });
                         if (!note || note.show) return;
+
                         const eventParams: ISheetNoteShowEventParams = {
                             workbook,
                             worksheet,
-                            row: actualRow,
-                            col: actualColumn,
+                            row,
+                            col,
                         };
                         const cancel = this.fireEvent(this.Event.BeforeSheetNoteShow, eventParams);
+
                         if (cancel) {
                             throw new CanceledError();
                         }
@@ -297,30 +298,26 @@ export class FUniverSheetsNoteMixin extends FUniver {
                 this.Event.BeforeSheetNoteHide,
                 () => commandService.beforeCommandExecuted((command) => {
                     if (command.id === SheetToggleNotePopupCommand.id) {
-                        const target = getSheetCommandTarget(injector.get(IUniverInstanceService));
+                        const target = this.getSheetCommandTarget();
                         if (!target) return;
 
-                        const { unitId, subUnitId } = target;
-                        const workbook = this.getUniverSheet(unitId);
-                        if (!workbook) return;
-                        const worksheet = workbook.getSheetBySheetId(subUnitId);
-                        if (!worksheet) return;
-
-                        const sheetsSelectionsService = injector.get(SheetsSelectionsService);
-                        const selection = sheetsSelectionsService.getCurrentLastSelection();
+                        const selection = injector.get(SheetsSelectionsService).getCurrentLastSelection();
                         if (!selection?.primary) return;
 
-                        const sheetsNoteModel = injector.get(SheetsNoteModel);
-                        const { actualColumn, actualRow } = selection.primary;
-                        const note = sheetsNoteModel.getNote(unitId, subUnitId, { row: actualRow, col: actualColumn });
+                        const { workbook, worksheet, unitId, subUnitId } = target;
+                        const { actualRow: row, actualColumn: col } = selection.primary;
+
+                        const note = injector.get(SheetsNoteModel).getNote(unitId, subUnitId, { row, col });
                         if (!note || !note.show) return;
+
                         const eventParams: ISheetNoteHideEventParams = {
                             workbook,
                             worksheet,
-                            row: actualRow,
-                            col: actualColumn,
+                            row,
+                            col,
                         };
                         const cancel = this.fireEvent(this.Event.BeforeSheetNoteHide, eventParams);
+
                         if (cancel) {
                             throw new CanceledError();
                         }

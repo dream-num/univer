@@ -40,6 +40,7 @@ export interface IRenderManagerService extends IDisposable {
     createRender(unitId: string, createUnitOptions?: ICreateUnitOptions): IRender;
     removeRender(unitId: string): void;
     /**
+     * @deprecated use getRenderUnitById instead
      * Get RenderUnit By Id, RenderUnit implements IRender
      * @param unitId
      */

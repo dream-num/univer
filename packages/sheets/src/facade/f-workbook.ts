@@ -170,22 +170,6 @@ export class FWorkbook extends FBaseInitialable {
     }
 
     /**
-     * @deprecated use 'save' instead.
-     * @returns {IWorkbookData} Workbook snapshot data
-     * @memberof FWorkbook
-     * @example
-     * ```ts
-     * // The code below saves the workbook snapshot data
-     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
-     * const snapshot = activeSpreadsheet.getSnapshot();
-     * ```
-     */
-    getSnapshot(): IWorkbookData {
-        this._logService.warn('use \'save\' instead of \'getSnapshot\'');
-        return this.save();
-    }
-
-    /**
      * Get the active sheet of the workbook.
      * @returns {FWorksheet} The active sheet of the workbook
      * @example
@@ -753,14 +737,6 @@ export class FWorkbook extends FBaseInitialable {
      */
     getLocale(): LocaleType {
         return this._localeService.getCurrentLocale();
-    }
-
-    /**
-     * @deprecated use `setSpreadsheetLocale` instead.
-     * @param {LocaleType} locale - The locale to set
-     */
-    setLocale(locale: LocaleType): void {
-        this._localeService.setLocale(locale);
     }
 
     /**

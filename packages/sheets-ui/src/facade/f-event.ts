@@ -98,7 +98,7 @@ export interface IBeforeSheetEditStartEventParams extends IEventBase {
     /** Column index of the cell to be edited */
     column: number;
     /** Type of input device event triggering the edit */
-    eventType: DeviceInputEventType;
+    eventType?: DeviceInputEventType;
     /** Optional keycode triggering the edit */
     keycode?: KeyCode;
     /** Whether the edit will happen in zen editor mode */
@@ -118,7 +118,7 @@ export interface ISheetEditStartedEventParams extends IEventBase {
     /** Column index of the editing cell */
     column: number;
     /** Type of input device event that triggered the edit */
-    eventType: DeviceInputEventType;
+    eventType?: DeviceInputEventType;
     /** Optional keycode that triggered the edit */
     keycode?: KeyCode;
     /** Whether the edit is happening in zen editor mode */
@@ -158,7 +158,7 @@ export interface IBeforeSheetEditEndEventParams extends IEventBase {
     /** Current value being edited */
     value: RichTextValue;
     /** Type of input device event triggering the edit end */
-    eventType: DeviceInputEventType;
+    eventType?: DeviceInputEventType;
     /** Optional keycode triggering the edit end */
     keycode?: KeyCode;
     /** Whether the edit is happening in zen editor mode */
@@ -180,7 +180,7 @@ export interface ISheetEditEndedEventParams extends IEventBase {
     /** Column index of the edited cell */
     column: number;
     /** Type of input device event that triggered the edit end */
-    eventType: DeviceInputEventType;
+    eventType?: DeviceInputEventType;
     /** Optional keycode that triggered the edit end */
     keycode?: KeyCode;
     /** Whether the edit happened in zen editor mode */

@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, ICreateUnitOptions, IDisposable, Injector, IWorkbookData, Nullable, Workbook } from '@univerjs/core';
+import type { ICreateUnitOptions, Injector, IWorkbookData, Workbook } from '@univerjs/core';
 import type {
     CommandListenerValueChange,
     IInsertSheetCommandParams,
     IRemoveSheetCommandParams,
     ISetGridlinesColorCommandParams,
     ISetTabColorMutationParams,
-    ISetWorksheetActivateCommandParams,
+    ISetWorksheetActiveOperationParams,
     ISetWorksheetHideMutationParams,
     ISetWorksheetNameCommandParams,
     ISetWorksheetOrderMutationParams,
@@ -51,7 +51,7 @@ import type {
 } from './f-event';
 import type { FRange } from './f-range';
 import type { FWorksheet } from './f-worksheet';
-import { CanceledError, ICommandService, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { CanceledError, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import {
     COMMAND_LISTENER_VALUE_CHANGE,
@@ -74,15 +74,10 @@ import { FWorkbook } from './f-workbook';
  */
 export interface IFUniverSheetsMixin {
     /**
-     * @deprecated use `univerAPI.createWorkbook` instead.
-     */
-    createUniverSheet(data: Partial<IWorkbookData>): FWorkbook;
-
-    /**
      * Create a new spreadsheet and get the API handler of that spreadsheet.
      * @param {Partial<IWorkbookData>} data The snapshot of the spreadsheet.
      * @param {ICreateUnitOptions} options The options of creating the spreadsheet.
-     * @returns {FWorkbook} FWorkbook API instance.
+     * @returns {FWorkbook} The spreadsheet API instance.
      * @example
      * ```ts
      * const fWorkbook = univerAPI.createWorkbook({ id: 'Sheet1', name: 'Sheet1' });
@@ -99,7 +94,7 @@ export interface IFUniverSheetsMixin {
 
     /**
      * Get the currently focused Univer spreadsheet.
-     * @returns {FWorkbook | null} The currently focused Univer spreadsheet.
+     * @returns {FWorkbook | null} The currently focused Univer spreadsheet API instance, or null if there is no active spreadsheet.
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -109,49 +104,18 @@ export interface IFUniverSheetsMixin {
     getActiveWorkbook(): FWorkbook | null;
 
     /**
-     * @deprecated use `univerAPI.getActiveWorkbook` instead
-     */
-    getActiveUniverSheet(): FWorkbook | null;
-
-    /**
      * Get the spreadsheet API handler by the spreadsheet id.
      * @param {string} id The spreadsheet id.
-     * @returns {FWorkbook | null} The spreadsheet API instance.
+     * @returns {FWorkbook | null} The spreadsheet API instance corresponding to the spreadsheet id, or null if not found.
      *
-     * @example
-     * ```ts
-     * const fWorkbook = univerAPI.getUniverSheet('Sheet1');
-     * console.log(fWorkbook);
-     *
-     * const fWorkbook = univerAPI.getWorkbook('Sheet1');
-     * console.log(fWorkbook);
-     * ```
-     */
-    getUniverSheet(id: string): FWorkbook | null;
-
-    getWorkbook(id: string): FWorkbook | null;
-
-    /**
-     * @deprecated Use `univerAPI.addEvent(univerAPI.Event.UnitCreated, () => {})`
-     */
-    onUniverSheetCreated(callback: (workbook: FWorkbook) => void): IDisposable;
-
-    /**
-     * Get the target of the sheet.
-     * @param {string} unitId - The unitId of the sheet.
-     * @param {string} subUnitId - The subUnitId of the sheet.
-     * @returns {Nullable<{ workbook: FWorkbook; worksheet: FWorksheet }>} - The target of the sheet.
      * @example
      * ```ts
      * const unitId = 'workbook-01';
-     * const subUnitId = 'sheet-0001';
-     * const target = univerAPI.getSheetTarget(unitId, subUnitId);
-     * if (!target) return;
-     * const { workbook, worksheet } = target;
-     * console.log(workbook, worksheet);
+     * const fWorkbook = univerAPI.getWorkbook(unitId);
+     * console.log(fWorkbook);
      * ```
      */
-    getSheetTarget(unitId: string, subUnitId: string): Nullable<{ workbook: FWorkbook; worksheet: FWorksheet }>;
+    getWorkbook(id: string): FWorkbook | null;
 
     /**
      * Get the target of the sheet.
@@ -161,14 +125,14 @@ export interface IFUniverSheetsMixin {
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.CommandExecuted, (event) => {
      *   const { options, ...commandInfo } = event;
-     *   const target = univerAPI.getCommandSheetTarget(commandInfo);
+     *   const target = univerAPI.getSheetCommandTarget(commandInfo.params);
      *   if (!target) return;
      *   const { workbook, worksheet } = target;
      *   console.log(workbook, worksheet);
      * });
      * ```
      */
-    getCommandSheetTarget(commandInfo: ICommandInfo<object>): Nullable<{ workbook: FWorkbook; worksheet: FWorksheet }>;
+    getSheetCommandTarget(params?: { unitId?: string; subUnitId?: string; sheetId?: string }): { workbook: FWorkbook; worksheet: FWorksheet; unitId: string; subUnitId: string } | null;
 
     /**
      * Get the active sheet.
@@ -181,7 +145,7 @@ export interface IFUniverSheetsMixin {
      * console.log(workbook, worksheet);
      * ```
      */
-    getActiveSheet(): Nullable<{ workbook: FWorkbook; worksheet: FWorksheet }>;
+    getActiveSheet(): { workbook: FWorkbook; worksheet: FWorksheet } | null;
 
     /**
      * Set whether to enable synchronize the frozen state to other users in real-time collaboration.
@@ -196,34 +160,541 @@ export interface IFUniverSheetsMixin {
 }
 
 export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
-    override getCommandSheetTarget(commandInfo: ICommandInfo<object>): Nullable<{ workbook: FWorkbook; worksheet: FWorksheet }> {
-        const params = commandInfo.params as { unitId: string; subUnitId: string; sheetId: string };
-        if (!params) return this.getActiveSheet();
-        const workbook = params.unitId ? this.getUniverSheet(params.unitId) : this.getActiveWorkbook?.();
+    override createWorkbook(data: Partial<IWorkbookData>, options?: ICreateUnitOptions): FWorkbook {
+        const instanceService = this._injector.get(IUniverInstanceService);
+        const workbook = instanceService.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, data, options);
+        return this._injector.createInstance(FWorkbook, workbook);
+    }
+
+    override getActiveWorkbook(): FWorkbook | null {
+        const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!workbook) {
-            return;
+            return null;
         }
 
-        const worksheet = workbook.getSheetBySheetId(params.subUnitId || params.sheetId) || workbook.getActiveSheet();
+        return this._injector.createInstance(FWorkbook, workbook);
+    }
+
+    override getWorkbook(id: string): FWorkbook | null {
+        const workbook = this._univerInstanceService.getUnit<Workbook>(id, UniverInstanceType.UNIVER_SHEET);
+        if (!workbook) {
+            return null;
+        }
+
+        return this._injector.createInstance(FWorkbook, workbook);
+    }
+
+    override getSheetCommandTarget(params: { unitId?: string; subUnitId?: string; sheetId?: string } = {}): { workbook: FWorkbook; worksheet: FWorksheet; unitId: string; subUnitId: string } | null {
+        const { unitId, subUnitId, sheetId } = params;
+        const workbook = unitId ? this.getWorkbook(unitId) : this.getActiveWorkbook();
+        if (!workbook) {
+            return null;
+        }
+
+        const sheetIdToFind = subUnitId || sheetId;
+        const worksheet = sheetIdToFind ? workbook.getSheetBySheetId(sheetIdToFind) : workbook.getActiveSheet();
         if (!worksheet) {
-            return;
+            return null;
+        }
+
+        return {
+            workbook,
+            worksheet,
+            unitId: workbook.getId(),
+            subUnitId: worksheet.getSheetId(),
+        };
+    }
+
+    override getActiveSheet(): { workbook: FWorkbook; worksheet: FWorksheet } | null {
+        const workbook = this.getActiveWorkbook();
+        if (!workbook) {
+            return null;
+        }
+
+        const worksheet = workbook.getActiveSheet();
+        if (!worksheet) {
+            return null;
         }
 
         return { workbook, worksheet };
     }
 
-    override getSheetTarget(unitId: string, subUnitId: string): Nullable<{ workbook: FWorkbook; worksheet: FWorksheet }> {
-        const workbook = this.getUniverSheet(unitId);
-        if (!workbook) {
-            return;
-        }
+    override setFreezeSync(enabled: boolean): void {
+        const controller = this._injector.get(SheetsFreezeSyncController);
+        controller.setEnabled(enabled);
+    }
 
-        const worksheet = workbook.getSheetBySheetId(subUnitId);
-        if (!worksheet) {
-            return;
-        }
+    /**
+     * @ignore
+     */
+    // eslint-disable-next-line max-lines-per-function
+    override _initialize(injector: Injector): void {
+        const univerInstanceService = injector.get(IUniverInstanceService);
+        const commandService = injector.get(ICommandService);
 
-        return { workbook, worksheet };
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.BeforeSheetCreate,
+                () => commandService.beforeCommandExecuted((commandInfo) => {
+                    if (commandInfo.id === InsertSheetCommand.id) {
+                        const params = commandInfo.params as IInsertSheetCommandParams;
+                        const { unitId, index, sheet } = params || {};
+
+                        const workbook = unitId ? this.getWorkbook(unitId) : this.getActiveWorkbook();
+                        if (!workbook) {
+                            return;
+                        }
+
+                        const eventParams: IBeforeSheetCreateEventParams = {
+                            workbook,
+                            index,
+                            sheet,
+                        };
+                        this.fireEvent(this.Event.BeforeSheetCreate, eventParams);
+
+                        // cancel this command
+                        if (eventParams.cancel) {
+                            throw new CanceledError();
+                        }
+                    }
+                })
+            )
+        );
+
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.BeforeActiveSheetChange,
+                () => commandService.beforeCommandExecuted((commandInfo) => {
+                    if (commandInfo.id === SetWorksheetActiveOperation.id) {
+                        const params = commandInfo.params as ISetWorksheetActiveOperationParams;
+                        const target = this.getSheetCommandTarget(params);
+                        if (!target) return;
+
+                        const { workbook, worksheet: activeSheet } = target;
+                        const oldActiveSheet = workbook.getActiveSheet();
+                        if (!activeSheet || !oldActiveSheet) return;
+
+                        const eventParams: IBeforeActiveSheetChangeEventParams = {
+                            workbook,
+                            activeSheet,
+                            oldActiveSheet,
+                        };
+                        this.fireEvent(this.Event.BeforeActiveSheetChange, eventParams);
+
+                        // cancel this command
+                        if (eventParams.cancel) {
+                            throw new CanceledError();
+                        }
+                    }
+                })
+            )
+        );
+
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.BeforeSheetDelete,
+                () => commandService.beforeCommandExecuted((commandInfo) => {
+                    if (commandInfo.id === RemoveSheetCommand.id) {
+                        const params = commandInfo.params as IRemoveSheetCommandParams;
+                        const target = this.getSheetCommandTarget(params);
+                        if (!target) return;
+
+                        const { workbook, worksheet } = target;
+
+                        const eventParams: IBeforeSheetDeleteEventParams = {
+                            workbook,
+                            worksheet,
+                        };
+                        this.fireEvent(this.Event.BeforeSheetDelete, eventParams);
+
+                        // cancel this command
+                        if (eventParams.cancel) {
+                            throw new CanceledError();
+                        }
+                    }
+                })
+            )
+        );
+
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.BeforeSheetMove,
+                () => commandService.beforeCommandExecuted((commandInfo) => {
+                    if (commandInfo.id === SetWorksheetOrderMutation.id) {
+                        const params = commandInfo.params as ISetWorksheetOrderMutationParams;
+                        const target = this.getSheetCommandTarget(params);
+                        if (!target) return;
+
+                        const { workbook, worksheet } = target;
+                        const { fromOrder: oldIndex, toOrder: newIndex } = params;
+
+                        const eventParams: IBeforeSheetMoveEventParams = {
+                            workbook,
+                            worksheet,
+                            newIndex,
+                            oldIndex,
+                        };
+                        this.fireEvent(this.Event.BeforeSheetMove, eventParams);
+
+                        // cancel this command
+                        if (eventParams.cancel) {
+                            throw new CanceledError();
+                        }
+                    }
+                })
+            )
+        );
+
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.BeforeSheetNameChange,
+                () => commandService.beforeCommandExecuted((commandInfo) => {
+                    if (commandInfo.id === SetWorksheetNameCommand.id) {
+                        const params = commandInfo.params as ISetWorksheetNameCommandParams;
+                        const target = this.getSheetCommandTarget(params);
+                        if (!target) return;
+
+                        const { workbook, worksheet } = target;
+                        const oldName = worksheet.getSheetName();
+                        const { name: newName } = params;
+
+                        const eventParams: IBeforeSheetNameChangeEventParams = {
+                            workbook,
+                            worksheet,
+                            newName,
+                            oldName,
+                        };
+                        this.fireEvent(this.Event.BeforeSheetNameChange, eventParams);
+
+                        // cancel this command
+                        if (eventParams.cancel) {
+                            throw new CanceledError();
+                        }
+                    }
+                })
+            )
+        );
+
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.BeforeSheetTabColorChange,
+                () => commandService.beforeCommandExecuted((commandInfo) => {
+                    if (commandInfo.id === SetTabColorMutation.id) {
+                        const params = commandInfo.params as ISetTabColorMutationParams;
+                        const target = this.getSheetCommandTarget(params);
+                        if (!target) return;
+
+                        const { workbook, worksheet } = target;
+                        const oldColor = worksheet.getTabColor();
+                        const { color: newColor } = params;
+
+                        const eventParams: IBeforeSheetTabColorChangeEventParams = {
+                            workbook,
+                            worksheet,
+                            newColor,
+                            oldColor,
+                        };
+                        this.fireEvent(this.Event.BeforeSheetTabColorChange, eventParams);
+
+                        // cancel this command
+                        if (eventParams.cancel) {
+                            throw new CanceledError();
+                        }
+                    }
+                })
+            )
+        );
+
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.BeforeSheetHideChange,
+                () => commandService.beforeCommandExecuted((commandInfo) => {
+                    if (commandInfo.id === SetWorksheetHideMutation.id) {
+                        const params = commandInfo.params as ISetWorksheetHideMutationParams;
+                        const target = this.getSheetCommandTarget(params);
+                        if (!target) return;
+
+                        const { workbook, worksheet } = target;
+                        const { hidden } = params;
+
+                        const eventParams: IBeforeSheetHideChangeEventParams = {
+                            workbook,
+                            worksheet,
+                            hidden: Boolean(hidden),
+                        };
+                        this.fireEvent(this.Event.BeforeSheetHideChange, eventParams);
+
+                        // cancel this command
+                        if (eventParams.cancel) {
+                            throw new CanceledError();
+                        }
+                    }
+                })
+            )
+        );
+
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.BeforeGridlineColorChange,
+                () => commandService.beforeCommandExecuted((commandInfo) => {
+                    if (commandInfo.id === SetGridlinesColorCommand.id) {
+                        const params = commandInfo.params as ISetGridlinesColorCommandParams;
+                        const target = this.getSheetCommandTarget(params);
+                        if (!target) return;
+
+                        const { workbook, worksheet } = target;
+                        const { color } = params;
+
+                        const eventParams: IBeforeGridlineColorChangedEventParams = {
+                            workbook,
+                            worksheet,
+                            color,
+                        };
+                        this.fireEvent(this.Event.BeforeGridlineColorChange, eventParams);
+
+                        // cancel this command
+                        if (eventParams.cancel) {
+                            throw new CanceledError();
+                        }
+                    }
+                })
+            )
+        );
+
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.BeforeGridlineEnableChange,
+                () => commandService.beforeCommandExecuted((commandInfo) => {
+                    if (commandInfo.id === ToggleGridlinesCommand.id) {
+                        const params = commandInfo.params as IToggleGridlinesCommandParams;
+                        const target = this.getSheetCommandTarget(params);
+                        if (!target) return;
+
+                        const { workbook, worksheet } = target;
+                        const showGridlines = params.showGridlines ?? !worksheet.hasHiddenGridLines();
+
+                        const eventParams: IBeforeGridlineEnableChangeEventParams = {
+                            workbook,
+                            worksheet,
+                            enabled: Boolean(showGridlines),
+                        };
+                        this.fireEvent(this.Event.BeforeGridlineEnableChange, eventParams);
+
+                        // cancel this command
+                        if (eventParams.cancel) {
+                            throw new CanceledError();
+                        }
+                    }
+                })
+            )
+        );
+
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.SheetValueChanged,
+                () => commandService.onCommandExecuted((commandInfo) => {
+                    if (COMMAND_LISTENER_VALUE_CHANGE.indexOf(commandInfo.id) > -1) {
+                        const sheet = this.getActiveSheet();
+                        if (!sheet) return;
+
+                        const ranges = getValueChangedEffectedRange(univerInstanceService, commandInfo)
+                            .map(
+                                (range) => this.getWorkbook(range.unitId)
+                                    ?.getSheetBySheetId(range.subUnitId)
+                                    ?.getRange(range.range)
+                            )
+                            .filter(Boolean) as FRange[];
+                        if (!ranges.length) return;
+
+                        const eventParams: ISheetValueChangedEventParams = {
+                            payload: commandInfo as CommandListenerValueChange,
+                            effectedRanges: ranges,
+                        };
+                        this.fireEvent(this.Event.SheetValueChanged, eventParams);
+                    }
+                })
+            )
+        );
+
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.SheetCreated,
+                () => commandService.onCommandExecuted((commandInfo) => {
+                    if (commandInfo.id === InsertSheetCommand.id) {
+                        const params = commandInfo.params as IInsertSheetCommandParams;
+                        const target = this.getSheetCommandTarget(params);
+                        if (!target) return;
+
+                        const { workbook, worksheet } = target;
+
+                        const eventParams: ISheetCreatedEventParams = {
+                            workbook,
+                            worksheet,
+                        };
+                        this.fireEvent(this.Event.SheetCreated, eventParams);
+                    }
+                })
+            )
+        );
+
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.ActiveSheetChanged,
+                () => commandService.onCommandExecuted((commandInfo) => {
+                    if (commandInfo.id === SetWorksheetActiveOperation.id) {
+                        const params = commandInfo.params as ISetWorksheetActiveOperationParams;
+                        const target = this.getSheetCommandTarget(params);
+                        if (!target) return;
+
+                        const { workbook, worksheet: activeSheet } = target;
+
+                        const eventParams: IActiveSheetChangedEventParams = {
+                            workbook,
+                            activeSheet,
+                        };
+                        this.fireEvent(this.Event.ActiveSheetChanged, eventParams);
+                    }
+                })
+            )
+        );
+
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.SheetDeleted,
+                () => commandService.onCommandExecuted((commandInfo) => {
+                    if (commandInfo.id === RemoveSheetCommand.id) {
+                        const { unitId, subUnitId: sheetId } = commandInfo.params as IRemoveSheetCommandParams;
+                        const workbook = unitId ? this.getWorkbook(unitId) : this.getActiveWorkbook();
+                        if (!workbook || !sheetId) return;
+
+                        const eventParams: ISheetDeletedEventParams = {
+                            workbook,
+                            sheetId,
+                        };
+                        this.fireEvent(this.Event.SheetDeleted, eventParams);
+                    }
+                })
+            )
+        );
+
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.SheetMoved,
+                () => commandService.onCommandExecuted((commandInfo) => {
+                    if (commandInfo.id === SetWorksheetOrderMutation.id) {
+                        const params = commandInfo.params as ISetWorksheetOrderMutationParams;
+                        const target = this.getSheetCommandTarget(params);
+                        if (!target) return;
+
+                        const { workbook, worksheet } = target;
+                        const { toOrder: newIndex } = params;
+
+                        const eventParams: ISheetMovedEventParams = {
+                            workbook,
+                            worksheet,
+                            newIndex,
+                        };
+                        this.fireEvent(this.Event.SheetMoved, eventParams);
+                    }
+                })
+            )
+        );
+
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.SheetNameChanged,
+                () => commandService.onCommandExecuted((commandInfo) => {
+                    if (commandInfo.id === SetWorksheetNameCommand.id) {
+                        const params = commandInfo.params as ISetWorksheetNameCommandParams;
+                        const target = this.getSheetCommandTarget(params);
+                        if (!target) return;
+
+                        const { workbook, worksheet } = target;
+                        const { name: newName } = params;
+
+                        const eventParams: ISheetNameChangedEventParams = {
+                            workbook,
+                            worksheet,
+                            newName,
+                        };
+                        this.fireEvent(this.Event.SheetNameChanged, eventParams);
+                    }
+                })
+            )
+        );
+
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.SheetTabColorChanged,
+                () => commandService.onCommandExecuted((commandInfo) => {
+                    if (commandInfo.id === SetTabColorMutation.id) {
+                        const params = commandInfo.params as ISetTabColorMutationParams;
+                        const target = this.getSheetCommandTarget(params);
+                        if (!target) return;
+
+                        const { workbook, worksheet } = target;
+                        const { color: newColor } = params;
+
+                        const eventParams: ISheetTabColorChangedEventParams = {
+                            workbook,
+                            worksheet,
+                            newColor,
+                        };
+                        this.fireEvent(this.Event.SheetTabColorChanged, eventParams);
+                    }
+                })
+            )
+        );
+
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.SheetHideChanged,
+                () => commandService.onCommandExecuted((commandInfo) => {
+                    if (commandInfo.id === SetWorksheetHideMutation.id) {
+                        const params = commandInfo.params as ISetWorksheetHideMutationParams;
+                        const target = this.getSheetCommandTarget(params);
+                        if (!target) return;
+
+                        const { workbook, worksheet } = target;
+                        const { hidden } = params;
+
+                        const eventParams: ISheetHideChangedEventParams = {
+                            workbook,
+                            worksheet,
+                            hidden: Boolean(hidden),
+                        };
+                        this.fireEvent(this.Event.SheetHideChanged, eventParams);
+                    }
+                })
+            )
+        );
+
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.GridlineChanged,
+                () => commandService.onCommandExecuted((commandInfo) => {
+                    if (commandInfo.id === SetGridlinesColorCommand.id || commandInfo.id === ToggleGridlinesCommand.id) {
+                        const params = commandInfo.params as ISetGridlinesColorCommandParams | IToggleGridlinesCommandParams;
+                        const target = this.getSheetCommandTarget(params);
+                        if (!target) return;
+
+                        const { workbook, worksheet } = target;
+                        const enabled = !worksheet.hasHiddenGridLines();
+                        const color = worksheet.getGridLinesColor();
+
+                        const eventParams: IGridlineChangedEventParams = {
+                            workbook,
+                            worksheet,
+                            enabled,
+                            color,
+                        };
+                        this.fireEvent(this.Event.GridlineChanged, eventParams);
+                    }
+                })
+            )
+        );
+
+        this._initWorkbookEvent(injector);
     }
 
     private _initWorkbookEvent(injector: Injector): void {
@@ -266,475 +737,6 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
                 })
             )
         );
-    }
-
-    /**
-     * @ignore
-     */
-    // eslint-disable-next-line max-lines-per-function
-    override _initialize(injector: Injector): void {
-        const univerInstanceService = injector.get(IUniverInstanceService);
-        const commandService = injector.get(ICommandService);
-
-        this.disposeWithMe(
-            this.registerEventHandler(
-                this.Event.BeforeSheetCreate,
-                () => commandService.beforeCommandExecuted((commandInfo) => {
-                    if (commandInfo.id === InsertSheetCommand.id) {
-                        const params = (commandInfo.params) as IInsertSheetCommandParams;
-                        const { unitId, index, sheet } = params || {};
-                        const workbook = unitId ? this.getUniverSheet(unitId) : this.getActiveWorkbook?.();
-                        if (!workbook) {
-                            return;
-                        }
-                        const eventParams: IBeforeSheetCreateEventParams = {
-                            workbook,
-                            index,
-                            sheet,
-                        };
-                        this.fireEvent(this.Event.BeforeSheetCreate, eventParams);
-                        // cancel this command
-                        if (eventParams.cancel) {
-                            throw new CanceledError();
-                        }
-                    }
-                })
-            )
-        );
-
-        this.disposeWithMe(
-            this.registerEventHandler(
-                this.Event.BeforeActiveSheetChange,
-                () => commandService.beforeCommandExecuted((commandInfo) => {
-                    if (commandInfo.id === SetWorksheetActiveOperation.id) {
-                        const { subUnitId: sheetId, unitId } = commandInfo.params as ISetWorksheetActivateCommandParams;
-                        const workbook = unitId ? this.getUniverSheet(unitId) : this.getActiveWorkbook?.();
-                        if (!workbook || !sheetId) return;
-                        const activeSheet = workbook.getSheetBySheetId(sheetId);
-                        const oldActiveSheet = workbook.getActiveSheet();
-                        if (!activeSheet || !oldActiveSheet) return;
-                        const eventParams: IBeforeActiveSheetChangeEventParams = {
-                            workbook,
-                            activeSheet,
-                            oldActiveSheet,
-                        };
-                        this.fireEvent(this.Event.BeforeActiveSheetChange, eventParams);
-                        // cancel this command
-                        if (eventParams.cancel) {
-                            throw new CanceledError();
-                        }
-                    }
-                })
-            )
-        );
-
-        this.disposeWithMe(
-            this.registerEventHandler(
-                this.Event.BeforeSheetDelete,
-                () => commandService.beforeCommandExecuted((commandInfo) => {
-                    if (commandInfo.id === RemoveSheetCommand.id) {
-                        const target = this.getCommandSheetTarget(commandInfo);
-                        if (!target) return;
-                        const { workbook, worksheet } = target;
-                        const eventParams: IBeforeSheetDeleteEventParams = {
-                            workbook,
-                            worksheet,
-                        };
-                        this.fireEvent(this.Event.BeforeSheetDelete, eventParams);
-                        // cancel this command
-                        if (eventParams.cancel) {
-                            throw new CanceledError();
-                        }
-                    }
-                })
-            )
-        );
-
-        this.disposeWithMe(
-            this.registerEventHandler(
-                this.Event.BeforeSheetMove,
-                () => commandService.beforeCommandExecuted((commandInfo) => {
-                    if (commandInfo.id === SetWorksheetOrderMutation.id) {
-                        const { fromOrder, toOrder } = commandInfo.params as ISetWorksheetOrderMutationParams;
-                        const target = this.getCommandSheetTarget(commandInfo);
-                        if (!target) return;
-                        const eventParams: IBeforeSheetMoveEventParams = {
-                            workbook: target.workbook,
-                            worksheet: target.worksheet,
-                            newIndex: toOrder,
-                            oldIndex: fromOrder,
-                        };
-                        this.fireEvent(this.Event.BeforeSheetMove, eventParams);
-                        // cancel this command
-                        if (eventParams.cancel) {
-                            throw new CanceledError();
-                        }
-                    }
-                })
-            )
-        );
-
-        this.disposeWithMe(
-            this.registerEventHandler(
-                this.Event.BeforeSheetNameChange,
-                () => commandService.beforeCommandExecuted((commandInfo) => {
-                    if (commandInfo.id === SetWorksheetNameCommand.id) {
-                        const { name } = commandInfo.params as ISetWorksheetNameCommandParams;
-                        const target = this.getCommandSheetTarget(commandInfo);
-                        if (!target) return;
-                        const eventParams: IBeforeSheetNameChangeEventParams = {
-                            workbook: target.workbook,
-                            worksheet: target.worksheet,
-                            newName: name,
-                            oldName: target.worksheet.getSheetName(),
-                        };
-                        this.fireEvent(this.Event.BeforeSheetNameChange, eventParams);
-                        // cancel this command
-                        if (eventParams.cancel) {
-                            throw new CanceledError();
-                        }
-                    }
-                })
-            )
-        );
-
-        this.disposeWithMe(
-            this.registerEventHandler(
-                this.Event.BeforeSheetTabColorChange,
-                () => commandService.beforeCommandExecuted((commandInfo) => {
-                    if (commandInfo.id === SetTabColorMutation.id) {
-                        const { color } = commandInfo.params as ISetTabColorMutationParams;
-                        const target = this.getCommandSheetTarget(commandInfo);
-                        if (!target) return;
-                        const eventParams: IBeforeSheetTabColorChangeEventParams = {
-                            workbook: target.workbook,
-                            worksheet: target.worksheet,
-                            newColor: color,
-                            oldColor: target.worksheet.getTabColor(),
-                        };
-                        this.fireEvent(this.Event.BeforeSheetTabColorChange, eventParams);
-                        // cancel this command
-                        if (eventParams.cancel) {
-                            throw new CanceledError();
-                        }
-                    }
-                })
-            )
-        );
-
-        this.disposeWithMe(
-            this.registerEventHandler(
-                this.Event.BeforeSheetHideChange,
-                () => commandService.beforeCommandExecuted((commandInfo) => {
-                    if (commandInfo.id === SetWorksheetHideMutation.id) {
-                        const { hidden } = commandInfo.params as ISetWorksheetHideMutationParams;
-                        const target = this.getCommandSheetTarget(commandInfo);
-                        if (!target) return;
-                        const eventParams: IBeforeSheetHideChangeEventParams = {
-                            workbook: target.workbook,
-                            worksheet: target.worksheet,
-                            hidden: Boolean(hidden),
-                        };
-                        this.fireEvent(this.Event.BeforeSheetHideChange, eventParams);
-                        // cancel this command
-                        if (eventParams.cancel) {
-                            throw new CanceledError();
-                        }
-                    }
-                })
-            )
-        );
-
-        this.disposeWithMe(
-            this.registerEventHandler(
-                this.Event.BeforeGridlineColorChange,
-                () => commandService.beforeCommandExecuted((commandInfo) => {
-                    if (commandInfo.id === SetGridlinesColorCommand.id) {
-                        const target = this.getCommandSheetTarget(commandInfo);
-                        if (!target) return;
-                        const eventParams: IBeforeGridlineColorChangedEventParams = {
-                            ...target,
-                            color: (commandInfo.params as ISetGridlinesColorCommandParams)?.color,
-                        };
-                        this.fireEvent(this.Event.BeforeGridlineColorChange, eventParams);
-                        // cancel this command
-                        if (eventParams.cancel) {
-                            throw new CanceledError();
-                        }
-                    }
-                })
-            )
-        );
-
-        this.disposeWithMe(
-            this.registerEventHandler(
-                this.Event.BeforeGridlineEnableChange,
-                () => commandService.beforeCommandExecuted((commandInfo) => {
-                    if (commandInfo.id === ToggleGridlinesCommand.id) {
-                        const target = this.getCommandSheetTarget(commandInfo);
-                        if (!target) return;
-                        const showGridlines = (commandInfo.params as IToggleGridlinesCommandParams)?.showGridlines ?? !target.worksheet.hasHiddenGridLines();
-                        const eventParams: IBeforeGridlineEnableChangeEventParams = {
-                            ...target,
-                            enabled: Boolean(showGridlines),
-                        };
-                        this.fireEvent(this.Event.BeforeGridlineEnableChange, eventParams);
-                        // cancel this command
-                        if (eventParams.cancel) {
-                            throw new CanceledError();
-                        }
-                    }
-                })
-            )
-        );
-
-        this.disposeWithMe(
-            this.registerEventHandler(
-                this.Event.SheetValueChanged,
-                () => commandService.onCommandExecuted((commandInfo) => {
-                    if (COMMAND_LISTENER_VALUE_CHANGE.indexOf(commandInfo.id) > -1) {
-                        const sheet = this.getActiveSheet();
-                        if (!sheet) return;
-                        const ranges = getValueChangedEffectedRange(univerInstanceService, commandInfo)
-                            .map(
-                                (range) => this.getWorkbook(range.unitId)
-                                    ?.getSheetBySheetId(range.subUnitId)
-                                    ?.getRange(range.range)
-                            )
-                            .filter(Boolean) as FRange[];
-                        if (!ranges.length) return;
-                        const eventParams: ISheetValueChangedEventParams = {
-                            payload: commandInfo as CommandListenerValueChange,
-                            effectedRanges: ranges,
-                        };
-                        this.fireEvent(this.Event.SheetValueChanged, eventParams);
-                    }
-                })
-            )
-        );
-
-        this.disposeWithMe(
-            this.registerEventHandler(
-                this.Event.SheetCreated,
-                () => commandService.onCommandExecuted((commandInfo) => {
-                    if (commandInfo.id === InsertSheetCommand.id) {
-                        const params = commandInfo.params as IInsertSheetCommandParams;
-                        const { unitId } = params || {};
-                        const workbook = unitId ? this.getUniverSheet(unitId) : this.getActiveWorkbook?.();
-                        if (!workbook) {
-                            return;
-                        }
-                        const worksheet = workbook.getActiveSheet();
-                        if (!worksheet) {
-                            return;
-                        }
-                        const eventParams: ISheetCreatedEventParams = {
-                            workbook,
-                            worksheet,
-                        };
-                        this.fireEvent(this.Event.SheetCreated, eventParams);
-                    }
-                })
-            )
-        );
-
-        this.disposeWithMe(
-            this.registerEventHandler(
-                this.Event.ActiveSheetChanged,
-                () => commandService.onCommandExecuted((commandInfo) => {
-                    if (commandInfo.id === SetWorksheetActiveOperation.id) {
-                        const target = this.getActiveSheet();
-                        if (!target) return;
-                        const { workbook, worksheet: activeSheet } = target;
-                        const eventParams: IActiveSheetChangedEventParams = {
-                            workbook,
-                            activeSheet,
-                        };
-                        this.fireEvent(this.Event.ActiveSheetChanged, eventParams);
-                    }
-                })
-            )
-        );
-
-        this.disposeWithMe(
-            this.registerEventHandler(
-                this.Event.SheetDeleted,
-                () => commandService.onCommandExecuted((commandInfo) => {
-                    if (commandInfo.id === RemoveSheetCommand.id) {
-                        const { subUnitId: sheetId, unitId } = commandInfo.params as IRemoveSheetCommandParams;
-                        const workbook = unitId ? this.getUniverSheet(unitId) : this.getActiveWorkbook?.();
-                        if (!workbook || !sheetId) return;
-                        const eventParams: ISheetDeletedEventParams = {
-                            workbook,
-                            sheetId,
-                        };
-                        this.fireEvent(this.Event.SheetDeleted, eventParams);
-                    }
-                })
-            )
-        );
-
-        this.disposeWithMe(
-            this.registerEventHandler(
-                this.Event.SheetMoved,
-                () => commandService.onCommandExecuted((commandInfo) => {
-                    if (commandInfo.id === SetWorksheetOrderMutation.id) {
-                        const { toOrder: toIndex } = commandInfo.params as ISetWorksheetOrderMutationParams;
-                        const target = this.getCommandSheetTarget(commandInfo);
-                        if (!target) return;
-                        const { workbook, worksheet } = target;
-                        const eventParams: ISheetMovedEventParams = {
-                            workbook,
-                            worksheet,
-                            newIndex: toIndex,
-                        };
-                        this.fireEvent(this.Event.SheetMoved, eventParams);
-                    }
-                })
-            )
-        );
-
-        this.disposeWithMe(
-            this.registerEventHandler(
-                this.Event.SheetNameChanged,
-                () => commandService.onCommandExecuted((commandInfo) => {
-                    if (commandInfo.id === SetWorksheetNameCommand.id) {
-                        const { name } = commandInfo.params as ISetWorksheetNameCommandParams;
-                        const target = this.getCommandSheetTarget(commandInfo);
-                        if (!target) return;
-                        const { workbook, worksheet } = target;
-                        const eventParams: ISheetNameChangedEventParams = {
-                            workbook,
-                            worksheet,
-                            newName: name,
-                        };
-                        this.fireEvent(this.Event.SheetNameChanged, eventParams);
-                    }
-                })
-            )
-        );
-
-        this.disposeWithMe(
-            this.registerEventHandler(
-                this.Event.SheetTabColorChanged,
-                () => commandService.onCommandExecuted((commandInfo) => {
-                    if (commandInfo.id === SetTabColorMutation.id) {
-                        const { color } = commandInfo.params as ISetTabColorMutationParams;
-                        const target = this.getCommandSheetTarget(commandInfo);
-                        if (!target) return;
-                        const { workbook, worksheet } = target;
-                        const eventParams: ISheetTabColorChangedEventParams = {
-                            workbook,
-                            worksheet,
-                            newColor: color,
-                        };
-                        this.fireEvent(this.Event.SheetTabColorChanged, eventParams);
-                    }
-                })
-            )
-        );
-
-        this.disposeWithMe(
-            this.registerEventHandler(
-                this.Event.SheetHideChanged,
-                () => commandService.onCommandExecuted((commandInfo) => {
-                    if (commandInfo.id === SetWorksheetHideMutation.id) {
-                        const { hidden } = commandInfo.params as ISetWorksheetHideMutationParams;
-                        const target = this.getCommandSheetTarget(commandInfo);
-                        if (!target) return;
-                        const { workbook, worksheet } = target;
-                        const eventParams: ISheetHideChangedEventParams = {
-                            workbook,
-                            worksheet,
-                            hidden: Boolean(hidden),
-                        };
-                        this.fireEvent(this.Event.SheetHideChanged, eventParams);
-                    }
-                })
-            )
-        );
-
-        this.disposeWithMe(
-            this.registerEventHandler(
-                this.Event.GridlineChanged,
-                () => commandService.onCommandExecuted((commandInfo) => {
-                    if (commandInfo.id === SetGridlinesColorCommand.id || commandInfo.id === ToggleGridlinesCommand.id) {
-                        const target = this.getCommandSheetTarget(commandInfo);
-                        if (!target) return;
-                        const eventParams: IGridlineChangedEventParams = {
-                            ...target,
-                            enabled: !target.worksheet.hasHiddenGridLines(),
-                            color: target.worksheet.getGridLinesColor(),
-                        };
-                        this.fireEvent(this.Event.GridlineChanged, eventParams);
-                    }
-                })
-            )
-        );
-
-        this._initWorkbookEvent(injector);
-    }
-
-    override createUniverSheet(data: Partial<IWorkbookData>, options?: ICreateUnitOptions): FWorkbook {
-        const instanceService = this._injector.get(IUniverInstanceService);
-        const workbook = instanceService.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, data, options);
-        return this._injector.createInstance(FWorkbook, workbook);
-    };
-
-    override createWorkbook(data: Partial<IWorkbookData>, options?: ICreateUnitOptions): FWorkbook {
-        return this.createUniverSheet(data, options);
-    }
-
-    override getActiveWorkbook(): FWorkbook | null {
-        const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-        if (!workbook) {
-            return null;
-        }
-
-        return this._injector.createInstance(FWorkbook, workbook);
-    }
-
-    override getActiveUniverSheet(): FWorkbook | null {
-        return this.getActiveWorkbook();
-    }
-
-    override getUniverSheet(id: string): FWorkbook | null {
-        const workbook = this._univerInstanceService.getUnit<Workbook>(id, UniverInstanceType.UNIVER_SHEET);
-        if (!workbook) {
-            return null;
-        }
-
-        return this._injector.createInstance(FWorkbook, workbook);
-    }
-
-    override getWorkbook(id: string): FWorkbook | null {
-        return this.getUniverSheet(id);
-    }
-
-    override onUniverSheetCreated(callback: (workbook: FWorkbook) => void): IDisposable {
-        const subscription = this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((event) => {
-            const fworkbook = this._injector.createInstance(FWorkbook, event.unit);
-            callback(fworkbook);
-        });
-
-        return toDisposable(subscription);
-    }
-
-    override getActiveSheet(): Nullable<{ workbook: FWorkbook; worksheet: FWorksheet }> {
-        const workbook = this.getActiveWorkbook();
-        if (!workbook) {
-            return null;
-        }
-        const worksheet = workbook.getActiveSheet();
-        if (!worksheet) {
-            return null;
-        }
-        return { workbook, worksheet };
-    }
-
-    override setFreezeSync(enabled: boolean): void {
-        const controller = this._injector.get(SheetsFreezeSyncController);
-        controller.setEnabled(enabled);
     }
 }
 

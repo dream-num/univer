@@ -21,7 +21,6 @@ export * from './f-enum';
 export * from './f-event';
 export { FRange } from './f-range';
 export { FSelection } from './f-selection';
-export { FSheetHooks } from './f-sheet-hooks';
 export { FWorkbook } from './f-workbook';
 export { FWorksheet } from './f-worksheet';
 export { FWorkbookPermission } from './permission/f-workbook-permission';

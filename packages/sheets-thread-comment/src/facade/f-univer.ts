@@ -15,7 +15,6 @@
  */
 
 import type { Injector } from '@univerjs/core';
-import type { FWorkbook, FWorksheet } from '@univerjs/sheets/facade';
 import type { IAddCommentCommandParams, IDeleteCommentCommandParams, IResolveCommentCommandParams, IThreadComment, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
 import type {
     IBeforeSheetCommentAddEventParams,
@@ -66,21 +65,6 @@ export interface IFUniverSheetsThreadCommentMixin {
  * @ignore
  */
 export class FUniverSheetsThreadCommentMixin extends FUniver implements IFUniverSheetsThreadCommentMixin {
-    private _getTargetSheet(params: { unitId?: string; subUnitId?: string } = {}): {
-        workbook: FWorkbook;
-        worksheet: FWorksheet;
-    } | null {
-        const workbook = params.unitId ? this.getUniverSheet(params.unitId) : this.getActiveWorkbook?.();
-        if (!workbook) return null;
-        const worksheet = params.subUnitId ? workbook.getSheetBySheetId(params.subUnitId) : workbook.getActiveSheet();
-        if (!worksheet) return null;
-
-        return {
-            workbook,
-            worksheet,
-        };
-    }
-
     // eslint-disable-next-line max-lines-per-function
     override _initialize(injector: Injector): void {
         const commandService = injector.get(ICommandService);
@@ -92,11 +76,13 @@ export class FUniverSheetsThreadCommentMixin extends FUniver implements IFUniver
                 () => commandService.onCommandExecuted((commandInfo) => {
                     if (commandInfo.id !== AddCommentCommand.id) return;
 
-                    const target = this._getTargetSheet(commandInfo.params);
+                    const params = commandInfo.params as IAddCommentCommandParams;
+                    const target = this.getSheetCommandTarget(params);
                     if (!target) return;
 
                     const { workbook, worksheet } = target;
-                    const { comment } = commandInfo.params as IAddCommentCommandParams;
+                    const { comment } = params;
+
                     const threadComment = worksheet.getCommentById(comment.id);
                     if (!threadComment) return;
 
@@ -118,11 +104,13 @@ export class FUniverSheetsThreadCommentMixin extends FUniver implements IFUniver
                 () => commandService.onCommandExecuted((commandInfo) => {
                     if (commandInfo.id !== UpdateCommentCommand.id) return;
 
-                    const target = this._getTargetSheet(commandInfo.params);
+                    const params = commandInfo.params as IUpdateCommentCommandParams;
+                    const target = this.getSheetCommandTarget(params);
                     if (!target) return;
 
                     const { workbook, worksheet } = target;
-                    const { payload } = commandInfo.params as IUpdateCommentCommandParams;
+                    const { payload } = params;
+
                     const threadComment = worksheet.getCommentById(payload.commentId);
                     if (!threadComment) return;
 
@@ -144,11 +132,12 @@ export class FUniverSheetsThreadCommentMixin extends FUniver implements IFUniver
                 () => commandService.onCommandExecuted((commandInfo) => {
                     if (commandInfo.id !== DeleteCommentCommand.id && commandInfo.id !== DeleteCommentTreeCommand.id) return;
 
-                    const target = this._getTargetSheet(commandInfo.params);
+                    const params = commandInfo.params as IDeleteCommentCommandParams;
+                    const target = this.getSheetCommandTarget(params);
                     if (!target) return;
 
                     const { workbook, worksheet } = target;
-                    const { commentId } = commandInfo.params as IDeleteCommentCommandParams;
+                    const { commentId } = params;
 
                     const eventParams: ISheetCommentDeleteEventParams = {
                         workbook,
@@ -166,11 +155,13 @@ export class FUniverSheetsThreadCommentMixin extends FUniver implements IFUniver
                 () => commandService.onCommandExecuted((commandInfo) => {
                     if (commandInfo.id !== ResolveCommentCommand.id) return;
 
-                    const target = this._getTargetSheet(commandInfo.params);
+                    const params = commandInfo.params as IResolveCommentCommandParams;
+                    const target = this.getSheetCommandTarget(params);
                     if (!target) return;
 
                     const { workbook, worksheet } = target;
-                    const { commentId, resolved } = commandInfo.params as IResolveCommentCommandParams;
+                    const { commentId, resolved } = params;
+
                     const threadComment = worksheet.getCommentById(commentId);
                     if (!threadComment) return;
 
@@ -194,11 +185,12 @@ export class FUniverSheetsThreadCommentMixin extends FUniver implements IFUniver
                 () => commandService.beforeCommandExecuted((commandInfo) => {
                     if (commandInfo.id !== AddCommentCommand.id) return;
 
-                    const target = this._getTargetSheet(commandInfo.params);
+                    const params = commandInfo.params as IAddCommentCommandParams;
+                    const target = this.getSheetCommandTarget(params);
                     if (!target) return;
 
                     const { workbook, worksheet } = target;
-                    const { comment } = commandInfo.params as IAddCommentCommandParams;
+                    const { comment } = params;
                     const { range } = deserializeRangeWithSheet(comment.ref);
 
                     const eventParams: IBeforeSheetCommentAddEventParams = {
@@ -209,6 +201,7 @@ export class FUniverSheetsThreadCommentMixin extends FUniver implements IFUniver
                         comment: FTheadCommentItem.create(comment),
                     };
                     this.fireEvent(this.Event.BeforeCommentAdd, eventParams);
+
                     if (eventParams.cancel) {
                         throw new CanceledError();
                     }
@@ -222,11 +215,13 @@ export class FUniverSheetsThreadCommentMixin extends FUniver implements IFUniver
                 () => commandService.beforeCommandExecuted((commandInfo) => {
                     if (commandInfo.id !== UpdateCommentCommand.id) return;
 
-                    const target = this._getTargetSheet(commandInfo.params);
+                    const params = commandInfo.params as IUpdateCommentCommandParams;
+                    const target = this.getSheetCommandTarget(params);
                     if (!target) return;
 
                     const { workbook, worksheet } = target;
-                    const { payload } = commandInfo.params as IUpdateCommentCommandParams;
+                    const { payload } = params;
+
                     const threadComment = worksheet.getCommentById(payload.commentId);
                     if (!threadComment) return;
 
@@ -239,6 +234,7 @@ export class FUniverSheetsThreadCommentMixin extends FUniver implements IFUniver
                         newContent: RichTextValue.createByBody(payload.text),
                     };
                     this.fireEvent(this.Event.BeforeCommentUpdate, eventParams);
+
                     if (eventParams.cancel) {
                         throw new CanceledError();
                     }
@@ -252,11 +248,13 @@ export class FUniverSheetsThreadCommentMixin extends FUniver implements IFUniver
                 () => commandService.beforeCommandExecuted((commandInfo) => {
                     if (commandInfo.id !== DeleteCommentCommand.id && commandInfo.id !== DeleteCommentTreeCommand.id) return;
 
-                    const target = this._getTargetSheet(commandInfo.params);
+                    const params = commandInfo.params as IDeleteCommentCommandParams;
+                    const target = this.getSheetCommandTarget(params);
                     if (!target) return;
 
                     const { workbook, worksheet } = target;
-                    const { commentId } = commandInfo.params as IDeleteCommentCommandParams;
+                    const { commentId } = params;
+
                     const threadComment = worksheet.getCommentById(commentId);
                     if (!threadComment) return;
 
@@ -268,6 +266,7 @@ export class FUniverSheetsThreadCommentMixin extends FUniver implements IFUniver
                         comment: threadComment,
                     };
                     this.fireEvent(this.Event.BeforeCommentDelete, eventParams);
+
                     if (eventParams.cancel) {
                         throw new CanceledError();
                     }
@@ -281,11 +280,13 @@ export class FUniverSheetsThreadCommentMixin extends FUniver implements IFUniver
                 () => commandService.beforeCommandExecuted((commandInfo) => {
                     if (commandInfo.id !== ResolveCommentCommand.id) return;
 
-                    const target = this._getTargetSheet(commandInfo.params);
+                    const params = commandInfo.params as IResolveCommentCommandParams;
+                    const target = this.getSheetCommandTarget(params);
                     if (!target) return;
 
                     const { workbook, worksheet } = target;
-                    const { commentId, resolved } = commandInfo.params as IResolveCommentCommandParams;
+                    const { commentId, resolved } = params;
+
                     const threadComment = worksheet.getCommentById(commentId);
                     if (!threadComment) return;
 
@@ -298,6 +299,7 @@ export class FUniverSheetsThreadCommentMixin extends FUniver implements IFUniver
                         resolved,
                     };
                     this.fireEvent(this.Event.BeforeCommentResolve, eventParams);
+
                     if (eventParams.cancel) {
                         throw new CanceledError();
                     }

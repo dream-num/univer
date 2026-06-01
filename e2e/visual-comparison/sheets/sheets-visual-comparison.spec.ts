@@ -258,7 +258,7 @@ test('diff set force string cell', async () => {
 
         activeWorkbook.startEditing();
         await window.univerAPI.getActiveDocument().appendText("'1");
-        activeWorkbook.endEditing(true);
+        activeWorkbook.endEditingAsync(true);
 
         activeSheet.getRange('I1').setValue({
             v: '001',

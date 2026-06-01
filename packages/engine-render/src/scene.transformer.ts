@@ -21,6 +21,7 @@ import type { BaseObject } from './base-object';
 import type { IMouseEvent, IPointerEvent } from './basics/i-events';
 import type { ITransformerConfig } from './basics/transformer-config';
 import type { IPoint } from './basics/vector2';
+import type { UniverRenderingContext } from './context';
 import type { Scene } from './scene';
 import type { IRectProps } from './shape/rect';
 import type { IRegularPolygonProps } from './shape/regular-polygon';
@@ -103,6 +104,53 @@ const SINGLE_ACTIVE_OBJECT_TYPE_MAP = new Set<ObjectType>([
     ObjectType.CHART,
 ]);
 
+const ROTATE_ICON_SIZE = 14;
+
+class TransformerRotateIcon extends Rect {
+    protected override _draw(ctx: UniverRenderingContext) {
+        const iconWidth = this.width || ROTATE_ICON_SIZE;
+        const iconHeight = this.height || ROTATE_ICON_SIZE;
+        const scaleX = iconWidth / 24;
+        const scaleY = iconHeight / 24;
+
+        ctx.save();
+        ctx.scale(scaleX, scaleY);
+        ctx.beginPath();
+        ctx.lineWidth = (this.strokeWidth || 2) / Math.max(scaleX, scaleY);
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.strokeStyle = this.stroke || 'currentColor';
+
+        ctx.moveTo(21, 12);
+        ctx.arc(12, 12, 9, 0, Math.PI * 1.5, false);
+        ctx.bezierCurveTo(14.52, 3, 16.93, 4, 18.74, 5.74);
+        ctx.lineTo(21, 8);
+        ctx.moveTo(21, 3);
+        ctx.lineTo(21, 8);
+        ctx.lineTo(16, 8);
+
+        ctx.stroke();
+        ctx.restore();
+    }
+}
+
+class TransformerAnchor extends Rect {
+    protected override _draw(ctx: UniverRenderingContext) {
+        if (!this.shadowColor || (!this.shadowBlur && !this.shadowOffsetX && !this.shadowOffsetY)) {
+            Rect.drawWith(ctx, this as IRectProps);
+            return;
+        }
+
+        ctx.save();
+        ctx.shadowColor = this.shadowColor;
+        ctx.shadowBlur = this.shadowBlur;
+        ctx.shadowOffsetX = this.shadowOffsetX;
+        ctx.shadowOffsetY = this.shadowOffsetY;
+        Rect.drawWith(ctx, this as IRectProps);
+        ctx.restore();
+    }
+}
+
 /**
  * Transformer constructor.  Transformer is a special type of group that allow you transform
  * primitives and shapes. Transforming tool is not changing `width` and `height` properties of nodes
@@ -121,9 +169,17 @@ export class Transformer extends Disposable implements ITransformerConfig {
     rotationSnaps: number[] = [];
     rotationSnapTolerance = 5;
     rotateAnchorOffset = 50;
+    rotateAnchorPosition: 'top' | 'bottom' = 'top';
+    rotateLineEnabled = true;
     rotateSize = 10;
 
     rotateCornerRadius = 10;
+    rotateFill: string | undefined;
+    rotateStroke: string | undefined;
+    rotateStrokeWidth: number | undefined;
+    rotateIconEnabled = false;
+    rotateIconStroke: string | undefined;
+    rotateIconStrokeWidth = 1.5;
     borderEnabled = true;
 
     borderStroke = 'rgb(97, 97, 97)';
@@ -136,6 +192,14 @@ export class Transformer extends Disposable implements ITransformerConfig {
     anchorStrokeWidth = 1;
     anchorSize = 10;
     anchorCornerRadius = 10;
+    anchorStyle: 'default' | 'canva' = 'default';
+    anchorSideLongSize = 16;
+    anchorSideShortSize = 5;
+    anchorSideCornerRadius = 2.5;
+    anchorShadowColor: string | undefined;
+    anchorShadowBlur = 0;
+    anchorShadowOffsetX = 0;
+    anchorShadowOffsetY = 0;
 
     keepRatio = true;
     centeredScaling = false;
@@ -300,8 +364,16 @@ export class Transformer extends Disposable implements ITransformerConfig {
             rotationSnaps,
             rotationSnapTolerance,
             rotateAnchorOffset,
+            rotateAnchorPosition,
+            rotateLineEnabled,
             rotateSize,
             rotateCornerRadius,
+            rotateFill,
+            rotateStroke,
+            rotateStrokeWidth,
+            rotateIconEnabled,
+            rotateIconStroke,
+            rotateIconStrokeWidth,
             borderEnabled,
             borderStroke,
             borderStrokeWidth,
@@ -312,6 +384,14 @@ export class Transformer extends Disposable implements ITransformerConfig {
             anchorStrokeWidth,
             anchorSize,
             anchorCornerRadius,
+            anchorStyle,
+            anchorSideLongSize,
+            anchorSideShortSize,
+            anchorSideCornerRadius,
+            anchorShadowColor,
+            anchorShadowBlur,
+            anchorShadowOffsetX,
+            anchorShadowOffsetY,
             keepRatio,
             centeredScaling,
             enabledAnchors,
@@ -331,8 +411,16 @@ export class Transformer extends Disposable implements ITransformerConfig {
             rotationSnaps = objectTransformerConfig.rotationSnaps ?? rotationSnaps;
             rotationSnapTolerance = objectTransformerConfig.rotationSnapTolerance ?? rotationSnapTolerance;
             rotateAnchorOffset = objectTransformerConfig.rotateAnchorOffset ?? rotateAnchorOffset;
+            rotateAnchorPosition = objectTransformerConfig.rotateAnchorPosition ?? rotateAnchorPosition;
+            rotateLineEnabled = objectTransformerConfig.rotateLineEnabled ?? rotateLineEnabled;
             rotateSize = objectTransformerConfig.rotateSize ?? rotateSize;
             rotateCornerRadius = objectTransformerConfig.rotateCornerRadius ?? rotateCornerRadius;
+            rotateFill = objectTransformerConfig.rotateFill ?? rotateFill;
+            rotateStroke = objectTransformerConfig.rotateStroke ?? rotateStroke;
+            rotateStrokeWidth = objectTransformerConfig.rotateStrokeWidth ?? rotateStrokeWidth;
+            rotateIconEnabled = objectTransformerConfig.rotateIconEnabled ?? rotateIconEnabled;
+            rotateIconStroke = objectTransformerConfig.rotateIconStroke ?? rotateIconStroke;
+            rotateIconStrokeWidth = objectTransformerConfig.rotateIconStrokeWidth ?? rotateIconStrokeWidth;
             borderEnabled = objectTransformerConfig.borderEnabled ?? borderEnabled;
             borderStroke = objectTransformerConfig.borderStroke ?? borderStroke;
             borderStrokeWidth = objectTransformerConfig.borderStrokeWidth ?? borderStrokeWidth;
@@ -343,6 +431,14 @@ export class Transformer extends Disposable implements ITransformerConfig {
             anchorStrokeWidth = objectTransformerConfig.anchorStrokeWidth ?? anchorStrokeWidth;
             anchorSize = objectTransformerConfig.anchorSize ?? anchorSize;
             anchorCornerRadius = objectTransformerConfig.anchorCornerRadius ?? anchorCornerRadius;
+            anchorStyle = objectTransformerConfig.anchorStyle ?? anchorStyle;
+            anchorSideLongSize = objectTransformerConfig.anchorSideLongSize ?? anchorSideLongSize;
+            anchorSideShortSize = objectTransformerConfig.anchorSideShortSize ?? anchorSideShortSize;
+            anchorSideCornerRadius = objectTransformerConfig.anchorSideCornerRadius ?? anchorSideCornerRadius;
+            anchorShadowColor = objectTransformerConfig.anchorShadowColor ?? anchorShadowColor;
+            anchorShadowBlur = objectTransformerConfig.anchorShadowBlur ?? anchorShadowBlur;
+            anchorShadowOffsetX = objectTransformerConfig.anchorShadowOffsetX ?? anchorShadowOffsetX;
+            anchorShadowOffsetY = objectTransformerConfig.anchorShadowOffsetY ?? anchorShadowOffsetY;
             keepRatio = objectTransformerConfig.keepRatio ?? keepRatio;
             centeredScaling = objectTransformerConfig.centeredScaling ?? centeredScaling;
             enabledAnchors = objectTransformerConfig.enabledAnchors ?? enabledAnchors;
@@ -363,8 +459,16 @@ export class Transformer extends Disposable implements ITransformerConfig {
             rotationSnaps,
             rotationSnapTolerance,
             rotateAnchorOffset,
+            rotateAnchorPosition,
+            rotateLineEnabled,
             rotateSize,
             rotateCornerRadius,
+            rotateFill,
+            rotateStroke,
+            rotateStrokeWidth,
+            rotateIconEnabled,
+            rotateIconStroke,
+            rotateIconStrokeWidth,
             borderEnabled,
             borderStroke,
             borderStrokeWidth,
@@ -375,6 +479,14 @@ export class Transformer extends Disposable implements ITransformerConfig {
             anchorStrokeWidth,
             anchorSize,
             anchorCornerRadius,
+            anchorStyle,
+            anchorSideLongSize,
+            anchorSideShortSize,
+            anchorSideCornerRadius,
+            anchorShadowColor,
+            anchorShadowBlur,
+            anchorShadowOffsetX,
+            anchorShadowOffsetY,
             keepRatio,
             centeredScaling,
             enabledAnchors,
@@ -1240,6 +1352,25 @@ export class Transformer extends Disposable implements ITransformerConfig {
         return cursor;
     }
 
+    private _createRotateIcon(applyObject: BaseObject, zIndex: number, left: number, top: number) {
+        const { rotateSize, rotateIconStroke, rotateIconStrokeWidth, borderStroke } = this._getConfig(applyObject);
+        const iconOffset = (rotateSize - ROTATE_ICON_SIZE) / 2;
+
+        return new TransformerRotateIcon(`${TransformerManagerType.ROTATE}_ICON_${zIndex}`, {
+            zIndex,
+            evented: false,
+            left: left + iconOffset,
+            top: top + iconOffset,
+            width: ROTATE_ICON_SIZE,
+            height: ROTATE_ICON_SIZE,
+            fill: null,
+            stroke: rotateIconStroke ?? borderStroke,
+            strokeWidth: rotateIconStrokeWidth,
+            strokeLineCap: 'round',
+            strokeLineJoin: 'round',
+        });
+    }
+
     private _getCopperAnchorPosition(type: TransformerManagerType, height: number, width: number, applyObject: BaseObject) {
         const { borderStrokeWidth, borderSpacing, anchorSize } = this._getConfig(applyObject);
 
@@ -1298,7 +1429,8 @@ export class Transformer extends Disposable implements ITransformerConfig {
     }
 
     private _getRotateAnchorPosition(type: TransformerManagerType, height: number, width: number, applyObject: BaseObject) {
-        const { rotateAnchorOffset, rotateSize, borderStrokeWidth, borderSpacing, anchorSize } = this._getConfig(applyObject);
+        const { rotateAnchorOffset, rotateAnchorPosition, rotateSize, borderStrokeWidth, borderSpacing, anchorSize } = this._getConfig(applyObject);
+        const isBottomRotateAnchor = rotateAnchorPosition === 'bottom';
 
         let left = -anchorSize / 2;
         let top = -anchorSize / 2;
@@ -1306,12 +1438,16 @@ export class Transformer extends Disposable implements ITransformerConfig {
         switch (type) {
             case TransformerManagerType.ROTATE:
                 left = width / 2 - rotateSize / 2;
-                top = -rotateAnchorOffset - borderSpacing - borderStrokeWidth * 2 - rotateSize;
+                top = isBottomRotateAnchor
+                    ? height + rotateAnchorOffset + borderSpacing + borderStrokeWidth * 2
+                    : -rotateAnchorOffset - borderSpacing - borderStrokeWidth * 2 - rotateSize;
 
                 break;
             case TransformerManagerType.ROTATE_LINE:
                 left = width / 2;
-                top = -rotateAnchorOffset - borderSpacing - borderStrokeWidth;
+                top = isBottomRotateAnchor
+                    ? height + borderSpacing + borderStrokeWidth
+                    : -rotateAnchorOffset - borderSpacing - borderStrokeWidth;
 
                 break;
             case TransformerManagerType.RESIZE_LT:
@@ -1361,25 +1497,73 @@ export class Transformer extends Disposable implements ITransformerConfig {
         };
     }
 
+    private _isMiddleAnchor(type: TransformerManagerType) {
+        return type === TransformerManagerType.RESIZE_CT ||
+            type === TransformerManagerType.RESIZE_LM ||
+            type === TransformerManagerType.RESIZE_RM ||
+            type === TransformerManagerType.RESIZE_CB;
+    }
+
+    private _getResizeAnchorProps(type: TransformerManagerType, applyObject: BaseObject) {
+        const {
+            anchorSize,
+            anchorCornerRadius,
+            anchorStyle,
+            anchorSideLongSize,
+            anchorSideShortSize,
+            anchorSideCornerRadius,
+        } = this._getConfig(applyObject);
+
+        if (anchorStyle !== 'canva' || !this._isMiddleAnchor(type)) {
+            return {
+                width: anchorSize,
+                height: anchorSize,
+                radius: anchorStyle === 'canva' ? anchorSize / 2 : anchorCornerRadius,
+            };
+        }
+
+        const isHorizontal = type === TransformerManagerType.RESIZE_CT || type === TransformerManagerType.RESIZE_CB;
+
+        return {
+            width: isHorizontal ? anchorSideLongSize : anchorSideShortSize,
+            height: isHorizontal ? anchorSideShortSize : anchorSideLongSize,
+            radius: anchorSideCornerRadius,
+        };
+    }
+
     private _createResizeAnchor(type: TransformerManagerType, applyObject: BaseObject, zIndex: number) {
         const { height = 0, width = 0, scaleX = 1, scaleY = 1 } = applyObject.getState();
 
-        const { anchorFill, anchorStroke, anchorStrokeWidth, anchorCornerRadius, anchorSize } = this._getConfig(applyObject);
+        const {
+            anchorFill,
+            anchorStroke,
+            anchorStrokeWidth,
+            anchorSize,
+            anchorShadowColor,
+            anchorShadowBlur,
+            anchorShadowOffsetX,
+            anchorShadowOffsetY,
+        } = this._getConfig(applyObject);
 
         const { left, top } = this._getRotateAnchorPosition(type, height, width, applyObject);
+        const anchorProps = this._getResizeAnchorProps(type, applyObject);
 
         const cursor = this._getRotateAnchorCursor(type);
 
-        const anchor = new Rect(`${type}_${zIndex}`, {
+        const anchor = new TransformerAnchor(`${type}_${zIndex}`, {
             zIndex: zIndex - 1,
             fill: anchorFill,
             stroke: anchorStroke,
             strokeWidth: anchorStrokeWidth,
-            width: anchorSize,
-            height: anchorSize,
-            radius: anchorCornerRadius,
-            left,
-            top,
+            width: anchorProps.width,
+            height: anchorProps.height,
+            radius: anchorProps.radius,
+            left: left + (anchorSize - anchorProps.width) / 2,
+            top: top + (anchorSize - anchorProps.height) / 2,
+            shadowColor: anchorShadowColor,
+            shadowBlur: anchorShadowBlur,
+            shadowOffsetX: anchorShadowOffsetX,
+            shadowOffsetY: anchorShadowOffsetY,
         });
 
         this._attachHover(anchor, cursor, CURSOR_TYPE.DEFAULT);
@@ -1620,7 +1804,28 @@ export class Transformer extends Disposable implements ITransformerConfig {
     private _createControl(applyObject: BaseObject, isSkipOnCropper = true) {
         const { left = 0, top = 0, height = 0, width = 0 } = applyObject.getState();
         const angle = applyObject.angle;
-        const { isCropper, resizeEnabled, rotateEnabled, rotateAnchorOffset, rotateSize, rotateCornerRadius, borderEnabled, borderStroke, borderStrokeWidth, borderSpacing, enabledAnchors } = this._getConfig(applyObject);
+        const {
+            isCropper,
+            resizeEnabled,
+            rotateEnabled,
+            rotateAnchorOffset,
+            rotateLineEnabled,
+            rotateSize,
+            rotateCornerRadius,
+            rotateFill,
+            rotateStroke,
+            rotateStrokeWidth,
+            rotateIconEnabled,
+            anchorShadowColor,
+            anchorShadowBlur,
+            anchorShadowOffsetX,
+            anchorShadowOffsetY,
+            borderEnabled,
+            borderStroke,
+            borderStrokeWidth,
+            borderSpacing,
+            enabledAnchors,
+        } = this._getConfig(applyObject);
         if (isSkipOnCropper && isCropper) {
             return;
         }
@@ -1661,19 +1866,30 @@ export class Transformer extends Disposable implements ITransformerConfig {
                 const { left: rotateLeft, top: rotateTop } = this._getRotateAnchorPosition(TransformerManagerType.ROTATE, height, width, applyObject);
 
                 const cursor = this._getRotateAnchorCursor(TransformerManagerType.ROTATE);
-                const rotate = new Rect(`${TransformerManagerType.ROTATE}_${zIndex}`, {
+                const rotate = new TransformerAnchor(`${TransformerManagerType.ROTATE}_${zIndex}`, {
                     zIndex: zIndex - 1,
                     left: rotateLeft,
                     top: rotateTop,
                     height: rotateSize,
                     width: rotateSize,
                     radius: rotateCornerRadius,
-                    strokeWidth: borderStrokeWidth * 2,
-                    stroke: borderStroke,
+                    fill: rotateFill,
+                    strokeWidth: rotateStrokeWidth ?? borderStrokeWidth * 2,
+                    stroke: rotateStroke ?? borderStroke,
+                    shadowColor: anchorShadowColor,
+                    shadowBlur: anchorShadowBlur,
+                    shadowOffsetX: anchorShadowOffsetX,
+                    shadowOffsetY: anchorShadowOffsetY,
                 });
                 this._attachEventToRotate(rotate, applyObject);
                 this._attachHover(rotate, cursor, CURSOR_TYPE.DEFAULT);
-                groupElements.push(rotateLine, rotate);
+                if (rotateLineEnabled) {
+                    groupElements.push(rotateLine);
+                }
+                groupElements.push(rotate);
+                if (rotateIconEnabled) {
+                    groupElements.push(this._createRotateIcon(applyObject, zIndex, rotateLeft, rotateTop));
+                }
             }
         }
         if (resizeEnabled) {

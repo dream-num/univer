@@ -516,6 +516,27 @@ describe('engine scene viewport extra', () => {
         expect((transformer as any)._getRotateAnchorCursor('__SpreadsheetTransformerResizeLM__')).toBe(CURSOR_TYPE.WEST_RESIZE);
         expect((transformer as any)._getRotateAnchorCursor('__SpreadsheetTransformerResizeCB__')).toBe(CURSOR_TYPE.SOUTH_RESIZE);
         expect((transformer as any)._getRotateAnchorCursor('__SpreadsheetTransformerRotate__')).toBe(CURSOR_TYPE.MOVE);
+        expect((transformer as any)._getRotateAnchorPosition('__SpreadsheetTransformerRotate__', 40, 100, { transformerConfig: {} })).toEqual({
+            left: 45,
+            top: -34,
+        });
+        expect((transformer as any)._getRotateAnchorPosition('__SpreadsheetTransformerRotate__', 40, 100, {
+            transformerConfig: {
+                rotateAnchorPosition: 'bottom',
+                rotateSize: 16,
+            },
+        })).toEqual({
+            left: 42,
+            top: 64,
+        });
+        expect((transformer as any)._getRotateAnchorPosition('__SpreadsheetTransformerRotateLine__', 40, 100, {
+            transformerConfig: {
+                rotateAnchorPosition: 'bottom',
+            },
+        })).toEqual({
+            left: 50,
+            top: 43,
+        });
         expect((transformer as any)._checkTransformerType('__SpreadsheetTransformerResizeRT__123')).toBe('__SpreadsheetTransformerResizeRT__');
         expect((transformer as any)._getNorthEastPoints(10, 4)[0]).toHaveLength(6);
         expect((transformer as any)._getNorthWestPoints(10, 4)[0]).toHaveLength(6);
@@ -525,6 +546,34 @@ describe('engine scene viewport extra', () => {
         expect((transformer as any)._smoothAccuracy(1.23456, true)).toBe(1.235);
 
         transformer.dispose();
+    });
+
+    it('supports bottom rotate control without a connector line', () => {
+        const { engine, scene } = createFixture();
+        engine.setActiveScene(scene.sceneKey);
+
+        const rect = scene.getObject('rect-main') as Rect;
+        rect.transformerConfig = {
+            rotateAnchorPosition: 'bottom',
+            rotateLineEnabled: false,
+            rotateIconEnabled: true,
+        };
+        const transformer = new Transformer(scene, {
+            rotateEnabled: true,
+            resizeEnabled: true,
+            borderEnabled: true,
+        });
+
+        transformer.setSelectedControl(rect);
+        const control = (transformer as any)._transformerControlMap.get(rect.oKey) as Group;
+        const controlObjects = control.getObjects();
+
+        expect(controlObjects.some((o) => o.oKey.includes('__SpreadsheetTransformerRotateLine__'))).toBe(false);
+        expect(controlObjects.some((o) => o.oKey.includes('_ICON_'))).toBe(true);
+
+        transformer.dispose();
+        scene.dispose();
+        engine.dispose();
     });
 
     it('covers transformer attach, controls, resize and rotate flows', () => {

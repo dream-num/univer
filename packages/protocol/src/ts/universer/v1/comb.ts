@@ -108,6 +108,7 @@ export interface IMember {
     memberID: string;
     name: string;
     avatar?: string | undefined;
+    userID: string;
 }
 
 interface IRule {

@@ -236,13 +236,31 @@ export interface GridViewConfig {
 
 export interface CardLayoutConfig {
     titleFieldId?: FieldId;
-    coverFieldId?: FieldId;
+    coverFieldId?: FieldId | null;
     fieldIds: FieldId[];
+}
+
+export type KanbanCardLayoutMode = 'normal' | 'compose';
+
+export interface KanbanFieldCardSetting {
+    hidden?: boolean;
+    order?: number;
+}
+
+export interface KanbanColumnSetting {
+    title?: string;
+    color?: string;
+    collapsed?: boolean;
 }
 
 export interface KanbanViewConfig {
     groupFieldId: FieldId;
-    card: CardLayoutConfig;
+    coverFieldId?: FieldId | null;
+    cardLayout?: KanbanCardLayoutMode;
+    showFieldNames?: boolean;
+    fieldSettings?: Record<FieldId, KanbanFieldCardSetting>;
+    columnSettings?: Record<string, KanbanColumnSetting>;
+    card?: CardLayoutConfig;
 }
 
 export interface CalendarViewConfig {
@@ -251,6 +269,42 @@ export interface CalendarViewConfig {
     titleFieldId?: FieldId;
     colorFieldId?: FieldId;
     mode: 'month' | 'week' | 'day';
+    timeslotSize?: 'short' | 'medium' | 'long';
+    timeZone?: 'local' | string;
+    displayColor?: { type: 'custom'; color: string } | { type: 'selectField'; fieldId: FieldId };
+    fieldSettings?: Record<FieldId, { hidden?: boolean; order?: number }>;
+}
+
+export interface BaseViewColorCondition {
+    id: string;
+    color: string;
+    target?: 'cell' | 'row' | 'column';
+    fieldId: FieldId;
+    operator:
+        | 'is'
+        | 'isNot'
+        | 'contains'
+        | 'notContains'
+        | 'isEmpty'
+        | 'isNotEmpty'
+        | 'greaterThan'
+        | 'lessThan'
+        | 'before'
+        | 'after';
+    operand?: unknown;
+    dateMode?:
+        | 'exact'
+        | 'today'
+        | 'tomorrow'
+        | 'yesterday'
+        | 'thisWeek'
+        | 'lastWeek'
+        | 'thisMonth'
+        | 'lastMonth'
+        | 'past7'
+        | 'next7'
+        | 'past30'
+        | 'next30';
 }
 
 export interface GanttViewConfig {
@@ -261,12 +315,32 @@ export interface GanttViewConfig {
     dependencyFieldId?: FieldId;
     scale: 'week' | 'month' | 'quarter' | 'year';
     leftPaneWidth?: number;
+    leftPaneCollapsed?: boolean;
     showTodayLine?: boolean;
     showWeekend?: boolean;
+    displayColor?:
+        | { type: 'custom'; color: string }
+        | { type: 'selectField'; fieldId: FieldId }
+        | { type: 'conditional'; rules: BaseViewColorCondition[] };
+    fieldSettings?: Record<FieldId, { hidden?: boolean; order?: number }>;
+    workingDaysOnly?: boolean;
+    workingDays?: {
+        weekdays: Array<1 | 2 | 3 | 4 | 5 | 6 | 7>;
+        exceptions: Array<{
+            id: string;
+            date: number;
+            name: string;
+            type: 'off' | 'working';
+        }>;
+    };
 }
 
 export interface GalleryViewConfig {
     card: CardLayoutConfig;
+    coverFieldId?: FieldId | null;
+    cardLayout?: KanbanCardLayoutMode;
+    showFieldNames?: boolean;
+    fieldSettings?: Record<FieldId, KanbanFieldCardSetting>;
     cardSize?: 'small' | 'medium' | 'large';
 }
 
@@ -309,37 +383,58 @@ export interface GridProjection extends ViewProjection {
 
 export interface KanbanProjection extends ViewProjection {
     type: 'kanban';
+    groupFieldId: FieldId;
+    coverFieldId?: FieldId | null;
+    cardLayout: KanbanCardLayoutMode;
+    showFieldNames: boolean;
+    visibleCardFieldIds: FieldId[];
     lanes: Array<{
         key: string;
         title: string;
+        color?: string;
         recordIds: RecordId[];
     }>;
 }
 
 export interface CalendarProjection extends ViewProjection {
     type: 'calendar';
+    config: CalendarViewConfig;
     events: Array<{
         recordId: RecordId;
         title: string;
         start: number;
         end?: number;
         color?: string;
+        startMs: number;
+        endMs?: number;
+        allDay: boolean;
+        fieldValues: Record<FieldId, CellValue>;
     }>;
 }
 
 export interface GanttTimeColumn {
     id: string;
     label: string;
+    majorLabel?: string;
     start: number;
     end: number;
+    nonWorking?: boolean;
 }
 
 export interface GanttProjection extends ViewProjection {
     type: 'gantt';
+    config: GanttViewConfig;
     timeline: {
         scale: 'week' | 'month' | 'quarter' | 'year';
         start: number;
         end: number;
+        unitWidth: number;
+        majorHeaders: Array<{
+            id: string;
+            label: string;
+            start: number;
+            end: number;
+        }>;
         columns: GanttTimeColumn[];
     };
     bars: Array<{
@@ -347,13 +442,20 @@ export interface GanttProjection extends ViewProjection {
         title: string;
         start: number;
         end: number;
+        color: string;
         progress?: number;
+        workingDayCount?: number;
         dependencyRecordIds?: RecordId[];
     }>;
 }
 
 export interface GalleryProjection extends ViewProjection {
     type: 'gallery';
+    coverFieldId?: FieldId | null;
+    cardLayout: KanbanCardLayoutMode;
+    showFieldNames: boolean;
+    visibleCardFieldIds: FieldId[];
+    cardSize: 'small' | 'medium' | 'large';
     cards: Array<{
         recordId: RecordId;
         title: string;
@@ -439,6 +541,7 @@ export interface KanbanCardSelection {
     tableId: TableId;
     viewId: ViewId;
     recordId: RecordId;
+    groupKey?: string;
 }
 
 export interface CalendarEventSelection {
@@ -446,6 +549,23 @@ export interface CalendarEventSelection {
     tableId: TableId;
     viewId: ViewId;
     recordId: RecordId;
+    allDay?: boolean;
+    x?: number;
+    y?: number;
+    width?: number;
+    height?: number;
+}
+
+export interface CalendarEventResizeSelection {
+    type: 'calendar-event-resize';
+    tableId: TableId;
+    viewId: ViewId;
+    recordId: RecordId;
+    edge: 'start' | 'end';
+    x?: number;
+    y?: number;
+    width?: number;
+    height?: number;
 }
 
 export interface GanttCellSelection {
@@ -499,6 +619,123 @@ export type BaseHitTestResult =
         viewId: ViewId;
         recordId: RecordId;
     }
+    | {
+        type: 'kanban-add-record';
+        tableId: TableId;
+        viewId: ViewId;
+        groupFieldId: FieldId;
+        groupKey: string;
+    }
+    | {
+        type: 'kanban-add-group';
+        tableId: TableId;
+        viewId: ViewId;
+        groupFieldId: FieldId;
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+    }
+    | {
+        type: 'kanban-column';
+        tableId: TableId;
+        viewId: ViewId;
+        groupFieldId: FieldId;
+        groupKey: string;
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+    }
+    | {
+        type: 'kanban-column-title';
+        tableId: TableId;
+        viewId: ViewId;
+        groupFieldId: FieldId;
+        groupKey: string;
+        title: string;
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+    }
+    | {
+        type: 'kanban-column-color';
+        tableId: TableId;
+        viewId: ViewId;
+        groupFieldId: FieldId;
+        groupKey: string;
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+    }
+    | {
+        type: 'kanban-card-checkbox';
+        tableId: TableId;
+        viewId: ViewId;
+        recordId: RecordId;
+        fieldId: FieldId;
+        groupKey?: string;
+    }
+    | {
+        type: 'kanban-lane-scrollbar-edge' | 'kanban-lane-scrollbar-thumb';
+        tableId: TableId;
+        viewId: ViewId;
+        groupKey: string;
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+        trackY: number;
+        trackHeight: number;
+        thumbHeight: number;
+        maxScroll: number;
+    }
+    | {
+        type: 'calendar-mode-tab';
+        tableId: TableId;
+        viewId: ViewId;
+        mode: 'day' | 'week' | 'month';
+    }
+    | {
+        type: 'calendar-today';
+        tableId: TableId;
+        viewId: ViewId;
+    }
+    | {
+        type: 'calendar-navigate';
+        tableId: TableId;
+        viewId: ViewId;
+        direction: 'prev' | 'next';
+    }
+    | {
+        type: 'calendar-day-cell';
+        tableId: TableId;
+        viewId: ViewId;
+        dateMs: number;
+    }
+    | {
+        type: 'calendar-more-events';
+        tableId: TableId;
+        viewId: ViewId;
+        dateMs: number;
+        count: number;
+    }
+    | {
+        type: 'gantt-offscreen-record';
+        tableId: TableId;
+        viewId: ViewId;
+        recordId: RecordId;
+        direction: 'prev' | 'next';
+    }
+    | {
+        type: 'gantt-row';
+        tableId: TableId;
+        viewId: ViewId;
+        recordId: RecordId;
+    }
+    | CalendarEventResizeSelection
     | BaseSelection;
 
 export interface BaseInvalidation {

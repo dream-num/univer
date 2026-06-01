@@ -14,25 +14,15 @@
  * limitations under the License.
  */
 
-import type { UniverType } from './constants/univer';
-import type { IDocumentMeta } from './doc';
-import type { ISlideMeta } from './slide';
-import type { IWorkbookMeta } from './workbook';
+import type { IResource } from './resource';
 
-export interface ISnapshot {
-    /** unitID of the Univer document */
+export interface ISlideMeta {
     unitID: string;
-    type: UniverType;
     rev: number;
-    workbook: IWorkbookMeta | undefined;
-    doc: IDocumentMeta | undefined;
-    slide: ISlideMeta | undefined;
-}
+    creator: string;
+    name: string;
+    resources: IResource[];
 
-export interface ITableInfo {
-    /** json:ITableInfo */
-    meta: Uint8Array;
-    dataPath: string;
-    /** A matrix of values in JSON format. use in IGetPreprocessRangesResponse */
-    data?: string | undefined;
+    /** The original meta data in JSON format. */
+    originalMeta: Uint8Array;
 }

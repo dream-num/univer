@@ -50,3 +50,12 @@ export interface IGetSessionTicketResponse {
     error: IError | undefined;
     ticket: string;
 }
+
+export interface IMigrateRequest {
+    fromUserId: string;
+    toUserId: string;
+}
+
+export interface IMigrateResponse {
+    error: IError | undefined;
+}

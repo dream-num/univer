@@ -42,10 +42,7 @@ export {
     type IUpdateCursor,
     type IUpdatePermissionObj,
 } from './ts/univer/colla-msg';
-export {
-    ErrorCode,
-    type IError,
-} from './ts/univer/constants/errors';
+export { ErrorCode, type IError } from './ts/univer/constants/errors';
 export { UniverType } from './ts/univer/constants/univer';
 
 export type { IDocumentMeta } from './ts/univer/doc';
@@ -55,9 +52,7 @@ export {
     type IRow,
     type IRowCell,
 } from './ts/univer/initial-sheet';
-export type {
-    IUnitRoleKV,
-} from './ts/univer/permission';
+export type { IUnitRoleKV } from './ts/univer/permission';
 export {
     ObjectScope,
     UnitAction,
@@ -65,6 +60,8 @@ export {
     UnitRole,
 } from './ts/univer/permission';
 export type { IRange } from './ts/univer/range';
+
+export type { ISlideMeta } from './ts/univer/slide';
 
 export type {
     ISnapshot,
@@ -221,6 +218,10 @@ export {
     type IGetSheetBlockResponse,
     type IGetUnitOnRevRequest,
     type IGetUnitOnRevResponse,
+    type IMGetChangesetsByRevisionRequest,
+    type IMGetChangesetsByRevisionResponse,
+    type IMGetUnitMetaRequest,
+    type IMGetUnitMetaResponse,
     type IReportUnitRoutingStatsRequest,
     type IReportUnitRoutingStatsResponse,
     type ISaveChangesetRequest,
@@ -230,12 +231,15 @@ export {
     type ISaveSnapshotRequest,
     type ISaveSnapshotResponse,
     type ISnapshotService,
+    type IUnitMeta,
 } from './ts/universer/v1/snapshot';
 
 export type {
     IGetSessionTicketResponse,
     IGetUserResponse,
     IListUsersResponse,
+    IMigrateRequest,
+    IMigrateResponse,
     IUser,
 } from './ts/universer/v1/user';
 

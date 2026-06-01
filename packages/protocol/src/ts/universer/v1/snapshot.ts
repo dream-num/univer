@@ -59,6 +59,24 @@ interface IGetUnitMetaResponse {
     updateTime: string;
 }
 
+export interface IMGetUnitMetaRequest {
+    unitIds: string[];
+}
+
+export interface IMGetUnitMetaResponse {
+    error: IError | undefined;
+    metas: { [key: string]: IUnitMeta };
+}
+
+export interface IUnitMeta {
+    unitId: string;
+    name: string;
+    creator: string;
+    type: UniverType;
+    createTime: string;
+    updateTime: string;
+}
+
 interface IGetSheetTableInfoRequest {
     unitID: string;
     type: UniverType;
@@ -204,6 +222,16 @@ export interface IFetchMissingChangesetsResponse {
     error: IError | undefined;
     changesets: IChangeset[];
     latestRevision?: number | undefined;
+}
+
+export interface IMGetChangesetsByRevisionRequest {
+    unitId: string;
+    revisions: number[];
+}
+
+export interface IMGetChangesetsByRevisionResponse {
+    error: IError | undefined;
+    changesets: IChangeset[];
 }
 
 export interface ISaveSnapshotRequest {
@@ -385,4 +413,12 @@ export interface ISnapshotService {
         request: IReportUnitRoutingStatsRequest,
         metadata?: Metadata,
     ): Observable<IReportUnitRoutingStatsResponse>;
+    MGetChangesetsByRevision(
+        request: IMGetChangesetsByRevisionRequest,
+        metadata?: Metadata,
+    ): Observable<IMGetChangesetsByRevisionResponse>;
+    MGetUnitMeta(
+        request: IMGetUnitMetaRequest,
+        metadata?: Metadata,
+    ): Observable<IMGetUnitMetaResponse>;
 }

@@ -1274,15 +1274,13 @@ export class Transformer extends Disposable implements ITransformerConfig {
             return;
         }
 
-        const angle1 = Math.atan2(
-            (moveOffsetY - centerY) / ancestorScaleY + this._viewportScrollY,
-            (moveOffsetX - centerX) / ancestorScaleX + this._viewportScrollX
-        );
+        const moveSceneX = moveOffsetX / ancestorScaleX + this._viewportScrollX;
+        const moveSceneY = moveOffsetY / ancestorScaleY + this._viewportScrollY;
+        const startSceneX = this._startOffsetX / ancestorScaleX + this._viewportScrollX;
+        const startSceneY = this._startOffsetY / ancestorScaleY + this._viewportScrollY;
 
-        const angle2 = Math.atan2(
-            (this._startOffsetY - centerY) / ancestorScaleY + this._viewportScrollY,
-            (this._startOffsetX - centerX) / ancestorScaleX + this._viewportScrollX
-        );
+        const angle1 = Math.atan2(moveSceneY - centerY, moveSceneX - centerX);
+        const angle2 = Math.atan2(startSceneY - centerY, startSceneX - centerX);
 
         let angle = agentOrigin + radToDeg(angle1 - angle2);
 

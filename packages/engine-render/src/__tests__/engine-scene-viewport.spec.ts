@@ -576,6 +576,31 @@ describe('engine scene viewport extra', () => {
         engine.dispose();
     });
 
+    it('rotates around the scene center when the scene is scaled', () => {
+        const sceneMock = {
+            ancestorScaleX: 2,
+            ancestorScaleY: 2,
+        } as any;
+        const transformer = new Transformer(sceneMock);
+        const transformByState = vi.fn();
+
+        (transformer as any)._selectedObjectMap.set('s1', {
+            oKey: 's1',
+            transformByState,
+            dispose: vi.fn(),
+        });
+        (transformer as any)._moveBufferSkip = true;
+        (transformer as any)._viewportScrollX = 0;
+        (transformer as any)._viewportScrollY = 0;
+        (transformer as any)._startOffsetX = 200;
+        (transformer as any)._startOffsetY = 240;
+
+        (transformer as any)._rotateMoving(240, 200, 100, 100, 0);
+
+        expect(transformByState).toHaveBeenCalledWith({ angle: 270 });
+        transformer.dispose();
+    });
+
     it('covers transformer attach, controls, resize and rotate flows', () => {
         const { engine, scene } = createFixture();
         engine.setActiveScene(scene.sceneKey);

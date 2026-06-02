@@ -73,10 +73,6 @@ describe('Test FWorkbook/FWorksheet UI mixin', () => {
         expect(worksheet.scrollToCell(10, 10, 0)).toBe(worksheet);
         expect(worksheet.getScrollState()).toBeTruthy();
 
-        const onScrollSpy = vi.fn();
-        const onScrollDis = worksheet.onScroll(onScrollSpy);
-        onScrollDis.dispose();
-
         const skeleton = worksheet.getSkeleton();
         expect(skeleton == null || typeof skeleton === 'object').toBe(true);
     });
@@ -162,11 +158,10 @@ describe('Test FWorkbook/FWorksheet UI mixin', () => {
         const workbook = testBed.univerAPI.getActiveWorkbook()!;
         const worksheet = workbook.getActiveSheet()!;
         const renderManagerService = testBed.get(IRenderManagerService);
-        vi.spyOn(renderManagerService, 'getRenderById').mockReturnValue(render as never);
+        vi.spyOn(renderManagerService, 'getRenderUnitById').mockReturnValue(render as never);
         const commandService = testBed.get(ICommandService);
         const executeSpy = vi.spyOn(commandService, 'executeCommand').mockResolvedValue(true as never);
         const syncExecuteSpy = vi.spyOn(commandService, 'syncExecuteCommand').mockReturnValue(true as never);
-        const onScrollSpy = vi.fn();
 
         expect(worksheet.refreshCanvas()).toBe(worksheet);
         expect(skeletonManager.reCalculate).toHaveBeenCalledTimes(1);
@@ -179,10 +174,6 @@ describe('Test FWorkbook/FWorksheet UI mixin', () => {
         expect(scrollRenderController.scrollToCell).toHaveBeenCalledWith(9, 8, 120);
 
         expect(worksheet.getScrollState()).toEqual(scrollState);
-
-        const onScrollDisposable = worksheet.onScroll(onScrollSpy);
-        expect(onScrollSpy).toHaveBeenCalledWith(scrollState);
-        expect(onScrollDisposable).toBeTruthy();
 
         expect(worksheet.getSkeleton()).toEqual(worksheetSkeleton.skeleton);
 

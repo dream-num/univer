@@ -51,7 +51,7 @@ export class FUniverSheetsSortMixin extends FUniver {
 
     private _beforeRangeSort(commandInfo: Readonly<ICommandInfo<ISortRangeCommandParams>>): void {
         const params = commandInfo.params!;
-        const fWorkbook = this.getUniverSheet(params.unitId)!;
+        const fWorkbook = this.getWorkbook(params.unitId)!;
         const fWorksheet = fWorkbook.getSheetBySheetId(params.subUnitId)!;
         const { startColumn, endColumn, startRow, endRow } = params.range;
         const fRange = fWorksheet.getRange(startRow, startColumn, endRow - startRow + 1, endColumn - startColumn + 1);
@@ -73,7 +73,7 @@ export class FUniverSheetsSortMixin extends FUniver {
 
     private _onRangeSorted(commandInfo: Readonly<ICommandInfo<ISortRangeCommandParams>>): void {
         const params = commandInfo.params!;
-        const fWorkbook = this.getUniverSheet(params.unitId)!;
+        const fWorkbook = this.getWorkbook(params.unitId)!;
         const fWorksheet = fWorkbook.getSheetBySheetId(params.subUnitId)!;
         const { startColumn, endColumn, startRow, endRow } = params.range;
         const fRange = fWorksheet.getRange(startRow, startColumn, endRow - startRow + 1, endColumn - startColumn + 1);

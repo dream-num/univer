@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-import { Inject, Injector } from '@univerjs/core';
-import { FBase } from '@univerjs/core/facade';
+import type { IResource } from './resource';
 
-/**
- * @hideconstructor
- */
-export class FSheetHooks extends FBase {
-    constructor(
-        @Inject(Injector) protected readonly _injector: Injector
-    ) {
-        super();
-    }
+export interface ISlideMeta {
+    unitID: string;
+    rev: number;
+    creator: string;
+    name: string;
+    resources: IResource[];
+
+    /** The original meta data in JSON format. */
+    originalMeta: Uint8Array;
 }

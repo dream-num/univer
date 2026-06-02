@@ -18,7 +18,7 @@ import type { ICommand, IMutationInfo } from '@univerjs/core';
 import type { IDeleteSheetTableParams } from '../mutations/delete-sheet-table.mutation';
 import { CommandType, ICommandService, ILogService, IUndoRedoService, sequenceExecute } from '@univerjs/core';
 import { SheetInterceptorService } from '@univerjs/sheets';
-import { TableManager } from '../../model/table-manager';
+import { TableManager } from '../../models/table-manager';
 import { AddSheetTableMutation } from '../mutations/add-sheet-table.mutation';
 import { DeleteSheetTableMutation } from '../mutations/delete-sheet-table.mutation';
 

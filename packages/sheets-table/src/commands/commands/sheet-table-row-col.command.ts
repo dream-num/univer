@@ -21,7 +21,7 @@ import type { ITableColumnJson } from '../../types/type';
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecute } from '@univerjs/core';
 import { getMoveRangeUndoRedoMutations, getSheetCommandTarget, InsertColMutation, InsertRowMutation, RemoveColMutation, RemoveRowMutation, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import { SheetsTableController } from '../../controllers/sheets-table.controller';
-import { TableManager } from '../../model/table-manager';
+import { TableManager } from '../../models/table-manager';
 import { IRangeOperationTypeEnum, IRowColTypeEnum } from '../../types/type';
 import { SetSheetTableMutation } from '../mutations/set-sheet-table.mutation';
 

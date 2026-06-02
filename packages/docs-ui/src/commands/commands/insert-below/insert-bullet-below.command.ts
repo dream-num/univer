@@ -16,9 +16,8 @@
 
 import type { DocumentDataModel, ICommand, IDocumentBody, IMutationInfo, PresetListType } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import { BuildTextUtils, CommandType, ICommandService, IUniverInstanceService, JSONX, UniverInstanceType } from '@univerjs/core';
+import { BuildTextUtils, CommandType, getRichTextEditPath, ICommandService, IUniverInstanceService, JSONX, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
-import { getRichTextEditPath } from '../../util';
 
 interface IInsertBulletBelowCommandParams {
     listType: PresetListType;

@@ -23,7 +23,7 @@ import { InsertRowMutation } from '../commands/mutations/insert-row-col.mutation
 import { RemoveRowMutation } from '../commands/mutations/remove-row-col.mutation';
 import { SetRowHiddenMutation, SetRowVisibleMutation } from '../commands/mutations/set-row-visible.mutation';
 import { SetWorksheetRowHeightMutation } from '../commands/mutations/set-worksheet-row-height.mutation';
-import { SheetRangeThemeModel } from '../model/range-theme-model';
+import { SheetRangeThemeModel } from '../models/range-theme-model';
 
 export class ZebraCrossingCacheController extends Disposable {
     private _zebraCacheUpdateSubject = new Subject<{

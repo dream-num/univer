@@ -18,7 +18,7 @@ import type { ICommand, IMutationInfo, IRange } from '@univerjs/core';
 import type { ITableOptions } from '../../types/type';
 import { CommandType, customNameCharacterCheck, generateRandomId, ICommandService, IUndoRedoService, IUniverInstanceService, LocaleService, sequenceExecute } from '@univerjs/core';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
-import { TableManager } from '../../model/table-manager';
+import { TableManager } from '../../models/table-manager';
 import { getExistingNamesSet } from '../../util';
 import { AddSheetTableMutation } from '../mutations/add-sheet-table.mutation';
 import { DeleteSheetTableMutation } from '../mutations/delete-sheet-table.mutation';

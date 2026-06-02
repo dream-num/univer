@@ -33,6 +33,7 @@ import {
     CommandType,
     DOC_RANGE_TYPE,
     getBodySlice,
+    getRichTextEditPath,
     ICommandService,
     IUniverInstanceService,
     JSONX,
@@ -44,7 +45,6 @@ import {
 } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { DocMenuStyleService } from '../../services/doc-menu-style.service';
-import { getRichTextEditPath } from '../util';
 
 function handleInlineFormat(
     preCommandId: string,

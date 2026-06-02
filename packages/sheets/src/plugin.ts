@@ -33,10 +33,10 @@ import { SheetPermissionCheckController } from './controllers/permission/sheet-p
 import { SheetPermissionInitController } from './controllers/permission/sheet-permission-init.controller';
 import { SheetPermissionViewModelController } from './controllers/permission/sheet-permission-view-model.controller';
 import { ZebraCrossingCacheController } from './controllers/zebar-crossing.controller';
-import { RangeProtectionRenderModel } from './model/range-protection-render.model';
-import { RangeProtectionRuleModel } from './model/range-protection-rule.model';
-import { RangeProtectionCache } from './model/range-protection.cache';
-import { SheetRangeThemeModel } from './model/range-theme-model';
+import { RangeProtectionRenderModel } from './models/range-protection-render.model';
+import { RangeProtectionRuleModel } from './models/range-protection-rule.model';
+import { RangeProtectionCache } from './models/range-protection.cache';
+import { SheetRangeThemeModel } from './models/range-theme-model';
 import { AutoFillService, IAutoFillService } from './services/auto-fill/auto-fill.service';
 import { BorderStyleManagerService } from './services/border-style-manager.service';
 import { ExclusiveRangeService, IExclusiveRangeService } from './services/exclusive-range/exclusive-range.service';

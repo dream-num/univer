@@ -29,16 +29,6 @@ export { DocCopyCommand, DocCutCommand, DocPasteCommand } from './commands/comma
 export { CutContentCommand, type IInnerPasteCommandParams, InnerPasteCommand } from './commands/commands/clipboard.inner.command';
 export type { IInnerCutCommandParams } from './commands/commands/clipboard.inner.command';
 export { getCustomBlockIdsInSelections, getCutActionsFromDocRanges } from './commands/commands/clipboard.inner.command';
-export {
-    DeleteCommand,
-    EditorInsertTextCommandId,
-    type ICoverCommandParams,
-    type IDeleteCommandParams,
-    type IInsertCommandParams,
-    InsertCommand,
-    type IUpdateCommandParams,
-    UpdateCommand,
-} from './commands/commands/core-editing.command';
 export { buildMoveDocBlockActions, type IMoveDocBlockCommandParams, MoveDocBlockCommand } from './commands/commands/doc-block-move.command';
 export { DeleteCustomBlockCommand, DeleteLeftCommand, DeleteRightCommand, type IDeleteCustomBlockParams, MergeTwoParagraphCommand } from './commands/commands/doc-delete.command';
 export { getCursorWhenDelete } from './commands/commands/doc-delete.command';
@@ -46,6 +36,7 @@ export { HorizontalLineCommand } from './commands/commands/doc-horizontal-line.c
 export { DocSelectAllCommand } from './commands/commands/doc-select-all.command';
 export { type IIMEInputCommandParams, IMEInputCommand } from './commands/commands/ime-input.command';
 export {
+    getStyleInTextRange,
     ResetInlineFormatTextBackgroundColorCommand,
     SetInlineFormatBoldCommand,
     SetInlineFormatCommand,
@@ -59,7 +50,6 @@ export {
     SetInlineFormatTextColorCommand,
     SetInlineFormatTextFillCommand,
     SetInlineFormatUnderlineCommand,
-    getStyleInTextRange,
 } from './commands/commands/inline-format.command';
 export { type IInsertCustomRangeCommandParams, InsertCustomRangeCommand } from './commands/commands/insert-custom-range.command';
 export {
@@ -117,7 +107,7 @@ export { DocCreateTableOperation } from './commands/operations/doc-create-table.
 export { type IMoveCursorOperationParams, MoveSelectionOperation } from './commands/operations/doc-cursor.operation';
 export { MoveCursorOperation } from './commands/operations/doc-cursor.operation';
 export { type ISetDocZoomRatioOperationParams, SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-ratio.operation';
-export { getCommandSkeleton, getRichTextEditPath } from './commands/util';
+export { getCommandSkeleton } from './commands/util';
 export type { IUniverDocsUIConfig } from './config/config';
 export { DocUIController } from './controllers/doc-ui.controller';
 export { DocBackScrollRenderController } from './controllers/render-controllers/back-scroll.render-controller';

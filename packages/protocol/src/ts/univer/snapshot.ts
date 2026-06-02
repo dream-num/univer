@@ -16,6 +16,7 @@
 
 import type { UniverType } from './constants/univer';
 import type { IDocumentMeta } from './doc';
+import type { ISlideMeta } from './slide';
 import type { IWorkbookMeta } from './workbook';
 
 export interface ISnapshot {
@@ -25,6 +26,7 @@ export interface ISnapshot {
     rev: number;
     workbook: IWorkbookMeta | undefined;
     doc: IDocumentMeta | undefined;
+    slide: ISlideMeta | undefined;
 }
 
 export interface ITableInfo {

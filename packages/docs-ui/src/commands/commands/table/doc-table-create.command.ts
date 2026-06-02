@@ -17,12 +17,12 @@
 import type { ICommand, IMutationInfo, JSONXActions } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
-import { CommandType, DataStreamTreeTokenType, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
+import { CommandType, DataStreamTreeTokenType, getRichTextEditPath, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { getTextRunAtPosition } from '../../../basics/paragraph';
 import { DocContentInsertService } from '../../../services/doc-content-insert.service';
 import { DocMenuStyleService } from '../../../services/doc-menu-style.service';
-import { getCommandSkeleton, getRichTextEditPath } from '../../util';
+import { getCommandSkeleton } from '../../util';
 import { generateParagraphs } from '../break-line.command';
 import { genEmptyTable, genTableSource } from './table';
 

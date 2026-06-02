@@ -19,7 +19,7 @@ import type { ITableSetConfig } from '../../types/type';
 import { CommandType, ICommandService, ILogService, IUndoRedoService, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
 import { SheetInterceptorService } from '@univerjs/sheets';
-import { TableManager } from '../../model/table-manager';
+import { TableManager } from '../../models/table-manager';
 import { IRangeOperationTypeEnum } from '../../types/type';
 import { getExistingNamesSet } from '../../util';
 import { validateSheetTableName } from '../../util/table-name';

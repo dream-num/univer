@@ -23,14 +23,24 @@ import type {
     ITextRange,
     UpdateDocsAttributeType,
 } from '@univerjs/core';
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
-import { BuildTextUtils, CommandType, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType, UniverInstanceType } from '@univerjs/core';
-import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
-import { DeleteDirection } from '../../types/delete-direction';
-import { getRichTextEditPath } from '../util';
+import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
+import {
+    BuildTextUtils,
+    CommandType,
+    DeleteDirection,
+    getRichTextEditPath,
+    ICommandService,
+    IUniverInstanceService,
+    JSONX,
+    TextX,
+    TextXActionType,
+    UniverInstanceType,
+} from '@univerjs/core';
+import { DocSelectionManagerService } from '../../services/doc-selection-manager.service';
+import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
 
-export interface IInsertCommandParams {
+export interface IInsertTextCommandParams {
     unitId: string;
     body: IDocumentBody;
     range: ITextRange;
@@ -38,17 +48,13 @@ export interface IInsertCommandParams {
     cursorOffset?: number;
 }
 
-export const EditorInsertTextCommandId = 'doc.command.insert-text';
-
 /**
  * The command to insert text. The changed range could be non-collapsed, mainly use in line break and normal input.
  */
-export const InsertCommand: ICommand<IInsertCommandParams> = {
-    id: EditorInsertTextCommandId,
-
+export const InsertTextCommand: ICommand<IInsertTextCommandParams> = {
+    id: 'doc.command.insert-text',
     type: CommandType.COMMAND,
-
-    handler: async (accessor, params: IInsertCommandParams) => {
+    handler: async (accessor, params: IInsertTextCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const { range, segmentId, body, unitId, cursorOffset } = params;
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
@@ -126,7 +132,7 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
     },
 };
 
-export interface IDeleteCommandParams {
+export interface IDeleteTextCommandParams {
     unitId: string;
     range: ITextRange;
     direction: DeleteDirection;
@@ -137,11 +143,11 @@ export interface IDeleteCommandParams {
 /**
  * The command to delete text, mainly used in BACKSPACE and DELETE when collapsed is true. ONLY handle collapsed range!!!
  */
-export const DeleteCommand: ICommand<IDeleteCommandParams> = {
+export const DeleteTextCommand: ICommand<IDeleteTextCommandParams> = {
     id: 'doc.command.delete-text',
     type: CommandType.COMMAND,
 
-    handler: async (accessor, params: IDeleteCommandParams) => {
+    handler: async (accessor, params: IDeleteTextCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const { range, segmentId, unitId, direction, len = 1 } = params;
@@ -202,7 +208,7 @@ export const DeleteCommand: ICommand<IDeleteCommandParams> = {
     },
 };
 
-export interface IUpdateCommandParams {
+export interface IUpdateTextCommandParams {
     unitId: string;
     updateBody: IDocumentBody;
     range: ITextRange;
@@ -214,12 +220,12 @@ export interface IUpdateCommandParams {
 /**
  * The command to update text properties, mainly used in BACKSPACE.
  */
-export const UpdateCommand: ICommand<IUpdateCommandParams> = {
+export const UpdateTextCommand: ICommand<IUpdateTextCommandParams> = {
     id: 'doc.command.update-text',
 
     type: CommandType.COMMAND,
 
-    handler: async (accessor, params: IUpdateCommandParams) => {
+    handler: async (accessor, params: IUpdateTextCommandParams) => {
         const { range, segmentId, updateBody, coverType, unitId, textRanges } = params;
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);

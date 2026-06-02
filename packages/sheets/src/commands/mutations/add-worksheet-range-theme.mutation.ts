@@ -17,7 +17,7 @@
 import type { IAccessor, IMutation } from '@univerjs/core';
 import type { IWorksheetRangeThemeStyleMutationParams } from '../../basics/interfaces/mutation-interface';
 import { CommandType, IUniverInstanceService } from '@univerjs/core';
-import { SheetRangeThemeModel } from '../../model/range-theme-model';
+import { SheetRangeThemeModel } from '../../models/range-theme-model';
 import { getSheetCommandTarget, getSheetMutationTarget } from '../commands/utils/target-util';
 
 export const SetWorksheetRangeThemeStyleMutation: IMutation<IWorksheetRangeThemeStyleMutationParams> = {

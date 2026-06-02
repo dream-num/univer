@@ -94,7 +94,7 @@ import { SheetTableInsertColumnAtCommand, SheetTableRemoveColumnAtCommand } from
 import { AddSheetTableMutation } from '../../commands/mutations/add-sheet-table.mutation';
 import { DeleteSheetTableMutation } from '../../commands/mutations/delete-sheet-table.mutation';
 import { SetSheetTableMutation } from '../../commands/mutations/set-sheet-table.mutation';
-import { TableManager } from '../../model/table-manager';
+import { TableManager } from '../../models/table-manager';
 import { SheetTableService } from '../../services/table.service';
 import { SheetTableFormulaController } from '../sheet-table-formula.controller';
 import { SheetTableRefRangeController } from '../sheet-table-ref-range.controller';

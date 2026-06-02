@@ -15,15 +15,31 @@
  */
 
 import type { IDisposable, IRange, ISelectionCell, Nullable } from '@univerjs/core';
-import type { IColumnsHeaderCfgParam, IRowsHeaderCfgParam, RenderComponentType, RenderManagerService, SpreadsheetColumnHeader, SpreadsheetRowHeader, SpreadsheetSkeleton } from '@univerjs/engine-render';
-
+import type {
+    IColumnsHeaderCfgParam,
+    IRowsHeaderCfgParam,
+    RenderComponentType,
+    SpreadsheetColumnHeader,
+    SpreadsheetRowHeader,
+    SpreadsheetSkeleton,
+} from '@univerjs/engine-render';
 import type { ISelectionStyle } from '@univerjs/sheets';
-import type { IScrollState, IViewportScrollState } from '@univerjs/sheets-ui';
+import type { IScrollState } from '@univerjs/sheets-ui';
 import type { FRange } from '@univerjs/sheets/facade';
 import { ICommandService, toDisposable } from '@univerjs/core';
 import { IRenderManagerService, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { SetWorksheetRowIsAutoHeightCommand } from '@univerjs/sheets';
-import { IMarkSelectionService, SetColumnHeaderHeightCommand, SetRowHeaderWidthCommand, SetWorksheetColAutoWidthCommand, SetZoomRatioCommand, SHEET_VIEW_KEY, SheetScrollManagerService, SheetSkeletonManagerService, SheetsScrollRenderController } from '@univerjs/sheets-ui';
+import {
+    IMarkSelectionService,
+    SetColumnHeaderHeightCommand,
+    SetRowHeaderWidthCommand,
+    SetWorksheetColAutoWidthCommand,
+    SetZoomRatioCommand,
+    SHEET_VIEW_KEY,
+    SheetScrollManagerService,
+    SheetSkeletonManagerService,
+    SheetsScrollRenderController,
+} from '@univerjs/sheets-ui';
 import { FWorksheet } from '@univerjs/sheets/facade';
 
 /**
@@ -331,18 +347,13 @@ export interface IFWorksheetUIMixin {
      * ```
      */
     setRowHeaderWidth(width: number): FWorksheet;
-
-    /**
-     * @deprecated use `univerAPI.addEvent(univerAPI.Event.Scroll, (params) => {})` instead
-     */
-    onScroll(callback: (params: Nullable<IViewportScrollState>) => void): IDisposable;
 }
 
 export class FWorksheetUIMixin extends FWorksheet implements IFWorksheetUIMixin {
     override refreshCanvas(): FWorksheet {
         const renderManagerService = this._injector.get(IRenderManagerService);
         const unitId = this._fWorkbook.id;
-        const render = renderManagerService.getRenderById(unitId);
+        const render = renderManagerService.getRenderUnitById(unitId);
 
         if (!render) {
             throw new Error(`Render Unit with unitId ${unitId} not found`);
@@ -397,7 +408,7 @@ export class FWorksheetUIMixin extends FWorksheet implements IFWorksheetUIMixin 
     override getVisibleRange(): IRange | null {
         const unitId = this._workbook.getUnitId();
         const renderManagerService = this._injector.get(IRenderManagerService);
-        const render = renderManagerService.getRenderById(unitId);
+        const render = renderManagerService.getRenderUnitById(unitId);
         if (!render) return null;
         const skm = render.with(SheetSkeletonManagerService);
         const sk = skm.getCurrentSkeleton();
@@ -408,7 +419,7 @@ export class FWorksheetUIMixin extends FWorksheet implements IFWorksheetUIMixin 
     override getVisibleRangesOfAllViewports(): Map<SHEET_VIEWPORT_KEY, IRange> | null {
         const unitId = this._workbook.getUnitId();
         const renderManagerService = this._injector.get(IRenderManagerService);
-        const render = renderManagerService.getRenderById(unitId);
+        const render = renderManagerService.getRenderUnitById(unitId);
         if (!render) return null;
         const skm = render.with(SheetSkeletonManagerService);
         const sk = skm.getCurrentSkeleton();
@@ -419,7 +430,7 @@ export class FWorksheetUIMixin extends FWorksheet implements IFWorksheetUIMixin 
     override scrollToCell(row: number, column: number, duration?: number): FWorksheet {
         const unitId = this._workbook.getUnitId();
         const renderManagerService = this._injector.get(IRenderManagerService);
-        const render = renderManagerService.getRenderById(unitId);
+        const render = renderManagerService.getRenderUnitById(unitId);
         if (render) {
             const scrollRenderController = render?.with(SheetsScrollRenderController);
             scrollRenderController.scrollToCell(row, column, duration);
@@ -437,28 +448,15 @@ export class FWorksheetUIMixin extends FWorksheet implements IFWorksheetUIMixin 
         const unitId = this._workbook.getUnitId();
         const sheetId = this._worksheet.getSheetId();
         const renderManagerService = this._injector.get(IRenderManagerService);
-        const render = renderManagerService.getRenderById(unitId);
+        const render = renderManagerService.getRenderUnitById(unitId);
         if (!render) return emptyScrollState;
         const sheetScrollManagerService = render.with(SheetScrollManagerService);
         const scrollState = sheetScrollManagerService.getScrollStateByParam({ unitId, sheetId });
         return scrollState || emptyScrollState;
     }
 
-    override onScroll(callback: (params: Nullable<IViewportScrollState>) => void): IDisposable {
-        const unitId = this._workbook.getUnitId();
-        const renderManagerService = this._injector.get(IRenderManagerService) as RenderManagerService;
-        const scrollManagerService = renderManagerService.getRenderById(unitId)?.with(SheetScrollManagerService);
-        if (scrollManagerService) {
-            const sub = scrollManagerService.validViewportScrollInfo$.subscribe((params: Nullable<IViewportScrollState>) => {
-                callback(params);
-            });
-            return toDisposable(sub);
-        }
-        return toDisposable(() => { });
-    }
-
     override getSkeleton(): Nullable<SpreadsheetSkeleton> {
-        const service = this._injector.get(IRenderManagerService).getRenderById(this._workbook.getUnitId())?.with(SheetSkeletonManagerService);
+        const service = this._injector.get(IRenderManagerService).getRenderUnitById(this._workbook.getUnitId())?.with(SheetSkeletonManagerService);
         return service?.getSkeleton(this._worksheet.getSheetId());
     }
 
@@ -517,7 +515,7 @@ export class FWorksheetUIMixin extends FWorksheet implements IFWorksheetUIMixin 
         const subUnitId = this._worksheet.getSheetId();
 
         const renderManagerService = this._injector.get(IRenderManagerService);
-        const render = renderManagerService.getRenderById(unitId);
+        const render = renderManagerService.getRenderUnitById(unitId);
         if (render && cfg.headerStyle?.size) {
             const skm = render.with(SheetSkeletonManagerService);
             skm.setColumnHeaderSize(render, subUnitId, cfg.headerStyle?.size);
@@ -532,7 +530,7 @@ export class FWorksheetUIMixin extends FWorksheet implements IFWorksheetUIMixin 
         const subUnitId = this._worksheet.getSheetId();
 
         const renderManagerService = this._injector.get(IRenderManagerService);
-        const render = renderManagerService.getRenderById(unitId);
+        const render = renderManagerService.getRenderUnitById(unitId);
         if (render && cfg.headerStyle?.size) {
             const skm = render.with(SheetSkeletonManagerService);
             skm.setRowHeaderSize(render, subUnitId, cfg.headerStyle?.size);
@@ -575,7 +573,7 @@ export class FWorksheetUIMixin extends FWorksheet implements IFWorksheetUIMixin 
      */
     private _getSheetRenderComponent(unitId: string, viewKey: SHEET_VIEW_KEY): Nullable<RenderComponentType> {
         const renderManagerService = this._injector.get(IRenderManagerService);
-        const render = renderManagerService.getRenderById(unitId);
+        const render = renderManagerService.getRenderUnitById(unitId);
         if (!render) {
             throw new Error(`Render Unit with unitId ${unitId} not found`);
         }

@@ -15,10 +15,10 @@
  */
 
 import type { ISetSuperTableMutationParam, ISetSuperTableMutationSearchParam } from '@univerjs/engine-formula';
-import type { Table } from '../model/table';
+import type { Table } from '../models/table';
 import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import { RemoveSuperTableMutation, SetSuperTableMutation } from '@univerjs/engine-formula';
-import { TableManager } from '../model/table-manager';
+import { TableManager } from '../models/table-manager';
 
 export class SheetTableFormulaController extends Disposable {
     constructor(

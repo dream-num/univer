@@ -17,13 +17,12 @@
 import type { DocumentDataModel, ICommand, ICommandInfo } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
-import { BuildTextUtils, CommandType, ICommandService, IUniverInstanceService, JSONX, SHEET_EDITOR_UNITS, TextX, TextXActionType, UniverInstanceType } from '@univerjs/core';
+import { BuildTextUtils, CommandType, getRichTextEditPath, ICommandService, IUniverInstanceService, JSONX, SHEET_EDITOR_UNITS, TextX, TextXActionType, UniverInstanceType } from '@univerjs/core';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { getCustomDecorationAtPosition, getCustomRangeAtPosition, getTextRunAtPosition } from '../../basics/paragraph';
 import { DocIMEInputManagerService } from '../../services/doc-ime-input-manager.service';
 import { DocMenuStyleService } from '../../services/doc-menu-style.service';
-import { getRichTextEditPath } from '../util';
 
 export interface IIMEInputCommandParams {
     unitId: string;

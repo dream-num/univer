@@ -58,6 +58,7 @@ export interface ICollaMsgJoin {
     memberID: string;
     name: string;
     avatar: string;
+    userID: string;
 }
 
 export interface ICollaMsgLeave {

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import './f-univer';
+import './f-document';
 
-export { FDocument } from './f-document';
-
-export type * from './f-univer';
+export type * from './f-document';

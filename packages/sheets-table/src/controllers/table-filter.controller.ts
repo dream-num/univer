@@ -19,7 +19,7 @@ import type { Subscription } from 'rxjs';
 import { Disposable, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { getSheetCommandTarget, INTERCEPTOR_POINT, SheetInterceptorService, ZebraCrossingCacheController } from '@univerjs/sheets';
 import { filter, switchMap } from 'rxjs';
-import { TableManager } from '../model/table-manager';
+import { TableManager } from '../models/table-manager';
 
 export class TableFilterController extends Disposable {
     private readonly _tableFilteredOutRows = new Map<string, Set<number>>();

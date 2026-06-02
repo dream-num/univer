@@ -36,7 +36,7 @@ export type { IUniverSheetsTableConfig } from './config/config';
 export { SHEET_TABLE_CUSTOM_THEME_PREFIX, TABLE_FILTER_EMPTY_VALUE } from './const';
 export { SheetsTableController } from './controllers/sheets-table.controller';
 export { customEmptyThemeWithBorderStyle, processStyleWithBorderStyle } from './controllers/table-theme.factory';
-export { TableManager } from './model/table-manager';
+export { TableManager } from './models/table-manager';
 export { UniverSheetsTablePlugin } from './plugin';
 export { SheetTableService } from './services/table.service';
 export { SheetsTableButtonStateEnum, SheetsTableSortStateEnum, TableColumnDataTypeEnum, TableColumnFilterTypeEnum, TableConditionTypeEnum, TableDateCompareTypeEnum, TableNumberCompareTypeEnum, TableStringCompareTypeEnum } from './types/enum';

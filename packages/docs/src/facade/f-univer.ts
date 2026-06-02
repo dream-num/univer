@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
-import { UniverInstanceType } from '@univerjs/core';
+import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import { FDocument } from './f-document';
 
@@ -25,29 +25,44 @@ import { FDocument } from './f-document';
 export interface IFUniverDocsUIMixin {
     /**
      * Create a new document and get the API handler of that document.
-     *
      * @param {Partial<IDocumentData>} data The snapshot of the document.
-     * @returns {FDocument} FDocument API instance.
+     * @returns {FDocument} The document API instance.
+     * @example
+     * ```typescript
+     * const fDocument = univerAPI.createUniverDoc({ id: 'document-01', title: 'Document1'  });
+     * console.log(fDocument);
+     * ```
      */
-    createUniverDoc(data: Partial<IDocumentData>): FDocument;
-    /**
-     * Get the document API handler by the document id.
-     *
-     * @param {string} id The document id.
-     * @returns {FDocument | null} The document API instance.
-     */
-    getUniverDoc(id: string): FDocument | null;
+    createDocument(data: Partial<IDocumentData>): FDocument;
+
     /**
      * Get the currently focused Univer document.
-     *
-     * @returns {FDocument | null} The currently focused Univer document.
+     * @returns {FDocument | null} The currently focused Univer document API instance, or null if there is no focused Univer document.
+     * @example
+     * ```typescript
+     * const fDocument = univerAPI.getActiveDocument();
+     * console.log(fDocument);
+     * ```
      */
     getActiveDocument(): FDocument | null;
+
+    /**
+     * Get the document API handler by the document id.
+     * @param {string} id The document id.
+     * @returns {FDocument | null} The document API instance corresponding to the document id, or null if not found.
+     * @example
+     * ```typescript
+     * const fDocument = univerAPI.getDocument('document-01');
+     * console.log(fDocument);
+     * ```
+     */
+    getDocument(id: string): FDocument | null;
 }
 
 export class FUniverDocsUIMixin extends FUniver implements IFUniverDocsUIMixin {
-    override createUniverDoc(data: Partial<IDocumentData>): FDocument {
-        const document = this._univerInstanceService.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, data);
+    override createDocument(data: Partial<IDocumentData>): FDocument {
+        const instanceService = this._injector.get(IUniverInstanceService);
+        const document = instanceService.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, data);
         return this._injector.createInstance(FDocument, document);
     }
 
@@ -60,8 +75,8 @@ export class FUniverDocsUIMixin extends FUniver implements IFUniverDocsUIMixin {
         return this._injector.createInstance(FDocument, document);
     }
 
-    override getUniverDoc(id: string): FDocument | null {
-        const document = this._univerInstanceService.getUniverDocInstance(id);
+    override getDocument(id: string): FDocument | null {
+        const document = this._univerInstanceService.getUnit<DocumentDataModel>(id, UniverInstanceType.UNIVER_DOC);
         if (!document) {
             return null;
         }

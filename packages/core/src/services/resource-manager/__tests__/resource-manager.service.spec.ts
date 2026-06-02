@@ -134,4 +134,23 @@ describe('ResourceManagerService', () => {
         expect(unloaded).toEqual(['unit-1']);
         expect(errorSpy).toHaveBeenCalled();
     });
+
+    it('should load direct object-shaped plugin resources', () => {
+        const loaded: unknown[] = [];
+
+        service.registerPluginResource({
+            pluginName: 'SHEET_TEST_PLUGIN',
+            businesses: [UniverInstanceType.UNIVER_SHEET],
+            onLoad: (_unitId, resource) => loaded.push(resource),
+            onUnLoad: () => {},
+            toJson: () => '{}',
+            parseJson: JSON.parse,
+        });
+
+        service.loadResources('unit-1', {
+            SHEET_TEST_PLUGIN: { ok: true },
+        } as never);
+
+        expect(loaded).toEqual([{ ok: true }]);
+    });
 });

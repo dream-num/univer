@@ -30,8 +30,16 @@ export interface ITransformerConfig {
     rotationSnaps?: number[];
     rotationSnapTolerance?: number;
     rotateAnchorOffset?: number;
+    rotateAnchorPosition?: 'top' | 'bottom';
+    rotateLineEnabled?: boolean;
     rotateSize?: number;
     rotateCornerRadius?: number;
+    rotateFill?: string;
+    rotateStroke?: string;
+    rotateStrokeWidth?: number;
+    rotateIconEnabled?: boolean;
+    rotateIconStroke?: string;
+    rotateIconStrokeWidth?: number;
 
     borderEnabled?: boolean;
     borderStroke?: string;
@@ -46,6 +54,14 @@ export interface ITransformerConfig {
     anchorStrokeWidth?: number;
     anchorSize?: number;
     anchorCornerRadius?: number;
+    anchorStyle?: 'default' | 'canva';
+    anchorSideLongSize?: number;
+    anchorSideShortSize?: number;
+    anchorSideCornerRadius?: number;
+    anchorShadowColor?: string;
+    anchorShadowBlur?: number;
+    anchorShadowOffsetX?: number;
+    anchorShadowOffsetY?: number;
 
     keepRatio?: boolean;
     centeredScaling?: boolean;

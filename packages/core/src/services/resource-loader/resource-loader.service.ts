@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+import type { UnitModel } from '../../common/unit';
 import type { DocumentDataModel } from '../../docs';
 import type { Workbook } from '../../sheets/workbook';
-import type { IResourceHook } from '../resource-manager/type';
+import type { IResourceHook, IResourceName, IResources } from '../resource-manager/type';
 import type { IResourceLoaderService } from './type';
 import { isInternalEditorID } from '../../common/const';
 import { Inject } from '../../common/di';
@@ -36,39 +37,69 @@ export class ResourceLoaderService extends Disposable implements IResourceLoader
     }
 
     private _init() {
+        const loadHookResource = (
+            hook: IResourceHook,
+            unitId: string,
+            resources: unknown,
+            errorLabel: string
+        ) => {
+            const data = getResourceData(resources, hook.pluginName);
+            if (data !== undefined) {
+                try {
+                    const model = hook.parseJson(data);
+                    hook.onLoad(unitId, model);
+                } catch (err) {
+                    console.error(`Load ${errorLabel}{${unitId}} Resources{${hook.pluginName}} Data Error.`);
+                }
+            }
+        };
+        const getResourceData = (resources: unknown, pluginName: IResourceName): string | undefined => {
+            if (Array.isArray(resources)) {
+                const data = resources.find((resource) => resource.name === pluginName)?.data;
+                return typeof data === 'string' ? data : undefined;
+            }
+
+            if (!resources || typeof resources !== 'object') {
+                return undefined;
+            }
+
+            const raw = (resources as Record<string, unknown>)[pluginName];
+            if (typeof raw === 'string') {
+                return raw;
+            }
+
+            if (raw && typeof raw === 'object') {
+                const data = (raw as Record<string, unknown>).data;
+                if (typeof data === 'string') {
+                    return data;
+                }
+
+                return JSON.stringify(raw);
+            }
+
+            return undefined;
+        };
+
         const handleHookAdd = (hook: IResourceHook) => {
             hook.businesses.forEach((business) => {
                 switch (business) {
                     case UniverInstanceType.UNRECOGNIZED:
                     case UniverInstanceType.UNIVER_UNKNOWN:
-                    case UniverInstanceType.UNIVER_SLIDE:
                     case UniverInstanceType.UNIVER_DOC: {
                         this._univerInstanceService.getAllUnitsForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC).forEach((doc) => {
-                            const snapshotResource = doc.getSnapshot().resources || [];
-                            const plugin = snapshotResource.find((r) => r.name === hook.pluginName);
-                            if (plugin) {
-                                try {
-                                    const data = hook.parseJson(plugin.data);
-                                    hook.onLoad(doc.getUnitId(), data);
-                                } catch (err) {
-                                    console.error(`Load Document{${doc.getUnitId()}} Resources{${hook.pluginName}} Data Error.`);
-                                }
-                            }
+                            loadHookResource(hook, doc.getUnitId(), doc.getSnapshot().resources, 'Document');
+                        });
+                        break;
+                    }
+                    case UniverInstanceType.UNIVER_SLIDE: {
+                        this._univerInstanceService.getAllUnitsForType<UnitModel<{ resources?: IResources }>>(UniverInstanceType.UNIVER_SLIDE).forEach((slide) => {
+                            loadHookResource(hook, slide.getUnitId(), slide.getSnapshot().resources, 'Slide');
                         });
                         break;
                     }
                     case UniverInstanceType.UNIVER_SHEET: {
                         this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET).forEach((workbook) => {
-                            const snapshotResource = workbook.getSnapshot().resources || [];
-                            const plugin = snapshotResource.find((r) => r.name === hook.pluginName);
-                            if (plugin) {
-                                try {
-                                    const data = hook.parseJson(plugin.data);
-                                    hook.onLoad(workbook.getUnitId(), data);
-                                } catch (err) {
-                                    console.error(`Load Workbook{${workbook.getUnitId()}} Resources{${hook.pluginName}} Data Error.`);
-                                }
-                            }
+                            loadHookResource(hook, workbook.getUnitId(), workbook.getSnapshot().resources, 'Workbook');
                         });
                     }
                 }
@@ -95,8 +126,12 @@ export class ResourceLoaderService extends Disposable implements IResourceLoader
                 }
             })
         );
-
-        // TODO: add slides in the future
+        this.disposeWithMe(
+            this._univerInstanceService.getTypeOfUnitAdded$<UnitModel<{ resources?: IResources }>>(UniverInstanceType.UNIVER_SLIDE).subscribe((event) => {
+                const { unit: slide } = event;
+                this._resourceManagerService.loadResources(slide.getUnitId(), slide.getSnapshot().resources);
+            })
+        );
 
         this.disposeWithMe(
             this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
@@ -107,6 +142,11 @@ export class ResourceLoaderService extends Disposable implements IResourceLoader
         this.disposeWithMe(
             this._univerInstanceService.getTypeOfUnitDisposed$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC).subscribe((doc) => {
                 this._resourceManagerService.unloadResources(doc.getUnitId(), UniverInstanceType.UNIVER_DOC);
+            })
+        );
+        this.disposeWithMe(
+            this._univerInstanceService.getTypeOfUnitDisposed$<UnitModel>(UniverInstanceType.UNIVER_SLIDE).subscribe((slide) => {
+                this._resourceManagerService.unloadResources(slide.getUnitId(), UniverInstanceType.UNIVER_SLIDE);
             })
         );
     }

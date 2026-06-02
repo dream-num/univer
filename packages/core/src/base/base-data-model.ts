@@ -15,13 +15,13 @@
  */
 
 import type { Observable } from 'rxjs';
-import type { BaseCellData, IBaseSnapshot, CellValue, IFieldSnapshot, ITableSnapshot } from './typedef';
+import type { BaseCellData, CellValue, IBaseSnapshot, IFieldSnapshot, ITableSnapshot } from './typedef';
 import { BehaviorSubject } from 'rxjs';
 import { UnitModel, UniverInstanceType } from '../common/unit';
 import { Tools } from '../shared/tools';
 
 const BASE_LIST_VALUE_SEPARATOR = ', ';
-const BASE_ATTACHMENT_RESOURCE_KEY_SEPARATOR = '\u001f';
+const BASE_ATTACHMENT_RESOURCE_KEY_SEPARATOR = '\u001F';
 
 export class BaseDataModel extends UnitModel<IBaseSnapshot, UniverInstanceType.UNIVER_BASE> {
     override readonly type: UniverInstanceType.UNIVER_BASE = UniverInstanceType.UNIVER_BASE;
@@ -121,14 +121,14 @@ function normalizeBaseTable(table: ITableSnapshot): void {
     const orderedFieldIds = table.fieldOrder.filter((fieldId) => fields[fieldId]);
 
     table.recordOrder = orderedRecordIds;
-    table.rowIndex = { ...(table.rowIndex ?? {}) };
-    table.rowId = { ...(table.rowId ?? {}) };
-    table.colIndex = { ...(table.colIndex ?? {}) };
-    table.colId = { ...(table.colId ?? {}) };
-    table.cellData = { ...(table.cellData ?? {}) };
-    table.resources = { ...(table.resources ?? {}) };
-    table.resources.attachmentSets = { ...(table.resources.attachmentSets ?? {}) };
-    table.resources.attachments = { ...(table.resources.attachments ?? {}) };
+    table.rowIndex = { ...table.rowIndex };
+    table.rowId = { ...table.rowId };
+    table.colIndex = { ...table.colIndex };
+    table.colId = { ...table.colId };
+    table.cellData = { ...table.cellData };
+    table.resources = { ...table.resources };
+    table.resources.attachmentSets = { ...table.resources.attachmentSets };
+    table.resources.attachments = { ...table.resources.attachments };
 
     orderedRecordIds.forEach((recordId, index) => {
         if (table.rowIndex![recordId] == null) {
@@ -157,7 +157,7 @@ function normalizeBaseTable(table: ITableSnapshot): void {
         if (row == null) {
             return;
         }
-        table.cellData![row] = { ...(table.cellData![row] ?? {}) };
+        table.cellData![row] = { ...table.cellData![row] };
         Object.entries(record.values ?? {}).forEach(([fieldId, value]) => {
             const field = fields[fieldId];
             if (field?.type === 'attachment') {
@@ -215,9 +215,9 @@ function isBaseCellData(value: unknown): value is BaseCellData {
 
 function writeAttachmentResources(table: ITableSnapshot, recordId: string, fieldId: string, value: unknown): void {
     const attachments = normalizeAttachmentValue(value);
-    table.resources = { ...(table.resources ?? {}) };
-    table.resources.attachmentSets = { ...(table.resources.attachmentSets ?? {}) };
-    table.resources.attachments = { ...(table.resources.attachments ?? {}) };
+    table.resources = { ...table.resources };
+    table.resources.attachmentSets = { ...table.resources.attachmentSets };
+    table.resources.attachments = { ...table.resources.attachments };
     const key = `${fieldId}${BASE_ATTACHMENT_RESOURCE_KEY_SEPARATOR}${recordId}`;
     table.resources.attachmentSets[key] = attachments.map((attachment, index) => {
         const id = String(attachment.id ?? `${key}${BASE_ATTACHMENT_RESOURCE_KEY_SEPARATOR}${index}`);

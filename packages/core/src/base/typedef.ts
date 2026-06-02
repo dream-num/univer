@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+import type { IDocumentData } from '../types/interfaces';
+
 export type BaseId = string;
 export type TableId = string;
 export type FieldId = string;
 export type RecordId = string;
 export type ViewId = string;
-
-import type { IDocumentData } from '../types/interfaces';
 
 export type PrimitiveCellValue = string | number | boolean;
 export type CellValue =

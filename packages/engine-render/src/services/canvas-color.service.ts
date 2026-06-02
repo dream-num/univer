@@ -32,6 +32,43 @@ export class DumbCanvasColorService implements ICanvasColorService {
     }
 }
 
+const DARK_RENDER_COLOR_OVERRIDES: Record<string, string> = {
+    '#17212b': '#e2e8f0',
+    '#64748b': '#94a3b8',
+    '#d9e0e7': '#253044',
+    '#edf1f5': '#1b2535',
+    '#eef2f6': '#1b2535',
+    '#f2f5f8': '#101827',
+    '#f3f6fa': '#18243a',
+    '#f4f8ff': '#172a46',
+    '#f5f9ff': '#12233a',
+    '#f7f9fb': '#0d1422',
+    '#f7f9fc': '#0d1422',
+    '#f8fafc': '#0f172a',
+    '#fbfcfd': '#07111f',
+    '#fcfdff': '#050914',
+    '#e8f1ff': '#173a69',
+    '#eaf5ff': '#12315a',
+    '#dbeafe': '#1e3a8a',
+    '#bfdbfe': '#60a5fa',
+    '#93c5fd': '#60a5fa',
+    '#8eb6f5': '#60a5fa',
+    '#60a5fa': '#60a5fa',
+    '#2563eb': '#60a5fa',
+    '#1d64d8': '#93c5fd',
+    '#1d5cff': '#60a5fa',
+    '#0f766e': '#2dd4bf',
+    '#d7f4ef': '#134e4a',
+    'rgba(37,99,235,0.05)': 'rgba(96,165,250,0.16)',
+    'rgba(37,99,235,0.06)': 'rgba(96,165,250,0.18)',
+    'rgba(37,99,235,0.08)': 'rgba(96,165,250,0.22)',
+    'rgba(37,99,235,0.12)': 'rgba(96,165,250,0.26)',
+    'rgba(37,99,235,0.18)': 'rgba(96,165,250,0.30)',
+    'rgba(37,99,235,0.28)': 'rgba(96,165,250,0.38)',
+    'rgba(239,246,255,0.88)': 'rgba(30,64,175,0.72)',
+    'rgba(148,163,184,0.45)': 'rgba(148,163,184,0.52)',
+};
+
 /**
  * This service inverts a color for dark mode. This service is exposed
  */
@@ -55,7 +92,10 @@ export class CanvasColorService extends Disposable implements ICanvasColorServic
         }
 
         let cachedColor = '';
-        if (color.startsWith('#')) {
+        const mappedColor = getDarkRenderColorOverride(color);
+        if (mappedColor) {
+            cachedColor = mappedColor;
+        } else if (color.startsWith('#')) {
             const invertedColor = this._invertAlgo(hexToRgb(color));
             cachedColor = rgbToHex(invertedColor);
 
@@ -63,10 +103,8 @@ export class CanvasColorService extends Disposable implements ICanvasColorServic
             if (color.length === 5) {
                 const alpha = color.charAt(4);
                 cachedColor += alpha + alpha;
-            }
-
-            // For 8-digit hex (e.g., #RRGGBB[AA]), the alpha is the last two characters
-            else if (color.length === 9) {
+            } else if (color.length === 9) {
+                // For 8-digit hex (e.g., #RRGGBB[AA]), the alpha is the last two characters
                 const alpha = color.substring(7, 9);
                 cachedColor += alpha;
             }
@@ -93,6 +131,20 @@ export class CanvasColorService extends Disposable implements ICanvasColorServic
         this._cache.set(color, cachedColor);
         return cachedColor;
     }
+}
+
+export function getDarkRenderColorOverride(color: string): string | null {
+    const normalized = normalizeRenderColor(color);
+    return DARK_RENDER_COLOR_OVERRIDES[normalized] ?? null;
+}
+
+function normalizeRenderColor(color: string): string {
+    const trimmed = color.trim().toLowerCase();
+    if (trimmed.startsWith('rgb')) {
+        return trimmed.replace(/\s+/g, '');
+    }
+
+    return trimmed;
 }
 
 export function hexToRgb(_hex: string): RGBColorType {

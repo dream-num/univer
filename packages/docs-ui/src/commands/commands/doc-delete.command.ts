@@ -15,13 +15,15 @@
  */
 
 import type { DocumentDataModel, ICommand, IDocumentBlockRange, IDocumentBody, IMutationInfo, IParagraph, ITextRange, JSONXActions, Nullable } from '@univerjs/core';
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import type { IDeleteTextCommandParams, IRichTextEditingMutationParams, IUpdateTextCommandParams } from '@univerjs/docs';
 import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
 import {
     BlockType,
     BuildTextUtils,
     CommandType,
     DataStreamTreeTokenType,
+    DeleteDirection,
+    getRichTextEditPath,
     HorizontalAlign,
     ICommandService,
     IUniverInstanceService,
@@ -34,14 +36,11 @@ import {
     UniverInstanceType,
     UpdateDocsAttributeType,
 } from '@univerjs/core';
-
-import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { DeleteTextCommand, DocSelectionManagerService, RichTextEditingMutation, UpdateTextCommand } from '@univerjs/docs';
 import { getParagraphByGlyph, hasListGlyph, isFirstGlyph, isIndentByGlyph } from '@univerjs/engine-render';
 import { DocAutoFormatService } from '../../services/doc-auto-format.service';
-import { DeleteDirection } from '../../types/delete-direction';
-import { getCommandSkeleton, getRichTextEditPath } from '../util';
+import { getCommandSkeleton } from '../util';
 import { CutContentCommand } from './clipboard.inner.command';
-import { DeleteCommand, UpdateCommand } from './core-editing.command';
 import { getCurrentParagraph } from './util';
 
 export interface IDeleteCustomBlockParams {
@@ -519,14 +518,12 @@ export const DeleteLeftCommand: ICommand = {
             const paragraphStyle = paragraph.paragraphStyle;
 
             if (isBullet === true) {
-                const paragraphStyle = paragraph.paragraphStyle;
-
                 if (paragraphStyle) {
-                    updateParagraph.paragraphStyle = paragraphStyle;
+                    updateParagraph.paragraphStyle = { ...paragraphStyle };
                     // TODO: It maybe need to update codes bellow when we support nested list.
                     const { hanging } = paragraphStyle;
                     if (hanging) {
-                        updateParagraph.paragraphStyle.indentStart = hanging;
+                        updateParagraph.paragraphStyle.indentStart = { ...hanging };
                         updateParagraph.paragraphStyle.hanging = undefined;
                     }
                 }
@@ -537,7 +534,7 @@ export const DeleteLeftCommand: ICommand = {
                     updateParagraph.bullet = bullet;
                 }
 
-                if (paragraphStyle != null) {
+                if (paragraphStyle) {
                     updateParagraph.paragraphStyle = { ...paragraphStyle };
                     delete updateParagraph.paragraphStyle.hanging;
                     delete updateParagraph.paragraphStyle.indentStart;
@@ -548,11 +545,12 @@ export const DeleteLeftCommand: ICommand = {
                 {
                     startOffset: cursor,
                     endOffset: cursor,
+                    collapsed: true,
                     style,
                 },
             ];
 
-            result = await commandService.executeCommand(UpdateCommand.id, {
+            result = await commandService.executeCommand<IUpdateTextCommandParams>(UpdateTextCommand.id, {
                 unitId: docDataModel.getUnitId(),
                 updateBody: {
                     dataStream: '',
@@ -561,6 +559,7 @@ export const DeleteLeftCommand: ICommand = {
                 range: {
                     startOffset: paragraphIndex,
                     endOffset: paragraphIndex + 1,
+                    collapsed: true,
                 },
                 textRanges,
                 coverType: UpdateDocsAttributeType.REPLACE,
@@ -612,15 +611,7 @@ export const DeleteLeftCommand: ICommand = {
                         cursor -= preGlyph.count;
                         cursor -= prePreGlyph.count;
 
-                        const textRanges = [
-                            {
-                                startOffset: cursor,
-                                endOffset: cursor,
-                                style,
-                            },
-                        ];
-
-                        result = await commandService.executeCommand(DeleteCommand.id, {
+                        result = await commandService.executeCommand<IDeleteTextCommandParams>(DeleteTextCommand.id, {
                             unitId: docDataModel.getUnitId(),
                             range: {
                                 ...activeRange,
@@ -630,12 +621,11 @@ export const DeleteLeftCommand: ICommand = {
                             segmentId,
                             direction: DeleteDirection.LEFT,
                             len: prePreGlyph.count,
-                            textRanges,
                         });
                     }
                 } else {
                     cursor -= preGlyph.count;
-                    result = await commandService.executeCommand(DeleteCommand.id, {
+                    result = await commandService.executeCommand<IDeleteTextCommandParams>(DeleteTextCommand.id, {
                         unitId: docDataModel.getUnitId(),
                         range: actualRange,
                         segmentId,
@@ -763,15 +753,7 @@ export const DeleteRightCommand: ICommand = {
                         return true;
                     }
 
-                    const textRanges = [
-                        {
-                            startOffset: startOffset + 1,
-                            endOffset: startOffset + 1,
-                            style,
-                        },
-                    ];
-
-                    result = await commandService.executeCommand(DeleteCommand.id, {
+                    result = await commandService.executeCommand<IDeleteTextCommandParams>(DeleteTextCommand.id, {
                         unitId: docDataModel.getUnitId(),
                         range: {
                             ...activeRange,
@@ -780,25 +762,15 @@ export const DeleteRightCommand: ICommand = {
                         },
                         segmentId,
                         direction: DeleteDirection.RIGHT,
-                        textRanges,
                         len: nextGlyph.count,
                     });
                 }
             } else {
-                const textRanges = [
-                    {
-                        startOffset,
-                        endOffset: startOffset,
-                        style,
-                    },
-                ];
-
-                result = await commandService.executeCommand(DeleteCommand.id, {
+                result = await commandService.executeCommand<IDeleteTextCommandParams>(DeleteTextCommand.id, {
                     unitId: docDataModel.getUnitId(),
                     range: actualRange,
                     segmentId,
                     direction: DeleteDirection.RIGHT,
-                    textRanges,
                     len: needDeleteGlyph.count,
                 });
             }
@@ -881,7 +853,7 @@ function resetEmptyCenteredParagraphAlignment(
     paragraph: IParagraph,
     style: ITextRangeWithStyle['style']
 ) {
-    return commandService.executeCommand(UpdateCommand.id, {
+    return commandService.executeCommand<IUpdateTextCommandParams>(UpdateTextCommand.id, {
         unitId: docDataModel.getUnitId(),
         updateBody: {
             dataStream: '',
@@ -897,6 +869,7 @@ function resetEmptyCenteredParagraphAlignment(
         range: {
             startOffset: paragraph.startIndex,
             endOffset: paragraph.startIndex + 1,
+            collapsed: true,
         },
         textRanges: [{
             startOffset: paragraph.startIndex,

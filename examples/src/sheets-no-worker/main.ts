@@ -42,7 +42,6 @@ import { UniverUIPlugin } from '@univerjs/ui';
 
 import '@univerjs/sheets/facade';
 import '@univerjs/ui/facade';
-import '@univerjs/docs-ui/facade';
 import '@univerjs/sheets-ui/facade';
 import '@univerjs/sheets-data-validation/facade';
 import '@univerjs/engine-formula/facade';

@@ -31,6 +31,7 @@ import {
     BuildTextUtils,
     CommandType,
     generateRandomId,
+    getRichTextEditPath,
     ICommandService,
     IUniverInstanceService,
     JSONX,
@@ -42,7 +43,7 @@ import {
 } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { getCustomDecorationAtPosition, getCustomRangeAtPosition } from '../../basics/paragraph';
-import { getCommandSkeleton, getRichTextEditPath } from '../util';
+import { getCommandSkeleton } from '../util';
 import { getDeleteRowContentActionParams, getDeleteRowsActionsParams, getDeleteTableActionParams } from './table/table';
 
 export function getCustomBlockIdsInSelections(body: IDocumentBody, selections: ITextRange[]): string[] {

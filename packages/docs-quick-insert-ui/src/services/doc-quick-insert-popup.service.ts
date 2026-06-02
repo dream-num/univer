@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, IDisposable, Nullable } from '@univerjs/core';
-import type { IInsertCommandParams } from '@univerjs/docs-ui';
+import type { IInsertTextCommandParams } from '@univerjs/docs';
 import type { Documents, DocumentSkeleton, IBoundRectNoAngle, IDocumentSkeletonGlyph, ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { Observable } from 'rxjs';
 import { Disposable, ICommandService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
@@ -47,7 +47,7 @@ export interface IDocPopup {
     keyword: string;
     menus$: Observable<DocPopupMenu[]>;
     Placeholder?: React.ComponentType;
-    preconditions?: (params: IInsertCommandParams) => boolean;
+    preconditions?: (params: IInsertTextCommandParams) => boolean;
 }
 
 const noopDisposable = {

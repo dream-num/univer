@@ -17,9 +17,9 @@
 import type { ICommand, IMutationInfo, JSONXActions } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
-import { CommandType, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
+import { CommandType, getRichTextEditPath, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
-import { getCommandSkeleton, getRichTextEditPath } from '../../util';
+import { getCommandSkeleton } from '../../util';
 import { getDeleteColumnsActionParams, getDeleteRowsActionsParams, getDeleteTableActionParams, getRangeInfoFromRanges } from './table';
 
 export interface IDocTableDeleteRowsCommandParams {}

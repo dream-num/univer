@@ -15,15 +15,12 @@
  */
 
 import type { IDisposable, IExecutionOptions } from '@univerjs/core';
-import type { CommentUpdate, IAddCommentCommandParams, IDeleteCommentCommandParams } from '@univerjs/thread-comment';
+import type { CommentUpdate, IAddCommentCommandParams, IDeleteCommentCommandParams, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
 import { toDisposable } from '@univerjs/core';
 import { FWorkbook } from '@univerjs/sheets/facade';
 import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, ThreadCommentModel, UpdateCommentCommand } from '@univerjs/thread-comment';
 import { filter } from 'rxjs';
 import { FThreadComment } from './f-thread-comment';
-
-// eslint-disable-next-line ts/no-explicit-any
-type IUpdateCommandParams = any;
 
 /**
  * @ignore
@@ -82,7 +79,7 @@ export interface IFWorkbookSheetsThreadCommentMixin {
      */
     onBeforeUpdateThreadComment(
         this: FWorkbook,
-        callback: (params: IUpdateCommandParams, options: IExecutionOptions | undefined) => void | false
+        callback: (params: IUpdateCommentCommandParams, options: IExecutionOptions | undefined) => void | false
     ): IDisposable;
 
     /**
@@ -154,9 +151,9 @@ export class FWorkbookSheetsThreadCommentMixin extends FWorkbook implements IFWo
      * @param callback
      * @deprecated
      */
-    override onBeforeUpdateThreadComment(callback: (params: IUpdateCommandParams, options: IExecutionOptions | undefined) => void | false): IDisposable {
+    override onBeforeUpdateThreadComment(callback: (params: IUpdateCommentCommandParams, options: IExecutionOptions | undefined) => void | false): IDisposable {
         return toDisposable(this._commandService.beforeCommandExecuted((commandInfo, options) => {
-            const params = commandInfo.params as IUpdateCommandParams;
+            const params = commandInfo.params as IUpdateCommentCommandParams;
             if (commandInfo.id === UpdateCommentCommand.id) {
                 if (params.unitId !== this._workbook.getUnitId()) {
                     return;

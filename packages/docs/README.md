@@ -10,7 +10,7 @@
 
 | Package | UMD global | CSS | Locales | Facade entry |
 | --- | --- | :---: | :---: | :---: |
-| `@univerjs/docs` | `UniverDocs` | No | No | No |
+| `@univerjs/docs` | `UniverDocs` | No | No | Yes |
 
 ## Installation
 

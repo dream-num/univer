@@ -20,6 +20,7 @@ import type { IInsertDrawingCommandParams } from './interfaces';
 import {
     BuildTextUtils,
     CommandType,
+    getRichTextEditPath,
     ICommandService,
     IUniverInstanceService,
     JSONX,
@@ -27,7 +28,7 @@ import {
     TextXActionType,
 } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
-import { DocContentInsertService, getCustomBlockIdsInSelections, getRichTextEditPath } from '@univerjs/docs-ui';
+import { DocContentInsertService, getCustomBlockIdsInSelections } from '@univerjs/docs-ui';
 
 /**
  * The command to insert new drawings

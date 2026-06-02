@@ -172,7 +172,6 @@ import '@univerjs/sheets-numfmt-ui/lib/index.css'
 
 import '@univerjs/engine-formula/facade'
 import '@univerjs/ui/facade'
-import '@univerjs/docs-ui/facade'
 import '@univerjs/sheets/facade'
 import '@univerjs/sheets-ui/facade'
 import '@univerjs/sheets-formula/facade'

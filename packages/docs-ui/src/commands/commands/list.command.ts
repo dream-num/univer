@@ -21,6 +21,7 @@ import {
     BuildTextUtils,
     CommandType,
     generateRandomId,
+    getRichTextEditPath,
     ICommandService,
     IUniverInstanceService,
     JSONX,
@@ -34,7 +35,6 @@ import {
 } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { DocContentInsertService } from '../../services/doc-content-insert.service';
-import { getRichTextEditPath } from '../util';
 import { getCurrentParagraph } from './util';
 
 interface IListOperationCommandParams {

@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+export {
+    DeleteTextCommand,
+    type IDeleteTextCommandParams,
+    type IInsertTextCommandParams,
+    InsertTextCommand,
+    type IUpdateTextCommandParams,
+    UpdateTextCommand,
+} from './commands/commands/core-editing.command';
 export { type IRichTextEditingMutationParams, RichTextEditingMutation } from './commands/mutations/core-editing.mutation';
 export { type ISetTextSelectionsOperationParams, SetTextSelectionsOperation } from './commands/operations/text-selection.operation';
 export type { IUniverDocsConfig } from './config/config';

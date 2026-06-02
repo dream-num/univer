@@ -14,69 +14,44 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommandService, IDocumentData } from '@univerjs/core';
-import { InsertCommand } from '@univerjs/docs-ui';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { FDocument } from '../f-document';
+import type { DocumentDataModel, ICommand, IDocumentData, Injector, Univer } from '@univerjs/core';
+import { ICommandService, IResourceManagerService, UniverInstanceType } from '@univerjs/core';
+import { InsertTextCommand, RichTextEditingMutation } from '@univerjs/docs';
+import { FDocument } from '@univerjs/docs/facade';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { createTestBed } from './create-test-bed';
 
 describe('Test FDocument', () => {
-    let commandService: Pick<ICommandService, 'executeCommand'>;
-    let resourceManagerService: { getResourcesByType: ReturnType<typeof vi.fn> };
-    let univerInstanceService: { focusUnit: ReturnType<typeof vi.fn> };
-    let renderManagerService: { getRenderById: ReturnType<typeof vi.fn> };
-    let documentDataModel: Pick<DocumentDataModel, 'getUnitId' | 'getSnapshot'>;
+    let univer: Univer;
+    let get: Injector['get'];
+    let documentDataModel: DocumentDataModel;
     let document: FDocument;
 
+    function createDocumentFacade(docData?: IDocumentData) {
+        const testBed = createTestBed(docData);
+        univer = testBed.univer;
+        get = testBed.get;
+        documentDataModel = testBed.doc;
+
+        const commandService = get(ICommandService);
+        commandService.registerCommand(InsertTextCommand);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+
+        document = univer.__getInjector().createInstance(FDocument, documentDataModel);
+    }
+
     beforeEach(() => {
-        commandService = {
-            executeCommand: vi.fn().mockResolvedValue(true),
-        };
-        resourceManagerService = {
-            getResourcesByType: vi.fn(() => []),
-        };
-        univerInstanceService = {
-            focusUnit: vi.fn(),
-        };
-        renderManagerService = {
-            getRenderById: vi.fn(),
-        };
-        documentDataModel = {
-            getUnitId: () => 'test',
-            getSnapshot: () => ({
-                id: 'test',
-                title: 'Test Document',
-                documentStyle: {},
-                body: {
-                    dataStream: 'Hello,\r\n',
-                },
-            }),
-        };
-        document = new FDocument(
-            documentDataModel as DocumentDataModel,
-            {} as never,
-            univerInstanceService as never,
-            commandService as ICommandService,
-            resourceManagerService as never,
-            renderManagerService as never
-        );
+        createDocumentFacade();
     });
 
-    it('appends text by executing the insert command at the tail of the body', async () => {
+    afterEach(() => {
+        univer.dispose();
+    });
+
+    it('appends text at the tail of the body', async () => {
         await expect(document.appendText('Univer')).resolves.toBe(true);
 
-        expect(commandService.executeCommand).toHaveBeenCalledWith(InsertCommand.id, {
-            unitId: 'test',
-            body: {
-                dataStream: 'Univer',
-            },
-            range: {
-                startOffset: 6,
-                endOffset: 6,
-                collapsed: true,
-                segmentId: '',
-            },
-            segmentId: '',
-        });
+        expect(document.save().body?.dataStream).toBe('Hello,Univer\r\n');
     });
 
     it('inserts text at an explicit document range', async () => {
@@ -86,19 +61,7 @@ describe('Test FDocument', () => {
             startOffset: 2,
         })).resolves.toBe(true);
 
-        expect(commandService.executeCommand).toHaveBeenCalledWith(InsertCommand.id, {
-            unitId: 'test',
-            body: {
-                dataStream: 'Docs',
-            },
-            range: {
-                startOffset: 2,
-                endOffset: 4,
-                collapsed: false,
-                segmentId: '',
-            },
-            segmentId: '',
-        });
+        expect(document.save().body?.dataStream).toBe('HeDocso,\r\n');
     });
 
     it('inserts paragraphs at an explicit document range', async () => {
@@ -108,49 +71,35 @@ describe('Test FDocument', () => {
             startOffset: 6,
         })).resolves.toBe(true);
 
-        expect(commandService.executeCommand).toHaveBeenCalledWith(InsertCommand.id, {
-            unitId: 'test',
-            body: {
-                dataStream: 'Line 1\r\nLine 2\r\n',
-            },
-            range: {
-                startOffset: 6,
-                endOffset: 6,
-                collapsed: true,
-                segmentId: '',
-            },
-            segmentId: '',
-            cursorOffset: 'Line 1\r\nLine 2\r\n'.length,
-        });
+        expect(document.save().body?.dataStream).toBe('Hello,Line 1\r\nLine 2\r\n\r\n');
     });
 
     it('throws when appending text to a document without a body', () => {
-        const emptyDocument = new FDocument(
-            {
-                getUnitId: () => 'test',
-                getSnapshot: () => ({ id: 'test' } as IDocumentData),
-            } as DocumentDataModel,
-            {} as never,
-            univerInstanceService as never,
-            commandService as ICommandService,
-            resourceManagerService as never,
-            renderManagerService as never
-        );
+        univer.dispose();
+        createDocumentFacade({
+            id: 'test',
+            title: 'Test Document',
+            documentStyle: {},
+        });
 
-        expect(() => emptyDocument.appendText('Univer')).toThrowError('The document body is empty');
+        expect(() => document.appendText('Univer')).toThrowError('The document body is empty');
     });
 
     it('includes current document resources in snapshots', () => {
-        resourceManagerService.getResourcesByType.mockReturnValue([
-            {
-                name: 'test-resource',
-                data: '{"value":1}',
-            },
-        ]);
+        const resourceManagerService = get(IResourceManagerService);
 
-        expect(document.getSnapshot().resources).toEqual([
+        resourceManagerService.registerPluginResource({
+            pluginName: 'DOC_TEST_RESOURCE_PLUGIN',
+            businesses: [UniverInstanceType.UNIVER_DOC],
+            onLoad: () => undefined,
+            onUnLoad: () => undefined,
+            toJson: () => '{"value":1}',
+            parseJson: (bytes) => JSON.parse(bytes),
+        });
+
+        expect(document.save().resources).toEqual([
             {
-                name: 'test-resource',
+                name: 'DOC_TEST_RESOURCE_PLUGIN',
                 data: '{"value":1}',
             },
         ]);

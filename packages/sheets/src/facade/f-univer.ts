@@ -80,13 +80,13 @@ export interface IFUniverSheetsMixin {
      * @returns {FWorkbook} The spreadsheet API instance.
      * @example
      * ```ts
-     * const fWorkbook = univerAPI.createWorkbook({ id: 'Sheet1', name: 'Sheet1' });
+     * const fWorkbook = univerAPI.createWorkbook({ id: 'workbook-01', name: 'Workbook1' });
      * console.log(fWorkbook);
      * ```
      *
      * Add you can make the workbook not as the active workbook by setting options:
      * ```ts
-     * const fWorkbook = univerAPI.createWorkbook({ id: 'Sheet1', name: 'Sheet1' }, { makeCurrent: false });
+     * const fWorkbook = univerAPI.createWorkbook({ id: 'workbook-01', name: 'Workbook1' }, { makeCurrent: false });
      * console.log(fWorkbook);
      * ```
      */
@@ -110,8 +110,7 @@ export interface IFUniverSheetsMixin {
      *
      * @example
      * ```ts
-     * const unitId = 'workbook-01';
-     * const fWorkbook = univerAPI.getWorkbook(unitId);
+     * const fWorkbook = univerAPI.getWorkbook('workbook-01');
      * console.log(fWorkbook);
      * ```
      */

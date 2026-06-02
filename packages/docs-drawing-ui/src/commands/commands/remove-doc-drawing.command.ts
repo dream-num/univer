@@ -20,6 +20,7 @@ import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IDeleteDrawingCommandParams } from './interfaces';
 import {
     CommandType,
+    getRichTextEditPath,
     ICommandService,
     IUniverInstanceService,
     JSONX,
@@ -28,7 +29,7 @@ import {
     TextXActionType,
 } from '@univerjs/core';
 import { RichTextEditingMutation } from '@univerjs/docs';
-import { DocSelectionRenderService, getRichTextEditPath } from '@univerjs/docs-ui';
+import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 
 /**

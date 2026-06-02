@@ -15,8 +15,8 @@
  */
 
 import { DeleteDirection, Direction } from '@univerjs/core';
-import { RichTextEditingMutation } from '@univerjs/docs';
-import { DeleteCommand, DeleteLeftCommand, IMEInputCommand, InsertCommand, MoveCursorOperation } from '@univerjs/docs-ui';
+import { DeleteTextCommand, InsertTextCommand, RichTextEditingMutation } from '@univerjs/docs';
+import { DeleteLeftCommand, IMEInputCommand, MoveCursorOperation } from '@univerjs/docs-ui';
 import { KeyCode } from '@univerjs/ui';
 import { describe, expect, it, vi } from 'vitest';
 import { CloseQuickInsertPopupOperation, ShowQuickInsertPopupOperation } from '../../commands/operations/quick-insert-popup.operation';
@@ -114,7 +114,7 @@ describe('DocQuickInsertTriggerController', () => {
         }));
 
         commandService.emit({
-            id: InsertCommand.id,
+            id: InsertTextCommand.id,
             params: {
                 body: { dataStream: '/' },
                 range: { endOffset: 5 },
@@ -134,7 +134,7 @@ describe('DocQuickInsertTriggerController', () => {
 
         popupService.setEditPopup({ anchor: 4 });
         commandService.emit({
-            id: InsertCommand.id,
+            id: InsertTextCommand.id,
             params: {
                 body: { dataStream: 'a' },
                 range: { endOffset: 7 },
@@ -164,7 +164,7 @@ describe('DocQuickInsertTriggerController', () => {
         expect(popupService.setInputOffset).toHaveBeenLastCalledWith({ start: 4, end: 9 });
 
         commandService.emit({
-            id: DeleteCommand.id,
+            id: DeleteTextCommand.id,
             params: {
                 direction: DeleteDirection.LEFT,
                 len: 2,

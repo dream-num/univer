@@ -25,6 +25,7 @@ import {
     Plugin,
 } from '@univerjs/core';
 import pkg from '../package.json';
+import { DeleteTextCommand, InsertTextCommand, UpdateTextCommand } from './commands/commands/core-editing.command';
 import { RichTextEditingMutation } from './commands/mutations/core-editing.mutation';
 import { DocsRenameMutation } from './commands/mutations/docs-rename.mutation';
 import { SetTextSelectionsOperation } from './commands/operations/text-selection.operation';
@@ -63,6 +64,9 @@ export class UniverDocsPlugin extends Plugin {
     private _initializeCommands(): void {
         (
             [
+                InsertTextCommand,
+                DeleteTextCommand,
+                UpdateTextCommand,
                 RichTextEditingMutation,
                 DocsRenameMutation,
                 SetTextSelectionsOperation,

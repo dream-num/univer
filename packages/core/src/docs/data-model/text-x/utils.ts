@@ -15,6 +15,7 @@
  */
 
 import type { ICustomBlock, ICustomDecoration, ICustomRange, IDocumentBlockRange, IDocumentBody, IParagraph, ISectionBreak, ITextRun } from '../../../types/interfaces/i-document-data';
+import type { DocumentDataModel } from '../../data-model';
 import type { IRetainAction } from './action-types';
 import { UpdateDocsAttributeType } from '../../../shared/command-enum';
 import { Tools } from '../../../shared/tools';
@@ -562,4 +563,24 @@ export function isUselessRetainAction(action: IRetainAction): boolean {
     }
 
     return false;
+}
+
+export function getRichTextEditPath(docDataModel: DocumentDataModel, segmentId = '') {
+    if (!segmentId) {
+        return ['body'];
+    }
+
+    const { headers, footers } = docDataModel.getSnapshot();
+
+    if (headers == null && footers == null) {
+        throw new Error('Document data model must have headers or footers when update by segment id');
+    }
+
+    if (headers?.[segmentId] != null) {
+        return ['headers', segmentId, 'body'];
+    } else if (footers?.[segmentId] != null) {
+        return ['footers', segmentId, 'body'];
+    } else {
+        throw new Error('Segment id not found in headers or footers');
+    }
 }

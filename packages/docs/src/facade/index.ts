@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-export enum DeleteDirection {
-    LEFT,
-    RIGHT,
-}
+import './f-univer';
+
+export { FDocument } from './f-document';
+
+export type * from './f-univer';

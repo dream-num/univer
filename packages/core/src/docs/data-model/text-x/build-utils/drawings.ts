@@ -21,6 +21,7 @@ import type { JSONXActions } from '../../json-x/json-x';
 import { JSONX } from '../../json-x/json-x';
 import { TextXActionType } from '../action-types';
 import { TextX } from '../text-x';
+import { getRichTextEditPath } from '../utils';
 import { deleteSelectionTextX } from './text-x-utils';
 
 export interface IAddDrawingParam {
@@ -50,26 +51,6 @@ export function getCustomBlockIdsInSelections(body: IDocumentBody, selections: I
     }
 
     return customBlockIds;
-}
-
-export function getRichTextEditPath(docDataModel: DocumentDataModel, segmentId = '') {
-    if (!segmentId) {
-        return ['body'];
-    }
-
-    const { headers, footers } = docDataModel.getSnapshot();
-
-    if (headers == null && footers == null) {
-        throw new Error('Document data model must have headers or footers when update by segment id');
-    }
-
-    if (headers?.[segmentId] != null) {
-        return ['headers', segmentId, 'body'];
-    } else if (footers?.[segmentId] != null) {
-        return ['footers', segmentId, 'body'];
-    } else {
-        throw new Error('Segment id not found in headers or footers');
-    }
 }
 
 // eslint-disable-next-line max-lines-per-function

@@ -21,6 +21,7 @@ import type { IDocumentSkeletonDrawing, IDocumentSkeletonHeaderFooter, IDocument
 import {
     BooleanNumber,
     CommandType,
+    getRichTextEditPath,
     ICommandService,
     IUniverInstanceService,
     JSONX,
@@ -32,7 +33,7 @@ import {
     Tools,
 } from '@univerjs/core';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
-import { DocSelectionRenderService, getRichTextEditPath } from '@univerjs/docs-ui';
+import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 import { DocRefreshDrawingsService } from '../../services/doc-refresh-drawings.service';
 

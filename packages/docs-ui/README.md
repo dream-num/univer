@@ -10,7 +10,7 @@
 
 | Package | UMD global | CSS | Locales | Facade entry |
 | --- | --- | :---: | :---: | :---: |
-| `@univerjs/docs-ui` | `UniverDocsUi` | Yes | Yes | No |
+| `@univerjs/docs-ui` | `UniverDocsUi` | Yes | Yes | Yes |
 
 ## Installation
 

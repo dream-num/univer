@@ -15,13 +15,13 @@
  */
 
 import type { DocumentDataModel, Nullable } from '@univerjs/core';
+import type { IInsertTextCommandParams } from '@univerjs/docs';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { Subscription } from 'rxjs';
 import { Disposable, ICommandService, Inject, SHEET_EDITOR_UNITS } from '@univerjs/core';
-import { DocSkeletonManagerService } from '@univerjs/docs';
+import { DocSkeletonManagerService, InsertTextCommand } from '@univerjs/docs';
 import { getCustomDecorationAtPosition, getCustomRangeAtPosition, getTextRunAtPosition } from '../../basics/paragraph';
 import { AfterSpaceCommand } from '../../commands/commands/auto-format.command';
-import { InsertCommand } from '../../commands/commands/core-editing.command';
 import { DocMenuStyleService } from '../../services/doc-menu-style.service';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
 
@@ -80,7 +80,7 @@ export class DocInputController extends Disposable implements IRenderModule {
             const curTextRun = getTextRunAtPosition(originBody, activeRange.endOffset, defaultTextStyle, cacheStyle, SHEET_EDITOR_UNITS.includes(unitId));
             const curCustomDecorations = getCustomDecorationAtPosition(originBody?.customDecorations ?? [], activeRange.endOffset);
 
-            await this._commandService.executeCommand(InsertCommand.id, {
+            await this._commandService.executeCommand<IInsertTextCommandParams>(InsertTextCommand.id, {
                 unitId,
                 body: {
                     dataStream: content,

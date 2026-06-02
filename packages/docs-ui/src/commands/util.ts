@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IAccessor } from '@univerjs/core';
+import type { IAccessor } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 
@@ -26,24 +26,4 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 export function getCommandSkeleton(accessor: IAccessor, unitId: string) {
     const renderManagerService = accessor.get(IRenderManagerService);
     return renderManagerService.getRenderById(unitId)?.with(DocSkeletonManagerService);
-}
-
-export function getRichTextEditPath(docDataModel: DocumentDataModel, segmentId = '') {
-    if (!segmentId) {
-        return ['body'];
-    }
-
-    const { headers, footers } = docDataModel.getSnapshot();
-
-    if (headers == null && footers == null) {
-        throw new Error('Document data model must have headers or footers when update by segment id');
-    }
-
-    if (headers?.[segmentId] != null) {
-        return ['headers', segmentId, 'body'];
-    } else if (footers?.[segmentId] != null) {
-        return ['footers', segmentId, 'body'];
-    } else {
-        throw new Error('Segment id not found in headers or footers');
-    }
 }

@@ -38,7 +38,6 @@ import { AfterSpaceCommand, EnterCommand, TabCommand } from './commands/commands
 import { BreakLineCommand } from './commands/commands/break-line.command';
 import { DocCopyCommand, DocCopyCurrentParagraphCommand, DocCutCommand, DocCutCurrentParagraphCommand, DocPasteCommand } from './commands/commands/clipboard.command';
 import { CutContentCommand, InnerPasteCommand } from './commands/commands/clipboard.inner.command';
-import { DeleteCommand, InsertCommand, UpdateCommand } from './commands/commands/core-editing.command';
 import { MoveDocBlockCommand } from './commands/commands/doc-block-move.command';
 import { DeleteCurrentParagraphCommand, DeleteCustomBlockCommand, DeleteLeftCommand, DeleteRightCommand, MergeTwoParagraphCommand, RemoveHorizontalLineCommand } from './commands/commands/doc-delete.command';
 import { CloseHeaderFooterCommand } from './commands/commands/doc-header-footer.command';
@@ -221,11 +220,8 @@ export class UniverDocsUIPlugin extends Plugin {
             SetInlineFormatTextBackgroundColorCommand,
             SetInlineFormatCommand,
             BreakLineCommand,
-            InsertCommand,
-            DeleteCommand,
             DeleteCustomBlockCommand,
             MoveDocBlockCommand,
-            UpdateCommand,
             MergeTwoParagraphCommand,
             RemoveHorizontalLineCommand,
             SetDocZoomRatioOperation,

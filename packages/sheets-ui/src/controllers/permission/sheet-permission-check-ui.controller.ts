@@ -15,11 +15,13 @@
  */
 
 import type { ICommandInfo } from '@univerjs/core';
-import type { IIMEInputCommandParams, IInsertCommandParams } from '@univerjs/docs-ui';
+import type { IInsertTextCommandParams } from '@univerjs/docs';
+import type { IIMEInputCommandParams } from '@univerjs/docs-ui';
 import type { ISheetPasteParams } from '../../commands/commands/clipboard.command';
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import { Disposable, DisposableCollection, FOCUSING_COMMENT_EDITOR, FOCUSING_EDITOR_STANDALONE, ICommandService, IContextService, Inject, IPermissionService, IUniverInstanceService, LocaleService } from '@univerjs/core';
-import { IMEInputCommand, InsertCommand } from '@univerjs/docs-ui';
+import { InsertTextCommand } from '@univerjs/docs';
+import { IMEInputCommand } from '@univerjs/docs-ui';
 import { getSheetCommandTarget, RangeProtectionPermissionEditPoint, RangeProtectionPermissionViewPoint, RangeProtectionRuleModel, SheetPermissionCheckController, WorkbookCopyPermission, WorkbookEditablePermission, WorksheetCopyPermission, WorksheetEditPermission, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission, WorksheetSetColumnStylePermission } from '@univerjs/sheets';
 import { IDialogService } from '@univerjs/ui';
 import { SheetCopyCommand, SheetCutCommand, SheetPasteColWidthCommand, SheetPasteCommand, SheetPasteShortKeyCommand } from '../../commands/commands/clipboard.command';
@@ -90,13 +92,13 @@ export class SheetPermissionCheckUIController extends Disposable {
         let target;
 
         switch (id) {
-            case InsertCommand.id:
+            case InsertTextCommand.id:
             case IMEInputCommand.id:
                 if (this._contextService.getContextValue(FOCUSING_EDITOR_STANDALONE) === true || this._contextService.getContextValue(FOCUSING_COMMENT_EDITOR) === true) {
                     break;
                 }
 
-                params = commandInfo.params as IInsertCommandParams | IIMEInputCommandParams;
+                params = commandInfo.params as IInsertTextCommandParams | IIMEInputCommandParams;
 
                 permission = this._sheetPermissionCheckController.permissionCheckWithoutRange({
                     workbookTypes: [WorkbookEditablePermission],

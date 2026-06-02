@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { IInsertCommandParams } from '@univerjs/docs-ui';
+import type { IInsertTextCommandParams } from '@univerjs/docs';
 import { Disposable, ICommandService, Inject, Tools } from '@univerjs/core';
-import { DocSelectionManagerService } from '@univerjs/docs';
-import { DeleteLeftCommand, InsertCommand, MoveCursorOperation } from '@univerjs/docs-ui';
+import { DocSelectionManagerService, InsertTextCommand } from '@univerjs/docs';
+import { DeleteLeftCommand, MoveCursorOperation } from '@univerjs/docs-ui';
 import { CloseMentionEditPopupOperation, ShowMentionEditPopupOperation } from '../commands/operations/mention-popup.operation';
 import { DocMentionPopupService } from '../services/doc-mention-popup.service';
 import { DocMentionService } from '../services/doc-mention.service';
@@ -37,8 +37,8 @@ export class DocMentionTriggerController extends Disposable {
     private _initTrigger() {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((commandInfo) => {
-                if (commandInfo.id === InsertCommand.id) {
-                    const params = commandInfo.params as IInsertCommandParams;
+                if (commandInfo.id === InsertTextCommand.id) {
+                    const params = commandInfo.params as IInsertTextCommandParams;
                     const activeRange = this._textSelectionManagerService.getActiveTextRange();
                     if (params.body.dataStream === '@' && activeRange && !Tools.isDefine(this._docMentionService.editing)) {
                         setTimeout(() => {

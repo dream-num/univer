@@ -15,21 +15,21 @@
  */
 
 import type { DocumentDataModel, ICommand, IDocumentData, Injector, IStyleBase, Univer } from '@univerjs/core';
+import type { IDeleteTextCommandParams, IInsertTextCommandParams, IUpdateTextCommandParams } from '@univerjs/docs';
 import {
     awaitTime,
     BooleanNumber,
     CustomRangeType,
     DataStreamTreeTokenType,
+    DeleteDirection,
     HorizontalAlign,
     ICommandService,
     IUniverInstanceService,
     UniverInstanceType,
     UpdateDocsAttributeType,
 } from '@univerjs/core';
-import { DocSelectionManagerService, DocSkeletonManagerService, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
+import { DeleteTextCommand, DocSelectionManagerService, DocSkeletonManagerService, InsertTextCommand, RichTextEditingMutation, SetTextSelectionsOperation, UpdateTextCommand } from '@univerjs/docs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { DeleteDirection } from '../../../types/delete-direction';
-import { DeleteCommand, InsertCommand, UpdateCommand } from '../core-editing.command';
 import { DeleteLeftCommand, DeleteRightCommand, isDeleteOffsetInsideBlockRange } from '../doc-delete.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
@@ -209,7 +209,7 @@ describe('core editing commands', () => {
     function registerDeleteKeyCommands() {
         commandService.registerCommand(DeleteLeftCommand);
         commandService.registerCommand(DeleteRightCommand);
-        commandService.registerCommand(UpdateCommand);
+        commandService.registerCommand(UpdateTextCommand);
         commandService.registerCommand(SetTextSelectionsOperation);
         commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
     }
@@ -220,9 +220,9 @@ describe('core editing commands', () => {
         get = testBed.get;
 
         commandService = get(ICommandService);
-        commandService.registerCommand(InsertCommand);
-        commandService.registerCommand(DeleteCommand);
-        commandService.registerCommand(UpdateCommand);
+        commandService.registerCommand(InsertTextCommand);
+        commandService.registerCommand(DeleteTextCommand);
+        commandService.registerCommand(UpdateTextCommand);
         commandService.registerCommand(SetTextSelectionsOperation);
         commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
 
@@ -239,7 +239,7 @@ describe('core editing commands', () => {
         const selectionManager = get(DocSelectionManagerService);
         selectionManager.__TEST_ONLY_add([{ startOffset: 5, endOffset: 5, collapsed: true, isActive: true, segmentId: '', style: null as never }]);
 
-        await commandService.executeCommand(InsertCommand.id, {
+        await commandService.executeCommand<IInsertTextCommandParams>(InsertTextCommand.id, {
             unitId: 'test-doc',
             segmentId: '',
             range: { startOffset: 5, endOffset: 5, collapsed: true },
@@ -254,7 +254,7 @@ describe('core editing commands', () => {
     });
 
     it('deletes an entire custom range when the selection hits a whole entity', async () => {
-        await commandService.executeCommand(DeleteCommand.id, {
+        await commandService.executeCommand<IDeleteTextCommandParams>(DeleteTextCommand.id, {
             unitId: 'test-doc',
             segmentId: '',
             range: { startOffset: 7, endOffset: 7, collapsed: true },
@@ -273,11 +273,11 @@ describe('core editing commands', () => {
         univer = testBed.univer;
         get = testBed.get;
         commandService = get(ICommandService);
-        commandService.registerCommand(DeleteCommand);
+        commandService.registerCommand(DeleteTextCommand);
         commandService.registerCommand(SetTextSelectionsOperation);
         commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
 
-        await commandService.executeCommand(DeleteCommand.id, {
+        await commandService.executeCommand<IDeleteTextCommandParams>(DeleteTextCommand.id, {
             unitId: 'test-doc',
             segmentId: '',
             range: { startOffset: 0, endOffset: 0, collapsed: true },
@@ -296,11 +296,11 @@ describe('core editing commands', () => {
         univer = testBed.univer;
         get = testBed.get;
         commandService = get(ICommandService);
-        commandService.registerCommand(DeleteCommand);
+        commandService.registerCommand(DeleteTextCommand);
         commandService.registerCommand(SetTextSelectionsOperation);
         commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
 
-        await commandService.executeCommand(DeleteCommand.id, {
+        await commandService.executeCommand<IDeleteTextCommandParams>(DeleteTextCommand.id, {
             unitId: 'test-doc',
             segmentId: '',
             range: { startOffset: 1, endOffset: 1, collapsed: true },
@@ -411,14 +411,14 @@ describe('core editing commands', () => {
 
         await commandService.executeCommand(DeleteLeftCommand.id);
 
-        expect(executeSpy).not.toHaveBeenCalledWith(UpdateCommand.id, expect.anything());
-        expect(executeSpy).toHaveBeenCalledWith(DeleteCommand.id, expect.objectContaining({
+        expect(executeSpy).not.toHaveBeenCalledWith(UpdateTextCommand.id, expect.anything());
+        expect(executeSpy).toHaveBeenCalledWith(DeleteTextCommand.id, expect.objectContaining({
             direction: DeleteDirection.LEFT,
         }));
     });
 
     it('updates text styles through the shared rich text mutation flow', async () => {
-        await commandService.executeCommand(UpdateCommand.id, {
+        await commandService.executeCommand<IUpdateTextCommandParams>(UpdateTextCommand.id, {
             unitId: 'test-doc',
             segmentId: '',
             range: { startOffset: 0, endOffset: 5, collapsed: false },

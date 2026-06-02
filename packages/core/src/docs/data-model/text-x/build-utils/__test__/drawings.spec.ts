@@ -16,7 +16,8 @@
 
 import { describe, expect, it } from 'vitest';
 import { DocumentDataModel } from '../../../document-data-model';
-import { addDrawing, getCustomBlockIdsInSelections, getRichTextEditPath } from '../drawings';
+import { getRichTextEditPath } from '../../utils';
+import { addDrawing, getCustomBlockIdsInSelections } from '../drawings';
 
 describe('drawing build utils', () => {
     it('should resolve custom blocks and replace selected drawings in the document body', () => {

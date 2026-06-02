@@ -91,6 +91,7 @@ export {
     getCustomDecorationSlice,
     getCustomRangeSlice,
     getParagraphsSlice,
+    getRichTextEditPath,
     getSectionBreakSlice,
     getTableSlice,
     getTextRunSlice,

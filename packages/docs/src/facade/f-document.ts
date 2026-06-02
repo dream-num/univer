@@ -15,8 +15,8 @@
  */
 
 import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
+import type { IInsertTextCommandParams } from '@univerjs/docs';
 import {
-    DOC_RANGE_TYPE,
     ICommandService,
     Inject,
     Injector,
@@ -25,8 +25,8 @@ import {
     RedoCommand,
     UndoCommand,
 } from '@univerjs/core';
-import { DocSelectionRenderService, InsertCommand } from '@univerjs/docs-ui';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { FBaseInitialable } from '@univerjs/core/facade';
+import { InsertTextCommand } from '@univerjs/docs';
 
 export interface IDocumentInsertTextFacadeOptions {
     startOffset?: number;
@@ -36,19 +36,21 @@ export interface IDocumentInsertTextFacadeOptions {
 }
 
 /**
+ * Facade API object bounded to a document. It provides a set of methods to interact with the document.
  * @hideconstructor
  */
-export class FDocument {
+export class FDocument extends FBaseInitialable {
     readonly id: string;
 
     constructor(
         private readonly _documentDataModel: DocumentDataModel,
-        @Inject(Injector) protected readonly _injector: Injector,
+        @Inject(Injector) protected override readonly _injector: Injector,
         @IUniverInstanceService protected readonly _univerInstanceService: IUniverInstanceService,
         @Inject(IResourceLoaderService) protected readonly _resourceLoaderService: IResourceLoaderService,
-        @ICommandService private readonly _commandService: ICommandService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
+        @ICommandService private readonly _commandService: ICommandService
     ) {
+        super(_injector);
+
         this.id = this._documentDataModel.getUnitId();
     }
 
@@ -64,6 +66,10 @@ export class FDocument {
      */
     getDocumentDataModel(): DocumentDataModel {
         return this._documentDataModel;
+    }
+
+    override dispose(): void {
+        super.dispose();
     }
 
     /**
@@ -109,11 +115,29 @@ export class FDocument {
         return snapshot;
     }
 
+    /**
+     * Undo the last operation in the document.
+     * @returns {Promise<boolean>} A promise that resolves to true if the undo operation was successful, or false if it failed.
+     * @example
+     * ```typescript
+     * const fDocument = univerAPI.getActiveDocument();
+     * await fDocument.undo();
+     * ```
+     */
     undo(): Promise<boolean> {
         this._univerInstanceService.focusUnit(this.id);
         return this._commandService.executeCommand(UndoCommand.id);
     }
 
+    /**
+     * Redo the last undone operation in the document.
+     * @returns {Promise<boolean>} A promise that resolves to true if the redo operation was successful, or false if it failed.
+     * @example
+     * ```typescript
+     * const fDocument = univerAPI.getActiveDocument();
+     * await fDocument.redo();
+     * ```
+     */
     redo(): Promise<boolean> {
         this._univerInstanceService.focusUnit(this.id);
         return this._commandService.executeCommand(RedoCommand.id);
@@ -121,7 +145,13 @@ export class FDocument {
 
     /**
      * Adds the specified text to the end of this text region.
-     * @param text - The text to be added to the end of this text region.
+     * @param {string} text - The text to be added to the end of this text region.
+     * @return {Promise<boolean>} A promise that resolves to true if the text was successfully appended, or false if it failed.
+     * @example
+     * ```typescript
+     * const fDocument = univerAPI.getActiveDocument();
+     * await fDocument.appendText('Hello, world!');
+     * ```
      */
     appendText(text: string): Promise<boolean> {
         const { body } = this.save();
@@ -141,8 +171,52 @@ export class FDocument {
 
     /**
      * Inserts text at the provided document range. Defaults to appending before the final section break.
-     * @param text - The text to insert.
-     * @param options - Optional target range, segment id, and cursor offset.
+     * @param {string} text - The text to insert.
+     * @param {IDocumentInsertTextFacadeOptions} options - Optional target range, segment id, and cursor offset.
+     * @returns {Promise<boolean>} A promise that resolves to true if the text was successfully inserted, or false if it failed.
+     * @example
+     *
+     * // Insert text at a specific range in the document body
+     * ```typescript
+     * const fDocument = univerAPI.getActiveDocument();
+     * await fDocument.insertText('Hello, world!', {
+     *   startOffset: 5,
+     *   endOffset: 5,
+     *   segmentId: '',
+     *   cursorOffset: 13,
+     * });
+     * ```
+     *
+     * // Insert text at the beginning of a header or footer segment
+     * ```typescript
+     * const fDocument = univerAPI.getActiveDocument();
+     * const snapshot = fDocument.save();
+     * const { headers, footers } = snapshot;
+     *
+     * if (headers) {
+     *   for (const headerId in headers) {
+     *     if (headerId === 'target-header-id') {
+     *       await fDocument.insertText('Hello, header!', {
+     *         startOffset: 0,
+     *         endOffset: 0,
+     *         segmentId: headerId,
+     *       });
+     *     }
+     *   }
+     * }
+     *
+     * if (footers) {
+     *   for (const footerId in footers) {
+     *     if (footerId === 'target-footer-id') {
+     *       await fDocument.insertText('Hello, footer!', {
+     *         startOffset: 0,
+     *         endOffset: 0,
+     *         segmentId: footerId,
+     *       });
+     *     }
+     *   }
+     * }
+     * ```
      */
     insertText(text: string, options: IDocumentInsertTextFacadeOptions = {}): Promise<boolean> {
         const unitId = this.id;
@@ -162,7 +236,7 @@ export class FDocument {
             segmentId,
         };
 
-        return this._commandService.executeCommand(InsertCommand.id, {
+        return this._commandService.executeCommand<IInsertTextCommandParams>(InsertTextCommand.id, {
             unitId,
             body: {
                 dataStream: text,
@@ -175,8 +249,17 @@ export class FDocument {
 
     /**
      * Inserts one or more plain-text paragraphs at the provided document range.
-     * @param text - Paragraph text. Newlines are normalized to document paragraph separators.
-     * @param options - Optional target range, segment id, and cursor offset.
+     * @param {string} text - The paragraph text to insert. Newlines are normalized to document paragraph separators.
+     * @param {IDocumentInsertTextFacadeOptions} options - Optional target range, segment id, and cursor offset.
+     * @returns {Promise<boolean>} A promise that resolves to true if the paragraphs were successfully inserted, or false if it failed.
+     * @example
+     * ```typescript
+     * const fDocument = univerAPI.getActiveDocument();
+     * await fDocument.insertParagraph('Hello, world! This is a new paragraph.', {
+     *   startOffset: 5,
+     *   endOffset: 5,
+     * });
+     * ```
      */
     insertParagraph(text = '', options: IDocumentInsertTextFacadeOptions = {}): Promise<boolean> {
         const dataStream = `${text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n').join('\r\n')}\r\n`;
@@ -185,30 +268,5 @@ export class FDocument {
             ...options,
             cursorOffset: options.cursorOffset ?? dataStream.length,
         });
-    }
-
-    /**
-     * Sets the selection to a specified text range in the document.
-     * @param startOffset - The starting offset of the selection in the document.
-     * @param endOffset - The ending offset of the selection in the document.
-     * @example
-     * ```typescript
-     * document.setSelection(10, 20);
-     * ```
-     */
-    setSelection(startOffset: number, endOffset: number): void {
-        // TODO: @jocs...
-        const docSelectionRenderService = this._renderManagerService.getRenderById(this.getId())?.with(DocSelectionRenderService);
-        docSelectionRenderService?.removeAllRanges();
-        docSelectionRenderService?.addDocRanges(
-            [
-                {
-                    startOffset,
-                    endOffset,
-                    rangeType: DOC_RANGE_TYPE.TEXT,
-                },
-            ],
-            true
-        );
     }
 }

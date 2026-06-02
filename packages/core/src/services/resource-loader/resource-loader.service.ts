@@ -17,7 +17,7 @@
 import type { UnitModel } from '../../common/unit';
 import type { DocumentDataModel } from '../../docs';
 import type { Workbook } from '../../sheets/workbook';
-import type { IResourceHook, IResourceName, IResources } from '../resource-manager/type';
+import type { IResourceHook, IResourceName, IResourceSnapshot } from '../resource-manager/type';
 import type { IResourceLoaderService } from './type';
 import { isInternalEditorID } from '../../common/const';
 import { Inject } from '../../common/di';
@@ -92,7 +92,7 @@ export class ResourceLoaderService extends Disposable implements IResourceLoader
                         break;
                     }
                     case UniverInstanceType.UNIVER_SLIDE: {
-                        this._univerInstanceService.getAllUnitsForType<UnitModel<{ resources?: IResources }>>(UniverInstanceType.UNIVER_SLIDE).forEach((slide) => {
+                        this._univerInstanceService.getAllUnitsForType<UnitModel<{ resources?: IResourceSnapshot }>>(UniverInstanceType.UNIVER_SLIDE).forEach((slide) => {
                             loadHookResource(hook, slide.getUnitId(), slide.getSnapshot().resources, 'Slide');
                         });
                         break;
@@ -101,6 +101,7 @@ export class ResourceLoaderService extends Disposable implements IResourceLoader
                         this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET).forEach((workbook) => {
                             loadHookResource(hook, workbook.getUnitId(), workbook.getSnapshot().resources, 'Workbook');
                         });
+                        break;
                     }
                 }
             });
@@ -127,7 +128,7 @@ export class ResourceLoaderService extends Disposable implements IResourceLoader
             })
         );
         this.disposeWithMe(
-            this._univerInstanceService.getTypeOfUnitAdded$<UnitModel<{ resources?: IResources }>>(UniverInstanceType.UNIVER_SLIDE).subscribe((event) => {
+            this._univerInstanceService.getTypeOfUnitAdded$<UnitModel<{ resources?: IResourceSnapshot }>>(UniverInstanceType.UNIVER_SLIDE).subscribe((event) => {
                 const { unit: slide } = event;
                 this._resourceManagerService.loadResources(slide.getUnitId(), slide.getSnapshot().resources);
             })

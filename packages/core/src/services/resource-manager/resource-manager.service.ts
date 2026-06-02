@@ -15,7 +15,7 @@
  */
 
 import type { UniverInstanceType } from '../../common/unit';
-import type { IResourceHook, IResourceManagerService, IResourceName, IResources } from './type';
+import type { IResourceHook, IResourceManagerService, IResourceName, IResources, IResourceSnapshot } from './type';
 import { Subject } from 'rxjs';
 import { Disposable, toDisposable } from '../../shared/lifecycle';
 import { ILogService } from '../log/log.service';
@@ -79,7 +79,7 @@ export class ResourceManagerService extends Disposable implements IResourceManag
         this._resourceMap.delete(pluginName);
     }
 
-    public loadResources(unitId: string, resources?: IResources) {
+    public loadResources(unitId: string, resources?: IResourceSnapshot) {
         this.getAllResourceHooks().forEach((hook) => {
             const data = this._getResourceData(resources, hook.pluginName);
             if (data) {

@@ -49,6 +49,8 @@ export class DataSyncPrimaryController extends RxDisposable {
 
     private readonly _syncingMutations = new Set<string>();
 
+    private _syncMutationQueue: Promise<unknown> = Promise.resolve();
+
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
         @ICommandService private readonly _commandService: ICommandService,
@@ -121,7 +123,8 @@ export class DataSyncPrimaryController extends RxDisposable {
                 !(options as IRemoteSyncMutationOptions)?.fromSync &&
                 // do not sync mutations those are not meant to be synced
                 this._syncingMutations.has(id)) {
-                this._remoteInstanceService.syncMutation({ mutationInfo: commandInfo as IMutationInfo }, options);
+                const sync = () => this._remoteInstanceService.syncMutation({ mutationInfo: commandInfo as IMutationInfo }, options);
+                this._syncMutationQueue = this._syncMutationQueue.then(sync, sync).catch(() => false);
             }
         }));
     }

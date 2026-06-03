@@ -206,6 +206,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
     zeroLeft = 0;
     zeroTop = 0;
+    moveBoundaryEnabled = true;
 
     /**
      * leftTop centerTop rightTop
@@ -400,6 +401,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
             boundBoxFunc,
             useSingleNodeRotation,
             shouldOverdrawWholeArea,
+            moveBoundaryEnabled,
         } = this;
         if (objectTransformerConfig != null) {
             isCropper = objectTransformerConfig.isCropper ?? isCropper;
@@ -447,6 +449,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
             boundBoxFunc = objectTransformerConfig.boundBoxFunc ?? boundBoxFunc;
             useSingleNodeRotation = objectTransformerConfig.useSingleNodeRotation ?? useSingleNodeRotation;
             shouldOverdrawWholeArea = objectTransformerConfig.shouldOverdrawWholeArea ?? shouldOverdrawWholeArea;
+            moveBoundaryEnabled = objectTransformerConfig.moveBoundaryEnabled ?? moveBoundaryEnabled;
         }
 
         return {
@@ -495,6 +498,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
             boundBoxFunc,
             useSingleNodeRotation,
             shouldOverdrawWholeArea,
+            moveBoundaryEnabled,
         };
     }
 
@@ -652,6 +656,13 @@ export class Transformer extends Disposable implements ITransformerConfig {
     }
 
     private _checkMoveBoundary(moveObject: BaseObject, moveLeft: number, moveTop: number, ancestorLeft: number, ancestorTop: number, topSceneWidth: number, topSceneHeight: number) {
+        if (this._getConfig(moveObject).moveBoundaryEnabled === false) {
+            return {
+                moveLeft,
+                moveTop,
+            };
+        }
+
         const { left, top, width, height } = moveObject;
         let resultMoveLeft = moveLeft;
         let resultMoveTop = moveTop;

@@ -15,13 +15,15 @@
  */
 
 import type { Observable } from 'rxjs';
-import type { BaseCellData, CellValue, IBaseSnapshot, IFieldSnapshot, ITableSnapshot } from './typedef';
+import type { CellValue, IBaseCellData, IBaseSnapshot, IFieldSnapshot, IRecordSnapshot, ITableSnapshot } from './typedef';
 import { BehaviorSubject } from 'rxjs';
 import { UnitModel, UniverInstanceType } from '../common/unit';
 import { Tools } from '../shared/tools';
+import { CellValueType } from '../types/enum';
 
 const BASE_LIST_VALUE_SEPARATOR = ', ';
 const BASE_ATTACHMENT_RESOURCE_KEY_SEPARATOR = '\u001F';
+type ICompressedBaseCellTuple = [number, number, IBaseCellData & { c?: 1 }];
 
 export class BaseDataModel extends UnitModel<IBaseSnapshot, UniverInstanceType.UNIVER_BASE> {
     override readonly type: UniverInstanceType.UNIVER_BASE = UniverInstanceType.UNIVER_BASE;
@@ -98,7 +100,23 @@ function normalizeBaseSnapshot(snapshot: IBaseSnapshot): IBaseSnapshot {
 }
 
 function normalizeBaseTable(table: ITableSnapshot): void {
-    const compressedCellData = (table as ITableSnapshot & { cd?: Array<[number, number, BaseCellData & { c?: 1 }]> }).cd;
+    hydrateCompressedCellData(table);
+
+    const records = table.records ?? {};
+    const fields = table.fields ?? {};
+    const orderedRecordIds = getOrderedRecordIds(table, records);
+    const orderedFieldIds = getOrderedFieldIds(table, fields);
+
+    table.recordOrder = orderedRecordIds;
+    cloneBaseTableMutableMaps(table);
+    normalizeExistingCellData(table, fields);
+    rebuildRowIndexes(table, records, orderedRecordIds);
+    rebuildColumnIndexes(table, fields, orderedFieldIds);
+    hydrateRecordCellData(table, records, fields);
+}
+
+function hydrateCompressedCellData(table: ITableSnapshot): void {
+    const compressedCellData = (table as ITableSnapshot & { cd?: ICompressedBaseCellTuple[] }).cd;
     if (compressedCellData && !table.cellData) {
         table.cellData = Object.create(null) as ITableSnapshot['cellData'];
         compressedCellData.forEach(([row, col, cell]) => {
@@ -108,19 +126,23 @@ function normalizeBaseTable(table: ITableSnapshot): void {
         });
         delete (table as ITableSnapshot & { cd?: unknown }).cd;
     }
+}
 
-    const records = table.records ?? {};
-    const fields = table.fields ?? {};
+function getOrderedRecordIds(table: ITableSnapshot, records: Record<string, IRecordSnapshot>): string[] {
     const sortedRecordIds = Object.values(records)
         .sort((a, b) => a.orderKey.localeCompare(b.orderKey))
         .map((record) => record.id);
-    const orderedRecordIds = [
+    return [
         ...(table.recordOrder?.filter((recordId) => records[recordId]) ?? []),
         ...sortedRecordIds.filter((recordId) => !(table.recordOrder ?? []).includes(recordId)),
     ];
-    const orderedFieldIds = table.fieldOrder.filter((fieldId) => fields[fieldId]);
+}
 
-    table.recordOrder = orderedRecordIds;
+function getOrderedFieldIds(table: ITableSnapshot, fields: Record<string, IFieldSnapshot>): string[] {
+    return table.fieldOrder.filter((fieldId) => fields[fieldId]);
+}
+
+function cloneBaseTableMutableMaps(table: ITableSnapshot): void {
     table.rowIndex = { ...table.rowIndex };
     table.rowId = { ...table.rowId };
     table.colIndex = { ...table.colIndex };
@@ -129,29 +151,47 @@ function normalizeBaseTable(table: ITableSnapshot): void {
     table.resources = { ...table.resources };
     table.resources.attachmentSets = { ...table.resources.attachmentSets };
     table.resources.attachments = { ...table.resources.attachments };
+}
 
+function normalizeExistingCellData(table: ITableSnapshot, fields: Record<string, IFieldSnapshot>): void {
+    Object.entries(table.cellData ?? {}).forEach(([rowKey, rowData]) => {
+        const row = Number(rowKey);
+        table.cellData![row] = { ...rowData };
+        Object.entries(table.cellData![row] ?? {}).forEach(([colKey, cell]) => {
+            const col = Number(colKey);
+            const fieldId = table.colId?.[col];
+            table.cellData![row][col] = normalizeBaseCellData(cell, fieldId ? fields[fieldId] : undefined);
+        });
+    });
+}
+
+function rebuildRowIndexes(table: ITableSnapshot, records: Record<string, IRecordSnapshot>, orderedRecordIds: string[]): void {
     orderedRecordIds.forEach((recordId, index) => {
         if (table.rowIndex![recordId] == null) {
             table.rowIndex![recordId] = index;
         }
     });
-    Object.entries(table.rowIndex).forEach(([recordId, row]) => {
+    Object.entries(table.rowIndex ?? {}).forEach(([recordId, row]) => {
         if (records[recordId]) {
             table.rowId![row] = recordId;
         }
     });
+}
 
+function rebuildColumnIndexes(table: ITableSnapshot, fields: Record<string, IFieldSnapshot>, orderedFieldIds: string[]): void {
     orderedFieldIds.forEach((fieldId, index) => {
         if (table.colIndex![fieldId] == null) {
             table.colIndex![fieldId] = index;
         }
     });
-    Object.entries(table.colIndex).forEach(([fieldId, col]) => {
+    Object.entries(table.colIndex ?? {}).forEach(([fieldId, col]) => {
         if (fields[fieldId]) {
             table.colId![col] = fieldId;
         }
     });
+}
 
+function hydrateRecordCellData(table: ITableSnapshot, records: Record<string, IRecordSnapshot>, fields: Record<string, IFieldSnapshot>): void {
     Object.values(records).forEach((record) => {
         const row = table.rowIndex![record.id];
         if (row == null) {
@@ -169,6 +209,7 @@ function normalizeBaseTable(table: ITableSnapshot): void {
             }
             const existingCell = table.cellData![row][col];
             if (existingCell != null) {
+                table.cellData![row][col] = normalizeBaseCellData(existingCell, field);
                 if (shouldRefreshCellDataFromRecord(existingCell, field, value)) {
                     table.cellData![row][col] = toBaseCellData(value, field);
                 }
@@ -179,31 +220,40 @@ function normalizeBaseTable(table: ITableSnapshot): void {
     });
 }
 
-function toBaseCellData(value: CellValue | BaseCellData, field?: IFieldSnapshot): BaseCellData {
+function toBaseCellData(value: CellValue | IBaseCellData, field?: IFieldSnapshot): IBaseCellData {
     if (isBaseCellData(value)) {
         if (field?.type === 'attachment') {
-            return { ...value, v: '', t: field.type };
+            return { ...value, v: '', t: CellValueType.STRING };
         }
-        return value;
+        return normalizeBaseCellData(value, field);
     }
     if (field?.type === 'attachment') {
-        return { v: '', t: field.type };
+        return { v: '', t: CellValueType.STRING };
     }
     if (isListField(field)) {
-        return { v: normalizeListValue(value).join(BASE_LIST_VALUE_SEPARATOR), t: field.type };
+        return { v: normalizeListValue(value).join(BASE_LIST_VALUE_SEPARATOR), t: CellValueType.STRING };
     }
     if (field?.type === 'link' && value && typeof value === 'object' && !Array.isArray(value)) {
         const link = value as { text?: unknown; url?: unknown };
-        return { v: String(link.text ?? link.url ?? ''), t: field.type };
+        return { v: String(link.text ?? link.url ?? ''), t: CellValueType.STRING };
     }
     if (value === null || typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
-        return { v: value, t: field?.type ?? inferPrimitiveType(value) };
+        return { v: value, t: inferPrimitiveType(value) };
     }
 
-    return { v: null, t: field?.type ?? 'blank' };
+    return { v: null, t: null };
 }
 
-function isBaseCellData(value: unknown): value is BaseCellData {
+function normalizeBaseCellData(cell: IBaseCellData, _field?: IFieldSnapshot): IBaseCellData {
+    const type = normalizeBaseCellValueType(cell.t, cell.v);
+    if (type === undefined) {
+        const { t: _t, ...rest } = cell;
+        return rest;
+    }
+    return { ...cell, t: type };
+}
+
+function isBaseCellData(value: unknown): value is IBaseCellData {
     return !!value && typeof value === 'object' && (
         Object.prototype.hasOwnProperty.call(value, 'v')
         || Object.prototype.hasOwnProperty.call(value, 't')
@@ -243,7 +293,7 @@ function normalizeAttachmentValue(value: unknown): Record<string, unknown>[] {
     }).filter((attachment) => Object.keys(attachment).length > 0);
 }
 
-function shouldRefreshCellDataFromRecord(cell: BaseCellData, field: IFieldSnapshot | undefined, value: unknown): boolean {
+function shouldRefreshCellDataFromRecord(cell: IBaseCellData, field: IFieldSnapshot | undefined, value: unknown): boolean {
     if (field?.type === 'attachment') {
         return cell.v !== '';
     }
@@ -281,15 +331,22 @@ function primitiveText(value: unknown): string {
     return String(value);
 }
 
-function inferPrimitiveType(value: CellValue): 'string' | 'number' | 'boolean' | 'blank' {
+function inferPrimitiveType(value: CellValue): CellValueType | null {
     if (value == null) {
-        return 'blank';
+        return null;
     }
     if (typeof value === 'number') {
-        return 'number';
+        return CellValueType.NUMBER;
     }
     if (typeof value === 'boolean') {
-        return 'boolean';
+        return CellValueType.BOOLEAN;
     }
-    return 'string';
+    return CellValueType.STRING;
+}
+
+function normalizeBaseCellValueType(type: IBaseCellData['t'], value: IBaseCellData['v']): CellValueType | null | undefined {
+    if (type === CellValueType.STRING || type === CellValueType.NUMBER || type === CellValueType.BOOLEAN || type === CellValueType.FORCE_STRING || type == null) {
+        return type;
+    }
+    return inferPrimitiveType(value ?? null);
 }

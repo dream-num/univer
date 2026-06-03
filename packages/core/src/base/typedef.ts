@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { CellValueType } from '../types/enum';
 import type { IDocumentData } from '../types/interfaces';
 
 export type BaseId = string;
@@ -31,9 +32,9 @@ export type CellValue =
     | null;
 
 export type BaseCellPrimitiveValue = string | number | boolean | null;
-export type BaseCellValueType = FieldType | 'string' | 'number' | 'boolean' | 'blank';
+export type BaseCellValueType = CellValueType;
 
-export interface BaseCellData {
+export interface IBaseCellData {
     v?: BaseCellPrimitiveValue;
     t?: BaseCellValueType | null;
     p?: IDocumentData | null;
@@ -41,9 +42,9 @@ export interface BaseCellData {
     si?: string | null;
 }
 
-export type BaseCellMatrix = Record<number, Record<number, BaseCellData>>;
+export type BaseCellMatrix = Record<number, Record<number, IBaseCellData>>;
 
-export interface BaseResources {
+export interface IBaseResources {
     multiValueSets?: Record<string, string[]>;
     memberSets?: Record<string, string[]>;
     attachmentSets?: Record<string, string[]>;
@@ -85,11 +86,11 @@ export type ViewType = 'grid' | 'kanban' | 'calendar' | 'gantt' | 'gallery';
 
 export type FieldConfig = Record<string, unknown>;
 export type ViewSpecificConfig =
-    | GridViewConfig
-    | KanbanViewConfig
-    | CalendarViewConfig
-    | GanttViewConfig
-    | GalleryViewConfig
+    | IGridViewConfig
+    | IKanbanViewConfig
+    | ICalendarViewConfig
+    | IGanttViewConfig
+    | IGalleryViewConfig
     | Record<string, unknown>;
 
 export interface IBaseSnapshot {
@@ -116,7 +117,7 @@ export interface ITableSnapshot {
     colIndex?: Record<FieldId, number>;
     colId?: Record<number, FieldId>;
     cellData?: BaseCellMatrix;
-    resources?: BaseResources;
+    resources?: IBaseResources;
     views: Record<ViewId, IViewSnapshot>;
     viewOrder: ViewId[];
     primaryFieldId: FieldId;
@@ -152,10 +153,10 @@ export interface IViewSnapshot<TConfig extends ViewSpecificConfig = ViewSpecific
     name: string;
     type: ViewType;
     fieldOrder?: FieldId[];
-    fieldSettings?: Record<FieldId, ViewFieldSetting>;
-    filter?: FilterConfig | null;
-    sort?: SortConfig[];
-    group?: GroupConfig[];
+    fieldSettings?: Record<FieldId, IViewFieldSetting>;
+    filter?: IFilterConfig | null;
+    sort?: ISortConfig[];
+    group?: IGroupConfig[];
     config: TConfig;
     deleted?: boolean;
 }
@@ -166,13 +167,13 @@ export type RecordSnapshot = IRecordSnapshot;
 export type FieldSnapshot = IFieldSnapshot;
 export type ViewSnapshot<TConfig extends ViewSpecificConfig = ViewSpecificConfig> = IViewSnapshot<TConfig>;
 
-export interface ViewFieldSetting {
+export interface IViewFieldSetting {
     hidden?: boolean;
     width?: number;
     showInCard?: boolean;
 }
 
-export interface FieldCapabilities {
+export interface IFieldCapabilities {
     editable: boolean;
     sortable: boolean;
     filterable: boolean;
@@ -189,7 +190,7 @@ export interface FieldCapabilities {
     supportsRelation?: boolean;
 }
 
-export interface ValidationResult {
+export interface IValidationResult {
     valid: boolean;
     reason?: string;
 }
@@ -206,35 +207,35 @@ export type FilterOperator =
     | 'lessThan'
     | 'lessThanOrEqual';
 
-export interface FilterConfig {
+export interface IFilterConfig {
     conjunction: 'and' | 'or';
-    conditions: FilterCondition[];
+    conditions: IFilterCondition[];
 }
 
-export interface FilterCondition {
+export interface IFilterCondition {
     fieldId: FieldId;
     operator: string;
     operand?: unknown;
 }
 
-export interface SortConfig {
+export interface ISortConfig {
     fieldId: FieldId;
     direction: 'asc' | 'desc';
 }
 
-export interface GroupConfig {
+export interface IGroupConfig {
     fieldId: FieldId;
     direction?: 'asc' | 'desc';
     hideEmptyGroup?: boolean;
 }
 
-export interface GridViewConfig {
+export interface IGridViewConfig {
     frozenFieldCount?: number;
     showRecordIndex?: boolean;
     rowHeight?: 'short' | 'medium' | 'tall' | 'extraTall';
 }
 
-export interface CardLayoutConfig {
+export interface ICardLayoutConfig {
     titleFieldId?: FieldId;
     coverFieldId?: FieldId | null;
     fieldIds: FieldId[];
@@ -242,28 +243,28 @@ export interface CardLayoutConfig {
 
 export type KanbanCardLayoutMode = 'normal' | 'compose';
 
-export interface KanbanFieldCardSetting {
+export interface IKanbanFieldCardSetting {
     hidden?: boolean;
     order?: number;
 }
 
-export interface KanbanColumnSetting {
+export interface IKanbanColumnSetting {
     title?: string;
     color?: string;
     collapsed?: boolean;
 }
 
-export interface KanbanViewConfig {
+export interface IKanbanViewConfig {
     groupFieldId: FieldId;
     coverFieldId?: FieldId | null;
     cardLayout?: KanbanCardLayoutMode;
     showFieldNames?: boolean;
-    fieldSettings?: Record<FieldId, KanbanFieldCardSetting>;
-    columnSettings?: Record<string, KanbanColumnSetting>;
-    card?: CardLayoutConfig;
+    fieldSettings?: Record<FieldId, IKanbanFieldCardSetting>;
+    columnSettings?: Record<string, IKanbanColumnSetting>;
+    card?: ICardLayoutConfig;
 }
 
-export interface CalendarViewConfig {
+export interface ICalendarViewConfig {
     startDateFieldId: FieldId;
     endDateFieldId?: FieldId;
     titleFieldId?: FieldId;
@@ -275,7 +276,7 @@ export interface CalendarViewConfig {
     fieldSettings?: Record<FieldId, { hidden?: boolean; order?: number }>;
 }
 
-export interface BaseViewColorCondition {
+export interface IBaseViewColorCondition {
     id: string;
     color: string;
     target?: 'cell' | 'row' | 'column';
@@ -307,7 +308,7 @@ export interface BaseViewColorCondition {
         | 'next30';
 }
 
-export interface GanttViewConfig {
+export interface IGanttViewConfig {
     startDateFieldId: FieldId;
     endDateFieldId: FieldId;
     titleFieldId?: FieldId;
@@ -321,7 +322,7 @@ export interface GanttViewConfig {
     displayColor?:
         | { type: 'custom'; color: string }
         | { type: 'selectField'; fieldId: FieldId }
-        | { type: 'conditional'; rules: BaseViewColorCondition[] };
+        | { type: 'conditional'; rules: IBaseViewColorCondition[] };
     fieldSettings?: Record<FieldId, { hidden?: boolean; order?: number }>;
     workingDaysOnly?: boolean;
     workingDays?: {
@@ -335,53 +336,53 @@ export interface GanttViewConfig {
     };
 }
 
-export interface GalleryViewConfig {
-    card: CardLayoutConfig;
+export interface IGalleryViewConfig {
+    card: ICardLayoutConfig;
     coverFieldId?: FieldId | null;
     cardLayout?: KanbanCardLayoutMode;
     showFieldNames?: boolean;
-    fieldSettings?: Record<FieldId, KanbanFieldCardSetting>;
+    fieldSettings?: Record<FieldId, IKanbanFieldCardSetting>;
     cardSize?: 'small' | 'medium' | 'large';
 }
 
-export interface ProjectedField {
+export interface IProjectedField {
     id: FieldId;
     name: string;
     description?: string;
     type: FieldType;
     config?: FieldConfig;
     width?: number;
-    setting: ViewFieldSetting;
+    setting: IViewFieldSetting;
 }
 
-export interface ViewProjection {
+export interface IViewProjection {
     type: ViewType;
-    fields: ProjectedField[];
-    rows: ProjectedRow[];
-    groups?: ProjectedGroup[];
+    fields: IProjectedField[];
+    rows: IProjectedRow[];
+    groups?: IProjectedGroup[];
 }
 
-export interface ProjectedRow {
+export interface IProjectedRow {
     recordId: RecordId;
     values: Record<FieldId, CellValue>;
 }
 
-export interface ProjectedGroup {
+export interface IProjectedGroup {
     key: string;
     path?: string;
     label: string;
     recordIds: RecordId[];
     fieldId?: FieldId;
     level?: number;
-    children?: ProjectedGroup[];
+    children?: IProjectedGroup[];
 }
 
-export interface GridProjection extends ViewProjection {
+export interface IGridProjection extends IViewProjection {
     type: 'grid';
     frozenFieldCount?: number;
 }
 
-export interface KanbanProjection extends ViewProjection {
+export interface IKanbanProjection extends IViewProjection {
     type: 'kanban';
     groupFieldId: FieldId;
     coverFieldId?: FieldId | null;
@@ -396,9 +397,9 @@ export interface KanbanProjection extends ViewProjection {
     }>;
 }
 
-export interface CalendarProjection extends ViewProjection {
+export interface ICalendarProjection extends IViewProjection {
     type: 'calendar';
-    config: CalendarViewConfig;
+    config: ICalendarViewConfig;
     events: Array<{
         recordId: RecordId;
         title: string;
@@ -412,7 +413,7 @@ export interface CalendarProjection extends ViewProjection {
     }>;
 }
 
-export interface GanttTimeColumn {
+export interface IGanttTimeColumn {
     id: string;
     label: string;
     majorLabel?: string;
@@ -421,9 +422,9 @@ export interface GanttTimeColumn {
     nonWorking?: boolean;
 }
 
-export interface GanttProjection extends ViewProjection {
+export interface IGanttProjection extends IViewProjection {
     type: 'gantt';
-    config: GanttViewConfig;
+    config: IGanttViewConfig;
     timeline: {
         scale: 'week' | 'month' | 'quarter' | 'year';
         start: number;
@@ -435,7 +436,7 @@ export interface GanttProjection extends ViewProjection {
             start: number;
             end: number;
         }>;
-        columns: GanttTimeColumn[];
+        columns: IGanttTimeColumn[];
     };
     bars: Array<{
         recordId: RecordId;
@@ -449,7 +450,7 @@ export interface GanttProjection extends ViewProjection {
     }>;
 }
 
-export interface GalleryProjection extends ViewProjection {
+export interface IGalleryProjection extends IViewProjection {
     type: 'gallery';
     coverFieldId?: FieldId | null;
     cardLayout: KanbanCardLayoutMode;
@@ -463,7 +464,7 @@ export interface GalleryProjection extends ViewProjection {
     }>;
 }
 
-export interface InvalidViewProjection {
+export interface IInvalidViewProjection {
     type: 'invalid';
     viewType: ViewType;
     reason:
@@ -476,34 +477,34 @@ export interface InvalidViewProjection {
 }
 
 export type BaseViewProjection =
-    | GridProjection
-    | KanbanProjection
-    | CalendarProjection
-    | GanttProjection
-    | GalleryProjection
-    | InvalidViewProjection;
+    | IGridProjection
+    | IKanbanProjection
+    | ICalendarProjection
+    | IGanttProjection
+    | IGalleryProjection
+    | IInvalidViewProjection;
 
-export interface Viewport {
+export interface IViewport {
     x: number;
     y: number;
     width: number;
     height: number;
 }
 
-export interface Rect extends Viewport {}
+export interface IRect extends IViewport {}
 
 export type BaseSelection =
-    | GridCellSelection
-    | GridGroupSelection
-    | GridRecordSelection
-    | GridFieldSelection
-    | KanbanCardSelection
-    | CalendarEventSelection
-    | GanttCellSelection
-    | GanttBarSelection
-    | GalleryCardSelection;
+    | IGridCellSelection
+    | IGridGroupSelection
+    | IGridRecordSelection
+    | IGridFieldSelection
+    | IKanbanCardSelection
+    | ICalendarEventSelection
+    | IGanttCellSelection
+    | IGanttBarSelection
+    | IGalleryCardSelection;
 
-export interface GridCellSelection {
+export interface IGridCellSelection {
     type: 'grid-cell';
     tableId: TableId;
     viewId: ViewId;
@@ -511,7 +512,7 @@ export interface GridCellSelection {
     fieldId: FieldId;
 }
 
-export interface GridGroupSelection {
+export interface IGridGroupSelection {
     type: 'grid-group';
     tableId: TableId;
     viewId: ViewId;
@@ -522,21 +523,21 @@ export interface GridGroupSelection {
     collapsed: boolean;
 }
 
-export interface GridRecordSelection {
+export interface IGridRecordSelection {
     type: 'grid-record';
     tableId: TableId;
     viewId: ViewId;
     recordId: RecordId;
 }
 
-export interface GridFieldSelection {
+export interface IGridFieldSelection {
     type: 'grid-field';
     tableId: TableId;
     viewId: ViewId;
     fieldId: FieldId;
 }
 
-export interface KanbanCardSelection {
+export interface IKanbanCardSelection {
     type: 'kanban-card';
     tableId: TableId;
     viewId: ViewId;
@@ -544,7 +545,7 @@ export interface KanbanCardSelection {
     groupKey?: string;
 }
 
-export interface CalendarEventSelection {
+export interface ICalendarEventSelection {
     type: 'calendar-event';
     tableId: TableId;
     viewId: ViewId;
@@ -556,7 +557,7 @@ export interface CalendarEventSelection {
     height?: number;
 }
 
-export interface CalendarEventResizeSelection {
+export interface ICalendarEventResizeSelection {
     type: 'calendar-event-resize';
     tableId: TableId;
     viewId: ViewId;
@@ -568,7 +569,7 @@ export interface CalendarEventResizeSelection {
     height?: number;
 }
 
-export interface GanttCellSelection {
+export interface IGanttCellSelection {
     type: 'gantt-cell';
     tableId: TableId;
     viewId: ViewId;
@@ -576,14 +577,14 @@ export interface GanttCellSelection {
     fieldId: FieldId;
 }
 
-export interface GanttBarSelection {
+export interface IGanttBarSelection {
     type: 'gantt-bar';
     tableId: TableId;
     viewId: ViewId;
     recordId: RecordId;
 }
 
-export interface GalleryCardSelection {
+export interface IGalleryCardSelection {
     type: 'gallery-card';
     tableId: TableId;
     viewId: ViewId;
@@ -735,10 +736,10 @@ export type BaseHitTestResult =
         viewId: ViewId;
         recordId: RecordId;
     }
-    | CalendarEventResizeSelection
+    | ICalendarEventResizeSelection
     | BaseSelection;
 
-export interface BaseInvalidation {
+export interface IBaseInvalidation {
     tableId: TableId;
     viewId?: ViewId;
     recordId?: RecordId;
@@ -747,3 +748,46 @@ export interface BaseInvalidation {
     column?: number;
     reason: 'cell' | 'field' | 'record' | 'view' | 'table' | 'unknown';
 }
+
+export type BaseCellData = IBaseCellData;
+export type BaseResources = IBaseResources;
+export type ViewFieldSetting = IViewFieldSetting;
+export type FieldCapabilities = IFieldCapabilities;
+export type ValidationResult = IValidationResult;
+export type FilterConfig = IFilterConfig;
+export type FilterCondition = IFilterCondition;
+export type SortConfig = ISortConfig;
+export type GroupConfig = IGroupConfig;
+export type GridViewConfig = IGridViewConfig;
+export type CardLayoutConfig = ICardLayoutConfig;
+export type KanbanFieldCardSetting = IKanbanFieldCardSetting;
+export type KanbanColumnSetting = IKanbanColumnSetting;
+export type KanbanViewConfig = IKanbanViewConfig;
+export type CalendarViewConfig = ICalendarViewConfig;
+export type BaseViewColorCondition = IBaseViewColorCondition;
+export type GanttViewConfig = IGanttViewConfig;
+export type GalleryViewConfig = IGalleryViewConfig;
+export type ProjectedField = IProjectedField;
+export type ViewProjection = IViewProjection;
+export type ProjectedRow = IProjectedRow;
+export type ProjectedGroup = IProjectedGroup;
+export type GridProjection = IGridProjection;
+export type KanbanProjection = IKanbanProjection;
+export type CalendarProjection = ICalendarProjection;
+export type GanttTimeColumn = IGanttTimeColumn;
+export type GanttProjection = IGanttProjection;
+export type GalleryProjection = IGalleryProjection;
+export type InvalidViewProjection = IInvalidViewProjection;
+export type Viewport = IViewport;
+export type Rect = IRect;
+export type GridCellSelection = IGridCellSelection;
+export type GridGroupSelection = IGridGroupSelection;
+export type GridRecordSelection = IGridRecordSelection;
+export type GridFieldSelection = IGridFieldSelection;
+export type KanbanCardSelection = IKanbanCardSelection;
+export type CalendarEventSelection = ICalendarEventSelection;
+export type CalendarEventResizeSelection = ICalendarEventResizeSelection;
+export type GanttCellSelection = IGanttCellSelection;
+export type GanttBarSelection = IGanttBarSelection;
+export type GalleryCardSelection = IGalleryCardSelection;
+export type BaseInvalidation = IBaseInvalidation;

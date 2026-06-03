@@ -85,6 +85,7 @@
         "rxjs": "^7.8.2"
     },
     "devDependencies": {
+        "@clack/prompts": "^0.10.0",
         "@types/fs-extra": "^11.0.4",
         "@types/minimist": "^1.2.5",
         "@univerjs-infra/shared": "workspace:*",

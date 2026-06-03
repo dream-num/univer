@@ -233,49 +233,63 @@ if (!args.watch) {
     define['process.env.BUILD_TIME'] = `"${new Date().toISOString()}"`;
 }
 
-const { entryPoints } = syncDemoArtifacts();
+async function createBuildConfig(): Promise<SameShape<BuildOptions, BuildOptions>> {
+    const isAll = !!args.all;
+    let entryPoints: string[];
 
-const config: SameShape<BuildOptions, BuildOptions> = {
-    bundle: true,
-    format: 'esm',
-    splitting: true,
-    color: true,
-    loader: { '.svg': 'file', '.ttf': 'file' },
-    sourcemap: args.watch,
-    minify: false,
-    target: 'chrome70',
-    plugins: [
-        ignoreGlobalCssPlugin(),
-        removeClassnameNewlinesPlugin(),
-        copyPlugin({
-            assets: {
-                from: ['./public/**/*'],
-                to: ['./'],
-            },
-        }),
-        stylePlugin({
-            postcss: {
-                plugins: [tailwindcss as any],
-            },
-            renderOptions: {
-                lessOptions: {
-                    paths: [nodeModules],
+    if (args.watch && !isAll) {
+        const { selectEntries } = await import('./scripts/select-entries');
+        const result = await selectEntries();
+        entryPoints = result.entryPoints;
+    } else {
+        const { entryPoints: eps } = syncDemoArtifacts();
+        entryPoints = eps;
+    }
+
+    const config: SameShape<BuildOptions, BuildOptions> = {
+        bundle: true,
+        format: 'esm',
+        splitting: true,
+        color: true,
+        loader: { '.svg': 'file', '.ttf': 'file' },
+        sourcemap: args.watch,
+        minify: false,
+        target: 'chrome70',
+        plugins: [
+            ignoreGlobalCssPlugin(),
+            removeClassnameNewlinesPlugin(),
+            copyPlugin({
+                assets: {
+                    from: ['./public/**/*'],
+                    to: ['./'],
                 },
-            },
-        }),
-        vue3() as unknown as Plugin,
-    ],
-    entryPoints,
-    outdir: './local',
-    define,
-};
+            }),
+            stylePlugin({
+                postcss: {
+                    plugins: [tailwindcss as any],
+                },
+                renderOptions: {
+                    lessOptions: {
+                        paths: [nodeModules],
+                    },
+                },
+            }),
+            vue3() as unknown as Plugin,
+        ],
+        entryPoints,
+        outdir: './local',
+        define,
+    };
 
-if (isReact16) {
-    config.plugins?.push(
-        aliasPlugin({
-            'react-dom/client': path.resolve(__dirname, './src/client.ts'),
-        })
-    );
+    if (isReact16) {
+        config.plugins?.push(
+            aliasPlugin({
+                'react-dom/client': path.resolve(__dirname, './src/client.ts'),
+            })
+        );
+    }
+
+    return config;
 }
 
 /**
@@ -285,6 +299,8 @@ async function main() {
     if (args.watch) {
         logger.info('Starting examples dev server...');
     }
+
+    const config = await createBuildConfig();
 
     await monacoBuildTask();
 

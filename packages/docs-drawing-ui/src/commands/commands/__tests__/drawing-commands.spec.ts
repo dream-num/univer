@@ -26,9 +26,9 @@ import {
     UniverInstanceType,
     WrapTextType,
 } from '@univerjs/core';
-import { DocSelectionManagerService, DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { DocContentInsertService, DocSelectionManagerService, DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { DocDrawingController as CoreDocDrawingController, DocDrawingService, IDocDrawingService } from '@univerjs/docs-drawing';
-import { DocContentInsertService, DocSelectionRenderService } from '@univerjs/docs-ui';
+import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { DrawingManagerService, IDrawingManagerService } from '@univerjs/drawing';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 import { afterEach, describe, expect, it, vi } from 'vitest';

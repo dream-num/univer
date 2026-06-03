@@ -121,7 +121,6 @@ export { IDocClipboardService } from './services/clipboard/clipboard.service';
 
 export { convertBodyToHtml } from './services/clipboard/udm-to-html/convertor';
 export { DocAutoFormatService } from './services/doc-auto-format.service';
-export { DocContentInsertService, type IDocContentInsertRange } from './services/doc-content-insert.service';
 export { DocEventManagerService, type IBulletBound } from './services/doc-event-manager.service';
 export { DocIMEInputManagerService } from './services/doc-ime-input-manager.service';
 export { DocParagraphMenuService } from './services/doc-paragraph-menu.service';

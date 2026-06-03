@@ -21,7 +21,7 @@ import type { IMutiPageParagraphBound } from '../../services/doc-event-manager.s
 import type { IDocBlockMenuTarget } from '../../services/doc-paragraph-menu.service';
 import { ICommandService, IUniverInstanceService, NamedStyleType, SliceBodyType, UniverInstanceType } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
-import { DocSelectionManagerService } from '@univerjs/docs';
+import { DocContentInsertService, DocSelectionManagerService } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ComponentManager, ContextMenuPanel, ContextMenuPosition, IClipboardInterfaceService, ILayoutService, RectPopup, useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -35,7 +35,6 @@ import { DocTableDeleteTableCommand } from '../../commands/commands/table/doc-ta
 import { DocParagraphSettingPanelOperation } from '../../commands/operations/doc-paragraph-setting-panel.operation';
 import { DOC_TABLE_BLOCK_MENU_ID, EMPTY_PARAGRAPH_MENU_ID, HEADING_ICON_MAP, INSERT_BELLOW_MENU_ID } from '../../menu/paragraph-menu';
 import { IDocClipboardService } from '../../services/clipboard/clipboard.service';
-import { DocContentInsertService } from '../../services/doc-content-insert.service';
 import { DocEventManagerService } from '../../services/doc-event-manager.service';
 import { DocParagraphMenuService } from '../../services/doc-paragraph-menu.service';
 

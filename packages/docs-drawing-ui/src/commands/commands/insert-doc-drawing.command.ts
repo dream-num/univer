@@ -27,8 +27,8 @@ import {
     TextX,
     TextXActionType,
 } from '@univerjs/core';
-import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
-import { DocContentInsertService, getCustomBlockIdsInSelections } from '@univerjs/docs-ui';
+import { DocContentInsertService, DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { getCustomBlockIdsInSelections } from '@univerjs/docs-ui';
 
 /**
  * The command to insert new drawings

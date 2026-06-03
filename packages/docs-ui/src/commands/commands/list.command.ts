@@ -33,8 +33,7 @@ import {
     TextXActionType,
     UniverInstanceType,
 } from '@univerjs/core';
-import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
-import { DocContentInsertService } from '../../services/doc-content-insert.service';
+import { DocContentInsertService, DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { getCurrentParagraph } from './util';
 
 interface IListOperationCommandParams {

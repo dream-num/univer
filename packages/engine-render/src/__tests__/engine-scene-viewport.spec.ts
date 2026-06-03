@@ -447,6 +447,26 @@ describe('engine scene viewport extra', () => {
         expect(moveBoundary.moveLeft).toBeLessThanOrEqual(0);
         expect(moveBoundary.moveTop).toBeLessThanOrEqual(0);
 
+        const freeMoveTransformer = new Transformer(sceneMock, {
+            moveBoundaryEnabled: false,
+        } as any);
+        const freeMoveBoundary = (freeMoveTransformer as any)._checkMoveBoundary(
+            {
+                left: 820,
+                top: -28,
+                width: 520,
+                height: 520,
+            },
+            0,
+            40,
+            0,
+            0,
+            1280,
+            720
+        );
+        expect(freeMoveBoundary.moveLeft).toBe(0);
+        expect(freeMoveBoundary.moveTop).toBe(40);
+
         (transformer as any)._startOffsetX = 10;
         (transformer as any)._startOffsetY = 10;
         expect((transformer as any)._moveBufferBlocker(11, 11)).toBe(true);

@@ -74,4 +74,5 @@ export interface ITransformerConfig {
 
     zeroLeft?: number;
     zeroTop?: number;
+    moveBoundaryEnabled?: boolean;
 }

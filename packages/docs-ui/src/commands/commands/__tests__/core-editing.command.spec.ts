@@ -22,13 +22,22 @@ import {
     CustomRangeType,
     DataStreamTreeTokenType,
     DeleteDirection,
+    DocumentBlockRangeType,
     HorizontalAlign,
     ICommandService,
     IUniverInstanceService,
     UniverInstanceType,
     UpdateDocsAttributeType,
 } from '@univerjs/core';
-import { DeleteTextCommand, DocSelectionManagerService, DocSkeletonManagerService, InsertTextCommand, RichTextEditingMutation, SetTextSelectionsOperation, UpdateTextCommand } from '@univerjs/docs';
+import {
+    DeleteTextCommand,
+    DocSelectionManagerService,
+    DocSkeletonManagerService,
+    InsertTextCommand,
+    RichTextEditingMutation,
+    SetTextSelectionsOperation,
+    UpdateTextCommand,
+} from '@univerjs/docs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DeleteLeftCommand, DeleteRightCommand, isDeleteOffsetInsideBlockRange } from '../doc-delete.command';
 import { createCommandTestBed } from './create-command-test-bed';
@@ -134,7 +143,7 @@ function getIndentedBlockRangeDocumentData(): IDocumentData {
             }],
             blockRanges: [{
                 blockId: 'quote-1',
-                blockType: 'quote',
+                blockType: DocumentBlockRangeType.QUOTE,
                 startIndex: 0,
                 endIndex: 3,
             }],
@@ -355,7 +364,7 @@ describe('core editing commands', () => {
             dataStream,
             blockRanges: [{
                 blockId: 'block-1',
-                blockType: 'quote',
+                blockType: DocumentBlockRangeType.QUOTE,
                 startIndex: 0,
                 endIndex: 3,
             }],
@@ -373,7 +382,7 @@ describe('core editing commands', () => {
             dataStream,
             blockRanges: [{
                 blockId: 'block-1',
-                blockType: 'callout',
+                blockType: DocumentBlockRangeType.CALLOUT,
                 startIndex: 0,
                 endIndex: 2,
             }],

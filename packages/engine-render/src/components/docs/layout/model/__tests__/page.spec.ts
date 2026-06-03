@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import { BooleanNumber, ColumnSeparatorType, PageOrientType, PositionedObjectLayoutType } from '@univerjs/core';
+import { BooleanNumber, ColumnSeparatorType, DocumentBlockRangeType, PageOrientType, PositionedObjectLayoutType } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { DocumentSkeletonPageType } from '../../../../../basics/i-document-skeleton-cached';
-
 import {
     createNullCellPage,
     createSkeletonCellPages,
@@ -234,7 +233,7 @@ describe('page model', () => {
         const ctx = {
             dataModel: {
                 getBody: () => ({
-                    blockRanges: [{ blockId: 'callout-1', blockType: 'callout', startIndex: 10, endIndex: 14 }],
+                    blockRanges: [{ blockId: 'callout-1', blockType: DocumentBlockRangeType.CALLOUT, startIndex: 10, endIndex: 14 }],
                     paragraphs: [{ startIndex: 12 }],
                 }),
             },
@@ -312,7 +311,7 @@ describe('page model', () => {
         const ctx = {
             dataModel: {
                 getBody: () => ({
-                    blockRanges: [{ blockId: 'callout-1', blockType: 'callout', startIndex: 10, endIndex: 14 }],
+                    blockRanges: [{ blockId: 'callout-1', blockType: DocumentBlockRangeType.CALLOUT, startIndex: 10, endIndex: 14 }],
                     paragraphs: [{ startIndex: 12 }, { startIndex: 15 }],
                 }),
             },

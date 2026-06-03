@@ -15,7 +15,7 @@
  */
 
 import type { IDocumentBody } from '@univerjs/core';
-import { BooleanNumber, DataStreamTreeTokenType, NamedStyleType, TableRowHeightRule, TableSizeType } from '@univerjs/core';
+import { BooleanNumber, DataStreamTreeTokenType, DocumentBlockRangeType, NamedStyleType, TableRowHeightRule, TableSizeType } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { convertBodyToHtml, covertTextRunToHtml, getBodySliceHtml, UDMToHtmlService } from '../convertor';
 
@@ -198,7 +198,7 @@ describe('test case in html and udm convert', () => {
                 blockRanges: [{
                     startIndex: blockStart,
                     endIndex: blockStart + tokens.BLOCK_START.length + code.length - 1,
-                    blockType: 'code',
+                    blockType: DocumentBlockRangeType.CODE,
                 }] as any,
             },
         });

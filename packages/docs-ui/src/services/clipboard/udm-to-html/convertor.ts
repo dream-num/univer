@@ -17,7 +17,18 @@
 import type { IDocumentBody, IDocumentData, IParagraph, ITable, ITableCell, ITextRun, ITextStyle } from '@univerjs/core';
 import type { IDocImage } from '@univerjs/docs-drawing';
 import type { DataStreamTreeNode } from '@univerjs/engine-render';
-import { BaselineOffset, BooleanNumber, CustomRangeType, DataStreamTreeNodeType, DrawingTypeEnum, HorizontalAlign, NamedStyleType, PresetListType, Tools } from '@univerjs/core';
+import {
+    BaselineOffset,
+    BooleanNumber,
+    CustomRangeType,
+    DataStreamTreeNodeType,
+    DocumentBlockRangeType,
+    DrawingTypeEnum,
+    HorizontalAlign,
+    NamedStyleType,
+    PresetListType,
+    Tools,
+} from '@univerjs/core';
 import { ImageSourceType } from '@univerjs/drawing';
 import { parseDataStreamToTree } from '@univerjs/engine-render';
 
@@ -424,11 +435,11 @@ function renderBlockParagraphHtml(doc: IDocumentData, paragraph: IParagraph, sta
         ?? `<p class="UniverNormal" ${style.length ? `style="${style.join('; ')};"` : ''}>${innerHtml}</p>`;
 
     switch (blockRange?.blockType) {
-        case 'quote':
+        case DocumentBlockRangeType.QUOTE:
             return `<blockquote data-doc-type="quote" style="border-left: 4px solid #d0d7de; margin: 8px 0; padding: 4px 0 4px 12px; color: #57606a;">${paragraphHtml}</blockquote>`;
-        case 'code':
+        case DocumentBlockRangeType.CODE:
             return `<pre data-doc-type="code-block" style="font-family: Consolas, 'Courier New', monospace; background: #f6f8fa; padding: 12px; border-radius: 6px; white-space: pre-wrap;"><code>${innerHtml.replace(/<\/?[^>]+>/g, '')}</code></pre>`;
-        case 'callout':
+        case DocumentBlockRangeType.CALLOUT:
             return `<aside data-doc-type="callout" role="note" style="background: #fff8c5; border-left: 4px solid #d4a72c; padding: 8px 12px; margin: 8px 0; border-radius: 4px;"><p><span data-callout-icon="true" style="margin-right: 6px;">💡</span>${innerHtml}</p></aside>`;
         default:
             return paragraphHtml;

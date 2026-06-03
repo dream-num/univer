@@ -21,7 +21,16 @@ import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-no
 import type { DocumentViewModel } from '../../../view-model/document-view-model';
 import type { ILayoutContext } from '../../tools';
 import type { IShapedText } from './shaping';
-import { DataStreamTreeTokenType, DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING, DEFAULT_DOCUMENT_PARAGRAPH_SPACE_ABOVE, DEFAULT_DOCUMENT_PARAGRAPH_SPACE_BELOW, DocumentFlavor, PositionedObjectLayoutType, Tools } from '@univerjs/core';
+import {
+    DataStreamTreeTokenType,
+    DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING,
+    DEFAULT_DOCUMENT_PARAGRAPH_SPACE_ABOVE,
+    DEFAULT_DOCUMENT_PARAGRAPH_SPACE_BELOW,
+    DocumentBlockRangeType,
+    DocumentFlavor,
+    PositionedObjectLayoutType,
+    Tools,
+} from '@univerjs/core';
 import { BreakType } from '../../../../../basics/i-document-skeleton-cached';
 import { createSkeletonPage } from '../../model/page';
 import { setColumnFullState } from '../../model/section';
@@ -30,9 +39,9 @@ import { dealWithBullet } from './bullet';
 import { layoutParagraph } from './layout-ruler';
 
 const BLOCK_LAYOUT_OUTER_SPACING_MAP = new Map([
-    ['callout', 34],
-    ['code', 32],
-    ['quote', 24],
+    [DocumentBlockRangeType.CALLOUT, 34],
+    [DocumentBlockRangeType.CODE, 32],
+    [DocumentBlockRangeType.QUOTE, 24],
 ]);
 
 function _getListLevelAncestors(

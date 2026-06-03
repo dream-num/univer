@@ -22,6 +22,7 @@ import {
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     DOCS_ZEN_EDITOR_UNIT_ID_KEY,
+    DocumentBlockRangeType,
     ICommandService,
     Inject,
     IUniverInstanceService,
@@ -91,7 +92,7 @@ export class DocContextMenuRenderController extends Disposable implements IRende
 
     private _isSelectionInCodeBlock(): boolean {
         const documentDataModel = this._univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
-        const blockRanges = documentDataModel?.getBody()?.blockRanges?.filter((range) => range.blockType === 'code') ?? [];
+        const blockRanges = documentDataModel?.getBody()?.blockRanges?.filter((range) => range.blockType === DocumentBlockRangeType.CODE) ?? [];
         const textRanges = this._docSelectionManagerService.getTextRanges() ?? [];
         if (!blockRanges.length || !textRanges.length) {
             return false;

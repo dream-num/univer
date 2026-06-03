@@ -16,7 +16,7 @@
 
 import type { DocumentDataModel, IDisposable, ITextRangeParam, Nullable } from '@univerjs/core';
 import type { INodePosition, IRenderContext, IRenderModule, ITextRangeWithStyle } from '@univerjs/engine-render';
-import { DataStreamTreeTokenType, deepCompare, Disposable, Inject, isInternalEditorID, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { DataStreamTreeTokenType, deepCompare, Disposable, DocumentBlockRangeType, Inject, isInternalEditorID, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { ComponentManager } from '@univerjs/ui';
 import { FloatToolbar } from '../components/float-toolbar/FloatToolbar';
@@ -143,7 +143,7 @@ function isRangeInCodeBlock(documentDataModel: DocumentDataModel, range: ITextRa
     const blockRanges = documentDataModel.getBody()?.blockRanges ?? [];
 
     return blockRanges.some((blockRange) => (
-        blockRange.blockType === 'code' &&
+        blockRange.blockType === DocumentBlockRangeType.CODE &&
         Math.max(range.startOffset, blockRange.startIndex) <= Math.min(range.endOffset, blockRange.endIndex)
     ));
 }

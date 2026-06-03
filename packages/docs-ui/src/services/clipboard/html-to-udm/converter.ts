@@ -20,6 +20,7 @@ import {
     ColorKit,
     CustomRangeType,
     DataStreamTreeTokenType,
+    DocumentBlockRangeType,
     DrawingTypeEnum,
     generateRandomId,
     isSafeUrl,
@@ -267,7 +268,7 @@ export class HtmlToUDMService {
         body.blockRanges ??= [];
         body.blockRanges.push({
             blockId: generateRandomId(6),
-            blockType: 'code',
+            blockType: DocumentBlockRangeType.CODE,
             startIndex,
             endIndex: body.dataStream.length - 1,
         });
@@ -934,23 +935,23 @@ function roundCssNumber(value: number): number {
     return Math.round(value * 100) / 100;
 }
 
-function getStructuredBlockType(node: HTMLElement): string | null {
+function getStructuredBlockType(node: HTMLElement): DocumentBlockRangeType | null {
     const docType = node.dataset.docType;
-    if (docType === 'quote') {
-        return 'quote';
+    if (docType === DocumentBlockRangeType.QUOTE) {
+        return DocumentBlockRangeType.QUOTE;
     }
 
-    if (docType === 'callout') {
-        return 'callout';
+    if (docType === DocumentBlockRangeType.CALLOUT) {
+        return DocumentBlockRangeType.CALLOUT;
     }
 
     const tagName = node.tagName.toUpperCase();
     if (tagName === 'BLOCKQUOTE') {
-        return docType === 'callout' ? 'callout' : 'quote';
+        return docType === DocumentBlockRangeType.CALLOUT ? DocumentBlockRangeType.CALLOUT : DocumentBlockRangeType.QUOTE;
     }
 
     if (tagName === 'ASIDE' && node.getAttribute('role') === 'note') {
-        return 'callout';
+        return DocumentBlockRangeType.CALLOUT;
     }
 
     return null;

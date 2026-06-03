@@ -17,9 +17,20 @@
 import type { DocumentDataModel, ICommand, IMutationInfo, ITextRangeParam } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
-import { BuildTextUtils, CommandType, generateRandomId, getRichTextEditPath, ICommandService, IUniverInstanceService, JSONX, NamedStyleType, TextX, TextXActionType, UniverInstanceType } from '@univerjs/core';
-import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
-import { DocContentInsertService } from '../../services/doc-content-insert.service';
+import {
+    BuildTextUtils,
+    CommandType,
+    generateRandomId,
+    getRichTextEditPath,
+    ICommandService,
+    IUniverInstanceService,
+    JSONX,
+    NamedStyleType,
+    TextX,
+    TextXActionType,
+    UniverInstanceType,
+} from '@univerjs/core';
+import { DocContentInsertService, DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 
 export interface ISetParagraphNamedStyleCommandParams {
     value: NamedStyleType;

@@ -31,6 +31,7 @@ import { DocsRenameMutation } from './commands/mutations/docs-rename.mutation';
 import { SetTextSelectionsOperation } from './commands/operations/text-selection.operation';
 import { defaultPluginConfig, DOCS_PLUGIN_CONFIG_KEY } from './config/config';
 import { DocCustomRangeController } from './controllers/custom-range.controller';
+import { DocContentInsertService } from './services/doc-content-insert.service';
 import { DocSelectionManagerService } from './services/doc-selection-manager.service';
 import { DocStateEmitService } from './services/doc-state-emit.service';
 
@@ -81,6 +82,7 @@ export class UniverDocsPlugin extends Plugin {
             [
                 [DocSelectionManagerService],
                 [DocStateEmitService],
+                [DocContentInsertService],
                 [DocCustomRangeController],
             ] as Dependency[]
         ).forEach((d) => this._injector.add(d));

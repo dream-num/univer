@@ -26,6 +26,7 @@ export { type IRichTextEditingMutationParams, RichTextEditingMutation } from './
 export { type ISetTextSelectionsOperationParams, SetTextSelectionsOperation } from './commands/operations/text-selection.operation';
 export type { IUniverDocsConfig } from './config/config';
 export { UniverDocsPlugin } from './plugin';
+export { DocContentInsertService, type IDocContentInsertRange } from './services/doc-content-insert.service';
 export { DocInterceptorService } from './services/doc-interceptor/doc-interceptor.service';
 export { DOC_INTERCEPTOR_POINT } from './services/doc-interceptor/interceptor-const';
 export { DocSelectionManagerService } from './services/doc-selection-manager.service';

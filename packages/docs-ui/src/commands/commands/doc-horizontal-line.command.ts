@@ -16,7 +16,7 @@
 
 import type { ICommand, ITextRangeParam } from '@univerjs/core';
 import { CommandType, DashStyleType, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { DocContentInsertService } from '../../services/doc-content-insert.service';
+import { DocContentInsertService } from '@univerjs/docs';
 import { BreakLineCommand } from './break-line.command';
 import { getCurrentParagraph } from './util';
 

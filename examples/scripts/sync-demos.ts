@@ -141,6 +141,10 @@ export function discoverDemos() {
         .filter((demo): demo is DemoDefinition => demo !== null);
 }
 
+function filterDemos(demos: DemoDefinition[], selectedDirs?: string[]): DemoDefinition[] {
+    return selectedDirs ? demos.filter((demo) => selectedDirs.includes(demo.dir)) : demos;
+}
+
 function syncDemoHtml(demos: DemoDefinition[]) {
     fs.ensureDirSync(PUBLIC_DIR);
 
@@ -189,12 +193,13 @@ function syncDemosModule(demos: DemoDefinition[]) {
     fs.writeFileSync(GENERATED_DEMOS_FILE, content);
 }
 
-export function getDemoEntryPoints() {
-    return ['./src/main.tsx', ...discoverDemos().flatMap((demo) => demo.entryPoints)];
+export function getDemoEntryPoints(selectedDirs?: string[]) {
+    const demos = filterDemos(discoverDemos(), selectedDirs);
+    return ['./src/main.tsx', ...demos.flatMap((demo) => demo.entryPoints)];
 }
 
-export function syncDemoArtifacts() {
-    const demos = discoverDemos();
+export function syncDemoArtifacts(selectedDirs?: string[]) {
+    const demos = filterDemos(discoverDemos(), selectedDirs);
     syncDemoHtml(demos);
     syncDemosModule(demos);
 

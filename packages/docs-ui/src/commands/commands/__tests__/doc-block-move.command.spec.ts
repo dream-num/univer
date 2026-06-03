@@ -15,7 +15,7 @@
  */
 
 import type { IDocumentData } from '@univerjs/core';
-import { BlockType, CustomRangeType } from '@univerjs/core';
+import { BlockType, CustomRangeType, DocumentBlockRangeType } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { buildMoveDocBlockActions } from '../doc-block-move.command';
 
@@ -41,7 +41,7 @@ describe('buildMoveDocBlockActions', () => {
         const documentData = createDocument('aa\rBB\rcc\r\n', {
             paragraphs: [{ startIndex: 2 }, { startIndex: 5 }, { startIndex: 8 }],
             sectionBreaks: [{ startIndex: 9 }],
-            blockRanges: [{ blockId: 'quote-1', blockType: 'quote', startIndex: 3, endIndex: 5 }],
+            blockRanges: [{ blockId: 'quote-1', blockType: DocumentBlockRangeType.QUOTE, startIndex: 3, endIndex: 5 }],
         });
 
         const { nextDocumentData, movedRange } = buildMoveDocBlockActions({

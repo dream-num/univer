@@ -23,6 +23,7 @@ import {
     BuildTextUtils,
     DEFAULT_STYLES,
     DOCS_ZEN_EDITOR_UNIT_ID_KEY,
+    DocumentBlockRangeType,
     DocumentFlavor,
     HorizontalAlign,
     ICommandService,
@@ -237,7 +238,7 @@ export function disableMenuWhenNoDocRange(accessor: IAccessor): Observable<boole
             }
 
             const document = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
-            const codeBlockRanges = document?.getBody()?.blockRanges?.filter((range) => range.blockType === 'code') ?? [];
+            const codeBlockRanges = document?.getBody()?.blockRanges?.filter((range) => range.blockType === DocumentBlockRangeType.CODE) ?? [];
             if (codeBlockRanges.some((blockRange) => textRanges.some((range) => (
                 Math.max(range.startOffset, blockRange.startIndex) <= Math.min(range.endOffset, blockRange.endIndex)
             )))) {

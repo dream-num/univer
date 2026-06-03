@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import type { ImageSourceType } from '../../services/image-io/image-io.service';
 import type { ISize } from '../../shared/shape';
 import type { BooleanNumber, CellValueType, HorizontalAlign, LocaleType, TextDirection, VerticalAlign, WrapStrategy } from '../enum';
-import type { ImageSourceType } from '../../services/image-io/image-io.service';
 import type { IDrawingParam } from './i-drawing';
 import type { IMention } from './i-mention';
 import type { IColorStyle, IStyleBase } from './i-style-data';
@@ -366,11 +366,17 @@ export type IHyperLinkCustomRange = ICustomRange<{ url: string }>;
 
 export type IMentionCustomRange = ICustomRange<IMention>;
 
+export enum DocumentBlockRangeType {
+    CALLOUT = 'callout',
+    QUOTE = 'quote',
+    CODE = 'code',
+}
+
 export interface IDocumentBlockRange {
     startIndex: number;
     endIndex: number;
     blockId: string;
-    blockType: string;
+    blockType: DocumentBlockRangeType;
 }
 
 export enum CustomRangeType {

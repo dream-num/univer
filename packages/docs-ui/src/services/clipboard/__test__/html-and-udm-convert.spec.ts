@@ -15,13 +15,19 @@
  */
 
 import type { IDocumentBody, IDocumentData, Nullable } from '@univerjs/core';
-import { BooleanNumber, DataStreamTreeTokenType, HorizontalAlign, PresetListType, TableSizeType } from '@univerjs/core';
+import { BooleanNumber, DataStreamTreeTokenType, DocumentBlockRangeType, HorizontalAlign, PresetListType, TableSizeType } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-
 import { HtmlToUDMService } from '../html-to-udm/converter';
 import PastePluginLark from '../html-to-udm/paste-plugins/plugin-lark';
 import PastePluginWord from '../html-to-udm/paste-plugins/plugin-word';
-import { createInternalClipboardDocData, createInternalClipboardDocDataList, createInternalClipboardFragment, embedInternalClipboardFragment, extractInternalClipboardFragmentFromHtml, wrapClipboardHtml } from '../internal-fragment';
+import {
+    createInternalClipboardDocData,
+    createInternalClipboardDocDataList,
+    createInternalClipboardFragment,
+    embedInternalClipboardFragment,
+    extractInternalClipboardFragmentFromHtml,
+    wrapClipboardHtml,
+} from '../internal-fragment';
 import { UDMToHtmlService } from '../udm-to-html/convertor';
 
 HtmlToUDMService.use(PastePluginWord);
@@ -129,7 +135,11 @@ describe('test case in html and udm convert', () => {
                 <ol><li>First</li><li>Second</li></ol>
             `);
 
-            expect(udm.body?.blockRanges?.map((range) => range.blockType)).toEqual(['quote', 'code', 'callout']);
+            expect(udm.body?.blockRanges?.map((range) => range.blockType)).toEqual([
+                DocumentBlockRangeType.QUOTE,
+                DocumentBlockRangeType.CODE,
+                DocumentBlockRangeType.CALLOUT,
+            ]);
             expect(udm.body?.paragraphs?.filter((paragraph) => paragraph.bullet).map((paragraph) => paragraph.bullet?.listType)).toEqual(['ORDER_LIST', 'ORDER_LIST']);
             expect(udm.body?.dataStream).toContain('Quote text\r');
             expect(udm.body?.dataStream).toContain('const a = 1;\r');
@@ -274,9 +284,9 @@ describe('test case in html and udm convert', () => {
                 body: {
                     dataStream: 'Quote\rCode\rCallout\rItem\r',
                     blockRanges: [
-                        { blockId: 'quote-1', blockType: 'quote', startIndex: 0, endIndex: 5 },
-                        { blockId: 'code-1', blockType: 'code', startIndex: 6, endIndex: 10 },
-                        { blockId: 'callout-1', blockType: 'callout', startIndex: 11, endIndex: 18 },
+                        { blockId: 'quote-1', blockType: DocumentBlockRangeType.QUOTE, startIndex: 0, endIndex: 5 },
+                        { blockId: 'code-1', blockType: DocumentBlockRangeType.CODE, startIndex: 6, endIndex: 10 },
+                        { blockId: 'callout-1', blockType: DocumentBlockRangeType.CALLOUT, startIndex: 11, endIndex: 18 },
                     ],
                     paragraphs: [
                         { startIndex: 5 },
@@ -513,7 +523,11 @@ describe('test case in html and udm convert', () => {
             expect(styledRun.ts?.ul?.s).toBe(BooleanNumber.TRUE);
             expect(bulletParagraph).toBeDefined();
             expect(orderedParagraph).toBeDefined();
-            expect(blockTypes).toEqual(['callout', 'code', 'quote']);
+            expect(blockTypes).toEqual([
+                DocumentBlockRangeType.CALLOUT,
+                DocumentBlockRangeType.CODE,
+                DocumentBlockRangeType.QUOTE,
+            ]);
             expect(table).toBeDefined();
             const headerCell = table!.tableRows[0]!.tableCells[0]!;
             expect(table!.tableColumns.map((column) => column.size.width.v)).toEqual([90, 210]);

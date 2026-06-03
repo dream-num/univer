@@ -15,6 +15,7 @@
  */
 
 import type { IDocumentBody } from '../../../../types/interfaces';
+import { DocumentBlockRangeType } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { DataStreamTreeTokenType } from '../../types';
 import { deleteBlockRanges, insertBlockRanges } from '../apply-utils/common';
@@ -25,52 +26,52 @@ describe('document block ranges', () => {
     it('moves following block ranges when text is inserted before them', () => {
         const body: IDocumentBody = {
             dataStream: 'A\rB\r\n',
-            blockRanges: [{ blockId: 'callout-1', blockType: 'callout', startIndex: 2, endIndex: 3 }],
+            blockRanges: [{ blockId: 'callout-1', blockType: DocumentBlockRangeType.CALLOUT, startIndex: 2, endIndex: 3 }],
         };
 
         insertBlockRanges(body, { dataStream: 'XX' }, 2, 1);
 
         expect(body.blockRanges).toEqual([
-            { blockId: 'callout-1', blockType: 'callout', startIndex: 4, endIndex: 5 },
+            { blockId: 'callout-1', blockType: DocumentBlockRangeType.CALLOUT, startIndex: 4, endIndex: 5 },
         ]);
     });
 
     it('expands containing block ranges when text is inserted inside them', () => {
         const body: IDocumentBody = {
             dataStream: `${DataStreamTreeTokenType.BLOCK_START}A\r${DataStreamTreeTokenType.BLOCK_END}\n`,
-            blockRanges: [{ blockId: 'callout-1', blockType: 'callout', startIndex: 0, endIndex: 3 }],
+            blockRanges: [{ blockId: 'callout-1', blockType: DocumentBlockRangeType.CALLOUT, startIndex: 0, endIndex: 3 }],
         };
 
         insertBlockRanges(body, { dataStream: 'XX' }, 2, 2);
 
         expect(body.blockRanges).toEqual([
-            { blockId: 'callout-1', blockType: 'callout', startIndex: 0, endIndex: 5 },
+            { blockId: 'callout-1', blockType: DocumentBlockRangeType.CALLOUT, startIndex: 0, endIndex: 5 },
         ]);
     });
 
     it('cuts block ranges to the copied body with relative indexes', () => {
         const body: IDocumentBody = {
             dataStream: `A\r${DataStreamTreeTokenType.BLOCK_START}B\r${DataStreamTreeTokenType.BLOCK_END}C\r\n`,
-            blockRanges: [{ blockId: 'callout-1', blockType: 'callout', startIndex: 2, endIndex: 5 }],
+            blockRanges: [{ blockId: 'callout-1', blockType: DocumentBlockRangeType.CALLOUT, startIndex: 2, endIndex: 5 }],
         };
 
         const slice = getBodySlice(body, 2, 6);
 
         expect(slice.dataStream).toBe(`${DataStreamTreeTokenType.BLOCK_START}B\r${DataStreamTreeTokenType.BLOCK_END}`);
         expect(slice.blockRanges).toEqual([
-            { blockId: 'callout-1', blockType: 'callout', startIndex: 0, endIndex: 3 },
+            { blockId: 'callout-1', blockType: DocumentBlockRangeType.CALLOUT, startIndex: 0, endIndex: 3 },
         ]);
     });
 
     it('removes fully deleted block ranges', () => {
         const body: IDocumentBody = {
             dataStream: `${DataStreamTreeTokenType.BLOCK_START}A\r${DataStreamTreeTokenType.BLOCK_END}\n`,
-            blockRanges: [{ blockId: 'callout-1', blockType: 'callout', startIndex: 0, endIndex: 3 }],
+            blockRanges: [{ blockId: 'callout-1', blockType: DocumentBlockRangeType.CALLOUT, startIndex: 0, endIndex: 3 }],
         };
 
         const removed = deleteBlockRanges(body, 4, 0);
 
-        expect(removed).toEqual([{ blockId: 'callout-1', blockType: 'callout', startIndex: 0, endIndex: 3 }]);
+        expect(removed).toEqual([{ blockId: 'callout-1', blockType: DocumentBlockRangeType.CALLOUT, startIndex: 0, endIndex: 3 }]);
         expect(body.blockRanges).toEqual([]);
     });
 

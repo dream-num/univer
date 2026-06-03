@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DocumentFlavor } from '@univerjs/core';
+import { DocumentBlockRangeType, DocumentFlavor } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { lineBreaking } from '../linebreaking';
 import { shaping } from '../shaping';
@@ -105,7 +105,7 @@ describe('linebreaking', () => {
             paragraphs: [paragraph],
             blockRanges: [{
                 blockId: 'callout-1',
-                blockType: 'callout',
+                blockType: DocumentBlockRangeType.CALLOUT,
                 startIndex: 0,
                 endIndex: 6,
             }],
@@ -163,13 +163,13 @@ describe('linebreaking', () => {
             blockRanges: [
                 {
                     blockId: 'callout-1',
-                    blockType: 'callout',
+                    blockType: DocumentBlockRangeType.CALLOUT,
                     startIndex: 0,
                     endIndex: 2,
                 },
                 {
                     blockId: 'quote-1',
-                    blockType: 'quote',
+                    blockType: DocumentBlockRangeType.QUOTE,
                     startIndex: 3,
                     endIndex: 5,
                 },
@@ -225,7 +225,7 @@ describe('linebreaking', () => {
             paragraphs: [firstParagraph, lastParagraph],
             blockRanges: [{
                 blockId: 'quote-1',
-                blockType: 'quote',
+                blockType: DocumentBlockRangeType.QUOTE,
                 startIndex: 0,
                 endIndex: 6,
             }],
@@ -277,7 +277,7 @@ describe('linebreaking', () => {
             paragraphs: [paragraph],
             blockRanges: [{
                 blockId: 'code-1',
-                blockType: 'code',
+                blockType: DocumentBlockRangeType.CODE,
                 startIndex: 0,
                 endIndex: 6,
             }],

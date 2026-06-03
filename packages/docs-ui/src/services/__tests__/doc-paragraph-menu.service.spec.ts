@@ -15,7 +15,7 @@
  */
 
 import type { IMutiPageParagraphBound } from '../doc-event-manager.service';
-import { DataStreamTreeTokenType, PresetListType } from '@univerjs/core';
+import { DataStreamTreeTokenType, DocumentBlockRangeType, PresetListType } from '@univerjs/core';
 import { DocumentEditArea } from '@univerjs/engine-render';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
@@ -83,7 +83,7 @@ describe('DocParagraphMenuService', () => {
         const service = createService({
             attachPopupToRect,
             dataStream: blockText,
-            blockRanges: [{ blockId: 'block-1', blockType: 'quote', startIndex: 0, endIndex: blockText.length - 1 }],
+            blockRanges: [{ blockId: 'block-1', blockType: DocumentBlockRangeType.QUOTE, startIndex: 0, endIndex: blockText.length - 1 }],
         });
 
         service.showParagraphMenu(createParagraphBound({
@@ -118,7 +118,7 @@ describe('DocParagraphMenuService', () => {
         const service = createService({
             attachPopupToRect,
             dataStream: blockText,
-            blockRanges: [{ blockId: 'block-1', blockType: 'quote', startIndex: 0, endIndex: blockText.length - 1 }],
+            blockRanges: [{ blockId: 'block-1', blockType: DocumentBlockRangeType.QUOTE, startIndex: 0, endIndex: blockText.length - 1 }],
             paragraphBounds: new Map([
                 [2, firstBlockParagraph],
                 [4, secondBlockParagraph],

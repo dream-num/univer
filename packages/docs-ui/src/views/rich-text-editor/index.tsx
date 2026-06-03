@@ -49,6 +49,13 @@ export interface IRichTextEditorProps {
     icon?: ReactNode;
     editorRef?: RefObject<Editor | null> | ((editor: Editor | null) => void);
     noStyle?: boolean;
+    /**
+     * Writing direction for the wrapper element. Defaults to `'auto'` so the
+     * browser inherits from the surrounding ConfigProvider / cell editor.
+     * The formula bar pins this to `'ltr'` so formula syntax is never mirrored.
+     * Also forwarded to the arrow-key hook to lock visual<->logical mapping.
+     */
+    direction?: 'ltr' | 'rtl' | 'auto';
 }
 
 export const RichTextEditor = (props: IRichTextEditorProps) => {
@@ -71,6 +78,7 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
         editorRef,
         placeholder,
         noStyle,
+        direction = 'auto',
     } = props;
     const editorService = useDependency(IEditorService);
     const onFocusChange = useEvent(_onFocusChange);
@@ -132,12 +140,18 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
 
     useEditorClickOutside(editorId, sheetEmbeddingRef, onClickOutside);
 
-    useLeftAndRightArrow(isFocusing && moveCursor, false, editor);
+    useLeftAndRightArrow(
+        isFocusing && moveCursor,
+        false,
+        editor,
+        undefined,
+        direction === 'auto' ? undefined : { forceDirection: direction }
+    );
     useKeyboardEvent(isFocusing, keyboardEventConfig, editor);
     useOnChange(editor, onChange);
 
     return (
-        <div className={className} style={style}>
+        <div className={className} style={style} dir={direction}>
             <div
                 className={clsx(
                     {

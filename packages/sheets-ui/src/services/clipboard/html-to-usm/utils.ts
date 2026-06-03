@@ -16,7 +16,7 @@
 
 import type { IParagraph, IParagraphStyle, ITextRun, Nullable } from '@univerjs/core';
 import type { ICellDataWithSpanInfo } from '../type';
-import { DataStreamTreeTokenType, Tools } from '@univerjs/core';
+import { DataStreamTreeTokenType, TextDirection, Tools } from '@univerjs/core';
 import { ptToPixel } from '@univerjs/engine-render';
 import { sanitizeParsedHtml } from '@univerjs/ui';
 
@@ -58,12 +58,22 @@ export function getParagraphStyle(el: HTMLElement): Nullable<IParagraphStyle> {
     const styles = el.style;
 
     const paragraphStyle: IParagraphStyle = {};
+    const direction = styles.getPropertyValue('direction') || el.getAttribute('dir');
+    if (direction === 'rtl') {
+        paragraphStyle.direction = TextDirection.RIGHT_TO_LEFT;
+    } else if (direction === 'ltr') {
+        paragraphStyle.direction = TextDirection.LEFT_TO_RIGHT;
+    }
 
     for (let i = 0; i < styles.length; i++) {
         const cssRule = styles[i];
         const cssValue = styles.getPropertyValue(cssRule);
 
         switch (cssRule) {
+            case 'direction': {
+                break;
+            }
+
             case 'margin-top': {
                 const marginTopValue = Number.parseInt(cssValue);
                 paragraphStyle.spaceAbove = { v: /pt/.test(cssValue) ? ptToPixel(marginTopValue) : marginTopValue };

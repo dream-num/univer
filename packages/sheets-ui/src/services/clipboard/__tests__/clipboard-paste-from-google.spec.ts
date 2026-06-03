@@ -175,7 +175,10 @@ describe('Test clipboard', () => {
                     s: 0,
                 },
                 tb: 0,
-                td: 0,
+                // Google Sheets exports cells with an explicit `dir="ltr"`.
+                // RTL paste support now preserves that direction as
+                // `td: TextDirection.LEFT_TO_RIGHT (1)` instead of dropping it.
+                td: 1,
                 tr: {
                     a: 0,
                     v: 0,
@@ -203,9 +206,12 @@ describe('Test clipboard', () => {
             expect(richTextStyle?.body?.dataStream).toBe('univer\r\n');
             expect(richTextStyle?.body?.paragraphs).toStrictEqual([
                 {
-                    paragraphStyle: {
-                        horizontalAlign: 0,
-                    },
+                    // See clipboard-paste-form-excel.spec for context: the
+                    // pasted `cell.p` snapshot used to pick up
+                    // `paragraphStyle: { horizontalAlign: 0 }` written
+                    // back by `_updateConfigAndGetDocumentModel`. After
+                    // the per-paragraph RTL refactor the renderer mutates
+                    // a local clone instead, so the snapshot stays clean.
                     startIndex: 6,
                 },
             ]);

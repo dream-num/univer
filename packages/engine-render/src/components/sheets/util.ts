@@ -14,118 +14,14 @@
  * limitations under the License.
  */
 
-import type { CellValueType, IDocumentData, IPaddingData, IStyleBase, IStyleData, ITextRotation, ITextStyle, Nullable, TextDirection } from '@univerjs/core';
-import { DEFAULT_EMPTY_DOCUMENT_VALUE, DocumentDataModel, DocumentFlavor, HorizontalAlign, VerticalAlign, WrapStrategy } from '@univerjs/core';
-import { convertTextRotation } from '../../basics/text-rotation';
-import { DEFAULT_PADDING_DATA } from './sheet.render-skeleton';
-
-export interface ICellStyle {
-    textRotation?: ITextRotation;
-    textDirection?: Nullable<TextDirection>;
-    horizontalAlign?: HorizontalAlign;
-    verticalAlign?: VerticalAlign;
-    wrapStrategy?: WrapStrategy;
-    paddingData?: IPaddingData;
-    cellValueType?: CellValueType;
-}
-
-export function createDocumentModelWithStyle(content: string, textStyle: ITextStyle, config: ICellStyle = {}) {
-    const contentLength = content.length;
-    const {
-        textRotation,
-        paddingData,
-        horizontalAlign = HorizontalAlign.UNSPECIFIED,
-        verticalAlign = VerticalAlign.UNSPECIFIED,
-        wrapStrategy = WrapStrategy.UNSPECIFIED,
-        cellValueType,
-    } = config;
-
-    const { t: marginTop, r: marginRight, b: marginBottom, l: marginLeft } = paddingData || DEFAULT_PADDING_DATA;
-    const { vertexAngle, centerAngle } = convertTextRotation(textRotation);
-    const documentData: IDocumentData = {
-        id: 'd',
-        body: {
-            dataStream: `${content}${DEFAULT_EMPTY_DOCUMENT_VALUE}`,
-            textRuns: [
-                {
-                    ts: textStyle,
-                    st: 0,
-                    ed: contentLength,
-                },
-            ],
-            paragraphs: [
-                {
-                    startIndex: contentLength,
-                    paragraphStyle: {
-                        horizontalAlign,
-                    },
-                },
-            ],
-            sectionBreaks: [{
-                startIndex: contentLength + 1,
-            }],
-        },
-        documentStyle: {
-            pageSize: {
-                width: Number.POSITIVE_INFINITY,
-                height: Number.POSITIVE_INFINITY,
-            },
-            documentFlavor: DocumentFlavor.UNSPECIFIED,
-            marginTop,
-            marginBottom,
-            marginRight,
-            marginLeft,
-            paragraphLineGapDefault: 0,
-            renderConfig: {
-                horizontalAlign,
-                verticalAlign,
-                centerAngle,
-                vertexAngle,
-                wrapStrategy,
-                cellValueType,
-            },
-        },
-        drawings: {},
-        drawingsOrder: [],
-    };
-
-    return new DocumentDataModel(documentData);
-}
-
-export function extractOtherStyle(style?: Nullable<IStyleData>): ICellStyle {
-    if (!style) return {};
-    const {
-        tr: textRotation,
-        td: textDirection,
-        ht: horizontalAlign,
-        vt: verticalAlign,
-        tb: wrapStrategy,
-        pd: paddingData,
-    } = style;
-
-    return {
-        textRotation,
-        textDirection,
-        horizontalAlign,
-        verticalAlign,
-        wrapStrategy,
-        paddingData,
-    } as ICellStyle;
-}
-
-export function getFontFormat(format?: Nullable<IStyleData>): IStyleBase {
-    if (!format) {
-        return {};
-    }
-    const { ff, fs, it, bl, ul, st, ol, cl } = format;
-    const style: IStyleBase = {};
-    ff && (style.ff = ff);
-    fs && (style.fs = fs);
-    it && (style.it = it);
-    bl && (style.bl = bl);
-    ul && (style.ul = ul);
-    st && (style.st = st);
-    ol && (style.ol = ol);
-    cl && (style.cl = cl);
-    return style;
-}
+/**
+ * @deprecated The implementations here have been merged into `@univerjs/core`.
+ *             This file re-exports them for backward compatibility and will be
+ *             removed in a future release. Import from `@univerjs/core` instead.
+ */
+export {
+    createDocumentModelWithStyle,
+    extractOtherStyle,
+    getFontFormat,
+    type ICellStyle,
+} from '@univerjs/core';

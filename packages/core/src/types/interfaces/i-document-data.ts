@@ -499,6 +499,13 @@ export interface IDocumentRenderConfig {
     cellValueType?: CellValueType; // sheet cell type, In a spreadsheet cell, without any alignment settings applied, text should be left-aligned, numbers should be right-aligned, and Boolean values should be center-aligned.
     isRenderStyle?: BooleanNumber; // Whether to render the style(textRuns), used in formula bar editor. the default value is TRUE.
     zeroWidthParagraphBreak?: BooleanNumber; // Whether to render the paragraph \r to zero width. the default value is false.
+    /**
+     * Cell-level text direction. Carries the value of `style.td` through the
+     * cell → document model conversion so that the docs render pipeline
+     * (e.g. `_horizontalHandler`) can take it into account when deciding the
+     * default horizontal alignment for cells whose alignment is `UNSPECIFIED`.
+     */
+    textDirection?: TextDirection;
 }
 
 export interface ISectionBreakBase {

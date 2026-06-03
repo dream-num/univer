@@ -15,15 +15,15 @@
  */
 
 import type { Nullable } from '../shared';
-import type { CellValueType, TextDirection } from '../types/enum';
-import type { IDocumentData, IPaddingData, IStyleBase, IStyleData, ITextRotation, ITextStyle } from '../types/interfaces';
+import type { CellValueType } from '../types/enum';
+import type { IDocumentData, IPaddingData, IParagraphStyle, IStyleBase, IStyleData, ITextRotation, ITextStyle } from '../types/interfaces';
 import type { ICellData, IRange, IUnitRange } from './typedef';
 import { DEFAULT_EMPTY_DOCUMENT_VALUE } from '../common/const';
 import { BuildTextUtils, DocumentDataModel } from '../docs';
 import { TextX } from '../docs/data-model/text-x/text-x';
 import { convertTextRotation } from '../docs/data-model/utils';
 import { Rectangle } from '../shared';
-import { HorizontalAlign, VerticalAlign, WrapStrategy } from '../types/enum';
+import { HorizontalAlign, TextDirection, VerticalAlign, WrapStrategy } from '../types/enum';
 import { CustomRangeType, DocumentFlavor } from '../types/interfaces';
 
 export interface IFontLocale {
@@ -77,10 +77,21 @@ export function createDocumentModelWithStyle(content: string, textStyle: ITextSt
         verticalAlign = VerticalAlign.UNSPECIFIED,
         wrapStrategy = WrapStrategy.UNSPECIFIED,
         cellValueType,
+        textDirection,
     } = config;
 
     const { t: marginTop, r: marginRight, b: marginBottom, l: marginLeft } = paddingData || DEFAULT_PADDING_DATA;
     const { vertexAngle, centerAngle } = convertTextRotation(textRotation);
+    // Only attach `direction` to the paragraph style when an explicit, non-
+    // `UNSPECIFIED` text direction is supplied. We avoid writing `direction: 0`
+    // because the integer enum value 0 (`UNSPECIFIED`) is semantically "no
+    // opinion" — serialising it would dirty every paragraph snapshot in the
+    // codebase that pre-dates RTL support.
+    const hasExplicitDirection = textDirection != null && textDirection !== TextDirection.UNSPECIFIED;
+    const paragraphStyle: IParagraphStyle = hasExplicitDirection
+        ? { horizontalAlign, direction: textDirection }
+        : { horizontalAlign };
+
     const documentData: IDocumentData = {
         id: 'd',
         body: {
@@ -95,9 +106,7 @@ export function createDocumentModelWithStyle(content: string, textStyle: ITextSt
             paragraphs: [
                 {
                     startIndex: contentLength,
-                    paragraphStyle: {
-                        horizontalAlign,
-                    },
+                    paragraphStyle,
                 },
             ],
             sectionBreaks: [{
@@ -122,6 +131,11 @@ export function createDocumentModelWithStyle(content: string, textStyle: ITextSt
                 vertexAngle,
                 wrapStrategy,
                 cellValueType,
+                // Only emit the `textDirection` key when the cell actually
+                // declared a non-`UNSPECIFIED` direction; otherwise we leave
+                // the property absent so existing snapshots (which never
+                // contained the key) stay byte-identical.
+                ...(hasExplicitDirection ? { textDirection } : {}),
                 /**
                  * TODO@weird94
                  * This config was previously used to fix the issue of cell image editing, now remove it first.

@@ -173,10 +173,15 @@ export class Liquid {
     }
 
     translateDivide(divide: IDocumentSkeletonDivide, isVerticalAndWrap = false, verticalAlign = VerticalAlign.UNSPECIFIED, rotatedHeight = 0) {
-        const { left: divideLeft, paddingLeft: dividePaddingLeft, glyphGroupWidth = 0 } = divide;
+        const { left: divideLeft, paddingLeft: dividePaddingLeft, paddingRight: dividePaddingRight = 0, glyphGroupWidth = 0 } = divide;
         let left = divideLeft;
         if (!isVerticalAndWrap) {
-            left += dividePaddingLeft;
+            // For LTR `paddingRight` is always 0 and the math collapses to the
+            // historical `left += paddingLeft` behaviour. For RTL paragraphs
+            // `horizontalAlignHandler` writes the remaining whitespace into
+            // `paddingRight`, which we add here so glyphs are pushed away from
+            // the right edge of their divide.
+            left += dividePaddingLeft + dividePaddingRight;
         } else {
             if (verticalAlign === VerticalAlign.MIDDLE) {
                 left += (rotatedHeight - glyphGroupWidth) / 2;

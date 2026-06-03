@@ -53,5 +53,6 @@ export * from './row-col-iter';
 export * from './sequence';
 export * from './shape';
 export * from './sort-rules';
+export * from './text-direction';
 export * from './tools';
 export * from './types';

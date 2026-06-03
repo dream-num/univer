@@ -159,9 +159,11 @@ export class DocMoveCursorController extends Disposable {
         if (direction === Direction.LEFT || direction === Direction.RIGHT) {
             const preGlyph = skeleton.findNodeByCharIndex(focusOffset - 1, segmentId, segmentPage);
             const curGlyph = skeleton.findNodeByCharIndex(focusOffset, segmentId, segmentPage)!;
+            const preStep = preGlyph?.charAdvances != null ? 1 : (preGlyph?.count ?? 0);
+            const curStep = curGlyph?.charAdvances != null ? 1 : curGlyph.count;
 
             focusOffset =
-                direction === Direction.RIGHT ? focusOffset + curGlyph.count : focusOffset - (preGlyph?.count ?? 0);
+                direction === Direction.RIGHT ? focusOffset + curStep : focusOffset - preStep;
 
             focusOffset = Math.min(dataStreamLength - 2, Math.max(0, focusOffset));
 
@@ -263,11 +265,23 @@ export class DocMoveCursorController extends Disposable {
                 const curSpan = skeleton.findNodeByCharIndex(startOffset, segmentId, segmentPage)!;
                 const nextGlyph = skeleton.findNodeByCharIndex(startOffset + 1, segmentId, segmentPage);
 
+                // Cluster step rule: for caret-divisible cluster glyphs
+                // (e.g. the merged Arabic word that carries `charAdvances`),
+                // step by **one logical character** instead of jumping over
+                // the whole cluster. Non-divisible multi-char glyphs (emoji
+                // grapheme clusters, Tibetan phrases, etc.) keep the legacy
+                // "step the whole glyph" behaviour so a single ArrowRight
+                // moves past one emoji as a unit. We discriminate on the
+                // presence of `charAdvances`, which `ArabicHandler` is the
+                // sole producer of today.
+                const preStep = preSpan?.charAdvances != null ? 1 : (preSpan?.count ?? 1);
+                const curStep = curSpan?.charAdvances != null ? 1 : curSpan.count;
+
                 if (direction === Direction.LEFT) {
-                    cursor = Math.max(0, startOffset - (preSpan?.count ?? 1));
+                    cursor = Math.max(0, startOffset - preStep);
                 } else {
                     // -1 because the length of the string will be 1 larger than the index, and the reason for subtracting another 1 is because it ends in \n
-                    cursor = Math.min(dataStreamLength - 2, endOffset + curSpan.count + (nextGlyph?.streamType === DataStreamTreeTokenType.SECTION_BREAK ? 1 : 0));
+                    cursor = Math.min(dataStreamLength - 2, endOffset + curStep + (nextGlyph?.streamType === DataStreamTreeTokenType.SECTION_BREAK ? 1 : 0));
                 }
             }
             const skipTokens: string[] = [

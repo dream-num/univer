@@ -360,6 +360,10 @@ export function FormulaBar(props: IProps) {
                 <div className="univer-flex univer-w-full univer-flex-1 univer-overflow-hidden univer-pl-3">
                     <div
                         ref={ref}
+                        // Formula syntax (e.g. `=SUM(A1:B2)`) must never be
+                        // mirrored. Pin the formula bar editor to LTR even
+                        // when the surrounding workbench / sheet is RTL.
+                        dir="ltr"
                         className="
                           univer-relative univer-flex-1 univer-bg-white
                           dark:!univer-bg-gray-900
@@ -374,6 +378,7 @@ export function FormulaBar(props: IProps) {
                                 borderless
                                 disableSelectionOnClick
                                 editorId={DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY}
+                                forceDirection="ltr"
                                 initValue=""
                                 onChange={() => { }}
                                 isFocus={isFocusFxBar}

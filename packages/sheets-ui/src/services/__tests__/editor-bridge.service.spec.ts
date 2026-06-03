@@ -14,20 +14,47 @@
  * limitations under the License.
  */
 
-import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY } from '@univerjs/core';
+import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, TextDirection } from '@univerjs/core';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { EditorBridgeService } from '../editor-bridge.service';
 
-function createService(options?: { hasFocusEditor?: boolean }) {
+interface IServiceOptions {
+    hasFocusEditor?: boolean;
+    editorBodyText?: string;
+    explicitCellTd?: TextDirection;
+}
+
+function createService(options?: IServiceOptions) {
     const unitDisposed$ = new Subject<any>();
     const workbook = {
         getUnitId: () => 'unit-1',
+        getSheetBySheetId: vi.fn(() => ({
+            getComposedCellStyle: vi.fn(() => (options?.explicitCellTd != null ? { td: options.explicitCellTd } : {})),
+        })),
+    };
+
+    // The editor docs unit. Its body is mutable so tests can simulate typing
+    // between calls to `syncEditorTextDirection`. The default `getBody` mock
+    // places the paragraph break right after the body text so the per-
+    // paragraph direction detector sees the actual content.
+    const seedText = options?.editorBodyText ?? '';
+    const editorDoc = {
+        documentStyle: {
+            renderConfig: {
+                textDirection: undefined as TextDirection | undefined,
+            },
+        },
+        getBody: vi.fn(() => ({
+            dataStream: `${seedText}\r\n`,
+            paragraphs: [{ startIndex: seedText.length, paragraphStyle: {} }],
+        })),
     };
 
     const mocks = {
         unitDisposed$,
+        editorDoc,
         sheetInterceptorService: {
             writeCellInterceptor: {
                 fetchThroughInterceptors: vi.fn(() => (cell: unknown) => cell),
@@ -45,6 +72,10 @@ function createService(options?: { hasFocusEditor?: boolean }) {
         univerInstanceService: {
             getTypeOfUnitDisposed$: vi.fn(() => unitDisposed$.asObservable()),
             getCurrentUnitOfType: vi.fn(() => workbook),
+            getUnit: vi.fn((unitId: string) => {
+                if (unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY) return editorDoc;
+                return workbook;
+            }),
         },
         editorService: {
             getFocusEditor: vi.fn(() => (options?.hasFocusEditor ? { id: 'existing' } : null)),
@@ -203,5 +234,201 @@ describe('EditorBridgeService', () => {
         service.refreshEditCellPosition();
         expect(getLatestSpy).toHaveBeenCalled();
         expect(mocks.editorService.focus).not.toHaveBeenCalled();
+    });
+
+    describe('syncEditorTextDirection', () => {
+        function seedEditingState(service: EditorBridgeService) {
+            const latest = createLatestState();
+            vi.spyOn(service, 'getLatestEditCellState').mockReturnValue(latest as any);
+            service.setEditCell(createEditCellParam());
+        }
+
+        it('flips effective direction to RTL when the live body becomes Arabic', () => {
+            const { service, mocks } = createService({ editorBodyText: '' });
+            seedEditingState(service);
+            expect(service.getEffectiveTextDirection()).toBe(TextDirection.LEFT_TO_RIGHT);
+
+            // Simulate the user typing Arabic into a previously empty cell.
+            const arabic = 'كتاب';
+            mocks.editorDoc.getBody.mockReturnValue({
+                dataStream: `${arabic}\r\n`,
+                paragraphs: [{ startIndex: arabic.length, paragraphStyle: {} }],
+            });
+            service.syncEditorTextDirection();
+
+            expect(service.getEffectiveTextDirection()).toBe(TextDirection.RIGHT_TO_LEFT);
+            // Implicit (auto-detected) direction is written per-paragraph,
+            // not to the document-level renderConfig, so multi-line cells
+            // can mix LTR and RTL rows. RenderConfig only carries cell-level
+            // explicit `style.td`.
+            const liveBody = mocks.editorDoc.getBody.mock.results.at(-1)?.value;
+            expect(liveBody.paragraphs[0].paragraphStyle.direction)
+                .toBe(TextDirection.RIGHT_TO_LEFT);
+        });
+
+        it('flips back to LTR after the user deletes the Arabic and types Latin', () => {
+            const { service, mocks } = createService({ editorBodyText: 'كتاب' });
+            seedEditingState(service);
+            service.syncEditorTextDirection();
+            expect(service.getEffectiveTextDirection()).toBe(TextDirection.RIGHT_TO_LEFT);
+
+            // Backspace, then type "Hello".
+            mocks.editorDoc.getBody.mockReturnValue({
+                dataStream: 'Hello\r\n',
+                paragraphs: [{ startIndex: 5, paragraphStyle: { direction: TextDirection.RIGHT_TO_LEFT } }],
+            });
+            service.syncEditorTextDirection();
+
+            expect(service.getEffectiveTextDirection()).toBe(TextDirection.LEFT_TO_RIGHT);
+            const liveBody = mocks.editorDoc.getBody.mock.results.at(-1)?.value;
+            expect(liveBody.paragraphs[0].paragraphStyle.direction)
+                .toBe(TextDirection.LEFT_TO_RIGHT);
+        });
+
+        it('honours explicit cell-level style.td regardless of typed content', () => {
+            // Cell has `td=RTL` set explicitly; even if the user types only
+            // Latin, the direction must stay RTL because the author chose it.
+            const { service, mocks } = createService({
+                editorBodyText: 'Hello',
+                explicitCellTd: TextDirection.RIGHT_TO_LEFT,
+            });
+            seedEditingState(service);
+            service.syncEditorTextDirection();
+
+            expect(service.getEffectiveTextDirection()).toBe(TextDirection.RIGHT_TO_LEFT);
+            // Explicit `style.td` is propagated to renderConfig so the
+            // document-level `_horizontalHandler` fallback also picks it up.
+            expect(mocks.editorDoc.documentStyle.renderConfig.textDirection)
+                .toBe(TextDirection.RIGHT_TO_LEFT);
+        });
+
+        it('emits a single value per actual direction change', () => {
+            const { service, mocks } = createService({ editorBodyText: '' });
+            seedEditingState(service);
+
+            const emissions: TextDirection[] = [];
+            service.effectiveTextDirection$.subscribe((d) => emissions.push(d));
+
+            service.syncEditorTextDirection(); // still empty → LTR
+            service.syncEditorTextDirection(); // still empty → LTR (no emit)
+
+            const arabic = 'مرحبا';
+            mocks.editorDoc.getBody.mockReturnValue({
+                dataStream: `${arabic}\r\n`,
+                paragraphs: [{ startIndex: arabic.length, paragraphStyle: {} }],
+            });
+            service.syncEditorTextDirection(); // flip → RTL
+
+            // BehaviorSubject replays the seed value (LTR) on subscription,
+            // then we expect exactly one additional RTL emission.
+            const ltrCount = emissions.filter((d) => d === TextDirection.LEFT_TO_RIGHT).length;
+            const rtlCount = emissions.filter((d) => d === TextDirection.RIGHT_TO_LEFT).length;
+            expect(ltrCount).toBeGreaterThanOrEqual(1);
+            expect(rtlCount).toBe(1);
+        });
+
+        it('assigns each paragraph an independent direction based on its own first-strong character', () => {
+            // Simulate a list cell containing three bullets:
+            //   * Arabic
+            //   * Arabic
+            //   * Latin
+            // Each line must flip individually so the canvas /
+            // `horizontalAlignHandler` aligns each row to its own side.
+            const { service, mocks } = createService({ editorBodyText: '' });
+            seedEditingState(service);
+
+            const lines = ['كتاب', 'مرحبا', 'Hello'];
+            const stream = `${lines.join('\r')}\r\n`;
+            // Build paragraph startIndex list pointing at each `\r`.
+            const paragraphs: any[] = [];
+            let cursor = 0;
+            for (const line of lines) {
+                cursor += line.length;
+                paragraphs.push({ startIndex: cursor, paragraphStyle: {} });
+                cursor += 1; // skip the `\r`
+            }
+
+            mocks.editorDoc.getBody.mockReturnValue({
+                dataStream: stream,
+                paragraphs,
+            });
+            service.syncEditorTextDirection();
+
+            const liveBody = mocks.editorDoc.getBody.mock.results.at(-1)?.value;
+            expect(liveBody.paragraphs[0].paragraphStyle.direction)
+                .toBe(TextDirection.RIGHT_TO_LEFT);
+            expect(liveBody.paragraphs[1].paragraphStyle.direction)
+                .toBe(TextDirection.RIGHT_TO_LEFT);
+            expect(liveBody.paragraphs[2].paragraphStyle.direction)
+                .toBe(TextDirection.LEFT_TO_RIGHT);
+        });
+
+        it('makes an empty paragraph created by Enter inherit the previous direction', () => {
+            // Simulate the user pressing Enter at the end of an Arabic
+            // paragraph: the live body now has two paragraphs, where the
+            // second one is empty (no strong char yet) but should still
+            // be treated as RTL so the caret stays on the visual right
+            // and the next keystroke continues the Arabic flow.
+            const { service, mocks } = createService({ editorBodyText: '' });
+            seedEditingState(service);
+
+            // Build dataStream = "كتاب\r\r\n":
+            //   - paragraph 0: "كتاب" (RTL)
+            //   - paragraph 1: empty (just inserted by Enter)
+            //   - trailing \r\n is the sentinel terminator
+            const arabic = 'كتاب';
+            const stream = `${arabic}\r\r\n`;
+            const paragraphs = [
+                { startIndex: arabic.length, paragraphStyle: {} },
+                { startIndex: arabic.length + 1, paragraphStyle: {} },
+            ];
+
+            mocks.editorDoc.getBody.mockReturnValue({
+                dataStream: stream,
+                paragraphs,
+            });
+            service.syncEditorTextDirection();
+
+            const liveBody = mocks.editorDoc.getBody.mock.results.at(-1)?.value;
+            expect(liveBody.paragraphs[0].paragraphStyle.direction)
+                .toBe(TextDirection.RIGHT_TO_LEFT);
+            expect(liveBody.paragraphs[1].paragraphStyle.direction)
+                .toBe(TextDirection.RIGHT_TO_LEFT);
+            // Outer baseline tracks the first paragraph for the cell.
+            expect(service.getEffectiveTextDirection()).toBe(TextDirection.RIGHT_TO_LEFT);
+        });
+
+        it('forces every paragraph to the explicit cell-level direction', () => {
+            // When the cell author explicitly set `style.td=RTL`, even a
+            // paragraph whose own content is Latin must inherit RTL — the
+            // author's choice trumps content auto-detection.
+            const { service, mocks } = createService({
+                editorBodyText: '',
+                explicitCellTd: TextDirection.RIGHT_TO_LEFT,
+            });
+            seedEditingState(service);
+
+            const lines = ['Hello', 'World'];
+            const stream = `${lines.join('\r')}\r\n`;
+            const paragraphs: any[] = [];
+            let cursor = 0;
+            for (const line of lines) {
+                cursor += line.length;
+                paragraphs.push({ startIndex: cursor, paragraphStyle: {} });
+                cursor += 1;
+            }
+
+            mocks.editorDoc.getBody.mockReturnValue({
+                dataStream: stream,
+                paragraphs,
+            });
+            service.syncEditorTextDirection();
+
+            const liveBody = mocks.editorDoc.getBody.mock.results.at(-1)?.value;
+            expect(liveBody.paragraphs[0].paragraphStyle.direction)
+                .toBe(TextDirection.RIGHT_TO_LEFT);
+            expect(liveBody.paragraphs[1].paragraphStyle.direction)
+                .toBe(TextDirection.RIGHT_TO_LEFT);
+        });
     });
 });

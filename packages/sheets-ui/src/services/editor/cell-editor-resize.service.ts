@@ -16,7 +16,7 @@
 
 import type { DocumentDataModel, IPosition, Nullable } from '@univerjs/core';
 import type { DocumentSkeleton, IDocumentLayoutObject, Scene } from '@univerjs/engine-render';
-import { Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, HorizontalAlign, IConfigService, IUniverInstanceService, UniverInstanceType, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import { Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, HorizontalAlign, IConfigService, IUniverInstanceService, TextDirection, UniverInstanceType, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { DOCS_COMPONENT_MAIN_LAYER_INDEX, VIEWPORT_KEY } from '@univerjs/docs-ui';
 import { convertTextRotation, fixLineWidthByScale, getCurrentTypeOfRenderer, IRenderManagerService, Rect, ScrollBar } from '@univerjs/engine-render';
@@ -72,6 +72,14 @@ export class SheetCellEditorResizeService extends Disposable {
         return this._renderer?.engine;
     }
 
+    private _getEffectiveHorizontalAlign(horizontalAlign: HorizontalAlign): HorizontalAlign {
+        if (horizontalAlign === HorizontalAlign.UNSPECIFIED
+            && this._editorBridgeService.getEffectiveTextDirection() === TextDirection.RIGHT_TO_LEFT) {
+            return HorizontalAlign.RIGHT;
+        }
+        return horizontalAlign;
+    }
+
     fitTextSize(callback?: () => void) {
         const param = this._editorBridgeService.getEditCellState();
         if (!param) return;
@@ -98,6 +106,14 @@ export class SheetCellEditorResizeService extends Disposable {
         if (!info || info.actualWidth <= 0) return;
         let { actualWidth, actualHeight } = info;
         const { verticalAlign, horizontalAlign, paddingData, fill } = documentLayoutObject;
+        // For RTL cells whose horizontal alignment isn't explicitly set we
+        // mirror the LTR default: behave as if the cell were RIGHT-aligned so
+        // overflow (when content is wider than the cell) extends towards the
+        // left. We consult the **live** effective direction (re-emitted by
+        // the editor bridge on every keystroke) so the editor flips its
+        // overflow side mid-edit when the user types Arabic into a previously
+        // empty/LTR cell.
+        const effectiveHorizontalAlign = this._getEffectiveHorizontalAlign(horizontalAlign);
         actualWidth = actualWidth + (paddingData.l ?? 0) * scaleX + (paddingData.r ?? 0) * scaleX;
         actualHeight = actualHeight + (paddingData.t ?? 0) * scaleY + (paddingData.b ?? 0) * scaleY;
         let editorWidth = endX - startX;
@@ -123,10 +139,12 @@ export class SheetCellEditorResizeService extends Disposable {
         }
 
         let offsetLeft = 0;
-        if (horizontalAlign === HorizontalAlign.CENTER) {
-            // offsetLeft = ((editorWidth - actualWidth) / 2 / scaleX);
-        } else if (horizontalAlign === HorizontalAlign.RIGHT) {
-            offsetLeft = (editorWidth - actualWidth) / scaleX;
+        if (effectiveHorizontalAlign === HorizontalAlign.CENTER
+            || effectiveHorizontalAlign === HorizontalAlign.RIGHT) {
+            // Match static cell render: page-level align via `_horizontalHandler`
+            // (+ selection `computeDocumentPageAlignOffset`). Margin-based
+            // center/right offsets stack and break LTR center / RTL / right (#6039).
+            offsetLeft = paddingData.l || 0;
         } else {
             offsetLeft = paddingData.l || 0;
         }
@@ -146,7 +164,7 @@ export class SheetCellEditorResizeService extends Disposable {
             fill,
             scaleX,
             scaleY,
-            horizontalAlign,
+            effectiveHorizontalAlign,
             callback
         );
     }
@@ -184,6 +202,22 @@ export class SheetCellEditorResizeService extends Disposable {
             };
         }
 
+        const effectiveHorizontalAlign = this._getEffectiveHorizontalAlign(documentLayoutObject.horizontalAlign);
+        if ((effectiveHorizontalAlign === HorizontalAlign.CENTER
+            || effectiveHorizontalAlign === HorizontalAlign.RIGHT) && angle === 0) {
+            return this._predictingSizeForSheetCellAlign(
+                actualRangeWithCoord,
+                documentSkeleton,
+                documentDataModel,
+                scaleX,
+                scaleY,
+                paddingData,
+                effectiveHorizontalAlign
+            );
+        }
+
+        const cellHorizontalAlign = documentLayoutObject.horizontalAlign;
+
         const maxSize = this._getEditorMaxSize(actualRangeWithCoord, canvasOffset, documentLayoutObject.horizontalAlign);
         if (!maxSize) return;
         documentDataModel?.updateDocumentDataPageSize(maxSize.width / scaleX);
@@ -198,18 +232,64 @@ export class SheetCellEditorResizeService extends Disposable {
 
         // Scaling is handled by the renderer, so the skeleton only accepts the original width and height, which need to be divided by the magnification factor.
         documentDataModel?.updateDocumentDataPageSize(editorWidth / scaleX);
+        documentSkeleton.calculate();
+        const finalSize = documentSkeleton.getActualSize();
 
-        /**
-         * Do not rely on cell layout logic, depend on the document's internal alignment logic.
-         */
         documentDataModel?.updateDocumentRenderConfig({
-            horizontalAlign: HorizontalAlign.UNSPECIFIED,
+            horizontalAlign: cellHorizontalAlign !== HorizontalAlign.UNSPECIFIED
+                ? cellHorizontalAlign
+                : HorizontalAlign.UNSPECIFIED,
             cellValueType: undefined,
         });
 
         return {
-            actualWidth: size.actualWidth * scaleX,
-            actualHeight: size.actualHeight * scaleY,
+            actualWidth: finalSize.actualWidth * scaleX,
+            actualHeight: finalSize.actualHeight * scaleY,
+        };
+    }
+
+    /**
+     * Center / right + overflow (default): mirror static sheet cells —
+     * pageSize stays infinite so line-level align uses `_horizontalHandler`
+     * (and RTL per-line flush). Never use `cellWidth + 2*min(gaps)` as pageSize.
+     */
+    private _predictingSizeForSheetCellAlign(
+        actualRangeWithCoord: IPosition,
+        documentSkeleton: DocumentSkeleton,
+        documentDataModel: Nullable<DocumentDataModel>,
+        scaleX: number,
+        scaleY: number,
+        paddingData: IDocumentLayoutObject['paddingData'],
+        horizontalAlign: HorizontalAlign.CENTER | HorizontalAlign.RIGHT
+    ) {
+        const { startX, endX } = actualRangeWithCoord;
+        const cellWidthCanvas = endX - startX;
+
+        documentDataModel?.updateDocumentDataPageSize(Number.POSITIVE_INFINITY);
+        documentDataModel?.updateDocumentDataMargin({
+            l: paddingData.l,
+            r: paddingData.r,
+            t: paddingData.t,
+            b: paddingData.b,
+        });
+        const renderConfig = documentDataModel?.getSnapshot().documentStyle?.renderConfig ?? {};
+        documentDataModel?.updateDocumentRenderConfig({
+            ...renderConfig,
+            horizontalAlign,
+            cellValueType: undefined,
+        });
+        documentSkeleton.calculate();
+
+        const { actualWidth, actualHeight } = documentSkeleton.getActualSize();
+        let editorWidthCanvas = cellWidthCanvas;
+
+        if (editorWidthCanvas < actualWidth * scaleX + EDITOR_INPUT_SELF_EXTEND_GAP * scaleX) {
+            editorWidthCanvas = actualWidth * scaleX + EDITOR_INPUT_SELF_EXTEND_GAP * scaleX;
+        }
+
+        return {
+            actualWidth: actualWidth * scaleX,
+            actualHeight: actualHeight * scaleY,
         };
     }
 
@@ -309,6 +389,13 @@ export class SheetCellEditorResizeService extends Disposable {
             viewportMain?.getScrollBar()?.dispose();
         }
 
+        if ((horizontalAlign === HorizontalAlign.CENTER || horizontalAlign === HorizontalAlign.RIGHT) && viewportMain) {
+            viewportMain.scrollToViewportPos({
+                viewportScrollX: 0,
+                viewportScrollY: viewportMain.viewportScrollY ?? 0,
+            });
+        }
+
         editorWidth += scrollBar?.barSize || 0;
 
         if (editorWidth > clientWidth) {
@@ -348,10 +435,10 @@ export class SheetCellEditorResizeService extends Disposable {
         startY = startY * scaleAdjust + (canvasBoundingRect.top - contentBoundingRect.top);
 
         const cellWidth = actualRangeWithCoord.endX - actualRangeWithCoord.startX;
-        if (horizontalAlign === HorizontalAlign.RIGHT) {
+        if (horizontalAlign === HorizontalAlign.RIGHT && editorWidth > cellWidth) {
             startX += (cellWidth - editorWidth) * scaleAdjust;
-        } else if (horizontalAlign === HorizontalAlign.CENTER) {
-            startX += (cellWidth - editorWidth * scaleAdjust) / 2;
+        } else if (horizontalAlign === HorizontalAlign.CENTER && editorWidth > cellWidth) {
+            startX += ((cellWidth - editorWidth) * scaleAdjust) / 2;
         }
 
         // Update cell editor container position and size.
@@ -414,7 +501,8 @@ export class SheetCellEditorResizeService extends Disposable {
         if (!skeleton) return;
         const { row, column, scaleX, scaleY, position, canvasOffset, documentLayoutObject } = editCellState;
         const { horizontalAlign } = documentLayoutObject;
-        const maxSize = this._getEditorMaxSize(position, canvasOffset, horizontalAlign);
+        const effectiveHorizontalAlign = this._getEffectiveHorizontalAlign(horizontalAlign);
+        const maxSize = this._getEditorMaxSize(position, canvasOffset, effectiveHorizontalAlign);
         if (!maxSize) return;
         const { height: clientHeight, width: clientWidth, scaleAdjust } = maxSize;
 

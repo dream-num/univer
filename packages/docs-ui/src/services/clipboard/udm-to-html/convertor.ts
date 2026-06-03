@@ -17,7 +17,7 @@
 import type { IDocumentBody, IDocumentData, IParagraph, ITable, ITableCell, ITextRun, ITextStyle } from '@univerjs/core';
 import type { IDocImage } from '@univerjs/docs-drawing';
 import type { DataStreamTreeNode } from '@univerjs/engine-render';
-import { BaselineOffset, BooleanNumber, CustomRangeType, DataStreamTreeNodeType, DrawingTypeEnum, HorizontalAlign, NamedStyleType, PresetListType, Tools } from '@univerjs/core';
+import { BaselineOffset, BooleanNumber, CustomRangeType, DataStreamTreeNodeType, DrawingTypeEnum, HorizontalAlign, NamedStyleType, PresetListType, TextDirection, Tools } from '@univerjs/core';
 import { ImageSourceType } from '@univerjs/drawing';
 import { parseDataStreamToTree } from '@univerjs/engine-render';
 
@@ -273,8 +273,17 @@ function processNode(node: DataStreamTreeNode, doc: IDocumentData, result: IHtml
             const { children, startIndex, endIndex } = node;
             const paragraph = doc.body?.paragraphs?.find((p) => p.startIndex === endIndex) ?? {} as IParagraph;
             const { paragraphStyle = {} } = paragraph;
-            const { horizontalAlign, spaceAbove, spaceBelow, lineSpacing } = paragraphStyle;
+            const { horizontalAlign, direction, spaceAbove, spaceBelow, lineSpacing } = paragraphStyle;
             const style = [];
+            const dir = direction === TextDirection.RIGHT_TO_LEFT
+                ? 'rtl'
+                : direction === TextDirection.LEFT_TO_RIGHT
+                    ? 'ltr'
+                    : undefined;
+
+            if (dir) {
+                style.push(`direction: ${dir}`);
+            }
 
             if (horizontalAlign != null) {
                 const align = getTextAlign(horizontalAlign);

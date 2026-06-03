@@ -48,6 +48,7 @@ import {
     FOCUSING_EDITOR_STANDALONE,
     FOCUSING_FX_BAR_EDITOR,
     generateRandomId,
+    HorizontalAlign,
     ICommandService,
     IConfigService,
     IContextService,
@@ -57,6 +58,7 @@ import {
     IUndoRedoService,
     IUniverInstanceService,
     LocaleService,
+    TextDirection,
     toDisposable,
     Tools,
     UniverInstanceType,
@@ -370,6 +372,11 @@ export class EditingRenderController extends Disposable {
                 }
 
                 if (commandUnitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
+                    // Re-evaluate the live text direction first: typing
+                    // Arabic into an empty cell needs to flip the editor to
+                    // RTL *before* we recompute layout, so `fitTextSize`
+                    // picks up the updated `effectiveHorizontalAlign`.
+                    this._editorBridgeService.syncEditorTextDirection();
                     this._sheetCellEditorResizeService?.fitTextSize();
                 }
             }
@@ -445,11 +452,26 @@ export class EditingRenderController extends Disposable {
             return;
         }
 
+        this._editorBridgeService.syncEditorTextDirection();
         this._sheetCellEditorResizeService?.fitTextSize(() => {
             const viewMain = scene.getViewport(DOC_VIEWPORT_KEY.VIEW_MAIN);
+            const cellAlign = editCellState.documentLayoutObject.horizontalAlign;
+            const isRTL = this._editorBridgeService.getEffectiveTextDirection() === TextDirection.RIGHT_TO_LEFT;
+            let effectiveAlign = cellAlign;
+            if (cellAlign === HorizontalAlign.UNSPECIFIED && isRTL) {
+                effectiveAlign = HorizontalAlign.RIGHT;
+            }
+            const scrollContentToFarRight = effectiveAlign === HorizontalAlign.LEFT
+                || (cellAlign === HorizontalAlign.UNSPECIFIED && !isRTL);
             viewMain?.scrollToViewportPos({
-                viewportScrollX: Number.POSITIVE_INFINITY,
+                // Only LTR-left overflow editing scrolls to +Infinity; center/right/RTL
+                // use pageSize=Infinity + `_horizontalHandler` anchored at scroll 0.
+                viewportScrollX: scrollContentToFarRight ? Number.POSITIVE_INFINITY : 0,
                 viewportScrollY: Number.POSITIVE_INFINITY,
+            });
+            this._textSelectionManagerService.refreshSelection({
+                unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+                subUnitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
             });
         });
 
@@ -786,13 +808,16 @@ export class EditingRenderController extends Disposable {
 
     // TODO: @JOCS, is it necessary to move these commands MoveSelectionOperation\MoveCursorOperation to shortcut? and use multi-commands?
     private _moveInEditor(keycode: KeyCode, isShift: boolean) {
+        const isRTL = this._editorBridgeService.getEffectiveTextDirection() === TextDirection.RIGHT_TO_LEFT;
         let direction = Direction.LEFT;
         if (keycode === KeyCode.ARROW_DOWN) {
             direction = Direction.DOWN;
         } else if (keycode === KeyCode.ARROW_UP) {
             direction = Direction.UP;
+        } else if (keycode === KeyCode.ARROW_LEFT) {
+            direction = isRTL ? Direction.RIGHT : Direction.LEFT;
         } else if (keycode === KeyCode.ARROW_RIGHT) {
-            direction = Direction.RIGHT;
+            direction = isRTL ? Direction.LEFT : Direction.RIGHT;
         }
 
         if (isShift) {

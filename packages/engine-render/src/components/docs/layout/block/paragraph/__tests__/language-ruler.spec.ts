@@ -18,7 +18,7 @@ import type { ISectionBreakConfig } from '../../../../../../basics/interfaces';
 import { DocumentDataModel } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { DocumentViewModel } from '../../../../view-model/document-view-model';
-import { ArabicHandler, emojiHandler, otherHandler, ThaiHandler, TibetanHandler } from '../language-ruler';
+import { emojiHandler, otherHandler, ThaiHandler, TibetanHandler } from '../language-ruler';
 
 function createViewModel(content: string) {
     const dataStream = `${content}\r\n`;
@@ -99,34 +99,6 @@ describe('language-ruler', () => {
             const result = otherHandler(0, 'Hi\uD83D\uDE00', viewModel, paragraphNode, sectionBreakConfig, paragraph);
             expect(result.step).toBe(2);
             expect(result.glyphGroup.length).toBe(2);
-        });
-    });
-
-    describe('ArabicHandler', () => {
-        it('combines Arabic characters into one glyph in reverse order', () => {
-            const arabicText = '\u0645\u0631\u062D\u0628\u0627'; // 'مرحبا'
-            const { viewModel } = createViewModel(arabicText);
-            const paragraphNode = getParagraphNode(viewModel);
-            const paragraph = getParagraph(viewModel);
-            const sectionBreakConfig = createSectionBreakConfig();
-
-            const result = ArabicHandler(0, arabicText, viewModel, paragraphNode, sectionBreakConfig, paragraph);
-            expect(result.step).toBe(5);
-            expect(result.glyphGroup.length).toBe(1);
-            // Arabic characters are unshifted, so they should be in reverse order
-            expect(result.glyphGroup[0].content).toBe('\u0627\u0628\u062D\u0631\u0645'); // 'ابحرم'
-        });
-
-        it('stops at non-Arabic characters', () => {
-            const arabicText = '\u0645\u0631\u062D\u0628\u0627'; // 'مرحبا'
-            const { viewModel } = createViewModel(`${arabicText}X`);
-            const paragraphNode = getParagraphNode(viewModel);
-            const paragraph = getParagraph(viewModel);
-            const sectionBreakConfig = createSectionBreakConfig();
-
-            const result = ArabicHandler(0, `${arabicText}X`, viewModel, paragraphNode, sectionBreakConfig, paragraph);
-            expect(result.step).toBe(5);
-            expect(result.glyphGroup.length).toBe(1);
         });
     });
 

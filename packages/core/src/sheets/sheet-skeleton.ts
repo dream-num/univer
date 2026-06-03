@@ -45,7 +45,7 @@ import { ColorKit, isCellCoverable, ObjectMatrix, Rectangle, searchArray, Tools 
 import { ImageCacheMap } from '../shared/cache/image-cache';
 import { getIntersectRange } from '../shared/range';
 import { Skeleton } from '../skeleton';
-import { BooleanNumber, HorizontalAlign } from '../types/enum';
+import { BooleanNumber, HorizontalAlign, TextDirection } from '../types/enum';
 import { DocumentFlavor } from '../types/interfaces';
 
 /**
@@ -1151,7 +1151,8 @@ export class SheetSkeleton extends Skeleton {
         documentData: IDocumentData,
         horizontalAlign: HorizontalAlign,
         paddingData: IPaddingData,
-        renderConfig?: IDocumentRenderConfig
+        renderConfig?: IDocumentRenderConfig,
+        textDirection?: TextDirection
     ): Nullable<DocumentDataModel> {
         if (!renderConfig) {
             return;
@@ -1191,6 +1192,16 @@ export class SheetSkeleton extends Skeleton {
             }
 
             paragraph.paragraphStyle.horizontalAlign = horizontalAlign;
+            // Only fall back to the cell-level text direction when the cell
+            // declared a non-UNSPECIFIED direction AND the paragraph itself
+            // does not declare one (rich-text paragraphs may set their own).
+            if (
+                textDirection != null
+                && textDirection !== TextDirection.UNSPECIFIED
+                && paragraph.paragraphStyle.direction == null
+            ) {
+                paragraph.paragraphStyle.direction = textDirection;
+            }
         }
 
         return new DocumentDataModel(documentData);

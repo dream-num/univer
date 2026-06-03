@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IPosition, ISelectionCell, Nullable, Workbook } from '@univerjs/core';
+import type { DocumentDataModel, IDisposable, IPosition, ISelectionCell, Nullable, Workbook } from '@univerjs/core';
 import type { Engine, IDocumentLayoutObject, Scene } from '@univerjs/engine-render';
 import type { KeyCode } from '@univerjs/ui';
 import type { Observable } from 'rxjs';
@@ -28,7 +28,9 @@ import {
     FOCUSING_EDITOR_STANDALONE,
     IContextService,
     Inject,
+    isFirstStrongCharRTL,
     IUniverInstanceService,
+    TextDirection,
     ThemeService,
     toDisposable,
     UniverInstanceType,
@@ -81,6 +83,19 @@ export interface IEditorBridgeService {
     currentEditCell$: Observable<Nullable<IEditorBridgeServiceParam>>;
     visible$: Observable<IEditorBridgeServiceVisibleParam>;
     forceKeepVisible$: Observable<boolean>;
+    /**
+     * Stream of the *effective* text direction for the active cell editor.
+     * Re-evaluates whenever the editor's body content changes (typing, paste,
+     * delete) so the wrapper `<div dir>`, the hidden contenteditable, the
+     * cell-editor resize math, and the canvas paragraph alignment can all
+     * react in real time.
+     *
+     * Resolution order:
+     *  1. The cell's explicit `style.td`.
+     *  2. First-strong character in the live editor body.
+     *  3. LTR fallback.
+     */
+    effectiveTextDirection$: Observable<TextDirection>;
 
     dispose(): void;
     refreshEditCellState(): void;
@@ -104,6 +119,18 @@ export interface IEditorBridgeService {
     isForceKeepVisible(): boolean;
     getCurrentEditorId(): string;
     helpFunctionVisible$: BehaviorSubject<boolean>;
+    /**
+     * Recompute the cell editor's effective text direction based on the
+     * **live** content in the editor docs unit, write it back into the
+     * editor's `documentStyle.renderConfig.textDirection` and per-paragraph
+     * `paragraphStyle.direction`, and emit on `effectiveTextDirection$`.
+     *
+     * Call this on every keystroke / RichTextEditingMutation so the
+     * direction tracks reality (e.g. empty → Arabic flips to RTL, deleting
+     * back to ASCII flips to LTR).
+     */
+    syncEditorTextDirection(): void;
+    getEffectiveTextDirection(): TextDirection;
 }
 
 export class EditorBridgeService extends Disposable implements IEditorBridgeService, IDisposable {
@@ -142,6 +169,12 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
     private readonly _forceKeepVisible$ = new BehaviorSubject(false);
     readonly forceKeepVisible$ = this._forceKeepVisible$.asObservable();
 
+    // Live effective direction for the cell editor. Distinct so subscribers
+    // re-render exactly when it flips (e.g. user types Arabic into an empty
+    // English-leaning cell). Starts LTR; reset on each editor open.
+    private readonly _effectiveTextDirection$ = new BehaviorSubject<TextDirection>(TextDirection.LEFT_TO_RIGHT);
+    readonly effectiveTextDirection$ = this._effectiveTextDirection$.asObservable();
+
     constructor(
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
         @Inject(SheetSkeletonService) private readonly _sheetSkeletonService: SheetSkeletonService,
@@ -172,6 +205,11 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
             this._currentEditCellLayout = null;
             this._currentEditCellState$.next(null);
             this._currentEditCellLayout$.next(null);
+            // Editor closing → reset live direction so the next open starts
+            // with a clean LTR baseline (cell may have no content yet).
+            if (this._effectiveTextDirection$.getValue() !== TextDirection.LEFT_TO_RIGHT) {
+                this._effectiveTextDirection$.next(TextDirection.LEFT_TO_RIGHT);
+            }
             return;
         }
         const { position, scaleX, scaleY, canvasOffset, ...rest } = editCellState;
@@ -179,6 +217,20 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         this._currentEditCellLayout = { position, scaleX, scaleY, canvasOffset };
         this._currentEditCellState$.next(this._currentEditCellState);
         this._currentEditCellLayout$.next(this._currentEditCellLayout);
+
+        // Seed the live direction stream with the snapshot value so the
+        // editor's `<div dir>` is correct *before* the user starts typing.
+        const seedDir = rest.documentLayoutObject
+            ?.documentModel
+            ?.documentStyle
+            ?.renderConfig
+            ?.textDirection;
+        const initial = seedDir === TextDirection.RIGHT_TO_LEFT
+            ? TextDirection.RIGHT_TO_LEFT
+            : TextDirection.LEFT_TO_RIGHT;
+        if (this._effectiveTextDirection$.getValue() !== initial) {
+            this._effectiveTextDirection$.next(initial);
+        }
     }
 
     refreshEditCellPosition(resetSizeOnly?: boolean) {
@@ -347,10 +399,17 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
 
         documentLayoutObject = cell && worksheet.getCellDocumentModelWithFormula(cell, location.row, location.col);
 
-        // Rewrite the cellValueType to STRING to avoid render the value on the right side when number type.
+        // Rewrite the cellValueType to STRING so the document doesn't right-align
+        // numeric cells while we're editing them. For RTL cells we keep the
+        // original cellValueType because `_horizontalHandler` already decides
+        // the default alignment based on `renderConfig.textDirection` and we
+        // don't want to override the natural RTL right-alignment.
         const renderConfig = documentLayoutObject?.documentModel?.documentStyle.renderConfig;
         if (renderConfig != null) {
-            renderConfig.cellValueType = CellValueType.STRING;
+            const isRTL = renderConfig.textDirection === TextDirection.RIGHT_TO_LEFT;
+            if (!isRTL) {
+                renderConfig.cellValueType = CellValueType.STRING;
+            }
         }
 
         if (!documentLayoutObject || documentLayoutObject.documentModel == null) {
@@ -450,6 +509,164 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
 
     getEditorDirty() {
         return this._editorIsDirty;
+    }
+
+    getEffectiveTextDirection(): TextDirection {
+        return this._effectiveTextDirection$.getValue();
+    }
+
+    syncEditorTextDirection(): void {
+        // Only the cell author's *explicit* `style.td` is treated as a hard
+        // override. Snapshot renderConfig values that came from content
+        // auto-detection should not be sticky once the user starts editing,
+        // because the content is now in flux.
+        const explicitTd = this._getEditCellExplicitTextDirection();
+
+        // Push per-paragraph directions into the live editor model so each
+        // line (e.g. each bullet in a list) flips independently when its
+        // first-strong character is RTL / LTR. `explicitTd != null` makes
+        // the whole cell honour the author's choice regardless of content.
+        // The returned `baselineDir` is the single cell-level direction
+        // that outer UI surfaces (container `<div dir>`, resize math)
+        // should follow.
+        const baselineDir = this._applyEditorDirection(explicitTd);
+
+        if (this._effectiveTextDirection$.getValue() !== baselineDir) {
+            this._effectiveTextDirection$.next(baselineDir);
+        }
+    }
+
+    /**
+     * Returns the cell's explicit `style.td` (LTR / RTL) when set, or
+     * `undefined` when the cell has no direction set / is `UNSPECIFIED`.
+     * Reads from the actual workbook so it can't be fooled by the renderConfig
+     * value that was previously auto-derived from the seed content.
+     */
+    private _getEditCellExplicitTextDirection(): TextDirection | undefined {
+        const state = this._currentEditCellState;
+        if (!state) return undefined;
+        const workbook = this._univerInstanceService.getUnit<Workbook>(state.unitId, UniverInstanceType.UNIVER_SHEET);
+        const worksheet = workbook?.getSheetBySheetId(state.sheetId);
+        const style = worksheet?.getComposedCellStyle(state.row, state.column);
+        const td = style?.td;
+        return td != null && td !== TextDirection.UNSPECIFIED ? td : undefined;
+    }
+
+    /**
+     * Concatenate the editor body's dataStream. We strip the trailing
+     * sentinel paragraph break + chapter break that Univer always appends.
+     */
+    private _readEditorBodyText(): string {
+        const editorDoc = this._univerInstanceService.getUnit<DocumentDataModel>(
+            DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+            UniverInstanceType.UNIVER_DOC
+        );
+        const body = editorDoc?.getBody();
+        const stream = body?.dataStream ?? '';
+        // The dataStream ends with `\r\n` (paragraph break + section end).
+        // Slicing it off avoids false-positives on neutral terminators.
+        return stream.replace(/[\r\n]+$/, '');
+    }
+
+    /**
+     * Push paragraph-level directions into the live editor docs unit so the
+     * canvas pipeline (`_horizontalHandler`, `applyBidiReorderToLine`) and
+     * `cell-editor-resize.service` `effectiveHorizontalAlign` math see the
+     * same source of truth. Callers (`fitTextSize` / the React container)
+     * handle the DOM-side `<div dir>` + contenteditable updates.
+     *
+     * @param explicitOverride When set, every paragraph and the document
+     *   renderConfig get this single direction (cell-level explicit
+     *   `style.td`). When `undefined`, each paragraph independently picks
+     *   a direction from its own first-strong character — this is what
+     *   makes mixed-direction list cells (Arabic bullet → English bullet)
+     *   align each row correctly.
+     * @returns The single "baseline" direction representing the whole
+     *   cell, used by outer UI signals (`<div dir>`, resize math, the
+     *   `effectiveTextDirection$` observable). Equals `explicitOverride`
+     *   when set, otherwise the first paragraph's resolved direction
+     *   (LTR fallback when the cell has no paragraphs / content).
+     */
+    private _applyEditorDirection(explicitOverride: TextDirection | undefined): TextDirection {
+        const editorDoc = this._univerInstanceService.getUnit<DocumentDataModel>(
+            DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+            UniverInstanceType.UNIVER_DOC
+        );
+        if (!editorDoc) return explicitOverride ?? TextDirection.LEFT_TO_RIGHT;
+
+        const body = editorDoc.getBody();
+        if (!body?.paragraphs) {
+            return explicitOverride ?? TextDirection.LEFT_TO_RIGHT;
+        }
+
+        const dataStream = body.dataStream ?? '';
+        let prevParagraphEnd = 0;
+        let firstParagraphDir: TextDirection | undefined;
+        // Carry the previously resolved direction forward so that a brand-
+        // new empty paragraph created by Enter (no strong char yet) keeps
+        // pointing in the same direction as the line the user just left.
+        // Without this, an empty RTL paragraph silently falls back to LTR
+        // and the caret jumps to the visual left edge — even though the
+        // user expects to keep typing Arabic on the right.
+        let inheritedDir: TextDirection | undefined;
+
+        for (const paragraph of body.paragraphs) {
+            if (!paragraph.paragraphStyle) {
+                paragraph.paragraphStyle = {};
+            }
+
+            let nextDir: TextDirection;
+            if (explicitOverride != null) {
+                nextDir = explicitOverride;
+            } else {
+                const sliceStart = prevParagraphEnd;
+                const sliceEnd = paragraph.startIndex;
+                const paragraphText = sliceEnd > sliceStart
+                    ? dataStream.slice(sliceStart, sliceEnd)
+                    : '';
+                if (paragraphText.length === 0) {
+                    // Empty paragraph: keep whatever the previous
+                    // paragraph resolved to (or the paragraph's own
+                    // previously-declared direction, if any). Falling
+                    // back to LTR here is what made Enter-in-RTL pop
+                    // the caret to the wrong side.
+                    nextDir = inheritedDir
+                        ?? paragraph.paragraphStyle.direction
+                        ?? TextDirection.LEFT_TO_RIGHT;
+                } else if (isFirstStrongCharRTL(paragraphText)) {
+                    nextDir = TextDirection.RIGHT_TO_LEFT;
+                } else {
+                    nextDir = TextDirection.LEFT_TO_RIGHT;
+                }
+            }
+
+            if (paragraph.paragraphStyle.direction !== nextDir) {
+                paragraph.paragraphStyle.direction = nextDir;
+            }
+            if (firstParagraphDir === undefined) {
+                firstParagraphDir = nextDir;
+            }
+            inheritedDir = nextDir;
+
+            prevParagraphEnd = paragraph.startIndex + 1;
+        }
+
+        // Document-level renderConfig.textDirection drives the page-level
+        // `_horizontalHandler` default-alignment fallback (used when the
+        // cell has no explicit `horizontalAlign`). In multi-line cells
+        // the page can carry only one baseline, so we use:
+        //   - the explicit cell-level direction when set, or
+        //   - the first paragraph's auto-detected direction as the visual
+        //     baseline of the cell box.
+        // Per-paragraph alignment of the actual glyph rows is handled
+        // independently in `horizontalAlignHandler` from each paragraph's
+        // own `direction` written above.
+        const renderConfig = editorDoc.documentStyle.renderConfig;
+        const baselineDir = explicitOverride ?? firstParagraphDir ?? TextDirection.LEFT_TO_RIGHT;
+        if (renderConfig && renderConfig.textDirection !== baselineDir) {
+            renderConfig.textDirection = baselineDir;
+        }
+        return baselineDir;
     }
 }
 

@@ -25,7 +25,7 @@ import type { IDrawInfo } from '../../extension';
 import type { IFontCacheItem } from '../interfaces';
 import type { SheetComponent } from '../sheet-component';
 import type { SpreadsheetSkeleton } from '../sheet.render-skeleton';
-import { CellValueType, getDisplayValueFromCell, HorizontalAlign, Range, Tools, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import { CellValueType, getDisplayValueFromCell, HorizontalAlign, isFirstStrongCharRTL, Range, TextDirection, Tools, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics';
 import { VERTICAL_ROTATE_ANGLE } from '../../../basics/text-rotation';
 import { clampRange, inViewRanges } from '../../../basics/tools';
@@ -539,6 +539,23 @@ export class Font extends SheetExtension {
             } else if (cellData.t === CellValueType.BOOLEAN) {
                 // If the cell value is a boolean, default to center alignment.
                 hAlign = HorizontalAlign.CENTER;
+            } else if (
+                fontCache.style?.td === TextDirection.RIGHT_TO_LEFT
+                // Auto-detect RTL when the text starts with a strong RTL char
+                // (Excel / Sheets style) even if `style.td` was never set.
+                //
+                // Note: under the current `_setFontStylesCache` policy, any
+                // cell whose content contains an RTL codepoint at all is
+                // routed through the docs pipeline (`_renderDocuments`), so
+                // this branch is only reached by truly pure-LTR /
+                // pure-numeric cells. Keeping the auto-detect here as a
+                // belt-and-braces fallback in case the upstream policy ever
+                // narrows again.
+                || isFirstStrongCharRTL(text)
+            ) {
+                // RTL strings default to right alignment (mirrors LTR's default-left behaviour).
+                // This is the fallback when the cell escapes the docs pipeline (e.g. legacy paths).
+                hAlign = HorizontalAlign.RIGHT;
             }
         }
 

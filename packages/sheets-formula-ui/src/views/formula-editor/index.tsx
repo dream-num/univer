@@ -88,6 +88,13 @@ export interface IFormulaEditorProps {
         backgroundColor?: string;
         fontSize?: number;
     };
+    /**
+     * Force the arrow-key visual<->logical mapping to a specific direction
+     * regardless of the editor's paragraph direction. The formula bar passes
+     * `'ltr'` so formula syntax navigation stays consistent even when the
+     * surrounding workbook is set to RTL.
+     */
+    forceDirection?: 'ltr' | 'rtl';
 }
 
 export interface IFormulaEditorRef {
@@ -121,6 +128,7 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
         style,
         borderless = false,
         canvasStyle,
+        forceDirection,
     } = props;
 
     const editorService = useDependency(IEditorService);
@@ -312,7 +320,13 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
 
     const { checkScrollBar } = useResize(editor, isSingle, autoScrollbar);
     useRefactorEffect(isFocus, Boolean(isSelecting && docFocusing), unitId, editorId, disableContextMenu);
-    useLeftAndRightArrow(Boolean(isFocus && isFocusing && moveCursor), selectingMode, editor, onMoveInEditor);
+    useLeftAndRightArrow(
+        Boolean(isFocus && isFocusing && moveCursor),
+        selectingMode,
+        editor,
+        onMoveInEditor,
+        forceDirection ? { forceDirection } : undefined
+    );
 
     const handleSelectionChange = useEvent((refString: string, offset: number, isEnd: boolean) => {
         if (!isFocusing) {

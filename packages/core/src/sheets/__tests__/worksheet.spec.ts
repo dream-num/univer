@@ -19,7 +19,7 @@ import type { IRange, IWorkbookData } from '../typedef';
 import type { Worksheet } from '../worksheet';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { DisposableCollection } from '../../shared/lifecycle';
-import { CellValueType } from '../../types/enum';
+import { CellValueType, TextDirection } from '../../types/enum';
 import { LocaleType } from '../../types/enum/locale-type';
 import { RANGE_TYPE } from '../typedef';
 import { extractPureTextFromCell } from '../worksheet';
@@ -322,6 +322,120 @@ describe('test worksheet', () => {
                     },
                 },
             });
+        });
+    });
+
+    describe('per-paragraph RTL auto-detection in rich-text cells', () => {
+        // The fixture below mimics a multi-line / list cell so we can
+        // verify each paragraph gets its own direction based on its first-
+        // strong character. The actual paragraph break character (`\r`)
+        // sits at each `startIndex`; the slice between previous break and
+        // current `startIndex` is the paragraph's content.
+        beforeEach(() => {
+            prepare();
+            caseDisposable = new DisposableCollection();
+        });
+
+        function makeRichTextCellWithThreeLines() {
+            const lines = ['كتاب', 'مرحبا', 'Hello'];
+            let cursor = 0;
+            const paragraphs = lines.map((line) => {
+                cursor += line.length;
+                const entry = { startIndex: cursor, paragraphStyle: {} };
+                cursor += 1;
+                return entry;
+            });
+            return {
+                p: {
+                    id: '__paragraph_test__',
+                    body: {
+                        dataStream: `${lines.join('\r')}\r\n`,
+                        paragraphs,
+                    },
+                    documentStyle: {},
+                },
+            } as any;
+        }
+
+        it('flips each paragraph independently from its own first-strong char', () => {
+            const cell = makeRichTextCellWithThreeLines();
+            const model = worksheet.getCellDocumentModel(cell, {});
+            const paragraphs = model?.documentModel?.getBody()?.paragraphs ?? [];
+            expect(paragraphs[0]?.paragraphStyle?.direction).toBe(TextDirection.RIGHT_TO_LEFT);
+            expect(paragraphs[1]?.paragraphStyle?.direction).toBe(TextDirection.RIGHT_TO_LEFT);
+            expect(paragraphs[2]?.paragraphStyle?.direction).toBe(TextDirection.LEFT_TO_RIGHT);
+        });
+
+        it('does not mutate the source `cell.p` snapshot when injecting direction', () => {
+            const cell = makeRichTextCellWithThreeLines();
+            worksheet.getCellDocumentModel(cell, {});
+            // The snapshot the renderer was given must stay clean so the
+            // next render (potentially with different content) can re-run
+            // first-strong detection.
+            for (const p of cell.p.body.paragraphs) {
+                expect(p.paragraphStyle).toEqual({});
+            }
+        });
+
+        it('lets explicit cell-level `style.td` override per-paragraph auto-detection', () => {
+            const cell = makeRichTextCellWithThreeLines();
+            const model = worksheet.getCellDocumentModel(cell, { td: TextDirection.LEFT_TO_RIGHT });
+            const paragraphs = model?.documentModel?.getBody()?.paragraphs ?? [];
+            for (const p of paragraphs) {
+                expect(p.paragraphStyle?.direction).toBe(TextDirection.LEFT_TO_RIGHT);
+            }
+        });
+
+        it('lets an empty paragraph inherit the previous paragraph\'s direction', () => {
+            // Two paragraphs: a non-empty RTL one and a freshly-split
+            // empty one (what BreakLine creates when the user presses
+            // Enter at the end of an Arabic line). Without inheritance,
+            // the empty paragraph would silently fall back to LTR and
+            // the caret would jump to the wrong visual edge.
+            const lines = ['كتاب', ''];
+            let cursor = 0;
+            const paragraphs = lines.map((line) => {
+                cursor += line.length;
+                const entry = { startIndex: cursor, paragraphStyle: {} };
+                cursor += 1;
+                return entry;
+            });
+            const cell = {
+                p: {
+                    id: '__paragraph_test__',
+                    body: {
+                        dataStream: `${lines.join('\r')}\r\n`,
+                        paragraphs,
+                    },
+                    documentStyle: {},
+                },
+            } as any;
+            const model = worksheet.getCellDocumentModel(cell, {});
+            const resolved = model?.documentModel?.getBody()?.paragraphs ?? [];
+            expect(resolved[0]?.paragraphStyle?.direction).toBe(TextDirection.RIGHT_TO_LEFT);
+            expect(resolved[1]?.paragraphStyle?.direction).toBe(TextDirection.RIGHT_TO_LEFT);
+        });
+
+        it('preserves an already-declared paragraph direction from the model', () => {
+            // An author / clipboard paste might pin a specific paragraph
+            // to a direction. That declaration should always win, even
+            // when the paragraph's first-strong character disagrees.
+            const cell = {
+                p: {
+                    id: '__paragraph_test__',
+                    body: {
+                        dataStream: 'Hello\r\n',
+                        paragraphs: [{
+                            startIndex: 5,
+                            paragraphStyle: { direction: TextDirection.RIGHT_TO_LEFT },
+                        }],
+                    },
+                    documentStyle: {},
+                },
+            } as any;
+            const model = worksheet.getCellDocumentModel(cell, {});
+            const paragraphs = model?.documentModel?.getBody()?.paragraphs ?? [];
+            expect(paragraphs[0]?.paragraphStyle?.direction).toBe(TextDirection.RIGHT_TO_LEFT);
         });
     });
 });

@@ -15,20 +15,52 @@
  */
 
 import type { Editor } from '../../../services/editor/editor';
-import { CommandType, Direction, DisposableCollection, ICommandService } from '@univerjs/core';
+import { CommandType, Direction, DisposableCollection, ICommandService, TextDirection } from '@univerjs/core';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { IShortcutService, KeyCode, MetaKeys, useDependency } from '@univerjs/ui';
 import { useEffect, useRef } from 'react';
 import { MoveCursorOperation, MoveSelectionOperation } from '../../../commands/operations/doc-cursor.operation';
 
+export interface IUseLeftAndRightArrowOptions {
+    /**
+     * Force a writing direction for arrow-key mapping regardless of the
+     * editor's paragraph direction. Used e.g. by the formula bar to lock
+     * LTR behaviour even when the surrounding sheet / cell is RTL.
+     */
+    forceDirection?: 'ltr' | 'rtl';
+}
+
+function readEditorTextDirection(editor: Editor | undefined): TextDirection {
+    if (!editor) return TextDirection.UNSPECIFIED;
+    try {
+        // For cell / formula editors the document typically contains a single
+        // paragraph, and that paragraph carries `direction` populated by
+        // `createDocumentModelWithStyle`. Reading the first paragraph is a good
+        // heuristic and avoids resolving the cursor against the skeleton.
+        const data = editor.getDocumentData();
+        const direction = data.body?.paragraphs?.[0]?.paragraphStyle?.direction;
+        return direction ?? TextDirection.UNSPECIFIED;
+    } catch {
+        return TextDirection.UNSPECIFIED;
+    }
+}
+
 // eslint-disable-next-line max-lines-per-function
-export const useLeftAndRightArrow = (isNeed: boolean, selectingMode: boolean, editor?: Editor, onMoveInEditor?: (keyCode: KeyCode, metaKey?: MetaKeys) => void) => {
+export const useLeftAndRightArrow = (
+    isNeed: boolean,
+    selectingMode: boolean,
+    editor?: Editor,
+    onMoveInEditor?: (keyCode: KeyCode, metaKey?: MetaKeys) => void,
+    options?: IUseLeftAndRightArrowOptions
+) => {
     const commandService = useDependency(ICommandService);
     const shortcutService = useDependency(IShortcutService);
     const selectingModeRef = useRef(selectingMode);
     selectingModeRef.current = selectingMode;
     const onMoveInEditorRef = useRef(onMoveInEditor);
     onMoveInEditorRef.current = onMoveInEditor;
+    const forceDirectionRef = useRef(options?.forceDirection);
+    forceDirectionRef.current = options?.forceDirection;
 
     useEffect(() => {
         if (!editor || !isNeed) {
@@ -43,13 +75,28 @@ export const useLeftAndRightArrow = (isNeed: boolean, selectingMode: boolean, ed
                 return;
             }
 
+            // Decide effective direction:
+            //  - explicit `forceDirection` always wins (formula bar pins LTR).
+            //  - otherwise read the current editor's paragraph direction.
+            const forced = forceDirectionRef.current;
+            const effectiveDir = forced === 'rtl'
+                ? TextDirection.RIGHT_TO_LEFT
+                : forced === 'ltr'
+                    ? TextDirection.LEFT_TO_RIGHT
+                    : readEditorTextDirection(editor);
+            const isRTL = effectiveDir === TextDirection.RIGHT_TO_LEFT;
+
             let direction = Direction.LEFT;
             if (keycode === KeyCode.ARROW_DOWN) {
                 direction = Direction.DOWN;
             } else if (keycode === KeyCode.ARROW_UP) {
                 direction = Direction.UP;
+            } else if (keycode === KeyCode.ARROW_LEFT) {
+                // In RTL paragraphs the physical left arrow advances the
+                // logical cursor (matches macOS / Excel / Google Sheets).
+                direction = isRTL ? Direction.RIGHT : Direction.LEFT;
             } else if (keycode === KeyCode.ARROW_RIGHT) {
-                direction = Direction.RIGHT;
+                direction = isRTL ? Direction.LEFT : Direction.RIGHT;
             }
 
             if (metaKey === MetaKeys.SHIFT) {

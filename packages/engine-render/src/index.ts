@@ -20,7 +20,12 @@ export { getOffsetRectForDom } from './basics/position';
 export * from './canvas';
 export * from './components';
 export { DocBackground } from './components/docs/doc-background';
-export { Documents } from './components/docs/document';
+export {
+    computeDocumentPageAlignOffset,
+    computeDocumentPageHorizontalAlignOffset,
+    computeDocumentPageVerticalAlignOffset,
+    Documents,
+} from './components/docs/document';
 export type { IPageRenderConfig } from './components/docs/document';
 export type { IDocumentOffsetConfig } from './components/docs/document';
 export { getTableIdAndSliceIndex } from './components/docs/layout/block/table';

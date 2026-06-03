@@ -167,6 +167,21 @@ export interface INodeInfo {
     ratioY: number;
     segmentId: string;
     segmentPage: number; // The index of the page where node is located.
+    /**
+     * For cluster glyphs (multi-character glyphs such as the merged
+     * Arabic word produced by `ArabicHandler` to support cursive
+     * joining), this is the character index *inside* the glyph that the
+     * hit-test resolved to. Range: `[0, node.count]`. A value of `0`
+     * means the hit is at the visual leading edge of the cluster (caret
+     * should sit before the first char); `node.count` means it's at the
+     * trailing edge (after the last char).
+     *
+     * Absent for single-char glyphs and for hit-tests that didn't refine
+     * into a cluster. Callers that need exact in-cluster placement (e.g.
+     * `_getNodePosition`) consume this; callers that still operate at
+     * glyph granularity ignore it and fall back to `ratioX < 0.5`.
+     */
+    subOffset?: number;
 }
 
 export interface INodeSearch {
@@ -179,6 +194,14 @@ export interface INodeSearch {
     segmentPage: number; // The index of the page where the header and footer reside.
     pageType: DocumentSkeletonPageType;
     path: (string | number)[];
+    /**
+     * Sub-glyph character offset for cluster glyphs (see
+     * `INodeInfo.subOffset`). Range: `[0, glyph.count]`. Propagated
+     * through `findPositionByGlyph` so consumers like the caret painter
+     * and the keyboard step path can render / step at the correct
+     * intra-cluster char boundary. Absent for non-cluster hits.
+     */
+    subOffset?: number;
 }
 
 export interface INodePosition extends INodeSearch {

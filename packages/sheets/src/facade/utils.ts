@@ -18,12 +18,53 @@ import type { IRange, IRangeWithCoord, Worksheet } from '@univerjs/core';
 import {
     HorizontalAlign,
     RANGE_TYPE,
+    TextDirection,
     VerticalAlign,
 } from '@univerjs/core';
 
 export type FDefaultAlignment = 'general';
 export type FHorizontalAlignment = 'left' | 'center' | 'normal';
 export type FVerticalAlignment = 'top' | 'middle' | 'bottom';
+
+/**
+ * Facade-friendly text direction value.
+ *
+ * - `'ltr'` — left-to-right (e.g. Latin, CJK).
+ * - `'rtl'` — right-to-left (e.g. Arabic, Hebrew).
+ * - `'auto'` — let the renderer pick based on content / global locale
+ *   (maps to `TextDirection.UNSPECIFIED` internally).
+ */
+export type FTextDirection = 'auto' | 'ltr' | 'rtl';
+
+/**
+ * Translate the public Facade text-direction value into the internal
+ * `TextDirection` enum.
+ */
+export function transformFacadeTextDirection(value: FTextDirection): TextDirection {
+    switch (value) {
+        case 'ltr':
+            return TextDirection.LEFT_TO_RIGHT;
+        case 'rtl':
+            return TextDirection.RIGHT_TO_LEFT;
+        case 'auto':
+        default:
+            return TextDirection.UNSPECIFIED;
+    }
+}
+
+/**
+ * Translate the internal `TextDirection` enum into the public Facade value.
+ */
+export function transformCoreTextDirection(value: TextDirection | number | undefined | null): FTextDirection {
+    switch (value) {
+        case TextDirection.LEFT_TO_RIGHT:
+            return 'ltr';
+        case TextDirection.RIGHT_TO_LEFT:
+            return 'rtl';
+        default:
+            return 'auto';
+    }
+}
 
 /**
  * Transform the Facade API horizontal alignment to the Univer Core horizontal alignment.

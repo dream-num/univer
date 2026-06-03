@@ -24,7 +24,7 @@ import type {
 
 import type { IFontCreateConfig } from '../../../../basics/interfaces';
 import type { IOpenTypeGlyphInfo } from '../shaping-engine/text-shaping';
-import { BooleanNumber, BulletAlignment, DataStreamTreeTokenType as DT, GridType } from '@univerjs/core';
+import { BooleanNumber, BulletAlignment, DataStreamTreeTokenType as DT, GridType, TextDirection } from '@univerjs/core';
 import { GlyphType } from '../../../../basics/i-document-skeleton-cached';
 import { hasCJK, hasCJKText, isCjkCenterAlignedPunctuation, isCjkLeftAlignedPunctuation, isCjkRightAlignedPunctuation, ptToPixel } from '../../../../basics/tools';
 import { FontCache } from '../shaping-engine/font-cache';
@@ -249,7 +249,8 @@ export function _createSkeletonWordOrLetter(
 export function createSkeletonBulletGlyph(
     glyph: IDocumentSkeletonGlyph,
     bulletSkeleton: IDocumentSkeletonBullet,
-    charSpaceApply: number
+    charSpaceApply: number,
+    direction?: TextDirection
 ): IDocumentSkeletonGlyph {
     const {
         // bBox: boundingBox,
@@ -270,9 +271,35 @@ export function createSkeletonBulletGlyph(
     let width = (multiple < 2 ? 2 : multiple) * charSpaceApply; // Default bullet has 2 tabs
 
     let left = 0;
+    // `xOffset` is the in-glyph paint offset used by the renderer:
+    // `paintX = glyph.left + glyph.xOffset` (see `document.ts`). It does
+    // not change the laid-out box (`glyph.left` is reassigned by the
+    // layout pipeline anyway), only where the symbol is painted inside
+    // that box.
+    let xOffset = 0;
+    const isRTL = direction === TextDirection.RIGHT_TO_LEFT;
 
-    if (bulletType) {
-        // Ordered list processing, left=0 when left-aligned, otherwise adjusted based on contentWidth
+    if (isRTL) {
+        // RTL paragraphs: after bidi-reorder places this bullet glyph at
+        // the visual right of the line, the **bullet symbol** also needs
+        // to sit at the glyph's local-right so the wide bullet-glyph
+        // padding becomes the gap between the symbol and the RTL text.
+        // Without this push, the symbol stays at the glyph's local-left,
+        // glued to the text, while the bullet's natural padding floats
+        // unused at the line's far-right.
+        //
+        // `xOffset` is the right knob because `glyph.left` is reassigned
+        // by `setGlyphGroupLeft` during layout (any pre-set value is
+        // wiped). The page-width accumulator in `tools.ts` is taught to
+        // skip this `xOffset` for `GlyphType.LIST` so we don't shrink
+        // the line and accidentally wrap narrow cells.
+        xOffset = width - contentWidth;
+    } else if (bulletType) {
+        // Ordered list processing (LTR), left=0 when left-aligned,
+        // otherwise adjusted based on contentWidth. The `width -= left`
+        // here grows the glyph rect leftwards so the symbol can extend
+        // past the glyph's local origin — preserved for legacy
+        // CENTER/END alignment.
         if (bulletAlign === BulletAlignment.CENTER) {
             left = -contentWidth / 2;
             width -= left;
@@ -295,7 +322,7 @@ export function createSkeletonBulletGlyph(
         },
         fontStyle,
         width,
-        xOffset: 0,
+        xOffset,
         bBox,
         left,
         isJustifiable: isJustifiable(content),

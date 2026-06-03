@@ -44,6 +44,15 @@ import { CutContentCommand } from './clipboard.inner.command';
 import { DeleteCommand, UpdateCommand } from './core-editing.command';
 import { getCurrentParagraph } from './util';
 
+/**
+ * Logical characters removed by one BACKSPACE/DELETE on a skeleton glyph.
+ * Arabic word clusters (`charAdvances`) delete one code unit at a time;
+ * other multi-char glyphs (emoji, Tibetan) delete the whole glyph.
+ */
+function getGlyphDeleteStep(glyph: { count: number; charAdvances?: number[] }): number {
+    return glyph.charAdvances != null ? 1 : glyph.count;
+}
+
 export interface IDeleteCustomBlockParams {
     direction: DeleteDirection;
     range: ITextRangeWithStyle;
@@ -634,13 +643,14 @@ export const DeleteLeftCommand: ICommand = {
                         });
                     }
                 } else {
-                    cursor -= preGlyph.count;
+                    const deleteLen = getGlyphDeleteStep(preGlyph);
+                    cursor -= deleteLen;
                     result = await commandService.executeCommand(DeleteCommand.id, {
                         unitId: docDataModel.getUnitId(),
                         range: actualRange,
                         segmentId,
                         direction: DeleteDirection.LEFT,
-                        len: preGlyph.count,
+                        len: deleteLen,
                     });
                 }
             } else {
@@ -799,7 +809,7 @@ export const DeleteRightCommand: ICommand = {
                     segmentId,
                     direction: DeleteDirection.RIGHT,
                     textRanges,
-                    len: needDeleteGlyph.count,
+                    len: getGlyphDeleteStep(needDeleteGlyph),
                 });
             }
         } else {

@@ -74,6 +74,59 @@ export interface IFindNodeRestrictions {
     segmentPage: number;
 }
 
+/**
+ * For cluster glyphs (multi-character glyphs that hold an entire
+ * Arabic word so the browser can apply cursive joining), refine a
+ * hit-test x-coordinate into a `subOffset` — the character index inside
+ * the cluster, in `[0, glyph.count]`, where the caret should sit.
+ *
+ * The cluster glyph carries `charAdvances[i] = cumulative width up to
+ * (and including) the i-th character in **logical** order`. We binary-
+ * search for the half-way point of each character so a click on the
+ * **leading** half of char `i` snaps the caret *before* char `i`, and a
+ * click on the **trailing** half snaps it *after* char `i`. This mirrors
+ * the standard browser caret hit-test heuristic.
+ *
+ * Bidi note: `charAdvances` is laid out in logical order, but the
+ * cluster is rendered in visual order. For an RTL cluster (resolved
+ * bidiLevel === 1) the *visual* x grows leftwards through the logical
+ * indices, so we mirror `xInGlyph` before searching.
+ *
+ * Returns `undefined` when the glyph isn't a refinable cluster
+ * (no `charAdvances` available, or `count <= 1`), so callers transparently
+ * fall back to the legacy `ratioX < 0.5` heuristic.
+ */
+function resolveSubOffset(glyph: IDocumentSkeletonGlyph, xInGlyph: number): number | undefined {
+    const advances = glyph.charAdvances;
+    if (advances == null || advances.length <= 1 || glyph.count <= 1) {
+        return undefined;
+    }
+
+    // Mirror visual x for RTL clusters so the search runs in logical
+    // order regardless of paint direction.
+    const isRTL = (glyph.bidiLevel ?? 0) % 2 === 1;
+    const effectiveX = isRTL ? glyph.width - xInGlyph : xInGlyph;
+
+    const lastIndex = advances.length - 1;
+    // Clamp out-of-range to the cluster ends.
+    if (effectiveX <= 0) return 0;
+    if (effectiveX >= advances[lastIndex]) return advances.length;
+
+    // Walk forward picking the half-way midpoint of each char. We
+    // intentionally do this linearly — Arabic words are short and the
+    // overhead of `Array.prototype.findIndex` here is negligible
+    // compared to the surrounding hit-test cost.
+    let prevAdvance = 0;
+    for (let i = 0; i < advances.length; i++) {
+        const midpoint = (prevAdvance + advances[i]) / 2;
+        if (effectiveX < midpoint) {
+            return i;
+        }
+        prevAdvance = advances[i];
+    }
+    return advances.length;
+}
+
 function getPagePath(page: IDocumentSkeletonPage) {
     const path: (string | number)[] = [];
 
@@ -217,7 +270,7 @@ export class DocumentSkeleton extends Skeleton {
         return this.getViewModel().getDataModel().documentStyle.pageSize;
     }
 
-    findPositionByGlyph(glyph: IDocumentSkeletonGlyph, segmentPage: number): Nullable<INodeSearch> {
+    findPositionByGlyph(glyph: IDocumentSkeletonGlyph, segmentPage: number, subOffset?: number): Nullable<INodeSearch> {
         const divide = glyph.parent;
         const line = divide?.parent;
         const column = line?.parent;
@@ -277,6 +330,7 @@ export class DocumentSkeleton extends Skeleton {
             segmentPage,
             pageType,
             path,
+            subOffset,
         };
     }
 
@@ -300,6 +354,17 @@ export class DocumentSkeleton extends Skeleton {
             index += g.count;
         }
 
+        // Cluster-glyph refinement: when the position carries a
+        // `subOffset` (the character index inside a multi-char glyph
+        // such as the merged Arabic word), honour it instead of the
+        // glyph-coarse `isBack` fallback. `subOffset === 0` means
+        // "caret before first char of this glyph"; `subOffset ===
+        // glyph.count` means "after last char"; intermediate values
+        // place the caret between chars inside the cluster.
+        if (position.subOffset != null && glyph && glyph.count > 1) {
+            return index + position.subOffset;
+        }
+
         return position.isBack ? index : (index + glyph!.count);
     }
 
@@ -318,7 +383,7 @@ export class DocumentSkeleton extends Skeleton {
 
         const pages = skeletonData.pages;
 
-        const { glyph, divide, line, column, section, page, segmentPageIndex, pageType } = nodes;
+        const { glyph, divide, line, column, section, page, segmentPageIndex, pageType, subOffset } = nodes;
 
         const path = getPagePath(page);
 
@@ -357,6 +422,7 @@ export class DocumentSkeleton extends Skeleton {
             segmentPage: segmentPageIndex,
             isBack,
             path,
+            subOffset,
         };
     }
 
@@ -825,6 +891,7 @@ export class DocumentSkeleton extends Skeleton {
                                                 segmentId,
                                                 ratioX: x / (startX_fin + endX_fin),
                                                 ratioY: y / (startY_fin + endY_fin),
+                                                subOffset: resolveSubOffset(glyph, x - startX_fin),
                                             };
                                         }
 
@@ -1342,9 +1409,18 @@ export class DocumentSkeleton extends Skeleton {
                             let delta = charIndex - st;
 
                             for (const glyph of glyphGroup) {
+                                const beforeGlyph = delta;
                                 delta -= glyph.count;
 
                                 if (delta < 0) {
+                                    // `beforeGlyph` is the in-glyph
+                                    // character index for the requested
+                                    // `charIndex` — exactly the
+                                    // `subOffset` consumers need to
+                                    // place the caret inside a cluster
+                                    // glyph. For single-char glyphs it
+                                    // is always 0 and harmlessly
+                                    // ignored downstream.
                                     return {
                                         page: segmentPage,
                                         pageType: segmentPage.type,
@@ -1354,6 +1430,7 @@ export class DocumentSkeleton extends Skeleton {
                                         divide,
                                         glyph,
                                         segmentPageIndex,
+                                        subOffset: glyph.count > 1 ? beforeGlyph : undefined,
                                     };
                                 }
                             }

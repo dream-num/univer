@@ -22,6 +22,7 @@ import type {
     IObjectArrayPrimitiveType,
     IObjectMatrixPrimitiveType,
     IRange,
+    Nullable,
     Workbook,
     Worksheet,
 } from '@univerjs/core';
@@ -52,11 +53,13 @@ import {
     IContextService,
     Inject,
     Injector,
+    isFirstStrongCharRTL,
     isFormulaString,
     IUniverInstanceService,
     LocaleService,
     ObjectMatrix,
     RxDisposable,
+    TextDirection,
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -121,6 +124,19 @@ const shouldRemoveShapeIds = [
     MoveRowsMutation.id,
     MoveColsMutation.id,
 ];
+
+function resolveClipboardDirection(cell: Nullable<ICellData>, textDirection?: Nullable<TextDirection>) {
+    if (textDirection === TextDirection.LEFT_TO_RIGHT) {
+        return { dir: 'ltr' as const, implicit: false };
+    }
+    if (textDirection === TextDirection.RIGHT_TO_LEFT) {
+        return { dir: 'rtl' as const, implicit: false };
+    }
+
+    return isFirstStrongCharRTL(extractPureTextFromCell(cell))
+        ? { dir: 'rtl' as const, implicit: true }
+        : { dir: undefined, implicit: false };
+}
 
 export class SheetClipboardController extends RxDisposable {
     private _refreshOptionalPaste$ = new Subject();
@@ -281,6 +297,11 @@ export class SheetClipboardController extends RxDisposable {
                     style = handleStyleToString(textStyle);
                 }
 
+                const { dir, implicit } = resolveClipboardDirection(currentSheet!.getCell(row, col), textStyle?.td);
+                if (implicit) {
+                    style += `${style ? ';' : ''}direction: rtl; `;
+                }
+
                 if (mergedCellByRowCol) {
                     const endRow = mergedCellByRowCol.endRow;
                     const endColumn = mergedCellByRowCol.endColumn;
@@ -298,6 +319,9 @@ export class SheetClipboardController extends RxDisposable {
 
                 if (style) {
                     properties.style = style;
+                }
+                if (dir) {
+                    properties.dir = dir;
                 }
 
                 return Object.keys(properties).length ? properties : null;

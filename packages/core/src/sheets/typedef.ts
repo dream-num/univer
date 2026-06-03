@@ -727,10 +727,43 @@ export enum RANGE_DIRECTION {
     FORWARD = 'forward',
 }
 
+/**
+ * Caret affinity at a direction boundary.
+ *
+ * The same logical character offset corresponds to two visual positions
+ * whenever the offset lies on an LTR↔RTL boundary (see Unicode UAX#9 §5
+ * "Cursor Movement" and W3C css-text §8 "Caret"). Univer uses this hint
+ * to pick which visual position the caret should render at.
+ *
+ * - `downstream` (default): caret hugs the **leading** edge of the glyph
+ *   at `startOffset` — i.e. the visual position of "before the next
+ *   character in logical order". This matches the W3C Recommendation
+ *   and the muscle-memory of having just inserted that character.
+ * - `upstream`: caret hugs the **trailing** edge of the glyph at
+ *   `startOffset - 1` — "after the previous character in logical order".
+ *   Useful when the user arrived at the boundary from the upstream run
+ *   (e.g. arrow-leftward from an LTR run into an RTL run); rendering on
+ *   the upstream side keeps the caret visually adjacent to where it
+ *   came from.
+ *
+ * Operations should set affinity explicitly when they know which side
+ * the user was just on (Backspace/Delete, arrow keys, paste). Insertions
+ * default to `downstream` because the just-typed glyph is the "after"
+ * side of the caret.
+ */
+export type ICaretAffinity = 'upstream' | 'downstream';
+
 export interface ITextRange extends ITextRangeStart {
     endOffset: number;
     collapsed: boolean;
     direction?: RANGE_DIRECTION;
+    /**
+     * Caret affinity hint for direction-boundary disambiguation. See
+     * {@link ICaretAffinity}. Defaults to `downstream` when absent.
+     * Only meaningful when `collapsed === true`; non-collapsed ranges
+     * derive each end's affinity from its movement direction internally.
+     */
+    affinity?: ICaretAffinity;
 }
 
 export enum DOC_RANGE_TYPE {

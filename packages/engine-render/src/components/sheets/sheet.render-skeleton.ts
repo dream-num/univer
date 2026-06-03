@@ -49,11 +49,13 @@ import {
     extractPureTextFromCell,
     getColorStyle,
     getDisplayValueFromCell,
+    hasRTLCharacter,
     HorizontalAlign,
     IConfigService,
     IContextService,
     Inject,
     Injector,
+    isFirstStrongCharRTL,
     isNullCell,
     isWhiteColor,
     LocaleService,
@@ -61,6 +63,7 @@ import {
     Range,
     searchArray,
     SheetSkeleton,
+    TextDirection,
     Tools,
     VerticalAlign,
     WrapStrategy,
@@ -542,7 +545,8 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         const sideGap = (cell?.fontRenderExtension?.leftOffset ?? 0) + (cell?.fontRenderExtension?.rightOffset ?? 0);
 
         const { vertexAngle, centerAngle } = convertTextRotation(style?.tr ?? { a: 0 });
-        const isRichText = cell?.p || vertexAngle || centerAngle;
+        const hasExplicitTextDirection = style?.td != null && style.td !== TextDirection.UNSPECIFIED;
+        const isRichText = cell?.p || vertexAngle || centerAngle || hasExplicitTextDirection;
 
         let colWidth = columnData[col]?.w ?? defaultColumnWidth;
         if (cellMergeInfo.isMergedMainCell) {
@@ -1049,10 +1053,13 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         const verticalAlign: VerticalAlign = cellOtherConfig.verticalAlign || DEFAULT_STYLES.vt;
         const wrapStrategy: WrapStrategy = cellOtherConfig.wrapStrategy || DEFAULT_STYLES.tb;
         const paddingData: IPaddingData = cellOtherConfig.paddingData || DEFAULT_PADDING_DATA;
+        // Forward the cell-level text direction (`style.td`) so the docs render
+        // pipeline can pick correct defaults for `UNSPECIFIED` alignment and
+        // apply bidi reordering / RTL padding at layout time.
+        const textDirection = cellOtherConfig.textDirection ?? undefined;
 
         if (cell.f && displayRawFormula) {
-            // The formula does not detect horizontal alignment and rotation.
-            documentModel = createDocumentModelWithStyle(cell.f.toString(), {}, { verticalAlign });
+            documentModel = createDocumentModelWithStyle(cell.f.toString(), {}, { verticalAlign, textDirection });
             horizontalAlign = DEFAULT_STYLES.ht;
         } else if (cell.p) {
             const { centerAngle, vertexAngle } = convertTextRotation(textRotation);
@@ -1066,8 +1073,10 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                     centerAngle,
                     vertexAngle,
                     wrapStrategy,
+                    textDirection,
                     zeroWidthParagraphBreak: 1,
-                }
+                },
+                textDirection
             );
         } else if (cell.v != null) {
             const textStyle = getFontFormat(style);
@@ -1422,10 +1431,44 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             return;
         }
         const { vertexAngle, centerAngle } = convertTextRotation(style?.tr ?? { a: 0 });
-        const isRichText = cellData?.p || vertexAngle || centerAngle;
+        // Cells whose `style.td` requests an explicit text direction need to go
+        // through the docs render pipeline (which honours `renderConfig.textDirection`
+        // and per-paragraph bidi), otherwise they would fall back to the simple
+        // `Text.drawWith` branch that has no awareness of RTL.
+        const hasExplicitTextDirection = style?.td != null && style.td !== TextDirection.UNSPECIFIED;
+        // Auto-detection. Two related but distinct signals:
+        //
+        //  * `contentLooksRTL` (first-strong char is RTL) — used to decide
+        //    the cell's *implicit* paragraph direction. Mirrors Excel /
+        //    Google Sheets: a cell that starts with Arabic right-aligns by
+        //    default even without `style.td`.
+        //  * `contentHasBidi` (text contains *any* RTL codepoint) — used to
+        //    decide whether the cell must go through the docs pipeline at
+        //    all. This is the wider net: LTR-baseline mixed text like
+        //    "Hello كتاب" doesn't look RTL but **must not** be rendered by
+        //    the simple `Text.drawWith` fallback, because that fallback
+        //    delegates bidi/shaping to the browser's `ctx.fillText`, which
+        //    disagrees with our docs-engine bidi in edit mode and would
+        //    show different visual ordering when the editor closes.
+        const pureText = cellData != null ? extractPureTextFromCell(cellData) : '';
+        const contentLooksRTL = !hasExplicitTextDirection && isFirstStrongCharRTL(pureText);
+        const contentHasBidi = !hasExplicitTextDirection && hasRTLCharacter(pureText);
+        const isRichText = cellData?.p
+            || vertexAngle
+            || centerAngle
+            || hasExplicitTextDirection
+            || contentHasBidi;
 
         const modelObject = isRichText ?
-            this.worksheet.getCellDocumentModel(cellData, style, { displayRawFormula: this._renderRawFormula })
+            this.worksheet.getCellDocumentModel(cellData, style, {
+                displayRawFormula: this._renderRawFormula,
+                // Inject an implicit RTL direction when the cell didn't ask
+                // for one but the content itself is RTL. The override flows
+                // into `paragraphStyle.direction` and
+                // `documentStyle.renderConfig.textDirection`, driving the
+                // alignment defaults and bidi reorder downstream.
+                implicitTextDirection: contentLooksRTL ? TextDirection.RIGHT_TO_LEFT : undefined,
+            })
             : null;
 
         if (modelObject) {

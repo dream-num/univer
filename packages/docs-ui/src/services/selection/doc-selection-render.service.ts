@@ -745,6 +745,11 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         `;
 
         this._input.contentEditable = 'true';
+        // Default to `auto` so the browser picks RTL/LTR based on the typed
+        // characters even before the host (e.g. EditorContainer) has had a
+        // chance to set the direction explicitly. This keeps IME behaviour
+        // stable on Windows / macOS for both LTR and RTL inputs.
+        this._input.dir = 'auto';
 
         // TODO: to be removed
         this._input.dataset.uComp = 'editor';
@@ -761,6 +766,17 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
             white-space: pre-wrap;
             user-select: text;
         `;
+    }
+
+    /**
+     * Force the hidden contenteditable input to a specific writing direction.
+     * Called by the cell editor container when entering a cell with a known
+     * `style.td`. Pass `'auto'` to let the browser decide based on content.
+     */
+    setInputDirection(direction: 'ltr' | 'rtl' | 'auto'): void {
+        if (this._input) {
+            this._input.dir = direction;
+        }
     }
 
     private _ensureHostContainer(): void {
@@ -783,10 +799,10 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
             return;
         }
 
-        const { node: glyph, ratioX, segmentPage } = node;
+        const { node: glyph, ratioX, segmentPage, subOffset } = node;
 
         const skeleton = this._docSkeletonManagerService.getSkeleton();
-        const position = skeleton.findPositionByGlyph(glyph, segmentPage);
+        const position = skeleton.findPositionByGlyph(glyph, segmentPage, subOffset);
 
         if (position == null) {
             return;
@@ -799,9 +815,21 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
             isBack = true;
         }
 
+        // For cluster glyphs (multi-char glyphs such as the merged
+        // Arabic word) `subOffset` is the authoritative caret position:
+        // `isBack === true` is interpreted by `findCharIndexByPosition`
+        // as the leading edge of the glyph, which is wrong when the
+        // caret should sit *between* two chars inside the cluster. When
+        // `subOffset` is in `(0, count)` we force `isBack = true` so
+        // the index path uses `index + subOffset` (not `index + count`)
+        // — see `findCharIndexByPosition`.
+        const effectiveIsBack = subOffset != null && glyph.count > 1
+            ? subOffset < glyph.count
+            : isBack;
+
         return {
             ...position,
-            isBack,
+            isBack: effectiveIsBack,
         };
     }
 

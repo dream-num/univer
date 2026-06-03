@@ -15,7 +15,7 @@
  */
 
 import type { KeyCode } from '@univerjs/ui';
-import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, IContextService } from '@univerjs/core';
+import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, IContextService, TextDirection } from '@univerjs/core';
 import { DocSelectionRenderService, IEditorService } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { ComponentManager, DISABLE_AUTO_FOCUS_KEY, MetaKeys, useDependency, useEvent, useObservable, useSidebarClick } from '@univerjs/ui';
@@ -62,6 +62,23 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
     );
     const FormulaEditor = componentManager.get(EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY);
     const editState = editorBridgeService.getEditLocation();
+    // Live effective direction, re-emitted from the bridge service whenever
+    // the editor body changes. Subscribing here keeps `<div dir>` and the
+    // hidden contenteditable's `dir` attribute in sync with what the user is
+    // actually typing - so flipping ASCII → Arabic flips the wrapper to RTL
+    // on the same keystroke, and deleting all Arabic flips back to LTR.
+    const effectiveTextDirection = useObservable(
+        editorBridgeService.effectiveTextDirection$,
+        editorBridgeService.getEffectiveTextDirection()
+    );
+    const dir = effectiveTextDirection === TextDirection.RIGHT_TO_LEFT ? 'rtl' : 'ltr';
+
+    useEffect(() => {
+        if (!visible?.visible) return;
+        const editor = editorService.getEditor(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+        const docSelectionRenderService = editor?.render.with(DocSelectionRenderService);
+        docSelectionRenderService?.setInputDirection(dir);
+    }, [dir, editorService, visible?.visible]);
 
     useEffect(() => {
         const sub = cellEditorManagerService.state$.subscribe((param) => {
@@ -167,6 +184,7 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
     return (
         <div
             className="univer-absolute univer-z-10 univer-flex"
+            dir={dir}
             style={{
                 left: state.left,
                 top: state.top,

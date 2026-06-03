@@ -31,7 +31,7 @@ import type {
     SplitDelimiterEnum,
 } from '@univerjs/sheets';
 import type { IFacadeClearOptions } from './f-worksheet';
-import type { FHorizontalAlignment, FVerticalAlignment } from './utils';
+import type { FHorizontalAlignment, FTextDirection, FVerticalAlignment } from './utils';
 import { BooleanNumber, covertCellValue, covertCellValues, DEFAULT_STYLES, Dimension, ICommandService, Inject, Injector, isNullCell, Rectangle, RichTextValue, TextStyleValue, WrapStrategy } from '@univerjs/core';
 import { FBaseInitialable } from '@univerjs/core/facade';
 import { FormulaDataModel, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
@@ -65,7 +65,7 @@ import {
 import { FWorkbook } from './f-workbook';
 import { FWorksheet } from './f-worksheet';
 import { FRangePermission } from './permission/f-range-permission';
-import { transformCoreHorizontalAlignment, transformCoreVerticalAlignment, transformFacadeHorizontalAlignment, transformFacadeVerticalAlignment } from './utils';
+import { transformCoreHorizontalAlignment, transformCoreTextDirection, transformCoreVerticalAlignment, transformFacadeHorizontalAlignment, transformFacadeTextDirection, transformFacadeVerticalAlignment } from './utils';
 
 export type FontLine = 'none' | 'underline' | 'line-through';
 export type FontStyle = 'normal' | 'italic';
@@ -1479,6 +1479,53 @@ export class FRange extends FBaseInitialable {
             value: transformFacadeHorizontalAlignment(alignment),
         } as ISetHorizontalTextAlignCommandParams);
 
+        return this;
+    }
+
+    /**
+     * Get the text direction of the top-left cell in the range.
+     * @returns {FTextDirection} `'ltr' | 'rtl' | 'auto'`.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1');
+     * console.log(fRange.getTextDirection()); // 'auto' by default
+     * ```
+     */
+    getTextDirection(): FTextDirection {
+        const value = this._worksheet.getRange(this._range).getTextDirection();
+        return transformCoreTextDirection(value);
+    }
+
+    /**
+     * Set the text direction for every cell in the range. Equivalent to setting
+     * `style.td` on those cells.
+     *
+     * - `'ltr'` forces a left-to-right baseline (Latin, CJK).
+     * - `'rtl'` forces a right-to-left baseline (Arabic, Hebrew).
+     * - `'auto'` clears the override and lets the renderer pick.
+     *
+     * @param {FTextDirection} direction The desired text direction.
+     * @returns {FRange} This range, for chaining.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:B2');
+     * fRange.setTextDirection('rtl');
+     * ```
+     */
+    setTextDirection(direction: FTextDirection): FRange {
+        this._commandService.syncExecuteCommand(SetStyleCommand.id, {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            range: this._range,
+            style: {
+                type: 'td',
+                value: transformFacadeTextDirection(direction),
+            },
+        } as ISetStyleCommandParams<number>);
         return this;
     }
 

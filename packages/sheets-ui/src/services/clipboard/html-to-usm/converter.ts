@@ -16,7 +16,7 @@
 
 /* eslint-disable complexity */
 
-import type { ICustomRange, IDocumentBody, IDocumentData, IStyleData, ITextRun, ITextStyle, Nullable } from '@univerjs/core';
+import type { ICustomRange, IDocumentBody, IDocumentData, IParagraph, IStyleData, ITextRun, ITextStyle, Nullable } from '@univerjs/core';
 import type { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ISheetSkeletonManagerParam } from '@univerjs/sheets';
 import type {
@@ -29,7 +29,7 @@ import type { IAfterProcessRule, IPastePlugin } from './paste-plugins/type';
 import { CustomRangeType, DEFAULT_WORKSHEET_ROW_HEIGHT, generateRandomId, getNumfmtParseValueFilter, isSafeUrl, numfmt, ObjectMatrix, skipParseTagNames } from '@univerjs/core';
 import { handleStringToStyle, textTrim } from '@univerjs/ui';
 import { extractNodeStyle } from './parse-node-style';
-import parseToDom, { convertToCellStyle, generateParagraphs } from './utils';
+import parseToDom, { convertToCellStyle, generateParagraphs, getParagraphStyle } from './utils';
 
 export interface IStyleRule {
     filter: string | string[] | ((node: HTMLElement) => boolean);
@@ -45,6 +45,7 @@ const sheetStyleRules: string[] =
         // Rich Text Style Rules,
         'color',
         'background',
+        'direction',
         'font-size',
         'text-align',
         'vertical-align',
@@ -190,7 +191,7 @@ export class HtmlToUSMService {
                     body: {
                         dataStream: cellDataStream,
                         textRuns: cellTextRuns,
-                        paragraphs: generateParagraphs(cellDataStream),
+                        paragraphs: generateParagraphs(cellDataStream, paragraphs[i]),
                         customRanges: cellCustomRanges,
                     },
                 });
@@ -327,6 +328,11 @@ export class HtmlToUSMService {
                     this._getStyleBySelectorText(`#${node.id}`, 'text-decoration-line') || this._getStyleBySelectorText(`#${node.id}`, key) ||
                     this._getStyleBySelectorText(node.nodeName.toLowerCase(), key) || this._getStyleBySelectorText(node.nodeName, 'text-decoration-line') || recordStyle['text-decoration-line'] || '';
                 textDecoration && (newStyleStr += `text-decoration:${textDecoration};`);
+                continue;
+            }
+            if (key === 'direction') {
+                const direction = style.getPropertyValue(key) || node.getAttribute('dir') || recordStyle[key] || '';
+                direction && (newStyleStr += `${key}:${direction};`);
                 continue;
             }
 
@@ -554,6 +560,29 @@ export class HtmlToUSMService {
                 doc.paragraphs.push({ startIndex: doc.dataStream.length });
                 doc.dataStream += '\r';
             } else if (node.nodeType === Node.ELEMENT_NODE) {
+                if (node.nodeName.toLowerCase() === 'p') {
+                    const currentNodeStyle = this._getStyle(node as HTMLElement, styleStr);
+                    const parentStyles = parent ? styleCache.get(parent) : {};
+                    const predefinedStyles = turnToStyleObject(currentNodeStyle);
+                    const nodeStyles = extractNodeStyle(node as HTMLElement, predefinedStyles);
+                    const paragraphStyle = getParagraphStyle(node as HTMLElement);
+                    styleCache.set(node, { ...parentStyles, ...nodeStyles });
+                    this._parseCellHtml(node, node.childNodes, doc, styleCache, currentNodeStyle);
+
+                    const paragraph: IParagraph = {
+                        startIndex: doc.dataStream.length,
+                    };
+                    if (paragraphStyle) {
+                        paragraph.paragraphStyle = paragraphStyle;
+                    }
+                    if (!doc.paragraphs) {
+                        doc.paragraphs = [];
+                    }
+                    doc.paragraphs.push(paragraph);
+                    doc.dataStream += '\r';
+                    continue;
+                }
+
                 const currentNodeStyle = this._getStyle(node as HTMLElement, styleStr);
                 const parentStyles = parent ? styleCache.get(parent) : {};
                 const predefinedStyles = turnToStyleObject(currentNodeStyle);
@@ -597,14 +626,18 @@ export class HtmlToUSMService {
             this._parseCellHtml(null, cell.childNodes, newDocBody, undefined, styleStr);
             const documentModel = skeleton.getBlankCellDocumentModel()?.documentModel;
             const p = documentModel?.getSnapshot();
-            const singleDataStream = `${newDocBody.dataStream}\r\n`;
+            const singleDataStream = newDocBody.dataStream.endsWith('\r')
+                ? `${newDocBody.dataStream}\n`
+                : `${newDocBody.dataStream}\r\n`;
             const documentData = {
                 ...p,
                 ...{
                     body: {
                         dataStream: singleDataStream,
                         textRuns: newDocBody.textRuns,
-                        paragraphs: generateParagraphs(singleDataStream),
+                        paragraphs: newDocBody.paragraphs?.length
+                            ? newDocBody.paragraphs
+                            : generateParagraphs(singleDataStream),
                     },
                 },
             };

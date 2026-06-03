@@ -25,7 +25,7 @@ import type { ComponentExtension, IDrawInfo, IExtensionConfig } from '../extensi
 import type { IDocumentsConfig, IPageMarginLayout } from './doc-component';
 import type { DocumentSkeleton } from './layout/doc-skeleton';
 import type { IDocsTableRenderViewport } from './table-render-viewport';
-import { CellValueType, DashStyleType, HorizontalAlign, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import { CellValueType, DashStyleType, HorizontalAlign, TextDirection, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { BORDER_TYPE as BORDER_LTRB, drawLineByBorderType } from '../../basics';
 import { calculateRectRotate, getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
@@ -58,7 +58,105 @@ export interface IPageRenderConfig {
 export interface IDocumentOffsetConfig extends IPageMarginLayout {
     docsLeft: number;
     docsTop: number;
+    docsWidth: number;
+    docsHeight: number;
     documentTransform: Transform;
+}
+
+/**
+ * Page-level horizontal offset used by `Documents._horizontalHandler` when
+ * painting. Selection/caret code must apply the same offset so the cursor
+ * lines up with centered (and right-aligned) cell text.
+ */
+export function computeDocumentPageHorizontalAlignOffset(
+    componentWidth: number,
+    pageContentWidth: number,
+    pagePaddingLeft: number,
+    pagePaddingRight: number,
+    renderConfig: IDocumentRenderConfig = {}
+): number {
+    let {
+        horizontalAlign = HorizontalAlign.LEFT,
+        centerAngle: centerAngleDeg = 0,
+        vertexAngle: vertexAngleDeg = 0,
+        cellValueType,
+        textDirection,
+    } = renderConfig;
+
+    if (horizontalAlign === HorizontalAlign.UNSPECIFIED) {
+        if (centerAngleDeg === VERTICAL_ROTATE_ANGLE && vertexAngleDeg === VERTICAL_ROTATE_ANGLE) {
+            horizontalAlign = HorizontalAlign.CENTER;
+        } else if ((vertexAngleDeg > 0 && vertexAngleDeg !== VERTICAL_ROTATE_ANGLE) || vertexAngleDeg === -VERTICAL_ROTATE_ANGLE) {
+            horizontalAlign = HorizontalAlign.RIGHT;
+        } else {
+            const isRTL = textDirection === TextDirection.RIGHT_TO_LEFT;
+            if (cellValueType === CellValueType.NUMBER) {
+                horizontalAlign = HorizontalAlign.RIGHT;
+            } else if (cellValueType === CellValueType.BOOLEAN) {
+                horizontalAlign = HorizontalAlign.CENTER;
+            } else {
+                horizontalAlign = isRTL ? HorizontalAlign.RIGHT : HorizontalAlign.LEFT;
+            }
+        }
+    }
+
+    if (horizontalAlign === HorizontalAlign.CENTER) {
+        return (componentWidth - pageContentWidth) / 2;
+    }
+    if (horizontalAlign === HorizontalAlign.RIGHT) {
+        return componentWidth - pageContentWidth - pagePaddingRight;
+    }
+    return pagePaddingLeft;
+}
+
+export function computeDocumentPageVerticalAlignOffset(
+    componentHeight: number,
+    pageContentHeight: number,
+    pagePaddingTop: number,
+    pagePaddingBottom: number,
+    verticalAlign: VerticalAlign = VerticalAlign.TOP
+): number {
+    if (verticalAlign === VerticalAlign.MIDDLE) {
+        return (componentHeight - pageContentHeight) / 2;
+    }
+    if (verticalAlign === VerticalAlign.TOP) {
+        return pagePaddingTop;
+    }
+    return componentHeight - pageContentHeight - pagePaddingBottom;
+}
+
+export function computeDocumentPageAlignOffset(
+    componentWidth: number,
+    componentHeight: number,
+    page: IDocumentSkeletonPage
+): { x: number; y: number } {
+    const {
+        marginTop: pagePaddingTop = 0,
+        marginBottom: pagePaddingBottom = 0,
+        marginLeft: pagePaddingLeft = 0,
+        marginRight: pagePaddingRight = 0,
+        width: pageContentWidth = 0,
+        height: pageContentHeight = 0,
+        renderConfig = {},
+    } = page;
+    const { verticalAlign = VerticalAlign.TOP } = renderConfig;
+
+    return {
+        x: computeDocumentPageHorizontalAlignOffset(
+            componentWidth,
+            pageContentWidth,
+            pagePaddingLeft,
+            pagePaddingRight,
+            renderConfig
+        ),
+        y: computeDocumentPageVerticalAlignOffset(
+            componentHeight,
+            pageContentHeight,
+            pagePaddingTop,
+            pagePaddingBottom,
+            verticalAlign
+        ),
+    };
 }
 
 export class Documents extends DocComponent {
@@ -104,6 +202,8 @@ export class Documents extends DocComponent {
             pageMarginTop,
             docsLeft,
             docsTop,
+            docsWidth: this.width,
+            docsHeight: this.height,
         };
     }
 
@@ -170,6 +270,7 @@ export class Documents extends DocComponent {
                 vertexAngle: vertexAngleDeg = 0,
                 wrapStrategy = WrapStrategy.UNSPECIFIED,
                 cellValueType,
+                textDirection,
                 // isRotateNonEastAsian = BooleanNumber.FALSE,
             } = renderConfig;
             const isVertical = vertexAngleDeg === VERTICAL_ROTATE_ANGLE && centerAngleDeg === VERTICAL_ROTATE_ANGLE;
@@ -180,7 +281,8 @@ export class Documents extends DocComponent {
                 horizontalAlign,
                 vertexAngleDeg,
                 centerAngleDeg,
-                cellValueType
+                cellValueType,
+                textDirection
             );
             const verticalOffsetNoAngle = this._verticalHandler(
                 actualHeight,
@@ -292,7 +394,9 @@ export class Documents extends DocComponent {
                             pagePaddingRight,
                             horizontalAlign,
                             vertexAngleDeg,
-                            centerAngleDeg
+                            centerAngleDeg,
+                            cellValueType,
+                            textDirection
                         );
 
                         const verticalOffset = this._verticalHandler(
@@ -1146,47 +1250,22 @@ export class Documents extends DocComponent {
         horizontalAlign: HorizontalAlign,
         vertexAngleDeg: number = 0,
         centerAngleDeg: number = 0,
-        cellValueType: Nullable<CellValueType>
+        cellValueType: Nullable<CellValueType>,
+        textDirection?: TextDirection
     ) {
-        /**
-         * In Excel, if horizontal alignment is not specified,
-         * rotated text aligns to the right when rotated downwards and aligns to the left when rotated upwards.
-         */
-        if (horizontalAlign === HorizontalAlign.UNSPECIFIED) {
-            if (centerAngleDeg === VERTICAL_ROTATE_ANGLE && vertexAngleDeg === VERTICAL_ROTATE_ANGLE) {
-                horizontalAlign = HorizontalAlign.CENTER;
-            } else if ((vertexAngleDeg > 0 && vertexAngleDeg !== VERTICAL_ROTATE_ANGLE) || vertexAngleDeg === -VERTICAL_ROTATE_ANGLE) {
-                /**
-                 * https://github.com/dream-num/univer-pro/issues/334
-                 */
-                horizontalAlign = HorizontalAlign.RIGHT;
-            } else {
-                /**
-                 * sheet cell type, In a spreadsheet cell, without any alignment settings applied,
-                 * text should be left-aligned,
-                 * numbers should be right-aligned,
-                 * and Boolean values should be center-aligned.
-                 */
-                if (cellValueType === CellValueType.NUMBER) {
-                    horizontalAlign = HorizontalAlign.RIGHT;
-                } else if (cellValueType === CellValueType.BOOLEAN) {
-                    horizontalAlign = HorizontalAlign.CENTER;
-                } else {
-                    horizontalAlign = HorizontalAlign.LEFT;
-                }
+        return computeDocumentPageHorizontalAlignOffset(
+            this.width,
+            pageWidth,
+            pagePaddingLeft,
+            pagePaddingRight,
+            {
+                horizontalAlign,
+                vertexAngle: vertexAngleDeg,
+                centerAngle: centerAngleDeg,
+                cellValueType: cellValueType ?? undefined,
+                textDirection,
             }
-        }
-
-        let offsetLeft = 0;
-        if (horizontalAlign === HorizontalAlign.CENTER) {
-            offsetLeft = (this.width - pageWidth) / 2;
-        } else if (horizontalAlign === HorizontalAlign.RIGHT) {
-            offsetLeft = this.width - pageWidth - pagePaddingRight;
-        } else {
-            offsetLeft = pagePaddingLeft;
-        }
-
-        return offsetLeft;
+        );
     }
 
     private _verticalHandler(
@@ -1195,16 +1274,13 @@ export class Documents extends DocComponent {
         pagePaddingBottom: number,
         verticalAlign: VerticalAlign
     ) {
-        let offsetTop = 0;
-        if (verticalAlign === VerticalAlign.MIDDLE) {
-            offsetTop = (this.height - pageHeight) / 2;
-        } else if (verticalAlign === VerticalAlign.TOP) {
-            offsetTop = pagePaddingTop;
-        } else { // VerticalAlign.UNSPECIFIED follow the same rule as HorizontalAlign.BOTTOM.
-            offsetTop = this.height - pageHeight - pagePaddingBottom;
-        }
-
-        return offsetTop;
+        return computeDocumentPageVerticalAlignOffset(
+            this.height,
+            pageHeight,
+            pagePaddingTop,
+            pagePaddingBottom,
+            verticalAlign
+        );
     }
 
     private _startRotation(ctx: UniverRenderingContext, textAngle: number) {

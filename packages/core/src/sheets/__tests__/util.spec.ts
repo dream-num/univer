@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { BaselineOffset, BooleanNumber, HorizontalAlign, VerticalAlign, WrapStrategy } from '../../types/enum';
+import { BaselineOffset, BooleanNumber, HorizontalAlign, TextDirection, VerticalAlign, WrapStrategy } from '../../types/enum';
 import { CustomRangeType, DocumentFlavor } from '../../types/interfaces';
 import {
     addLinkToDocumentModel,
@@ -59,6 +59,27 @@ describe('sheet util helpers', () => {
             },
         });
         expect(documentModel.getDrawingsOrder()).toEqual([]);
+    });
+
+    it('should propagate RTL textDirection to paragraph.direction and renderConfig', () => {
+        const documentModel = createDocumentModelWithStyle('שלום', { ff: 'Inter' }, {
+            textDirection: TextDirection.RIGHT_TO_LEFT,
+            horizontalAlign: HorizontalAlign.UNSPECIFIED,
+        });
+        const snapshot = documentModel.getSnapshot();
+        expect(snapshot.body!.paragraphs![0].paragraphStyle!.direction)
+            .toBe(TextDirection.RIGHT_TO_LEFT);
+        expect(snapshot.documentStyle!.renderConfig!.textDirection)
+            .toBe(TextDirection.RIGHT_TO_LEFT);
+    });
+
+    it('should leave paragraph.direction unset when no textDirection is provided', () => {
+        const documentModel = createDocumentModelWithStyle('hello', {}, {});
+        const snapshot = documentModel.getSnapshot();
+        expect(snapshot.body!.paragraphs![0].paragraphStyle!.direction)
+            .toBeUndefined();
+        expect(snapshot.documentStyle!.renderConfig!.textDirection)
+            .toBeUndefined();
     });
 
     it('should extract cell style fragments and enrich document links once', () => {

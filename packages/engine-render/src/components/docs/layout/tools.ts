@@ -405,7 +405,21 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
 
                         lineHasGlyph = true;
 
-                        if (glyphGroup[0].xOffset !== 0 && i === divideLength - 1) {
+                        if (
+                            glyphGroup[0].xOffset !== 0
+                            && i === divideLength - 1
+                            // Exclude list bullets: their `xOffset` is
+                            // used in RTL paragraphs to push the bullet
+                            // symbol from the glyph's local-left to its
+                            // local-right (so the symbol ends up flush
+                            // with the visual-right edge after bidi
+                            // reorder). It is *not* compensation for
+                            // shrunk CJK punctuation, so subtracting it
+                            // from `actualWidth` would shrink the page
+                            // width by ~13px and force unintended line
+                            // wraps in narrow cells.
+                            && glyphGroup[0].glyphType !== GlyphType.LIST
+                        ) {
                             actualWidth -= glyphGroup[0].xOffset;
                         }
 

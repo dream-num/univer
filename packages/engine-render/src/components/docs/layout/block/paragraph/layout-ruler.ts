@@ -30,7 +30,7 @@ import type {
     IFloatObject,
     ILayoutContext,
 } from '../../tools';
-import { BooleanNumber, DataStreamTreeTokenType, GridType, NAMED_STYLE_SPACE_MAP, ObjectRelativeFromV, PositionedObjectLayoutType, SpacingRule, TableTextWrapType } from '@univerjs/core';
+import { BooleanNumber, DataStreamTreeTokenType, GridType, NAMED_STYLE_SPACE_MAP, ObjectRelativeFromV, PositionedObjectLayoutType, SpacingRule, TableTextWrapType, TextDirection } from '@univerjs/core';
 import { GlyphType, LineType } from '../../../../../basics/i-document-skeleton-cached';
 import { BreakPointType } from '../../line-breaker/break';
 import { addGlyphToDivide, createSkeletonBulletGlyph } from '../../model/glyph';
@@ -82,7 +82,16 @@ export function layoutParagraph(
             const { snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
 
             const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
-            const bulletGlyph = createSkeletonBulletGlyph(glyphGroup[0], bulletSkeleton, charSpaceApply);
+            // Pass the paragraph direction so the bullet builder can
+            // pin the symbol to the glyph's logical-start (visual-right
+            // in RTL). See createSkeletonBulletGlyph for the rationale
+            // and the page-width carve-out in tools.ts.
+            const bulletGlyph = createSkeletonBulletGlyph(
+                glyphGroup[0],
+                bulletSkeleton,
+                charSpaceApply,
+                paragraphStyle.direction
+            );
             const paragraphProperties = bulletSkeleton.paragraphProperties || {};
 
             paragraphConfig.paragraphStyle = mergeByV<IParagraphStyle>(paragraphConfig.paragraphStyle, { ...paragraphProperties, hanging: { v: bulletGlyph.width } } as IParagraphProperties, 'max');
@@ -459,7 +468,7 @@ function _lineOperator(
     };
 
     const {
-        // direction,
+        direction,
         spaceAbove,
         spaceBelow,
         indentFirstLine,
@@ -593,7 +602,8 @@ function _lineOperator(
         indentStart,
         indentEnd,
         charSpaceApply,
-        isParagraphFirstShapedText
+        isParagraphFirstShapedText,
+        direction
     );
 
     // If the width is insufficient to accommodate the margin, leave 1px width for placeholder.
@@ -626,6 +636,12 @@ function _lineOperator(
         footerPage
     );
 
+    // Stamp the paragraph-level writing direction onto the skeleton line so
+    // that downstream consumers (`horizontalAlignHandler`, selection rendering,
+    // arrow-key visual<->logical mapping) can look it up without re-resolving
+    // the paragraph each time. Lines inherit the direction of their owning
+    // paragraph.
+    newLine.direction = direction;
     column.lines.push(newLine);
     newLine.parent = column;
     createAndUpdateBlockAnchor(paragraphIndex, newLine, lineTop, pDrawingAnchor);
@@ -1060,6 +1076,24 @@ function _pageOperator(
 
 /**
  * 17.3.1.12 ind (Paragraph Indentation)
+ *
+ * RTL paragraphs interpret the indent values in **logical** terms
+ * (CSS Writing Modes Level 3 §3.6 / OOXML §17.3.1.12):
+ *   - `indentStart` is the start-side margin → logical start → visual *right*
+ *     edge of an RTL line.
+ *   - `indentEnd` is the end-side margin → logical end → visual *left*
+ *     edge of an RTL line.
+ *   - `indentFirstLine` and `hanging` both reduce/extend the **start**
+ *     edge → visual right for RTL.
+ *
+ * The CSS / OOXML model maps cleanly to "paddingLeft = start" for LTR and
+ * "paddingRight = start" for RTL. Skipping this swap (the way the layout
+ * ruler used to) keeps list bullets and hanging indents on the visual
+ * left even in RTL paragraphs — so an Arabic bulleted list ends up
+ * with the bullet rendered glyph-right (correct, courtesy of bidi
+ * reorder) but the hanging-indent gutter sitting on the visual left
+ * (wrong), making the bullet appear glued to the text and a phantom
+ * whitespace block float at the line's left edge.
  */
 function __getIndentPadding(
     indentFirstLine: Nullable<INumberUnit>,
@@ -1067,27 +1101,32 @@ function __getIndentPadding(
     indentStart: Nullable<INumberUnit>,
     indentEnd: Nullable<INumberUnit>,
     charSpaceApply: number,
-    isParagraphFirstShapedText = false
+    isParagraphFirstShapedText = false,
+    direction?: TextDirection
 ) {
     const indentFirstLineNumber = getNumberUnitValue(indentFirstLine, charSpaceApply);
     const hangingNumber = getNumberUnitValue(hanging, charSpaceApply);
     const indentStartNumber = getNumberUnitValue(indentStart, charSpaceApply);
     const indentEndNumber = getNumberUnitValue(indentEnd, charSpaceApply);
 
-    let paddingLeft = indentStartNumber;
-    const paddingRight = indentEndNumber;
+    let startPadding = indentStartNumber;
+    const endPadding = indentEndNumber;
 
     if (indentFirstLineNumber > 0 && isParagraphFirstShapedText) {
-        paddingLeft += indentFirstLineNumber;
+        startPadding += indentFirstLineNumber;
     }
 
     if (hangingNumber > 0 && !isParagraphFirstShapedText) {
-        paddingLeft += hangingNumber;
+        startPadding += hangingNumber;
     }
 
+    const isRTL = direction === TextDirection.RIGHT_TO_LEFT;
     return {
-        paddingLeft,
-        paddingRight,
+        // For LTR: paddingLeft = start, paddingRight = end (legacy).
+        // For RTL: swap, so the bullet/hanging gutter sits at the
+        // line's visual right edge instead of phantom-padding the left.
+        paddingLeft: isRTL ? endPadding : startPadding,
+        paddingRight: isRTL ? startPadding : endPadding,
     };
 }
 

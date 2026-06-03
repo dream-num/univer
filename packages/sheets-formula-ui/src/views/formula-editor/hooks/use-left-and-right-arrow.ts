@@ -15,7 +15,7 @@
  */
 
 import type { Editor } from '@univerjs/docs-ui';
-import { CommandType, Direction, DisposableCollection, ICommandService } from '@univerjs/core';
+import { CommandType, Direction, DisposableCollection, ICommandService, TextDirection } from '@univerjs/core';
 import { MoveCursorOperation, MoveSelectionOperation } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { ExpandSelectionCommand, JumpOver, MoveSelectionCommand } from '@univerjs/sheets-ui';
@@ -23,14 +23,37 @@ import { IShortcutService, KeyCode, MetaKeys, useDependency } from '@univerjs/ui
 import { useEffect, useRef } from 'react';
 import { FormulaSelectingType } from './use-formula-selection';
 
+export interface IUseFormulaArrowOptions {
+    /** Force LTR/RTL arrow-key semantics regardless of paragraph direction. */
+    forceDirection?: 'ltr' | 'rtl';
+}
+
+function readEditorTextDirection(editor: Editor | undefined): TextDirection {
+    if (!editor) return TextDirection.UNSPECIFIED;
+    try {
+        const data = editor.getDocumentData();
+        return data.body?.paragraphs?.[0]?.paragraphStyle?.direction ?? TextDirection.UNSPECIFIED;
+    } catch {
+        return TextDirection.UNSPECIFIED;
+    }
+}
+
 // eslint-disable-next-line max-lines-per-function
-export const useLeftAndRightArrow = (isNeed: boolean, shouldMoveSelection: FormulaSelectingType, editor?: Editor, onMoveInEditor?: (keyCode: KeyCode, metaKey?: MetaKeys) => void) => {
+export const useLeftAndRightArrow = (
+    isNeed: boolean,
+    shouldMoveSelection: FormulaSelectingType,
+    editor?: Editor,
+    onMoveInEditor?: (keyCode: KeyCode, metaKey?: MetaKeys) => void,
+    options?: IUseFormulaArrowOptions
+) => {
     const commandService = useDependency(ICommandService);
     const shortcutService = useDependency(IShortcutService);
     const shouldMoveSelectionRef = useRef(shouldMoveSelection);
     shouldMoveSelectionRef.current = shouldMoveSelection;
     const onMoveInEditorRef = useRef(onMoveInEditor);
     onMoveInEditorRef.current = onMoveInEditor;
+    const forceDirectionRef = useRef(options?.forceDirection);
+    forceDirectionRef.current = options?.forceDirection;
 
     // eslint-disable-next-line max-lines-per-function
     useEffect(() => {
@@ -46,13 +69,23 @@ export const useLeftAndRightArrow = (isNeed: boolean, shouldMoveSelection: Formu
                 return;
             }
 
+            const forced = forceDirectionRef.current;
+            const effectiveDir = forced === 'rtl'
+                ? TextDirection.RIGHT_TO_LEFT
+                : forced === 'ltr'
+                    ? TextDirection.LEFT_TO_RIGHT
+                    : readEditorTextDirection(editor);
+            const isRTL = effectiveDir === TextDirection.RIGHT_TO_LEFT;
+
             let direction = Direction.LEFT;
             if (keycode === KeyCode.ARROW_DOWN) {
                 direction = Direction.DOWN;
             } else if (keycode === KeyCode.ARROW_UP) {
                 direction = Direction.UP;
+            } else if (keycode === KeyCode.ARROW_LEFT) {
+                direction = isRTL ? Direction.RIGHT : Direction.LEFT;
             } else if (keycode === KeyCode.ARROW_RIGHT) {
-                direction = Direction.RIGHT;
+                direction = isRTL ? Direction.LEFT : Direction.RIGHT;
             }
 
             if (metaKey === MetaKeys.SHIFT) {

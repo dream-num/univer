@@ -219,9 +219,13 @@ describe('Test clipboard', () => {
             expect(richTextStyle?.body?.dataStream).toBe('Univer\r\n');
             expect(richTextStyle?.body?.paragraphs).toStrictEqual([
                 {
-                    paragraphStyle: {
-                        horizontalAlign: 0,
-                    },
+                    // Previously this captured the `paragraphStyle:
+                    // { horizontalAlign: 0 }` that `_updateConfigAndGetDocumentModel`
+                    // used to write back into the shared `cell.p` snapshot.
+                    // The per-paragraph RTL refactor no longer mutates the
+                    // original cell — alignment / direction now live only
+                    // on the renderer-local document copy — so the pasted
+                    // snapshot stays clean here.
                     startIndex: 6,
                 },
             ]);

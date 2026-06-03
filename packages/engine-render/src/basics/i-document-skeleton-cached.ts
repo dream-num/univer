@@ -28,6 +28,7 @@ import type {
     ITableRow,
     ITextStyle,
     PageOrientType,
+    TextDirection,
 } from '@univerjs/core';
 import type { BreakPointType } from '../components/docs/layout/line-breaker/break';
 
@@ -186,6 +187,14 @@ export interface IDocumentSkeletonLine {
     isBehindTable: boolean; // In DataStream, if paragraph contains table, the first line isBehindTable is true and tableId is not empty, mainly used to calculate st\ed.
     tableId: string; // tableId if paragraph contains table, tableId is not empty, mainly used to calculate st\ed.
 
+    /**
+     * Paragraph-level writing direction propagated from `IParagraphStyle.direction`.
+     * `undefined` (or `UNSPECIFIED`) means LTR baseline. Consumed by
+     * `horizontalAlignHandler` and the document render to flip default alignment
+     * and `isBack` semantics in selection.
+     */
+    direction?: TextDirection;
+
     borderBottom?: IParagraphBorder; // borderBottom
     bullet?: IDocumentSkeletonBullet; // unordered and ordered list bullet
     width?: number; // the actual width of a line
@@ -200,6 +209,14 @@ export interface IDocumentSkeletonDivide {
     width: number; // width: Total width after division
     left: number; // left: Offset position after division by objects | d1 | | d2 |
     paddingLeft: number; // paddingLeft: Alignment offset calculated based on horizonAlign and width
+    /**
+     * paddingRight: only used for RTL paragraphs. In LTR paragraphs the
+     * available space is consumed via `paddingLeft`; in RTL paragraphs we
+     * need to push glyphs from the right edge, so this field carries the
+     * remaining-space offset that downstream renderers add to `left`.
+     * Defaults to `0` so LTR code paths see no behavioural change.
+     */
+    paddingRight?: number;
     isFull: boolean; // isFull: Whether content is full
     st: number; // startIndex
     ed: number; // endIndex
@@ -235,6 +252,44 @@ export interface IDocumentSkeletonGlyph {
     url?: string; // image url
     featureId?: string; // support interaction for feature ,eg. hyperLine person
     drawingId?: string; // drawing.drawingId
+    /**
+     * Unicode bidi embedding level assigned by `applyBidiReorderToLine`.
+     * Even levels (0, 2, ...) are LTR; odd levels (1, 3, ...) are RTL.
+     * Used by caret / selection rendering to invert the "isBack → left edge"
+     * rule per-glyph, so mixed runs (e.g. English + Arabic in one line)
+     * position the caret on the correct visual side at each segment border.
+     *
+     * `undefined` means the bidi pass hasn't run or the glyph has no
+     * resolved level (callers should treat it as 0 / LTR).
+     */
+    bidiLevel?: number;
+    /**
+     * For "cluster" glyphs that hold more than one logical character — e.g.
+     * the single glyph the Arabic shaper produces for a whole word so the
+     * browser can apply cursive joining (initial / medial / final / isolated
+     * forms) — this is the per-character cumulative advance in **logical
+     * order**, measured by `ctx.measureText(content.slice(0, i + 1))` at
+     * shape time.
+     *
+     * - `charAdvances.length === content.length` when present.
+     * - `charAdvances[i]` is the x-advance from the glyph's left edge to the
+     *   trailing edge of the i-th character; so `charAdvances[count - 1]`
+     *   equals `width` modulo rounding.
+     * - Absent for single-character glyphs and for clusters whose shaping
+     *   path doesn't measure prefixes — callers must fall back to "treat the
+     *   whole glyph as one caret cell" (the legacy behaviour).
+     *
+     * Used by:
+     *  - `_collectNearestNode` to refine a hit into a `subOffset` inside the
+     *    cluster, so clicking the middle of an Arabic word lands the caret
+     *    on the right character.
+     *  - The caret painter (`_getNodePosition` + caret-translate) to draw the
+     *    caret at the actual char boundary instead of at the cluster edge.
+     *  - The keyboard step-by-char path (`getGlyphCharIndex` style lookups)
+     *    so `ArrowLeft` / `ArrowRight` advance one logical character at a
+     *    time inside a cluster.
+     */
+    charAdvances?: number[];
 }
 
 export interface IDocumentSkeletonBullet {

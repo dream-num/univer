@@ -589,6 +589,7 @@ function __getDivideSKe(left: number, width: number): IDocumentSkeletonDivide {
         width, // Total width after division
         left, // Offset position after division by objects | d1 | | d2 |
         paddingLeft: 0, // paddingLeft alignment offset calculated based on horizonAlign and width
+        paddingRight: 0, // paddingRight (only used for RTL alignment, see horizontalAlignHandler)
         isFull: false, // isFull, // whether content is full
         st: 0, // startIndex
         ed: 0, // endIndex

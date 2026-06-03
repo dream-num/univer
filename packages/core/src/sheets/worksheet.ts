@@ -17,17 +17,17 @@
 import type { IDisposable } from '@wendellhu/redi';
 import type { IInterceptor } from '../common/interceptor';
 import type { IObjectMatrixPrimitiveType, Nullable } from '../shared';
-import type { BooleanNumber, HorizontalAlign, TextDirection, VerticalAlign, WrapStrategy } from '../types/enum';
-import type { IDocumentData, IDocumentRenderConfig, IPaddingData, IStyleData, ITextRotation } from '../types/interfaces';
+import type { BooleanNumber, HorizontalAlign, VerticalAlign, WrapStrategy } from '../types/enum';
+import type { IDocumentData, IDocumentRenderConfig, IPaddingData, IParagraphStyle, IStyleData, ITextRotation } from '../types/interfaces';
 import type { Styles } from './styles';
 import type { CustomData, ICellData, ICellDataForSheetInterceptor, ICellDataWithSpanAndDisplay, IFreeze, IRange, ISelectionCell, IWorksheetData } from './typedef';
 import { BuildTextUtils, DocumentDataModel } from '../docs';
 import { convertTextRotation, getFontStyleString } from '../docs/data-model/utils';
-import { composeStyles, ObjectMatrix, toDisposable, Tools } from '../shared';
+import { composeStyles, isFirstStrongCharRTL, ObjectMatrix, toDisposable, Tools } from '../shared';
 import { createRowColIter } from '../shared/row-col-iter';
 import { generateRandomId } from '../shared/tools';
 import { DEFAULT_STYLES } from '../types/const';
-import { CellValueType } from '../types/enum';
+import { CellValueType, TextDirection } from '../types/enum';
 import { DocumentFlavor } from '../types/interfaces';
 import { cloneWorksheetData } from './clone';
 import { ColumnManager } from './column-manager';
@@ -63,6 +63,14 @@ export interface ICellDocumentModelOption {
     isDeepClone?: boolean;
     displayRawFormula?: boolean;
     ignoreTextRotation?: boolean;
+    /**
+     * Forces the document model to use this text direction even when the
+     * cell's style does not declare one. Used by the canvas sheet renderer
+     * when the cell content auto-detected as RTL (first-strong character)
+     * but the user didn't explicitly set `style.td`. The implicit direction
+     * applies only when `style.td` is missing / UNSPECIFIED.
+     */
+    implicitTextDirection?: TextDirection;
 }
 
 const DEFAULT_CELL_DOCUMENT_MODEL_OPTION = {
@@ -1157,7 +1165,7 @@ export class Worksheet {
             return;
         }
 
-        const { isDeepClone, displayRawFormula, ignoreTextRotation } = {
+        const { isDeepClone, displayRawFormula, ignoreTextRotation, implicitTextDirection } = {
             ...DEFAULT_CELL_DOCUMENT_MODEL_OPTION,
             ...options,
         };
@@ -1173,10 +1181,29 @@ export class Worksheet {
         const verticalAlign: VerticalAlign = cellOtherConfig.verticalAlign || DEFAULT_STYLES.vt;
         const wrapStrategy: WrapStrategy = cellOtherConfig.wrapStrategy || DEFAULT_STYLES.tb;
         const paddingData: IPaddingData = cellOtherConfig.paddingData || DEFAULT_PADDING_DATA;
+        // `style.td` (text direction) is unwrapped by `extractOtherStyle`.
+        // Capture it here so every branch below can forward it down to the
+        // generated Doc model — both for the paragraph style (renderer baseline)
+        // and the document-level renderConfig (decides default alignment when
+        // `horizontalAlign === UNSPECIFIED`).
+        //
+        // Fallback order:
+        //   1. explicit `style.td`,
+        //   2. `options.implicitTextDirection` (auto-detected from content by
+        //      the caller, e.g. canvas renderer / editor bridge),
+        //   3. undefined (LTR baseline).
+        const explicitTextDirection = cellOtherConfig.textDirection ?? undefined;
+        const textDirection = explicitTextDirection != null && explicitTextDirection !== TextDirection.UNSPECIFIED
+            ? explicitTextDirection
+            : (implicitTextDirection != null && implicitTextDirection !== TextDirection.UNSPECIFIED
+                ? implicitTextDirection
+                : undefined);
 
         if (cell.f && displayRawFormula) {
-            // The formula does not detect horizontal alignment and rotation.
-            documentModel = createDocumentModelWithStyle(cell.f.toString(), {}, { verticalAlign });
+            // The formula does not detect horizontal alignment and rotation,
+            // but it should still respect the cell's text direction so that
+            // the default alignment (`_horizontalHandler`) flips for RTL cells.
+            documentModel = createDocumentModelWithStyle(cell.f.toString(), {}, { verticalAlign, textDirection });
             horizontalAlign = DEFAULT_STYLES.ht;
         } else if (cell.p) {
             const { centerAngle, vertexAngle } = convertTextRotation(textRotation);
@@ -1190,8 +1217,10 @@ export class Worksheet {
                     centerAngle,
                     vertexAngle,
                     wrapStrategy,
+                    textDirection,
                     zeroWidthParagraphBreak: 1,
-                }
+                },
+                textDirection
             );
         } else if (cell.v != null) {
             const textStyle = getFontFormat(style);
@@ -1209,6 +1238,11 @@ export class Worksheet {
                 ...cellOtherConfig,
                 textRotation,
                 cellValueType: cell.t!,
+                // Override with the resolved direction (explicit > implicit
+                // > none). When no explicit `style.td` exists but the
+                // content auto-detected as RTL, `textDirection` falls back
+                // to the implicit RTL direction supplied by the caller.
+                textDirection,
             });
         }
 
@@ -1242,19 +1276,26 @@ export class Worksheet {
         };
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _updateConfigAndGetDocumentModel(
-        documentData: IDocumentData,
+        sourceDocumentData: IDocumentData,
         horizontalAlign: HorizontalAlign,
         paddingData: IPaddingData,
-        renderConfig?: IDocumentRenderConfig
+        renderConfig?: IDocumentRenderConfig,
+        textDirection?: TextDirection
     ): Nullable<DocumentDataModel> {
         if (!renderConfig) {
             return;
         }
 
-        if (!documentData.body?.dataStream) {
+        if (!sourceDocumentData.body?.dataStream) {
             return;
         }
+
+        // Working copy alias so we can swap in a fresh body / documentStyle
+        // wrapper without mutating the original `cell.p` snapshot under
+        // the no-deep-clone path (see the paragraphs detach further below).
+        let documentData = sourceDocumentData;
 
         if (!documentData.documentStyle) {
             documentData.documentStyle = {};
@@ -1278,14 +1319,130 @@ export class Worksheet {
             ...renderConfig,
         };
 
-        const paragraphs = documentData.body.paragraphs || [];
+        // Shallow-copy the paragraphs array so that the per-paragraph
+        // mutations below don't leak back into the original `cell.p`
+        // snapshot when `isDeepClone === false`. The individual entries
+        // are also shallow-cloned inside the loop before we touch their
+        // `paragraphStyle`.
+        const body = documentData.body;
+        const originalParagraphs = body?.paragraphs ?? [];
+        const paragraphs = originalParagraphs.slice();
+        const dataStream = body?.dataStream || '';
 
-        for (const paragraph of paragraphs) {
-            if (!paragraph.paragraphStyle) {
-                paragraph.paragraphStyle = {};
+        // Resolve direction *per paragraph* so multi-line / list cells
+        // can mix LTR and RTL rows in one cell (e.g. an Arabic bullet
+        // followed by an English bullet, each right- or left-aligned by
+        // its own first-strong character).
+        //
+        // Priority for each paragraph:
+        //  1. `paragraphStyle.direction` already declared on the model
+        //     (e.g. via `RichTextBuilder.setDirection` or pasted content) —
+        //     takes precedence over everything; we never overwrite it.
+        //  2. Cell-level `style.td` (the `textDirection` argument): if the
+        //     user explicitly set a direction on the cell, every paragraph
+        //     inherits it. This matches Excel / Sheets where the cell
+        //     direction wins for all rows.
+        //  3. First-strong character within *that paragraph's* text slice:
+        //     mirrors the auto-detection used for simple-string cells, but
+        //     scoped to each paragraph independently so a list whose first
+        //     item is Arabic and second item is English picks the right
+        //     direction for each row.
+        //  4. Otherwise leave `direction` undefined (LTR baseline) so
+        //     clipboard / serialisation snapshots stay stable for pure
+        //     LTR rich-text content.
+        //
+        // Important: `documentData` (and therefore each `paragraph`) may
+        // alias the original `cell.p` snapshot — when the caller passes
+        // `isDeepClone: false` (the hot path for renderer cache lookups)
+        // we share references. Mutating `paragraph.paragraphStyle` in
+        // place would persist the auto-detected direction back into the
+        // cell snapshot and "stick" forever, breaking subsequent
+        // first-strong detection if the user clears the cell and types
+        // in the other direction. We therefore replace the paragraph
+        // entry with a shallow clone whenever we need to write into its
+        // style. Existing `direction` values are still respected, so
+        // explicit author/clipboard direction never gets clobbered.
+        let prevParagraphEnd = 0;
+        // Carry the previously-resolved direction so that a brand-new
+        // empty paragraph (e.g. one just inserted by Enter in the cell
+        // editor) inherits the writing direction of the line it was
+        // split from. Without this, an empty paragraph between two
+        // RTL paragraphs would silently fall back to LTR and flicker
+        // the cell's alignment.
+        let inheritedDir: TextDirection | undefined;
+        for (let i = 0; i < paragraphs.length; i++) {
+            const original = paragraphs[i];
+            const existingStyle = original.paragraphStyle ?? {};
+
+            const explicitParagraphDir = existingStyle.direction;
+            let resolvedDirection: TextDirection | undefined = explicitParagraphDir;
+            let detectedFromContent = false;
+            if (resolvedDirection == null) {
+                if (textDirection != null && textDirection !== TextDirection.UNSPECIFIED) {
+                    resolvedDirection = textDirection;
+                } else {
+                    const sliceStart = prevParagraphEnd;
+                    const sliceEnd = original.startIndex;
+                    const paragraphText = sliceEnd > sliceStart
+                        ? dataStream.slice(sliceStart, sliceEnd)
+                        : '';
+                    if (paragraphText.length === 0) {
+                        // Empty paragraph: inherit from the previous
+                        // paragraph we just resolved (this is the freshly
+                        // split-off line case). Leave `resolvedDirection`
+                        // undefined when there is no predecessor so the
+                        // overall LTR fallback elsewhere still applies.
+                        resolvedDirection = inheritedDir;
+                    } else if (isFirstStrongCharRTL(paragraphText)) {
+                        resolvedDirection = TextDirection.RIGHT_TO_LEFT;
+                        detectedFromContent = true;
+                    } else {
+                        // Treat any non-empty paragraph that doesn't start
+                        // with a strong RTL char as explicit LTR. Stamping
+                        // a value (rather than leaving `undefined`) gives
+                        // the docs engine an unambiguous baseline so a
+                        // previously RTL row that the user converted to
+                        // English flips back to LTR instead of inheriting
+                        // a stale level from the skeleton cache.
+                        resolvedDirection = TextDirection.LEFT_TO_RIGHT;
+                        detectedFromContent = true;
+                    }
+                }
             }
 
-            paragraph.paragraphStyle.horizontalAlign = horizontalAlign;
+            const nextStyle: IParagraphStyle = { ...existingStyle, horizontalAlign };
+            if (resolvedDirection != null) {
+                nextStyle.direction = resolvedDirection;
+            }
+            paragraphs[i] = { ...original, paragraphStyle: nextStyle };
+            inheritedDir = resolvedDirection ?? inheritedDir;
+
+            // Suppress unused-variable noise; the flag exists to document
+            // *why* we shallow-clone the paragraph above when our detector
+            // (rather than the author) supplied the direction. Mutating
+            // the original style in place would persist auto-detected
+            // direction back into `cell.p`, defeating future re-detection.
+            void detectedFromContent;
+
+            prevParagraphEnd = original.startIndex + 1;
+        }
+
+        // Build a fresh `documentData` for the DocumentDataModel so the
+        // mutated paragraphs array (and any direction we just stamped)
+        // never leaks back into the shared `cell.p` snapshot under the
+        // no-deep-clone path. We only need to detach `body.paragraphs`
+        // here because the rest of `documentData` (documentStyle,
+        // dataStream, textRuns) is reused as-is downstream and any
+        // already-existing pollution of `documentStyle` was there before
+        // this refactor — keeping that change out of scope.
+        if (body) {
+            documentData = {
+                ...documentData,
+                body: {
+                    ...body,
+                    paragraphs,
+                },
+            };
         }
 
         return new DocumentDataModel(documentData);
@@ -1297,11 +1454,17 @@ export class Worksheet {
     getBlankCellDocumentModel(cell: Nullable<ICellData>, row: number, column: number): IDocumentLayoutObject {
         const style = this.getComposedCellStyleByCellData(row, column, cell);
         const textStyle = getFontFormat(style);
-        const documentModelObject = this.getCellDocumentModel(cell, style, { ignoreTextRotation: true });
+        const implicitTextDirection = this._detectImplicitTextDirection(cell, style);
+        const documentModelObject = this.getCellDocumentModel(cell, style, {
+            ignoreTextRotation: true,
+            implicitTextDirection,
+        });
 
         if (documentModelObject != null) {
             if (documentModelObject.documentModel == null) {
-                documentModelObject.documentModel = createDocumentModelWithStyle('', textStyle);
+                documentModelObject.documentModel = createDocumentModelWithStyle('', textStyle, {
+                    textDirection: implicitTextDirection,
+                });
             }
             return documentModelObject;
         }
@@ -1318,7 +1481,9 @@ export class Worksheet {
 
         fontString = getFontStyleString({}).fontCache;
 
-        const documentModel = createDocumentModelWithStyle(content, textStyle);
+        const documentModel = createDocumentModelWithStyle(content, textStyle, {
+            textDirection: implicitTextDirection,
+        });
 
         return {
             documentModel,
@@ -1338,7 +1503,30 @@ export class Worksheet {
             isDeepClone: true,
             displayRawFormula: true,
             ignoreTextRotation: true,
+            implicitTextDirection: this._detectImplicitTextDirection(cell, style),
         });
+    }
+
+    /**
+     * Auto-detect text direction from the cell's content when the user has
+     * not explicitly set `style.td`. Matches Excel/Google Sheets behaviour:
+     * a cell that starts with Arabic / Hebrew is treated as RTL.
+     *
+     * Returns `undefined` when:
+     *  - `style.td` is already explicit (caller will use that), or
+     *  - the content does not start with a strong RTL character.
+     */
+    private _detectImplicitTextDirection(
+        cell: Nullable<ICellData>,
+        style: Nullable<IStyleData>
+    ): TextDirection | undefined {
+        const explicit = style?.td;
+        if (explicit != null && explicit !== TextDirection.UNSPECIFIED) {
+            return undefined;
+        }
+        if (cell == null) return undefined;
+        const text = extractPureTextFromCell(cell);
+        return isFirstStrongCharRTL(text) ? TextDirection.RIGHT_TO_LEFT : undefined;
     }
 
     /**

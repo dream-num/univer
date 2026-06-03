@@ -1401,6 +1401,9 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
+      bidi-js:
+        specifier: ^1.0.3
+        version: 1.0.3
       cjk-regex:
         specifier: ^3.4.0
         version: 3.4.0

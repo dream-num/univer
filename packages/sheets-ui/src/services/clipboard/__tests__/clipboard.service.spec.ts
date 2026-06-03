@@ -190,7 +190,7 @@ describe('Test clipboard', () => {
                     s: 0,
                 },
                 tb: 0,
-                td: 0,
+                td: 1,
                 tr: {
                     a: 0,
                     v: 0,
@@ -263,7 +263,7 @@ describe('Test clipboard', () => {
                     s: 0,
                 },
                 tb: 0,
-                td: 0,
+                td: 1,
                 tr: {
                     a: 0,
                     v: 0,
@@ -336,7 +336,7 @@ describe('Test clipboard', () => {
                     s: 0,
                 },
                 tb: 0,
-                td: 0,
+                td: 1,
                 tr: {
                     a: 0,
                     v: 0,
@@ -413,7 +413,7 @@ describe('Test clipboard', () => {
                     s: 0,
                 },
                 tb: 0,
-                td: 0,
+                td: 1,
                 tr: {
                     a: 0,
                     v: 0,
@@ -457,7 +457,7 @@ describe('Test clipboard', () => {
                     s: 0,
                 },
                 tb: 0,
-                td: 0,
+                td: 1,
                 tr: {
                     a: 0,
                     v: 0,
@@ -541,7 +541,7 @@ describe('Test clipboard', () => {
                         s: 0,
                     },
                     tb: 0,
-                    td: 0,
+                    td: 1,
                     tr: {
                         a: 0,
                         v: 0,
@@ -585,7 +585,7 @@ describe('Test clipboard', () => {
                         s: 0,
                     },
                     tb: 0,
-                    td: 0,
+                    td: 1,
                     tr: {
                         a: 0,
                         v: 0,
@@ -707,7 +707,7 @@ describe('Test clipboard', () => {
                     s: 0,
                 },
                 tb: 0,
-                td: 0,
+                td: 1,
                 tr: {
                     a: 0,
                     v: 0,
@@ -845,7 +845,7 @@ describe('Test clipboard', () => {
                     s: 0,
                 },
                 tb: 0,
-                td: 0,
+                td: 1,
                 tr: {
                     a: 0,
                     v: 0,
@@ -972,7 +972,7 @@ describe('Test clipboard', () => {
                     s: 0,
                 },
                 tb: 0,
-                td: 0,
+                td: 1,
                 tr: {
                     a: 0,
                     v: 0,

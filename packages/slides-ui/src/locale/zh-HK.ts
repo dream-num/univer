@@ -14,9 +14,67 @@
  * limitations under the License.
  */
 
-import type zhCN from './zh-CN';
-import enUS from './en-US';
+import type enUS from './en-US';
 
-const locale: typeof zhCN = enUS;
+const locale: typeof enUS = {
+    'slides-ui': {
+        append: 'Append Slide',
+
+        text: {
+            insert: {
+                title: 'Insert Text',
+            },
+        },
+
+        shape: {
+            insert: {
+                title: 'Insert Shape',
+                rectangle: 'Insert Rectangle',
+                ellipse: 'Insert Ellipse',
+            },
+        },
+
+        image: {
+            insert: {
+                title: 'Insert Image',
+                float: 'Insert Float Image',
+            },
+        },
+
+        popup: {
+            edit: 'Edit',
+            delete: 'Delete',
+        },
+
+        sidebar: {
+            text: 'Edit Text',
+            shape: 'Edit Shape',
+            image: 'Edit Image',
+        },
+
+        'image-panel': {
+            arrange: {
+                title: 'Arrange',
+                forward: 'Bring Forward',
+                backward: 'Send Backward',
+                front: 'Bring to Front',
+                back: 'Send to Back',
+            },
+            transform: {
+                title: 'Transform',
+                width: 'Width (px)',
+                height: 'Height (px)',
+                x: 'X (px)',
+                y: 'Y (px)',
+                rotate: 'Rotate (°)',
+            },
+        },
+        panel: {
+            fill: {
+                title: 'Fill Color',
+            },
+        },
+    },
+};
 
 export default locale;

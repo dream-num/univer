@@ -845,7 +845,7 @@ function getEngineBaseTableName(table: ITableSnapshot, snapshot: IBaseSnapshot):
 }
 
 function buildBaseRuntimeCellData(table: ITableSnapshot): Record<number, Record<number, IBaseCellData>> {
-    const cellData: Record<number, Record<number, IBaseCellData>> = { ...(table.cellData ?? {}) };
+    const cellData: Record<number, Record<number, IBaseCellData>> = { ...table.cellData };
     const fieldOrder = table.fieldOrder.filter((fieldId) => table.fields[fieldId] && !table.fields[fieldId].deleted);
     const recordOrder = table.recordOrder?.filter((recordId) => table.records[recordId] && !table.records[recordId].deleted)
         ?? Object.values(table.records ?? {}).filter((record) => !record.deleted).sort((a, b) => a.orderKey.localeCompare(b.orderKey)).map((record) => record.id);
@@ -855,7 +855,7 @@ function buildBaseRuntimeCellData(table: ITableSnapshot): Record<number, Record<
         if (!record || record.deleted) {
             return;
         }
-        cellData[row] = { ...(cellData[row] ?? {}) };
+        cellData[row] = { ...cellData[row] };
         fieldOrder.forEach((fieldId, col) => {
             if (!Object.prototype.hasOwnProperty.call(record.values ?? {}, fieldId)) {
                 return;

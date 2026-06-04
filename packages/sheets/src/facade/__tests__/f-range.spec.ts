@@ -14,13 +14,31 @@
  * limitations under the License.
  */
 
-/* eslint-disable ts/no-non-null-asserted-optional-chain */
-
 import type { ICellData, Injector, IStyleData, Nullable } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
-import { HorizontalAlign, ICommandService, IConfirmService, IUniverInstanceService, LifecycleStages, TestConfirmService, VerticalAlign, WrapStrategy } from '@univerjs/core';
-import { AddWorksheetMergeCommand, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand } from '@univerjs/sheets';
-import { beforeEach, describe, expect, it } from 'vitest';
+import {
+    HorizontalAlign,
+    ICommandService,
+    IConfirmService,
+    ILogService,
+    IUniverInstanceService,
+    LifecycleStages,
+    TestConfirmService,
+    VerticalAlign,
+    WrapStrategy,
+} from '@univerjs/core';
+import {
+    AddWorksheetMergeCommand,
+    SetHorizontalTextAlignCommand,
+    SetRangeCustomMetadataCommand,
+    SetRangeValuesCommand,
+    SetRangeValuesMutation,
+    SetStyleCommand,
+    SetTextWrapCommand,
+    SetVerticalTextAlignCommand,
+} from '@univerjs/sheets';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { SHEETS_CUSTOM_FIELD_WARNING_MESSAGE } from '../const';
 import { createFacadeTestBed } from './create-test-bed';
 
 describe('Test FRange', () => {
@@ -56,6 +74,7 @@ describe('Test FRange', () => {
         commandService.registerCommand(SetHorizontalTextAlignCommand);
         commandService.registerCommand(SetTextWrapCommand);
         commandService.registerCommand(AddWorksheetMergeCommand);
+        commandService.registerCommand(SetRangeCustomMetadataCommand);
 
         getValueByPosition = (
             startRow: number,
@@ -262,6 +281,30 @@ describe('Test FRange', () => {
         ]);
     });
 
+    it('Range custom metadata APIs should warn about custom field usage', () => {
+        const logService = get(ILogService);
+        Object.defineProperty(logService, 'warn', { configurable: true, value: vi.fn() });
+        const warnSpy = vi.spyOn(logService, 'warn');
+        const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+        const range = activeSheet?.getRange(0, 0, 2, 2);
+
+        range?.setCustomMetaData({ key: 'value' });
+        range?.getCustomMetaData();
+        range?.setCustomMetaDatas([
+            [{ key: 'a' }, { key: 'b' }],
+            [{ key: 'c' }, { key: 'd' }],
+        ]);
+        range?.getCustomMetaDatas();
+
+        expect(warnSpy).toHaveBeenCalledTimes(4);
+        expect(warnSpy).toHaveBeenNthCalledWith(1, SHEETS_CUSTOM_FIELD_WARNING_MESSAGE);
+        expect(warnSpy).toHaveBeenNthCalledWith(2, SHEETS_CUSTOM_FIELD_WARNING_MESSAGE);
+        expect(warnSpy).toHaveBeenNthCalledWith(3, SHEETS_CUSTOM_FIELD_WARNING_MESSAGE);
+        expect(warnSpy).toHaveBeenNthCalledWith(4, SHEETS_CUSTOM_FIELD_WARNING_MESSAGE);
+
+        warnSpy.mockRestore();
+    });
+
     it('Range getCellData', () => {
         const activeSheet = univerAPI.getActiveWorkbook()!.getActiveSheet();
         activeSheet?.getRange(0, 0)?.setValue(1);
@@ -271,12 +314,12 @@ describe('Test FRange', () => {
 
     it('Range isMerged', () => {
         const activeSheet = univerAPI.getActiveWorkbook()!.getActiveSheet()!;
-        const range = activeSheet!.getRange(2, 3);
-        const isMerged = range?.isMerged()!;
+        const range = activeSheet.getRange(2, 3);
+        const isMerged = range.isMerged();
         expect(isMerged).toBe(false);
 
-        const range2 = activeSheet!.getRange(2, 3, 3, 3)!;
-        const isMerged2 = range2.isMerged()!;
+        const range2 = activeSheet.getRange(2, 3, 3, 3);
+        const isMerged2 = range2.isMerged();
         expect(isMerged2).toBe(false);
     });
 
@@ -591,7 +634,7 @@ describe('Test FRange', () => {
     it('test Merge', async () => {
         let hasError = false;
         try {
-            const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet()!;
+            const activeSheet = univerAPI.getActiveWorkbook()!.getActiveSheet()!;
             let range = activeSheet.getRange(0, 2, 0, 2);
             expect(activeSheet.getMergedRanges().length).toBe(0);
             range = await range.merge();
@@ -610,7 +653,7 @@ describe('Test FRange', () => {
             expect(range2.isPartOfMerge()).toBeTruthy();
             const range3 = activeSheet.getRange(0, 5, 0, 5);
             await range3.merge();
-        } catch (error) {
+        } catch {
             hasError = true;
         }
         expect(hasError).toBeTruthy();

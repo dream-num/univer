@@ -14,7 +14,17 @@
  * limitations under the License.
  */
 
-import type { CommandListener, CustomData, ICommandInfo, IDisposable, IRange, IStyleData, IWorkbookData, IWorksheetData, Workbook } from '@univerjs/core';
+import type {
+    CommandListener,
+    CustomData,
+    ICommandInfo,
+    IDisposable,
+    IRange,
+    IStyleData,
+    IWorkbookData,
+    IWorksheetData,
+    Workbook,
+} from '@univerjs/core';
 import type { ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import type { IRangeThemeStyleJSON, ISetSelectionsOperationParams, ISheetCommandSharedParams } from '@univerjs/sheets';
 import type { FontLine as _FontLine } from './f-range';
@@ -53,6 +63,7 @@ import {
     UnregisterWorksheetRangeThemeStyleCommand,
     WorkbookEditablePermission,
 } from '@univerjs/sheets';
+import { SHEETS_CUSTOM_FIELD_WARNING_MESSAGE } from './const';
 import { FDefinedName, FDefinedNameBuilder } from './f-defined-name';
 import { FRange } from './f-range';
 import { FWorksheet } from './f-worksheet';
@@ -1050,6 +1061,8 @@ export class FWorkbook extends FBaseInitialable {
      * ```
      */
     setCustomMetadata(custom: CustomData | undefined): FWorkbook {
+        this._logService.warn(SHEETS_CUSTOM_FIELD_WARNING_MESSAGE);
+
         this._workbook.setCustomMetadata(custom);
         return this;
     }
@@ -1065,6 +1078,8 @@ export class FWorkbook extends FBaseInitialable {
      * ```
      */
     getCustomMetadata(): CustomData | undefined {
+        this._logService.warn(SHEETS_CUSTOM_FIELD_WARNING_MESSAGE);
+
         return this._workbook.getCustomMetadata();
     }
 

@@ -14,7 +14,23 @@
  * limitations under the License.
  */
 
-import type { AbsoluteRefType, BorderStyleTypes, BorderType, CellValue, CustomData, ICellData, IColorStyle, IDocumentData, IObjectMatrixPrimitiveType, IRange, IStyleData, ITextDecoration, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type {
+    AbsoluteRefType,
+    BorderStyleTypes,
+    BorderType,
+    CellValue,
+    CustomData,
+    ICellData,
+    IColorStyle,
+    IDocumentData,
+    IObjectMatrixPrimitiveType,
+    IRange,
+    IStyleData,
+    ITextDecoration,
+    Nullable,
+    Workbook,
+    Worksheet,
+} from '@univerjs/core';
 import type {
     AUTO_FILL_APPLY_TYPE,
     IMergeCellsUtilOptions,
@@ -32,7 +48,22 @@ import type {
 } from '@univerjs/sheets';
 import type { IFacadeClearOptions } from './f-worksheet';
 import type { FHorizontalAlignment, FVerticalAlignment } from './utils';
-import { BooleanNumber, covertCellValue, covertCellValues, DEFAULT_STYLES, Dimension, ICommandService, Inject, Injector, isNullCell, Rectangle, RichTextValue, TextStyleValue, WrapStrategy } from '@univerjs/core';
+import {
+    BooleanNumber,
+    covertCellValue,
+    covertCellValues,
+    DEFAULT_STYLES,
+    Dimension,
+    ICommandService,
+    ILogService,
+    Inject,
+    Injector,
+    isNullCell,
+    Rectangle,
+    RichTextValue,
+    TextStyleValue,
+    WrapStrategy,
+} from '@univerjs/core';
 import { FBaseInitialable } from '@univerjs/core/facade';
 import { FormulaDataModel, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import {
@@ -62,10 +93,16 @@ import {
     SheetRangeThemeService,
     SplitTextToColumnsCommand,
 } from '@univerjs/sheets';
+import { SHEETS_CUSTOM_FIELD_WARNING_MESSAGE } from './const';
 import { FWorkbook } from './f-workbook';
 import { FWorksheet } from './f-worksheet';
 import { FRangePermission } from './permission/f-range-permission';
-import { transformCoreHorizontalAlignment, transformCoreVerticalAlignment, transformFacadeHorizontalAlignment, transformFacadeVerticalAlignment } from './utils';
+import {
+    transformCoreHorizontalAlignment,
+    transformCoreVerticalAlignment,
+    transformFacadeHorizontalAlignment,
+    transformFacadeVerticalAlignment,
+} from './utils';
 
 export type FontLine = 'none' | 'underline' | 'line-through';
 export type FontStyle = 'normal' | 'italic';
@@ -95,7 +132,8 @@ export class FRange extends FBaseInitialable {
         protected readonly _range: IRange,
         @Inject(Injector) protected override readonly _injector: Injector,
         @ICommandService protected readonly _commandService: ICommandService,
-        @Inject(FormulaDataModel) protected readonly _formulaDataModel: FormulaDataModel
+        @Inject(FormulaDataModel) protected readonly _formulaDataModel: FormulaDataModel,
+        @ILogService protected readonly _logService: ILogService
     ) {
         super(_injector);
 
@@ -1027,6 +1065,8 @@ export class FRange extends FBaseInitialable {
      * ```
      */
     setCustomMetaData(data: CustomData): FRange {
+        this._logService.warn(SHEETS_CUSTOM_FIELD_WARNING_MESSAGE);
+
         const params: ISetRangeCustomMetadataCommandParams = {
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
@@ -1058,6 +1098,8 @@ export class FRange extends FBaseInitialable {
      * ```
      */
     setCustomMetaDatas(datas: CustomData[][]): FRange {
+        this._logService.warn(SHEETS_CUSTOM_FIELD_WARNING_MESSAGE);
+
         const params: ISetRangeCustomMetadataCommandParams = {
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
@@ -1083,6 +1125,8 @@ export class FRange extends FBaseInitialable {
      * ```
      */
     getCustomMetaData(): CustomData | null {
+        this._logService.warn(SHEETS_CUSTOM_FIELD_WARNING_MESSAGE);
+
         const cell = this.getCellData();
         return cell?.custom ?? null;
     }
@@ -1100,6 +1144,8 @@ export class FRange extends FBaseInitialable {
      * ```
      */
     getCustomMetaDatas(): Nullable<CustomData>[][] {
+        this._logService.warn(SHEETS_CUSTOM_FIELD_WARNING_MESSAGE);
+
         const dataGrid = this.getCellDataGrid();
         return dataGrid.map((row) => row.map((data) => data?.custom ?? null));
     }

@@ -45,9 +45,7 @@ if (command === 'preset') {
 
     if (presetCommand === 'prepare') {
         preparePresetPackage();
-    }
-
-    else if (presetCommand === 'build') {
+    } else if (presetCommand === 'build') {
         const options: IPresetCliBuildOptions = {};
 
         if (presetArgs.includes('--skipUMD')) {
@@ -72,9 +70,9 @@ if (command === 'preset') {
             options.tsdownConfigPath = presetArgs[configIdx + 1];
         }
 
+        // eslint-disable-next-line antfu/no-top-level-await
         await buildPresetPackage(options);
-    }
-    else {
+    } else {
         throw new Error(`Unknown preset subcommand "${presetCommand}". Expected "prepare" or "build".`);
     }
 }

@@ -59,6 +59,7 @@
     "directories": {
         "lib": "lib"
     },
+    "types": "./lib/types/index.d.ts",
     "files": [
         "lib"
     ],
@@ -85,6 +86,5 @@
         "react-dom": "18.3.1",
         "rxjs": "^7.8.2",
         "typescript": "^6.0.3"
-    },
-    "types": "./lib/types/index.d.ts"
+    }
 }

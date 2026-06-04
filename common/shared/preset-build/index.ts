@@ -20,7 +20,7 @@ import type { IPresetBuildOptions, IPresetPackageJson } from './types';
 import { existsSync, readFileSync, rmSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
-import { build as tsdownBuild, mergeConfig } from 'tsdown';
+import { mergeConfig, build as tsdownBuild } from 'tsdown';
 import { createModuleConfig } from '../tsdown/configs/module';
 import { createUmdConfig } from '../tsdown/configs/umd';
 import { BUILD_OUTPUT_DIRECTORIES, CLEANUP_DIRECTORIES } from '../tsdown/constants';
@@ -31,8 +31,8 @@ import { buildPresetStyles } from './style';
 import { prependPresetUmd } from './umd';
 
 export { generatePresetLocales } from './locale';
-export { prependPresetUmd } from './umd';
 export type { IPresetBuildOptions } from './types';
+export { prependPresetUmd } from './umd';
 
 function readPackageJson(packageDir: string): IPresetPackageJson {
     return JSON.parse(readFileSync(path.join(packageDir, 'package.json'), 'utf8')) as IPresetPackageJson;

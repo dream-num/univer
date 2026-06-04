@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * Starting from Univer 0.6.0, with the support for React 19[^1], UMD users may need additional adaptation.
  * It is recommended to migrate to module script[^2] and a more modern build system.

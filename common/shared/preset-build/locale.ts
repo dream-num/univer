@@ -1,7 +1,23 @@
+/**
+ * Copyright 2023-present DreamNum Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import type { IGeneratePresetLocalesOptions, IPresetPackageJson } from './types';
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { PRESET_LOCALE_SOURCE_DIR, PRESET_LOCALES } from './constants';
-import type { IGeneratePresetLocalesOptions, IPresetPackageJson } from './types';
 
 function readPackageJson(packageDir: string): IPresetPackageJson {
     return JSON.parse(readFileSync(path.join(packageDir, 'package.json'), 'utf8')) as IPresetPackageJson;
@@ -27,7 +43,7 @@ function compareStrings(left: string, right: string) {
 
 function getDependencyNames(pkg: IPresetPackageJson) {
     return Object.keys(pkg.dependencies ?? {})
-        .filter(name => name.startsWith('@univerjs'))
+        .filter((name) => name.startsWith('@univerjs'))
         .sort(compareStrings);
 }
 
@@ -64,7 +80,7 @@ export function generatePresetLocales(options: IGeneratePresetLocalesOptions): s
 
     for (const locale of PRESET_LOCALES) {
         const dependenciesWithLocale = dependencyNames
-            .map(dependencyName => ({
+            .map((dependencyName) => ({
                 dependencyName,
                 localeSubpath: getDependencyLocaleSubpath(packageDir, dependencyName, locale),
             }))
@@ -74,19 +90,19 @@ export function generatePresetLocales(options: IGeneratePresetLocalesOptions): s
             continue;
         }
 
-        let content = `import { mergeLocales } from '@univerjs/core';\n\n`;
+        let content = 'import { mergeLocales } from \'@univerjs/core\';\n\n';
 
         for (const { dependencyName, localeSubpath } of dependenciesWithLocale) {
             content += `import ${convertImportNameFromPackageName(dependencyName)} from '${dependencyName}/${localeSubpath}/${locale}';\n`;
         }
 
-        content += `\nexport default mergeLocales(\n`;
+        content += '\nexport default mergeLocales(\n';
 
         for (const { dependencyName } of dependenciesWithLocale) {
             content += `    ${convertImportNameFromPackageName(dependencyName)},\n`;
         }
 
-        content += `);\n`;
+        content += ');\n';
 
         writeFileSync(path.join(localeDir, `${locale}.ts`), content);
         generated.push(locale);

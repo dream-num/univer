@@ -1,0 +1,84 @@
+{
+    "name": "@univerjs/preset-sheets-sort",
+    "version": "0.25.0",
+    "private": false,
+    "description": "Preset for sort functionality in Univer Sheets.",
+    "author": "DreamNum Co., Ltd. <developer@univer.ai>",
+    "license": "Apache-2.0",
+    "funding": {
+        "type": "opencollective",
+        "url": "https://opencollective.com/univer"
+    },
+    "homepage": "https://univer.ai",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/dream-num/univer"
+    },
+    "bugs": {
+        "url": "https://github.com/dream-num/univer/issues"
+    },
+    "keywords": [
+        "univer",
+        "univer-preset",
+        "sheets",
+        "sort"
+    ],
+    "sideEffects": [
+        "*.css"
+    ],
+    "exports": {
+        ".": "./src/index.ts",
+        "./locales/*": "./src/locales/*.ts",
+        "./lib/*": "./lib/*"
+    },
+    "main": "./src/index.ts",
+    "publishConfig": {
+        "access": "public",
+        "main": "./lib/es/index.js",
+        "module": "./lib/es/index.js",
+        "exports": {
+            ".": {
+                "import": "./lib/es/index.js",
+                "require": "./lib/cjs/index.js",
+                "types": "./lib/types/index.d.ts"
+            },
+            "./locales/*": {
+                "import": "./lib/es/locales/*.js",
+                "require": "./lib/cjs/locales/*.js",
+                "types": "./lib/types/locales/*.d.ts"
+            },
+            "./lib/*": "./lib/*"
+        }
+    },
+    "directories": {
+        "lib": "lib"
+    },
+    "files": [
+        "lib"
+    ],
+    "scripts": {
+        "prebuild": "univer-cli preset prepare",
+        "build:bundle": "univer-cli preset build --cleanup --umdDeps @univerjs/sheets-sort,@univerjs/sheets-sort-ui",
+        "build:types": "tsc -p tsconfig.node.json",
+        "build": "pnpm run build:bundle && pnpm run build:types",
+        "typecheck": "tsc --noEmit"
+    },
+    "peerDependencies": {
+        "react": "^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc",
+        "react-dom": "^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc",
+        "rxjs": ">=7.0.0"
+    },
+    "dependencies": {
+        "@univerjs/sheets-sort": "workspace:*",
+        "@univerjs/sheets-sort-ui": "workspace:*"
+    },
+    "devDependencies": {
+        "@univerjs-infra/shared": "workspace:*",
+        "@univerjs/core": "workspace:*",
+        "react": "18.3.1",
+        "react-dom": "18.3.1",
+        "rxjs": "^7.8.2",
+        "typescript": "^6.0.3"
+    },
+    "types": "./lib/types/index.d.ts"
+}

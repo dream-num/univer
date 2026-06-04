@@ -1,0 +1,75 @@
+{
+    "name": "@univerjs/presets",
+    "version": "0.25.0",
+    "private": false,
+    "description": "Build Univer apps faster and easier with pre-configured plugin collections.",
+    "author": "DreamNum Co., Ltd. <developer@univer.ai>",
+    "license": "Apache-2.0",
+    "funding": {
+        "type": "opencollective",
+        "url": "https://opencollective.com/univer"
+    },
+    "homepage": "https://univer.ai",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/dream-num/univer"
+    },
+    "bugs": {
+        "url": "https://github.com/dream-num/univer/issues"
+    },
+    "keywords": [
+        "univer",
+        "univer-preset",
+        "presets"
+    ],
+    "sideEffects": [
+        "*.css"
+    ],
+    "exports": {
+        ".": "./src/index.ts",
+        "./lib/*": "./lib/*"
+    },
+    "main": "./src/index.ts",
+    "types": "./lib/types/index.d.ts",
+    "publishConfig": {
+        "access": "public",
+        "main": "./lib/es/index.js",
+        "module": "./lib/es/index.js",
+        "exports": {
+            ".": {
+                "import": "./lib/es/index.js",
+                "require": "./lib/cjs/index.js",
+                "types": "./lib/types/index.d.ts"
+            },
+            "./lib/*": "./lib/*"
+        }
+    },
+    "directories": {
+        "lib": "lib"
+    },
+    "files": [
+        "lib"
+    ],
+    "scripts": {
+        "typecheck": "tsc --noEmit",
+        "build:bundle": "univer-cli preset build --cleanup --umdDeps @univerjs/themes,@univerjs/protocol,@univerjs/core,@univerjs/network,@univerjs/telemetry,@univerjs/rpc,@univerjs/engine-render,@univerjs/engine-formula,@univerjs/drawing --umdAdditionalFiles ./node_modules/@univerjs-infra/shared/react-polyfill/react-polyfill.js,./node_modules/@wendellhu/redi/dist/umd/index.js,./node_modules/@wendellhu/redi/dist/umd/react-bindings/index.js",
+        "build:types": "tsc -p tsconfig.node.json",
+        "build": "pnpm run build:bundle && pnpm run build:types"
+    },
+    "dependencies": {
+        "@univerjs/core": "workspace:*",
+        "@univerjs/drawing": "workspace:*",
+        "@univerjs/engine-formula": "workspace:*",
+        "@univerjs/engine-render": "workspace:*",
+        "@univerjs/network": "workspace:*",
+        "@univerjs/protocol": "workspace:*",
+        "@univerjs/rpc": "workspace:*",
+        "@univerjs/telemetry": "workspace:*",
+        "@univerjs/themes": "workspace:*"
+    },
+    "devDependencies": {
+        "@univerjs-infra/shared": "workspace:*",
+        "@wendellhu/redi": "1.1.1",
+        "typescript": "^6.0.3"
+    }
+}

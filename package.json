@@ -45,6 +45,7 @@
         "analyze:build": "tsx ./scripts/build-analysis.ts",
         "build": "turbo build --filter=!./common/*",
         "build:ci": "turbo build --filter=!./common/*",
+        "build:presets": "turbo build --filter @univerjs/presets^... --filter './presets/packages/*^...' --filter '!@univerjs/presets' --filter '!./presets/packages/*' && turbo build --filter @univerjs/presets --filter './presets/packages/*'",
         "build:demo": "pnpm --filter univer-examples build:demo",
         "build:e2e": "pnpm --filter univer-examples build:e2e",
         "serve:e2e": "serve ./examples/local",

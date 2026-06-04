@@ -46,7 +46,10 @@ export default antfu(
     typescriptPreset(),
     univerSourcePreset({
         noFacadeImportsOutsideFacade: {
-            ignore: ['packages/uniscript/src/services/script-execution.service.ts'],
+            ignore: [
+                'packages/uniscript/src/services/script-execution.service.ts',
+                'presets/packages/preset-',
+            ],
         },
     }),
     facadePreset(),

@@ -14,13 +14,31 @@
  * limitations under the License.
  */
 
-/* eslint-disable ts/no-non-null-asserted-optional-chain */
-
 import type { ICellData, Injector, IStyleData, Nullable } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
-import { HorizontalAlign, ICommandService, IConfirmService, IUniverInstanceService, LifecycleStages, TestConfirmService, VerticalAlign, WrapStrategy } from '@univerjs/core';
-import { AddWorksheetMergeCommand, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand } from '@univerjs/sheets';
-import { beforeEach, describe, expect, it } from 'vitest';
+import {
+    HorizontalAlign,
+    ICommandService,
+    IConfirmService,
+    ILogService,
+    IUniverInstanceService,
+    LifecycleStages,
+    TestConfirmService,
+    VerticalAlign,
+    WrapStrategy,
+} from '@univerjs/core';
+import {
+    AddWorksheetMergeCommand,
+    SetHorizontalTextAlignCommand,
+    SetRangeCustomMetadataCommand,
+    SetRangeValuesCommand,
+    SetRangeValuesMutation,
+    SetStyleCommand,
+    SetTextWrapCommand,
+    SetVerticalTextAlignCommand,
+} from '@univerjs/sheets';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { SHEETS_CUSTOM_FIELD_WARNING_MESSAGE } from '../const';
 import { createFacadeTestBed } from './create-test-bed';
 
 describe('Test FRange', () => {
@@ -56,6 +74,7 @@ describe('Test FRange', () => {
         commandService.registerCommand(SetHorizontalTextAlignCommand);
         commandService.registerCommand(SetTextWrapCommand);
         commandService.registerCommand(AddWorksheetMergeCommand);
+        commandService.registerCommand(SetRangeCustomMetadataCommand);
 
         getValueByPosition = (
             startRow: number,
@@ -260,6 +279,30 @@ describe('Test FRange', () => {
             [null, null, null],
             [null, null, null],
         ]);
+    });
+
+    it('Range custom metadata APIs should warn about custom field usage', () => {
+        const logService = get(ILogService);
+        Object.defineProperty(logService, 'warn', { configurable: true, value: vi.fn() });
+        const warnSpy = vi.spyOn(logService, 'warn');
+        const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+        const range = activeSheet?.getRange(0, 0, 2, 2);
+
+        range?.setCustomMetaData({ key: 'value' });
+        range?.getCustomMetaData();
+        range?.setCustomMetaDatas([
+            [{ key: 'a' }, { key: 'b' }],
+            [{ key: 'c' }, { key: 'd' }],
+        ]);
+        range?.getCustomMetaDatas();
+
+        expect(warnSpy).toHaveBeenCalledTimes(4);
+        expect(warnSpy).toHaveBeenNthCalledWith(1, SHEETS_CUSTOM_FIELD_WARNING_MESSAGE);
+        expect(warnSpy).toHaveBeenNthCalledWith(2, SHEETS_CUSTOM_FIELD_WARNING_MESSAGE);
+        expect(warnSpy).toHaveBeenNthCalledWith(3, SHEETS_CUSTOM_FIELD_WARNING_MESSAGE);
+        expect(warnSpy).toHaveBeenNthCalledWith(4, SHEETS_CUSTOM_FIELD_WARNING_MESSAGE);
+
+        warnSpy.mockRestore();
     });
 
     it('Range getCellData', () => {

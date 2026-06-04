@@ -77,7 +77,10 @@ export interface IWorkbookData {
     resources?: IResources;
 
     /**
-     * User stored custom fields
+     * User stored custom fields.
+     *
+     * @remarks
+     * This field is not recommended for external use. Use it at your own risk.
      */
     custom?: CustomData;
 }
@@ -151,7 +154,10 @@ export interface IWorksheetData {
     rightToLeft: BooleanNumber;
 
     /**
-     * User stored custom fields
+     * User stored custom fields.
+     *
+     * @remarks
+     * This field is not recommended for external use. Use it at your own risk.
      */
     custom?: CustomData;
 }
@@ -188,7 +194,10 @@ export interface IRowData {
     s?: Nullable<IStyleData | string>;
 
     /**
-     * User stored custom fields
+     * User stored custom fields.
+     *
+     * @remarks
+     * This field is not recommended for external use. Use it at your own risk.
      */
     custom?: CustomData;
 }
@@ -218,7 +227,10 @@ export interface IColumnData {
     s?: Nullable<IStyleData | string>;
 
     /**
-     * User stored custom fields
+     * User stored custom fields.
+     *
+     * @remarks
+     * This field is not recommended for external use. Use it at your own risk.
      */
     custom?: CustomData;
 }
@@ -277,7 +289,10 @@ export interface ICellData {
     si?: Nullable<string>;
 
     /**
-     * User stored custom fields
+     * User stored custom fields.
+     *
+     * @remarks
+     * This field is not recommended for external use. Use it at your own risk.
      */
     custom?: CustomData;
 }

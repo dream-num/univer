@@ -16,9 +16,25 @@
 
 import type { ICellData, Injector, Nullable } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
-import { ICommandService, IUniverInstanceService, LocaleType } from '@univerjs/core';
-import { CopySheetCommand, InsertSheetCommand, InsertSheetMutation, RemoveSheetCommand, RemoveSheetMutation, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand, SetWorksheetActiveOperation, SetWorksheetOrderCommand, SetWorksheetOrderMutation } from '@univerjs/sheets';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { ICommandService, ILogService, IUniverInstanceService, LocaleType } from '@univerjs/core';
+import {
+    CopySheetCommand,
+    InsertSheetCommand,
+    InsertSheetMutation,
+    RemoveSheetCommand,
+    RemoveSheetMutation,
+    SetHorizontalTextAlignCommand,
+    SetRangeValuesCommand,
+    SetRangeValuesMutation,
+    SetStyleCommand,
+    SetTextWrapCommand,
+    SetVerticalTextAlignCommand,
+    SetWorksheetActiveOperation,
+    SetWorksheetOrderCommand,
+    SetWorksheetOrderMutation,
+} from '@univerjs/sheets';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { SHEETS_CUSTOM_FIELD_WARNING_MESSAGE } from '../const';
 import { createFacadeTestBed } from './create-test-bed';
 
 describe('Test FWorkbook', () => {
@@ -75,6 +91,22 @@ describe('Test FWorkbook', () => {
     it('Workbook getSheetByName', () => {
         const activeSheet = univerAPI.getActiveWorkbook()?.getSheetByName('sheet1');
         expect(activeSheet).not.toBeNull();
+    });
+
+    it('Workbook custom metadata APIs should warn about custom field usage', () => {
+        const logService = get(ILogService);
+        Object.defineProperty(logService, 'warn', { configurable: true, value: vi.fn() });
+        const warnSpy = vi.spyOn(logService, 'warn');
+        const workbook = univerAPI.getActiveWorkbook();
+
+        workbook?.setCustomMetadata({ key: 'value' });
+        workbook?.getCustomMetadata();
+
+        expect(warnSpy).toHaveBeenCalledTimes(2);
+        expect(warnSpy).toHaveBeenNthCalledWith(1, SHEETS_CUSTOM_FIELD_WARNING_MESSAGE);
+        expect(warnSpy).toHaveBeenNthCalledWith(2, SHEETS_CUSTOM_FIELD_WARNING_MESSAGE);
+
+        warnSpy.mockRestore();
     });
 
     it('Workbook insertSheet, deleteSheet, and setActiveSheet', async () => {

@@ -14,14 +14,83 @@
  * limitations under the License.
  */
 
-import type { CellValue, CustomData, ICellData, IColumnData, IColumnRange, IFreeze, IObjectArrayPrimitiveType, IRange, IRowData, IRowRange, IStyleData, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import type { ISetColDataCommandParams, ISetGridlinesColorCommandParams, ISetRowDataCommandParams, ISetTextWrapCommandParams, IToggleGridlinesCommandParams } from '@univerjs/sheets';
+import type {
+    CellValue,
+    CustomData,
+    ICellData,
+    IColumnData,
+    IColumnRange,
+    IFreeze,
+    IObjectArrayPrimitiveType,
+    IRange,
+    IRowData,
+    IRowRange,
+    IStyleData,
+    Nullable,
+    Workbook,
+    Worksheet,
+} from '@univerjs/core';
+import type {
+    ISetColDataCommandParams,
+    ISetGridlinesColorCommandParams,
+    ISetRowDataCommandParams,
+    ISetTextWrapCommandParams,
+    IToggleGridlinesCommandParams,
+} from '@univerjs/sheets';
 import type { FDefinedName } from './f-defined-name';
 import type { FWorkbook } from './f-workbook';
-import { BooleanNumber, covertCellValue, Direction, generateIntervalsByPoints, ICommandService, ILogService, Inject, Injector, ObjectMatrix, RANGE_TYPE, WrapStrategy } from '@univerjs/core';
+import {
+    BooleanNumber,
+    covertCellValue,
+    Direction,
+    generateIntervalsByPoints,
+    ICommandService,
+    ILogService,
+    Inject,
+    Injector,
+    ObjectMatrix,
+    RANGE_TYPE,
+    WrapStrategy,
+} from '@univerjs/core';
 import { FBaseInitialable } from '@univerjs/core/facade';
 import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
-import { AppendRowCommand, CancelFrozenCommand, ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand, copyRangeStyles, InsertColByRangeCommand, InsertRowByRangeCommand, MoveColsCommand, MoveRowsCommand, RemoveColByRangeCommand, RemoveRowByRangeCommand, SetColDataCommand, SetColHiddenCommand, SetColWidthCommand, SetFrozenCommand, SetGridlinesColorCommand, SetRowDataCommand, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetTabColorCommand, SetTextWrapCommand, SetWorksheetColumnCountCommand, SetWorksheetDefaultStyleMutation, SetWorksheetHideCommand, SetWorksheetNameCommand, SetWorksheetRowCountCommand, SetWorksheetRowIsAutoHeightCommand, SetWorksheetRowIsAutoHeightMutation, SetWorksheetShowCommand, SheetsSelectionsService, ToggleGridlinesCommand } from '@univerjs/sheets';
+import {
+    AppendRowCommand,
+    CancelFrozenCommand,
+    ClearSelectionAllCommand,
+    ClearSelectionContentCommand,
+    ClearSelectionFormatCommand,
+    copyRangeStyles,
+    InsertColByRangeCommand,
+    InsertRowByRangeCommand,
+    MoveColsCommand,
+    MoveRowsCommand,
+    RemoveColByRangeCommand,
+    RemoveRowByRangeCommand,
+    SetColDataCommand,
+    SetColHiddenCommand,
+    SetColWidthCommand,
+    SetFrozenCommand,
+    SetGridlinesColorCommand,
+    SetRowDataCommand,
+    SetRowHeightCommand,
+    SetRowHiddenCommand,
+    SetSpecificColsVisibleCommand,
+    SetSpecificRowsVisibleCommand,
+    SetTabColorCommand,
+    SetTextWrapCommand,
+    SetWorksheetColumnCountCommand,
+    SetWorksheetDefaultStyleMutation,
+    SetWorksheetHideCommand,
+    SetWorksheetNameCommand,
+    SetWorksheetRowCountCommand,
+    SetWorksheetRowIsAutoHeightCommand,
+    SetWorksheetRowIsAutoHeightMutation,
+    SetWorksheetShowCommand,
+    SheetsSelectionsService,
+    ToggleGridlinesCommand,
+} from '@univerjs/sheets';
+import { SHEETS_CUSTOM_FIELD_WARNING_MESSAGE } from './const';
 import { FDefinedNameBuilder } from './f-defined-name';
 import { FRange } from './f-range';
 import { FSelection } from './f-selection';
@@ -1092,6 +1161,8 @@ export class FWorksheet extends FBaseInitialable {
      * ```
      */
     setRowCustom(custom: IObjectArrayPrimitiveType<CustomData>): FWorksheet {
+        this._logService.warn(SHEETS_CUSTOM_FIELD_WARNING_MESSAGE);
+
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
 
@@ -1590,6 +1661,8 @@ export class FWorksheet extends FBaseInitialable {
      * ```
      */
     setColumnCustom(custom: IObjectArrayPrimitiveType<CustomData>): FWorksheet {
+        this._logService.warn(SHEETS_CUSTOM_FIELD_WARNING_MESSAGE);
+
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
 
@@ -2474,6 +2547,8 @@ export class FWorksheet extends FBaseInitialable {
      * ```
      */
     setCustomMetadata(custom: CustomData | undefined): FWorksheet {
+        this._logService.warn(SHEETS_CUSTOM_FIELD_WARNING_MESSAGE);
+
         this._worksheet.setCustomMetadata(custom);
         return this;
     }
@@ -2491,6 +2566,8 @@ export class FWorksheet extends FBaseInitialable {
      * ```
      */
     getCustomMetadata(): CustomData | undefined {
+        this._logService.warn(SHEETS_CUSTOM_FIELD_WARNING_MESSAGE);
+
         return this._worksheet.getCustomMetadata();
     }
 
@@ -2508,6 +2585,8 @@ export class FWorksheet extends FBaseInitialable {
      * ```
      */
     setRowCustomMetadata(index: number, custom: CustomData | undefined): FWorksheet {
+        this._logService.warn(SHEETS_CUSTOM_FIELD_WARNING_MESSAGE);
+
         this._worksheet.getRowManager().setCustomMetadata(index, custom);
         return this;
     }
@@ -2526,6 +2605,8 @@ export class FWorksheet extends FBaseInitialable {
      * ```
      */
     setColumnCustomMetadata(index: number, custom: CustomData | undefined): FWorksheet {
+        this._logService.warn(SHEETS_CUSTOM_FIELD_WARNING_MESSAGE);
+
         this._worksheet.getColumnManager().setCustomMetadata(index, custom);
         return this;
     }
@@ -2544,6 +2625,8 @@ export class FWorksheet extends FBaseInitialable {
      * ```
      */
     getRowCustomMetadata(index: number): CustomData | undefined {
+        this._logService.warn(SHEETS_CUSTOM_FIELD_WARNING_MESSAGE);
+
         return this._worksheet.getRowManager().getCustomMetadata(index);
     }
 
@@ -2561,6 +2644,8 @@ export class FWorksheet extends FBaseInitialable {
      * ```
      */
     getColumnCustomMetadata(index: number): CustomData | undefined {
+        this._logService.warn(SHEETS_CUSTOM_FIELD_WARNING_MESSAGE);
+
         return this._worksheet.getColumnManager().getCustomMetadata(index);
     }
 

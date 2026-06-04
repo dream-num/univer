@@ -314,12 +314,12 @@ describe('Test FRange', () => {
 
     it('Range isMerged', () => {
         const activeSheet = univerAPI.getActiveWorkbook()!.getActiveSheet()!;
-        const range = activeSheet!.getRange(2, 3);
-        const isMerged = range?.isMerged()!;
+        const range = activeSheet.getRange(2, 3);
+        const isMerged = range.isMerged();
         expect(isMerged).toBe(false);
 
-        const range2 = activeSheet!.getRange(2, 3, 3, 3)!;
-        const isMerged2 = range2.isMerged()!;
+        const range2 = activeSheet.getRange(2, 3, 3, 3);
+        const isMerged2 = range2.isMerged();
         expect(isMerged2).toBe(false);
     });
 
@@ -634,7 +634,7 @@ describe('Test FRange', () => {
     it('test Merge', async () => {
         let hasError = false;
         try {
-            const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet()!;
+            const activeSheet = univerAPI.getActiveWorkbook()!.getActiveSheet()!;
             let range = activeSheet.getRange(0, 2, 0, 2);
             expect(activeSheet.getMergedRanges().length).toBe(0);
             range = await range.merge();
@@ -653,7 +653,7 @@ describe('Test FRange', () => {
             expect(range2.isPartOfMerge()).toBeTruthy();
             const range3 = activeSheet.getRange(0, 5, 0, 5);
             await range3.merge();
-        } catch (error) {
+        } catch {
             hasError = true;
         }
         expect(hasError).toBeTruthy();

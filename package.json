@@ -46,7 +46,7 @@
         "build": "pnpm run build:plugins && pnpm run build:presets",
         "build:ci": "pnpm run build",
         "build:plugins": "turbo build --filter '!./common/*' --filter '!./presets/**'",
-        "build:presets": "turbo build --filter './presets/**'",
+        "build:presets": "turbo build --filter './presets/**...' --filter '!./presets/**' && turbo build --filter './presets/**'",
         "build:demo": "pnpm --filter univer-examples build:demo",
         "build:e2e": "pnpm --filter univer-examples build:e2e",
         "serve:e2e": "serve ./examples/local",

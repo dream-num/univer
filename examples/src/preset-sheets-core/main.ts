@@ -19,7 +19,6 @@ import { UniverSheetsCorePreset } from '@univerjs/preset-sheets-core';
 import UniverPresetSheetsCoreZhCN from '@univerjs/preset-sheets-core/locales/zh-CN';
 import { createUniver, LocaleType, LogLevel, mergeLocales } from '@univerjs/presets';
 
-import '@univerjs/preset-sheets-core/lib/index.css';
 import '../global.css';
 
 const { univer, univerAPI } = createUniver({

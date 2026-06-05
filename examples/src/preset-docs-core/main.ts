@@ -20,7 +20,6 @@ import { UniverDocsCorePreset } from '@univerjs/preset-docs-core';
 import UniverPresetDocsCoreZhCN from '@univerjs/preset-docs-core/locales/zh-CN';
 import { createUniver, LocaleType, LogLevel, mergeLocales } from '@univerjs/presets';
 
-import '@univerjs/preset-docs-core/lib/index.css';
 import '../global.css';
 
 const { univer, univerAPI } = createUniver({

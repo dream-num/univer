@@ -151,8 +151,6 @@ export async function buildPresetPackage(options: IPresetBuildOptions = {}) {
         removePresetOutputs(packageDir);
     }
 
-    preparePresetPackage(packageDir);
-
     const externalPackages = getExternalPackages(packageJson);
     const baseConfig = createBaseConfig({
         entries: [],

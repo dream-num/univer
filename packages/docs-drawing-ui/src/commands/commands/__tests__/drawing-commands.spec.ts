@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DependencyIdentifier, DocumentDataModel, ICommand, IDocumentData, Injector } from '@univerjs/core';
+import type { DependencyIdentifier, DocumentDataModel, ICommand, IDocumentData } from '@univerjs/core';
 import {
     awaitTime,
     Direction,

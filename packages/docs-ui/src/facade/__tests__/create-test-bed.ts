@@ -27,8 +27,8 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
-import { DocSelectionManagerService, DocSkeletonManagerService, DocStateEmitService } from '@univerjs/docs';
-import { DocIMEInputManagerService, DocsRenderService, DocStateChangeManagerService } from '@univerjs/docs-ui';
+import { DocSelectionManagerService, DocSkeletonManagerService, DocStateChangeManagerService, DocStateEmitService } from '@univerjs/docs';
+import { DocIMEInputManagerService, DocsRenderService } from '@univerjs/docs-ui';
 import enUS from '@univerjs/docs-ui/locale/en-US';
 import zhCN from '@univerjs/docs-ui/locale/zh-CN';
 import { DumbCanvasColorService, ICanvasColorService, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';

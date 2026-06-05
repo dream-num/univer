@@ -77,7 +77,6 @@ export { SetParagraphNamedStyleCommand } from './commands/commands/set-heading.c
 export { SwitchDocModeCommand } from './commands/commands/switch-doc-mode.command';
 export { CreateDocTableCommand, type ICreateDocTableCommandParams } from './commands/commands/table/doc-table-create.command';
 export { DocTableDeleteColumnsCommand, DocTableDeleteRowsCommand, DocTableDeleteTableCommand } from './commands/commands/table/doc-table-delete.command';
-
 export type {
     IDocTableDeleteColumnsCommandParams,
     IDocTableDeleteRowsCommandParams,
@@ -102,7 +101,6 @@ export {
 export type { IDocTableTabCommandParams } from './commands/commands/table/doc-table-tab.command';
 export { DocTableTabCommand } from './commands/commands/table/doc-table-tab.command';
 export { genTableSource, getEmptyTableCell, getEmptyTableRow, getTableColumn } from './commands/commands/table/table';
-
 export { DocCreateTableOperation } from './commands/operations/doc-create-table.operation';
 export { type IMoveCursorOperationParams, MoveSelectionOperation } from './commands/operations/doc-cursor.operation';
 export { MoveCursorOperation } from './commands/operations/doc-cursor.operation';
@@ -118,7 +116,6 @@ export { menuSchema as DocsUIMenuSchema } from './menu/schema';
 export { UniverDocsUIPlugin } from './plugin';
 export * from './services';
 export { IDocClipboardService } from './services/clipboard/clipboard.service';
-
 export { convertBodyToHtml } from './services/clipboard/udm-to-html/convertor';
 export { DocAutoFormatService } from './services/doc-auto-format.service';
 export { DocEventManagerService, type IBulletBound } from './services/doc-event-manager.service';
@@ -126,14 +123,12 @@ export { DocIMEInputManagerService } from './services/doc-ime-input-manager.serv
 export { DocParagraphMenuService } from './services/doc-paragraph-menu.service';
 export { calcDocRangePositions, DocCanvasPopManagerService } from './services/doc-popup-manager.service';
 export { DocPrintInterceptorService, type IDocPrintComponentContext, type IDocPrintContext } from './services/doc-print-interceptor.service';
-export { DocStateChangeManagerService } from './services/doc-state-change-manager.service';
 export { DocsRenderService } from './services/docs-render.service';
 export { Editor } from './services/editor/editor';
 export { EditorService, IEditorService } from './services/editor/editor-manager.service';
 export { isInSameTableCell, isValidRectRange, NodePositionConvertToRectRange } from './services/selection/convert-rect-range';
 export { NodePositionConvertToCursor } from './services/selection/convert-text-range';
 export { getOneTextSelectionRange } from './services/selection/convert-text-range';
-
 export type { IEditorInputConfig } from './services/selection/doc-selection-render.service';
 export { DocSelectionRenderService } from './services/selection/doc-selection-render.service';
 export type { IDocRange } from './services/selection/range-interface';

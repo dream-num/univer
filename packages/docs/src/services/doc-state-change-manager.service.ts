@@ -15,12 +15,11 @@
  */
 
 import type { JSONXActions, Nullable } from '@univerjs/core';
-import type { IDocStateChangeParams, IRichTextEditingMutationParams } from '@univerjs/docs';
-import { ICommandService, Inject, IUndoRedoService, IUniverInstanceService, JSONX, RedoCommandId, RxDisposable, UndoCommandId } from '@univerjs/core';
-import { DocStateEmitService } from '@univerjs/docs';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import type { IRichTextEditingMutationParams } from '../commands/mutations/core-editing.mutation';
+import type { IDocStateChangeInfo, IDocStateChangeParams } from './doc-state-emit.service';
+import { createIdentifier, ICommandService, Inject, IUndoRedoService, IUniverInstanceService, JSONX, Optional, RedoCommandId, RxDisposable, UndoCommandId } from '@univerjs/core';
 import { BehaviorSubject, takeUntil } from 'rxjs';
-import { DocIMEInputManagerService } from './doc-ime-input-manager.service';
+import { DocStateEmitService } from './doc-state-emit.service';
 
 type ChangeStateCacheType = 'history' | 'collaboration';
 
@@ -31,9 +30,14 @@ interface IStateCache {
     collaboration: IDocStateChangeParams[];
 }
 
-// This class sends out state-changing events, what is the state, the data model,
-// and the cursor & selection, and this class mainly serves the History(undo/redo) module and
-// the collaboration module.
+export interface IDocStateChangeInterceptorService {
+    transformChangeStateInfo(changeStateInfo: IDocStateChangeInfo): Nullable<IDocStateChangeInfo>;
+}
+
+export const IDocStateChangeInterceptorService = createIdentifier<IDocStateChangeInterceptorService>('doc.state-change-interceptor-service');
+
+// This class sends out state-changing events, what the state is, the data model,
+// and cursor & selection information. It mainly serves history and collaboration.
 export class DocStateChangeManagerService extends RxDisposable {
     private readonly _docStateChange$ = new BehaviorSubject<Nullable<IDocStateChangeParams>>(null);
     readonly docStateChange$ = this._docStateChange$.asObservable();
@@ -45,11 +49,11 @@ export class DocStateChangeManagerService extends RxDisposable {
     private _changeStateCacheTimer: Nullable<ReturnType<typeof setTimeout>> = null;
 
     constructor(
-        @Inject(IUndoRedoService) private _undoRedoService: IUndoRedoService,
+        @Optional(IUndoRedoService) private _undoRedoService: Nullable<IUndoRedoService>,
         @ICommandService private readonly _commandService: ICommandService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(DocStateEmitService) private readonly _docStateEmitService: DocStateEmitService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
+        @Optional(IDocStateChangeInterceptorService) private readonly _docStateChangeInterceptorService?: IDocStateChangeInterceptorService
     ) {
         super();
 
@@ -99,26 +103,16 @@ export class DocStateChangeManagerService extends RxDisposable {
                 return;
             }
 
-            const { isCompositionEnd, isSync, syncer, ...changeState } = changeStateInfo;
-            const imeInputManagerService = this._renderManagerService.getRenderById(isSync ? syncer! : changeStateInfo.unitId)?.with(DocIMEInputManagerService);
-
-            if (imeInputManagerService == null) {
+            const interceptedChangeStateInfo = this._docStateChangeInterceptorService?.transformChangeStateInfo(changeStateInfo) ?? changeStateInfo;
+            if (interceptedChangeStateInfo == null) {
                 return;
             }
 
-            // Handle IME input.
-            if (isCompositionEnd) {
-                const historyParams = imeInputManagerService.fetchComposedUndoRedoMutationParams();
-
-                if (historyParams == null) {
-                    throw new Error('historyParams is null in RichTextEditingMutation');
-                }
-
-                const { undoMutationParams, redoMutationParams, previousActiveRange } = historyParams;
-                changeState.redoState.actions = redoMutationParams.actions;
-                changeState.undoState.actions = undoMutationParams.actions;
-                changeState.undoState.textRanges = [previousActiveRange];
+            if (interceptedChangeStateInfo.isSync) {
+                return;
             }
+
+            const { isCompositionEnd: _isCompositionEnd, isSync: _isSync, syncer: _syncer, ...changeState } = interceptedChangeStateInfo;
 
             this._setChangeState(changeState);
         });
@@ -127,7 +121,7 @@ export class DocStateChangeManagerService extends RxDisposable {
     private _cacheChangeState(changeState: IDocStateChangeParams, type: ChangeStateCacheType = 'history') {
         const { trigger, unitId, noHistory, debounce = false } = changeState;
 
-        if (noHistory || trigger == null) {
+        if (noHistory || (type === 'history' && trigger == null)) {
             return;
         }
 
@@ -178,7 +172,7 @@ export class DocStateChangeManagerService extends RxDisposable {
         const undoRedoService = this._undoRedoService;
         const cacheStates = this._historyStateCache.get(unitId);
 
-        if (!Array.isArray(cacheStates) || cacheStates.length === 0) {
+        if (undoRedoService == null || !Array.isArray(cacheStates) || cacheStates.length === 0) {
             return;
         }
 

@@ -235,15 +235,3 @@ export function createFrozenCommandTestBed(workbookData?: IWorkbookData) {
         sheet,
     };
 }
-
-// export class MockRenderManagerService implements Pick<IRenderManagerService, 'getRenderById'> {
-//     constructor(
-//         @Inject(Injector) private readonly _injector: Injector
-//     ) { }
-
-//     getRenderById(_unitId: string): Nullable<IRender> {
-//         return {
-//             with: <T>(identifier: DependencyIdentifier<T>) => this._injector.get(identifier),
-//         } as unknown as IRender;
-//     }
-// }

@@ -16,10 +16,11 @@
 
 /* eslint-disable ts/no-explicit-any */
 
-import type { Ctor, Dependency, DependencyIdentifier, DocumentDataModel, IDocumentData, Nullable } from '@univerjs/core';
-import type { DocumentSkeleton, IRender, IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import type { Dependency, DocumentDataModel, IDocumentData, Nullable } from '@univerjs/core';
+import type { DocumentSkeleton, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import {
     BooleanNumber,
+    DisposableCollection,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     ILogService,
     Inject,
@@ -32,12 +33,11 @@ import {
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
-import { DocSelectionManagerService, DocSkeletonManagerService, DocStateEmitService } from '@univerjs/docs';
-import { DocumentViewModel, IRenderManagerService } from '@univerjs/engine-render';
+import { DocSelectionManagerService, DocSkeletonManagerService, DocStateChangeManagerService, DocStateEmitService } from '@univerjs/docs';
+import { DocumentViewModel, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { BehaviorSubject, takeUntil } from 'rxjs';
 import { DocIMEInputManagerService } from '../../../services/doc-ime-input-manager.service';
 import { DocMenuStyleService } from '../../../services/doc-menu-style.service';
-import { DocStateChangeManagerService } from '../../../services/doc-state-change-manager.service';
 import { DocSelectionRenderService } from '../../../services/selection/doc-selection-render.service';
 
 const TEST_DOCUMENT_DATA_EN: IDocumentData = {
@@ -114,7 +114,7 @@ export function createCommandTestBed(docData?: IDocumentData, dependencies?: Dep
             const injector = this._injector;
             injector.get(IUndoRedoService);
 
-            injector.add([IRenderManagerService, { useClass: MockRenderManagerService as unknown as Ctor<IRenderManagerService> }]);
+            injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
 
             injector.add([DocSelectionManagerService]);
             injector.add([DocMenuStyleService]);
@@ -155,6 +155,23 @@ export function createCommandTestBed(docData?: IDocumentData, dependencies?: Dep
     }, univerInstanceService);
 
     injector.add([DocSkeletonManagerService, { useValue: fakeDocSkeletonManager as unknown as DocSkeletonManagerService }]);
+    const renderManagerService = get(IRenderManagerService);
+    if (renderManagerService.getRenderUnitById(doc.getUnitId()) == null) {
+        renderManagerService.addRender(doc.getUnitId(), {
+            unitId: doc.getUnitId(),
+            type: UniverInstanceType.UNIVER_DOC,
+            engine: new DisposableCollection() as any,
+            scene: new DisposableCollection() as any,
+            mainComponent: null as any,
+            components: new Map(),
+            isMainScene: true,
+            activated$: new BehaviorSubject(true),
+            with: injector.get.bind(injector),
+            activate: () => {},
+            deactivate: () => {},
+            isDisposed: () => false,
+        });
+    }
 
     univerInstanceService.focusUnit('test-doc');
 
@@ -167,21 +184,6 @@ export function createCommandTestBed(docData?: IDocumentData, dependencies?: Dep
         doc,
         injector,
     };
-}
-
-// These services are for document build and manage doc skeletons.
-
-export class MockRenderManagerService implements Pick<IRenderManagerService, 'getRenderById'> {
-    constructor(
-        @Inject(Injector) private readonly _injector: Injector
-    ) { }
-
-    getRenderById(_unitId: string): Nullable<IRender> {
-        return {
-            with: <T>(identifier: DependencyIdentifier<T>) => this._injector.get(identifier),
-            isDisposed: () => false,
-        } as unknown as IRender;
-    }
 }
 
 export class MockDocSkeletonManagerService extends RxDisposable implements IRenderModule {

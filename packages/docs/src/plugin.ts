@@ -33,6 +33,7 @@ import { defaultPluginConfig, DOCS_PLUGIN_CONFIG_KEY } from './config/config';
 import { DocCustomRangeController } from './controllers/custom-range.controller';
 import { DocContentInsertService } from './services/doc-content-insert.service';
 import { DocSelectionManagerService } from './services/doc-selection-manager.service';
+import { DocStateChangeManagerService } from './services/doc-state-change-manager.service';
 import { DocStateEmitService } from './services/doc-state-emit.service';
 
 export class UniverDocsPlugin extends Plugin {
@@ -82,6 +83,7 @@ export class UniverDocsPlugin extends Plugin {
             [
                 [DocSelectionManagerService],
                 [DocStateEmitService],
+                [DocStateChangeManagerService],
                 [DocContentInsertService],
                 [DocCustomRangeController],
             ] as Dependency[]
@@ -89,6 +91,7 @@ export class UniverDocsPlugin extends Plugin {
     }
 
     override onReady(): void {
+        this._injector.get(DocStateChangeManagerService);
         this._injector.get(DocCustomRangeController);
     }
 }

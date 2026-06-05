@@ -30,7 +30,7 @@ import {
     touchDependencies,
     UniverInstanceType,
 } from '@univerjs/core';
-import { DocInterceptorService, DocSkeletonManagerService } from '@univerjs/docs';
+import { DocInterceptorService, DocSkeletonManagerService, IDocStateChangeInterceptorService } from '@univerjs/docs';
 import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { IShortcutService } from '@univerjs/ui';
 import pkg from '../package.json';
@@ -117,12 +117,12 @@ import { DocClipboardService, IDocClipboardService } from './services/clipboard/
 import { DocAutoFormatService } from './services/doc-auto-format.service';
 import { DocEventManagerService } from './services/doc-event-manager.service';
 import { DocIMEInputManagerService } from './services/doc-ime-input-manager.service';
+import { DocIMEStateChangeInterceptorService } from './services/doc-ime-state-change-interceptor.service';
 import { DocMenuStyleService } from './services/doc-menu-style.service';
 import { DocPageLayoutService } from './services/doc-page-layout.service';
 import { DocParagraphMenuService } from './services/doc-paragraph-menu.service';
 import { DocCanvasPopManagerService } from './services/doc-popup-manager.service';
 import { DocPrintInterceptorService } from './services/doc-print-interceptor.service';
-import { DocStateChangeManagerService } from './services/doc-state-change-manager.service';
 import { DocsRenderService } from './services/docs-render.service';
 import { EditorService, IEditorService } from './services/editor/editor-manager.service';
 import { DocFloatMenuService } from './services/float-menu.service';
@@ -179,9 +179,7 @@ export class UniverDocsUIPlugin extends Plugin {
         this._markDocAsFocused();
 
         touchDependencies(this._injector, [
-            [DocStateChangeManagerService],
             [DocsRenderService],
-
         ]);
     }
 
@@ -329,7 +327,7 @@ export class UniverDocsUIPlugin extends Plugin {
             [IDocClipboardService, { useClass: DocClipboardService }],
             [DocCanvasPopManagerService],
             [DocsRenderService],
-            [DocStateChangeManagerService],
+            [IDocStateChangeInterceptorService, { useClass: DocIMEStateChangeInterceptorService }],
             [DocAutoFormatService],
             [DocMenuStyleService],
 

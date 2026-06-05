@@ -11,6 +11,7 @@ import {
     typescriptPreset,
     univerSourcePreset,
 } from '@univerjs-infra/shared/eslint';
+import reactHooks from 'eslint-plugin-react-hooks';
 
 export default antfu(
     {
@@ -38,6 +39,9 @@ export default antfu(
         formatters: {
             css: true,
             html: true,
+        },
+        plugins: {
+            'react-hooks': reactHooks,
         },
         rules: baseRules,
     },

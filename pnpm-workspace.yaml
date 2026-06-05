@@ -2,6 +2,8 @@ packages:
     - common/*
     - examples
     - mockdata
+    - presets
+    - presets/packages/*
     - packages/*
     - tests/*
 publicHoistPattern:

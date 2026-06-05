@@ -9,6 +9,7 @@
         },
 
         "build": {
+            "outputs": ["lib/**"]
         },
 
         "build:e2e": {},

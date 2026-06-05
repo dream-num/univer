@@ -25,7 +25,7 @@ export interface IBuildOptions {
     obfuscatorIgnorePatterns?: RegExp[];
 }
 
-export type TEntryType = 'facade' | 'index' | 'locale';
+export type TEntryType = 'facade' | 'index' | 'locale' | 'worker';
 
 export interface IEntryConfig {
     key: string;

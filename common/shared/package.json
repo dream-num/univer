@@ -19,7 +19,8 @@
         "./esbuild": "./esbuild/index.ts",
         "./tailwind": "./tailwind/tailwind.config.ts",
         "./postcss": "./postcss/postcss.config.mjs",
-        "./tsdown": "./tsdown/index.ts"
+        "./tsdown": "./tsdown/index.ts",
+        "./preset-build": "./preset-build/index.ts"
     },
     "main": "bin/index.ts",
     "bin": {

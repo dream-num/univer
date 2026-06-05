@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IMutation, IMutationInfo, Workbook } from '@univerjs/core';
+import type { BaseDataModel, IDisposable, IMutation, IMutationInfo, Workbook } from '@univerjs/core';
 import type { IRemoteSyncMutationOptions } from '../../services/remote-instance/remote-instance.service';
 import {
     CommandType,
@@ -73,8 +73,28 @@ export class DataSyncPrimaryController extends RxDisposable {
      * sync other types of documents, you should manually call this method with that document's id.
      */
     syncUnit(unitId: string): IDisposable {
+        const alreadySyncing = this._syncingUnits.has(unitId);
         this._syncingUnits.add(unitId);
-        return toDisposable(() => this._syncingUnits.delete(unitId));
+        const unit = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)
+            ?? this._univerInstanceService.getUnit<BaseDataModel>(unitId, UniverInstanceType.UNIVER_BASE);
+        if (!alreadySyncing && unit) {
+            this._remoteInstanceService.createInstance({
+                unitID: unit.getUnitId(),
+                type: unit.type,
+                snapshot: unit.getSnapshot(),
+            });
+        }
+
+        return toDisposable(() => {
+            if (!alreadySyncing) {
+                this._syncingUnits.delete(unitId);
+            }
+            if (!alreadySyncing && unit) {
+                this._remoteInstanceService.disposeInstance({
+                    unitID: unit.getUnitId(),
+                });
+            }
+        });
     }
 
     private _initRPCChannels(): void {

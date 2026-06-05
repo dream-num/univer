@@ -94,6 +94,16 @@ describe('data-sync controllers', () => {
         const univerInstanceService = {
             getTypeOfUnitAdded$: vi.fn(() => added$.asObservable()),
             getTypeOfUnitDisposed$: vi.fn(() => disposed$.asObservable()),
+            getUnit: vi.fn((unitId: string) => {
+                if (unitId !== 'unit-2') {
+                    return null;
+                }
+                return {
+                    type: UniverInstanceType.UNIVER_BASE,
+                    getUnitId: () => 'unit-2',
+                    getSnapshot: () => ({ base: true }),
+                };
+            }),
         } as unknown as IUniverInstanceService;
 
         const remoteSyncService = {
@@ -130,6 +140,11 @@ describe('data-sync controllers', () => {
         controller.registerSyncingMutations({ id: 'm-sync' } as never);
 
         const unit2Disposable = controller.syncUnit('unit-2');
+        expect(remoteInstanceImpl.createInstance).toHaveBeenCalledWith({
+            unitID: 'unit-2',
+            type: UniverInstanceType.UNIVER_BASE,
+            snapshot: { base: true },
+        });
 
         commandCallback?.({
             id: 'm-sync',
@@ -169,6 +184,7 @@ describe('data-sync controllers', () => {
         expect(remoteInstanceImpl.syncMutation).toHaveBeenCalledTimes(2);
 
         unit2Disposable.dispose();
+        expect(remoteInstanceImpl.disposeInstance).toHaveBeenCalledWith({ unitID: 'unit-2' });
         commandCallback?.({
             id: 'm-sync',
             type: CommandType.MUTATION,
@@ -227,6 +243,7 @@ describe('data-sync controllers', () => {
         const univerInstanceService = {
             getTypeOfUnitAdded$: vi.fn(() => added$.asObservable()),
             getTypeOfUnitDisposed$: vi.fn(() => disposed$.asObservable()),
+            getUnit: vi.fn(() => null),
         } as unknown as IUniverInstanceService;
 
         const remoteSyncService = {

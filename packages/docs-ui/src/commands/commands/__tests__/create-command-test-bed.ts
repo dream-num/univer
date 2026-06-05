@@ -32,12 +32,11 @@ import {
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
-import { DocSelectionManagerService, DocSkeletonManagerService, DocStateEmitService } from '@univerjs/docs';
+import { DocSelectionManagerService, DocSkeletonManagerService, DocStateChangeManagerService, DocStateEmitService } from '@univerjs/docs';
 import { DocumentViewModel, IRenderManagerService } from '@univerjs/engine-render';
 import { BehaviorSubject, takeUntil } from 'rxjs';
 import { DocIMEInputManagerService } from '../../../services/doc-ime-input-manager.service';
 import { DocMenuStyleService } from '../../../services/doc-menu-style.service';
-import { DocStateChangeManagerService } from '../../../services/doc-state-change-manager.service';
 import { DocSelectionRenderService } from '../../../services/selection/doc-selection-render.service';
 
 const TEST_DOCUMENT_DATA_EN: IDocumentData = {
@@ -171,7 +170,7 @@ export function createCommandTestBed(docData?: IDocumentData, dependencies?: Dep
 
 // These services are for document build and manage doc skeletons.
 
-export class MockRenderManagerService implements Pick<IRenderManagerService, 'getRenderById'> {
+export class MockRenderManagerService implements Pick<IRenderManagerService, 'getRenderById' | 'getRenderUnitById'> {
     constructor(
         @Inject(Injector) private readonly _injector: Injector
     ) { }
@@ -181,6 +180,10 @@ export class MockRenderManagerService implements Pick<IRenderManagerService, 'ge
             with: <T>(identifier: DependencyIdentifier<T>) => this._injector.get(identifier),
             isDisposed: () => false,
         } as unknown as IRender;
+    }
+
+    getRenderUnitById(_unitId: string): Nullable<IRender> {
+        return this.getRenderById(_unitId);
     }
 }
 

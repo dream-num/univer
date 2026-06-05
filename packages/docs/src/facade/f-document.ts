@@ -27,6 +27,11 @@ import {
 } from '@univerjs/core';
 import { FBaseInitialable } from '@univerjs/core/facade';
 import { InsertTextCommand } from '@univerjs/docs';
+import {
+    buildPlainTextInsertBody,
+    getNormalizedPlainTextCursorOffset,
+    getParagraphStyleAtOffset,
+} from './utils';
 
 export interface IDocumentInsertTextFacadeOptions {
     startOffset?: number;
@@ -235,15 +240,21 @@ export class FDocument extends FBaseInitialable {
             collapsed: startOffset === endOffset,
             segmentId,
         };
+        const removeLeadingParagraphBreak = startOffset === 0;
+        const insertBody = buildPlainTextInsertBody(text, {
+            paragraphStyle: getParagraphStyleAtOffset(body, startOffset),
+            removeLeadingParagraphBreak,
+        });
+        const cursorOffset = options.cursorOffset == null
+            ? undefined
+            : getNormalizedPlainTextCursorOffset(text, options.cursorOffset, removeLeadingParagraphBreak);
 
         return this._commandService.executeCommand<IInsertTextCommandParams>(InsertTextCommand.id, {
             unitId,
-            body: {
-                dataStream: text,
-            },
+            body: insertBody,
             range: activeRange,
             segmentId,
-            ...(options.cursorOffset == null ? {} : { cursorOffset: options.cursorOffset }),
+            ...(cursorOffset == null ? {} : { cursorOffset }),
         });
     }
 

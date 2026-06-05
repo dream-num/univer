@@ -71,7 +71,7 @@ describe('Test FDocument', () => {
             startOffset: 6,
         })).resolves.toBe(true);
 
-        expect(document.save().body?.dataStream).toBe('Hello,Line 1\r\nLine 2\r\n\r\n');
+        expect(document.save().body?.dataStream).toBe('Hello,Line 1\rLine 2\r\r\n');
     });
 
     it('throws when appending text to a document without a body', () => {

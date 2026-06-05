@@ -112,7 +112,7 @@ export const Input = forwardRef<HTMLInputElement, IInputProps>(
                 });
 
                 observer.observe(slotRef.current, { childList: true, subtree: true });
-                // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
+
                 setPaddingRight(slotRef.current.offsetWidth + 4 * 2);
             }
 

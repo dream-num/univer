@@ -86,7 +86,7 @@ export function ShortcutPanel() {
             })
             .sort((a, b) => a.sequence - b.sequence);
 
-        // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
+        // eslint-disable-next-line react/set-state-in-effect
         setShortcutItems(toRender);
     }, [shortcutService, localeService, currentLocale]);
 

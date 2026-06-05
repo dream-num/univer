@@ -19,6 +19,7 @@ import type { IRenderContext } from '@univerjs/engine-render';
 import {
     awaitTime,
     CustomRangeType,
+    DisposableCollection,
     ICommandService,
     IUniverInstanceService,
     LifecycleService,
@@ -27,7 +28,8 @@ import {
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
+import { BehaviorSubject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { DocsRenameMutation } from '../commands/mutations/docs-rename.mutation';
 import { SetTextSelectionsOperation } from '../commands/operations/text-selection.operation';
@@ -58,20 +60,21 @@ function registerRenderManagerForDoc(
         univerInstanceService
     );
 
-    injector.add([IRenderManagerService, {
-        useValue: {
-            getRenderById: (unitId: string) => unitId === doc.getUnitId()
-                ? ({
-                    with: () => skeletonManager,
-                } as never)
-                : null,
-            getRenderUnitById: (unitId: string) => unitId === doc.getUnitId()
-                ? ({
-                    with: () => skeletonManager,
-                } as never)
-                : null,
-        } as never,
-    }]);
+    injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+    injector.get(IRenderManagerService).addRender(doc.getUnitId(), {
+        unitId: doc.getUnitId(),
+        type: UniverInstanceType.UNIVER_DOC,
+        engine: new DisposableCollection() as never,
+        scene: new DisposableCollection() as never,
+        mainComponent: null,
+        components: new Map(),
+        isMainScene: true,
+        activated$: new BehaviorSubject(true),
+        with: <T>() => skeletonManager as T,
+        activate: () => {},
+        deactivate: () => {},
+        isDisposed: () => false,
+    });
 
     return skeletonManager;
 }

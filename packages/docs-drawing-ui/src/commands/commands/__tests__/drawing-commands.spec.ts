@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommand, IDocumentData, Injector } from '@univerjs/core';
+import type { DependencyIdentifier, DocumentDataModel, ICommand, IDocumentData, Injector } from '@univerjs/core';
 import {
     awaitTime,
     Direction,
+    DisposableCollection,
     ICommandService,
     IUniverInstanceService,
     ObjectRelativeFromH,
@@ -30,7 +31,8 @@ import { DocContentInsertService, DocSelectionManagerService, DocSkeletonManager
 import { DocDrawingController as CoreDocDrawingController, DocDrawingService, IDocDrawingService } from '@univerjs/docs-drawing';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { DrawingManagerService, IDrawingManagerService } from '@univerjs/drawing';
-import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
+import { DocumentEditArea, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
+import { BehaviorSubject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createDocUiTestBed } from '../../../__tests__/create-doc-ui-test-bed';
 import { DocDrawingAddRemoveController } from '../../../controllers/doc-drawing-notification.controller';
@@ -101,30 +103,38 @@ function createDrawingDocData(): IDocumentData {
 
 function setupDrawingTestBed(docData: IDocumentData) {
     const refreshControls = vi.fn();
-    let injector!: Injector;
-    const renderManagerService = {
-        getRenderById: () => ({
-            scene: {
-                getTransformerByCreate: () => ({
-                    refreshControls,
-                }),
-            },
-            with: <T>(token: T) => {
-                if (token === DocSelectionRenderService) {
-                    return {
-                        getSegment: () => '',
-                    } as T;
-                }
-
-                return injector.get(token as never);
-            },
-        }),
-    };
     const testBed = createDocUiTestBed(docData, [
-        [IRenderManagerService, { useValue: renderManagerService }],
+        [IRenderManagerService, { useClass: RenderManagerService }],
     ]);
     const { univer, get } = testBed;
-    injector = testBed.injector;
+    const injector = testBed.injector;
+
+    const scene = new DisposableCollection() as any;
+    scene.getTransformerByCreate = () => ({
+        refreshControls,
+    });
+    get(IRenderManagerService).addRender('test-doc', {
+        unitId: 'test-doc',
+        type: UniverInstanceType.UNIVER_DOC,
+        engine: new DisposableCollection() as any,
+        scene,
+        mainComponent: null as any,
+        components: new Map(),
+        isMainScene: true,
+        activated$: new BehaviorSubject(true),
+        with: <T>(token: DependencyIdentifier<T>) => {
+            if (token === DocSelectionRenderService) {
+                return {
+                    getSegment: () => '',
+                } as T;
+            }
+
+            return injector.get(token);
+        },
+        activate: () => {},
+        deactivate: () => {},
+        isDisposed: () => false,
+    });
 
     injector.add([DocDrawingService]);
     injector.add([IDocDrawingService, { useClass: DocDrawingService }]);

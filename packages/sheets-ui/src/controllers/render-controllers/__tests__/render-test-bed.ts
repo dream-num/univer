@@ -18,7 +18,7 @@ import type { Dependency, IDisposable, Injector, IWorkbookData, Workbook } from 
 import type { IRenderContext, Vector2 } from '@univerjs/engine-render';
 import type { Observable } from 'rxjs';
 import { ICommandService, IContextService, ILogService, Inject, IUniverInstanceService, LocaleService, LocaleType, LogLevel, Plugin, Tools, Univer, Injector as UniverInjector, UniverInstanceType } from '@univerjs/core';
-import { IRenderManagerService, SHEET_VIEWPORT_KEY, Viewport } from '@univerjs/engine-render';
+import { IRenderManagerService, RenderManagerService, SHEET_VIEWPORT_KEY, Viewport } from '@univerjs/engine-render';
 import { SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { SHEET_VIEW_KEY } from '../../../common/keys';
@@ -500,11 +500,13 @@ export function createRenderTestBed(options?: { workbookData?: IWorkbookData; de
     viewportMap.set(SHEET_VIEWPORT_KEY.VIEW_LEFT_TOP, viewportFactory(SHEET_VIEWPORT_KEY.VIEW_LEFT_TOP));
 
     const scene = createFakeScene(viewportMap, { parentClassType: options?.parentClassType, engine });
+    (scene as any).dispose ??= () => { };
+    (engine as any).dispose ??= () => { };
 
     const components = new Map<any, any>();
-    components.set(SHEET_VIEW_KEY.ROW, { onPointerDown$: createTestEvent<any>(), onPointerMove$: createTestEvent<any>(), onPointerLeave$: createTestEvent<any>() });
-    components.set(SHEET_VIEW_KEY.COLUMN, { onPointerDown$: createTestEvent<any>(), onPointerMove$: createTestEvent<any>(), onPointerLeave$: createTestEvent<any>() });
-    components.set(SHEET_VIEW_KEY.LEFT_TOP, { onPointerDown$: createTestEvent<any>() });
+    components.set(SHEET_VIEW_KEY.ROW, { onPointerDown$: createTestEvent<any>(), onPointerMove$: createTestEvent<any>(), onPointerLeave$: createTestEvent<any>(), dispose: () => { } });
+    components.set(SHEET_VIEW_KEY.COLUMN, { onPointerDown$: createTestEvent<any>(), onPointerMove$: createTestEvent<any>(), onPointerLeave$: createTestEvent<any>(), dispose: () => { } });
+    components.set(SHEET_VIEW_KEY.LEFT_TOP, { onPointerDown$: createTestEvent<any>(), dispose: () => { } });
 
     const mainComponent = {
         zIndex: 1,
@@ -557,20 +559,22 @@ export function createRenderTestBed(options?: { workbookData?: IWorkbookData; de
 
     injector.add([SheetSkeletonManagerService, { useValue: sheetSkeletonManagerService as any }]);
 
-    const renderManagerService: IRenderManagerService = {
-        getRenderById: (unitId: string) => {
-            if (unitId !== sheet.getUnitId()) return null as any;
-            return {
-                unitId,
-                engine,
-                scene,
-                mainComponent,
-                components,
-            } as any;
-        },
-    } as IRenderManagerService;
-
-    injector.add([IRenderManagerService, { useValue: renderManagerService as any }]);
+    injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+    const renderManagerService = injector.get(IRenderManagerService);
+    renderManagerService.addRender(sheet.getUnitId(), {
+        unitId: sheet.getUnitId(),
+        type: UniverInstanceType.UNIVER_SHEET,
+        engine: engine as any,
+        scene: scene as any,
+        mainComponent: mainComponent as any,
+        components,
+        isMainScene: true,
+        activated$: new BehaviorSubject(true),
+        with: injector.get.bind(injector),
+        activate: () => { },
+        deactivate: () => { },
+        isDisposed: () => false,
+    });
 
     return {
         univer,

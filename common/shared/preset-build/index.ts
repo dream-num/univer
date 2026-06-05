@@ -16,7 +16,7 @@
 
 import type { TModuleFormat } from '../tsdown/configs/module';
 import type { IPackageJson } from '../tsdown/types';
-import type { IPresetBuildOptions, IPresetPackageJson } from './types';
+import type { IPresetBuildConfig, IPresetBuildOptions, IPresetPackageJson } from './types';
 import { existsSync, readFileSync, rmSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
@@ -31,8 +31,14 @@ import { buildPresetStyles } from './style';
 import { prependPresetUmd } from './umd';
 
 export { generatePresetLocales } from './locale';
-export type { IPresetBuildOptions } from './types';
+export type { IPresetBuildConfig, IPresetBuildOptions } from './types';
 export { prependPresetUmd } from './umd';
+
+const PRESET_BUILD_CONFIG_FILENAMES = [
+    'univer-preset.config.mjs',
+    'univer-preset.config.ts',
+    'univer-preset.config.js',
+] as const;
 
 function readPackageJson(packageDir: string): IPresetPackageJson {
     return JSON.parse(readFileSync(path.join(packageDir, 'package.json'), 'utf8')) as IPresetPackageJson;
@@ -73,6 +79,48 @@ function mergeUserConfig(configs: any[], userConfig: any) {
     return configs.map((config) => mergeConfig(config, userConfig));
 }
 
+async function loadPresetBuildConfig(packageDir: string): Promise<IPresetBuildConfig> {
+    for (const filename of PRESET_BUILD_CONFIG_FILENAMES) {
+        const configPath = path.resolve(packageDir, filename);
+        if (!existsSync(configPath)) {
+            continue;
+        }
+
+        let presetBuildConfig = (await import(configPath)).default;
+        if (typeof presetBuildConfig === 'function') {
+            presetBuildConfig = await presetBuildConfig();
+        }
+
+        return presetBuildConfig ?? {};
+    }
+
+    return {};
+}
+
+function mergeArrayOption(configValues?: string[], optionValues?: string[]) {
+    return [...new Set([
+        ...(configValues ?? []),
+        ...(optionValues ?? []),
+    ])];
+}
+
+export function resolvePresetBuildOptions(presetBuildConfig: IPresetBuildConfig = {}, options: IPresetBuildOptions = {}): IPresetBuildOptions {
+    const resolvedOptions: IPresetBuildOptions = {
+        ...options,
+    };
+    const umdDeps = mergeArrayOption(presetBuildConfig?.umdDeps, options.umdDeps);
+    const umdAdditionalFiles = mergeArrayOption(presetBuildConfig?.umdAdditionalFiles, options.umdAdditionalFiles);
+
+    if (umdDeps.length > 0) {
+        resolvedOptions.umdDeps = umdDeps;
+    }
+    if (umdAdditionalFiles.length > 0) {
+        resolvedOptions.umdAdditionalFiles = umdAdditionalFiles;
+    }
+
+    return resolvedOptions;
+}
+
 export function removePresetOutputs(packageDir = process.cwd()) {
     for (const dir of CLEANUP_DIRECTORIES) {
         const targetDir = path.resolve(packageDir, dir);
@@ -96,8 +144,10 @@ export function preparePresetPackage(packageDir = process.cwd()) {
 export async function buildPresetPackage(options: IPresetBuildOptions = {}) {
     const packageDir = process.cwd();
     const packageJson = readPackageJson(packageDir);
+    const presetBuildConfig = await loadPresetBuildConfig(packageDir);
+    const resolvedOptions = resolvePresetBuildOptions(presetBuildConfig, options);
 
-    if (options.cleanup) {
+    if (resolvedOptions.cleanup) {
         removePresetOutputs(packageDir);
     }
 
@@ -113,7 +163,7 @@ export async function buildPresetPackage(options: IPresetBuildOptions = {}) {
         plugins: [],
     });
     const plugins = createInputPlugins(packageDir);
-    const userConfig = await loadUserConfig(options, packageDir);
+    const userConfig = await loadUserConfig(resolvedOptions, packageDir);
     const moduleFormats: TModuleFormat[] = ['esm', 'cjs'];
     const moduleConfigs = moduleFormats.flatMap((format) => {
         return getPresetModuleEntries(packageDir).map((entry) => createModuleConfig({
@@ -140,7 +190,7 @@ export async function buildPresetPackage(options: IPresetBuildOptions = {}) {
         plugins,
     });
 
-    if (options.skipUMD) {
+    if (resolvedOptions.skipUMD) {
         return;
     }
 
@@ -160,7 +210,7 @@ export async function buildPresetPackage(options: IPresetBuildOptions = {}) {
 
     prependPresetUmd({
         packageDir,
-        umdAdditionalFiles: options.umdAdditionalFiles,
-        umdDeps: options.umdDeps,
+        umdAdditionalFiles: resolvedOptions.umdAdditionalFiles,
+        umdDeps: resolvedOptions.umdDeps,
     });
 }

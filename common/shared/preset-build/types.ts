@@ -22,6 +22,8 @@ export interface IPresetBuildOptions {
     umdDeps?: string[];
 }
 
+export type IPresetBuildConfig = Pick<IPresetBuildOptions, 'umdAdditionalFiles' | 'umdDeps'>;
+
 export interface IPresetPackageJson {
     dependencies?: Record<string, string>;
     devDependencies?: Record<string, string>;

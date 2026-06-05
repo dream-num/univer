@@ -59,7 +59,7 @@
     ],
     "scripts": {
         "prebuild": "univer-cli preset prepare",
-        "build:bundle": "univer-cli preset build --cleanup --umdDeps @univerjs/sheets-note,@univerjs/sheets-note-ui",
+        "build:bundle": "univer-cli preset build --cleanup",
         "build:types": "tsc -p tsconfig.node.json",
         "build": "pnpm run build:bundle && pnpm run build:types",
         "typecheck": "tsc --noEmit"

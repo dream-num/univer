@@ -52,7 +52,7 @@
     ],
     "scripts": {
         "typecheck": "tsc --noEmit",
-        "build:bundle": "univer-cli preset build --cleanup --umdDeps @univerjs/themes,@univerjs/protocol,@univerjs/core,@univerjs/network,@univerjs/telemetry,@univerjs/rpc,@univerjs/engine-render,@univerjs/engine-formula,@univerjs/drawing --umdAdditionalFiles ./node_modules/@univerjs-infra/shared/react-polyfill/react-polyfill.js,./node_modules/@wendellhu/redi/dist/umd/index.js,./node_modules/@wendellhu/redi/dist/umd/react-bindings/index.js",
+        "build:bundle": "univer-cli preset build --cleanup",
         "build:types": "tsc -p tsconfig.node.json",
         "build": "pnpm run build:bundle && pnpm run build:types"
     },

@@ -65,7 +65,7 @@
     ],
     "scripts": {
         "prebuild": "univer-cli preset prepare",
-        "build:bundle": "univer-cli preset build --cleanup --umdDeps @univerjs/sheets-filter,@univerjs/sheets-filter-ui",
+        "build:bundle": "univer-cli preset build --cleanup",
         "build:types": "tsc -p tsconfig.node.json",
         "build": "pnpm run build:bundle && pnpm run build:types",
         "typecheck": "tsc --noEmit"

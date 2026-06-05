@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-import type { IPresetBuildConfig } from '@univerjs-infra/shared/preset-build';
-
-const config: IPresetBuildConfig = {
+const config = {
     umdDeps: [
-        '@univerjs/thread-comment',
-        '@univerjs/sheets-thread-comment',
-        '@univerjs/thread-comment-ui',
-        '@univerjs/sheets-thread-comment-ui',
+        '@univerjs/data-validation',
+        '@univerjs/sheets-data-validation',
+        '@univerjs/sheets-data-validation-ui',
     ],
 };
 

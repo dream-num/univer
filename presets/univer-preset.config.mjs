@@ -14,12 +14,22 @@
  * limitations under the License.
  */
 
-import type { IPresetBuildConfig } from '@univerjs-infra/shared/preset-build';
-
-const config: IPresetBuildConfig = {
+const config = {
     umdDeps: [
-        '@univerjs/find-replace',
-        '@univerjs/sheets-find-replace',
+        '@univerjs/themes',
+        '@univerjs/protocol',
+        '@univerjs/core',
+        '@univerjs/network',
+        '@univerjs/telemetry',
+        '@univerjs/rpc',
+        '@univerjs/engine-render',
+        '@univerjs/engine-formula',
+        '@univerjs/drawing',
+    ],
+    umdAdditionalFiles: [
+        './node_modules/@univerjs-infra/shared/react-polyfill/react-polyfill.js',
+        './node_modules/@wendellhu/redi/dist/umd/index.js',
+        './node_modules/@wendellhu/redi/dist/umd/react-bindings/index.js',
     ],
 };
 

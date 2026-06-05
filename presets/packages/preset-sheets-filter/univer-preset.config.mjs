@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-import type { IPresetBuildConfig } from '@univerjs-infra/shared/preset-build';
-
-const config: IPresetBuildConfig = {
+const config = {
     umdDeps: [
-        '@univerjs/sheets-table',
-        '@univerjs/sheets-table-ui',
+        '@univerjs/sheets-filter',
+        '@univerjs/sheets-filter-ui',
     ],
 };
 

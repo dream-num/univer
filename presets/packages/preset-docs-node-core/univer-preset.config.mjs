@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { IPresetBuildConfig } from '@univerjs-infra/shared/preset-build';
-
-const config: IPresetBuildConfig = {
+const config = {
     umdDeps: [
+        '@univerjs/docs',
+        '@univerjs/rpc-node',
         '@univerjs/docs-hyper-link',
-        '@univerjs/docs-hyper-link-ui',
+        '@univerjs/thread-comment',
     ],
 };
 

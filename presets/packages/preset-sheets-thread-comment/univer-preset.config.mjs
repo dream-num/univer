@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { IPresetBuildConfig } from '@univerjs-infra/shared/preset-build';
-
-const config: IPresetBuildConfig = {
+const config = {
     umdDeps: [
-        '@univerjs/sheets-conditional-formatting',
-        '@univerjs/sheets-conditional-formatting-ui',
+        '@univerjs/thread-comment',
+        '@univerjs/sheets-thread-comment',
+        '@univerjs/thread-comment-ui',
+        '@univerjs/sheets-thread-comment-ui',
     ],
 };
 

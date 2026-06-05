@@ -152,7 +152,7 @@ jobs:
                       summary.write(f"- Code scanning upload: {sarif_upload_outcome}\n")
                   PY
 
-            - name: Fail on Semgrep execution errors
+            - name: Fail on Semgrep findings or execution errors
               if: ${{ always() }}
               shell: bash
               env:
@@ -165,8 +165,8 @@ jobs:
 
                   if [ "$SEMGREP_EXIT_CODE" -eq 1 ]; then
                     echo "Semgrep reported findings."
-                    echo "The SARIF report has been uploaded and the job will continue."
-                    exit 0
+                    echo "See the uploaded SARIF artifact for details."
+                    exit 1
                   fi
 
                   if [ "$SEMGREP_EXIT_CODE" -ne 0 ]; then

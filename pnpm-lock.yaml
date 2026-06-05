@@ -547,6 +547,15 @@ importers:
       '@univerjs/network':
         specifier: workspace:*
         version: link:../packages/network
+      '@univerjs/preset-docs-core':
+        specifier: workspace:*
+        version: link:../presets/packages/preset-docs-core
+      '@univerjs/preset-sheets-core':
+        specifier: workspace:*
+        version: link:../presets/packages/preset-sheets-core
+      '@univerjs/presets':
+        specifier: workspace:*
+        version: link:../presets
       '@univerjs/rpc':
         specifier: workspace:*
         version: link:../packages/rpc

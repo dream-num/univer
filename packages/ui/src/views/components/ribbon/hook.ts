@@ -63,8 +63,13 @@ export function useToolbarItemStatus(menuItem: IDisplayMenuItem<IMenuItem>): ITo
         disabled$ && subscriptions.push(disabled$.subscribe((disabled) => setDisabled(disabled)));
         hidden$ && subscriptions.push(hidden$.subscribe((hidden) => setHidden(hidden)));
         activated$ && subscriptions.push(activated$.subscribe((activated) => setActivated(activated)));
-        value$ && subscriptions.push(value$.subscribe((value) => setValue(value)));
-        selectionsValue$ && subscriptions.push(selectionsValue$.subscribe((value) => setSelectionsValue(value)));
+        value$ && subscriptions.push(value$.subscribe((value) => {
+            setValue(value);
+        }));
+        selectionsValue$ && subscriptions.push(selectionsValue$.subscribe((value) => {
+            setSelectionsValue(value);
+            setValue(value);
+        }));
 
         return () => subscriptions.forEach((subscription) => subscription.unsubscribe());
     }, [activated$, disabled$, hidden$, value$, selectionsValue$]);

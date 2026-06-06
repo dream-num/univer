@@ -15,7 +15,7 @@
  */
 
 import type { Univer } from '@univerjs/core';
-import { ICommandService, Injector, RANGE_TYPE } from '@univerjs/core';
+import { ICommandService, Injector, RANGE_TYPE, ThemeService } from '@univerjs/core';
 import { SetRangeValuesMutation, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { firstValueFrom, take } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -94,11 +94,12 @@ describe('advanced menu state streams', () => {
 
         const textColorSelections = textColor.selections as any[];
         const bgColorSelections = bgColor.selections as any[];
+        const themeBackgroundColor = get(ThemeService).getColorFromTheme('primary.600');
 
         expect(await firstValueFrom(textColor.value$!.pipe(take(1)))).toBeTypeOf('string');
         expect(await firstValueFrom(textColorSelections[0].value$!.pipe(take(1)))).toBeTypeOf('string');
-        expect(await firstValueFrom(bgColor.value$!.pipe(take(1)))).toBeTypeOf('string');
-        expect(await firstValueFrom(bgColorSelections[0].value$!.pipe(take(1)))).toBeTypeOf('string');
+        expect(await firstValueFrom(bgColor.value$!.pipe(take(1)))).toBe(themeBackgroundColor);
+        expect(await firstValueFrom(bgColorSelections[0].value$!.pipe(take(1)))).toBe(themeBackgroundColor);
         expect(await firstValueFrom(horizontal.value$!.pipe(take(1)))).not.toBeUndefined();
         expect(await firstValueFrom(vertical.value$!.pipe(take(1)))).not.toBeUndefined();
         expect(await firstValueFrom(wrap.value$!.pipe(take(1)))).not.toBeUndefined();

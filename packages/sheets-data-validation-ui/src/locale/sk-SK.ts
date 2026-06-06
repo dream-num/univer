@@ -19,6 +19,9 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'sheets-data-validation-ui': {
         title: 'Overenie údajov',
+        operators: {
+            legal: 'je platný typ',
+        },
         validFail: {
             value: 'Zadajte hodnotu',
             common: 'Zadajte hodnotu alebo vzorec',

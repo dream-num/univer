@@ -19,6 +19,9 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'sheets-drawing-ui': {
         title: '圖片',
+        uploadLoading: {
+            loading: '正在上傳，目前剩餘',
+        },
 
         upload: {
             float: '浮動圖片',

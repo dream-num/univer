@@ -19,6 +19,9 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'sheets-data-validation-ui': {
         title: 'Xác thực dữ liệu',
+        operators: {
+            legal: 'là kiểu hợp lệ',
+        },
         validFail: {
             value: 'Vui lòng nhập một giá trị hợp lệ',
             common: 'Vui lòng nhập giá trị hoặc công thức',

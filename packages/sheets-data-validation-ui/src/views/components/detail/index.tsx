@@ -312,7 +312,7 @@ export function DataValidationDetail() {
                             options={[
                                 {
                                     value: '',
-                                    label: localeService.t('data-validation.operators.legal'),
+                                    label: localeService.t('sheets-data-validation-ui.operators.legal'),
                                 },
                                 ...operators.map((op, i) => ({
                                     value: `${op}`,

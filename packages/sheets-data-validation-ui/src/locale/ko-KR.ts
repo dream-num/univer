@@ -19,6 +19,9 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'sheets-data-validation-ui': {
         title: '데이터 유효성 검사',
+        operators: {
+            legal: '유효한 형식',
+        },
         validFail: {
             value: '값을 입력하세요',
             common: '값 또는 수식을 입력하세요',

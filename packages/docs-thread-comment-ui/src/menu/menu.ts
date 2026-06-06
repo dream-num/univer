@@ -19,7 +19,7 @@ import type { IMenuButtonItem } from '@univerjs/ui';
 import { IUniverInstanceService, SHEET_EDITOR_UNITS, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService, withCurrentTypeOfRenderer } from '@univerjs/engine-render';
-import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
+import { getDocMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { debounceTime, Observable } from 'rxjs';
 import { StartAddCommentOperation, ToggleCommentPanelOperation } from '../commands/operations/show-comment-panel.operation';
 
@@ -54,7 +54,7 @@ export function AddDocCommentMenuItemFactory(accessor: IAccessor): IMenuButtonIt
         icon: 'CommentIcon',
         title: 'docs-thread-comment-ui.panel.addComment',
         tooltip: 'docs-thread-comment-ui.panel.addComment',
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC, undefined, SHEET_EDITOR_UNITS),
+        hidden$: getDocMenuHiddenObservable(accessor, { excludeUnitIds: SHEET_EDITOR_UNITS }),
         disabled$: new Observable(function (subscribe) {
             const textSelectionService = accessor.get(DocSelectionManagerService);
             const observer = textSelectionService.textSelection$.pipe(debounceTime(16)).subscribe(() => {
@@ -75,6 +75,6 @@ export function ToolbarDocCommentMenuItemFactory(accessor: IAccessor): IMenuButt
         icon: 'CommentIcon',
         title: 'docs-thread-comment-ui.panel.addComment',
         tooltip: 'docs-thread-comment-ui.panel.addComment',
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+        hidden$: getDocMenuHiddenObservable(accessor),
     };
 }

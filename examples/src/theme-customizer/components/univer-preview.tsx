@@ -43,7 +43,6 @@ import { UniverSheetsSortUIPlugin } from '@univerjs/sheets-sort-ui';
 import { UniverSheetsTablePlugin } from '@univerjs/sheets-table';
 import { UniverSheetsTableUIPlugin } from '@univerjs/sheets-table-ui';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
-import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
 import { UniverUIPlugin } from '@univerjs/ui';
 import { useEffect, useRef } from 'react';
 import { PREVIEW_CONTAINER_ID } from '../constants';
@@ -76,7 +75,6 @@ export function UniverPreview(props: { theme: Theme; darkMode: boolean }) {
             }],
             [UniverSheetsUIPlugin],
             [UniverSheetsNumfmtPlugin],
-            [UniverSheetsZenEditorPlugin],
             [UniverFormulaEnginePlugin],
             [UniverSheetsFormulaPlugin],
             [UniverSheetsFormulaUIPlugin],

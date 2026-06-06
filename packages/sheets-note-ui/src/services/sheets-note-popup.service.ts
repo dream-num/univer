@@ -18,7 +18,6 @@ import type { IDisposable, Nullable } from '@univerjs/core';
 import type { ISheetLocationBase } from '@univerjs/sheets';
 import { Disposable, DisposableCollection, Inject } from '@univerjs/core';
 import { CellPopupManagerService } from '@univerjs/sheets-ui';
-import { IZenZoneService } from '@univerjs/ui';
 import { BehaviorSubject } from 'rxjs';
 import { SHEET_NOTE_COMPONENT } from '../views/config';
 
@@ -39,24 +38,12 @@ export class SheetsNotePopupService extends Disposable {
         return this._activePopup;
     }
 
-    constructor(
-        @IZenZoneService private readonly _zenZoneService: IZenZoneService,
-        @Inject(CellPopupManagerService) private readonly _cellPopupManagerService: CellPopupManagerService
-    ) {
+    constructor(@Inject(CellPopupManagerService) private readonly _cellPopupManagerService: CellPopupManagerService) {
         super();
-        this._initZenVisible();
 
         this.disposeWithMe(() => {
             this._activePopup$.complete();
         });
-    }
-
-    private _initZenVisible() {
-        this.disposeWithMe(this._zenZoneService.visible$.subscribe((visible) => {
-            if (visible) {
-                this.hidePopup();
-            }
-        }));
     }
 
     override dispose(): void {
@@ -80,9 +67,6 @@ export class SheetsNotePopupService extends Disposable {
         if (this._lastPopup) {
             this._lastPopup.dispose();
         };
-        if (this._zenZoneService.visible) {
-            return;
-        }
 
         this._activePopup = location;
         this._activePopup$.next(location);

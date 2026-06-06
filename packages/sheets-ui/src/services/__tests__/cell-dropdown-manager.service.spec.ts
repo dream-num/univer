@@ -59,7 +59,6 @@ describe('SheetCellDropdownManagerService', () => {
 
         const service = new SheetCellDropdownManagerService(
             { attachPopupToCell } as any,
-            { visible: false } as any,
             renderManager as any,
             componentManager as any
         );
@@ -102,24 +101,15 @@ describe('SheetCellDropdownManagerService', () => {
         disposable2.dispose();
     });
 
-    it('throws when zen mode is visible or popup cannot be attached', () => {
+    it('throws when popup cannot be attached', () => {
         const commonArgs = [
             { attachPopupToCell: vi.fn() },
             { getRenderById: vi.fn(() => null) },
             { register: vi.fn(() => ({ dispose: vi.fn() })) },
         ] as const;
 
-        const zenVisibleService = new SheetCellDropdownManagerService(
-            commonArgs[0] as any,
-            { visible: true } as any,
-            commonArgs[1] as any,
-            commonArgs[2] as any
-        );
-        expect(() => zenVisibleService.showDropdown(createParam())).toThrowError('cannot show dropdown when zen mode is visible');
-
         const attachFailService = new SheetCellDropdownManagerService(
             { attachPopupToCell: vi.fn(() => null) } as any,
-            { visible: false } as any,
             commonArgs[1] as any,
             commonArgs[2] as any
         );

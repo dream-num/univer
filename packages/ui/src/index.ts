@@ -18,7 +18,8 @@ import './global.css';
 
 export { ToggleShortcutPanelOperation } from './commands/operations/toggle-shortcut-panel.operation';
 export * from './common';
-export { getHeaderFooterMenuHiddenObservable, getMenuHiddenObservable } from './common/menu-hidden-observable';
+export { getDocMenuHiddenObservable, getHeaderFooterMenuHiddenObservable, getMenuHiddenObservable, getSheetMenuHiddenObservable } from './common/menu-hidden-observable';
+export type { IMenuHiddenContext, IMenuHiddenOptions } from './common/menu-hidden-observable';
 export { mergeMenuConfigs } from './common/menu-merge-configs';
 export * from './components';
 export { COLOR_PICKER_COMPONENT } from './components/color-picker/interface';
@@ -117,8 +118,6 @@ export { DesktopSidebarService } from './services/sidebar/desktop-sidebar.servic
 export { useSidebarClick } from './services/sidebar/hooks/use-sidebar-click';
 export { ILeftSidebarService, ISidebarService } from './services/sidebar/sidebar.service';
 export { ThemeSwitcherService } from './services/theme-switcher/theme-switcher.service';
-export { DesktopZenZoneService } from './services/zen-zone/desktop-zen-zone.service';
-export { IZenZoneService } from './services/zen-zone/zen-zone.service';
 export * from './utils';
 export { ComponentContainer, type IComponentContainerProps, useComponentsOfPart } from './views/components/ComponentContainer';
 export type { IConfirmChildrenProps } from './views/components/confirm-part/interface';
@@ -138,4 +137,3 @@ export { Ribbon } from './views/components/ribbon/Ribbon';
 export { ToolbarButton } from './views/components/ribbon/ToolbarButton';
 export { ToolbarItem } from './views/components/ribbon/ToolbarItem';
 export { type ISidebarMethodOptions, Sidebar } from './views/components/sidebar/Sidebar';
-export { ZenZone } from './views/components/zen-zone/ZenZone';

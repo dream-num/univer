@@ -24,7 +24,6 @@ import { useDependency } from '../../utils/di';
 import { ComponentContainer, useComponentsOfPart } from '../components/ComponentContainer';
 import { MobileContextMenu } from '../components/context-menu/MobileContextMenu';
 import { Sidebar } from '../components/sidebar/Sidebar';
-import { ZenZone } from '../components/zen-zone/ZenZone';
 
 export interface IUniverAppProps extends IWorkbenchOptions {
     mountContainer: HTMLElement;
@@ -198,7 +197,6 @@ export function MobileWorkbench(props: IUniverAppProps) {
                             <ComponentContainer key="footer" components={footerComponents} />
                         </footer>
                     )}
-                    <ZenZone />
                 </section>
             </div>
             <div dir={direction}>

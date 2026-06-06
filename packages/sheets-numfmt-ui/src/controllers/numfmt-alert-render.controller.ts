@@ -21,7 +21,6 @@ import { Disposable, IConfigService, Inject, isRealNum, isTextFormat, LocaleServ
 import { INumfmtService } from '@univerjs/sheets';
 import { SHEETS_NUMFMT_PLUGIN_CONFIG_KEY } from '@univerjs/sheets-numfmt';
 import { CellAlertManagerService, CellAlertType, HoverManagerService } from '@univerjs/sheets-ui';
-import { IZenZoneService } from '@univerjs/ui';
 import { debounceTime } from 'rxjs';
 
 const ALERT_KEY = 'SHEET_NUMFMT_ALERT';
@@ -32,7 +31,6 @@ export class NumfmtAlertRenderController extends Disposable implements IRenderMo
         @Inject(HoverManagerService) private readonly _hoverManagerService: HoverManagerService,
         @Inject(CellAlertManagerService) private readonly _cellAlertManagerService: CellAlertManagerService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @IZenZoneService private readonly _zenZoneService: IZenZoneService,
         @Inject(INumfmtService) private _numfmtService: INumfmtService,
         @IConfigService private readonly _configService: IConfigService
     ) {
@@ -42,7 +40,6 @@ export class NumfmtAlertRenderController extends Disposable implements IRenderMo
 
     private _init() {
         this._initCellAlertPopup();
-        this._initZenService();
     }
 
     private _initCellAlertPopup() {
@@ -109,14 +106,6 @@ export class NumfmtAlertRenderController extends Disposable implements IRenderMo
             }
 
             this._hideAlert();
-        }));
-    }
-
-    private _initZenService() {
-        this.disposeWithMe(this._zenZoneService.visible$.subscribe((visible) => {
-            if (visible) {
-                this._hideAlert();
-            }
         }));
     }
 

@@ -16,12 +16,12 @@
 
 import type { ICustomRange, Nullable, Workbook } from '@univerjs/core';
 import type { IHyperLinkPopup } from '../../services/popup.service';
-import { DOCS_ZEN_EDITOR_UNIT_ID_KEY, ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { borderClassName, clsx, MessageType, Tooltip } from '@univerjs/design';
 import { AllBorderIcon, CopyIcon, LinkIcon, UnlinkIcon, WriteIcon, XlsxMultiIcon } from '@univerjs/icons';
 import { CancelHyperLinkCommand, CancelRichHyperLinkCommand, SheetHyperLinkType, SheetsHyperLinkParserService } from '@univerjs/sheets-hyper-link';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
-import { IMessageService, IZenZoneService, useDependency } from '@univerjs/ui';
+import { IMessageService, useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 import { OpenHyperLinkEditPanelOperation } from '../../commands/operations/popup.operations';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
@@ -55,7 +55,6 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
     const resolverService = useDependency(SheetsHyperLinkResolverService);
     const editorBridgeService = useDependency(IEditorBridgeService);
     const parserHyperLinkService = useDependency(SheetsHyperLinkParserService);
-    const zenZoneService = useDependency(IZenZoneService);
     const { customRange, row, col, unitId, subUnitId, editPermission, copyPermission, type } = props;
 
     if (!customRange?.properties?.url) {
@@ -79,10 +78,6 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
                   univer-truncate univer-text-sm univer-leading-5 univer-text-primary-600
                 `, { 'univer-text-red-500': isError })}
                 onClick={() => {
-                    if (zenZoneService.visible) {
-                        return;
-                    }
-
                     if (isError) {
                         return;
                     }
@@ -170,16 +165,14 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
                               dark:hover:!univer-bg-gray-700
                             `}
                             onClick={() => {
-                                const commandId = (type === HyperLinkEditSourceType.EDITING || type === HyperLinkEditSourceType.ZEN_EDITOR) ? CancelRichHyperLinkCommand.id : CancelHyperLinkCommand.id;
+                                const commandId = type === HyperLinkEditSourceType.EDITING ? CancelRichHyperLinkCommand.id : CancelHyperLinkCommand.id;
                                 if (commandService.syncExecuteCommand(commandId, {
                                     unitId,
                                     subUnitId,
                                     id: customRange.rangeId,
                                     row,
                                     column: col,
-                                    documentId: type === HyperLinkEditSourceType.ZEN_EDITOR ?
-                                        DOCS_ZEN_EDITOR_UNIT_ID_KEY
-                                        : editorBridgeService.getCurrentEditorId(),
+                                    documentId: editorBridgeService.getCurrentEditorId(),
                                 })) {
                                     popupService.hideCurrentPopup(undefined, true);
                                 }

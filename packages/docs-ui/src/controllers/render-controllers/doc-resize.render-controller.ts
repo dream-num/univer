@@ -15,7 +15,7 @@
  */
 
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { Disposable, DOCS_ZEN_EDITOR_UNIT_ID_KEY, fromEventSubject, Inject, isInternalEditorID } from '@univerjs/core';
+import { Disposable, fromEventSubject, Inject, isInternalEditorID } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
 import { animationFrameScheduler, filter, throttleTime } from 'rxjs';
@@ -31,7 +31,7 @@ export class DocResizeRenderController extends Disposable implements IRenderModu
         super();
 
         const unitId = this._context.unitId;
-        if (isInternalEditorID(unitId) && unitId !== DOCS_ZEN_EDITOR_UNIT_ID_KEY) return this;
+        if (isInternalEditorID(unitId)) return this;
 
         this._initResize();
     }

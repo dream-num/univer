@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { CustomRangeType, DOCS_ZEN_EDITOR_UNIT_ID_KEY, Injector } from '@univerjs/core';
+import { CustomRangeType, Injector } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { HyperLinkEditSourceType } from '../../types/enums/edit-source';
 import { SheetsHyperLinkPopupService } from '../popup.service';
@@ -28,21 +28,15 @@ function createDisposable() {
 
 function createService(options?: {
     workbook?: unknown;
-    document?: unknown;
-    zenVisible?: boolean;
 }) {
     const cellDisposable = createDisposable();
     const positionDisposable = createDisposable();
     const absoluteDisposable = createDisposable();
-    const docDisposable = createDisposable();
 
     const sheetCanvasPopManagerService = {
         attachPopupToCell: vi.fn(() => cellDisposable),
         attachPopupByPosition: vi.fn(() => positionDisposable),
         attachPopupToAbsolutePosition: vi.fn(() => absoluteDisposable),
-    };
-    const docCanvasPopManagerService = {
-        attachPopupToRange: vi.fn(() => docDisposable),
     };
     const textSelectionManagerService = {
         getActiveTextRange: vi.fn(() => ({ startOffset: 1, endOffset: 3, collapsed: false })),
@@ -50,12 +44,7 @@ function createService(options?: {
         replaceTextRanges: vi.fn(),
     };
     const univerInstanceService = {
-        getUnit: vi.fn((unitId: string) => {
-            if (unitId === DOCS_ZEN_EDITOR_UNIT_ID_KEY) {
-                return options?.document ?? null;
-            }
-            return options?.workbook ?? null;
-        }),
+        getUnit: vi.fn(() => options?.workbook ?? null),
     };
 
     return {
@@ -64,12 +53,9 @@ function createService(options?: {
             new Injector(),
             univerInstanceService as never,
             { isVisible: () => ({ visible: false }), getEditCellState: vi.fn() } as never,
-            textSelectionManagerService as never,
-            docCanvasPopManagerService as never,
-            { visible: options?.zenVisible ?? false } as never
+            textSelectionManagerService as never
         ),
         sheetCanvasPopManagerService,
-        docCanvasPopManagerService,
         textSelectionManagerService,
         cellDisposable,
     };
@@ -116,21 +102,8 @@ describe('SheetsHyperLinkPopupService', () => {
         expect(service.currentPopup).toBeNull();
     });
 
-    it('routes popups by source type and blocks sheet popups while zen mode is visible', () => {
-        const blocked = createService({ zenVisible: true });
-
-        blocked.service.showPopup({
-            unitId: 'unit-1',
-            subUnitId: 'sheet-1',
-            row: 0,
-            col: 0,
-            customRange: { rangeId: 'r1', startIndex: 1, endIndex: 3, rangeType: CustomRangeType.HYPERLINK },
-            customRangeRect: { left: 0, top: 0, right: 10, bottom: 10 },
-            type: HyperLinkEditSourceType.VIEWING,
-        });
-        expect(blocked.service.currentPopup).toBeNull();
-
-        const active = createService({ zenVisible: false });
+    it('routes popups by source type', () => {
+        const active = createService();
 
         active.service.showPopup({
             unitId: 'unit-1',
@@ -154,20 +127,7 @@ describe('SheetsHyperLinkPopupService', () => {
         });
         expect(active.sheetCanvasPopManagerService.attachPopupByPosition).toHaveBeenCalledTimes(1);
 
-        active.service.showPopup({
-            unitId: 'unit-1',
-            subUnitId: 'sheet-1',
-            row: 0,
-            col: 0,
-            customRange: { rangeId: 'r3', startIndex: 0, endIndex: 2, rangeType: CustomRangeType.HYPERLINK },
-            type: HyperLinkEditSourceType.ZEN_EDITOR,
-        });
-        expect(active.docCanvasPopManagerService.attachPopupToRange).toHaveBeenCalledWith({
-            startOffset: 0,
-            endOffset: 3,
-            collapsed: false,
-        }, expect.any(Object), DOCS_ZEN_EDITOR_UNIT_ID_KEY);
-        expect(blocked.sheetCanvasPopManagerService.attachPopupByPosition).not.toHaveBeenCalled();
+        expect(active.sheetCanvasPopManagerService.attachPopupByPosition).toHaveBeenCalledTimes(1);
     });
 
     it('starts viewing edits from cell content and preserves editor state while keep-visible is enabled', () => {
@@ -198,40 +158,5 @@ describe('SheetsHyperLinkPopupService', () => {
         service.setIsKeepVisible(false);
         service.endEditing(HyperLinkEditSourceType.VIEWING);
         expect(service.currentEditing).toBeNull();
-    });
-
-    it('starts zen editor editing from the real custom range in the zen document', () => {
-        const document = {
-            getBody: () => ({
-                dataStream: 'abcdef',
-                customRanges: [{ rangeId: 'range-3', startIndex: 1, endIndex: 3, rangeType: CustomRangeType.HYPERLINK }],
-            }),
-        };
-        const { service, docCanvasPopManagerService, textSelectionManagerService } = createService({ document });
-
-        service.startEditing({
-            unitId: 'unit-1',
-            subUnitId: 'sheet-1',
-            row: 1,
-            col: 1,
-            customRangeId: 'range-3',
-            type: HyperLinkEditSourceType.ZEN_EDITOR,
-        });
-
-        expect(textSelectionManagerService.replaceTextRanges).toHaveBeenCalledWith([
-            {
-                startOffset: 1,
-                endOffset: 4,
-            },
-        ]);
-        expect(docCanvasPopManagerService.attachPopupToRange).toHaveBeenCalledWith({
-            startOffset: 1,
-            endOffset: 3,
-            collapsed: false,
-        }, expect.any(Object), DOCS_ZEN_EDITOR_UNIT_ID_KEY);
-        expect(service.currentEditing).toEqual(expect.objectContaining({
-            label: 'bcd',
-            type: HyperLinkEditSourceType.ZEN_EDITOR,
-        }));
     });
 });

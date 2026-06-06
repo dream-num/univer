@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type { IAccessor, UniverInstanceType } from '@univerjs/core';
-import { DocumentFlavor } from '@univerjs/core';
+import type { IAccessor } from '@univerjs/core';
+import { DocumentFlavor, UniverInstanceType } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { getHeaderFooterMenuHiddenObservable, getMenuHiddenObservable } from '../menu-hidden-observable';
+import { getDocMenuHiddenObservable, getHeaderFooterMenuHiddenObservable, getMenuHiddenObservable, getSheetMenuHiddenObservable } from '../menu-hidden-observable';
 
-const TARGET_TYPE = 'sheet' as unknown as UniverInstanceType;
-const OTHER_TYPE = 'doc' as unknown as UniverInstanceType;
+const TARGET_TYPE = UniverInstanceType.UNIVER_SHEET;
+const OTHER_TYPE = UniverInstanceType.UNIVER_DOC;
 
 function createDocModel(flavor: DocumentFlavor) {
     return {
@@ -122,15 +122,15 @@ describe('getMenuHiddenObservable', () => {
         sub.unsubscribe();
     });
 
-    it('should hide when needHideUnitId matches current unit (string and array)', () => {
+    it('should hide when excludeUnitIds matches current unit (string and array)', () => {
         const { accessor, service } = createMenuAccessor({ focusedUnitId: 'unit-1' });
         const hiddenWithString: boolean[] = [];
         const hiddenWithArray: boolean[] = [];
 
-        const sub1 = getMenuHiddenObservable(accessor, TARGET_TYPE, undefined, 'blocked-unit').subscribe((hidden) =>
+        const sub1 = getMenuHiddenObservable(accessor, { targetType: TARGET_TYPE, excludeUnitIds: 'blocked-unit' }).subscribe((hidden) =>
             hiddenWithString.push(hidden)
         );
-        const sub2 = getMenuHiddenObservable(accessor, TARGET_TYPE, undefined, ['blocked-unit']).subscribe((hidden) =>
+        const sub2 = getMenuHiddenObservable(accessor, { targetType: TARGET_TYPE, excludeUnitIds: ['blocked-unit'] }).subscribe((hidden) =>
             hiddenWithArray.push(hidden)
         );
 
@@ -138,6 +138,49 @@ describe('getMenuHiddenObservable', () => {
 
         expect(hiddenWithString).toEqual([false, true]);
         expect(hiddenWithArray).toEqual([false, true]);
+
+        sub1.unsubscribe();
+        sub2.unsubscribe();
+    });
+
+    it('should keep the legacy positional signature compatible', () => {
+        const { accessor, service } = createMenuAccessor({ focusedUnitId: 'unit-1' });
+        const hiddenValues: boolean[] = [];
+        const sub = getMenuHiddenObservable(accessor, TARGET_TYPE, undefined, 'blocked-unit').subscribe((hidden) => hiddenValues.push(hidden));
+
+        service.focused$.next('blocked-unit');
+
+        expect(hiddenValues).toEqual([false, true]);
+        sub.unsubscribe();
+    });
+
+    it('should allow custom hidden predicates with focused unit context', () => {
+        const { accessor, service } = createMenuAccessor({ focusedUnitId: 'unit-1', unitType: TARGET_TYPE });
+        const hiddenValues: boolean[] = [];
+        const shouldHide = vi.fn(({ unitId }) => unitId === 'custom-hidden-unit');
+
+        const sub = getMenuHiddenObservable(accessor, { targetType: TARGET_TYPE, shouldHide }).subscribe((hidden) => hiddenValues.push(hidden));
+
+        service.focused$.next('custom-hidden-unit');
+
+        expect(hiddenValues).toEqual([false, true]);
+        expect(shouldHide).toHaveBeenCalledWith(expect.objectContaining({
+            unitId: 'custom-hidden-unit',
+            unitType: TARGET_TYPE,
+            targetType: TARGET_TYPE,
+        }));
+        sub.unsubscribe();
+    });
+
+    it('should expose doc and sheet semantic helpers', () => {
+        const { accessor } = createMenuAccessor({ unitType: TARGET_TYPE });
+        const hiddenDocValues: boolean[] = [];
+        const hiddenSheetValues: boolean[] = [];
+        const sub1 = getDocMenuHiddenObservable(accessor).subscribe((hidden) => hiddenDocValues.push(hidden));
+        const sub2 = getSheetMenuHiddenObservable(accessor, { excludeUnitIds: 'unit-1' }).subscribe((hidden) => hiddenSheetValues.push(hidden));
+
+        expect(hiddenDocValues).toEqual([true]);
+        expect(hiddenSheetValues).toEqual([true]);
 
         sub1.unsubscribe();
         sub2.unsubscribe();

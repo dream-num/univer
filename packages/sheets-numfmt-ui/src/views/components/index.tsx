@@ -41,7 +41,6 @@ export const SheetNumfmtPanel: FC<ISheetNumfmtPanelProps> = (props) => {
     const { defaultValue, defaultPattern, row, col } = props.value;
     const localeService = useDependency(LocaleService);
     const getCurrentPattern = useRef<() => string | null>(() => '');
-    const t = localeService.t;
     const nextTick = useNextTick();
     const typeOptions = useMemo(
         () =>
@@ -52,8 +51,8 @@ export const SheetNumfmtPanel: FC<ISheetNumfmtPanelProps> = (props) => {
                 { label: 'sheets-numfmt-ui.date', component: DatePanel },
                 { label: 'sheets-numfmt-ui.thousandthPercentile', component: ThousandthPercentilePanel },
                 { label: 'sheets-numfmt-ui.customFormat', component: CustomFormat },
-            ].map((item) => ({ ...item, label: t(item.label) })),
-        []
+            ].map((item) => ({ ...item, label: localeService.t(item.label) })),
+        [localeService]
     );
     const [type, setType] = useState(findDefaultType);
     const [key, setKey] = useState(() => `${row}_${col}`);
@@ -116,7 +115,7 @@ export const SheetNumfmtPanel: FC<ISheetNumfmtPanelProps> = (props) => {
             `, scrollbarClassName)}
         >
             <div>
-                <div className="univer-mt-3.5 univer-text-sm univer-text-gray-400">{t('sheets-numfmt-ui.numfmtType')}</div>
+                <div className="univer-mt-3.5 univer-text-sm univer-text-gray-400">{localeService.t('sheets-numfmt-ui.numfmtType')}</div>
                 <div className="univer-mt-2">
                     <Select className="univer-w-full" value={type} options={selectOptions} onChange={handleSelect} />
                 </div>
@@ -131,10 +130,10 @@ export const SheetNumfmtPanel: FC<ISheetNumfmtPanelProps> = (props) => {
 
             <div className="univer-mb-5 univer-mt-3.5 univer-flex univer-justify-end">
                 <Button onClick={handleCancel} className="univer-mr-3">
-                    {t('sheets-numfmt-ui.cancel')}
+                    {localeService.t('sheets-numfmt-ui.cancel')}
                 </Button>
                 <Button variant="primary" onClick={handleConfirm}>
-                    {t('sheets-numfmt-ui.confirm')}
+                    {localeService.t('sheets-numfmt-ui.confirm')}
                 </Button>
             </div>
         </div>

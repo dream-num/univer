@@ -19,6 +19,9 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'sheets-data-validation-ui': {
         title: 'اعتبارسنجی داده',
+        operators: {
+            legal: 'نوع قانونی است',
+        },
         validFail: {
             value: 'لطفا یک مقدار وارد کنید',
             common: 'لطفا مقدار یا فرمول را وارد کنید',

@@ -19,6 +19,9 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'sheets-data-validation-ui': {
         title: 'データの入力規則',
+        operators: {
+            legal: '有効な形式',
+        },
         validFail: {
             value: '値を入力してください',
             common: '値または数式を入力してください',

@@ -17,6 +17,9 @@
 const locale = {
     'sheets-drawing-ui': {
         title: 'Image',
+        uploadLoading: {
+            loading: 'Loading..., remaining',
+        },
 
         upload: {
             float: 'Float Image',

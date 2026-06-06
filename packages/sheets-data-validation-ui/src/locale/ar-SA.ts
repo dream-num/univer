@@ -19,6 +19,9 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'sheets-data-validation-ui': {
         title: 'التحقق من صحة البيانات',
+        operators: {
+            legal: 'نوع قانوني',
+        },
         validFail: {
             value: 'يُرجى إدخال قيمة',
             common: 'يُرجى إدخال قيمة أو صيغة',

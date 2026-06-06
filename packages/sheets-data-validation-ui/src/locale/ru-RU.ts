@@ -19,6 +19,9 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'sheets-data-validation-ui': {
         title: 'Проверка данных',
+        operators: {
+            legal: 'является допустимым типом',
+        },
         validFail: {
             value: 'Пожалуйста, введите значение',
             common: 'Пожалуйста, введите значение или формулу',

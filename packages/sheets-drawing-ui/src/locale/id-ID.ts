@@ -19,6 +19,9 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'sheets-drawing-ui': {
         title: 'Gambar',
+        uploadLoading: {
+            loading: 'Memuat..., tersisa',
+        },
 
         upload: {
             float: 'Gambar Mengambang',

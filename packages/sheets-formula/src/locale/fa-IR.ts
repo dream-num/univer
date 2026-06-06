@@ -34,6 +34,13 @@ import web from './function-list/web/fa-IR';
 
 const locale: typeof enUS = {
     'sheets-formula': {
+        progress: {
+            analyzing: 'در حال تحلیل فرمول‌ها...',
+            calculating: 'در حال محاسبه فرمول‌ها...',
+            'array-analysis': 'در حال تحلیل فرمول‌های آرایه‌ای...',
+            'array-calculation': 'در حال محاسبه فرمول‌های آرایه‌ای...',
+            done: 'انجام شد',
+        },
         functionList: {
             ...array,
             ...compatibility,

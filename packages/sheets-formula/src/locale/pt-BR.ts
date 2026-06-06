@@ -34,6 +34,13 @@ import web from './function-list/web/en-US';
 
 const locale: typeof enUS = {
     'sheets-formula': {
+        progress: {
+            analyzing: 'Analisando fórmulas...',
+            calculating: 'Calculando fórmulas...',
+            'array-analysis': 'Analisando fórmulas de matriz...',
+            'array-calculation': 'Calculando fórmulas de matriz...',
+            done: 'Concluído',
+        },
         functionList: {
             ...array,
             ...compatibility,

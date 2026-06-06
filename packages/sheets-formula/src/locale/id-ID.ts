@@ -34,6 +34,13 @@ import web from './function-list/web/en-US';
 
 const locale: typeof enUS = {
     'sheets-formula': {
+        progress: {
+            analyzing: 'Menganalisis rumus...',
+            calculating: 'Menghitung rumus...',
+            'array-analysis': 'Menganalisis rumus array...',
+            'array-calculation': 'Menghitung rumus array...',
+            done: 'Selesai',
+        },
         functionList: {
             ...array,
             ...compatibility,

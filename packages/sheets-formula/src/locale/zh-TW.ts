@@ -34,6 +34,13 @@ import web from './function-list/web/zh-TW';
 
 const locale: typeof enUS = {
     'sheets-formula': {
+        progress: {
+            analyzing: '正在分析公式...',
+            calculating: '正在計算公式...',
+            'array-analysis': '正在分析陣列公式...',
+            'array-calculation': '正在計算陣列公式...',
+            done: '完成',
+        },
         functionList: {
             ...array,
             ...compatibility,

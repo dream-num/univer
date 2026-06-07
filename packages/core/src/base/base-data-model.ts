@@ -20,6 +20,7 @@ import { BehaviorSubject } from 'rxjs';
 import { UnitModel, UniverInstanceType } from '../common/unit';
 import { Tools } from '../shared/tools';
 import { CellValueType } from '../types/enum';
+import { isBasePerformanceTracingEnabled, traceBasePerformance } from './base-performance';
 
 const BASE_LIST_VALUE_SEPARATOR = ', ';
 const BASE_ATTACHMENT_RESOURCE_KEY_SEPARATOR = '\u001F';
@@ -36,7 +37,7 @@ export class BaseDataModel extends UnitModel<IBaseSnapshot, UniverInstanceType.U
         super();
 
         const now = Date.now();
-        this._snapshot = normalizeBaseSnapshot(Tools.commonExtend({
+        this._snapshot = traceBasePerformance('Core.BaseDataModel.normalizeSnapshot', () => normalizeBaseSnapshot(Tools.commonExtend({
             id: '',
             name: '',
             schemaVersion: 1,
@@ -45,7 +46,9 @@ export class BaseDataModel extends UnitModel<IBaseSnapshot, UniverInstanceType.U
             createdAt: now,
             updatedAt: now,
             rev: 1,
-        } as IBaseSnapshot, snapshot));
+        } as IBaseSnapshot, snapshot)), {
+            tables: Object.keys(snapshot.tables ?? {}).length,
+        });
 
         if (!this._snapshot.id) {
             this._snapshot.id = `base-${Math.random().toString(36).slice(2, 10)}`;
@@ -95,24 +98,58 @@ export class BaseDataModel extends UnitModel<IBaseSnapshot, UniverInstanceType.U
 function normalizeBaseSnapshot(snapshot: IBaseSnapshot): IBaseSnapshot {
     delete (snapshot as IBaseSnapshot & { compress?: unknown }).compress;
     delete (snapshot as IBaseSnapshot & { kind?: unknown }).kind;
-    Object.values(snapshot.tables ?? {}).forEach(normalizeBaseTable);
+    Object.values(snapshot.tables ?? {}).forEach((table) => {
+        if (!isBasePerformanceTracingEnabled()) {
+            normalizeBaseTable(table);
+            return;
+        }
+
+        traceBasePerformance('Core.BaseDataModel.normalizeTable', () => normalizeBaseTable(table), {
+            tableId: table.id,
+            records: Object.keys(table.records ?? {}).length,
+            fields: table.fieldOrder.length,
+        });
+    });
     return snapshot;
 }
 
 function normalizeBaseTable(table: ITableSnapshot): void {
-    hydrateCompressedCellData(table);
+    traceBasePerformance('Core.BaseDataModel.hydrateCompressedCellData', () => hydrateCompressedCellData(table), {
+        tableId: table.id,
+    });
 
     const records = table.records ?? {};
     const fields = table.fields ?? {};
-    const orderedRecordIds = getOrderedRecordIds(table, records);
-    const orderedFieldIds = getOrderedFieldIds(table, fields);
+    const orderedRecordIds = traceBasePerformance('Core.BaseDataModel.getOrderedRecordIds', () => getOrderedRecordIds(table, records), {
+        tableId: table.id,
+        records: Object.keys(records).length,
+        hasRecordOrder: Boolean(table.recordOrder?.length),
+    });
+    const orderedFieldIds = traceBasePerformance('Core.BaseDataModel.getOrderedFieldIds', () => getOrderedFieldIds(table, fields), {
+        tableId: table.id,
+        fields: Object.keys(fields).length,
+    });
 
     table.recordOrder = orderedRecordIds;
-    cloneBaseTableMutableMaps(table);
-    normalizeExistingCellData(table, fields);
-    rebuildRowIndexes(table, records, orderedRecordIds);
-    rebuildColumnIndexes(table, fields, orderedFieldIds);
-    hydrateRecordCellData(table, records, fields);
+    traceBasePerformance('Core.BaseDataModel.cloneMutableMaps', () => cloneBaseTableMutableMaps(table), {
+        tableId: table.id,
+    });
+    traceBasePerformance('Core.BaseDataModel.normalizeExistingCellData', () => normalizeExistingCellData(table, fields), {
+        tableId: table.id,
+    });
+    traceBasePerformance('Core.BaseDataModel.rebuildRowIndexes', () => rebuildRowIndexes(table, records, orderedRecordIds), {
+        tableId: table.id,
+        records: orderedRecordIds.length,
+    });
+    traceBasePerformance('Core.BaseDataModel.rebuildColumnIndexes', () => rebuildColumnIndexes(table, fields, orderedFieldIds), {
+        tableId: table.id,
+        fields: orderedFieldIds.length,
+    });
+    traceBasePerformance('Core.BaseDataModel.hydrateRecordCellData', () => hydrateRecordCellData(table, records, fields), {
+        tableId: table.id,
+        records: orderedRecordIds.length,
+        fields: orderedFieldIds.length,
+    });
 }
 
 function hydrateCompressedCellData(table: ITableSnapshot): void {
@@ -129,12 +166,16 @@ function hydrateCompressedCellData(table: ITableSnapshot): void {
 }
 
 function getOrderedRecordIds(table: ITableSnapshot, records: Record<string, IRecordSnapshot>): string[] {
-    const sortedRecordIds = Object.values(records)
-        .sort((a, b) => a.orderKey.localeCompare(b.orderKey))
-        .map((record) => record.id);
+    const orderedRecordIds = table.recordOrder?.filter((recordId) => records[recordId]) ?? [];
+    const orderedRecordIdSet = new Set(orderedRecordIds);
+    const missingRecords = Object.values(records).filter((record) => !orderedRecordIdSet.has(record.id));
+    if (!missingRecords.length) {
+        return orderedRecordIds;
+    }
+
     return [
-        ...(table.recordOrder?.filter((recordId) => records[recordId]) ?? []),
-        ...sortedRecordIds.filter((recordId) => !(table.recordOrder ?? []).includes(recordId)),
+        ...orderedRecordIds,
+        ...missingRecords.sort((a, b) => a.orderKey.localeCompare(b.orderKey)).map((record) => record.id),
     ];
 }
 

@@ -11,6 +11,7 @@ import {
     typescriptPreset,
     univerSourcePreset,
 } from '@univerjs-infra/shared/eslint';
+import reactHooks from 'eslint-plugin-react-hooks';
 
 export default antfu(
     {
@@ -39,6 +40,9 @@ export default antfu(
             css: true,
             html: true,
         },
+        plugins: {
+            'react-hooks': reactHooks,
+        },
         rules: baseRules,
     },
     headerPreset(),
@@ -46,7 +50,10 @@ export default antfu(
     typescriptPreset(),
     univerSourcePreset({
         noFacadeImportsOutsideFacade: {
-            ignore: ['packages/uniscript/src/services/script-execution.service.ts'],
+            ignore: [
+                'packages/uniscript/src/services/script-execution.service.ts',
+                'presets/packages/preset-',
+            ],
         },
     }),
     facadePreset(),

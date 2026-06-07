@@ -27,7 +27,7 @@ import {
     UndoCommand,
     UniverInstanceType,
 } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import {
     AddWorksheetMergeMutation,
     RemoveWorksheetMergeMutation,
@@ -208,21 +208,12 @@ describe('Test format painter rules in controller', () => {
             [IMarkSelectionService, { useClass: MarkSelectionService }],
             [IFormatPainterService, { useClass: FormatPainterService }],
             [ISheetSelectionRenderService, { useClass: SheetSelectionRenderService }],
+            [IRenderManagerService, { useClass: RenderManagerService }],
             [FormatPainterController],
         ]);
 
         univer = testBed.univer;
         get = testBed.get;
-
-        class MockRenderManagerService {
-            getRenderById() {
-                return null;
-            }
-        }
-
-        const injector = univer.__getInjector();
-        // @ts-ignore
-        injector.add([IRenderManagerService, { useClass: MockRenderManagerService }]);
 
         commandService = get(ICommandService);
         themeService = get(ThemeService);

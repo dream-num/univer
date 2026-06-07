@@ -15,7 +15,79 @@
  */
 
 import type { Config } from 'tailwindcss';
+import { existsSync, readFileSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import scrollbar from 'tailwind-scrollbar';
+
+const SOURCE_CONTENT = './src/**/*.{js,ts,jsx,tsx}';
+const DEPENDENCY_SOURCE_CONTENT = './node_modules/{name}/src/**/*.{js,ts,jsx,tsx}';
+
+interface ITailwindContentOptions {
+    includeStyleDependencies?: boolean;
+}
+
+interface IPackageJson {
+    dependencies?: Record<string, string>;
+}
+
+function getPackageDir(configUrl: string) {
+    const configPath = configUrl.startsWith('file:')
+        ? fileURLToPath(configUrl)
+        : configUrl;
+
+    return path.dirname(configPath);
+}
+
+function getPackageJson(packageDir: string): IPackageJson {
+    const packageJsonPath = path.join(packageDir, 'package.json');
+
+    if (!existsSync(packageJsonPath)) {
+        return {};
+    }
+
+    return JSON.parse(readFileSync(packageJsonPath, 'utf8')) as IPackageJson;
+}
+
+function getDependencyDir(packageDir: string, dependencyName: string) {
+    return path.join(packageDir, 'node_modules', dependencyName);
+}
+
+function compareDependencyName(left: string, right: string) {
+    const leftScope = left.startsWith('@univerjs-pro/') ? 1 : 0;
+    const rightScope = right.startsWith('@univerjs-pro/') ? 1 : 0;
+
+    if (leftScope !== rightScope) {
+        return leftScope - rightScope;
+    }
+
+    return left.localeCompare(right);
+}
+
+export function createTailwindContent(configUrl: string, options: ITailwindContentOptions = {}) {
+    const content = [SOURCE_CONTENT];
+
+    if (!options.includeStyleDependencies) {
+        return content;
+    }
+
+    const packageDir = getPackageDir(configUrl);
+    const packageJson = getPackageJson(packageDir);
+    const dependencyNames = Object.keys(packageJson.dependencies ?? {})
+        .filter((dependencyName) => {
+            if (!dependencyName.startsWith('@univerjs')) {
+                return false;
+            }
+
+            return existsSync(path.join(getDependencyDir(packageDir, dependencyName), 'src/global.css'));
+        })
+        .sort(compareDependencyName);
+
+    return [
+        ...content,
+        ...dependencyNames.map((dependencyName) => DEPENDENCY_SOURCE_CONTENT.replace('{name}', dependencyName)),
+    ];
+}
 
 const config: Omit<Config, 'content'> = {
     prefix: 'univer-',

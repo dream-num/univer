@@ -23,7 +23,6 @@ export const isGeneralPanel = (pattern: string) => !pattern;
 
 export const GeneralPanel: FC<IBusinessComponentProps> = (props) => {
     const localeService = useDependency(LocaleService);
-    const t = localeService.t;
 
     // FIXME: WTF
     props.action.current = () => '';
@@ -36,7 +35,7 @@ export const GeneralPanel: FC<IBusinessComponentProps> = (props) => {
                   dark:!univer-text-gray-200
                 `}
             >
-                {t('sheets-numfmt-ui.generalDes')}
+                {localeService.t('sheets-numfmt-ui.generalDes')}
             </div>
         </div>
     );

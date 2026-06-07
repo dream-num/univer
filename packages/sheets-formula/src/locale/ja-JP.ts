@@ -34,6 +34,13 @@ import web from './function-list/web/ja-JP';
 
 const locale: typeof enUS = {
     'sheets-formula': {
+        progress: {
+            analyzing: '数式を分析中...',
+            calculating: '数式を計算中...',
+            'array-analysis': '配列数式を分析中...',
+            'array-calculation': '配列数式を計算中...',
+            done: '完了',
+        },
         functionList: {
             ...array,
             ...compatibility,

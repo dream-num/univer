@@ -19,6 +19,9 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'sheets-data-validation-ui': {
         title: 'Validació de dades',
+        operators: {
+            legal: 'és tipus legal',
+        },
         validFail: {
             value: 'Si us plau, introdueix un valor',
             common: 'Si us plau, introdueix un valor o una fórmula',

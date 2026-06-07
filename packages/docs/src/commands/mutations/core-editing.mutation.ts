@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { IMutation, IMutationCommonParams, JSONXActions, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, IExecutionOptions, IMutation, IMutationCommonParams, JSONXActions, Nullable } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IDocStateChangeInfo } from '../../services/doc-state-emit.service';
-import { CommandType, IUniverInstanceService, JSONX } from '@univerjs/core';
+import { CommandType, IUniverInstanceService, JSONX, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { DocSelectionManagerService } from '../../services/doc-selection-manager.service';
 import { DocSkeletonManagerService } from '../../services/doc-skeleton-manager.service';
@@ -53,7 +53,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
     type: CommandType.MUTATION,
 
     // eslint-disable-next-line max-lines-per-function
-    handler: (accessor, params) => {
+    handler: (accessor, params, options?: IExecutionOptions) => {
         const {
             unitId,
             segmentId = '',
@@ -66,17 +66,18 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
             noNeedSetTextRange,
             debounce,
             isEditing = true,
-            isSync,
+            isSync: paramsIsSync,
             syncer,
         } = params;
+        const isSync = paramsIsSync || options?.fromCollab || options?.fromChangeset;
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const renderManagerService = accessor.get(IRenderManagerService);
         const docStateEmitService = accessor.get(DocStateEmitService);
 
-        const documentDataModel = univerInstanceService.getUniverDocInstance(unitId);
-        const documentViewModel = renderManagerService.getRenderById(unitId)?.with(DocSkeletonManagerService).getViewModel();
-        if (documentDataModel == null || documentViewModel == null) {
-            throw new Error(`DocumentDataModel or documentViewModel not found for unitId: ${unitId}`);
+        const documentDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
+        const documentViewModel = renderManagerService.getRenderUnitById(unitId)?.with(DocSkeletonManagerService).getViewModel();
+        if (documentDataModel == null) {
+            throw new Error(`DocumentDataModel not found for unitId: ${unitId}`);
         }
 
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
@@ -100,7 +101,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         documentDataModel.apply(actions);
 
         // Step 2: Update Doc View Model.
-        documentViewModel.reset(documentDataModel);
+        documentViewModel?.reset(documentDataModel);
         // Step 3: Update cursor & selection.
         // Make sure update cursor & selection after doc skeleton is calculated.
         if (!noNeedSetTextRange && textRanges && trigger != null && !isSync) {

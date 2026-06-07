@@ -51,8 +51,7 @@ jobs:
                     semgrep scan \
                       --config auto \
                       --sarif \
-                      --output reports/semgrep.sarif \
-                      --error
+                      --output reports/semgrep.sarif
                     exit_code=$?
                     set -e
                   else
@@ -152,7 +151,7 @@ jobs:
                       summary.write(f"- Code scanning upload: {sarif_upload_outcome}\n")
                   PY
 
-            - name: Fail on Semgrep execution errors
+            - name: Fail on Semgrep error findings or execution errors
               if: ${{ always() }}
               shell: bash
               env:
@@ -163,14 +162,30 @@ jobs:
                     exit 2
                   fi
 
-                  if [ "$SEMGREP_EXIT_CODE" -eq 1 ]; then
-                    echo "Semgrep reported findings."
-                    echo "The SARIF report has been uploaded and the job will continue."
-                    exit 0
-                  fi
-
                   if [ "$SEMGREP_EXIT_CODE" -ne 0 ]; then
                     echo "Semgrep execution failed."
                     echo "See the uploaded SARIF artifact for details."
                     exit "$SEMGREP_EXIT_CODE"
                   fi
+
+                  python - <<'PY'
+                  import json
+                  import sys
+                  from pathlib import Path
+
+                  report_path = Path("reports/semgrep.sarif")
+                  with report_path.open() as file:
+                      sarif = json.load(file)
+
+                  error_results = [
+                      result
+                      for run in sarif.get("runs", [])
+                      for result in run.get("results", [])
+                      if result.get("level") == "error"
+                  ]
+
+                  if error_results:
+                      print(f"Semgrep reported {len(error_results)} error-level finding(s).")
+                      print("See the uploaded SARIF artifact for details.")
+                      sys.exit(1)
+                  PY

@@ -35,6 +35,7 @@ export interface ICreateUmdConfigOptions {
 const UMD_GLOBALS: Record<string, string> = Object.fromEntries(
     Object.entries(peerDepsMap).map(([source, value]) => [source, value.global])
 );
+const CSS_UMD_GLOBAL = 'UniverCssNoop';
 
 function convertLibNameFromPackageName(name: string) {
     return name
@@ -51,6 +52,10 @@ function convertLibNameFromPackageName(name: string) {
  * Maps externals to their browser globals in UMD builds.
  */
 function resolveUmdGlobal(source: string) {
+    if (source.endsWith('.css')) {
+        return null;
+    }
+
     if (source in UMD_GLOBALS) {
         return UMD_GLOBALS[source];
     }
@@ -60,10 +65,30 @@ function resolveUmdGlobal(source: string) {
             return null;
         }
 
+        const localeMatch = source.match(/^(@univerjs(?:-pro)?\/[^/]+)\/(?:locale|locales)\/([^/]+)$/);
+
+        if (localeMatch) {
+            return `${convertLibNameFromPackageName(localeMatch[1])}${convertLibNameFromPackageName(localeMatch[2])}`;
+        }
+
         return convertLibNameFromPackageName(source);
     }
 
     return null;
+}
+
+function resolveOutputGlobal(source: string) {
+    const global = resolveUmdGlobal(source);
+
+    if (global !== null) {
+        return global;
+    }
+
+    if (source.endsWith('.css')) {
+        return CSS_UMD_GLOBAL;
+    }
+
+    return convertLibNameFromPackageName(source);
 }
 
 /**
@@ -76,7 +101,7 @@ function getGlobalName(packageName: string, entryKey: string) {
         return `${name}Facade`;
     }
 
-    if (entryKey.startsWith('locale/')) {
+    if (entryKey.startsWith('locale/') || entryKey.startsWith('locales/')) {
         const localeKey = entryKey.split('/')[1];
         return `${name}${convertLibNameFromPackageName(localeKey)}`;
     }
@@ -104,7 +129,7 @@ export function createUmdConfig(options: ICreateUmdConfigOptions): UserConfig {
         outDir,
         outputOptions: {
             entryFileNames: '[name].js',
-            globals: (source: string) => resolveUmdGlobal(source) ?? convertLibNameFromPackageName(source),
+            globals: (source: string) => resolveOutputGlobal(source),
             minify: true,
         },
         platform: 'browser',

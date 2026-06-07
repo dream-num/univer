@@ -19,6 +19,7 @@ import type { IRenderContext } from '@univerjs/engine-render';
 import {
     awaitTime,
     CustomRangeType,
+    DisposableCollection,
     ICommandService,
     IUniverInstanceService,
     LifecycleService,
@@ -27,7 +28,8 @@ import {
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
+import { BehaviorSubject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { DocsRenameMutation } from '../commands/mutations/docs-rename.mutation';
 import { SetTextSelectionsOperation } from '../commands/operations/text-selection.operation';
@@ -36,6 +38,7 @@ import { DocInterceptorService } from '../services/doc-interceptor/doc-intercept
 import { DOC_INTERCEPTOR_POINT } from '../services/doc-interceptor/interceptor-const';
 import { DocSelectionManagerService } from '../services/doc-selection-manager.service';
 import { DocSkeletonManagerService } from '../services/doc-skeleton-manager.service';
+import { DocStateChangeManagerService } from '../services/doc-state-change-manager.service';
 import { DocStateEmitService } from '../services/doc-state-emit.service';
 import { DocViewModelManagerService } from '../services/doc-view-model-manager.service';
 import { addCustomRangeBySelectionFactory, deleteCustomRangeFactory } from '../utils/custom-range-factory';
@@ -57,15 +60,21 @@ function registerRenderManagerForDoc(
         univerInstanceService
     );
 
-    injector.add([IRenderManagerService, {
-        useValue: {
-            getRenderById: (unitId: string) => unitId === doc.getUnitId()
-                ? ({
-                    with: () => skeletonManager,
-                } as never)
-                : null,
-        } as never,
-    }]);
+    injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+    injector.get(IRenderManagerService).addRender(doc.getUnitId(), {
+        unitId: doc.getUnitId(),
+        type: UniverInstanceType.UNIVER_DOC,
+        engine: new DisposableCollection() as never,
+        scene: new DisposableCollection() as never,
+        mainComponent: null,
+        components: new Map(),
+        isMainScene: true,
+        activated$: new BehaviorSubject(true),
+        with: <T>() => skeletonManager as T,
+        activate: () => {},
+        deactivate: () => {},
+        isDisposed: () => false,
+    });
 
     return skeletonManager;
 }
@@ -250,6 +259,64 @@ describe('docs integration', () => {
         expect(ok).toBeTruthy();
         expect(doc.getBody()?.dataStream).toBe('Hello world\r\n');
         expect(stateChanges).toHaveLength(1);
+
+        sub.unsubscribe();
+        skeletonManager.dispose();
+    });
+
+    it('emits composed doc state changes from the docs package without docs-ui', async () => {
+        univer.registerPlugin(UniverDocsPlugin);
+        const doc = univer.createUnit<IDocumentData, DocumentDataModel>(
+            UniverInstanceType.UNIVER_DOC,
+            createTestDocData('doc-state-change')
+        );
+
+        const univerInstanceService = injector.get(IUniverInstanceService);
+        univerInstanceService.focusUnit(doc.getUnitId());
+        const skeletonManager = registerRenderManagerForDoc(injector, doc);
+
+        const selectionManager = injector.get(DocSelectionManagerService);
+        selectionManager.__TEST_ONLY_setCurrentSelection({
+            unitId: doc.getUnitId(),
+            subUnitId: doc.getUnitId(),
+        });
+        selectionManager.__TEST_ONLY_add([{
+            startOffset: 5,
+            endOffset: 5,
+            collapsed: true,
+            isActive: true,
+            segmentId: '',
+            style: null as never,
+        }]);
+
+        const docStateChangeManagerService = injector.get(DocStateChangeManagerService);
+        const stateChanges: unknown[] = [];
+        const sub = docStateChangeManagerService.docStateChange$.subscribe((value) => value && stateChanges.push(value));
+
+        const mutation = replaceSelectionFactory(injector as never, {
+            unitId: doc.getUnitId(),
+            body: {
+                dataStream: ' from docs',
+            },
+        });
+
+        expect(mutation).not.toBe(false);
+        if (mutation === false) {
+            throw new Error('Expected replaceSelectionFactory to create a mutation.');
+        }
+
+        const commandService = injector.get(ICommandService);
+        const ok = await commandService.executeCommand(mutation.id, {
+            ...mutation.params,
+            debounce: false,
+            trigger: 'doc-state-change-spec' as never,
+        });
+
+        await awaitTime(0);
+
+        expect(ok).toBeTruthy();
+        expect(stateChanges).toHaveLength(1);
+        expect(doc.getBody()?.dataStream).toBe('Hello from docs\r\n');
 
         sub.unsubscribe();
         skeletonManager.dispose();

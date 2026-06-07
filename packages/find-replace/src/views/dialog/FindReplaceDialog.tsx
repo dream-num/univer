@@ -77,7 +77,6 @@ export const FindDialog = forwardRef(function FindDialogImpl(_props, ref) {
                 matchesCount={matchesCount}
                 matchesPosition={matchesPosition}
                 findReplaceService={findReplaceService}
-                localeService={localeService}
                 initialFindString={findString}
                 onChange={onFindStringChange}
             />
@@ -183,7 +182,6 @@ export const ReplaceDialog = forwardRef(function ReplaceDialogImpl(_props, ref) 
                     matchesCount={matchesCount}
                     matchesPosition={matchesPosition}
                     findReplaceService={findReplaceService}
-                    localeService={localeService}
                     initialFindString={inputtingFindString}
                     onChange={onFindStringChange}
                 />

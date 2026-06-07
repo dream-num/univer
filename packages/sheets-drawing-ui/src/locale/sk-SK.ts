@@ -19,6 +19,9 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'sheets-drawing-ui': {
         title: 'Obrázok',
+        uploadLoading: {
+            loading: 'Načítava sa..., zostáva',
+        },
 
         upload: {
             float: 'Plávajúci obrázok',

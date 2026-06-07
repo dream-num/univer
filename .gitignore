@@ -121,3 +121,7 @@ typedoc.json
 **/tsx-0
 
 .pnpm-store
+
+# Generated preset locales
+/presets/src/locales/
+/presets/packages/*/src/locales/

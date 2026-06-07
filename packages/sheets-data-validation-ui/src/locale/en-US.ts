@@ -17,6 +17,9 @@
 const locale = {
     'sheets-data-validation-ui': {
         title: 'Data validation',
+        operators: {
+            legal: 'is legal type',
+        },
         validFail: {
             value: 'Please input a value',
             common: 'Please input value or formula',

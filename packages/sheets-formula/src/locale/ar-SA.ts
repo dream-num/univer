@@ -34,6 +34,13 @@ import web from './function-list/web/en-US';
 
 const locale: typeof enUS = {
     'sheets-formula': {
+        progress: {
+            analyzing: 'جارٍ تحليل الصيغ...',
+            calculating: 'جارٍ حساب الصيغ...',
+            'array-analysis': 'جارٍ تحليل صيغ الصفائف...',
+            'array-calculation': 'جارٍ حساب صيغ الصفائف...',
+            done: 'تم',
+        },
         functionList: {
             ...array,
             ...compatibility,

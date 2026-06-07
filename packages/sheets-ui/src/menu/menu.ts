@@ -564,7 +564,7 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
                     selectable: false,
                 },
                 value$: new Observable<string>((subscriber) => {
-                    const defaultValue = DEFAULT_STYLES.bg.rgb;
+                    const defaultValue = themeService.getColorFromTheme('primary.600');
                     const { isAllValuesSame, value: currentValue } = selectionManagerService.getCellStylesProperty('bg');
 
                     if (isAllValuesSame) {

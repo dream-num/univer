@@ -425,6 +425,7 @@ export interface IGanttTimeColumn {
 export interface IGanttProjection extends IViewProjection {
     type: 'gantt';
     config: IGanttViewConfig;
+    dateRangeAllDay?: boolean;
     timeline: {
         scale: 'week' | 'month' | 'quarter' | 'year';
         start: number;

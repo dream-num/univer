@@ -29,7 +29,6 @@ import { DataValidationDropdownManagerService } from '../dropdown-manager.servic
 
 describe('DataValidationDropdownManagerService', () => {
     it('shows a list dropdown, saves the selection, opens the editor, and reacts to hide triggers', async () => {
-        const zenVisible$ = new Subject<boolean>();
         const selectionMoveEnd$ = new Subject<ISelectionWithStyle[]>();
         const popupDispose = vi.fn();
         let dropdownParam: IDropdownParam | undefined;
@@ -61,9 +60,6 @@ describe('DataValidationDropdownManagerService', () => {
                         { label: 'Closed', color: '#f00' },
                     ]),
                 })),
-            } as never,
-            {
-                visible$: zenVisible$,
             } as never,
             {
                 getRuleByLocation: vi.fn((unitId: string, subUnitId: string, row: number, col: number) => {
@@ -182,10 +178,6 @@ describe('DataValidationDropdownManagerService', () => {
         expect(service.activeDropdown).toBeNull();
 
         service.showDataValidationDropdown('book-1', 'sheet-1', 1, 2, onHide);
-        zenVisible$.next(true);
-        expect(service.activeDropdown).toBeNull();
-
-        service.showDataValidationDropdown('book-1', 'sheet-1', 1, 2, onHide);
         service.hideDropdown();
         expect(onHide).toHaveBeenCalledTimes(2);
     });
@@ -221,9 +213,6 @@ describe('DataValidationDropdownManagerService', () => {
                         { label: '3', color: '#f00' },
                     ]),
                 })),
-            } as never,
-            {
-                visible$: new Subject<boolean>(),
             } as never,
             {
                 getRuleByLocation: vi.fn(() => rule),

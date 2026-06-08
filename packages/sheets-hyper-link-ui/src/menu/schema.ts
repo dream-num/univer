@@ -17,17 +17,13 @@
 import type { MenuSchemaType } from '@univerjs/ui';
 import { ContextMenuGroup, ContextMenuPosition, RibbonInsertGroup } from '@univerjs/ui';
 import { InsertHyperLinkToolbarOperation } from '../commands/operations/popup.operations';
-import { genZenEditorMenuId, insertLinkMenuFactory, insertLinkMenuToolbarFactory, zenEditorInsertLinkMenuFactory, zenEditorInsertLinkMenuToolbarFactory } from './menu';
+import { insertLinkMenuFactory, insertLinkMenuToolbarFactory } from './menu';
 
 export const menuSchema: MenuSchemaType = {
     [RibbonInsertGroup.MEDIA]: {
         [InsertHyperLinkToolbarOperation.id]: {
             order: 1,
             menuItemFactory: insertLinkMenuToolbarFactory,
-        },
-        [genZenEditorMenuId(InsertHyperLinkToolbarOperation.id)]: {
-            order: 1,
-            menuItemFactory: zenEditorInsertLinkMenuToolbarFactory,
         },
     },
     [ContextMenuPosition.MAIN_AREA]: {
@@ -36,10 +32,6 @@ export const menuSchema: MenuSchemaType = {
             [InsertHyperLinkToolbarOperation.id]: {
                 order: 0,
                 menuItemFactory: insertLinkMenuFactory,
-            },
-            [genZenEditorMenuId(InsertHyperLinkToolbarOperation.id)]: {
-                order: 0,
-                menuItemFactory: zenEditorInsertLinkMenuFactory,
             },
         },
     },

@@ -20,7 +20,6 @@ import type { Documents, DocumentSkeleton, IDocumentSkeletonHeaderFooter, IDocum
 import {
     BooleanNumber,
     Disposable,
-    DOCS_ZEN_EDITOR_UNIT_ID_KEY,
     fromEventSubject,
     ICommandService,
     Inject,
@@ -135,7 +134,7 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
                     }
 
                     // TODO: @JOCS, Do not use unitId to check if it's need to render images or isEditor. maybe need a config?
-                    if (this._editorService.isEditor(unitId) && unitId !== DOCS_ZEN_EDITOR_UNIT_ID_KEY) {
+                    if (this._editorService.isEditor(unitId)) {
                         mainComponent?.makeDirty();
                         return;
                     }

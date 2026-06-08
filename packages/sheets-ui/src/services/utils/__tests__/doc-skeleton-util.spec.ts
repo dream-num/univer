@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
+import type { DocumentSkeleton } from '@univerjs/engine-render';
 import { HorizontalAlign, IUniverInstanceService, VerticalAlign } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { describe, expect, it, vi } from 'vitest';
 import { IEditorBridgeService } from '../../editor-bridge.service';
-import { calcPadding, getCustomRangePosition, getEditingCustomRangePosition } from '../doc-skeleton-util';
+import { calcPadding, calculateDocSkeletonRects, getCustomRangePosition, getEditingCustomRangePosition } from '../doc-skeleton-util';
 
 vi.mock('@univerjs/docs-ui', async (importOriginal) => {
     const actual = await importOriginal<typeof import('@univerjs/docs-ui')>();
@@ -94,6 +95,40 @@ describe('doc-skeleton-util', () => {
             horizontalAlign: HorizontalAlign.UNSPECIFIED,
         };
         expect(calcPadding(cell, unspecifiedNumeric, true)).toEqual({ paddingTop: 20, paddingLeft: 30 });
+    });
+
+    it('does not add cell alignment padding to skeleton drawing positions', () => {
+        const docSkeleton = {
+            getSkeletonData: () => ({
+                pages: [{
+                    skeDrawings: new Map([
+                        ['image-1', {
+                            aLeft: 45,
+                            aTop: 1,
+                            width: 38,
+                            height: 38,
+                        }],
+                    ]),
+                }],
+            }),
+            getViewModel: () => ({
+                getDataModel: () => ({
+                    getBody: () => ({
+                        customRanges: [],
+                        paragraphs: [],
+                    }),
+                }),
+            }),
+        };
+
+        const rects = calculateDocSkeletonRects(docSkeleton as unknown as DocumentSkeleton, 48, 1);
+
+        expect(rects.drawings[0].rect).toEqual({
+            top: 1,
+            bottom: 39,
+            left: 45,
+            right: 83,
+        });
     });
 
     it('getCustomRangePosition returns transformed rects and label', () => {

@@ -67,7 +67,7 @@ export class SheetCellImageHoverRenderController extends Disposable implements I
 
     private _initImageClick() {
         this.disposeWithMe(this._hoverManagerService.currentClickedCell$.subscribe((click) => {
-            if (click?.drawing && this._isSetCursor) {
+            if (click?.drawing) {
                 const imageDrawing = click.drawing.drawing.drawingOrigin as IDocImage;
                 const imageEle = this._sheetSkeletonManagerService.getCurrentSkeleton()?.imageCacheMap.getImage(imageDrawing.imageSourceType, imageDrawing.source);
                 if (!imageEle) return;

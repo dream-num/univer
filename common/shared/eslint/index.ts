@@ -120,6 +120,7 @@ export const baseRules: Partial<Rules> = {
         },
     ],
     'perfectionist/sort-imports': 'warn',
+    'perfectionist/sort-named-imports': 'off',
     'perfectionist/sort-named-exports': 'warn',
 
     // Code quality rules

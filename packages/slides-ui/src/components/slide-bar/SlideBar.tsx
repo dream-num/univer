@@ -100,8 +100,7 @@ export function SlideSideBar() {
                     <a
                         className={clsx(`
                           univer-box-border univer-block univer-h-8 univer-w-full univer-cursor-pointer
-                          univer-rounded-md univer-bg-white univer-text-center univer-text-sm univer-leading-8
-                          univer-transition-colors
+                          univer-rounded-md univer-bg-white univer-text-center univer-text-sm univer-transition-colors
                         `, borderClassName)}
                         onClick={handleAppendSlide}
                     >

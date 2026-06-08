@@ -43,7 +43,7 @@ export enum IIconSetType {
 
 export const iconGroup: { title: string; group: { name: IIconSetType; list: string[] }[] }[] = [
     {
-        title: 'sheet.cf.iconSet.direction',
+        title: 'sheets-conditional-formatting.iconSet.direction',
         group: [
             {
                 name: IIconSetType.threeArrows,
@@ -76,7 +76,7 @@ export const iconGroup: { title: string; group: { name: IIconSetType; list: stri
         ],
     },
     {
-        title: 'sheet.cf.iconSet.shape',
+        title: 'sheets-conditional-formatting.iconSet.shape',
         group: [
             {
                 name: IIconSetType.threeTrafficLights1,
@@ -101,7 +101,7 @@ export const iconGroup: { title: string; group: { name: IIconSetType; list: stri
         ],
     },
     {
-        title: 'sheet.cf.iconSet.mark',
+        title: 'sheets-conditional-formatting.iconSet.mark',
         group: [
             {
                 name: IIconSetType.threeSymbols,
@@ -119,7 +119,7 @@ export const iconGroup: { title: string; group: { name: IIconSetType; list: stri
         ],
     },
     {
-        title: 'sheet.cf.iconSet.rank',
+        title: 'sheets-conditional-formatting.iconSet.rank',
         group: [
             {
                 name: IIconSetType.fourRating,

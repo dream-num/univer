@@ -15,12 +15,32 @@
  */
 
 import type { IMutationInfo, IRange, Nullable, Workbook } from '@univerjs/core';
-import type { IAddConditionalRuleMutationParams, IDeleteConditionalRuleMutationParams, ISetConditionalRuleMutationParams } from '@univerjs/sheets-conditional-formatting';
+import type {
+    IAddConditionalRuleMutationParams,
+    IDeleteConditionalRuleMutationParams,
+    ISetConditionalRuleMutationParams,
+} from '@univerjs/sheets-conditional-formatting';
 import type { IFormatPainterHook } from '@univerjs/sheets-ui';
-import { Disposable, Inject, Injector, IUniverInstanceService, ObjectMatrix, Range, Rectangle, Tools, UniverInstanceType } from '@univerjs/core';
-import { createTopMatrixFromMatrix, findAllRectangle, SheetsSelectionsService } from '@univerjs/sheets';
-import { AddConditionalRuleMutation, AddConditionalRuleMutationUndoFactory, ConditionalFormattingRuleModel, ConditionalFormattingViewModel, DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory, SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
+import { Disposable, Inject, Injector, IUniverInstanceService, Range, Rectangle, Tools, UniverInstanceType } from '@univerjs/core';
+import { SheetsSelectionsService } from '@univerjs/sheets';
+import {
+    AddConditionalRuleMutation,
+    AddConditionalRuleMutationUndoFactory,
+    ConditionalFormattingRangeTransformService,
+    ConditionalFormattingRuleModel,
+    ConditionalFormattingViewModel,
+    DeleteConditionalRuleMutation,
+    DeleteConditionalRuleMutationUndoFactory,
+    SetConditionalRuleMutation,
+    setConditionalRuleMutationUndoFactory,
+    SHEET_CONDITIONAL_FORMATTING_PLUGIN,
+} from '@univerjs/sheets-conditional-formatting';
 import { FormatPainterStatus, IFormatPainterService } from '@univerjs/sheets-ui';
+
+interface IRangeDelta {
+    add: IRange[];
+    remove: IRange[];
+}
 
 const repeatByRange = (sourceRange: IRange, targetRange: IRange) => {
     const getRowLength = (range: IRange) => range.endRow - range.startRow + 1;
@@ -81,8 +101,8 @@ export class ConditionalFormattingPainterController extends Disposable {
         @Inject(IFormatPainterService) private _formatPainterService: IFormatPainterService,
         @Inject(SheetsSelectionsService) private _sheetsSelectionsService: SheetsSelectionsService,
         @Inject(ConditionalFormattingRuleModel) private _conditionalFormattingRuleModel: ConditionalFormattingRuleModel,
-
-        @Inject(ConditionalFormattingViewModel) private _conditionalFormattingViewModel: ConditionalFormattingViewModel
+        @Inject(ConditionalFormattingViewModel) private _conditionalFormattingViewModel: ConditionalFormattingViewModel,
+        @Inject(ConditionalFormattingRangeTransformService) private _conditionalFormattingRangeTransformService: ConditionalFormattingRangeTransformService
 
     ) {
         super();
@@ -98,7 +118,8 @@ export class ConditionalFormattingPainterController extends Disposable {
             sourceStartCell: { row: number; col: number },
             targetStartCell: { row: number; col: number },
             relativeRange: IRange,
-            matrixMap: Map<string, ObjectMatrix<1>>,
+            rangeMap: Map<string, IRange[]>,
+            rangeDeltaMap: Map<string, IRangeDelta>,
             config: {
                 targetUnitId: string;
                 targetSubUnitId: string;
@@ -107,6 +128,14 @@ export class ConditionalFormattingPainterController extends Disposable {
             const { unitId: sourceUnitId, subUnitId: sourceSubUnitId } = this._painterConfig!;
             const { targetUnitId, targetSubUnitId } = config;
 
+            const getRangeDelta = (cfId: string) => {
+                let rangeDelta = rangeDeltaMap.get(cfId);
+                if (!rangeDelta) {
+                    rangeDelta = { add: [], remove: [] };
+                    rangeDeltaMap.set(cfId, rangeDelta);
+                }
+                return rangeDelta;
+            };
             const sourceRange = {
                 startRow: sourceStartCell.row,
                 startColumn: sourceStartCell.col,
@@ -156,28 +185,33 @@ export class ConditionalFormattingPainterController extends Disposable {
 
                 if (targetCellCf) {
                     targetCellCf.forEach((cf) => {
-                        let matrix = matrixMap.get(cf.cfId);
-                        if (!matrixMap.get(cf.cfId)) {
+                        if (!rangeMap.has(cf.cfId)) {
                             const rule = this._conditionalFormattingRuleModel.getRule(targetUnitId, targetSubUnitId, cf.cfId);
                             if (!rule) {
                                 return;
                             }
-                            matrix = new ObjectMatrix();
-                            rule.ranges.forEach((range) => {
-                                Range.foreach(range, (row, col) => {
-                                    matrix!.setValue(row, col, 1);
-                                });
-                            });
-                            matrixMap.set(cf.cfId, matrix);
+                            rangeMap.set(cf.cfId, rule.ranges);
                         }
-                        matrix!.realDeleteValue(targetPositionRange.startRow, targetPositionRange.startColumn);
+                        getRangeDelta(cf.cfId).remove.push({
+                            startRow: targetPositionRange.startRow,
+                            endRow: targetPositionRange.startRow,
+                            startColumn: targetPositionRange.startColumn,
+                            endColumn: targetPositionRange.startColumn,
+                        });
                     });
                 }
 
                 if (sourceCellCf) {
                     sourceCellCf.forEach((cf) => {
-                        const matrix = matrixMap.get(cf.cfId);
-                        matrix && matrix.setValue(targetPositionRange.startRow, targetPositionRange.startColumn, 1);
+                        if (!rangeMap.has(cf.cfId)) {
+                            return;
+                        }
+                        getRangeDelta(cf.cfId).add.push({
+                            startRow: targetPositionRange.startRow,
+                            endRow: targetPositionRange.startRow,
+                            startColumn: targetPositionRange.startColumn,
+                            endColumn: targetPositionRange.startColumn,
+                        });
                     });
                 }
             });
@@ -186,7 +220,8 @@ export class ConditionalFormattingPainterController extends Disposable {
         const generalApplyFunc = (targetUnitId: string, targetSubUnitId: string, targetRange: IRange) => {
             const { range: sourceRange, unitId: sourceUnitId, subUnitId: sourceSubUnitId } = this._painterConfig!;
             const isSkipSheet = targetUnitId !== sourceUnitId || sourceSubUnitId !== targetSubUnitId;
-            const matrixMap: Map<string, ObjectMatrix<1>> = new Map();
+            const rangeMap: Map<string, IRange[]> = new Map();
+            const rangeDeltaMap: Map<string, IRangeDelta> = new Map();
 
             const redos: IMutationInfo[] = [];
             const undos: IMutationInfo[] = [];
@@ -197,15 +232,7 @@ export class ConditionalFormattingPainterController extends Disposable {
             ruleList?.forEach((rule) => {
                 const { ranges, cfId } = rule;
                 if (ranges.some((range) => Rectangle.intersects(sourceRange, range))) {
-                    const matrix = new ObjectMatrix<1>();
-                    if (!isSkipSheet) {
-                        ranges.forEach((range) => {
-                            Range.foreach(range, (row, col) => {
-                                matrix.setValue(row, col, 1);
-                            });
-                        });
-                    }
-                    matrixMap.set(cfId, matrix);
+                    rangeMap.set(cfId, isSkipSheet ? [] : ranges);
                 }
             });
 
@@ -217,16 +244,27 @@ export class ConditionalFormattingPainterController extends Disposable {
             const repeats = repeatByRange(sourceRange, targetRange);
 
             repeats.forEach((repeat) => {
-                loopFunc(sourceStartCell, { row: repeat.startRange.startRow, col: repeat.startRange.startColumn }, repeat.repeatRelativeRange, matrixMap, { targetUnitId, targetSubUnitId });
+                loopFunc(sourceStartCell, { row: repeat.startRange.startRow, col: repeat.startRange.startColumn }, repeat.repeatRelativeRange, rangeMap, rangeDeltaMap, { targetUnitId, targetSubUnitId });
+            });
+            rangeDeltaMap.forEach((rangeDelta, cfId) => {
+                const ranges = rangeMap.get(cfId);
+                if (!ranges) {
+                    return;
+                }
+
+                rangeMap.set(cfId, this._conditionalFormattingRangeTransformService.applyRangeDelta(
+                    ranges,
+                    rangeDelta.remove,
+                    rangeDelta.add
+                ));
             });
 
-            matrixMap.forEach((item, cfId) => {
+            rangeMap.forEach((ranges, cfId) => {
                 if (!isSkipSheet) {
                     const rule = this._conditionalFormattingRuleModel.getRule(sourceUnitId, sourceSubUnitId, cfId);
                     if (!rule) {
                         return;
                     }
-                    const ranges = findAllRectangle(createTopMatrixFromMatrix(item));
                     if (ranges.length) {
                         const params: ISetConditionalRuleMutationParams = {
                             unitId: sourceUnitId,
@@ -246,7 +284,6 @@ export class ConditionalFormattingPainterController extends Disposable {
                     }
                 } else {
                     const rule = this._conditionalFormattingRuleModel.getRule(targetUnitId, targetSubUnitId, cfId);
-                    const ranges = findAllRectangle(createTopMatrixFromMatrix(item));
                     if (!rule) {
                         if (ranges.length) {
                             const sourceRule = this._conditionalFormattingRuleModel.getRule(sourceUnitId, sourceSubUnitId, cfId);

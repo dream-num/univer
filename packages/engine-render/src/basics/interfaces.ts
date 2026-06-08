@@ -127,6 +127,7 @@ export interface IParagraphTableCache {
 
 export interface IParagraphConfig {
     paragraphIndex: number;
+    useWordStyleLineHeight?: boolean;
     paragraphNonInlineSkeDrawings?: Map<string, IDocumentSkeletonDrawing>;
     paragraphInlineSkeDrawings?: Map<string, IDocumentSkeletonDrawing>;
     skeTablesInParagraph?: IParagraphTableCache[];

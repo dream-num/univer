@@ -128,29 +128,35 @@ describe('layout-ruler', () => {
     });
 
     it('uses glyph height as the base for auto line spacing when grid snapping is not explicitly enabled', () => {
-        const metrics = getLineHeightMetrics(16, 0, 15.6, GridType.LINES, 1.5, SpacingRule.AUTO, BooleanNumber.FALSE);
+        const metrics = getLineHeightMetrics(16, 0, 15.6, GridType.LINES, 1.5, SpacingRule.AUTO, BooleanNumber.FALSE, true);
 
         expect(getLineBoxHeight(metrics)).toBeCloseTo(24, 4);
     });
 
     it('keeps document-grid line pitch behavior when auto line spacing explicitly snaps to the grid', () => {
-        const metrics = getLineHeightMetrics(16, 0, 15.6, GridType.LINES, 1.5, SpacingRule.AUTO, BooleanNumber.TRUE);
+        const metrics = getLineHeightMetrics(16, 0, 15.6, GridType.LINES, 1.5, SpacingRule.AUTO, BooleanNumber.TRUE, true);
 
         expect(getLineBoxHeight(metrics)).toBeCloseTo(23.4, 4);
     });
 
     it('treats at-least spacing as a minimum line box height', () => {
-        const compactMetrics = getLineHeightMetrics(16, 0, 15.6, GridType.LINES, 10, SpacingRule.AT_LEAST, BooleanNumber.FALSE);
-        const expandedMetrics = getLineHeightMetrics(16, 0, 15.6, GridType.LINES, 40, SpacingRule.AT_LEAST, BooleanNumber.FALSE);
+        const compactMetrics = getLineHeightMetrics(16, 0, 15.6, GridType.LINES, 10, SpacingRule.AT_LEAST, BooleanNumber.FALSE, true);
+        const expandedMetrics = getLineHeightMetrics(16, 0, 15.6, GridType.LINES, 40, SpacingRule.AT_LEAST, BooleanNumber.FALSE, true);
 
         expect(getLineBoxHeight(compactMetrics)).toBeCloseTo(16, 4);
         expect(getLineBoxHeight(expandedMetrics)).toBeCloseTo(40, 4);
     });
 
     it('treats exact spacing as the requested line box height even when glyphs are taller', () => {
-        const metrics = getLineHeightMetrics(16, 0, 15.6, GridType.LINES, 10, SpacingRule.EXACT, BooleanNumber.FALSE);
+        const metrics = getLineHeightMetrics(16, 0, 15.6, GridType.LINES, 10, SpacingRule.EXACT, BooleanNumber.FALSE, true);
 
         expect(getLineBoxHeight(metrics)).toBeCloseTo(10, 4);
         expect(metrics.contentHeight).toBeGreaterThan(getLineBoxHeight(metrics));
+    });
+
+    it('keeps the legacy line-height behavior for embedded sheet documents', () => {
+        const metrics = getLineHeightMetrics(16, 0, 15.6, GridType.LINES, 1.5, SpacingRule.AUTO, BooleanNumber.TRUE, false);
+
+        expect(getLineBoxHeight(metrics)).toBeCloseTo(23.4, 4);
     });
 });

@@ -290,19 +290,26 @@ export function validationGrid(gridType = GridType.LINES, snapToGrid = BooleanNu
 }
 
 export function getLineHeightConfig(sectionBreakConfig: ISectionBreakConfig, paragraphConfig: IParagraphConfig) {
-    const { paragraphStyle = {} } = paragraphConfig;
+    const { paragraphStyle = {}, useWordStyleLineHeight = false } = paragraphConfig;
     const { linePitch = 15.6, gridType = GridType.LINES, paragraphLineGapDefault = 0 } = sectionBreakConfig;
-    // Word-style line spacing should follow glyph metrics by default.
-    // We only opt into line-pitch spacing when the paragraph explicitly snaps to the document grid.
-    const { lineSpacing = 0, spacingRule = SpacingRule.AUTO, snapToGrid = BooleanNumber.FALSE } = paragraphStyle;
+    const defaultSnapToGrid = useWordStyleLineHeight ? BooleanNumber.FALSE : BooleanNumber.TRUE;
+    const { lineSpacing = 0, spacingRule = SpacingRule.AUTO, snapToGrid = defaultSnapToGrid } = paragraphStyle;
 
-    // The default line spacing in Word is 1. Here, if line spacing is omitted, treat it as single-spacing.
+    // Flavored docs use Word-style single spacing by default.
+    // Embedded sheet/slides documents keep the legacy grid-based fallback.
     let lineSpacingApply = lineSpacing;
-    if (lineSpacing === 0 && spacingRule === SpacingRule.AUTO) {
+    if (useWordStyleLineHeight && lineSpacing === 0 && spacingRule === SpacingRule.AUTO) {
+        lineSpacingApply = 1;
+    } else if (
+        !useWordStyleLineHeight &&
+        (gridType === GridType.LINES || gridType === GridType.LINES_AND_CHARS) &&
+        lineSpacing === 0 &&
+        spacingRule === SpacingRule.AUTO
+    ) {
         lineSpacingApply = 1;
     }
 
-    return { paragraphLineGapDefault, linePitch, gridType, lineSpacing: lineSpacingApply, spacingRule, snapToGrid };
+    return { paragraphLineGapDefault, linePitch, gridType, lineSpacing: lineSpacingApply, spacingRule, snapToGrid, useWordStyleLineHeight };
 }
 
 export function getCharSpaceConfig(sectionBreakConfig: ISectionBreakConfig, paragraphConfig: IParagraphConfig) {

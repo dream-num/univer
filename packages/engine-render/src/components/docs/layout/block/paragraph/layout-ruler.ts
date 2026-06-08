@@ -345,7 +345,8 @@ function _divideOperator(
                     gridType,
                     lineSpacing,
                     spacingRule,
-                    snapToGrid
+                    snapToGrid,
+                    paragraphConfig.useWordStyleLineHeight
                 );
 
                 if (currentLine.contentHeight < contentHeight) {
@@ -487,7 +488,8 @@ function _lineOperator(
         gridType,
         lineSpacing,
         spacingRule,
-        snapToGrid
+        snapToGrid,
+        paragraphConfig.useWordStyleLineHeight
     );
 
     const { marginTop, spaceBelowApply } = __getParagraphSpace(
@@ -1138,8 +1140,52 @@ export function getLineHeightMetrics(
     gridType: GridType,
     lineSpacing: number,
     spacingRule: SpacingRule,
-    snapToGrid: BooleanNumber
+    snapToGrid: BooleanNumber,
+    useWordStyleLineHeight = true
 ) {
+    if (!useWordStyleLineHeight) {
+        let paddingTop = paragraphLineGapDefault;
+        let paddingBottom = paragraphLineGapDefault;
+
+        if (gridType === GridType.DEFAULT || snapToGrid === BooleanNumber.FALSE) {
+            if (spacingRule === SpacingRule.AUTO) {
+                return {
+                    paddingTop,
+                    paddingBottom,
+                    contentHeight: lineSpacing * glyphLineHeight,
+                    lineSpacingApply: glyphLineHeight,
+                };
+            }
+
+            return {
+                paddingTop,
+                paddingBottom,
+                contentHeight: Math.max(lineSpacing, glyphLineHeight),
+                lineSpacingApply: lineSpacing,
+            };
+        }
+
+        let lineSpacingApply = 0;
+        if (spacingRule === SpacingRule.AUTO) {
+            lineSpacingApply = lineSpacing * linePitch;
+        } else {
+            lineSpacingApply = lineSpacing;
+        }
+
+        if (glyphLineHeight + paragraphLineGapDefault * 2 < lineSpacingApply) {
+            paddingTop = paddingBottom = (lineSpacingApply - glyphLineHeight) / 2;
+        } else {
+            lineSpacingApply = glyphLineHeight;
+        }
+
+        return {
+            paddingTop,
+            paddingBottom,
+            contentHeight: glyphLineHeight,
+            lineSpacingApply,
+        };
+    }
+
     const usesDocumentGrid =
         spacingRule === SpacingRule.AUTO
         && snapToGrid === BooleanNumber.TRUE

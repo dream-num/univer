@@ -289,9 +289,6 @@ importers:
       '@univerjs/sheets-ui':
         specifier: workspace:*
         version: link:../../packages/sheets-ui
-      '@univerjs/sheets-zen-editor':
-        specifier: workspace:*
-        version: link:../../packages/sheets-zen-editor
       '@univerjs/slides':
         specifier: workspace:*
         version: link:../../packages/slides
@@ -640,9 +637,6 @@ importers:
       '@univerjs/sheets-ui':
         specifier: workspace:*
         version: link:../packages/sheets-ui
-      '@univerjs/sheets-zen-editor':
-        specifier: workspace:*
-        version: link:../packages/sheets-zen-editor
       '@univerjs/slides':
         specifier: workspace:*
         version: link:../packages/slides
@@ -2663,58 +2657,6 @@ importers:
       '@univerjs/themes':
         specifier: workspace:*
         version: link:../themes
-      postcss:
-        specifier: ^8.5.15
-        version: 8.5.15
-      react:
-        specifier: 19.2.7
-        version: 19.2.7
-      rxjs:
-        specifier: ^7.8.2
-        version: 7.8.2
-      tailwindcss:
-        specifier: 3.4.18
-        version: 3.4.18
-      typescript:
-        specifier: ^6.0.3
-        version: 6.0.3
-      vitest:
-        specifier: ^4.1.8
-        version: 4.1.8(@types/node@25.9.1)(@vitest/coverage-istanbul@4.1.8)(happy-dom@20.10.1)(jsdom@29.1.1)(vite@8.0.11(@types/node@25.9.1)(esbuild@0.28.0)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.22.3)(yaml@2.9.0))
-
-  packages/sheets-zen-editor:
-    dependencies:
-      '@univerjs/core':
-        specifier: workspace:*
-        version: link:../core
-      '@univerjs/design':
-        specifier: workspace:*
-        version: link:../design
-      '@univerjs/docs':
-        specifier: workspace:*
-        version: link:../docs
-      '@univerjs/docs-ui':
-        specifier: workspace:*
-        version: link:../docs-ui
-      '@univerjs/engine-render':
-        specifier: workspace:*
-        version: link:../engine-render
-      '@univerjs/icons':
-        specifier: 1.5.0
-        version: 1.5.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
-      '@univerjs/sheets':
-        specifier: workspace:*
-        version: link:../sheets
-      '@univerjs/sheets-ui':
-        specifier: workspace:*
-        version: link:../sheets-ui
-      '@univerjs/ui':
-        specifier: workspace:*
-        version: link:../ui
-    devDependencies:
-      '@univerjs-infra/shared':
-        specifier: workspace:*
-        version: link:../../common/shared
       postcss:
         specifier: ^8.5.15
         version: 8.5.15

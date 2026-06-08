@@ -34,8 +34,6 @@ import {
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
 import { CellPopupManagerService, ISheetClipboardService, SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import { AddCommentMutation, DeleteCommentMutation, IThreadCommentDataSourceService, ThreadCommentDataSourceService, ThreadCommentModel } from '@univerjs/thread-comment';
-import { IZenZoneService } from '@univerjs/ui';
-import { BehaviorSubject } from 'rxjs';
 import { vi } from 'vitest';
 
 const TEST_WORKBOOK_DATA: IWorkbookData = {
@@ -79,13 +77,6 @@ export function createThreadCommentUiTestBed(workbookData?: IWorkbookData, depen
     const cellPopupManagerService = {
         showPopup: vi.fn(() => popupDisposable),
     };
-    const zenVisible$ = new BehaviorSubject(false);
-    const zenZoneService = {
-        visible$: zenVisible$,
-        get visible() {
-            return zenVisible$.getValue();
-        },
-    };
     const sheetClipboardService = {
         addClipboardHook: vi.fn((hook) => {
             clipboardHook = hook;
@@ -114,7 +105,6 @@ export function createThreadCommentUiTestBed(workbookData?: IWorkbookData, depen
                 [ISheetClipboardService, { useValue: sheetClipboardService as unknown as ISheetClipboardService }],
                 [CellPopupManagerService, { useValue: cellPopupManagerService as unknown as CellPopupManagerService }],
                 [SheetCanvasPopManagerService, { useValue: {} as SheetCanvasPopManagerService }],
-                [IZenZoneService, { useValue: zenZoneService as unknown as IZenZoneService }],
             ] as Dependency[]).forEach((dependency) => this._injector.add(dependency));
 
             dependencies?.forEach((dependency) => this._injector.add(dependency));
@@ -142,7 +132,6 @@ export function createThreadCommentUiTestBed(workbookData?: IWorkbookData, depen
         commandService: get(ICommandService),
         cellPopupManagerService,
         popupDisposable,
-        zenVisible$,
         getClipboardHook: () => clipboardHook,
     };
 }

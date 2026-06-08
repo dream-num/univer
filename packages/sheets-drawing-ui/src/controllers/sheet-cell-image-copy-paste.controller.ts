@@ -16,7 +16,7 @@
 
 import type { DocumentDataModel, IDocDrawingBase } from '@univerjs/core';
 import type { IInnerPasteCommandParams } from '@univerjs/docs-ui';
-import { BuildTextUtils, createDocumentModelWithStyle, Disposable, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_ZEN_EDITOR_UNIT_ID_KEY, ICommandService, Inject, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
+import { BuildTextUtils, createDocumentModelWithStyle, Disposable, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, Inject, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { InnerPasteCommand } from '@univerjs/docs-ui';
 import { getCurrentTypeOfRenderer, IRenderManagerService } from '@univerjs/engine-render';
 import { EditingRenderController, SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
@@ -25,7 +25,6 @@ import { IDialogService } from '@univerjs/ui';
 const DISABLE_UNITS = [
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
-    DOCS_ZEN_EDITOR_UNIT_ID_KEY,
 ];
 export class SheetCellImageCopyPasteController extends Disposable {
     constructor(
@@ -71,40 +70,38 @@ export class SheetCellImageCopyPasteController extends Disposable {
                     }
                     const docUnitId = currentDoc.getUnitId();
                     if (DISABLE_UNITS.includes(docUnitId)) {
-                        if (docUnitId !== DOCS_ZEN_EDITOR_UNIT_ID_KEY) {
-                            const handleCloseDialog = () => {
-                                this._dialogService.close('sheet-cell-image-copy-paste');
-                                this._commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, {
-                                    visible: false,
-                                });
-                            };
-                            // empty
-                            if (currentDoc.getBody()?.dataStream === '\r\n') {
-                                this._commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, {
-                                    visible: false,
-                                });
-                                this._setCellImage(Object.values(doc.drawings!)[0]);
-                            } else {
-                                this._dialogService.open({
-                                    id: 'sheet-cell-image-copy-paste',
-                                    title: {
-                                        label: this._localeService.t('sheets-drawing-ui.cell-image.pasteTitle'),
-                                    },
-                                    children: {
-                                        label: this._localeService.t('sheets-drawing-ui.cell-image.pasteContent'),
-                                    },
-                                    width: 320,
-                                    destroyOnClose: true,
-                                    onClose: handleCloseDialog,
-                                    showOk: true,
-                                    showCancel: true,
-                                    onOk: () => {
-                                        handleCloseDialog();
-                                        this._setCellImage(Object.values(doc.drawings!)[0]);
-                                    },
-                                    onCancel: handleCloseDialog,
-                                });
-                            }
+                        const handleCloseDialog = () => {
+                            this._dialogService.close('sheet-cell-image-copy-paste');
+                            this._commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, {
+                                visible: false,
+                            });
+                        };
+                        // empty
+                        if (currentDoc.getBody()?.dataStream === '\r\n') {
+                            this._commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, {
+                                visible: false,
+                            });
+                            this._setCellImage(Object.values(doc.drawings!)[0]);
+                        } else {
+                            this._dialogService.open({
+                                id: 'sheet-cell-image-copy-paste',
+                                title: {
+                                    label: this._localeService.t('sheets-drawing-ui.cell-image.pasteTitle'),
+                                },
+                                children: {
+                                    label: this._localeService.t('sheets-drawing-ui.cell-image.pasteContent'),
+                                },
+                                width: 320,
+                                destroyOnClose: true,
+                                onClose: handleCloseDialog,
+                                showOk: true,
+                                showCancel: true,
+                                onOk: () => {
+                                    handleCloseDialog();
+                                    this._setCellImage(Object.values(doc.drawings!)[0]);
+                                },
+                                onCancel: handleCloseDialog,
+                            });
                         }
                     }
                 }

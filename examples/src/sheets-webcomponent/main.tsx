@@ -51,7 +51,6 @@ import { UniverSheetsTableUIPlugin } from '@univerjs/sheets-table-ui';
 import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment';
 import { UniverSheetsThreadCommentUIPlugin, UniverThreadCommentUIPlugin } from '@univerjs/sheets-thread-comment-ui';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
-import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
 import { UniverThreadCommentPlugin } from '@univerjs/thread-comment';
 import { UniverUIPlugin } from '@univerjs/ui';
 import { UniverVue3AdapterPlugin } from '@univerjs/ui-adapter-vue3';
@@ -125,8 +124,6 @@ class MyWebComponent extends LitElement {
         univer.registerPlugin(UniverSheetsThreadCommentUIPlugin);
         // sheet find and replace plugins
         univer.registerPlugin(UniverSheetsFindReplacePlugin);
-        // zen editor plugin
-        univer.registerPlugin(UniverSheetsZenEditorPlugin);
         // crosshair highlight plugin
         univer.registerPlugin(UniverSheetsCrosshairHighlightPlugin);
         // watermark plugin

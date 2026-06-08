@@ -55,7 +55,6 @@ import { UniverSheetsSortPlugin } from '@univerjs/sheets-sort';
 import { UniverSheetsTablePlugin } from '@univerjs/sheets-table';
 import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
-import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
 import { UniverUIPlugin } from '@univerjs/ui';
 import { UniverVue3AdapterPlugin } from '@univerjs/ui-adapter-vue3';
 import { UniverWebComponentAdapterPlugin } from '@univerjs/ui-adapter-web-component';
@@ -81,7 +80,6 @@ import '@univerjs/sheets-conditional-formatting/facade';
 import '@univerjs/sheets-find-replace/facade';
 import '@univerjs/sheets-drawing/facade';
 import '@univerjs/sheets-drawing-ui/facade';
-import '@univerjs/sheets-zen-editor/facade';
 import '@univerjs/sheets-crosshair-highlight/facade';
 import '@univerjs/sheets-formula-ui/facade';
 import '@univerjs/sheets-table/facade';
@@ -160,7 +158,6 @@ function createNewInstance() {
         }],
         [UniverSheetsUIPlugin],
         [UniverSheetsNumfmtPlugin],
-        [UniverSheetsZenEditorPlugin],
         [UniverFormulaEnginePlugin, { notExecuteFormula: true }],
         [UniverSheetsFormulaPlugin, { notExecuteFormula: true }],
         [UniverSheetsDataValidationPlugin],

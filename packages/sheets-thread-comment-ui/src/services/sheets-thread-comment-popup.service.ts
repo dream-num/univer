@@ -18,7 +18,6 @@ import type { IDisposable, Nullable } from '@univerjs/core';
 import type { ISheetLocationBase } from '@univerjs/sheets';
 import { Disposable, DisposableCollection, Inject } from '@univerjs/core';
 import { CellPopupManagerService, SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
-import { IZenZoneService } from '@univerjs/ui';
 import { BehaviorSubject } from 'rxjs';
 import { SHEETS_THREAD_COMMENT_MODAL } from '../types/const';
 
@@ -42,23 +41,13 @@ export class SheetsThreadCommentPopupService extends Disposable {
 
     constructor(
         @Inject(SheetCanvasPopManagerService) private readonly _canvasPopupManagerService: SheetCanvasPopManagerService,
-        @IZenZoneService private readonly _zenZoneService: IZenZoneService,
         @Inject(CellPopupManagerService) private readonly _cellPopupManagerService: CellPopupManagerService
     ) {
         super();
-        this._initZenVisible();
 
         this.disposeWithMe(() => {
             this._activePopup$.complete();
         });
-    }
-
-    private _initZenVisible() {
-        this.disposeWithMe(this._zenZoneService.visible$.subscribe((visible) => {
-            if (visible) {
-                this.hidePopup();
-            }
-        }));
     }
 
     override dispose(): void {
@@ -82,9 +71,6 @@ export class SheetsThreadCommentPopupService extends Disposable {
         if (this._lastPopup) {
             this._lastPopup.dispose();
         };
-        if (this._zenZoneService.visible) {
-            return;
-        }
 
         this._activePopup = location;
         this._activePopup$.next(location);

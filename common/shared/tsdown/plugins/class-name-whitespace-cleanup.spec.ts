@@ -35,6 +35,25 @@ describe('cleanupClassNameTemplateWhitespace', () => {
         );
     });
 
+    it('should normalize whitespace for conditional clsx template arguments', () => {
+        const sourceCode = `
+            const value = clsx(
+                "univer-relative univer-transition-all univer-duration-150",
+                isDraggingItem && "univer-opacity-0",
+                dragOverId === itemId && !isDraggingItem && \`
+                  univer-bg-primary-50/60
+                  dark:!univer-bg-primary-900/20
+                  univer-rounded univer-border univer-border-primary-200
+                  dark:!univer-border-primary-700
+                \`
+            );
+        `;
+
+        expect(cleanupClassNameTemplateWhitespace(sourceCode, '/tmp/example.tsx')).toContain(
+            'dragOverId === itemId && !isDraggingItem && "univer-bg-primary-50/60 dark:!univer-bg-primary-900/20 univer-rounded univer-border univer-border-primary-200 dark:!univer-border-primary-700"'
+        );
+    });
+
     it('should normalize whitespace for className template literals', () => {
         const sourceCode = `
             const value = (

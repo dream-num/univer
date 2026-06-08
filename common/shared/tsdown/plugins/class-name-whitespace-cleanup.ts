@@ -78,9 +78,18 @@ function isClassNameIdentifier(name: ts.PropertyName | ts.JsxAttributeName) {
 }
 
 function isClsxArgument(node: ts.Expression) {
-    return ts.isCallExpression(node.parent)
-        && node.parent.arguments.includes(node)
-        && isClsxIdentifier(node.parent.expression);
+    let current: ts.Node = node;
+
+    while (current.parent) {
+        if (ts.isCallExpression(current.parent)) {
+            return current.parent.arguments.includes(current as ts.Expression)
+                && isClsxIdentifier(current.parent.expression);
+        }
+
+        current = current.parent;
+    }
+
+    return false;
 }
 
 function isClassNameJsxAttributeValue(node: ts.Expression) {

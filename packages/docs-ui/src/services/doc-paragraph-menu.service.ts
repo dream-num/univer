@@ -64,9 +64,9 @@ export interface IDocBlockDropTarget {
 }
 
 const BLOCK_RANGE_ICON_MAP: Record<string, string> = {
-    code: 'DocsCodeBlockIcon',
-    quote: 'DocsQuoteBlockIcon',
-    callout: 'DocsCalloutBlockIcon',
+    code: 'CodeBlockIcon',
+    quote: 'QuoteIcon',
+    callout: 'CalloutIcon',
 };
 
 const LIST_ICON_MAP: Partial<Record<PresetListType, string>> = {

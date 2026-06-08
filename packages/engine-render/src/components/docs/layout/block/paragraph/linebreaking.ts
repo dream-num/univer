@@ -268,6 +268,7 @@ export function lineBreaking(
     const paragraph = viewModel.getParagraph(endIndex) || { startIndex: 0 };
 
     const { paragraphStyle = {}, bullet } = paragraph;
+    const useWordStyleLineHeight = _shouldApplyDocumentDefaultParagraphStyle(viewModel);
 
     const { skeHeaders, skeFooters, skeListLevel, drawingAnchor } = skeletonResourceReference;
 
@@ -287,8 +288,9 @@ export function lineBreaking(
             viewModel.getBody?.() ?? null,
             paragraph,
             paragraphStyle,
-            _shouldApplyDocumentDefaultParagraphStyle(viewModel)
+            useWordStyleLineHeight
         ),
+        useWordStyleLineHeight,
         paragraphNonInlineSkeDrawings,
         paragraphInlineSkeDrawings,
         skeTablesInParagraph: tableSkeleton

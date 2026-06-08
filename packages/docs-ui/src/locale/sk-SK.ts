@@ -95,6 +95,8 @@ const locale: typeof enUS = {
                 after: 'Za',
                 lineSpace: 'Riadkovanie',
                 multiSpace: 'Viacnásobné',
+                atLeast: 'At Least (px)',
+                exactly: 'Exactly (px)',
                 fixedValue: 'Pevná hodnota (px)',
             },
         },

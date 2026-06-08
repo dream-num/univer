@@ -15,7 +15,7 @@
  */
 
 import type { ReactNode } from 'react';
-import { HorizontalAlign, LocaleService, SpacingRule } from '@univerjs/core';
+import { HorizontalAlign, LocaleService } from '@univerjs/core';
 import { borderClassName, clsx, InputNumber, Select, Tooltip } from '@univerjs/design';
 import { AlignTextBothIcon, HorizontallyIcon, LeftJustifyingIcon, RightJustifyingIcon } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
@@ -31,6 +31,7 @@ import {
     useFirstParagraphLineSpacing,
     useFirstParagraphSpaceBelow,
 } from './hook/utils';
+import { getLineSpacingInputConfig, getLineSpacingRuleOptions } from './line-spacing';
 
 const PARAGRAPH_SETTING_CONTROL_CLASS = 'univer-w-full';
 
@@ -131,12 +132,8 @@ export function ParagraphSetting() {
     const [spaceBelow, setSpaceBelow] = useFirstParagraphSpaceBelow(currentParagraph);
     const { lineSpacing: [lineSpacing, setLineSpacing], spacingRule: [spacingRule, setSpacingRule] } = useFirstParagraphLineSpacing(currentParagraph);
 
-    const lineSpaceConfig = useMemo(() => {
-        if (spacingRule === SpacingRule.AUTO) {
-            return { min: 1, max: 5, step: 0.1 };
-        }
-        return { min: 1, max: 100 };
-    }, [spacingRule]);
+    const lineSpaceConfig = useMemo(() => getLineSpacingInputConfig(spacingRule), [spacingRule]);
+    const lineSpacingOptions = useMemo(() => getLineSpacingRuleOptions(localeService), [localeService]);
 
     return (
         <div className="univer-box-border univer-w-full">
@@ -210,10 +207,7 @@ export function ParagraphSetting() {
                             <Select
                                 className={PARAGRAPH_SETTING_CONTROL_CLASS}
                                 value={`${spacingRule}`}
-                                options={[
-                                    { label: localeService.t('docs-ui.doc.paragraphSetting.multiSpace'), value: `${SpacingRule.AUTO}` },
-                                    { label: localeService.t('docs-ui.doc.paragraphSetting.fixedValue'), value: `${SpacingRule.AT_LEAST}` },
-                                ]}
+                                options={lineSpacingOptions}
                                 onChange={(v) => setSpacingRule(Number(v))}
                             />
                             <AutoFocusInputNumber

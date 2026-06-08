@@ -46,7 +46,7 @@ export function getParagraphMenuPopupDirection(anchorLeft: number, menuWidth = 2
     return anchorLeft - menuWidth < viewportPadding ? 'right' : 'left';
 }
 
-export const PARAGRAPH_MENU_HOVER_OPEN_DELAY = 260;
+export const PARAGRAPH_MENU_HOVER_OPEN_DELAY = 800;
 
 export function createParagraphMenuHoverOpenScheduler(openMenu: () => void, delay = PARAGRAPH_MENU_HOVER_OPEN_DELAY) {
     let openTimer: number | null = null;

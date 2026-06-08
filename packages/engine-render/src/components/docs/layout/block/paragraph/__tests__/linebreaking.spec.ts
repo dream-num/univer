@@ -360,8 +360,9 @@ describe('linebreaking', () => {
         expect(ctx.paragraphConfigCache.get('segment-1')?.get(3)?.paragraphStyle).toEqual({
             spaceAbove: { v: 0 },
             lineSpacing: 1.5,
-            spaceBelow: { v: 8 },
+            spaceBelow: { v: 12 },
         });
+        expect(ctx.paragraphConfigCache.get('segment-1')?.get(3)?.useWordStyleLineHeight).toBe(true);
         expect(paragraphStyle).toEqual({});
     });
 
@@ -408,6 +409,7 @@ describe('linebreaking', () => {
         );
 
         expect(ctx.paragraphConfigCache.get('segment-1')?.get(3)?.paragraphStyle).toEqual({});
+        expect(ctx.paragraphConfigCache.get('segment-1')?.get(3)?.useWordStyleLineHeight).toBe(false);
         expect(paragraphStyle).toEqual({});
     });
 
@@ -452,6 +454,7 @@ describe('linebreaking', () => {
         );
 
         expect(ctx.paragraphConfigCache.get('segment-1')?.get(3)?.paragraphStyle).toEqual({});
+        expect(ctx.paragraphConfigCache.get('segment-1')?.get(3)?.useWordStyleLineHeight).toBe(false);
         expect(paragraphStyle).toEqual({});
     });
 });

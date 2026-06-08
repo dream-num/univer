@@ -95,6 +95,8 @@ const locale: typeof enUS = {
                 after: 'بعد',
                 lineSpace: 'فاصله خط',
                 multiSpace: 'فاصله چندگانه',
+                atLeast: 'At Least (px)',
+                exactly: 'Exactly (px)',
                 fixedValue: 'مقدار ثابت(px)',
             },
         },

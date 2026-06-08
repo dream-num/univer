@@ -338,14 +338,15 @@ function _divideOperator(
                     getLineHeightConfig(sectionBreakConfig, paragraphConfig);
                 const { boundingBoxAscent, boundingBoxDescent } = maxBox;
                 const spanLineHeight = boundingBoxAscent + boundingBoxDescent;
-                const { contentHeight } = __getLineHeight(
+                const { contentHeight } = getLineHeightMetrics(
                     spanLineHeight,
                     paragraphLineGapDefault,
                     linePitch,
                     gridType,
                     lineSpacing,
                     spacingRule,
-                    snapToGrid
+                    snapToGrid,
+                    paragraphConfig.useWordStyleLineHeight
                 );
 
                 if (currentLine.contentHeight < contentHeight) {
@@ -480,14 +481,15 @@ function _lineOperator(
         paragraphConfig
     );
 
-    const { paddingTop, paddingBottom, contentHeight, lineSpacingApply } = __getLineHeight(
+    const { paddingTop, paddingBottom, contentHeight, lineSpacingApply } = getLineHeightMetrics(
         glyphLineHeight,
         paragraphLineGapDefault,
         linePitch,
         gridType,
         lineSpacing,
         spacingRule,
-        snapToGrid
+        snapToGrid,
+        paragraphConfig.useWordStyleLineHeight
     );
 
     const { marginTop, spaceBelowApply } = __getParagraphSpace(
@@ -1131,58 +1133,97 @@ function __getParagraphSpace(
     };
 }
 
-function __getLineHeight(
+export function getLineHeightMetrics(
     glyphLineHeight: number,
     paragraphLineGapDefault: number,
     linePitch: number,
     gridType: GridType,
     lineSpacing: number,
     spacingRule: SpacingRule,
-    snapToGrid: BooleanNumber
+    snapToGrid: BooleanNumber,
+    useWordStyleLineHeight = true
 ) {
-    let paddingTop = paragraphLineGapDefault;
-    let paddingBottom = paragraphLineGapDefault;
+    if (!useWordStyleLineHeight) {
+        let paddingTop = paragraphLineGapDefault;
+        let paddingBottom = paragraphLineGapDefault;
 
-    if (gridType === GridType.DEFAULT || snapToGrid === BooleanNumber.FALSE) {
-        // Scenario where doc grid is not applied, layout is determined by character height and width
-        if (spacingRule === SpacingRule.AUTO) {
-            // In auto mode, lineSpacing represents the number of lines
+        if (gridType === GridType.DEFAULT || snapToGrid === BooleanNumber.FALSE) {
+            if (spacingRule === SpacingRule.AUTO) {
+                return {
+                    paddingTop,
+                    paddingBottom,
+                    contentHeight: lineSpacing * glyphLineHeight,
+                    lineSpacingApply: glyphLineHeight,
+                };
+            }
+
             return {
                 paddingTop,
                 paddingBottom,
-                contentHeight: lineSpacing * glyphLineHeight,
-                lineSpacingApply: glyphLineHeight,
+                contentHeight: Math.max(lineSpacing, glyphLineHeight),
+                lineSpacingApply: lineSpacing,
             };
+        }
+
+        let lineSpacingApply = 0;
+        if (spacingRule === SpacingRule.AUTO) {
+            lineSpacingApply = lineSpacing * linePitch;
+        } else {
+            lineSpacingApply = lineSpacing;
+        }
+
+        if (glyphLineHeight + paragraphLineGapDefault * 2 < lineSpacingApply) {
+            paddingTop = paddingBottom = (lineSpacingApply - glyphLineHeight) / 2;
+        } else {
+            lineSpacingApply = glyphLineHeight;
         }
 
         return {
             paddingTop,
             paddingBottom,
-            contentHeight: Math.max(lineSpacing, glyphLineHeight),
-            lineSpacingApply: lineSpacing,
+            contentHeight: glyphLineHeight,
+            lineSpacingApply,
         };
     }
 
-    // open xml $17.18.14 ST_DocGrid (Document Grid Types)
-    let lineSpacingApply = 0;
+    const usesDocumentGrid =
+        spacingRule === SpacingRule.AUTO
+        && snapToGrid === BooleanNumber.TRUE
+        && gridType !== GridType.DEFAULT;
+
     if (spacingRule === SpacingRule.AUTO) {
-        // In auto mode, lineSpacing represents the number of lines
-        lineSpacingApply = lineSpacing * linePitch;
-    } else {
-        lineSpacingApply = lineSpacing;
+        const lineSpacingApply = usesDocumentGrid ? lineSpacing * linePitch : lineSpacing * glyphLineHeight;
+        const padding = (lineSpacingApply - glyphLineHeight) / 2;
+
+        return {
+            paddingTop: padding,
+            paddingBottom: padding,
+            contentHeight: glyphLineHeight,
+            lineSpacingApply,
+        };
     }
 
-    if (glyphLineHeight + paragraphLineGapDefault * 2 < lineSpacingApply) {
-        paddingTop = paddingBottom = (lineSpacingApply - glyphLineHeight) / 2;
-    } else {
-        lineSpacingApply = glyphLineHeight;
+    if (spacingRule === SpacingRule.AT_LEAST) {
+        const lineSpacingApply = Math.max(lineSpacing, glyphLineHeight);
+        const padding = (lineSpacingApply - glyphLineHeight) / 2;
+
+        return {
+            paddingTop: padding,
+            paddingBottom: padding,
+            contentHeight: glyphLineHeight,
+            lineSpacingApply,
+        };
     }
+
+    // EXACT follows the requested line box height even when it is smaller than the glyph box.
+    // Negative padding lets subsequent lines advance by the exact value, which is closer to Word.
+    const exactPadding = (lineSpacing - glyphLineHeight) / 2;
 
     return {
-        paddingTop,
-        paddingBottom,
+        paddingTop: exactPadding,
+        paddingBottom: exactPadding,
         contentHeight: glyphLineHeight,
-        lineSpacingApply,
+        lineSpacingApply: lineSpacing,
     };
 }
 

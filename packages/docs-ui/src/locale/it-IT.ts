@@ -95,6 +95,8 @@ const locale: typeof enUS = {
                 after: 'Dopo',
                 lineSpace: 'Interlinea',
                 multiSpace: 'Spaziatura multipla',
+                atLeast: 'At Least (px)',
+                exactly: 'Exactly (px)',
                 fixedValue: 'Valore fisso (px)',
             },
         },

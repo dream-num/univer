@@ -95,6 +95,8 @@ const locale: typeof enUS = {
                 after: '段落后',
                 lineSpace: '行距',
                 multiSpace: '多倍行距',
+                atLeast: '至少值(px)',
+                exactly: '固定值(px)',
                 fixedValue: '固定值(px)',
             },
         },

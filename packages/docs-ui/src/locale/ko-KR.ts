@@ -95,6 +95,8 @@ const locale: typeof enUS = {
                 after: '아래 간격',
                 lineSpace: '줄 간격',
                 multiSpace: '복수 줄 간격',
+                atLeast: 'At Least (px)',
+                exactly: 'Exactly (px)',
                 fixedValue: '고정 값(px)',
             },
         },

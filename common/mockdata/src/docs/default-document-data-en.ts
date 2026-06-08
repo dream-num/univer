@@ -199,6 +199,7 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
             {
                 startIndex: 67,
             },
+            // Keep the English default demo aligned with the current docs default spacing.
             {
                 startIndex: 253,
                 paragraphStyle: {

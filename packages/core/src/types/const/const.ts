@@ -186,7 +186,8 @@ const BOTTOM_P = 4;
 
 export const DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING = 1.5;
 export const DEFAULT_DOCUMENT_PARAGRAPH_SPACE_ABOVE = 0;
-export const DEFAULT_DOCUMENT_PARAGRAPH_SPACE_BELOW = 8;
+// Docs defaults keep fixed paragraph-after spacing in px to match the current product setting model.
+export const DEFAULT_DOCUMENT_PARAGRAPH_SPACE_BELOW = 12;
 
 export const NAMED_STYLE_SPACE_MAP: Record<NamedStyleType, Nullable<IParagraphStyle>> = {
     [NamedStyleType.HEADING_1]: {

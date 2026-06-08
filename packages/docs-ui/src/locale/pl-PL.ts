@@ -95,6 +95,8 @@ const locale: typeof enUS = {
                 after: 'Po',
                 lineSpace: 'Odstęp między wierszami',
                 multiSpace: 'Wielokrotny odstęp',
+                atLeast: 'At Least (px)',
+                exactly: 'Exactly (px)',
                 fixedValue: 'Wartość stała (px)',
             },
         },

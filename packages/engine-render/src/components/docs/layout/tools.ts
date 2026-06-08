@@ -292,11 +292,13 @@ export function validationGrid(gridType = GridType.LINES, snapToGrid = BooleanNu
 export function getLineHeightConfig(sectionBreakConfig: ISectionBreakConfig, paragraphConfig: IParagraphConfig) {
     const { paragraphStyle = {} } = paragraphConfig;
     const { linePitch = 15.6, gridType = GridType.LINES, paragraphLineGapDefault = 0 } = sectionBreakConfig;
-    const { lineSpacing = 0, spacingRule = SpacingRule.AUTO, snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
+    // Word-style line spacing should follow glyph metrics by default.
+    // We only opt into line-pitch spacing when the paragraph explicitly snaps to the document grid.
+    const { lineSpacing = 0, spacingRule = SpacingRule.AUTO, snapToGrid = BooleanNumber.FALSE } = paragraphStyle;
 
-    // The default line spacing in Word is 1. Here, if the lines layout is used, the default line spacing is set to 1.
+    // The default line spacing in Word is 1. Here, if line spacing is omitted, treat it as single-spacing.
     let lineSpacingApply = lineSpacing;
-    if ((gridType === GridType.LINES || gridType === GridType.LINES_AND_CHARS) && lineSpacing === 0 && spacingRule === SpacingRule.AUTO) {
+    if (lineSpacing === 0 && spacingRule === SpacingRule.AUTO) {
         lineSpacingApply = 1;
     }
 

@@ -20,12 +20,13 @@ import { BuildTextUtils, DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING, DEFAULT_DOCUME
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import { getNumberUnitValue, IRenderManagerService } from '@univerjs/engine-render';
 import { useDependency } from '@univerjs/ui';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { bufferTime, filter, map } from 'rxjs/operators';
 import { DocParagraphSettingCommand } from '../../../commands/commands/doc-paragraph-setting.command';
 import { findNearestSectionBreak } from '../../../commands/commands/list.command';
 import { DocParagraphSettingController } from '../../../controllers/doc-paragraph-setting.controller';
+import { convertDisplayLineSpacingToStoredValue, convertLineSpacingForRuleChange, convertStoredLineSpacingToDisplayValue, getLineSpacingMetrics } from '../line-spacing';
 
 const useDocRanges = () => {
     const docSelectionManagerService = useDependency(DocSelectionManagerService);
@@ -246,16 +247,6 @@ export const useFirstParagraphLineSpacing = (paragraph: IParagraph[]) => {
 
     const stateChange$ = useMemo(() => new BehaviorSubject<{ spacingRule?: SpacingRule; lineSpacing?: number }>({}), []);
 
-    const [lineSpacing, setLineSpacingInternal] = useState(() => {
-        const firstParagraph = paragraph[0];
-        if (!firstParagraph) {
-            return 1.5;
-        }
-        return firstParagraph.paragraphStyle?.lineSpacing ?? DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING;
-    });
-
-    const lineSpacingCache = useRef<number>(lineSpacing);
-
     const [spacingRule, setSpacingRuleInternal] = useState<SpacingRule>(() => {
         const firstParagraph = paragraph[0];
         if (!firstParagraph) {
@@ -264,33 +255,45 @@ export const useFirstParagraphLineSpacing = (paragraph: IParagraph[]) => {
         return firstParagraph.paragraphStyle?.spacingRule ?? SpacingRule.AUTO;
     });
 
+    const [lineSpacing, setLineSpacingInternal] = useState(() => {
+        const firstParagraph = paragraph[0];
+        if (!firstParagraph) {
+            return DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING;
+        }
+        const currentSpacingRule = firstParagraph.paragraphStyle?.spacingRule ?? SpacingRule.AUTO;
+        const storedLineSpacing = firstParagraph.paragraphStyle?.lineSpacing ?? DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING;
+
+        return convertStoredLineSpacingToDisplayValue(storedLineSpacing, currentSpacingRule);
+    });
+
     const setLineSpacing = async (v: number) => {
         setLineSpacingInternal(v);
-        stateChange$.next({ lineSpacing: v, spacingRule });
+        stateChange$.next({
+            lineSpacing: convertDisplayLineSpacingToStoredValue(v, spacingRule),
+            spacingRule,
+        });
     };
 
     const setSpacingRule = async (v: SpacingRule) => {
         if (v !== spacingRule) {
-            let cache = lineSpacingCache.current;
-            if (v === SpacingRule.AT_LEAST) {
-                const glyphNode = skeleton?.findNodeByCharIndex(paragraph[0].startIndex);
-                const divideNode = glyphNode?.parent;
-                const lineNode = divideNode?.parent;
-                if (lineNode?.contentHeight !== undefined) {
-                    cache = Math.max(lineNode.contentHeight, cache);
-                }
-            } else {
-                // If the paragraph is set to fixed-spacing by default,
-                // the first time you enter the panel,
-                // you will set the fixed-spacing value to the initial value of multiple-spacing
-                if (cache > 5) {
-                    cache = 2;
-                }
-            }
-            lineSpacingCache.current = lineSpacing;
-            setLineSpacing(cache);
+            const glyphNode = skeleton?.findNodeByCharIndex(paragraph[0].startIndex);
+            const divideNode = glyphNode?.parent;
+            const lineNode = divideNode?.parent;
+            const metrics = getLineSpacingMetrics(lineNode as any);
+            const nextStoredLineSpacing = convertLineSpacingForRuleChange(
+                convertDisplayLineSpacingToStoredValue(lineSpacing, spacingRule),
+                spacingRule,
+                v,
+                metrics
+            );
+            const nextDisplayLineSpacing = convertStoredLineSpacingToDisplayValue(nextStoredLineSpacing, v);
+
+            setLineSpacingInternal(nextDisplayLineSpacing);
             setSpacingRuleInternal(v);
-            stateChange$.next({ spacingRule: v });
+            stateChange$.next({
+                spacingRule: v,
+                lineSpacing: nextStoredLineSpacing,
+            });
         }
     };
 

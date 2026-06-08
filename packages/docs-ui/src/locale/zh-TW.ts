@@ -95,6 +95,8 @@ const locale: typeof enUS = {
                 after: 'After',
                 lineSpace: 'Line Space',
                 multiSpace: 'Multi Space',
+                atLeast: 'At Least (px)',
+                exactly: 'Exactly (px)',
                 fixedValue: 'Fixed Value(px)',
             },
         },

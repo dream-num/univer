@@ -95,6 +95,8 @@ const locale: typeof enUS = {
                 after: 'Sesudah',
                 lineSpace: 'Spasi Baris',
                 multiSpace: 'Spasi Ganda',
+                atLeast: 'At Least (px)',
+                exactly: 'Exactly (px)',
                 fixedValue: 'Nilai Tetap(px)',
             },
         },

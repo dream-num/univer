@@ -18,11 +18,11 @@ import { describe, expect, it } from 'vitest';
 import { getEmptySnapshot } from '../empty-snapshot';
 
 describe('getEmptySnapshot', () => {
-    it('uses comfortable paragraph spacing defaults for new docs', () => {
+    it('uses the configured paragraph spacing defaults for new docs', () => {
         expect(getEmptySnapshot().body?.paragraphs?.[0].paragraphStyle).toEqual({
             spaceAbove: { v: 0 },
             lineSpacing: 1.5,
-            spaceBelow: { v: 8 },
+            spaceBelow: { v: 12 },
         });
     });
 });

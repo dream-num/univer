@@ -44,6 +44,17 @@ export interface IOpenTypeGlyphInfo {
 const fontCache = new Map<string, Opentype.Font>();
 const glyphCache: Map<string, IOpenTypeGlyphInfo[]> = new Map();
 
+function expandFontFamilies(fontFamily: Nullable<string>): string[] {
+    if (!fontFamily?.trim()) {
+        return [];
+    }
+
+    return fontFamily
+        .split(',')
+        .map((family) => family.trim().replace(/^['"]|['"]$/g, ''))
+        .filter(Boolean);
+}
+
 function shapeChunk(
     content: string,
     charPosition: number,
@@ -197,9 +208,10 @@ export function textShape(body: IDocumentBody) {
 
     for (const chunk of chunks) {
         const { content, style = {} } = chunk;
-        let fontFamilies = DEFAULT_FONTFACE_PLANE.split(',').map((family) => family.trim().replace(/["']/g, ''));
-
-        fontFamilies.unshift(style.ff ?? 'Arial');
+        let fontFamilies = [
+            ...expandFontFamilies(style.ff ?? 'Arial'),
+            ...expandFontFamilies(DEFAULT_FONTFACE_PLANE),
+        ];
 
         fontFamilies = fontLibrary.getValidFontFamilies(fontFamilies);
 

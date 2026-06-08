@@ -115,6 +115,13 @@ describe('remote-instance.service', () => {
         })).resolves.toBe(true);
         expect(createUnit).toHaveBeenCalledWith(UniverInstanceType.UNIVER_SHEET, { id: 'snapshot' });
 
+        await expect(service.createInstance({
+            unitID: 'base-1',
+            type: UniverInstanceType.UNIVER_BASE,
+            snapshot: { id: 'base-snapshot' } as never,
+        })).resolves.toBe(true);
+        expect(createUnit).toHaveBeenCalledWith(UniverInstanceType.UNIVER_BASE, { id: 'base-snapshot' });
+
         await expect(service.disposeInstance({ unitID: 'sheet-1' })).resolves.toBe(true);
         expect(disposeUnit).toHaveBeenCalledWith('sheet-1');
         expect(debug).toHaveBeenCalled();

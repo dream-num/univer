@@ -63,6 +63,18 @@ describe('Test Canvas Color', () => {
         expect(invertedColor2).toEqual('rgba(255,85,85, 1)');
     });
 
+    it('uses stable dark-mode overrides for common canvas interaction colors', async () => {
+        themeService.setDarkMode(false);
+        expect(canvasColorService.getRenderColor('#f3f6fa')).toEqual('#f3f6fa');
+        expect(canvasColorService.getRenderColor('rgba(37, 99, 235, 0.08)')).toEqual('rgba(37, 99, 235, 0.08)');
+
+        themeService.setDarkMode(true);
+        expect(canvasColorService.getRenderColor('#f3f6fa')).toEqual('#18243a');
+        expect(canvasColorService.getRenderColor('#1d5cff')).toEqual('#60a5fa');
+        expect(canvasColorService.getRenderColor('rgba(37, 99, 235, 0.08)')).toEqual('rgba(96,165,250,0.22)');
+        expect(canvasColorService.getRenderColor('rgba(37,99,235,0.08)')).toEqual('rgba(96,165,250,0.22)');
+    });
+
     it('test short hex color', async () => {
         const color = '#ccc';
         themeService.setDarkMode(false);

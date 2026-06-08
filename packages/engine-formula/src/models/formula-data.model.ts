@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, IObjectArrayPrimitiveType, IObjectMatrixPrimitiveType, IRange, IRowData, IUnitRange, Nullable, Workbook } from '@univerjs/core';
+import type { BaseCellValue, BaseDataModel, IBaseCellData, IBaseSnapshot, ICellData, IFieldSnapshot, IObjectArrayPrimitiveType, IObjectMatrixPrimitiveType, IRange, IRowData, ITableSnapshot, IUnitRange, Nullable, Workbook } from '@univerjs/core';
 import type {
     IArrayFormulaRangeType,
     IArrayFormulaUnitCellType,
@@ -30,7 +30,7 @@ import type {
     IUnitStylesData,
 } from '../basics/common';
 import type { IImageFormulaInfo } from '../engine/value-object/primitive-object';
-import { BooleanNumber, Disposable, Inject, isFormulaId, isFormulaString, IUniverInstanceService, ObjectMatrix, RANGE_TYPE, UniverInstanceType } from '@univerjs/core';
+import { BooleanNumber, CellValueType, Disposable, Inject, isFormulaId, isFormulaString, IUniverInstanceService, ObjectMatrix, RANGE_TYPE, Styles, UniverInstanceType } from '@univerjs/core';
 import { LexerTreeBuilder } from '../engine/analysis/lexer-tree-builder';
 import { clearArrayFormulaCellDataByCell, updateFormulaDataByCellValue } from './utils/formula-data-util';
 
@@ -164,10 +164,6 @@ export class FormulaDataModel extends Disposable {
     getFormulaData(): IFormulaData {
         const formulaData: IFormulaData = {};
         const allSheets = this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-        if (allSheets.length === 0) {
-            return formulaData;
-        }
-
         allSheets.forEach((workbook) => {
             const unitId = workbook.getUnitId();
             formulaData[unitId] = {};
@@ -178,6 +174,39 @@ export class FormulaDataModel extends Disposable {
                 const sheetId = worksheet.getSheetId();
 
                 initSheetFormulaData(formulaData, unitId, sheetId, cellMatrix);
+            });
+        });
+
+        const allBases = this._univerInstanceService.getAllUnitsForType<BaseDataModel>(UniverInstanceType.UNIVER_BASE);
+        allBases.forEach((base) => {
+            const snapshot = base.getSnapshot();
+            const unitId = base.getUnitId();
+            formulaData[unitId] = {};
+
+            Object.values(snapshot.tables).filter((table) => !table.deleted).forEach((table) => {
+                const tableFormulaData: Record<number, Record<number, IFormulaDataItem>> = {};
+                table.recordOrder?.forEach((recordId, row) => {
+                    const record = table.records[recordId];
+                    if (!record || record.deleted) {
+                        return;
+                    }
+                    table.fieldOrder.forEach((fieldId, col) => {
+                        const field = table.fields[fieldId];
+                        if (!field || field.deleted || field.type !== 'formula') {
+                            return;
+                        }
+                        const formula = String(field.config?.formula ?? '').trim();
+                        if (!formula) {
+                            return;
+                        }
+                        tableFormulaData[row] ??= {};
+                        tableFormulaData[row][col] = {
+                            f: normalizeBaseFormulaForEngine(formula, table, snapshot),
+                            si: field.id,
+                        };
+                    });
+                });
+                formulaData[unitId]![table.id] = tableFormulaData;
             });
         });
 
@@ -342,6 +371,29 @@ export class FormulaDataModel extends Disposable {
             unitStylesData[unitId] = workbook.getStyles();
 
             unitSheetNameMap[unitId] = sheetNameMap;
+        }
+
+        const unitAllBases = this._univerInstanceService.getAllUnitsForType<BaseDataModel>(UniverInstanceType.UNIVER_BASE);
+        for (const base of unitAllBases) {
+            const snapshot = base.getSnapshot();
+            const unitId = base.getUnitId();
+            const baseData: ISheetData = {};
+            const tableNameMap: { [tableName: string]: string } = {};
+
+            for (const table of Object.values(snapshot.tables).filter((item) => !item.deleted)) {
+                baseData[table.id] = {
+                    cellData: new ObjectMatrix(buildBaseRuntimeCellData(table)) as unknown as ObjectMatrix<ICellData>,
+                    rowCount: table.recordOrder?.filter((recordId) => !table.records[recordId]?.deleted).length ?? 0,
+                    columnCount: table.fieldOrder.filter((fieldId) => !table.fields[fieldId]?.deleted).length,
+                    rowData: {},
+                    columnData: {},
+                };
+                tableNameMap[table.name] = table.id;
+            }
+
+            allUnitData[unitId] = baseData;
+            unitStylesData[unitId] = new Styles();
+            unitSheetNameMap[unitId] = tableNameMap;
         }
 
         return {
@@ -761,4 +813,118 @@ export function initSheetFormulaData(
             [sheetId]: newSheetFormulaData,
         },
     };
+}
+
+const BASE_LEGACY_FIELD_REF_PATTERN = /\{([^}]+)\}/g;
+const BASE_TABLE_FIELD_REF_PATTERN = /\b([A-Z_]\w*)\[([^\]]+)\]/gi;
+const BASE_BRACKET_FIELD_REF_PATTERN = /(^|[^A-Za-z0-9_\]\[])\[([^\]]+)\]/g;
+
+function normalizeBaseFormulaForEngine(formula: string, currentTable: ITableSnapshot, snapshot: IBaseSnapshot): string {
+    const refs: string[] = [];
+    const hold = (ref: string) => {
+        const index = refs.push(ref) - 1;
+        return `__BASE_FORMULA_REF_${index}__`;
+    };
+    const normalized = formula
+        .replace(BASE_LEGACY_FIELD_REF_PATTERN, (_match, fieldName: string) => hold(createEngineThisRowRef(currentTable, fieldName, snapshot)))
+        .replace(BASE_TABLE_FIELD_REF_PATTERN, (_match, sourceTableName: string, fieldName: string) => {
+            const targetTable = resolveBaseFormulaTable(sourceTableName, currentTable, snapshot);
+            return targetTable ? hold(createEngineThisRowRef(targetTable, fieldName, snapshot)) : `${sourceTableName}[${fieldName}]`;
+        })
+        .replace(BASE_BRACKET_FIELD_REF_PATTERN, (_match, prefix: string, fieldName: string) => `${prefix}${hold(createEngineThisRowRef(currentTable, fieldName, snapshot))}`);
+    return normalized.replace(/__BASE_FORMULA_REF_(\d+)__/g, (_match, index: string) => refs[Number(index)] ?? '');
+}
+
+function createEngineThisRowRef(table: ITableSnapshot, fieldName: string, snapshot: IBaseSnapshot): string {
+    return `${getEngineBaseTableName(table, snapshot)}[[#This Row],[${fieldName}]]`;
+}
+
+function getEngineBaseTableName(table: ITableSnapshot, snapshot: IBaseSnapshot): string {
+    const sameNameCount = Object.values(snapshot.tables).filter((item) => !item.deleted && item.name === table.name).length;
+    return sameNameCount === 1 ? table.name : table.id;
+}
+
+function buildBaseRuntimeCellData(table: ITableSnapshot): Record<number, Record<number, IBaseCellData>> {
+    const cellData: Record<number, Record<number, IBaseCellData>> = { ...table.cellData };
+    const fieldOrder = table.fieldOrder.filter((fieldId) => table.fields[fieldId] && !table.fields[fieldId].deleted);
+    const recordOrder = table.recordOrder?.filter((recordId) => table.records[recordId] && !table.records[recordId].deleted)
+        ?? Object.values(table.records ?? {}).filter((record) => !record.deleted).sort((a, b) => a.orderKey.localeCompare(b.orderKey)).map((record) => record.id);
+
+    recordOrder.forEach((recordId, row) => {
+        const record = table.records[recordId];
+        if (!record || record.deleted) {
+            return;
+        }
+        cellData[row] = { ...cellData[row] };
+        fieldOrder.forEach((fieldId, col) => {
+            if (!Object.prototype.hasOwnProperty.call(record.values ?? {}, fieldId)) {
+                return;
+            }
+            cellData[row][col] = toBaseRuntimeCellData(record.values[fieldId], table.fields[fieldId]);
+        });
+    });
+
+    return cellData;
+}
+
+function toBaseRuntimeCellData(value: BaseCellValue | IBaseCellData, field?: IFieldSnapshot): IBaseCellData {
+    if (isBaseCellData(value)) {
+        return normalizeBaseCellData(value);
+    }
+    if (field?.type === 'attachment') {
+        return { v: '', t: CellValueType.STRING };
+    }
+    if (Array.isArray(value)) {
+        return { v: value.join(', '), t: CellValueType.STRING };
+    }
+    if (field?.type === 'link' && value && typeof value === 'object') {
+        const link = value as { text?: unknown; url?: unknown };
+        return { v: String(link.text ?? link.url ?? ''), t: CellValueType.STRING };
+    }
+    if (value === null || typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+        return { v: value, t: inferBaseRuntimeCellType(value) };
+    }
+    return { v: null, t: null };
+}
+
+function normalizeBaseCellData(cell: IBaseCellData): IBaseCellData {
+    const type = inferBaseRuntimeCellType(cell.v ?? null);
+    return { ...cell, t: type };
+}
+
+function inferBaseRuntimeCellType(value: IBaseCellData['v']): CellValueType | null {
+    if (typeof value === 'number') {
+        return CellValueType.NUMBER;
+    }
+    if (typeof value === 'boolean') {
+        return CellValueType.BOOLEAN;
+    }
+    if (typeof value === 'string') {
+        return CellValueType.STRING;
+    }
+    return null;
+}
+
+function isBaseCellData(value: unknown): value is IBaseCellData {
+    return !!value && typeof value === 'object' && (
+        Object.prototype.hasOwnProperty.call(value, 'v')
+        || Object.prototype.hasOwnProperty.call(value, 't')
+        || Object.prototype.hasOwnProperty.call(value, 'p')
+        || Object.prototype.hasOwnProperty.call(value, 'f')
+        || Object.prototype.hasOwnProperty.call(value, 'si')
+    );
+}
+
+function resolveBaseFormulaTable(tableName: string | undefined, currentTable: ITableSnapshot, snapshot: IBaseSnapshot): ITableSnapshot | undefined {
+    if (!tableName || tableName === 'table' || tableName === currentTable.id || tableName === currentTable.name) {
+        return currentTable;
+    }
+
+    const byId = snapshot.tables[tableName];
+    if (byId && !byId.deleted) {
+        return byId;
+    }
+
+    const matches = Object.values(snapshot.tables).filter((table) => !table.deleted && table.name === tableName);
+    return matches.length === 1 ? matches[0] : undefined;
 }

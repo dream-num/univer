@@ -22,6 +22,7 @@ import type { DependencyOverride } from './services/plugin/plugin-override';
 import type { Plugin, PluginCtor } from './services/plugin/plugin.service';
 import type { ILocales } from './shared';
 import type { LocaleType } from './types/enum/locale-type';
+import { traceBasePerformance } from './base/base-performance';
 import { Injector, touchDependencies } from './common/di';
 import { UniverInstanceType } from './common/unit';
 import { DocumentDataModel } from './docs/data-model/document-data-model';
@@ -167,7 +168,9 @@ export class Univer implements IDisposable {
     }
 
     createUnit<T, U extends UnitModel>(type: UniverInstanceType, data: Partial<T>): U {
-        return this._univerInstanceService.createUnit(type, data);
+        return traceBasePerformance('Core.Univer.createUnit', () => this._univerInstanceService.createUnit(type, data), {
+            type,
+        });
     }
 
     private _init(injector: Injector): void {
@@ -180,7 +183,9 @@ export class Univer implements IDisposable {
             (type: UniverInstanceType, data, ctor, options) => {
                 const isFirstTime = !this._startedTypes.has(type);
                 if (isFirstTime) {
-                    this._pluginService.startPluginsForType(type);
+                    traceBasePerformance('Core.Univer.startPluginsForType', () => this._pluginService.startPluginsForType(type), {
+                        type,
+                    });
                     this._startedTypes.add(type);
                 }
 
@@ -189,11 +194,19 @@ export class Univer implements IDisposable {
                     throw new Error(`[Univer]: No constructor registered for unit type ${type}.`);
                 }
 
-                const model = injector.createInstance(actualCtor, data);
-                univerInstanceService.__addUnit(model, options);
+                const model = traceBasePerformance('Core.Univer.createModelInstance', () => injector.createInstance(actualCtor, data), {
+                    type,
+                    ctor: actualCtor.name,
+                });
+                traceBasePerformance('Core.Univer.addUnit', () => univerInstanceService.__addUnit(model, options), {
+                    type,
+                    unitId: model.getUnitId(),
+                });
 
                 if (isFirstTime) {
-                    this._tryProgressToReady();
+                    traceBasePerformance('Core.Univer.tryProgressToReady', () => this._tryProgressToReady(), {
+                        type,
+                    });
                 }
 
                 return model;

@@ -62,7 +62,7 @@ export function Segmented<T extends ItemValue = ItemValue>({
             const containerRect = containerRef.current.getBoundingClientRect();
             const newRect = newItemElement.getBoundingClientRect();
 
-          // Calculate position relative to container's padding
+            // Calculate position relative to container's padding
             const newLeft = newRect.left - containerRect.left - 4; // Subtract padding-left (p-1 = 4px)
 
             if (oldItemElement) {

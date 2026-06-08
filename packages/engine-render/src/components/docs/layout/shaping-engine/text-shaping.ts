@@ -43,17 +43,51 @@ export interface IOpenTypeGlyphInfo {
 
 const fontCache = new Map<string, Opentype.Font>();
 const glyphCache: Map<string, IOpenTypeGlyphInfo[]> = new Map();
+const fontFamilyCache = new Map<string, string[]>();
+
+function trimOuterQuotes(value: string): string {
+    const firstChar = value.charCodeAt(0);
+    const lastChar = value.charCodeAt(value.length - 1);
+    const hasLeadingQuote = firstChar === 34 || firstChar === 39;
+    const hasTrailingQuote = lastChar === 34 || lastChar === 39;
+
+    if (hasLeadingQuote && hasTrailingQuote) {
+        return value.slice(1, -1);
+    }
+
+    if (hasLeadingQuote) {
+        return value.slice(1);
+    }
+
+    if (hasTrailingQuote) {
+        return value.slice(0, -1);
+    }
+
+    return value;
+}
 
 function expandFontFamilies(fontFamily: Nullable<string>): string[] {
     if (!fontFamily?.trim()) {
         return [];
     }
 
-    return fontFamily
+    let families = fontFamilyCache.get(fontFamily);
+
+    if (families) {
+        return families;
+    }
+
+    families = fontFamily
         .split(',')
-        .map((family) => family.trim().replace(/^['"]|['"]$/g, ''))
+        .map((family) => trimOuterQuotes(family.trim()))
         .filter(Boolean);
+
+    fontFamilyCache.set(fontFamily, families);
+
+    return families;
 }
+
+const defaultFontFamilies = expandFontFamilies(DEFAULT_FONTFACE_PLANE);
 
 function shapeChunk(
     content: string,
@@ -210,7 +244,7 @@ export function textShape(body: IDocumentBody) {
         const { content, style = {} } = chunk;
         let fontFamilies = [
             ...expandFontFamilies(style.ff ?? 'Arial'),
-            ...expandFontFamilies(DEFAULT_FONTFACE_PLANE),
+            ...defaultFontFamilies,
         ];
 
         fontFamilies = fontLibrary.getValidFontFamilies(fontFamilies);

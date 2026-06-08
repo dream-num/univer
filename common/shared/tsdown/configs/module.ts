@@ -17,6 +17,7 @@
 import type { UserConfig } from 'tsdown';
 import type { IEntryConfig } from '../types';
 import { defineConfig } from 'tsdown';
+import { createCssNoopInputOptions } from '../plugins/css-noop';
 import { createOutputAliasPlugin } from '../plugins/output-alias';
 import { createOutputObfuscatorPlugin } from '../plugins/output-obfuscator';
 
@@ -54,6 +55,7 @@ export function createModuleConfig(options: ICreateModuleConfigOptions): UserCon
         dts: false,
         entry: Object.fromEntries(entries.map((entry) => [entry.key, entry.path])),
         format,
+        inputOptions: keepRootIndexCss ? baseConfig.inputOptions : createCssNoopInputOptions(baseConfig.inputOptions),
         outputOptions: {
             codeSplitting: true,
             minify: enableObfuscation,

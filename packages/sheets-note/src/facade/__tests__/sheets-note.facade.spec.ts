@@ -16,7 +16,6 @@
 
 import type { Dependency, IWorkbookData, UnitModel } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
-import type { ISheetNote } from '../../models/sheets-note.model';
 import {
     ILogService,
     Inject,
@@ -166,10 +165,16 @@ describe('sheets-note facade mixins', () => {
         const range = sheet.getRange(1, 1, 1, 1);
         expect(range.getNote()).toBeUndefined();
 
-        const note: ISheetNote = { id: 'ignored-id', row: 1, col: 1, width: 160, height: 72, note: 'hello', show: true };
-        range.createOrUpdateNote(note);
+        range.createOrUpdateNote({ width: 160, height: 72, note: 'hello', show: true });
 
-        expect(range.getNote()?.note).toBe('hello');
+        expect(range.getNote()).toMatchObject({
+            col: 1,
+            height: 72,
+            note: 'hello',
+            row: 1,
+            show: true,
+            width: 160,
+        });
         expect(sheet.getNotes()).toHaveLength(1);
 
         range.deleteNote();

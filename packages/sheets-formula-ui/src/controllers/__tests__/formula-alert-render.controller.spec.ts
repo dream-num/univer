@@ -32,10 +32,9 @@ afterEach(() => {
 });
 
 describe('FormulaAlertRenderController', () => {
-    it('shows formula alerts for hovered cells and hides them for repeated hovers or zen mode', async () => {
+    it('shows formula alerts for hovered cells and hides them for repeated hovers', async () => {
         vi.useFakeTimers();
         const currentCell$ = new Subject<{ location: { unitId: string; subUnitId: string; row: number; col: number } }>();
-        const visible$ = new Subject<boolean>();
         const currentAlert = new Map<string, { alert: { location: { unitId: string; subUnitId: string; row: number; col: number } } }>();
         const showAlert = vi.fn((alert) => currentAlert.set('SHEET_FORMULA_ALERT', { alert }));
         const removeAlert = vi.fn((key: string) => currentAlert.delete(key));
@@ -46,8 +45,7 @@ describe('FormulaAlertRenderController', () => {
             { currentCell$ } as never,
             { currentAlert, removeAlert, showAlert } as never,
             { t: (key: string) => key } as never,
-            { getArrayFormulaCellData: vi.fn(() => null) } as never,
-            { visible$ } as never
+            { getArrayFormulaCellData: vi.fn(() => null) } as never
         );
 
         expect(controller).toBeTruthy();
@@ -66,9 +64,6 @@ describe('FormulaAlertRenderController', () => {
         currentCell$.next({ location });
         await vi.advanceTimersByTimeAsync(120);
         expect(removeAlert).toHaveBeenCalledWith('SHEET_FORMULA_ALERT');
-
-        visible$.next(true);
-        expect(removeAlert).toHaveBeenCalledWith('SHEET_FORMULA_ALERT');
     });
 
     it('hides alerts when there is no extractable formula error', async () => {
@@ -82,8 +77,7 @@ describe('FormulaAlertRenderController', () => {
             { currentCell$ } as never,
             { currentAlert: new Map(), removeAlert, showAlert: vi.fn() } as never,
             { t: (key: string) => key } as never,
-            { getArrayFormulaCellData: vi.fn(() => null) } as never,
-            { visible$: new Subject<boolean>() } as never
+            { getArrayFormulaCellData: vi.fn(() => null) } as never
         );
 
         expect(controller).toBeTruthy();

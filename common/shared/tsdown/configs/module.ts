@@ -17,6 +17,7 @@
 import type { UserConfig } from 'tsdown';
 import type { IEntryConfig } from '../types';
 import { defineConfig } from 'tsdown';
+import { createCssNoopInputOptions } from '../plugins/css-noop';
 import { createOutputAliasPlugin } from '../plugins/output-alias';
 import { createOutputObfuscatorPlugin } from '../plugins/output-obfuscator';
 
@@ -25,7 +26,7 @@ export type TModuleFormat = 'cjs' | 'esm';
 export interface ICreateModuleConfigOptions {
     baseConfig: Partial<UserConfig>;
     enableObfuscation: boolean;
-    entry: IEntryConfig;
+    entries: IEntryConfig[];
     externalPackages: string[];
     facadeExternalPackages: string[];
     format: TModuleFormat;
@@ -39,10 +40,12 @@ export interface ICreateModuleConfigOptions {
  * Creates the common ESM/CJS bundle config for a single package entry.
  */
 export function createModuleConfig(options: ICreateModuleConfigOptions): UserConfig {
-    const { baseConfig, enableObfuscation, entry, externalPackages, facadeExternalPackages, format, obfuscatorIgnorePatterns, outDir, packageDir, plugins } = options;
-    const neverBundle = entry.type === 'facade' ? facadeExternalPackages : externalPackages;
+    const { baseConfig, enableObfuscation, entries, externalPackages, facadeExternalPackages, format, obfuscatorIgnorePatterns, outDir, packageDir, plugins } = options;
+    const hasFacadeEntry = entries.some((entry) => entry.type === 'facade');
+    const hasIndexEntry = entries.some((entry) => entry.type === 'index');
+    const neverBundle = hasFacadeEntry ? facadeExternalPackages : externalPackages;
     const copyToRoot = format === 'esm';
-    const keepRootIndexCss = entry.type === 'index' && format === 'esm';
+    const keepRootIndexCss = hasIndexEntry && format === 'esm';
 
     return defineConfig({
         ...baseConfig,
@@ -50,8 +53,9 @@ export function createModuleConfig(options: ICreateModuleConfigOptions): UserCon
             neverBundle,
         },
         dts: false,
-        entry: { [entry.key]: entry.path },
+        entry: Object.fromEntries(entries.map((entry) => [entry.key, entry.path])),
         format,
+        inputOptions: keepRootIndexCss ? baseConfig.inputOptions : createCssNoopInputOptions(baseConfig.inputOptions),
         outputOptions: {
             codeSplitting: true,
             minify: enableObfuscation,

@@ -16,7 +16,7 @@
 
 import type { ICommand } from '@univerjs/core';
 import type { ISheetCommandSharedParams } from '@univerjs/sheets';
-import { CommandType, DOCS_ZEN_EDITOR_UNIT_ID_KEY, ICommandService, IUniverInstanceService } from '@univerjs/core';
+import { CommandType, ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { getSheetCommandTarget, SheetsSelectionsService } from '@univerjs/sheets';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
@@ -79,15 +79,12 @@ export const InsertHyperLinkOperation: ICommand = {
         const row = selection.range.startRow;
         const col = selection.range.startColumn;
         const visible = editorBridgeService.isVisible();
-        const isZenEditor = univerInstanceService.getFocusedUnit()?.getUnitId() === DOCS_ZEN_EDITOR_UNIT_ID_KEY;
         return commandService.executeCommand(OpenHyperLinkEditPanelOperation.id, {
             unitId: target.unitId,
             subUnitId: target.subUnitId,
             row,
             col,
-            type: isZenEditor ?
-                HyperLinkEditSourceType.ZEN_EDITOR
-                : visible.visible ? HyperLinkEditSourceType.EDITING : HyperLinkEditSourceType.VIEWING,
+            type: visible.visible ? HyperLinkEditSourceType.EDITING : HyperLinkEditSourceType.VIEWING,
         });
     },
 };

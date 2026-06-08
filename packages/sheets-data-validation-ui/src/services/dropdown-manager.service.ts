@@ -26,7 +26,7 @@ import { serializeListOptions, SetRangeValuesCommand, SheetsSelectionsService } 
 import { getCellValueOrigin, getDataValidationCellValue, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
 import { getPatternType } from '@univerjs/sheets-numfmt';
 import { IEditorBridgeService, ISheetCellDropdownManagerService, SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
-import { IZenZoneService, KeyCode } from '@univerjs/ui';
+import { KeyCode } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { OpenValidationPanelOperation } from '../commands/operations/data-validation.operation';
 import { SHEETS_DATA_VALIDATION_UI_PLUGIN_CONFIG_KEY } from '../config/config';
@@ -88,8 +88,6 @@ export class DataValidationDropdownManagerService extends Disposable {
 
     activeDropdown$ = this._activeDropdown$.asObservable();
 
-    private _zenVisible = false;
-
     get activeDropdown() {
         return this._activeDropdown;
     }
@@ -97,7 +95,6 @@ export class DataValidationDropdownManagerService extends Disposable {
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(DataValidatorRegistryService) private readonly _dataValidatorRegistryService: DataValidatorRegistryService,
-        @IZenZoneService private readonly _zenZoneService: IZenZoneService,
         @Inject(SheetDataValidationModel) private readonly _dataValidationModel: SheetDataValidationModel,
         @Inject(SheetsSelectionsService) private readonly _sheetsSelectionsService: SheetsSelectionsService,
         @Inject(ISheetCellDropdownManagerService) private readonly _cellDropdownManagerService: ISheetCellDropdownManagerService,
@@ -108,21 +105,10 @@ export class DataValidationDropdownManagerService extends Disposable {
         @IConfigService private readonly _configService: IConfigService
     ) {
         super();
-        this._init();
-
         this._initSelectionChange();
         this.disposeWithMe(() => {
             this._activeDropdown$.complete();
         });
-    }
-
-    private _init() {
-        this.disposeWithMe(this._zenZoneService.visible$.subscribe((visible) => {
-            this._zenVisible = visible;
-            if (visible) {
-                this.hideDropdown();
-            }
-        }));
     }
 
     private _getDropdownByCell(unitId: string | undefined, subUnitId: string | undefined, row: number, col: number) {
@@ -163,10 +149,6 @@ export class DataValidationDropdownManagerService extends Disposable {
         if (this._currentPopup) {
             this._currentPopup.dispose();
         };
-
-        if (this._zenVisible) {
-            return;
-        }
 
         this._activeDropdown = param;
         this._activeDropdown$.next(this._activeDropdown);

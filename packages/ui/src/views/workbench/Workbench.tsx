@@ -28,7 +28,6 @@ import { useDependency } from '../../utils/di';
 import { ComponentContainer, useComponentsOfPart } from '../components/ComponentContainer';
 import { DesktopContextMenu } from '../components/context-menu/ContextMenu';
 import { Sidebar } from '../components/sidebar/Sidebar';
-import { ZenZone } from '../components/zen-zone/ZenZone';
 
 export interface IUniverWorkbenchProps extends IWorkbenchOptions {
     mountContainer: HTMLElement;
@@ -230,7 +229,6 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
                             <ComponentContainer key="footer" components={footerComponents} sharedProps={{ contextMenu }} />
                         </footer>
                     )}
-                    <ZenZone />
                 </section>
             </div>
 

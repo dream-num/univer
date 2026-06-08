@@ -24,7 +24,6 @@ import { isMenuButtonSelectorItem, isMenuSelectorItem, MenuItemType } from '../m
 import { CanvasPopupService } from '../popup/canvas-popup.service';
 import { DesktopSidebarService } from '../sidebar/desktop-sidebar.service';
 import { ThemeSwitcherService } from '../theme-switcher/theme-switcher.service';
-import { DesktopZenZoneService } from '../zen-zone/desktop-zen-zone.service';
 
 describe('clipboard capability detection', () => {
     afterEach(() => {
@@ -471,80 +470,5 @@ describe('theme switcher service', () => {
         const styles = document.querySelectorAll('#univer-theme-css-variables');
         expect(styles.length).toBe(1);
         expect(styles[0]?.textContent).toContain('#000');
-    });
-});
-
-describe('zen zone service', () => {
-    function createComponentManager() {
-        return {
-            register: vi.fn(),
-            delete: vi.fn(),
-        };
-    }
-
-    it('should register the component and emit its key through componentKey$', () => {
-        const manager = createComponentManager();
-        const service = new DesktopZenZoneService(manager as any);
-
-        const keys: string[] = [];
-        service.componentKey$.subscribe((k) => keys.push(k));
-
-        const dummyComponent = () => null;
-        service.set('zen-editor', dummyComponent);
-
-        expect(manager.register).toHaveBeenCalledWith('zen-editor', dummyComponent);
-        expect(keys).toContain('zen-editor');
-    });
-
-    it('should transition visible state when opening and closing', () => {
-        const manager = createComponentManager();
-        const service = new DesktopZenZoneService(manager as any);
-        service.set('zen-editor', () => null);
-
-        expect(service.visible).toBe(false);
-
-        service.open();
-        expect(service.visible).toBe(true);
-
-        service.close();
-        expect(service.visible).toBe(false);
-    });
-
-    it('should temporarily hide without affecting the underlying visible state', () => {
-        const manager = createComponentManager();
-        const service = new DesktopZenZoneService(manager as any);
-        service.set('zen-editor', () => null);
-
-        service.open();
-        service.hide();
-        expect(service.temporaryHidden).toBe(true);
-        expect(service.visible).toBe(true);
-
-        service.show();
-        expect(service.temporaryHidden).toBe(false);
-    });
-
-    it('should unregister the component when the set disposable is disposed', () => {
-        const manager = createComponentManager();
-        const service = new DesktopZenZoneService(manager as any);
-
-        const disposable = service.set('zen-editor', () => null);
-        disposable.dispose();
-
-        expect(manager.delete).toHaveBeenCalledWith('zen-editor');
-    });
-
-    it('should emit false through visible$ on dispose', () => {
-        const manager = createComponentManager();
-        const service = new DesktopZenZoneService(manager as any);
-        service.set('zen-editor', () => null);
-
-        const visibleValues: boolean[] = [];
-        service.visible$.subscribe((v) => visibleValues.push(v));
-
-        service.open();
-        service.dispose();
-
-        expect(visibleValues.at(-1)).toBe(false);
     });
 });

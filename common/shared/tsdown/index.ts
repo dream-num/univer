@@ -51,16 +51,26 @@ function createBuildContext(packageDir: string, options: IBuildOptions): IBuildC
 /**
  * Expands the package context into all required tsdown configs.
  */
-function createConfigs(context: IBuildContext, options: IBuildOptions) {
+function createModuleEntryGroups(entries: IBuildContext['entries']) {
+    const primaryEntries = entries.filter((entry) => entry.type === 'index' || entry.type === 'locale');
+    const isolatedEntries = entries.filter((entry) => entry.type !== 'index' && entry.type !== 'locale');
+
+    return [
+        ...(primaryEntries.length > 0 ? [primaryEntries] : []),
+        ...isolatedEntries.map((entry) => [entry]),
+    ];
+}
+
+export function createConfigs(context: IBuildContext, options: IBuildOptions) {
     const baseConfig = createBaseConfig(context);
     const moduleFormats: TModuleFormat[] = ['esm', 'cjs'];
     const enableObfuscation = context.packageJson.name.startsWith('@univerjs-pro/');
 
-    const moduleConfigs = context.entries.flatMap((entry) => {
+    const moduleConfigs = createModuleEntryGroups(context.entries).flatMap((entries) => {
         return moduleFormats.map((format) => createModuleConfig({
             baseConfig,
             enableObfuscation,
-            entry,
+            entries,
             externalPackages: context.externalPackages,
             facadeExternalPackages: context.facadeExternalPackages,
             format,

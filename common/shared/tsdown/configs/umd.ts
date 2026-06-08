@@ -18,6 +18,7 @@ import type { UserConfig } from 'tsdown';
 import type { IEntryConfig } from '../types';
 import { defineConfig } from 'tsdown';
 import { peerDepsMap } from '../data/peer-deps';
+import { createCssNoopInputOptions } from '../plugins/css-noop';
 import { createOutputAliasPlugin } from '../plugins/output-alias';
 import { createOutputObfuscatorPlugin } from '../plugins/output-obfuscator';
 
@@ -126,6 +127,7 @@ export function createUmdConfig(options: ICreateUmdConfigOptions): UserConfig {
         entry: { [entry.key]: entry.path },
         format: 'umd',
         globalName: getGlobalName(packageName, entry.key),
+        inputOptions: createCssNoopInputOptions(baseConfig.inputOptions),
         outDir,
         outputOptions: {
             entryFileNames: '[name].js',

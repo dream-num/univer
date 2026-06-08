@@ -121,6 +121,16 @@ export function resolvePresetBuildOptions(presetBuildConfig: IPresetBuildConfig 
     return resolvedOptions;
 }
 
+export function createPresetModuleEntryGroups(entries: ReturnType<typeof getPresetModuleEntries>) {
+    const primaryEntries = entries.filter((entry) => entry.type === 'index' || entry.type === 'locale');
+    const isolatedEntries = entries.filter((entry) => entry.type !== 'index' && entry.type !== 'locale');
+
+    return [
+        ...(primaryEntries.length > 0 ? [primaryEntries] : []),
+        ...isolatedEntries.map((entry) => [entry]),
+    ];
+}
+
 export function removePresetOutputs(packageDir = process.cwd()) {
     for (const dir of CLEANUP_DIRECTORIES) {
         const targetDir = path.resolve(packageDir, dir);
@@ -163,11 +173,11 @@ export async function buildPresetPackage(options: IPresetBuildOptions = {}) {
     const plugins = createInputPlugins(packageDir);
     const userConfig = await loadUserConfig(resolvedOptions, packageDir);
     const moduleFormats: TModuleFormat[] = ['esm', 'cjs'];
-    const moduleConfigs = moduleFormats.flatMap((format) => {
-        return getPresetModuleEntries(packageDir).map((entry) => createModuleConfig({
+    const moduleConfigs = createPresetModuleEntryGroups(getPresetModuleEntries(packageDir)).flatMap((entries) => {
+        return moduleFormats.map((format) => createModuleConfig({
             baseConfig,
             enableObfuscation: false,
-            entry,
+            entries,
             externalPackages,
             facadeExternalPackages: externalPackages,
             format,

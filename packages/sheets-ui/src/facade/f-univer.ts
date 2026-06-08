@@ -217,7 +217,6 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
                         keycode,
                         workbook,
                         worksheet,
-                        isZenEditor: false,
                     };
                     this.fireEvent(this.Event.BeforeSheetEditStart, eventParams);
                     if (eventParams.cancel) {
@@ -251,7 +250,6 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
                         keycode,
                         workbook,
                         worksheet,
-                        isZenEditor: false,
                         value: RichTextValue.create(univerInstanceService.getUnit<DocumentDataModel>(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)!.getSnapshot()),
                         isConfirm: keycode !== KeyCode.ESC,
                     };
@@ -286,7 +284,6 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
                         keycode,
                         workbook,
                         worksheet,
-                        isZenEditor: false,
                     };
                     this.fireEvent(this.Event.SheetEditStarted, eventParams);
                 })
@@ -316,7 +313,6 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
                         keycode,
                         workbook,
                         worksheet,
-                        isZenEditor: false,
                         isConfirm: keycode !== KeyCode.ESC,
                     };
                     this.fireEvent(this.Event.SheetEditEnded, eventParams);
@@ -349,7 +345,6 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
                             row,
                             column,
                             value: RichTextValue.create(univerInstanceService.getUnit<DocumentDataModel>(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)!.getSnapshot()),
-                            isZenEditor: false,
                         };
                         this.fireEvent(this.Event.SheetEditChanging, eventParams);
                     }

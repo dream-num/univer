@@ -47,11 +47,11 @@ export function Badge(props: IBadgeProps) {
 
             {closable && (
                 <button
-                    className={`
+                    className="
                       univer-flex univer-cursor-pointer univer-items-center univer-justify-center univer-border-none
                       univer-p-0 univer-outline-none univer-transition-opacity
                       hover:univer-opacity-70
-                    `}
+                    "
                     type="button"
                     aria-label="Close badge"
                     onClick={onClose}

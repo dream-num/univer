@@ -21,7 +21,6 @@ import {
     Disposable,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-    DOCS_ZEN_EDITOR_UNIT_ID_KEY,
     DocumentBlockRangeType,
     ICommandService,
     Inject,
@@ -36,7 +35,6 @@ const SKIP_UNIT_IDS = [
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-    DOCS_ZEN_EDITOR_UNIT_ID_KEY,
 ];
 
 /**

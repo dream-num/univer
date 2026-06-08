@@ -56,21 +56,81 @@ function normalizeClassNameWhitespace(value: string) {
     return value.replace(/\s+/g, ' ').trim();
 }
 
+function mayContainCleanupTarget(sourceCode: string) {
+    return /(?:className|clsx\s*\(|cva\s*\()/.test(sourceCode)
+        && /(?:\s{2,}|\\[nr])/.test(sourceCode);
+}
+
 function isClsxIdentifier(node: ts.Expression) {
     return ts.isIdentifier(node) && node.text === 'clsx';
 }
 
-function isClsxTemplate(node: ts.NoSubstitutionTemplateLiteral) {
-    return ts.isCallExpression(node.parent)
-        && node.parent.arguments.includes(node)
-        && isClsxIdentifier(node.parent.expression);
+function isCvaIdentifier(node: ts.Expression) {
+    return ts.isIdentifier(node) && node.text === 'cva';
 }
 
-function isClassNameTemplate(node: ts.NoSubstitutionTemplateLiteral) {
+function isStaticStringLiteral(node: ts.Node): node is ts.NoSubstitutionTemplateLiteral | ts.StringLiteral {
+    return ts.isNoSubstitutionTemplateLiteral(node) || ts.isStringLiteral(node);
+}
+
+function isClassNameIdentifier(name: ts.PropertyName | ts.JsxAttributeName) {
+    return ts.isIdentifier(name) && name.text === 'className';
+}
+
+function isClsxArgument(node: ts.Expression) {
+    let current: ts.Node = node;
+
+    while (current.parent) {
+        if (ts.isCallExpression(current.parent)) {
+            return current.parent.arguments.includes(current as ts.Expression)
+                && isClsxIdentifier(current.parent.expression);
+        }
+
+        current = current.parent;
+    }
+
+    return false;
+}
+
+function isClassNameJsxAttributeValue(node: ts.Expression) {
+    if (ts.isJsxAttribute(node.parent)) {
+        return node.parent.initializer === node && isClassNameIdentifier(node.parent.name);
+    }
+
     return ts.isJsxExpression(node.parent)
+        && node.parent.expression === node
         && ts.isJsxAttribute(node.parent.parent)
-        && ts.isIdentifier(node.parent.parent.name)
-        && node.parent.parent.name.text === 'className';
+        && isClassNameIdentifier(node.parent.parent.name);
+}
+
+function isClassNamePropertyValue(node: ts.Expression) {
+    return ts.isPropertyAssignment(node.parent)
+        && node.parent.initializer === node
+        && (
+            isClassNameIdentifier(node.parent.name)
+            || (ts.isStringLiteral(node.parent.name) && node.parent.name.text === 'className')
+        );
+}
+
+function isInsideCvaCall(node: ts.Node) {
+    let current: ts.Node | undefined = node.parent;
+
+    while (current) {
+        if (ts.isCallExpression(current) && isCvaIdentifier(current.expression)) {
+            return true;
+        }
+
+        current = current.parent;
+    }
+
+    return false;
+}
+
+function isClassNameWhitespaceTarget(node: ts.NoSubstitutionTemplateLiteral | ts.StringLiteral) {
+    return isClsxArgument(node)
+        || isClassNameJsxAttributeValue(node)
+        || isClassNamePropertyValue(node)
+        || isInsideCvaCall(node);
 }
 
 function applyTextEdits(sourceCode: string, edits: ITextEdit[]) {
@@ -80,7 +140,7 @@ function applyTextEdits(sourceCode: string, edits: ITextEdit[]) {
 }
 
 export function cleanupClassNameTemplateWhitespace(sourceCode: string, filePath: string) {
-    if (!shouldProcessFile(filePath)) {
+    if (!shouldProcessFile(filePath) || !mayContainCleanupTarget(sourceCode)) {
         return sourceCode;
     }
 
@@ -88,7 +148,7 @@ export function cleanupClassNameTemplateWhitespace(sourceCode: string, filePath:
     const edits: ITextEdit[] = [];
 
     function visit(node: ts.Node) {
-        if (ts.isNoSubstitutionTemplateLiteral(node) && (isClsxTemplate(node) || isClassNameTemplate(node))) {
+        if (isStaticStringLiteral(node) && isClassNameWhitespaceTarget(node)) {
             const normalized = normalizeClassNameWhitespace(node.text);
 
             if (normalized !== node.text) {

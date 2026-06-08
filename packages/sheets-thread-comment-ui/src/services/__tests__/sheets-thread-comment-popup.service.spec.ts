@@ -79,23 +79,4 @@ describe('SheetsThreadCommentPopupService', () => {
         expect(testBed.popupDisposable.dispose).toHaveBeenCalled();
         expect(onHide).toHaveBeenCalledTimes(1);
     });
-
-    it('hides the popup when zen mode becomes visible', () => {
-        const service = testBed.injector.createInstance(SheetsThreadCommentPopupService);
-
-        service.showPopup({
-            unitId: 'test',
-            subUnitId: 'sheet1',
-            row: 4,
-            col: 5,
-            commentId: 'comment-2',
-        });
-        expect(service.activePopup).toEqual(expect.objectContaining({
-            commentId: 'comment-2',
-        }));
-
-        testBed.zenVisible$.next(true);
-
-        expect(service.activePopup).toBeNull();
-    });
 });

@@ -19,7 +19,6 @@ import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { Disposable, Inject, isICellData, LocaleService } from '@univerjs/core';
 import { ErrorType, extractFormulaError, FormulaDataModel } from '@univerjs/engine-formula';
 import { CellAlertManagerService, CellAlertType, HoverManagerService } from '@univerjs/sheets-ui';
-import { IZenZoneService } from '@univerjs/ui';
 import { debounceTime } from 'rxjs';
 
 const ALERT_KEY = 'SHEET_FORMULA_ALERT';
@@ -45,8 +44,7 @@ export class FormulaAlertRenderController extends Disposable implements IRenderM
         @Inject(HoverManagerService) private readonly _hoverManagerService: HoverManagerService,
         @Inject(CellAlertManagerService) private readonly _cellAlertManagerService: CellAlertManagerService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
-        @IZenZoneService private readonly _zenZoneService: IZenZoneService
+        @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel
     ) {
         super();
         this._init();
@@ -54,7 +52,6 @@ export class FormulaAlertRenderController extends Disposable implements IRenderM
 
     private _init() {
         this._initCellAlertPopup();
-        this._initZenService();
     }
 
     private _initCellAlertPopup() {
@@ -110,14 +107,6 @@ export class FormulaAlertRenderController extends Disposable implements IRenderM
             }
 
             this._hideAlert();
-        }));
-    }
-
-    private _initZenService() {
-        this.disposeWithMe(this._zenZoneService.visible$.subscribe((visible) => {
-            if (visible) {
-                this._hideAlert();
-            }
         }));
     }
 

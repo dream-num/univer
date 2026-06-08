@@ -30,8 +30,7 @@ import type {
 } from '@univerjs/sheets';
 import type { IAddConditionalRuleMutationParams } from '../commands/mutations/add-conditional-rule.mutation';
 import type { IDeleteConditionalRuleMutationParams } from '../commands/mutations/delete-conditional-rule.mutation';
-import type { IConditionFormattingRule, IHighlightCell, IRuleModelJson } from '../models/type';
-import type { IDataBarCellData, IDataBarRenderParams, IIconSetCellData, IIconSetRenderParams } from '../render/type';
+import type { IRuleModelJson } from '../models/type';
 import {
     Disposable,
     ICommandService,
@@ -40,9 +39,7 @@ import {
     IResourceManagerService,
     isInternalEditorID,
     IUniverInstanceService,
-    merge,
     ObjectMatrix,
-    Rectangle,
     UniverInstanceType,
 } from '@univerjs/core';
 import {
@@ -60,57 +57,23 @@ import {
     SetRangeValuesMutation,
     SheetInterceptorService,
 } from '@univerjs/sheets';
-import { CFRuleType, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '../base/const';
+import { SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '../base/const';
 import { AddConditionalRuleMutation, AddConditionalRuleMutationUndoFactory } from '../commands/mutations/add-conditional-rule.mutation';
 import { DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory } from '../commands/mutations/delete-conditional-rule.mutation';
+import { ConditionalFormattingRangeIndexModel } from '../models/conditional-formatting-range-index-model';
 import { ConditionalFormattingRuleModel } from '../models/conditional-formatting-rule-model';
 import { ConditionalFormattingViewModel } from '../models/conditional-formatting-view-model';
+import { ConditionalFormattingStyleComposer } from './conditional-formatting-style-composer.service';
 
 export class ConditionalFormattingService extends Disposable {
     get _conditionalFormattingViewModelV2() {
         return this._injector.get(ConditionalFormattingViewModel);
     }
 
-    private _mergeComposeResult(
-        result: { style?: IHighlightCell['style'] } & IDataBarCellData & IIconSetCellData & { isShowValue: boolean },
-        rule: IConditionFormattingRule,
-        ruleResult: unknown
-    ) {
-        const type = rule.rule.type;
-
-        if (type === CFRuleType.highlightCell) {
-            ruleResult && merge(result, { style: ruleResult });
-            return;
-        }
-
-        if (type === CFRuleType.colorScale) {
-            if (ruleResult && typeof ruleResult === 'string') {
-                const preStyle = result.style || {};
-                result.style = { ...preStyle, bg: { rgb: ruleResult } };
-            }
-            return;
-        }
-
-        if (type === CFRuleType.dataBar) {
-            const ruleCache = ruleResult as IDataBarRenderParams;
-            if (ruleCache) {
-                result.dataBar = ruleCache;
-                result.isShowValue = ruleCache.isShowValue;
-            }
-            return;
-        }
-
-        if (type === CFRuleType.iconSet) {
-            const ruleCache = ruleResult as IIconSetRenderParams;
-            if (ruleCache) {
-                result.iconSet = ruleCache;
-                result.isShowValue = ruleCache.isShowValue;
-            }
-        }
-    }
-
     constructor(
         @Inject(ConditionalFormattingRuleModel) private _conditionalFormattingRuleModel: ConditionalFormattingRuleModel,
+        @Inject(ConditionalFormattingRangeIndexModel) private _conditionalFormattingRangeIndexModel: ConditionalFormattingRangeIndexModel,
+        @Inject(ConditionalFormattingStyleComposer) private _conditionalFormattingStyleComposer: ConditionalFormattingStyleComposer,
         @Inject(Injector) private _injector: Injector,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
         @Inject(IResourceManagerService) private _resourceManagerService: IResourceManagerService,
@@ -123,61 +86,8 @@ export class ConditionalFormattingService extends Disposable {
         this._initSheetChange();
     }
 
-    //Conditional formats need to be evaluated in priority order
-    //  (in this implementation, this is equivalent to evaluating higher-priority rules first,
-    //  which generally corresponds to a smaller order value coming first).
-    // Evaluation of subsequent rules shall stop only if the current rule is matched and stopIfTrue=true.
-    // A stopIfTrue rule that is not matched must not terminate the evaluation of subsequent rules.
     public composeStyle(unitId: string, subUnitId: string, row: number, col: number) {
-        const cellCfs = this._conditionalFormattingViewModelV2.getCellCfs(unitId, subUnitId, row, col);
-
-        if (!cellCfs?.length) {
-            return null;
-        }
-
-        const matchedRules: Array<{
-            rule: IConditionFormattingRule;
-            cacheItem: (typeof cellCfs)[number];
-        }> = [];
-
-        let stopIfTrueIndex = -1;
-        for (const cacheItem of cellCfs) {
-            const rule = this._conditionalFormattingRuleModel.getRule(unitId, subUnitId, cacheItem.cfId);
-            if (!rule) {
-                continue;
-            }
-
-            matchedRules.push({ rule, cacheItem });
-
-            if (stopIfTrueIndex === -1 && rule.stopIfTrue && this._isRuleMatched(rule, cacheItem.result)) {
-                stopIfTrueIndex = matchedRules.length - 1;
-            }
-        }
-
-        if (!matchedRules.length) {
-            return null;
-        }
-
-        const effectiveRules = stopIfTrueIndex > -1
-            ? matchedRules.slice(0, stopIfTrueIndex + 1)
-            : matchedRules;
-
-        const result = {} as { style?: IHighlightCell['style'] } & IDataBarCellData & IIconSetCellData & { isShowValue: boolean };
-
-        for (let i = effectiveRules.length - 1; i >= 0; i--) {
-            const { rule, cacheItem } = effectiveRules[i];
-            this._mergeComposeResult(result, rule, cacheItem.result);
-        }
-
-        return result;
-    }
-
-    private _isRuleMatched(rule: IConditionFormattingRule, ruleResult: unknown) {
-        if (rule.rule.type === CFRuleType.highlightCell) {
-            return !!ruleResult && typeof ruleResult === 'object' && Object.keys(ruleResult as object).length > 0;
-        }
-
-        return !!ruleResult;
+        return this._conditionalFormattingStyleComposer.composeStyle(unitId, subUnitId, row, col);
     }
 
     private _initSnapshot() {
@@ -210,6 +120,7 @@ export class ConditionalFormattingService extends Disposable {
                 parseJson: (json) => parseJson(json),
                 onUnLoad: (unitID) => {
                     this._conditionalFormattingRuleModel.deleteUnitId(unitID);
+                    this._conditionalFormattingRangeIndexModel.rebuild();
                     if (isInternalEditorID(unitID)) return;
                     this._conditionalFormattingViewModelV2.clearCache();
                 },
@@ -307,38 +218,26 @@ export class ConditionalFormattingService extends Disposable {
         this.disposeWithMe(
             // eslint-disable-next-line max-lines-per-function
             this._commandService.onCommandExecuted((commandInfo) => {
-                const collectRule = (unitId: string, subUnitId: string, cellData: [number, number][]) => {
-                    const ruleIds: Set<string> = new Set();
-                    cellData.forEach(([row, col]) => {
-                        const ruleItem = this._conditionalFormattingViewModelV2.getCellCfs(unitId, subUnitId, row, col);
-                        ruleItem?.forEach((item) => ruleIds.add(item.cfId));
+                const markRulesDirtyByRanges = (unitId: string, subUnitId: string, ranges: IRange[]) => {
+                    const rules = this._conditionalFormattingRangeIndexModel.getRulesByRanges(unitId, subUnitId, ranges);
+                    rules.forEach((rule) => {
+                        this._conditionalFormattingViewModelV2.markRuleDirty(unitId, subUnitId, rule.cfId);
                     });
-                    const rules: IConditionFormattingRule[] = [];
-                    for (const cfId of ruleIds) {
-                        const rule = this._conditionalFormattingRuleModel.getRule(unitId, subUnitId, cfId);
-                        if (rule) {
-                            rules.push(rule);
-                        }
-                    }
-                    return rules;
                 };
 
                 switch (commandInfo.id) {
                     case SetRangeValuesMutation.id: {
                         const params = commandInfo.params as ISetRangeValuesMutationParams;
                         const { subUnitId, unitId, cellValue } = params;
-                        const cellMatrix: [number, number][] = [];
+                        const ranges: IRange[] = [];
                         new ObjectMatrix(cellValue).forValue((row, col, value) => {
                             // When P and V are involved
                             const result = value && Object.keys(value).some((key) => ['p', 'v'].includes(key));
                             if (result) {
-                                cellMatrix.push([row, col]);
+                                ranges.push({ startRow: row, endRow: row, startColumn: col, endColumn: col });
                             }
                         });
-                        const rules = collectRule(unitId, subUnitId, cellMatrix);
-                        rules.forEach((rule) => {
-                            this._conditionalFormattingViewModelV2.markRuleDirty(unitId, subUnitId, rule.cfId);
-                        });
+                        markRulesDirtyByRanges(unitId, subUnitId, ranges);
                         break;
                     }
                     case InsertColMutation.id:
@@ -351,13 +250,7 @@ export class ConditionalFormattingService extends Disposable {
                         const { range } = params;
                         const effectRange: IRange = { ...range, endColumn: worksheet.getColumnCount() - 1 };
 
-                        const allRules = this._conditionalFormattingRuleModel.getSubunitRules(unitId, subUnitId);
-                        if (allRules) {
-                            const effectRule = allRules.filter((rule) => rule.ranges.some((ruleRange) => Rectangle.intersects(ruleRange, effectRange)));
-                            effectRule.forEach((rule) => {
-                                this._conditionalFormattingViewModelV2.markRuleDirty(unitId, subUnitId, rule.cfId);
-                            });
-                        }
+                        markRulesDirtyByRanges(unitId, subUnitId, [effectRange]);
                         break;
                     }
                     case RemoveRowMutation.id:
@@ -370,13 +263,7 @@ export class ConditionalFormattingService extends Disposable {
                         const { range } = params;
                         const effectRange: IRange = { ...range, endRow: worksheet.getRowCount() - 1 };
 
-                        const allRules = this._conditionalFormattingRuleModel.getSubunitRules(unitId, subUnitId);
-                        if (allRules) {
-                            const effectRule = allRules.filter((rule) => rule.ranges.some((ruleRange) => Rectangle.intersects(ruleRange, effectRange)));
-                            effectRule.forEach((rule) => {
-                                this._conditionalFormattingViewModelV2.markRuleDirty(unitId, subUnitId, rule.cfId);
-                            });
-                        }
+                        markRulesDirtyByRanges(unitId, subUnitId, [effectRange]);
                         break;
                     }
                     case MoveRowsMutation.id: {
@@ -393,13 +280,7 @@ export class ConditionalFormattingService extends Disposable {
                             endColumn: worksheet.getColumnCount() - 1,
                         };
 
-                        const allRules = this._conditionalFormattingRuleModel.getSubunitRules(unitId, subUnitId);
-                        if (allRules) {
-                            const effectRule = allRules.filter((rule) => rule.ranges.some((ruleRange) => Rectangle.intersects(ruleRange, effectRange)));
-                            effectRule.forEach((rule) => {
-                                this._conditionalFormattingViewModelV2.markRuleDirty(unitId, subUnitId, rule.cfId);
-                            });
-                        }
+                        markRulesDirtyByRanges(unitId, subUnitId, [effectRange]);
                         break;
                     }
                     case MoveColsMutation.id: {
@@ -416,26 +297,17 @@ export class ConditionalFormattingService extends Disposable {
                             endColumn: worksheet.getColumnCount() - 1,
                         };
 
-                        const allRules = this._conditionalFormattingRuleModel.getSubunitRules(unitId, subUnitId);
-                        if (allRules) {
-                            const effectRule = allRules.filter((rule) => rule.ranges.some((ruleRange) => Rectangle.intersects(ruleRange, effectRange)));
-                            effectRule.forEach((rule) => {
-                                this._conditionalFormattingViewModelV2.markRuleDirty(unitId, subUnitId, rule.cfId);
-                            });
-                        }
+                        markRulesDirtyByRanges(unitId, subUnitId, [effectRange]);
                         break;
                     }
                     case MoveRangeMutation.id: {
                         const { unitId, to, from } = commandInfo.params as IMoveRangeMutationParams;
                         const handleSubUnit = (value: IMoveRangeMutationParams['from']) => {
-                            const cellMatrix: [number, number][] = [];
+                            const ranges: IRange[] = [];
                             new ObjectMatrix(value.value).forValue((row, col) => {
-                                cellMatrix.push([row, col]);
+                                ranges.push({ startRow: row, endRow: row, startColumn: col, endColumn: col });
                             });
-                            const rules = collectRule(unitId, value.subUnitId, cellMatrix);
-                            rules.forEach((rule) => {
-                                this._conditionalFormattingViewModelV2.markRuleDirty(unitId, value.subUnitId, rule.cfId);
-                            });
+                            markRulesDirtyByRanges(unitId, value.subUnitId, ranges);
                         };
                         handleSubUnit(to);
                         handleSubUnit(from);
@@ -443,13 +315,7 @@ export class ConditionalFormattingService extends Disposable {
                     }
                     case ReorderRangeMutation.id: {
                         const { range, unitId, subUnitId } = commandInfo.params as IReorderRangeMutationParams;
-                        const allRules = this._conditionalFormattingRuleModel.getSubunitRules(unitId, subUnitId);
-                        if (allRules) {
-                            const effectRule = allRules.filter((rule) => rule.ranges.some((ruleRange) => Rectangle.intersects(ruleRange, range)));
-                            effectRule.forEach((rule) => {
-                                this._conditionalFormattingViewModelV2.markRuleDirty(unitId, subUnitId, rule.cfId);
-                            });
-                        }
+                        markRulesDirtyByRanges(unitId, subUnitId, [range]);
                         break;
                     }
                 }

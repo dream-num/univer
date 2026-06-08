@@ -17,7 +17,7 @@
 import type { Workbook } from '@univerjs/core';
 import type { BaseCalculateUnit, IContext } from './calculate-unit-v2/base-calculate-unit';
 import type { IConditionFormattingRule } from './type';
-import { Disposable, Inject, Injector, IUniverInstanceService, LRUMap, RTree } from '@univerjs/core';
+import { Disposable, Inject, Injector, IUniverInstanceService, LRUMap } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { bufferTime, filter, map } from 'rxjs/operators';
 import { CFRuleType, CFSubRuleType } from '../base/const';
@@ -26,6 +26,7 @@ import { ColorScaleCalculateUnit } from './calculate-unit-v2/color-scale-calcula
 import { DataBarCalculateUnit } from './calculate-unit-v2/data-bar-calculate-unit';
 import { HighlightCellCalculateUnit } from './calculate-unit-v2/highlight-cell-calculate-unit';
 import { IconSetCalculateUnit } from './calculate-unit-v2/icon-set-calculate-unit';
+import { ConditionalFormattingRangeIndexModel } from './conditional-formatting-range-index-model';
 import { ConditionalFormattingRuleModel } from './conditional-formatting-rule-model';
 
 // The default is a 50-row,20-column viewable area.
@@ -33,7 +34,6 @@ export const CONDITIONAL_FORMATTING_VIEWPORT_CACHE_LENGTH = 50 * 20 * 3 * 3;
 export class ConditionalFormattingViewModel extends Disposable {
     //  Map<unitID ,<sheetId ,ObjectMatrix>>
     private _calculateUnitManagers: Map<string, Map<string, Map<string, BaseCalculateUnit>>> = new Map();
-    private _rTreeManager: RTree = new RTree();
 
     /**
      * 1nd-level cache
@@ -49,6 +49,7 @@ export class ConditionalFormattingViewModel extends Disposable {
     constructor(
         @Inject(Injector) private _injector: Injector,
         @Inject(ConditionalFormattingRuleModel) private _conditionalFormattingRuleModel: ConditionalFormattingRuleModel,
+        @Inject(ConditionalFormattingRangeIndexModel) private _conditionalFormattingRangeIndexModel: ConditionalFormattingRangeIndexModel,
         @Inject(ConditionalFormattingFormulaService) private _conditionalFormattingFormulaService: ConditionalFormattingFormulaService,
         @IUniverInstanceService private _univerInstanceService: IUniverInstanceService
     ) {
@@ -85,7 +86,7 @@ export class ConditionalFormattingViewModel extends Disposable {
     private _getCellCfs(unitId: string, subUnitId: string, row: number, col: number) {
         const subunitRules = this._conditionalFormattingRuleModel.getSubunitRules(unitId, subUnitId) ?? [];
         const _calculateUnitManagers = this._ensureCalculateUnitManager(unitId, subUnitId);
-        const list = this._rTreeManager.bulkSearch([{ unitId, sheetId: subUnitId, range: { startColumn: col, endColumn: col, startRow: row, endRow: row } }]);
+        const list = this._conditionalFormattingRangeIndexModel.getRuleIdsByCell(unitId, subUnitId, row, col);
         const rules = subunitRules.filter((rule) => list.has(rule.cfId));
         if (!rules.length) {
             return [];
@@ -170,7 +171,6 @@ export class ConditionalFormattingViewModel extends Disposable {
     clearCache() {
         this._calculateUnitManagers.clear();
         this._cellCache.clear();
-        this._rTreeManager.clear();
     }
 
     private _handleCustomFormulasSeparately() {
@@ -197,7 +197,6 @@ export class ConditionalFormattingViewModel extends Disposable {
                 this.markRuleDirty(unitId, subUnitId, cfId);
                 switch (e.type) {
                     case 'add': {
-                        this._rTreeManager.bulkInsert(ranges.map((r) => ({ unitId, sheetId: subUnitId, id: cfId, range: r })));
                         const instance = this._createRuleCalculateUnitInstance(unitId, subUnitId, rule);
                         if (!instance) {
                             return;
@@ -206,15 +205,12 @@ export class ConditionalFormattingViewModel extends Disposable {
                         break;
                     }
                     case 'delete': {
-                        this._rTreeManager.bulkRemove(ranges.map((r) => ({ unitId, sheetId: subUnitId, id: cfId, range: r })));
                         calculateUnitManager.delete(rule.cfId);
                         break;
                     }
                     case 'set': {
                         const oldRule = e.oldRule!;
 
-                        this._rTreeManager.bulkRemove(oldRule.ranges.map((r) => ({ unitId, sheetId: subUnitId, id: oldRule.cfId, range: r })));
-                        this._rTreeManager.bulkInsert(ranges.map((r) => ({ unitId, sheetId: subUnitId, id: cfId, range: r })));
                         if (oldRule.rule.type !== rule.rule.type) {
                             const instance = this._createRuleCalculateUnitInstance(unitId, subUnitId, rule);
                             if (!instance) {

@@ -40,6 +40,7 @@ export type { ISetConditionalRuleMutationParams } from './commands/mutations/set
 export { SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory } from './commands/mutations/set-conditional-rule.mutation';
 export type { IUniverSheetsConditionalFormattingConfig } from './config/config';
 export * from './models/calculate-unit-v2/utils';
+export * from './models/conditional-formatting-range-index-model';
 export * from './models/conditional-formatting-rule-model';
 export * from './models/conditional-formatting-view-model';
 export * from './models/icon-map';
@@ -49,6 +50,8 @@ export * from './render/data-bar.render';
 export * from './render/icon.render';
 export * from './render/type';
 export * from './services/conditional-formatting-formula.service';
+export * from './services/conditional-formatting-range-transform.service';
+export * from './services/conditional-formatting-style-composer.service';
 export * from './services/conditional-formatting.service';
 export * from './utils/anchor';
 export * from './utils/create-cf-id';

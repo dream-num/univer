@@ -18,7 +18,9 @@ import type { IAccessor } from '@univerjs/core';
 import { ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
 import { getSheetCommandTarget, SheetsSelectionsService } from '@univerjs/sheets';
 import { describe, expect, it, vi } from 'vitest';
+import { ConditionalFormattingRangeIndexModel } from '../../../models/conditional-formatting-range-index-model';
 import { ConditionalFormattingRuleModel } from '../../../models/conditional-formatting-rule-model';
+import { ConditionalFormattingRangeTransformService } from '../../../services/conditional-formatting-range-transform.service';
 import { DeleteConditionalRuleMutation } from '../../mutations/delete-conditional-rule.mutation';
 import { SetConditionalRuleMutation } from '../../mutations/set-conditional-rule.mutation';
 import { ClearRangeCfCommand } from '../clear-range-cf.command';
@@ -68,6 +70,8 @@ function createRuleModel() {
 }
 
 function createAccessor(ruleModel: ConditionalFormattingRuleModel) {
+    const rangeIndexModel = new ConditionalFormattingRangeIndexModel(ruleModel);
+    const rangeTransformService = new ConditionalFormattingRangeTransformService();
     const commandService = {
         syncExecuteCommand: vi.fn(() => true),
     };
@@ -85,6 +89,14 @@ function createAccessor(ruleModel: ConditionalFormattingRuleModel) {
         get(token: unknown) {
             if (token === ConditionalFormattingRuleModel) {
                 return ruleModel;
+            }
+
+            if (token === ConditionalFormattingRangeIndexModel) {
+                return rangeIndexModel;
+            }
+
+            if (token === ConditionalFormattingRangeTransformService) {
+                return rangeTransformService;
             }
 
             if (token === ICommandService) {

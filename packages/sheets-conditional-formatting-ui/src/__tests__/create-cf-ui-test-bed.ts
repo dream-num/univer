@@ -54,6 +54,8 @@ import {
     ClearRangeCfCommand,
     ClearWorksheetCfCommand,
     ConditionalFormattingFormulaService,
+    ConditionalFormattingRangeIndexModel,
+    ConditionalFormattingRangeTransformService,
     ConditionalFormattingRuleModel,
     ConditionalFormattingViewModel,
     DeleteConditionalRuleMutation,
@@ -204,7 +206,9 @@ export function createCfUiTestBed() {
         } as unknown as IActiveDirtyManagerService,
     }]);
     injector.add([ConditionalFormattingRuleModel]);
+    injector.add([ConditionalFormattingRangeIndexModel]);
     injector.add([ConditionalFormattingFormulaService]);
+    injector.add([ConditionalFormattingRangeTransformService]);
     injector.add([ConditionalFormattingViewModel]);
     injector.add([ComponentManager, { useValue: componentManager as unknown as ComponentManager }]);
     injector.add([ISidebarService, { useValue: sidebarService as unknown as ISidebarService }]);

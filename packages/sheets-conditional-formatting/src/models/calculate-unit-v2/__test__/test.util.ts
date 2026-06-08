@@ -23,7 +23,10 @@ import { DeleteConditionalRuleMutation } from '../../../commands/mutations/delet
 import { MoveConditionalRuleMutation } from '../../../commands/mutations/move-conditional-rule.mutation';
 import { SetConditionalRuleMutation } from '../../../commands/mutations/set-conditional-rule.mutation';
 import { ConditionalFormattingFormulaService } from '../../../services/conditional-formatting-formula.service';
+import { ConditionalFormattingRangeTransformService } from '../../../services/conditional-formatting-range-transform.service';
+import { ConditionalFormattingStyleComposer } from '../../../services/conditional-formatting-style-composer.service';
 import { ConditionalFormattingService } from '../../../services/conditional-formatting.service';
+import { ConditionalFormattingRangeIndexModel } from '../../conditional-formatting-range-index-model';
 import { ConditionalFormattingRuleModel } from '../../conditional-formatting-rule-model';
 import { ConditionalFormattingViewModel } from '../../conditional-formatting-view-model';
 
@@ -72,7 +75,10 @@ export const createTestBed = (dependencies?: Dependency[]) => {
             this._injector.add([ConditionalFormattingService]);
             this._injector.add([RegisterOtherFormulaService]);
             this._injector.add([ConditionalFormattingFormulaService]);
+            this._injector.add([ConditionalFormattingRangeTransformService]);
+            this._injector.add([ConditionalFormattingStyleComposer]);
             this._injector.add([ConditionalFormattingRuleModel]);
+            this._injector.add([ConditionalFormattingRangeIndexModel]);
             this._injector.add([ConditionalFormattingViewModel]);
             this._injector.add([IActiveDirtyManagerService, { useFactory: () => ({ register: () => { /* empty */ } } as any) }]);
         }

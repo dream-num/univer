@@ -34,9 +34,12 @@ import {
     defaultPluginConfig,
     SHEETS_CONDITIONAL_FORMATTING_PLUGIN_CONFIG_KEY,
 } from './config/config';
+import { ConditionalFormattingRangeIndexModel } from './models/conditional-formatting-range-index-model';
 import { ConditionalFormattingRuleModel } from './models/conditional-formatting-rule-model';
 import { ConditionalFormattingViewModel } from './models/conditional-formatting-view-model';
 import { ConditionalFormattingFormulaService } from './services/conditional-formatting-formula.service';
+import { ConditionalFormattingRangeTransformService } from './services/conditional-formatting-range-transform.service';
+import { ConditionalFormattingStyleComposer } from './services/conditional-formatting-style-composer.service';
 import { ConditionalFormattingService } from './services/conditional-formatting.service';
 
 @DependentOn(UniverFormulaEnginePlugin)
@@ -65,7 +68,10 @@ export class UniverSheetsConditionalFormattingPlugin extends Plugin {
         ([
             [ConditionalFormattingService],
             [ConditionalFormattingFormulaService],
+            [ConditionalFormattingRangeTransformService],
+            [ConditionalFormattingStyleComposer],
             [ConditionalFormattingRuleModel],
+            [ConditionalFormattingRangeIndexModel],
             [ConditionalFormattingViewModel],
         ] as Dependency[]).forEach((dependency) => {
             this._injector.add(dependency);
@@ -91,6 +97,7 @@ export class UniverSheetsConditionalFormattingPlugin extends Plugin {
         this._injector.get(ConditionalFormattingService);
         touchDependencies(this._injector, [
             [ConditionalFormattingService],
+            [ConditionalFormattingRangeIndexModel],
             [ConditionalFormattingViewModel],
         ]);
     }

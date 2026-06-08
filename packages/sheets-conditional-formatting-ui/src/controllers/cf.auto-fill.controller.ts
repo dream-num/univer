@@ -17,10 +17,24 @@
 import type { IMutationInfo, IRange, Workbook } from '@univerjs/core';
 import type { IDiscreteRange, ISheetAutoFillHook } from '@univerjs/sheets';
 import type { IDeleteConditionalRuleMutationParams, ISetConditionalRuleMutationParams } from '@univerjs/sheets-conditional-formatting';
-import { Disposable, Inject, Injector, IUniverInstanceService, ObjectMatrix, Range, Rectangle, UniverInstanceType } from '@univerjs/core';
-import { AUTO_FILL_APPLY_TYPE, AutoFillTools, createTopMatrixFromMatrix, findAllRectangle, IAutoFillService } from '@univerjs/sheets';
-import { ConditionalFormattingRuleModel, ConditionalFormattingViewModel, DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory, SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
+import { Disposable, Inject, Injector, IUniverInstanceService, Range, Rectangle, UniverInstanceType } from '@univerjs/core';
+import { AUTO_FILL_APPLY_TYPE, AutoFillTools, IAutoFillService } from '@univerjs/sheets';
+import {
+    ConditionalFormattingRangeTransformService,
+    ConditionalFormattingRuleModel,
+    ConditionalFormattingViewModel,
+    DeleteConditionalRuleMutation,
+    DeleteConditionalRuleMutationUndoFactory,
+    SetConditionalRuleMutation,
+    setConditionalRuleMutationUndoFactory,
+    SHEET_CONDITIONAL_FORMATTING_PLUGIN,
+} from '@univerjs/sheets-conditional-formatting';
 import { virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
+
+interface IRangeDelta {
+    add: IRange[];
+    remove: IRange[];
+}
 
 export class ConditionalFormattingAutoFillController extends Disposable {
     constructor(
@@ -28,7 +42,8 @@ export class ConditionalFormattingAutoFillController extends Disposable {
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
         @Inject(IAutoFillService) private _autoFillService: IAutoFillService,
         @Inject(ConditionalFormattingRuleModel) private _conditionalFormattingRuleModel: ConditionalFormattingRuleModel,
-        @Inject(ConditionalFormattingViewModel) private _conditionalFormattingViewModel: ConditionalFormattingViewModel
+        @Inject(ConditionalFormattingViewModel) private _conditionalFormattingViewModel: ConditionalFormattingViewModel,
+        @Inject(ConditionalFormattingRangeTransformService) private _conditionalFormattingRangeTransformService: ConditionalFormattingRangeTransformService
     ) {
         super();
 
@@ -43,7 +58,8 @@ export class ConditionalFormattingAutoFillController extends Disposable {
             sourceStartCell: { row: number; col: number },
             targetStartCell: { row: number; col: number },
             relativeRange: IRange,
-            matrixMap: Map<string, ObjectMatrix<1>>,
+            rangeMap: Map<string, IRange[]>,
+            rangeDeltaMap: Map<string, IRangeDelta>,
             mapFunc: (row: number, col: number) => ({ row: number; col: number })
         ) => {
             const unitId = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
@@ -52,6 +68,27 @@ export class ConditionalFormattingAutoFillController extends Disposable {
                 return;
             }
 
+            const getRangeDelta = (cfId: string) => {
+                let rangeDelta = rangeDeltaMap.get(cfId);
+                if (!rangeDelta) {
+                    rangeDelta = { add: [], remove: [] };
+                    rangeDeltaMap.set(cfId, rangeDelta);
+                }
+                return rangeDelta;
+            };
+            const ensureRuleRanges = (cfId: string) => {
+                if (rangeMap.has(cfId)) {
+                    return true;
+                }
+
+                const rule = this._conditionalFormattingRuleModel.getRule(unitId, subUnitId, cfId);
+                if (!rule) {
+                    return false;
+                }
+
+                rangeMap.set(cfId, rule.ranges);
+                return true;
+            };
             const sourceRange = {
                 startRow: sourceStartCell.row,
                 startColumn: sourceStartCell.col,
@@ -100,41 +137,29 @@ export class ConditionalFormattingAutoFillController extends Disposable {
                 );
                 if (targetCellCf) {
                     targetCellCf.forEach((cf) => {
-                        let matrix = matrixMap.get(cf.cfId);
-                        if (!matrixMap.get(cf.cfId)) {
-                            const rule = this._conditionalFormattingRuleModel.getRule(unitId, subUnitId, cf.cfId);
-                            if (!rule) {
-                                return;
-                            }
-                            matrix = new ObjectMatrix();
-                            rule.ranges.forEach((range) => {
-                                Range.foreach(range, (row, col) => {
-                                    matrix!.setValue(row, col, 1);
-                                });
-                            });
-                            matrixMap.set(cf.cfId, matrix);
+                        if (!ensureRuleRanges(cf.cfId)) {
+                            return;
                         }
-                        matrix!.realDeleteValue(targetRow, targetCol);
+                        getRangeDelta(cf.cfId).remove.push({
+                            startRow: targetRow,
+                            endRow: targetRow,
+                            startColumn: targetCol,
+                            endColumn: targetCol,
+                        });
                     });
                 }
 
                 if (sourceCellCf) {
                     sourceCellCf.forEach((cf) => {
-                        let matrix = matrixMap.get(cf.cfId);
-                        if (!matrixMap.get(cf.cfId)) {
-                            const rule = this._conditionalFormattingRuleModel.getRule(unitId, subUnitId, cf.cfId);
-                            if (!rule) {
-                                return;
-                            }
-                            matrix = new ObjectMatrix();
-                            rule.ranges.forEach((range) => {
-                                Range.foreach(range, (row, col) => {
-                                    matrix!.setValue(row, col, 1);
-                                });
-                            });
-                            matrixMap.set(cf.cfId, matrix);
+                        if (!ensureRuleRanges(cf.cfId)) {
+                            return;
                         }
-                        matrix!.setValue(targetRow, targetCol, 1);
+                        getRangeDelta(cf.cfId).add.push({
+                            startRow: targetRow,
+                            endRow: targetRow,
+                            startColumn: targetCol,
+                            endColumn: targetCol,
+                        });
                     });
                 }
             });
@@ -143,7 +168,8 @@ export class ConditionalFormattingAutoFillController extends Disposable {
         const generalApplyFunc = (sourceRange: IDiscreteRange, targetRange: IDiscreteRange) => {
             const unitId = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getUnitId();
             const subUnitId = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getActiveSheet()?.getSheetId();
-            const matrixMap: Map<string, ObjectMatrix<1>> = new Map();
+            const rangeMap: Map<string, IRange[]> = new Map();
+            const rangeDeltaMap: Map<string, IRangeDelta> = new Map();
 
             const redos: IMutationInfo[] = [];
             const undos: IMutationInfo[] = [];
@@ -162,14 +188,25 @@ export class ConditionalFormattingAutoFillController extends Disposable {
 
             const repeats = AutoFillTools.getAutoFillRepeatRange(vSourceRange, vTargetRange);
             repeats.forEach((repeat) => {
-                loopFunc(sourceStartCell, repeat.repeatStartCell, repeat.relativeRange, matrixMap, mapFunc);
+                loopFunc(sourceStartCell, repeat.repeatStartCell, repeat.relativeRange, rangeMap, rangeDeltaMap, mapFunc);
             });
-            matrixMap.forEach((item, cfId) => {
+            rangeDeltaMap.forEach((rangeDelta, cfId) => {
+                const ranges = rangeMap.get(cfId);
+                if (!ranges) {
+                    return;
+                }
+
+                rangeMap.set(cfId, this._conditionalFormattingRangeTransformService.applyRangeDelta(
+                    ranges,
+                    rangeDelta.remove,
+                    rangeDelta.add
+                ));
+            });
+            rangeMap.forEach((ranges, cfId) => {
                 const rule = this._conditionalFormattingRuleModel.getRule(unitId, subUnitId, cfId);
                 if (!rule) {
                     return;
                 }
-                const ranges = findAllRectangle(createTopMatrixFromMatrix(item));
                 if (ranges.length) {
                     const params: ISetConditionalRuleMutationParams = {
                         unitId,

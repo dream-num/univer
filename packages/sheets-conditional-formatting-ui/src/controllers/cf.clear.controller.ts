@@ -15,10 +15,22 @@
  */
 
 import type { IMutationInfo, IRange, Workbook } from '@univerjs/core';
-import type { IConditionalFormattingRuleConfig, IConditionFormattingRule, IDeleteConditionalRuleMutationParams, ISetConditionalRuleMutationParams } from '@univerjs/sheets-conditional-formatting';
-import { Disposable, Inject, Injector, IUniverInstanceService, Rectangle, UniverInstanceType } from '@univerjs/core';
-import { ClearSelectionAllCommand, ClearSelectionFormatCommand, RangeMergeUtil, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
-import { ConditionalFormattingRuleModel, DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory, SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory } from '@univerjs/sheets-conditional-formatting';
+import type {
+    IConditionalFormattingRuleConfig,
+    IConditionFormattingRule,
+    IDeleteConditionalRuleMutationParams,
+    ISetConditionalRuleMutationParams,
+} from '@univerjs/sheets-conditional-formatting';
+import { Disposable, Inject, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { ClearSelectionAllCommand, ClearSelectionFormatCommand, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
+import {
+    ConditionalFormattingRangeIndexModel,
+    ConditionalFormattingRangeTransformService,
+    DeleteConditionalRuleMutation,
+    DeleteConditionalRuleMutationUndoFactory,
+    SetConditionalRuleMutation,
+    setConditionalRuleMutationUndoFactory,
+} from '@univerjs/sheets-conditional-formatting';
 
 export class ConditionalFormattingClearController extends Disposable {
     constructor(
@@ -26,7 +38,7 @@ export class ConditionalFormattingClearController extends Disposable {
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
         @Inject(SheetsSelectionsService) private _selectionManagerService: SheetsSelectionsService,
-        @Inject(ConditionalFormattingRuleModel) private _conditionalFormattingRuleModel: ConditionalFormattingRuleModel
+        @Inject(ConditionalFormattingRangeIndexModel) private _conditionalFormattingRangeIndexModel: ConditionalFormattingRangeIndexModel
 
     ) {
         super();
@@ -53,7 +65,7 @@ export class ConditionalFormattingClearController extends Disposable {
                     const unitId = workbook.getUnitId();
                     const subUnitId = worksheet.getSheetId();
 
-                    const allRules = this._conditionalFormattingRuleModel.getSubunitRules(unitId, subUnitId);
+                    const allRules = this._conditionalFormattingRangeIndexModel.getRulesByRanges(unitId, subUnitId, ranges);
                     if (!allRules || !allRules.length) {
                         return defaultV;
                     }
@@ -73,7 +85,7 @@ export class ConditionalFormattingClearController extends Disposable {
                 if (!ranges || !ranges.length) {
                     return emptyInterceptorArr;
                 }
-                const allRules = this._conditionalFormattingRuleModel.getSubunitRules(unitId, subUnitId);
+                const allRules = this._conditionalFormattingRangeIndexModel.getRulesByRanges(unitId, subUnitId, ranges);
                 if (!allRules || !allRules.length) {
                     return emptyInterceptorArr;
                 }
@@ -90,11 +102,9 @@ export class ConditionalFormattingClearController extends Disposable {
 export function generateClearCfMutations(injector: Injector, allRules: IConditionFormattingRule<IConditionalFormattingRuleConfig>[], ranges: IRange[], unitId: string, subUnitId: string) {
     const redos: IMutationInfo[] = [];
     const undos: IMutationInfo[] = [];
-    allRules.filter((rule) => {
-        return ranges.some((range) => rule.ranges.some((ruleRange) => Rectangle.getIntersects(ruleRange, range)));
-    }).forEach((rule) => {
-        const mergeUtil = new RangeMergeUtil();
-        const mergeRanges = mergeUtil.add(...rule.ranges).subtract(...ranges).merge();
+    const rangeTransformService = injector.get(ConditionalFormattingRangeTransformService);
+    allRules.forEach((rule) => {
+        const mergeRanges = rangeTransformService.subtractRanges(rule.ranges, ranges);
         if (mergeRanges.length) {
             const redo: IMutationInfo<ISetConditionalRuleMutationParams> = {
                 id: SetConditionalRuleMutation.id,

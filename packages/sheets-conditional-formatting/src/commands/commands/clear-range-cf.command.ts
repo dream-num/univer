@@ -23,12 +23,11 @@ import {
     ICommandService,
     IUndoRedoService,
     IUniverInstanceService,
-    ObjectMatrix,
-    Range,
     sequenceExecute,
 } from '@univerjs/core';
-import { createTopMatrixFromMatrix, findAllRectangle, getSheetCommandTarget, SheetsSelectionsService } from '@univerjs/sheets';
-import { ConditionalFormattingRuleModel } from '../../models/conditional-formatting-rule-model';
+import { getSheetCommandTarget, SheetsSelectionsService } from '@univerjs/sheets';
+import { ConditionalFormattingRangeIndexModel } from '../../models/conditional-formatting-range-index-model';
+import { ConditionalFormattingRangeTransformService } from '../../services/conditional-formatting-range-transform.service';
 import { DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory } from '../mutations/delete-conditional-rule.mutation';
 import { SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory } from '../mutations/set-conditional-rule.mutation';
 
@@ -44,7 +43,8 @@ export const ClearRangeCfCommand: ICommand<IClearRangeCfParams> = {
         if (!params) {
             return false;
         }
-        const conditionalFormattingRuleModel = accessor.get(ConditionalFormattingRuleModel);
+        const conditionalFormattingRangeIndexModel = accessor.get(ConditionalFormattingRangeIndexModel);
+        const conditionalFormattingRangeTransformService = accessor.get(ConditionalFormattingRangeTransformService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
@@ -54,8 +54,8 @@ export const ClearRangeCfCommand: ICommand<IClearRangeCfParams> = {
         if (!target) return false;
 
         const { unitId, subUnitId } = target;
-        const ranges = selectionManagerService.getCurrentSelections()?.map((selection) => selection.range) || [];
-        const allRuleList = conditionalFormattingRuleModel.getSubunitRules(unitId, subUnitId);
+        const ranges = params.ranges ?? selectionManagerService.getCurrentSelections()?.map((selection) => selection.range) ?? [];
+        const allRuleList = conditionalFormattingRangeIndexModel.getRulesByRanges(unitId, subUnitId, ranges);
         if (!allRuleList?.length || !ranges.length) {
             return false;
         }
@@ -63,18 +63,7 @@ export const ClearRangeCfCommand: ICommand<IClearRangeCfParams> = {
         const redos: IMutationInfo[] = [];
         const undos: IMutationInfo[] = [];
         allRuleList.forEach((oldRule) => {
-            const matrix = new ObjectMatrix<1>();
-            oldRule.ranges.forEach((range) => {
-                Range.foreach(range, (row, col) => {
-                    matrix.setValue(row, col, 1);
-                });
-            });
-            ranges.forEach((range) => {
-                Range.foreach(range, (row, col) => {
-                    matrix.realDeleteValue(row, col);
-                });
-            });
-            const newRanges = findAllRectangle(createTopMatrixFromMatrix(matrix));
+            const newRanges = conditionalFormattingRangeTransformService.subtractRanges(oldRule.ranges, ranges);
             if (newRanges.length) {
                 const rule: IConditionFormattingRule = { ...oldRule, ranges: newRanges };
                 const params = { unitId, subUnitId, rule } as ISetConditionalRuleMutationParams;

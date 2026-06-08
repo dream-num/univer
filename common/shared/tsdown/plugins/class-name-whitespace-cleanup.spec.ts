@@ -52,6 +52,76 @@ describe('cleanupClassNameTemplateWhitespace', () => {
         );
     });
 
+    it('should normalize whitespace for className string literals', () => {
+        const sourceCode = `
+            const value = (
+                <button
+                    className="
+                      univer-flex univer-cursor-pointer univer-items-center univer-justify-center
+                      univer-border-none
+                      hover:univer-opacity-70
+                    "
+                />
+            );
+        `;
+
+        expect(cleanupClassNameTemplateWhitespace(sourceCode, '/tmp/example.tsx')).toContain(
+            'className="univer-flex univer-cursor-pointer univer-items-center univer-justify-center univer-border-none hover:univer-opacity-70"'
+        );
+    });
+
+    it('should normalize whitespace for compiled className properties', () => {
+        const sourceCode = `
+            jsx("button", {
+                className: "\\n                  univer-flex univer-cursor-pointer univer-items-center univer-justify-center\\n                  univer-border-none\\n                  hover:univer-opacity-70\\n                ",
+                type: "button",
+            });
+        `;
+
+        expect(cleanupClassNameTemplateWhitespace(sourceCode, '/tmp/example.js')).toContain(
+            'className: "univer-flex univer-cursor-pointer univer-items-center univer-justify-center univer-border-none hover:univer-opacity-70"'
+        );
+    });
+
+    it('should normalize whitespace inside cva definitions', () => {
+        const sourceCode = `
+            const buttonVariants = cva(
+                \`
+                  univer-box-border univer-inline-flex univer-cursor-pointer
+                  disabled:univer-pointer-events-none
+                \`,
+                {
+                    variants: {
+                        variant: {
+                            primary: \`
+                              univer-border-primary-600 univer-bg-primary-600 univer-text-white
+                              hover:univer-bg-primary-500
+                            \`,
+                        },
+                    },
+                    compoundVariants: [{
+                        className: \`
+                          univer-gap-1 univer-rounded
+                          dark:!univer-bg-gray-700
+                        \`,
+                    }],
+                }
+            );
+        `;
+
+        const cleanedCode = cleanupClassNameTemplateWhitespace(sourceCode, '/tmp/example.tsx');
+
+        expect(cleanedCode).toContain(
+            'cva(\n                "univer-box-border univer-inline-flex univer-cursor-pointer disabled:univer-pointer-events-none",'
+        );
+        expect(cleanedCode).toContain(
+            'primary: "univer-border-primary-600 univer-bg-primary-600 univer-text-white hover:univer-bg-primary-500"'
+        );
+        expect(cleanedCode).toContain(
+            'className: "univer-gap-1 univer-rounded dark:!univer-bg-gray-700"'
+        );
+    });
+
     it('should not touch unrelated template literals', () => {
         const sourceCode = 'const message = ` hello\\n  world `;';
 

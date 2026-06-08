@@ -22,7 +22,7 @@ import { FDocument } from './f-document';
 /**
  * @ignore
  */
-export interface IFUniverDocsUIMixin {
+export interface IFUniverDocsMixin {
     /**
      * Create a new document and get the API handler of that document.
      * @param {Partial<IDocumentData>} data The snapshot of the document.
@@ -59,7 +59,7 @@ export interface IFUniverDocsUIMixin {
     getDocument(id: string): FDocument | null;
 }
 
-export class FUniverDocsUIMixin extends FUniver implements IFUniverDocsUIMixin {
+export class FUniverDocsMixin extends FUniver implements IFUniverDocsMixin {
     override createDocument(data: Partial<IDocumentData>): FDocument {
         const instanceService = this._injector.get(IUniverInstanceService);
         const document = instanceService.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, data);
@@ -85,8 +85,8 @@ export class FUniverDocsUIMixin extends FUniver implements IFUniverDocsUIMixin {
     }
 }
 
-FUniver.extend(FUniverDocsUIMixin);
+FUniver.extend(FUniverDocsMixin);
 declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
-    interface FUniver extends IFUniverDocsUIMixin {}
+    interface FUniver extends IFUniverDocsMixin {}
 }

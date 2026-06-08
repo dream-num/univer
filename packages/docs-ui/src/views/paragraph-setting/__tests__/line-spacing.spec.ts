@@ -17,9 +17,9 @@
 import { SpacingRule } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import {
-    convertStoredLineSpacingToDisplayValue,
     convertDisplayLineSpacingToStoredValue,
     convertLineSpacingForRuleChange,
+    convertStoredLineSpacingToDisplayValue,
     getLineSpacingInputConfig,
     getLineSpacingRuleOptions,
 } from '../line-spacing';

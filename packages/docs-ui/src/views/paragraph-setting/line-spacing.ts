@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING, DEFAULT_STYLES, type LocaleService, SpacingRule } from '@univerjs/core';
+import type { LocaleService } from '@univerjs/core';
+import { DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING, DEFAULT_STYLES, SpacingRule } from '@univerjs/core';
 
 interface ILineSpacingMetrics {
     glyphLineHeight: number;

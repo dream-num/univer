@@ -15,7 +15,7 @@
  */
 
 import type { ReactNode } from 'react';
-import { HorizontalAlign, LocaleService, SpacingRule } from '@univerjs/core';
+import { HorizontalAlign, LocaleService } from '@univerjs/core';
 import { borderClassName, clsx, InputNumber, Select, Tooltip } from '@univerjs/design';
 import { AlignTextBothIcon, HorizontallyIcon, LeftJustifyingIcon, RightJustifyingIcon } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';

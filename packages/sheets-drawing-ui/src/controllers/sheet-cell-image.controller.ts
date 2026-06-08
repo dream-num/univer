@@ -15,12 +15,10 @@
  */
 
 import type { ICellData, IDocDrawingBase, Nullable } from '@univerjs/core';
-import type { IReplaceSnapshotCommandParams } from '@univerjs/docs-ui';
 import type { IImageData } from '@univerjs/drawing';
 import type { ISheetLocationBase } from '@univerjs/sheets';
-import { Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_ZEN_EDITOR_UNIT_ID_KEY, ICommandService, Inject, Injector, InterceptorEffectEnum } from '@univerjs/core';
+import { Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, Inject, Injector, InterceptorEffectEnum } from '@univerjs/core';
 import { DocDrawingController } from '@univerjs/docs-drawing';
-import { ReplaceSnapshotCommand } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { InterceptCellContentPriority, INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
@@ -63,7 +61,6 @@ export function resizeImageByCell(injector: Injector, location: ISheetLocationBa
 
 export class SheetCellImageController extends Disposable {
     constructor(
-        @ICommandService private readonly _commandService: ICommandService,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
         @Inject(Injector) private readonly _injector: Injector,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
@@ -84,18 +81,6 @@ export class SheetCellImageController extends Disposable {
                 this._drawingManagerService.removeDrawingDataForUnit(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
                 this._docDrawingController.loadDrawingDataForUnit(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
                 this._drawingManagerService.initializeNotification(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
-            }
-        }));
-
-        this.disposeWithMe(this._commandService.onCommandExecuted((commandInfo) => {
-            if (commandInfo.id === ReplaceSnapshotCommand.id) {
-                const params = commandInfo.params as IReplaceSnapshotCommandParams;
-                const unitId = params.unitId;
-                if (unitId === DOCS_ZEN_EDITOR_UNIT_ID_KEY) {
-                    this._drawingManagerService.removeDrawingDataForUnit(DOCS_ZEN_EDITOR_UNIT_ID_KEY);
-                    this._docDrawingController.loadDrawingDataForUnit(DOCS_ZEN_EDITOR_UNIT_ID_KEY);
-                    this._drawingManagerService.initializeNotification(DOCS_ZEN_EDITOR_UNIT_ID_KEY);
-                }
             }
         }));
     }

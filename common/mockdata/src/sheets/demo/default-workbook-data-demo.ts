@@ -14408,7 +14408,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                 25: {
                     10: {
                         p: {
-                            id: '__INTERNAL_EDITOR__ZEN_EDITOR',
+                            id: '__INTERNAL_EDITOR__DOCS_NORMAL',
                             documentStyle: {
                                 pageSize: {
                                     width: 37.2261962890625,
@@ -14461,7 +14461,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                     },
                     11: {
                         p: {
-                            id: '__INTERNAL_EDITOR__ZEN_EDITOR',
+                            id: '__INTERNAL_EDITOR__DOCS_NORMAL',
                             documentStyle: {
                                 pageSize: {
                                     width: 37.2261962890625,

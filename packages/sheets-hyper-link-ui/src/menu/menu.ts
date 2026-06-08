@@ -17,7 +17,7 @@
 import type { DocumentDataModel, IAccessor, Nullable } from '@univerjs/core';
 import type { IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui';
 import type { IMenuItem, IShortcutItem } from '@univerjs/ui';
-import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_ZEN_EDITOR_UNIT_ID_KEY, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { getSheetCommandTarget, RangeProtectionPermissionEditPoint, WorkbookEditablePermission, WorksheetEditPermission, WorksheetInsertHyperlinkPermission, WorksheetSetCellValuePermission } from '@univerjs/sheets';
@@ -27,7 +27,7 @@ import { combineLatest, map, of, switchMap } from 'rxjs';
 import { InsertHyperLinkOperation, InsertHyperLinkToolbarOperation } from '../commands/operations/popup.operations';
 import { DisableLinkType, getShouldDisableCellLink, shouldDisableAddLink } from '../utils';
 
-const getEditingLinkDisable$ = (accessor: IAccessor, unitId = DOCS_ZEN_EDITOR_UNIT_ID_KEY) => {
+const getEditingLinkDisable$ = (accessor: IAccessor, unitId = DOCS_NORMAL_EDITOR_UNIT_ID_KEY) => {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const docSelctionService = accessor.get(IRenderManagerService).getRenderById(unitId)?.with(DocSelectionRenderService);
     if (!docSelctionService) {
@@ -107,8 +107,6 @@ const linkMenu = {
     icon: 'LinkIcon',
 };
 
-export const genZenEditorMenuId = (id: string) => `${id}-zen-editor`;
-
 export const insertLinkMenuFactory = (accessor: IAccessor) => {
     return {
         ...linkMenu,
@@ -116,15 +114,6 @@ export const insertLinkMenuFactory = (accessor: IAccessor) => {
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getLinkDisable$(accessor),
         // disabled$: getObservableWithExclusiveRange$(accessor, getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission, WorksheetInsertHyperlinkPermission], rangeTypes: [RangeProtectionPermissionEditPoint] })),
-    } as IMenuItem;
-};
-
-export const zenEditorInsertLinkMenuFactory = (accessor: IAccessor) => {
-    return {
-        ...linkMenu,
-        id: genZenEditorMenuId(linkMenu.commandId),
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC, DOCS_ZEN_EDITOR_UNIT_ID_KEY),
-        disabled$: getEditingLinkDisable$(accessor),
     } as IMenuItem;
 };
 
@@ -141,15 +130,6 @@ export const insertLinkMenuToolbarFactory = (accessor: IAccessor) => {
         id: linkToolbarMenu.commandId,
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getLinkDisable$(accessor),
-    };
-};
-
-export const zenEditorInsertLinkMenuToolbarFactory = (accessor: IAccessor) => {
-    return {
-        ...linkToolbarMenu,
-        id: genZenEditorMenuId(linkToolbarMenu.commandId),
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC, DOCS_ZEN_EDITOR_UNIT_ID_KEY),
-        disabled$: getEditingLinkDisable$(accessor),
     };
 };
 

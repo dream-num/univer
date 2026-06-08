@@ -101,8 +101,6 @@ export interface IBeforeSheetEditStartEventParams extends IEventBase {
     eventType?: DeviceInputEventType;
     /** Optional keycode triggering the edit */
     keycode?: KeyCode;
-    /** Whether the edit will happen in zen editor mode */
-    isZenEditor: boolean;
 }
 
 /**
@@ -121,8 +119,6 @@ export interface ISheetEditStartedEventParams extends IEventBase {
     eventType?: DeviceInputEventType;
     /** Optional keycode that triggered the edit */
     keycode?: KeyCode;
-    /** Whether the edit is happening in zen editor mode */
-    isZenEditor: boolean;
 }
 
 /**
@@ -139,8 +135,6 @@ export interface ISheetEditChangingEventParams extends IEventBase {
     column: number;
     /** Current value being edited */
     value: RichTextValue;
-    /** Whether the edit is happening in zen editor mode */
-    isZenEditor: boolean;
 }
 
 /**
@@ -161,8 +155,6 @@ export interface IBeforeSheetEditEndEventParams extends IEventBase {
     eventType?: DeviceInputEventType;
     /** Optional keycode triggering the edit end */
     keycode?: KeyCode;
-    /** Whether the edit is happening in zen editor mode */
-    isZenEditor: boolean;
     /** Whether the edit will be confirmed or cancelled */
     isConfirm: boolean;
 }
@@ -183,8 +175,6 @@ export interface ISheetEditEndedEventParams extends IEventBase {
     eventType?: DeviceInputEventType;
     /** Optional keycode that triggered the edit end */
     keycode?: KeyCode;
-    /** Whether the edit happened in zen editor mode */
-    isZenEditor: boolean;
     /** Whether the edit was confirmed or cancelled */
     isConfirm: boolean;
 }
@@ -349,7 +339,7 @@ export interface IFSheetsUIEventNameMixin {
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetEditStart, (params) => {
-     *   const { worksheet, workbook, row, column, eventType, keycode, isZenEditor } = params;
+     *   const { worksheet, workbook, row, column, eventType, keycode } = params;
      *   console.log(params);
      *
      *   // Cancel the cell edit start operation
@@ -367,7 +357,7 @@ export interface IFSheetsUIEventNameMixin {
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.SheetEditStarted, (params) => {
-     *   const { worksheet, workbook, row, column, eventType, keycode, isZenEditor } = params;
+     *   const { worksheet, workbook, row, column, eventType, keycode } = params;
      *   console.log(params);
      * });
      *
@@ -382,7 +372,7 @@ export interface IFSheetsUIEventNameMixin {
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.SheetEditChanging, (params) => {
-     *   const { worksheet, workbook, row, column, value, isZenEditor } = params;
+     *   const { worksheet, workbook, row, column, value } = params;
      *   console.log(params);
      * });
      *
@@ -397,7 +387,7 @@ export interface IFSheetsUIEventNameMixin {
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetEditEnd, (params) => {
-     *   const { worksheet, workbook, row, column, value, eventType, keycode, isZenEditor, isConfirm } = params;
+     *   const { worksheet, workbook, row, column, value, eventType, keycode, isConfirm } = params;
      *   console.log(params);
      *
      *   // Cancel the cell edit end operation
@@ -415,7 +405,7 @@ export interface IFSheetsUIEventNameMixin {
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.SheetEditEnded, (params) => {
-     *   const { worksheet, workbook, row, column, eventType, keycode, isZenEditor, isConfirm } = params;
+     *   const { worksheet, workbook, row, column, eventType, keycode, isConfirm } = params;
      *   console.log(params);
      * });
      *

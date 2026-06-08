@@ -15,18 +15,15 @@
  */
 
 import type { DocumentDataModel, Nullable, Workbook } from '@univerjs/core';
-import type { ISelectionWithStyle, ISetSelectionsOperationParams } from '@univerjs/sheets';
+import type { ISelectionWithStyle } from '@univerjs/sheets';
 import {
     BuildTextUtils,
     ColorKit,
     CustomRangeType,
     DataStreamTreeTokenType,
     DisposableCollection,
-    DOCS_ZEN_EDITOR_UNIT_ID_KEY,
-    FOCUSING_SHEET,
     generateRandomId,
     ICommandService,
-    IContextService,
     IUniverInstanceService,
     LocaleService,
     ThemeService,
@@ -35,14 +32,14 @@ import {
 } from '@univerjs/core';
 import { borderClassName, Button, clsx, FormLayout, Input, Select } from '@univerjs/design';
 import { DocSelectionManagerService } from '@univerjs/docs';
-import { DocBackScrollRenderController, DocSelectionRenderService } from '@univerjs/docs-ui';
+import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { deserializeRangeWithSheet, IDefinedNamesService, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { SetSelectionsOperation, SetWorksheetActiveOperation, SheetsSelectionsService } from '@univerjs/sheets';
+import { SetWorksheetActiveOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { RangeSelector } from '@univerjs/sheets-formula-ui';
 import { AddHyperLinkCommand, AddRichHyperLinkCommand, SheetHyperLinkType, SheetsHyperLinkParserService, UpdateHyperLinkCommand, UpdateRichHyperLinkCommand } from '@univerjs/sheets-hyper-link';
 import { IEditorBridgeService, IMarkSelectionService, ScrollToRangeOperation } from '@univerjs/sheets-ui';
-import { IZenZoneService, KeyCode, useDependency, useEvent, useObservable } from '@univerjs/ui';
+import { KeyCode, useDependency, useEvent, useObservable } from '@univerjs/ui';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CloseHyperLinkPopupOperation } from '../../commands/operations/popup.operations';
 import { isLegalLink, serializeUrl } from '../../common/util';
@@ -71,13 +68,10 @@ export const CellLinkEdit = () => {
     const commandService = useDependency(ICommandService);
     const sidePanelService = useDependency(SheetsHyperLinkSidePanelService);
     const sidePanelOptions = useMemo(() => sidePanelService.getOptions(), [sidePanelService]);
-    const zenZoneService = useDependency(IZenZoneService);
     const renderManagerService = useDependency(IRenderManagerService);
     const markSelectionService = useDependency(IMarkSelectionService);
     const textSelectionService = useDependency(DocSelectionManagerService);
-    const contextService = useDependency(IContextService);
     const themeService = useDependency(ThemeService);
-    const docSelectionManagerService = useDependency(DocSelectionManagerService);
     const [selectorDialogVisible, setSelectorDialogVisible] = useState(false);
     const sheetsSelectionService = useDependency(SheetsSelectionsService);
     const selections = useMemo(() => sheetsSelectionService.getCurrentSelections(), []);
@@ -249,9 +243,7 @@ export const CellLinkEdit = () => {
     }, [type]);
 
     useEffect(() => {
-        const render = editing?.type === HyperLinkEditSourceType.ZEN_EDITOR ?
-            renderManagerService.getRenderById(DOCS_ZEN_EDITOR_UNIT_ID_KEY) :
-            renderManagerService.getRenderById(editorBridgeService.getCurrentEditorId());
+        const render = renderManagerService.getRenderById(editorBridgeService.getCurrentEditorId());
         const disposeCollection = new DisposableCollection();
 
         if (render) {
@@ -266,7 +258,7 @@ export const CellLinkEdit = () => {
             editorBridgeService.disableForceKeepVisible();
             disposeCollection.dispose();
         };
-    }, [editing?.type, editorBridgeService, renderManagerService]);
+    }, [editorBridgeService, renderManagerService]);
 
     useEffect(() => {
         if (isFocusRangeSelector) {
@@ -278,15 +270,6 @@ export const CellLinkEdit = () => {
             popupService.setIsKeepVisible(false);
         };
     }, [isFocusRangeSelector, selectorDialogVisible, popupService]);
-
-    useEffect(() => {
-        return () => {
-            if (zenZoneService.temporaryHidden) {
-                zenZoneService.show();
-                contextService.setContextValue(FOCUSING_SHEET, false);
-            }
-        };
-    }, [contextService, zenZoneService]);
 
     useEffect(() => {
         if (isFocusRangeSelector) {
@@ -371,7 +354,7 @@ export const CellLinkEdit = () => {
 
         if (editing) {
             if (id) {
-                const commandId = (editing.type === HyperLinkEditSourceType.ZEN_EDITOR || editing.type === HyperLinkEditSourceType.EDITING) ? UpdateRichHyperLinkCommand.id : UpdateHyperLinkCommand.id;
+                const commandId = editing.type === HyperLinkEditSourceType.EDITING ? UpdateRichHyperLinkCommand.id : UpdateHyperLinkCommand.id;
                 await commandService.executeCommand(commandId, {
                     id,
                     unitId: editing.unitId,
@@ -382,12 +365,10 @@ export const CellLinkEdit = () => {
                     },
                     row: editing.row,
                     column: editing.col,
-                    documentId: editing.type === HyperLinkEditSourceType.ZEN_EDITOR ?
-                        DOCS_ZEN_EDITOR_UNIT_ID_KEY
-                        : editorBridgeService.getCurrentEditorId(),
+                    documentId: editorBridgeService.getCurrentEditorId(),
                 });
             } else {
-                const commandId = (editing.type === HyperLinkEditSourceType.ZEN_EDITOR || editing.type === HyperLinkEditSourceType.EDITING) ? AddRichHyperLinkCommand.id : AddHyperLinkCommand.id;
+                const commandId = editing.type === HyperLinkEditSourceType.EDITING ? AddRichHyperLinkCommand.id : AddHyperLinkCommand.id;
                 await commandService.executeCommand(commandId, {
                     unitId: editing.unitId,
                     subUnitId: editing.subUnitId,
@@ -398,9 +379,7 @@ export const CellLinkEdit = () => {
                         payload: formatUrl(type, payload),
                         display: showLabel ? display : '',
                     },
-                    documentId: editing.type === HyperLinkEditSourceType.ZEN_EDITOR ?
-                        DOCS_ZEN_EDITOR_UNIT_ID_KEY
-                        : editorBridgeService.getCurrentEditorId(),
+                    documentId: editorBridgeService.getCurrentEditorId(),
                 });
             }
         }
@@ -505,33 +484,12 @@ export const CellLinkEdit = () => {
                         onRangeSelectorDialogVisibleChange={async (visible) => {
                             setSelectorDialogVisible(visible);
                             if (visible) {
-                                if (editing.type === HyperLinkEditSourceType.ZEN_EDITOR) {
-                                    zenZoneService.hide();
-                                    contextService.setContextValue(FOCUSING_SHEET, true);
-                                }
                                 if (editing.type !== HyperLinkEditSourceType.VIEWING) {
                                     editorBridgeService.enableForceKeepVisible();
                                 }
                                 setHide(true);
                             } else {
                                 await resolverService.navigateToRange(editing.unitId, editing.subUnitId, { startRow: editing.row, endRow: editing.row, startColumn: editing.col, endColumn: editing.col }, true);
-                                if (editing.type === HyperLinkEditSourceType.ZEN_EDITOR) {
-                                    await commandService.executeCommand(SetSelectionsOperation.id, {
-                                        unitId: editing.unitId,
-                                        subUnitId: editing.subUnitId,
-                                        selections: [{ range: { startRow: editing.row, endRow: editing.row, startColumn: editing.col, endColumn: editing.col } }],
-                                    } as ISetSelectionsOperationParams);
-
-                                    zenZoneService.show();
-                                    contextService.setContextValue(FOCUSING_SHEET, false);
-                                    const docBackScrollRenderController = renderManagerService.getRenderById(DOCS_ZEN_EDITOR_UNIT_ID_KEY)?.with(DocBackScrollRenderController);
-                                    const range = docSelectionManagerService.getTextRanges({ unitId: DOCS_ZEN_EDITOR_UNIT_ID_KEY, subUnitId: DOCS_ZEN_EDITOR_UNIT_ID_KEY })?.[0];
-
-                                    if (docBackScrollRenderController && range) {
-                                        docBackScrollRenderController.scrollToRange(range);
-                                        docSelectionManagerService.refreshSelection({ unitId: DOCS_ZEN_EDITOR_UNIT_ID_KEY, subUnitId: DOCS_ZEN_EDITOR_UNIT_ID_KEY });
-                                    }
-                                }
                                 editorBridgeService.disableForceKeepVisible();
                                 setHide(false);
                             }

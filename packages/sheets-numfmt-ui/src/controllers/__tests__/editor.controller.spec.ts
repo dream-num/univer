@@ -291,7 +291,7 @@ describe('test editor', () => {
     it('edit number with bullet should keep rich text', () => {
         const sheetInterceptorService = testBed.get(SheetInterceptorService);
         const richTextParams = {
-            id: '__INTERNAL_EDITOR__ZEN_EDITOR',
+            id: '__INTERNAL_EDITOR__DOCS_NORMAL',
             documentStyle: {
                 pageSize: {
                     width: 595,

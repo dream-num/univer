@@ -19,7 +19,7 @@ import type { ISheetLocation } from '@univerjs/sheets';
 import type { ICellDropdown } from '../views/dropdown';
 import { createIdentifier, Disposable, DisposableCollection, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, Inject } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { ComponentManager, IZenZoneService } from '@univerjs/ui';
+import { ComponentManager } from '@univerjs/ui';
 import { dropdownMap } from '../views/dropdown';
 import { SheetCanvasPopManagerService } from './canvas-pop-manager.service';
 
@@ -43,7 +43,6 @@ export const ISheetCellDropdownManagerService = createIdentifier<ISheetCellDropd
 export class SheetCellDropdownManagerService extends Disposable implements ISheetCellDropdownManagerService {
     constructor(
         @Inject(SheetCanvasPopManagerService) private readonly _canvasPopupManagerService: SheetCanvasPopManagerService,
-        @IZenZoneService private readonly _zenZoneService: IZenZoneService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager
     ) {
@@ -57,9 +56,6 @@ export class SheetCellDropdownManagerService extends Disposable implements IShee
     showDropdown(param: IDropdownParam): IDisposable {
         const { location, onHide, closeOnOutSide = true } = param;
         const { row, col, unitId, subUnitId } = location;
-        if (this._zenZoneService.visible) {
-            throw new Error('[SheetCellDropdownManagerService]: cannot show dropdown when zen mode is visible');
-        }
 
         const component = dropdownMap[param.type];
         const currentRender = this._renderManagerService.getRenderById(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);

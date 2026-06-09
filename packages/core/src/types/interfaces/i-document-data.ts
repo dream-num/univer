@@ -15,6 +15,7 @@
  */
 
 import type { ImageSourceType } from '../../services/image-io/image-io.service';
+import type { IResources } from '../../services/resource-manager/type';
 import type { ISize } from '../../shared/shape';
 import type { BooleanNumber, CellValueType, HorizontalAlign, LocaleType, TextDirection, VerticalAlign, WrapStrategy } from '../enum';
 import type { IDrawingParam } from './i-drawing';
@@ -36,7 +37,7 @@ export interface IDocumentData extends IReferenceSource {
     documentStyle: IDocumentStyle;
     settings?: IDocumentSettings;
     // The type of data depends on how the plug-in is defined
-    resources?: Array<{ id?: string; name: string; data: string }>;
+    resources?: IResources;
     disabled?: boolean;
 }
 

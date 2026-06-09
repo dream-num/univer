@@ -20,7 +20,6 @@ import type { UniverInstanceType } from '../../common/unit';
 import { createIdentifier } from '../../common/di';
 
 export type IResources = Array<{ id?: string; name: string; data: string }>;
-export type IResourceSnapshot = IResources | Record<string, unknown>;
 
 type IBusinessName = 'SHEET' | 'DOC' | 'SLIDE';
 export type IResourceName = `${IBusinessName}_${string}_PLUGIN`;
@@ -42,7 +41,7 @@ export interface IResourceManagerService {
 
     getResources(unitId: string, type: UniverInstanceType): IResources;
     getResourcesByType: (unitId: string, type: UniverInstanceType) => IResources;
-    loadResources: (unitId: string, resources?: IResourceSnapshot) => void;
+    loadResources: (unitId: string, resources?: IResources) => void;
     unloadResources(unitId: string, type: UniverInstanceType): void;
 }
 

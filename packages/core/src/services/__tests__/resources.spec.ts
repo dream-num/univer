@@ -16,6 +16,7 @@
 
 import type { IDocumentData } from '../../types/interfaces';
 import type { Univer } from '../../univer';
+import type { IResources } from '../resource-manager/type';
 import { BehaviorSubject } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY } from '../../common/const';
@@ -45,7 +46,7 @@ function createDocData(id: string, resources?: NonNullable<IDocumentData['resour
 interface ITestSlideData {
     id: string;
     name?: string;
-    resources?: unknown;
+    resources?: IResources;
 }
 
 class MockSlideUnit extends UnitModel<ITestSlideData> {
@@ -231,11 +232,11 @@ describe('Test resources service', () => {
         expect(loads).toEqual([['slide-late-resource', 'late']]);
     });
 
-    it('should load object-shaped slide plugin resources through the unit lifecycle', () => {
+    it('should load array-shaped slide plugin resources through the unit lifecycle', () => {
         const injector = univer.__getInjector();
         const resourceManagerService = injector.get(IResourceManagerService);
         const univerInstanceService = injector.get(IUniverInstanceService);
-        const pluginName = 'SLIDE_OBJECT_PLUGIN' as never;
+        const pluginName = 'SLIDE_ARRAY_PLUGIN' as never;
         const loads: Array<[string, string]> = [];
 
         univerInstanceService.registerCtorForType(UniverInstanceType.UNIVER_SLIDE, MockSlideUnit as never);
@@ -249,22 +250,20 @@ describe('Test resources service', () => {
         });
 
         univer.createUnit<ITestSlideData, MockSlideUnit>(UniverInstanceType.UNIVER_SLIDE, {
-            id: 'slide-object-resource',
-            resources: {
-                [pluginName]: {
-                    data: '{"kind":"object"}',
-                },
-            },
+            id: 'slide-array-resource',
+            resources: [
+                { name: pluginName, data: '{"kind":"array"}' },
+            ],
         });
 
-        expect(loads).toEqual([['slide-object-resource', 'object']]);
+        expect(loads).toEqual([['slide-array-resource', 'array']]);
     });
 
-    it('should load direct object-shaped slide plugin resources through the unit lifecycle', () => {
+    it('should load serialized object slide plugin resources through the unit lifecycle', () => {
         const injector = univer.__getInjector();
         const resourceManagerService = injector.get(IResourceManagerService);
         const univerInstanceService = injector.get(IUniverInstanceService);
-        const pluginName = 'SLIDE_DIRECT_OBJECT_PLUGIN' as never;
+        const pluginName = 'SLIDE_SERIALIZED_OBJECT_PLUGIN' as never;
         const loads: Array<[string, string]> = [];
 
         univerInstanceService.registerCtorForType(UniverInstanceType.UNIVER_SLIDE, MockSlideUnit as never);
@@ -278,15 +277,13 @@ describe('Test resources service', () => {
         });
 
         univer.createUnit<ITestSlideData, MockSlideUnit>(UniverInstanceType.UNIVER_SLIDE, {
-            id: 'slide-direct-object-resource',
-            resources: {
-                [pluginName]: {
-                    kind: 'direct-object',
-                },
-            },
+            id: 'slide-serialized-object-resource',
+            resources: [
+                { name: pluginName, data: '{"kind":"serialized-object"}' },
+            ],
         });
 
-        expect(loads).toEqual([['slide-direct-object-resource', 'direct-object']]);
+        expect(loads).toEqual([['slide-serialized-object-resource', 'serialized-object']]);
     });
 
     it('should load empty persisted resource payloads when hooks are registered later', () => {

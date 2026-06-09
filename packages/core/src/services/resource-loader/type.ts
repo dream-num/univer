@@ -14,10 +14,18 @@
  * limitations under the License.
  */
 
-import type { IResourceSnapshot } from '../resource-manager/type';
+import type { IResources } from '../resource-manager/type';
 import { createIdentifier } from '../../common/di';
+
+type IResourceLoaderResources<T> = 'resources' extends keyof T
+    ? T extends { resources?: infer TResources }
+        ? NonNullable<TResources>
+        : IResources
+    : IResources;
+
+export type IResourceLoaderSaveUnitSnapshot<T> = Omit<T, 'resources'> & { resources: IResourceLoaderResources<T> };
 
 export const IResourceLoaderService = createIdentifier<IResourceLoaderService>('resource-loader-service');
 export interface IResourceLoaderService {
-    saveUnit<T = object>(unitId: string): T & { resources: IResourceSnapshot } | null;
+    saveUnit<T = object>(unitId: string): IResourceLoaderSaveUnitSnapshot<T> | null;
 }

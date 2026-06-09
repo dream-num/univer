@@ -18,7 +18,7 @@ import type { UnitModel } from '../../common/unit';
 import type { DocumentDataModel } from '../../docs';
 import type { Workbook } from '../../sheets/workbook';
 import type { IResourceHook, IResourceName, IResourceSnapshot } from '../resource-manager/type';
-import type { IResourceLoaderService } from './type';
+import type { IResourceLoaderSaveUnitSnapshot, IResourceLoaderService } from './type';
 import { isInternalEditorID } from '../../common/const';
 import { Inject } from '../../common/di';
 import { UniverInstanceType } from '../../common/unit';
@@ -158,8 +158,9 @@ export class ResourceLoaderService extends Disposable implements IResourceLoader
             return null;
         }
         const resources = this._resourceManagerService.getResources(unitId, unit.type);
-        const snapshot = Tools.deepClone(unit.getSnapshot()) as { resources: IResourceSnapshot } & T;
-        snapshot.resources = unit.type === UniverInstanceType.UNIVER_SLIDE ? resourceListToObject(resources) : resources;
+        const snapshot = Tools.deepClone(unit.getSnapshot()) as IResourceLoaderSaveUnitSnapshot<T>;
+        (snapshot as { resources: IResourceSnapshot }).resources =
+            unit.type === UniverInstanceType.UNIVER_SLIDE ? resourceListToObject(resources) : resources;
         return snapshot;
     }
 }

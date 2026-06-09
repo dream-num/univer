@@ -48,16 +48,32 @@ export class SheetCellImageHoverRenderController extends Disposable implements I
                 if (richText !== null) {
                     currentSelections = this._selectionsService.getWorkbookSelections(this._context.unitId).getCurrentSelections();
                 }
+
                 if (
-                    currentSelections.length > 0 &&
                     richText?.unitId === this._context.unitId &&
                     richText?.drawing &&
                     currentSelections.length === 1 &&
-                    currentSelections[0].primary?.actualRow === richText.row &&
-                    currentSelections[0].primary?.actualColumn === richText.col
+                    currentSelections[0].primary
                 ) {
-                    this._isSetCursor = true;
-                    this._context.scene.setCursor(CURSOR_TYPE.ZOOM_IN);
+                    const { row, col } = richText;
+                    const { actualRow, actualColumn, startRow, startColumn, endRow, endColumn, isMerged, isMergedMainCell } = currentSelections[0].primary;
+
+                    if (
+                        (isMerged || isMergedMainCell) &&
+                        row >= startRow &&
+                        row <= endRow &&
+                        col >= startColumn &&
+                        col <= endColumn
+                    ) {
+                        this._isSetCursor = true;
+                        this._context.scene.setCursor(CURSOR_TYPE.ZOOM_IN);
+                    } else if (row === actualRow && col === actualColumn) {
+                        this._isSetCursor = true;
+                        this._context.scene.setCursor(CURSOR_TYPE.ZOOM_IN);
+                    } else if (this._isSetCursor) {
+                        this._isSetCursor = false;
+                        this._context.scene.resetCursor();
+                    }
                 } else if (this._isSetCursor) {
                     this._isSetCursor = false;
                     this._context.scene.resetCursor();
@@ -67,7 +83,7 @@ export class SheetCellImageHoverRenderController extends Disposable implements I
 
     private _initImageClick() {
         this.disposeWithMe(this._hoverManagerService.currentClickedCell$.subscribe((click) => {
-            if (click?.drawing) {
+            if (click?.drawing && this._isSetCursor) {
                 const imageDrawing = click.drawing.drawing.drawingOrigin as IDocImage;
                 const imageEle = this._sheetSkeletonManagerService.getCurrentSkeleton()?.imageCacheMap.getImage(imageDrawing.imageSourceType, imageDrawing.source);
                 if (!imageEle) return;

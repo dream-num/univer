@@ -16,6 +16,7 @@
 
 import type { IDisplayMenuItem, IMenuItem, IValueOption } from '../../../services/menu/menu';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
+import type { TinyMenuSizeVariant } from './DesignTinyMenuGroup';
 import { convertObservableToBehaviorSubject, LocaleService } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
 import { useEffect, useMemo, useState } from 'react';
@@ -29,6 +30,7 @@ interface IUIQuickMenuGroupProps {
     activeItemIds?: string[];
     hiddenItemIds?: string[];
     columns?: number;
+    sizeVariant?: TinyMenuSizeVariant;
     onOptionSelect?: (option: IValueOption) => void;
 }
 
@@ -128,7 +130,7 @@ function QuickTileMenuItem(props: IUIQuickTileMenuItemProps) {
 }
 
 export function UITinyMenuGroup(props: IUIQuickMenuGroupProps) {
-    const { item, activeItemIds, hiddenItemIds = EMPTY_HIDDEN_ITEM_IDS, columns, onOptionSelect } = props;
+    const { item, activeItemIds, hiddenItemIds = EMPTY_HIDDEN_ITEM_IDS, columns, sizeVariant = 'default', onOptionSelect } = props;
     const [activeItems, setActiveItems] = useState<string[]>([]);
     const [hiddenItems, setHiddenItems] = useState<string[]>([]);
     const componentManager = useDependency(ComponentManager);
@@ -188,6 +190,7 @@ export function UITinyMenuGroup(props: IUIQuickMenuGroupProps) {
     return (
         <DesignTinyMenuGroup
             columns={columns}
+            sizeVariant={sizeVariant}
             items={visibleChildren.map((child) => ({
                 key: child.key,
                 onClick: () => {
@@ -201,7 +204,9 @@ export function UITinyMenuGroup(props: IUIQuickMenuGroupProps) {
                     });
                 },
                 className: '',
-                iconClassName: child.item?.icon === 'TextTypeIcon' ? '!univer-size-3.5' : undefined,
+                iconClassName: child.item?.icon === 'TextTypeIcon'
+                    ? (sizeVariant === 'paragraph-t' ? '!univer-size-4' : '!univer-size-3.5')
+                    : undefined,
                 Icon: componentManager.get(child.item!.icon as string)!,
                 active: resolveMenuItemActiveState(child.item?.id, activeItems.includes(child.item?.id ?? ''), activeItemIds),
                 tooltip: child.item?.tooltip ? localeService.t(child.item.tooltip) : undefined,

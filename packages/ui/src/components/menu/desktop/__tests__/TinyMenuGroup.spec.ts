@@ -151,4 +151,30 @@ describe('TinyMenuGroup', () => {
 
         expect(props.columns).toBe(6);
     });
+
+    it('passes paragraph T size variant through to the tiny menu renderer', () => {
+        const item = {
+            key: 'quick',
+            order: 0,
+            children: [{
+                key: 'h1',
+                order: 0,
+                item: {
+                    id: 'doc.command.h1-heading',
+                    type: MenuItemType.BUTTON,
+                    icon: 'H1Icon',
+                    hidden$: of(false),
+                    activated$: of(false),
+                },
+            }],
+        } as never;
+
+        render(React.createElement(UITinyMenuGroup, { item, sizeVariant: 'paragraph-t' }));
+
+        const props = designTinyMenuGroupSpy.mock.calls[0][0] as {
+            sizeVariant?: string;
+        };
+
+        expect(props.sizeVariant).toBe('paragraph-t');
+    });
 });

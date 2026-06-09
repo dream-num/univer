@@ -37,12 +37,15 @@ import { MenuItemType } from '../../../services/menu/menu';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
 import { useDependency, useObservable } from '../../../utils/di';
 
+type ContextMenuSizeVariant = 'default' | 'paragraph-t';
+
 interface IContextMenuPanelProps {
     menuType: string;
     menuSessionVersion?: number;
     className?: string;
     activeItemIds?: string[];
     hiddenItemIds?: string[];
+    sizeVariant?: ContextMenuSizeVariant;
     onOptionSelect?: (option: IValueOption) => void;
 }
 
@@ -53,6 +56,7 @@ interface IContextMenuMenuProps {
     maxMenuHeight: number;
     activeItemIds?: string[];
     hiddenItemIds?: string[];
+    sizeVariant: ContextMenuSizeVariant;
     onOptionSelect?: (option: IValueOption) => void;
 }
 
@@ -65,10 +69,10 @@ interface IContextMenuMenuItemProps {
     activeItemIds?: string[];
     hiddenItemIds?: string[];
     compact?: boolean;
+    sizeVariant: ContextMenuSizeVariant;
     onOptionSelect?: (option: IValueOption) => void;
 }
 
-const contentClassName = 'univer-inline-flex univer-items-center univer-gap-2';
 const menuViewportPadding = 8;
 const submenuOverlapOffset = 2;
 const submenuVisualGap = 20;
@@ -127,8 +131,63 @@ export function getContextMenuQuickGroupColumns(menuSchema: IMenuSchema): number
     return undefined;
 }
 
+function getContextMenuContentClassName(sizeVariant: ContextMenuSizeVariant) {
+    return clsx(
+        'univer-inline-flex univer-items-center',
+        sizeVariant === 'paragraph-t' ? 'univer-gap-3' : 'univer-gap-2'
+    );
+}
+
+function getContextMenuPanelClassName(sizeVariant: ContextMenuSizeVariant) {
+    return sizeVariant === 'paragraph-t'
+        ? `
+          univer-box-border univer-grid univer-min-w-64 univer-max-w-full univer-gap-2 univer-overflow-y-auto
+          univer-overscroll-contain univer-rounded-md univer-bg-white univer-px-3 univer-py-2 univer-text-base
+          univer-text-gray-900 univer-shadow-md
+          dark:!univer-bg-gray-700 dark:!univer-text-white
+        `
+        : `
+          univer-box-border univer-grid univer-min-w-52 univer-max-w-full univer-gap-1 univer-overflow-y-auto
+          univer-overscroll-contain univer-rounded-md univer-bg-white univer-px-2 univer-py-1 univer-text-sm
+          univer-text-gray-900 univer-shadow-md
+          dark:!univer-bg-gray-700 dark:!univer-text-white
+        `;
+}
+
+function getContextMenuGroupClassName(sizeVariant: ContextMenuSizeVariant) {
+    return sizeVariant === 'paragraph-t' ? 'univer-grid univer-gap-2 univer-py-2' : 'univer-grid univer-gap-1 univer-py-1';
+}
+
+function getContextMenuHeaderClassName(sizeVariant: ContextMenuSizeVariant) {
+    return sizeVariant === 'paragraph-t'
+        ? `
+          univer-px-3 univer-text-sm univer-font-semibold univer-text-gray-600
+          dark:!univer-text-gray-300
+        `
+        : `
+          univer-px-2 univer-text-xs univer-font-semibold univer-text-gray-600
+          dark:!univer-text-gray-300
+        `;
+}
+
+function getContextMenuSubmenuPanelClassName(sizeVariant: ContextMenuSizeVariant) {
+    return sizeVariant === 'paragraph-t'
+        ? `
+          univer-overflow-y-auto univer-overscroll-contain univer-rounded-md univer-border
+          univer-border-solid univer-border-gray-200 univer-bg-white univer-p-2
+          univer-shadow-md
+          dark:!univer-border-gray-600 dark:!univer-bg-gray-700
+        `
+        : `
+          univer-overflow-y-auto univer-overscroll-contain univer-rounded-md univer-border
+          univer-border-solid univer-border-gray-200 univer-bg-white univer-p-1.5
+          univer-shadow-md
+          dark:!univer-border-gray-600 dark:!univer-bg-gray-700
+        `;
+}
+
 export function ContextMenuPanel(props: IContextMenuPanelProps) {
-    const { menuType, menuSessionVersion = 0, className, activeItemIds, hiddenItemIds, onOptionSelect } = props;
+    const { menuType, menuSessionVersion = 0, className, activeItemIds, hiddenItemIds, sizeVariant = 'default', onOptionSelect } = props;
     const menuManagerService = useDependency(IMenuManagerService);
     const layoutService = useDependency(ILayoutService);
     const [menuElement, setMenuElement] = useState<HTMLDivElement | null>(null);
@@ -192,12 +251,7 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
         <div
             ref={setMenuElement}
             className={clsx(
-                `
-                  univer-box-border univer-grid univer-min-w-52 univer-max-w-full univer-gap-1 univer-overflow-y-auto
-                  univer-overscroll-contain univer-rounded-md univer-bg-white univer-px-2 univer-py-1 univer-text-sm
-                  univer-text-gray-900 univer-shadow-md
-                  dark:!univer-bg-gray-700 dark:!univer-text-white
-                `,
+                getContextMenuPanelClassName(sizeVariant),
                 borderClassName,
                 scrollbarClassName,
                 className
@@ -213,6 +267,7 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
                 submenuPortalContainer={submenuPortalContainer}
                 activeItemIds={activeItemIds}
                 hiddenItemIds={hiddenItemIds}
+                sizeVariant={sizeVariant}
                 onOptionSelect={onOptionSelect}
                 maxMenuHeight={maxMenuHeight}
             />
@@ -221,7 +276,7 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
 }
 
 function ContextMenuMenu(props: IContextMenuMenuProps) {
-    const { menuSchemas, menuSessionVersion, submenuPortalContainer, activeItemIds, hiddenItemIds, onOptionSelect, maxMenuHeight } = props;
+    const { menuSchemas, menuSessionVersion, submenuPortalContainer, activeItemIds, hiddenItemIds, sizeVariant, onOptionSelect, maxMenuHeight } = props;
     const localeService = useDependency(LocaleService);
     const hiddenGroupStates = useContextGroupHiddenStates(menuSchemas);
 
@@ -246,10 +301,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                 const titleNode = menuSchema.title
                     ? (
                         <strong
-                            className={`
-                              univer-px-2 univer-text-xs univer-font-semibold univer-text-gray-600
-                              dark:!univer-text-gray-300
-                            `}
+                            className={getContextMenuHeaderClassName(sizeVariant)}
                         >
                             {localeService.t(menuSchema.title)}
                         </strong>
@@ -267,6 +319,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                             onOptionSelect={onOptionSelect}
                             maxMenuHeight={maxMenuHeight}
                             hiddenItemIds={hiddenItemIds}
+                            sizeVariant={sizeVariant}
                         />
                     );
                 }
@@ -280,7 +333,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                         <div
                             key={menuSchema.key}
                             className={clsx(
-                                'univer-grid univer-gap-1 univer-py-1',
+                                getContextMenuGroupClassName(sizeVariant),
                                 hasSeparator && borderBottomClassName
                             )}
                         >
@@ -300,6 +353,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                                         columns={getContextMenuQuickGroupColumns(menuSchema)}
                                         activeItemIds={activeItemIds}
                                         hiddenItemIds={hiddenItemIds}
+                                        sizeVariant={sizeVariant}
                                         onOptionSelect={onOptionSelect}
                                     />
                                 )}
@@ -312,7 +366,9 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                         <div
                             key={menuSchema.key}
                             className={clsx(
-                                'univer-flex univer-items-center univer-gap-1 univer-py-1',
+                                sizeVariant === 'paragraph-t'
+                                    ? 'univer-flex univer-items-center univer-gap-2 univer-py-2'
+                                    : 'univer-flex univer-items-center univer-gap-1 univer-py-1',
                                 hasSeparator && borderBottomClassName
                             )}
                         >
@@ -329,6 +385,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                                         onOptionSelect={onOptionSelect}
                                         maxMenuHeight={maxMenuHeight}
                                         compact
+                                        sizeVariant={sizeVariant}
                                     />
                                 )
                             ))}
@@ -340,7 +397,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                     <div
                         key={menuSchema.key}
                         className={clsx(
-                            'univer-grid univer-gap-1 univer-py-1',
+                            getContextMenuGroupClassName(sizeVariant),
                             hasSeparator && borderBottomClassName
                         )}
                     >
@@ -357,6 +414,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                                     hiddenItemIds={hiddenItemIds}
                                     onOptionSelect={onOptionSelect}
                                     maxMenuHeight={maxMenuHeight}
+                                    sizeVariant={sizeVariant}
                                 />
                             )
                         ))}
@@ -368,7 +426,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
 }
 
 function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
-    const { menuKey, menuItem, menuSessionVersion, submenuPortalContainer, activeItemIds, hiddenItemIds = [], compact = false, onOptionSelect, maxMenuHeight } = props;
+    const { menuKey, menuItem, menuSessionVersion, submenuPortalContainer, activeItemIds, hiddenItemIds = [], compact = false, sizeVariant, onOptionSelect, maxMenuHeight } = props;
     const localeService = useDependency(LocaleService);
     const direction = useObservable(localeService.direction$);
     const menuManagerService = useDependency(IMenuManagerService);
@@ -506,17 +564,36 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
 
     const itemClassName = clsx(
         compact
-            ? `
-              univer-relative univer-flex univer-size-8 univer-items-center univer-justify-center univer-rounded-md
-              univer-border-none univer-bg-transparent univer-p-0 univer-text-left univer-text-sm
-              dark:!univer-text-white
-            `
-            : `
-              univer-relative univer-flex univer-min-h-8 univer-w-full univer-items-center univer-justify-between
-              univer-gap-3 univer-rounded-md univer-border-none univer-bg-transparent univer-px-2 univer-text-left
-              univer-text-sm
-              dark:!univer-text-white
-            `,
+            ? (
+                sizeVariant === 'paragraph-t'
+                    ? `
+                      univer-relative univer-flex univer-size-10 univer-items-center univer-justify-center
+                      univer-rounded-lg univer-border-none univer-bg-transparent univer-p-0 univer-text-left
+                      univer-text-base
+                      dark:!univer-text-white
+                    `
+                    : `
+                      univer-relative univer-flex univer-size-8 univer-items-center univer-justify-center
+                      univer-rounded-md univer-border-none univer-bg-transparent univer-p-0 univer-text-left
+                      univer-text-sm
+                      dark:!univer-text-white
+                    `
+            )
+            : (
+                sizeVariant === 'paragraph-t'
+                    ? `
+                      univer-relative univer-flex univer-min-h-10 univer-w-full univer-items-center
+                      univer-justify-between univer-gap-4 univer-rounded-lg univer-border-none univer-bg-transparent
+                      univer-px-3 univer-text-left univer-text-base
+                      dark:!univer-text-white
+                    `
+                    : `
+                      univer-relative univer-flex univer-min-h-8 univer-w-full univer-items-center
+                      univer-justify-between univer-gap-3 univer-rounded-md univer-border-none univer-bg-transparent
+                      univer-px-2 univer-text-left univer-text-sm
+                      dark:!univer-text-white
+                    `
+            ),
         disabled
             ? 'univer-cursor-not-allowed univer-opacity-60'
             : `
@@ -531,7 +608,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
     );
 
     const contentNode = (
-        <span className={contentClassName}>
+        <span className={getContextMenuContentClassName(sizeVariant)}>
             <CustomLabel
                 value={inputValue}
                 title={compact ? undefined : menuItem.title}
@@ -581,7 +658,8 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                         {hasSubmenu && (
                             <MoreIcon
                                 className={`
-                                  univer-size-3.5 univer-text-gray-400
+                                  ${sizeVariant === 'paragraph-t' ? 'univer-size-4' : 'univer-size-3.5'}
+                                  univer-text-gray-400
                                   dark:!univer-text-gray-200
                                 `}
                             />
@@ -632,7 +710,8 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                         {hasSubmenu && !compact && (
                             <MoreIcon
                                 className={`
-                                  univer-size-3.5 univer-text-gray-400
+                                  ${sizeVariant === 'paragraph-t' ? 'univer-size-4' : 'univer-size-3.5'}
+                                  univer-text-gray-400
                                   dark:!univer-text-gray-200
                                 `}
                             />
@@ -671,12 +750,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                         >
                             <div
                                 className={clsx(
-                                    `
-                                      univer-overflow-y-auto univer-overscroll-contain univer-rounded-md univer-border
-                                      univer-border-solid univer-border-gray-200 univer-bg-white univer-p-1.5
-                                      univer-shadow-md
-                                      dark:!univer-border-gray-600 dark:!univer-bg-gray-700
-                                    `,
+                                    getContextMenuSubmenuPanelClassName(sizeVariant),
                                     scrollbarClassName
                                 )}
                                 style={{
@@ -684,19 +758,32 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                                 }}
                             >
                                 {hasSelectionSubmenu && (
-                                    <div className="univer-grid univer-gap-1">
+                                    <div
+                                        className={sizeVariant === 'paragraph-t'
+                                            ? 'univer-grid univer-gap-2'
+                                            : 'univer-grid univer-gap-1'}
+                                    >
                                         {selections.map((option, index) => {
                                             const optionKey = `${menuItem.id}-${option.label ?? option.id}-${index}`;
                                             const optionSelected = typeof inputValue !== 'undefined' && String(inputValue) === String(option.value);
                                             const optionSelectable = !isNonSelectableLabel(option.label);
                                             const optionHoverable = !isNonHoverableLabel(option.label);
                                             const optionClassName = clsx(
-                                                `
-                                                  univer-relative univer-box-border univer-flex univer-min-h-8
-                                                  univer-w-full univer-items-center univer-rounded-md univer-border-none
-                                                  univer-bg-transparent univer-px-2 univer-text-left univer-text-sm
-                                                  dark:!univer-text-white
-                                                `,
+                                                sizeVariant === 'paragraph-t'
+                                                    ? `
+                                                      univer-relative univer-box-border univer-flex univer-min-h-10
+                                                      univer-w-full univer-items-center univer-rounded-lg
+                                                      univer-border-none univer-bg-transparent univer-px-3
+                                                      univer-text-left univer-text-base
+                                                      dark:!univer-text-white
+                                                    `
+                                                    : `
+                                                      univer-relative univer-box-border univer-flex univer-min-h-8
+                                                      univer-w-full univer-items-center univer-rounded-md
+                                                      univer-border-none univer-bg-transparent univer-px-2
+                                                      univer-text-left univer-text-sm
+                                                      dark:!univer-text-white
+                                                    `,
                                                 option.disabled
                                                     ? 'univer-cursor-not-allowed univer-opacity-60'
                                                     : optionHoverable && `
@@ -709,14 +796,16 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                                                 <>
                                                     {optionSelectable && optionSelected && (
                                                         <CheckMarkIcon
-                                                            className="
-                                                              univer-absolute univer-left-0 univer-size-4
-                                                              univer-text-primary-600
-                                                            "
+                                                            className={clsx(
+                                                                'univer-absolute univer-left-0 univer-text-primary-600',
+                                                                sizeVariant === 'paragraph-t'
+                                                                    ? 'univer-size-5'
+                                                                    : 'univer-size-4'
+                                                            )}
                                                         />
                                                     )}
                                                     <span
-                                                        className={clsx(contentClassName, optionSelectable && optionSelected && `
+                                                        className={clsx(getContextMenuContentClassName(sizeVariant), optionSelectable && optionSelected && `
                                                           univer-pl-4
                                                         `)}
                                                     >

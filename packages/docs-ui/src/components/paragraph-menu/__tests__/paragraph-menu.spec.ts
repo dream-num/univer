@@ -56,6 +56,10 @@ describe('ParagraphMenu', () => {
         expect(HEADING_ICON_MAP[NamedStyleType.SUBTITLE].key).toBe('SubtitleTypeIcon');
     });
 
+    it('uses the enlarged context menu size variant for the docs T menu', () => {
+        expect((paragraphMenu as any).getParagraphMenuContextMenuSizeVariant?.()).toBe('paragraph-t');
+    });
+
     it('uses fully-qualified locale keys for paragraph context menu labels', () => {
         const accessor = {
             get: () => ({

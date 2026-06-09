@@ -63,6 +63,10 @@ export function getParagraphMenuIconSizeClass(iconKey: string): string {
     return iconKey === 'TextTypeIcon' ? 'univer-size-3' : 'univer-size-4';
 }
 
+export function getParagraphMenuContextMenuSizeVariant(): 'paragraph-t' {
+    return 'paragraph-t';
+}
+
 export function getParagraphMenuPopupDirection(anchorLeft: number, menuWidth = 212, viewportPadding = 8): 'left' | 'right' {
     return anchorLeft - menuWidth < viewportPadding ? 'right' : 'left';
 }
@@ -1042,6 +1046,7 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
                         <ContextMenuPanel
                             className="univer-w-[212px]"
                             menuType={paragraphMenuType}
+                            sizeVariant={getParagraphMenuContextMenuSizeVariant()}
                             activeItemIds={currentActiveTarget?.kind === 'table' ? undefined : paragraphMenuActiveItemIds}
                             hiddenItemIds={currentActiveTarget?.kind === 'table' ? undefined : paragraphMenuHiddenItemIds}
                             onOptionSelect={async (params) => {

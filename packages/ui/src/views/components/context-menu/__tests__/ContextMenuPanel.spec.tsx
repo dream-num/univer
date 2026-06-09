@@ -25,6 +25,7 @@ import { IMenuManagerService } from '../../../../services/menu/menu-manager.serv
 import { ContextMenuPanel, getContextMenuQuickGroupColumns, shouldShowContextMenuGroupSeparator } from '../ContextMenuPanel';
 
 const dependencyMap = new Map();
+const tinyMenuGroupSpy = vi.fn();
 
 vi.mock('../../../../utils/di', async () => {
     const ReactModule = await import('react');
@@ -54,7 +55,10 @@ vi.mock('../../../../utils/di', async () => {
 
 vi.mock('../../../../components/menu/desktop/TinyMenuGroup', () => ({
     resolveMenuItemActiveState: () => false,
-    UITinyMenuGroup: () => <div data-testid="tiny-menu-group" />,
+    UITinyMenuGroup: (props: unknown) => {
+        tinyMenuGroupSpy(props);
+        return <div data-testid="tiny-menu-group" />;
+    },
     UIQuickTileMenuGroup: () => <div data-testid="quick-tile-menu-group" />,
 }));
 
@@ -63,6 +67,51 @@ vi.mock('../../../../components/custom-label/CustomLabel', () => ({
 }));
 
 describe('ContextMenuPanel', () => {
+    it('applies the enlarged paragraph T size variant without affecting the shared defaults', () => {
+        dependencyMap.clear();
+        tinyMenuGroupSpy.mockClear();
+
+        dependencyMap.set(IMenuManagerService, {
+            menuChanged$: new BehaviorSubject<void>(undefined),
+            getMenuByPositionKey: vi.fn(() => [{
+                key: 'quickTop',
+                order: 0,
+                title: 'docs-ui.paragraphMenu.align',
+                quickLayout: 'icon',
+                children: [{
+                    key: 'quickItem',
+                    order: 0,
+                    item: {
+                        id: 'quick-item',
+                        type: MenuItemType.BUTTON,
+                    },
+                }],
+            }]),
+        });
+        dependencyMap.set(ILayoutService, {
+            rootContainerElement: document.body,
+        });
+        dependencyMap.set(LocaleService, {
+            t: (key: string) => key,
+            direction$: new BehaviorSubject<'ltr'>('ltr'),
+        });
+
+        const { container } = render(React.createElement(ContextMenuPanel as never, {
+            menuType: 'quick-layout-menu',
+            sizeVariant: 'paragraph-t',
+        }));
+
+        const className = (container.firstChild as HTMLDivElement | null)?.className ?? '';
+        expect(className).toContain('univer-min-w-64');
+        expect(className).toContain('univer-text-base');
+        expect(className).toContain('univer-px-3');
+        expect(className).toContain('univer-py-2');
+        expect(tinyMenuGroupSpy.mock.calls[0][0]).toEqual(expect.objectContaining({
+            columns: 6,
+            sizeVariant: 'paragraph-t',
+        }));
+    });
+
     it('does not render a separator between consecutive header quick rows', () => {
         expect(shouldShowContextMenuGroupSeparator([
             { key: 'quickTop', order: 0, quickLayout: 'icon' },
@@ -127,7 +176,7 @@ describe('ContextMenuPanel', () => {
 
         render(<ContextMenuPanel menuType="quick-layout-menu" />);
 
-        expect(screen.getByText('docs-ui.paragraphMenu.align')).toBeTruthy();
-        expect(screen.getByTestId('tiny-menu-group')).toBeTruthy();
+        expect(screen.getAllByText('docs-ui.paragraphMenu.align').length).toBeGreaterThan(0);
+        expect(screen.getAllByTestId('tiny-menu-group').length).toBeGreaterThan(0);
     });
 });

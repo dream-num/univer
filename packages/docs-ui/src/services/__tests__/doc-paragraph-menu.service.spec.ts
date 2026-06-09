@@ -250,12 +250,13 @@ describe('DocParagraphMenuService', () => {
     it('projects table cell block-menu geometry through the horizontal table viewport', () => {
         expect(getTableHorizontalViewportGeometry(100, 600, {
             contentWidth: 600,
+            leadingInsetLeft: 80,
             scrollLeft: 160,
             viewportWidth: 240,
         })).toEqual({
             scrollLeft: 160,
-            visibleLeft: 100,
-            visibleRight: 340,
+            visibleLeft: 20,
+            visibleRight: 260,
         });
     });
 

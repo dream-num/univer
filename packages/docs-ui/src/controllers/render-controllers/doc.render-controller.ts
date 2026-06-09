@@ -331,7 +331,9 @@ function getPageSizeInModernMode(page: IDocumentSkeletonPage) {
     }
 
     for (const table of skeTables.values()) {
-        pageWidth = Math.max(pageWidth, table.left + table.width + marginLeft + marginRight);
+        // Keep the modern document page anchored to its configured width. Tables
+        // may render beyond the text column, but they should not widen the whole
+        // document and recenter the page during column resize.
         pageHeight = Math.max(pageHeight, table.top + table.height + marginTop + marginBottom);
     }
 

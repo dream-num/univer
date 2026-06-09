@@ -110,6 +110,18 @@ const locale: typeof enUS = {
             checkList: 'Llista de tasques',
             insertBellow: 'Insereix a sota',
         },
+        paragraphMenu: {
+            alignAndIndent: 'Align and indent',
+            align: 'Align',
+            indent: 'Indent',
+            color: 'Colors',
+            increase: 'Increase',
+            decrease: 'Decrease',
+            increaseIndent: 'Increase indent',
+            decreaseIndent: 'Decrease indent',
+            defaultTextColor: 'Default text color',
+            noBackground: 'No background',
+        },
         'page-settings': {
             'document-setting': 'Configuració de document',
             mode: 'Mode',

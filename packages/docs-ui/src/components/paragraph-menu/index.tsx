@@ -14,26 +14,47 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel } from '@univerjs/core';
+import type { DocumentDataModel, IDocumentBlockRange, IDocumentBody, IParagraph, ITextRun } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IPopup, IValueOption } from '@univerjs/ui';
+import type { CSSProperties } from 'react';
 import type { IMutiPageParagraphBound } from '../../services/doc-event-manager.service';
 import type { IDocBlockMenuTarget } from '../../services/doc-paragraph-menu.service';
-import { ICommandService, IUniverInstanceService, NamedStyleType, SliceBodyType, UniverInstanceType } from '@univerjs/core';
+import { DataStreamTreeTokenType, ICommandService, IUniverInstanceService, JSONX, NamedStyleType, SliceBodyType, Tools, UniverInstanceType } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
-import { DocContentInsertService, DocSelectionManagerService } from '@univerjs/docs';
+import { DocContentInsertService, DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { ComponentManager, ContextMenuPanel, ContextMenuPosition, IClipboardInterfaceService, ILayoutService, RectPopup, useDependency, useObservable } from '@univerjs/ui';
+import { ComponentManager, ContextMenuPanel, IClipboardInterfaceService, ILayoutService, RectPopup, useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { DocCopyCommand, DocPasteCommand } from '../../commands/commands/clipboard.command';
+import { BreakLineCommand } from '../../commands/commands/break-line.command';
+import { DocCopyCommand, DocCopyCurrentParagraphCommand, DocCutCurrentParagraphCommand, DocPasteCommand } from '../../commands/commands/clipboard.command';
 import { MoveDocBlockCommand } from '../../commands/commands/doc-block-move.command';
+import { DeleteCurrentParagraphCommand } from '../../commands/commands/doc-delete.command';
 import { HorizontalLineCommand } from '../../commands/commands/doc-horizontal-line.command';
+import { DocParagraphSettingCommand } from '../../commands/commands/doc-paragraph-setting.command';
+import { ResetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand } from '../../commands/commands/inline-format.command';
 import { BulletListCommand, CheckListCommand, OrderListCommand } from '../../commands/commands/list.command';
+import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignRightCommand } from '../../commands/commands/paragraph-align.command';
 import { H1HeadingCommand, H2HeadingCommand, H3HeadingCommand, H4HeadingCommand, H5HeadingCommand, NormalTextHeadingCommand, SetParagraphNamedStyleCommand, SubtitleHeadingCommand, TitleHeadingCommand } from '../../commands/commands/set-heading.command';
 import { DocTableDeleteTableCommand } from '../../commands/commands/table/doc-table-delete.command';
-import { DocParagraphSettingPanelOperation } from '../../commands/operations/doc-paragraph-setting-panel.operation';
-import { DOC_TABLE_BLOCK_MENU_ID, EMPTY_PARAGRAPH_MENU_ID, HEADING_ICON_MAP, INSERT_BELLOW_MENU_ID } from '../../menu/paragraph-menu';
+import {
+    DOC_PARAGRAPH_T_DIVIDER_MENU_ID,
+    DOC_PARAGRAPH_T_EDIT_MENU_ID,
+    DOC_PARAGRAPH_T_INDENT_DECREASE_ID,
+    DOC_PARAGRAPH_T_INDENT_INCREASE_ID,
+    DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID,
+    DOC_PARAGRAPH_T_INSERT_MENU_ID,
+    DOC_PARAGRAPH_T_RESET_COLORS_ID,
+    DOC_TABLE_BLOCK_MENU_ID,
+    DOCS_CALLOUT_INSERT_COMMAND_ID,
+    DOCS_CODE_INSERT_COMMAND_ID,
+    DOCS_QUOTE_INSERT_COMMAND_ID,
+    HEADING_ICON_MAP,
+    INSERT_BELLOW_MENU_ID,
+    INSERT_DOC_IMAGE_COMMAND_ID,
+    INSERT_DOC_SHAPE_COMMAND_ID,
+} from '../../menu/paragraph-menu';
 import { IDocClipboardService } from '../../services/clipboard/clipboard.service';
 import { DocEventManagerService } from '../../services/doc-event-manager.service';
 import { DocParagraphMenuService } from '../../services/doc-paragraph-menu.service';
@@ -47,6 +68,9 @@ export function getParagraphMenuPopupDirection(anchorLeft: number, menuWidth = 2
 }
 
 export const PARAGRAPH_MENU_HOVER_OPEN_DELAY = 800;
+const PARAGRAPH_MENU_HOVER_HIDE_DELAY = 240;
+const PARAGRAPH_MENU_HOVER_BRIDGE_EDGE_OVERLAP = 12;
+const PARAGRAPH_MENU_HOVER_BRIDGE_VERTICAL_PADDING = 8;
 
 export function createParagraphMenuHoverOpenScheduler(openMenu: () => void, delay = PARAGRAPH_MENU_HOVER_OPEN_DELAY) {
     let openTimer: number | null = null;
@@ -105,6 +129,24 @@ export function getParagraphMenuTargetRange(paragraph?: IMutiPageParagraphBound 
     };
 }
 
+export function getParagraphMenuHoverBridgeStyle(
+    anchorRect: { left: number; right: number; top: number; bottom: number } | null | undefined,
+    direction: 'left' | 'right',
+    edgeOverlap = PARAGRAPH_MENU_HOVER_BRIDGE_EDGE_OVERLAP,
+    verticalPadding = PARAGRAPH_MENU_HOVER_BRIDGE_VERTICAL_PADDING
+): CSSProperties | undefined {
+    if (!anchorRect) {
+        return undefined;
+    }
+
+    return {
+        left: direction === 'left' ? anchorRect.left - edgeOverlap : anchorRect.right - edgeOverlap,
+        top: anchorRect.top - verticalPadding,
+        width: edgeOverlap * 2,
+        height: anchorRect.bottom - anchorRect.top + verticalPadding * 2,
+    };
+}
+
 const HEADING_COMMAND_VALUES: Record<string, NamedStyleType> = {
     [H1HeadingCommand.id]: NamedStyleType.HEADING_1,
     [H2HeadingCommand.id]: NamedStyleType.HEADING_2,
@@ -133,15 +175,55 @@ export function getParagraphMenuActiveHeadingCommandId(namedStyleType?: NamedSty
 
 export function getParagraphMenuHiddenHeadingCommandIds(namedStyleType?: NamedStyleType): string[] {
     if (namedStyleType === NamedStyleType.TITLE) {
-        return [H5HeadingCommand.id, SubtitleHeadingCommand.id];
+        return [H4HeadingCommand.id, H5HeadingCommand.id, SubtitleHeadingCommand.id];
     }
 
     if (namedStyleType === NamedStyleType.SUBTITLE) {
-        return [H5HeadingCommand.id, TitleHeadingCommand.id];
+        return [H4HeadingCommand.id, H5HeadingCommand.id, TitleHeadingCommand.id];
     }
 
-    return [TitleHeadingCommand.id, SubtitleHeadingCommand.id];
+    if (namedStyleType === NamedStyleType.HEADING_5) {
+        return [H4HeadingCommand.id, TitleHeadingCommand.id, SubtitleHeadingCommand.id];
+    }
+
+    return [H5HeadingCommand.id, TitleHeadingCommand.id, SubtitleHeadingCommand.id];
 }
+
+const LIST_ICON_TO_COMMAND_ID: Record<string, string> = {
+    OrderIcon: OrderListCommand.id,
+    UnorderIcon: BulletListCommand.id,
+    TodoListDoubleIcon: CheckListCommand.id,
+};
+
+const BLOCK_TYPE_TO_COMMAND_ID: Record<string, string> = {
+    code: DOCS_CODE_INSERT_COMMAND_ID,
+    quote: DOCS_QUOTE_INSERT_COMMAND_ID,
+    callout: DOCS_CALLOUT_INSERT_COMMAND_ID,
+};
+
+const PARAGRAPH_MENU_SELECTION_COMMAND_IDS = new Set([
+    BulletListCommand.id,
+    OrderListCommand.id,
+    CheckListCommand.id,
+    HorizontalLineCommand.id,
+    SetInlineFormatTextColorCommand.id,
+    SetInlineFormatTextBackgroundColorCommand.id,
+    DOCS_CODE_INSERT_COMMAND_ID,
+    DOCS_QUOTE_INSERT_COMMAND_ID,
+    DOCS_CALLOUT_INSERT_COMMAND_ID,
+    AlignLeftCommand.id,
+    AlignCenterCommand.id,
+    AlignRightCommand.id,
+    AlignJustifyCommand.id,
+]);
+
+const PARAGRAPH_MENU_SKIP_REPLACE_SELECTION_COMMAND_IDS = new Set([
+    DocCopyCurrentParagraphCommand.id,
+    DocCutCurrentParagraphCommand.id,
+    DeleteCurrentParagraphCommand.id,
+    INSERT_DOC_IMAGE_COMMAND_ID,
+    INSERT_DOC_SHAPE_COMMAND_ID,
+]);
 
 export function getParagraphMenuCommand(params: IValueOption, targetRange?: ITextRangeWithStyle | null): { commandId?: string; params?: object } {
     const commandId = params.commandId ?? params.id ?? (typeof params.label === 'string' ? params.label : undefined);
@@ -189,19 +271,289 @@ function getParagraphMenuType(target: IDocBlockMenuTarget | null | undefined, em
         return DOC_TABLE_BLOCK_MENU_ID;
     }
 
-    return emptyMode ? EMPTY_PARAGRAPH_MENU_ID : ContextMenuPosition.PARAGRAPH;
+    if (emptyMode) {
+        return DOC_PARAGRAPH_T_INSERT_MENU_ID;
+    }
+
+    if (target?.icon === 'ReduceIcon') {
+        return DOC_PARAGRAPH_T_DIVIDER_MENU_ID;
+    }
+
+    return DOC_PARAGRAPH_T_EDIT_MENU_ID;
 }
 
 export function shouldShowParagraphSettingMenu(target: IDocBlockMenuTarget | null | undefined): boolean {
     return !target || target.kind === 'paragraph';
 }
 
+function getParagraphMenuActiveItemIds(target: IDocBlockMenuTarget | null | undefined, namedStyleType?: NamedStyleType): string[] {
+    if (target?.kind === 'blockRange') {
+        const blockType = target.blockRange?.blockType;
+        return blockType && BLOCK_TYPE_TO_COMMAND_ID[blockType]
+            ? [BLOCK_TYPE_TO_COMMAND_ID[blockType]]
+            : [];
+    }
+
+    const activeIds = [getParagraphMenuActiveHeadingCommandId(namedStyleType)];
+    const listCommandId = target?.icon ? LIST_ICON_TO_COMMAND_ID[target.icon] : undefined;
+    if (listCommandId) {
+        activeIds.push(listCommandId);
+    }
+
+    return activeIds;
+}
+
+export function getParagraphMenuHiddenItemIds(
+    menuType: string,
+    target: IDocBlockMenuTarget | null | undefined,
+    namedStyleType?: NamedStyleType
+): string[] {
+    if (menuType === DOC_PARAGRAPH_T_INSERT_MENU_ID) {
+        return [];
+    }
+
+    const hiddenIds = [...getParagraphMenuHiddenHeadingCommandIds(namedStyleType)];
+    const blockType = target?.kind === 'blockRange' ? target.blockRange?.blockType : undefined;
+
+    if (blockType === 'callout') {
+        hiddenIds.push(DOCS_CODE_INSERT_COMMAND_ID, DOCS_QUOTE_INSERT_COMMAND_ID);
+    } else if (blockType === 'quote' || blockType === 'code') {
+        hiddenIds.push(DOCS_CALLOUT_INSERT_COMMAND_ID);
+    }
+
+    return hiddenIds;
+}
+
+function getEndTokenOffset(body: IDocumentBody, blockRange: Pick<IDocumentBlockRange, 'endIndex'>): number {
+    return body.dataStream[blockRange.endIndex] === DataStreamTreeTokenType.BLOCK_END
+        ? blockRange.endIndex
+        : body.dataStream[blockRange.endIndex + 1] === DataStreamTreeTokenType.BLOCK_END
+            ? blockRange.endIndex + 1
+            : blockRange.endIndex;
+}
+
+function shiftPointRangesAfterDelete<T extends { startIndex: number }>(ranges: T[] | undefined, offset: number, length: number): T[] | undefined {
+    const endOffset = offset + length;
+    return ranges
+        ?.map((range) => {
+            if (range.startIndex >= offset && range.startIndex < endOffset) {
+                return null;
+            }
+
+            return range.startIndex >= endOffset ? { ...range, startIndex: range.startIndex - length } : range;
+        })
+        .filter((range): range is T => range != null);
+}
+
+function shiftTextRunsAfterDelete(runs: ITextRun[] | undefined, offset: number, length: number): ITextRun[] | undefined {
+    const endOffset = offset + length;
+    return runs
+        ?.map((run) => {
+            if (run.st >= offset && run.ed < endOffset) {
+                return null;
+            }
+
+            if (run.st >= endOffset) {
+                return {
+                    ...run,
+                    st: run.st - length,
+                    ed: run.ed - length,
+                };
+            }
+
+            if (run.ed >= offset) {
+                return {
+                    ...run,
+                    st: run.st < offset ? run.st : offset,
+                    ed: Math.max(offset, run.ed - length),
+                };
+            }
+
+            return run;
+        })
+        .filter((run): run is ITextRun => run != null);
+}
+
+function shiftIndexRangesAfterDelete<T extends { startIndex: number; endIndex: number }>(
+    ranges: T[] | undefined,
+    offset: number,
+    length: number
+): T[] | undefined {
+    const endOffset = offset + length;
+    return ranges
+        ?.map((range) => {
+            if (range.startIndex >= offset && range.endIndex < endOffset) {
+                return null;
+            }
+
+            if (range.startIndex >= endOffset) {
+                return {
+                    ...range,
+                    startIndex: range.startIndex - length,
+                    endIndex: range.endIndex - length,
+                };
+            }
+
+            if (range.endIndex >= offset) {
+                return {
+                    ...range,
+                    startIndex: range.startIndex < offset ? range.startIndex : offset,
+                    endIndex: Math.max(offset, range.endIndex - length),
+                };
+            }
+
+            return range;
+        })
+        .filter((range): range is T => range != null);
+}
+
+function deleteBodyText(body: IDocumentBody, startOffset: number, endOffset: number): void {
+    const length = endOffset - startOffset;
+    body.dataStream = `${body.dataStream.slice(0, startOffset)}${body.dataStream.slice(endOffset)}`;
+    body.paragraphs = shiftPointRangesAfterDelete(body.paragraphs, startOffset, length);
+    body.sectionBreaks = shiftPointRangesAfterDelete(body.sectionBreaks, startOffset, length);
+    body.customBlocks = shiftPointRangesAfterDelete(body.customBlocks, startOffset, length);
+    body.textRuns = shiftTextRunsAfterDelete(body.textRuns, startOffset, length);
+    body.tables = shiftIndexRangesAfterDelete(body.tables, startOffset, length);
+    body.customRanges = shiftIndexRangesAfterDelete(body.customRanges, startOffset, length);
+    body.customDecorations = shiftIndexRangesAfterDelete(body.customDecorations, startOffset, length);
+    body.blockRanges = shiftIndexRangesAfterDelete(body.blockRanges, startOffset, length);
+}
+
+function stripBlockParagraphStyle(style: IParagraph['paragraphStyle'], blockType: string): IParagraph['paragraphStyle'] {
+    const nextStyle = { ...(style ?? {}) };
+
+    if (blockType === 'quote') {
+        delete nextStyle.indentStart;
+        delete nextStyle.spaceAbove;
+        delete nextStyle.spaceBelow;
+        return nextStyle;
+    }
+
+    if (blockType === 'code') {
+        delete nextStyle.indentStart;
+        delete nextStyle.indentEnd;
+        delete nextStyle.spaceAbove;
+        delete nextStyle.spaceBelow;
+        if (nextStyle.textStyle?.ff === 'monospace' && nextStyle.textStyle?.fs === 12) {
+            delete nextStyle.textStyle;
+        }
+        return nextStyle;
+    }
+
+    if (blockType === 'callout') {
+        delete nextStyle.indentStart;
+        delete nextStyle.indentEnd;
+        delete nextStyle.spaceAbove;
+        delete nextStyle.spaceBelow;
+        return nextStyle;
+    }
+
+    return nextStyle;
+}
+
+function unwrapBlockRangeBody(documentBody: IDocumentBody, blockRange: IDocumentBlockRange) {
+    const body = Tools.deepClone(documentBody);
+    const endTokenOffset = getEndTokenOffset(body, blockRange);
+
+    (body.paragraphs ?? [])
+        .filter((paragraph) => paragraph.startIndex > blockRange.startIndex && paragraph.startIndex < endTokenOffset)
+        .forEach((paragraph) => {
+            paragraph.paragraphStyle = stripBlockParagraphStyle(paragraph.paragraphStyle, blockRange.blockType);
+        });
+
+    deleteBodyText(body, endTokenOffset, endTokenOffset + 1);
+    deleteBodyText(body, blockRange.startIndex, blockRange.startIndex + 1);
+    body.blockRanges = body.blockRanges?.filter((range) => range.blockId !== blockRange.blockId);
+
+    return {
+        body,
+        range: {
+            startOffset: blockRange.startIndex,
+            endOffset: Math.max(blockRange.startIndex, endTokenOffset - 1),
+            collapsed: false,
+        },
+    };
+}
+
+function buildReplaceBodyActions(previousBody: IDocumentBody, nextBody: IDocumentBody) {
+    const jsonX = JSONX.getInstance();
+    return [
+        jsonX.replaceOp(['body', 'dataStream'], previousBody.dataStream, nextBody.dataStream),
+        jsonX.replaceOp(['body', 'paragraphs'], previousBody.paragraphs, nextBody.paragraphs),
+        jsonX.replaceOp(['body', 'sectionBreaks'], previousBody.sectionBreaks, nextBody.sectionBreaks),
+        jsonX.replaceOp(['body', 'textRuns'], previousBody.textRuns, nextBody.textRuns),
+        jsonX.replaceOp(['body', 'customRanges'], previousBody.customRanges, nextBody.customRanges),
+        jsonX.replaceOp(['body', 'customDecorations'], previousBody.customDecorations, nextBody.customDecorations),
+        jsonX.replaceOp(['body', 'customBlocks'], previousBody.customBlocks, nextBody.customBlocks),
+        jsonX.replaceOp(['body', 'tables'], previousBody.tables, nextBody.tables),
+        jsonX.replaceOp(['body', 'blockRanges'], previousBody.blockRanges, nextBody.blockRanges),
+    ].reduce((acc, action) => JSONX.compose(acc, action), null as ReturnType<typeof JSONX.compose>);
+}
+
+function getTargetSelectionRange(target: IDocBlockMenuTarget | null | undefined, paragraph?: IMutiPageParagraphBound | null): ITextRangeWithStyle | null {
+    if (!target) {
+        return getParagraphMenuTargetRange(paragraph);
+    }
+
+    return {
+        ...target.menuRange,
+        segmentId: paragraph?.segmentId,
+    };
+}
+
+export function getParagraphFormattingRange(target: IDocBlockMenuTarget | null | undefined, paragraph?: IMutiPageParagraphBound | null): ITextRangeWithStyle | null {
+    if (target?.kind === 'blockRange') {
+        return getBlockSelectionRange(target, paragraph);
+    }
+
+    if (paragraph) {
+        return {
+            startOffset: paragraph.paragraphStart,
+            endOffset: paragraph.paragraphEnd,
+            collapsed: false,
+            segmentId: paragraph.segmentId,
+        };
+    }
+
+    return getTargetSelectionRange(target, paragraph);
+}
+
+export function getParagraphMenuCommandTargetRange(
+    commandId: string | undefined,
+    targetRange?: ITextRangeWithStyle | null,
+    formattingRange?: ITextRangeWithStyle | null
+): ITextRangeWithStyle | null | undefined {
+    if (commandId && PARAGRAPH_MENU_SELECTION_COMMAND_IDS.has(commandId)) {
+        return formattingRange ?? targetRange;
+    }
+
+    return targetRange ?? formattingRange;
+}
+
+function getBlockSelectionRange(target: IDocBlockMenuTarget | null | undefined, paragraph?: IMutiPageParagraphBound | null): ITextRangeWithStyle | null {
+    if (target?.kind !== 'blockRange') {
+        return getTargetSelectionRange(target, paragraph);
+    }
+
+    const blockRange = target.blockRange;
+    if (!blockRange) {
+        return getTargetSelectionRange(target, paragraph);
+    }
+
+    return {
+        startOffset: blockRange.startIndex,
+        endOffset: blockRange.endIndex + 1,
+        collapsed: false,
+        segmentId: paragraph?.segmentId,
+    };
+}
+
 export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
     const [visible, setVisible] = useState(false);
-    const [emptyMode, setEmptyMode] = useState(false);
+    const [anchorRect, setAnchorRect] = useState<{ left: number; right: number; top: number; bottom: number } | null>(null);
     const [dropRect, setDropRect] = useState<{ left: number; right: number; top: number; bottom: number } | null>(null);
     const [menuDirection, setMenuDirection] = useState<'left' | 'right'>('left');
-    const contentRef = useRef<HTMLDivElement>(null);
     const targetRangeRef = useRef<ITextRangeWithStyle | null>(null);
     const dragTargetOffsetRef = useRef<number | null>(null);
     const dragRangeRef = useRef<{ startOffset: number; endOffset: number } | null>(null);
@@ -234,18 +586,23 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
     const paragraphObj = useMemo(() => doc?.getBody()?.paragraphs?.find((p) => p.startIndex === startIndex), [doc, startIndex]);
     const isEmptyParagraph = currentActiveTarget?.emptyMode ?? isEmptyParagraphMenuTarget(dataStream, activeParagraphBound);
     const namedStyleType = paragraphObj?.paragraphStyle?.namedStyleType;
-    const activeHeadingCommandId = getParagraphMenuActiveHeadingCommandId(namedStyleType);
-    const hiddenHeadingCommandIds = useMemo(() => getParagraphMenuHiddenHeadingCommandIds(namedStyleType), [namedStyleType]);
-    const hiddenItemIds = useMemo(() => {
-        if (!shouldShowParagraphSettingMenu(currentActiveTarget)) {
-            return [...hiddenHeadingCommandIds, DocParagraphSettingPanelOperation.id];
-        }
-
-        return hiddenHeadingCommandIds;
-    }, [currentActiveTarget, hiddenHeadingCommandIds]);
     const icon = HEADING_ICON_MAP[namedStyleType ?? NamedStyleType.NORMAL_TEXT];
     const targetIconKey = currentActiveTarget?.icon ?? icon.key;
     const TargetIcon = componentManager.get(targetIconKey) ?? icon.component;
+    const paragraphMenuType = useMemo(
+        () => getParagraphMenuType(currentActiveTarget, isEmptyParagraph),
+        [currentActiveTarget, isEmptyParagraph]
+    );
+    const paragraphMenuActiveItemIds = useMemo(
+        () => getParagraphMenuActiveItemIds(currentActiveTarget, namedStyleType),
+        [currentActiveTarget, namedStyleType]
+    );
+    const paragraphMenuHiddenItemIds = useMemo(
+        () => currentActiveTarget?.kind === 'table'
+            ? []
+            : getParagraphMenuHiddenItemIds(paragraphMenuType, currentActiveTarget, namedStyleType),
+        [currentActiveTarget, namedStyleType, paragraphMenuType]
+    );
     const anchorRect$ = useMemo(() => new BehaviorSubject({
         left: 0,
         right: 0,
@@ -257,12 +614,14 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
         const boundingRect = anchorRef.current?.getBoundingClientRect();
         const left = (boundingRect?.left ?? 0) - 4;
         setMenuDirection(getParagraphMenuPopupDirection(left));
-        anchorRect$.next({
+        const nextAnchorRect = {
             left,
             right: boundingRect?.right ?? 0,
             top: boundingRect?.top ?? 0,
             bottom: boundingRect?.bottom ?? 0,
-        });
+        };
+        setAnchorRect(nextAnchorRect);
+        anchorRect$.next(nextAnchorRect);
     };
 
     const handleHideMenu = () => {
@@ -283,7 +642,7 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
             if (!isMouseOver.current && !isDraggingRef.current) {
                 handleHideMenu();
             }
-        }, 180);
+        }, PARAGRAPH_MENU_HOVER_HIDE_DELAY);
     };
 
     const handleOpenMenu = () => {
@@ -297,7 +656,6 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
             : getParagraphMenuTargetRange(activeParagraphBound);
         targetRangeRef.current = targetRange;
         updateAnchorRect();
-        setEmptyMode(isEmptyParagraph);
         setVisible(true);
     };
     openMenuRef.current = handleOpenMenu;
@@ -310,6 +668,199 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
     const cancelOpenMenu = () => {
         hoverOpenSchedulerRef.current.cancel();
     };
+
+    const replaceSelection = (range: ITextRangeWithStyle | null | undefined) => {
+        if (!range) {
+            return;
+        }
+
+        docSelectionManagerService.replaceTextRanges([range], false);
+    };
+
+    const executeResolvedCommand = (commandId: string, params?: Record<string, unknown>, targetRange?: ITextRangeWithStyle | null) => {
+        const resolved = getParagraphMenuCommand({
+            commandId,
+            id: commandId,
+            params,
+        }, targetRange);
+
+        if (!resolved.commandId) {
+            return false;
+        }
+
+        return commandService.executeCommand(resolved.commandId, resolved.params);
+    };
+
+    const unwrapActiveBlockRange = async () => {
+        const latestTarget = docParagraphMenuService?.activeTarget ?? activeTarget;
+        if (!latestTarget || latestTarget.kind !== 'blockRange' || !latestTarget.blockRange || !doc?.getBody()) {
+            return null;
+        }
+
+        const previousBody = doc.getBody()!;
+        const { body, range } = unwrapBlockRangeBody(previousBody, latestTarget.blockRange);
+        const actions = buildReplaceBodyActions(previousBody, body);
+        const segmentId = activeParagraphBound?.segmentId ?? '';
+
+        const success = await commandService.executeCommand(RichTextEditingMutation.id, {
+            unitId: popup.unitId,
+            actions,
+            textRanges: [{
+                ...range,
+                segmentId,
+            }],
+        });
+
+        if (!success) {
+            return null;
+        }
+
+        const nextRange = {
+            ...range,
+            segmentId,
+        };
+        replaceSelection(nextRange);
+        targetRangeRef.current = nextRange;
+        return nextRange;
+    };
+
+    const executeParagraphMenuOption = async (option: IValueOption) => {
+        const latestTarget = docParagraphMenuService?.activeTarget ?? activeTarget;
+        const targetRange = getTargetSelectionRange(latestTarget, activeParagraphBound ?? undefined);
+        const blockRange = getBlockSelectionRange(latestTarget, activeParagraphBound ?? undefined);
+        const formattingRange = getParagraphFormattingRange(latestTarget, activeParagraphBound ?? undefined);
+        const commandId = option.commandId ?? option.id ?? (typeof option.label === 'string' ? option.label : undefined);
+        const commandParams = typeof option.params === 'function' ? option.params() : option.params;
+
+        if (!commandId) {
+            return;
+        }
+
+        if (commandId === DOC_PARAGRAPH_T_RESET_COLORS_ID) {
+            if (formattingRange) {
+                replaceSelection(formattingRange);
+            }
+            await commandService.executeCommand(SetInlineFormatTextColorCommand.id, { value: '#000000' });
+            await commandService.executeCommand(ResetInlineFormatTextBackgroundColorCommand.id);
+            layoutService.focus();
+            handleHideMenu();
+            return;
+        }
+
+        if (commandId === DOC_PARAGRAPH_T_INDENT_INCREASE_ID || commandId === DOC_PARAGRAPH_T_INDENT_DECREASE_ID) {
+            if (formattingRange) {
+                replaceSelection(formattingRange);
+            }
+            const currentIndent = paragraphObj?.paragraphStyle?.indentFirstLine?.v ?? 0;
+            const delta = commandId === DOC_PARAGRAPH_T_INDENT_INCREASE_ID ? 20 : -20;
+            await commandService.executeCommand(DocParagraphSettingCommand.id, {
+                paragraph: {
+                    indentFirstLine: {
+                        v: Math.max(0, currentIndent + delta),
+                    },
+                },
+            });
+            layoutService.focus();
+            handleHideMenu();
+            return;
+        }
+
+        if (commandId === DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID) {
+            if (!latestTarget?.moveRange) {
+                return;
+            }
+
+            const insertRange = {
+                startOffset: latestTarget.moveRange.endOffset,
+                endOffset: latestTarget.moveRange.endOffset,
+                collapsed: true,
+                segmentId: activeParagraphBound?.segmentId,
+            };
+            replaceSelection(insertRange);
+            await commandService.executeCommand(BreakLineCommand.id, {
+                textRange: insertRange,
+            });
+            const wrappedCommandId = typeof commandParams?.commandId === 'string' ? commandParams.commandId : undefined;
+            if (wrappedCommandId) {
+                await commandService.executeCommand(wrappedCommandId);
+            }
+            layoutService.focus();
+            handleHideMenu();
+            return;
+        }
+
+        if (latestTarget?.kind === 'blockRange') {
+            const currentBlockCommandId = BLOCK_TYPE_TO_COMMAND_ID[latestTarget.blockRange?.blockType ?? ''];
+
+            if (commandId === currentBlockCommandId) {
+                await unwrapActiveBlockRange();
+                layoutService.focus();
+                handleHideMenu();
+                return;
+            }
+
+            if (
+                commandId === NormalTextHeadingCommand.id ||
+                commandId in HEADING_COMMAND_VALUES ||
+                commandId === BulletListCommand.id ||
+                commandId === OrderListCommand.id ||
+                commandId === CheckListCommand.id
+            ) {
+                const nextRange = await unwrapActiveBlockRange();
+                if (commandId !== NormalTextHeadingCommand.id) {
+                    await executeResolvedCommand(commandId, commandParams as Record<string, unknown> | undefined, nextRange);
+                }
+                layoutService.focus();
+                handleHideMenu();
+                return;
+            }
+
+            if (
+                commandId === DOCS_CODE_INSERT_COMMAND_ID ||
+                commandId === DOCS_QUOTE_INSERT_COMMAND_ID ||
+                commandId === DOCS_CALLOUT_INSERT_COMMAND_ID
+            ) {
+                if (blockRange) {
+                    replaceSelection(blockRange);
+                }
+                await executeResolvedCommand(commandId, commandParams as Record<string, unknown> | undefined, blockRange);
+                layoutService.focus();
+                handleHideMenu();
+                return;
+            }
+        }
+
+        if (commandId === getParagraphMenuActiveHeadingCommandId(namedStyleType) && commandId !== NormalTextHeadingCommand.id) {
+            if (targetRange) {
+                replaceSelection(targetRange);
+            }
+            await executeResolvedCommand(NormalTextHeadingCommand.id, undefined, targetRange);
+            layoutService.focus();
+            handleHideMenu();
+            return;
+        }
+
+        if (commandId && shouldUseInsertBelowRange(commandId, option) && latestTarget?.moveRange) {
+            docContentInsertService.setInsertRange({
+                unitId: popup.unitId,
+                startOffset: latestTarget.moveRange.endOffset,
+                endOffset: latestTarget.moveRange.endOffset,
+                segmentId: targetRange?.segmentId ?? activeParagraphBound?.segmentId ?? '',
+            });
+        } else if (PARAGRAPH_MENU_SELECTION_COMMAND_IDS.has(commandId) && !PARAGRAPH_MENU_SKIP_REPLACE_SELECTION_COMMAND_IDS.has(commandId)) {
+            replaceSelection(getParagraphMenuCommandTargetRange(commandId, targetRange, formattingRange));
+        }
+
+        await executeResolvedCommand(
+            commandId,
+            commandParams as Record<string, unknown> | undefined,
+            getParagraphMenuCommandTargetRange(commandId, targetRange, formattingRange)
+        );
+        layoutService.focus();
+        handleHideMenu();
+    };
+
+    const hoverBridgeStyle = visible ? getParagraphMenuHoverBridgeStyle(anchorRect, menuDirection) : undefined;
 
     useEffect(() => () => {
         if (hideTimerRef.current != null) {
@@ -454,6 +1005,23 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
                     </button>
                 )}
             </div>
+            {visible && hoverBridgeStyle && (
+                <div
+                    aria-hidden="true"
+                    className="univer-fixed univer-z-[1019] univer-bg-transparent"
+                    style={hoverBridgeStyle}
+                    // Keep hover continuity when the pointer crosses the tiny dead zone between trigger and popup.
+                    onMouseEnter={(e) => {
+                        popup.onPointerEnter?.(e);
+                        isMouseOver.current = true;
+                        clearHideTimer();
+                    }}
+                    onMouseLeave={() => {
+                        isMouseOver.current = false;
+                        scheduleHideMenu();
+                    }}
+                />
+            )}
             {visible && (
                 <RectPopup
                     portal
@@ -461,7 +1029,6 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
                     direction={menuDirection}
                 >
                     <section
-                        ref={contentRef}
                         onMouseEnter={(e) => {
                             popup.onPointerEnter?.(e);
                             isMouseOver.current = true;
@@ -474,22 +1041,13 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
                     >
                         <ContextMenuPanel
                             className="univer-w-[212px]"
-                            menuType={getParagraphMenuType(currentActiveTarget, emptyMode)}
-                            activeItemIds={[activeHeadingCommandId]}
-                            hiddenItemIds={hiddenItemIds}
+                            menuType={paragraphMenuType}
+                            activeItemIds={currentActiveTarget?.kind === 'table' ? undefined : paragraphMenuActiveItemIds}
+                            hiddenItemIds={currentActiveTarget?.kind === 'table' ? undefined : paragraphMenuHiddenItemIds}
                             onOptionSelect={async (params) => {
                                 const targetRange = targetRangeRef.current ?? getParagraphMenuTargetRange(activeParagraphBound);
                                 const { commandId, params: commandParams } = getParagraphMenuCommand(params, targetRange);
                                 const latestTarget = docParagraphMenuService?.activeTarget ?? activeTarget;
-
-                                if (commandId && shouldUseInsertBelowRange(commandId, params) && latestTarget?.moveRange) {
-                                    docContentInsertService.setInsertRange({
-                                        unitId: popup.unitId,
-                                        startOffset: latestTarget.moveRange.endOffset,
-                                        endOffset: latestTarget.moveRange.endOffset,
-                                        segmentId: targetRange?.segmentId ?? '',
-                                    });
-                                }
 
                                 if (latestTarget?.kind === 'table' && commandId && targetRange) {
                                     const tableRange = {
@@ -525,21 +1083,17 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
                                     } else if (params.id === INSERT_BELLOW_MENU_ID || commandId !== INSERT_BELLOW_MENU_ID) {
                                         docSelectionManagerService.replaceTextRanges([afterTableRange], false);
                                     }
+
+                                    if (commandService && commandId) {
+                                        commandService.executeCommand(commandId, commandParams);
+                                    }
+
+                                    layoutService.focus();
+                                    handleHideMenu();
+                                    return;
                                 }
 
-                                if (commandService && commandId) {
-                                    const blockRangeParams = latestTarget?.kind === 'blockRange' && latestTarget.blockRange && commandParams && typeof commandParams === 'object'
-                                        ? {
-                                            ...commandParams,
-                                            unitId: popup.unitId,
-                                            blockId: latestTarget.blockRange.blockId,
-                                        }
-                                        : commandParams;
-                                    commandService.executeCommand(commandId, blockRangeParams);
-                                }
-
-                                layoutService.focus();
-                                handleHideMenu();
+                                await executeParagraphMenuOption(params);
                             }}
                         />
                     </section>
@@ -567,6 +1121,11 @@ export function shouldUseInsertBelowRange(commandId: string, params: IValueOptio
         return true;
     }
 
+    const rawParams = typeof params.params === 'function' ? params.params() : params.params;
+    if (rawParams && typeof rawParams === 'object' && 'paragraphMenuPlacement' in rawParams && rawParams.paragraphMenuPlacement === 'below') {
+        return true;
+    }
+
     const normalized = commandId.toLowerCase();
 
     if (normalized.includes('insert') && (normalized.includes('below') || normalized.includes('bellow'))) {
@@ -577,7 +1136,13 @@ export function shouldUseInsertBelowRange(commandId: string, params: IValueOptio
         return true;
     }
 
-    return normalized === 'doc.command.create-table' || normalized === 'doc.operation.create-table';
+    if (normalized.includes('table') && normalized.includes('create')) {
+        return true;
+    }
+
+    return normalized === 'doc.command.create-table'
+        || normalized === 'doc.operation.create-table'
+        || normalized === DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID;
 }
 
 function DragHandleDotsIcon() {

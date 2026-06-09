@@ -19,6 +19,7 @@ import { DocumentFlavor } from '@univerjs/core';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
+import { DOCS_VIEW_KEY } from '../../basics/docs-view-key';
 import { DocRenderController } from '../render-controllers/doc.render-controller';
 
 vi.mock('@univerjs/engine-render', async (importOriginal) => {
@@ -76,14 +77,19 @@ vi.mock('@univerjs/engine-render', async (importOriginal) => {
     };
 });
 
-function createControllerFixture() {
+function createControllerFixture(options?: {
+    documentFlavor?: DocumentFlavor;
+    pages?: Array<Record<string, unknown>>;
+}) {
     const commandCallbacks: Array<(command: ICommandInfo) => void> = [];
     const skeleton = {
         calculate: vi.fn(),
         getSkeletonData: vi.fn(() => ({
-            pages: [{
+            pages: options?.pages ?? [{
                 pageWidth: 640,
                 pageHeight: 900,
+                skeDrawings: new Map(),
+                skeTables: new Map(),
             }],
         })),
         getViewModel: vi.fn(() => ({
@@ -102,7 +108,7 @@ function createControllerFixture() {
             getUnitId: vi.fn(() => 'doc-unit'),
             getSnapshot: vi.fn(() => ({
                 documentStyle: {
-                    documentFlavor: DocumentFlavor.TRADITIONAL,
+                    documentFlavor: options?.documentFlavor ?? DocumentFlavor.TRADITIONAL,
                 },
             })),
         },
@@ -163,6 +169,8 @@ function createControllerFixture() {
 
     return {
         commandCallbacks,
+        context,
+        skeletonManager,
         pageLayoutService,
         selectionManager,
     };
@@ -182,5 +190,33 @@ describe('doc render controller', () => {
 
         expect(pageLayoutService.calculatePagePosition).toHaveBeenCalledTimes(1);
         expect(selectionManager.refreshSelection).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps modern doc width anchored to page width when a table grows wider than the text column', () => {
+        const { context, skeletonManager } = createControllerFixture({
+            documentFlavor: DocumentFlavor.MODERN,
+            pages: [{
+                pageWidth: 960,
+                pageHeight: Number.POSITIVE_INFINITY,
+                width: 960,
+                height: 640,
+                marginLeft: 66.66666666666667,
+                marginRight: 66.66666666666667,
+                marginTop: 72,
+                marginBottom: 72,
+                skeDrawings: new Map(),
+                skeTables: new Map([['table-1', {
+                    left: 0,
+                    top: 180,
+                    width: 1254,
+                    height: 240,
+                }]]),
+            }],
+        });
+
+        skeletonManager.currentSkeletonBefore$.next(skeletonManager.getSkeleton());
+
+        expect(context.mainComponent?.width).toBe(960);
+        expect((context.components.get(DOCS_VIEW_KEY.BACKGROUND) as { width: number }).width).toBe(960);
     });
 });

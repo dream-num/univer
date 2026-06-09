@@ -17,17 +17,43 @@
 import { NamedStyleType, PresetListType } from '@univerjs/core';
 import { ContextMenuGroup, ContextMenuPosition, MenuItemType, RibbonInsertGroup, RibbonStartGroup } from '@univerjs/ui';
 import { describe, expect, it } from 'vitest';
+import { DocCopyCurrentParagraphCommand, DocCutCurrentParagraphCommand } from '../../commands/commands/clipboard.command';
+import { DeleteCurrentParagraphCommand } from '../../commands/commands/doc-delete.command';
 import { HorizontalLineCommand, InsertHorizontalLineBellowCommand } from '../../commands/commands/doc-horizontal-line.command';
+import { ResetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand } from '../../commands/commands/inline-format.command';
 import { BulletListCommand, CheckListCommand, InsertBulletListBellowCommand, InsertCheckListBellowCommand, InsertOrderListBellowCommand, OrderListCommand } from '../../commands/commands/list.command';
 import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignOperationCommand, AlignRightCommand } from '../../commands/commands/paragraph-align.command';
-import { H1HeadingCommand, NormalTextHeadingCommand, SetParagraphNamedStyleCommand, SubtitleHeadingCommand, TitleHeadingCommand } from '../../commands/commands/set-heading.command';
+import { H1HeadingCommand, H2HeadingCommand, H3HeadingCommand, H4HeadingCommand, H5HeadingCommand, NormalTextHeadingCommand, SetParagraphNamedStyleCommand, SubtitleHeadingCommand, TitleHeadingCommand } from '../../commands/commands/set-heading.command';
 import { SwitchDocModeCommand } from '../../commands/commands/switch-doc-mode.command';
 import { CreateDocTableCommand } from '../../commands/commands/table/doc-table-create.command';
 import { DocTableDeleteTableCommand } from '../../commands/commands/table/doc-table-delete.command';
 import { DocCreateTableOperation } from '../../commands/operations/doc-create-table.operation';
 import { DocParagraphSettingPanelOperation } from '../../commands/operations/doc-paragraph-setting-panel.operation';
 import { AlignMenuItemFactory, DocSwitchModeMenuItemFactory, FLOAT_TEXT_STYLE_MENU_ID, FLOAT_TOOLBAR_MENU_POSITION, FloatTextStyleMenuItemFactory, InsertDefaultTableMenuFactory, InsertTableMenuFactory } from '../menu';
-import { DOC_CONTENT_INSERT_MENU_ID, DOC_TABLE_BLOCK_MENU_ID, EMPTY_PARAGRAPH_MENU_ID, INSERT_BELLOW_MENU_ID } from '../paragraph-menu';
+import {
+    DOC_CONTENT_INSERT_MENU_ID,
+    DOC_PARAGRAPH_T_ALIGN_MENU_ID,
+    DOC_PARAGRAPH_T_COLORS_MENU_ID,
+    DOC_PARAGRAPH_T_DIVIDER_MENU_ID,
+    DOC_PARAGRAPH_T_EDIT_MENU_ID,
+    DOC_PARAGRAPH_T_INDENT_DECREASE_ID,
+    DOC_PARAGRAPH_T_INDENT_INCREASE_ID,
+    DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID,
+    DOC_PARAGRAPH_T_INSERT_BELOW_MENU_ID,
+    DOC_PARAGRAPH_T_INSERT_MENU_ID,
+    DOC_TABLE_BLOCK_MENU_ID,
+    DOCS_CALLOUT_INSERT_BELOW_COMMAND_ID,
+    DOCS_CALLOUT_INSERT_COMMAND_ID,
+    DOCS_CODE_INSERT_BELOW_COMMAND_ID,
+    DOCS_CODE_INSERT_COMMAND_ID,
+    DOCS_QUOTE_INSERT_BELOW_COMMAND_ID,
+    DOCS_QUOTE_INSERT_COMMAND_ID,
+    EMPTY_PARAGRAPH_MENU_ID,
+    INSERT_BELLOW_MENU_ID,
+    INSERT_DOC_IMAGE_COMMAND_ID,
+    INSERT_DOC_SHAPE_COMMAND_ID,
+    ParagraphMenuDefaultTextColorMenuItemFactory,
+} from '../paragraph-menu';
 import { menuSchema } from '../schema';
 
 describe('docs ui ribbon schema', () => {
@@ -182,5 +208,126 @@ describe('docs ui ribbon schema', () => {
         expect(item.params).toEqual({ rowCount: 3, colCount: 5 });
         expect(item.icon).toBe('GridIcon');
         expect(item.title).toBe('docs-ui.toolbar.table.insert');
+    });
+
+    it('builds the insert-state T menu from official menu schema groups', () => {
+        const paragraph = (menuSchema as any)[ContextMenuPosition.PARAGRAPH];
+        const insertMenu = paragraph[DOC_PARAGRAPH_T_INSERT_MENU_ID];
+        const quickTop = insertMenu.quickTop;
+        const quickBottom = insertMenu.quickBottom;
+        const insert = insertMenu.insert;
+
+        expect(quickTop.quickLayout).toBe('icon');
+        expect(quickBottom.quickLayout).toBe('icon');
+        expect(Object.keys(quickTop)).toEqual(expect.arrayContaining([
+            H1HeadingCommand.id,
+            H2HeadingCommand.id,
+            H3HeadingCommand.id,
+            H4HeadingCommand.id,
+            H5HeadingCommand.id,
+            OrderListCommand.id,
+        ]));
+        expect(Object.keys(quickBottom)).toEqual(expect.arrayContaining([
+            BulletListCommand.id,
+            CheckListCommand.id,
+            DOCS_CODE_INSERT_COMMAND_ID,
+            DOCS_QUOTE_INSERT_COMMAND_ID,
+            DOCS_CALLOUT_INSERT_COMMAND_ID,
+            HorizontalLineCommand.id,
+        ]));
+        expect(insert[DocCreateTableOperation.id].menuItemFactory).toBe(InsertDefaultTableMenuFactory);
+        expect(insert[INSERT_DOC_IMAGE_COMMAND_ID].menuItemFactory).toBeDefined();
+        expect(insert[INSERT_DOC_SHAPE_COMMAND_ID].menuItemFactory).toBeDefined();
+    });
+
+    it('builds the edit-state T menu with official submenus instead of a custom panel', () => {
+        const paragraph = (menuSchema as any)[ContextMenuPosition.PARAGRAPH];
+        const editMenu = paragraph[DOC_PARAGRAPH_T_EDIT_MENU_ID];
+        const quickTop = editMenu.quickTop;
+        const quickBottom = editMenu.quickBottom;
+        const layout = editMenu.layout;
+        const format = editMenu.format;
+        const others = editMenu.others;
+
+        expect(quickTop.quickLayout).toBe('icon');
+        expect(quickBottom.quickLayout).toBe('icon');
+        expect(quickTop[NormalTextHeadingCommand.id].menuItemFactory).toBeDefined();
+        expect(quickTop[TitleHeadingCommand.id].menuItemFactory).toBeDefined();
+        expect(quickTop[SubtitleHeadingCommand.id].menuItemFactory).toBeDefined();
+        expect(quickBottom[DOCS_CODE_INSERT_COMMAND_ID].menuItemFactory).toBeDefined();
+        expect(quickBottom[DOCS_QUOTE_INSERT_COMMAND_ID].menuItemFactory).toBeDefined();
+        expect(quickBottom[DOCS_CALLOUT_INSERT_COMMAND_ID].menuItemFactory).toBeDefined();
+        expect(layout[DOC_PARAGRAPH_T_ALIGN_MENU_ID].menuItemFactory).toBeDefined();
+        expect(layout[DOC_PARAGRAPH_T_COLORS_MENU_ID].menuItemFactory).toBeDefined();
+        expect(format[DocCutCurrentParagraphCommand.id].menuItemFactory).toBeDefined();
+        expect(format[DocCopyCurrentParagraphCommand.id].menuItemFactory).toBeDefined();
+        expect(format[DeleteCurrentParagraphCommand.id].menuItemFactory).toBeDefined();
+        expect(others[DOC_PARAGRAPH_T_INSERT_BELOW_MENU_ID].menuItemFactory).toBeDefined();
+    });
+
+    it('keeps divider-state T menus compact while reusing the same official submenu system', () => {
+        const paragraph = (menuSchema as any)[ContextMenuPosition.PARAGRAPH];
+        const dividerMenu = paragraph[DOC_PARAGRAPH_T_DIVIDER_MENU_ID];
+
+        expect(dividerMenu.quick).toBeUndefined();
+        expect(dividerMenu.layout[DOC_PARAGRAPH_T_COLORS_MENU_ID].menuItemFactory).toBeDefined();
+        expect(dividerMenu.layout[DOC_PARAGRAPH_T_ALIGN_MENU_ID]).toBeUndefined();
+        expect(dividerMenu.others[DOC_PARAGRAPH_T_INSERT_BELOW_MENU_ID].menuItemFactory).toBeDefined();
+    });
+
+    it('defines align, color, and insert-below submenu contents in schema', () => {
+        const paragraph = (menuSchema as any)[ContextMenuPosition.PARAGRAPH];
+        const alignMenu = paragraph[DOC_PARAGRAPH_T_ALIGN_MENU_ID];
+        const colorsMenu = paragraph[DOC_PARAGRAPH_T_COLORS_MENU_ID];
+        const insertBelowMenu = paragraph[DOC_PARAGRAPH_T_INSERT_BELOW_MENU_ID];
+
+        expect(alignMenu.align.title).toBe('docs-ui.paragraphMenu.align');
+        expect(alignMenu.align.quickLayout).toBe('icon');
+        expect(Object.keys(alignMenu.align)).toEqual(expect.arrayContaining([
+            AlignOperationCommand.id,
+            `${AlignOperationCommand.id}.center`,
+            `${AlignOperationCommand.id}.right`,
+            `${AlignOperationCommand.id}.justify`,
+        ]));
+        expect(alignMenu.indent.title).toBe('docs-ui.paragraphMenu.indent');
+        expect(alignMenu.indent.quickLayout).toBeUndefined();
+        expect(Object.keys(alignMenu.indent)).toEqual(expect.arrayContaining([
+            DOC_PARAGRAPH_T_INDENT_INCREASE_ID,
+            DOC_PARAGRAPH_T_INDENT_DECREASE_ID,
+        ]));
+
+        expect(colorsMenu.text.title).toBe('docs-ui.toolbar.textColor.main');
+        expect(colorsMenu.text.quickLayout).toBe('icon');
+        expect(colorsMenu.text[`${SetInlineFormatTextColorCommand.id}.default`].menuItemFactory).toBe(ParagraphMenuDefaultTextColorMenuItemFactory);
+        expect(colorsMenu.backgroundTop.title).toBe('docs-ui.toolbar.fillColor.main');
+        expect(colorsMenu.backgroundTop.quickLayout).toBe('icon');
+        expect(colorsMenu.backgroundTop[ResetInlineFormatTextBackgroundColorCommand.id].menuItemFactory).toBeDefined();
+        expect(colorsMenu.backgroundBottom.quickLayout).toBe('icon');
+        expect(colorsMenu.reset).toBeUndefined();
+        expect(Object.keys(colorsMenu.text).filter((key) => key.startsWith('doc.menu.paragraph-t.text-color.'))).toHaveLength(7);
+        expect(Object.keys(colorsMenu.backgroundTop).filter((key) => key.startsWith('doc.menu.paragraph-t.background-color.'))).toHaveLength(7);
+        expect(Object.keys(colorsMenu.backgroundBottom).filter((key) => key.startsWith('doc.menu.paragraph-t.background-color.'))).toHaveLength(8);
+
+        expect(insertBelowMenu.quickTop.quickLayout).toBe('icon');
+        expect(insertBelowMenu.quickBottom.quickLayout).toBe('icon');
+        expect(Object.keys(insertBelowMenu.quickTop)).toEqual(expect.arrayContaining([
+            `${DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID}.h1`,
+            `${DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID}.h2`,
+            `${DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID}.h3`,
+            `${DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID}.h4`,
+            `${DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID}.h5`,
+            InsertOrderListBellowCommand.id,
+        ]));
+        expect(Object.keys(insertBelowMenu.quickBottom)).toEqual(expect.arrayContaining([
+            InsertBulletListBellowCommand.id,
+            InsertCheckListBellowCommand.id,
+            DOCS_CODE_INSERT_BELOW_COMMAND_ID,
+            DOCS_QUOTE_INSERT_BELOW_COMMAND_ID,
+            DOCS_CALLOUT_INSERT_BELOW_COMMAND_ID,
+            InsertHorizontalLineBellowCommand.id,
+        ]));
+        expect(insertBelowMenu.insert[`${DocCreateTableOperation.id}.below`].menuItemFactory).toBeDefined();
+        expect(insertBelowMenu.insert[`${INSERT_DOC_IMAGE_COMMAND_ID}.below`].menuItemFactory).toBeDefined();
+        expect(insertBelowMenu.insert[`${INSERT_DOC_SHAPE_COMMAND_ID}.below`].menuItemFactory).toBeDefined();
     });
 });

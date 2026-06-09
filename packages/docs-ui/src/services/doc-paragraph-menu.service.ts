@@ -443,6 +443,7 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
         const paragraphDataStream = dataStream.slice(paragraph.paragraphStart, paragraph.paragraphEnd);
         const paragraphModel = body?.paragraphs?.find((item) => item.startIndex === paragraph.startIndex);
         const listIcon = getListIcon(paragraphModel?.bullet?.listType);
+        const isHorizontalRuleParagraph = paragraphDataStream.replace(/[\r\n]/g, '') === '' && !!paragraphModel?.paragraphStyle?.borderBottom;
         const customBlock = body?.customBlocks?.find((item) => item.startIndex >= paragraph.paragraphStart && item.startIndex <= paragraph.paragraphEnd);
         const isCustomBlockOnly = customBlock?.blockType === BlockType.CUSTOM && paragraphDataStream.replace(/[\b\r\n]/g, '') === '';
         if (customBlock && customBlock.blockType === BlockType.CUSTOM && isCustomBlockOnly) {
@@ -472,7 +473,7 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
             kind: 'paragraph',
             key: `paragraph:${paragraph.startIndex}`,
             paragraph,
-            icon: listIcon,
+            icon: isHorizontalRuleParagraph ? 'ReduceIcon' : listIcon,
             cellRange: cellRange ?? undefined,
             menuRange: {
                 startOffset: paragraph.paragraphStart,
@@ -480,7 +481,7 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
                 collapsed: true,
             },
             moveRange: getParagraphMoveRange(this._context.unit, paragraph, cellRange),
-            emptyMode: paragraphDataStream.replace(/[\r\n]/g, '') === '',
+            emptyMode: isHorizontalRuleParagraph ? false : paragraphDataStream.replace(/[\r\n]/g, '') === '',
             draggable: cellRange != null || !inTable,
         };
     }

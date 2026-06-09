@@ -29,12 +29,21 @@ export interface ITinyMenuItem {
 
 export interface ITinyMenuGroupProps {
     items: ITinyMenuItem[];
+    columns?: number;
 }
 
-export function DesignTinyMenuGroup({ items }: ITinyMenuGroupProps) {
+export function DesignTinyMenuGroup({ items, columns }: ITinyMenuGroupProps) {
     return (
         <div
-            className="univer-menu-item-group univer-flex univer-flex-wrap univer-gap-2.5 univer-p-1 univer-px-0"
+            className={clsx(
+                'univer-menu-item-group univer-gap-1.5 univer-p-0.5 univer-px-0',
+                columns
+                    ? `
+                      univer-grid univer-justify-items-center
+                      ${columns === 6 ? 'univer-grid-cols-6' : ''}
+                    `
+                    : 'univer-flex univer-flex-wrap'
+            )}
         >
             {items.map((item) => {
                 const ele = (

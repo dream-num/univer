@@ -19,17 +19,31 @@ import type { IMenuButtonItem, IMenuItem, IMenuSelectorItem } from '@univerjs/ui
 import type { ComponentType } from 'react';
 import { ICommandService, NamedStyleType, UniverInstanceType } from '@univerjs/core';
 import { SetTextSelectionsOperation } from '@univerjs/docs';
-import { H1Icon, H2Icon, H3Icon, H4Icon, H5Icon, TextTypeIcon } from '@univerjs/icons';
+import {
+    CalloutIcon,
+    CodeBlockIcon,
+    H1Icon,
+    H2Icon,
+    H3Icon,
+    H4Icon,
+    H5Icon,
+    MoreLeftIcon,
+    MoreRightIcon,
+    QuoteIcon,
+    ShapeIcon,
+    TextTypeIcon,
+} from '@univerjs/icons';
 import { ComponentManager, getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { createElement } from 'react';
 import { Observable } from 'rxjs';
 import { DocCopyCommand, DocCopyCurrentParagraphCommand, DocCutCurrentParagraphCommand, DocPasteCommand } from '../commands/commands/clipboard.command';
 import { DeleteCurrentParagraphCommand } from '../commands/commands/doc-delete.command';
 import { HorizontalLineCommand, InsertHorizontalLineBellowCommand } from '../commands/commands/doc-horizontal-line.command';
-import { SetInlineFormatFontSizeCommand } from '../commands/commands/inline-format.command';
+import { ResetInlineFormatTextBackgroundColorCommand, SetInlineFormatFontSizeCommand, SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand } from '../commands/commands/inline-format.command';
 import { BulletListCommand, CheckListCommand, InsertBulletListBellowCommand, InsertCheckListBellowCommand, InsertOrderListBellowCommand, OrderListCommand } from '../commands/commands/list.command';
 import { H1HeadingCommand, H2HeadingCommand, H3HeadingCommand, H4HeadingCommand, H5HeadingCommand, NormalTextHeadingCommand, SubtitleHeadingCommand, TitleHeadingCommand } from '../commands/commands/set-heading.command';
 import { DocTableDeleteTableCommand } from '../commands/commands/table/doc-table-delete.command';
+import { DocCreateTableOperation } from '../commands/operations/doc-create-table.operation';
 import { disableMenuWhenNoDocRange, getParagraphStyleAtCursor } from './menu';
 
 const HEADING_MAP: Record<NamedStyleType, ICommand> = {
@@ -100,6 +114,34 @@ function SubtitleTypeIcon({ className }: { className: string }) {
     );
 }
 
+function DefaultTextColorIcon({ className }: { className: string }) {
+    return createElement(
+        'svg',
+        {
+            className,
+            viewBox: '0 0 24 24',
+            fill: 'none',
+            'aria-hidden': true,
+        },
+        createElement('text', {
+            x: 5,
+            y: 17,
+            fontFamily: 'Arial, sans-serif',
+            fontSize: 16,
+            fontWeight: 700,
+            fill: '#000000',
+        }, 'A'),
+        createElement('rect', {
+            x: 4,
+            y: 19,
+            width: 16,
+            height: 2,
+            rx: 1,
+            fill: '#000000',
+        })
+    );
+}
+
 export const HEADING_ICON_MAP: Record<NamedStyleType, { key: string; component: ComponentType<{ className: string }> }> = {
     [NamedStyleType.HEADING_1]: { key: 'H1Icon', component: H1Icon },
     [NamedStyleType.HEADING_2]: { key: 'H2Icon', component: H2Icon },
@@ -111,22 +153,6 @@ export const HEADING_ICON_MAP: Record<NamedStyleType, { key: string; component: 
     [NamedStyleType.SUBTITLE]: { key: 'SubtitleTypeIcon', component: SubtitleTypeIcon },
     [NamedStyleType.NAMED_STYLE_TYPE_UNSPECIFIED]: { key: 'TextTypeIcon', component: TextTypeIcon },
 };
-
-export function shouldShowParagraphHeadingOption(headingType: NamedStyleType, currentType = NamedStyleType.NORMAL_TEXT): boolean {
-    if (headingType === NamedStyleType.HEADING_5) {
-        return currentType !== NamedStyleType.TITLE && currentType !== NamedStyleType.SUBTITLE;
-    }
-
-    if (headingType === NamedStyleType.TITLE) {
-        return currentType === NamedStyleType.TITLE;
-    }
-
-    if (headingType === NamedStyleType.SUBTITLE) {
-        return currentType === NamedStyleType.SUBTITLE;
-    }
-
-    return true;
-}
 
 const createHeadingSelectorMenuItemFactory = (headingType: NamedStyleType) => (accessor: IAccessor): IMenuItem => {
     const commandService = accessor.get(ICommandService);
@@ -141,7 +167,7 @@ const createHeadingSelectorMenuItemFactory = (headingType: NamedStyleType) => (a
         type: MenuItemType.BUTTON,
         icon: icon.key,
         title: HEADING_TITLE_MAP[headingType],
-        tooltip: 'ui.toolbar.heading.tooltip',
+        tooltip: HEADING_TITLE_MAP[headingType],
         disabled$: disableMenuWhenNoDocRange(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
         activated$: new Observable((subscriber) => {
@@ -196,6 +222,7 @@ const createEmptyParagraphButtonFactory = (
         type: MenuItemType.BUTTON,
         icon,
         title,
+        tooltip: title,
     };
 };
 
@@ -244,6 +271,7 @@ export const InsertBulletListBellowMenuItemFactory = (accessor: IAccessor): IMen
         type: MenuItemType.BUTTON,
         icon: 'UnorderIcon',
         title: 'docs-ui.rightClick.bulletList',
+        tooltip: 'docs-ui.rightClick.bulletList',
     };
 };
 
@@ -253,6 +281,7 @@ export const InsertOrderListBellowMenuItemFactory = (accessor: IAccessor): IMenu
         type: MenuItemType.BUTTON,
         icon: 'OrderIcon',
         title: 'docs-ui.rightClick.orderList',
+        tooltip: 'docs-ui.rightClick.orderList',
     };
 };
 
@@ -262,6 +291,7 @@ export const InsertCheckListBellowMenuItemFactory = (accessor: IAccessor): IMenu
         type: MenuItemType.BUTTON,
         icon: 'TodoListDoubleIcon',
         title: 'docs-ui.rightClick.checkList',
+        tooltip: 'docs-ui.rightClick.checkList',
     };
 };
 
@@ -271,15 +301,184 @@ export const InsertHorizontalLineBellowMenuItemFactory = (accessor: IAccessor): 
         type: MenuItemType.BUTTON,
         icon: 'ReduceIcon',
         title: 'docs-ui.toolbar.horizontalLine',
+        tooltip: 'docs-ui.toolbar.horizontalLine',
     };
 };
 
 export const INSERT_BELLOW_MENU_ID = 'doc.menu.insert-bellow';
 export const DOC_CONTENT_INSERT_MENU_ID = 'doc.menu.content-insert';
 export const DOC_TABLE_BLOCK_MENU_ID = 'doc.menu.table-block';
+export const DOC_PARAGRAPH_T_INSERT_MENU_ID = 'doc.menu.paragraph-t.insert';
+export const DOC_PARAGRAPH_T_EDIT_MENU_ID = 'doc.menu.paragraph-t.edit';
+export const DOC_PARAGRAPH_T_DIVIDER_MENU_ID = 'doc.menu.paragraph-t.divider';
+export const DOC_PARAGRAPH_T_ALIGN_MENU_ID = 'doc.menu.paragraph-t.align';
+export const DOC_PARAGRAPH_T_COLORS_MENU_ID = 'doc.menu.paragraph-t.colors';
+export const DOC_PARAGRAPH_T_INSERT_BELOW_MENU_ID = 'doc.menu.paragraph-t.insert-below';
+export const DOC_PARAGRAPH_T_RESET_COLORS_ID = 'doc.menu.paragraph-t.reset-colors';
+export const DOC_PARAGRAPH_T_INDENT_INCREASE_ID = 'doc.menu.paragraph-t.indent.increase';
+export const DOC_PARAGRAPH_T_INDENT_DECREASE_ID = 'doc.menu.paragraph-t.indent.decrease';
+export const DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID = 'doc.menu.paragraph-t.insert-below.command';
+export const DOCS_CODE_INSERT_COMMAND_ID = 'docs-code.command.insert';
+export const DOCS_CODE_INSERT_BELOW_COMMAND_ID = 'docs-code.command.insert-below';
+export const DOCS_QUOTE_INSERT_COMMAND_ID = 'docs-quote.command.insert';
+export const DOCS_QUOTE_INSERT_BELOW_COMMAND_ID = 'docs-quote.command.insert-below';
+export const DOCS_CALLOUT_INSERT_COMMAND_ID = 'docs-callout.command.insert';
+export const DOCS_CALLOUT_INSERT_BELOW_COMMAND_ID = 'docs-callout.command.insert-below';
+export const INSERT_DOC_IMAGE_COMMAND_ID = 'doc.command.insert-float-image';
+export const INSERT_DOC_SHAPE_COMMAND_ID = 'doc.command.menu-insert-shape';
+
+const TEXT_COLORS = ['#FE4B4B', '#FF8C51', '#A4DC16', '#2DAEFF', '#3A60F7', '#9E6DE3', '#F248A6'];
+const BACKGROUND_COLORS = [
+    'rgba(158, 109, 227, 0.3)',
+    'rgba(254, 75, 75, 0.3)',
+    'rgba(255, 140, 81, 0.3)',
+    'rgba(164, 220, 22, 0.3)',
+    'rgba(45, 174, 255, 0.3)',
+    'rgba(58, 96, 247, 0.3)',
+    'rgba(242, 72, 166, 0.3)',
+    'rgba(153, 153, 153, 0.3)',
+    'rgba(158, 109, 227, 0.15)',
+    'rgba(254, 75, 75, 0.15)',
+    'rgba(255, 140, 81, 0.15)',
+    'rgba(164, 220, 22, 0.15)',
+    'rgba(45, 174, 255, 0.15)',
+    'rgba(58, 96, 247, 0.15)',
+    'rgba(242, 72, 166, 0.15)',
+];
 
 export function getDocBlockRangeMenuId(blockType: string): string {
     return `doc.block-range.${blockType}.menu`;
+}
+
+function ensureParagraphMenuIcon(componentManager: ComponentManager, icon: string) {
+    if (componentManager.get(icon)) {
+        return;
+    }
+
+    const mapping: Partial<Record<string, ComponentType<{ className: string }>>> = {
+        TitleTypeIcon,
+        SubtitleTypeIcon,
+        DefaultTextColorIcon,
+        CodeBlockIcon,
+        QuoteIcon,
+        CalloutIcon,
+        ShapeIcon,
+        MoreRightIcon,
+        MoreLeftIcon,
+    };
+
+    const component = mapping[icon];
+    if (component) {
+        componentManager.register(icon, component);
+    }
+}
+
+function ColorSwatchIcon(props: { className?: string; color: string }) {
+    const { className, color } = props;
+    return createElement(
+        'svg',
+        {
+            className,
+            viewBox: '0 0 24 24',
+            fill: 'none',
+            'aria-hidden': true,
+        },
+        createElement('rect', {
+            x: 3,
+            y: 3,
+            width: 18,
+            height: 18,
+            rx: 5,
+            fill: color,
+            stroke: 'currentColor',
+            strokeOpacity: 0.12,
+        })
+    );
+}
+
+function ensureColorSwatchIcon(componentManager: ComponentManager, icon: string, color: string) {
+    if (componentManager.get(icon)) {
+        return;
+    }
+
+    componentManager.register(icon, ({ className }: { className?: string }) => ColorSwatchIcon({ className, color }));
+}
+
+function createStaticButtonMenuItemFactory(config: {
+    id: string;
+    commandId?: string;
+    icon?: string;
+    title?: string;
+    tooltip?: string;
+    params?: Record<string, unknown>;
+    disabled$?: ReturnType<typeof disableMenuWhenNoDocRange>;
+}) {
+    return (accessor: IAccessor): IMenuButtonItem => {
+        const componentManager = accessor.get(ComponentManager);
+        if (config.icon) {
+            ensureParagraphMenuIcon(componentManager, config.icon);
+        }
+
+        return {
+            id: config.id,
+            commandId: config.commandId,
+            type: MenuItemType.BUTTON,
+            icon: config.icon,
+            title: config.title,
+            tooltip: config.tooltip,
+            params: config.params,
+            disabled$: config.disabled$,
+            hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+        };
+    };
+}
+
+function createStaticSubmenuMenuItemFactory(config: {
+    id: string;
+    icon?: string;
+    title?: string;
+    tooltip?: string;
+}) {
+    return (accessor: IAccessor): IMenuSelectorItem<string> => {
+        const componentManager = accessor.get(ComponentManager);
+        if (config.icon) {
+            ensureParagraphMenuIcon(componentManager, config.icon);
+        }
+
+        return {
+            id: config.id,
+            type: MenuItemType.SUBITEMS,
+            icon: config.icon,
+            title: config.title,
+            tooltip: config.tooltip,
+            hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+        };
+    };
+}
+
+function createColorSwatchMenuItemFactory(config: {
+    id: string;
+    commandId: string;
+    icon: string;
+    color: string;
+    tooltip: string;
+}) {
+    return (accessor: IAccessor): IMenuButtonItem => {
+        const componentManager = accessor.get(ComponentManager);
+        ensureColorSwatchIcon(componentManager, config.icon, config.color);
+
+        return {
+            id: config.id,
+            commandId: config.commandId,
+            type: MenuItemType.BUTTON,
+            icon: config.icon,
+            tooltip: config.tooltip,
+            params: {
+                value: config.color,
+            },
+            hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+        };
+    };
 }
 
 export const TableBlockCopyMenuItemFactory = (accessor: IAccessor): IMenuItem => {
@@ -317,3 +516,219 @@ export function DocInsertBellowMenuItemFactory(accessor: IAccessor): IMenuSelect
         title: 'docs-ui.rightClick.insertBellow',
     };
 }
+
+export const ParagraphMenuAlignSubmenuItemFactory = createStaticSubmenuMenuItemFactory({
+    id: DOC_PARAGRAPH_T_ALIGN_MENU_ID,
+    icon: 'LeftJustifyingIcon',
+    title: 'docs-ui.paragraphMenu.alignAndIndent',
+    tooltip: 'docs-ui.paragraphMenu.alignAndIndent',
+});
+
+export const ParagraphMenuColorsSubmenuItemFactory = createStaticSubmenuMenuItemFactory({
+    id: DOC_PARAGRAPH_T_COLORS_MENU_ID,
+    icon: 'PaintBucketDoubleIcon',
+    title: 'docs-ui.paragraphMenu.color',
+    tooltip: 'docs-ui.paragraphMenu.color',
+});
+
+export const ParagraphMenuInsertBelowSubmenuItemFactory = createStaticSubmenuMenuItemFactory({
+    id: DOC_PARAGRAPH_T_INSERT_BELOW_MENU_ID,
+    icon: 'TextTypeIcon',
+    title: 'docs-ui.rightClick.insertBellow',
+    tooltip: 'docs-ui.rightClick.insertBellow',
+});
+
+export const ParagraphMenuInsertImageMenuItemFactory = createStaticButtonMenuItemFactory({
+    id: INSERT_DOC_IMAGE_COMMAND_ID,
+    icon: 'AddImageIcon',
+    title: 'docs-drawing-ui.upload.float',
+    tooltip: 'docs-drawing-ui.upload.float',
+});
+
+export const ParagraphMenuInsertShapeMenuItemFactory = createStaticButtonMenuItemFactory({
+    id: INSERT_DOC_SHAPE_COMMAND_ID,
+    icon: 'ShapeIcon',
+    title: 'docs-shape-ui.insertShape',
+    tooltip: 'docs-shape-ui.insertShape',
+});
+
+export const ParagraphMenuInsertCodeMenuItemFactory = createStaticButtonMenuItemFactory({
+    id: DOCS_CODE_INSERT_COMMAND_ID,
+    icon: 'CodeBlockIcon',
+    title: 'docs-code-ui.menu.code',
+    tooltip: 'docs-code-ui.menu.code',
+});
+
+export const ParagraphMenuInsertQuoteMenuItemFactory = createStaticButtonMenuItemFactory({
+    id: DOCS_QUOTE_INSERT_COMMAND_ID,
+    icon: 'QuoteIcon',
+    title: 'docs-quote-ui.menu.quote',
+    tooltip: 'docs-quote-ui.menu.quote',
+});
+
+export const ParagraphMenuInsertCalloutMenuItemFactory = createStaticButtonMenuItemFactory({
+    id: DOCS_CALLOUT_INSERT_COMMAND_ID,
+    icon: 'CalloutIcon',
+    title: 'docs-callout-ui.menu.callout',
+    tooltip: 'docs-callout-ui.menu.callout',
+});
+
+export const ParagraphMenuInsertBelowHeadingH1MenuItemFactory = createStaticButtonMenuItemFactory({
+    id: `${DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID}.h1`,
+    commandId: DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID,
+    icon: 'H1Icon',
+    title: 'ui.toolbar.heading.1',
+    tooltip: 'ui.toolbar.heading.1',
+    params: { commandId: H1HeadingCommand.id, paragraphMenuPlacement: 'below', paragraphMenuInsertMode: 'breakline' },
+});
+
+export const ParagraphMenuInsertBelowHeadingH2MenuItemFactory = createStaticButtonMenuItemFactory({
+    id: `${DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID}.h2`,
+    commandId: DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID,
+    icon: 'H2Icon',
+    title: 'ui.toolbar.heading.2',
+    tooltip: 'ui.toolbar.heading.2',
+    params: { commandId: H2HeadingCommand.id, paragraphMenuPlacement: 'below', paragraphMenuInsertMode: 'breakline' },
+});
+
+export const ParagraphMenuInsertBelowHeadingH3MenuItemFactory = createStaticButtonMenuItemFactory({
+    id: `${DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID}.h3`,
+    commandId: DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID,
+    icon: 'H3Icon',
+    title: 'ui.toolbar.heading.3',
+    tooltip: 'ui.toolbar.heading.3',
+    params: { commandId: H3HeadingCommand.id, paragraphMenuPlacement: 'below', paragraphMenuInsertMode: 'breakline' },
+});
+
+export const ParagraphMenuInsertBelowHeadingH4MenuItemFactory = createStaticButtonMenuItemFactory({
+    id: `${DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID}.h4`,
+    commandId: DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID,
+    icon: 'H4Icon',
+    title: 'ui.toolbar.heading.4',
+    tooltip: 'ui.toolbar.heading.4',
+    params: { commandId: H4HeadingCommand.id, paragraphMenuPlacement: 'below', paragraphMenuInsertMode: 'breakline' },
+});
+
+export const ParagraphMenuInsertBelowHeadingH5MenuItemFactory = createStaticButtonMenuItemFactory({
+    id: `${DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID}.h5`,
+    commandId: DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID,
+    icon: 'H5Icon',
+    title: 'ui.toolbar.heading.5',
+    tooltip: 'ui.toolbar.heading.5',
+    params: { commandId: H5HeadingCommand.id, paragraphMenuPlacement: 'below', paragraphMenuInsertMode: 'breakline' },
+});
+
+export const ParagraphMenuInsertBelowImageMenuItemFactory = createStaticButtonMenuItemFactory({
+    id: `${INSERT_DOC_IMAGE_COMMAND_ID}.below`,
+    commandId: INSERT_DOC_IMAGE_COMMAND_ID,
+    icon: 'AddImageIcon',
+    title: 'docs-drawing-ui.upload.float',
+    tooltip: 'docs-drawing-ui.upload.float',
+    params: { paragraphMenuPlacement: 'below' },
+});
+
+export const ParagraphMenuInsertBelowShapeMenuItemFactory = createStaticButtonMenuItemFactory({
+    id: `${INSERT_DOC_SHAPE_COMMAND_ID}.below`,
+    commandId: INSERT_DOC_SHAPE_COMMAND_ID,
+    icon: 'ShapeIcon',
+    title: 'docs-shape-ui.insertShape',
+    tooltip: 'docs-shape-ui.insertShape',
+    params: { paragraphMenuPlacement: 'below' },
+});
+
+export const ParagraphMenuInsertBelowTableMenuItemFactory = createStaticButtonMenuItemFactory({
+    id: `${DocCreateTableOperation.id}.below`,
+    commandId: DocCreateTableOperation.id,
+    icon: 'GridIcon',
+    title: 'docs-ui.toolbar.table.insert',
+    tooltip: 'docs-ui.toolbar.table.insert',
+    params: { rowCount: 3, colCount: 5, paragraphMenuPlacement: 'below' },
+});
+
+export const ParagraphMenuInsertBelowCodeMenuItemFactory = createStaticButtonMenuItemFactory({
+    id: DOCS_CODE_INSERT_BELOW_COMMAND_ID,
+    icon: 'CodeBlockIcon',
+    title: 'docs-code-ui.menu.code',
+    tooltip: 'docs-code-ui.menu.code',
+});
+
+export const ParagraphMenuInsertBelowQuoteMenuItemFactory = createStaticButtonMenuItemFactory({
+    id: DOCS_QUOTE_INSERT_BELOW_COMMAND_ID,
+    icon: 'QuoteIcon',
+    title: 'docs-quote-ui.menu.quote',
+    tooltip: 'docs-quote-ui.menu.quote',
+});
+
+export const ParagraphMenuInsertBelowCalloutMenuItemFactory = createStaticButtonMenuItemFactory({
+    id: DOCS_CALLOUT_INSERT_BELOW_COMMAND_ID,
+    icon: 'CalloutIcon',
+    title: 'docs-callout-ui.menu.callout',
+    tooltip: 'docs-callout-ui.menu.callout',
+});
+
+export const ParagraphMenuIndentIncreaseMenuItemFactory = createStaticButtonMenuItemFactory({
+    id: DOC_PARAGRAPH_T_INDENT_INCREASE_ID,
+    icon: 'MoreRightIcon',
+    title: 'docs-ui.paragraphMenu.increase',
+    tooltip: 'docs-ui.paragraphMenu.increaseIndent',
+});
+
+export const ParagraphMenuIndentDecreaseMenuItemFactory = createStaticButtonMenuItemFactory({
+    id: DOC_PARAGRAPH_T_INDENT_DECREASE_ID,
+    icon: 'MoreLeftIcon',
+    title: 'docs-ui.paragraphMenu.decrease',
+    tooltip: 'docs-ui.paragraphMenu.decreaseIndent',
+});
+
+export const ParagraphMenuDefaultTextColorMenuItemFactory = createStaticButtonMenuItemFactory({
+    id: `${SetInlineFormatTextColorCommand.id}.default`,
+    commandId: SetInlineFormatTextColorCommand.id,
+    icon: 'DefaultTextColorIcon',
+    title: 'docs-ui.paragraphMenu.defaultTextColor',
+    tooltip: 'docs-ui.paragraphMenu.defaultTextColor',
+    params: { value: '#000000' },
+});
+
+export const ParagraphMenuNoBackgroundMenuItemFactory = createStaticButtonMenuItemFactory({
+    id: ResetInlineFormatTextBackgroundColorCommand.id,
+    icon: 'NoColorDoubleIcon',
+    title: 'docs-ui.paragraphMenu.noBackground',
+    tooltip: 'docs-ui.paragraphMenu.noBackground',
+});
+
+export const ParagraphMenuResetColorsMenuItemFactory = createStaticButtonMenuItemFactory({
+    id: DOC_PARAGRAPH_T_RESET_COLORS_ID,
+    icon: 'PaintBucketDoubleIcon',
+    title: 'docs-ui.toolbar.resetColor',
+    tooltip: 'docs-ui.toolbar.resetColor',
+});
+
+export const ParagraphMenuTextColorSwatchMenuItemFactories = TEXT_COLORS.reduce<Record<string, { order: number; menuItemFactory: ReturnType<typeof createColorSwatchMenuItemFactory> }>>((items, color, index) => {
+    const id = `doc.menu.paragraph-t.text-color.${index}`;
+    items[id] = {
+        order: index,
+        menuItemFactory: createColorSwatchMenuItemFactory({
+            id,
+            commandId: SetInlineFormatTextColorCommand.id,
+            icon: `DocParagraphTextColorSwatchIcon.${index}`,
+            color,
+            tooltip: 'docs-ui.toolbar.textColor.main',
+        }),
+    };
+    return items;
+}, {});
+
+export const ParagraphMenuBackgroundColorSwatchMenuItemFactories = BACKGROUND_COLORS.reduce<Record<string, { order: number; menuItemFactory: ReturnType<typeof createColorSwatchMenuItemFactory> }>>((items, color, index) => {
+    const id = `doc.menu.paragraph-t.background-color.${index}`;
+    items[id] = {
+        order: index,
+        menuItemFactory: createColorSwatchMenuItemFactory({
+            id,
+            commandId: SetInlineFormatTextBackgroundColorCommand.id,
+            icon: `DocParagraphBackgroundColorSwatchIcon.${index}`,
+            color,
+            tooltip: 'docs-ui.toolbar.fillColor.main',
+        }),
+    };
+    return items;
+}, {});

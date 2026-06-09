@@ -38,7 +38,7 @@ import { DocComponent } from './doc-component';
 import { DOCS_EXTENSION_TYPE } from './doc-extension';
 import { getTableIdAndSliceIndex } from './layout/block/table';
 import { Liquid } from './liquid';
-import { getDocsTableRenderViewport } from './table-render-viewport';
+import { getDocsTableRenderViewport, hasDocsTableHorizontalViewport } from './table-render-viewport';
 import './extensions';
 
 const DEFAULT_BORDER_COLOR: ITableCellBorder = {
@@ -538,12 +538,13 @@ export class Documents extends DocComponent {
             drawLiquid.translateSave();
             drawLiquid.translate(tableLeft, tableTop);
 
-            if (viewport && viewport.contentWidth > viewport.viewportWidth) {
+            if (hasDocsTableHorizontalViewport(viewport)) {
                 const { x, y } = drawLiquid;
+                const clipLeft = x + page.marginLeft - (viewport.leadingInsetLeft ?? 0);
                 ctx.save();
                 ctx.beginPath();
                 ctx.rectByPrecision(
-                    x + page.marginLeft - TABLE_VIEWPORT_BORDER_CLIP_PADDING,
+                    clipLeft - TABLE_VIEWPORT_BORDER_CLIP_PADDING,
                     y + page.marginTop - TABLE_VIEWPORT_BORDER_CLIP_PADDING,
                     viewport.viewportWidth + TABLE_VIEWPORT_BORDER_CLIP_PADDING * 2,
                     tableSkeleton.height + TABLE_VIEWPORT_BORDER_CLIP_PADDING * 2
@@ -587,7 +588,7 @@ export class Documents extends DocComponent {
                 drawLiquid.translateRestore();
             }
 
-            if (viewport && viewport.contentWidth > viewport.viewportWidth) {
+            if (hasDocsTableHorizontalViewport(viewport)) {
                 ctx.restore();
             }
 

@@ -28,6 +28,7 @@ interface IUIQuickMenuGroupProps {
     item: IMenuSchema;
     activeItemIds?: string[];
     hiddenItemIds?: string[];
+    columns?: number;
     onOptionSelect?: (option: IValueOption) => void;
 }
 
@@ -105,6 +106,8 @@ function QuickTileMenuItem(props: IUIQuickTileMenuItemProps) {
                     label: menuItem.id ?? menuSchema.key,
                     commandId: menuItem.commandId,
                     id: menuItem.id,
+                    params: menuItem.params,
+                    value: menuItem.value,
                     tooltip: menuItem.tooltip && localeService.t(menuItem.tooltip),
                 });
             }}
@@ -125,7 +128,7 @@ function QuickTileMenuItem(props: IUIQuickTileMenuItemProps) {
 }
 
 export function UITinyMenuGroup(props: IUIQuickMenuGroupProps) {
-    const { item, activeItemIds, hiddenItemIds = EMPTY_HIDDEN_ITEM_IDS, onOptionSelect } = props;
+    const { item, activeItemIds, hiddenItemIds = EMPTY_HIDDEN_ITEM_IDS, columns, onOptionSelect } = props;
     const [activeItems, setActiveItems] = useState<string[]>([]);
     const [hiddenItems, setHiddenItems] = useState<string[]>([]);
     const componentManager = useDependency(ComponentManager);
@@ -184,6 +187,7 @@ export function UITinyMenuGroup(props: IUIQuickMenuGroupProps) {
 
     return (
         <DesignTinyMenuGroup
+            columns={columns}
             items={visibleChildren.map((child) => ({
                 key: child.key,
                 onClick: () => {
@@ -191,6 +195,8 @@ export function UITinyMenuGroup(props: IUIQuickMenuGroupProps) {
                         label: child.item?.id ?? child.key,
                         commandId: child.item?.commandId,
                         id: child.item?.id,
+                        params: child.item?.params,
+                        value: child.item?.value,
                         tooltip: child.item?.tooltip && localeService.t(child.item?.tooltip),
                     });
                 },
@@ -198,6 +204,7 @@ export function UITinyMenuGroup(props: IUIQuickMenuGroupProps) {
                 iconClassName: child.item?.icon === 'TextTypeIcon' ? '!univer-size-3.5' : undefined,
                 Icon: componentManager.get(child.item!.icon as string)!,
                 active: resolveMenuItemActiveState(child.item?.id, activeItems.includes(child.item?.id ?? ''), activeItemIds),
+                tooltip: child.item?.tooltip ? localeService.t(child.item.tooltip) : undefined,
             }))}
         />
     );

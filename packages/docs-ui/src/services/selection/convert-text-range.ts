@@ -17,6 +17,7 @@
 import type { IPosition, ITextRange, Nullable } from '@univerjs/core';
 import type {
     DocumentSkeleton,
+    IDocsTableRenderViewport,
     IDocumentOffsetConfig,
     IDocumentSkeletonColumn,
     IDocumentSkeletonDivide,
@@ -585,11 +586,11 @@ export class NodePositionConvertToCursor {
                     const { top: rowTop } = rowSke;
                     const sourceTableId = getTableIdAndSliceIndex(tableSke.tableId).tableId;
                     const viewport = getDocsTableRenderViewport(getDocumentUnitId(skeleton), sourceTableId);
-                    const hasHorizontalViewport = viewport && viewport.contentWidth > viewport.viewportWidth;
+                    const hasHorizontalViewport = hasHorizontalTableViewport(viewport);
                     const scrollLeft = hasHorizontalViewport ? viewport.scrollLeft : 0;
 
                     if (hasHorizontalViewport) {
-                        const visibleLeft = this._liquid.x + tableLeft;
+                        const visibleLeft = this._liquid.x + tableLeft - (viewport.leadingInsetLeft ?? 0);
                         this._horizontalClip = {
                             left: visibleLeft,
                             right: visibleLeft + viewport.viewportWidth,
@@ -686,6 +687,11 @@ export class NodePositionConvertToCursor {
             this._liquid.translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
         }
     }
+}
+
+function hasHorizontalTableViewport(viewport: Nullable<IDocsTableRenderViewport>): viewport is IDocsTableRenderViewport {
+    return viewport != null &&
+        (viewport.leadingInsetLeft ?? 0) + viewport.contentWidth + (viewport.trailingInsetRight ?? 0) > viewport.viewportWidth;
 }
 
 function clipPositionToHorizontalRange(position: IPosition, clip: Nullable<{ left: number; right: number }>): Nullable<IPosition> {

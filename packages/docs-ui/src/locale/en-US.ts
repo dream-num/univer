@@ -108,6 +108,18 @@ const locale = {
             checkList: 'Task list',
             insertBellow: 'Insert below',
         },
+        paragraphMenu: {
+            alignAndIndent: 'Align and indent',
+            align: 'Align',
+            indent: 'Indent',
+            color: 'Colors',
+            increase: 'Increase',
+            decrease: 'Decrease',
+            increaseIndent: 'Increase indent',
+            decreaseIndent: 'Decrease indent',
+            defaultTextColor: 'Default text color',
+            noBackground: 'No background',
+        },
         'page-settings': {
             'document-setting': 'Document Setting',
             mode: 'Mode',

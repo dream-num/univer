@@ -16,7 +16,7 @@
 
 import type { DocumentDataModel, ICommandInfo, IDrawingParam, ITransformState } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import type { Documents, DocumentSkeleton, IDocumentSkeletonHeaderFooter, IDocumentSkeletonPage, IDocumentSkeletonRow, IDocumentSkeletonTable, Image, IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import type { Documents, DocumentSkeleton, IDocsTableRenderViewport, IDocumentSkeletonHeaderFooter, IDocumentSkeletonPage, IDocumentSkeletonRow, IDocumentSkeletonTable, Image, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import {
     BooleanNumber,
     Disposable,
@@ -55,13 +55,18 @@ export function getDocsTableCellDrawingOffset(
 ) {
     const sourceTableId = getTableIdAndSliceIndex(table.tableId).tableId;
     const viewport = getDocsTableRenderViewport(unitId, sourceTableId);
-    const hasHorizontalViewport = viewport && viewport.contentWidth > viewport.viewportWidth;
+    const hasHorizontalViewport = hasHorizontalTableViewport(viewport);
     const scrollLeft = hasHorizontalViewport ? viewport.scrollLeft : 0;
 
     return {
         left: table.left + cell.left - scrollLeft + cell.marginLeft,
         top: table.top + row.top + cell.marginTop,
     };
+}
+
+function hasHorizontalTableViewport(viewport: IDocsTableRenderViewport | null | undefined): viewport is IDocsTableRenderViewport {
+    return viewport != null &&
+        (viewport.leadingInsetLeft ?? 0) + viewport.contentWidth + (viewport.trailingInsetRight ?? 0) > viewport.viewportWidth;
 }
 
 export class DocDrawingTransformUpdateController extends Disposable implements IRenderModule {

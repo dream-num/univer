@@ -29,7 +29,7 @@ import { PRESET_LIST_TYPE, SectionType, Skeleton } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { DocumentSkeletonPageType, GlyphType, LineType, PageLayoutType } from '../../../basics/i-document-skeleton-cached';
 import { Liquid } from '../liquid';
-import { getDocsTableRenderViewport } from '../table-render-viewport';
+import { getDocsTableRenderViewport, hasDocsTableHorizontalViewport } from '../table-render-viewport';
 import { DocumentEditArea } from '../view-model/document-view-model';
 import { dealWithSection } from './block/section';
 import { getTableIdAndSliceIndex } from './block/table';
@@ -894,8 +894,8 @@ export class DocumentSkeleton extends Skeleton {
 
                 this._findLiquid?.translateSave();
                 this._findLiquid?.translate(tableLeft, tableTop);
-                if (viewport && viewport.contentWidth > viewport.viewportWidth) {
-                    const visibleLeft = this._findLiquid.x;
+                if (hasDocsTableHorizontalViewport(viewport)) {
+                    const visibleLeft = this._findLiquid.x + page.marginLeft - (viewport.leadingInsetLeft ?? 0);
                     const visibleRight = visibleLeft + viewport.viewportWidth;
                     if (x < visibleLeft || x > visibleRight) {
                         this._findLiquid?.translateRestore();

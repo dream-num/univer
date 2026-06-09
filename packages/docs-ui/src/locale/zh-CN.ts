@@ -110,6 +110,18 @@ const locale: typeof enUS = {
             checkList: '任务列表',
             insertBellow: '在下方插入',
         },
+        paragraphMenu: {
+            alignAndIndent: '对齐和缩进',
+            align: '对齐',
+            indent: '缩进',
+            color: '颜色',
+            increase: '增加',
+            decrease: '减少',
+            increaseIndent: '增加缩进',
+            decreaseIndent: '减少缩进',
+            defaultTextColor: '默认文字颜色',
+            noBackground: '无背景色',
+        },
         'page-settings': {
             'document-setting': '文档设置',
             mode: '模式',

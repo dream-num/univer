@@ -74,6 +74,8 @@ const submenuOverlapOffset = 2;
 const submenuVisualGap = 20;
 export const CONTEXT_MENU_SUBMENU_CLOSE_DELAY = 500;
 export const CONTEXT_MENU_SUBMENU_PORTAL_ATTR = 'data-u-context-menu-submenu';
+const CONTEXT_MENU_CONNECTED_QUICK_GROUP_KEYS = new Set(['quickTop', 'quickBottom']);
+const CONTEXT_MENU_HEADER_QUICK_GROUP_KEYS = new Set(['quickTop', 'quickBottom']);
 
 type MenuLabel = IMenuItem['label'] | IValueOption['label'];
 
@@ -95,6 +97,34 @@ export function hasRenderableContextMenuSchema(menuSchema: IMenuSchema): boolean
     }
 
     return menuSchema.children.some((childSchema) => Boolean(childSchema.item));
+}
+
+export function shouldShowContextMenuGroupSeparator(visibleSchemas: IMenuSchema[], index: number): boolean {
+    if (index === visibleSchemas.length - 1) {
+        return false;
+    }
+
+    const currentSchema = visibleSchemas[index];
+    const nextSchema = visibleSchemas[index + 1];
+
+    if (
+        currentSchema?.quickLayout
+        && nextSchema?.quickLayout
+        && CONTEXT_MENU_CONNECTED_QUICK_GROUP_KEYS.has(currentSchema.key)
+        && CONTEXT_MENU_CONNECTED_QUICK_GROUP_KEYS.has(nextSchema.key)
+    ) {
+        return false;
+    }
+
+    return true;
+}
+
+export function getContextMenuQuickGroupColumns(menuSchema: IMenuSchema): number | undefined {
+    if (menuSchema.quickLayout === 'icon' && CONTEXT_MENU_HEADER_QUICK_GROUP_KEYS.has(menuSchema.key)) {
+        return 6;
+    }
+
+    return undefined;
 }
 
 export function ContextMenuPanel(props: IContextMenuPanelProps) {
@@ -212,7 +242,19 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
     return (
         <>
             {visibleSchemas.map((menuSchema, index) => {
-                const hasSeparator = index !== visibleSchemas.length - 1;
+                const hasSeparator = shouldShowContextMenuGroupSeparator(visibleSchemas, index);
+                const titleNode = menuSchema.title
+                    ? (
+                        <strong
+                            className={`
+                              univer-px-2 univer-text-xs univer-font-semibold univer-text-gray-600
+                              dark:!univer-text-gray-300
+                            `}
+                        >
+                            {localeService.t(menuSchema.title)}
+                        </strong>
+                    )
+                    : null;
 
                 if (menuSchema.item) {
                     return (
@@ -238,10 +280,11 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                         <div
                             key={menuSchema.key}
                             className={clsx(
-                                'univer-py-1',
+                                'univer-grid univer-gap-1 univer-py-1',
                                 hasSeparator && borderBottomClassName
                             )}
                         >
+                            {titleNode}
                             {menuSchema.quickLayout === 'tile'
                                 ? (
                                     <UIQuickTileMenuGroup
@@ -254,6 +297,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                                 : (
                                     <UITinyMenuGroup
                                         item={menuSchema}
+                                        columns={getContextMenuQuickGroupColumns(menuSchema)}
                                         activeItemIds={activeItemIds}
                                         hiddenItemIds={hiddenItemIds}
                                         onOptionSelect={onOptionSelect}
@@ -300,16 +344,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                             hasSeparator && borderBottomClassName
                         )}
                     >
-                        {menuSchema.title && (
-                            <strong
-                                className={`
-                                  univer-px-2 univer-text-xs univer-font-semibold univer-text-gray-600
-                                  dark:!univer-text-gray-300
-                                `}
-                            >
-                                {localeService.t(menuSchema.title)}
-                            </strong>
-                        )}
+                        {titleNode}
                         {menuSchema.children.map((childSchema) => (
                             childSchema.item && (
                                 <ContextMenuMenuItem
@@ -558,7 +593,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                         type="button"
                         className={interactiveItemClassName}
                         disabled={disabled}
-                        title={compact && typeof menuItem.tooltip === 'string' ? localeService.t(menuItem.tooltip) : undefined}
+                        title={typeof menuItem.tooltip === 'string' ? localeService.t(menuItem.tooltip) : undefined}
                         onClick={() => {
                             clearSubmenuCloseTimer();
                             if (hasSubmenu) {
@@ -638,7 +673,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                                 className={clsx(
                                     `
                                       univer-overflow-y-auto univer-overscroll-contain univer-rounded-md univer-border
-                                      univer-border-solid univer-border-gray-200 univer-bg-white univer-p-2
+                                      univer-border-solid univer-border-gray-200 univer-bg-white univer-p-1.5
                                       univer-shadow-md
                                       dark:!univer-border-gray-600 dark:!univer-bg-gray-700
                                     `,

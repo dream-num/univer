@@ -204,12 +204,13 @@ function pushViewportClippedPoints(
     viewport: Nullable<IDocsTableRenderViewport>,
     tableLeft: number
 ): void {
-    const scrollLeft = viewport && viewport.contentWidth > viewport.viewportWidth ? viewport.scrollLeft : 0;
-    const viewportWidth = viewport && viewport.contentWidth > viewport.viewportWidth ? viewport.viewportWidth : null;
+    const scrollLeft = hasHorizontalTableViewport(viewport) ? viewport.scrollLeft : 0;
+    const viewportWidth = hasHorizontalTableViewport(viewport) ? viewport.viewportWidth : null;
+    const visibleLeft = tableLeft - (viewport?.leadingInsetLeft ?? 0);
     const startX = position.startX - scrollLeft;
     const endX = position.endX - scrollLeft;
-    const clippedStartX = viewportWidth == null ? startX : Math.max(startX, tableLeft);
-    const clippedEndX = viewportWidth == null ? endX : Math.min(endX, tableLeft + viewportWidth);
+    const clippedStartX = viewportWidth == null ? startX : Math.max(startX, visibleLeft);
+    const clippedEndX = viewportWidth == null ? endX : Math.min(endX, visibleLeft + viewportWidth);
 
     if (clippedEndX <= clippedStartX) {
         return;
@@ -220,6 +221,11 @@ function pushViewportClippedPoints(
         startX: clippedStartX,
         endX: clippedEndX,
     }));
+}
+
+function hasHorizontalTableViewport(viewport: Nullable<IDocsTableRenderViewport>): viewport is IDocsTableRenderViewport {
+    return viewport != null &&
+        (viewport.leadingInsetLeft ?? 0) + viewport.contentWidth + (viewport.trailingInsetRight ?? 0) > viewport.viewportWidth;
 }
 
 interface IRectRangeNodePositions {

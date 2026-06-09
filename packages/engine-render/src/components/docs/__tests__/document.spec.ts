@@ -723,6 +723,7 @@ describe('documents render', () => {
 
             return {
                 contentWidth: 240,
+                leadingInsetLeft: 40,
                 scrollLeft: 80,
                 viewportWidth: 120,
             };
@@ -762,7 +763,7 @@ describe('documents render', () => {
 
         expect(queriedUnitIds).toEqual(['doc-unit-1:table-1']);
         expect(ctx.clip).toHaveBeenCalledTimes(1);
-        expect(ctx.rectByPrecision).toHaveBeenCalledWith(20, 30, 124, 64);
+        expect(ctx.rectByPrecision).toHaveBeenCalledWith(-20, 30, 124, 64);
         expect(translateCalls).toContainEqual([-80, 0]);
 
         documents.dispose();

@@ -111,7 +111,21 @@ export { DocUIController } from './controllers/doc-ui.controller';
 export { DocBackScrollRenderController } from './controllers/render-controllers/back-scroll.render-controller';
 export { DocRenderController } from './controllers/render-controllers/doc.render-controller';
 export { FLOAT_TEXT_STYLE_MENU_ID, FLOAT_TOOLBAR_MENU_POSITION, hideMenuWhenSelectionInBlockRange, isTextRangeInAnyBlockRange } from './menu/menu';
-export { DOC_CONTENT_INSERT_MENU_ID, EMPTY_PARAGRAPH_MENU_ID, getDocBlockRangeMenuId, INSERT_BELLOW_MENU_ID } from './menu/paragraph-menu';
+export {
+    DOC_CONTENT_INSERT_MENU_ID,
+    DOC_PARAGRAPH_T_ALIGN_MENU_ID,
+    DOC_PARAGRAPH_T_COLORS_MENU_ID,
+    DOC_PARAGRAPH_T_DIVIDER_MENU_ID,
+    DOC_PARAGRAPH_T_EDIT_MENU_ID,
+    DOC_PARAGRAPH_T_INSERT_BELOW_MENU_ID,
+    DOC_PARAGRAPH_T_INSERT_MENU_ID,
+    DOC_TABLE_BLOCK_MENU_ID,
+    EMPTY_PARAGRAPH_MENU_ID,
+    getDocBlockRangeMenuId,
+    INSERT_BELLOW_MENU_ID,
+    INSERT_DOC_SHAPE_COMMAND_ID,
+    ParagraphMenuInsertBelowSubmenuItemFactory,
+} from './menu/paragraph-menu';
 export { menuSchema as DocsUIMenuSchema } from './menu/schema';
 export { UniverDocsUIPlugin } from './plugin';
 export * from './services';

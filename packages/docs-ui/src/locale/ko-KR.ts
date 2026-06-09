@@ -110,6 +110,18 @@ const locale: typeof enUS = {
             checkList: '할 일 목록',
             insertBellow: '아래에 삽입',
         },
+        paragraphMenu: {
+            alignAndIndent: 'Align and indent',
+            align: 'Align',
+            indent: 'Indent',
+            color: 'Colors',
+            increase: 'Increase',
+            decrease: 'Decrease',
+            increaseIndent: 'Increase indent',
+            decreaseIndent: 'Decrease indent',
+            defaultTextColor: 'Default text color',
+            noBackground: 'No background',
+        },
         'page-settings': {
             'document-setting': '문서 설정',
             mode: '모드',

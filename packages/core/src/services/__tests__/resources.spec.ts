@@ -190,15 +190,15 @@ describe('Test resources service', () => {
 
         const slide = univer.createUnit<ITestSlideData, MockSlideUnit>(UniverInstanceType.UNIVER_SLIDE, {
             id: 'slide-resource',
-            resources: [
-                { name: pluginName, data: '{"kind":"loaded"}' },
-            ],
+            resources: {
+                [pluginName]: { kind: 'loaded' },
+            },
         });
 
         expect(loads).toContainEqual(['slide-resource', 'loaded']);
-        expect(resourceLoaderService.saveUnit<ITestSlideData>('slide-resource')?.resources).toEqual([
-            { name: pluginName, data: '{"kind":"saved:slide-resource"}' },
-        ]);
+        expect(resourceLoaderService.saveUnit<ITestSlideData>('slide-resource')?.resources).toEqual({
+            [pluginName]: { kind: 'saved:slide-resource' },
+        });
 
         expect(univerInstanceService.disposeUnit(slide.getUnitId())).toBe(true);
         expect(unloads).toEqual(['slide-resource']);
@@ -214,9 +214,9 @@ describe('Test resources service', () => {
         univerInstanceService.registerCtorForType(UniverInstanceType.UNIVER_SLIDE, MockSlideUnit as never);
         univer.createUnit<ITestSlideData, MockSlideUnit>(UniverInstanceType.UNIVER_SLIDE, {
             id: 'slide-late-resource',
-            resources: [
-                { name: pluginName, data: '{"kind":"late"}' },
-            ],
+            resources: {
+                [pluginName]: { kind: 'late' },
+            },
         });
 
         resourceManagerService.registerPluginResource<{ kind: string }>({

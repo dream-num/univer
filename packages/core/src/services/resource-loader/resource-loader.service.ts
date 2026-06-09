@@ -25,7 +25,7 @@ import { UniverInstanceType } from '../../common/unit';
 import { Tools } from '../../shared';
 import { Disposable } from '../../shared/lifecycle';
 import { IUniverInstanceService } from '../instance/instance.service';
-import { IResourceManagerService } from '../resource-manager/type';
+import { IResourceManagerService, resourceListToObject } from '../resource-manager/type';
 
 export class ResourceLoaderService extends Disposable implements IResourceLoaderService {
     constructor(
@@ -158,8 +158,8 @@ export class ResourceLoaderService extends Disposable implements IResourceLoader
             return null;
         }
         const resources = this._resourceManagerService.getResources(unitId, unit.type);
-        const snapshot = Tools.deepClone(unit.getSnapshot()) as { resources: typeof resources } & T;
-        snapshot.resources = resources;
+        const snapshot = Tools.deepClone(unit.getSnapshot()) as { resources: IResourceSnapshot } & T;
+        snapshot.resources = unit.type === UniverInstanceType.UNIVER_SLIDE ? resourceListToObject(resources) : resources;
         return snapshot;
     }
 }

@@ -19,8 +19,40 @@ import type { IDisposable } from '../../common/di';
 import type { UniverInstanceType } from '../../common/unit';
 import { createIdentifier } from '../../common/di';
 
-export type IResources = Array<{ id?: string; name: string; data: string }>;
-export type IResourceSnapshot = IResources | Record<string, unknown>;
+export interface IResourceItem { id?: string; name: string; data: string }
+export type IResources = IResourceItem[];
+export type IResourceObject = Record<string, unknown>;
+export type IResourceSnapshot = IResources | IResourceObject;
+
+export function resourceListToObject(resources: IResources | null | undefined): IResourceObject {
+    const result: IResourceObject = {};
+
+    resources?.forEach((resource) => {
+        if (!resource?.name) {
+            return;
+        }
+
+        result[resource.name] = parseResourceItemData(resource);
+    });
+
+    return result;
+}
+
+function parseResourceItemData(resource: IResourceItem): unknown {
+    const { data } = resource;
+    try {
+        return JSON.parse(data);
+    } catch {
+        if (resource.id !== undefined) {
+            return {
+                id: resource.id,
+                data,
+            };
+        }
+
+        return data;
+    }
+}
 
 type IBusinessName = 'SHEET' | 'DOC' | 'SLIDE';
 export type IResourceName = `${IBusinessName}_${string}_PLUGIN`;

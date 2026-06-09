@@ -135,7 +135,7 @@ describe('ResourceManagerService', () => {
         expect(errorSpy).toHaveBeenCalled();
     });
 
-    it('should load direct object-shaped plugin resources', () => {
+    it('should load array-shaped plugin resources', () => {
         const loaded: unknown[] = [];
 
         service.registerPluginResource({
@@ -147,9 +147,9 @@ describe('ResourceManagerService', () => {
             parseJson: JSON.parse,
         });
 
-        service.loadResources('unit-1', {
-            SHEET_TEST_PLUGIN: { ok: true },
-        } as never);
+        service.loadResources('unit-1', [
+            { name: 'SHEET_TEST_PLUGIN', data: '{"ok":true}' },
+        ]);
 
         expect(loaded).toEqual([{ ok: true }]);
     });

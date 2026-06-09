@@ -17,7 +17,7 @@
 import type { UnitModel } from '../../common/unit';
 import type { DocumentDataModel } from '../../docs';
 import type { Workbook } from '../../sheets/workbook';
-import type { IResourceHook, IResourceName, IResourceSnapshot } from '../resource-manager/type';
+import type { IResourceHook, IResources } from '../resource-manager/type';
 import type { IResourceLoaderService } from './type';
 import { isInternalEditorID } from '../../common/const';
 import { Inject } from '../../common/di';
@@ -36,48 +36,23 @@ export class ResourceLoaderService extends Disposable implements IResourceLoader
         this._init();
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _init() {
         const loadHookResource = (
             hook: IResourceHook,
             unitId: string,
-            resources: unknown,
+            resources: IResources = [],
             errorLabel: string
         ) => {
-            const data = getResourceData(resources, hook.pluginName);
-            if (data !== undefined) {
+            const plugin = resources.find((r) => r.name === hook.pluginName);
+            if (plugin) {
                 try {
-                    const model = hook.parseJson(data);
-                    hook.onLoad(unitId, model);
+                    const data = hook.parseJson(plugin.data);
+                    hook.onLoad(unitId, data);
                 } catch (err) {
                     console.error(`Load ${errorLabel}{${unitId}} Resources{${hook.pluginName}} Data Error.`);
                 }
             }
-        };
-        const getResourceData = (resources: unknown, pluginName: IResourceName): string | undefined => {
-            if (Array.isArray(resources)) {
-                const data = resources.find((resource) => resource.name === pluginName)?.data;
-                return typeof data === 'string' ? data : undefined;
-            }
-
-            if (!resources || typeof resources !== 'object') {
-                return undefined;
-            }
-
-            const raw = (resources as Record<string, unknown>)[pluginName];
-            if (typeof raw === 'string') {
-                return raw;
-            }
-
-            if (raw && typeof raw === 'object') {
-                const data = (raw as Record<string, unknown>).data;
-                if (typeof data === 'string') {
-                    return data;
-                }
-
-                return JSON.stringify(raw);
-            }
-
-            return undefined;
         };
 
         const handleHookAdd = (hook: IResourceHook) => {
@@ -92,7 +67,7 @@ export class ResourceLoaderService extends Disposable implements IResourceLoader
                         break;
                     }
                     case UniverInstanceType.UNIVER_SLIDE: {
-                        this._univerInstanceService.getAllUnitsForType<UnitModel<{ resources?: IResourceSnapshot }>>(UniverInstanceType.UNIVER_SLIDE).forEach((slide) => {
+                        this._univerInstanceService.getAllUnitsForType<UnitModel<{ resources?: IResources }>>(UniverInstanceType.UNIVER_SLIDE).forEach((slide) => {
                             loadHookResource(hook, slide.getUnitId(), slide.getSnapshot().resources, 'Slide');
                         });
                         break;
@@ -128,7 +103,7 @@ export class ResourceLoaderService extends Disposable implements IResourceLoader
             })
         );
         this.disposeWithMe(
-            this._univerInstanceService.getTypeOfUnitAdded$<UnitModel<{ resources?: IResourceSnapshot }>>(UniverInstanceType.UNIVER_SLIDE).subscribe((event) => {
+            this._univerInstanceService.getTypeOfUnitAdded$<UnitModel<{ resources?: IResources }>>(UniverInstanceType.UNIVER_SLIDE).subscribe((event) => {
                 const { unit: slide } = event;
                 this._resourceManagerService.loadResources(slide.getUnitId(), slide.getSnapshot().resources);
             })

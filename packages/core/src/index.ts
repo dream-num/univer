@@ -153,7 +153,7 @@ export type { PluginCtor } from './services/plugin/plugin.service';
 export { DependentOn, Plugin, PluginService } from './services/plugin/plugin.service';
 export { IResourceLoaderService } from './services/resource-loader/type';
 export { ResourceManagerService } from './services/resource-manager/resource-manager.service';
-export type { IResourceHook, IResources } from './services/resource-manager/type';
+export type { IResourceHook, IResources, IResourceSnapshot } from './services/resource-manager/type';
 export { IResourceManagerService } from './services/resource-manager/type';
 export { ThemeService } from './services/theme/theme.service';
 export {

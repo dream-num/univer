@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDisplayMenuItem, IMenuItem, IValueOption } from '../../../services/menu/menu';
+import type { IDisplayMenuItem, IMenuItem, IValueOption, MenuItemDefaultValueType } from '../../../services/menu/menu';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import type { TinyMenuLayoutVariant, TinyMenuSizeVariant } from './DesignTinyMenuGroup';
 import { convertObservableToBehaviorSubject, LocaleService } from '@univerjs/core';
@@ -43,6 +43,10 @@ interface IUIQuickTileMenuItemProps {
 
 const EMPTY_HIDDEN_ITEM_IDS: string[] = [];
 
+type TinyMenuDisplayItem = IDisplayMenuItem<IMenuItem> & {
+    value?: MenuItemDefaultValueType;
+};
+
 export function resolveMenuItemActiveState(itemId: string | undefined, observableActive: boolean, activeItemIds?: string[]): boolean {
     if (activeItemIds) {
         return Boolean(itemId && activeItemIds.includes(itemId));
@@ -64,7 +68,7 @@ function QuickTileMenuItem(props: IUIQuickTileMenuItemProps) {
     const { menuSchema, activeItemIds, onOptionSelect } = props;
     const componentManager = useDependency(ComponentManager);
     const localeService = useDependency(LocaleService);
-    const menuItem = menuSchema.item as IDisplayMenuItem<IMenuItem> | undefined;
+    const menuItem = menuSchema.item as TinyMenuDisplayItem | undefined;
     const disabled = useObservable<boolean>(menuItem?.disabled$, false);
     const hidden = useObservable<boolean>(menuItem?.hidden$, false);
     const activated = useObservable<boolean>(menuItem?.activated$, false);
@@ -201,7 +205,7 @@ export function UITinyMenuGroup(props: IUIQuickMenuGroupProps) {
                         commandId: child.item?.commandId,
                         id: child.item?.id,
                         params: child.item?.params,
-                        value: child.item?.value,
+                        value: (child.item as TinyMenuDisplayItem | undefined)?.value,
                         tooltip: child.item?.tooltip && localeService.t(child.item?.tooltip),
                     });
                 },

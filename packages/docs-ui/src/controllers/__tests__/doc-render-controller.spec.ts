@@ -127,6 +127,7 @@ function createControllerFixture(options?: {
                 getCanvasEle: vi.fn(() => ({ style: {} })),
             })),
         },
+        mainComponent: undefined as { width: number } | undefined,
         components: new Map(),
         activated$: new Subject<boolean>(),
     };

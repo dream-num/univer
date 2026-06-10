@@ -601,7 +601,7 @@ export class Documents extends DocComponent {
         tableSkeleton: IDocumentSkeletonTable,
         unitId: string,
         tableId: string
-    ): Nullable<IDocsTableRenderViewport> {
+    ): IDocsTableRenderViewport | null {
         const viewport = getDocsTableRenderViewport(unitId, tableId);
         if (viewport) {
             return viewport;

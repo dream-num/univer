@@ -61,6 +61,10 @@ export function Fab() {
     const dispose = useDispose();
 
     const globalItems = [locale, rtl, darkMode, theme];
+    const lightweightItems = [
+        ...globalItems,
+        watermark,
+    ];
     const commonDebugItems = [
         watermark,
         { type: 'separator' as const },
@@ -92,7 +96,7 @@ export function Fab() {
     ];
 
     const items: IDropdownMenuProps['items'] = fabEntryUnitType === UniverInstanceType.UNIVER_BASE || fabEntryUnitType === UniverInstanceType.UNIVER_SLIDE
-        ? globalItems
+        ? lightweightItems
         : fabEntryUnitType === UniverInstanceType.UNIVER_DOC
             ? [...globalItems, ...commonDebugItems, floatingDom].filter(Boolean) as IDropdownMenuProps['items']
             : sheetItems.filter(Boolean) as IDropdownMenuProps['items'];

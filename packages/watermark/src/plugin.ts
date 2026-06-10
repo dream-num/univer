@@ -104,6 +104,8 @@ export class UniverWatermarkPlugin extends Plugin {
         ] as Dependency[]).forEach((d) => {
             this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_SHEET, d);
             this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, d);
+            this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_SLIDE, d);
+            this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_BASE, d);
         });
     }
 }

@@ -22,25 +22,8 @@ import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { DEFAULT_WORKBOOK_DATA_DEMO, loadDebuggerLocale } from '@univerjs/mockdata';
-import arSA from '@univerjs/mockdata/locales/ar-SA';
-import caES from '@univerjs/mockdata/locales/ca-ES';
-import deDE from '@univerjs/mockdata/locales/de-DE';
 import enUS from '@univerjs/mockdata/locales/en-US';
-import esES from '@univerjs/mockdata/locales/es-ES';
-import faIR from '@univerjs/mockdata/locales/fa-IR';
-import frFR from '@univerjs/mockdata/locales/fr-FR';
-import idID from '@univerjs/mockdata/locales/id-ID';
-import itIT from '@univerjs/mockdata/locales/it-IT';
-import jaJP from '@univerjs/mockdata/locales/ja-JP';
-import koKR from '@univerjs/mockdata/locales/ko-KR';
-import plPL from '@univerjs/mockdata/locales/pl-PL';
-import ptBR from '@univerjs/mockdata/locales/pt-BR';
-import ruRU from '@univerjs/mockdata/locales/ru-RU';
-import skSK from '@univerjs/mockdata/locales/sk-SK';
-import viVN from '@univerjs/mockdata/locales/vi-VN';
 import zhCN from '@univerjs/mockdata/locales/zh-CN';
-import zhHK from '@univerjs/mockdata/locales/zh-HK';
-import zhTW from '@univerjs/mockdata/locales/zh-TW';
 import { UniverNetworkPlugin } from '@univerjs/network';
 import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
@@ -106,29 +89,10 @@ export const mockUser = {
 function createNewInstance() {
     // univer
     const univer = new Univer({
-        // theme: greenTheme,
-        darkMode: localStorage.getItem('local.darkMode') === 'dark',
-        locale: LocaleType.ZH_CN,
+        locale: LocaleType.EN_US,
         locales: {
-            [LocaleType.AR_SA]: arSA,
-            [LocaleType.CA_ES]: caES,
-            [LocaleType.DE_DE]: deDE,
             [LocaleType.EN_US]: enUS,
-            [LocaleType.ES_ES]: esES,
-            [LocaleType.FA_IR]: faIR,
-            [LocaleType.FR_FR]: frFR,
-            [LocaleType.ID_ID]: idID,
-            [LocaleType.IT_IT]: itIT,
-            [LocaleType.JA_JP]: jaJP,
-            [LocaleType.KO_KR]: koKR,
-            [LocaleType.PL_PL]: plPL,
-            [LocaleType.PT_BR]: ptBR,
-            [LocaleType.RU_RU]: ruRU,
-            [LocaleType.SK_SK]: skSK,
-            [LocaleType.VI_VN]: viVN,
             [LocaleType.ZH_CN]: zhCN,
-            [LocaleType.ZH_HK]: zhHK,
-            [LocaleType.ZH_TW]: zhTW,
         },
         logLevel: LogLevel.VERBOSE,
     });

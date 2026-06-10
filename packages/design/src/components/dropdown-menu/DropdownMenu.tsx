@@ -36,6 +36,7 @@ interface IDropdownMenuNormalItem {
     className?: string;
     children: ReactNode;
     disabled?: boolean;
+    variant?: 'default' | 'destructive';
     onSelect?: (item: DropdownMenuType) => void;
 }
 
@@ -78,7 +79,13 @@ interface IDropdownMenuCheckItem {
     onSelect?: (item: string) => void;
 }
 
-type DropdownMenuType = IDropdownMenuNormalItem | IDropdownMenuNormalSubItem | IDropdownMenuSeparatorItem | IDropdownMenuRadioItem | IDropdownMenuCheckItem;
+interface IDropdownMenuCustomItem {
+    type: 'custom';
+    className?: string;
+    children: ReactNode;
+}
+
+type DropdownMenuType = IDropdownMenuNormalItem | IDropdownMenuNormalSubItem | IDropdownMenuSeparatorItem | IDropdownMenuRadioItem | IDropdownMenuCheckItem | IDropdownMenuCustomItem;
 
 export interface IDropdownMenuProps extends ComponentProps<typeof DropdownMenuContent> {
     children: ReactNode;
@@ -118,6 +125,12 @@ export function DropdownMenu(props: IDropdownMenuProps) {
 
         if (type === 'separator') {
             return <DropdownMenuSeparator key={index} className={className} />;
+        } else if (type === 'custom') {
+            return (
+                <div key={index} className={className}>
+                    {item.children}
+                </div>
+            );
         } else if (type === 'radio') {
             return (
                 <DropdownMenuRadioGroup
@@ -170,6 +183,7 @@ export function DropdownMenu(props: IDropdownMenuProps) {
                     key={index}
                     className={className}
                     disabled={item.disabled}
+                    variant={item.variant}
                     onSelect={() => {
                         item.onSelect?.(item);
                     }}

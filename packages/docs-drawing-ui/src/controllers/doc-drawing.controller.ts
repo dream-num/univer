@@ -22,6 +22,7 @@ import { GroupDocDrawingCommand } from '../commands/commands/group-doc-drawing.c
 import { InsertDocDrawingCommand } from '../commands/commands/insert-doc-drawing.command';
 
 import { InsertDocImageCommand } from '../commands/commands/insert-image.command';
+import { InsertDocEllipseShapeCommand, InsertDocRectangleShapeCommand } from '../commands/commands/insert-shape.command';
 import { MoveDocDrawingsCommand } from '../commands/commands/move-drawings.command';
 import { RemoveDocDrawingCommand } from '../commands/commands/remove-doc-drawing.command';
 import { SetDocDrawingArrangeCommand } from '../commands/commands/set-drawing-arrange.command';
@@ -59,6 +60,8 @@ export class DocDrawingUIController extends Disposable {
     private _initCommands() {
         [
             InsertDocImageCommand,
+            InsertDocRectangleShapeCommand,
+            InsertDocEllipseShapeCommand,
             InsertDocDrawingCommand,
             UpdateDocDrawingWrappingStyleCommand,
             UpdateDocDrawingDistanceCommand,

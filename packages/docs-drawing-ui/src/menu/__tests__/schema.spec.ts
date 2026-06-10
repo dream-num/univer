@@ -18,8 +18,13 @@ import { DOC_CONTENT_INSERT_MENU_ID, EMPTY_PARAGRAPH_MENU_ID, INSERT_BELLOW_MENU
 import { ContextMenuGroup, ContextMenuPosition } from '@univerjs/ui';
 import { describe, expect, it } from 'vitest';
 import { InsertDocImageCommand } from '../../commands/commands/insert-image.command';
+import { InsertDocEllipseShapeCommand, InsertDocRectangleShapeCommand } from '../../commands/commands/insert-shape.command';
 import { UploadFloatImageMenuFactory } from '../image.menu';
 import { menuSchema } from '../schema';
+import {
+    DOCS_SHAPE_BELOW_MENU_ID,
+    DOCS_SHAPE_MENU_ID,
+} from '../shape.menu';
 
 describe('docs drawing menu schema', () => {
     it('adds image to paragraph insert menus', () => {
@@ -34,5 +39,16 @@ describe('docs drawing menu schema', () => {
         const item = UploadFloatImageMenuFactory({ get: () => undefined } as never);
 
         expect(item.icon).toBe('AddImageIcon');
+    });
+
+    it('registers shape submenu options for paragraph insert menus', () => {
+        const paragraph = (menuSchema as any)[ContextMenuPosition.PARAGRAPH];
+        const rootShapeMenu = paragraph[DOCS_SHAPE_MENU_ID].shapes;
+        const belowShapeMenu = paragraph[DOCS_SHAPE_BELOW_MENU_ID].shapes;
+
+        expect(rootShapeMenu[InsertDocRectangleShapeCommand.id].menuItemFactory).toBeDefined();
+        expect(rootShapeMenu[InsertDocEllipseShapeCommand.id].menuItemFactory).toBeDefined();
+        expect(belowShapeMenu[`${InsertDocRectangleShapeCommand.id}.below`].menuItemFactory).toBeDefined();
+        expect(belowShapeMenu[`${InsertDocEllipseShapeCommand.id}.below`].menuItemFactory).toBeDefined();
     });
 });

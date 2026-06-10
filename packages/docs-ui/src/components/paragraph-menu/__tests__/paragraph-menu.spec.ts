@@ -15,12 +15,15 @@
  */
 
 import { NamedStyleType } from '@univerjs/core';
+import { MenuItemType } from '@univerjs/ui';
 
+import React from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import * as paragraphMenu from '..';
 import { createParagraphMenuHoverOpenScheduler, getParagraphFormattingRange, getParagraphMenuActiveHeadingCommandId, getParagraphMenuCommand, getParagraphMenuCommandTargetRange, getParagraphMenuHiddenHeadingCommandIds, getParagraphMenuHiddenItemIds, getParagraphMenuIconSizeClass, getParagraphMenuPopupDirection, getParagraphMenuTargetRange, isEmptyParagraphMenuTarget, PARAGRAPH_MENU_HOVER_OPEN_DELAY, shouldShowParagraphSettingMenu, shouldUseInsertBelowRange } from '..';
 import { HorizontalLineCommand } from '../../../commands/commands/doc-horizontal-line.command';
-import { SetInlineFormatTextColorCommand } from '../../../commands/commands/inline-format.command';
+import { SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand } from '../../../commands/commands/inline-format.command';
 import { BulletListCommand, InsertBulletListBellowCommand, OrderListCommand } from '../../../commands/commands/list.command';
 import { H1HeadingCommand, H3HeadingCommand, H4HeadingCommand, H5HeadingCommand, NormalTextHeadingCommand, SetParagraphNamedStyleCommand, SubtitleHeadingCommand, TitleHeadingCommand } from '../../../commands/commands/set-heading.command';
 import { CreateDocTableCommand } from '../../../commands/commands/table/doc-table-create.command';
@@ -35,8 +38,14 @@ import {
     InsertBulletListBellowMenuItemFactory,
     InsertHorizontalLineBellowMenuItemFactory,
     InsertOrderListBellowMenuItemFactory,
+    ParagraphMenuBackgroundColorHeaderActionMenuItemFactory,
+    ParagraphMenuBackgroundColorSwatchMenuItemFactories,
+    ParagraphMenuDefaultTextColorMenuItemFactory,
     ParagraphMenuIndentDecreaseMenuItemFactory,
     ParagraphMenuIndentIncreaseMenuItemFactory,
+    ParagraphMenuNoBackgroundMenuItemFactory,
+    ParagraphMenuTextColorHeaderActionMenuItemFactory,
+    ParagraphMenuTextColorSwatchMenuItemFactories,
     TableBlockCopyMenuItemFactory,
     TableBlockDeleteMenuItemFactory,
     TableBlockPasteMenuItemFactory,
@@ -94,6 +103,102 @@ describe('ParagraphMenu', () => {
         expect(ParagraphMenuIndentDecreaseMenuItemFactory(accessor).tooltip).toBe('docs-ui.paragraphMenu.decreaseIndent');
         expect(ParagraphMenuIndentIncreaseMenuItemFactory(accessor).title).toBe('docs-ui.paragraphMenu.increase');
         expect(ParagraphMenuIndentDecreaseMenuItemFactory(accessor).title).toBe('docs-ui.paragraphMenu.decrease');
+    });
+
+    it('renders paragraph text color swatches with an A glyph inside an outlined color chip', () => {
+        const registeredIcons = new Map<string, React.ComponentType<{ className?: string }>>();
+        const componentManager = {
+            get: (key: string) => registeredIcons.get(key),
+            register: (key: string, component: React.ComponentType<{ className?: string }>) => {
+                registeredIcons.set(key, component);
+            },
+        };
+        const accessor = {
+            get: () => componentManager,
+        } as never;
+
+        const factory = ParagraphMenuTextColorSwatchMenuItemFactories['doc.menu.paragraph-t.text-color.0'].menuItemFactory;
+        const menuItem = factory(accessor);
+        const Icon = registeredIcons.get(menuItem.icon as string);
+
+        expect(Icon).toBeDefined();
+        expect(menuItem.tooltip).toBeUndefined();
+
+        const markup = renderToStaticMarkup(React.createElement(Icon!, { className: 'swatch-icon' }));
+
+        expect(markup).toContain('>A<');
+        expect(markup.match(/<rect/g)?.length ?? 0).toBeGreaterThan(0);
+    });
+
+    it('keeps paragraph background color swatches as plain color blocks', () => {
+        const registeredIcons = new Map<string, React.ComponentType<{ className?: string }>>();
+        const componentManager = {
+            get: (key: string) => registeredIcons.get(key),
+            register: (key: string, component: React.ComponentType<{ className?: string }>) => {
+                registeredIcons.set(key, component);
+            },
+        };
+        const accessor = {
+            get: () => componentManager,
+        } as never;
+
+        const factory = ParagraphMenuBackgroundColorSwatchMenuItemFactories['doc.menu.paragraph-t.background-color.0'].menuItemFactory;
+        const menuItem = factory(accessor);
+        const Icon = registeredIcons.get(menuItem.icon as string);
+
+        expect(Icon).toBeDefined();
+        expect(menuItem.tooltip).toBeUndefined();
+
+        const markup = renderToStaticMarkup(React.createElement(Icon!, { className: 'swatch-icon' }));
+
+        expect(markup).not.toContain('>A<');
+        expect(markup.match(/<rect/g)?.length ?? 0).toBeGreaterThan(0);
+    });
+
+    it('keeps the non-color explanatory actions in the colors submenu tooltip-free', () => {
+        const accessor = {
+            get: () => ({
+                get: () => undefined,
+                register: () => undefined,
+            }),
+        } as never;
+
+        expect(ParagraphMenuDefaultTextColorMenuItemFactory(accessor).tooltip).toBeUndefined();
+        expect(ParagraphMenuNoBackgroundMenuItemFactory(accessor).tooltip).toBeUndefined();
+    });
+
+    it('reuses the existing text color selector logic for the colors header action with an A icon', () => {
+        const accessor = {
+            get: () => ({
+                get: () => undefined,
+                register: () => undefined,
+            }),
+        } as never;
+
+        const menuItem = ParagraphMenuTextColorHeaderActionMenuItemFactory(accessor);
+
+        expect(menuItem.type).toBe(MenuItemType.BUTTON_SELECTOR);
+        expect(menuItem.id).toBe(SetInlineFormatTextColorCommand.id);
+        expect(menuItem.icon).toBe('HeaderTextColorIcon');
+        expect(menuItem.tooltip).toBeUndefined();
+        expect(Array.isArray((menuItem as any).selections)).toBe(true);
+    });
+
+    it('reuses the existing background color selector logic for the colors header action with the bucket icon', () => {
+        const accessor = {
+            get: () => ({
+                get: () => undefined,
+                register: () => undefined,
+            }),
+        } as never;
+
+        const menuItem = ParagraphMenuBackgroundColorHeaderActionMenuItemFactory(accessor);
+
+        expect(menuItem.type).toBe(MenuItemType.BUTTON_SELECTOR);
+        expect(menuItem.id).toBe(SetInlineFormatTextBackgroundColorCommand.id);
+        expect(menuItem.icon).toBe('PaintBucketDoubleIcon');
+        expect(menuItem.tooltip).toBeUndefined();
+        expect(Array.isArray((menuItem as any).selections)).toBe(true);
     });
 
     it('opens the popup away from the drag handle when there is not enough left space', () => {

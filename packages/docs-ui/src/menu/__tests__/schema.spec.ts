@@ -52,7 +52,11 @@ import {
     INSERT_BELLOW_MENU_ID,
     INSERT_DOC_IMAGE_COMMAND_ID,
     INSERT_DOC_SHAPE_COMMAND_ID,
+    ParagraphMenuBackgroundColorHeaderActionMenuItemFactory,
     ParagraphMenuDefaultTextColorMenuItemFactory,
+    ParagraphMenuInsertBelowShapeMenuItemFactory,
+    ParagraphMenuInsertShapeMenuItemFactory,
+    ParagraphMenuTextColorHeaderActionMenuItemFactory,
 } from '../paragraph-menu';
 import { menuSchema } from '../schema';
 
@@ -297,12 +301,20 @@ describe('docs ui ribbon schema', () => {
         ]));
 
         expect(colorsMenu.text.title).toBe('docs-ui.toolbar.textColor.main');
+        expect(colorsMenu.text.headerActionMenuItemFactory).toBe(ParagraphMenuTextColorHeaderActionMenuItemFactory);
         expect(colorsMenu.text.quickLayout).toBe('icon');
+        expect(colorsMenu.text.quickColumns).toBe(8);
+        expect(colorsMenu.text.quickLayoutVariant).toBe('compact');
         expect(colorsMenu.text[`${SetInlineFormatTextColorCommand.id}.default`].menuItemFactory).toBe(ParagraphMenuDefaultTextColorMenuItemFactory);
         expect(colorsMenu.backgroundTop.title).toBe('docs-ui.toolbar.fillColor.main');
+        expect(colorsMenu.backgroundTop.headerActionMenuItemFactory).toBe(ParagraphMenuBackgroundColorHeaderActionMenuItemFactory);
         expect(colorsMenu.backgroundTop.quickLayout).toBe('icon');
+        expect(colorsMenu.backgroundTop.quickColumns).toBe(8);
+        expect(colorsMenu.backgroundTop.quickLayoutVariant).toBe('compact');
         expect(colorsMenu.backgroundTop[ResetInlineFormatTextBackgroundColorCommand.id].menuItemFactory).toBeDefined();
         expect(colorsMenu.backgroundBottom.quickLayout).toBe('icon');
+        expect(colorsMenu.backgroundBottom.quickColumns).toBe(8);
+        expect(colorsMenu.backgroundBottom.quickLayoutVariant).toBe('compact');
         expect(colorsMenu.reset).toBeUndefined();
         expect(Object.keys(colorsMenu.text).filter((key) => key.startsWith('doc.menu.paragraph-t.text-color.'))).toHaveLength(7);
         expect(Object.keys(colorsMenu.backgroundTop).filter((key) => key.startsWith('doc.menu.paragraph-t.background-color.'))).toHaveLength(7);
@@ -329,5 +341,15 @@ describe('docs ui ribbon schema', () => {
         expect(insertBelowMenu.insert[`${DocCreateTableOperation.id}.below`].menuItemFactory).toBeDefined();
         expect(insertBelowMenu.insert[`${INSERT_DOC_IMAGE_COMMAND_ID}.below`].menuItemFactory).toBeDefined();
         expect(insertBelowMenu.insert[`${INSERT_DOC_SHAPE_COMMAND_ID}.below`].menuItemFactory).toBeDefined();
+    });
+
+    it('uses official shape submenus for paragraph insert shape actions', () => {
+        const rootShapeItem = ParagraphMenuInsertShapeMenuItemFactory({ get: () => ({ get: () => undefined, register: () => undefined }) } as never);
+        const belowShapeItem = ParagraphMenuInsertBelowShapeMenuItemFactory({ get: () => ({ get: () => undefined, register: () => undefined }) } as never);
+
+        expect(rootShapeItem.type).toBe(MenuItemType.SUBITEMS);
+        expect(rootShapeItem.id).toBe(INSERT_DOC_SHAPE_COMMAND_ID);
+        expect(belowShapeItem.type).toBe(MenuItemType.SUBITEMS);
+        expect(belowShapeItem.id).toBe(`${INSERT_DOC_SHAPE_COMMAND_ID}.below`);
     });
 });

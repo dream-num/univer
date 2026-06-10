@@ -44,7 +44,7 @@ import { BulletListCommand, CheckListCommand, InsertBulletListBellowCommand, Ins
 import { H1HeadingCommand, H2HeadingCommand, H3HeadingCommand, H4HeadingCommand, H5HeadingCommand, NormalTextHeadingCommand, SubtitleHeadingCommand, TitleHeadingCommand } from '../commands/commands/set-heading.command';
 import { DocTableDeleteTableCommand } from '../commands/commands/table/doc-table-delete.command';
 import { DocCreateTableOperation } from '../commands/operations/doc-create-table.operation';
-import { disableMenuWhenNoDocRange, getParagraphStyleAtCursor } from './menu';
+import { BackgroundColorSelectorMenuItemFactory, disableMenuWhenNoDocRange, getParagraphStyleAtCursor, TextColorSelectorMenuItemFactory } from './menu';
 
 const HEADING_MAP: Record<NamedStyleType, ICommand> = {
     [NamedStyleType.HEADING_1]: H1HeadingCommand,
@@ -114,7 +114,9 @@ function SubtitleTypeIcon({ className }: { className: string }) {
     );
 }
 
-function DefaultTextColorIcon({ className }: { className: string }) {
+function HeaderTextColorIcon({ className, extend }: { className: string; extend?: { colorChannel1?: string } }) {
+    const color = extend?.colorChannel1 ?? 'currentColor';
+
     return createElement(
         'svg',
         {
@@ -123,23 +125,29 @@ function DefaultTextColorIcon({ className }: { className: string }) {
             fill: 'none',
             'aria-hidden': true,
         },
-        createElement('text', {
-            x: 5,
-            y: 17,
-            fontFamily: 'Arial, sans-serif',
-            fontSize: 16,
-            fontWeight: 700,
-            fill: '#000000',
-        }, 'A'),
         createElement('rect', {
-            x: 4,
-            y: 19,
-            width: 16,
-            height: 2,
-            rx: 1,
-            fill: '#000000',
-        })
+            x: 3,
+            y: 3,
+            width: 18,
+            height: 18,
+            rx: 4,
+            fill: 'none',
+            stroke: 'currentColor',
+            strokeOpacity: 0.16,
+        }),
+        createElement('text', {
+            x: 7.5,
+            y: 16.5,
+            fontFamily: 'Arial, sans-serif',
+            fontSize: 12,
+            fontWeight: 700,
+            fill: color,
+        }, 'A')
     );
+}
+
+function DefaultTextColorIcon({ className }: { className: string }) {
+    return TextColorSwatchIcon({ className, color: '#000000' });
 }
 
 export const HEADING_ICON_MAP: Record<NamedStyleType, { key: string; component: ComponentType<{ className: string }> }> = {
@@ -359,6 +367,7 @@ function ensureParagraphMenuIcon(componentManager: ComponentManager, icon: strin
         TitleTypeIcon,
         SubtitleTypeIcon,
         DefaultTextColorIcon,
+        HeaderTextColorIcon,
         CodeBlockIcon,
         QuoteIcon,
         CalloutIcon,
@@ -373,7 +382,38 @@ function ensureParagraphMenuIcon(componentManager: ComponentManager, icon: strin
     }
 }
 
-function ColorSwatchIcon(props: { className?: string; color: string }) {
+function TextColorSwatchIcon(props: { className?: string; color: string }) {
+    const { className, color } = props;
+    return createElement(
+        'svg',
+        {
+            className,
+            viewBox: '0 0 24 24',
+            fill: 'none',
+            'aria-hidden': true,
+        },
+        createElement('rect', {
+            x: 3,
+            y: 3,
+            width: 18,
+            height: 18,
+            rx: 4,
+            fill: 'none',
+            stroke: 'currentColor',
+            strokeOpacity: 0.16,
+        }),
+        createElement('text', {
+            x: 7.5,
+            y: 16.5,
+            fontFamily: 'Arial, sans-serif',
+            fontSize: 12,
+            fontWeight: 700,
+            fill: color,
+        }, 'A')
+    );
+}
+
+function BackgroundColorSwatchIcon(props: { className?: string; color: string }) {
     const { className, color } = props;
     return createElement(
         'svg',
@@ -396,12 +436,17 @@ function ColorSwatchIcon(props: { className?: string; color: string }) {
     );
 }
 
-function ensureColorSwatchIcon(componentManager: ComponentManager, icon: string, color: string) {
+function ensureColorSwatchIcon(componentManager: ComponentManager, icon: string, color: string, variant: 'text' | 'background') {
     if (componentManager.get(icon)) {
         return;
     }
 
-    componentManager.register(icon, ({ className }: { className?: string }) => ColorSwatchIcon({ className, color }));
+    componentManager.register(
+        icon,
+        ({ className }: { className?: string }) => (variant === 'text'
+            ? TextColorSwatchIcon({ className, color })
+            : BackgroundColorSwatchIcon({ className, color }))
+    );
 }
 
 function createStaticButtonMenuItemFactory(config: {
@@ -461,22 +506,45 @@ function createColorSwatchMenuItemFactory(config: {
     commandId: string;
     icon: string;
     color: string;
-    tooltip: string;
+    variant: 'text' | 'background';
 }) {
     return (accessor: IAccessor): IMenuButtonItem => {
         const componentManager = accessor.get(ComponentManager);
-        ensureColorSwatchIcon(componentManager, config.icon, config.color);
+        ensureColorSwatchIcon(componentManager, config.icon, config.color, config.variant);
 
         return {
             id: config.id,
             commandId: config.commandId,
             type: MenuItemType.BUTTON,
             icon: config.icon,
-            tooltip: config.tooltip,
             params: {
                 value: config.color,
             },
             hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+        };
+    };
+}
+
+function createHeaderActionMenuItemFactory(
+    baseFactory: (accessor: IAccessor) => IMenuItem,
+    config?: {
+        icon?: string;
+    }
+) {
+    return (accessor: IAccessor): IMenuItem => {
+        const componentManager = accessor.get(ComponentManager);
+
+        if (config?.icon) {
+            ensureParagraphMenuIcon(componentManager, config.icon);
+        }
+
+        const baseItem = baseFactory(accessor) as IMenuSelectorItem<string, string | undefined>;
+
+        return {
+            ...baseItem,
+            icon: config?.icon ?? baseItem.icon,
+            tooltip: undefined,
+            title: undefined,
         };
     };
 }
@@ -531,6 +599,16 @@ export const ParagraphMenuColorsSubmenuItemFactory = createStaticSubmenuMenuItem
     tooltip: 'docs-ui.paragraphMenu.color',
 });
 
+export const ParagraphMenuTextColorHeaderActionMenuItemFactory = createHeaderActionMenuItemFactory(
+    TextColorSelectorMenuItemFactory,
+    { icon: 'HeaderTextColorIcon' }
+);
+
+export const ParagraphMenuBackgroundColorHeaderActionMenuItemFactory = createHeaderActionMenuItemFactory(
+    BackgroundColorSelectorMenuItemFactory,
+    { icon: 'PaintBucketDoubleIcon' }
+);
+
 export const ParagraphMenuInsertBelowSubmenuItemFactory = createStaticSubmenuMenuItemFactory({
     id: DOC_PARAGRAPH_T_INSERT_BELOW_MENU_ID,
     icon: 'TextTypeIcon',
@@ -545,11 +623,11 @@ export const ParagraphMenuInsertImageMenuItemFactory = createStaticButtonMenuIte
     tooltip: 'docs-drawing-ui.upload.float',
 });
 
-export const ParagraphMenuInsertShapeMenuItemFactory = createStaticButtonMenuItemFactory({
+export const ParagraphMenuInsertShapeMenuItemFactory = createStaticSubmenuMenuItemFactory({
     id: INSERT_DOC_SHAPE_COMMAND_ID,
     icon: 'ShapeIcon',
-    title: 'docs-shape-ui.insertShape',
-    tooltip: 'docs-shape-ui.insertShape',
+    title: 'Insert Shape',
+    tooltip: 'Insert Shape',
 });
 
 export const ParagraphMenuInsertCodeMenuItemFactory = createStaticButtonMenuItemFactory({
@@ -627,13 +705,11 @@ export const ParagraphMenuInsertBelowImageMenuItemFactory = createStaticButtonMe
     params: { paragraphMenuPlacement: 'below' },
 });
 
-export const ParagraphMenuInsertBelowShapeMenuItemFactory = createStaticButtonMenuItemFactory({
+export const ParagraphMenuInsertBelowShapeMenuItemFactory = createStaticSubmenuMenuItemFactory({
     id: `${INSERT_DOC_SHAPE_COMMAND_ID}.below`,
-    commandId: INSERT_DOC_SHAPE_COMMAND_ID,
     icon: 'ShapeIcon',
-    title: 'docs-shape-ui.insertShape',
-    tooltip: 'docs-shape-ui.insertShape',
-    params: { paragraphMenuPlacement: 'below' },
+    title: 'Insert Shape',
+    tooltip: 'Insert Shape',
 });
 
 export const ParagraphMenuInsertBelowTableMenuItemFactory = createStaticButtonMenuItemFactory({
@@ -685,7 +761,6 @@ export const ParagraphMenuDefaultTextColorMenuItemFactory = createStaticButtonMe
     commandId: SetInlineFormatTextColorCommand.id,
     icon: 'DefaultTextColorIcon',
     title: 'docs-ui.paragraphMenu.defaultTextColor',
-    tooltip: 'docs-ui.paragraphMenu.defaultTextColor',
     params: { value: '#000000' },
 });
 
@@ -693,7 +768,6 @@ export const ParagraphMenuNoBackgroundMenuItemFactory = createStaticButtonMenuIt
     id: ResetInlineFormatTextBackgroundColorCommand.id,
     icon: 'NoColorDoubleIcon',
     title: 'docs-ui.paragraphMenu.noBackground',
-    tooltip: 'docs-ui.paragraphMenu.noBackground',
 });
 
 export const ParagraphMenuResetColorsMenuItemFactory = createStaticButtonMenuItemFactory({
@@ -712,7 +786,7 @@ export const ParagraphMenuTextColorSwatchMenuItemFactories = TEXT_COLORS.reduce<
             commandId: SetInlineFormatTextColorCommand.id,
             icon: `DocParagraphTextColorSwatchIcon.${index}`,
             color,
-            tooltip: 'docs-ui.toolbar.textColor.main',
+            variant: 'text',
         }),
     };
     return items;
@@ -727,7 +801,7 @@ export const ParagraphMenuBackgroundColorSwatchMenuItemFactories = BACKGROUND_CO
             commandId: SetInlineFormatTextBackgroundColorCommand.id,
             icon: `DocParagraphBackgroundColorSwatchIcon.${index}`,
             color,
-            tooltip: 'docs-ui.toolbar.fillColor.main',
+            variant: 'background',
         }),
     };
     return items;

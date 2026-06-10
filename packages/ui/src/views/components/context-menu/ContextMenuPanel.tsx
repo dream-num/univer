@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { Dispatch, SetStateAction } from 'react';
 import type {
     IDisplayMenuItem,
     IMenuButtonItem,
@@ -66,11 +67,20 @@ interface IContextMenuMenuItemProps {
     menuSessionVersion: number;
     submenuPortalContainer: HTMLElement | null;
     maxMenuHeight: number;
+    activeSubmenuKey: string | null;
+    setActiveSubmenuKey: Dispatch<SetStateAction<string | null>>;
     activeItemIds?: string[];
     hiddenItemIds?: string[];
     compact?: boolean;
+    headerAction?: boolean;
     sizeVariant: ContextMenuSizeVariant;
     onOptionSelect?: (option: IValueOption) => void;
+}
+
+interface IContextMenuSchemaRenderGroup {
+    startIndex: number;
+    endIndex: number;
+    menuSchemas: IMenuSchema[];
 }
 
 const menuViewportPadding = 8;
@@ -124,6 +134,10 @@ export function shouldShowContextMenuGroupSeparator(visibleSchemas: IMenuSchema[
 }
 
 export function getContextMenuQuickGroupColumns(menuSchema: IMenuSchema): number | undefined {
+    if (isRealNum(menuSchema.quickColumns)) {
+        return menuSchema.quickColumns;
+    }
+
     if (menuSchema.quickLayout === 'icon' && CONTEXT_MENU_HEADER_QUICK_GROUP_KEYS.has(menuSchema.key)) {
         return 6;
     }
@@ -158,6 +172,86 @@ function getContextMenuGroupClassName(sizeVariant: ContextMenuSizeVariant) {
     return sizeVariant === 'paragraph-t' ? 'univer-grid univer-gap-2 univer-py-2' : 'univer-grid univer-gap-1 univer-py-1';
 }
 
+function isParagraphTHeaderQuickGroup(menuSchema: IMenuSchema, sizeVariant: ContextMenuSizeVariant) {
+    return sizeVariant === 'paragraph-t'
+        && menuSchema.quickLayout === 'icon'
+        && CONTEXT_MENU_HEADER_QUICK_GROUP_KEYS.has(menuSchema.key);
+}
+
+function shouldClusterParagraphTHeaderQuickGroups(
+    currentSchema: IMenuSchema,
+    nextSchema: IMenuSchema | undefined,
+    sizeVariant: ContextMenuSizeVariant
+) {
+    return isParagraphTHeaderQuickGroup(currentSchema, sizeVariant)
+        && !!nextSchema
+        && isParagraphTHeaderQuickGroup(nextSchema, sizeVariant);
+}
+
+function getContextMenuQuickGroupClassName(
+    menuSchema: IMenuSchema,
+    visibleSchemas: IMenuSchema[],
+    index: number,
+    sizeVariant: ContextMenuSizeVariant
+) {
+    if (sizeVariant !== 'paragraph-t' || !CONTEXT_MENU_HEADER_QUICK_GROUP_KEYS.has(menuSchema.key)) {
+        return getContextMenuGroupClassName(sizeVariant);
+    }
+
+    const previousSchema = index > 0 ? visibleSchemas[index - 1] : null;
+    const nextSchema = index < visibleSchemas.length - 1 ? visibleSchemas[index + 1] : null;
+    const connectedToPrevious = !!previousSchema?.quickLayout && CONTEXT_MENU_HEADER_QUICK_GROUP_KEYS.has(previousSchema.key);
+    const connectedToNext = !!nextSchema?.quickLayout && CONTEXT_MENU_HEADER_QUICK_GROUP_KEYS.has(nextSchema.key);
+
+    if (connectedToPrevious && connectedToNext) {
+        return 'univer-grid univer-gap-2 univer-pt-1 univer-pb-1';
+    }
+
+    if (connectedToPrevious) {
+        return 'univer-grid univer-gap-2 univer-pt-1 univer-pb-2';
+    }
+
+    if (connectedToNext) {
+        return 'univer-grid univer-gap-2 univer-pt-2 univer-pb-1';
+    }
+
+    return getContextMenuGroupClassName(sizeVariant);
+}
+
+function getContextMenuQuickGroupClusterClassName(sizeVariant: ContextMenuSizeVariant) {
+    return sizeVariant === 'paragraph-t' ? 'univer-grid univer-gap-0 univer-py-2' : getContextMenuGroupClassName(sizeVariant);
+}
+
+export function getContextMenuSchemaRenderGroups(
+    visibleSchemas: IMenuSchema[],
+    sizeVariant: ContextMenuSizeVariant
+): IContextMenuSchemaRenderGroup[] {
+    const renderGroups: IContextMenuSchemaRenderGroup[] = [];
+
+    for (let index = 0; index < visibleSchemas.length; index++) {
+        const menuSchema = visibleSchemas[index];
+        const nextSchema = visibleSchemas[index + 1];
+
+        if (shouldClusterParagraphTHeaderQuickGroups(menuSchema, nextSchema, sizeVariant)) {
+            renderGroups.push({
+                startIndex: index,
+                endIndex: index + 1,
+                menuSchemas: [menuSchema, nextSchema!],
+            });
+            index += 1;
+            continue;
+        }
+
+        renderGroups.push({
+            startIndex: index,
+            endIndex: index,
+            menuSchemas: [menuSchema],
+        });
+    }
+
+    return renderGroups;
+}
+
 function getContextMenuHeaderClassName(sizeVariant: ContextMenuSizeVariant) {
     return sizeVariant === 'paragraph-t'
         ? `
@@ -168,6 +262,12 @@ function getContextMenuHeaderClassName(sizeVariant: ContextMenuSizeVariant) {
           univer-px-2 univer-text-xs univer-font-semibold univer-text-gray-600
           dark:!univer-text-gray-300
         `;
+}
+
+function getContextMenuHeaderRowClassName(sizeVariant: ContextMenuSizeVariant) {
+    return sizeVariant === 'paragraph-t'
+        ? 'univer-flex univer-items-center univer-justify-between univer-gap-2'
+        : 'univer-flex univer-items-center univer-justify-between univer-gap-1.5';
 }
 
 function getContextMenuSubmenuPanelClassName(sizeVariant: ContextMenuSizeVariant) {
@@ -279,6 +379,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
     const { menuSchemas, menuSessionVersion, submenuPortalContainer, activeItemIds, hiddenItemIds, sizeVariant, onOptionSelect, maxMenuHeight } = props;
     const localeService = useDependency(LocaleService);
     const hiddenGroupStates = useContextGroupHiddenStates(menuSchemas);
+    const [activeSubmenuKey, setActiveSubmenuKey] = useState<string | null>(null);
 
     const visibleSchemas = useMemo(() => {
         return menuSchemas.filter((item) => {
@@ -293,20 +394,78 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
             return !hiddenGroupStates[item.key];
         });
     }, [hiddenGroupStates, menuSchemas]);
+    const renderGroups = useMemo(
+        () => getContextMenuSchemaRenderGroups(visibleSchemas, sizeVariant),
+        [sizeVariant, visibleSchemas]
+    );
+
+    const renderQuickLayoutGroup = (
+        menuSchema: IMenuSchema,
+        index: number,
+        renderAsClusterChild = false,
+        hasSeparator = false
+    ) => {
+        const titleNode = renderMenuSchemaHeader(menuSchema);
+
+        return (
+            <div
+                key={menuSchema.key}
+                className={clsx(
+                    renderAsClusterChild
+                        ? 'univer-grid'
+                        : getContextMenuQuickGroupClassName(menuSchema, visibleSchemas, index, sizeVariant),
+                    hasSeparator && borderBottomClassName
+                )}
+            >
+                {titleNode}
+                {menuSchema.quickLayout === 'tile'
+                    ? (
+                        <UIQuickTileMenuGroup
+                            item={menuSchema}
+                            activeItemIds={activeItemIds}
+                            hiddenItemIds={hiddenItemIds}
+                            onOptionSelect={onOptionSelect}
+                        />
+                    )
+                    : (
+                        <UITinyMenuGroup
+                            item={menuSchema}
+                            columns={getContextMenuQuickGroupColumns(menuSchema)}
+                            activeItemIds={activeItemIds}
+                            hiddenItemIds={hiddenItemIds}
+                            sizeVariant={sizeVariant}
+                            layoutVariant={menuSchema.quickLayoutVariant}
+                            onOptionSelect={onOptionSelect}
+                        />
+                    )}
+            </div>
+        );
+    };
 
     return (
         <>
-            {visibleSchemas.map((menuSchema, index) => {
-                const hasSeparator = shouldShowContextMenuGroupSeparator(visibleSchemas, index);
-                const titleNode = menuSchema.title
-                    ? (
-                        <strong
-                            className={getContextMenuHeaderClassName(sizeVariant)}
+            {renderGroups.map(({ menuSchemas: groupedSchemas, startIndex, endIndex }) => {
+                const menuSchema = groupedSchemas[0];
+                const hasSeparator = shouldShowContextMenuGroupSeparator(visibleSchemas, endIndex);
+                const titleNode = renderMenuSchemaHeader(menuSchema);
+
+                if (groupedSchemas.length > 1) {
+                    return (
+                        <div
+                            key={groupedSchemas.map((schema) => schema.key).join('-')}
+                            className={clsx(
+                                getContextMenuQuickGroupClusterClassName(sizeVariant),
+                                hasSeparator && borderBottomClassName
+                            )}
                         >
-                            {localeService.t(menuSchema.title)}
-                        </strong>
-                    )
-                    : null;
+                            {groupedSchemas.map((groupedMenuSchema, groupedIndex) => renderQuickLayoutGroup(
+                                groupedMenuSchema,
+                                startIndex + groupedIndex,
+                                true
+                            ))}
+                        </div>
+                    );
+                }
 
                 if (menuSchema.item) {
                     return (
@@ -316,6 +475,8 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                             menuItem={menuSchema.item as IDisplayMenuItem<IMenuItem>}
                             menuSessionVersion={menuSessionVersion}
                             submenuPortalContainer={submenuPortalContainer}
+                            activeSubmenuKey={activeSubmenuKey}
+                            setActiveSubmenuKey={setActiveSubmenuKey}
                             onOptionSelect={onOptionSelect}
                             maxMenuHeight={maxMenuHeight}
                             hiddenItemIds={hiddenItemIds}
@@ -329,36 +490,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                 }
 
                 if (menuSchema.quickLayout) {
-                    return (
-                        <div
-                            key={menuSchema.key}
-                            className={clsx(
-                                getContextMenuGroupClassName(sizeVariant),
-                                hasSeparator && borderBottomClassName
-                            )}
-                        >
-                            {titleNode}
-                            {menuSchema.quickLayout === 'tile'
-                                ? (
-                                    <UIQuickTileMenuGroup
-                                        item={menuSchema}
-                                        activeItemIds={activeItemIds}
-                                        hiddenItemIds={hiddenItemIds}
-                                        onOptionSelect={onOptionSelect}
-                                    />
-                                )
-                                : (
-                                    <UITinyMenuGroup
-                                        item={menuSchema}
-                                        columns={getContextMenuQuickGroupColumns(menuSchema)}
-                                        activeItemIds={activeItemIds}
-                                        hiddenItemIds={hiddenItemIds}
-                                        sizeVariant={sizeVariant}
-                                        onOptionSelect={onOptionSelect}
-                                    />
-                                )}
-                        </div>
-                    );
+                    return renderQuickLayoutGroup(menuSchema, startIndex, false, hasSeparator);
                 }
 
                 if (menuSchema.tiny) {
@@ -380,6 +512,8 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                                         menuItem={childSchema.item as IDisplayMenuItem<IMenuItem>}
                                         menuSessionVersion={menuSessionVersion}
                                         submenuPortalContainer={submenuPortalContainer}
+                                        activeSubmenuKey={activeSubmenuKey}
+                                        setActiveSubmenuKey={setActiveSubmenuKey}
                                         activeItemIds={activeItemIds}
                                         hiddenItemIds={hiddenItemIds}
                                         onOptionSelect={onOptionSelect}
@@ -410,6 +544,8 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                                     menuItem={childSchema.item as IDisplayMenuItem<IMenuItem>}
                                     menuSessionVersion={menuSessionVersion}
                                     submenuPortalContainer={submenuPortalContainer}
+                                    activeSubmenuKey={activeSubmenuKey}
+                                    setActiveSubmenuKey={setActiveSubmenuKey}
                                     activeItemIds={activeItemIds}
                                     hiddenItemIds={hiddenItemIds}
                                     onOptionSelect={onOptionSelect}
@@ -423,10 +559,63 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
             })}
         </>
     );
+
+    function renderMenuSchemaHeader(menuSchema: IMenuSchema) {
+        if (!menuSchema.title) {
+            return null;
+        }
+
+        const titleContent = (
+            <strong
+                className={getContextMenuHeaderClassName(sizeVariant)}
+            >
+                {localeService.t(menuSchema.title)}
+            </strong>
+        );
+
+        if (!menuSchema.headerActionItem) {
+            return titleContent;
+        }
+
+        return (
+            <div className={getContextMenuHeaderRowClassName(sizeVariant)}>
+                {titleContent}
+                <ContextMenuMenuItem
+                    menuKey={`${menuSchema.key}-header-action`}
+                    menuItem={menuSchema.headerActionItem as IDisplayMenuItem<IMenuItem>}
+                    menuSessionVersion={menuSessionVersion}
+                    submenuPortalContainer={submenuPortalContainer}
+                    activeSubmenuKey={activeSubmenuKey}
+                    setActiveSubmenuKey={setActiveSubmenuKey}
+                    activeItemIds={activeItemIds}
+                    hiddenItemIds={hiddenItemIds}
+                    compact
+                    headerAction
+                    sizeVariant={sizeVariant}
+                    onOptionSelect={onOptionSelect}
+                    maxMenuHeight={maxMenuHeight}
+                />
+            </div>
+        );
+    }
 }
 
 function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
-    const { menuKey, menuItem, menuSessionVersion, submenuPortalContainer, activeItemIds, hiddenItemIds = [], compact = false, sizeVariant, onOptionSelect, maxMenuHeight } = props;
+    const {
+        menuKey,
+        menuItem,
+        menuSessionVersion,
+        submenuPortalContainer,
+        maxMenuHeight,
+        activeSubmenuKey,
+        setActiveSubmenuKey,
+        activeItemIds,
+        hiddenItemIds = [],
+        compact = false,
+        headerAction = false,
+        sizeVariant,
+        onOptionSelect,
+    } = props;
     const localeService = useDependency(LocaleService);
     const direction = useObservable(localeService.direction$);
     const menuManagerService = useDependency(IMenuManagerService);
@@ -439,7 +628,6 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
         isObservable(selectorItem.selections) ? selectorItem.selections : undefined
     );
     const [inputValue, setInputValue] = useState(value);
-    const [submenuVisible, setSubmenuVisible] = useState(false);
     const [submenuPosition, setSubmenuPosition] = useState<{
         left: number;
         top: number;
@@ -476,6 +664,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
     const hasSelectionSubmenu = selections.length > 0;
     const hasSubItemSubmenu = subMenuItems.length > 0;
     const hasSubmenu = hasSelectionSubmenu || hasSubItemSubmenu;
+    const submenuVisible = hasSubmenu && activeSubmenuKey === menuKey;
     const selectionsCommandId = selectorItem.selectionsCommandId;
 
     const clearSubmenuCloseTimer = useCallback(() => {
@@ -491,9 +680,9 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
         clearSubmenuCloseTimer();
         submenuCloseTimerRef.current = setTimeout(() => {
             submenuCloseTimerRef.current = null;
-            setSubmenuVisible(false);
+            setActiveSubmenuKey((currentKey) => (currentKey === menuKey ? null : currentKey));
         }, CONTEXT_MENU_SUBMENU_CLOSE_DELAY);
-    }, [clearSubmenuCloseTimer]);
+    }, [clearSubmenuCloseTimer, menuKey, setActiveSubmenuKey]);
 
     useEffect(() => {
         setInputValue(value);
@@ -559,7 +748,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
     const onSubmenuOptionSelect = (option: IValueOption) => {
         onOptionSelect?.(option);
         clearSubmenuCloseTimer();
-        setSubmenuVisible(false);
+        setActiveSubmenuKey((currentKey) => (currentKey === menuKey ? null : currentKey));
     };
 
     const itemClassName = clsx(
@@ -567,15 +756,21 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
             ? (
                 sizeVariant === 'paragraph-t'
                     ? `
-                      univer-relative univer-flex univer-size-10 univer-items-center univer-justify-center
-                      univer-rounded-lg univer-border-none univer-bg-transparent univer-p-0 univer-text-left
-                      univer-text-base
+                      univer-relative univer-flex
+                      ${headerAction
+                    ? 'univer-size-8 univer-rounded-md'
+                    : 'univer-size-10 univer-rounded-lg'}
+                      univer-items-center univer-justify-center univer-border-none univer-bg-transparent univer-p-0
+                      univer-text-left univer-text-base
                       dark:!univer-text-white
                     `
                     : `
-                      univer-relative univer-flex univer-size-8 univer-items-center univer-justify-center
-                      univer-rounded-md univer-border-none univer-bg-transparent univer-p-0 univer-text-left
-                      univer-text-sm
+                      univer-relative univer-flex
+                      ${headerAction
+                    ? 'univer-size-7 univer-rounded-sm'
+                    : 'univer-size-8 univer-rounded-md'}
+                      univer-items-center univer-justify-center univer-border-none univer-bg-transparent univer-p-0
+                      univer-text-left univer-text-sm
                       dark:!univer-text-white
                     `
             )
@@ -635,7 +830,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                 clearSubmenuCloseTimer();
                 if (hasSubmenu && !disabled) {
                     setSubmenuPositionReady(false);
-                    setSubmenuVisible(true);
+                    setActiveSubmenuKey(menuKey);
                 }
             }}
             onMouseLeave={(event) => {
@@ -688,7 +883,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                                 }
 
                                 setSubmenuPositionReady(false);
-                                setSubmenuVisible(true);
+                                setActiveSubmenuKey(menuKey);
                                 return;
                             }
 
@@ -868,6 +1063,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                                         submenuPortalContainer={submenuPortalContainer}
                                         activeItemIds={activeItemIds}
                                         hiddenItemIds={hiddenItemIds}
+                                        sizeVariant={sizeVariant}
                                         onOptionSelect={onSubmenuOptionSelect}
                                         maxMenuHeight={maxMenuHeight}
                                     />

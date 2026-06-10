@@ -129,6 +129,7 @@ import {
     InsertOrderListBellowMenuItemFactory,
     NormalTextHeadingMenuItemFactory,
     ParagraphMenuAlignSubmenuItemFactory,
+    ParagraphMenuBackgroundColorHeaderActionMenuItemFactory,
     ParagraphMenuBackgroundColorSwatchMenuItemFactories,
     ParagraphMenuColorsSubmenuItemFactory,
     ParagraphMenuDefaultTextColorMenuItemFactory,
@@ -152,6 +153,7 @@ import {
     ParagraphMenuInsertQuoteMenuItemFactory,
     ParagraphMenuInsertShapeMenuItemFactory,
     ParagraphMenuNoBackgroundMenuItemFactory,
+    ParagraphMenuTextColorHeaderActionMenuItemFactory,
     ParagraphMenuTextColorSwatchMenuItemFactories,
     SubtitleHeadingMenuItemFactory,
     TableBlockCopyMenuItemFactory,
@@ -876,7 +878,10 @@ export const menuSchema: MenuSchemaType = {
             text: {
                 order: 0,
                 title: 'docs-ui.toolbar.textColor.main',
+                headerActionMenuItemFactory: ParagraphMenuTextColorHeaderActionMenuItemFactory,
                 quickLayout: 'icon',
+                quickColumns: 8,
+                quickLayoutVariant: 'compact',
                 [`${SetInlineFormatTextColorCommand.id}.default`]: {
                     order: 0,
                     menuItemFactory: ParagraphMenuDefaultTextColorMenuItemFactory,
@@ -886,7 +891,10 @@ export const menuSchema: MenuSchemaType = {
             backgroundTop: {
                 order: 1,
                 title: 'docs-ui.toolbar.fillColor.main',
+                headerActionMenuItemFactory: ParagraphMenuBackgroundColorHeaderActionMenuItemFactory,
                 quickLayout: 'icon',
+                quickColumns: 8,
+                quickLayoutVariant: 'compact',
                 [ResetInlineFormatTextBackgroundColorCommand.id]: {
                     order: 0,
                     menuItemFactory: ParagraphMenuNoBackgroundMenuItemFactory,
@@ -898,6 +906,8 @@ export const menuSchema: MenuSchemaType = {
             backgroundBottom: {
                 order: 2,
                 quickLayout: 'icon',
+                quickColumns: 8,
+                quickLayoutVariant: 'compact',
                 ...Object.fromEntries(
                     Object.entries(ParagraphMenuBackgroundColorSwatchMenuItemFactories).filter(([, config]) => config.order >= 7)
                 ),

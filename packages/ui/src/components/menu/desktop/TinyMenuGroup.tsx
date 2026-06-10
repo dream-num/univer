@@ -16,7 +16,7 @@
 
 import type { IDisplayMenuItem, IMenuItem, IValueOption } from '../../../services/menu/menu';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
-import type { TinyMenuSizeVariant } from './DesignTinyMenuGroup';
+import type { TinyMenuLayoutVariant, TinyMenuSizeVariant } from './DesignTinyMenuGroup';
 import { convertObservableToBehaviorSubject, LocaleService } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
 import { useEffect, useMemo, useState } from 'react';
@@ -31,6 +31,7 @@ interface IUIQuickMenuGroupProps {
     hiddenItemIds?: string[];
     columns?: number;
     sizeVariant?: TinyMenuSizeVariant;
+    layoutVariant?: TinyMenuLayoutVariant;
     onOptionSelect?: (option: IValueOption) => void;
 }
 
@@ -130,7 +131,7 @@ function QuickTileMenuItem(props: IUIQuickTileMenuItemProps) {
 }
 
 export function UITinyMenuGroup(props: IUIQuickMenuGroupProps) {
-    const { item, activeItemIds, hiddenItemIds = EMPTY_HIDDEN_ITEM_IDS, columns, sizeVariant = 'default', onOptionSelect } = props;
+    const { item, activeItemIds, hiddenItemIds = EMPTY_HIDDEN_ITEM_IDS, columns, sizeVariant = 'default', layoutVariant = 'default', onOptionSelect } = props;
     const [activeItems, setActiveItems] = useState<string[]>([]);
     const [hiddenItems, setHiddenItems] = useState<string[]>([]);
     const componentManager = useDependency(ComponentManager);
@@ -191,6 +192,7 @@ export function UITinyMenuGroup(props: IUIQuickMenuGroupProps) {
         <DesignTinyMenuGroup
             columns={columns}
             sizeVariant={sizeVariant}
+            layoutVariant={layoutVariant}
             items={visibleChildren.map((child) => ({
                 key: child.key,
                 onClick: () => {

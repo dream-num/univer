@@ -18,6 +18,7 @@ import type { ComponentType } from 'react';
 import { clsx, Tooltip } from '@univerjs/design';
 
 export type TinyMenuSizeVariant = 'default' | 'paragraph-t';
+export type TinyMenuLayoutVariant = 'default' | 'compact';
 
 export interface ITinyMenuItem {
     onClick: () => void;
@@ -33,23 +34,33 @@ export interface ITinyMenuGroupProps {
     items: ITinyMenuItem[];
     columns?: number;
     sizeVariant?: TinyMenuSizeVariant;
+    layoutVariant?: TinyMenuLayoutVariant;
 }
 
-export function DesignTinyMenuGroup({ items, columns, sizeVariant = 'default' }: ITinyMenuGroupProps) {
+export function DesignTinyMenuGroup({ items, columns, sizeVariant = 'default', layoutVariant = 'default' }: ITinyMenuGroupProps) {
     const isParagraphTVariant = sizeVariant === 'paragraph-t';
+    const isCompactParagraphVariant = isParagraphTVariant && layoutVariant === 'compact';
 
     return (
         <div
             className={clsx(
                 'univer-menu-item-group univer-px-0',
-                isParagraphTVariant ? 'univer-gap-2 univer-p-1' : 'univer-gap-1.5 univer-p-0.5',
+                isCompactParagraphVariant
+                    ? 'univer-gap-0.5 univer-p-0'
+                    : isParagraphTVariant
+                        ? 'univer-gap-2 univer-p-1'
+                        : 'univer-gap-1.5 univer-p-0.5',
                 columns
                     ? `
-                      univer-grid univer-justify-items-center
-                      ${columns === 6 ? 'univer-grid-cols-6' : ''}
+                      univer-grid
+                      ${isCompactParagraphVariant ? 'univer-justify-items-start' : 'univer-justify-items-center'}
+                      ${columns === 6 && !isCompactParagraphVariant ? 'univer-grid-cols-6' : ''}
                     `
                     : 'univer-flex univer-flex-wrap'
             )}
+            style={isCompactParagraphVariant && columns
+                ? { gridTemplateColumns: `repeat(${columns}, max-content)` }
+                : undefined}
         >
             {items.map((item) => {
                 const ele = (
@@ -61,9 +72,11 @@ export function DesignTinyMenuGroup({ items, columns, sizeVariant = 'default' }:
                               hover:univer-bg-gray-50
                               dark:hover:!univer-bg-gray-900
                             `,
-                            isParagraphTVariant
-                                ? 'univer-size-8 univer-rounded-lg'
-                                : 'univer-size-6 univer-rounded-md',
+                            isCompactParagraphVariant
+                                ? 'univer-size-6 univer-rounded-sm'
+                                : isParagraphTVariant
+                                    ? 'univer-size-8 univer-rounded-lg'
+                                    : 'univer-size-6 univer-rounded-md',
                             {
                                 'univer-bg-gray-50 dark:!univer-bg-gray-900': item.active,
                             },
@@ -77,7 +90,11 @@ export function DesignTinyMenuGroup({ items, columns, sizeVariant = 'default' }:
                                   univer-text-gray-900
                                   dark:!univer-text-gray-200
                                 `,
-                                isParagraphTVariant ? 'univer-size-5' : 'univer-size-4',
+                                isCompactParagraphVariant
+                                    ? 'univer-size-4'
+                                    : isParagraphTVariant
+                                        ? 'univer-size-5'
+                                        : 'univer-size-4',
                                 item.iconClassName
                             )}
                         />

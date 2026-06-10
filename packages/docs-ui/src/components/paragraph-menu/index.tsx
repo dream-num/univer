@@ -425,7 +425,7 @@ function deleteBodyText(body: IDocumentBody, startOffset: number, endOffset: num
 }
 
 function stripBlockParagraphStyle(style: IParagraph['paragraphStyle'], blockType: string): IParagraph['paragraphStyle'] {
-    const nextStyle = { ...(style ?? {}) };
+    const nextStyle = { ...style };
 
     if (blockType === 'quote') {
         delete nextStyle.indentStart;

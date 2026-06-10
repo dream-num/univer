@@ -91,7 +91,7 @@ export function DesignTinyMenuGroup({ items, columns, sizeVariant = 'default', l
                                   dark:!univer-text-gray-200
                                 `,
                                 isCompactParagraphVariant
-                                    ? 'univer-size-4'
+                                    ? 'univer-size-5'
                                     : isParagraphTVariant
                                         ? 'univer-size-5'
                                         : 'univer-size-4',

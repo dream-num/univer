@@ -17,6 +17,8 @@
 import type { DocumentDataModel, ICommandInfo, Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
 
+import type { IDocPageSetupCommandParams } from '../../commands/commands/doc-page-setup.command';
+import type { ISetDocZoomRatioOperationParams } from '../../commands/operations/set-doc-zoom-ratio.operation';
 import {
     Disposable,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
@@ -37,6 +39,7 @@ import { SetDocZoomRatioCommand } from '../../commands/commands/set-doc-zoom-rat
 import { SwitchDocModeCommand } from '../../commands/commands/switch-doc-mode.command';
 import { SetDocZoomRatioOperation } from '../../commands/operations/set-doc-zoom-ratio.operation';
 import { DocPageLayoutService } from '../../services/doc-page-layout.service';
+import { DEFAULT_MODERN_DOC_ZOOM_RATIO, getDocEffectiveZoomRatio } from '../../services/doc-zoom';
 import { IEditorService } from '../../services/editor/editor-manager.service';
 
 export function shouldHandleDocWheelZoom(
@@ -45,14 +48,6 @@ export function shouldHandleDocWheelZoom(
     _documentFlavor?: DocumentFlavor
 ): boolean {
     return focusingDoc && (event.ctrlKey || event.metaKey);
-}
-
-export function getDefaultDocZoomRatio(documentFlavor?: DocumentFlavor): number {
-    return documentFlavor === DocumentFlavor.MODERN ? 1.2 : 1;
-}
-
-export function getRuntimeDocZoomRatio(savedZoomRatio?: number, documentFlavor?: DocumentFlavor): number {
-    return savedZoomRatio ?? getDefaultDocZoomRatio(documentFlavor);
 }
 
 export class DocZoomRenderController extends Disposable implements IRenderModule {
@@ -80,12 +75,10 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
         const sheetRenderer = currentSheet && this._renderManagerService.getRenderById(currentSheet.getUnitId());
         // TODO: do not use setTimeout.
         this._initTimer = window.setTimeout(() => {
-            const documentModel = this._univerInstanceService.getCurrentUniverDocInstance();
             const zoomRatio = sheetRenderer && this._isSheetEditor
                 ? sheetRenderer.scene.scaleX
-                : documentModel
-                    ? this._getRuntimeZoomRatio(documentModel)
-                    : 1;
+                : getDocEffectiveZoomRatio(this._context.unit);
+
             this.updateViewZoom(zoomRatio, true);
         }, 20);
 
@@ -111,9 +104,7 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
             this._updateTimer = window.setTimeout(() => {
                 const currentSheet = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
                 const sheetRenderer = currentSheet && this._renderManagerService.getRenderById(currentSheet.getUnitId());
-                const zoomRatio = !this._isSheetEditor
-                    ? this._getRuntimeZoomRatio(documentModel)
-                    : sheetRenderer?.scene.scaleX || 1;
+                const zoomRatio = !this._isSheetEditor ? getDocEffectiveZoomRatio(documentModel) : sheetRenderer?.scene.scaleX || 1;
 
                 this.updateViewZoom(zoomRatio, false);
             });
@@ -121,35 +112,29 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
     }
 
     private _initCommandExecutedListener() {
-        const updateCommandList = [SetDocZoomRatioOperation.id, SwitchDocModeCommand.id, DocPageSetupCommand.id];
+        const updateCommandList = [SetDocZoomRatioOperation.id];
 
         this.disposeWithMe(this._commandService.onCommandExecuted((command: ICommandInfo) => {
-            if (!updateCommandList.includes(command.id)) {
-                return;
-            }
-
-            const unitId = (command.params as { unitId?: string; documentId?: string } | undefined)?.unitId
-                ?? (command.params as { unitId?: string; documentId?: string } | undefined)?.documentId
-                ?? this._context.unitId;
-
-            if (unitId !== this._context.unitId) {
-                return;
-            }
-
-            const documentModel = this._context.unit;
-
-            if (command.id === SetDocZoomRatioOperation.id) {
-                const zoomRatio = documentModel.zoomRatio || 1;
+            if (updateCommandList.includes(command.id) && (command.params as ISetDocZoomRatioOperationParams).unitId === this._context.unitId) {
+                const documentModel = this._context.unit;
+                const zoomRatio = getDocEffectiveZoomRatio(documentModel);
                 this.updateViewZoom(zoomRatio);
-                return;
             }
-
-            if (documentModel.getSettings()?.zoomRatio != null) {
-                return;
-            }
-
-            this.updateViewZoom(this._getRuntimeZoomRatio(documentModel));
         }));
+
+        this.disposeWithMe(
+            this._commandService.beforeCommandExecuted((command: ICommandInfo) => {
+                const shouldResetZoom = command.id === SwitchDocModeCommand.id ||
+                    (command.id === DocPageSetupCommand.id && (command.params as IDocPageSetupCommandParams | undefined)?.documentFlavor === DocumentFlavor.MODERN);
+
+                if (shouldResetZoom) {
+                    this._commandService.executeCommand(SetDocZoomRatioCommand.id, {
+                        zoomRatio: DEFAULT_MODERN_DOC_ZOOM_RATIO,
+                        documentId: this._context.unitId,
+                    });
+                }
+            })
+        );
     }
 
     updateViewZoom(zoomRatio: number, needRefreshSelection = true) {
@@ -186,7 +171,7 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
                     return;
                 }
 
-                const currentRatio = this._getRuntimeZoomRatio(documentModel);
+                const currentRatio = getDocEffectiveZoomRatio(documentModel);
                 const nextRatio = getNextWheelZoomRatio(currentRatio, e);
 
                 this._commandService.executeCommand(SetDocZoomRatioCommand.id, {
@@ -196,13 +181,6 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
 
                 e.preventDefault();
             })
-        );
-    }
-
-    private _getRuntimeZoomRatio(documentModel: DocumentDataModel): number {
-        return getRuntimeDocZoomRatio(
-            documentModel.getSettings()?.zoomRatio,
-            documentModel.getSnapshot().documentStyle?.documentFlavor
         );
     }
 }

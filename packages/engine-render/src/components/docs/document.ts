@@ -36,6 +36,7 @@ import { Vector2 } from '../../basics/vector2';
 import { DocumentsSpanAndLineExtensionRegistry } from '../extension';
 import { DocComponent } from './doc-component';
 import { DOCS_EXTENSION_TYPE } from './doc-extension';
+import { collectBackgroundGlyphRuns } from './extensions/background-runs';
 import { getTableIdAndSliceIndex } from './layout/block/table';
 import { Liquid } from './liquid';
 import { getDocsTableRenderViewport, hasDocsTableHorizontalViewport } from './table-render-viewport';
@@ -371,37 +372,16 @@ export class Documents extends DocComponent {
                                 this._drawLiquid.translateSave();
                                 this._drawLiquid.translateDivide(divide, isVertical && wrapStrategy === WrapStrategy.WRAP, verticalAlign, rotatedHeightStore);
 
-                                // Draw text background.
-                                for (const glyph of glyphGroup) {
-                                    if (!glyph.content || glyph.content.length === 0) {
-                                        continue;
-                                    }
-
-                                    const { width: spanWidth, left: spanLeft } = glyph;
-
-                                    const { x: translateX, y: translateY } = this._drawLiquid;
-
-                                    const originTranslate = Vector2.create(translateX, translateY);
-
-                                    const centerPoint = Vector2.create(spanWidth / 2, lineHeight / 2);
-
-                                    const spanStartPoint = calculateRectRotate(
-                                        originTranslate.addByPoint(spanLeft, 0),
-                                        centerPoint,
-                                        centerAngle,
-                                        vertexAngle,
-                                        alignOffset
-                                    );
-
-                                    const extensionOffset: IExtensionConfig = {
-                                        spanStartPoint,
-                                    };
-
-                                    if (backgroundExtension) {
-                                        backgroundExtension.extensionOffset = extensionOffset;
-                                        backgroundExtension.draw(ctx, parentScale, glyph);
-                                    }
-                                }
+                                this._drawGlyphGroupBackgrounds(
+                                    ctx,
+                                    parentScale,
+                                    glyphGroup,
+                                    lineHeight,
+                                    alignOffset,
+                                    centerAngle,
+                                    vertexAngle,
+                                    backgroundExtension
+                                );
 
                                 // Draw text\border\lines etc.
                                 for (const glyph of glyphGroup) {
@@ -668,6 +648,42 @@ export class Documents extends DocComponent {
         ctx.restore();
     }
 
+    private _drawGlyphGroupBackgrounds(
+        ctx: UniverRenderingContext,
+        parentScale: IScale,
+        glyphGroup: IDocumentSkeletonGlyph[],
+        lineHeight: number,
+        alignOffset: Vector2,
+        centerAngle: number,
+        vertexAngle: number,
+        backgroundExtension: Nullable<ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>>
+    ) {
+        if (!backgroundExtension || this._drawLiquid == null) {
+            return;
+        }
+
+        const backgroundRuns = collectBackgroundGlyphRuns(glyphGroup);
+
+        for (const backgroundRun of backgroundRuns) {
+            const { glyph, left: spanLeft, width: spanWidth } = backgroundRun;
+            const { x: translateX, y: translateY } = this._drawLiquid;
+            const originTranslate = Vector2.create(translateX, translateY);
+            const centerPoint = Vector2.create(spanWidth / 2, lineHeight / 2);
+            const spanStartPoint = calculateRectRotate(
+                originTranslate.addByPoint(spanLeft, 0),
+                centerPoint,
+                centerAngle,
+                vertexAngle,
+                alignOffset
+            );
+
+            backgroundExtension.extensionOffset = {
+                spanStartPoint,
+            };
+            backgroundExtension.draw(ctx, parentScale, glyph);
+        }
+    }
+
     // TODO: @JOCS, DRY!!!
     private _drawTableCell(
         ctx: UniverRenderingContext,
@@ -747,37 +763,16 @@ export class Documents extends DocComponent {
                             this._drawLiquid.translateSave();
                             this._drawLiquid.translateDivide(divide);
 
-                            // Draw text background.
-                            for (const glyph of glyphGroup) {
-                                if (!glyph.content || glyph.content.length === 0) {
-                                    continue;
-                                }
-
-                                const { width: spanWidth, left: spanLeft } = glyph;
-
-                                const { x: translateX, y: translateY } = this._drawLiquid;
-
-                                const originTranslate = Vector2.create(translateX, translateY);
-
-                                const centerPoint = Vector2.create(spanWidth / 2, lineHeight / 2);
-
-                                const spanStartPoint = calculateRectRotate(
-                                    originTranslate.addByPoint(spanLeft, 0),
-                                    centerPoint,
-                                    centerAngle,
-                                    vertexAngle,
-                                    alignOffset
-                                );
-
-                                const extensionOffset: IExtensionConfig = {
-                                    spanStartPoint,
-                                };
-
-                                if (backgroundExtension) {
-                                    backgroundExtension.extensionOffset = extensionOffset;
-                                    backgroundExtension.draw(ctx, parentScale, glyph);
-                                }
-                            }
+                            this._drawGlyphGroupBackgrounds(
+                                ctx,
+                                parentScale,
+                                glyphGroup,
+                                lineHeight,
+                                alignOffset,
+                                centerAngle,
+                                vertexAngle,
+                                backgroundExtension
+                            );
 
                             // Draw text\border\lines etc.
                             for (const glyph of glyphGroup) {
@@ -1042,37 +1037,16 @@ export class Documents extends DocComponent {
                             this._drawLiquid.translateSave();
                             this._drawLiquid.translateDivide(divide);
 
-                            // Draw text background.
-                            for (const glyph of glyphGroup) {
-                                if (!glyph.content || glyph.content.length === 0) {
-                                    continue;
-                                }
-
-                                const { width: spanWidth, left: spanLeft } = glyph;
-
-                                const { x: translateX, y: translateY } = this._drawLiquid;
-
-                                const originTranslate = Vector2.create(translateX, translateY);
-
-                                const centerPoint = Vector2.create(spanWidth / 2, lineHeight / 2);
-
-                                const spanStartPoint = calculateRectRotate(
-                                    originTranslate.addByPoint(spanLeft, 0),
-                                    centerPoint,
-                                    centerAngle,
-                                    vertexAngle,
-                                    alignOffset
-                                );
-
-                                const extensionOffset: IExtensionConfig = {
-                                    spanStartPoint,
-                                };
-
-                                if (backgroundExtension) {
-                                    backgroundExtension.extensionOffset = extensionOffset;
-                                    backgroundExtension.draw(ctx, parentScale, glyph);
-                                }
-                            }
+                            this._drawGlyphGroupBackgrounds(
+                                ctx,
+                                parentScale,
+                                glyphGroup,
+                                lineHeight,
+                                alignOffset,
+                                centerAngle,
+                                vertexAngle,
+                                backgroundExtension
+                            );
 
                             // Draw text\border\lines etc.
                             for (const glyph of glyphGroup) {
@@ -1153,14 +1127,16 @@ export class Documents extends DocComponent {
          * In Excel, if horizontal alignment is not specified,
          * rotated text aligns to the right when rotated downwards and aligns to the left when rotated upwards.
          */
-        if (horizontalAlign === HorizontalAlign.UNSPECIFIED) {
+        let resolvedHorizontalAlign = horizontalAlign;
+
+        if (resolvedHorizontalAlign === HorizontalAlign.UNSPECIFIED) {
             if (centerAngleDeg === VERTICAL_ROTATE_ANGLE && vertexAngleDeg === VERTICAL_ROTATE_ANGLE) {
-                horizontalAlign = HorizontalAlign.CENTER;
+                resolvedHorizontalAlign = HorizontalAlign.CENTER;
             } else if ((vertexAngleDeg > 0 && vertexAngleDeg !== VERTICAL_ROTATE_ANGLE) || vertexAngleDeg === -VERTICAL_ROTATE_ANGLE) {
                 /**
                  * https://github.com/dream-num/univer-pro/issues/334
                  */
-                horizontalAlign = HorizontalAlign.RIGHT;
+                resolvedHorizontalAlign = HorizontalAlign.RIGHT;
             } else {
                 /**
                  * sheet cell type, In a spreadsheet cell, without any alignment settings applied,
@@ -1169,19 +1145,19 @@ export class Documents extends DocComponent {
                  * and Boolean values should be center-aligned.
                  */
                 if (cellValueType === CellValueType.NUMBER) {
-                    horizontalAlign = HorizontalAlign.RIGHT;
+                    resolvedHorizontalAlign = HorizontalAlign.RIGHT;
                 } else if (cellValueType === CellValueType.BOOLEAN) {
-                    horizontalAlign = HorizontalAlign.CENTER;
+                    resolvedHorizontalAlign = HorizontalAlign.CENTER;
                 } else {
-                    horizontalAlign = HorizontalAlign.LEFT;
+                    resolvedHorizontalAlign = HorizontalAlign.LEFT;
                 }
             }
         }
 
         let offsetLeft = 0;
-        if (horizontalAlign === HorizontalAlign.CENTER) {
+        if (resolvedHorizontalAlign === HorizontalAlign.CENTER) {
             offsetLeft = (this.width - pageWidth) / 2;
-        } else if (horizontalAlign === HorizontalAlign.RIGHT) {
+        } else if (resolvedHorizontalAlign === HorizontalAlign.RIGHT) {
             offsetLeft = this.width - pageWidth - pagePaddingRight;
         } else {
             offsetLeft = pagePaddingLeft;

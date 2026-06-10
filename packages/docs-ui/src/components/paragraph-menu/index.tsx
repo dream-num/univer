@@ -270,6 +270,20 @@ export function getParagraphMenuCommand(params: IValueOption, targetRange?: ITex
     };
 }
 
+export function getParagraphMenuResolvedCommand(option: IValueOption, targetRange?: ITextRangeWithStyle | null): { commandId?: string; params?: object } {
+    const commandId = option.commandId ?? option.id ?? (typeof option.label === 'string' ? option.label : undefined);
+
+    if (!commandId) {
+        return {};
+    }
+
+    return getParagraphMenuCommand({
+        ...option,
+        commandId,
+        id: option.id ?? commandId,
+    }, targetRange);
+}
+
 function getParagraphMenuType(target: IDocBlockMenuTarget | null | undefined, emptyMode: boolean): string {
     if (target?.kind === 'table') {
         return DOC_TABLE_BLOCK_MENU_ID;
@@ -681,12 +695,8 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
         docSelectionManagerService.replaceTextRanges([range], false);
     };
 
-    const executeResolvedCommand = (commandId: string, params?: Record<string, unknown>, targetRange?: ITextRangeWithStyle | null) => {
-        const resolved = getParagraphMenuCommand({
-            commandId,
-            id: commandId,
-            params,
-        }, targetRange);
+    const executeResolvedCommand = (option: IValueOption, targetRange?: ITextRangeWithStyle | null) => {
+        const resolved = getParagraphMenuResolvedCommand(option, targetRange);
 
         if (!resolved.commandId) {
             return false;
@@ -812,7 +822,11 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
             ) {
                 const nextRange = await unwrapActiveBlockRange();
                 if (commandId !== NormalTextHeadingCommand.id) {
-                    await executeResolvedCommand(commandId, commandParams as Record<string, unknown> | undefined, nextRange);
+                    await executeResolvedCommand({
+                        ...option,
+                        commandId,
+                        params: commandParams as Record<string, unknown> | undefined,
+                    }, nextRange);
                 }
                 layoutService.focus();
                 handleHideMenu();
@@ -827,7 +841,11 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
                 if (blockRange) {
                     replaceSelection(blockRange);
                 }
-                await executeResolvedCommand(commandId, commandParams as Record<string, unknown> | undefined, blockRange);
+                await executeResolvedCommand({
+                    ...option,
+                    commandId,
+                    params: commandParams as Record<string, unknown> | undefined,
+                }, blockRange);
                 layoutService.focus();
                 handleHideMenu();
                 return;
@@ -838,7 +856,9 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
             if (targetRange) {
                 replaceSelection(targetRange);
             }
-            await executeResolvedCommand(NormalTextHeadingCommand.id, undefined, targetRange);
+            await executeResolvedCommand({
+                id: NormalTextHeadingCommand.id,
+            }, targetRange);
             layoutService.focus();
             handleHideMenu();
             return;
@@ -855,11 +875,11 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
             replaceSelection(getParagraphMenuCommandTargetRange(commandId, targetRange, formattingRange));
         }
 
-        await executeResolvedCommand(
+        await executeResolvedCommand({
+            ...option,
             commandId,
-            commandParams as Record<string, unknown> | undefined,
-            getParagraphMenuCommandTargetRange(commandId, targetRange, formattingRange)
-        );
+            params: commandParams as Record<string, unknown> | undefined,
+        }, getParagraphMenuCommandTargetRange(commandId, targetRange, formattingRange));
         layoutService.focus();
         handleHideMenu();
     };

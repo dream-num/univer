@@ -122,6 +122,8 @@ function HeaderTextColorIcon({ className, extend }: { className: string; extend?
         {
             className,
             viewBox: '0 0 24 24',
+            width: '1em',
+            height: '1em',
             fill: 'none',
             'aria-hidden': true,
         },
@@ -246,7 +248,7 @@ export const EmptyParagraphBulletListMenuItemFactory = createEmptyParagraphButto
 export const EmptyParagraphCheckListMenuItemFactory = createEmptyParagraphButtonFactory(CheckListCommand, 'TodoListDoubleIcon', 'docs-ui.rightClick.checkList');
 export const EmptyParagraphHorizontalLineMenuItemFactory = createEmptyParagraphButtonFactory(HorizontalLineCommand, 'ReduceIcon', 'docs-ui.toolbar.horizontalLine');
 
-export const CopyCurrentParagraphMenuItemFactory = (accessor: IAccessor): IMenuItem => {
+export const CopyCurrentParagraphMenuItemFactory = (_accessor: IAccessor): IMenuItem => {
     return {
         id: DocCopyCurrentParagraphCommand.id,
         type: MenuItemType.BUTTON,
@@ -255,7 +257,7 @@ export const CopyCurrentParagraphMenuItemFactory = (accessor: IAccessor): IMenuI
     };
 };
 
-export const CutCurrentParagraphMenuItemFactory = (accessor: IAccessor): IMenuItem => {
+export const CutCurrentParagraphMenuItemFactory = (_accessor: IAccessor): IMenuItem => {
     return {
         id: DocCutCurrentParagraphCommand.id,
         type: MenuItemType.BUTTON,
@@ -264,7 +266,7 @@ export const CutCurrentParagraphMenuItemFactory = (accessor: IAccessor): IMenuIt
     };
 };
 
-export const DeleteCurrentParagraphMenuItemFactory = (accessor: IAccessor): IMenuItem => {
+export const DeleteCurrentParagraphMenuItemFactory = (_accessor: IAccessor): IMenuItem => {
     return {
         id: DeleteCurrentParagraphCommand.id,
         type: MenuItemType.BUTTON,
@@ -273,7 +275,7 @@ export const DeleteCurrentParagraphMenuItemFactory = (accessor: IAccessor): IMen
     };
 };
 
-export const InsertBulletListBellowMenuItemFactory = (accessor: IAccessor): IMenuItem => {
+export const InsertBulletListBellowMenuItemFactory = (_accessor: IAccessor): IMenuItem => {
     return {
         id: InsertBulletListBellowCommand.id,
         type: MenuItemType.BUTTON,
@@ -283,7 +285,7 @@ export const InsertBulletListBellowMenuItemFactory = (accessor: IAccessor): IMen
     };
 };
 
-export const InsertOrderListBellowMenuItemFactory = (accessor: IAccessor): IMenuItem => {
+export const InsertOrderListBellowMenuItemFactory = (_accessor: IAccessor): IMenuItem => {
     return {
         id: InsertOrderListBellowCommand.id,
         type: MenuItemType.BUTTON,
@@ -293,7 +295,7 @@ export const InsertOrderListBellowMenuItemFactory = (accessor: IAccessor): IMenu
     };
 };
 
-export const InsertCheckListBellowMenuItemFactory = (accessor: IAccessor): IMenuItem => {
+export const InsertCheckListBellowMenuItemFactory = (_accessor: IAccessor): IMenuItem => {
     return {
         id: InsertCheckListBellowCommand.id,
         type: MenuItemType.BUTTON,
@@ -303,7 +305,7 @@ export const InsertCheckListBellowMenuItemFactory = (accessor: IAccessor): IMenu
     };
 };
 
-export const InsertHorizontalLineBellowMenuItemFactory = (accessor: IAccessor): IMenuItem => {
+export const InsertHorizontalLineBellowMenuItemFactory = (_accessor: IAccessor): IMenuItem => {
     return {
         id: InsertHorizontalLineBellowCommand.id,
         type: MenuItemType.BUTTON,
@@ -389,6 +391,8 @@ function TextColorSwatchIcon(props: { className?: string; color: string }) {
         {
             className,
             viewBox: '0 0 24 24',
+            width: '1em',
+            height: '1em',
             fill: 'none',
             'aria-hidden': true,
         },
@@ -420,6 +424,8 @@ function BackgroundColorSwatchIcon(props: { className?: string; color: string })
         {
             className,
             viewBox: '0 0 24 24',
+            width: '1em',
+            height: '1em',
             fill: 'none',
             'aria-hidden': true,
         },
@@ -549,7 +555,7 @@ function createHeaderActionMenuItemFactory(
     };
 }
 
-export const TableBlockCopyMenuItemFactory = (accessor: IAccessor): IMenuItem => {
+export const TableBlockCopyMenuItemFactory = (_accessor: IAccessor): IMenuItem => {
     return {
         id: DocCopyCommand.name,
         commandId: DocCopyCommand.id,
@@ -559,7 +565,7 @@ export const TableBlockCopyMenuItemFactory = (accessor: IAccessor): IMenuItem =>
     };
 };
 
-export const TableBlockPasteMenuItemFactory = (accessor: IAccessor): IMenuItem => {
+export const TableBlockPasteMenuItemFactory = (_accessor: IAccessor): IMenuItem => {
     return {
         id: DocPasteCommand.id,
         type: MenuItemType.BUTTON,
@@ -568,7 +574,7 @@ export const TableBlockPasteMenuItemFactory = (accessor: IAccessor): IMenuItem =
     };
 };
 
-export const TableBlockDeleteMenuItemFactory = (accessor: IAccessor): IMenuItem => {
+export const TableBlockDeleteMenuItemFactory = (_accessor: IAccessor): IMenuItem => {
     return {
         id: DocTableDeleteTableCommand.id,
         type: MenuItemType.BUTTON,
@@ -577,7 +583,7 @@ export const TableBlockDeleteMenuItemFactory = (accessor: IAccessor): IMenuItem 
     };
 };
 
-export function DocInsertBellowMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
+export function DocInsertBellowMenuItemFactory(_accessor: IAccessor): IMenuSelectorItem<string> {
     return {
         id: INSERT_BELLOW_MENU_ID,
         type: MenuItemType.SUBITEMS,

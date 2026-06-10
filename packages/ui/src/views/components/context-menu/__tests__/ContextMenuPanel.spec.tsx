@@ -181,7 +181,6 @@ describe('ContextMenuPanel', () => {
             sizeVariant: 'paragraph-t',
         }));
 
-        const tinyGroups = screen.getAllByTestId('tiny-menu-group');
         const sharedCluster = container.querySelector('.univer-gap-0') as HTMLDivElement | null;
 
         expect(sharedCluster).not.toBeNull();
@@ -316,6 +315,60 @@ describe('ContextMenuPanel', () => {
         }));
 
         expect(document.querySelector('button[title="header-action"]')).not.toBeNull();
+    });
+
+    it('opens a header action selector submenu instead of immediately executing its current value', () => {
+        dependencyMap.clear();
+        tinyMenuGroupSpy.mockClear();
+        const onOptionSelect = vi.fn();
+
+        dependencyMap.set(IMenuManagerService, {
+            menuChanged$: new BehaviorSubject<void>(undefined),
+            getMenuByPositionKey: vi.fn(() => [{
+                key: 'colors',
+                order: 0,
+                title: 'docs-ui.toolbar.textColor.main',
+                headerActionItem: {
+                    id: 'header-action',
+                    type: MenuItemType.BUTTON_SELECTOR,
+                    icon: 'HeaderTextColorIcon',
+                    tooltip: 'header-action',
+                    selections: [{
+                        label: 'custom-option',
+                        value: '#ff0000',
+                    }],
+                },
+                children: [{
+                    key: 'quickItem',
+                    order: 0,
+                    item: {
+                        id: 'quick-item',
+                        type: MenuItemType.BUTTON,
+                    },
+                }],
+            }]),
+        });
+        dependencyMap.set(ILayoutService, {
+            rootContainerElement: document.body,
+        });
+        dependencyMap.set(LocaleService, {
+            t: (key: string) => key,
+            direction$: new BehaviorSubject<'ltr'>('ltr'),
+        });
+
+        render(React.createElement(ContextMenuPanel as never, {
+            menuType: 'quick-layout-menu',
+            sizeVariant: 'paragraph-t',
+            onOptionSelect,
+        }));
+
+        const headerActionButton = document.querySelector('button[title="header-action"]') as HTMLButtonElement | null;
+
+        expect(headerActionButton).not.toBeNull();
+
+        fireEvent.click(headerActionButton!);
+
+        expect(onOptionSelect).not.toHaveBeenCalled();
     });
 
     it('renders quick layout group titles before icon rows', () => {

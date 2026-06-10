@@ -16,7 +16,7 @@
 
 import { DocumentFlavor } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
-import { getRuntimeDocZoomRatio, shouldHandleDocWheelZoom } from '../zoom.render-controller';
+import { shouldHandleDocWheelZoom } from '../zoom.render-controller';
 
 describe('DocZoomRenderController', () => {
     it('handles wheel zoom intent for focused modern docs', () => {
@@ -27,15 +27,5 @@ describe('DocZoomRenderController', () => {
         expect(shouldHandleDocWheelZoom({ ctrlKey: false, metaKey: true }, true, DocumentFlavor.TRADITIONAL)).toBe(true);
         expect(shouldHandleDocWheelZoom({ ctrlKey: false, metaKey: false }, true, DocumentFlavor.TRADITIONAL)).toBe(false);
         expect(shouldHandleDocWheelZoom({ ctrlKey: true, metaKey: false }, false, DocumentFlavor.TRADITIONAL)).toBe(false);
-    });
-
-    it('uses a larger runtime zoom default for modern docs without persisting it', () => {
-        expect(getRuntimeDocZoomRatio(undefined, DocumentFlavor.MODERN)).toBe(1.2);
-        expect(getRuntimeDocZoomRatio(undefined, DocumentFlavor.TRADITIONAL)).toBe(1);
-    });
-
-    it('keeps explicit document zoom settings ahead of runtime defaults', () => {
-        expect(getRuntimeDocZoomRatio(0.85, DocumentFlavor.MODERN)).toBe(0.85);
-        expect(getRuntimeDocZoomRatio(1.5, DocumentFlavor.TRADITIONAL)).toBe(1.5);
     });
 });

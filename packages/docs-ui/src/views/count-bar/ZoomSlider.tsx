@@ -19,6 +19,7 @@ import { ICommandService, IUniverInstanceService, UniverInstanceType } from '@un
 import { Slider, useDependency } from '@univerjs/ui';
 import { useCallback, useEffect, useState } from 'react';
 import { SetDocZoomRatioOperation } from '../../commands/operations/set-doc-zoom-ratio.operation';
+import { getDocEffectiveZoomRatio } from '../../services/doc-zoom';
 
 const ZOOM_MAP = [50, 80, 100, 130, 150, 170, 200, 400];
 const DOC_ZOOM_RANGE = [10, 400];
@@ -29,11 +30,10 @@ export function ZoomSlider() {
     const [documentDataModel, setDocumentDataModel] = useState<DocumentDataModel | null>(null);
     const [zoom, setZoom] = useState<number>(100);
 
-    const getCurrentZoom = useCallback(() => {
-        if (!documentDataModel) return 100;
+    const getCurrentZoom = useCallback((docModel: DocumentDataModel | null = documentDataModel) => {
+        if (!docModel) return 100;
 
-        const currentZoom = ((documentDataModel.getSettings()?.zoomRatio ?? 1) * 100);
-        return Math.round(currentZoom);
+        return Math.round(getDocEffectiveZoomRatio(docModel) * 100);
     }, [documentDataModel]);
 
     useEffect(() => {
@@ -42,7 +42,7 @@ export function ZoomSlider() {
         const subscription = currentDoc$.subscribe((doc) => {
             if (doc) {
                 setDocumentDataModel(doc);
-                setZoom(getCurrentZoom());
+                setZoom(getCurrentZoom(doc));
             }
         });
 

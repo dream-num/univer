@@ -870,6 +870,12 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                         onClick={() => {
                             clearSubmenuCloseTimer();
                             if (hasSubmenu) {
+                                if (headerAction) {
+                                    setSubmenuPositionReady(false);
+                                    setActiveSubmenuKey(menuKey);
+                                    return;
+                                }
+
                                 if (canExecuteItem) {
                                     const item = menuItem as IDisplayMenuItem<IMenuButtonItem>;
                                     onOptionSelect?.({

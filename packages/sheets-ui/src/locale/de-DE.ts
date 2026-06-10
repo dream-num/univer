@@ -164,6 +164,7 @@ const locale: typeof enUS = {
             pasteFormat: 'Formatierung einfügen',
             pasteColWidth: 'Spaltenbreite einfügen',
             pasteBesidesBorder: 'Rahmenstile einfügen',
+            pasteFormula: 'Formel einfügen',
             insert: 'Einfügen',
             insertRow: 'Zeile einfügen',
             insertRowBefore: 'Zeile davor einfügen',

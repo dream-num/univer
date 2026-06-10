@@ -164,6 +164,7 @@ const locale: typeof enUS = {
             pasteFormat: 'لصق التنسيق',
             pasteColWidth: 'لصق عرض العمود',
             pasteBesidesBorder: 'لصق باستثناء أنماط الحدود',
+            pasteFormula: 'لصق الصيغة',
             insert: 'إدراج',
             insertRow: 'إدراج صف',
             insertRowBefore: 'إدراج صف قبل',

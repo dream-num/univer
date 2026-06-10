@@ -164,6 +164,7 @@ const locale: typeof enUS = {
             pasteFormat: '仅粘贴格式',
             pasteColWidth: '仅粘贴列宽',
             pasteBesidesBorder: '仅粘贴边框以外内容',
+            pasteFormula: '仅粘贴公式',
             insert: '插入',
             insertRow: '插入行',
             insertRowBefore: '在上方插入行',

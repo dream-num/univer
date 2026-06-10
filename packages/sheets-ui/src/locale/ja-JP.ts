@@ -164,6 +164,7 @@ const locale: typeof enUS = {
             pasteFormat: '書式を貼り付け',
             pasteColWidth: '列幅を貼り付け',
             pasteBesidesBorder: '罫線スタイルを貼り付け',
+            pasteFormula: '数式を貼り付け',
             insert: '挿入',
             insertRow: '行を挿入',
             insertRowBefore: '前に行を挿入',

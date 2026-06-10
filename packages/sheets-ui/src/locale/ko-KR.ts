@@ -164,6 +164,7 @@ const locale: typeof enUS = {
             pasteFormat: '서식 붙여넣기',
             pasteColWidth: '열 너비 붙여넣기',
             pasteBesidesBorder: '테두리 스타일 붙여넣기',
+            pasteFormula: '수식 붙여넣기',
             insert: '삽입',
             insertRow: '행 삽입',
             insertRowBefore: '앞에 행 삽입',

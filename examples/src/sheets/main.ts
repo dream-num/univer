@@ -21,7 +21,7 @@ import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
-import { DEFAULT_WORKBOOK_DATA_DEMO } from '@univerjs/mockdata';
+import { DEFAULT_WORKBOOK_DATA_DEMO, loadDebuggerLocale } from '@univerjs/mockdata';
 import arSA from '@univerjs/mockdata/locales/ar-SA';
 import caES from '@univerjs/mockdata/locales/ca-ES';
 import deDE from '@univerjs/mockdata/locales/de-DE';
@@ -177,6 +177,8 @@ function createNewInstance() {
     if (IS_E2E) {
         univer.registerPlugin(UniverDebuggerPlugin, {
             fab: false,
+            fabEntryUnitType: UniverInstanceType.UNIVER_SHEET,
+            localeLoader: loadDebuggerLocale,
             performanceMonitor: {
                 enabled: false,
             },

@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import { LocaleService, LocaleType } from '@univerjs/core';
+import type { IUniverDebuggerConfig } from '../config/config';
+import { IConfigService, LocaleService, LocaleType } from '@univerjs/core';
 import { useDependency } from '@univerjs/ui';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
+import { DEBUGGER_PLUGIN_CONFIG_KEY } from '../config/config';
 
 const locales = [
     {
@@ -97,77 +99,23 @@ const locales = [
     },
 ];
 
-// eslint-disable-next-line max-lines-per-function
 export function useLocale() {
+    const configService = useDependency(IConfigService);
     const localeService = useDependency(LocaleService);
+    const configs = configService.getConfig<IUniverDebuggerConfig>(DEBUGGER_PLUGIN_CONFIG_KEY);
+    const localeLoader = configs?.localeLoader;
 
-    async function loadLocales(value: string) {
-        let locales;
-        switch (value) {
-            case LocaleType.ZH_CN:
-                locales = await import('@univerjs/mockdata/locales/zh-CN');
-                break;
-            case LocaleType.ZH_TW:
-                locales = await import('@univerjs/mockdata/locales/zh-TW');
-                break;
-            case LocaleType.ZH_HK:
-                locales = await import('@univerjs/mockdata/locales/zh-HK');
-                break;
-            case LocaleType.FR_FR:
-                locales = await import('@univerjs/mockdata/locales/fr-FR');
-                break;
-            case LocaleType.RU_RU:
-                locales = await import('@univerjs/mockdata/locales/ru-RU');
-                break;
-            case LocaleType.VI_VN:
-                locales = await import('@univerjs/mockdata/locales/vi-VN');
-                break;
-            case LocaleType.JA_JP:
-                locales = await import('@univerjs/mockdata/locales/ja-JP');
-                break;
-            case LocaleType.FA_IR:
-                locales = await import('@univerjs/mockdata/locales/fa-IR');
-                break;
-            case LocaleType.KO_KR:
-                locales = await import('@univerjs/mockdata/locales/ko-KR');
-                break;
-            case LocaleType.ES_ES:
-                locales = await import('@univerjs/mockdata/locales/es-ES');
-                break;
-            case LocaleType.CA_ES:
-                locales = await import('@univerjs/mockdata/locales/ca-ES');
-                break;
-            case LocaleType.SK_SK:
-                locales = await import('@univerjs/mockdata/locales/sk-SK');
-                break;
-            case LocaleType.PT_BR:
-                locales = await import('@univerjs/mockdata/locales/pt-BR');
-                break;
-            case LocaleType.DE_DE:
-                locales = await import('@univerjs/mockdata/locales/de-DE');
-                break;
-            case LocaleType.IT_IT:
-                locales = await import('@univerjs/mockdata/locales/it-IT');
-                break;
-            case LocaleType.ID_ID:
-                locales = await import('@univerjs/mockdata/locales/id-ID');
-                break;
-            case LocaleType.PL_PL:
-                locales = await import('@univerjs/mockdata/locales/pl-PL');
-                break;
-            case LocaleType.AR_SA:
-                locales = await import('@univerjs/mockdata/locales/ar-SA');
-                break;
-            case LocaleType.EN_US:
-            default:
-                locales = await import('@univerjs/mockdata/locales/en-US');
-                break;
+    const loadLocales = useCallback(async (value: string) => {
+        const locale = value as LocaleType;
+        if (!localeLoader) {
+            throw new Error('[UniverDebuggerPlugin]: localeLoader is required.');
         }
+        const localePack = await localeLoader(locale);
 
         localeService.load({
-            [value]: locales.default,
+            [locale]: localePack,
         });
-    }
+    }, [localeLoader, localeService]);
 
     useEffect(() => {
         const locale = localStorage.getItem('local.locale');
@@ -177,7 +125,7 @@ export function useLocale() {
                 localeService.setLocale(locale as LocaleType);
             });
         }
-    }, []);
+    }, [loadLocales, localeService]);
 
     const onSelect = async (value: string) => {
         await loadLocales(value);

@@ -20,7 +20,7 @@ import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
-import { UNISCRIT_WORKBOOK_DATA_DEMO } from '@univerjs/mockdata';
+import { loadDebuggerLocale, UNISCRIT_WORKBOOK_DATA_DEMO } from '@univerjs/mockdata';
 import zhCN from '@univerjs/mockdata/locales/zh-CN';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
@@ -76,6 +76,8 @@ univer.registerPlugin(UniverUniscriptPlugin, {
 if (IS_E2E) {
     univer.registerPlugin(UniverDebuggerPlugin, {
         fab: false,
+        fabEntryUnitType: UniverInstanceType.UNIVER_SHEET,
+        localeLoader: loadDebuggerLocale,
         performanceMonitor: {
             enabled: false,
         },

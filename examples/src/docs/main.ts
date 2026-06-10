@@ -26,12 +26,14 @@ import { UniverDocsThreadCommentUIPlugin } from '@univerjs/docs-thread-comment-u
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
-import { DEFAULT_DOCUMENT_DATA_SIMPLE } from '@univerjs/mockdata';
+import { DEFAULT_DOCUMENT_DATA_SIMPLE, loadDebuggerLocale } from '@univerjs/mockdata';
 import zhCN from '@univerjs/mockdata/locales/zh-CN';
 import { UniverUIPlugin } from '@univerjs/ui';
+import { UniverWatermarkPlugin } from '@univerjs/watermark';
 
 import '@univerjs/docs/facade';
 import '@univerjs/docs-ui/facade';
+import '@univerjs/watermark/facade';
 
 import '../global.css';
 
@@ -65,15 +67,19 @@ univer.registerPlugin(UniverDocsThreadCommentUIPlugin);
 univer.registerPlugin(UniverDocsHyperLinkUIPlugin);
 univer.registerPlugin(UniverDocsMentionUIPlugin);
 univer.registerPlugin(UniverDocsQuickInsertUIPlugin);
+univer.registerPlugin(UniverWatermarkPlugin);
 
 if (!IS_E2E) {
     univer.createUnit(UniverInstanceType.UNIVER_DOC, DEFAULT_DOCUMENT_DATA_SIMPLE);
     univer.registerPlugin(UniverDebuggerPlugin, {
         fabEntryUnitType: UniverInstanceType.UNIVER_DOC,
+        localeLoader: loadDebuggerLocale,
     });
 } else {
     univer.registerPlugin(UniverDebuggerPlugin, {
         fab: false,
+        fabEntryUnitType: UniverInstanceType.UNIVER_DOC,
+        localeLoader: loadDebuggerLocale,
         performanceMonitor: {
             enabled: false,
         },

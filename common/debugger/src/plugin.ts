@@ -32,7 +32,7 @@ export class UniverDebuggerPlugin extends Plugin {
     private _debuggerController!: DebuggerController;
 
     constructor(
-        private readonly _config: Partial<IUniverDebuggerConfig> = defaultPluginConfig,
+        private readonly _config: IUniverDebuggerConfig,
         @Inject(Injector) override readonly _injector: Injector,
         @IConfigService private readonly _configService: IConfigService
     ) {

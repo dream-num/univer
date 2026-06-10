@@ -16,7 +16,9 @@
 
 import type { Plugin, PluginCtor } from '@univerjs/core';
 import { UniverActionRecorderPlugin } from '@univerjs/action-recorder';
+import { UniverInstanceType } from '@univerjs/core';
 import { UniverDebuggerPlugin } from '@univerjs/debugger';
+import { loadDebuggerLocale } from '@univerjs/mockdata';
 import { UniverSheetsCrosshairHighlightPlugin } from '@univerjs/sheets-crosshair-highlight';
 import { UniverSheetsFindReplacePlugin } from '@univerjs/sheets-find-replace';
 import { UniverSheetsHyperLinkUIPlugin } from '@univerjs/sheets-hyper-link-ui';
@@ -38,7 +40,10 @@ export default function getVeryLazyPlugins() {
     ];
 
     if (!IS_E2E) {
-        plugins.push([UniverDebuggerPlugin]);
+        plugins.push([UniverDebuggerPlugin, {
+            fabEntryUnitType: UniverInstanceType.UNIVER_SHEET,
+            localeLoader: loadDebuggerLocale,
+        }]);
         plugins.push([UniverUniscriptPlugin, {
             getWorkerUrl(_: string, label: string) {
                 if (label === 'json') {

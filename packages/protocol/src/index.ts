@@ -208,6 +208,8 @@ export type {
 export {
     type ICopyFileMetaRequest,
     type ICopyFileMetaResponse,
+    type IDeleteUnitsRequest,
+    type IDeleteUnitsResponse,
     type IFetchMissingChangesetsRequest,
     type IFetchMissingChangesetsResponse,
     type IGetLatestCsReqIdBySidRequest,
@@ -222,6 +224,8 @@ export {
     type IMGetChangesetsByRevisionResponse,
     type IMGetUnitMetaRequest,
     type IMGetUnitMetaResponse,
+    type IRecoverUnitsRequest,
+    type IRecoverUnitsResponse,
     type IReportUnitRoutingStatsRequest,
     type IReportUnitRoutingStatsResponse,
     type ISaveChangesetRequest,

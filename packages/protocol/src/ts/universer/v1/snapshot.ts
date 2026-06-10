@@ -111,6 +111,7 @@ export interface IForkUnitResponse {
 
 export interface ICopyFileMetaRequest {
     fileMetaId: string;
+    assign: string;
 }
 
 export interface ICopyFileMetaResponse {
@@ -333,11 +334,21 @@ interface IListUnitsResponse {
     nextCursor: string;
 }
 
-interface IDeleteUnitsRequest {
+export interface IDeleteUnitsRequest {
+    unitIds: string[];
+    /** if true, delete the unit permanently, otherwise just mark as deleted */
+    hardDelete: boolean;
+}
+
+export interface IDeleteUnitsResponse {
+    error: IError | undefined;
+}
+
+export interface IRecoverUnitsRequest {
     unitIds: string[];
 }
 
-interface IDeleteUnitsResponse {
+export interface IRecoverUnitsResponse {
     error: IError | undefined;
 }
 
@@ -368,6 +379,7 @@ export interface ISnapshotService {
     UpdateUnit(request: IUpdateUnitRequest, metadata?: Metadata): Observable<IUpdateUnitResponse>;
     ListUnits(request: IListUnitsRequest, metadata?: Metadata): Observable<IListUnitsResponse>;
     DeleteUnits(request: IDeleteUnitsRequest, metadata?: Metadata): Observable<IDeleteUnitsResponse>;
+    RecoverUnits(request: IRecoverUnitsRequest, metadata?: Metadata): Observable<IRecoverUnitsResponse>;
     SaveChangeset(request: ISaveChangesetRequest, metadata?: Metadata): Observable<ISaveChangesetResponse>;
     GetLatestCsReqIdBySid(
         request: IGetLatestCsReqIdBySidRequest,

@@ -231,13 +231,21 @@ export function getTableBlockMenuHoverRect(tableRect: IBoundRectNoAngle): IBound
 }
 
 export function getTableHorizontalViewportGeometry(tableLeft: number, tableWidth: number, viewport: Nullable<IDocsTableRenderViewport>) {
-    const hasHorizontalViewport = viewport != null && viewport.contentWidth > viewport.viewportWidth;
+    const hasHorizontalViewport = hasHorizontalTableViewport(viewport);
+    const visibleLeft = hasHorizontalViewport
+        ? tableLeft - (viewport.leadingInsetLeft ?? 0)
+        : tableLeft;
 
     return {
         scrollLeft: hasHorizontalViewport ? viewport.scrollLeft : 0,
-        visibleLeft: tableLeft,
-        visibleRight: tableLeft + (hasHorizontalViewport ? viewport.viewportWidth : tableWidth),
+        visibleLeft,
+        visibleRight: visibleLeft + (hasHorizontalViewport ? viewport.viewportWidth : tableWidth),
     };
+}
+
+function hasHorizontalTableViewport(viewport: Nullable<IDocsTableRenderViewport>): viewport is IDocsTableRenderViewport {
+    return viewport != null &&
+        (viewport.leadingInsetLeft ?? 0) + viewport.contentWidth + (viewport.trailingInsetRight ?? 0) > viewport.viewportWidth;
 }
 
 export class DocEventManagerService extends Disposable implements IRenderModule {

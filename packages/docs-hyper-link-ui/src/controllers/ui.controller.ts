@@ -16,6 +16,7 @@
 
 import type { MenuConfig } from '@univerjs/ui';
 import { Disposable, ICommandService, Inject } from '@univerjs/core';
+import { FLOAT_TOOLBAR_MENU_POSITION } from '@univerjs/docs-ui';
 import { LinkIcon } from '@univerjs/icons';
 import { ComponentManager, IMenuManagerService, IShortcutService } from '@univerjs/ui';
 import { AddDocHyperLinkCommand } from '../commands/commands/add-link.command';
@@ -78,6 +79,7 @@ export class DocHyperLinkUIController extends Disposable {
     }
 
     private _initMenus() {
+        this._menuManagerService.appendRootMenu({ [FLOAT_TOOLBAR_MENU_POSITION]: {} });
         this._menuManagerService.mergeMenu(menuSchema);
     }
 }

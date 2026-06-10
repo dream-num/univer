@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import type { IDisplayMenuItem, IMenuItem, IValueOption } from '../../../services/menu/menu';
+import type { IDisplayMenuItem, IMenuItem, IValueOption, MenuItemDefaultValueType } from '../../../services/menu/menu';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
+import type { TinyMenuLayoutVariant, TinyMenuSizeVariant } from './DesignTinyMenuGroup';
 import { convertObservableToBehaviorSubject, LocaleService } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
 import { useEffect, useMemo, useState } from 'react';
@@ -28,6 +29,9 @@ interface IUIQuickMenuGroupProps {
     item: IMenuSchema;
     activeItemIds?: string[];
     hiddenItemIds?: string[];
+    columns?: number;
+    sizeVariant?: TinyMenuSizeVariant;
+    layoutVariant?: TinyMenuLayoutVariant;
     onOptionSelect?: (option: IValueOption) => void;
 }
 
@@ -38,6 +42,10 @@ interface IUIQuickTileMenuItemProps {
 }
 
 const EMPTY_HIDDEN_ITEM_IDS: string[] = [];
+
+type TinyMenuDisplayItem = IDisplayMenuItem<IMenuItem> & {
+    value?: MenuItemDefaultValueType;
+};
 
 export function resolveMenuItemActiveState(itemId: string | undefined, observableActive: boolean, activeItemIds?: string[]): boolean {
     if (activeItemIds) {
@@ -60,7 +68,7 @@ function QuickTileMenuItem(props: IUIQuickTileMenuItemProps) {
     const { menuSchema, activeItemIds, onOptionSelect } = props;
     const componentManager = useDependency(ComponentManager);
     const localeService = useDependency(LocaleService);
-    const menuItem = menuSchema.item as IDisplayMenuItem<IMenuItem> | undefined;
+    const menuItem = menuSchema.item as TinyMenuDisplayItem | undefined;
     const disabled = useObservable<boolean>(menuItem?.disabled$, false);
     const hidden = useObservable<boolean>(menuItem?.hidden$, false);
     const activated = useObservable<boolean>(menuItem?.activated$, false);
@@ -105,6 +113,8 @@ function QuickTileMenuItem(props: IUIQuickTileMenuItemProps) {
                     label: menuItem.id ?? menuSchema.key,
                     commandId: menuItem.commandId,
                     id: menuItem.id,
+                    params: menuItem.params,
+                    value: menuItem.value,
                     tooltip: menuItem.tooltip && localeService.t(menuItem.tooltip),
                 });
             }}
@@ -125,7 +135,7 @@ function QuickTileMenuItem(props: IUIQuickTileMenuItemProps) {
 }
 
 export function UITinyMenuGroup(props: IUIQuickMenuGroupProps) {
-    const { item, activeItemIds, hiddenItemIds = EMPTY_HIDDEN_ITEM_IDS, onOptionSelect } = props;
+    const { item, activeItemIds, hiddenItemIds = EMPTY_HIDDEN_ITEM_IDS, columns, sizeVariant = 'default', layoutVariant = 'default', onOptionSelect } = props;
     const [activeItems, setActiveItems] = useState<string[]>([]);
     const [hiddenItems, setHiddenItems] = useState<string[]>([]);
     const componentManager = useDependency(ComponentManager);
@@ -184,6 +194,9 @@ export function UITinyMenuGroup(props: IUIQuickMenuGroupProps) {
 
     return (
         <DesignTinyMenuGroup
+            columns={columns}
+            sizeVariant={sizeVariant}
+            layoutVariant={layoutVariant}
             items={visibleChildren.map((child) => ({
                 key: child.key,
                 onClick: () => {
@@ -191,13 +204,18 @@ export function UITinyMenuGroup(props: IUIQuickMenuGroupProps) {
                         label: child.item?.id ?? child.key,
                         commandId: child.item?.commandId,
                         id: child.item?.id,
+                        params: child.item?.params,
+                        value: (child.item as TinyMenuDisplayItem | undefined)?.value,
                         tooltip: child.item?.tooltip && localeService.t(child.item?.tooltip),
                     });
                 },
                 className: '',
-                iconClassName: child.item?.icon === 'TextTypeIcon' ? '!univer-size-3.5' : undefined,
+                iconClassName: child.item?.icon === 'TextTypeIcon'
+                    ? (sizeVariant === 'paragraph-t' ? '!univer-size-4' : '!univer-size-3.5')
+                    : undefined,
                 Icon: componentManager.get(child.item!.icon as string)!,
                 active: resolveMenuItemActiveState(child.item?.id, activeItems.includes(child.item?.id ?? ''), activeItemIds),
+                tooltip: child.item?.tooltip ? localeService.t(child.item.tooltip) : undefined,
             }))}
         />
     );

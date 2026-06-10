@@ -17,12 +17,21 @@
 import type { MenuSchemaType } from '@univerjs/ui';
 import { DOC_CONTENT_INSERT_MENU_ID, EMPTY_PARAGRAPH_MENU_ID, INSERT_BELLOW_MENU_ID } from '@univerjs/docs-ui';
 import { ContextMenuGroup, ContextMenuPosition, RibbonInsertGroup } from '@univerjs/ui';
+import { InsertDocEllipseShapeCommand, InsertDocRectangleShapeCommand } from '../commands/commands/insert-shape.command';
 import {
     DOCS_IMAGE_MENU_ID,
     IMAGE_MENU_UPLOAD_FLOAT_ID,
     ImageMenuFactory,
     UploadFloatImageMenuFactory,
 } from './image.menu';
+import {
+    DOCS_SHAPE_BELOW_MENU_ID,
+    DOCS_SHAPE_MENU_ID,
+    InsertEllipseShapeBelowMenuFactory,
+    InsertEllipseShapeMenuFactory,
+    InsertRectangleShapeBelowMenuFactory,
+    InsertRectangleShapeMenuFactory,
+} from './shape.menu';
 
 export const menuSchema: MenuSchemaType = {
     [RibbonInsertGroup.MEDIA]: {
@@ -57,6 +66,32 @@ export const menuSchema: MenuSchemaType = {
                 [IMAGE_MENU_UPLOAD_FLOAT_ID]: {
                     order: 5,
                     menuItemFactory: UploadFloatImageMenuFactory,
+                },
+            },
+        },
+        [DOCS_SHAPE_MENU_ID]: {
+            shapes: {
+                order: 0,
+                [InsertDocRectangleShapeCommand.id]: {
+                    order: 0,
+                    menuItemFactory: InsertRectangleShapeMenuFactory,
+                },
+                [InsertDocEllipseShapeCommand.id]: {
+                    order: 1,
+                    menuItemFactory: InsertEllipseShapeMenuFactory,
+                },
+            },
+        },
+        [DOCS_SHAPE_BELOW_MENU_ID]: {
+            shapes: {
+                order: 0,
+                [`${InsertDocRectangleShapeCommand.id}.below`]: {
+                    order: 0,
+                    menuItemFactory: InsertRectangleShapeBelowMenuFactory,
+                },
+                [`${InsertDocEllipseShapeCommand.id}.below`]: {
+                    order: 1,
+                    menuItemFactory: InsertEllipseShapeBelowMenuFactory,
                 },
             },
         },

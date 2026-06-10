@@ -25,6 +25,7 @@ import { ContextMenuGroup, ContextMenuPosition, MenuManagerPosition, RibbonDataG
 export const IMenuManagerService = createIdentifier<IMenuManagerService>('univer.menu-manager-service');
 
 export type ContextMenuQuickLayout = 'icon' | 'tile';
+export type ContextMenuQuickLayoutVariant = 'default' | 'compact';
 
 export interface IMenuSchema {
     key: string;
@@ -32,8 +33,11 @@ export interface IMenuSchema {
     title?: string;
     contextual?: boolean;
     item?: IMenuItem;
+    headerActionItem?: IMenuItem;
     children?: IMenuSchema[];
     quickLayout?: ContextMenuQuickLayout;
+    quickColumns?: number;
+    quickLayoutVariant?: ContextMenuQuickLayoutVariant;
     tiny?: boolean;
 }
 
@@ -52,9 +56,12 @@ export interface IMenuManagerService {
 export type MenuSchemaType = {
     order?: number;
     menuItemFactory?: (accessor: IAccessor) => IMenuItem;
+    headerActionMenuItemFactory?: (accessor: IAccessor) => IMenuItem;
     title?: string;
     contextual?: boolean;
     quickLayout?: ContextMenuQuickLayout;
+    quickColumns?: number;
+    quickLayoutVariant?: ContextMenuQuickLayoutVariant;
     tiny?: boolean;
 } | {
     [key: string]: MenuSchemaType;
@@ -294,6 +301,8 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
                 title: value.title,
                 contextual: value.contextual,
                 quickLayout: value.quickLayout,
+                quickColumns: value.quickColumns,
+                quickLayoutVariant: value.quickLayoutVariant,
                 tiny: value.tiny,
             };
 
@@ -310,6 +319,9 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
                         menuItem.item = item;
                     }
                 }
+            }
+            if (value.headerActionMenuItemFactory) {
+                menuItem.headerActionItem = this._injector.invoke(value.headerActionMenuItemFactory);
             }
             if (typeof value === 'object') {
                 const children = this._buildMenuSchema(value);

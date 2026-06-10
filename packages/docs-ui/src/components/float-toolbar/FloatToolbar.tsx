@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IMenuSchema } from '@univerjs/ui';
+import type { IMenuManagerService as IMenuManagerServiceType, IMenuSchema } from '@univerjs/ui';
 import { borderClassName, clsx } from '@univerjs/design';
 import { IMenuManagerService, MenuManagerPosition, ToolbarItem, useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
@@ -48,29 +48,44 @@ const DEFAULT_AVALIABLE_MENUS: string[] = [
     SetInlineFormatTextBackgroundColorCommand.id,
 ];
 
+export function resolveFloatToolbarMenus(
+    menuManagerService: IMenuManagerServiceType,
+    avaliableMenus: string[]
+): { menus: IMenuSchema[]; extraMenus: IMenuSchema[] } {
+    const floatToolbarMenus = menuManagerService.getMenuByPositionKey(FLOAT_TOOLBAR_MENU_POSITION);
+    const flatMenus = [
+        ...menuManagerService.getFlatMenuByPositionKey(FLOAT_TOOLBAR_MENU_POSITION),
+        ...menuManagerService.getFlatMenuByPositionKey(MenuManagerPosition.RIBBON),
+    ];
+
+    const menus: IMenuSchema[] = [];
+    for (const key of avaliableMenus) {
+        const item = flatMenus.find((item) => item.key === key);
+        if (item) {
+            menus.push(item);
+        }
+    }
+
+    return {
+        menus,
+        extraMenus: floatToolbarMenus.filter((item) => item.item && !avaliableMenus.includes(item.key)),
+    };
+}
+
 export function FloatToolbar(props: IFloatToolbarProps) {
     const { avaliableMenus = DEFAULT_AVALIABLE_MENUS } = props;
 
     const menuManagerService = useDependency(IMenuManagerService);
 
     const [menus, setMenus] = useState<IMenuSchema[]>([]);
+    const [extraMenus, setExtraMenus] = useState<IMenuSchema[]>([]);
 
     // subscribe to menu changes
     useEffect(() => {
         function getRibbon(): void {
-            const flatMenus = [
-                ...menuManagerService.getFlatMenuByPositionKey(FLOAT_TOOLBAR_MENU_POSITION),
-                ...menuManagerService.getFlatMenuByPositionKey(MenuManagerPosition.RIBBON),
-            ];
-
-            const menus: IMenuSchema[] = [];
-            for (const key of avaliableMenus) {
-                const item = flatMenus.find((item) => item.key === key);
-                if (item) {
-                    menus.push(item);
-                }
-            }
+            const { menus, extraMenus } = resolveFloatToolbarMenus(menuManagerService, avaliableMenus);
             setMenus(menus);
+            setExtraMenus(extraMenus);
         }
         getRibbon();
 
@@ -79,7 +94,7 @@ export function FloatToolbar(props: IFloatToolbarProps) {
         return () => {
             subscription.unsubscribe();
         };
-    }, [menuManagerService]);
+    }, [avaliableMenus, menuManagerService]);
 
     return (
         <div
@@ -89,6 +104,19 @@ export function FloatToolbar(props: IFloatToolbarProps) {
             `, borderClassName)}
         >
             {menus.map((groupItem) => groupItem.item && (
+                <div key={groupItem.key} className="univer-flex univer-flex-nowrap univer-gap-2 univer-px-2">
+                    <ToolbarItem key={groupItem.key} {...groupItem.item} />
+                </div>
+            ))}
+            {extraMenus.length > 0 && (
+                <div
+                    className="
+                      univer-my-1 univer-w-px univer-bg-gray-200
+                      dark:univer-bg-gray-700
+                    "
+                />
+            )}
+            {extraMenus.map((groupItem) => groupItem.item && (
                 <div key={groupItem.key} className="univer-flex univer-flex-nowrap univer-gap-2 univer-px-2">
                     <ToolbarItem key={groupItem.key} {...groupItem.item} />
                 </div>

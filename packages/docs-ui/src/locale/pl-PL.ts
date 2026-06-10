@@ -110,6 +110,18 @@ const locale: typeof enUS = {
             checkList: 'Lista zadań',
             insertBellow: 'Wstaw poniżej',
         },
+        paragraphMenu: {
+            alignAndIndent: 'Align and indent',
+            align: 'Align',
+            indent: 'Indent',
+            color: 'Colors',
+            increase: 'Increase',
+            decrease: 'Decrease',
+            increaseIndent: 'Increase indent',
+            decreaseIndent: 'Decrease indent',
+            defaultTextColor: 'Default text color',
+            noBackground: 'No background',
+        },
         'page-settings': {
             'document-setting': 'Ustawienia dokumentu',
             mode: 'Tryb',

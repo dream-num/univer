@@ -15,20 +15,37 @@
  */
 
 import { NamedStyleType } from '@univerjs/core';
+import { MenuItemType } from '@univerjs/ui';
 
+import React from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { createParagraphMenuHoverOpenScheduler, getParagraphMenuActiveHeadingCommandId, getParagraphMenuCommand, getParagraphMenuHiddenHeadingCommandIds, getParagraphMenuIconSizeClass, getParagraphMenuPopupDirection, getParagraphMenuTargetRange, isEmptyParagraphMenuTarget, PARAGRAPH_MENU_HOVER_OPEN_DELAY, shouldShowParagraphSettingMenu, shouldUseInsertBelowRange } from '..';
+import * as paragraphMenu from '..';
+import { createParagraphMenuHoverOpenScheduler, getParagraphFormattingRange, getParagraphMenuActiveHeadingCommandId, getParagraphMenuCommand, getParagraphMenuCommandTargetRange, getParagraphMenuHiddenHeadingCommandIds, getParagraphMenuHiddenItemIds, getParagraphMenuIconSizeClass, getParagraphMenuPopupDirection, getParagraphMenuTargetRange, isEmptyParagraphMenuTarget, PARAGRAPH_MENU_HOVER_OPEN_DELAY, shouldShowParagraphSettingMenu, shouldUseInsertBelowRange } from '..';
 import { HorizontalLineCommand } from '../../../commands/commands/doc-horizontal-line.command';
+import { SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand } from '../../../commands/commands/inline-format.command';
 import { BulletListCommand, InsertBulletListBellowCommand, OrderListCommand } from '../../../commands/commands/list.command';
-import { H1HeadingCommand, H3HeadingCommand, H5HeadingCommand, NormalTextHeadingCommand, SetParagraphNamedStyleCommand, SubtitleHeadingCommand, TitleHeadingCommand } from '../../../commands/commands/set-heading.command';
+import { H1HeadingCommand, H3HeadingCommand, H4HeadingCommand, H5HeadingCommand, NormalTextHeadingCommand, SetParagraphNamedStyleCommand, SubtitleHeadingCommand, TitleHeadingCommand } from '../../../commands/commands/set-heading.command';
 import { CreateDocTableCommand } from '../../../commands/commands/table/doc-table-create.command';
 import {
+    DOC_PARAGRAPH_T_EDIT_MENU_ID,
+    DOC_PARAGRAPH_T_INSERT_MENU_ID,
     EmptyParagraphBulletListMenuItemFactory,
     EmptyParagraphH1MenuItemFactory,
     EmptyParagraphHorizontalLineMenuItemFactory,
     HEADING_ICON_MAP,
     INSERT_BELLOW_MENU_ID,
-    shouldShowParagraphHeadingOption,
+    InsertBulletListBellowMenuItemFactory,
+    InsertHorizontalLineBellowMenuItemFactory,
+    InsertOrderListBellowMenuItemFactory,
+    ParagraphMenuBackgroundColorHeaderActionMenuItemFactory,
+    ParagraphMenuBackgroundColorSwatchMenuItemFactories,
+    ParagraphMenuDefaultTextColorMenuItemFactory,
+    ParagraphMenuIndentDecreaseMenuItemFactory,
+    ParagraphMenuIndentIncreaseMenuItemFactory,
+    ParagraphMenuNoBackgroundMenuItemFactory,
+    ParagraphMenuTextColorHeaderActionMenuItemFactory,
+    ParagraphMenuTextColorSwatchMenuItemFactories,
     TableBlockCopyMenuItemFactory,
     TableBlockDeleteMenuItemFactory,
     TableBlockPasteMenuItemFactory,
@@ -48,6 +65,10 @@ describe('ParagraphMenu', () => {
         expect(HEADING_ICON_MAP[NamedStyleType.SUBTITLE].key).toBe('SubtitleTypeIcon');
     });
 
+    it('uses the enlarged context menu size variant for the docs T menu', () => {
+        expect((paragraphMenu as any).getParagraphMenuContextMenuSizeVariant?.()).toBe('paragraph-t');
+    });
+
     it('uses fully-qualified locale keys for paragraph context menu labels', () => {
         const accessor = {
             get: () => ({
@@ -64,9 +85,153 @@ describe('ParagraphMenu', () => {
         expect(TableBlockDeleteMenuItemFactory(accessor).title).toBe('docs-ui.rightClick.delete');
     });
 
+    it('adds matching tooltips to T-menu icon actions', () => {
+        const accessor = {
+            get: () => ({
+                get: () => undefined,
+                register: () => undefined,
+            }),
+        } as never;
+
+        expect(EmptyParagraphH1MenuItemFactory(accessor).tooltip).toBe('ui.toolbar.heading.1');
+        expect(EmptyParagraphBulletListMenuItemFactory(accessor).tooltip).toBe('docs-ui.rightClick.bulletList');
+        expect(EmptyParagraphHorizontalLineMenuItemFactory(accessor).tooltip).toBe('docs-ui.toolbar.horizontalLine');
+        expect(InsertOrderListBellowMenuItemFactory(accessor).tooltip).toBe('docs-ui.rightClick.orderList');
+        expect(InsertBulletListBellowMenuItemFactory(accessor).tooltip).toBe('docs-ui.rightClick.bulletList');
+        expect(InsertHorizontalLineBellowMenuItemFactory(accessor).tooltip).toBe('docs-ui.toolbar.horizontalLine');
+        expect(ParagraphMenuIndentIncreaseMenuItemFactory(accessor).tooltip).toBe('docs-ui.paragraphMenu.increaseIndent');
+        expect(ParagraphMenuIndentDecreaseMenuItemFactory(accessor).tooltip).toBe('docs-ui.paragraphMenu.decreaseIndent');
+        expect(ParagraphMenuIndentIncreaseMenuItemFactory(accessor).title).toBe('docs-ui.paragraphMenu.increase');
+        expect(ParagraphMenuIndentDecreaseMenuItemFactory(accessor).title).toBe('docs-ui.paragraphMenu.decrease');
+    });
+
+    it('renders paragraph text color swatches with an A glyph inside an outlined color chip', () => {
+        const registeredIcons = new Map<string, React.ComponentType<{ className?: string }>>();
+        const componentManager = {
+            get: (key: string) => registeredIcons.get(key),
+            register: (key: string, component: React.ComponentType<{ className?: string }>) => {
+                registeredIcons.set(key, component);
+            },
+        };
+        const accessor = {
+            get: () => componentManager,
+        } as never;
+
+        const factory = ParagraphMenuTextColorSwatchMenuItemFactories['doc.menu.paragraph-t.text-color.0'].menuItemFactory;
+        const menuItem = factory(accessor);
+        const Icon = registeredIcons.get(menuItem.icon as string);
+
+        expect(Icon).toBeDefined();
+        expect(menuItem.tooltip).toBeUndefined();
+
+        const markup = renderToStaticMarkup(React.createElement(Icon!, { className: 'swatch-icon' }));
+
+        expect(markup).toContain('>A<');
+        expect(markup.match(/<rect/g)?.length ?? 0).toBeGreaterThan(0);
+    });
+
+    it('keeps paragraph background color swatches as plain color blocks', () => {
+        const registeredIcons = new Map<string, React.ComponentType<{ className?: string }>>();
+        const componentManager = {
+            get: (key: string) => registeredIcons.get(key),
+            register: (key: string, component: React.ComponentType<{ className?: string }>) => {
+                registeredIcons.set(key, component);
+            },
+        };
+        const accessor = {
+            get: () => componentManager,
+        } as never;
+
+        const factory = ParagraphMenuBackgroundColorSwatchMenuItemFactories['doc.menu.paragraph-t.background-color.0'].menuItemFactory;
+        const menuItem = factory(accessor);
+        const Icon = registeredIcons.get(menuItem.icon as string);
+
+        expect(Icon).toBeDefined();
+        expect(menuItem.tooltip).toBeUndefined();
+
+        const markup = renderToStaticMarkup(React.createElement(Icon!, { className: 'swatch-icon' }));
+
+        expect(markup).not.toContain('>A<');
+        expect(markup.match(/<rect/g)?.length ?? 0).toBeGreaterThan(0);
+    });
+
+    it('keeps the non-color explanatory actions in the colors submenu tooltip-free', () => {
+        const accessor = {
+            get: () => ({
+                get: () => undefined,
+                register: () => undefined,
+            }),
+        } as never;
+
+        expect(ParagraphMenuDefaultTextColorMenuItemFactory(accessor).tooltip).toBeUndefined();
+        expect(ParagraphMenuNoBackgroundMenuItemFactory(accessor).tooltip).toBeUndefined();
+    });
+
+    it('reuses the existing text color selector logic for the colors header action with an A icon', () => {
+        const accessor = {
+            get: () => ({
+                get: () => undefined,
+                register: () => undefined,
+            }),
+        } as never;
+
+        const menuItem = ParagraphMenuTextColorHeaderActionMenuItemFactory(accessor);
+
+        expect(menuItem.type).toBe(MenuItemType.BUTTON_SELECTOR);
+        expect(menuItem.id).toBe(SetInlineFormatTextColorCommand.id);
+        expect(menuItem.icon).toBe('HeaderTextColorIcon');
+        expect(menuItem.tooltip).toBeUndefined();
+        expect(Array.isArray((menuItem as any).selections)).toBe(true);
+    });
+
+    it('reuses the existing background color selector logic for the colors header action with the bucket icon', () => {
+        const accessor = {
+            get: () => ({
+                get: () => undefined,
+                register: () => undefined,
+            }),
+        } as never;
+
+        const menuItem = ParagraphMenuBackgroundColorHeaderActionMenuItemFactory(accessor);
+
+        expect(menuItem.type).toBe(MenuItemType.BUTTON_SELECTOR);
+        expect(menuItem.id).toBe(SetInlineFormatTextBackgroundColorCommand.id);
+        expect(menuItem.icon).toBe('PaintBucketDoubleIcon');
+        expect(menuItem.tooltip).toBeUndefined();
+        expect(Array.isArray((menuItem as any).selections)).toBe(true);
+    });
+
     it('opens the popup away from the drag handle when there is not enough left space', () => {
         expect(getParagraphMenuPopupDirection(170)).toBe('right');
         expect(getParagraphMenuPopupDirection(260)).toBe('left');
+    });
+
+    it('creates a hover bridge overlapping the trigger edge for left-side paragraph popups', () => {
+        expect(paragraphMenu.getParagraphMenuHoverBridgeStyle?.({
+            left: 320,
+            right: 348,
+            top: 120,
+            bottom: 152,
+        }, 'left')).toEqual({
+            left: 308,
+            top: 112,
+            width: 24,
+            height: 48,
+        });
+    });
+
+    it('creates a hover bridge overlapping the trigger edge for right-side paragraph popups', () => {
+        expect(paragraphMenu.getParagraphMenuHoverBridgeStyle?.({
+            left: 24,
+            right: 52,
+            top: 40,
+            bottom: 72,
+        }, 'right')).toEqual({
+            left: 40,
+            top: 32,
+            width: 24,
+            height: 48,
+        });
     });
 
     it('delays opening the paragraph popup for hover and cancels before the delay elapses', () => {
@@ -106,20 +271,6 @@ describe('ParagraphMenu', () => {
         expect(openMenu).toHaveBeenCalledTimes(1);
     });
 
-    it('shows title and subtitle heading shortcuts only when they are the current paragraph style', () => {
-        expect(shouldShowParagraphHeadingOption(NamedStyleType.HEADING_5, NamedStyleType.NORMAL_TEXT)).toBe(true);
-        expect(shouldShowParagraphHeadingOption(NamedStyleType.TITLE, NamedStyleType.NORMAL_TEXT)).toBe(false);
-        expect(shouldShowParagraphHeadingOption(NamedStyleType.SUBTITLE, NamedStyleType.NORMAL_TEXT)).toBe(false);
-
-        expect(shouldShowParagraphHeadingOption(NamedStyleType.HEADING_5, NamedStyleType.TITLE)).toBe(false);
-        expect(shouldShowParagraphHeadingOption(NamedStyleType.TITLE, NamedStyleType.TITLE)).toBe(true);
-        expect(shouldShowParagraphHeadingOption(NamedStyleType.SUBTITLE, NamedStyleType.TITLE)).toBe(false);
-
-        expect(shouldShowParagraphHeadingOption(NamedStyleType.HEADING_5, NamedStyleType.SUBTITLE)).toBe(false);
-        expect(shouldShowParagraphHeadingOption(NamedStyleType.TITLE, NamedStyleType.SUBTITLE)).toBe(false);
-        expect(shouldShowParagraphHeadingOption(NamedStyleType.SUBTITLE, NamedStyleType.SUBTITLE)).toBe(true);
-    });
-
     it('maps paragraph named styles to the active heading menu item', () => {
         expect(getParagraphMenuActiveHeadingCommandId(NamedStyleType.HEADING_1)).toBe(H1HeadingCommand.id);
         expect(getParagraphMenuActiveHeadingCommandId(NamedStyleType.HEADING_3)).toBe(H3HeadingCommand.id);
@@ -131,14 +282,35 @@ describe('ParagraphMenu', () => {
 
     it('hides the alternate title shortcuts for the hovered paragraph style', () => {
         expect(getParagraphMenuHiddenHeadingCommandIds(NamedStyleType.TITLE)).toEqual([
+            H4HeadingCommand.id,
             H5HeadingCommand.id,
             SubtitleHeadingCommand.id,
         ]);
         expect(getParagraphMenuHiddenHeadingCommandIds(NamedStyleType.SUBTITLE)).toEqual([
+            H4HeadingCommand.id,
             H5HeadingCommand.id,
             TitleHeadingCommand.id,
         ]);
         expect(getParagraphMenuHiddenHeadingCommandIds(NamedStyleType.NORMAL_TEXT)).toEqual([
+            H5HeadingCommand.id,
+            TitleHeadingCommand.id,
+            SubtitleHeadingCommand.id,
+        ]);
+    });
+
+    it('keeps all six insert-state header icons visible for empty paragraphs', () => {
+        expect(getParagraphMenuHiddenItemIds(
+            DOC_PARAGRAPH_T_INSERT_MENU_ID,
+            { kind: 'paragraph' } as never,
+            NamedStyleType.NORMAL_TEXT
+        )).toEqual([]);
+
+        expect(getParagraphMenuHiddenItemIds(
+            DOC_PARAGRAPH_T_EDIT_MENU_ID,
+            { kind: 'paragraph' } as never,
+            NamedStyleType.NORMAL_TEXT
+        )).toEqual([
+            H5HeadingCommand.id,
             TitleHeadingCommand.id,
             SubtitleHeadingCommand.id,
         ]);
@@ -180,6 +352,54 @@ describe('ParagraphMenu', () => {
             segmentId: 'header-1',
             startOffset: 3,
         });
+    });
+
+    it('builds a full formatting range for whole-paragraph color actions', () => {
+        expect(getParagraphFormattingRange({
+            kind: 'paragraph',
+            menuRange: {
+                startOffset: 3,
+                endOffset: 3,
+                collapsed: true,
+            },
+        } as never, {
+            paragraphStart: 3,
+            paragraphEnd: 8,
+            segmentId: 'header-1',
+        } as never)).toEqual({
+            collapsed: false,
+            endOffset: 8,
+            segmentId: 'header-1',
+            startOffset: 3,
+        });
+
+        expect(getParagraphFormattingRange({
+            kind: 'blockRange',
+            blockRange: {
+                startIndex: 6,
+                endIndex: 14,
+            },
+            menuRange: {
+                startOffset: 6,
+                endOffset: 15,
+                collapsed: false,
+            },
+        } as never, {
+            segmentId: 'body',
+        } as never)).toEqual({
+            collapsed: false,
+            endOffset: 15,
+            segmentId: 'body',
+            startOffset: 6,
+        });
+    });
+
+    it('uses the formatting range for whole-paragraph selection commands', () => {
+        const targetRange = { startOffset: 3, endOffset: 3, collapsed: true };
+        const formattingRange = { startOffset: 3, endOffset: 8, collapsed: false };
+
+        expect(getParagraphMenuCommandTargetRange(SetInlineFormatTextColorCommand.id, targetRange as never, formattingRange as never)).toEqual(formattingRange);
+        expect(getParagraphMenuCommandTargetRange(H1HeadingCommand.id, targetRange as never, formattingRange as never)).toEqual(targetRange);
     });
 
     it('preserves context menu command params for paragraph menu actions', () => {

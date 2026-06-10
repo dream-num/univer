@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
+import { FLOAT_TOOLBAR_MENU_POSITION } from '@univerjs/docs-ui';
 import { DocumentEditArea } from '@univerjs/engine-render';
 import { describe, expect, it, vi } from 'vitest';
 
+import { StartAddCommentOperation } from '../../commands/operations/show-comment-panel.operation';
 import { AddDocCommentMenuItemFactory, shouldDisableAddComment, ToolbarDocCommentMenuItemFactory } from '../menu';
+import { menuSchema } from '../schema';
 
 vi.mock('@univerjs/engine-render', async () => {
     const actual = await vi.importActual<typeof import('@univerjs/engine-render')>('@univerjs/engine-render');
@@ -64,5 +67,13 @@ describe('docs-thread-comment-ui menu', () => {
         const toolbarItem = ToolbarDocCommentMenuItemFactory(accessor);
         expect(addItem.id).toBe('docs.operation.start-add-comment');
         expect(toolbarItem.id).toBe('docs.operation.toggle-comment-panel');
+    });
+
+    it('adds comment to docs text floating toolbar', () => {
+        const floatToolbar = (menuSchema as any)[FLOAT_TOOLBAR_MENU_POSITION];
+        const comment = floatToolbar[StartAddCommentOperation.id];
+
+        expect(comment.order).toBe(21);
+        expect(comment.menuItemFactory).toBe(AddDocCommentMenuItemFactory);
     });
 });

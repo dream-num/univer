@@ -20,6 +20,7 @@ export { DeleteDocDrawingsCommand } from './commands/commands/delete-doc-drawing
 export { GroupDocDrawingCommand } from './commands/commands/group-doc-drawing.command';
 export { InsertDocDrawingCommand } from './commands/commands/insert-doc-drawing.command';
 export { InsertDocImageCommand } from './commands/commands/insert-image.command';
+export { InsertDocEllipseShapeCommand, InsertDocRectangleShapeCommand } from './commands/commands/insert-shape.command';
 export { MoveDocDrawingsCommand } from './commands/commands/move-drawings.command';
 export { RemoveDocDrawingCommand } from './commands/commands/remove-doc-drawing.command';
 export { SetDocDrawingArrangeCommand } from './commands/commands/set-drawing-arrange.command';
@@ -30,6 +31,7 @@ export { SidebarDocDrawingOperation } from './commands/operations/open-drawing-p
 export { type IUniverDocsDrawingUIConfig } from './config/config';
 export { DocFloatDomController } from './controllers/doc-float-dom.controller';
 export { DOCS_IMAGE_MENU_ID } from './menu/image.menu';
+export { DOCS_SHAPE_BELOW_MENU_ID, DOCS_SHAPE_MENU_ID } from './menu/shape.menu';
 export { UniverDocsDrawingUIPlugin } from './plugin';
 export { DocDrawingPosition } from './views/doc-image-panel/DocDrawingPosition';
 export { DocDrawingTextWrap } from './views/doc-image-panel/DocDrawingTextWrap';

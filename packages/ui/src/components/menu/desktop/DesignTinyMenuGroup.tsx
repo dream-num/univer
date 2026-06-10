@@ -17,6 +17,9 @@
 import type { ComponentType } from 'react';
 import { clsx, Tooltip } from '@univerjs/design';
 
+export type TinyMenuSizeVariant = 'default' | 'paragraph-t';
+export type TinyMenuLayoutVariant = 'default' | 'compact';
+
 export interface ITinyMenuItem {
     onClick: () => void;
     className: string;
@@ -29,33 +32,69 @@ export interface ITinyMenuItem {
 
 export interface ITinyMenuGroupProps {
     items: ITinyMenuItem[];
+    columns?: number;
+    sizeVariant?: TinyMenuSizeVariant;
+    layoutVariant?: TinyMenuLayoutVariant;
 }
 
-export function DesignTinyMenuGroup({ items }: ITinyMenuGroupProps) {
+export function DesignTinyMenuGroup({ items, columns, sizeVariant = 'default', layoutVariant = 'default' }: ITinyMenuGroupProps) {
+    const isParagraphTVariant = sizeVariant === 'paragraph-t';
+    const isCompactParagraphVariant = isParagraphTVariant && layoutVariant === 'compact';
+
     return (
         <div
-            className="univer-menu-item-group univer-flex univer-flex-wrap univer-gap-2.5 univer-p-1 univer-px-0"
+            className={clsx(
+                'univer-menu-item-group univer-px-0',
+                isCompactParagraphVariant
+                    ? 'univer-gap-0.5 univer-p-0'
+                    : isParagraphTVariant
+                        ? 'univer-gap-2 univer-p-1'
+                        : 'univer-gap-1.5 univer-p-0.5',
+                columns
+                    ? `
+                      univer-grid
+                      ${isCompactParagraphVariant ? 'univer-justify-items-start' : 'univer-justify-items-center'}
+                      ${columns === 6 && !isCompactParagraphVariant ? 'univer-grid-cols-6' : ''}
+                    `
+                    : 'univer-flex univer-flex-wrap'
+            )}
+            style={isCompactParagraphVariant && columns
+                ? { gridTemplateColumns: `repeat(${columns}, max-content)` }
+                : undefined}
         >
             {items.map((item) => {
                 const ele = (
                     <div
                         key={item.key}
-                        className={clsx(`
-                          univer-flex univer-size-6 univer-cursor-pointer univer-items-center univer-justify-center
-                          univer-rounded-md
-                          hover:univer-bg-gray-50
-                          dark:hover:!univer-bg-gray-900
-                        `, {
-                            'univer-bg-gray-50 dark:!univer-bg-gray-900': item.active,
-                        }, item.className)}
+                        className={clsx(
+                            `
+                              univer-flex univer-cursor-pointer univer-items-center univer-justify-center
+                              hover:univer-bg-gray-50
+                              dark:hover:!univer-bg-gray-900
+                            `,
+                            isCompactParagraphVariant
+                                ? 'univer-size-6 univer-rounded-sm'
+                                : isParagraphTVariant
+                                    ? 'univer-size-8 univer-rounded-lg'
+                                    : 'univer-size-6 univer-rounded-md',
+                            {
+                                'univer-bg-gray-50 dark:!univer-bg-gray-900': item.active,
+                            },
+                            item.className
+                        )}
                         onClick={() => item.onClick()}
                     >
                         <item.Icon
                             className={clsx(
                                 `
-                                  univer-size-4 univer-text-gray-900
+                                  univer-text-gray-900
                                   dark:!univer-text-gray-200
                                 `,
+                                isCompactParagraphVariant
+                                    ? 'univer-size-4'
+                                    : isParagraphTVariant
+                                        ? 'univer-size-5'
+                                        : 'univer-size-4',
                                 item.iconClassName
                             )}
                         />

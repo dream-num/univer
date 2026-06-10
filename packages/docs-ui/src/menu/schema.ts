@@ -50,7 +50,11 @@ import {
     TableInsertMenuItemFactory,
 } from './context-menu';
 import {
+    AlignCenterMenuItemFactory,
+    AlignJustifyMenuItemFactory,
+    AlignLeftMenuItemFactory,
     AlignMenuItemFactory,
+    AlignRightMenuItemFactory,
     BackgroundColorSelectorMenuItemFactory,
     BoldMenuItemFactory,
     BulletListMenuItemFactory,
@@ -78,7 +82,85 @@ import {
     TextColorSelectorMenuItemFactory,
     UnderlineMenuItemFactory,
 } from './menu';
-import { CopyCurrentParagraphMenuItemFactory, CutCurrentParagraphMenuItemFactory, DeleteCurrentParagraphMenuItemFactory, DOC_CONTENT_INSERT_MENU_ID, DOC_TABLE_BLOCK_MENU_ID, DocInsertBellowMenuItemFactory, EMPTY_PARAGRAPH_MENU_ID, EmptyParagraphBulletListMenuItemFactory, EmptyParagraphCheckListMenuItemFactory, EmptyParagraphH1MenuItemFactory, EmptyParagraphH2MenuItemFactory, EmptyParagraphH3MenuItemFactory, EmptyParagraphH4MenuItemFactory, EmptyParagraphH5MenuItemFactory, EmptyParagraphHorizontalLineMenuItemFactory, EmptyParagraphNormalTextMenuItemFactory, EmptyParagraphOrderListMenuItemFactory, H1HeadingMenuItemFactory, H2HeadingMenuItemFactory, H3HeadingMenuItemFactory, H4HeadingMenuItemFactory, H5HeadingMenuItemFactory, INSERT_BELLOW_MENU_ID, InsertBulletListBellowMenuItemFactory, InsertCheckListBellowMenuItemFactory, InsertHorizontalLineBellowMenuItemFactory, InsertOrderListBellowMenuItemFactory, NormalTextHeadingMenuItemFactory, SubtitleHeadingMenuItemFactory, TableBlockCopyMenuItemFactory, TableBlockDeleteMenuItemFactory, TableBlockPasteMenuItemFactory, TitleHeadingMenuItemFactory } from './paragraph-menu';
+import {
+    CopyCurrentParagraphMenuItemFactory,
+    CutCurrentParagraphMenuItemFactory,
+    DeleteCurrentParagraphMenuItemFactory,
+    DOC_CONTENT_INSERT_MENU_ID,
+    DOC_PARAGRAPH_T_ALIGN_MENU_ID,
+    DOC_PARAGRAPH_T_COLORS_MENU_ID,
+    DOC_PARAGRAPH_T_DIVIDER_MENU_ID,
+    DOC_PARAGRAPH_T_EDIT_MENU_ID,
+    DOC_PARAGRAPH_T_INDENT_DECREASE_ID,
+    DOC_PARAGRAPH_T_INDENT_INCREASE_ID,
+    DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID,
+    DOC_PARAGRAPH_T_INSERT_BELOW_MENU_ID,
+    DOC_PARAGRAPH_T_INSERT_MENU_ID,
+    DOC_TABLE_BLOCK_MENU_ID,
+    DocInsertBellowMenuItemFactory,
+    DOCS_CALLOUT_INSERT_BELOW_COMMAND_ID,
+    DOCS_CALLOUT_INSERT_COMMAND_ID,
+    DOCS_CODE_INSERT_BELOW_COMMAND_ID,
+    DOCS_CODE_INSERT_COMMAND_ID,
+    DOCS_QUOTE_INSERT_BELOW_COMMAND_ID,
+    DOCS_QUOTE_INSERT_COMMAND_ID,
+    EMPTY_PARAGRAPH_MENU_ID,
+    EmptyParagraphBulletListMenuItemFactory,
+    EmptyParagraphCheckListMenuItemFactory,
+    EmptyParagraphH1MenuItemFactory,
+    EmptyParagraphH2MenuItemFactory,
+    EmptyParagraphH3MenuItemFactory,
+    EmptyParagraphH4MenuItemFactory,
+    EmptyParagraphH5MenuItemFactory,
+    EmptyParagraphHorizontalLineMenuItemFactory,
+    EmptyParagraphNormalTextMenuItemFactory,
+    EmptyParagraphOrderListMenuItemFactory,
+    H1HeadingMenuItemFactory,
+    H2HeadingMenuItemFactory,
+    H3HeadingMenuItemFactory,
+    H4HeadingMenuItemFactory,
+    H5HeadingMenuItemFactory,
+    INSERT_BELLOW_MENU_ID,
+    INSERT_DOC_IMAGE_COMMAND_ID,
+    INSERT_DOC_SHAPE_COMMAND_ID,
+    InsertBulletListBellowMenuItemFactory,
+    InsertCheckListBellowMenuItemFactory,
+    InsertHorizontalLineBellowMenuItemFactory,
+    InsertOrderListBellowMenuItemFactory,
+    NormalTextHeadingMenuItemFactory,
+    ParagraphMenuAlignSubmenuItemFactory,
+    ParagraphMenuBackgroundColorHeaderActionMenuItemFactory,
+    ParagraphMenuBackgroundColorSwatchMenuItemFactories,
+    ParagraphMenuColorsSubmenuItemFactory,
+    ParagraphMenuDefaultTextColorMenuItemFactory,
+    ParagraphMenuIndentDecreaseMenuItemFactory,
+    ParagraphMenuIndentIncreaseMenuItemFactory,
+    ParagraphMenuInsertBelowCalloutMenuItemFactory,
+    ParagraphMenuInsertBelowCodeMenuItemFactory,
+    ParagraphMenuInsertBelowHeadingH1MenuItemFactory,
+    ParagraphMenuInsertBelowHeadingH2MenuItemFactory,
+    ParagraphMenuInsertBelowHeadingH3MenuItemFactory,
+    ParagraphMenuInsertBelowHeadingH4MenuItemFactory,
+    ParagraphMenuInsertBelowHeadingH5MenuItemFactory,
+    ParagraphMenuInsertBelowImageMenuItemFactory,
+    ParagraphMenuInsertBelowQuoteMenuItemFactory,
+    ParagraphMenuInsertBelowShapeMenuItemFactory,
+    ParagraphMenuInsertBelowSubmenuItemFactory,
+    ParagraphMenuInsertBelowTableMenuItemFactory,
+    ParagraphMenuInsertCalloutMenuItemFactory,
+    ParagraphMenuInsertCodeMenuItemFactory,
+    ParagraphMenuInsertImageMenuItemFactory,
+    ParagraphMenuInsertQuoteMenuItemFactory,
+    ParagraphMenuInsertShapeMenuItemFactory,
+    ParagraphMenuNoBackgroundMenuItemFactory,
+    ParagraphMenuTextColorHeaderActionMenuItemFactory,
+    ParagraphMenuTextColorSwatchMenuItemFactories,
+    SubtitleHeadingMenuItemFactory,
+    TableBlockCopyMenuItemFactory,
+    TableBlockDeleteMenuItemFactory,
+    TableBlockPasteMenuItemFactory,
+    TitleHeadingMenuItemFactory,
+} from './paragraph-menu';
 
 export const floatToolbarMenuSchema: MenuSchemaType = {
     [FLOAT_TOOLBAR_MENU_POSITION]: {
@@ -479,6 +561,356 @@ export const menuSchema: MenuSchemaType = {
                         menuItemFactory: InsertDefaultTableMenuFactory,
                     },
                 },
+            },
+        },
+        [DOC_PARAGRAPH_T_INSERT_MENU_ID]: {
+            quickTop: {
+                order: 0,
+                quickLayout: 'icon',
+                [H1HeadingCommand.id]: {
+                    order: 0,
+                    menuItemFactory: EmptyParagraphH1MenuItemFactory,
+                },
+                [H2HeadingCommand.id]: {
+                    order: 1,
+                    menuItemFactory: EmptyParagraphH2MenuItemFactory,
+                },
+                [H3HeadingCommand.id]: {
+                    order: 2,
+                    menuItemFactory: EmptyParagraphH3MenuItemFactory,
+                },
+                [H4HeadingCommand.id]: {
+                    order: 3,
+                    menuItemFactory: EmptyParagraphH4MenuItemFactory,
+                },
+                [H5HeadingCommand.id]: {
+                    order: 4,
+                    menuItemFactory: EmptyParagraphH5MenuItemFactory,
+                },
+                [OrderListCommand.id]: {
+                    order: 5,
+                    menuItemFactory: EmptyParagraphOrderListMenuItemFactory,
+                },
+            },
+            quickBottom: {
+                order: 1,
+                quickLayout: 'icon',
+                [BulletListCommand.id]: {
+                    order: 0,
+                    menuItemFactory: EmptyParagraphBulletListMenuItemFactory,
+                },
+                [CheckListCommand.id]: {
+                    order: 1,
+                    menuItemFactory: EmptyParagraphCheckListMenuItemFactory,
+                },
+                [DOCS_CODE_INSERT_COMMAND_ID]: {
+                    order: 2,
+                    menuItemFactory: ParagraphMenuInsertCodeMenuItemFactory,
+                },
+                [DOCS_QUOTE_INSERT_COMMAND_ID]: {
+                    order: 3,
+                    menuItemFactory: ParagraphMenuInsertQuoteMenuItemFactory,
+                },
+                [DOCS_CALLOUT_INSERT_COMMAND_ID]: {
+                    order: 4,
+                    menuItemFactory: ParagraphMenuInsertCalloutMenuItemFactory,
+                },
+                [HorizontalLineCommand.id]: {
+                    order: 5,
+                    menuItemFactory: EmptyParagraphHorizontalLineMenuItemFactory,
+                },
+            },
+            insert: {
+                order: 2,
+                [DocCreateTableOperation.id]: {
+                    order: 0,
+                    menuItemFactory: InsertDefaultTableMenuFactory,
+                },
+                [INSERT_DOC_IMAGE_COMMAND_ID]: {
+                    order: 1,
+                    menuItemFactory: ParagraphMenuInsertImageMenuItemFactory,
+                },
+                [INSERT_DOC_SHAPE_COMMAND_ID]: {
+                    order: 2,
+                    menuItemFactory: ParagraphMenuInsertShapeMenuItemFactory,
+                },
+            },
+        },
+        [DOC_PARAGRAPH_T_INSERT_BELOW_MENU_ID]: {
+            quickTop: {
+                order: 0,
+                quickLayout: 'icon',
+                [`${DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID}.h1`]: {
+                    order: 0,
+                    menuItemFactory: ParagraphMenuInsertBelowHeadingH1MenuItemFactory,
+                },
+                [`${DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID}.h2`]: {
+                    order: 1,
+                    menuItemFactory: ParagraphMenuInsertBelowHeadingH2MenuItemFactory,
+                },
+                [`${DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID}.h3`]: {
+                    order: 2,
+                    menuItemFactory: ParagraphMenuInsertBelowHeadingH3MenuItemFactory,
+                },
+                [`${DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID}.h4`]: {
+                    order: 3,
+                    menuItemFactory: ParagraphMenuInsertBelowHeadingH4MenuItemFactory,
+                },
+                [`${DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID}.h5`]: {
+                    order: 4,
+                    menuItemFactory: ParagraphMenuInsertBelowHeadingH5MenuItemFactory,
+                },
+                [InsertOrderListBellowCommand.id]: {
+                    order: 5,
+                    menuItemFactory: InsertOrderListBellowMenuItemFactory,
+                },
+            },
+            quickBottom: {
+                order: 1,
+                quickLayout: 'icon',
+                [InsertBulletListBellowCommand.id]: {
+                    order: 0,
+                    menuItemFactory: InsertBulletListBellowMenuItemFactory,
+                },
+                [InsertCheckListBellowCommand.id]: {
+                    order: 1,
+                    menuItemFactory: InsertCheckListBellowMenuItemFactory,
+                },
+                [DOCS_CODE_INSERT_BELOW_COMMAND_ID]: {
+                    order: 2,
+                    menuItemFactory: ParagraphMenuInsertBelowCodeMenuItemFactory,
+                },
+                [DOCS_QUOTE_INSERT_BELOW_COMMAND_ID]: {
+                    order: 3,
+                    menuItemFactory: ParagraphMenuInsertBelowQuoteMenuItemFactory,
+                },
+                [DOCS_CALLOUT_INSERT_BELOW_COMMAND_ID]: {
+                    order: 4,
+                    menuItemFactory: ParagraphMenuInsertBelowCalloutMenuItemFactory,
+                },
+                [InsertHorizontalLineBellowCommand.id]: {
+                    order: 5,
+                    menuItemFactory: InsertHorizontalLineBellowMenuItemFactory,
+                },
+            },
+            insert: {
+                order: 2,
+                [`${DocCreateTableOperation.id}.below`]: {
+                    order: 0,
+                    menuItemFactory: ParagraphMenuInsertBelowTableMenuItemFactory,
+                },
+                [`${INSERT_DOC_IMAGE_COMMAND_ID}.below`]: {
+                    order: 1,
+                    menuItemFactory: ParagraphMenuInsertBelowImageMenuItemFactory,
+                },
+                [`${INSERT_DOC_SHAPE_COMMAND_ID}.below`]: {
+                    order: 2,
+                    menuItemFactory: ParagraphMenuInsertBelowShapeMenuItemFactory,
+                },
+            },
+        },
+        [DOC_PARAGRAPH_T_EDIT_MENU_ID]: {
+            quickTop: {
+                order: 0,
+                quickLayout: 'icon',
+                [NormalTextHeadingCommand.id]: {
+                    order: 0,
+                    menuItemFactory: NormalTextHeadingMenuItemFactory,
+                },
+                [H1HeadingCommand.id]: {
+                    order: 1,
+                    menuItemFactory: H1HeadingMenuItemFactory,
+                },
+                [H2HeadingCommand.id]: {
+                    order: 2,
+                    menuItemFactory: H2HeadingMenuItemFactory,
+                },
+                [H3HeadingCommand.id]: {
+                    order: 3,
+                    menuItemFactory: H3HeadingMenuItemFactory,
+                },
+                [H4HeadingCommand.id]: {
+                    order: 4,
+                    menuItemFactory: H4HeadingMenuItemFactory,
+                },
+                [H5HeadingCommand.id]: {
+                    order: 5,
+                    menuItemFactory: H5HeadingMenuItemFactory,
+                },
+                [TitleHeadingCommand.id]: {
+                    order: 6,
+                    menuItemFactory: TitleHeadingMenuItemFactory,
+                },
+                [SubtitleHeadingCommand.id]: {
+                    order: 7,
+                    menuItemFactory: SubtitleHeadingMenuItemFactory,
+                },
+            },
+            quickBottom: {
+                order: 1,
+                quickLayout: 'icon',
+                [OrderListCommand.id]: {
+                    order: 0,
+                    menuItemFactory: OrderListMenuItemFactory,
+                },
+                [BulletListCommand.id]: {
+                    order: 1,
+                    menuItemFactory: BulletListMenuItemFactory,
+                },
+                [CheckListCommand.id]: {
+                    order: 2,
+                    menuItemFactory: CheckListMenuItemFactory,
+                },
+                [DOCS_CODE_INSERT_COMMAND_ID]: {
+                    order: 3,
+                    menuItemFactory: ParagraphMenuInsertCodeMenuItemFactory,
+                },
+                [DOCS_QUOTE_INSERT_COMMAND_ID]: {
+                    order: 4,
+                    menuItemFactory: ParagraphMenuInsertQuoteMenuItemFactory,
+                },
+                [DOCS_CALLOUT_INSERT_COMMAND_ID]: {
+                    order: 5,
+                    menuItemFactory: ParagraphMenuInsertCalloutMenuItemFactory,
+                },
+            },
+            layout: {
+                order: 2,
+                [DOC_PARAGRAPH_T_ALIGN_MENU_ID]: {
+                    order: 0,
+                    menuItemFactory: ParagraphMenuAlignSubmenuItemFactory,
+                },
+                [DOC_PARAGRAPH_T_COLORS_MENU_ID]: {
+                    order: 1,
+                    menuItemFactory: ParagraphMenuColorsSubmenuItemFactory,
+                },
+            },
+            format: {
+                order: 3,
+                [DocCutCurrentParagraphCommand.id]: {
+                    order: 0,
+                    menuItemFactory: CutCurrentParagraphMenuItemFactory,
+                },
+                [DocCopyCurrentParagraphCommand.id]: {
+                    order: 1,
+                    menuItemFactory: CopyCurrentParagraphMenuItemFactory,
+                },
+                [DeleteCurrentParagraphCommand.id]: {
+                    order: 2,
+                    menuItemFactory: DeleteCurrentParagraphMenuItemFactory,
+                },
+            },
+            others: {
+                order: 4,
+                [DOC_PARAGRAPH_T_INSERT_BELOW_MENU_ID]: {
+                    order: 0,
+                    menuItemFactory: ParagraphMenuInsertBelowSubmenuItemFactory,
+                },
+            },
+        },
+        [DOC_PARAGRAPH_T_DIVIDER_MENU_ID]: {
+            layout: {
+                order: 1,
+                [DOC_PARAGRAPH_T_COLORS_MENU_ID]: {
+                    order: 0,
+                    menuItemFactory: ParagraphMenuColorsSubmenuItemFactory,
+                },
+            },
+            format: {
+                order: 2,
+                [DocCutCurrentParagraphCommand.id]: {
+                    order: 0,
+                    menuItemFactory: CutCurrentParagraphMenuItemFactory,
+                },
+                [DocCopyCurrentParagraphCommand.id]: {
+                    order: 1,
+                    menuItemFactory: CopyCurrentParagraphMenuItemFactory,
+                },
+                [DeleteCurrentParagraphCommand.id]: {
+                    order: 2,
+                    menuItemFactory: DeleteCurrentParagraphMenuItemFactory,
+                },
+            },
+            others: {
+                order: 3,
+                [DOC_PARAGRAPH_T_INSERT_BELOW_MENU_ID]: {
+                    order: 0,
+                    menuItemFactory: ParagraphMenuInsertBelowSubmenuItemFactory,
+                },
+            },
+        },
+        [DOC_PARAGRAPH_T_ALIGN_MENU_ID]: {
+            align: {
+                order: 0,
+                title: 'docs-ui.paragraphMenu.align',
+                quickLayout: 'icon',
+                [AlignOperationCommand.id]: {
+                    order: 0,
+                    menuItemFactory: AlignLeftMenuItemFactory,
+                },
+                [`${AlignOperationCommand.id}.center`]: {
+                    order: 1,
+                    menuItemFactory: AlignCenterMenuItemFactory,
+                },
+                [`${AlignOperationCommand.id}.right`]: {
+                    order: 2,
+                    menuItemFactory: AlignRightMenuItemFactory,
+                },
+                [`${AlignOperationCommand.id}.justify`]: {
+                    order: 3,
+                    menuItemFactory: AlignJustifyMenuItemFactory,
+                },
+            },
+            indent: {
+                order: 1,
+                title: 'docs-ui.paragraphMenu.indent',
+                [DOC_PARAGRAPH_T_INDENT_INCREASE_ID]: {
+                    order: 0,
+                    menuItemFactory: ParagraphMenuIndentIncreaseMenuItemFactory,
+                },
+                [DOC_PARAGRAPH_T_INDENT_DECREASE_ID]: {
+                    order: 1,
+                    menuItemFactory: ParagraphMenuIndentDecreaseMenuItemFactory,
+                },
+            },
+        },
+        [DOC_PARAGRAPH_T_COLORS_MENU_ID]: {
+            text: {
+                order: 0,
+                title: 'docs-ui.toolbar.textColor.main',
+                headerActionMenuItemFactory: ParagraphMenuTextColorHeaderActionMenuItemFactory,
+                quickLayout: 'icon',
+                quickColumns: 8,
+                quickLayoutVariant: 'compact',
+                [`${SetInlineFormatTextColorCommand.id}.default`]: {
+                    order: 0,
+                    menuItemFactory: ParagraphMenuDefaultTextColorMenuItemFactory,
+                },
+                ...ParagraphMenuTextColorSwatchMenuItemFactories,
+            },
+            backgroundTop: {
+                order: 1,
+                title: 'docs-ui.toolbar.fillColor.main',
+                headerActionMenuItemFactory: ParagraphMenuBackgroundColorHeaderActionMenuItemFactory,
+                quickLayout: 'icon',
+                quickColumns: 8,
+                quickLayoutVariant: 'compact',
+                [ResetInlineFormatTextBackgroundColorCommand.id]: {
+                    order: 0,
+                    menuItemFactory: ParagraphMenuNoBackgroundMenuItemFactory,
+                },
+                ...Object.fromEntries(
+                    Object.entries(ParagraphMenuBackgroundColorSwatchMenuItemFactories).filter(([, config]) => config.order < 7)
+                ),
+            },
+            backgroundBottom: {
+                order: 2,
+                quickLayout: 'icon',
+                quickColumns: 8,
+                quickLayoutVariant: 'compact',
+                ...Object.fromEntries(
+                    Object.entries(ParagraphMenuBackgroundColorSwatchMenuItemFactories).filter(([, config]) => config.order >= 7)
+                ),
             },
         },
     },

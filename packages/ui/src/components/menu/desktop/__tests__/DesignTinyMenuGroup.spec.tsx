@@ -44,6 +44,6 @@ describe('DesignTinyMenuGroup', () => {
         expect(group?.className ?? '').toContain('univer-p-0');
         expect(button?.className ?? '').toContain('univer-size-6');
         expect(button?.className ?? '').toContain('univer-rounded-sm');
-        expect(icon?.className ?? '').toContain('univer-size-4');
+        expect(icon?.className ?? '').toContain('univer-size-5');
     });
 });

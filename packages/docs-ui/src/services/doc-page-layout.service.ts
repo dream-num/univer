@@ -19,6 +19,7 @@ import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { Disposable } from '@univerjs/core';
 import { neoGetDocObject } from '../basics/component-tools';
 import { VIEWPORT_KEY } from '../basics/docs-view-key';
+import { getDocEffectiveZoomRatio } from './doc-zoom';
 
 export class DocPageLayoutService extends Disposable implements IRenderModule {
     constructor(
@@ -32,7 +33,7 @@ export class DocPageLayoutService extends Disposable implements IRenderModule {
 
         const docObject = neoGetDocObject(this._context);
         const docDataModel = this._context.unit;
-        const zoomRatio = docDataModel.getSettings()?.zoomRatio ?? 1;
+        const zoomRatio = getDocEffectiveZoomRatio(docDataModel);
         const { document: docsComponent, scene, docBackground } = docObject;
 
         const parent = scene?.getParent();

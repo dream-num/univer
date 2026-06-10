@@ -28,7 +28,7 @@ import { DOCS_EXTENSION_TYPE } from '../doc-extension';
 import { Documents } from '../document';
 import { setDocsTableRenderViewportProvider } from '../table-render-viewport';
 
-function createGlyph(content: string, left: number, width = 16) {
+function createGlyph(content: string, left: number, width = 16, backgroundColor?: string) {
     return {
         glyphType: GlyphType.WORD,
         streamType: 'word',
@@ -55,6 +55,11 @@ function createGlyph(content: string, left: number, width = 16) {
             fs: 12,
             ff: 'Arial',
             cl: { rgb: '#222222' },
+            ...(backgroundColor
+                ? {
+                    bg: { rgb: backgroundColor },
+                }
+                : {}),
         },
         fontStyle: {
             fontString: '12px Arial',
@@ -70,9 +75,9 @@ function createGlyph(content: string, left: number, width = 16) {
     } as any;
 }
 
-function createLine(type: LineType, top: number, withBorder = false) {
-    const glyphA = createGlyph('A', 0);
-    const glyphB = createGlyph('B', 18);
+function createLine(type: LineType, top: number, withBorder = false, backgroundColor?: string) {
+    const glyphA = createGlyph('A', 0, 16, backgroundColor);
+    const glyphB = createGlyph('B', 18, 16, backgroundColor);
     const divide = {
         glyphGroup: [glyphA, glyphB],
         width: 120,
@@ -118,9 +123,9 @@ function createLine(type: LineType, top: number, withBorder = false) {
     return line;
 }
 
-function createPage(pageType: DocumentSkeletonPageType, segmentId: string) {
-    const lineBlock = createLine(LineType.BLOCK, 0);
-    const lineText = createLine(LineType.PARAGRAPH, 24, true);
+function createPage(pageType: DocumentSkeletonPageType, segmentId: string, backgroundColor?: string) {
+    const lineBlock = createLine(LineType.BLOCK, 0, false, backgroundColor);
+    const lineText = createLine(LineType.PARAGRAPH, 24, true, backgroundColor);
     const column = {
         lines: [lineBlock, lineText],
         left: 0,
@@ -281,7 +286,7 @@ describe('documents render', () => {
         setDocsTableRenderViewportProvider(null);
     });
 
-    it('uses explicit table cell border width and skips no-border markers', () => {
+    it('uses explicit table cell border width inside table render path', () => {
         const skeleton = { getSkeletonData: () => ({ pages: [] }) } as any;
         const documents = new Documents('docs-border', skeleton, {
             pageLayoutType: PageLayoutType.VERTICAL,
@@ -946,7 +951,6 @@ describe('documents render', () => {
         expect(pageEvents.length).toBe(1);
         expect(clearCache).toHaveBeenCalled();
         expect(lineDraw).toHaveBeenCalled();
-        expect(bgDraw).toHaveBeenCalled();
         expect(spanDraw).toHaveBeenCalled();
 
         documents.draw(canvas.getContext(), {
@@ -961,6 +965,54 @@ describe('documents render', () => {
         documents.draw(canvas.getContext(), {
             viewBound: { left: 0, top: 0, right: 300, bottom: 300 },
         } as any);
+
+        documents.dispose();
+    });
+
+    it('merges adjacent glyph backgrounds with the same color into one draw per line', () => {
+        const bodyPage = createPage(DocumentSkeletonPageType.BODY, '', '#d9eaf7');
+        const skeletonData = {
+            pages: [bodyPage],
+            skeHeaders: new Map(),
+            skeFooters: new Map(),
+        };
+        bodyPage.parent = skeletonData;
+
+        const skeleton = {
+            getSkeletonData: () => skeletonData,
+        } as any;
+
+        const documents = new Documents('docs-merged-background', skeleton, {
+            pageLayoutType: PageLayoutType.VERTICAL,
+            pageMarginLeft: 0,
+            pageMarginTop: 0,
+        });
+        documents.transformByState({
+            left: 0,
+            top: 0,
+            width: 260,
+            height: 180,
+        });
+        scene.addObject(documents, 1);
+
+        const bgDraw = vi.fn();
+        vi.spyOn(documents as any, 'getExtensionsByOrder').mockReturnValue([
+            {
+                uKey: 'DefaultDocsBackgroundExtension',
+                type: DOCS_EXTENSION_TYPE.SPAN,
+                extensionOffset: {},
+                clearCache: vi.fn(),
+                draw: bgDraw,
+            },
+        ] as any);
+
+        documents.draw(canvas.getContext(), {
+            viewBound: { left: 0, top: 0, right: 900, bottom: 700 },
+            cacheBound: { left: 0, top: 0, right: 900, bottom: 700 },
+        } as any);
+
+        expect(bgDraw).toHaveBeenCalledTimes(1);
+        expect(bgDraw.mock.calls.map((call) => call[2].width)).toEqual([34]);
 
         documents.dispose();
     });

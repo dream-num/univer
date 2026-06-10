@@ -21,7 +21,7 @@ import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import * as paragraphMenu from '..';
-import { createParagraphMenuHoverOpenScheduler, getParagraphFormattingRange, getParagraphMenuActiveHeadingCommandId, getParagraphMenuCommand, getParagraphMenuCommandTargetRange, getParagraphMenuHiddenHeadingCommandIds, getParagraphMenuHiddenItemIds, getParagraphMenuIconSizeClass, getParagraphMenuPopupDirection, getParagraphMenuTargetRange, isEmptyParagraphMenuTarget, PARAGRAPH_MENU_HOVER_OPEN_DELAY, shouldShowParagraphSettingMenu, shouldUseInsertBelowRange } from '..';
+import { createParagraphMenuHoverOpenScheduler, getParagraphFormattingRange, getParagraphMenuActiveHeadingCommandId, getParagraphMenuCommand, getParagraphMenuCommandTargetRange, getParagraphMenuHiddenHeadingCommandIds, getParagraphMenuHiddenItemIds, getParagraphMenuIconSizeClass, getParagraphMenuPopupDirection, getParagraphMenuResolvedCommand, getParagraphMenuTargetRange, isEmptyParagraphMenuTarget, PARAGRAPH_MENU_HOVER_OPEN_DELAY, shouldShowParagraphSettingMenu, shouldUseInsertBelowRange } from '..';
 import { HorizontalLineCommand } from '../../../commands/commands/doc-horizontal-line.command';
 import { SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand } from '../../../commands/commands/inline-format.command';
 import { BulletListCommand, InsertBulletListBellowCommand, OrderListCommand } from '../../../commands/commands/list.command';
@@ -168,20 +168,32 @@ describe('ParagraphMenu', () => {
     });
 
     it('reuses the existing text color selector logic for the colors header action with an A icon', () => {
+        const registeredIcons = new Map<string, React.ComponentType<{ className?: string }>>();
+        const componentManager = {
+            get: (key: string) => registeredIcons.get(key),
+            register: (key: string, component: React.ComponentType<{ className?: string }>) => {
+                registeredIcons.set(key, component);
+            },
+        };
         const accessor = {
-            get: () => ({
-                get: () => undefined,
-                register: () => undefined,
-            }),
+            get: () => componentManager,
         } as never;
 
         const menuItem = ParagraphMenuTextColorHeaderActionMenuItemFactory(accessor);
+        const Icon = registeredIcons.get(menuItem.icon as string);
 
         expect(menuItem.type).toBe(MenuItemType.BUTTON_SELECTOR);
         expect(menuItem.id).toBe(SetInlineFormatTextColorCommand.id);
         expect(menuItem.icon).toBe('HeaderTextColorIcon');
         expect(menuItem.tooltip).toBeUndefined();
         expect(Array.isArray((menuItem as any).selections)).toBe(true);
+        expect(Icon).toBeDefined();
+
+        const markup = renderToStaticMarkup(React.createElement(Icon!, { className: 'header-color-icon' }));
+
+        expect(markup).toContain('>A<');
+        expect(markup).toContain('width="1em"');
+        expect(markup).toContain('height="1em"');
     });
 
     it('reuses the existing background color selector logic for the colors header action with the bucket icon', () => {
@@ -421,6 +433,24 @@ describe('ParagraphMenu', () => {
                 value: NamedStyleType.HEADING_1,
                 textRanges: [{ startOffset: 3, endOffset: 3, collapsed: true }],
             },
+        });
+    });
+
+    it('preserves custom color values when resolving paragraph menu commands', () => {
+        expect(getParagraphMenuResolvedCommand({
+            id: SetInlineFormatTextColorCommand.id,
+            value: '#ff5500',
+        }, null)).toEqual({
+            commandId: SetInlineFormatTextColorCommand.id,
+            params: { value: '#ff5500' },
+        });
+
+        expect(getParagraphMenuResolvedCommand({
+            id: SetInlineFormatTextBackgroundColorCommand.id,
+            value: 'rgba(255, 140, 81, 0.3)',
+        }, null)).toEqual({
+            commandId: SetInlineFormatTextBackgroundColorCommand.id,
+            params: { value: 'rgba(255, 140, 81, 0.3)' },
         });
     });
 

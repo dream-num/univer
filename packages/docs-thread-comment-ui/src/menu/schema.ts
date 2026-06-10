@@ -15,6 +15,7 @@
  */
 
 import type { MenuSchemaType } from '@univerjs/ui';
+import { FLOAT_TOOLBAR_MENU_POSITION } from '@univerjs/docs-ui';
 import { ContextMenuGroup, ContextMenuPosition, RibbonInsertGroup } from '@univerjs/ui';
 import {
     StartAddCommentOperation,
@@ -27,6 +28,12 @@ export const menuSchema: MenuSchemaType = {
         [ToggleCommentPanelOperation.id]: {
             order: 3,
             menuItemFactory: ToolbarDocCommentMenuItemFactory,
+        },
+    },
+    [FLOAT_TOOLBAR_MENU_POSITION]: {
+        [StartAddCommentOperation.id]: {
+            order: 21,
+            menuItemFactory: AddDocCommentMenuItemFactory,
         },
     },
     [ContextMenuPosition.MAIN_AREA]: {

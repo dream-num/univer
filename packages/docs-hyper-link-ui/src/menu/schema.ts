@@ -15,7 +15,7 @@
  */
 
 import type { MenuSchemaType } from '@univerjs/ui';
-import { EMPTY_PARAGRAPH_MENU_ID, INSERT_BELLOW_MENU_ID } from '@univerjs/docs-ui';
+import { EMPTY_PARAGRAPH_MENU_ID, FLOAT_TOOLBAR_MENU_POSITION, INSERT_BELLOW_MENU_ID } from '@univerjs/docs-ui';
 import { ContextMenuGroup, ContextMenuPosition, RibbonInsertGroup } from '@univerjs/ui';
 import { ShowDocHyperLinkEditPopupOperation } from '../commands/operations/popup.operation';
 import { AddHyperLinkMenuItemFactory } from './menu';
@@ -24,6 +24,12 @@ export const menuSchema: MenuSchemaType = {
     [RibbonInsertGroup.MEDIA]: {
         [ShowDocHyperLinkEditPopupOperation.id]: {
             order: 1,
+            menuItemFactory: AddHyperLinkMenuItemFactory,
+        },
+    },
+    [FLOAT_TOOLBAR_MENU_POSITION]: {
+        [ShowDocHyperLinkEditPopupOperation.id]: {
+            order: 20,
             menuItemFactory: AddHyperLinkMenuItemFactory,
         },
     },

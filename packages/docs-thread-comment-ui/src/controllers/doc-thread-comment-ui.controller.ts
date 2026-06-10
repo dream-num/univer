@@ -15,6 +15,7 @@
  */
 
 import { Disposable, ICommandService, Inject } from '@univerjs/core';
+import { FLOAT_TOOLBAR_MENU_POSITION } from '@univerjs/docs-ui';
 import { CommentIcon } from '@univerjs/icons';
 import { ComponentManager, IMenuManagerService } from '@univerjs/ui';
 import { AddDocCommentComment } from '../commands/commands/add-doc-comment.command';
@@ -49,6 +50,7 @@ export class DocThreadCommentUIController extends Disposable {
     }
 
     private _initMenus() {
+        this._menuManagerService.appendRootMenu({ [FLOAT_TOOLBAR_MENU_POSITION]: {} });
         this._menuManagerService.mergeMenu(menuSchema);
     }
 

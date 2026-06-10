@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { EMPTY_PARAGRAPH_MENU_ID, INSERT_BELLOW_MENU_ID } from '@univerjs/docs-ui';
+import { EMPTY_PARAGRAPH_MENU_ID, FLOAT_TOOLBAR_MENU_POSITION, INSERT_BELLOW_MENU_ID } from '@univerjs/docs-ui';
 import { ContextMenuGroup, ContextMenuPosition } from '@univerjs/ui';
 import { describe, expect, it } from 'vitest';
 import { ShowDocHyperLinkEditPopupOperation } from '../../commands/operations/popup.operation';
@@ -26,5 +26,13 @@ describe('docs hyperlink menu schema', () => {
 
         expect(paragraph[ContextMenuGroup.LAYOUT][INSERT_BELLOW_MENU_ID][ShowDocHyperLinkEditPopupOperation.id].menuItemFactory).toBeDefined();
         expect(paragraph[EMPTY_PARAGRAPH_MENU_ID][ContextMenuGroup.LAYOUT][ShowDocHyperLinkEditPopupOperation.id].menuItemFactory).toBeDefined();
+    });
+
+    it('adds hyperlink to docs text floating toolbar', () => {
+        const floatToolbar = (menuSchema as any)[FLOAT_TOOLBAR_MENU_POSITION];
+        const hyperlink = floatToolbar[ShowDocHyperLinkEditPopupOperation.id];
+
+        expect(hyperlink.order).toBe(20);
+        expect(hyperlink.menuItemFactory).toBeDefined();
     });
 });

@@ -16,28 +16,29 @@
 
 import { FLOAT_TOOLBAR_MENU_POSITION } from '@univerjs/docs-ui';
 import { describe, expect, it, vi } from 'vitest';
-import { DOCS_THREAD_COMMENT_PANEL } from '../../common/const';
-import { DocThreadCommentPanel } from '../../views/doc-thread-comment-panel';
-import { DocThreadCommentUIController } from '../doc-thread-comment-ui.controller';
+import { DocHyperLinkEdit } from '../../views/hyper-link-edit';
+import { DocHyperLinkUIController } from '../ui.controller';
 
-describe('DocThreadCommentUIController', () => {
-    it('should register commands, menus and components', () => {
-        const registerCommand = vi.fn(() => ({ dispose: vi.fn() }));
-        const mergeMenu = vi.fn();
-        const appendRootMenu = vi.fn();
+describe('DocHyperLinkUIController', () => {
+    it('creates the docs floating toolbar root before merging hyperlink menus', () => {
         const registerComponent = vi.fn(() => ({ dispose: vi.fn() }));
+        const registerCommand = vi.fn();
+        const appendRootMenu = vi.fn();
+        const mergeMenu = vi.fn();
+        const registerShortcut = vi.fn();
 
-        const controller = new DocThreadCommentUIController(
+        const controller = new DocHyperLinkUIController(
+            { register: registerComponent } as any,
             { registerCommand } as any,
             { appendRootMenu, mergeMenu } as any,
-            { register: registerComponent } as any
+            { registerShortcut } as any
         );
 
-        expect(registerCommand).toHaveBeenCalled();
+        expect(registerComponent).toHaveBeenCalledWith(DocHyperLinkEdit.componentKey, DocHyperLinkEdit);
         expect(appendRootMenu).toHaveBeenCalledWith({ [FLOAT_TOOLBAR_MENU_POSITION]: {} });
         expect(mergeMenu).toHaveBeenCalled();
         expect(appendRootMenu.mock.invocationCallOrder[0]).toBeLessThan(mergeMenu.mock.invocationCallOrder[0]);
-        expect(registerComponent).toHaveBeenCalledWith(DOCS_THREAD_COMMENT_PANEL, DocThreadCommentPanel);
+        expect(registerShortcut).toHaveBeenCalled();
 
         controller.dispose();
     });

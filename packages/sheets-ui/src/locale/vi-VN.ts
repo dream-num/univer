@@ -164,6 +164,7 @@ const locale: typeof enUS = {
             pasteFormat: 'Chỉ dán định dạng',
             pasteColWidth: 'Chỉ dán độ rộng cột',
             pasteBesidesBorder: 'Chỉ dán nội dung ngoài đường viền',
+            pasteFormula: 'Chỉ dán công thức',
             insert: 'Chèn',
             insertRow: 'Chèn hàng',
             insertRowBefore: 'Chèn hàng phía trên',

@@ -164,6 +164,7 @@ const locale: typeof enUS = {
             pasteFormat: 'Prilepiť formát',
             pasteColWidth: 'Prilepiť šírku stĺpca',
             pasteBesidesBorder: 'Prilepiť bez štýlov ohraničenia',
+            pasteFormula: 'Prilepiť vzorec',
             insert: 'Vložiť',
             insertRow: 'Vložiť riadok',
             insertRowBefore: 'Vložiť riadok pred',

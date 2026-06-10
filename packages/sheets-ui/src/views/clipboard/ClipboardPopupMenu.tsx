@@ -37,7 +37,7 @@ const SheetPasteOptions = [
     { value: 'SPECIAL_PASTE_FORMAT', label: 'sheets-ui.rightClick.pasteFormat' },
     { value: 'SPECIAL_PASTE_COL_WIDTH', label: 'sheets-ui.rightClick.pasteColWidth' },
     { value: 'SPECIAL_PASTE_BESIDES_BORDER', label: 'sheets-ui.rightClick.pasteBesidesBorder' },
-    { value: 'SPECIAL_PASTE_FORMULA', label: 'formula.operation.pasteFormula' },
+    { value: 'SPECIAL_PASTE_FORMULA', label: 'sheets-ui.rightClick.pasteFormula' },
 ];
 
 const useMenuPosition = (range?: IDiscreteRange) => {

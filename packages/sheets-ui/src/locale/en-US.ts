@@ -162,6 +162,7 @@ const locale = {
             pasteFormat: 'Paste Format',
             pasteColWidth: 'Paste Column Width',
             pasteBesidesBorder: 'Paste Besides Border Styles',
+            pasteFormula: 'Paste Formula',
             insert: 'Insert',
             insertRow: 'Insert Row',
             insertRowBefore: 'Insert Row Before',

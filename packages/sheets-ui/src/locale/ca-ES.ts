@@ -164,6 +164,7 @@ const locale: typeof enUS = {
             pasteFormat: 'Enganxar només el format',
             pasteColWidth: 'Enganxar l\'amplada de la columna',
             pasteBesidesBorder: 'Enganxar excepte les vores',
+            pasteFormula: 'Enganxa la fórmula',
             insert: 'Inserir',
             insertRow: 'Inserir fila',
             insertRowBefore: 'Inserir fila abans',

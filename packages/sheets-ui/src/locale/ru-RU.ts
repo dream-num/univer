@@ -164,6 +164,7 @@ const locale: typeof enUS = {
             pasteFormat: 'Вставить формат',
             pasteColWidth: 'Вставить ширину столбца',
             pasteBesidesBorder: 'Вставить кроме стилей границы',
+            pasteFormula: 'Вставить Формулу',
             insert: 'Вставить',
             insertRow: 'Вставить строку',
             insertRowBefore: 'Вставить строку выше',

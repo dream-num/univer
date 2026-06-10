@@ -164,6 +164,7 @@ const locale: typeof enUS = {
             pasteFormat: 'چسباندن قالب',
             pasteColWidth: 'چسباندن عرض ستون',
             pasteBesidesBorder: 'چسباندن کنار سبک‌های مرز',
+            pasteFormula: 'چسباندن فرمول',
             insert: 'درج',
             insertRow: 'درج سطر',
             insertRowBefore: 'درج سطر قبل از',

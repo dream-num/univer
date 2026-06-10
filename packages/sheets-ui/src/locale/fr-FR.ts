@@ -164,6 +164,7 @@ const locale: typeof enUS = {
             pasteFormat: 'Coller le format',
             pasteColWidth: 'Coller la largeur de la colonne',
             pasteBesidesBorder: 'Coller à côté des styles de bordure',
+            pasteFormula: 'Coller la formule',
             insert: 'Insérer',
             insertRow: 'Insérer une ligne',
             insertRowBefore: 'Insérer une ligne avant',

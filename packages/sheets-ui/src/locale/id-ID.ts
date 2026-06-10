@@ -164,6 +164,7 @@ const locale: typeof enUS = {
             pasteFormat: 'Tempel Format',
             pasteColWidth: 'Tempel Lebar Kolom',
             pasteBesidesBorder: 'Tempel Tanpa Gaya Batas',
+            pasteFormula: 'Tempel Rumus',
             insert: 'Sisipkan',
             insertRow: 'Sisipkan Baris',
             insertRowBefore: 'Sisipkan Baris Sebelum',

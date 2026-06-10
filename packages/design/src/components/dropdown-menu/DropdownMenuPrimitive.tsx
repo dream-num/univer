@@ -202,8 +202,9 @@ function DropdownMenuItem({
                 `
                   univer-relative univer-flex univer-cursor-default univer-select-none univer-items-center univer-gap-2
                   univer-rounded univer-px-2 univer-py-1.5 univer-text-sm univer-outline-none univer-transition-colors
-                  data-[disabled]:univer-pointer-events-none data-[disabled]:univer-opacity-50
+                  data-[disabled]:univer-pointer-events-none
                   data-[variant=destructive]:univer-text-red-600
+                  data-[disabled]:univer-opacity-50
                   focus:univer-bg-gray-100
                   data-[variant=destructive]:focus:univer-bg-red-50
                   dark:data-[variant=destructive]:!univer-text-red-400

@@ -26,6 +26,7 @@ export { CascaderList, type ICascaderListProps, type ICascaderOption } from './c
 export { CheckboxGroup, type ICheckboxGroupProps } from './components/checkbox-group/CheckboxGroup';
 export { Checkbox, type ICheckboxProps } from './components/checkbox/Checkbox';
 export { ColorPicker, type IColorPickerProps } from './components/color-picker/ColorPicker';
+export { ColorPresets } from './components/color-picker/ColorPresets';
 export { ConfigContext, ConfigProvider, type IConfigProviderProps } from './components/config-provider/ConfigProvider';
 export { Confirm, type IConfirmProps } from './components/confirm/Confirm';
 export { DatePicker } from './components/date-picker/DatePicker';

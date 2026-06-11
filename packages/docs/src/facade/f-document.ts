@@ -27,6 +27,8 @@ import {
 } from '@univerjs/core';
 import { FBaseInitialable } from '@univerjs/core/facade';
 import { InsertTextCommand } from '@univerjs/docs';
+import { DocElementRegistry } from './doc-element-registry';
+import { FDocBody } from './f-doc-body';
 import {
     buildPlainTextInsertBody,
     getNormalizedPlainTextCursorOffset,
@@ -46,6 +48,7 @@ export interface IDocumentInsertTextFacadeOptions {
  */
 export class FDocument extends FBaseInitialable {
     readonly id: string;
+    private readonly _docElementRegistry = new DocElementRegistry();
 
     constructor(
         private readonly _documentDataModel: DocumentDataModel,
@@ -71,6 +74,34 @@ export class FDocument extends FBaseInitialable {
      */
     getDocumentDataModel(): DocumentDataModel {
         return this._documentDataModel;
+    }
+
+    /**
+     * Get the document body facade.
+     *
+     * The returned body facade provides synchronous Google Docs-like element APIs
+     * for reading and editing top-level document body elements. Paragraph elements
+     * receive runtime temporary keys that remain stable for this `FDocument`
+     * facade lifecycle. Persisted elements, such as tables and custom blocks, use
+     * their existing ids.
+     *
+     * @returns {FDocBody} The document body API instance.
+     * @example
+     * ```typescript
+     * const doc = univerAPI.getActiveDocument();
+     * if (!doc) throw new Error('No active document');
+     *
+     * const body = doc.getBody();
+     * const paragraph = body.getChild(0).asParagraph();
+     * paragraph.appendText(' updated');
+     * ```
+     */
+    getBody(): FDocBody {
+        return new FDocBody(
+            this._documentDataModel,
+            this._commandService,
+            this._docElementRegistry
+        );
     }
 
     override dispose(): void {

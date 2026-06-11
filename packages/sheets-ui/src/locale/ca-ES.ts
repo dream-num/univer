@@ -257,6 +257,8 @@ const locale: typeof enUS = {
             tipRowHeightLimit: 'L\'alçada de la fila ha d\'estar entre 0 i 545',
             tipColumnWidthLimit: 'L\'amplada de la columna ha d\'estar entre 0 i 2038',
             problem: 'Hi ha hagut un problema',
+            error: 'Error',
+            forceStringInfo: 'Número emmagatzemat com a text',
         },
         clipboard: {
             paste: {

@@ -257,6 +257,8 @@ const locale: typeof enUS = {
             tipRowHeightLimit: 'Výška riadku musí byť medzi 0 ~ 545',
             tipColumnWidthLimit: 'Šírka stĺpca musí byť medzi 0 ~ 2038',
             problem: 'Vyskytol sa problém',
+            error: 'Chyba',
+            forceStringInfo: 'Číslo uložené ako text',
         },
         clipboard: {
             paste: {

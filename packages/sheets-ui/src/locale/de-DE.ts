@@ -257,6 +257,8 @@ const locale: typeof enUS = {
             tipRowHeightLimit: 'Die Zeilenhöhe muss zwischen 0 und 545 liegen',
             tipColumnWidthLimit: 'Die Spaltenbreite muss zwischen 0 und 2038 liegen',
             problem: 'Es ist ein Problem aufgetreten',
+            error: 'Fehler',
+            forceStringInfo: 'Zahl als Text gespeichert',
         },
         clipboard: {
             paste: {

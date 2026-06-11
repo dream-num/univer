@@ -257,6 +257,8 @@ const locale: typeof enUS = {
             tipRowHeightLimit: 'Chiều cao hàng phải từ 0 ~ 545',
             tipColumnWidthLimit: 'Độ rộng cột phải từ 0 ~ 2038',
             problem: 'Đã xảy ra một vấn đề',
+            error: 'Lỗi',
+            forceStringInfo: 'Số được lưu trữ dưới dạng văn bản',
         },
         clipboard: {
             paste: {

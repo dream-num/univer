@@ -257,6 +257,8 @@ const locale: typeof enUS = {
             tipRowHeightLimit: '列高必須在 0 ~ 545 之間',
             tipColumnWidthLimit: '欄寬必須在 0 ~ 2038 之間',
             problem: '出現了一個問題',
+            error: '錯誤',
+            forceStringInfo: '以文字形式儲存的數字',
         },
         clipboard: {
             paste: {

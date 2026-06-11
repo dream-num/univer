@@ -257,6 +257,8 @@ const locale: typeof enUS = {
             tipRowHeightLimit: 'Tinggi baris harus antara 0 ~ 545',
             tipColumnWidthLimit: 'Lebar kolom harus antara 0 ~ 2038',
             problem: 'Terjadi masalah',
+            error: 'Kesalahan',
+            forceStringInfo: 'Angka disimpan sebagai teks',
         },
         clipboard: {
             paste: {

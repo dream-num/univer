@@ -255,6 +255,8 @@ const locale = {
             tipRowHeightLimit: 'Row height must be between 0 ~ 545',
             tipColumnWidthLimit: 'The column width must be between 0 ~ 2038',
             problem: 'There was a problem',
+            error: 'Error',
+            forceStringInfo: 'Number stored as text',
         },
         clipboard: {
             paste: {

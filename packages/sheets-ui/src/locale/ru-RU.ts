@@ -257,6 +257,8 @@ const locale: typeof enUS = {
             tipRowHeightLimit: 'Высота строки должна быть в пределах от 0 до 545',
             tipColumnWidthLimit: 'Ширина столбца должна быть в пределах от 0 до 2038',
             problem: 'Произошла проблема',
+            error: 'Ошибка',
+            forceStringInfo: 'Число хранится как текст',
         },
         clipboard: {
             paste: {

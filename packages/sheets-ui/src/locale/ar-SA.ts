@@ -257,6 +257,8 @@ const locale: typeof enUS = {
             tipRowHeightLimit: 'يجب أن يكون ارتفاع الصف بين 0 ~ 545',
             tipColumnWidthLimit: 'يجب أن يكون عرض العمود بين 0 ~ 2038',
             problem: 'حدثت مشكلة',
+            error: 'خطأ',
+            forceStringInfo: 'رقم مخزن كنص',
         },
         clipboard: {
             paste: {

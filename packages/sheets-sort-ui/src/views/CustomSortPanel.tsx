@@ -19,7 +19,7 @@ import type { IOrderRule } from '@univerjs/sheets-sort';
 import type { ICustomSortState } from '../services/sheets-sort-ui.service';
 import { LocaleService, throttle } from '@univerjs/core';
 import { Button, Checkbox, clsx, DraggableList, Dropdown, Radio, RadioGroup, scrollbarClassName } from '@univerjs/design';
-import { CheckMarkIcon, DeleteEmptyIcon, IncreaseIcon, MoreDownIcon, SequenceIcon } from '@univerjs/icons';
+import { CheckMarkIcon, DeleteEmptyIcon, GripVerticalIcon, IncreaseIcon, MoreDownIcon } from '@univerjs/icons';
 import { SheetsSortService, SortType } from '@univerjs/sheets-sort';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -233,7 +233,7 @@ export function SortOptionItem(props: ISortOptionItemProps) {
                       univer-text-gray-700
                     `}
                 >
-                    <SequenceIcon />
+                    <GripVerticalIcon />
                 </div>
                 {/* TODO@wzhudev: change it to the Select component later. */}
                 <Dropdown

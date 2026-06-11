@@ -19,7 +19,7 @@ import type { IConditionFormattingRule, IDeleteCfCommandParams, IMoveCfCommandPa
 import { ICommandService, Injector, IUniverInstanceService, LocaleService, Rectangle, UniverInstanceType } from '@univerjs/core';
 import { clsx, DraggableList, Select, Tooltip } from '@univerjs/design';
 import { serializeRange } from '@univerjs/engine-formula';
-import { DeleteIcon, IncreaseIcon, SequenceIcon } from '@univerjs/icons';
+import { DeleteIcon, GripVerticalIcon, IncreaseIcon } from '@univerjs/icons';
 import { checkRangesEditablePermission, SetSelectionsOperation, SetWorksheetActiveOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import {
     AddConditionalRuleMutation,
@@ -357,7 +357,7 @@ export const RuleList = (props: IRuleListProps) => {
                                 `, 'draggableHandle')}
                                 onClick={(e) => e.stopPropagation()}
                             >
-                                <SequenceIcon />
+                                <GripVerticalIcon />
                             </div>
                             <div
                                 className="univer-min-w-0 univer-max-w-full univer-flex-shrink univer-overflow-hidden"

@@ -20,7 +20,7 @@ import type { IFormulaEditorRef } from '@univerjs/sheets-formula-ui';
 import { awaitTime, DataValidationType, generateRandomId, isFormulaString, LocaleService } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { borderClassName, clsx, DraggableList, Dropdown, FormLayout, Input, Radio, RadioGroup } from '@univerjs/design';
-import { DeleteIcon, IncreaseIcon, MoreDownIcon, SequenceIcon } from '@univerjs/icons';
+import { DeleteIcon, GripVerticalIcon, IncreaseIcon, MoreDownIcon } from '@univerjs/icons';
 import { deserializeListOptions } from '@univerjs/sheets';
 import { DataValidationFormulaController } from '@univerjs/sheets-data-validation';
 import { FormulaEditor } from '@univerjs/sheets-formula-ui';
@@ -132,7 +132,7 @@ const Template = (props: { item: IDropdownItem; commonProps: any; className?: st
         <div className={clsx('univer-flex univer-items-center univer-gap-2', className)}>
             {!item.isRef && (
                 <div className={clsx('univer-cursor-move', 'draggableHandle')}>
-                    <SequenceIcon />
+                    <GripVerticalIcon />
                 </div>
             )}
             <ColorSelect

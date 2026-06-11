@@ -115,8 +115,8 @@ export function Gallery(props: IGalleryProps) {
             ref={dialogRef}
             className={clsx(
                 `
-                  univer-absolute univer-inset-0 univer-z-[1080] univer-flex univer-size-full univer-select-none
-                  univer-items-center univer-justify-center
+                  univer-fixed univer-inset-0 univer-z-[1080] univer-flex univer-h-screen univer-w-screen
+                  univer-select-none univer-items-center univer-justify-center
                 `,
                 {
                     'univer-animate-in univer-fade-in': open,
@@ -132,12 +132,14 @@ export function Gallery(props: IGalleryProps) {
             />
 
             {/* Content */}
-            <div className="univer-relative">
+            <div
+                className="univer-relative univer-flex univer-w-fit univer-items-center univer-justify-center"
+            >
                 {activeImage && (
                     <img
                         className={`
-                          univer-max-h-[40vh] univer-max-w-[60vw] univer-transition-transform univer-duration-300
-                          univer-ease-out
+                          univer-h-full univer-w-full univer-object-contain univer-transition-transform
+                          univer-duration-300 univer-ease-out
                         `}
                         style={{
                             transform: `scale(${zoomLevel})`,

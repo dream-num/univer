@@ -256,6 +256,8 @@ const locale: typeof enUS = {
             tipRowHeightLimit: 'Wysokość wiersza musi wynosić od 0 do 545',
             tipColumnWidthLimit: 'Szerokość kolumny musi wynosić od 0 do 2038',
             problem: 'Wystąpił problem',
+            error: 'Błąd',
+            forceStringInfo: 'Liczba przechowywana jako tekst',
         },
         clipboard: {
             paste: {

@@ -256,6 +256,8 @@ const locale: typeof enUS = {
             tipRowHeightLimit: '行高必须在0 ~ 545之间',
             tipColumnWidthLimit: '列宽必须在0 ~ 2038之间',
             problem: '出现了一个问题',
+            error: '错误',
+            forceStringInfo: '以文本形式存储的数字',
         },
         clipboard: {
             paste: {

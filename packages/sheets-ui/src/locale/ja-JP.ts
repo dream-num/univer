@@ -256,6 +256,8 @@ const locale: typeof enUS = {
             tipRowHeightLimit: '行の高さは0〜545の範囲である必要があります',
             tipColumnWidthLimit: '列幅は0〜2038の範囲である必要があります',
             problem: '問題が発生しました',
+            error: 'エラー',
+            forceStringInfo: '数値がテキストとして保存されました',
         },
         clipboard: {
             paste: {

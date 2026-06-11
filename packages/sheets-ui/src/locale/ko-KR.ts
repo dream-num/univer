@@ -256,6 +256,8 @@ const locale: typeof enUS = {
             tipRowHeightLimit: '행 높이는 0 ~ 545 사이여야 합니다',
             tipColumnWidthLimit: '열 너비는 0 ~ 2038 사이여야 합니다',
             problem: '문제가 발생했습니다',
+            error: '오류',
+            forceStringInfo: '숫자가 텍스트로 저장되었습니다',
         },
         clipboard: {
             paste: {

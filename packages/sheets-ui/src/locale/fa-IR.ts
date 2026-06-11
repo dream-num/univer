@@ -256,6 +256,8 @@ const locale: typeof enUS = {
             tipRowHeightLimit: 'ارتفاع سطر باید بین 0 ~ 545 باشد',
             tipColumnWidthLimit: 'عرض ستون باید بین 0 ~ 2038 باشد',
             problem: 'مشکلی پیش آمد',
+            error: 'خطا',
+            forceStringInfo: 'عدد به عنوان متن ذخیره شده',
         },
         clipboard: {
             paste: {

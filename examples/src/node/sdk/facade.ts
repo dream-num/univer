@@ -18,6 +18,7 @@
 // However some plugins are implemented incorrectly, so they are not included here.
 
 import '@univerjs/sheets/facade';
+import '@univerjs/docs/facade';
 import '@univerjs/sheets-data-validation/facade';
 import '@univerjs/engine-formula/facade';
 import '@univerjs/sheets-filter/facade';

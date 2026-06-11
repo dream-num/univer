@@ -286,6 +286,41 @@ describe('Test resources service', () => {
         expect(loads).toEqual([['slide-serialized-object-resource', 'serialized-object']]);
     });
 
+    it('should ignore object-shaped slide resources through the unit lifecycle', () => {
+        const injector = univer.__getInjector();
+        const resourceManagerService = injector.get(IResourceManagerService);
+        const univerInstanceService = injector.get(IUniverInstanceService);
+        const earlyPluginName = 'SLIDE_OBJECT_EARLY_PLUGIN' as never;
+        const latePluginName = 'SLIDE_OBJECT_LATE_PLUGIN' as never;
+        const onLoad = vi.fn();
+
+        univerInstanceService.registerCtorForType(UniverInstanceType.UNIVER_SLIDE, MockSlideUnit as never);
+        resourceManagerService.registerPluginResource<{ kind: string }>({
+            pluginName: earlyPluginName,
+            businesses: [UniverInstanceType.UNIVER_SLIDE],
+            onLoad,
+            onUnLoad: () => undefined,
+            toJson: () => '{}',
+            parseJson: (bytes) => JSON.parse(bytes),
+        });
+
+        expect(() => univer.createUnit<ITestSlideData, MockSlideUnit>(UniverInstanceType.UNIVER_SLIDE, {
+            id: 'slide-object-resource',
+            resources: {} as never,
+        })).not.toThrow();
+
+        expect(() => resourceManagerService.registerPluginResource<{ kind: string }>({
+            pluginName: latePluginName,
+            businesses: [UniverInstanceType.UNIVER_SLIDE],
+            onLoad,
+            onUnLoad: () => undefined,
+            toJson: () => '{}',
+            parseJson: (bytes) => JSON.parse(bytes),
+        })).not.toThrow();
+
+        expect(onLoad).not.toHaveBeenCalled();
+    });
+
     it('should load empty persisted resource payloads when hooks are registered later', () => {
         const resourceManagerService = univer.__getInjector().get(IResourceManagerService);
         const onLoad = vi.fn();

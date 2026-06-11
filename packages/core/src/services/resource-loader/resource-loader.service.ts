@@ -44,7 +44,8 @@ export class ResourceLoaderService extends Disposable implements IResourceLoader
             resources: IResources = [],
             errorLabel: string
         ) => {
-            const plugin = resources.find((r) => r.name === hook.pluginName);
+            const resourceList = Array.isArray(resources) ? resources : [];
+            const plugin = resourceList.find((r) => r.name === hook.pluginName);
             if (plugin) {
                 try {
                     const data = hook.parseJson(plugin.data);

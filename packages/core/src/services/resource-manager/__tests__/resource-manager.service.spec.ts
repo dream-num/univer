@@ -153,4 +153,20 @@ describe('ResourceManagerService', () => {
 
         expect(loaded).toEqual([{ ok: true }]);
     });
+
+    it('should ignore object-shaped resources when loading', () => {
+        const onLoad = vi.fn();
+
+        service.registerPluginResource({
+            pluginName: 'SLIDE_TEST_PLUGIN',
+            businesses: [UniverInstanceType.UNIVER_SLIDE],
+            onLoad,
+            onUnLoad: () => {},
+            toJson: () => '{}',
+            parseJson: JSON.parse,
+        });
+
+        expect(() => service.loadResources('unit-1', {} as never)).not.toThrow();
+        expect(onLoad).not.toHaveBeenCalled();
+    });
 });

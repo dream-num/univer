@@ -80,8 +80,9 @@ export class ResourceManagerService extends Disposable implements IResourceManag
     }
 
     public loadResources(unitId: string, resources?: IResources) {
+        const resourceList = Array.isArray(resources) ? resources : [];
         this.getAllResourceHooks().forEach((hook) => {
-            const data = resources?.find((resource) => resource.name === hook.pluginName)?.data;
+            const data = resourceList.find((resource) => resource.name === hook.pluginName)?.data;
             if (data) {
                 try {
                     const model = hook.parseJson(data);

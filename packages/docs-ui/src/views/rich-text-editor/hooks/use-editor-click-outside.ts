@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
+import type { RefObject } from 'react';
 import { useDependency } from '@univerjs/ui';
 import { useEffect } from 'react';
 import { IEditorService } from '../../../services/editor/editor-manager.service';
 
 export const useEditorClickOutside = (
     editorId: string,
-    containerRef: React.RefObject<HTMLElement | null>,
+    containerRef: RefObject<HTMLElement | null>,
     onClickOutside?: () => void
 ) => {
     const editorService = useDependency(IEditorService);

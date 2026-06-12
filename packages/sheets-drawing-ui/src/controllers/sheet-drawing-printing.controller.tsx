@@ -16,6 +16,7 @@
 
 import type { IRange } from '@univerjs/core';
 import type { IFloatDomData } from '@univerjs/sheets-drawing';
+import type { ComponentType } from '@univerjs/ui';
 import type { IPrintingFloatDomProps } from '../views/printing-float-dom';
 import { Disposable, DrawingTypeEnum, Inject, Injector, PRINT_CHART_COMPONENT_KEY, Tools } from '@univerjs/core';
 import { render, unmount } from '@univerjs/design';
@@ -152,7 +153,7 @@ export class SheetDrawingPrintingController extends Disposable {
 
                                 return null;
                             }).filter(Boolean) as IFloatDomData[];
-                            const PrintingFloatDomInjector = connectInjector(PrintingFloatDom, this._injector) as React.ComponentType<IPrintingFloatDomProps>;
+                            const PrintingFloatDomInjector = connectInjector(PrintingFloatDom, this._injector) as ComponentType<IPrintingFloatDomProps>;
 
                             render(
                                 <PrintingFloatDomInjector floatDomInfos={floatDomInfos} scene={pos.scene} skeleton={pos.skeleton} worksheet={pos.worksheet} />,

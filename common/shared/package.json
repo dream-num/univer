@@ -52,8 +52,8 @@
     },
     "devDependencies": {
         "@types/fs-extra": "^11.0.4",
-        "@univerjs/icons": "1.11.0",
-        "@univerjs/icons-svg": "^1.11.0",
+        "@univerjs/icons": "1.12.0",
+        "@univerjs/icons-svg": "^1.12.0",
         "@univerjs/protocol": "workspace:*",
         "typescript": "^6.0.3",
         "vue-tsc": "^3.3.2"

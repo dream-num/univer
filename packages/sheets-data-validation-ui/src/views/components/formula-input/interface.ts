@@ -14,20 +14,18 @@
  * limitations under the License.
  */
 
-import type { FormulaInputType } from './interface';
-import { BaseFormulaInput } from './BaseFormulaInput';
-import { ListFormulaInput } from './ListFormulaInput';
+import type { IFormulaValidResult, IFormulaValue } from '@univerjs/data-validation';
+import type { ComponentType } from 'react';
 
-export const BASE_FORMULA_INPUT_NAME = 'data-validation.formula-input';
-export const LIST_FORMULA_INPUT_NAME = 'data-validation.list-formula-input';
+export interface IFormulaInputProps {
+    isTwoFormula?: boolean;
+    value?: IFormulaValue;
+    onChange?: (value?: IFormulaValue) => void;
+    unitId: string;
+    subUnitId: string;
+    showError?: boolean;
+    validResult?: IFormulaValidResult;
+    ruleId: string;
+}
 
-export const FORMULA_INPUTS: [string, FormulaInputType][] = [
-    [
-        BASE_FORMULA_INPUT_NAME,
-        BaseFormulaInput,
-    ],
-    [
-        LIST_FORMULA_INPUT_NAME,
-        ListFormulaInput,
-    ],
-];
+export type FormulaInputType = ComponentType<IFormulaInputProps>;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IFormulaInputProps } from '@univerjs/data-validation';
+import type { IFormulaInputProps } from './interface';
 import { LocaleService } from '@univerjs/core';
 import { FormLayout, Input } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';

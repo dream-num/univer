@@ -20,7 +20,7 @@ import { LocaleService } from '@univerjs/core';
 import { InputNumber, Select } from '@univerjs/design';
 import { getCurrencyType, getDecimalFromPattern, setPatternDecimal } from '@univerjs/sheets-numfmt';
 import { useDependency } from '@univerjs/ui';
-import { useContext, useMemo, useState } from 'react';
+import { useContext, useLayoutEffect, useMemo, useState } from 'react';
 import { UserHabitCurrencyContext } from '../../controllers/user-habit.controller';
 
 export const isAccountingPanel = (pattern: string) => {
@@ -29,7 +29,7 @@ export const isAccountingPanel = (pattern: string) => {
 };
 
 export const AccountingPanel: FC<IBusinessComponentProps> = (props) => {
-    const { defaultPattern, action, onChange } = props;
+    const { defaultPattern, onActionChange, onChange } = props;
 
     const [decimal, setDecimal] = useState(() => getDecimalFromPattern(defaultPattern || '', 2));
     const userHabitCurrency = useContext(UserHabitCurrencyContext);
@@ -38,7 +38,9 @@ export const AccountingPanel: FC<IBusinessComponentProps> = (props) => {
 
     const localeService = useDependency(LocaleService);
 
-    action.current = () => setPatternDecimal(`_("${suffix}"* #,##0${decimal > 0 ? '.0' : ''}_)`, decimal);
+    useLayoutEffect(() => {
+        onActionChange(() => setPatternDecimal(`_("${suffix}"* #,##0${decimal > 0 ? '.0' : ''}_)`, decimal));
+    }, [decimal, onActionChange, suffix]);
 
     const handleSelect = (v: string) => {
         setSuffix(v);

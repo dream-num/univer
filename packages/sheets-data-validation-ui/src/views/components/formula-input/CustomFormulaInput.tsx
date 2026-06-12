@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IFormulaInputProps } from '@univerjs/data-validation';
 import type { IFormulaEditorRef } from '@univerjs/sheets-formula-ui';
+import type { IFormulaInputProps } from './interface';
 import { borderClassName, clsx, FormLayout } from '@univerjs/design';
 import { FormulaEditor } from '@univerjs/sheets-formula-ui';
 import { useSidebarClick } from '@univerjs/ui';

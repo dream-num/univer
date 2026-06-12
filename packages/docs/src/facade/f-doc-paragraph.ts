@@ -19,10 +19,9 @@ import type { FDocBody, IFDocTextRange } from './f-doc-body';
 /**
  * A paragraph facade wrapper.
  *
- * Paragraph identity is backed by a runtime temporary key. The key is stable for
- * the current `FDocument` facade lifecycle and is re-resolved before each method
- * call, so insertions before this paragraph made through the facade do not break
- * the wrapper.
+ * Paragraph identity is backed by the persisted `paragraphId`. The id is
+ * re-resolved before each method call, so insertions before this paragraph do
+ * not break the wrapper.
  *
  * @hideconstructor
  */
@@ -49,8 +48,8 @@ export class FDocParagraph {
     }
 
     /**
-     * Get the runtime key used to resolve this paragraph.
-     * @returns {string} The paragraph runtime key for the current `FDocument` facade lifecycle.
+     * Get the persisted paragraph id.
+     * @returns {string} The paragraph id.
      * @example
      * ```ts
      * const doc = univerAPI.getActiveDocument();
@@ -61,6 +60,22 @@ export class FDocParagraph {
      * ```
      */
     getKey(): string {
+        return this._key;
+    }
+
+    /**
+     * Get the persisted paragraph id.
+     * @returns {string} The paragraph id.
+     * @example
+     * ```ts
+     * const doc = univerAPI.getActiveDocument();
+     * if (!doc) throw new Error('No active document');
+     *
+     * const paragraph = doc.getBody().getChild(0).asParagraph();
+     * console.log(paragraph.getId());
+     * ```
+     */
+    getId(): string {
         return this._key;
     }
 

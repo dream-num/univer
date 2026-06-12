@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-import type { MutableRefObject } from 'react';
-
 export interface IBusinessComponentProps {
     onChange: (result: string) => void;
+    onActionChange: (action: () => string | null) => void;
     defaultValue: number;
     defaultPattern: string;
-    action: MutableRefObject<() => string | null>;
 }

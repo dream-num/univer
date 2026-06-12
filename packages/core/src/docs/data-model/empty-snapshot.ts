@@ -40,6 +40,9 @@ export function getEmptySnapshot(
             textRuns: [],
             customBlocks: [],
             tables: [],
+            blockRanges: [],
+            customRanges: [],
+            customDecorations: [],
             paragraphs: [
                 {
                     startIndex: 0,

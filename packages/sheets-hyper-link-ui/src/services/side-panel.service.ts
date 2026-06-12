@@ -23,8 +23,9 @@ export interface ICustomHyperLinkFormProps {
     linkId: string;
     payload: string;
     display: string;
-    setByPayload: React.MutableRefObject<boolean>;
+    getIsDisplaySyncedWithPayload: () => boolean;
     showError: boolean;
+    setDisplaySyncedWithPayload: (synced: boolean) => void;
     setDisplay: (display: string) => void;
     setPayload: (payload: string) => void;
 }

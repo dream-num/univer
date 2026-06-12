@@ -15,10 +15,9 @@
  */
 
 import type { IDropdownMenuProps } from '@univerjs/design';
-import { LocaleService } from '@univerjs/core';
-import { Button, clsx, DropdownMenu } from '@univerjs/design';
-import * as React from 'react';
-import { useMemo, useRef, useState } from 'react';
+import type { PointerEvent as ReactPointerEvent } from 'react';
+import { borderClassName, Button, clsx, DropdownMenu, Input } from '@univerjs/design';
+import { useEffect, useRef, useState } from 'react';
 import { ComponentManager } from '../../common';
 import { useDependency } from '../../utils/di';
 
@@ -58,18 +57,40 @@ export interface ISliderProps {
 }
 
 const SLIDER_WIDTH = 116;
+const DRAG_COMMIT_INTERVAL = 50;
 
 /**
  * Slider Component
  */
 export function Slider(props: ISliderProps) {
-    const localeService = useDependency(LocaleService);
     const componentManager = useDependency(ComponentManager);
 
     const { value, min = 0, max = 400, disabled = false, resetPoint = 100, shortcuts, onChange } = props;
 
     const sliderInnerRailRef = useRef<HTMLDivElement>(null);
+    const isEditingZoomRef = useRef(false);
+    const dragValueRef = useRef(value);
+    const pendingDragValueRef = useRef<number | null>(null);
+    const lastCommittedDragValueRef = useRef(value);
+    const dragCommitTimerRef = useRef<number | null>(null);
     const [zoomListVisible, setZoomListVisible] = useState(false);
+    const [isDragging, setIsDragging] = useState(false);
+    const [dragValue, setDragValue] = useState(value);
+    const [zoomInputValue, setZoomInputValue] = useState(() => `${value}%`);
+
+    useEffect(() => {
+        if (!isEditingZoomRef.current) {
+            setZoomInputValue(`${value}%`);
+        }
+    }, [value]);
+
+    useEffect(() => () => {
+        clearDragCommitTimer();
+    }, []);
+
+    function clampValue(value: number) {
+        return Math.min(Math.max(value, min), max);
+    }
 
     function handleReset() {
         if (disabled) return;
@@ -89,62 +110,129 @@ export function Slider(props: ISliderProps) {
         onChange && onChange(result);
     }
 
-    const offset = useMemo(() => {
-        if (value <= resetPoint) {
+    function getSliderOffset(sliderValue: number) {
+        if (sliderValue <= resetPoint) {
             const ratio = 50 / (resetPoint - min);
-            return (value - min) * ratio;
+            return (sliderValue - min) * ratio;
         }
 
-        if (value <= max) {
-            return resetPoint * 0.5 + ((value - resetPoint) / (max - resetPoint)) * 50;
+        if (sliderValue <= max) {
+            return resetPoint * 0.5 + ((sliderValue - resetPoint) / (max - resetPoint)) * 50;
         }
-    }, [min, max, resetPoint, value]);
+    }
 
-    function handleMouseDown(e: React.MouseEvent<HTMLButtonElement>) {
+    function getValueByClientX(clientX: number, rail: HTMLDivElement) {
+        const railRect = rail.getBoundingClientRect();
+        const railWidth = railRect.width || SLIDER_WIDTH;
+        const pureOffsetX = clientX - railRect.x;
+
+        let offsetX = pureOffsetX;
+
+        if (offsetX <= 0) {
+            offsetX = 0;
+        } else if (offsetX >= railWidth) {
+            offsetX = railWidth;
+        }
+
+        const ratio = offsetX / railWidth;
+
+        if (ratio <= 0.5) {
+            return min + ratio * (resetPoint - min) * 2;
+        }
+
+        return resetPoint + (ratio - 0.5) * (max - resetPoint) * 2;
+    }
+
+    function getRoundedSliderValue(clientX: number, rail: HTMLDivElement) {
+        return Math.ceil(clampValue(getValueByClientX(clientX, rail)));
+    }
+
+    function clearDragCommitTimer() {
+        if (dragCommitTimerRef.current != null) {
+            window.clearTimeout(dragCommitTimerRef.current);
+            dragCommitTimerRef.current = null;
+        }
+    }
+
+    function commitDragValue(nextValue: number) {
+        if (nextValue === lastCommittedDragValueRef.current) {
+            return;
+        }
+
+        lastCommittedDragValueRef.current = nextValue;
+        onChange && onChange(nextValue);
+    }
+
+    function flushDragCommit() {
+        clearDragCommitTimer();
+
+        const nextValue = pendingDragValueRef.current;
+        pendingDragValueRef.current = null;
+
+        if (nextValue != null) {
+            commitDragValue(nextValue);
+        }
+    }
+
+    function scheduleDragCommit(nextValue: number) {
+        pendingDragValueRef.current = nextValue;
+
+        if (dragCommitTimerRef.current != null) {
+            return;
+        }
+
+        dragCommitTimerRef.current = window.setTimeout(() => {
+            dragCommitTimerRef.current = null;
+            const pendingValue = pendingDragValueRef.current;
+            pendingDragValueRef.current = null;
+
+            if (pendingValue != null) {
+                commitDragValue(pendingValue);
+            }
+        }, DRAG_COMMIT_INTERVAL);
+    }
+
+    function updateDragValue(clientX: number, rail: HTMLDivElement) {
+        const nextValue = getRoundedSliderValue(clientX, rail);
+        dragValueRef.current = nextValue;
+        setDragValue(nextValue);
+        return nextValue;
+    }
+
+    function handlePointerDown(e: ReactPointerEvent<HTMLElement>) {
         if (disabled) return;
         e.preventDefault();
+        e.stopPropagation();
 
         const rail = sliderInnerRailRef.current!;
         let isDragging = true;
+        lastCommittedDragValueRef.current = value;
+        setIsDragging(true);
+        scheduleDragCommit(updateDragValue(e.clientX, rail));
 
-        function onMouseMove(e: MouseEvent) {
+        function onPointerMove(e: PointerEvent) {
             if (isDragging) {
-                const pureOffsetX = e.clientX - rail.getBoundingClientRect().x;
-
-                let offsetX = pureOffsetX;
-
-                if (offsetX <= 0) {
-                    offsetX = 0;
-                } else if (offsetX >= SLIDER_WIDTH) {
-                    offsetX = SLIDER_WIDTH;
-                }
-
-                const ratio = offsetX / SLIDER_WIDTH;
-
-                let result = 0;
-                if (ratio <= 0.5) {
-                    result = min + ratio * (resetPoint - min) * 2;
-                } else {
-                    result = resetPoint + (ratio - 0.5) * (max - resetPoint) * 2;
-                }
-
-                onChange && onChange(Math.ceil(result));
+                scheduleDragCommit(updateDragValue(e.clientX, rail));
             }
         }
 
-        function onMouseUp() {
+        function onPointerUp() {
             isDragging = false;
-            document.removeEventListener('pointermove', onMouseMove);
-            window.removeEventListener('pointerup', onMouseUp);
+            setIsDragging(false);
+            window.removeEventListener('pointermove', onPointerMove);
+            window.removeEventListener('pointerup', onPointerUp);
+            window.removeEventListener('pointerout', onPointerOut);
+
+            flushDragCommit();
         }
 
-        function onMouseOut(e: MouseEvent) {
-            e.relatedTarget === null && onMouseUp();
+        function onPointerOut(e: PointerEvent) {
+            e.relatedTarget === null && onPointerUp();
         }
 
-        window.addEventListener('pointermove', onMouseMove);
-        window.addEventListener('pointerup', onMouseUp);
-        window.addEventListener('pointerout', onMouseOut);
+        window.addEventListener('pointermove', onPointerMove);
+        window.addEventListener('pointerup', onPointerUp);
+        window.addEventListener('pointerout', onPointerOut);
     }
 
     function handleSelectZoomLevel(value: number) {
@@ -154,19 +242,75 @@ export function Slider(props: ISliderProps) {
         onChange && onChange(value);
     }
 
+    function parseExactZoomInput(rawValue: string) {
+        const normalizedValue = rawValue.trim().replace(/%$/, '').trim();
+        if (normalizedValue === '') {
+            return null;
+        }
+
+        const parsedValue = Number(normalizedValue);
+        if (!Number.isFinite(parsedValue)) {
+            return null;
+        }
+
+        return Math.round(clampValue(parsedValue));
+    }
+
+    function handleExactZoomFocus() {
+        if (disabled) return;
+
+        isEditingZoomRef.current = true;
+        setZoomInputValue(String(value));
+    }
+
+    function commitExactZoomInput() {
+        if (disabled) return;
+        if (!isEditingZoomRef.current) return;
+
+        const parsedValue = parseExactZoomInput(zoomInputValue);
+        isEditingZoomRef.current = false;
+
+        if (parsedValue == null) {
+            setZoomInputValue(`${value}%`);
+            return;
+        }
+
+        setZoomInputValue(`${parsedValue}%`);
+        if (parsedValue !== value) {
+            onChange && onChange(parsedValue);
+        }
+    }
+
+    function handleExactZoomChange(value: string) {
+        setZoomInputValue(value);
+    }
+
+    function handleInputKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+        e.stopPropagation();
+
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            commitExactZoomInput();
+            e.currentTarget.blur();
+        }
+    }
+
     const items: IDropdownMenuProps['items'] = [{
         type: 'radio',
         value: value.toString(),
         options: shortcuts.map((item) => ({ value: item.toString(), label: `${item}%` })),
         onSelect: (value: string) => handleSelectZoomLevel(+value),
     }];
+    const visualValue = isDragging ? dragValue : value;
+    const sliderOffset = Math.min(Math.max(getSliderOffset(visualValue) ?? 0, 0), 100);
 
     const ReduceIcon = componentManager.get('ReduceIcon');
     const IncreaseIcon = componentManager.get('IncreaseIcon');
+    const MoreDownIcon = componentManager.get('MoreDownIcon');
 
     return (
         <div
-            className={clsx('univer-flex univer-select-none univer-items-center univer-gap-1', {
+            className={clsx('univer-flex univer-select-none univer-items-center univer-gap-1.5', {
                 'univer-cursor-not-allowed': disabled,
             })}
         >
@@ -181,41 +325,77 @@ export function Slider(props: ISliderProps) {
             </Button>
 
             <div
-                className={`
-                  univer-relative univer-hidden univer-h-0.5 univer-rounded-2xl univer-bg-gray-400 univer-px-1.5
-                  sm:!univer-block
-                `}
-                style={{
-                    width: `${SLIDER_WIDTH}px`,
-                }}
+                className="
+                  univer-hidden univer-h-6 univer-items-center
+                  sm:!univer-flex
+                "
             >
-                <div ref={sliderInnerRailRef} role="track" className="univer-relative univer-h-0.5">
-                    <a
-                        key="reset-button"
-                        className={`
-                          univer-absolute univer-left-1/2 univer-top-1/2 univer-box-border univer-block univer-size-0.5
-                          -univer-translate-x-1/2 -univer-translate-y-1/2 univer-cursor-pointer univer-rounded-full
-                          univer-bg-white
-                        `}
-                        role="button"
-                        onClick={handleReset}
-                    />
+                <div
+                    className={clsx(`
+                      univer-relative univer-h-1.5 univer-rounded-full univer-bg-gray-200 univer-px-1.5
+                      univer-transition-colors
+                      dark:!univer-bg-gray-600
+                    `, {
+                        'univer-opacity-60': disabled,
+                    })}
+                    style={{
+                        width: `${SLIDER_WIDTH}px`,
+                    }}
+                >
+                    <div
+                        ref={sliderInnerRailRef}
+                        role="track"
+                        className="
+                          univer-relative univer-h-1.5 univer-bg-gray-200
+                          dark:!univer-bg-gray-600
+                        "
+                        onPointerDown={handlePointerDown}
+                    >
+                        <div
+                            className={`
+                              univer-bg-primary-500/60 univer-absolute univer-left-0 univer-top-0 univer-h-full
+                              univer-rounded-full
+                            `}
+                            style={{
+                                width: `${sliderOffset}%`,
+                            }}
+                        />
+                        <a
+                            key="reset-button"
+                            className={`
+                              univer-absolute univer-left-1/2 univer-top-1/2 univer-box-border univer-block
+                              univer-size-1.5 -univer-translate-x-1/2 -univer-translate-y-1/2 univer-cursor-pointer
+                              univer-rounded-full univer-border univer-border-white univer-bg-gray-400
+                              dark:!univer-border-gray-700 dark:!univer-bg-gray-300
+                            `}
+                            role="button"
+                            onClick={handleReset}
+                        />
 
-                    <button
-                        className={clsx(`
-                          univer-absolute univer-top-[calc(50%-6px)] univer-size-3 -univer-translate-x-1/2
-                          univer-rounded-full univer-border-none univer-bg-white univer-shadow univer-transition-colors
-                        `, {
-                            'hover:univer-gray-200 univer-cursor-pointer': !disabled,
-                            'univer-cursor-not-allowed': disabled,
-                        })}
-                        role="handle"
-                        type="button"
-                        style={{
-                            left: `${offset}%`,
-                        }}
-                        onPointerDown={handleMouseDown}
-                    />
+                        <button
+                            className={clsx(`
+                              univer-absolute univer-top-1/2 univer-size-3.5 -univer-translate-x-1/2
+                              -univer-translate-y-1/2 univer-rounded-full univer-bg-white univer-shadow-sm
+                              univer-transition-colors
+                              focus-visible:univer-outline-none focus-visible:univer-ring-2
+                              focus-visible:univer-ring-primary-100
+                              dark:!univer-bg-gray-800
+                            `, borderClassName, {
+                                'univer-cursor-pointer hover:univer-border-primary-600 hover:univer-shadow-md': !disabled,
+                                'univer-cursor-not-allowed': disabled,
+                                'univer-scale-125 univer-border-primary-600 univer-shadow-md': isDragging,
+                            })}
+                            role="slider"
+                            aria-valuemin={min}
+                            aria-valuemax={max}
+                            aria-valuenow={visualValue}
+                            type="button"
+                            style={{
+                                left: `${sliderOffset}%`,
+                            }}
+                            onPointerDown={handlePointerDown}
+                        />
+                    </div>
                 </div>
             </div>
 
@@ -229,20 +409,56 @@ export function Slider(props: ISliderProps) {
                 <IncreaseIcon />
             </Button>
 
-            <DropdownMenu
-                align="end"
-                items={items}
-                open={zoomListVisible}
-                onOpenChange={setZoomListVisible}
+            <div
+                className={clsx(`
+                  univer-flex univer-h-6 univer-w-[68px] univer-flex-shrink-0 univer-items-center univer-overflow-hidden
+                  univer-rounded-md univer-border univer-border-gray-200 univer-bg-white
+                  dark:!univer-border-gray-600 dark:!univer-bg-gray-800
+                `, {
+                    'univer-opacity-60': disabled,
+                })}
             >
-                <Button
-                    size="small"
-                    variant="text"
+                <Input
+                    className={`
+                      univer-box-border univer-h-6 univer-w-[52px] univer-border-none univer-bg-transparent
+                      [&_input:focus]:!univer-ring-0
+                      [&_input]:univer-h-6 [&_input]:univer-w-[52px] [&_input]:univer-border-none
+                      [&_input]:!univer-bg-transparent [&_input]:univer-px-1 [&_input]:univer-text-center
+                      [&_input]:univer-text-xs [&_input]:univer-tabular-nums
+                    `}
+                    inputClass="univer-w-[52px]"
+                    size="mini"
+                    value={zoomInputValue}
+                    disabled={disabled}
+                    type="text"
+                    onChange={handleExactZoomChange}
+                    onFocus={handleExactZoomFocus}
+                    onBlur={commitExactZoomInput}
+                    onKeyDown={handleInputKeyDown}
+                />
+
+                <DropdownMenu
+                    align="end"
+                    items={items}
+                    open={zoomListVisible}
+                    disabled={disabled}
+                    onOpenChange={setZoomListVisible}
                 >
-                    {value}
-                    %
-                </Button>
-            </DropdownMenu>
+                    <Button
+                        className="univer-h-6 univer-w-4 univer-rounded-none univer-p-0"
+                        size="small"
+                        variant="text"
+                        disabled={disabled}
+                    >
+                        <MoreDownIcon
+                            className="
+                              univer-size-3 univer-text-gray-500
+                              dark:!univer-text-gray-300
+                            "
+                        />
+                    </Button>
+                </DropdownMenu>
+            </div>
         </div>
     );
 }

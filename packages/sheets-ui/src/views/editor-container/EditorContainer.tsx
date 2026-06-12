@@ -20,7 +20,7 @@ import { DocSelectionRenderService, IEditorService } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { ComponentManager, DISABLE_AUTO_FOCUS_KEY, MetaKeys, useDependency, useEvent, useObservable, useSidebarClick } from '@univerjs/ui';
 import * as React from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { SetCellEditVisibleArrowOperation, SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
 import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY } from '../../common/keys';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
@@ -53,7 +53,6 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
     const editorBridgeService = useDependency(IEditorBridgeService);
     const visible = useObservable(editorBridgeService.visible$);
     const commandService = useDependency(ICommandService);
-    const isRefSelecting = useRef<0 | 1 | 2>(0);
     const disableAutoFocus = useObservable(
         () => contextService.subscribeContextValue$(DISABLE_AUTO_FOCUS_KEY),
         false,
@@ -152,7 +151,7 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
 
     useSidebarClick(handleClickSideBar);
 
-    const keyCodeConfig = useKeyEventConfig(isRefSelecting, editState?.unitId);
+    const keyCodeConfig = useKeyEventConfig(editState?.unitId);
 
     const onMoveInEditor = useEvent((keycode: KeyCode, metaKey: MetaKeys) => {
         commandService.executeCommand(SetCellEditVisibleArrowOperation.id, {
@@ -193,7 +192,6 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
                     isSingle={false}
                     autoScrollbar={false}
                     onFormulaSelectingChange={(isSelecting: 0 | 1 | 2, isFocusing: boolean) => {
-                        isRefSelecting.current = isSelecting;
                         if (!isFocusing) return;
                         if (isSelecting) {
                             editorBridgeService.enableForceKeepVisible();

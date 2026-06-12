@@ -17,11 +17,11 @@
 import fs from 'node:fs';
 
 const progress = [
-    ['progress0', '@univerjs/icons-svg/single/progress-0-icon.svg', { black: '#7A7A7A', '#E5E5E5': '#7A7A7A' }],
-    ['progress25', '@univerjs/icons-svg/single/progress-25-icon.svg', { black: '#7A7A7A', '#E5E5E5': '#7A7A7A' }],
-    ['progress50', '@univerjs/icons-svg/single/progress-50-icon.svg', { black: '#7A7A7A', '#E5E5E5': '#7A7A7A' }],
-    ['progress75', '@univerjs/icons-svg/single/progress-75-icon.svg', { black: '#7A7A7A', '#E5E5E5': '#7A7A7A' }],
-    ['progress100', '@univerjs/icons-svg/single/progress-100-icon.svg', { black: '#7A7A7A', '#E5E5E5': '#7A7A7A' }],
+    ['progress0', '@univerjs/icons-svg/double/progress-0-double-icon.svg', { black: '#7A7A7A', '#E5E5E5': '#7A7A7A' }],
+    ['progress25', '@univerjs/icons-svg/double/progress-25-double-icon.svg', { black: '#7A7A7A', '#E5E5E5': '#7A7A7A' }],
+    ['progress50', '@univerjs/icons-svg/double/progress-50-double-icon.svg', { black: '#7A7A7A', '#E5E5E5': '#7A7A7A' }],
+    ['progress75', '@univerjs/icons-svg/double/progress-75-double-icon.svg', { black: '#7A7A7A', '#E5E5E5': '#7A7A7A' }],
+    ['progress100', '@univerjs/icons-svg/double/progress-100-double-icon.svg', { black: '#7A7A7A', '#E5E5E5': '#7A7A7A' }],
 ];
 
 const star = [

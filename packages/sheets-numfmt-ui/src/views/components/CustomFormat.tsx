@@ -20,27 +20,29 @@ import { borderClassName, clsx, Input } from '@univerjs/design';
 import { CheckMarkIcon } from '@univerjs/icons';
 import { CURRENCYFORMAT, DATEFMTLISG, NUMBERFORMAT } from '@univerjs/sheets-numfmt';
 import { useDependency } from '@univerjs/ui';
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import { UserHabitController } from '../../controllers/user-habit.controller';
 
 const key = 'customFormat';
 const historyPatternKey = 'numfmt_custom_pattern';
 
 export function CustomFormat(props: IBusinessComponentProps) {
-    const { defaultPattern, action, onChange } = props;
+    const { defaultPattern, onActionChange, onChange } = props;
     const userHabitController = useDependency(UserHabitController);
     const localStorageService = useDependency(ILocalStorageService);
     const localeService = useDependency(LocaleService);
 
     const [pattern, setPattern] = useState(defaultPattern);
-    action.current = () => {
-        userHabitController.markHabit(key, pattern);
-        localStorageService.getItem<string[]>(historyPatternKey).then((list = []) => {
-            const _list = [...new Set([pattern, ...(list || [])])].splice(0, 10).filter((e) => !!e);
-            localStorageService.setItem(historyPatternKey, _list);
+    useLayoutEffect(() => {
+        onActionChange(() => {
+            userHabitController.markHabit(key, pattern);
+            localStorageService.getItem<string[]>(historyPatternKey).then((list = []) => {
+                const _list = [...new Set([pattern, ...(list || [])])].splice(0, 10).filter((e) => !!e);
+                localStorageService.setItem(historyPatternKey, _list);
+            });
+            return pattern;
         });
-        return pattern;
-    };
+    }, [localStorageService, onActionChange, pattern, userHabitController]);
     const [options, setOptions] = useState<(string | number)[]>([]);
 
     useEffect(() => {

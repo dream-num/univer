@@ -54,7 +54,7 @@ export interface IInsertTextCommandParams {
 export const InsertTextCommand: ICommand<IInsertTextCommandParams> = {
     id: 'doc.command.insert-text',
     type: CommandType.COMMAND,
-    handler: async (accessor, params: IInsertTextCommandParams) => {
+    handler: (accessor, params: IInsertTextCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const { range, segmentId, body, unitId, cursorOffset } = params;
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
@@ -147,7 +147,7 @@ export const DeleteTextCommand: ICommand<IDeleteTextCommandParams> = {
     id: 'doc.command.delete-text',
     type: CommandType.COMMAND,
 
-    handler: async (accessor, params: IDeleteTextCommandParams) => {
+    handler: (accessor, params: IDeleteTextCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const { range, segmentId, unitId, direction, len = 1 } = params;
@@ -225,7 +225,7 @@ export const UpdateTextCommand: ICommand<IUpdateTextCommandParams> = {
 
     type: CommandType.COMMAND,
 
-    handler: async (accessor, params: IUpdateTextCommandParams) => {
+    handler: (accessor, params: IUpdateTextCommandParams) => {
         const { range, segmentId, updateBody, coverType, unitId, textRanges } = params;
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);

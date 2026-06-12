@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { FormulaInputType } from '@univerjs/data-validation';
+import type { FormulaInputType } from './interface';
 import {
     BASE_FORMULA_INPUT_NAME,
     CHECKBOX_FORMULA_INPUT_NAME,

@@ -17,7 +17,7 @@
 import type { DocPopupMenu, IDocPopupMenuItem } from '../services/doc-quick-insert-popup.service';
 import { CommandType, Direction, DisposableCollection, generateRandomId, ICommandService, LocaleService, toDisposable } from '@univerjs/core';
 import { ComponentManager, IShortcutService, KeyCode, useDependency, useObservable } from '@univerjs/ui';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CloseQuickInsertPopupOperation } from '../commands/operations/quick-insert-popup.operation';
 import { DocQuickInsertPopupService } from '../services/doc-quick-insert-popup.service';
 import { getQuickInsertMenuLeafCount, QuickInsertMenu } from './QuickInsertMenu';
@@ -108,6 +108,10 @@ export const QuickInsertPopup = () => {
         docQuickInsertPopupService.emitMenuSelected(menu);
         commandService.executeCommand(CloseQuickInsertPopupOperation.id);
     };
+
+    const handleFocusedMenuChange = useCallback((menu: IDocPopupMenuItem | null) => {
+        focusedMenuRef.current = menu;
+    }, []);
 
     useEffect(() => {
         /** Use up or down to navigate the focused menu instead of moving the cursor in documents. */
@@ -209,14 +213,6 @@ export const QuickInsertPopup = () => {
         setFocusedMenuIndex(0);
     }, [filteredMenus]);
 
-    const menuNodeMapRef = useRef<Map<string, HTMLElement>>(new Map());
-
-    useEffect(() => {
-        return () => {
-            menuNodeMapRef.current.clear();
-        };
-    }, []);
-
     const hasMenus = filteredMenus.length > 0;
 
     const Placeholder = currentPopup?.popup.Placeholder || componentManager.get(QuickInsertPlaceholder.componentKey);
@@ -228,10 +224,9 @@ export const QuickInsertPopup = () => {
                     <QuickInsertMenu
                         menus={filteredMenus}
                         focusedMenuIndex={focusedMenuIndex}
-                        focusedMenuRef={focusedMenuRef}
-                        menuNodeMapRef={menuNodeMapRef}
                         componentManager={componentManager}
                         onFocusedMenuIndexChange={setFocusedMenuIndex}
+                        onFocusedMenuChange={handleFocusedMenuChange}
                         onSelect={handleMenuSelect}
                     />
                 )

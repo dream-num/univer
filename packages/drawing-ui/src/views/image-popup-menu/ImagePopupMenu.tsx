@@ -15,10 +15,17 @@
  */
 
 import type { DocumentDataModel } from '@univerjs/core';
-import type * as React from 'react';
-import { BooleanNumber, ICommandService, IUniverInstanceService, LocaleService, PositionedObjectLayoutType, UniverInstanceType } from '@univerjs/core';
+import type { ReactNode } from 'react';
+import {
+    BooleanNumber,
+    ICommandService,
+    IUniverInstanceService,
+    LocaleService,
+    PositionedObjectLayoutType,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { borderClassName, clsx, Dropdown, DropdownMenu, Tooltip } from '@univerjs/design';
-import { AutofillDoubleIcon, DeleteIcon, DocSettingIcon, MoreDownIcon } from '@univerjs/icons';
+import { AutofillDoubleIcon, CropIcon, DeleteIcon, DocSettingIcon, MoreDownIcon, TextWrapShapeIcon } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
 import { useState } from 'react';
 
@@ -151,7 +158,7 @@ interface IDocImageFloatingToolbarProps {
 interface IToolbarDropdownOption<T extends string | number> {
     label: string;
     value: T;
-    icon: React.ReactNode;
+    icon: ReactNode;
 }
 
 function getWrappingStyle(documentDataModel: DocumentDataModel | undefined, drawingId: string): TextWrappingStyle {
@@ -186,7 +193,7 @@ function Divider() {
     );
 }
 
-function ToolbarGroup(props: { children: React.ReactNode }) {
+function ToolbarGroup(props: { children: ReactNode }) {
     return (
         <div className="univer-flex univer-h-7 univer-items-center univer-gap-1 univer-px-1">
             {props.children}
@@ -194,7 +201,7 @@ function ToolbarGroup(props: { children: React.ReactNode }) {
     );
 }
 
-function ToolbarButton(props: { title: string; active?: boolean; disabled?: boolean; children: React.ReactNode; onClick: () => void }) {
+function ToolbarButton(props: { title: string; active?: boolean; disabled?: boolean; children: ReactNode; onClick: () => void }) {
     return (
         <Tooltip title={props.title} placement="bottom">
             <button
@@ -216,30 +223,6 @@ function ToolbarButton(props: { title: string; active?: boolean; disabled?: bool
                 {props.children}
             </button>
         </Tooltip>
-    );
-}
-
-function TextWrapShapeIcon() {
-    return (
-        <svg viewBox="0 0 20 20" width="1em" height="1em" fill="none" aria-hidden="true">
-            <path d="M2.5 4.5H8.2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-            <path d="M11.8 4.5H17.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-            <path d="M2.5 10H5.7" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-            <path d="M14.3 10H17.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-            <path d="M2.5 15.5H8.2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-            <path d="M11.8 15.5H17.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-            <rect x="6.8" y="7" width="6.4" height="6" rx="1" stroke="currentColor" strokeWidth="1.4" />
-        </svg>
-    );
-}
-
-function CropIcon() {
-    return (
-        <svg viewBox="0 0 20 20" width="1em" height="1em" fill="none" aria-hidden="true">
-            <path d="M5 2.8V12.5C5 13.9 6.1 15 7.5 15H17.2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-            <path d="M2.8 5H12.5C13.9 5 15 6.1 15 7.5V17.2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-            <path d="M8.3 8.3H11.7V11.7H8.3V8.3Z" stroke="currentColor" strokeWidth="1.2" />
-        </svg>
     );
 }
 

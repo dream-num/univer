@@ -15,7 +15,6 @@
  */
 
 import type { IDisposable, Nullable } from '@univerjs/core';
-import type { MutableRefObject } from 'react';
 import { DisposableCollection, LocaleService, ThemeService, toDisposable } from '@univerjs/core';
 import { Button, MessageType } from '@univerjs/design';
 import { IMessageService, IShortcutService, useDependency } from '@univerjs/ui';
@@ -88,7 +87,8 @@ export function ScriptEditorPanel() {
         };
     }, [editorService, shortcutService]);
 
-    const startExecution = useExecution(monacoEditorRef);
+    const getMonacoEditor = useCallback(() => monacoEditorRef.current, []);
+    const startExecution = useExecution(getMonacoEditor);
 
     return (
         <div className="univer-h-full">
@@ -104,13 +104,13 @@ export function ScriptEditorPanel() {
     );
 }
 
-function useExecution(monacoEditorRef: MutableRefObject<Nullable<editor.IStandaloneCodeEditor>>) {
+function useExecution(getMonacoEditor: () => Nullable<editor.IStandaloneCodeEditor>) {
     const scriptService = useDependency(IUniscriptExecutionService);
     const messageService = useDependency(IMessageService);
     const localeService = useDependency(LocaleService);
 
     return useCallback(() => {
-        const model = monacoEditorRef.current?.getModel();
+        const model = getMonacoEditor()?.getModel();
         if (model) {
             scriptService
                 .execute(model.getValue())
@@ -127,5 +127,5 @@ function useExecution(monacoEditorRef: MutableRefObject<Nullable<editor.IStandal
                     });
                 });
         }
-    }, [localeService, messageService, monacoEditorRef, scriptService]);
+    }, [getMonacoEditor, localeService, messageService, scriptService]);
 }

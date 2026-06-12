@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { IFormulaInputProps } from '@univerjs/data-validation';
 import type { ListValidator } from '@univerjs/sheets-data-validation';
 import type { IFormulaEditorRef } from '@univerjs/sheets-formula-ui';
+import type { IFormulaInputProps } from './interface';
 import { awaitTime, DataValidationType, generateRandomId, isFormulaString, LocaleService } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { borderClassName, clsx, DraggableList, Dropdown, FormLayout, Input, Radio, RadioGroup } from '@univerjs/design';

@@ -22,7 +22,7 @@ import { useMemo } from 'react';
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 
-export function useKeyEventConfig(isRefSelecting: React.MutableRefObject<0 | 1 | 2>, unitId?: string) {
+export function useKeyEventConfig(unitId?: string) {
     const editorBridgeService = useDependency(IEditorBridgeService);
     const commandService = useDependency(ICommandService);
 

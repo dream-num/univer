@@ -17,6 +17,7 @@
 import type { IUnitRangeName, Nullable } from '@univerjs/core';
 import type { Editor, IRichTextEditorProps } from '@univerjs/docs-ui';
 import type { ISelectionWithStyle, ISetSelectionsOperationParams } from '@univerjs/sheets';
+import type { RefObject } from 'react';
 import { ICommandService, LocaleService, RichTextBuilder } from '@univerjs/core';
 import { Button, clsx, Dialog, Input, scrollbarClassName, Tooltip } from '@univerjs/design';
 import { IEditorService, RichTextEditor } from '@univerjs/docs-ui';
@@ -50,7 +51,7 @@ export interface IRangeSelectorProps extends IRichTextEditorProps {
      * always return range ref with sheet name, default: false
      */
     keepSheetReference?: boolean;
-    selectorRef?: React.RefObject<IRangeSelectorInstance | null>;
+    selectorRef?: RefObject<IRangeSelectorInstance | null>;
     onVerify?: (res: boolean, rangeText: string) => void;
     onRangeSelectorDialogVisibleChange?: (visible: boolean) => void;
     hideEditor?: boolean;

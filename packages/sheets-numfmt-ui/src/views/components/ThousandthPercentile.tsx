@@ -19,12 +19,13 @@ import { isPatternEqualWithoutDecimal, LocaleService } from '@univerjs/core';
 import { InputNumber, SelectList } from '@univerjs/design';
 import { getDecimalFromPattern, getNumberFormatOptions, isPatternHasDecimal, setPatternDecimal } from '@univerjs/sheets-numfmt';
 import { useDependency } from '@univerjs/ui';
-import { useMemo, useState } from 'react';
+import { useLayoutEffect, useMemo, useState } from 'react';
 
 export const isThousandthPercentilePanel = (pattern: string) =>
     getNumberFormatOptions().some((item) => isPatternEqualWithoutDecimal(item.value, pattern));
 
 export function ThousandthPercentilePanel(props: IBusinessComponentProps) {
+    const { onActionChange, onChange } = props;
     const localeService = useDependency(LocaleService);
 
     const options = useMemo(getNumberFormatOptions, []);
@@ -41,7 +42,7 @@ export function ThousandthPercentilePanel(props: IBusinessComponentProps) {
 
     const handleDecimalChange = (decimal: number | null) => {
         setDecimal(decimal || 0);
-        props.onChange(setPatternDecimal(suffix, Number(decimal || 0)));
+        onChange(setPatternDecimal(suffix, Number(decimal || 0)));
     };
     const handleClick = (v: any) => {
         if (v === undefined) {
@@ -49,10 +50,12 @@ export function ThousandthPercentilePanel(props: IBusinessComponentProps) {
         }
         setDecimal(getDecimalFromPattern(v, 0));
         setSuffix(v);
-        props.onChange(v);
+        onChange(v);
     };
 
-    props.action.current = () => pattern;
+    useLayoutEffect(() => {
+        onActionChange(() => pattern);
+    }, [onActionChange, pattern]);
 
     return (
         <div>

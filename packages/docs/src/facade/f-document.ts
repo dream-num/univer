@@ -60,6 +60,7 @@ export class FDocument extends FBaseInitialable {
     ) {
         super(_injector);
 
+        normalizeDocumentParagraphIds(this._documentDataModel.getSnapshot());
         this.id = this._documentDataModel.getUnitId();
     }
 

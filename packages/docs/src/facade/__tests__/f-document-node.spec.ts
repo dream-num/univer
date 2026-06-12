@@ -225,10 +225,21 @@ describe('FDocument facade in Node', () => {
     });
 
     it('normalizes paragraph ids when saving an old snapshot without pre-normalized ids', () => {
-        const oldSnapshot = createSimpleDocument();
+        const oldSnapshot = createDocumentData('legacy-doc', {
+            dataStream: 'Alpha\rBeta\rGamma\r\n',
+            paragraphs: [
+                { startIndex: 5 },
+                { startIndex: 10 },
+                { startIndex: 16 },
+            ],
+            sectionBreaks: [{ startIndex: 17 }],
+        });
         const saveUnit = vi.fn(() => oldSnapshot);
         const legacyDocument = new FDocument(
-            { getUnitId: () => 'legacy-doc' } as never,
+            {
+                getSnapshot: () => ({ id: 'legacy-doc', documentStyle: {} }),
+                getUnitId: () => 'legacy-doc',
+            } as never,
             {} as never,
             {} as never,
             { saveUnit } as never,
@@ -240,6 +251,33 @@ describe('FDocument facade in Node', () => {
         expect(saveUnit).toHaveBeenCalledWith('legacy-doc');
         expect(savedParagraphs?.map((paragraph) => paragraph.startIndex)).toEqual([5, 10, 16]);
         expectParagraphIds(savedParagraphs);
+    });
+
+    it('normalizes live paragraph ids before creating body facade wrappers', () => {
+        const oldSnapshot = createDocumentData('legacy-doc', {
+            dataStream: 'Legacy\r\n',
+            paragraphs: [{ startIndex: 6 }],
+            sectionBreaks: [{ startIndex: 7 }],
+        });
+        const model = {
+            getUnitId: () => 'legacy-doc',
+            getSnapshot: () => oldSnapshot,
+            getSelfOrHeaderFooterModel: () => ({
+                getBody: () => oldSnapshot.body,
+            }),
+        };
+        const legacyDocument = new FDocument(
+            model as never,
+            {} as never,
+            {} as never,
+            {} as never,
+            {} as never
+        );
+
+        const paragraph = legacyDocument.getBody().getChild(0).asParagraph();
+
+        expect(paragraph.getId()).toMatch(/^para_/);
+        expect(oldSnapshot.body?.paragraphs?.[0].paragraphId).toBe(paragraph.getId());
     });
 
     it('runs FDocBody paragraph and range APIs in Node', () => {

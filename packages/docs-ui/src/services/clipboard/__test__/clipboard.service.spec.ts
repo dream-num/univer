@@ -31,10 +31,10 @@ describe('DocClipboardService table copy helpers', () => {
         const body: IDocumentBody = {
             dataStream,
             paragraphs: [
-                { startIndex: 5 },
-                { startIndex: tableStart + tokens.TABLE_START.length + tokens.TABLE_ROW_START.length + tokens.TABLE_CELL_START.length + 1 },
-                { startIndex: tableStart + tokens.TABLE_START.length + tokens.TABLE_ROW_START.length + tokens.TABLE_CELL_START.length + 'A\r\n'.length + tokens.TABLE_CELL_END.length + tokens.TABLE_CELL_START.length + 1 },
-                { startIndex: dataStream.length - 1 },
+                { paragraphId: 'para_docs_ui_fixture_46', startIndex: 5 },
+                { paragraphId: 'para_docs_ui_fixture_47', startIndex: tableStart + tokens.TABLE_START.length + tokens.TABLE_ROW_START.length + tokens.TABLE_CELL_START.length + 1 },
+                { paragraphId: 'para_docs_ui_fixture_48', startIndex: tableStart + tokens.TABLE_START.length + tokens.TABLE_ROW_START.length + tokens.TABLE_CELL_START.length + 'A\r\n'.length + tokens.TABLE_CELL_END.length + tokens.TABLE_CELL_START.length + 1 },
+                { paragraphId: 'para_docs_ui_fixture_49', startIndex: dataStream.length - 1 },
             ],
             sectionBreaks: [],
             tables: [{

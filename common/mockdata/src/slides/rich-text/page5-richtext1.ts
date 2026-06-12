@@ -87,9 +87,11 @@ export const PAGE5_RICHTEXT_1: IDocumentData = {
         ],
         paragraphs: [
             {
+                paragraphId: 'para_common_mockdata_src_slides_rich_text_page5_richtext1_1',
                 startIndex: 67,
             },
             {
+                paragraphId: 'para_common_mockdata_src_slides_rich_text_page5_richtext1_2',
                 startIndex: 253,
                 paragraphStyle: {
                     spaceAbove: { v: 20 },
@@ -97,6 +99,7 @@ export const PAGE5_RICHTEXT_1: IDocumentData = {
                 },
             },
             {
+                paragraphId: 'para_common_mockdata_src_slides_rich_text_page5_richtext1_3',
                 startIndex: 404,
                 paragraphStyle: {
                     spaceAbove: { v: 20 },
@@ -104,6 +107,7 @@ export const PAGE5_RICHTEXT_1: IDocumentData = {
                 },
             },
             {
+                paragraphId: 'para_common_mockdata_src_slides_rich_text_page5_richtext1_4',
                 startIndex: 433,
                 bullet: {
                     listType: PresetListType.BULLET_LIST,
@@ -118,6 +122,7 @@ export const PAGE5_RICHTEXT_1: IDocumentData = {
                 },
             },
             {
+                paragraphId: 'para_common_mockdata_src_slides_rich_text_page5_richtext1_5',
                 startIndex: 484,
                 bullet: {
                     listType: PresetListType.BULLET_LIST,
@@ -132,6 +137,7 @@ export const PAGE5_RICHTEXT_1: IDocumentData = {
                 },
             },
             {
+                paragraphId: 'para_common_mockdata_src_slides_rich_text_page5_richtext1_6',
                 startIndex: 516,
                 bullet: {
                     listType: PresetListType.BULLET_LIST,

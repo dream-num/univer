@@ -37,22 +37,16 @@ function getTestBody() {
             },
         ],
         paragraphs: [
-            {
-                startIndex: 4,
-                paragraphStyle: {
-                    spaceAbove: { v: 10 },
-                    lineSpacing: 2,
-                    spaceBelow: { v: 0 },
-                },
-            },
-            {
-                startIndex: 11,
-                paragraphStyle: {
-                    spaceAbove: { v: 10 },
-                    lineSpacing: 2,
-                    spaceBelow: { v: 0 },
-                },
-            },
+            { paragraphId: 'para_docs_ui_fixture_65', startIndex: 4, paragraphStyle: {
+                spaceAbove: { v: 10 },
+                lineSpacing: 2,
+                spaceBelow: { v: 0 },
+            } },
+            { paragraphId: 'para_docs_ui_fixture_66', startIndex: 11, paragraphStyle: {
+                spaceAbove: { v: 10 },
+                lineSpacing: 2,
+                spaceBelow: { v: 0 },
+            } },
         ],
     } as IDocumentBody;
 }
@@ -75,12 +69,9 @@ describe('test case in html and udm convert', () => {
                     },
                 ],
                 paragraphs: [
-                    {
-                        startIndex: 13,
-                        paragraphStyle: {
-                            horizontalAlign: 0,
-                        },
-                    },
+                    { paragraphId: 'para_docs_ui_fixture_67', startIndex: 13, paragraphStyle: {
+                        horizontalAlign: 0,
+                    } },
                 ],
             },
         ];
@@ -152,8 +143,8 @@ describe('test case in html and udm convert', () => {
             body: {
                 dataStream,
                 paragraphs: [
-                    { startIndex: prefix.length - 1 },
-                    { startIndex: tableStart + tokens.TABLE_START.length + tokens.TABLE_ROW_START.length + tokens.TABLE_CELL_START.length + cellText.length },
+                    { paragraphId: 'para_docs_ui_fixture_68', startIndex: prefix.length - 1 },
+                    { paragraphId: 'para_docs_ui_fixture_69', startIndex: tableStart + tokens.TABLE_START.length + tokens.TABLE_ROW_START.length + tokens.TABLE_CELL_START.length + cellText.length },
                 ],
                 sectionBreaks: [],
                 tables: [{
@@ -184,15 +175,10 @@ describe('test case in html and udm convert', () => {
             body: {
                 dataStream,
                 paragraphs: [
-                    {
-                        startIndex: title.length,
-                        paragraphStyle: {
-                            namedStyleType: NamedStyleType.TITLE,
-                        },
-                    },
-                    {
-                        startIndex: dataStream.length - 2,
-                    },
+                    { paragraphId: 'para_docs_ui_fixture_70', startIndex: title.length, paragraphStyle: {
+                        namedStyleType: NamedStyleType.TITLE,
+                    } },
+                    { paragraphId: 'para_docs_ui_fixture_71', startIndex: dataStream.length - 2 },
                 ],
                 sectionBreaks: [],
                 blockRanges: [{
@@ -216,17 +202,14 @@ describe('test case in html and udm convert', () => {
             documentStyle: {},
             body: {
                 dataStream: `${title}\r\n`,
-                paragraphs: [{
-                    startIndex: title.length,
-                    paragraphStyle: {
-                        textStyle: {
-                            fs: 22,
-                            bl: BooleanNumber.TRUE,
-                            cl: { rgb: '#4B5563' },
-                            ff: 'Arial',
-                        },
+                paragraphs: [{ paragraphId: 'para_docs_ui_fixture_72', startIndex: title.length, paragraphStyle: {
+                    textStyle: {
+                        fs: 22,
+                        bl: BooleanNumber.TRUE,
+                        cl: { rgb: '#4B5563' },
+                        ff: 'Arial',
                     },
-                }],
+                } }],
                 sectionBreaks: [],
             },
         });

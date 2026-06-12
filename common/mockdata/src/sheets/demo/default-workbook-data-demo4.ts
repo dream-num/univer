@@ -45,6 +45,7 @@ const richTextDemo1: IDocumentData = {
         ],
         paragraphs: [
             {
+                paragraphId: 'para_common_mockdata_src_sheets_demo_default_workbook_data_demo4_1',
                 startIndex: 10,
             },
         ],

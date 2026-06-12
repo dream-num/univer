@@ -15,7 +15,7 @@
  */
 
 import type { IDocumentData, IParagraph, ISectionBreak, ITable, ITableCell, ITableColumn, ITableRow } from '@univerjs/core';
-import { BooleanNumber, DocumentFlavor, HorizontalAlign, ObjectRelativeFromH, ObjectRelativeFromV, TableAlignmentType, TableRowHeightRule, TableSizeType, TableTextWrapType, Tools, VerticalAlignmentType } from '@univerjs/core';
+import { BooleanNumber, createParagraphId, DocumentFlavor, HorizontalAlign, ObjectRelativeFromH, ObjectRelativeFromV, TableAlignmentType, TableRowHeightRule, TableSizeType, TableTextWrapType, Tools, VerticalAlignmentType } from '@univerjs/core';
 import { ptToPixel } from '@univerjs/engine-render';
 
 const TABLE_START = '\x1A'; // 表格开始
@@ -66,11 +66,13 @@ const endIndex = tableStream.length + startIndex;
 function createParagraphAndSectionBreaks(dataStream: string) {
     const paragraphs: IParagraph[] = [];
     const sectionBreaks: ISectionBreak[] = [];
+    const existingParagraphIds = new Set<string>();
     for (let i = 0; i < dataStream.length; i++) {
         const char = dataStream[i];
         if (char === '\r') {
             paragraphs.push({
                 startIndex: i,
+                paragraphId: createParagraphId(existingParagraphIds),
                 paragraphStyle: {
                     spaceAbove: { v: 5 },
                     lineSpacing: 2,

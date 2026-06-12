@@ -50,6 +50,7 @@ export const PAGE3_RICHTEXT_1 = {
                 ],
                 paragraphs: [
                     {
+                        paragraphId: 'para_common_mockdata_src_slides_rich_text_page3_richtext1_1',
                         startIndex: 21,
                         bullet: {
                             listType: PresetListType.ORDER_LIST,
@@ -64,6 +65,7 @@ export const PAGE3_RICHTEXT_1 = {
                         },
                     },
                     {
+                        paragraphId: 'para_common_mockdata_src_slides_rich_text_page3_richtext1_2',
                         startIndex: 43,
                         bullet: {
                             listType: PresetListType.ORDER_LIST,

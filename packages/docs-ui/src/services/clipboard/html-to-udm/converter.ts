@@ -18,6 +18,7 @@ import type { IDocumentBody, IDocumentData, IParagraph, ITable, ITableCell, ITab
 import type { IAfterProcessRule, IPastePlugin, IStyleRule } from './paste-plugins/type';
 import {
     ColorKit,
+    createParagraphId,
     CustomRangeType,
     DataStreamTreeTokenType,
     DocumentBlockRangeType,
@@ -101,6 +102,10 @@ export class HtmlToUDMService {
     private _listStack: IListContext[] = [];
 
     private _lastParagraphIndex = -1;
+
+    private _createParagraphId(body: IDocumentBody): string {
+        return createParagraphId(new Set(body.paragraphs?.map((paragraph) => paragraph.paragraphId)));
+    }
 
     convert(html: string, metaConfig: { unitId?: string } = {}): Partial<IDocumentData> {
         const pastePlugin = HtmlToUDMService._pluginList.find((plugin) => plugin.checkPasteType(html));
@@ -346,6 +351,7 @@ export class HtmlToUDMService {
         body.paragraphs ??= [];
         const paragraph: IParagraph = {
             startIndex: body.dataStream.length,
+            paragraphId: this._createParagraphId(body),
         };
 
         const heading = getHeadingNamedStyleType(node);
@@ -398,6 +404,7 @@ export class HtmlToUDMService {
             body.paragraphs ??= [];
             body.paragraphs.push({
                 startIndex: body.dataStream.length - 1,
+                paragraphId: this._createParagraphId(body),
             });
         }
 
@@ -492,6 +499,7 @@ export class HtmlToUDMService {
 
                     body.paragraphs?.push({
                         startIndex: body.dataStream.length - 1,
+                        paragraphId: this._createParagraphId(body),
                     });
                 }
 
@@ -585,6 +593,7 @@ export class HtmlToUDMService {
                 if (body.dataStream[body.dataStream.length - 1] !== '\r') {
                     body.paragraphs?.push({
                         startIndex: body.dataStream.length,
+                        paragraphId: this._createParagraphId(body),
                     });
 
                     body.dataStream += '\r';

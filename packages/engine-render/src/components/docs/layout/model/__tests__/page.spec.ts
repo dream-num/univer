@@ -234,7 +234,7 @@ describe('page model', () => {
             dataModel: {
                 getBody: () => ({
                     blockRanges: [{ blockId: 'callout-1', blockType: DocumentBlockRangeType.CALLOUT, startIndex: 10, endIndex: 14 }],
-                    paragraphs: [{ startIndex: 12 }],
+                    paragraphs: [{ startIndex: 12, paragraphId: 'para_page_header' }],
                 }),
             },
             layoutStartPointer: {},
@@ -312,7 +312,10 @@ describe('page model', () => {
             dataModel: {
                 getBody: () => ({
                     blockRanges: [{ blockId: 'callout-1', blockType: DocumentBlockRangeType.CALLOUT, startIndex: 10, endIndex: 14 }],
-                    paragraphs: [{ startIndex: 12 }, { startIndex: 15 }],
+                    paragraphs: [
+                        { startIndex: 12, paragraphId: 'para_page_header_1' },
+                        { startIndex: 15, paragraphId: 'para_page_header_2' },
+                    ],
                 }),
             },
             layoutStartPointer: {},

@@ -289,10 +289,10 @@ describe('test case in html and udm convert', () => {
                         { blockId: 'callout-1', blockType: DocumentBlockRangeType.CALLOUT, startIndex: 11, endIndex: 18 },
                     ],
                     paragraphs: [
-                        { startIndex: 5 },
-                        { startIndex: 10 },
-                        { startIndex: 18 },
-                        { startIndex: 23, bullet: { listId: 'list-1', listType: 'ORDER_LIST', nestingLevel: 0 } },
+                        { paragraphId: 'para_docs_ui_fixture_50', startIndex: 5 },
+                        { paragraphId: 'para_docs_ui_fixture_51', startIndex: 10 },
+                        { paragraphId: 'para_docs_ui_fixture_52', startIndex: 18 },
+                        { paragraphId: 'para_docs_ui_fixture_53', startIndex: 23, bullet: { listId: 'list-1', listType: 'ORDER_LIST', nestingLevel: 0 } },
                     ],
                 },
             }]);
@@ -332,10 +332,10 @@ describe('test case in html and udm convert', () => {
                     dataStream,
                     tables: [{ startIndex: 0, endIndex: dataStream.length, tableId: 'table-1' }],
                     paragraphs: [
-                        { startIndex: 9, paragraphStyle: { horizontalAlign: HorizontalAlign.CENTER } },
-                        { startIndex: 13 },
-                        { startIndex: 21 },
-                        { startIndex: 27 },
+                        { paragraphId: 'para_docs_ui_fixture_54', startIndex: 9, paragraphStyle: { horizontalAlign: HorizontalAlign.CENTER } },
+                        { paragraphId: 'para_docs_ui_fixture_55', startIndex: 13 },
+                        { paragraphId: 'para_docs_ui_fixture_56', startIndex: 21 },
+                        { paragraphId: 'para_docs_ui_fixture_57', startIndex: 27 },
                     ],
                     sectionBreaks: [{ startIndex: 10 }, { startIndex: 14 }, { startIndex: 22 }, { startIndex: 28 }],
                 },
@@ -394,9 +394,9 @@ describe('test case in html and udm convert', () => {
                 body: {
                     dataStream: 'One\rNested\rTwo\r',
                     paragraphs: [
-                        { startIndex: 3, bullet: { listId: 'list-1', listType: 'ORDER_LIST', nestingLevel: 0 } },
-                        { startIndex: 10, bullet: { listId: 'list-1', listType: 'BULLET_LIST', nestingLevel: 1 } },
-                        { startIndex: 14, bullet: { listId: 'list-1', listType: 'ORDER_LIST', nestingLevel: 0 } },
+                        { paragraphId: 'para_docs_ui_fixture_58', startIndex: 3, bullet: { listId: 'list-1', listType: 'ORDER_LIST', nestingLevel: 0 } },
+                        { paragraphId: 'para_docs_ui_fixture_59', startIndex: 10, bullet: { listId: 'list-1', listType: 'BULLET_LIST', nestingLevel: 1 } },
+                        { paragraphId: 'para_docs_ui_fixture_60', startIndex: 14, bullet: { listId: 'list-1', listType: 'ORDER_LIST', nestingLevel: 0 } },
                     ],
                 },
             }]);
@@ -418,16 +418,11 @@ describe('test case in html and udm convert', () => {
                         endIndex: 10,
                         tableId: 'table-1',
                     }],
-                    paragraphs: [{
-                        startIndex: 5,
-                    }, {
-                        startIndex: 19,
-                        bullet: {
-                            listId: 'list-1',
-                            listType: PresetListType.BULLET_LIST,
-                            nestingLevel: 0,
-                        },
-                    }],
+                    paragraphs: [{ paragraphId: 'para_docs_ui_fixture_61', startIndex: 5 }, { paragraphId: 'para_docs_ui_fixture_62', startIndex: 19, bullet: {
+                        listId: 'list-1',
+                        listType: PresetListType.BULLET_LIST,
+                        nestingLevel: 0,
+                    } }],
                 },
                 tableSource: {
                     'table-1': {
@@ -466,9 +461,7 @@ describe('test case in html and udm convert', () => {
                             endIndex: dataStream.length,
                             tableId,
                         }],
-                        paragraphs: [{
-                            startIndex: DataStreamTreeTokenType.TABLE_START.length + DataStreamTreeTokenType.TABLE_ROW_START.length + DataStreamTreeTokenType.TABLE_CELL_START.length + text.length,
-                        }],
+                        paragraphs: [{ paragraphId: 'para_docs_ui_fixture_63', startIndex: DataStreamTreeTokenType.TABLE_START.length + DataStreamTreeTokenType.TABLE_ROW_START.length + DataStreamTreeTokenType.TABLE_CELL_START.length + text.length }],
                     },
                     tableSource: {
                         [tableId]: {
@@ -540,7 +533,7 @@ describe('test case in html and udm convert', () => {
             const fragment = createInternalClipboardFragment({
                 body: {
                     dataStream: 'Internal\r',
-                    paragraphs: [{ startIndex: 8 }],
+                    paragraphs: [{ paragraphId: 'para_docs_ui_fixture_64', startIndex: 8 }],
                 },
             });
             const html = wrapClipboardHtml(embedInternalClipboardFragment('<p>Internal</p>', fragment));

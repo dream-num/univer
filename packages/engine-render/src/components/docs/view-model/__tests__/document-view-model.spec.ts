@@ -202,7 +202,7 @@ describe('DocumentViewModel', () => {
                 body: {
                     dataStream: bodyStream,
                     textRuns: [{ st: 0, ed: 2, ts: {} }],
-                    paragraphs: [{ startIndex: 0 }],
+                    paragraphs: [{ startIndex: 0, paragraphId: 'para_view_model_header' }],
                     sectionBreaks: [{ startIndex: 2 }],
                     customBlocks: [{ startIndex: 1, blockId: 'b1' }],
                     customRanges: [{ startIndex: 0, endIndex: 1, rangeId: 'r1' }],
@@ -262,7 +262,7 @@ describe('DocumentViewModel', () => {
                 body: {
                     dataStream: `Z${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`,
                     textRuns: [{ st: 0, ed: 1, ts: { fs: 14 } }],
-                    paragraphs: [{ startIndex: 0 }],
+                    paragraphs: [{ startIndex: 0, paragraphId: 'para_view_model_footer' }],
                     sectionBreaks: [{ startIndex: 1 }],
                     customBlocks: [],
                     customRanges: [],

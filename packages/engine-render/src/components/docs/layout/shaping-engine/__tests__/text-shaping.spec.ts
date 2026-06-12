@@ -51,6 +51,7 @@ function getDocumentBody(): IDocumentBody {
         paragraphs: [
             {
                 startIndex: 4,
+                paragraphId: 'para_text_shaping_1',
                 paragraphStyle: {
                     spaceAbove: { v: 10 },
                     lineSpacing: 2,
@@ -59,6 +60,7 @@ function getDocumentBody(): IDocumentBody {
             },
             {
                 startIndex: 36,
+                paragraphId: 'para_text_shaping_2',
                 paragraphStyle: {
                     spaceAbove: { v: 10 },
                     lineSpacing: 2,

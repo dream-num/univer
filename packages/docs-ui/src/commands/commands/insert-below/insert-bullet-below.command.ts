@@ -16,7 +16,7 @@
 
 import type { DocumentDataModel, ICommand, IDocumentBody, IMutationInfo, PresetListType } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import { BuildTextUtils, CommandType, getRichTextEditPath, ICommandService, IUniverInstanceService, JSONX, UniverInstanceType } from '@univerjs/core';
+import { BuildTextUtils, CommandType, createParagraphId, getRichTextEditPath, ICommandService, IUniverInstanceService, JSONX, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 
 interface IInsertBulletBelowCommandParams {
@@ -56,6 +56,7 @@ export const InsertBulletBelowCommand: ICommand<IInsertBulletBelowCommandParams>
             dataStream: '\r',
             paragraphs: [{
                 startIndex: 0,
+                paragraphId: createParagraphId(new Set(paragraphs.map((paragraph) => paragraph.paragraphId))),
                 bullet: {
                     listType,
                     listId: listType === currentParagraph.bullet?.listType ? currentParagraph.bullet.listId : '',

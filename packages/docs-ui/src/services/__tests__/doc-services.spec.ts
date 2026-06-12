@@ -37,11 +37,7 @@ function createDocData(): IDocumentData {
                 ed: 22,
                 ts: {},
             }],
-            paragraphs: [{
-                startIndex: 11,
-            }, {
-                startIndex: 23,
-            }],
+            paragraphs: [{ paragraphId: 'para_docs_ui_fixture_44', startIndex: 11 }, { paragraphId: 'para_docs_ui_fixture_45', startIndex: 23 }],
             sectionBreaks: [{
                 startIndex: 24,
             }],

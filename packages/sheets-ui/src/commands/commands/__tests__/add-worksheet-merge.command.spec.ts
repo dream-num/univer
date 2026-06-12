@@ -400,12 +400,9 @@ describe('Test add worksheet merge commands', () => {
                                         },
                                     ],
                                     paragraphs: [
-                                        {
-                                            startIndex: 6,
-                                            paragraphStyle: {
-                                                horizontalAlign: 0,
-                                            },
-                                        },
+                                        { paragraphId: 'para_sheets_ui_fixture_1', startIndex: 6, paragraphStyle: {
+                                            horizontalAlign: 0,
+                                        } },
                                     ],
                                     sectionBreaks: [
                                         {

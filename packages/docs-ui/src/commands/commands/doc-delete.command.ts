@@ -513,7 +513,7 @@ export const DeleteLeftCommand: ICommand = {
 
             const paragraphIndex = paragraph?.startIndex;
 
-            const updateParagraph: IParagraph = { startIndex: 0 };
+            const updateParagraph: IParagraph = { startIndex: 0, paragraphId: paragraph.paragraphId };
 
             const paragraphStyle = paragraph.paragraphStyle;
 

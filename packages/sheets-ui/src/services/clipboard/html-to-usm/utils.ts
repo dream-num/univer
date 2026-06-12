@@ -16,7 +16,7 @@
 
 import type { IParagraph, IParagraphStyle, ITextRun, Nullable } from '@univerjs/core';
 import type { ICellDataWithSpanInfo } from '../type';
-import { DataStreamTreeTokenType, Tools } from '@univerjs/core';
+import { createParagraphId, DataStreamTreeTokenType, Tools } from '@univerjs/core';
 import { ptToPixel } from '@univerjs/engine-render';
 import { sanitizeParsedHtml } from '@univerjs/ui';
 
@@ -96,6 +96,7 @@ export function getParagraphStyle(el: HTMLElement): Nullable<IParagraphStyle> {
 
 export function generateParagraphs(dataStream: string, prevParagraph?: IParagraph): IParagraph[] {
     const paragraphs: IParagraph[] = [];
+    const existingParagraphIds = new Set<string>();
 
     for (let i = 0, len = dataStream.length; i < len; i++) {
         const char = dataStream[i];
@@ -106,6 +107,7 @@ export function generateParagraphs(dataStream: string, prevParagraph?: IParagrap
 
         paragraphs.push({
             startIndex: i,
+            paragraphId: createParagraphId(existingParagraphIds),
         });
     }
 

@@ -219,6 +219,7 @@ describe('Test clipboard', () => {
             expect(richTextStyle?.body?.dataStream).toBe('Univer\r\n');
             expect(richTextStyle?.body?.paragraphs).toStrictEqual([
                 {
+                    paragraphId: expect.stringMatching(/^para_/),
                     paragraphStyle: {
                         horizontalAlign: 0,
                     },

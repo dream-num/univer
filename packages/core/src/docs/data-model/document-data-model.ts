@@ -20,7 +20,7 @@ import type { IPaddingData } from '../../types/interfaces/i-style-data';
 import type { JSONXActions } from './json-x/json-x';
 import { BehaviorSubject } from 'rxjs';
 import { UnitModel, UniverInstanceType } from '../../common/unit';
-import { generateRandomId, Tools } from '../../shared/tools';
+import { generateRandomId } from '../../shared/tools';
 import { getEmptySnapshot } from './empty-snapshot';
 import { JSONX } from './json-x/json-x';
 import { PRESET_LIST_TYPE } from './preset-list-type';
@@ -31,6 +31,20 @@ export const DEFAULT_DOC = {
     id: 'default_doc',
     documentStyle: {},
 };
+
+function normalizeDocumentSnapshot(snapshot: Partial<IDocumentData>): Partial<IDocumentData> {
+    if (snapshot.body != null) {
+        return snapshot;
+    }
+
+    const emptySnapshot = getEmptySnapshot(snapshot.id, snapshot.locale, snapshot.title);
+
+    return {
+        ...emptySnapshot,
+        ...snapshot,
+        body: emptySnapshot.body,
+    };
+}
 
 interface IDrawingUpdateConfig {
     left: number;
@@ -238,7 +252,7 @@ export class DocumentDataModel extends DocumentDataModelSimple {
     change$ = new BehaviorSubject<number>(0);
 
     constructor(snapshot: Partial<IDocumentData>) {
-        super(Tools.isEmptyObject(snapshot) ? getEmptySnapshot() : snapshot);
+        super(normalizeDocumentSnapshot(snapshot));
 
         const UNIT_ID_LENGTH = 6;
 

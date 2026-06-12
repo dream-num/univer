@@ -58,16 +58,6 @@ export { mergeSets } from './common/set';
 export { UnitModel, UniverInstanceType } from './common/unit';
 export { isSafeUrl, normalizeUrl, resolveWithBasePath } from './common/url';
 export * from './docs/data-model';
-export {
-    cloneBodyWithFreshParagraphIds,
-    cloneParagraphWithId,
-    createParagraphId,
-    ensureUniqueParagraphIds,
-    normalizeBodyParagraphIds,
-    normalizeDocumentParagraphIds,
-    PARAGRAPH_ID_PREFIX,
-    type IParagraphIdScope,
-} from './docs/paragraph-id';
 export { JSON1, JSONX } from './docs/data-model/json-x/json-x';
 export type { JSONXActions, JSONXPath } from './docs/data-model/json-x/json-x';
 export { replaceInDocumentBody } from './docs/data-model/replacement';
@@ -109,6 +99,16 @@ export {
     normalizeBody,
     SliceBodyType,
 } from './docs/data-model/text-x/utils';
+export {
+    cloneBodyWithFreshParagraphIds,
+    cloneParagraphWithId,
+    createParagraphId,
+    ensureUniqueParagraphIds,
+    normalizeBodyParagraphIds,
+    normalizeDocumentParagraphIds,
+    PARAGRAPH_ID_PREFIX,
+    type IParagraphIdScope,
+} from './docs/paragraph-id';
 export { EventState, EventSubject, fromEventSubject, type IEventObserver } from './observer/observable';
 export { AuthzIoLocalService } from './services/authz-io/authz-io-local.service';
 export { IAuthzIoService } from './services/authz-io/type';

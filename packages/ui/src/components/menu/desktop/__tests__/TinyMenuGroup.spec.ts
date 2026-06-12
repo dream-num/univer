@@ -126,6 +126,32 @@ describe('TinyMenuGroup', () => {
         }));
     });
 
+    it('passes a primary color channel to tiny menu icons', () => {
+        const item = {
+            key: 'quick',
+            order: 0,
+            children: [{
+                key: 'reset-color',
+                order: 0,
+                item: {
+                    id: 'doc.command.reset-inline-format-text-color',
+                    type: MenuItemType.BUTTON,
+                    icon: 'NoColorDoubleIcon',
+                    hidden$: of(false),
+                    activated$: of(false),
+                },
+            }],
+        } as never;
+
+        render(React.createElement(UITinyMenuGroup, { item }));
+
+        const props = designTinyMenuGroupSpy.mock.calls[0][0] as {
+            items: Array<{ iconExtend?: { colorChannel1?: string } }>;
+        };
+
+        expect(props.items[0].iconExtend).toEqual({ colorChannel1: 'var(--univer-primary-600)' });
+    });
+
     it('passes fixed column layout through to the tiny menu renderer', () => {
         const item = {
             key: 'quick',

@@ -63,7 +63,7 @@ export class DocContextMenuRenderController extends Disposable implements IRende
         // Content range context menu
         const documentsSubscription = documentsPointerDownObserver.subscribeEvent((event) => {
             if (event.button === 2) {
-                if (this._docEventManagerService.isPointerOnBullet(event.offsetX, event.offsetY)) {
+                if (this._docEventManagerService.isPointerOnNonChecklistBullet(event.offsetX, event.offsetY)) {
                     return;
                 }
                 if (this._isSelectionInCodeBlock()) {

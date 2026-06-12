@@ -198,6 +198,21 @@ export const SetInlineFormatTextColorCommand: ICommand = {
     },
 };
 
+const ResetInlineFormatTextColorCommandId = 'doc.command.reset-inline-format-text-color';
+export const ResetInlineFormatTextColorCommand: ICommand = {
+    id: ResetInlineFormatTextColorCommandId,
+    type: CommandType.COMMAND,
+    handler: async (accessor, params) => {
+        const commandService = accessor.get(ICommandService);
+
+        return handleInlineFormat(
+            ResetInlineFormatTextColorCommandId,
+            params,
+            commandService
+        );
+    },
+};
+
 const SetInlineFormatTextFillCommandId = 'doc.command.set-inline-format-text-fill';
 export const SetInlineFormatTextFillCommand: ICommand = {
     id: SetInlineFormatTextFillCommandId,
@@ -251,6 +266,7 @@ const COMMAND_ID_TO_FORMAT_KEY_MAP: Record<string, keyof IStyleBase> = {
     [SetInlineFormatFontSizeCommand.id]: 'fs',
     [SetInlineFormatFontFamilyCommand.id]: 'ff',
     [SetInlineFormatTextColorCommand.id]: 'cl',
+    [ResetInlineFormatTextColorCommand.id]: 'cl',
     [SetInlineFormatTextBackgroundColorCommand.id]: 'bg',
     [ResetInlineFormatTextBackgroundColorCommand.id]: 'bg',
     [SetInlineFormatSubscriptCommand.id]: 'va',
@@ -337,6 +353,7 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
                 break;
             }
 
+            case ResetInlineFormatTextColorCommand.id:
             case ResetInlineFormatTextBackgroundColorCommand.id: {
                 formatValue = {
                     rgb: null,

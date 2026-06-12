@@ -20,7 +20,7 @@ import { describe, expect, it } from 'vitest';
 import { DocCopyCurrentParagraphCommand, DocCutCurrentParagraphCommand } from '../../commands/commands/clipboard.command';
 import { DeleteCurrentParagraphCommand } from '../../commands/commands/doc-delete.command';
 import { HorizontalLineCommand, InsertHorizontalLineBellowCommand } from '../../commands/commands/doc-horizontal-line.command';
-import { ResetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand } from '../../commands/commands/inline-format.command';
+import { ResetInlineFormatTextBackgroundColorCommand, ResetInlineFormatTextColorCommand, SetInlineFormatTextColorCommand } from '../../commands/commands/inline-format.command';
 import { BulletListCommand, CheckListCommand, InsertBulletListBellowCommand, InsertCheckListBellowCommand, InsertOrderListBellowCommand, OrderListCommand } from '../../commands/commands/list.command';
 import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignOperationCommand, AlignRightCommand } from '../../commands/commands/paragraph-align.command';
 import { H1HeadingCommand, H2HeadingCommand, H3HeadingCommand, H4HeadingCommand, H5HeadingCommand, NormalTextHeadingCommand, SetParagraphNamedStyleCommand, SubtitleHeadingCommand, TitleHeadingCommand } from '../../commands/commands/set-heading.command';
@@ -306,6 +306,7 @@ describe('docs ui ribbon schema', () => {
         expect(colorsMenu.text.quickColumns).toBe(8);
         expect(colorsMenu.text.quickLayoutVariant).toBe('compact');
         expect(colorsMenu.text[`${SetInlineFormatTextColorCommand.id}.default`].menuItemFactory).toBe(ParagraphMenuDefaultTextColorMenuItemFactory);
+        expect(colorsMenu.text[ResetInlineFormatTextColorCommand.id].menuItemFactory).toBeDefined();
         expect(colorsMenu.backgroundTop.title).toBe('docs-ui.toolbar.fillColor.main');
         expect(colorsMenu.backgroundTop.headerActionMenuItemFactory).toBe(ParagraphMenuBackgroundColorHeaderActionMenuItemFactory);
         expect(colorsMenu.backgroundTop.quickLayout).toBe('icon');
@@ -319,6 +320,10 @@ describe('docs ui ribbon schema', () => {
         expect(Object.keys(colorsMenu.text).filter((key) => key.startsWith('doc.menu.paragraph-t.text-color.'))).toHaveLength(7);
         expect(Object.keys(colorsMenu.backgroundTop).filter((key) => key.startsWith('doc.menu.paragraph-t.background-color.'))).toHaveLength(7);
         expect(Object.keys(colorsMenu.backgroundBottom).filter((key) => key.startsWith('doc.menu.paragraph-t.background-color.'))).toHaveLength(8);
+
+        const format = (menuSchema as any)[RibbonStartGroup.FORMAT];
+        expect(format[SetInlineFormatTextColorCommand.id][ResetInlineFormatTextColorCommand.id].menuItemFactory).toBeDefined();
+        expect(format[SetInlineFormatTextColorCommand.id][ResetInlineFormatTextColorCommand.id].order).toBe(0);
 
         expect(insertBelowMenu.quickTop.quickLayout).toBe('icon');
         expect(insertBelowMenu.quickBottom.quickLayout).toBe('icon');

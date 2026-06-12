@@ -39,7 +39,7 @@ import { Observable } from 'rxjs';
 import { DocCopyCommand, DocCopyCurrentParagraphCommand, DocCutCurrentParagraphCommand, DocPasteCommand } from '../commands/commands/clipboard.command';
 import { DeleteCurrentParagraphCommand } from '../commands/commands/doc-delete.command';
 import { HorizontalLineCommand, InsertHorizontalLineBellowCommand } from '../commands/commands/doc-horizontal-line.command';
-import { ResetInlineFormatTextBackgroundColorCommand, SetInlineFormatFontSizeCommand, SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand } from '../commands/commands/inline-format.command';
+import { ResetInlineFormatTextBackgroundColorCommand, ResetInlineFormatTextColorCommand, SetInlineFormatFontSizeCommand, SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand } from '../commands/commands/inline-format.command';
 import { BulletListCommand, CheckListCommand, InsertBulletListBellowCommand, InsertCheckListBellowCommand, InsertOrderListBellowCommand, OrderListCommand } from '../commands/commands/list.command';
 import { H1HeadingCommand, H2HeadingCommand, H3HeadingCommand, H4HeadingCommand, H5HeadingCommand, NormalTextHeadingCommand, SubtitleHeadingCommand, TitleHeadingCommand } from '../commands/commands/set-heading.command';
 import { DocTableDeleteTableCommand } from '../commands/commands/table/doc-table-delete.command';
@@ -774,6 +774,13 @@ export const ParagraphMenuNoBackgroundMenuItemFactory = createStaticButtonMenuIt
     id: ResetInlineFormatTextBackgroundColorCommand.id,
     icon: 'NoColorDoubleIcon',
     title: 'docs-ui.paragraphMenu.noBackground',
+});
+
+export const ParagraphMenuResetTextColorMenuItemFactory = createStaticButtonMenuItemFactory({
+    id: ResetInlineFormatTextColorCommand.id,
+    icon: 'NoColorDoubleIcon',
+    title: 'docs-ui.toolbar.resetColor',
+    tooltip: 'docs-ui.toolbar.resetColor',
 });
 
 export const ParagraphMenuResetColorsMenuItemFactory = createStaticButtonMenuItemFactory({

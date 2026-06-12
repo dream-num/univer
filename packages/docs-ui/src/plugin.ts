@@ -48,6 +48,7 @@ import { DocSelectAllCommand } from './commands/commands/doc-select-all.command'
 import { IMEInputCommand } from './commands/commands/ime-input.command';
 import {
     ResetInlineFormatTextBackgroundColorCommand,
+    ResetInlineFormatTextColorCommand,
     SetInlineFormatBoldCommand,
     SetInlineFormatCommand,
     SetInlineFormatFontFamilyCommand,
@@ -212,6 +213,7 @@ export class UniverDocsUIPlugin extends Plugin {
             SetInlineFormatFontSizeCommand,
             SetInlineFormatFontFamilyCommand,
             SetInlineFormatTextColorCommand,
+            ResetInlineFormatTextColorCommand,
             SetInlineFormatTextFillCommand,
             ResetInlineFormatTextBackgroundColorCommand,
             SetInlineFormatTextBackgroundColorCommand,

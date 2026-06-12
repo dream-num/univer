@@ -98,6 +98,13 @@ export function createParagraphMenuHoverOpenScheduler(openMenu: () => void, dela
     };
 }
 
+export function setParagraphMenuInteractionActive(
+    docParagraphMenuService: Pick<DocParagraphMenuService, 'setParagraphMenuActive'> | null | undefined,
+    active: boolean
+): void {
+    docParagraphMenuService?.setParagraphMenuActive(active);
+}
+
 export function isEmptyParagraphMenuTarget(dataStream: string, paragraph?: IMutiPageParagraphBound | null | void): boolean {
     if (!paragraph) {
         return false;
@@ -663,6 +670,7 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
         setVisible(false);
         setOpenMode('pointer');
         targetRangeRef.current = null;
+        setParagraphMenuInteractionActive(docParagraphMenuService, false);
     };
 
     const clearHideTimer = () => {
@@ -684,6 +692,7 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
     const handleOpenMenu = (mode: ParagraphMenuOpenMode = 'pointer') => {
         clearHideTimer();
         const latestTarget = docParagraphMenuService?.activeTarget ?? activeTarget;
+        setParagraphMenuInteractionActive(docParagraphMenuService, true);
         const targetRange = latestTarget
             ? {
                 ...latestTarget.menuRange,
@@ -915,6 +924,7 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
             hideTimerRef.current = null;
         }
         hoverOpenSchedulerRef.current.cancel();
+        setParagraphMenuInteractionActive(docParagraphMenuService, false);
     }, []);
 
     useEffect(() => {
@@ -946,6 +956,7 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
                 })}
                 onMouseEnter={(e) => {
                     popup.onPointerEnter?.(e);
+                    setParagraphMenuInteractionActive(docParagraphMenuService, true);
                     isMouseOver.current = true;
                     scheduleOpenMenu();
                 }}
@@ -1072,6 +1083,7 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
                     // Keep hover continuity when the pointer crosses the tiny dead zone between trigger and popup.
                     onMouseEnter={(e) => {
                         popup.onPointerEnter?.(e);
+                        setParagraphMenuInteractionActive(docParagraphMenuService, true);
                         isMouseOver.current = true;
                         clearHideTimer();
                     }}
@@ -1090,6 +1102,7 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
                     <section
                         onMouseEnter={(e) => {
                             popup.onPointerEnter?.(e);
+                            setParagraphMenuInteractionActive(docParagraphMenuService, true);
                             isMouseOver.current = true;
                             clearHideTimer();
                         }}

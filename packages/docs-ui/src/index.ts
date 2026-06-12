@@ -38,6 +38,7 @@ export { type IIMEInputCommandParams, IMEInputCommand } from './commands/command
 export {
     getStyleInTextRange,
     ResetInlineFormatTextBackgroundColorCommand,
+    ResetInlineFormatTextColorCommand,
     SetInlineFormatBoldCommand,
     SetInlineFormatCommand,
     SetInlineFormatFontFamilyCommand,
@@ -111,7 +112,22 @@ export { DocUIController } from './controllers/doc-ui.controller';
 export { DocBackScrollRenderController } from './controllers/render-controllers/back-scroll.render-controller';
 export { DocParagraphPlaceholderRenderController } from './controllers/render-controllers/doc-paragraph-placeholder.render-controller';
 export { DocRenderController } from './controllers/render-controllers/doc.render-controller';
-export { FLOAT_TEXT_STYLE_MENU_ID, FLOAT_TOOLBAR_MENU_POSITION, hideMenuWhenSelectionInBlockRange, isTextRangeInAnyBlockRange } from './menu/menu';
+export {
+    AlignMenuItemFactory,
+    BackgroundColorSelectorMenuItemFactory,
+    BoldMenuItemFactory,
+    FLOAT_TEXT_STYLE_MENU_ID,
+    FLOAT_TOOLBAR_MENU_POSITION,
+    FloatTextStyleMenuItemFactory,
+    FontFamilySelectorMenuItemFactory,
+    FontSizeSelectorMenuItemFactory,
+    hideMenuWhenSelectionInBlockRange,
+    isTextRangeInAnyBlockRange,
+    ItalicMenuItemFactory,
+    StrikeThroughMenuItemFactory,
+    TextColorSelectorMenuItemFactory,
+    UnderlineMenuItemFactory,
+} from './menu/menu';
 export {
     DOC_CONTENT_INSERT_MENU_ID,
     DOC_PARAGRAPH_T_ALIGN_MENU_ID,
@@ -132,7 +148,7 @@ export * from './services';
 export { IDocClipboardService } from './services/clipboard/clipboard.service';
 export { convertBodyToHtml } from './services/clipboard/udm-to-html/convertor';
 export { DocAutoFormatService } from './services/doc-auto-format.service';
-export { DocEventManagerService, type IBulletBound } from './services/doc-event-manager.service';
+export { DocEventManagerService, getListMarkerFallbackBound, getListParagraphContextMenuHit, type IBulletBound, type IMutiPageParagraphBound } from './services/doc-event-manager.service';
 export { DocIMEInputManagerService } from './services/doc-ime-input-manager.service';
 export { DocParagraphMenuService } from './services/doc-paragraph-menu.service';
 export { calcDocRangePositions, DocCanvasPopManagerService } from './services/doc-popup-manager.service';

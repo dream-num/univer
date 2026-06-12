@@ -15,13 +15,14 @@
  */
 
 import type { IDocumentData, Injector, ITextStyle, Univer } from '@univerjs/core';
-import { CustomRangeType, DocumentFlavor, IUniverInstanceService } from '@univerjs/core';
+import { CustomRangeType, DocumentFlavor, IUniverInstanceService, PresetListType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocumentEditArea } from '@univerjs/engine-render';
 import { Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createCommandTestBed } from '../../commands/commands/__tests__/create-command-test-bed';
 import { DocAutoFormatService } from '../doc-auto-format.service';
+import { getListMarkerFallbackBound, getListMarkerFallbackHit, getListParagraphContextMenuHit, isChecklistListType } from '../doc-event-manager.service';
 import { DocMenuStyleService } from '../doc-menu-style.service';
 import { DocPrintInterceptorService } from '../doc-print-interceptor.service';
 import { DocsRenderService } from '../docs-render.service';
@@ -72,6 +73,67 @@ describe('docs ui services', () => {
 
     afterEach(() => {
         univer?.dispose();
+    });
+
+    it('detects a list marker fallback hit from paragraph bounds without treating body text as marker', () => {
+        const paragraph = {
+            startIndex: 12,
+            bullet: {
+                listId: 'list-1',
+                listType: 'bulletList',
+                nestingLevel: 0,
+            },
+        };
+        const paragraphBound = {
+            firstLine: { bottom: 124, left: 160, right: 460, top: 104 },
+            pageIndex: 0,
+            rect: { bottom: 128, left: 160, right: 460, top: 100 },
+            segmentId: undefined,
+        };
+
+        expect(getListMarkerFallbackBound(paragraphBound, paragraph)).toEqual({
+            paragraph,
+            rect: { bottom: 124, left: 160, right: 196, top: 104 },
+            segmentId: undefined,
+            segmentPageIndex: 0,
+        });
+        expect(getListMarkerFallbackHit(paragraphBound, paragraph, { x: 168, y: 112 })).toEqual({
+            paragraph,
+            rect: { bottom: 124, left: 160, right: 196, top: 104 },
+            segmentId: undefined,
+            segmentPageIndex: 0,
+        });
+        expect(getListMarkerFallbackHit(paragraphBound, paragraph, { x: 240, y: 112 })).toBeNull();
+        expect(getListMarkerFallbackHit(paragraphBound, { startIndex: 12 }, { x: 168, y: 112 })).toBeNull();
+    });
+
+    it('does not treat list paragraph body hits as list marker context menu hits', () => {
+        const paragraph = {
+            startIndex: 12,
+            bullet: {
+                listId: 'list-1',
+                listType: 'bulletList',
+                nestingLevel: 0,
+            },
+        };
+        const paragraphBound = {
+            firstLine: { bottom: 124, left: 160, right: 460, top: 104 },
+            pageIndex: 0,
+            rect: { bottom: 128, left: 160, right: 460, top: 100 },
+            segmentId: undefined,
+        };
+
+        expect(getListMarkerFallbackHit(paragraphBound, paragraph, { x: 260, y: 112 })).toBeNull();
+        expect(getListParagraphContextMenuHit(paragraphBound, paragraph, { x: 260, y: 112 })).toBeNull();
+        expect(getListParagraphContextMenuHit(paragraphBound, paragraph, { x: 260, y: 180 })).toBeNull();
+        expect(getListParagraphContextMenuHit(paragraphBound, { startIndex: 12 }, { x: 260, y: 112 })).toBeNull();
+    });
+
+    it('identifies checklist list types separately from interactive list markers', () => {
+        expect(isChecklistListType(PresetListType.CHECK_LIST)).toBe(true);
+        expect(isChecklistListType(PresetListType.CHECK_LIST_CHECKED)).toBe(true);
+        expect(isChecklistListType(PresetListType.BULLET_LIST)).toBe(false);
+        expect(isChecklistListType(PresetListType.ORDER_LIST)).toBe(false);
     });
 
     it('matches auto-format handlers by priority and builds context from the current selection', () => {

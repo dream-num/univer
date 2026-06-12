@@ -21,7 +21,7 @@ import { DeleteCurrentParagraphCommand, DeleteLeftCommand } from '../commands/co
 import { OpenHeaderFooterPanelCommand } from '../commands/commands/doc-header-footer.command';
 import { HorizontalLineCommand, InsertHorizontalLineBellowCommand } from '../commands/commands/doc-horizontal-line.command';
 
-import { ResetInlineFormatTextBackgroundColorCommand, SetInlineFormatBoldCommand, SetInlineFormatFontFamilyCommand, SetInlineFormatFontSizeCommand, SetInlineFormatItalicCommand, SetInlineFormatStrikethroughCommand, SetInlineFormatSubscriptCommand, SetInlineFormatSuperscriptCommand, SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand, SetInlineFormatUnderlineCommand } from '../commands/commands/inline-format.command';
+import { ResetInlineFormatTextBackgroundColorCommand, ResetInlineFormatTextColorCommand, SetInlineFormatBoldCommand, SetInlineFormatFontFamilyCommand, SetInlineFormatFontSizeCommand, SetInlineFormatItalicCommand, SetInlineFormatStrikethroughCommand, SetInlineFormatSubscriptCommand, SetInlineFormatSuperscriptCommand, SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand, SetInlineFormatUnderlineCommand } from '../commands/commands/inline-format.command';
 import { BulletListCommand, CheckListCommand, InsertBulletListBellowCommand, InsertCheckListBellowCommand, InsertOrderListBellowCommand, OrderListCommand } from '../commands/commands/list.command';
 import { AlignOperationCommand } from '../commands/commands/paragraph-align.command';
 import { H1HeadingCommand, H2HeadingCommand, H3HeadingCommand, H4HeadingCommand, H5HeadingCommand, NormalTextHeadingCommand, SetParagraphNamedStyleCommand, SubtitleHeadingCommand, TitleHeadingCommand } from '../commands/commands/set-heading.command';
@@ -74,6 +74,7 @@ import {
     OrderListMenuItemFactory,
     PageSettingMenuItemFactory,
     ResetBackgroundColorMenuItemFactory,
+    ResetTextColorMenuItemFactory,
     StrikeThroughMenuItemFactory,
     SubscriptMenuItemFactory,
     SuperscriptMenuItemFactory,
@@ -135,6 +136,7 @@ import {
     ParagraphMenuInsertBelowSubmenuItemFactory,
     ParagraphMenuInsertBelowTableMenuItemFactory,
     ParagraphMenuNoBackgroundMenuItemFactory,
+    ParagraphMenuResetTextColorMenuItemFactory,
     ParagraphMenuTextColorHeaderActionMenuItemFactory,
     ParagraphMenuTextColorSwatchMenuItemFactories,
     SubtitleHeadingMenuItemFactory,
@@ -195,6 +197,10 @@ export const menuSchema: MenuSchemaType = {
         [SetInlineFormatTextColorCommand.id]: {
             order: 8,
             menuItemFactory: TextColorSelectorMenuItemFactory,
+            [ResetInlineFormatTextColorCommand.id]: {
+                order: 0,
+                menuItemFactory: ResetTextColorMenuItemFactory,
+            },
         },
         [SetInlineFormatTextBackgroundColorCommand.id]: {
             order: 9,
@@ -815,6 +821,10 @@ export const menuSchema: MenuSchemaType = {
                 [`${SetInlineFormatTextColorCommand.id}.default`]: {
                     order: 0,
                     menuItemFactory: ParagraphMenuDefaultTextColorMenuItemFactory,
+                },
+                [ResetInlineFormatTextColorCommand.id]: {
+                    order: 8,
+                    menuItemFactory: ParagraphMenuResetTextColorMenuItemFactory,
                 },
                 ...ParagraphMenuTextColorSwatchMenuItemFactories,
             },

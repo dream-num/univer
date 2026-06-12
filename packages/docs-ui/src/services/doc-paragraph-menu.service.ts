@@ -16,7 +16,7 @@
 
 import type { DocumentDataModel, ICustomBlock, ICustomTable, IDocumentBlockRange, INeedCheckDisposable, Nullable } from '@univerjs/core';
 import type { IBoundRectNoAngle, IRenderContext, IRenderModule, ITextRangeWithStyle } from '@univerjs/engine-render';
-import type { IMutiPageParagraphBound, ITableBound } from './doc-event-manager.service';
+import type { IMutiPageParagraphBound, ITableBound, ITableParagraphBound } from './doc-event-manager.service';
 import type { IEditorInputConfig } from './selection/doc-selection-render.service';
 import { BlockType, DataStreamTreeTokenType, Disposable, Inject, isInternalEditorID, PresetListType } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
@@ -400,9 +400,18 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
         const targetParagraph = target.paragraph ?? paragraph;
         const blockRange = target.blockRange;
 
-        const getFirstLine = () => blockRange
-            ? getBlockRangeAnchorRect(this._docEventManagerService, blockRange, paragraph)
-            : this._docEventManagerService.findParagraphBoundByIndex(paragraph.startIndex)?.firstLine ?? paragraph.firstLine;
+        const getFirstLine = () => {
+            const latestParagraphBound = this._docEventManagerService.findParagraphBoundByIndex(targetParagraph.startIndex) ?? targetParagraph;
+            const baseAnchor = blockRange
+                ? getBlockRangeAnchorRect(this._docEventManagerService, blockRange, paragraph)
+                : latestParagraphBound.firstLine ?? paragraph.firstLine;
+
+            if (!target.cellRange) {
+                return baseAnchor;
+            }
+
+            return getTableCellParagraphAnchorRect(this._docEventManagerService, latestParagraphBound, baseAnchor);
+        };
 
         const disposable = this._docPopupManagerService.attachPopupToRect(
             getFirstLine,
@@ -461,6 +470,10 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
             draggable: true,
         };
 
+        if (this._shouldKeepCurrentCellMenuForTable(table)) {
+            return;
+        }
+
         if (this._paragrahMenu?.target.key === target.key) {
             return;
         }
@@ -498,6 +511,16 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
             active: false,
         };
         this._activeTarget$.next(target);
+    }
+
+    private _shouldKeepCurrentCellMenuForTable(table: ICustomTable): boolean {
+        const target = this._paragrahMenu?.target;
+        if (!target || target.kind === 'table' || !target.cellRange) {
+            return false;
+        }
+
+        return target.cellRange.startOffset >= table.startIndex &&
+            target.cellRange.startOffset <= table.endIndex;
     }
 
     getDropTargetFromClientPoint(clientX: number, clientY: number, sourceRange: { startOffset: number; endOffset: number }): IDocBlockDropTarget | null {
@@ -832,6 +855,42 @@ function getTableAnchorRect(tableBound: ITableBound) {
         right: left,
         top,
         bottom: top,
+    };
+}
+
+const TABLE_CELL_PARAGRAPH_MENU_GAP = 4;
+const TABLE_CELL_PARAGRAPH_MENU_RESIZE_SAFE_GAP = 10;
+const TABLE_CELL_PARAGRAPH_MENU_FIRST_COLUMN_EXTRA_OFFSET = 16;
+
+function getTableCellParagraphAnchorRect(
+    docEventManagerService: DocEventManagerService,
+    paragraph: IMutiPageParagraphBound | ITableParagraphBound,
+    baseAnchor: IBoundRectNoAngle
+) {
+    const tableParagraph = paragraph as IMutiPageParagraphBound & Partial<ITableParagraphBound>;
+    if (!tableParagraph.tableId || tableParagraph.rowIndex == null || tableParagraph.colIndex == null) {
+        return baseAnchor;
+    }
+
+    const cellBound = docEventManagerService.findTableCellBound(
+        tableParagraph.tableId,
+        tableParagraph.rowIndex,
+        tableParagraph.colIndex,
+        tableParagraph.pageIndex
+    );
+
+    if (!cellBound) {
+        return baseAnchor;
+    }
+
+    const gap = tableParagraph.colIndex === 0
+        ? TABLE_CELL_PARAGRAPH_MENU_GAP + TABLE_CELL_PARAGRAPH_MENU_FIRST_COLUMN_EXTRA_OFFSET
+        : TABLE_CELL_PARAGRAPH_MENU_RESIZE_SAFE_GAP;
+    const left = cellBound.rect.left - gap;
+    return {
+        ...baseAnchor,
+        left,
+        right: left,
     };
 }
 

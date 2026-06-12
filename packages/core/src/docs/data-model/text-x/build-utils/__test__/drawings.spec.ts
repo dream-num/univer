@@ -97,10 +97,11 @@ describe('drawing build utils', () => {
         expect(doc.getBody()?.dataStream).toBe('A\bB\r\n');
     });
 
-    it('should return false when drawing insertion targets a missing body', () => {
-        const result = addDrawing({
+    it('should add drawings to document data without body after normalization', () => {
+        const doc = new DocumentDataModel({ id: 'doc-without-body' });
+        const actions = addDrawing({
             selection: { startOffset: 0, endOffset: 0, collapsed: true },
-            documentDataModel: new DocumentDataModel({ id: 'doc-without-body' }),
+            documentDataModel: doc,
             drawings: [{
                 unitId: 'doc-without-body',
                 subUnitId: '',
@@ -117,6 +118,14 @@ describe('drawing build utils', () => {
             } as never],
         });
 
-        expect(result).toBe(false);
+        expect(actions).toBeTruthy();
+        if (!actions) {
+            throw new Error('Expected addDrawing to return JSONX actions');
+        }
+        doc.apply(actions);
+
+        expect(doc.getDrawingsOrder()).toEqual(['drawing-new']);
+        expect(doc.getBody()?.customBlocks).toEqual([{ startIndex: 0, blockId: 'drawing-new' }]);
+        expect(doc.getBody()?.dataStream).toBe('\b\r\n');
     });
 });

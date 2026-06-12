@@ -125,7 +125,6 @@ describe('paragraph build utils', () => {
             listType: PresetListType.ORDER_LIST,
             document: doc,
         });
-        expect(setParagraphBullet({ paragraphs: [thirdParagraph], listType: PresetListType.ORDER_LIST, segmentId: 'missing', document: new DocumentDataModel({ id: 'missing-segment' }) })).toBe(false);
         if (setBulletTextX === false) {
             throw new Error('Expected setParagraphBullet to return TextX actions');
         }
@@ -134,6 +133,24 @@ describe('paragraph build utils', () => {
             listType: PresetListType.ORDER_LIST,
             nestingLevel: 0,
             textStyle: { fs: 20 },
+        });
+
+        const normalizedDoc = new DocumentDataModel({ id: 'normalized-paragraph-doc' });
+        const normalizedBody = normalizedDoc.getBody()!;
+        const normalizedParagraph = normalizedBody.paragraphs![0] as IParagraph;
+        const normalizedTextX = setParagraphBullet({
+            paragraphs: [normalizedParagraph],
+            listType: PresetListType.ORDER_LIST,
+            document: normalizedDoc,
+        });
+        expect(normalizedTextX).not.toBe(false);
+        if (normalizedTextX === false) {
+            throw new Error('Expected setParagraphBullet to return TextX actions');
+        }
+        TextX.apply(normalizedBody, normalizedTextX.serialize());
+        expect(normalizedBody.paragraphs?.[0].bullet).toMatchObject({
+            listType: PresetListType.ORDER_LIST,
+            nestingLevel: 0,
         });
 
         const toggled = toggleChecklistParagraph({ paragraphIndex: secondParagraph.startIndex, document: doc });

@@ -67,8 +67,8 @@ export const useLeftAndRightArrow = (isNeed: boolean, selectingMode: boolean, ed
             id: operationId,
             type: CommandType.OPERATION,
             handler(_event, params) {
-                const { keyCode } = params as { eventType: DeviceInputEventType; keyCode: KeyCode };
-                handleMoveInEditor(keyCode);
+                const { keyCode, metaKey } = params as { eventType: DeviceInputEventType; keyCode: KeyCode; metaKey?: MetaKeys };
+                handleMoveInEditor(keyCode, metaKey);
             },
         }));
 
@@ -81,14 +81,6 @@ export const useLeftAndRightArrow = (isNeed: boolean, selectingMode: boolean, ed
             { keyCode: KeyCode.ARROW_LEFT, metaKey: MetaKeys.SHIFT },
             { keyCode: KeyCode.ARROW_RIGHT, metaKey: MetaKeys.SHIFT },
             { keyCode: KeyCode.ARROW_UP, metaKey: MetaKeys.SHIFT },
-            { keyCode: KeyCode.ARROW_DOWN, metaKey: MetaKeys.CTRL_COMMAND },
-            { keyCode: KeyCode.ARROW_LEFT, metaKey: MetaKeys.CTRL_COMMAND },
-            { keyCode: KeyCode.ARROW_RIGHT, metaKey: MetaKeys.CTRL_COMMAND },
-            { keyCode: KeyCode.ARROW_UP, metaKey: MetaKeys.CTRL_COMMAND },
-            { keyCode: KeyCode.ARROW_DOWN, metaKey: MetaKeys.CTRL_COMMAND | MetaKeys.SHIFT },
-            { keyCode: KeyCode.ARROW_LEFT, metaKey: MetaKeys.CTRL_COMMAND | MetaKeys.SHIFT },
-            { keyCode: KeyCode.ARROW_RIGHT, metaKey: MetaKeys.CTRL_COMMAND | MetaKeys.SHIFT },
-            { keyCode: KeyCode.ARROW_UP, metaKey: MetaKeys.CTRL_COMMAND | MetaKeys.SHIFT },
         ];
 
         keyCodes.map(({ keyCode, metaKey }) => {
@@ -100,6 +92,7 @@ export const useLeftAndRightArrow = (isNeed: boolean, selectingMode: boolean, ed
                 staticParameters: {
                     eventType: DeviceInputEventType.Keyboard,
                     keyCode,
+                    metaKey,
                 },
             };
         }).forEach((item) => {

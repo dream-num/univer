@@ -26,7 +26,7 @@ import type {
     INodeSearch,
 } from '@univerjs/engine-render';
 import type { Subscription } from 'rxjs';
-import type { IMoveCursorOperationParams } from '../commands/operations/doc-cursor.operation';
+import type { DocCursorMoveGranularity, IMoveCursorOperationParams } from '../commands/operations/doc-cursor.operation';
 import {
     DataStreamTreeTokenType,
     Direction,
@@ -43,7 +43,15 @@ import { getDocObject } from '../basics/component-tools';
 import { findAboveCell, findBellowCell, findLineBeforeAndAfterTable, findTableAfterLine, findTableBeforeLine, firstLineInCell, firstLineInTable, lastLineInCell, lastLineInTable } from '../basics/table';
 import { MoveCursorOperation, MoveSelectionOperation } from '../commands/operations/doc-cursor.operation';
 import { NodePositionConvertToCursor } from '../services/selection/convert-text-range';
+import { getParagraphInfoByGlyph } from '../services/selection/selection-utils';
+import { getNextWordBoundaryOffset } from '../services/selection/word-boundary';
 import { DocBackScrollRenderController } from './render-controllers/back-scroll.render-controller';
+
+interface IWholeEntityRange {
+    wholeEntity?: boolean;
+    startIndex: number;
+    endIndex: number;
+}
 
 export class DocMoveCursorController extends Disposable {
     private _onInputSubscription: Nullable<Subscription>;
@@ -78,11 +86,11 @@ export class DocMoveCursorController extends Disposable {
 
                 switch (command.id) {
                     case MoveCursorOperation.id: {
-                        return this._handleMoveCursor(param.direction);
+                        return this._handleMoveCursor(param.direction, param.granularity ?? 'character');
                     }
 
                     case MoveSelectionOperation.id: {
-                        return this._handleShiftMoveSelection(param.direction);
+                        return this._handleShiftMoveSelection(param.direction, param.granularity ?? 'character');
                     }
 
                     default: {
@@ -94,7 +102,7 @@ export class DocMoveCursorController extends Disposable {
     }
 
     // eslint-disable-next-line max-lines-per-function, complexity
-    private _handleShiftMoveSelection(direction: Direction) {
+    private _handleShiftMoveSelection(direction: Direction, granularity: DocCursorMoveGranularity = 'character') {
         const activeRange = this._textSelectionManagerService.getActiveTextRange();
         const allRanges = this._textSelectionManagerService.getTextRanges()!;
         const docDataModel = this._univerInstanceService.getCurrentUniverDocInstance();
@@ -122,6 +130,8 @@ export class DocMoveCursorController extends Disposable {
             endNodePosition,
             segmentPage,
         } = activeRange;
+        const normalizedSegmentId = segmentId ?? '';
+        const normalizedSegmentPage = segmentPage ?? -1;
 
         if (allRanges.length > 1) {
             let min = Number.POSITIVE_INFINITY;
@@ -154,7 +164,35 @@ export class DocMoveCursorController extends Disposable {
             : rangeDirection === RANGE_DIRECTION.FORWARD
                 ? endOffset
                 : startOffset;
-        const dataStreamLength = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()!.dataStream.length ?? Number.POSITIVE_INFINITY;
+        const dataStreamLength = docDataModel.getSelfOrHeaderFooterModel(normalizedSegmentId).getBody()!.dataStream.length ?? Number.POSITIVE_INFINITY;
+
+        if (granularity !== 'character') {
+            const nextOffset = this._getCursorOffsetByGranularity(
+                skeleton,
+                focusOffset,
+                direction,
+                granularity,
+                normalizedSegmentId,
+                normalizedSegmentPage,
+                dataStreamLength
+            );
+
+            if (nextOffset == null || nextOffset === focusOffset) {
+                return;
+            }
+
+            this._textSelectionManagerService.replaceTextRanges([
+                {
+                    startOffset: anchorOffset,
+                    endOffset: nextOffset,
+                    style,
+                },
+            ], false);
+
+            this._scrollToFocusNodePosition(docDataModel.getUnitId(), nextOffset);
+
+            return;
+        }
 
         if (direction === Direction.LEFT || direction === Direction.RIGHT) {
             const preGlyph = skeleton.findNodeByCharIndex(focusOffset - 1, segmentId, segmentPage);
@@ -219,7 +257,7 @@ export class DocMoveCursorController extends Disposable {
     }
 
     // eslint-disable-next-line max-lines-per-function, complexity
-    private _handleMoveCursor(direction: Direction) {
+    private _handleMoveCursor(direction: Direction, granularity: DocCursorMoveGranularity = 'character') {
         const activeRange = this._textSelectionManagerService.getActiveTextRange();
         const allRanges = this._textSelectionManagerService.getTextRanges();
         const docDataModel = this._univerInstanceService.getCurrentUniverDocInstance();
@@ -236,7 +274,9 @@ export class DocMoveCursorController extends Disposable {
         }
 
         const { startOffset, endOffset, style, collapsed, segmentId, startNodePosition, endNodePosition, segmentPage } = activeRange;
-        const body = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody();
+        const normalizedSegmentId = segmentId ?? '';
+        const normalizedSegmentPage = segmentPage ?? -1;
+        const body = docDataModel.getSelfOrHeaderFooterModel(normalizedSegmentId).getBody();
 
         if (body == null) {
             return;
@@ -244,6 +284,52 @@ export class DocMoveCursorController extends Disposable {
 
         const dataStreamLength = body.dataStream.length ?? Number.POSITIVE_INFINITY;
         const customRanges = docDataModel.getCustomRanges() ?? [];
+
+        if (granularity !== 'character') {
+            let cursorOffset: number;
+
+            if (!activeRange.collapsed || allRanges.length > 1) {
+                let min = Number.POSITIVE_INFINITY;
+                let max = Number.NEGATIVE_INFINITY;
+
+                for (const range of allRanges) {
+                    min = Math.min(min, range.startOffset!);
+                    max = Math.max(max, range.endOffset!);
+                }
+
+                cursorOffset = direction === Direction.LEFT || direction === Direction.UP ? min : max;
+            } else {
+                cursorOffset = direction === Direction.LEFT || direction === Direction.UP ? startOffset : endOffset;
+            }
+
+            let cursor = this._getCursorOffsetByGranularity(
+                skeleton,
+                cursorOffset,
+                direction,
+                granularity,
+                normalizedSegmentId,
+                normalizedSegmentPage,
+                dataStreamLength
+            );
+
+            if (cursor == null) {
+                return;
+            }
+
+            cursor = this._normalizeCursorOffset(body.dataStream, customRanges, cursor, direction);
+
+            this._textSelectionManagerService.replaceTextRanges([
+                {
+                    startOffset: cursor,
+                    endOffset: cursor,
+                    style,
+                },
+            ], false);
+
+            this._scrollToFocusNodePosition(docDataModel.getUnitId(), cursor);
+
+            return;
+        }
 
         if (direction === Direction.LEFT || direction === Direction.RIGHT) {
             let cursor: number;
@@ -271,13 +357,7 @@ export class DocMoveCursorController extends Disposable {
                 }
             }
             const skipTokens: string[] = [
-                DataStreamTreeTokenType.TABLE_START,
-                DataStreamTreeTokenType.TABLE_END,
-                DataStreamTreeTokenType.TABLE_ROW_START,
-                DataStreamTreeTokenType.TABLE_ROW_END,
-                DataStreamTreeTokenType.TABLE_CELL_START,
-                DataStreamTreeTokenType.TABLE_CELL_END,
-                DataStreamTreeTokenType.SECTION_BREAK,
+                ...this._getCursorSkipTokens(),
             ];
             if (direction === Direction.LEFT) {
                 while (skipTokens.includes(body.dataStream[cursor])) {
@@ -289,14 +369,7 @@ export class DocMoveCursorController extends Disposable {
                 }
             }
 
-            const relativeRanges = customRanges.filter((range) => range.wholeEntity && range.startIndex < cursor && range.endIndex >= cursor);
-            relativeRanges.forEach((range) => {
-                if (direction === Direction.LEFT) {
-                    cursor = Math.min(range.startIndex, cursor);
-                } else {
-                    cursor = Math.max(range.endIndex + 1, cursor);
-                }
-            });
+            cursor = this._normalizeWholeEntityRanges(customRanges, cursor, direction);
 
             this._textSelectionManagerService.replaceTextRanges([
                 {
@@ -361,6 +434,192 @@ export class DocMoveCursorController extends Disposable {
         }
     }
 
+    private _getCursorOffsetByGranularity(
+        skeleton: DocumentSkeleton,
+        focusOffset: number,
+        direction: Direction,
+        granularity: DocCursorMoveGranularity,
+        segmentId: string,
+        segmentPage: number,
+        dataStreamLength: number
+    ): Nullable<number> {
+        switch (granularity) {
+            case 'document':
+                return direction === Direction.LEFT || direction === Direction.UP ? 0 : dataStreamLength - 2;
+            case 'line':
+                return this._getLineBoundaryOffset(skeleton, focusOffset, direction, segmentId, segmentPage, dataStreamLength);
+            case 'word':
+                return this._getWordBoundaryOffset(skeleton, focusOffset, direction, segmentId, segmentPage, dataStreamLength);
+            case 'character':
+            default:
+                return null;
+        }
+    }
+
+    private _getWordBoundaryOffset(
+        skeleton: DocumentSkeleton,
+        focusOffset: number,
+        direction: Direction,
+        segmentId: string,
+        segmentPage: number,
+        dataStreamLength: number
+    ): Nullable<number> {
+        if (direction !== Direction.LEFT && direction !== Direction.RIGHT) {
+            return;
+        }
+
+        const glyph = skeleton.findNodeByCharIndex(focusOffset, segmentId, segmentPage)
+            ?? skeleton.findNodeByCharIndex(Math.max(0, focusOffset - 1), segmentId, segmentPage);
+
+        if (glyph == null) {
+            return direction === Direction.LEFT ? 0 : dataStreamLength - 2;
+        }
+
+        const paragraphInfo = getParagraphInfoByGlyph(glyph);
+
+        if (paragraphInfo == null) {
+            return;
+        }
+
+        const nodeIndex = Math.min(Math.max(0, focusOffset - paragraphInfo.st), paragraphInfo.content.length);
+        const nextOffset = getNextWordBoundaryOffset(paragraphInfo.content, nodeIndex, paragraphInfo.st, direction);
+
+        if (nextOffset == null) {
+            return;
+        }
+
+        return Math.min(dataStreamLength - 2, Math.max(0, nextOffset));
+    }
+
+    private _getLineBoundaryOffset(
+        skeleton: DocumentSkeleton,
+        focusOffset: number,
+        direction: Direction,
+        segmentId: string,
+        segmentPage: number,
+        dataStreamLength: number
+    ): Nullable<number> {
+        if (direction !== Direction.LEFT && direction !== Direction.RIGHT) {
+            return;
+        }
+
+        const glyph = skeleton.findNodeByCharIndex(focusOffset, segmentId, segmentPage)
+            ?? skeleton.findNodeByCharIndex(Math.max(0, focusOffset - 1), segmentId, segmentPage);
+        const line = glyph?.parent?.parent;
+
+        if (line == null) {
+            return direction === Direction.LEFT ? 0 : dataStreamLength - 2;
+        }
+
+        const boundaryGlyph = direction === Direction.LEFT
+            ? this._getFirstCursorGlyphInLine(line)
+            : this._getLastCursorGlyphInLine(line);
+        const boundaryPosition = boundaryGlyph == null
+            ? undefined
+            : skeleton.findPositionByGlyph(boundaryGlyph, segmentPage);
+
+        if (boundaryPosition == null) {
+            return direction === Direction.LEFT ? 0 : dataStreamLength - 2;
+        }
+
+        const cursor = skeleton.findCharIndexByPosition({
+            ...boundaryPosition,
+            isBack: direction === Direction.LEFT,
+        });
+
+        if (cursor == null) {
+            return;
+        }
+
+        return Math.min(dataStreamLength - 2, Math.max(0, cursor));
+    }
+
+    private _getFirstCursorGlyphInLine(line: IDocumentSkeletonLine): Nullable<IDocumentSkeletonGlyph> {
+        for (const divide of line.divides) {
+            for (const glyph of divide.glyphGroup) {
+                if (this._isCursorAddressableGlyph(glyph)) {
+                    return glyph;
+                }
+            }
+        }
+    }
+
+    private _getLastCursorGlyphInLine(line: IDocumentSkeletonLine): Nullable<IDocumentSkeletonGlyph> {
+        for (let divideIndex = line.divides.length - 1; divideIndex >= 0; divideIndex--) {
+            const divide = line.divides[divideIndex];
+            for (let glyphIndex = divide.glyphGroup.length - 1; glyphIndex >= 0; glyphIndex--) {
+                const glyph = divide.glyphGroup[glyphIndex];
+                if (this._isCursorAddressableGlyph(glyph)) {
+                    return glyph;
+                }
+            }
+        }
+    }
+
+    private _isCursorAddressableGlyph(glyph: IDocumentSkeletonGlyph): boolean {
+        return glyph.count > 0 && !this._getCursorSkipTokens(true).includes(glyph.streamType);
+    }
+
+    private _normalizeCursorOffset(
+        dataStream: string,
+        customRanges: IWholeEntityRange[],
+        cursor: number,
+        direction: Direction
+    ): number {
+        cursor = Math.max(0, cursor);
+
+        const skipTokens = this._getCursorSkipTokens();
+
+        if (direction === Direction.LEFT || direction === Direction.UP) {
+            while (cursor > 0 && skipTokens.includes(dataStream[cursor])) {
+                cursor--;
+            }
+        } else {
+            while (cursor < dataStream.length - 1 && skipTokens.includes(dataStream[cursor])) {
+                cursor++;
+            }
+        }
+
+        return this._normalizeWholeEntityRanges(customRanges, cursor, direction);
+    }
+
+    private _normalizeWholeEntityRanges(
+        customRanges: IWholeEntityRange[],
+        cursor: number,
+        direction: Direction
+    ): number {
+        const relativeRanges = customRanges.filter((range) => range.wholeEntity && range.startIndex < cursor && range.endIndex >= cursor);
+        relativeRanges.forEach((range) => {
+            if (direction === Direction.LEFT || direction === Direction.UP) {
+                cursor = Math.min(range.startIndex, cursor);
+            } else {
+                cursor = Math.max(range.endIndex + 1, cursor);
+            }
+        });
+
+        return cursor;
+    }
+
+    private _getCursorSkipTokens(includeParagraph = false): string[] {
+        const tokens = [
+            DataStreamTreeTokenType.TABLE_START,
+            DataStreamTreeTokenType.TABLE_END,
+            DataStreamTreeTokenType.TABLE_ROW_START,
+            DataStreamTreeTokenType.TABLE_ROW_END,
+            DataStreamTreeTokenType.TABLE_CELL_START,
+            DataStreamTreeTokenType.TABLE_CELL_END,
+            DataStreamTreeTokenType.SECTION_BREAK,
+            DataStreamTreeTokenType.BLOCK_START,
+            DataStreamTreeTokenType.BLOCK_END,
+        ];
+
+        if (includeParagraph) {
+            tokens.push(DataStreamTreeTokenType.PARAGRAPH);
+        }
+
+        return tokens;
+    }
+
     private _getTopOrBottomPosition(
         docSkeleton: DocumentSkeleton,
         glyph: Nullable<IDocumentSkeletonGlyph>,
@@ -416,7 +675,7 @@ export class DocMoveCursorController extends Disposable {
             const divideLeft = divide.left;
 
             for (const glyph of divide.glyphGroup) {
-                if (glyph.streamType === DataStreamTreeTokenType.SECTION_BREAK) {
+                if (!this._isCursorAddressableGlyph(glyph)) {
                     continue;
                 }
                 const { left } = glyph;

@@ -21,6 +21,50 @@ import { DocSelectAllCommand } from '../commands/commands/doc-select-all.command
 import { MoveCursorOperation, MoveSelectionOperation } from '../commands/operations/doc-cursor.operation';
 import { whenDocAndEditorFocused } from './utils';
 
+function moveCursorShortcut(
+    direction: Direction,
+    granularity: 'word' | 'line' | 'document',
+    binding: number,
+    mac: number = binding,
+    win: number = binding,
+    linux: number = binding
+): IShortcutItem {
+    return {
+        id: MoveCursorOperation.id,
+        binding,
+        mac,
+        win,
+        linux,
+        preconditions: whenDocAndEditorFocused,
+        staticParameters: {
+            direction,
+            granularity,
+        },
+    };
+}
+
+function moveSelectionShortcut(
+    direction: Direction,
+    granularity: 'word' | 'line' | 'document',
+    binding: number,
+    mac: number = binding,
+    win: number = binding,
+    linux: number = binding
+): IShortcutItem {
+    return {
+        id: MoveSelectionOperation.id,
+        binding,
+        mac,
+        win,
+        linux,
+        preconditions: whenDocAndEditorFocused,
+        staticParameters: {
+            direction,
+            granularity,
+        },
+    };
+}
+
 export const MoveCursorUpShortcut: IShortcutItem = {
     id: MoveCursorOperation.id,
     binding: KeyCode.ARROW_UP,
@@ -92,6 +136,90 @@ export const MoveSelectionRightShortcut: IShortcutItem = {
         direction: Direction.RIGHT,
     },
 };
+
+export const MoveCursorLineStartShortcut = moveCursorShortcut(
+    Direction.LEFT,
+    'line',
+    KeyCode.HOME,
+    KeyCode.ARROW_LEFT | MetaKeys.CTRL_COMMAND
+);
+
+export const MoveCursorLineEndShortcut = moveCursorShortcut(
+    Direction.RIGHT,
+    'line',
+    KeyCode.END,
+    KeyCode.ARROW_RIGHT | MetaKeys.CTRL_COMMAND
+);
+
+export const MoveSelectionLineStartShortcut = moveSelectionShortcut(
+    Direction.LEFT,
+    'line',
+    KeyCode.HOME | MetaKeys.SHIFT,
+    KeyCode.ARROW_LEFT | MetaKeys.CTRL_COMMAND | MetaKeys.SHIFT
+);
+
+export const MoveSelectionLineEndShortcut = moveSelectionShortcut(
+    Direction.RIGHT,
+    'line',
+    KeyCode.END | MetaKeys.SHIFT,
+    KeyCode.ARROW_RIGHT | MetaKeys.CTRL_COMMAND | MetaKeys.SHIFT
+);
+
+export const MoveCursorDocumentStartShortcut = moveCursorShortcut(
+    Direction.UP,
+    'document',
+    KeyCode.HOME | MetaKeys.CTRL_COMMAND,
+    KeyCode.ARROW_UP | MetaKeys.CTRL_COMMAND
+);
+
+export const MoveCursorDocumentEndShortcut = moveCursorShortcut(
+    Direction.DOWN,
+    'document',
+    KeyCode.END | MetaKeys.CTRL_COMMAND,
+    KeyCode.ARROW_DOWN | MetaKeys.CTRL_COMMAND
+);
+
+export const MoveSelectionDocumentStartShortcut = moveSelectionShortcut(
+    Direction.UP,
+    'document',
+    KeyCode.HOME | MetaKeys.CTRL_COMMAND | MetaKeys.SHIFT,
+    KeyCode.ARROW_UP | MetaKeys.CTRL_COMMAND | MetaKeys.SHIFT
+);
+
+export const MoveSelectionDocumentEndShortcut = moveSelectionShortcut(
+    Direction.DOWN,
+    'document',
+    KeyCode.END | MetaKeys.CTRL_COMMAND | MetaKeys.SHIFT,
+    KeyCode.ARROW_DOWN | MetaKeys.CTRL_COMMAND | MetaKeys.SHIFT
+);
+
+export const MoveCursorWordLeftShortcut = moveCursorShortcut(
+    Direction.LEFT,
+    'word',
+    KeyCode.ARROW_LEFT | MetaKeys.CTRL_COMMAND,
+    KeyCode.ARROW_LEFT | MetaKeys.ALT
+);
+
+export const MoveCursorWordRightShortcut = moveCursorShortcut(
+    Direction.RIGHT,
+    'word',
+    KeyCode.ARROW_RIGHT | MetaKeys.CTRL_COMMAND,
+    KeyCode.ARROW_RIGHT | MetaKeys.ALT
+);
+
+export const MoveSelectionWordLeftShortcut = moveSelectionShortcut(
+    Direction.LEFT,
+    'word',
+    KeyCode.ARROW_LEFT | MetaKeys.CTRL_COMMAND | MetaKeys.SHIFT,
+    KeyCode.ARROW_LEFT | MetaKeys.ALT | MetaKeys.SHIFT
+);
+
+export const MoveSelectionWordRightShortcut = moveSelectionShortcut(
+    Direction.RIGHT,
+    'word',
+    KeyCode.ARROW_RIGHT | MetaKeys.CTRL_COMMAND | MetaKeys.SHIFT,
+    KeyCode.ARROW_RIGHT | MetaKeys.ALT | MetaKeys.SHIFT
+);
 
 export const SelectAllShortcut: IShortcutItem = {
     id: DocSelectAllCommand.id,

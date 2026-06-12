@@ -14,24 +14,16 @@
  * limitations under the License.
  */
 
-import type { DependencyOverride } from '@univerjs/core';
-import type { MenuConfig } from '@univerjs/ui';
+import { KeyCode, MetaKeys } from '@univerjs/ui';
+import { describe, expect, it } from 'vitest';
+import { BreakLineCommand } from '../../commands/commands/break-line.command';
+import { SoftBreakLineShortcut } from '../core-editing.shortcut';
 
-export const DOCS_UI_PLUGIN_CONFIG_KEY = 'docs-ui.config';
-
-export const configSymbol = Symbol(DOCS_UI_PLUGIN_CONFIG_KEY);
-
-export interface IUniverDocsUIConfig {
-    menu?: MenuConfig;
-    container?: HTMLElement | string;
-    toc?: boolean;
-    footer?: boolean;
-    placeholder?: boolean;
-    override?: DependencyOverride;
-}
-
-export const defaultPluginConfig: IUniverDocsUIConfig = {
-    toc: false,
-    footer: true,
-    placeholder: true,
-};
+describe('docs core editing shortcuts', () => {
+    it('registers Shift+Enter as a soft line break', () => {
+        expect(SoftBreakLineShortcut).toMatchObject({
+            id: BreakLineCommand.id,
+            binding: KeyCode.ENTER | MetaKeys.SHIFT,
+        });
+    });
+});

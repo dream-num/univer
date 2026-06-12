@@ -177,4 +177,47 @@ describe('TinyMenuGroup', () => {
 
         expect(props.sizeVariant).toBe('paragraph-t');
     });
+
+    it('skips tiny menu children whose icons are not registered', () => {
+        dependencyMap.set(ComponentManager, {
+            get: (key: string) => key === 'KnownIcon' ? () => React.createElement('span') : undefined,
+        });
+
+        const item = {
+            key: 'quick',
+            order: 0,
+            children: [
+                {
+                    key: 'known',
+                    order: 0,
+                    item: {
+                        id: 'known',
+                        type: MenuItemType.BUTTON,
+                        icon: 'KnownIcon',
+                        hidden$: of(false),
+                        activated$: of(false),
+                    },
+                },
+                {
+                    key: 'missing',
+                    order: 1,
+                    item: {
+                        id: 'missing',
+                        type: MenuItemType.BUTTON,
+                        icon: 'MissingIcon',
+                        hidden$: of(false),
+                        activated$: of(false),
+                    },
+                },
+            ],
+        } as never;
+
+        render(React.createElement(UITinyMenuGroup, { item }));
+
+        const props = designTinyMenuGroupSpy.mock.calls[0][0] as {
+            items: Array<{ key: string }>;
+        };
+
+        expect(props.items.map((menuItem) => menuItem.key)).toEqual(['known']);
+    });
 });

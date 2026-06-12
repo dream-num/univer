@@ -34,6 +34,17 @@ export function ShapeMenuFactory(accessor: IAccessor): IMenuItem {
     };
 }
 
+export function ShapeBelowMenuFactory(accessor: IAccessor): IMenuItem {
+    return {
+        id: DOCS_SHAPE_BELOW_MENU_ID,
+        type: MenuItemType.SUBITEMS,
+        icon: 'ShapeIcon',
+        title: 'Insert Shape',
+        tooltip: 'Insert Shape',
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+    };
+}
+
 export function InsertRectangleShapeMenuFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: InsertDocRectangleShapeCommand.id,

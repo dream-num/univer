@@ -99,12 +99,6 @@ import {
     DOC_PARAGRAPH_T_INSERT_MENU_ID,
     DOC_TABLE_BLOCK_MENU_ID,
     DocInsertBellowMenuItemFactory,
-    DOCS_CALLOUT_INSERT_BELOW_COMMAND_ID,
-    DOCS_CALLOUT_INSERT_COMMAND_ID,
-    DOCS_CODE_INSERT_BELOW_COMMAND_ID,
-    DOCS_CODE_INSERT_COMMAND_ID,
-    DOCS_QUOTE_INSERT_BELOW_COMMAND_ID,
-    DOCS_QUOTE_INSERT_COMMAND_ID,
     EMPTY_PARAGRAPH_MENU_ID,
     EmptyParagraphBulletListMenuItemFactory,
     EmptyParagraphCheckListMenuItemFactory,
@@ -122,8 +116,6 @@ import {
     H4HeadingMenuItemFactory,
     H5HeadingMenuItemFactory,
     INSERT_BELLOW_MENU_ID,
-    INSERT_DOC_IMAGE_COMMAND_ID,
-    INSERT_DOC_SHAPE_COMMAND_ID,
     InsertBulletListBellowMenuItemFactory,
     InsertCheckListBellowMenuItemFactory,
     InsertHorizontalLineBellowMenuItemFactory,
@@ -136,23 +128,13 @@ import {
     ParagraphMenuDefaultTextColorMenuItemFactory,
     ParagraphMenuIndentDecreaseMenuItemFactory,
     ParagraphMenuIndentIncreaseMenuItemFactory,
-    ParagraphMenuInsertBelowCalloutMenuItemFactory,
-    ParagraphMenuInsertBelowCodeMenuItemFactory,
     ParagraphMenuInsertBelowHeadingH1MenuItemFactory,
     ParagraphMenuInsertBelowHeadingH2MenuItemFactory,
     ParagraphMenuInsertBelowHeadingH3MenuItemFactory,
     ParagraphMenuInsertBelowHeadingH4MenuItemFactory,
     ParagraphMenuInsertBelowHeadingH5MenuItemFactory,
-    ParagraphMenuInsertBelowImageMenuItemFactory,
-    ParagraphMenuInsertBelowQuoteMenuItemFactory,
-    ParagraphMenuInsertBelowShapeMenuItemFactory,
     ParagraphMenuInsertBelowSubmenuItemFactory,
     ParagraphMenuInsertBelowTableMenuItemFactory,
-    ParagraphMenuInsertCalloutMenuItemFactory,
-    ParagraphMenuInsertCodeMenuItemFactory,
-    ParagraphMenuInsertImageMenuItemFactory,
-    ParagraphMenuInsertQuoteMenuItemFactory,
-    ParagraphMenuInsertShapeMenuItemFactory,
     ParagraphMenuNoBackgroundMenuItemFactory,
     ParagraphMenuResetTextColorMenuItemFactory,
     ParagraphMenuTextColorHeaderActionMenuItemFactory,
@@ -609,18 +591,6 @@ export const menuSchema: MenuSchemaType = {
                     order: 1,
                     menuItemFactory: EmptyParagraphCheckListMenuItemFactory,
                 },
-                [DOCS_CODE_INSERT_COMMAND_ID]: {
-                    order: 2,
-                    menuItemFactory: ParagraphMenuInsertCodeMenuItemFactory,
-                },
-                [DOCS_QUOTE_INSERT_COMMAND_ID]: {
-                    order: 3,
-                    menuItemFactory: ParagraphMenuInsertQuoteMenuItemFactory,
-                },
-                [DOCS_CALLOUT_INSERT_COMMAND_ID]: {
-                    order: 4,
-                    menuItemFactory: ParagraphMenuInsertCalloutMenuItemFactory,
-                },
                 [HorizontalLineCommand.id]: {
                     order: 5,
                     menuItemFactory: EmptyParagraphHorizontalLineMenuItemFactory,
@@ -631,14 +601,6 @@ export const menuSchema: MenuSchemaType = {
                 [DocCreateTableOperation.id]: {
                     order: 0,
                     menuItemFactory: InsertDefaultTableMenuFactory,
-                },
-                [INSERT_DOC_IMAGE_COMMAND_ID]: {
-                    order: 1,
-                    menuItemFactory: ParagraphMenuInsertImageMenuItemFactory,
-                },
-                [INSERT_DOC_SHAPE_COMMAND_ID]: {
-                    order: 2,
-                    menuItemFactory: ParagraphMenuInsertShapeMenuItemFactory,
                 },
             },
         },
@@ -682,18 +644,6 @@ export const menuSchema: MenuSchemaType = {
                     order: 1,
                     menuItemFactory: InsertCheckListBellowMenuItemFactory,
                 },
-                [DOCS_CODE_INSERT_BELOW_COMMAND_ID]: {
-                    order: 2,
-                    menuItemFactory: ParagraphMenuInsertBelowCodeMenuItemFactory,
-                },
-                [DOCS_QUOTE_INSERT_BELOW_COMMAND_ID]: {
-                    order: 3,
-                    menuItemFactory: ParagraphMenuInsertBelowQuoteMenuItemFactory,
-                },
-                [DOCS_CALLOUT_INSERT_BELOW_COMMAND_ID]: {
-                    order: 4,
-                    menuItemFactory: ParagraphMenuInsertBelowCalloutMenuItemFactory,
-                },
                 [InsertHorizontalLineBellowCommand.id]: {
                     order: 5,
                     menuItemFactory: InsertHorizontalLineBellowMenuItemFactory,
@@ -704,14 +654,6 @@ export const menuSchema: MenuSchemaType = {
                 [`${DocCreateTableOperation.id}.below`]: {
                     order: 0,
                     menuItemFactory: ParagraphMenuInsertBelowTableMenuItemFactory,
-                },
-                [`${INSERT_DOC_IMAGE_COMMAND_ID}.below`]: {
-                    order: 1,
-                    menuItemFactory: ParagraphMenuInsertBelowImageMenuItemFactory,
-                },
-                [`${INSERT_DOC_SHAPE_COMMAND_ID}.below`]: {
-                    order: 2,
-                    menuItemFactory: ParagraphMenuInsertBelowShapeMenuItemFactory,
                 },
             },
         },
@@ -766,18 +708,6 @@ export const menuSchema: MenuSchemaType = {
                 [CheckListCommand.id]: {
                     order: 2,
                     menuItemFactory: CheckListMenuItemFactory,
-                },
-                [DOCS_CODE_INSERT_COMMAND_ID]: {
-                    order: 3,
-                    menuItemFactory: ParagraphMenuInsertCodeMenuItemFactory,
-                },
-                [DOCS_QUOTE_INSERT_COMMAND_ID]: {
-                    order: 4,
-                    menuItemFactory: ParagraphMenuInsertQuoteMenuItemFactory,
-                },
-                [DOCS_CALLOUT_INSERT_COMMAND_ID]: {
-                    order: 5,
-                    menuItemFactory: ParagraphMenuInsertCalloutMenuItemFactory,
                 },
             },
             layout: {

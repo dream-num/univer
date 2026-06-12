@@ -1,2 +1,6 @@
 @tailwind components;
 @tailwind utilities;
+
+.univer-context-menu-hover-suppressed button:hover:not(:focus) {
+    background-color: transparent !important;
+}

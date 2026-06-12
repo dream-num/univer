@@ -17,8 +17,11 @@
 import type { Direction, IOperation } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
 
+export type DocCursorMoveGranularity = 'character' | 'word' | 'line' | 'document';
+
 export interface IMoveCursorOperationParams {
     direction: Direction;
+    granularity?: DocCursorMoveGranularity;
 }
 
 // TODO@wzhudev: it should be moved to a command then trigger the operation.

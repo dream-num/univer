@@ -76,6 +76,15 @@ const locale: typeof enUS = {
             closeHeaderFooter: '關閉頁眉頁腳',
             disableText: '頁眉頁腳設置不可用',
         },
+        placeholder: {
+            heading1: '標題1',
+            heading2: '標題2',
+            heading3: '標題3',
+            heading4: '標題4',
+            heading5: '標題5',
+            normalText: '請輸入文字或按"/"啟用命令',
+            listItem: '項目',
+        },
         doc: {
             menu: {
                 paragraphSetting: 'Paragraph Setting',

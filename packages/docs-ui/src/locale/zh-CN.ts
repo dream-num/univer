@@ -76,6 +76,15 @@ const locale: typeof enUS = {
             closeHeaderFooter: '关闭页眉页脚',
             disableText: '页眉页脚设置不可用',
         },
+        placeholder: {
+            heading1: '标题1',
+            heading2: '标题2',
+            heading3: '标题3',
+            heading4: '标题4',
+            heading5: '标题5',
+            normalText: '请输入文字或按"/"启用命令',
+            listItem: '项目',
+        },
         doc: {
             menu: {
                 paragraphSetting: '段落设置',

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Dispatch, SetStateAction } from 'react';
+import type { Dispatch, KeyboardEvent, SetStateAction } from 'react';
 import type {
     IDisplayMenuItem,
     IMenuButtonItem,
@@ -39,6 +39,7 @@ import { IMenuManagerService } from '../../../services/menu/menu-manager.service
 import { useDependency, useObservable } from '../../../utils/di';
 
 type ContextMenuSizeVariant = 'default' | 'paragraph-t';
+type ContextMenuAutoFocusTarget = 'first-item' | 'container';
 
 interface IContextMenuPanelProps {
     menuType: string;
@@ -47,6 +48,10 @@ interface IContextMenuPanelProps {
     activeItemIds?: string[];
     hiddenItemIds?: string[];
     sizeVariant?: ContextMenuSizeVariant;
+    autoFocus?: boolean;
+    autoFocusTarget?: ContextMenuAutoFocusTarget;
+    suppressHoverUntilPointerMove?: boolean;
+    onCancel?: () => void;
     onOptionSelect?: (option: IValueOption) => void;
 }
 
@@ -57,6 +62,7 @@ interface IContextMenuMenuProps {
     maxMenuHeight: number;
     activeItemIds?: string[];
     hiddenItemIds?: string[];
+    hoverSuppressed?: boolean;
     sizeVariant: ContextMenuSizeVariant;
     onOptionSelect?: (option: IValueOption) => void;
 }
@@ -71,6 +77,7 @@ interface IContextMenuMenuItemProps {
     setActiveSubmenuKey: Dispatch<SetStateAction<string | null>>;
     activeItemIds?: string[];
     hiddenItemIds?: string[];
+    hoverSuppressed?: boolean;
     compact?: boolean;
     headerAction?: boolean;
     sizeVariant: ContextMenuSizeVariant;
@@ -90,6 +97,7 @@ export const CONTEXT_MENU_SUBMENU_CLOSE_DELAY = 500;
 export const CONTEXT_MENU_SUBMENU_PORTAL_ATTR = 'data-u-context-menu-submenu';
 const CONTEXT_MENU_CONNECTED_QUICK_GROUP_KEYS = new Set(['quickTop', 'quickBottom']);
 const CONTEXT_MENU_HEADER_QUICK_GROUP_KEYS = new Set(['quickTop', 'quickBottom']);
+const CONTEXT_MENU_NAVIGATION_KEYS = new Set(['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight']);
 
 type MenuLabel = IMenuItem['label'] | IValueOption['label'];
 
@@ -222,6 +230,131 @@ function getContextMenuQuickGroupClusterClassName(sizeVariant: ContextMenuSizeVa
     return sizeVariant === 'paragraph-t' ? 'univer-grid univer-gap-0 univer-py-2' : getContextMenuGroupClassName(sizeVariant);
 }
 
+function getMenuButtonCenter(button: HTMLButtonElement) {
+    const rect = button.getBoundingClientRect();
+
+    return {
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2,
+    };
+}
+
+function getMenuButtonRows(buttons: HTMLButtonElement[]): HTMLButtonElement[][] {
+    const sortedButtons = [...buttons].sort((left, right) => {
+        const leftRect = left.getBoundingClientRect();
+        const rightRect = right.getBoundingClientRect();
+
+        return leftRect.top - rightRect.top || leftRect.left - rightRect.left;
+    });
+    const rows: HTMLButtonElement[][] = [];
+
+    for (const button of sortedButtons) {
+        const rect = button.getBoundingClientRect();
+        const centerY = rect.top + rect.height / 2;
+        const row = rows.find((candidateRow) => {
+            const rowRect = candidateRow[0].getBoundingClientRect();
+            const rowCenterY = rowRect.top + rowRect.height / 2;
+            const tolerance = Math.max(4, Math.max(rowRect.height, rect.height) / 2);
+
+            return Math.abs(rowCenterY - centerY) <= tolerance;
+        });
+
+        if (row) {
+            row.push(button);
+        } else {
+            rows.push([button]);
+        }
+    }
+
+    rows.forEach((row) => row.sort((left, right) => left.getBoundingClientRect().left - right.getBoundingClientRect().left));
+
+    return rows;
+}
+
+function getFirstMenuButtonByVisualOrder(buttons: HTMLButtonElement[]): HTMLButtonElement | undefined {
+    return [...buttons].sort((left, right) => {
+        const leftRect = left.getBoundingClientRect();
+        const rightRect = right.getBoundingClientRect();
+
+        return leftRect.top - rightRect.top || leftRect.left - rightRect.left;
+    })[0];
+}
+
+export function getNextMenuButtonByDirection(
+    buttons: HTMLButtonElement[],
+    activeIndex: number,
+    key: string
+): HTMLButtonElement {
+    const direction = key === 'ArrowDown' || key === 'ArrowRight' ? 1 : -1;
+    const fallbackIndex = activeIndex < 0
+        ? (direction > 0 ? 0 : buttons.length - 1)
+        : (activeIndex + direction + buttons.length) % buttons.length;
+    const fallbackButton = buttons[fallbackIndex];
+    const activeButton = activeIndex >= 0 ? buttons[activeIndex] : null;
+
+    if (!activeButton) {
+        return fallbackButton;
+    }
+
+    const rows = getMenuButtonRows(buttons);
+    const activeRowIndex = rows.findIndex((row) => row.includes(activeButton));
+    const activeRow = rows[activeRowIndex];
+
+    if (activeRow && (key === 'ArrowRight' || key === 'ArrowLeft')) {
+        const rowButtonIndex = activeRow.indexOf(activeButton);
+        const nextRowButton = activeRow[rowButtonIndex + (key === 'ArrowRight' ? 1 : -1)];
+
+        return nextRowButton ?? fallbackButton;
+    }
+
+    if (activeRow && (key === 'ArrowDown' || key === 'ArrowUp')) {
+        const nextRow = rows[activeRowIndex + (key === 'ArrowDown' ? 1 : -1)];
+        if (nextRow) {
+            const activeCenter = getMenuButtonCenter(activeButton);
+
+            return [...nextRow].sort((left, right) => (
+                Math.abs(getMenuButtonCenter(left).x - activeCenter.x) - Math.abs(getMenuButtonCenter(right).x - activeCenter.x)
+            ))[0] ?? fallbackButton;
+        }
+    }
+
+    const activeCenter = getMenuButtonCenter(activeButton);
+    const scoredCandidates = buttons
+        .filter((button) => button !== activeButton)
+        .map((button) => {
+            const center = getMenuButtonCenter(button);
+            const deltaX = center.x - activeCenter.x;
+            const deltaY = center.y - activeCenter.y;
+            const isCandidate = key === 'ArrowRight'
+                ? deltaX > 0
+                : key === 'ArrowLeft'
+                    ? deltaX < 0
+                    : key === 'ArrowDown'
+                        ? deltaY > 0
+                        : deltaY < 0;
+
+            if (!isCandidate) {
+                return null;
+            }
+
+            const primaryDistance = key === 'ArrowRight' || key === 'ArrowLeft'
+                ? Math.abs(deltaX)
+                : Math.abs(deltaY);
+            const secondaryDistance = key === 'ArrowRight' || key === 'ArrowLeft'
+                ? Math.abs(deltaY)
+                : Math.abs(deltaX);
+
+            return {
+                button,
+                score: primaryDistance * 1000 + secondaryDistance,
+            };
+        })
+        .filter((candidate): candidate is { button: HTMLButtonElement; score: number } => candidate != null)
+        .sort((left, right) => left.score - right.score);
+
+    return scoredCandidates[0]?.button ?? fallbackButton;
+}
+
 export function getContextMenuSchemaRenderGroups(
     visibleSchemas: IMenuSchema[],
     sizeVariant: ContextMenuSizeVariant
@@ -287,7 +420,19 @@ function getContextMenuSubmenuPanelClassName(sizeVariant: ContextMenuSizeVariant
 }
 
 export function ContextMenuPanel(props: IContextMenuPanelProps) {
-    const { menuType, menuSessionVersion = 0, className, activeItemIds, hiddenItemIds, sizeVariant = 'default', onOptionSelect } = props;
+    const {
+        menuType,
+        menuSessionVersion = 0,
+        className,
+        activeItemIds,
+        hiddenItemIds,
+        sizeVariant = 'default',
+        autoFocus,
+        autoFocusTarget = 'first-item',
+        suppressHoverUntilPointerMove = false,
+        onCancel,
+        onOptionSelect,
+    } = props;
     const menuManagerService = useDependency(IMenuManagerService);
     const layoutService = useDependency(ILayoutService);
     const [menuElement, setMenuElement] = useState<HTMLDivElement | null>(null);
@@ -298,6 +443,7 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
 
         return Math.max(120, window.innerHeight - menuViewportPadding * 2);
     });
+    const [hoverSuppressed, setHoverSuppressed] = useState(suppressHoverUntilPointerMove);
     const menuSchemaVersion$ = useMemo(
         () => menuManagerService.menuChanged$.pipe(startWith(undefined), scan((version) => version + 1, 0)),
         [menuManagerService]
@@ -312,6 +458,73 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
         ?? (typeof document !== 'undefined' ? document.body : null);
 
     useScrollYOverContainer(menuElement, layoutService.rootContainerElement);
+
+    const getFocusableMenuButtons = useCallback(() => {
+        if (!menuElement) {
+            return [];
+        }
+
+        return Array.from(menuElement.querySelectorAll<HTMLButtonElement>('button:not(:disabled)'));
+    }, [menuElement]);
+
+    useEffect(() => {
+        if (!autoFocus || !menuElement) {
+            return;
+        }
+
+        const view = menuElement.ownerDocument.defaultView ?? window;
+        const frameId = view.requestAnimationFrame(() => {
+            if (autoFocusTarget === 'container') {
+                menuElement.focus();
+                return;
+            }
+
+            const firstButton = getFirstMenuButtonByVisualOrder(getFocusableMenuButtons());
+            (firstButton ?? menuElement).focus();
+        });
+
+        return () => view.cancelAnimationFrame(frameId);
+    }, [autoFocus, autoFocusTarget, getFocusableMenuButtons, menuElement, menuItems]);
+
+    useEffect(() => {
+        setHoverSuppressed(suppressHoverUntilPointerMove);
+    }, [menuSessionVersion, menuType, suppressHoverUntilPointerMove]);
+
+    const handleKeyDown = useCallback((event: KeyboardEvent<HTMLDivElement>) => {
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            event.stopPropagation();
+            onCancel?.();
+            return;
+        }
+
+        if (!CONTEXT_MENU_NAVIGATION_KEYS.has(event.key) && event.key !== 'Enter') {
+            return;
+        }
+
+        const focusableButtons = getFocusableMenuButtons();
+        if (!focusableButtons.length) {
+            return;
+        }
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        const activeElement = menuElement?.ownerDocument.activeElement;
+        const activeIndex = focusableButtons.findIndex((button) => button === activeElement);
+
+        if (event.key === 'Enter') {
+            const button = activeIndex >= 0 ? focusableButtons[activeIndex] : getFirstMenuButtonByVisualOrder(focusableButtons);
+            if (!button) {
+                return;
+            }
+
+            button.click();
+            return;
+        }
+
+        getNextMenuButtonByDirection(focusableButtons, activeIndex, event.key).focus();
+    }, [getFocusableMenuButtons, menuElement, onCancel]);
 
     useEffect(() => {
         const defaultView = layoutService.rootContainerElement?.ownerDocument?.defaultView
@@ -350,14 +563,22 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
     return (
         <div
             ref={setMenuElement}
+            tabIndex={-1}
             className={clsx(
                 getContextMenuPanelClassName(sizeVariant),
                 borderClassName,
                 scrollbarClassName,
+                hoverSuppressed && 'univer-context-menu-hover-suppressed',
                 className
             )}
             style={{
                 maxHeight: maxMenuHeight,
+            }}
+            onKeyDown={handleKeyDown}
+            onPointerMove={() => {
+                if (hoverSuppressed) {
+                    setHoverSuppressed(false);
+                }
             }}
             onWheel={(event) => event.stopPropagation()}
         >
@@ -367,6 +588,7 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
                 submenuPortalContainer={submenuPortalContainer}
                 activeItemIds={activeItemIds}
                 hiddenItemIds={hiddenItemIds}
+                hoverSuppressed={hoverSuppressed}
                 sizeVariant={sizeVariant}
                 onOptionSelect={onOptionSelect}
                 maxMenuHeight={maxMenuHeight}
@@ -376,7 +598,7 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
 }
 
 function ContextMenuMenu(props: IContextMenuMenuProps) {
-    const { menuSchemas, menuSessionVersion, submenuPortalContainer, activeItemIds, hiddenItemIds, sizeVariant, onOptionSelect, maxMenuHeight } = props;
+    const { menuSchemas, menuSessionVersion, submenuPortalContainer, activeItemIds, hiddenItemIds, hoverSuppressed, sizeVariant, onOptionSelect, maxMenuHeight } = props;
     const localeService = useDependency(LocaleService);
     const hiddenGroupStates = useContextGroupHiddenStates(menuSchemas);
     const [activeSubmenuKey, setActiveSubmenuKey] = useState<string | null>(null);
@@ -424,6 +646,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                             item={menuSchema}
                             activeItemIds={activeItemIds}
                             hiddenItemIds={hiddenItemIds}
+                            hoverSuppressed={hoverSuppressed}
                             onOptionSelect={onOptionSelect}
                         />
                     )
@@ -433,6 +656,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                             columns={getContextMenuQuickGroupColumns(menuSchema)}
                             activeItemIds={activeItemIds}
                             hiddenItemIds={hiddenItemIds}
+                            hoverSuppressed={hoverSuppressed}
                             sizeVariant={sizeVariant}
                             layoutVariant={menuSchema.quickLayoutVariant}
                             onOptionSelect={onOptionSelect}
@@ -480,6 +704,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                             onOptionSelect={onOptionSelect}
                             maxMenuHeight={maxMenuHeight}
                             hiddenItemIds={hiddenItemIds}
+                            hoverSuppressed={hoverSuppressed}
                             sizeVariant={sizeVariant}
                         />
                     );
@@ -516,6 +741,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                                         setActiveSubmenuKey={setActiveSubmenuKey}
                                         activeItemIds={activeItemIds}
                                         hiddenItemIds={hiddenItemIds}
+                                        hoverSuppressed={hoverSuppressed}
                                         onOptionSelect={onOptionSelect}
                                         maxMenuHeight={maxMenuHeight}
                                         compact
@@ -548,6 +774,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                                     setActiveSubmenuKey={setActiveSubmenuKey}
                                     activeItemIds={activeItemIds}
                                     hiddenItemIds={hiddenItemIds}
+                                    hoverSuppressed={hoverSuppressed}
                                     onOptionSelect={onOptionSelect}
                                     maxMenuHeight={maxMenuHeight}
                                     sizeVariant={sizeVariant}
@@ -589,6 +816,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                     setActiveSubmenuKey={setActiveSubmenuKey}
                     activeItemIds={activeItemIds}
                     hiddenItemIds={hiddenItemIds}
+                    hoverSuppressed={hoverSuppressed}
                     compact
                     headerAction
                     sizeVariant={sizeVariant}
@@ -611,6 +839,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
         setActiveSubmenuKey,
         activeItemIds,
         hiddenItemIds = [],
+        hoverSuppressed = false,
         compact = false,
         headerAction = false,
         sizeVariant,
@@ -791,11 +1020,16 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
             ),
         disabled
             ? 'univer-cursor-not-allowed univer-opacity-60'
-            : `
+            : !hoverSuppressed && `
               univer-cursor-pointer
               hover:univer-bg-gray-50
-              dark:hover:!univer-bg-gray-600
             `,
+        !disabled && hoverSuppressed && 'univer-cursor-pointer',
+        !disabled && `
+          focus:univer-bg-gray-50 focus:univer-outline-none
+          dark:focus:!univer-bg-gray-600
+        `,
+        !disabled && !hoverSuppressed && 'dark:hover:!univer-bg-gray-600',
         resolveMenuItemActiveState(menuItem.id, activated, activeItemIds) && `
           univer-bg-gray-200
           dark:!univer-bg-gray-600
@@ -828,7 +1062,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
             className="univer-relative"
             onMouseEnter={() => {
                 clearSubmenuCloseTimer();
-                if (hasSubmenu && !disabled) {
+                if (hasSubmenu && !disabled && !hoverSuppressed) {
                     setSubmenuPositionReady(false);
                     setActiveSubmenuKey(menuKey);
                 }
@@ -1069,6 +1303,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                                         submenuPortalContainer={submenuPortalContainer}
                                         activeItemIds={activeItemIds}
                                         hiddenItemIds={hiddenItemIds}
+                                        hoverSuppressed={hoverSuppressed}
                                         sizeVariant={sizeVariant}
                                         onOptionSelect={onSubmenuOptionSelect}
                                         maxMenuHeight={maxMenuHeight}

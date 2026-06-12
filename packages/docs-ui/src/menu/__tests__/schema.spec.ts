@@ -42,23 +42,35 @@ import {
     DOC_PARAGRAPH_T_INSERT_BELOW_MENU_ID,
     DOC_PARAGRAPH_T_INSERT_MENU_ID,
     DOC_TABLE_BLOCK_MENU_ID,
-    DOCS_CALLOUT_INSERT_BELOW_COMMAND_ID,
-    DOCS_CALLOUT_INSERT_COMMAND_ID,
-    DOCS_CODE_INSERT_BELOW_COMMAND_ID,
-    DOCS_CODE_INSERT_COMMAND_ID,
-    DOCS_QUOTE_INSERT_BELOW_COMMAND_ID,
-    DOCS_QUOTE_INSERT_COMMAND_ID,
     EMPTY_PARAGRAPH_MENU_ID,
     INSERT_BELLOW_MENU_ID,
-    INSERT_DOC_IMAGE_COMMAND_ID,
-    INSERT_DOC_SHAPE_COMMAND_ID,
+    InsertBulletListBellowMenuItemFactory,
+    InsertCheckListBellowMenuItemFactory,
+    InsertHorizontalLineBellowMenuItemFactory,
+    InsertOrderListBellowMenuItemFactory,
     ParagraphMenuBackgroundColorHeaderActionMenuItemFactory,
     ParagraphMenuDefaultTextColorMenuItemFactory,
-    ParagraphMenuInsertBelowShapeMenuItemFactory,
-    ParagraphMenuInsertShapeMenuItemFactory,
+    ParagraphMenuInsertBelowHeadingH1MenuItemFactory,
+    ParagraphMenuInsertBelowTableMenuItemFactory,
     ParagraphMenuTextColorHeaderActionMenuItemFactory,
 } from '../paragraph-menu';
 import { menuSchema } from '../schema';
+
+const OPTIONAL_INSERT_COMMAND_IDS = [
+    'docs-code.command.insert',
+    'docs-quote.command.insert',
+    'docs-callout.command.insert',
+    'doc.command.insert-float-image',
+    'doc.command.menu-insert-shape',
+];
+
+const OPTIONAL_INSERT_BELOW_COMMAND_IDS = [
+    'docs-code.command.insert-below',
+    'docs-quote.command.insert-below',
+    'docs-callout.command.insert-below',
+    'doc.command.insert-float-image.below',
+    'doc.command.menu-insert-shape.below',
+];
 
 describe('docs ui ribbon schema', () => {
     it('uses one align dropdown instead of separate toolbar buttons', () => {
@@ -234,14 +246,10 @@ describe('docs ui ribbon schema', () => {
         expect(Object.keys(quickBottom)).toEqual(expect.arrayContaining([
             BulletListCommand.id,
             CheckListCommand.id,
-            DOCS_CODE_INSERT_COMMAND_ID,
-            DOCS_QUOTE_INSERT_COMMAND_ID,
-            DOCS_CALLOUT_INSERT_COMMAND_ID,
             HorizontalLineCommand.id,
         ]));
         expect(insert[DocCreateTableOperation.id].menuItemFactory).toBe(InsertDefaultTableMenuFactory);
-        expect(insert[INSERT_DOC_IMAGE_COMMAND_ID].menuItemFactory).toBeDefined();
-        expect(insert[INSERT_DOC_SHAPE_COMMAND_ID].menuItemFactory).toBeDefined();
+        expect(OPTIONAL_INSERT_COMMAND_IDS.some((id) => quickBottom[id] || insert[id])).toBe(false);
     });
 
     it('builds the edit-state T menu with official submenus instead of a custom panel', () => {
@@ -258,9 +266,7 @@ describe('docs ui ribbon schema', () => {
         expect(quickTop[NormalTextHeadingCommand.id].menuItemFactory).toBeDefined();
         expect(quickTop[TitleHeadingCommand.id].menuItemFactory).toBeDefined();
         expect(quickTop[SubtitleHeadingCommand.id].menuItemFactory).toBeDefined();
-        expect(quickBottom[DOCS_CODE_INSERT_COMMAND_ID].menuItemFactory).toBeDefined();
-        expect(quickBottom[DOCS_QUOTE_INSERT_COMMAND_ID].menuItemFactory).toBeDefined();
-        expect(quickBottom[DOCS_CALLOUT_INSERT_COMMAND_ID].menuItemFactory).toBeDefined();
+        expect(OPTIONAL_INSERT_COMMAND_IDS.some((id) => quickBottom[id])).toBe(false);
         expect(layout[DOC_PARAGRAPH_T_ALIGN_MENU_ID].menuItemFactory).toBeDefined();
         expect(layout[DOC_PARAGRAPH_T_COLORS_MENU_ID].menuItemFactory).toBeDefined();
         expect(format[DocCutCurrentParagraphCommand.id].menuItemFactory).toBeDefined();
@@ -333,23 +339,37 @@ describe('docs ui ribbon schema', () => {
         expect(Object.keys(insertBelowMenu.quickBottom)).toEqual(expect.arrayContaining([
             InsertBulletListBellowCommand.id,
             InsertCheckListBellowCommand.id,
-            DOCS_CODE_INSERT_BELOW_COMMAND_ID,
-            DOCS_QUOTE_INSERT_BELOW_COMMAND_ID,
-            DOCS_CALLOUT_INSERT_BELOW_COMMAND_ID,
             InsertHorizontalLineBellowCommand.id,
         ]));
         expect(insertBelowMenu.insert[`${DocCreateTableOperation.id}.below`].menuItemFactory).toBeDefined();
-        expect(insertBelowMenu.insert[`${INSERT_DOC_IMAGE_COMMAND_ID}.below`].menuItemFactory).toBeDefined();
-        expect(insertBelowMenu.insert[`${INSERT_DOC_SHAPE_COMMAND_ID}.below`].menuItemFactory).toBeDefined();
+        expect(OPTIONAL_INSERT_BELOW_COMMAND_IDS.some((id) => insertBelowMenu.quickBottom[id] || insertBelowMenu.insert[id])).toBe(false);
     });
 
-    it('uses official shape submenus for paragraph insert shape actions', () => {
-        const rootShapeItem = ParagraphMenuInsertShapeMenuItemFactory({ get: () => ({ get: () => undefined, register: () => undefined }) } as never);
-        const belowShapeItem = ParagraphMenuInsertBelowShapeMenuItemFactory({ get: () => ({ get: () => undefined, register: () => undefined }) } as never);
+    it('registers icons needed by paragraph T insert-below tiny menu items', () => {
+        const registered = new Set<string>();
+        const accessor = {
+            get: () => ({
+                get: (key: string) => registered.has(key),
+                register: (key: string) => registered.add(key),
+            }),
+        } as never;
 
-        expect(rootShapeItem.type).toBe(MenuItemType.SUBITEMS);
-        expect(rootShapeItem.id).toBe(INSERT_DOC_SHAPE_COMMAND_ID);
-        expect(belowShapeItem.type).toBe(MenuItemType.SUBITEMS);
-        expect(belowShapeItem.id).toBe(`${INSERT_DOC_SHAPE_COMMAND_ID}.below`);
+        [
+            ParagraphMenuInsertBelowHeadingH1MenuItemFactory,
+            InsertOrderListBellowMenuItemFactory,
+            InsertBulletListBellowMenuItemFactory,
+            InsertCheckListBellowMenuItemFactory,
+            InsertHorizontalLineBellowMenuItemFactory,
+            ParagraphMenuInsertBelowTableMenuItemFactory,
+        ].forEach((factory) => factory(accessor));
+
+        expect([...registered]).toEqual(expect.arrayContaining([
+            'H1Icon',
+            'OrderIcon',
+            'UnorderIcon',
+            'TodoListDoubleIcon',
+            'ReduceIcon',
+            'GridIcon',
+        ]));
     });
 });

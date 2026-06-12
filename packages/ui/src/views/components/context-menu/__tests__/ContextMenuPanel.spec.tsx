@@ -28,6 +28,7 @@ import {
     ContextMenuPanel,
     getContextMenuQuickGroupColumns,
     getContextMenuSchemaRenderGroups,
+    getNextMenuButtonByDirection,
     shouldShowContextMenuGroupSeparator,
 } from '../ContextMenuPanel';
 
@@ -117,6 +118,147 @@ describe('ContextMenuPanel', () => {
             columns: 6,
             sizeVariant: 'paragraph-t',
         }));
+    });
+
+    it('suppresses initial hover highlight until the pointer moves', () => {
+        dependencyMap.clear();
+        tinyMenuGroupSpy.mockClear();
+
+        dependencyMap.set(IMenuManagerService, {
+            menuChanged$: new BehaviorSubject<void>(undefined),
+            getMenuByPositionKey: vi.fn(() => [{
+                key: 'insert',
+                order: 0,
+                children: [{
+                    key: 'table',
+                    order: 0,
+                    item: {
+                        id: 'insert-table',
+                        type: MenuItemType.BUTTON,
+                    },
+                }],
+            }]),
+        });
+        dependencyMap.set(ILayoutService, {
+            rootContainerElement: document.body,
+        });
+        dependencyMap.set(LocaleService, {
+            t: (key: string) => key,
+            direction$: new BehaviorSubject<'ltr'>('ltr'),
+        });
+
+        const { container } = render(React.createElement(ContextMenuPanel as never, {
+            menuType: 'insert-menu',
+            suppressHoverUntilPointerMove: true,
+        }));
+        const panel = container.firstChild as HTMLDivElement;
+
+        expect(panel.className).toContain('univer-context-menu-hover-suppressed');
+
+        fireEvent.pointerMove(panel);
+
+        expect(panel.className).not.toContain('univer-context-menu-hover-suppressed');
+    });
+
+    it('keeps selector submenus closed while initial hover is suppressed', () => {
+        dependencyMap.clear();
+        tinyMenuGroupSpy.mockClear();
+
+        dependencyMap.set(IMenuManagerService, {
+            menuChanged$: new BehaviorSubject<void>(undefined),
+            getMenuByPositionKey: vi.fn(() => [{
+                key: 'insert',
+                order: 0,
+                children: [{
+                    key: 'table',
+                    order: 0,
+                    item: {
+                        id: 'insert-table',
+                        type: MenuItemType.BUTTON_SELECTOR,
+                        title: 'insert table',
+                        tooltip: 'insert table',
+                        selections: [{
+                            label: 'table picker',
+                            value: 'table picker',
+                        }],
+                    },
+                }],
+            }]),
+        });
+        dependencyMap.set(ILayoutService, {
+            rootContainerElement: document.body,
+        });
+        dependencyMap.set(LocaleService, {
+            t: (key: string) => key,
+            direction$: new BehaviorSubject<'ltr'>('ltr'),
+        });
+
+        const { container, unmount } = render(React.createElement(ContextMenuPanel as never, {
+            menuType: 'insert-menu',
+            suppressHoverUntilPointerMove: true,
+        }));
+        const panel = container.firstChild as HTMLDivElement;
+        const tableButton = document.querySelector('button[title="insert table"]') as HTMLButtonElement | null;
+        const tableWrapper = tableButton?.parentElement as HTMLDivElement | null;
+
+        expect(tableWrapper).not.toBeNull();
+
+        fireEvent.mouseEnter(tableWrapper!);
+        expect(document.querySelectorAll(`[${CONTEXT_MENU_SUBMENU_PORTAL_ATTR}="true"]`)).toHaveLength(0);
+
+        fireEvent.pointerMove(panel);
+        fireEvent.mouseEnter(tableWrapper!);
+        expect(document.querySelectorAll(`[${CONTEXT_MENU_SUBMENU_PORTAL_ATTR}="true"]`)).toHaveLength(1);
+
+        unmount();
+    });
+
+    it('can focus the menu container without selecting an item initially', async () => {
+        dependencyMap.clear();
+        tinyMenuGroupSpy.mockClear();
+
+        dependencyMap.set(IMenuManagerService, {
+            menuChanged$: new BehaviorSubject<void>(undefined),
+            getMenuByPositionKey: vi.fn(() => [{
+                key: 'insert',
+                order: 0,
+                children: [{
+                    key: 'table',
+                    order: 0,
+                    item: {
+                        id: 'insert-table',
+                        type: MenuItemType.BUTTON,
+                        title: 'insert table',
+                        tooltip: 'insert table',
+                    },
+                }],
+            }]),
+        });
+        dependencyMap.set(ILayoutService, {
+            rootContainerElement: document.body,
+        });
+        dependencyMap.set(LocaleService, {
+            t: (key: string) => key,
+            direction$: new BehaviorSubject<'ltr'>('ltr'),
+        });
+
+        const { container } = render(React.createElement(ContextMenuPanel as never, {
+            menuType: 'insert-menu',
+            autoFocus: true,
+            autoFocusTarget: 'container',
+        }));
+        const panel = container.firstChild as HTMLDivElement;
+        const tableButton = document.querySelector('button[title="insert table"]') as HTMLButtonElement | null;
+
+        await act(async () => {
+            await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+        });
+
+        expect(document.activeElement).toBe(panel);
+
+        fireEvent.keyDown(panel, { key: 'ArrowDown' });
+
+        expect(document.activeElement).toBe(tableButton);
     });
 
     it('does not render a separator between consecutive header quick rows', () => {
@@ -403,6 +545,116 @@ describe('ContextMenuPanel', () => {
 
         expect(screen.getAllByText('docs-ui.paragraphMenu.align').length).toBeGreaterThan(0);
         expect(screen.getAllByTestId('tiny-menu-group').length).toBeGreaterThan(0);
+    });
+
+    it('supports keyboard focus, navigation, confirm, and cancel', async () => {
+        dependencyMap.clear();
+        const onOptionSelect = vi.fn();
+        const onCancel = vi.fn();
+
+        dependencyMap.set(IMenuManagerService, {
+            menuChanged$: new BehaviorSubject<void>(undefined),
+            getMenuByPositionKey: vi.fn(() => [{
+                key: 'insert',
+                order: 0,
+                children: [
+                    {
+                        key: 'heading-1',
+                        order: 0,
+                        item: {
+                            id: 'heading-1',
+                            type: MenuItemType.BUTTON,
+                            title: 'heading 1',
+                            tooltip: 'heading 1',
+                        },
+                    },
+                    {
+                        key: 'callout',
+                        order: 1,
+                        item: {
+                            id: 'callout',
+                            type: MenuItemType.BUTTON,
+                            title: 'callout',
+                            tooltip: 'callout',
+                        },
+                    },
+                ],
+            }]),
+        });
+        dependencyMap.set(ILayoutService, {
+            rootContainerElement: document.body,
+        });
+        dependencyMap.set(LocaleService, {
+            t: (key: string) => key,
+            direction$: new BehaviorSubject<'ltr'>('ltr'),
+        });
+
+        const { container } = render(
+            <ContextMenuPanel
+                menuType="keyboard-menu"
+                autoFocus
+                onCancel={onCancel}
+                onOptionSelect={onOptionSelect}
+            />
+        );
+
+        const panel = container.firstElementChild as HTMLDivElement;
+        const headingButton = document.querySelector('button[title="heading 1"]') as HTMLButtonElement | null;
+        const calloutButton = document.querySelector('button[title="callout"]') as HTMLButtonElement | null;
+
+        await act(async () => {
+            await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+        });
+
+        expect(document.activeElement).toBe(headingButton);
+
+        fireEvent.keyDown(panel, { key: 'ArrowDown' });
+        expect(document.activeElement).toBe(calloutButton);
+
+        fireEvent.keyDown(panel, { key: 'ArrowLeft' });
+        expect(document.activeElement).toBe(headingButton);
+
+        fireEvent.keyDown(panel, { key: 'ArrowRight' });
+        expect(document.activeElement).toBe(calloutButton);
+
+        fireEvent.keyDown(panel, { key: 'Enter' });
+        expect(onOptionSelect).toHaveBeenCalledWith(expect.objectContaining({
+            id: 'callout',
+            label: 'callout',
+        }));
+
+        fireEvent.keyDown(panel, { key: 'Escape' });
+        expect(onCancel).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps left and right navigation on the same visual row until the row boundary', () => {
+        const createButton = (left: number, top: number) => ({
+            getBoundingClientRect: () => ({
+                bottom: top + 32,
+                height: 32,
+                left,
+                right: left + 32,
+                top,
+                width: 32,
+                x: left,
+                y: top,
+                toJSON: () => ({}),
+            }),
+        }) as HTMLButtonElement;
+        const h2 = createButton(56, 0);
+        const h3 = createButton(112, 0);
+        const visuallyCloseSecondRowItem = createButton(60, 40);
+
+        expect(getNextMenuButtonByDirection([
+            h2,
+            h3,
+            visuallyCloseSecondRowItem,
+        ], 0, 'ArrowRight')).toBe(h3);
+        expect(getNextMenuButtonByDirection([
+            h2,
+            h3,
+            visuallyCloseSecondRowItem,
+        ], 1, 'ArrowRight')).toBe(visuallyCloseSecondRowItem);
     });
 
     it('keeps the newly hovered submenu open when switching quickly between sibling submenu items', () => {

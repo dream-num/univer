@@ -37,9 +37,10 @@ export interface ITinyMenuGroupProps {
     columns?: number;
     sizeVariant?: TinyMenuSizeVariant;
     layoutVariant?: TinyMenuLayoutVariant;
+    hoverSuppressed?: boolean;
 }
 
-export function DesignTinyMenuGroup({ items, columns, sizeVariant = 'default', layoutVariant = 'default' }: ITinyMenuGroupProps) {
+export function DesignTinyMenuGroup({ items, columns, sizeVariant = 'default', layoutVariant = 'default', hoverSuppressed = false }: ITinyMenuGroupProps) {
     const isParagraphTVariant = sizeVariant === 'paragraph-t';
     const isCompactParagraphVariant = isParagraphTVariant && layoutVariant === 'compact';
 
@@ -65,12 +66,21 @@ export function DesignTinyMenuGroup({ items, columns, sizeVariant = 'default', l
                 : undefined}
         >
             {items.map((item) => {
+                const showTooltip = !isParagraphTVariant && item.tooltip;
                 const ele = (
-                    <div
+                    <button
                         key={item.key}
+                        type="button"
+                        aria-label={item.tooltip ?? item.key}
+                        title={showTooltip ? item.tooltip : undefined}
                         className={clsx(
                             `
                               univer-flex univer-cursor-pointer univer-items-center univer-justify-center
+                              univer-border-none univer-bg-transparent univer-p-0
+                              focus:univer-bg-gray-50 focus:univer-outline-none
+                              dark:focus:!univer-bg-gray-900
+                            `,
+                            !hoverSuppressed && `
                               hover:univer-bg-gray-50
                               dark:hover:!univer-bg-gray-900
                             `,
@@ -101,9 +111,9 @@ export function DesignTinyMenuGroup({ items, columns, sizeVariant = 'default', l
                             )}
                             extend={ICON_EXTEND}
                         />
-                    </div>
+                    </button>
                 );
-                return item.tooltip
+                return showTooltip
                     ? (
                         <Tooltip key={item.key} title={item.tooltip}>
                             {ele}

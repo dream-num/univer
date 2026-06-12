@@ -24,6 +24,8 @@ describe('keycode mappings', () => {
         expect(KeyCodeToChar[KeyCode.DELETE]).toBe('Del');
         expect(KeyCodeToChar[KeyCode.ESC]).toBe('Esc');
         expect(KeyCodeToChar[KeyCode.SPACE]).toBe('Space');
+        expect(KeyCodeToChar[KeyCode.HOME]).toBe('Home');
+        expect(KeyCodeToChar[KeyCode.END]).toBe('End');
     });
 
     it('should map alphanumeric and function keys', () => {

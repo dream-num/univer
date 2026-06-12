@@ -110,6 +110,7 @@ export { getCommandSkeleton } from './commands/util';
 export type { IUniverDocsUIConfig } from './config/config';
 export { DocUIController } from './controllers/doc-ui.controller';
 export { DocBackScrollRenderController } from './controllers/render-controllers/back-scroll.render-controller';
+export { DocParagraphPlaceholderRenderController } from './controllers/render-controllers/doc-paragraph-placeholder.render-controller';
 export { DocRenderController } from './controllers/render-controllers/doc.render-controller';
 export {
     AlignMenuItemFactory,
@@ -139,7 +140,6 @@ export {
     EMPTY_PARAGRAPH_MENU_ID,
     getDocBlockRangeMenuId,
     INSERT_BELLOW_MENU_ID,
-    INSERT_DOC_SHAPE_COMMAND_ID,
     ParagraphMenuInsertBelowSubmenuItemFactory,
 } from './menu/paragraph-menu';
 export { menuSchema as DocsUIMenuSchema } from './menu/schema';

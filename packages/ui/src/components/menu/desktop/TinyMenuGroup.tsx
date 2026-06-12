@@ -29,6 +29,7 @@ interface IUIQuickMenuGroupProps {
     item: IMenuSchema;
     activeItemIds?: string[];
     hiddenItemIds?: string[];
+    hoverSuppressed?: boolean;
     columns?: number;
     sizeVariant?: TinyMenuSizeVariant;
     layoutVariant?: TinyMenuLayoutVariant;
@@ -135,7 +136,7 @@ function QuickTileMenuItem(props: IUIQuickTileMenuItemProps) {
 }
 
 export function UITinyMenuGroup(props: IUIQuickMenuGroupProps) {
-    const { item, activeItemIds, hiddenItemIds = EMPTY_HIDDEN_ITEM_IDS, columns, sizeVariant = 'default', layoutVariant = 'default', onOptionSelect } = props;
+    const { item, activeItemIds, hiddenItemIds = EMPTY_HIDDEN_ITEM_IDS, hoverSuppressed, columns, sizeVariant = 'default', layoutVariant = 'default', onOptionSelect } = props;
     const [activeItems, setActiveItems] = useState<string[]>([]);
     const [hiddenItems, setHiddenItems] = useState<string[]>([]);
     const componentManager = useDependency(ComponentManager);
@@ -192,12 +193,15 @@ export function UITinyMenuGroup(props: IUIQuickMenuGroupProps) {
 
     if (!item.children) return null;
 
-    return (
-        <DesignTinyMenuGroup
-            columns={columns}
-            sizeVariant={sizeVariant}
-            layoutVariant={layoutVariant}
-            items={visibleChildren.map((child) => ({
+    const items = visibleChildren
+        .map((child) => {
+            const Icon = child.item?.icon ? componentManager.get(child.item.icon as string) : undefined;
+
+            if (!Icon) {
+                return null;
+            }
+
+            return {
                 key: child.key,
                 onClick: () => {
                     onOptionSelect?.({
@@ -213,10 +217,20 @@ export function UITinyMenuGroup(props: IUIQuickMenuGroupProps) {
                 iconClassName: child.item?.icon === 'TextTypeIcon'
                     ? (sizeVariant === 'paragraph-t' ? '!univer-size-4' : '!univer-size-3.5')
                     : undefined,
-                Icon: componentManager.get(child.item!.icon as string)!,
+                Icon,
                 active: resolveMenuItemActiveState(child.item?.id, activeItems.includes(child.item?.id ?? ''), activeItemIds),
                 tooltip: child.item?.tooltip ? localeService.t(child.item.tooltip) : undefined,
-            }))}
+            };
+        })
+        .filter((child): child is NonNullable<typeof child> => child != null);
+
+    return (
+        <DesignTinyMenuGroup
+            columns={columns}
+            sizeVariant={sizeVariant}
+            layoutVariant={layoutVariant}
+            hoverSuppressed={hoverSuppressed}
+            items={items}
         />
     );
 }

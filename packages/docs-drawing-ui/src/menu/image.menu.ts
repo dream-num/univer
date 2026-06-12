@@ -81,3 +81,17 @@ export function UploadFloatImageMenuFactory(_accessor: IAccessor): IMenuItem {
         hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
+
+export function UploadFloatImageBelowMenuFactory(_accessor: IAccessor): IMenuItem {
+    return {
+        id: `${IMAGE_MENU_UPLOAD_FLOAT_ID}.below`,
+        commandId: IMAGE_MENU_UPLOAD_FLOAT_ID,
+        title: 'docs-drawing-ui.upload.float',
+        type: MenuItemType.BUTTON,
+        icon: 'AddImageIcon',
+        params: {
+            paragraphMenuPlacement: 'below',
+        },
+        hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_DOC),
+    };
+}

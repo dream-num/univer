@@ -29,6 +29,7 @@ import {
     cloneCellData,
     cloneCellDataMatrix,
     cloneValue,
+    createParagraphId,
     CustomRangeType,
     DEFAULT_STYLES,
     generateRandomId,
@@ -586,6 +587,7 @@ export function generateBody(text: string): IDocumentBody {
             dataStream: `${urlText}\r\n`,
             paragraphs: [{
                 startIndex: urlText.length,
+                paragraphId: createParagraphId(new Set()),
             }],
             customRanges: [range],
         };
@@ -597,10 +599,11 @@ export function generateBody(text: string): IDocumentBody {
         dataStream += '\r\n';
     }
     const paragraphs: IParagraph[] = [];
+    const existingParagraphIds = new Set<string>();
 
     for (let i = 0; i < dataStream.length; i++) {
         if (dataStream[i] === '\r') {
-            paragraphs.push({ startIndex: i });
+            paragraphs.push({ startIndex: i, paragraphId: createParagraphId(existingParagraphIds) });
         }
     }
 

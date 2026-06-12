@@ -38,9 +38,11 @@ function getDefaultDocWithCustomRange() {
         paragraphs: [
             {
                 startIndex: 4,
+                paragraphId: 'para_first',
             },
             {
                 startIndex: 9,
+                paragraphId: 'para_second',
             },
         ],
         customDecorations: [],
@@ -69,6 +71,7 @@ describe('apply consistency', () => {
                     dataStream: '\r',
                     paragraphs: [{
                         startIndex: 0,
+                        paragraphId: 'para_first',
                     }],
                     customRanges: [],
                 },

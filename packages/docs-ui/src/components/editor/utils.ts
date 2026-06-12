@@ -15,7 +15,7 @@
  */
 
 import type { IDocumentData } from '@univerjs/core';
-import { DEFAULT_EMPTY_DOCUMENT_VALUE, DocumentFlavor } from '@univerjs/core';
+import { createParagraphId, DEFAULT_EMPTY_DOCUMENT_VALUE, DocumentFlavor } from '@univerjs/core';
 
 /**
  *
@@ -26,11 +26,13 @@ export function genSnapShotByValue(id = '', value = '') {
     const dataStream = `${value}${DEFAULT_EMPTY_DOCUMENT_VALUE}`;
     const paragraphs = [];
     const sectionBreaks = [];
+    const existingParagraphIds = new Set<string>();
 
     for (let i = 0; i < dataStream.length; i++) {
         if (dataStream[i] === '\r') {
             paragraphs.push({
                 startIndex: i,
+                paragraphId: createParagraphId(existingParagraphIds),
             });
         }
 

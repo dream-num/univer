@@ -233,6 +233,7 @@ function updateParagraphs(
         for (const updateParagraph of updateDataParagraphs) {
             const {
                 startIndex: updateStartIndex,
+                paragraphId: updateParagraphId,
                 paragraphStyle: updateParagraphStyle,
                 bullet: updateBullet,
             } = updateParagraph;
@@ -242,6 +243,7 @@ function updateParagraphs(
             for (const removeParagraph of removeParagraphs) {
                 const {
                     startIndex: removeStartIndex,
+                    paragraphId: removeParagraphId,
                     paragraphStyle: removeParagraphStyle,
                     bullet: removeBullet,
                 } = removeParagraph;
@@ -273,6 +275,7 @@ function updateParagraphs(
                 if (updateStartIndex === removeStartIndex) {
                     splitUpdateParagraphs.push({
                         startIndex: updateStartIndex,
+                        paragraphId: updateParagraphId ?? removeParagraphId,
                         paragraphStyle: newParagraphStyle,
                         bullet: newBullet,
                     });
@@ -284,9 +287,17 @@ function updateParagraphs(
         }
 
         updateBody.paragraphs = newUpdateParagraphs;
+    } else {
+        for (const updateParagraph of updateDataParagraphs) {
+            const removeParagraph = removeParagraphs.find((paragraph) => paragraph.startIndex === updateParagraph.startIndex);
+
+            if (removeParagraph && updateParagraph.paragraphId == null) {
+                updateParagraph.paragraphId = removeParagraph.paragraphId;
+            }
+        }
     }
 
-    insertParagraphs(body, updateBody, textLength, currentIndex);
+    insertParagraphs(body, updateBody, textLength, currentIndex, true);
 
     return removeParagraphs;
 }

@@ -56,15 +56,19 @@ describe('test case in apply utils', () => {
             paragraphs: [
                 {
                     startIndex: 5,
+                    paragraphId: 'para_fixture_1010',
                 },
                 {
                     startIndex: 17,
+                    paragraphId: 'para_fixture_1011',
                 },
                 {
                     startIndex: 29,
+                    paragraphId: 'para_fixture_1012',
                 },
                 {
                     startIndex: 38,
+                    paragraphId: 'para_fixture_1013',
                 },
             ],
         };
@@ -177,15 +181,19 @@ describe('test case in apply utils', () => {
                 paragraphs: [
                     {
                         startIndex: 5,
+                        paragraphId: 'para_fixture_1014',
                     },
                     {
                         startIndex: 17,
+                        paragraphId: 'para_fixture_1015',
                     },
                     {
                         startIndex: 29,
+                        paragraphId: 'para_fixture_1016',
                     },
                     {
                         startIndex: 38,
+                        paragraphId: 'para_fixture_1017',
                     },
                 ],
             };

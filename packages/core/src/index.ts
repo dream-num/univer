@@ -99,6 +99,13 @@ export {
     normalizeBody,
     SliceBodyType,
 } from './docs/data-model/text-x/utils';
+export {
+    cloneBodyWithFreshParagraphIds,
+    cloneParagraphWithId,
+    createParagraphId,
+    PARAGRAPH_ID_PREFIX,
+    type IParagraphIdScope,
+} from './docs/paragraph-id';
 export { EventState, EventSubject, fromEventSubject, type IEventObserver } from './observer/observable';
 export { AuthzIoLocalService } from './services/authz-io/authz-io-local.service';
 export { IAuthzIoService } from './services/authz-io/type';

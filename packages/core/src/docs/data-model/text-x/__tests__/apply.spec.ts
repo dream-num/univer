@@ -73,6 +73,7 @@ function getDefaultDocWithParagraph() {
         paragraphs: [
             {
                 startIndex: 1,
+                paragraphId: 'para_fixture_1018',
             },
         ],
     };
@@ -104,6 +105,7 @@ function getDefaultDocWithCustomRange() {
         paragraphs: [
             {
                 startIndex: 10,
+                paragraphId: 'para_fixture_1019',
             },
         ],
     };
@@ -299,6 +301,7 @@ describe('apply method', () => {
                     dataStream: '',
                     paragraphs: [{
                         startIndex: 0,
+                        paragraphId: 'para_fixture_1020',
                         paragraphStyle: {
                             horizontalAlign: HorizontalAlign.LEFT,
                         },
@@ -319,6 +322,7 @@ describe('apply method', () => {
                     dataStream: '',
                     paragraphs: [{
                         startIndex: 0,
+                        paragraphId: 'para_fixture_1020',
                         paragraphStyle: {
                             horizontalAlign: HorizontalAlign.RIGHT,
                         },
@@ -361,6 +365,7 @@ describe('apply method', () => {
                     dataStream: '',
                     paragraphs: [{
                         startIndex: 0,
+                        paragraphId: 'para_fixture_1022',
                         paragraphStyle: {
                             horizontalAlign: HorizontalAlign.LEFT,
                         },
@@ -382,6 +387,7 @@ describe('apply method', () => {
                     dataStream: '',
                     paragraphs: [{
                         startIndex: 0,
+                        paragraphId: 'para_fixture_1022',
                         paragraphStyle: {
                             horizontalAlign: HorizontalAlign.RIGHT,
                         },
@@ -424,6 +430,7 @@ describe('apply method', () => {
                     dataStream: '',
                     paragraphs: [{
                         startIndex: 0,
+                        paragraphId: 'para_fixture_1024',
                         bullet: {
                             listId: 'J7FZTm',
                             listType: PresetListType.CHECK_LIST,
@@ -450,6 +457,7 @@ describe('apply method', () => {
                     dataStream: '',
                     paragraphs: [{
                         startIndex: 0,
+                        paragraphId: 'para_fixture_1024',
                         bullet: {
                             listId: 'uODEbf',
                             listType: PresetListType.BULLET_LIST,
@@ -555,6 +563,7 @@ describe('apply method', () => {
                     dataStream: '\r',
                     paragraphs: [{
                         startIndex: 0,
+                        paragraphId: 'para_fixture_1026',
                         paragraphStyle: {
                             horizontalAlign: HorizontalAlign.LEFT,
                         },

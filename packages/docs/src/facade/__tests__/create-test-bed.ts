@@ -28,7 +28,7 @@ function getTestDocumentDataDemo(): IDocumentData {
         id: 'test',
         body: {
             dataStream: 'Hello,\r\n',
-            paragraphs: [{ startIndex: 6 }],
+            paragraphs: [{ startIndex: 6, paragraphId: 'para_fixture_19' }],
         },
         documentStyle: {
             pageSize: {
@@ -41,6 +41,10 @@ function getTestDocumentDataDemo(): IDocumentData {
             marginLeft: 90,
         },
     };
+}
+
+function cloneDocumentData(documentData: IDocumentData): IDocumentData {
+    return JSON.parse(JSON.stringify(documentData)) as IDocumentData;
 }
 
 export interface ITestBed {
@@ -58,9 +62,10 @@ export function createTestBed(documentConfig?: IDocumentData): ITestBed {
     injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
 
     univer.registerPlugin(UniverDocsPlugin);
+    const documentConfigWithIds = cloneDocumentData(documentConfig ?? getTestDocumentDataDemo());
     const doc = univer.createUnit<IDocumentData, DocumentDataModel>(
         UniverInstanceType.UNIVER_DOC,
-        documentConfig ?? getTestDocumentDataDemo()
+        documentConfigWithIds
     );
 
     injector.get(IUniverInstanceService).focusUnit(doc.getUnitId());

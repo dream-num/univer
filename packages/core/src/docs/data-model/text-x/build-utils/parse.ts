@@ -17,6 +17,7 @@
 import type { ICustomRange, IDocumentBody, IParagraph } from '../../../../types/interfaces';
 import { generateRandomId, Tools } from '../../../../shared';
 import { CustomRangeType } from '../../../../types/interfaces';
+import { createParagraphId } from '../../../paragraph-id';
 import { DataStreamTreeTokenType } from '../../types';
 
 const tags = [
@@ -53,6 +54,7 @@ export const isEmptyDocument = (dataStream?: string) => {
 export const fromPlainText = (text: string): IDocumentBody => {
     const dataStream = text.replace(/\n/g, '\r');
     const paragraphs: IParagraph[] = [];
+    const existingParagraphIds = new Set<string>();
     const customRanges: ICustomRange[] = [];
     let cursor = 0;
     let newDataStream = '';
@@ -76,13 +78,13 @@ export const fromPlainText = (text: string): IDocumentBody => {
             cursor = i + 1;
             if (insertP) {
                 newDataStream += '\r';
-                paragraphs.push({ startIndex: i });
+                paragraphs.push({ startIndex: i, paragraphId: createParagraphId(existingParagraphIds) });
             }
         } else {
             newDataStream += dataStream.slice(cursor, i + 1);
             cursor = i + 1;
             if (insertP) {
-                paragraphs.push({ startIndex: i });
+                paragraphs.push({ startIndex: i, paragraphId: createParagraphId(existingParagraphIds) });
             }
         }
     };

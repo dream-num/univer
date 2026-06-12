@@ -128,6 +128,7 @@ export const docsDemoData: IDocumentData = {
         ],
         paragraphs: [
             {
+                paragraphId: 'para_slides_demo_order_1',
                 startIndex: 60,
                 bullet: {
                     listId: 'orderList',
@@ -139,6 +140,7 @@ export const docsDemoData: IDocumentData = {
                 },
             },
             {
+                paragraphId: 'para_slides_demo_order_2',
                 startIndex: 91,
                 bullet: {
                     listId: 'orderList',
@@ -150,6 +152,7 @@ export const docsDemoData: IDocumentData = {
                 },
             },
             {
+                paragraphId: 'para_slides_demo_order_3',
                 startIndex: 234,
                 bullet: {
                     listId: 'orderList',
@@ -161,6 +164,7 @@ export const docsDemoData: IDocumentData = {
                 },
             },
             {
+                paragraphId: 'para_slides_demo_order_4',
                 startIndex: 327,
                 bullet: {
                     listId: 'orderList',
@@ -172,6 +176,7 @@ export const docsDemoData: IDocumentData = {
                 },
             },
             {
+                paragraphId: 'para_slides_demo_order_5',
                 startIndex: 406,
                 bullet: {
                     listId: 'orderList',

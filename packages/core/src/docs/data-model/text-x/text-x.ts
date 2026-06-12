@@ -22,11 +22,24 @@ import { Tools } from '../../../shared/tools';
 import { ActionIterator } from './action-iterator';
 import { TextXActionType } from './action-types';
 import { textXApply } from './apply';
+import { normalizeInsertedParagraphIdsForDocument, RESTORE_INSERTED_PARAGRAPH_IDS } from './apply-utils/common';
 import { transformBody } from './transform-utils';
 import { composeBody, getBodySlice, isUselessRetainAction } from './utils';
 
 function onlyHasDataStream(body: IDocumentBody) {
     return Object.keys(body).length === 1;
+}
+
+function normalizeInsertActionParagraphIds(
+    body: IDocumentBody,
+    doc: IDocumentBody,
+    currentIndex: number,
+    reservedParagraphIds: Set<string>
+) {
+    normalizeInsertedParagraphIdsForDocument(doc.paragraphs, body.paragraphs, currentIndex, {
+        freshenSplitParagraph: false,
+        reservedParagraphIds,
+    });
 }
 
 export type TPriority = 'left' | 'right';
@@ -230,6 +243,10 @@ export class TextX {
                     throw new Error('Can not invert DELETE action without body property, makeInvertible must be called first.');
                 }
 
+                if (action.body.paragraphs?.length) {
+                    (action.body as IDocumentBody & Record<string, unknown>)[RESTORE_INSERTED_PARAGRAPH_IDS] = true;
+                }
+
                 invertedActions.push({
                     t: TextXActionType.INSERT,
                     body: action.body,
@@ -261,8 +278,13 @@ export class TextX {
         const invertibleActions: TextXAction[] = [];
 
         let index = 0;
+        const reservedParagraphIds = new Set<string>();
 
         for (const action of actions) {
+            if (action.t === TextXActionType.INSERT) {
+                normalizeInsertActionParagraphIds(action.body, doc, index, reservedParagraphIds);
+            }
+
             if (action.t === TextXActionType.DELETE && (action.body == null || (action.body && action.body.dataStream.length !== action.len))) {
                 const body = getBodySlice(doc, index, index + action.len, false);
                 action.len = body.dataStream.length;

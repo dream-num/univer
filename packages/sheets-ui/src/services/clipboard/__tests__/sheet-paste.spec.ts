@@ -37,6 +37,27 @@ function getHTMLString(filePath: string): string {
     return readFileSync(filePath, 'utf-8');
 }
 
+function normalizeParagraphIds(value: unknown): unknown {
+    if (Array.isArray(value)) {
+        return value.map((item) => normalizeParagraphIds(item));
+    }
+
+    if (value && typeof value === 'object') {
+        return Object.fromEntries(Object.entries(value).map(([key, item]) => [
+            key,
+            key === 'paragraphId' ? '<paragraphId>' : normalizeParagraphIds(item),
+        ]));
+    }
+
+    return value;
+}
+
+function normalizeSnapshotValue(value: unknown): unknown {
+    return normalizeParagraphIds(typeof (value as { toJSON?: unknown }).toJSON === 'function'
+        ? (value as { toJSON: () => unknown }).toJSON()
+        : value);
+}
+
 describe('Test clipboard', () => {
     let univer: Univer;
     let get: Injector['get'];
@@ -113,7 +134,7 @@ describe('Test clipboard', () => {
             const htmlPath = path.join(__dirname, 'assets', 'html', 'excel-base-sample.html');
             const html = getHTMLString(htmlPath);
             const cellMatrix = htmlToUSM.convert(html).cellMatrix;
-            expect(cellMatrix).toMatchSnapshot();
+            expect(normalizeSnapshotValue(cellMatrix)).toMatchSnapshot();
         });
 
         it('test convert util func from google', async () => {
@@ -125,7 +146,7 @@ describe('Test clipboard', () => {
             const htmlPath = path.join(__dirname, 'assets', 'html', 'google-base-sample.html');
             const html = getHTMLString(htmlPath);
             const cellMatrix = htmlToUSM.convert(html).cellMatrix;
-            expect(cellMatrix).toMatchSnapshot();
+            expect(normalizeSnapshotValue(cellMatrix)).toMatchSnapshot();
         });
     });
 });

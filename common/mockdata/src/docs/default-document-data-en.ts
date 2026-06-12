@@ -197,10 +197,12 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
         ],
         paragraphs: [
             {
+                paragraphId: 'para_common_mockdata_src_docs_default_document_data_en_1',
                 startIndex: 67,
             },
             // Keep the English default demo aligned with the current docs default spacing.
             {
+                paragraphId: 'para_common_mockdata_src_docs_default_document_data_en_2',
                 startIndex: 253,
                 paragraphStyle: {
                     spaceAbove: { v: 30 },
@@ -209,6 +211,7 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                 },
             },
             {
+                paragraphId: 'para_common_mockdata_src_docs_default_document_data_en_3',
                 startIndex: 404,
                 paragraphStyle: {
                     spaceAbove: { v: 20 },
@@ -217,6 +220,7 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                 },
             },
             {
+                paragraphId: 'para_common_mockdata_src_docs_default_document_data_en_4',
                 startIndex: 433,
                 bullet: {
                     listType: PresetListType.ORDER_LIST,
@@ -235,6 +239,7 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                 },
             },
             {
+                paragraphId: 'para_common_mockdata_src_docs_default_document_data_en_5',
                 startIndex: 484,
                 bullet: {
                     listType: PresetListType.ORDER_LIST,
@@ -250,6 +255,7 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                 },
             },
             {
+                paragraphId: 'para_common_mockdata_src_docs_default_document_data_en_6',
                 startIndex: 516,
                 bullet: {
                     listType: PresetListType.ORDER_LIST,
@@ -265,6 +271,7 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                 },
             },
             {
+                paragraphId: 'para_common_mockdata_src_docs_default_document_data_en_7',
                 startIndex: 713,
                 paragraphStyle: {
                     spaceAbove: { v: 20 },
@@ -273,6 +280,7 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                 },
             },
             {
+                paragraphId: 'para_common_mockdata_src_docs_default_document_data_en_8',
                 startIndex: 771,
                 paragraphStyle: {
                     spaceAbove: { v: 20 },
@@ -280,6 +288,7 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                 },
             },
             {
+                paragraphId: 'para_common_mockdata_src_docs_default_document_data_en_9',
                 startIndex: 1244,
                 paragraphStyle: {
                     spaceAbove: { v: 20 },
@@ -288,6 +297,7 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                 },
             },
             {
+                paragraphId: 'para_common_mockdata_src_docs_default_document_data_en_10',
                 startIndex: 1589,
                 paragraphStyle: {
                     indentFirstLine: { v: 20 },
@@ -295,6 +305,7 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                 },
             },
             {
+                paragraphId: 'para_common_mockdata_src_docs_default_document_data_en_11',
                 startIndex: 1986,
                 paragraphStyle: {
                     indentFirstLine: { v: 20 },
@@ -302,6 +313,7 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                 },
             },
             {
+                paragraphId: 'para_common_mockdata_src_docs_default_document_data_en_12',
                 startIndex: 2062,
                 paragraphStyle: {
                     indentFirstLine: { v: 20 },
@@ -309,6 +321,7 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                 },
             },
             {
+                paragraphId: 'para_common_mockdata_src_docs_default_document_data_en_13',
                 startIndex: 2294,
                 paragraphStyle: {
                     indentFirstLine: { v: 20 },
@@ -324,6 +337,7 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                 },
             },
             {
+                paragraphId: 'para_common_mockdata_src_docs_default_document_data_en_14',
                 startIndex: 2438,
                 paragraphStyle: {
                     indentFirstLine: { v: 20 },
@@ -339,6 +353,7 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                 },
             },
             {
+                paragraphId: 'para_common_mockdata_src_docs_default_document_data_en_15',
                 startIndex: 2628,
                 paragraphStyle: {
                     indentFirstLine: { v: 20 },

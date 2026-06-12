@@ -41,7 +41,11 @@ describe('sheet util helpers', () => {
         expect(documentModel.getBody()).toMatchObject({
             dataStream: 'Cell\r\n',
             textRuns: [{ st: 0, ed: 4, ts: { ff: 'Inter', fs: 12, va: BaselineOffset.SUPERSCRIPT } }],
-            paragraphs: [{ startIndex: 4, paragraphStyle: { horizontalAlign: HorizontalAlign.CENTER } }],
+            paragraphs: [{
+                startIndex: 4,
+                paragraphId: expect.stringMatching(/^para_/),
+                paragraphStyle: { horizontalAlign: HorizontalAlign.CENTER },
+            }],
         });
         expect(documentModel.getSnapshot().documentStyle).toMatchObject({
             marginTop: 1,

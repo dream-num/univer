@@ -63,6 +63,7 @@ function getTestDocumentBody() {
         paragraphs: [
             {
                 startIndex: 4,
+                paragraphId: 'para_fixture_1001',
                 paragraphStyle: {
                     spaceAbove: { v: 10 },
                     lineSpacing: 2,
@@ -71,6 +72,7 @@ function getTestDocumentBody() {
             },
             {
                 startIndex: 11,
+                paragraphId: 'para_fixture_1002',
                 paragraphStyle: {
                     spaceAbove: { v: 10 },
                     lineSpacing: 2,
@@ -125,6 +127,7 @@ describe('test case in replaceInDocumentBody utils', () => {
             paragraphs: [
                 {
                     startIndex: 6,
+                    paragraphId: 'para_fixture_1001',
                     paragraphStyle: {
                         spaceAbove: { v: 10 },
                         lineSpacing: 2,
@@ -133,6 +136,7 @@ describe('test case in replaceInDocumentBody utils', () => {
                 },
                 {
                     startIndex: 15,
+                    paragraphId: 'para_fixture_1002',
                     paragraphStyle: {
                         spaceAbove: { v: 10 },
                         lineSpacing: 2,
@@ -184,6 +188,7 @@ describe('test case in replaceInDocumentBody utils', () => {
             paragraphs: [
                 {
                     startIndex: 2,
+                    paragraphId: 'para_fixture_1001',
                     paragraphStyle: {
                         spaceAbove: { v: 10 },
                         lineSpacing: 2,
@@ -192,6 +197,7 @@ describe('test case in replaceInDocumentBody utils', () => {
                 },
                 {
                     startIndex: 7,
+                    paragraphId: 'para_fixture_1002',
                     paragraphStyle: {
                         spaceAbove: { v: 10 },
                         lineSpacing: 2,

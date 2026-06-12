@@ -113,6 +113,7 @@ const richTextTestFloat: IDocumentData = {
         ],
         paragraphs: [
             {
+                paragraphId: 'para_common_mockdata_src_sheets_default_workbook_data_1',
                 startIndex: 60,
                 bullet: {
                     listId: 'orderList',
@@ -200,6 +201,7 @@ const richTextTest: IDocumentData = {
         ],
         paragraphs: [
             {
+                paragraphId: 'para_common_mockdata_src_sheets_default_workbook_data_2',
                 startIndex: 60,
                 bullet: {
                     listId: 'orderList',

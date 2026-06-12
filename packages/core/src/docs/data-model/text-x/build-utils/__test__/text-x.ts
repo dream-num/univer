@@ -29,6 +29,7 @@ describe('test textX function', () => {
             paragraphs: [
                 {
                     startIndex: text.length - 1,
+                    paragraphId: 'para_fixture_1072',
                 },
             ],
             customRanges: [

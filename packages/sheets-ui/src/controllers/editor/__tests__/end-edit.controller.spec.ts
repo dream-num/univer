@@ -41,14 +41,11 @@ const richTextDemo: IDocumentData = {
             },
         ],
         paragraphs: [
-            {
-                startIndex: 489,
-                paragraphStyle: {
-                    horizontalAlign: 0,
-                    spaceAbove: { v: 10 },
-                    lineSpacing: 1.2,
-                },
-            },
+            { paragraphId: 'para_sheets_ui_fixture_2', startIndex: 489, paragraphStyle: {
+                horizontalAlign: 0,
+                spaceAbove: { v: 10 },
+                lineSpacing: 1.2,
+            } },
         ],
     },
     documentStyle: {
@@ -300,7 +297,7 @@ describe('Test EndEditController', () => {
                             { st: 1, ed: 2, ts: { ff: 'Arial', fs: 11, cl: { rgb: '#B20000' } } },
                         ],
                         paragraphs: [
-                            { startIndex: 2, paragraphStyle: { horizontalAlign: 0 } },
+                            { paragraphId: 'para_sheets_ui_fixture_3', startIndex: 2, paragraphStyle: { horizontalAlign: 0 } },
                         ],
                         sectionBreaks: [
                             { startIndex: 3 },
@@ -356,7 +353,7 @@ describe('Test EndEditController', () => {
                             { st: 1, ed: 2, ts: { ff: 'Arial', fs: 11, cl: { rgb: '#B20000' } } },
                         ],
                         paragraphs: [
-                            { startIndex: 2, paragraphStyle: { horizontalAlign: 0 } },
+                            { paragraphId: expect.stringMatching(/^para_/), startIndex: 2, paragraphStyle: { horizontalAlign: 0 } },
                         ],
                         sectionBreaks: [
                             { startIndex: 3 },
@@ -533,12 +530,9 @@ describe('Test EndEditController', () => {
                     },
                 ],
                 paragraphs: [
-                    {
-                        startIndex: 8,
-                        paragraphStyle: {
-                            horizontalAlign: 0,
-                        },
-                    },
+                    { paragraphId: 'para_sheets_ui_fixture_5', startIndex: 8, paragraphStyle: {
+                        horizontalAlign: 0,
+                    } },
                 ],
                 customRanges: [],
                 customDecorations: [],
@@ -562,12 +556,9 @@ describe('Test EndEditController', () => {
                     },
                 ],
                 paragraphs: [
-                    {
-                        startIndex: 4,
-                        paragraphStyle: {
-                            horizontalAlign: 0,
-                        },
-                    },
+                    { paragraphId: 'para_sheets_ui_fixture_6', startIndex: 4, paragraphStyle: {
+                        horizontalAlign: 0,
+                    } },
                 ],
                 customBlocks: [],
                 customRanges: [],

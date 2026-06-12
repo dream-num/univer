@@ -15,25 +15,19 @@
  */
 
 import type { IDocumentBody } from '@univerjs/core';
-import { generateRandomId } from '@univerjs/core';
 
 /**
  * The top-level document body element types supported by the doc facade.
  */
 export type FDocElementType = 'paragraph' | 'table' | 'blockRange' | 'customBlock';
 
-interface IParagraphRegistryEntry {
-    key: string;
-    segmentId: string;
-    startIndex: number;
-    stale: boolean;
-}
+const PARAGRAPH_REGISTRY_MIGRATION_ERROR = 'DocElementRegistry no longer tracks paragraph identity; use paragraphId.';
 
 /**
  * Error thrown when a facade element key can no longer be resolved uniquely.
  *
- * A stale paragraph usually means the paragraph was deleted, or an external edit
- * changed the document in a way that the runtime temporary key cannot follow.
+ * A stale paragraph usually means the paragraph was deleted, or the document no
+ * longer contains exactly one paragraph with the requested `paragraphId`.
  *
  * @example
  * ```ts
@@ -64,134 +58,50 @@ export class DocElementStaleError extends Error {
 }
 
 /**
- * Runtime registry for temporary paragraph keys.
- *
- * The registry is owned by an `FDocument` instance. It never writes keys into the
- * document snapshot. Facade edits notify the registry before text changes so
- * paragraph keys can move with their source paragraph or become stale when the
- * source paragraph is removed.
+ * @deprecated Paragraph facade identity is now resolved directly from persisted
+ * `paragraphId` values. This class remains as a compatibility shell for callers
+ * that constructed document facade internals directly.
  *
  * @hideconstructor
  */
 export class DocElementRegistry {
-    private readonly _paragraphsBySegment = new Map<string, IParagraphRegistryEntry[]>();
-
     /**
-     * Get or create the runtime key for a paragraph in a segment.
-     * @param {string} segmentId The header/footer segment id, or an empty string for the main body.
-     * @param {IDocumentBody} body The current document body snapshot.
-     * @param {number} paragraphIndex The zero-based paragraph index.
-     * @returns {string} The runtime key for the paragraph.
+     * @deprecated Paragraph facade identity is now the persisted `paragraphId`.
+     * @throws {Error} Always throws; use `paragraph.paragraphId` instead.
      */
-    getParagraphKey(segmentId: string, body: IDocumentBody, paragraphIndex: number): string {
-        const paragraph = body.paragraphs?.[paragraphIndex];
-        if (!paragraph) {
-            throw new RangeError(`Paragraph index ${paragraphIndex} is out of range.`);
-        }
-
-        const entries = this._getSegmentEntries(segmentId);
-        const activeEntry = entries.find((entry) => !entry.stale && entry.startIndex === paragraph.startIndex);
-        if (activeEntry) {
-            return activeEntry.key;
-        }
-
-        const key = `paragraph-${generateRandomId(10)}`;
-        entries.push({
-            key,
-            segmentId,
-            startIndex: paragraph.startIndex,
-            stale: false,
-        });
-
-        return key;
+    getParagraphKey(_segmentId: string, _body: IDocumentBody, _paragraphIndex: number): string {
+        throw new Error(PARAGRAPH_REGISTRY_MIGRATION_ERROR);
     }
 
     /**
-     * Resolve a paragraph runtime key to its tracked paragraph break offset.
-     * @param {string} segmentId The header/footer segment id, or an empty string for the main body.
-     * @param {string} key The runtime paragraph key.
-     * @returns {number} The tracked paragraph `startIndex`.
-     * @throws {DocElementStaleError} If the key is missing or stale.
+     * @deprecated Paragraph facade identity is now the persisted `paragraphId`.
+     * @throws {Error} Always throws; resolve paragraph handles by `paragraphId` instead.
      */
-    resolveParagraphStartIndex(segmentId: string, key: string): number {
-        const entry = this._getSegmentEntries(segmentId).find((item) => item.key === key);
-        if (!entry || entry.stale) {
-            throw new DocElementStaleError();
-        }
-
-        return entry.startIndex;
+    resolveParagraphStartIndex(_segmentId: string, _key: string): number {
+        throw new Error(PARAGRAPH_REGISTRY_MIGRATION_ERROR);
     }
 
     /**
-     * Resolve a paragraph runtime key against the current body.
-     * @param {string} segmentId The header/footer segment id, or an empty string for the main body.
-     * @param {string} key The runtime paragraph key.
-     * @param {IDocumentBody} body The current document body snapshot.
-     * @returns {number} The current paragraph index in `body.paragraphs`.
-     * @throws {DocElementStaleError} If the tracked paragraph no longer exists.
+     * @deprecated Paragraph facade identity is now the persisted `paragraphId`.
+     * @throws {Error} Always throws; resolve paragraph handles by `paragraphId` instead.
      */
-    syncParagraph(segmentId: string, key: string, body: IDocumentBody): number {
-        const startIndex = this.resolveParagraphStartIndex(segmentId, key);
-        const paragraphIndex = body.paragraphs?.findIndex((paragraph) => paragraph.startIndex === startIndex) ?? -1;
-
-        if (paragraphIndex < 0) {
-            this.markStale(segmentId, key);
-            throw new DocElementStaleError();
-        }
-
-        return paragraphIndex;
+    syncParagraph(_segmentId: string, _key: string, _body: IDocumentBody): number {
+        throw new Error(PARAGRAPH_REGISTRY_MIGRATION_ERROR);
     }
 
     /**
-     * Mark a paragraph runtime key as stale.
-     * @param {string} segmentId The header/footer segment id, or an empty string for the main body.
-     * @param {string} key The runtime paragraph key.
-     * @returns {void}
+     * @deprecated Paragraph facade identity is now the persisted `paragraphId`.
+     * @throws {Error} Always throws; stale state is detected from live `paragraphId` lookups.
      */
-    markStale(segmentId: string, key: string): void {
-        const entry = this._getSegmentEntries(segmentId).find((item) => item.key === key);
-        if (entry) {
-            entry.stale = true;
-        }
+    markStale(_segmentId: string, _key: string): void {
+        throw new Error(PARAGRAPH_REGISTRY_MIGRATION_ERROR);
     }
 
     /**
-     * Update tracked paragraph offsets before a facade text edit is applied.
-     *
-     * Paragraphs inside the deleted range are marked stale. Paragraphs after the
-     * edited range move by the inserted length minus deleted length.
-     *
-     * @param {string} segmentId The header/footer segment id, or an empty string for the main body.
-     * @param {number} startOffset The inclusive start offset of the edit.
-     * @param {number} endOffset The exclusive end offset of the replaced range.
-     * @param {number} insertLength The data stream length inserted by the edit.
-     * @returns {void}
+     * @deprecated Paragraph facade identity is now the persisted `paragraphId`.
+     * @throws {Error} Always throws; text edits no longer need registry offset tracking.
      */
-    beforeTextEdit(segmentId: string, startOffset: number, endOffset: number, insertLength: number): void {
-        const deleteLength = Math.max(0, endOffset - startOffset);
-        const delta = insertLength - deleteLength;
-
-        for (const entry of this._getSegmentEntries(segmentId)) {
-            if (entry.stale) {
-                continue;
-            }
-
-            if (entry.startIndex >= startOffset && entry.startIndex < endOffset) {
-                entry.stale = true;
-            } else if (entry.startIndex >= endOffset) {
-                entry.startIndex += delta;
-            }
-        }
-    }
-
-    private _getSegmentEntries(segmentId: string): IParagraphRegistryEntry[] {
-        const key = segmentId || '';
-        let entries = this._paragraphsBySegment.get(key);
-        if (!entries) {
-            entries = [];
-            this._paragraphsBySegment.set(key, entries);
-        }
-
-        return entries;
+    beforeTextEdit(_segmentId: string, _startOffset: number, _endOffset: number, _insertLength: number): void {
+        throw new Error(PARAGRAPH_REGISTRY_MIGRATION_ERROR);
     }
 }

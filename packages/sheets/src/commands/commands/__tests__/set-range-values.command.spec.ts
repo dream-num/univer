@@ -230,6 +230,7 @@ describe('Test set range values commands', () => {
                             paragraphs: [
                                 {
                                     startIndex: 489,
+                                    paragraphId: 'para_sheets_set_range_values_1',
                                     paragraphStyle: {
                                         spaceAbove: { v: 10 },
                                         lineSpacing: 1.2,
@@ -772,6 +773,7 @@ describe('Test set range values commands', () => {
                             paragraphs: [
                                 {
                                     startIndex: 489,
+                                    paragraphId: 'para_sheets_set_range_values_2',
                                     paragraphStyle: {
                                         spaceAbove: { v: 10 },
                                         lineSpacing: 1.2,
@@ -839,6 +841,7 @@ describe('Test set range values commands', () => {
                             paragraphs: [
                                 {
                                     startIndex: 489,
+                                    paragraphId: 'para_sheets_set_range_values_3',
                                     paragraphStyle: {
                                         spaceAbove: { v: 10 },
                                         lineSpacing: 1.2,

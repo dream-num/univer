@@ -16,7 +16,7 @@
 
 import type { DocumentDataModel, ICommand, IDocumentBody, IMutationInfo, IParagraph, IParagraphBorder, ITextRangeParam } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import { BuildTextUtils, CommandType, DataStreamTreeTokenType, generateRandomId, getRichTextEditPath, ICommandService, IUniverInstanceService, JSONX, PresetListType, TextX, TextXActionType, Tools, UniverInstanceType, UpdateDocsAttributeType } from '@univerjs/core';
+import { BuildTextUtils, CommandType, createParagraphId, DataStreamTreeTokenType, generateRandomId, getRichTextEditPath, ICommandService, IUniverInstanceService, JSONX, PresetListType, TextX, TextXActionType, Tools, UniverInstanceType, UpdateDocsAttributeType } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { getTextRunAtPosition } from '../../basics/paragraph';
 import { DocMenuStyleService } from '../../services/doc-menu-style.service';
@@ -27,6 +27,7 @@ export function generateParagraphs(
     borderBottom?: IParagraphBorder
 ): IParagraph[] {
     const paragraphs: IParagraph[] = [];
+    const existingParagraphIds = new Set<string>();
 
     for (let i = 0, len = dataStream.length; i < len; i++) {
         const char = dataStream[i];
@@ -37,6 +38,7 @@ export function generateParagraphs(
 
         paragraphs.push({
             startIndex: i,
+            paragraphId: createParagraphId(existingParagraphIds),
         });
     }
 

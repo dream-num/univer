@@ -128,6 +128,7 @@ export const DEFAULT_DOCUMENT_DATA: IDocumentData = {
         ],
         paragraphs: [
             {
+                paragraphId: 'para_common_mockdata_src_docs_default_document_data_1',
                 startIndex: 60,
                 bullet: {
                     listType: PresetListType.ORDER_LIST,
@@ -139,6 +140,7 @@ export const DEFAULT_DOCUMENT_DATA: IDocumentData = {
                 },
             },
             {
+                paragraphId: 'para_common_mockdata_src_docs_default_document_data_2',
                 startIndex: 91,
                 bullet: {
                     listType: PresetListType.ORDER_LIST,
@@ -150,6 +152,7 @@ export const DEFAULT_DOCUMENT_DATA: IDocumentData = {
                 },
             },
             {
+                paragraphId: 'para_common_mockdata_src_docs_default_document_data_3',
                 startIndex: 234,
                 bullet: {
                     listType: PresetListType.ORDER_LIST,
@@ -161,6 +164,7 @@ export const DEFAULT_DOCUMENT_DATA: IDocumentData = {
                 },
             },
             {
+                paragraphId: 'para_common_mockdata_src_docs_default_document_data_4',
                 startIndex: 327,
                 bullet: {
                     listType: PresetListType.ORDER_LIST,
@@ -172,6 +176,7 @@ export const DEFAULT_DOCUMENT_DATA: IDocumentData = {
                 },
             },
             {
+                paragraphId: 'para_common_mockdata_src_docs_default_document_data_5',
                 startIndex: 406,
                 bullet: {
                     listType: PresetListType.ORDER_LIST,

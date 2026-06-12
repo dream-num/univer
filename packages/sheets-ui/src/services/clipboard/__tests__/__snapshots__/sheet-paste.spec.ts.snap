@@ -28,6 +28,7 @@ exports[`Test clipboard > Test paste > test convert util func from excel 1`] = `
 ",
           "paragraphs": [
             {
+              "paragraphId": "<paragraphId>",
               "startIndex": 19,
             },
           ],
@@ -538,6 +539,7 @@ exports[`Test clipboard > Test paste > test convert util func from excel 1`] = `
 ",
           "paragraphs": [
             {
+              "paragraphId": "<paragraphId>",
               "startIndex": 29,
             },
           ],
@@ -3285,6 +3287,7 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
 ",
           "paragraphs": [
             {
+              "paragraphId": "<paragraphId>",
               "startIndex": 17,
             },
           ],
@@ -3574,6 +3577,7 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
 ",
           "paragraphs": [
             {
+              "paragraphId": "<paragraphId>",
               "startIndex": 53,
             },
           ],
@@ -4136,6 +4140,7 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
 ",
           "paragraphs": [
             {
+              "paragraphId": "<paragraphId>",
               "startIndex": 4,
             },
           ],
@@ -4203,6 +4208,7 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
 ",
           "paragraphs": [
             {
+              "paragraphId": "<paragraphId>",
               "startIndex": 10,
             },
           ],
@@ -4684,6 +4690,7 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
 ",
           "paragraphs": [
             {
+              "paragraphId": "<paragraphId>",
               "startIndex": 4,
             },
           ],
@@ -4751,6 +4758,7 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
 ",
           "paragraphs": [
             {
+              "paragraphId": "<paragraphId>",
               "startIndex": 10,
             },
           ],

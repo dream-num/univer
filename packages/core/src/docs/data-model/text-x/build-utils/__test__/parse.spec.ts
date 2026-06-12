@@ -34,7 +34,7 @@ describe('parse build utils', () => {
 
         expect(body).toMatchObject({
             dataStream: 'https://univer.ai\rSecond line',
-            paragraphs: [{ startIndex: 17 }],
+            paragraphs: [{ startIndex: 17, paragraphId: expect.stringMatching(/^para_/) }],
             customRanges: [
                 {
                     startIndex: 0,

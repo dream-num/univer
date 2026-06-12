@@ -49,7 +49,7 @@ const DEFAULT_DOC_DATA: IDocumentData = {
                 bl: BooleanNumber.FALSE,
             },
         }],
-        paragraphs: [{ startIndex: 11 }],
+        paragraphs: [{ startIndex: 11, paragraphId: 'para_mention_test' }],
         sectionBreaks: [],
         customBlocks: [],
     },

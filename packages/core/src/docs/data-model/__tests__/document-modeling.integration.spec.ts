@@ -35,7 +35,7 @@ function createDocSnapshot(id = 'doc-main'): IDocumentData {
         },
         body: {
             dataStream: 'Hello World\r\n',
-            paragraphs: [{ startIndex: 0 }],
+            paragraphs: [{ startIndex: 0, paragraphId: 'para_fixture_1' }],
             textRuns: [{ st: 0, ed: 5, ts: { ff: 'Arial', fs: 12 } }],
             customRanges: [],
             customDecorations: [],
@@ -45,7 +45,7 @@ function createDocSnapshot(id = 'doc-main'): IDocumentData {
                 headerId: 'header1',
                 body: {
                     dataStream: 'Header\r\n',
-                    paragraphs: [{ startIndex: 0 }],
+                    paragraphs: [{ startIndex: 0, paragraphId: 'para_fixture_2' }],
                     textRuns: [],
                 },
             },
@@ -55,7 +55,7 @@ function createDocSnapshot(id = 'doc-main'): IDocumentData {
                 footerId: 'footer1',
                 body: {
                     dataStream: 'Footer\r\n',
-                    paragraphs: [{ startIndex: 0 }],
+                    paragraphs: [{ startIndex: 0, paragraphId: 'para_fixture_3' }],
                     textRuns: [],
                 },
             },
@@ -157,8 +157,8 @@ describe('DocumentDataModel + RichTextBuilder integration', () => {
             body: {
                 dataStream: 'First\rSecond\r',
                 paragraphs: [
-                    { startIndex: 5, paragraphStyle: { horizontalAlign: HorizontalAlign.CENTER } },
-                    { startIndex: 12, paragraphStyle: { textStyle: { fs: 18 } } },
+                    { startIndex: 5, paragraphId: 'para_fixture_4', paragraphStyle: { horizontalAlign: HorizontalAlign.CENTER } },
+                    { startIndex: 12, paragraphId: 'para_fixture_5', paragraphStyle: { textStyle: { fs: 18 } } },
                 ],
             },
         });
@@ -188,7 +188,7 @@ describe('DocumentDataModel + RichTextBuilder integration', () => {
             body: {
                 dataStream: tableStream,
                 tables: [{ startIndex: 0, endIndex: tableStream.length, tableId: 'table-1' }],
-                paragraphs: [{ startIndex: 7 }],
+                paragraphs: [{ startIndex: 7, paragraphId: 'para_fixture_6' }],
             },
         });
         expect(partialTableModel.sliceBody(1, tableStream.length - 1)?.tables?.[0]).toMatchObject({
@@ -224,7 +224,7 @@ describe('DocumentDataModel + RichTextBuilder integration', () => {
                 headerId: 'header2',
                 body: {
                     dataStream: 'Another Header\r\n',
-                    paragraphs: [{ startIndex: 0 }],
+                    paragraphs: [{ startIndex: 0, paragraphId: 'para_fixture_7' }],
                 },
             },
         }) as never);
@@ -239,7 +239,7 @@ describe('DocumentDataModel + RichTextBuilder integration', () => {
             title: 'Reset Title',
             body: {
                 dataStream: 'Reset\r\n',
-                paragraphs: [{ startIndex: 5 }],
+                paragraphs: [{ startIndex: 5, paragraphId: 'para_fixture_8' }],
             },
             documentStyle: {},
         });

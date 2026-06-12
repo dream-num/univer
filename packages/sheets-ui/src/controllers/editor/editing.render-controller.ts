@@ -36,6 +36,7 @@ import type { IUniverSheetsUIConfig } from '../../config/config';
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import {
     CellValueType,
+    createParagraphId,
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     Direction,
     Disposable,
@@ -1006,6 +1007,7 @@ function emptyBody(body: IDocumentBody, removeStyle = false) {
         body.paragraphs = [
             {
                 startIndex: 0,
+                paragraphId: createParagraphId(new Set()),
             },
         ];
     }

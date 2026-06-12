@@ -59,7 +59,7 @@ function createServiceTestBed() {
     const docDataModel = {
         getBody: () => ({
             dataStream,
-            paragraphs: [{ startIndex: 1 }],
+            paragraphs: [{ startIndex: 1, paragraphId: 'para_quick_insert_test' }],
         }),
     };
     const docEventManagerService = {

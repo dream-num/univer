@@ -147,26 +147,26 @@ describe('FDocument facade in Node', () => {
         univer.dispose();
     });
 
-    it('keeps existing FDocument methods in the docs package', async () => {
-        await expect(document.appendText('Univer')).resolves.toBe(true);
+    it('keeps existing FDocument methods in the docs package', () => {
+        expect(document.appendText('Univer')).toBe(true);
         expect(document.save().body?.dataStream).toBe('Hello,Univer\r\n');
 
         univer.dispose();
         createDocumentFacade();
-        await expect(document.insertText('Docs', {
+        expect(document.insertText('Docs', {
             endOffset: 4,
             segmentId: '',
             startOffset: 2,
-        })).resolves.toBe(true);
+        })).toBe(true);
         expect(document.save().body?.dataStream).toBe('HeDocso,\r\n');
 
         univer.dispose();
         createDocumentFacade();
-        await expect(document.insertParagraph('Line 1\nLine 2', {
+        expect(document.insertParagraph('Line 1\nLine 2', {
             endOffset: 6,
             segmentId: '',
             startOffset: 6,
-        })).resolves.toBe(true);
+        })).toBe(true);
         expect(document.save().body?.dataStream).toBe('Hello,Line 1\rLine 2\r\r\n');
     });
 

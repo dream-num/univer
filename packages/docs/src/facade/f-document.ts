@@ -153,43 +153,46 @@ export class FDocument extends FBaseInitialable {
 
     /**
      * Undo the last operation in the document.
-     * @returns {Promise<boolean>} A promise that resolves to true if the undo operation was successful, or false if it failed.
+     * @returns {boolean} `true` if the undo operation was successful, or `false` if it failed.
      * @example
      * ```typescript
      * const fDocument = univerAPI.getActiveDocument();
-     * await fDocument.undo();
+     * const success = fDocument.undo();
+     * console.log(success);
      * ```
      */
-    undo(): Promise<boolean> {
+    undo(): boolean {
         this._univerInstanceService.focusUnit(this.id);
-        return this._commandService.executeCommand(UndoCommand.id);
+        return this._commandService.syncExecuteCommand(UndoCommand.id);
     }
 
     /**
      * Redo the last undone operation in the document.
-     * @returns {Promise<boolean>} A promise that resolves to true if the redo operation was successful, or false if it failed.
+     * @returns {boolean} `true` if the redo operation was successful, or `false` if it failed.
      * @example
      * ```typescript
      * const fDocument = univerAPI.getActiveDocument();
-     * await fDocument.redo();
+     * const success = fDocument.redo();
+     * console.log(success);
      * ```
      */
-    redo(): Promise<boolean> {
+    redo(): boolean {
         this._univerInstanceService.focusUnit(this.id);
-        return this._commandService.executeCommand(RedoCommand.id);
+        return this._commandService.syncExecuteCommand(RedoCommand.id);
     }
 
     /**
      * Adds the specified text to the end of this text region.
      * @param {string} text - The text to be added to the end of this text region.
-     * @return {Promise<boolean>} A promise that resolves to true if the text was successfully appended, or false if it failed.
+     * @return {boolean} `true` if the text was successfully appended, or `false` if it failed.
      * @example
      * ```typescript
      * const fDocument = univerAPI.getActiveDocument();
-     * await fDocument.appendText('Hello, world!');
+     * const success = fDocument.appendText('Hello, world!');
+     * console.log(success);
      * ```
      */
-    appendText(text: string): Promise<boolean> {
+    appendText(text: string): boolean {
         const { body } = this.save();
 
         if (!body) {
@@ -209,18 +212,19 @@ export class FDocument extends FBaseInitialable {
      * Inserts text at the provided document range. Defaults to appending before the final section break.
      * @param {string} text - The text to insert.
      * @param {IDocumentInsertTextFacadeOptions} options - Optional target range, segment id, and cursor offset.
-     * @returns {Promise<boolean>} A promise that resolves to true if the text was successfully inserted, or false if it failed.
+     * @returns {boolean} `true` if the text was successfully inserted, or `false` if it failed.
      * @example
      *
      * // Insert text at a specific range in the document body
      * ```typescript
      * const fDocument = univerAPI.getActiveDocument();
-     * await fDocument.insertText('Hello, world!', {
+     * const success = fDocument.insertText('Hello, world!', {
      *   startOffset: 5,
      *   endOffset: 5,
      *   segmentId: '',
      *   cursorOffset: 13,
      * });
+     * console.log(success);
      * ```
      *
      * // Insert text at the beginning of a header or footer segment
@@ -232,7 +236,7 @@ export class FDocument extends FBaseInitialable {
      * if (headers) {
      *   for (const headerId in headers) {
      *     if (headerId === 'target-header-id') {
-     *       await fDocument.insertText('Hello, header!', {
+     *       fDocument.insertText('Hello, header!', {
      *         startOffset: 0,
      *         endOffset: 0,
      *         segmentId: headerId,
@@ -244,7 +248,7 @@ export class FDocument extends FBaseInitialable {
      * if (footers) {
      *   for (const footerId in footers) {
      *     if (footerId === 'target-footer-id') {
-     *       await fDocument.insertText('Hello, footer!', {
+     *       fDocument.insertText('Hello, footer!', {
      *         startOffset: 0,
      *         endOffset: 0,
      *         segmentId: footerId,
@@ -254,7 +258,7 @@ export class FDocument extends FBaseInitialable {
      * }
      * ```
      */
-    insertText(text: string, options: IDocumentInsertTextFacadeOptions = {}): Promise<boolean> {
+    insertText(text: string, options: IDocumentInsertTextFacadeOptions = {}): boolean {
         const unitId = this.id;
         const { body } = this.save();
 
@@ -280,7 +284,7 @@ export class FDocument extends FBaseInitialable {
             ? undefined
             : getNormalizedPlainTextCursorOffset(text, options.cursorOffset, removeLeadingParagraphBreak);
 
-        return this._commandService.executeCommand<IInsertTextCommandParams>(InsertTextCommand.id, {
+        return this._commandService.syncExecuteCommand<IInsertTextCommandParams>(InsertTextCommand.id, {
             unitId,
             body: insertBody,
             range: activeRange,
@@ -293,17 +297,18 @@ export class FDocument extends FBaseInitialable {
      * Inserts one or more plain-text paragraphs at the provided document range.
      * @param {string} text - The paragraph text to insert. Newlines are normalized to document paragraph separators.
      * @param {IDocumentInsertTextFacadeOptions} options - Optional target range, segment id, and cursor offset.
-     * @returns {Promise<boolean>} A promise that resolves to true if the paragraphs were successfully inserted, or false if it failed.
+     * @returns {boolean} `true` if the paragraphs were successfully inserted, or `false` if it failed.
      * @example
      * ```typescript
      * const fDocument = univerAPI.getActiveDocument();
-     * await fDocument.insertParagraph('Hello, world! This is a new paragraph.', {
+     * const success = fDocument.insertParagraph('Hello, world! This is a new paragraph.', {
      *   startOffset: 5,
      *   endOffset: 5,
      * });
+     * console.log(success);
      * ```
      */
-    insertParagraph(text = '', options: IDocumentInsertTextFacadeOptions = {}): Promise<boolean> {
+    insertParagraph(text = '', options: IDocumentInsertTextFacadeOptions = {}): boolean {
         const dataStream = `${text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n').join('\r\n')}\r\n`;
 
         return this.insertText(dataStream, {

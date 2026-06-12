@@ -16,6 +16,7 @@
 
 import type { IDisposable } from '@univerjs/core';
 import type { ISheetLocationBase } from '@univerjs/sheets';
+import type { ReactNode } from 'react';
 import { Disposable, Inject } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { Subject } from 'rxjs';
@@ -30,8 +31,8 @@ export enum CellAlertType {
 
 export interface ICellAlert {
     type: CellAlertType;
-    title: React.ReactNode;
-    message: React.ReactNode;
+    title: ReactNode;
+    message: ReactNode;
     location: ISheetLocationBase;
     width: number;
     height: number;

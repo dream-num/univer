@@ -25,4 +25,15 @@ describe('getEmptySnapshot', () => {
             spaceBelow: { v: 12 },
         });
     });
+
+    it('initializes optional body arrays for structured doc features', () => {
+        expect(getEmptySnapshot().body).toMatchObject({
+            blockRanges: [],
+            customBlocks: [],
+            customDecorations: [],
+            customRanges: [],
+            tables: [],
+            textRuns: [],
+        });
+    });
 });

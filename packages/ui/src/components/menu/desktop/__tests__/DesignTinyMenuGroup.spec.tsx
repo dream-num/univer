@@ -46,4 +46,22 @@ describe('DesignTinyMenuGroup', () => {
         expect(button?.className ?? '').toContain('univer-rounded-sm');
         expect(icon?.className ?? '').toContain('univer-size-5');
     });
+
+    it('uses the primary color channel for two-channel icons', () => {
+        const Icon = ({ extend }: { className?: string; extend?: { colorChannel1?: string } }) => (
+            React.createElement('span', { 'data-color-channel': extend?.colorChannel1 })
+        );
+        const { container } = render(
+            <DesignTinyMenuGroup
+                items={[{
+                    key: 'reset',
+                    onClick: () => {},
+                    className: '',
+                    Icon,
+                }]}
+            />
+        );
+
+        expect(container.querySelector('[data-color-channel]')?.getAttribute('data-color-channel')).toBe('var(--univer-primary-600)');
+    });
 });

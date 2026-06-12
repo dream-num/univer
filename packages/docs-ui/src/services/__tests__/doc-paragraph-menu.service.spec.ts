@@ -186,6 +186,130 @@ describe('DocParagraphMenuService', () => {
         expect(service.activeTarget?.cellRange).toEqual({ startOffset: 2, endOffset: 8 });
     });
 
+    it('does not let the same table hover target steal back a cell paragraph menu', () => {
+        const disposeTableMenu = vi.fn();
+        const disposeCellMenu = vi.fn();
+        const attachPopupToRect = vi.fn()
+            .mockReturnValueOnce({ canDispose: () => true, dispose: disposeTableMenu })
+            .mockReturnValueOnce({ canDispose: () => true, dispose: disposeCellMenu });
+        const service = createService({
+            attachPopupToRect,
+            dataStream: `${DataStreamTreeTokenType.TABLE_START}${DataStreamTreeTokenType.TABLE_ROW_START}${DataStreamTreeTokenType.TABLE_CELL_START}Cell\r${DataStreamTreeTokenType.TABLE_CELL_END}${DataStreamTreeTokenType.TABLE_ROW_END}${DataStreamTreeTokenType.TABLE_END}`,
+            tables: [{ tableId: 'table-1', startIndex: 0, endIndex: 9 }],
+        });
+        const tableBound = {
+            pageIndex: 0,
+            rect: {
+                bottom: 170,
+                left: 100,
+                right: 400,
+                top: 80,
+            },
+            tableId: 'table-1',
+        };
+
+        service.showTableMenu(tableBound);
+        service.showParagraphMenu(createParagraphBound({
+            paragraphStart: 3,
+            paragraphEnd: 7,
+            startIndex: 7,
+        }));
+        service.showTableMenu(tableBound);
+
+        expect(service.activeTarget?.kind).toBe('paragraph');
+        expect(service.activeTarget?.key).toBe('paragraph:7');
+        expect(disposeCellMenu).not.toHaveBeenCalled();
+        expect(attachPopupToRect).toHaveBeenCalledTimes(2);
+    });
+
+    it('anchors first-column table-cell paragraph menus to the left of the row header lane', () => {
+        const attachPopupToRect = vi.fn(() => ({ canDispose: () => true, dispose: vi.fn() }));
+        const paragraph = {
+            ...createParagraphBound({
+                paragraphStart: 3,
+                paragraphEnd: 7,
+                startIndex: 7,
+            }),
+            firstLine: { bottom: 140, left: 140, right: 240, top: 120 },
+            rowIndex: 0,
+            colIndex: 0,
+            tableId: 'table-1',
+        };
+        const service = createService({
+            attachPopupToRect,
+            dataStream: `${DataStreamTreeTokenType.TABLE_START}${DataStreamTreeTokenType.TABLE_ROW_START}${DataStreamTreeTokenType.TABLE_CELL_START}Cell\r${DataStreamTreeTokenType.TABLE_CELL_END}${DataStreamTreeTokenType.TABLE_ROW_END}${DataStreamTreeTokenType.TABLE_END}`,
+            findParagraphBoundByIndex: vi.fn(() => paragraph),
+            tableCellBounds: new Map([[
+                'table-1',
+                [{
+                    rect: { bottom: 180, left: 100, right: 260, top: 100 },
+                    pageIndex: 0,
+                    rowIndex: 0,
+                    colIndex: 0,
+                    tableId: 'table-1',
+                }],
+            ]]),
+            tables: [{ tableId: 'table-1', startIndex: 0, endIndex: 9 }],
+        });
+
+        service.showParagraphMenu(paragraph as IMutiPageParagraphBound);
+
+        const [anchor] = attachPopupToRect.mock.calls[0] as unknown as [() => { bottom: number; left: number; right: number; top: number }];
+        expect(anchor()).toEqual({
+            bottom: 140,
+            left: 80,
+            right: 80,
+            top: 120,
+        });
+    });
+
+    it('keeps non-first-column table-cell paragraph menus clear of the column resize edge', () => {
+        const attachPopupToRect = vi.fn(() => ({ canDispose: () => true, dispose: vi.fn() }));
+        const paragraph = {
+            ...createParagraphBound({
+                paragraphStart: 3,
+                paragraphEnd: 7,
+                startIndex: 7,
+            }),
+            firstLine: { bottom: 140, left: 300, right: 400, top: 120 },
+            rowIndex: 0,
+            colIndex: 1,
+            tableId: 'table-1',
+        };
+        const service = createService({
+            attachPopupToRect,
+            dataStream: `${DataStreamTreeTokenType.TABLE_START}${DataStreamTreeTokenType.TABLE_ROW_START}${DataStreamTreeTokenType.TABLE_CELL_START}A${DataStreamTreeTokenType.TABLE_CELL_END}${DataStreamTreeTokenType.TABLE_CELL_START}Cell\r${DataStreamTreeTokenType.TABLE_CELL_END}${DataStreamTreeTokenType.TABLE_ROW_END}${DataStreamTreeTokenType.TABLE_END}`,
+            findParagraphBoundByIndex: vi.fn(() => paragraph),
+            tableCellBounds: new Map([[
+                'table-1',
+                [{
+                    rect: { bottom: 180, left: 100, right: 260, top: 100 },
+                    pageIndex: 0,
+                    rowIndex: 0,
+                    colIndex: 0,
+                    tableId: 'table-1',
+                }, {
+                    rect: { bottom: 180, left: 280, right: 440, top: 100 },
+                    pageIndex: 0,
+                    rowIndex: 0,
+                    colIndex: 1,
+                    tableId: 'table-1',
+                }],
+            ]]),
+            tables: [{ tableId: 'table-1', startIndex: 0, endIndex: 12 }],
+        });
+
+        service.showParagraphMenu(paragraph as IMutiPageParagraphBound);
+
+        const [anchor] = attachPopupToRect.mock.calls[0] as unknown as [() => { bottom: number; left: number; right: number; top: number }];
+        expect(anchor()).toEqual({
+            bottom: 140,
+            left: 270,
+            right: 270,
+            top: 120,
+        });
+    });
+
     it('uses list icons for list paragraph menus', () => {
         const attachPopupToRect = vi.fn(() => ({ canDispose: () => true, dispose: vi.fn() }));
         const service = createService({
@@ -312,6 +436,7 @@ function createService(options: {
     findParagraphBoundByIndex?: (index: number) => unknown;
     paragraphs?: Array<{ bullet?: { listType?: PresetListType }; startIndex: number }>;
     paragraphBounds?: Map<number, IMutiPageParagraphBound>;
+    tableCellBounds?: Map<string, Array<{ colIndex: number; pageIndex: number; rect: { bottom: number; left: number; right: number; top: number }; rowIndex: number; tableId: string }>>;
     tables?: Array<{ endIndex: number; startIndex: number; tableId: string }>;
     viewportScrollY?: number;
 }) {
@@ -354,6 +479,11 @@ function createService(options: {
             findParagraphBoundByIndex: options.findParagraphBoundByIndex ?? vi.fn(() => null),
             findParagraphBoundsInRange: vi.fn((startIndex: number, endIndex: number) => [...(options.paragraphBounds ?? new Map()).values()]
                 .filter((bound) => Math.max(bound.paragraphStart, startIndex) <= Math.min(bound.paragraphEnd, endIndex))),
+            findTableCellBound: vi.fn((tableId: string, rowIndex: number, colIndex: number, pageIndex?: number) => options.tableCellBounds?.get(tableId)?.find((bound) =>
+                bound.rowIndex === rowIndex &&
+                bound.colIndex === colIndex &&
+                (pageIndex == null || bound.pageIndex === pageIndex)
+            )),
             paragraphBounds: options.paragraphBounds ?? new Map(),
             tableBounds: new Map(),
         } as never,

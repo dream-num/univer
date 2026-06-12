@@ -26,7 +26,7 @@ import type {
     IRenderContext,
     IRenderModule,
 } from '@univerjs/engine-render';
-import { Disposable, fromEventSubject, Inject } from '@univerjs/core';
+import { Disposable, fromEventSubject, Inject, PresetListType } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { CURSOR_TYPE, getDocsTableRenderViewport, getTableIdAndSliceIndex, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
 import { BehaviorSubject, distinctUntilChanged, filter, map, Subject, switchMap, take, throttleTime } from 'rxjs';
@@ -157,6 +157,55 @@ export const calcDocGlyphPosition = (glyph: IDocumentSkeletonGlyph, documents: D
         right: rect.left + documentOffsetConfig.docsLeft + glyph.width,
     };
 };
+
+const LIST_MARKER_FALLBACK_HIT_WIDTH = 36;
+
+export function getListMarkerFallbackHit(
+    paragraphBound: Pick<IMutiPageParagraphBound, 'firstLine' | 'pageIndex' | 'rect' | 'segmentId'>,
+    paragraph: Pick<IParagraph, 'bullet' | 'startIndex'> | undefined,
+    point: { x: number; y: number }
+): IBulletBound | null {
+    const markerBound = getListMarkerFallbackBound(paragraphBound, paragraph);
+
+    if (!markerBound || !isPointInRect(point.x, point.y, markerBound.rect)) {
+        return null;
+    }
+
+    return markerBound;
+}
+
+export function getListParagraphContextMenuHit(
+    paragraphBound: Pick<IMutiPageParagraphBound, 'firstLine' | 'pageIndex' | 'rect' | 'segmentId'>,
+    paragraph: Pick<IParagraph, 'bullet' | 'startIndex'> | undefined,
+    point: { x: number; y: number }
+): IBulletBound | null {
+    return getListMarkerFallbackHit(paragraphBound, paragraph, point);
+}
+
+export function isChecklistListType(listType?: string): boolean {
+    return listType === PresetListType.CHECK_LIST || listType === PresetListType.CHECK_LIST_CHECKED;
+}
+
+export function getListMarkerFallbackBound(
+    paragraphBound: Pick<IMutiPageParagraphBound, 'firstLine' | 'pageIndex' | 'rect' | 'segmentId'>,
+    paragraph: Pick<IParagraph, 'bullet' | 'startIndex'> | undefined
+): IBulletBound | null {
+    if (!paragraph?.bullet) {
+        return null;
+    }
+
+    return {
+        paragraph: paragraph as IParagraph,
+        rect: {
+            bottom: paragraphBound.firstLine.bottom,
+            left: paragraphBound.rect.left,
+            right: Math.min(paragraphBound.rect.right, paragraphBound.rect.left + LIST_MARKER_FALLBACK_HIT_WIDTH),
+            top: paragraphBound.firstLine.top,
+        },
+        segmentId: paragraphBound.segmentId,
+        segmentPageIndex: paragraphBound.pageIndex,
+    };
+}
 
 interface ICustomRangeActive {
     range: ICustomRange;
@@ -416,12 +465,12 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
         const onPointerUp$ = fromEventSubject(this._context.scene!.onPointerUp$);
         this.disposeWithMe(onPointerDown$.pipe(
             switchMap((down) => onPointerUp$.pipe(take(1), map((up) => ({ down, up })))),
-            filter(({ down, up }) => down.target === up.target && up.timeStamp - down.timeStamp < 300)
+            filter(({ down, up }) => down.target === up.target && (down.button === 2 || up.timeStamp - down.timeStamp < 300))
         ).subscribe(({ down }) => {
             const point = transformOffset2Bound(down.offsetX, down.offsetY, this._context.scene);
 
             if (down.button === 2) {
-                const bullet = this._calcActiveBullet(point);
+                const bullet = this._calcActiveBullet(point) ?? this._calcActiveListParagraph(point);
                 if (bullet) {
                     this._contextMenuBullet$.next({
                         ...bullet,
@@ -449,10 +498,22 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
         return Boolean(this._calcActiveBullet(transformOffset2Bound(offsetX, offsetY, this._context.scene)));
     }
 
+    isPointerOnNonChecklistBullet(offsetX: number, offsetY: number): boolean {
+        const bullet = this._calcActiveBullet(transformOffset2Bound(offsetX, offsetY, this._context.scene));
+
+        return Boolean(bullet && !isChecklistListType(bullet.paragraph.bullet?.listType));
+    }
+
     getBulletBounds(): IBulletBound[] {
         this._buildBulletBounds();
 
         return [...this._bulletBounds];
+    }
+
+    getListContextMenuBulletByOffset(offsetX: number, offsetY: number): Nullable<IBulletBound> {
+        const point = transformOffset2Bound(offsetX, offsetY, this._context.scene);
+
+        return this._calcActiveBullet(point) ?? this._calcActiveListParagraph(point);
     }
 
     private _buildCustomRangeBoundsBySegment(segmentId?: string, segmentPage = -1) {
@@ -607,7 +668,37 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
 
         const { x, y } = evt;
         const bullet = this._bulletBounds.find((layout) => isPointInRect(x, y, layout.rect));
-        return bullet;
+        if (bullet) {
+            return bullet;
+        }
+
+        const paragraphBound = this._calcActiveParagraph(evt);
+        if (!paragraphBound) {
+            return null;
+        }
+
+        return getListMarkerFallbackHit(
+            paragraphBound,
+            this._getParagraphByStartIndex(paragraphBound.startIndex, paragraphBound.segmentId),
+            evt
+        );
+    }
+
+    private _calcActiveListParagraph(evt: { x: number; y: number }) {
+        const paragraphBound = this._calcActiveParagraph(evt);
+        if (!paragraphBound) {
+            return null;
+        }
+
+        return getListParagraphContextMenuHit(
+            paragraphBound,
+            this._getParagraphByStartIndex(paragraphBound.startIndex, paragraphBound.segmentId),
+            evt
+        );
+    }
+
+    private _getParagraphByStartIndex(startIndex: number, segmentId?: string): IParagraph | undefined {
+        return this._context.unit.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.paragraphs?.find((paragraph) => paragraph.startIndex === startIndex);
     }
 
     // eslint-disable-next-line max-lines-per-function
@@ -837,6 +928,15 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
     get tableBounds() {
         this._buildParagraphBounds();
         return this._tableBounds;
+    }
+
+    findTableCellBound(tableId: string, rowIndex: number, colIndex: number, pageIndex?: number) {
+        this._buildParagraphBounds();
+        return this._tableCellBounds.get(tableId)?.find((bound) => (
+            bound.rowIndex === rowIndex &&
+            bound.colIndex === colIndex &&
+            (pageIndex == null || bound.pageIndex === pageIndex)
+        ));
     }
 
     findParagraphBoundByIndex(index: number) {

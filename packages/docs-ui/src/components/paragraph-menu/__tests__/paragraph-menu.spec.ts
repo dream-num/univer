@@ -21,7 +21,7 @@ import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import * as paragraphMenu from '..';
-import { createParagraphMenuHoverOpenScheduler, getParagraphFormattingRange, getParagraphMenuActiveHeadingCommandId, getParagraphMenuCommand, getParagraphMenuCommandTargetRange, getParagraphMenuHiddenHeadingCommandIds, getParagraphMenuHiddenItemIds, getParagraphMenuIconSizeClass, getParagraphMenuPopupDirection, getParagraphMenuResolvedCommand, getParagraphMenuTargetRange, isEmptyParagraphMenuTarget, PARAGRAPH_MENU_HOVER_OPEN_DELAY, shouldShowParagraphSettingMenu, shouldUseInsertBelowRange } from '..';
+import { createParagraphMenuHoverOpenScheduler, getParagraphFormattingRange, getParagraphMenuActiveHeadingCommandId, getParagraphMenuCommand, getParagraphMenuCommandTargetRange, getParagraphMenuHiddenHeadingCommandIds, getParagraphMenuHiddenItemIds, getParagraphMenuIconSizeClass, getParagraphMenuPopupDirection, getParagraphMenuResolvedCommand, getParagraphMenuTargetRange, isEmptyParagraphMenuTarget, PARAGRAPH_MENU_HOVER_OPEN_DELAY, setParagraphMenuInteractionActive, shouldShowParagraphSettingMenu, shouldUseInsertBelowRange } from '..';
 import { HorizontalLineCommand } from '../../../commands/commands/doc-horizontal-line.command';
 import { SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand } from '../../../commands/commands/inline-format.command';
 import { BulletListCommand, InsertBulletListBellowCommand, OrderListCommand } from '../../../commands/commands/list.command';
@@ -281,6 +281,16 @@ describe('ParagraphMenu', () => {
         vi.advanceTimersByTime(PARAGRAPH_MENU_HOVER_OPEN_DELAY);
 
         expect(openMenu).toHaveBeenCalledTimes(1);
+    });
+
+    it('marks the paragraph menu interaction as active while hovering trigger, bridge, or popup', () => {
+        const setParagraphMenuActive = vi.fn();
+
+        setParagraphMenuInteractionActive({ setParagraphMenuActive } as never, true);
+        setParagraphMenuInteractionActive({ setParagraphMenuActive } as never, false);
+
+        expect(setParagraphMenuActive).toHaveBeenNthCalledWith(1, true);
+        expect(setParagraphMenuActive).toHaveBeenNthCalledWith(2, false);
     });
 
     it('maps paragraph named styles to the active heading menu item', () => {

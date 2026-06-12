@@ -19,6 +19,7 @@ import { BooleanNumber, DOC_RANGE_TYPE, ICommandService, IUniverInstanceService,
 import { DocSelectionManagerService, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
+    ResetInlineFormatTextColorCommand,
     SetInlineFormatBoldCommand,
     SetInlineFormatCommand,
     SetInlineFormatFontFamilyCommand,
@@ -59,6 +60,7 @@ describe('Test inline format commands', () => {
 
         commandService = get(ICommandService);
         commandService.registerCommand(SetInlineFormatCommand);
+        commandService.registerCommand(ResetInlineFormatTextColorCommand);
         commandService.registerCommand(SetTextSelectionsOperation);
         commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
 
@@ -296,6 +298,30 @@ describe('Test inline format commands', () => {
             await commandService.executeCommand(RedoCommand.id);
             expect(getFormatValueAt('cl', 1)).toStrictEqual({
                 rgb: '#000000',
+            });
+        });
+
+        it('Should reset text color in selected ranges', async () => {
+            await commandService.executeCommand(SetInlineFormatCommand.id, {
+                segmentId: '',
+                preCommandId: SetInlineFormatTextColorCommand.id,
+                value: '#123456',
+            });
+
+            await commandService.executeCommand(ResetInlineFormatTextColorCommand.id);
+
+            expect(getFormatValueAt('cl', 1)).toStrictEqual({
+                rgb: null,
+            });
+
+            await commandService.executeCommand(UndoCommand.id);
+            expect(getFormatValueAt('cl', 1)).toStrictEqual({
+                rgb: '#123456',
+            });
+
+            await commandService.executeCommand(RedoCommand.id);
+            expect(getFormatValueAt('cl', 1)).toStrictEqual({
+                rgb: null,
             });
         });
     });

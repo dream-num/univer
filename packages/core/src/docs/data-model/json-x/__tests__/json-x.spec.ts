@@ -24,7 +24,7 @@ function createDoc(id = 'doc-json-x'): IDocumentData {
         id,
         body: {
             dataStream: 'Hello\r\n',
-            paragraphs: [{ startIndex: 5 }],
+            paragraphs: [{ startIndex: 5, paragraphId: 'para_fixture_9' }],
         },
         documentStyle: {
             pageSize: { width: 100, height: 100 },
@@ -72,7 +72,7 @@ describe('Basic use of json-x', () => {
             expect(transformed).toBeTruthy();
             expect(edited.body?.dataStream).toBe('Hello!?\r\n');
             expect(restored).toMatchObject(createDoc());
-            expect(restored.body).toMatchObject({ dataStream: 'Hello\r\n', paragraphs: [{ startIndex: 5 }] });
+            expect(restored.body).toMatchObject({ dataStream: 'Hello\r\n', paragraphs: [{ startIndex: 5, paragraphId: 'para_fixture_9' }] });
         });
     });
 });

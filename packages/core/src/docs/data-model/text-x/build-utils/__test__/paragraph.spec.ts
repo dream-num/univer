@@ -35,6 +35,7 @@ function createParagraphBody(): IDocumentBody {
         paragraphs: [
             {
                 startIndex: 5,
+                paragraphId: 'para_fixture_1069',
                 paragraphStyle: { horizontalAlign: HorizontalAlign.LEFT },
                 bullet: {
                     listId: 'bullet-prev',
@@ -45,6 +46,7 @@ function createParagraphBody(): IDocumentBody {
             },
             {
                 startIndex: 10,
+                paragraphId: 'para_fixture_1070',
                 paragraphStyle: { horizontalAlign: HorizontalAlign.LEFT },
                 bullet: {
                     listId: 'check-1',
@@ -55,6 +57,7 @@ function createParagraphBody(): IDocumentBody {
             },
             {
                 startIndex: 16,
+                paragraphId: 'para_fixture_1071',
                 paragraphStyle: { horizontalAlign: HorizontalAlign.RIGHT },
             },
         ],

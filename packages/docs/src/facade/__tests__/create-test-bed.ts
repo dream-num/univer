@@ -16,7 +16,7 @@
 
 import type { DocumentDataModel, IDocumentData, Injector } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
-import { DisposableCollection, ILogService, IUniverInstanceService, LogLevel, normalizeDocumentParagraphIds, Univer, UniverInstanceType } from '@univerjs/core';
+import { DisposableCollection, ILogService, IUniverInstanceService, LogLevel, Univer, UniverInstanceType } from '@univerjs/core';
 import { FUniver as FUniverCtor } from '@univerjs/core/facade';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { BehaviorSubject } from 'rxjs';
@@ -28,7 +28,7 @@ function getTestDocumentDataDemo(): IDocumentData {
         id: 'test',
         body: {
             dataStream: 'Hello,\r\n',
-            paragraphs: [{ startIndex: 6 }],
+            paragraphs: [{ startIndex: 6, paragraphId: 'para_fixture_19' }],
         },
         documentStyle: {
             pageSize: {
@@ -62,10 +62,10 @@ export function createTestBed(documentConfig?: IDocumentData): ITestBed {
     injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
 
     univer.registerPlugin(UniverDocsPlugin);
-    const normalizedDocumentConfig = normalizeDocumentParagraphIds(cloneDocumentData(documentConfig ?? getTestDocumentDataDemo()));
+    const documentConfigWithIds = cloneDocumentData(documentConfig ?? getTestDocumentDataDemo());
     const doc = univer.createUnit<IDocumentData, DocumentDataModel>(
         UniverInstanceType.UNIVER_DOC,
-        normalizedDocumentConfig
+        documentConfigWithIds
     );
 
     injector.get(IUniverInstanceService).focusUnit(doc.getUnitId());

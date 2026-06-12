@@ -25,7 +25,7 @@ describe('drawing build utils', () => {
             id: 'doc-drawing',
             body: {
                 dataStream: 'A\bB\r\n',
-                paragraphs: [{ startIndex: 4 }],
+                paragraphs: [{ startIndex: 4, paragraphId: 'para_fixture_15' }],
                 customBlocks: [{ startIndex: 1, blockId: 'drawing-old' }],
             },
             drawings: {

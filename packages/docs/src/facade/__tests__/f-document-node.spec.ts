@@ -73,6 +73,7 @@ function createTaskDocument(id = 'test'): IDocumentData {
         paragraphs: [
             {
                 startIndex: 4,
+                paragraphId: 'para_todo',
                 bullet: {
                     listId: 'task-list',
                     listType: PresetListType.CHECK_LIST,
@@ -91,6 +92,7 @@ function createBulletDocument(id = 'test'): IDocumentData {
         paragraphs: [
             {
                 startIndex: 6,
+                paragraphId: 'para_bullet',
                 bullet: {
                     listId: 'bullet-list',
                     listType: PresetListType.BULLET_LIST,
@@ -106,7 +108,7 @@ function createBulletDocument(id = 'test'): IDocumentData {
 function createBlockRangeDocument(blockType = DocumentBlockRangeType.QUOTE, id = 'test'): IDocumentData {
     return createDocumentData(id, {
         dataStream: 'Block\rAfter\r\n',
-        paragraphs: [{ startIndex: 5 }, { startIndex: 11 }],
+        paragraphs: [{ startIndex: 5, paragraphId: 'para_fixture_20' }, { startIndex: 11, paragraphId: 'para_after_block' }],
         blockRanges: [{
             blockId: `${blockType}-1`,
             blockType,
@@ -120,7 +122,7 @@ function createBlockRangeDocument(blockType = DocumentBlockRangeType.QUOTE, id =
 function createTableDocument(id = 'test'): IDocumentData {
     return createDocumentData(id, {
         dataStream: 'TT\raa\r\n',
-        paragraphs: [{ startIndex: 2 }, { startIndex: 5 }],
+        paragraphs: [{ startIndex: 2, paragraphId: 'para_fixture_21' }, { startIndex: 5, paragraphId: 'para_after_table' }],
         tables: [{ tableId: 'table-1', startIndex: 0, endIndex: 2 }],
         sectionBreaks: [{ startIndex: 6 }],
     });
@@ -129,7 +131,7 @@ function createTableDocument(id = 'test'): IDocumentData {
 function createCustomBlockDocument(id = 'test'): IDocumentData {
     return createDocumentData(id, {
         dataStream: '\b\raa\r\n',
-        paragraphs: [{ startIndex: 1 }, { startIndex: 4 }],
+        paragraphs: [{ startIndex: 1, paragraphId: 'para_fixture_22' }, { startIndex: 4, paragraphId: 'para_after_custom_block' }],
         customBlocks: [{ blockId: 'custom-1', blockType: 'custom' as never, startIndex: 0 }],
         sectionBreaks: [{ startIndex: 5 }],
     });
@@ -214,7 +216,7 @@ describe('FDocument facade in Node', () => {
         ]);
     });
 
-    it('normalizes paragraph ids at test-bed and save snapshot boundaries', () => {
+    it('preserves required paragraph ids at test-bed and save snapshot boundaries', () => {
         univer.dispose();
         createDocumentFacade(createSimpleDocument());
 
@@ -224,21 +226,21 @@ describe('FDocument facade in Node', () => {
         expectParagraphIds(savedParagraphs);
     });
 
-    it('normalizes paragraph ids when saving an old snapshot without pre-normalized ids', () => {
-        const oldSnapshot = createDocumentData('legacy-doc', {
+    it('returns saved snapshots with required paragraph ids unchanged', () => {
+        const snapshot = createDocumentData('doc-with-ids', {
             dataStream: 'Alpha\rBeta\rGamma\r\n',
             paragraphs: [
-                { startIndex: 5 },
-                { startIndex: 10 },
-                { startIndex: 16 },
+                { startIndex: 5, paragraphId: 'para_fixture_23' },
+                { startIndex: 10, paragraphId: 'para_fixture_24' },
+                { startIndex: 16, paragraphId: 'para_fixture_25' },
             ],
             sectionBreaks: [{ startIndex: 17 }],
         });
-        const saveUnit = vi.fn(() => oldSnapshot);
-        const legacyDocument = new FDocument(
+        const saveUnit = vi.fn(() => snapshot);
+        const facadeDocument = new FDocument(
             {
-                getSnapshot: () => ({ id: 'legacy-doc', documentStyle: {} }),
-                getUnitId: () => 'legacy-doc',
+                getSnapshot: () => ({ id: 'doc-with-ids', documentStyle: {} }),
+                getUnitId: () => 'doc-with-ids',
             } as never,
             {} as never,
             {} as never,
@@ -246,27 +248,27 @@ describe('FDocument facade in Node', () => {
             {} as never
         );
 
-        const savedParagraphs = legacyDocument.save().body?.paragraphs;
+        const savedParagraphs = facadeDocument.save().body?.paragraphs;
 
-        expect(saveUnit).toHaveBeenCalledWith('legacy-doc');
+        expect(saveUnit).toHaveBeenCalledWith('doc-with-ids');
         expect(savedParagraphs?.map((paragraph) => paragraph.startIndex)).toEqual([5, 10, 16]);
         expectParagraphIds(savedParagraphs);
     });
 
-    it('normalizes live paragraph ids before creating body facade wrappers', () => {
-        const oldSnapshot = createDocumentData('legacy-doc', {
+    it('uses existing paragraph ids when creating body facade wrappers', () => {
+        const snapshot = createDocumentData('doc-with-ids', {
             dataStream: 'Legacy\r\n',
-            paragraphs: [{ startIndex: 6 }],
+            paragraphs: [{ startIndex: 6, paragraphId: 'para_fixture_26' }],
             sectionBreaks: [{ startIndex: 7 }],
         });
         const model = {
-            getUnitId: () => 'legacy-doc',
-            getSnapshot: () => oldSnapshot,
+            getUnitId: () => 'doc-with-ids',
+            getSnapshot: () => snapshot,
             getSelfOrHeaderFooterModel: () => ({
-                getBody: () => oldSnapshot.body,
+                getBody: () => snapshot.body,
             }),
         };
-        const legacyDocument = new FDocument(
+        const facadeDocument = new FDocument(
             model as never,
             {} as never,
             {} as never,
@@ -274,10 +276,10 @@ describe('FDocument facade in Node', () => {
             {} as never
         );
 
-        const paragraph = legacyDocument.getBody().getChild(0).asParagraph();
+        const paragraph = facadeDocument.getBody().getChild(0).asParagraph();
 
         expect(paragraph.getId()).toMatch(/^para_/);
-        expect(oldSnapshot.body?.paragraphs?.[0].paragraphId).toBe(paragraph.getId());
+        expect(snapshot.body?.paragraphs?.[0].paragraphId).toBe(paragraph.getId());
     });
 
     it('runs FDocBody paragraph and range APIs in Node', () => {
@@ -385,7 +387,8 @@ describe('FDocument facade in Node', () => {
         createDocumentFacade(createSimpleDocument());
 
         const body = document.getBody();
-        delete document.getDocumentDataModel().getBody()!.paragraphs![0].paragraphId;
+        const invalidParagraph = document.getDocumentDataModel().getBody()!.paragraphs![0] as { paragraphId?: string };
+        delete invalidParagraph.paragraphId;
 
         expect(() => body.getChild(0)).toThrow(DocElementStaleError);
         expect(() => body.getChild(0)).toThrow('Paragraph at index 0 is missing paragraphId.');

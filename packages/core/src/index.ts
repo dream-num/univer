@@ -103,9 +103,6 @@ export {
     cloneBodyWithFreshParagraphIds,
     cloneParagraphWithId,
     createParagraphId,
-    ensureUniqueParagraphIds,
-    normalizeBodyParagraphIds,
-    normalizeDocumentParagraphIds,
     PARAGRAPH_ID_PREFIX,
     type IParagraphIdScope,
 } from './docs/paragraph-id';

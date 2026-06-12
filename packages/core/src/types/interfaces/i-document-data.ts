@@ -572,7 +572,7 @@ export interface ISectionColumnProperties {
 export interface IParagraph {
     // elements: IElement[]; // elements
     startIndex: number;
-    paragraphId?: string;
+    paragraphId: string;
     paragraphStyle?: IParagraphStyle; // paragraphStyle
     bullet?: IBullet; // bullet
     // dIds?: string[]; // drawingIds drawingId

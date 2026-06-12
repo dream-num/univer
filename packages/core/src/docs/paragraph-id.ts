@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody, IDocumentData, IParagraph } from '../types/interfaces/i-document-data';
+import type { IDocumentBody, IParagraph } from '../types/interfaces/i-document-data';
 import { generateRandomId } from '../shared/tools';
 
 export const PARAGRAPH_ID_PREFIX = 'para_';
@@ -36,45 +36,7 @@ export function createParagraphId(existingIds: Set<string>): string {
     return paragraphId;
 }
 
-export function normalizeDocumentParagraphIds(documentData: IDocumentData): IDocumentData {
-    if (documentData.body) {
-        normalizeBodyParagraphIds(documentData.body, { unitId: documentData.id, segmentId: '' });
-    }
-
-    Object.values(documentData.headers ?? {}).forEach((header) => {
-        if (header.body) {
-            normalizeBodyParagraphIds(header.body, { unitId: documentData.id, segmentId: header.headerId });
-        }
-    });
-
-    Object.values(documentData.footers ?? {}).forEach((footer) => {
-        if (footer.body) {
-            normalizeBodyParagraphIds(footer.body, { unitId: documentData.id, segmentId: footer.footerId });
-        }
-    });
-
-    return documentData;
-}
-
-export function normalizeBodyParagraphIds(body: IDocumentBody, scope: IParagraphIdScope): IDocumentBody {
-    ensureUniqueParagraphIds(body, scope);
-    return body;
-}
-
-export function ensureUniqueParagraphIds(body: IDocumentBody, _scope: IParagraphIdScope): void {
-    const existingIds = new Set<string>();
-
-    for (const paragraph of body.paragraphs ?? []) {
-        if (!isValidParagraphId(paragraph.paragraphId) || existingIds.has(paragraph.paragraphId)) {
-            paragraph.paragraphId = createParagraphId(existingIds);
-            continue;
-        }
-
-        existingIds.add(paragraph.paragraphId);
-    }
-}
-
-export function cloneBodyWithFreshParagraphIds(body: IDocumentBody, scope: IParagraphIdScope): IDocumentBody {
+export function cloneBodyWithFreshParagraphIds(body: IDocumentBody, _scope: IParagraphIdScope): IDocumentBody {
     const cloned = cloneBody(body);
     const existingIds = new Set<string>();
 
@@ -82,7 +44,6 @@ export function cloneBodyWithFreshParagraphIds(body: IDocumentBody, scope: IPara
         paragraph.paragraphId = createParagraphId(existingIds);
     }
 
-    ensureUniqueParagraphIds(cloned, scope);
     return cloned;
 }
 

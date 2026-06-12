@@ -20,6 +20,7 @@ import { DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING, DEFAULT_DOCUMENT_PARAGRAPH_SPA
 import { BooleanNumber } from '../../types/enum';
 import { LocaleType } from '../../types/enum/locale-type';
 import { DocumentFlavor } from '../../types/interfaces';
+import { createParagraphId } from '../paragraph-id';
 
 export function getEmptySnapshot(
     unitID = generateRandomId(6),
@@ -46,6 +47,7 @@ export function getEmptySnapshot(
             paragraphs: [
                 {
                     startIndex: 0,
+                    paragraphId: createParagraphId(new Set()),
                     paragraphStyle: {
                         spaceAbove: { v: DEFAULT_DOCUMENT_PARAGRAPH_SPACE_ABOVE },
                         lineSpacing: DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING,

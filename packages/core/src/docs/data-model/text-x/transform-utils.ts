@@ -266,6 +266,7 @@ function transformParagraph(
 ): IParagraph {
     const paragraph: IParagraph = {
         startIndex: targetParagraph.startIndex,
+        paragraphId: targetParagraph.paragraphId,
     };
 
     if (targetParagraph.paragraphStyle) {
@@ -350,6 +351,10 @@ function transformParagraph(
                 }
             }
         }
+    }
+
+    if (paragraph.bullet === undefined) {
+        delete paragraph.bullet;
     }
 
     return paragraph;
@@ -483,6 +488,7 @@ export function transformBody(
         if (thisStart === otherStart) {
             let paragraph: IParagraph = {
                 startIndex: thisStart,
+                paragraphId: otherParagraph.paragraphId,
             };
 
             if (priority) {

@@ -563,6 +563,7 @@ describe('transform()', () => {
                     paragraphs: [
                         {
                             startIndex: 0,
+                            paragraphId: 'para_fixture_1041',
                             paragraphStyle: {
                                 lineSpacing: 1,
                             },
@@ -581,6 +582,7 @@ describe('transform()', () => {
                     paragraphs: [
                         {
                             startIndex: 0,
+                            paragraphId: 'para_fixture_1042',
                             paragraphStyle: {
                                 lineSpacing: 5,
                                 spaceBelow: { v: 6 },
@@ -601,6 +603,7 @@ describe('transform()', () => {
                     paragraphs: [
                         {
                             startIndex: 0,
+                            paragraphId: 'para_fixture_1042',
                             paragraphStyle: {
                                 spaceBelow: { v: 6 },
                             },
@@ -620,6 +623,7 @@ describe('transform()', () => {
                     paragraphs: [
                         {
                             startIndex: 0,
+                            paragraphId: 'para_fixture_1042',
                             paragraphStyle: {
                                 lineSpacing: 5,
                                 spaceBelow: { v: 6 },
@@ -645,6 +649,7 @@ describe('transform()', () => {
                     paragraphs: [
                         {
                             startIndex: 0,
+                            paragraphId: 'para_fixture_1045',
                             paragraphStyle: {
                                 lineSpacing: 1,
                             },
@@ -664,6 +669,7 @@ describe('transform()', () => {
                     paragraphs: [
                         {
                             startIndex: 0,
+                            paragraphId: 'para_fixture_1046',
                             paragraphStyle: {
                                 lineSpacing: 5,
                                 spaceBelow: { v: 6 },
@@ -684,6 +690,7 @@ describe('transform()', () => {
                     paragraphs: [
                         {
                             startIndex: 0,
+                            paragraphId: 'para_fixture_1046',
                             paragraphStyle: {
                                 lineSpacing: 1,
                             },
@@ -703,6 +710,7 @@ describe('transform()', () => {
                     paragraphs: [
                         {
                             startIndex: 0,
+                            paragraphId: 'para_fixture_1046',
                             paragraphStyle: {
                                 lineSpacing: 5,
                                 spaceBelow: { v: 6 },

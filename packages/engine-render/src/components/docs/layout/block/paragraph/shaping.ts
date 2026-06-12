@@ -123,7 +123,7 @@ export function shaping(
     const shapedTextList: IShapedText[] = [];
     let breaker = new LineBreaker(content);
     const { endIndex } = paragraphNode;
-    const paragraph = viewModel.getParagraph(endIndex) || { startIndex: 0 };
+    const paragraph = viewModel.getParagraph(endIndex) || { startIndex: 0, paragraphId: 'para_render_fallback' };
     const { paragraphStyle = {} } = paragraph;
     const { snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
     let last = 0;

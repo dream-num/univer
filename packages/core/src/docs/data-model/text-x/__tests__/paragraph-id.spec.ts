@@ -70,7 +70,7 @@ describe('TextX paragraph ids', () => {
 
         textX.insert(2, {
             dataStream: 'A\r',
-            paragraphs: [{ startIndex: 1 }],
+            paragraphs: [{ startIndex: 1, paragraphId: 'para_fixture_11' }],
         });
 
         const actions = textX.serialize();
@@ -97,7 +97,7 @@ describe('TextX paragraph ids', () => {
             len: 2,
             body: {
                 dataStream: 'A\r',
-                paragraphs: [{ startIndex: 1 }],
+                paragraphs: [{ startIndex: 1, paragraphId: 'para_fixture_12' }],
             },
         }]);
 
@@ -121,7 +121,7 @@ describe('TextX paragraph ids', () => {
             len: 1,
             body: {
                 dataStream: '\r',
-                paragraphs: [{ startIndex: 0 }],
+                paragraphs: [{ startIndex: 0, paragraphId: 'para_fixture_13' }],
             },
         }]);
 
@@ -168,7 +168,7 @@ describe('TextX paragraph ids', () => {
             len: 1,
             body: {
                 dataStream: '\r',
-                paragraphs: [{ startIndex: 0 }],
+                paragraphs: [{ startIndex: 0 } as never],
             },
         }];
 
@@ -309,7 +309,7 @@ describe('TextX paragraph ids', () => {
                 paragraphs: [{
                     startIndex: 0,
                     paragraphStyle: { lineSpacing: 2 },
-                }],
+                } as never],
             },
         }]);
 

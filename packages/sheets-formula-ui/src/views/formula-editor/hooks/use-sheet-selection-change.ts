@@ -82,7 +82,7 @@ export const useSheetSelectionChange = (
     isSelectingRef: RefObject<FormulaSelectingType>,
     unitId: string,
     subUnitId: string,
-    refSelectionRef: React.MutableRefObject<IRefSelection[]>,
+    getRefSelections: () => IRefSelection[],
     isSupportAcrossSheet: boolean,
     listenSelectionSet: boolean,
     editor?: Editor,
@@ -380,7 +380,7 @@ export const useSheetSelectionChange = (
             calcHighlightRanges({
                 unitId,
                 subUnitId,
-                refSelections: refSelectionRef.current,
+                refSelections: getRefSelections(),
                 editor,
                 refSelectionsService,
                 refSelectionsRenderService,
@@ -392,5 +392,5 @@ export const useSheetSelectionChange = (
         });
 
         return () => sub.unsubscribe();
-    }, [docSelectionManagerService.textSelection$, editor, refSelectionRef, refSelectionsRenderService, refSelectionsService, sheetSkeletonManagerService, subUnitId, themeService, unitId, univerInstanceService]);
+    }, [docSelectionManagerService.textSelection$, editor, getRefSelections, refSelectionsRenderService, refSelectionsService, sheetSkeletonManagerService, subUnitId, themeService, unitId, univerInstanceService]);
 };

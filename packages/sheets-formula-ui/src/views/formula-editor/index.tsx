@@ -160,6 +160,7 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
     const currentDoc = useObservable(currentDoc$);
     const docFocusing = currentDoc?.getUnitId() === editorId;
     const refSelections = useRef([] as IRefSelection[]);
+    const getRefSelections = useEvent(() => refSelections.current);
     const selectingMode = isSelecting;
 
     // whether to hide formula search and help popup
@@ -339,7 +340,7 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
         isSelectingRef,
         unitId,
         subUnitId,
-        refSelections,
+        getRefSelections,
         isSupportAcrossSheet,
         Boolean(selectingMode),
         editor,

@@ -32,7 +32,7 @@ export { TWO_FORMULA_OPERATOR_COUNT } from './types/const/two-formula-operators'
 export { UpdateRuleType } from './types/enum/update-rule-type';
 export type { IDataValidationDropdownProps } from './types/interfaces/i-data-validation-drop-down';
 export type { IDataValidatorOperatorConfig } from './types/interfaces/i-data-validator-operator-config';
-export type { FormulaInputType, IFormulaInputProps, IFormulaValue } from './types/interfaces/i-formula-input';
+export type { IFormulaValue } from './types/interfaces/i-formula-input';
 export type { IUpdateRuleOptionsPayload, IUpdateRulePayload, IUpdateRuleRangePayload, IUpdateRuleSettingPayload } from './types/interfaces/i-update-rule-payload';
 export { BaseDataValidator } from './validators/base-data-validator';
 export type { IFormulaResult, IValidatorCellInfo } from './validators/base-data-validator';

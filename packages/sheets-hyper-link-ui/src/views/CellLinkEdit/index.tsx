@@ -87,7 +87,11 @@ export const CellLinkEdit = () => {
 
     const [isFocusRangeSelector, setIsFocusRangeSelector] = useState(false);
 
-    const setByPayload = useRef(false);
+    const isDisplaySyncedWithPayloadRef = useRef(false);
+    const getIsDisplaySyncedWithPayload = useEvent(() => isDisplaySyncedWithPayloadRef.current);
+    const setDisplaySyncedWithPayload = useEvent((synced: boolean) => {
+        isDisplaySyncedWithPayloadRef.current = synced;
+    });
 
     const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
 
@@ -166,7 +170,7 @@ export const CellLinkEdit = () => {
                 case SheetHyperLinkType.URL: {
                     setPayload(linkInfo.url);
                     if (linkInfo.url === link.display) {
-                        setByPayload.current = true;
+                        setDisplaySyncedWithPayload(true);
                     }
                     break;
                 }
@@ -182,7 +186,7 @@ export const CellLinkEdit = () => {
                     const payload = (serializeRangeWithSheet(sheetName, deserializeRangeWithSheet(params.range!).range));
                     setPayload(payload);
                     if (payload === link.display) {
-                        setByPayload.current = true;
+                        setDisplaySyncedWithPayload(true);
                     }
                     break;
                 }
@@ -340,9 +344,9 @@ export const CellLinkEdit = () => {
 
         setPayload(newPayload);
 
-        if (newPayload && (setByPayload.current || !display)) {
+        if (newPayload && (getIsDisplaySyncedWithPayload() || !display)) {
             setDisplay(newPayload);
-            setByPayload.current = true;
+            setDisplaySyncedWithPayload(true);
         }
     });
 
@@ -424,7 +428,7 @@ export const CellLinkEdit = () => {
                             value={display}
                             onChange={(v) => {
                                 setDisplay(v);
-                                setByPayload.current = false;
+                                setDisplaySyncedWithPayload(false);
                             }}
                             placeholder={localeService.t('sheets-hyper-link-ui.form.labelPlaceholder')}
                             autoFocus
@@ -456,9 +460,9 @@ export const CellLinkEdit = () => {
                         value={payload}
                         onChange={(newLink) => {
                             setPayload(newLink);
-                            if (newLink && (setByPayload.current || !display || display === newLink)) {
+                            if (newLink && (getIsDisplaySyncedWithPayload() || !display || display === newLink)) {
                                 setDisplay(newLink);
-                                setByPayload.current = true;
+                                setDisplaySyncedWithPayload(true);
                             }
                         }}
                         placeholder={localeService.t('sheets-hyper-link-ui.form.linkPlaceholder')}
@@ -508,9 +512,9 @@ export const CellLinkEdit = () => {
                             setPayload(newPayload);
                             const label = sheetsOption.find((i) => i.value === newPayload)?.label;
                             const oldLabel = sheetsOption.find((i) => i.value === payload)?.label;
-                            if (label && (setByPayload.current || !display || display === oldLabel)) {
+                            if (label && (getIsDisplaySyncedWithPayload() || !display || display === oldLabel)) {
                                 setDisplay(label);
-                                setByPayload.current = true;
+                                setDisplaySyncedWithPayload(true);
                             }
                         }}
                     />
@@ -526,9 +530,9 @@ export const CellLinkEdit = () => {
                             setPayload(newValue);
                             const label = definedNames.find((i) => i.value === newValue)?.label;
                             const oldLabel = definedNames.find((i) => i.value === payload)?.label;
-                            if (label && (setByPayload.current || !display || display === oldLabel)) {
+                            if (label && (getIsDisplaySyncedWithPayload() || !display || display === oldLabel)) {
                                 setDisplay(label);
-                                setByPayload.current = true;
+                                setDisplaySyncedWithPayload(true);
                             }
                         }}
                     />
@@ -540,10 +544,11 @@ export const CellLinkEdit = () => {
                     payload={payload}
                     display={display}
                     showError={showError}
-                    setByPayload={setByPayload}
+                    getIsDisplaySyncedWithPayload={getIsDisplaySyncedWithPayload}
+                    setDisplaySyncedWithPayload={setDisplaySyncedWithPayload}
                     setDisplay={(newLink) => {
                         setDisplay(newLink);
-                        setByPayload.current = true;
+                        setDisplaySyncedWithPayload(true);
                     }}
                     setPayload={setPayload}
                 />

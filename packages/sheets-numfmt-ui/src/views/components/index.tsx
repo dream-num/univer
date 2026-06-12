@@ -83,6 +83,10 @@ export const SheetNumfmtPanel: FC<ISheetNumfmtPanelProps> = (props) => {
         props.onChange({ type: 'change', value: v });
     }, []);
 
+    const handleActionChange = useCallback((action: () => string | null) => {
+        getCurrentPattern.current = action;
+    }, []);
+
     const handleConfirm = () => {
         const pattern = getCurrentPattern.current() || '';
         const currency = getCurrencyType(pattern);
@@ -98,9 +102,9 @@ export const SheetNumfmtPanel: FC<ISheetNumfmtPanelProps> = (props) => {
 
     const subProps: IBusinessComponentProps = {
         onChange: handleChange,
+        onActionChange: handleActionChange,
         defaultValue,
         defaultPattern,
-        action: getCurrentPattern,
     };
 
     useEffect(() => {

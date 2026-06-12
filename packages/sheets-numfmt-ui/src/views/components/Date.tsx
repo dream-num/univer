@@ -19,7 +19,7 @@ import { LocaleService, numfmt } from '@univerjs/core';
 import { SelectList } from '@univerjs/design';
 import { getDateFormatOptions } from '@univerjs/sheets-numfmt';
 import { useDependency } from '@univerjs/ui';
-import { useMemo, useState } from 'react';
+import { useLayoutEffect, useMemo, useState } from 'react';
 
 export const isDatePanel = (pattern: string) => {
     const info = numfmt.getFormatInfo(pattern);
@@ -31,7 +31,7 @@ export const isDatePanel = (pattern: string) => {
 };
 
 export function DatePanel(props: IBusinessComponentProps) {
-    const { onChange, defaultPattern } = props;
+    const { onActionChange, onChange, defaultPattern } = props;
 
     const options = useMemo(getDateFormatOptions, []);
     const localeService = useDependency(LocaleService);
@@ -46,8 +46,9 @@ export function DatePanel(props: IBusinessComponentProps) {
         return options[0].value;
     });
 
-    // FIXME: WTF??
-    props.action.current = () => suffix;
+    useLayoutEffect(() => {
+        onActionChange(() => suffix);
+    }, [onActionChange, suffix]);
 
     const handleChange = (v: any) => {
         if (v === undefined) {

@@ -82,9 +82,8 @@ export function FormulaBar(props: IProps) {
     const [imageDisable, setImageDisable] = useState<boolean>(false);
     const componentManager = useDependency(ComponentManager);
     const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), undefined, undefined, [])!;
-    const isRefSelecting = useRef<0 | 1 | 2>(0);
     const editState = useObservable(editorBridgeService.currentEditCellState$);
-    const keyCodeConfig = useKeyEventConfig(isRefSelecting, editState?.unitId);
+    const keyCodeConfig = useKeyEventConfig(editState?.unitId);
     const FormulaEditor = componentManager.get(EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY);
     const formulaAuxUIParts = useComponentsOfPart(SheetsUIPart.FORMULA_AUX);
     const contextService = useDependency(IContextService);
@@ -384,7 +383,6 @@ export function FormulaBar(props: IProps) {
                                 isSingle={false}
                                 keyboardEventConfig={keyCodeConfig}
                                 onFormulaSelectingChange={(isSelecting: 0 | 1 | 2, isFocusing: boolean) => {
-                                    isRefSelecting.current = isSelecting;
                                     if (!isFocusing) return;
                                     if (isSelecting) {
                                         editorBridgeService.enableForceKeepVisible();

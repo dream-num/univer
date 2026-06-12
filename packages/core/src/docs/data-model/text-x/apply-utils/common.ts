@@ -29,7 +29,11 @@ import type {
 import { shallowEqual } from '../../../../common/equal';
 import { horizontalLineSegmentsSubtraction, sortRulesFactory, Tools } from '../../../../shared';
 import { isSameStyleTextRun } from '../../../../shared/compare';
+import { cloneParagraphWithId } from '../../../paragraph-id';
 import { getBodySlice } from '../utils';
+
+// Internal TextX undo marker: restored delete bodies keep their captured paragraph ids.
+export const RESTORE_INSERTED_PARAGRAPH_IDS = '__textXRestoreParagraphIds';
 
 export function normalizeTextRuns(textRuns: ITextRun[], reserveEmptyTextRun = false): ITextRun[] {
     const results: ITextRun[] = [];
@@ -167,7 +171,8 @@ export function insertParagraphs(
     body: IDocumentBody,
     insertBody: IDocumentBody,
     textLength: number,
-    currentIndex: number
+    currentIndex: number,
+    preserveMissingParagraphIds = false
 ) {
     const { paragraphs } = body;
     if (paragraphs == null) {
@@ -175,6 +180,11 @@ export function insertParagraphs(
     }
 
     const { paragraphs: insertParagraphs } = insertBody;
+    normalizeInsertedParagraphIdsForDocument(paragraphs, insertParagraphs, currentIndex, {
+        freshenSplitParagraph: true,
+        preserveMissingParagraphIds,
+        preserveExplicitSplitParagraphIds: Boolean((insertBody as unknown as Record<string, unknown>)[RESTORE_INSERTED_PARAGRAPH_IDS]),
+    });
 
     const paragraphIndexList = [];
     let firstInsertParagraphNextIndex = -1;
@@ -211,6 +221,119 @@ export function insertParagraphs(
         paragraphs.push(...insertParagraphs);
         paragraphs.sort(sortRulesFactory('startIndex'));
     }
+}
+
+export function normalizeInsertedParagraphIdsForDocument(
+    paragraphs: IParagraph[] | undefined,
+    insertParagraphs: IParagraph[] | undefined,
+    currentIndex: number,
+    options: {
+        freshenSplitParagraph: boolean;
+        preserveExplicitSplitParagraphIds?: boolean;
+        preserveMissingParagraphIds?: boolean;
+        reservedParagraphIds?: Set<string>;
+    }
+) {
+    if (!paragraphs || !insertParagraphs?.length) {
+        return;
+    }
+
+    const splitParagraph = getParagraphSplitByInsert(paragraphs, currentIndex);
+    const firstSplitInsertIndex = splitParagraph ? getFirstInsertedParagraphIndex(insertParagraphs) : -1;
+    const splitParagraphId = splitParagraph?.paragraphId;
+    const firstInsertedParagraphId = firstSplitInsertIndex === -1 ? undefined : insertParagraphs[firstSplitInsertIndex].paragraphId;
+    const shouldPreserveExplicitSplitParagraphId = options.preserveExplicitSplitParagraphIds && firstInsertedParagraphId != null && firstInsertedParagraphId !== splitParagraphId;
+    const existingParagraphIds = collectParagraphIds(paragraphs);
+
+    if (splitParagraphId) {
+        existingParagraphIds.delete(splitParagraphId);
+    }
+
+    for (const paragraphId of options.reservedParagraphIds ?? []) {
+        existingParagraphIds.add(paragraphId);
+    }
+
+    let splitRemainderParagraph: IParagraph | undefined;
+
+    if (splitParagraphId && firstSplitInsertIndex !== -1 && !shouldPreserveExplicitSplitParagraphId) {
+        const firstInsertParagraph = insertParagraphs[firstSplitInsertIndex];
+        splitRemainderParagraph = firstInsertedParagraphId != null && firstInsertedParagraphId !== splitParagraphId
+            ? cloneInsertedParagraphWithId(firstInsertParagraph, existingParagraphIds, options.preserveMissingParagraphIds ?? false)
+            : cloneParagraphWithId(firstInsertParagraph, existingParagraphIds, false);
+
+        if (options.freshenSplitParagraph && splitRemainderParagraph.paragraphId) {
+            splitParagraph.paragraphId = splitRemainderParagraph.paragraphId;
+        }
+    }
+
+    for (let i = 0, len = insertParagraphs.length; i < len; i++) {
+        if (i !== firstSplitInsertIndex || splitParagraphId == null || shouldPreserveExplicitSplitParagraphId) {
+            insertParagraphs[i] = cloneInsertedParagraphWithId(insertParagraphs[i], existingParagraphIds, options.preserveMissingParagraphIds ?? false);
+            continue;
+        }
+
+        insertParagraphs[i] = options.freshenSplitParagraph || firstInsertedParagraphId == null || firstInsertedParagraphId === splitParagraphId
+            ? cloneParagraphWithId({
+                ...insertParagraphs[i],
+                paragraphId: splitParagraphId,
+            }, existingParagraphIds)
+            : splitRemainderParagraph!;
+    }
+
+    for (const insertParagraph of insertParagraphs) {
+        if (insertParagraph.paragraphId) {
+            options.reservedParagraphIds?.add(insertParagraph.paragraphId);
+        }
+    }
+}
+
+function collectParagraphIds(paragraphs: IParagraph[] | undefined): Set<string> {
+    const paragraphIds = new Set<string>();
+
+    for (const paragraph of paragraphs ?? []) {
+        if (paragraph.paragraphId) {
+            paragraphIds.add(paragraph.paragraphId);
+        }
+    }
+
+    return paragraphIds;
+}
+
+function cloneInsertedParagraphWithId(
+    insertParagraph: IParagraph,
+    existingParagraphIds: Set<string>,
+    preserveMissingParagraphIds: boolean
+): IParagraph {
+    if (preserveMissingParagraphIds && insertParagraph.paragraphId == null) {
+        return Tools.deepClone(insertParagraph);
+    }
+
+    return cloneParagraphWithId(insertParagraph, existingParagraphIds);
+}
+
+function getParagraphSplitByInsert(paragraphs: IParagraph[], currentIndex: number): IParagraph | undefined {
+    const sortedParagraphs = [...paragraphs].sort((left, right) => left.startIndex - right.startIndex);
+
+    for (let i = 0; i < sortedParagraphs.length; i++) {
+        const paragraph = sortedParagraphs[i];
+        const paragraphStart = i > 0 ? sortedParagraphs[i - 1].startIndex + 1 : 0;
+
+        if (currentIndex > paragraphStart && currentIndex < paragraph.startIndex) {
+            return paragraph;
+        }
+    }
+}
+
+function getFirstInsertedParagraphIndex(insertParagraphs: IParagraph[]): number {
+    let index = 0;
+
+    for (let i = 1; i < insertParagraphs.length; i++) {
+        if (insertParagraphs[i].startIndex < insertParagraphs[index].startIndex) {
+            index = i;
+        }
+    }
+
+    return index;
 }
 
 export function insertSectionBreaks(

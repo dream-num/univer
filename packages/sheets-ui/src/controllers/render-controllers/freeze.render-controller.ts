@@ -102,6 +102,8 @@ export const FREEZE_COLUMN_HEADER_NAME = '__SpreadsheetFreezeColumnHeaderName__'
 
 const FREEZE_SIZE_NORMAL = 2;
 
+const FREEZE_SIZE_BOUNDARY_RATIO = 1.5;
+
 const AUXILIARY_CLICK_HIDDEN_OBJECT_TRANSPARENCY = 0.01;
 
 export const FREEZE_PERMISSION_CHECK = createInterceptorKey<boolean, null>('freezePermissionCheck');
@@ -222,7 +224,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
 
         if (freezeDirectionType === FREEZE_DIRECTION_TYPE.ROW) {
             if (freezeRow === -1 || freezeRow === 0) {
-                freezeSize = freezeSize * 2;
+                freezeSize = freezeSize * FREEZE_SIZE_BOUNDARY_RATIO;
             }
 
             const freezeOffset = freezeSize;
@@ -253,7 +255,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
             scene.addObjects([this._rowFreezeHeaderRect, this._rowFreezeMainRect], SHEET_COMPONENT_HEADER_LAYER_INDEX);
         } else {
             if (freezeColumn === -1 || freezeColumn === 0) {
-                freezeSize = freezeSize * 2;
+                freezeSize = freezeSize * FREEZE_SIZE_BOUNDARY_RATIO;
             }
 
             const FREEZE_OFFSET = freezeSize;

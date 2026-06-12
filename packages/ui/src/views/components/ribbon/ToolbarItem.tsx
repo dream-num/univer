@@ -17,7 +17,7 @@
 import type { IDisplayMenuItem, IMenuItem, IMenuSelectorItem, IValueOption } from '../../../services/menu/menu';
 import type { ITooltipWrapperRef } from './TooltipButtonWrapper';
 import { ICommandService, LocaleService } from '@univerjs/core';
-import { clsx } from '@univerjs/design';
+import { cva } from '@univerjs/design';
 import { MoreDownIcon } from '@univerjs/icons';
 import { forwardRef, useMemo } from 'react';
 import { isObservable, Observable } from 'rxjs';
@@ -29,6 +29,152 @@ import { useDependency, useObservable } from '../../../utils/di';
 import { useToolbarItemStatus } from './hook';
 import { ToolbarButton } from './ToolbarButton';
 import { DropdownMenuWrapper, TooltipWrapper } from './TooltipButtonWrapper';
+
+const toolbarDisabledClassName = 'univer-pointer-events-none univer-cursor-not-allowed univer-text-gray-300 dark:!univer-text-gray-600';
+
+const toolbarButtonSelectorRootVariants = cva(
+    `
+      univer-toolbar-button-selector-root univer-animate-in univer-fade-in univer-group univer-relative univer-flex
+      univer-h-6 univer-cursor-pointer univer-items-center univer-rounded univer-pr-5 univer-text-sm
+      univer-transition-colors
+      hover:univer-bg-gray-100
+      dark:hover:!univer-bg-gray-700
+    `,
+    {
+        variants: {
+            disabled: {
+                true: toolbarDisabledClassName,
+                false: `
+                  univer-text-gray-900
+                  dark:!univer-text-white
+                `,
+            },
+        },
+        defaultVariants: {
+            disabled: false,
+        },
+    }
+);
+
+const toolbarButtonSelectorMainVariants = cva(
+    `
+      univer-toolbar-button-selector-main univer-relative univer-z-[1] univer-flex univer-h-full univer-items-center
+      univer-rounded-l univer-px-1 univer-transition-colors
+      hover:univer-bg-gray-200
+      dark:hover:!univer-bg-gray-600
+    `,
+    {
+        variants: {
+            active: {
+                true: `
+                  univer-bg-gray-200
+                  dark:!univer-bg-gray-500
+                `,
+                false: '',
+            },
+            disabled: {
+                true: '',
+                false: '',
+            },
+        },
+        compoundVariants: [
+            {
+                active: true,
+                disabled: true,
+                class: 'univer-bg-gray-100',
+            },
+        ],
+        defaultVariants: {
+            active: false,
+            disabled: false,
+        },
+    }
+);
+
+const toolbarButtonSelectorTriggerVariants = cva(
+    `
+      univer-toolbar-button-selector-trigger univer-absolute univer-right-0 univer-top-0 univer-box-border univer-flex
+      univer-h-6 univer-w-5 univer-items-center univer-justify-center univer-rounded-r univer-transition-colors
+      hover:univer-bg-gray-200
+      dark:hover:!univer-bg-gray-600
+    `,
+    {
+        variants: {
+            disabled: {
+                true: toolbarDisabledClassName,
+                false: '',
+            },
+            active: {
+                true: `
+                  univer-bg-gray-200
+                  dark:!univer-bg-gray-500
+                `,
+                false: '',
+            },
+        },
+        compoundVariants: [
+            {
+                active: true,
+                disabled: true,
+                class: 'univer-bg-gray-100',
+            },
+        ],
+        defaultVariants: {
+            disabled: false,
+            active: false,
+        },
+    }
+);
+
+const toolbarSelectorRootVariants = cva(
+    `
+      univer-toolbar-selector-root univer-animate-in univer-fade-in univer-relative univer-flex univer-h-6
+      univer-cursor-pointer univer-items-center univer-gap-2 univer-whitespace-nowrap univer-rounded univer-px-1
+      univer-transition-colors
+      hover:univer-bg-gray-100
+      dark:hover:!univer-bg-gray-700
+    `,
+    {
+        variants: {
+            disabled: {
+                true: toolbarDisabledClassName,
+                false: `
+                  univer-text-gray-900
+                  dark:!univer-text-white
+                `,
+            },
+            active: {
+                true: 'univer-bg-gray-200',
+                false: '',
+            },
+        },
+        compoundVariants: [
+            {
+                active: true,
+                disabled: true,
+                class: 'univer-bg-gray-100',
+            },
+        ],
+        defaultVariants: {
+            disabled: false,
+            active: false,
+        },
+    }
+);
+
+const toolbarSelectorTriggerVariants = cva(`
+  univer-toolbar-selector-trigger univer-flex univer-h-full univer-items-center
+`, {
+    variants: {
+        disabled: {
+            true: toolbarDisabledClassName,
+            false: '',
+        },
+    },
+    defaultVariants: {
+        disabled: false,
+    },
+});
 
 export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenuItem>>((props, ref) => {
     const localeService = useDependency(LocaleService);
@@ -107,27 +253,10 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
                 <div
                     data-u-command={id}
                     data-disabled={disabled}
-                    className={clsx(`
-                      univer-toolbar-button-selector-root univer-animate-in univer-fade-in univer-group univer-relative
-                      univer-flex univer-h-6 univer-cursor-pointer univer-items-center univer-rounded univer-pr-5
-                      univer-text-sm univer-transition-colors
-                      hover:univer-bg-gray-100
-                      dark:hover:!univer-bg-gray-700
-                    `, {
-                        'univer-text-gray-900 dark:!univer-text-white': !disabled,
-                        'univer-pointer-events-none univer-cursor-not-allowed univer-text-gray-300 dark:!univer-text-gray-600': disabled,
-                    })}
+                    className={toolbarButtonSelectorRootVariants({ disabled })}
                 >
                     <div
-                        className={clsx(`
-                          univer-toolbar-button-selector-main univer-relative univer-z-[1] univer-flex univer-h-full
-                          univer-items-center univer-rounded-l univer-px-1 univer-transition-colors
-                          hover:univer-bg-gray-200
-                          dark:hover:!univer-bg-gray-600
-                        `, {
-                            'univer-bg-gray-200 dark:!univer-bg-gray-500': activated,
-                            'univer-bg-gray-100': activated && disabled,
-                        })}
+                        className={toolbarButtonSelectorMainVariants({ active: activated, disabled })}
                         onClick={handleClick}
                     >
                         <CustomLabel
@@ -148,17 +277,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
                         onOptionSelect={handleSelect}
                     >
                         <div
-                            className={clsx(`
-                              univer-toolbar-button-selector-trigger univer-absolute univer-right-0 univer-top-0
-                              univer-box-border univer-flex univer-h-6 univer-w-5 univer-items-center
-                              univer-justify-center univer-rounded-r univer-transition-colors
-                              hover:univer-bg-gray-200
-                              dark:hover:!univer-bg-gray-600
-                            `, {
-                                'univer-pointer-events-none univer-cursor-not-allowed univer-text-gray-300 dark:!univer-text-gray-600': disabled,
-                                'univer-bg-gray-200 dark:!univer-bg-gray-500': activated,
-                                'univer-bg-gray-100': activated && disabled,
-                            })}
+                            className={toolbarButtonSelectorTriggerVariants({ disabled, active: activated })}
                             data-disabled={disabled}
                         >
                             <MoreDownIcon />
@@ -178,18 +297,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
                 >
                     <div
                         data-u-command={id}
-                        className={clsx(`
-                          univer-toolbar-selector-root univer-animate-in univer-fade-in univer-relative univer-flex
-                          univer-h-6 univer-cursor-pointer univer-items-center univer-gap-2 univer-whitespace-nowrap
-                          univer-rounded univer-px-1 univer-transition-colors
-                          hover:univer-bg-gray-100
-                          dark:hover:!univer-bg-gray-700
-                        `, {
-                            'univer-text-gray-900 dark:!univer-text-white': !disabled,
-                            'univer-pointer-events-none univer-cursor-not-allowed univer-text-gray-300 dark:!univer-text-gray-600': disabled,
-                            'univer-bg-gray-200': activated,
-                            'univer-bg-gray-100': activated && disabled,
-                        })}
+                        className={toolbarSelectorRootVariants({ disabled, active: activated })}
                     >
                         <CustomLabel
                             icon={iconToDisplay}
@@ -199,11 +307,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
                             onChange={handleSelectionsValueChange}
                         />
                         <div
-                            className={clsx(`
-                              univer-toolbar-selector-trigger univer-flex univer-h-full univer-items-center
-                            `, {
-                                'univer-pointer-events-none univer-cursor-not-allowed univer-text-gray-300 dark:!univer-text-gray-600': disabled,
-                            })}
+                            className={toolbarSelectorTriggerVariants({ disabled })}
                         >
                             <MoreDownIcon />
                         </div>

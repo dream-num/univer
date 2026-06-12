@@ -18,7 +18,7 @@ import type { IDisplayMenuItem, IMenuItem, IValueOption, MenuItemDefaultValueTyp
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import type { TinyMenuLayoutVariant, TinyMenuSizeVariant } from './DesignTinyMenuGroup';
 import { convertObservableToBehaviorSubject, LocaleService } from '@univerjs/core';
-import { clsx } from '@univerjs/design';
+import { cva } from '@univerjs/design';
 import { useEffect, useMemo, useState } from 'react';
 import { combineLatest, of } from 'rxjs';
 import { ComponentManager } from '../../../common';
@@ -47,6 +47,39 @@ const EMPTY_HIDDEN_ITEM_IDS: string[] = [];
 type TinyMenuDisplayItem = IDisplayMenuItem<IMenuItem> & {
     value?: MenuItemDefaultValueType;
 };
+
+const quickTileMenuButtonVariants = cva(
+    `
+      univer-relative univer-box-border univer-flex univer-size-12 univer-w-full univer-appearance-none univer-flex-col
+      univer-items-center univer-justify-center univer-gap-0.5 univer-rounded-lg univer-border-none univer-bg-white
+      univer-p-0 univer-font-medium univer-text-gray-700 univer-outline-none univer-transition-all
+      focus-visible:univer-ring-2 focus-visible:univer-ring-primary-600 focus-visible:univer-ring-offset-0
+      dark:!univer-bg-gray-700 dark:!univer-text-gray-100
+    `,
+    {
+        variants: {
+            disabled: {
+                true: 'univer-cursor-not-allowed univer-opacity-60',
+                false: `
+                  univer-cursor-pointer
+                  hover:univer-bg-gray-50
+                  dark:hover:!univer-bg-gray-600
+                `,
+            },
+            active: {
+                true: `
+                  univer-bg-primary-50 univer-text-primary-700 univer-ring-1 univer-ring-primary-600
+                  dark:!univer-bg-primary-900 dark:!univer-text-primary-100
+                `,
+                false: '',
+            },
+        },
+        defaultVariants: {
+            disabled: false,
+            active: false,
+        },
+    }
+);
 
 export function resolveMenuItemActiveState(itemId: string | undefined, observableActive: boolean, activeItemIds?: string[]): boolean {
     if (activeItemIds) {
@@ -79,31 +112,12 @@ function QuickTileMenuItem(props: IUIQuickTileMenuItemProps) {
     }
 
     const Icon = menuItem.icon ? componentManager.get(menuItem.icon as string) : null;
+    const active = resolveMenuItemActiveState(menuItem.id, activated, activeItemIds);
 
     return (
         <button
             type="button"
-            className={clsx(
-                `
-                  univer-relative univer-box-border univer-flex univer-size-12 univer-w-full univer-appearance-none
-                  univer-flex-col univer-items-center univer-justify-center univer-gap-0.5 univer-rounded-lg
-                  univer-border-none univer-bg-white univer-p-0 univer-font-medium univer-text-gray-700
-                  univer-outline-none univer-transition-all
-                  focus-visible:univer-ring-2 focus-visible:univer-ring-primary-600 focus-visible:univer-ring-offset-0
-                  dark:!univer-bg-gray-700 dark:!univer-text-gray-100
-                `,
-                disabled
-                    ? 'univer-cursor-not-allowed univer-opacity-60'
-                    : `
-                      univer-cursor-pointer
-                      hover:univer-bg-gray-50
-                      dark:hover:!univer-bg-gray-600
-                    `,
-                resolveMenuItemActiveState(menuItem.id, activated, activeItemIds) && `
-                  univer-bg-primary-50 univer-text-primary-700 univer-ring-1 univer-ring-primary-600
-                  dark:!univer-bg-primary-900 dark:!univer-text-primary-100
-                `
-            )}
+            className={quickTileMenuButtonVariants({ disabled, active })}
             disabled={disabled}
             onClick={() => {
                 if (disabled) {

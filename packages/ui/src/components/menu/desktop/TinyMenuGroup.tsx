@@ -143,17 +143,18 @@ export function UITinyMenuGroup(props: IUIQuickMenuGroupProps) {
     const localeService = useDependency(LocaleService);
 
     useEffect(() => {
-        if (!item.children) return;
-        const observables = item.children.map((child) => convertObservableToBehaviorSubject(child.item?.activated$ ?? of(false), false));
+        const { children } = item;
+        if (!children) return;
+
+        const observables = children.map((child) => convertObservableToBehaviorSubject(child.item?.activated$ ?? of(false), false));
         const subscription = combineLatest(observables).subscribe((activedArr) => {
-            const actived = activedArr
-                .map((actived, index) => ({ actived, item: getTinyMenuChildStateKey(item.children![index]) }))
-                .filter((actived) => actived.actived);
-            if (actived.length === 0) {
-                setActiveItems([]);
-            } else {
-                setActiveItems(actived.map((actived) => actived.item));
+            const activeItems: string[] = [];
+            for (let index = 0; index < activedArr.length; index++) {
+                if (activedArr[index]) {
+                    activeItems.push(getTinyMenuChildStateKey(children[index]));
+                }
             }
+            setActiveItems(activeItems);
         });
 
         return () => {
@@ -165,17 +166,18 @@ export function UITinyMenuGroup(props: IUIQuickMenuGroupProps) {
     }, [item]);
 
     useEffect(() => {
-        if (!item.children) return;
-        const observables = item.children.map((child) => convertObservableToBehaviorSubject(child.item?.hidden$ ?? of(false), false));
+        const { children } = item;
+        if (!children) return;
+
+        const observables = children.map((child) => convertObservableToBehaviorSubject(child.item?.hidden$ ?? of(false), false));
         const subscription = combineLatest(observables).subscribe((hiddenArr) => {
-            const hidden = hiddenArr
-                .map((hidden, index) => ({ hidden, item: getTinyMenuChildStateKey(item.children![index]) }))
-                .filter((hidden) => hidden.hidden);
-            if (hidden.length === 0) {
-                setHiddenItems([]);
-            } else {
-                setHiddenItems(hidden.map((hidden) => hidden.item));
+            const hiddenItems: string[] = [];
+            for (let index = 0; index < hiddenArr.length; index++) {
+                if (hiddenArr[index]) {
+                    hiddenItems.push(getTinyMenuChildStateKey(children[index]));
+                }
             }
+            setHiddenItems(hiddenItems);
         });
 
         return () => {

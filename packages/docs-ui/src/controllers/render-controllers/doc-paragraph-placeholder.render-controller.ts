@@ -16,8 +16,10 @@
 
 import type { DocumentDataModel, IDocumentBody, IParagraph, Nullable } from '@univerjs/core';
 import type { Documents, IDocumentSkeletonColumn, IDocumentSkeletonLine, IDocumentSkeletonPage, IDocumentSkeletonSection, IPageRenderConfig, IRenderContext, IRenderModule, UniverRenderingContext } from '@univerjs/engine-render';
-import { DataStreamTreeTokenType, Disposable, Inject, LocaleService, NAMED_STYLE_MAP, NamedStyleType } from '@univerjs/core';
+import type { IUniverDocsUIConfig } from '../../config/config';
+import { DataStreamTreeTokenType, Disposable, DocumentFlavor, IConfigService, Inject, isInternalEditorID, LocaleService, NAMED_STYLE_MAP, NamedStyleType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
+import { DOCS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 
 const PLACEHOLDER_COLOR = 'rgba(0, 0, 0, 0.35)';
 const DEFAULT_PLACEHOLDER_FONT_SIZE = 12;
@@ -48,7 +50,8 @@ export class DocParagraphPlaceholderRenderController extends Disposable implemen
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @Inject(DocSelectionManagerService) private readonly _docSelectionManagerService: DocSelectionManagerService
+        @Inject(DocSelectionManagerService) private readonly _docSelectionManagerService: DocSelectionManagerService,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
 
@@ -56,6 +59,11 @@ export class DocParagraphPlaceholderRenderController extends Disposable implemen
     }
 
     private _initParagraphPlaceholderRender(): void {
+        const config = this._configService.getConfig<IUniverDocsUIConfig>(DOCS_UI_PLUGIN_CONFIG_KEY);
+        if (!shouldRenderParagraphPlaceholder(this._context.unit, this._context.unitId, config)) {
+            return;
+        }
+
         const documents = this._context.mainComponent as Documents | undefined;
         if (!documents) {
             return;
@@ -94,6 +102,22 @@ export class DocParagraphPlaceholderRenderController extends Disposable implemen
             normalText: this._localeService.t('docs-ui.placeholder.normalText'),
         };
     }
+}
+
+export function shouldRenderParagraphPlaceholder(
+    documentModel: DocumentDataModel,
+    unitId: string,
+    config?: Nullable<IUniverDocsUIConfig>
+): boolean {
+    if (config?.placeholder === false) {
+        return false;
+    }
+
+    if (isInternalEditorID(unitId)) {
+        return false;
+    }
+
+    return documentModel.getSnapshot().documentStyle?.documentFlavor === DocumentFlavor.MODERN;
 }
 
 export function getParagraphPlaceholderLayouts(

@@ -26,10 +26,12 @@ export interface IUniverDocsUIConfig {
     container?: HTMLElement | string;
     toc?: boolean;
     footer?: boolean;
+    placeholder?: boolean;
     override?: DependencyOverride;
 }
 
 export const defaultPluginConfig: IUniverDocsUIConfig = {
     toc: false,
     footer: true,
+    placeholder: true,
 };

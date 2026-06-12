@@ -16,10 +16,10 @@
 
 import type { IDocumentBody, IParagraph } from '@univerjs/core';
 import type { IDocumentSkeletonLine, IDocumentSkeletonPage } from '@univerjs/engine-render';
-import { NamedStyleType } from '@univerjs/core';
+import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DocumentFlavor, NamedStyleType } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { DocumentSkeletonPageType, GlyphType, LineType } from '@univerjs/engine-render';
-import { getParagraphPlaceholderLayouts } from '../doc-paragraph-placeholder.render-controller';
+import { getParagraphPlaceholderLayouts, shouldRenderParagraphPlaceholder } from '../doc-paragraph-placeholder.render-controller';
 
 const locale = {
     heading1: '标题1',
@@ -182,7 +182,27 @@ function createBody(dataStream: string, paragraphs: IParagraph[]): IDocumentBody
     };
 }
 
+function createDocumentModel(documentFlavor: DocumentFlavor) {
+    return {
+        getSnapshot: () => ({
+            documentStyle: {
+                documentFlavor,
+            },
+        }),
+    } as any;
+}
+
 describe('doc paragraph placeholder render controller', () => {
+    it('only enables placeholder rendering for modern docs when config is enabled', () => {
+        expect(shouldRenderParagraphPlaceholder(createDocumentModel(DocumentFlavor.MODERN), 'doc-1', { placeholder: true })).toBe(true);
+        expect(shouldRenderParagraphPlaceholder(createDocumentModel(DocumentFlavor.TRADITIONAL), 'doc-1', { placeholder: true })).toBe(false);
+        expect(shouldRenderParagraphPlaceholder(createDocumentModel(DocumentFlavor.MODERN), 'doc-1', { placeholder: false })).toBe(false);
+    });
+
+    it('disables placeholder rendering for internal editors', () => {
+        expect(shouldRenderParagraphPlaceholder(createDocumentModel(DocumentFlavor.MODERN), DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, { placeholder: true })).toBe(false);
+    });
+
     it('shows normal text placeholder for an empty normal paragraph', () => {
         const page = createPage([createLine(0, { fontSize: 13, fontFamily: 'Inter' })]);
         const body = createBody('\r\n', [{ startIndex: 0 }]);

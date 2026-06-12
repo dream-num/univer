@@ -22,6 +22,7 @@ import {
     Injector,
     IResourceLoaderService,
     IUniverInstanceService,
+    normalizeDocumentParagraphIds,
     RedoCommand,
     UndoCommand,
 } from '@univerjs/core';
@@ -148,7 +149,7 @@ export class FDocument extends FBaseInitialable {
      */
     save(): IDocumentData {
         const snapshot = this._resourceLoaderService.saveUnit<IDocumentData>(this._documentDataModel.getUnitId())!;
-        return snapshot;
+        return normalizeDocumentParagraphIds(snapshot);
     }
 
     /**

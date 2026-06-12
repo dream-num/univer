@@ -16,7 +16,7 @@
 
 import type { DocumentDataModel, IDocumentData, Injector } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
-import { DisposableCollection, ILogService, IUniverInstanceService, LogLevel, Univer, UniverInstanceType } from '@univerjs/core';
+import { DisposableCollection, ILogService, IUniverInstanceService, LogLevel, normalizeDocumentParagraphIds, Univer, UniverInstanceType } from '@univerjs/core';
 import { FUniver as FUniverCtor } from '@univerjs/core/facade';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { BehaviorSubject } from 'rxjs';
@@ -43,6 +43,10 @@ function getTestDocumentDataDemo(): IDocumentData {
     };
 }
 
+function cloneDocumentData(documentData: IDocumentData): IDocumentData {
+    return JSON.parse(JSON.stringify(documentData)) as IDocumentData;
+}
+
 export interface ITestBed {
     univer: Univer;
     get: Injector['get'];
@@ -58,9 +62,10 @@ export function createTestBed(documentConfig?: IDocumentData): ITestBed {
     injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
 
     univer.registerPlugin(UniverDocsPlugin);
+    const normalizedDocumentConfig = normalizeDocumentParagraphIds(cloneDocumentData(documentConfig ?? getTestDocumentDataDemo()));
     const doc = univer.createUnit<IDocumentData, DocumentDataModel>(
         UniverInstanceType.UNIVER_DOC,
-        documentConfig ?? getTestDocumentDataDemo()
+        normalizedDocumentConfig
     );
 
     injector.get(IUniverInstanceService).focusUnit(doc.getUnitId());

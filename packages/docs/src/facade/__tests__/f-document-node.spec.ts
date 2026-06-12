@@ -15,10 +15,10 @@
  */
 
 import type { IDocumentData, Univer } from '@univerjs/core';
-import type { FDocument } from '../f-document';
 import { DocumentBlockRangeType, IResourceManagerService, PresetListType, UniverInstanceType } from '@univerjs/core';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DocElementStaleError } from '../doc-element-registry';
+import { FDocument } from '../f-document';
 import { createTestBed } from './create-test-bed';
 
 const DOCUMENT_STYLE: IDocumentData['documentStyle'] = {
@@ -127,6 +127,11 @@ function createCustomBlockDocument(id = 'test'): IDocumentData {
     });
 }
 
+function expectParagraphIds(paragraphs: NonNullable<IDocumentData['body']>['paragraphs']): void {
+    expect(paragraphs?.every((paragraph) => paragraph.paragraphId?.startsWith('para_'))).toBe(true);
+    expect(new Set(paragraphs?.map((paragraph) => paragraph.paragraphId)).size).toBe(paragraphs?.length);
+}
+
 describe('FDocument facade in Node', () => {
     let univer: Univer;
     let document: FDocument;
@@ -199,6 +204,34 @@ describe('FDocument facade in Node', () => {
                 data: '{"value":1}',
             },
         ]);
+    });
+
+    it('normalizes paragraph ids at test-bed and save snapshot boundaries', () => {
+        univer.dispose();
+        createDocumentFacade(createSimpleDocument());
+
+        const savedParagraphs = document.save().body?.paragraphs;
+
+        expect(savedParagraphs?.map((paragraph) => paragraph.startIndex)).toEqual([5, 10, 16]);
+        expectParagraphIds(savedParagraphs);
+    });
+
+    it('normalizes paragraph ids when saving an old snapshot without pre-normalized ids', () => {
+        const oldSnapshot = createSimpleDocument();
+        const saveUnit = vi.fn(() => oldSnapshot);
+        const legacyDocument = new FDocument(
+            { getUnitId: () => 'legacy-doc' } as never,
+            {} as never,
+            {} as never,
+            { saveUnit } as never,
+            {} as never
+        );
+
+        const savedParagraphs = legacyDocument.save().body?.paragraphs;
+
+        expect(saveUnit).toHaveBeenCalledWith('legacy-doc');
+        expect(savedParagraphs?.map((paragraph) => paragraph.startIndex)).toEqual([5, 10, 16]);
+        expectParagraphIds(savedParagraphs);
     });
 
     it('runs FDocBody paragraph and range APIs in Node', () => {

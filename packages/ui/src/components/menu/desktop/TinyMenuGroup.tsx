@@ -16,7 +16,7 @@
 
 import type { IDisplayMenuItem, IMenuItem, IValueOption, MenuItemDefaultValueType } from '../../../services/menu/menu';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
-import type { TinyMenuIconExtend, TinyMenuLayoutVariant, TinyMenuSizeVariant } from './DesignTinyMenuGroup';
+import type { TinyMenuLayoutVariant, TinyMenuSizeVariant } from './DesignTinyMenuGroup';
 import { convertObservableToBehaviorSubject, LocaleService } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
 import { useEffect, useMemo, useState } from 'react';
@@ -42,7 +42,6 @@ interface IUIQuickTileMenuItemProps {
 }
 
 const EMPTY_HIDDEN_ITEM_IDS: string[] = [];
-const PRIMARY_ICON_EXTEND: TinyMenuIconExtend = { colorChannel1: 'var(--univer-primary-600)' };
 
 type TinyMenuDisplayItem = IDisplayMenuItem<IMenuItem> & {
     value?: MenuItemDefaultValueType;
@@ -214,7 +213,6 @@ export function UITinyMenuGroup(props: IUIQuickMenuGroupProps) {
                 iconClassName: child.item?.icon === 'TextTypeIcon'
                     ? (sizeVariant === 'paragraph-t' ? '!univer-size-4' : '!univer-size-3.5')
                     : undefined,
-                iconExtend: PRIMARY_ICON_EXTEND,
                 Icon: componentManager.get(child.item!.icon as string)!,
                 active: resolveMenuItemActiveState(child.item?.id, activeItems.includes(child.item?.id ?? ''), activeItemIds),
                 tooltip: child.item?.tooltip ? localeService.t(child.item.tooltip) : undefined,

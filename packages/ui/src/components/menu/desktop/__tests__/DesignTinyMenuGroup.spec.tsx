@@ -47,7 +47,7 @@ describe('DesignTinyMenuGroup', () => {
         expect(icon?.className ?? '').toContain('univer-size-5');
     });
 
-    it('passes icon extend props through for two-channel icons', () => {
+    it('uses the primary color channel for two-channel icons', () => {
         const Icon = ({ extend }: { className?: string; extend?: { colorChannel1?: string } }) => (
             React.createElement('span', { 'data-color-channel': extend?.colorChannel1 })
         );
@@ -58,7 +58,6 @@ describe('DesignTinyMenuGroup', () => {
                     onClick: () => {},
                     className: '',
                     Icon,
-                    iconExtend: { colorChannel1: 'var(--univer-primary-600)' },
                 }]}
             />
         );

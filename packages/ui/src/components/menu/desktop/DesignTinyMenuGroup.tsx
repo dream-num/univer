@@ -19,15 +19,13 @@ import { clsx, Tooltip } from '@univerjs/design';
 
 export type TinyMenuSizeVariant = 'default' | 'paragraph-t';
 export type TinyMenuLayoutVariant = 'default' | 'compact';
-export interface TinyMenuIconExtend {
-    colorChannel1?: string;
-}
+
+const ICON_EXTEND = { colorChannel1: 'var(--univer-primary-600)' };
 
 export interface ITinyMenuItem {
     onClick: () => void;
     className: string;
-    Icon: ComponentType<{ className?: string; extend?: TinyMenuIconExtend }>;
-    iconExtend?: TinyMenuIconExtend;
+    Icon: ComponentType<{ className?: string; extend?: { colorChannel1?: string } }>;
     iconClassName?: string;
     key: string;
     active?: boolean;
@@ -101,7 +99,7 @@ export function DesignTinyMenuGroup({ items, columns, sizeVariant = 'default', l
                                         : 'univer-size-4',
                                 item.iconClassName
                             )}
-                            extend={item.iconExtend}
+                            extend={ICON_EXTEND}
                         />
                     </div>
                 );

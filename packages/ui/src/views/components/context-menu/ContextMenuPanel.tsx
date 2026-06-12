@@ -1062,7 +1062,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
             className="univer-relative"
             onMouseEnter={() => {
                 clearSubmenuCloseTimer();
-                if (hasSubmenu && !disabled) {
+                if (hasSubmenu && !disabled && !hoverSuppressed) {
                     setSubmenuPositionReady(false);
                     setActiveSubmenuKey(menuKey);
                 }

@@ -160,6 +160,59 @@ describe('ContextMenuPanel', () => {
         expect(panel.className).not.toContain('univer-context-menu-hover-suppressed');
     });
 
+    it('keeps selector submenus closed while initial hover is suppressed', () => {
+        dependencyMap.clear();
+        tinyMenuGroupSpy.mockClear();
+
+        dependencyMap.set(IMenuManagerService, {
+            menuChanged$: new BehaviorSubject<void>(undefined),
+            getMenuByPositionKey: vi.fn(() => [{
+                key: 'insert',
+                order: 0,
+                children: [{
+                    key: 'table',
+                    order: 0,
+                    item: {
+                        id: 'insert-table',
+                        type: MenuItemType.BUTTON_SELECTOR,
+                        title: 'insert table',
+                        tooltip: 'insert table',
+                        selections: [{
+                            label: 'table picker',
+                            value: 'table picker',
+                        }],
+                    },
+                }],
+            }]),
+        });
+        dependencyMap.set(ILayoutService, {
+            rootContainerElement: document.body,
+        });
+        dependencyMap.set(LocaleService, {
+            t: (key: string) => key,
+            direction$: new BehaviorSubject<'ltr'>('ltr'),
+        });
+
+        const { container, unmount } = render(React.createElement(ContextMenuPanel as never, {
+            menuType: 'insert-menu',
+            suppressHoverUntilPointerMove: true,
+        }));
+        const panel = container.firstChild as HTMLDivElement;
+        const tableButton = document.querySelector('button[title="insert table"]') as HTMLButtonElement | null;
+        const tableWrapper = tableButton?.parentElement as HTMLDivElement | null;
+
+        expect(tableWrapper).not.toBeNull();
+
+        fireEvent.mouseEnter(tableWrapper!);
+        expect(document.querySelectorAll(`[${CONTEXT_MENU_SUBMENU_PORTAL_ATTR}="true"]`)).toHaveLength(0);
+
+        fireEvent.pointerMove(panel);
+        fireEvent.mouseEnter(tableWrapper!);
+        expect(document.querySelectorAll(`[${CONTEXT_MENU_SUBMENU_PORTAL_ATTR}="true"]`)).toHaveLength(1);
+
+        unmount();
+    });
+
     it('can focus the menu container without selecting an item initially', async () => {
         dependencyMap.clear();
         tinyMenuGroupSpy.mockClear();

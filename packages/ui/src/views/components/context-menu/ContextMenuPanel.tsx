@@ -25,7 +25,7 @@ import type {
 } from '../../../services/menu/menu';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import { isRealNum, LocaleService } from '@univerjs/core';
-import { borderBottomClassName, borderClassName, clsx, scrollbarClassName } from '@univerjs/design';
+import { borderBottomClassName, borderClassName, clsx, cva, scrollbarClassName } from '@univerjs/design';
 import { CheckMarkIcon, MoreIcon } from '@univerjs/icons';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -100,6 +100,245 @@ const CONTEXT_MENU_HEADER_QUICK_GROUP_KEYS = new Set(['quickTop', 'quickBottom']
 const CONTEXT_MENU_NAVIGATION_KEYS = new Set(['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight']);
 
 type MenuLabel = IMenuItem['label'] | IValueOption['label'];
+type ContextMenuQuickGroupConnection = 'none' | 'previous' | 'next' | 'both';
+type ContextMenuItemVariant = 'default' | 'compact' | 'compactHeaderAction';
+
+const contextMenuContentVariants = cva('univer-inline-flex univer-items-center', {
+    variants: {
+        sizeVariant: {
+            default: 'univer-gap-2',
+            'paragraph-t': 'univer-gap-3',
+        },
+    },
+    defaultVariants: {
+        sizeVariant: 'default',
+    },
+});
+
+const contextMenuPanelVariants = cva(
+    `
+      univer-box-border univer-grid univer-max-w-full univer-overflow-y-auto univer-overscroll-contain univer-rounded-md
+      univer-bg-white univer-text-gray-900 univer-shadow-md
+      dark:!univer-bg-gray-700 dark:!univer-text-white
+    `,
+    {
+        variants: {
+            sizeVariant: {
+                default: 'univer-min-w-52 univer-gap-1 univer-px-2 univer-py-1 univer-text-sm',
+                'paragraph-t': 'univer-min-w-64 univer-gap-2 univer-px-3 univer-py-2 univer-text-base',
+            },
+        },
+        defaultVariants: {
+            sizeVariant: 'default',
+        },
+    }
+);
+
+const contextMenuGroupVariants = cva('univer-grid', {
+    variants: {
+        sizeVariant: {
+            default: 'univer-gap-1 univer-py-1',
+            'paragraph-t': 'univer-gap-2 univer-py-2',
+        },
+    },
+    defaultVariants: {
+        sizeVariant: 'default',
+    },
+});
+
+const contextMenuQuickGroupVariants = cva('univer-grid', {
+    variants: {
+        sizeVariant: {
+            default: 'univer-gap-1 univer-py-1',
+            'paragraph-t': 'univer-gap-2 univer-py-2',
+        },
+        connection: {
+            none: '',
+            previous: '',
+            next: '',
+            both: '',
+        },
+    },
+    compoundVariants: [
+        {
+            sizeVariant: 'paragraph-t',
+            connection: 'previous',
+            class: 'univer-pb-2 univer-pt-1',
+        },
+        {
+            sizeVariant: 'paragraph-t',
+            connection: 'next',
+            class: 'univer-pb-1 univer-pt-2',
+        },
+        {
+            sizeVariant: 'paragraph-t',
+            connection: 'both',
+            class: 'univer-pb-1 univer-pt-1',
+        },
+    ],
+    defaultVariants: {
+        sizeVariant: 'default',
+        connection: 'none',
+    },
+});
+
+const contextMenuQuickGroupClusterVariants = cva('univer-grid', {
+    variants: {
+        sizeVariant: {
+            default: 'univer-gap-1 univer-py-1',
+            'paragraph-t': 'univer-gap-0 univer-py-2',
+        },
+    },
+    defaultVariants: {
+        sizeVariant: 'default',
+    },
+});
+
+const contextMenuHeaderVariants = cva(`
+  univer-font-semibold univer-text-gray-600
+  dark:!univer-text-gray-300
+`, {
+    variants: {
+        sizeVariant: {
+            default: 'univer-px-2 univer-text-xs',
+            'paragraph-t': 'univer-px-3 univer-text-sm',
+        },
+    },
+    defaultVariants: {
+        sizeVariant: 'default',
+    },
+});
+
+const contextMenuHeaderRowVariants = cva('univer-flex univer-items-center univer-justify-between', {
+    variants: {
+        sizeVariant: {
+            default: 'univer-gap-1.5',
+            'paragraph-t': 'univer-gap-2',
+        },
+    },
+    defaultVariants: {
+        sizeVariant: 'default',
+    },
+});
+
+const contextMenuSubmenuPanelVariants = cva(
+    `
+      univer-overflow-y-auto univer-overscroll-contain univer-rounded-md univer-border univer-border-solid
+      univer-border-gray-200 univer-bg-white univer-shadow-md
+      dark:!univer-border-gray-600 dark:!univer-bg-gray-700
+    `,
+    {
+        variants: {
+            sizeVariant: {
+                default: 'univer-p-1.5',
+                'paragraph-t': 'univer-p-2',
+            },
+        },
+        defaultVariants: {
+            sizeVariant: 'default',
+        },
+    }
+);
+
+const contextMenuItemVariants = cva(
+    `
+      univer-relative univer-flex univer-border-none univer-bg-transparent univer-text-left
+      dark:!univer-text-white
+    `,
+    {
+        variants: {
+            sizeVariant: {
+                default: '',
+                'paragraph-t': '',
+            },
+            variant: {
+                default: '',
+                compact: '',
+                compactHeaderAction: '',
+            },
+            disabled: {
+                true: 'univer-cursor-not-allowed univer-opacity-60',
+                false: `
+                  univer-cursor-pointer
+                  focus:univer-bg-gray-50 focus:univer-outline-none
+                  dark:focus:!univer-bg-gray-600
+                `,
+            },
+            hoverSuppressed: {
+                true: '',
+                false: '',
+            },
+            active: {
+                true: `
+                  univer-bg-gray-200
+                  dark:!univer-bg-gray-600
+                `,
+                false: '',
+            },
+        },
+        compoundVariants: [
+            {
+                sizeVariant: 'default',
+                variant: 'default',
+                class: `
+                  univer-min-h-8 univer-w-full univer-items-center univer-justify-between univer-gap-3 univer-rounded-md
+                  univer-px-2 univer-text-sm
+                `,
+            },
+            {
+                sizeVariant: 'default',
+                variant: 'compact',
+                class: `
+                  univer-size-8 univer-items-center univer-justify-center univer-rounded-md univer-p-0 univer-text-sm
+                `,
+            },
+            {
+                sizeVariant: 'default',
+                variant: 'compactHeaderAction',
+                class: `
+                  univer-size-7 univer-items-center univer-justify-center univer-rounded-sm univer-p-0 univer-text-sm
+                `,
+            },
+            {
+                sizeVariant: 'paragraph-t',
+                variant: 'default',
+                class: `
+                  univer-min-h-10 univer-w-full univer-items-center univer-justify-between univer-gap-4
+                  univer-rounded-lg univer-px-3 univer-text-base
+                `,
+            },
+            {
+                sizeVariant: 'paragraph-t',
+                variant: 'compact',
+                class: `
+                  univer-size-10 univer-items-center univer-justify-center univer-rounded-lg univer-p-0 univer-text-base
+                `,
+            },
+            {
+                sizeVariant: 'paragraph-t',
+                variant: 'compactHeaderAction',
+                class: `
+                  univer-size-8 univer-items-center univer-justify-center univer-rounded-md univer-p-0 univer-text-base
+                `,
+            },
+            {
+                disabled: false,
+                hoverSuppressed: false,
+                class: `
+                  hover:univer-bg-gray-50
+                  dark:hover:!univer-bg-gray-600
+                `,
+            },
+        ],
+        defaultVariants: {
+            sizeVariant: 'default',
+            variant: 'default',
+            disabled: false,
+            hoverSuppressed: false,
+            active: false,
+        },
+    }
+);
 
 function isNonSelectableLabel(label?: MenuLabel) {
     return typeof label === 'object' && label?.selectable === false;
@@ -154,30 +393,15 @@ export function getContextMenuQuickGroupColumns(menuSchema: IMenuSchema): number
 }
 
 function getContextMenuContentClassName(sizeVariant: ContextMenuSizeVariant) {
-    return clsx(
-        'univer-inline-flex univer-items-center',
-        sizeVariant === 'paragraph-t' ? 'univer-gap-3' : 'univer-gap-2'
-    );
+    return contextMenuContentVariants({ sizeVariant });
 }
 
 function getContextMenuPanelClassName(sizeVariant: ContextMenuSizeVariant) {
-    return sizeVariant === 'paragraph-t'
-        ? `
-          univer-box-border univer-grid univer-min-w-64 univer-max-w-full univer-gap-2 univer-overflow-y-auto
-          univer-overscroll-contain univer-rounded-md univer-bg-white univer-px-3 univer-py-2 univer-text-base
-          univer-text-gray-900 univer-shadow-md
-          dark:!univer-bg-gray-700 dark:!univer-text-white
-        `
-        : `
-          univer-box-border univer-grid univer-min-w-52 univer-max-w-full univer-gap-1 univer-overflow-y-auto
-          univer-overscroll-contain univer-rounded-md univer-bg-white univer-px-2 univer-py-1 univer-text-sm
-          univer-text-gray-900 univer-shadow-md
-          dark:!univer-bg-gray-700 dark:!univer-text-white
-        `;
+    return contextMenuPanelVariants({ sizeVariant });
 }
 
 function getContextMenuGroupClassName(sizeVariant: ContextMenuSizeVariant) {
-    return sizeVariant === 'paragraph-t' ? 'univer-grid univer-gap-2 univer-py-2' : 'univer-grid univer-gap-1 univer-py-1';
+    return contextMenuGroupVariants({ sizeVariant });
 }
 
 function isParagraphTHeaderQuickGroup(menuSchema: IMenuSchema, sizeVariant: ContextMenuSizeVariant) {
@@ -210,24 +434,19 @@ function getContextMenuQuickGroupClassName(
     const nextSchema = index < visibleSchemas.length - 1 ? visibleSchemas[index + 1] : null;
     const connectedToPrevious = !!previousSchema?.quickLayout && CONTEXT_MENU_HEADER_QUICK_GROUP_KEYS.has(previousSchema.key);
     const connectedToNext = !!nextSchema?.quickLayout && CONTEXT_MENU_HEADER_QUICK_GROUP_KEYS.has(nextSchema.key);
+    const connection: ContextMenuQuickGroupConnection = connectedToPrevious && connectedToNext
+        ? 'both'
+        : connectedToPrevious
+            ? 'previous'
+            : connectedToNext
+                ? 'next'
+                : 'none';
 
-    if (connectedToPrevious && connectedToNext) {
-        return 'univer-grid univer-gap-2 univer-pt-1 univer-pb-1';
-    }
-
-    if (connectedToPrevious) {
-        return 'univer-grid univer-gap-2 univer-pt-1 univer-pb-2';
-    }
-
-    if (connectedToNext) {
-        return 'univer-grid univer-gap-2 univer-pt-2 univer-pb-1';
-    }
-
-    return getContextMenuGroupClassName(sizeVariant);
+    return contextMenuQuickGroupVariants({ sizeVariant, connection });
 }
 
 function getContextMenuQuickGroupClusterClassName(sizeVariant: ContextMenuSizeVariant) {
-    return sizeVariant === 'paragraph-t' ? 'univer-grid univer-gap-0 univer-py-2' : getContextMenuGroupClassName(sizeVariant);
+    return contextMenuQuickGroupClusterVariants({ sizeVariant });
 }
 
 function getMenuButtonCenter(button: HTMLButtonElement) {
@@ -386,37 +605,15 @@ export function getContextMenuSchemaRenderGroups(
 }
 
 function getContextMenuHeaderClassName(sizeVariant: ContextMenuSizeVariant) {
-    return sizeVariant === 'paragraph-t'
-        ? `
-          univer-px-3 univer-text-sm univer-font-semibold univer-text-gray-600
-          dark:!univer-text-gray-300
-        `
-        : `
-          univer-px-2 univer-text-xs univer-font-semibold univer-text-gray-600
-          dark:!univer-text-gray-300
-        `;
+    return contextMenuHeaderVariants({ sizeVariant });
 }
 
 function getContextMenuHeaderRowClassName(sizeVariant: ContextMenuSizeVariant) {
-    return sizeVariant === 'paragraph-t'
-        ? 'univer-flex univer-items-center univer-justify-between univer-gap-2'
-        : 'univer-flex univer-items-center univer-justify-between univer-gap-1.5';
+    return contextMenuHeaderRowVariants({ sizeVariant });
 }
 
 function getContextMenuSubmenuPanelClassName(sizeVariant: ContextMenuSizeVariant) {
-    return sizeVariant === 'paragraph-t'
-        ? `
-          univer-overflow-y-auto univer-overscroll-contain univer-rounded-md univer-border
-          univer-border-solid univer-border-gray-200 univer-bg-white univer-p-2
-          univer-shadow-md
-          dark:!univer-border-gray-600 dark:!univer-bg-gray-700
-        `
-        : `
-          univer-overflow-y-auto univer-overscroll-contain univer-rounded-md univer-border
-          univer-border-solid univer-border-gray-200 univer-bg-white univer-p-1.5
-          univer-shadow-md
-          dark:!univer-border-gray-600 dark:!univer-bg-gray-700
-        `;
+    return contextMenuSubmenuPanelVariants({ sizeVariant });
 }
 
 export function ContextMenuPanel(props: IContextMenuPanelProps) {
@@ -980,61 +1177,16 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
         setActiveSubmenuKey((currentKey) => (currentKey === menuKey ? null : currentKey));
     };
 
-    const itemClassName = clsx(
-        compact
-            ? (
-                sizeVariant === 'paragraph-t'
-                    ? `
-                      univer-relative univer-flex
-                      ${headerAction
-                    ? 'univer-size-8 univer-rounded-md'
-                    : 'univer-size-10 univer-rounded-lg'}
-                      univer-items-center univer-justify-center univer-border-none univer-bg-transparent univer-p-0
-                      univer-text-left univer-text-base
-                      dark:!univer-text-white
-                    `
-                    : `
-                      univer-relative univer-flex
-                      ${headerAction
-                    ? 'univer-size-7 univer-rounded-sm'
-                    : 'univer-size-8 univer-rounded-md'}
-                      univer-items-center univer-justify-center univer-border-none univer-bg-transparent univer-p-0
-                      univer-text-left univer-text-sm
-                      dark:!univer-text-white
-                    `
-            )
-            : (
-                sizeVariant === 'paragraph-t'
-                    ? `
-                      univer-relative univer-flex univer-min-h-10 univer-w-full univer-items-center
-                      univer-justify-between univer-gap-4 univer-rounded-lg univer-border-none univer-bg-transparent
-                      univer-px-3 univer-text-left univer-text-base
-                      dark:!univer-text-white
-                    `
-                    : `
-                      univer-relative univer-flex univer-min-h-8 univer-w-full univer-items-center
-                      univer-justify-between univer-gap-3 univer-rounded-md univer-border-none univer-bg-transparent
-                      univer-px-2 univer-text-left univer-text-sm
-                      dark:!univer-text-white
-                    `
-            ),
-        disabled
-            ? 'univer-cursor-not-allowed univer-opacity-60'
-            : !hoverSuppressed && `
-              univer-cursor-pointer
-              hover:univer-bg-gray-50
-            `,
-        !disabled && hoverSuppressed && 'univer-cursor-pointer',
-        !disabled && `
-          focus:univer-bg-gray-50 focus:univer-outline-none
-          dark:focus:!univer-bg-gray-600
-        `,
-        !disabled && !hoverSuppressed && 'dark:hover:!univer-bg-gray-600',
-        resolveMenuItemActiveState(menuItem.id, activated, activeItemIds) && `
-          univer-bg-gray-200
-          dark:!univer-bg-gray-600
-        `
-    );
+    const itemVariant: ContextMenuItemVariant = compact
+        ? headerAction ? 'compactHeaderAction' : 'compact'
+        : 'default';
+    const itemClassName = contextMenuItemVariants({
+        sizeVariant,
+        variant: itemVariant,
+        disabled,
+        hoverSuppressed,
+        active: resolveMenuItemActiveState(menuItem.id, activated, activeItemIds),
+    });
 
     const contentNode = (
         <span className={getContextMenuContentClassName(sizeVariant)}>

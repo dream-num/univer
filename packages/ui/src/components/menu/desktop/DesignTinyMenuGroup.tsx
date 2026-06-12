@@ -14,25 +14,23 @@
  * limitations under the License.
  */
 
-import type { ComponentType } from 'react';
-import { clsx, Tooltip } from '@univerjs/design';
+import { cva, Tooltip } from '@univerjs/design';
 
 export type TinyMenuSizeVariant = 'default' | 'paragraph-t';
 export type TinyMenuLayoutVariant = 'default' | 'compact';
+type TinyMenuVariant = 'default' | 'paragraphT' | 'compactParagraph';
 
-const ICON_EXTEND = { colorChannel1: 'var(--univer-primary-600)' };
-
-export interface ITinyMenuItem {
+interface ITinyMenuItem {
     onClick: () => void;
     className: string;
-    Icon: ComponentType<{ className?: string; extend?: { colorChannel1?: string } }>;
+    Icon: any;
     iconClassName?: string;
     key: string;
     active?: boolean;
     tooltip?: string;
 }
 
-export interface ITinyMenuGroupProps {
+interface ITinyMenuGroupProps {
     items: ITinyMenuItem[];
     columns?: number;
     sizeVariant?: TinyMenuSizeVariant;
@@ -40,28 +38,127 @@ export interface ITinyMenuGroupProps {
     hoverSuppressed?: boolean;
 }
 
-export function DesignTinyMenuGroup({ items, columns, sizeVariant = 'default', layoutVariant = 'default', hoverSuppressed = false }: ITinyMenuGroupProps) {
-    const isParagraphTVariant = sizeVariant === 'paragraph-t';
-    const isCompactParagraphVariant = isParagraphTVariant && layoutVariant === 'compact';
+const tinyMenuGroupVariants = cva('univer-menu-item-group univer-px-0', {
+    variants: {
+        variant: {
+            default: 'univer-gap-1.5 univer-p-0.5',
+            paragraphT: 'univer-gap-2 univer-p-1',
+            compactParagraph: 'univer-gap-0.5 univer-p-0',
+        },
+        layout: {
+            grid: 'univer-grid',
+            wrap: 'univer-flex univer-flex-wrap',
+        },
+        columnsSix: {
+            true: 'univer-grid-cols-6',
+            false: '',
+        },
+    },
+    compoundVariants: [
+        {
+            variant: 'compactParagraph',
+            layout: 'grid',
+            class: 'univer-justify-items-start',
+        },
+        {
+            variant: ['default', 'paragraphT'],
+            layout: 'grid',
+            class: 'univer-justify-items-center',
+        },
+    ],
+    defaultVariants: {
+        variant: 'default',
+        layout: 'wrap',
+        columnsSix: false,
+    },
+});
+
+const tinyMenuButtonVariants = cva(
+    `
+      univer-flex univer-cursor-pointer univer-items-center univer-justify-center univer-border-none
+      univer-bg-transparent univer-p-0
+      focus:univer-bg-gray-50 focus:univer-outline-none
+      dark:focus:!univer-bg-gray-900
+    `,
+    {
+        variants: {
+            variant: {
+                default: 'univer-size-6 univer-rounded-md',
+                paragraphT: 'univer-size-8 univer-rounded-lg',
+                compactParagraph: 'univer-size-6 univer-rounded-sm',
+            },
+            hoverSuppressed: {
+                true: '',
+                false: `
+                  hover:univer-bg-gray-50
+                  dark:hover:!univer-bg-gray-900
+                `,
+            },
+            active: {
+                true: `
+                  univer-bg-gray-50
+                  dark:!univer-bg-gray-900
+                `,
+                false: '',
+            },
+        },
+        defaultVariants: {
+            variant: 'default',
+            hoverSuppressed: false,
+            active: false,
+        },
+    }
+);
+
+const tinyMenuIconVariants = cva(
+    `
+      univer-text-gray-900
+      dark:!univer-text-gray-200
+    `,
+    {
+        variants: {
+            variant: {
+                default: 'univer-size-4',
+                paragraphT: 'univer-size-5',
+                compactParagraph: 'univer-size-5',
+            },
+        },
+        defaultVariants: {
+            variant: 'default',
+        },
+    }
+);
+
+function getTinyMenuVariant(sizeVariant: TinyMenuSizeVariant, layoutVariant: TinyMenuLayoutVariant): TinyMenuVariant {
+    if (sizeVariant === 'paragraph-t' && layoutVariant === 'compact') {
+        return 'compactParagraph';
+    }
+
+    if (sizeVariant === 'paragraph-t') {
+        return 'paragraphT';
+    }
+
+    return 'default';
+}
+
+export function DesignTinyMenuGroup({
+    items,
+    columns,
+    sizeVariant = 'default',
+    layoutVariant = 'default',
+    hoverSuppressed = false,
+}: ITinyMenuGroupProps) {
+    const variant = getTinyMenuVariant(sizeVariant, layoutVariant);
+    const isParagraphTVariant = variant !== 'default';
 
     return (
         <div
-            className={clsx(
-                'univer-menu-item-group univer-px-0',
-                isCompactParagraphVariant
-                    ? 'univer-gap-0.5 univer-p-0'
-                    : isParagraphTVariant
-                        ? 'univer-gap-2 univer-p-1'
-                        : 'univer-gap-1.5 univer-p-0.5',
-                columns
-                    ? `
-                      univer-grid
-                      ${isCompactParagraphVariant ? 'univer-justify-items-start' : 'univer-justify-items-center'}
-                      ${columns === 6 && !isCompactParagraphVariant ? 'univer-grid-cols-6' : ''}
-                    `
-                    : 'univer-flex univer-flex-wrap'
-            )}
-            style={isCompactParagraphVariant && columns
+            className={tinyMenuGroupVariants({
+                variant,
+                layout: columns ? 'grid' : 'wrap',
+                columnsSix: columns === 6 && variant !== 'compactParagraph',
+            })}
+            style={variant === 'compactParagraph' && columns
                 ? { gridTemplateColumns: `repeat(${columns}, max-content)` }
                 : undefined}
         >
@@ -73,43 +170,20 @@ export function DesignTinyMenuGroup({ items, columns, sizeVariant = 'default', l
                         type="button"
                         aria-label={item.tooltip ?? item.key}
                         title={showTooltip ? item.tooltip : undefined}
-                        className={clsx(
-                            `
-                              univer-flex univer-cursor-pointer univer-items-center univer-justify-center
-                              univer-border-none univer-bg-transparent univer-p-0
-                              focus:univer-bg-gray-50 focus:univer-outline-none
-                              dark:focus:!univer-bg-gray-900
-                            `,
-                            !hoverSuppressed && `
-                              hover:univer-bg-gray-50
-                              dark:hover:!univer-bg-gray-900
-                            `,
-                            isCompactParagraphVariant
-                                ? 'univer-size-6 univer-rounded-sm'
-                                : isParagraphTVariant
-                                    ? 'univer-size-8 univer-rounded-lg'
-                                    : 'univer-size-6 univer-rounded-md',
-                            {
-                                'univer-bg-gray-50 dark:!univer-bg-gray-900': item.active,
-                            },
-                            item.className
-                        )}
+                        className={tinyMenuButtonVariants({
+                            variant,
+                            hoverSuppressed,
+                            active: item.active,
+                            className: item.className,
+                        })}
                         onClick={() => item.onClick()}
                     >
                         <item.Icon
-                            className={clsx(
-                                `
-                                  univer-text-gray-900
-                                  dark:!univer-text-gray-200
-                                `,
-                                isCompactParagraphVariant
-                                    ? 'univer-size-5'
-                                    : isParagraphTVariant
-                                        ? 'univer-size-5'
-                                        : 'univer-size-4',
-                                item.iconClassName
-                            )}
-                            extend={ICON_EXTEND}
+                            className={tinyMenuIconVariants({
+                                variant,
+                                className: item.iconClassName,
+                            })}
+                            extend={{ colorChannel1: 'var(--univer-primary-600)' }}
                         />
                     </button>
                 );

@@ -303,6 +303,265 @@ describe('DocParagraphMenuService', () => {
         expect(dispose).toHaveBeenCalledTimes(1);
         expect(service.activeTarget).toBeNull();
     });
+
+    it('hides the paragraph menu on keyboard input', () => {
+        const dispose = vi.fn();
+        const keydown$ = new Subject();
+        const attachPopupToRect = vi.fn(() => ({ canDispose: () => true, dispose }));
+        const service = createService({
+            attachPopupToRect,
+            dataStream: 'Title\r',
+            keydown$,
+        });
+
+        service.showParagraphMenu(createParagraphBound({
+            paragraphStart: 0,
+            paragraphEnd: 5,
+            startIndex: 5,
+        }));
+
+        keydown$.next({ event: { key: 'a' } });
+
+        expect(dispose).toHaveBeenCalledTimes(1);
+        expect(service.activeTarget).toBeNull();
+    });
+
+    it('intercepts slash keydown and requests the insert menu without inserting slash', () => {
+        const dispose = vi.fn();
+        const keydown$ = new Subject();
+        const attachPopupToRect = vi.fn(() => ({ canDispose: () => true, dispose }));
+        const service = createService({
+            attachPopupToRect,
+            dataStream: 'Title\r',
+            keydown$,
+        });
+        const slashRequests: unknown[] = [];
+        const preventDefault = vi.fn();
+        const stopPropagation = vi.fn();
+        const paragraph = createParagraphBound({
+            paragraphStart: 0,
+            paragraphEnd: 5,
+            startIndex: 5,
+        });
+
+        service.slashMenuRequest$.subscribe((request) => {
+            if (request) {
+                slashRequests.push(request);
+            }
+        });
+        service.showParagraphMenu(paragraph);
+
+        keydown$.next({
+            activeRange: { startOffset: 2, endOffset: 2, collapsed: true },
+            event: { key: '/', preventDefault, stopPropagation },
+        });
+
+        expect(preventDefault).toHaveBeenCalledTimes(1);
+        expect(stopPropagation).toHaveBeenCalledTimes(1);
+        expect(dispose).not.toHaveBeenCalled();
+        expect(service.activeTarget?.kind).toBe('paragraph');
+        expect(slashRequests).toHaveLength(1);
+        expect(slashRequests[0]).toMatchObject({
+            anchorRect: paragraph.firstLine,
+        });
+    });
+
+    it('opens the slash insert menu from the current cursor paragraph when no menu is active', () => {
+        const keydown$ = new Subject();
+        const attachPopupToRect = vi.fn(() => ({ canDispose: () => true, dispose: vi.fn() }));
+        const paragraph = createParagraphBound({
+            paragraphStart: 0,
+            paragraphEnd: 5,
+            startIndex: 5,
+        });
+        const service = createService({
+            attachPopupToRect,
+            dataStream: 'Title\r',
+            keydown$,
+            paragraphBounds: new Map([[5, paragraph]]),
+        });
+        const slashRequests: unknown[] = [];
+
+        service.slashMenuRequest$.subscribe((request) => {
+            if (request) {
+                slashRequests.push(request);
+            }
+        });
+
+        keydown$.next({
+            activeRange: { startOffset: 2, endOffset: 2, collapsed: true },
+            event: { key: '/', preventDefault: vi.fn(), stopPropagation: vi.fn() },
+        });
+
+        expect(attachPopupToRect).toHaveBeenCalledTimes(1);
+        expect(service.activeTarget?.kind).toBe('paragraph');
+        expect(slashRequests).toHaveLength(1);
+    });
+
+    it('opens the slash insert menu inside a paragraph that already has text', () => {
+        const keydown$ = new Subject();
+        const attachPopupToRect = vi.fn(() => ({ canDispose: () => true, dispose: vi.fn() }));
+        const paragraph = createParagraphBound({
+            paragraphStart: 0,
+            paragraphEnd: 11,
+            startIndex: 11,
+        });
+        const service = createService({
+            attachPopupToRect,
+            dataStream: 'Hello world\r',
+            keydown$,
+            paragraphBounds: new Map([[11, paragraph]]),
+        });
+        const slashRequests: unknown[] = [];
+
+        service.slashMenuRequest$.subscribe((request) => {
+            if (request) {
+                slashRequests.push(request);
+            }
+        });
+
+        keydown$.next({
+            activeRange: { startOffset: 5, endOffset: 5, collapsed: true },
+            event: { key: '/', preventDefault: vi.fn(), stopPropagation: vi.fn() },
+        });
+
+        expect(attachPopupToRect).toHaveBeenCalledTimes(1);
+        expect(service.activeTarget?.kind).toBe('paragraph');
+        expect(service.activeTarget?.emptyMode).toBe(false);
+        expect(slashRequests).toHaveLength(1);
+    });
+
+    it('opens the slash insert menu inside an existing list paragraph', () => {
+        const keydown$ = new Subject();
+        const attachPopupToRect = vi.fn(() => ({ canDispose: () => true, dispose: vi.fn() }));
+        const paragraph = createParagraphBound({
+            paragraphStart: 0,
+            paragraphEnd: 9,
+            startIndex: 9,
+        });
+        const service = createService({
+            attachPopupToRect,
+            dataStream: 'List item\r',
+            keydown$,
+            paragraphBounds: new Map([[9, paragraph]]),
+            paragraphs: [{
+                bullet: { listType: PresetListType.BULLET_LIST },
+                startIndex: 9,
+            }],
+        });
+        const slashRequests: unknown[] = [];
+
+        service.slashMenuRequest$.subscribe((request) => {
+            if (request) {
+                slashRequests.push(request);
+            }
+        });
+
+        keydown$.next({
+            activeRange: { startOffset: 4, endOffset: 4, collapsed: true },
+            event: { key: '/', preventDefault: vi.fn(), stopPropagation: vi.fn() },
+        });
+
+        expect(attachPopupToRect).toHaveBeenCalledTimes(1);
+        expect(service.activeTarget?.kind).toBe('paragraph');
+        expect(service.activeTarget?.icon).toBe('UnorderIcon');
+        expect(slashRequests).toHaveLength(1);
+    });
+
+    it('falls back to opening the slash insert menu from input-before without inserting slash', () => {
+        const inputBefore$ = new Subject();
+        const attachPopupToRect = vi.fn(() => ({ canDispose: () => true, dispose: vi.fn() }));
+        const preventDefault = vi.fn();
+        const stopPropagation = vi.fn();
+        const paragraph = createParagraphBound({
+            paragraphStart: 0,
+            paragraphEnd: 11,
+            startIndex: 11,
+        });
+        const service = createService({
+            attachPopupToRect,
+            dataStream: 'Hello world\r',
+            inputBefore$,
+            paragraphBounds: new Map([[11, paragraph]]),
+        });
+        const slashRequests: unknown[] = [];
+
+        service.slashMenuRequest$.subscribe((request) => {
+            if (request) {
+                slashRequests.push(request);
+            }
+        });
+
+        inputBefore$.next({
+            activeRange: { startOffset: 5, endOffset: 5, collapsed: true },
+            content: '/',
+            event: { data: '/', preventDefault, stopPropagation },
+        });
+
+        expect(preventDefault).toHaveBeenCalledTimes(1);
+        expect(stopPropagation).toHaveBeenCalledTimes(1);
+        expect(attachPopupToRect).toHaveBeenCalledTimes(1);
+        expect(service.activeTarget?.kind).toBe('paragraph');
+        expect(slashRequests).toHaveLength(1);
+    });
+
+    it('hides the slash insert menu immediately when clicking back into the document body', () => {
+        const dispose = vi.fn();
+        const keydown$ = new Subject();
+        const attachPopupToRect = vi.fn(() => ({ canDispose: () => true, dispose }));
+        const paragraph = createParagraphBound({
+            paragraphStart: 0,
+            paragraphEnd: 5,
+            startIndex: 5,
+        });
+        const service = createService({
+            attachPopupToRect,
+            dataStream: 'Title\r',
+            keydown$,
+            paragraphBounds: new Map([[5, paragraph]]),
+        });
+
+        keydown$.next({
+            activeRange: { startOffset: 2, endOffset: 2, collapsed: true },
+            event: { key: '/', preventDefault: vi.fn(), stopPropagation: vi.fn() },
+        });
+
+        const [, popupOptions] = attachPopupToRect.mock.calls[0] as unknown as [unknown, { onClickOutside: () => void }];
+        popupOptions.onClickOutside();
+
+        expect(dispose).toHaveBeenCalledTimes(1);
+        expect(service.activeTarget).toBeNull();
+    });
+
+    it('clears the slash insert menu request after hiding so hover does not reopen it', () => {
+        const keydown$ = new Subject();
+        const attachPopupToRect = vi.fn(() => ({ canDispose: () => true, dispose: vi.fn() }));
+        const paragraph = createParagraphBound({
+            paragraphStart: 0,
+            paragraphEnd: 5,
+            startIndex: 5,
+        });
+        const service = createService({
+            attachPopupToRect,
+            dataStream: 'Title\r',
+            keydown$,
+            paragraphBounds: new Map([[5, paragraph]]),
+        });
+
+        keydown$.next({
+            activeRange: { startOffset: 2, endOffset: 2, collapsed: true },
+            event: { key: '/', preventDefault: vi.fn(), stopPropagation: vi.fn() },
+        });
+
+        const [, popupOptions] = attachPopupToRect.mock.calls[0] as unknown as [unknown, { onClickOutside: () => void }];
+        popupOptions.onClickOutside();
+
+        const replayedRequests: unknown[] = [];
+        const subscription = service.slashMenuRequest$.subscribe((request) => replayedRequests.push(request));
+        subscription.unsubscribe();
+
+        expect(replayedRequests).toEqual([null]);
+    });
 });
 
 function createService(options: {
@@ -312,6 +571,8 @@ function createService(options: {
     findParagraphBoundByIndex?: (index: number) => unknown;
     paragraphs?: Array<{ bullet?: { listType?: PresetListType }; startIndex: number }>;
     paragraphBounds?: Map<number, IMutiPageParagraphBound>;
+    inputBefore$?: Subject<unknown>;
+    keydown$?: Subject<unknown>;
     tables?: Array<{ endIndex: number; startIndex: number; tableId: string }>;
     viewportScrollY?: number;
 }) {
@@ -367,6 +628,10 @@ function createService(options: {
         } as never,
         {
             floatMenu: null,
+        } as never,
+        {
+            onInputBefore$: options.inputBefore$ ?? new Subject(),
+            onKeydown$: options.keydown$ ?? new Subject(),
         } as never
     );
 }

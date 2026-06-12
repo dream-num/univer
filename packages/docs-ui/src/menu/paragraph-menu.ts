@@ -20,8 +20,7 @@ import type { ComponentType } from 'react';
 import { ICommandService, NamedStyleType, UniverInstanceType } from '@univerjs/core';
 import { SetTextSelectionsOperation } from '@univerjs/docs';
 import {
-    CalloutIcon,
-    CodeBlockIcon,
+    GridIcon,
     H1Icon,
     H2Icon,
     H3Icon,
@@ -29,9 +28,11 @@ import {
     H5Icon,
     MoreLeftIcon,
     MoreRightIcon,
-    QuoteIcon,
-    ShapeIcon,
+    OrderIcon,
+    ReduceIcon,
     TextTypeIcon,
+    TodoListDoubleIcon,
+    UnorderIcon,
 } from '@univerjs/icons';
 import { ComponentManager, getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { createElement } from 'react';
@@ -225,6 +226,8 @@ const createEmptyParagraphButtonFactory = (
     const headingIcon = Object.values(HEADING_ICON_MAP).find((item) => item.key === icon);
     if (headingIcon && !componentManager.get(headingIcon.key)) {
         componentManager.register(headingIcon.key, headingIcon.component);
+    } else {
+        ensureParagraphMenuIcon(componentManager, icon);
     }
 
     return {
@@ -275,7 +278,9 @@ export const DeleteCurrentParagraphMenuItemFactory = (_accessor: IAccessor): IMe
     };
 };
 
-export const InsertBulletListBellowMenuItemFactory = (_accessor: IAccessor): IMenuItem => {
+export const InsertBulletListBellowMenuItemFactory = (accessor: IAccessor): IMenuItem => {
+    ensureParagraphMenuIcon(accessor.get(ComponentManager), 'UnorderIcon');
+
     return {
         id: InsertBulletListBellowCommand.id,
         type: MenuItemType.BUTTON,
@@ -285,7 +290,9 @@ export const InsertBulletListBellowMenuItemFactory = (_accessor: IAccessor): IMe
     };
 };
 
-export const InsertOrderListBellowMenuItemFactory = (_accessor: IAccessor): IMenuItem => {
+export const InsertOrderListBellowMenuItemFactory = (accessor: IAccessor): IMenuItem => {
+    ensureParagraphMenuIcon(accessor.get(ComponentManager), 'OrderIcon');
+
     return {
         id: InsertOrderListBellowCommand.id,
         type: MenuItemType.BUTTON,
@@ -295,7 +302,9 @@ export const InsertOrderListBellowMenuItemFactory = (_accessor: IAccessor): IMen
     };
 };
 
-export const InsertCheckListBellowMenuItemFactory = (_accessor: IAccessor): IMenuItem => {
+export const InsertCheckListBellowMenuItemFactory = (accessor: IAccessor): IMenuItem => {
+    ensureParagraphMenuIcon(accessor.get(ComponentManager), 'TodoListDoubleIcon');
+
     return {
         id: InsertCheckListBellowCommand.id,
         type: MenuItemType.BUTTON,
@@ -305,7 +314,9 @@ export const InsertCheckListBellowMenuItemFactory = (_accessor: IAccessor): IMen
     };
 };
 
-export const InsertHorizontalLineBellowMenuItemFactory = (_accessor: IAccessor): IMenuItem => {
+export const InsertHorizontalLineBellowMenuItemFactory = (accessor: IAccessor): IMenuItem => {
+    ensureParagraphMenuIcon(accessor.get(ComponentManager), 'ReduceIcon');
+
     return {
         id: InsertHorizontalLineBellowCommand.id,
         type: MenuItemType.BUTTON,
@@ -328,14 +339,6 @@ export const DOC_PARAGRAPH_T_RESET_COLORS_ID = 'doc.menu.paragraph-t.reset-color
 export const DOC_PARAGRAPH_T_INDENT_INCREASE_ID = 'doc.menu.paragraph-t.indent.increase';
 export const DOC_PARAGRAPH_T_INDENT_DECREASE_ID = 'doc.menu.paragraph-t.indent.decrease';
 export const DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID = 'doc.menu.paragraph-t.insert-below.command';
-export const DOCS_CODE_INSERT_COMMAND_ID = 'docs-code.command.insert';
-export const DOCS_CODE_INSERT_BELOW_COMMAND_ID = 'docs-code.command.insert-below';
-export const DOCS_QUOTE_INSERT_COMMAND_ID = 'docs-quote.command.insert';
-export const DOCS_QUOTE_INSERT_BELOW_COMMAND_ID = 'docs-quote.command.insert-below';
-export const DOCS_CALLOUT_INSERT_COMMAND_ID = 'docs-callout.command.insert';
-export const DOCS_CALLOUT_INSERT_BELOW_COMMAND_ID = 'docs-callout.command.insert-below';
-export const INSERT_DOC_IMAGE_COMMAND_ID = 'doc.command.insert-float-image';
-export const INSERT_DOC_SHAPE_COMMAND_ID = 'doc.command.menu-insert-shape';
 
 const TEXT_COLORS = ['#FE4B4B', '#FF8C51', '#A4DC16', '#2DAEFF', '#3A60F7', '#9E6DE3', '#F248A6'];
 const BACKGROUND_COLORS = [
@@ -365,17 +368,24 @@ function ensureParagraphMenuIcon(componentManager: ComponentManager, icon: strin
         return;
     }
 
+    const headingIcon = Object.values(HEADING_ICON_MAP).find((item) => item.key === icon);
+    if (headingIcon) {
+        componentManager.register(headingIcon.key, headingIcon.component);
+        return;
+    }
+
     const mapping: Partial<Record<string, ComponentType<{ className: string }>>> = {
         TitleTypeIcon,
         SubtitleTypeIcon,
         DefaultTextColorIcon,
         HeaderTextColorIcon,
-        CodeBlockIcon,
-        QuoteIcon,
-        CalloutIcon,
-        ShapeIcon,
         MoreRightIcon,
         MoreLeftIcon,
+        OrderIcon,
+        UnorderIcon,
+        TodoListDoubleIcon,
+        ReduceIcon,
+        GridIcon,
     };
 
     const component = mapping[icon];
@@ -622,41 +632,6 @@ export const ParagraphMenuInsertBelowSubmenuItemFactory = createStaticSubmenuMen
     tooltip: 'docs-ui.rightClick.insertBellow',
 });
 
-export const ParagraphMenuInsertImageMenuItemFactory = createStaticButtonMenuItemFactory({
-    id: INSERT_DOC_IMAGE_COMMAND_ID,
-    icon: 'AddImageIcon',
-    title: 'docs-drawing-ui.upload.float',
-    tooltip: 'docs-drawing-ui.upload.float',
-});
-
-export const ParagraphMenuInsertShapeMenuItemFactory = createStaticSubmenuMenuItemFactory({
-    id: INSERT_DOC_SHAPE_COMMAND_ID,
-    icon: 'ShapeIcon',
-    title: 'Insert Shape',
-    tooltip: 'Insert Shape',
-});
-
-export const ParagraphMenuInsertCodeMenuItemFactory = createStaticButtonMenuItemFactory({
-    id: DOCS_CODE_INSERT_COMMAND_ID,
-    icon: 'CodeBlockIcon',
-    title: 'docs-code-ui.menu.code',
-    tooltip: 'docs-code-ui.menu.code',
-});
-
-export const ParagraphMenuInsertQuoteMenuItemFactory = createStaticButtonMenuItemFactory({
-    id: DOCS_QUOTE_INSERT_COMMAND_ID,
-    icon: 'QuoteIcon',
-    title: 'docs-quote-ui.menu.quote',
-    tooltip: 'docs-quote-ui.menu.quote',
-});
-
-export const ParagraphMenuInsertCalloutMenuItemFactory = createStaticButtonMenuItemFactory({
-    id: DOCS_CALLOUT_INSERT_COMMAND_ID,
-    icon: 'CalloutIcon',
-    title: 'docs-callout-ui.menu.callout',
-    tooltip: 'docs-callout-ui.menu.callout',
-});
-
 export const ParagraphMenuInsertBelowHeadingH1MenuItemFactory = createStaticButtonMenuItemFactory({
     id: `${DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID}.h1`,
     commandId: DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID,
@@ -702,22 +677,6 @@ export const ParagraphMenuInsertBelowHeadingH5MenuItemFactory = createStaticButt
     params: { commandId: H5HeadingCommand.id, paragraphMenuPlacement: 'below', paragraphMenuInsertMode: 'breakline' },
 });
 
-export const ParagraphMenuInsertBelowImageMenuItemFactory = createStaticButtonMenuItemFactory({
-    id: `${INSERT_DOC_IMAGE_COMMAND_ID}.below`,
-    commandId: INSERT_DOC_IMAGE_COMMAND_ID,
-    icon: 'AddImageIcon',
-    title: 'docs-drawing-ui.upload.float',
-    tooltip: 'docs-drawing-ui.upload.float',
-    params: { paragraphMenuPlacement: 'below' },
-});
-
-export const ParagraphMenuInsertBelowShapeMenuItemFactory = createStaticSubmenuMenuItemFactory({
-    id: `${INSERT_DOC_SHAPE_COMMAND_ID}.below`,
-    icon: 'ShapeIcon',
-    title: 'Insert Shape',
-    tooltip: 'Insert Shape',
-});
-
 export const ParagraphMenuInsertBelowTableMenuItemFactory = createStaticButtonMenuItemFactory({
     id: `${DocCreateTableOperation.id}.below`,
     commandId: DocCreateTableOperation.id,
@@ -725,27 +684,6 @@ export const ParagraphMenuInsertBelowTableMenuItemFactory = createStaticButtonMe
     title: 'docs-ui.toolbar.table.insert',
     tooltip: 'docs-ui.toolbar.table.insert',
     params: { rowCount: 3, colCount: 5, paragraphMenuPlacement: 'below' },
-});
-
-export const ParagraphMenuInsertBelowCodeMenuItemFactory = createStaticButtonMenuItemFactory({
-    id: DOCS_CODE_INSERT_BELOW_COMMAND_ID,
-    icon: 'CodeBlockIcon',
-    title: 'docs-code-ui.menu.code',
-    tooltip: 'docs-code-ui.menu.code',
-});
-
-export const ParagraphMenuInsertBelowQuoteMenuItemFactory = createStaticButtonMenuItemFactory({
-    id: DOCS_QUOTE_INSERT_BELOW_COMMAND_ID,
-    icon: 'QuoteIcon',
-    title: 'docs-quote-ui.menu.quote',
-    tooltip: 'docs-quote-ui.menu.quote',
-});
-
-export const ParagraphMenuInsertBelowCalloutMenuItemFactory = createStaticButtonMenuItemFactory({
-    id: DOCS_CALLOUT_INSERT_BELOW_COMMAND_ID,
-    icon: 'CalloutIcon',
-    title: 'docs-callout-ui.menu.callout',
-    tooltip: 'docs-callout-ui.menu.callout',
 });
 
 export const ParagraphMenuIndentIncreaseMenuItemFactory = createStaticButtonMenuItemFactory({

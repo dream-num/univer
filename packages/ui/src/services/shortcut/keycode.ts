@@ -31,6 +31,8 @@ export enum KeyCode {
     ESC = 27,
     SPACE = 32,
 
+    END = 35,
+    HOME = 36,
     ARROW_LEFT = 37,
     ARROW_UP = 38,
     ARROW_RIGHT = 39,
@@ -107,6 +109,8 @@ export const KeyCodeToChar: { [key: number]: string } = {
     [KeyCode.DELETE]: 'Del',
     [KeyCode.ESC]: 'Esc',
     [KeyCode.SPACE]: 'Space',
+    [KeyCode.HOME]: 'Home',
+    [KeyCode.END]: 'End',
     [KeyCode.ARROW_LEFT]: '←',
     [KeyCode.ARROW_RIGHT]: '→',
     [KeyCode.ARROW_UP]: '↑',

@@ -76,6 +76,15 @@ const locale: typeof enUS = {
             closeHeaderFooter: '머리글 및 바닥글 닫기',
             disableText: '머리글 및 바닥글 설정이 비활성화되었습니다',
         },
+        placeholder: {
+            heading1: 'Heading 1',
+            heading2: 'Heading 2',
+            heading3: 'Heading 3',
+            heading4: 'Heading 4',
+            heading5: 'Heading 5',
+            normalText: 'Type text or press "/" for commands',
+            listItem: 'Item',
+        },
         doc: {
             menu: {
                 paragraphSetting: '문단 설정',

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IMenuButtonItem } from '../menu/menu';
+import type { IMenuButtonItem, IMenuItem } from '../menu/menu';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { CONTEXT_MENU_SUBMENU_CLOSE_DELAY, hasRenderableContextMenuSchema } from '../../views/components/context-menu/ContextMenuPanel';
@@ -146,6 +146,58 @@ describe('MenuManagerService', () => {
             ContextMenuGroup.QUICK,
             ContextMenuGroup.LAYOUT,
         ]);
+    });
+
+    it('replaces an existing menu node without preserving stale children', () => {
+        const service = new MenuManagerService({ invoke: vi.fn((factory: any) => factory({})) } as any, { getConfig: vi.fn() } as any);
+
+        service.mergeMenu({
+            [ContextMenuPosition.PARAGRAPH]: {
+                shapeMenu: {
+                    order: 1,
+                    child: {
+                        order: 0,
+                        menuItemFactory: () => ({
+                            id: 'shape-child',
+                            type: MenuItemType.BUTTON,
+                        } as IMenuButtonItem),
+                    },
+                    menuItemFactory: () => ({
+                        id: 'shapeMenu',
+                        type: MenuItemType.SUBITEMS,
+                    } as IMenuItem),
+                },
+            },
+        });
+        service.mergeMenu({
+            [ContextMenuPosition.PARAGRAPH]: {
+                shapeMenu: {
+                    replace: true,
+                    order: 1,
+                    menuItemFactory: () => ({
+                        id: 'shapeMenu',
+                        type: MenuItemType.SELECTOR,
+                    } as IMenuItem),
+                },
+            },
+        });
+        service.mergeMenu({
+            [ContextMenuPosition.PARAGRAPH]: {
+                shapeMenu: {
+                    childFromLateMerge: {
+                        order: 0,
+                        menuItemFactory: () => ({
+                            id: 'late-shape-child',
+                            type: MenuItemType.BUTTON,
+                        } as IMenuButtonItem),
+                    },
+                },
+            },
+        });
+
+        const shapeMenu = service.getMenuByPositionKey(ContextMenuPosition.PARAGRAPH).find((item) => item.key === 'shapeMenu');
+        expect(shapeMenu?.item?.type).toBe(MenuItemType.SELECTOR);
+        expect(shapeMenu?.children).toBeUndefined();
     });
 
     it('ignores nested context menu containers that have no direct renderable items', () => {

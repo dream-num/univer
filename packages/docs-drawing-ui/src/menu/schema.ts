@@ -15,13 +15,14 @@
  */
 
 import type { MenuSchemaType } from '@univerjs/ui';
-import { DOC_CONTENT_INSERT_MENU_ID, EMPTY_PARAGRAPH_MENU_ID, INSERT_BELLOW_MENU_ID } from '@univerjs/docs-ui';
+import { DOC_CONTENT_INSERT_MENU_ID, DOC_PARAGRAPH_T_INSERT_BELOW_MENU_ID, DOC_PARAGRAPH_T_INSERT_MENU_ID, EMPTY_PARAGRAPH_MENU_ID, INSERT_BELLOW_MENU_ID } from '@univerjs/docs-ui';
 import { ContextMenuGroup, ContextMenuPosition, RibbonInsertGroup } from '@univerjs/ui';
 import { InsertDocEllipseShapeCommand, InsertDocRectangleShapeCommand } from '../commands/commands/insert-shape.command';
 import {
     DOCS_IMAGE_MENU_ID,
     IMAGE_MENU_UPLOAD_FLOAT_ID,
     ImageMenuFactory,
+    UploadFloatImageBelowMenuFactory,
     UploadFloatImageMenuFactory,
 } from './image.menu';
 import {
@@ -31,6 +32,8 @@ import {
     InsertEllipseShapeMenuFactory,
     InsertRectangleShapeBelowMenuFactory,
     InsertRectangleShapeMenuFactory,
+    ShapeBelowMenuFactory,
+    ShapeMenuFactory,
 } from './shape.menu';
 
 export const menuSchema: MenuSchemaType = {
@@ -66,6 +69,30 @@ export const menuSchema: MenuSchemaType = {
                 [IMAGE_MENU_UPLOAD_FLOAT_ID]: {
                     order: 5,
                     menuItemFactory: UploadFloatImageMenuFactory,
+                },
+            },
+        },
+        [DOC_PARAGRAPH_T_INSERT_MENU_ID]: {
+            insert: {
+                [IMAGE_MENU_UPLOAD_FLOAT_ID]: {
+                    order: 1,
+                    menuItemFactory: UploadFloatImageMenuFactory,
+                },
+                [DOCS_SHAPE_MENU_ID]: {
+                    order: 2,
+                    menuItemFactory: ShapeMenuFactory,
+                },
+            },
+        },
+        [DOC_PARAGRAPH_T_INSERT_BELOW_MENU_ID]: {
+            insert: {
+                [`${IMAGE_MENU_UPLOAD_FLOAT_ID}.below`]: {
+                    order: 1,
+                    menuItemFactory: UploadFloatImageBelowMenuFactory,
+                },
+                [DOCS_SHAPE_BELOW_MENU_ID]: {
+                    order: 2,
+                    menuItemFactory: ShapeBelowMenuFactory,
                 },
             },
         },

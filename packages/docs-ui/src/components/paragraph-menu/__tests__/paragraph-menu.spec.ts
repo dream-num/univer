@@ -21,7 +21,7 @@ import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import * as paragraphMenu from '..';
-import { createParagraphMenuHoverOpenScheduler, getParagraphFormattingRange, getParagraphMenuActiveHeadingCommandId, getParagraphMenuCommand, getParagraphMenuCommandTargetRange, getParagraphMenuHiddenHeadingCommandIds, getParagraphMenuHiddenItemIds, getParagraphMenuIconSizeClass, getParagraphMenuPopupDirection, getParagraphMenuResolvedCommand, getParagraphMenuTargetRange, isEmptyParagraphMenuTarget, PARAGRAPH_MENU_HOVER_OPEN_DELAY, shouldShowParagraphSettingMenu, shouldUseInsertBelowRange } from '..';
+import { createParagraphMenuHoverOpenScheduler, finishParagraphMenuCommand, getParagraphFormattingRange, getParagraphMenuActiveHeadingCommandId, getParagraphMenuCommand, getParagraphMenuCommandTargetRange, getParagraphMenuHiddenHeadingCommandIds, getParagraphMenuHiddenItemIds, getParagraphMenuIconSizeClass, getParagraphMenuPopupDirection, getParagraphMenuResolvedCommand, getParagraphMenuTargetRange, isEmptyParagraphMenuTarget, PARAGRAPH_MENU_HOVER_OPEN_DELAY, shouldShowParagraphSettingMenu, shouldUseInsertBelowRange } from '..';
 import { HorizontalLineCommand } from '../../../commands/commands/doc-horizontal-line.command';
 import { SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand } from '../../../commands/commands/inline-format.command';
 import { BulletListCommand, InsertBulletListBellowCommand, OrderListCommand } from '../../../commands/commands/list.command';
@@ -502,5 +502,21 @@ describe('ParagraphMenu', () => {
         expect(shouldUseInsertBelowRange(H1HeadingCommand.id, {
             id: INSERT_BELLOW_MENU_ID,
         })).toBe(true);
+    });
+
+    it('releases the paragraph menu service before returning focus after command execution', () => {
+        const calls: string[] = [];
+
+        finishParagraphMenuCommand(
+            {
+                hideParagraphMenu: vi.fn(() => calls.push('service')),
+            } as never,
+            {
+                focus: vi.fn(() => calls.push('focus')),
+            } as never,
+            () => calls.push('ui')
+        );
+
+        expect(calls).toEqual(['service', 'ui', 'focus']);
     });
 });

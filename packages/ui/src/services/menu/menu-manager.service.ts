@@ -55,6 +55,7 @@ export interface IMenuManagerService {
 
 export type MenuSchemaType = {
     order?: number;
+    replace?: boolean;
     menuItemFactory?: (accessor: IAccessor) => IMenuItem;
     headerActionMenuItemFactory?: (accessor: IAccessor) => IMenuItem;
     title?: string;
@@ -276,12 +277,13 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
 
         for (const [key, value] of Object.entries(_target)) {
             if (key in source) {
-                const _key = key as keyof MenuSchemaType;
-                _target[_key] = merge({}, _target[_key], source[_key]);
+                const targetRecord = _target as Record<string, unknown>;
+                const sourceRecord = source as Record<string, unknown>;
+                targetRecord[key] = mergeMenuSchemaNode(targetRecord[key], sourceRecord[key]);
 
                 this.menuChanged$.next();
-            } else if (typeof value === 'object') {
-                this.mergeMenu(source, value);
+            } else if (isMenuSchemaRecord(value)) {
+                this.mergeMenu(source, value as MenuSchemaType);
             }
         }
     }
@@ -295,6 +297,10 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
         const result: IMenuSchema[] = [];
 
         for (const [key, value] of Object.entries(data)) {
+            if (key === 'replace') {
+                continue;
+            }
+
             const menuItem: Partial<IMenuSchema> = {
                 key,
                 order: value.order,
@@ -388,4 +394,52 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
 
 function normalizeMenuOrder(order: number | undefined): number {
     return order ?? 0;
+}
+
+function isMenuSchemaRecord(value: unknown): value is Record<string, unknown> {
+    return value != null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function cloneMenuSchemaNode<T>(source: T, preserveReplace = false): T {
+    if (!isMenuSchemaRecord(source)) {
+        return source;
+    }
+
+    const result: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(source)) {
+        if (key === 'replace' && !preserveReplace) {
+            continue;
+        }
+
+        result[key] = cloneMenuSchemaNode(value, preserveReplace);
+    }
+
+    return result as T;
+}
+
+function mergeMenuSchemaNode(target: unknown, source: unknown): unknown {
+    if (!isMenuSchemaRecord(source) || !isMenuSchemaRecord(target)) {
+        return cloneMenuSchemaNode(source);
+    }
+
+    if (source.replace === true) {
+        return cloneMenuSchemaNode(source, true);
+    }
+
+    if (target.replace === true) {
+        return cloneMenuSchemaNode(target, true);
+    }
+
+    const result = merge({}, target) as Record<string, unknown>;
+    for (const [key, value] of Object.entries(source)) {
+        if (key === 'replace') {
+            continue;
+        }
+
+        result[key] = key in result
+            ? mergeMenuSchemaNode(result[key], value)
+            : cloneMenuSchemaNode(value, true);
+    }
+
+    return result;
 }

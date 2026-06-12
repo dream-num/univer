@@ -15,16 +15,18 @@
  */
 
 import type { DocumentDataModel, ICustomBlock, ICustomTable, IDocumentBlockRange, INeedCheckDisposable, Nullable } from '@univerjs/core';
-import type { IBoundRectNoAngle, IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import type { IBoundRectNoAngle, IRenderContext, IRenderModule, ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IMutiPageParagraphBound, ITableBound } from './doc-event-manager.service';
+import type { IEditorInputConfig } from './selection/doc-selection-render.service';
 import { BlockType, DataStreamTreeTokenType, Disposable, Inject, isInternalEditorID, PresetListType } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import { DocumentEditArea } from '@univerjs/engine-render';
 import { BehaviorSubject, combineLatest, first, throttleTime } from 'rxjs';
 import { VIEWPORT_KEY } from '../basics/docs-view-key';
 import { DocEventManagerService } from './doc-event-manager.service';
-import { DocCanvasPopManagerService, transformBound2OffsetBound, transformOffset2Bound } from './doc-popup-manager.service';
+import { calcDocRangePositions, DocCanvasPopManagerService, transformBound2OffsetBound, transformOffset2Bound } from './doc-popup-manager.service';
 import { DocFloatMenuService } from './float-menu.service';
+import { DocSelectionRenderService } from './selection/doc-selection-render.service';
 
 export type DocBlockMenuTargetKind = 'paragraph' | 'blockRange' | 'table' | 'customBlock';
 
@@ -61,6 +63,12 @@ export interface IDocBlockDropTarget {
         top: number;
         bottom: number;
     };
+}
+
+export interface IDocSlashMenuRequest {
+    anchorRect: IBoundRectNoAngle;
+    nonce: number;
+    target: IDocBlockMenuTarget;
 }
 
 const BLOCK_RANGE_ICON_MAP: Record<string, string> = {
@@ -102,7 +110,11 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
 
     private readonly _activeTarget$ = new BehaviorSubject<IDocBlockMenuTarget | null>(null);
     readonly activeTarget$ = this._activeTarget$.asObservable();
+    private readonly _slashMenuRequest$ = new BehaviorSubject<IDocSlashMenuRequest | null>(null);
+    readonly slashMenuRequest$ = this._slashMenuRequest$.asObservable();
     private _isBlockMenuDragging = false;
+    private _isSlashMenuActive = false;
+    private _slashMenuRequestNonce = 0;
 
     get activeParagraph() {
         return this._paragrahMenu?.paragraph;
@@ -126,7 +138,8 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
         @Inject(DocEventManagerService) private _docEventManagerService: DocEventManagerService,
         @Inject(DocCanvasPopManagerService) private _docPopupManagerService: DocCanvasPopManagerService,
         @Inject(DocSkeletonManagerService) private _docSkeletonManagerService: DocSkeletonManagerService,
-        @Inject(DocFloatMenuService) private _floatMenuService: DocFloatMenuService
+        @Inject(DocFloatMenuService) private _floatMenuService: DocFloatMenuService,
+        @Inject(DocSelectionRenderService) private _docSelectionRenderService: DocSelectionRenderService
     ) {
         super();
 
@@ -235,6 +248,141 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
             }
             this.hideParagraphMenu(true);
         }));
+
+        this.disposeWithMe(this._docSelectionRenderService.onKeydown$.subscribe((config) => {
+            if (this._isBlockMenuDragging) {
+                return;
+            }
+
+            if (this._handleSlashMenuKeydown(config)) {
+                return;
+            }
+
+            this.hideParagraphMenu(true);
+        }));
+
+        this.disposeWithMe(this._docSelectionRenderService.onInputBefore$.subscribe((config) => {
+            if (!config || this._isBlockMenuDragging) {
+                return;
+            }
+
+            this._handleSlashMenuInputBefore(config);
+        }));
+    }
+
+    private _handleSlashMenuKeydown(config: IEditorInputConfig): boolean {
+        if (!this._shouldOpenSlashMenu(config)) {
+            return false;
+        }
+
+        return this._openSlashMenu(config);
+    }
+
+    private _handleSlashMenuInputBefore(config: IEditorInputConfig): boolean {
+        if (!this._shouldOpenSlashMenuFromInput(config)) {
+            return false;
+        }
+
+        return this._openSlashMenu(config);
+    }
+
+    private _openSlashMenu(config: IEditorInputConfig): boolean {
+        config.event.preventDefault();
+        config.event.stopPropagation();
+
+        const paragraph = this._getSlashMenuParagraph(config);
+        if (!paragraph) {
+            return true;
+        }
+
+        this.showParagraphMenu(paragraph);
+        const target = this.activeTarget;
+        if (!target) {
+            return true;
+        }
+
+        this._slashMenuRequest$.next({
+            anchorRect: this._getSlashMenuAnchorRect(config, paragraph),
+            nonce: ++this._slashMenuRequestNonce,
+            target,
+        });
+        this._isSlashMenuActive = true;
+        return true;
+    }
+
+    private _shouldOpenSlashMenu(config: IEditorInputConfig): boolean {
+        const event = config.event as KeyboardEvent;
+        if (event.key !== '/' || event.altKey || event.ctrlKey || event.metaKey) {
+            return false;
+        }
+
+        return this._getCollapsedTextRange(config) != null;
+    }
+
+    private _shouldOpenSlashMenuFromInput(config: IEditorInputConfig): boolean {
+        const event = config.event as InputEvent;
+        const content = config.content ?? event.data ?? '';
+        if (content !== '/') {
+            return false;
+        }
+
+        return this._getCollapsedTextRange(config) != null;
+    }
+
+    private _getCollapsedTextRange(config: IEditorInputConfig): ITextRangeWithStyle | null {
+        const activeRange = config.activeRange ?? this._docSelectionManagerService.getActiveTextRange();
+        if (!activeRange) {
+            return null;
+        }
+
+        if (activeRange.collapsed || activeRange.startOffset === activeRange.endOffset) {
+            return {
+                ...activeRange,
+                collapsed: true,
+            };
+        }
+
+        return null;
+    }
+
+    private _getSlashMenuParagraph(config: IEditorInputConfig): IMutiPageParagraphBound | null {
+        const activeRange = this._getCollapsedTextRange(config);
+        const offset = activeRange?.startOffset;
+        const activeParagraph = this._paragrahMenu?.paragraph ?? null;
+
+        if (activeParagraph && offset != null && offset >= activeParagraph.paragraphStart && offset <= activeParagraph.paragraphEnd) {
+            return activeParagraph;
+        }
+
+        if (activeParagraph && offset == null) {
+            return activeParagraph;
+        }
+
+        if (offset == null) {
+            return null;
+        }
+
+        return [...this._docEventManagerService.paragraphBounds.values()]
+            .find((paragraph) => offset >= paragraph.paragraphStart && offset <= paragraph.paragraphEnd)
+            ?? null;
+    }
+
+    private _getSlashMenuAnchorRect(config: IEditorInputConfig, paragraph: IMutiPageParagraphBound): IBoundRectNoAngle {
+        const activeRange = this._getCollapsedTextRange(config);
+        if (!activeRange) {
+            return paragraph.firstLine;
+        }
+
+        try {
+            return calcDocRangePositions({
+                ...activeRange,
+                collapsed: true,
+                endOffset: activeRange.startOffset,
+            }, this._context as never)?.[0] ?? paragraph.firstLine;
+        } catch {
+            // Unit tests and lightweight render contexts may not include the full skeleton/render stack.
+            return paragraph.firstLine;
+        }
     }
 
     showParagraphMenu(paragraph: IMutiPageParagraphBound) {
@@ -262,6 +410,11 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
                 componentKey: 'doc.paragraph.menu',
                 direction: 'left-center',
                 onClickOutside: () => {
+                    if (this._isSlashMenuActive) {
+                        this.hideParagraphMenu(true);
+                        return;
+                    }
+
                     this._docSelectionManagerService.textSelection$.pipe(first()).subscribe(() => {
                         if (!this._isCursorInActiveParagraph()) {
                             this.hideParagraphMenu(true);
@@ -401,6 +554,8 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
         if (this._paragrahMenu && ((this._paragrahMenu.disposable.canDispose() || force))) {
             this._paragrahMenu.disposable.dispose();
             this._paragrahMenu = null;
+            this._isSlashMenuActive = false;
+            this._slashMenuRequest$.next(null);
             this._activeTarget$.next(null);
         }
     }

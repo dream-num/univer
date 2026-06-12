@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DOC_CONTENT_INSERT_MENU_ID, EMPTY_PARAGRAPH_MENU_ID, INSERT_BELLOW_MENU_ID } from '@univerjs/docs-ui';
+import { DOC_CONTENT_INSERT_MENU_ID, DOC_PARAGRAPH_T_INSERT_BELOW_MENU_ID, DOC_PARAGRAPH_T_INSERT_MENU_ID, EMPTY_PARAGRAPH_MENU_ID, INSERT_BELLOW_MENU_ID } from '@univerjs/docs-ui';
 import { ContextMenuGroup, ContextMenuPosition } from '@univerjs/ui';
 import { describe, expect, it } from 'vitest';
 import { InsertDocImageCommand } from '../../commands/commands/insert-image.command';
@@ -33,6 +33,8 @@ describe('docs drawing menu schema', () => {
         expect(paragraph[ContextMenuGroup.LAYOUT][INSERT_BELLOW_MENU_ID][InsertDocImageCommand.id].menuItemFactory).toBeDefined();
         expect(paragraph[EMPTY_PARAGRAPH_MENU_ID][ContextMenuGroup.LAYOUT][InsertDocImageCommand.id].menuItemFactory).toBeDefined();
         expect(paragraph[DOC_CONTENT_INSERT_MENU_ID][ContextMenuGroup.LAYOUT][InsertDocImageCommand.id].menuItemFactory).toBeDefined();
+        expect(paragraph[DOC_PARAGRAPH_T_INSERT_MENU_ID].insert[InsertDocImageCommand.id].menuItemFactory).toBeDefined();
+        expect(paragraph[DOC_PARAGRAPH_T_INSERT_BELOW_MENU_ID].insert[`${InsertDocImageCommand.id}.below`].menuItemFactory).toBeDefined();
     });
 
     it('uses the same image icon in paragraph insert menus', () => {
@@ -46,6 +48,8 @@ describe('docs drawing menu schema', () => {
         const rootShapeMenu = paragraph[DOCS_SHAPE_MENU_ID].shapes;
         const belowShapeMenu = paragraph[DOCS_SHAPE_BELOW_MENU_ID].shapes;
 
+        expect(paragraph[DOC_PARAGRAPH_T_INSERT_MENU_ID].insert[DOCS_SHAPE_MENU_ID].menuItemFactory).toBeDefined();
+        expect(paragraph[DOC_PARAGRAPH_T_INSERT_BELOW_MENU_ID].insert[DOCS_SHAPE_BELOW_MENU_ID].menuItemFactory).toBeDefined();
         expect(rootShapeMenu[InsertDocRectangleShapeCommand.id].menuItemFactory).toBeDefined();
         expect(rootShapeMenu[InsertDocEllipseShapeCommand.id].menuItemFactory).toBeDefined();
         expect(belowShapeMenu[`${InsertDocRectangleShapeCommand.id}.below`].menuItemFactory).toBeDefined();

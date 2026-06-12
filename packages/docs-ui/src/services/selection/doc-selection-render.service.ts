@@ -50,6 +50,7 @@ import {
     serializeTextRange,
 } from './selection-utils';
 import { TextRange } from './text-range';
+import { getWordBoundaryByIndex } from './word-boundary';
 
 export interface IEditorInputConfig {
     event: Event | CompositionEvent | KeyboardEvent;
@@ -420,30 +421,15 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
             return;
         }
 
-        // Create a locale-specific word segmenter
-        const segmenter = new Intl.Segmenter(undefined, { granularity: 'word' });
-        const segments = segmenter.segment(content);
+        const wordBoundary = getWordBoundaryByIndex(content, nodeIndex, st);
 
-        let startOffset = Number.NEGATIVE_INFINITY;
-        let endOffset = Number.NEGATIVE_INFINITY;
-
-        // Use that for segmentation
-        for (const { segment, index, isWordLike } of segments) {
-            if (index <= nodeIndex && nodeIndex < index + segment.length && isWordLike) {
-                startOffset = index + st;
-                endOffset = index + st + segment.length;
-
-                break;
-            }
-        }
-
-        if (Number.isFinite(startOffset) && Number.isFinite(endOffset)) {
+        if (wordBoundary != null) {
             this.removeAllRanges();
 
             const textRanges = [
                 {
-                    startOffset,
-                    endOffset,
+                    startOffset: wordBoundary.startOffset,
+                    endOffset: wordBoundary.endOffset,
                 },
             ];
 

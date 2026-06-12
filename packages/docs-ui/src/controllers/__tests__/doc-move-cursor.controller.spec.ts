@@ -1,0 +1,126 @@
+/**
+ * Copyright 2023-present DreamNum Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { DataStreamTreeTokenType, Direction } from '@univerjs/core';
+import { describe, expect, it, vi } from 'vitest';
+import { DocMoveCursorController } from '../doc-move-cursor.controller';
+
+function createControllerHarness() {
+    return Object.create(DocMoveCursorController.prototype) as Record<string, (...args: unknown[]) => unknown>;
+}
+
+describe('DocMoveCursorController movement helpers', () => {
+    it('resolves Chinese word boundaries with the shared Segmenter behavior', () => {
+        const controller = createControllerHarness();
+        const line = { paragraphIndex: 0, st: 10, divides: [] as unknown[], parent: null as unknown };
+        const column = { lines: [line] };
+        line.parent = column;
+
+        const glyphs = ['中', '文', '测', '试'].map((content) => ({
+            count: 1,
+            content,
+            streamType: DataStreamTreeTokenType.LETTER,
+        }));
+        const divide = { st: 10, glyphGroup: glyphs, parent: line };
+        line.divides = [divide];
+        glyphs.forEach((glyph) => {
+            Object.assign(glyph, { parent: divide });
+        });
+
+        const skeleton = {
+            findNodeByCharIndex: vi.fn(() => glyphs[1]),
+        };
+
+        expect(controller._getWordBoundaryOffset(skeleton, 11, Direction.RIGHT, '', -1, 100)).toBe(12);
+        expect(controller._getWordBoundaryOffset(skeleton, 13, Direction.LEFT, '', -1, 100)).toBe(12);
+    });
+
+    it('resolves visual line start and end from skeleton glyph positions', () => {
+        const controller = createControllerHarness();
+        const firstGlyph = {
+            count: 1,
+            content: 'A',
+            streamType: DataStreamTreeTokenType.LETTER,
+        };
+        const paragraphGlyph = {
+            count: 1,
+            content: '\r',
+            streamType: DataStreamTreeTokenType.PARAGRAPH,
+        };
+        const lastGlyph = {
+            count: 1,
+            content: 'B',
+            streamType: DataStreamTreeTokenType.LETTER,
+        };
+        const line = { divides: [] as unknown[] };
+        const divide = { st: 5, glyphGroup: [firstGlyph, lastGlyph, paragraphGlyph], parent: line };
+        line.divides = [divide];
+        [firstGlyph, lastGlyph, paragraphGlyph].forEach((glyph) => {
+            Object.assign(glyph, { parent: divide });
+        });
+
+        const skeleton = {
+            findNodeByCharIndex: vi.fn(() => lastGlyph),
+            findPositionByGlyph: vi.fn((glyph) => ({ glyph: glyph === firstGlyph ? 0 : 1 })),
+            findCharIndexByPosition: vi.fn((position) => position.isBack ? 5 : 7),
+        };
+
+        expect(controller._getLineBoundaryOffset(skeleton, 6, Direction.LEFT, '', -1, 100)).toBe(5);
+        expect(controller._getLineBoundaryOffset(skeleton, 6, Direction.RIGHT, '', -1, 100)).toBe(7);
+    });
+
+    it('ignores block range boundary glyphs when matching vertical cursor position', () => {
+        const controller = createControllerHarness();
+        const firstGlyph = {
+            count: 1,
+            content: 'A',
+            left: 0,
+            streamType: DataStreamTreeTokenType.LETTER,
+        };
+        const lastTextGlyph = {
+            count: 1,
+            content: 'B',
+            left: 20,
+            streamType: DataStreamTreeTokenType.LETTER,
+        };
+        const blockEndGlyph = {
+            count: 1,
+            content: DataStreamTreeTokenType.BLOCK_END,
+            left: 88,
+            streamType: DataStreamTreeTokenType.BLOCK_END,
+        };
+        const line = { divides: [] as unknown[] };
+        const divide = { left: 0, glyphGroup: [firstGlyph, lastTextGlyph, blockEndGlyph], parent: line };
+        line.divides = [divide];
+        [firstGlyph, lastTextGlyph, blockEndGlyph].forEach((glyph) => {
+            Object.assign(glyph, { parent: divide });
+        });
+
+        const skeleton = {
+            findPositionByGlyph: vi.fn((glyph) => ({ glyph: glyph === lastTextGlyph ? 1 : -1 })),
+        };
+
+        expect(controller._matchPositionByLeftOffset(skeleton, line, 90, { segmentPage: -1 })).toEqual({ glyph: 1 });
+        expect(skeleton.findPositionByGlyph).toHaveBeenCalledWith(lastTextGlyph, -1);
+    });
+
+    it('resolves document start and end offsets', () => {
+        const controller = createControllerHarness();
+
+        expect(controller._getCursorOffsetByGranularity({}, 8, Direction.UP, 'document', '', -1, 20)).toBe(0);
+        expect(controller._getCursorOffsetByGranularity({}, 8, Direction.DOWN, 'document', '', -1, 20)).toBe(18);
+    });
+});

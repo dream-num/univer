@@ -14,36 +14,54 @@
  * limitations under the License.
  */
 
-import { render } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { DesignTinyMenuGroup } from '../DesignTinyMenuGroup';
 
 describe('DesignTinyMenuGroup', () => {
-    it('uses a tighter compact footprint for paragraph T color swatches', () => {
-        const Icon = ({ className }: { className?: string }) => React.createElement('span', { 'data-testid': 'swatch-icon', className });
+    it('renders quick icon items as focusable menu buttons', () => {
+        const onClick = vi.fn();
+        const Icon = () => <span data-testid="quick-icon" />;
+
+        render(
+            <DesignTinyMenuGroup
+                items={[{
+                    key: 'h1',
+                    Icon,
+                    className: '',
+                    onClick,
+                    tooltip: 'Heading 1',
+                }]}
+                columns={6}
+                sizeVariant="paragraph-t"
+            />
+        );
+
+        const button = screen.getByRole('button', { name: 'Heading 1' });
+        button.focus();
+        fireEvent.click(button);
+
+        expect(document.activeElement).toBe(button);
+        expect(button.getAttribute('title')).toBeNull();
+        expect(onClick).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps native titles for default tiny menus', () => {
+        const Icon = () => <span data-testid="quick-icon" />;
+
         const { container } = render(
             <DesignTinyMenuGroup
-                columns={8}
-                sizeVariant="paragraph-t"
-                layoutVariant="compact"
                 items={[{
-                    key: 'swatch',
-                    onClick: () => {},
-                    className: '',
+                    key: 'h1',
                     Icon,
+                    className: '',
+                    onClick: vi.fn(),
+                    tooltip: 'Heading 1',
                 }]}
             />
         );
 
-        const group = container.firstChild as HTMLDivElement | null;
-        const button = group?.querySelector('div');
-        const icon = group?.querySelector('[data-testid="swatch-icon"]');
-
-        expect(group?.className ?? '').toContain('univer-gap-0.5');
-        expect(group?.className ?? '').toContain('univer-p-0');
-        expect(button?.className ?? '').toContain('univer-size-6');
-        expect(button?.className ?? '').toContain('univer-rounded-sm');
-        expect(icon?.className ?? '').toContain('univer-size-5');
+        expect(container.querySelector('button')?.getAttribute('title')).toBe('Heading 1');
     });
 });

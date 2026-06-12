@@ -61,6 +61,9 @@ export class DocInputController extends Disposable implements IRenderModule {
             const { event, content = '', activeRange } = config;
 
             const e = event as InputEvent;
+            if (e.defaultPrevented) {
+                return;
+            }
 
             const skeleton = this._docSkeletonManagerService.getSkeleton();
 

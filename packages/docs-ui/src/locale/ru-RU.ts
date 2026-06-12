@@ -76,6 +76,15 @@ const locale: typeof enUS = {
             closeHeaderFooter: 'Закрыть верхний и нижний колонтитулы',
             disableText: 'Настройки верхнего и нижнего колонтитулов отключены',
         },
+        placeholder: {
+            heading1: 'Heading 1',
+            heading2: 'Heading 2',
+            heading3: 'Heading 3',
+            heading4: 'Heading 4',
+            heading5: 'Heading 5',
+            normalText: 'Type text or press "/" for commands',
+            listItem: 'Item',
+        },
         doc: {
             menu: {
                 paragraphSetting: 'Настройка абзаца',

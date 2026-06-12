@@ -76,6 +76,15 @@ const locale: typeof enUS = {
             closeHeaderFooter: 'Fechar cabeçalho e rodapé',
             disableText: 'As configurações de cabeçalho e rodapé estão desativadas',
         },
+        placeholder: {
+            heading1: 'Heading 1',
+            heading2: 'Heading 2',
+            heading3: 'Heading 3',
+            heading4: 'Heading 4',
+            heading5: 'Heading 5',
+            normalText: 'Type text or press "/" for commands',
+            listItem: 'Item',
+        },
         doc: {
             menu: {
                 paragraphSetting: 'Configurações de parágrafo',

@@ -110,6 +110,7 @@ import { DocEditorBridgeController } from './controllers/render-controllers/doc-
 import { DocIMEInputController } from './controllers/render-controllers/doc-ime-input.controller';
 import { DocInputController } from './controllers/render-controllers/doc-input.controller';
 import { DocResizeRenderController } from './controllers/render-controllers/doc-resize.render-controller';
+import { DocParagraphPlaceholderRenderController } from './controllers/render-controllers/doc-paragraph-placeholder.render-controller';
 import { DocSelectionRenderController } from './controllers/render-controllers/doc-selection-render.controller';
 import { DocRenderController } from './controllers/render-controllers/doc.render-controller';
 import { DocZoomRenderController } from './controllers/render-controllers/zoom.render-controller';
@@ -127,19 +128,32 @@ import { DocsRenderService } from './services/docs-render.service';
 import { EditorService, IEditorService } from './services/editor/editor-manager.service';
 import { DocFloatMenuService } from './services/float-menu.service';
 import { DocSelectionRenderService } from './services/selection/doc-selection-render.service';
-import { BreakLineShortcut, DeleteLeftShortcut, DeleteRightShortcut } from './shortcuts/core-editing.shortcut';
+import { BreakLineShortcut, DeleteLeftShortcut, DeleteRightShortcut, SoftBreakLineShortcut } from './shortcuts/core-editing.shortcut';
 import {
+    MoveCursorDocumentEndShortcut,
+    MoveCursorDocumentStartShortcut,
     MoveCursorDownShortcut,
     MoveCursorLeftShortcut,
+    MoveCursorLineEndShortcut,
+    MoveCursorLineStartShortcut,
     MoveCursorRightShortcut,
     MoveCursorUpShortcut,
+    MoveCursorWordLeftShortcut,
+    MoveCursorWordRightShortcut,
+    MoveSelectionDocumentEndShortcut,
+    MoveSelectionDocumentStartShortcut,
     MoveSelectionDownShortcut,
     MoveSelectionLeftShortcut,
+    MoveSelectionLineEndShortcut,
+    MoveSelectionLineStartShortcut,
     MoveSelectionRightShortcut,
     MoveSelectionUpShortcut,
+    MoveSelectionWordLeftShortcut,
+    MoveSelectionWordRightShortcut,
     SelectAllShortcut,
 } from './shortcuts/cursor.shortcut';
 import { ShiftTabShortCut } from './shortcuts/format.shortcut';
+import { H1HeadingShortcut, H2HeadingShortcut, H3HeadingShortcut, H4HeadingShortcut, H5HeadingShortcut, NormalTextHeadingShortcut } from './shortcuts/heading.shortcut';
 
 @DependentOn(UniverRenderEnginePlugin)
 export class UniverDocsUIPlugin extends Plugin {
@@ -303,11 +317,30 @@ export class UniverDocsUIPlugin extends Plugin {
             MoveSelectionDownShortcut,
             MoveSelectionLeftShortcut,
             MoveSelectionRightShortcut,
+            MoveCursorLineStartShortcut,
+            MoveCursorLineEndShortcut,
+            MoveSelectionLineStartShortcut,
+            MoveSelectionLineEndShortcut,
+            MoveCursorDocumentStartShortcut,
+            MoveCursorDocumentEndShortcut,
+            MoveSelectionDocumentStartShortcut,
+            MoveSelectionDocumentEndShortcut,
+            MoveCursorWordLeftShortcut,
+            MoveCursorWordRightShortcut,
+            MoveSelectionWordLeftShortcut,
+            MoveSelectionWordRightShortcut,
             SelectAllShortcut,
             DeleteLeftShortcut,
             DeleteRightShortcut,
             BreakLineShortcut,
+            SoftBreakLineShortcut,
             ShiftTabShortCut,
+            NormalTextHeadingShortcut,
+            H1HeadingShortcut,
+            H2HeadingShortcut,
+            H3HeadingShortcut,
+            H4HeadingShortcut,
+            H5HeadingShortcut,
         ].forEach((shortcut) => {
             this._injector.get(IShortcutService).registerShortcut(shortcut);
         });
@@ -374,6 +407,7 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocSelectionRenderController],
             [DocHeaderFooterController],
             [DocResizeRenderController],
+            [DocParagraphPlaceholderRenderController],
             [DocContextMenuRenderController],
             [DocChecklistRenderController],
             [DocClipboardController],

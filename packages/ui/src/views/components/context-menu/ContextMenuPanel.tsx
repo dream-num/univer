@@ -52,6 +52,8 @@ interface IContextMenuPanelProps {
     autoFocusTarget?: ContextMenuAutoFocusTarget;
     suppressHoverUntilPointerMove?: boolean;
     onCancel?: () => void;
+    onMenuPointerEnter?: () => void;
+    onMenuPointerLeave?: () => void;
     onOptionSelect?: (option: IValueOption) => void;
 }
 
@@ -59,11 +61,14 @@ interface IContextMenuMenuProps {
     menuSchemas: IMenuSchema[];
     menuSessionVersion: number;
     submenuPortalContainer: HTMLElement | null;
+    rootMenuElement: HTMLElement | null;
     maxMenuHeight: number;
     activeItemIds?: string[];
     hiddenItemIds?: string[];
     hoverSuppressed?: boolean;
     sizeVariant: ContextMenuSizeVariant;
+    onMenuPointerEnter?: () => void;
+    onMenuPointerLeave?: () => void;
     onOptionSelect?: (option: IValueOption) => void;
 }
 
@@ -72,6 +77,7 @@ interface IContextMenuMenuItemProps {
     menuItem: IDisplayMenuItem<IMenuItem>;
     menuSessionVersion: number;
     submenuPortalContainer: HTMLElement | null;
+    rootMenuElement: HTMLElement | null;
     maxMenuHeight: number;
     activeSubmenuKey: string | null;
     setActiveSubmenuKey: Dispatch<SetStateAction<string | null>>;
@@ -81,6 +87,8 @@ interface IContextMenuMenuItemProps {
     compact?: boolean;
     headerAction?: boolean;
     sizeVariant: ContextMenuSizeVariant;
+    onMenuPointerEnter?: () => void;
+    onMenuPointerLeave?: () => void;
     onOptionSelect?: (option: IValueOption) => void;
 }
 
@@ -392,6 +400,22 @@ export function getContextMenuQuickGroupColumns(menuSchema: IMenuSchema): number
     return undefined;
 }
 
+function isContextMenuPointerLeaveTarget(
+    nextTarget: Node | null,
+    owningMenuItemElement: HTMLElement | null,
+    rootMenuElement: HTMLElement | null
+) {
+    if (!nextTarget) {
+        return true;
+    }
+
+    if (owningMenuItemElement?.contains(nextTarget) || rootMenuElement?.contains(nextTarget)) {
+        return false;
+    }
+
+    return true;
+}
+
 function getContextMenuContentClassName(sizeVariant: ContextMenuSizeVariant) {
     return contextMenuContentVariants({ sizeVariant });
 }
@@ -628,6 +652,8 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
         autoFocusTarget = 'first-item',
         suppressHoverUntilPointerMove = false,
         onCancel,
+        onMenuPointerEnter,
+        onMenuPointerLeave,
         onOptionSelect,
     } = props;
     const menuManagerService = useDependency(IMenuManagerService);
@@ -783,10 +809,13 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
                 menuSchemas={menuItems}
                 menuSessionVersion={menuSessionVersion}
                 submenuPortalContainer={submenuPortalContainer}
+                rootMenuElement={menuElement}
                 activeItemIds={activeItemIds}
                 hiddenItemIds={hiddenItemIds}
                 hoverSuppressed={hoverSuppressed}
                 sizeVariant={sizeVariant}
+                onMenuPointerEnter={onMenuPointerEnter}
+                onMenuPointerLeave={onMenuPointerLeave}
                 onOptionSelect={onOptionSelect}
                 maxMenuHeight={maxMenuHeight}
             />
@@ -795,7 +824,7 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
 }
 
 function ContextMenuMenu(props: IContextMenuMenuProps) {
-    const { menuSchemas, menuSessionVersion, submenuPortalContainer, activeItemIds, hiddenItemIds, hoverSuppressed, sizeVariant, onOptionSelect, maxMenuHeight } = props;
+    const { menuSchemas, menuSessionVersion, submenuPortalContainer, rootMenuElement, activeItemIds, hiddenItemIds, hoverSuppressed, sizeVariant, onMenuPointerEnter, onMenuPointerLeave, onOptionSelect, maxMenuHeight } = props;
     const localeService = useDependency(LocaleService);
     const hiddenGroupStates = useContextGroupHiddenStates(menuSchemas);
     const [activeSubmenuKey, setActiveSubmenuKey] = useState<string | null>(null);
@@ -896,6 +925,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                             menuItem={menuSchema.item as IDisplayMenuItem<IMenuItem>}
                             menuSessionVersion={menuSessionVersion}
                             submenuPortalContainer={submenuPortalContainer}
+                            rootMenuElement={rootMenuElement}
                             activeSubmenuKey={activeSubmenuKey}
                             setActiveSubmenuKey={setActiveSubmenuKey}
                             onOptionSelect={onOptionSelect}
@@ -903,6 +933,8 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                             hiddenItemIds={hiddenItemIds}
                             hoverSuppressed={hoverSuppressed}
                             sizeVariant={sizeVariant}
+                            onMenuPointerEnter={onMenuPointerEnter}
+                            onMenuPointerLeave={onMenuPointerLeave}
                         />
                     );
                 }
@@ -934,11 +966,14 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                                         menuItem={childSchema.item as IDisplayMenuItem<IMenuItem>}
                                         menuSessionVersion={menuSessionVersion}
                                         submenuPortalContainer={submenuPortalContainer}
+                                        rootMenuElement={rootMenuElement}
                                         activeSubmenuKey={activeSubmenuKey}
                                         setActiveSubmenuKey={setActiveSubmenuKey}
                                         activeItemIds={activeItemIds}
                                         hiddenItemIds={hiddenItemIds}
                                         hoverSuppressed={hoverSuppressed}
+                                        onMenuPointerEnter={onMenuPointerEnter}
+                                        onMenuPointerLeave={onMenuPointerLeave}
                                         onOptionSelect={onOptionSelect}
                                         maxMenuHeight={maxMenuHeight}
                                         compact
@@ -967,11 +1002,14 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                                     menuItem={childSchema.item as IDisplayMenuItem<IMenuItem>}
                                     menuSessionVersion={menuSessionVersion}
                                     submenuPortalContainer={submenuPortalContainer}
+                                    rootMenuElement={rootMenuElement}
                                     activeSubmenuKey={activeSubmenuKey}
                                     setActiveSubmenuKey={setActiveSubmenuKey}
                                     activeItemIds={activeItemIds}
                                     hiddenItemIds={hiddenItemIds}
                                     hoverSuppressed={hoverSuppressed}
+                                    onMenuPointerEnter={onMenuPointerEnter}
+                                    onMenuPointerLeave={onMenuPointerLeave}
                                     onOptionSelect={onOptionSelect}
                                     maxMenuHeight={maxMenuHeight}
                                     sizeVariant={sizeVariant}
@@ -1009,6 +1047,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                     menuItem={menuSchema.headerActionItem as IDisplayMenuItem<IMenuItem>}
                     menuSessionVersion={menuSessionVersion}
                     submenuPortalContainer={submenuPortalContainer}
+                    rootMenuElement={rootMenuElement}
                     activeSubmenuKey={activeSubmenuKey}
                     setActiveSubmenuKey={setActiveSubmenuKey}
                     activeItemIds={activeItemIds}
@@ -1017,6 +1056,8 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                     compact
                     headerAction
                     sizeVariant={sizeVariant}
+                    onMenuPointerEnter={onMenuPointerEnter}
+                    onMenuPointerLeave={onMenuPointerLeave}
                     onOptionSelect={onOptionSelect}
                     maxMenuHeight={maxMenuHeight}
                 />
@@ -1031,6 +1072,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
         menuItem,
         menuSessionVersion,
         submenuPortalContainer,
+        rootMenuElement,
         maxMenuHeight,
         activeSubmenuKey,
         setActiveSubmenuKey,
@@ -1040,6 +1082,8 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
         compact = false,
         headerAction = false,
         sizeVariant,
+        onMenuPointerEnter,
+        onMenuPointerLeave,
         onOptionSelect,
     } = props;
     const localeService = useDependency(LocaleService);
@@ -1217,6 +1261,11 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                 if (hasSubmenu && !disabled && !hoverSuppressed) {
                     setSubmenuPositionReady(false);
                     setActiveSubmenuKey(menuKey);
+                    return;
+                }
+
+                if (!hasSubmenu && !hoverSuppressed) {
+                    setActiveSubmenuKey(null);
                 }
             }}
             onMouseLeave={(event) => {
@@ -1324,7 +1373,10 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                                 visibility: submenuPositionReady ? 'visible' : 'hidden',
                                 pointerEvents: submenuPositionReady ? 'auto' : 'none',
                             }}
-                            onMouseEnter={clearSubmenuCloseTimer}
+                            onMouseEnter={() => {
+                                clearSubmenuCloseTimer();
+                                onMenuPointerEnter?.();
+                            }}
                             onMouseLeave={(event) => {
                                 const nextTarget = event.relatedTarget as Node | null;
                                 if (nextTarget && menuItemElementRef.current?.contains(nextTarget)) {
@@ -1332,6 +1384,9 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                                 }
 
                                 scheduleSubmenuClose();
+                                if (isContextMenuPointerLeaveTarget(nextTarget, menuItemElementRef.current, rootMenuElement)) {
+                                    onMenuPointerLeave?.();
+                                }
                             }}
                             onWheel={(event) => event.stopPropagation()}
                         >
@@ -1453,10 +1508,13 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                                         menuSchemas={subMenuItems}
                                         menuSessionVersion={menuSessionVersion}
                                         submenuPortalContainer={submenuPortalContainer}
+                                        rootMenuElement={rootMenuElement}
                                         activeItemIds={activeItemIds}
                                         hiddenItemIds={hiddenItemIds}
                                         hoverSuppressed={hoverSuppressed}
                                         sizeVariant={sizeVariant}
+                                        onMenuPointerEnter={onMenuPointerEnter}
+                                        onMenuPointerLeave={onMenuPointerLeave}
                                         onOptionSelect={onSubmenuOptionSelect}
                                         maxMenuHeight={maxMenuHeight}
                                     />

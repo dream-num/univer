@@ -20,7 +20,7 @@ import { describe, expect, it } from 'vitest';
 import { DocCopyCurrentParagraphCommand, DocCutCurrentParagraphCommand } from '../../commands/commands/clipboard.command';
 import { DeleteCurrentParagraphCommand } from '../../commands/commands/doc-delete.command';
 import { HorizontalLineCommand, InsertHorizontalLineBellowCommand } from '../../commands/commands/doc-horizontal-line.command';
-import { ResetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand } from '../../commands/commands/inline-format.command';
+import { ResetInlineFormatTextBackgroundColorCommand, ResetInlineFormatTextColorCommand, SetInlineFormatTextColorCommand } from '../../commands/commands/inline-format.command';
 import { BulletListCommand, CheckListCommand, InsertBulletListBellowCommand, InsertCheckListBellowCommand, InsertOrderListBellowCommand, OrderListCommand } from '../../commands/commands/list.command';
 import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignOperationCommand, AlignRightCommand } from '../../commands/commands/paragraph-align.command';
 import { H1HeadingCommand, H2HeadingCommand, H3HeadingCommand, H4HeadingCommand, H5HeadingCommand, NormalTextHeadingCommand, SetParagraphNamedStyleCommand, SubtitleHeadingCommand, TitleHeadingCommand } from '../../commands/commands/set-heading.command';
@@ -49,9 +49,9 @@ import {
     InsertHorizontalLineBellowMenuItemFactory,
     InsertOrderListBellowMenuItemFactory,
     ParagraphMenuBackgroundColorHeaderActionMenuItemFactory,
-    ParagraphMenuDefaultTextColorMenuItemFactory,
     ParagraphMenuInsertBelowHeadingH1MenuItemFactory,
     ParagraphMenuInsertBelowTableMenuItemFactory,
+    ParagraphMenuResetTextColorMenuItemFactory,
     ParagraphMenuTextColorHeaderActionMenuItemFactory,
 } from '../paragraph-menu';
 import { menuSchema } from '../schema';
@@ -311,7 +311,9 @@ describe('docs ui ribbon schema', () => {
         expect(colorsMenu.text.quickLayout).toBe('icon');
         expect(colorsMenu.text.quickColumns).toBe(8);
         expect(colorsMenu.text.quickLayoutVariant).toBe('compact');
-        expect(colorsMenu.text[`${SetInlineFormatTextColorCommand.id}.default`].menuItemFactory).toBe(ParagraphMenuDefaultTextColorMenuItemFactory);
+        expect(colorsMenu.text[`${SetInlineFormatTextColorCommand.id}.default`]).toBeUndefined();
+        expect(colorsMenu.text[ResetInlineFormatTextColorCommand.id].order).toBe(0);
+        expect(colorsMenu.text[ResetInlineFormatTextColorCommand.id].menuItemFactory).toBe(ParagraphMenuResetTextColorMenuItemFactory);
         expect(colorsMenu.backgroundTop.title).toBe('docs-ui.toolbar.fillColor.main');
         expect(colorsMenu.backgroundTop.headerActionMenuItemFactory).toBe(ParagraphMenuBackgroundColorHeaderActionMenuItemFactory);
         expect(colorsMenu.backgroundTop.quickLayout).toBe('icon');

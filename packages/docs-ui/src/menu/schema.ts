@@ -125,7 +125,6 @@ import {
     ParagraphMenuBackgroundColorHeaderActionMenuItemFactory,
     ParagraphMenuBackgroundColorSwatchMenuItemFactories,
     ParagraphMenuColorsSubmenuItemFactory,
-    ParagraphMenuDefaultTextColorMenuItemFactory,
     ParagraphMenuIndentDecreaseMenuItemFactory,
     ParagraphMenuIndentIncreaseMenuItemFactory,
     ParagraphMenuInsertBelowHeadingH1MenuItemFactory,
@@ -818,12 +817,8 @@ export const menuSchema: MenuSchemaType = {
                 quickLayout: 'icon',
                 quickColumns: 8,
                 quickLayoutVariant: 'compact',
-                [`${SetInlineFormatTextColorCommand.id}.default`]: {
-                    order: 0,
-                    menuItemFactory: ParagraphMenuDefaultTextColorMenuItemFactory,
-                },
                 [ResetInlineFormatTextColorCommand.id]: {
-                    order: 8,
+                    order: 0,
                     menuItemFactory: ParagraphMenuResetTextColorMenuItemFactory,
                 },
                 ...ParagraphMenuTextColorSwatchMenuItemFactories,

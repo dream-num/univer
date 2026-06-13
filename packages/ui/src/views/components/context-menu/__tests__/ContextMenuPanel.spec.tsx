@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { LocaleService } from '@univerjs/core';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ILayoutService } from '../../../../services/layout/layout.service';
 import { MenuItemType } from '../../../../services/menu/menu';
 import { IMenuManagerService } from '../../../../services/menu/menu-manager.service';
@@ -34,6 +34,11 @@ import {
 
 const dependencyMap = new Map();
 const tinyMenuGroupSpy = vi.fn();
+
+afterEach(() => {
+    cleanup();
+    vi.useRealTimers();
+});
 
 vi.mock('../../../../utils/di', async () => {
     const ReactModule = await import('react');
@@ -753,5 +758,164 @@ describe('ContextMenuPanel', () => {
         expect(document.querySelectorAll(`[${CONTEXT_MENU_SUBMENU_PORTAL_ATTR}="true"]`)).toHaveLength(1);
 
         vi.useRealTimers();
+    });
+
+    it('closes an open submenu immediately when hovering a plain root menu item', () => {
+        vi.useFakeTimers();
+        dependencyMap.clear();
+
+        dependencyMap.set(IMenuManagerService, {
+            menuChanged$: new BehaviorSubject<void>(undefined),
+            getMenuByPositionKey: vi.fn((key: string) => {
+                if (key === 'submenu-root') {
+                    return [
+                        {
+                            key: 'insert',
+                            order: 0,
+                            item: {
+                                id: 'insert',
+                                type: MenuItemType.SUBITEMS,
+                                title: 'insert',
+                                tooltip: 'insert',
+                            },
+                        },
+                        {
+                            key: 'align',
+                            order: 1,
+                            item: {
+                                id: 'align',
+                                type: MenuItemType.BUTTON,
+                                title: 'align',
+                                tooltip: 'align',
+                            },
+                        },
+                    ];
+                }
+
+                if (key === 'insert') {
+                    return [{
+                        key: 'insert-option',
+                        order: 0,
+                        item: {
+                            id: 'insert-option',
+                            type: MenuItemType.BUTTON,
+                            title: 'insert option',
+                            tooltip: 'insert option',
+                        },
+                    }];
+                }
+
+                return [];
+            }),
+        });
+        dependencyMap.set(ILayoutService, {
+            rootContainerElement: document.body,
+        });
+        dependencyMap.set(LocaleService, {
+            t: (key: string) => key,
+            direction$: new BehaviorSubject<'ltr'>('ltr'),
+        });
+
+        render(<ContextMenuPanel menuType="submenu-root" />);
+
+        const insertButton = document.querySelector('button[title="insert"]') as HTMLButtonElement | null;
+        const alignButton = document.querySelector('button[title="align"]') as HTMLButtonElement | null;
+        expect(insertButton).not.toBeNull();
+        expect(alignButton).not.toBeNull();
+
+        act(() => {
+            fireEvent.mouseEnter(insertButton!.parentElement!);
+        });
+        expect(document.querySelector('button[title="insert option"]')).not.toBeNull();
+
+        act(() => {
+            fireEvent.mouseLeave(insertButton!.parentElement!, { relatedTarget: alignButton });
+            fireEvent.mouseEnter(alignButton!.parentElement!);
+        });
+
+        expect(document.querySelector('button[title="insert option"]')).toBeNull();
+
+        vi.useRealTimers();
+    });
+
+    it('does not report a menu pointer leave when moving from a portal submenu back to the root menu', () => {
+        dependencyMap.clear();
+        const onMenuPointerLeave = vi.fn();
+
+        dependencyMap.set(IMenuManagerService, {
+            menuChanged$: new BehaviorSubject<void>(undefined),
+            getMenuByPositionKey: vi.fn((key: string) => {
+                if (key === 'submenu-root') {
+                    return [
+                        {
+                            key: 'insert',
+                            order: 0,
+                            item: {
+                                id: 'insert',
+                                type: MenuItemType.SUBITEMS,
+                                title: 'insert',
+                                tooltip: 'insert',
+                            },
+                        },
+                        {
+                            key: 'align',
+                            order: 1,
+                            item: {
+                                id: 'align',
+                                type: MenuItemType.BUTTON,
+                                title: 'align',
+                                tooltip: 'align',
+                            },
+                        },
+                    ];
+                }
+
+                if (key === 'insert') {
+                    return [{
+                        key: 'insert-option',
+                        order: 0,
+                        item: {
+                            id: 'insert-option',
+                            type: MenuItemType.BUTTON,
+                            title: 'insert option',
+                            tooltip: 'insert option',
+                        },
+                    }];
+                }
+
+                return [];
+            }),
+        });
+        dependencyMap.set(ILayoutService, {
+            rootContainerElement: document.body,
+        });
+        dependencyMap.set(LocaleService, {
+            t: (key: string) => key,
+            direction$: new BehaviorSubject<'ltr'>('ltr'),
+        });
+
+        render(
+            <ContextMenuPanel
+                menuType="submenu-root"
+                onMenuPointerLeave={onMenuPointerLeave}
+            />
+        );
+
+        const insertButton = document.querySelector('button[title="insert"]') as HTMLButtonElement | null;
+        const alignButton = document.querySelector('button[title="align"]') as HTMLButtonElement | null;
+        expect(insertButton).not.toBeNull();
+        expect(alignButton).not.toBeNull();
+
+        act(() => {
+            fireEvent.mouseEnter(insertButton!.parentElement!);
+        });
+
+        const optionButton = Array.from(document.querySelectorAll<HTMLButtonElement>('button[title="insert option"]')).pop() ?? null;
+        const submenu = optionButton?.closest(`[${CONTEXT_MENU_SUBMENU_PORTAL_ATTR}="true"]`) as HTMLDivElement | null;
+        expect(submenu).not.toBeNull();
+
+        fireEvent.mouseLeave(submenu!, { relatedTarget: alignButton });
+
+        expect(onMenuPointerLeave).not.toHaveBeenCalled();
     });
 });

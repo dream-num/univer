@@ -339,6 +339,59 @@ describe('documents render', () => {
         documents.dispose();
     });
 
+    it('aligns table cell background to precise start and end edges', () => {
+        const skeleton = { getSkeletonData: () => ({ pages: [] }) } as any;
+        const documents = new Documents('docs-background-precision', skeleton, {
+            pageLayoutType: PageLayoutType.VERTICAL,
+            pageMarginLeft: 0,
+            pageMarginTop: 0,
+        });
+        const cell = createPage(DocumentSkeletonPageType.CELL, 'cell-background-precision');
+        cell.marginLeft = 0;
+        cell.marginTop = 0;
+        cell.pageWidth = 10.25;
+        cell.pageHeight = 6.25;
+        const noBorder = { color: { rgb: 'transparent' }, width: { v: 0 } };
+        const row = {
+            cells: [cell],
+            rowSource: {
+                tableCells: [{
+                    backgroundColor: { rgb: '#bf125d' },
+                    borderTop: noBorder,
+                    borderBottom: noBorder,
+                    borderLeft: noBorder,
+                    borderRight: noBorder,
+                }],
+            },
+        } as any;
+        cell.parent = row;
+        (documents as any)._drawLiquid = { x: 0.25, y: 0.25 };
+
+        const ctx = {
+            save: vi.fn(),
+            restore: vi.fn(),
+            getScale: vi.fn(() => ({ scaleX: 2, scaleY: 2 })),
+            fillRect: vi.fn(),
+            fillRectByPrecision: vi.fn(),
+            setLineWidthByPrecision: vi.fn(),
+            beginPath: vi.fn(),
+            moveToByPrecision: vi.fn(),
+            lineToByPrecision: vi.fn(),
+            setLineDash: vi.fn(),
+            stroke: vi.fn(),
+            closePathByEnv: vi.fn(),
+            set fillStyle(_value: string) {},
+            set strokeStyle(_value: string) {},
+        } as any;
+
+        (documents as any)._drawTableCellBordersAndBg(ctx, { marginLeft: 0, marginTop: 0 }, cell);
+
+        expect(ctx.fillRect).toHaveBeenCalledWith(0.5, 0.5, 10, 6);
+        expect(ctx.fillRectByPrecision).not.toHaveBeenCalled();
+
+        documents.dispose();
+    });
+
     it('draws a docs workspace background behind traditional pages', () => {
         const page = createPage(DocumentSkeletonPageType.BODY, '');
         const skeleton = {
@@ -702,6 +755,109 @@ describe('documents render', () => {
         documents.dispose();
     });
 
+    it('batches adjacent table cell backgrounds into a shared path', () => {
+        const bodyPage = createPage(DocumentSkeletonPageType.BODY, '');
+        bodyPage.marginLeft = 0;
+        bodyPage.marginTop = 0;
+        const cells = Array.from({ length: 2 }, (_, index) => {
+            const cell = createPage(DocumentSkeletonPageType.CELL, `background-batch-cell-${index}`);
+            cell.marginLeft = 0;
+            cell.marginTop = 0;
+            cell.pageWidth = 10.25;
+            cell.pageHeight = 6.25;
+            cell.left = index * 10.25;
+            return cell;
+        });
+        const noBorder = { color: { rgb: 'transparent' }, width: { v: 0 } };
+        const row = {
+            cells,
+            index: 0,
+            height: 6.25,
+            top: 0,
+            rowSource: {
+                tableCells: [
+                    {
+                        backgroundColor: { rgb: '#000000' },
+                        borderTop: noBorder,
+                        borderBottom: noBorder,
+                        borderLeft: noBorder,
+                        borderRight: noBorder,
+                    },
+                    {
+                        backgroundColor: { rgb: '#000000' },
+                        borderTop: noBorder,
+                        borderBottom: noBorder,
+                        borderLeft: noBorder,
+                        borderRight: noBorder,
+                    },
+                ],
+            },
+        } as any;
+        const table = {
+            rows: [row],
+            width: 20.5,
+            height: 6.25,
+            top: 0.25,
+            left: 0.25,
+            tableId: 'table-background-batch',
+            tableSource: {},
+            parent: bodyPage,
+        } as any;
+        row.parent = table;
+        cells.forEach((cell) => {
+            cell.parent = row;
+        });
+        bodyPage.skeTables.set('table-background-batch', table);
+
+        const documents = new Documents('docs-background-batch', {
+            getSkeletonData: () => ({ pages: [bodyPage] }),
+        } as any, {
+            pageLayoutType: PageLayoutType.VERTICAL,
+            pageMarginLeft: 0,
+            pageMarginTop: 0,
+        });
+
+        const rects: Array<[number, number, number, number]> = [];
+        const fillStyles: string[] = [];
+        const ctx = {
+            save: vi.fn(),
+            restore: vi.fn(),
+            getScale: vi.fn(() => ({ scaleX: 2, scaleY: 2 })),
+            beginPath: vi.fn(),
+            rect: vi.fn((x: number, y: number, width: number, height: number) => rects.push([x, y, width, height])),
+            fill: vi.fn(),
+            closePath: vi.fn(),
+            set fillStyle(value: string) {
+                fillStyles.push(value);
+            },
+        } as any;
+
+        vi.spyOn(documents as any, '_drawTableCell').mockImplementation(() => {});
+
+        (documents as any)._drawTable(
+            ctx,
+            bodyPage,
+            bodyPage.skeTables,
+            [],
+            null,
+            [],
+            {} as any,
+            0,
+            0,
+            {},
+            { scaleX: 1, scaleY: 1 }
+        );
+
+        expect(fillStyles).toEqual(['#000000']);
+        expect(ctx.fill).toHaveBeenCalledTimes(1);
+        expect(rects).toEqual([
+            [0.5, 0.5, 10, 6],
+            [10.5, 0.5, 10.5, 6],
+        ]);
+
+        documents.dispose();
+    });
+
     it('uses the document unit id to apply table horizontal viewport while drawing', () => {
         const bodyPage = createPage(DocumentSkeletonPageType.BODY, '');
         attachTable(bodyPage);
@@ -737,10 +893,14 @@ describe('documents render', () => {
         const ctx = {
             save: vi.fn(),
             restore: vi.fn(),
+            getScale: vi.fn(() => ({ scaleX: 1, scaleY: 1 })),
             beginPath: vi.fn(),
+            rect: vi.fn(),
+            fill: vi.fn(),
             rectByPrecision: vi.fn(),
             closePath: vi.fn(),
             clip: vi.fn(),
+            set fillStyle(_value: string) {},
         } as any;
 
         const translateCalls: Array<[number | undefined, number | undefined]> = [];
@@ -792,10 +952,14 @@ describe('documents render', () => {
         const ctx = {
             save: vi.fn(),
             restore: vi.fn(),
+            getScale: vi.fn(() => ({ scaleX: 1, scaleY: 1 })),
             beginPath: vi.fn(),
+            rect: vi.fn(),
+            fill: vi.fn(),
             rectByPrecision: vi.fn(),
             closePath: vi.fn(),
             clip: vi.fn(),
+            set fillStyle(_value: string) {},
         } as any;
 
         vi.spyOn(documents as any, '_drawTableCell').mockImplementation(() => {});

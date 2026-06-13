@@ -29,7 +29,7 @@ import { BuiltInUIPart, ComponentManager, connectInjector, ILayoutService, IMenu
 import { CoreHeaderFooterCommand, OpenHeaderFooterPanelCommand } from '../commands/commands/doc-header-footer.command';
 import { SidebarDocHeaderFooterPanelOperation } from '../commands/operations/doc-header-footer-panel.operation';
 import { BULLET_LIST_TYPE_COMPONENT, BulletListTypePicker, ORDER_LIST_TYPE_COMPONENT, OrderListTypePicker } from '../components/list-type-picker';
-import { ParagraphMenu } from '../components/paragraph-menu';
+import { DOC_PARAGRAPH_MENU_COMPONENT_KEY, DOC_TABLE_BLOCK_MENU_COMPONENT_KEY, ParagraphMenu, TableBlockMenu } from '../components/paragraph-menu';
 import { floatToolbarMenuSchema, menuSchema } from '../menu/schema';
 import { DocSelectionRenderService } from '../services/selection/doc-selection-render.service';
 import { TabShortCut } from '../shortcuts/format.shortcut';
@@ -73,7 +73,8 @@ export class DocUIController extends Disposable {
             [BULLET_LIST_TYPE_COMPONENT, BulletListTypePicker],
             [ORDER_LIST_TYPE_COMPONENT, OrderListTypePicker],
             ['TodoListDoubleIcon', TodoListDoubleIcon],
-            ['doc.paragraph.menu', ParagraphMenu],
+            [DOC_PARAGRAPH_MENU_COMPONENT_KEY, ParagraphMenu],
+            [DOC_TABLE_BLOCK_MENU_COMPONENT_KEY, TableBlockMenu],
             ['DeleteIcon', DeleteIcon],
             [PAGE_SETTING_COMPONENT_ID, PageSettings],
             ['DocumentSettingIcon', DocSettingIcon],

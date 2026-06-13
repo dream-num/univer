@@ -24,7 +24,7 @@ import {
     PositionedObjectLayoutType,
     UniverInstanceType,
 } from '@univerjs/core';
-import { borderClassName, clsx, Dropdown, DropdownMenu, Tooltip } from '@univerjs/design';
+import { borderClassName, clsx, Dropdown, DropdownMenu, Separator, Tooltip } from '@univerjs/design';
 import { AutofillDoubleIcon, CropIcon, DeleteIcon, DocSettingIcon, MoreDownIcon, TextWrapShapeIcon } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
 import { useState } from 'react';
@@ -182,17 +182,6 @@ function getWrappingStyle(documentDataModel: DocumentDataModel | undefined, draw
     return TextWrappingStyle.INLINE;
 }
 
-function Divider() {
-    return (
-        <span
-            className="
-              univer-h-5 univer-w-px univer-bg-gray-200
-              dark:!univer-bg-gray-700
-            "
-        />
-    );
-}
-
 function ToolbarGroup(props: { children: ReactNode }) {
     return (
         <div className="univer-flex univer-h-7 univer-items-center univer-gap-1 univer-px-1">
@@ -310,11 +299,31 @@ function DocImageFloatingToolbar(props: IDocImageFloatingToolbarProps) {
     const cropItem = getMenuItem('drawing-ui.image-popup.crop');
     const deleteItem = getMenuItem('drawing-ui.image-popup.delete');
     const wrappingStyleOptions = [
-        { label: localeService.t('drawing-ui.image-text-wrap.inline'), value: TextWrappingStyle.INLINE, icon: <TextWrapShapeIcon /> },
-        { label: localeService.t('drawing-ui.image-text-wrap.square'), value: TextWrappingStyle.WRAP_SQUARE, icon: <TextWrapShapeIcon /> },
-        { label: localeService.t('drawing-ui.image-text-wrap.topAndBottom'), value: TextWrappingStyle.WRAP_TOP_AND_BOTTOM, icon: <TextWrapShapeIcon /> },
-        { label: localeService.t('drawing-ui.image-text-wrap.behindText'), value: TextWrappingStyle.BEHIND_TEXT, icon: <TextWrapShapeIcon /> },
-        { label: localeService.t('drawing-ui.image-text-wrap.inFrontText'), value: TextWrappingStyle.IN_FRONT_OF_TEXT, icon: <TextWrapShapeIcon /> },
+        {
+            label: localeService.t('drawing-ui.image-text-wrap.inline'),
+            value: TextWrappingStyle.INLINE,
+            icon: <TextWrapShapeIcon />,
+        },
+        {
+            label: localeService.t('drawing-ui.image-text-wrap.square'),
+            value: TextWrappingStyle.WRAP_SQUARE,
+            icon: <TextWrapShapeIcon />,
+        },
+        {
+            label: localeService.t('drawing-ui.image-text-wrap.topAndBottom'),
+            value: TextWrappingStyle.WRAP_TOP_AND_BOTTOM,
+            icon: <TextWrapShapeIcon />,
+        },
+        {
+            label: localeService.t('drawing-ui.image-text-wrap.behindText'),
+            value: TextWrappingStyle.BEHIND_TEXT,
+            icon: <TextWrapShapeIcon />,
+        },
+        {
+            label: localeService.t('drawing-ui.image-text-wrap.inFrontText'),
+            value: TextWrappingStyle.IN_FRONT_OF_TEXT,
+            icon: <TextWrapShapeIcon />,
+        },
     ];
 
     const executeMenuItem = (item: IImagePopupMenuItem | undefined) => {
@@ -359,7 +368,7 @@ function DocImageFloatingToolbar(props: IDocImageFloatingToolbarProps) {
                     onChange={updateWrappingStyle}
                 />
             </ToolbarGroup>
-            <Divider />
+            <Separator orientation="vertical" />
             <ToolbarGroup>
                 <ToolbarButton
                     title={editItem ? localeService.t(editItem.label) : localeService.t('drawing-ui.image-popup.edit')}
@@ -379,7 +388,7 @@ function DocImageFloatingToolbar(props: IDocImageFloatingToolbarProps) {
                     <CropIcon />
                 </ToolbarButton>
             </ToolbarGroup>
-            <Divider />
+            <Separator orientation="vertical" />
             <ToolbarGroup>
                 <ToolbarButton
                     title={deleteItem ? localeService.t(deleteItem.label) : localeService.t('drawing-ui.image-popup.delete')}

@@ -82,4 +82,20 @@ describe('DesignTinyMenuGroup', () => {
 
         expect(container.querySelector('[data-color-channel]')?.getAttribute('data-color-channel')).toBe('var(--univer-primary-600)');
     });
+
+    it('defines explicit grid columns for compact quick layouts with custom column counts', () => {
+        const Icon = () => <span data-testid="quick-icon" />;
+        const { container } = render(
+            <DesignTinyMenuGroup
+                items={[
+                    { key: 'black', Icon, className: '', onClick: vi.fn() },
+                    { key: 'red', Icon, className: '', onClick: vi.fn() },
+                ]}
+                columns={8}
+                layoutVariant="compact"
+            />
+        );
+
+        expect((container.firstElementChild as HTMLElement).style.gridTemplateColumns).toBe('repeat(8, max-content)');
+    });
 });

@@ -16,7 +16,7 @@
 
 import type { ComponentType } from 'react';
 import { LocaleService } from '@univerjs/core';
-import { borderBottomClassName, borderClassName, borderRightClassName, clsx } from '@univerjs/design';
+import { borderBottomClassName, borderClassName, borderRightClassName, clsx, resetButtonClassName } from '@univerjs/design';
 import { MoreIcon, MoreLeftIcon, MoreRightIcon } from '@univerjs/icons';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { RibbonPosition } from '../../../services/menu/types';
@@ -31,10 +31,7 @@ interface IMobileRibbonProps {
 }
 
 const toolbarScrollOffset = 168;
-const resetButtonClassName = `
-univer-m-0 univer-flex univer-appearance-none univer-items-center univer-justify-center
-univer-border-0 univer-bg-transparent univer-p-0 univer-leading-none univer-outline-none
-`;
+
 const nestedControlResetClassName = `
 [&_button]:!univer-m-0 [&_button]:!univer-appearance-none [&_button]:!univer-border-0
 [&_button]:!univer-bg-transparent [&_button]:!univer-p-0 [&_button]:!univer-leading-none

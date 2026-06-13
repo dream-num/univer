@@ -16,7 +16,7 @@
 
 import type { ReactNode } from 'react';
 import { HorizontalAlign, LocaleService } from '@univerjs/core';
-import { borderClassName, clsx, InputNumber, Select, Tooltip } from '@univerjs/design';
+import { borderClassName, Button, clsx, InputNumber, Select, Tooltip } from '@univerjs/design';
 import { AlignTextBothIcon, HorizontallyIcon, LeftJustifyingIcon, RightJustifyingIcon } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
 import { useMemo, useRef } from 'react';
@@ -32,8 +32,6 @@ import {
     useFirstParagraphSpaceBelow,
 } from './hook/utils';
 import { getLineSpacingInputConfig, getLineSpacingRuleOptions } from './line-spacing';
-
-const PARAGRAPH_SETTING_CONTROL_CLASS = 'univer-w-full';
 
 const ParagraphSettingSection = (props: {
     title: ReactNode;
@@ -105,7 +103,7 @@ const AutoFocusInputNumber = (props: {
                     }, 30);
                 });
             }}
-            className={clsx(PARAGRAPH_SETTING_CONTROL_CLASS, className)}
+            className={clsx('univer-w-full', className)}
         />
     );
 };
@@ -140,37 +138,33 @@ export function ParagraphSetting() {
             <ParagraphSettingSection title={localeService.t('docs-ui.doc.paragraphSetting.alignment')} first>
                 <div
                     className={clsx(`
-                      univer-grid univer-h-10 univer-grid-cols-4 univer-items-stretch univer-gap-1 univer-rounded-lg
-                      univer-bg-white univer-p-1
+                      univer-flex univer-grid-cols-4 univer-items-center univer-justify-around univer-gap-2
+                      univer-rounded-lg univer-bg-white univer-p-1
                       dark:!univer-bg-gray-900
                     `, borderClassName)}
                 >
                     {alignmentOptions.map((item) => {
                         return (
                             <Tooltip title={item.label} key={item.value} placement="bottom">
-                                <button
-                                    type="button"
-                                    className={clsx(`
-                                      univer-flex univer-h-full univer-w-full univer-cursor-pointer univer-items-center
-                                      univer-justify-center univer-rounded-md univer-border-none univer-bg-transparent
-                                      univer-p-0 univer-text-gray-900 univer-transition-colors
-                                      hover:univer-bg-gray-100
-                                      dark:!univer-text-gray-100
-                                      dark:hover:!univer-bg-gray-700
-                                    `, {
-                                        'univer-bg-gray-200 dark:!univer-bg-gray-700': horizontalAlignValue === item.value,
-                                    })}
-                                    onClick={() => setHorizontalAlign(item.value)}
-                                >
-                                    <span
-                                        className="
-                                          univer-flex univer-size-5 univer-items-center univer-justify-center
-                                          univer-text-lg
-                                        "
+                                <span className="univer-flex univer-w-full univer-items-center univer-justify-center">
+                                    <Button
+                                        type="button"
+                                        variant="text"
+                                        className={clsx({
+                                            '!univer-bg-gray-200 dark:!univer-bg-gray-700': horizontalAlignValue === item.value,
+                                        })}
+                                        onClick={() => setHorizontalAlign(item.value)}
                                     >
-                                        {item.icon}
-                                    </span>
-                                </button>
+                                        <span
+                                            className="
+                                              univer-flex univer-size-5 univer-items-center univer-justify-center
+                                              univer-text-lg
+                                            "
+                                        >
+                                            {item.icon}
+                                        </span>
+                                    </Button>
+                                </span>
                             </Tooltip>
                         );
                     })}
@@ -205,7 +199,7 @@ export function ParagraphSetting() {
                     <ParagraphSettingRow label={localeService.t('docs-ui.doc.paragraphSetting.lineSpace')}>
                         <div className="univer-flex univer-w-full univer-flex-col univer-gap-2">
                             <Select
-                                className={PARAGRAPH_SETTING_CONTROL_CLASS}
+                                className="univer-w-full"
                                 value={`${spacingRule}`}
                                 options={lineSpacingOptions}
                                 onChange={(v) => setSpacingRule(Number(v))}

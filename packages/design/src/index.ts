@@ -77,6 +77,7 @@ export {
     borderTopClassName,
     divideXClassName,
     divideYClassName,
+    resetButtonClassName,
     scrollbarClassName,
 } from './helper/class-utilities';
 export { clsx } from './helper/clsx';

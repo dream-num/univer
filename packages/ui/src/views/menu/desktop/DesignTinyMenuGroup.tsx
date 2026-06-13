@@ -141,6 +141,14 @@ function getTinyMenuVariant(sizeVariant: TinyMenuSizeVariant, layoutVariant: Tin
     return 'default';
 }
 
+function getTinyMenuGridTemplateColumns(columns: number | undefined, variant: TinyMenuVariant) {
+    if (!columns || (columns === 6 && variant !== 'compactParagraph')) {
+        return undefined;
+    }
+
+    return `repeat(${columns}, max-content)`;
+}
+
 export function DesignTinyMenuGroup({
     items,
     columns,
@@ -150,6 +158,7 @@ export function DesignTinyMenuGroup({
 }: ITinyMenuGroupProps) {
     const variant = getTinyMenuVariant(sizeVariant, layoutVariant);
     const isParagraphTVariant = variant !== 'default';
+    const gridTemplateColumns = getTinyMenuGridTemplateColumns(columns, variant);
 
     return (
         <div
@@ -158,8 +167,8 @@ export function DesignTinyMenuGroup({
                 layout: columns ? 'grid' : 'wrap',
                 columnsSix: columns === 6 && variant !== 'compactParagraph',
             })}
-            style={variant === 'compactParagraph' && columns
-                ? { gridTemplateColumns: `repeat(${columns}, max-content)` }
+            style={gridTemplateColumns
+                ? { gridTemplateColumns }
                 : undefined}
         >
             {items.map((item) => {

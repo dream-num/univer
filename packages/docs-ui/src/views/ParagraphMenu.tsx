@@ -56,14 +56,6 @@ import { DocParagraphMenuService } from '../services/doc-paragraph-menu.service'
 
 export { DOC_PARAGRAPH_MENU_COMPONENT_KEY, DOC_TABLE_BLOCK_MENU_COMPONENT_KEY } from './paragraph-menu/component-keys';
 
-export function getParagraphMenuIconSizeClass(iconKey: string): string {
-    return iconKey === 'TextTypeIcon' ? 'univer-size-3' : 'univer-size-4';
-}
-
-export function getParagraphMenuContextMenuSizeVariant(): 'paragraph-t' {
-    return 'paragraph-t';
-}
-
 export function getParagraphMenuPopupDirection(anchorLeft: number, menuWidth = 212, viewportPadding = 8): 'left' | 'right' {
     return anchorLeft - menuWidth < viewportPadding ? 'right' : 'left';
 }
@@ -981,15 +973,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
                     hoverOpenSchedulerRef.current.openNow();
                 }}
             >
-                <TargetIcon
-                    className={clsx(
-                        getParagraphMenuIconSizeClass(targetIconKey),
-                        `
-                          univer-text-gray-700
-                          dark:!univer-text-white
-                        `
-                    )}
-                />
+                <TargetIcon />
                 {currentActiveTarget?.draggable && (
                     <button
                         type="button"
@@ -1123,7 +1107,6 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
                         <ContextMenuPanel
                             className="univer-w-[212px]"
                             menuType={resolvedParagraphMenuType}
-                            sizeVariant={getParagraphMenuContextMenuSizeVariant()}
                             activeItemIds={currentActiveTarget?.kind === 'table' ? undefined : paragraphMenuActiveItemIds}
                             hiddenItemIds={openMode === 'slash' || currentActiveTarget?.kind === 'table' ? undefined : paragraphMenuHiddenItemIds}
                             autoFocus={openMode === 'slash'}

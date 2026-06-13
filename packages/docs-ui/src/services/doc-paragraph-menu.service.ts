@@ -18,11 +18,12 @@ import type { DocumentDataModel, ICustomBlock, ICustomTable, IDocumentBlockRange
 import type { IBoundRectNoAngle, IRenderContext, IRenderModule, ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IMutiPageParagraphBound, ITableBound, ITableParagraphBound } from './doc-event-manager.service';
 import type { IEditorInputConfig } from './selection/doc-selection-render.service';
-import { BlockType, DataStreamTreeTokenType, Disposable, Inject, isInternalEditorID, PresetListType } from '@univerjs/core';
+import { BlockType, DataStreamTreeTokenType, Disposable, DOC_RANGE_TYPE, Inject, isInternalEditorID, PresetListType } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import { DocumentEditArea } from '@univerjs/engine-render';
 import { BehaviorSubject, combineLatest, first, throttleTime } from 'rxjs';
 import { VIEWPORT_KEY } from '../basics/docs-view-key';
+import { DOC_PARAGRAPH_MENU_COMPONENT_KEY, DOC_TABLE_BLOCK_MENU_COMPONENT_KEY } from '../components/paragraph-menu/component-keys';
 import { DocEventManagerService } from './doc-event-manager.service';
 import { calcDocRangePositions, DocCanvasPopManagerService, transformBound2OffsetBound, transformOffset2Bound } from './doc-popup-manager.service';
 import { DocFloatMenuService } from './float-menu.service';
@@ -99,6 +100,18 @@ const LIST_ICON_MAP: Partial<Record<PresetListType, string>> = {
     [PresetListType.CHECK_LIST_CHECKED]: 'TodoListDoubleIcon',
 };
 
+interface IDocSelectionRangeLike {
+    collapsed?: boolean;
+    endOffset?: number;
+    rangeType?: string;
+    startOffset?: number;
+}
+
+interface IDocExpandedSelectionState {
+    hasExpandedTextRange: boolean;
+    hasRectRange: boolean;
+}
+
 export class DocParagraphMenuService extends Disposable implements IRenderModule {
     private _paragrahMenu: {
         paragraph: IMutiPageParagraphBound;
@@ -171,21 +184,74 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
         return true;
     }
 
+    private _getExpandedSelectionState(ranges: readonly IDocSelectionRangeLike[]): IDocExpandedSelectionState {
+        return ranges.reduce<IDocExpandedSelectionState>((state, range) => {
+            if (range.rangeType === DOC_RANGE_TYPE.RECT) {
+                state.hasRectRange = true;
+                return state;
+            }
+
+            if (range.collapsed === false) {
+                state.hasExpandedTextRange = true;
+                return state;
+            }
+
+            if (typeof range.startOffset === 'number' &&
+                typeof range.endOffset === 'number' &&
+                range.endOffset > range.startOffset &&
+                range.collapsed !== true) {
+                state.hasExpandedTextRange = true;
+            }
+
+            return state;
+        }, {
+            hasExpandedTextRange: false,
+            hasRectRange: false,
+        });
+    }
+
+    private _hasExpandedSelectionRanges(ranges: readonly IDocSelectionRangeLike[]) {
+        const state = this._getExpandedSelectionState(ranges);
+        return state.hasExpandedTextRange || state.hasRectRange;
+    }
+
+    private _hasExpandedTextSelection() {
+        return this._getExpandedSelectionState(this._docSelectionManagerService.getDocRanges()).hasExpandedTextRange;
+    }
+
+    private _hasExpandedSelection() {
+        return this._hasExpandedSelectionRanges(this._docSelectionManagerService.getDocRanges());
+    }
+
     setParagraphMenuActive(active: boolean) {
         if (this._paragrahMenu) {
             this._paragrahMenu.active = active;
-            if (!this._isCursorInActiveParagraph()) {
-                this._docSelectionManagerService.replaceDocRanges([{
-                    startOffset: this._paragrahMenu.paragraph.paragraphStart,
-                    endOffset: this._paragrahMenu.paragraph.paragraphStart,
-                }]);
-            }
         }
     }
 
     private _init() {
         const handleHoverTarget = (paragraph: Nullable<IMutiPageParagraphBound>, tableBound: Nullable<ITableBound>) => {
             if (this._isBlockMenuDragging) {
+                return;
+            }
+
+            const selectionState = this._getExpandedSelectionState(this._docSelectionManagerService.getDocRanges());
+            if (selectionState.hasExpandedTextRange) {
+                this.hideParagraphMenu(true);
+                return;
+            }
+
+            if (selectionState.hasRectRange) {
+                if (tableBound) {
+                    this.showTableMenu(tableBound);
+                    return;
+                }
+
+                if (this._paragrahMenu?.target.kind === 'table') {
+                    return;
+                }
+
+                this.hideParagraphMenu(true);
                 return;
             }
 
@@ -225,6 +291,13 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
                     handleHoverTarget(paragraph, table);
                 })
         );
+
+        this.disposeWithMe(this._docSelectionManagerService.textSelection$.subscribe(({ textRanges, rectRanges }) => {
+            const selectionState = this._getExpandedSelectionState([...textRanges, ...rectRanges]);
+            if (selectionState.hasExpandedTextRange || (selectionState.hasRectRange && this._paragrahMenu?.target.kind !== 'table')) {
+                this.hideParagraphMenu(true);
+            }
+        }));
 
         let lastScrollY = 0;
         this.disposeWithMe(this._context.scene.getViewport(VIEWPORT_KEY.VIEW_MAIN)!.onScrollAfter$.subscribeEvent((e) => {
@@ -386,6 +459,11 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
     }
 
     showParagraphMenu(paragraph: IMutiPageParagraphBound) {
+        if (this._hasExpandedSelection()) {
+            this.hideParagraphMenu(true);
+            return;
+        }
+
         const target = this._buildParagraphMenuTarget(paragraph);
         if (!target) {
             this.hideParagraphMenu(true);
@@ -416,7 +494,7 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
         const disposable = this._docPopupManagerService.attachPopupToRect(
             getFirstLine,
             {
-                componentKey: 'doc.paragraph.menu',
+                componentKey: DOC_PARAGRAPH_MENU_COMPONENT_KEY,
                 direction: 'left-center',
                 onClickOutside: () => {
                     if (this._isSlashMenuActive) {
@@ -446,6 +524,11 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
     }
 
     showTableMenu(tableBound: ITableBound) {
+        if (this._hasExpandedTextSelection()) {
+            this.hideParagraphMenu(true);
+            return;
+        }
+
         const body = this._context.unit.getBody();
         const table = body?.tables?.find((item) => item.tableId === tableBound.tableId);
         if (!table) {
@@ -494,7 +577,7 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
         const disposable = this._docPopupManagerService.attachPopupToRect(
             getFirstLine,
             {
-                componentKey: 'doc.paragraph.menu',
+                componentKey: DOC_TABLE_BLOCK_MENU_COMPONENT_KEY,
                 direction: 'top-right',
                 onClickOutside: () => {
                     this.hideParagraphMenu(true);

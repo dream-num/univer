@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, IParagraph, ISectionBreak, ITextRun, IMutationInfo, JSONXActions } from '@univerjs/core';
+import type { ICommand, IMutationInfo, IParagraph, ISectionBreak, ITextRun, JSONXActions } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import { CommandType, createParagraphId, DataStreamTreeTokenType, getRichTextEditPath, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';

@@ -88,7 +88,6 @@ export { SheetPermissionOpenPanelOperation } from './commands/operations/sheet-p
 export { SidebarDefinedNameOperation } from './commands/operations/sidebar-defined-name.operation';
 export { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, RANGE_SELECTOR_COMPONENT_KEY, SHEET_VIEW_KEY } from './common/keys';
 export { getCellRealRange, getViewportByCell } from './common/utils';
-export { useActiveWorkbook, useActiveWorksheet, useWorkbooks } from './components/hook';
 export { type IUniverSheetsUIConfig } from './config/config';
 export { UNIVER_SHEET_PERMISSION_USER_PART } from './consts/permission';
 export { SHEET_UI_PLUGIN_NAME } from './consts/plugin-name';
@@ -160,6 +159,7 @@ export { SheetsRenderService } from './services/sheets-render.service';
 export { IStatusBarService, StatusBarService } from './services/status-bar.service';
 export { calculateDocSkeletonRects, getCustomRangePosition, getEditingCustomRangePosition } from './services/utils/doc-skeleton-util';
 export { useKeyEventConfig } from './views/editor-container';
+export { useActiveWorkbook, useActiveWorksheet, useWorkbooks } from './views/hook';
 export type { IRangeProtectionRenderCellData } from './views/permission/extensions/range-protection.render';
 export { type IPermissionDetailUserPartProps } from './views/permission/panel-detail/PermissionDetailUserPart';
 export { type IBaseSheetBarProps } from './views/sheet-bar/sheet-bar-tabs/SheetBarItem';

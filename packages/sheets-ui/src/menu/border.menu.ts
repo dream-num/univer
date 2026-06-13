@@ -22,7 +22,7 @@ import { BorderStyleManagerService, RangeProtectionPermissionEditPoint, SetBorde
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { combineLatest, map, Observable, startWith } from 'rxjs';
 
-import { BORDER_LINE_CHILDREN, BORDER_PANEL_COMPONENT } from '../components/border-panel/interface';
+import { BORDER_LINE_CHILDREN, BORDER_PANEL_COMPONENT } from '../views/border-panel/interface';
 import { getCurrentRangeDisable$ } from './menu-util';
 
 export function CellBorderSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<IBorderInfo, IBorderInfo> {

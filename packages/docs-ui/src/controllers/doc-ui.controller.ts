@@ -28,8 +28,6 @@ import { DeleteIcon, DocSettingIcon, TodoListDoubleIcon } from '@univerjs/icons'
 import { BuiltInUIPart, ComponentManager, connectInjector, ILayoutService, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 import { CoreHeaderFooterCommand, OpenHeaderFooterPanelCommand } from '../commands/commands/doc-header-footer.command';
 import { SidebarDocHeaderFooterPanelOperation } from '../commands/operations/doc-header-footer-panel.operation';
-import { BULLET_LIST_TYPE_COMPONENT, BulletListTypePicker, ORDER_LIST_TYPE_COMPONENT, OrderListTypePicker } from '../components/list-type-picker';
-import { DOC_PARAGRAPH_MENU_COMPONENT_KEY, DOC_TABLE_BLOCK_MENU_COMPONENT_KEY, ParagraphMenu, TableBlockMenu } from '../components/paragraph-menu';
 import { floatToolbarMenuSchema, menuSchema } from '../menu/schema';
 import { DocSelectionRenderService } from '../services/selection/doc-selection-render.service';
 import { TabShortCut } from '../shortcuts/format.shortcut';
@@ -49,7 +47,9 @@ import {
 } from '../shortcuts/toolbar.shortcut';
 import { DocFooter } from '../views/doc-footer';
 import { DocSideMenu } from '../views/DocSideMenu';
+import { BULLET_LIST_TYPE_COMPONENT, BulletListTypePicker, ORDER_LIST_TYPE_COMPONENT, OrderListTypePicker } from '../views/list-type-picker/index';
 import { PAGE_SETTING_COMPONENT_ID, PageSettings } from '../views/PageSettings';
+import { DOC_PARAGRAPH_MENU_COMPONENT_KEY, DOC_TABLE_BLOCK_MENU_COMPONENT_KEY, ParagraphMenu, TableBlockMenu } from '../views/ParagraphMenu';
 
 export class DocUIController extends Disposable {
     constructor(

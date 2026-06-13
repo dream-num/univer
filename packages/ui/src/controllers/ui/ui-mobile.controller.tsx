@@ -23,21 +23,21 @@ import { Inject, Injector, IUniverInstanceService, LifecycleService, toDisposabl
 import { ColorPicker, render as createRoot, unmount } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ComponentManager } from '../../common';
-import { HEADING_ITEM_COMPONENT, HeadingItem } from '../../components';
-import { COLOR_PICKER_COMPONENT } from '../../components/color-picker/interface';
-import { COMMON_LABEL_COMPONENT, CommonLabel } from '../../components/common-label';
-import { FontFamily, FontFamilyItem } from '../../components/font-family';
-import { FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT } from '../../components/font-family/interface';
-import { FontSize } from '../../components/font-size/FontSize';
-import { FONT_SIZE_COMPONENT } from '../../components/font-size/interface';
 import { menuSchema } from '../../menu/schema';
 import { ILayoutService } from '../../services/layout/layout.service';
 import { IMenuManagerService } from '../../services/menu/menu-manager.service';
 import { BuiltInUIPart, IUIPartsService } from '../../services/parts/parts.service';
 import { connectInjector } from '../../utils/di';
+import { COLOR_PICKER_COMPONENT } from '../../views/color-picker/interface';
+import { COMMON_LABEL_COMPONENT, CommonLabel } from '../../views/CommonLabel';
 import { FloatDom } from '../../views/components/dom/FloatDom';
 import { CanvasPopup } from '../../views/components/popup/CanvasPopup';
 import { MobileRibbon } from '../../views/components/ribbon/MobileRibbon';
+import { FontFamily, FontFamilyItem } from '../../views/font-family/index';
+import { FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT } from '../../views/font-family/interface';
+import { FontSize } from '../../views/font-size/FontSize';
+import { FONT_SIZE_COMPONENT } from '../../views/font-size/interface';
+import { HEADING_ITEM_COMPONENT, HeadingItem } from '../../views/index';
 import { MobileWorkbench } from '../../views/mobile-workbench/MobileWorkbench';
 import { SingleUnitUIController } from './ui-shared.controller';
 

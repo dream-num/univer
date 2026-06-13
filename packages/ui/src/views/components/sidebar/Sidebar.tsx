@@ -15,13 +15,13 @@
  */
 
 import type { CSSProperties, ReactNode } from 'react';
-import type { ICustomLabelProps } from '../../../components/custom-label/CustomLabel';
+import type { ICustomLabelProps } from '../../custom-label/CustomLabel';
 import { borderLeftBottomClassName, clsx, scrollbarClassName } from '@univerjs/design';
 import { CloseIcon } from '@univerjs/icons';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { CustomLabel } from '../../../components/custom-label/CustomLabel';
 import { ISidebarService } from '../../../services/sidebar/sidebar.service';
 import { useDependency, useObservable } from '../../../utils/di';
+import { CustomLabel } from '../../custom-label/CustomLabel';
 
 export interface ISidebarMethodOptions {
     id?: string;

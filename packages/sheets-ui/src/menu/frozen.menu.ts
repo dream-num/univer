@@ -22,7 +22,7 @@ import { CancelFrozenCommand, SheetsSelectionsService } from '@univerjs/sheets';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { combineLatest, map, Observable } from 'rxjs';
 import { SetColumnFrozenCommand, SetFirstColumnFrozenCommand, SetFirstRowFrozenCommand, SetRowFrozenCommand, SetSelectionFrozenCommand } from '../commands/commands/set-frozen.command';
-import { MENU_ITEM_FROZEN_COMPONENT } from '../components/menu-item-frozen';
+import { MENU_ITEM_FROZEN_COMPONENT } from '../views/menu-item-frozen/index';
 
 const getMenuHiddenByCurrentSelectionChangedObservable$ = (accessor: IAccessor, type: 'row' | 'col' | 'all'): Observable<boolean> => {
     const selectionManagerService = accessor.get(SheetsSelectionsService);

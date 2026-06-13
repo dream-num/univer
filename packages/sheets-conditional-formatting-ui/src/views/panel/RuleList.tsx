@@ -37,8 +37,8 @@ import { useHighlightRange } from '@univerjs/sheets-ui';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useMemo, useState } from 'react';
 import { debounceTime, Observable } from 'rxjs';
-import { ConditionalFormattingI18nController } from '../../../controllers/cf.i18n.controller';
-import { Preview } from '../../preview';
+import { ConditionalFormattingI18nController } from '../../controllers/cf.i18n.controller';
+import { Preview } from '../Preview';
 
 interface IRuleListProps {
     onClick: (rule: IConditionFormattingRule) => void;

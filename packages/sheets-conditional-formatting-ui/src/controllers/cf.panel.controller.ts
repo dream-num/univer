@@ -18,7 +18,7 @@ import type { IDisposable } from '@univerjs/core';
 import type { IConditionFormattingRule } from '@univerjs/sheets-conditional-formatting';
 import { Disposable, generateRandomId, Inject, Injector, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { ComponentManager, ISidebarService } from '@univerjs/ui';
-import { ConditionFormattingPanel } from '../components/panel';
+import { ConditionFormattingPanel } from '../views/ConditionFormattingPanel';
 
 const CF_PANEL_KEY = 'sheet.conditional.formatting.panel';
 

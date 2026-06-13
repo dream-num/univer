@@ -34,8 +34,8 @@ import {
 } from '@univerjs/sheets-conditional-formatting';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useMemo, useState } from 'react';
-import { ConditionalStyleEditor } from '../../conditional-style-editor';
-import { Preview } from '../../preview';
+import { ConditionalStyleEditor } from '../../ConditionalStyleEditor';
+import { Preview } from '../../Preview';
 import { WrapperError } from '../../wrapper-error/WrapperError';
 import { previewClassName } from './styles';
 

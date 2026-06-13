@@ -35,7 +35,7 @@ export default function RectSidebar() {
     const pageId = currentSlide?.getActivePage()?.id;
 
     // see packages/sheets-ui/src/views/permission/permission-dialog/index.tsx@SheetPermissionDialog
-    // see packages/sheets-conditional-formatting-ui/src/components/panel/rule-edit/index.tsx@getUnitId
+    // see packages/sheets-conditional-formatting-ui/src/views/panel/rule-edit/index.tsx@getUnitId
     // const unitId = univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_SLIDE)!.getUnitId();
     const unitId = univerInstanceService.getFocusedUnit()?.getUnitId() || '';
 

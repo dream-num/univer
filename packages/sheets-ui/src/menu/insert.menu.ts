@@ -41,7 +41,7 @@ import { MenuItemType } from '@univerjs/ui';
 import { Observable } from 'rxjs';
 import { InsertRangeMoveDownConfirmCommand } from '../commands/commands/insert-range-move-down-confirm.command';
 import { InsertRangeMoveRightConfirmCommand } from '../commands/commands/insert-range-move-right-confirm.command';
-import { MENU_ITEM_INPUT_COMPONENT } from '../components/menu-item-input';
+import { MENU_ITEM_INPUT_COMPONENT } from '../views/menu-item-input/index';
 import { deriveStateFromActiveSheet$, getBaseRangeMenuHidden$, getCellMenuHidden$, getCurrentRangeDisable$, getInsertAfterMenuHidden$, getInsertBeforeMenuHidden$, getObservableWithExclusiveRange$ } from './menu-util';
 
 export const COL_INSERT_MENU_ID = 'sheet.menu.col-insert';

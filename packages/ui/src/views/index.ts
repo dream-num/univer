@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-export * from './common-label';
-export * from './custom-label';
-export * from './heading-item';
+export * from './CommonLabel';
+export * from './custom-label/index';
+export * from './HeadingItem';
 
 export { useScrollYOverContainer } from './hooks/layout';
 
-export { type ISliderProps, Slider } from './slider';
+export { type ISliderProps, Slider } from './slider/index';

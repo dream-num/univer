@@ -24,8 +24,8 @@ import { CFRuleType, CFSubRuleType } from '@univerjs/sheets-conditional-formatti
 import { FormulaEditor } from '@univerjs/sheets-formula-ui';
 import { useDependency, useSidebarClick } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
-import { ConditionalStyleEditor } from '../../conditional-style-editor';
-import { Preview } from '../../preview';
+import { ConditionalStyleEditor } from '../../ConditionalStyleEditor';
+import { Preview } from '../../Preview';
 import { previewClassName } from './styles';
 
 export const FormulaStyleEditor = (props: IStyleEditorProps) => {

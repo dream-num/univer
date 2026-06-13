@@ -15,7 +15,7 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
-import type { INotificationOptions } from '../../components/notification/Notification';
+import type { INotificationOptions } from '../../views/notification/Notification';
 import { createIdentifier } from '@univerjs/core';
 
 export const INotificationService = createIdentifier<INotificationService>('ui.notification.service');

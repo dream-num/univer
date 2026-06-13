@@ -20,7 +20,7 @@ import { clsx } from '@univerjs/design';
 import { BoldIcon, FontColorDoubleIcon, ItalicIcon, StrikethroughIcon, UnderlineIcon } from '@univerjs/icons';
 import { removeUndefinedAttr } from '@univerjs/sheets-conditional-formatting';
 import { useEffect, useState } from 'react';
-import { ColorPicker } from '../color-picker';
+import { ColorPicker } from './ColorPicker';
 
 interface IConditionalStyleEditorProps {
     className?: string;

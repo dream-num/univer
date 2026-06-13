@@ -23,7 +23,7 @@ import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs
 import { DocumentEditArea } from '@univerjs/engine-render';
 import { BehaviorSubject, combineLatest, first, throttleTime } from 'rxjs';
 import { VIEWPORT_KEY } from '../basics/docs-view-key';
-import { DOC_PARAGRAPH_MENU_COMPONENT_KEY, DOC_TABLE_BLOCK_MENU_COMPONENT_KEY } from '../components/paragraph-menu/component-keys';
+import { DOC_PARAGRAPH_MENU_COMPONENT_KEY, DOC_TABLE_BLOCK_MENU_COMPONENT_KEY } from '../views/paragraph-menu/component-keys';
 import { DocEventManagerService } from './doc-event-manager.service';
 import { calcDocRangePositions, DocCanvasPopManagerService, transformBound2OffsetBound, transformOffset2Bound } from './doc-popup-manager.service';
 import { DocFloatMenuService } from './float-menu.service';

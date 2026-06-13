@@ -88,15 +88,15 @@ import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.ope
 import { SheetPermissionOpenDialogOperation } from '../commands/operations/sheet-permission-open-dialog.operation';
 import { SheetPermissionOpenPanelOperation } from '../commands/operations/sheet-permission-open-panel.operation';
 import { SidebarDefinedNameOperation } from '../commands/operations/sidebar-defined-name.operation';
-import { BorderPanel } from '../components/border-panel/BorderPanel';
-import { BORDER_PANEL_COMPONENT } from '../components/border-panel/interface';
-import { MENU_ITEM_FROZEN_COMPONENT, MenuItemFrozen } from '../components/menu-item-frozen';
-import { MENU_ITEM_INPUT_COMPONENT, MenuItemInput } from '../components/menu-item-input';
 import { menuSchema } from '../menu/schema';
+import { BorderPanel } from '../views/border-panel/BorderPanel';
+import { BORDER_PANEL_COMPONENT } from '../views/border-panel/interface';
 import { CELL_POPUP_COMPONENT_KEY } from '../views/cell-popup/config';
 import { CellPopup } from '../views/CellPopup';
 import { DEFINED_NAME_CONTAINER } from '../views/defined-name/component-name';
 import { DefinedNameContainer } from '../views/defined-name/DefinedNameContainer';
+import { MENU_ITEM_FROZEN_COMPONENT, MenuItemFrozen } from '../views/menu-item-frozen/index';
+import { MENU_ITEM_INPUT_COMPONENT, MenuItemInput } from '../views/menu-item-input/index';
 import { RenderSheetContent, RenderSheetFooter, RenderSheetHeader } from '../views/sheet-container/SheetContainer';
 import { CopyDownShortcutItem, CopyRightShortcutItem } from './shortcuts/copy-fill.shortcut';
 import {

@@ -23,9 +23,9 @@ import { ISidebarService } from '@univerjs/ui';
 import { DeleteSlideElementOperation } from '../commands/operations/delete-element.operation';
 import { ToggleSlideEditSidebarOperation } from '../commands/operations/insert-shape.operation';
 import { UpdateSlideElementOperation } from '../commands/operations/update-element.operation';
-import { COMPONENT_SLIDE_IMAGE_POPUP_MENU } from '../components/image-popup-menu/component-name';
 import { CanvasView } from '../controllers/canvas-view';
 import { SlideCanvasPopMangerService } from '../services/slide-popup-manager.service';
+import { COMPONENT_SLIDE_IMAGE_POPUP_MENU } from '../views/image-popup-menu/component-name';
 
 export class SlidePopupMenuController extends RxDisposable {
     private _initImagePopupMenu = new Set<string>();

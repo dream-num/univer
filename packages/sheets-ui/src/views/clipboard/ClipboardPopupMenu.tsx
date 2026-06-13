@@ -23,11 +23,11 @@ import { MoreDownIcon, PasteSpecialDoubleIcon } from '@univerjs/icons';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useState } from 'react';
 import { SheetOptionalPasteCommand } from '../../commands/commands/clipboard.command';
-import { useActiveWorkbook } from '../../components/hook';
 import { getSheetObject } from '../../controllers/utils/component-tools';
 import { ISheetClipboardService, PREDEFINED_HOOK_NAME_PASTE } from '../../services/clipboard/clipboard.service';
 import { ISheetSelectionRenderService } from '../../services/selection/base-selection-render.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
+import { useActiveWorkbook } from '../hook';
 
 const DEFAULT_PADDING = 2;
 

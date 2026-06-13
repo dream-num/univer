@@ -20,8 +20,6 @@ import { MenuItemType } from '@univerjs/ui';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import * as paragraphMenu from '..';
-import { createParagraphMenuHoverOpenScheduler, finishParagraphMenuCommand, getParagraphFormattingRange, getParagraphMenuActiveHeadingCommandId, getParagraphMenuCommand, getParagraphMenuCommandTargetRange, getParagraphMenuHiddenHeadingCommandIds, getParagraphMenuHiddenItemIds, getParagraphMenuIconSizeClass, getParagraphMenuPopupDirection, getParagraphMenuResolvedCommand, getParagraphMenuTargetRange, isEmptyParagraphMenuTarget, PARAGRAPH_MENU_HOVER_OPEN_DELAY, setParagraphMenuInteractionActive, shouldShowParagraphSettingMenu, shouldUseInsertBelowRange } from '..';
 import { HorizontalLineCommand } from '../../../commands/commands/doc-horizontal-line.command';
 import { SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand } from '../../../commands/commands/inline-format.command';
 import { BulletListCommand, InsertBulletListBellowCommand, OrderListCommand } from '../../../commands/commands/list.command';
@@ -50,6 +48,8 @@ import {
     TableBlockDeleteMenuItemFactory,
     TableBlockPasteMenuItemFactory,
 } from '../../../menu/paragraph-menu';
+import * as paragraphMenu from '../../ParagraphMenu';
+import { createParagraphMenuHoverOpenScheduler, finishParagraphMenuCommand, getParagraphFormattingRange, getParagraphMenuActiveHeadingCommandId, getParagraphMenuCommand, getParagraphMenuCommandTargetRange, getParagraphMenuHiddenHeadingCommandIds, getParagraphMenuHiddenItemIds, getParagraphMenuIconSizeClass, getParagraphMenuPopupDirection, getParagraphMenuResolvedCommand, getParagraphMenuTargetRange, isEmptyParagraphMenuTarget, PARAGRAPH_MENU_HOVER_OPEN_DELAY, setParagraphMenuInteractionActive, shouldShowParagraphSettingMenu, shouldUseInsertBelowRange } from '../../ParagraphMenu';
 
 describe('ParagraphMenu', () => {
     afterEach(() => {

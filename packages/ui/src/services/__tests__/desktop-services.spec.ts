@@ -38,7 +38,7 @@ vi.mock('@univerjs/design', async (importOriginal) => {
     };
 });
 
-vi.mock('../../components/notification/Notification', () => ({
+vi.mock('../../views/notification/Notification', () => ({
     Notification: () => null,
     notification: {
         show: vi.fn(),
@@ -169,7 +169,7 @@ describe('DesktopGalleryService', () => {
 });
 
 describe('DesktopNotificationService', async () => {
-    const { notification } = await import('../../components/notification/Notification');
+    const { notification } = await import('../../views/notification/Notification');
 
     it('should register ui part and show notification', () => {
         const uiPartsService = createUiPartsService();

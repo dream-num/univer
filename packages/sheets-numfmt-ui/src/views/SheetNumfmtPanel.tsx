@@ -16,21 +16,21 @@
 
 import type { ISelectProps } from '@univerjs/design';
 import type { FC } from 'react';
-import type { IBusinessComponentProps } from './interface';
+import type { IBusinessComponentProps } from './components/interface';
 import { LocaleService } from '@univerjs/core';
 import { Button, clsx, scrollbarClassName, Select } from '@univerjs/design';
 import { getCurrencyType } from '@univerjs/sheets-numfmt';
 import { useDependency } from '@univerjs/ui';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { UserHabitCurrencyContext } from '../../controllers/user-habit.controller';
-import { useCurrencyOptions } from '../hooks/use-currency-options';
-import { useNextTick } from '../hooks/use-next-tick';
-import { AccountingPanel, isAccountingPanel } from './Accounting';
-import { CurrencyPanel, isCurrencyPanel } from './Currency';
-import { CustomFormat } from './CustomFormat';
-import { DatePanel, isDatePanel } from './Date';
-import { GeneralPanel, isGeneralPanel } from './General';
-import { isThousandthPercentilePanel, ThousandthPercentilePanel } from './ThousandthPercentile';
+import { UserHabitCurrencyContext } from '../controllers/user-habit.controller';
+import { AccountingPanel, isAccountingPanel } from './components/Accounting';
+import { CurrencyPanel, isCurrencyPanel } from './components/Currency';
+import { CustomFormat } from './components/CustomFormat';
+import { DatePanel, isDatePanel } from './components/Date';
+import { GeneralPanel, isGeneralPanel } from './components/General';
+import { isThousandthPercentilePanel, ThousandthPercentilePanel } from './components/ThousandthPercentile';
+import { useCurrencyOptions } from './hooks/use-currency-options';
+import { useNextTick } from './hooks/use-next-tick';
 
 export interface ISheetNumfmtPanelProps {
     value: { defaultValue: number; defaultPattern: string; row: number; col: number };

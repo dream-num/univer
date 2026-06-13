@@ -24,8 +24,8 @@ import { CFRuleType, CFValueType, createDefaultValueByValueType } from '@univerj
 import { FormulaEditor } from '@univerjs/sheets-formula-ui';
 import { useDependency, useSidebarClick } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ColorPicker } from '../../color-picker';
-import { Preview } from '../../preview';
+import { ColorPicker } from '../../ColorPicker';
+import { Preview } from '../../Preview';
 import { previewClassName } from './styles';
 
 const createOptionItem = (text: string, localeService: LocaleService) => ({ label: localeService.t(`sheets-conditional-formatting-ui.valueType.${text}`), value: text });

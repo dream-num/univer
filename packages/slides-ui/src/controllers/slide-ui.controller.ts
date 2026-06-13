@@ -26,12 +26,12 @@ import { SlideAddTextCommand, SlideAddTextOperation } from '../commands/operatio
 import { SetSlidePageThumbOperation } from '../commands/operations/set-thumb.operation';
 import { SetTextEditArrowOperation } from '../commands/operations/text-edit.operation';
 import { UpdateSlideElementOperation } from '../commands/operations/update-element.operation';
-import { COMPONENT_SLIDE_IMAGE_POPUP_MENU } from '../components/image-popup-menu/component-name';
-import { SlideImagePopupMenu } from '../components/image-popup-menu/ImagePopupMenu';
-import Sidebar, { COMPONENT_SLIDE_SIDEBAR } from '../components/sidebar/Sidebar';
-import { SlideSideBar } from '../components/slide-bar/SlideBar';
 import { menuSchema } from '../menu/schema';
 import { SlideEditorContainer } from '../views/editor-container';
+import { COMPONENT_SLIDE_IMAGE_POPUP_MENU } from '../views/image-popup-menu/component-name';
+import { SlideImagePopupMenu } from '../views/image-popup-menu/ImagePopupMenu';
+import Sidebar, { COMPONENT_SLIDE_SIDEBAR } from '../views/sidebar/Sidebar';
+import { SlideSideBar } from '../views/slide-bar/SlideBar';
 import { EditorDeleteLeftShortcut, generateArrowSelectionShortCutItem } from './shortcuts/editor.shortcuts';
 
 /**

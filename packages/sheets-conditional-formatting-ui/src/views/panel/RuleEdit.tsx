@@ -17,7 +17,7 @@
 import type { IRange, Workbook } from '@univerjs/core';
 import type { IRemoveSheetMutationParams } from '@univerjs/sheets';
 import type { IAddCfCommandParams, IConditionFormattingRule, ISetCfCommandParams } from '@univerjs/sheets-conditional-formatting';
-import type { IStyleEditorProps } from './type';
+import type { IStyleEditorProps } from './rule-edit/type';
 import { ICommandService, InterceptorManager, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { Button, Select } from '@univerjs/design';
 import { deserializeRangeWithSheet, serializeRange } from '@univerjs/engine-formula';
@@ -26,13 +26,13 @@ import { AddCfCommand, CFRuleType, CFSubRuleType, ConditionalFormattingRuleModel
 import { RangeSelector } from '@univerjs/sheets-formula-ui';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ColorScaleStyleEditor } from './ColorScale';
-import { DataBarStyleEditor } from './DataBar';
-import { FormulaStyleEditor } from './Formula';
-import { HighlightCellStyleEditor } from './HighlightCell';
-import { IconSet } from './IconSet';
-import { RankStyleEditor } from './Rank';
-import { beforeSubmit, submit } from './type';
+import { ColorScaleStyleEditor } from './rule-edit/ColorScale';
+import { DataBarStyleEditor } from './rule-edit/DataBar';
+import { FormulaStyleEditor } from './rule-edit/Formula';
+import { HighlightCellStyleEditor } from './rule-edit/HighlightCell';
+import { IconSet } from './rule-edit/IconSet';
+import { RankStyleEditor } from './rule-edit/Rank';
+import { beforeSubmit, submit } from './rule-edit/type';
 
 interface IRuleEditProps {
     rule?: IConditionFormattingRule;

@@ -26,7 +26,7 @@ import { scan, startWith } from 'rxjs/operators';
 import { MenuItemType } from '../../../services/menu/menu';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
 import { useDependency, useObservable } from '../../../utils/di';
-import { CustomLabel } from '../../custom-label';
+import { CustomLabel } from '../../custom-label/index';
 
 type MobileMenuView =
     | {

@@ -16,8 +16,8 @@
 
 import type { IConditionFormattingRule } from '@univerjs/sheets-conditional-formatting';
 import { useState } from 'react';
-import { RuleEdit } from './rule-edit';
-import { RuleList } from './rule-list';
+import { RuleEdit } from './panel/RuleEdit';
+import { RuleList } from './panel/RuleList';
 
 interface IConditionFormattingPanelProps { rule?: IConditionFormattingRule };
 

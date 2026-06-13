@@ -19,7 +19,7 @@ import React from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { DropdownMenuLabel } from '../TooltipButtonWrapper';
 
-vi.mock('../../../../components/custom-label/CustomLabel', () => ({
+vi.mock('../../../custom-label/CustomLabel', () => ({
     CustomLabel: (props: { label?: unknown }) => React.createElement(
         'span',
         {

@@ -29,7 +29,7 @@ import {
 } from '@univerjs/sheets';
 import { useDependency } from '@univerjs/ui';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useActiveWorkbook } from '../../../components/hook';
+import { useActiveWorkbook } from '../../hook';
 
 export function MobileSheetBar() {
     const workbook = useActiveWorkbook();

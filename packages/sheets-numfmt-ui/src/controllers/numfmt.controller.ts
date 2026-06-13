@@ -17,7 +17,7 @@
 import type { IDisposable, IRange, Workbook } from '@univerjs/core';
 import type { ISetNumfmtMutationParams } from '@univerjs/sheets';
 import type { ISetNumfmtCommandParams } from '@univerjs/sheets-numfmt';
-import type { ISheetNumfmtPanelProps } from '../views/components';
+import type { ISheetNumfmtPanelProps } from '../views/SheetNumfmtPanel';
 import {
     CellValueType,
     Disposable,
@@ -49,7 +49,7 @@ import { combineLatest, merge, Observable } from 'rxjs';
 import { debounceTime, map, switchMap, tap } from 'rxjs/operators';
 import { CloseNumfmtPanelOperator } from '../commands/operations/close.numfmt.panel.operation';
 import { OpenNumfmtPanelOperator } from '../commands/operations/open.numfmt.panel.operation';
-import { SheetNumfmtPanel } from '../views/components';
+import { SheetNumfmtPanel } from '../views/SheetNumfmtPanel';
 
 const SHEET_NUMFMT_PANEL = 'SHEET_NUMFMT_PANEL';
 

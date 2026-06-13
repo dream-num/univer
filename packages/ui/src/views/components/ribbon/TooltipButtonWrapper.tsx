@@ -22,9 +22,9 @@ import { clsx, Dropdown, DropdownMenu, Tooltip } from '@univerjs/design';
 import { CheckMarkIcon } from '@univerjs/icons';
 import { createContext, forwardRef, useContext, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { combineLatest, of } from 'rxjs';
-import { CustomLabel } from '../../../components/custom-label/CustomLabel';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
 import { useDependency } from '../../../utils/di';
+import { CustomLabel } from '../../custom-label/CustomLabel';
 
 const TooltipWrapperContext = createContext({
     dropdownVisible: false,

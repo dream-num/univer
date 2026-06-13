@@ -21,8 +21,8 @@ import { Checkbox, InputNumber, Select } from '@univerjs/design';
 import { CFNumberOperator, CFRuleType, CFSubRuleType } from '@univerjs/sheets-conditional-formatting';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
-import { ConditionalStyleEditor } from '../../conditional-style-editor';
-import { Preview } from '../../preview';
+import { ConditionalStyleEditor } from '../../ConditionalStyleEditor';
+import { Preview } from '../../Preview';
 import { previewClassName } from './styles';
 
 export const RankStyleEditor = (props: IStyleEditorProps) => {

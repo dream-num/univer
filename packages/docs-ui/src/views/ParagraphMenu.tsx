@@ -33,7 +33,7 @@ import { MoveDocBlockCommand } from '../commands/commands/doc-block-move.command
 import { DeleteCurrentParagraphCommand } from '../commands/commands/doc-delete.command';
 import { HorizontalLineCommand } from '../commands/commands/doc-horizontal-line.command';
 import { DocParagraphSettingCommand } from '../commands/commands/doc-paragraph-setting.command';
-import { ResetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand } from '../commands/commands/inline-format.command';
+import { ResetInlineFormatTextBackgroundColorCommand, ResetInlineFormatTextColorCommand, SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand } from '../commands/commands/inline-format.command';
 import { BulletListCommand, CheckListCommand, OrderListCommand } from '../commands/commands/list.command';
 import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignRightCommand } from '../commands/commands/paragraph-align.command';
 import { H1HeadingCommand, H2HeadingCommand, H3HeadingCommand, H4HeadingCommand, H5HeadingCommand, NormalTextHeadingCommand, SetParagraphNamedStyleCommand, SubtitleHeadingCommand, TitleHeadingCommand } from '../commands/commands/set-heading.command';
@@ -65,6 +65,19 @@ const PARAGRAPH_MENU_HOVER_HIDE_DELAY = 240;
 const PARAGRAPH_MENU_HOVER_BRIDGE_EDGE_OVERLAP = 12;
 const PARAGRAPH_MENU_HOVER_BRIDGE_VERTICAL_PADDING = 8;
 type ParagraphMenuOpenMode = 'pointer' | 'slash';
+
+function getParagraphMenuTriggerClassName(visible: boolean) {
+    return clsx(`
+      univer-mr-1 univer-inline-flex univer-h-7 univer-cursor-pointer univer-items-center univer-gap-1 univer-rounded-md
+      univer-border univer-border-gray-200 univer-bg-white univer-px-2 univer-py-0 univer-shadow-sm
+      univer-transition-colors
+      hover:univer-bg-gray-50 hover:univer-shadow-md
+      dark:!univer-border-gray-700 dark:!univer-bg-gray-900
+      dark:hover:!univer-bg-gray-800
+    `, {
+        'univer-bg-gray-100 univer-shadow-md dark:!univer-bg-gray-800': visible,
+    });
+}
 
 export function createParagraphMenuHoverOpenScheduler(openMenu: () => void, delay = PARAGRAPH_MENU_HOVER_OPEN_DELAY) {
     let openTimer: number | null = null;
@@ -216,7 +229,9 @@ const PARAGRAPH_MENU_SELECTION_COMMAND_IDS = new Set([
     CheckListCommand.id,
     HorizontalLineCommand.id,
     SetInlineFormatTextColorCommand.id,
+    ResetInlineFormatTextColorCommand.id,
     SetInlineFormatTextBackgroundColorCommand.id,
+    ResetInlineFormatTextBackgroundColorCommand.id,
     ...PARAGRAPH_MENU_BLOCK_RANGE_COMMAND_IDS,
     AlignLeftCommand.id,
     AlignCenterCommand.id,
@@ -229,6 +244,17 @@ const PARAGRAPH_MENU_SKIP_REPLACE_SELECTION_COMMAND_IDS = new Set([
     DocCutCurrentParagraphCommand.id,
     DeleteCurrentParagraphCommand.id,
 ]);
+
+const PARAGRAPH_MENU_RESTORE_SELECTION_COMMAND_IDS = new Set([
+    SetInlineFormatTextColorCommand.id,
+    ResetInlineFormatTextColorCommand.id,
+    SetInlineFormatTextBackgroundColorCommand.id,
+    ResetInlineFormatTextBackgroundColorCommand.id,
+]);
+
+function shouldRestoreParagraphMenuSelectionAfterCommand(commandId: string | undefined) {
+    return !!commandId && PARAGRAPH_MENU_RESTORE_SELECTION_COMMAND_IDS.has(commandId);
+}
 
 export function getParagraphMenuCommand(params: IValueOption, targetRange?: ITextRangeWithStyle | null): { commandId?: string; params?: object } {
     const commandId = params.commandId ?? params.id ?? (typeof params.label === 'string' ? params.label : undefined);
@@ -733,6 +759,18 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
         docSelectionManagerService.replaceTextRanges([range], false);
     };
 
+    const getCurrentTextRangesSnapshot = () => {
+        return (docSelectionManagerService.getTextRanges() ?? []).map((range) => ({ ...range }));
+    };
+
+    const restoreTextRanges = (ranges: ITextRangeWithStyle[] | null) => {
+        if (!ranges) {
+            return;
+        }
+
+        docSelectionManagerService.replaceTextRanges(ranges, false);
+    };
+
     const executeResolvedCommand = (option: IValueOption, targetRange?: ITextRangeWithStyle | null) => {
         const resolved = getParagraphMenuResolvedCommand(option, targetRange);
 
@@ -891,6 +929,10 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
             return;
         }
 
+        const previousTextRanges = shouldRestoreParagraphMenuSelectionAfterCommand(commandId)
+            ? getCurrentTextRangesSnapshot()
+            : null;
+
         if (commandId && shouldUseInsertBelowRange(commandId, option) && latestTarget?.moveRange) {
             docContentInsertService.setInsertRange({
                 unitId: popup.unitId,
@@ -902,11 +944,15 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
             replaceSelection(getParagraphMenuCommandTargetRange(commandId, targetRange, formattingRange));
         }
 
-        await executeResolvedCommand({
-            ...option,
-            commandId,
-            params: commandParams as Record<string, unknown> | undefined,
-        }, getParagraphMenuCommandTargetRange(commandId, targetRange, formattingRange));
+        try {
+            await executeResolvedCommand({
+                ...option,
+                commandId,
+                params: commandParams as Record<string, unknown> | undefined,
+            }, getParagraphMenuCommandTargetRange(commandId, targetRange, formattingRange));
+        } finally {
+            restoreTextRanges(previousTextRanges);
+        }
         finishParagraphMenuCommand(docParagraphMenuService, layoutService, handleHideMenu);
     };
 
@@ -945,16 +991,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
             <div
                 data-u-comp="paragraph-menu"
                 ref={anchorRef}
-                className={clsx(`
-                  univer-mr-1 univer-inline-flex univer-h-8 univer-cursor-pointer univer-items-center univer-gap-1.5
-                  univer-rounded-lg univer-border univer-border-gray-200 univer-bg-white univer-px-2.5 univer-py-0
-                  univer-shadow-sm univer-transition-colors
-                  hover:univer-bg-gray-50 hover:univer-shadow-md
-                  dark:!univer-border-gray-700 dark:!univer-bg-gray-900
-                  dark:hover:!univer-bg-gray-800
-                `, {
-                    'univer-bg-gray-100 univer-shadow-md dark:!univer-bg-gray-800': visible,
-                })}
+                className={getParagraphMenuTriggerClassName(visible)}
                 onMouseEnter={(e) => {
                     popup.onPointerEnter?.(e);
                     setParagraphMenuInteractionActive(docParagraphMenuService, true);
@@ -1112,6 +1149,15 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
                             autoFocus={openMode === 'slash'}
                             autoFocusTarget={openMode === 'slash' ? 'container' : undefined}
                             suppressHoverUntilPointerMove={openMode === 'slash'}
+                            onMenuPointerEnter={() => {
+                                setParagraphMenuInteractionActive(docParagraphMenuService, true);
+                                isMouseOver.current = true;
+                                clearHideTimer();
+                            }}
+                            onMenuPointerLeave={() => {
+                                isMouseOver.current = false;
+                                scheduleHideMenu();
+                            }}
                             onCancel={() => {
                                 finishParagraphMenuCommand(docParagraphMenuService, layoutService, handleHideMenu);
                             }}

@@ -25,8 +25,8 @@ import { UpdateDocHyperLinkCommand } from '../commands/commands/update-link.comm
 import { ClickDocHyperLinkOperation, ShowDocHyperLinkEditPopupOperation, ToggleDocHyperLinkInfoPopupOperation } from '../commands/operations/popup.operation';
 import { addLinkShortcut, DOC_LINK_ICON } from '../menu/menu';
 import { menuSchema } from '../menu/schema';
-import { DocHyperLinkEdit } from '../views/hyper-link-edit';
-import { DocLinkPopup } from '../views/hyper-link-popup';
+import { DocHyperLinkEdit } from '../views/DocHyperLinkEdit';
+import { DocLinkPopup } from '../views/DocLinkPopup';
 
 export interface IDocHyperLinkUIConfig {
     menu: MenuConfig;

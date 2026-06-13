@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ThreadCommentTreeLocation } from '../thread-comment-tree';
+import type { ThreadCommentTreeLocation } from '../ThreadCommentTree';
 import { DOCS_COMMENT_EDITOR_UNIT_ID_KEY } from '@univerjs/core';
 
 interface IGetThreadCommentEditorIdParams {

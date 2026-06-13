@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export { SheetPermissionPanel } from './panel';
-export { SheetPermissionPanelList } from './panel-list';
-export { SheetPermissionDialog } from './permission-dialog';
-export { SheetPermissionUserDialog } from './user-dialog';
+export { SheetPermissionDialog } from './SheetPermissionDialog';
+export { SheetPermissionPanel } from './SheetPermissionPanel';
+export { SheetPermissionPanelList } from './SheetPermissionPanelList';
+export { SheetPermissionUserDialog } from './SheetPermissionUserDialog';

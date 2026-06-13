@@ -167,5 +167,5 @@ export { getCanvasOffsetByEngine } from './services/selection/selection-utils';
 export { getAnchorBounding, getLineBounding, TEXT_RANGE_LAYER_INDEX, TextRange } from './services/selection/text-range';
 export { whenDocAndEditorFocused } from './shortcuts/utils';
 export { DOC_VERTICAL_PADDING } from './types/const/padding';
-export { type IRichTextEditorProps, RichTextEditor } from './views/rich-text-editor';
 export { type IKeyboardEventConfig, useEditor, useEditorClickOutside, useIsFocusing, useKeyboardEvent, useLeftAndRightArrow, useOnChange, useResize } from './views/rich-text-editor/hooks';
+export { type IRichTextEditorProps, RichTextEditor } from './views/RichTextEditor';

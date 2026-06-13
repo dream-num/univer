@@ -16,7 +16,7 @@
 
 import { FLOAT_TOOLBAR_MENU_POSITION } from '@univerjs/docs-ui';
 import { describe, expect, it, vi } from 'vitest';
-import { DocHyperLinkEdit } from '../../views/hyper-link-edit';
+import { DocHyperLinkEdit } from '../../views/DocHyperLinkEdit';
 import { DocHyperLinkUIController } from '../ui.controller';
 
 describe('DocHyperLinkUIController', () => {

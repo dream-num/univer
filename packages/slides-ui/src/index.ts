@@ -24,7 +24,6 @@ export { InsertSlideShapeEllipseCommand, InsertSlideShapeEllipseOperation, Inser
 export { SlideAddTextCommand, SlideAddTextOperation } from './commands/operations/insert-text.operation';
 export { SetSlidePageThumbOperation } from './commands/operations/set-thumb.operation';
 export { UpdateSlideElementOperation } from './commands/operations/update-element.operation';
-export { SlideSideBar } from './components/slide-bar/SlideBar';
 export type { IUniverSlidesUIConfig } from './config/config';
 export { SLIDE_EDITOR_ID } from './const';
 export { CanvasView } from './controllers/canvas-view';
@@ -35,4 +34,3 @@ export { SHAPE_MENU_ID } from './menu/shape.menu';
 export { UniverSlidesUIPlugin } from './plugin';
 export { ISlideEditorBridgeService } from './services/slide-editor-bridge.service';
 export { SlideCanvasPopMangerService } from './services/slide-popup-manager.service';
-export { SlideEditorContainer } from './views/editor-container/EditorContainer';

@@ -20,7 +20,7 @@ export { type ISetActiveCommentOperationParams, SetActiveCommentOperation } from
 export type { IUniverThreadCommentUIConfig } from './config/config';
 export { UniverThreadCommentUIPlugin } from './plugin';
 export { type ActiveCommentInfo, ThreadCommentPanelService } from './services/thread-comment-panel.service';
-export { ThreadCommentPanel } from './views/thread-comment-panel';
-export type { IThreadCommentPanelProps } from './views/thread-comment-panel';
-export { ThreadCommentTree, ThreadCommentTreeLocation } from './views/thread-comment-tree';
-export type { IThreadCommentTreeProps } from './views/thread-comment-tree';
+export { ThreadCommentPanel } from './views/ThreadCommentPanel';
+export type { IThreadCommentPanelProps } from './views/ThreadCommentPanel';
+export { ThreadCommentTree, ThreadCommentTreeLocation } from './views/ThreadCommentTree';
+export type { IThreadCommentTreeProps } from './views/ThreadCommentTree';

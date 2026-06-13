@@ -97,8 +97,8 @@ import { BORDER_PANEL_COMPONENT } from '../../components/border-panel/interface'
 import { MENU_ITEM_FROZEN_COMPONENT, MenuItemFrozen } from '../../components/menu-item-frozen';
 import { MENU_ITEM_INPUT_COMPONENT, MenuItemInput } from '../../components/menu-item-input';
 import { menuSchema } from '../../menu/mobile-menu';
-import { CellPopup } from '../../views/cell-popup';
 import { CELL_POPUP_COMPONENT_KEY } from '../../views/cell-popup/config';
+import { CellPopup } from '../../views/CellPopup';
 import { DEFINED_NAME_CONTAINER } from '../../views/defined-name/component-name';
 import { DefinedNameContainer } from '../../views/defined-name/DefinedNameContainer';
 import { MobileSheetBar } from '../../views/mobile/sheet-bar/MobileSheetBar';

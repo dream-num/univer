@@ -48,8 +48,8 @@ import {
     UnderlineShortCut,
 } from '../shortcuts/toolbar.shortcut';
 import { DocFooter } from '../views/doc-footer';
-import { PAGE_SETTING_COMPONENT_ID, PageSettings } from '../views/page-settings';
-import { DocSideMenu } from '../views/side-menu';
+import { DocSideMenu } from '../views/DocSideMenu';
+import { PAGE_SETTING_COMPONENT_ID, PageSettings } from '../views/PageSettings';
 
 export class DocUIController extends Disposable {
     constructor(

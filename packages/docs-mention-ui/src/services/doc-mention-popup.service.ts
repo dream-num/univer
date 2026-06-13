@@ -18,7 +18,7 @@ import type { IDisposable, Nullable } from '@univerjs/core';
 import { Disposable, Inject } from '@univerjs/core';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { BehaviorSubject } from 'rxjs';
-import { MentionEditPopup } from '../views/mention-edit-popup';
+import { MentionEditPopup } from '../views/MentionEditPopup';
 import { DocMentionService } from './doc-mention.service';
 
 export class DocMentionPopupService extends Disposable {

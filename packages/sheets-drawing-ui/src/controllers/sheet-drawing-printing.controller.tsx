@@ -17,7 +17,7 @@
 import type { IRange } from '@univerjs/core';
 import type { IFloatDomData } from '@univerjs/sheets-drawing';
 import type { ComponentType } from '@univerjs/ui';
-import type { IPrintingFloatDomProps } from '../views/printing-float-dom';
+import type { IPrintingFloatDomProps } from '../views/PrintingFloatDom';
 import { Disposable, DrawingTypeEnum, Inject, Injector, PRINT_CHART_COMPONENT_KEY, Tools } from '@univerjs/core';
 import { render, unmount } from '@univerjs/design';
 import { IDrawingManagerService } from '@univerjs/drawing';
@@ -26,7 +26,7 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetPrintInterceptorService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { ComponentManager, connectInjector } from '@univerjs/ui';
 import { SheetCanvasFloatDomManagerService } from '../services/canvas-float-dom-manager.service';
-import { PrintingFloatDom } from '../views/printing-float-dom';
+import { PrintingFloatDom } from '../views/PrintingFloatDom';
 
 export class SheetDrawingPrintingController extends Disposable {
     constructor(

@@ -18,7 +18,7 @@ import type { DocumentDataModel } from '@univerjs/core';
 import { DocumentFlavor } from '@univerjs/core';
 
 const DEFAULT_DOC_ZOOM_RATIO = 1;
-export const DEFAULT_MODERN_DOC_ZOOM_RATIO = 1.2;
+export const DEFAULT_MODERN_DOC_ZOOM_RATIO = 1;
 
 type DocZoomSource = Pick<DocumentDataModel, 'getSettings' | 'getSnapshot'>;
 

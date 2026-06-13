@@ -16,7 +16,7 @@
 
 import type { IDocumentBody } from '@univerjs/core';
 import type { IThreadCommentMention } from '@univerjs/thread-comment';
-import { CustomRangeType, getBodySlice } from '@univerjs/core';
+import { createParagraphId, CustomRangeType, getBodySlice } from '@univerjs/core';
 
 interface IThreadCommentEditorFocusService {
     focus: (editorId: string) => void;
@@ -114,6 +114,7 @@ export const transformTextNodes2Document = (nodes: TextNode[]): IDocumentBody =>
         paragraphs: [
             {
                 startIndex: str.length - 2,
+                paragraphId: createParagraphId(new Set()),
                 paragraphStyle: {},
             },
         ],

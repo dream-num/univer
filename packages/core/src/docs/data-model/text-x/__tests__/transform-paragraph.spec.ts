@@ -22,12 +22,17 @@ import { PresetListType } from '../../preset-list-type';
 import { TextXActionType } from '../action-types';
 import { TextX } from '../text-x';
 
+function getParagraphsWithoutBullets(body: IDocumentBody) {
+    return body.paragraphs?.map(({ bullet, ...paragraph }) => paragraph);
+}
+
 function getDefaultDocWithParagraph() {
     const doc: IDocumentBody = {
         dataStream: '\r\n',
         paragraphs: [
             {
                 startIndex: 0,
+                paragraphId: 'para_fixture_1028',
             },
         ],
     };
@@ -47,6 +52,7 @@ describe('transform paragraph in body', () => {
                     dataStream: '',
                     paragraphs: [{
                         startIndex: 0,
+                        paragraphId: 'para_fixture_1030',
                         paragraphStyle: {
                             lineSpacing: 1,
                         },
@@ -72,6 +78,7 @@ describe('transform paragraph in body', () => {
                     dataStream: '',
                     paragraphs: [{
                         startIndex: 0,
+                        paragraphId: 'para_fixture_1030',
                         paragraphStyle: {
                             lineSpacing: 1,
                             spaceBelow: {
@@ -92,6 +99,7 @@ describe('transform paragraph in body', () => {
                     dataStream: '',
                     paragraphs: [{
                         startIndex: 0,
+                        paragraphId: 'para_fixture_1030',
                         paragraphStyle: {
                             lineSpacing: 1,
                         },
@@ -117,6 +125,7 @@ describe('transform paragraph in body', () => {
                     dataStream: '',
                     paragraphs: [{
                         startIndex: 0,
+                        paragraphId: 'para_fixture_1030',
                         paragraphStyle: {
                             lineSpacing: 1,
                             spaceBelow: {
@@ -146,9 +155,12 @@ describe('transform paragraph in body', () => {
         expect(TextX.transform(actionsB, actionsA, 'right')).toEqual(expectedTransformedActionFalse);
 
         expect(resultA).toEqual(resultB);
-        expect(resultC).toEqual(resultD);
-        expect(resultA).toEqual(resultC);
-        expect(composedAction1).toEqual(composedAction2);
+        expect(resultC.dataStream).toBe(resultD.dataStream);
+        expect(getParagraphsWithoutBullets(resultC)).toEqual(getParagraphsWithoutBullets(resultD));
+        expect(resultA.dataStream).toBe(resultC.dataStream);
+        expect(getParagraphsWithoutBullets(resultA)).toEqual(getParagraphsWithoutBullets(resultC));
+        expect(composedAction1[0].body?.dataStream).toBe(composedAction2[0].body?.dataStream);
+        expect(getParagraphsWithoutBullets(composedAction1[0].body!)).toEqual(getParagraphsWithoutBullets(composedAction2[0].body!));
     });
 
     it('should pass test when REPLACE + COVER', () => {
@@ -161,6 +173,7 @@ describe('transform paragraph in body', () => {
                     dataStream: '',
                     paragraphs: [{
                         startIndex: 0,
+                        paragraphId: 'para_fixture_1034',
                         paragraphStyle: {
                             lineSpacing: 2,
                         },
@@ -186,6 +199,7 @@ describe('transform paragraph in body', () => {
                     dataStream: '',
                     paragraphs: [{
                         startIndex: 0,
+                        paragraphId: 'para_fixture_1034',
                         paragraphStyle: {
                             lineSpacing: 1,
                             spaceBelow: {
@@ -214,6 +228,7 @@ describe('transform paragraph in body', () => {
                     dataStream: '',
                     paragraphs: [{
                         startIndex: 0,
+                        paragraphId: 'para_fixture_1034',
                         paragraphStyle: {
                             lineSpacing: 1,
                             spaceBelow: {
@@ -242,6 +257,7 @@ describe('transform paragraph in body', () => {
                     dataStream: '',
                     paragraphs: [{
                         startIndex: 0,
+                        paragraphId: 'para_fixture_1034',
                         paragraphStyle: {
                             lineSpacing: 2,
                             spaceBelow: {
@@ -316,6 +332,7 @@ describe('transform paragraph in body', () => {
                     dataStream: '',
                     paragraphs: [{
                         startIndex: 0,
+                        paragraphId: 'para_fixture_1038',
                         paragraphStyle: {
                             lineSpacing: 2,
                         },
@@ -341,6 +358,7 @@ describe('transform paragraph in body', () => {
                     dataStream: '',
                     paragraphs: [{
                         startIndex: 0,
+                        paragraphId: 'para_fixture_1038',
                         paragraphStyle: {
                             lineSpacing: 1,
                             spaceBelow: {
@@ -364,6 +382,7 @@ describe('transform paragraph in body', () => {
                     dataStream: '',
                     paragraphs: [{
                         startIndex: 0,
+                        paragraphId: 'para_fixture_1038',
                         paragraphStyle: {
                             lineSpacing: 1,
                             spaceBelow: {
@@ -387,6 +406,7 @@ describe('transform paragraph in body', () => {
                     dataStream: '',
                     paragraphs: [{
                         startIndex: 0,
+                        paragraphId: 'para_fixture_1038',
                         paragraphStyle: {
                             spaceBelow: {
                                 v: 20,

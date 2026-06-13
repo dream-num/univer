@@ -46,6 +46,7 @@ const DOCUMENT_DATA = {
         paragraphs: [
             {
                 startIndex: 10,
+                paragraphId: 'para_fixture_1080',
             },
         ],
     },

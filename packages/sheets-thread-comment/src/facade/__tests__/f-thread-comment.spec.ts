@@ -134,7 +134,8 @@ describe('thread comment facade', () => {
 
         await rootComment.deleteAsync();
         await replyComment.deleteAsync();
-        await rootComment.updateAsync(createBody('updated'));
+        const updatedBody = createBody('updated');
+        await rootComment.updateAsync(updatedBody);
         await rootComment.resolveAsync();
         await rootComment.resolveAsync(true);
         await rootComment.replyAsync(FTheadCommentBuilder.create().setContent(createBody('reply')));
@@ -145,7 +146,7 @@ describe('thread comment facade', () => {
             payload: expect.objectContaining({
                 commentId: root.id,
                 updated: true,
-                text: createBody('updated').getData().body,
+                text: updatedBody.getData().body,
             }),
         }));
         expect(commandService.executeCommand).toHaveBeenCalledWith(ResolveCommentCommand.id, expect.objectContaining({ resolved: true }));

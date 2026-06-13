@@ -60,16 +60,12 @@ describe('doc auto format controller', () => {
 
         expect(listTabRule.match({
             selection: { startOffset: 4 },
-            paragraphs: [{
-                paragraphStart: 4,
-                startIndex: 4,
-                bullet: { listId: 'list-1' },
-            }],
+            paragraphs: [{ paragraphId: 'para_docs_ui_fixture_31', paragraphStart: 4, startIndex: 4, bullet: { listId: 'list-1' } }],
             unit: {
                 getBody: () => ({
                     paragraphs: [
-                        { startIndex: 1, bullet: { listId: 'list-1' } },
-                        { startIndex: 4, bullet: { listId: 'list-1' } },
+                        { paragraphId: 'para_docs_ui_fixture_32', startIndex: 1, bullet: { listId: 'list-1' } },
+                        { paragraphId: 'para_docs_ui_fixture_33', startIndex: 4, bullet: { listId: 'list-1' } },
                     ],
                 }),
             },
@@ -97,14 +93,14 @@ describe('doc auto format controller', () => {
         const quickListText = Object.keys(QuickListTypeMap)[0];
         expect(spaceRule.match({
             selection: { collapsed: true, startOffset: quickListText.length + 1 },
-            paragraphs: [{ paragraphStart: 0 }],
+            paragraphs: [{ paragraphId: 'para_docs_ui_fixture_34', paragraphStart: 0 }],
             unit: {
                 getBody: () => ({ dataStream: `${quickListText} \r\n` }),
             },
         })).toBe(true);
         expect(spaceRule.getMutations({
             selection: { startOffset: quickListText.length + 1 },
-            paragraphs: [{ paragraphStart: 0, startIndex: 0 }],
+            paragraphs: [{ paragraphId: 'para_docs_ui_fixture_35', paragraphStart: 0, startIndex: 0 }],
             unit: {
                 getBody: () => ({ dataStream: `${quickListText} \r\n` }),
             },
@@ -112,14 +108,14 @@ describe('doc auto format controller', () => {
             id: QuickListCommand.id,
             params: {
                 listType: QuickListTypeMap[quickListText as keyof typeof QuickListTypeMap],
-                paragraph: { paragraphStart: 0, startIndex: 0 },
+                paragraph: { paragraphId: 'para_docs_ui_fixture_35', paragraphStart: 0, startIndex: 0 },
             },
         }]);
 
         const quickHeadingText = Object.keys(QUICK_HEADING_MAP)[0];
         expect(spaceRule.getMutations({
             selection: { startOffset: quickHeadingText.length + 1 },
-            paragraphs: [{ paragraphStart: 0 }],
+            paragraphs: [{ paragraphId: 'para_docs_ui_fixture_36', paragraphStart: 0 }],
             unit: {
                 getBody: () => ({ dataStream: `${quickHeadingText} \r\n` }),
             },
@@ -131,16 +127,10 @@ describe('doc auto format controller', () => {
         }]);
 
         expect(exitListRule.match({
-            paragraphs: [{
-                bullet: { listType: 'bullet', nestingLevel: 0 },
-                paragraphStart: 0,
-                paragraphEnd: 0,
-            }],
+            paragraphs: [{ paragraphId: 'para_docs_ui_fixture_37', bullet: { listType: 'bullet', nestingLevel: 0 }, paragraphStart: 0, paragraphEnd: 0 }],
         })).toBe(true);
         expect(exitListRule.getMutations({
-            paragraphs: [{
-                bullet: { listType: 'bullet', nestingLevel: 1 },
-            }],
+            paragraphs: [{ paragraphId: 'para_docs_ui_fixture_38', bullet: { listType: 'bullet', nestingLevel: 1 } }],
         })).toEqual([{
             id: ChangeListNestingLevelCommand.id,
             params: {
@@ -148,9 +138,7 @@ describe('doc auto format controller', () => {
             },
         }]);
         expect(exitListRule.getMutations({
-            paragraphs: [{
-                bullet: { listType: 'bullet', nestingLevel: 0 },
-            }],
+            paragraphs: [{ paragraphId: 'para_docs_ui_fixture_39', bullet: { listType: 'bullet', nestingLevel: 0 } }],
         })).toEqual([{
             id: ListOperationCommand.id,
             params: {

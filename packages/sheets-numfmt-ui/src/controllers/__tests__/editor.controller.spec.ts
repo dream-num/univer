@@ -254,6 +254,7 @@ describe('test editor', () => {
                     paragraphs: [
                         {
                             startIndex: 10,
+                            paragraphId: 'para_sheets_numfmt_edit_date',
                             paragraphStyle: {
                                 horizontalAlign: 0,
                             },
@@ -323,6 +324,7 @@ describe('test editor', () => {
                 paragraphs: [
                     {
                         startIndex: 9,
+                        paragraphId: 'para_sheets_numfmt_bullet',
                         paragraphStyle: {
                             horizontalAlign: 0,
                         },
@@ -678,6 +680,7 @@ describe('test get cell text/plain', () => {
                                         paragraphs: [
                                             {
                                                 startIndex: 6,
+                                                paragraphId: 'para_sheets_numfmt_rich_text',
                                                 paragraphStyle: {
                                                     horizontalAlign: 0,
                                                 },

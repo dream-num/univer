@@ -265,7 +265,7 @@ export function lineBreaking(
     const { endIndex, blocks = [], children } = paragraphNode;
     const { segmentId } = curPage;
 
-    const paragraph = viewModel.getParagraph(endIndex) || { startIndex: 0 };
+    const paragraph = viewModel.getParagraph(endIndex) || { startIndex: 0, paragraphId: 'para_render_fallback' };
 
     const { paragraphStyle = {}, bullet } = paragraph;
     const useWordStyleLineHeight = _shouldApplyDocumentDefaultParagraphStyle(viewModel);

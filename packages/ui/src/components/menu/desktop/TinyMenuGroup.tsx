@@ -18,7 +18,7 @@ import type { IDisplayMenuItem, IMenuItem, IValueOption, MenuItemDefaultValueTyp
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import type { TinyMenuLayoutVariant, TinyMenuSizeVariant } from './DesignTinyMenuGroup';
 import { convertObservableToBehaviorSubject, LocaleService } from '@univerjs/core';
-import { clsx } from '@univerjs/design';
+import { cva } from '@univerjs/design';
 import { useEffect, useMemo, useState } from 'react';
 import { combineLatest, of } from 'rxjs';
 import { ComponentManager } from '../../../common';
@@ -47,6 +47,39 @@ const EMPTY_HIDDEN_ITEM_IDS: string[] = [];
 type TinyMenuDisplayItem = IDisplayMenuItem<IMenuItem> & {
     value?: MenuItemDefaultValueType;
 };
+
+const quickTileMenuButtonVariants = cva(
+    `
+      univer-relative univer-box-border univer-flex univer-size-12 univer-w-full univer-appearance-none univer-flex-col
+      univer-items-center univer-justify-center univer-gap-0.5 univer-rounded-lg univer-border-none univer-bg-white
+      univer-p-0 univer-font-medium univer-text-gray-700 univer-outline-none univer-transition-all
+      focus-visible:univer-ring-2 focus-visible:univer-ring-primary-600 focus-visible:univer-ring-offset-0
+      dark:!univer-bg-gray-700 dark:!univer-text-gray-100
+    `,
+    {
+        variants: {
+            disabled: {
+                true: 'univer-cursor-not-allowed univer-opacity-60',
+                false: `
+                  univer-cursor-pointer
+                  hover:univer-bg-gray-50
+                  dark:hover:!univer-bg-gray-600
+                `,
+            },
+            active: {
+                true: `
+                  univer-bg-primary-50 univer-text-primary-700 univer-ring-1 univer-ring-primary-600
+                  dark:!univer-bg-primary-900 dark:!univer-text-primary-100
+                `,
+                false: '',
+            },
+        },
+        defaultVariants: {
+            disabled: false,
+            active: false,
+        },
+    }
+);
 
 export function resolveMenuItemActiveState(itemId: string | undefined, observableActive: boolean, activeItemIds?: string[]): boolean {
     if (activeItemIds) {
@@ -79,31 +112,12 @@ function QuickTileMenuItem(props: IUIQuickTileMenuItemProps) {
     }
 
     const Icon = menuItem.icon ? componentManager.get(menuItem.icon as string) : null;
+    const active = resolveMenuItemActiveState(menuItem.id, activated, activeItemIds);
 
     return (
         <button
             type="button"
-            className={clsx(
-                `
-                  univer-relative univer-box-border univer-flex univer-size-12 univer-w-full univer-appearance-none
-                  univer-flex-col univer-items-center univer-justify-center univer-gap-0.5 univer-rounded-lg
-                  univer-border-none univer-bg-white univer-p-0 univer-font-medium univer-text-gray-700
-                  univer-outline-none univer-transition-all
-                  focus-visible:univer-ring-2 focus-visible:univer-ring-primary-600 focus-visible:univer-ring-offset-0
-                  dark:!univer-bg-gray-700 dark:!univer-text-gray-100
-                `,
-                disabled
-                    ? 'univer-cursor-not-allowed univer-opacity-60'
-                    : `
-                      univer-cursor-pointer
-                      hover:univer-bg-gray-50
-                      dark:hover:!univer-bg-gray-600
-                    `,
-                resolveMenuItemActiveState(menuItem.id, activated, activeItemIds) && `
-                  univer-bg-primary-50 univer-text-primary-700 univer-ring-1 univer-ring-primary-600
-                  dark:!univer-bg-primary-900 dark:!univer-text-primary-100
-                `
-            )}
+            className={quickTileMenuButtonVariants({ disabled, active })}
             disabled={disabled}
             onClick={() => {
                 if (disabled) {
@@ -143,17 +157,18 @@ export function UITinyMenuGroup(props: IUIQuickMenuGroupProps) {
     const localeService = useDependency(LocaleService);
 
     useEffect(() => {
-        if (!item.children) return;
-        const observables = item.children.map((child) => convertObservableToBehaviorSubject(child.item?.activated$ ?? of(false), false));
+        const { children } = item;
+        if (!children) return;
+
+        const observables = children.map((child) => convertObservableToBehaviorSubject(child.item?.activated$ ?? of(false), false));
         const subscription = combineLatest(observables).subscribe((activedArr) => {
-            const actived = activedArr
-                .map((actived, index) => ({ actived, item: getTinyMenuChildStateKey(item.children![index]) }))
-                .filter((actived) => actived.actived);
-            if (actived.length === 0) {
-                setActiveItems([]);
-            } else {
-                setActiveItems(actived.map((actived) => actived.item));
+            const activeItems: string[] = [];
+            for (let index = 0; index < activedArr.length; index++) {
+                if (activedArr[index]) {
+                    activeItems.push(getTinyMenuChildStateKey(children[index]));
+                }
             }
+            setActiveItems(activeItems);
         });
 
         return () => {
@@ -165,17 +180,18 @@ export function UITinyMenuGroup(props: IUIQuickMenuGroupProps) {
     }, [item]);
 
     useEffect(() => {
-        if (!item.children) return;
-        const observables = item.children.map((child) => convertObservableToBehaviorSubject(child.item?.hidden$ ?? of(false), false));
+        const { children } = item;
+        if (!children) return;
+
+        const observables = children.map((child) => convertObservableToBehaviorSubject(child.item?.hidden$ ?? of(false), false));
         const subscription = combineLatest(observables).subscribe((hiddenArr) => {
-            const hidden = hiddenArr
-                .map((hidden, index) => ({ hidden, item: getTinyMenuChildStateKey(item.children![index]) }))
-                .filter((hidden) => hidden.hidden);
-            if (hidden.length === 0) {
-                setHiddenItems([]);
-            } else {
-                setHiddenItems(hidden.map((hidden) => hidden.item));
+            const hiddenItems: string[] = [];
+            for (let index = 0; index < hiddenArr.length; index++) {
+                if (hiddenArr[index]) {
+                    hiddenItems.push(getTinyMenuChildStateKey(children[index]));
+                }
             }
+            setHiddenItems(hiddenItems);
         });
 
         return () => {

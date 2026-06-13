@@ -20,6 +20,7 @@ import type { DataStreamTreeNode } from '@univerjs/engine-render';
 import {
     BaselineOffset,
     BooleanNumber,
+    createParagraphId,
     CustomRangeType,
     DataStreamTreeNodeType,
     DocumentBlockRangeType,
@@ -245,6 +246,7 @@ export function convertBodyToHtml(doc: IDocumentData): string {
 
         paragraphs.push({
             startIndex: dataStream.length - 2,
+            paragraphId: createParagraphId(new Set(paragraphs.map((paragraph) => paragraph.paragraphId))),
         });
 
         sectionBreaks.push({

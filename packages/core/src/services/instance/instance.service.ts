@@ -19,7 +19,6 @@ import type { IDisposable } from '../../common/di';
 import type { UnitModel } from '../../common/unit';
 import type { Nullable } from '../../shared';
 import { BehaviorSubject, distinctUntilChanged, filter, map, Subject } from 'rxjs';
-import { traceBasePerformance } from '../../base/base-performance';
 import { createIdentifier, Inject, Injector } from '../../common/di';
 import { UniverInstanceType } from '../../common/unit';
 import { DocumentDataModel } from '../../docs/data-model/document-data-model';
@@ -141,9 +140,7 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
     }
 
     createUnit<T, U extends UnitModel>(type: UniverInstanceType, data: T, options?: ICreateUnitOptions): U {
-        const model = traceBasePerformance('Core.InstanceService.createUnitHandler', () => this._createHandler(type, data, this._ctorByType.get(type)!, options), {
-            type,
-        });
+        const model = this._createHandler(type, data, this._ctorByType.get(type)!, options);
         return model as U;
     }
 
@@ -195,36 +192,25 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
      * @param unit The unit to be added.
      */
     __addUnit(unit: UnitModel, options?: ICreateUnitOptions): void {
-        traceBasePerformance('Core.InstanceService.__addUnit', () => {
-            this._logService.debug(`[UniverInstanceService]: Adding unit with id ${unit.getUnitId()}`);
-            const type = unit.type;
+        this._logService.debug(`[UniverInstanceService]: Adding unit with id ${unit.getUnitId()}`);
+        const type = unit.type;
 
-            if (!this._unitsByType.has(type)) {
-                this._unitsByType.set(type, []);
-            }
+        if (!this._unitsByType.has(type)) {
+            this._unitsByType.set(type, []);
+        }
 
-            const units = this._unitsByType.get(type)!;
-            const newUnitId = unit.getUnitId();
-            if (units.findIndex((u) => u.getUnitId() === newUnitId) !== -1) {
-                throw new Error(`[UniverInstanceService]: cannot create a unit with the same unit id: ${newUnitId}.`);
-            }
+        const units = this._unitsByType.get(type)!;
+        const newUnitId = unit.getUnitId();
+        if (units.findIndex((u) => u.getUnitId() === newUnitId) !== -1) {
+            throw new Error(`[UniverInstanceService]: cannot create a unit with the same unit id: ${newUnitId}.`);
+        }
 
-            units.push(unit);
-            traceBasePerformance('Core.InstanceService.unitAdded.next', () => this._unitAdded$.next({ unit, options }), {
-                type,
-                unitId: unit.getUnitId(),
-            });
+        units.push(unit);
+        this._unitAdded$.next({ unit, options });
 
-            if (options?.makeCurrent ?? true) {
-                traceBasePerformance('Core.InstanceService.setCurrentUnitForType', () => this.setCurrentUnitForType(unit.getUnitId()), {
-                    type,
-                    unitId: unit.getUnitId(),
-                });
-            }
-        }, {
-            type: unit.type,
-            unitId: unit.getUnitId(),
-        });
+        if (options?.makeCurrent ?? true) {
+            this.setCurrentUnitForType(unit.getUnitId());
+        }
     }
 
     private _unitDisposed$ = new Subject<UnitModel>();

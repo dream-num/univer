@@ -15,6 +15,7 @@
  */
 
 import type { IDocumentBody } from '@univerjs/core';
+import { createParagraphId } from '@univerjs/core';
 
 type IParagraphStyle = NonNullable<IDocumentBody['paragraphs']>[number]['paragraphStyle'];
 
@@ -79,10 +80,12 @@ export function buildPlainTextInsertBody(
     };
 
     const paragraphs = [];
+    const existingParagraphIds = new Set<string>();
     for (let index = 0; index < normalizedDataStream.length; index++) {
         if (normalizedDataStream[index] === '\r') {
             paragraphs.push({
                 startIndex: index,
+                paragraphId: createParagraphId(existingParagraphIds),
                 ...(options.paragraphStyle == null ? {} : { paragraphStyle: cloneParagraphStyle(options.paragraphStyle) }),
             });
         }

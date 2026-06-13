@@ -27,8 +27,8 @@ import { FDocTable } from './f-doc-table';
  * Use this wrapper when you need to inspect an element type first, navigate to
  * neighboring elements, or cast the element to a more specific facade wrapper.
  *
- * Paragraph keys are runtime temporary keys for the current `FDocument` facade
- * lifecycle. Tables, block ranges, and custom blocks use their persisted ids.
+ * Paragraph keys are persisted `paragraphId` values. Tables, block ranges, and
+ * custom blocks use their persisted ids.
  *
  * @hideconstructor
  */
@@ -57,7 +57,7 @@ export class FDocElement {
 
     /**
      * Get the facade key used to resolve this element.
-     * @returns {string} The runtime paragraph key or persisted table/block id.
+     * @returns {string} The paragraph `paragraphId` or persisted table/block/custom block id.
      * @example
      * ```ts
      * const doc = univerAPI.getActiveDocument();

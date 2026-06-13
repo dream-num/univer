@@ -26,9 +26,7 @@ function getHeadingDocumentData(): IDocumentData {
         id: 'test-doc',
         body: {
             dataStream: 'Heading\r\n',
-            paragraphs: [{
-                startIndex: 7,
-            }],
+            paragraphs: [{ paragraphId: 'para_docs_ui_fixture_29', startIndex: 7 }],
         },
         documentStyle: {
             pageSize: {
@@ -48,9 +46,7 @@ function getQuickHeadingDocumentData(): IDocumentData {
         id: 'test-doc',
         body: {
             dataStream: '# Heading\r\n',
-            paragraphs: [{
-                startIndex: 9,
-            }],
+            paragraphs: [{ paragraphId: 'para_docs_ui_fixture_30', startIndex: 9 }],
         },
         documentStyle: {
             pageSize: {

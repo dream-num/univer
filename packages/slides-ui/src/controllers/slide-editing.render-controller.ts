@@ -35,6 +35,7 @@ import type {
 import type { SlideDataModel } from '@univerjs/slides';
 import type { IEditorBridgeServiceVisibleParam } from '../services/slide-editor-bridge.service';
 import {
+    createParagraphId,
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     Direction,
     Disposable,
@@ -633,6 +634,7 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
                 body.paragraphs = [
                     {
                         startIndex: 0,
+                        paragraphId: createParagraphId(new Set()),
                     },
                 ];
             }

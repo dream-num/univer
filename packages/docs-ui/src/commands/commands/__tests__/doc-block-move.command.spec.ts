@@ -22,7 +22,7 @@ import { buildMoveDocBlockActions } from '../doc-block-move.command';
 describe('buildMoveDocBlockActions', () => {
     it('moves a paragraph and remaps paragraph indexes', () => {
         const documentData = createDocument('A\rB\rC\r\n', {
-            paragraphs: [{ startIndex: 1 }, { startIndex: 3 }, { startIndex: 5 }],
+            paragraphs: [{ paragraphId: 'para_docs_ui_fixture_9', startIndex: 1 }, { paragraphId: 'para_docs_ui_fixture_10', startIndex: 3 }, { paragraphId: 'para_docs_ui_fixture_11', startIndex: 5 }],
             sectionBreaks: [{ startIndex: 6 }],
         });
 
@@ -39,7 +39,7 @@ describe('buildMoveDocBlockActions', () => {
 
     it('moves a block range as one unit', () => {
         const documentData = createDocument('aa\rBB\rcc\r\n', {
-            paragraphs: [{ startIndex: 2 }, { startIndex: 5 }, { startIndex: 8 }],
+            paragraphs: [{ paragraphId: 'para_docs_ui_fixture_12', startIndex: 2 }, { paragraphId: 'para_docs_ui_fixture_13', startIndex: 5 }, { paragraphId: 'para_docs_ui_fixture_14', startIndex: 8 }],
             sectionBreaks: [{ startIndex: 9 }],
             blockRanges: [{ blockId: 'quote-1', blockType: DocumentBlockRangeType.QUOTE, startIndex: 3, endIndex: 5 }],
         });
@@ -58,7 +58,7 @@ describe('buildMoveDocBlockActions', () => {
 
     it('moves a table range and remaps custom ranges and text runs', () => {
         const documentData = createDocument('aa\rTT\rcc\r\n', {
-            paragraphs: [{ startIndex: 2 }, { startIndex: 5 }, { startIndex: 8 }],
+            paragraphs: [{ paragraphId: 'para_docs_ui_fixture_15', startIndex: 2 }, { paragraphId: 'para_docs_ui_fixture_16', startIndex: 5 }, { paragraphId: 'para_docs_ui_fixture_17', startIndex: 8 }],
             sectionBreaks: [{ startIndex: 9 }],
             tables: [{ tableId: 'table-1', startIndex: 3, endIndex: 6 }],
             customRanges: [{ rangeId: 'comment-1', rangeType: CustomRangeType.COMMENT, startIndex: 6, endIndex: 7 }],
@@ -79,7 +79,7 @@ describe('buildMoveDocBlockActions', () => {
 
     it('moves a custom block paragraph and keeps the custom block attached', () => {
         const documentData = createDocument('\b\raa\r\n', {
-            paragraphs: [{ startIndex: 1 }, { startIndex: 4 }],
+            paragraphs: [{ paragraphId: 'para_docs_ui_fixture_18', startIndex: 1 }, { paragraphId: 'para_docs_ui_fixture_19', startIndex: 4 }],
             sectionBreaks: [{ startIndex: 5 }],
             customBlocks: [{ blockId: 'custom-1', blockType: BlockType.CUSTOM, startIndex: 0 }],
         });

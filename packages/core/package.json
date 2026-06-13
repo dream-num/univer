@@ -80,7 +80,7 @@
     "dependencies": {
         "@univerjs/protocol": "workspace:*",
         "@univerjs/themes": "workspace:*",
-        "@wendellhu/redi": "1.1.1",
+        "@wendellhu/redi": "1.1.2",
         "async-lock": "^1.4.1",
         "fast-diff": "1.3.0",
         "kdbush": "^4.1.0",

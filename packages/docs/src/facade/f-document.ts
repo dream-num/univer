@@ -81,9 +81,8 @@ export class FDocument extends FBaseInitialable {
      *
      * The returned body facade provides synchronous Google Docs-like element APIs
      * for reading and editing top-level document body elements. Paragraph elements
-     * receive runtime temporary keys that remain stable for this `FDocument`
-     * facade lifecycle. Persisted elements, such as tables and custom blocks, use
-     * their existing ids.
+     * use their persisted `paragraphId` values. Persisted elements, such as tables
+     * and custom blocks, use their existing ids.
      *
      * @returns {FDocBody} The document body API instance.
      * @example
@@ -147,8 +146,7 @@ export class FDocument extends FBaseInitialable {
      * ```
      */
     save(): IDocumentData {
-        const snapshot = this._resourceLoaderService.saveUnit<IDocumentData>(this._documentDataModel.getUnitId())!;
-        return snapshot;
+        return this._resourceLoaderService.saveUnit<IDocumentData>(this._documentDataModel.getUnitId())!;
     }
 
     /**

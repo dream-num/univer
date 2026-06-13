@@ -52,9 +52,7 @@ function createBaseDoc(dataStream = 'Hello world\r\n'): IDocumentData {
                 ed: dataStream.length - 2,
                 ts: {},
             }],
-            paragraphs: [{
-                startIndex: dataStream.length - 2,
-            }],
+            paragraphs: [{ paragraphId: 'para_docs_ui_fixture_22', startIndex: dataStream.length - 2 }],
             sectionBreaks: [{
                 startIndex: dataStream.length - 1,
             }],
@@ -83,15 +81,10 @@ function createMultiParagraphDoc(): IDocumentData {
                 ed: 10,
                 ts: {},
             }],
-            paragraphs: [{
-                startIndex: 5,
-                paragraphStyle: {
-                    namedStyleType: NamedStyleType.HEADING_1,
-                    headingId: 'heading-1',
-                },
-            }, {
-                startIndex: 10,
-            }],
+            paragraphs: [{ paragraphId: 'para_docs_ui_fixture_23', startIndex: 5, paragraphStyle: {
+                namedStyleType: NamedStyleType.HEADING_1,
+                headingId: 'heading-1',
+            } }, { paragraphId: 'para_docs_ui_fixture_24', startIndex: 10 }],
             sectionBreaks: [{
                 startIndex: 11,
             }],
@@ -130,9 +123,7 @@ function createTableDoc(): IDocumentData {
                     ...paragraph,
                     startIndex: paragraph.startIndex + prefix.length,
                 })),
-                {
-                    startIndex: dataStream.length - 2,
-                },
+                { paragraphId: 'para_docs_ui_fixture_25', startIndex: dataStream.length - 2 },
             ],
             sectionBreaks: [
                 ...table.sectionBreaks.map((sectionBreak) => ({
@@ -179,15 +170,13 @@ function createTableDocWithParagraphsBeforeTable(): IDocumentData {
                 ts: {},
             }],
             paragraphs: [
-                { startIndex: 5 },
-                { startIndex: 10 },
+                { paragraphId: 'para_docs_ui_fixture_26', startIndex: 5 },
+                { paragraphId: 'para_docs_ui_fixture_27', startIndex: 10 },
                 ...table.paragraphs.map((paragraph) => ({
                     ...paragraph,
                     startIndex: paragraph.startIndex + prefix.length,
                 })),
-                {
-                    startIndex: dataStream.length - 2,
-                },
+                { paragraphId: 'para_docs_ui_fixture_28', startIndex: dataStream.length - 2 },
             ],
             sectionBreaks: [
                 ...table.sectionBreaks.map((sectionBreak) => ({

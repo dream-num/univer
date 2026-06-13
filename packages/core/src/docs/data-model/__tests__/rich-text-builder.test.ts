@@ -220,6 +220,7 @@ describe('RichTextValue', () => {
             textRuns: [],
             paragraphs: [{
                 startIndex: 11,
+                paragraphId: 'para_fixture_1007',
                 paragraphStyle,
             }],
         });
@@ -237,6 +238,7 @@ describe('RichTextValue', () => {
             textRuns: [],
             paragraphs: [{
                 startIndex: 11,
+                paragraphId: 'para_fixture_1008',
                 bullet,
             }],
         });
@@ -297,6 +299,7 @@ describe('RichTextValue', () => {
             }],
             paragraphs: [{
                 startIndex: 11,
+                paragraphId: 'para_fixture_1009',
                 paragraphStyle: { horizontalAlign: HorizontalAlign.CENTER },
             }],
         };
@@ -312,7 +315,13 @@ describe('RichTextBuilder', () => {
     it('should create empty rich text builder', () => {
         const builder = RichTextBuilder.create();
         const emptyData = RichTextBuilder.newEmptyData();
-        expect(builder.getData()).toEqual(emptyData);
+        expect(builder.getData()).toMatchObject({
+            ...emptyData,
+            body: {
+                ...emptyData.body,
+                paragraphs: [{ startIndex: 0, paragraphId: expect.stringMatching(/^para_/) }],
+            },
+        });
     });
 
     describe('text insertion', () => {

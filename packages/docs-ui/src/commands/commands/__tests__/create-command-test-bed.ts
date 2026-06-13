@@ -69,16 +69,11 @@ const TEST_DOCUMENT_DATA_EN: IDocumentData = {
             },
         ],
         paragraphs: [
-            {
-                startIndex: 22,
-            },
-            {
-                startIndex: 68,
-                paragraphStyle: {
-                    spaceAbove: { v: 20 },
-                    indentFirstLine: { v: 20 },
-                },
-            },
+            { paragraphId: 'para_docs_ui_fixture_7', startIndex: 22 },
+            { paragraphId: 'para_docs_ui_fixture_8', startIndex: 68, paragraphStyle: {
+                spaceAbove: { v: 20 },
+                indentFirstLine: { v: 20 },
+            } },
         ],
         sectionBreaks: [],
         customBlocks: [],

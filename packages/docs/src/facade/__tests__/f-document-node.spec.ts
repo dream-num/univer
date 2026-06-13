@@ -15,10 +15,10 @@
  */
 
 import type { IDocumentData, Univer } from '@univerjs/core';
-import type { FDocument } from '../f-document';
 import { DocumentBlockRangeType, IResourceManagerService, PresetListType, UniverInstanceType } from '@univerjs/core';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DocElementStaleError } from '../doc-element-registry';
+import { FDocument } from '../f-document';
 import { createTestBed } from './create-test-bed';
 
 const DOCUMENT_STYLE: IDocumentData['documentStyle'] = {
@@ -46,7 +46,11 @@ function createDocumentData(id: string, body: NonNullable<IDocumentData['body']>
 function createSimpleDocument(id = 'test'): IDocumentData {
     return createDocumentData(id, {
         dataStream: 'Alpha\rBeta\rGamma\r\n',
-        paragraphs: [{ startIndex: 5 }, { startIndex: 10 }, { startIndex: 16 }],
+        paragraphs: [
+            { startIndex: 5, paragraphId: 'para_alpha' },
+            { startIndex: 10, paragraphId: 'para_beta' },
+            { startIndex: 16, paragraphId: 'para_gamma' },
+        ],
         sectionBreaks: [{ startIndex: 17 }],
     });
 }
@@ -54,7 +58,11 @@ function createSimpleDocument(id = 'test'): IDocumentData {
 function createDuplicateDocument(id = 'test'): IDocumentData {
     return createDocumentData(id, {
         dataStream: 'Same\rSame\rTail\r\n',
-        paragraphs: [{ startIndex: 4 }, { startIndex: 9 }, { startIndex: 14 }],
+        paragraphs: [
+            { startIndex: 4, paragraphId: 'para_same_1' },
+            { startIndex: 9, paragraphId: 'para_same_2' },
+            { startIndex: 14, paragraphId: 'para_tail' },
+        ],
         sectionBreaks: [{ startIndex: 15 }],
     });
 }
@@ -65,13 +73,14 @@ function createTaskDocument(id = 'test'): IDocumentData {
         paragraphs: [
             {
                 startIndex: 4,
+                paragraphId: 'para_todo',
                 bullet: {
                     listId: 'task-list',
                     listType: PresetListType.CHECK_LIST,
                     nestingLevel: 0,
                 },
             },
-            { startIndex: 9 },
+            { startIndex: 9, paragraphId: 'para_done' },
         ],
         sectionBreaks: [{ startIndex: 10 }],
     });
@@ -83,13 +92,14 @@ function createBulletDocument(id = 'test'): IDocumentData {
         paragraphs: [
             {
                 startIndex: 6,
+                paragraphId: 'para_bullet',
                 bullet: {
                     listId: 'bullet-list',
                     listType: PresetListType.BULLET_LIST,
                     nestingLevel: 0,
                 },
             },
-            { startIndex: 11 },
+            { startIndex: 11, paragraphId: 'para_bullet_tail' },
         ],
         sectionBreaks: [{ startIndex: 12 }],
     });
@@ -98,7 +108,7 @@ function createBulletDocument(id = 'test'): IDocumentData {
 function createBlockRangeDocument(blockType = DocumentBlockRangeType.QUOTE, id = 'test'): IDocumentData {
     return createDocumentData(id, {
         dataStream: 'Block\rAfter\r\n',
-        paragraphs: [{ startIndex: 5 }, { startIndex: 11 }],
+        paragraphs: [{ startIndex: 5, paragraphId: 'para_fixture_20' }, { startIndex: 11, paragraphId: 'para_after_block' }],
         blockRanges: [{
             blockId: `${blockType}-1`,
             blockType,
@@ -112,7 +122,7 @@ function createBlockRangeDocument(blockType = DocumentBlockRangeType.QUOTE, id =
 function createTableDocument(id = 'test'): IDocumentData {
     return createDocumentData(id, {
         dataStream: 'TT\raa\r\n',
-        paragraphs: [{ startIndex: 2 }, { startIndex: 5 }],
+        paragraphs: [{ startIndex: 2, paragraphId: 'para_fixture_21' }, { startIndex: 5, paragraphId: 'para_after_table' }],
         tables: [{ tableId: 'table-1', startIndex: 0, endIndex: 2 }],
         sectionBreaks: [{ startIndex: 6 }],
     });
@@ -121,10 +131,15 @@ function createTableDocument(id = 'test'): IDocumentData {
 function createCustomBlockDocument(id = 'test'): IDocumentData {
     return createDocumentData(id, {
         dataStream: '\b\raa\r\n',
-        paragraphs: [{ startIndex: 1 }, { startIndex: 4 }],
+        paragraphs: [{ startIndex: 1, paragraphId: 'para_fixture_22' }, { startIndex: 4, paragraphId: 'para_after_custom_block' }],
         customBlocks: [{ blockId: 'custom-1', blockType: 'custom' as never, startIndex: 0 }],
         sectionBreaks: [{ startIndex: 5 }],
     });
+}
+
+function expectParagraphIds(paragraphs: NonNullable<IDocumentData['body']>['paragraphs']): void {
+    expect(paragraphs?.every((paragraph) => paragraph.paragraphId?.startsWith('para_'))).toBe(true);
+    expect(new Set(paragraphs?.map((paragraph) => paragraph.paragraphId)).size).toBe(paragraphs?.length);
 }
 
 describe('FDocument facade in Node', () => {
@@ -201,6 +216,72 @@ describe('FDocument facade in Node', () => {
         ]);
     });
 
+    it('preserves required paragraph ids at test-bed and save snapshot boundaries', () => {
+        univer.dispose();
+        createDocumentFacade(createSimpleDocument());
+
+        const savedParagraphs = document.save().body?.paragraphs;
+
+        expect(savedParagraphs?.map((paragraph) => paragraph.startIndex)).toEqual([5, 10, 16]);
+        expectParagraphIds(savedParagraphs);
+    });
+
+    it('returns saved snapshots with required paragraph ids unchanged', () => {
+        const snapshot = createDocumentData('doc-with-ids', {
+            dataStream: 'Alpha\rBeta\rGamma\r\n',
+            paragraphs: [
+                { startIndex: 5, paragraphId: 'para_fixture_23' },
+                { startIndex: 10, paragraphId: 'para_fixture_24' },
+                { startIndex: 16, paragraphId: 'para_fixture_25' },
+            ],
+            sectionBreaks: [{ startIndex: 17 }],
+        });
+        const saveUnit = vi.fn(() => snapshot);
+        const facadeDocument = new FDocument(
+            {
+                getSnapshot: () => ({ id: 'doc-with-ids', documentStyle: {} }),
+                getUnitId: () => 'doc-with-ids',
+            } as never,
+            {} as never,
+            {} as never,
+            { saveUnit } as never,
+            {} as never
+        );
+
+        const savedParagraphs = facadeDocument.save().body?.paragraphs;
+
+        expect(saveUnit).toHaveBeenCalledWith('doc-with-ids');
+        expect(savedParagraphs?.map((paragraph) => paragraph.startIndex)).toEqual([5, 10, 16]);
+        expectParagraphIds(savedParagraphs);
+    });
+
+    it('uses existing paragraph ids when creating body facade wrappers', () => {
+        const snapshot = createDocumentData('doc-with-ids', {
+            dataStream: 'Legacy\r\n',
+            paragraphs: [{ startIndex: 6, paragraphId: 'para_fixture_26' }],
+            sectionBreaks: [{ startIndex: 7 }],
+        });
+        const model = {
+            getUnitId: () => 'doc-with-ids',
+            getSnapshot: () => snapshot,
+            getSelfOrHeaderFooterModel: () => ({
+                getBody: () => snapshot.body,
+            }),
+        };
+        const facadeDocument = new FDocument(
+            model as never,
+            {} as never,
+            {} as never,
+            {} as never,
+            {} as never
+        );
+
+        const paragraph = facadeDocument.getBody().getChild(0).asParagraph();
+
+        expect(paragraph.getId()).toMatch(/^para_/);
+        expect(snapshot.body?.paragraphs?.[0].paragraphId).toBe(paragraph.getId());
+    });
+
     it('runs FDocBody paragraph and range APIs in Node', () => {
         univer.dispose();
         createDocumentFacade(createSimpleDocument());
@@ -211,7 +292,10 @@ describe('FDocument facade in Node', () => {
         const first = body.getChild(0);
         const second = body.getChild(1).asParagraph();
         expect(first.getType()).toBe('paragraph');
-        expect(first.getKey()).toMatch(/^paragraph-/);
+        expect(first.getKey()).toBe('para_alpha');
+        expect(first.asParagraph().getId()).toBe('para_alpha');
+        expect(second.getId()).toBe('para_beta');
+        expect(second.getKey()).toBe('para_beta');
         expect(first.getParent()).toBe(body);
         expect(first.getNextSibling()?.asParagraph().getText()).toBe('Beta');
         expect(body.getChild(1).getPreviousSibling()?.asParagraph().getText()).toBe('Alpha');
@@ -221,10 +305,15 @@ describe('FDocument facade in Node', () => {
         expect(body.insertText(0, 'Hello ')).toBe(true);
         expect(document.save().body?.dataStream).toBe('Hello Alpha\rBeta\rGamma\r\n');
 
-        expect(body.insertParagraph(0, 'Title')).toBe(true);
+        const title = body.insertParagraph(0, 'Title');
+        expect(title.getId()).toMatch(/^para_/);
+        expect(title.getKey()).toBe(title.getId());
+        expect(title.getText()).toBe('Title');
+        expect(document.save().body?.paragraphs?.[0].paragraphId).toBe(title.getId());
         expect(document.save().body?.dataStream).toBe('Title\rHello Alpha\rBeta\rGamma\r\n');
 
-        expect(body.appendParagraph('Tail')).toBe(true);
+        const tail = body.appendParagraph('Tail');
+        expect(tail.getText()).toBe('Tail');
         expect(document.save().body?.dataStream).toBe('Title\rHello Alpha\rBeta\rGamma\rTail\r\n');
 
         expect(body.deleteRange({ startOffset: 0, endOffset: 6 })).toBe(true);
@@ -264,10 +353,13 @@ describe('FDocument facade in Node', () => {
         const body = document.getBody();
         const secondSame = body.getChild(1).asParagraph();
 
-        expect(body.insertParagraph(0, 'X')).toBe(true);
+        expect(secondSame.getId()).toBe('para_same_2');
+        expect(body.insertParagraph(0, 'X').getText()).toBe('X');
         expect(body.getChildIndex(secondSame)).toBe(2);
         expect(secondSame.setText('Picked')).toBe(true);
         expect(document.save().body?.dataStream).toBe('X\rSame\rPicked\rTail\r\n');
+        expect(secondSame.removeFromParent()).toBe(true);
+        expect(document.save().body?.dataStream).toBe('X\rSame\rTail\r\n');
     });
 
     it('marks deleted paragraph wrappers as stale', () => {
@@ -277,6 +369,29 @@ describe('FDocument facade in Node', () => {
         const paragraph = document.getBody().getChild(1).asParagraph();
         expect(paragraph.removeFromParent()).toBe(true);
         expect(() => paragraph.getText()).toThrow(DocElementStaleError);
+        expect(() => paragraph.removeFromParent()).toThrow(DocElementStaleError);
+    });
+
+    it('throws stale errors for duplicate paragraph ids', () => {
+        univer.dispose();
+        createDocumentFacade(createSimpleDocument());
+
+        const body = document.getBody();
+        document.getDocumentDataModel().getBody()!.paragraphs![1].paragraphId = 'para_alpha';
+
+        expect(() => body.resolveParagraph('para_alpha')).toThrow(DocElementStaleError);
+    });
+
+    it('throws a stale error when a paragraph child is missing its id', () => {
+        univer.dispose();
+        createDocumentFacade(createSimpleDocument());
+
+        const body = document.getBody();
+        const invalidParagraph = document.getDocumentDataModel().getBody()!.paragraphs![0] as { paragraphId?: string };
+        delete invalidParagraph.paragraphId;
+
+        expect(() => body.getChild(0)).toThrow(DocElementStaleError);
+        expect(() => body.getChild(0)).toThrow('Paragraph at index 0 is missing paragraphId.');
     });
 
     it('runs FDocParagraph list and task APIs in Node', () => {
@@ -286,7 +401,8 @@ describe('FDocument facade in Node', () => {
         const bulletBody = document.getBody();
         const listItem = bulletBody.getChild(0).asParagraph();
         expect(listItem.getType()).toBe('paragraph');
-        expect(listItem.getKey()).toMatch(/^paragraph-/);
+        expect(listItem.getKey()).toMatch(/^para_/);
+        expect(listItem.getId()).toBe(listItem.getKey());
         expect(listItem.getParent()).toBe(bulletBody);
         expect(listItem.isListItem()).toBe(true);
         expect(listItem.isTask()).toBe(false);
@@ -336,7 +452,7 @@ describe('FDocument facade in Node', () => {
             expect(block.getText()).toBe('Block');
             expect(body.getBlockRange(block.getKey()).blockType).toBe(blockType);
             expect(body.getBlockRangeText(block.getKey())).toBe('Block');
-            expect(body.insertParagraph(0, 'Intro')).toBe(true);
+            expect(body.insertParagraph(0, 'Intro').getText()).toBe('Intro');
             expect(block.getText()).toBe('Block');
             expect(block.setText('Updated')).toBe(true);
             expect(body.getBlockRangeText(block.getKey())).toBe('Updated');

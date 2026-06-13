@@ -31,13 +31,10 @@ function getDocumentData(): IDocumentData {
                 ed: 5,
                 ts: {},
             }],
-            paragraphs: [{
-                startIndex: 5,
-                paragraphStyle: {
-                    headingId: 'heading-1',
-                    namedStyleType: NamedStyleType.HEADING_1,
-                },
-            }],
+            paragraphs: [{ paragraphId: 'para_docs_ui_fixture_1', startIndex: 5, paragraphStyle: {
+                headingId: 'heading-1',
+                namedStyleType: NamedStyleType.HEADING_1,
+            } }],
         },
         documentStyle: {
             pageSize: {

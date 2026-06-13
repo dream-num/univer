@@ -21,6 +21,7 @@ import type { IMoveRangeMutationParams, ISetRangeValuesMutationParams } from '@u
 import type { ICellEditorState } from '../../services/editor-bridge.service';
 import {
     BooleanNumber,
+    createParagraphId,
     Disposable,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
@@ -123,6 +124,7 @@ export class EditorDataSyncController extends Disposable {
                 paragraphs: [
                     {
                         startIndex: 0,
+                        paragraphId: createParagraphId(new Set()),
                     },
                 ],
                 textRuns: [],

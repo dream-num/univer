@@ -52,16 +52,11 @@ function getDocumentData() {
                 },
             ],
             paragraphs: [
-                {
-                    startIndex: 22,
-                },
-                {
-                    startIndex: 68,
-                    paragraphStyle: {
-                        spaceAbove: { v: 20 },
-                        indentFirstLine: { v: 20 },
-                    },
-                },
+                { paragraphId: 'para_docs_ui_fixture_2', startIndex: 22 },
+                { paragraphId: 'para_docs_ui_fixture_3', startIndex: 68, paragraphStyle: {
+                    spaceAbove: { v: 20 },
+                    indentFirstLine: { v: 20 },
+                } },
             ],
             sectionBreaks: [],
             customBlocks: [],

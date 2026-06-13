@@ -20,6 +20,7 @@ import type { IDocumentData, IPaddingData, IStyleBase, IStyleData, ITextRotation
 import type { ICellData, IRange, IUnitRange } from './typedef';
 import { DEFAULT_EMPTY_DOCUMENT_VALUE } from '../common/const';
 import { BuildTextUtils, DocumentDataModel } from '../docs';
+import { createParagraphId } from '../docs/paragraph-id';
 import { TextX } from '../docs/data-model/text-x/text-x';
 import { convertTextRotation } from '../docs/data-model/utils';
 import { Rectangle } from '../shared';
@@ -95,6 +96,7 @@ export function createDocumentModelWithStyle(content: string, textStyle: ITextSt
             paragraphs: [
                 {
                     startIndex: contentLength,
+                    paragraphId: createParagraphId(new Set()),
                     paragraphStyle: {
                         horizontalAlign,
                     },

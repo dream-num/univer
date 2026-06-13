@@ -19,6 +19,7 @@ import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { DocElementRegistry, FDocElementType } from './doc-element-registry';
 import { getRichTextEditPath, JSONX, PresetListType, TextX, TextXActionType, UpdateDocsAttributeType } from '@univerjs/core';
 import { RichTextEditingMutation } from '@univerjs/docs';
+import { DocElementStaleError } from './doc-element-registry';
 import { buildPlainTextInsertBody } from './utils';
 import { FDocElement } from './f-doc-element';
 import { FDocParagraph } from './f-doc-paragraph';
@@ -59,7 +60,7 @@ export interface IFDocElementHandle {
      */
     getType(): FDocElementType;
     /**
-     * Get the runtime or persisted key used by the facade to resolve the element.
+     * Get the persisted key used by the facade to resolve the element.
      * @returns {string} The facade key.
      */
     getKey(): string;
@@ -88,13 +89,14 @@ interface IFDocChildInfo {
 }
 
 const FACADE_TRIGGER = 'doc-facade';
+const RESTORE_INSERTED_PARAGRAPH_IDS = '__textXRestoreParagraphIds';
 
 /**
  * A Facade API object bounded to a document body or header/footer segment.
  * It provides Google Docs-like element access and range editing methods.
  *
- * Paragraph elements use runtime temporary keys that remain stable for this `FDocument`
- * facade instance. Tables, block ranges, and custom blocks use their persisted ids.
+ * Paragraph elements use their persisted `paragraphId`. Tables, block ranges, and
+ * custom blocks use their persisted ids.
  *
  * @hideconstructor
  */
@@ -102,7 +104,7 @@ export class FDocBody {
     constructor(
         private readonly _documentDataModel: DocumentDataModel,
         private readonly _commandService: ICommandService,
-        private readonly _registry: DocElementRegistry,
+        _registry: DocElementRegistry,
         private readonly _segmentId = ''
     ) {}
 
@@ -195,35 +197,44 @@ export class FDocBody {
      * Insert a plain-text paragraph before the paragraph at the given paragraph index.
      * @param {number} index The zero-based paragraph insertion index.
      * @param {string} text The paragraph text. Defaults to an empty paragraph.
-     * @returns {boolean} `true` if the paragraph was inserted.
+     * @returns {FDocParagraph} The inserted paragraph wrapper.
      * @example
      * ```ts
      * const doc = univerAPI.getActiveDocument();
      * if (!doc) throw new Error('No active document');
      *
      * const body = doc.getBody();
-     * body.insertParagraph(0, 'Document title');
+     * const paragraph = body.insertParagraph(0, 'Document title');
+     * paragraph.appendText(' suffix');
      * ```
      */
-    insertParagraph(index: number, text = ''): boolean {
+    insertParagraph(index: number, text = ''): FDocParagraph {
         const offset = this._getParagraphInsertOffset(index);
-        return this._replaceBodyRange({ startOffset: offset, endOffset: offset }, buildPlainTextInsertBody(`${text}\r`));
+        const result = this._replaceBodyRange({ startOffset: offset, endOffset: offset }, buildPlainTextInsertBody(`${text}\r`));
+        if (!result) {
+            throw new Error('Failed to insert paragraph.');
+        }
+
+        const paragraphIndex = this._normalizeInsertedParagraphIndex(index);
+        const paragraph = this._getBody().paragraphs?.[paragraphIndex];
+        return new FDocParagraph(this, this._getParagraphId(paragraph, paragraphIndex));
     }
 
     /**
      * Append a plain-text paragraph at the end of the body.
      * @param {string} text The paragraph text. Defaults to an empty paragraph.
-     * @returns {boolean} `true` if the paragraph was appended.
+     * @returns {FDocParagraph} The appended paragraph wrapper.
      * @example
      * ```ts
      * const doc = univerAPI.getActiveDocument();
      * if (!doc) throw new Error('No active document');
      *
      * const body = doc.getBody();
-     * body.appendParagraph('Summary');
+     * const paragraph = body.appendParagraph('Summary');
+     * console.log(paragraph.getText());
      * ```
      */
-    appendParagraph(text = ''): boolean {
+    appendParagraph(text = ''): FDocParagraph {
         return this.insertParagraph(this._getBody().paragraphs?.length ?? 0, text);
     }
 
@@ -331,6 +342,7 @@ export class FDocBody {
                 },
             }],
         };
+        this._preserveExplicitParagraphIds(updateBody);
 
         return this._retainBodyRange(
             { startOffset: resolved.endOffset, endOffset: resolved.endOffset + 1 },
@@ -340,8 +352,8 @@ export class FDocBody {
     }
 
     /**
-     * Get the text content of a paragraph by runtime key.
-     * @param {string} key The paragraph runtime key.
+     * Get the text content of a paragraph by paragraph id.
+     * @param {string} key The paragraph id.
      * @returns {string} The paragraph text without the trailing paragraph break.
      * @example
      * ```ts
@@ -358,8 +370,8 @@ export class FDocBody {
     }
 
     /**
-     * Replace the text content of a paragraph by runtime key.
-     * @param {string} key The paragraph runtime key.
+     * Replace the text content of a paragraph by paragraph id.
+     * @param {string} key The paragraph id.
      * @param {string} text The replacement paragraph text.
      * @returns {boolean} `true` if the paragraph text was replaced.
      * @example
@@ -377,8 +389,8 @@ export class FDocBody {
     }
 
     /**
-     * Append text to a paragraph by runtime key.
-     * @param {string} key The paragraph runtime key.
+     * Append text to a paragraph by paragraph id.
+     * @param {string} key The paragraph id.
      * @param {string} text The text to append before the paragraph break.
      * @returns {boolean} `true` if the text was appended.
      * @example
@@ -396,8 +408,8 @@ export class FDocBody {
     }
 
     /**
-     * Remove a paragraph by runtime key.
-     * @param {string} key The paragraph runtime key.
+     * Remove a paragraph by paragraph id.
+     * @param {string} key The paragraph id.
      * @returns {boolean} `true` if the paragraph was removed.
      * @example
      * ```ts
@@ -414,8 +426,8 @@ export class FDocBody {
     }
 
     /**
-     * Get a paragraph text range by runtime key.
-     * @param {string} key The paragraph runtime key.
+     * Get a paragraph text range by paragraph id.
+     * @param {string} key The paragraph id.
      * @returns {IFDocTextRange} The paragraph range excluding the trailing paragraph break.
      * @example
      * ```ts
@@ -434,7 +446,7 @@ export class FDocBody {
 
     /**
      * Check whether a paragraph has list metadata.
-     * @param {string} key The paragraph runtime key.
+     * @param {string} key The paragraph id.
      * @returns {boolean} `true` if the paragraph is a list item.
      * @example
      * ```ts
@@ -451,7 +463,7 @@ export class FDocBody {
 
     /**
      * Check whether a paragraph is a task/checklist item.
-     * @param {string} key The paragraph runtime key.
+     * @param {string} key The paragraph id.
      * @returns {boolean} `true` if the paragraph is an unchecked or checked task item.
      * @example
      * ```ts
@@ -469,7 +481,7 @@ export class FDocBody {
 
     /**
      * Set the checked state of a task/checklist paragraph.
-     * @param {string} key The paragraph runtime key.
+     * @param {string} key The paragraph id.
      * @param {boolean} checked Whether the task should be checked.
      * @returns {boolean} `true` if the task state was updated, or `false` if the paragraph is not a task item.
      * @example
@@ -499,6 +511,7 @@ export class FDocBody {
                 },
             }],
         };
+        this._preserveExplicitParagraphIds(updateBody);
 
         return this._retainBodyRange(
             { startOffset: resolved.endOffset, endOffset: resolved.endOffset + 1 },
@@ -508,8 +521,8 @@ export class FDocBody {
     }
 
     /**
-     * Resolve a paragraph runtime key to its current paragraph metadata.
-     * @param {string} key The paragraph runtime key.
+     * Resolve a paragraph id to its current paragraph metadata.
+     * @param {string} key The paragraph id.
      * @returns {IFDocResolvedParagraph} The current paragraph metadata.
      * @example
      * ```ts
@@ -523,8 +536,18 @@ export class FDocBody {
      */
     resolveParagraph(key: string): IFDocResolvedParagraph {
         const body = this._getBody();
-        const paragraphIndex = this._registry.syncParagraph(this._segmentId, key, body);
-        const paragraph = body.paragraphs![paragraphIndex];
+        const paragraphs = body.paragraphs ?? [];
+        const matches = paragraphs
+            .map((paragraph, paragraphIndex) => ({ paragraph, paragraphIndex }))
+            .filter(({ paragraph }) => paragraph.paragraphId === key);
+
+        if (matches.length !== 1) {
+            throw new DocElementStaleError(matches.length > 1
+                ? `Doc paragraph id "${key}" is duplicated.`
+                : `Doc paragraph id "${key}" is stale.`);
+        }
+
+        const { paragraph, paragraphIndex } = matches[0];
         const startOffset = paragraphIndex > 0 ? body.paragraphs![paragraphIndex - 1].startIndex + 1 : 0;
 
         return {
@@ -538,7 +561,7 @@ export class FDocBody {
     /**
      * Resolve an element key to its current child metadata.
      * @param {FDocElementType} type The element type.
-     * @param {string} key The runtime or persisted element key.
+     * @param {string} key The persisted element key.
      * @returns {object} The current child metadata used by the facade.
      * @example
      * ```ts
@@ -758,7 +781,7 @@ export class FDocBody {
             const paragraph = body.paragraphs![index];
             children.push({
                 type: 'paragraph',
-                key: this._registry.getParagraphKey(this._segmentId, body, index),
+                key: this._getParagraphId(paragraph, index),
                 position: index > 0 ? body.paragraphs![index - 1].startIndex + 1 : 0,
                 priority: 3,
             });
@@ -819,6 +842,27 @@ export class FDocBody {
         return paragraphs[index - 1].startIndex + 1;
     }
 
+    private _normalizeInsertedParagraphIndex(index: number): number {
+        const paragraphs = this._getBody().paragraphs ?? [];
+        return Math.max(0, Math.min(index, paragraphs.length - 1));
+    }
+
+    private _getParagraphId(paragraph: IParagraph | undefined, paragraphIndex: number): string {
+        if (!paragraph) {
+            throw new RangeError(`Paragraph index ${paragraphIndex} is out of range.`);
+        }
+
+        if (!paragraph.paragraphId) {
+            throw new DocElementStaleError(`Paragraph at index ${paragraphIndex} is missing paragraphId.`);
+        }
+
+        return paragraph.paragraphId;
+    }
+
+    private _preserveExplicitParagraphIds(body: IDocumentBody): void {
+        (body as IDocumentBody & Record<string, unknown>)[RESTORE_INSERTED_PARAGRAPH_IDS] = true;
+    }
+
     private _findParagraphByRange(range: IFDocTextRange): IFDocResolvedParagraph {
         const paragraphs = this._getBody().paragraphs ?? [];
         const paragraphIndex = paragraphs.findIndex((paragraph, index) => {
@@ -860,7 +904,7 @@ export class FDocBody {
             });
         }
 
-        return this._executeTextX(range, textX, insertBody.dataStream.length);
+        return this._executeTextX(textX);
     }
 
     private _retainBodyRange(range: IFDocTextRange, body: IDocumentBody, coverType: UpdateDocsAttributeType): boolean {
@@ -880,7 +924,7 @@ export class FDocBody {
             len: range.endOffset - range.startOffset,
         });
 
-        return this._executeTextX(range, textX, range.endOffset - range.startOffset, false);
+        return this._executeTextX(textX);
     }
 
     private _ensureTextRuns(): void {
@@ -909,11 +953,7 @@ export class FDocBody {
         );
     }
 
-    private _executeTextX(range: IFDocTextRange, textX: TextX, insertLength: number, trackTextEdit = true): boolean {
-        if (trackTextEdit) {
-            this._registry.beforeTextEdit(this._segmentId, range.startOffset, range.endOffset, insertLength);
-        }
-
+    private _executeTextX(textX: TextX): boolean {
         const jsonX = JSONX.getInstance();
         const actions = jsonX.editOp(textX.serialize(), getRichTextEditPath(this._documentDataModel, this._segmentId));
         const result = this._commandService.syncExecuteCommand<IRichTextEditingMutationParams>(

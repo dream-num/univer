@@ -32,7 +32,6 @@ import {
     connectInjector,
     ILayoutService,
     IMenuManagerService,
-    IShortcutService,
     IUIPartsService,
 } from '@univerjs/ui';
 import { DeleteRangeMoveLeftConfirmCommand } from '../../commands/commands/delete-range-move-left-confirm.command';
@@ -104,59 +103,6 @@ import { DEFINED_NAME_CONTAINER } from '../../views/defined-name/component-name'
 import { DefinedNameContainer } from '../../views/defined-name/DefinedNameContainer';
 import { MobileSheetBar } from '../../views/mobile/sheet-bar/MobileSheetBar';
 import { RenderSheetContent } from '../../views/sheet-container/SheetContainer';
-import {
-    EditorBreakLineShortcut,
-    EditorCursorCtrlEnterShortcut,
-    EditorCursorEnterShortcut,
-    EditorCursorEscShortcut,
-    EditorCursorTabShortcut,
-    EditorDeleteLeftShortcut,
-    EditorDeleteLeftShortcutInActive,
-    EditorDeleteRightShortcut,
-    generateArrowSelectionShortCutItem,
-    ShiftEditorDeleteLeftShortcut,
-    StartEditWithF2Shortcut,
-} from '../shortcuts/editor.shortcut';
-import { SetColHiddenShortcutItem, SetRowHiddenShortcutItem } from '../shortcuts/operation.shortcut';
-import {
-    ExpandSelectionDownShortcutItem,
-    ExpandSelectionEndDownShortcutItem,
-    ExpandSelectionEndLeftShortcutItem,
-    ExpandSelectionEndRightShortcutItem,
-    ExpandSelectionEndUpShortcutItem,
-    ExpandSelectionLeftShortcutItem,
-    ExpandSelectionRightShortcutItem,
-    ExpandSelectionUpShortcutItem,
-    // MoveBackSelectionShortcutItem,
-    MoveSelectionDownShortcutItem,
-    MoveSelectionEndDownShortcutItem,
-    MoveSelectionEndLeftShortcutItem,
-    MoveSelectionEndRightShortcutItem,
-    MoveSelectionEndUpShortcutItem,
-    MoveSelectionEnterShortcutItem,
-    MoveSelectionEnterUpShortcutItem,
-    MoveSelectionLeftShortcutItem,
-    MoveSelectionRightShortcutItem,
-    MoveSelectionTabLeftShortcutItem,
-    MoveSelectionTabShortcutItem,
-    MoveSelectionUpShortcutItem,
-    SelectAllShortcutItem,
-} from '../shortcuts/selection.shortcut';
-import {
-    SetBoldShortcutItem,
-    SetItalicShortcutItem,
-    SetStrikeThroughShortcutItem,
-    SetUnderlineShortcutItem,
-} from '../shortcuts/style.shortcut';
-import { ClearSelectionValueShortcutItem, ClearSelectionValueShortcutItemMac, ShiftClearSelectionValueShortcutItem, ShiftDeleteSelectionValueShortcutItem } from '../shortcuts/value.shortcut';
-import {
-    PreventDefaultResetZoomShortcutItem,
-    PreventDefaultZoomInShortcutItem,
-    PreventDefaultZoomOutShortcutItem,
-    ResetZoomShortcutItem,
-    ZoomInShortcutItem,
-    ZoomOutShortcutItem,
-} from '../shortcuts/view.shortcut';
 
 export class SheetUIMobileController extends Disposable {
     constructor(
@@ -164,7 +110,6 @@ export class SheetUIMobileController extends Disposable {
         @Inject(ComponentManager) protected readonly _componentManager: ComponentManager,
         @ILayoutService protected readonly _layoutService: ILayoutService,
         @ICommandService protected readonly _commandService: ICommandService,
-        @IShortcutService protected readonly _shortcutService: IShortcutService,
         @IMenuManagerService protected readonly _menuManagerService: IMenuManagerService,
         @IUIPartsService protected readonly _uiPartsService: IUIPartsService,
         @IConfigService protected readonly _configService: IConfigService
@@ -178,7 +123,6 @@ export class SheetUIMobileController extends Disposable {
         this._initComponents();
         this._initCommands();
         this._initMenus();
-        this._initShortcuts();
         this._initWorkbenchParts();
         this._initFocusHandler();
     }
@@ -275,71 +219,6 @@ export class SheetUIMobileController extends Disposable {
 
     private _initMenus(): void {
         this._menuManagerService.mergeMenu(menuSchema);
-    }
-
-    private _initShortcuts(): void {
-        [
-            // selection shortcuts
-            MoveSelectionDownShortcutItem,
-            MoveSelectionUpShortcutItem,
-            MoveSelectionLeftShortcutItem,
-            MoveSelectionRightShortcutItem,
-            MoveSelectionTabShortcutItem,
-            MoveSelectionTabLeftShortcutItem,
-            MoveSelectionEnterShortcutItem,
-            MoveSelectionEnterUpShortcutItem,
-            // MoveBackSelectionShortcutItem,
-            MoveSelectionEndDownShortcutItem,
-            MoveSelectionEndUpShortcutItem,
-            MoveSelectionEndLeftShortcutItem,
-            MoveSelectionEndRightShortcutItem,
-            ExpandSelectionDownShortcutItem,
-            ExpandSelectionUpShortcutItem,
-            ExpandSelectionLeftShortcutItem,
-            ExpandSelectionRightShortcutItem,
-            ExpandSelectionEndDownShortcutItem,
-            ExpandSelectionEndUpShortcutItem,
-            ExpandSelectionEndLeftShortcutItem,
-            ExpandSelectionEndRightShortcutItem,
-            SelectAllShortcutItem,
-
-            // view shortcuts
-            ZoomInShortcutItem,
-            ZoomOutShortcutItem,
-            ResetZoomShortcutItem,
-            PreventDefaultResetZoomShortcutItem,
-            PreventDefaultZoomInShortcutItem,
-            PreventDefaultZoomOutShortcutItem,
-
-            // toggle cell style shortcuts
-            SetBoldShortcutItem,
-            SetItalicShortcutItem,
-            SetUnderlineShortcutItem,
-            SetStrikeThroughShortcutItem,
-
-            // cell content editing shortcuts
-            ClearSelectionValueShortcutItem,
-            ClearSelectionValueShortcutItemMac,
-            ShiftClearSelectionValueShortcutItem,
-            ShiftDeleteSelectionValueShortcutItem,
-            ...generateArrowSelectionShortCutItem(),
-            EditorCursorEnterShortcut,
-            StartEditWithF2Shortcut,
-            EditorCursorTabShortcut,
-            EditorBreakLineShortcut,
-            EditorDeleteLeftShortcut,
-            EditorDeleteRightShortcut,
-            EditorDeleteLeftShortcutInActive,
-            EditorCursorEscShortcut,
-            EditorCursorCtrlEnterShortcut,
-            ShiftEditorDeleteLeftShortcut,
-
-            // operation shortcuts
-            SetRowHiddenShortcutItem,
-            SetColHiddenShortcutItem,
-        ].forEach((item) => {
-            this.disposeWithMe(this._shortcutService.registerShortcut(item));
-        });
     }
 
     private _initWorkbenchParts(): void {

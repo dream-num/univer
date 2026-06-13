@@ -85,12 +85,9 @@ function getCenteredSingleCharacterDocumentData(): IDocumentData {
                 ed: 1,
                 ts: {},
             }],
-            paragraphs: [{
-                startIndex: 1,
-                paragraphStyle: {
-                    horizontalAlign: HorizontalAlign.CENTER,
-                },
-            }],
+            paragraphs: [{ paragraphId: 'para_docs_ui_fixture_4', startIndex: 1, paragraphStyle: {
+                horizontalAlign: HorizontalAlign.CENTER,
+            } }],
         },
         documentStyle: {
             pageSize: {
@@ -110,12 +107,9 @@ function getCenteredEmptyParagraphDocumentData(): IDocumentData {
         id: 'test-doc',
         body: {
             dataStream: '\r\n',
-            paragraphs: [{
-                startIndex: 0,
-                paragraphStyle: {
-                    horizontalAlign: HorizontalAlign.CENTER,
-                },
-            }],
+            paragraphs: [{ paragraphId: 'para_docs_ui_fixture_5', startIndex: 0, paragraphStyle: {
+                horizontalAlign: HorizontalAlign.CENTER,
+            } }],
         },
         documentStyle: {
             pageSize: {
@@ -135,12 +129,9 @@ function getIndentedBlockRangeDocumentData(): IDocumentData {
         id: 'test-doc',
         body: {
             dataStream: `${DataStreamTreeTokenType.BLOCK_START}A${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.BLOCK_END}\n`,
-            paragraphs: [{
-                startIndex: 2,
-                paragraphStyle: {
-                    indentStart: { v: 22 },
-                },
-            }],
+            paragraphs: [{ paragraphId: 'para_docs_ui_fixture_6', startIndex: 2, paragraphStyle: {
+                indentStart: { v: 22 },
+            } }],
             blockRanges: [{
                 blockId: 'quote-1',
                 blockType: DocumentBlockRangeType.QUOTE,

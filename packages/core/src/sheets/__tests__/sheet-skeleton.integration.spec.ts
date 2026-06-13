@@ -241,7 +241,7 @@ describe('SheetSkeleton integration', () => {
             id: 'doc-in-skeleton',
             body: {
                 dataStream: 'Hello\r\n',
-                paragraphs: [{ startIndex: 5 }],
+                paragraphs: [{ startIndex: 5, paragraphId: 'para_fixture_17' }],
             },
             documentStyle: {
                 marginTop: 9,
@@ -281,6 +281,7 @@ describe('SheetSkeleton integration', () => {
             body: {
                 paragraphs: [{
                     startIndex: 5,
+                    paragraphId: 'para_fixture_17',
                     paragraphStyle: {
                         horizontalAlign: HorizontalAlign.CENTER,
                     },

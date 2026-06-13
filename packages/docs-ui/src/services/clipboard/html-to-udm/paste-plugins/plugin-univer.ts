@@ -16,6 +16,7 @@
 
 import type { IParagraph } from '@univerjs/core';
 import type { IPastePlugin } from './type';
+import { createParagraphId } from '@univerjs/core';
 import { getParagraphStyle } from '../utils';
 
 const UniverPastePlugin: IPastePlugin = {
@@ -39,6 +40,7 @@ const UniverPastePlugin: IPastePlugin = {
 
                 const paragraph: IParagraph = {
                     startIndex: body.dataStream.length,
+                    paragraphId: createParagraphId(new Set(body.paragraphs.map((p) => p.paragraphId))),
                 };
 
                 const paragraphStyle = getParagraphStyle(el);

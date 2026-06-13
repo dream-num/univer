@@ -279,7 +279,7 @@ export function lineAdjustment(
     sectionBreakConfig: ISectionBreakConfig
 ) {
     const { endIndex } = paragraphNode;
-    const paragraph = viewModel.getParagraph(endIndex) || { startIndex: 0 };
+    const paragraph = viewModel.getParagraph(endIndex) || { startIndex: 0, paragraphId: 'para_render_fallback' };
 
     lineIterator(pages, (line) => {
         // Only need to adjust the current paragraph.

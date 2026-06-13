@@ -16,7 +16,7 @@
 
 import type { IParagraph } from '@univerjs/core';
 import type { IPastePlugin } from './type';
-import { BooleanNumber } from '@univerjs/core';
+import { BooleanNumber, createParagraphId } from '@univerjs/core';
 import { extractNodeStyle as getInlineStyle } from '../parse-node-style';
 import { getParagraphStyle } from '../utils';
 
@@ -70,6 +70,7 @@ const WordPastePlugin: IPastePlugin = {
 
                 const paragraph: IParagraph = {
                     startIndex: body.dataStream.length,
+                    paragraphId: createParagraphId(new Set(body.paragraphs.map((p) => p.paragraphId))),
                 };
 
                 const paragraphStyle = getParagraphStyle(el);

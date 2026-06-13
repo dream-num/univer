@@ -20,6 +20,7 @@ import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import {
     BuildTextUtils,
     CommandType,
+    createParagraphId,
     generateRandomId,
     getRichTextEditPath,
     ICommandService,
@@ -121,6 +122,7 @@ function insertNamedStyleParagraph(
             dataStream: '\r',
             paragraphs: [{
                 startIndex: 0,
+                paragraphId: createParagraphId(new Set()),
                 paragraphStyle: {
                     namedStyleType,
                     headingId: !namedStyleType || namedStyleType === NamedStyleType.NORMAL_TEXT ? undefined : generateRandomId(6),

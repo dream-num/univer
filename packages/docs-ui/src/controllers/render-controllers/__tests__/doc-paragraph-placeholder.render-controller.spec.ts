@@ -17,8 +17,8 @@
 import type { IDocumentBody, IParagraph } from '@univerjs/core';
 import type { IDocumentSkeletonLine, IDocumentSkeletonPage } from '@univerjs/engine-render';
 import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DocumentFlavor, NamedStyleType } from '@univerjs/core';
-import { describe, expect, it } from 'vitest';
 import { DocumentSkeletonPageType, GlyphType, LineType } from '@univerjs/engine-render';
+import { describe, expect, it } from 'vitest';
 import { getParagraphPlaceholderLayouts, shouldRenderParagraphPlaceholder } from '../doc-paragraph-placeholder.render-controller';
 
 const locale = {
@@ -205,7 +205,7 @@ describe('doc paragraph placeholder render controller', () => {
 
     it('shows normal text placeholder for an empty normal paragraph', () => {
         const page = createPage([createLine(0, { fontSize: 13, fontFamily: 'Inter' })]);
-        const body = createBody('\r\n', [{ startIndex: 0 }]);
+        const body = createBody('\r\n', [{ startIndex: 0, paragraphId: 'para_placeholder_normal' }]);
 
         const placeholders = getParagraphPlaceholderLayouts(page, body, locale);
 
@@ -223,6 +223,7 @@ describe('doc paragraph placeholder render controller', () => {
         const page = createPage([createLine(0, { fontSize: 20 })]);
         const body = createBody('\r\n', [{
             startIndex: 0,
+            paragraphId: 'para_placeholder_heading',
             paragraphStyle: {
                 namedStyleType: NamedStyleType.HEADING_1,
             },
@@ -241,6 +242,7 @@ describe('doc paragraph placeholder render controller', () => {
         const page = createPage([createLine(0, { bullet: true, fontSize: 14 })]);
         const body = createBody('\r\n', [{
             startIndex: 0,
+            paragraphId: 'para_placeholder_list',
             bullet: {
                 listId: 'list-1',
                 listType: 'decimal',
@@ -259,7 +261,7 @@ describe('doc paragraph placeholder render controller', () => {
 
     it('hides placeholder once the paragraph has text', () => {
         const page = createPage([createLine(5, { st: 0 })]);
-        const body = createBody('Hello\r\n', [{ startIndex: 5 }]);
+        const body = createBody('Hello\r\n', [{ startIndex: 5, paragraphId: 'para_placeholder_text' }]);
 
         const placeholders = getParagraphPlaceholderLayouts(page, body, locale);
 
@@ -271,7 +273,10 @@ describe('doc paragraph placeholder render controller', () => {
             createLine(0, { st: 0, top: 20 }),
             createLine(1, { st: 1, top: 50 }),
         ]);
-        const body = createBody('\r\r\n', [{ startIndex: 0 }, { startIndex: 1 }]);
+        const body = createBody('\r\r\n', [
+            { startIndex: 0, paragraphId: 'para_placeholder_active_1' },
+            { startIndex: 1, paragraphId: 'para_placeholder_active_2' },
+        ]);
 
         const placeholders = getParagraphPlaceholderLayouts(page, body, locale, 0, 0, 1);
 

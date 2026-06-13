@@ -26,7 +26,7 @@ import type {
     IUniverSheetCopyDataModel,
 } from '../type';
 import type { IAfterProcessRule, IPastePlugin } from './paste-plugins/type';
-import { CustomRangeType, DEFAULT_WORKSHEET_ROW_HEIGHT, generateRandomId, getNumfmtParseValueFilter, isSafeUrl, numfmt, ObjectMatrix, skipParseTagNames } from '@univerjs/core';
+import { createParagraphId, CustomRangeType, DEFAULT_WORKSHEET_ROW_HEIGHT, generateRandomId, getNumfmtParseValueFilter, isSafeUrl, numfmt, ObjectMatrix, skipParseTagNames } from '@univerjs/core';
 import { handleStringToStyle, textTrim } from '@univerjs/ui';
 import { extractNodeStyle } from './parse-node-style';
 import parseToDom, { convertToCellStyle, generateParagraphs } from './utils';
@@ -551,7 +551,10 @@ export class HtmlToUSMService {
                 if (!doc.paragraphs) {
                     doc.paragraphs = [];
                 }
-                doc.paragraphs.push({ startIndex: doc.dataStream.length });
+                doc.paragraphs.push({
+                    startIndex: doc.dataStream.length,
+                    paragraphId: createParagraphId(new Set(doc.paragraphs.map((paragraph) => paragraph.paragraphId))),
+                });
                 doc.dataStream += '\r';
             } else if (node.nodeType === Node.ELEMENT_NODE) {
                 const currentNodeStyle = this._getStyle(node as HTMLElement, styleStr);
@@ -681,7 +684,10 @@ export class HtmlToUSMService {
                 if (!doc.paragraphs) {
                     doc.paragraphs = [];
                 }
-                doc.paragraphs.push({ startIndex: doc.dataStream.length });
+                doc.paragraphs.push({
+                    startIndex: doc.dataStream.length,
+                    paragraphId: createParagraphId(new Set(doc.paragraphs.map((paragraph) => paragraph.paragraphId))),
+                });
                 doc.dataStream += '\r';
             } else if (node.nodeType === Node.ELEMENT_NODE) {
                 if (node.nodeName === 'STYLE') {

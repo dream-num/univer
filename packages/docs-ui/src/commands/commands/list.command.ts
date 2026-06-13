@@ -20,6 +20,7 @@ import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import {
     BuildTextUtils,
     CommandType,
+    createParagraphId,
     generateRandomId,
     getRichTextEditPath,
     ICommandService,
@@ -453,6 +454,7 @@ export const QuickListCommand: ICommand<IQuickListCommandParams> = {
                 paragraphs: [
                     {
                         startIndex: 0,
+                        paragraphId: paragraph.paragraphId,
                         paragraphStyle: {
                             ...paragraphStyle,
                             textStyle: {
@@ -515,6 +517,7 @@ function insertList(accessor: IAccessor, listType: PresetListType) {
             paragraphs: [
                 {
                     startIndex: 0,
+                    paragraphId: createParagraphId(new Set()),
                     paragraphStyle: {
                         ...(sourceParagraph?.paragraphStyle ?? {}),
                     },

@@ -37,8 +37,8 @@ function getDocumentData(): IDocumentData {
         body: {
             dataStream: 'Alpha\rBeta\r\n',
             paragraphs: [
-                { startIndex: 5 },
-                { startIndex: 10 },
+                { paragraphId: 'para_docs_ui_fixture_20', startIndex: 5 },
+                { paragraphId: 'para_docs_ui_fixture_21', startIndex: 10 },
             ],
         },
         documentStyle: {

@@ -15,7 +15,7 @@
  */
 
 import type { IPastePlugin } from './type';
-import { BooleanNumber } from '@univerjs/core';
+import { BooleanNumber, createParagraphId } from '@univerjs/core';
 import { extractNodeStyle as getInlineStyle } from '../parse-node-style';
 
 const LarkPastePlugin: IPastePlugin = {
@@ -53,6 +53,7 @@ const LarkPastePlugin: IPastePlugin = {
 
                 body.paragraphs.push({
                     startIndex: body.dataStream.length,
+                    paragraphId: createParagraphId(new Set(body.paragraphs.map((paragraph) => paragraph.paragraphId))),
                 });
                 body.dataStream += '\r';
             },

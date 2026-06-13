@@ -54,6 +54,8 @@ import { IDocClipboardService } from '../../services/clipboard/clipboard.service
 import { DocEventManagerService } from '../../services/doc-event-manager.service';
 import { DocParagraphMenuService } from '../../services/doc-paragraph-menu.service';
 
+export { DOC_PARAGRAPH_MENU_COMPONENT_KEY, DOC_TABLE_BLOCK_MENU_COMPONENT_KEY } from './component-keys';
+
 export function getParagraphMenuIconSizeClass(iconKey: string): string {
     return iconKey === 'TextTypeIcon' ? 'univer-size-3' : 'univer-size-4';
 }
@@ -588,7 +590,7 @@ function getBlockSelectionRange(target: IDocBlockMenuTarget | null | undefined, 
     };
 }
 
-export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
+function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; tableBlockOnly?: boolean }) {
     const [visible, setVisible] = useState(false);
     const [openMode, setOpenMode] = useState<ParagraphMenuOpenMode>('pointer');
     const [anchorRect, setAnchorRect] = useState<{ left: number; right: number; top: number; bottom: number } | null>(null);
@@ -621,7 +623,10 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
     const slashMenuRequest = useObservable(docParagraphMenuService?.slashMenuRequest$);
     const paragraph = useObservable(docEventManagerService?.hoverParagraph$);
     const paragraphLeft = useObservable(docEventManagerService?.hoverParagraphLeft$);
-    const currentActiveTarget = activeTarget ?? docParagraphMenuService?.activeTarget;
+    const rawActiveTarget = activeTarget ?? docParagraphMenuService?.activeTarget;
+    const currentActiveTarget = tableBlockOnly
+        ? rawActiveTarget?.kind === 'table' ? rawActiveTarget : null
+        : rawActiveTarget?.kind === 'table' ? null : rawActiveTarget;
     const activeParagraphBound = currentActiveTarget?.paragraph ?? docParagraphMenuService?.activeParagraph ?? paragraph ?? paragraphLeft;
     const startIndex = activeParagraphBound?.startIndex;
     const dataStream = doc?.getBody()?.dataStream ?? '';
@@ -939,6 +944,10 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
         handleOpenSlashMenu(slashMenuRequest);
     }, [slashMenuRequest]);
 
+    if (!currentActiveTarget) {
+        return null;
+    }
+
     return (
         <>
             <div
@@ -1190,7 +1199,15 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
             )}
         </>
     );
-};
+}
+
+export const ParagraphMenu = ({ popup }: { popup: IPopup }) => (
+    <ParagraphMenuBase popup={popup} />
+);
+
+export const TableBlockMenu = ({ popup }: { popup: IPopup }) => (
+    <ParagraphMenuBase popup={popup} tableBlockOnly />
+);
 
 export function shouldUseInsertBelowRange(commandId: string, params: IValueOption): boolean {
     if (params.id === INSERT_BELLOW_MENU_ID) {

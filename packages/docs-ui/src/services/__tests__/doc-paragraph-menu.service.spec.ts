@@ -15,10 +15,11 @@
  */
 
 import type { IMutiPageParagraphBound } from '../doc-event-manager.service';
-import { DataStreamTreeTokenType, DocumentBlockRangeType, PresetListType } from '@univerjs/core';
+import { DataStreamTreeTokenType, DOC_RANGE_TYPE, DocumentBlockRangeType, PresetListType } from '@univerjs/core';
 import { DocumentEditArea } from '@univerjs/engine-render';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
+import { DOC_PARAGRAPH_MENU_COMPONENT_KEY, DOC_TABLE_BLOCK_MENU_COMPONENT_KEY } from '../../components/paragraph-menu';
 import { getPreferredParagraphBoundsInRange, getTableBlockMenuHoverRect, getTableHorizontalViewportGeometry } from '../doc-event-manager.service';
 import { DocParagraphMenuService } from '../doc-paragraph-menu.service';
 
@@ -156,7 +157,8 @@ describe('DocParagraphMenuService', () => {
             tableId: 'table-1',
         });
 
-        const [anchor, options] = attachPopupToRect.mock.calls[0] as unknown as [() => { bottom: number; left: number; right: number; top: number }, { direction: string }];
+        const [anchor, options] = attachPopupToRect.mock.calls[0] as unknown as [() => { bottom: number; left: number; right: number; top: number }, { componentKey: string; direction: string }];
+        expect(options.componentKey).toBe(DOC_TABLE_BLOCK_MENU_COMPONENT_KEY);
         expect(options.direction).toBe('top-right');
         expect(anchor()).toEqual({
             bottom: 76,
@@ -184,6 +186,9 @@ describe('DocParagraphMenuService', () => {
         expect(service.activeTarget?.kind).toBe('paragraph');
         expect(service.activeTarget?.draggable).toBe(true);
         expect(service.activeTarget?.cellRange).toEqual({ startOffset: 2, endOffset: 8 });
+
+        const [, options] = attachPopupToRect.mock.calls[0] as unknown as [unknown, { componentKey: string }];
+        expect(options.componentKey).toBe(DOC_PARAGRAPH_MENU_COMPONENT_KEY);
     });
 
     it('does not let the same table hover target steal back a cell paragraph menu', () => {
@@ -308,6 +313,171 @@ describe('DocParagraphMenuService', () => {
             right: 270,
             top: 120,
         });
+    });
+
+    it('does not move the document cursor when the paragraph menu is hovered', () => {
+        const attachPopupToRect = vi.fn(() => ({ canDispose: () => true, dispose: vi.fn() }));
+        const replaceDocRanges = vi.fn();
+        const service = createService({
+            attachPopupToRect,
+            dataStream: 'Body\r',
+            replaceDocRanges,
+        });
+
+        service.showParagraphMenu(createParagraphBound({
+            paragraphStart: 0,
+            paragraphEnd: 4,
+            startIndex: 4,
+        }));
+        service.setParagraphMenuActive(true);
+
+        expect(replaceDocRanges).not.toHaveBeenCalled();
+    });
+
+    it('does not show paragraph menus while a table rect selection is active', () => {
+        const attachPopupToRect = vi.fn(() => ({ canDispose: () => true, dispose: vi.fn() }));
+        const service = createService({
+            attachPopupToRect,
+            dataStream: 'Body\r',
+            docRanges: [{
+                startOffset: 3,
+                endOffset: 12,
+                collapsed: false,
+                rangeType: DOC_RANGE_TYPE.RECT,
+            }],
+        });
+
+        service.showParagraphMenu(createParagraphBound({
+            paragraphStart: 0,
+            paragraphEnd: 4,
+            startIndex: 4,
+        }));
+
+        expect(attachPopupToRect).not.toHaveBeenCalled();
+        expect(service.activeTarget).toBeNull();
+    });
+
+    it('shows paragraph menus again after the table rect selection is cleared', () => {
+        const attachPopupToRect = vi.fn(() => ({ canDispose: () => true, dispose: vi.fn() }));
+        const docRanges: Array<{ collapsed: boolean; endOffset: number; rangeType: DOC_RANGE_TYPE; startOffset: number }> = [{
+            startOffset: 3,
+            endOffset: 12,
+            collapsed: false,
+            rangeType: DOC_RANGE_TYPE.RECT,
+        }];
+        const service = createService({
+            attachPopupToRect,
+            dataStream: 'Body\r',
+            getDocRanges: () => docRanges,
+        });
+
+        service.showParagraphMenu(createParagraphBound({
+            paragraphStart: 0,
+            paragraphEnd: 4,
+            startIndex: 4,
+        }));
+        docRanges.length = 0;
+        service.showParagraphMenu(createParagraphBound({
+            paragraphStart: 0,
+            paragraphEnd: 4,
+            startIndex: 4,
+        }));
+
+        expect(attachPopupToRect).toHaveBeenCalledTimes(1);
+        expect(service.activeTarget?.kind).toBe('paragraph');
+    });
+
+    it('hides an already visible paragraph menu when a table rect selection becomes active', () => {
+        const dispose = vi.fn();
+        const textSelection$ = new Subject();
+        const attachPopupToRect = vi.fn(() => ({ canDispose: () => true, dispose }));
+        const service = createService({
+            attachPopupToRect,
+            dataStream: 'Body\r',
+            textSelection$,
+        });
+
+        service.showParagraphMenu(createParagraphBound({
+            paragraphStart: 0,
+            paragraphEnd: 4,
+            startIndex: 4,
+        }));
+        textSelection$.next({
+            textRanges: [],
+            rectRanges: [{
+                startOffset: 3,
+                endOffset: 12,
+                collapsed: false,
+                rangeType: DOC_RANGE_TYPE.RECT,
+            }],
+        });
+
+        expect(dispose).toHaveBeenCalledTimes(1);
+        expect(service.activeTarget).toBeNull();
+    });
+
+    it('still shows the table menu while a table rect selection is active', () => {
+        const attachPopupToRect = vi.fn(() => ({ canDispose: () => true, dispose: vi.fn() }));
+        const service = createService({
+            attachPopupToRect,
+            dataStream: '',
+            docRanges: [{
+                startOffset: 10,
+                endOffset: 30,
+                collapsed: false,
+                rangeType: DOC_RANGE_TYPE.RECT,
+            }],
+            tables: [{ tableId: 'table-1', startIndex: 10, endIndex: 30 }],
+        });
+
+        service.showTableMenu({
+            pageIndex: 0,
+            rect: {
+                bottom: 170,
+                left: 100,
+                right: 400,
+                top: 80,
+            },
+            tableId: 'table-1',
+        });
+
+        expect(attachPopupToRect).toHaveBeenCalledTimes(1);
+        expect(service.activeTarget?.kind).toBe('table');
+    });
+
+    it('keeps an already visible table menu when a table rect selection becomes active', () => {
+        const dispose = vi.fn();
+        const textSelection$ = new Subject();
+        const attachPopupToRect = vi.fn(() => ({ canDispose: () => true, dispose }));
+        const service = createService({
+            attachPopupToRect,
+            dataStream: '',
+            tables: [{ tableId: 'table-1', startIndex: 10, endIndex: 30 }],
+            textSelection$,
+        });
+
+        service.showTableMenu({
+            pageIndex: 0,
+            rect: {
+                bottom: 170,
+                left: 100,
+                right: 400,
+                top: 80,
+            },
+            tableId: 'table-1',
+        });
+        textSelection$.next({
+            textRanges: [],
+            rectRanges: [{
+                startOffset: 10,
+                endOffset: 30,
+                collapsed: false,
+                rangeType: DOC_RANGE_TYPE.RECT,
+            }],
+        });
+
+        expect(dispose).not.toHaveBeenCalled();
+        expect(service.activeTarget?.kind).toBe('table');
     });
 
     it('uses list icons for list paragraph menus', () => {
@@ -693,10 +863,14 @@ function createService(options: {
     blockRanges?: Array<{ blockId: string; blockType: string; endIndex: number; startIndex: number }>;
     dataStream: string;
     findParagraphBoundByIndex?: (index: number) => unknown;
+    docRanges?: Array<{ collapsed?: boolean; endOffset?: number; rangeType?: DOC_RANGE_TYPE | string; startOffset?: number }>;
+    getDocRanges?: () => Array<{ collapsed?: boolean; endOffset?: number; rangeType?: DOC_RANGE_TYPE | string; startOffset?: number }>;
     paragraphs?: Array<{ bullet?: { listType?: PresetListType }; startIndex: number }>;
     paragraphBounds?: Map<number, IMutiPageParagraphBound>;
     inputBefore$?: Subject<unknown>;
     keydown$?: Subject<unknown>;
+    replaceDocRanges?: ReturnType<typeof vi.fn>;
+    textSelection$?: Subject<unknown>;
     tableCellBounds?: Map<string, Array<{ colIndex: number; pageIndex: number; rect: { bottom: number; left: number; right: number; top: number }; rowIndex: number; tableId: string }>>;
     tables?: Array<{ endIndex: number; startIndex: number; tableId: string }>;
     viewportScrollY?: number;
@@ -730,8 +904,9 @@ function createService(options: {
         } as never,
         {
             getActiveTextRange: () => null,
-            replaceDocRanges: vi.fn(),
-            textSelection$: new Subject(),
+            getDocRanges: options.getDocRanges ?? vi.fn(() => options.docRanges ?? []),
+            replaceDocRanges: options.replaceDocRanges ?? vi.fn(),
+            textSelection$: options.textSelection$ ?? new Subject(),
         } as never,
         {
             hoverParagraphRealTime$: new BehaviorSubject(null),

@@ -31,7 +31,7 @@ import { BORDER_TYPE as BORDER_LTRB, drawLineByBorderType } from '../../basics';
 import { calculateRectRotate, getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
 import { LineType } from '../../basics/i-document-skeleton-cached';
 import { VERTICAL_ROTATE_ANGLE } from '../../basics/text-rotation';
-import { degToRad } from '../../basics/tools';
+import { degToRad, fixLineWidthByScale } from '../../basics/tools';
 import { Vector2 } from '../../basics/vector2';
 import { DocumentsSpanAndLineExtensionRegistry } from '../extension';
 import { DocComponent } from './doc-component';
@@ -534,6 +534,8 @@ export class Documents extends DocComponent {
                 drawLiquid.translate(-viewport.scrollLeft, 0);
             }
 
+            this._drawTableCellBackgrounds(ctx, page, tableSkeleton);
+
             for (const row of rows) {
                 const { top: rowTop, cells } = row;
                 drawLiquid.translateSave();
@@ -574,6 +576,59 @@ export class Documents extends DocComponent {
 
             drawLiquid.translateRestore();
         }
+    }
+
+    private _drawTableCellBackgrounds(
+        ctx: UniverRenderingContext,
+        page: IDocumentSkeletonPage,
+        tableSkeleton: IDocumentSkeletonTable
+    ) {
+        if (this._drawLiquid == null) {
+            return;
+        }
+
+        const backgrounds = new Map<string, Array<{ x: number; y: number; width: number; height: number }>>();
+        const tableX = this._drawLiquid.x + page.marginLeft;
+        const tableY = this._drawLiquid.y + page.marginTop;
+
+        for (const row of tableSkeleton.rows) {
+            row.cells.forEach((cell, index) => {
+                if ((cell as IDocumentSkeletonPage & { isMergedCellCovered?: boolean }).isMergedCellCovered) {
+                    return;
+                }
+
+                const cellSource = row.rowSource.tableCells[index];
+                if (!cellSource || cellSource.rowSpan === 0 || cellSource.columnSpan === 0) {
+                    return;
+                }
+
+                const color = cellSource.backgroundColor?.rgb;
+                if (!color) {
+                    return;
+                }
+
+                const rects = backgrounds.get(color) ?? [];
+                rects.push({
+                    x: tableX + cell.left,
+                    y: tableY + row.top,
+                    width: cell.pageWidth,
+                    height: cell.pageHeight,
+                });
+                backgrounds.set(color, rects);
+            });
+        }
+
+        backgrounds.forEach((rects, color) => {
+            ctx.save();
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            rects.forEach(({ x, y, width, height }) => {
+                rectByPrecisionBounds(ctx, x, y, width, height);
+            });
+            ctx.fill();
+            ctx.closePath();
+            ctx.restore();
+        });
     }
 
     private _getTableViewport(
@@ -701,7 +756,7 @@ export class Documents extends DocComponent {
         if (this._drawLiquid == null) {
             return;
         }
-        this._drawTableCellBordersAndBg(ctx, page, cell);
+        this._drawTableCellBordersAndBg(ctx, page, cell, false);
         const { sections, marginLeft, marginTop } = cell;
 
         // eslint-disable-next-line no-param-reassign
@@ -845,7 +900,8 @@ export class Documents extends DocComponent {
     private _drawTableCellBordersAndBg(
         ctx: UniverRenderingContext,
         page: IDocumentSkeletonPage,
-        cell: IDocumentSkeletonPage
+        cell: IDocumentSkeletonPage,
+        drawBackground = true
     ) {
         const { marginLeft, marginTop } = page;
         const { pageWidth, pageHeight } = cell;
@@ -874,10 +930,10 @@ export class Documents extends DocComponent {
         y += marginTop;
 
         // Draw cell bg.
-        if (cellSource.backgroundColor?.rgb) {
+        if (drawBackground && cellSource.backgroundColor?.rgb) {
             ctx.save();
             ctx.fillStyle = cellSource.backgroundColor.rgb;
-            ctx.fillRectByPrecision(x, y, pageWidth, pageHeight);
+            fillRectByPrecisionBounds(ctx, x, y, pageWidth, pageHeight);
             ctx.restore();
         }
 
@@ -1211,4 +1267,36 @@ function setTableCellBorderDash(ctx: UniverRenderingContext, dashStyle?: DashSty
     }
 
     ctx.setLineDash([0]);
+}
+
+function fillRectByPrecisionBounds(
+    ctx: UniverRenderingContext,
+    x: number,
+    y: number,
+    width: number,
+    height: number
+) {
+    const { scaleX, scaleY } = ctx.getScale();
+    const startX = fixLineWidthByScale(x, scaleX);
+    const startY = fixLineWidthByScale(y, scaleY);
+    const endX = fixLineWidthByScale(x + width, scaleX);
+    const endY = fixLineWidthByScale(y + height, scaleY);
+
+    ctx.fillRect(startX, startY, endX - startX, endY - startY);
+}
+
+function rectByPrecisionBounds(
+    ctx: UniverRenderingContext,
+    x: number,
+    y: number,
+    width: number,
+    height: number
+) {
+    const { scaleX, scaleY } = ctx.getScale();
+    const startX = fixLineWidthByScale(x, scaleX);
+    const startY = fixLineWidthByScale(y, scaleY);
+    const endX = fixLineWidthByScale(x + width, scaleX);
+    const endY = fixLineWidthByScale(y + height, scaleY);
+
+    ctx.rect(startX, startY, endX - startX, endY - startY);
 }

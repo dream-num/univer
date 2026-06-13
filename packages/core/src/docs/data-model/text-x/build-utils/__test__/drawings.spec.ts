@@ -16,10 +16,58 @@
 
 import { describe, expect, it } from 'vitest';
 import { DocumentDataModel } from '../../../document-data-model';
+import { DataStreamTreeTokenType } from '../../../types';
 import { getRichTextEditPath } from '../../utils';
 import { addDrawing, getCustomBlockIdsInSelections } from '../drawings';
 
 describe('drawing build utils', () => {
+    it('keeps the initial empty paragraph above a drawing inserted at offset zero', () => {
+        const doc = new DocumentDataModel({
+            id: 'doc-empty-drawing',
+            body: {
+                dataStream: '\r\n',
+                paragraphs: [{ startIndex: 0, paragraphId: 'para_top' }],
+                sectionBreaks: [{ startIndex: 1 }],
+                customBlocks: [],
+            },
+            drawings: {},
+            drawingsOrder: [],
+        });
+
+        const actions = addDrawing({
+            selection: { startOffset: 0, endOffset: 0, collapsed: true },
+            documentDataModel: doc,
+            drawings: [{
+                unitId: 'doc-empty-drawing',
+                subUnitId: '',
+                drawingId: 'drawing-new',
+                drawingType: 0,
+                title: 'New drawing',
+                description: 'New drawing',
+                docTransform: {
+                    size: { width: 20, height: 20 },
+                    positionH: { relativeFrom: 0, posOffset: 0 },
+                    positionV: { relativeFrom: 0, posOffset: 0 },
+                },
+                layoutType: 0,
+            } as never],
+        });
+
+        expect(actions).toBeTruthy();
+        if (!actions) {
+            throw new Error('Expected addDrawing to return JSONX actions');
+        }
+        doc.apply(actions);
+
+        expect(doc.getBody()?.dataStream).toBe(`\r${DataStreamTreeTokenType.CUSTOM_BLOCK}\r\n`);
+        expect(doc.getBody()?.paragraphs).toEqual([
+            { startIndex: 0, paragraphId: 'para_top' },
+            { startIndex: 2, paragraphId: expect.stringMatching(/^para_/) },
+        ]);
+        expect(doc.getBody()?.customBlocks).toEqual([{ startIndex: 1, blockId: 'drawing-new' }]);
+        expect(doc.getBody()?.sectionBreaks).toEqual([{ startIndex: 3 }]);
+    });
+
     it('should resolve custom blocks and replace selected drawings in the document body', () => {
         const doc = new DocumentDataModel({
             id: 'doc-drawing',

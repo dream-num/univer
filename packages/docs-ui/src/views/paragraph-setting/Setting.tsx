@@ -17,8 +17,7 @@
 import type { ReactNode } from 'react';
 import { HorizontalAlign, LocaleService } from '@univerjs/core';
 import { borderClassName, clsx, InputNumber, Select, Tooltip } from '@univerjs/design';
-import { AlignTextBothIcon, HorizontallyIcon, LeftJustifyingIcon, RightJustifyingIcon } from '@univerjs/icons';
-import { useDependency } from '@univerjs/ui';
+import { ComponentManager, useDependency } from '@univerjs/ui';
 import { useMemo, useRef } from 'react';
 import {
     useCurrentParagraph,
@@ -111,6 +110,12 @@ const AutoFocusInputNumber = (props: {
 };
 export function ParagraphSetting() {
     const localeService = useDependency(LocaleService);
+    const componentManager = useDependency(ComponentManager);
+
+    const LeftJustifyingIcon = componentManager.get('LeftJustifyingIcon');
+    const HorizontallyIcon = componentManager.get('HorizontallyIcon');
+    const RightJustifyingIcon = componentManager.get('RightJustifyingIcon');
+    const AlignTextBothIcon = componentManager.get('AlignTextBothIcon');
 
     const alignmentOptions = useMemo(() => [
         { label: localeService.t('docs-ui.toolbar.alignLeft'), value: String(HorizontalAlign.LEFT), icon: <LeftJustifyingIcon /> },

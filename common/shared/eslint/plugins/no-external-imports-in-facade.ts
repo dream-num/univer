@@ -33,7 +33,7 @@ const rule: Rule.RuleModule = {
             description: 'Disallow imports from outside facade directory in facade files',
         },
         messages: {
-            noExternalImports: 'Imports from outside facade directory are not allowed in facade files: "{{importPath}}"',
+            noExternalImports: 'Facade files are published as a separate package entry. Do not import package-internal runtime modules through "{{importPath}}"; it can duplicate module singletons when consumers import both the package root and the facade entry. Move the needed symbol to the package root export if necessary, then import it through the package name. Type-only imports should also use a public package entry.',
         },
     },
 

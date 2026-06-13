@@ -16,8 +16,11 @@
 
 import type { Observable, Subscription } from 'rxjs';
 import type { IDisplayMenuItem, IMenuItem } from '../../../services/menu/menu';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { map, of, startWith } from 'rxjs';
 import { isMenuButtonSelectorItem } from '../../../services/menu/menu';
+import { IShortcutService } from '../../../services/shortcut/shortcut.service';
+import { useDependency, useObservable } from '../../../utils/di';
 
 export interface IToolbarItemStatus {
     disabled: boolean;
@@ -75,4 +78,25 @@ export function useToolbarItemStatus(menuItem: IDisplayMenuItem<IMenuItem>): ITo
     }, [activated$, disabled$, hidden$, value$, selectionsValue$]);
 
     return { disabled, value, activated, hidden, selectionsValue };
+}
+
+export function useToolbarShortcutDisplay({
+    id,
+    commandId,
+    shortcut,
+}: Pick<IDisplayMenuItem<IMenuItem>, 'id' | 'commandId' | 'shortcut'>): string | null {
+    const shortcutService = useDependency(IShortcutService);
+    const shortcutCommandId = commandId ?? id;
+
+    const shortcut$ = useMemo(
+        () => shortcut
+            ? of(shortcut)
+            : shortcutService.shortcutChanged$.pipe(
+                map(() => shortcutService.getShortcutDisplayOfCommand(shortcutCommandId)),
+                startWith(shortcutService.getShortcutDisplayOfCommand(shortcutCommandId))
+            ),
+        [shortcut, shortcutService, shortcutCommandId]
+    );
+
+    return useObservable(shortcut$, null, true) as string | null;
 }

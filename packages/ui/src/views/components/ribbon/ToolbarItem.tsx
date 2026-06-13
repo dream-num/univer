@@ -26,7 +26,7 @@ import { CustomLabel } from '../../../components/custom-label/CustomLabel';
 import { ILayoutService } from '../../../services/layout/layout.service';
 import { MenuItemType } from '../../../services/menu/menu';
 import { useDependency, useObservable } from '../../../utils/di';
-import { useToolbarItemStatus } from './hook';
+import { useToolbarItemStatus, useToolbarShortcutDisplay } from './hook';
 import { ToolbarButton } from './ToolbarButton';
 import { DropdownMenuWrapper, TooltipWrapper } from './TooltipButtonWrapper';
 
@@ -191,7 +191,11 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
 
     const { tooltip, shortcut, icon, title, label, id, commandId, type, slot, params } = props;
 
-    const tooltipTitle = localeService.t(tooltip ?? '') + (shortcut ? ` (${shortcut})` : '');
+    const shortcutDisplay = useToolbarShortcutDisplay({ id, commandId, shortcut });
+    let tooltipTitle = tooltip ? localeService.t(tooltip) : '';
+    if (shortcutDisplay) {
+        tooltipTitle += ` (${shortcutDisplay})`;
+    }
 
     const { selections } = props as IDisplayMenuItem<IMenuSelectorItem>;
     const selections$ = useMemo(() => {

@@ -19,6 +19,8 @@ import { KeyCode, MetaKeys } from '@univerjs/ui';
 
 import {
     SetRangeBoldCommand,
+    SetRangeFontDecreaseCommand,
+    SetRangeFontIncreaseCommand,
     SetRangeItalicCommand,
     SetRangeStrickThroughCommand,
     SetRangeUnderlineCommand,
@@ -59,4 +61,22 @@ export const SetStrikeThroughShortcutItem: IShortcutItem = {
     groupTitle: 'sheets-ui.shortcut.sheet-edit',
     preconditions: (contextService) => whenSheetFocusedInlineFormat(contextService),
     binding: KeyCode.X | MetaKeys.SHIFT | MetaKeys.CTRL_COMMAND,
+};
+
+export const SetFontIncreaseShortcutItem: IShortcutItem = {
+    id: SetRangeFontIncreaseCommand.id,
+    description: 'sheets-ui.toolbar.fontSizeIncrease',
+    group: '4_sheet-edit',
+    groupTitle: 'sheets-ui.shortcut.sheet-edit',
+    preconditions: (contextService) => whenSheetFocusedInlineFormat(contextService),
+    binding: KeyCode.PERIOD | MetaKeys.SHIFT | MetaKeys.CTRL_COMMAND,
+};
+
+export const SetFontDecreaseShortcutItem: IShortcutItem = {
+    id: SetRangeFontDecreaseCommand.id,
+    description: 'sheets-ui.toolbar.fontSizeDecrease',
+    group: '4_sheet-edit',
+    groupTitle: 'sheets-ui.shortcut.sheet-edit',
+    preconditions: (contextService) => whenSheetFocusedInlineFormat(contextService),
+    binding: KeyCode.COMMA | MetaKeys.SHIFT | MetaKeys.CTRL_COMMAND,
 };

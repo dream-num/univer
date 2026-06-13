@@ -140,6 +140,8 @@ import {
 } from './shortcuts/selection.shortcut';
 import {
     SetBoldShortcutItem,
+    SetFontDecreaseShortcutItem,
+    SetFontIncreaseShortcutItem,
     SetItalicShortcutItem,
     SetStrikeThroughShortcutItem,
     SetUnderlineShortcutItem,
@@ -315,6 +317,8 @@ export class SheetUIController extends Disposable {
             SetItalicShortcutItem,
             SetUnderlineShortcutItem,
             SetStrikeThroughShortcutItem,
+            SetFontIncreaseShortcutItem,
+            SetFontDecreaseShortcutItem,
 
             // cell content editing shortcuts
             ClearSelectionValueShortcutItem,

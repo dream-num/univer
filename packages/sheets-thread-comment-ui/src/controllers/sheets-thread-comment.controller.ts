@@ -20,8 +20,8 @@ import { ComponentManager, IMenuManagerService, IShortcutService } from '@univer
 import { AddCommentShortcut } from '../menu/menu';
 import { menuSchema } from '../menu/schema';
 import { SHEETS_THREAD_COMMENT_MODAL, SHEETS_THREAD_COMMENT_PANEL } from '../types/const';
-import { SheetsThreadCommentCell } from '../views/sheets-thread-comment-cell';
-import { SheetsThreadCommentPanel } from '../views/sheets-thread-comment-panel';
+import { SheetsThreadCommentCell } from '../views/SheetsThreadCommentCell';
+import { SheetsThreadCommentPanel } from '../views/SheetsThreadCommentPanel';
 
 export class SheetsThreadCommentController extends Disposable {
     constructor(

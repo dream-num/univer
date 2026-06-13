@@ -61,7 +61,7 @@ vi.mock('../../../../utils/di', async () => {
     };
 });
 
-vi.mock('../../../../components/menu/desktop/TinyMenuGroup', () => ({
+vi.mock('../../../menu/desktop/TinyMenuGroup', () => ({
     resolveMenuItemActiveState: () => false,
     UITinyMenuGroup: (props: unknown) => {
         tinyMenuGroupSpy(props);
@@ -70,7 +70,7 @@ vi.mock('../../../../components/menu/desktop/TinyMenuGroup', () => ({
     UIQuickTileMenuGroup: () => <div data-testid="quick-tile-menu-group" />,
 }));
 
-vi.mock('../../../../components/custom-label/CustomLabel', () => ({
+vi.mock('../../../custom-label/CustomLabel', () => ({
     CustomLabel: () => <span data-testid="custom-label" />,
 }));
 

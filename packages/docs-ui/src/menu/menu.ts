@@ -68,8 +68,8 @@ import { CreateDocTableCommand } from '../commands/commands/table/doc-table-crea
 import { DocCreateTableOperation } from '../commands/operations/doc-create-table.operation';
 import { DocOpenPageSettingCommand } from '../commands/operations/open-page-setting.operation';
 import { getCommandSkeleton } from '../commands/util';
-import { BULLET_LIST_TYPE_COMPONENT, ORDER_LIST_TYPE_COMPONENT } from '../components/list-type-picker';
 import { DocMenuStyleService } from '../services/doc-menu-style.service';
+import { BULLET_LIST_TYPE_COMPONENT, ORDER_LIST_TYPE_COMPONENT } from '../views/list-type-picker/index';
 
 function getInsertTableHiddenObservable(
     accessor: IAccessor

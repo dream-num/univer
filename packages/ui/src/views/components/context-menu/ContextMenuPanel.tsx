@@ -30,13 +30,13 @@ import { CheckMarkIcon, MoreIcon } from '@univerjs/icons';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { combineLatest, isObservable, of, scan, startWith } from 'rxjs';
-import { CustomLabel } from '../../../components/custom-label/CustomLabel';
-import { useScrollYOverContainer } from '../../../components/hooks/layout';
-import { resolveMenuItemActiveState, UIQuickTileMenuGroup, UITinyMenuGroup } from '../../../components/menu/desktop/TinyMenuGroup';
 import { ILayoutService } from '../../../services/layout/layout.service';
 import { MenuItemType } from '../../../services/menu/menu';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
 import { useDependency, useObservable } from '../../../utils/di';
+import { CustomLabel } from '../../custom-label/CustomLabel';
+import { useScrollYOverContainer } from '../../hooks/layout';
+import { resolveMenuItemActiveState, UIQuickTileMenuGroup, UITinyMenuGroup } from '../../menu/desktop/TinyMenuGroup';
 
 type ContextMenuSizeVariant = 'default' | 'paragraph-t';
 type ContextMenuAutoFocusTarget = 'first-item' | 'container';

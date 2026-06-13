@@ -19,7 +19,7 @@ import type { INodePosition, IRenderContext, IRenderModule, ITextRangeWithStyle 
 import { DataStreamTreeTokenType, deepCompare, Disposable, DocumentBlockRangeType, Inject, isInternalEditorID, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { ComponentManager } from '@univerjs/ui';
-import { FloatToolbar } from '../components/float-toolbar/FloatToolbar';
+import { FloatToolbar } from '../views/float-toolbar/FloatToolbar';
 import { DocCanvasPopManagerService } from './doc-popup-manager.service';
 import { DocSelectionRenderService } from './selection/doc-selection-render.service';
 

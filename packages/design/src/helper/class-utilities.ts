@@ -28,3 +28,4 @@ export const borderBottomClassName = clsx(borderBasicClassName, 'univer-border-l
 export const borderRightClassName = clsx(borderBasicClassName, 'univer-border-l-0 univer-border-b-0 univer-border-t-0 univer-border-r');
 export const divideYClassName = 'univer-divide-gray-200 dark:!univer-divide-gray-600 univer-divide-y univer-divide-x-0 univer-divide-solid';
 export const divideXClassName = 'univer-divide-gray-200 dark:!univer-divide-gray-600 univer-divide-x univer-divide-y-0 univer-divide-solid';
+export const resetButtonClassName = 'univer-m-0 univer-flex univer-appearance-none univer-items-center univer-justify-center univer-border-0 univer-bg-transparent univer-p-0 univer-leading-none univer-outline-none univer-cursor-pointer';

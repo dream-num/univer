@@ -29,6 +29,19 @@ export { SheetsDrawingGroupCopyPasteController } from './controllers/sheet-drawi
 export { SheetDrawingUpdateController } from './controllers/sheet-drawing-update.controller';
 export { SHEETS_IMAGE_MENU_ID } from './menu/image.menu';
 export { UniverSheetsDrawingUIPlugin } from './plugin';
-export { BatchSaveImagesService, FileNamePart, type IBatchSaveImagesConfig, IBatchSaveImagesService, type ICellImageInfo } from './services/batch-save-images.service';
-export { calcSheetFloatDomPosition, type ICanvasFloatDom, type ICanvasFloatDomInfo, type IDOMAnchor, SHEET_FLOAT_DOM_PREFIX, SheetCanvasFloatDomManagerService } from './services/canvas-float-dom-manager.service';
+export {
+    BatchSaveImagesService,
+    FileNamePart,
+    type IBatchSaveImagesConfig,
+    IBatchSaveImagesService,
+    type ICellImageInfo,
+} from './services/batch-save-images.service';
+export {
+    calcSheetFloatDomPosition,
+    type ICanvasFloatDom,
+    type ICanvasFloatDomInfo,
+    type IDOMAnchor,
+    SHEET_FLOAT_DOM_PREFIX,
+    SheetCanvasFloatDomManagerService,
+} from './services/canvas-float-dom-manager.service';
 export { SheetDrawingAnchor } from './views/sheet-image-panel/SheetDrawingAnchor';

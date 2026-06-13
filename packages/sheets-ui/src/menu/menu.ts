@@ -102,9 +102,9 @@ import {
 } from '../commands/commands/inline-format.command';
 import { SetInfiniteFormatPainterCommand, SetOnceFormatPainterCommand } from '../commands/commands/set-format-painter.command';
 import { SetWorksheetColAutoWidthCommand } from '../commands/commands/set-worksheet-auto-col-width.command';
-import { MENU_ITEM_INPUT_COMPONENT } from '../components/menu-item-input';
 import { ISheetClipboardService } from '../services/clipboard/clipboard.service';
 import { FormatPainterStatus, IFormatPainterService } from '../services/format-painter/format-painter.service';
+import { MENU_ITEM_INPUT_COMPONENT } from '../views/menu-item-input/index';
 import { deriveStateFromActiveSheet$, getCurrentRangeDisable$, getObservableWithExclusiveRange$ } from './menu-util';
 import { getFontStyleAtCursor } from './utils';
 

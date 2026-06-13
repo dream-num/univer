@@ -16,7 +16,7 @@
 
 import { DOCS_COMMENT_EDITOR_UNIT_ID_KEY } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
-import { ThreadCommentTreeLocation } from '..';
+import { ThreadCommentTreeLocation } from '../../ThreadCommentTree';
 import { getThreadCommentEditorId } from '../util';
 
 describe('getThreadCommentEditorId', () => {

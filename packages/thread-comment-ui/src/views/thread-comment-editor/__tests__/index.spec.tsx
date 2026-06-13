@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
+import type { ButtonHTMLAttributes, FormEvent } from 'react';
 import type { Root } from 'react-dom/client';
 import { UniverInstanceType } from '@univerjs/core';
-import * as React from 'react';
-import { act } from 'react';
+import { act, createRef, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
-
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { ThreadCommentEditor } from '../index';
+import { ThreadCommentEditor } from '../../ThreadCommentEditor';
 
 const { commandService, localeService, editorService, coreTokens, docsUiTokens, editorHandle } = vi.hoisted(() => {
     const commandService = {
@@ -92,7 +91,7 @@ vi.mock('@univerjs/docs-ui', () => ({
     },
     IEditorService: docsUiTokens.IEditorService,
     RichTextEditor: ({ autoFocus, editorRef, onFocusChange, placeholder }: any) => {
-        React.useEffect(() => {
+        useEffect(() => {
             editorRef.current = editorHandle;
             if (autoFocus) {
                 onFocusChange?.(true);
@@ -114,7 +113,7 @@ vi.mock('../../../commands/operations/comment.operations', () => ({
 }));
 
 vi.mock('@univerjs/design', () => ({
-    Button: ({ children, disabled, onClick, type }: React.ButtonHTMLAttributes<HTMLButtonElement>) => (
+    Button: ({ children, disabled, onClick, type }: ButtonHTMLAttributes<HTMLButtonElement>) => (
         <button disabled={disabled} onClick={onClick} type={type}>
             {children}
         </button>
@@ -179,7 +178,7 @@ describe('ThreadCommentEditor', () => {
 
     it('uses non-submit buttons so replying does not submit an outer form', () => {
         const onSave = vi.fn();
-        const onSubmit = vi.fn((event: React.FormEvent<HTMLFormElement>) => event.preventDefault());
+        const onSubmit = vi.fn((event: FormEvent<HTMLFormElement>) => event.preventDefault());
 
         container = document.createElement('div');
         document.body.appendChild(container);
@@ -281,7 +280,7 @@ describe('ThreadCommentEditor', () => {
     });
 
     it('shows action buttons after reply inserts mention text without a focus change event', () => {
-        const ref = React.createRef<{ reply: (text: { dataStream: string }) => void }>();
+        const ref = createRef<{ reply: (text: { dataStream: string }) => void }>();
 
         container = document.createElement('div');
         document.body.appendChild(container);

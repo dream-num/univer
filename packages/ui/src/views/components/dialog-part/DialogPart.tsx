@@ -18,9 +18,9 @@ import type { IDialogProps } from '@univerjs/design';
 import type { IDialogPartMethodOptions } from './interface';
 import { Dialog } from '@univerjs/design';
 import { useEffect, useMemo, useState } from 'react';
-import { CustomLabel } from '../../../components/custom-label/CustomLabel';
 import { IDialogService } from '../../../services/dialog/dialog.service';
 import { useDependency } from '../../../utils/di';
+import { CustomLabel } from '../../custom-label/CustomLabel';
 
 export function DialogPart() {
     const dialogService = useDependency(IDialogService);

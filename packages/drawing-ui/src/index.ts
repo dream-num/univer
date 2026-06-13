@@ -39,5 +39,4 @@ export { DrawingRenderService } from './services/drawing-render.service';
 export { getUpdateParams } from './utils/get-update-params';
 export { ImageCropperObject } from './views/crop/image-cropper-object';
 export { COMPONENT_IMAGE_POPUP_MENU } from './views/image-popup-menu/component-name';
-export { ImagePopupMenu } from './views/image-popup-menu/ImagePopupMenu';
 export { DrawingCommonPanel } from './views/panel/DrawingCommonPanel';

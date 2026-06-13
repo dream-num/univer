@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export { DataValidationPanel } from './panel';
+export { DataValidationPanel } from './DataValidationPanel';

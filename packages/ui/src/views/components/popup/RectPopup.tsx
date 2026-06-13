@@ -22,9 +22,9 @@ import { IConfigService, LocaleService } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
 import { createContext, useContext, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { useEvent } from '../../../components/hooks/event';
 import { UI_PLUGIN_CONFIG_KEY } from '../../../config/config';
 import { useDependency, useObservable } from '../../../utils/di';
+import { useEvent } from '../../hooks/event';
 
 interface IAbsolutePosition {
     left: number;

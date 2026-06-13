@@ -23,10 +23,10 @@ import { AUTO_FILL_APPLY_TYPE, IAutoFillService, RefillCommand } from '@univerjs
 import { useDependency } from '@univerjs/ui';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { SetScrollOperation } from '../../commands/operations/scroll.operation';
-import { useActiveWorkbook } from '../../components/hook';
 import { getSheetObject } from '../../controllers/utils/component-tools';
 import { ISheetSelectionRenderService } from '../../services/selection/base-selection-render.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
+import { useActiveWorkbook } from '../hook';
 
 export interface IAnchorPoint {
     row: number;

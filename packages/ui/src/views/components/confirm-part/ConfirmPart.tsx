@@ -19,8 +19,8 @@ import type { IConfirmChildrenProps, IConfirmPartMethodOptions, IContextConfirmP
 import { IConfirmService } from '@univerjs/core';
 import { Confirm } from '@univerjs/design';
 import { cloneElement, useEffect, useState } from 'react';
-import { CustomLabel } from '../../../components/custom-label/CustomLabel';
 import { useDependency } from '../../../utils/di';
+import { CustomLabel } from '../../custom-label/CustomLabel';
 
 const ContextConfirm = (props: IContextConfirmProps) => {
     const { children, onClose, onConfirm } = props;

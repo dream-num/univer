@@ -15,14 +15,14 @@
  */
 
 import type { IDocFloatDom } from '@univerjs/docs-drawing';
-import type { IPrintingFloatDomProps } from '../views/printing-float-dom';
+import type { IPrintingFloatDomProps } from '../views/DocPrintingFloatDom';
 import { Disposable, DOC_DRAWING_PRINTING_COMPONENT_KEY, DrawingTypeEnum, Inject, Injector } from '@univerjs/core';
 import { render, unmount } from '@univerjs/design';
 import { DocPrintInterceptorService } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { DrawingRenderService } from '@univerjs/drawing-ui';
 import { ComponentManager, connectInjector } from '@univerjs/ui';
-import { DocPrintingFloatDom } from '../views/printing-float-dom';
+import { DocPrintingFloatDom } from '../views/DocPrintingFloatDom';
 
 export class DocDrawingPrintingController extends Disposable {
     constructor(

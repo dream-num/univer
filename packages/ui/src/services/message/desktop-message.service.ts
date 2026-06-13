@@ -19,8 +19,8 @@ import type { IMessageProps } from '@univerjs/design';
 import type { IMessageService } from './message.service';
 import { Disposable, Inject, Injector, toDisposable } from '@univerjs/core';
 import { message, removeMessage } from '@univerjs/design';
-import { MessageContainer } from '../../components/message/MessageContainer';
 import { connectInjector } from '../../utils/di';
+import { MessageContainer } from '../../views/message/MessageContainer';
 import { BuiltInUIPart, IUIPartsService } from '../parts/parts.service';
 
 let messageId = 0;

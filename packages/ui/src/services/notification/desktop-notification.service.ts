@@ -15,12 +15,12 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
-import type { INotificationOptions } from '../../components/notification/Notification';
+import type { INotificationOptions } from '../../views/notification/Notification';
 
 import type { INotificationService } from './notification.service';
 import { Disposable, Inject, Injector, toDisposable } from '@univerjs/core';
-import { notification, Notification } from '../../components/notification/Notification';
 import { connectInjector } from '../../utils/di';
+import { notification, Notification } from '../../views/notification/Notification';
 import { BuiltInUIPart, IUIPartsService } from '../parts/parts.service';
 
 export class DesktopNotificationService extends Disposable implements INotificationService {

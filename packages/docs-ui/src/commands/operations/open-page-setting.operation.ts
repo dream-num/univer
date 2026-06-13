@@ -18,7 +18,7 @@ import type { ICommand, ModernDocumentWidthMode, PaperType } from '@univerjs/cor
 import type { IConfirmPartMethodOptions } from '@univerjs/ui';
 import type { IDocPageSetupCommandParams } from '../commands/doc-page-setup.command';
 import { CommandType, DocumentFlavor, ICommandService, IConfirmService, LocaleService, MODERN_DOCUMENT_WIDTH, PAGE_SIZE } from '@univerjs/core';
-import { PAGE_SETTING_COMPONENT_ID } from '../../views/page-settings';
+import { PAGE_SETTING_COMPONENT_ID } from '../../views/PageSettings';
 import { DocPageSetupCommand } from '../commands/doc-page-setup.command';
 
 export const DocOpenPageSettingCommand: ICommand = {

@@ -23,7 +23,7 @@ import { DeleteDocCommentComment } from '../commands/commands/delete-doc-comment
 import { ShowCommentPanelOperation, StartAddCommentOperation, ToggleCommentPanelOperation } from '../commands/operations/show-comment-panel.operation';
 import { DOCS_THREAD_COMMENT_PANEL } from '../common/const';
 import { menuSchema } from '../menu/schema';
-import { DocThreadCommentPanel } from '../views/doc-thread-comment-panel';
+import { DocThreadCommentPanel } from '../views/DocThreadCommentPanel';
 
 export class DocThreadCommentUIController extends Disposable {
     constructor(

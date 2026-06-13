@@ -20,12 +20,12 @@ import { ConfigContext } from '@univerjs/design';
 import { CloseIcon } from '@univerjs/icons';
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { MobileMenu } from '../../../components/menu/mobile/MobileMenu';
 import { IContextMenuHostService } from '../../../services/contextmenu/contextmenu-host.service';
 import { IContextMenuService } from '../../../services/contextmenu/contextmenu.service';
 import { ILayoutService } from '../../../services/layout/layout.service';
 import { ContextMenuPosition } from '../../../services/menu/types';
 import { useDependency, useObservable } from '../../../utils/di';
+import { MobileMenu } from '../../menu/mobile/MobileMenu';
 
 const MOBILE_CONTEXT_MENU_HOST_ID = 'mobile-context-menu';
 

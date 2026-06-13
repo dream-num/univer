@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type { ICascaderDropdownProps } from './cascader-dropdown';
-import type { IColorDropdownProps } from './color-dropdown';
-import type { IDateDropdownProps } from './date-dropdown';
-import type { IListDropdownProps } from './list-dropdown';
-import { CascaderDropdown } from './cascader-dropdown';
-import { ColorDropdown } from './color-dropdown';
-import { DateDropdown } from './date-dropdown';
-import { ListDropDown } from './list-dropdown';
+import type { ICascaderDropdownProps } from './CascaderDropdown';
+import type { IColorDropdownProps } from './ColorDropdown';
+import type { IDateDropdownProps } from './DateDropdown';
+import type { IListDropdownProps } from './ListDropDown';
+import { CascaderDropdown } from './CascaderDropdown';
+import { ColorDropdown } from './ColorDropdown';
+import { DateDropdown } from './DateDropdown';
+import { ListDropDown } from './ListDropDown';
 
 export type ICellDropdown = {
     type: 'datepicker';
@@ -37,10 +37,10 @@ export type ICellDropdown = {
     props: ICascaderDropdownProps;
 };
 
-export { CascaderDropdown } from './cascader-dropdown';
-export { ColorDropdown } from './color-dropdown';
-export { DateDropdown } from './date-dropdown';
-export { ListDropDown } from './list-dropdown';
+export { CascaderDropdown } from './CascaderDropdown';
+export { ColorDropdown } from './ColorDropdown';
+export { DateDropdown } from './DateDropdown';
+export { ListDropDown } from './ListDropDown';
 
 export const dropdownMap = {
     datepicker: DateDropdown,

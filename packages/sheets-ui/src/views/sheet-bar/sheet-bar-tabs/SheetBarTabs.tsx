@@ -46,9 +46,9 @@ import {
 import { UI_PLUGIN_CONFIG_KEY, useConfigValue, useDependency, useObservable } from '@univerjs/ui';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { merge } from 'rxjs';
-import { useActiveWorkbook } from '../../../components/hook';
 import { IEditorBridgeService } from '../../../services/editor-bridge.service';
 import { ISheetBarService } from '../../../services/sheet-bar/sheet-bar.service';
+import { useActiveWorkbook } from '../../hook';
 import { SheetBarItem } from './SheetBarItem';
 import { SheetBarTabsContextMenu } from './SheetBarTabsContextMenu';
 import { SlideTabBar } from './utils/slide-tab-bar';

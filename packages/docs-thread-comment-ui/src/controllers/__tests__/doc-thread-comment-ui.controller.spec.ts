@@ -17,7 +17,7 @@
 import { FLOAT_TOOLBAR_MENU_POSITION } from '@univerjs/docs-ui';
 import { describe, expect, it, vi } from 'vitest';
 import { DOCS_THREAD_COMMENT_PANEL } from '../../common/const';
-import { DocThreadCommentPanel } from '../../views/doc-thread-comment-panel';
+import { DocThreadCommentPanel } from '../../views/DocThreadCommentPanel';
 import { DocThreadCommentUIController } from '../doc-thread-comment-ui.controller';
 
 describe('DocThreadCommentUIController', () => {

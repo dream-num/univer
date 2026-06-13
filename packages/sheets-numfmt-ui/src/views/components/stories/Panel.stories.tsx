@@ -16,7 +16,7 @@
 
 import type { Meta, StoryObj } from '@storybook/react';
 import type { Dependency } from '@univerjs/core';
-import type { ISheetNumfmtPanelProps } from '../index';
+import type { ISheetNumfmtPanelProps } from '../../SheetNumfmtPanel';
 import { LocaleService, LocaleType } from '@univerjs/core';
 import { RediContext } from '@univerjs/ui';
 import { useContext, useState } from 'react';
@@ -24,7 +24,7 @@ import { UserHabitController } from '../../../controllers/user-habit.controller'
 import enUS from '../../../locale/en-US';
 import ruRU from '../../../locale/ru-RU';
 import zhCN from '../../../locale/zh-CN';
-import { SheetNumfmtPanel } from '../index';
+import { SheetNumfmtPanel } from '../../SheetNumfmtPanel';
 
 const meta: Meta = {
     title: 'numfmt',

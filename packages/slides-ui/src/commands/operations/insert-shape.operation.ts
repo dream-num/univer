@@ -20,8 +20,8 @@ import { CommandType, generateRandomId, ICommandService, IUniverInstanceService,
 import { ObjectType } from '@univerjs/engine-render';
 import { BasicShapes, PageElementType } from '@univerjs/slides';
 import { ISidebarService } from '@univerjs/ui';
-import { COMPONENT_SLIDE_SIDEBAR } from '../../components/sidebar/Sidebar';
 import { CanvasView } from '../../controllers/canvas-view';
+import { COMPONENT_SLIDE_SIDEBAR } from '../../views/sidebar/Sidebar';
 
 export interface IInsertShapeOperationParams {
     unitId: string;

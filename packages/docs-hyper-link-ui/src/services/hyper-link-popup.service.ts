@@ -19,8 +19,8 @@ import { Disposable, Inject, IUniverInstanceService, UniverInstanceType } from '
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { BehaviorSubject } from 'rxjs';
-import { DocHyperLinkEdit } from '../views/hyper-link-edit';
-import { DocLinkPopup } from '../views/hyper-link-popup';
+import { DocHyperLinkEdit } from '../views/DocHyperLinkEdit';
+import { DocLinkPopup } from '../views/DocLinkPopup';
 
 export interface ILinkInfo {
     unitId: string;

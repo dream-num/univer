@@ -70,7 +70,7 @@ export class BaseDataModel extends UnitModel<IBaseSnapshot, UniverInstanceType.U
     }
 
     setSnapshot(snapshot: IBaseSnapshot): void {
-        this._snapshot = normalizeBaseSnapshot(snapshot);
+        this._snapshot = isNormalizedBaseSnapshot(snapshot) ? snapshot : normalizeBaseSnapshot(snapshot);
         this._name$.next(snapshot.name);
     }
 
@@ -99,6 +99,51 @@ function normalizeBaseSnapshot(snapshot: IBaseSnapshot): IBaseSnapshot {
         normalizeBaseTable(table);
     });
     return snapshot;
+}
+
+function isNormalizedBaseSnapshot(snapshot: IBaseSnapshot): boolean {
+    return Object.values(snapshot.tables ?? {}).every((table) => isNormalizedBaseTable(table));
+}
+
+function isNormalizedBaseTable(table: ITableSnapshot): boolean {
+    const records = table.records ?? {};
+    const fields = table.fields ?? {};
+    if (
+        !Array.isArray(table.recordOrder)
+        || !table.rowIndex
+        || !table.rowId
+        || !table.colIndex
+        || !table.colId
+        || !table.cellData
+        || !table.resources
+        || !table.resources.attachmentSets
+        || !table.resources.attachments
+    ) {
+        return false;
+    }
+
+    if (Object.keys(records).length !== table.recordOrder.length) {
+        return false;
+    }
+
+    for (let index = 0; index < table.recordOrder.length; index++) {
+        const recordId = table.recordOrder[index];
+        if (!records[recordId] || table.rowIndex[recordId] !== index || table.rowId[index] !== recordId) {
+            return false;
+        }
+    }
+
+    for (let index = 0; index < table.fieldOrder.length; index++) {
+        const fieldId = table.fieldOrder[index];
+        if (!fields[fieldId]) {
+            continue;
+        }
+        if (table.colIndex[fieldId] !== index || table.colId[index] !== fieldId) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 function normalizeBaseTable(table: ITableSnapshot): void {

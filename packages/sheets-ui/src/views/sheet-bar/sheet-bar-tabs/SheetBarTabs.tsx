@@ -307,6 +307,15 @@ export function SheetBarTabs() {
         void commandService.executeCommand(SetWorksheetActiveOperation.id, {
             subUnitId,
             unitId: workbookRef.current.getUnitId(),
+        }).then((result) => {
+            if (result !== false) {
+                return;
+            }
+
+            const worksheet = workbookRef.current.getSheetBySheetId(subUnitId);
+            if (worksheet) {
+                workbookRef.current.setActiveSheet(worksheet);
+            }
         });
     }, [commandService]);
 

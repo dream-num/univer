@@ -22,6 +22,7 @@ import { ComponentManager } from './common/component-manager';
 import { IconManager } from './common/icon-manager';
 import { ZIndexManager } from './common/z-index-manager';
 import { defaultPluginConfig, UI_PLUGIN_CONFIG_KEY } from './config/config';
+import { ComponentsController } from './controllers/components.controller';
 import { ErrorController } from './controllers/error/error.controller';
 import { SharedController } from './controllers/shared-shortcut.controller';
 import { ShortcutPanelController } from './controllers/shortcut-display/shortcut-panel.controller';
@@ -98,6 +99,7 @@ export class UniverMobileUIPlugin extends Plugin {
         registerDependencies(this._injector, mergeOverrideWithDependencies([
             [ComponentManager],
             [IconManager],
+            [ComponentsController],
             [ThemeSwitcherService],
             [ZIndexManager],
             [ShortcutPanelService],
@@ -136,6 +138,7 @@ export class UniverMobileUIPlugin extends Plugin {
         ], this._config.override));
 
         touchDependencies(this._injector, [
+            [ComponentsController],
             [IUIController],
             [ErrorController],
         ]);

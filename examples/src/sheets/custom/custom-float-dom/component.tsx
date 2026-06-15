@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const RangeLoading = () => {
+export const CustomRangeLoading = () => {
     const divStyle = {
         width: '100%',
         height: '100%',
@@ -30,7 +30,7 @@ export const RangeLoading = () => {
 
     return (
         <div style={divStyle}>
-            Loading...
+            Custom Loading...
         </div>
     );
 };

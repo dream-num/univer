@@ -19,6 +19,7 @@ import type { IUniverFindReplaceConfig } from './config/config';
 import { IConfigService, Inject, Injector, merge, Plugin } from '@univerjs/core';
 import pkg from '../package.json';
 import { defaultPluginConfig, FIND_REPLACE_PLUGIN_CONFIG_KEY } from './config/config';
+import { ComponentsController } from './controllers/components.controller';
 import { FindReplaceController } from './controllers/find-replace.controller';
 import { FindReplaceService, IFindReplaceService } from './services/find-replace.service';
 
@@ -44,6 +45,8 @@ export class UniverFindReplacePlugin extends Plugin {
     }
 
     override onStarting(): void {
+        this._injector.add([ComponentsController]);
+        this._injector.get(ComponentsController);
         ([
             [FindReplaceController],
             [IFindReplaceService, { useClass: FindReplaceService }],

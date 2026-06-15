@@ -15,18 +15,15 @@
  */
 
 import type { MenuConfig } from '@univerjs/ui';
-import { Disposable, ICommandService, Inject } from '@univerjs/core';
+import { Disposable, ICommandService } from '@univerjs/core';
 import { FLOAT_TOOLBAR_MENU_POSITION } from '@univerjs/docs-ui';
-import { LinkIcon } from '@univerjs/icons';
-import { ComponentManager, IconManager, IMenuManagerService, IShortcutService } from '@univerjs/ui';
+import { IMenuManagerService, IShortcutService } from '@univerjs/ui';
 import { AddDocHyperLinkCommand } from '../commands/commands/add-link.command';
 import { DeleteDocHyperLinkCommand } from '../commands/commands/delete-link.command';
 import { UpdateDocHyperLinkCommand } from '../commands/commands/update-link.command';
 import { ClickDocHyperLinkOperation, ShowDocHyperLinkEditPopupOperation, ToggleDocHyperLinkInfoPopupOperation } from '../commands/operations/popup.operation';
 import { addLinkShortcut } from '../menu/menu';
 import { menuSchema } from '../menu/schema';
-import { DocHyperLinkEdit } from '../views/DocHyperLinkEdit';
-import { DocLinkPopup } from '../views/DocLinkPopup';
 
 export interface IDocHyperLinkUIConfig {
     menu: MenuConfig;
@@ -34,36 +31,14 @@ export interface IDocHyperLinkUIConfig {
 
 export class DocHyperLinkUIController extends Disposable {
     constructor(
-        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
-        @Inject(IconManager) private readonly _iconManager: IconManager,
         @ICommandService private readonly _commandService: ICommandService,
         @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
         @IShortcutService private readonly _shortcutService: IShortcutService
     ) {
         super();
-
-        this._initComponents();
-        this._registerIcons();
         this._initCommands();
         this._initMenus();
         this._initShortcut();
-    }
-
-    private _initComponents() {
-        ([
-            [DocHyperLinkEdit.componentKey, DocHyperLinkEdit],
-            [DocLinkPopup.componentKey, DocLinkPopup],
-        ] as const).forEach(([key, comp]) => {
-            this.disposeWithMe(
-                this._componentManager.register(key, comp)
-            );
-        });
-    }
-
-    private _registerIcons(): void {
-        this.disposeWithMe(this._iconManager.register({
-            LinkIcon,
-        }));
     }
 
     private _initCommands() {

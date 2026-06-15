@@ -17,30 +17,21 @@
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IDocPopup } from '../services/doc-quick-insert-popup.service';
 import { Disposable, ICommandService, Inject } from '@univerjs/core';
-import { DividerIcon, TextIcon } from '@univerjs/icons';
-import { ComponentManager, IconManager } from '@univerjs/ui';
 import { of } from 'rxjs';
 import { DeleteSearchKeyCommand } from '../commands/commands/doc-quick-insert.command';
 import { CloseQuickInsertPopupOperation, ShowQuickInsertPopupOperation } from '../commands/operations/quick-insert-popup.operation';
 import { builtInMenus } from '../menu/menu';
 import { DocQuickInsertPopupService } from '../services/doc-quick-insert-popup.service';
-import { KeywordInputPlaceholder } from '../views/KeywordInputPlaceholder';
-import { QuickInsertButton } from '../views/QuickInsertButton';
-import { QuickInsertPlaceholder } from '../views/QuickInsertPlaceholder';
-import { QuickInsertPopup } from '../views/QuickInsertPopup';
 
 export class DocQuickInsertUIController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(DocQuickInsertPopupService) private readonly _docQuickInsertPopupService: DocQuickInsertPopupService,
-        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
-        @Inject(IconManager) private readonly _iconManager: IconManager
+        @Inject(DocQuickInsertPopupService) private readonly _docQuickInsertPopupService: DocQuickInsertPopupService
     ) {
         super();
 
         this._initCommands();
         this._initComponents();
-        this._registerIcons();
         this._initMenus();
     }
 
@@ -55,17 +46,6 @@ export class DocQuickInsertUIController extends Disposable {
     }
 
     private _initComponents() {
-        ([
-            [QuickInsertPopup.componentKey, QuickInsertPopup],
-            [KeywordInputPlaceholder.componentKey, KeywordInputPlaceholder],
-            [QuickInsertPlaceholder.componentKey, QuickInsertPlaceholder],
-            [QuickInsertButton.componentKey, QuickInsertButton],
-        ] as const).forEach(([key, comp]) => {
-            if (key) {
-                this.disposeWithMe(this._componentManager.register(key, comp));
-            }
-        });
-
         const popups: IDocPopup[] = [
             {
                 keyword: '/',
@@ -82,12 +62,5 @@ export class DocQuickInsertUIController extends Disposable {
 
     private _initMenus() {
 
-    }
-
-    private _registerIcons(): void {
-        this.disposeWithMe(this._iconManager.register({
-            DividerIcon,
-            TextIcon,
-        }));
     }
 }

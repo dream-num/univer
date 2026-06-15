@@ -18,10 +18,9 @@ import type { IDisposable, Nullable } from '@univerjs/core';
 import { ICommandService, IContextService, Inject, Injector, LocaleService } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { FilterIcon } from '@univerjs/icons';
 import { SheetsFilterService, SmartToggleSheetsFilterCommand } from '@univerjs/sheets-filter';
 import { SheetCanvasPopManagerService, SheetsRenderService } from '@univerjs/sheets-ui';
-import { ComponentManager, IconManager, IMenuManagerService, IMessageService, IShortcutService } from '@univerjs/ui';
+import { IMenuManagerService, IMessageService, IShortcutService } from '@univerjs/ui';
 import { distinctUntilChanged } from 'rxjs';
 import {
     ChangeFilterByOperation,
@@ -31,11 +30,9 @@ import {
 } from '../commands/operations/sheets-filter.operation';
 import { menuSchema } from '../menu/schema';
 import { SheetsFilterPanelService } from '../services/sheets-filter-panel.service';
-import { FilterPanel } from '../views/components/SheetsFilterPanel';
+import { FILTER_PANEL_POPUP_KEY } from '../views/components/SheetsFilterPanel';
 import { SmartToggleFilterShortcut } from './sheets-filter.shortcut';
 import { SheetsFilterUIMobileController } from './ui-mobile.controller';
-
-export const FILTER_PANEL_POPUP_KEY = 'FILTER_PANEL_POPUP';
 
 /**
  * This controller controls the UI of "filter" features. Menus, commands and filter panel etc. Except for the rendering.
@@ -43,8 +40,6 @@ export const FILTER_PANEL_POPUP_KEY = 'FILTER_PANEL_POPUP';
 export class SheetsFilterUIDesktopController extends SheetsFilterUIMobileController {
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
-        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
-        @Inject(IconManager) private readonly _iconManager: IconManager,
         @Inject(SheetsFilterPanelService) private readonly _sheetsFilterPanelService: SheetsFilterPanelService,
         @Inject(SheetCanvasPopManagerService) private _sheetCanvasPopupService: SheetCanvasPopManagerService,
         @Inject(SheetsFilterService) private _sheetsFilterService: SheetsFilterService,
@@ -63,7 +58,6 @@ export class SheetsFilterUIDesktopController extends SheetsFilterUIMobileControl
         this._initShortcuts();
         this._initMenuItems();
         this._initUI();
-        this._registerIcons();
     }
 
     override dispose(): void {
@@ -96,14 +90,6 @@ export class SheetsFilterUIDesktopController extends SheetsFilterUIMobileControl
     }
 
     private _initUI(): void {
-        ([
-            [FILTER_PANEL_POPUP_KEY, FilterPanel],
-        ] as const).forEach(([key, comp]) => {
-            this.disposeWithMe(
-                this._componentManager.register(key, comp)
-            );
-        });
-
         this.disposeWithMe(this._contextService.subscribeContextValue$(FILTER_PANEL_OPENED_KEY)
             .pipe(distinctUntilChanged())
             .subscribe((open) => {
@@ -124,12 +110,6 @@ export class SheetsFilterUIDesktopController extends SheetsFilterUIMobileControl
     }
 
     private _popupDisposable?: Nullable<IDisposable>;
-
-    private _registerIcons(): void {
-        this.disposeWithMe(this._iconManager.register({
-            FilterIcon,
-        }));
-    }
 
     private _openFilterPopup(): void {
         const currentFilterModel = this._sheetsFilterPanelService.filterModel;

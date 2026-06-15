@@ -20,25 +20,17 @@ import type { IUniverUIConfig } from '../../config/config';
 import type { IUniverWorkbenchProps } from '../../views/workbench/Workbench';
 import type { IUIController, IWorkbenchOptions } from './ui.controller';
 import { Inject, Injector, IUniverInstanceService, LifecycleService, toDisposable } from '@univerjs/core';
-import { ColorPicker, render as createRoot, unmount } from '@univerjs/design';
+import { render as createRoot, unmount } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { IncreaseIcon, MoreDownIcon, RedoIcon, ReduceIcon, ShortcutIcon, UndoIcon } from '@univerjs/icons';
-import { ComponentManager, IconManager } from '../../common';
+import { ComponentManager } from '../../common';
 import { menuSchema } from '../../menu/schema';
 import { ILayoutService } from '../../services/layout/layout.service';
 import { IMenuManagerService } from '../../services/menu/menu-manager.service';
 import { BuiltInUIPart, IUIPartsService } from '../../services/parts/parts.service';
 import { connectInjector } from '../../utils/di';
-import { COLOR_PICKER_COMPONENT } from '../../views/color-picker/interface';
-import { COMMON_LABEL_COMPONENT, CommonLabel } from '../../views/CommonLabel';
 import { FloatDom } from '../../views/components/dom/FloatDom';
 import { CanvasPopup } from '../../views/components/popup/CanvasPopup';
 import { MobileRibbon } from '../../views/components/ribbon/MobileRibbon';
-import { FontFamily, FontFamilyItem } from '../../views/font-family/index';
-import { FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT } from '../../views/font-family/interface';
-import { FontSize } from '../../views/font-size/FontSize';
-import { FONT_SIZE_COMPONENT } from '../../views/font-size/interface';
-import { HEADING_ITEM_COMPONENT, HeadingItem } from '../../views/index';
 import { MobileWorkbench } from '../../views/mobile-workbench/MobileWorkbench';
 import { SingleUnitUIController } from './ui-shared.controller';
 
@@ -52,27 +44,13 @@ export class MobileUIController extends SingleUnitUIController implements IUICon
         @IUniverInstanceService instanceService: IUniverInstanceService,
         @IMenuManagerService menuManagerService: IMenuManagerService,
         @IUIPartsService uiPartsService: IUIPartsService,
-        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
-        @Inject(IconManager) private readonly _iconManager: IconManager
+        @Inject(ComponentManager) private readonly _componentManager: ComponentManager
     ) {
         super(injector, instanceService, layoutService, lifecycleService, renderManagerService);
 
         menuManagerService.mergeMenu(menuSchema);
         this._initBuiltinComponents(uiPartsService);
-        this._registerComponents();
-        this._registerIcons();
         this._bootstrapWorkbench();
-    }
-
-    private _registerIcons(): void {
-        this.disposeWithMe(this._iconManager.register({
-            IncreaseIcon,
-            MoreDownIcon,
-            RedoIcon,
-            ReduceIcon,
-            ShortcutIcon,
-            UndoIcon,
-        }));
     }
 
     override dispose(): void {
@@ -82,21 +60,6 @@ export class MobileUIController extends SingleUnitUIController implements IUICon
 
     override bootstrap(callback: (contentElement: HTMLElement, containerElement: HTMLElement) => void): IDisposable {
         return bootstrap(this._injector, this._config, callback);
-    }
-
-    private _registerComponents() {
-        ([
-            [COMMON_LABEL_COMPONENT, CommonLabel],
-            [HEADING_ITEM_COMPONENT, HeadingItem],
-            [FONT_FAMILY_COMPONENT, FontFamily],
-            [FONT_FAMILY_ITEM_COMPONENT, FontFamilyItem],
-            [FONT_SIZE_COMPONENT, FontSize],
-            [COLOR_PICKER_COMPONENT, ColorPicker],
-        ] as const).forEach(([key, comp]) => {
-            this.disposeWithMe(
-                this._componentManager.register(key, comp)
-            );
-        });
     }
 
     private _initBuiltinComponents(uiPartsService: IUIPartsService) {

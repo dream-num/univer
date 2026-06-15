@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, Inject } from '@univerjs/core';
-import { ComponentManager, IMenuManagerService, IShortcutService } from '@univerjs/ui';
+import { Disposable, ICommandService } from '@univerjs/core';
+import { IMenuManagerService, IShortcutService } from '@univerjs/ui';
 import { DeleteDocDrawingsCommand } from '../commands/commands/delete-doc-drawing.command';
 import { GroupDocDrawingCommand } from '../commands/commands/group-doc-drawing.command';
 import { InsertDocDrawingCommand } from '../commands/commands/insert-doc-drawing.command';
@@ -37,8 +37,6 @@ import { ClearDocDrawingTransformerOperation } from '../commands/operations/clea
 import { EditDocDrawingOperation } from '../commands/operations/edit-doc-drawing.operation';
 import { SidebarDocDrawingOperation } from '../commands/operations/open-drawing-panel.operation';
 import { menuSchema } from '../menu/schema';
-import { COMPONENT_DOC_DRAWING_PANEL } from '../views/doc-image-panel/component-name';
-import { DocDrawingPanel } from '../views/doc-image-panel/DocDrawingPanel';
 import {
     DeleteDrawingsShortcutItem,
     MoveDrawingDownShortcutItem,
@@ -49,7 +47,6 @@ import {
 
 export class DocDrawingUIController extends Disposable {
     constructor(
-        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
         @ICommandService private readonly _commandService: ICommandService,
         @IShortcutService private readonly _shortcutService: IShortcutService
@@ -60,8 +57,6 @@ export class DocDrawingUIController extends Disposable {
     }
 
     private _initCustomComponents(): void {
-        const componentManager = this._componentManager;
-        this.disposeWithMe(componentManager.register(COMPONENT_DOC_DRAWING_PANEL, DocDrawingPanel));
     }
 
     private _initMenus(): void {

@@ -19,6 +19,7 @@ import type { IUniverUniscriptConfig } from './config/config';
 import { IConfigService, Inject, Injector, merge, Plugin } from '@univerjs/core';
 import pkg from '../package.json';
 import { defaultPluginConfig, UNISCRIPT_PLUGIN_CONFIG_KEY } from './config/config';
+import { ComponentsController } from './controllers/components.controller';
 import { UniscriptController } from './controllers/uniscript.controller';
 import { ScriptEditorService } from './services/script-editor.service';
 import { IUniscriptExecutionService, UniscriptExecutionService } from './services/script-execution.service';
@@ -51,6 +52,7 @@ export class UniverUniscriptPlugin extends Plugin {
     override onStarting(): void {
         const injector = this._injector;
         const dependencies: Dependency[] = [
+            [ComponentsController],
             [UniscriptController],
             [ScriptEditorService],
             [ScriptPanelService],
@@ -59,6 +61,7 @@ export class UniverUniscriptPlugin extends Plugin {
         dependencies.forEach((d) => injector.add(d));
 
         this.registerExecution();
+        this._injector.get(ComponentsController);
     }
 
     override onSteady(): void {

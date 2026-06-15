@@ -15,15 +15,12 @@
  */
 
 import { Disposable, Inject } from '@univerjs/core';
-import { AddDigitsIcon, DollarIcon, EuroIcon, PercentIcon, ReduceDigitsIcon, RmbIcon, RoubleIcon } from '@univerjs/icons';
-import { ComponentManager, IconManager, IMenuManagerService } from '@univerjs/ui';
-import { MORE_NUMFMT_TYPE_KEY, MoreNumfmtType, Options, OPTIONS_KEY } from '../views/components/MoreNumfmtType';
+import { ComponentManager, IMenuManagerService } from '@univerjs/ui';
 import { menuSchema } from './schema';
 
 export class NumfmtMenuController extends Disposable {
     constructor(
         @Inject(ComponentManager) private _componentManager: ComponentManager,
-        @Inject(IconManager) private readonly _iconManager: IconManager,
         @IMenuManagerService private readonly _menuManagerService: IMenuManagerService
     ) {
         super();
@@ -33,23 +30,5 @@ export class NumfmtMenuController extends Disposable {
 
     private _initMenu() {
         this._menuManagerService.mergeMenu(menuSchema);
-        this.disposeWithMe(this._iconManager.register({
-            AddDigitsIcon,
-            DollarIcon,
-            EuroIcon,
-            PercentIcon,
-            ReduceDigitsIcon,
-            RmbIcon,
-            RoubleIcon,
-        }));
-
-        ([
-            [MORE_NUMFMT_TYPE_KEY, MoreNumfmtType],
-            [OPTIONS_KEY, Options],
-        ] as const).forEach(([key, comp]) => {
-            this.disposeWithMe(
-                this._componentManager.register(key, comp)
-            );
-        });
     }
 }

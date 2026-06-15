@@ -31,6 +31,7 @@ import { IRPCChannelService, toModule } from '@univerjs/rpc';
 import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import pkg from '../package.json';
 import { defaultPluginConfig, SHEETS_FILTER_UI_PLUGIN_CONFIG_KEY } from './config/config';
+import { ComponentsController } from './controllers/components.controller';
 import { SheetsFilterPermissionController } from './controllers/sheets-filter-permission.controller';
 import { SheetsFilterUIDesktopController } from './controllers/ui.controller';
 import { SheetsFilterPanelService } from './services/sheets-filter-panel.service';
@@ -70,6 +71,8 @@ export class UniverSheetsFilterUIPlugin extends Plugin {
     }
 
     override onStarting(): void {
+        this._injector.add([ComponentsController]);
+        this._injector.get(ComponentsController);
         registerDependencies(this._injector, [
             [SheetsFilterPanelService],
             [SheetsFilterPermissionController],

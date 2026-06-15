@@ -21,6 +21,7 @@ import { UniverDocsHyperLinkPlugin } from '@univerjs/docs-hyper-link';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import pkg from '../package.json';
 import { defaultPluginConfig, DOCS_HYPER_LINK_UI_PLUGIN_CONFIG_KEY } from './config/config';
+import { ComponentsController } from './controllers/components.controller';
 import { DocHyperLinkSelectionController } from './controllers/doc-hyper-link-selection.controller';
 import { DocHyperLinkEventRenderController } from './controllers/render-controllers/hyper-link-event.render-controller';
 import { DocHyperLinkRenderController } from './controllers/render-controllers/render.controller';
@@ -56,6 +57,8 @@ export class UniverDocsHyperLinkUIPlugin extends Plugin {
     }
 
     override onStarting(): void {
+        this._injector.add([ComponentsController]);
+        this._injector.get(ComponentsController);
         const deps: Dependency[] = [
             [DocHyperLinkPopupService],
             [DocHyperLinkUIController],

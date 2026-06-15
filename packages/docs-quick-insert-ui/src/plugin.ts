@@ -25,6 +25,7 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverUIPlugin } from '@univerjs/ui';
 import pkg from '../package.json';
 import { defaultPluginConfig, DOCS_QUICK_INSERT_UI_PLUGIN_CONFIG_KEY } from './config/config';
+import { ComponentsController } from './controllers/components.controller';
 import { DocQuickInsertTriggerController } from './controllers/doc-quick-insert-trigger.controller';
 import { DocQuickInsertUIController } from './controllers/ui.controller';
 import { DocQuickInsertMenuController } from './menu/doc-quick-insert-menu.controller';
@@ -58,6 +59,8 @@ export class UniverDocsQuickInsertUIPlugin extends Plugin {
     }
 
     override onStarting(): void {
+        this._injector.add([ComponentsController]);
+        this._injector.get(ComponentsController);
         const dependencies: Dependency[] = [
             [DocQuickInsertUIController],
             [DocQuickInsertTriggerController],

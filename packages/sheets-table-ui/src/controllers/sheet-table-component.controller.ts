@@ -17,11 +17,9 @@
 import type { IDisposable, Nullable } from '@univerjs/core';
 import { Disposable, IContextService, Inject } from '@univerjs/core';
 import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
-import { ComponentManager, IDialogService } from '@univerjs/ui';
+import { IDialogService } from '@univerjs/ui';
 import { distinctUntilChanged, startWith } from 'rxjs';
-import { SHEET_TABLE_RENAME_DIALOG, SHEETS_TABLE_FILTER_PANEL_OPENED_KEY, UNIVER_SHEET_TABLE_FILTER_PANEL_ID } from '../const';
-import { SheetTableFilterPanel } from '../views/components/SheetTableFilterPanel';
-import { SheetTableRenameDialog } from '../views/components/SheetTableRenameDialog';
+import { SHEETS_TABLE_FILTER_PANEL_OPENED_KEY, UNIVER_SHEET_TABLE_FILTER_PANEL_ID } from '../const';
 
 interface ITableFilterPanelInfo {
     unitId: string;
@@ -34,15 +32,12 @@ export class SheetsTableComponentController extends Disposable {
     private _popupDisposable?: Nullable<IDisposable>;
     private _currentTableFilterInfo: Nullable<ITableFilterPanelInfo> = null;
     constructor(
-
-        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @IContextService private readonly _contextService: IContextService,
         @Inject(SheetCanvasPopManagerService) private _sheetCanvasPopupService: SheetCanvasPopManagerService,
         @Inject(IDialogService) private readonly _dialogService: IDialogService
 
     ) {
         super();
-        this._initComponents();
         this._initUIPopup();
     }
 
@@ -76,15 +71,6 @@ export class SheetsTableComponentController extends Disposable {
 
     public getCurrentTableFilterInfo(): Nullable<ITableFilterPanelInfo> {
         return this._currentTableFilterInfo;
-    }
-
-    private _initComponents() {
-        ([
-            [SHEETS_TABLE_FILTER_PANEL_OPENED_KEY, SheetTableFilterPanel],
-            [SHEET_TABLE_RENAME_DIALOG, SheetTableRenameDialog],
-        ] as const).forEach(([key, comp]) => {
-            this.disposeWithMe(this._componentManager.register(key, comp));
-        });
     }
 
     private _initUIPopup() {

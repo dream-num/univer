@@ -14,25 +14,16 @@
  * limitations under the License.
  */
 
-import type { IDisposable } from '@univerjs/core';
-import { Disposable, Inject, Injector } from '@univerjs/core';
-import { ConditionsDoubleIcon } from '@univerjs/icons';
-import { IconManager, IMenuManagerService } from '@univerjs/ui';
+import { Disposable } from '@univerjs/core';
+import { IMenuManagerService } from '@univerjs/ui';
 import { menuSchema } from './schema';
 
 export class ConditionalFormattingMenuController extends Disposable {
-    private _sidebarDisposable: IDisposable | null = null;
-
     constructor(
-        @Inject(Injector) private _injector: Injector,
-        @Inject(IconManager) private readonly _iconManager: IconManager,
         @IMenuManagerService private readonly _menuManagerService: IMenuManagerService
     ) {
         super();
 
         this._menuManagerService.mergeMenu(menuSchema);
-        this.disposeWithMe(this._iconManager.register({
-            ConditionsDoubleIcon,
-        }));
     }
 }

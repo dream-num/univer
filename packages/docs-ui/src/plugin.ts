@@ -97,6 +97,7 @@ import { DocParagraphSettingPanelOperation } from './commands/operations/doc-par
 import { DocOpenPageSettingCommand } from './commands/operations/open-page-setting.operation';
 import { SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-ratio.operation';
 import { defaultPluginConfig, DOCS_UI_PLUGIN_CONFIG_KEY } from './config/config';
+import { ComponentsController } from './controllers/components.controller';
 import { DocAutoFormatController } from './controllers/doc-auto-format.controller';
 import { DocHeaderFooterController } from './controllers/doc-header-footer.controller';
 import { DocMoveCursorController } from './controllers/doc-move-cursor.controller';
@@ -206,6 +207,7 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocMoveCursorController],
             [DocParagraphSettingController],
             [DocTableController],
+            [ComponentsController],
 
             // FIXME: LifecycleStages.Rendered must be used, otherwise the menu cannot be added to the DOM, but the sheet ui
             // plugin can be added in LifecycleStages.Ready
@@ -353,6 +355,7 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocPrintInterceptorService],
             [DocClipboardController],
             [DocEditorBridgeController],
+            [ComponentsController],
             [DocUIController],
             [DocAutoFormatController],
             [DocTableController],

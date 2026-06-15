@@ -14,16 +14,12 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, Inject } from '@univerjs/core';
-import { ComponentManager } from '@univerjs/ui';
+import { Disposable, ICommandService } from '@univerjs/core';
 import { DocCreateTableOperation } from '../commands/operations/doc-create-table.operation';
-import { COMPONENT_DOC_CREATE_TABLE_CONFIRM } from '../views/table/create/component-name';
-import { DocCreateTableConfirm } from '../views/table/create/TableCreate';
 
 export class DocTableController extends Disposable {
     constructor(
-        @ICommandService private readonly _commandService: ICommandService,
-        @Inject(ComponentManager) private readonly _componentManager: ComponentManager
+        @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
 
@@ -33,18 +29,12 @@ export class DocTableController extends Disposable {
     private _initialize() {
         this._init();
         this._registerCommands();
-        this._initCustomComponents();
     }
 
     private _registerCommands() {
         [
             DocCreateTableOperation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
-    }
-
-    private _initCustomComponents(): void {
-        const componentManager = this._componentManager;
-        this.disposeWithMe(componentManager.register(COMPONENT_DOC_CREATE_TABLE_CONFIRM, DocCreateTableConfirm));
     }
 
     private _init() {}

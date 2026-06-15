@@ -29,14 +29,14 @@ import {
 } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
-import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, RANGE_SELECTOR_COMPONENT_KEY } from '@univerjs/sheets-ui';
-import { BuiltInUIPart, ComponentManager, connectInjector, IUIPartsService } from '@univerjs/ui';
+import { BuiltInUIPart, connectInjector, IUIPartsService } from '@univerjs/ui';
 import pkg from '../package.json';
 import { FORMULA_UI_PLUGIN_NAME } from './common/plugin-name';
 import {
     defaultPluginConfig,
     PLUGIN_CONFIG_KEY_BASE,
 } from './config/config';
+import { ComponentsController } from './controllers/components.controller';
 import { FormulaAlertRenderController } from './controllers/formula-alert-render.controller';
 import { FormulaClipboardController } from './controllers/formula-clipboard.controller';
 import { FormulaEditorShowController } from './controllers/formula-editor-show.controller';
@@ -47,8 +47,6 @@ import { FormulaUIController } from './controllers/ui.controller';
 import { FormulaPromptService, IFormulaPromptService } from './services/prompt.service';
 import { GlobalRangeSelectorService } from './services/range-selector.service';
 import { RefSelectionsRenderService } from './services/render-services/ref-selections.render.service';
-import { FormulaEditor } from './views/formula-editor/index';
-import { RangeSelector } from './views/range-selector';
 import { GlobalRangeSelector } from './views/range-selector/Global';
 
 /**
@@ -82,6 +80,8 @@ export class UniverSheetsFormulaUIPlugin extends Plugin {
     }
 
     override onStarting(): void {
+        this._injector.add([ComponentsController]);
+        this._injector.get(ComponentsController);
         registerDependencies(this._injector, [
             [IFormulaPromptService, { useClass: FormulaPromptService }],
             [GlobalRangeSelectorService],
@@ -125,9 +125,6 @@ export class UniverSheetsFormulaUIPlugin extends Plugin {
     }
 
     private _initUIPart(): void {
-        const componentManager = this._injector.get(ComponentManager);
-        this.disposeWithMe(componentManager.register(RANGE_SELECTOR_COMPONENT_KEY, RangeSelector));
-        this.disposeWithMe(componentManager.register(EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, FormulaEditor));
         this.disposeWithMe(this._uiPartsService.registerComponent(BuiltInUIPart.GLOBAL, () => connectInjector(GlobalRangeSelector, this._injector)));
     }
 }

@@ -49,7 +49,6 @@ import { combineLatest, merge, Observable } from 'rxjs';
 import { debounceTime, map, switchMap, tap } from 'rxjs/operators';
 import { CloseNumfmtPanelOperator } from '../commands/operations/close.numfmt.panel.operation';
 import { OpenNumfmtPanelOperator } from '../commands/operations/open.numfmt.panel.operation';
-import { SheetNumfmtPanel } from '../views/SheetNumfmtPanel';
 
 const SHEET_NUMFMT_PANEL = 'SHEET_NUMFMT_PANEL';
 
@@ -77,7 +76,6 @@ export class SheetNumfmtUIController extends Disposable {
         super();
 
         this._initRealTimeRenderingInterceptor();
-        this._initPanel();
         this._initCommands();
         this._initCloseListener();
         this._commandExecutedListener();
@@ -184,12 +182,6 @@ export class SheetNumfmtUIController extends Disposable {
         ].forEach((config) => {
             this.disposeWithMe(this._commandService.registerCommand(config));
         });
-    }
-
-    private _initPanel() {
-        this.disposeWithMe(
-            this._componentManager.register(SHEET_NUMFMT_PANEL, SheetNumfmtPanel)
-        );
     }
 
     // eslint-disable-next-line max-lines-per-function

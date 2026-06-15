@@ -17,9 +17,8 @@
 import type { Dependency } from '@univerjs/core';
 import { Disposable, ICommandService, Inject, Injector, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { FunctionIcon } from '@univerjs/icons';
 import { SheetsUIPart } from '@univerjs/sheets-ui';
-import { ComponentManager, connectInjector, IconManager, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
+import { connectInjector, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 import { SheetCopyFormulaOnlyCommand, SheetOnlyPasteFormulaCommand } from '../commands/commands/formula-clipboard.command';
 import { HelpFunctionOperation } from '../commands/operations/help-function.operation';
 import { InsertFunctionOperation } from '../commands/operations/insert-function.operation';
@@ -28,8 +27,6 @@ import { ReferenceAbsoluteOperation } from '../commands/operations/reference-abs
 import { SearchFunctionOperation } from '../commands/operations/search-function.operation';
 import { menuSchema } from '../menu/schema';
 import { FormulaProgressBar } from '../views/formula-progress/FormulaProgress';
-import { MORE_FUNCTIONS_COMPONENT } from '../views/more-functions/interface';
-import { MoreFunctions } from '../views/more-functions/MoreFunctions';
 import { FormulaEditorShowController } from './formula-editor-show.controller';
 import { ChangeRefToAbsoluteShortcut } from './shortcuts/prompt.shortcut';
 import { QuickSumShortcut } from './shortcuts/quick-sum.shortcut';
@@ -41,9 +38,7 @@ export class FormulaUIController extends Disposable {
         @ICommandService private readonly _commandService: ICommandService,
         @IShortcutService private readonly _shortcutService: IShortcutService,
         @IUIPartsService private readonly _uiPartsService: IUIPartsService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
-        @Inject(IconManager) private readonly _iconManager: IconManager
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
 
@@ -53,7 +48,6 @@ export class FormulaUIController extends Disposable {
     private _initialize(): void {
         this._registerCommands();
         this._registerMenus();
-        this._registerIcons();
         this._registerShortcuts();
         this._registerComponents();
         this._registerRenderModules();
@@ -61,12 +55,6 @@ export class FormulaUIController extends Disposable {
 
     private _registerMenus(): void {
         this._menuManagerService.mergeMenu(menuSchema);
-    }
-
-    private _registerIcons(): void {
-        this.disposeWithMe(this._iconManager.register({
-            FunctionIcon,
-        }));
     }
 
     private _registerCommands(): void {
@@ -92,8 +80,6 @@ export class FormulaUIController extends Disposable {
 
     private _registerComponents(): void {
         this.disposeWithMe(this._uiPartsService.registerComponent(SheetsUIPart.FORMULA_AUX, () => connectInjector(FormulaProgressBar, this._injector)));
-
-        this._componentManager.register(MORE_FUNCTIONS_COMPONENT, MoreFunctions);
     }
 
     private _registerRenderModules(): void {

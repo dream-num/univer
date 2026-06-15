@@ -58,9 +58,6 @@ function createCommonDeps() {
             focused$: new Subject<string>(),
             getFocusedUnit: vi.fn(() => null),
         },
-        iconManager: {
-            register: vi.fn(() => ({ dispose: vi.fn() })),
-        },
     };
 }
 
@@ -87,7 +84,6 @@ describe('DesktopUIController', () => {
             registerComponent: vi.fn(() => ({ dispose: vi.fn() })),
         };
         const componentManager = {
-            register: vi.fn(() => ({ dispose: vi.fn() })),
             dispose: vi.fn(),
         };
 
@@ -100,15 +96,13 @@ describe('DesktopUIController', () => {
             deps.instanceService as any,
             menuManagerService as any,
             uiPartsService as any,
-            componentManager as any,
-            deps.iconManager as any
+            componentManager as any
         );
 
         vi.advanceTimersByTime(3300);
 
         expect(menuManagerService.mergeMenu).toHaveBeenCalledTimes(1);
         expect(uiPartsService.registerComponent).toHaveBeenCalledTimes(3);
-        expect(componentManager.register).toHaveBeenCalledTimes(6);
         expect(render).toHaveBeenCalledWith(expect.any(Object), container);
 
         controller.dispose();
@@ -124,7 +118,7 @@ describe('DesktopUIController', () => {
         const deps = createCommonDeps();
         const menuManagerService = { mergeMenu: vi.fn() };
         const uiPartsService = { registerComponent: vi.fn(() => ({ dispose: vi.fn() })) };
-        const componentManager = { register: vi.fn(() => ({ dispose: vi.fn() })), dispose: vi.fn() };
+        const componentManager = { dispose: vi.fn() };
 
         const withMissingId = new DesktopUIController(
             { container: 'missing-container' } as any,
@@ -135,8 +129,7 @@ describe('DesktopUIController', () => {
             deps.instanceService as any,
             menuManagerService as any,
             uiPartsService as any,
-            componentManager as any,
-            deps.iconManager as any
+            componentManager as any
         );
 
         const withDefault = new DesktopUIController(
@@ -148,8 +141,7 @@ describe('DesktopUIController', () => {
             deps.instanceService as any,
             menuManagerService as any,
             uiPartsService as any,
-            componentManager as any,
-            deps.iconManager as any
+            componentManager as any
         );
 
         vi.advanceTimersByTime(3300);
@@ -173,7 +165,7 @@ describe('DesktopUIController', () => {
         const mountContainer = document.createElement('div');
         const menuManagerService = { mergeMenu: vi.fn() };
         const uiPartsService = { registerComponent: vi.fn(() => ({ dispose: vi.fn() })) };
-        const componentManager = { register: vi.fn(() => ({ dispose: vi.fn() })), dispose: vi.fn() };
+        const componentManager = { dispose: vi.fn() };
 
         const controller = new DesktopUIController(
             { container: mountContainer } as any,
@@ -184,8 +176,7 @@ describe('DesktopUIController', () => {
             deps.instanceService as any,
             menuManagerService as any,
             uiPartsService as any,
-            componentManager as any,
-            deps.iconManager as any
+            componentManager as any
         );
 
         vi.advanceTimersByTime(3300);
@@ -215,7 +206,6 @@ describe('MobileUIController', () => {
             registerComponent: vi.fn(() => ({ dispose: vi.fn() })),
         };
         const componentManager = {
-            register: vi.fn(() => ({ dispose: vi.fn() })),
             dispose: vi.fn(),
         };
 
@@ -228,15 +218,13 @@ describe('MobileUIController', () => {
             deps.instanceService as any,
             menuManagerService as any,
             uiPartsService as any,
-            componentManager as any,
-            deps.iconManager as any
+            componentManager as any
         );
 
         vi.advanceTimersByTime(3300);
 
         expect(menuManagerService.mergeMenu).toHaveBeenCalledTimes(1);
         expect(uiPartsService.registerComponent).toHaveBeenCalledTimes(3);
-        expect(componentManager.register).toHaveBeenCalledTimes(6);
         expect(render).toHaveBeenCalledWith(expect.any(Object), expect.objectContaining({ id: 'missing-mobile' }));
 
         controller.dispose();
@@ -262,7 +250,6 @@ describe('MobileUIController', () => {
             registerComponent: vi.fn(() => ({ dispose: vi.fn() })),
         };
         const componentManager = {
-            register: vi.fn(() => ({ dispose: vi.fn() })),
             dispose: vi.fn(),
         };
 
@@ -275,8 +262,7 @@ describe('MobileUIController', () => {
             deps.instanceService as any,
             menuManagerService as any,
             uiPartsService as any,
-            componentManager as any,
-            deps.iconManager as any
+            componentManager as any
         );
 
         const byElement = new MobileUIController(
@@ -288,8 +274,7 @@ describe('MobileUIController', () => {
             deps.instanceService as any,
             menuManagerService as any,
             uiPartsService as any,
-            componentManager as any,
-            deps.iconManager as any
+            componentManager as any
         );
 
         const byDefault = new MobileUIController(
@@ -301,8 +286,7 @@ describe('MobileUIController', () => {
             deps.instanceService as any,
             menuManagerService as any,
             uiPartsService as any,
-            componentManager as any,
-            deps.iconManager as any
+            componentManager as any
         );
 
         vi.advanceTimersByTime(3300);

@@ -15,7 +15,6 @@
  */
 
 import type { IDisposable } from '../../common/di';
-import type { Nullable } from '../../shared/types';
 import { filter, Observable, Subject } from 'rxjs';
 import { createIdentifier } from '../../common/di';
 import { merge } from '../../common/lodash';
@@ -43,7 +42,7 @@ interface IConfigOptions {
 }
 
 export interface IConfigService {
-    getConfig<T>(id: string | symbol): Nullable<T>;
+    getConfig<T>(id: string | symbol): T;
     setConfig(id: string | symbol, value: unknown, options?: IConfigOptions): void;
     deleteConfig(id: string): boolean;
     subscribeConfigValue$<T = unknown>(key: string): Observable<T>;
@@ -61,7 +60,7 @@ export class ConfigService implements IConfigService, IDisposable {
         this._configChanged$.complete();
     }
 
-    getConfig<T>(id: string | symbol): Nullable<T> {
+    getConfig<T>(id: string | symbol): T {
         return this._config.get(id) as T;
     }
 

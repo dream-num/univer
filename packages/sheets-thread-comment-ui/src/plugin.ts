@@ -22,6 +22,7 @@ import { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
 import pkg from '../package.json';
 import { ShowAddSheetCommentModalOperation, ToggleSheetCommentPanelOperation } from './commands/operations/comment.operation';
 import { defaultPluginConfig, SHEETS_THREAD_COMMENT_UI_PLUGIN_CONFIG_KEY } from './config/config';
+import { ComponentsController } from './controllers/components.controller';
 import { SheetsThreadCommentRenderController } from './controllers/render-controllers/render.controller';
 import { SheetsThreadCommentCopyPasteController } from './controllers/sheets-thread-comment-copy-paste.controller';
 import { SheetsThreadCommentHoverController } from './controllers/sheets-thread-comment-hover.controller';
@@ -59,6 +60,8 @@ export class UniverSheetsThreadCommentUIPlugin extends Plugin {
     }
 
     override onStarting(): void {
+        this._injector.add([ComponentsController]);
+        this._injector.get(ComponentsController);
         ([
             [SheetsThreadCommentController],
             [SheetsThreadCommentRenderController],

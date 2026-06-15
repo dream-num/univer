@@ -90,8 +90,8 @@ export function CustomLabel(props: ICustomLabelProps) {
         return false;
     }, [realValue]);
 
-    if (icon) {
-        const Icon = iconManager.get(realIcon ?? '');
+    if (realIcon) {
+        const Icon = iconManager.get(realIcon);
 
         if (Icon) {
             nodes.push(

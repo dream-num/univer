@@ -1,7 +1,62 @@
 import type { ICreateUnitOptions, IWorkbookData, IWorksheetData, Injector, Workbook } from '@univerjs/core';
+import type { EmbedCapability } from '@univerjs/embed';
 import { BooleanNumber, generateRandomId, IUniverInstanceService, LocaleType, UniverInstanceType } from '@univerjs/core';
-import { registerEmbedGuestContribution } from '@univerjs/embed';
+import { registerEmbedCapabilities, registerEmbedGuestContribution } from '@univerjs/embed';
 import pkg from '../package.json';
+
+const SHEETS_HOST_EMBED_CAPABILITIES: readonly EmbedCapability[] = [
+    {
+        hostType: UniverInstanceType.UNIVER_SHEET,
+        childType: UniverInstanceType.UNIVER_DOC,
+        entry: 'sheets-floating-object',
+        mode: 'float',
+        renderHost: 'sheets-drawing-dom',
+        layout: 'doc-width-scale',
+        menuBehavior: 'floating',
+        nestedEmbed: false,
+    },
+    {
+        hostType: UniverInstanceType.UNIVER_SHEET,
+        childType: UniverInstanceType.UNIVER_SLIDE,
+        entry: 'sheets-floating-object',
+        mode: 'float',
+        renderHost: 'sheets-drawing-dom',
+        layout: 'aspect-fit',
+        menuBehavior: 'floating',
+        nestedEmbed: false,
+    },
+    {
+        hostType: UniverInstanceType.UNIVER_SHEET,
+        childType: UniverInstanceType.UNIVER_BASE,
+        entry: 'sheets-sheet-tab',
+        mode: 'tab',
+        layout: 'tab-peer',
+        menuBehavior: 'host-override',
+        nestedEmbed: false,
+    },
+    {
+        hostType: UniverInstanceType.UNIVER_SHEET,
+        childType: UniverInstanceType.UNIVER_DOC,
+        entry: 'sheets-sheet-tab',
+        mode: 'tab',
+        layout: 'tab-peer',
+        menuBehavior: 'host-override',
+        nestedEmbed: false,
+    },
+    {
+        hostType: UniverInstanceType.UNIVER_SHEET,
+        childType: UniverInstanceType.UNIVER_SLIDE,
+        entry: 'sheets-sheet-tab',
+        mode: 'tab',
+        layout: 'tab-peer',
+        menuBehavior: 'host-override',
+        nestedEmbed: false,
+    },
+];
+
+export function registerSheetsEmbedHostCapabilities(injector: Injector): void {
+    registerEmbedCapabilities(injector, SHEETS_HOST_EMBED_CAPABILITIES);
+}
 
 export function registerSheetsEmbedGuestContribution(injector: Injector): void {
     if (!injector.has(IUniverInstanceService)) {

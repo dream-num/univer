@@ -1,6 +1,41 @@
 import type { ICreateUnitOptions, IDocumentData, Injector } from '@univerjs/core';
+import type { EmbedCapability } from '@univerjs/embed';
 import { DocumentDataModel, DocumentFlavor, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { registerEmbedGuestContribution } from '@univerjs/embed';
+import { registerEmbedCapabilities, registerEmbedGuestContribution } from '@univerjs/embed';
+
+const DOCS_HOST_EMBED_CAPABILITIES: readonly EmbedCapability[] = [
+    {
+        hostType: UniverInstanceType.UNIVER_DOC,
+        childType: UniverInstanceType.UNIVER_SHEET,
+        entry: 'docs-custom-block',
+        mode: 'float',
+        layout: 'docs-sticky-sheet',
+        menuBehavior: 'floating',
+        nestedEmbed: false,
+    },
+    {
+        hostType: UniverInstanceType.UNIVER_DOC,
+        childType: UniverInstanceType.UNIVER_BASE,
+        entry: 'docs-custom-block',
+        mode: 'float',
+        layout: 'docs-sticky-base',
+        menuBehavior: 'floating',
+        nestedEmbed: false,
+    },
+    {
+        hostType: UniverInstanceType.UNIVER_DOC,
+        childType: UniverInstanceType.UNIVER_SLIDE,
+        entry: 'docs-custom-block',
+        mode: 'float',
+        layout: 'aspect-fit',
+        menuBehavior: 'floating',
+        nestedEmbed: false,
+    },
+];
+
+export function registerDocsEmbedHostCapabilities(injector: Injector): void {
+    registerEmbedCapabilities(injector, DOCS_HOST_EMBED_CAPABILITIES);
+}
 
 export function registerDocsEmbedGuestContribution(injector: Injector): void {
     if (!injector.has(IUniverInstanceService)) {

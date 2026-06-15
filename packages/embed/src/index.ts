@@ -47,6 +47,7 @@ export type {
     EmbedLayoutPolicy,
     EmbedMenuBehavior,
     EmbedMode,
+    EmbedProductPluginConfig,
     EmbedRenderHost,
     EmbedResolvedSource,
     EmbedResource,

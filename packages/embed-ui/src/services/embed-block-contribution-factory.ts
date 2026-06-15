@@ -4,7 +4,6 @@ import type { EmbedBlockContribution } from '../types/embed-ui';
 import { DEFAULT_EMBED_DOC_FLOW_LAYOUT_POLICY, DEFAULT_EMBED_FLOAT_LAYOUT_POLICY, DEFAULT_EMBED_TAB_LAYOUT_POLICY } from '@univerjs/embed';
 import { of } from 'rxjs';
 import { createEmbedProductMenuInjector } from './embed-product-menu-mounting';
-import { EmbedProductMenuRegistryService } from './embed-product-menu-registry.service';
 
 export interface CreateEmbedRibbonBlockContributionOptions {
     childType: UniverInstanceType;
@@ -30,15 +29,10 @@ export function createEmbedRibbonBlockContribution(options: CreateEmbedRibbonBlo
             docFlow: DEFAULT_EMBED_DOC_FLOW_LAYOUT_POLICY,
         },
         createRibbonOverride: ({ childUnitId, injector }) => {
-            const menuSchema = getEmbedProductMenuSchema(injector, childType) ?? options.menuSchema;
-            if (!menuSchema) {
-                return undefined;
-            }
-
             const scoped = createEmbedProductMenuInjector(injector as never, {
                 childType,
                 childUnitId,
-                menuSchema,
+                menuSchema: options.menuSchema,
                 menuTitlePrefix: productName,
             });
 
@@ -49,15 +43,6 @@ export function createEmbedRibbonBlockContribution(options: CreateEmbedRibbonBlo
             };
         },
     };
-}
-
-function getEmbedProductMenuSchema(injector: unknown, childType: UniverInstanceType): unknown | undefined {
-    const maybeInjector = injector as { has?: (dependency: unknown) => boolean; get?: <T>(dependency: unknown) => T };
-    if (!maybeInjector.has?.(EmbedProductMenuRegistryService) || !maybeInjector.get) {
-        return undefined;
-    }
-
-    return maybeInjector.get<EmbedProductMenuRegistryService>(EmbedProductMenuRegistryService).getMergedMenuSchema(childType);
 }
 
 export function createEmbedNoHeaderBlockContribution(options: CreateEmbedNoHeaderBlockContributionOptions): EmbedBlockContribution {

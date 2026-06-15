@@ -26,7 +26,7 @@ import {
     SetStrikeThroughCommand,
     SetUnderlineCommand,
 } from '@univerjs/sheets';
-import { BuiltInUIPart, ComponentManager, connectInjector, ILayoutService, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
+import { BuiltInUIPart, ComponentManager, connectInjector, IconManager, ILayoutService, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 import { DeleteRangeMoveLeftConfirmCommand } from '../commands/commands/delete-range-move-left-confirm.command';
 import { DeleteRangeMoveUpConfirmCommand } from '../commands/commands/delete-range-move-up-confirm.command';
 import { SetColumnHeaderHeightCommand, SetRowHeaderWidthCommand } from '../commands/commands/headersize-changed.command';
@@ -160,6 +160,7 @@ export class SheetUIController extends Disposable {
     constructor(
         @Inject(Injector) protected readonly _injector: Injector,
         @Inject(ComponentManager) protected readonly _componentManager: ComponentManager,
+        @Inject(IconManager) protected readonly _iconManager: IconManager,
         @ILayoutService protected readonly _layoutService: ILayoutService,
         @ICommandService protected readonly _commandService: ICommandService,
         @IShortcutService protected readonly _shortcutService: IShortcutService,
@@ -174,6 +175,7 @@ export class SheetUIController extends Disposable {
 
     private _init(): void {
         this._initComponents();
+        this._registerIcons();
         this._initCommands();
         this._initMenus();
         this._initShortcuts();
@@ -190,9 +192,12 @@ export class SheetUIController extends Disposable {
         this.disposeWithMe(componentManager.register(BORDER_PANEL_COMPONENT, BorderPanel));
         this.disposeWithMe(componentManager.register(DEFINED_NAME_CONTAINER, DefinedNameContainer));
         this.disposeWithMe(componentManager.register(CELL_POPUP_COMPONENT_KEY, CellPopup));
+    }
 
-        // init icons
-        this.disposeWithMe(componentManager.register('HideGridlinesDoubleIcon', HideGridlinesDoubleIcon));
+    private _registerIcons(): void {
+        this.disposeWithMe(this._iconManager.register({
+            HideGridlinesDoubleIcon,
+        }));
     }
 
     private _initCommands(): void {

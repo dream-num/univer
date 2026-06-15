@@ -30,6 +30,7 @@ import {
     BuiltInUIPart,
     ComponentManager,
     connectInjector,
+    IconManager,
     ILayoutService,
     IMenuManagerService,
     IUIPartsService,
@@ -108,6 +109,7 @@ export class SheetUIMobileController extends Disposable {
     constructor(
         @Inject(Injector) protected readonly _injector: Injector,
         @Inject(ComponentManager) protected readonly _componentManager: ComponentManager,
+        @Inject(IconManager) protected readonly _iconManager: IconManager,
         @ILayoutService protected readonly _layoutService: ILayoutService,
         @ICommandService protected readonly _commandService: ICommandService,
         @IMenuManagerService protected readonly _menuManagerService: IMenuManagerService,
@@ -121,6 +123,7 @@ export class SheetUIMobileController extends Disposable {
 
     private _init(): void {
         this._initComponents();
+        this._registerIcons();
         this._initCommands();
         this._initMenus();
         this._initWorkbenchParts();
@@ -136,9 +139,12 @@ export class SheetUIMobileController extends Disposable {
         this.disposeWithMe(componentManager.register(BORDER_PANEL_COMPONENT, BorderPanel));
         this.disposeWithMe(componentManager.register(DEFINED_NAME_CONTAINER, DefinedNameContainer));
         this.disposeWithMe(componentManager.register(CELL_POPUP_COMPONENT_KEY, CellPopup));
+    }
 
-        // init icons
-        this.disposeWithMe(componentManager.register('HideGridlinesDoubleIcon', HideGridlinesDoubleIcon));
+    private _registerIcons(): void {
+        this.disposeWithMe(this._iconManager.register({
+            HideGridlinesDoubleIcon,
+        }));
     }
 
     private _initCommands(): void {

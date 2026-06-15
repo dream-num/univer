@@ -15,120 +15,7 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
-import type { ForwardRefExoticComponent } from 'react';
-import { Disposable, toDisposable } from '@univerjs/core';
-import {
-    AddDigitsIcon,
-    AddImageIcon,
-    AdditionAndSubtractionIcon,
-    AdjustHeightDoubleIcon,
-    AdjustWidthDoubleIcon,
-    AlignBottomIcon,
-    AlignTextBothIcon,
-    AlignTopIcon,
-    AllBorderIcon,
-    AmplifyIcon,
-    AutoHeightDoubleIcon,
-    AutoWidthDoubleIcon,
-    AutowrapIcon,
-    AvgIcon,
-    BackSlashDoubleIcon,
-    BoldIcon,
-    BrushIcon,
-    CancelFreezeIcon,
-    CancelMergeIcon,
-    ClearFormatDoubleIcon,
-    CntIcon,
-    CodeIcon,
-    ConditionsDoubleIcon,
-    CopyDoubleIcon,
-    CutIcon,
-    DeleteCellMoveDownDoubleIcon,
-    DeleteCellShiftLeftDoubleIcon,
-    DeleteCellShiftRightDoubleIcon,
-    DeleteCellShiftUpDoubleIcon,
-    DeleteColumnDoubleIcon,
-    DeleteRowDoubleIcon,
-    DirectExportIcon,
-    DollarIcon,
-    DownBorderDoubleIcon,
-    DownloadImageIcon,
-    EuroIcon,
-    ExportIcon,
-    EyeOutlineIcon,
-    FolderIcon,
-    FontColorDoubleIcon,
-    FontSizeIncreaseIcon,
-    FontSizeReduceIcon,
-    FreezeColumnIcon,
-    FreezeRowIcon,
-    FreezeToSelectedIcon,
-    FunctionIcon,
-    GridIcon,
-    HeaderFooterIcon,
-    HideDoubleIcon,
-    HorizontalBorderDoubleIcon,
-    HorizontallyIcon,
-    HorizontalMergeIcon,
-    IncreaseIcon,
-    InnerBorderDoubleIcon,
-    InsertCellDownDoubleIcon,
-    InsertCellShiftRightDoubleIcon,
-    InsertDoubleIcon,
-    InsertRowAboveDoubleIcon,
-    InsertRowBelowDoubleIcon,
-    ItalicIcon,
-    KeyboardIcon,
-    LeftBorderDoubleIcon,
-    LeftDoubleDiagonalDoubleIcon,
-    LeftInsertColumnDoubleIcon,
-    LeftJustifyingIcon,
-    LeftRotationFortyFiveDegreesIcon,
-    LeftRotationNinetyDegreesIcon,
-    LeftTridiagonalDoubleIcon,
-    MaxIcon,
-    MenuIcon,
-    MergeAllIcon,
-    MinIcon,
-    MoreDownIcon,
-    NoBorderIcon,
-    NoColorDoubleIcon,
-    NoRotationIcon,
-    OrderIcon,
-    OuterBorderDoubleIcon,
-    OverflowIcon,
-    PaintBucketDoubleIcon,
-    PasteSpecialDoubleIcon,
-    PercentIcon,
-    PipingIcon,
-    RedoIcon,
-    ReduceDigitsIcon,
-    ReduceDoubleIcon,
-    ReduceIcon,
-    RightBorderDoubleIcon,
-    RightDoubleDiagonalDoubleIcon,
-    RightInsertColumnDoubleIcon,
-    RightJustifyingIcon,
-    RightRotationFortyFiveDegreesIcon,
-    RightRotationNinetyDegreesIcon,
-    RmbIcon,
-    RoubleIcon,
-    ShortcutIcon,
-    SlashDoubleIcon,
-    StrikethroughIcon,
-    SubscriptIcon,
-    SumIcon,
-    SuperscriptIcon,
-    TruncationIcon,
-    UnderlineIcon,
-    UndoIcon,
-    UnorderIcon,
-    UpBorderDoubleIcon,
-    VerticalBorderDoubleIcon,
-    VerticalCenterIcon,
-    VerticalIntegrationIcon,
-    VerticalTextIcon,
-} from '@univerjs/icons';
+import { Disposable, ILogService, Optional, toDisposable } from '@univerjs/core';
 import { createElement, useEffect, useRef } from 'react';
 
 type ComponentFramework = string;
@@ -146,136 +33,11 @@ export type ComponentType<T = any> = any;
 
 export type ComponentList = Map<string, IComponent>;
 
-const iconList: Record<string, ForwardRefExoticComponent<any>> = {
-    AddDigitsIcon,
-    AddImageIcon,
-    AdditionAndSubtractionIcon,
-    AdjustHeightDoubleIcon,
-    AdjustWidthDoubleIcon,
-    AlignBottomIcon,
-    AlignTextBothIcon,
-    AlignTopIcon,
-    AllBorderIcon,
-    AmplifyIcon,
-    AutoHeightDoubleIcon,
-    AutoWidthDoubleIcon,
-    AutowrapIcon,
-    AvgIcon,
-    BackSlashDoubleIcon,
-    BoldIcon,
-    BrushIcon,
-    CancelFreezeIcon,
-    CancelMergeIcon,
-    ClearFormatDoubleIcon,
-    CntIcon,
-    CodeIcon,
-    ConditionsDoubleIcon,
-    CopyDoubleIcon,
-    CutIcon,
-    DeleteCellMoveDownDoubleIcon,
-    DeleteCellShiftLeftDoubleIcon,
-    DeleteCellShiftRightDoubleIcon,
-    DeleteCellShiftUpDoubleIcon,
-    DeleteColumnDoubleIcon,
-    DeleteRowDoubleIcon,
-    DirectExportIcon,
-    DollarIcon,
-    DownBorderDoubleIcon,
-    DownloadImageIcon,
-    EuroIcon,
-    ExportIcon,
-    EyeOutlineIcon,
-    FolderIcon,
-    FontColorDoubleIcon,
-    FontSizeIncreaseIcon,
-    FontSizeReduceIcon,
-    FreezeColumnIcon,
-    FreezeRowIcon,
-    FreezeToSelectedIcon,
-    FunctionIcon,
-    GridIcon,
-    HeaderFooterIcon,
-    HideDoubleIcon,
-    HorizontalBorderDoubleIcon,
-    HorizontallyIcon,
-    HorizontalMergeIcon,
-    IncreaseIcon,
-    InnerBorderDoubleIcon,
-    InsertCellDownDoubleIcon,
-    InsertCellShiftRightDoubleIcon,
-    InsertDoubleIcon,
-    InsertRowAboveDoubleIcon,
-    InsertRowBelowDoubleIcon,
-    ItalicIcon,
-    KeyboardIcon,
-    LeftBorderDoubleIcon,
-    LeftDoubleDiagonalDoubleIcon,
-    LeftInsertColumnDoubleIcon,
-    LeftJustifyingIcon,
-    LeftRotationFortyFiveDegreesIcon,
-    LeftRotationNinetyDegreesIcon,
-    LeftTridiagonalDoubleIcon,
-    MaxIcon,
-    MenuIcon,
-    MergeAllIcon,
-    MinIcon,
-    MoreDownIcon,
-    NoBorderIcon,
-    NoColorDoubleIcon,
-    NoRotationIcon,
-    OrderIcon,
-    OuterBorderDoubleIcon,
-    OverflowIcon,
-    PaintBucketDoubleIcon,
-    PasteSpecialDoubleIcon,
-    PercentIcon,
-    PipingIcon,
-    RedoIcon,
-    ReduceDigitsIcon,
-    ReduceDoubleIcon,
-    ReduceIcon,
-    RightBorderDoubleIcon,
-    RightDoubleDiagonalDoubleIcon,
-    RightInsertColumnDoubleIcon,
-    RightJustifyingIcon,
-    RightRotationFortyFiveDegreesIcon,
-    RightRotationNinetyDegreesIcon,
-    RmbIcon,
-    RoubleIcon,
-    ShortcutIcon,
-    SlashDoubleIcon,
-    StrikethroughIcon,
-    SubscriptIcon,
-    SumIcon,
-    SuperscriptIcon,
-    TruncationIcon,
-    UnderlineIcon,
-    UndoIcon,
-    UnorderIcon,
-    UpBorderDoubleIcon,
-    VerticalBorderDoubleIcon,
-    VerticalCenterIcon,
-    VerticalIntegrationIcon,
-    VerticalTextIcon,
-};
-
 export class ComponentManager extends Disposable {
     private _components: ComponentList = new Map();
-    private _componentsReverse = new Map<ComponentType, string>();
 
-    constructor() {
+    constructor(@Optional(ILogService) private readonly _logService?: ILogService) {
         super();
-
-        for (const k in iconList) {
-            this.register(k, iconList[k]);
-        }
-
-        this.disposeWithMe(toDisposable(() => {
-            for (const k in iconList) {
-                this._components.delete(k);
-                this._componentsReverse.delete(iconList[k]);
-            }
-        }));
     }
 
     register(name: string, component: ComponentType, options?: IComponentOptions): IDisposable {
@@ -286,23 +48,17 @@ export class ComponentManager extends Disposable {
         }
 
         if (this._components.has(name)) {
-            console.warn(`Component ${name} already exists.`);
+            this._logService?.warn('[ComponentManager]', `Component ${name} already exists.`);
         }
 
         this._components.set(name, {
             framework,
             component,
         });
-        this._componentsReverse.set(component, name);
 
         return toDisposable(() => {
             this._components.delete(name);
-            this._componentsReverse.delete(component);
         });
-    }
-
-    getKey(component: ComponentType) {
-        return this._componentsReverse.get(component);
     }
 
     reactUtils: {

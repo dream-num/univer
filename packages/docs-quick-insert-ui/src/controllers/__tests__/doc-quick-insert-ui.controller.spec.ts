@@ -21,18 +21,21 @@ import { DocQuickInsertUIController } from '../doc-quick-insert-ui.controller';
 describe('DocQuickInsertUIController', () => {
     it('registers commands, components and the built-in slash popup', () => {
         const registerCommand = vi.fn(() => ({ dispose: vi.fn() }));
-        const register = vi.fn(() => ({ dispose: vi.fn() }));
+        const registerComponent = vi.fn(() => ({ dispose: vi.fn() }));
+        const registerIcon = vi.fn(() => ({ dispose: vi.fn() }));
         const unregisterPopup = vi.fn();
         const registerPopup = vi.fn(() => unregisterPopup);
 
         const controller = new DocQuickInsertUIController(
             { registerCommand } as never,
             { registerPopup } as never,
-            { register } as never
+            { register: registerComponent } as never,
+            { register: registerIcon } as never
         );
 
         expect(registerCommand).toHaveBeenCalledTimes(3);
-        expect(register).toHaveBeenCalledWith(QuickInsertButton.componentKey, QuickInsertButton);
+        expect(registerComponent).toHaveBeenCalledWith(QuickInsertButton.componentKey, QuickInsertButton);
+
         expect(registerPopup).toHaveBeenCalledTimes(1);
 
         const firstRegisterPopupCall = registerPopup.mock.calls[0] as unknown[] | undefined;

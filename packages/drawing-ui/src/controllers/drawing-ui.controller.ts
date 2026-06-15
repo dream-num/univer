@@ -16,7 +16,7 @@
 
 import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import { BottomIcon, GroupIcon, MoveDownIcon, MoveUpIcon, TopmostIcon, UngroupIcon } from '@univerjs/icons';
-import { ComponentManager, IMenuManagerService } from '@univerjs/ui';
+import { ComponentManager, IconManager, IMenuManagerService } from '@univerjs/ui';
 import {
     SetDrawingAlignBottomOperation,
     SetDrawingAlignCenterOperation,
@@ -45,6 +45,7 @@ import { ImagePopupMenu } from '../views/image-popup-menu/ImagePopupMenu';
 export class DrawingUIController extends Disposable {
     constructor(
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
+        @Inject(IconManager) private readonly _iconManager: IconManager,
         @ICommandService private readonly _commandService: ICommandService,
         @IMenuManagerService private readonly _menuManagerService: IMenuManagerService
     ) {
@@ -57,6 +58,7 @@ export class DrawingUIController extends Disposable {
         this._initMenus();
         this._initCommands();
         this._initComponents();
+        this._registerIcons();
     }
 
     private _initMenus(): void {
@@ -91,14 +93,19 @@ export class DrawingUIController extends Disposable {
     private _initComponents(): void {
         ([
             [COMPONENT_IMAGE_POPUP_MENU, ImagePopupMenu],
-            ['BottomIcon', BottomIcon],
-            ['GroupIcon', GroupIcon],
-            ['MoveDownIcon', MoveDownIcon],
-            ['MoveUpIcon', MoveUpIcon],
-            ['TopmostIcon', TopmostIcon],
-            ['UngroupIcon', UngroupIcon],
         ] as const).forEach(([key, component]) => {
             this.disposeWithMe(this._componentManager.register(key, component));
         });
+    }
+
+    private _registerIcons(): void {
+        this.disposeWithMe(this._iconManager.register({
+            BottomIcon,
+            GroupIcon,
+            MoveDownIcon,
+            MoveUpIcon,
+            TopmostIcon,
+            UngroupIcon,
+        }));
     }
 }

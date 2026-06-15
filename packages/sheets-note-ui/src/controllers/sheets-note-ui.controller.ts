@@ -16,7 +16,7 @@
 
 import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import { AddNoteIcon, DeleteNoteIcon, HideNoteIcon } from '@univerjs/icons';
-import { ComponentManager, IMenuManagerService } from '@univerjs/ui';
+import { ComponentManager, IconManager, IMenuManagerService } from '@univerjs/ui';
 import { AddNotePopupOperation } from '../commands/operations/add-note-popup.operation';
 import { menuSchema } from '../menu/schema';
 import { SHEET_NOTE_COMPONENT } from '../views/config';
@@ -25,12 +25,14 @@ import { SheetsNote } from '../views/Note';
 export class SheetsNoteUIController extends Disposable {
     constructor(
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
+        @Inject(IconManager) private readonly _iconManager: IconManager,
         @Inject(IMenuManagerService) private readonly _menuManagerService: IMenuManagerService,
         @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
 
         this._initComponents();
+        this._registerIcons();
         this._initMenu();
         this._initCommands();
     }
@@ -38,14 +40,19 @@ export class SheetsNoteUIController extends Disposable {
     private _initComponents() {
         ([
             [SHEET_NOTE_COMPONENT, SheetsNote],
-            ['AddNoteIcon', AddNoteIcon],
-            ['DeleteNoteIcon', DeleteNoteIcon],
-            ['HideNoteIcon', HideNoteIcon],
         ] as const).forEach(([key, comp]) => {
             this.disposeWithMe(
                 this._componentManager.register(key, comp)
             );
         });
+    }
+
+    private _registerIcons(): void {
+        this.disposeWithMe(this._iconManager.register({
+            AddNoteIcon,
+            DeleteNoteIcon,
+            HideNoteIcon,
+        }));
     }
 
     private _initMenu() {

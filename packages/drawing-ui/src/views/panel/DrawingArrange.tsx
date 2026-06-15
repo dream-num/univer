@@ -18,7 +18,7 @@ import type { IDrawingParam } from '@univerjs/core';
 import { ArrangeTypeEnum, ICommandService, LocaleService } from '@univerjs/core';
 import { Button, clsx } from '@univerjs/design';
 import { IDrawingManagerService } from '@univerjs/drawing';
-import { ComponentManager, useDependency } from '@univerjs/ui';
+import { IconManager, useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 import { SetDrawingArrangeOperation } from '../../commands/operations/drawing-arrange.operation';
 
@@ -33,12 +33,12 @@ export const DrawingArrange = (props: IDrawingArrangeProps) => {
     const localeService = useDependency(LocaleService);
     const drawingManagerService = useDependency(IDrawingManagerService);
     const commandService = useDependency(ICommandService);
-    const componentManager = useDependency(ComponentManager);
+    const iconManager = useDependency(IconManager);
 
-    const MoveUpIcon = componentManager.get('MoveUpIcon');
-    const MoveDownIcon = componentManager.get('MoveDownIcon');
-    const TopmostIcon = componentManager.get('TopmostIcon');
-    const BottomIcon = componentManager.get('BottomIcon');
+    const MoveUpIcon = iconManager.get('MoveUpIcon');
+    const MoveDownIcon = iconManager.get('MoveDownIcon');
+    const TopmostIcon = iconManager.get('TopmostIcon');
+    const BottomIcon = iconManager.get('BottomIcon');
 
     const [drawings, setDrawings] = useState<IDrawingParam[]>(focusDrawings);
 

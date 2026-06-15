@@ -41,11 +41,9 @@ import {
     SetTextSelectionsOperation,
 } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
-import { H1Icon, H2Icon, H3Icon, H4Icon, H5Icon, TextTypeIcon } from '@univerjs/icons';
 import {
     COLOR_PICKER_COMPONENT,
     COMMON_LABEL_COMPONENT,
-    ComponentManager,
     FONT_FAMILY_COMPONENT,
     FONT_FAMILY_ITEM_COMPONENT,
     FONT_SIZE_COMPONENT,
@@ -724,21 +722,6 @@ const FLOAT_TEXT_STYLE_OPTIONS = [
     },
 ];
 
-function registerFloatingTextStyleIcons(componentManager: ComponentManager): void {
-    ([
-        ['TextTypeIcon', TextTypeIcon],
-        ['H1Icon', H1Icon],
-        ['H2Icon', H2Icon],
-        ['H3Icon', H3Icon],
-        ['H4Icon', H4Icon],
-        ['H5Icon', H5Icon],
-    ] as const).forEach(([key, component]) => {
-        if (!componentManager.get(key)) {
-            componentManager.register(key, component);
-        }
-    });
-}
-
 function normalizeFloatingTextStyleValue(paragraph: ReturnType<typeof getParagraphStyleAtCursor>): string | number {
     const listType = paragraph?.bullet?.listType;
 
@@ -759,9 +742,6 @@ function normalizeFloatingTextStyleValue(paragraph: ReturnType<typeof getParagra
 
 export function FloatTextStyleMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string | number> {
     const commandService = accessor.get(ICommandService);
-    const componentManager = accessor.get(ComponentManager);
-
-    registerFloatingTextStyleIcons(componentManager);
 
     return {
         id: FLOAT_TEXT_STYLE_MENU_ID,
@@ -1409,7 +1389,7 @@ export function PageSettingMenuItemFactory(accessor: IAccessor): IMenuButtonItem
     return {
         id: DocOpenPageSettingCommand.id,
         type: MenuItemType.BUTTON,
-        icon: 'DocumentSettingIcon',
+        icon: 'DocSettingIcon',
         tooltip: 'docs-ui.toolbar.pageSetup',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };

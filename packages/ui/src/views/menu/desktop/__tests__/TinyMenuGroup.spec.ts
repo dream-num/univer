@@ -19,7 +19,7 @@ import { LocaleService } from '@univerjs/core';
 import React from 'react';
 import { BehaviorSubject, of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { ComponentManager } from '../../../../common';
+import { IconManager } from '../../../../common';
 import { MenuItemType } from '../../../../services/menu/menu';
 import { getVisibleTinyMenuChildren, resolveMenuItemActiveState, UITinyMenuGroup } from '../TinyMenuGroup';
 
@@ -63,7 +63,7 @@ describe('TinyMenuGroup', () => {
     beforeEach(() => {
         dependencyMap.clear();
         designTinyMenuGroupSpy.mockClear();
-        dependencyMap.set(ComponentManager, {
+        dependencyMap.set(IconManager, {
             get: () => () => React.createElement('span'),
         });
         dependencyMap.set(LocaleService, {
@@ -179,7 +179,7 @@ describe('TinyMenuGroup', () => {
     });
 
     it('skips tiny menu children whose icons are not registered', () => {
-        dependencyMap.set(ComponentManager, {
+        dependencyMap.set(IconManager, {
             get: (key: string) => key === 'KnownIcon' ? () => React.createElement('span') : undefined,
         });
 

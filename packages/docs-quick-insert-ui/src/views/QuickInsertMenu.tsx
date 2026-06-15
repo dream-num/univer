@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-import type { ComponentManager } from '@univerjs/ui';
 import type { DocPopupMenu, IDocPopupMenuItem } from '../services/doc-quick-insert-popup.service';
 import { borderBottomClassName, borderClassName, clsx, scrollbarClassName, Tooltip } from '@univerjs/design';
+import { IconManager, useDependency } from '@univerjs/ui';
 import { useEffect, useMemo, useRef } from 'react';
 
 interface IQuickInsertMenuProps {
     menus: DocPopupMenu[];
     focusedMenuIndex: number;
-    componentManager: ComponentManager;
     onFocusedMenuIndexChange: (index: number) => void;
     onFocusedMenuChange: (menu: IDocPopupMenuItem | null) => void;
     onSelect: (menu: IDocPopupMenuItem) => void;
@@ -50,12 +49,12 @@ export function QuickInsertMenu(props: IQuickInsertMenuProps) {
     const {
         menus,
         focusedMenuIndex,
-        componentManager,
         onFocusedMenuIndexChange,
         onFocusedMenuChange,
         onSelect,
     } = props;
 
+    const iconManager = useDependency(IconManager);
     const flatMenus = useMemo(() => flattenMenuItems(menus), [menus]);
     const menuNodeMapRef = useRef(new Map<string, HTMLElement>());
 
@@ -89,7 +88,7 @@ export function QuickInsertMenu(props: IQuickInsertMenuProps) {
     function renderMenus(currentMenus: DocPopupMenu[]) {
         return currentMenus.map((menu, index) => {
             const iconKey = menu.icon;
-            const Icon = iconKey ? componentManager.get(iconKey) : null;
+            const Icon = iconKey ? iconManager.get(iconKey) : null;
 
             if (isMenuGroup(menu)) {
                 return (

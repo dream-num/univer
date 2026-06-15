@@ -21,7 +21,7 @@ import { convertObservableToBehaviorSubject, LocaleService } from '@univerjs/cor
 import { cva } from '@univerjs/design';
 import { useEffect, useMemo, useState } from 'react';
 import { combineLatest, of } from 'rxjs';
-import { ComponentManager } from '../../../common';
+import { IconManager } from '../../../common';
 import { useDependency, useObservable } from '../../../utils/di';
 import { DesignTinyMenuGroup } from './DesignTinyMenuGroup';
 
@@ -100,7 +100,7 @@ export function getVisibleTinyMenuChildren(children: IMenuSchema[], hiddenItemKe
 
 function QuickTileMenuItem(props: IUIQuickTileMenuItemProps) {
     const { menuSchema, activeItemIds, onOptionSelect } = props;
-    const componentManager = useDependency(ComponentManager);
+    const iconManager = useDependency(IconManager);
     const localeService = useDependency(LocaleService);
     const menuItem = menuSchema.item as TinyMenuDisplayItem | undefined;
     const disabled = useObservable<boolean>(menuItem?.disabled$, false);
@@ -111,7 +111,7 @@ function QuickTileMenuItem(props: IUIQuickTileMenuItemProps) {
         return null;
     }
 
-    const Icon = menuItem.icon ? componentManager.get(menuItem.icon as string) : null;
+    const Icon = menuItem.icon ? iconManager.get(menuItem.icon as string) : null;
     const active = resolveMenuItemActiveState(menuItem.id, activated, activeItemIds);
 
     return (
@@ -153,7 +153,7 @@ export function UITinyMenuGroup(props: IUIQuickMenuGroupProps) {
     const { item, activeItemIds, hiddenItemIds = EMPTY_HIDDEN_ITEM_IDS, hoverSuppressed, columns, sizeVariant = 'default', layoutVariant = 'default', onOptionSelect } = props;
     const [activeItems, setActiveItems] = useState<string[]>([]);
     const [hiddenItems, setHiddenItems] = useState<string[]>([]);
-    const componentManager = useDependency(ComponentManager);
+    const iconManager = useDependency(IconManager);
     const localeService = useDependency(LocaleService);
 
     useEffect(() => {
@@ -211,7 +211,7 @@ export function UITinyMenuGroup(props: IUIQuickMenuGroupProps) {
 
     const items = visibleChildren
         .map((child) => {
-            const Icon = child.item?.icon ? componentManager.get(child.item.icon as string) : undefined;
+            const Icon = child.item?.icon ? iconManager.get(child.item.icon as string) : undefined;
 
             if (!Icon) {
                 return null;

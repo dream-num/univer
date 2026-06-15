@@ -15,25 +15,26 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import { SHEET_TABLE_THEME_PANEL, TABLE_SELECTOR_DIALOG, TABLE_TOOLBAR_BUTTON } from '../../const';
+import { SHEET_TABLE_THEME_PANEL, TABLE_SELECTOR_DIALOG } from '../../const';
 import { menuSchema } from '../schema';
 import { SheetTableMenuController } from '../sheet-table-menu.controller';
 
 describe('SheetTableMenuController', () => {
     it('should register table components and merge table menu schema', () => {
         const register = vi.fn(() => ({ dispose: vi.fn() }));
+        const registerIcon = vi.fn(() => ({ dispose: vi.fn() }));
         const mergeMenu = vi.fn();
 
         const controller = new SheetTableMenuController(
             { register } as any,
+            { register: registerIcon } as any,
             { mergeMenu } as any
         );
 
-        expect(register).toHaveBeenCalledTimes(3);
+        expect(register).toHaveBeenCalledTimes(2);
         const calls = register.mock.calls as Array<Array<any>>;
-        expect(calls[0]?.[0]).toBe(TABLE_TOOLBAR_BUTTON);
-        expect(calls[1]?.[0]).toBe(TABLE_SELECTOR_DIALOG);
-        expect(calls[2]?.[0]).toBe(SHEET_TABLE_THEME_PANEL);
+        expect(calls[0]?.[0]).toBe(TABLE_SELECTOR_DIALOG);
+        expect(calls[1]?.[0]).toBe(SHEET_TABLE_THEME_PANEL);
         expect(mergeMenu).toHaveBeenCalledWith(menuSchema);
 
         controller.dispose();

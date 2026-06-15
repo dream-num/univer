@@ -24,7 +24,7 @@ import { DataStreamTreeTokenType, DocumentBlockRangeType, ICommandService, IUniv
 import { clsx } from '@univerjs/design';
 import { DocContentInsertService, DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { ComponentManager, ContextMenuPanel, IClipboardInterfaceService, ILayoutService, RectPopup, useDependency, useObservable } from '@univerjs/ui';
+import { ContextMenuPanel, IClipboardInterfaceService, IconManager, ILayoutService, RectPopup, useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { BreakLineCommand } from '../commands/commands/break-line.command';
@@ -47,7 +47,6 @@ import {
     DOC_PARAGRAPH_T_INSERT_MENU_ID,
     DOC_PARAGRAPH_T_RESET_COLORS_ID,
     DOC_TABLE_BLOCK_MENU_ID,
-    HEADING_ICON_MAP,
     INSERT_BELLOW_MENU_ID,
 } from '../menu/paragraph-menu';
 import { IDocClipboardService } from '../services/clipboard/clipboard.service';
@@ -77,6 +76,29 @@ function getParagraphMenuTriggerClassName(visible: boolean) {
     `, {
         'univer-bg-gray-100 univer-shadow-md dark:!univer-bg-gray-800': visible,
     });
+}
+
+function getParagraphMenuTriggerIconKey(namedStyleType?: NamedStyleType): string {
+    switch (namedStyleType) {
+        case NamedStyleType.HEADING_1:
+            return 'H1Icon';
+        case NamedStyleType.HEADING_2:
+            return 'H2Icon';
+        case NamedStyleType.HEADING_3:
+            return 'H3Icon';
+        case NamedStyleType.HEADING_4:
+            return 'H4Icon';
+        case NamedStyleType.HEADING_5:
+            return 'H5Icon';
+        case NamedStyleType.TITLE:
+            return 'TitleTypeIcon';
+        case NamedStyleType.SUBTITLE:
+            return 'SubtitleTypeIcon';
+        case NamedStyleType.NORMAL_TEXT:
+        case NamedStyleType.NAMED_STYLE_TYPE_UNSPECIFIED:
+        default:
+            return 'TextTypeIcon';
+    }
 }
 
 export function createParagraphMenuHoverOpenScheduler(openMenu: () => void, delay = PARAGRAPH_MENU_HOVER_OPEN_DELAY) {
@@ -626,7 +648,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
     const docContentInsertService = useDependency(DocContentInsertService);
     const clipboardInterfaceService = useDependency(IClipboardInterfaceService);
     const layoutService = useDependency(ILayoutService);
-    const componentManager = useDependency(ComponentManager);
+    const iconManager = useDependency(IconManager);
     const anchorRef = useRef<HTMLDivElement>(null);
     const isMouseOver = useRef(false);
     const hideTimerRef = useRef<number | null>(null);
@@ -651,9 +673,8 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
     const paragraphObj = useMemo(() => doc?.getBody()?.paragraphs?.find((p) => p.startIndex === startIndex), [doc, startIndex]);
     const isEmptyParagraph = currentActiveTarget?.emptyMode ?? isEmptyParagraphMenuTarget(dataStream, activeParagraphBound);
     const namedStyleType = paragraphObj?.paragraphStyle?.namedStyleType;
-    const icon = HEADING_ICON_MAP[namedStyleType ?? NamedStyleType.NORMAL_TEXT];
-    const targetIconKey = currentActiveTarget?.icon ?? icon.key;
-    const TargetIcon = componentManager.get(targetIconKey) ?? icon.component;
+    const targetIconKey = currentActiveTarget?.icon ?? getParagraphMenuTriggerIconKey(namedStyleType);
+    const TargetIcon = iconManager.get(targetIconKey);
     const paragraphMenuType = useMemo(
         () => getParagraphMenuType(currentActiveTarget, isEmptyParagraph),
         [currentActiveTarget, isEmptyParagraph]

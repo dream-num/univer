@@ -18,7 +18,7 @@ import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IDocPopup } from '../services/doc-quick-insert-popup.service';
 import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import { DividerIcon, TextIcon } from '@univerjs/icons';
-import { ComponentManager } from '@univerjs/ui';
+import { ComponentManager, IconManager } from '@univerjs/ui';
 import { of } from 'rxjs';
 import { DeleteSearchKeyCommand } from '../commands/commands/doc-quick-insert.command';
 import { CloseQuickInsertPopupOperation, ShowQuickInsertPopupOperation } from '../commands/operations/quick-insert-popup.operation';
@@ -33,12 +33,14 @@ export class DocQuickInsertUIController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(DocQuickInsertPopupService) private readonly _docQuickInsertPopupService: DocQuickInsertPopupService,
-        @Inject(ComponentManager) private readonly _componentManager: ComponentManager
+        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
+        @Inject(IconManager) private readonly _iconManager: IconManager
     ) {
         super();
 
         this._initCommands();
         this._initComponents();
+        this._registerIcons();
         this._initMenus();
     }
 
@@ -57,8 +59,6 @@ export class DocQuickInsertUIController extends Disposable {
             [QuickInsertPopup.componentKey, QuickInsertPopup],
             [KeywordInputPlaceholder.componentKey, KeywordInputPlaceholder],
             [QuickInsertPlaceholder.componentKey, QuickInsertPlaceholder],
-            [DividerIcon.displayName, DividerIcon],
-            [TextIcon.displayName, TextIcon],
             [QuickInsertButton.componentKey, QuickInsertButton],
         ] as const).forEach(([key, comp]) => {
             if (key) {
@@ -82,5 +82,12 @@ export class DocQuickInsertUIController extends Disposable {
 
     private _initMenus() {
 
+    }
+
+    private _registerIcons(): void {
+        this.disposeWithMe(this._iconManager.register({
+            DividerIcon,
+            TextIcon,
+        }));
     }
 }

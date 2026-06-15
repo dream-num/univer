@@ -16,8 +16,8 @@
 
 import { Disposable, Inject } from '@univerjs/core';
 import { TableIcon } from '@univerjs/icons';
-import { ComponentManager, IMenuManagerService } from '@univerjs/ui';
-import { SHEET_TABLE_THEME_PANEL, TABLE_SELECTOR_DIALOG, TABLE_TOOLBAR_BUTTON } from '../const';
+import { ComponentManager, IconManager, IMenuManagerService } from '@univerjs/ui';
+import { SHEET_TABLE_THEME_PANEL, TABLE_SELECTOR_DIALOG } from '../const';
 import { SheetTableSelector } from '../views/components/SheetTableSelector';
 import { SheetTableThemePanel } from '../views/components/SheetTableThemePanel';
 import { menuSchema } from './schema';
@@ -25,21 +25,28 @@ import { menuSchema } from './schema';
 export class SheetTableMenuController extends Disposable {
     constructor(
         @Inject(ComponentManager) private _componentManager: ComponentManager,
+        @Inject(IconManager) private _iconManager: IconManager,
         @Inject(IMenuManagerService) private _menuManagerService: IMenuManagerService
     ) {
         super();
         this._initComponents();
+        this._registerIcons();
         this._initMenu();
     }
 
     private _initComponents() {
         ([
-            [TABLE_TOOLBAR_BUTTON, TableIcon],
             [TABLE_SELECTOR_DIALOG, SheetTableSelector],
             [SHEET_TABLE_THEME_PANEL, SheetTableThemePanel],
         ] as const).forEach(([key, comp]) => {
             this.disposeWithMe(this._componentManager.register(key, comp));
         });
+    }
+
+    private _registerIcons(): void {
+        this.disposeWithMe(this._iconManager.register({
+            TableIcon,
+        }));
     }
 
     private _initMenu() {

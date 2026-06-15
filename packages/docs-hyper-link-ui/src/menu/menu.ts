@@ -23,13 +23,11 @@ import { getMenuHiddenObservable, KeyCode, MenuItemType, MetaKeys } from '@unive
 import { debounceTime, Observable } from 'rxjs';
 import { shouldDisableAddLink, ShowDocHyperLinkEditPopupOperation } from '../commands/operations/popup.operation';
 
-export const DOC_LINK_ICON = 'doc-hyper-link-icon';
-
 export function AddHyperLinkMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: ShowDocHyperLinkEditPopupOperation.id,
         type: MenuItemType.BUTTON,
-        icon: DOC_LINK_ICON,
+        icon: 'LinkIcon',
         title: 'docs-hyper-link-ui.menu.tooltip',
         tooltip: 'docs-hyper-link-ui.menu.tooltip',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),

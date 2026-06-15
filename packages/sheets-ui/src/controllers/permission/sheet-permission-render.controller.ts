@@ -21,15 +21,10 @@ import { Disposable, IConfigService, Inject, Injector, IPermissionService } from
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { CheckMarkIcon, DeleteIcon, LockIcon, ProtectIcon, WriteIcon } from '@univerjs/icons';
 import { RangeProtectionRuleModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
-import { ComponentManager } from '@univerjs/ui';
+import { ComponentManager, IconManager } from '@univerjs/ui';
 import { merge, throttleTime } from 'rxjs';
 import { convertToShadowStrategy, SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 import {
-    permissionCheckIconKey,
-    permissionDeleteIconKey,
-    permissionEditIconKey,
-    permissionLockIconKey,
-    permissionMenuIconKey,
     UNIVER_SHEET_PERMISSION_DIALOG,
     UNIVER_SHEET_PERMISSION_PANEL,
     UNIVER_SHEET_PERMISSION_USER_DIALOG,
@@ -49,7 +44,8 @@ export interface IUniverSheetsPermissionMenuConfig {
 export class SheetPermissionRenderManagerController extends Disposable {
     constructor(
         @Inject(Injector) private _injector: Injector,
-        @Inject(ComponentManager) private _componentManager: ComponentManager
+        @Inject(ComponentManager) private _componentManager: ComponentManager,
+        @Inject(IconManager) private _iconManager: IconManager
     ) {
         super();
         this._init();
@@ -57,16 +53,12 @@ export class SheetPermissionRenderManagerController extends Disposable {
 
     private _init(): void {
         this._initComponents();
+        this._registerIcons();
         this._initUiPartComponents();
     }
 
     private _initComponents(): void {
         ([
-            [permissionMenuIconKey, ProtectIcon],
-            [permissionDeleteIconKey, DeleteIcon],
-            [permissionEditIconKey, WriteIcon],
-            [permissionCheckIconKey, CheckMarkIcon],
-            [permissionLockIconKey, LockIcon],
             [UNIVER_SHEET_PERMISSION_PANEL, SheetPermissionPanel],
             [UNIVER_SHEET_PERMISSION_USER_DIALOG, SheetPermissionUserDialog],
             [UNIVER_SHEET_PERMISSION_DIALOG, SheetPermissionDialog],
@@ -77,6 +69,16 @@ export class SheetPermissionRenderManagerController extends Disposable {
                 comp
             ));
         });
+    }
+
+    private _registerIcons(): void {
+        this.disposeWithMe(this._iconManager.register({
+            ProtectIcon,
+            DeleteIcon,
+            WriteIcon,
+            CheckMarkIcon,
+            LockIcon,
+        }));
     }
 
     private _initUiPartComponents(): void {

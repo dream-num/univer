@@ -26,11 +26,13 @@ describe('DocThreadCommentUIController', () => {
         const mergeMenu = vi.fn();
         const appendRootMenu = vi.fn();
         const registerComponent = vi.fn(() => ({ dispose: vi.fn() }));
+        const registerIcon = vi.fn(() => ({ dispose: vi.fn() }));
 
         const controller = new DocThreadCommentUIController(
             { registerCommand } as any,
             { appendRootMenu, mergeMenu } as any,
-            { register: registerComponent } as any
+            { register: registerComponent } as any,
+            { register: registerIcon } as any
         );
 
         expect(registerCommand).toHaveBeenCalled();

@@ -24,7 +24,7 @@ import {
     toDisposable,
 } from '@univerjs/core';
 import { SearchIcon } from '@univerjs/icons';
-import { ComponentManager, IDialogService, ILayoutService, IMenuManagerService, IShortcutService } from '@univerjs/ui';
+import { ComponentManager, IconManager, IDialogService, ILayoutService, IMenuManagerService, IShortcutService } from '@univerjs/ui';
 import { takeUntil } from 'rxjs';
 import { ReplaceAllMatchesCommand, ReplaceCurrentMatchCommand } from '../commands/commands/replace.command';
 import {
@@ -62,12 +62,14 @@ export class FindReplaceController extends RxDisposable {
         @IDialogService private readonly _dialogService: IDialogService,
         @ILayoutService private readonly _layoutService: ILayoutService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @Inject(ComponentManager) private readonly _componentManager: ComponentManager
+        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
+        @Inject(IconManager) private readonly _iconManager: IconManager
     ) {
         super();
 
         this._initCommands();
         this._initUI();
+        this._registerIcons();
         this._initShortcuts();
     }
 
@@ -106,7 +108,6 @@ export class FindReplaceController extends RxDisposable {
     private _initUI(): void {
         ([
             ['FindReplaceDialog', FindReplaceDialog],
-            ['SearchIcon', SearchIcon],
         ] as const).forEach(([key, comp]) => {
             this.disposeWithMe(
                 this._componentManager.register(key, comp)
@@ -142,6 +143,12 @@ export class FindReplaceController extends RxDisposable {
             if (!focused || !this._univerInstanceService.getUniverSheetInstance(focused)) {
                 this.closePanel();
             }
+        }));
+    }
+
+    private _registerIcons(): void {
+        this.disposeWithMe(this._iconManager.register({
+            SearchIcon,
         }));
     }
 

@@ -17,7 +17,7 @@
 import type { Meta } from '@storybook/react';
 import { Inject, Injector, LocaleType, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import { useState } from 'react';
-import { ComponentManager } from '../../../common';
+import { ComponentManager, IconManager } from '../../../common';
 import { ContextMenuPosition } from '../../../services/menu/types';
 import { IPlatformService, PlatformService } from '../../../services/platform/platform.service';
 import { IShortcutService, ShortcutService } from '../../../services/shortcut/shortcut.service';
@@ -59,6 +59,7 @@ function createMobileMenuStorybookBed() {
             injector.add([IPlatformService, { useClass: PlatformService }]);
             injector.add([IShortcutService, { useClass: ShortcutService }]);
             injector.add([ComponentManager]);
+            injector.add([IconManager]);
         }
     }
 

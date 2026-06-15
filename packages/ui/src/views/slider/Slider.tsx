@@ -18,7 +18,7 @@ import type { IDropdownMenuProps } from '@univerjs/design';
 import type { PointerEvent as ReactPointerEvent } from 'react';
 import { borderClassName, Button, clsx, DropdownMenu, Input } from '@univerjs/design';
 import { useEffect, useRef, useState } from 'react';
-import { ComponentManager } from '../../common';
+import { IconManager } from '../../common';
 import { useDependency } from '../../utils/di';
 
 export interface ISliderProps {
@@ -63,7 +63,7 @@ const DRAG_COMMIT_INTERVAL = 50;
  * Slider Component
  */
 export function Slider(props: ISliderProps) {
-    const componentManager = useDependency(ComponentManager);
+    const iconManager = useDependency(IconManager);
 
     const { value, min = 0, max = 400, disabled = false, resetPoint = 100, shortcuts, onChange } = props;
 
@@ -304,9 +304,9 @@ export function Slider(props: ISliderProps) {
     const visualValue = isDragging ? dragValue : value;
     const sliderOffset = Math.min(Math.max(getSliderOffset(visualValue) ?? 0, 0), 100);
 
-    const ReduceIcon = componentManager.get('ReduceIcon');
-    const IncreaseIcon = componentManager.get('IncreaseIcon');
-    const MoreDownIcon = componentManager.get('MoreDownIcon');
+    const ReduceIcon = iconManager.get('ReduceIcon');
+    const IncreaseIcon = iconManager.get('IncreaseIcon');
+    const MoreDownIcon = iconManager.get('MoreDownIcon');
 
     return (
         <div

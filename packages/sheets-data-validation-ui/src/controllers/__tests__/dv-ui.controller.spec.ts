@@ -51,6 +51,7 @@ function createView(id: string) {
 describe('SheetsDataValidationUIController', () => {
     it('registers panel components and wires validator views into the registry', () => {
         const register = vi.fn((_key: string) => ({ dispose: vi.fn() }));
+        const registerIcon = vi.fn((_key: string) => ({ dispose: vi.fn() }));
         const validators = new Map<string, Record<string, unknown>>();
         const createInstance = vi.fn((viewCtor: { name: string }) => createView(viewCtor.name));
         const getValidatorItem = vi.fn((id: string) => {
@@ -63,13 +64,13 @@ describe('SheetsDataValidationUIController', () => {
         const controller = new SheetsDataValidationUIController(
             { createInstance } as unknown as Injector,
             { register } as never,
+            { register: registerIcon } as never,
             { getValidatorItem } as never
         );
 
         expect(controller).toBeTruthy();
 
         const registeredKeys = register.mock.calls.map((args) => args[0]);
-        expect(registeredKeys).toContain('DataValidationIcon');
         expect(registeredKeys).toContain(DATA_VALIDATION_PANEL);
         expect(registeredKeys).toContain('LIST_RENDER_MODE_OPTION_INPUT');
         expect(registeredKeys).toContain('DATE_SHOW_TIME_OPTION');

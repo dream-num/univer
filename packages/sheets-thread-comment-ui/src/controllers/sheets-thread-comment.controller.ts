@@ -16,7 +16,7 @@
 
 import { Disposable, Inject } from '@univerjs/core';
 import { CommentIcon } from '@univerjs/icons';
-import { ComponentManager, IMenuManagerService, IShortcutService } from '@univerjs/ui';
+import { ComponentManager, IconManager, IMenuManagerService, IShortcutService } from '@univerjs/ui';
 import { AddCommentShortcut } from '../menu/menu';
 import { menuSchema } from '../menu/schema';
 import { SHEETS_THREAD_COMMENT_MODAL, SHEETS_THREAD_COMMENT_PANEL } from '../types/const';
@@ -27,12 +27,14 @@ export class SheetsThreadCommentController extends Disposable {
     constructor(
         @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
+        @Inject(IconManager) private readonly _iconManager: IconManager,
         @IShortcutService private readonly _shortcutService: IShortcutService
     ) {
         super();
         this._initMenu();
         this._initShortcut();
         this._initComponent();
+        this._registerIcons();
     }
 
     private _initShortcut() {
@@ -47,11 +49,16 @@ export class SheetsThreadCommentController extends Disposable {
         ([
             [SHEETS_THREAD_COMMENT_MODAL, SheetsThreadCommentCell],
             [SHEETS_THREAD_COMMENT_PANEL, SheetsThreadCommentPanel],
-            ['CommentIcon', CommentIcon],
         ] as const).forEach(([key, comp]) => {
             this.disposeWithMe(
                 this._componentManager.register(key, comp)
             );
         });
+    }
+
+    private _registerIcons(): void {
+        this.disposeWithMe(this._iconManager.register({
+            CommentIcon,
+        }));
     }
 }

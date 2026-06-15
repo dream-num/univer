@@ -21,7 +21,7 @@ import { ColorKit, LocaleService } from '@univerjs/core';
 import { useEffect, useMemo, useState } from 'react';
 
 import { isObservable } from 'rxjs';
-import { ComponentManager } from '../../common/component-manager';
+import { ComponentManager, IconManager } from '../../common';
 import { useDependency } from '../../utils/di';
 
 export type ICustomLabelProps<T = undefined> = {
@@ -44,6 +44,7 @@ export function CustomLabel(props: ICustomLabelProps) {
     const { className, title, icon, label, value, value$ } = props;
     const localeService = useDependency(LocaleService);
     const componentManager = useDependency(ComponentManager);
+    const iconManager = useDependency(IconManager);
     const [subscribedValue, setSubscribedValue] = useState(value);
     const [realIcon, setRealIcon] = useState('');
 
@@ -90,14 +91,14 @@ export function CustomLabel(props: ICustomLabelProps) {
     }, [realValue]);
 
     if (icon) {
-        const Icon = componentManager.get(realIcon ?? '');
+        const Icon = iconManager.get(realIcon ?? '');
 
         if (Icon) {
             nodes.push(
                 <Icon
                     key={index++}
                     className="univer-text-base"
-                    extend={{ colorChannel1: isValid ? realValue : 'var(--univer-primary-600)' }}
+                    extend={{ colorChannel1: isValid ? String(realValue) : 'var(--univer-primary-600)' }}
                 />
             );
         }

@@ -21,7 +21,7 @@ import { BorderStyleTypes } from '@univerjs/core';
 import { clsx, ColorPicker, Dropdown, Separator } from '@univerjs/design';
 import { CheckMarkIcon, MoreDownIcon, PaintBucketDoubleIcon } from '@univerjs/icons';
 import { BorderStyleManagerService, SheetsSelectionsService } from '@univerjs/sheets';
-import { ComponentManager, useDependency } from '@univerjs/ui';
+import { IconManager, useDependency } from '@univerjs/ui';
 import { BorderLine } from './border-line/BorderLine';
 import { BORDER_LINE_CHILDREN } from './interface';
 
@@ -93,7 +93,7 @@ function getBorderStyle(borderData: Nullable<IBorderData>): BorderStyleTypes | u
 }
 
 export function BorderPanel(props: IBorderPanelProps) {
-    const componentManager = useDependency(ComponentManager);
+    const iconManager = useDependency(IconManager);
     const borderStyleManagerService = useDependency(BorderStyleManagerService);
     const selectionManagerService = useDependency(SheetsSelectionsService);
 
@@ -111,7 +111,7 @@ export function BorderPanel(props: IBorderPanelProps) {
     }
 
     function renderIcon(icon: string) {
-        const Icon = componentManager.get(icon);
+        const Icon = iconManager.get(icon);
 
         return Icon && <Icon className="univer-fill-primary-600" />;
     }

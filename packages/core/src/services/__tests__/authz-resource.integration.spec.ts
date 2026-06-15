@@ -16,14 +16,58 @@
 
 import type { Univer } from '../../univer';
 import { UnitAction, UnitObject, UnitRole } from '@univerjs/protocol';
+import { BehaviorSubject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { UniverInstanceType } from '../../common/unit';
+import { UnitModel, UniverInstanceType } from '../../common/unit';
 import { IAuthzIoService } from '../authz-io/type';
 import { IUniverInstanceService } from '../instance/instance.service';
 import { IMentionIOService } from '../mention-io/type';
 import { IResourceLoaderService } from '../resource-loader/type';
 import { UserManagerService } from '../user-manager/user-manager.service';
 import { createTestBed } from './create-test-bed';
+
+interface ITestBoardData {
+    id: string;
+    name?: string;
+    resources?: Array<{ name: string; data: string }>;
+}
+
+class MockBoardUnit extends UnitModel<ITestBoardData, UniverInstanceType.UNIVER_BOARD> {
+    override readonly type = UniverInstanceType.UNIVER_BOARD;
+    override name$ = new BehaviorSubject('');
+    private readonly _snapshot: ITestBoardData;
+
+    constructor(snapshot: Partial<ITestBoardData> = {}) {
+        super();
+        this._snapshot = {
+            id: 'board-resource',
+            name: '',
+            ...snapshot,
+        };
+        this.name$.next(this._snapshot.name ?? '');
+    }
+
+    override getUnitId(): string {
+        return this._snapshot.id;
+    }
+
+    override setName(name: string): void {
+        this._snapshot.name = name;
+        this.name$.next(name);
+    }
+
+    override getSnapshot(): ITestBoardData {
+        return this._snapshot;
+    }
+
+    override getRev(): number {
+        return 1;
+    }
+
+    override incrementRev(): void { }
+
+    override setRev(): void { }
+}
 
 describe('Authz/resource integration', () => {
     let univer: Univer;
@@ -131,6 +175,33 @@ describe('Authz/resource integration', () => {
 
         expect(reloaded[0].name).toBe('Protected range');
         expect(reloaded[0].actions).toEqual([{ action: UnitAction.Edit, allowed: false }]);
+    });
+
+    it('should persist permission resources for board units', async () => {
+        const injector = univer.__getInjector();
+        const authzIoService = injector.get(IAuthzIoService);
+        const resourceLoaderService = injector.get(IResourceLoaderService);
+        const univerInstanceService = injector.get(IUniverInstanceService);
+
+        univerInstanceService.registerCtorForType(UniverInstanceType.UNIVER_BOARD, MockBoardUnit);
+        const board = univer.createUnit<ITestBoardData, MockBoardUnit>(UniverInstanceType.UNIVER_BOARD, {
+            id: 'board-resource',
+        });
+        const objectID = await authzIoService.create({
+            objectType: UnitObject.Workbook,
+            worksheetObject: {
+                unitID: board.getUnitId(),
+                name: 'Board permission',
+                collaborators: [],
+                strategies: [{ action: UnitAction.Edit, role: UnitRole.Owner }],
+                scope: undefined,
+            },
+        });
+
+        const snapshot = resourceLoaderService.saveUnit<ITestBoardData>(board.getUnitId());
+        const authzResource = snapshot?.resources?.find((resource) => resource.name === 'SHEET_AuthzIoMockService_PLUGIN');
+
+        expect(authzResource?.data).toContain(objectID);
     });
 
     it('should expose current user data consistently through mention and user services', async () => {

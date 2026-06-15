@@ -82,6 +82,11 @@ export interface EmbedCapability {
     nestedEmbed: false;
 }
 
+export interface EmbedProductPluginConfig {
+    host?: boolean;
+    guest?: boolean;
+}
+
 export type EmbedSource =
     | {
         kind: 'ref';

@@ -1,9 +1,9 @@
 import type { Injector } from '@univerjs/core';
-import { EmbedBlockRegistryService, EmbedChildViewRegistryService, EmbedHostAdapterRegistryService, EmbedHostAnchorModelService, EmbedHostContainerRegistryService, registerEmbedProductMenuContribution, registerEmbedUIContribution } from '@univerjs/embed-ui';
+import { EmbedBlockRegistryService, EmbedChildViewRegistryService, EmbedHostAdapterRegistryService, EmbedHostAnchorModelService, EmbedHostContainerRegistryService, registerEmbedUIContribution } from '@univerjs/embed-ui';
 import { IUniverInstanceService } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ComponentManager } from '@univerjs/ui';
-import { createDocsEmbedBlockContribution, createDocsEmbedChildViewContribution, createDocsEmbedProductMenuContribution } from './embed-block';
+import { createDocsEmbedBlockContribution, createDocsEmbedChildViewContribution } from './embed-block';
 import { EmbedDocsCustomBlockRenderer } from './embed-docs-custom-block-renderer';
 import { EMBED_DOCS_CUSTOM_BLOCK_DEFAULT_COMPONENT_KEY } from './embed-host-anchor';
 import { createDocsCustomBlockHostAdapterContribution, createDocsCustomBlockHostContainerContribution } from './embed-host-adapter';
@@ -43,6 +43,4 @@ function registerDocsEmbedUIContributionsNow(injector: Injector): void {
     if (!blockRegistry.get(block.childType)) {
         blockRegistry.register(block);
     }
-
-    registerEmbedProductMenuContribution(injector, createDocsEmbedProductMenuContribution());
 }

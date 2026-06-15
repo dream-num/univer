@@ -40,7 +40,7 @@ export function createEmbedProductMenuInjector(
     params: {
         childType: UniverInstanceType;
         childUnitId?: string;
-        menuSchema: unknown;
+        menuSchema?: unknown;
         menuTitlePrefix?: string;
         activeRibbonTab?: string;
     }
@@ -56,7 +56,8 @@ export function createEmbedProductMenuInjector(
         childUnitId,
         () => scopedInjector
     );
-    let menuManager: MenuManagerService;
+    let menuManager: IMenuManagerService;
+    let menuManagerDisposable: IDisposable | undefined;
     let ribbonService: DesktopRibbonService;
     let exposedRibbonService: IRibbonService;
     const hasDependency = (identifier: Parameters<Injector['get']>[0]) => {
@@ -96,8 +97,18 @@ export function createEmbedProductMenuInjector(
         } as IAccessor, ...args),
     } as Pick<Injector, 'invoke' | 'get' | 'has'>;
 
-    menuManager = new MenuManagerService(scopedInjector as Injector, injector.get(IConfigService));
-    menuManager.mergeMenu(prefixRibbonMenuTitles(menuSchema, menuTitlePrefix, injector) as MenuSchemaType);
+    if (menuSchema && typeof menuSchema === 'object') {
+        const localMenuManager = new MenuManagerService(scopedInjector as Injector, injector.get(IConfigService));
+        localMenuManager.mergeMenu(prefixRibbonMenuTitles(menuSchema, menuTitlePrefix, injector) as MenuSchemaType);
+        menuManager = localMenuManager;
+        menuManagerDisposable = localMenuManager;
+    } else {
+        const rootMenuManager = injector.get(IMenuManagerService);
+        const createScoped = (rootMenuManager as MenuManagerService).createScoped;
+        menuManager = typeof createScoped === 'function'
+            ? createScoped.call(rootMenuManager, scopedInjector as Injector)
+            : rootMenuManager;
+    }
     ribbonService = new DesktopRibbonService(menuManager, scopedInstanceService);
     if (activeRibbonTab) {
         ribbonService.setActivatedTab(activeRibbonTab);
@@ -111,7 +122,7 @@ export function createEmbedProductMenuInjector(
         ribbonService: exposedRibbonService,
         disposable: toDisposable(() => {
             ribbonService.dispose();
-            menuManager.dispose();
+            menuManagerDisposable?.dispose();
         }),
     };
 }

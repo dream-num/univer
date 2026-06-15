@@ -195,7 +195,9 @@ export class UniverDocsUIPlugin extends Plugin {
         this._initDependencies(_injector);
         this._initializeShortcut();
         this._initCommand();
-        registerDocsEmbedUIContributions(this._injector);
+        if (rest.embed?.host || rest.embed?.guest) {
+            registerDocsEmbedUIContributions(this._injector);
+        }
     }
 
     override onReady(): void {

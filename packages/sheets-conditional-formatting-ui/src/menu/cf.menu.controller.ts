@@ -31,6 +31,10 @@ export class ConditionalFormattingMenuController extends Disposable {
         super();
 
         this._menuManagerService.mergeMenu(menuSchema);
+        this._registerIcons();
+    }
+
+    private _registerIcons(): void {
         this.disposeWithMe(this._iconManager.register({
             ConditionsDoubleIcon,
         }));

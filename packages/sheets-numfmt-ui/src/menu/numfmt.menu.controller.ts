@@ -33,15 +33,7 @@ export class NumfmtMenuController extends Disposable {
 
     private _initMenu() {
         this._menuManagerService.mergeMenu(menuSchema);
-        this.disposeWithMe(this._iconManager.register({
-            AddDigitsIcon,
-            DollarIcon,
-            EuroIcon,
-            PercentIcon,
-            ReduceDigitsIcon,
-            RmbIcon,
-            RoubleIcon,
-        }));
+        this._registerIcons();
 
         ([
             [MORE_NUMFMT_TYPE_KEY, MoreNumfmtType],
@@ -51,5 +43,17 @@ export class NumfmtMenuController extends Disposable {
                 this._componentManager.register(key, comp)
             );
         });
+    }
+
+    private _registerIcons(): void {
+        this.disposeWithMe(this._iconManager.register({
+            AddDigitsIcon,
+            DollarIcon,
+            EuroIcon,
+            PercentIcon,
+            ReduceDigitsIcon,
+            RmbIcon,
+            RoubleIcon,
+        }));
     }
 }

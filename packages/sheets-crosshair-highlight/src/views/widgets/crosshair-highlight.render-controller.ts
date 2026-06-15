@@ -74,7 +74,7 @@ export class SheetCrosshairHighlightRenderController extends Disposable implemen
             this._contextService.subscribeContextValue$(REF_SELECTIONS_ENABLED).pipe(startWith(false)),
             this._sheetSkeletonManagerService.currentSkeleton$,
             this._sheetsCrosshairHighlightService.enabled$,
-            this._sheetsCrosshairHighlightService.color$.pipe(tap((color) => (this._color = color))),
+            this._sheetsCrosshairHighlightService.highlightColor$.pipe(tap((color) => (this._color = color))),
 
             merge(
                 this._sheetsSelectionsService.selectionMoveStart$,

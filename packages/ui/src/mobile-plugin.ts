@@ -19,6 +19,7 @@ import { DependentOn, generateRandomId, IConfigService, IConfirmService, IContex
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import pkg from '../package.json';
 import { ComponentManager } from './common/component-manager';
+import { IconManager } from './common/icon-manager';
 import { ZIndexManager } from './common/z-index-manager';
 import { defaultPluginConfig, UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { ErrorController } from './controllers/error/error.controller';
@@ -96,6 +97,7 @@ export class UniverMobileUIPlugin extends Plugin {
     override onStarting(): void {
         registerDependencies(this._injector, mergeOverrideWithDependencies([
             [ComponentManager],
+            [IconManager],
             [ThemeSwitcherService],
             [ZIndexManager],
             [ShortcutPanelService],

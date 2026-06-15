@@ -21,7 +21,15 @@ import { serializeRange } from '@univerjs/engine-formula';
 import { AscendingIcon, CustomSortIcon, DescendingIcon, ExpandAscendingIcon, ExpandDescendingIcon } from '@univerjs/icons';
 import { SortRangeCommand } from '@univerjs/sheets-sort';
 import { SheetsRenderService, SheetsUIPart } from '@univerjs/sheets-ui';
-import { ComponentManager, connectInjector, IDialogService, ILayoutService, IMenuManagerService, IUIPartsService } from '@univerjs/ui';
+import {
+    ComponentManager,
+    connectInjector,
+    IconManager,
+    IDialogService,
+    ILayoutService,
+    IMenuManagerService,
+    IUIPartsService,
+} from '@univerjs/ui';
 import { takeUntil } from 'rxjs';
 import {
     SortRangeAscCommand,
@@ -36,7 +44,6 @@ import {
     SortRangeDescInCtxMenuCommand,
 } from '../commands/commands/sheets-sort.command';
 import { menuSchema } from '../menu/schema';
-import { SHEETS_SORT_ASC_EXT_ICON, SHEETS_SORT_ASC_ICON, SHEETS_SORT_CUSTOM_ICON, SHEETS_SORT_DESC_EXT_ICON, SHEETS_SORT_DESC_ICON } from '../menu/sheets-sort.menu';
 import { SheetsSortUIService } from '../services/sheets-sort-ui.service';
 import { CustomSortPanel } from '../views/CustomSortPanel';
 import EmbedSortBtn from '../views/EmbedSortBtn';
@@ -56,12 +63,14 @@ export class SheetsSortUIController extends RxDisposable {
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(SheetsSortUIService) private readonly _sheetsSortUIService: SheetsSortUIService,
         @Inject(Injector) private _injector: Injector,
-        @Inject(ComponentManager) private readonly _componentManager: ComponentManager
+        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
+        @Inject(IconManager) private readonly _iconManager: IconManager
     ) {
         super();
         this._initCommands();
         this._initMenu();
         this._initUI();
+        this._registerIcons();
     }
 
     private _initMenu() {
@@ -93,11 +102,6 @@ export class SheetsSortUIController extends RxDisposable {
 
         ([
             ['CustomSortPanel', CustomSortPanel],
-            [SHEETS_SORT_ASC_ICON, AscendingIcon],
-            [SHEETS_SORT_ASC_EXT_ICON, ExpandAscendingIcon],
-            [SHEETS_SORT_DESC_ICON, DescendingIcon],
-            [SHEETS_SORT_DESC_EXT_ICON, ExpandDescendingIcon],
-            [SHEETS_SORT_CUSTOM_ICON, CustomSortIcon],
         ] as const).forEach(([key, comp]) => {
             this.disposeWithMe(
                 this._componentManager.register(key, comp)
@@ -133,6 +137,16 @@ export class SheetsSortUIController extends RxDisposable {
         this._dialogService.close(CUSTOM_SORT_DIALOG_ID);
 
         queueMicrotask(() => this._layoutService.focus());
+    }
+
+    private _registerIcons(): void {
+        this.disposeWithMe(this._iconManager.register({
+            AscendingIcon,
+            ExpandAscendingIcon,
+            DescendingIcon,
+            ExpandDescendingIcon,
+            CustomSortIcon,
+        }));
     }
 }
 

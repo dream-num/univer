@@ -16,7 +16,7 @@
 
 import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import { CrossHighlightingIcon } from '@univerjs/icons';
-import { ComponentManager, IMenuManagerService } from '@univerjs/ui';
+import { ComponentManager, IconManager, IMenuManagerService } from '@univerjs/ui';
 import {
     DisableCrosshairHighlightOperation,
     EnableCrosshairHighlightOperation,
@@ -30,6 +30,7 @@ import { CrosshairOverlay } from '../views/components/CrosshairHighlight';
 export class SheetsCrosshairHighlightController extends Disposable {
     constructor(
         @Inject(ComponentManager) private readonly _componentMgr: ComponentManager,
+        @Inject(IconManager) private readonly _iconMgr: IconManager,
         @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
         @ICommandService private readonly _cmdSrv: ICommandService
     ) {
@@ -38,6 +39,7 @@ export class SheetsCrosshairHighlightController extends Disposable {
         this._initCommands();
         this._initMenus();
         this._initComponents();
+        this._registerIcons();
     }
 
     private _initCommands(): void {
@@ -55,6 +57,11 @@ export class SheetsCrosshairHighlightController extends Disposable {
 
     private _initComponents(): void {
         this._componentMgr.register(CROSSHAIR_HIGHLIGHT_OVERLAY_COMPONENT, CrosshairOverlay);
-        this._componentMgr.register('CrossHighlightingIcon', CrossHighlightingIcon);
+    }
+
+    private _registerIcons(): void {
+        this.disposeWithMe(this._iconMgr.register({
+            CrossHighlightingIcon,
+        }));
     }
 }

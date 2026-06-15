@@ -21,14 +21,19 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { FilterIcon } from '@univerjs/icons';
 import { SheetsFilterService, SmartToggleSheetsFilterCommand } from '@univerjs/sheets-filter';
 import { SheetCanvasPopManagerService, SheetsRenderService } from '@univerjs/sheets-ui';
-import { ComponentManager, IMenuManagerService, IMessageService, IShortcutService } from '@univerjs/ui';
+import { ComponentManager, IconManager, IMenuManagerService, IMessageService, IShortcutService } from '@univerjs/ui';
 import { distinctUntilChanged } from 'rxjs';
-import { ChangeFilterByOperation, CloseFilterPanelOperation, FILTER_PANEL_OPENED_KEY, OpenFilterPanelOperation } from '../commands/operations/sheets-filter.operation';
+import {
+    ChangeFilterByOperation,
+    CloseFilterPanelOperation,
+    FILTER_PANEL_OPENED_KEY,
+    OpenFilterPanelOperation,
+} from '../commands/operations/sheets-filter.operation';
 import { menuSchema } from '../menu/schema';
 import { SheetsFilterPanelService } from '../services/sheets-filter-panel.service';
 import { FilterPanel } from '../views/components/SheetsFilterPanel';
-import { SheetsFilterUIMobileController } from './sheets-filter-ui-mobile.controller';
 import { SmartToggleFilterShortcut } from './sheets-filter.shortcut';
+import { SheetsFilterUIMobileController } from './ui-mobile.controller';
 
 export const FILTER_PANEL_POPUP_KEY = 'FILTER_PANEL_POPUP';
 
@@ -39,6 +44,7 @@ export class SheetsFilterUIDesktopController extends SheetsFilterUIMobileControl
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
+        @Inject(IconManager) private readonly _iconManager: IconManager,
         @Inject(SheetsFilterPanelService) private readonly _sheetsFilterPanelService: SheetsFilterPanelService,
         @Inject(SheetCanvasPopManagerService) private _sheetCanvasPopupService: SheetCanvasPopManagerService,
         @Inject(SheetsFilterService) private _sheetsFilterService: SheetsFilterService,
@@ -57,6 +63,7 @@ export class SheetsFilterUIDesktopController extends SheetsFilterUIMobileControl
         this._initShortcuts();
         this._initMenuItems();
         this._initUI();
+        this._registerIcons();
     }
 
     override dispose(): void {
@@ -91,7 +98,6 @@ export class SheetsFilterUIDesktopController extends SheetsFilterUIMobileControl
     private _initUI(): void {
         ([
             [FILTER_PANEL_POPUP_KEY, FilterPanel],
-            ['FilterIcon', FilterIcon],
         ] as const).forEach(([key, comp]) => {
             this.disposeWithMe(
                 this._componentManager.register(key, comp)
@@ -118,6 +124,13 @@ export class SheetsFilterUIDesktopController extends SheetsFilterUIMobileControl
     }
 
     private _popupDisposable?: Nullable<IDisposable>;
+
+    private _registerIcons(): void {
+        this.disposeWithMe(this._iconManager.register({
+            FilterIcon,
+        }));
+    }
+
     private _openFilterPopup(): void {
         const currentFilterModel = this._sheetsFilterPanelService.filterModel;
         if (!currentFilterModel) {

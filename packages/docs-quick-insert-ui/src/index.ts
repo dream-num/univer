@@ -18,7 +18,7 @@ import './global.css';
 
 export type { IUniverDocsQuickInsertUIConfig } from './config/config';
 export { DocQuickInsertTriggerController } from './controllers/doc-quick-insert-trigger.controller';
-export { DocQuickInsertUIController } from './controllers/doc-quick-insert-ui.controller';
+export { DocQuickInsertUIController } from './controllers/ui.controller';
 export { UniverDocsQuickInsertUIPlugin } from './plugin';
 export type { DocPopupMenu, IDocPopup, IDocPopupGroupItem, IDocPopupMenuItem } from './services/doc-quick-insert-popup.service';
 export { DocQuickInsertPopupService } from './services/doc-quick-insert-popup.service';

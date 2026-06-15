@@ -23,8 +23,8 @@ import pkg from '../package.json';
 import { PLUGIN_NAME } from './common/const';
 import { defaultPluginConfig, DOCS_THREAD_COMMENT_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { DocThreadCommentSelectionController } from './controllers/doc-thread-comment-selection.controller';
-import { DocThreadCommentUIController } from './controllers/doc-thread-comment-ui.controller';
 import { DocThreadCommentRenderController } from './controllers/render-controllers/render.controller';
+import { DocThreadCommentUIController } from './controllers/ui.controller';
 import { DocThreadCommentService } from './services/doc-thread-comment.service';
 
 @DependentOn(UniverThreadCommentUIPlugin)

@@ -14,28 +14,11 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand } from '@univerjs/core';
+import type { IAccessor } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuItem, IMenuSelectorItem } from '@univerjs/ui';
-import type { ComponentType } from 'react';
-import { ICommandService, NamedStyleType, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, NamedStyleType, ThemeService, UniverInstanceType } from '@univerjs/core';
 import { SetTextSelectionsOperation } from '@univerjs/docs';
-import {
-    GridIcon,
-    H1Icon,
-    H2Icon,
-    H3Icon,
-    H4Icon,
-    H5Icon,
-    MoreLeftIcon,
-    MoreRightIcon,
-    OrderIcon,
-    ReduceIcon,
-    TextTypeIcon,
-    TodoListDoubleIcon,
-    UnorderIcon,
-} from '@univerjs/icons';
-import { ComponentManager, getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
-import { createElement } from 'react';
+import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { Observable } from 'rxjs';
 import { DocCopyCommand, DocCopyCurrentParagraphCommand, DocCutCurrentParagraphCommand, DocPasteCommand } from '../commands/commands/clipboard.command';
 import { DeleteCurrentParagraphCommand } from '../commands/commands/doc-delete.command';
@@ -45,242 +28,301 @@ import { BulletListCommand, CheckListCommand, InsertBulletListBellowCommand, Ins
 import { H1HeadingCommand, H2HeadingCommand, H3HeadingCommand, H4HeadingCommand, H5HeadingCommand, NormalTextHeadingCommand, SubtitleHeadingCommand, TitleHeadingCommand } from '../commands/commands/set-heading.command';
 import { DocTableDeleteTableCommand } from '../commands/commands/table/doc-table-delete.command';
 import { DocCreateTableOperation } from '../commands/operations/doc-create-table.operation';
+import { getHighlightBackgroundColor } from '../views/paragraph-menu/theme-color';
 import { BackgroundColorSelectorMenuItemFactory, disableMenuWhenNoDocRange, getParagraphStyleAtCursor, TextColorSelectorMenuItemFactory } from './menu';
 
-const HEADING_MAP: Record<NamedStyleType, ICommand> = {
-    [NamedStyleType.HEADING_1]: H1HeadingCommand,
-    [NamedStyleType.HEADING_2]: H2HeadingCommand,
-    [NamedStyleType.HEADING_3]: H3HeadingCommand,
-    [NamedStyleType.HEADING_4]: H4HeadingCommand,
-    [NamedStyleType.HEADING_5]: H5HeadingCommand,
-    [NamedStyleType.NORMAL_TEXT]: NormalTextHeadingCommand,
-    [NamedStyleType.TITLE]: TitleHeadingCommand,
-    [NamedStyleType.SUBTITLE]: SubtitleHeadingCommand,
-    [NamedStyleType.NAMED_STYLE_TYPE_UNSPECIFIED]: NormalTextHeadingCommand,
-};
+export const TEXT_COLORS = ['#FE4B4B', '#FF8C51', '#A4DC16', '#2DAEFF', '#3A60F7', '#9E6DE3', '#F248A6'];
+export const TEXT_COLOR_SWATCH_ICONS = [
+    'DocParagraphTextColorSwatchIcon.0',
+    'DocParagraphTextColorSwatchIcon.1',
+    'DocParagraphTextColorSwatchIcon.2',
+    'DocParagraphTextColorSwatchIcon.3',
+    'DocParagraphTextColorSwatchIcon.4',
+    'DocParagraphTextColorSwatchIcon.5',
+    'DocParagraphTextColorSwatchIcon.6',
+] as const;
 
-const HEADING_TITLE_MAP: Partial<Record<NamedStyleType, string>> = {
-    [NamedStyleType.HEADING_1]: 'ui.toolbar.heading.1',
-    [NamedStyleType.HEADING_2]: 'ui.toolbar.heading.2',
-    [NamedStyleType.HEADING_3]: 'ui.toolbar.heading.3',
-    [NamedStyleType.HEADING_4]: 'ui.toolbar.heading.4',
-    [NamedStyleType.HEADING_5]: 'ui.toolbar.heading.5',
-    [NamedStyleType.NORMAL_TEXT]: 'ui.toolbar.heading.normal',
-    [NamedStyleType.TITLE]: 'ui.toolbar.heading.title',
-    [NamedStyleType.SUBTITLE]: 'ui.toolbar.heading.subTitle',
-};
+export const BACKGROUND_COLOR_SWATCH_ICONS = [
+    'DocParagraphBackgroundColorSwatchIcon.0',
+    'DocParagraphBackgroundColorSwatchIcon.1',
+    'DocParagraphBackgroundColorSwatchIcon.2',
+    'DocParagraphBackgroundColorSwatchIcon.3',
+    'DocParagraphBackgroundColorSwatchIcon.4',
+    'DocParagraphBackgroundColorSwatchIcon.5',
+    'DocParagraphBackgroundColorSwatchIcon.6',
+    'DocParagraphBackgroundColorSwatchIcon.7',
+    'DocParagraphBackgroundColorSwatchIcon.8',
+    'DocParagraphBackgroundColorSwatchIcon.9',
+    'DocParagraphBackgroundColorSwatchIcon.10',
+    'DocParagraphBackgroundColorSwatchIcon.11',
+    'DocParagraphBackgroundColorSwatchIcon.12',
+    'DocParagraphBackgroundColorSwatchIcon.13',
+    'DocParagraphBackgroundColorSwatchIcon.14',
+    'DocParagraphBackgroundColorSwatchIcon.15',
+] as const;
 
-function TitleTypeIcon({ className }: { className: string }) {
-    return createElement(
-        'svg',
-        {
-            className,
-            viewBox: '0 0 24 24',
-            fill: 'currentColor',
-            'aria-hidden': true,
-        },
-        createElement('text', {
-            x: 2,
-            y: 19,
-            fontFamily: 'Arial, sans-serif',
-            fontSize: 19,
-            fontWeight: 500,
-        }, 'T'),
-        createElement('text', {
-            x: 15,
-            y: 19,
-            fontFamily: 'Arial, sans-serif',
-            fontSize: 13,
-            fontWeight: 500,
-        }, 't')
-    );
-}
-
-function SubtitleTypeIcon({ className }: { className: string }) {
-    return createElement(
-        'svg',
-        {
-            className,
-            viewBox: '0 0 24 24',
-            fill: 'currentColor',
-            'aria-hidden': true,
-        },
-        createElement('text', {
-            x: 5,
-            y: 19,
-            fontFamily: 'Arial, sans-serif',
-            fontSize: 19,
-            fontWeight: 500,
-        }, 'S')
-    );
-}
-
-function HeaderTextColorIcon({ className, extend }: { className: string; extend?: { colorChannel1?: string } }) {
-    const color = extend?.colorChannel1 ?? 'currentColor';
-
-    return createElement(
-        'svg',
-        {
-            className,
-            viewBox: '0 0 24 24',
-            width: '1em',
-            height: '1em',
-            fill: 'none',
-            'aria-hidden': true,
-        },
-        createElement('rect', {
-            x: 3,
-            y: 3,
-            width: 18,
-            height: 18,
-            rx: 4,
-            fill: 'none',
-            stroke: 'currentColor',
-            strokeOpacity: 0.16,
-        }),
-        createElement('text', {
-            x: 7.5,
-            y: 16.5,
-            fontFamily: 'Arial, sans-serif',
-            fontSize: 12,
-            fontWeight: 700,
-            fill: color,
-        }, 'A')
-    );
-}
-
-function DefaultTextColorIcon({ className }: { className: string }) {
-    return TextColorSwatchIcon({ className, color: '#000000' });
-}
-
-export const HEADING_ICON_MAP: Record<NamedStyleType, { key: string; component: ComponentType<{ className: string }> }> = {
-    [NamedStyleType.HEADING_1]: { key: 'H1Icon', component: H1Icon },
-    [NamedStyleType.HEADING_2]: { key: 'H2Icon', component: H2Icon },
-    [NamedStyleType.HEADING_3]: { key: 'H3Icon', component: H3Icon },
-    [NamedStyleType.HEADING_4]: { key: 'H4Icon', component: H4Icon },
-    [NamedStyleType.HEADING_5]: { key: 'H5Icon', component: H5Icon },
-    [NamedStyleType.NORMAL_TEXT]: { key: 'TextTypeIcon', component: TextTypeIcon },
-    [NamedStyleType.TITLE]: { key: 'TitleTypeIcon', component: TitleTypeIcon },
-    [NamedStyleType.SUBTITLE]: { key: 'SubtitleTypeIcon', component: SubtitleTypeIcon },
-    [NamedStyleType.NAMED_STYLE_TYPE_UNSPECIFIED]: { key: 'TextTypeIcon', component: TextTypeIcon },
-};
-
-const createHeadingSelectorMenuItemFactory = (headingType: NamedStyleType) => (accessor: IAccessor): IMenuItem => {
+function getHeadingActivatedObservable(accessor: IAccessor, headingType: NamedStyleType): Observable<boolean> {
     const commandService = accessor.get(ICommandService);
-    const componentManager = accessor.get(ComponentManager);
-    const icon = HEADING_ICON_MAP[headingType];
-    if (!componentManager.get(icon.key)) {
-        componentManager.register(icon.key, icon.component);
-    }
 
+    return new Observable((subscriber) => {
+        const DEFAULT_TYPE = NamedStyleType.NORMAL_TEXT;
+        const calc = () => {
+            const paragraph = getParagraphStyleAtCursor(accessor);
+            if (paragraph == null) {
+                subscriber.next(DEFAULT_TYPE === headingType);
+                return;
+            }
+
+            const namedStyleType = paragraph.paragraphStyle?.namedStyleType ?? DEFAULT_TYPE;
+            subscriber.next(namedStyleType === headingType);
+        };
+
+        const disposable = commandService.onCommandExecuted((c) => {
+            const id = c.id;
+
+            if (id === SetTextSelectionsOperation.id || id === SetInlineFormatFontSizeCommand.id) {
+                calc();
+            }
+        });
+
+        calc();
+        return disposable.dispose;
+    });
+}
+
+export function H1HeadingMenuItemFactory(accessor: IAccessor): IMenuItem {
     return {
-        id: HEADING_MAP[headingType]!.id,
+        id: H1HeadingCommand.id,
         type: MenuItemType.BUTTON,
-        icon: icon.key,
-        title: HEADING_TITLE_MAP[headingType],
-        tooltip: HEADING_TITLE_MAP[headingType],
+        icon: 'H1Icon',
+        title: 'ui.toolbar.heading.1',
+        tooltip: 'ui.toolbar.heading.1',
         disabled$: disableMenuWhenNoDocRange(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
-        activated$: new Observable((subscriber) => {
-            const DEFAULT_TYPE = NamedStyleType.NORMAL_TEXT;
-            const calc = () => {
-                const paragraph = getParagraphStyleAtCursor(accessor);
-                if (paragraph == null) {
-                    subscriber.next(DEFAULT_TYPE === headingType);
-                    return;
-                }
-
-                const namedStyleType = paragraph.paragraphStyle?.namedStyleType ?? DEFAULT_TYPE;
-                subscriber.next(namedStyleType === headingType);
-            };
-
-            const disposable = commandService.onCommandExecuted((c) => {
-                const id = c.id;
-
-                if (id === SetTextSelectionsOperation.id || id === SetInlineFormatFontSizeCommand.id) {
-                    calc();
-                }
-            });
-
-            calc();
-            return disposable.dispose;
-        }),
+        activated$: getHeadingActivatedObservable(accessor, NamedStyleType.HEADING_1),
     };
-};
+}
 
-export const H1HeadingMenuItemFactory = createHeadingSelectorMenuItemFactory(NamedStyleType.HEADING_1);
-export const H2HeadingMenuItemFactory = createHeadingSelectorMenuItemFactory(NamedStyleType.HEADING_2);
-export const H3HeadingMenuItemFactory = createHeadingSelectorMenuItemFactory(NamedStyleType.HEADING_3);
-export const H4HeadingMenuItemFactory = createHeadingSelectorMenuItemFactory(NamedStyleType.HEADING_4);
-export const H5HeadingMenuItemFactory = createHeadingSelectorMenuItemFactory(NamedStyleType.HEADING_5);
-export const NormalTextHeadingMenuItemFactory = createHeadingSelectorMenuItemFactory(NamedStyleType.NORMAL_TEXT);
-export const TitleHeadingMenuItemFactory = createHeadingSelectorMenuItemFactory(NamedStyleType.TITLE);
-export const SubtitleHeadingMenuItemFactory = createHeadingSelectorMenuItemFactory(NamedStyleType.SUBTITLE);
-
-const createEmptyParagraphButtonFactory = (
-    command: ICommand,
-    icon: string,
-    title: string
-) => (accessor: IAccessor): IMenuButtonItem => {
-    const componentManager = accessor.get(ComponentManager);
-    const headingIcon = Object.values(HEADING_ICON_MAP).find((item) => item.key === icon);
-    if (headingIcon && !componentManager.get(headingIcon.key)) {
-        componentManager.register(headingIcon.key, headingIcon.component);
-    } else {
-        ensureParagraphMenuIcon(componentManager, icon);
-    }
-
+export function H2HeadingMenuItemFactory(accessor: IAccessor): IMenuItem {
     return {
-        id: command.id,
+        id: H2HeadingCommand.id,
         type: MenuItemType.BUTTON,
-        icon,
-        title,
-        tooltip: title,
+        icon: 'H2Icon',
+        title: 'ui.toolbar.heading.2',
+        tooltip: 'ui.toolbar.heading.2',
+        disabled$: disableMenuWhenNoDocRange(accessor),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+        activated$: getHeadingActivatedObservable(accessor, NamedStyleType.HEADING_2),
     };
-};
+}
+
+export function H3HeadingMenuItemFactory(accessor: IAccessor): IMenuItem {
+    return {
+        id: H3HeadingCommand.id,
+        type: MenuItemType.BUTTON,
+        icon: 'H3Icon',
+        title: 'ui.toolbar.heading.3',
+        tooltip: 'ui.toolbar.heading.3',
+        disabled$: disableMenuWhenNoDocRange(accessor),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+        activated$: getHeadingActivatedObservable(accessor, NamedStyleType.HEADING_3),
+    };
+}
+
+export function H4HeadingMenuItemFactory(accessor: IAccessor): IMenuItem {
+    return {
+        id: H4HeadingCommand.id,
+        type: MenuItemType.BUTTON,
+        icon: 'H4Icon',
+        title: 'ui.toolbar.heading.4',
+        tooltip: 'ui.toolbar.heading.4',
+        disabled$: disableMenuWhenNoDocRange(accessor),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+        activated$: getHeadingActivatedObservable(accessor, NamedStyleType.HEADING_4),
+    };
+}
+
+export function H5HeadingMenuItemFactory(accessor: IAccessor): IMenuItem {
+    return {
+        id: H5HeadingCommand.id,
+        type: MenuItemType.BUTTON,
+        icon: 'H5Icon',
+        title: 'ui.toolbar.heading.5',
+        tooltip: 'ui.toolbar.heading.5',
+        disabled$: disableMenuWhenNoDocRange(accessor),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+        activated$: getHeadingActivatedObservable(accessor, NamedStyleType.HEADING_5),
+    };
+}
+
+export function NormalTextHeadingMenuItemFactory(accessor: IAccessor): IMenuItem {
+    return {
+        id: NormalTextHeadingCommand.id,
+        type: MenuItemType.BUTTON,
+        icon: 'TextTypeIcon',
+        title: 'ui.toolbar.heading.normal',
+        tooltip: 'ui.toolbar.heading.normal',
+        disabled$: disableMenuWhenNoDocRange(accessor),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+        activated$: getHeadingActivatedObservable(accessor, NamedStyleType.NORMAL_TEXT),
+    };
+}
+
+export function TitleHeadingMenuItemFactory(accessor: IAccessor): IMenuItem {
+    return {
+        id: TitleHeadingCommand.id,
+        type: MenuItemType.BUTTON,
+        icon: 'TitleTypeIcon',
+        title: 'ui.toolbar.heading.title',
+        tooltip: 'ui.toolbar.heading.title',
+        disabled$: disableMenuWhenNoDocRange(accessor),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+        activated$: getHeadingActivatedObservable(accessor, NamedStyleType.TITLE),
+    };
+}
+
+export function SubtitleHeadingMenuItemFactory(accessor: IAccessor): IMenuItem {
+    return {
+        id: SubtitleHeadingCommand.id,
+        type: MenuItemType.BUTTON,
+        icon: 'SubtitleTypeIcon',
+        title: 'ui.toolbar.heading.subTitle',
+        tooltip: 'ui.toolbar.heading.subTitle',
+        disabled$: disableMenuWhenNoDocRange(accessor),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+        activated$: getHeadingActivatedObservable(accessor, NamedStyleType.SUBTITLE),
+    };
+}
 
 export const EMPTY_PARAGRAPH_MENU_ID = 'doc.menu.empty-paragraph';
-export const EmptyParagraphH1MenuItemFactory = createEmptyParagraphButtonFactory(H1HeadingCommand, 'H1Icon', 'ui.toolbar.heading.1');
-export const EmptyParagraphH2MenuItemFactory = createEmptyParagraphButtonFactory(H2HeadingCommand, 'H2Icon', 'ui.toolbar.heading.2');
-export const EmptyParagraphH3MenuItemFactory = createEmptyParagraphButtonFactory(H3HeadingCommand, 'H3Icon', 'ui.toolbar.heading.3');
-export const EmptyParagraphH4MenuItemFactory = createEmptyParagraphButtonFactory(H4HeadingCommand, 'H4Icon', 'ui.toolbar.heading.4');
-export const EmptyParagraphH5MenuItemFactory = createEmptyParagraphButtonFactory(H5HeadingCommand, 'H5Icon', 'ui.toolbar.heading.5');
-export const EmptyParagraphNormalTextMenuItemFactory = createEmptyParagraphButtonFactory(NormalTextHeadingCommand, 'TextTypeIcon', 'ui.toolbar.heading.normal');
-export const EmptyParagraphOrderListMenuItemFactory = createEmptyParagraphButtonFactory(OrderListCommand, 'OrderIcon', 'docs-ui.rightClick.orderList');
-export const EmptyParagraphBulletListMenuItemFactory = createEmptyParagraphButtonFactory(BulletListCommand, 'UnorderIcon', 'docs-ui.rightClick.bulletList');
-export const EmptyParagraphCheckListMenuItemFactory = createEmptyParagraphButtonFactory(CheckListCommand, 'TodoListDoubleIcon', 'docs-ui.rightClick.checkList');
-export const EmptyParagraphHorizontalLineMenuItemFactory = createEmptyParagraphButtonFactory(HorizontalLineCommand, 'ReduceIcon', 'docs-ui.toolbar.horizontalLine');
+export function EmptyParagraphH1MenuItemFactory(_accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: H1HeadingCommand.id,
+        type: MenuItemType.BUTTON,
+        icon: 'H1Icon',
+        title: 'ui.toolbar.heading.1',
+        tooltip: 'ui.toolbar.heading.1',
+    };
+}
 
-export const CopyCurrentParagraphMenuItemFactory = (_accessor: IAccessor): IMenuItem => {
+export function EmptyParagraphH2MenuItemFactory(_accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: H2HeadingCommand.id,
+        type: MenuItemType.BUTTON,
+        icon: 'H2Icon',
+        title: 'ui.toolbar.heading.2',
+        tooltip: 'ui.toolbar.heading.2',
+    };
+}
+
+export function EmptyParagraphH3MenuItemFactory(_accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: H3HeadingCommand.id,
+        type: MenuItemType.BUTTON,
+        icon: 'H3Icon',
+        title: 'ui.toolbar.heading.3',
+        tooltip: 'ui.toolbar.heading.3',
+    };
+}
+
+export function EmptyParagraphH4MenuItemFactory(_accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: H4HeadingCommand.id,
+        type: MenuItemType.BUTTON,
+        icon: 'H4Icon',
+        title: 'ui.toolbar.heading.4',
+        tooltip: 'ui.toolbar.heading.4',
+    };
+}
+
+export function EmptyParagraphH5MenuItemFactory(_accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: H5HeadingCommand.id,
+        type: MenuItemType.BUTTON,
+        icon: 'H5Icon',
+        title: 'ui.toolbar.heading.5',
+        tooltip: 'ui.toolbar.heading.5',
+    };
+}
+
+export function EmptyParagraphNormalTextMenuItemFactory(_accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: NormalTextHeadingCommand.id,
+        type: MenuItemType.BUTTON,
+        icon: 'TextTypeIcon',
+        title: 'ui.toolbar.heading.normal',
+        tooltip: 'ui.toolbar.heading.normal',
+    };
+}
+
+export function EmptyParagraphOrderListMenuItemFactory(_accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: OrderListCommand.id,
+        type: MenuItemType.BUTTON,
+        icon: 'OrderIcon',
+        title: 'docs-ui.rightClick.orderList',
+        tooltip: 'docs-ui.rightClick.orderList',
+    };
+}
+
+export function EmptyParagraphBulletListMenuItemFactory(_accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: BulletListCommand.id,
+        type: MenuItemType.BUTTON,
+        icon: 'UnorderIcon',
+        title: 'docs-ui.rightClick.bulletList',
+        tooltip: 'docs-ui.rightClick.bulletList',
+    };
+}
+
+export function EmptyParagraphCheckListMenuItemFactory(_accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: CheckListCommand.id,
+        type: MenuItemType.BUTTON,
+        icon: 'TodoListDoubleIcon',
+        title: 'docs-ui.rightClick.checkList',
+        tooltip: 'docs-ui.rightClick.checkList',
+    };
+}
+
+export function EmptyParagraphHorizontalLineMenuItemFactory(_accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: HorizontalLineCommand.id,
+        type: MenuItemType.BUTTON,
+        icon: 'ReduceIcon',
+        title: 'docs-ui.toolbar.horizontalLine',
+        tooltip: 'docs-ui.toolbar.horizontalLine',
+    };
+}
+
+export function CopyCurrentParagraphMenuItemFactory(_accessor: IAccessor): IMenuItem {
     return {
         id: DocCopyCurrentParagraphCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'CopyDoubleIcon',
         title: 'docs-ui.rightClick.copy',
     };
-};
+}
 
-export const CutCurrentParagraphMenuItemFactory = (_accessor: IAccessor): IMenuItem => {
+export function CutCurrentParagraphMenuItemFactory(_accessor: IAccessor): IMenuItem {
     return {
         id: DocCutCurrentParagraphCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'CutIcon',
         title: 'docs-ui.rightClick.cut',
     };
-};
+}
 
-export const DeleteCurrentParagraphMenuItemFactory = (_accessor: IAccessor): IMenuItem => {
+export function DeleteCurrentParagraphMenuItemFactory(_accessor: IAccessor): IMenuItem {
     return {
         id: DeleteCurrentParagraphCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'DeleteIcon',
         title: 'docs-ui.rightClick.delete',
     };
-};
+}
 
-export const InsertBulletListBellowMenuItemFactory = (accessor: IAccessor): IMenuItem => {
-    ensureParagraphMenuIcon(accessor.get(ComponentManager), 'UnorderIcon');
-
+export function InsertBulletListBellowMenuItemFactory(_accessor: IAccessor): IMenuItem {
     return {
         id: InsertBulletListBellowCommand.id,
         type: MenuItemType.BUTTON,
@@ -288,11 +330,9 @@ export const InsertBulletListBellowMenuItemFactory = (accessor: IAccessor): IMen
         title: 'docs-ui.rightClick.bulletList',
         tooltip: 'docs-ui.rightClick.bulletList',
     };
-};
+}
 
-export const InsertOrderListBellowMenuItemFactory = (accessor: IAccessor): IMenuItem => {
-    ensureParagraphMenuIcon(accessor.get(ComponentManager), 'OrderIcon');
-
+export function InsertOrderListBellowMenuItemFactory(_accessor: IAccessor): IMenuItem {
     return {
         id: InsertOrderListBellowCommand.id,
         type: MenuItemType.BUTTON,
@@ -300,11 +340,9 @@ export const InsertOrderListBellowMenuItemFactory = (accessor: IAccessor): IMenu
         title: 'docs-ui.rightClick.orderList',
         tooltip: 'docs-ui.rightClick.orderList',
     };
-};
+}
 
-export const InsertCheckListBellowMenuItemFactory = (accessor: IAccessor): IMenuItem => {
-    ensureParagraphMenuIcon(accessor.get(ComponentManager), 'TodoListDoubleIcon');
-
+export function InsertCheckListBellowMenuItemFactory(_accessor: IAccessor): IMenuItem {
     return {
         id: InsertCheckListBellowCommand.id,
         type: MenuItemType.BUTTON,
@@ -312,11 +350,9 @@ export const InsertCheckListBellowMenuItemFactory = (accessor: IAccessor): IMenu
         title: 'docs-ui.rightClick.checkList',
         tooltip: 'docs-ui.rightClick.checkList',
     };
-};
+}
 
-export const InsertHorizontalLineBellowMenuItemFactory = (accessor: IAccessor): IMenuItem => {
-    ensureParagraphMenuIcon(accessor.get(ComponentManager), 'ReduceIcon');
-
+export function InsertHorizontalLineBellowMenuItemFactory(_accessor: IAccessor): IMenuItem {
     return {
         id: InsertHorizontalLineBellowCommand.id,
         type: MenuItemType.BUTTON,
@@ -324,7 +360,7 @@ export const InsertHorizontalLineBellowMenuItemFactory = (accessor: IAccessor): 
         title: 'docs-ui.toolbar.horizontalLine',
         tooltip: 'docs-ui.toolbar.horizontalLine',
     };
-};
+}
 
 export const INSERT_BELLOW_MENU_ID = 'doc.menu.insert-bellow';
 export const DOC_CONTENT_INSERT_MENU_ID = 'doc.menu.content-insert';
@@ -340,232 +376,11 @@ export const DOC_PARAGRAPH_T_INDENT_INCREASE_ID = 'doc.menu.paragraph-t.indent.i
 export const DOC_PARAGRAPH_T_INDENT_DECREASE_ID = 'doc.menu.paragraph-t.indent.decrease';
 export const DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID = 'doc.menu.paragraph-t.insert-below.command';
 
-const TEXT_COLORS = ['#FE4B4B', '#FF8C51', '#A4DC16', '#2DAEFF', '#3A60F7', '#9E6DE3', '#F248A6'];
-const BACKGROUND_COLORS = [
-    'rgba(158, 109, 227, 0.3)',
-    'rgba(254, 75, 75, 0.3)',
-    'rgba(255, 140, 81, 0.3)',
-    'rgba(164, 220, 22, 0.3)',
-    'rgba(45, 174, 255, 0.3)',
-    'rgba(58, 96, 247, 0.3)',
-    'rgba(242, 72, 166, 0.3)',
-    'rgba(153, 153, 153, 0.3)',
-    'rgba(158, 109, 227, 0.15)',
-    'rgba(254, 75, 75, 0.15)',
-    'rgba(255, 140, 81, 0.15)',
-    'rgba(164, 220, 22, 0.15)',
-    'rgba(45, 174, 255, 0.15)',
-    'rgba(58, 96, 247, 0.15)',
-    'rgba(242, 72, 166, 0.15)',
-];
-
 export function getDocBlockRangeMenuId(blockType: string): string {
     return `doc.block-range.${blockType}.menu`;
 }
 
-function ensureParagraphMenuIcon(componentManager: ComponentManager, icon: string) {
-    if (componentManager.get(icon)) {
-        return;
-    }
-
-    const headingIcon = Object.values(HEADING_ICON_MAP).find((item) => item.key === icon);
-    if (headingIcon) {
-        componentManager.register(headingIcon.key, headingIcon.component);
-        return;
-    }
-
-    const mapping: Partial<Record<string, ComponentType<{ className: string }>>> = {
-        TitleTypeIcon,
-        SubtitleTypeIcon,
-        DefaultTextColorIcon,
-        HeaderTextColorIcon,
-        MoreRightIcon,
-        MoreLeftIcon,
-        OrderIcon,
-        UnorderIcon,
-        TodoListDoubleIcon,
-        ReduceIcon,
-        GridIcon,
-    };
-
-    const component = mapping[icon];
-    if (component) {
-        componentManager.register(icon, component);
-    }
-}
-
-function TextColorSwatchIcon(props: { className?: string; color: string }) {
-    const { className, color } = props;
-    return createElement(
-        'svg',
-        {
-            className,
-            viewBox: '0 0 24 24',
-            width: '1em',
-            height: '1em',
-            fill: 'none',
-            'aria-hidden': true,
-        },
-        createElement('rect', {
-            x: 3,
-            y: 3,
-            width: 18,
-            height: 18,
-            rx: 4,
-            fill: 'none',
-            stroke: 'currentColor',
-            strokeOpacity: 0.16,
-        }),
-        createElement('text', {
-            x: 7.5,
-            y: 16.5,
-            fontFamily: 'Arial, sans-serif',
-            fontSize: 12,
-            fontWeight: 700,
-            fill: color,
-        }, 'A')
-    );
-}
-
-function BackgroundColorSwatchIcon(props: { className?: string; color: string }) {
-    const { className, color } = props;
-    return createElement(
-        'svg',
-        {
-            className,
-            viewBox: '0 0 24 24',
-            width: '1em',
-            height: '1em',
-            fill: 'none',
-            'aria-hidden': true,
-        },
-        createElement('rect', {
-            x: 3,
-            y: 3,
-            width: 18,
-            height: 18,
-            rx: 5,
-            fill: color,
-            stroke: 'currentColor',
-            strokeOpacity: 0.12,
-        })
-    );
-}
-
-function ensureColorSwatchIcon(componentManager: ComponentManager, icon: string, color: string, variant: 'text' | 'background') {
-    if (componentManager.get(icon)) {
-        return;
-    }
-
-    componentManager.register(
-        icon,
-        ({ className }: { className?: string }) => (variant === 'text'
-            ? TextColorSwatchIcon({ className, color })
-            : BackgroundColorSwatchIcon({ className, color }))
-    );
-}
-
-function createStaticButtonMenuItemFactory(config: {
-    id: string;
-    commandId?: string;
-    icon?: string;
-    title?: string;
-    tooltip?: string;
-    params?: Record<string, unknown>;
-    disabled$?: ReturnType<typeof disableMenuWhenNoDocRange>;
-}) {
-    return (accessor: IAccessor): IMenuButtonItem => {
-        const componentManager = accessor.get(ComponentManager);
-        if (config.icon) {
-            ensureParagraphMenuIcon(componentManager, config.icon);
-        }
-
-        return {
-            id: config.id,
-            commandId: config.commandId,
-            type: MenuItemType.BUTTON,
-            icon: config.icon,
-            title: config.title,
-            tooltip: config.tooltip,
-            params: config.params,
-            disabled$: config.disabled$,
-            hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
-        };
-    };
-}
-
-function createStaticSubmenuMenuItemFactory(config: {
-    id: string;
-    icon?: string;
-    title?: string;
-    tooltip?: string;
-}) {
-    return (accessor: IAccessor): IMenuSelectorItem<string> => {
-        const componentManager = accessor.get(ComponentManager);
-        if (config.icon) {
-            ensureParagraphMenuIcon(componentManager, config.icon);
-        }
-
-        return {
-            id: config.id,
-            type: MenuItemType.SUBITEMS,
-            icon: config.icon,
-            title: config.title,
-            tooltip: config.tooltip,
-            hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
-        };
-    };
-}
-
-function createColorSwatchMenuItemFactory(config: {
-    id: string;
-    commandId: string;
-    icon: string;
-    color: string;
-    variant: 'text' | 'background';
-}) {
-    return (accessor: IAccessor): IMenuButtonItem => {
-        const componentManager = accessor.get(ComponentManager);
-        ensureColorSwatchIcon(componentManager, config.icon, config.color, config.variant);
-
-        return {
-            id: config.id,
-            commandId: config.commandId,
-            type: MenuItemType.BUTTON,
-            icon: config.icon,
-            params: {
-                value: config.color,
-            },
-            hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
-        };
-    };
-}
-
-function createHeaderActionMenuItemFactory(
-    baseFactory: (accessor: IAccessor) => IMenuItem,
-    config?: {
-        icon?: string;
-    }
-) {
-    return (accessor: IAccessor): IMenuItem => {
-        const componentManager = accessor.get(ComponentManager);
-
-        if (config?.icon) {
-            ensureParagraphMenuIcon(componentManager, config.icon);
-        }
-
-        const baseItem = baseFactory(accessor) as IMenuSelectorItem<string, string | undefined>;
-
-        return {
-            ...baseItem,
-            icon: config?.icon ?? baseItem.icon,
-            tooltip: undefined,
-            title: undefined,
-        };
-    };
-}
-
-export const TableBlockCopyMenuItemFactory = (_accessor: IAccessor): IMenuItem => {
+export function TableBlockCopyMenuItemFactory(_accessor: IAccessor): IMenuItem {
     return {
         id: DocCopyCommand.name,
         commandId: DocCopyCommand.id,
@@ -573,25 +388,25 @@ export const TableBlockCopyMenuItemFactory = (_accessor: IAccessor): IMenuItem =
         icon: 'CopyDoubleIcon',
         title: 'docs-ui.rightClick.copy',
     };
-};
+}
 
-export const TableBlockPasteMenuItemFactory = (_accessor: IAccessor): IMenuItem => {
+export function TableBlockPasteMenuItemFactory(_accessor: IAccessor): IMenuItem {
     return {
         id: DocPasteCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'PasteSpecialDoubleIcon',
         title: 'docs-ui.rightClick.paste',
     };
-};
+}
 
-export const TableBlockDeleteMenuItemFactory = (_accessor: IAccessor): IMenuItem => {
+export function TableBlockDeleteMenuItemFactory(_accessor: IAccessor): IMenuItem {
     return {
         id: DocTableDeleteTableCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'DeleteIcon',
         title: 'docs-ui.rightClick.delete',
     };
-};
+}
 
 export function DocInsertBellowMenuItemFactory(_accessor: IAccessor): IMenuSelectorItem<string> {
     return {
@@ -601,159 +416,242 @@ export function DocInsertBellowMenuItemFactory(_accessor: IAccessor): IMenuSelec
     };
 }
 
-export const ParagraphMenuAlignSubmenuItemFactory = createStaticSubmenuMenuItemFactory({
-    id: DOC_PARAGRAPH_T_ALIGN_MENU_ID,
-    icon: 'LeftJustifyingIcon',
-    title: 'docs-ui.paragraphMenu.alignAndIndent',
-    tooltip: 'docs-ui.paragraphMenu.alignAndIndent',
-});
+export function ParagraphMenuAlignSubmenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
+    return {
+        id: DOC_PARAGRAPH_T_ALIGN_MENU_ID,
+        type: MenuItemType.SUBITEMS,
+        icon: 'LeftJustifyingIcon',
+        title: 'docs-ui.paragraphMenu.alignAndIndent',
+        tooltip: 'docs-ui.paragraphMenu.alignAndIndent',
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+    };
+}
 
-export const ParagraphMenuColorsSubmenuItemFactory = createStaticSubmenuMenuItemFactory({
-    id: DOC_PARAGRAPH_T_COLORS_MENU_ID,
-    icon: 'PaintBucketDoubleIcon',
-    title: 'docs-ui.paragraphMenu.color',
-    tooltip: 'docs-ui.paragraphMenu.color',
-});
+export function ParagraphMenuColorsSubmenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
+    return {
+        id: DOC_PARAGRAPH_T_COLORS_MENU_ID,
+        type: MenuItemType.SUBITEMS,
+        icon: 'PaintBucketDoubleIcon',
+        title: 'docs-ui.paragraphMenu.color',
+        tooltip: 'docs-ui.paragraphMenu.color',
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+    };
+}
 
-export const ParagraphMenuTextColorHeaderActionMenuItemFactory = createHeaderActionMenuItemFactory(
-    TextColorSelectorMenuItemFactory,
-    { icon: 'HeaderTextColorIcon' }
-);
+export function ParagraphMenuTextColorHeaderActionMenuItemFactory(accessor: IAccessor): IMenuItem {
+    const baseItem = TextColorSelectorMenuItemFactory(accessor) as IMenuSelectorItem<string, string | undefined>;
 
-export const ParagraphMenuBackgroundColorHeaderActionMenuItemFactory = createHeaderActionMenuItemFactory(
-    BackgroundColorSelectorMenuItemFactory,
-    { icon: 'PaintBucketDoubleIcon' }
-);
+    return {
+        ...baseItem,
+        icon: 'HeaderTextColorIcon',
+        tooltip: undefined,
+        title: undefined,
+    };
+}
 
-export const ParagraphMenuInsertBelowSubmenuItemFactory = createStaticSubmenuMenuItemFactory({
-    id: DOC_PARAGRAPH_T_INSERT_BELOW_MENU_ID,
-    icon: 'TextTypeIcon',
-    title: 'docs-ui.rightClick.insertBellow',
-    tooltip: 'docs-ui.rightClick.insertBellow',
-});
+export function ParagraphMenuBackgroundColorHeaderActionMenuItemFactory(accessor: IAccessor): IMenuItem {
+    const baseItem = BackgroundColorSelectorMenuItemFactory(accessor) as IMenuSelectorItem<string, string | undefined>;
 
-export const ParagraphMenuInsertBelowHeadingH1MenuItemFactory = createStaticButtonMenuItemFactory({
-    id: `${DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID}.h1`,
-    commandId: DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID,
-    icon: 'H1Icon',
-    title: 'ui.toolbar.heading.1',
-    tooltip: 'ui.toolbar.heading.1',
-    params: { commandId: H1HeadingCommand.id, paragraphMenuPlacement: 'below', paragraphMenuInsertMode: 'breakline' },
-});
+    return {
+        ...baseItem,
+        icon: 'PaintBucketDoubleIcon',
+        tooltip: undefined,
+        title: undefined,
+    };
+}
 
-export const ParagraphMenuInsertBelowHeadingH2MenuItemFactory = createStaticButtonMenuItemFactory({
-    id: `${DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID}.h2`,
-    commandId: DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID,
-    icon: 'H2Icon',
-    title: 'ui.toolbar.heading.2',
-    tooltip: 'ui.toolbar.heading.2',
-    params: { commandId: H2HeadingCommand.id, paragraphMenuPlacement: 'below', paragraphMenuInsertMode: 'breakline' },
-});
+export function ParagraphMenuInsertBelowSubmenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
+    return {
+        id: DOC_PARAGRAPH_T_INSERT_BELOW_MENU_ID,
+        type: MenuItemType.SUBITEMS,
+        icon: 'TextTypeIcon',
+        title: 'docs-ui.rightClick.insertBellow',
+        tooltip: 'docs-ui.rightClick.insertBellow',
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+    };
+}
 
-export const ParagraphMenuInsertBelowHeadingH3MenuItemFactory = createStaticButtonMenuItemFactory({
-    id: `${DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID}.h3`,
-    commandId: DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID,
-    icon: 'H3Icon',
-    title: 'ui.toolbar.heading.3',
-    tooltip: 'ui.toolbar.heading.3',
-    params: { commandId: H3HeadingCommand.id, paragraphMenuPlacement: 'below', paragraphMenuInsertMode: 'breakline' },
-});
+export function ParagraphMenuInsertBelowHeadingH1MenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: `${DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID}.h1`,
+        commandId: DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID,
+        type: MenuItemType.BUTTON,
+        icon: 'H1Icon',
+        title: 'ui.toolbar.heading.1',
+        tooltip: 'ui.toolbar.heading.1',
+        params: { commandId: H1HeadingCommand.id, paragraphMenuPlacement: 'below', paragraphMenuInsertMode: 'breakline' },
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+    };
+}
 
-export const ParagraphMenuInsertBelowHeadingH4MenuItemFactory = createStaticButtonMenuItemFactory({
-    id: `${DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID}.h4`,
-    commandId: DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID,
-    icon: 'H4Icon',
-    title: 'ui.toolbar.heading.4',
-    tooltip: 'ui.toolbar.heading.4',
-    params: { commandId: H4HeadingCommand.id, paragraphMenuPlacement: 'below', paragraphMenuInsertMode: 'breakline' },
-});
+export function ParagraphMenuInsertBelowHeadingH2MenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: `${DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID}.h2`,
+        commandId: DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID,
+        type: MenuItemType.BUTTON,
+        icon: 'H2Icon',
+        title: 'ui.toolbar.heading.2',
+        tooltip: 'ui.toolbar.heading.2',
+        params: { commandId: H2HeadingCommand.id, paragraphMenuPlacement: 'below', paragraphMenuInsertMode: 'breakline' },
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+    };
+}
 
-export const ParagraphMenuInsertBelowHeadingH5MenuItemFactory = createStaticButtonMenuItemFactory({
-    id: `${DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID}.h5`,
-    commandId: DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID,
-    icon: 'H5Icon',
-    title: 'ui.toolbar.heading.5',
-    tooltip: 'ui.toolbar.heading.5',
-    params: { commandId: H5HeadingCommand.id, paragraphMenuPlacement: 'below', paragraphMenuInsertMode: 'breakline' },
-});
+export function ParagraphMenuInsertBelowHeadingH3MenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: `${DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID}.h3`,
+        commandId: DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID,
+        type: MenuItemType.BUTTON,
+        icon: 'H3Icon',
+        title: 'ui.toolbar.heading.3',
+        tooltip: 'ui.toolbar.heading.3',
+        params: { commandId: H3HeadingCommand.id, paragraphMenuPlacement: 'below', paragraphMenuInsertMode: 'breakline' },
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+    };
+}
 
-export const ParagraphMenuInsertBelowTableMenuItemFactory = createStaticButtonMenuItemFactory({
-    id: `${DocCreateTableOperation.id}.below`,
-    commandId: DocCreateTableOperation.id,
-    icon: 'GridIcon',
-    title: 'docs-ui.toolbar.table.insert',
-    tooltip: 'docs-ui.toolbar.table.insert',
-    params: { rowCount: 3, colCount: 5, paragraphMenuPlacement: 'below' },
-});
+export function ParagraphMenuInsertBelowHeadingH4MenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: `${DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID}.h4`,
+        commandId: DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID,
+        type: MenuItemType.BUTTON,
+        icon: 'H4Icon',
+        title: 'ui.toolbar.heading.4',
+        tooltip: 'ui.toolbar.heading.4',
+        params: { commandId: H4HeadingCommand.id, paragraphMenuPlacement: 'below', paragraphMenuInsertMode: 'breakline' },
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+    };
+}
 
-export const ParagraphMenuIndentIncreaseMenuItemFactory = createStaticButtonMenuItemFactory({
-    id: DOC_PARAGRAPH_T_INDENT_INCREASE_ID,
-    icon: 'MoreRightIcon',
-    title: 'docs-ui.paragraphMenu.increase',
-    tooltip: 'docs-ui.paragraphMenu.increaseIndent',
-});
+export function ParagraphMenuInsertBelowHeadingH5MenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: `${DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID}.h5`,
+        commandId: DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID,
+        type: MenuItemType.BUTTON,
+        icon: 'H5Icon',
+        title: 'ui.toolbar.heading.5',
+        tooltip: 'ui.toolbar.heading.5',
+        params: { commandId: H5HeadingCommand.id, paragraphMenuPlacement: 'below', paragraphMenuInsertMode: 'breakline' },
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+    };
+}
 
-export const ParagraphMenuIndentDecreaseMenuItemFactory = createStaticButtonMenuItemFactory({
-    id: DOC_PARAGRAPH_T_INDENT_DECREASE_ID,
-    icon: 'MoreLeftIcon',
-    title: 'docs-ui.paragraphMenu.decrease',
-    tooltip: 'docs-ui.paragraphMenu.decreaseIndent',
-});
+export function ParagraphMenuInsertBelowTableMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: `${DocCreateTableOperation.id}.below`,
+        commandId: DocCreateTableOperation.id,
+        type: MenuItemType.BUTTON,
+        icon: 'GridIcon',
+        title: 'docs-ui.toolbar.table.insert',
+        tooltip: 'docs-ui.toolbar.table.insert',
+        params: { rowCount: 3, colCount: 5, paragraphMenuPlacement: 'below' },
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+    };
+}
 
-export const ParagraphMenuDefaultTextColorMenuItemFactory = createStaticButtonMenuItemFactory({
-    id: `${SetInlineFormatTextColorCommand.id}.default`,
-    commandId: SetInlineFormatTextColorCommand.id,
-    icon: 'DefaultTextColorIcon',
-    title: 'docs-ui.paragraphMenu.defaultTextColor',
-    params: { value: '#000000' },
-});
+export function ParagraphMenuIndentIncreaseMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: DOC_PARAGRAPH_T_INDENT_INCREASE_ID,
+        type: MenuItemType.BUTTON,
+        icon: 'MoreRightIcon',
+        title: 'docs-ui.paragraphMenu.increase',
+        tooltip: 'docs-ui.paragraphMenu.increaseIndent',
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+    };
+}
 
-export const ParagraphMenuNoBackgroundMenuItemFactory = createStaticButtonMenuItemFactory({
-    id: ResetInlineFormatTextBackgroundColorCommand.id,
-    icon: 'NoColorDoubleIcon',
-    title: 'docs-ui.paragraphMenu.noBackground',
-});
+export function ParagraphMenuIndentDecreaseMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: DOC_PARAGRAPH_T_INDENT_DECREASE_ID,
+        type: MenuItemType.BUTTON,
+        icon: 'MoreLeftIcon',
+        title: 'docs-ui.paragraphMenu.decrease',
+        tooltip: 'docs-ui.paragraphMenu.decreaseIndent',
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+    };
+}
 
-export const ParagraphMenuResetTextColorMenuItemFactory = createStaticButtonMenuItemFactory({
-    id: ResetInlineFormatTextColorCommand.id,
-    icon: 'NoColorDoubleIcon',
-    title: 'docs-ui.toolbar.resetColor',
-    tooltip: 'docs-ui.toolbar.resetColor',
-});
+export function ParagraphMenuDefaultTextColorMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: `${SetInlineFormatTextColorCommand.id}.default`,
+        commandId: SetInlineFormatTextColorCommand.id,
+        type: MenuItemType.BUTTON,
+        icon: 'DefaultTextColorIcon',
+        title: 'docs-ui.paragraphMenu.defaultTextColor',
+        params: { value: '#000000' },
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+    };
+}
 
-export const ParagraphMenuResetColorsMenuItemFactory = createStaticButtonMenuItemFactory({
-    id: DOC_PARAGRAPH_T_RESET_COLORS_ID,
-    icon: 'PaintBucketDoubleIcon',
-    title: 'docs-ui.toolbar.resetColor',
-    tooltip: 'docs-ui.toolbar.resetColor',
-});
+export function ParagraphMenuNoBackgroundMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: ResetInlineFormatTextBackgroundColorCommand.id,
+        type: MenuItemType.BUTTON,
+        icon: 'NoColorDoubleIcon',
+        title: 'docs-ui.paragraphMenu.noBackground',
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+    };
+}
 
-export const ParagraphMenuTextColorSwatchMenuItemFactories = TEXT_COLORS.reduce<Record<string, { order: number; menuItemFactory: ReturnType<typeof createColorSwatchMenuItemFactory> }>>((items, color, index) => {
+export function ParagraphMenuResetTextColorMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: ResetInlineFormatTextColorCommand.id,
+        type: MenuItemType.BUTTON,
+        icon: 'NoColorDoubleIcon',
+        title: 'docs-ui.toolbar.resetColor',
+        tooltip: 'docs-ui.toolbar.resetColor',
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+    };
+}
+
+export function ParagraphMenuResetColorsMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: DOC_PARAGRAPH_T_RESET_COLORS_ID,
+        type: MenuItemType.BUTTON,
+        icon: 'PaintBucketDoubleIcon',
+        title: 'docs-ui.toolbar.resetColor',
+        tooltip: 'docs-ui.toolbar.resetColor',
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+    };
+}
+
+export const ParagraphMenuTextColorSwatchMenuItemFactories = TEXT_COLORS.reduce<Record<string, { order: number; menuItemFactory: (accessor: IAccessor) => IMenuButtonItem }>>((items, color, index) => {
     const id = `doc.menu.paragraph-t.text-color.${index}`;
     items[id] = {
         order: index,
-        menuItemFactory: createColorSwatchMenuItemFactory({
+        menuItemFactory: (accessor: IAccessor): IMenuButtonItem => ({
             id,
             commandId: SetInlineFormatTextColorCommand.id,
-            icon: `DocParagraphTextColorSwatchIcon.${index}`,
-            color,
-            variant: 'text',
+            type: MenuItemType.BUTTON,
+            icon: TEXT_COLOR_SWATCH_ICONS[index],
+            params: {
+                value: color,
+            },
+            hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
         }),
     };
     return items;
 }, {});
 
-export const ParagraphMenuBackgroundColorSwatchMenuItemFactories = BACKGROUND_COLORS.reduce<Record<string, { order: number; menuItemFactory: ReturnType<typeof createColorSwatchMenuItemFactory> }>>((items, color, index) => {
+export const ParagraphMenuBackgroundColorSwatchMenuItemFactories = BACKGROUND_COLOR_SWATCH_ICONS.reduce<Record<string, { order: number; menuItemFactory: (accessor: IAccessor) => IMenuButtonItem }>>((items, icon, index) => {
     const id = `doc.menu.paragraph-t.background-color.${index}`;
     items[id] = {
         order: index,
-        menuItemFactory: createColorSwatchMenuItemFactory({
-            id,
-            commandId: SetInlineFormatTextBackgroundColorCommand.id,
-            icon: `DocParagraphBackgroundColorSwatchIcon.${index}`,
-            color,
-            variant: 'background',
-        }),
+        menuItemFactory: (accessor: IAccessor): IMenuButtonItem => {
+            const themeService = accessor.get(ThemeService);
+            const color = getHighlightBackgroundColor(themeService, index);
+
+            return {
+                id,
+                commandId: SetInlineFormatTextBackgroundColorCommand.id,
+                type: MenuItemType.BUTTON,
+                icon,
+                params: {
+                    value: color,
+                },
+                hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+            };
+        },
     };
     return items;
 }, {});

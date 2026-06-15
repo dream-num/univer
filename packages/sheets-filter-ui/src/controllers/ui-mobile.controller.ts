@@ -17,7 +17,12 @@
 import type { Dependency } from '@univerjs/core';
 import { Inject, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { ReCalcSheetsFilterMutation, RemoveSheetsFilterMutation, SetSheetsFilterCriteriaMutation, SetSheetsFilterRangeMutation } from '@univerjs/sheets-filter';
+import {
+    ReCalcSheetsFilterMutation,
+    RemoveSheetsFilterMutation,
+    SetSheetsFilterCriteriaMutation,
+    SetSheetsFilterRangeMutation,
+} from '@univerjs/sheets-filter';
 import { SheetsRenderService } from '@univerjs/sheets-ui';
 import { SheetsFilterRenderController } from '../views/render-modules/sheets-filter.render-controller';
 

@@ -16,7 +16,17 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetsNumfmtUIConfig } from './config/config';
-import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
+import {
+    DependentOn,
+    IConfigService,
+    Inject,
+    Injector,
+    merge,
+    Plugin,
+    registerDependencies,
+    touchDependencies,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
@@ -24,8 +34,8 @@ import pkg from '../package.json';
 import { defaultPluginConfig } from './config/config';
 import { NumfmtAlertRenderController } from './controllers/numfmt-alert-render.controller';
 import { NumfmtRepeatLastActionController } from './controllers/numfmt-repeat-last-action.controller';
-import { SheetNumfmtUIController } from './controllers/numfmt.controller';
 import { NumfmtEditorController } from './controllers/numfmt.editor.controller';
+import { SheetNumfmtUIController } from './controllers/ui.controller';
 import { UserHabitController } from './controllers/user-habit.controller';
 import { NumfmtMenuController } from './menu/numfmt.menu.controller';
 

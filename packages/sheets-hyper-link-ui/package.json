@@ -106,6 +106,6 @@
         "rxjs": "^7.8.2",
         "tailwindcss": "3.4.18",
         "typescript": "^6.0.3",
-        "vitest": "^4.1.8"
+        "vitest": "^4.1.9"
     }
 }

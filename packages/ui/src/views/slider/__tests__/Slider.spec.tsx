@@ -20,9 +20,9 @@
 
 import type { ISliderProps } from '../Slider';
 import { cleanup, fireEvent, render } from '@testing-library/react';
-import { Injector } from '@univerjs/core';
+import { DesktopLogService, ILogService, Injector } from '@univerjs/core';
 import { afterEach, describe, expect, it } from 'vitest';
-import { ComponentManager } from '../../../common';
+import { ComponentManager, IconManager } from '../../../common';
 import { RediProvider } from '../../../utils/di';
 import { Slider } from '../Slider';
 
@@ -36,7 +36,11 @@ describe('Slider', () => {
     });
 
     function renderSlider(props: SliderTestProps = {}) {
-        const injector = new Injector([[ComponentManager]]);
+        const injector = new Injector([
+            [ILogService, { useClass: DesktopLogService }],
+            [ComponentManager],
+            [IconManager],
+        ]);
         const { onChange = () => {}, ...sliderProps } = props;
 
         return render(

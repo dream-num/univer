@@ -18,12 +18,12 @@ import type { IDisposable, Univer } from '@univerjs/core';
 import { ICommandService, IConfirmService, Injector, RANGE_TYPE, TestConfirmService } from '@univerjs/core';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { SheetsRenderService } from '@univerjs/sheets-ui';
-import { ComponentManager, IDialogService, ILayoutService, IMenuManagerService, IUIPartsService } from '@univerjs/ui';
+import { ComponentManager, IconManager, IDialogService, ILayoutService, IMenuManagerService, IUIPartsService } from '@univerjs/ui';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createCommandTestBed } from '../../commands/commands/__tests__/create-command-test-bed';
 import { SortRangeCustomCommand } from '../../commands/commands/sheets-sort.command';
 import { SheetsSortUIService } from '../../services/sheets-sort-ui.service';
-import { SheetsSortUIController } from '../sheets-sort-ui.controller';
+import { SheetsSortUIController } from '../ui.controller';
 
 function createDisposable(): IDisposable {
     return {
@@ -60,6 +60,9 @@ describe('SheetsSortUIController', () => {
         const componentManager = {
             register: vi.fn(() => createDisposable()),
         };
+        const iconManager = {
+            register: vi.fn(() => createDisposable()),
+        };
 
         const testBed = createCommandTestBed(undefined, [
             [IConfirmService, { useClass: TestConfirmService }],
@@ -69,6 +72,7 @@ describe('SheetsSortUIController', () => {
             [IUIPartsService, { useValue: uiPartsService as unknown as IUIPartsService }],
             [SheetsRenderService, { useValue: sheetsRenderService as unknown as SheetsRenderService }],
             [ComponentManager, { useValue: componentManager as unknown as ComponentManager }],
+            [IconManager, { useValue: iconManager as unknown as IconManager }],
         ]);
 
         univer = testBed.univer;

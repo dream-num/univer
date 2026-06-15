@@ -14,40 +14,58 @@
  * limitations under the License.
  */
 
-import { Disposable } from '@univerjs/core';
-import { BehaviorSubject } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { ColorKit, Disposable, Inject, ThemeService } from '@univerjs/core';
+import { BehaviorSubject, combineLatest, map } from 'rxjs';
 
-// Currently these colors are hard-coded, but in the future they could be customizable.
-export const CROSSHAIR_HIGHLIGHT_COLORS = [
-    'rgba(158, 109, 227, 0.3)',
-    'rgba(254, 75, 75, 0.3)',
-    'rgba(255, 140, 81, 0.3)',
-    'rgba(164, 220, 22, 0.3)',
-    'rgba(45, 174, 255, 0.3)',
-    'rgba(58, 96, 247, 0.3)',
-    'rgba(242, 72, 166, 0.3)',
-    'rgba(153, 153, 153, 0.3)',
-    'rgba(158, 109, 227, 0.15)',
-    'rgba(254, 75, 75, 0.15)',
-    'rgba(255, 140, 81, 0.15)',
-    'rgba(164, 220, 22, 0.15)',
-    'rgba(45, 174, 255, 0.15)',
-    'rgba(58, 96, 247, 0.15)',
-    'rgba(242, 72, 166, 0.15)',
-    'rgba(153, 153, 153, 0.15)',
-];
+export const CROSSHAIR_HIGHLIGHT_COLOR_THEME_PATHS = Array.from({ length: 16 }, (_, index) => `highlight.background.${index + 1}`);
+export const DEFAULT_CROSSHAIR_HIGHLIGHT_COLOR_THEME_PATH = CROSSHAIR_HIGHLIGHT_COLOR_THEME_PATHS[0];
+
+interface IThemeColorWithAlpha {
+    color: string;
+    alpha: number;
+}
+
+export function resolveCrosshairHighlightColor(themeService: ThemeService, tokenPath: string): string {
+    const token = themeService.getColorFromTheme<IThemeColorWithAlpha | undefined>(tokenPath);
+
+    if (token == null || typeof token.color !== 'string' || typeof token.alpha !== 'number') {
+        throw new Error(`Theme token ${tokenPath} is required.`);
+    }
+
+    const color = themeService.getColorFromTheme<string | undefined>(token.color) ?? token.color;
+    return new ColorKit(color).setAlpha(token.alpha).toRgbString();
+}
+
+export function resolveCrosshairHighlightColors(themeService: ThemeService): string[] {
+    return CROSSHAIR_HIGHLIGHT_COLOR_THEME_PATHS.map((tokenPath) => resolveCrosshairHighlightColor(themeService, tokenPath));
+}
 
 export class SheetsCrosshairHighlightService extends Disposable {
     private readonly _enabled$ = new BehaviorSubject<boolean>(false);
     readonly enabled$ = this._enabled$.asObservable();
     get enabled(): boolean { return this._enabled$.getValue(); }
 
-    private readonly _color$ = new BehaviorSubject<string>(CROSSHAIR_HIGHLIGHT_COLORS[0]);
-    readonly color$ = this._color$.asObservable();
-    get color(): string { return this._color$.getValue(); }
+    private readonly _colorToken$ = new BehaviorSubject<string>(DEFAULT_CROSSHAIR_HIGHLIGHT_COLOR_THEME_PATH);
+    readonly colorToken$ = this._colorToken$.asObservable();
+
+    readonly color$: Observable<string>;
+    readonly highlightColor$: Observable<string>;
+
+    constructor(
+        @Inject(ThemeService) private readonly _themeService: ThemeService
+    ) {
+        super();
+
+        this.color$ = combineLatest([this._colorToken$, this._themeService.currentTheme$]).pipe(
+            map(([tokenPath]) => resolveCrosshairHighlightColor(this._themeService, tokenPath))
+        );
+        this.highlightColor$ = this.color$;
+    }
 
     override dispose(): void {
         this._enabled$.complete();
+        this._colorToken$.complete();
     }
 
     setEnabled(value: boolean): void {
@@ -55,6 +73,6 @@ export class SheetsCrosshairHighlightService extends Disposable {
     }
 
     setColor(value: string): void {
-        this._color$.next(value);
+        this._colorToken$.next(value);
     }
 }

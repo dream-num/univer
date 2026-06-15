@@ -24,7 +24,6 @@ import { getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { of, switchMap } from 'rxjs';
 import { OpenTableSelectorOperation } from '../commands/operations/open-table-selector.operation';
-import { TABLE_TOOLBAR_BUTTON } from '../const';
 
 export const SHEET_TABLE_CONTEXT_INSERT_MENU_ID = 'sheet.table.context-insert_menu-id';
 export const SHEET_TABLE_CONTEXT_REMOVE_MENU_ID = 'sheet.table.context-remove_menu-id';
@@ -33,7 +32,7 @@ export function sheetTableToolbarInsertMenuFactory(accessor: IAccessor): IMenuIt
     return {
         id: OpenTableSelectorOperation.id,
         type: MenuItemType.BUTTON,
-        icon: TABLE_TOOLBAR_BUTTON,
+        icon: 'TableIcon',
         tooltip: 'sheets-table-ui.title',
         title: 'sheets-table-ui.title',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),

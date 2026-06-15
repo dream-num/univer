@@ -16,3 +16,4 @@
 
 export { default as defaultTheme, type Theme } from './default';
 export { default as greenTheme } from './green';
+export { default as redTheme } from './red';

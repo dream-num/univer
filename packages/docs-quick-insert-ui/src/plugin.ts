@@ -26,7 +26,7 @@ import { UniverUIPlugin } from '@univerjs/ui';
 import pkg from '../package.json';
 import { defaultPluginConfig, DOCS_QUICK_INSERT_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { DocQuickInsertTriggerController } from './controllers/doc-quick-insert-trigger.controller';
-import { DocQuickInsertUIController } from './controllers/doc-quick-insert-ui.controller';
+import { DocQuickInsertUIController } from './controllers/ui.controller';
 import { DocQuickInsertMenuController } from './menu/doc-quick-insert-menu.controller';
 import { DocQuickInsertPopupService } from './services/doc-quick-insert-popup.service';
 

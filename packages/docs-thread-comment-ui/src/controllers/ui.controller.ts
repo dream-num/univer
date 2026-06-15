@@ -17,10 +17,14 @@
 import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import { FLOAT_TOOLBAR_MENU_POSITION } from '@univerjs/docs-ui';
 import { CommentIcon } from '@univerjs/icons';
-import { ComponentManager, IMenuManagerService } from '@univerjs/ui';
+import { ComponentManager, IconManager, IMenuManagerService } from '@univerjs/ui';
 import { AddDocCommentComment } from '../commands/commands/add-doc-comment.command';
 import { DeleteDocCommentComment } from '../commands/commands/delete-doc-comment.command';
-import { ShowCommentPanelOperation, StartAddCommentOperation, ToggleCommentPanelOperation } from '../commands/operations/show-comment-panel.operation';
+import {
+    ShowCommentPanelOperation,
+    StartAddCommentOperation,
+    ToggleCommentPanelOperation,
+} from '../commands/operations/show-comment-panel.operation';
 import { DOCS_THREAD_COMMENT_PANEL } from '../common/const';
 import { menuSchema } from '../menu/schema';
 import { DocThreadCommentPanel } from '../views/DocThreadCommentPanel';
@@ -29,12 +33,14 @@ export class DocThreadCommentUIController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
-        @Inject(ComponentManager) private readonly _componentManager: ComponentManager
+        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
+        @Inject(IconManager) private readonly _iconManager: IconManager
     ) {
         super();
         this._initCommands();
         this._initMenus();
         this._initComponents();
+        this._registerIcons();
     }
 
     private _initCommands() {
@@ -57,11 +63,16 @@ export class DocThreadCommentUIController extends Disposable {
     private _initComponents() {
         ([
             [DOCS_THREAD_COMMENT_PANEL, DocThreadCommentPanel],
-            ['CommentIcon', CommentIcon],
         ] as const).forEach(([id, comp]) => {
             this.disposeWithMe(
                 this._componentManager.register(id, comp)
             );
         });
+    }
+
+    private _registerIcons(): void {
+        this.disposeWithMe(this._iconManager.register({
+            CommentIcon,
+        }));
     }
 }

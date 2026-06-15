@@ -34,7 +34,7 @@ import { DataValidationCopyPasteController } from './controllers/dv-copy-paste.c
 import { DataValidationPermissionController } from './controllers/dv-permission.controller';
 import { SheetsDataValidationRenderController } from './controllers/dv-render.controller';
 import { SheetsDataValidationReRenderController } from './controllers/dv-rerender.controller';
-import { SheetsDataValidationUIController } from './controllers/dv-ui.controller';
+import { SheetsDataValidationUIController } from './controllers/ui.controller';
 import { DataValidationPanelService } from './services/data-validation-panel.service';
 import { DataValidationDropdownManagerService } from './services/dropdown-manager.service';
 

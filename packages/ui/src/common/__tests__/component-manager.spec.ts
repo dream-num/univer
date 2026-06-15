@@ -14,19 +14,31 @@
  * limitations under the License.
  */
 
+import type { ILogService } from '@univerjs/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ComponentManager } from '../component-manager';
+
+function createLogService(): ILogService {
+    return {
+        debug: vi.fn(),
+        log: vi.fn(),
+        warn: vi.fn(),
+        error: vi.fn(),
+        deprecate: vi.fn(),
+        setLogLevel: vi.fn(),
+    };
+}
 
 describe('ComponentManager', () => {
     afterEach(() => {
         vi.restoreAllMocks();
     });
 
-    it('should expose built-in icons, react utils and clear built-ins on dispose', () => {
-        const manager = new ComponentManager();
+    it('should not expose built-in icons and should expose react utils', () => {
+        const logService = createLogService();
+        const manager = new ComponentManager(logService);
 
-        const iconComp = manager.get('ShortcutIcon');
-        expect(iconComp).toBeDefined();
+        expect(manager.get('ShortcutIcon')).toBeUndefined();
         expect(manager.reactUtils.createElement).toBeTypeOf('function');
         expect(manager.reactUtils.useEffect).toBeTypeOf('function');
         expect(manager.reactUtils.useRef).toBeTypeOf('function');
@@ -35,14 +47,15 @@ describe('ComponentManager', () => {
         expect(manager.get('ShortcutIcon')).toBeUndefined();
     });
 
-    it('should register default react component and support get/getKey/delete/disposable', () => {
-        const manager = new ComponentManager();
+    it('should register default react component and support get/delete/disposable', () => {
+        const logService = createLogService();
+        const manager = new ComponentManager(logService);
         const Comp = () => null;
 
         const disposable = manager.register('test-comp', Comp);
 
         expect(manager.get('test-comp')).toBe(Comp);
-        expect(manager.getKey(Comp)).toBe('test-comp');
+        expect('getKey' in manager).toBe(false);
 
         manager.delete('test-comp');
         expect(manager.get('test-comp')).toBeUndefined();
@@ -54,21 +67,36 @@ describe('ComponentManager', () => {
         manager.dispose();
     });
 
-    it('should warn when register duplicate name', () => {
-        const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-        const manager = new ComponentManager();
+    it('should warn through log service when registering duplicate component', () => {
+        const logService = createLogService();
+        const manager = new ComponentManager(logService);
         const Comp = () => null;
 
         manager.register('dup-comp', Comp);
         manager.register('dup-comp', Comp);
 
-        expect(warn).toHaveBeenCalledWith('Component dup-comp already exists.');
+        expect(logService.warn).toHaveBeenCalledWith('[ComponentManager]', 'Component dup-comp already exists.');
+
+        manager.dispose();
+    });
+
+    it('should allow direct construction without log service', () => {
+        const manager = new ComponentManager();
+        const Comp = () => null;
+
+        expect(() => {
+            manager.register('dup-comp', Comp);
+            manager.register('dup-comp', Comp);
+        }).not.toThrow();
+
+        expect(manager.get('dup-comp')).toBe(Comp);
 
         manager.dispose();
     });
 
     it('should throw when registering vue3 without handler', () => {
-        const manager = new ComponentManager();
+        const logService = createLogService();
+        const manager = new ComponentManager(logService);
 
         expect(() => manager.register('vue-comp', () => null, { framework: 'vue3' })).toThrow(
             '[ComponentManager] Vue3 support is no longer built-in since v0.9.0, please install @univerjs/ui-adapter-vue3 plugin.'
@@ -78,7 +106,8 @@ describe('ComponentManager', () => {
     });
 
     it('should use custom framework handler and throw when handler missing at get', () => {
-        const manager = new ComponentManager();
+        const logService = createLogService();
+        const manager = new ComponentManager(logService);
         const CustomComp = () => null;
 
         manager.setHandler('custom', (component, name) => ({
@@ -94,7 +123,7 @@ describe('ComponentManager', () => {
             wrapped: true,
         });
 
-        manager.register('unknown-framework-comp', CustomComp, { framework: 'unknown' });
+        expect(() => manager.register('unknown-framework-comp', CustomComp, { framework: 'unknown' })).not.toThrow();
         expect(() => manager.get('unknown-framework-comp')).toThrow(
             '[ComponentManager] No handler found for framework: unknown'
         );

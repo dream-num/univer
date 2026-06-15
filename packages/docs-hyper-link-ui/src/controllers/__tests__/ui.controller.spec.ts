@@ -22,6 +22,7 @@ import { DocHyperLinkUIController } from '../ui.controller';
 describe('DocHyperLinkUIController', () => {
     it('creates the docs floating toolbar root before merging hyperlink menus', () => {
         const registerComponent = vi.fn(() => ({ dispose: vi.fn() }));
+        const registerIcon = vi.fn(() => ({ dispose: vi.fn() }));
         const registerCommand = vi.fn();
         const appendRootMenu = vi.fn();
         const mergeMenu = vi.fn();
@@ -29,6 +30,7 @@ describe('DocHyperLinkUIController', () => {
 
         const controller = new DocHyperLinkUIController(
             { register: registerComponent } as any,
+            { register: registerIcon } as any,
             { registerCommand } as any,
             { appendRootMenu, mergeMenu } as any,
             { registerShortcut } as any

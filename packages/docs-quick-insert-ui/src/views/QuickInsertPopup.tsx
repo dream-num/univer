@@ -224,7 +224,6 @@ export const QuickInsertPopup = () => {
                     <QuickInsertMenu
                         menus={filteredMenus}
                         focusedMenuIndex={focusedMenuIndex}
-                        componentManager={componentManager}
                         onFocusedMenuIndexChange={setFocusedMenuIndex}
                         onFocusedMenuChange={handleFocusedMenuChange}
                         onSelect={handleMenuSelect}

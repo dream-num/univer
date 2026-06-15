@@ -30,7 +30,13 @@ export { CutContentCommand, type IInnerPasteCommandParams, InnerPasteCommand } f
 export type { IInnerCutCommandParams } from './commands/commands/clipboard.inner.command';
 export { getCustomBlockIdsInSelections, getCutActionsFromDocRanges } from './commands/commands/clipboard.inner.command';
 export { buildMoveDocBlockActions, type IMoveDocBlockCommandParams, MoveDocBlockCommand } from './commands/commands/doc-block-move.command';
-export { DeleteCustomBlockCommand, DeleteLeftCommand, DeleteRightCommand, type IDeleteCustomBlockParams, MergeTwoParagraphCommand } from './commands/commands/doc-delete.command';
+export {
+    DeleteCustomBlockCommand,
+    DeleteLeftCommand,
+    DeleteRightCommand,
+    type IDeleteCustomBlockParams,
+    MergeTwoParagraphCommand,
+} from './commands/commands/doc-delete.command';
 export { getCursorWhenDelete } from './commands/commands/doc-delete.command';
 export { HorizontalLineCommand } from './commands/commands/doc-horizontal-line.command';
 export { DocSelectAllCommand } from './commands/commands/doc-select-all.command';
@@ -72,7 +78,14 @@ export {
     AlignRightCommand,
 } from './commands/commands/paragraph-align.command';
 export { ReplaceTextRunsCommand } from './commands/commands/replace-content.command';
-export { CoverContentCommand, type IReplaceSelectionCommandParams, type IReplaceSnapshotCommandParams, ReplaceContentCommand, ReplaceSelectionCommand, ReplaceSnapshotCommand } from './commands/commands/replace-content.command';
+export {
+    CoverContentCommand,
+    type IReplaceSelectionCommandParams,
+    type IReplaceSnapshotCommandParams,
+    ReplaceContentCommand,
+    ReplaceSelectionCommand,
+    ReplaceSnapshotCommand,
+} from './commands/commands/replace-content.command';
 export { SetDocZoomRatioCommand } from './commands/commands/set-doc-zoom-ratio.command';
 export { SetParagraphNamedStyleCommand } from './commands/commands/set-heading.command';
 export { SwitchDocModeCommand } from './commands/commands/switch-doc-mode.command';
@@ -108,10 +121,10 @@ export { MoveCursorOperation } from './commands/operations/doc-cursor.operation'
 export { type ISetDocZoomRatioOperationParams, SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-ratio.operation';
 export { getCommandSkeleton } from './commands/util';
 export type { IUniverDocsUIConfig } from './config/config';
-export { DocUIController } from './controllers/doc-ui.controller';
 export { DocBackScrollRenderController } from './controllers/render-controllers/back-scroll.render-controller';
 export { DocParagraphPlaceholderRenderController } from './controllers/render-controllers/doc-paragraph-placeholder.render-controller';
 export { DocRenderController } from './controllers/render-controllers/doc.render-controller';
+export { DocUIController } from './controllers/ui.controller';
 export {
     AlignMenuItemFactory,
     BackgroundColorSelectorMenuItemFactory,

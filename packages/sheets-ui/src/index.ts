@@ -110,9 +110,9 @@ export { HeaderResizeRenderController } from './controllers/render-controllers/h
 export { HEADER_UNHIDE_RANGE_VISIBLE_CHECK, HeaderUnhideRenderController } from './controllers/render-controllers/header-unhide.render-controller';
 export { SheetsScrollRenderController } from './controllers/render-controllers/scroll.render-controller';
 export { type ITelemetryData, SheetRenderController } from './controllers/render-controllers/sheet.render-controller';
-export { SheetUIController } from './controllers/sheet-ui.controller';
 export { whenFormulaEditorActivated, whenSheetEditorActivated, whenSheetEditorFocused } from './controllers/shortcuts/utils';
 export { StatusBarController } from './controllers/status-bar.controller';
+export { SheetUIController } from './controllers/ui.controller';
 export { getCoordByCell, getCoordByOffset, getSheetObject, getTransformCoord } from './controllers/utils/component-tools';
 export { virtualizeDiscreteRanges } from './controllers/utils/range-tools';
 export { matchedSelectionByRowColIndex as checkInHeaderRanges } from './controllers/utils/selections-tools';

@@ -39,6 +39,7 @@ describe('FindReplaceController', () => {
         const layoutService = { focus: vi.fn() };
         const localeService = { t: (k: string) => k };
         const componentManager = { register: vi.fn(() => ({ dispose: vi.fn() })) };
+        const iconManager = { register: vi.fn(() => ({ dispose: vi.fn() })) };
 
         const controller = new FindReplaceController(
             univerInstanceService as any,
@@ -49,8 +50,11 @@ describe('FindReplaceController', () => {
             dialogService as any,
             layoutService as any,
             localeService as any,
-            componentManager as any
+            componentManager as any,
+            iconManager as any
         );
+
+        expect(componentManager.register).toHaveBeenCalledWith('FindReplaceDialog', expect.anything());
 
         stateUpdates$.next({ revealed: true });
         expect(dialogService.open).toHaveBeenCalled();

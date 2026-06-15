@@ -68,7 +68,7 @@ describe('action-recorder controller/menu', () => {
         expect(registerComponent).toHaveBeenCalledTimes(1);
         const componentFactory = registerComponent.mock.calls[0][1] as () => unknown;
         expect(componentFactory()).toBeDefined();
-        expect(registerIcon).toHaveBeenCalledWith('RecordIcon', expect.anything());
+
         expect(mergeMenu).toHaveBeenCalledWith(menuSchema);
 
         expect(registerRecordedCommand).toHaveBeenCalled();

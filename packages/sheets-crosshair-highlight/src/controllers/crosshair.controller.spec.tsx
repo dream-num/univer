@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { CrossHighlightingIcon } from '@univerjs/icons';
 import { describe, expect, it, vi } from 'vitest';
 import {
     DisableCrosshairHighlightOperation,
@@ -23,16 +24,19 @@ import {
 } from '../commands/operations/operation';
 import { CROSSHAIR_HIGHLIGHT_OVERLAY_COMPONENT } from '../menu/crosshair.menu';
 import { menuSchema } from '../menu/schema';
+import { CrosshairOverlay } from '../views/components/CrosshairHighlight';
 import { SheetsCrosshairHighlightController } from './crosshair.controller';
 
 describe('SheetsCrosshairHighlightController', () => {
-    it('should register commands, merge menu and register components', () => {
+    it('should register commands, merge menu, register components and register icons', () => {
         const registerCommand = vi.fn();
         const mergeMenu = vi.fn();
-        const register = vi.fn(() => ({ dispose: vi.fn() }));
+        const registerComponent = vi.fn(() => ({ dispose: vi.fn() }));
+        const registerIcon = vi.fn(() => ({ dispose: vi.fn() }));
 
         const controller = new SheetsCrosshairHighlightController(
-            { register } as never,
+            { register: registerComponent } as never,
+            { register: registerIcon } as never,
             { mergeMenu } as never,
             { registerCommand } as never
         );
@@ -43,8 +47,8 @@ describe('SheetsCrosshairHighlightController', () => {
         expect(registerCommand).toHaveBeenCalledWith(DisableCrosshairHighlightOperation);
 
         expect(mergeMenu).toHaveBeenCalledWith(menuSchema);
-        expect(register).toHaveBeenCalledWith(CROSSHAIR_HIGHLIGHT_OVERLAY_COMPONENT, expect.any(Function));
-        expect(register).toHaveBeenCalledWith('CrossHighlightingIcon', expect.anything());
+        expect(registerComponent).toHaveBeenCalledWith(CROSSHAIR_HIGHLIGHT_OVERLAY_COMPONENT, CrosshairOverlay);
+        expect(registerIcon).toHaveBeenCalledWith({ CrossHighlightingIcon });
         expect(Object.keys(menuSchema).length).toBeGreaterThan(0);
 
         controller.dispose();

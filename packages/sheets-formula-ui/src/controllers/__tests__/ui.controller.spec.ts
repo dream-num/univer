@@ -16,12 +16,12 @@
 
 import type { ICommandService, Injector } from '@univerjs/core';
 import type { IRenderManagerService } from '@univerjs/engine-render';
-import type { ComponentManager, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
+import type { ComponentManager, IconManager, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 import { UniverInstanceType } from '@univerjs/core';
 import { SheetsUIPart } from '@univerjs/sheets-ui';
 import { describe, expect, it, vi } from 'vitest';
 import { MORE_FUNCTIONS_COMPONENT } from '../../views/more-functions/interface';
-import { FormulaUIController } from '../formula-ui.controller';
+import { FormulaUIController } from '../ui.controller';
 
 describe('FormulaUIController', () => {
     it('registers formula commands, menus, shortcuts, UI parts, and render modules', () => {
@@ -31,6 +31,7 @@ describe('FormulaUIController', () => {
         const registerComponent = vi.fn(() => ({ dispose: vi.fn() }));
         const registerRenderModule = vi.fn(() => ({ dispose: vi.fn() }));
         const componentRegister = vi.fn();
+        const registerIcon = vi.fn(() => ({ dispose: vi.fn() }));
         const injector = {};
 
         const controller = new FormulaUIController(
@@ -40,7 +41,8 @@ describe('FormulaUIController', () => {
             { registerShortcut } as unknown as IShortcutService,
             { registerComponent } as unknown as IUIPartsService,
             { registerRenderModule } as unknown as IRenderManagerService,
-            { register: componentRegister } as unknown as ComponentManager
+            { register: componentRegister } as unknown as ComponentManager,
+            { register: registerIcon } as unknown as IconManager
         );
 
         expect(controller).toBeTruthy();
@@ -49,6 +51,7 @@ describe('FormulaUIController', () => {
         expect(registerShortcut.mock.calls.length).toBeLessThan(3);
         expect(registerComponent).toHaveBeenCalledWith(SheetsUIPart.FORMULA_AUX, expect.any(Function));
         expect(componentRegister).toHaveBeenCalledWith(MORE_FUNCTIONS_COMPONENT, expect.any(Function));
+        expect(registerIcon).toHaveBeenCalledWith({ FunctionIcon: expect.any(Object) });
         expect(registerRenderModule).toHaveBeenCalledWith(UniverInstanceType.UNIVER_SHEET, [expect.any(Function)]);
     });
 });

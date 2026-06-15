@@ -18,7 +18,7 @@ import { FLOAT_TOOLBAR_MENU_POSITION } from '@univerjs/docs-ui';
 import { describe, expect, it, vi } from 'vitest';
 import { DOCS_THREAD_COMMENT_PANEL } from '../../common/const';
 import { DocThreadCommentPanel } from '../../views/DocThreadCommentPanel';
-import { DocThreadCommentUIController } from '../doc-thread-comment-ui.controller';
+import { DocThreadCommentUIController } from '../ui.controller';
 
 describe('DocThreadCommentUIController', () => {
     it('should register commands, menus and components', () => {
@@ -26,11 +26,13 @@ describe('DocThreadCommentUIController', () => {
         const mergeMenu = vi.fn();
         const appendRootMenu = vi.fn();
         const registerComponent = vi.fn(() => ({ dispose: vi.fn() }));
+        const registerIcon = vi.fn(() => ({ dispose: vi.fn() }));
 
         const controller = new DocThreadCommentUIController(
             { registerCommand } as any,
             { appendRootMenu, mergeMenu } as any,
-            { register: registerComponent } as any
+            { register: registerComponent } as any,
+            { register: registerIcon } as any
         );
 
         expect(registerCommand).toHaveBeenCalled();

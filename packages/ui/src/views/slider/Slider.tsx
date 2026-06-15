@@ -18,7 +18,7 @@ import type { IDropdownMenuProps } from '@univerjs/design';
 import type { PointerEvent as ReactPointerEvent } from 'react';
 import { borderClassName, Button, clsx, DropdownMenu, Input } from '@univerjs/design';
 import { useEffect, useRef, useState } from 'react';
-import { ComponentManager } from '../../common';
+import { IconManager } from '../../common';
 import { useDependency } from '../../utils/di';
 
 export interface ISliderProps {
@@ -63,7 +63,7 @@ const DRAG_COMMIT_INTERVAL = 50;
  * Slider Component
  */
 export function Slider(props: ISliderProps) {
-    const componentManager = useDependency(ComponentManager);
+    const iconManager = useDependency(IconManager);
 
     const { value, min = 0, max = 400, disabled = false, resetPoint = 100, shortcuts, onChange } = props;
 
@@ -304,9 +304,9 @@ export function Slider(props: ISliderProps) {
     const visualValue = isDragging ? dragValue : value;
     const sliderOffset = Math.min(Math.max(getSliderOffset(visualValue) ?? 0, 0), 100);
 
-    const ReduceIcon = componentManager.get('ReduceIcon');
-    const IncreaseIcon = componentManager.get('IncreaseIcon');
-    const MoreDownIcon = componentManager.get('MoreDownIcon');
+    const ReduceIcon = iconManager.get('ReduceIcon');
+    const IncreaseIcon = iconManager.get('IncreaseIcon');
+    const MoreDownIcon = iconManager.get('MoreDownIcon');
 
     return (
         <div
@@ -321,7 +321,7 @@ export function Slider(props: ISliderProps) {
                 disabled={value <= min || disabled}
                 onClick={() => handleStep(-10)}
             >
-                <ReduceIcon />
+                <ReduceIcon className="univer-text-gray-500" />
             </Button>
 
             <div
@@ -376,14 +376,14 @@ export function Slider(props: ISliderProps) {
                             className={clsx(`
                               univer-absolute univer-top-1/2 univer-size-3.5 -univer-translate-x-1/2
                               -univer-translate-y-1/2 univer-rounded-full univer-bg-white univer-shadow-sm
-                              univer-transition-colors
+                              univer-transition-all
                               focus-visible:univer-outline-none focus-visible:univer-ring-2
                               focus-visible:univer-ring-primary-100
                               dark:!univer-bg-gray-800
                             `, borderClassName, {
                                 'univer-cursor-pointer hover:univer-border-primary-600 hover:univer-shadow-md': !disabled,
                                 'univer-cursor-not-allowed': disabled,
-                                'univer-scale-125 univer-border-primary-600 univer-shadow-md': isDragging,
+                                'univer-scale-105 univer-border-primary-600 univer-shadow-md': isDragging,
                             })}
                             role="slider"
                             aria-valuemin={min}
@@ -406,7 +406,7 @@ export function Slider(props: ISliderProps) {
                 disabled={value >= max || disabled}
                 onClick={() => handleStep(10)}
             >
-                <IncreaseIcon />
+                <IncreaseIcon className="univer-text-gray-500" />
             </Button>
 
             <div

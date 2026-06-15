@@ -17,12 +17,31 @@
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuItem, IMenuSelectorItem } from '@univerjs/ui';
 import { UniverInstanceType } from '@univerjs/core';
-
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
-import { AddRangeProtectionFromContextMenuCommand, AddRangeProtectionFromSheetBarCommand, AddRangeProtectionFromToolbarCommand, DeleteRangeProtectionFromContextMenuCommand, SetRangeProtectionFromContextMenuCommand, ViewSheetPermissionFromContextMenuCommand, ViewSheetPermissionFromSheetBarCommand } from '../commands/commands/range-protection.command';
-import { ChangeSheetProtectionFromSheetBarCommand, DeleteWorksheetProtectionFormSheetBarCommand } from '../commands/commands/worksheet-protection.command';
-import { permissionLockIconKey, permissionMenuIconKey } from '../consts/permission';
-import { getAddPermissionDisableBase$, getAddPermissionFromSheetBarDisable$, getAddPermissionHidden$, getEditPermissionHidden$, getPermissionDisableBase$, getRemovePermissionDisable$, getRemovePermissionFromSheetBarDisable$, getSetPermissionFromSheetBarDisable$, getViewPermissionDisable$ } from './permission-menu-util';
+import {
+    AddRangeProtectionFromContextMenuCommand,
+    AddRangeProtectionFromSheetBarCommand,
+    AddRangeProtectionFromToolbarCommand,
+    DeleteRangeProtectionFromContextMenuCommand,
+    SetRangeProtectionFromContextMenuCommand,
+    ViewSheetPermissionFromContextMenuCommand,
+    ViewSheetPermissionFromSheetBarCommand,
+} from '../commands/commands/range-protection.command';
+import {
+    ChangeSheetProtectionFromSheetBarCommand,
+    DeleteWorksheetProtectionFormSheetBarCommand,
+} from '../commands/commands/worksheet-protection.command';
+import {
+    getAddPermissionDisableBase$,
+    getAddPermissionFromSheetBarDisable$,
+    getAddPermissionHidden$,
+    getEditPermissionHidden$,
+    getPermissionDisableBase$,
+    getRemovePermissionDisable$,
+    getRemovePermissionFromSheetBarDisable$,
+    getSetPermissionFromSheetBarDisable$,
+    getViewPermissionDisable$,
+} from './permission-menu-util';
 
 export const SHEET_PERMISSION_CONTEXT_MENU_ID = 'sheet.contextMenu.permission';
 
@@ -30,7 +49,7 @@ export function sheetPermissionToolbarMenuFactory(accessor: IAccessor): IMenuIte
     return {
         id: AddRangeProtectionFromToolbarCommand.id,
         type: MenuItemType.BUTTON,
-        icon: permissionMenuIconKey,
+        icon: 'ProtectIcon',
         tooltip: 'sheets-ui.permission.toolbarMenu',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getAddPermissionDisableBase$(accessor),
@@ -42,7 +61,7 @@ export function sheetPermissionContextMenuFactory(accessor: IAccessor): IMenuSel
         id: SHEET_PERMISSION_CONTEXT_MENU_ID,
         type: MenuItemType.SUBITEMS,
         title: 'sheets-ui.rightClick.protectRange',
-        icon: permissionLockIconKey,
+        icon: 'LockIcon',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }

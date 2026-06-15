@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+import { of } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
-import { CROSSHAIR_HIGHLIGHT_COLORS } from '../../services/crosshair.service';
+import { CROSSHAIR_HIGHLIGHT_COLOR_THEME_PATHS } from '../../services/crosshair.service';
 import { CrosshairOverlay } from './CrosshairHighlight';
 
 const mocked = vi.hoisted(() => ({
@@ -56,18 +57,31 @@ vi.mock('react', async () => {
 });
 
 describe('CrosshairOverlay', () => {
-    it('should render color cells and trigger onChange', () => {
-        mocked.useDependency.mockReturnValue({ color$: {} });
-        mocked.useObservable.mockReturnValue(CROSSHAIR_HIGHLIGHT_COLORS[0]);
+    it('should render theme color cells and trigger onChange with token path', () => {
+        const themeService = {
+            currentTheme$: of({}),
+            getColorFromTheme: vi.fn((path: string) => ({
+                'highlight.background.1': { color: 'purple.500', alpha: 0.3 },
+                'highlight.background.2': { color: 'red.500', alpha: 0.15 },
+                'purple.500': '#010203',
+                'red.500': '#040506',
+            })[path] ?? { color: 'purple.500', alpha: 0.3 }),
+        };
+
+        mocked.useDependency
+            .mockReturnValueOnce({ color$: of('rgba(1,2,3,0.3)') })
+            .mockReturnValueOnce(themeService);
+        mocked.useObservable.mockReturnValueOnce('rgba(1,2,3,0.3)').mockReturnValueOnce({});
         const onChange = vi.fn();
 
         const element = CrosshairOverlay({ onChange });
         const children = element.props.children as Array<{ props: { onClick: () => void; style: { backgroundColor: string } } }>;
 
-        expect(children).toHaveLength(CROSSHAIR_HIGHLIGHT_COLORS.length);
-        expect(children[0].props.style.backgroundColor).toBe(CROSSHAIR_HIGHLIGHT_COLORS[0]);
+        expect(children).toHaveLength(CROSSHAIR_HIGHLIGHT_COLOR_THEME_PATHS.length);
+        expect(children[0].props.style.backgroundColor).toBe('rgba(1,2,3,0.3)');
+        expect(children[1].props.style.backgroundColor).toBe('rgba(4,5,6,0.15)');
 
         children[1].props.onClick();
-        expect(onChange).toHaveBeenCalledWith(CROSSHAIR_HIGHLIGHT_COLORS[1]);
+        expect(onChange).toHaveBeenCalledWith('highlight.background.2');
     });
 });

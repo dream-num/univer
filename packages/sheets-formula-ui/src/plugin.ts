@@ -16,7 +16,17 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetsFormulaUIConfig } from './config/config';
-import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
+import {
+    DependentOn,
+    IConfigService,
+    Inject,
+    Injector,
+    merge,
+    Plugin,
+    registerDependencies,
+    touchDependencies,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
 import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, RANGE_SELECTOR_COMPONENT_KEY } from '@univerjs/sheets-ui';
@@ -32,8 +42,8 @@ import { FormulaClipboardController } from './controllers/formula-clipboard.cont
 import { FormulaEditorShowController } from './controllers/formula-editor-show.controller';
 import { FormulaRenderManagerController } from './controllers/formula-render.controller';
 import { FormulaReorderController } from './controllers/formula-reorder.controller';
-import { FormulaUIController } from './controllers/formula-ui.controller';
 import { ImageFormulaRenderController } from './controllers/image-formula-render.controller';
+import { FormulaUIController } from './controllers/ui.controller';
 import { FormulaPromptService, IFormulaPromptService } from './services/prompt.service';
 import { GlobalRangeSelectorService } from './services/range-selector.service';
 import { RefSelectionsRenderService } from './services/render-services/ref-selections.render.service';

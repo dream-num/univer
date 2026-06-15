@@ -17,8 +17,9 @@
 import type { Dependency } from '@univerjs/core';
 import { Disposable, ICommandService, Inject, Injector, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { FunctionIcon } from '@univerjs/icons';
 import { SheetsUIPart } from '@univerjs/sheets-ui';
-import { ComponentManager, connectInjector, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
+import { ComponentManager, connectInjector, IconManager, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 import { SheetCopyFormulaOnlyCommand, SheetOnlyPasteFormulaCommand } from '../commands/commands/formula-clipboard.command';
 import { HelpFunctionOperation } from '../commands/operations/help-function.operation';
 import { InsertFunctionOperation } from '../commands/operations/insert-function.operation';
@@ -41,7 +42,8 @@ export class FormulaUIController extends Disposable {
         @IShortcutService private readonly _shortcutService: IShortcutService,
         @IUIPartsService private readonly _uiPartsService: IUIPartsService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @Inject(ComponentManager) private readonly _componentManager: ComponentManager
+        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
+        @Inject(IconManager) private readonly _iconManager: IconManager
     ) {
         super();
 
@@ -51,6 +53,7 @@ export class FormulaUIController extends Disposable {
     private _initialize(): void {
         this._registerCommands();
         this._registerMenus();
+        this._registerIcons();
         this._registerShortcuts();
         this._registerComponents();
         this._registerRenderModules();
@@ -58,6 +61,12 @@ export class FormulaUIController extends Disposable {
 
     private _registerMenus(): void {
         this._menuManagerService.mergeMenu(menuSchema);
+    }
+
+    private _registerIcons(): void {
+        this.disposeWithMe(this._iconManager.register({
+            FunctionIcon,
+        }));
     }
 
     private _registerCommands(): void {

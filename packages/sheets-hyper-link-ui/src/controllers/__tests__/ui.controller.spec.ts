@@ -21,6 +21,7 @@ import { SheetsHyperLinkUIController } from '../ui.controller';
 describe('SheetsHyperLinkUIController', () => {
     it('should register components, commands, menu and shortcut', () => {
         const componentManager = { register: vi.fn() } as any;
+        const iconManager = { register: vi.fn() } as any;
         const commandService = { registerCommand: vi.fn() } as any;
         const menuManagerService = { mergeMenu: vi.fn() } as any;
         const injector = {} as any;
@@ -28,6 +29,7 @@ describe('SheetsHyperLinkUIController', () => {
 
         const controller = new SheetsHyperLinkUIController(
             componentManager,
+            iconManager,
             commandService,
             menuManagerService,
             injector,
@@ -35,6 +37,7 @@ describe('SheetsHyperLinkUIController', () => {
         );
 
         expect(componentManager.register).toHaveBeenCalled();
+
         expect(commandService.registerCommand).toHaveBeenCalled();
         expect(menuManagerService.mergeMenu).toHaveBeenCalled();
         expect(shortcutService.registerShortcut).toHaveBeenCalled();

@@ -15,13 +15,19 @@
  */
 
 import { Disposable, ICommandService, Inject, Injector } from '@univerjs/core';
-import { GraphIcon, TextIcon } from '@univerjs/icons';
-import { BuiltInUIPart, ComponentManager, connectInjector, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
+import { AddImageIcon, GraphIcon, TextIcon } from '@univerjs/icons';
+import { BuiltInUIPart, ComponentManager, connectInjector, IconManager, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 import { ActivateSlidePageOperation } from '../commands/operations/activate.operation';
 import { AppendSlideOperation } from '../commands/operations/append-slide.operation';
 import { DeleteSlideElementOperation } from '../commands/operations/delete-element.operation';
 import { InsertSlideFloatImageCommand } from '../commands/operations/insert-image.operation';
-import { InsertSlideShapeEllipseCommand, InsertSlideShapeEllipseOperation, InsertSlideShapeRectangleCommand, InsertSlideShapeRectangleOperation, ToggleSlideEditSidebarOperation } from '../commands/operations/insert-shape.operation';
+import {
+    InsertSlideShapeEllipseCommand,
+    InsertSlideShapeEllipseOperation,
+    InsertSlideShapeRectangleCommand,
+    InsertSlideShapeRectangleOperation,
+    ToggleSlideEditSidebarOperation,
+} from '../commands/operations/insert-shape.operation';
 import { SlideAddTextCommand, SlideAddTextOperation } from '../commands/operations/insert-text.operation';
 import { SetSlidePageThumbOperation } from '../commands/operations/set-thumb.operation';
 import { SetTextEditArrowOperation } from '../commands/operations/text-edit.operation';
@@ -42,6 +48,7 @@ export class SlidesUIController extends Disposable {
         @Inject(Injector) protected readonly _injector: Injector,
         @IMenuManagerService protected readonly _menuManagerService: IMenuManagerService,
         @Inject(ComponentManager) protected readonly _componentManager: ComponentManager,
+        @Inject(IconManager) protected readonly _iconManager: IconManager,
         @IUIPartsService protected readonly _uiPartsService: IUIPartsService,
         @ICommandService protected readonly _commandService: ICommandService,
         @IShortcutService protected readonly _shortcutService: IShortcutService
@@ -50,6 +57,7 @@ export class SlidesUIController extends Disposable {
 
         this._initCommands();
         this._initCustomComponents();
+        this._registerIcons();
         this._initUIComponents();
         this._initMenus();
         this._initShortcuts();
@@ -61,10 +69,16 @@ export class SlidesUIController extends Disposable {
 
     private _initCustomComponents(): void {
         const componentManager = this._componentManager;
-        this.disposeWithMe(componentManager.register('TextIcon', TextIcon));
-        this.disposeWithMe(componentManager.register('GraphIcon', GraphIcon));
         this.disposeWithMe(componentManager.register(COMPONENT_SLIDE_IMAGE_POPUP_MENU, SlideImagePopupMenu));
         this.disposeWithMe(componentManager.register(COMPONENT_SLIDE_SIDEBAR, Sidebar));
+    }
+
+    private _registerIcons(): void {
+        this.disposeWithMe(this._iconManager.register({
+            AddImageIcon,
+            TextIcon,
+            GraphIcon,
+        }));
     }
 
     private _initCommands(): void {

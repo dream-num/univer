@@ -14,10 +14,98 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, IConfigService, Inject, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import {
+    Disposable,
+    ICommandService,
+    IConfigService,
+    Inject,
+    Injector,
+    IUniverInstanceService,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { getCurrentTypeOfRenderer, IRenderManagerService } from '@univerjs/engine-render';
-import { HideGridlinesDoubleIcon } from '@univerjs/icons';
+import {
+    AddImageIcon,
+    AdjustHeightDoubleIcon,
+    AdjustWidthDoubleIcon,
+    AlignBottomIcon,
+    AlignTopIcon,
+    AllBorderIcon,
+    AutoHeightDoubleIcon,
+    AutoWidthDoubleIcon,
+    AutowrapIcon,
+    BackSlashDoubleIcon,
+    BoldIcon,
+    BrushIcon,
+    CancelFreezeIcon,
+    CancelMergeIcon,
+    ClearFormatDoubleIcon,
+    CodeIcon,
+    CopyDoubleIcon,
+    CutIcon,
+    DeleteCellShiftLeftDoubleIcon,
+    DeleteCellShiftUpDoubleIcon,
+    DeleteColumnDoubleIcon,
+    DeleteRowDoubleIcon,
+    DownBorderDoubleIcon,
+    DownloadImageIcon,
+    EyeOutlineIcon,
+    FontColorDoubleIcon,
+    FontSizeIncreaseIcon,
+    FontSizeReduceIcon,
+    FreezeColumnIcon,
+    FreezeRowIcon,
+    FreezeToSelectedIcon,
+    HideDoubleIcon,
+    HideGridlinesDoubleIcon,
+    HorizontalBorderDoubleIcon,
+    HorizontallyIcon,
+    HorizontalMergeIcon,
+    InnerBorderDoubleIcon,
+    InsertCellDownDoubleIcon,
+    InsertCellShiftRightDoubleIcon,
+    InsertDoubleIcon,
+    InsertRowAboveDoubleIcon,
+    InsertRowBelowDoubleIcon,
+    ItalicIcon,
+    LeftBorderDoubleIcon,
+    LeftDoubleDiagonalDoubleIcon,
+    LeftInsertColumnDoubleIcon,
+    LeftJustifyingIcon,
+    LeftRotationFortyFiveDegreesIcon,
+    LeftRotationNinetyDegreesIcon,
+    LeftTridiagonalDoubleIcon,
+    LockIcon,
+    MergeAllIcon,
+    NoBorderIcon,
+    NoColorDoubleIcon,
+    NoRotationIcon,
+    OuterBorderDoubleIcon,
+    OverflowIcon,
+    PaintBucketDoubleIcon,
+    PasteSpecialDoubleIcon,
+    PipingIcon,
+    ProtectIcon,
+    ReduceDoubleIcon,
+    RightBorderDoubleIcon,
+    RightDoubleDiagonalDoubleIcon,
+    RightInsertColumnDoubleIcon,
+    RightJustifyingIcon,
+    RightRotationFortyFiveDegreesIcon,
+    RightRotationNinetyDegreesIcon,
+    SlashDoubleIcon,
+    StrikethroughIcon,
+    SubscriptIcon,
+    SuperscriptIcon,
+    TruncationIcon,
+    UnderlineIcon,
+    UpBorderDoubleIcon,
+    VerticalBorderDoubleIcon,
+    VerticalCenterIcon,
+    VerticalIntegrationIcon,
+    VerticalTextIcon,
+} from '@univerjs/icons';
 import {
     SetBoldCommand,
     SetFontFamilyCommand,
@@ -26,7 +114,7 @@ import {
     SetStrikeThroughCommand,
     SetUnderlineCommand,
 } from '@univerjs/sheets';
-import { BuiltInUIPart, ComponentManager, connectInjector, ILayoutService, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
+import { BuiltInUIPart, ComponentManager, connectInjector, IconManager, ILayoutService, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 import { DeleteRangeMoveLeftConfirmCommand } from '../commands/commands/delete-range-move-left-confirm.command';
 import { DeleteRangeMoveUpConfirmCommand } from '../commands/commands/delete-range-move-up-confirm.command';
 import { SetColumnHeaderHeightCommand, SetRowHeaderWidthCommand } from '../commands/commands/headersize-changed.command';
@@ -160,6 +248,7 @@ export class SheetUIController extends Disposable {
     constructor(
         @Inject(Injector) protected readonly _injector: Injector,
         @Inject(ComponentManager) protected readonly _componentManager: ComponentManager,
+        @Inject(IconManager) protected readonly _iconManager: IconManager,
         @ILayoutService protected readonly _layoutService: ILayoutService,
         @ICommandService protected readonly _commandService: ICommandService,
         @IShortcutService protected readonly _shortcutService: IShortcutService,
@@ -174,6 +263,7 @@ export class SheetUIController extends Disposable {
 
     private _init(): void {
         this._initComponents();
+        this._registerIcons();
         this._initCommands();
         this._initMenus();
         this._initShortcuts();
@@ -190,9 +280,91 @@ export class SheetUIController extends Disposable {
         this.disposeWithMe(componentManager.register(BORDER_PANEL_COMPONENT, BorderPanel));
         this.disposeWithMe(componentManager.register(DEFINED_NAME_CONTAINER, DefinedNameContainer));
         this.disposeWithMe(componentManager.register(CELL_POPUP_COMPONENT_KEY, CellPopup));
+    }
 
-        // init icons
-        this.disposeWithMe(componentManager.register('HideGridlinesDoubleIcon', HideGridlinesDoubleIcon));
+    // eslint-disable-next-line max-lines-per-function
+    private _registerIcons(): void {
+        this.disposeWithMe(this._iconManager.register({
+            AdjustHeightDoubleIcon,
+            AdjustWidthDoubleIcon,
+            AddImageIcon,
+            AlignBottomIcon,
+            AlignTopIcon,
+            AllBorderIcon,
+            AutoHeightDoubleIcon,
+            AutoWidthDoubleIcon,
+            AutowrapIcon,
+            BackSlashDoubleIcon,
+            BoldIcon,
+            BrushIcon,
+            CancelFreezeIcon,
+            CancelMergeIcon,
+            ClearFormatDoubleIcon,
+            CodeIcon,
+            CopyDoubleIcon,
+            CutIcon,
+            DeleteCellShiftLeftDoubleIcon,
+            DeleteCellShiftUpDoubleIcon,
+            DeleteColumnDoubleIcon,
+            DeleteRowDoubleIcon,
+            DownBorderDoubleIcon,
+            DownloadImageIcon,
+            EyeOutlineIcon,
+            FontColorDoubleIcon,
+            FontSizeIncreaseIcon,
+            FontSizeReduceIcon,
+            FreezeColumnIcon,
+            FreezeRowIcon,
+            FreezeToSelectedIcon,
+            HideDoubleIcon,
+            HideGridlinesDoubleIcon,
+            HorizontalBorderDoubleIcon,
+            HorizontalMergeIcon,
+            HorizontallyIcon,
+            InnerBorderDoubleIcon,
+            InsertCellDownDoubleIcon,
+            InsertCellShiftRightDoubleIcon,
+            InsertDoubleIcon,
+            InsertRowAboveDoubleIcon,
+            InsertRowBelowDoubleIcon,
+            ItalicIcon,
+            LeftBorderDoubleIcon,
+            LeftDoubleDiagonalDoubleIcon,
+            LeftInsertColumnDoubleIcon,
+            LeftJustifyingIcon,
+            LeftRotationFortyFiveDegreesIcon,
+            LeftRotationNinetyDegreesIcon,
+            LeftTridiagonalDoubleIcon,
+            LockIcon,
+            MergeAllIcon,
+            NoBorderIcon,
+            NoColorDoubleIcon,
+            NoRotationIcon,
+            OuterBorderDoubleIcon,
+            OverflowIcon,
+            PaintBucketDoubleIcon,
+            PasteSpecialDoubleIcon,
+            PipingIcon,
+            ProtectIcon,
+            ReduceDoubleIcon,
+            RightBorderDoubleIcon,
+            RightDoubleDiagonalDoubleIcon,
+            RightInsertColumnDoubleIcon,
+            RightJustifyingIcon,
+            RightRotationFortyFiveDegreesIcon,
+            RightRotationNinetyDegreesIcon,
+            SlashDoubleIcon,
+            StrikethroughIcon,
+            SubscriptIcon,
+            SuperscriptIcon,
+            TruncationIcon,
+            UnderlineIcon,
+            UpBorderDoubleIcon,
+            VerticalBorderDoubleIcon,
+            VerticalCenterIcon,
+            VerticalIntegrationIcon,
+            VerticalTextIcon,
+        }));
     }
 
     private _initCommands(): void {

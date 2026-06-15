@@ -16,7 +16,8 @@
 
 import type { IDisposable } from '@univerjs/core';
 import { Disposable, Inject, Injector } from '@univerjs/core';
-import { IMenuManagerService } from '@univerjs/ui';
+import { ConditionsDoubleIcon } from '@univerjs/icons';
+import { IconManager, IMenuManagerService } from '@univerjs/ui';
 import { menuSchema } from './schema';
 
 export class ConditionalFormattingMenuController extends Disposable {
@@ -24,10 +25,14 @@ export class ConditionalFormattingMenuController extends Disposable {
 
     constructor(
         @Inject(Injector) private _injector: Injector,
+        @Inject(IconManager) private readonly _iconManager: IconManager,
         @IMenuManagerService private readonly _menuManagerService: IMenuManagerService
     ) {
         super();
 
         this._menuManagerService.mergeMenu(menuSchema);
+        this.disposeWithMe(this._iconManager.register({
+            ConditionsDoubleIcon,
+        }));
     }
 }

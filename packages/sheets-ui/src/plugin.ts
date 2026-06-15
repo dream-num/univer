@@ -17,7 +17,19 @@
 import type { Dependency, Workbook } from '@univerjs/core';
 import type { IUniverUIConfig } from '@univerjs/ui';
 import type { IUniverSheetsUIConfig } from './config/config';
-import { DependentOn, IConfigService, Inject, Injector, IUniverInstanceService, merge, mergeOverrideWithDependencies, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
+import {
+    DependentOn,
+    IConfigService,
+    Inject,
+    Injector,
+    IUniverInstanceService,
+    merge,
+    mergeOverrideWithDependencies,
+    Plugin,
+    registerDependencies,
+    touchDependencies,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService, RefSelectionsService, UniverSheetsPlugin } from '@univerjs/sheets';
 import { ComponentManager, UI_PLUGIN_CONFIG_KEY } from '@univerjs/ui';
@@ -49,7 +61,11 @@ import { SheetPermissionInitUIController } from './controllers/permission/sheet-
 import { SheetPermissionInterceptorCanvasRenderController } from './controllers/permission/sheet-permission-interceptor-canvas-render.controller';
 import { SheetPermissionInterceptorClipboardController } from './controllers/permission/sheet-permission-interceptor-clipboard.controller';
 import { SheetPermissionInterceptorFormulaRenderController } from './controllers/permission/sheet-permission-interceptor-formula-render.controller';
-import { SheetPermissionRenderController, SheetPermissionRenderManagerController, WorksheetProtectionRenderController } from './controllers/permission/sheet-permission-render.controller';
+import {
+    SheetPermissionRenderController,
+    SheetPermissionRenderManagerController,
+    WorksheetProtectionRenderController,
+} from './controllers/permission/sheet-permission-render.controller';
 import { ClipboardRenderController } from './controllers/render-controllers/clipboard.render-controller';
 import { SheetContextMenuRenderController } from './controllers/render-controllers/contextmenu.render-controller';
 import { EditorBridgeRenderController } from './controllers/render-controllers/editor-bridge.render-controller';
@@ -64,8 +80,8 @@ import { SheetRenderController } from './controllers/render-controllers/sheet.re
 import { SheetSkeletonRenderController } from './controllers/render-controllers/skeleton.render-controller';
 import { SheetsZoomRenderController } from './controllers/render-controllers/zoom.render-controller';
 import { RepeatLastActionController } from './controllers/repeat-last-action.controller';
-import { SheetUIController } from './controllers/sheet-ui.controller';
 import { StatusBarController } from './controllers/status-bar.controller';
+import { SheetUIController } from './controllers/ui.controller';
 import { AutoHeightService } from './services/auto-height.service';
 import { SheetCanvasPopManagerService } from './services/canvas-pop-manager.service';
 import { CellAlertManagerService } from './services/cell-alert-manager.service';
@@ -81,8 +97,8 @@ import {
     IFormulaEditorManagerService,
 } from './services/editor/formula-editor-manager.service';
 import { FormatPainterService, IFormatPainterService } from './services/format-painter/format-painter.service';
-import { HoverManagerService } from './services/hover-manager.service';
 import { HeaderUnhideRangeService } from './services/header-unhide-range.service';
+import { HoverManagerService } from './services/hover-manager.service';
 import { IMarkSelectionService, MarkSelectionService } from './services/mark-selection/mark-selection.service';
 import { SheetPermissionPanelModel } from './services/permission/sheet-permission-panel.model';
 import { SheetPermissionRenderManagerService } from './services/permission/sheet-permission-render-manager.service';

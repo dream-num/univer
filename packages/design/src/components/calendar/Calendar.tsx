@@ -18,8 +18,16 @@ import type { ButtonHTMLAttributes } from 'react';
 import { MoreRightIcon } from '@univerjs/icons';
 import { useContext, useMemo, useState } from 'react';
 import { clsx } from '../../helper/clsx';
+import { Button } from '../button/Button';
 import { ConfigContext } from '../config-provider/ConfigProvider';
+import { DropdownMenu } from '../dropdown-menu/DropdownMenu';
+import { Dropdown } from '../dropdown/Dropdown';
 import { TimeInput } from '../time-input/TimeInput';
+import { VirtualList } from '../virtual-list';
+
+const DEFAULT_YEAR_RANGE = 100;
+const YEAR_ITEM_HEIGHT = 32;
+const YEAR_LIST_HEIGHT = 224;
 
 function getDaysInMonth(year: number, month: number) {
     return new Date(year, month + 1, 0).getDate();
@@ -59,7 +67,13 @@ export function Calendar(props: ICalendarProps) {
 
     const { locale } = useContext(ConfigContext);
 
-    const { year, weekDays, months } = locale?.Calendar as {
+    const { ariaLabels, year, weekDays, months } = locale?.Calendar as {
+        ariaLabels: {
+            previousMonth: string;
+            nextMonth: string;
+            selectYear: string;
+            selectMonth: string;
+        };
         year: string;
         weekDays: string[];
         months: string[];
@@ -68,6 +82,7 @@ export function Calendar(props: ICalendarProps) {
     const today = new Date();
     const [currentYear, setCurrentYear] = useState((value ?? today).getFullYear());
     const [currentMonth, setCurrentMonth] = useState((value ?? today).getMonth());
+    const [yearDropdownOpen, setYearDropdownOpen] = useState(false);
 
     function prevMonth() {
         setCurrentMonth((prev) => {
@@ -88,6 +103,38 @@ export function Calendar(props: ICalendarProps) {
             return prev + 1;
         });
     }
+
+    function handleChangeMonth(month: string) {
+        setCurrentMonth(Number(month));
+    }
+
+    function handleChangeYear(year: number) {
+        setCurrentYear(year);
+        setYearDropdownOpen(false);
+    }
+
+    const yearOptions = useMemo(() => {
+        const startYear = min?.getFullYear() ?? currentYear - DEFAULT_YEAR_RANGE;
+        const endYear = max?.getFullYear() ?? currentYear + DEFAULT_YEAR_RANGE;
+
+        return Array.from(
+            { length: Math.max(0, endYear - startYear + 1) },
+            (_, index) => ({ year: startYear + index })
+        );
+    }, [currentYear, max, min]);
+
+    const currentYearIndex = Math.max(0, yearOptions.findIndex((item) => item.year === currentYear));
+
+    const monthMenuItems = useMemo(() => [{
+        type: 'radio' as const,
+        value: String(currentMonth),
+        hideIndicator: true,
+        options: months.map((month, index) => ({
+            label: month,
+            value: String(index),
+        })),
+        onSelect: handleChangeMonth,
+    }], [currentMonth, months]);
 
     const daysInMonth = getDaysInMonth(currentYear, currentMonth);
     const firstDay = getFirstDayOfWeek(currentYear, currentMonth);
@@ -159,22 +206,76 @@ export function Calendar(props: ICalendarProps) {
                       univer-text-lg univer-text-gray-500
                       dark:!univer-text-gray-200
                     `}
-                    aria-label="Previous Month"
+                    aria-label={ariaLabels.previousMonth}
                     onClick={prevMonth}
                 >
                     <MoreRightIcon className="univer-rotate-180" />
                 </DayButton>
-                <span className="univer-flex univer-gap-0.5 univer-text-sm univer-font-medium">
-                    <span>{currentYear}</span>
-                    <span>{year}</span>
-                    <span>{months[currentMonth]}</span>
+                <span className="univer-flex univer-items-center univer-gap-0.5 univer-text-sm univer-font-medium">
+                    <Dropdown
+                        align="center"
+                        className="univer-w-24 univer-p-1.5"
+                        open={yearDropdownOpen}
+                        overlay={(
+                            <VirtualList
+                                className="univer-rounded"
+                                data={yearOptions}
+                                height={YEAR_LIST_HEIGHT}
+                                initialScrollIndex={currentYearIndex}
+                                itemHeight={YEAR_ITEM_HEIGHT}
+                                itemKey="year"
+                            >
+                                {(item) => (
+                                    <button
+                                        className={clsx(`
+                                          univer-flex univer-h-8 univer-w-full univer-items-center univer-justify-center
+                                          univer-rounded univer-border-none univer-bg-transparent univer-px-2
+                                          univer-text-sm univer-text-gray-900 univer-transition-colors
+                                          hover:univer-bg-gray-100
+                                          dark:!univer-text-white
+                                          dark:hover:!univer-bg-gray-600
+                                        `, {
+                                            'univer-bg-gray-200 dark:!univer-bg-gray-500': item.year === currentYear,
+                                        })}
+                                        type="button"
+                                        onClick={() => handleChangeYear(item.year)}
+                                    >
+                                        {item.year}
+                                    </button>
+                                )}
+                            </VirtualList>
+                        )}
+                        onOpenChange={setYearDropdownOpen}
+                    >
+                        <Button
+                            variant="text"
+                            type="button"
+                            aria-label={ariaLabels.selectYear}
+                        >
+                            {currentYear}
+                            {year}
+                        </Button>
+                    </Dropdown>
+                    <DropdownMenu
+                        align="center"
+                        className="univer-max-h-80 univer-min-w-28 univer-overflow-auto"
+                        items={monthMenuItems}
+                    >
+                        <Button
+                            variant="text"
+                            type="button"
+                            aria-label={ariaLabels.selectMonth}
+                        >
+                            {months[currentMonth]}
+                        </Button>
+                    </DropdownMenu>
                 </span>
                 <DayButton
                     className={`
                       univer-text-lg univer-text-gray-500
                       dark:!univer-text-gray-200
                     `}
-                    aria-label="Next Month"
+                    aria-label={ariaLabels.nextMonth}
                     onClick={nextMonth}
                 >
                     <MoreRightIcon />

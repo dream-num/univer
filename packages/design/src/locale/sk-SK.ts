@@ -42,6 +42,12 @@ const locale: typeof enUS = {
                 'Nov',
                 'Dec',
             ],
+            ariaLabels: {
+                previousMonth: 'Predchádzajúci mesiac',
+                nextMonth: 'Nasledujúci mesiac',
+                selectYear: 'Vybrať rok',
+                selectMonth: 'Vybrať mesiac',
+            },
         },
         Select: {
             empty: 'Žiadne',

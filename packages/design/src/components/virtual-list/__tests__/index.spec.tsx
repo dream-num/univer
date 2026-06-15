@@ -57,4 +57,24 @@ describe('VirtualList', () => {
 
         expect(scroller.textContent).toContain('Item 10');
     });
+
+    it('should render from the initial scroll index', () => {
+        const { container } = render(
+            <VirtualList
+                data={data}
+                itemKey="id"
+                height={40}
+                initialScrollIndex={10}
+                itemHeight={10}
+                overscan={1}
+            >
+                {(item) => <span>{item.label}</span>}
+            </VirtualList>
+        );
+
+        const scroller = container.firstElementChild as HTMLDivElement;
+
+        expect(scroller.textContent).toContain('Item 9');
+        expect(scroller.textContent).toContain('Item 10');
+    });
 });

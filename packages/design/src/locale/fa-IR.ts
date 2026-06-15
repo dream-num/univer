@@ -42,6 +42,12 @@ const locale: typeof enUS = {
                 'بهمن',
                 'اسفند',
             ],
+            ariaLabels: {
+                previousMonth: 'ماه قبل',
+                nextMonth: 'ماه بعد',
+                selectYear: 'انتخاب سال',
+                selectMonth: 'انتخاب ماه',
+            },
         },
         Select: {
             empty: 'هیچ‌کدام',

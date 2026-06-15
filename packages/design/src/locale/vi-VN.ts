@@ -42,6 +42,12 @@ const locale: typeof enUS = {
                 'Tháng 11',
                 'Tháng 12',
             ],
+            ariaLabels: {
+                previousMonth: 'Tháng trước',
+                nextMonth: 'Tháng sau',
+                selectYear: 'Chọn năm',
+                selectMonth: 'Chọn tháng',
+            },
         },
         Select: {
             empty: 'Không có',

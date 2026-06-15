@@ -40,6 +40,12 @@ const locale = {
                 'Nov',
                 'Dec',
             ],
+            ariaLabels: {
+                previousMonth: 'Previous month',
+                nextMonth: 'Next month',
+                selectYear: 'Select year',
+                selectMonth: 'Select month',
+            },
         },
         Select: {
             empty: 'None',

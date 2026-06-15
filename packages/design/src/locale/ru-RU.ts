@@ -45,6 +45,12 @@ const locale: typeof enUS = {
                 'Ноябрь',
                 'Декабрь',
             ],
+            ariaLabels: {
+                previousMonth: 'Предыдущий месяц',
+                nextMonth: 'Следующий месяц',
+                selectYear: 'Выбрать год',
+                selectMonth: 'Выбрать месяц',
+            },
         },
         ColorPicker: {
             more: 'Больше цветов',

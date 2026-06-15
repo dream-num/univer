@@ -42,6 +42,12 @@ const locale: typeof enUS = {
                 'lis',
                 'gru',
             ],
+            ariaLabels: {
+                previousMonth: 'Poprzedni miesiąc',
+                nextMonth: 'Następny miesiąc',
+                selectYear: 'Wybierz rok',
+                selectMonth: 'Wybierz miesiąc',
+            },
         },
         Select: {
             empty: 'Brak',

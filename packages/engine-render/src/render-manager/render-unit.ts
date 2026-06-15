@@ -52,6 +52,7 @@ export interface IRender {
     activated$: Observable<boolean>;
 
     with<T>(dependency: DependencyIdentifier<T>): T;
+    getInjector?(): Injector;
     getRenderContext?(): IRenderContext;
     /**
      * Deactivate the render unit, means the render unit would be freezed and not updated,
@@ -157,6 +158,10 @@ export class RenderUnit extends Disposable implements IRender {
      */
     with<T>(dependency: DependencyIdentifier<T>): T {
         return this._injector.get(dependency);
+    }
+
+    getInjector(): Injector {
+        return this._injector;
     }
 
     /**

@@ -15,7 +15,7 @@
  */
 
 import type { BooleanNumber } from '@univerjs/core';
-import type { CSSProperties, KeyboardEventHandler, ReactNode } from 'react';
+import type { CSSProperties, KeyboardEventHandler, MouseEventHandler, ReactNode } from 'react';
 import { ColorKit, ThemeService } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
@@ -32,11 +32,12 @@ export interface IBaseSheetBarProps {
     menuOverlay?: ReactNode;
     className?: string;
     onKeyDown?: KeyboardEventHandler<HTMLDivElement>;
+    onClick?: MouseEventHandler<HTMLDivElement>;
     tabIndex?: number;
 }
 
 export function SheetBarItem(props: IBaseSheetBarProps) {
-    const { sheetId, label, color, selected, className, onKeyDown, tabIndex } = props;
+    const { sheetId, label, color, selected, className, onKeyDown, onClick, tabIndex } = props;
 
     const themeService = useDependency(ThemeService);
 
@@ -58,6 +59,7 @@ export function SheetBarItem(props: IBaseSheetBarProps) {
             aria-selected={currentSelected}
             tabIndex={tabIndex ?? (currentSelected ? 0 : -1)}
             onKeyDown={onKeyDown}
+            onClick={onClick}
             className={clsx(`
               univer-mx-1 univer-box-border univer-flex univer-flex-grow univer-cursor-pointer univer-select-none
               univer-flex-row univer-items-center univer-rounded univer-text-xs univer-transition-[colors,box-shadow]

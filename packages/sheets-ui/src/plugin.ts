@@ -36,6 +36,7 @@ import { UI_PLUGIN_CONFIG_KEY } from '@univerjs/ui';
 import { filter } from 'rxjs/operators';
 import pkg from '../package.json';
 import { defaultPluginConfig, SHEETS_UI_PLUGIN_CONFIG_KEY } from './config/config';
+import { registerSheetsEmbedUIContributions } from './embed-register';
 import { AutoFillUIController } from './controllers/auto-fill-ui.controller';
 import { AutoHeightController } from './controllers/auto-height.controller';
 import { AutoWidthController } from './controllers/auto-width.controller';
@@ -144,6 +145,7 @@ export class UniverSheetsUIPlugin extends Plugin {
         }
 
         this._configService.setConfig(SHEETS_UI_PLUGIN_CONFIG_KEY, { ...rest });
+        registerSheetsEmbedUIContributions(this._injector);
     }
 
     override onStarting(): void {
@@ -308,6 +310,14 @@ export class UniverSheetsUIPlugin extends Plugin {
         const univerInstanceService = this._univerInstanceService;
         this.disposeWithMe(univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET)
             .pipe(filter((v) => !!v))
-            .subscribe((workbook) => univerInstanceService.focusUnit(workbook!.getUnitId())));
+            .subscribe((workbook) => {
+                const unitId = workbook!.getUnitId();
+                const createOptions = univerInstanceService.getUnitCreateOptions(unitId);
+                if (createOptions?.makeCurrent === false) {
+                    return;
+                }
+
+                univerInstanceService.focusUnit(unitId);
+            }));
     }
 }

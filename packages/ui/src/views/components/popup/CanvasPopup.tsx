@@ -20,7 +20,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { animationFrameScheduler, combineLatest, map, of, throttleTime } from 'rxjs';
 import { ComponentManager } from '../../../common';
 import { ICanvasPopupService } from '../../../services/popup/canvas-popup.service';
-import { useDependency, useObservable, useObservableRef } from '../../../utils/di';
+import { RediProvider, useDependency, useObservable, useObservableRef } from '../../../utils/di';
 import { RectPopup } from './RectPopup';
 
 interface ISingleCanvasPopupProps {
@@ -116,12 +116,16 @@ export function CanvasPopup() {
         const [key, popup] = item;
         const Component = componentManager.get(popup.componentKey);
 
+        const content = Component ? <Component popup={popup} /> : null;
+
         return (
             <SingleCanvasPopup
                 key={key}
                 popup={popup}
             >
-                {Component ? <Component popup={popup} /> : null}
+                {popup.injector
+                    ? <RediProvider value={{ injector: popup.injector }}>{content}</RediProvider>
+                    : content}
             </SingleCanvasPopup>
         );
     });

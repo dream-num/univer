@@ -84,6 +84,7 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
+        "@univerjs/embed": "workspace:*",
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",

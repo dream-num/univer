@@ -23,6 +23,7 @@ import { borderBottomClassName, clsx, divideXClassName, Dropdown } from '@univer
 import { MoreVerticalIcon } from '@univerjs/icons';
 import { Fragment, useCallback, useEffect, useMemo, useRef } from 'react';
 import { RibbonPosition } from '../../../services/menu/types';
+import { IRibbonOverrideService } from '../../../services/ribbon/ribbon-override.service';
 import { IRibbonService } from '../../../services/ribbon/ribbon.service';
 import { useDependency, useObservable } from '../../../utils/di';
 import { ComponentContainer } from '../ComponentContainer';
@@ -36,13 +37,17 @@ interface IRibbonProps {
     ribbonType: RibbonType;
     headerMenuComponents?: Set<ComponentType>;
     headerMenu?: boolean;
+    toolbarOnly?: boolean;
 }
 
 export function Ribbon(props: IRibbonProps) {
-    const { ribbonType, headerMenuComponents, headerMenu = true } = props;
+    const { ribbonType, headerMenuComponents, headerMenu = true, toolbarOnly = false } = props;
 
-    const ribbonService = useDependency(IRibbonService);
+    const defaultRibbonService = useDependency(IRibbonService);
+    const ribbonOverrideService = useDependency(IRibbonOverrideService);
     const localeService = useDependency(LocaleService);
+    const ribbonOverride = useObservable(ribbonOverrideService.override$, ribbonOverrideService.getOverride());
+    const ribbonService = ribbonOverride?.ribbonService ?? defaultRibbonService;
 
     const containerRef = useRef<HTMLDivElement>(null!);
     const toolbarItemRefs = useRef<Record<string, {
@@ -53,10 +58,10 @@ export function Ribbon(props: IRibbonProps) {
         itemOrder: number;
     }>>({});
 
-    const ribbonData = useObservable(ribbonService.ribbon$, []);
-    const activatedTab = useObservable(ribbonService.activatedTab$, RibbonPosition.START);
-    const collapsedIds = useObservable(ribbonService.collapsedIds$, []);
-    const fakeToolbarVisible = useObservable(ribbonService.fakeToolbarVisible$, false);
+    const ribbonData = useObservable(() => ribbonService.ribbon$, [], undefined, [ribbonService]);
+    const activatedTab = useObservable(() => ribbonService.activatedTab$, RibbonPosition.START, undefined, [ribbonService]);
+    const collapsedIds = useObservable(() => ribbonService.collapsedIds$, [], undefined, [ribbonService]);
+    const fakeToolbarVisible = useObservable(() => ribbonService.fakeToolbarVisible$, false, undefined, [ribbonService]);
 
     const ribbon = useMemo(() => {
         if (ribbonType === 'simple') {
@@ -80,7 +85,7 @@ export function Ribbon(props: IRibbonProps) {
     const handleSelectTab = useCallback((group: IMenuSchema) => {
         toolbarItemRefs.current = {};
         ribbonService.setActivatedTab(group.key);
-    }, []);
+    }, [ribbonService]);
 
     const activeGroup = useMemo(() => {
         const allGroups = ribbon.find((group) => group.key === activatedTab)?.children ?? [];
@@ -207,10 +212,26 @@ export function Ribbon(props: IRibbonProps) {
             <div
                 data-u-comp="ribbon-header-menu"
                 className={clsx('univer-relative univer-select-none', {
-                    'univer-h-9': ribbonType === 'classic' || (headerMenuComponents && headerMenuComponents.size > 0),
+                    'univer-hidden': toolbarOnly,
+                    'univer-h-9': !toolbarOnly && (ribbonType === 'classic' || (headerMenuComponents && headerMenuComponents.size > 0)),
                 })}
             >
-                {ribbonType === 'classic' && ribbon.length >= 1 && (
+                {!toolbarOnly && ribbonOverride?.placeholderTitle && ribbon.length === 0 && (
+                    <div className="univer-flex univer-h-9 univer-items-end univer-px-3">
+                        <span
+                            className="
+                              univer-relative univer-inline-flex univer-h-8 univer-items-center univer-justify-center
+                              univer-rounded-t univer-bg-primary-50 univer-px-3 univer-text-sm univer-font-medium
+                              univer-text-primary-600
+                            "
+                            data-u-comp="ribbon-override-placeholder"
+                        >
+                            {ribbonOverride.placeholderTitle}
+                        </span>
+                    </div>
+                )}
+
+                {!toolbarOnly && ribbonType === 'classic' && ribbon.length >= 1 && (
                     <ClassicMenu
                         ribbon={ribbon}
                         activatedTab={activatedTab}

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, DocumentFlavor } from '@univerjs/core';
+import type { DocumentDataModel, DocumentFlavor, ICreateUnitOptions } from '@univerjs/core';
 import type { ICanvasColorService } from '@univerjs/engine-render';
 import { isInternalEditorID, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -50,18 +50,22 @@ export class DocsRenderService extends RxDisposable {
             .subscribe((unitId) => this._createRenderWithId(unitId));
 
         this._instanceSrv.getAllUnitsForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)
-            .forEach((documentModel) => this._createRenderer(documentModel));
+            .forEach((documentModel) => this._createRenderer(documentModel, this._instanceSrv.getUnitCreateOptions(documentModel.getUnitId()) ?? undefined));
 
         this._instanceSrv.getTypeOfUnitAdded$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)
             .pipe(takeUntil(this.dispose$))
-            .subscribe((event) => this._createRenderer(event.unit));
+            .subscribe((event) => this._createRenderer(event.unit, event.options));
 
         this._instanceSrv.getTypeOfUnitDisposed$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)
             .pipe(takeUntil(this.dispose$))
             .subscribe((doc) => this._disposeRenderer(doc));
     }
 
-    private _createRenderer(doc: DocumentDataModel) {
+    private _createRenderer(doc: DocumentDataModel, createUnitOptions?: ICreateUnitOptions) {
+        if (createUnitOptions?.skipAutoRender) {
+            return;
+        }
+
         const unitId = doc.getUnitId();
         this._renderManagerService.created$.subscribe((renderer) => {
             if (renderer.unitId === unitId) {

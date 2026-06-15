@@ -513,6 +513,7 @@ export type { IRangeThemeStyleJSON } from './models/range-theme-util';
 export { RangeThemeStyle } from './models/range-theme-util';
 export type { IRangeThemeStyleItem } from './models/range-theme-util';
 export { UniverSheetsPlugin } from './plugin';
+export { createSheetsEmbedEmptySnapshot, registerSheetsEmbedGuestContribution } from './embed-guest';
 export { AutoFillService, IAutoFillService } from './services/auto-fill/auto-fill.service';
 export { default as AutoFillRules } from './services/auto-fill/rules';
 export { default as AutoFillTools } from './services/auto-fill/tools';

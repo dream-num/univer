@@ -1,0 +1,224 @@
+import type { EmbedDescriptor, EmbedResource } from '../types/embed';
+import type { ResourceRef } from '../types/resource-ref';
+import { cloneEmbedResource, createEmptyEmbedResource } from '../common/embed-resource';
+import { getResourceRefKey, normalizeResourceRef } from '../common/resource-ref';
+import { fromResourceRefUnitType } from '../common/unit-type';
+
+export class EmbedModelService {
+    private readonly _resources = new Map<string, EmbedResource>();
+
+    addDescriptor(hostUnitId: string, descriptor: EmbedDescriptor): void {
+        const now = Date.now();
+        const normalizedDescriptor = this._normalizeDescriptor(hostUnitId, descriptor);
+        this._assertActiveChildUnitAvailable(normalizedDescriptor);
+        const resource = this._ensureResource(hostUnitId);
+        resource.embeds[normalizedDescriptor.embedId] = {
+            ...normalizedDescriptor,
+            createdAt: normalizedDescriptor.createdAt ?? now,
+            updatedAt: now,
+        };
+    }
+
+    getDescriptor(hostUnitId: string, embedId: string): EmbedDescriptor | undefined {
+        return this._resources.get(hostUnitId)?.embeds[embedId];
+    }
+
+    getActiveDescriptors(hostUnitId: string): EmbedDescriptor[] {
+        return Object.values(this._resources.get(hostUnitId)?.embeds ?? {})
+            .filter((descriptor) => descriptor.lifecycle !== 'soft-deleted');
+    }
+
+    getActiveDescriptorsByChildUnit(childUnitId: string): EmbedDescriptor[] {
+        return [...this._resources.values()]
+            .flatMap((resource) => Object.values(resource.embeds))
+            .filter((descriptor) => descriptor.lifecycle !== 'soft-deleted' && descriptor.childUnitId === childUnitId);
+    }
+
+    getDescriptors(hostUnitId: string): EmbedDescriptor[] {
+        return Object.values(this._resources.get(hostUnitId)?.embeds ?? {});
+    }
+
+    getDescriptorsByResourceRef(hostUnitId: string, ref: ResourceRef): EmbedDescriptor[] {
+        const key = getResourceRefKey(ref);
+        return Object.values(this._resources.get(hostUnitId)?.embeds ?? {})
+            .filter((descriptor) => getResourceRefKey(this._getDescriptorResourceRef(descriptor)) === key);
+    }
+
+    getActiveDescriptorsByResourceRef(hostUnitId: string, ref: ResourceRef): EmbedDescriptor[] {
+        return this.getDescriptorsByResourceRef(hostUnitId, ref)
+            .filter((descriptor) => descriptor.lifecycle !== 'soft-deleted');
+    }
+
+    countReferencesByResourceRef(hostUnitId: string, ref: ResourceRef): number {
+        return this.getDescriptorsByResourceRef(hostUnitId, ref).length;
+    }
+
+    countActiveReferencesByResourceRef(hostUnitId: string, ref: ResourceRef): number {
+        return this.getActiveDescriptorsByResourceRef(hostUnitId, ref).length;
+    }
+
+    softDeleteDescriptor(hostUnitId: string, embedId: string): void {
+        const descriptor = this.getDescriptor(hostUnitId, embedId);
+        if (!descriptor) {
+            return;
+        }
+
+        descriptor.lifecycle = 'soft-deleted';
+        descriptor.updatedAt = Date.now();
+    }
+
+    restoreDescriptor(hostUnitId: string, embedId: string): void {
+        const descriptor = this.getDescriptor(hostUnitId, embedId);
+        if (!descriptor) {
+            return;
+        }
+
+        this._assertActiveChildUnitAvailable({
+            ...descriptor,
+            lifecycle: 'active',
+        });
+        descriptor.lifecycle = 'active';
+        descriptor.updatedAt = Date.now();
+    }
+
+    serializeUnit(unitId: string): EmbedResource {
+        return this._cloneResource(this._resources.get(unitId) ?? this._createResource());
+    }
+
+    loadUnit(unitId: string, resource: EmbedResource): void {
+        const normalizedResource = this._createResource();
+        for (const [embedId, descriptor] of Object.entries(resource.embeds ?? {})) {
+            normalizedResource.embeds[embedId] = this._normalizeDescriptor(unitId, {
+                ...descriptor,
+                embedId,
+            });
+        }
+        this._assertResourceHasNoDuplicateActiveChildUnits(normalizedResource);
+        for (const descriptor of Object.values(normalizedResource.embeds)) {
+            this._assertActiveChildUnitAvailable(descriptor, unitId);
+        }
+
+        this._resources.set(unitId, this._cloneResource(normalizedResource));
+    }
+
+    unloadUnit(unitId: string): void {
+        this._resources.delete(unitId);
+    }
+
+    parseJson(json: string): EmbedResource {
+        if (!json) {
+            return this._createResource();
+        }
+
+        const parsed = JSON.parse(json) as Partial<EmbedResource>;
+        const resource = {
+            ...createEmptyEmbedResource(),
+            embeds: Object.fromEntries(Object.entries(parsed.embeds ?? {}).map(([embedId, descriptor]) => [
+                embedId,
+                this._normalizeDescriptor(descriptor.hostUnitId, {
+                    ...descriptor,
+                    embedId,
+                }),
+            ])),
+        };
+        this._assertResourceHasNoDuplicateActiveChildUnits(resource);
+        return resource;
+    }
+
+    toJson(unitId: string): string {
+        return JSON.stringify(this.serializeUnit(unitId));
+    }
+
+    private _normalizeDescriptor(hostUnitId: string, descriptor: EmbedDescriptor): EmbedDescriptor {
+        if (descriptor.source.kind !== 'ref') {
+            throw new Error('EMBED_DESCRIPTOR_SOURCE_NOT_CANONICAL');
+        }
+        const persistableDescriptor = { ...descriptor } as EmbedDescriptor & { hostContext?: Record<string, unknown> };
+        delete persistableDescriptor.hostContext;
+
+        const ref = normalizeResourceRef(descriptor.source.ref);
+        if (descriptor.childUnitId && descriptor.childUnitId !== ref.unit.selector) {
+            throw new Error('EMBED_DESCRIPTOR_CHILD_REF_MISMATCH');
+        }
+
+        const refUnitType = fromResourceRefUnitType(ref.unit.type);
+        if (descriptor.childType != null && descriptor.childType !== refUnitType) {
+            throw new Error('EMBED_DESCRIPTOR_CHILD_TYPE_MISMATCH');
+        }
+
+        return {
+            ...persistableDescriptor,
+            hostUnitId,
+            source: {
+                kind: 'ref',
+                ref,
+            },
+            childUnitId: descriptor.childUnitId ?? ref.unit.selector,
+            childType: descriptor.childType ?? refUnitType,
+            lifecycle: descriptor.lifecycle ?? 'active',
+        };
+    }
+
+    private _getDescriptorResourceRef(descriptor: EmbedDescriptor): ResourceRef {
+        if (descriptor.source.kind !== 'ref') {
+            throw new Error('EMBED_DESCRIPTOR_SOURCE_NOT_CANONICAL');
+        }
+
+        return descriptor.source.ref;
+    }
+
+    private _assertActiveChildUnitAvailable(descriptor: EmbedDescriptor, replacingUnitId?: string): void {
+        if (descriptor.lifecycle === 'soft-deleted' || !descriptor.childUnitId) {
+            return;
+        }
+
+        for (const [unitId, resource] of this._resources.entries()) {
+            if (unitId === replacingUnitId) {
+                continue;
+            }
+
+            const duplicated = Object.values(resource.embeds).find((item) =>
+                item.lifecycle !== 'soft-deleted' &&
+                item.childUnitId === descriptor.childUnitId &&
+                (item.hostUnitId !== descriptor.hostUnitId || item.embedId !== descriptor.embedId)
+            );
+            if (duplicated) {
+                throw new Error('EMBED_CHILD_UNIT_ALREADY_EMBEDDED');
+            }
+        }
+    }
+
+    private _assertResourceHasNoDuplicateActiveChildUnits(resource: EmbedResource): void {
+        const activeByChildUnit = new Map<string, EmbedDescriptor>();
+        for (const descriptor of Object.values(resource.embeds)) {
+            if (descriptor.lifecycle === 'soft-deleted' || !descriptor.childUnitId) {
+                continue;
+            }
+
+            const duplicated = activeByChildUnit.get(descriptor.childUnitId);
+            if (duplicated && duplicated.embedId !== descriptor.embedId) {
+                throw new Error('EMBED_CHILD_UNIT_ALREADY_EMBEDDED');
+            }
+
+            activeByChildUnit.set(descriptor.childUnitId, descriptor);
+        }
+    }
+
+    private _ensureResource(unitId: string): EmbedResource {
+        let resource = this._resources.get(unitId);
+        if (!resource) {
+            resource = this._createResource();
+            this._resources.set(unitId, resource);
+        }
+
+        return resource;
+    }
+
+    private _createResource(): EmbedResource {
+        return createEmptyEmbedResource();
+    }
+
+    private _cloneResource(resource: EmbedResource): EmbedResource {
+        return cloneEmbedResource(resource);
+    }
+}

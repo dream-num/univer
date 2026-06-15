@@ -24,14 +24,14 @@ import { ConditionalFormattingStyleComposer } from '../conditional-formatting-st
 describe('ConditionalFormattingStyleComposer', () => {
     let service: ConditionalFormattingStyleComposer;
     const rules = new Map<string, unknown>();
-    let cellCfs: Array<{ cfId: string; result: unknown }>;
+    let cellCfs: Array<{ cfId: string; result: unknown; priority: number }>;
 
     beforeEach(() => {
         rules.clear();
         cellCfs = [];
         const injector = new Injector();
-        injector.add([ConditionalFormattingRuleModel, { useValue: { getRule: (_unitId: string, _subUnitId: string, cfId: string) => rules.get(cfId) } }]);
-        injector.add([ConditionalFormattingViewModel, { useValue: { getCellCfs: () => cellCfs } }]);
+        injector.add([ConditionalFormattingRuleModel, { useValue: { getRule: (_unitId: string, _subUnitId: string, cfId: string) => rules.get(cfId) } as unknown as ConditionalFormattingRuleModel }]);
+        injector.add([ConditionalFormattingViewModel, { useValue: { getCellCfs: () => cellCfs } as unknown as ConditionalFormattingViewModel }]);
         injector.add([ConditionalFormattingStyleComposer]);
         service = injector.get(ConditionalFormattingStyleComposer);
     });
@@ -40,8 +40,8 @@ describe('ConditionalFormattingStyleComposer', () => {
         rules.set('color-scale', { stopIfTrue: false, rule: { type: CFRuleType.colorScale } });
         rules.set('highlight', { stopIfTrue: false, rule: { type: CFRuleType.highlightCell } });
         cellCfs = [
-            { cfId: 'color-scale', result: '#ffeeaa' },
-            { cfId: 'highlight', result: { cl: { rgb: '#333333' } } },
+            { cfId: 'color-scale', result: '#ffeeaa', priority: 1 },
+            { cfId: 'highlight', result: { cl: { rgb: '#333333' } }, priority: 2 },
         ];
 
         expect(service.composeStyle('book-1', 'sheet-1', 1, 1)).toEqual({
@@ -53,8 +53,8 @@ describe('ConditionalFormattingStyleComposer', () => {
         rules.set('stop', { stopIfTrue: true, rule: { type: CFRuleType.highlightCell } });
         rules.set('ignored', { stopIfTrue: false, rule: { type: CFRuleType.colorScale } });
         cellCfs = [
-            { cfId: 'stop', result: { bg: { rgb: '#ff0000' } } },
-            { cfId: 'ignored', result: '#00ff00' },
+            { cfId: 'stop', result: { bg: { rgb: '#ff0000' } }, priority: 1 },
+            { cfId: 'ignored', result: '#00ff00', priority: 2 },
         ];
 
         expect(service.composeStyle('book-1', 'sheet-1', 1, 1)).toEqual({

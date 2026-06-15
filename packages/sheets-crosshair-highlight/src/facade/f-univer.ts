@@ -15,15 +15,12 @@
  */
 
 import type { Injector } from '@univerjs/core';
-import type { ISetCrosshairHighlightColorOperationParams } from '@univerjs/sheets-crosshair-highlight';
-import type { ICrosshairHighlightColorChangedEventParams, ICrosshairHighlightEnabledChangedEventParams } from './f-event';
+import type { ICrosshairHighlightEnabledChangedEventParams } from './f-event';
 import { ICommandService } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import {
-    CROSSHAIR_HIGHLIGHT_COLORS,
     DisableCrosshairHighlightOperation,
     EnableCrosshairHighlightOperation,
-    SetCrosshairHighlightColorOperation,
     SheetsCrosshairHighlightService,
     ToggleCrosshairHighlightOperation,
 } from '@univerjs/sheets-crosshair-highlight';
@@ -44,19 +41,6 @@ export interface IFUniverSheetsCrosshairHighlightMixin {
     setCrosshairHighlightEnabled(enabled: boolean): FUniver;
 
     /**
-     * Set the color of the crosshair highlight.
-     * @param {string} color - The color of the crosshair highlight, if the color not has alpha channel, the alpha channel will be set to 0.5
-     * @returns {FUniver} The FUniver instance for chaining
-     * @example
-     * ```ts
-     * univerAPI.setCrosshairHighlightColor('#FF0000');
-     * // or
-     * univerAPI.setCrosshairHighlightColor('rgba(232, 11, 11, 0.2)');
-     * ```
-     */
-    setCrosshairHighlightColor(color: string): FUniver;
-
-    /**
      * Get whether the crosshair highlight is enabled.
      * @returns {boolean} Whether the crosshair highlight is enabled
      * @example
@@ -65,21 +49,6 @@ export interface IFUniverSheetsCrosshairHighlightMixin {
      * ```
      */
     getCrosshairHighlightEnabled(): boolean;
-
-    /**
-     * Get the color of the crosshair highlight.
-     * @returns {string} The color of the crosshair highlight
-     * @example
-     * ```ts
-     * console.log(univerAPI.getCrosshairHighlightColor());
-     * ```
-     */
-    getCrosshairHighlightColor(): string;
-
-    /**
-     * Get the available built-in colors for the crosshair highlight.
-     */
-    readonly CROSSHAIR_HIGHLIGHT_COLORS: string[];
 }
 
 /**
@@ -112,23 +81,6 @@ export class FUniverSheetsCrosshairHighlightMixin extends FUniver implements IFU
                 })
             )
         );
-
-        this.disposeWithMe(
-            this.registerEventHandler(
-                this.Event.CrosshairHighlightColorChanged,
-                () => commandService.onCommandExecuted((commandInfo) => {
-                    if (commandInfo.id === SetCrosshairHighlightColorOperation.id) {
-                        const activeSheet = this.getActiveSheet();
-                        if (!activeSheet) return;
-                        const eventParams: ICrosshairHighlightColorChangedEventParams = {
-                            color: this.getCrosshairHighlightColor(),
-                            ...activeSheet,
-                        };
-                        this.fireEvent(this.Event.CrosshairHighlightColorChanged, eventParams);
-                    }
-                })
-            )
-        );
     }
 
     override setCrosshairHighlightEnabled(enabled: boolean): FUniver {
@@ -141,25 +93,9 @@ export class FUniverSheetsCrosshairHighlightMixin extends FUniver implements IFU
         return this;
     }
 
-    override setCrosshairHighlightColor(color: string): FUniver {
-        this._commandService.syncExecuteCommand(SetCrosshairHighlightColorOperation.id, {
-            value: color,
-        } as ISetCrosshairHighlightColorOperationParams);
-        return this;
-    }
-
     override getCrosshairHighlightEnabled(): boolean {
         const crosshairHighlightService = this._injector.get(SheetsCrosshairHighlightService);
         return crosshairHighlightService.enabled;
-    }
-
-    override getCrosshairHighlightColor(): string {
-        const crosshairHighlightService = this._injector.get(SheetsCrosshairHighlightService);
-        return crosshairHighlightService.color;
-    }
-
-    override get CROSSHAIR_HIGHLIGHT_COLORS(): string[] {
-        return CROSSHAIR_HIGHLIGHT_COLORS;
     }
 }
 

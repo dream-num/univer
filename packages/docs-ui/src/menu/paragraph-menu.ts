@@ -16,7 +16,7 @@
 
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuItem, IMenuSelectorItem } from '@univerjs/ui';
-import { ICommandService, NamedStyleType, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, NamedStyleType, ThemeService, UniverInstanceType } from '@univerjs/core';
 import { SetTextSelectionsOperation } from '@univerjs/docs';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { Observable } from 'rxjs';
@@ -28,27 +28,10 @@ import { BulletListCommand, CheckListCommand, InsertBulletListBellowCommand, Ins
 import { H1HeadingCommand, H2HeadingCommand, H3HeadingCommand, H4HeadingCommand, H5HeadingCommand, NormalTextHeadingCommand, SubtitleHeadingCommand, TitleHeadingCommand } from '../commands/commands/set-heading.command';
 import { DocTableDeleteTableCommand } from '../commands/commands/table/doc-table-delete.command';
 import { DocCreateTableOperation } from '../commands/operations/doc-create-table.operation';
+import { getHighlightBackgroundColor } from '../views/paragraph-menu/theme-color';
 import { BackgroundColorSelectorMenuItemFactory, disableMenuWhenNoDocRange, getParagraphStyleAtCursor, TextColorSelectorMenuItemFactory } from './menu';
 
 export const TEXT_COLORS = ['#FE4B4B', '#FF8C51', '#A4DC16', '#2DAEFF', '#3A60F7', '#9E6DE3', '#F248A6'];
-export const BACKGROUND_COLORS = [
-    'rgba(158, 109, 227, 0.3)',
-    'rgba(254, 75, 75, 0.3)',
-    'rgba(255, 140, 81, 0.3)',
-    'rgba(164, 220, 22, 0.3)',
-    'rgba(45, 174, 255, 0.3)',
-    'rgba(58, 96, 247, 0.3)',
-    'rgba(242, 72, 166, 0.3)',
-    'rgba(153, 153, 153, 0.3)',
-    'rgba(158, 109, 227, 0.15)',
-    'rgba(254, 75, 75, 0.15)',
-    'rgba(255, 140, 81, 0.15)',
-    'rgba(164, 220, 22, 0.15)',
-    'rgba(45, 174, 255, 0.15)',
-    'rgba(58, 96, 247, 0.15)',
-    'rgba(242, 72, 166, 0.15)',
-];
-
 export const TEXT_COLOR_SWATCH_ICONS = [
     'DocParagraphTextColorSwatchIcon.0',
     'DocParagraphTextColorSwatchIcon.1',
@@ -75,6 +58,7 @@ export const BACKGROUND_COLOR_SWATCH_ICONS = [
     'DocParagraphBackgroundColorSwatchIcon.12',
     'DocParagraphBackgroundColorSwatchIcon.13',
     'DocParagraphBackgroundColorSwatchIcon.14',
+    'DocParagraphBackgroundColorSwatchIcon.15',
 ] as const;
 
 function getHeadingActivatedObservable(accessor: IAccessor, headingType: NamedStyleType): Observable<boolean> {
@@ -649,20 +633,25 @@ export const ParagraphMenuTextColorSwatchMenuItemFactories = TEXT_COLORS.reduce<
     return items;
 }, {});
 
-export const ParagraphMenuBackgroundColorSwatchMenuItemFactories = BACKGROUND_COLORS.reduce<Record<string, { order: number; menuItemFactory: (accessor: IAccessor) => IMenuButtonItem }>>((items, color, index) => {
+export const ParagraphMenuBackgroundColorSwatchMenuItemFactories = BACKGROUND_COLOR_SWATCH_ICONS.reduce<Record<string, { order: number; menuItemFactory: (accessor: IAccessor) => IMenuButtonItem }>>((items, icon, index) => {
     const id = `doc.menu.paragraph-t.background-color.${index}`;
     items[id] = {
         order: index,
-        menuItemFactory: (accessor: IAccessor): IMenuButtonItem => ({
-            id,
-            commandId: SetInlineFormatTextBackgroundColorCommand.id,
-            type: MenuItemType.BUTTON,
-            icon: BACKGROUND_COLOR_SWATCH_ICONS[index],
-            params: {
-                value: color,
-            },
-            hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
-        }),
+        menuItemFactory: (accessor: IAccessor): IMenuButtonItem => {
+            const themeService = accessor.get(ThemeService);
+            const color = getHighlightBackgroundColor(themeService, index);
+
+            return {
+                id,
+                commandId: SetInlineFormatTextBackgroundColorCommand.id,
+                type: MenuItemType.BUTTON,
+                icon,
+                params: {
+                    value: color,
+                },
+                hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+            };
+        },
     };
     return items;
 }, {});

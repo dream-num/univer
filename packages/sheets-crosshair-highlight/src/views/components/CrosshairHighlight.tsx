@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 
+import { ThemeService } from '@univerjs/core';
 import { borderClassName, clsx } from '@univerjs/design';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useCallback } from 'react';
-import { CROSSHAIR_HIGHLIGHT_COLORS, SheetsCrosshairHighlightService } from '../../services/crosshair.service';
+import {
+    CROSSHAIR_HIGHLIGHT_COLOR_THEME_PATHS,
+    resolveCrosshairHighlightColors,
+    SheetsCrosshairHighlightService,
+} from '../../services/crosshair.service';
 
 export interface ICrosshairOverlayProps {
     onChange?: (value: string) => void;
@@ -27,19 +32,23 @@ export function CrosshairOverlay(props: ICrosshairOverlayProps) {
     const { onChange } = props;
 
     const crosshairSrv = useDependency(SheetsCrosshairHighlightService);
+    const themeService = useDependency(ThemeService);
 
     const currentColor = useObservable(crosshairSrv.color$);
+    useObservable(themeService.currentTheme$);
 
-    const handleColorPicked = useCallback((color: string) => {
-        onChange?.(color);
+    const colors = resolveCrosshairHighlightColors(themeService);
+
+    const handleColorPicked = useCallback((tokenPath: string) => {
+        onChange?.(tokenPath);
     }, [onChange]);
 
     return (
         <div className="univer-grid univer-grid-cols-8 univer-gap-x-2 univer-gap-y-3">
-            {CROSSHAIR_HIGHLIGHT_COLORS.map((color: string) => {
+            {colors.map((color: string, index: number) => {
                 return (
                     <div
-                        key={color}
+                        key={CROSSHAIR_HIGHLIGHT_COLOR_THEME_PATHS[index]}
                         className={clsx(`
                           hover:univer-ring-primary-600/40
                           univer-box-border univer-size-5 univer-cursor-pointer univer-rounded univer-ring-offset-1
@@ -49,7 +58,7 @@ export function CrosshairOverlay(props: ICrosshairOverlayProps) {
                             'univer-ring-[1.5px] univer-ring-primary-600 hover:univer-ring-primary-600': color === currentColor,
                         })}
                         style={{ backgroundColor: color }}
-                        onClick={() => handleColorPicked(color)}
+                        onClick={() => handleColorPicked(CROSSHAIR_HIGHLIGHT_COLOR_THEME_PATHS[index])}
                     />
                 );
             })}

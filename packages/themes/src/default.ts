@@ -163,6 +163,26 @@ const defaultTheme = {
         11: 'green.600',
         12: 'yellow.700',
     },
+    highlight: {
+        background: {
+            1: { color: 'purple.500', alpha: 0.3 },
+            2: { color: 'red.500', alpha: 0.3 },
+            3: { color: 'orange.400', alpha: 0.3 },
+            4: { color: 'green.400', alpha: 0.3 },
+            5: { color: 'blue.500', alpha: 0.3 },
+            6: { color: 'primary.500', alpha: 0.3 },
+            7: { color: 'pink.500', alpha: 0.3 },
+            8: { color: 'gray.400', alpha: 0.3 },
+            9: { color: 'purple.500', alpha: 0.15 },
+            10: { color: 'red.500', alpha: 0.15 },
+            11: { color: 'orange.400', alpha: 0.15 },
+            12: { color: 'green.400', alpha: 0.15 },
+            13: { color: 'blue.500', alpha: 0.15 },
+            14: { color: 'primary.500', alpha: 0.15 },
+            15: { color: 'pink.500', alpha: 0.15 },
+            16: { color: 'gray.400', alpha: 0.15 },
+        },
+    },
 };
 
 export type Theme = typeof defaultTheme;

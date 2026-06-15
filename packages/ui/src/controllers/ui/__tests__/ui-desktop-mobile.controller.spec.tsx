@@ -58,6 +58,9 @@ function createCommonDeps() {
             focused$: new Subject<string>(),
             getFocusedUnit: vi.fn(() => null),
         },
+        iconManager: {
+            register: vi.fn(() => ({ dispose: vi.fn() })),
+        },
     };
 }
 
@@ -97,7 +100,8 @@ describe('DesktopUIController', () => {
             deps.instanceService as any,
             menuManagerService as any,
             uiPartsService as any,
-            componentManager as any
+            componentManager as any,
+            deps.iconManager as any
         );
 
         vi.advanceTimersByTime(3300);
@@ -131,7 +135,8 @@ describe('DesktopUIController', () => {
             deps.instanceService as any,
             menuManagerService as any,
             uiPartsService as any,
-            componentManager as any
+            componentManager as any,
+            deps.iconManager as any
         );
 
         const withDefault = new DesktopUIController(
@@ -143,7 +148,8 @@ describe('DesktopUIController', () => {
             deps.instanceService as any,
             menuManagerService as any,
             uiPartsService as any,
-            componentManager as any
+            componentManager as any,
+            deps.iconManager as any
         );
 
         vi.advanceTimersByTime(3300);
@@ -178,7 +184,8 @@ describe('DesktopUIController', () => {
             deps.instanceService as any,
             menuManagerService as any,
             uiPartsService as any,
-            componentManager as any
+            componentManager as any,
+            deps.iconManager as any
         );
 
         vi.advanceTimersByTime(3300);
@@ -221,7 +228,8 @@ describe('MobileUIController', () => {
             deps.instanceService as any,
             menuManagerService as any,
             uiPartsService as any,
-            componentManager as any
+            componentManager as any,
+            deps.iconManager as any
         );
 
         vi.advanceTimersByTime(3300);
@@ -267,7 +275,8 @@ describe('MobileUIController', () => {
             deps.instanceService as any,
             menuManagerService as any,
             uiPartsService as any,
-            componentManager as any
+            componentManager as any,
+            deps.iconManager as any
         );
 
         const byElement = new MobileUIController(
@@ -279,7 +288,8 @@ describe('MobileUIController', () => {
             deps.instanceService as any,
             menuManagerService as any,
             uiPartsService as any,
-            componentManager as any
+            componentManager as any,
+            deps.iconManager as any
         );
 
         const byDefault = new MobileUIController(
@@ -291,7 +301,8 @@ describe('MobileUIController', () => {
             deps.instanceService as any,
             menuManagerService as any,
             uiPartsService as any,
-            componentManager as any
+            componentManager as any,
+            deps.iconManager as any
         );
 
         vi.advanceTimersByTime(3300);

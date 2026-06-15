@@ -23,7 +23,6 @@ const mocked = vi.hoisted(() => ({
     enableId: 'enable',
     disableId: 'disable',
     toggleId: 'toggle',
-    setColorId: 'set-color',
 }));
 
 vi.mock('@univerjs/core/facade', () => {
@@ -41,11 +40,9 @@ vi.mock('@univerjs/core/facade', () => {
 });
 
 vi.mock('@univerjs/sheets-crosshair-highlight', () => ({
-    CROSSHAIR_HIGHLIGHT_COLORS: mocked.colors,
     DisableCrosshairHighlightOperation: { id: mocked.disableId },
     EnableCrosshairHighlightOperation: { id: mocked.enableId },
     ToggleCrosshairHighlightOperation: { id: mocked.toggleId },
-    SetCrosshairHighlightColorOperation: { id: mocked.setColorId },
     SheetsCrosshairHighlightService: class {},
 }));
 
@@ -69,12 +66,10 @@ describe('crosshair facade', () => {
         const thisArg = {
             Event: {
                 CrosshairHighlightEnabledChanged: 'CrosshairHighlightEnabledChanged',
-                CrosshairHighlightColorChanged: 'CrosshairHighlightColorChanged',
             },
             _injector: {
                 get: vi.fn(() => ({
                     enabled: true,
-                    color: 'rgba(1,2,3,0.2)',
                 })),
             },
             _commandService: {
@@ -85,7 +80,6 @@ describe('crosshair facade', () => {
                 worksheet: { id: 'ws' },
             })),
             getCrosshairHighlightEnabled: vi.fn(() => true),
-            getCrosshairHighlightColor: vi.fn(() => 'rgba(1,2,3,0.2)'),
             fireEvent,
             registerEventHandler,
             disposeWithMe: vi.fn(),
@@ -95,19 +89,16 @@ describe('crosshair facade', () => {
             thisArg,
             { get: vi.fn(() => commandService) } as never
         );
-        expect(registerEventHandler).toHaveBeenCalledTimes(2);
+        expect(registerEventHandler).toHaveBeenCalledTimes(1);
 
         callbacks[0]({ id: mocked.enableId });
         callbacks[0]({ id: mocked.disableId });
         callbacks[0]({ id: mocked.toggleId });
         callbacks[0]({ id: 'other-command' });
-        callbacks[1]({ id: mocked.setColorId });
-        callbacks[1]({ id: 'other-color-command' });
         expect(fireEvent).toHaveBeenCalled();
 
         thisArg.getActiveSheet.mockReturnValue(undefined as never);
         callbacks[0]({ id: mocked.enableId });
-        callbacks[1]({ id: mocked.setColorId });
 
         const enabledResult = module1.FUniverSheetsCrosshairHighlightMixin.prototype.setCrosshairHighlightEnabled.call(thisArg, true);
         const disabledResult = module1.FUniverSheetsCrosshairHighlightMixin.prototype.setCrosshairHighlightEnabled.call(thisArg, false);
@@ -116,17 +107,10 @@ describe('crosshair facade', () => {
         expect(thisArg._commandService.syncExecuteCommand).toHaveBeenCalledWith(mocked.enableId);
         expect(thisArg._commandService.syncExecuteCommand).toHaveBeenCalledWith(mocked.disableId);
 
-        const colorResult = module1.FUniverSheetsCrosshairHighlightMixin.prototype.setCrosshairHighlightColor.call(thisArg, '#ff0000');
-        expect(colorResult).toBe(thisArg);
-        expect(thisArg._commandService.syncExecuteCommand).toHaveBeenCalledWith(mocked.setColorId, { value: '#ff0000' });
-
         expect(module1.FUniverSheetsCrosshairHighlightMixin.prototype.getCrosshairHighlightEnabled.call(thisArg)).toBe(true);
-        expect(module1.FUniverSheetsCrosshairHighlightMixin.prototype.getCrosshairHighlightColor.call(thisArg)).toBe('rgba(1,2,3,0.2)');
-        expect(module1.FUniverSheetsCrosshairHighlightMixin.prototype.CROSSHAIR_HIGHLIGHT_COLORS).toBe(mocked.colors);
 
         const eventEnum = new module2.FSheetsCrosshairHighlightEventNameMixin();
         expect(eventEnum.CrosshairHighlightEnabledChanged).toBe('CrosshairHighlightEnabledChanged');
-        expect(eventEnum.CrosshairHighlightColorChanged).toBe('CrosshairHighlightColorChanged');
     });
 
     it('should run facade entry export', async () => {

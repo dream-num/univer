@@ -81,6 +81,14 @@ describe('Test theme service', () => {
         expect(themeService.getColorFromTheme('primary.600')).toBe('#abcdef');
     });
 
+    it('should get semantic highlight background token from theme', () => {
+        const themeService = univer.__getInjector().get(ThemeService);
+        const token = themeService.getColorFromTheme<{ color: string; alpha: number }>('highlight.background.1');
+
+        expect(token).toEqual({ color: 'purple.500', alpha: 0.3 });
+        expect(themeService.getColorFromTheme(token.color)).toBe('#9061F9');
+    });
+
     it('should tap cached theme color', () => {
         const themeService = univer.__getInjector().get(ThemeService);
         const oldTheme = themeService.getCurrentTheme();

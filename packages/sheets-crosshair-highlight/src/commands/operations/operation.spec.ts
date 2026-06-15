@@ -17,13 +17,9 @@
 import { MenuItemType } from '@univerjs/ui';
 import { of } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
-import {
-    CROSSHAIR_HIGHLIGHT_OVERLAY_COMPONENT,
-    CrosshairHighlightMenuItemFactory,
-} from '../../menu/crosshair.menu';
+import { CrosshairHighlightMenuItemFactory } from '../../menu/crosshair.menu';
 import { menuSchema } from '../../menu/schema';
 import {
-    CROSSHAIR_HIGHLIGHT_COLORS,
     SheetsCrosshairHighlightService,
 } from '../../services/crosshair.service';
 import {
@@ -41,52 +37,57 @@ vi.mock('@univerjs/ui', async () => {
     };
 });
 
+function createThemeService() {
+    return {
+        currentTheme$: of({}),
+        getColorFromTheme: vi.fn((path: string) => ({
+            'highlight.background.1': { color: 'purple.500', alpha: 0.3 },
+            'highlight.background.2': { color: 'red.500', alpha: 0.15 },
+            'purple.500': '#010203',
+            'red.500': '#040506',
+        })[path]),
+    };
+}
+
 describe('crosshair operations/menu/service', () => {
     it('should handle service state changes and dispose', () => {
-        const service = new SheetsCrosshairHighlightService();
+        const service = new SheetsCrosshairHighlightService(createThemeService() as never);
         expect(service.enabled).toBe(false);
-        expect(service.color).toBe(CROSSHAIR_HIGHLIGHT_COLORS[0]);
 
         service.setEnabled(true);
-        service.setColor(CROSSHAIR_HIGHLIGHT_COLORS[1]);
         expect(service.enabled).toBe(true);
-        expect(service.color).toBe(CROSSHAIR_HIGHLIGHT_COLORS[1]);
 
         service.dispose();
     });
 
     it('should execute operation handlers with branch coverage', () => {
-        const service = new SheetsCrosshairHighlightService();
+        const service = new SheetsCrosshairHighlightService(createThemeService() as never);
         const accessor = { get: vi.fn(() => service) };
 
         expect(ToggleCrosshairHighlightOperation.handler(accessor as never, undefined as never)).toBe(true);
         expect(service.enabled).toBe(true);
 
         service.setEnabled(false);
-        expect(SetCrosshairHighlightColorOperation.handler(accessor as never, { value: 'rgba(0,0,0,0.1)' })).toBe(true);
-        expect(service.enabled).toBe(true);
-        expect(service.color).toBe('rgba(0,0,0,0.1)');
-        expect(SetCrosshairHighlightColorOperation.handler(accessor as never, { value: 'rgba(0,0,0,0.2)' })).toBe(true);
-
-        expect(EnableCrosshairHighlightOperation.handler(accessor as never, undefined as never)).toBe(false);
-        service.setEnabled(false);
         expect(EnableCrosshairHighlightOperation.handler(accessor as never, undefined as never)).toBe(true);
+        expect(EnableCrosshairHighlightOperation.handler(accessor as never, undefined as never)).toBe(false);
 
         expect(DisableCrosshairHighlightOperation.handler(accessor as never, undefined as never)).toBe(true);
         expect(DisableCrosshairHighlightOperation.handler(accessor as never, undefined as never)).toBe(false);
+
+        expect(SetCrosshairHighlightColorOperation.handler(accessor as never, { value: 'highlight.background.2' })).toBe(true);
+        expect(service.enabled).toBe(true);
     });
 
     it('should create menu item schema and factory output', () => {
-        const service = new SheetsCrosshairHighlightService();
+        const service = new SheetsCrosshairHighlightService(createThemeService() as never);
         service.setEnabled(true);
         const accessor = { get: vi.fn(() => service) };
 
         const item = CrosshairHighlightMenuItemFactory(accessor as never);
         expect(item.id).toBe(ToggleCrosshairHighlightOperation.id);
         expect(item.type).toBe(MenuItemType.BUTTON_SELECTOR);
-        const itemSelections = (item as unknown as { selections: Array<{ label: { name: string } }> }).selections;
-        expect(itemSelections[0].label.name).toBe(CROSSHAIR_HIGHLIGHT_OVERLAY_COMPONENT);
         expect(item.selectionsCommandId).toBe(SetCrosshairHighlightColorOperation.id);
+        expect(item.selections).toHaveLength(1);
         expect(item.activated$).toBe(service.enabled$);
         expect(item.hidden$).toBeDefined();
 

@@ -22,7 +22,8 @@ import type { IUIController, IWorkbenchOptions } from './ui.controller';
 import { Inject, Injector, IUniverInstanceService, LifecycleService, toDisposable } from '@univerjs/core';
 import { ColorPicker, render as createRoot, unmount } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { ComponentManager } from '../../common';
+import { IncreaseIcon, MoreDownIcon, RedoIcon, ReduceIcon, ShortcutIcon, UndoIcon } from '@univerjs/icons';
+import { ComponentManager, IconManager } from '../../common';
 import { menuSchema } from '../../menu/schema';
 import { ILayoutService } from '../../services/layout/layout.service';
 import { IMenuManagerService } from '../../services/menu/menu-manager.service';
@@ -51,14 +52,27 @@ export class MobileUIController extends SingleUnitUIController implements IUICon
         @IUniverInstanceService instanceService: IUniverInstanceService,
         @IMenuManagerService menuManagerService: IMenuManagerService,
         @IUIPartsService uiPartsService: IUIPartsService,
-        @Inject(ComponentManager) private readonly _componentManager: ComponentManager
+        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
+        @Inject(IconManager) private readonly _iconManager: IconManager
     ) {
         super(injector, instanceService, layoutService, lifecycleService, renderManagerService);
 
         menuManagerService.mergeMenu(menuSchema);
         this._initBuiltinComponents(uiPartsService);
         this._registerComponents();
+        this._registerIcons();
         this._bootstrapWorkbench();
+    }
+
+    private _registerIcons(): void {
+        this.disposeWithMe(this._iconManager.register({
+            IncreaseIcon,
+            MoreDownIcon,
+            RedoIcon,
+            ReduceIcon,
+            ShortcutIcon,
+            UndoIcon,
+        }));
     }
 
     override dispose(): void {

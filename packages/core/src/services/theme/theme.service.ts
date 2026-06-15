@@ -107,9 +107,9 @@ export class ThemeService extends Disposable {
     /**
      * Get a color from the current theme.
      * @param {string} color - The color key to retrieve.
-     * @returns {string} The color value from the current theme.
+     * @returns The value from the current theme.
      */
-    getColorFromTheme(color: string): string {
-        return get(this._currentTheme, color);
+    getColorFromTheme<T = string>(color: string): T {
+        return get(this._currentTheme, color) as T;
     }
 }

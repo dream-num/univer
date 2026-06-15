@@ -321,7 +321,7 @@ export function Slider(props: ISliderProps) {
                 disabled={value <= min || disabled}
                 onClick={() => handleStep(-10)}
             >
-                <ReduceIcon />
+                <ReduceIcon className="univer-text-gray-500" />
             </Button>
 
             <div
@@ -376,14 +376,14 @@ export function Slider(props: ISliderProps) {
                             className={clsx(`
                               univer-absolute univer-top-1/2 univer-size-3.5 -univer-translate-x-1/2
                               -univer-translate-y-1/2 univer-rounded-full univer-bg-white univer-shadow-sm
-                              univer-transition-colors
+                              univer-transition-all
                               focus-visible:univer-outline-none focus-visible:univer-ring-2
                               focus-visible:univer-ring-primary-100
                               dark:!univer-bg-gray-800
                             `, borderClassName, {
                                 'univer-cursor-pointer hover:univer-border-primary-600 hover:univer-shadow-md': !disabled,
                                 'univer-cursor-not-allowed': disabled,
-                                'univer-scale-125 univer-border-primary-600 univer-shadow-md': isDragging,
+                                'univer-scale-105 univer-border-primary-600 univer-shadow-md': isDragging,
                             })}
                             role="slider"
                             aria-valuemin={min}
@@ -406,7 +406,7 @@ export function Slider(props: ISliderProps) {
                 disabled={value >= max || disabled}
                 onClick={() => handleStep(10)}
             >
-                <IncreaseIcon />
+                <IncreaseIcon className="univer-text-gray-500" />
             </Button>
 
             <div

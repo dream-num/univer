@@ -71,7 +71,7 @@ describe('SheetCrosshairHighlightRenderController', () => {
 
         const refSelectionEnabled$ = new BehaviorSubject(false);
         const enabled$ = new BehaviorSubject(false);
-        const color$ = new BehaviorSubject('rgba(10,20,30,0.6)');
+        const highlightColor$ = new BehaviorSubject('rgba(10,20,30,0.6)');
         const skeleton = { a: 1 };
         const currentSkeleton$ = new BehaviorSubject(skeleton);
 
@@ -101,7 +101,7 @@ describe('SheetCrosshairHighlightRenderController', () => {
             } as never,
             {
                 enabled$,
-                color$,
+                highlightColor$,
             } as never,
             {
                 subscribeContextValue$: vi.fn(() => refSelectionEnabled$.asObservable()),

@@ -15,7 +15,7 @@
  */
 
 import { ThemeService } from '@univerjs/core';
-import { defaultTheme, greenTheme } from '@univerjs/themes';
+import { defaultTheme, greenTheme, redTheme } from '@univerjs/themes';
 import { useDependency } from '@univerjs/ui';
 import { useEffect } from 'react';
 
@@ -27,6 +27,10 @@ const themes = [
     {
         label: '🔵',
         value: defaultTheme,
+    },
+    {
+        label: '🔴',
+        value: redTheme,
     },
 ];
 

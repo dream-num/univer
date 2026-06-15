@@ -21,7 +21,15 @@ import { serializeRange } from '@univerjs/engine-formula';
 import { AscendingIcon, CustomSortIcon, DescendingIcon, ExpandAscendingIcon, ExpandDescendingIcon } from '@univerjs/icons';
 import { SortRangeCommand } from '@univerjs/sheets-sort';
 import { SheetsRenderService, SheetsUIPart } from '@univerjs/sheets-ui';
-import { ComponentManager, connectInjector, IconManager, IDialogService, ILayoutService, IMenuManagerService, IUIPartsService } from '@univerjs/ui';
+import {
+    ComponentManager,
+    connectInjector,
+    IconManager,
+    IDialogService,
+    ILayoutService,
+    IMenuManagerService,
+    IUIPartsService,
+} from '@univerjs/ui';
 import { takeUntil } from 'rxjs';
 import {
     SortRangeAscCommand,
@@ -136,8 +144,8 @@ export class SheetsSortUIController extends RxDisposable {
             AscendingIcon,
             ExpandAscendingIcon,
             DescendingIcon,
-            [SHEETS_SORT_DESC_EXT_ICON]: ExpandDescendingIcon,
-            [SHEETS_SORT_CUSTOM_ICON]: CustomSortIcon,
+            ExpandDescendingIcon,
+            CustomSortIcon,
         }));
     }
 }

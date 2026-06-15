@@ -15,6 +15,9 @@
  */
 
 import type { IconType, IIconProps } from '@univerjs/ui';
+import { ThemeService } from '@univerjs/core';
+import { useDependency, useObservable } from '@univerjs/ui';
+import { getHighlightBackgroundColor } from './paragraph-menu/theme-color';
 
 type ColorSwatchIconProps = IIconProps & {
     color: string;
@@ -167,8 +170,12 @@ function createTextColorSwatchIcon(color: string): IconType {
     };
 }
 
-function createBackgroundColorSwatchIcon(color: string): IconType {
+function createBackgroundColorSwatchIcon(index: number): IconType {
     return function DocParagraphBackgroundColorSwatchIcon(props: IIconProps) {
+        const themeService = useDependency(ThemeService);
+        useObservable(themeService.currentTheme$);
+        const color = getHighlightBackgroundColor(themeService, index);
+
         return <BackgroundColorSwatchIcon {...props} color={color} />;
     };
 }
@@ -181,18 +188,19 @@ export const DocParagraphTextColorSwatchIcon4 = createTextColorSwatchIcon('#3A60
 export const DocParagraphTextColorSwatchIcon5 = createTextColorSwatchIcon('#9E6DE3');
 export const DocParagraphTextColorSwatchIcon6 = createTextColorSwatchIcon('#F248A6');
 
-export const DocParagraphBackgroundColorSwatchIcon0 = createBackgroundColorSwatchIcon('rgba(158, 109, 227, 0.3)');
-export const DocParagraphBackgroundColorSwatchIcon1 = createBackgroundColorSwatchIcon('rgba(254, 75, 75, 0.3)');
-export const DocParagraphBackgroundColorSwatchIcon2 = createBackgroundColorSwatchIcon('rgba(255, 140, 81, 0.3)');
-export const DocParagraphBackgroundColorSwatchIcon3 = createBackgroundColorSwatchIcon('rgba(164, 220, 22, 0.3)');
-export const DocParagraphBackgroundColorSwatchIcon4 = createBackgroundColorSwatchIcon('rgba(45, 174, 255, 0.3)');
-export const DocParagraphBackgroundColorSwatchIcon5 = createBackgroundColorSwatchIcon('rgba(58, 96, 247, 0.3)');
-export const DocParagraphBackgroundColorSwatchIcon6 = createBackgroundColorSwatchIcon('rgba(242, 72, 166, 0.3)');
-export const DocParagraphBackgroundColorSwatchIcon7 = createBackgroundColorSwatchIcon('rgba(153, 153, 153, 0.3)');
-export const DocParagraphBackgroundColorSwatchIcon8 = createBackgroundColorSwatchIcon('rgba(158, 109, 227, 0.15)');
-export const DocParagraphBackgroundColorSwatchIcon9 = createBackgroundColorSwatchIcon('rgba(254, 75, 75, 0.15)');
-export const DocParagraphBackgroundColorSwatchIcon10 = createBackgroundColorSwatchIcon('rgba(255, 140, 81, 0.15)');
-export const DocParagraphBackgroundColorSwatchIcon11 = createBackgroundColorSwatchIcon('rgba(164, 220, 22, 0.15)');
-export const DocParagraphBackgroundColorSwatchIcon12 = createBackgroundColorSwatchIcon('rgba(45, 174, 255, 0.15)');
-export const DocParagraphBackgroundColorSwatchIcon13 = createBackgroundColorSwatchIcon('rgba(58, 96, 247, 0.15)');
-export const DocParagraphBackgroundColorSwatchIcon14 = createBackgroundColorSwatchIcon('rgba(242, 72, 166, 0.15)');
+export const DocParagraphBackgroundColorSwatchIcon0 = createBackgroundColorSwatchIcon(0);
+export const DocParagraphBackgroundColorSwatchIcon1 = createBackgroundColorSwatchIcon(1);
+export const DocParagraphBackgroundColorSwatchIcon2 = createBackgroundColorSwatchIcon(2);
+export const DocParagraphBackgroundColorSwatchIcon3 = createBackgroundColorSwatchIcon(3);
+export const DocParagraphBackgroundColorSwatchIcon4 = createBackgroundColorSwatchIcon(4);
+export const DocParagraphBackgroundColorSwatchIcon5 = createBackgroundColorSwatchIcon(5);
+export const DocParagraphBackgroundColorSwatchIcon6 = createBackgroundColorSwatchIcon(6);
+export const DocParagraphBackgroundColorSwatchIcon7 = createBackgroundColorSwatchIcon(7);
+export const DocParagraphBackgroundColorSwatchIcon8 = createBackgroundColorSwatchIcon(8);
+export const DocParagraphBackgroundColorSwatchIcon9 = createBackgroundColorSwatchIcon(9);
+export const DocParagraphBackgroundColorSwatchIcon10 = createBackgroundColorSwatchIcon(10);
+export const DocParagraphBackgroundColorSwatchIcon11 = createBackgroundColorSwatchIcon(11);
+export const DocParagraphBackgroundColorSwatchIcon12 = createBackgroundColorSwatchIcon(12);
+export const DocParagraphBackgroundColorSwatchIcon13 = createBackgroundColorSwatchIcon(13);
+export const DocParagraphBackgroundColorSwatchIcon14 = createBackgroundColorSwatchIcon(14);
+export const DocParagraphBackgroundColorSwatchIcon15 = createBackgroundColorSwatchIcon(15);

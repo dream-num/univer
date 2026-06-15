@@ -15,7 +15,7 @@
  */
 
 import { Disposable, ICommandService, Inject, Injector } from '@univerjs/core';
-import { GraphIcon, TextIcon } from '@univerjs/icons';
+import { AddImageIcon, GraphIcon, TextIcon } from '@univerjs/icons';
 import { BuiltInUIPart, ComponentManager, connectInjector, IconManager, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 import { ActivateSlidePageOperation } from '../commands/operations/activate.operation';
 import { AppendSlideOperation } from '../commands/operations/append-slide.operation';
@@ -69,6 +69,7 @@ export class SlidesUIController extends Disposable {
 
     private _registerIcons(): void {
         this.disposeWithMe(this._iconManager.register({
+            AddImageIcon,
             TextIcon,
             GraphIcon,
         }));

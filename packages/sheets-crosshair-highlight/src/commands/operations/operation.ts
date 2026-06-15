@@ -33,18 +33,16 @@ export const ToggleCrosshairHighlightOperation: IOperation = {
 };
 
 /**
- * A {@link CommandType.OPERATION} to set the crosshair highlight color.
- * @property {string} value - The color value to set.
+ * A {@link CommandType.OPERATION} to set the crosshair highlight color theme token.
+ * @property {string} value - The theme token path to set.
  */
 export interface ISetCrosshairHighlightColorOperationParams {
     value: string;
 }
 
 /**
- * A {@link CommandType.OPERATION} to set the crosshair highlight color. It the crosshair highlight is not enabled,
+ * A {@link CommandType.OPERATION} to set the crosshair highlight color. If the crosshair highlight is not enabled,
  * it will be enabled.
- *
- * Its params {@link ISetCrosshairHighlightColorOperationParams} contains the color value to set as and is required.
  */
 export const SetCrosshairHighlightColorOperation: IOperation<ISetCrosshairHighlightColorOperationParams> = {
     id: 'sheet.operation.set-crosshair-highlight-color',

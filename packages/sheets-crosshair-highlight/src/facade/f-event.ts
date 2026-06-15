@@ -33,21 +33,6 @@ export interface IFSheetsCrosshairHighlightEventNameMixin {
      * ```
      */
     readonly CrosshairHighlightEnabledChanged: 'CrosshairHighlightEnabledChanged';
-
-    /**
-     * Triggered when the crosshair highlight color is changed.
-     * @see {@link ICrosshairHighlightColorChangedEventParams}
-     * @example
-     * ```ts
-     * const disposable = univerAPI.addEvent(univerAPI.Event.CrosshairHighlightColorChanged, (params) => {
-     *   const { color, workbook, worksheet } = params;
-     *   console.log(params);
-     * });
-     *
-     * // Remove the event listener, use `disposable.dispose()`
-     * ```
-     */
-    readonly CrosshairHighlightColorChanged: 'CrosshairHighlightColorChanged';
 }
 
 /**
@@ -56,10 +41,6 @@ export interface IFSheetsCrosshairHighlightEventNameMixin {
 export class FSheetsCrosshairHighlightEventNameMixin extends FEventName implements IFSheetsCrosshairHighlightEventNameMixin {
     override get CrosshairHighlightEnabledChanged(): 'CrosshairHighlightEnabledChanged' {
         return 'CrosshairHighlightEnabledChanged';
-    }
-
-    override get CrosshairHighlightColorChanged(): 'CrosshairHighlightColorChanged' {
-        return 'CrosshairHighlightColorChanged';
     }
 }
 
@@ -78,27 +59,11 @@ export interface ICrosshairHighlightEnabledChangedEventParams extends IEventBase
     worksheet: FWorksheet;
 }
 
-export interface ICrosshairHighlightColorChangedEventParams extends IEventBase {
-    /**
-     * The color of the crosshair highlight.
-     */
-    color: string;
-    /**
-     * The workbook that the crosshair highlight is enabled in.
-     */
-    workbook: FWorkbook;
-    /**
-     * The worksheet that the crosshair highlight is enabled in.
-     */
-    worksheet: FWorksheet;
-}
-
 /**
  * @ignore
  */
 export interface ISheetsCrosshairHighlightEventParamConfig {
     CrosshairHighlightEnabledChanged: ICrosshairHighlightEnabledChangedEventParams;
-    CrosshairHighlightColorChanged: ICrosshairHighlightColorChangedEventParams;
 }
 
 FEventName.extend(FSheetsCrosshairHighlightEventNameMixin);

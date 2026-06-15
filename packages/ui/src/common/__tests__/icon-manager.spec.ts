@@ -34,16 +34,16 @@ describe('IconManager', () => {
         vi.restoreAllMocks();
     });
 
-    it('should expose built-in icons and clear built-ins on dispose', () => {
+    it('should start without built-in icons', () => {
         const logService = createLogService();
         const manager = new IconManager(logService);
 
-        expect(manager.has('ShortcutIcon')).toBe(true);
+        expect(manager.has('ShortcutIcon')).toBe(false);
         expect(manager.get('ShortcutIcon')).toBeDefined();
+        expect(logService.warn).toHaveBeenCalledWith('[IconManager]', 'Icon ShortcutIcon does not exist.');
 
         manager.dispose();
         expect(manager.has('ShortcutIcon')).toBe(false);
-        expect(manager.get('ShortcutIcon')).toBeDefined();
     });
 
     it('should register icon and support get/delete/disposable', () => {
@@ -94,9 +94,14 @@ describe('IconManager', () => {
         const logService = createLogService();
         const manager = new IconManager(logService);
         const Icon = () => null;
+        const OverrideIcon = () => null;
 
         manager.register('dup-icon', Icon);
-        manager.register('dup-icon', Icon);
+        manager.register('dup-icon', Icon).dispose();
+        expect(manager.has('dup-icon')).toBe(true);
+        expect(logService.warn).not.toHaveBeenCalledWith('[IconManager]', 'Icon dup-icon already exists.');
+
+        manager.register('dup-icon', OverrideIcon);
 
         expect(logService.warn).toHaveBeenCalledWith('[IconManager]', 'Icon dup-icon already exists.');
 

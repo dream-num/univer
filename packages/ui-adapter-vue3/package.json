@@ -73,7 +73,7 @@
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
         "typescript": "^6.0.3",
-        "vitest": "^4.1.8",
+        "vitest": "^4.1.9",
         "vue": "^3.5.34"
     }
 }

@@ -15,6 +15,7 @@
  */
 
 import type { Dependency, IWorkbookData, Workbook, Worksheet } from '@univerjs/core';
+import type { IFormulaData } from '@univerjs/engine-formula';
 import {
     CellValueType,
     ICommandService,
@@ -141,6 +142,18 @@ describe('ArrayFormulaCellInterceptorController', () => {
                     },
                 },
             },
+            'base-unit': {
+                tasks: {
+                    0: {
+                        0: {
+                            startRow: 0,
+                            endRow: 0,
+                            startColumn: 0,
+                            endColumn: 0,
+                        },
+                    },
+                },
+            },
         };
         const arrayFormulaEmbedded = {
             test: {
@@ -151,6 +164,13 @@ describe('ArrayFormulaCellInterceptorController', () => {
                     },
                 },
             },
+            'base-unit': {
+                tasks: {
+                    0: {
+                        0: {},
+                    },
+                },
+            },
         };
         const arrayFormulaCellData = {
             test: {
@@ -158,6 +178,13 @@ describe('ArrayFormulaCellInterceptorController', () => {
                     0: {
                         0: { v: 1, t: CellValueType.NUMBER },
                         1: { v: 2, t: CellValueType.NUMBER },
+                    },
+                },
+            },
+            'base-unit': {
+                tasks: {
+                    0: {
+                        0: { v: 99, t: CellValueType.NUMBER },
                     },
                 },
             },
@@ -175,6 +202,7 @@ describe('ArrayFormulaCellInterceptorController', () => {
         const setRangeValuesCalls = executeCommandSpy.mock.calls.filter(([id]) => id === SetRangeValuesMutation.id);
 
         expect(setRangeValuesCalls).toHaveLength(3);
+        expect(setRangeValuesCalls.map((call) => (call[1] as { unitId?: string }).unitId)).toEqual(['test', 'test', 'test']);
         expect(setRangeValuesCalls[0]?.[1]).toMatchObject({
             unitId: 'test',
             subUnitId: 'sheet1',
@@ -259,6 +287,52 @@ describe('ArrayFormulaCellInterceptorController', () => {
                 fromFormula: true,
             }),
         ]);
+    });
+
+    it('should write prefixed formulas only for sheet units when calculation data includes other unit types', async () => {
+        configService.setConfig(PLUGIN_CONFIG_KEY_BASE, { writeArrayFormulaToSnapshot: true });
+
+        const lexerTreeBuilder = testBed.injector.get(LexerTreeBuilder);
+        const executeCommandSpy = vi.spyOn(commandService, 'executeCommand');
+        const prefixSpy = vi
+            .spyOn(lexerTreeBuilder, 'getNewFormulaWithPrefix')
+            .mockImplementation((formula) => `PREFIX:${formula}`);
+
+        vi.spyOn(formulaDataModel, 'getFormulaData').mockReturnValue({
+            test: {
+                sheet1: {
+                    3: {
+                        0: { f: '=SUM(A1)' },
+                    },
+                },
+            },
+            'base-unit': {
+                tasks: {
+                    0: {
+                        0: { f: '=SUM(A1)' },
+                    },
+                },
+            },
+        } satisfies IFormulaData);
+
+        await commandService.executeCommand(SetFormulaCalculationResultMutation.id, {
+            unitData: {},
+            unitOtherData: {},
+        });
+
+        const setRangeValuesCalls = executeCommandSpy.mock.calls.filter(([id]) => id === SetRangeValuesMutation.id);
+
+        expect(prefixSpy).toHaveBeenCalledTimes(1);
+        expect(setRangeValuesCalls).toHaveLength(1);
+        expect(setRangeValuesCalls[0]?.[1]).toMatchObject({
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            cellValue: {
+                3: {
+                    0: { xf: 'PREFIX:=SUM(A1)' },
+                },
+            },
+        });
     });
 
     it('should intercept array formula cells with default values, precision cleanup, raw passthrough and array values', () => {

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICommandInfo } from '@univerjs/core';
+import type { ICellData, ICommandInfo, Nullable, Workbook } from '@univerjs/core';
 import type { IArrayFormulaEmbeddedMap, IArrayFormulaRangeType, IArrayFormulaUnitCellType, ISetArrayFormulaDataMutationParams, ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import type { IUniverSheetsFormulaBaseConfig } from '../config/config';
-import { CellValueType, Disposable, ICommandService, IConfigService, Inject, InterceptorEffectEnum, isRealNum, ObjectMatrix } from '@univerjs/core';
+import { CellValueType, Disposable, ICommandService, IConfigService, Inject, InterceptorEffectEnum, isRealNum, IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 import { FormulaDataModel, IDefinedNamesService, IFunctionService, LexerTreeBuilder, serializeRange, SetArrayFormulaDataMutation, SetDefinedNameMutation, SetFormulaCalculationResultMutation, stripErrorMargin } from '@univerjs/engine-formula';
 import { INTERCEPTOR_POINT, SetRangeValuesMutation, SheetInterceptorService } from '@univerjs/sheets';
 import { PLUGIN_CONFIG_KEY_BASE } from '../config/config';
@@ -27,6 +27,7 @@ export class ArrayFormulaCellInterceptorController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @IConfigService private readonly _configService: IConfigService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
         @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
@@ -97,114 +98,134 @@ export class ArrayFormulaCellInterceptorController extends Disposable {
     private _addPrefixToFunctionSnapshot() {
         const dataModel = this._formulaDataModel.getFormulaData();
         const cacheMap = new Map<string, string>();
-        Object.entries(dataModel).forEach(([unitId, subUnitData]) => {
-            subUnitData && Array.from(Object.entries(subUnitData)).forEach(([subUnitId, formulaDataItem]) => {
-                // Convert from IObjectMatrixPrimitiveType<IRange> to IObjectMatrixPrimitiveType<ICellData>
-                if (!formulaDataItem) {
+        this._forEachSheetSnapshotData(dataModel, (unitId, subUnitId, formulaDataItem) => {
+            // Convert from IObjectMatrixPrimitiveType<IRange> to IObjectMatrixPrimitiveType<ICellData>
+            if (!formulaDataItem) {
+                return;
+            }
+            const cellValue = new ObjectMatrix<ICellData>();
+            const matrix = new ObjectMatrix(formulaDataItem);
+            matrix.forValue((row, col, value) => {
+                const functionText = value?.f;
+                if (value?.x != null || !functionText || functionText.length === 0) {
                     return;
                 }
-                const cellValue = new ObjectMatrix<ICellData>();
-                const matrix = new ObjectMatrix(formulaDataItem);
-                matrix.forValue((row, col, value) => {
-                    const functionText = value?.f;
-                    if (value?.x != null || !functionText || functionText.length === 0) {
-                        return;
-                    }
 
-                    if (cacheMap.has(functionText)) {
-                        const cachedFormula = cacheMap.get(functionText)!;
-                        cellValue.setValue(row, col, { xf: cachedFormula });
-                        return;
-                    }
+                if (cacheMap.has(functionText)) {
+                    const cachedFormula = cacheMap.get(functionText)!;
+                    cellValue.setValue(row, col, { xf: cachedFormula });
+                    return;
+                }
 
-                    const newFormula = this._lexerTreeBuilder.getNewFormulaWithPrefix(functionText, this._functionService.hasExecutor.bind(this._functionService));
-                    if (newFormula) {
-                        cellValue.setValue(row, col, { xf: newFormula });
-                        cacheMap.set(functionText, newFormula);
-                    }
-                });
+                const newFormula = this._lexerTreeBuilder.getNewFormulaWithPrefix(functionText, this._functionService.hasExecutor.bind(this._functionService));
+                if (newFormula) {
+                    cellValue.setValue(row, col, { xf: newFormula });
+                    cacheMap.set(functionText, newFormula);
+                }
+            });
 
-                // Keep this local to avoid triggering re-calculate in the worker.
-                this._commandService.executeCommand<ISetRangeValuesMutationParams>(SetRangeValuesMutation.id, {
-                    unitId,
-                    subUnitId,
-                    cellValue: cellValue.getMatrix(),
-                }, {
-                    onlyLocal: true,
-                    fromFormula: true,
-                });
+            // Keep this local to avoid triggering re-calculate in the worker.
+            this._commandService.executeCommand<ISetRangeValuesMutationParams>(SetRangeValuesMutation.id, {
+                unitId,
+                subUnitId,
+                cellValue: cellValue.getMatrix(),
+            }, {
+                onlyLocal: true,
+                fromFormula: true,
             });
         });
         cacheMap.clear();
     }
 
+    private _forEachSheetSnapshotData<T>(
+        snapshotData: Record<string, Nullable<Record<string, T>>> | null | undefined,
+        iterator: (unitId: string, subUnitId: string, data: T) => void
+    ): void {
+        if (!snapshotData) {
+            return;
+        }
+
+        const workbooks = this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        for (const workbook of workbooks) {
+            const unitId = workbook.getUnitId();
+            const subUnitData = snapshotData[unitId];
+            if (!subUnitData) {
+                continue;
+            }
+
+            for (const worksheet of workbook.getSheets()) {
+                const subUnitId = worksheet.getSheetId();
+                const data = subUnitData[subUnitId];
+                if (data == null) {
+                    continue;
+                }
+
+                iterator(unitId, subUnitId, data);
+            }
+        }
+    }
+
     private _writeArrayFormulaToSnapshot(arrayFormulaRange: IArrayFormulaRangeType, arrayFormulaCellData: IArrayFormulaUnitCellType, arrayFormulaEmbedded: IArrayFormulaEmbeddedMap) {
         // Write values to the `ref` property of the array formula range.
-        arrayFormulaRange && Object.entries(arrayFormulaRange).forEach(([unitId, subUnitData]) => {
-            subUnitData && Array.from(Object.entries(subUnitData)).forEach(([subUnitId, rangeData]) => {
-                // Convert from IObjectMatrixPrimitiveType<IRange> to IObjectMatrixPrimitiveType<ICellData>
-                const cellValue = new ObjectMatrix<ICellData>();
-                const matrix = new ObjectMatrix(rangeData);
-                matrix.forValue((row, col, value) => {
-                    cellValue.setValue(row, col, { ref: serializeRange(value) }); // convert to ref string
-                });
+        this._forEachSheetSnapshotData(arrayFormulaRange, (unitId, subUnitId, rangeData) => {
+            // Convert from IObjectMatrixPrimitiveType<IRange> to IObjectMatrixPrimitiveType<ICellData>
+            const cellValue = new ObjectMatrix<ICellData>();
+            const matrix = new ObjectMatrix(rangeData);
+            matrix.forValue((row, col, value) => {
+                cellValue.setValue(row, col, { ref: serializeRange(value) }); // convert to ref string
+            });
 
-                // Keep this local to avoid triggering re-calculate in the worker.
-                this._commandService.executeCommand<ISetRangeValuesMutationParams>(SetRangeValuesMutation.id, {
-                    unitId,
-                    subUnitId,
-                    cellValue: cellValue.getMatrix(),
-                }, {
-                    onlyLocal: true,
-                    fromFormula: true,
-                });
+            // Keep this local to avoid triggering re-calculate in the worker.
+            this._commandService.executeCommand<ISetRangeValuesMutationParams>(SetRangeValuesMutation.id, {
+                unitId,
+                subUnitId,
+                cellValue: cellValue.getMatrix(),
+            }, {
+                onlyLocal: true,
+                fromFormula: true,
             });
         });
 
         // <f t="array" ref="E7">SUM(A1:A7*B1:B7)</f> , write ref for embedded array formula cells
-        arrayFormulaEmbedded && Object.entries(arrayFormulaEmbedded).forEach(([unitId, subUnitData]) => {
-            subUnitData && Array.from(Object.entries(subUnitData)).forEach(([subUnitId, rangeData]) => {
-                const cellValue = new ObjectMatrix<ICellData>();
-                const matrix = new ObjectMatrix(rangeData);
-                matrix.forValue((row, col) => {
-                    const existingArrayRange = arrayFormulaRange?.[unitId]?.[subUnitId]?.[row]?.[col];
-                    if (existingArrayRange) {
-                        return; // Skip if there is already an array formula range at this position
-                    }
-                    cellValue.setValue(row, col, {
-                        ref: serializeRange({
-                            startRow: row,
-                            endRow: row,
-                            startColumn: col,
-                            endColumn: col,
-                        }),
-                    }); // convert to ref string
-                });
+        this._forEachSheetSnapshotData(arrayFormulaEmbedded, (unitId, subUnitId, rangeData) => {
+            const cellValue = new ObjectMatrix<ICellData>();
+            const matrix = new ObjectMatrix(rangeData);
+            matrix.forValue((row, col) => {
+                const existingArrayRange = arrayFormulaRange?.[unitId]?.[subUnitId]?.[row]?.[col];
+                if (existingArrayRange) {
+                    return; // Skip if there is already an array formula range at this position
+                }
+                cellValue.setValue(row, col, {
+                    ref: serializeRange({
+                        startRow: row,
+                        endRow: row,
+                        startColumn: col,
+                        endColumn: col,
+                    }),
+                }); // convert to ref string
+            });
 
-                // Keep this local to avoid triggering re-calculate in the worker.
-                this._commandService.executeCommand<ISetRangeValuesMutationParams>(SetRangeValuesMutation.id, {
-                    unitId,
-                    subUnitId,
-                    cellValue: cellValue.getMatrix(),
-                }, {
-                    onlyLocal: true,
-                    fromFormula: true,
-                });
+            // Keep this local to avoid triggering re-calculate in the worker.
+            this._commandService.executeCommand<ISetRangeValuesMutationParams>(SetRangeValuesMutation.id, {
+                unitId,
+                subUnitId,
+                cellValue: cellValue.getMatrix(),
+            }, {
+                onlyLocal: true,
+                fromFormula: true,
             });
         });
 
         // Write values to the 'v' property of the cell data.
-        arrayFormulaCellData && Object.entries(arrayFormulaCellData).forEach(([unitId, subUnitData]) => {
-            subUnitData && Array.from(Object.entries(subUnitData)).forEach(([subUnitId, rowData]) => {
-                // Keep this local to avoid triggering re-calculate in the worker.
-                this._commandService.executeCommand<ISetRangeValuesMutationParams>(SetRangeValuesMutation.id, {
-                    unitId,
-                    subUnitId,
-                    cellValue: rowData,
-                }, {
-                    onlyLocal: true,
-                    fromFormula: true,
-                });
+        this._forEachSheetSnapshotData(arrayFormulaCellData, (unitId, subUnitId, rowData) => {
+            // Keep this local to avoid triggering re-calculate in the worker.
+            this._commandService.executeCommand<ISetRangeValuesMutationParams>(SetRangeValuesMutation.id, {
+                unitId,
+                subUnitId,
+                cellValue: rowData,
+            }, {
+                onlyLocal: true,
+                fromFormula: true,
             });
         });
     }

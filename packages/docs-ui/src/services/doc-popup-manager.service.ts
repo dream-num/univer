@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { INeedCheckDisposable, ITextRangeParam } from '@univerjs/core';
+import type { INeedCheckDisposable, Injector, ITextRangeParam } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { BaseObject, Documents, IBoundRectNoAngle, IRender, Scene } from '@univerjs/engine-render';
 import type { IPopup } from '@univerjs/ui';
-import { Disposable, DisposableCollection, ICommandService, Inject, IUniverInstanceService } from '@univerjs/core';
+import { Disposable, DisposableCollection, ICommandService, Inject, Injector as UniverInjector, IUniverInstanceService } from '@univerjs/core';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { IRenderManagerService, pxToNum } from '@univerjs/engine-render';
 import { ICanvasPopupService } from '@univerjs/ui';
@@ -133,7 +133,8 @@ export class DocCanvasPopManagerService extends Disposable {
         @Inject(ICanvasPopupService) private readonly _globalPopupManagerService: ICanvasPopupService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @Inject(UniverInjector) private readonly _injector: Injector
     ) {
         super();
     }
@@ -268,12 +269,14 @@ export class DocCanvasPopManagerService extends Disposable {
         if (!currentRender) {
             throw new Error(`Current render not found, unitId: ${unitId}`);
         }
+        const popupInjector = currentRender.getInjector?.() ?? this._injector;
 
         const { position, position$, disposable } = this._createRectPositionObserver(rect, currentRender);
         const id = this._globalPopupManagerService.addPopup({
             ...popup,
             unitId,
             subUnitId: 'default',
+            injector: popupInjector,
             anchorRect: position,
             anchorRect$: position$,
             canvasElement: currentRender.engine.getCanvasElement(),
@@ -301,12 +304,14 @@ export class DocCanvasPopManagerService extends Disposable {
         if (!currentRender) {
             throw new Error(`Current render not found, unitId: ${unitId}`);
         }
+        const popupInjector = currentRender.getInjector?.() ?? this._injector;
 
         const { position, position$, disposable } = this._createObjectPositionObserver(targetObject, currentRender);
         const id = this._globalPopupManagerService.addPopup({
             ...popup,
             unitId,
             subUnitId: 'default',
+            injector: popupInjector,
             anchorRect: position,
             anchorRect$: position$,
             canvasElement: currentRender.engine.getCanvasElement(),
@@ -341,6 +346,7 @@ export class DocCanvasPopManagerService extends Disposable {
         if (!currentRender) {
             throw new Error(`Current render not found, unitId: ${unitId}`);
         }
+        const popupInjector = currentRender.getInjector?.() ?? this._injector;
 
         const { positions: bounds, positions$: bounds$, disposable } = this._createRangePositionObserver(range, currentRender);
         const position$ = bounds$.pipe(map((bounds) => direction.includes('top') ? bounds[0] : bounds[bounds.length - 1]));
@@ -349,6 +355,7 @@ export class DocCanvasPopManagerService extends Disposable {
             ...popup,
             unitId,
             subUnitId: 'default',
+            injector: popupInjector,
             anchorRect: direction.includes('top') ? bounds[0] : bounds[bounds.length - 1],
             anchorRect$: position$,
             excludeRects: bounds,

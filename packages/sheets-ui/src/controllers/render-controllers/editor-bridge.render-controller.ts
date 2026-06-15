@@ -19,6 +19,7 @@ import type { IEditorInputConfig } from '@univerjs/docs-ui';
 import type { IRender, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import type { ICurrentEditCellParam, IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
+import type { ISheetObjectParam } from '../utils/component-tools';
 import { DisposableCollection, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, FOCUSING_FX_BAR_EDITOR, FOCUSING_SHEET, ICommandService, IContextService, Inject, IUniverInstanceService, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
@@ -89,6 +90,9 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
         const primary = params?.[params.length - 1]?.primary;
         if (primary) {
             const sheetObject = this._getSheetObject();
+            if (!sheetObject) {
+                return;
+            }
             const { scene, engine } = sheetObject;
             const unitId = this._context.unitId;
             const sheetId = this._context.unit.getActiveSheet()?.getSheetId();
@@ -128,6 +132,9 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
 
     private _initEventListener(d: DisposableCollection) {
         const sheetObject = this._getSheetObject();
+        if (!sheetObject) {
+            return;
+        }
         const { spreadsheet, spreadsheetColumnHeader, spreadsheetLeftTopPlaceholder, spreadsheetRowHeader } = sheetObject;
 
         d.add(spreadsheet.onDblclick$.subscribeEvent((evt) => {
@@ -261,8 +268,12 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
         });
     }
 
-    private _getSheetObject() {
-        return getSheetObject(this._context.unit, this._context)!;
+    private _getSheetObject(): Nullable<ISheetObjectParam> {
+        if (!this._context.unit) {
+            return null;
+        }
+
+        return getSheetObject(this._context.unit, this._context);
     }
 
     private _isCurrentSheetFocused(): boolean {

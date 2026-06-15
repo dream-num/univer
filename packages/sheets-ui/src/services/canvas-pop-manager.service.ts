@@ -305,11 +305,13 @@ export class SheetCanvasPopManagerService extends Disposable {
         };
 
         const { position, position$, disposable } = this._createPositionObserver(bound, currentRender, skeleton, worksheet);
+        const popupInjector = currentRender.getInjector?.();
 
         const id = this._globalPopupManagerService.addPopup({
             ...popup,
             unitId,
             subUnitId,
+            injector: popupInjector,
             anchorRect: position,
             anchorRect$: position$,
             canvasElement: currentRender.engine.getCanvasElement(),
@@ -359,10 +361,12 @@ export class SheetCanvasPopManagerService extends Disposable {
             skeleton,
             currentRender,
         });
+        const popupInjector = currentRender.getInjector?.();
         const id = this._globalPopupManagerService.addPopup({
             ...popup,
             unitId,
             subUnitId,
+            injector: popupInjector,
             anchorRect: position,
             anchorRect$: position$,
             hiddenRects$: rects$,
@@ -411,10 +415,12 @@ export class SheetCanvasPopManagerService extends Disposable {
         }
 
         const position$ = new BehaviorSubject(bound);
+        const popupInjector = currentRender.getInjector?.();
         const id = this._globalPopupManagerService.addPopup({
             ...popup,
             unitId,
             subUnitId,
+            injector: popupInjector,
             anchorRect: bound,
             anchorRect$: position$.asObservable(),
             canvasElement: currentRender.engine.getCanvasElement(),
@@ -481,10 +487,12 @@ export class SheetCanvasPopManagerService extends Disposable {
             skeleton,
             currentRender,
         });
+        const popupInjector = currentRender.getInjector?.();
         const id = this._globalPopupManagerService.addPopup({
             ...popup,
             unitId,
             subUnitId,
+            injector: popupInjector,
             anchorRect: position,
             anchorRect$: position$,
             canvasElement: currentRender.engine.getCanvasElement(),
@@ -567,10 +575,12 @@ export class SheetCanvasPopManagerService extends Disposable {
             skeleton,
             currentRender,
         });
+        const popupInjector = currentRender.getInjector?.();
         const id = this._globalPopupManagerService.addPopup({
             ...popup,
             unitId,
             subUnitId,
+            injector: popupInjector,
             anchorRect: position,
             anchorRect$: position$,
             canvasElement: currentRender.engine.getCanvasElement(),

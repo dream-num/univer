@@ -142,6 +142,34 @@ export {
 export { SheetsScrollRenderController } from './controllers/render-controllers/scroll.render-controller';
 export { SheetRenderController } from './controllers/render-controllers/sheet.render-controller';
 export type { ITelemetryData } from './controllers/render-controllers/sheet.render-controller';
+export { createSheetsEmbedBlockContribution, createSheetsEmbedChildViewContribution } from './embed-block';
+export { registerSheetsEmbedUIContributions } from './embed-register';
+export {
+    createSheetsFloatingObjectHostAdapterContribution,
+    createSheetsFloatingObjectHostContainerContribution,
+    createSheetsSheetTabHostAdapterContribution,
+    createSheetsSheetTabHostContainerContribution,
+    EMBED_SHEETS_FLOATING_COMPONENT_KEY,
+} from './embed-host-adapter';
+export {
+    createEmbedSheetsFloatingDrawing,
+    createEmbedSheetsFloatingDrawingFromDescriptor,
+    createEmbedSheetsFloatingObjectData,
+    getEmbedSheetsFloatingObjectData,
+    isEmbedSheetsFloatingDrawing,
+    type EmbedSheetsFloatingObjectData,
+    type EmbedSheetsFloatingObjectParams,
+} from './embed-floating-anchor';
+export {
+    createEmbedSheetsTabCustomData,
+    createEmbedSheetsTabSnapshot,
+    createEmbedSheetsTabSnapshotFromDescriptor,
+    EMBED_SHEETS_TAB_CUSTOM_KEY,
+    getEmbedSheetsTabCustomData,
+    isEmbedSheetsTabSnapshot,
+    type EmbedSheetsTabCustomData,
+    type EmbedSheetsTabSnapshotParams,
+} from './embed-tab-anchor';
 export {
     whenFormulaEditorActivated,
     whenSheetEditorActivated,

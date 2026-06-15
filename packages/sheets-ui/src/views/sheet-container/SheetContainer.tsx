@@ -14,16 +14,20 @@
  * limitations under the License.
  */
 
-import type { Workbook } from '@univerjs/core';
+import type { EmbedDescriptor } from '@univerjs/embed';
+import type { Workbook, Worksheet } from '@univerjs/core';
 import type { IUniverSheetsUIConfig } from '../../config/config';
-import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { EmbedModelService } from '@univerjs/embed';
+import { EmbedActivationService, EmbedMountService } from '@univerjs/embed-ui';
+import { Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { ComponentManager, ContextMenuPosition, IMenuManagerService, ToolbarItem, useConfigValue, useDependency, useObservable } from '@univerjs/ui';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
+import { getEmbedSheetsTabCustomData } from '../../embed-tab-anchor';
 import { AutoFillPopupMenu } from '../auto-fill-popup-menu/AutoFillPopupMenu';
 import { EditorContainer } from '../editor-container/EditorContainer';
 import { FormulaBar } from '../formula-bar/FormulaBar';
-import { useActiveWorkbook } from '../hook';
+import { useActiveWorkbook, useActiveWorksheet } from '../hook';
 import { SheetBar } from '../sheet-bar/SheetBar';
 import { SheetZoomSlider } from '../sheet-slider/CountBar';
 import { StatusBar } from '../status-bar/StatusBar';
@@ -35,11 +39,24 @@ export function RenderSheetFooter() {
     const menuManagerService = useDependency(IMenuManagerService);
     const showFooter = config?.footer ?? true;
     const workbook = useActiveWorkbook();
+    const activeWorkbookEmbeddedRender = useActiveWorkbookIsEmbeddedRender(workbook);
+    const focusedUnitType = useFocusedUnitType();
+    const activeEmbedTab = useActiveSheetEmbedTabData(workbook);
     if (!workbook || !showFooter) return null;
+    if (activeWorkbookEmbeddedRender) return null;
+    if (!activeEmbedTab && focusedUnitType != null && focusedUnitType !== UniverInstanceType.UNIVER_SHEET) return null;
 
     const footerMenus = menuManagerService.getMenuByPositionKey(ContextMenuPosition.FOOTER_MENU);
-    const { sheetBar = true, statisticBar = true, menus = true, zoomSlider = true } = config?.footer || {};
-    if (!sheetBar && !statisticBar && !menus && !zoomSlider) return null;
+    const {
+        sheetBar = true,
+        statisticBar = true,
+        menus = true,
+        zoomSlider = true,
+    } = config?.footer || {};
+    const showStatisticBar = activeEmbedTab ? false : statisticBar;
+    const showMenus = activeEmbedTab ? false : menus;
+    const showZoomSlider = activeEmbedTab ? false : zoomSlider;
+    if (!sheetBar && !showStatisticBar && !showMenus && !showZoomSlider) return null;
 
     return (
         <section
@@ -54,8 +71,8 @@ export function RenderSheetFooter() {
             data-range-selector
         >
             {sheetBar && <SheetBar />}
-            {statisticBar && <StatusBar />}
-            {menus && footerMenus.length > 0 && (
+            {showStatisticBar && <StatusBar />}
+            {showMenus && footerMenus.length > 0 && (
                 <div className="univer-box-border univer-flex univer-gap-2 univer-px-2">
                     {footerMenus.map((item) => item.children?.map((child) => (
                         child?.item && (
@@ -67,16 +84,30 @@ export function RenderSheetFooter() {
                     )))}
                 </div>
             )}
-            {zoomSlider && <SheetZoomSlider />}
+            {showZoomSlider && <SheetZoomSlider />}
         </section>
     );
 }
 
 export function RenderSheetHeader() {
     const config = useConfigValue<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
-    const hasWorkbook = useHasWorkbook();
+    const workbook = useActiveWorkbook();
+    const hasWorkbook = !!workbook;
+    const activeWorkbookEmbeddedRender = useActiveWorkbookIsEmbeddedRender(workbook);
+    const focusedUnitType = useFocusedUnitType();
+    const activeEmbedTab = useActiveSheetEmbedTabData(workbook);
     if (!hasWorkbook) return null;
-
+    if (activeWorkbookEmbeddedRender) return null;
+    if (activeEmbedTab) return null;
+    if (focusedUnitType != null && focusedUnitType !== UniverInstanceType.UNIVER_SHEET) {
+        return (
+            <div
+                aria-hidden
+                className="univer-h-7 univer-border-b univer-border-gray-200 univer-bg-white dark:!univer-border-gray-700 dark:!univer-bg-gray-900"
+                data-u-comp="formula-bar-placeholder"
+            />
+        );
+    }
     if (config?.formulaBar !== false) {
         return <FormulaBar />;
     }
@@ -91,12 +122,31 @@ export function RenderSheetContent() {
     const config = useConfigValue<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
     const hasWorkbook = useHasWorkbook();
     const componentManager = useDependency(ComponentManager);
+    const workbook = useActiveWorkbook();
+    const activeEmbedTab = useActiveSheetEmbedTabData(workbook);
+    const injector = useDependency(Injector);
+    const activeWorkbookEmbeddedRender = useActiveWorkbookIsEmbeddedRender(workbook);
 
     // Attempt to retrieve the registered ShapeTextEditorContainer
     // We use a string key to avoid hard dependency on sheets-shape-ui
     const ShapeTextEditorContainer = componentManager.get('ShapeTextEditorContainer');
 
+    useEffect(() => {
+        if (!workbook || activeEmbedTab || activeWorkbookEmbeddedRender) {
+            return;
+        }
+
+        const instanceService = injector.get(IUniverInstanceService);
+        instanceService.setCurrentUnitForType(workbook.getUnitId());
+        instanceService.focusUnit(workbook.getUnitId());
+        tryGetEmbedActivationService(injector)?.clearTab();
+    }, [activeEmbedTab, activeWorkbookEmbeddedRender, injector, workbook]);
+
     if (!hasWorkbook) return null;
+    if (activeWorkbookEmbeddedRender) return null;
+    if (activeEmbedTab && workbook) {
+        return <RenderSheetEmbedTabHost workbook={workbook} worksheet={activeEmbedTab.worksheet} />;
+    }
 
     return (
         <>
@@ -107,13 +157,96 @@ export function RenderSheetContent() {
     );
 }
 
+function RenderSheetEmbedTabHost(props: { workbook: Workbook; worksheet: Worksheet }) {
+    const { workbook, worksheet } = props;
+    const injector = useDependency(Injector);
+    const embedData = getEmbedSheetsTabCustomData(worksheet.getConfig());
+    const hostUnitId = workbook.getUnitId();
+    const hostAnchorId = embedData?.hostAnchorId;
+    const embedId = embedData?.embedId;
+    const embedModelService = useDependency(EmbedModelService);
+
+    useEffect(() => {
+        if (!embedId || !hostAnchorId) {
+            return undefined;
+        }
+
+        const mountService = tryGetEmbedMountService(injector);
+        if (!mountService) {
+            return undefined;
+        }
+
+        const descriptor = embedModelService.getDescriptor(hostUnitId, embedId) as EmbedDescriptor | undefined;
+        if (!descriptor || descriptor.hostAnchorId !== hostAnchorId) {
+            return undefined;
+        }
+
+        try {
+            mountService.mount(descriptor);
+            injector.get(EmbedActivationService).activateTab(descriptor);
+        } catch (error) {
+            console.warn('[sheets-ui] failed to mount embedded sheet-tab block', error);
+        }
+
+        return () => {
+            mountService.unmount(embedId);
+            injector.get(EmbedActivationService).clearTab(embedId);
+        };
+    }, [embedId, embedModelService, hostAnchorId, hostUnitId, injector]);
+
+    return (
+        <div
+            data-embed-sheets-sheet-tab-host={hostAnchorId}
+            className="univer-absolute univer-inset-0 univer-z-40 univer-bg-white dark:!univer-bg-gray-900"
+        />
+    );
+}
+
 function useHasWorkbook(): boolean {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), null, false, []);
-    const hasWorkbook = !!workbook;
-    return useMemo(
-        () => univerInstanceService.getAllUnitsForType(UniverInstanceType.UNIVER_SHEET).length > 0,
+    return useMemo(() => !!workbook, [workbook]);
+}
 
-        [univerInstanceService, hasWorkbook]
-    );
+function useActiveWorkbookIsEmbeddedRender(workbook: Workbook | null): boolean {
+    const univerInstanceService = useDependency(IUniverInstanceService);
+    return useMemo(() => {
+        if (!workbook) {
+            return false;
+        }
+
+        return univerInstanceService.getUnitCreateOptions(workbook.getUnitId())?.embeddedRender === true;
+    }, [univerInstanceService, workbook]);
+}
+
+function useFocusedUnitType(): UniverInstanceType | null {
+    const univerInstanceService = useDependency(IUniverInstanceService);
+    const focusedUnitId = useObservable(() => univerInstanceService.focused$, null, false, [univerInstanceService]);
+    return useMemo(() => {
+        if (!focusedUnitId) return null;
+
+        const focusedUnit = univerInstanceService.getUnit(focusedUnitId);
+        return focusedUnit?.type ?? null;
+    }, [focusedUnitId, univerInstanceService]);
+}
+
+function useActiveSheetEmbedTabData(workbook: Workbook | null): { worksheet: Worksheet } | undefined {
+    const worksheet = useActiveWorksheet(workbook) as Worksheet | null | undefined;
+    return worksheet && getEmbedSheetsTabCustomData(worksheet.getConfig()) ? { worksheet } : undefined;
+}
+
+function tryGetEmbedMountService(injector: Injector): EmbedMountService | undefined {
+    try {
+        return injector.get(EmbedMountService);
+    } catch {
+        return undefined;
+    }
+}
+
+function tryGetEmbedActivationService(injector: Injector): EmbedActivationService | undefined {
+    try {
+        return injector.get(EmbedActivationService);
+    } catch {
+        return undefined;
+    }
 }

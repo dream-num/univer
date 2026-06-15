@@ -425,7 +425,6 @@ export class SlideTabBar {
             if (this._activeTabItemIndex !== slideItemIndex) {
                 this._activeTabItem?.removeEventListener('pointermove', this._moveAction);
                 this._activeTabItem?.removeEventListener('pointerup', this._upAction);
-                this.removeListener();
                 this._config.onChangeTab(downEvent, slideItemId);
                 return;
             }
@@ -571,9 +570,9 @@ export class SlideTabBar {
      * @param currentIndex
      */
     update(currentIndex: number) {
+        this.removeListener();
         this._config.currentIndex = currentIndex;
         this._initConfig();
-        this.removeListener();
         this.addListener();
         this.scrollToItem(currentIndex);
     }

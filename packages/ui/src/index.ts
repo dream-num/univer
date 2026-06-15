@@ -114,6 +114,7 @@ export { IPlatformService, PlatformService } from './services/platform/platform.
 export { CanvasPopupService, ICanvasPopupService } from './services/popup/canvas-popup.service';
 export type { IPopup } from './services/popup/canvas-popup.service';
 export { DesktopRibbonService, IRibbonService } from './services/ribbon/ribbon.service';
+export { IRibbonOverrideService, RibbonOverrideService, type IRibbonOverride } from './services/ribbon/ribbon-override.service';
 export { KeyCode, MetaKeys } from './services/shortcut/keycode';
 export { ShortcutPanelService } from './services/shortcut/shortcut-panel.service';
 export { IShortcutService, ShortcutService } from './services/shortcut/shortcut.service';

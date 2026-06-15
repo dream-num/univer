@@ -1,0 +1,303 @@
+import type { IAccessor, IDisposable, IExecutionOptions, UniverInstanceType } from '@univerjs/core';
+import type { IMenuSchema } from '@univerjs/ui';
+import type { MenuSchemaType } from '@univerjs/ui';
+import type { EmbedProductMenuMountContext } from '../types/embed-ui';
+import { COMMAND_EXECUTION_INJECTOR_KEY, ICommandService, IConfigService, Injector, IUniverInstanceService, LocaleService, toDisposable } from '@univerjs/core';
+import { DesktopRibbonService, IMenuManagerService, IRibbonService, MenuManagerPosition, MenuManagerService, RediProvider, Ribbon } from '@univerjs/ui';
+import { createElement } from 'react';
+import { createRoot } from 'react-dom/client';
+import { map, merge, of } from 'rxjs';
+import { disposeEmbedReactRoot } from './react-root-disposal';
+
+export function mountEmbedProductRibbonMenu(context: EmbedProductMenuMountContext): IDisposable | undefined {
+    const { container, injector, childType, childUnitId, menuSchema, menuTitlePrefix, activeRibbonTab, toolbarOnly } = context;
+    if (!menuSchema || typeof menuSchema !== 'object') {
+        return undefined;
+    }
+
+    const scoped = createEmbedProductMenuInjector(injector as Injector, {
+        childType,
+        childUnitId,
+        menuSchema,
+        menuTitlePrefix,
+        activeRibbonTab,
+    });
+    const root = createRoot(container);
+    root.render(createElement(
+        RediProvider,
+        { value: { injector: scoped.injector as Injector } },
+        createElement(Ribbon, { ribbonType: 'classic', headerMenu: false, toolbarOnly })
+    ));
+
+    return toDisposable(() => {
+        disposeEmbedReactRoot(root);
+        scoped.disposable.dispose();
+    });
+}
+
+export function createEmbedProductMenuInjector(
+    injector: Injector,
+    params: {
+        childType: UniverInstanceType;
+        childUnitId?: string;
+        menuSchema: unknown;
+        menuTitlePrefix?: string;
+        activeRibbonTab?: string;
+    }
+): { injector: Pick<Injector, 'invoke' | 'get' | 'has'>; ribbonService: IRibbonService; disposable: IDisposable } {
+    const { childType, childUnitId, menuSchema, menuTitlePrefix, activeRibbonTab } = params;
+    const instanceService = injector.get(IUniverInstanceService);
+    const scopedInstanceService = createScopedEmbedProductInstanceService(instanceService, childType, childUnitId);
+    let scopedInjector: Pick<Injector, 'invoke' | 'get' | 'has'>;
+    const commandService = createScopedEmbedProductCommandService(
+        injector.get(ICommandService),
+        instanceService,
+        childType,
+        childUnitId,
+        () => scopedInjector
+    );
+    let menuManager: MenuManagerService;
+    let ribbonService: DesktopRibbonService;
+    let exposedRibbonService: IRibbonService;
+    const hasDependency = (identifier: Parameters<Injector['get']>[0]) => {
+        if (
+            identifier === IUniverInstanceService ||
+            identifier === ICommandService ||
+            identifier === IMenuManagerService ||
+            identifier === IRibbonService
+        ) {
+            return true;
+        }
+
+        return injector.has(identifier);
+    };
+    const getDependency = (identifier: Parameters<Injector['get']>[0]) => {
+        if (identifier === IUniverInstanceService) {
+            return scopedInstanceService;
+        }
+        if (identifier === ICommandService) {
+            return commandService;
+        }
+        if (identifier === IMenuManagerService) {
+            return menuManager;
+        }
+        if (identifier === IRibbonService) {
+            return exposedRibbonService;
+        }
+
+        return injector.get(identifier);
+    };
+    scopedInjector = {
+        has: hasDependency,
+        get: getDependency,
+        invoke: <T, P extends unknown[] = []>(factory: (accessor: IAccessor, ...args: P) => T, ...args: P): T => factory({
+            has: hasDependency,
+            get: getDependency,
+        } as IAccessor, ...args),
+    } as Pick<Injector, 'invoke' | 'get' | 'has'>;
+
+    menuManager = new MenuManagerService(scopedInjector as Injector, injector.get(IConfigService));
+    menuManager.mergeMenu(prefixRibbonMenuTitles(menuSchema, menuTitlePrefix, injector) as MenuSchemaType);
+    ribbonService = new DesktopRibbonService(menuManager, scopedInstanceService);
+    if (activeRibbonTab) {
+        ribbonService.setActivatedTab(activeRibbonTab);
+    }
+    exposedRibbonService = menuTitlePrefix
+        ? createPrefixedRibbonService(ribbonService, menuTitlePrefix, injector)
+        : ribbonService;
+
+    return {
+        injector: scopedInjector,
+        ribbonService: exposedRibbonService,
+        disposable: toDisposable(() => {
+            ribbonService.dispose();
+            menuManager.dispose();
+        }),
+    };
+}
+
+function createPrefixedRibbonService(ribbonService: IRibbonService, prefix: string, injector: Injector): IRibbonService {
+    let localeService: LocaleService | undefined;
+    try {
+        localeService = injector.get(LocaleService);
+    } catch {
+        localeService = undefined;
+    }
+
+    return {
+        ribbon$: ribbonService.ribbon$.pipe(map((ribbon) => ribbon.map((group) => prefixRibbonGroupTitle(group, prefix, localeService)))),
+        activatedTab$: ribbonService.activatedTab$,
+        collapsedIds$: ribbonService.collapsedIds$,
+        fakeToolbarVisible$: ribbonService.fakeToolbarVisible$,
+        setActivatedTab: (tab: string) => ribbonService.setActivatedTab(tab),
+        showContextualTab: (tab: string, options?: { activate?: boolean }) => ribbonService.showContextualTab(tab, options),
+        hideContextualTab: (tab: string) => ribbonService.hideContextualTab(tab),
+        hideAllContextualTabs: () => ribbonService.hideAllContextualTabs(),
+        setCollapsedIds: (ids: string[]) => ribbonService.setCollapsedIds(ids),
+        setFakeToolbarVisible: (visible: boolean) => ribbonService.setFakeToolbarVisible(visible),
+    };
+}
+
+function prefixRibbonGroupTitle(group: IMenuSchema, prefix: string, localeService: LocaleService | undefined): IMenuSchema {
+    const rawTitle = group.title || group.key;
+    const title = localeService?.t(rawTitle) ?? rawTitle;
+    return {
+        ...group,
+        title: `${prefix} - ${title}`,
+    };
+}
+
+function prefixRibbonMenuTitles(menuSchema: unknown, prefix: string | undefined, injector: Injector): unknown {
+    if (!prefix || !menuSchema || typeof menuSchema !== 'object') {
+        return menuSchema;
+    }
+
+    const cloned = cloneMenuSchema(menuSchema);
+    const ribbon = (cloned as Record<string, unknown>)[MenuManagerPosition.RIBBON];
+    if (!ribbon || typeof ribbon !== 'object') {
+        return cloned;
+    }
+
+    let localeService: LocaleService | undefined;
+    try {
+        localeService = injector.get(LocaleService);
+    } catch {
+        localeService = undefined;
+    }
+
+    Object.values(ribbon as Record<string, unknown>).forEach((group) => {
+        if (!group || typeof group !== 'object') {
+            return;
+        }
+
+        const schema = group as { title?: string };
+        const rawTitle = schema.title;
+        if (!rawTitle) {
+            return;
+        }
+
+        const title = localeService?.t(rawTitle) ?? rawTitle;
+        schema.title = `${prefix} - ${title}`;
+    });
+
+    return cloned;
+}
+
+function cloneMenuSchema(value: unknown): unknown {
+    if (!value || typeof value !== 'object') {
+        return value;
+    }
+
+    if (Array.isArray(value)) {
+        return value.map((item) => cloneMenuSchema(item));
+    }
+
+    return Object.fromEntries(
+        Object.entries(value).map(([key, child]) => [key, cloneMenuSchema(child)])
+    );
+}
+
+function createScopedEmbedProductInstanceService(
+    instanceService: IUniverInstanceService,
+    childType: UniverInstanceType,
+    childUnitId?: string
+): IUniverInstanceService {
+    const getChildUnit = () => childUnitId ? instanceService.getUnit(childUnitId, childType) : null;
+    const scopedFocused$ = childUnitId
+        ? merge(
+            of(childUnitId),
+            instanceService.getTypeOfUnitAdded$(childType).pipe(map(() => childUnitId)),
+            instanceService.getTypeOfUnitDisposed$(childType).pipe(map(() => childUnitId))
+        )
+        : instanceService.focused$;
+
+    return new Proxy(instanceService, {
+        get(target, property, receiver) {
+            if (property === 'focused$') {
+                return scopedFocused$;
+            }
+            if (property === 'focused') {
+                return getChildUnit() ?? target.getFocusedUnit();
+            }
+            if (property === 'getCurrentUnitOfType') {
+                return (type: UniverInstanceType) => type === childType && childUnitId
+                    ? getChildUnit()
+                    : target.getCurrentUnitOfType(type);
+            }
+            if (property === 'getCurrentTypeOfUnit$') {
+                return (type: UniverInstanceType) => type === childType && childUnitId
+                    ? merge(
+                        of(undefined),
+                        target.getTypeOfUnitAdded$(childType),
+                        target.getTypeOfUnitDisposed$(childType)
+                    ).pipe(map(() => getChildUnit()))
+                    : target.getCurrentTypeOfUnit$(type);
+            }
+            if (property === 'getFocusedUnit') {
+                return () => getChildUnit() ?? target.getFocusedUnit();
+            }
+
+            return Reflect.get(target, property, receiver);
+        },
+    });
+}
+
+function createScopedEmbedProductCommandService(
+    commandService: ICommandService,
+    instanceService: IUniverInstanceService,
+    childType: UniverInstanceType,
+    childUnitId?: string,
+    getScopedInjector?: () => Pick<Injector, 'invoke' | 'get' | 'has'> | undefined
+): ICommandService {
+    if (!childUnitId) {
+        return commandService;
+    }
+
+    return new Proxy(commandService, {
+        get(target, property, receiver) {
+            if (property === 'executeCommand') {
+                return async (...args: Parameters<ICommandService['executeCommand']>) => {
+                    const previous = instanceService.getCurrentUnitOfType(childType);
+                    try {
+                        instanceService.setCurrentUnitForType(childUnitId);
+                        return await target.executeCommand(args[0], args[1], withEmbedProductMenuExecutionInjector(args[2], getScopedInjector));
+                    } finally {
+                        if (previous) {
+                            instanceService.setCurrentUnitForType(previous.getUnitId());
+                        }
+                    }
+                };
+            }
+            if (property === 'syncExecuteCommand') {
+                return (...args: Parameters<ICommandService['syncExecuteCommand']>) => {
+                    const previous = instanceService.getCurrentUnitOfType(childType);
+                    try {
+                        instanceService.setCurrentUnitForType(childUnitId);
+                        return target.syncExecuteCommand(args[0], args[1], withEmbedProductMenuExecutionInjector(args[2], getScopedInjector));
+                    } finally {
+                        if (previous) {
+                            instanceService.setCurrentUnitForType(previous.getUnitId());
+                        }
+                    }
+                };
+            }
+
+            return Reflect.get(target, property, receiver);
+        },
+    });
+}
+
+function withEmbedProductMenuExecutionInjector(
+    options: IExecutionOptions | undefined,
+    getScopedInjector?: () => Pick<Injector, 'invoke' | 'get' | 'has'> | undefined
+): IExecutionOptions | undefined {
+    const scopedInjector = getScopedInjector?.();
+    if (!scopedInjector || options?.[COMMAND_EXECUTION_INJECTOR_KEY]) {
+        return options;
+    }
+
+    return {
+        ...(options ?? {}),
+        [COMMAND_EXECUTION_INJECTOR_KEY]: scopedInjector as Injector,
+    };
+}

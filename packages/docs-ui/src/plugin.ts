@@ -116,6 +116,7 @@ import { DocSelectionRenderController } from './controllers/render-controllers/d
 import { DocRenderController } from './controllers/render-controllers/doc.render-controller';
 import { DocZoomRenderController } from './controllers/render-controllers/zoom.render-controller';
 import { DocUIController } from './controllers/ui.controller';
+import { registerDocsEmbedUIContributions } from './embed-register';
 import { DocClipboardService, IDocClipboardService } from './services/clipboard/clipboard.service';
 import { DocHtmlExportService } from './services/clipboard/udm-to-html/doc-html-export.service';
 import { DocAutoFormatService } from './services/doc-auto-format.service';
@@ -194,6 +195,7 @@ export class UniverDocsUIPlugin extends Plugin {
         this._initDependencies(_injector);
         this._initializeShortcut();
         this._initCommand();
+        registerDocsEmbedUIContributions(this._injector);
     }
 
     override onReady(): void {
@@ -392,6 +394,11 @@ export class UniverDocsUIPlugin extends Plugin {
             if (!doc) return;
 
             const id = doc.getUnitId();
+            const createOptions = currentService.getUnitCreateOptions(id);
+            if (createOptions?.makeCurrent === false) {
+                return;
+            }
+
             if (!editorService.isEditor(id)) {
                 currentService.focusUnit(doc.getUnitId());
             }

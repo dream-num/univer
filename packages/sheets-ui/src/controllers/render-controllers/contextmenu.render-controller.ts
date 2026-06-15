@@ -15,10 +15,13 @@
  */
 
 import type { Workbook } from '@univerjs/core';
+import type { EmbedHostMenuOverride } from '@univerjs/embed-ui';
 import type { IRenderContext, IRenderModule, Spreadsheet, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
+import { EmbedHostMenuOverrideService } from '@univerjs/embed-ui';
 import {
     Disposable,
     Inject,
+    Injector,
     RANGE_TYPE,
 } from '@univerjs/core';
 import { attachSelectionWithCoord, SheetsSelectionsService } from '@univerjs/sheets';
@@ -35,7 +38,8 @@ export class SheetContextMenuRenderController extends Disposable implements IRen
         private readonly _context: IRenderContext<Workbook>,
         @IContextMenuService private readonly _contextMenuService: IContextMenuService,
         @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
-        @ISheetSelectionRenderService private readonly _selectionRenderService: ISheetSelectionRenderService
+        @ISheetSelectionRenderService private readonly _selectionRenderService: ISheetSelectionRenderService,
+        @Inject(Injector) private readonly _injector: Injector
     ) {
         super();
 
@@ -74,6 +78,9 @@ export class SheetContextMenuRenderController extends Disposable implements IRen
                 };
 
                 const triggerMenu = (position: string) => {
+                    if (this._shouldSuppressHostContextMenu()) {
+                        return;
+                    }
                     this._contextMenuService.triggerContextMenu(event, position);
                 };
                 if (!isPointerInRange()) {
@@ -94,6 +101,9 @@ export class SheetContextMenuRenderController extends Disposable implements IRen
         const spreadsheetRowHeader = this._context.components.get(SHEET_VIEW_KEY.ROW) as SpreadsheetHeader;
         const rowHeaderSub = spreadsheetRowHeader.onPointerDown$.subscribeEvent((event) => {
             if (event.button === 2) {
+                if (this._shouldSuppressHostContextMenu()) {
+                    return;
+                }
                 this._contextMenuService.triggerContextMenu(event, ContextMenuPosition.ROW_HEADER);
             }
         });
@@ -103,9 +113,32 @@ export class SheetContextMenuRenderController extends Disposable implements IRen
         const colHeaderPointerDownObserver = spreadsheetColumnHeader.onPointerDown$;
         const colHeaderObserver = colHeaderPointerDownObserver.subscribeEvent((event) => {
             if (event.button === 2) {
+                if (this._shouldSuppressHostContextMenu()) {
+                    return;
+                }
                 this._contextMenuService.triggerContextMenu(event, ContextMenuPosition.COL_HEADER);
             }
         });
         this.disposeWithMe(colHeaderObserver);
     }
+
+    private _shouldSuppressHostContextMenu(): boolean {
+        return shouldSuppressSheetContextMenuForEmbedOverride(
+            this._context.unitId,
+            this._getEmbedHostMenuOverrideService()?.getOverride()
+        );
+    }
+
+    private _getEmbedHostMenuOverrideService(): EmbedHostMenuOverrideService | undefined {
+        return this._injector.has(EmbedHostMenuOverrideService)
+            ? this._injector.get(EmbedHostMenuOverrideService)
+            : undefined;
+    }
+}
+
+export function shouldSuppressSheetContextMenuForEmbedOverride(
+    hostUnitId: string,
+    override: Pick<EmbedHostMenuOverride, 'entry' | 'hostUnitId'> | null | undefined
+): boolean {
+    return override?.hostUnitId === hostUnitId && override.entry === 'sheets-sheet-tab';
 }

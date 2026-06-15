@@ -15,6 +15,7 @@
  */
 
 import type { IMouseEvent } from '@univerjs/engine-render';
+import type { IContextMenuTriggerContext } from '../../../services/contextmenu/contextmenu.service';
 import type { IContextMenuAnchorRect } from './AnchoredContextMenu';
 import { ICommandService } from '@univerjs/core';
 import { useEffect, useRef, useState } from 'react';
@@ -29,6 +30,7 @@ export function DesktopContextMenu() {
     const [visible, setVisible] = useState(false);
     const [menuType, setMenuType] = useState('');
     const [anchorRect, setAnchorRect] = useState<IContextMenuAnchorRect | null>(null);
+    const [menuContext, setMenuContext] = useState<IContextMenuTriggerContext | undefined>();
     const visibleRef = useRef(visible);
     const contextMenuService = useDependency(IContextMenuService);
     const commandService = useDependency(ICommandService);
@@ -52,10 +54,11 @@ export function DesktopContextMenu() {
     }, [contextMenuService]);
 
     /** A function to open context menu with given position and menu type. */
-    function handleContextMenu(event: IMouseEvent, menuType: string) {
+    function handleContextMenu(event: IMouseEvent, menuType: string, context?: IContextMenuTriggerContext) {
         setVisible(false);
         requestAnimationFrame(() => {
             setMenuType(menuType);
+            setMenuContext(context);
             setAnchorRect({
                 left: event.clientX,
                 top: event.clientY,
@@ -75,17 +78,24 @@ export function DesktopContextMenu() {
             visible={visible}
             anchorRect={anchorRect}
             menuType={menuType}
+            menuInjector={menuContext?.injector}
             onRequestClose={handleClose}
             onOptionSelect={(params) => {
                 const { label: id, commandId, value } = params;
                 const rawParams = typeof params.params === 'function' ? params.params() : params.params;
                 const commandParams = typeof rawParams === 'undefined' ? { value } : rawParams;
+                const activeInjector = menuContext?.injector;
+                const activeCommandService = activeInjector?.has(ICommandService)
+                    ? activeInjector.get(ICommandService)
+                    : commandService;
 
-                if (commandService) {
-                    commandService.executeCommand(commandId ?? id as string, commandParams);
+                if (activeCommandService) {
+                    activeCommandService.executeCommand(commandId ?? id as string, commandParams);
                 }
 
-                const layoutService = injector.get(ILayoutService);
+                const layoutService = activeInjector?.has(ILayoutService)
+                    ? activeInjector.get(ILayoutService)
+                    : injector.get(ILayoutService);
                 layoutService.focus();
 
                 handleClose();

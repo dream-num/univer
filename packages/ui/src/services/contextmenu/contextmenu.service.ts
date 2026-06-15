@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-import type { IDisposable } from '@univerjs/core';
+import type { IDisposable, Injector } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent } from '@univerjs/engine-render';
 import { createIdentifier, Disposable, toDisposable } from '@univerjs/core';
 
+export interface IContextMenuTriggerContext {
+    injector?: Injector;
+}
+
 export interface IContextMenuHandler {
     /** A callback to open context menu with given position and menu type. */
-    handleContextMenu(event: IPointerEvent | IMouseEvent, menuType: string): void;
+    handleContextMenu(event: IPointerEvent | IMouseEvent, menuType: string, context?: IContextMenuTriggerContext): void;
     hideContextMenu(): void;
 
     get visible(): boolean;
@@ -32,7 +36,7 @@ export interface IContextMenuService {
 
     enable(): void;
     disable(): void;
-    triggerContextMenu(event: IPointerEvent | IMouseEvent, menuType: string): void;
+    triggerContextMenu(event: IPointerEvent | IMouseEvent, menuType: string, context?: IContextMenuTriggerContext): void;
     hideContextMenu(): void;
     registerContextMenuHandler(handler: IContextMenuHandler): IDisposable;
 }
@@ -55,11 +59,11 @@ export class ContextMenuService extends Disposable implements IContextMenuServic
         this.disabled = false;
     }
 
-    triggerContextMenu(event: IPointerEvent | IMouseEvent, menuType: string): void {
+    triggerContextMenu(event: IPointerEvent | IMouseEvent, menuType: string, context?: IContextMenuTriggerContext): void {
         event.stopPropagation();
 
         if (this.disabled) return;
-        this._currentHandler?.handleContextMenu(event, menuType);
+        this._currentHandler?.handleContextMenu(event, menuType, context);
     }
 
     hideContextMenu(): void {

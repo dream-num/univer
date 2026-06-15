@@ -51,6 +51,7 @@ import { INotificationService } from './services/notification/notification.servi
 import { IUIPartsService, UIPartsService } from './services/parts/parts.service';
 import { IPlatformService, PlatformService } from './services/platform/platform.service';
 import { CanvasPopupService, ICanvasPopupService } from './services/popup/canvas-popup.service';
+import { IRibbonOverrideService, RibbonOverrideService } from './services/ribbon/ribbon-override.service';
 import { DesktopRibbonService, IRibbonService } from './services/ribbon/ribbon.service';
 import { ShortcutPanelService } from './services/shortcut/shortcut-panel.service';
 import { IShortcutService, ShortcutService } from './services/shortcut/shortcut.service';
@@ -106,6 +107,7 @@ export class UniverUIPlugin extends Plugin {
             [IUIPartsService, { useClass: UIPartsService }],
             [ILayoutService, { useClass: DesktopLayoutService }],
             [IRibbonService, { useClass: DesktopRibbonService }],
+            [IRibbonOverrideService, { useClass: RibbonOverrideService }],
             [IShortcutService, { useClass: ShortcutService }],
             [IPlatformService, { useClass: PlatformService }],
             [IMenuManagerService, { useClass: MenuManagerService }],

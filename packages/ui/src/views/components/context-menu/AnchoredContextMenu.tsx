@@ -15,10 +15,11 @@
  */
 
 import type { IValueOption } from '../../../services/menu/menu';
+import type { Injector } from '@univerjs/core';
 import { Popup } from '@univerjs/design';
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { IContextMenuHostService } from '../../../services/contextmenu/contextmenu-host.service';
-import { useDependency } from '../../../utils/di';
+import { RediProvider, useDependency } from '../../../utils/di';
 import { CONTEXT_MENU_SUBMENU_PORTAL_ATTR, ContextMenuPanel } from './ContextMenuPanel';
 
 export interface IContextMenuAnchorRect {
@@ -34,6 +35,7 @@ export interface IAnchoredContextMenuProps {
     menuType: string;
     anchorVertical?: 'top' | 'bottom';
     menuOffset?: number;
+    menuInjector?: Injector;
     onRequestClose: () => void;
     onOptionSelect?: (option: IValueOption) => void;
 }
@@ -46,6 +48,7 @@ export function AnchoredContextMenu(props: IAnchoredContextMenuProps) {
         menuType,
         anchorVertical = 'bottom',
         menuOffset = 0,
+        menuInjector,
         onRequestClose,
         onOptionSelect,
     } = props;
@@ -159,11 +162,23 @@ export function AnchoredContextMenu(props: IAnchoredContextMenuProps) {
         >
             <section ref={contentRef}>
                 {menuType && (
-                    <ContextMenuPanel
-                        menuType={menuType}
-                        menuSessionVersion={menuSessionVersionRef.current}
-                        onOptionSelect={onOptionSelect}
-                    />
+                    menuInjector
+                        ? (
+                            <RediProvider value={{ injector: menuInjector }}>
+                                <ContextMenuPanel
+                                    menuType={menuType}
+                                    menuSessionVersion={menuSessionVersionRef.current}
+                                    onOptionSelect={onOptionSelect}
+                                />
+                            </RediProvider>
+                        )
+                        : (
+                            <ContextMenuPanel
+                                menuType={menuType}
+                                menuSessionVersion={menuSessionVersionRef.current}
+                                onOptionSelect={onOptionSelect}
+                            />
+                        )
                 )}
             </section>
         </Popup>

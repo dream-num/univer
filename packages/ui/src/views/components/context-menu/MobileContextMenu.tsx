@@ -16,6 +16,7 @@
 
 import type { IMouseEvent } from '@univerjs/engine-render';
 import type { LocaleKey } from '../../../locale/types';
+import type { IContextMenuTriggerContext } from '../../../services/contextmenu/contextmenu.service';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import { ConfigContext } from '@univerjs/design';
 import { CloseIcon } from '@univerjs/icons';
@@ -25,7 +26,7 @@ import { IContextMenuHostService } from '../../../services/contextmenu/contextme
 import { IContextMenuService } from '../../../services/contextmenu/contextmenu.service';
 import { ILayoutService } from '../../../services/layout/layout.service';
 import { ContextMenuPosition } from '../../../services/menu/types';
-import { useDependency, useObservable } from '../../../utils/di';
+import { RediProvider, useDependency, useObservable } from '../../../utils/di';
 import { MobileMenu } from '../../menu/mobile/MobileMenu';
 
 const MOBILE_CONTEXT_MENU_HOST_ID = 'mobile-context-menu';
@@ -33,6 +34,7 @@ const MOBILE_CONTEXT_MENU_HOST_ID = 'mobile-context-menu';
 export function MobileContextMenu() {
     const [visible, setVisible] = useState(false);
     const [menuType, setMenuType] = useState('');
+    const [menuContext, setMenuContext] = useState<IContextMenuTriggerContext | undefined>();
     const visibleRef = useRef(visible);
     const contextMenuHostService = useDependency(IContextMenuHostService);
     const contextMenuService = useDependency(IContextMenuService);
@@ -66,9 +68,10 @@ export function MobileContextMenu() {
         };
     }, [contextMenuHostService, contextMenuService]);
 
-    function handleContextMenu(_event: IMouseEvent, nextMenuType: string) {
+    function handleContextMenu(_event: IMouseEvent, nextMenuType: string, context?: IContextMenuTriggerContext) {
         contextMenuHostService.activateMenu(MOBILE_CONTEXT_MENU_HOST_ID);
         setMenuType(nextMenuType);
+        setMenuContext(context);
         setVisible(true);
     }
 
@@ -91,6 +94,32 @@ export function MobileContextMenu() {
     if (!mountContainer || !visible) {
         return null;
     }
+
+    const activeInjector = menuContext?.injector;
+    const activeCommandService = activeInjector?.has(ICommandService)
+        ? activeInjector.get(ICommandService)
+        : commandService;
+    const activeLayoutService = activeInjector?.has(ILayoutService)
+        ? activeInjector.get(ILayoutService)
+        : layoutService;
+    const menu = (
+        <MobileMenu
+            menuType={menuType}
+            onOptionSelect={(params) => {
+                const commandId = params.commandId ?? params.id ?? params.label as string | undefined;
+                const fallbackParams = typeof params.params === 'function' ? params.params() : params.params;
+                const commandParams = typeof params.value === 'undefined' ? fallbackParams : { value: params.value };
+
+                if (!commandId) {
+                    return;
+                }
+
+                activeLayoutService.focus();
+                activeCommandService.executeCommand(commandId, commandParams);
+                handleClose();
+            }}
+        />
+    );
 
     return createPortal(
         <div dir={direction} className="univer-fixed univer-inset-0 univer-z-[1080] univer-flex univer-items-end">
@@ -144,22 +173,9 @@ export function MobileContextMenu() {
                     </div>
                 </div>
                 {menuType && (
-                    <MobileMenu
-                        menuType={menuType}
-                        onOptionSelect={(params) => {
-                            const commandId = params.commandId ?? params.id ?? params.label as string | undefined;
-                            const fallbackParams = typeof params.params === 'function' ? params.params() : params.params;
-                            const commandParams = typeof params.value === 'undefined' ? fallbackParams : { value: params.value };
-
-                            if (!commandId) {
-                                return;
-                            }
-
-                            layoutService.focus();
-                            commandService.executeCommand(commandId, commandParams);
-                            handleClose();
-                        }}
-                    />
+                    activeInjector
+                        ? <RediProvider value={{ injector: activeInjector }}>{menu}</RediProvider>
+                        : menu
                 )}
             </section>
         </div>,

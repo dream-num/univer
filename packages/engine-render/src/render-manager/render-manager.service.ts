@@ -215,7 +215,8 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
      * @returns renderUnit:IRender
      */
     createRender(unitId: string, createUnitOptions?: ICreateUnitOptions): IRender {
-        const renderer = this._createRender(unitId, this._injector.createInstance(Engine, unitId, undefined), true, createUnitOptions);
+        const parentInjector = createUnitOptions?.renderParentInjector ?? this._injector;
+        const renderer = this._createRender(unitId, parentInjector.createInstance(Engine, unitId, undefined), createUnitOptions?.embeddedRender !== true, createUnitOptions, parentInjector);
         this._renderCreated$.next(renderer);
         return renderer;
     }
@@ -250,7 +251,7 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
      * @param isMainScene
      * @returns renderUnit:IRender
      */
-    protected _createRender(unitId: string, engine: Engine, isMainScene: boolean = true, createUnitOptions?: ICreateUnitOptions): IRender {
+    protected _createRender(unitId: string, engine: Engine, isMainScene: boolean = true, createUnitOptions?: ICreateUnitOptions, parentInjector: Injector = this._injector): IRender {
         const existItem = this.getRenderById(unitId);
         let shouldDestroyEngine = true;
 
@@ -277,7 +278,7 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
             const type = this._univerInstanceService.getUnitType(unitId);
             const ctorOfDeps = this._getRenderDepsByType(type);
 
-            renderUnit = this._injector.createInstance(RenderUnit, {
+            renderUnit = parentInjector.createInstance(RenderUnit, {
                 unit,
                 engine,
                 scene,
@@ -286,8 +287,17 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
             });
             this._addRenderUnit(unitId, renderUnit);
 
-            // init deps
-            this._tryAddRenderDependencies(renderUnit, ctorOfDeps);
+            try {
+                // init deps
+                this._tryAddRenderDependencies(renderUnit, ctorOfDeps);
+            } catch (error) {
+                try {
+                    this._disposeItem(renderUnit);
+                } finally {
+                    this._renderMap.delete(unitId);
+                }
+                throw error;
+            }
         } else {
             // For slide pages
             renderUnit = {

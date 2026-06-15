@@ -5,9 +5,8 @@ import type { EmbedProductMenuMountContext } from '../types/embed-ui';
 import { COMMAND_EXECUTION_INJECTOR_KEY, ICommandService, IConfigService, Injector, IUniverInstanceService, LocaleService, toDisposable } from '@univerjs/core';
 import { DesktopRibbonService, IMenuManagerService, IRibbonService, MenuManagerPosition, MenuManagerService, RediProvider, Ribbon } from '@univerjs/ui';
 import { createElement } from 'react';
-import { createRoot } from 'react-dom/client';
 import { map, merge, of } from 'rxjs';
-import { disposeEmbedReactRoot } from './react-root-disposal';
+import { createEmbedReactRoot, disposeEmbedReactRoot } from './react-root-disposal';
 
 export function mountEmbedProductRibbonMenu(context: EmbedProductMenuMountContext): IDisposable | undefined {
     const { container, injector, childType, childUnitId, menuSchema, menuTitlePrefix, activeRibbonTab, toolbarOnly } = context;
@@ -22,7 +21,7 @@ export function mountEmbedProductRibbonMenu(context: EmbedProductMenuMountContex
         menuTitlePrefix,
         activeRibbonTab,
     });
-    const root = createRoot(container);
+    const root = createEmbedReactRoot(container);
     root.render(createElement(
         RediProvider,
         { value: { injector: scoped.injector as Injector } },

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
+import type { Injector, Nullable } from '@univerjs/core';
 import type { IBoundRectNoAngle } from '@univerjs/engine-render';
 import type { Observable } from 'rxjs';
 import type { IRectPopupProps } from '../../views/components/popup/RectPopup';
@@ -27,6 +27,7 @@ export interface IPopup<T = Record<string, unknown>> extends Omit<IRectPopupProp
     excludeRects$?: Observable<IBoundRectNoAngle[]>;
     excludeRects?: Nullable<IBoundRectNoAngle[]>;
     componentKey: string;
+    injector?: Injector;
 
     unitId: string;
     subUnitId: string;

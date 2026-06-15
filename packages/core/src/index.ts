@@ -109,6 +109,7 @@ export { AuthzIoLocalService } from './services/authz-io/authz-io-local.service'
 export { IAuthzIoService } from './services/authz-io/type';
 export {
     COMMAND_LOG_EXECUTION_CONFIG_KEY,
+    COMMAND_EXECUTION_INJECTOR_KEY,
     CommandService,
     CommandType,
     ICommandService,

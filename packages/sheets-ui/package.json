@@ -85,8 +85,11 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
+        "@univerjs/embed": "workspace:*",
+        "@univerjs/embed-ui": "workspace:*",
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
+        "@univerjs/drawing": "workspace:*",
         "@univerjs/docs": "workspace:*",
         "@univerjs/docs-ui": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
@@ -94,6 +97,7 @@
         "@univerjs/icons": "1.19.0",
         "@univerjs/protocol": "workspace:*",
         "@univerjs/sheets": "workspace:*",
+        "@univerjs/sheets-drawing": "workspace:*",
         "@univerjs/telemetry": "workspace:*",
         "@univerjs/ui": "workspace:*"
     },

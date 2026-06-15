@@ -514,6 +514,9 @@ export function SheetBarTabs() {
         const renameSubscription = sheetBarService.renameId$.subscribe(() => {
             setTabEditor();
         });
+        const activeSheetSubscription = workbook.activeSheet$.subscribe(() => {
+            updateSheetItems();
+        });
 
         return () => {
             commandDisposable.dispose();
@@ -522,6 +525,7 @@ export function SheetBarTabs() {
             scrollSubscription.unsubscribe();
             scrollXSubscription.unsubscribe();
             renameSubscription.unsubscribe();
+            activeSheetSubscription.unsubscribe();
             disconnectResizeObserver?.();
         };
     }, [commandService, initializeSlideTabBar, resetOrder, setTabEditor, sheetBarService, syncScrollState, updateSheetItems, workbook]);

@@ -20,7 +20,11 @@ import { CommentIcon } from '@univerjs/icons';
 import { ComponentManager, IconManager, IMenuManagerService } from '@univerjs/ui';
 import { AddDocCommentComment } from '../commands/commands/add-doc-comment.command';
 import { DeleteDocCommentComment } from '../commands/commands/delete-doc-comment.command';
-import { ShowCommentPanelOperation, StartAddCommentOperation, ToggleCommentPanelOperation } from '../commands/operations/show-comment-panel.operation';
+import {
+    ShowCommentPanelOperation,
+    StartAddCommentOperation,
+    ToggleCommentPanelOperation,
+} from '../commands/operations/show-comment-panel.operation';
 import { DOCS_THREAD_COMMENT_PANEL } from '../common/const';
 import { menuSchema } from '../menu/schema';
 import { DocThreadCommentPanel } from '../views/DocThreadCommentPanel';

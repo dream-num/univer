@@ -14,7 +14,15 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, IConfigService, Inject, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import {
+    Disposable,
+    ICommandService,
+    IConfigService,
+    Inject,
+    Injector,
+    IUniverInstanceService,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { getCurrentTypeOfRenderer, IRenderManagerService } from '@univerjs/engine-render';
 import {
@@ -274,6 +282,7 @@ export class SheetUIController extends Disposable {
         this.disposeWithMe(componentManager.register(CELL_POPUP_COMPONENT_KEY, CellPopup));
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _registerIcons(): void {
         this.disposeWithMe(this._iconManager.register({
             AdjustHeightDoubleIcon,

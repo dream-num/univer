@@ -46,7 +46,7 @@ import { SheetDrawingPermissionController } from './controllers/sheet-drawing-pe
 import { SheetDrawingPrintingController } from './controllers/sheet-drawing-printing.controller';
 import { SheetDrawingTransformAffectedController } from './controllers/sheet-drawing-transform-affected.controller';
 import { SheetDrawingUpdateController } from './controllers/sheet-drawing-update.controller';
-import { SheetDrawingUIController } from './controllers/sheet-drawing.controller';
+import { SheetDrawingUIController } from './controllers/ui.controller';
 import { DrawingPopupMenuController } from './menu/drawing-popup-menu.controller';
 import { BatchSaveImagesService, IBatchSaveImagesService } from './services/batch-save-images.service';
 import { SheetCanvasFloatDomManagerService } from './services/canvas-float-dom-manager.service';

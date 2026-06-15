@@ -15,26 +15,37 @@
  */
 
 import { Disposable, ICommandService, Inject } from '@univerjs/core';
-
 import { ComponentManager, IMenuManagerService, IShortcutService } from '@univerjs/ui';
 import { DeleteDocDrawingsCommand } from '../commands/commands/delete-doc-drawing.command';
 import { GroupDocDrawingCommand } from '../commands/commands/group-doc-drawing.command';
 import { InsertDocDrawingCommand } from '../commands/commands/insert-doc-drawing.command';
-
 import { InsertDocImageCommand } from '../commands/commands/insert-image.command';
 import { InsertDocEllipseShapeCommand, InsertDocRectangleShapeCommand } from '../commands/commands/insert-shape.command';
 import { MoveDocDrawingsCommand } from '../commands/commands/move-drawings.command';
 import { RemoveDocDrawingCommand } from '../commands/commands/remove-doc-drawing.command';
 import { SetDocDrawingArrangeCommand } from '../commands/commands/set-drawing-arrange.command';
 import { UngroupDocDrawingCommand } from '../commands/commands/ungroup-doc-drawing.command';
-import { IMoveInlineDrawingCommand, ITransformNonInlineDrawingCommand, UpdateDocDrawingDistanceCommand, UpdateDocDrawingWrappingStyleCommand, UpdateDocDrawingWrapTextCommand, UpdateDrawingDocTransformCommand } from '../commands/commands/update-doc-drawing.command';
+import {
+    IMoveInlineDrawingCommand,
+    ITransformNonInlineDrawingCommand,
+    UpdateDocDrawingDistanceCommand,
+    UpdateDocDrawingWrappingStyleCommand,
+    UpdateDocDrawingWrapTextCommand,
+    UpdateDrawingDocTransformCommand,
+} from '../commands/commands/update-doc-drawing.command';
 import { ClearDocDrawingTransformerOperation } from '../commands/operations/clear-drawing-transformer.operation';
 import { EditDocDrawingOperation } from '../commands/operations/edit-doc-drawing.operation';
 import { SidebarDocDrawingOperation } from '../commands/operations/open-drawing-panel.operation';
 import { menuSchema } from '../menu/schema';
 import { COMPONENT_DOC_DRAWING_PANEL } from '../views/doc-image-panel/component-name';
 import { DocDrawingPanel } from '../views/doc-image-panel/DocDrawingPanel';
-import { DeleteDrawingsShortcutItem, MoveDrawingDownShortcutItem, MoveDrawingLeftShortcutItem, MoveDrawingRightShortcutItem, MoveDrawingUpShortcutItem } from './shortcuts/drawing.shortcut';
+import {
+    DeleteDrawingsShortcutItem,
+    MoveDrawingDownShortcutItem,
+    MoveDrawingLeftShortcutItem,
+    MoveDrawingRightShortcutItem,
+    MoveDrawingUpShortcutItem,
+} from './shortcuts/drawing.shortcut';
 
 export class DocDrawingUIController extends Disposable {
     constructor(

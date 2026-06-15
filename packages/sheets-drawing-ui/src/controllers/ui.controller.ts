@@ -29,7 +29,13 @@ import { menuSchema } from '../menu/schema';
 import { BATCH_SAVE_IMAGES_DIALOG_ID, BatchSaveImagesDialog } from '../views/batch-save-images';
 import { COMPONENT_SHEET_DRAWING_PANEL } from '../views/sheet-image-panel/component-name';
 import { SheetDrawingPanel } from '../views/sheet-image-panel/SheetDrawingPanel';
-import { DeleteDrawingsShortcutItem, MoveDrawingDownShortcutItem, MoveDrawingLeftShortcutItem, MoveDrawingRightShortcutItem, MoveDrawingUpShortcutItem } from './shortcuts/drawing.shortcut';
+import {
+    DeleteDrawingsShortcutItem,
+    MoveDrawingDownShortcutItem,
+    MoveDrawingLeftShortcutItem,
+    MoveDrawingRightShortcutItem,
+    MoveDrawingUpShortcutItem,
+} from './shortcuts/drawing.shortcut';
 
 export class SheetDrawingUIController extends Disposable {
     constructor(

@@ -70,7 +70,16 @@ import {
     UnderlineIcon,
     UnorderIcon,
 } from '@univerjs/icons';
-import { BuiltInUIPart, ComponentManager, connectInjector, IconManager, ILayoutService, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
+import {
+    BuiltInUIPart,
+    ComponentManager,
+    connectInjector,
+    IconManager,
+    ILayoutService,
+    IMenuManagerService,
+    IShortcutService,
+    IUIPartsService,
+} from '@univerjs/ui';
 import { CoreHeaderFooterCommand, OpenHeaderFooterPanelCommand } from '../commands/commands/doc-header-footer.command';
 import { SidebarDocHeaderFooterPanelOperation } from '../commands/operations/doc-header-footer-panel.operation';
 import { floatToolbarMenuSchema, menuSchema } from '../menu/schema';
@@ -121,9 +130,19 @@ import {
     SubtitleTypeIcon,
     TitleTypeIcon,
 } from '../views/Icon';
-import { BULLET_LIST_TYPE_COMPONENT, BulletListTypePicker, ORDER_LIST_TYPE_COMPONENT, OrderListTypePicker } from '../views/list-type-picker/index';
+import {
+    BULLET_LIST_TYPE_COMPONENT,
+    BulletListTypePicker,
+    ORDER_LIST_TYPE_COMPONENT,
+    OrderListTypePicker,
+} from '../views/list-type-picker/index';
 import { PAGE_SETTING_COMPONENT_ID, PageSettings } from '../views/PageSettings';
-import { DOC_PARAGRAPH_MENU_COMPONENT_KEY, DOC_TABLE_BLOCK_MENU_COMPONENT_KEY, ParagraphMenu, TableBlockMenu } from '../views/ParagraphMenu';
+import {
+    DOC_PARAGRAPH_MENU_COMPONENT_KEY,
+    DOC_TABLE_BLOCK_MENU_COMPONENT_KEY,
+    ParagraphMenu,
+    TableBlockMenu,
+} from '../views/ParagraphMenu';
 
 export class DocUIController extends Disposable {
     constructor(

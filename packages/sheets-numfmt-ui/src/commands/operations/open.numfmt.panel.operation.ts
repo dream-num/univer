@@ -16,7 +16,7 @@
 
 import type { IAccessor, ICommand } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
-import { SheetNumfmtUIController } from '../../controllers/numfmt.controller';
+import { SheetNumfmtUIController } from '../../controllers/ui.controller';
 
 export const OpenNumfmtPanelOperator: ICommand = {
     id: 'sheet.operation.open.numfmt.panel',

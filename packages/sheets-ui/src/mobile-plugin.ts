@@ -43,7 +43,7 @@ import { ForceStringRenderController } from './controllers/force-string-render.c
 import { FormatPainterController } from './controllers/format-painter/format-painter.controller';
 import { HoverRenderController } from './controllers/hover-render.controller';
 import { MarkSelectionRenderController } from './controllers/mark-selection.controller';
-import { SheetUIMobileController } from './controllers/mobile/mobile-sheet-ui.controller';
+import { SheetUIMobileController } from './controllers/mobile/ui-mobile.controller';
 import { MoveRangeRenderController } from './controllers/move-range.controller';
 import { SheetPermissionCheckUIController } from './controllers/permission/sheet-permission-check-ui.controller';
 import { SheetPermissionInitUIController } from './controllers/permission/sheet-permission-init-ui.controller';
@@ -78,8 +78,8 @@ import { CellEditorManagerService, ICellEditorManagerService } from './services/
 import { SheetCellEditorResizeService } from './services/editor/cell-editor-resize.service';
 import { FormulaEditorManagerService, IFormulaEditorManagerService } from './services/editor/formula-editor-manager.service';
 import { FormatPainterService, IFormatPainterService } from './services/format-painter/format-painter.service';
-import { HoverManagerService } from './services/hover-manager.service';
 import { HeaderUnhideRangeService } from './services/header-unhide-range.service';
+import { HoverManagerService } from './services/hover-manager.service';
 import { IMarkSelectionService, MarkSelectionService } from './services/mark-selection/mark-selection.service';
 import { SheetPermissionPanelModel } from './services/permission/sheet-permission-panel.model';
 import { SheetPermissionUserManagerService } from './services/permission/sheet-permission-user-list.service';

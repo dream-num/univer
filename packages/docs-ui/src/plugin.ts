@@ -102,7 +102,6 @@ import { DocHeaderFooterController } from './controllers/doc-header-footer.contr
 import { DocMoveCursorController } from './controllers/doc-move-cursor.controller';
 import { DocParagraphSettingController } from './controllers/doc-paragraph-setting.controller';
 import { DocTableController } from './controllers/doc-table.controller';
-import { DocUIController } from './controllers/doc-ui.controller';
 import { DocBackScrollRenderController } from './controllers/render-controllers/back-scroll.render-controller';
 import { DocChecklistRenderController } from './controllers/render-controllers/doc-checklist.render-controller';
 import { DocClipboardController } from './controllers/render-controllers/doc-clipboard.controller';
@@ -110,11 +109,12 @@ import { DocContextMenuRenderController } from './controllers/render-controllers
 import { DocEditorBridgeController } from './controllers/render-controllers/doc-editor-bridge.controller';
 import { DocIMEInputController } from './controllers/render-controllers/doc-ime-input.controller';
 import { DocInputController } from './controllers/render-controllers/doc-input.controller';
-import { DocResizeRenderController } from './controllers/render-controllers/doc-resize.render-controller';
 import { DocParagraphPlaceholderRenderController } from './controllers/render-controllers/doc-paragraph-placeholder.render-controller';
+import { DocResizeRenderController } from './controllers/render-controllers/doc-resize.render-controller';
 import { DocSelectionRenderController } from './controllers/render-controllers/doc-selection-render.controller';
 import { DocRenderController } from './controllers/render-controllers/doc.render-controller';
 import { DocZoomRenderController } from './controllers/render-controllers/zoom.render-controller';
+import { DocUIController } from './controllers/ui.controller';
 import { DocClipboardService, IDocClipboardService } from './services/clipboard/clipboard.service';
 import { DocAutoFormatService } from './services/doc-auto-format.service';
 import { DocEventManagerService } from './services/doc-event-manager.service';

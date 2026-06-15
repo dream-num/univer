@@ -27,7 +27,7 @@ export { UpdateSlideElementOperation } from './commands/operations/update-elemen
 export type { IUniverSlidesUIConfig } from './config/config';
 export { SLIDE_EDITOR_ID } from './const';
 export { CanvasView } from './controllers/canvas-view';
-export { SlidesUIController } from './controllers/slide-ui.controller';
+export { SlidesUIController } from './controllers/ui.controller';
 export { SLIDES_IMAGE_MENU_ID } from './menu/image.menu';
 export { menuSchema as SlidesUIMenuSchema } from './menu/schema';
 export { SHAPE_MENU_ID } from './menu/shape.menu';

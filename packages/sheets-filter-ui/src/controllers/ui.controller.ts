@@ -23,12 +23,17 @@ import { SheetsFilterService, SmartToggleSheetsFilterCommand } from '@univerjs/s
 import { SheetCanvasPopManagerService, SheetsRenderService } from '@univerjs/sheets-ui';
 import { ComponentManager, IconManager, IMenuManagerService, IMessageService, IShortcutService } from '@univerjs/ui';
 import { distinctUntilChanged } from 'rxjs';
-import { ChangeFilterByOperation, CloseFilterPanelOperation, FILTER_PANEL_OPENED_KEY, OpenFilterPanelOperation } from '../commands/operations/sheets-filter.operation';
+import {
+    ChangeFilterByOperation,
+    CloseFilterPanelOperation,
+    FILTER_PANEL_OPENED_KEY,
+    OpenFilterPanelOperation,
+} from '../commands/operations/sheets-filter.operation';
 import { menuSchema } from '../menu/schema';
 import { SheetsFilterPanelService } from '../services/sheets-filter-panel.service';
 import { FilterPanel } from '../views/components/SheetsFilterPanel';
-import { SheetsFilterUIMobileController } from './sheets-filter-ui-mobile.controller';
 import { SmartToggleFilterShortcut } from './sheets-filter.shortcut';
+import { SheetsFilterUIMobileController } from './ui-mobile.controller';
 
 export const FILTER_PANEL_POPUP_KEY = 'FILTER_PANEL_POPUP';
 

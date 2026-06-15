@@ -21,7 +21,7 @@ import { UniverInstanceType } from '@univerjs/core';
 import { SheetsUIPart } from '@univerjs/sheets-ui';
 import { describe, expect, it, vi } from 'vitest';
 import { MORE_FUNCTIONS_COMPONENT } from '../../views/more-functions/interface';
-import { FormulaUIController } from '../formula-ui.controller';
+import { FormulaUIController } from '../ui.controller';
 
 describe('FormulaUIController', () => {
     it('registers formula commands, menus, shortcuts, UI parts, and render modules', () => {

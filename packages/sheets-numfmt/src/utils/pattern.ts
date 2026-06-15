@@ -32,7 +32,7 @@ export const getPatternPreview = (pattern: string, value: number, locale: INumfm
         const color = formatColor ? String(formatColor) : undefined;
         const result = numfmt.format(pattern, value, { locale, throws: false });
         if (value < 0) {
-            // pay attention, controllers/numfmt.controller.ts
+            // pay attention, controllers/ui.controller.ts
             // in the pattern, the negative value color may be upper case one , so if we read a color with UpperCase, we should return the color with lower case for our theme system
             return {
                 result,

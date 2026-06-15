@@ -221,6 +221,7 @@ export class SheetUIMobileController extends Disposable {
         this.disposeWithMe(componentManager.register(CELL_POPUP_COMPONENT_KEY, CellPopup));
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _registerIcons(): void {
         this.disposeWithMe(this._iconManager.register({
             AdjustHeightDoubleIcon,

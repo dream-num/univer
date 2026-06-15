@@ -389,11 +389,6 @@ export function initEvent() {
     });
 
     // checked
-    window.univerAPI?.addEvent(window.univerAPI.Event.CrosshairHighlightColorChanged, (params) => {
-        logService.log('===CrosshairHighlightColorChanged', params);
-    });
-
-    // checked
     window.univerAPI?.addEvent(window.univerAPI.Event.CrosshairHighlightEnabledChanged, (params) => {
         logService.log('===CrosshairHighlightEnabledChanged', params);
     });

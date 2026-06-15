@@ -23,7 +23,7 @@ import {
     CUSTOM_FORMULA_INPUT_NAME,
     LIST_FORMULA_INPUT_NAME,
 } from '../../views/components/formula-input';
-import { SheetsDataValidationUIController } from '../dv-ui.controller';
+import { SheetsDataValidationUIController } from '../ui.controller';
 
 vi.hoisted(() => {
     Object.assign(globalThis, {

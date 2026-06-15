@@ -18,7 +18,7 @@ import type { ICommandService } from '@univerjs/core';
 import type { ComponentManager, IconManager, IMenuManagerService } from '@univerjs/ui';
 import { describe, expect, it, vi } from 'vitest';
 import { COMPONENT_IMAGE_POPUP_MENU } from '../../views/image-popup-menu/component-name';
-import { DrawingUIController } from '../drawing-ui.controller';
+import { DrawingUIController } from '../ui.controller';
 
 describe('DrawingUIController', () => {
     it('registers popup components and drawing operations', () => {

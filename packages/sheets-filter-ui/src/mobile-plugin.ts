@@ -21,7 +21,7 @@ import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import pkg from '../package.json';
 import { defaultPluginConfig, SHEETS_FILTER_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { SheetsFilterPermissionController } from './controllers/sheets-filter-permission.controller';
-import { SheetsFilterUIMobileController } from './controllers/sheets-filter-ui-mobile.controller';
+import { SheetsFilterUIMobileController } from './controllers/ui-mobile.controller';
 
 @DependentOn(UniverSheetsFilterPlugin)
 export class UniverSheetsFilterMobileUIPlugin extends Plugin {

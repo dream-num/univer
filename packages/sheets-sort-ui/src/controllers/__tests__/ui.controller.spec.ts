@@ -23,7 +23,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createCommandTestBed } from '../../commands/commands/__tests__/create-command-test-bed';
 import { SortRangeCustomCommand } from '../../commands/commands/sheets-sort.command';
 import { SheetsSortUIService } from '../../services/sheets-sort-ui.service';
-import { SheetsSortUIController } from '../sheets-sort-ui.controller';
+import { SheetsSortUIController } from '../ui.controller';
 
 function createDisposable(): IDisposable {
     return {

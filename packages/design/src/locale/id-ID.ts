@@ -42,6 +42,12 @@ const locale: typeof enUS = {
                 'Nov',
                 'Des',
             ],
+            ariaLabels: {
+                previousMonth: 'Bulan sebelumnya',
+                nextMonth: 'Bulan berikutnya',
+                selectYear: 'Pilih tahun',
+                selectMonth: 'Pilih bulan',
+            },
         },
         Select: {
             empty: 'Tidak ada',

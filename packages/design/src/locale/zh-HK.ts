@@ -42,6 +42,12 @@ const locale: typeof enUS = {
                 '十一月',
                 '十二月',
             ],
+            ariaLabels: {
+                previousMonth: '上一個月',
+                nextMonth: '下一個月',
+                selectYear: '選擇年份',
+                selectMonth: '選擇月份',
+            },
         },
         Select: {
             empty: '無',

@@ -42,6 +42,12 @@ const locale: typeof enUS = {
                 'Novembre',
                 'Desembre',
             ],
+            ariaLabels: {
+                previousMonth: 'Mes anterior',
+                nextMonth: 'Mes siguiente',
+                selectYear: 'Seleccionar año',
+                selectMonth: 'Seleccionar mes',
+            },
         },
         Select: {
             empty: 'Cap',

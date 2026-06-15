@@ -15,7 +15,7 @@
  */
 
 import type { CSSProperties, Key, ReactNode } from 'react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export interface IVirtualListProps<T extends object> {
     data: T[];
@@ -23,14 +23,26 @@ export interface IVirtualListProps<T extends object> {
     children: (item: T, index: number) => ReactNode;
     height?: number;
     itemHeight?: number;
+    initialScrollIndex?: number;
     overscan?: number;
     className?: string;
     style?: CSSProperties;
 }
 
 export function VirtualList<T extends object>(props: IVirtualListProps<T>) {
-    const { data, itemKey, children, height, itemHeight, overscan = 2, className, style } = props;
-    const [scrollTop, setScrollTop] = useState(0);
+    const { data, itemKey, children, height, itemHeight, initialScrollIndex = 0, overscan = 2, className, style } = props;
+    const initialScrollTop = height && itemHeight ? initialScrollIndex * itemHeight : 0;
+    const scrollerRef = useRef<HTMLDivElement>(null);
+    const [scrollTop, setScrollTop] = useState(initialScrollTop);
+
+    useEffect(() => {
+        const scroller = scrollerRef.current;
+        if (!scroller || !height || !itemHeight) return;
+
+        const nextScrollTop = initialScrollIndex * itemHeight;
+        scroller.scrollTop = nextScrollTop;
+        setScrollTop(nextScrollTop);
+    }, [height, initialScrollIndex, itemHeight]);
 
     if (!height || !itemHeight || itemHeight <= 0) {
         return (
@@ -57,6 +69,7 @@ export function VirtualList<T extends object>(props: IVirtualListProps<T>) {
 
     return (
         <div
+            ref={scrollerRef}
             className={className}
             style={{
                 ...style,

@@ -42,6 +42,12 @@ const locale: typeof enUS = {
                 'نوفمبر',
                 'ديسمبر',
             ],
+            ariaLabels: {
+                previousMonth: 'الشهر السابق',
+                nextMonth: 'الشهر التالي',
+                selectYear: 'اختر السنة',
+                selectMonth: 'اختر الشهر',
+            },
         },
         Select: {
             empty: 'لا شيء',

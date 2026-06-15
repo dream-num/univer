@@ -51,7 +51,7 @@ export {
     EmbedMountService,
 } from './services/embed-mount.service';
 export { EmbedOverlayRootService, type EmbedOverlayRootRegistration } from './services/embed-overlay-root.service';
-export { disposeEmbedReactRoot } from './services/react-root-disposal';
+export { createEmbedReactRoot, disposeEmbedReactRoot } from './services/react-root-disposal';
 export {
     createEmbedRenderChildViewContribution,
     createEmbedChildRender,

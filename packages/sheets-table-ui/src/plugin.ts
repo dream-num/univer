@@ -24,6 +24,7 @@ import { OpenTableFilterPanelOperation } from './commands/operations/open-table-
 import { OpenTableSelectorOperation } from './commands/operations/open-table-selector.operation';
 import { defaultPluginConfig, SHEETS_TABLE_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { PLUGIN_NAME } from './const';
+import { ComponentsController } from './controllers/components.controller';
 import { SheetsTableComponentController } from './controllers/sheet-table-component.controller';
 import { SheetTableControlsRenderController } from './controllers/sheet-table-controls-render.controller';
 import { SheetsTableFilterButtonRenderController } from './controllers/sheet-table-filter-button-render.controller';
@@ -63,6 +64,8 @@ export class UniverSheetsTableUIPlugin extends Plugin {
     }
 
     override onStarting(): void {
+        this._injector.add([ComponentsController]);
+        this._injector.get(ComponentsController);
         registerDependencies(this._injector, [
             [SheetsTableComponentController],
             [SheetsTableUiService],

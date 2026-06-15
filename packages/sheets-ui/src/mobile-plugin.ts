@@ -20,11 +20,10 @@ import type { IUniverSheetsUIConfig } from './config/config';
 import { DependentOn, IConfigService, Inject, Injector, IUniverInstanceService, merge, mergeOverrideWithDependencies, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService, RefSelectionsService, UniverSheetsPlugin } from '@univerjs/sheets';
-import { ComponentManager, UI_PLUGIN_CONFIG_KEY, UniverMobileUIPlugin } from '@univerjs/ui';
+import { UI_PLUGIN_CONFIG_KEY, UniverMobileUIPlugin } from '@univerjs/ui';
 import { filter } from 'rxjs/operators';
 import pkg from '../package.json';
 import { defaultPluginConfig, SHEETS_UI_PLUGIN_CONFIG_KEY } from './config/config';
-import { UNIVER_SHEET_PERMISSION_USER_PART } from './consts/permission';
 import { AutoFillUIController } from './controllers/auto-fill-ui.controller';
 import { AutoHeightController } from './controllers/auto-height.controller';
 import { AutoWidthController } from './controllers/auto-width.controller';
@@ -33,6 +32,7 @@ import { CellCustomRenderController } from './controllers/cell-custom-render.con
 import { CellPopupEditorController } from './controllers/cell-popup-editor.controller';
 import { SheetCheckboxController } from './controllers/checkbox.controller';
 import { SheetClipboardController } from './controllers/clipboard/clipboard.controller';
+import { ComponentsController } from './controllers/components.controller';
 import { SheetsDefinedNameController } from './controllers/defined-name/defined-name.controller';
 import { DragRenderController } from './controllers/drag-render.controller';
 import { EditorDataSyncController } from './controllers/editor/data-sync.controller';
@@ -107,8 +107,7 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
         @Inject(Injector) override readonly _injector: Injector,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IConfigService private readonly _configService: IConfigService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(ComponentManager) private readonly _componentManager: ComponentManager
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
 
@@ -119,20 +118,6 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
             this._config
         );
 
-        if (rest.protectedRangeUserSelector) {
-            const { component, framework } = rest.protectedRangeUserSelector;
-
-            this.disposeWithMe(
-                this._componentManager.register(
-                    UNIVER_SHEET_PERMISSION_USER_PART,
-                    component,
-                    {
-                        framework,
-                    }
-                )
-            );
-        }
-
         if (menu) {
             this._configService.setConfig('menu', menu, { merge: true });
         }
@@ -141,6 +126,8 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
     }
 
     override onStarting(): void {
+        this._injector.add([ComponentsController]);
+        this._injector.get(ComponentsController);
         registerDependencies(this._injector, mergeOverrideWithDependencies([
             [ShortcutExperienceService],
             [IEditorBridgeService, { useClass: EditorBridgeService }],

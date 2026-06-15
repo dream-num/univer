@@ -19,6 +19,7 @@ import type { IUniverDrawingUIConfig } from './config/config';
 import { IConfigService, Inject, Injector, merge, Plugin } from '@univerjs/core';
 import pkg from '../package.json';
 import { defaultPluginConfig, DRAWING_UI_PLUGIN_CONFIG_KEY } from './config/config';
+import { ComponentsController } from './controllers/components.controller';
 import { DrawingUpdateController } from './controllers/drawing-update.controller';
 import { ImageCropperController } from './controllers/image-cropper.controller';
 import { ImageUpdateController } from './controllers/image-update.controller';
@@ -51,6 +52,8 @@ export class UniverDrawingUIPlugin extends Plugin {
     }
 
     override onStarting(): void {
+        this._injector.add([ComponentsController]);
+        this._injector.get(ComponentsController);
         this._initDependencies();
     }
 

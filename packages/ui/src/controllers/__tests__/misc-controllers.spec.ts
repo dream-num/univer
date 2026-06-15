@@ -58,10 +58,7 @@ describe('shortcut-display controllers', () => {
         });
     });
 
-    it('should register panel component, command and shortcut', () => {
-        const componentManager = {
-            register: vi.fn(() => ({ dispose: vi.fn() })),
-        };
+    it('should register command and shortcut', () => {
         const shortcutService = {
             registerShortcut: vi.fn(() => ({ dispose: vi.fn() })),
         };
@@ -70,14 +67,11 @@ describe('shortcut-display controllers', () => {
         };
 
         const controller = new ShortcutPanelController(
-            {} as any,
-            componentManager as any,
             shortcutService as any,
             {} as any,
             commandService as any
         );
 
-        expect(componentManager.register).toHaveBeenCalledTimes(1);
         expect(commandService.registerCommand).toHaveBeenCalledWith(ToggleShortcutPanelOperation);
         expect(shortcutService.registerShortcut).toHaveBeenCalledTimes(1);
 

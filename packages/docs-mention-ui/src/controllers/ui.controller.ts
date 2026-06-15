@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, Inject } from '@univerjs/core';
-import { ComponentManager } from '@univerjs/ui';
+import { Disposable, ICommandService } from '@univerjs/core';
 import { AddDocMentionCommand, DeleteDocMentionCommand } from '../commands/commands/doc-mention.command';
 import {
     CloseMentionEditPopupOperation,
@@ -23,17 +22,14 @@ import {
     ShowMentionEditPopupOperation,
     ShowMentionInfoPopupOperation,
 } from '../commands/operations/mention-popup.operation';
-import { MentionEditPopup } from '../views/MentionEditPopup';
 
 export class DocMentionUIController extends Disposable {
     constructor(
-        @ICommandService private readonly _commandService: ICommandService,
-        @Inject(ComponentManager) private readonly _componentManager: ComponentManager
+        @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
 
         this._initCommands();
-        this._initComponents();
     }
 
     private _initCommands() {
@@ -46,14 +42,6 @@ export class DocMentionUIController extends Disposable {
             DeleteDocMentionCommand,
         ].forEach((operation) => {
             this.disposeWithMe(this._commandService.registerCommand(operation));
-        });
-    }
-
-    private _initComponents() {
-        const components = [[MentionEditPopup.componentKey, MentionEditPopup]] as const;
-
-        components.forEach(([key, comp]) => {
-            this.disposeWithMe(this._componentManager.register(key, comp));
         });
     }
 }

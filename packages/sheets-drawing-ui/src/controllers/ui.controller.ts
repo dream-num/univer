@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, Inject } from '@univerjs/core';
-import { ComponentManager, IMenuManagerService, IShortcutService } from '@univerjs/ui';
+import { Disposable, ICommandService } from '@univerjs/core';
+import { IMenuManagerService, IShortcutService } from '@univerjs/ui';
 import { DeleteDrawingsCommand } from '../commands/commands/delete-drawings.command';
 import { FlipSheetDrawingCommand } from '../commands/commands/flip-drawings.command';
 import { GroupSheetDrawingCommand } from '../commands/commands/group-sheet-drawing.command';
@@ -26,9 +26,6 @@ import { UngroupSheetDrawingCommand } from '../commands/commands/ungroup-sheet-d
 import { EditSheetDrawingOperation } from '../commands/operations/edit-sheet-drawing.operation';
 import { SidebarSheetDrawingOperation } from '../commands/operations/open-drawing-panel.operation';
 import { menuSchema } from '../menu/schema';
-import { BATCH_SAVE_IMAGES_DIALOG_ID, BatchSaveImagesDialog } from '../views/batch-save-images';
-import { COMPONENT_SHEET_DRAWING_PANEL } from '../views/sheet-image-panel/component-name';
-import { SheetDrawingPanel } from '../views/sheet-image-panel/SheetDrawingPanel';
 import {
     DeleteDrawingsShortcutItem,
     MoveDrawingDownShortcutItem,
@@ -39,7 +36,6 @@ import {
 
 export class SheetDrawingUIController extends Disposable {
     constructor(
-        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
         @ICommandService private readonly _commandService: ICommandService,
         @IShortcutService private readonly _shortcutService: IShortcutService
@@ -50,9 +46,6 @@ export class SheetDrawingUIController extends Disposable {
     }
 
     private _initCustomComponents(): void {
-        const componentManager = this._componentManager;
-        this.disposeWithMe(componentManager.register(COMPONENT_SHEET_DRAWING_PANEL, SheetDrawingPanel));
-        this.disposeWithMe(componentManager.register(BATCH_SAVE_IMAGES_DIALOG_ID, BatchSaveImagesDialog));
     }
 
     private _initMenus(): void {

@@ -24,57 +24,10 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import {
-    AddImageIcon,
-    AlignTextBothIcon,
-    BoldIcon,
-    CopyDoubleIcon,
-    CutIcon,
-    DeleteColumnDoubleIcon,
-    DeleteIcon,
-    DeleteRowDoubleIcon,
-    DocSettingIcon,
-    FontColorDoubleIcon,
-    GridIcon,
-    H1Icon,
-    H2Icon,
-    H3Icon,
-    H4Icon,
-    H5Icon,
-    HeaderFooterIcon,
-    HorizontallyIcon,
-    InsertDoubleIcon,
-    InsertRowAboveDoubleIcon,
-    InsertRowBelowDoubleIcon,
-    ItalicIcon,
-    KeyboardIcon,
-    LeftInsertColumnDoubleIcon,
-    LeftJustifyingIcon,
-    MenuIcon,
-    MoreLeftIcon,
-    MoreRightIcon,
-    NoColorDoubleIcon,
-    OrderIcon,
-    PaintBucketDoubleIcon,
-    PasteSpecialDoubleIcon,
-    ReduceDoubleIcon,
-    ReduceIcon,
-    RightInsertColumnDoubleIcon,
-    RightJustifyingIcon,
-    ShapeIcon,
-    StrikethroughIcon,
-    SubscriptIcon,
-    SuperscriptIcon,
-    TextTypeIcon,
-    TodoListDoubleIcon,
-    UnderlineIcon,
-    UnorderIcon,
-} from '@univerjs/icons';
+
 import {
     BuiltInUIPart,
-    ComponentManager,
     connectInjector,
-    IconManager,
     ILayoutService,
     IMenuManagerService,
     IShortcutService,
@@ -101,54 +54,10 @@ import {
 } from '../shortcuts/toolbar.shortcut';
 import { DocFooter } from '../views/doc-footer';
 import { DocSideMenu } from '../views/DocSideMenu';
-import {
-    DefaultTextColorIcon,
-    DocParagraphBackgroundColorSwatchIcon0,
-    DocParagraphBackgroundColorSwatchIcon1,
-    DocParagraphBackgroundColorSwatchIcon10,
-    DocParagraphBackgroundColorSwatchIcon11,
-    DocParagraphBackgroundColorSwatchIcon12,
-    DocParagraphBackgroundColorSwatchIcon13,
-    DocParagraphBackgroundColorSwatchIcon14,
-    DocParagraphBackgroundColorSwatchIcon15,
-    DocParagraphBackgroundColorSwatchIcon2,
-    DocParagraphBackgroundColorSwatchIcon3,
-    DocParagraphBackgroundColorSwatchIcon4,
-    DocParagraphBackgroundColorSwatchIcon5,
-    DocParagraphBackgroundColorSwatchIcon6,
-    DocParagraphBackgroundColorSwatchIcon7,
-    DocParagraphBackgroundColorSwatchIcon8,
-    DocParagraphBackgroundColorSwatchIcon9,
-    DocParagraphTextColorSwatchIcon0,
-    DocParagraphTextColorSwatchIcon1,
-    DocParagraphTextColorSwatchIcon2,
-    DocParagraphTextColorSwatchIcon3,
-    DocParagraphTextColorSwatchIcon4,
-    DocParagraphTextColorSwatchIcon5,
-    DocParagraphTextColorSwatchIcon6,
-    HeaderTextColorIcon,
-    SubtitleTypeIcon,
-    TitleTypeIcon,
-} from '../views/Icon';
-import {
-    BULLET_LIST_TYPE_COMPONENT,
-    BulletListTypePicker,
-    ORDER_LIST_TYPE_COMPONENT,
-    OrderListTypePicker,
-} from '../views/list-type-picker/index';
-import { PAGE_SETTING_COMPONENT_ID, PageSettings } from '../views/PageSettings';
-import {
-    DOC_PARAGRAPH_MENU_COMPONENT_KEY,
-    DOC_TABLE_BLOCK_MENU_COMPONENT_KEY,
-    ParagraphMenu,
-    TableBlockMenu,
-} from '../views/ParagraphMenu';
 
 export class DocUIController extends Disposable {
     constructor(
         @Inject(Injector) protected readonly _injector: Injector,
-        @Inject(ComponentManager) protected readonly _componentManager: ComponentManager,
-        @Inject(IconManager) protected readonly _iconManager: IconManager,
         @ICommandService protected readonly _commandService: ICommandService,
         @ILayoutService protected readonly _layoutService: ILayoutService,
         @IMenuManagerService protected readonly _menuManagerService: IMenuManagerService,
@@ -160,96 +69,6 @@ export class DocUIController extends Disposable {
         super();
 
         this._init();
-    }
-
-    private _registerIcons(): void {
-        this.disposeWithMe(this._iconManager.register({
-            AlignTextBothIcon,
-            AddImageIcon,
-            BoldIcon,
-            CopyDoubleIcon,
-            CutIcon,
-            DeleteColumnDoubleIcon,
-            DeleteIcon,
-            DeleteRowDoubleIcon,
-            DocSettingIcon,
-            FontColorDoubleIcon,
-            GridIcon,
-            H1Icon,
-            H2Icon,
-            H3Icon,
-            H4Icon,
-            H5Icon,
-            HeaderFooterIcon,
-            HorizontallyIcon,
-            InsertDoubleIcon,
-            InsertRowAboveDoubleIcon,
-            InsertRowBelowDoubleIcon,
-            ItalicIcon,
-            KeyboardIcon,
-            LeftInsertColumnDoubleIcon,
-            LeftJustifyingIcon,
-            MenuIcon,
-            TextTypeIcon,
-            NoColorDoubleIcon,
-            OrderIcon,
-            PaintBucketDoubleIcon,
-            PasteSpecialDoubleIcon,
-            ReduceDoubleIcon,
-            ReduceIcon,
-            RightInsertColumnDoubleIcon,
-            RightJustifyingIcon,
-            ShapeIcon,
-            StrikethroughIcon,
-            SubscriptIcon,
-            SuperscriptIcon,
-            TitleTypeIcon,
-            SubtitleTypeIcon,
-            TodoListDoubleIcon,
-            UnderlineIcon,
-            UnorderIcon,
-            DefaultTextColorIcon,
-            HeaderTextColorIcon,
-            MoreRightIcon,
-            MoreLeftIcon,
-            'DocParagraphTextColorSwatchIcon.0': DocParagraphTextColorSwatchIcon0,
-            'DocParagraphTextColorSwatchIcon.1': DocParagraphTextColorSwatchIcon1,
-            'DocParagraphTextColorSwatchIcon.2': DocParagraphTextColorSwatchIcon2,
-            'DocParagraphTextColorSwatchIcon.3': DocParagraphTextColorSwatchIcon3,
-            'DocParagraphTextColorSwatchIcon.4': DocParagraphTextColorSwatchIcon4,
-            'DocParagraphTextColorSwatchIcon.5': DocParagraphTextColorSwatchIcon5,
-            'DocParagraphTextColorSwatchIcon.6': DocParagraphTextColorSwatchIcon6,
-            'DocParagraphBackgroundColorSwatchIcon.0': DocParagraphBackgroundColorSwatchIcon0,
-            'DocParagraphBackgroundColorSwatchIcon.1': DocParagraphBackgroundColorSwatchIcon1,
-            'DocParagraphBackgroundColorSwatchIcon.2': DocParagraphBackgroundColorSwatchIcon2,
-            'DocParagraphBackgroundColorSwatchIcon.3': DocParagraphBackgroundColorSwatchIcon3,
-            'DocParagraphBackgroundColorSwatchIcon.4': DocParagraphBackgroundColorSwatchIcon4,
-            'DocParagraphBackgroundColorSwatchIcon.5': DocParagraphBackgroundColorSwatchIcon5,
-            'DocParagraphBackgroundColorSwatchIcon.6': DocParagraphBackgroundColorSwatchIcon6,
-            'DocParagraphBackgroundColorSwatchIcon.7': DocParagraphBackgroundColorSwatchIcon7,
-            'DocParagraphBackgroundColorSwatchIcon.8': DocParagraphBackgroundColorSwatchIcon8,
-            'DocParagraphBackgroundColorSwatchIcon.9': DocParagraphBackgroundColorSwatchIcon9,
-            'DocParagraphBackgroundColorSwatchIcon.10': DocParagraphBackgroundColorSwatchIcon10,
-            'DocParagraphBackgroundColorSwatchIcon.11': DocParagraphBackgroundColorSwatchIcon11,
-            'DocParagraphBackgroundColorSwatchIcon.12': DocParagraphBackgroundColorSwatchIcon12,
-            'DocParagraphBackgroundColorSwatchIcon.13': DocParagraphBackgroundColorSwatchIcon13,
-            'DocParagraphBackgroundColorSwatchIcon.14': DocParagraphBackgroundColorSwatchIcon14,
-            'DocParagraphBackgroundColorSwatchIcon.15': DocParagraphBackgroundColorSwatchIcon15,
-        }));
-    }
-
-    private _initCustomComponents(): void {
-        ([
-            [BULLET_LIST_TYPE_COMPONENT, BulletListTypePicker],
-            [ORDER_LIST_TYPE_COMPONENT, OrderListTypePicker],
-            [DOC_PARAGRAPH_MENU_COMPONENT_KEY, ParagraphMenu],
-            [DOC_TABLE_BLOCK_MENU_COMPONENT_KEY, TableBlockMenu],
-            [PAGE_SETTING_COMPONENT_ID, PageSettings],
-        ] as const).forEach(([key, comp]) => {
-            this.disposeWithMe(
-                this._componentManager.register(key, comp)
-            );
-        });
     }
 
     private _initUiParts() {
@@ -283,8 +102,6 @@ export class DocUIController extends Disposable {
     }
 
     private _init(): void {
-        this._initCustomComponents();
-        this._registerIcons();
         this._initMenus();
         this._initFocusHandler();
         this._initCommands();

@@ -30,13 +30,10 @@ import {
 } from '@univerjs/core';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService, PageLayoutType, Path, Rect, Vector2 } from '@univerjs/engine-render';
-import { ComponentManager } from '@univerjs/ui';
 import { neoGetDocObject } from '../basics/component-tools';
 import { CloseHeaderFooterCommand, CoreHeaderFooterCommand } from '../commands/commands/doc-header-footer.command';
 import { IEditorService } from '../services/editor/editor-manager.service';
 import { DocSelectionRenderService } from '../services/selection/doc-selection-render.service';
-import { COMPONENT_DOC_HEADER_FOOTER_PANEL } from '../views/header-footer/panel/component-name';
-import { DocHeaderFooterPanel } from '../views/header-footer/panel/DocHeaderFooterPanel';
 import { TextBubbleShape } from '../views/header-footer/text-bubble';
 
 const HEADER_FOOTER_STROKE_COLOR = 'rgba(58, 96, 247, 1)';
@@ -142,8 +139,7 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @Inject(DocSelectionRenderService) private readonly _docSelectionRenderService: DocSelectionRenderService,
-        @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @Inject(ComponentManager) private readonly _componentManager: ComponentManager
+        @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         super();
 
@@ -153,7 +149,6 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
     private _initialize() {
         this._init();
         this._drawHeaderFooterLabel();
-        this._initCustomComponents();
         this._listenSwitchMode();
     }
 
@@ -197,12 +192,6 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
                 }
             })
         );
-    }
-
-    private _initCustomComponents(): void {
-        if (!this._componentManager.get(COMPONENT_DOC_HEADER_FOOTER_PANEL)) {
-            this.disposeWithMe(this._componentManager.register(COMPONENT_DOC_HEADER_FOOTER_PANEL, DocHeaderFooterPanel));
-        }
     }
 
     private _init() {

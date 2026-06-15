@@ -28,8 +28,6 @@ export interface IUniverSheetsFilterUIConfig {
 
 export const DefaultSheetFilterUiConfig = {};
 
-export const FILTER_PANEL_POPUP_KEY = 'FILTER_PANEL_POPUP';
-
 /**
  * This controller controls the UI of "filter" features. Menus, commands and filter panel etc. Except for the rendering.
  */

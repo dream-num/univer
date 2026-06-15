@@ -18,8 +18,6 @@ import type { Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { Disposable, Inject } from '@univerjs/core';
 import { ComponentManager } from '@univerjs/ui';
-import { CELL_ALERT_KEY } from '../views/cell-alert';
-import { CellAlert } from '../views/cell-alert/CellAlertPopup';
 
 // FIXME@weird94: this should not be render module
 
@@ -29,12 +27,5 @@ export class CellAlertRenderController extends Disposable implements IRenderModu
         @Inject(ComponentManager) private _componentManager: ComponentManager
     ) {
         super();
-        this._initComponent();
-    }
-
-    private _initComponent() {
-        this.disposeWithMe(
-            this._componentManager.register(CELL_ALERT_KEY, CellAlert)
-        );
     }
 }

@@ -32,6 +32,7 @@ import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import pkg from '../package.json';
 import { defaultPluginConfig } from './config/config';
+import { ComponentsController } from './controllers/components.controller';
 import { NumfmtAlertRenderController } from './controllers/numfmt-alert-render.controller';
 import { NumfmtRepeatLastActionController } from './controllers/numfmt-repeat-last-action.controller';
 import { NumfmtEditorController } from './controllers/numfmt.editor.controller';
@@ -68,6 +69,8 @@ export class UniverSheetsNumfmtUIPlugin extends Plugin {
     }
 
     override onStarting(): void {
+        this._injector.add([ComponentsController]);
+        this._injector.get(ComponentsController);
         registerDependencies(this._injector, [
             [SheetNumfmtUIController],
             [NumfmtEditorController],

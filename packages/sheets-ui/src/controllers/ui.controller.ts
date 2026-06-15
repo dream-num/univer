@@ -25,87 +25,7 @@ import {
 } from '@univerjs/core';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { getCurrentTypeOfRenderer, IRenderManagerService } from '@univerjs/engine-render';
-import {
-    AddImageIcon,
-    AdjustHeightDoubleIcon,
-    AdjustWidthDoubleIcon,
-    AlignBottomIcon,
-    AlignTopIcon,
-    AllBorderIcon,
-    AutoHeightDoubleIcon,
-    AutoWidthDoubleIcon,
-    AutowrapIcon,
-    BackSlashDoubleIcon,
-    BoldIcon,
-    BrushIcon,
-    CancelFreezeIcon,
-    CancelMergeIcon,
-    ClearFormatDoubleIcon,
-    CodeIcon,
-    CopyDoubleIcon,
-    CutIcon,
-    DeleteCellShiftLeftDoubleIcon,
-    DeleteCellShiftUpDoubleIcon,
-    DeleteColumnDoubleIcon,
-    DeleteRowDoubleIcon,
-    DownBorderDoubleIcon,
-    DownloadImageIcon,
-    EyeOutlineIcon,
-    FontColorDoubleIcon,
-    FontSizeIncreaseIcon,
-    FontSizeReduceIcon,
-    FreezeColumnIcon,
-    FreezeRowIcon,
-    FreezeToSelectedIcon,
-    HideDoubleIcon,
-    HideGridlinesDoubleIcon,
-    HorizontalBorderDoubleIcon,
-    HorizontallyIcon,
-    HorizontalMergeIcon,
-    InnerBorderDoubleIcon,
-    InsertCellDownDoubleIcon,
-    InsertCellShiftRightDoubleIcon,
-    InsertDoubleIcon,
-    InsertRowAboveDoubleIcon,
-    InsertRowBelowDoubleIcon,
-    ItalicIcon,
-    LeftBorderDoubleIcon,
-    LeftDoubleDiagonalDoubleIcon,
-    LeftInsertColumnDoubleIcon,
-    LeftJustifyingIcon,
-    LeftRotationFortyFiveDegreesIcon,
-    LeftRotationNinetyDegreesIcon,
-    LeftTridiagonalDoubleIcon,
-    LockIcon,
-    MergeAllIcon,
-    NoBorderIcon,
-    NoColorDoubleIcon,
-    NoRotationIcon,
-    OuterBorderDoubleIcon,
-    OverflowIcon,
-    PaintBucketDoubleIcon,
-    PasteSpecialDoubleIcon,
-    PipingIcon,
-    ProtectIcon,
-    ReduceDoubleIcon,
-    RightBorderDoubleIcon,
-    RightDoubleDiagonalDoubleIcon,
-    RightInsertColumnDoubleIcon,
-    RightJustifyingIcon,
-    RightRotationFortyFiveDegreesIcon,
-    RightRotationNinetyDegreesIcon,
-    SlashDoubleIcon,
-    StrikethroughIcon,
-    SubscriptIcon,
-    SuperscriptIcon,
-    TruncationIcon,
-    UnderlineIcon,
-    UpBorderDoubleIcon,
-    VerticalBorderDoubleIcon,
-    VerticalCenterIcon,
-    VerticalIntegrationIcon,
-    VerticalTextIcon,
-} from '@univerjs/icons';
+
 import {
     SetBoldCommand,
     SetFontFamilyCommand,
@@ -114,7 +34,7 @@ import {
     SetStrikeThroughCommand,
     SetUnderlineCommand,
 } from '@univerjs/sheets';
-import { BuiltInUIPart, ComponentManager, connectInjector, IconManager, ILayoutService, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
+import { BuiltInUIPart, connectInjector, ILayoutService, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 import { DeleteRangeMoveLeftConfirmCommand } from '../commands/commands/delete-range-move-left-confirm.command';
 import { DeleteRangeMoveUpConfirmCommand } from '../commands/commands/delete-range-move-up-confirm.command';
 import { SetColumnHeaderHeightCommand, SetRowHeaderWidthCommand } from '../commands/commands/headersize-changed.command';
@@ -177,14 +97,6 @@ import { SheetPermissionOpenDialogOperation } from '../commands/operations/sheet
 import { SheetPermissionOpenPanelOperation } from '../commands/operations/sheet-permission-open-panel.operation';
 import { SidebarDefinedNameOperation } from '../commands/operations/sidebar-defined-name.operation';
 import { menuSchema } from '../menu/schema';
-import { BorderPanel } from '../views/border-panel/BorderPanel';
-import { BORDER_PANEL_COMPONENT } from '../views/border-panel/interface';
-import { CELL_POPUP_COMPONENT_KEY } from '../views/cell-popup/config';
-import { CellPopup } from '../views/CellPopup';
-import { DEFINED_NAME_CONTAINER } from '../views/defined-name/component-name';
-import { DefinedNameContainer } from '../views/defined-name/DefinedNameContainer';
-import { MENU_ITEM_FROZEN_COMPONENT, MenuItemFrozen } from '../views/menu-item-frozen/index';
-import { MENU_ITEM_INPUT_COMPONENT, MenuItemInput } from '../views/menu-item-input/index';
 import { RenderSheetContent, RenderSheetFooter, RenderSheetHeader } from '../views/sheet-container/SheetContainer';
 import { CopyDownShortcutItem, CopyRightShortcutItem } from './shortcuts/copy-fill.shortcut';
 import {
@@ -247,8 +159,6 @@ import {
 export class SheetUIController extends Disposable {
     constructor(
         @Inject(Injector) protected readonly _injector: Injector,
-        @Inject(ComponentManager) protected readonly _componentManager: ComponentManager,
-        @Inject(IconManager) protected readonly _iconManager: IconManager,
         @ILayoutService protected readonly _layoutService: ILayoutService,
         @ICommandService protected readonly _commandService: ICommandService,
         @IShortcutService protected readonly _shortcutService: IShortcutService,
@@ -262,109 +172,11 @@ export class SheetUIController extends Disposable {
     }
 
     private _init(): void {
-        this._initComponents();
-        this._registerIcons();
         this._initCommands();
         this._initMenus();
         this._initShortcuts();
         this._initWorkbenchParts();
         this._initFocusHandler();
-    }
-
-    private _initComponents(): void {
-        const componentManager = this._componentManager;
-
-        // init custom components
-        this.disposeWithMe(componentManager.register(MENU_ITEM_INPUT_COMPONENT, MenuItemInput));
-        this.disposeWithMe(componentManager.register(MENU_ITEM_FROZEN_COMPONENT, MenuItemFrozen));
-        this.disposeWithMe(componentManager.register(BORDER_PANEL_COMPONENT, BorderPanel));
-        this.disposeWithMe(componentManager.register(DEFINED_NAME_CONTAINER, DefinedNameContainer));
-        this.disposeWithMe(componentManager.register(CELL_POPUP_COMPONENT_KEY, CellPopup));
-    }
-
-    // eslint-disable-next-line max-lines-per-function
-    private _registerIcons(): void {
-        this.disposeWithMe(this._iconManager.register({
-            AdjustHeightDoubleIcon,
-            AdjustWidthDoubleIcon,
-            AddImageIcon,
-            AlignBottomIcon,
-            AlignTopIcon,
-            AllBorderIcon,
-            AutoHeightDoubleIcon,
-            AutoWidthDoubleIcon,
-            AutowrapIcon,
-            BackSlashDoubleIcon,
-            BoldIcon,
-            BrushIcon,
-            CancelFreezeIcon,
-            CancelMergeIcon,
-            ClearFormatDoubleIcon,
-            CodeIcon,
-            CopyDoubleIcon,
-            CutIcon,
-            DeleteCellShiftLeftDoubleIcon,
-            DeleteCellShiftUpDoubleIcon,
-            DeleteColumnDoubleIcon,
-            DeleteRowDoubleIcon,
-            DownBorderDoubleIcon,
-            DownloadImageIcon,
-            EyeOutlineIcon,
-            FontColorDoubleIcon,
-            FontSizeIncreaseIcon,
-            FontSizeReduceIcon,
-            FreezeColumnIcon,
-            FreezeRowIcon,
-            FreezeToSelectedIcon,
-            HideDoubleIcon,
-            HideGridlinesDoubleIcon,
-            HorizontalBorderDoubleIcon,
-            HorizontalMergeIcon,
-            HorizontallyIcon,
-            InnerBorderDoubleIcon,
-            InsertCellDownDoubleIcon,
-            InsertCellShiftRightDoubleIcon,
-            InsertDoubleIcon,
-            InsertRowAboveDoubleIcon,
-            InsertRowBelowDoubleIcon,
-            ItalicIcon,
-            LeftBorderDoubleIcon,
-            LeftDoubleDiagonalDoubleIcon,
-            LeftInsertColumnDoubleIcon,
-            LeftJustifyingIcon,
-            LeftRotationFortyFiveDegreesIcon,
-            LeftRotationNinetyDegreesIcon,
-            LeftTridiagonalDoubleIcon,
-            LockIcon,
-            MergeAllIcon,
-            NoBorderIcon,
-            NoColorDoubleIcon,
-            NoRotationIcon,
-            OuterBorderDoubleIcon,
-            OverflowIcon,
-            PaintBucketDoubleIcon,
-            PasteSpecialDoubleIcon,
-            PipingIcon,
-            ProtectIcon,
-            ReduceDoubleIcon,
-            RightBorderDoubleIcon,
-            RightDoubleDiagonalDoubleIcon,
-            RightInsertColumnDoubleIcon,
-            RightJustifyingIcon,
-            RightRotationFortyFiveDegreesIcon,
-            RightRotationNinetyDegreesIcon,
-            SlashDoubleIcon,
-            StrikethroughIcon,
-            SubscriptIcon,
-            SuperscriptIcon,
-            TruncationIcon,
-            UnderlineIcon,
-            UpBorderDoubleIcon,
-            VerticalBorderDoubleIcon,
-            VerticalCenterIcon,
-            VerticalIntegrationIcon,
-            VerticalTextIcon,
-        }));
     }
 
     private _initCommands(): void {

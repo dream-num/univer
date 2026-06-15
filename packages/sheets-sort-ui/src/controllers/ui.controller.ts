@@ -18,13 +18,10 @@ import type { UIPartsService } from '@univerjs/ui';
 import type { ISheetSortLocation } from '../services/sheets-sort-ui.service';
 import { ICommandService, Inject, Injector, LocaleService, RxDisposable } from '@univerjs/core';
 import { serializeRange } from '@univerjs/engine-formula';
-import { AscendingIcon, CustomSortIcon, DescendingIcon, ExpandAscendingIcon, ExpandDescendingIcon } from '@univerjs/icons';
 import { SortRangeCommand } from '@univerjs/sheets-sort';
 import { SheetsRenderService, SheetsUIPart } from '@univerjs/sheets-ui';
 import {
-    ComponentManager,
     connectInjector,
-    IconManager,
     IDialogService,
     ILayoutService,
     IMenuManagerService,
@@ -45,7 +42,6 @@ import {
 } from '../commands/commands/sheets-sort.command';
 import { menuSchema } from '../menu/schema';
 import { SheetsSortUIService } from '../services/sheets-sort-ui.service';
-import { CustomSortPanel } from '../views/CustomSortPanel';
 import EmbedSortBtn from '../views/EmbedSortBtn';
 
 const CUSTOM_SORT_DIALOG_ID = 'custom-sort-dialog';
@@ -62,15 +58,12 @@ export class SheetsSortUIController extends RxDisposable {
         @Inject(SheetsRenderService) private _sheetRenderService: SheetsRenderService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(SheetsSortUIService) private readonly _sheetsSortUIService: SheetsSortUIService,
-        @Inject(Injector) private _injector: Injector,
-        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
-        @Inject(IconManager) private readonly _iconManager: IconManager
+        @Inject(Injector) private _injector: Injector
     ) {
         super();
         this._initCommands();
         this._initMenu();
         this._initUI();
-        this._registerIcons();
     }
 
     private _initMenu() {
@@ -99,14 +92,6 @@ export class SheetsSortUIController extends RxDisposable {
         this.disposeWithMe(
             this._uiPartsService.registerComponent(SheetsUIPart.FILTER_PANEL_EMBED_POINT, () => connectInjector(EmbedSortBtn, this._injector))
         );
-
-        ([
-            ['CustomSortPanel', CustomSortPanel],
-        ] as const).forEach(([key, comp]) => {
-            this.disposeWithMe(
-                this._componentManager.register(key, comp)
-            );
-        });
 
         // this controller is also responsible for toggling the CustomSortDialog
         this._sheetsSortUIService.customSortState$.pipe(takeUntil(this.dispose$)).subscribe((newState) => {
@@ -137,16 +122,6 @@ export class SheetsSortUIController extends RxDisposable {
         this._dialogService.close(CUSTOM_SORT_DIALOG_ID);
 
         queueMicrotask(() => this._layoutService.focus());
-    }
-
-    private _registerIcons(): void {
-        this.disposeWithMe(this._iconManager.register({
-            AscendingIcon,
-            ExpandAscendingIcon,
-            DescendingIcon,
-            ExpandDescendingIcon,
-            CustomSortIcon,
-        }));
     }
 }
 

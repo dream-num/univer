@@ -29,6 +29,7 @@ import {
 import { UniverSheetsNotePlugin } from '@univerjs/sheets-note';
 import pkg from '../package.json';
 import { defaultPluginConfig, SHEETS_NOTE_UI_PLUGIN_CONFIG_KEY } from './config/config';
+import { ComponentsController } from './controllers/components.controller';
 import { SheetsCellContentController } from './controllers/sheets-cell-content.controller';
 import { SheetsNoteAttachmentController } from './controllers/sheets-note-attachment.controller';
 import { SheetsNotePopupController } from './controllers/sheets-note-popup.controller';
@@ -61,6 +62,8 @@ export class UniverSheetsNoteUIPlugin extends Plugin {
     }
 
     override onStarting(): void {
+        this._injector.add([ComponentsController]);
+        this._injector.get(ComponentsController);
         ([
             [SheetsNotePopupService],
             [SheetsCellContentController],

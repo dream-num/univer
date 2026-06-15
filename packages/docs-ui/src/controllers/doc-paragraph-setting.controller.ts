@@ -15,8 +15,7 @@
  */
 
 import { Disposable, ICommandService, Inject } from '@univerjs/core';
-import { ComponentManager, ISidebarService } from '@univerjs/ui';
-import { ParagraphSettingIndex } from '../views/paragraph-setting/index';
+import { ISidebarService } from '@univerjs/ui';
 
 const paragraphSettingIndexKey = 'doc_ui_paragraph-setting-panel';
 
@@ -25,16 +24,10 @@ export class DocParagraphSettingController extends Disposable {
 
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @Inject(ISidebarService) private _sidebarService: ISidebarService
 
     ) {
         super();
-        this._init();
-    }
-
-    private _init() {
-        this.disposeWithMe(this._componentManager.register(paragraphSettingIndexKey, ParagraphSettingIndex));
     }
 
     public openPanel() {

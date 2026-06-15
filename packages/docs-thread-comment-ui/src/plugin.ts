@@ -22,6 +22,7 @@ import { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
 import pkg from '../package.json';
 import { PLUGIN_NAME } from './common/const';
 import { defaultPluginConfig, DOCS_THREAD_COMMENT_UI_PLUGIN_CONFIG_KEY } from './config/config';
+import { ComponentsController } from './controllers/components.controller';
 import { DocThreadCommentSelectionController } from './controllers/doc-thread-comment-selection.controller';
 import { DocThreadCommentRenderController } from './controllers/render-controllers/render.controller';
 import { DocThreadCommentUIController } from './controllers/ui.controller';
@@ -55,6 +56,8 @@ export class UniverDocsThreadCommentUIPlugin extends Plugin {
     }
 
     override onStarting(): void {
+        this._injector.add([ComponentsController]);
+        this._injector.get(ComponentsController);
         ([
             [DocThreadCommentUIController],
             [DocThreadCommentSelectionController],

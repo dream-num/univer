@@ -15,8 +15,7 @@
  */
 
 import { Disposable, ICommandService, Inject, Injector } from '@univerjs/core';
-import { AddImageIcon, GraphIcon, TextIcon } from '@univerjs/icons';
-import { BuiltInUIPart, ComponentManager, connectInjector, IconManager, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
+import { BuiltInUIPart, connectInjector, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 import { ActivateSlidePageOperation } from '../commands/operations/activate.operation';
 import { AppendSlideOperation } from '../commands/operations/append-slide.operation';
 import { DeleteSlideElementOperation } from '../commands/operations/delete-element.operation';
@@ -34,9 +33,6 @@ import { SetTextEditArrowOperation } from '../commands/operations/text-edit.oper
 import { UpdateSlideElementOperation } from '../commands/operations/update-element.operation';
 import { menuSchema } from '../menu/schema';
 import { SlideEditorContainer } from '../views/editor-container';
-import { COMPONENT_SLIDE_IMAGE_POPUP_MENU } from '../views/image-popup-menu/component-name';
-import { SlideImagePopupMenu } from '../views/image-popup-menu/ImagePopupMenu';
-import Sidebar, { COMPONENT_SLIDE_SIDEBAR } from '../views/sidebar/Sidebar';
 import { SlideSideBar } from '../views/slide-bar/SlideBar';
 import { EditorDeleteLeftShortcut, generateArrowSelectionShortCutItem } from './shortcuts/editor.shortcuts';
 
@@ -47,8 +43,6 @@ export class SlidesUIController extends Disposable {
     constructor(
         @Inject(Injector) protected readonly _injector: Injector,
         @IMenuManagerService protected readonly _menuManagerService: IMenuManagerService,
-        @Inject(ComponentManager) protected readonly _componentManager: ComponentManager,
-        @Inject(IconManager) protected readonly _iconManager: IconManager,
         @IUIPartsService protected readonly _uiPartsService: IUIPartsService,
         @ICommandService protected readonly _commandService: ICommandService,
         @IShortcutService protected readonly _shortcutService: IShortcutService
@@ -56,8 +50,6 @@ export class SlidesUIController extends Disposable {
         super();
 
         this._initCommands();
-        this._initCustomComponents();
-        this._registerIcons();
         this._initUIComponents();
         this._initMenus();
         this._initShortcuts();
@@ -65,20 +57,6 @@ export class SlidesUIController extends Disposable {
 
     private _initMenus(): void {
         this._menuManagerService.mergeMenu(menuSchema);
-    }
-
-    private _initCustomComponents(): void {
-        const componentManager = this._componentManager;
-        this.disposeWithMe(componentManager.register(COMPONENT_SLIDE_IMAGE_POPUP_MENU, SlideImagePopupMenu));
-        this.disposeWithMe(componentManager.register(COMPONENT_SLIDE_SIDEBAR, Sidebar));
-    }
-
-    private _registerIcons(): void {
-        this.disposeWithMe(this._iconManager.register({
-            AddImageIcon,
-            TextIcon,
-            GraphIcon,
-        }));
     }
 
     private _initCommands(): void {

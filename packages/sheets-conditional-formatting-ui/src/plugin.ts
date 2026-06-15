@@ -52,6 +52,7 @@ import { ConditionalFormattingPanelController } from './controllers/cf.panel.con
 import { ConditionalFormattingPermissionController } from './controllers/cf.permission.controller';
 import { SheetsCfRenderController } from './controllers/cf.render.controller';
 import { ConditionalFormattingViewportController } from './controllers/cf.viewport.controller';
+import { ComponentsController } from './controllers/components.controller';
 import { ConditionalFormattingMenuController } from './menu/cf.menu.controller';
 
 @DependentOn(UniverSheetsConditionalFormattingPlugin, UniverSheetsFormulaPlugin)
@@ -84,6 +85,8 @@ export class UniverSheetsConditionalFormattingUIPlugin extends Plugin {
     }
 
     override onStarting(): void {
+        this._injector.add([ComponentsController]);
+        this._injector.get(ComponentsController);
         registerDependencies(this._injector, [
             [SheetsCfRenderController],
             [ConditionalFormattingCopyPasteController],

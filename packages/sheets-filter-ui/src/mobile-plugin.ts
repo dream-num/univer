@@ -20,6 +20,7 @@ import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, UniverIns
 import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import pkg from '../package.json';
 import { defaultPluginConfig, SHEETS_FILTER_UI_PLUGIN_CONFIG_KEY } from './config/config';
+import { ComponentsController } from './controllers/components.controller';
 import { SheetsFilterPermissionController } from './controllers/sheets-filter-permission.controller';
 import { SheetsFilterUIMobileController } from './controllers/ui-mobile.controller';
 
@@ -50,6 +51,8 @@ export class UniverSheetsFilterMobileUIPlugin extends Plugin {
     }
 
     override onStarting(): void {
+        this._injector.add([ComponentsController]);
+        this._injector.get(ComponentsController);
         ([
             [SheetsFilterPermissionController],
             [SheetsFilterUIMobileController],

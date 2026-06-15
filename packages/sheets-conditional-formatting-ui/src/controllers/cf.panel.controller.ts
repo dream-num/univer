@@ -18,7 +18,6 @@ import type { IDisposable } from '@univerjs/core';
 import type { IConditionFormattingRule } from '@univerjs/sheets-conditional-formatting';
 import { Disposable, generateRandomId, Inject, Injector, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { ComponentManager, ISidebarService } from '@univerjs/ui';
-import { ConditionFormattingPanel } from '../views/ConditionFormattingPanel';
 
 const CF_PANEL_KEY = 'sheet.conditional.formatting.panel';
 
@@ -33,8 +32,6 @@ export class ConditionalFormattingPanelController extends Disposable {
         @Inject(LocaleService) private _localeService: LocaleService
     ) {
         super();
-
-        this._initPanel();
 
         this.disposeWithMe(
             this._univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SHEET).subscribe((sheet) => {
@@ -65,11 +62,5 @@ export class ConditionalFormattingPanelController extends Disposable {
         };
 
         this._sidebarDisposable = this._sidebarService.open(props);
-    }
-
-    private _initPanel() {
-        this.disposeWithMe(
-            this._componentManager.register(CF_PANEL_KEY, ConditionFormattingPanel)
-        );
     }
 }

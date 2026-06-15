@@ -129,6 +129,7 @@ export function FilterPanel() {
         </div>
     );
 }
+export const FILTER_PANEL_POPUP_KEY = 'FILTER_PANEL_POPUP';
 
 function useFilterByOptions(localeService: LocaleService) {
     const locale = localeService.getCurrentLocale();

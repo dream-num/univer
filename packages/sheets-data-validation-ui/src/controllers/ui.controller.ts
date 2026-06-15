@@ -18,8 +18,7 @@ import type { Ctor } from '@univerjs/core';
 import type { BaseSheetDataValidatorView } from '../views/validator-views/sheet-validator-view';
 import { Inject, Injector, RxDisposable } from '@univerjs/core';
 import { DataValidatorRegistryService } from '@univerjs/data-validation';
-import { DataValidationIcon } from '@univerjs/icons';
-import { ComponentManager, IconManager } from '@univerjs/ui';
+import { ComponentManager } from '@univerjs/ui';
 import { DATA_VALIDATION_PANEL } from '../commands/operations/data-validation.operation';
 import { DataValidationPanel } from '../views/components';
 import { DateShowTimeOption } from '../views/components/DateShowTimeOption';
@@ -38,13 +37,11 @@ export class SheetsDataValidationUIController extends RxDisposable {
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(ComponentManager) private readonly _componentManger: ComponentManager,
-        @Inject(IconManager) private readonly _iconManager: IconManager,
         @Inject(DataValidatorRegistryService) private readonly _dataValidatorRegistryService: DataValidatorRegistryService
     ) {
         super();
 
         this._initComponents();
-        this._registerIcons();
         this._registerValidatorViews();
     }
 
@@ -60,12 +57,6 @@ export class SheetsDataValidationUIController extends RxDisposable {
                 comp
             ));
         });
-    }
-
-    private _registerIcons(): void {
-        this.disposeWithMe(this._iconManager.register({
-            DataValidationIcon,
-        }));
     }
 
     private _registerValidatorViews(): void {

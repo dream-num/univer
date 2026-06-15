@@ -14,23 +14,20 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, Inject } from '@univerjs/core';
-import { ComponentManager, IMenuManagerService } from '@univerjs/ui';
+import { Disposable, ICommandService } from '@univerjs/core';
+import { IMenuManagerService } from '@univerjs/ui';
 
-import { ScriptPanelComponentName, ToggleScriptPanelOperation } from '../commands/operations/panel.operation';
+import { ToggleScriptPanelOperation } from '../commands/operations/panel.operation';
 import { menuSchema } from '../menu/schema';
-import { ScriptEditorPanel } from '../views/components/ScriptEditorPanel';
 
 export class UniscriptController extends Disposable {
     constructor(
         @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
-        @ICommandService commandService: ICommandService,
-        @Inject(ComponentManager) componentManager: ComponentManager
+        @ICommandService commandService: ICommandService
     ) {
         super();
 
         this._menuManagerService.mergeMenu(menuSchema);
-        this.disposeWithMe(componentManager.register(ScriptPanelComponentName, ScriptEditorPanel));
         this.disposeWithMe(commandService.registerCommand(ToggleScriptPanelOperation));
     }
 }

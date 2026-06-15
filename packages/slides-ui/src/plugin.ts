@@ -31,6 +31,7 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import pkg from '../package.json';
 import { defaultPluginConfig, SLIDES_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { CanvasView } from './controllers/canvas-view';
+import { ComponentsController } from './controllers/components.controller';
 import { SlideEditingRenderController } from './controllers/slide-editing.render-controller';
 import { SlideEditorBridgeRenderController } from './controllers/slide-editor-bridge.render-controller';
 import { SlideRenderController } from './controllers/slide.render-controller';
@@ -69,6 +70,8 @@ export class UniverSlidesUIPlugin extends Plugin {
     }
 
     override onStarting(): void {
+        this._injector.add([ComponentsController]);
+        this._injector.get(ComponentsController);
         mergeOverrideWithDependencies([
             [SlideRenderService],
             [ISlideEditorBridgeService, { useClass: SlideEditorBridgeService }],

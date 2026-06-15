@@ -177,7 +177,7 @@ describe('Authz/resource integration', () => {
         expect(reloaded[0].actions).toEqual([{ action: UnitAction.Edit, allowed: false }]);
     });
 
-    it('should persist permission resources for board units', async () => {
+    it('should persist and reload permission resources for board units', async () => {
         const injector = univer.__getInjector();
         const authzIoService = injector.get(IAuthzIoService);
         const resourceLoaderService = injector.get(IResourceLoaderService);
@@ -202,6 +202,28 @@ describe('Authz/resource integration', () => {
         const authzResource = snapshot?.resources?.find((resource) => resource.name === 'SHEET_AuthzIoMockService_PLUGIN');
 
         expect(authzResource?.data).toContain(objectID);
+
+        expect(univerInstanceService.disposeUnit(board.getUnitId())).toBe(true);
+
+        const unloaded = await authzIoService.list({
+            unitID: board.getUnitId(),
+            objectIDs: [objectID],
+            actions: [UnitAction.Edit],
+        });
+
+        expect(unloaded[0].name).toBe('');
+        expect(unloaded[0].actions).toEqual([{ action: UnitAction.Edit, allowed: true }]);
+
+        univer.createUnit<ITestBoardData, MockBoardUnit>(UniverInstanceType.UNIVER_BOARD, snapshot!);
+
+        const reloaded = await authzIoService.list({
+            unitID: board.getUnitId(),
+            objectIDs: [objectID],
+            actions: [UnitAction.Edit],
+        });
+
+        expect(reloaded[0].name).toBe('Board permission');
+        expect(reloaded[0].actions).toEqual([{ action: UnitAction.Edit, allowed: true }]);
     });
 
     it('should expose current user data consistently through mention and user services', async () => {

@@ -72,6 +72,12 @@ export class ResourceLoaderService extends Disposable implements IResourceLoader
                         });
                         break;
                     }
+                    case UniverInstanceType.UNIVER_BOARD: {
+                        this._univerInstanceService.getAllUnitsForType<UnitModel<{ resources?: IResources }>>(UniverInstanceType.UNIVER_BOARD).forEach((board) => {
+                            loadHookResource(hook, board.getUnitId(), board.getSnapshot().resources, 'Board');
+                        });
+                        break;
+                    }
                     case UniverInstanceType.UNIVER_SHEET: {
                         this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET).forEach((workbook) => {
                             loadHookResource(hook, workbook.getUnitId(), workbook.getSnapshot().resources, 'Workbook');
@@ -108,6 +114,12 @@ export class ResourceLoaderService extends Disposable implements IResourceLoader
                 this._resourceManagerService.loadResources(slide.getUnitId(), slide.getSnapshot().resources);
             })
         );
+        this.disposeWithMe(
+            this._univerInstanceService.getTypeOfUnitAdded$<UnitModel<{ resources?: IResources }>>(UniverInstanceType.UNIVER_BOARD).subscribe((event) => {
+                const { unit: board } = event;
+                this._resourceManagerService.loadResources(board.getUnitId(), board.getSnapshot().resources);
+            })
+        );
 
         this.disposeWithMe(
             this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
@@ -123,6 +135,11 @@ export class ResourceLoaderService extends Disposable implements IResourceLoader
         this.disposeWithMe(
             this._univerInstanceService.getTypeOfUnitDisposed$<UnitModel>(UniverInstanceType.UNIVER_SLIDE).subscribe((slide) => {
                 this._resourceManagerService.unloadResources(slide.getUnitId(), UniverInstanceType.UNIVER_SLIDE);
+            })
+        );
+        this.disposeWithMe(
+            this._univerInstanceService.getTypeOfUnitDisposed$<UnitModel>(UniverInstanceType.UNIVER_BOARD).subscribe((board) => {
+                this._resourceManagerService.unloadResources(board.getUnitId(), UniverInstanceType.UNIVER_BOARD);
             })
         );
     }

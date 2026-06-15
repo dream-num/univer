@@ -11,72 +11,7 @@ const TAB_CONTAINER = new Map<EmbedHostEntry, EmbedTabConfig['container']>([
 ]);
 
 export function createDefaultEmbedCapabilities(): EmbedCapability[] {
-    return [
-        {
-            hostType: UniverInstanceType.UNIVER_DOC,
-            childType: UniverInstanceType.UNIVER_SHEET,
-            entry: 'docs-custom-block',
-            mode: 'float',
-            layout: 'docs-sticky-sheet',
-            menuBehavior: 'floating',
-            nestedEmbed: false,
-        },
-        {
-            hostType: UniverInstanceType.UNIVER_DOC,
-            childType: UniverInstanceType.UNIVER_BASE,
-            entry: 'docs-custom-block',
-            mode: 'float',
-            layout: 'docs-sticky-base',
-            menuBehavior: 'floating',
-            nestedEmbed: false,
-        },
-        {
-            hostType: UniverInstanceType.UNIVER_SHEET,
-            childType: UniverInstanceType.UNIVER_DOC,
-            entry: 'sheets-floating-object',
-            mode: 'float',
-            renderHost: 'sheets-drawing-dom',
-            layout: 'doc-width-scale',
-            menuBehavior: 'floating',
-            nestedEmbed: false,
-        },
-        {
-            hostType: UniverInstanceType.UNIVER_SHEET,
-            childType: UniverInstanceType.UNIVER_BASE,
-            entry: 'sheets-sheet-tab',
-            mode: 'tab',
-            layout: 'tab-peer',
-            menuBehavior: 'host-override',
-            nestedEmbed: false,
-        },
-        {
-            hostType: UniverInstanceType.UNIVER_SHEET,
-            childType: UniverInstanceType.UNIVER_DOC,
-            entry: 'sheets-sheet-tab',
-            mode: 'tab',
-            layout: 'tab-peer',
-            menuBehavior: 'host-override',
-            nestedEmbed: false,
-        },
-        {
-            hostType: UniverInstanceType.UNIVER_BASE,
-            childType: UniverInstanceType.UNIVER_SHEET,
-            entry: 'bases-table-list-block',
-            mode: 'tab',
-            layout: 'tab-peer',
-            menuBehavior: 'host-override',
-            nestedEmbed: false,
-        },
-        {
-            hostType: UniverInstanceType.UNIVER_BASE,
-            childType: UniverInstanceType.UNIVER_DOC,
-            entry: 'bases-table-list-block',
-            mode: 'tab',
-            layout: 'tab-peer',
-            menuBehavior: 'host-override',
-            nestedEmbed: false,
-        },
-    ];
+    return [];
 }
 
 export function createDefaultEmbedSourceMeta(capability: EmbedCapability): EmbedSourceMeta {

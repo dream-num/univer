@@ -1,23 +1,13 @@
-import type { EmbedBlockContribution, EmbedChildViewContribution, EmbedProductMenuContribution } from '@univerjs/embed-ui';
+import type { EmbedBlockContribution, EmbedChildViewContribution } from '@univerjs/embed-ui';
 import { createEmbedRibbonBlockContribution, mountEmbedRenderChildUnit } from '@univerjs/embed-ui';
 import { toDisposable, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { menuSchema } from './menu/schema';
 
 export function createSheetsEmbedBlockContribution(): EmbedBlockContribution {
     return createEmbedRibbonBlockContribution({
         childType: UniverInstanceType.UNIVER_SHEET,
         productName: 'Sheets',
-        menuSchema,
     });
-}
-
-export function createSheetsEmbedProductMenuContribution(): EmbedProductMenuContribution {
-    return {
-        childType: UniverInstanceType.UNIVER_SHEET,
-        id: '@univerjs/sheets-ui',
-        menuSchema,
-    };
 }
 
 export function createSheetsEmbedChildViewContribution(): EmbedChildViewContribution {

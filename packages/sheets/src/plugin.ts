@@ -52,7 +52,7 @@ import { RefRangeService } from './services/ref-range/ref-range.service';
 import { SheetsSelectionsService } from './services/selections/selection.service';
 import { SheetInterceptorService } from './services/sheet-interceptor/sheet-interceptor.service';
 import { SheetSkeletonService } from './skeleton/skeleton.service';
-import { registerSheetsEmbedGuestContribution } from './embed-guest';
+import { registerSheetsEmbedGuestContribution, registerSheetsEmbedHostCapabilities } from './embed-guest';
 
 @DependentOn(UniverFormulaEnginePlugin)
 export class UniverSheetsPlugin extends Plugin {
@@ -76,9 +76,15 @@ export class UniverSheetsPlugin extends Plugin {
         );
         this._configService.setConfig(SHEETS_PLUGIN_CONFIG_KEY, rest);
 
+        if (rest.embed?.host) {
+            registerSheetsEmbedHostCapabilities(this._injector);
+        }
+        if (rest.embed?.guest) {
+            registerSheetsEmbedGuestContribution(this._injector);
+        }
+
         this._initConfig();
         this._initDependencies();
-        registerSheetsEmbedGuestContribution(this._injector);
     }
 
     private _initConfig(): void {

@@ -15,6 +15,7 @@
  */
 
 import type { DependencyOverride } from '@univerjs/core';
+import type { EmbedProductPluginConfig } from '@univerjs/embed';
 
 export const SHEETS_PLUGIN_CONFIG_KEY = 'sheets.config';
 
@@ -39,6 +40,7 @@ export interface ILargeSheetOperationConfig {
 
 export interface IUniverSheetsConfig {
     notExecuteFormula?: boolean;
+    embed?: EmbedProductPluginConfig;
     override?: DependencyOverride;
     /**
      * Only register the mutations related to the formula calculation. Especially useful for the

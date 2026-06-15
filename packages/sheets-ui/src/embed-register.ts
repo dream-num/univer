@@ -1,9 +1,9 @@
 import type { Injector } from '@univerjs/core';
-import { EmbedBlockRegistryService, EmbedChildViewRegistryService, EmbedFloatDomRenderer, EmbedHostAdapterRegistryService, EmbedHostAnchorModelService, EmbedHostContainerRegistryService, registerEmbedProductMenuContribution, registerEmbedUIContribution } from '@univerjs/embed-ui';
+import { EmbedBlockRegistryService, EmbedChildViewRegistryService, EmbedFloatDomRenderer, EmbedHostAdapterRegistryService, EmbedHostAnchorModelService, EmbedHostContainerRegistryService, registerEmbedUIContribution } from '@univerjs/embed-ui';
 import { IUniverInstanceService } from '@univerjs/core';
 import { ISheetDrawingService } from '@univerjs/sheets-drawing';
 import { ComponentManager } from '@univerjs/ui';
-import { createSheetsEmbedBlockContribution, createSheetsEmbedChildViewContribution, createSheetsEmbedProductMenuContribution } from './embed-block';
+import { createSheetsEmbedBlockContribution, createSheetsEmbedChildViewContribution } from './embed-block';
 import { EMBED_SHEETS_FLOATING_COMPONENT_KEY } from './embed-floating-anchor';
 import { createSheetsFloatingObjectHostAdapterContribution, createSheetsFloatingObjectHostContainerContribution, createSheetsSheetTabHostAdapterContribution, createSheetsSheetTabHostContainerContribution } from './embed-host-adapter';
 
@@ -52,6 +52,4 @@ function registerSheetsEmbedUIContributionsNow(injector: Injector): void {
     if (!blockRegistry.get(block.childType)) {
         blockRegistry.register(block);
     }
-
-    registerEmbedProductMenuContribution(injector, createSheetsEmbedProductMenuContribution());
 }

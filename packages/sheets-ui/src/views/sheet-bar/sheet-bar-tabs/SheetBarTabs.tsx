@@ -107,6 +107,7 @@ export function SheetBarTabs() {
 
     const slideTabBarRef = useRef<SlideTabBar | null>(null);
     const slideTabBarContainerRef = useRef<HTMLDivElement>(null);
+    const activeSheetIdRef = useRef(activeSheetId);
 
     const commandService = useDependency(ICommandService);
     const sheetBarService = useDependency(ISheetBarService);
@@ -118,6 +119,7 @@ export function SheetBarTabs() {
     const permissionService = useDependency(IPermissionService);
 
     const workbook = useActiveWorkbook()!;
+    const workbookRef = useRef(workbook);
     const resetOrder = useObservable(worksheetProtectionRuleModel.resetOrder$);
     const config = useConfigValue<IUniverUIConfig>(UI_PLUGIN_CONFIG_KEY);
     const showContextMenu = config?.contextMenu ?? true;
@@ -288,6 +290,25 @@ export function SheetBarTabs() {
             rightEnd: slideTabBar.isRightEnd(),
         });
     }, [sheetBarService]);
+
+    useEffect(() => {
+        activeSheetIdRef.current = activeSheetId;
+    }, [activeSheetId]);
+
+    useEffect(() => {
+        workbookRef.current = workbook;
+    }, [workbook]);
+
+    const activateSheetTab = useCallback((subUnitId?: string) => {
+        if (!subUnitId || subUnitId === activeSheetIdRef.current) {
+            return;
+        }
+
+        void commandService.executeCommand(SetWorksheetActiveOperation.id, {
+            subUnitId,
+            unitId: workbookRef.current.getUnitId(),
+        });
+    }, [commandService]);
 
     const observeResize = useCallback((slideTabBar: SlideTabBar) => {
         const slideTabBarContainer = slideTabBarContainerRef.current?.querySelector('[data-u-comp=slide-tab-bar]');
@@ -538,6 +559,26 @@ export function SheetBarTabs() {
         const currentIndex = sheetList.findIndex((item) => item.sheetId === activeSheetId);
         slideTabBarRef.current?.update(currentIndex >= 0 ? currentIndex : 0);
     }, [activeSheetId, sheetList]);
+
+    useEffect(() => {
+        const handlePointerDownCapture = (event: PointerEvent) => {
+            const container = slideTabBarContainerRef.current;
+            const target = event.target;
+            if (!container || !(target instanceof Element)) {
+                return;
+            }
+
+            const tabElement = target.closest<HTMLElement>('[data-u-comp=slide-tab-item]');
+            if (!tabElement || !container.contains(tabElement)) {
+                return;
+            }
+
+            activateSheetTab(tabElement.getAttribute('data-id') ?? undefined);
+        };
+
+        document.addEventListener('pointerdown', handlePointerDownCapture, true);
+        return () => document.removeEventListener('pointerdown', handlePointerDownCapture, true);
+    }, [activateSheetTab]);
 
     useEffect(() => {
         const subscription = merge(

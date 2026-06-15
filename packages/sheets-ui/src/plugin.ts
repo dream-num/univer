@@ -145,7 +145,9 @@ export class UniverSheetsUIPlugin extends Plugin {
         }
 
         this._configService.setConfig(SHEETS_UI_PLUGIN_CONFIG_KEY, { ...rest });
-        registerSheetsEmbedUIContributions(this._injector);
+        if (rest.embed?.host || rest.embed?.guest) {
+            registerSheetsEmbedUIContributions(this._injector);
+        }
     }
 
     override onStarting(): void {

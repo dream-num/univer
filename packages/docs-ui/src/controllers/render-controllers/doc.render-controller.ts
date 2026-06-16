@@ -17,13 +17,13 @@
 import type { DocumentDataModel, EventState, ICommandInfo, Nullable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { DocumentSkeleton, IDocumentSkeletonPage, IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
-import { DocumentFlavor, ICommandService, Inject, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import { DocumentFlavor, ICommandService, Inject, isInternalEditorID, IUniverInstanceService, RxDisposable, ThemeService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { DocBackground, Documents, IRenderManagerService, Layer, PageLayoutType, ScrollBar, Viewport } from '@univerjs/engine-render';
 import { takeUntil } from 'rxjs';
 import { DOCS_COMPONENT_BACKGROUND_LAYER_INDEX, DOCS_COMPONENT_DEFAULT_Z_INDEX, DOCS_COMPONENT_HEADER_LAYER_INDEX, DOCS_COMPONENT_MAIN_LAYER_INDEX, DOCS_VIEW_KEY, VIEWPORT_KEY } from '../../basics/docs-view-key';
 import { DocPageLayoutService } from '../../services/doc-page-layout.service';
-import { getDocsCanvasBackgroundColor } from '../../services/docs-render.service';
+import { resolveDocsCanvasBackground } from '../../services/docs-render.service';
 import { IEditorService } from '../../services/editor/editor-manager.service';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
 
@@ -37,13 +37,15 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(DocPageLayoutService) private readonly _docPageLayoutService: DocPageLayoutService,
-        @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService
+        @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService,
+        @Inject(ThemeService) private readonly _themeService: ThemeService
     ) {
         super();
 
         this._addNewRender();
         this._initRenderRefresh();
         this._initCommandListener();
+        this._initThemeListener();
     }
 
     reRender(unitId: string) {
@@ -62,8 +64,8 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         skeleton.calculate();
 
         // REFACTOR: @Jocs, should not use scroll bar to indicate a Zen Editor. refactor after support modern doc.
-        const editor = this._editorService.getEditor(unitId);
-        if (this._editorService.isEditor(unitId) && !editor?.params.scrollBar) {
+        const editorRenderConfig = this._editorService.getEditorRenderConfig(unitId);
+        if (editorRenderConfig && !editorRenderConfig.scrollBar) {
             this._context.mainComponent?.makeDirty();
 
             return;
@@ -167,7 +169,7 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         scene.addObjects([documents], DOCS_COMPONENT_MAIN_LAYER_INDEX);
         scene.addObjects([docBackground], DOCS_COMPONENT_BACKGROUND_LAYER_INDEX);
 
-        if (this._editorService.getEditor(documentModel.getUnitId()) == null) {
+        if (!this._isEditorRenderUnit(documentModel.getUnitId())) {
             scene.enableLayerCache(DOCS_COMPONENT_MAIN_LAYER_INDEX);
         }
     }
@@ -195,8 +197,8 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         const { unitId } = this._context;
 
         // REFACTOR: @Jocs, should not use scroll bar to indicate a Zen Editor. refactor after support modern doc.
-        const editor = this._editorService.getEditor(unitId);
-        if (this._editorService.isEditor(unitId) && !editor?.params.scrollBar) {
+        const editorRenderConfig = this._editorService.getEditorRenderConfig(unitId);
+        if (editorRenderConfig && !editorRenderConfig.scrollBar) {
             this._context.mainComponent?.makeDirty();
 
             return;
@@ -220,8 +222,16 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         }));
     }
 
+    private _initThemeListener() {
+        this.disposeWithMe(this._themeService.darkMode$.pipe(takeUntil(this.dispose$)).subscribe(() => {
+            this._syncCanvasBackground();
+            this._context.mainComponent?.makeDirty(true);
+            this._context.components.get(DOCS_VIEW_KEY.BACKGROUND)?.makeDirty(true);
+        }));
+    }
+
     private _refreshPagePositionAndSelection() {
-        if (this._editorService.isEditor(this._context.unitId)) {
+        if (this._isEditorRenderUnit()) {
             return;
         }
 
@@ -284,32 +294,49 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         docsComponent.resize(width, height);
         docBackground.resize(width, height);
 
-        const editor = this._editorService.getEditor(unitId);
+        const editorRenderConfig = this._editorService.getEditorRenderConfig(unitId);
 
         // REFACTOR: @JOCS show not use scrollBar to indicate it's a Zen Editor.
-        if (!this._editorService.isEditor(unitId) || editor?.params.scrollBar) {
+        if (!editorRenderConfig || editorRenderConfig.scrollBar) {
             scene.resize(width, height);
         }
     }
 
     private _syncCanvasBackground(documentFlavor = this._context.unit.getSnapshot().documentStyle.documentFlavor) {
-        const editor = this._editorService.getEditor(this._context.unitId);
-        const editorBackgroundColor = editor?.params.canvasStyle?.backgroundColor;
-        this._context.engine.getCanvas().getCanvasEle().style.backgroundColor = editorBackgroundColor ?? getDocsCanvasBackgroundColor(documentFlavor);
+        const editorRenderConfig = this._editorService.getEditorRenderConfig(this._context.unitId);
+        const editorBackgroundColor = editorRenderConfig?.canvasStyle.backgroundColor;
+        const resolvedBackground = resolveDocsCanvasBackground({
+            documentFlavor,
+            canvasColorService: this._context.engine.canvasColorService,
+            editorBackgroundColor,
+            isEditor: this._isEditorRenderUnit(),
+        });
+        this._context.engine.getCanvas().getCanvasEle().style.backgroundColor = resolvedBackground.canvasElementBackgroundColor;
         const docBackground = this._context.components.get(DOCS_VIEW_KEY.BACKGROUND) as DocBackground | undefined;
-        docBackground?.setFillColors?.(editorBackgroundColor, editorBackgroundColor, editorBackgroundColor, editorBackgroundColor);
+        docBackground?.setFillColors?.(
+            resolvedBackground.docBackgroundFillColor,
+            resolvedBackground.docBackgroundFillColor,
+            resolvedBackground.docBackgroundFillColor,
+            resolvedBackground.docBackgroundFillColor
+        );
     }
 
     private _getEditorBackgroundConfig() {
-        const editorBackgroundColor = this._editorService.getEditor(this._context.unitId)?.params.canvasStyle?.backgroundColor;
-        return editorBackgroundColor == null
-            ? {}
-            : {
-                backgroundFillColor: editorBackgroundColor,
-                pageFillColor: editorBackgroundColor,
-                pageStrokeColor: editorBackgroundColor,
-                marginStrokeColor: editorBackgroundColor,
-            };
+        if (!this._isEditorRenderUnit()) {
+            return {};
+        }
+
+        const editorBackgroundColor = 'transparent';
+        return {
+            backgroundFillColor: editorBackgroundColor,
+            pageFillColor: editorBackgroundColor,
+            pageStrokeColor: editorBackgroundColor,
+            marginStrokeColor: editorBackgroundColor,
+        };
+    }
+
+    private _isEditorRenderUnit(unitId = this._context.unitId) {
+        return this._editorService.isEditor(unitId) || isInternalEditorID(unitId);
     }
 }
 

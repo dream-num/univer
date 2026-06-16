@@ -25,7 +25,7 @@ import { DocAutoFormatService } from '../doc-auto-format.service';
 import { getListMarkerFallbackBound, getListMarkerFallbackHit, getListParagraphContextMenuHit, isChecklistListType } from '../doc-event-manager.service';
 import { DocMenuStyleService } from '../doc-menu-style.service';
 import { DocPrintInterceptorService } from '../doc-print-interceptor.service';
-import { DocsRenderService } from '../docs-render.service';
+import { DocsRenderService, getDocsCanvasBackgroundColor, resolveDocsCanvasBackground } from '../docs-render.service';
 
 function createDocData(): IDocumentData {
     return {
@@ -322,6 +322,34 @@ describe('docs ui services', () => {
         expect(renderManagerService.createRender).toHaveBeenCalledWith('doc-2');
         expect(renderManagerService.createRender).toHaveBeenCalledWith('doc-4');
         expect(renderManagerService.removeRender).toHaveBeenCalledWith('doc-3');
+    });
+
+    it('resolves the docs canvas background through the canvas color service', () => {
+        const canvasColorService = {
+            getRenderColor: vi.fn((color: string) => `rendered:${color}`),
+        };
+
+        expect(getDocsCanvasBackgroundColor(DocumentFlavor.MODERN, canvasColorService as never)).toBe('rendered:#fff');
+        expect(getDocsCanvasBackgroundColor(DocumentFlavor.TRADITIONAL, canvasColorService as never)).toBe('rendered:#fafafa');
+        expect(getDocsCanvasBackgroundColor(DocumentFlavor.MODERN, canvasColorService as never, '#123456')).toBe('rendered:#123456');
+        expect(getDocsCanvasBackgroundColor(DocumentFlavor.UNSPECIFIED, canvasColorService as never, '#fff', true)).toBe('#fff');
+        expect(resolveDocsCanvasBackground({
+            documentFlavor: DocumentFlavor.UNSPECIFIED,
+            canvasColorService: canvasColorService as never,
+            editorBackgroundColor: '#fff',
+            isEditor: true,
+        })).toEqual({
+            canvasElementBackgroundColor: '#fff',
+            docBackgroundFillColor: 'transparent',
+        });
+        expect(resolveDocsCanvasBackground({
+            documentFlavor: DocumentFlavor.UNSPECIFIED,
+            canvasColorService: canvasColorService as never,
+            isEditor: true,
+        })).toEqual({
+            canvasElementBackgroundColor: 'transparent',
+            docBackgroundFillColor: 'transparent',
+        });
     });
 
     it('keeps print interceptor defaults as pass-through and stores component mappings', () => {

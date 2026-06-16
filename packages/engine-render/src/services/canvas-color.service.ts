@@ -91,6 +91,11 @@ export class CanvasColorService extends Disposable implements ICanvasColorServic
             return this._cache.get(color)!;
         }
 
+        if (normalizeRenderColor(color) === 'transparent') {
+            this._cache.set(color, 'transparent');
+            return 'transparent';
+        }
+
         let cachedColor = '';
         const mappedColor = getDarkRenderColorOverride(color);
         if (mappedColor) {

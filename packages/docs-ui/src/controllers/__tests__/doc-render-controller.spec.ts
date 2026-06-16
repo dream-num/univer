@@ -15,7 +15,7 @@
  */
 
 import type { ICommandInfo } from '@univerjs/core';
-import { DocumentFlavor } from '@univerjs/core';
+import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DocumentFlavor } from '@univerjs/core';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
@@ -37,9 +37,17 @@ vi.mock('@univerjs/engine-render', async (importOriginal) => {
         pageLayoutType = PageLayoutType.VERTICAL;
         zIndex = 0;
 
-        constructor(_key: string, _skeleton?: unknown, config?: { pageMarginLeft?: number; pageMarginTop?: number }) {
+        fillColors: unknown[] | null = null;
+
+        constructor(_key: string, _skeleton?: unknown, config?: { pageMarginLeft?: number; pageMarginTop?: number; backgroundFillColor?: string; pageFillColor?: string; pageStrokeColor?: string; marginStrokeColor?: string }) {
             this.pageMarginLeft = config?.pageMarginLeft ?? 0;
             this.pageMarginTop = config?.pageMarginTop ?? 0;
+            this.fillColors = [
+                config?.backgroundFillColor,
+                config?.pageFillColor,
+                config?.pageStrokeColor,
+                config?.marginStrokeColor,
+            ];
         }
 
         changeSkeleton() {
@@ -53,6 +61,11 @@ vi.mock('@univerjs/engine-render', async (importOriginal) => {
         }
 
         makeDirty() {
+            return this;
+        }
+
+        setFillColors(...colors: unknown[]) {
+            this.fillColors = colors;
             return this;
         }
     }
@@ -79,9 +92,16 @@ vi.mock('@univerjs/engine-render', async (importOriginal) => {
 
 function createControllerFixture(options?: {
     documentFlavor?: DocumentFlavor;
+    pendingEditorBackgroundColor?: string | null;
     pages?: Array<Record<string, unknown>>;
+    unitId?: string;
 }) {
     const commandCallbacks: Array<(command: ICommandInfo) => void> = [];
+    const darkMode$ = new Subject<boolean>();
+    const canvasElement = { style: {} as Record<string, string> };
+    const canvasColorService = {
+        getRenderColor: vi.fn((color: string) => color),
+    };
     const skeleton = {
         calculate: vi.fn(),
         getSkeletonData: vi.fn(() => ({
@@ -102,10 +122,11 @@ function createControllerFixture(options?: {
         currentSkeletonBefore$: new Subject(),
         getSkeleton: vi.fn(() => skeleton),
     };
+    const unitId = options?.unitId ?? 'doc-unit';
     const context = {
-        unitId: 'doc-unit',
+        unitId,
         unit: {
-            getUnitId: vi.fn(() => 'doc-unit'),
+            getUnitId: vi.fn(() => unitId),
             getSnapshot: vi.fn(() => ({
                 documentStyle: {
                     documentFlavor: options?.documentFlavor ?? DocumentFlavor.TRADITIONAL,
@@ -121,10 +142,11 @@ function createControllerFixture(options?: {
             resize: vi.fn(),
         },
         engine: {
+            canvasColorService,
             runRenderLoop: vi.fn(),
             stopRenderLoop: vi.fn(),
             getCanvas: vi.fn(() => ({
-                getCanvasEle: vi.fn(() => ({ style: {} })),
+                getCanvasEle: vi.fn(() => canvasElement),
             })),
         },
         mainComponent: undefined as { width: number } | undefined,
@@ -137,6 +159,14 @@ function createControllerFixture(options?: {
             return { dispose: vi.fn() };
         }),
     };
+    const pendingEditorRenderConfig = options?.pendingEditorBackgroundColor === undefined
+        ? null
+        : {
+            canvasStyle: options.pendingEditorBackgroundColor == null
+                ? {}
+                : { backgroundColor: options.pendingEditorBackgroundColor },
+        };
+    const editorRenderConfig = pendingEditorRenderConfig;
     const pageLayoutService = {
         calculatePagePosition: vi.fn(),
     };
@@ -145,14 +175,15 @@ function createControllerFixture(options?: {
     };
 
     const Controller = DocRenderController as unknown as new (...args: unknown[]) => DocRenderController;
-    new Controller(
+    const controller = new Controller(
         context,
         commandService,
         { __attachScrollEvent: vi.fn() },
         skeletonManager,
         {
-            isEditor: vi.fn(() => false),
+            isEditor: vi.fn(() => editorRenderConfig != null),
             getEditor: vi.fn(() => null),
+            getEditorRenderConfig: vi.fn(() => editorRenderConfig),
         },
         {
             getRenderById: vi.fn(() => ({
@@ -161,16 +192,20 @@ function createControllerFixture(options?: {
         },
         {
             getCurrentUnitOfType: vi.fn(() => ({
-                getUnitId: vi.fn(() => 'doc-unit'),
+                getUnitId: vi.fn(() => unitId),
             })),
         },
         pageLayoutService,
-        selectionManager
+        selectionManager,
+        { darkMode$ }
     );
 
     return {
         commandCallbacks,
+        controller,
         context,
+        canvasElement,
+        canvasColorService,
         skeletonManager,
         pageLayoutService,
         selectionManager,
@@ -219,5 +254,51 @@ describe('doc render controller', () => {
 
         expect(context.mainComponent?.width).toBe(960);
         expect((context.components.get(DOCS_VIEW_KEY.BACKGROUND) as { width: number }).width).toBe(960);
+    });
+
+    it('keeps internal editor doc background transparent before the render config is registered', () => {
+        const { canvasElement, context, skeletonManager } = createControllerFixture({
+            documentFlavor: DocumentFlavor.UNSPECIFIED,
+            unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+            pages: [{
+                pageWidth: 300,
+                pageHeight: 80,
+                skeDrawings: new Map(),
+                skeTables: new Map(),
+            }],
+        });
+
+        skeletonManager.currentSkeletonBefore$.next(skeletonManager.getSkeleton());
+
+        expect(canvasElement.style.backgroundColor).toBe('transparent');
+        expect((context.components.get(DOCS_VIEW_KEY.BACKGROUND) as { fillColors: unknown[] }).fillColors).toEqual([
+            'transparent',
+            'transparent',
+            'transparent',
+            'transparent',
+        ]);
+    });
+
+    it('keeps editor doc background transparent when the host provides a surface color', () => {
+        const { canvasElement, context, skeletonManager } = createControllerFixture({
+            documentFlavor: DocumentFlavor.UNSPECIFIED,
+            pendingEditorBackgroundColor: '#fff',
+            pages: [{
+                pageWidth: 300,
+                pageHeight: 80,
+                skeDrawings: new Map(),
+                skeTables: new Map(),
+            }],
+        });
+
+        skeletonManager.currentSkeletonBefore$.next(skeletonManager.getSkeleton());
+
+        expect(canvasElement.style.backgroundColor).toBe('#fff');
+        expect((context.components.get(DOCS_VIEW_KEY.BACKGROUND) as { fillColors: unknown[] }).fillColors).toEqual([
+            'transparent',
+            'transparent',
+            'transparent',
+            'transparent',
+        ]);
     });
 });

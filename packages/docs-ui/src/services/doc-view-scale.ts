@@ -137,7 +137,7 @@ export class DocViewScaleService extends Disposable implements IRenderModule {
         }
 
         if (typeof container === 'string') {
-            return document.querySelector<HTMLElement>(container) ?? undefined;
+            return document.querySelector<HTMLElement>(container) ?? document.getElementById(container) ?? undefined;
         }
 
         return container;

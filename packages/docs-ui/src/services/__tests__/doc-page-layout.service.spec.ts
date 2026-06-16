@@ -34,6 +34,7 @@ function createFixture(options: {
     docsWidth?: number;
     docsHeight?: number;
     viewScale: number;
+    sceneScale?: number;
     align?: 'center' | 'start';
     paddingX?: number;
 }) {
@@ -51,7 +52,10 @@ function createFixture(options: {
         scrollToViewportPos: vi.fn(),
     };
     const scene = {
+        scaleX: options.sceneScale ?? options.viewScale,
+        scaleY: options.sceneScale ?? options.viewScale,
         getParent: vi.fn(() => ({ width: options.engineWidth, height: options.engineHeight })),
+        scale: vi.fn(),
         resize: vi.fn(),
         getViewport: vi.fn(() => viewport),
     };
@@ -118,5 +122,20 @@ describe('DocPageLayoutService', () => {
         service.calculatePagePosition();
 
         expect(docsComponent.translate).toHaveBeenCalledWith(0, 20);
+    });
+
+    it('reapplies view scale when an early container measurement left the scene stale', () => {
+        const { scene, service } = createFixture({
+            engineWidth: 900,
+            engineHeight: 800,
+            viewScale: 1.5,
+            sceneScale: 1 / 600,
+            align: 'start',
+            paddingX: 0,
+        });
+
+        service.calculatePagePosition();
+
+        expect(scene.scale).toHaveBeenCalledWith(1.5, 1.5);
     });
 });

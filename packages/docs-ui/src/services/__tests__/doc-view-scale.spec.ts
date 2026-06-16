@@ -15,11 +15,15 @@
  */
 
 import { DocumentFlavor, MODERN_DOCUMENT_WIDTH, ModernDocumentWidthMode } from '@univerjs/core';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { DEFAULT_DOC_FIT_TO_WIDTH_OPTIONS } from '../../config/config';
 import { calcDocFitToWidthScale, DocViewScaleService, resolveDocFitBaseWidth, resolveDocViewScale } from '../doc-view-scale';
 
 describe('doc view scale helpers', () => {
+    afterEach(() => {
+        document.body.innerHTML = '';
+    });
+
     it('does not fit when mode is none', () => {
         expect(calcDocFitToWidthScale({
             availableWidth: 1600,
@@ -117,6 +121,41 @@ describe('doc view scale helpers', () => {
             {
                 getConfig: () => ({
                     container: { clientWidth: 480 },
+                    fitToWidth: { mode: 'fit-width', target: 'container', paddingX: 0, minScale: 0 },
+                }),
+            } as never
+        );
+
+        expect(service.getAvailableWidth()).toBe(480);
+        expect(service.getFitToWidthScale()).toBe(0.5);
+    });
+
+    it('resolves string containers as element ids for embedded fitting', () => {
+        const container = document.createElement('div');
+        container.id = 'univerdoc';
+        Object.defineProperty(container, 'clientWidth', {
+            configurable: true,
+            value: 480,
+        });
+        document.body.appendChild(container);
+
+        const context = {
+            engine: { width: 960 },
+            unit: {
+                getSettings: () => ({ zoomRatio: 1 }),
+                getSnapshot: () => ({
+                    documentStyle: {
+                        documentFlavor: DocumentFlavor.MODERN,
+                        pageSize: { width: 960, height: Number.POSITIVE_INFINITY },
+                    },
+                }),
+            },
+        };
+        const service = new DocViewScaleService(
+            context as never,
+            {
+                getConfig: () => ({
+                    container: 'univerdoc',
                     fitToWidth: { mode: 'fit-width', target: 'container', paddingX: 0, minScale: 0 },
                 }),
             } as never

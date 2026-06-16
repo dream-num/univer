@@ -37,6 +37,9 @@ export class DocPageLayoutService extends Disposable implements IRenderModule {
         const fitOptions = this._docViewScaleService.getOptions();
         const isStartAlignedFit = fitOptions.mode === 'fit-width' && fitOptions.align === 'start';
         const { document: docsComponent, scene, docBackground } = docObject;
+        if (scene.scaleX !== viewScale || scene.scaleY !== viewScale) {
+            scene.scale(viewScale, viewScale);
+        }
 
         const parent = scene?.getParent();
 

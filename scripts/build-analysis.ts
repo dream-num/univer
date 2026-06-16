@@ -16,10 +16,10 @@
 
 /* eslint-disable max-lines-per-function */
 
+import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import { brotliCompressSync, gzipSync } from 'node:zlib';
-import fs from 'fs-extra';
 
 type OutputBucketKey = 'cjs' | 'es' | 'types' | 'umd';
 
@@ -161,7 +161,7 @@ function readWorkspacePackages(): IWorkspacePackage[] {
 
             return {
                 dir,
-                packageJson: fs.readJSONSync(packageJsonPath) as IPackageJson,
+                packageJson: JSON.parse(fs.readFileSync(packageJsonPath, 'utf8')) as IPackageJson,
             };
         })
         .filter((pkg): pkg is IWorkspacePackage => Boolean(pkg))
@@ -400,11 +400,8 @@ function buildVisualizationHtml(report: ReturnType<typeof buildPackageSizesRepor
 function main() {
     const report = buildPackageSizesReport(readWorkspacePackages());
 
-    fs.ensureDirSync(ARTIFACTS_DIR);
-    fs.writeJSONSync(path.join(ARTIFACTS_DIR, 'package-sizes.json'), report, {
-        EOL: '\n',
-        spaces: 4,
-    });
+    fs.mkdirSync(ARTIFACTS_DIR, { recursive: true });
+    fs.writeFileSync(path.join(ARTIFACTS_DIR, 'package-sizes.json'), `${JSON.stringify(report, null, 4)}\n`);
     fs.writeFileSync(
         path.join(ARTIFACTS_DIR, 'package-sizes.html'),
         buildVisualizationHtml(report),

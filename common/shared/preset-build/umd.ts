@@ -17,7 +17,8 @@
 import type { IPrependPresetUmdOptions } from './types';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { PRESET_LOCALES, PRESET_UMD_OUTPUT_DIR } from './constants';
+import { discoverUniverUiLocales } from '../locale';
+import { PRESET_UMD_OUTPUT_DIR } from './constants';
 
 function readRequiredFile(filePath: string, label: string) {
     if (!existsSync(filePath)) {
@@ -99,7 +100,12 @@ export function prependPresetUmd(options: IPrependPresetUmdOptions): void {
 
     prependFile(rootOutput, [...rootChunks, ...rootFacadeChunks]);
 
-    for (const locale of PRESET_LOCALES) {
+    const localeOutputDir = path.join(outputDir, 'locales');
+    if (!existsSync(localeOutputDir)) {
+        return;
+    }
+
+    for (const locale of discoverUniverUiLocales({ rootDir: packageDir })) {
         const localeOutput = path.join(outputDir, 'locales', `${locale}.js`);
 
         if (!existsSync(localeOutput)) {

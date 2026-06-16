@@ -9,6 +9,7 @@
         "esbuild/**/*.ts",
         "eslint/**/*.ts",
         "eslint/**/*.d.ts",
+        "locale/**/*.ts",
         "tailwind/**/*.ts",
         "tsdown/**/*.ts",
         "vitest/**/*.ts"

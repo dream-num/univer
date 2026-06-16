@@ -14,33 +14,25 @@
  * limitations under the License.
  */
 
+import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import fs from 'fs-extra';
+import { discoverUniverUiLocales } from '@univerjs-infra/shared/locale';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const root = path.resolve(__dirname, '../../..');
 
-const locales = [
-    'en-US',
-    'fr-FR',
-    'ru-RU',
-    'zh-CN',
-    'zh-TW',
-    'zh-HK',
-    'vi-VN',
-    'fa-IR',
-    'ko-KR',
-    'ja-JP',
-    'es-ES',
-    'ca-ES',
-    'sk-SK',
-    'pt-BR',
-    'de-DE',
-    'it-IT',
-    'id-ID',
-    'pl-PL',
-    'ar-SA',
-];
+type MockdataPackageJson = Record<string, unknown> & {
+    dependencies: Record<string, string>;
+};
+
+function readJsonFileSync<T>(filePath: string): T {
+    return JSON.parse(fs.readFileSync(filePath, 'utf8')) as T;
+}
+
+function writeJsonFileSync(filePath: string, value: unknown) {
+    fs.writeFileSync(filePath, `${JSON.stringify(value, null, 4)}\n`);
+}
 
 /**
  * Generate locales files
@@ -48,7 +40,7 @@ const locales = [
 async function generateLocales() {
     const packageNames: string[] = [];
 
-    const pkgJsonFile = fs.readJsonSync(path.resolve(__dirname, '../package.json'));
+    const pkgJsonFile = readJsonFileSync<MockdataPackageJson>(path.resolve(__dirname, '../package.json'));
 
     const packagesRoot = path.resolve(__dirname, '../../../packages');
     const packageEntries = fs.existsSync(packagesRoot)
@@ -67,15 +59,15 @@ async function generateLocales() {
             if (!fs.existsSync(pkgJsonPath)) {
                 continue;
             }
-            const pkgJson = fs.readJSONSync(pkgJsonPath);
+            const pkgJson = readJsonFileSync<{ name: string }>(pkgJsonPath);
             packageNames.push(pkgJson.name);
             pkgJsonFile.dependencies[pkgJson.name] = 'workspace:*';
         }
     }
 
-    fs.writeJsonSync(path.resolve(__dirname, '../package.json'), pkgJsonFile, { spaces: 4, EOL: '\n' });
+    writeJsonFileSync(path.resolve(__dirname, '../package.json'), pkgJsonFile);
 
-    locales.forEach((locale) => {
+    discoverUniverUiLocales({ rootDir: root }).forEach((locale) => {
         let statements = '/* eslint-disable */\n' + 'import { mergeLocales } from \'@univerjs/core\';\n\n';
 
         packageNames.forEach((pkg) => {
@@ -92,7 +84,7 @@ async function generateLocales() {
         statements += ');\n';
 
         const outputPath = path.resolve(__dirname, `../src/locales/${locale}.ts`);
-        fs.ensureDirSync(path.dirname(outputPath));
+        fs.mkdirSync(path.dirname(outputPath), { recursive: true });
         fs.writeFileSync(outputPath, statements);
     });
 }

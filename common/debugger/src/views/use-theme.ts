@@ -15,7 +15,7 @@
  */
 
 import { ThemeService } from '@univerjs/core';
-import { defaultTheme, greenTheme, redTheme } from '@univerjs/themes';
+import { defaultTheme, greenTheme, purpleTheme, redTheme } from '@univerjs/themes';
 import { useDependency } from '@univerjs/ui';
 import { useEffect } from 'react';
 
@@ -32,6 +32,10 @@ const themes = [
         label: '🔴',
         value: redTheme,
     },
+    {
+        label: '🟣',
+        value: purpleTheme,
+    },
 ];
 
 export function useTheme() {
@@ -45,7 +49,7 @@ export function useTheme() {
         if (theme) {
             themeService.setTheme(theme.value);
         }
-    }, []);
+    }, [themeService]);
 
     const onSelect = (value: string) => {
         localStorage.setItem('local.theme', value);

@@ -15,7 +15,7 @@
  */
 
 import type { IThemePreset, ThemeScaleKey, ThemeShadeKey, TokenDensity } from './types';
-import { defaultTheme, greenTheme } from '@univerjs/themes';
+import { defaultTheme, greenTheme, purpleTheme, redTheme } from '@univerjs/themes';
 
 export const PREVIEW_CONTAINER_ID = 'theme-customizer-preview';
 
@@ -34,6 +34,8 @@ export const LOOP_COLOR_OPTIONS = COLOR_SCALE_KEYS.flatMap((scale) =>
 export const THEME_PRESETS: IThemePreset[] = [
     { key: 'default', label: 'defaultTheme', theme: defaultTheme },
     { key: 'green', label: 'greenTheme', theme: greenTheme },
+    { key: 'red', label: 'redTheme', theme: redTheme },
+    { key: 'purple', label: 'purpleTheme', theme: purpleTheme },
 ];
 
 export const TOKEN_DENSITY_LABELS: Record<TokenDensity, string> = {

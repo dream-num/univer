@@ -5,5 +5,5 @@
         "allowArbitraryExtensions": true,
         "outDir": "local"
     },
-    "include": ["src"]
+    "include": ["src", "scripts", "tailwind.config.ts"]
 }

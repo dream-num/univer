@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-/* eslint-disable node/prefer-global/process */
-
+import fs from 'node:fs';
 import path from 'node:path';
+import process from 'node:process';
 import { fileURLToPath } from 'node:url';
-import fs from 'fs-extra';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -70,7 +69,7 @@ const indexTemplate = `<!doctype html>
 </html>
 `;
 
-export interface DemoDefinition {
+export interface IDemoDefinition {
     dir: string;
     entryPoints: string[];
     href: `./${string}/`;
@@ -118,7 +117,7 @@ function getDemoEntryFiles(exampleDir: string) {
 export function discoverDemos() {
     return fs.readdirSync(SRC_DIR)
         .sort((left, right) => left.localeCompare(right))
-        .map((dir): DemoDefinition | null => {
+        .map((dir): IDemoDefinition | null => {
             const exampleDir = path.resolve(SRC_DIR, dir);
 
             if (!fs.statSync(exampleDir).isDirectory()) {
@@ -138,15 +137,15 @@ export function discoverDemos() {
                 entryPoints: entryFiles.map((entryFile) => `./src/${dir}/${entryFile}`),
             };
         })
-        .filter((demo): demo is DemoDefinition => demo !== null);
+        .filter((demo): demo is IDemoDefinition => demo !== null);
 }
 
-function filterDemos(demos: DemoDefinition[], selectedDirs?: string[]): DemoDefinition[] {
+function filterDemos(demos: IDemoDefinition[], selectedDirs?: string[]): IDemoDefinition[] {
     return selectedDirs ? demos.filter((demo) => selectedDirs.includes(demo.dir)) : demos;
 }
 
-function syncDemoHtml(demos: DemoDefinition[]) {
-    fs.ensureDirSync(PUBLIC_DIR);
+function syncDemoHtml(demos: IDemoDefinition[]) {
+    fs.mkdirSync(PUBLIC_DIR, { recursive: true });
 
     const activeDemoDirs = new Set(demos.map((demo) => demo.dir));
 
@@ -166,18 +165,18 @@ function syncDemoHtml(demos: DemoDefinition[]) {
         }
 
         if (fs.existsSync(path.resolve(entryPath, 'index.html'))) {
-            fs.removeSync(entryPath);
+            fs.rmSync(entryPath, { force: true, recursive: true });
         }
     });
 
     demos.forEach((demo) => {
         const targetDir = path.resolve(PUBLIC_DIR, demo.dir);
-        fs.ensureDirSync(targetDir);
+        fs.mkdirSync(targetDir, { recursive: true });
         fs.writeFileSync(path.resolve(targetDir, 'index.html'), indexTemplate);
     });
 }
 
-function syncDemosModule(demos: DemoDefinition[]) {
+function syncDemosModule(demos: IDemoDefinition[]) {
     const demoImports = demos.map(({ dir, href, title }) => ({ dir, href, title }));
 
     const content = `${[

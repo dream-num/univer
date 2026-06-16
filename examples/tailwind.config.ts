@@ -15,10 +15,10 @@
  */
 
 import type { Config } from 'tailwindcss';
+import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import preset from '@univerjs-infra/shared/tailwind';
-import fs from 'fs-extra';
 import animate from 'tailwindcss-animate';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));

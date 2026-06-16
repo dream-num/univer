@@ -4,7 +4,6 @@
         "useDefineForClassFields": false,
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
-        "baseUrl": ".",
         "rootDir": ".",
         "module": "esnext",
         "moduleResolution": "bundler",
@@ -14,7 +13,8 @@
         "allowSyntheticDefaultImports": true
     },
     "include": [
-        ".storybook/**/*"
+        ".storybook/**/*",
+        "tailwind.config.ts"
     ],
     "exclude": ["src/**/*.spec.ts", "src/**/*.test.ts"]
 }

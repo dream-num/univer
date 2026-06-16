@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import fs from 'fs-extra';
+import fs from 'node:fs';
 
 interface IResolveArgs {
     importer: string;

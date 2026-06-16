@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { DemoDefinition } from './sync-demos';
+import type { IDemoDefinition } from './sync-demos';
+import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
-import * as p from '@clack/prompts';
-import fs from 'fs-extra';
+import { cancel, isCancel, multiselect } from '@clack/prompts';
 import { discoverDemos, syncDemoArtifacts } from './sync-demos';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -47,23 +47,23 @@ export async function selectEntries(): Promise<ISelectionResult> {
         };
     }
 
-    const saved = await readSelection();
+    const saved = readSelection();
     const merged = mergeSelection(demos, saved);
 
     const selectedDirs = await promptSelection(demos, merged);
-    await writeSelection(selectedDirs, demos);
+    writeSelection(selectedDirs, demos);
 
     const { entryPoints } = syncDemoArtifacts(selectedDirs);
 
     return { entryPoints, selectedDirs };
 }
 
-export async function readSelection(filePath = SELECTION_FILE): Promise<ISelectionFile | null> {
+function readSelection(filePath = SELECTION_FILE): ISelectionFile | null {
     try {
-        if (!await fs.pathExists(filePath)) {
+        if (!fs.existsSync(filePath)) {
             return null;
         }
-        const content = await fs.readFile(filePath, 'utf-8');
+        const content = fs.readFileSync(filePath, 'utf-8');
         const parsed = JSON.parse(content);
         // Backward compat: old format was just an array of strings
         if (Array.isArray(parsed)) {
@@ -81,7 +81,7 @@ export async function readSelection(filePath = SELECTION_FILE): Promise<ISelecti
     }
 }
 
-export function mergeSelection(demos: DemoDefinition[], saved: ISelectionFile | null): string[] {
+export function mergeSelection(demos: IDemoDefinition[], saved: ISelectionFile | null): string[] {
     const currentDirs = new Set(demos.map((d) => d.dir));
     if (!saved) {
         return [...currentDirs].sort();
@@ -97,7 +97,7 @@ export function mergeSelection(demos: DemoDefinition[], saved: ISelectionFile | 
     return [...merged].sort();
 }
 
-async function promptSelection(demos: DemoDefinition[], initial: string[]): Promise<string[]> {
+async function promptSelection(demos: IDemoDefinition[], initial: string[]): Promise<string[]> {
     const options = demos.map((demo) => ({
         value: demo.dir,
         label: demo.title,
@@ -105,24 +105,24 @@ async function promptSelection(demos: DemoDefinition[], initial: string[]): Prom
 
     const initialSet = new Set(initial);
 
-    const result = await p.multiselect({
+    const result = await multiselect({
         message: 'Select demo entries to start (a: toggle all, space: select, enter: confirm, esc: cancel)',
         options,
         initialValues: options.filter((opt) => initialSet.has(opt.value)).map((opt) => opt.value),
     });
 
-    if (p.isCancel(result)) {
-        p.cancel('Operation cancelled');
+    if (isCancel(result)) {
+        cancel('Operation cancelled');
         process.exit(0);
     }
 
     return result;
 }
 
-async function writeSelection(selectedDirs: string[], demos: DemoDefinition[]): Promise<void> {
+function writeSelection(selectedDirs: string[], demos: IDemoDefinition[]) {
     const file: ISelectionFile = {
         selected: selectedDirs,
         known: demos.map((d) => d.dir),
     };
-    await fs.writeFile(SELECTION_FILE, `${JSON.stringify(file, null, 4)}\n`);
+    fs.writeFileSync(SELECTION_FILE, `${JSON.stringify(file, null, 4)}\n`);
 }

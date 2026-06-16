@@ -20,84 +20,27 @@ import { useDependency } from '@univerjs/ui';
 import { useCallback, useEffect } from 'react';
 import { DEBUGGER_PLUGIN_CONFIG_KEY } from '../config/config';
 
-const locales = [
-    {
-        label: 'English',
-        value: LocaleType.EN_US,
-    },
-    {
-        label: 'Français',
-        value: LocaleType.FR_FR,
-    },
-    {
-        label: 'Русский',
-        value: LocaleType.RU_RU,
-    },
-    {
-        label: 'Tiếng Việt',
-        value: LocaleType.VI_VN,
-    },
-    {
-        label: 'فارسی',
-        value: LocaleType.FA_IR,
-    },
-    {
-        label: 'Español',
-        value: LocaleType.ES_ES,
-    },
-    {
-        label: 'Català',
-        value: LocaleType.CA_ES,
-    },
-    {
-        label: 'Slovenčina',
-        value: LocaleType.SK_SK,
-    },
-    {
-        label: '简体中文',
-        value: LocaleType.ZH_CN,
-    },
-    {
-        label: '繁體中文（台灣）',
-        value: LocaleType.ZH_TW,
-    },
-    {
-        label: '繁體中文（香港）',
-        value: LocaleType.ZH_HK,
-    },
-    {
-        label: '日本語',
-        value: LocaleType.JA_JP,
-    },
-    {
-        label: '한국어',
-        value: LocaleType.KO_KR,
-    },
-    {
-        label: 'Português (Brasil)',
-        value: LocaleType.PT_BR,
-    },
-    {
-        label: 'Deutsch',
-        value: LocaleType.DE_DE,
-    },
-    {
-        label: 'Italiano',
-        value: LocaleType.IT_IT,
-    },
-    {
-        label: 'Bahasa Indonesia',
-        value: LocaleType.ID_ID,
-    },
-    {
-        label: 'Polski',
-        value: LocaleType.PL_PL,
-    },
-    {
-        label: 'العربية',
-        value: LocaleType.AR_SA,
-    },
-];
+const localeLabels: Record<LocaleType, string> = {
+    [LocaleType.AR_SA]: 'العربية',
+    [LocaleType.CA_ES]: 'Català',
+    [LocaleType.DE_DE]: 'Deutsch',
+    [LocaleType.EN_US]: 'English',
+    [LocaleType.ES_ES]: 'Español',
+    [LocaleType.FA_IR]: 'فارسی',
+    [LocaleType.FR_FR]: 'Français',
+    [LocaleType.ID_ID]: 'Bahasa Indonesia',
+    [LocaleType.IT_IT]: 'Italiano',
+    [LocaleType.JA_JP]: '日本語',
+    [LocaleType.KO_KR]: '한국어',
+    [LocaleType.PL_PL]: 'Polski',
+    [LocaleType.PT_BR]: 'Português (Brasil)',
+    [LocaleType.RU_RU]: 'Русский',
+    [LocaleType.SK_SK]: 'Slovenčina',
+    [LocaleType.VI_VN]: 'Tiếng Việt',
+    [LocaleType.ZH_CN]: '简体中文',
+    [LocaleType.ZH_HK]: '繁體中文（香港）',
+    [LocaleType.ZH_TW]: '繁體中文（台灣）',
+};
 
 export function useLocale() {
     const configService = useDependency(IConfigService);
@@ -138,12 +81,12 @@ export function useLocale() {
     return {
         type: 'subItem' as const,
         children: '🌐 Languages',
-        options: locales.map((lang) => ({
+        options: Object.values(LocaleType).map((locale) => ({
             type: 'radio' as const,
             value: localeService.getCurrentLocale(),
             options: [{
-                label: lang.label,
-                value: lang.value,
+                label: localeLabels[locale],
+                value: locale,
             }],
             onSelect,
         })),

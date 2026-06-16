@@ -17,7 +17,8 @@
 import type { IGeneratePresetLocalesOptions, IPresetPackageJson } from './types';
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { PRESET_LOCALE_SOURCE_DIR, PRESET_LOCALES } from './constants';
+import { discoverUniverUiLocales } from '../locale';
+import { PRESET_LOCALE_SOURCE_DIR } from './constants';
 
 function readPackageJson(packageDir: string): IPresetPackageJson {
     return JSON.parse(readFileSync(path.join(packageDir, 'package.json'), 'utf8')) as IPresetPackageJson;
@@ -78,7 +79,7 @@ export function generatePresetLocales(options: IGeneratePresetLocalesOptions): s
 
     const generated: string[] = [];
 
-    for (const locale of PRESET_LOCALES) {
+    for (const locale of discoverUniverUiLocales({ rootDir: packageDir })) {
         const dependenciesWithLocale = dependencyNames
             .map((dependencyName) => ({
                 dependencyName,

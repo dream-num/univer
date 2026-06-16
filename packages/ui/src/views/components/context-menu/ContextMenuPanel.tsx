@@ -1146,13 +1146,18 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
         submenuCloseTimerRef.current = null;
     }, []);
 
+    const closeSubmenu = useCallback(() => {
+        clearSubmenuCloseTimer();
+        setActiveSubmenuKey((currentKey) => (currentKey === menuKey ? null : currentKey));
+    }, [clearSubmenuCloseTimer, menuKey, setActiveSubmenuKey]);
+
     const scheduleSubmenuClose = useCallback(() => {
         clearSubmenuCloseTimer();
         submenuCloseTimerRef.current = setTimeout(() => {
             submenuCloseTimerRef.current = null;
-            setActiveSubmenuKey((currentKey) => (currentKey === menuKey ? null : currentKey));
+            closeSubmenu();
         }, CONTEXT_MENU_SUBMENU_CLOSE_DELAY);
-    }, [clearSubmenuCloseTimer, menuKey, setActiveSubmenuKey]);
+    }, [clearSubmenuCloseTimer, closeSubmenu]);
 
     useEffect(() => {
         setInputValue(value);
@@ -1274,6 +1279,10 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                     if (nextTarget && submenuElementRef.current?.contains(nextTarget)) {
                         return;
                     }
+                    if (isContextMenuPointerLeaveTarget(nextTarget, menuItemElementRef.current, rootMenuElement)) {
+                        closeSubmenu();
+                        return;
+                    }
                     scheduleSubmenuClose();
                 }
             }}
@@ -1383,10 +1392,13 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                                     return;
                                 }
 
-                                scheduleSubmenuClose();
                                 if (isContextMenuPointerLeaveTarget(nextTarget, menuItemElementRef.current, rootMenuElement)) {
+                                    closeSubmenu();
                                     onMenuPointerLeave?.();
+                                    return;
                                 }
+
+                                scheduleSubmenuClose();
                             }}
                             onWheel={(event) => event.stopPropagation()}
                         >

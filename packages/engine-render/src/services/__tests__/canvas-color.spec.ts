@@ -63,6 +63,12 @@ describe('Test Canvas Color', () => {
         expect(invertedColor2).toEqual('rgba(255,85,85, 1)');
     });
 
+    it('keeps transparent named colors transparent in dark mode', async () => {
+        themeService.setDarkMode(true);
+
+        expect(canvasColorService.getRenderColor('transparent')).toBe('transparent');
+    });
+
     it('uses stable dark-mode overrides for common canvas interaction colors', async () => {
         themeService.setDarkMode(false);
         expect(canvasColorService.getRenderColor('#f3f6fa')).toEqual('#f3f6fa');

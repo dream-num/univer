@@ -297,7 +297,7 @@ export function FormulaBar(props: IProps) {
             data-u-comp="formula-bar"
             className={clsx(`
               univer-box-border univer-flex univer-bg-white univer-transition-[height] univer-ease-linear
-              dark:!univer-bg-gray-900
+              dark:!univer-bg-gray-800
             `, borderBottomClassName, className, {
                 'univer-h-7': arrowDirection === ArrowDirection.Down,
                 'univer-h-20': arrowDirection === ArrowDirection.Up,
@@ -361,7 +361,7 @@ export function FormulaBar(props: IProps) {
                         ref={ref}
                         className="
                           univer-relative univer-flex-1 univer-bg-white
-                          dark:!univer-bg-gray-900
+                          dark:!univer-bg-gray-800
                         "
                         onPointerDown={handlePointerDown}
                         onPointerUp={handlePointerUp}
@@ -392,16 +392,15 @@ export function FormulaBar(props: IProps) {
                                 }}
                                 autoScrollbar={false}
                                 disableContextMenu={false}
-                                canvasStyle={{ backgroundColor: '#fff' }}
                             />
                         )}
-                        {/* When the editor is hidden, we just cover a div on the editor because re-instantiate
-                        the formula editor will be expensive. */}
+                        {/* Cover the hidden editor instead of re-instantiating the formula editor. */}
                         {hideEditor && (
                             <div
                                 className={`
                                   univer-pointer-events-none univer-relative univer-left-0 univer-top-0 univer-z-[100]
                                   univer-size-full univer-cursor-not-allowed univer-bg-white
+                                  dark:!univer-bg-gray-800
                                 `}
                             />
                         )}

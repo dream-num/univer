@@ -264,10 +264,7 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
                         },
                     },
                 },
-                canvasStyle: {
-                    ...canvasStyle,
-                    backgroundColor: canvasStyle?.backgroundColor ?? '#fff',
-                },
+                canvasStyle,
             }, formulaEditorContainerRef.current);
             const editor = editorService.getEditor(editorId)! as Editor;
             editorRef.current = editor;

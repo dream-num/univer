@@ -17,13 +17,19 @@
 import type { DocumentDataModel, IDisposable, IDocumentBody, IDocumentData, Nullable } from '@univerjs/core';
 import type { DocBackground, ISuccinctDocRangeParam, Scene } from '@univerjs/engine-render';
 import type { Observable } from 'rxjs';
-import type { IEditorConfigParams } from './editor';
+import type { IEditorCanvasStyle, IEditorConfigParams } from './editor';
 import { createIdentifier, createParagraphId, DEFAULT_EMPTY_DOCUMENT_VALUE, Disposable, EDITOR_ACTIVATED, FOCUSING_COMMENT_EDITOR, FOCUSING_EDITOR_STANDALONE, HorizontalAlign, ICommandService, IContextService, Inject, Injector, isCommentEditorID, isInternalEditorID, IUndoRedoService, IUniverInstanceService, toDisposable, UniverInstanceType, VerticalAlign } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { fromEvent, Subject } from 'rxjs';
 import { DOCS_VIEW_KEY } from '../../basics/docs-view-key';
+import { resolveDocsCanvasBackground } from '../docs-render.service';
 import { Editor } from './editor';
+
+export interface IEditorRenderConfig {
+    canvasStyle: IEditorCanvasStyle;
+    scrollBar?: boolean;
+}
 
 /**
  * Not these elements will be considered as editor blur.
@@ -55,6 +61,8 @@ export interface IEditorService {
 
     isEditor(editorUnitId: string): boolean;
 
+    getEditorRenderConfig(editorUnitId: string): Nullable<IEditorRenderConfig>;
+
     isSheetEditor(editorUnitId: string): boolean;
 
     blur$: Observable<unknown>;
@@ -69,6 +77,8 @@ export interface IEditorService {
 
 export class EditorService extends Disposable implements IEditorService, IDisposable {
     private _editors = new Map<string, Editor>();
+
+    private _editorRenderConfigs = new Map<string, IEditorRenderConfig>();
 
     private _focusEditorUnitId: Nullable<string>;
 
@@ -129,7 +139,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
     }
 
     isEditor(editorUnitId: string) {
-        return this._editors.has(editorUnitId);
+        return this._editorRenderConfigs.has(editorUnitId) || this._editors.has(editorUnitId);
     }
 
     isSheetEditor(editorUnitId: string) {
@@ -191,6 +201,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
 
     override dispose(): void {
         this._editors.clear();
+        this._editorRenderConfigs.clear();
         super.dispose();
     }
 
@@ -202,9 +213,25 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         return this._editors;
     }
 
+    getEditorRenderConfig(editorUnitId: string): Nullable<IEditorRenderConfig> {
+        const editor = this._editors.get(editorUnitId);
+        if (editor) {
+            return {
+                canvasStyle: editor.params.canvasStyle ?? {},
+                scrollBar: editor.params.scrollBar,
+            };
+        }
+
+        return this._editorRenderConfigs.get(editorUnitId) ?? null;
+    }
+
     register(config: IEditorConfigParams, container: HTMLDivElement): IDisposable {
         const { initialSnapshot, canvasStyle = {} } = config;
         const editorUnitId = initialSnapshot.id;
+        this._editorRenderConfigs.set(editorUnitId, {
+            canvasStyle,
+            scrollBar: config.scrollBar,
+        });
 
         const documentDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(editorUnitId, UniverInstanceType.UNIVER_DOC);
 
@@ -235,16 +262,20 @@ export class EditorService extends Disposable implements IEditorService, IDispos
             );
 
             this._editors.set(editorUnitId, editor);
-            if (canvasStyle.backgroundColor != null) {
-                render.engine.getCanvas().getCanvasEle().style.backgroundColor = canvasStyle.backgroundColor;
-                const docBackground = render.components.get(DOCS_VIEW_KEY.BACKGROUND) as DocBackground | undefined;
-                docBackground?.setFillColors(
-                    canvasStyle.backgroundColor,
-                    canvasStyle.backgroundColor,
-                    canvasStyle.backgroundColor,
-                    canvasStyle.backgroundColor
-                );
-            }
+
+            const resolvedEditorBackground = resolveDocsCanvasBackground({
+                canvasColorService: render.engine.canvasColorService,
+                editorBackgroundColor: canvasStyle.backgroundColor,
+                isEditor: true,
+            });
+            render.engine.getCanvas().getCanvasEle().style.backgroundColor = resolvedEditorBackground.canvasElementBackgroundColor;
+            const docBackground = render.components.get(DOCS_VIEW_KEY.BACKGROUND) as DocBackground | undefined;
+            docBackground?.setFillColors(
+                resolvedEditorBackground.docBackgroundFillColor,
+                resolvedEditorBackground.docBackgroundFillColor,
+                resolvedEditorBackground.docBackgroundFillColor,
+                resolvedEditorBackground.docBackgroundFillColor
+            );
 
             // Delete scroll bar
             if (!config.scrollBar) {
@@ -266,12 +297,14 @@ export class EditorService extends Disposable implements IEditorService, IDispos
     private _unRegister(editorUnitId: string) {
         const editor = this._editors.get(editorUnitId);
         if (editor == null) {
+            this._editorRenderConfigs.delete(editorUnitId);
             return;
         }
 
         this._renderManagerService.removeRender(editorUnitId);
         editor.dispose();
         this._editors.delete(editorUnitId);
+        this._editorRenderConfigs.delete(editorUnitId);
         this._univerInstanceService.disposeUnit(editorUnitId);
     }
 

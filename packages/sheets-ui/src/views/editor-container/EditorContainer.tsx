@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+import type { Nullable } from '@univerjs/core';
 import type { KeyCode } from '@univerjs/ui';
-import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, IContextService } from '@univerjs/core';
+import type { ICellEditorState } from '../../services/editor-bridge.service';
+import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, IContextService, ThemeService } from '@univerjs/core';
 import { DocSelectionRenderService, IEditorService } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { ComponentManager, DISABLE_AUTO_FOCUS_KEY, MetaKeys, useDependency, useEvent, useObservable, useSidebarClick } from '@univerjs/ui';
@@ -38,9 +40,31 @@ const EDITOR_DEFAULT_POSITION = {
     left: HIDDEN_EDITOR_POSITION,
 };
 
+const CELL_EDITOR_DARK_SURFACE_THEME_COLOR = 'gray.800';
+
+interface ICellEditorHostBackgroundOptions {
+    darkMode?: boolean;
+    getColorFromTheme?: (color: string) => string | undefined;
+}
+
+/**
+ * @returns the host background color for the cell editor.
+ */
+function getCellEditorHostBackgroundColor(
+    editState: Nullable<Pick<ICellEditorState, 'documentLayoutObject'>>,
+    options: ICellEditorHostBackgroundOptions = {}
+): string | undefined {
+    const cellFill = editState?.documentLayoutObject.fill;
+    if (cellFill) {
+        return cellFill;
+    }
+
+    return options.darkMode ? options.getColorFromTheme?.(CELL_EDITOR_DARK_SURFACE_THEME_COLOR) : undefined;
+}
+
 /**
  * Cell editor container.
- * @returns
+ * @returns the rendered cell editor container.
  */
 export const EditorContainer: React.FC<ICellIEditorProps> = () => {
     const [state, setState] = useState({
@@ -49,6 +73,7 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
     const cellEditorManagerService = useDependency(ICellEditorManagerService);
     const editorService = useDependency(IEditorService);
     const contextService = useDependency(IContextService);
+    const themeService = useDependency(ThemeService);
     const componentManager = useDependency(ComponentManager);
     const editorBridgeService = useDependency(IEditorBridgeService);
     const visible = useObservable(editorBridgeService.visible$);
@@ -60,7 +85,8 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
         [contextService, DISABLE_AUTO_FOCUS_KEY]
     );
     const FormulaEditor = componentManager.get(EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY);
-    const editState = editorBridgeService.getEditLocation();
+    const editState = useObservable(editorBridgeService.currentEditCellState$);
+    const darkMode = useObservable(themeService.darkMode$, themeService.darkMode);
 
     useEffect(() => {
         const sub = cellEditorManagerService.state$.subscribe((param) => {
@@ -171,6 +197,10 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
                 top: state.top,
                 width: state.width,
                 height: state.height,
+                backgroundColor: getCellEditorHostBackgroundColor(editState, {
+                    darkMode,
+                    getColorFromTheme: themeService.getColorFromTheme.bind(themeService),
+                }),
             }}
         >
             {FormulaEditor && (

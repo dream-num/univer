@@ -15,10 +15,34 @@
  */
 
 import { DocumentFlavor } from '@univerjs/core';
-import { describe, expect, it } from 'vitest';
-import { shouldHandleDocWheelZoom } from '../zoom.render-controller';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { DocZoomRenderController, shouldHandleDocWheelZoom } from '../zoom.render-controller';
+
+const mockSceneScale = vi.hoisted(() => vi.fn());
+const mockClearSelectedObjects = vi.hoisted(() => vi.fn());
+
+vi.mock('../../../basics/component-tools', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('../../../basics/component-tools')>();
+
+    return {
+        ...actual,
+        neoGetDocObject: () => ({
+            scene: {
+                scale: mockSceneScale,
+                getTransformer: () => ({
+                    clearSelectedObjects: mockClearSelectedObjects,
+                }),
+            },
+        }),
+    };
+});
 
 describe('DocZoomRenderController', () => {
+    beforeEach(() => {
+        mockSceneScale.mockClear();
+        mockClearSelectedObjects.mockClear();
+    });
+
     it('handles wheel zoom intent for focused modern docs', () => {
         expect(shouldHandleDocWheelZoom({ ctrlKey: true, metaKey: false }, true, DocumentFlavor.MODERN)).toBe(true);
     });
@@ -27,5 +51,29 @@ describe('DocZoomRenderController', () => {
         expect(shouldHandleDocWheelZoom({ ctrlKey: false, metaKey: true }, true, DocumentFlavor.TRADITIONAL)).toBe(true);
         expect(shouldHandleDocWheelZoom({ ctrlKey: false, metaKey: false }, true, DocumentFlavor.TRADITIONAL)).toBe(false);
         expect(shouldHandleDocWheelZoom({ ctrlKey: true, metaKey: false }, false, DocumentFlavor.TRADITIONAL)).toBe(false);
+    });
+
+    it('applies composed view scale while receiving user zoom', () => {
+        const controller = Object.create(DocZoomRenderController.prototype) as DocZoomRenderController;
+        Object.assign(controller, {
+            _context: { unitId: 'doc-unit' },
+            _docViewScaleService: {
+                getViewScale: vi.fn(() => 1.875),
+            },
+            _editorService: {
+                isEditor: vi.fn(() => false),
+            },
+            _docPageLayoutService: {
+                calculatePagePosition: vi.fn(),
+            },
+            _textSelectionManagerService: {
+                refreshSelection: vi.fn(),
+            },
+        });
+
+        controller.updateViewZoom(1.25);
+
+        expect((controller as never as { _docViewScaleService: { getViewScale: ReturnType<typeof vi.fn> } })._docViewScaleService.getViewScale).toHaveBeenCalledWith(1.25);
+        expect(mockSceneScale).toHaveBeenCalledWith(1.875, 1.875);
     });
 });

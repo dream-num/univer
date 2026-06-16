@@ -18,3 +18,5 @@ export { default as PastePluginLark } from './clipboard/html-to-udm/paste-plugin
 export { default as PastePluginUniver } from './clipboard/html-to-udm/paste-plugins/plugin-univer';
 export { default as PastePluginWord } from './clipboard/html-to-udm/paste-plugins/plugin-word';
 export { type IPastePlugin } from './clipboard/html-to-udm/paste-plugins/type';
+export { calcDocFitToWidthScale, DocViewScaleService, normalizeDocFitToWidthOptions, resolveDocFitBaseWidth, resolveDocViewScale } from './doc-view-scale';
+export type { ICalcDocFitToWidthScaleParams, IResolveDocFitBaseWidthParams } from './doc-view-scale';

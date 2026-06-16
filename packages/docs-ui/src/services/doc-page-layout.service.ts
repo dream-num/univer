@@ -16,14 +16,15 @@
 
 import type { DocumentDataModel } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { Disposable } from '@univerjs/core';
+import { Disposable, Inject } from '@univerjs/core';
 import { neoGetDocObject } from '../basics/component-tools';
 import { VIEWPORT_KEY } from '../basics/docs-view-key';
-import { getDocEffectiveZoomRatio } from './doc-zoom';
+import { DocViewScaleService } from './doc-view-scale';
 
 export class DocPageLayoutService extends Disposable implements IRenderModule {
     constructor(
-        private _context: IRenderContext<DocumentDataModel>
+        private _context: IRenderContext<DocumentDataModel>,
+        @Inject(DocViewScaleService) private readonly _docViewScaleService: DocViewScaleService
     ) {
         super();
     }
@@ -32,13 +33,15 @@ export class DocPageLayoutService extends Disposable implements IRenderModule {
         if (this._disposed) return;
 
         const docObject = neoGetDocObject(this._context);
-        const docDataModel = this._context.unit;
-        const zoomRatio = getDocEffectiveZoomRatio(docDataModel);
+        const viewScale = this._docViewScaleService.getViewScale();
+        const fitOptions = this._docViewScaleService.getOptions();
+        const isStartAlignedFit = fitOptions.mode === 'fit-width' && fitOptions.align === 'start';
         const { document: docsComponent, scene, docBackground } = docObject;
 
         const parent = scene?.getParent();
 
         const { width: docsWidth, height: docsHeight, pageMarginLeft, pageMarginTop } = docsComponent;
+        const horizontalMargin = isStartAlignedFit ? (fitOptions.paddingX ?? 0) / viewScale : pageMarginLeft;
 
         if (parent == null || docsWidth === Number.POSITIVE_INFINITY || docsHeight === Number.POSITIVE_INFINITY) {
             return;
@@ -53,21 +56,20 @@ export class DocPageLayoutService extends Disposable implements IRenderModule {
 
         let scrollToX = Number.POSITIVE_INFINITY;
 
-        if (engineWidth > (docsWidth + pageMarginLeft * 2) * zoomRatio) {
-            docsLeft = engineWidth / 2 - (docsWidth * zoomRatio) / 2;
-            docsLeft /= zoomRatio;
-            sceneWidth = (engineWidth - pageMarginLeft * 2) / zoomRatio;
+        if (engineWidth > (docsWidth + horizontalMargin * 2) * viewScale) {
+            docsLeft = isStartAlignedFit ? horizontalMargin : (engineWidth / 2 - (docsWidth * viewScale) / 2) / viewScale;
+            sceneWidth = (engineWidth - horizontalMargin * 2) / viewScale;
 
             scrollToX = 0;
         } else {
-            docsLeft = pageMarginLeft;
-            sceneWidth = docsWidth + pageMarginLeft * 2;
+            docsLeft = horizontalMargin;
+            sceneWidth = docsWidth + horizontalMargin * 2;
 
-            scrollToX = (sceneWidth - engineWidth / zoomRatio) / 2;
+            scrollToX = isStartAlignedFit ? 0 : (sceneWidth - engineWidth / viewScale) / 2;
         }
 
         if (engineHeight > docsHeight) {
-            sceneHeight = (engineHeight - pageMarginTop * 2) / zoomRatio;
+            sceneHeight = (engineHeight - pageMarginTop * 2) / viewScale;
         } else {
             sceneHeight = docsHeight + pageMarginTop * 2;
         }

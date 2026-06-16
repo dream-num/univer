@@ -120,7 +120,8 @@ export { type IMoveCursorOperationParams, MoveSelectionOperation } from './comma
 export { MoveCursorOperation } from './commands/operations/doc-cursor.operation';
 export { type ISetDocZoomRatioOperationParams, SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-ratio.operation';
 export { getCommandSkeleton } from './commands/util';
-export type { IUniverDocsUIConfig } from './config/config';
+export type { DocFitAlign, DocFitMode, DocFitTarget, IDocFitToWidthOptions, IUniverDocsUIConfig } from './config/config';
+export { DEFAULT_DOC_FIT_TO_WIDTH_OPTIONS } from './config/config';
 export { DocBackScrollRenderController } from './controllers/render-controllers/back-scroll.render-controller';
 export { DocParagraphPlaceholderRenderController } from './controllers/render-controllers/doc-paragraph-placeholder.render-controller';
 export { DocRenderController } from './controllers/render-controllers/doc.render-controller';

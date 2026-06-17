@@ -14,67 +14,84 @@
  * limitations under the License.
  */
 
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { Animate } from '../animate';
+
+const originalDateNow = Date.now;
+const originalRequestAnimationFrame = window.requestAnimationFrame;
+const originalCancelAnimationFrame = window.cancelAnimationFrame;
+
+class TestAnimationState {
+    static receivedValues: number[] = [];
+    static successValues: number[] = [];
+    static cancelValues: number[] = [];
+    static completeValues: number[] = [];
+    static canceledFrames: number[] = [];
+
+    static reset(): void {
+        this.receivedValues = [];
+        this.successValues = [];
+        this.cancelValues = [];
+        this.completeValues = [];
+        this.canceledFrames = [];
+    }
+}
 
 describe('animate util', () => {
     afterEach(() => {
-        vi.restoreAllMocks();
+        Date.now = originalDateNow;
+        window.requestAnimationFrame = originalRequestAnimationFrame;
+        window.cancelAnimationFrame = originalCancelAnimationFrame;
+        TestAnimationState.reset();
     });
 
     it('runs request -> success -> complete path', () => {
         let now = 0;
-        const receive = vi.fn();
-        const success = vi.fn();
-        const complete = vi.fn();
-        vi.spyOn(Date, 'now').mockImplementation(() => {
+        Date.now = () => {
             now += 10;
             return now;
-        });
+        };
 
         const animate = new Animate({
             begin: 0,
             end: 100,
             duration: 10,
-            receive,
-            success,
-            complete,
+            receive: (value) => TestAnimationState.receivedValues.push(value),
+            success: (value) => TestAnimationState.successValues.push(value),
+            complete: (value) => TestAnimationState.completeValues.push(value),
         });
         animate.request();
 
-        expect(receive).toHaveBeenCalled();
-        expect(success).toHaveBeenCalled();
-        expect(complete).toHaveBeenCalled();
+        expect(TestAnimationState.receivedValues.length).toBe(1);
+        expect(TestAnimationState.successValues.length).toBe(1);
+        expect(TestAnimationState.completeValues.length).toBe(1);
     });
 
     it('runs cancel callback when animation was canceled', () => {
-        let rafCallback: (() => void) | null = null;
-        vi.spyOn(Date, 'now').mockImplementation(() => 0);
-        vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb: FrameRequestCallback) => {
-            rafCallback = () => cb(0);
+        Date.now = () => 0;
+        window.requestAnimationFrame = () => {
             return 1;
-        });
-        const cancelAnimationFrameSpy = vi.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => {});
-        const cancel = vi.fn();
-        const complete = vi.fn();
-        const receive = vi.fn();
+        };
+        window.cancelAnimationFrame = (frameId: number) => {
+            TestAnimationState.canceledFrames.push(frameId);
+        };
 
         const animate = new Animate({
             begin: 0,
             end: 100,
             duration: 100,
-            receive,
-            cancel,
-            complete,
+            receive: (value) => TestAnimationState.receivedValues.push(value),
+            cancel: (value) => TestAnimationState.cancelValues.push(value),
+            complete: (value) => TestAnimationState.completeValues.push(value),
         });
         animate.request();
         animate.cancel();
-        (animate as any)._fakeHandle();
+        (animate as unknown as { _fakeHandle: () => void })._fakeHandle();
 
-        expect(receive).toHaveBeenCalled();
-        expect(cancelAnimationFrameSpy).toHaveBeenCalledWith(1);
-        expect(cancel).toHaveBeenCalled();
-        expect(complete).toHaveBeenCalled();
+        expect(TestAnimationState.receivedValues.length).toBe(2);
+        expect(TestAnimationState.canceledFrames).toEqual([1]);
+        expect(TestAnimationState.cancelValues.length).toBe(1);
+        expect(TestAnimationState.completeValues.length).toBe(1);
     });
 
     it('Animate.success resolves after all non-loop animations succeed', async () => {

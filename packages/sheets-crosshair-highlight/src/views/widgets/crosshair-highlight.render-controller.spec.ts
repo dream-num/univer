@@ -14,178 +14,222 @@
  * limitations under the License.
  */
 
-import { RANGE_TYPE } from '@univerjs/core';
+import type { IRange } from '@univerjs/core';
+import type { ISelectionWithStyle } from '@univerjs/sheets';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
+import { SheetCrossHairHighlightShape } from './crosshair-highlight-shape';
 import { SheetCrosshairHighlightRenderController } from './crosshair-highlight.render-controller';
 
-const mockShapes: Array<{ dispose: ReturnType<typeof vi.fn>; props: Record<string, unknown> }> = [];
+class TestSheet {
+    getRowCount(): number {
+        return 20;
+    }
 
-vi.mock('@univerjs/sheets-ui', async () => {
-    const actual = await vi.importActual<typeof import('@univerjs/sheets-ui')>('@univerjs/sheets-ui');
-    return {
-        ...actual,
-        getCoordByCell: vi.fn((row: number, col: number) => ({
-            startX: row * 10 + col,
-            startY: row * 5 + col,
-            endX: row * 10 + col + 8,
-            endY: row * 5 + col + 6,
-        })),
-    };
-});
+    getColumnCount(): number {
+        return 10;
+    }
+}
 
-vi.mock('./crosshair-highlight-shape', () => ({
-    SheetCrossHairHighlightShape: class {
-        readonly dispose = vi.fn();
-        readonly props: Record<string, unknown>;
+class TestWorkbook {
+    readonly activeSheet$ = new BehaviorSubject(0);
+    readonly sheet = new TestSheet();
 
-        constructor(_key: string, props: Record<string, unknown>) {
-            this.props = props;
-            mockShapes.push(this);
-        }
-    },
-}));
+    getActiveSheet(): TestSheet {
+        return this.sheet;
+    }
+}
+
+class TestScene {
+    readonly objects: SheetCrossHairHighlightShape[] = [];
+    readonly dirtyRequests: boolean[] = [];
+
+    addObject(object: SheetCrossHairHighlightShape): void {
+        this.objects.push(object);
+    }
+
+    makeDirty(value: boolean): void {
+        this.dirtyRequests.push(value);
+    }
+}
+
+class TestSkeleton {
+    getCellWithCoordByIndex(row: number, column: number) {
+        return {
+            startX: column * 100,
+            startY: row * 20,
+            endX: column * 100 + 100,
+            endY: row * 20 + 20,
+        };
+    }
+}
+
+class TestSkeletonManagerService {
+    readonly skeleton = new TestSkeleton();
+    readonly currentSkeleton$ = new BehaviorSubject(this.skeleton);
+
+    getCurrentSkeleton(): TestSkeleton {
+        return this.skeleton;
+    }
+}
+
+class TestSelectionsService {
+    readonly selectionMoveStart$ = new Subject<ISelectionWithStyle[]>();
+    readonly selectionMoving$ = new Subject<ISelectionWithStyle[]>();
+    readonly selectionMoveEnd$ = new Subject<ISelectionWithStyle[]>();
+    readonly selectionSet$ = new Subject<ISelectionWithStyle[]>();
+    private _selections: ISelectionWithStyle[] = [];
+
+    setSelections(selections: ISelectionWithStyle[]): void {
+        this._selections = selections;
+        this.selectionSet$.next(selections);
+    }
+
+    getCurrentSelections(): ISelectionWithStyle[] {
+        return this._selections;
+    }
+}
+
+class TestCrosshairHighlightService {
+    readonly enabled$ = new BehaviorSubject(false);
+    readonly highlightColor$ = new BehaviorSubject('rgba(10,20,30,0.6)');
+}
+
+class TestContextService {
+    readonly refSelectionEnabled$ = new BehaviorSubject(false);
+
+    subscribeContextValue$() {
+        return this.refSelectionEnabled$.asObservable();
+    }
+}
+
+function createSelection(range: IRange): ISelectionWithStyle {
+    return { range } as ISelectionWithStyle;
+}
+
+function getShapeRects(scene: TestScene) {
+    return scene.objects.map((shape) => ({
+        left: shape.left,
+        top: shape.top,
+        width: shape.width,
+        height: shape.height,
+    }));
+}
+
+function getRenderedShapeCount(controller: SheetCrosshairHighlightRenderController): number {
+    return (controller as unknown as { _shapes: SheetCrossHairHighlightShape[] })._shapes.length;
+}
 
 describe('SheetCrosshairHighlightRenderController', () => {
-    it('should react to selections, render shapes and clear on disable', async () => {
-        mockShapes.length = 0;
-
-        const activeSheet$ = new BehaviorSubject(0);
-        const workbook = {
-            activeSheet$,
-            getActiveSheet: vi.fn(() => ({
-                getRowCount: () => 20,
-                getColumnCount: () => 10,
-            })),
-        };
-        const scene = {
-            addObject: vi.fn(),
-            makeDirty: vi.fn(),
-        };
-        const normalSelection = {
-            range: { startRow: 1, endRow: 2, startColumn: 1, endColumn: 2 },
-        };
-        const refSelection = {
-            range: { startRow: 3, endRow: 3, startColumn: 3, endColumn: 3 },
-        };
-
-        const refSelectionEnabled$ = new BehaviorSubject(false);
-        const enabled$ = new BehaviorSubject(false);
-        const highlightColor$ = new BehaviorSubject('rgba(10,20,30,0.6)');
-        const skeleton = { a: 1 };
-        const currentSkeleton$ = new BehaviorSubject(skeleton);
-
-        const selectionMoveStart$ = new Subject<unknown>();
-        const selectionMoving$ = new Subject<unknown>();
-        const selectionMoveEnd$ = new Subject<unknown>();
-        const selectionSet$ = new Subject<unknown>();
-        const refSelectionMoveStart$ = new Subject<unknown>();
-        const refSelectionMoving$ = new Subject<unknown>();
-        const refSelectionMoveEnd$ = new Subject<unknown>();
+    it('renders crosshair rectangles from the active normal selection and clears them when disabled', async () => {
+        const workbook = new TestWorkbook();
+        const scene = new TestScene();
+        const skeletonManagerService = new TestSkeletonManagerService();
+        const selectionsService = new TestSelectionsService();
+        const refSelectionsService = new TestSelectionsService();
+        const crosshairHighlightService = new TestCrosshairHighlightService();
+        const contextService = new TestContextService();
+        selectionsService.setSelections([
+            createSelection({
+                startRow: 1,
+                endRow: 1,
+                startColumn: 1,
+                endColumn: 1,
+            }),
+        ]);
 
         const controller = new SheetCrosshairHighlightRenderController(
             {
                 unit: workbook,
                 scene,
             } as never,
-            {
-                currentSkeleton$,
-                getCurrentSkeleton: vi.fn(() => skeleton),
-            } as never,
-            {
-                selectionMoveStart$,
-                selectionMoving$,
-                selectionMoveEnd$,
-                selectionSet$,
-                getCurrentSelections: vi.fn(() => [normalSelection]),
-            } as never,
-            {
-                enabled$,
-                highlightColor$,
-            } as never,
-            {
-                subscribeContextValue$: vi.fn(() => refSelectionEnabled$.asObservable()),
-            } as never,
-            {
-                selectionMoveStart$: refSelectionMoveStart$,
-                selectionMoving$: refSelectionMoving$,
-                selectionMoveEnd$: refSelectionMoveEnd$,
-                getCurrentSelections: vi.fn(() => [refSelection]),
-            } as never
+            skeletonManagerService as never,
+            selectionsService as never,
+            crosshairHighlightService as never,
+            contextService as never,
+            refSelectionsService as never
         );
 
-        const addSelectionSpy = vi.spyOn(controller, 'addSelection');
-        const clearSpy = vi.spyOn(controller as never, '_clear');
+        crosshairHighlightService.enabled$.next(true);
 
-        enabled$.next(true);
-        activeSheet$.next(1);
-        expect(addSelectionSpy).toHaveBeenCalled();
-        expect(scene.addObject).toHaveBeenCalled();
-        expect(scene.makeDirty).toHaveBeenCalledWith(true);
+        expect(getRenderedShapeCount(controller)).toBe(4);
+        expect(scene.objects.every((object) => object instanceof SheetCrossHairHighlightShape)).toBe(true);
+        expect(getShapeRects(scene)).toEqual([
+            { left: 0, top: 20, width: 100, height: 20 },
+            { left: 200, top: 20, width: 900, height: 20 },
+            { left: 100, top: 0, width: 100, height: 20 },
+            { left: 100, top: 40, width: 100, height: 380 },
+        ]);
+        expect(scene.dirtyRequests).toEqual([true]);
 
-        refSelectionEnabled$.next(true);
-        activeSheet$.next(2);
-        expect(addSelectionSpy).toHaveBeenCalledWith(refSelection.range, expect.anything());
+        crosshairHighlightService.enabled$.next(false);
 
-        enabled$.next(false);
-        activeSheet$.next(3);
-        expect(clearSpy).toHaveBeenCalled();
+        expect(getRenderedShapeCount(controller)).toBe(0);
 
-        controller.addSelection(
-            {
-                rangeType: RANGE_TYPE.COLUMN,
-                startRow: 0,
-                endRow: 1,
-                startColumn: 0,
-                endColumn: 0,
-            } as never,
-            workbook.getActiveSheet() as never
-        );
+        await controller.dispose();
+    });
 
-        controller.addSelection(
-            {
+    it('switches to reference selections and ignores full-row or full-column selections', async () => {
+        const workbook = new TestWorkbook();
+        const scene = new TestScene();
+        const skeletonManagerService = new TestSkeletonManagerService();
+        const selectionsService = new TestSelectionsService();
+        const refSelectionsService = new TestSelectionsService();
+        const crosshairHighlightService = new TestCrosshairHighlightService();
+        const contextService = new TestContextService();
+
+        selectionsService.setSelections([
+            createSelection({
                 startRow: 2,
                 endRow: 2,
                 startColumn: 2,
                 endColumn: 2,
-            } as never,
-            workbook.getActiveSheet() as never
-        );
-
-        (controller as unknown as { _transformSelection: (value: unknown, sheet: unknown) => void })._transformSelection(
-            null,
-            workbook.getActiveSheet()
-        );
-        (controller as unknown as { _transformSelection: (value: unknown, sheet: unknown) => void })._transformSelection(
-            [{
-                range: {
-                    startRow: 0,
-                    endRow: 19,
-                    startColumn: 0,
-                    endColumn: 0,
-                },
-            }],
-            workbook.getActiveSheet()
-        );
-
-        const preShape = { dispose: vi.fn() };
-        (controller as unknown as { _shapes: Array<{ dispose: () => void }> })._shapes = [preShape];
-        (controller as unknown as { _clear: () => void })._clear();
-        expect(preShape.dispose).toHaveBeenCalledTimes(1);
-
-        controller.addSelection(
-            {
+            }),
+        ]);
+        refSelectionsService.setSelections([
+            createSelection({
                 startRow: 0,
-                endRow: 0,
-                startColumn: 0,
-                endColumn: 0,
+                endRow: 19,
+                startColumn: 3,
+                endColumn: 3,
+            }),
+            createSelection({
+                startRow: 3,
+                endRow: 3,
+                startColumn: 4,
+                endColumn: 4,
+            }),
+        ]);
+
+        const controller = new SheetCrosshairHighlightRenderController(
+            {
+                unit: workbook,
+                scene,
             } as never,
-            workbook.getActiveSheet() as never
+            skeletonManagerService as never,
+            selectionsService as never,
+            crosshairHighlightService as never,
+            contextService as never,
+            refSelectionsService as never
         );
 
-        (controller as unknown as { _sheetSkeletonManagerService: { getCurrentSkeleton: () => unknown } })._sheetSkeletonManagerService.getCurrentSkeleton = () => null;
-        controller.render([{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 } as never]);
-        expect(scene.makeDirty).toHaveBeenCalledWith(true);
+        crosshairHighlightService.enabled$.next(true);
+        expect(getShapeRects(scene).slice(-4)).toEqual([
+            { left: 0, top: 40, width: 200, height: 20 },
+            { left: 300, top: 40, width: 800, height: 20 },
+            { left: 200, top: 0, width: 100, height: 40 },
+            { left: 200, top: 60, width: 100, height: 360 },
+        ]);
+
+        contextService.refSelectionEnabled$.next(true);
+
+        expect(getShapeRects(scene).slice(-4)).toEqual([
+            { left: 0, top: 60, width: 400, height: 20 },
+            { left: 500, top: 60, width: 600, height: 20 },
+            { left: 400, top: 0, width: 100, height: 60 },
+            { left: 400, top: 80, width: 100, height: 340 },
+        ]);
+        expect(getRenderedShapeCount(controller)).toBe(4);
 
         await controller.dispose();
     });

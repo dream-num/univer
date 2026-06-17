@@ -14,11 +14,23 @@
  * limitations under the License.
  */
 
-import type { IDrawingParam } from '@univerjs/core';
+import type { ICommandInfo, IDrawingParam } from '@univerjs/core';
 import type { IDrawingGroupUpdateParam, IDrawingOrderUpdateParam } from '@univerjs/drawing';
 import { ArrangeTypeEnum, DrawingTypeEnum, ICommandService, Univer } from '@univerjs/core';
 import { DrawingManagerService, IDrawingManagerService } from '@univerjs/drawing';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import {
+    AlignType,
+    SetDrawingAlignBottomOperation,
+    SetDrawingAlignCenterOperation,
+    SetDrawingAlignHorizonOperation,
+    SetDrawingAlignLeftOperation,
+    SetDrawingAlignMiddleOperation,
+    SetDrawingAlignOperation,
+    SetDrawingAlignRightOperation,
+    SetDrawingAlignTopOperation,
+    SetDrawingAlignVerticalOperation,
+} from '../drawing-align.operation';
 import {
     SetDrawingArrangeBackOperation,
     SetDrawingArrangeBackwardOperation,
@@ -27,6 +39,8 @@ import {
     SetDrawingArrangeOperation,
 } from '../drawing-arrange.operation';
 import { CancelDrawingGroupOperation, SetDrawingGroupOperation } from '../drawing-group.operation';
+import { AutoImageCropOperation, CloseImageCropOperation, CropType, OpenImageCropOperation } from '../image-crop.operation';
+import { ImageResetSizeOperation } from '../image-reset-size.operation';
 
 const unitId = 'drawing-ui-unit';
 const subUnitId = 'drawing-ui-subunit';
@@ -64,6 +78,19 @@ describe('drawing arrange and group operations', () => {
         commandService.registerCommand(SetDrawingArrangeBackwardOperation);
         commandService.registerCommand(SetDrawingGroupOperation);
         commandService.registerCommand(CancelDrawingGroupOperation);
+        commandService.registerCommand(SetDrawingAlignOperation);
+        commandService.registerCommand(SetDrawingAlignLeftOperation);
+        commandService.registerCommand(SetDrawingAlignCenterOperation);
+        commandService.registerCommand(SetDrawingAlignRightOperation);
+        commandService.registerCommand(SetDrawingAlignTopOperation);
+        commandService.registerCommand(SetDrawingAlignMiddleOperation);
+        commandService.registerCommand(SetDrawingAlignBottomOperation);
+        commandService.registerCommand(SetDrawingAlignHorizonOperation);
+        commandService.registerCommand(SetDrawingAlignVerticalOperation);
+        commandService.registerCommand(OpenImageCropOperation);
+        commandService.registerCommand(CloseImageCropOperation);
+        commandService.registerCommand(AutoImageCropOperation);
+        commandService.registerCommand(ImageResetSizeOperation);
         drawingManagerService = injector.get(IDrawingManagerService);
     });
 
@@ -249,5 +276,82 @@ describe('drawing arrange and group operations', () => {
 
         expect(result).toBe(false);
         expect(ungroupUpdates).toEqual([]);
+    });
+
+    it('translates drawing alignment menu actions into concrete alignment operations', async () => {
+        const executedCommands: ICommandInfo[] = [];
+        commandService.onCommandExecuted((command) => executedCommands.push(command));
+
+        expect(await commandService.executeCommand(SetDrawingAlignLeftOperation.id)).toBe(true);
+        expect(await commandService.executeCommand(SetDrawingAlignCenterOperation.id)).toBe(true);
+        expect(await commandService.executeCommand(SetDrawingAlignRightOperation.id)).toBe(true);
+        expect(await commandService.executeCommand(SetDrawingAlignTopOperation.id)).toBe(true);
+        expect(await commandService.executeCommand(SetDrawingAlignMiddleOperation.id)).toBe(true);
+        expect(await commandService.executeCommand(SetDrawingAlignBottomOperation.id)).toBe(true);
+        expect(await commandService.executeCommand(SetDrawingAlignHorizonOperation.id)).toBe(true);
+        expect(await commandService.executeCommand(SetDrawingAlignVerticalOperation.id)).toBe(true);
+
+        const alignTypes: AlignType[] = [];
+        for (const command of executedCommands) {
+            if (command.id === SetDrawingAlignOperation.id) {
+                alignTypes.push((command.params as { alignType: AlignType }).alignType);
+            }
+        }
+
+        expect(alignTypes).toEqual([
+            AlignType.left,
+            AlignType.center,
+            AlignType.right,
+            AlignType.top,
+            AlignType.middle,
+            AlignType.bottom,
+            AlignType.horizon,
+            AlignType.vertical,
+        ]);
+    });
+
+    it('publishes image crop lifecycle operations with the target drawing and crop mode', async () => {
+        const executedCommands: ICommandInfo[] = [];
+        commandService.onCommandExecuted((command) => executedCommands.push(command));
+        const targetDrawing = { unitId, subUnitId, drawingId: 'image-1' };
+
+        expect(await commandService.executeCommand(OpenImageCropOperation.id, targetDrawing)).toBe(true);
+        expect(await commandService.executeCommand(AutoImageCropOperation.id, { cropType: CropType.R16_9 })).toBe(true);
+        expect(await commandService.executeCommand(CloseImageCropOperation.id, { isAuto: true })).toBe(true);
+
+        expect(executedCommands).toEqual([
+            {
+                id: OpenImageCropOperation.id,
+                type: OpenImageCropOperation.type,
+                params: targetDrawing,
+            },
+            {
+                id: AutoImageCropOperation.id,
+                type: AutoImageCropOperation.type,
+                params: { cropType: CropType.R16_9 },
+            },
+            {
+                id: CloseImageCropOperation.id,
+                type: CloseImageCropOperation.type,
+                params: { isAuto: true },
+            },
+        ]);
+    });
+
+    it('publishes image reset-size operation for selected image drawings', async () => {
+        const executedCommands: ICommandInfo[] = [];
+        commandService.onCommandExecuted((command) => executedCommands.push(command));
+        const selectedImages = [
+            { unitId, subUnitId, drawingId: 'image-1' },
+            { unitId, subUnitId, drawingId: 'image-2' },
+        ];
+
+        expect(await commandService.executeCommand(ImageResetSizeOperation.id, selectedImages)).toBe(true);
+
+        expect(executedCommands).toEqual([{
+            id: ImageResetSizeOperation.id,
+            type: ImageResetSizeOperation.type,
+            params: selectedImages,
+        }]);
     });
 });

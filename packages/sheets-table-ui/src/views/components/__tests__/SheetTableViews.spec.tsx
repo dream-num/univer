@@ -35,8 +35,18 @@ import {
 } from '@univerjs/core';
 import { DefinedNamesService, IDefinedNamesService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { SheetInterceptorService, SheetsSelectionsService, WorkbookEditablePermission } from '@univerjs/sheets';
 import {
+    AddRangeThemeMutation,
+    RemoveRangeThemeMutation,
+    SetRangeThemeMutation,
+    SheetInterceptorService,
+    SheetRangeThemeModel,
+    SheetsSelectionsService,
+    WorkbookEditablePermission,
+} from '@univerjs/sheets';
+import {
+    AddTableThemeCommand,
+    RemoveTableThemeCommand,
     SetSheetTableCommand,
     SetSheetTableFilterCommand,
     SetSheetTableFilterMutation,
@@ -46,17 +56,26 @@ import {
     TableManager,
 } from '@univerjs/sheets-table';
 import { IMarkSelectionService, SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
-import { IDialogService, IPlatformService, IShortcutService, PlatformService, RediContext, ShortcutService } from '@univerjs/ui';
+import {
+    IDialogService,
+    IPlatformService,
+    IShortcutService,
+    PlatformService,
+    RediContext,
+    ShortcutService,
+} from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Subject } from 'rxjs';
 import { afterEach, describe, expect, it } from 'vitest';
 import { SheetsTableComponentController } from '../../../controllers/sheet-table-component.controller';
+import { SheetTableThemeUIController } from '../../../controllers/sheet-table-theme-ui.controller';
 import enUS from '../../../locale/en-US';
 import { SheetsTableUiService } from '../../../services/sheets-table-ui.service';
 import { SheetTableFilterPanel } from '../SheetTableFilterPanel';
 import { SheetTableRenameDialog } from '../SheetTableRenameDialog';
 import { SheetTableSelector } from '../SheetTableSelector';
+import { SheetTableThemePanel } from '../SheetTableThemePanel';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -303,9 +322,11 @@ function createTableRenameViewTestBed() {
                 [SheetsSelectionsService],
                 [TableManager],
                 [SheetInterceptorService],
+                [SheetRangeThemeModel],
                 [SheetTableService],
                 [SheetsTableUiService],
                 [SheetsTableComponentController],
+                [SheetTableThemeUIController],
                 [LexerTreeBuilder],
                 [IEditorService, { useClass: TestEditorService as never }],
                 [IDescriptionService, { useClass: TestDescriptionService }],
@@ -343,7 +364,17 @@ function createTableRenameViewTestBed() {
     injector.get(ILogService).setLogLevel(LogLevel.SILENT);
 
     const commandService = injector.get(ICommandService);
-    [SetSheetTableCommand, SetSheetTableMutation, SetSheetTableFilterCommand, SetSheetTableFilterMutation].forEach((command) => commandService.registerCommand(command));
+    [
+        SetSheetTableCommand,
+        SetSheetTableMutation,
+        SetSheetTableFilterCommand,
+        SetSheetTableFilterMutation,
+        AddTableThemeCommand,
+        RemoveTableThemeCommand,
+        AddRangeThemeMutation,
+        RemoveRangeThemeMutation,
+        SetRangeThemeMutation,
+    ].forEach((command) => commandService.registerCommand(command));
     injector.get(IPermissionService).addPermissionPoint(new WorkbookEditablePermission(UNIT_ID));
 
     const tableManager = injector.get(TableManager);
@@ -413,11 +444,34 @@ async function renderSelector(root: Root, testBed: ReturnType<typeof createTable
     });
 }
 
+async function renderThemePanel(root: Root, testBed: ReturnType<typeof createTableRenameViewTestBed>) {
+    await act(async () => {
+        root.render(
+            <RediContext.Provider value={{ injector: testBed.injector }}>
+                <SheetTableThemePanel
+                    unitId={UNIT_ID}
+                    subUnitId={SUB_UNIT_ID}
+                    tableId={PRIMARY_TABLE_ID}
+                    oldConfig={{}}
+                />
+            </RediContext.Provider>
+        );
+        await awaitTime(20);
+    });
+}
+
 function getButton(container: HTMLElement, text: string) {
     const button = Array.from(container.querySelectorAll('[data-u-comp="button"]'))
         .find((item) => item.textContent === text);
     expect(button).toBeTruthy();
     return button as HTMLElement;
+}
+
+function getSectionAfterHeading(container: HTMLElement, text: string) {
+    const heading = Array.from(container.querySelectorAll('h5'))
+        .find((item) => item.textContent === text);
+    expect(heading).toBeTruthy();
+    return heading!.nextElementSibling as HTMLElement;
 }
 
 describe('SheetTableRenameDialog', () => {
@@ -586,6 +640,77 @@ describe('SheetTableFilterPanel', () => {
             values: ['East'],
         });
         expect(currentTestBed.componentController.getCurrentTableFilterInfo()).toBeNull();
+    });
+});
+
+describe('SheetTableThemePanel', () => {
+    let root: Root | undefined;
+    let container: HTMLDivElement | undefined;
+    let currentTestBed: ReturnType<typeof createTableRenameViewTestBed> | undefined;
+
+    afterEach(() => {
+        act(() => {
+            root?.unmount();
+        });
+        container?.remove();
+        currentTestBed?.univer.dispose();
+        root = undefined;
+        container = undefined;
+        currentTestBed = undefined;
+    });
+
+    it('adds a custom table theme and selects it for the active table', async () => {
+        currentTestBed = createTableRenameViewTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        const rangeThemeModel = currentTestBed.injector.get(SheetRangeThemeModel);
+        const table = currentTestBed.tableManager.getTableById(UNIT_ID, PRIMARY_TABLE_ID);
+        expect(rangeThemeModel.getALLRegisteredTheme(UNIT_ID)).toEqual([]);
+        expect(table?.getTableStyleId()).toBe('table-default-0');
+
+        await renderThemePanel(root, currentTestBed);
+
+        const customStyleSection = getSectionAfterHeading(container, 'Custom Style');
+        const addCustomTheme = Array.from(customStyleSection.querySelectorAll('div'))
+            .find((item) => item.textContent === '+' && item.children.length === 0) as HTMLElement;
+        expect(addCustomTheme).toBeTruthy();
+
+        await act(async () => {
+            addCustomTheme.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            await awaitTime(20);
+        });
+
+        expect(rangeThemeModel.getALLRegisteredTheme(UNIT_ID)).toEqual(['table-custom-1']);
+        expect(table?.getTableStyleId()).toBe('table-custom-1');
+        expect(container.textContent).toContain('Header');
+        expect(container.textContent).toContain('First Line');
+        expect(container.textContent).toContain('Second Line');
+        expect(container.textContent).toContain('Footer');
+    });
+
+    it('selects a default table theme from the gallery', async () => {
+        currentTestBed = createTableRenameViewTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        const table = currentTestBed.tableManager.getTableById(UNIT_ID, PRIMARY_TABLE_ID);
+        expect(table?.getTableStyleId()).toBe('table-default-0');
+
+        await renderThemePanel(root, currentTestBed);
+
+        const defaultStyleSection = getSectionAfterHeading(container, 'Default Style');
+        const secondDefaultTheme = defaultStyleSection.children[1] as HTMLElement;
+        expect(secondDefaultTheme).toBeTruthy();
+
+        await act(async () => {
+            secondDefaultTheme.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            await awaitTime(20);
+        });
+
+        expect(table?.getTableStyleId()).toBe('table-default-1');
     });
 });
 

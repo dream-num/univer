@@ -16,12 +16,20 @@
 
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { DesignTinyMenuGroup } from '../DesignTinyMenuGroup';
+
+class TestState {
+    static clickCount = 0;
+
+    static recordClick(): void {
+        this.clickCount += 1;
+    }
+}
 
 describe('DesignTinyMenuGroup', () => {
     it('renders quick icon items as focusable menu buttons', () => {
-        const onClick = vi.fn();
+        TestState.clickCount = 0;
         const Icon = () => <span data-testid="quick-icon" />;
 
         render(
@@ -30,7 +38,7 @@ describe('DesignTinyMenuGroup', () => {
                     key: 'h1',
                     Icon,
                     className: '',
-                    onClick,
+                    onClick: () => TestState.recordClick(),
                     tooltip: 'Heading 1',
                 }]}
                 columns={6}
@@ -44,7 +52,7 @@ describe('DesignTinyMenuGroup', () => {
 
         expect(document.activeElement).toBe(button);
         expect(button.getAttribute('title')).toBeNull();
-        expect(onClick).toHaveBeenCalledTimes(1);
+        expect(TestState.clickCount).toBe(1);
     });
 
     it('keeps native titles for default tiny menus', () => {
@@ -56,7 +64,7 @@ describe('DesignTinyMenuGroup', () => {
                     key: 'h1',
                     Icon,
                     className: '',
-                    onClick: vi.fn(),
+                    onClick: () => undefined,
                     tooltip: 'Heading 1',
                 }]}
             />
@@ -88,8 +96,8 @@ describe('DesignTinyMenuGroup', () => {
         const { container } = render(
             <DesignTinyMenuGroup
                 items={[
-                    { key: 'black', Icon, className: '', onClick: vi.fn() },
-                    { key: 'red', Icon, className: '', onClick: vi.fn() },
+                    { key: 'black', Icon, className: '', onClick: () => undefined },
+                    { key: 'red', Icon, className: '', onClick: () => undefined },
                 ]}
                 columns={8}
                 layoutVariant="compact"

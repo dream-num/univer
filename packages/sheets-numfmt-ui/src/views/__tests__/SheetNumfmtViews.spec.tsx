@@ -363,6 +363,59 @@ describe('CustomFormat', () => {
         expect(confirmedPattern).toBe('0.0000');
         expect(await currentTestBed.localStorageService.getItem<string[]>(CUSTOM_HISTORY_KEY)).toEqual(['0.0000']);
     });
+
+    it('keeps confirmed custom patterns recent and unique in the saved history', async () => {
+        currentTestBed = createNumfmtViewTestBed();
+        await currentTestBed.localStorageService.setItem(CUSTOM_HISTORY_KEY, [
+            '0.0',
+            '#,##0',
+            'm/d/yyyy',
+            '0.0',
+            '0%',
+            '$#,##0.00',
+            'h:mm AM/PM',
+            '0.000',
+            '#,##0.00',
+            '0.00%',
+            '0.0000',
+        ]);
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        let getCurrentPattern: (() => string | null) | undefined;
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <CustomFormat
+                        defaultValue={1234.5}
+                        defaultPattern="#,##0"
+                        onChange={() => undefined}
+                        onActionChange={(action) => {
+                            getCurrentPattern = action;
+                        }}
+                    />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        expect(getCurrentPattern?.()).toBe('#,##0');
+        await Promise.resolve();
+
+        expect(await currentTestBed.localStorageService.getItem<string[]>(CUSTOM_HISTORY_KEY)).toEqual([
+            '#,##0',
+            '0.0',
+            'm/d/yyyy',
+            '0%',
+            '$#,##0.00',
+            'h:mm AM/PM',
+            '0.000',
+            '#,##0.00',
+            '0.00%',
+            '0.0000',
+        ]);
+    });
 });
 
 describe('SheetNumfmtPanel', () => {
@@ -422,6 +475,58 @@ describe('SheetNumfmtPanel', () => {
         expect(events).toEqual([
             { type: 'confirm', value: '#,##0_);(#,##0)' },
             { type: 'cancel', value: '' },
+        ]);
+    });
+
+    it('clears an existing number format when the user switches the panel type to General', async () => {
+        currentTestBed = createNumfmtViewTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        const events: Array<{ type: 'change' | 'cancel' | 'confirm'; value: string }> = [];
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <SheetNumfmtPanel
+                        value={{
+                            defaultValue: 1234.5,
+                            defaultPattern: '#,##0_);(#,##0)',
+                            row: 0,
+                            col: 0,
+                        }}
+                        onChange={(event) => events.push(event)}
+                    />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        await act(async () => {
+            container!.querySelector('[data-u-comp="select"]')!.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0 }));
+            await Promise.resolve();
+        });
+
+        const generalOption = Array.from(document.querySelectorAll('[data-slot="dropdown-menu-radio-item"]'))
+            .find((button) => button.textContent === 'General');
+
+        expect(generalOption).toBeDefined();
+
+        await act(async () => {
+            generalOption!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            await Promise.resolve();
+        });
+
+        const confirmButton = Array.from(container.querySelectorAll('[data-u-comp="button"]'))[1] as HTMLElement;
+
+        await act(async () => {
+            confirmButton.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            await Promise.resolve();
+        });
+
+        expect(events).toEqual([
+            { type: 'change', value: '' },
+            { type: 'confirm', value: '' },
         ]);
     });
 });

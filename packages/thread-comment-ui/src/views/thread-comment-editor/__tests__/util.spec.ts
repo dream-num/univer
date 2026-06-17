@@ -14,22 +14,34 @@
  * limitations under the License.
  */
 
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { focusThreadCommentEditor } from '../util';
+
+class TestEditorService {
+    focusedEditorId = '';
+
+    focus(editorId: string): void {
+        this.focusedEditorId = editorId;
+    }
+}
+
+class TestEditor {
+    focused = false;
+
+    focus(): void {
+        this.focused = true;
+    }
+}
 
 describe('focusThreadCommentEditor', () => {
     it('focuses the editor instance even when the editor service already tracks the id', () => {
         const editorId = 'comment-editor-id';
-        const editorService = {
-            focus: vi.fn(),
-        };
-        const editor = {
-            focus: vi.fn(),
-        };
+        const editorService = new TestEditorService();
+        const editor = new TestEditor();
 
         focusThreadCommentEditor(editorService, editorId, editor);
 
-        expect(editorService.focus).toHaveBeenCalledWith(editorId);
-        expect(editor.focus).toHaveBeenCalled();
+        expect(editorService.focusedEditorId).toBe(editorId);
+        expect(editor.focused).toBe(true);
     });
 });

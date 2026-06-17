@@ -30,8 +30,14 @@ import {
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { SetRangeValuesMutation, SheetInterceptorService } from '@univerjs/sheets';
 import {
+    SetRangeValuesMutation,
+    SetWorksheetActiveOperation,
+    SheetInterceptorService,
+    SheetsSelectionsService,
+} from '@univerjs/sheets';
+import {
+    AddHyperLinkCommand,
     AddHyperLinkMutation,
     CancelHyperLinkCommand,
     HyperLinkModel,
@@ -39,15 +45,22 @@ import {
     SheetsHyperLinkParserService,
     UpdateHyperLinkMutation,
 } from '@univerjs/sheets-hyper-link';
-import { IEditorBridgeService, SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
+import {
+    IEditorBridgeService,
+    IMarkSelectionService,
+    ScrollToRangeOperation,
+    SheetCanvasPopManagerService,
+} from '@univerjs/sheets-ui';
 import { IMessageService, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { afterEach, describe, expect, it } from 'vitest';
-import { OpenHyperLinkEditPanelOperation } from '../../commands/operations/popup.operations';
+import { CloseHyperLinkPopupOperation, OpenHyperLinkEditPanelOperation } from '../../commands/operations/popup.operations';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
+import { SheetsHyperLinkSidePanelService } from '../../services/side-panel.service';
 import { HyperLinkEditSourceType } from '../../types/enums/edit-source';
+import { CellLinkEdit } from '../CellLinkEdit';
 import { CellLinkPopupPure } from '../CellLinkPopup';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -70,12 +83,56 @@ class TestCanvasPopManagerService {
 }
 
 class TestRenderManagerService {
-    getRenderById() {
-        return undefined;
+    enableScrollRender = false;
+    readonly scrollRanges: unknown[] = [];
+
+    getRenderById(id: string) {
+        if (id !== UNIT_ID || !this.enableScrollRender) {
+            return undefined;
+        }
+
+        return {
+            with: () => ({
+                scrollToRange: (range: unknown) => {
+                    this.scrollRanges.push(range);
+                    return true;
+                },
+            }),
+        };
+    }
+}
+
+class TestMarkSelectionService {
+    readonly shapes = new Map<string, unknown>();
+
+    addShape(selection: unknown) {
+        const id = `shape-${this.shapes.size + 1}`;
+        this.shapes.set(id, selection);
+        return id;
+    }
+
+    addShapeWithNoFresh(selection: unknown) {
+        return this.addShape(selection);
+    }
+
+    removeShape(id: string) {
+        this.shapes.delete(id);
+    }
+
+    removeAllShapes() {
+        this.shapes.clear();
+    }
+
+    refreshShapes() {}
+
+    getShapeMap() {
+        return this.shapes;
     }
 }
 
 class TestEditorBridgeService {
+    forceKeepVisible = false;
+
     getCurrentEditorId() {
         return 'sheet-popup-editor';
     }
@@ -87,11 +144,23 @@ class TestEditorBridgeService {
     getEditCellState() {
         return null;
     }
+
+    enableForceKeepVisible() {
+        this.forceKeepVisible = true;
+    }
+
+    disableForceKeepVisible() {
+        this.forceKeepVisible = false;
+    }
 }
 
 class TestDefinedNamesService {
     getValueById() {
         return undefined;
+    }
+
+    getDefinedNameMap() {
+        return {};
     }
 
     getWorksheetByRef() {
@@ -177,10 +246,13 @@ function createPopupTestBed() {
     injector.add([IRenderManagerService, { useClass: TestRenderManagerService as never }]);
     injector.add([IMessageService, { useClass: TestMessageService as never }]);
     injector.add([IEditorBridgeService, { useClass: TestEditorBridgeService as never }]);
+    injector.add([IMarkSelectionService, { useClass: TestMarkSelectionService as never }]);
     injector.add([SheetCanvasPopManagerService, { useClass: TestCanvasPopManagerService as never }]);
+    injector.add([SheetsSelectionsService]);
     injector.add([SheetsHyperLinkParserService]);
     injector.add([SheetsHyperLinkResolverService]);
     injector.add([SheetsHyperLinkPopupService]);
+    injector.add([SheetsHyperLinkSidePanelService]);
 
     const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, createWorkbookData(customRange));
     injector.get(IUniverInstanceService).focusUnit(UNIT_ID);
@@ -190,6 +262,21 @@ function createPopupTestBed() {
                 popup: {
                     edit: 'Edit',
                     cancel: 'Remove link',
+                },
+                form: {
+                    label: 'Display text',
+                    labelPlaceholder: 'Text',
+                    type: 'Link type',
+                    link: 'Web link',
+                    range: 'Range',
+                    worksheet: 'Worksheet',
+                    definedName: 'Defined name',
+                    linkPlaceholder: 'URL',
+                    inputError: 'Required',
+                    linkError: 'Invalid link',
+                    selectError: 'Select a target',
+                    cancel: 'Cancel',
+                    ok: 'OK',
                 },
                 message: {
                     coped: 'Copied',
@@ -208,8 +295,12 @@ function createPopupTestBed() {
     commandService.registerCommand(AddHyperLinkMutation);
     commandService.registerCommand(UpdateHyperLinkMutation);
     commandService.registerCommand(RemoveHyperLinkMutation);
+    commandService.registerCommand(AddHyperLinkCommand);
     commandService.registerCommand(CancelHyperLinkCommand);
     commandService.registerCommand(OpenHyperLinkEditPanelOperation);
+    commandService.registerCommand(CloseHyperLinkPopupOperation);
+    commandService.registerCommand(SetWorksheetActiveOperation);
+    commandService.registerCommand(ScrollToRangeOperation);
 
     return {
         univer,
@@ -218,6 +309,12 @@ function createPopupTestBed() {
         workbook,
         customRange,
     };
+}
+
+function inputText(input: HTMLInputElement, value: string) {
+    const valueSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
+    valueSetter?.call(input, value);
+    input.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
 function renderPopup(
@@ -310,5 +407,72 @@ describe('CellLinkPopupPure', () => {
 
         expect(cell?.p?.body?.customRanges?.some((range) => range.rangeId === 'link-range')).toBe(false);
         expect(cell?.p?.body?.dataStream).toBe('Univer\r\n');
+    });
+});
+
+describe('CellLinkEdit', () => {
+    let root: Root | undefined;
+    let container: HTMLDivElement | undefined;
+    let currentTestBed: ReturnType<typeof createPopupTestBed> | undefined;
+
+    afterEach(() => {
+        act(() => {
+            root?.unmount();
+        });
+        container?.remove();
+        currentTestBed?.univer.dispose();
+        root = undefined;
+        container = undefined;
+        currentTestBed = undefined;
+    });
+
+    it('adds a URL hyperlink to the current cell text and closes the popup', async () => {
+        currentTestBed = createPopupTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        const popupService = currentTestBed.injector.get(SheetsHyperLinkPopupService);
+        const renderManagerService = currentTestBed.injector.get(IRenderManagerService) as unknown as TestRenderManagerService;
+
+        act(() => {
+            popupService.startAddEditing({
+                unitId: UNIT_ID,
+                subUnitId: SUB_UNIT_ID,
+                row: 0,
+                col: 0,
+                type: HyperLinkEditSourceType.VIEWING,
+            });
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <CellLinkEdit />
+                </RediContext.Provider>
+            );
+        });
+
+        const inputs = Array.from(container.querySelectorAll('input'));
+        expect(inputs).toHaveLength(1);
+
+        await act(async () => {
+            inputText(inputs[0], 'docs.univer.ai');
+            await Promise.resolve();
+        });
+        renderManagerService.enableScrollRender = true;
+
+        const formButtons = Array.from(container.querySelectorAll<HTMLButtonElement>('[data-u-comp="button"]'));
+        const okButton = formButtons[formButtons.length - 1];
+        expect(okButton).toBeDefined();
+
+        await act(async () => {
+            okButton!.click();
+            await Promise.resolve();
+        });
+
+        const cell = currentTestBed.workbook.getSheetBySheetId(SUB_UNIT_ID)?.getCellRaw(0, 0);
+        const body = cell?.p?.body;
+        const linkRange = body?.customRanges?.find((range) => range.rangeType === CustomRangeType.HYPERLINK);
+
+        expect(body?.dataStream).toBe('Univer\r\n');
+        expect(linkRange?.properties?.url).toBe('http://docs.univer.ai');
+        expect(popupService.currentEditing).toBeNull();
     });
 });

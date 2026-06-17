@@ -21,7 +21,18 @@ import type { IStyleEditorProps } from './type';
 import { get, IUniverInstanceService, LocaleService, set, Tools, UniverInstanceType } from '@univerjs/core';
 import { borderClassName, Checkbox, clsx, Dropdown, InputNumber, Select } from '@univerjs/design';
 import { MoreDownIcon, SlashDoubleIcon } from '@univerjs/icons';
-import { CFNumberOperator, CFRuleType, CFSubRuleType, CFValueType, compareWithNumber, createDefaultValue, getOppositeOperator, iconGroup, iconMap, IIconSetType } from '@univerjs/sheets-conditional-formatting';
+import {
+    CFNumberOperator,
+    CFRuleType,
+    CFSubRuleType,
+    CFValueType,
+    compareWithNumber,
+    createDefaultValue,
+    getOppositeOperator,
+    iconGroup,
+    iconMap,
+    IIconSetType,
+} from '@univerjs/sheets-conditional-formatting';
 import { FormulaEditor } from '@univerjs/sheets-formula-ui';
 import { ILayoutService, useDependency, useScrollYOverContainer, useSidebarClick } from '@univerjs/ui';
 import { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
@@ -517,8 +528,9 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
     useEffect(() => {
         const dispose = interceptorManager.intercept(interceptorManager.getInterceptPoints().beforeSubmit, {
             handler() {
-                const keys = Object.keys(errorMap);
-                return keys.length === 0;
+                const currentErrorMap = checkResult(configList);
+                setErrorMap(currentErrorMap);
+                return Object.keys(currentErrorMap).length === 0;
             },
         });
         return () => {

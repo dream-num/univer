@@ -17,7 +17,14 @@
 import type { IConditionalFormattingRuleConfig } from '@univerjs/sheets-conditional-formatting';
 import type { Root } from 'react-dom/client';
 import { InterceptorManager, LocaleService, LocaleType } from '@univerjs/core';
-import { CFRuleType, CFSubRuleType, CFValueType } from '@univerjs/sheets-conditional-formatting';
+import {
+    CFNumberOperator,
+    CFRuleType,
+    CFSubRuleType,
+    CFTextOperator,
+    CFValueType,
+    IIconSetType,
+} from '@univerjs/sheets-conditional-formatting';
 import { ILayoutService, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -257,5 +264,205 @@ describe('conditional formatting rule editors', () => {
                 },
             ],
         });
+    });
+
+    it('preserves an existing number highlight rule when reopening the editor', async () => {
+        currentTestBed = createEditorTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        const interceptorManager = createRuleInterceptorManager();
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <HighlightCellStyleEditor
+                        interceptorManager={interceptorManager}
+                        rule={{
+                            type: CFRuleType.highlightCell,
+                            subType: CFSubRuleType.number,
+                            operator: CFNumberOperator.between,
+                            value: [5, 12],
+                            style: {
+                                bg: {
+                                    rgb: '#ffeecc',
+                                },
+                            },
+                        }}
+                        onChange={() => undefined}
+                    />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        expect(submitRule(interceptorManager)).toMatchObject({
+            type: CFRuleType.highlightCell,
+            subType: CFSubRuleType.number,
+            operator: CFNumberOperator.between,
+            value: [5, 12],
+            style: {
+                bg: {
+                    rgb: '#ffeecc',
+                },
+            },
+        });
+    });
+
+    it('preserves an existing text highlight rule and validates it through beforeSubmit', async () => {
+        currentTestBed = createEditorTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        const interceptorManager = createRuleInterceptorManager();
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <HighlightCellStyleEditor
+                        interceptorManager={interceptorManager}
+                        rule={{
+                            type: CFRuleType.highlightCell,
+                            subType: CFSubRuleType.text,
+                            operator: CFTextOperator.endsWith,
+                            value: '.com',
+                            style: {
+                                cl: {
+                                    rgb: '#0070c0',
+                                },
+                            },
+                        }}
+                        onChange={() => undefined}
+                    />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        expect(interceptorManager.fetchThroughInterceptors(beforeSubmit)(true, null)).toBe(true);
+        expect(submitRule(interceptorManager)).toMatchObject({
+            type: CFRuleType.highlightCell,
+            subType: CFSubRuleType.text,
+            operator: CFTextOperator.endsWith,
+            value: '.com',
+            style: {
+                cl: {
+                    rgb: '#0070c0',
+                },
+            },
+        });
+    });
+
+    it('preserves an existing icon set rule with hidden cell values', async () => {
+        currentTestBed = createEditorTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        const interceptorManager = createRuleInterceptorManager();
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <IconSet
+                        interceptorManager={interceptorManager}
+                        rule={{
+                            type: CFRuleType.iconSet,
+                            isShowValue: false,
+                            config: [
+                                {
+                                    iconType: IIconSetType.threeTrafficLights1,
+                                    iconId: '0',
+                                    operator: CFNumberOperator.greaterThanOrEqual,
+                                    value: { type: CFValueType.percent, value: 75 },
+                                },
+                                {
+                                    iconType: IIconSetType.threeTrafficLights1,
+                                    iconId: '1',
+                                    operator: CFNumberOperator.greaterThan,
+                                    value: { type: CFValueType.percent, value: 25 },
+                                },
+                                {
+                                    iconType: IIconSetType.threeTrafficLights1,
+                                    iconId: '2',
+                                    operator: CFNumberOperator.lessThanOrEqual,
+                                    value: { type: CFValueType.percent, value: Number.MAX_SAFE_INTEGER },
+                                },
+                            ],
+                        }}
+                        onChange={() => undefined}
+                    />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        expect(interceptorManager.fetchThroughInterceptors(beforeSubmit)(true, null)).toBe(true);
+        expect(submitRule(interceptorManager)).toMatchObject({
+            type: CFRuleType.iconSet,
+            isShowValue: false,
+            config: [
+                {
+                    iconType: IIconSetType.threeTrafficLights1,
+                    iconId: '0',
+                    value: { type: CFValueType.percent, value: 75 },
+                },
+                {
+                    iconType: IIconSetType.threeTrafficLights1,
+                    iconId: '1',
+                    value: { type: CFValueType.percent, value: 25 },
+                },
+                {
+                    iconType: IIconSetType.threeTrafficLights1,
+                    iconId: '2',
+                    value: { type: CFValueType.percent, value: Number.MAX_SAFE_INTEGER },
+                },
+            ],
+        });
+    });
+
+    it('blocks submitting an icon set whose thresholds are not ordered by their operators', async () => {
+        currentTestBed = createEditorTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        const interceptorManager = createRuleInterceptorManager();
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <IconSet
+                        interceptorManager={interceptorManager}
+                        rule={{
+                            type: CFRuleType.iconSet,
+                            isShowValue: true,
+                            config: [
+                                {
+                                    iconType: IIconSetType.threeArrows,
+                                    iconId: '0',
+                                    operator: CFNumberOperator.greaterThan,
+                                    value: { type: CFValueType.num, value: 20 },
+                                },
+                                {
+                                    iconType: IIconSetType.threeArrows,
+                                    iconId: '1',
+                                    operator: CFNumberOperator.greaterThan,
+                                    value: { type: CFValueType.num, value: 30 },
+                                },
+                                {
+                                    iconType: IIconSetType.threeArrows,
+                                    iconId: '2',
+                                    operator: CFNumberOperator.lessThanOrEqual,
+                                    value: { type: CFValueType.num, value: Number.MAX_SAFE_INTEGER },
+                                },
+                            ],
+                        }}
+                        onChange={() => undefined}
+                    />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        expect(interceptorManager.fetchThroughInterceptors(beforeSubmit)(true, null)).toBe(false);
     });
 });

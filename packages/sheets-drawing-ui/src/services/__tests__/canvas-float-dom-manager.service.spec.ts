@@ -17,6 +17,7 @@
 import type { IWorkbookData } from '@univerjs/core';
 import type { IRender, IRenderManagerService as IRenderManagerServiceType, Scene } from '@univerjs/engine-render';
 import type { IFloatDom, IFloatDomLayout } from '@univerjs/ui';
+import type { ICanvasFloatDomInfo } from '../canvas-float-dom-manager.service';
 import {
     BooleanNumber,
     Disposable,
@@ -379,6 +380,97 @@ describe('SheetCanvasFloatDomManagerService', () => {
         });
     });
 
+    it('keeps float dom bounds stable when the main viewport is unavailable', () => {
+        const fixture = setup();
+        disposables.push(fixture);
+        const scene = createScene({
+            left: 0,
+            top: 0,
+            right: 360,
+            bottom: 220,
+            viewportScrollX: 30,
+            viewportScrollY: 18,
+        });
+        scene.getViewport = () => undefined;
+
+        expect(transformBound2DOMBound({
+            left: 20,
+            right: 120,
+            top: 30,
+            bottom: 90,
+        }, scene, fixture.skeleton, fixture.worksheet)).toEqual({
+            left: 20,
+            right: 120,
+            top: 30,
+            bottom: 90,
+            absolute: {
+                left: true,
+                top: true,
+            },
+        });
+    });
+
+    it('handles frozen panes when float doms cross or move past the frozen boundary', () => {
+        const fixture = setup(createWorkbookDataWithFreeze());
+        disposables.push(fixture);
+
+        expect(transformBound2DOMBound({
+            left: 100,
+            right: 150,
+            top: 44,
+            bottom: 80,
+        }, fixture.scene, fixture.skeleton, fixture.worksheet)).toEqual({
+            left: 100,
+            right: 120,
+            top: 44,
+            bottom: 62,
+            absolute: {
+                left: true,
+                top: true,
+            },
+        });
+
+        expect(transformBound2DOMBound({
+            left: 140,
+            right: 200,
+            top: 70,
+            bottom: 110,
+        }, fixture.scene, fixture.skeleton, fixture.worksheet)).toEqual({
+            left: 110,
+            right: 170,
+            top: 52,
+            bottom: 92,
+            absolute: {
+                left: false,
+                top: false,
+            },
+        });
+    });
+
+    it('can keep horizontal sheet coordinates fixed for vertically responsive float doms', () => {
+        const fixture = setup();
+        disposables.push(fixture);
+        const floatDomInfo = {
+            scrollDirectionResponse: 'VERTICAL',
+        } as ICanvasFloatDomInfo;
+
+        expect(transformBound2DOMBound({
+            left: 100,
+            right: 160,
+            top: 90,
+            bottom: 130,
+        }, fixture.scene, fixture.skeleton, fixture.worksheet, floatDomInfo, true)).toEqual({
+            left: 100,
+            right: 160,
+            top: 72,
+            bottom: 112,
+            absolute: {
+                left: false,
+                top: false,
+            },
+        });
+    });
+
     it('adds range and column header float doms to the canvas layer and removes them through their disposables', () => {
         const fixture = setup();
         disposables.push(fixture);
@@ -394,6 +486,7 @@ describe('SheetCanvasFloatDomManagerService', () => {
             initPosition: { startX: 0, startY: 0, endX: 0, endY: 0 },
             data: { label: 'Range order' },
             allowTransform: true,
+            eventPassThrough: true,
         }, {
             width: 80,
             height: 24,
@@ -454,11 +547,24 @@ describe('SheetCanvasFloatDomManagerService', () => {
             paintFirst: 'stroke',
             radius: 8,
         }));
+        findFloatDom(canvasFloatDomService, 'range-card')?.onPointerDown(new MouseEvent('pointerdown'));
+        findFloatDom(canvasFloatDomService, 'range-card')?.onPointerMove(new MouseEvent('pointermove'));
+        findFloatDom(canvasFloatDomService, 'range-card')?.onPointerUp(new MouseEvent('pointerup'));
+        findFloatDom(canvasFloatDomService, 'range-card')?.onWheel(new WheelEvent('wheel'));
         findFloatDom(canvasFloatDomService, 'header-card')?.onPointerDown(new MouseEvent('pointerdown'));
         findFloatDom(canvasFloatDomService, 'header-card')?.onPointerMove(new MouseEvent('pointermove'));
         findFloatDom(canvasFloatDomService, 'header-card')?.onPointerUp(new MouseEvent('pointerup'));
         findFloatDom(canvasFloatDomService, 'header-card')?.onWheel(new WheelEvent('wheel'));
-        expect((fixture.scene as unknown as TestRenderScene).canvasEvents).toEqual(['pointerdown', 'pointermove', 'pointerup', 'wheel']);
+        expect((fixture.scene as unknown as TestRenderScene).canvasEvents).toEqual([
+            'pointerdown',
+            'pointermove',
+            'pointerup',
+            'wheel',
+            'pointerdown',
+            'pointermove',
+            'pointerup',
+            'wheel',
+        ]);
 
         fixture.manager.updateFloatDomProps('test', 'sheet1', 'range-card', { fill: '#ff0000' });
         expect(fixture.manager.getFloatDomInfo('range-card')?.rect.fill).toBe('#ff0000');
@@ -536,11 +642,41 @@ describe('SheetCanvasFloatDomManagerService', () => {
             data: { label: 'Pinned note' },
             unitId: 'test',
         }));
+        findFloatDom(canvasFloatDomService, 'position-card')?.onPointerDown(new MouseEvent('pointerdown'));
+        findFloatDom(canvasFloatDomService, 'position-card')?.onPointerMove(new MouseEvent('pointermove'));
+        findFloatDom(canvasFloatDomService, 'position-card')?.onPointerUp(new MouseEvent('pointerup'));
+        findFloatDom(canvasFloatDomService, 'position-card')?.onWheel(new WheelEvent('wheel'));
+        expect((fixture.scene as unknown as TestRenderScene).canvasEvents).toEqual([
+            'pointerdown',
+            'pointermove',
+            'pointerup',
+            'wheel',
+        ]);
 
         const transformChanges: unknown[] = [];
         const transformDisposable = fixture.manager.transformChange$.subscribe((event) => {
             transformChanges.push(event);
         });
+        const positions: IFloatDomLayout[] = [];
+        const positionSubscription = findFloatDom(canvasFloatDomService, 'position-card')!.position$.subscribe((position) => {
+            positions.push(position);
+        });
+
+        fixture.manager.getFloatDomInfo('position-card')!.rect.transformByState({
+            left: 88,
+            top: 36,
+            width: 104,
+            height: 44,
+        });
+        expect(positions[positions.length - 1]).toEqual(expect.objectContaining({
+            startX: 58,
+            startY: 28,
+            endX: 162,
+            endY: 62,
+            width: 104,
+            height: 44,
+        }));
+
         await fixture.commandService.executeCommand(SetSheetDrawingCommand.id, {
             unitId: 'test',
             subUnitId: 'sheet1',
@@ -587,6 +723,7 @@ describe('SheetCanvasFloatDomManagerService', () => {
         expect(findFloatDom(canvasFloatDomService, 'position-card')).toBeUndefined();
 
         transformDisposable.unsubscribe();
+        positionSubscription.unsubscribe();
         disposable.unsubscribe();
     });
 

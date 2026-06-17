@@ -14,48 +14,86 @@
  * limitations under the License.
  */
 
-import type { ISheetFindReplaceHighlightShapeProps } from '../find-replace-highlight.shape';
-import { Rect } from '@univerjs/engine-render';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { SheetFindReplaceHighlightShape } from '../find-replace-highlight.shape';
 
-vi.mock('@univerjs/engine-render', async () => {
-    const actual = await vi.importActual<typeof import('@univerjs/engine-render')>('@univerjs/engine-render');
-    return {
-        ...actual,
-        Rect: {
-            drawWith: vi.fn(),
-        },
-        Shape: class {
-            width = 0;
-            height = 0;
-            constructor(_key?: string, _props?: unknown) {}
-            transformByState(state: { width?: number; height?: number }) {
-                if (state.width) this.width = state.width;
-                if (state.height) this.height = state.height;
-            }
-        },
-    };
-});
+class TestCanvasContext {
+    fillStyle = '';
+    strokeStyle = '';
+    lineWidth = 0;
+    lineCap = '';
+    lineDashOffset = 0;
+    lineJoin = '';
+    miterLimit = 0;
+    fillCount = 0;
+    strokeCount = 0;
+    readonly rects: Array<{ left: number; top: number; width: number; height: number }> = [];
+
+    save(): void {}
+
+    restore(): void {}
+
+    beginPath(): void {}
+
+    closePath(): void {}
+
+    setLineDash(): void {}
+
+    rect(left: number, top: number, width: number, height: number): void {
+        this.rects.push({ left, top, width, height });
+    }
+
+    fill(): void {
+        this.fillCount += 1;
+    }
+
+    stroke(): void {
+        this.strokeCount += 1;
+    }
+}
+
+function drawShape(shape: SheetFindReplaceHighlightShape, context: TestCanvasContext): void {
+    (shape as unknown as { _draw: (ctx: TestCanvasContext) => void })._draw(context);
+}
 
 describe('SheetFindReplaceHighlightShape', () => {
-    it('should update props and draw activated border', () => {
-        const shape = new SheetFindReplaceHighlightShape('k', {
+    it('draws a translucent search result highlight without a border by default', () => {
+        const shape = new SheetFindReplaceHighlightShape('result', {
             inHiddenRange: false,
             color: { r: 1, g: 2, b: 3 },
             width: 10,
             height: 20,
-        } satisfies ISheetFindReplaceHighlightShapeProps);
+        });
+        const context = new TestCanvasContext();
 
-        const drawableShape = shape as SheetFindReplaceHighlightShape & {
-            _draw(ctx: CanvasRenderingContext2D): void;
-        };
+        drawShape(shape, context);
 
-        shape.setShapeProps({ activated: true, width: 10, height: 20 });
-        drawableShape._draw({} as CanvasRenderingContext2D);
+        expect(context.rects).toEqual([{ left: 0, top: 0, width: 10, height: 20 }]);
+        expect(context.fillStyle).toBe('rgba(1, 2, 3, 0.35)');
+        expect(context.fillCount).toBe(1);
+        expect(context.strokeCount).toBe(0);
+    });
 
-        expect(Rect.drawWith).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
-            strokeWidth: 2,
-        }));
+    it('draws the current search result with a solid two-pixel border', () => {
+        const shape = new SheetFindReplaceHighlightShape('active-result', {
+            inHiddenRange: false,
+            color: { r: 4, g: 5, b: 6 },
+            width: 10,
+            height: 20,
+        });
+        shape.setShapeProps({
+            activated: true,
+            width: 30,
+            height: 40,
+        });
+        const context = new TestCanvasContext();
+
+        drawShape(shape, context);
+
+        expect(context.rects).toEqual([{ left: 0, top: 0, width: 30, height: 40 }]);
+        expect(context.fillStyle).toBe('rgba(4, 5, 6, 0.35)');
+        expect(context.strokeStyle).toBe('rgb(4, 5, 6)');
+        expect(context.lineWidth).toBe(2);
+        expect(context.strokeCount).toBe(1);
     });
 });

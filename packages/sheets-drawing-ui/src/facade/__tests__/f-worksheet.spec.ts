@@ -15,9 +15,12 @@
  */
 
 import type { Dependency, ICellData, IDrawingParam, IWorkbookData, Workbook } from '@univerjs/core';
+import type { IRender, Rect, Scene } from '@univerjs/engine-render';
 import type { ISheetFloatDom, ISheetImage } from '@univerjs/sheets-drawing';
 import {
+    Disposable,
     DrawingTypeEnum,
+    EventSubject,
     ICommandService,
     ILogService,
     ImageSourceType,
@@ -36,7 +39,7 @@ import {
 } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import { IDrawingManagerService, UniverDrawingPlugin } from '@univerjs/drawing';
-import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
+import { IRenderManagerService, RenderManagerService, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import {
     InsertSheetDrawingCommand,
@@ -50,8 +53,10 @@ import {
     IBatchSaveImagesService,
     SheetCanvasFloatDomManagerService,
 } from '@univerjs/sheets-drawing-ui';
+import { ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import sheetsEnUS from '@univerjs/sheets/locale/en-US';
 import { CanvasFloatDomService, ComponentManager } from '@univerjs/ui';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import '@univerjs/sheets/facade';
 import '@univerjs/sheets-drawing-ui/facade';
@@ -93,14 +98,17 @@ function createDrawingUITestBed(dependencies: Dependency[] = []) {
         override onStarting(): void {
             this._injector.get(IUndoRedoService);
 
-            ([
-                [IRenderManagerService, { useClass: RenderManagerService }],
+            const baseDependencies: Dependency[] = [
                 [ComponentManager],
                 [CanvasFloatDomService],
                 [IBatchSaveImagesService, { useClass: BatchSaveImagesService }],
                 [SheetCanvasFloatDomManagerService],
                 ...dependencies,
-            ] as Dependency[]).forEach((dependency) => this._injector.add(dependency));
+            ];
+            if (!hasDependency(dependencies, IRenderManagerService)) {
+                baseDependencies.unshift([IRenderManagerService, { useClass: RenderManagerService }]);
+            }
+            baseDependencies.forEach((dependency) => this._injector.add(dependency));
         }
     }
 
@@ -126,6 +134,171 @@ function createDrawingUITestBed(dependencies: Dependency[] = []) {
         injector,
         workbook,
     };
+}
+
+function hasDependency(dependencies: Dependency[], token: unknown): boolean {
+    for (const dependency of dependencies) {
+        if (Array.isArray(dependency) && dependency[0] === token) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+class TestRenderManagerService extends Disposable implements Partial<IRenderManagerService> {
+    private _render: IRender | null = null;
+    readonly createRender$ = new Subject<string>();
+    readonly created$ = new Subject<IRender>();
+    readonly disposed$ = new Subject<string>();
+
+    configure(render: IRender): void {
+        this._render = render;
+    }
+
+    getRenderById(): IRender | null {
+        return this._render;
+    }
+
+    getRenderUnitById(): IRender | null {
+        return this._render;
+    }
+
+    has(): boolean {
+        return this._render != null;
+    }
+
+    getRenderAll(): Map<string, IRender> {
+        const renderMap = new Map<string, IRender>();
+        if (this._render) {
+            renderMap.set(this._render.unitId, this._render);
+        }
+        return renderMap;
+    }
+}
+
+class TestSheetSkeletonManager {
+    readonly currentSkeleton$: BehaviorSubject<{ sheetId: string } | null>;
+
+    constructor(private readonly _skeleton: SpreadsheetSkeleton) {
+        this.currentSkeleton$ = new BehaviorSubject<{ sheetId: string } | null>({ sheetId: 'sheet1' });
+    }
+
+    getSkeletonParam() {
+        return {
+            sheetId: 'sheet1',
+            skeleton: this._skeleton,
+        };
+    }
+}
+
+class TestSheetSelectionRenderService {
+    getCellWithCoordByOffset(x: number, y: number) {
+        const column = Math.max(0, Math.floor(x / 72));
+        const row = Math.max(0, Math.floor(y / 24));
+        return {
+            actualColumn: column,
+            actualRow: row,
+            startColumn: column,
+            endColumn: column,
+            startRow: row,
+            endRow: row,
+            startX: column * 72,
+            endX: (column + 1) * 72,
+            startY: row * 24,
+            endY: (row + 1) * 24,
+            isMerged: false,
+            isMergedMainCell: false,
+        };
+    }
+}
+
+class TestRenderScene {
+    private readonly _objects = new Map<string, Rect>();
+    readonly onScrollAfter$ = new EventSubject();
+    private readonly _transformer = {
+        clearControlByIds: () => undefined,
+        clearSelectedObjects: () => undefined,
+        debounceRefreshControls: () => undefined,
+    };
+
+    getAncestorScale() {
+        return { scaleX: 1, scaleY: 1 };
+    }
+
+    getViewport() {
+        return {
+            left: 0,
+            top: 0,
+            right: 360,
+            bottom: 220,
+            viewportScrollX: 0,
+            viewportScrollY: 0,
+            onScrollAfter$: this.onScrollAfter$,
+        };
+    }
+
+    getMainViewport() {
+        return this.getViewport();
+    }
+
+    getTransformerByCreate() {
+        return this._transformer;
+    }
+
+    getTransformer() {
+        return this._transformer;
+    }
+
+    addObject(object: Rect) {
+        this._objects.set(object.oKey, object);
+    }
+
+    removeObject(object: Rect) {
+        this._objects.delete(object.oKey);
+    }
+
+    getObject(key: string) {
+        return this._objects.get(key);
+    }
+
+    attachTransformerTo() { }
+
+    detachTransformerFrom() { }
+}
+
+function createRender(skeleton: SpreadsheetSkeleton, scene: Scene): IRender {
+    const sheetSkeletonManager = new TestSheetSkeletonManager(skeleton);
+    const sheetSelectionRenderService = new TestSheetSelectionRenderService();
+    const canvasElement = document.createElement('div');
+    const activated$ = new BehaviorSubject(true);
+
+    return {
+        unitId: 'test',
+        type: UniverInstanceType.UNIVER_SHEET,
+        engine: {
+            clientRect$: new BehaviorSubject({ width: 360, height: 220 }),
+            getCanvasElement: () => canvasElement,
+        } as unknown as IRender['engine'],
+        scene,
+        mainComponent: null,
+        components: new Map(),
+        isMainScene: true,
+        render: { scene },
+        activated$,
+        with: (dependency: unknown) => {
+            if (dependency === SheetSkeletonManagerService) {
+                return sheetSkeletonManager;
+            }
+            if (dependency === ISheetSelectionRenderService) {
+                return sheetSelectionRenderService;
+            }
+            return null;
+        },
+        deactivate: () => activated$.next(false),
+        activate: () => activated$.next(true),
+        isDisposed: () => false,
+    } as unknown as IRender;
 }
 
 describe('sheets-drawing-ui facade', () => {
@@ -202,6 +375,156 @@ describe('sheets-drawing-ui facade', () => {
         expect(worksheet.batchUpdateFloatDoms([{ id: 'missing-dom', config: { data: { label: 'Ignored' } } }])).toBe(worksheet);
 
         worksheet.removeFloatDom('order-card');
+    });
+
+    it('adds, reads, updates, batch updates and disposes float doms through the worksheet facade', async () => {
+        univer.dispose();
+        const testBed = createDrawingUITestBed([
+            [IRenderManagerService, { useClass: TestRenderManagerService }],
+        ]);
+        univer = testBed.univer;
+        injector = testBed.injector;
+        univerAPI = FUniver.newAPI(injector);
+
+        const modelWorksheet = testBed.workbook.getActiveSheet();
+        const skeleton = injector.createInstance(
+            SpreadsheetSkeleton,
+            modelWorksheet,
+            testBed.workbook.getStyles()
+        ).calculate() as SpreadsheetSkeleton;
+        const renderManager = injector.get(IRenderManagerService) as unknown as TestRenderManagerService;
+        renderManager.configure(createRender(skeleton, new TestRenderScene() as unknown as Scene));
+        const sheetDrawingService = injector.get(ISheetDrawingService);
+        const worksheet = univerAPI.getActiveWorkbook()!.getActiveSheet();
+
+        const primary = worksheet.addFloatDomToPosition({
+            componentKey: 'OrderCard',
+            initPosition: {
+                startX: 72,
+                startY: 24,
+                endX: 172,
+                endY: 64,
+            },
+            data: { label: 'Draft order' },
+            allowTransform: true,
+        }, 'order-card')!;
+        const secondary = worksheet.addFloatDomToPosition({
+            componentKey: 'StatusCard',
+            initPosition: {
+                startX: 144,
+                startY: 48,
+                endX: 244,
+                endY: 88,
+            },
+            data: { label: 'Pending' },
+            allowTransform: true,
+        }, 'status-card')!;
+        await Promise.resolve();
+
+        expect(primary.id).toBe('order-card');
+        expect(secondary.id).toBe('status-card');
+        expect(worksheet.getFloatDomById('order-card')).toEqual(expect.objectContaining({
+            id: 'order-card',
+            componentKey: 'OrderCard',
+            allowTransform: true,
+            data: { label: 'Draft order' },
+            position: expect.objectContaining({
+                left: 72,
+                top: 24,
+                width: 100,
+                height: 40,
+            }),
+        }));
+
+        const allDoms = worksheet.getAllFloatDoms();
+        const allDomIds: string[] = [];
+        for (const dom of allDoms) {
+            allDomIds.push(dom.id);
+        }
+        expect(allDomIds).toEqual(['order-card', 'status-card']);
+
+        expect(worksheet.updateFloatDom('order-card', {
+            componentKey: 'OrderCardUpdated',
+            allowTransform: false,
+            data: { label: 'Approved' },
+            position: {
+                left: 90,
+                top: 36,
+                width: 120,
+                height: 50,
+            },
+        })).toBe(worksheet);
+        expect(sheetDrawingService.getDrawingByParam({
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            drawingId: 'order-card',
+        })).toEqual(expect.objectContaining({
+            componentKey: 'OrderCardUpdated',
+            allowTransform: false,
+            data: { label: 'Approved' },
+            transform: expect.objectContaining({
+                left: 90,
+                top: 36,
+                width: 120,
+                height: 50,
+            }),
+        }));
+
+        expect(worksheet.batchUpdateFloatDoms([
+            {
+                id: 'order-card',
+                config: {
+                    data: { label: 'Shipped' },
+                    position: {
+                        left: 100,
+                        top: 40,
+                        width: 130,
+                        height: 54,
+                    },
+                },
+            },
+            {
+                id: 'status-card',
+                config: {
+                    componentKey: 'StatusCardUpdated',
+                    data: { label: 'Done' },
+                    allowTransform: false,
+                },
+            },
+            {
+                id: 'missing-card',
+                config: {
+                    data: { label: 'Ignored' },
+                },
+            },
+        ])).toBe(worksheet);
+
+        expect(worksheet.getFloatDomById('order-card')).toEqual(expect.objectContaining({
+            componentKey: 'OrderCardUpdated',
+            data: { label: 'Shipped' },
+        }));
+        expect(sheetDrawingService.getDrawingByParam({
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            drawingId: 'order-card',
+        })).toEqual(expect.objectContaining({
+            transform: expect.objectContaining({
+                left: 100,
+                top: 40,
+                width: 130,
+                height: 54,
+            }),
+        }));
+        expect(worksheet.getFloatDomById('status-card')).toEqual(expect.objectContaining({
+            componentKey: 'StatusCardUpdated',
+            allowTransform: false,
+            data: { label: 'Done' },
+        }));
+
+        primary.dispose();
+        expect(worksheet.getFloatDomById('order-card')).toBeNull();
+        worksheet.removeFloatDom('status-card');
+        expect(worksheet.getAllFloatDoms()).toEqual([]);
     });
 
     it('saves cell images from range and worksheet selections', async () => {

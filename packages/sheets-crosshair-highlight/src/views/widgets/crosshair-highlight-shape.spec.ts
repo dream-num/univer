@@ -14,22 +14,37 @@
  * limitations under the License.
  */
 
-import { Rect } from '@univerjs/engine-render';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { SheetCrossHairHighlightShape } from './crosshair-highlight-shape';
 
-describe('SheetCrossHairHighlightShape', () => {
-    it('should set shape props and draw rectangle with rgba color', () => {
-        const drawKey = '_draw';
-        const drawSpy = vi.spyOn(Rect, 'drawWith').mockImplementation(() => undefined);
-        const emptyShape = new SheetCrossHairHighlightShape('shape-empty');
-        emptyShape.setShapeProps({
-            color: { r: 7, g: 8, b: 9 },
-            width: 1,
-            height: 1,
-        });
-        (emptyShape as unknown as Record<string, (ctx: unknown) => void>)[drawKey]({} as never);
+class TestCanvasContext {
+    fillStyle = '';
+    readonly rects: Array<{ left: number; top: number; width: number; height: number }> = [];
+    fillCount = 0;
 
+    save(): void {}
+
+    restore(): void {}
+
+    beginPath(): void {}
+
+    closePath(): void {}
+
+    rect(left: number, top: number, width: number, height: number): void {
+        this.rects.push({ left, top, width, height });
+    }
+
+    fill(): void {
+        this.fillCount += 1;
+    }
+}
+
+function drawShape(shape: SheetCrossHairHighlightShape, context: TestCanvasContext): void {
+    (shape as unknown as { _draw: (ctx: TestCanvasContext) => void })._draw(context);
+}
+
+describe('SheetCrossHairHighlightShape', () => {
+    it('draws the highlight rectangle with its configured rgba fill', () => {
         const shape = new SheetCrossHairHighlightShape('shape-1', {
             color: { r: 1, g: 2, b: 3, a: 0.4 },
             width: 20,
@@ -39,24 +54,27 @@ describe('SheetCrossHairHighlightShape', () => {
             zIndex: 1,
             evented: false,
         });
-
         shape.setShapeProps({ width: 30, height: 15 });
-        (shape as unknown as Record<string, (ctx: unknown) => void>)[drawKey]({} as never);
+        const context = new TestCanvasContext();
 
-        expect(drawSpy).toHaveBeenCalledWith(
-            {} as never,
-            expect.objectContaining({
-                width: shape.width,
-                height: shape.height,
-                fill: 'rgba(1, 2, 3, 0.4)',
-                strokeWidth: 0,
-            })
-        );
-        expect(drawSpy).toHaveBeenCalledWith(
-            {} as never,
-            expect.objectContaining({
-                fill: 'rgba(7, 8, 9, 0.5)',
-            })
-        );
+        drawShape(shape, context);
+
+        expect(context.rects).toEqual([{ left: 0, top: 0, width: 30, height: 15 }]);
+        expect(context.fillStyle).toBe('rgba(1, 2, 3, 0.4)');
+        expect(context.fillCount).toBe(1);
+    });
+
+    it('uses the default half opacity when the color has no alpha channel', () => {
+        const shape = new SheetCrossHairHighlightShape('shape-default-alpha');
+        shape.setShapeProps({
+            color: { r: 7, g: 8, b: 9 },
+            width: 1,
+            height: 1,
+        });
+        const context = new TestCanvasContext();
+
+        drawShape(shape, context);
+
+        expect(context.fillStyle).toBe('rgba(7, 8, 9, 0.5)');
     });
 });

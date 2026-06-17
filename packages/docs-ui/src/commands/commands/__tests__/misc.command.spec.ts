@@ -49,6 +49,7 @@ import {
     DocSkeletonManagerService,
     RichTextEditingMutation,
     SetTextSelectionsOperation,
+    UpdateTextCommand,
 } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 import { ISidebarService } from '@univerjs/ui';
@@ -70,7 +71,16 @@ import { DocOpenPageSettingCommand } from '../../operations/open-page-setting.op
 import { SetDocZoomRatioOperation } from '../../operations/set-doc-zoom-ratio.operation';
 import { AfterSpaceCommand, EnterCommand, TabCommand } from '../auto-format.command';
 import { BreakLineCommand } from '../break-line.command';
-import { DeleteCurrentParagraphCommand, DeleteLeftCommand, DeleteRightCommand, MergeTwoParagraphCommand, RemoveHorizontalLineCommand } from '../doc-delete.command';
+import { CutContentCommand } from '../clipboard.inner.command';
+import {
+    DeleteCurrentParagraphCommand,
+    DeleteCustomBlockCommand,
+    DeleteLeftCommand,
+    DeleteRightCommand,
+    getCursorWhenDelete,
+    MergeTwoParagraphCommand,
+    RemoveHorizontalLineCommand,
+} from '../doc-delete.command';
 import { CloseHeaderFooterCommand, CoreHeaderFooterCommand, OpenHeaderFooterPanelCommand } from '../doc-header-footer.command';
 import { HorizontalLineCommand, InsertHorizontalLineBellowCommand } from '../doc-horizontal-line.command';
 import { DocPageSetupCommand } from '../doc-page-setup.command';
@@ -259,6 +269,51 @@ function createDrawingModeDoc(): IDocumentData {
         },
         drawingsOrder: ['drawing-1'],
     } as unknown as IDocumentData;
+}
+
+function createInlineDrawingDoc(): IDocumentData {
+    const doc = createBaseDoc('A\bB\r\n');
+    return {
+        ...doc,
+        body: {
+            ...doc.body!,
+            customBlocks: [{
+                blockId: 'drawing-1',
+                startIndex: 1,
+                blockType: 'normal',
+            }],
+        },
+        drawings: {
+            'drawing-1': {
+                drawingId: 'drawing-1',
+                layoutType: PositionedObjectLayoutType.INLINE,
+                docTransform: {
+                    positionV: {
+                        relativeFrom: ObjectRelativeFromV.PARAGRAPH,
+                        posOffset: 0,
+                    },
+                },
+            },
+        },
+        drawingsOrder: ['drawing-1'],
+    } as unknown as IDocumentData;
+}
+
+function createCenteredEmptyParagraphDoc(): IDocumentData {
+    const doc = createBaseDoc('\r\n');
+    return {
+        ...doc,
+        body: {
+            ...doc.body!,
+            paragraphs: [{
+                paragraphId: 'para_center_empty',
+                startIndex: 0,
+                paragraphStyle: {
+                    horizontalAlign: HorizontalAlign.CENTER,
+                },
+            }],
+        },
+    };
 }
 
 function createHeaderFooterDoc(): IDocumentData {
@@ -933,6 +988,40 @@ describe('misc document commands', () => {
         expect(getBody()?.dataStream).toBe('AC\r\n');
     });
 
+    it('resets a centered empty paragraph before deleting surrounding content', async () => {
+        ({ univer, get } = createCommandTestBed(createCenteredEmptyParagraphDoc()));
+        commandService = get(ICommandService);
+        commandService.registerCommand(DeleteLeftCommand);
+        commandService.registerCommand(UpdateTextCommand);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+        setCollapsedSelection(0);
+
+        const skeletonManager = get(DocSkeletonManagerService) as unknown as { getSkeleton: () => unknown };
+        skeletonManager.getSkeleton = () => useLinearSkeleton('\r\n');
+
+        expect(await commandService.executeCommand(DeleteLeftCommand.id)).toBe(true);
+        await awaitTime(0);
+
+        expect(getBody()?.paragraphs?.[0].paragraphStyle?.horizontalAlign).toBe(HorizontalAlign.LEFT);
+    });
+
+    it('removes a horizontal line when Backspace is pressed after the decorated paragraph break', async () => {
+        ({ univer, get } = createCommandTestBed(createHorizontalLineDoc()));
+        commandService = get(ICommandService);
+        commandService.registerCommand(DeleteLeftCommand);
+        commandService.registerCommand(RemoveHorizontalLineCommand);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+        setCollapsedSelection(6);
+
+        const skeletonManager = get(DocSkeletonManagerService) as unknown as { getSkeleton: () => unknown };
+        skeletonManager.getSkeleton = () => useLinearSkeleton('Title\rBody\r\n');
+
+        expect(await commandService.executeCommand(DeleteLeftCommand.id)).toBe(true);
+        await awaitTime(0);
+
+        expect(getBody()?.paragraphs?.[0].paragraphStyle?.borderBottom).toBeUndefined();
+    });
+
     it('removes the character after the cursor when Delete is pressed inside text', async () => {
         ({ univer, get } = createCommandTestBed(createBaseDoc('ABC\r\n')));
         commandService = get(ICommandService);
@@ -948,6 +1037,128 @@ describe('misc document commands', () => {
         await awaitTime(0);
 
         expect(getBody()?.dataStream).toBe('AC\r\n');
+    });
+
+    it('merges with the next paragraph when Delete is pressed on a paragraph break', async () => {
+        ({ univer, get } = createCommandTestBed(createMultiParagraphDoc()));
+        commandService = get(ICommandService);
+        commandService.registerCommand(DeleteRightCommand);
+        commandService.registerCommand(MergeTwoParagraphCommand);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+        setCollapsedSelection(5);
+
+        const skeletonManager = get(DocSkeletonManagerService) as unknown as { getSkeleton: () => unknown };
+        skeletonManager.getSkeleton = () => useLinearSkeleton('Title\rBody\r\n');
+
+        expect(await commandService.executeCommand(DeleteRightCommand.id)).toBe(true);
+        await awaitTime(0);
+
+        expect(getBody()?.dataStream).toBe('TitleBody\r\n');
+        expect(getBody()?.paragraphs).toHaveLength(1);
+    });
+
+    it('cuts the selected content when Backspace is pressed on a non-collapsed text range', async () => {
+        ({ univer, get } = createCommandTestBed(createBaseDoc('ABCD\r\n')));
+        commandService = get(ICommandService);
+        commandService.registerCommand(DeleteLeftCommand);
+        commandService.registerCommand(CutContentCommand);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+        setCollapsedSelection(1, 3);
+
+        const skeletonManager = get(DocSkeletonManagerService) as unknown as { getSkeleton: () => unknown };
+        skeletonManager.getSkeleton = () => useLinearSkeleton('ABCD\r\n');
+
+        expect(await commandService.executeCommand(DeleteLeftCommand.id)).toBe(true);
+        await awaitTime(0);
+
+        expect(getBody()?.dataStream).toBe('AD\r\n');
+    });
+
+    it('removes an inline drawing when Backspace is pressed after its object marker', async () => {
+        ({ univer, get } = createCommandTestBed(createInlineDrawingDoc()));
+        commandService = get(ICommandService);
+        commandService.registerCommand(DeleteLeftCommand);
+        commandService.registerCommand(DeleteCustomBlockCommand);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+        setCollapsedSelection(2);
+
+        const skeletonManager = get(DocSkeletonManagerService) as unknown as { getSkeleton: () => unknown };
+        skeletonManager.getSkeleton = () => ({
+            findNodeByCharIndex(index: number) {
+                const content = 'A\bB\r\n'[index];
+                if (content == null) {
+                    return null;
+                }
+
+                return {
+                    content,
+                    count: 1,
+                    streamType: content,
+                    drawingId: content === '\b' ? 'drawing-1' : undefined,
+                };
+            },
+        });
+
+        expect(await commandService.executeCommand(DeleteLeftCommand.id)).toBe(true);
+        await awaitTime(0);
+
+        expect(getBody()?.dataStream).toBe('AB\r\n');
+        expect(getDoc()?.getSnapshot().drawings?.['drawing-1']).toBeUndefined();
+    });
+
+    it('removes an inline drawing block and its drawing record from the document', async () => {
+        ({ univer, get } = createCommandTestBed(createInlineDrawingDoc()));
+        commandService = get(ICommandService);
+        commandService.registerCommand(DeleteCustomBlockCommand);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+        setCollapsedSelection(2);
+
+        expect(await commandService.executeCommand(DeleteCustomBlockCommand.id, {
+            unitId: 'test-doc',
+            drawingId: 'drawing-1',
+            direction: DeleteDirection.LEFT,
+            range: {
+                startOffset: 2,
+                endOffset: 2,
+                collapsed: true,
+                segmentId: '',
+            },
+        })).toBe(true);
+        await awaitTime(0);
+
+        expect(getBody()?.dataStream).toBe('AB\r\n');
+        expect(getDoc()?.getSnapshot().drawings?.['drawing-1']).toBeUndefined();
+        expect(getDoc()?.getSnapshot().drawingsOrder).toEqual([]);
+    });
+
+    it('keeps the cursor near the deleted table area when table selections are cut', () => {
+        expect(getCursorWhenDelete(null, [{
+            startOffset: 20,
+            endOffset: 30,
+            collapsed: false,
+            startRow: 0,
+            startColumn: 0,
+            endRow: 2,
+            endColumn: 2,
+            tableId: 'table-1',
+            spanEntireRow: false,
+            spanEntireColumn: false,
+            spanEntireTable: true,
+        }])).toBe(17);
+
+        expect(getCursorWhenDelete([{ startOffset: 30, endOffset: 34, collapsed: false }], [{
+            startOffset: 20,
+            endOffset: 26,
+            collapsed: false,
+            startRow: 1,
+            startColumn: 0,
+            endRow: 1,
+            endColumn: 2,
+            tableId: 'table-1',
+            spanEntireRow: true,
+            spanEntireColumn: false,
+            spanEntireTable: false,
+        }])).toBe(14);
     });
 
     it('aligns selected paragraphs through the wrapper and toggles an existing alignment', async () => {
@@ -1561,7 +1772,15 @@ describe('misc document commands', () => {
     });
 
     it('inserts IME composition text at the cached active range', async () => {
-        ({ univer, get } = createCommandTestBed(createBaseDoc('AB\r\n')));
+        const doc = createBaseDoc('AB\r\n');
+        doc.body!.customDecorations = [{
+            startIndex: 0,
+            endIndex: 1,
+            id: 'mention-1',
+            type: CustomRangeType.MENTION,
+            properties: {},
+        }] as never;
+        ({ univer, get } = createCommandTestBed(doc));
         commandService = get(ICommandService);
         commandService.registerCommand(IMEInputCommand);
         commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
@@ -1584,6 +1803,10 @@ describe('misc document commands', () => {
         await awaitTime(0);
 
         expect(getBody()?.dataStream).toBe('A你B\r\n');
+        expect(getBody()?.customDecorations?.[0]).toEqual(expect.objectContaining({
+            startIndex: 0,
+            endIndex: 2,
+        }));
         const cache = imeInputManagerService.getUndoRedoMutationParamsCache();
         expect(cache.undoCache).toHaveLength(1);
         expect(cache.redoCache[0].isCompositionEnd).toBe(true);

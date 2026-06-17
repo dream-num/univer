@@ -63,6 +63,7 @@ export default function createConfig(options?: any) {
                     'packages/protocol/**',
                     'packages/slides/**',
                     'packages/slides-ui/**',
+                    '**/src/menu/**',
                     '**/src/plugin.ts',
                     '**/src/mobile-plugin.ts',
                     '**/src/config/config.ts',

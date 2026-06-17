@@ -14,19 +14,92 @@
  * limitations under the License.
  */
 
-import { describe, expect, it, vi } from 'vitest';
+import {
+    CommandService,
+    ConfigService,
+    ContextService,
+    DesktopLogService,
+    ICommandService,
+    IConfigService,
+    IContextService,
+    ILogService,
+    Injector,
+    IUniverInstanceService,
+    LogLevel,
+} from '@univerjs/core';
+import { ILocalFileService } from '@univerjs/ui';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { ActionRecorderService } from '../../services/action-recorder.service';
 import { CloseRecordPanelOperation, OpenRecordPanelOperation } from './operation';
 
-describe('action-recorder operations', () => {
-    it('should toggle panel open/close', () => {
-        const togglePanel = vi.fn();
-        const accessor = {
-            get: vi.fn(() => ({ togglePanel })),
-        };
+class TestLocalFileService implements ILocalFileService {
+    static downloads = 0;
 
-        expect(OpenRecordPanelOperation.handler(accessor as never, undefined as never)).toBe(true);
-        expect(CloseRecordPanelOperation.handler(accessor as never, undefined as never)).toBe(true);
-        expect(togglePanel).toHaveBeenCalledWith(true);
-        expect(togglePanel).toHaveBeenCalledWith(false);
+    static reset() {
+        this.downloads = 0;
+    }
+
+    openFile(): Promise<File[]> {
+        return Promise.resolve([]);
+    }
+
+    downloadFile(): void {
+        TestLocalFileService.downloads += 1;
+    }
+}
+
+class TestFocusedUnit {
+    getUnitId() {
+        return 'focused-workbook';
+    }
+}
+
+class TestUniverInstanceService {
+    private readonly _focusedUnit = new TestFocusedUnit();
+
+    getFocusedUnit() {
+        return this._focusedUnit;
+    }
+}
+
+function createOperationTestBed() {
+    const injector = new Injector();
+    injector.add([ICommandService, { useClass: CommandService }]);
+    injector.add([ILogService, { useClass: DesktopLogService }]);
+    injector.add([IContextService, { useClass: ContextService }]);
+    injector.add([IConfigService, { useClass: ConfigService }]);
+    injector.add([ILocalFileService, { useClass: TestLocalFileService }]);
+    injector.add([IUniverInstanceService, { useClass: TestUniverInstanceService as never }]);
+    injector.add([ActionRecorderService]);
+
+    injector.get(ILogService).setLogLevel(LogLevel.SILENT);
+
+    const commandService = injector.get(ICommandService);
+    commandService.registerCommand(OpenRecordPanelOperation);
+    commandService.registerCommand(CloseRecordPanelOperation);
+
+    return {
+        commandService,
+        recorderService: injector.get(ActionRecorderService),
+    };
+}
+
+describe('action-recorder panel operations', () => {
+    beforeEach(() => {
+        TestLocalFileService.reset();
+    });
+
+    it('opens the record panel and closes an active recording session without exporting', async () => {
+        const { commandService, recorderService } = createOperationTestBed();
+        const panelStates: boolean[] = [];
+        recorderService.panelOpened$.subscribe((state) => panelStates.push(state));
+
+        await commandService.executeCommand(OpenRecordPanelOperation.id);
+        recorderService.startRecording();
+        await commandService.executeCommand(CloseRecordPanelOperation.id);
+
+        expect(panelStates).toEqual([false, true, false]);
+        expect(recorderService.recording).toBe(false);
+        expect(TestLocalFileService.downloads).toBe(0);
     });
 });

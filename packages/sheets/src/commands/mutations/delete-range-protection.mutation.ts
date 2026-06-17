@@ -29,7 +29,13 @@ export interface IDeleteRangeProtectionMutationParams {
 };
 export const FactoryDeleteRangeProtectionMutation = (accessor: IAccessor, param: IDeleteRangeProtectionMutationParams) => {
     const selectionProtectionRuleModel = accessor.get(RangeProtectionRuleModel);
-    const rules = param.ruleIds.map((id) => selectionProtectionRuleModel.getRule(param.unitId, param.subUnitId, id)).filter((rule) => !!rule) as IRangeProtectionRule[];
+    const rules: IRangeProtectionRule[] = [];
+    for (let i = 0; i < param.ruleIds.length; i++) {
+        const rule = selectionProtectionRuleModel.getRule(param.unitId, param.subUnitId, param.ruleIds[i]);
+        if (rule) {
+            rules.push(rule);
+        }
+    }
     const result: IMutationInfo<Omit<IAddRangeProtectionMutationParams, 'name'>> = { id: AddRangeProtectionMutation.id, params: { subUnitId: param.subUnitId, unitId: param.unitId, rules } };
     return result;
 };
@@ -39,9 +45,9 @@ export const DeleteRangeProtectionMutation: IMutation<IDeleteRangeProtectionMuta
     handler: (accessor, params) => {
         const { unitId, subUnitId, ruleIds } = params;
         const selectionProtectionRuleModel = accessor.get(RangeProtectionRuleModel);
-        ruleIds.forEach((id) => {
-            selectionProtectionRuleModel.deleteRule(unitId, subUnitId, id);
-        });
+        for (let i = 0; i < ruleIds.length; i++) {
+            selectionProtectionRuleModel.deleteRule(unitId, subUnitId, ruleIds[i]);
+        }
         return true;
     },
 };

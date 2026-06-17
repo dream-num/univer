@@ -19,14 +19,15 @@ import { ObjectMatrix, Range } from '@univerjs/core';
 
 export function getRangesHeight(ranges: IRange[], worksheet: Worksheet) {
     const cellHeights = new ObjectMatrix<number>();
-    ranges.map((range) => Range.transformRange(range, worksheet)).forEach((range) => {
+    for (let i = 0; i < ranges.length; i++) {
+        const range = Range.transformRange(ranges[i], worksheet);
         Range.foreach(range, (row, col) => {
             const cellHeight = worksheet.getCellHeight(row, col);
             if (cellHeight) {
                 cellHeights.setValue(row, col, cellHeight);
             }
         });
-    });
+    }
 
     return cellHeights;
 }

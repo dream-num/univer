@@ -342,12 +342,19 @@ function normalizeAttachmentValue(value: unknown): Record<string, unknown>[] {
         return [];
     }
     const values = Array.isArray(value) ? value : [value];
-    return values.map((item, index) => {
+    const attachments: Record<string, unknown>[] = [];
+    for (let i = 0; i < values.length; i++) {
+        const item = values[i];
         if (item && typeof item === 'object') {
-            return { ...(item as Record<string, unknown>) };
+            const attachment = { ...(item as Record<string, unknown>) };
+            if (Object.keys(attachment).length > 0) {
+                attachments.push(attachment);
+            }
+            continue;
         }
-        return { id: `attachment-${index}`, name: String(item) };
-    }).filter((attachment) => Object.keys(attachment).length > 0);
+        attachments.push({ id: `attachment-${i}`, name: String(item) });
+    }
+    return attachments;
 }
 
 function shouldRefreshCellDataFromRecord(cell: IBaseCellData, field: IFieldSnapshot | undefined, value: unknown): boolean {
@@ -368,10 +375,24 @@ function normalizeListValue(value: unknown): string[] {
     if (value == null || value === '') {
         return [];
     }
+    const result: string[] = [];
     if (Array.isArray(value)) {
-        return value.map((item) => primitiveText(item)).filter(Boolean);
+        for (let i = 0; i < value.length; i++) {
+            const item = primitiveText(value[i]);
+            if (item) {
+                result.push(item);
+            }
+        }
+        return result;
     }
-    return String(value).split(',').map((item) => item.trim()).filter(Boolean);
+    const items = String(value).split(',');
+    for (let i = 0; i < items.length; i++) {
+        const item = items[i].trim();
+        if (item) {
+            result.push(item);
+        }
+    }
+    return result;
 }
 
 function primitiveText(value: unknown): string {

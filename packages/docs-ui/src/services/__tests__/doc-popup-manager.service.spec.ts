@@ -15,7 +15,9 @@
  */
 
 import type { IPopup } from '@univerjs/ui';
-import { EventSubject } from '@univerjs/core';
+import { EventSubject, ICommandService, Injector, IUniverInstanceService } from '@univerjs/core';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { ICanvasPopupService } from '@univerjs/ui';
 import { describe, expect, it, vi } from 'vitest';
 import { DocCanvasPopManagerService } from '../doc-popup-manager.service';
 
@@ -26,39 +28,49 @@ describe('DocCanvasPopManagerService', () => {
         const onScrollAfter$ = new EventSubject();
         let popup: IPopup | undefined;
         const removePopup = vi.fn();
-        const service = new DocCanvasPopManagerService(
-            {
-                addPopup: vi.fn((param: IPopup) => {
-                    popup = param;
-                    return 'popup-1';
-                }),
-                removePopup,
-                activePopupId: 'other-popup',
-            } as never,
-            {
-                getRenderById: () => ({
-                    engine: {
-                        getCanvasElement: () => ({
-                            getBoundingClientRect: () => ({ left: 10, top: 20, width: 1000 }),
-                            style: { width: '1000px' },
-                        }),
-                    },
-                    scene: {
-                        getAncestorScale: () => ({ scaleX: scale, scaleY: scale }),
-                        getViewport: () => ({
-                            onScrollAfter$,
-                            viewportScrollX: 0,
-                            viewportScrollY: 0,
-                        }),
-                        onTransformChange$,
-                    },
-                }),
-            } as never,
-            {} as never,
-            {
-                onCommandExecuted: vi.fn(() => ({ dispose: vi.fn() })),
-            } as never
-        );
+        class TestCanvasPopupService {
+            activePopupId = 'other-popup';
+            addPopup = vi.fn((param: IPopup) => {
+                popup = param;
+                return 'popup-1';
+            });
+
+            removePopup = removePopup;
+        }
+
+        class TestRenderManagerService {
+            getRenderById = () => ({
+                engine: {
+                    getCanvasElement: () => ({
+                        getBoundingClientRect: () => ({ left: 10, top: 20, width: 1000 }),
+                        style: { width: '1000px' },
+                    }),
+                },
+                scene: {
+                    getAncestorScale: () => ({ scaleX: scale, scaleY: scale }),
+                    getViewport: () => ({
+                        onScrollAfter$,
+                        viewportScrollX: 0,
+                        viewportScrollY: 0,
+                    }),
+                    onTransformChange$,
+                },
+            });
+        }
+
+        class TestUniverInstanceService {}
+
+        class TestCommandService {
+            onCommandExecuted = vi.fn(() => ({ dispose: vi.fn() }));
+        }
+
+        const injector = new Injector();
+        injector.add([ICanvasPopupService, { useClass: TestCanvasPopupService as never }]);
+        injector.add([IRenderManagerService, { useClass: TestRenderManagerService as never }]);
+        injector.add([IUniverInstanceService, { useClass: TestUniverInstanceService }]);
+        injector.add([ICommandService, { useClass: TestCommandService as never }]);
+        injector.add([DocCanvasPopManagerService]);
+        const service = injector.get(DocCanvasPopManagerService);
 
         service.attachPopupToRect({ left: 10, right: 110, top: 20, bottom: 40 }, { componentKey: 'test' }, 'doc-1');
 

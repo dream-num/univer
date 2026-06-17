@@ -15,8 +15,9 @@
  */
 
 import type { SocketBodyType } from '../web-socket.service';
+import { Injector } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { WebSocketService } from '../web-socket.service';
+import { ISocketService, WebSocketService } from '../web-socket.service';
 
 type SocketEventName = 'open' | 'close' | 'error' | 'message';
 
@@ -58,6 +59,12 @@ class FakeWebSocket {
 describe('WebSocketService', () => {
     const originalWebSocket = globalThis.WebSocket;
 
+    function createService() {
+        const injector = new Injector();
+        injector.add([ISocketService, { useClass: WebSocketService }]);
+        return injector.get(ISocketService) as WebSocketService;
+    }
+
     beforeEach(() => {
         FakeWebSocket.instances = [];
         vi.stubGlobal('WebSocket', FakeWebSocket as unknown as typeof WebSocket);
@@ -69,7 +76,7 @@ describe('WebSocketService', () => {
     });
 
     it('creates sockets, forwards events, and removes listeners on close', () => {
-        const service = new WebSocketService();
+        const service = createService();
         const socket = service.createSocket('wss://example.com/socket');
 
         expect(socket).not.toBeNull();
@@ -128,7 +135,7 @@ describe('WebSocketService', () => {
             }
         } as unknown as typeof WebSocket);
 
-        const service = new WebSocketService();
+        const service = createService();
 
         expect(service.createSocket('wss://example.com/fail')).toBeNull();
         expect(errorSpy).toHaveBeenCalled();

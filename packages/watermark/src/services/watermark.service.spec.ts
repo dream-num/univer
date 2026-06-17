@@ -14,20 +14,30 @@
  * limitations under the License.
  */
 
+import { ILocalStorageService, Injector } from '@univerjs/core';
 import { UNIVER_WATERMARK_STORAGE_KEY } from '@univerjs/engine-render';
 import { describe, expect, it, vi } from 'vitest';
 import { WatermarkService } from './watermark.service';
 
+const getItem = vi.fn(async () => ({ type: 'text' }));
+const setItem = vi.fn();
+const removeItem = vi.fn();
+
+class TestLocalStorage {
+    getItem = getItem;
+    setItem = setItem;
+    removeItem = removeItem;
+}
+
 describe('WatermarkService', () => {
     it('should get/update/delete/refresh and dispose', async () => {
-        const getItem = vi.fn(async () => ({ type: 'text' }));
-        const setItem = vi.fn();
-        const removeItem = vi.fn();
-        const service = new WatermarkService({
-            getItem,
-            setItem,
-            removeItem,
-        } as never);
+        getItem.mockClear();
+        setItem.mockClear();
+        removeItem.mockClear();
+        const injector = new Injector();
+        injector.add([ILocalStorageService, { useClass: TestLocalStorage as never }]);
+        injector.add([WatermarkService]);
+        const service = injector.get(WatermarkService);
 
         await expect(service.getWatermarkConfig()).resolves.toEqual({ type: 'text' });
         expect(getItem).toHaveBeenCalledWith(UNIVER_WATERMARK_STORAGE_KEY);

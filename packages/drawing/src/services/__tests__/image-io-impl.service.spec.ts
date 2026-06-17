@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ImageSourceType, ImageUploadStatusType } from '@univerjs/core';
+import { ImageSourceType, ImageUploadStatusType, Injector } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { getDrawingImageAllowSize } from '../../basics/config';
 import { ImageIoService } from '../image-io-impl.service';
@@ -61,7 +61,9 @@ describe('ImageIoService', () => {
     let service: ImageIoService;
 
     beforeEach(() => {
-        service = new ImageIoService();
+        const injector = new Injector();
+        injector.add([ImageIoService]);
+        service = injector.get(ImageIoService);
         vi.stubGlobal('Image', MockImage);
     });
 
@@ -100,6 +102,7 @@ describe('ImageIoService', () => {
         service.setWaitCount(1);
         await expect(service.saveImage(new File(['abc'], 'a.txt', { type: 'text/plain' }))).rejects.toThrow(ImageUploadStatusType.ERROR_IMAGE_TYPE);
 
+        vi.stubGlobal('FileReader', SuccessFileReader);
         service.setWaitCount(1);
         await expect(service.saveImage(new File(['abc'], 'a.png', { type: 'image/png' }))).resolves.toMatchObject({
             source: expect.any(String),

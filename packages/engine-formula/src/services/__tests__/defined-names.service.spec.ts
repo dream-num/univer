@@ -14,19 +14,25 @@
  * limitations under the License.
  */
 
+import { Injector, IUniverInstanceService } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
-import { DefinedNamesService } from '../defined-names.service';
+import { DefinedNamesService, IDefinedNamesService } from '../defined-names.service';
+
+const worksheet = { id: 'sheet-a' };
+
+class TestUniverInstanceService {
+    getUnit() {
+        return {
+            getSheetBySheetName: (sheetName: string) => (sheetName === 'Sheet1' ? worksheet : null),
+        };
+    }
+}
 
 function createDefinedNamesService() {
-    const worksheet = { id: 'sheet-a' };
-    const workbook = {
-        getSheetBySheetName: (sheetName: string) => (sheetName === 'Sheet1' ? worksheet : null),
-    };
-    const univerInstanceService = {
-        getUnit: () => workbook,
-    };
-
-    const service = new DefinedNamesService(univerInstanceService as never);
+    const injector = new Injector();
+    injector.add([IUniverInstanceService, { useClass: TestUniverInstanceService as never }]);
+    injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
+    const service = injector.get(IDefinedNamesService);
     return {
         service,
         worksheet,

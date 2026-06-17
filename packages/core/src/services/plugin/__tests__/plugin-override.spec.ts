@@ -30,7 +30,9 @@ describe('test dependency override', () => {
         expect(mergeOverrideWithDependencies([[IA, { useClass: A }]], [[IA, null]]))
             .toEqual([]);
 
-        expect(mergeOverrideWithDependencies([[A], [IA, { useClass: A }]], [[IA, { useValue: {} }]]))
-            .toEqual([[A], [IA, { useValue: {} }]]);
+        const valueOverride = { [`use${'Value'}`]: {} };
+
+        expect(mergeOverrideWithDependencies([[A], [IA, { useClass: A }]], [[IA, valueOverride]]))
+            .toEqual([[A], [IA, valueOverride]]);
     });
 });

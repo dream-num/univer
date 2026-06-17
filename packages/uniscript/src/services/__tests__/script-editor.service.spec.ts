@@ -26,11 +26,11 @@ describe('ScriptEditorService', () => {
         vi.stubGlobal('window', globalThis);
         Reflect.deleteProperty(window, 'MonacoEnvironment');
         const injector = new Injector();
-        injector.add([IConfigService, {
-            useValue: {
-                getConfig: (key: string) => key === UNISCRIPT_PLUGIN_CONFIG_KEY ? { getWorkerUrl: () => 'worker.js' } : undefined,
-            } as unknown as IConfigService,
-        }]);
+        class TestConfigService {
+            getConfig = (key: string) => key === UNISCRIPT_PLUGIN_CONFIG_KEY ? { getWorkerUrl: () => 'worker.js' } : undefined;
+        }
+
+        injector.add([IConfigService, { useClass: TestConfigService as never }]);
         injector.add([ScriptEditorService]);
         service = injector.get(ScriptEditorService);
     });

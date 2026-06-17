@@ -15,11 +15,11 @@
  */
 
 import type { FindModel, IFindMatch } from '../find-replace.service';
-import { awaitTime } from '@univerjs/core';
+import { awaitTime, ICommandService, IContextService, Injector, IUniverInstanceService } from '@univerjs/core';
 
 import { Subject } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { FindBy, FindDirection, FindReplaceModel, FindReplaceService, FindScope } from '../find-replace.service';
+import { FindBy, FindDirection, FindReplaceService, FindScope } from '../find-replace.service';
 
 describe('FindReplaceService', () => {
     beforeEach(() => {
@@ -27,17 +27,22 @@ describe('FindReplaceService', () => {
     });
 
     it('should start session and move to next match', async () => {
-        const contextService = { setContextValue: vi.fn() };
+        const setContextValue = vi.fn();
 
         const focused$ = new Subject<any>();
-        const univerInstanceService = {
-            getFocusedUnit: vi.fn(() => ({ getUnitId: () => 'u1' })),
-            focused$,
-        };
+        const focusedStream$ = focused$;
+        class TestUniverInstanceService {
+            focused$ = focusedStream$;
+            getFocusedUnit = vi.fn(() => ({ getUnitId: () => 'u1' }));
+        }
 
-        const commandService = {
-            onCommandExecuted: vi.fn(() => ({ dispose: vi.fn() })),
-        };
+        class TestCommandService {
+            onCommandExecuted = vi.fn(() => ({ dispose: vi.fn() }));
+        }
+
+        class TestContextService {
+            setContextValue = setContextValue;
+        }
 
         const matchesUpdate$ = new Subject<IFindMatch[]>();
         const activelyChangingMatch$ = new Subject<IFindMatch>();
@@ -62,13 +67,12 @@ describe('FindReplaceService', () => {
             terminate: vi.fn(),
         };
 
-        const injector = {
-            createInstance: vi.fn((_cls: any, _state: any, _providers: any) => {
-                return new FindReplaceModel(_state, _providers, univerInstanceService as any, commandService as any);
-            }),
-        };
-
-        const service = new FindReplaceService(injector as any, contextService as any);
+        const injector = new Injector();
+        injector.add([IUniverInstanceService, { useClass: TestUniverInstanceService as never }]);
+        injector.add([ICommandService, { useClass: TestCommandService as never }]);
+        injector.add([IContextService, { useClass: TestContextService as never }]);
+        injector.add([FindReplaceService]);
+        const service = injector.get(FindReplaceService);
         service.registerFindReplaceProvider(provider as any);
         expect(service.start(false)).toBe(true);
 

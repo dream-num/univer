@@ -14,13 +14,24 @@
  * limitations under the License.
  */
 
+import { Injector } from '@univerjs/core';
+import { ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
+import { ISidebarService } from '@univerjs/ui';
 import { describe, expect, it } from 'vitest';
 
 import { DocThreadCommentService } from '../doc-thread-comment.service';
 
+class TestSidebarService {}
+
+class TestThreadCommentPanelService {}
+
 describe('DocThreadCommentService', () => {
     it('should track adding comment lifecycle', () => {
-        const service = new DocThreadCommentService({} as any, {} as any);
+        const injector = new Injector();
+        injector.add([ISidebarService, { useClass: TestSidebarService }]);
+        injector.add([ThreadCommentPanelService, { useClass: TestThreadCommentPanelService }]);
+        injector.add([DocThreadCommentService]);
+        const service = injector.get(DocThreadCommentService);
 
         expect(service.addingComment).toBeUndefined();
 

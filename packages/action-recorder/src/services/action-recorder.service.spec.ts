@@ -14,33 +14,58 @@
  * limitations under the License.
  */
 
-import { CommandType } from '@univerjs/core';
+import {
+    CommandService,
+    CommandType,
+    ConfigService,
+    ContextService,
+    DesktopLogService,
+    ICommandService,
+    IConfigService,
+    IContextService,
+    ILogService,
+    Injector,
+    IUniverInstanceService,
+} from '@univerjs/core';
 import { SetSelectionsOperation } from '@univerjs/sheets';
-import { describe, expect, it, vi } from 'vitest';
+import { DesktopLocalFileService, ILocalFileService } from '@univerjs/ui';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ActionRecorderService } from './action-recorder.service';
 
-describe('ActionRecorderService', () => {
-    it('should record commands, replace selection entries and complete/stop', () => {
-        let commandCallback: ((commandInfo: { id: string; type: CommandType; params?: Record<string, unknown> }) => void) | undefined;
-        const recorderDisposable = { dispose: vi.fn() };
-        const onCommandExecuted = vi.fn((callback: typeof commandCallback) => {
-            commandCallback = callback;
-            return recorderDisposable;
-        });
+class TestUniverInstanceService {
+    getFocusedUnit() {
+        return { getUnitId: () => 'unit-1' };
+    }
 
-        const downloadFile = vi.fn();
-        const logError = vi.fn();
-        const service = new ActionRecorderService(
-            { onCommandExecuted } as never,
-            { error: logError } as never,
-            { downloadFile } as never,
-            {
-                getFocusedUnit: vi.fn(() => ({ getUnitId: () => 'unit-1' })),
-                getUnit: vi.fn(() => ({
-                    getSheetBySheetId: vi.fn(() => ({ getName: () => 'Sheet-A' })),
-                })),
-            } as never
-        );
+    getUnit() {
+        return {
+            getSheetBySheetId: () => ({ getName: () => 'Sheet-A' }),
+        };
+    }
+}
+
+describe('ActionRecorderService', () => {
+    afterEach(() => {
+        vi.unstubAllGlobals();
+    });
+
+    it('should record commands, replace selection entries and complete/stop', () => {
+        const link = { click: vi.fn(), download: '', href: '' };
+        vi.stubGlobal('document', { createElement: () => link });
+        vi.stubGlobal('window', { URL: { createObjectURL: () => 'blob:recording' } });
+
+        const injector = new Injector();
+        injector.add([ICommandService, { useClass: CommandService }]);
+        injector.add([ILogService, { useClass: DesktopLogService }]);
+        injector.add([IContextService, { useClass: ContextService }]);
+        injector.add([IConfigService, { useClass: ConfigService }]);
+        injector.add([ILocalFileService, { useClass: DesktopLocalFileService }]);
+        injector.add([IUniverInstanceService, { useClass: TestUniverInstanceService as never }]);
+        injector.add([ActionRecorderService]);
+        const service = injector.get(ActionRecorderService);
+        const commandService = injector.get(ICommandService);
+        const logService = injector.get(ILogService);
+        const logError = vi.spyOn(logService, 'error');
 
         expect(() =>
             service.registerRecordedCommand({
@@ -51,6 +76,21 @@ describe('ActionRecorderService', () => {
 
         service.registerRecordedCommand({ id: 'cmd-1', type: CommandType.COMMAND } as never);
         service.registerRecordedCommand({ id: SetSelectionsOperation.id, type: CommandType.OPERATION } as never);
+        commandService.registerCommand({
+            id: 'cmd-1',
+            type: CommandType.COMMAND,
+            handler: () => true,
+        });
+        commandService.registerCommand({
+            id: SetSelectionsOperation.id,
+            type: CommandType.OPERATION,
+            handler: () => true,
+        });
+        commandService.registerCommand({
+            id: 'ignored',
+            type: CommandType.COMMAND,
+            handler: () => true,
+        });
 
         const panelStates: boolean[] = [];
         const recordingStates: boolean[] = [];
@@ -64,40 +104,34 @@ describe('ActionRecorderService', () => {
         expect(service.recording).toBe(true);
         expect(recordingStates[recordingStates.length - 1]).toBe(true);
 
-        commandCallback?.({
-            id: 'cmd-1',
-            type: CommandType.COMMAND,
-            params: { unitId: 'unit-1', subUnitId: 'sheet-1' },
+        commandService.syncExecuteCommand('cmd-1', {
+            unitId: 'unit-1',
+            subUnitId: 'sheet-1',
         });
-        commandCallback?.({
-            id: SetSelectionsOperation.id,
-            type: CommandType.OPERATION,
-            params: { unitId: 'unit-1', subUnitId: 'sheet-1', mark: 1 },
+        commandService.syncExecuteCommand(SetSelectionsOperation.id, {
+            unitId: 'unit-1',
+            subUnitId: 'sheet-1',
+            mark: 1,
         });
-        commandCallback?.({
-            id: SetSelectionsOperation.id,
-            type: CommandType.OPERATION,
-            params: { unitId: 'unit-1', subUnitId: 'sheet-1', mark: 2 },
+        commandService.syncExecuteCommand(SetSelectionsOperation.id, {
+            unitId: 'unit-1',
+            subUnitId: 'sheet-1',
+            mark: 2,
         });
-        commandCallback?.({
-            id: 'ignored',
-            type: CommandType.COMMAND,
-            params: {},
-        });
+        commandService.syncExecuteCommand('ignored', {});
 
         expect(commandStates[commandStates.length - 1]).toEqual(['cmd-1']);
 
         service.completeRecording();
-        expect(downloadFile).toHaveBeenCalledTimes(1);
+        expect(link.download).toBe('recorded-commands.json');
+        expect(link.href).toBe('blob:recording');
+        expect(link.click).toHaveBeenCalledTimes(1);
         expect(logError).toHaveBeenCalled();
-        expect(recorderDisposable.dispose).toHaveBeenCalled();
         expect(recordingStates[recordingStates.length - 1]).toBe(false);
 
         service.startRecording();
-        commandCallback?.({
-            id: 'cmd-1',
-            type: CommandType.COMMAND,
-            params: {},
+        commandService.syncExecuteCommand('cmd-1', {
+            params: { unitId: 'unit-1', subUnitId: 'sheet-1' },
         });
         service.togglePanel(false);
         expect(panelStates[panelStates.length - 1]).toBe(false);

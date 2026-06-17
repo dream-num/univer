@@ -26,11 +26,27 @@ describe('SheetsFilterFormulaService', () => {
 
     beforeEach(() => {
         dirtyConverters = new Map();
+        class TestActiveDirtyManagerService {
+            register = (commandId: string, converter: never) => dirtyConverters.set(commandId, converter);
+        }
+
+        class TestSheetRowFilteredService {
+            register = (callback: never) => (rowFilteredCallback = callback);
+        }
+
+        class TestSheetsFilterService {
+            getFilterModel = vi.fn(() => ({ getRange: () => ({ startRow: 2, endRow: 5 }), isRowFiltered: (row: number) => row === 3 }));
+        }
+
+        class TestUniverInstanceService {
+            getUnit = () => ({ getSheetBySheetId: () => ({ getColumnCount: () => 10 }) });
+        }
+
         const injector = new Injector();
-        injector.add([IActiveDirtyManagerService, { useValue: { register: (commandId: string, converter: never) => dirtyConverters.set(commandId, converter) } as unknown as IActiveDirtyManagerService }]);
-        injector.add([ISheetRowFilteredService, { useValue: { register: (callback: never) => (rowFilteredCallback = callback) } as unknown as ISheetRowFilteredService }]);
-        injector.add([SheetsFilterService, { useValue: { getFilterModel: vi.fn(() => ({ getRange: () => ({ startRow: 2, endRow: 5 }), isRowFiltered: (row: number) => row === 3 })) } as unknown as SheetsFilterService }]);
-        injector.add([IUniverInstanceService, { useValue: { getUnit: () => ({ getSheetBySheetId: () => ({ getColumnCount: () => 10 }) }) } as unknown as IUniverInstanceService }]);
+        injector.add([IActiveDirtyManagerService, { useClass: TestActiveDirtyManagerService as never }]);
+        injector.add([ISheetRowFilteredService, { useClass: TestSheetRowFilteredService as never }]);
+        injector.add([SheetsFilterService, { useClass: TestSheetsFilterService as never }]);
+        injector.add([IUniverInstanceService, { useClass: TestUniverInstanceService as never }]);
         injector.add([SheetsFilterFormulaService]);
         injector.get(SheetsFilterFormulaService);
     });

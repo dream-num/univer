@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import type { IContextService } from '@univerjs/core';
-import type { ILayoutService } from '../../layout/layout.service';
-import { describe, expect, it, vi } from 'vitest';
+import { ICommandService, IContextService, Injector } from '@univerjs/core';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { ILayoutService } from '../../layout/layout.service';
+import { IPlatformService } from '../../platform/platform.service';
 import { KeyCode, MetaKeys } from '../keycode';
 import { ShortcutService } from '../shortcut.service';
 
@@ -24,19 +25,23 @@ function createKeyboardEvent(
     keyCode: number,
     options?: { ctrlKey?: boolean; metaKey?: boolean; shiftKey?: boolean; altKey?: boolean }
 ): KeyboardEvent {
-    const event = new KeyboardEvent('keydown', {
+    const event = new Event('keydown', {
         bubbles: true,
         cancelable: true,
-        ctrlKey: options?.ctrlKey,
-        metaKey: options?.metaKey,
-        shiftKey: options?.shiftKey,
-        altKey: options?.altKey,
-    });
+    }) as KeyboardEvent;
 
-    Object.defineProperty(event, 'keyCode', {
-        configurable: true,
-        get: () => keyCode,
-    });
+    for (const [key, value] of Object.entries({
+        altKey: options?.altKey ?? false,
+        ctrlKey: options?.ctrlKey ?? false,
+        keyCode,
+        metaKey: options?.metaKey ?? false,
+        shiftKey: options?.shiftKey ?? false,
+    })) {
+        Object.defineProperty(event, key, {
+            configurable: true,
+            get: () => value,
+        });
+    }
 
     return event;
 }
@@ -47,26 +52,60 @@ function createService(options?: {
     isLinux?: boolean;
     layoutAllowed?: boolean;
 }) {
+    const eventTarget = new EventTarget();
+    vi.stubGlobal('window', {
+        addEventListener: eventTarget.addEventListener.bind(eventTarget),
+        removeEventListener: eventTarget.removeEventListener.bind(eventTarget),
+        dispatchEvent: eventTarget.dispatchEvent.bind(eventTarget),
+    });
+    vi.stubGlobal('document', {
+        createElement: () => ({}),
+    });
+
     const executeCommand = vi.fn();
-    const commandService = { executeCommand };
     const platformService = {
         isMac: options?.isMac ?? false,
         isWindows: options?.isWindows ?? true,
         isLinux: options?.isLinux ?? false,
     };
-    const contextService = {} as IContextService;
-    const layoutService = options?.layoutAllowed === undefined
-        ? undefined
-        : ({
-            checkElementInCurrentContainers: vi.fn(() => options.layoutAllowed),
-        } as unknown as ILayoutService);
+    const layoutService = {
+        checkElementInCurrentContainers: vi.fn(() => options?.layoutAllowed),
+    };
 
-    const service = new ShortcutService(commandService as any, platformService as any, contextService, layoutService);
+    class TestCommandService {
+        executeCommand = executeCommand;
+    }
+
+    class TestPlatformService {
+        isMac = platformService.isMac;
+        isWindows = platformService.isWindows;
+        isLinux = platformService.isLinux;
+    }
+
+    class TestContextService {}
+
+    class TestLayoutService {
+        checkElementInCurrentContainers = layoutService.checkElementInCurrentContainers;
+    }
+
+    const injector = new Injector();
+    injector.add([ICommandService, { useClass: TestCommandService as never }]);
+    injector.add([IPlatformService, { useClass: TestPlatformService }]);
+    injector.add([IContextService, { useClass: TestContextService }]);
+    if (options?.layoutAllowed !== undefined) {
+        injector.add([ILayoutService, { useClass: TestLayoutService as never }]);
+    }
+    injector.add([ShortcutService]);
+    const service = injector.get(ShortcutService);
 
     return { service, executeCommand, layoutService };
 }
 
 describe('ShortcutService', () => {
+    afterEach(() => {
+        vi.unstubAllGlobals();
+    });
+
     it('should register and unregister shortcuts', () => {
         const { service } = createService();
         const changed = vi.fn();

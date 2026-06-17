@@ -15,7 +15,6 @@
  */
 
 import type { ICommand } from '../../command/command.service';
-import type { IUniverInstanceService } from '../../instance/instance.service';
 import { BehaviorSubject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY } from '../../../common/const';
@@ -24,6 +23,7 @@ import { CommandService, CommandType, ICommandService } from '../../command/comm
 import { ConfigService, IConfigService } from '../../config/config.service';
 import { EDITOR_ACTIVATED, FOCUSING_FX_BAR_EDITOR, FOCUSING_SHEET } from '../../context/context';
 import { ContextService, IContextService } from '../../context/context.service';
+import { IUniverInstanceService } from '../../instance/instance.service';
 import { DesktopLogService, ILogService, LogLevel } from '../../log/log.service';
 import { IUndoRedoService, LocalUndoRedoService, RedoCommandId, UndoCommandId } from '../undoredo.service';
 
@@ -43,7 +43,6 @@ describe('LocalUndoRedoService', () => {
     let contextService: ContextService;
     let logService: DesktopLogService;
     let focused$: BehaviorSubject<FocusedUnit | null>;
-    let instanceService: IUniverInstanceService;
     let undoRedoService: LocalUndoRedoService;
     let mutationLog: string[];
 
@@ -60,13 +59,17 @@ describe('LocalUndoRedoService', () => {
         logService.setLogLevel(LogLevel.SILENT);
 
         focused$ = new BehaviorSubject<FocusedUnit | null>(new FocusedUnit('unit-1'));
-        instanceService = {
-            focused$: focused$.asObservable(),
-            getFocusedUnit: () => focused$.value,
-        } as IUniverInstanceService;
+        class TestUniverInstanceService {
+            focused$ = focused$.asObservable();
 
-        undoRedoService = new LocalUndoRedoService(instanceService, commandService, contextService);
-        injector.add([IUndoRedoService, { useValue: undoRedoService }]);
+            getFocusedUnit() {
+                return focused$.value;
+            }
+        }
+
+        injector.add([IUniverInstanceService, { useClass: TestUniverInstanceService as never }]);
+        injector.add([IUndoRedoService, { useClass: LocalUndoRedoService }]);
+        undoRedoService = injector.get(IUndoRedoService) as LocalUndoRedoService;
 
         mutationLog = [];
         commandService.registerCommand({

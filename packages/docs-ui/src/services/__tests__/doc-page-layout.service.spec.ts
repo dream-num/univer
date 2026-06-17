@@ -36,7 +36,7 @@ function createFixture(options: {
     viewScale: number;
     sceneScale?: number;
     align?: 'center' | 'start';
-    paddingX?: number;
+    paddingX?: number | `${number}%`;
 }) {
     const docsComponent = {
         width: options.docsWidth ?? 960,
@@ -67,6 +67,7 @@ function createFixture(options: {
 
     const viewScaleService = {
         getViewScale: vi.fn(() => options.viewScale),
+        getAvailableWidth: vi.fn(() => options.engineWidth),
         getOptions: vi.fn(() => ({
             mode: 'fit-width',
             target: 'viewport',
@@ -122,6 +123,20 @@ describe('DocPageLayoutService', () => {
         service.calculatePagePosition();
 
         expect(docsComponent.translate).toHaveBeenCalledWith(0, 20);
+    });
+
+    it('uses percentage padding for start-aligned fitting', () => {
+        const { docsComponent, service } = createFixture({
+            engineWidth: 1200,
+            engineHeight: 800,
+            viewScale: 1,
+            align: 'start',
+            paddingX: '10%',
+        });
+
+        service.calculatePagePosition();
+
+        expect(docsComponent.translate).toHaveBeenCalledWith(120, 20);
     });
 
     it('reapplies view scale when an early container measurement left the scene stale', () => {

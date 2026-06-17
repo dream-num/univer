@@ -19,7 +19,7 @@ import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { Disposable, Inject } from '@univerjs/core';
 import { neoGetDocObject } from '../basics/component-tools';
 import { VIEWPORT_KEY } from '../basics/docs-view-key';
-import { DocViewScaleService } from './doc-view-scale';
+import { DocViewScaleService, resolveDocFitPaddingX } from './doc-view-scale';
 
 export class DocPageLayoutService extends Disposable implements IRenderModule {
     constructor(
@@ -44,7 +44,9 @@ export class DocPageLayoutService extends Disposable implements IRenderModule {
         const parent = scene?.getParent();
 
         const { width: docsWidth, height: docsHeight, pageMarginLeft, pageMarginTop } = docsComponent;
-        const horizontalMargin = isStartAlignedFit ? (fitOptions.paddingX ?? 0) / viewScale : pageMarginLeft;
+        const horizontalMargin = isStartAlignedFit
+            ? resolveDocFitPaddingX(this._docViewScaleService.getAvailableWidth(), fitOptions.paddingX) / viewScale
+            : pageMarginLeft;
 
         if (parent == null || docsWidth === Number.POSITIVE_INFINITY || docsHeight === Number.POSITIVE_INFINITY) {
             return;

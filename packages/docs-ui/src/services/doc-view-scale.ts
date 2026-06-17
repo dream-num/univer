@@ -40,6 +40,22 @@ export function normalizeDocFitToWidthOptions(options?: IDocFitToWidthOptions) {
     };
 }
 
+export function resolveDocFitPaddingX(availableWidth: number, paddingX: IDocFitToWidthOptions['paddingX']): number {
+    if (typeof paddingX === 'number') {
+        return Number.isFinite(paddingX) ? paddingX : 0;
+    }
+
+    if (typeof paddingX === 'string') {
+        const trimmedPadding = paddingX.trim();
+        if (trimmedPadding.endsWith('%')) {
+            const percent = Number(trimmedPadding.slice(0, -1));
+            return Number.isFinite(percent) ? availableWidth * percent / 100 : 0;
+        }
+    }
+
+    return 0;
+}
+
 export function calcDocFitToWidthScale(params: ICalcDocFitToWidthScaleParams): number {
     const options = normalizeDocFitToWidthOptions(params.options);
     if (options.mode !== 'fit-width') {
@@ -50,7 +66,8 @@ export function calcDocFitToWidthScale(params: ICalcDocFitToWidthScaleParams): n
         return 1;
     }
 
-    const availableWidth = Math.max(0, params.availableWidth - options.paddingX * 2);
+    const paddingX = resolveDocFitPaddingX(params.availableWidth, options.paddingX);
+    const availableWidth = Math.max(0, params.availableWidth - paddingX * 2);
     const rawScale = availableWidth / params.baseWidth;
     const maxScale = options.maxScale ?? Number.POSITIVE_INFINITY;
 

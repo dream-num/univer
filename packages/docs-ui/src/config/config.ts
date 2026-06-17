@@ -24,11 +24,12 @@ export const configSymbol = Symbol(DOCS_UI_PLUGIN_CONFIG_KEY);
 export type DocFitMode = 'none' | 'fit-width';
 export type DocFitTarget = 'viewport' | 'container';
 export type DocFitAlign = 'center' | 'start';
+export type DocFitPaddingX = number | `${number}%`;
 
 export interface IDocFitToWidthOptions {
     mode?: DocFitMode;
     target?: DocFitTarget;
-    paddingX?: number;
+    paddingX?: DocFitPaddingX;
     minScale?: number;
     maxScale?: number;
     align?: DocFitAlign;

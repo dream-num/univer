@@ -45,6 +45,14 @@ describe('doc view scale helpers', () => {
         })).toBe(1);
     });
 
+    it('fits width with percentage padding relative to available width', () => {
+        expect(calcDocFitToWidthScale({
+            availableWidth: 1200,
+            baseWidth: 960,
+            options: { mode: 'fit-width', paddingX: '10%', minScale: 0 },
+        })).toBe(1);
+    });
+
     it('allows embedded containers to shrink and clamp max scale', () => {
         expect(calcDocFitToWidthScale({
             availableWidth: 480,

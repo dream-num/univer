@@ -15,26 +15,24 @@
  */
 
 import { Injector } from '@univerjs/core';
+import { MessageType } from '@univerjs/design';
 import { describe, expect, it } from 'vitest';
-import { DocRefreshDrawingsService } from '../doc-refresh-drawings.service';
+import { IMessageService } from '../message.service';
+import { MockMessageService } from './mock-message.service';
 
-function createService(): DocRefreshDrawingsService {
+function createService(): IMessageService {
     const injector = new Injector();
-    injector.add([DocRefreshDrawingsService]);
-    return injector.get(DocRefreshDrawingsService);
+    injector.add([IMessageService, { useClass: MockMessageService }]);
+    return injector.get(IMessageService);
 }
 
-describe('DocRefreshDrawingsService', () => {
-    it('emits the latest document skeleton refresh request', () => {
+describe('MockMessageService', () => {
+    it('acts as a no-op message channel for tests without a UI container', () => {
         const service = createService();
-        const values: unknown[] = [];
-        const sub = service.refreshDrawings$.subscribe((value) => values.push(value));
-        const skeleton = { id: 'skeleton-1' };
+        const disposable = service.show({ content: 'Saved', type: MessageType.Success });
 
-        service.refreshDrawings(skeleton as never);
-        service.refreshDrawings(null);
-
-        expect(values).toEqual([null, skeleton, null]);
-        sub.unsubscribe();
+        expect(() => disposable.dispose()).not.toThrow();
+        expect(() => service.remove('message-1')).not.toThrow();
+        expect(() => service.removeAll()).not.toThrow();
     });
 });

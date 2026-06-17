@@ -16,25 +16,23 @@
 
 import { Injector } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
-import { DocRefreshDrawingsService } from '../doc-refresh-drawings.service';
+import { SelectAllService } from '../select-all.service';
 
-function createService(): DocRefreshDrawingsService {
+function createService(): SelectAllService {
     const injector = new Injector();
-    injector.add([DocRefreshDrawingsService]);
-    return injector.get(DocRefreshDrawingsService);
+    injector.add([SelectAllService]);
+    return injector.get(SelectAllService);
 }
 
-describe('DocRefreshDrawingsService', () => {
-    it('emits the latest document skeleton refresh request', () => {
+describe('SelectAllService', () => {
+    it('keeps the worksheet and range stack used by repeated select-all actions', () => {
         const service = createService();
-        const values: unknown[] = [];
-        const sub = service.refreshDrawings$.subscribe((value) => values.push(value));
-        const skeleton = { id: 'skeleton-1' };
+        const sheetRange = { startRow: 0, endRow: 99, startColumn: 0, endColumn: 25 };
 
-        service.refreshDrawings(skeleton as never);
-        service.refreshDrawings(null);
+        service.selectedRangeWorksheet = 'sheet-1';
+        service.rangesStack.push(sheetRange);
 
-        expect(values).toEqual([null, skeleton, null]);
-        sub.unsubscribe();
+        expect(service.selectedRangeWorksheet).toBe('sheet-1');
+        expect(service.rangesStack).toEqual([sheetRange]);
     });
 });

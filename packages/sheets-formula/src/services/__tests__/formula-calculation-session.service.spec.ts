@@ -15,9 +15,16 @@
  */
 
 import type { ISetFormulaCalculationResultMutation } from '@univerjs/engine-formula';
+import { Injector } from '@univerjs/core';
 import { FormulaExecutedStateType, FormulaExecuteStageType } from '@univerjs/engine-formula';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { FormulaCalculationSessionService } from '../formula-calculation-session.service';
+
+function createService(): FormulaCalculationSessionService {
+    const injector = new Injector();
+    injector.add([FormulaCalculationSessionService]);
+    return injector.get(FormulaCalculationSessionService);
+}
 
 describe('FormulaCalculationSessionService', () => {
     afterEach(() => {
@@ -27,7 +34,7 @@ describe('FormulaCalculationSessionService', () => {
     it('waits for the latest restarted session to be applied', async () => {
         vi.useFakeTimers();
 
-        const service = new FormulaCalculationSessionService();
+        const service = createService();
         service.initialize();
         const waitForApplied = service.waitForLatestApplied();
         let resolved = false;
@@ -71,7 +78,7 @@ describe('FormulaCalculationSessionService', () => {
     });
 
     it('stores lifecycle flags and progress for the active session', () => {
-        const service = new FormulaCalculationSessionService();
+        const service = createService();
         service.initialize();
 
         service.start();
@@ -104,7 +111,7 @@ describe('FormulaCalculationSessionService', () => {
     it('does not resolve from an already applied previous session when a new session starts', async () => {
         vi.useFakeTimers();
 
-        const service = new FormulaCalculationSessionService();
+        const service = createService();
         service.initialize();
         service.start();
         service.markResultEmitted({ unitData: {}, unitOtherData: {} }, false);
@@ -130,7 +137,7 @@ describe('FormulaCalculationSessionService', () => {
     });
 
     it('emits result applied when value application is observed', async () => {
-        const service = new FormulaCalculationSessionService();
+        const service = createService();
         service.initialize();
         const result = {
             unitData: {
@@ -158,7 +165,7 @@ describe('FormulaCalculationSessionService', () => {
     });
 
     it('emits result applied only once for repeated value application notifications', () => {
-        const service = new FormulaCalculationSessionService();
+        const service = createService();
         service.initialize();
         const result = {
             unitData: {
@@ -186,7 +193,7 @@ describe('FormulaCalculationSessionService', () => {
     });
 
     it('emits result applied once when result arrives after an application notification', () => {
-        const service = new FormulaCalculationSessionService();
+        const service = createService();
         service.initialize();
         const result = {
             unitData: {
@@ -214,7 +221,7 @@ describe('FormulaCalculationSessionService', () => {
     });
 
     it('emits result applied immediately when there is no sheet value to apply', () => {
-        const service = new FormulaCalculationSessionService();
+        const service = createService();
         service.initialize();
         const result: ISetFormulaCalculationResultMutation = {
             unitData: {},
@@ -234,7 +241,7 @@ describe('FormulaCalculationSessionService', () => {
     it('does not start the no-calculation watchdog until the session controller is initialized', async () => {
         vi.useFakeTimers();
 
-        const service = new FormulaCalculationSessionService();
+        const service = createService();
         const waitForApplied = service.waitForLatestApplied();
         let resolved = false;
         void waitForApplied.then(() => {
@@ -257,7 +264,7 @@ describe('FormulaCalculationSessionService', () => {
     it('does not reject long-running calculations unless a timeout is provided', async () => {
         vi.useFakeTimers();
 
-        const service = new FormulaCalculationSessionService();
+        const service = createService();
         service.initialize();
         service.start();
 
@@ -280,7 +287,7 @@ describe('FormulaCalculationSessionService', () => {
     it('rejects long-running calculations when a timeout is provided', async () => {
         vi.useFakeTimers();
 
-        const service = new FormulaCalculationSessionService();
+        const service = createService();
         service.initialize();
         service.start();
 

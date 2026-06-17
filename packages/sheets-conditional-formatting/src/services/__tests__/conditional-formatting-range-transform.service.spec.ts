@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { Injector } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { ConditionalFormattingRangeTransformService } from '../conditional-formatting-range-transform.service';
 
@@ -26,9 +27,15 @@ const sortRanges = <T extends { startRow: number; startColumn: number; endRow: n
     );
 };
 
+function createService(): ConditionalFormattingRangeTransformService {
+    const injector = new Injector();
+    injector.add([ConditionalFormattingRangeTransformService]);
+    return injector.get(ConditionalFormattingRangeTransformService);
+}
+
 describe('ConditionalFormattingRangeTransformService', () => {
     it('subtracts ranges without expanding to a cell matrix', () => {
-        const service = new ConditionalFormattingRangeTransformService();
+        const service = createService();
 
         const ranges = service.subtractRanges(
             [{ startRow: 0, endRow: 4, startColumn: 0, endColumn: 4 }],
@@ -44,7 +51,7 @@ describe('ConditionalFormattingRangeTransformService', () => {
     });
 
     it('intersects source ranges and translates them to a target anchor', () => {
-        const service = new ConditionalFormattingRangeTransformService();
+        const service = createService();
 
         const ranges = service.copyIntersectingRanges(
             [{ startRow: 0, endRow: 2, startColumn: 0, endColumn: 2 }],
@@ -58,7 +65,7 @@ describe('ConditionalFormattingRangeTransformService', () => {
     });
 
     it('adds and merges translated ranges', () => {
-        const service = new ConditionalFormattingRangeTransformService();
+        const service = createService();
 
         const ranges = service.addRanges(
             [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }],
@@ -69,7 +76,7 @@ describe('ConditionalFormattingRangeTransformService', () => {
     });
 
     it('applies batched subtract and add operations once per rule', () => {
-        const service = new ConditionalFormattingRangeTransformService();
+        const service = createService();
 
         const ranges = service.applyRangeDelta(
             [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 2 }],

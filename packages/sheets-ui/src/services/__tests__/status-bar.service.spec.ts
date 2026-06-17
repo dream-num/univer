@@ -14,13 +14,20 @@
  * limitations under the License.
  */
 
+import { Injector } from '@univerjs/core';
 import { FUNCTION_NAMES_MATH, FUNCTION_NAMES_STATISTICAL } from '@univerjs/engine-formula';
 import { describe, expect, it } from 'vitest';
-import { StatusBarService } from '../status-bar.service';
+import { IStatusBarService, StatusBarService } from '../status-bar.service';
+
+function createService(): IStatusBarService {
+    const injector = new Injector();
+    injector.add([IStatusBarService, { useClass: StatusBarService }]);
+    return injector.get(IStatusBarService);
+}
 
 describe('StatusBarService', () => {
     it('filters status values based on count/counter rules', () => {
-        const service = new StatusBarService();
+        const service = createService();
 
         // With only one non-empty cell: should emit pattern but filter out all calculated metrics.
         service.setState({

@@ -16,25 +16,27 @@
 
 import { Injector } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
-import { DocRefreshDrawingsService } from '../doc-refresh-drawings.service';
+import { DocMentionService } from '../doc-mention.service';
 
-function createService(): DocRefreshDrawingsService {
+function createService(): DocMentionService {
     const injector = new Injector();
-    injector.add([DocRefreshDrawingsService]);
-    return injector.get(DocRefreshDrawingsService);
+    injector.add([DocMentionService]);
+    return injector.get(DocMentionService);
 }
 
-describe('DocRefreshDrawingsService', () => {
-    it('emits the latest document skeleton refresh request', () => {
+describe('DocMentionService', () => {
+    it('publishes the mention currently being edited and clears it when editing ends', () => {
         const service = createService();
         const values: unknown[] = [];
-        const sub = service.refreshDrawings$.subscribe((value) => values.push(value));
-        const skeleton = { id: 'skeleton-1' };
+        const sub = service.editing$.subscribe((value) => values.push(value));
 
-        service.refreshDrawings(skeleton as never);
-        service.refreshDrawings(null);
+        service.startEditing({ unitId: 'doc-1', index: 8 });
+        expect(service.editing).toEqual({ unitId: 'doc-1', index: 8 });
 
-        expect(values).toEqual([null, skeleton, null]);
+        service.endEditing();
+        expect(service.editing).toBeUndefined();
+        expect(values).toEqual([undefined, { unitId: 'doc-1', index: 8 }, undefined]);
+
         sub.unsubscribe();
     });
 });

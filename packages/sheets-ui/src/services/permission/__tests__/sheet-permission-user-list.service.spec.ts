@@ -15,6 +15,7 @@
  */
 
 import type { ICollaborator } from '@univerjs/protocol';
+import { Injector } from '@univerjs/core';
 import { firstValueFrom, skip, take } from 'rxjs';
 import { describe, expect, it } from 'vitest';
 import { SheetPermissionUserManagerService } from '../sheet-permission-user-list.service';
@@ -31,9 +32,15 @@ const EDITOR: ICollaborator = {
     subject: undefined,
 };
 
+function createService(): SheetPermissionUserManagerService {
+    const injector = new Injector();
+    injector.add([SheetPermissionUserManagerService]);
+    return injector.get(SheetPermissionUserManagerService);
+}
+
 describe('SheetPermissionUserManagerService', () => {
     it('tracks editable users, selected users and historical collaborators', async () => {
-        const service = new SheetPermissionUserManagerService();
+        const service = createService();
 
         expect(service.userList).toEqual([]);
         expect(service.oldCollaboratorList).toEqual([]);
@@ -56,7 +63,7 @@ describe('SheetPermissionUserManagerService', () => {
     });
 
     it('clears stored collaborator state on reset', async () => {
-        const service = new SheetPermissionUserManagerService();
+        const service = createService();
         service.setCanEditUserList([OWNER]);
         service.setOldCollaboratorList([OWNER, EDITOR]);
         service.setSelectUserList([EDITOR]);

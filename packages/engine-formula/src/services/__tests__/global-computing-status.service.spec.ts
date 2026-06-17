@@ -14,13 +14,20 @@
  * limitations under the License.
  */
 
+import { Injector } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
 import { describe, expect, it } from 'vitest';
 import { GlobalComputingStatusService } from '../global-computing-status.service';
 
+function createService(): GlobalComputingStatusService {
+    const injector = new Injector();
+    injector.add([GlobalComputingStatusService]);
+    return injector.get(GlobalComputingStatusService);
+}
+
 describe('GlobalComputingStatusService', () => {
     it('should aggregate computing status from all registered subjects', () => {
-        const service = new GlobalComputingStatusService();
+        const service = createService();
         const subjectA = new BehaviorSubject(false);
         const subjectB = new BehaviorSubject(true);
 
@@ -43,7 +50,7 @@ describe('GlobalComputingStatusService', () => {
     });
 
     it('should expose computingStatus$ and cleanup on dispose', () => {
-        const service = new GlobalComputingStatusService();
+        const service = createService();
         const subject = new BehaviorSubject(true);
         const observed: boolean[] = [];
         service.computingStatus$.subscribe((value) => observed.push(value));

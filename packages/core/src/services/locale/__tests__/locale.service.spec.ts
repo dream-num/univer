@@ -15,6 +15,7 @@
  */
 
 import { beforeEach, describe, expect, it } from 'vitest';
+import { Injector } from '../../../common/di';
 import { LocaleType } from '../../../types/enum/locale-type';
 import { LocaleService } from '../locale.service';
 
@@ -40,7 +41,9 @@ describe('LocaleService', () => {
     };
 
     beforeEach(() => {
-        localeService = new LocaleService();
+        const injector = new Injector();
+        injector.add([LocaleService]);
+        localeService = injector.get(LocaleService);
         localeService.load(testLocales);
     });
 
@@ -75,7 +78,9 @@ describe('LocaleService', () => {
     });
 
     it('should throw an error if locales are not initialized', () => {
-        const newLocaleService = new LocaleService();
+        const injector = new Injector();
+        injector.add([LocaleService]);
+        const newLocaleService = injector.get(LocaleService);
         const t = () => {
             newLocaleService.t('greeting');
         };

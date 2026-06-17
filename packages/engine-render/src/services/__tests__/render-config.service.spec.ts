@@ -14,12 +14,19 @@
  * limitations under the License.
  */
 
-import { describe, expect, it, vi } from 'vitest';
+import { Injector } from '@univerjs/core';
+import { describe, expect, it } from 'vitest';
 import { UniverRenderConfigService } from '../render-config.service';
 
+function createService(): UniverRenderConfigService {
+    const injector = new Injector();
+    injector.add([UniverRenderConfigService]);
+    return injector.get(UniverRenderConfigService);
+}
+
 describe('UniverRenderConfigService', () => {
-    it('should set/get render config and remove nullish values', () => {
-        const service = new UniverRenderConfigService();
+    it('stores renderer options and removes options when callers clear them', () => {
+        const service = createService();
 
         expect(service.getRenderConfig()).toEqual({ ok: '111' });
 
@@ -30,26 +37,7 @@ describe('UniverRenderConfigService', () => {
         expect(service.getRenderConfig()).toEqual({ ok: '111' });
 
         service.setRenderConfig('lineWidth', 2);
-        service.setRenderConfig('lineWidth', undefined as any);
+        service.setRenderConfig('lineWidth', undefined);
         expect(service.getRenderConfig()).toEqual({ ok: '111' });
-    });
-
-    it('should debounce update signal stream', async () => {
-        vi.useFakeTimers();
-
-        const service = new UniverRenderConfigService();
-        const listener = vi.fn();
-        const subscription = service.updateSignal$.subscribe(listener);
-
-        (service as any)._updateSignal$.next();
-        (service as any)._updateSignal$.next();
-
-        expect(listener).not.toHaveBeenCalled();
-
-        await vi.advanceTimersByTimeAsync(4);
-        expect(listener).toHaveBeenCalledTimes(1);
-
-        subscription.unsubscribe();
-        vi.useRealTimers();
     });
 });

@@ -14,12 +14,19 @@
  * limitations under the License.
  */
 
+import { Injector } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { ShortcutPanelService } from '../shortcut-panel.service';
 
+function createService(): ShortcutPanelService {
+    const injector = new Injector();
+    injector.add([ShortcutPanelService]);
+    return injector.get(ShortcutPanelService);
+}
+
 describe('ShortcutPanelService', () => {
     it('should open and close panel state', () => {
-        const service = new ShortcutPanelService();
+        const service = createService();
 
         expect(service.isOpen).toBe(false);
 
@@ -31,7 +38,7 @@ describe('ShortcutPanelService', () => {
     });
 
     it('should emit distinct state values and complete on dispose', () => {
-        const service = new ShortcutPanelService();
+        const service = createService();
         const values: boolean[] = [];
         let completed = false;
 

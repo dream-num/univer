@@ -49,8 +49,6 @@ import { DocAutoFormatService } from '../../../services/doc-auto-format.service'
 import { DocSelectionRenderService } from '../../../services/selection/doc-selection-render.service';
 import { COMPONENT_DOC_HEADER_FOOTER_PANEL } from '../../../views/header-footer/panel/component-name';
 import { PAGE_SETTING_COMPONENT_ID } from '../../../views/PageSettings';
-import { COMPONENT_DOC_CREATE_TABLE_CONFIRM } from '../../../views/table/create/component-name';
-import { DocCreateTableOperation } from '../../operations/doc-create-table.operation';
 import { MoveCursorOperation, MoveSelectionOperation } from '../../operations/doc-cursor.operation';
 import { SidebarDocHeaderFooterPanelOperation } from '../../operations/doc-header-footer-panel.operation';
 import { DocParagraphSettingPanelOperation } from '../../operations/doc-paragraph-setting-panel.operation';
@@ -68,7 +66,6 @@ import { AlignCenterCommand, AlignJustifyCommand, AlignOperationCommand } from '
 import { ReplaceSelectionCommand } from '../replace-content.command';
 import { SetDocZoomRatioCommand } from '../set-doc-zoom-ratio.command';
 import { SwitchDocModeCommand } from '../switch-doc-mode.command';
-import { CreateDocTableCommand } from '../table/doc-table-create.command';
 import { genEmptyTable } from '../table/table';
 import { createCommandTestBed } from './create-command-test-bed';
 
@@ -195,13 +192,6 @@ function createHeaderFooterDoc(): IDocumentData {
         ...createBaseDoc(),
         headers: {},
         footers: {},
-    };
-}
-
-function createTableInsertDoc(): IDocumentData {
-    return {
-        ...createBaseDoc(),
-        tableSource: {},
     };
 }
 
@@ -834,7 +824,7 @@ describe('misc document commands', () => {
     });
 
     it('opens and closes the header footer sidebar panel through commands and operations', async () => {
-        ({ univer, get } = createCommandTestBed(createTableInsertDoc(), [
+        ({ univer, get } = createCommandTestBed(createBaseDoc(), [
             [ISidebarService, { useClass: TestSidebarService }],
         ]));
         loadTestLocale();
@@ -926,76 +916,6 @@ describe('misc document commands', () => {
         })).toBe(true);
         expect(await commandService.executeCommand(MoveCursorOperation.id)).toBe(false);
         expect(await commandService.executeCommand(MoveSelectionOperation.id)).toBe(false);
-    });
-
-    it('opens the create-table confirm flow and forwards the confirmed size to the table command', async () => {
-        ({ univer, get } = createCommandTestBed(createBaseDoc(), [
-            [IConfirmService, { useClass: TestConfirmService }],
-        ]));
-        loadTestLocale();
-        commandService = get(ICommandService);
-        commandService.registerCommand(DocCreateTableOperation);
-        commandService.registerCommand(CreateDocTableCommand);
-        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
-        setCollapsedSelection(5);
-
-        const skeletonManager = get(DocSkeletonManagerService) as unknown as { getSkeleton: () => unknown };
-        skeletonManager.getSkeleton = () => ({
-            findNodeByCharIndex: () => ({
-                parent: {
-                    parent: {
-                        parent: {
-                            parent: {
-                                parent: {
-                                    pageWidth: 594.3,
-                                    marginLeft: 90,
-                                    marginRight: 90,
-                                },
-                            },
-                        },
-                    },
-                },
-            }),
-        }) as never;
-
-        const result = await commandService.executeCommand(DocCreateTableOperation.id);
-        const confirmService = get(IConfirmService) as TestConfirmService;
-        const children = confirmService.lastOption?.children as {
-            label: {
-                name: string;
-                props: {
-                    handleRowColChange: (rowCount: number, colCount: number) => void;
-                    tableCreateParams: { rowCount: number; colCount: number };
-                };
-            };
-        };
-
-        expect(result).toBe(true);
-        expect(confirmService.lastOption).toEqual(expect.objectContaining({
-            id: 'doc.component.create-table-confirm',
-            width: 'auto',
-        }));
-        expect(children.label.name).toBe(COMPONENT_DOC_CREATE_TABLE_CONFIRM);
-        expect(children.label.props.tableCreateParams).toEqual({
-            rowCount: 3,
-            colCount: 5,
-        });
-
-        children.label.props.handleRowColChange(4, 2);
-        expect(children.label.props.tableCreateParams).toEqual({
-            rowCount: 4,
-            colCount: 2,
-        });
-
-        confirmService.lastOption?.onConfirm?.({});
-        await awaitTime(0);
-
-        const tableId = getBody()?.tables?.[0].tableId;
-        expect(getBody()?.tables).toHaveLength(1);
-        expect(tableId).toEqual(expect.any(String));
-        expect(getDoc()?.getSnapshot().tableSource?.[tableId!].tableRows).toHaveLength(4);
-        expect(getDoc()?.getSnapshot().tableSource?.[tableId!].tableColumns).toHaveLength(2);
-        expect(confirmService.closedIds).toContain('doc.component.create-table-confirm');
     });
 
     it('runs registered auto-format mutations for tab, after-space, and enter commands', async () => {

@@ -16,10 +16,16 @@
 
 import type { ICommand, IDocumentData, Univer } from '@univerjs/core';
 import { awaitTime, DataStreamTreeTokenType, ICommandService } from '@univerjs/core';
-import { DocSelectionManagerService, DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import {
+    DocContentInsertService,
+    DocSelectionManagerService,
+    DocSkeletonManagerService,
+    RichTextEditingMutation,
+} from '@univerjs/docs';
 import { afterEach, describe, expect, it } from 'vitest';
 import {
     buildDocTableInsertBody,
+    CreateDocTableCommand,
     normalizeTableInsertOffset,
     shouldCreateParagraphBeforeTable,
 } from '../table/doc-table-create.command';
@@ -173,6 +179,17 @@ function createTableCommandBed(fixture: ITableFixture) {
     commandService.registerCommand(DocTableDeleteRowsCommand);
     commandService.registerCommand(DocTableDeleteColumnsCommand);
     commandService.registerCommand(DocTableDeleteTableCommand);
+    commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+
+    return testBed;
+}
+
+function createTableCreationBed(documentData: IDocumentData) {
+    const testBed = createCommandTestBed(documentData, [[DocContentInsertService]]);
+    univer = testBed.univer;
+
+    const commandService = testBed.get(ICommandService);
+    commandService.registerCommand(CreateDocTableCommand);
     commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
 
     return testBed;
@@ -539,8 +556,115 @@ describe('doc table create command helpers', () => {
         expect(tableTestBed.doc.getBody()?.dataStream).toBe(TABLE_SUFFIX);
         expect(testBedSnapshotTableIds(tableTestBed)).toEqual([]);
     });
+
+    it('creates a table at the current document selection and fits it to page content width', async () => {
+        const testBed = createTableCreationBed(createParagraphDocument('Hello\r\n'));
+        const commandService = testBed.get(ICommandService);
+        setActiveTableRange(testBed, 5);
+        setCommandSkeletonPage(testBed, 5, {
+            pageWidth: 540,
+            marginLeft: 90,
+            marginRight: 90,
+        });
+
+        await expect(commandService.executeCommand(CreateDocTableCommand.id, {
+            rowCount: 2,
+            colCount: 3,
+        })).resolves.toBe(true);
+        await awaitTime(0);
+
+        const snapshot = testBed.doc.getSnapshot();
+        const tableId = Object.keys(snapshot.tableSource ?? {})[0];
+        expect(snapshot.body?.dataStream).toContain(DataStreamTreeTokenType.TABLE_START);
+        expect(snapshot.body?.dataStream).toContain(DataStreamTreeTokenType.TABLE_END);
+        expect(snapshot.tableSource?.[tableId].tableRows).toHaveLength(2);
+        expect(snapshot.tableSource?.[tableId].tableRows.map((row) => row.tableCells.length)).toEqual([3, 3]);
+        expect(snapshot.tableSource?.[tableId].tableColumns.map((column) => column.size.width.v)).toEqual([120, 120, 120]);
+    });
+
+    it('creates a table from the paragraph menu insert range when there is no active selection', async () => {
+        const testBed = createTableCreationBed(createParagraphDocument('Hello\r\n'));
+        const commandService = testBed.get(ICommandService);
+        testBed.get(DocContentInsertService).setInsertRange({
+            unitId: 'test-doc',
+            startOffset: 0,
+            endOffset: 0,
+        });
+        setCommandSkeletonPage(testBed, 0, {
+            pageWidth: 500,
+            marginLeft: 70,
+            marginRight: 70,
+        });
+
+        await expect(commandService.executeCommand(CreateDocTableCommand.id, {
+            rowCount: 1,
+            colCount: 2,
+        })).resolves.toBe(true);
+        await awaitTime(0);
+
+        const snapshot = testBed.doc.getSnapshot();
+        const tableId = Object.keys(snapshot.tableSource ?? {})[0];
+        expect(snapshot.body?.dataStream).toContain(DataStreamTreeTokenType.TABLE_START);
+        expect(snapshot.body?.dataStream).toContain(DataStreamTreeTokenType.TABLE_END);
+        expect(snapshot.tableSource?.[tableId].tableRows).toHaveLength(1);
+        expect(snapshot.tableSource?.[tableId].tableColumns.map((column) => column.size.width.v)).toEqual([180, 180]);
+    });
+
+    it('does not create a table without a render skeleton for the cursor', async () => {
+        const testBed = createTableCreationBed(createParagraphDocument('Hello\r\n'));
+        const commandService = testBed.get(ICommandService);
+        setActiveTableRange(testBed, 5);
+        const skeletonManager = testBed.get(DocSkeletonManagerService) as unknown as { getSkeleton: () => unknown };
+        skeletonManager.getSkeleton = () => null;
+
+        await expect(commandService.executeCommand(CreateDocTableCommand.id, {
+            rowCount: 1,
+            colCount: 1,
+        })).resolves.toBe(false);
+
+        expect(testBed.doc.getSnapshot().body?.tables).toBeUndefined();
+        expect(testBed.doc.getSnapshot().tableSource).toEqual({});
+    });
 });
 
 function testBedSnapshotTableIds(testBed: ReturnType<typeof createCommandTestBed>) {
     return Object.keys(testBed.doc.getSnapshot().tableSource ?? {});
+}
+
+function createParagraphDocument(dataStream: string): IDocumentData {
+    return {
+        id: 'test-doc',
+        body: {
+            dataStream,
+            textRuns: [{
+                st: 0,
+                ed: dataStream.length - 2,
+                ts: {},
+            }],
+            paragraphs: [{ paragraphId: 'para_docs_ui_create_table', startIndex: dataStream.length - 2 }],
+            sectionBreaks: [{ startIndex: dataStream.length - 1 }],
+            customBlocks: [],
+        },
+        documentStyle: {
+            pageSize: { width: 540, height: 720 },
+            marginTop: 72,
+            marginBottom: 72,
+            marginRight: 90,
+            marginLeft: 90,
+        },
+        tableSource: {},
+    };
+}
+
+function setCommandSkeletonPage(testBed: ReturnType<typeof createCommandTestBed>, offset: number, pageInfo: { pageWidth: number; marginLeft: number; marginRight: number }) {
+    const page = { ...pageInfo };
+    const pageChild = { parent: page };
+    const paragraph = { parent: pageChild };
+    const line = { parent: paragraph };
+    const divide = { parent: line };
+    const glyph = { parent: divide };
+    const skeletonManager = testBed.get(DocSkeletonManagerService) as unknown as { getSkeleton: () => unknown };
+    skeletonManager.getSkeleton = () => ({
+        findNodeByCharIndex: (index: number) => index === offset ? glyph : null,
+    });
 }

@@ -15,28 +15,50 @@
  */
 
 import type { FUniver } from '@univerjs/core/facade';
-import { LifecycleStages } from '@univerjs/core';
+import { ICommandService } from '@univerjs/core';
+import { RemoveNumfmtMutation, SetNumfmtMutation, SetRangeValuesMutation } from '@univerjs/sheets';
 import { beforeEach, describe, expect, it } from 'vitest';
+import { SetNumfmtCommand, SheetsNumfmtCellContentController } from '../../index';
 import { createFacadeTestBed } from './create-test-bed';
+import '../index';
 
 describe('Test FRange', () => {
     let univerAPI: FUniver;
+    let testBed: ReturnType<typeof createFacadeTestBed>;
 
     beforeEach(() => {
-        const testBed = createFacadeTestBed();
-
+        testBed = createFacadeTestBed(undefined, [[SheetsNumfmtCellContentController]]);
+        const commandService = testBed.injector.get(ICommandService);
+        [
+            SetRangeValuesMutation,
+            SetNumfmtMutation,
+            RemoveNumfmtMutation,
+            SetNumfmtCommand,
+        ].forEach((command) => commandService.registerCommand(command));
         univerAPI = testBed.univerAPI;
     });
 
-    it('Range setNumberFormat', () => {
-        univerAPI.addEvent(univerAPI.Event.LifeCycleChanged, ({ stage }) => {
-            if (stage === LifecycleStages.Rendered) {
-                const activeSheet = univerAPI.getActiveWorkbook()!.getActiveSheet();
-                const range = activeSheet.getRange(0, 0, 1, 1);
-                range.setValue(1234.5678);
-                range.setNumberFormat('#,###');
-                expect(range.getValue()).toBe('1,234.5678');
-            }
-        });
+    it('sets and reads number formats on a single range and a range grid', () => {
+        const activeSheet = univerAPI.getActiveWorkbook()!.getActiveSheet();
+        const singleCell = activeSheet.getRange('A1');
+
+        expect(singleCell.setNumberFormat('#,##0.00')).toBe(singleCell);
+        expect(singleCell.getNumberFormat()).toBe('#,##0.00');
+
+        const range = activeSheet.getRange('A1:B2');
+        range.setNumberFormats([
+            ['#,##0.00', '0.00%'],
+            ['yyyy-MM-DD', ''],
+        ]);
+
+        expect(range.getNumberFormats()).toEqual([
+            ['#,##0.00', '0.00%'],
+            ['yyyy-MM-DD', ''],
+        ]);
+    });
+
+    it('sets workbook number format locale through the facade API', () => {
+        const workbook = univerAPI.getActiveWorkbook()!;
+        expect(workbook.setNumfmtLocal('fr')).toBe(workbook);
     });
 });

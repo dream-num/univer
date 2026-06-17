@@ -60,6 +60,7 @@ export default function createConfig(options?: any) {
                     '**/*.stories.tsx',
                     '**/__testing__/**',
                     '**/*/tailwind.config.ts',
+                    'packages/protocol/**',
                     'packages/slides/**',
                     'packages/slides-ui/**',
                     '**/src/plugin.ts',

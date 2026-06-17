@@ -17,7 +17,7 @@ importers:
     devDependencies:
       '@antfu/eslint-config':
         specifier: ^9.0.0
-        version: 9.0.0(@eslint-react/eslint-plugin@5.9.0(eslint@10.5.0(jiti@2.7.0))(typescript@6.0.3))(@typescript-eslint/rule-tester@8.56.1(eslint@10.5.0(jiti@2.7.0))(typescript@6.0.3))(@typescript-eslint/typescript-estree@8.61.0(typescript@6.0.3))(@typescript-eslint/utils@8.61.0(eslint@10.5.0(jiti@2.7.0))(typescript@6.0.3))(@vue/compiler-sfc@3.5.35)(eslint-plugin-format@2.0.1(eslint@10.5.0(jiti@2.7.0)))(eslint-plugin-react-refresh@0.5.2(eslint@10.5.0(jiti@2.7.0)))(eslint@10.5.0(jiti@2.7.0))(ts-declaration-location@1.0.7(typescript@6.0.3))(typescript@6.0.3)(vitest@4.1.9)
+        version: 9.0.0(@eslint-react/eslint-plugin@5.9.0(eslint@10.5.0(jiti@2.7.0))(typescript@6.0.3))(@typescript-eslint/rule-tester@8.56.1(eslint@10.5.0(jiti@2.7.0))(typescript@6.0.3))(@typescript-eslint/typescript-estree@8.61.0(typescript@6.0.3))(@typescript-eslint/utils@8.61.0(eslint@10.5.0(jiti@2.7.0))(typescript@6.0.3))(@vue/compiler-sfc@3.5.35)(eslint-plugin-format@2.0.1(eslint@10.5.0(jiti@2.7.0)))(eslint-plugin-react-refresh@0.5.3(eslint@10.5.0(jiti@2.7.0)))(eslint@10.5.0(jiti@2.7.0))(ts-declaration-location@1.0.7(typescript@6.0.3))(typescript@6.0.3)(vitest@4.1.9)
       '@commitlint/cli':
         specifier: ^21.0.2
         version: 21.0.2(@types/node@25.9.3)(conventional-commits-filter@5.0.0)(conventional-commits-parser@6.3.0)(typescript@6.0.3)
@@ -67,8 +67,8 @@ importers:
         specifier: ^7.1.1
         version: 7.1.1(eslint@10.5.0(jiti@2.7.0))
       eslint-plugin-react-refresh:
-        specifier: ^0.5.2
-        version: 0.5.2(eslint@10.5.0(jiti@2.7.0))
+        specifier: ^0.5.3
+        version: 0.5.3(eslint@10.5.0(jiti@2.7.0))
       husky:
         specifier: ^9.1.7
         version: 9.1.7
@@ -76,8 +76,8 @@ importers:
         specifier: ^17.0.7
         version: 17.0.7
       posthog-node:
-        specifier: ^5.37.0
-        version: 5.37.0(rxjs@7.8.2)
+        specifier: ^5.38.0
+        version: 5.38.0(rxjs@7.8.2)
       react:
         specifier: 19.2.7
         version: 19.2.7
@@ -5567,11 +5567,11 @@ packages:
     engines: {node: '>=18'}
     hasBin: true
 
-  '@posthog/core@1.32.3':
-    resolution: {integrity: sha512-vwOEMfZvGv5XxNWV7p9I52NSmvFNMhyW2IHpIoUHW5jLkgUrknzJW1H/qxVGSIrNNVQkfsoaDFzDhJdg10pgrA==}
+  '@posthog/core@1.34.0':
+    resolution: {integrity: sha512-hf+COAWSAG1UQHluPsfAOJDOR8tr8YY7cdf58ENGt20pEEWZ6sH3IbtvFDWkhp0ulSftA62x17w8R/f6IAwwEA==}
 
-  '@posthog/types@1.386.3':
-    resolution: {integrity: sha512-LqJoiQi2eyWn7rCUgnn+D+F3Efp6+04o72bjSX6kWHx0nFaYNC/nJuAIRliDTY/X7GPIUAaHAcSjbMI/9wfX1Q==}
+  '@posthog/types@1.387.0':
+    resolution: {integrity: sha512-XR0B1geABbnUlSNv4RuFWvk19D870B668C/XzcKDctAZ+xCH5gmGM0oltGbA9yj+2ia9Y65nOrDYKN6Whu1oBw==}
 
   '@protobufjs/aspromise@1.1.2':
     resolution: {integrity: sha512-j+gKExEuLmKwvz3OgROXtrJ2UG2x8Ch2YZUxahh+s1F2HZ+wAceUNLkvy6zKCPVRkU++ZWQrdxsUeQXmcg4uoQ==}
@@ -8568,8 +8568,8 @@ packages:
       eslint: '*'
       typescript: '*'
 
-  eslint-plugin-react-refresh@0.5.2:
-    resolution: {integrity: sha512-hmgTH57GfzoTFjVN0yBwTggnsVUF2tcqi7RJZHqi9lIezSs4eFyAMktA68YD4r5kNw1mxyY4dmkyoFDb3FIqrA==}
+  eslint-plugin-react-refresh@0.5.3:
+    resolution: {integrity: sha512-5EMmLCV98Pi4o/f/3DP/v/tNqLHMIc9I8LKClNDWhZ9JTho89/kQcitCXQBMG7sAfVRK0Ie3T2EDOzp1YXYiVA==}
     peerDependencies:
       eslint: ^9 || ^10
 
@@ -10696,8 +10696,8 @@ packages:
     resolution: {integrity: sha512-FfR8sjd4em2T6fb3I2MwAJU7HWVMr9zba+enmQeeWFfCbm+UOC/0X4DS8XtpUTMwWMGbjKYP7xjfNekzyGmB3A==}
     engines: {node: ^10 || ^12 || >=14}
 
-  posthog-node@5.37.0:
-    resolution: {integrity: sha512-wFwWGcqAqZ1WJRlNNYc92veV83d1lOQcP4Lq0q7Kar9GdZLPpiFYHeudyybYJnjZjkI9v06vLvY/Og5CZIfByg==}
+  posthog-node@5.38.0:
+    resolution: {integrity: sha512-xEojUWq7ajYfsMPZIexG9xtvhewpqrPWvL/qRhnm8W3KVZi6BlXHe29tjywZJglrDwEQpqdtYKbRXyg2zF9MWw==}
     engines: {node: ^20.20.0 || >=22.22.0}
     peerDependencies:
       rxjs: ^7.0.0
@@ -12257,7 +12257,7 @@ snapshots:
 
   '@alloc/quick-lru@5.2.0': {}
 
-  '@antfu/eslint-config@9.0.0(@eslint-react/eslint-plugin@5.9.0(eslint@10.5.0(jiti@2.7.0))(typescript@6.0.3))(@typescript-eslint/rule-tester@8.56.1(eslint@10.5.0(jiti@2.7.0))(typescript@6.0.3))(@typescript-eslint/typescript-estree@8.61.0(typescript@6.0.3))(@typescript-eslint/utils@8.61.0(eslint@10.5.0(jiti@2.7.0))(typescript@6.0.3))(@vue/compiler-sfc@3.5.35)(eslint-plugin-format@2.0.1(eslint@10.5.0(jiti@2.7.0)))(eslint-plugin-react-refresh@0.5.2(eslint@10.5.0(jiti@2.7.0)))(eslint@10.5.0(jiti@2.7.0))(ts-declaration-location@1.0.7(typescript@6.0.3))(typescript@6.0.3)(vitest@4.1.9)':
+  '@antfu/eslint-config@9.0.0(@eslint-react/eslint-plugin@5.9.0(eslint@10.5.0(jiti@2.7.0))(typescript@6.0.3))(@typescript-eslint/rule-tester@8.56.1(eslint@10.5.0(jiti@2.7.0))(typescript@6.0.3))(@typescript-eslint/typescript-estree@8.61.0(typescript@6.0.3))(@typescript-eslint/utils@8.61.0(eslint@10.5.0(jiti@2.7.0))(typescript@6.0.3))(@vue/compiler-sfc@3.5.35)(eslint-plugin-format@2.0.1(eslint@10.5.0(jiti@2.7.0)))(eslint-plugin-react-refresh@0.5.3(eslint@10.5.0(jiti@2.7.0)))(eslint@10.5.0(jiti@2.7.0))(ts-declaration-location@1.0.7(typescript@6.0.3))(typescript@6.0.3)(vitest@4.1.9)':
     dependencies:
       '@antfu/install-pkg': 1.1.0
       '@clack/prompts': 1.5.1
@@ -12299,7 +12299,7 @@ snapshots:
     optionalDependencies:
       '@eslint-react/eslint-plugin': 5.9.0(eslint@10.5.0(jiti@2.7.0))(typescript@6.0.3)
       eslint-plugin-format: 2.0.1(eslint@10.5.0(jiti@2.7.0))
-      eslint-plugin-react-refresh: 0.5.2(eslint@10.5.0(jiti@2.7.0))
+      eslint-plugin-react-refresh: 0.5.3(eslint@10.5.0(jiti@2.7.0))
     transitivePeerDependencies:
       - '@eslint/json'
       - '@typescript-eslint/rule-tester'
@@ -14029,11 +14029,11 @@ snapshots:
     dependencies:
       playwright: 1.57.0
 
-  '@posthog/core@1.32.3':
+  '@posthog/core@1.34.0':
     dependencies:
-      '@posthog/types': 1.386.3
+      '@posthog/types': 1.387.0
 
-  '@posthog/types@1.386.3': {}
+  '@posthog/types@1.387.0': {}
 
   '@protobufjs/aspromise@1.1.2': {}
 
@@ -15158,8 +15158,8 @@ snapshots:
 
   '@typescript-eslint/project-service@8.56.1(typescript@6.0.3)':
     dependencies:
-      '@typescript-eslint/tsconfig-utils': 8.56.1(typescript@6.0.3)
-      '@typescript-eslint/types': 8.56.1
+      '@typescript-eslint/tsconfig-utils': 8.61.0(typescript@6.0.3)
+      '@typescript-eslint/types': 8.61.0
       debug: 4.4.3
       typescript: 6.0.3
     transitivePeerDependencies:
@@ -17177,7 +17177,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-plugin-react-refresh@0.5.2(eslint@10.5.0(jiti@2.7.0)):
+  eslint-plugin-react-refresh@0.5.3(eslint@10.5.0(jiti@2.7.0)):
     dependencies:
       eslint: 10.5.0(jiti@2.7.0)
 
@@ -19693,9 +19693,9 @@ snapshots:
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
-  posthog-node@5.37.0(rxjs@7.8.2):
+  posthog-node@5.38.0(rxjs@7.8.2):
     dependencies:
-      '@posthog/core': 1.32.3
+      '@posthog/core': 1.34.0
     optionalDependencies:
       rxjs: 7.8.2
 

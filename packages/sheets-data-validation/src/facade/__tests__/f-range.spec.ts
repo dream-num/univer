@@ -19,7 +19,12 @@
 import type { Injector } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
 import { DataValidationType, ICommandService } from '@univerjs/core';
-import { FormulaExecuteStageType, SetFormulaCalculationNotificationMutation, SetFormulaCalculationResultMutation, SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
+import {
+    FormulaExecuteStageType,
+    SetFormulaCalculationNotificationMutation,
+    SetFormulaCalculationResultMutation,
+    SetFormulaCalculationStartMutation,
+} from '@univerjs/engine-formula';
 import { AddSheetDataValidationCommand, DataValidationCustomFormulaService } from '@univerjs/sheets-data-validation';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createFacadeTestBed } from './create-test-bed';

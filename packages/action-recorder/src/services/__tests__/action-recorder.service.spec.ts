@@ -30,7 +30,7 @@ import {
 import { SetSelectionsOperation } from '@univerjs/sheets';
 import { DesktopLocalFileService, ILocalFileService } from '@univerjs/ui';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { ActionRecorderService } from './action-recorder.service';
+import { ActionRecorderService } from '../action-recorder.service';
 
 class TestUniverInstanceService {
     getFocusedUnit() {

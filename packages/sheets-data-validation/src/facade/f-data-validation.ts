@@ -14,11 +14,30 @@
  * limitations under the License.
  */
 
-import type { DataValidationOperator, DataValidationType, IDataValidationRule, IDataValidationRuleOptions, Injector, IRange, Workbook, Worksheet } from '@univerjs/core';
-import type { IRemoveSheetDataValidationCommandParams, IUpdateSheetDataValidationOptionsCommandParams, IUpdateSheetDataValidationRangeCommandParams, IUpdateSheetDataValidationSettingCommandParams } from '@univerjs/sheets-data-validation';
+import type {
+    DataValidationOperator,
+    DataValidationType,
+    IDataValidationRule,
+    IDataValidationRuleOptions,
+    Injector,
+    IRange,
+    Workbook,
+    Worksheet,
+} from '@univerjs/core';
+import type {
+    IRemoveSheetDataValidationCommandParams,
+    IUpdateSheetDataValidationOptionsCommandParams,
+    IUpdateSheetDataValidationRangeCommandParams,
+    IUpdateSheetDataValidationSettingCommandParams,
+} from '@univerjs/sheets-data-validation';
 import { DataValidationErrorStyle, ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { DataValidationModel, getRuleOptions } from '@univerjs/data-validation';
-import { RemoveSheetDataValidationCommand, UpdateSheetDataValidationOptionsCommand, UpdateSheetDataValidationRangeCommand, UpdateSheetDataValidationSettingCommand } from '@univerjs/sheets-data-validation';
+import {
+    RemoveSheetDataValidationCommand,
+    UpdateSheetDataValidationOptionsCommand,
+    UpdateSheetDataValidationRangeCommand,
+    UpdateSheetDataValidationSettingCommand,
+} from '@univerjs/sheets-data-validation';
 import { FRange } from '@univerjs/sheets/facade';
 import { FDataValidationBuilder } from './f-data-validation-builder';
 

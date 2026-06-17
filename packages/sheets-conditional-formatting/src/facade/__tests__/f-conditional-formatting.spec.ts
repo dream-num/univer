@@ -17,15 +17,27 @@
 import type { Injector, Univer } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
 import { ICommandService } from '@univerjs/core/services/command/command.service.js';
-import { FormulaExecuteStageType, RemoveOtherFormulaMutation, SetFormulaCalculationNotificationMutation, SetFormulaCalculationResultMutation, SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
+import {
+    FormulaExecuteStageType,
+    RemoveOtherFormulaMutation,
+    SetFormulaCalculationNotificationMutation,
+    SetFormulaCalculationResultMutation,
+    SetFormulaCalculationStartMutation,
+} from '@univerjs/engine-formula';
 import { SetSelectionsOperation } from '@univerjs/sheets';
 import {
     AddCfCommand,
     AddConditionalRuleMutation,
+    CFNumberOperator,
+    CFTimePeriodOperator,
+    CFValueType,
+    ClearRangeCfCommand,
+    ClearWorksheetCfCommand,
     ConditionalFormattingFormulaService,
     ConditionalFormattingViewModel,
     DeleteCfCommand,
     DeleteConditionalRuleMutation,
+    IIconSetType,
     MoveCfCommand,
     MoveConditionalRuleMutation,
     SetCfCommand,
@@ -55,6 +67,8 @@ describe('Test conditional formatting facade', () => {
         [
             AddCfCommand,
             AddConditionalRuleMutation,
+            ClearRangeCfCommand,
+            ClearWorksheetCfCommand,
             DeleteCfCommand,
             DeleteConditionalRuleMutation,
             MoveCfCommand,
@@ -91,13 +105,18 @@ describe('Test conditional formatting facade', () => {
     it('Creates a constructor for conditional formatting', () => {
         const workbook = univerAPI.getActiveWorkbook();
         const worksheet = workbook?.getActiveSheet();
+        const range = worksheet?.getRange(0, 0, 2, 2);
         const rule = worksheet?.createConditionalFormattingRule()
             .whenCellNotEmpty()
-            .setRanges([{ startRow: 0, endRow: 100, startColumn: 0, endColumn: 100 }])
-            .setItalic(true)
-            .setItalic(true)
+            .setRanges([range!.getRange()])
+            .setBold(true)
+            .setItalic(false)
+            .setStrikethrough(true)
+            .setUnderline(true)
             .setBackground('red')
             .setFontColor('green')
+            .setBackground()
+            .setFontColor()
             .build();
         expect({ ...rule, cfId: 123 }).toEqual({
             rule: {
@@ -106,26 +125,143 @@ describe('Test conditional formatting facade', () => {
                 operator: 'notEqual',
                 value: '',
                 style: {
-                    it: 1,
-                    bg: {
-                        rgb: 'rgb(255,0,0)',
+                    bl: 1,
+                    it: 0,
+                    st: {
+                        s: 1,
                     },
-                    cl: {
-                        rgb: 'rgb(0,128,0)',
+                    ul: {
+                        s: 1,
                     },
                 },
             },
             ranges: [
                 {
                     startRow: 0,
-                    endRow: 100,
+                    endRow: 1,
                     startColumn: 0,
-                    endColumn: 100,
+                    endColumn: 1,
+                    unitId: 'test',
+                    sheetId: 'sheet1',
                 },
             ],
             cfId: 123,
             stopIfTrue: false,
         });
+    });
+
+    it('Builds conditional formatting rules for text, numbers, dates, rank, duplicate values, data bars, color scales, and icon sets', () => {
+        const workbook = univerAPI.getActiveWorkbook()!;
+        const worksheet = workbook.getActiveSheet();
+        const range = worksheet.getRange('A1:B2').getRange();
+        const builder = worksheet.newConditionalFormattingRule();
+
+        expect(univerAPI.Enum.ConditionFormatNumberOperatorEnum.greaterThan).toBe(CFNumberOperator.greaterThan);
+        expect(univerAPI.Enum.ConditionFormatTimePeriodOperatorEnum.last7Days).toBe(CFTimePeriodOperator.last7Days);
+        expect(univerAPI.Enum.ConditionFormatValueTypeEnum.num).toBe(CFValueType.num);
+        expect(univerAPI.Enum.ConditionFormatIconSetTypeEnum.threeArrows).toBe(IIconSetType.threeArrows);
+
+        const rules = [
+            builder.whenCellEmpty().setRanges([range]).build(),
+            builder.whenDate(CFTimePeriodOperator.last7Days).setRanges([range]).build(),
+            builder.whenFormulaSatisfied('=$A1>10').setRanges([range]).build(),
+            builder.whenNumberBetween(20, 10).setRanges([range]).build(),
+            builder.whenNumberEqualTo(10).setRanges([range]).build(),
+            builder.whenNumberGreaterThan(10).setRanges([range]).build(),
+            builder.whenNumberGreaterThanOrEqualTo(10).setRanges([range]).build(),
+            builder.whenNumberLessThan(10).setRanges([range]).build(),
+            builder.whenNumberLessThanOrEqualTo(10).setRanges([range]).build(),
+            builder.whenNumberNotBetween(20, 10).setRanges([range]).build(),
+            builder.whenNumberNotEqualTo(10).setRanges([range]).build(),
+            builder.whenTextContains('apple').setRanges([range]).build(),
+            builder.whenTextDoesNotContain('apple').setRanges([range]).build(),
+            builder.whenTextEndsWith('.ai').setRanges([range]).build(),
+            builder.whenTextEqualTo('done').setRanges([range]).build(),
+            builder.whenTextStartsWith('https://').setRanges([range]).build(),
+            builder.setAverage(CFNumberOperator.greaterThan).setRanges([range]).build(),
+            builder.setUniqueValues().setRanges([range]).build(),
+            builder.setDuplicateValues().setRanges([range]).build(),
+            builder.setRank({ isBottom: true, isPercent: true, value: 10 }).setRanges([range]).build(),
+            builder.setDataBar({
+                min: { type: CFValueType.num, value: -100 },
+                max: { type: CFValueType.num, value: 100 },
+                positiveColor: '#00ff00',
+                nativeColor: '#ff0000',
+                isGradient: true,
+                isShowValue: true,
+            }).setRanges([range]).build(),
+            builder.setColorScale([
+                { index: 0, color: '#00ff00', value: { type: CFValueType.min } },
+                { index: 1, color: '#ffff00', value: { type: CFValueType.percent, value: 50 } },
+                { index: 2, color: '#ff0000', value: { type: CFValueType.max } },
+            ]).setRanges([range]).build(),
+            builder.setIconSet({
+                isShowValue: true,
+                iconConfigs: [
+                    {
+                        iconType: IIconSetType.threeArrows,
+                        iconId: '0',
+                        operator: CFNumberOperator.greaterThan,
+                        value: { type: CFValueType.num, value: 20 },
+                    },
+                    {
+                        iconType: IIconSetType.threeArrows,
+                        iconId: '1',
+                        operator: CFNumberOperator.greaterThan,
+                        value: { type: CFValueType.num, value: 10 },
+                    },
+                    {
+                        iconType: IIconSetType.threeArrows,
+                        iconId: '2',
+                        operator: CFNumberOperator.lessThanOrEqual,
+                        value: { type: CFValueType.num, value: 10 },
+                    },
+                ],
+            }).setRanges([range]).build(),
+        ];
+
+        expect(rules.map((rule) => rule.rule.type)).toEqual([
+            'highlightCell',
+            'highlightCell',
+            'highlightCell',
+            'highlightCell',
+            'highlightCell',
+            'highlightCell',
+            'highlightCell',
+            'highlightCell',
+            'highlightCell',
+            'highlightCell',
+            'highlightCell',
+            'highlightCell',
+            'highlightCell',
+            'highlightCell',
+            'highlightCell',
+            'highlightCell',
+            'highlightCell',
+            'highlightCell',
+            'highlightCell',
+            'highlightCell',
+            'dataBar',
+            'colorScale',
+            'iconSet',
+        ]);
+        expect(rules.map((rule) => ('operator' in rule.rule ? rule.rule.operator : undefined))).toContain(CFNumberOperator.between);
+        expect(rules.map((rule) => ('operator' in rule.rule ? rule.rule.operator : undefined))).toContain(CFNumberOperator.notBetween);
+        expect(rules[3].rule).toMatchObject({ value: [10, 20] });
+        expect(rules[20].rule).toMatchObject({
+            type: 'dataBar',
+            isShowValue: true,
+            config: {
+                min: { type: 'num', value: -100 },
+                max: { type: 'num', value: 100 },
+                positiveColor: '#00ff00',
+                nativeColor: '#ff0000',
+                isGradient: true,
+            },
+        });
+        expect(rules[21].rule).toMatchObject({ type: 'colorScale', config: [{ index: 0 }, { index: 1 }, { index: 2 }] });
+        expect(rules[22].rule).toMatchObject({ type: 'iconSet', isShowValue: true, config: [{ iconId: '0' }, { iconId: '1' }, { iconId: '2' }] });
+        expect(builder.getIconMap()[IIconSetType.threeArrows].length).toBeGreaterThan(0);
     });
 
     it('Creates rule and add', () => {
@@ -263,5 +399,60 @@ describe('Test conditional formatting facade', () => {
         const afterEditRule = worksheet?.getConditionalFormattingRules()[0];
         expect(afterEditRule?.cfId).toEqual(rule.cfId);
         expect(afterEditRule?.ranges).toEqual([]);
+    });
+
+    it('Uses range facade APIs to add, update, reprioritize, and delete rules on the active selection', () => {
+        const workbook = univerAPI.getActiveWorkbook()!;
+        const worksheet = workbook.getActiveSheet();
+        const range = worksheet.getRange('A1:B2');
+        const rule = range.createConditionalFormattingRule()
+            .whenTextContains('paid')
+            .setBackground('#00ff00')
+            .build();
+
+        range.addConditionalFormattingRule(rule);
+        expect(range.getConditionalFormattingRules().some((item) => item.cfId === rule.cfId)).toBe(true);
+
+        const updatedRule = range.createConditionalFormattingRule()
+            .whenTextContains('overdue')
+            .setBackground('#ff0000')
+            .build();
+        range.setConditionalFormattingRule(rule.cfId, { ...updatedRule, cfId: rule.cfId });
+        expect(worksheet.getConditionalFormattingRules().find((item) => item.cfId === rule.cfId)?.rule).toMatchObject({ value: 'overdue' });
+
+        const firstRule = worksheet.getConditionalFormattingRules()[0];
+        range.moveConditionalFormattingRule(rule.cfId, firstRule.cfId, 'before');
+        expect(worksheet.getConditionalFormattingRules()[0].cfId).toBe(rule.cfId);
+
+        range.deleteConditionalFormattingRule(rule.cfId);
+        expect(worksheet.getConditionalFormattingRules().some((item) => item.cfId === rule.cfId)).toBe(false);
+    });
+
+    it('Clears conditional formatting from a range without removing unrelated sheet rules', () => {
+        const workbook = univerAPI.getActiveWorkbook()!;
+        const worksheet = workbook.getActiveSheet();
+        const range = worksheet.getRange('A1:B2');
+        const rule = range.createConditionalFormattingRule()
+            .whenNumberGreaterThan(100)
+            .setBackground('#ff0000')
+            .build();
+
+        range.addConditionalFormattingRule(rule);
+        expect(range.getConditionalFormattingRules().map((item) => item.cfId)).toContain(rule.cfId);
+
+        range.clearConditionalFormatRules();
+
+        expect(range.getConditionalFormattingRules().map((item) => item.cfId)).not.toContain(rule.cfId);
+        expect(worksheet.getConditionalFormattingRules().length).toBe(3);
+    });
+
+    it('Clears all conditional formatting rules from a worksheet', () => {
+        const workbook = univerAPI.getActiveWorkbook()!;
+        const worksheet = workbook.getActiveSheet();
+
+        expect(worksheet.getConditionalFormattingRules().length).toBeGreaterThan(0);
+        worksheet.clearConditionalFormatRules();
+
+        expect(worksheet.getConditionalFormattingRules()).toEqual([]);
     });
 });

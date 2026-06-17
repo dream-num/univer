@@ -16,8 +16,15 @@
 
 import type { Injector } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
-import { ICommandService } from '@univerjs/core';
-import { InsertSheetCommand, InsertSheetMutation, RemoveSheetCommand, RemoveSheetMutation, SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/sheets';
+import { Direction, ICommandService } from '@univerjs/core';
+import {
+    InsertSheetCommand,
+    InsertSheetMutation,
+    RemoveSheetCommand,
+    RemoveSheetMutation,
+    SetSelectionsOperation,
+    SetWorksheetActiveOperation,
+} from '@univerjs/sheets';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { createFacadeTestBed } from './create-test-bed';
 
@@ -94,5 +101,27 @@ describe('Test Active Range', () => {
         expect(() => {
             sheet1.setActiveRange(range2);
         }).toThrow('Specified range must be part of the sheet.');
+    });
+
+    it('Worksheet selection tracks the active range and current cell as users move within it', () => {
+        const workbook = univerAPI.getActiveWorkbook()!;
+        const sheet = workbook.getActiveSheet();
+
+        sheet.getRange('A1:B2').activate();
+        let selection = sheet.getSelection()!;
+
+        expect(selection.getActiveSheet().equalTo(sheet)).toBe(true);
+        expect(selection.getActiveRange()?.getA1Notation()).toBe('A1:B2');
+        expect(selection.getActiveRangeList().map((range) => range.getA1Notation())).toEqual(['A1:B2']);
+        expect(selection.getCurrentCell()).toMatchObject({ actualRow: 0, actualColumn: 0 });
+        expect(selection.getNextDataRange(Direction.RIGHT)?.getA1Notation()).toBe('B1');
+
+        selection = selection.updatePrimaryCell(sheet.getRange('B1'));
+        expect(selection.getCurrentCell()).toMatchObject({ actualRow: 0, actualColumn: 1 });
+        expect(selection.getNextDataRange(Direction.RIGHT)?.getA1Notation()).toBe('A2');
+
+        selection = selection.updatePrimaryCell(sheet.getRange('C3'));
+        expect(selection.getActiveRange()?.getA1Notation()).toBe('C3');
+        expect(selection.getCurrentCell()).toMatchObject({ actualRow: 2, actualColumn: 2 });
     });
 });

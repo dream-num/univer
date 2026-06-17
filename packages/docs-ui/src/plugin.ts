@@ -126,6 +126,7 @@ import { DocPageLayoutService } from './services/doc-page-layout.service';
 import { DocParagraphMenuService } from './services/doc-paragraph-menu.service';
 import { DocCanvasPopManagerService } from './services/doc-popup-manager.service';
 import { DocPrintInterceptorService } from './services/doc-print-interceptor.service';
+import { DocViewScaleService } from './services/doc-view-scale';
 import { DocsRenderService } from './services/docs-render.service';
 import { EditorService, IEditorService } from './services/editor/editor-manager.service';
 import { DocFloatMenuService } from './services/float-menu.service';
@@ -394,6 +395,7 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocSkeletonManagerService],
             [DocSelectionRenderService],
             [DocInterceptorService],
+            [DocViewScaleService],
             [DocPageLayoutService],
             [DocIMEInputManagerService],
             [DocRenderController],

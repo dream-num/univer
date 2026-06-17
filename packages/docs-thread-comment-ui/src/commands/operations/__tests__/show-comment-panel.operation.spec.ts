@@ -14,75 +14,197 @@
  * limitations under the License.
  */
 
-import { describe, expect, it, vi } from 'vitest';
-import { DOCS_THREAD_COMMENT_PANEL } from '../../../common/const';
-import { ShowCommentPanelOperation, ToggleCommentPanelOperation } from '../show-comment-panel.operation';
+import type { DocumentDataModel, IDisposable, IDocumentData } from '@univerjs/core';
+import type { IRender } from '@univerjs/engine-render';
+import type { ISidebarMethodOptions } from '@univerjs/ui';
+import { Disposable, ICommandService, IUniverInstanceService, toDisposable, Univer, UniverInstanceType } from '@univerjs/core';
+import { DocSelectionManagerService } from '@univerjs/docs';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
+import { ISidebarService } from '@univerjs/ui';
+import { Subject } from 'rxjs';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { DEFAULT_DOC_SUBUNIT_ID, DOCS_THREAD_COMMENT_PANEL } from '../../../common/const';
+import { DocThreadCommentService } from '../../../services/doc-thread-comment.service';
+import { ShowCommentPanelOperation, StartAddCommentOperation, ToggleCommentPanelOperation } from '../show-comment-panel.operation';
 
-describe('ShowCommentPanelOperation', () => {
-    it('should open sidebar and set active comment', () => {
-        const setPanelVisible = vi.fn();
-        const setActiveComment = vi.fn();
-        const panelService = {
-            panelVisible: false,
-            setPanelVisible,
-            setActiveComment,
-        };
+const unitId = 'doc-thread-comment-operation-doc';
 
-        const open = vi.fn();
-        const sidebarService = {
-            options: {},
-            open,
-        };
-
-        const accessor = {
-            get: (token: any) => {
-                if (token.name === 'ThreadCommentPanelService') return panelService;
-                return sidebarService;
+function createDocData(): IDocumentData {
+    return {
+        id: unitId,
+        body: {
+            dataStream: 'Hello world\r\n',
+        },
+        documentStyle: {
+            pageSize: {
+                width: 594.3,
+                height: 840.51,
             },
-        } as any;
+            marginTop: 72,
+            marginBottom: 72,
+            marginRight: 90,
+            marginLeft: 90,
+        },
+    };
+}
 
-        const ok = ShowCommentPanelOperation.handler(accessor, {
-            activeComment: { unitId: 'doc-1', subUnitId: 'default', commentId: 'c1' },
+class TestSidebarService extends Disposable implements ISidebarService {
+    readonly sidebarOptions$ = new Subject<ISidebarMethodOptions>();
+    readonly scrollEvent$ = new Subject<Event>();
+    private _options: ISidebarMethodOptions = {};
+    private _container?: HTMLElement;
+    private _width?: number;
+
+    get visible(): boolean {
+        return this._options.visible ?? false;
+    }
+
+    get options(): ISidebarMethodOptions {
+        return this._options;
+    }
+
+    get width(): number | undefined {
+        return this._width;
+    }
+
+    open(params: ISidebarMethodOptions): IDisposable {
+        this._options = { ...params, visible: true };
+        this.sidebarOptions$.next(this._options);
+        return toDisposable(() => this.close());
+    }
+
+    close(): void {
+        this._options = { ...this._options, visible: false };
+        this.sidebarOptions$.next(this._options);
+        this._options.onClose?.();
+    }
+
+    getContainer(): HTMLElement | undefined {
+        return this._container;
+    }
+
+    setContainer(element?: HTMLElement): void {
+        this._container = element;
+    }
+
+    setWidth(value: number): void {
+        this._width = value;
+    }
+
+    override dispose(): void {
+        super.dispose();
+        this.sidebarOptions$.complete();
+        this.scrollEvent$.complete();
+    }
+}
+
+class TestRenderManagerService implements Pick<IRenderManagerService, 'getRenderById'> {
+    getRenderById(): IRender | null {
+        return null;
+    }
+}
+
+describe('doc thread comment panel operations', () => {
+    let univer: Univer;
+    let commandService: ICommandService;
+    let sidebarService: ISidebarService;
+    let panelService: ThreadCommentPanelService;
+    let selectionManager: DocSelectionManagerService;
+    let docThreadCommentService: DocThreadCommentService;
+
+    beforeEach(() => {
+        univer = new Univer();
+        const injector = univer.__getInjector();
+        injector.add([ISidebarService, { useClass: TestSidebarService }]);
+        injector.add([ThreadCommentPanelService]);
+        injector.add([DocSelectionManagerService]);
+        injector.add([DocThreadCommentService]);
+        injector.add([IRenderManagerService, { useClass: TestRenderManagerService as never }]);
+
+        univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, createDocData());
+        injector.get(IUniverInstanceService).focusUnit(unitId);
+
+        commandService = injector.get(ICommandService);
+        commandService.registerCommand(ShowCommentPanelOperation);
+        commandService.registerCommand(ToggleCommentPanelOperation);
+        commandService.registerCommand(StartAddCommentOperation);
+
+        sidebarService = injector.get(ISidebarService);
+        panelService = injector.get(ThreadCommentPanelService);
+        selectionManager = injector.get(DocSelectionManagerService);
+        docThreadCommentService = injector.get(DocThreadCommentService);
+    });
+
+    afterEach(() => {
+        univer.dispose();
+    });
+
+    it('opens the docs comment panel and activates the requested comment', async () => {
+        const activeComment = { unitId, subUnitId: 'doc', commentId: 'comment-1' };
+
+        const result = await commandService.executeCommand(ShowCommentPanelOperation.id, {
+            activeComment,
         });
 
-        expect(ok).toBe(true);
-        expect(open).toHaveBeenCalledWith(expect.objectContaining({
-            children: { label: DOCS_THREAD_COMMENT_PANEL },
-            width: 320,
-        }));
-        expect(setPanelVisible).toHaveBeenCalledWith(true);
-        expect(setActiveComment).toHaveBeenCalledWith({ unitId: 'doc-1', subUnitId: 'default', commentId: 'c1' });
+        expect(result).toBe(true);
+        expect(panelService.panelVisible).toBe(true);
+        expect(panelService.activeCommentId).toEqual(activeComment);
+        expect(sidebarService.visible).toBe(true);
+        expect(sidebarService.options.children?.label).toBe(DOCS_THREAD_COMMENT_PANEL);
     });
-});
 
-describe('ToggleCommentPanelOperation', () => {
-    it('should close sidebar and reset state when already opened', () => {
-        const setPanelVisible = vi.fn();
-        const setActiveComment = vi.fn();
-        const panelService = {
-            panelVisible: true,
-            setPanelVisible,
-            setActiveComment,
-        };
+    it('toggles an open comment panel closed and clears the active comment', async () => {
+        const activeComment = { unitId, subUnitId: 'doc', commentId: 'comment-2' };
 
-        const close = vi.fn();
-        const sidebarService = {
-            options: { children: { label: DOCS_THREAD_COMMENT_PANEL } },
-            open: vi.fn(),
-            close,
-        };
+        await commandService.executeCommand(ShowCommentPanelOperation.id, {
+            activeComment,
+        });
+        const result = await commandService.executeCommand(ToggleCommentPanelOperation.id);
 
-        const accessor = {
-            get: (token: any) => {
-                if (token.name === 'ThreadCommentPanelService') return panelService;
-                return sidebarService;
-            },
-        } as any;
+        expect(result).toBe(true);
+        expect(panelService.panelVisible).toBe(false);
+        expect(panelService.activeCommentId).toBeNull();
+        expect(sidebarService.visible).toBe(false);
+    });
 
-        const ok = ToggleCommentPanelOperation.handler(accessor);
-        expect(ok).toBe(true);
-        expect(close).toHaveBeenCalledTimes(1);
-        expect(setPanelVisible).toHaveBeenCalledWith(false);
-        expect(setActiveComment).toHaveBeenCalledWith(null);
+    it('starts a new comment draft from the selected document text', async () => {
+        selectionManager.__TEST_ONLY_setCurrentSelection({
+            unitId,
+            subUnitId: unitId,
+        });
+        selectionManager.__TEST_ONLY_add([{
+            startOffset: 0,
+            endOffset: 5,
+            collapsed: false,
+            isActive: true,
+            segmentId: '',
+            style: null as never,
+        }]);
+
+        const result = await commandService.executeCommand(StartAddCommentOperation.id);
+
+        expect(result).toBe(true);
+        expect(panelService.panelVisible).toBe(true);
+        expect(docThreadCommentService.addingComment).toMatchObject({
+            unitId,
+            ref: 'Hello',
+            startOffset: 0,
+            endOffset: 5,
+            collapsed: true,
+        });
+        expect(panelService.activeCommentId).toEqual({
+            unitId,
+            subUnitId: DEFAULT_DOC_SUBUNIT_ID,
+            commentId: '',
+        });
+    });
+
+    it('does not start a new comment draft without selected document text', async () => {
+        const result = await commandService.executeCommand(StartAddCommentOperation.id);
+
+        expect(result).toBe(false);
+        expect(docThreadCommentService.addingComment).toBeUndefined();
+        expect(panelService.panelVisible).toBe(false);
     });
 });

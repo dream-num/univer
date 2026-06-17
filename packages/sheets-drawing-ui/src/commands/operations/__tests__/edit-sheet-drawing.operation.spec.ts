@@ -14,56 +14,84 @@
  * limitations under the License.
  */
 
-import type { IAccessor, IDrawingSearch } from '@univerjs/core';
-import { ICommandService } from '@univerjs/core';
-import { SetDrawingSelectedOperation } from '@univerjs/drawing';
-import { describe, expect, it, vi } from 'vitest';
+import type { ISheetDrawing } from '@univerjs/sheets-drawing';
+import { DrawingTypeEnum, ImageSourceType } from '@univerjs/core';
+import { IDrawingManagerService } from '@univerjs/drawing';
+import { InsertSheetDrawingCommand } from '@univerjs/sheets-drawing';
+import { afterEach, describe, expect, it } from 'vitest';
+import { createSheetsDrawingUiTestBed } from '../../../__tests__/create-sheets-drawing-ui-test-bed';
 import { EditSheetDrawingOperation } from '../edit-sheet-drawing.operation';
 import { SidebarSheetDrawingOperation } from '../open-drawing-panel.operation';
 
+function createSheetDrawing(drawingId: string): ISheetDrawing {
+    return {
+        unitId: 'test',
+        subUnitId: 'sheet1',
+        drawingId,
+        drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+        imageSourceType: ImageSourceType.URL,
+        source: `https://example.com/${drawingId}.png`,
+        sheetTransform: {
+            angle: 0,
+            flipX: false,
+            flipY: false,
+            skewX: 0,
+            skewY: 0,
+            from: { row: 1, column: 1, rowOffset: 0, columnOffset: 0 },
+            to: { row: 4, column: 3, rowOffset: 0, columnOffset: 0 },
+        },
+        axisAlignSheetTransform: {
+            angle: 0,
+            flipX: false,
+            flipY: false,
+            skewX: 0,
+            skewY: 0,
+            from: { row: 1, column: 1, rowOffset: 0, columnOffset: 0 },
+            to: { row: 4, column: 3, rowOffset: 0, columnOffset: 0 },
+        },
+    };
+}
+
 describe('EditSheetDrawingOperation', () => {
-    it('returns false when there is no selected drawing', () => {
-        const commandService = {
-            syncExecuteCommand: vi.fn(),
-            executeCommand: vi.fn(),
-        };
-        const accessor = {
-            get(token: unknown) {
-                if (token === ICommandService) {
-                    return commandService;
-                }
-
-                throw new Error(`Unknown dependency: ${String(token)}`);
-            },
-        } as IAccessor;
-
-        expect(EditSheetDrawingOperation.handler(accessor, null as never)).toBe(false);
-        expect(commandService.syncExecuteCommand).not.toHaveBeenCalled();
-        expect(commandService.executeCommand).not.toHaveBeenCalled();
+    afterEach(() => {
+        // each test disposes its own univer instance
     });
 
-    it('selects the drawing and opens the sheet sidebar editor', () => {
-        const commandService = {
-            syncExecuteCommand: vi.fn(() => true),
-            executeCommand: vi.fn(),
-        };
-        const accessor = {
-            get(token: unknown) {
-                if (token === ICommandService) {
-                    return commandService;
-                }
+    it('keeps focus and sidebar unchanged when no drawing is provided', async () => {
+        const testBed = createSheetsDrawingUiTestBed();
+        const drawingManagerService = testBed.get(IDrawingManagerService);
+        testBed.commandService.registerCommand(EditSheetDrawingOperation);
+        testBed.commandService.registerCommand(SidebarSheetDrawingOperation);
 
-                throw new Error(`Unknown dependency: ${String(token)}`);
-            },
-        } as IAccessor;
-        const drawing: IDrawingSearch = {
-            unitId: 'book-1',
-            subUnitId: 'sheet-1',
+        expect(await testBed.commandService.executeCommand(EditSheetDrawingOperation.id, null as never)).toBe(false);
+        expect(drawingManagerService.getFocusDrawings()).toEqual([]);
+        expect(testBed.sidebarService.visible).toBe(false);
+
+        testBed.univer.dispose();
+    });
+
+    it('selects a drawing and opens the sheet drawing editor', async () => {
+        const testBed = createSheetsDrawingUiTestBed();
+        const drawingManagerService = testBed.get(IDrawingManagerService);
+        testBed.commandService.registerCommand(EditSheetDrawingOperation);
+        testBed.commandService.registerCommand(SidebarSheetDrawingOperation);
+
+        await testBed.commandService.executeCommand(InsertSheetDrawingCommand.id, {
+            unitId: testBed.unitId,
+            drawings: [createSheetDrawing('drawing-1')],
+        });
+
+        expect(await testBed.commandService.executeCommand(EditSheetDrawingOperation.id, {
+            unitId: testBed.unitId,
+            subUnitId: testBed.subUnitId,
             drawingId: 'drawing-1',
-        };
+        })).toBe(true);
 
-        expect(EditSheetDrawingOperation.handler(accessor, drawing)).toBe(true);
-        expect(commandService.syncExecuteCommand).toHaveBeenCalledWith(SetDrawingSelectedOperation.id, [drawing]);
-        expect(commandService.executeCommand).toHaveBeenCalledWith(SidebarSheetDrawingOperation.id, { value: 'open' });
+        expect(drawingManagerService.getFocusDrawings()).toEqual([expect.objectContaining({
+            drawingId: 'drawing-1',
+        })]);
+        expect(testBed.sidebarService.visible).toBe(true);
+
+        testBed.univer.dispose();
     });
 });

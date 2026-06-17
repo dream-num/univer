@@ -22,6 +22,9 @@ import {
     BooleanNumber,
     CommandType,
     CustomRangeType,
+    DashStyleType,
+    DataStreamTreeTokenType,
+    DeleteDirection,
     Direction,
     Disposable,
     DocumentFlavor,
@@ -38,7 +41,12 @@ import {
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
-import { DocSelectionManagerService, DocSkeletonManagerService, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
+import {
+    DocSelectionManagerService,
+    DocSkeletonManagerService,
+    RichTextEditingMutation,
+    SetTextSelectionsOperation,
+} from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ISidebarService } from '@univerjs/ui';
 import { Subject } from 'rxjs';
@@ -49,6 +57,8 @@ import { DocAutoFormatService } from '../../../services/doc-auto-format.service'
 import { DocSelectionRenderService } from '../../../services/selection/doc-selection-render.service';
 import { COMPONENT_DOC_HEADER_FOOTER_PANEL } from '../../../views/header-footer/panel/component-name';
 import { PAGE_SETTING_COMPONENT_ID } from '../../../views/PageSettings';
+import { COMPONENT_DOC_CREATE_TABLE_CONFIRM } from '../../../views/table/create/component-name';
+import { DocCreateTableOperation } from '../../operations/doc-create-table.operation';
 import { MoveCursorOperation, MoveSelectionOperation } from '../../operations/doc-cursor.operation';
 import { SidebarDocHeaderFooterPanelOperation } from '../../operations/doc-header-footer-panel.operation';
 import { DocParagraphSettingPanelOperation } from '../../operations/doc-paragraph-setting-panel.operation';
@@ -56,17 +66,27 @@ import { DocOpenPageSettingCommand } from '../../operations/open-page-setting.op
 import { SetDocZoomRatioOperation } from '../../operations/set-doc-zoom-ratio.operation';
 import { AfterSpaceCommand, EnterCommand, TabCommand } from '../auto-format.command';
 import { BreakLineCommand } from '../break-line.command';
+import { DeleteCurrentParagraphCommand, MergeTwoParagraphCommand, RemoveHorizontalLineCommand } from '../doc-delete.command';
 import { CoreHeaderFooterCommand, OpenHeaderFooterPanelCommand } from '../doc-header-footer.command';
 import { HorizontalLineCommand, InsertHorizontalLineBellowCommand } from '../doc-horizontal-line.command';
 import { DocPageSetupCommand } from '../doc-page-setup.command';
 import { DocParagraphSettingCommand } from '../doc-paragraph-setting.command';
 import { DocSelectAllCommand } from '../doc-select-all.command';
 import { InsertCustomRangeCommand } from '../insert-custom-range.command';
-import { AlignCenterCommand, AlignJustifyCommand, AlignOperationCommand } from '../paragraph-align.command';
+import {
+    AlignCenterCommand,
+    AlignJustifyCommand,
+    AlignLeftCommand,
+    AlignOperationCommand,
+    AlignRightCommand,
+} from '../paragraph-align.command';
 import { ReplaceSelectionCommand } from '../replace-content.command';
 import { SetDocZoomRatioCommand } from '../set-doc-zoom-ratio.command';
 import { SwitchDocModeCommand } from '../switch-doc-mode.command';
-import { genEmptyTable } from '../table/table';
+import { CreateDocTableCommand } from '../table/doc-table-create.command';
+import { DocTableInsertRowCommand } from '../table/doc-table-insert.command';
+import { DocTableTabCommand } from '../table/doc-table-tab.command';
+import { genEmptyTable, genTableSource } from '../table/table';
 import { createCommandTestBed } from './create-command-test-bed';
 
 class TestSidebarService extends Disposable implements ISidebarService {
@@ -227,6 +247,31 @@ function createMultiParagraphDoc(): IDocumentData {
     };
 }
 
+function createHorizontalLineDoc(): IDocumentData {
+    const doc = createMultiParagraphDoc();
+    const body = doc.body!;
+    return {
+        ...doc,
+        body: {
+            ...body,
+            paragraphs: body.paragraphs?.map((paragraph, index) => index === 0
+                ? {
+                    ...paragraph,
+                    paragraphStyle: {
+                        ...paragraph.paragraphStyle,
+                        borderBottom: {
+                            padding: 5,
+                            color: { rgb: '#CDD0D8' },
+                            width: 1,
+                            dashStyle: DashStyleType.SOLID,
+                        },
+                    },
+                }
+                : paragraph),
+        },
+    };
+}
+
 function createTableDoc(): IDocumentData {
     const table = genEmptyTable(2, 2);
     const prefix = 'AB';
@@ -274,6 +319,71 @@ function createTableDoc(): IDocumentData {
             marginBottom: 72,
             marginRight: 90,
             marginLeft: 90,
+        },
+    };
+}
+
+function createTableCommandDoc(rowCount = 2, colCount = 2): IDocumentData {
+    const table = genEmptyTable(rowCount, colCount);
+    const tableSource = genTableSource(rowCount, colCount, 360);
+    const suffix = 'Tail\r\n';
+    const dataStream = `${table.dataStream}${suffix}`;
+
+    return {
+        id: 'test-doc',
+        body: {
+            dataStream,
+            textRuns: [{
+                st: 0,
+                ed: dataStream.length - 2,
+                ts: {},
+            }],
+            paragraphs: [
+                ...table.paragraphs,
+                { paragraphId: 'para_docs_ui_fixture_29', startIndex: dataStream.length - 2 },
+            ],
+            sectionBreaks: [
+                ...table.sectionBreaks,
+                {
+                    startIndex: dataStream.length - 1,
+                },
+            ],
+            tables: [{
+                startIndex: 0,
+                endIndex: table.dataStream.length,
+                tableId: 'table-1',
+            }],
+            customBlocks: [],
+        },
+        documentStyle: {
+            pageSize: {
+                width: 594.3,
+                height: 840.51,
+            },
+            marginTop: 72,
+            marginBottom: 72,
+            marginRight: 90,
+            marginLeft: 90,
+        },
+        tableSource: {
+            'table-1': {
+                ...tableSource,
+                tableId: 'table-1',
+            },
+        },
+    };
+}
+
+function createPageFillTableCommandDoc(): IDocumentData {
+    const doc = createTableCommandDoc();
+    return {
+        ...doc,
+        documentStyle: {
+            ...doc.documentStyle,
+            pageSize: {
+                width: 540,
+                height: 840.51,
+            },
         },
     };
 }
@@ -331,6 +441,22 @@ function createTableDocWithParagraphsBeforeTable(): IDocumentData {
     };
 }
 
+function collectTokenRanges(dataStream: string, startToken: string, endToken: string) {
+    const ranges: Array<{ startIndex: number; endIndex: number }> = [];
+
+    for (let i = 0; i < dataStream.length; i++) {
+        if (dataStream[i] !== startToken) {
+            continue;
+        }
+
+        const endIndex = dataStream.indexOf(endToken, i);
+        ranges.push({ startIndex: i, endIndex });
+        i = endIndex;
+    }
+
+    return ranges;
+}
+
 describe('misc document commands', () => {
     let univer: Univer;
     let get: Injector['get'];
@@ -362,6 +488,19 @@ describe('misc document commands', () => {
 
     function loadTestLocale() {
         get(LocaleService).load({ [LocaleType.ZH_CN]: {} });
+    }
+
+    function useViewModelSkeleton() {
+        const skeletonManager = get(DocSkeletonManagerService);
+        const viewModel = skeletonManager.getViewModel();
+        const mutableSkeletonManager = skeletonManager as unknown as {
+            getSkeleton: () => {
+                getViewModel: () => typeof viewModel;
+            };
+        };
+        mutableSkeletonManager.getSkeleton = () => ({
+            getViewModel: () => viewModel,
+        });
     }
 
     afterEach(() => {
@@ -667,6 +806,62 @@ describe('misc document commands', () => {
         }));
     });
 
+    it('removes a horizontal line from the paragraph before the cursor', async () => {
+        ({ univer, get } = createCommandTestBed(createHorizontalLineDoc()));
+        commandService = get(ICommandService);
+        commandService.registerCommand(RemoveHorizontalLineCommand);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+        setCollapsedSelection(6);
+
+        expect(await commandService.executeCommand(RemoveHorizontalLineCommand.id)).toBe(true);
+        await awaitTime(0);
+
+        expect(getBody()?.paragraphs?.[0].paragraphStyle?.borderBottom).toBeUndefined();
+    });
+
+    it('merges adjacent paragraphs through the delete merge command', async () => {
+        ({ univer, get } = createCommandTestBed(createMultiParagraphDoc()));
+        commandService = get(ICommandService);
+        commandService.registerCommand(MergeTwoParagraphCommand);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+        setCollapsedSelection(6);
+
+        expect(await commandService.executeCommand(MergeTwoParagraphCommand.id, {
+            direction: DeleteDirection.LEFT,
+            range: {
+                startOffset: 6,
+                endOffset: 6,
+                collapsed: true,
+                segmentId: '',
+                style: null,
+            },
+        })).toBe(true);
+        await awaitTime(0);
+
+        expect(getBody()?.dataStream).toBe('TitleBody\r\n');
+        expect(getBody()?.paragraphs).toHaveLength(1);
+    });
+
+    it('deletes the current paragraph through rich text editing', async () => {
+        ({ univer, get } = createCommandTestBed(createMultiParagraphDoc()));
+        commandService = get(ICommandService);
+        commandService.registerCommand(DeleteCurrentParagraphCommand);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+        setCollapsedSelection(2);
+
+        expect(await commandService.executeCommand(DeleteCurrentParagraphCommand.id)).toEqual(expect.objectContaining({
+            unitId: 'test-doc',
+            textRanges: [expect.objectContaining({
+                startOffset: 2,
+                endOffset: 2,
+            })],
+        }));
+        await awaitTime(0);
+
+        expect(getBody()?.dataStream).toBe('Body\r\n');
+        expect(getBody()?.paragraphs?.[0].startIndex).toBe(0);
+    });
+
     it('aligns selected paragraphs through the wrapper and toggles an existing alignment', async () => {
         ({ univer, get } = createCommandTestBed(createMultiParagraphDoc()));
         commandService = get(ICommandService);
@@ -694,6 +889,29 @@ describe('misc document commands', () => {
 
         expect(getBody()?.paragraphs?.[0].paragraphStyle?.horizontalAlign).toBe(HorizontalAlign.JUSTIFIED);
         expect(getBody()?.paragraphs?.[1].paragraphStyle?.horizontalAlign).toBe(HorizontalAlign.JUSTIFIED);
+    });
+
+    it('aligns selected paragraphs through left and right wrappers', async () => {
+        ({ univer, get } = createCommandTestBed(createMultiParagraphDoc()));
+        commandService = get(ICommandService);
+        commandService.registerCommand(AlignOperationCommand);
+        commandService.registerCommand(AlignLeftCommand);
+        commandService.registerCommand(AlignRightCommand);
+        commandService.registerCommand(SetTextSelectionsOperation);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+        setCollapsedSelection(0, 10);
+
+        await commandService.executeCommand(AlignRightCommand.id);
+        await awaitTime(0);
+
+        expect(getBody()?.paragraphs?.[0].paragraphStyle?.horizontalAlign).toBe(HorizontalAlign.RIGHT);
+        expect(getBody()?.paragraphs?.[1].paragraphStyle?.horizontalAlign).toBe(HorizontalAlign.RIGHT);
+
+        await commandService.executeCommand(AlignLeftCommand.id);
+        await awaitTime(0);
+
+        expect(getBody()?.paragraphs?.[0].paragraphStyle?.horizontalAlign).toBe(HorizontalAlign.LEFT);
+        expect(getBody()?.paragraphs?.[1].paragraphStyle?.horizontalAlign).toBe(HorizontalAlign.LEFT);
     });
 
     it('updates the current document zoom ratio through the command and operation chain', async () => {
@@ -742,6 +960,29 @@ describe('misc document commands', () => {
             marginLeft: 48,
             marginRight: 54,
         }));
+    });
+
+    it('resizes page-fill tables when page content width changes', async () => {
+        ({ univer, get } = createCommandTestBed(createPageFillTableCommandDoc()));
+        commandService = get(ICommandService);
+        commandService.registerCommand(DocPageSetupCommand);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+
+        const result = await commandService.executeCommand(DocPageSetupCommand.id, {
+            documentFlavor: DocumentFlavor.TRADITIONAL,
+            pageSize: { width: 640, height: 840.51 },
+            pageOrient: PageOrientType.PORTRAIT,
+            marginTop: 72,
+            marginBottom: 72,
+            marginLeft: 90,
+            marginRight: 90,
+        });
+        await awaitTime(0);
+
+        const table = getDoc()?.getSnapshot().tableSource?.['table-1'];
+        expect(result).toBe(true);
+        expect(table?.size.width.v).toBe(460);
+        expect(table?.tableColumns.map((column) => column.size.width.v)).toEqual([230, 230]);
     });
 
     it('opens page settings and applies confirmed document setup', async () => {
@@ -793,6 +1034,25 @@ describe('misc document commands', () => {
         }));
     });
 
+    it('closes page settings without applying document setup', async () => {
+        ({ univer, get } = createCommandTestBed(createBaseDoc(), [
+            [IConfirmService, { useClass: TestConfirmService }],
+        ]));
+        loadTestLocale();
+        commandService = get(ICommandService);
+        commandService.registerCommand(DocOpenPageSettingCommand);
+
+        expect(await commandService.executeCommand(DocOpenPageSettingCommand.id)).toBe(true);
+        const confirmService = get(IConfirmService) as TestConfirmService;
+        confirmService.lastOption?.onClose?.();
+
+        expect(confirmService.options).toEqual([]);
+        expect(getDoc()?.getDocumentStyle().pageSize).toEqual({
+            width: 594.3,
+            height: 840.51,
+        });
+    });
+
     it('creates header and footer records while updating header footer margins', async () => {
         ({ univer, get } = createCommandTestBed(createHeaderFooterDoc()));
         commandService = get(ICommandService);
@@ -821,6 +1081,46 @@ describe('misc document commands', () => {
         }));
         expect(snapshot?.headers?.['header-segment-1'].body?.dataStream).toBe('\r\n');
         expect(snapshot?.documentStyle.defaultFooterId).toEqual(expect.any(String));
+    });
+
+    it('creates footer pairs when a footer segment is requested', async () => {
+        ({ univer, get } = createCommandTestBed(createHeaderFooterDoc()));
+        commandService = get(ICommandService);
+        commandService.registerCommand(CoreHeaderFooterCommand);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+
+        expect(await commandService.executeCommand(CoreHeaderFooterCommand.id, {
+            unitId: 'test-doc',
+            segmentId: 'footer-segment-1',
+            createType: HeaderFooterType.DEFAULT_FOOTER,
+        })).toBe(true);
+        await awaitTime(0);
+
+        const snapshot = getDoc()?.getSnapshot();
+        expect(snapshot?.documentStyle.defaultFooterId).toBe('footer-segment-1');
+        expect(snapshot?.documentStyle.defaultHeaderId).toEqual(expect.any(String));
+        expect(snapshot?.footers?.['footer-segment-1'].body?.dataStream).toBe('\r\n');
+    });
+
+    it('creates even page footer records when header footer options require them', async () => {
+        ({ univer, get } = createCommandTestBed(createHeaderFooterDoc()));
+        commandService = get(ICommandService);
+        commandService.registerCommand(CoreHeaderFooterCommand);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+
+        expect(await commandService.executeCommand(CoreHeaderFooterCommand.id, {
+            unitId: 'test-doc',
+            segmentId: 'even-footer-segment-1',
+            headerFooterProps: {
+                evenAndOddHeaders: BooleanNumber.TRUE,
+            },
+        })).toBe(true);
+        await awaitTime(0);
+
+        const snapshot = getDoc()?.getSnapshot();
+        expect(snapshot?.documentStyle.evenPageFooterId).toBe('even-footer-segment-1');
+        expect(snapshot?.documentStyle.evenPageHeaderId).toEqual(expect.any(String));
+        expect(snapshot?.footers?.['even-footer-segment-1'].body?.dataStream).toBe('\r\n');
     });
 
     it('opens and closes the header footer sidebar panel through commands and operations', async () => {
@@ -900,6 +1200,28 @@ describe('misc document commands', () => {
         expect(getDoc()?.getDocumentStyle().documentFlavor).toBe(DocumentFlavor.TRADITIONAL);
     });
 
+    it('does not switch document mode when command skeleton is unavailable', async () => {
+        ({ univer, get } = createCommandTestBed(createBaseDoc()));
+        commandService = get(ICommandService);
+        commandService.registerCommand(SwitchDocModeCommand);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+
+        const skeletonManager = get(DocSkeletonManagerService) as unknown as { getSkeleton: () => undefined };
+        skeletonManager.getSkeleton = () => undefined;
+        const render = get(IRenderManagerService).getRenderById('test-doc');
+        const mutableRender = render as unknown as { with: (dependency: unknown) => unknown };
+        const originalWith = mutableRender.with.bind(mutableRender);
+        mutableRender.with = (dependency: unknown) => {
+            if (dependency === DocSelectionRenderService) {
+                return undefined;
+            }
+            return originalWith(dependency);
+        };
+
+        expect(await commandService.executeCommand(SwitchDocModeCommand.id)).toBe(false);
+        expect(getDoc()?.getDocumentStyle().documentFlavor).toBeUndefined();
+    });
+
     it('reports cursor operations only when movement params are provided', async () => {
         ({ univer, get } = createCommandTestBed(createBaseDoc()));
         commandService = get(ICommandService);
@@ -916,6 +1238,172 @@ describe('misc document commands', () => {
         })).toBe(true);
         expect(await commandService.executeCommand(MoveCursorOperation.id)).toBe(false);
         expect(await commandService.executeCommand(MoveSelectionOperation.id)).toBe(false);
+    });
+
+    it('opens the create-table confirm flow and forwards the confirmed size to the table command', async () => {
+        ({ univer, get } = createCommandTestBed(createBaseDoc(), [
+            [IConfirmService, { useClass: TestConfirmService }],
+        ]));
+        loadTestLocale();
+        commandService = get(ICommandService);
+        const createdTables: Array<{ rowCount: number; colCount: number }> = [];
+        commandService.registerCommand(DocCreateTableOperation);
+        commandService.registerCommand({
+            id: CreateDocTableCommand.id,
+            type: CommandType.COMMAND,
+            handler: (_accessor, params: { rowCount: number; colCount: number }) => {
+                createdTables.push(params);
+                return true;
+            },
+        });
+
+        const result = await commandService.executeCommand(DocCreateTableOperation.id);
+        const confirmService = get(IConfirmService) as TestConfirmService;
+        const children = confirmService.lastOption?.children as {
+            label: {
+                name: string;
+                props: {
+                    handleRowColChange: (rowCount: number, colCount: number) => void;
+                    tableCreateParams: { rowCount: number; colCount: number };
+                };
+            };
+        };
+
+        expect(result).toBe(true);
+        expect(confirmService.lastOption).toEqual(expect.objectContaining({
+            id: 'doc.component.create-table-confirm',
+            width: 'auto',
+        }));
+        expect(children.label.name).toBe(COMPONENT_DOC_CREATE_TABLE_CONFIRM);
+        expect(children.label.props.tableCreateParams).toEqual({
+            rowCount: 3,
+            colCount: 5,
+        });
+
+        children.label.props.handleRowColChange(4, 2);
+        expect(children.label.props.tableCreateParams).toEqual({
+            rowCount: 4,
+            colCount: 2,
+        });
+
+        confirmService.lastOption?.onConfirm?.({});
+        await awaitTime(0);
+
+        expect(createdTables).toEqual([{
+            rowCount: 4,
+            colCount: 2,
+        }]);
+        expect(confirmService.closedIds).toContain('doc.component.create-table-confirm');
+    });
+
+    it('closes the create-table confirm flow without creating a table', async () => {
+        ({ univer, get } = createCommandTestBed(createBaseDoc(), [
+            [IConfirmService, { useClass: TestConfirmService }],
+        ]));
+        loadTestLocale();
+        commandService = get(ICommandService);
+        const createdTables: Array<{ rowCount: number; colCount: number }> = [];
+        commandService.registerCommand(DocCreateTableOperation);
+        commandService.registerCommand({
+            id: CreateDocTableCommand.id,
+            type: CommandType.COMMAND,
+            handler: (_accessor, params: { rowCount: number; colCount: number }) => {
+                createdTables.push(params);
+                return true;
+            },
+        });
+
+        expect(await commandService.executeCommand(DocCreateTableOperation.id)).toBe(true);
+        const confirmService = get(IConfirmService) as TestConfirmService;
+        confirmService.lastOption?.onClose?.();
+
+        expect(createdTables).toEqual([]);
+        expect(confirmService.closedIds).toContain('doc.component.create-table-confirm');
+    });
+
+    it('moves table tab selection to the next cell', async () => {
+        ({ univer, get } = createCommandTestBed(createTableCommandDoc()));
+        commandService = get(ICommandService);
+        commandService.registerCommand(DocTableTabCommand);
+        useViewModelSkeleton();
+
+        const cellRanges = collectTokenRanges(
+            getBody()?.dataStream ?? '',
+            DataStreamTreeTokenType.TABLE_CELL_START,
+            DataStreamTreeTokenType.TABLE_CELL_END
+        );
+        setCollapsedSelection(cellRanges[0].startIndex + 1);
+        const selectionManager = get(DocSelectionManagerService);
+        const refreshEvents: Array<unknown> = [];
+        const subscription = selectionManager.refreshSelection$.subscribe((event) => {
+            if (event) {
+                refreshEvents.push(event);
+            }
+        });
+
+        expect(await commandService.executeCommand(DocTableTabCommand.id, { shift: false })).toBe(true);
+
+        expect(refreshEvents.at(-1)).toEqual(expect.objectContaining({
+            docRanges: [expect.objectContaining({
+                startOffset: cellRanges[1].startIndex + 1,
+                endOffset: cellRanges[1].endIndex - 2,
+            })],
+        }));
+
+        subscription.unsubscribe();
+    });
+
+    it('moves table tab selection to the previous cell when shift is held', async () => {
+        ({ univer, get } = createCommandTestBed(createTableCommandDoc()));
+        commandService = get(ICommandService);
+        commandService.registerCommand(DocTableTabCommand);
+        useViewModelSkeleton();
+
+        const cellRanges = collectTokenRanges(
+            getBody()?.dataStream ?? '',
+            DataStreamTreeTokenType.TABLE_CELL_START,
+            DataStreamTreeTokenType.TABLE_CELL_END
+        );
+        setCollapsedSelection(cellRanges[2].startIndex + 1);
+        const selectionManager = get(DocSelectionManagerService);
+        const refreshEvents: Array<unknown> = [];
+        const subscription = selectionManager.refreshSelection$.subscribe((event) => {
+            if (event) {
+                refreshEvents.push(event);
+            }
+        });
+
+        expect(await commandService.executeCommand(DocTableTabCommand.id, { shift: true })).toBe(true);
+
+        expect(refreshEvents.at(-1)).toEqual(expect.objectContaining({
+            docRanges: [expect.objectContaining({
+                startOffset: cellRanges[1].startIndex + 1,
+                endOffset: cellRanges[1].endIndex - 2,
+            })],
+        }));
+
+        subscription.unsubscribe();
+    });
+
+    it('inserts a row when tab is pressed in the last table cell', async () => {
+        ({ univer, get } = createCommandTestBed(createTableCommandDoc()));
+        commandService = get(ICommandService);
+        commandService.registerCommand(DocTableTabCommand);
+        commandService.registerCommand(DocTableInsertRowCommand);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+        useViewModelSkeleton();
+
+        const cellRanges = collectTokenRanges(
+            getBody()?.dataStream ?? '',
+            DataStreamTreeTokenType.TABLE_CELL_START,
+            DataStreamTreeTokenType.TABLE_CELL_END
+        );
+        setCollapsedSelection(cellRanges[3].startIndex + 1);
+
+        expect(await commandService.executeCommand(DocTableTabCommand.id, { shift: false })).toBe(true);
+        await awaitTime(0);
+
+        expect(getDoc()?.getSnapshot().tableSource?.['table-1'].tableRows).toHaveLength(3);
     });
 
     it('runs registered auto-format mutations for tab, after-space, and enter commands', async () => {

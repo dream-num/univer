@@ -169,10 +169,12 @@ function renderPanel(root: Root, testBed: ReturnType<typeof createPanelTestBed>)
 function clickButton(container: HTMLElement, text: string) {
     const button = Array.from(container.querySelectorAll('button'))
         .find((button) => button.textContent?.includes(text));
-    expect(button).toBeDefined();
+    if (!button) {
+        throw new Error(`Button not found: ${text}`);
+    }
 
     act(() => {
-        button!.click();
+        button.click();
     });
 }
 
@@ -209,6 +211,22 @@ describe('ArrangePanel', () => {
         expect(selectedObject.zIndex).toBe(5);
         expect(currentTestBed.slide.getElement(PAGE_ID, SELECTED_ID)).toMatchObject({
             zIndex: 5,
+        });
+    });
+
+    it('moves the selected slide element one layer forward', () => {
+        currentTestBed = createPanelTestBed();
+        const selectedObject = createRenderScene(2, [1, 4]);
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        renderPanel(root, currentTestBed);
+
+        clickButton(container, 'Bring Forward');
+
+        expect(selectedObject.zIndex).toBe(3);
+        expect(currentTestBed.slide.getElement(PAGE_ID, SELECTED_ID)).toMatchObject({
+            zIndex: 3,
         });
     });
 

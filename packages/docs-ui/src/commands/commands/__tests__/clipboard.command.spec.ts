@@ -573,7 +573,10 @@ describe('test cases in clipboard', () => {
 
         it('Should cut an entire selected table and remove the table source', async () => {
             replaceDocument(createTableDocumentData());
-            const table = getDocumentSnapshot()?.body?.tables?.[0]!;
+            const table = getDocumentSnapshot()?.body?.tables?.[0];
+            if (!table) {
+                throw new Error('Table not found');
+            }
             const rectRange: IRectRangeWithStyle = {
                 startOffset: table.startIndex,
                 endOffset: table.endIndex - 1,

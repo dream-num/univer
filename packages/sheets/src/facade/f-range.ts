@@ -54,6 +54,8 @@ import {
     covertCellValues,
     DEFAULT_STYLES,
     Dimension,
+    getDisplayValueFromCell,
+    getOriginCellValue,
     ICommandService,
     ILogService,
     Inject,
@@ -534,8 +536,7 @@ export class FRange extends FBaseInitialable {
      */
     getRawValue(): Nullable<CellValue> {
         const cell = this._worksheet.getCellMatrix().getValue(this._range.startRow, this._range.startColumn);
-        if (cell?.p && cell.p.body?.dataStream) return cell.p.body.dataStream;
-        return cell?.v ?? null;
+        return getOriginCellValue(cell);
     }
 
     /**
@@ -560,8 +561,7 @@ export class FRange extends FBaseInitialable {
      */
     getDisplayValue(): string {
         const cell = this._worksheet.getCell(this._range.startRow, this._range.startColumn);
-        if (cell?.p && cell.p.body?.dataStream) return cell.p.body.dataStream;
-        return cell?.v?.toString() ?? '';
+        return getDisplayValueFromCell(cell);
     }
 
     /**
@@ -666,11 +666,8 @@ export class FRange extends FBaseInitialable {
 
             for (let c = startColumn; c <= endColumn; c++) {
                 const cell = cellMatrix.getValue(r, c);
-                if (cell?.p && cell.p.body?.dataStream) {
-                    row.push(cell.p.body.dataStream);
-                } else {
-                    row.push(cell?.v ?? null);
-                }
+                const rawValue = getOriginCellValue(cell);
+                row.push(rawValue);
             }
 
             values.push(row);
@@ -731,12 +728,8 @@ export class FRange extends FBaseInitialable {
 
             for (let c = startColumn; c <= endColumn; c++) {
                 const cell = this._worksheet.getCell(r, c);
-
-                if (cell?.p && cell.p.body?.dataStream) {
-                    row.push(cell.p.body.dataStream);
-                } else {
-                    row.push(cell?.v?.toString() ?? '');
-                }
+                const displayValue = getDisplayValueFromCell(cell);
+                row.push(displayValue);
             }
 
             values.push(row);

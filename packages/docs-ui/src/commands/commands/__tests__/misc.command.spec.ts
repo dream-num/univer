@@ -14,33 +14,152 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommand, IDocumentData, Injector, Univer } from '@univerjs/core';
+import type { DocumentDataModel, ICommand, IDisposable, IDocumentData, Injector, Univer } from '@univerjs/core';
+import type { IConfirmPartMethodOptions, ISidebarMethodOptions } from '@univerjs/ui';
 import type { IAutoFormat } from '../../../services/doc-auto-format.service';
 import {
     awaitTime,
+    BooleanNumber,
     CommandType,
     CustomRangeType,
+    Direction,
+    Disposable,
+    DocumentFlavor,
     HorizontalAlign,
     ICommandService,
+    IConfirmService,
     IUniverInstanceService,
+    LocaleService,
+    LocaleType,
     NamedStyleType,
+    PAGE_SIZE,
+    PageOrientType,
+    PaperType,
+    toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
-import { DocSelectionManagerService, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
+import { DocSelectionManagerService, DocSkeletonManagerService, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { ISidebarService } from '@univerjs/ui';
+import { Subject } from 'rxjs';
 import { afterEach, describe, expect, it } from 'vitest';
+import { HeaderFooterType } from '../../../controllers/doc-header-footer.controller';
+import { DocParagraphSettingController } from '../../../controllers/doc-paragraph-setting.controller';
 import { DocAutoFormatService } from '../../../services/doc-auto-format.service';
+import { DocSelectionRenderService } from '../../../services/selection/doc-selection-render.service';
+import { COMPONENT_DOC_HEADER_FOOTER_PANEL } from '../../../views/header-footer/panel/component-name';
+import { PAGE_SETTING_COMPONENT_ID } from '../../../views/PageSettings';
+import { COMPONENT_DOC_CREATE_TABLE_CONFIRM } from '../../../views/table/create/component-name';
+import { DocCreateTableOperation } from '../../operations/doc-create-table.operation';
+import { MoveCursorOperation, MoveSelectionOperation } from '../../operations/doc-cursor.operation';
+import { SidebarDocHeaderFooterPanelOperation } from '../../operations/doc-header-footer-panel.operation';
+import { DocParagraphSettingPanelOperation } from '../../operations/doc-paragraph-setting-panel.operation';
+import { DocOpenPageSettingCommand } from '../../operations/open-page-setting.operation';
 import { SetDocZoomRatioOperation } from '../../operations/set-doc-zoom-ratio.operation';
 import { AfterSpaceCommand, EnterCommand, TabCommand } from '../auto-format.command';
 import { BreakLineCommand } from '../break-line.command';
+import { CoreHeaderFooterCommand, OpenHeaderFooterPanelCommand } from '../doc-header-footer.command';
 import { HorizontalLineCommand, InsertHorizontalLineBellowCommand } from '../doc-horizontal-line.command';
+import { DocPageSetupCommand } from '../doc-page-setup.command';
 import { DocParagraphSettingCommand } from '../doc-paragraph-setting.command';
 import { DocSelectAllCommand } from '../doc-select-all.command';
 import { InsertCustomRangeCommand } from '../insert-custom-range.command';
 import { AlignCenterCommand, AlignJustifyCommand, AlignOperationCommand } from '../paragraph-align.command';
 import { ReplaceSelectionCommand } from '../replace-content.command';
 import { SetDocZoomRatioCommand } from '../set-doc-zoom-ratio.command';
+import { SwitchDocModeCommand } from '../switch-doc-mode.command';
+import { CreateDocTableCommand } from '../table/doc-table-create.command';
 import { genEmptyTable } from '../table/table';
 import { createCommandTestBed } from './create-command-test-bed';
+
+class TestSidebarService extends Disposable implements ISidebarService {
+    readonly sidebarOptions$ = new Subject<ISidebarMethodOptions>();
+    readonly scrollEvent$ = new Subject<Event>();
+    private _options: ISidebarMethodOptions = {};
+    private _container?: HTMLElement;
+    private _width?: number;
+
+    get visible(): boolean {
+        return this._options.visible ?? false;
+    }
+
+    get options(): ISidebarMethodOptions {
+        return this._options;
+    }
+
+    get width(): number | undefined {
+        return this._width;
+    }
+
+    open(params: ISidebarMethodOptions): IDisposable {
+        this._options = { ...params, visible: true };
+        this.sidebarOptions$.next(this._options);
+        return toDisposable(() => this.close());
+    }
+
+    close(): void {
+        this._options = { ...this._options, visible: false };
+        this.sidebarOptions$.next(this._options);
+        this._options.onClose?.();
+    }
+
+    getContainer(): HTMLElement | undefined {
+        return this._container;
+    }
+
+    setContainer(element?: HTMLElement): void {
+        this._container = element;
+    }
+
+    setWidth(value: number): void {
+        this._width = value;
+    }
+
+    override dispose(): void {
+        super.dispose();
+        this.sidebarOptions$.complete();
+        this.scrollEvent$.complete();
+    }
+}
+
+class TestConfirmService extends Disposable implements IConfirmService<IConfirmPartMethodOptions> {
+    readonly confirmOptions$ = new Subject<IConfirmPartMethodOptions[]>();
+    readonly closedIds: string[] = [];
+    private _options: IConfirmPartMethodOptions[] = [];
+
+    get options(): IConfirmPartMethodOptions[] {
+        return this._options;
+    }
+
+    get lastOption(): IConfirmPartMethodOptions | undefined {
+        return this._options.at(-1);
+    }
+
+    open(params: IConfirmPartMethodOptions): IDisposable {
+        this._options = [...this._options.filter((option) => option.id !== params.id), { ...params, visible: true }];
+        this.confirmOptions$.next(this._options);
+        return toDisposable(() => {
+            this._options = this._options.filter((option) => option.id !== params.id);
+            this.confirmOptions$.next(this._options);
+        });
+    }
+
+    confirm(params: IConfirmPartMethodOptions): Promise<boolean> {
+        this.open(params);
+        return Promise.resolve(true);
+    }
+
+    close(id: string): void {
+        this.closedIds.push(id);
+        this._options = this._options.map((option) => option.id === id ? { ...option, visible: false } : option);
+        this.confirmOptions$.next(this._options);
+    }
+
+    override dispose(): void {
+        super.dispose();
+        this.confirmOptions$.complete();
+    }
+}
 
 function createBaseDoc(dataStream = 'Hello world\r\n'): IDocumentData {
     return {
@@ -68,6 +187,21 @@ function createBaseDoc(dataStream = 'Hello world\r\n'): IDocumentData {
             marginRight: 90,
             marginLeft: 90,
         },
+    };
+}
+
+function createHeaderFooterDoc(): IDocumentData {
+    return {
+        ...createBaseDoc(),
+        headers: {},
+        footers: {},
+    };
+}
+
+function createTableInsertDoc(): IDocumentData {
+    return {
+        ...createBaseDoc(),
+        tableSource: {},
     };
 }
 
@@ -234,6 +368,10 @@ describe('misc document commands', () => {
             segmentId: '',
             style: null as never,
         }]);
+    }
+
+    function loadTestLocale() {
+        get(LocaleService).load({ [LocaleType.ZH_CN]: {} });
     }
 
     afterEach(() => {
@@ -585,6 +723,279 @@ describe('misc document commands', () => {
             documentId: 'missing-doc',
             zoomRatio: 0.8,
         })).toBe(false);
+    });
+
+    it('updates document page setup through the real rich text mutation flow', async () => {
+        ({ univer, get } = createCommandTestBed(createBaseDoc()));
+        commandService = get(ICommandService);
+        commandService.registerCommand(DocPageSetupCommand);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+
+        const result = await commandService.executeCommand(DocPageSetupCommand.id, {
+            documentFlavor: DocumentFlavor.TRADITIONAL,
+            pageSize: PAGE_SIZE[PaperType.A3],
+            pageOrient: PageOrientType.LANDSCAPE,
+            marginTop: 36,
+            marginBottom: 42,
+            marginLeft: 48,
+            marginRight: 54,
+        });
+        await awaitTime(0);
+
+        expect(result).toBe(true);
+        expect(getDoc()?.getDocumentStyle()).toEqual(expect.objectContaining({
+            documentFlavor: DocumentFlavor.TRADITIONAL,
+            pageSize: PAGE_SIZE[PaperType.A3],
+            pageOrient: PageOrientType.LANDSCAPE,
+            marginTop: 36,
+            marginBottom: 42,
+            marginLeft: 48,
+            marginRight: 54,
+        }));
+    });
+
+    it('opens page settings and applies confirmed document setup', async () => {
+        ({ univer, get } = createCommandTestBed(createBaseDoc(), [
+            [IConfirmService, { useClass: TestConfirmService }],
+        ]));
+        loadTestLocale();
+        commandService = get(ICommandService);
+        commandService.registerCommand(DocOpenPageSettingCommand);
+        commandService.registerCommand(DocPageSetupCommand);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+
+        const result = await commandService.executeCommand(DocOpenPageSettingCommand.id);
+        const confirmService = get(IConfirmService) as TestConfirmService;
+
+        expect(result).toBe(true);
+        expect(confirmService.lastOption).toEqual(expect.objectContaining({
+            id: PAGE_SETTING_COMPONENT_ID,
+            width: 528,
+            confirmText: expect.any(String),
+            cancelText: expect.any(String),
+        }));
+        expect(confirmService.lastOption?.children).toEqual({
+            label: PAGE_SETTING_COMPONENT_ID,
+        });
+
+        confirmService.lastOption?.onConfirm?.({
+            mode: DocumentFlavor.TRADITIONAL,
+            paperSize: PaperType.A5,
+            orientation: PageOrientType.PORTRAIT,
+            margins: {
+                top: 18,
+                bottom: 24,
+                left: 30,
+                right: 36,
+            },
+        });
+        await awaitTime(0);
+
+        expect(confirmService.options).toEqual([]);
+        expect(getDoc()?.getDocumentStyle()).toEqual(expect.objectContaining({
+            documentFlavor: DocumentFlavor.TRADITIONAL,
+            pageSize: PAGE_SIZE[PaperType.A5],
+            pageOrient: PageOrientType.PORTRAIT,
+            marginTop: 18,
+            marginBottom: 24,
+            marginLeft: 30,
+            marginRight: 36,
+        }));
+    });
+
+    it('creates header and footer records while updating header footer margins', async () => {
+        ({ univer, get } = createCommandTestBed(createHeaderFooterDoc()));
+        commandService = get(ICommandService);
+        commandService.registerCommand(CoreHeaderFooterCommand);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+
+        const result = await commandService.executeCommand(CoreHeaderFooterCommand.id, {
+            unitId: 'test-doc',
+            segmentId: 'header-segment-1',
+            createType: HeaderFooterType.DEFAULT_HEADER,
+            headerFooterProps: {
+                marginHeader: 30,
+                marginFooter: 40,
+                useFirstPageHeaderFooter: BooleanNumber.TRUE,
+            },
+        });
+        await awaitTime(0);
+
+        const snapshot = getDoc()?.getSnapshot();
+        expect(result).toBe(true);
+        expect(snapshot?.documentStyle).toEqual(expect.objectContaining({
+            defaultHeaderId: 'header-segment-1',
+            marginHeader: 30,
+            marginFooter: 40,
+            useFirstPageHeaderFooter: BooleanNumber.TRUE,
+        }));
+        expect(snapshot?.headers?.['header-segment-1'].body?.dataStream).toBe('\r\n');
+        expect(snapshot?.documentStyle.defaultFooterId).toEqual(expect.any(String));
+    });
+
+    it('opens and closes the header footer sidebar panel through commands and operations', async () => {
+        ({ univer, get } = createCommandTestBed(createTableInsertDoc(), [
+            [ISidebarService, { useClass: TestSidebarService }],
+        ]));
+        loadTestLocale();
+        commandService = get(ICommandService);
+        commandService.registerCommand(OpenHeaderFooterPanelCommand);
+        commandService.registerCommand(SidebarDocHeaderFooterPanelOperation);
+
+        const sidebarService = get(ISidebarService) as TestSidebarService;
+
+        expect(await commandService.executeCommand(OpenHeaderFooterPanelCommand.id)).toBe(true);
+        expect(sidebarService.visible).toBe(true);
+        expect(sidebarService.options).toEqual(expect.objectContaining({
+            width: 400,
+            children: { label: COMPONENT_DOC_HEADER_FOOTER_PANEL },
+        }));
+
+        expect(await commandService.executeCommand(SidebarDocHeaderFooterPanelOperation.id, { value: 'close' })).toBe(true);
+        expect(sidebarService.visible).toBe(false);
+    });
+
+    it('opens the paragraph setting panel through its controller-backed operation', async () => {
+        ({ univer, get } = createCommandTestBed(createBaseDoc(), [
+            [ISidebarService, { useClass: TestSidebarService }],
+            [DocParagraphSettingController],
+        ]));
+        commandService = get(ICommandService);
+        commandService.registerCommand(DocParagraphSettingPanelOperation);
+
+        const result = await commandService.executeCommand(DocParagraphSettingPanelOperation.id);
+        const sidebarService = get(ISidebarService) as TestSidebarService;
+
+        expect(result).toBe(true);
+        expect(sidebarService.visible).toBe(true);
+        expect(sidebarService.options).toEqual(expect.objectContaining({
+            id: undefined,
+            width: 300,
+            children: { label: 'doc_ui_paragraph-setting-panel' },
+        }));
+    });
+
+    it('switches document mode by executing the command against the current document', async () => {
+        ({ univer, get } = createCommandTestBed(createBaseDoc()));
+        commandService = get(ICommandService);
+        commandService.registerCommand(SwitchDocModeCommand);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+        setCollapsedSelection(1);
+
+        const render = get(IRenderManagerService).getRenderById('test-doc')!;
+        const skeletonManager = get(DocSkeletonManagerService) as unknown as { getSkeleton: () => unknown };
+        const selectionRenderService = {
+            getSegment: () => '',
+            getSegmentPage: () => -1,
+        };
+        const mutableRender = render as unknown as { with: (dependency: unknown) => unknown };
+        const originalWith = mutableRender.with.bind(mutableRender);
+        mutableRender.with = (dependency: unknown) => {
+            if (dependency === DocSkeletonManagerService) {
+                skeletonManager.getSkeleton = () => ({}) as never;
+                return skeletonManager;
+            }
+            if (dependency === DocSelectionRenderService) {
+                return selectionRenderService;
+            }
+            return originalWith(dependency);
+        };
+
+        expect(await commandService.executeCommand(SwitchDocModeCommand.id)).toBe(true);
+        await awaitTime(0);
+        expect(getDoc()?.getDocumentStyle().documentFlavor).toBe(DocumentFlavor.MODERN);
+
+        expect(await commandService.executeCommand(SwitchDocModeCommand.id)).toBe(true);
+        await awaitTime(0);
+        expect(getDoc()?.getDocumentStyle().documentFlavor).toBe(DocumentFlavor.TRADITIONAL);
+    });
+
+    it('reports cursor operations only when movement params are provided', async () => {
+        ({ univer, get } = createCommandTestBed(createBaseDoc()));
+        commandService = get(ICommandService);
+        commandService.registerCommand(MoveCursorOperation);
+        commandService.registerCommand(MoveSelectionOperation);
+
+        expect(await commandService.executeCommand(MoveCursorOperation.id, {
+            direction: Direction.RIGHT,
+            granularity: 'word',
+        })).toBe(true);
+        expect(await commandService.executeCommand(MoveSelectionOperation.id, {
+            direction: Direction.LEFT,
+            granularity: 'line',
+        })).toBe(true);
+        expect(await commandService.executeCommand(MoveCursorOperation.id)).toBe(false);
+        expect(await commandService.executeCommand(MoveSelectionOperation.id)).toBe(false);
+    });
+
+    it('opens the create-table confirm flow and forwards the confirmed size to the table command', async () => {
+        ({ univer, get } = createCommandTestBed(createBaseDoc(), [
+            [IConfirmService, { useClass: TestConfirmService }],
+        ]));
+        loadTestLocale();
+        commandService = get(ICommandService);
+        commandService.registerCommand(DocCreateTableOperation);
+        commandService.registerCommand(CreateDocTableCommand);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+        setCollapsedSelection(5);
+
+        const skeletonManager = get(DocSkeletonManagerService) as unknown as { getSkeleton: () => unknown };
+        skeletonManager.getSkeleton = () => ({
+            findNodeByCharIndex: () => ({
+                parent: {
+                    parent: {
+                        parent: {
+                            parent: {
+                                parent: {
+                                    pageWidth: 594.3,
+                                    marginLeft: 90,
+                                    marginRight: 90,
+                                },
+                            },
+                        },
+                    },
+                },
+            }),
+        }) as never;
+
+        const result = await commandService.executeCommand(DocCreateTableOperation.id);
+        const confirmService = get(IConfirmService) as TestConfirmService;
+        const children = confirmService.lastOption?.children as {
+            label: {
+                name: string;
+                props: {
+                    handleRowColChange: (rowCount: number, colCount: number) => void;
+                    tableCreateParams: { rowCount: number; colCount: number };
+                };
+            };
+        };
+
+        expect(result).toBe(true);
+        expect(confirmService.lastOption).toEqual(expect.objectContaining({
+            id: 'doc.component.create-table-confirm',
+            width: 'auto',
+        }));
+        expect(children.label.name).toBe(COMPONENT_DOC_CREATE_TABLE_CONFIRM);
+        expect(children.label.props.tableCreateParams).toEqual({
+            rowCount: 3,
+            colCount: 5,
+        });
+
+        children.label.props.handleRowColChange(4, 2);
+        expect(children.label.props.tableCreateParams).toEqual({
+            rowCount: 4,
+            colCount: 2,
+        });
+
+        confirmService.lastOption?.onConfirm?.({});
+        await awaitTime(0);
+
+        const tableId = getBody()?.tables?.[0].tableId;
+        expect(getBody()?.tables).toHaveLength(1);
+        expect(tableId).toEqual(expect.any(String));
+        expect(getDoc()?.getSnapshot().tableSource?.[tableId!].tableRows).toHaveLength(4);
+        expect(getDoc()?.getSnapshot().tableSource?.[tableId!].tableColumns).toHaveLength(2);
+        expect(confirmService.closedIds).toContain('doc.component.create-table-confirm');
     });
 
     it('runs registered auto-format mutations for tab, after-space, and enter commands', async () => {

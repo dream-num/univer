@@ -14,251 +14,427 @@
  * limitations under the License.
  */
 
-import type { ISelectionWithStyle, SheetsSelectionsService } from '@univerjs/sheets';
-import type { SheetDataValidationModel } from '@univerjs/sheets-data-validation';
-import type { IDropdownParam, IEditorBridgeService } from '@univerjs/sheets-ui';
-import { DataValidationRenderMode } from '@univerjs/core';
-import { DataValidatorDropdownType } from '@univerjs/data-validation';
-import { SetRangeValuesCommand } from '@univerjs/sheets';
-import { SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
+import type { Dependency, ICommand, ICommandInfo, IDisposable, IWorkbookData, Workbook } from '@univerjs/core';
+import type { ISelectionWithStyle } from '@univerjs/sheets';
+import type { IDropdownParam } from '@univerjs/sheets-ui';
+import {
+    awaitTime,
+    CommandType,
+    DataValidationErrorStyle,
+    DataValidationRenderMode,
+    dateKit,
+    ICommandService,
+    Inject,
+    Injector,
+    LocaleType,
+    Plugin,
+    toDisposable,
+    Univer,
+    UniverInstanceType,
+} from '@univerjs/core';
+import { DataValidatorDropdownType, DataValidatorRegistryService } from '@univerjs/data-validation';
+import { serializeListOptions, SetRangeValuesCommand, SheetsSelectionsService } from '@univerjs/sheets';
+import { SheetDataValidationModel } from '@univerjs/sheets-data-validation';
+import {
+    IEditorBridgeService as IEditorBridgeServiceIdentifier,
+    ISheetCellDropdownManagerService,
+    SetCellEditVisibleOperation,
+} from '@univerjs/sheets-ui';
 import { Subject } from 'rxjs';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { OpenValidationPanelOperation } from '../../commands/operations/data-validation.operation';
-import { SHEETS_DATA_VALIDATION_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { DataValidationDropdownManagerService } from '../dropdown-manager.service';
 
-describe('DataValidationDropdownManagerService', () => {
-    it('shows a list dropdown, saves the selection, opens the editor, and reacts to hide triggers', async () => {
-        const selectionMoveEnd$ = new Subject<ISelectionWithStyle[]>();
-        const popupDispose = vi.fn();
-        let dropdownParam: IDropdownParam | undefined;
-        const onHide = vi.fn();
+interface IRule {
+    uid: string;
+    type: string;
+    formula1?: string;
+    renderMode?: DataValidationRenderMode;
+    errorStyle?: DataValidationErrorStyle;
+    bizInfo?: Record<string, unknown>;
+}
 
-        const worksheet = {
-            getSheetId: () => 'sheet-1',
-            getCellRaw: () => ({ v: 'Open' }),
-        };
-        const workbook = {
-            getUnitId: () => 'book-1',
-            getSheetBySheetId: () => worksheet,
-        };
-        const rule = {
-            uid: 'rule-1',
-            type: 'list',
-            renderMode: DataValidationRenderMode.CUSTOM,
-        };
+interface IValidator {
+    dropdownType?: DataValidatorDropdownType;
+    getListWithColor?: (rule: IRule, unitId: string, subUnitId: string) => Array<{ label: string; color?: string }>;
+    validator?: (context: unknown, rule: IRule) => boolean | Promise<boolean>;
+    getRuleFinalError?: (rule: IRule, location: unknown) => string;
+}
 
-        const service = new DataValidationDropdownManagerService(
-            {
-                getUnit: () => workbook,
-            } as never,
-            {
-                getValidatorItem: vi.fn(() => ({
-                    dropdownType: DataValidatorDropdownType.LIST,
-                    getListWithColor: vi.fn(() => [
-                        { label: 'Open', color: '#0f0' },
-                        { label: 'Closed', color: '#f00' },
-                    ]),
-                })),
-            } as never,
-            {
-                getRuleByLocation: vi.fn((unitId: string, subUnitId: string, row: number, col: number) => {
-                    if (unitId === 'book-1' && subUnitId === 'sheet-1' && row === 1 && col === 2) {
-                        return rule;
-                    }
+class TestDataValidatorRegistryService {
+    validator: IValidator | undefined;
 
-                    return null;
-                }),
-            } as never,
-            {
-                selectionMoveEnd$,
-            } as unknown as SheetsSelectionsService,
-            {
-                showDropdown: vi.fn((param: IDropdownParam) => {
-                    dropdownParam = param;
+    getValidatorItem(): IValidator | undefined {
+        return this.validator;
+    }
+}
 
-                    return {
-                        dispose: popupDispose,
-                    };
-                }),
-            } as never,
-            {
-                getRuleByLocation: vi.fn((unitId: string, subUnitId: string, row: number, col: number) => {
-                    if (unitId === 'book-1' && subUnitId === 'sheet-1' && row === 1 && col === 2) {
-                        return rule;
-                    }
+class TestSheetDataValidationModel {
+    rule: IRule | null = null;
 
-                    return null;
-                }),
-            } as unknown as SheetDataValidationModel,
-            {
-                executeCommand: vi.fn(() => Promise.resolve(true)),
-            } as never,
-            {
-                isVisible: () => ({ visible: true }),
-            } as IEditorBridgeService,
-            {
-                has: () => false,
-            } as never,
-            {
-                getConfig: vi.fn((key: string) => key === SHEETS_DATA_VALIDATION_UI_PLUGIN_CONFIG_KEY
-                    ? { showEditOnDropdown: true, showSearchOnDropdown: false }
-                    : undefined),
-            } as never
-        );
+    getRuleByLocation(_unitId: string, _subUnitId: string, row: number, col: number): IRule | null {
+        return col === 2 && row >= 1 && row <= 4 ? this.rule : null;
+    }
+}
 
-        service.showDataValidationDropdown('book-1', 'sheet-1', 1, 2, onHide);
+class TestSheetsSelectionsService {
+    private readonly _selectionMoveEnd$ = new Subject<ISelectionWithStyle[]>();
+    readonly selectionMoveEnd$ = this._selectionMoveEnd$.asObservable();
 
-        expect(dropdownParam).toEqual(expect.objectContaining({
-            type: 'list',
-            location: expect.objectContaining({
-                row: 1,
-                col: 2,
-                unitId: 'book-1',
-                subUnitId: 'sheet-1',
-                workbook,
-                worksheet,
-            }),
-            props: expect.objectContaining({
-                defaultValue: 'Open',
-                multiple: false,
-                showEdit: true,
-                showSearch: false,
-                options: [
-                    { label: 'Open', value: 'Open', color: '#0f0' },
-                    { label: 'Closed', value: 'Closed', color: '#f00' },
-                ],
-            }),
-        }));
-        expect(service.activeDropdown).toEqual(expect.objectContaining({ location: expect.objectContaining({ row: 1, col: 2 }) }));
+    moveEnd(selections: ISelectionWithStyle[]): void {
+        this._selectionMoveEnd$.next(selections);
+    }
+}
 
-        const listProps = dropdownParam?.props as {
-            onChange?: (value: string[]) => Promise<boolean>;
-            onEdit?: () => void;
-        } | undefined;
+class TestCellDropdownManagerService {
+    dropdownParam: (IDropdownParam & { onHide?: () => void }) | undefined;
+    hideCount = 0;
 
-        await listProps?.onChange?.(['Closed']);
+    showDropdown(param: IDropdownParam & { onHide?: () => void }): IDisposable {
+        this.dropdownParam = param;
 
-        const commandService = (service as unknown as { _commandService: { executeCommand: ReturnType<typeof vi.fn> } })._commandService;
-        expect(commandService.executeCommand).toHaveBeenNthCalledWith(1, SetRangeValuesCommand.id, {
-            unitId: 'book-1',
-            subUnitId: 'sheet-1',
-            range: {
-                startColumn: 2,
-                endColumn: 2,
-                startRow: 1,
-                endRow: 1,
-            },
-            value: {
-                v: 'Closed',
-                p: null,
-                f: null,
-                si: null,
-            },
+        return toDisposable(() => {
+            this.hideCount++;
         });
-        expect(commandService.executeCommand).toHaveBeenNthCalledWith(2, SetCellEditVisibleOperation.id, expect.objectContaining({
-            visible: false,
-            unitId: 'book-1',
-        }));
+    }
+}
 
-        listProps?.onEdit?.();
-        expect(commandService.executeCommand).toHaveBeenCalledWith(OpenValidationPanelOperation.id, { ruleId: 'rule-1' });
-        expect(popupDispose).toHaveBeenCalledTimes(1);
+class TestEditorBridgeService {
+    visible = true;
 
-        selectionMoveEnd$.next([
-            {
-                primary: {
-                    unitId: 'book-1',
-                    sheetId: 'sheet-1',
-                    actualRow: 9,
-                    actualColumn: 9,
+    isVisible(): { visible: boolean } {
+        return { visible: this.visible };
+    }
+}
+
+interface ITestBed {
+    univer: Univer;
+    get: Injector['get'];
+    workbook: Workbook;
+    executedCommands: ICommandInfo[];
+}
+
+function createWorkbookData(): IWorkbookData {
+    return {
+        id: 'book-1',
+        appVersion: '3.0.0-alpha',
+        locale: LocaleType.EN_US,
+        name: 'test',
+        sheetOrder: ['sheet-1'],
+        sheets: {
+            'sheet-1': {
+                id: 'sheet-1',
+                rowCount: 20,
+                columnCount: 20,
+                cellData: {
+                    1: {
+                        2: { v: 'Open' },
+                    },
+                    2: {
+                        2: { v: 'East/West' },
+                    },
+                    3: {
+                        2: { v: '#ff0000' },
+                    },
+                    4: {
+                        2: { v: 45800 },
+                    },
                 },
             },
-        ] as never);
-        expect(service.activeDropdown).toBeNull();
+        },
+        styles: {},
+    };
+}
 
-        service.showDataValidationDropdown('book-1', 'sheet-1', 1, 2, onHide);
-        service.hideDropdown();
-        expect(onHide).toHaveBeenCalledTimes(2);
+function createTestBed(): ITestBed {
+    const univer = new Univer();
+    const injector = univer.__getInjector();
+    const executedCommands: ICommandInfo[] = [];
+
+    class TestPlugin extends Plugin {
+        static override pluginName = 'test-plugin';
+        static override type = UniverInstanceType.UNIVER_SHEET;
+
+        constructor(
+            _config: undefined,
+            @Inject(Injector) override readonly _injector: Injector
+        ) {
+            super();
+        }
+
+        override onStarting(): void {
+            const dependencies: Dependency[] = [
+                [DataValidatorRegistryService, { useClass: TestDataValidatorRegistryService }],
+                [SheetDataValidationModel, { useClass: TestSheetDataValidationModel }],
+                [SheetsSelectionsService, { useClass: TestSheetsSelectionsService }],
+                [ISheetCellDropdownManagerService, { useClass: TestCellDropdownManagerService }],
+                [IEditorBridgeServiceIdentifier, { useClass: TestEditorBridgeService }],
+                [DataValidationDropdownManagerService],
+            ];
+            dependencies.forEach((dependency) => this._injector.add(dependency));
+        }
+    }
+
+    univer.registerPlugin(TestPlugin);
+    const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, createWorkbookData());
+    const commandService = injector.get(ICommandService);
+    [SetRangeValuesCommand.id, SetCellEditVisibleOperation.id, OpenValidationPanelOperation.id].forEach((id) => {
+        commandService.registerCommand({
+            id,
+            type: CommandType.COMMAND,
+            handler: (_accessor, params) => {
+                executedCommands.push({ id, params });
+                return true;
+            },
+        } as ICommand);
     });
 
-    it('serializes multiple list selections when saving to the cell', async () => {
-        let dropdownParam: IDropdownParam | undefined;
-        const worksheet = {
-            getSheetId: () => 'sheet-1',
-            getCellRaw: () => ({ v: '' }),
-        };
-        const workbook = {
-            getUnitId: () => 'book-1',
-            getSheetBySheetId: () => worksheet,
-        };
-        const rule = {
-            uid: 'rule-1',
+    return {
+        univer,
+        get: injector.get.bind(injector),
+        workbook,
+        executedCommands,
+    };
+}
+
+function setRule(testBed: ITestBed, rule: IRule, validator: IValidator): void {
+    (testBed.get(SheetDataValidationModel) as unknown as TestSheetDataValidationModel).rule = rule;
+    (testBed.get(DataValidatorRegistryService) as unknown as TestDataValidatorRegistryService).validator = validator;
+}
+
+function getDropdown(testBed: ITestBed): IDropdownParam {
+    return (testBed.get(ISheetCellDropdownManagerService) as unknown as TestCellDropdownManagerService).dropdownParam!;
+}
+
+function showDropdown(testBed: ITestBed, row: number, col = 2): void {
+    testBed.get(DataValidationDropdownManagerService).showDataValidationDropdown('book-1', 'sheet-1', row, col);
+}
+
+function getSetRangeValue(testBed: ITestBed): unknown {
+    return (testBed.executedCommands.find((command) => command.id === SetRangeValuesCommand.id)?.params as { value?: unknown } | undefined)?.value;
+}
+
+describe('DataValidationDropdownManagerService', () => {
+    let testBed: ITestBed | undefined;
+
+    afterEach(() => {
+        testBed?.univer.dispose();
+        testBed = undefined;
+    });
+
+    it('shows a list dropdown, saves the selected item, and opens the validation panel for editing', async () => {
+        testBed = createTestBed();
+        setRule(testBed, {
+            uid: 'rule-list',
             type: 'list',
             renderMode: DataValidationRenderMode.CUSTOM,
-        };
-        const commandService = {
-            executeCommand: vi.fn(() => Promise.resolve(true)),
-        };
+        }, {
+            dropdownType: DataValidatorDropdownType.LIST,
+            getListWithColor: () => [
+                { label: 'Open', color: '#00aa00' },
+                { label: 'Closed' },
+            ],
+        });
 
-        const service = new DataValidationDropdownManagerService(
-            {
-                getUnit: () => workbook,
-            } as never,
-            {
-                getValidatorItem: vi.fn(() => ({
-                    dropdownType: DataValidatorDropdownType.MULTIPLE_LIST,
-                    getListWithColor: vi.fn(() => [
-                        { label: '1,2', color: '#0f0' },
-                        { label: '3', color: '#f00' },
-                    ]),
-                })),
-            } as never,
-            {
-                getRuleByLocation: vi.fn(() => rule),
-            } as never,
-            {
-                selectionMoveEnd$: new Subject<ISelectionWithStyle[]>(),
-            } as unknown as SheetsSelectionsService,
-            {
-                showDropdown: vi.fn((param: IDropdownParam) => {
-                    dropdownParam = param;
+        showDropdown(testBed, 1);
 
-                    return {
-                        dispose: vi.fn(),
-                    };
-                }),
-            } as never,
-            {
-                getRuleByLocation: vi.fn(() => rule),
-            } as unknown as SheetDataValidationModel,
-            commandService as never,
-            {
-                isVisible: () => ({ visible: false }),
-            } as IEditorBridgeService,
-            {
-                has: () => false,
-            } as never,
-            {
-                getConfig: vi.fn(() => undefined),
-            } as never
-        );
+        const dropdown = getDropdown(testBed);
+        expect(dropdown.type).toBe('list');
+        expect(dropdown.props).toMatchObject({
+            defaultValue: 'Open',
+            multiple: false,
+            showEdit: true,
+            showSearch: true,
+            options: [
+                { label: 'Open', value: 'Open', color: '#00aa00' },
+                { label: 'Closed', value: 'Closed', color: '#ECECEC' },
+            ],
+        });
 
-        service.showDataValidationDropdown('book-1', 'sheet-1', 1, 2);
+        await (dropdown.props as { onChange: (value: string[]) => Promise<boolean> }).onChange(['Closed']);
+        await awaitTime(0);
+        expect(getSetRangeValue(testBed)).toEqual({
+            v: 'Closed',
+            p: null,
+            f: null,
+            si: null,
+        });
+        expect(testBed.executedCommands.some((command) => command.id === SetCellEditVisibleOperation.id)).toBe(true);
 
-        const listProps = dropdownParam?.props as {
-            onChange?: (value: string[]) => Promise<boolean>;
-        } | undefined;
+        (dropdown.props as { onEdit: () => void }).onEdit();
+        expect(testBed.executedCommands.at(-1)).toMatchObject({
+            id: OpenValidationPanelOperation.id,
+            params: { ruleId: 'rule-list' },
+        });
+        expect((testBed.get(ISheetCellDropdownManagerService) as unknown as TestCellDropdownManagerService).hideCount).toBe(1);
+    });
 
-        await expect(listProps?.onChange?.(['1,2', '3'])).resolves.toBe(false);
+    it('keeps a multiple-list dropdown open after serializing selected values', async () => {
+        testBed = createTestBed();
+        (testBed.get(IEditorBridgeServiceIdentifier) as unknown as TestEditorBridgeService).visible = false;
+        setRule(testBed, {
+            uid: 'rule-multiple',
+            type: 'list',
+        }, {
+            dropdownType: DataValidatorDropdownType.MULTIPLE_LIST,
+            getListWithColor: () => [
+                { label: '1,2', color: '#00aa00' },
+                { label: '3', color: '#ff0000' },
+            ],
+        });
 
-        expect(commandService.executeCommand).toHaveBeenCalledWith(SetRangeValuesCommand.id, expect.objectContaining({
-            value: {
-                v: '["1,2","3"]',
-                p: null,
-                f: null,
-                si: null,
+        showDropdown(testBed, 1);
+
+        const dropdown = getDropdown(testBed);
+        await expect((dropdown.props as { onChange: (value: string[]) => Promise<boolean> }).onChange(['1,2', '3'])).resolves.toBe(false);
+        expect(getSetRangeValue(testBed)).toEqual({
+            v: serializeListOptions(['1,2', '3']),
+            p: null,
+            f: null,
+            si: null,
+        });
+        expect(testBed.executedCommands.some((command) => command.id === SetCellEditVisibleOperation.id)).toBe(false);
+    });
+
+    it('saves cascader and color dropdown values with synchronous command flow', () => {
+        testBed = createTestBed();
+        setRule(testBed, {
+            uid: 'rule-cascade',
+            type: 'cascade',
+            formula1: '[{"label":"East","value":"East","children":[{"label":"West","value":"West"}]}]',
+        }, {
+            dropdownType: DataValidatorDropdownType.CASCADE,
+        });
+
+        showDropdown(testBed, 2);
+        let dropdown = getDropdown(testBed);
+        expect(dropdown.type).toBe('cascader');
+        expect(dropdown.props).toMatchObject({
+            defaultValue: ['East', 'West'],
+        });
+        expect((dropdown.props as { onChange: (value: string[]) => boolean }).onChange(['North', 'South'])).toBe(true);
+        expect(getSetRangeValue(testBed)).toMatchObject({ v: 'North/South' });
+
+        setRule(testBed, {
+            uid: 'rule-color',
+            type: 'color',
+        }, {
+            dropdownType: DataValidatorDropdownType.COLOR,
+        });
+
+        showDropdown(testBed, 3);
+        dropdown = getDropdown(testBed);
+        expect(dropdown.type).toBe('color');
+        expect(dropdown.props).toMatchObject({ defaultValue: '#ff0000' });
+        expect((dropdown.props as { onChange: (value: string) => boolean }).onChange('#336699')).toBe(true);
+        expect(testBed.executedCommands.at(-2)).toMatchObject({
+            id: SetRangeValuesCommand.id,
+            params: expect.objectContaining({
+                value: expect.objectContaining({ v: '#336699' }),
+            }),
+        });
+    });
+
+    it('saves date-like dropdown values as serial numbers and closes cell editing', async () => {
+        testBed = createTestBed();
+        setRule(testBed, {
+            uid: 'rule-date',
+            type: 'date',
+            errorStyle: DataValidationErrorStyle.STOP,
+        }, {
+            dropdownType: DataValidatorDropdownType.DATE,
+            validator: () => true,
+        });
+
+        showDropdown(testBed, 4);
+
+        const dropdown = getDropdown(testBed);
+        expect(dropdown.type).toBe('datepicker');
+        expect(dropdown.props).toMatchObject({
+            showTime: false,
+            patternType: 'date',
+        });
+        await expect((dropdown.props as { onChange: (value: ReturnType<typeof dateKit>) => Promise<boolean> }).onChange(dateKit('2026-06-17'))).resolves.toBe(true);
+        expect(getSetRangeValue(testBed)).toEqual(expect.objectContaining({
+            t: 2,
+            s: {
+                n: {
+                    pattern: 'yyyy-MM-dd',
+                },
             },
         }));
+        expect(testBed.executedCommands.at(-1)?.id).toBe(SetCellEditVisibleOperation.id);
+
+        setRule(testBed, {
+            uid: 'rule-time',
+            type: 'time',
+            errorStyle: DataValidationErrorStyle.STOP,
+        }, {
+            dropdownType: DataValidatorDropdownType.TIME,
+            validator: () => true,
+        });
+
+        showDropdown(testBed, 4);
+        const timeDropdown = getDropdown(testBed);
+        expect(timeDropdown.props).toMatchObject({ patternType: 'time' });
+        await expect((timeDropdown.props as { onChange: (value: ReturnType<typeof dateKit>) => Promise<boolean> }).onChange(dateKit('2026-06-17 12:30:00'))).resolves.toBe(true);
+        expect(testBed.executedCommands.at(-2)?.params).toMatchObject({
+            value: expect.objectContaining({
+                s: {
+                    n: {
+                        pattern: 'HH:mm:ss',
+                    },
+                },
+            }),
+        });
+    });
+
+    it('hides the active dropdown when selection leaves validation cells', () => {
+        testBed = createTestBed();
+        setRule(testBed, {
+            uid: 'rule-list',
+            type: 'list',
+        }, {
+            dropdownType: DataValidatorDropdownType.LIST,
+            getListWithColor: () => [{ label: 'Open' }],
+        });
+
+        let hideCount = 0;
+        testBed.get(DataValidationDropdownManagerService).showDataValidationDropdown('book-1', 'sheet-1', 1, 2, () => {
+            hideCount++;
+        });
+        expect(testBed.get(DataValidationDropdownManagerService).activeDropdown).toMatchObject({
+            location: expect.objectContaining({ row: 1, col: 2 }),
+        });
+
+        (testBed.get(SheetsSelectionsService) as unknown as TestSheetsSelectionsService).moveEnd([{
+            primary: {
+                unitId: 'book-1',
+                sheetId: 'sheet-1',
+                actualRow: 9,
+                actualColumn: 9,
+            },
+        } as never]);
+
+        expect(testBed.get(DataValidationDropdownManagerService).activeDropdown).toBeNull();
+        expect(hideCount).toBe(1);
+    });
+
+    it('does not open a dropdown when workbook, rule, or validator dropdown type is unavailable', () => {
+        testBed = createTestBed();
+        const service = testBed.get(DataValidationDropdownManagerService);
+
+        service.showDataValidationDropdown('missing-book', 'sheet-1', 1, 2);
+        expect((testBed.get(ISheetCellDropdownManagerService) as unknown as TestCellDropdownManagerService).dropdownParam).toBeUndefined();
+
+        service.showDataValidationDropdown('book-1', 'sheet-1', 1, 2);
+        expect((testBed.get(ISheetCellDropdownManagerService) as unknown as TestCellDropdownManagerService).dropdownParam).toBeUndefined();
+
+        setRule(testBed, {
+            uid: 'rule-no-dropdown',
+            type: 'unknown',
+        }, {});
+        service.showDataValidationDropdown('book-1', 'sheet-1', 1, 2);
+        expect(service.activeDropdown).toBeUndefined();
     });
 });

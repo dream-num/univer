@@ -15,10 +15,24 @@
  */
 
 import type { IDocumentBody, IDocumentData, Nullable } from '@univerjs/core';
-import { BooleanNumber, DataStreamTreeTokenType, DocumentBlockRangeType, HorizontalAlign, PresetListType, TableSizeType } from '@univerjs/core';
+import {
+    BaselineOffset,
+    BooleanNumber,
+    CustomDecorationType,
+    CustomRangeType,
+    DataStreamTreeTokenType,
+    DocumentBlockRangeType,
+    DrawingTypeEnum,
+    HorizontalAlign,
+    PresetListType,
+    TableSizeType,
+} from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { CopyContentCache, extractId } from '../copy-content-cache';
 import { HtmlToUDMService } from '../html-to-udm/converter';
+import { extractNodeStyle } from '../html-to-udm/parse-node-style';
 import PastePluginLark from '../html-to-udm/paste-plugins/plugin-lark';
+import PastePluginUniver from '../html-to-udm/paste-plugins/plugin-univer';
 import PastePluginWord from '../html-to-udm/paste-plugins/plugin-word';
 import {
     createInternalClipboardDocData,
@@ -26,12 +40,14 @@ import {
     createInternalClipboardFragment,
     embedInternalClipboardFragment,
     extractInternalClipboardFragmentFromHtml,
+    parseInternalClipboardFragment,
     wrapClipboardHtml,
 } from '../internal-fragment';
-import { UDMToHtmlService } from '../udm-to-html/convertor';
+import { covertTextRunToHtml, getBodySliceHtml, UDMToHtmlService } from '../udm-to-html/convertor';
 
 HtmlToUDMService.use(PastePluginWord);
 HtmlToUDMService.use(PastePluginLark);
+HtmlToUDMService.use(PastePluginUniver);
 
 describe('test case in html and udm convert', () => {
     let body: Nullable<IDocumentBody> = null;
@@ -266,6 +282,56 @@ describe('test case in html and udm convert', () => {
             expect(titleCell?.borderTop?.width?.v).toBe(1);
             expect(titleCell?.borderTop?.color.rgb).toBe('rgb(203,213,225)');
         });
+
+        it('should paste Univer exported paragraphs with paragraph styles', () => {
+            const convertor = new HtmlToUDMService();
+            const udm = convertor.convert(`
+                <p class="UniverNormal" style="text-align: center; margin-top: 6px; margin-bottom: 12px; line-height: 150%;">Title</p>
+                <p class="UniverNormal">Body</p>
+            `);
+            const firstParagraph = udm.body?.paragraphs?.[0];
+            const secondParagraph = udm.body?.paragraphs?.[1];
+
+            expect(udm.body?.dataStream).toBe('Title\rBody\r');
+            expect(firstParagraph?.startIndex).toBe(5);
+            expect(firstParagraph?.paragraphStyle).toMatchObject({
+                horizontalAlign: HorizontalAlign.CENTER,
+                spaceAbove: { v: 6 },
+                spaceBelow: { v: 12 },
+                lineSpacing: 1.5,
+            });
+            expect(secondParagraph?.startIndex).toBe(10);
+        });
+
+        it('should paste Lark deleted text as strike-through rich text', () => {
+            const convertor = new HtmlToUDMService();
+            const udm = convertor.convert(`
+                <meta name="lark-record-clipboard" content="1">
+                <div class="ace-line">Keep <s style="color: #C81E1E;">deleted</s></div>
+            `);
+            const deletedRun = udm.body?.textRuns?.find((run) => udm.body?.dataStream.slice(run.st, run.ed) === 'deleted');
+
+            expect(udm.body?.dataStream).toBe('Keep deleted\r');
+            expect(deletedRun?.ts).toMatchObject({
+                st: { s: BooleanNumber.TRUE },
+                cl: { rgb: 'rgb(200,30,30)' },
+            });
+            expect(udm.body?.paragraphs?.[0].startIndex).toBe(12);
+        });
+
+        it('should read inline css styles used by copied rich text', () => {
+            const span = document.createElement('span');
+            span.setAttribute('style', 'font-family: "Inter"; font-size: 16px; font-weight: 700; font-style: italic; text-decoration: overline; background-color: rgb(240, 240, 10);');
+
+            expect(extractNodeStyle(span)).toMatchObject({
+                ff: 'Inter',
+                fs: 12,
+                bl: BooleanNumber.TRUE,
+                it: BooleanNumber.TRUE,
+                ol: { s: BooleanNumber.TRUE },
+                bg: { rgb: 'rgb(240,240,10)' },
+            });
+        });
     });
 
     describe('test cases in udm-to-html', () => {
@@ -481,6 +547,166 @@ describe('test case in html and udm convert', () => {
             expect(internalDocData?.body?.tables?.[1].startIndex).toBe(first.body!.dataStream.length);
             expect(internalDocData?.tableSource?.['table-1'].tableColumns?.map((column) => column.size.width.v)).toEqual([120, 240]);
             expect(internalDocData?.tableSource?.['table-2'].tableColumns?.map((column) => column.size.width.v)).toEqual([90, 180]);
+        });
+
+        it('should reject invalid internal clipboard fragments and empty copied document lists', () => {
+            expect(parseInternalClipboardFragment()).toBeNull();
+            expect(parseInternalClipboardFragment('{bad-json')).toBeNull();
+            expect(parseInternalClipboardFragment(JSON.stringify({
+                version: 1,
+                kind: 'univer-doc-fragment',
+                doc: {},
+            }))).toBeNull();
+            expect(extractInternalClipboardFragmentFromHtml('<p>No internal fragment</p>')).toBeNull();
+            expect(createInternalClipboardDocDataList([])).toBeNull();
+        });
+
+        it('should resolve internal copy ids and cached document payloads for local paste', () => {
+            const cache = new CopyContentCache();
+            const doc = {
+                body: {
+                    dataStream: 'Cached\r\n',
+                    paragraphs: [{ paragraphId: 'para_docs_ui_fixture_67', startIndex: 6 }],
+                },
+            };
+
+            cache.set('copy-1', doc);
+            expect(extractId('<p data-copy-id="copy-1">Cached</p>')).toBe('copy-1');
+            expect(extractId('<p>External paste</p>')).toBeNull();
+            expect(cache.get('copy-1')?.body?.dataStream).toBe('Cached\r\n');
+
+            cache.clear();
+            expect(cache.get('copy-1')).toBeUndefined();
+        });
+
+        it('should merge copied body metadata with offsets for internal multi-range paste', () => {
+            const first: IDocumentData = {
+                id: 'first',
+                documentStyle: {},
+                body: {
+                    dataStream: 'AB',
+                    textRuns: [{ st: 0, ed: 1, ts: { bl: BooleanNumber.TRUE } }],
+                    paragraphs: [{ paragraphId: 'para_docs_ui_fixture_65', startIndex: 1 }],
+                    sectionBreaks: [{ startIndex: 2 }],
+                    blockRanges: [{ startIndex: 0, endIndex: 1, blockId: 'quote-1', blockType: DocumentBlockRangeType.QUOTE }],
+                    customRanges: [{ startIndex: 0, endIndex: 1, rangeId: 'range-1', rangeType: 0 }],
+                    customDecorations: [{ startIndex: 0, endIndex: 1, id: 'decoration-1', type: CustomDecorationType.COMMENT }],
+                    customBlocks: [{ startIndex: 1, blockId: 'block-1' }],
+                },
+            };
+            const second: IDocumentData = {
+                id: 'second',
+                documentStyle: {},
+                body: {
+                    dataStream: 'CD',
+                    textRuns: [{ st: 0, ed: 2, ts: { it: BooleanNumber.TRUE } }],
+                    paragraphs: [{ paragraphId: 'para_docs_ui_fixture_66', startIndex: 2 }],
+                    sectionBreaks: [{ startIndex: 2 }],
+                    blockRanges: [{ startIndex: 0, endIndex: 2, blockId: 'code-1', blockType: DocumentBlockRangeType.CODE }],
+                    customRanges: [{ startIndex: 0, endIndex: 1, rangeId: 'range-2', rangeType: 0 }],
+                    customDecorations: [{ startIndex: 1, endIndex: 2, id: 'decoration-2', type: CustomDecorationType.COMMENT }],
+                    customBlocks: [{ startIndex: 0, blockId: 'block-2' }],
+                },
+            };
+
+            const merged = createInternalClipboardDocDataList([first, second]);
+            const body = merged?.body;
+
+            expect(body?.dataStream).toBe('ABCD');
+            expect(body?.textRuns?.[1]).toMatchObject({ st: 2, ed: 4 });
+            expect(body?.paragraphs?.[1].startIndex).toBe(4);
+            expect(body?.sectionBreaks?.[1].startIndex).toBe(4);
+            expect(body?.blockRanges?.[1]).toMatchObject({ startIndex: 2, endIndex: 4, blockType: DocumentBlockRangeType.CODE });
+            expect(body?.customRanges?.[1]).toMatchObject({ startIndex: 2, endIndex: 3, rangeId: 'range-2' });
+            expect(body?.customDecorations?.[1]).toMatchObject({ startIndex: 3, endIndex: 4, id: 'decoration-2' });
+            expect(body?.customBlocks?.[1]).toMatchObject({ startIndex: 2, blockId: 'block-2' });
+        });
+
+        it('should copy inline drawings with fresh block ids for internal paste', () => {
+            const doc: IDocumentData = {
+                id: 'drawing-doc',
+                documentStyle: {},
+                body: {
+                    dataStream: '\b',
+                    customBlocks: [{ startIndex: 0, blockId: 'image-1' }],
+                },
+                drawings: {
+                    'image-1': {
+                        drawingId: 'image-1',
+                        drawingType: 0,
+                        unitId: 'drawing-doc',
+                        subUnitId: '',
+                    } as never,
+                },
+            };
+
+            const internalDocData = createInternalClipboardDocData(doc);
+            const blockId = internalDocData.body?.customBlocks?.[0].blockId;
+
+            expect(blockId).toBeTruthy();
+            expect(blockId).not.toBe('image-1');
+            expect(blockId ? internalDocData.drawings?.[blockId]?.drawingId : undefined).toBe(blockId);
+        });
+
+        it('should serialize rich inline text styles for html clipboard output', () => {
+            const html = covertTextRunToHtml('Styled', {
+                st: 0,
+                ed: 6,
+                ts: {
+                    bl: BooleanNumber.TRUE,
+                    it: BooleanNumber.TRUE,
+                    ul: { s: BooleanNumber.TRUE },
+                    st: { s: BooleanNumber.TRUE },
+                    va: BaselineOffset.SUPERSCRIPT,
+                    fs: 14,
+                    ff: 'Inter',
+                    cl: { rgb: '#123456' },
+                    bg: { rgb: 'rgb(240, 240, 10)' },
+                    ol: { s: BooleanNumber.TRUE },
+                },
+            });
+
+            expect(html).toContain('<strong><s><u><sup><i>Styled</i></sup></u></s></strong>');
+            expect(html).toContain('font-family: Inter');
+            expect(html).toContain('font-size: 14pt');
+            expect(html).toContain('color: #123456');
+            expect(html).toContain('background: #f0f00a');
+            expect(html).toContain('text-decoration: overline');
+        });
+
+        it('should serialize copied hyperlinks and inline images into html clipboard output', () => {
+            const doc: IDocumentData = {
+                id: 'copy-html',
+                documentStyle: {},
+                body: {
+                    dataStream: 'A\bB',
+                    customRanges: [{
+                        startIndex: 0,
+                        endIndex: 2,
+                        rangeId: 'link-1',
+                        rangeType: CustomRangeType.HYPERLINK,
+                        properties: { url: 'https://univer.ai' },
+                    }],
+                    customBlocks: [{ startIndex: 1, blockId: 'image-1' }],
+                },
+                drawings: {
+                    'image-1': {
+                        drawingId: 'image-1',
+                        drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+                        imageSourceType: 'UUID',
+                        source: 'remote-image-id',
+                        transform: { width: 120, height: 80 },
+                        docTransform: { size: { width: 120, height: 80 } },
+                    } as never,
+                },
+            };
+
+            const html = getBodySliceHtml(doc, 0, 3);
+
+            expect(html).toContain('<a data-rangeid="link-1" href="https://univer.ai">');
+            expect(html).toContain('data-source=remote-image-id');
+            expect(html).toContain('data-doc-transform-width=120');
+            expect(html).toContain('src=remote-image-id');
         });
 
         it('should paste docs feature coverage from html with styles, blocks, lists and table dimensions', () => {

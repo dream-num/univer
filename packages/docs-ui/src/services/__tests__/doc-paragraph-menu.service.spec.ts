@@ -15,12 +15,16 @@
  */
 
 import type { IMutiPageParagraphBound } from '../doc-event-manager.service';
-import { DataStreamTreeTokenType, DOC_RANGE_TYPE, DocumentBlockRangeType, PresetListType } from '@univerjs/core';
+import { BlockType, DataStreamTreeTokenType, DOC_RANGE_TYPE, DocumentBlockRangeType, PresetListType } from '@univerjs/core';
 import { DocumentEditArea } from '@univerjs/engine-render';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { DOC_PARAGRAPH_MENU_COMPONENT_KEY, DOC_TABLE_BLOCK_MENU_COMPONENT_KEY } from '../../views/ParagraphMenu';
-import { getPreferredParagraphBoundsInRange, getTableBlockMenuHoverRect, getTableHorizontalViewportGeometry } from '../doc-event-manager.service';
+import {
+    getPreferredParagraphBoundsInRange,
+    getTableBlockMenuHoverRect,
+    getTableHorizontalViewportGeometry,
+} from '../doc-event-manager.service';
 import { DocParagraphMenuService } from '../doc-paragraph-menu.service';
 
 describe('DocParagraphMenuService', () => {
@@ -502,6 +506,64 @@ describe('DocParagraphMenuService', () => {
         expect(service.activeTarget?.icon).toBe('OrderIcon');
     });
 
+    it('shows a horizontal-rule paragraph as a draggable divider block', () => {
+        const attachPopupToRect = vi.fn(() => ({ canDispose: () => true, dispose: vi.fn() }));
+        const service = createService({
+            attachPopupToRect,
+            dataStream: '\r',
+            paragraphs: [{
+                startIndex: 0,
+                paragraphStyle: {
+                    borderBottom: {},
+                },
+            }],
+        });
+
+        service.showParagraphMenu(createParagraphBound({
+            paragraphStart: 0,
+            paragraphEnd: 0,
+            startIndex: 0,
+        }));
+
+        expect(service.activeTarget).toMatchObject({
+            kind: 'paragraph',
+            icon: 'ReduceIcon',
+            emptyMode: false,
+            draggable: true,
+        });
+    });
+
+    it('shows a custom block paragraph as a custom block menu target', () => {
+        const attachPopupToRect = vi.fn(() => ({ canDispose: () => true, dispose: vi.fn() }));
+        const service = createService({
+            attachPopupToRect,
+            customBlocks: [{
+                blockId: 'custom-1',
+                blockType: BlockType.CUSTOM,
+                startIndex: 0,
+            }],
+            dataStream: '\b\r',
+            paragraphs: [{ startIndex: 1 }],
+        });
+
+        service.showParagraphMenu(createParagraphBound({
+            paragraphStart: 0,
+            paragraphEnd: 1,
+            startIndex: 1,
+        }));
+
+        expect(service.activeTarget).toMatchObject({
+            kind: 'customBlock',
+            key: 'customBlock:custom-1',
+            icon: 'TextTypeIcon',
+            menuRange: {
+                startOffset: 0,
+                endOffset: 0,
+                collapsed: true,
+            },
+        });
+    });
+
     it('keeps cell paragraph move ranges inside the current table cell', () => {
         const attachPopupToRect = vi.fn(() => ({ canDispose: () => true, dispose: vi.fn() }));
         const dataStream = `${DataStreamTreeTokenType.TABLE_START}${DataStreamTreeTokenType.TABLE_ROW_START}${DataStreamTreeTokenType.TABLE_CELL_START}A\rB\r${DataStreamTreeTokenType.TABLE_CELL_END}${DataStreamTreeTokenType.TABLE_ROW_END}${DataStreamTreeTokenType.TABLE_END}`;
@@ -856,16 +918,108 @@ describe('DocParagraphMenuService', () => {
 
         expect(replayedRequests).toEqual([null]);
     });
+
+    it('calculates paragraph drop targets before and after the nearest body block', () => {
+        const paragraphBounds = new Map([
+            [3, createParagraphBound({
+                paragraphStart: 0,
+                paragraphEnd: 3,
+                startIndex: 3,
+            })],
+            [7, {
+                ...createParagraphBound({
+                    paragraphStart: 4,
+                    paragraphEnd: 7,
+                    startIndex: 7,
+                }),
+                rect: { bottom: 60, left: 10, right: 200, top: 40 },
+            }],
+            [13, {
+                ...createParagraphBound({
+                    paragraphStart: 8,
+                    paragraphEnd: 13,
+                    startIndex: 13,
+                }),
+                rect: { bottom: 100, left: 10, right: 200, top: 80 },
+            }],
+        ] as Array<[number, IMutiPageParagraphBound]>);
+        const service = createService({
+            attachPopupToRect: vi.fn(() => ({ canDispose: () => true, dispose: vi.fn() })),
+            dataStream: 'One\rTwo\rThree\r',
+            paragraphBounds,
+            paragraphs: [
+                { startIndex: 3 },
+                { startIndex: 7 },
+                { startIndex: 13 },
+            ],
+        });
+
+        expect(service.getDropTargetFromClientPoint(12, 45, { startOffset: 0, endOffset: 4 })).toEqual({
+            targetOffset: 4,
+            rect: { bottom: 40, left: 10, right: 200, top: 40 },
+        });
+        expect(service.getDropTargetFromClientPoint(12, 55, { startOffset: 0, endOffset: 4 })).toEqual({
+            targetOffset: 8,
+            rect: { bottom: 60, left: 10, right: 200, top: 60 },
+        });
+    });
+
+    it('does not return a drop target when the document has no movable blocks', () => {
+        const service = createService({
+            attachPopupToRect: vi.fn(() => ({ canDispose: () => true, dispose: vi.fn() })),
+            dataStream: '',
+        });
+
+        expect(service.getDropTargetFromClientPoint(12, 45, { startOffset: 0, endOffset: 4 })).toBeNull();
+    });
+
+    it('keeps drop targets inside the source table cell while dragging a cell paragraph', () => {
+        const dataStream = `${DataStreamTreeTokenType.TABLE_START}${DataStreamTreeTokenType.TABLE_ROW_START}${DataStreamTreeTokenType.TABLE_CELL_START}A\rB\r${DataStreamTreeTokenType.TABLE_CELL_END}${DataStreamTreeTokenType.TABLE_ROW_END}${DataStreamTreeTokenType.TABLE_END}`;
+        const paragraphBounds = new Map([
+            [4, {
+                ...createParagraphBound({
+                    paragraphStart: 3,
+                    paragraphEnd: 4,
+                    startIndex: 4,
+                }),
+                rect: { bottom: 40, left: 120, right: 260, top: 20 },
+            }],
+            [6, {
+                ...createParagraphBound({
+                    paragraphStart: 5,
+                    paragraphEnd: 6,
+                    startIndex: 6,
+                }),
+                rect: { bottom: 80, left: 120, right: 260, top: 60 },
+            }],
+        ] as Array<[number, IMutiPageParagraphBound]>);
+        const service = createService({
+            attachPopupToRect: vi.fn(() => ({ canDispose: () => true, dispose: vi.fn() })),
+            dataStream,
+            paragraphBounds,
+            paragraphs: [
+                { startIndex: 4 },
+                { startIndex: 6 },
+            ],
+            tables: [{ tableId: 'table-1', startIndex: 0, endIndex: dataStream.length - 1 }],
+        });
+
+        expect(service.getDropTargetFromClientPoint(125, 65, { startOffset: 3, endOffset: 5 })).toEqual({
+            targetOffset: 5,
+            rect: { bottom: 60, left: 120, right: 260, top: 60 },
+        });
+    });
 });
 
 function createService(options: {
     attachPopupToRect: ReturnType<typeof vi.fn>;
     blockRanges?: Array<{ blockId: string; blockType: string; endIndex: number; startIndex: number }>;
+    customBlocks?: Array<{ blockId: string; blockType: BlockType; startIndex: number }>;
     dataStream: string;
     findParagraphBoundByIndex?: (index: number) => unknown;
     docRanges?: Array<{ collapsed?: boolean; endOffset?: number; rangeType?: DOC_RANGE_TYPE | string; startOffset?: number }>;
     getDocRanges?: () => Array<{ collapsed?: boolean; endOffset?: number; rangeType?: DOC_RANGE_TYPE | string; startOffset?: number }>;
-    paragraphs?: Array<{ bullet?: { listType?: PresetListType }; startIndex: number }>;
+    paragraphs?: Array<{ bullet?: { listType?: PresetListType }; paragraphStyle?: Record<string, unknown>; startIndex: number }>;
     paragraphBounds?: Map<number, IMutiPageParagraphBound>;
     inputBefore$?: Subject<unknown>;
     keydown$?: Subject<unknown>;
@@ -881,6 +1035,7 @@ function createService(options: {
             unit: {
                 getBody: () => ({
                     blockRanges: options.blockRanges ?? [],
+                    customBlocks: options.customBlocks ?? [],
                     dataStream: options.dataStream,
                     paragraphs: options.paragraphs ?? [],
                     tables: options.tables ?? [],
@@ -893,11 +1048,13 @@ function createService(options: {
                 }),
             },
             scene: {
+                getAncestorScale: () => ({ scaleX: 1, scaleY: 1 }),
                 getViewport: () => ({
                     height: 300,
                     onScrollAfter$: {
                         subscribeEvent: vi.fn(() => ({ dispose: vi.fn() })),
                     },
+                    viewportScrollX: 0,
                     viewportScrollY: options.viewportScrollY ?? 0,
                 }),
             },
@@ -939,6 +1096,32 @@ function createService(options: {
             onKeydown$: options.keydown$ ?? new Subject(),
         } as never
     );
+}
+
+function createScrollAfterEvent() {
+    const callbacks: Array<(event: { scrollY: number }) => void> = [];
+
+    return {
+        event$: {
+            subscribeEvent: (callback: (event: { scrollY: number }) => void) => {
+                callbacks.push(callback);
+
+                return {
+                    dispose: () => {
+                        const index = callbacks.indexOf(callback);
+                        if (index >= 0) {
+                            callbacks.splice(index, 1);
+                        }
+                    },
+                };
+            },
+        },
+        emit: (event: { scrollY: number }) => {
+            for (const callback of callbacks) {
+                callback(event);
+            }
+        },
+    };
 }
 
 function createParagraphBound(partial: Pick<IMutiPageParagraphBound, 'paragraphEnd' | 'paragraphStart' | 'startIndex'>): IMutiPageParagraphBound {

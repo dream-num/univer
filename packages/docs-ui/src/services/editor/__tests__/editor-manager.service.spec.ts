@@ -96,7 +96,74 @@ class TestRender {
     }
 }
 
-function createService() {
+class TestRegisterViewport {
+    disposed = false;
+    scrollVal: unknown;
+
+    getScrollBar() {
+        return {
+            dispose: () => {
+                this.disposed = true;
+            },
+        };
+    }
+
+    updateScrollVal(value: unknown) {
+        this.scrollVal = value;
+    }
+}
+
+class TestRegisterRender extends TestRender {
+    readonly canvas = document.createElement('canvas');
+    readonly viewport = new TestRegisterViewport();
+    container: HTMLDivElement | null = null;
+    readonly engine = {
+        canvasColorService: {},
+        setContainer: (container: HTMLDivElement) => {
+            this.container = container;
+        },
+        getCanvas: () => ({
+            getCanvasEle: () => this.canvas,
+        }),
+    };
+
+    readonly components = new Map();
+    readonly mainComponent = {
+        getScene: () => ({
+            getViewports: () => [this.viewport],
+        }),
+    };
+}
+
+class TestRegisterRenderManagerService {
+    static readonly renders = new Map<string, TestRegisterRender>();
+    static readonly removedRenderIds: string[] = [];
+
+    create(unitId: string) {
+        TestRegisterRenderManagerService.renders.set(unitId, new TestRegisterRender(new TestDocSelectionRenderService()));
+    }
+
+    getRenderById(unitId: string) {
+        return TestRegisterRenderManagerService.renders.get(unitId);
+    }
+
+    removeRender(unitId: string) {
+        TestRegisterRenderManagerService.removedRenderIds.push(unitId);
+        TestRegisterRenderManagerService.renders.delete(unitId);
+    }
+}
+
+class TestMissingRenderManagerService {
+    create() {}
+
+    getRenderById() {
+        return null;
+    }
+
+    removeRender() {}
+}
+
+function createService(renderManagerServiceClass: unknown = RenderManagerService) {
     vi.stubGlobal('window', new EventTarget());
     const injector = new Injector();
     injector.add([ILogService, { useClass: DesktopLogService }]);
@@ -106,7 +173,7 @@ function createService() {
     injector.add([IUniverInstanceService, { useClass: UniverInstanceService }]);
     injector.add([IUndoRedoService, { useClass: LocalUndoRedoService }]);
     injector.add([ThemeService]);
-    injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+    injector.add([IRenderManagerService, { useClass: renderManagerServiceClass as never }]);
     injector.add([DocSelectionManagerService]);
     injector.add([DocStateEmitService]);
     injector.add([IEditorService, { useClass: EditorService }]);
@@ -149,6 +216,8 @@ function createEditor(
 describe('EditorService', () => {
     afterEach(() => {
         vi.unstubAllGlobals();
+        TestRegisterRenderManagerService.renders.clear();
+        TestRegisterRenderManagerService.removedRenderIds.length = 0;
     });
 
     it('focuses the requested editor, emits caret position, and clears editor contexts on blur', () => {
@@ -171,12 +240,21 @@ describe('EditorService', () => {
         expect(univerInstanceService.getCurrentUniverDocInstance()?.getUnitId()).toBe('editor-1');
         expect(editorFocused).toBe(1);
         expect(focusRanges).toEqual([{ startOffset: 3, endOffset: 3 }]);
+        expect(service.getEditor()).toBe(service.getEditor('editor-1'));
+
+        service.focus('editor-1');
+        expect(editorFocused).toBe(1);
+        expect(service.getFocusId()).toBe('editor-1');
 
         service.blur();
         expect(service.getFocusId()).toBeNull();
         expect(editorBlurred).toBe(1);
         expect(blurs).toEqual([null]);
         expect(contextService.getContextValue(EDITOR_ACTIVATED)).toBe(false);
+
+        service.focus('missing-editor');
+        expect(service.getFocusId()).toBeNull();
+        expect(editorFocused).toBe(1);
     });
 
     it('turns render-layer editing activity into editor events and document updates', async () => {
@@ -300,5 +378,82 @@ describe('EditorService', () => {
 
         standaloneEditor.dispose();
         commentEditor.dispose();
+    });
+
+    it('registers an editor render and cleans it up with the returned disposable', () => {
+        const { service, univerInstanceService } = createService(TestRegisterRenderManagerService);
+        const editorUnitId = EDITOR_ID;
+        const container = document.createElement('div');
+        const disposable = service.register({
+            initialSnapshot: {
+                id: editorUnitId,
+                body: {
+                    dataStream: 'draft\r\n',
+                    paragraphs: [{ startIndex: 0, paragraphId: createParagraphId(new Set()) }],
+                    sectionBreaks: [],
+                    customRanges: [],
+                    tables: [],
+                    textRuns: [],
+                },
+                documentStyle: {},
+            },
+            canvasStyle: { backgroundColor: '#ffffff' },
+            scrollBar: false,
+        }, container);
+        const render = TestRegisterRenderManagerService.renders.get(editorUnitId)!;
+
+        expect(service.isEditor(editorUnitId)).toBe(true);
+        expect(service.getEditor(editorUnitId)?.getEditorId()).toBe(editorUnitId);
+        expect(service.getEditorRenderConfig(editorUnitId)).toEqual({
+            canvasStyle: { backgroundColor: '#ffffff' },
+            scrollBar: false,
+        });
+        expect(render.container).toBe(container);
+        expect(render.viewport.disposed).toBe(true);
+        expect(render.viewport.scrollVal).toEqual({
+            scrollX: 0,
+            scrollY: 0,
+            viewportScrollX: 0,
+            viewportScrollY: 0,
+        });
+        expect(univerInstanceService.getUnit<DocumentDataModel>(editorUnitId)?.getBody()?.dataStream).toBe('abc\r\n');
+
+        disposable.dispose();
+
+        expect(service.isEditor(editorUnitId)).toBe(false);
+        expect(TestRegisterRenderManagerService.removedRenderIds).toEqual([editorUnitId]);
+        expect(univerInstanceService.getUnit<DocumentDataModel>(editorUnitId)).toBeUndefined();
+    });
+
+    it('keeps render config without an editor when no render is available and removes it on dispose', () => {
+        const { service } = createService(TestMissingRenderManagerService);
+        const disposable = service.register({
+            initialSnapshot: {
+                id: EDITOR_ID,
+                body: {
+                    dataStream: 'abc\r\n',
+                    paragraphs: [{ startIndex: 0, paragraphId: createParagraphId(new Set()) }],
+                    sectionBreaks: [],
+                    customRanges: [],
+                    tables: [],
+                    textRuns: [],
+                },
+                documentStyle: {},
+            },
+            canvasStyle: { fontSize: 14 },
+            scrollBar: true,
+        }, document.createElement('div'));
+
+        expect(service.getEditor(EDITOR_ID)).toBeUndefined();
+        expect(service.isEditor(EDITOR_ID)).toBe(true);
+        expect(service.getEditorRenderConfig(EDITOR_ID)).toEqual({
+            canvasStyle: { fontSize: 14 },
+            scrollBar: true,
+        });
+
+        disposable.dispose();
+
+        expect(service.isEditor(EDITOR_ID)).toBe(false);
+        expect(service.getEditorRenderConfig(EDITOR_ID)).toBeNull();
     });
 });

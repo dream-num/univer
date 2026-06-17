@@ -919,6 +919,148 @@ describe('DocParagraphMenuService', () => {
         expect(replayedRequests).toEqual([null]);
     });
 
+    it('reports active paragraph and dragging state while the paragraph menu is visible', () => {
+        const attachPopupToRect = vi.fn(() => ({ canDispose: () => true, dispose: vi.fn() }));
+        const service = createService({
+            attachPopupToRect,
+            dataStream: 'Title\r',
+        });
+        const paragraph = createParagraphBound({
+            paragraphStart: 0,
+            paragraphEnd: 5,
+            startIndex: 5,
+        });
+
+        service.showParagraphMenu(paragraph);
+        service.setBlockMenuDragging(true);
+
+        expect(service.activeParagraph).toBe(paragraph);
+        expect(service.isBlockMenuDragging).toBe(true);
+    });
+
+    it('keeps the paragraph menu open after outside click when the cursor is still inside it', () => {
+        const dispose = vi.fn();
+        const textSelection$ = new Subject();
+        const attachPopupToRect = vi.fn(() => ({ canDispose: () => true, dispose }));
+        const service = createService({
+            activeTextRange: { startOffset: 2, endOffset: 2, collapsed: true },
+            attachPopupToRect,
+            dataStream: 'Title\r',
+            textSelection$,
+        });
+
+        service.showParagraphMenu(createParagraphBound({
+            paragraphStart: 0,
+            paragraphEnd: 5,
+            startIndex: 5,
+        }));
+        const [, popupOptions] = attachPopupToRect.mock.calls[0] as unknown as [unknown, { onClickOutside: () => void }];
+        popupOptions.onClickOutside();
+        textSelection$.next({ textRanges: [], rectRanges: [] });
+
+        expect(dispose).not.toHaveBeenCalled();
+        expect(service.activeTarget?.key).toBe('paragraph:5');
+    });
+
+    it('hides the visible paragraph menu after a custom range click and after scrolling', () => {
+        const dispose = vi.fn();
+        const clickCustomRanges$ = new Subject();
+        const scrollAfter = createScrollAfterEvent();
+        const attachPopupToRect = vi.fn(() => ({ canDispose: () => true, dispose }));
+        const service = createService({
+            attachPopupToRect,
+            clickCustomRanges$,
+            dataStream: 'Title\r',
+            scrollAfter$: scrollAfter.event$,
+        });
+
+        service.showParagraphMenu(createParagraphBound({
+            paragraphStart: 0,
+            paragraphEnd: 5,
+            startIndex: 5,
+        }));
+        clickCustomRanges$.next({});
+
+        expect(dispose).toHaveBeenCalledTimes(1);
+        expect(service.activeTarget).toBeNull();
+
+        service.showParagraphMenu(createParagraphBound({
+            paragraphStart: 0,
+            paragraphEnd: 5,
+            startIndex: 5,
+        }));
+        scrollAfter.emit({ scrollY: 20 });
+
+        expect(dispose).toHaveBeenCalledTimes(2);
+        expect(service.activeTarget).toBeNull();
+    });
+
+    it('shows and hides menus from hover state changes', async () => {
+        const dispose = vi.fn();
+        const hoverParagraphRealTime$ = new BehaviorSubject<IMutiPageParagraphBound | null>(null);
+        const hoverParagraphLeft$ = new BehaviorSubject<IMutiPageParagraphBound | null>(null);
+        const hoverTableRealTime$ = new BehaviorSubject<null>(null);
+        const attachPopupToRect = vi.fn(() => ({ canDispose: () => true, dispose }));
+        const service = createService({
+            attachPopupToRect,
+            dataStream: 'Title\r',
+            hoverParagraphLeft$,
+            hoverParagraphRealTime$,
+            hoverTableRealTime$,
+        });
+
+        await new Promise((resolve) => setTimeout(resolve, 20));
+        hoverParagraphRealTime$.next(createParagraphBound({
+            paragraphStart: 0,
+            paragraphEnd: 5,
+            startIndex: 5,
+        }));
+        await new Promise((resolve) => setTimeout(resolve, 20));
+
+        expect(service.activeTarget?.key).toBe('paragraph:5');
+
+        hoverParagraphRealTime$.next(null);
+        hoverParagraphLeft$.next(null);
+        await new Promise((resolve) => setTimeout(resolve, 20));
+
+        expect(dispose).toHaveBeenCalledTimes(1);
+        expect(service.activeTarget).toBeNull();
+    });
+
+    it('does not show table menus for expanded text selections or missing table data', () => {
+        const attachPopupToRect = vi.fn(() => ({ canDispose: () => true, dispose: vi.fn() }));
+        const service = createService({
+            attachPopupToRect,
+            dataStream: '',
+            docRanges: [{
+                collapsed: false,
+                endOffset: 6,
+                startOffset: 2,
+            }],
+            tables: [{ tableId: 'table-1', startIndex: 10, endIndex: 30 }],
+        });
+
+        service.showTableMenu({
+            pageIndex: 0,
+            rect: { bottom: 170, left: 100, right: 400, top: 80 },
+            tableId: 'table-1',
+        });
+
+        expect(attachPopupToRect).not.toHaveBeenCalled();
+
+        const missingTableService = createService({
+            attachPopupToRect,
+            dataStream: '',
+        });
+        missingTableService.showTableMenu({
+            pageIndex: 0,
+            rect: { bottom: 170, left: 100, right: 400, top: 80 },
+            tableId: 'missing-table',
+        });
+
+        expect(attachPopupToRect).not.toHaveBeenCalled();
+    });
+
     it('calculates paragraph drop targets before and after the nearest body block', () => {
         const paragraphBounds = new Map([
             [3, createParagraphBound({
@@ -1012,8 +1154,10 @@ describe('DocParagraphMenuService', () => {
 });
 
 function createService(options: {
+    activeTextRange?: { collapsed: boolean; endOffset: number; startOffset: number };
     attachPopupToRect: ReturnType<typeof vi.fn>;
     blockRanges?: Array<{ blockId: string; blockType: string; endIndex: number; startIndex: number }>;
+    clickCustomRanges$?: Subject<unknown>;
     customBlocks?: Array<{ blockId: string; blockType: BlockType; startIndex: number }>;
     dataStream: string;
     findParagraphBoundByIndex?: (index: number) => unknown;
@@ -1021,9 +1165,13 @@ function createService(options: {
     getDocRanges?: () => Array<{ collapsed?: boolean; endOffset?: number; rangeType?: DOC_RANGE_TYPE | string; startOffset?: number }>;
     paragraphs?: Array<{ bullet?: { listType?: PresetListType }; paragraphStyle?: Record<string, unknown>; startIndex: number }>;
     paragraphBounds?: Map<number, IMutiPageParagraphBound>;
+    hoverParagraphLeft$?: BehaviorSubject<IMutiPageParagraphBound | null>;
+    hoverParagraphRealTime$?: BehaviorSubject<IMutiPageParagraphBound | null>;
+    hoverTableRealTime$?: BehaviorSubject<null>;
     inputBefore$?: Subject<unknown>;
     keydown$?: Subject<unknown>;
     replaceDocRanges?: ReturnType<typeof vi.fn>;
+    scrollAfter$?: { subscribeEvent: (callback: (event: { scrollY: number }) => void) => { dispose: () => void } };
     textSelection$?: Subject<unknown>;
     tableCellBounds?: Map<string, Array<{ colIndex: number; pageIndex: number; rect: { bottom: number; left: number; right: number; top: number }; rowIndex: number; tableId: string }>>;
     tables?: Array<{ endIndex: number; startIndex: number; tableId: string }>;
@@ -1051,7 +1199,7 @@ function createService(options: {
                 getAncestorScale: () => ({ scaleX: 1, scaleY: 1 }),
                 getViewport: () => ({
                     height: 300,
-                    onScrollAfter$: {
+                    onScrollAfter$: options.scrollAfter$ ?? {
                         subscribeEvent: vi.fn(() => ({ dispose: vi.fn() })),
                     },
                     viewportScrollX: 0,
@@ -1060,15 +1208,16 @@ function createService(options: {
             },
         } as never,
         {
-            getActiveTextRange: () => null,
+            getActiveTextRange: () => options.activeTextRange ?? null,
             getDocRanges: options.getDocRanges ?? vi.fn(() => options.docRanges ?? []),
             replaceDocRanges: options.replaceDocRanges ?? vi.fn(),
             textSelection$: options.textSelection$ ?? new Subject(),
         } as never,
         {
-            hoverParagraphRealTime$: new BehaviorSubject(null),
-            hoverParagraphLeft$: new BehaviorSubject(null),
-            clickCustomRanges$: new Subject(),
+            hoverParagraphRealTime$: options.hoverParagraphRealTime$ ?? new BehaviorSubject(null),
+            hoverParagraphLeft$: options.hoverParagraphLeft$ ?? new BehaviorSubject(null),
+            hoverTableRealTime$: options.hoverTableRealTime$ ?? new BehaviorSubject(null),
+            clickCustomRanges$: options.clickCustomRanges$ ?? new Subject(),
             findParagraphBoundByIndex: options.findParagraphBoundByIndex ?? vi.fn(() => null),
             findParagraphBoundsInRange: vi.fn((startIndex: number, endIndex: number) => [...(options.paragraphBounds ?? new Map()).values()]
                 .filter((bound) => Math.max(bound.paragraphStart, startIndex) <= Math.min(bound.paragraphEnd, endIndex))),

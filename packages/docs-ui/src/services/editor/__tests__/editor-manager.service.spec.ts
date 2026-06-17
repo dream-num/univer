@@ -38,6 +38,7 @@ import {
 } from '@univerjs/core';
 import {
     DocSelectionManagerService,
+    DocSkeletonManagerService,
     DocStateEmitService,
     RichTextEditingMutation,
     SetTextSelectionsOperation,
@@ -163,6 +164,28 @@ class TestMissingRenderManagerService {
     removeRender() {}
 }
 
+class TestEditorRenderManagerService {
+    static readonly skeleton = { unitId: EDITOR_ID };
+
+    getRenderById(unitId: string) {
+        if (unitId !== EDITOR_ID) {
+            return undefined;
+        }
+
+        return {
+            with: (token: unknown) => {
+                if (token === DocSkeletonManagerService) {
+                    return {
+                        getSkeleton: () => TestEditorRenderManagerService.skeleton,
+                    };
+                }
+
+                throw new Error(`Unexpected render service: ${String(token)}`);
+            },
+        };
+    }
+}
+
 function createService(renderManagerServiceClass: unknown = RenderManagerService) {
     vi.stubGlobal('window', new EventTarget());
     const injector = new Injector();
@@ -202,14 +225,18 @@ function createEditor(
     univerInstanceService: IUniverInstanceService,
     commandService: ICommandService,
     editorUnitId: string,
-    selectionRenderService: TestDocSelectionRenderService
+    selectionRenderService: TestDocSelectionRenderService,
+    config: Partial<ConstructorParameters<typeof Editor>[0]> = {}
 ) {
+    const editorDom = config.editorDom ?? document.createElement('div');
+
     return injector.createInstance(Editor, {
         initialSnapshot: { id: editorUnitId },
         render: new TestRender(selectionRenderService),
-        editorDom: document.createElement('div'),
+        editorDom,
         canvasStyle: { backgroundColor: '#ffffff' },
         scrollBar: true,
+        ...config,
     } as never, univerInstanceService, injector.get(DocSelectionManagerService), commandService, injector.get(IUndoRedoService), injector);
 }
 
@@ -272,8 +299,16 @@ describe('EditorService', () => {
         const selectionManagerService = injector.get(DocSelectionManagerService);
         const inputs: string[] = [];
         const pastes: string[] = [];
+        const focusEvents: unknown[] = [];
+        const blurEvents: unknown[] = [];
+        const changeEvents: string[] = [];
         const selections: string[] = [];
         const refreshSelections: string[] = [];
+        editor.focus$.subscribe((event) => focusEvents.push(event));
+        editor.blur$.subscribe((event) => blurEvents.push(event));
+        editor.change$.subscribe(({ data }) => {
+            changeEvents.push(data.body?.dataStream ?? '');
+        });
         editor.input$.subscribe(({ content, isComposing }) => {
             inputs.push(`${content}:${isComposing}`);
         });
@@ -295,9 +330,13 @@ describe('EditorService', () => {
             }
         });
 
+        selectionRenderService.onFocus$.next({ type: 'focus' } as never);
         selectionRenderService.onInput$.next({ event: new InputEvent('input'), content: 'd' });
+        selectionRenderService.onKeydown$.next({ event: { type: 'keydown', ctrlKey: true, keyCode: 88 } as KeyboardEvent, content: 'cut' });
+        selectionRenderService.onKeydown$.next({ event: { type: 'keydown', keyCode: 8 } as KeyboardEvent, content: '' });
         selectionRenderService.onCompositionupdate$.next({ event: new CompositionEvent('compositionupdate'), content: '拼' });
         selectionRenderService.onPaste$.next({ event: new Event('paste'), content: 'paste-text' });
+        selectionRenderService.onBlur$.next({ type: 'blur' } as never);
         selectionManagerService.__TEST_ONLY_setCurrentSelection({ unitId: EDITOR_ID, subUnitId: EDITOR_ID });
         selectionManagerService.__replaceTextRangesWithNoRefresh({
             textRanges: [{
@@ -315,7 +354,10 @@ describe('EditorService', () => {
         editor.replaceText('quarterly');
         await Promise.resolve();
 
-        expect(inputs).toEqual(['d:false', '拼:true', 'paste-text:false']);
+        expect(focusEvents).toEqual([{ type: 'focus' }]);
+        expect(blurEvents).toEqual([{ type: 'blur' }]);
+        expect(changeEvents).toEqual(['abc\r\n']);
+        expect(inputs).toEqual(['d:false', 'cut:false', ':false', '拼:true', 'paste-text:false']);
         expect(pastes).toEqual(['paste-text']);
         expect(selections).toEqual(['1:2:false']);
         expect(editor.getDocumentData().body?.dataStream).toBe('quarterly\r\n');
@@ -323,6 +365,69 @@ describe('EditorService', () => {
         expect(univerInstanceService.getUnit<DocumentDataModel>(EDITOR_ID)?.getBody()?.dataStream).toBe('quarterly\r\n');
 
         editor.dispose();
+    });
+
+    it('exposes editor state and selection APIs used by host UI', () => {
+        const { injector, univerInstanceService } = createService(TestEditorRenderManagerService);
+        const commandService = injector.get(ICommandService);
+        commandService.registerCommand(SetTextSelectionsOperation);
+        const selectionRenderService = new TestDocSelectionRenderService();
+        const editorDom = document.createElement('div');
+        const editor = createEditor(
+            injector,
+            univerInstanceService,
+            commandService,
+            EDITOR_ID,
+            selectionRenderService,
+            {
+                cancelDefaultResizeListener: true,
+                editorDom,
+                readonly: true,
+                visible: false,
+            } as never
+        );
+        const selectionManagerService = injector.get(DocSelectionManagerService);
+        const refreshedSelections: string[] = [];
+        selectionManagerService.refreshSelection$.subscribe((selection) => {
+            if (!selection) {
+                return;
+            }
+
+            for (const range of selection.docRanges) {
+                refreshedSelections.push(`${range.startOffset}:${range.endOffset}`);
+            }
+        });
+
+        expect(editor.docSelectionRenderService).toBe(selectionRenderService);
+        expect(editor.isFocus()).toBe(true);
+        selectionRenderService.isFocusing = false;
+        expect(editor.isFocus()).toBe(false);
+
+        editor.setSelectionRanges([{ startOffset: 1, endOffset: 2 }], false);
+        selectionManagerService.__TEST_ONLY_setCurrentSelection({ unitId: EDITOR_ID, subUnitId: EDITOR_ID });
+        selectionManagerService.__replaceTextRangesWithNoRefresh({
+            textRanges: [{ startOffset: 2, endOffset: 2, collapsed: true, isActive: true }],
+            rectRanges: [],
+            segmentId: '',
+            segmentPage: -1,
+            style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+            isEditing: true,
+        }, { unitId: EDITOR_ID, subUnitId: EDITOR_ID });
+
+        expect(refreshedSelections.at(-1)).toBe('1:2');
+        expect(editor.getSelectionRanges()[0].startOffset).toBe(2);
+        expect(editor.getCursorPosition()).toBe(2);
+
+        editor.select();
+        expect(refreshedSelections.at(-1)).toBe('0:3');
+        expect(editor.getDocumentDataModel()).toBe(univerInstanceService.getUnit<DocumentDataModel>(EDITOR_ID));
+        expect(editor.cancelDefaultResizeListener).toBe(true);
+        expect(editor.isReadOnly()).toBe(true);
+        expect(editor.getBoundingClientRect()).toEqual(editorDom.getBoundingClientRect());
+        expect(editor.editorDOM).toBe(editorDom);
+        expect(editor.isVisible()).toBe(false);
+        expect(editor.getSkeleton()).toBe(TestEditorRenderManagerService.skeleton);
+        expect(editor.isSheetEditor()).toBe(false);
     });
 
     it('tracks editor focus context when moving between standalone and comment editors', () => {

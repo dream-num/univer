@@ -32,12 +32,17 @@ import { InnerPasteCommand } from '../../../commands/commands/clipboard.inner.co
 import { DocClipboardService, getTableClipboardBodySlice, IDocClipboardService } from '../clipboard.service';
 
 class TestClipboardInterfaceService {
+    readonly writes: Array<{ text: string; html: string; custom?: Record<string, string> }> = [];
+
     get supportClipboard(): boolean {
         return true;
     }
 
     async writeText(): Promise<void> {}
-    async write(): Promise<void> {}
+    async write(text: string, html: string, custom?: Record<string, string>): Promise<void> {
+        this.writes.push({ text, html, custom });
+    }
+
     async readText(): Promise<string> { return ''; }
     async read(): Promise<ClipboardItem[]> { return []; }
 }
@@ -87,6 +92,45 @@ describe('DocClipboardService table copy helpers', () => {
             endIndex: tableStream.length,
             tableId: 'table-1',
         }]);
+    });
+
+    it('copies the selected document text as plain text, html, and internal clipboard data', async () => {
+        const documentData: IDocumentData = {
+            id: 'copy-doc',
+            body: {
+                dataStream: 'Alpha\r\n',
+                paragraphs: [{ paragraphId: 'para_docs_ui_clipboard_fixture_2', startIndex: 5 }],
+                sectionBreaks: [],
+                customBlocks: [],
+                textRuns: [],
+            },
+            documentStyle: {},
+        };
+        const testBed = createCommandTestBed(documentData, [
+            [IClipboardInterfaceService, { useClass: TestClipboardInterfaceService }],
+            [IDocClipboardService, { useClass: DocClipboardService }],
+        ]);
+        const selectionManager = testBed.get(DocSelectionManagerService);
+        selectionManager.__TEST_ONLY_setCurrentSelection({ unitId: 'copy-doc', subUnitId: '' });
+        selectionManager.__TEST_ONLY_add([{
+            startOffset: 0,
+            endOffset: 5,
+            collapsed: false,
+            isActive: true,
+            segmentId: '',
+        }]);
+
+        const service = testBed.get(IDocClipboardService);
+        const copied = await service.copy();
+        const clipboard = testBed.get(IClipboardInterfaceService) as unknown as TestClipboardInterfaceService;
+
+        expect(copied).toBe(true);
+        expect(clipboard.writes[0].text).toBe('Alpha');
+        expect(clipboard.writes[0].html).toContain('data-copy-id=');
+        expect(clipboard.writes[0].html).toContain('<!--univer-doc-fragment:');
+        expect(clipboard.writes[0].custom).toHaveProperty('application/x-doc-fragment+json');
+
+        testBed.univer.dispose();
     });
 
     it('uploads base64 images from pasted html and inserts remote drawings into the document', async () => {

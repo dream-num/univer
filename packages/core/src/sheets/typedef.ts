@@ -593,34 +593,6 @@ export interface IRangeCellData {
  */
 export type IRangeType = IRange | IRangeStringData | IRangeArrayData | IRangeCellData;
 
-/**
- * Whether to clear only the contents. Whether to clear only the format; note that clearing format also clears data validation rules.
- */
-export interface IOptionData {
-    /**
-     * 1. designates that only the format should be copied
-     *
-     * 2. Whether to clear only the format; note that clearing format also clears data validation rules.
-     *
-     * 3. worksheet Whether to clear the format.
-     */
-    formatOnly?: boolean;
-    /**
-     * 1. designates that only the content should be copied
-     *
-     * 2. Whether to clear only the contents.
-     *
-     * 3. worksheet Whether to clear the content.
-     *
-     */
-    contentsOnly?: boolean;
-}
-
-/**
- * Option of copyTo function
- */
-export interface ICopyToOptionsData extends IOptionData { }
-
 export interface IRectLTRB {
     left: number;
     top: number;

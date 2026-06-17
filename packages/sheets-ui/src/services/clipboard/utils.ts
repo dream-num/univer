@@ -149,7 +149,8 @@ export function mergeCellValues(...cellValues: IObjectMatrixPrimitiveType<Nullab
 export function getRangeValuesMergeable(m1: IMutationInfo<ISetRangeValuesMutationParams>, m2: IMutationInfo<ISetRangeValuesMutationParams>) {
     return m1.id === m2.id
     && m1.params.unitId === m2.params.unitId
-    && m1.params.subUnitId === m2.params.subUnitId;
+    && m1.params.subUnitId === m2.params.subUnitId
+    && Boolean(m1.params.isOverrideStyle) === Boolean(m2.params.isOverrideStyle);
 }
 
 export function mergeSetRangeValues(mutations: IMutationInfo[]) {

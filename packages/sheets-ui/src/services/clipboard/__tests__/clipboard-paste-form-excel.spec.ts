@@ -172,36 +172,7 @@ describe('Test clipboard', () => {
                 fs: 12,
                 ht: 0,
                 it: 1,
-                ol: {
-                    cl: {
-                        rgb: 'rgb(0,0,0)',
-                    },
-                    s: 0,
-                },
-                pd: {
-                    b: 2,
-                    l: 2,
-                    r: 2,
-                    t: 0,
-                },
-                st: {
-                    cl: {
-                        rgb: 'rgb(0,0,0)',
-                    },
-                    s: 0,
-                },
                 tb: 1,
-                td: 0,
-                tr: {
-                    a: 0,
-                    v: 0,
-                },
-                ul: {
-                    cl: {
-                        rgb: 'rgb(0,0,0)',
-                    },
-                    s: 0,
-                },
                 vt: 2,
             });
         });
@@ -303,16 +274,10 @@ describe('Test clipboard', () => {
                 fs: 11,
                 it: 0,
                 bl: 0,
-                ul: { s: 0, cl: { rgb: 'rgb(0,0,0)' } },
-                st: { s: 0, cl: { rgb: 'rgb(0,0,0)' } },
-                ol: { s: 0, cl: { rgb: 'rgb(0,0,0)' } },
-                tr: { a: 0, v: 0 },
-                td: 0,
                 cl: { rgb: 'rgb(0,0,0)' },
                 ht: 0,
                 vt: 2,
                 tb: 1,
-                pd: { t: 0, b: 2, l: 2, r: 2 },
             });
             expect(L1CellStyle).toStrictEqual({
                 n: { pattern: DEFAULT_TEXT_FORMAT_EXCEL },
@@ -320,16 +285,10 @@ describe('Test clipboard', () => {
                 fs: 11,
                 it: 0,
                 bl: 0,
-                ul: { s: 0, cl: { rgb: 'rgb(0,0,0)' } },
-                st: { s: 0, cl: { rgb: 'rgb(0,0,0)' } },
-                ol: { s: 0, cl: { rgb: 'rgb(0,0,0)' } },
-                tr: { a: 0, v: 0 },
-                td: 0,
                 cl: { rgb: 'rgb(0,0,0)' },
                 ht: 0,
                 vt: 2,
                 tb: 1,
-                pd: { t: 0, b: 2, l: 2, r: 2 },
             });
         });
 

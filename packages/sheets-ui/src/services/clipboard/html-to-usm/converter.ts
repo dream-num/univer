@@ -26,7 +26,7 @@ import type {
     IUniverSheetCopyDataModel,
 } from '../type';
 import type { IAfterProcessRule, IPastePlugin } from './paste-plugins/type';
-import { createParagraphId, CustomRangeType, DEFAULT_WORKSHEET_ROW_HEIGHT, generateRandomId, getNumfmtParseValueFilter, isSafeUrl, numfmt, ObjectMatrix, skipParseTagNames } from '@univerjs/core';
+import { createParagraphId, CustomRangeType, DEFAULT_WORKSHEET_ROW_HEIGHT, generateRandomId, getNumfmtParseValueFilter, isDefaultFormat, isSafeUrl, numfmt, ObjectMatrix, skipParseTagNames } from '@univerjs/core';
 import { handleStringToStyle, textTrim } from '@univerjs/ui';
 import { extractNodeStyle } from './parse-node-style';
 import parseToDom, { convertToCellStyle, generateParagraphs } from './utils';
@@ -93,6 +93,14 @@ export class HtmlToUSMService {
     }
 
     private _styleMap = new Map<string, CSSStyleDeclaration>();
+
+    private _selectorStyleValueCache = new Map<string, string>();
+
+    private _styleObjectCache = new Map<string, Record<string, string>>();
+
+    private _computedStyleStringCache = new Map<string, string>();
+
+    private _cellStyleDataCache = new Map<string, IStyleData>();
 
     private _styleCache: Map<ChildNode, ITextStyle> = new Map();
 
@@ -291,15 +299,36 @@ export class HtmlToUSMService {
     }
 
     private _getStyleBySelectorText(selectorText: string, cssText: string) {
+        const cacheKey = `${selectorText}\0${cssText}`;
+        if (this._selectorStyleValueCache.has(cacheKey)) {
+            return this._selectorStyleValueCache.get(cacheKey)!;
+        }
+
         const css = this._styleMap.get(selectorText)?.getPropertyValue(cssText);
         if (!css) {
+            this._selectorStyleValueCache.set(cacheKey, '');
             return '';
         }
+        this._selectorStyleValueCache.set(cacheKey, css);
         return css;
     }
 
+    private _getStyleObject(styleStr: string) {
+        let styleObject = this._styleObjectCache.get(styleStr);
+        if (!styleObject) {
+            styleObject = turnToStyleObject(styleStr);
+            this._styleObjectCache.set(styleStr, styleObject);
+        }
+        return styleObject;
+    }
+
     private _getStyle(node: HTMLElement, styleStr: string) {
-        const recordStyle: Record<string, string> = turnToStyleObject(styleStr);
+        const styleCacheKey = `${styleStr}\0${node.nodeName}\0${node.id}\0${node.className}\0${node.style.cssText}`;
+        if (this._computedStyleStringCache.has(styleCacheKey)) {
+            return this._computedStyleStringCache.get(styleCacheKey)!;
+        }
+
+        const recordStyle: Record<string, string> = this._getStyleObject(styleStr);
         const style = node.style;
         // style represents inline styles with the highest priority, followed by selectorText which corresponds to stylesheet rules, and recordStyle pertains to inherited styles with the lowest priority.
         let newStyleStr = '';
@@ -344,7 +373,17 @@ export class HtmlToUSMService {
                 '';
             value && (newStyleStr += `${key}:${value};`);
         }
+        this._computedStyleStringCache.set(styleCacheKey, newStyleStr);
         return newStyleStr;
+    }
+
+    private _getCellStyleData(styleStr = '') {
+        let style = this._cellStyleDataCache.get(styleStr);
+        if (!style) {
+            style = handleStringToStyle(undefined, styleStr);
+            this._cellStyleDataCache.set(styleStr, style);
+        }
+        return style;
     }
 
     private _parseTable(html: string, tableElIndex: number) {
@@ -354,7 +393,7 @@ export class HtmlToUSMService {
         const parsedCellMatrix = this._parseTableByHtml(this._dom!, tableElIndex, this._getCurrentSkeleton()?.skeleton);
         parsedCellMatrix &&
             parsedCellMatrix.forValue((row, col, value) => {
-                let style = handleStringToStyle(undefined, value.style);
+                let style = this._getCellStyleData(value.style);
                 if (value?.richTextParma?.p?.body?.textRuns?.length) {
                     const textLen = value?.richTextParma?.v?.length;
                     for (let i = 0; i < value?.richTextParma?.p?.body?.textRuns?.length; i++) {
@@ -459,8 +498,8 @@ export class HtmlToUSMService {
                 let numfmtPattern: string | undefined;
 
                 const pattern = this._getMsoNumfmtForNode(cell as HTMLElement);
-                if (pattern) {
-                    cellText = cell.innerHTML;
+                if (!isDefaultFormat(pattern)) {
+                    cellText = cell.childElementCount === 0 ? normalizePlainCellText(cell.textContent ?? '') : cell.innerHTML;
                     if (cellText.includes('mso-spacerun:yes')) {
                         cellText = cleanMsoSpaceRun(cellText);
                     }
@@ -559,7 +598,7 @@ export class HtmlToUSMService {
             } else if (node.nodeType === Node.ELEMENT_NODE) {
                 const currentNodeStyle = this._getStyle(node as HTMLElement, styleStr);
                 const parentStyles = parent ? styleCache.get(parent) : {};
-                const predefinedStyles = turnToStyleObject(currentNodeStyle);
+                const predefinedStyles = this._getStyleObject(currentNodeStyle);
                 const nodeStyles = extractNodeStyle(node as HTMLElement, predefinedStyles);
 
                 styleCache.set(node, { ...parentStyles, ...nodeStyles });
@@ -570,14 +609,22 @@ export class HtmlToUSMService {
     }
 
     private _getCellTextAndRichText(cell: Element, styleStr: string, skeleton?: SpreadsheetSkeleton) {
+        if (cell.childElementCount === 0) {
+            return {
+                cellText: normalizePlainCellText(cell.textContent ?? ''),
+                cellRichStyle: undefined,
+            };
+        }
+
+        const cellHtml = cell.innerHTML;
         /**
          * mso-spacerun:yes is used to force spaces in html copied from excel.
          * if the remaining text is a number or parse to a number, return the remaining text directly.
          * e.g. excel cell value is 1234.567, and cell format is "#,##0.00", then the copied html is:
          * "<span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>1,234.57 "
          */
-        if (cell.innerHTML.includes('mso-spacerun:yes')) {
-            const cellText = cleanMsoSpaceRun(cell.innerHTML);
+        if (cellHtml.includes('mso-spacerun:yes')) {
+            const cellText = cleanMsoSpaceRun(cellHtml);
             const parseInfo = getNumfmtParseValueFilter(cellText);
 
             if (parseInfo && parseInfo.z && typeof parseInfo.v === 'number') {
@@ -590,7 +637,7 @@ export class HtmlToUSMService {
 
         let cellText = '';
         let cellRichStyle;
-        const isRichText = /<[^>]+>/.test(cell.innerHTML);
+        const isRichText = /<[^>]+>/.test(cellHtml);
         if (isRichText && skeleton) {
             const newDocBody: IDocumentBody = {
                 dataStream: '',
@@ -615,7 +662,7 @@ export class HtmlToUSMService {
             cellRichStyle = documentModel?.getSnapshot();
             cellText = newDocBody.dataStream;
         } else {
-            cellText = decodeHTMLEntities(cell.innerHTML.replace(/[\r\n]/g, ''));
+            cellText = decodeHTMLEntities(cellHtml.replace(/[\r\n]/g, ''));
         }
         return {
             cellText,
@@ -748,6 +795,10 @@ export class HtmlToUSMService {
         this._dom = null;
         this._styleCache.clear();
         this._styleMap.clear();
+        this._selectorStyleValueCache.clear();
+        this._styleObjectCache.clear();
+        this._computedStyleStringCache.clear();
+        this._cellStyleDataCache.clear();
         this._msoNumfmtMap.clear();
     }
 }
@@ -873,6 +924,10 @@ function decodeHTMLEntities(input: string): string {
     };
 
     return input.replace(/&lt;|&gt;|&amp;|&quot;|&#39;|&nbsp;|<br>/g, (match) => entities[match]);
+}
+
+function normalizePlainCellText(input: string): string {
+    return input.replace(/[\r\n]/g, '').replace(/\u00A0/g, ' ');
 }
 
 function extractStyleProperty(styleString?: string, propertyName?: string) {

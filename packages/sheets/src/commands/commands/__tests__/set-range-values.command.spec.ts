@@ -32,7 +32,7 @@ import {
 } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SheetsSelectionsService } from '../../../services/selections/selection.service';
-import { SetRangeValuesMutation } from '../../mutations/set-range-values.mutation';
+import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../../mutations/set-range-values.mutation';
 import { SetSelectionsOperation } from '../../operations/selection.operation';
 import { SetRangeValuesCommand } from '../set-range-values.command';
 import { createCommandTestBed } from './create-command-test-bed';
@@ -133,6 +133,7 @@ const getTestWorkbookDataDemo = (): IWorkbookData => ({
 
 describe('Test set range values commands', () => {
     let univer: Univer;
+    let injector: Injector;
     let get: Injector['get'];
     let commandService: ICommandService;
     let selectionManager: SheetsSelectionsService;
@@ -149,6 +150,7 @@ describe('Test set range values commands', () => {
     beforeEach(() => {
         const testBed = createCommandTestBed(getTestWorkbookDataDemo());
         univer = testBed.univer;
+        injector = testBed.injector;
         get = testBed.get;
 
         commandService = get(ICommandService);
@@ -890,6 +892,55 @@ describe('Test set range values commands', () => {
                     },
                 })).toBeTruthy();
                 expect(getValue()?.p).toBeTruthy();
+            });
+
+            it('merges styles by default and restores the previous style on undo', async () => {
+                const redoParams = {
+                    unitId: 'test',
+                    subUnitId: 'sheet1',
+                    cellValue: {
+                        2: {
+                            1: {
+                                v: 'B2 changed',
+                                s: { fs: 20 },
+                            },
+                        },
+                    },
+                };
+                const undoParams = injector.invoke((accessor) => SetRangeValuesUndoMutationFactory(accessor, redoParams));
+
+                expect(await commandService.executeCommand(SetRangeValuesMutation.id, redoParams)).toBeTruthy();
+                expect(getValues(2, 1, 2, 1)).toStrictEqual([[expect.objectContaining({ v: 'B2 changed' })]]);
+                expect(getStyles(2, 1, 2, 1)).toStrictEqual([[{ bl: 0, fs: 20 }]]);
+
+                expect(await commandService.executeCommand(SetRangeValuesMutation.id, undoParams)).toBeTruthy();
+                expect(getValues(2, 1, 2, 1)).toStrictEqual([[expect.objectContaining({ v: 'B2' })]]);
+                expect(getStyles(2, 1, 2, 1)).toStrictEqual([[{ bl: 0 }]]);
+            });
+
+            it('overrides styles when isOverrideStyle is true and restores the full previous style on undo', async () => {
+                const redoParams = {
+                    unitId: 'test',
+                    subUnitId: 'sheet1',
+                    isOverrideStyle: true,
+                    cellValue: {
+                        2: {
+                            1: {
+                                v: 'B2 changed',
+                                s: { fs: 20 },
+                            },
+                        },
+                    },
+                };
+                const undoParams = injector.invoke((accessor) => SetRangeValuesUndoMutationFactory(accessor, redoParams));
+
+                expect(await commandService.executeCommand(SetRangeValuesMutation.id, redoParams)).toBeTruthy();
+                expect(getValues(2, 1, 2, 1)).toStrictEqual([[expect.objectContaining({ v: 'B2 changed' })]]);
+                expect(getStyles(2, 1, 2, 1)).toStrictEqual([[{ fs: 20 }]]);
+
+                expect(await commandService.executeCommand(SetRangeValuesMutation.id, undoParams)).toBeTruthy();
+                expect(getValues(2, 1, 2, 1)).toStrictEqual([[expect.objectContaining({ v: 'B2' })]]);
+                expect(getStyles(2, 1, 2, 1)).toStrictEqual([[{ bl: 0 }]]);
             });
 
             it('set value when origin cell has text number format', async () => {

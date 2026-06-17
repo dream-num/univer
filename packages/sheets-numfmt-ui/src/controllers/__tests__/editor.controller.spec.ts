@@ -27,8 +27,8 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { excelDateSerial } from '@univerjs/engine-formula';
-import { SetNumfmtMutation, SheetInterceptorService } from '@univerjs/sheets';
-import { SheetsNumfmtCellContentController } from '@univerjs/sheets-numfmt';
+import { SetNumfmtMutation, SetRangeValuesCommand, SheetInterceptorService } from '@univerjs/sheets';
+import { getPatternType, SheetsNumfmtCellContentController } from '@univerjs/sheets-numfmt';
 import { getMatrixPlainText, IEditorBridgeService } from '@univerjs/sheets-ui';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { NumfmtEditorController } from '../numfmt.editor.controller';
@@ -68,6 +68,36 @@ describe('test editor', () => {
         workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         worksheet = workbook.getActiveSheet()!;
     });
+
+    function setCellNumfmt(row: number, col: number, pattern: string) {
+        const params: ISetNumfmtMutationParams = {
+            unitId,
+            subUnitId,
+            values: {
+                1: {
+                    ranges: [{ startRow: row, endRow: row, startColumn: col, endColumn: col }],
+                },
+            },
+            refMap: {
+                1: {
+                    pattern,
+                },
+            },
+        };
+        commandService.syncExecuteCommand(SetNumfmtMutation.id, params);
+    }
+
+    function createLocation(row: number, col: number, cellData: ICellDataForSheetInterceptor) {
+        return {
+            workbook,
+            worksheet,
+            unitId,
+            subUnitId,
+            row,
+            col,
+            origin: cellData,
+        };
+    }
 
     it('before edit with currency', () => {
         const params: ISetNumfmtMutationParams = {
@@ -206,6 +236,83 @@ describe('test editor', () => {
         const result = sheetInterceptorService.writeCellInterceptor.fetchThroughInterceptors(AFTER_CELL_EDIT)(cellData, location);
         // The date-time drop is a numeric value, not a literal string
         expect(result?.v).toBe(0.5231712962962963);
+    });
+
+    it('after edit with percent keeps bare numeric input in display units', () => {
+        setCellNumfmt(10, 0, '0.00%');
+        const sheetInterceptorService = testBed.get(SheetInterceptorService);
+        const cellData = { v: '35' };
+        const location = createLocation(10, 0, cellData);
+
+        const result = sheetInterceptorService.writeCellInterceptor.fetchThroughInterceptors(AFTER_CELL_EDIT)(cellData, location);
+
+        expect(result?.v).toBe(0.35);
+        expect(result?.t).toBe(CellValueType.NUMBER);
+    });
+
+    it('after edit with percent keeps explicit percent input unchanged', () => {
+        setCellNumfmt(10, 0, '0.00%');
+        const sheetInterceptorService = testBed.get(SheetInterceptorService);
+        const cellData = { v: '35%' };
+        const location = createLocation(10, 0, cellData);
+
+        const result = sheetInterceptorService.writeCellInterceptor.fetchThroughInterceptors(AFTER_CELL_EDIT)(cellData, location);
+
+        expect(result?.v).toBe(0.35);
+        expect(result?.t).toBe(CellValueType.NUMBER);
+    });
+
+    it('after edit with percent handles decimal display values', () => {
+        setCellNumfmt(10, 0, '0.00%');
+        const sheetInterceptorService = testBed.get(SheetInterceptorService);
+        const cellData = { v: '35.5' };
+        const location = createLocation(10, 0, cellData);
+
+        const result = sheetInterceptorService.writeCellInterceptor.fetchThroughInterceptors(AFTER_CELL_EDIT)(cellData, location);
+
+        expect(result?.v).toBe(0.355);
+        expect(result?.t).toBe(CellValueType.NUMBER);
+    });
+
+    it('after edit with percent accepts explicit currency input and changes format', () => {
+        setCellNumfmt(10, 0, '0.00%');
+        const sheetInterceptorService = testBed.get(SheetInterceptorService);
+        const cellData = { v: '$30' };
+        const location = createLocation(10, 0, cellData);
+
+        const result = sheetInterceptorService.writeCellInterceptor.fetchThroughInterceptors(AFTER_CELL_EDIT)(cellData, location);
+        const effects = sheetInterceptorService.onCommandExecute({
+            id: SetRangeValuesCommand.id,
+            params: {},
+        });
+        const params = effects.redos[0].params as ISetNumfmtMutationParams;
+        const pattern = Object.values(params.refMap)[0].pattern;
+
+        expect(result?.v).toBe(30);
+        expect(result?.t).toBe(CellValueType.NUMBER);
+        expect(getPatternType(pattern)).toBe('currency');
+    });
+
+    it('after edit with currency and number formats keeps bare numeric input in raw units', () => {
+        const sheetInterceptorService = testBed.get(SheetInterceptorService);
+
+        setCellNumfmt(0, 0, '$#,##0;(#,##0)');
+        const currencyCellData = { v: '35' };
+        const currencyResult = sheetInterceptorService.writeCellInterceptor.fetchThroughInterceptors(AFTER_CELL_EDIT)(
+            currencyCellData,
+            createLocation(0, 0, currencyCellData)
+        );
+        expect(currencyResult?.v).toBe(35);
+        expect(currencyResult?.t).toBe(CellValueType.NUMBER);
+
+        setCellNumfmt(0, 1, '0.00');
+        const numberCellData = { v: '35' };
+        const numberResult = sheetInterceptorService.writeCellInterceptor.fetchThroughInterceptors(AFTER_CELL_EDIT)(
+            numberCellData,
+            createLocation(0, 1, numberCellData)
+        );
+        expect(numberResult?.v).toBe(35);
+        expect(numberResult?.t).toBe(CellValueType.NUMBER);
     });
 
     it('edit number will throw style in this editing', () => {

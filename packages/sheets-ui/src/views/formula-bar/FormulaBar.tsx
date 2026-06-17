@@ -274,6 +274,7 @@ export function FormulaBar(props: IProps) {
 
             // Open the normal editor first, and then we mark formula editor as activated.
             contextService.setContextValue(FOCUSING_FX_BAR_EDITOR, true);
+            editorService.focus(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
         } catch (e) {
             shouldSkipFocus.current = true;
             throw e;

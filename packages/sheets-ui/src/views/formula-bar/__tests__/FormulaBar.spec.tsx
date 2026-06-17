@@ -24,6 +24,7 @@ import type {
     IEditorBridgeServiceVisibleParam,
 } from '../../../services/editor-bridge.service';
 import {
+    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     ICommandService,
     IConfigService,
@@ -265,6 +266,7 @@ function createFormulaBarTestBed() {
         injector,
         workbook,
         editorBridgeService,
+        editorService: injector.get(IEditorService) as unknown as TestEditorService,
         restoreResizeObserver: () => {
             globalThis.ResizeObserver = originalResizeObserver;
         },
@@ -303,8 +305,16 @@ function getActionElement(container: HTMLElement, index: number): HTMLElement {
 }
 
 async function clickElement(element: HTMLElement): Promise<void> {
+    await dispatchMouseEvent(element, 'click');
+}
+
+async function pointerDownElement(element: HTMLElement): Promise<void> {
+    await dispatchMouseEvent(element, 'pointerdown');
+}
+
+async function dispatchMouseEvent(element: HTMLElement, type: 'click' | 'pointerdown'): Promise<void> {
     await act(async () => {
-        element.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        element.dispatchEvent(new MouseEvent(type, { bubbles: true }));
         await Promise.resolve();
     });
 }
@@ -355,5 +365,30 @@ describe('FormulaBar', () => {
             eventType: DeviceInputEventType.PointerDown,
             unitId: UNIT_ID,
         });
+    });
+
+    it('focuses the formula editor when the formula bar starts editing', async () => {
+        currentBed = createFormulaBarTestBed();
+        currentBed.editorBridgeService.changeVisible({
+            visible: false,
+            eventType: DeviceInputEventType.PointerDown,
+            unitId: UNIT_ID,
+        });
+        const rendered = renderWithDependencies(<FormulaBar disableDefinedName />, currentBed.injector);
+        root = rendered.root;
+        container = rendered.container;
+        const formulaEditor = rendered.container.querySelector(`[data-editor-id="${DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY}"]`);
+        if (!(formulaEditor instanceof HTMLElement) || !(formulaEditor.parentElement instanceof HTMLElement)) {
+            throw new TypeError('Formula editor not rendered');
+        }
+
+        await pointerDownElement(formulaEditor.parentElement);
+
+        expect(currentBed.editorBridgeService.visibleHistory.at(-1)).toEqual({
+            visible: true,
+            eventType: DeviceInputEventType.PointerDown,
+            unitId: UNIT_ID,
+        });
+        expect(currentBed.editorService.focusedEditorIds.at(-1)).toBe(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
     });
 });

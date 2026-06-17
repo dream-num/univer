@@ -243,7 +243,7 @@ export class NumfmtEditorController extends Disposable {
                                 );
                             }
 
-                            const v = stripErrorMargin(Number(numfmtInfo.v), 16);
+                            const v = getParsedNumfmtValue(numfmtInfo.v, currentNumfmtValue?.pattern, numfmtInfo.z);
 
                             return next({ ...value, p: undefined, v, t: CellValueType.NUMBER });
                         }
@@ -355,4 +355,14 @@ function canConvertRichTextToNumfmt(body: IDocumentBody): boolean {
         Boolean(customRanges?.length) ||
         customBlocks.length > 0
     );
+}
+
+function getParsedNumfmtValue(parsedValue: string | number | boolean, currentPattern?: string, parsedPattern?: string): number {
+    const value = Number(parsedValue);
+
+    if (!parsedPattern && currentPattern && getPatternType(currentPattern) === 'percent') {
+        return stripErrorMargin(value / 100, 16);
+    }
+
+    return stripErrorMargin(value, 16);
 }

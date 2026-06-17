@@ -58,11 +58,13 @@ export interface IWorkbookData {
      */
     styles: Record<string, Nullable<IStyleData>>;
 
-    /** Ids of {@link IWorksheetData}s of this Univer Sheet in sequence order. */
+    /**
+     * Sheet ids of {@link IWorksheetData}s in sequence order. Each entry must reference a key in {@link IWorkbookData.sheets}.
+     */
     sheetOrder: string[];
 
     /**
-     * Data of each {@link IWorksheetData} in this Univer Sheet.
+     * Data of each {@link IWorksheetData} in this Univer Sheet. The map key is the canonical sheet id and must match the nested worksheet data id when it is provided.
      */
     sheets: { [sheetId: string]: Partial<IWorksheetData> };
 

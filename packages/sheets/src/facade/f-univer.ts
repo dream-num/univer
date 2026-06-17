@@ -89,6 +89,25 @@ export interface IFUniverSheetsMixin {
      * const fWorkbook = univerAPI.createWorkbook({ id: 'workbook-01', name: 'Workbook1' }, { makeCurrent: false });
      * console.log(fWorkbook);
      * ```
+     *
+     * When `data` includes sheet snapshots, `sheetOrder` entries enumerate the `sheets` map keys.
+     * Each `sheets` map key is the canonical sheet id.
+     * Each `sheets[sheetId].id`, when provided, must match the enclosing `sheetId`.
+     * ```ts
+     * const fWorkbook = univerAPI.createWorkbook({
+     *   id: 'workbook-01',
+     *   name: 'Workbook1',
+     *   sheetOrder: ['sheet-01'],
+     *   sheets: {
+     *     'sheet-01': {
+     *       id: 'sheet-01',
+     *       name: 'Sheet1',
+     *       rowCount: 100,
+     *       columnCount: 20,
+     *     },
+     *   },
+     * });
+     * ```
      */
     createWorkbook(data: Partial<IWorkbookData>, options?: ICreateUnitOptions): FWorkbook;
 
@@ -160,6 +179,7 @@ export interface IFUniverSheetsMixin {
 
 export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
     override createWorkbook(data: Partial<IWorkbookData>, options?: ICreateUnitOptions): FWorkbook {
+        validateWorkbookSnapshotSheetIds(data);
         const instanceService = this._injector.get(IUniverInstanceService);
         const workbook = instanceService.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, data, options);
         return this._injector.createInstance(FWorkbook, workbook);
@@ -736,6 +756,27 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
                 })
             )
         );
+    }
+}
+
+function validateWorkbookSnapshotSheetIds(data: Partial<IWorkbookData>): void {
+    const { sheets, sheetOrder } = data;
+    if (sheets == null) {
+        return;
+    }
+
+    if (sheetOrder != null) {
+        for (const sheetId of sheetOrder) {
+            if (!Object.prototype.hasOwnProperty.call(sheets, sheetId)) {
+                throw new Error(`createWorkbook snapshot is invalid: sheetOrder contains "${sheetId}" but sheets["${sheetId}"] is missing. Use sheet ids for sheetOrder and sheets map keys.`);
+            }
+        }
+    }
+
+    for (const [sheetKey, sheet] of Object.entries(sheets)) {
+        if (sheet?.id != null && sheet.id !== sheetKey) {
+            throw new Error(`createWorkbook snapshot is invalid: sheets["${sheetKey}"].id must equal "${sheetKey}", got "${sheet.id}". Use sheet ids for sheetOrder and sheets map keys.`);
+        }
     }
 }
 

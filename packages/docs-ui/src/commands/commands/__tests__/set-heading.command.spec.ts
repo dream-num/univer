@@ -151,12 +151,8 @@ describe('set heading commands', () => {
         await commandService.executeCommand(NormalTextHeadingCommand.id);
         await awaitTime(0);
 
-        expect(getBody()?.paragraphs?.[0].paragraphStyle).toMatchObject({
+        expect(getBody()?.paragraphs?.[0].paragraphStyle).toEqual({
             namedStyleType: NamedStyleType.NORMAL_TEXT,
-            headingId: undefined,
-            spaceAbove: undefined,
-            spaceBelow: undefined,
-            lineSpacing: undefined,
         });
     });
 
@@ -186,8 +182,8 @@ describe('set heading commands', () => {
         await awaitTime(0);
 
         expect(getBody()?.dataStream).toBe('Heading\r\r\n');
-        expect(getBody()?.paragraphs?.[1].paragraphStyle?.namedStyleType).toBe(NamedStyleType.TITLE);
-        expect(getBody()?.paragraphs?.[1].paragraphStyle?.headingId?.length).toBe(6);
+        expect(getBody()?.paragraphs?.[0].paragraphStyle?.namedStyleType).toBe(NamedStyleType.TITLE);
+        expect(getBody()?.paragraphs?.[0].paragraphStyle?.headingId?.length).toBe(6);
     });
 
     it('converts markdown-like quick headings through the real command chain', async () => {

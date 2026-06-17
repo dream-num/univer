@@ -15,7 +15,16 @@
  */
 
 import type { DocumentDataModel, ICommand, Injector, ITextStyle, Univer } from '@univerjs/core';
-import { BaselineOffset, BooleanNumber, DOC_RANGE_TYPE, ICommandService, IUniverInstanceService, RedoCommand, UndoCommand, UniverInstanceType } from '@univerjs/core';
+import {
+    BaselineOffset,
+    BooleanNumber,
+    DOC_RANGE_TYPE,
+    ICommandService,
+    IUniverInstanceService,
+    RedoCommand,
+    UndoCommand,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
@@ -110,54 +119,76 @@ describe('Test inline format commands', () => {
 
     describe('Public inline format wrapper commands', () => {
         it('applies document text styles through the menu command wrappers', async () => {
-            await commandService.executeCommand(SetInlineFormatBoldCommand.id);
-            await commandService.executeCommand(SetInlineFormatItalicCommand.id);
-            await commandService.executeCommand(SetInlineFormatUnderlineCommand.id);
-            await commandService.executeCommand(SetInlineFormatStrikethroughCommand.id);
+            let appliedCommandCount = 0;
 
-            expect(getFormatValueAt('bl', 1)).toBe(BooleanNumber.TRUE);
-            expect(getFormatValueAt('it', 1)).toBe(BooleanNumber.TRUE);
-            expect(getFormatValueAt('ul', 1)).toStrictEqual({ s: BooleanNumber.TRUE });
-            expect(getFormatValueAt('st', 1)).toStrictEqual({ s: BooleanNumber.TRUE });
+            try {
+                await commandService.executeCommand(SetInlineFormatBoldCommand.id);
+                appliedCommandCount++;
+                await commandService.executeCommand(SetInlineFormatItalicCommand.id);
+                appliedCommandCount++;
+                await commandService.executeCommand(SetInlineFormatUnderlineCommand.id);
+                appliedCommandCount++;
+                await commandService.executeCommand(SetInlineFormatStrikethroughCommand.id);
+                appliedCommandCount++;
 
-            await commandService.executeCommand(SetInlineFormatSubscriptCommand.id);
-            expect(getFormatValueAt('va', 1)).toBe(BaselineOffset.SUBSCRIPT);
+                expect(getFormatValueAt('bl', 1)).toBe(BooleanNumber.TRUE);
+                expect(getFormatValueAt('it', 1)).toBe(BooleanNumber.TRUE);
+                expect(getFormatValueAt('ul', 1)).toStrictEqual({ s: BooleanNumber.TRUE });
+                expect(getFormatValueAt('st', 1)).toStrictEqual({ s: BooleanNumber.TRUE });
 
-            await commandService.executeCommand(SetInlineFormatSuperscriptCommand.id);
-            expect(getFormatValueAt('va', 1)).toBe(BaselineOffset.SUPERSCRIPT);
+                await commandService.executeCommand(SetInlineFormatSubscriptCommand.id);
+                appliedCommandCount++;
+                expect(getFormatValueAt('va', 1)).toBe(BaselineOffset.SUBSCRIPT);
 
-            await commandService.executeCommand(SetInlineFormatSuperscriptCommand.id);
-            expect(getFormatValueAt('va', 1)).toBe(BaselineOffset.NORMAL);
+                await commandService.executeCommand(SetInlineFormatSuperscriptCommand.id);
+                appliedCommandCount++;
+                expect(getFormatValueAt('va', 1)).toBe(BaselineOffset.SUPERSCRIPT);
 
-            await commandService.executeCommand(SetInlineFormatFontFamilyCommand.id, { value: 'Inter' });
-            await commandService.executeCommand(SetInlineFormatFontSizeCommand.id, { value: 32 });
-            expect(getFormatValueAt('ff', 1)).toBe('Inter');
-            expect(getFormatValueAt('fs', 1)).toBe(32);
+                await commandService.executeCommand(SetInlineFormatSuperscriptCommand.id);
+                appliedCommandCount++;
+                expect(getFormatValueAt('va', 1)).toBe(BaselineOffset.NORMAL);
 
-            await commandService.executeCommand(SetInlineFormatTextColorCommand.id, { value: '#224466' });
-            await commandService.executeCommand(SetInlineFormatTextBackgroundColorCommand.id, { value: '#ffeeaa' });
-            expect(getFormatValueAt('cl', 1)).toStrictEqual({ rgb: '#224466' });
-            expect(getFormatValueAt('bg', 1)).toStrictEqual({ rgb: '#ffeeaa' });
+                await commandService.executeCommand(SetInlineFormatFontFamilyCommand.id, { value: 'Inter' });
+                appliedCommandCount++;
+                await commandService.executeCommand(SetInlineFormatFontSizeCommand.id, { value: 32 });
+                appliedCommandCount++;
+                expect(getFormatValueAt('ff', 1)).toBe('Inter');
+                expect(getFormatValueAt('fs', 1)).toBe(32);
 
-            await commandService.executeCommand(ResetInlineFormatTextColorCommand.id);
-            await commandService.executeCommand(ResetInlineFormatTextBackgroundColorCommand.id);
-            expect(getFormatValueAt('cl', 1)).toStrictEqual({ rgb: null });
-            expect(getFormatValueAt('bg', 1)).toStrictEqual({ rgb: null });
+                await commandService.executeCommand(SetInlineFormatTextColorCommand.id, { value: '#224466' });
+                appliedCommandCount++;
+                await commandService.executeCommand(SetInlineFormatTextBackgroundColorCommand.id, { value: '#ffeeaa' });
+                appliedCommandCount++;
+                expect(getFormatValueAt('cl', 1)).toStrictEqual({ rgb: '#224466' });
+                expect(getFormatValueAt('bg', 1)).toStrictEqual({ rgb: '#ffeeaa' });
 
-            await commandService.executeCommand(SetInlineFormatTextFillCommand.id, {
-                value: {
-                    textFill: {
-                        type: 'solid',
-                        color: '#445566',
-                        opacity: 0.8,
+                await commandService.executeCommand(ResetInlineFormatTextColorCommand.id);
+                appliedCommandCount++;
+                await commandService.executeCommand(ResetInlineFormatTextBackgroundColorCommand.id);
+                appliedCommandCount++;
+                expect(getFormatValueAt('cl', 1)).toStrictEqual({ rgb: null });
+                expect(getFormatValueAt('bg', 1)).toStrictEqual({ rgb: null });
+
+                await commandService.executeCommand(SetInlineFormatTextFillCommand.id, {
+                    value: {
+                        textFill: {
+                            type: 'solid',
+                            color: '#445566',
+                            opacity: 0.8,
+                        },
                     },
-                },
-            });
-            expect(getFormatValueAt('textFill', 1)).toStrictEqual({
-                type: 'solid',
-                color: '#445566',
-                opacity: 0.8,
-            });
+                });
+                appliedCommandCount++;
+                expect(getFormatValueAt('textFill', 1)).toStrictEqual({
+                    type: 'solid',
+                    color: '#445566',
+                    opacity: 0.8,
+                });
+            } finally {
+                for (let i = 0; i < appliedCommandCount; i++) {
+                    await commandService.executeCommand(UndoCommand.id);
+                }
+            }
         });
     });
 

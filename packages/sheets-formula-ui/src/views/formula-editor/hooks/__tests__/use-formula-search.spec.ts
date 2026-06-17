@@ -19,6 +19,22 @@ import { describe, expect, it } from 'vitest';
 import { getFormulaReplaceResult } from '../use-formula-search';
 
 describe('getFormulaReplaceResult', () => {
+    it('adds the call bracket when replacing a typed function prefix and keeps the rest of the formula', () => {
+        expect(getFormulaReplaceResult(
+            [
+                { nodeType: sequenceNodeType.FUNCTION, token: 'SU', startIndex: 0, endIndex: 1 },
+                'A1:A3)',
+                '+B1',
+            ],
+            0,
+            'SUM',
+            FunctionType.Math
+        )).toEqual({
+            text: 'SUM(A1:A3)+B1',
+            offset: -2,
+        });
+    });
+
     it('does not append an open bracket when replacing table names', () => {
         expect(getFormulaReplaceResult(
             [{ nodeType: sequenceNodeType.FUNCTION, token: 'Ord', startIndex: 0, endIndex: 2 }],

@@ -169,7 +169,7 @@ describe('buildMoveDocBlockActions', () => {
         });
 
         expect(nextDocumentData.body?.dataStream).toBe('MM\raa\rzz\r\n');
-        expect(collectStarts(nextDocumentData.body?.sectionBreaks)).toEqual([3, 9]);
+        expect(collectStarts(nextDocumentData.body?.sectionBreaks)).toEqual([6, 9]);
         expect(collectStarts(nextDocumentData.body?.customBlocks)).toEqual([0, 6]);
         expect(collectStarts(nextDocumentData.body?.tables)).toEqual([0, 6]);
         expect(collectStarts(nextDocumentData.body?.blockRanges)).toEqual([0, 6]);

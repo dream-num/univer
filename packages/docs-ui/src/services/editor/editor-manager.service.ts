@@ -23,7 +23,7 @@ import { DocSelectionManagerService } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { fromEvent, Subject } from 'rxjs';
 import { DOCS_VIEW_KEY } from '../../basics/docs-view-key';
-import { resolveDocsCanvasBackground } from '../docs-render.service';
+import { resolveDocRenderBackground } from '../doc-render-background';
 import { Editor } from './editor';
 
 export interface IEditorRenderConfig {
@@ -263,7 +263,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
 
             this._editors.set(editorUnitId, editor);
 
-            const resolvedEditorBackground = resolveDocsCanvasBackground({
+            const resolvedEditorBackground = resolveDocRenderBackground({
                 canvasColorService: render.engine.canvasColorService,
                 editorBackgroundColor: canvasStyle.backgroundColor,
                 isEditor: true,

@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
+import type { Injector } from '@univerjs/core';
+import type { ComponentType } from 'react';
 import type { IWorkbenchOptions } from '../../controllers/ui/ui.controller';
 import { LocaleService, ThemeService } from '@univerjs/core';
-import { borderBottomClassName, clsx, ConfigProvider } from '@univerjs/design';
+import { borderBottomClassName, clsx, ConfigProvider, render as createRoot } from '@univerjs/design';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { BuiltInUIPart } from '../../services/parts/parts.service';
 import { ThemeSwitcherService } from '../../services/theme-switcher/theme-switcher.service';
-import { useDependency } from '../../utils/di';
+import { connectInjector, useDependency } from '../../utils/di';
 import { ComponentContainer, useComponentsOfPart } from '../components/ComponentContainer';
 import { MobileContextMenu } from '../components/context-menu/MobileContextMenu';
 import { Sidebar } from '../components/sidebar/Sidebar';
@@ -29,6 +31,24 @@ export interface IUniverAppProps extends IWorkbenchOptions {
     mountContainer: HTMLElement;
 
     onRendered?: (container: HTMLElement) => void;
+}
+
+export function mountMobileWorkbench(
+    injector: Injector,
+    options: IWorkbenchOptions,
+    mountContainer: HTMLElement,
+    onRendered: (contentElement: HTMLElement) => void
+): void {
+    const ConnectedApp = connectInjector(MobileWorkbench, injector) as ComponentType<IUniverAppProps>;
+
+    createRoot(
+        <ConnectedApp
+            {...options}
+            mountContainer={mountContainer}
+            onRendered={onRendered}
+        />,
+        mountContainer
+    );
 }
 
 export function MobileWorkbench(props: IUniverAppProps) {

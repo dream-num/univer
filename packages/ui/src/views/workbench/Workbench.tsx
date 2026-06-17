@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
+import type { Injector } from '@univerjs/core';
+import type { ComponentType } from 'react';
 import type { IUniverUIConfig } from '../../config/config';
 import type { IWorkbenchOptions } from '../../controllers/ui/ui.controller';
 import { IConfigService, LocaleService, ThemeService } from '@univerjs/core';
-import { borderBottomClassName, clsx, ConfigContext, ConfigProvider } from '@univerjs/design';
+import { borderBottomClassName, clsx, ConfigContext, ConfigProvider, render as createRoot } from '@univerjs/design';
 import { useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { BuiltInUIPart } from '../../services/parts/parts.service';
 import { ThemeSwitcherService } from '../../services/theme-switcher/theme-switcher.service';
-import { useDependency } from '../../utils/di';
+import { connectInjector, useDependency } from '../../utils/di';
 import { ComponentContainer, useComponentsOfPart } from '../components/ComponentContainer';
 import { DesktopContextMenu } from '../components/context-menu/ContextMenu';
 import { Sidebar } from '../components/sidebar/Sidebar';
@@ -38,6 +40,24 @@ export interface IUniverWorkbenchProps extends IWorkbenchOptions {
 export function DesktopWorkbench(props: IUniverWorkbenchProps) {
     const uiConfig = useConfigValue<IUniverUIConfig>(UI_PLUGIN_CONFIG_KEY);
     return <DesktopWorkbenchContent {...props} {...uiConfig} />;
+}
+
+export function mountDesktopWorkbench(
+    injector: Injector,
+    options: IWorkbenchOptions,
+    mountContainer: HTMLElement,
+    onRendered: (contentElement: HTMLElement) => void
+): void {
+    const ConnectedApp = connectInjector(DesktopWorkbench, injector) as ComponentType<IUniverWorkbenchProps>;
+
+    createRoot(
+        <ConnectedApp
+            {...options}
+            mountContainer={mountContainer}
+            onRendered={onRendered}
+        />,
+        mountContainer
+    );
 }
 
 export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {

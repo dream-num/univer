@@ -15,12 +15,10 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
-import type { ComponentType } from 'react';
 import type { IUniverUIConfig } from '../../config/config';
-import type { IUniverWorkbenchProps } from '../../views/workbench/Workbench';
 import type { IWorkbenchOptions } from './ui.controller';
 import { Inject, Injector, IUniverInstanceService, LifecycleService, toDisposable } from '@univerjs/core';
-import { render as createRoot, unmount } from '@univerjs/design';
+import { unmount } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ComponentManager } from '../../common';
 import { menuSchema } from '../../menu/schema';
@@ -31,7 +29,7 @@ import { connectInjector } from '../../utils/di';
 import { FloatDom } from '../../views/components/dom/FloatDom';
 import { CanvasPopup } from '../../views/components/popup/CanvasPopup';
 import { Ribbon } from '../../views/components/ribbon/Ribbon';
-import { DesktopWorkbench } from '../../views/workbench/Workbench';
+import { mountDesktopWorkbench } from '../../views/workbench/Workbench';
 import { SingleUnitUIController } from './ui-shared.controller';
 
 export class DesktopUIController extends SingleUnitUIController {
@@ -91,18 +89,10 @@ function bootstrap(
         mountContainer = createContainer('univer');
     }
 
-    const ConnectedApp = connectInjector(DesktopWorkbench, injector) as ComponentType<IUniverWorkbenchProps>;
     const onRendered = (contentElement: HTMLElement) => callback(contentElement, mountContainer);
 
     function render() {
-        createRoot(
-            <ConnectedApp
-                {...options}
-                mountContainer={mountContainer}
-                onRendered={onRendered}
-            />,
-            mountContainer
-        );
+        mountDesktopWorkbench(injector, options, mountContainer, onRendered);
     }
 
     render();

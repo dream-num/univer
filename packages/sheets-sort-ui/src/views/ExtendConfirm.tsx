@@ -51,3 +51,7 @@ export const ExtendConfirm = (props: IExtendConfirmProps) => {
         </div>
     );
 };
+
+export function createExtendConfirm(onChange: IExtendConfirmProps['onChange']) {
+    return <ExtendConfirm onChange={onChange} />;
+}

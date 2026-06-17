@@ -31,7 +31,8 @@ import {
 import { expandToContinuousRange, getPrimaryForRange, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { SheetsSortService, SortType } from '@univerjs/sheets-sort';
 import { BehaviorSubject } from 'rxjs';
-import { ExtendConfirm } from '../views/ExtendConfirm';
+import { createExtendConfirm } from '../views/ExtendConfirm';
+import { createSortCheckError } from '../views/SortCheckError';
 
 export enum EXTEND_TYPE {
     KEEP = 'keep',
@@ -159,7 +160,7 @@ export class SheetsSortUIService extends Disposable {
                 title: this._localeService.t('sheets-sort-ui.info.tooltip'),
             },
             children: {
-                title: <div>{this._localeService.t(content)}</div>,
+                title: createSortCheckError(this._localeService.t(content)),
             },
             cancelText: this._localeService.t('sheets-sort-ui.dialog.cancel'),
             confirmText: this._localeService.t('sheets-sort-ui.dialog.confirm'),
@@ -174,13 +175,9 @@ export class SheetsSortUIService extends Disposable {
                 title: this._localeService.t('sheets-sort-ui.dialog.sort-reminder'),
             },
             children: {
-                title: (
-                    <ExtendConfirm
-                        onChange={(value: string) => {
-                            shouldExtend = value === '1';
-                        }}
-                    />
-                ),
+                title: createExtendConfirm((value: string) => {
+                    shouldExtend = value === '1';
+                }),
             },
             width: 400,
             cancelText: this._localeService.t('sheets-sort-ui.dialog.cancel'),

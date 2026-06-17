@@ -19,6 +19,9 @@ permissions:
 jobs:
     test:
         runs-on: ubuntu-latest
+        env:
+            TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+            TURBO_TEAM: ${{ vars.TURBO_TEAM }}
 
         steps:
             - name: Checkout
@@ -28,6 +31,14 @@ jobs:
 
             - name: Setup Node.js
               uses: ./.github/actions/setup-node
+
+            - name: Restore Turborepo cache
+              uses: actions/cache@v4
+              with:
+                  path: .turbo/cache
+                  key: ${{ runner.os }}-turbo-coverage-${{ github.sha }}
+                  restore-keys: |
+                      ${{ runner.os }}-turbo-coverage-
 
             - name: 🩺 Run test
               run: pnpm coverage
@@ -54,6 +65,9 @@ jobs:
 
     typecheck:
         runs-on: ubuntu-latest
+        env:
+            TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+            TURBO_TEAM: ${{ vars.TURBO_TEAM }}
 
         steps:
             - name: Checkout

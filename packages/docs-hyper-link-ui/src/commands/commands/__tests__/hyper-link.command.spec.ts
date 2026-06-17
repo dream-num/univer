@@ -21,6 +21,7 @@ import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-re
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { AddDocHyperLinkCommand } from '../add-link.command';
 import { DeleteDocHyperLinkCommand } from '../delete-link.command';
+import { UpdateDocHyperLinkCommand } from '../update-link.command';
 
 const unitId = 'hyper-link-doc';
 
@@ -76,6 +77,7 @@ describe('doc hyperlink commands', () => {
         commandService = injector.get(ICommandService);
         commandService.registerCommand(AddDocHyperLinkCommand);
         commandService.registerCommand(DeleteDocHyperLinkCommand);
+        commandService.registerCommand(UpdateDocHyperLinkCommand);
         commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
     });
 
@@ -131,5 +133,48 @@ describe('doc hyperlink commands', () => {
         expect(result).toBeTruthy();
         expect(getDocBody()?.dataStream).toBe('Hello world\r\n');
         expect(removedLinkStillExists).toBe(false);
+    });
+
+    it('updates a hyperlink label and target for the selected document text', async () => {
+        const selectionManager = univer.__getInjector().get(DocSelectionManagerService);
+        selectionManager.__TEST_ONLY_setCurrentSelection({
+            unitId,
+            subUnitId: unitId,
+        });
+        selectionManager.__TEST_ONLY_add([{
+            startOffset: 6,
+            endOffset: 11,
+            collapsed: false,
+            isActive: true,
+            segmentId: '',
+            style: null as never,
+        }]);
+
+        const result = await commandService.executeCommand(UpdateDocHyperLinkCommand.id, {
+            unitId,
+            linkId: 'existing-link',
+            payload: 'https://after.invalid',
+            label: 'Univer',
+            segmentId: '',
+        });
+
+        let updatedLink;
+        for (const range of getDocBody()?.customRanges ?? []) {
+            if (range.rangeId === 'existing-link') {
+                updatedLink = range;
+                break;
+            }
+        }
+
+        expect(result).toBeTruthy();
+        expect(getDocBody()?.dataStream).toBe('Hello Univer\r\n');
+        expect(updatedLink).toMatchObject({
+            startIndex: 6,
+            endIndex: 11,
+            rangeType: CustomRangeType.HYPERLINK,
+            properties: {
+                url: 'https://after.invalid',
+            },
+        });
     });
 });

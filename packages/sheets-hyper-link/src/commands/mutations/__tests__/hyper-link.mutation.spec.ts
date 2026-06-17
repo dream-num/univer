@@ -14,16 +14,63 @@
  * limitations under the License.
  */
 
+import type { IWorkbookData, Workbook } from '@univerjs/core';
 import type { ISheetHyperLink } from '../../../types/interfaces/i-hyper-link';
-import { ICommandService, Univer } from '@univerjs/core';
+import { CustomRangeType, ICommandService, LocaleType, Univer, UniverInstanceType } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { HyperLinkModel } from '../../../models/hyper-link.model';
 import { AddHyperLinkMutation } from '../add-hyper-link.mutation';
 import { RemoveHyperLinkMutation } from '../remove-hyper-link.mutation';
-import { UpdateHyperLinkMutation, UpdateHyperLinkRefMutation } from '../update-hyper-link.mutation';
+import { UpdateHyperLinkMutation, UpdateHyperLinkRefMutation, UpdateRichHyperLinkMutation } from '../update-hyper-link.mutation';
 
 const unitId = 'hyper-link-workbook';
 const subUnitId = 'sheet-1';
+
+const workbookData: IWorkbookData = {
+    id: unitId,
+    appVersion: '3.0.0-alpha',
+    name: 'hyperlink workbook',
+    locale: LocaleType.EN_US,
+    sheetOrder: [subUnitId],
+    styles: {},
+    sheets: {
+        [subUnitId]: {
+            id: subUnitId,
+            name: 'Sheet 1',
+            cellData: {
+                4: {
+                    3: {
+                        p: {
+                            id: 'cell-doc',
+                            documentStyle: {
+                                pageSize: {
+                                    width: 100,
+                                    height: 40,
+                                },
+                                marginTop: 0,
+                                marginBottom: 0,
+                                marginLeft: 0,
+                                marginRight: 0,
+                            },
+                            body: {
+                                dataStream: 'Docs\r\n',
+                                customRanges: [{
+                                    rangeId: 'rich-link',
+                                    rangeType: CustomRangeType.HYPERLINK,
+                                    startIndex: 0,
+                                    endIndex: 3,
+                                    properties: {
+                                        url: 'https://old.invalid',
+                                    },
+                                }],
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    },
+};
 
 function createLink(overrides: Partial<ISheetHyperLink> = {}): ISheetHyperLink {
     return {
@@ -40,6 +87,7 @@ describe('sheet hyperlink mutations', () => {
     let univer: Univer;
     let commandService: ICommandService;
     let hyperLinkModel: HyperLinkModel;
+    let workbook: Workbook;
 
     beforeEach(() => {
         univer = new Univer();
@@ -50,8 +98,10 @@ describe('sheet hyperlink mutations', () => {
         commandService.registerCommand(AddHyperLinkMutation);
         commandService.registerCommand(UpdateHyperLinkMutation);
         commandService.registerCommand(UpdateHyperLinkRefMutation);
+        commandService.registerCommand(UpdateRichHyperLinkMutation);
         commandService.registerCommand(RemoveHyperLinkMutation);
         hyperLinkModel = injector.get(HyperLinkModel);
+        workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, workbookData);
     });
 
     afterEach(() => {
@@ -123,5 +173,28 @@ describe('sheet hyperlink mutations', () => {
         expect(removeResult).toBe(true);
         expect(hyperLinkModel.getHyperLink(unitId, subUnitId, 'link-1')).toBeUndefined();
         expect(hyperLinkModel.getHyperLinkByLocation(unitId, subUnitId, 0, 0)).toBeUndefined();
+    });
+
+    it('updates the URL stored in a rich hyperlink cell range', async () => {
+        const result = await commandService.executeCommand(UpdateRichHyperLinkMutation.id, {
+            unitId,
+            subUnitId,
+            row: 4,
+            col: 3,
+            id: 'rich-link',
+            url: 'https://new.invalid',
+        });
+
+        let updatedUrl = '';
+        const ranges = workbook.getSheetBySheetId(subUnitId)?.getCellRaw(4, 3)?.p?.body?.customRanges ?? [];
+        for (const range of ranges) {
+            if (range.rangeId === 'rich-link') {
+                updatedUrl = range.properties?.url ?? '';
+                break;
+            }
+        }
+
+        expect(result).toBe(true);
+        expect(updatedUrl).toBe('https://new.invalid');
     });
 });

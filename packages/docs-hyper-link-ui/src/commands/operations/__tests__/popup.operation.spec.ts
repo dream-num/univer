@@ -15,12 +15,16 @@
  */
 
 import type { IDocumentData } from '@univerjs/core';
-import { ICommandService, toDisposable, Univer, UniverInstanceType } from '@univerjs/core';
+import { CustomRangeType, ICommandService, toDisposable, Univer, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { DocHyperLinkPopupService } from '../../../services/hyper-link-popup.service';
-import { ShowDocHyperLinkEditPopupOperation, ToggleDocHyperLinkInfoPopupOperation } from '../popup.operation';
+import {
+    ClickDocHyperLinkOperation,
+    ShowDocHyperLinkEditPopupOperation,
+    ToggleDocHyperLinkInfoPopupOperation,
+} from '../popup.operation';
 
 const unitId = 'hyper-link-popup-doc';
 
@@ -29,6 +33,15 @@ function createDocData(): IDocumentData {
         id: unitId,
         body: {
             dataStream: 'Hello world\r\n',
+            customRanges: [{
+                rangeId: 'unsafe-link',
+                rangeType: CustomRangeType.HYPERLINK,
+                startIndex: 0,
+                endIndex: 4,
+                properties: {
+                    url: 'javascript:alert(1)',
+                },
+            }],
         },
         documentStyle: {
             pageSize: {
@@ -66,6 +79,7 @@ describe('doc hyperlink popup operations', () => {
         commandService = injector.get(ICommandService);
         commandService.registerCommand(ShowDocHyperLinkEditPopupOperation);
         commandService.registerCommand(ToggleDocHyperLinkInfoPopupOperation);
+        commandService.registerCommand(ClickDocHyperLinkOperation);
         selectionManager = injector.get(DocSelectionManagerService);
         popupService = injector.get(DocHyperLinkPopupService);
         selectionManager.__TEST_ONLY_setCurrentSelection({
@@ -92,6 +106,13 @@ describe('doc hyperlink popup operations', () => {
 
         expect(result).toBe(true);
         expect(popupService.editing).toBeUndefined();
+    });
+
+    it('keeps the hyperlink editor closed when there is no selected text', async () => {
+        const result = await commandService.executeCommand(ShowDocHyperLinkEditPopupOperation.id);
+
+        expect(result).toBe(false);
+        expect(popupService.editing).toBeNull();
     });
 
     it('opens the hyperlink editor for an existing link and stores its range context', async () => {
@@ -125,5 +146,15 @@ describe('doc hyperlink popup operations', () => {
         const hideResult = await commandService.executeCommand(ToggleDocHyperLinkInfoPopupOperation.id);
         expect(hideResult).toBe(true);
         expect(popupService.showing).toBeNull();
+    });
+
+    it('does not open unsafe hyperlink URLs', async () => {
+        const result = await commandService.executeCommand(ClickDocHyperLinkOperation.id, {
+            unitId,
+            linkId: 'unsafe-link',
+            segmentId: '',
+        });
+
+        expect(result).toBe(false);
     });
 });

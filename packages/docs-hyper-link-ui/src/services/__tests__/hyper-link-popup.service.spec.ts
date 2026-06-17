@@ -102,4 +102,86 @@ describe('DocHyperLinkPopupService', () => {
 
         refreshSub.unsubscribe();
     });
+
+    it('opens the edit popup from the current text selection when creating a new hyperlink', () => {
+        const { service, selectionManager, attached, disposed } = createService();
+        selectionManager.__TEST_ONLY_add([{
+            startOffset: 1,
+            endOffset: 5,
+            collapsed: false,
+            isActive: true,
+            segmentId: '',
+        }]);
+
+        const firstPopup = service.showEditPopup('doc-1', null);
+        const secondPopup = service.showEditPopup('doc-1', null);
+
+        expect(firstPopup).not.toBeNull();
+        expect(secondPopup).not.toBeNull();
+        expect(service.editing).toBeNull();
+        expect(attached).toMatchObject([
+            { range: { startOffset: 1, endOffset: 5, collapsed: false }, unitId: 'doc-1' },
+            { range: { startOffset: 1, endOffset: 5, collapsed: false }, unitId: 'doc-1' },
+        ]);
+        expect(disposed).toEqual([1]);
+    });
+
+    it('reuses an already visible link popup and replaces it only when the hovered link changes', () => {
+        const { service, attached, disposed } = createService();
+        const firstLink = {
+            unitId: 'doc-1',
+            linkId: 'link-1',
+            startIndex: 4,
+            endIndex: 8,
+        };
+        const secondLink = {
+            unitId: 'doc-1',
+            linkId: 'link-2',
+            startIndex: 0,
+            endIndex: 3,
+        };
+
+        const firstPopup = service.showInfoPopup(firstLink);
+        const duplicatePopup = service.showInfoPopup(firstLink);
+        const secondPopup = service.showInfoPopup(secondLink);
+
+        expect(firstPopup).not.toBeNull();
+        expect(duplicatePopup).toBeUndefined();
+        expect(secondPopup).not.toBeNull();
+        expect(attached).toHaveLength(2);
+        expect(service.showing).toEqual(secondLink);
+        expect(disposed).toEqual([1]);
+    });
+
+    it('does not show link information when the target document is not loaded', () => {
+        const { service, attached } = createService();
+
+        const popup = service.showInfoPopup({
+            unitId: 'missing-doc',
+            linkId: 'link-1',
+            startIndex: 0,
+            endIndex: 4,
+        });
+
+        expect(popup).toBeUndefined();
+        expect(service.showing).toBeNull();
+        expect(attached).toEqual([]);
+    });
+
+    it('hides the link information popup when the user clicks outside it', () => {
+        const { service, attached, disposed } = createService();
+        const link = {
+            unitId: 'doc-1',
+            linkId: 'link-1',
+            startIndex: 4,
+            endIndex: 8,
+        };
+
+        service.showInfoPopup(link);
+        const popupConfig = (attached[0] as { popup: { onClickOutside: () => void } }).popup;
+        popupConfig.onClickOutside();
+
+        expect(service.showing).toBeNull();
+        expect(disposed).toEqual([1]);
+    });
 });

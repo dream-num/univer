@@ -2788,6 +2788,9 @@ importers:
       '@univerjs-infra/shared':
         specifier: workspace:*
         version: link:../../common/shared
+      '@univerjs/engine-render':
+        specifier: workspace:*
+        version: link:../engine-render
       postcss:
         specifier: ^8.5.15
         version: 8.5.15

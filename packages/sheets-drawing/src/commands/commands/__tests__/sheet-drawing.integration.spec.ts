@@ -16,7 +16,7 @@
 
 import type { ICommandService, Injector, Univer } from '@univerjs/core';
 import type { ISheetDrawing } from '../../../services/sheet-drawing.service';
-import { DrawingTypeEnum, ImageSourceType, IUniverInstanceService, UndoCommand } from '@univerjs/core';
+import { ArrangeTypeEnum, DrawingTypeEnum, ImageSourceType, IUniverInstanceService, UndoCommand } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { CopySheetCommand, RemoveSheetCommand, SetWorksheetActivateCommand } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -24,6 +24,8 @@ import { createSheetsDrawingTestBed } from '../../../__tests__/create-sheets-dra
 import { ISheetDrawingService } from '../../../services/sheet-drawing.service';
 import { InsertSheetDrawingCommand } from '../insert-sheet-drawing.command';
 import { RemoveSheetDrawingCommand } from '../remove-sheet-drawing.command';
+import { SetDrawingArrangeCommand } from '../set-drawing-arrange.command';
+import { SetSheetDrawingCommand } from '../set-sheet-drawing.command';
 
 function createSheetDrawing(drawingId: string, subUnitId = 'sheet1'): ISheetDrawing {
     return {
@@ -138,6 +140,106 @@ describe('sheet drawing integration', () => {
         expect(sheetDrawingService.getDrawingOrder('test', 'sheet1')).toEqual([]);
     });
 
+    it('updates an existing drawing through the real command pipeline', async () => {
+        await commandService.executeCommand(InsertSheetDrawingCommand.id, {
+            unitId: 'test',
+            drawings: [createSheetDrawing('drawing-update')],
+        });
+
+        expect(await commandService.executeCommand(SetSheetDrawingCommand.id, {
+            unitId: 'test',
+            drawings: [{
+                ...createSheetDrawing('drawing-update'),
+                source: 'https://example.com/updated.png',
+                sheetTransform: {
+                    angle: 0,
+                    flipX: false,
+                    flipY: false,
+                    skewX: 0,
+                    skewY: 0,
+                    from: {
+                        row: 2,
+                        rowOffset: 1,
+                        column: 2,
+                        columnOffset: 1,
+                    },
+                    to: {
+                        row: 6,
+                        rowOffset: 0,
+                        column: 5,
+                        columnOffset: 0,
+                    },
+                },
+            }],
+        })).toBe(true);
+
+        const sheetDrawingService = get(ISheetDrawingService);
+        const drawingManagerService = get(IDrawingManagerService);
+
+        expect(sheetDrawingService.getDrawingByParam({ unitId: 'test', subUnitId: 'sheet1', drawingId: 'drawing-update' })).toMatchObject({
+            source: 'https://example.com/updated.png',
+            sheetTransform: {
+                from: {
+                    row: 2,
+                    column: 2,
+                },
+                to: {
+                    row: 6,
+                    column: 5,
+                },
+            },
+        });
+        expect(drawingManagerService.getDrawingByParam({ unitId: 'test', subUnitId: 'sheet1', drawingId: 'drawing-update' })).toMatchObject({
+            source: 'https://example.com/updated.png',
+        });
+    });
+
+    it('arranges drawing order through the real command pipeline', async () => {
+        await commandService.executeCommand(InsertSheetDrawingCommand.id, {
+            unitId: 'test',
+            drawings: [
+                createSheetDrawing('drawing-a'),
+                createSheetDrawing('drawing-b'),
+                createSheetDrawing('drawing-c'),
+            ],
+        });
+
+        const sheetDrawingService = get(ISheetDrawingService);
+        expect(sheetDrawingService.getDrawingOrder('test', 'sheet1')).toEqual(['drawing-c', 'drawing-b', 'drawing-a']);
+
+        expect(await commandService.executeCommand(SetDrawingArrangeCommand.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            drawingIds: ['drawing-c'],
+            arrangeType: ArrangeTypeEnum.front,
+        })).toBe(true);
+        expect(sheetDrawingService.getDrawingOrder('test', 'sheet1')).toEqual(['drawing-b', 'drawing-a', 'drawing-c']);
+
+        expect(await commandService.executeCommand(SetDrawingArrangeCommand.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            drawingIds: ['drawing-c'],
+            arrangeType: ArrangeTypeEnum.backward,
+        })).toBe(true);
+        expect(sheetDrawingService.getDrawingOrder('test', 'sheet1')).toEqual(['drawing-b', 'drawing-c', 'drawing-a']);
+
+        expect(await commandService.executeCommand(SetDrawingArrangeCommand.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            drawingIds: ['drawing-b'],
+            arrangeType: ArrangeTypeEnum.forward,
+        })).toBe(true);
+        expect(sheetDrawingService.getDrawingOrder('test', 'sheet1')).toEqual(['drawing-c', 'drawing-b', 'drawing-a']);
+
+        expect(await commandService.executeCommand(SetDrawingArrangeCommand.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            drawingIds: ['drawing-a'],
+            arrangeType: ArrangeTypeEnum.back,
+        })).toBe(true);
+        expect(sheetDrawingService.getDrawingOrder('test', 'sheet1')).toEqual(['drawing-a', 'drawing-c', 'drawing-b']);
+    });
+
     it('copies sheet drawings when a worksheet is duplicated', async () => {
         await commandService.executeCommand(SetWorksheetActivateCommand.id, {
             unitId: 'test',
@@ -154,9 +256,16 @@ describe('sheet drawing integration', () => {
         })).toBe(true);
 
         const workbook = get(IUniverInstanceService).getUniverSheetInstance('test')!;
-        const copiedSheetId = workbook.getSheets()
-            .map((sheet) => sheet.getSheetId())
-            .find((sheetId) => sheetId !== 'sheet1' && sheetId !== 'sheet2')!;
+        let copiedSheetId = '';
+        const sheets = workbook.getSheets();
+        for (const sheet of sheets) {
+            const sheetId = sheet.getSheetId();
+            if (sheetId !== 'sheet1' && sheetId !== 'sheet2') {
+                copiedSheetId = sheetId;
+                break;
+            }
+        }
+        expect(copiedSheetId).not.toBe('');
         const copiedDrawings = Object.values(get(ISheetDrawingService).getDrawingData('test', copiedSheetId));
 
         expect(copiedDrawings).toHaveLength(1);

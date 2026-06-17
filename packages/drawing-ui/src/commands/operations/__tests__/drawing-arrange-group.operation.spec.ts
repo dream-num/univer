@@ -19,7 +19,13 @@ import type { IDrawingGroupUpdateParam, IDrawingOrderUpdateParam } from '@univer
 import { ArrangeTypeEnum, DrawingTypeEnum, ICommandService, Univer } from '@univerjs/core';
 import { DrawingManagerService, IDrawingManagerService } from '@univerjs/drawing';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { SetDrawingArrangeFrontOperation, SetDrawingArrangeOperation } from '../drawing-arrange.operation';
+import {
+    SetDrawingArrangeBackOperation,
+    SetDrawingArrangeBackwardOperation,
+    SetDrawingArrangeForwardOperation,
+    SetDrawingArrangeFrontOperation,
+    SetDrawingArrangeOperation,
+} from '../drawing-arrange.operation';
 import { CancelDrawingGroupOperation, SetDrawingGroupOperation } from '../drawing-group.operation';
 
 const unitId = 'drawing-ui-unit';
@@ -53,6 +59,9 @@ describe('drawing arrange and group operations', () => {
         commandService = injector.get(ICommandService);
         commandService.registerCommand(SetDrawingArrangeOperation);
         commandService.registerCommand(SetDrawingArrangeFrontOperation);
+        commandService.registerCommand(SetDrawingArrangeForwardOperation);
+        commandService.registerCommand(SetDrawingArrangeBackOperation);
+        commandService.registerCommand(SetDrawingArrangeBackwardOperation);
         commandService.registerCommand(SetDrawingGroupOperation);
         commandService.registerCommand(CancelDrawingGroupOperation);
         drawingManagerService = injector.get(IDrawingManagerService);
@@ -106,6 +115,43 @@ describe('drawing arrange and group operations', () => {
             drawingIds: ['image-1', 'image-2'],
             arrangeType: ArrangeTypeEnum.front,
         }]);
+    });
+
+    it('uses focused drawings for forward, backward and back layer commands', async () => {
+        drawingManagerService.registerDrawingData(unitId, {
+            [subUnitId]: {
+                data: {
+                    'image-1': createDrawing('image-1', 0),
+                    'image-2': createDrawing('image-2', 30),
+                },
+                order: ['image-1', 'image-2'],
+            },
+        });
+        drawingManagerService.focusDrawing([
+            { unitId, subUnitId, drawingId: 'image-1' },
+            { unitId, subUnitId, drawingId: 'image-2' },
+        ]);
+        const orderUpdates: IDrawingOrderUpdateParam[] = [];
+        drawingManagerService.featurePluginOrderUpdate$.subscribe((update) => orderUpdates.push(update));
+
+        expect(await commandService.executeCommand(SetDrawingArrangeForwardOperation.id)).toBe(true);
+        expect(await commandService.executeCommand(SetDrawingArrangeBackwardOperation.id)).toBe(true);
+        expect(await commandService.executeCommand(SetDrawingArrangeBackOperation.id)).toBe(true);
+
+        const arrangeTypes: ArrangeTypeEnum[] = [];
+        for (const update of orderUpdates) {
+            arrangeTypes.push(update.arrangeType as ArrangeTypeEnum);
+            expect(update).toMatchObject({
+                unitId,
+                subUnitId,
+                drawingIds: ['image-1', 'image-2'],
+            });
+        }
+        expect(arrangeTypes).toEqual([
+            ArrangeTypeEnum.forward,
+            ArrangeTypeEnum.backward,
+            ArrangeTypeEnum.back,
+        ]);
     });
 
     it('groups two selected drawings under a generated group drawing', async () => {

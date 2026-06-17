@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import type { DependencyIdentifier, DocumentDataModel, ICommand, IDocumentData } from '@univerjs/core';
+import type { Dependency, DependencyIdentifier, DocumentDataModel, ICommand, IDocumentData } from '@univerjs/core';
 import {
+    ArrangeTypeEnum,
     awaitTime,
+    BooleanNumber,
     Direction,
     DisposableCollection,
     ICommandService,
@@ -27,8 +29,17 @@ import {
     UniverInstanceType,
     WrapTextType,
 } from '@univerjs/core';
-import { DocContentInsertService, DocSelectionManagerService, DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
-import { DocDrawingController as CoreDocDrawingController, DocDrawingService, IDocDrawingService } from '@univerjs/docs-drawing';
+import {
+    DocContentInsertService,
+    DocSelectionManagerService,
+    DocSkeletonManagerService,
+    RichTextEditingMutation,
+} from '@univerjs/docs';
+import {
+    DocDrawingController as CoreDocDrawingController,
+    DocDrawingService,
+    IDocDrawingService,
+} from '@univerjs/docs-drawing';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { DrawingManagerService, IDrawingManagerService } from '@univerjs/drawing';
 import { DocumentEditArea, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
@@ -36,11 +47,24 @@ import { BehaviorSubject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createDocUiTestBed } from '../../../__tests__/create-doc-ui-test-bed';
 import { DocDrawingAddRemoveController } from '../../../controllers/doc-drawing-notification.controller';
+import { DocDrawingUpdateRenderController } from '../../../controllers/render-controllers/doc-drawing-update.render-controller';
+import { DocRefreshDrawingsService } from '../../../services/doc-refresh-drawings.service';
+import { ClearDocDrawingTransformerOperation } from '../../operations/clear-drawing-transformer.operation';
 import { DeleteDocDrawingsCommand } from '../delete-doc-drawing.command';
 import { InsertDocDrawingCommand } from '../insert-doc-drawing.command';
+import { InsertDocImageCommand } from '../insert-image.command';
 import { MoveDocDrawingsCommand } from '../move-drawings.command';
 import { RemoveDocDrawingCommand } from '../remove-doc-drawing.command';
-import { TextWrappingStyle, UpdateDocDrawingDistanceCommand, UpdateDocDrawingWrappingStyleCommand, UpdateDocDrawingWrapTextCommand, UpdateDrawingDocTransformCommand } from '../update-doc-drawing.command';
+import { SetDocDrawingArrangeCommand } from '../set-drawing-arrange.command';
+import {
+    IMoveInlineDrawingCommand,
+    ITransformNonInlineDrawingCommand,
+    TextWrappingStyle,
+    UpdateDocDrawingDistanceCommand,
+    UpdateDocDrawingWrappingStyleCommand,
+    UpdateDocDrawingWrapTextCommand,
+    UpdateDrawingDocTransformCommand,
+} from '../update-doc-drawing.command';
 
 function createBaseDocData(): IDocumentData {
     return {
@@ -101,18 +125,88 @@ function createDrawingDocData(): IDocumentData {
     };
 }
 
-function setupDrawingTestBed(docData: IDocumentData) {
+function createMultiDrawingDocData(): IDocumentData {
+    return {
+        id: 'test-doc',
+        body: {
+            dataStream: '\b\b\b\r\n',
+            customBlocks: [
+                { startIndex: 0, blockId: 'drawing-a' },
+                { startIndex: 1, blockId: 'drawing-b' },
+                { startIndex: 2, blockId: 'drawing-c' },
+            ],
+        },
+        drawings: {
+            'drawing-a': {
+                drawingId: 'drawing-a',
+                unitId: 'test-doc',
+                subUnitId: 'test-doc',
+                drawingType: 'image',
+                layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
+                docTransform: { positionH: { posOffset: 1 }, positionV: { posOffset: 2 } },
+            } as never,
+            'drawing-b': {
+                drawingId: 'drawing-b',
+                unitId: 'test-doc',
+                subUnitId: 'test-doc',
+                drawingType: 'image',
+                layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
+                docTransform: { positionH: { posOffset: 3 }, positionV: { posOffset: 4 } },
+            } as never,
+            'drawing-c': {
+                drawingId: 'drawing-c',
+                unitId: 'test-doc',
+                subUnitId: 'test-doc',
+                drawingType: 'image',
+                layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
+                docTransform: { positionH: { posOffset: 5 }, positionV: { posOffset: 6 } },
+            } as never,
+        },
+        drawingsOrder: ['drawing-a', 'drawing-b', 'drawing-c'],
+        documentStyle: {
+            pageSize: {
+                width: 594.3,
+                height: 840.51,
+            },
+            marginTop: 72,
+            marginBottom: 72,
+            marginRight: 90,
+            marginLeft: 90,
+        },
+    };
+}
+
+class TestDocDrawingUpdateRenderController {
+    private _inserted = false;
+
+    get inserted(): boolean {
+        return this._inserted;
+    }
+
+    insertDocImage(): boolean {
+        this._inserted = true;
+        return true;
+    }
+}
+
+function setupDrawingTestBed(docData: IDocumentData, dependencies: Dependency[] = []) {
     const refreshControls = vi.fn();
     const testBed = createDocUiTestBed(docData, [
         [IRenderManagerService, { useClass: RenderManagerService }],
+        ...dependencies,
     ]);
     const { univer, get } = testBed;
     const injector = testBed.injector;
 
     const scene = new DisposableCollection() as any;
-    scene.getTransformerByCreate = () => ({
+    const transformer = {
         refreshControls,
-    });
+        debounceRefreshControls: refreshControls,
+    };
+    scene.getTransformerByCreate = () => transformer;
+    scene.getTransformer = () => transformer;
+    let currentSegment = '';
+    let currentSegmentPage = 0;
     get(IRenderManagerService).addRender('test-doc', {
         unitId: 'test-doc',
         type: UniverInstanceType.UNIVER_DOC,
@@ -125,7 +219,10 @@ function setupDrawingTestBed(docData: IDocumentData) {
         with: <T>(token: DependencyIdentifier<T>) => {
             if (token === DocSelectionRenderService) {
                 return {
-                    getSegment: () => '',
+                    getSegment: () => currentSegment,
+                    setSegment: (segmentId: string) => currentSegment = segmentId,
+                    getSegmentPage: () => currentSegmentPage,
+                    setSegmentPage: (page: number) => currentSegmentPage = page,
                 } as T;
             }
 
@@ -140,6 +237,7 @@ function setupDrawingTestBed(docData: IDocumentData) {
     injector.add([IDocDrawingService, { useClass: DocDrawingService }]);
     injector.add([IDrawingManagerService, { useClass: DrawingManagerService }]);
     injector.add([DocContentInsertService]);
+    injector.add([DocRefreshDrawingsService]);
     injector.add([CoreDocDrawingController]);
     injector.add([DocDrawingAddRemoveController]);
 
@@ -149,6 +247,11 @@ function setupDrawingTestBed(docData: IDocumentData) {
         RemoveDocDrawingCommand,
         DeleteDocDrawingsCommand,
         MoveDocDrawingsCommand,
+        SetDocDrawingArrangeCommand,
+        ClearDocDrawingTransformerOperation,
+        InsertDocImageCommand,
+        IMoveInlineDrawingCommand,
+        ITransformNonInlineDrawingCommand,
         UpdateDocDrawingDistanceCommand,
         UpdateDocDrawingWrappingStyleCommand,
         UpdateDocDrawingWrapTextCommand,
@@ -263,6 +366,45 @@ describe('docs drawing commands integration', () => {
 
         expect(doc.getBody()?.dataStream).toBe('Hello\b\r\n');
         expect(doc.getBody()?.customBlocks).toEqual([{ startIndex: insertOffset, blockId: 'shape-1' }]);
+
+        testBed.univer.dispose();
+    });
+
+    it('replaces the selected drawing block when inserting a new drawing over a selection', async () => {
+        const testBed = setupDrawingTestBed(createDrawingDocData());
+
+        testBed.selectionManager.__TEST_ONLY_add([{
+            startOffset: 0,
+            endOffset: 1,
+            collapsed: false,
+            isActive: true,
+            segmentId: '',
+            style: null as never,
+        }]);
+
+        expect(await testBed.commandService.executeCommand(InsertDocDrawingCommand.id, {
+            drawings: [{
+                drawingId: 'shape-2',
+                unitId: 'test-doc',
+                subUnitId: 'test-doc',
+                drawingType: 'image',
+                layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
+                docTransform: {
+                    positionH: { posOffset: 10 },
+                    positionV: { posOffset: 20 },
+                },
+            }],
+        })).toBe(true);
+        await awaitTime(0);
+
+        const doc = testBed.get(IUniverInstanceService)
+            .getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC)!;
+
+        expect(doc.getBody()?.dataStream).toBe('\b\r\n');
+        expect(doc.getBody()?.customBlocks).toEqual([{ startIndex: 0, blockId: 'shape-2' }]);
+        expect(doc.getSnapshot().drawings?.['shape-1']).toBeUndefined();
+        expect(doc.getSnapshot().drawings?.['shape-2']).toMatchObject({ drawingId: 'shape-2' });
+        expect(doc.getSnapshot().drawingsOrder).toEqual(['shape-2']);
 
         testBed.univer.dispose();
     });
@@ -449,6 +591,81 @@ describe('docs drawing commands integration', () => {
         testBed.univer.dispose();
     });
 
+    it('updates drawing behind-text wrapping and keeps the anchor position in page coordinates', async () => {
+        const docData = createDrawingDocData();
+        docData.drawings!['shape-1'].docTransform = {
+            positionH: {
+                relativeFrom: ObjectRelativeFromH.MARGIN,
+                posOffset: 999,
+            },
+            positionV: {
+                relativeFrom: ObjectRelativeFromV.PAGE,
+                posOffset: 999,
+            },
+            angle: 0,
+        } as never;
+        const testBed = setupDrawingTestBed(docData);
+        const skeletonManager = testBed.injector.get(DocSkeletonManagerService);
+        vi.spyOn(skeletonManager, 'getViewModel').mockReturnValue({
+            getEditArea: () => DocumentEditArea.BODY,
+            reset: vi.fn(),
+        } as never);
+        vi.spyOn(skeletonManager, 'getSkeleton').mockReturnValue({
+            getSkeletonData: () => ({
+                pages: [{
+                    marginTop: 72,
+                    marginLeft: 90,
+                    marginBottom: 72,
+                    pageHeight: 800,
+                    pageWidth: 600,
+                    headerId: '',
+                    footerId: '',
+                    skeDrawings: new Map([
+                        ['shape-1', {
+                            drawingId: 'shape-1',
+                            aLeft: 140,
+                            aTop: 30,
+                            columnLeft: 0,
+                            lineTop: 0,
+                            blockAnchorTop: 0,
+                            drawingOrigin: docData.drawings!['shape-1'],
+                        }],
+                    ]),
+                    skeTables: new Map(),
+                }],
+                skeHeaders: new Map(),
+                skeFooters: new Map(),
+            }),
+        } as never);
+
+        expect(await testBed.commandService.executeCommand(UpdateDocDrawingWrappingStyleCommand.id, {
+            unitId: 'test-doc',
+            subUnitId: 'test-doc',
+            drawings: [{
+                drawingId: 'shape-1',
+            }],
+            wrappingStyle: TextWrappingStyle.BEHIND_TEXT,
+        })).toBe(true);
+        await awaitTime(0);
+
+        const doc = testBed.get(IUniverInstanceService)
+            .getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC)!;
+        const drawing = doc.getSnapshot().drawings?.['shape-1'];
+
+        expect(drawing?.layoutType).toBe(PositionedObjectLayoutType.WRAP_NONE);
+        expect(drawing?.behindDoc).toBe(BooleanNumber.TRUE);
+        expect(drawing?.docTransform.positionH).toEqual({
+            relativeFrom: ObjectRelativeFromH.MARGIN,
+            posOffset: 50,
+        });
+        expect(drawing?.docTransform.positionV).toEqual({
+            relativeFrom: ObjectRelativeFromV.PAGE,
+            posOffset: 102,
+        });
+
+        testBed.univer.dispose();
+    });
+
     it('updates drawing doc transform through the command pipeline', async () => {
         const testBed = setupDrawingTestBed(createDrawingDocData());
 
@@ -470,6 +687,148 @@ describe('docs drawing commands integration', () => {
 
         expect(doc.getSnapshot().drawings?.['shape-1'].docTransform.positionV).toEqual({ posOffset: 18 });
         expect(testBed.refreshControls).toHaveBeenCalled();
+
+        testBed.univer.dispose();
+    });
+
+    it('transforms a non-inline drawing and persists position, size and angle changes', async () => {
+        const testBed = setupDrawingTestBed(createDrawingDocData());
+
+        expect(await testBed.commandService.executeCommand(ITransformNonInlineDrawingCommand.id, {
+            unitId: 'test-doc',
+            subUnitId: 'test-doc',
+            drawing: {
+                drawingId: 'shape-1',
+            },
+            offset: 0,
+            segmentId: '',
+            segmentPage: 0,
+            docTransform: {
+                positionH: {
+                    relativeFrom: ObjectRelativeFromH.PAGE,
+                    posOffset: 30,
+                },
+                positionV: {
+                    relativeFrom: ObjectRelativeFromV.PAGE,
+                    posOffset: 40,
+                },
+                size: {
+                    width: 120,
+                    height: 80,
+                },
+                angle: 15,
+            },
+        })).toBe(true);
+        await awaitTime(0);
+
+        const doc = testBed.get(IUniverInstanceService)
+            .getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC)!;
+
+        expect(doc.getSnapshot().drawings?.['shape-1'].docTransform).toMatchObject({
+            positionH: {
+                relativeFrom: ObjectRelativeFromH.PAGE,
+                posOffset: 30,
+            },
+            positionV: {
+                relativeFrom: ObjectRelativeFromV.PAGE,
+                posOffset: 40,
+            },
+            size: {
+                width: 120,
+                height: 80,
+            },
+            angle: 15,
+        });
+        expect(testBed.refreshControls).toHaveBeenCalled();
+
+        testBed.univer.dispose();
+    });
+
+    it('refreshes inline drawing controls when the inline anchor needs to be recalculated', async () => {
+        const testBed = setupDrawingTestBed(createDrawingDocData());
+        const skeletonManager = testBed.injector.get(DocSkeletonManagerService);
+        vi.spyOn(skeletonManager, 'getSkeleton').mockReturnValue({} as never);
+
+        expect(await testBed.commandService.executeCommand(IMoveInlineDrawingCommand.id, {
+            unitId: 'test-doc',
+            subUnitId: 'test-doc',
+            drawing: {
+                drawingId: 'shape-1',
+            },
+            offset: 0,
+            segmentId: '',
+            segmentPage: 0,
+            needRefreshDrawings: true,
+        })).toBe(true);
+
+        expect(testBed.refreshControls).toHaveBeenCalled();
+
+        testBed.univer.dispose();
+    });
+
+    it('arranges doc drawing order through the rich text mutation pipeline', async () => {
+        const testBed = setupDrawingTestBed(createMultiDrawingDocData());
+        const doc = testBed.get(IUniverInstanceService)
+            .getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC)!;
+
+        expect(doc.getSnapshot().drawingsOrder).toEqual(['drawing-a', 'drawing-b', 'drawing-c']);
+
+        expect(await testBed.commandService.executeCommand(SetDocDrawingArrangeCommand.id, {
+            unitId: 'test-doc',
+            subUnitId: 'test-doc',
+            drawingIds: ['drawing-a'],
+            arrangeType: ArrangeTypeEnum.front,
+        })).toBe(true);
+        await awaitTime(0);
+        expect(doc.getSnapshot().drawingsOrder).toEqual(['drawing-b', 'drawing-c', 'drawing-a']);
+
+        expect(await testBed.commandService.executeCommand(SetDocDrawingArrangeCommand.id, {
+            unitId: 'test-doc',
+            subUnitId: 'test-doc',
+            drawingIds: ['drawing-a'],
+            arrangeType: ArrangeTypeEnum.backward,
+        })).toBe(true);
+        await awaitTime(0);
+        expect(doc.getSnapshot().drawingsOrder).toEqual(['drawing-b', 'drawing-a', 'drawing-c']);
+
+        expect(await testBed.commandService.executeCommand(SetDocDrawingArrangeCommand.id, {
+            unitId: 'test-doc',
+            subUnitId: 'test-doc',
+            drawingIds: ['drawing-b'],
+            arrangeType: ArrangeTypeEnum.forward,
+        })).toBe(true);
+        await awaitTime(0);
+        expect(doc.getSnapshot().drawingsOrder).toEqual(['drawing-a', 'drawing-b', 'drawing-c']);
+
+        expect(await testBed.commandService.executeCommand(SetDocDrawingArrangeCommand.id, {
+            unitId: 'test-doc',
+            subUnitId: 'test-doc',
+            drawingIds: ['drawing-c'],
+            arrangeType: ArrangeTypeEnum.back,
+        })).toBe(true);
+        await awaitTime(0);
+        expect(doc.getSnapshot().drawingsOrder).toEqual(['drawing-c', 'drawing-a', 'drawing-b']);
+
+        testBed.univer.dispose();
+    });
+
+    it('clears the doc drawing transformer for the active render scene', async () => {
+        const testBed = setupDrawingTestBed(createDrawingDocData());
+
+        expect(await testBed.commandService.executeCommand(ClearDocDrawingTransformerOperation.id, ['test-doc'])).toBe(true);
+        expect(testBed.refreshControls).toHaveBeenCalled();
+
+        testBed.univer.dispose();
+    });
+
+    it('inserts an image through the current doc render controller', async () => {
+        const testBed = setupDrawingTestBed(createBaseDocData(), [
+            [DocDrawingUpdateRenderController, { useClass: TestDocDrawingUpdateRenderController as never }],
+        ]);
+        const updateController = testBed.injector.get(DocDrawingUpdateRenderController) as unknown as TestDocDrawingUpdateRenderController;
+
+        expect(await testBed.commandService.executeCommand(InsertDocImageCommand.id, { files: null })).toBe(true);
+        expect(updateController.inserted).toBe(true);
 
         testBed.univer.dispose();
     });

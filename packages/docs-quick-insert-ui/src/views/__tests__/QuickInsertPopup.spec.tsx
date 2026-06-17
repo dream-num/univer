@@ -34,7 +34,7 @@ import {
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { CutContentCommand, DocCanvasPopManagerService, DocEventManagerService } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { ComponentManager, IconManager, IPlatformService, IShortcutService, PlatformService, RediContext, ShortcutService } from '@univerjs/ui';
+import { ComponentManager, IconManager, IPlatformService, IShortcutService, KeyCode, PlatformService, RediContext, ShortcutService } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BehaviorSubject } from 'rxjs';
@@ -49,10 +49,12 @@ import { QuickInsertPopup } from '../QuickInsertPopup';
 const TEST_DOC_UNIT_ID = 'doc-quick-insert-test';
 
 class TestUniverInstanceService {
+    dataStream = '/ta\r\n';
+
     private readonly _doc = {
         getUnitId: () => TEST_DOC_UNIT_ID,
         getBody: () => ({
-            dataStream: '/ta\r\n',
+            dataStream: this.dataStream,
             paragraphs: [{ startIndex: 3, paragraphId: 'para_quick_insert_popup_test' }],
         }),
     };
@@ -120,7 +122,10 @@ class TestDocSelectionManagerService {
     }
 }
 
-function createQuickInsertPopupTestBed() {
+function createQuickInsertPopupTestBed(options?: {
+    dataStream?: string;
+    inputOffset?: { start: number; end: number };
+}) {
     const injector = new Injector();
     let cutContentParams: unknown;
     let selectedMenu: unknown;
@@ -139,6 +144,9 @@ function createQuickInsertPopupTestBed() {
     injector.add([IRenderManagerService, { useClass: TestRenderManagerService as never }]);
     injector.add([DocSelectionManagerService, { useClass: TestDocSelectionManagerService as never }]);
     injector.add([DocQuickInsertPopupService, { useClass: DocQuickInsertPopupService }]);
+
+    const univerInstanceService = injector.get(IUniverInstanceService) as unknown as TestUniverInstanceService;
+    univerInstanceService.dataStream = options?.dataStream ?? '/ta\r\n';
 
     const localeService = injector.get(LocaleService);
     localeService.load({
@@ -198,7 +206,7 @@ function createQuickInsertPopupTestBed() {
         index: 0,
         unitId: TEST_DOC_UNIT_ID,
     });
-    popupService.setInputOffset({ start: 0, end: 3 });
+    popupService.setInputOffset(options?.inputOffset ?? { start: 0, end: 3 });
 
     return {
         getCutContentParams: () => cutContentParams,
@@ -299,5 +307,82 @@ describe('QuickInsertPopup', () => {
         }));
         expect(popupService.editPopup).toBeNull();
         expect(popupManagerService.attachedPopups.find((popup) => popup.componentKey === QuickInsertPopup.componentKey)?.disposed).toBe(true);
+    });
+
+    it('uses popup keyboard commands to move focus and select the focused business menu item', async () => {
+        const { getCutContentParams, getSelectedMenu, injector, popupService } = createQuickInsertPopupTestBed({
+            dataStream: '/\r\n',
+            inputOffset: { start: 0, end: 1 },
+        });
+        const commandService = injector.get(ICommandService);
+        const shortcutService = injector.get(IShortcutService);
+
+        await act(async () => {
+            root.render(
+                <RediContext.Provider value={{ injector }}>
+                    <QuickInsertPopup />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        const moveDownShortcut = shortcutService.getAllShortcuts().find((shortcut) => shortcut.binding === KeyCode.ARROW_DOWN);
+        const enterShortcut = shortcutService.getAllShortcuts().find((shortcut) => shortcut.binding === KeyCode.ENTER);
+
+        expect(moveDownShortcut).toBeDefined();
+        expect(enterShortcut).toBeDefined();
+
+        await act(async () => {
+            await commandService.executeCommand(moveDownShortcut!.id, moveDownShortcut!.staticParameters);
+            await Promise.resolve();
+        });
+
+        await act(async () => {
+            await commandService.executeCommand(enterShortcut!.id);
+            await new Promise((resolve) => setTimeout(resolve, 0));
+        });
+
+        expect(getSelectedMenu()).toEqual({
+            id: 'insert-image',
+            title: 'Image',
+            keywords: ['image', 'picture', 'image'],
+        });
+        expect(getCutContentParams()).toEqual(expect.objectContaining({
+            selections: [expect.objectContaining({ startOffset: 0, endOffset: 1 })],
+        }));
+        expect(popupService.editPopup).toBeNull();
+    });
+
+    it('temporarily disables document cursor shortcuts while the popup owns keyboard navigation', async () => {
+        const { injector } = createQuickInsertPopupTestBed({
+            dataStream: '/\r\n',
+            inputOffset: { start: 0, end: 1 },
+        });
+        const shortcutService = injector.get(IShortcutService);
+        const documentArrowDownShortcut = {
+            id: 'doc.operation.move-cursor-down',
+            binding: KeyCode.ARROW_DOWN,
+            preconditions: () => true,
+        };
+
+        shortcutService.registerShortcut(documentArrowDownShortcut);
+
+        await act(async () => {
+            root.render(
+                <RediContext.Provider value={{ injector }}>
+                    <QuickInsertPopup />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        expect(documentArrowDownShortcut.preconditions()).toBe(false);
+
+        await act(async () => {
+            root.render(<RediContext.Provider value={{ injector }} />);
+            await Promise.resolve();
+        });
+
+        expect(documentArrowDownShortcut.preconditions()).toBe(true);
     });
 });

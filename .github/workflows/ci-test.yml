@@ -25,7 +25,7 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
               with:
                   persist-credentials: false
 
@@ -33,7 +33,7 @@ jobs:
               uses: ./.github/actions/setup-node
 
             - name: Restore Turborepo cache
-              uses: actions/cache@v4
+              uses: actions/cache@v5
               with:
                   path: .turbo/cache
                   key: ${{ runner.os }}-turbo-coverage-${{ github.sha }}
@@ -44,7 +44,7 @@ jobs:
               run: pnpm coverage
 
             - name: 🧬 Report coverage
-              uses: codecov/codecov-action@v3
+              uses: codecov/codecov-action@v7
               env:
                   CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
@@ -53,7 +53,7 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
               with:
                   persist-credentials: false
 
@@ -71,7 +71,7 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
               with:
                   persist-credentials: false
 

@@ -19,19 +19,32 @@ import type { FUniver } from '@univerjs/core/facade';
 import { ICommandService, ILogService, IUniverInstanceService, LocaleType } from '@univerjs/core';
 import {
     CopySheetCommand,
+    getPrimaryForRange,
     InsertSheetCommand,
     InsertSheetMutation,
+    RegisterWorksheetRangeThemeStyleCommand,
+    RegisterWorksheetRangeThemeStyleMutation,
     RemoveSheetCommand,
     RemoveSheetMutation,
     SetHorizontalTextAlignCommand,
     SetRangeValuesCommand,
     SetRangeValuesMutation,
+    SetSelectionsOperation,
     SetStyleCommand,
     SetTextWrapCommand,
     SetVerticalTextAlignCommand,
+    SetWorkbookNameCommand,
+    SetWorkbookNameMutation,
     SetWorksheetActiveOperation,
     SetWorksheetOrderCommand,
     SetWorksheetOrderMutation,
+    SetWorksheetRangeThemeStyleCommand,
+    SetWorksheetRangeThemeStyleMutation,
+    SheetRangeThemeModel,
+    SheetRangeThemeService,
+    SheetsSelectionsService,
+    UnregisterWorksheetRangeThemeStyleCommand,
+    UnregisterWorksheetRangeThemeStyleMutation,
 } from '@univerjs/sheets';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { SHEETS_CUSTOM_FIELD_WARNING_MESSAGE } from '../const';
@@ -49,7 +62,10 @@ describe('Test FWorkbook', () => {
     ) => Nullable<ICellData>;
 
     beforeEach(() => {
-        const testBed = createFacadeTestBed();
+        const testBed = createFacadeTestBed(undefined, [
+            [SheetRangeThemeModel],
+            [SheetRangeThemeService],
+        ]);
         get = testBed.get;
         univerAPI = testBed.univerAPI;
 
@@ -60,6 +76,7 @@ describe('Test FWorkbook', () => {
         commandService.registerCommand(SetVerticalTextAlignCommand);
         commandService.registerCommand(SetHorizontalTextAlignCommand);
         commandService.registerCommand(SetTextWrapCommand);
+        commandService.registerCommand(SetSelectionsOperation);
         commandService.registerCommand(InsertSheetCommand);
         commandService.registerCommand(InsertSheetMutation);
         commandService.registerCommand(SetWorksheetActiveOperation);
@@ -68,6 +85,14 @@ describe('Test FWorkbook', () => {
         commandService.registerCommand(CopySheetCommand);
         commandService.registerCommand(SetWorksheetOrderCommand);
         commandService.registerCommand(SetWorksheetOrderMutation);
+        commandService.registerCommand(SetWorkbookNameCommand);
+        commandService.registerCommand(SetWorkbookNameMutation);
+        commandService.registerCommand(RegisterWorksheetRangeThemeStyleCommand);
+        commandService.registerCommand(RegisterWorksheetRangeThemeStyleMutation);
+        commandService.registerCommand(UnregisterWorksheetRangeThemeStyleCommand);
+        commandService.registerCommand(UnregisterWorksheetRangeThemeStyleMutation);
+        commandService.registerCommand(SetWorksheetRangeThemeStyleCommand);
+        commandService.registerCommand(SetWorksheetRangeThemeStyleMutation);
 
         getValueByPosition = (
             startRow: number,
@@ -184,5 +209,75 @@ describe('Test FWorkbook', () => {
         const workbook = univerAPI.getActiveWorkbook()!;
         const sheet = workbook.create('sheet1', 10, 10);
         expect(sheet.getSheetName()).not.toBe('sheet1');
+    });
+
+    it('Workbook exposes editable workbook state, command hooks, themes, and saved snapshots', () => {
+        const workbook = univerAPI.getActiveWorkbook()!;
+        const commandEvents: string[] = [];
+        const selections: string[][] = [];
+
+        const beforeDisposable = workbook.onBeforeCommandExecute((command) => {
+            commandEvents.push(`before:${command.id}`);
+        });
+        const afterDisposable = workbook.onCommandExecuted((command) => {
+            commandEvents.push(`after:${command.id}`);
+        });
+        const selectionDisposable = workbook.onSelectionChange((ranges) => {
+            selections.push(ranges.map((range) => `${range.startRow}:${range.startColumn}-${range.endRow}:${range.endColumn}`));
+        });
+
+        workbook.setName('Finance planning');
+        expect(workbook.getName()).toBe('Finance planning');
+        expect(workbook.getId()).toBe('test');
+        expect(workbook.getWorkbook().getUnitId()).toBe('test');
+        expect(workbook.save().name).toBe('Finance planning');
+        expect(workbook.getUrl()).toContain('localhost');
+
+        workbook.setEditable(false);
+        expect(workbook.getWorkbookPermission().canEdit()).toBe(false);
+        workbook.setEditable(true);
+        expect(workbook.getWorkbookPermission().canEdit()).toBe(true);
+
+        const activeSheet = workbook.getActiveSheet();
+        workbook.setActiveRange(activeSheet.getRange('B2:C3'));
+        const selectionRange = activeSheet.getRange('B2:C3').getRange();
+        get(SheetsSelectionsService).setSelections([
+            {
+                range: selectionRange,
+                primary: getPrimaryForRange(selectionRange, activeSheet.getSheet()),
+                style: null,
+            },
+        ], 2 as never);
+        expect(workbook.getActiveRange()?.getA1Notation()).toBe('B2:C3');
+        expect(workbook.getActiveCell()?.getA1Notation()).toBe('B2');
+
+        expect(selections).toContainEqual(['1:1-2:2']);
+        expect(commandEvents).toContain(`before:${SetWorkbookNameCommand.id}`);
+        expect(commandEvents).toContain(`after:${SetWorkbookNameCommand.id}`);
+
+        const planningTheme = workbook.createRangeThemeStyle('planning-theme', {
+            secondRowStyle: {
+                bg: { rgb: '#eef5ff' },
+            },
+        });
+        expect(workbook.getRegisteredRangeThemes()).toContain('default');
+        workbook.registerRangeTheme(planningTheme);
+        activeSheet.getRange('A1:B2').useThemeStyle('planning-theme');
+        expect(activeSheet.getRange('A1:B2').getUsedThemeStyle()).toBe('planning-theme');
+        workbook.unregisterRangeTheme('planning-theme');
+
+        workbook.addStyles({
+            'planning-style': {
+                fs: 18,
+                bg: { rgb: '#ffeecc' },
+            },
+        });
+        activeSheet.getRange('D1').setValue({ v: 'Styled', s: 'planning-style' });
+        expect(activeSheet.getRange('D1').getCellStyleData('cell')?.fs).toBe(18);
+        workbook.removeStyles(['planning-style']);
+
+        beforeDisposable.dispose();
+        afterDisposable.dispose();
+        selectionDisposable.dispose();
     });
 });

@@ -25,9 +25,19 @@ describe('SheetsSortService', () => {
 
     beforeEach(() => {
         const injector = new Injector();
-        injector.add([IUniverInstanceService, { useValue: {} as IUniverInstanceService }]);
-        injector.add([ICommandService, { useValue: { executeCommand: async () => true } as unknown as ICommandService }]);
-        injector.add([FormulaDataModel, { useValue: { getArrayFormulaRange: () => ({}) } as unknown as FormulaDataModel }]);
+        class TestUniverInstanceService {}
+
+        class TestCommandService {
+            executeCommand = async () => true;
+        }
+
+        class TestFormulaDataModel {
+            getArrayFormulaRange = () => ({});
+        }
+
+        injector.add([IUniverInstanceService, { useClass: TestUniverInstanceService as never }]);
+        injector.add([ICommandService, { useClass: TestCommandService as never }]);
+        injector.add([FormulaDataModel, { useClass: TestFormulaDataModel as never }]);
         injector.add([SheetsSortService]);
         service = injector.get(SheetsSortService);
     });

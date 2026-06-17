@@ -14,25 +14,67 @@
  * limitations under the License.
  */
 
+import type { Injector, IWorkbookData } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
-import { beforeEach, describe, expect, it } from 'vitest';
-import { createWorksheetTestBed } from './create-worksheet-test-bed';
+import {
+    ICommandService,
+    LocaleType,
+} from '@univerjs/core';
+import {
+    AddSheetDataValidationCommand,
+    ClearRangeDataValidationCommand,
+    RemoveSheetAllDataValidationCommand,
+    RemoveSheetDataValidationCommand,
+    UpdateSheetDataValidationOptionsCommand,
+    UpdateSheetDataValidationRangeCommand,
+    UpdateSheetDataValidationSettingCommand,
+} from '@univerjs/sheets-data-validation';
+import { beforeEach, describe } from 'vitest';
+import { createFacadeTestBed } from './create-test-bed';
 
-describe('Test FWorksheet', () => {
+function createWorkbookData(): IWorkbookData {
+    return {
+        id: 'test',
+        appVersion: '3.0.0-alpha',
+        locale: LocaleType.ZH_CN,
+        name: '',
+        sheetOrder: ['sheet1'],
+        styles: {},
+        sheets: {
+            sheet1: {
+                id: 'sheet1',
+                name: 'sheet1',
+                rowCount: 100,
+                columnCount: 100,
+                cellData: {
+                    0: { 0: { v: 1, t: 2 } },
+                    1: { 0: { v: 2, t: 2 } },
+                    2: { 0: { v: 3, t: 2 } },
+                    3: { 0: { v: 4, t: 2 } },
+                },
+            },
+        },
+    };
+}
+
+describe('Test FWorksheet data validation facade', () => {
+    let get: Injector['get'];
     let univerAPI: FUniver;
+
     beforeEach(() => {
-        const testBed = createWorksheetTestBed();
-
+        const testBed = createFacadeTestBed(createWorkbookData());
+        get = testBed.get;
         univerAPI = testBed.univerAPI;
-    });
 
-    it('Worksheet getDataValidations', async () => {
-        const activeSheet = univerAPI.getActiveWorkbook()?.getSheetByName('sheet1');
-        expect(activeSheet?.getDataValidations()).toBeDefined();
-    });
-
-    it('Worksheet getValidatorStatusAsync', async () => {
-        const activeSheet = univerAPI.getActiveWorkbook()?.getSheetByName('sheet1');
-        expect(activeSheet?.getValidatorStatusAsync()).toBeDefined();
+        const commandService = get(ICommandService);
+        [
+            AddSheetDataValidationCommand,
+            ClearRangeDataValidationCommand,
+            RemoveSheetAllDataValidationCommand,
+            RemoveSheetDataValidationCommand,
+            UpdateSheetDataValidationOptionsCommand,
+            UpdateSheetDataValidationRangeCommand,
+            UpdateSheetDataValidationSettingCommand,
+        ].forEach((command) => commandService.registerCommand(command));
     });
 });

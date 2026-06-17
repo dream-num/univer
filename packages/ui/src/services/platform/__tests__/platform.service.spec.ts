@@ -14,17 +14,25 @@
  * limitations under the License.
  */
 
+import { Injector } from '@univerjs/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { PlatformService } from '../platform.service';
+import { IPlatformService, PlatformService } from '../platform.service';
+
+function createService(): IPlatformService {
+    const injector = new Injector();
+    injector.add([IPlatformService, { useClass: PlatformService }]);
+    return injector.get(IPlatformService);
+}
 
 describe('PlatformService', () => {
     afterEach(() => {
         vi.restoreAllMocks();
+        vi.unstubAllGlobals();
     });
 
     it('should detect Mac platform by appVersion', () => {
-        vi.spyOn(window.navigator, 'appVersion', 'get').mockReturnValue('Mac OS X');
-        const service = new PlatformService();
+        vi.stubGlobal('navigator', { appVersion: 'Mac OS X' });
+        const service = createService();
 
         expect(service.isMac).toBe(true);
         expect(service.isWindows).toBe(false);
@@ -32,8 +40,8 @@ describe('PlatformService', () => {
     });
 
     it('should detect Windows platform by appVersion', () => {
-        vi.spyOn(window.navigator, 'appVersion', 'get').mockReturnValue('Windows NT');
-        const service = new PlatformService();
+        vi.stubGlobal('navigator', { appVersion: 'Windows NT' });
+        const service = createService();
 
         expect(service.isMac).toBe(false);
         expect(service.isWindows).toBe(true);
@@ -41,8 +49,8 @@ describe('PlatformService', () => {
     });
 
     it('should detect Linux platform by appVersion', () => {
-        vi.spyOn(window.navigator, 'appVersion', 'get').mockReturnValue('Linux x86_64');
-        const service = new PlatformService();
+        vi.stubGlobal('navigator', { appVersion: 'Linux x86_64' });
+        const service = createService();
 
         expect(service.isMac).toBe(false);
         expect(service.isWindows).toBe(false);

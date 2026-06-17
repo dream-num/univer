@@ -14,12 +14,19 @@
  * limitations under the License.
  */
 
+import { Injector } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { DocRefreshDrawingsService } from '../doc-refresh-drawings.service';
 
+function createService(): DocRefreshDrawingsService {
+    const injector = new Injector();
+    injector.add([DocRefreshDrawingsService]);
+    return injector.get(DocRefreshDrawingsService);
+}
+
 describe('DocRefreshDrawingsService', () => {
     it('emits the latest document skeleton refresh request', () => {
-        const service = new DocRefreshDrawingsService();
+        const service = createService();
         const values: unknown[] = [];
         const sub = service.refreshDrawings$.subscribe((value) => values.push(value));
         const skeleton = { id: 'skeleton-1' };

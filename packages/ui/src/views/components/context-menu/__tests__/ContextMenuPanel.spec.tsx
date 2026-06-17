@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { LocaleService } from '@univerjs/core';
-import React from 'react';
-import { BehaviorSubject } from 'rxjs';
+import type { ReactElement } from 'react';
+import type { IValueOption } from '../../../../services/menu/menu';
+import type { IMenuSchema } from '../../../../services/menu/menu-manager.service';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { ILogService, Injector, LocaleService } from '@univerjs/core';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { ComponentManager, IconManager } from '../../../../common';
 import { ILayoutService } from '../../../../services/layout/layout.service';
 import { MenuItemType } from '../../../../services/menu/menu';
 import { IMenuManagerService } from '../../../../services/menu/menu-manager.service';
+import { RediContext } from '../../../../utils/di';
 import {
     CONTEXT_MENU_SUBMENU_CLOSE_DELAY,
     CONTEXT_MENU_SUBMENU_PORTAL_ATTR,
@@ -32,607 +36,438 @@ import {
     shouldShowContextMenuGroupSeparator,
 } from '../ContextMenuPanel';
 
-const dependencyMap = new Map();
-const tinyMenuGroupSpy = vi.fn();
+(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
-afterEach(() => {
-    cleanup();
-    vi.useRealTimers();
-});
+class TestMenuManagerService {
+    readonly menuChanged$ = new Subject<void>();
+    private readonly _menusByPosition = new Map<string, IMenuSchema[]>();
 
-vi.mock('../../../../utils/di', async () => {
-    const ReactModule = await import('react');
+    setMenus(position: string, menus: IMenuSchema[]): void {
+        this._menusByPosition.set(position, menus);
+        this.menuChanged$.next();
+    }
 
+    getMenuByPositionKey(position: string): IMenuSchema[] {
+        return this._menusByPosition.get(position) ?? [];
+    }
+}
+
+class TestLocaleService {
+    readonly direction$ = new BehaviorSubject<'ltr'>('ltr');
+
+    t(key: string): string {
+        return `translated:${key}`;
+    }
+}
+
+class TestLayoutService {
+    readonly rootContainerElement = document.body;
+}
+
+class TestLogService {
+    warn(): void {}
+}
+
+class TestState {
+    static selectedOptions: IValueOption[] = [];
+    static cancels = 0;
+
+    static reset(): void {
+        this.selectedOptions = [];
+        this.cancels = 0;
+    }
+}
+
+function createContextMenuInjector() {
+    const injector = new Injector();
+    injector.add([IMenuManagerService, { useClass: TestMenuManagerService as never }]);
+    injector.add([ILayoutService, { useClass: TestLayoutService as never }]);
+    injector.add([LocaleService, { useClass: TestLocaleService as never }]);
+    injector.add([ILogService, { useClass: TestLogService as never }]);
+    injector.add([ComponentManager]);
+    injector.add([IconManager]);
+
+    injector.get(IconManager).register({
+        AlignLeftIcon: ({ className }: { className?: string }) => <span className={className} data-icon="align-left" />,
+        AlignCenterIcon: ({ className }: { className?: string }) => <span className={className} data-icon="align-center" />,
+        TextColorIcon: ({ className }: { className?: string }) => <span className={className} data-icon="text-color" />,
+        ResetIcon: ({ className }: { className?: string }) => <span className={className} data-icon="reset" />,
+    });
+
+    return injector;
+}
+
+function renderWithDependencies(element: ReactElement, menuMap: Record<string, IMenuSchema[]>) {
+    const injector = createContextMenuInjector();
+    const menuManagerService = injector.get(IMenuManagerService) as unknown as TestMenuManagerService;
+
+    Object.entries(menuMap).forEach(([position, menus]) => menuManagerService.setMenus(position, menus));
+
+    return render(
+        <RediContext.Provider value={{ injector }}>
+            {element}
+        </RediContext.Provider>
+    );
+}
+
+function createButtonItem(
+    key: string,
+    options: {
+        icon?: string;
+        title?: string;
+        tooltip?: string;
+        params?: Record<string, unknown>;
+        activated$?: BehaviorSubject<boolean>;
+        hidden$?: BehaviorSubject<boolean>;
+    } = {}
+): IMenuSchema {
     return {
-        useDependency(token: unknown) {
-            return dependencyMap.get(token);
-        },
-        useObservable<T>(observable: any, defaultValue?: T) {
-            const [value, setValue] = ReactModule.useState(defaultValue);
-
-            ReactModule.useEffect(() => {
-                if (!observable) {
-                    return;
-                }
-
-                const source = typeof observable === 'function' ? observable() : observable;
-                const sub = source.subscribe?.((nextValue: T) => setValue(nextValue));
-
-                return () => sub?.unsubscribe?.();
-            }, [observable]);
-
-            return value;
+        key,
+        order: 0,
+        item: {
+            id: key,
+            type: MenuItemType.BUTTON,
+            icon: options.icon,
+            title: options.title,
+            tooltip: options.tooltip,
+            params: options.params,
+            activated$: options.activated$,
+            hidden$: options.hidden$,
         },
     };
-});
+}
 
-vi.mock('../../../menu/desktop/TinyMenuGroup', () => ({
-    resolveMenuItemActiveState: () => false,
-    UITinyMenuGroup: (props: unknown) => {
-        tinyMenuGroupSpy(props);
-        return <div data-testid="tiny-menu-group" />;
-    },
-    UIQuickTileMenuGroup: () => <div data-testid="quick-tile-menu-group" />,
-}));
+function hasClassToken(element: HTMLElement, token: string): boolean {
+    return element.className.split(/\s+/).includes(token);
+}
 
-vi.mock('../../../custom-label/CustomLabel', () => ({
-    CustomLabel: () => <span data-testid="custom-label" />,
-}));
+async function nextFrame() {
+    await act(async () => {
+        await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+    });
+}
 
 describe('ContextMenuPanel', () => {
-    it('applies the enlarged paragraph T size variant without affecting the shared defaults', () => {
-        dependencyMap.clear();
-        tinyMenuGroupSpy.mockClear();
-
-        dependencyMap.set(IMenuManagerService, {
-            menuChanged$: new BehaviorSubject<void>(undefined),
-            getMenuByPositionKey: vi.fn(() => [{
-                key: 'quickTop',
-                order: 0,
-                title: 'docs-ui.paragraphMenu.align',
-                quickLayout: 'icon',
-                children: [{
-                    key: 'quickItem',
-                    order: 0,
-                    item: {
-                        id: 'quick-item',
-                        type: MenuItemType.BUTTON,
-                    },
-                }],
-            }]),
-        });
-        dependencyMap.set(ILayoutService, {
-            rootContainerElement: document.body,
-        });
-        dependencyMap.set(LocaleService, {
-            t: (key: string) => key,
-            direction$: new BehaviorSubject<'ltr'>('ltr'),
-        });
-
-        const { container } = render(React.createElement(ContextMenuPanel as never, {
-            menuType: 'quick-layout-menu',
-            sizeVariant: 'paragraph-t',
-        }));
-
-        const className = (container.firstChild as HTMLDivElement | null)?.className ?? '';
-        expect(className).toContain('univer-min-w-64');
-        expect(className).toContain('univer-text-base');
-        expect(className).toContain('univer-px-3');
-        expect(className).toContain('univer-py-2');
-        expect(tinyMenuGroupSpy.mock.calls[0][0]).toEqual(expect.objectContaining({
-            columns: 6,
-            sizeVariant: 'paragraph-t',
-        }));
+    afterEach(() => {
+        cleanup();
+        vi.useRealTimers();
+        TestState.reset();
     });
 
-    it('suppresses initial hover highlight until the pointer moves', () => {
-        dependencyMap.clear();
-        tinyMenuGroupSpy.mockClear();
-
-        dependencyMap.set(IMenuManagerService, {
-            menuChanged$: new BehaviorSubject<void>(undefined),
-            getMenuByPositionKey: vi.fn(() => [{
-                key: 'insert',
-                order: 0,
-                children: [{
-                    key: 'table',
-                    order: 0,
-                    item: {
-                        id: 'insert-table',
-                        type: MenuItemType.BUTTON,
-                    },
-                }],
-            }]),
-        });
-        dependencyMap.set(ILayoutService, {
-            rootContainerElement: document.body,
-        });
-        dependencyMap.set(LocaleService, {
-            t: (key: string) => key,
-            direction$: new BehaviorSubject<'ltr'>('ltr'),
-        });
-
-        const { container } = render(React.createElement(ContextMenuPanel as never, {
-            menuType: 'insert-menu',
-            suppressHoverUntilPointerMove: true,
-        }));
-        const panel = container.firstChild as HTMLDivElement;
-
-        expect(panel.className).toContain('univer-context-menu-hover-suppressed');
-
-        fireEvent.pointerMove(panel);
-
-        expect(panel.className).not.toContain('univer-context-menu-hover-suppressed');
-    });
-
-    it('keeps selector submenus closed while initial hover is suppressed', () => {
-        dependencyMap.clear();
-        tinyMenuGroupSpy.mockClear();
-
-        dependencyMap.set(IMenuManagerService, {
-            menuChanged$: new BehaviorSubject<void>(undefined),
-            getMenuByPositionKey: vi.fn(() => [{
-                key: 'insert',
-                order: 0,
-                children: [{
-                    key: 'table',
-                    order: 0,
-                    item: {
-                        id: 'insert-table',
-                        type: MenuItemType.BUTTON_SELECTOR,
-                        title: 'insert table',
-                        tooltip: 'insert table',
-                        selections: [{
-                            label: 'table picker',
-                            value: 'table picker',
-                        }],
-                    },
-                }],
-            }]),
-        });
-        dependencyMap.set(ILayoutService, {
-            rootContainerElement: document.body,
-        });
-        dependencyMap.set(LocaleService, {
-            t: (key: string) => key,
-            direction$: new BehaviorSubject<'ltr'>('ltr'),
-        });
-
-        const { container, unmount } = render(React.createElement(ContextMenuPanel as never, {
-            menuType: 'insert-menu',
-            suppressHoverUntilPointerMove: true,
-        }));
-        const panel = container.firstChild as HTMLDivElement;
-        const tableButton = document.querySelector('button[title="insert table"]') as HTMLButtonElement | null;
-        const tableWrapper = tableButton?.parentElement as HTMLDivElement | null;
-
-        expect(tableWrapper).not.toBeNull();
-
-        fireEvent.mouseEnter(tableWrapper!);
-        expect(document.querySelectorAll(`[${CONTEXT_MENU_SUBMENU_PORTAL_ATTR}="true"]`)).toHaveLength(0);
-
-        fireEvent.pointerMove(panel);
-        fireEvent.mouseEnter(tableWrapper!);
-        expect(document.querySelectorAll(`[${CONTEXT_MENU_SUBMENU_PORTAL_ATTR}="true"]`)).toHaveLength(1);
-
-        unmount();
-    });
-
-    it('can focus the menu container without selecting an item initially', async () => {
-        dependencyMap.clear();
-        tinyMenuGroupSpy.mockClear();
-
-        dependencyMap.set(IMenuManagerService, {
-            menuChanged$: new BehaviorSubject<void>(undefined),
-            getMenuByPositionKey: vi.fn(() => [{
-                key: 'insert',
-                order: 0,
-                children: [{
-                    key: 'table',
-                    order: 0,
-                    item: {
-                        id: 'insert-table',
-                        type: MenuItemType.BUTTON,
-                        title: 'insert table',
-                        tooltip: 'insert table',
-                    },
-                }],
-            }]),
-        });
-        dependencyMap.set(ILayoutService, {
-            rootContainerElement: document.body,
-        });
-        dependencyMap.set(LocaleService, {
-            t: (key: string) => key,
-            direction$: new BehaviorSubject<'ltr'>('ltr'),
-        });
-
-        const { container } = render(React.createElement(ContextMenuPanel as never, {
-            menuType: 'insert-menu',
-            autoFocus: true,
-            autoFocusTarget: 'container',
-        }));
-        const panel = container.firstChild as HTMLDivElement;
-        const tableButton = document.querySelector('button[title="insert table"]') as HTMLButtonElement | null;
-
-        await act(async () => {
-            await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
-        });
-
-        expect(document.activeElement).toBe(panel);
-
-        fireEvent.keyDown(panel, { key: 'ArrowDown' });
-
-        expect(document.activeElement).toBe(tableButton);
-    });
-
-    it('does not render a separator between consecutive header quick rows', () => {
-        expect(shouldShowContextMenuGroupSeparator([
+    it('keeps paragraph quick groups visually connected while separating the next normal group', () => {
+        const schemas = [
             { key: 'quickTop', order: 0, quickLayout: 'icon' },
             { key: 'quickBottom', order: 1, quickLayout: 'icon' },
             { key: 'layout', order: 2 },
-        ] as never, 0)).toBe(false);
+        ] as IMenuSchema[];
 
-        expect(shouldShowContextMenuGroupSeparator([
-            { key: 'quickTop', order: 0, quickLayout: 'icon' },
-            { key: 'quickBottom', order: 1, quickLayout: 'icon' },
-            { key: 'layout', order: 2 },
-        ] as never, 1)).toBe(true);
-    });
-
-    it('clusters consecutive paragraph T header quick rows into one shared container', () => {
-        dependencyMap.clear();
-        tinyMenuGroupSpy.mockClear();
-
-        dependencyMap.set(IMenuManagerService, {
-            menuChanged$: new BehaviorSubject<void>(undefined),
-            getMenuByPositionKey: vi.fn(() => [
-                {
-                    key: 'quickTop',
-                    order: 0,
-                    quickLayout: 'icon',
-                    children: [{
-                        key: 'quickItemTop',
-                        order: 0,
-                        item: {
-                            id: 'quick-item-top',
-                            type: MenuItemType.BUTTON,
-                        },
-                    }],
-                },
-                {
-                    key: 'quickBottom',
-                    order: 1,
-                    quickLayout: 'icon',
-                    children: [{
-                        key: 'quickItemBottom',
-                        order: 0,
-                        item: {
-                            id: 'quick-item-bottom',
-                            type: MenuItemType.BUTTON,
-                        },
-                    }],
-                },
-            ]),
-        });
-        dependencyMap.set(ILayoutService, {
-            rootContainerElement: document.body,
-        });
-        dependencyMap.set(LocaleService, {
-            t: (key: string) => key,
-            direction$: new BehaviorSubject<'ltr'>('ltr'),
-        });
-
-        const { container } = render(React.createElement(ContextMenuPanel as never, {
-            menuType: 'quick-layout-menu',
-            sizeVariant: 'paragraph-t',
-        }));
-
-        const sharedCluster = container.querySelector('.univer-gap-0') as HTMLDivElement | null;
-
-        expect(sharedCluster).not.toBeNull();
-        expect(sharedCluster?.className ?? '').toContain('univer-py-2');
-        expect(sharedCluster?.querySelectorAll('[data-testid="tiny-menu-group"]').length).toBe(2);
-        expect(container.querySelectorAll('.univer-gap-0 [data-testid="tiny-menu-group"]').length).toBe(2);
-    });
-
-    it('groups consecutive paragraph T header quick rows before rendering', () => {
-        expect(getContextMenuSchemaRenderGroups([
-            { key: 'quickTop', order: 0, quickLayout: 'icon' },
-            { key: 'quickBottom', order: 1, quickLayout: 'icon' },
-            { key: 'align', order: 2 },
-        ] as never, 'paragraph-t')).toEqual([
+        expect(shouldShowContextMenuGroupSeparator(schemas, 0)).toBe(false);
+        expect(shouldShowContextMenuGroupSeparator(schemas, 1)).toBe(true);
+        expect(getContextMenuSchemaRenderGroups(schemas, 'paragraph-t')).toEqual([
             {
                 startIndex: 0,
                 endIndex: 1,
-                menuSchemas: [
-                    { key: 'quickTop', order: 0, quickLayout: 'icon' },
-                    { key: 'quickBottom', order: 1, quickLayout: 'icon' },
-                ],
+                menuSchemas: [schemas[0], schemas[1]],
             },
             {
                 startIndex: 2,
                 endIndex: 2,
-                menuSchemas: [
-                    { key: 'align', order: 2 },
-                ],
+                menuSchemas: [schemas[2]],
             },
         ]);
+        expect(getContextMenuQuickGroupColumns(schemas[0])).toBe(6);
     });
 
-    it('uses a fixed six-column layout for header quick icon groups only', () => {
-        expect(getContextMenuQuickGroupColumns({
-            key: 'quickTop',
-            order: 0,
-            quickLayout: 'icon',
-        } as never)).toBe(6);
-
-        expect(getContextMenuQuickGroupColumns({
-            key: 'quickBottom',
-            order: 1,
-            quickLayout: 'icon',
-        } as never)).toBe(6);
-
-        expect(getContextMenuQuickGroupColumns({
-            key: 'align',
-            order: 0,
-            quickLayout: 'icon',
-        } as never)).toBeUndefined();
-    });
-
-    it('passes compact quick layout metadata through to tiny menu groups', () => {
-        dependencyMap.clear();
-        tinyMenuGroupSpy.mockClear();
-
-        dependencyMap.set(IMenuManagerService, {
-            menuChanged$: new BehaviorSubject<void>(undefined),
-            getMenuByPositionKey: vi.fn(() => [{
-                key: 'colors',
-                order: 0,
-                quickLayout: 'icon',
-                quickColumns: 8,
-                quickLayoutVariant: 'compact',
-                children: [{
-                    key: 'quickItem',
-                    order: 0,
-                    item: {
-                        id: 'quick-item',
-                        type: MenuItemType.BUTTON,
-                    },
-                }],
-            }]),
-        });
-        dependencyMap.set(ILayoutService, {
-            rootContainerElement: document.body,
-        });
-        dependencyMap.set(LocaleService, {
-            t: (key: string) => key,
-            direction$: new BehaviorSubject<'ltr'>('ltr'),
-        });
-
-        render(React.createElement(ContextMenuPanel as never, {
-            menuType: 'quick-layout-menu',
-            sizeVariant: 'paragraph-t',
-        }));
-
-        expect(tinyMenuGroupSpy.mock.calls[0][0]).toEqual(expect.objectContaining({
-            columns: 8,
-            layoutVariant: 'compact',
-        }));
-    });
-
-    it('renders a right-aligned header action for titled context menu groups', () => {
-        dependencyMap.clear();
-        tinyMenuGroupSpy.mockClear();
-
-        dependencyMap.set(IMenuManagerService, {
-            menuChanged$: new BehaviorSubject<void>(undefined),
-            getMenuByPositionKey: vi.fn(() => [{
-                key: 'colors',
-                order: 0,
-                title: 'docs-ui.toolbar.textColor.main',
-                headerActionItem: {
-                    id: 'header-action',
-                    type: MenuItemType.BUTTON_SELECTOR,
-                    icon: 'HeaderTextColorIcon',
-                    tooltip: 'header-action',
-                    selections: [],
-                },
-                children: [{
-                    key: 'quickItem',
-                    order: 0,
-                    item: {
-                        id: 'quick-item',
-                        type: MenuItemType.BUTTON,
-                    },
-                }],
-            }]),
-        });
-        dependencyMap.set(ILayoutService, {
-            rootContainerElement: document.body,
-        });
-        dependencyMap.set(LocaleService, {
-            t: (key: string) => key,
-            direction$: new BehaviorSubject<'ltr'>('ltr'),
-        });
-
-        render(React.createElement(ContextMenuPanel as never, {
-            menuType: 'quick-layout-menu',
-            sizeVariant: 'paragraph-t',
-        }));
-
-        expect(document.querySelector('button[title="header-action"]')).not.toBeNull();
-    });
-
-    it('opens a header action selector submenu instead of immediately executing its current value', () => {
-        dependencyMap.clear();
-        tinyMenuGroupSpy.mockClear();
-        const onOptionSelect = vi.fn();
-
-        dependencyMap.set(IMenuManagerService, {
-            menuChanged$: new BehaviorSubject<void>(undefined),
-            getMenuByPositionKey: vi.fn(() => [{
-                key: 'colors',
-                order: 0,
-                title: 'docs-ui.toolbar.textColor.main',
-                headerActionItem: {
-                    id: 'header-action',
-                    type: MenuItemType.BUTTON_SELECTOR,
-                    icon: 'HeaderTextColorIcon',
-                    tooltip: 'header-action',
-                    selections: [{
-                        label: 'custom-option',
-                        value: '#ff0000',
-                    }],
-                },
-                children: [{
-                    key: 'quickItem',
-                    order: 0,
-                    item: {
-                        id: 'quick-item',
-                        type: MenuItemType.BUTTON,
-                    },
-                }],
-            }]),
-        });
-        dependencyMap.set(ILayoutService, {
-            rootContainerElement: document.body,
-        });
-        dependencyMap.set(LocaleService, {
-            t: (key: string) => key,
-            direction$: new BehaviorSubject<'ltr'>('ltr'),
-        });
-
-        render(React.createElement(ContextMenuPanel as never, {
-            menuType: 'quick-layout-menu',
-            sizeVariant: 'paragraph-t',
-            onOptionSelect,
-        }));
-
-        const headerActionButton = document.querySelector('button[title="header-action"]') as HTMLButtonElement | null;
-
-        expect(headerActionButton).not.toBeNull();
-
-        fireEvent.click(headerActionButton!);
-
-        expect(onOptionSelect).not.toHaveBeenCalled();
-    });
-
-    it('renders quick layout group titles before icon rows', () => {
-        dependencyMap.clear();
-
-        dependencyMap.set(IMenuManagerService, {
-            menuChanged$: new BehaviorSubject<void>(undefined),
-            getMenuByPositionKey: vi.fn(() => [{
-                key: 'quickGroup',
-                order: 0,
-                title: 'docs-ui.paragraphMenu.align',
-                quickLayout: 'icon',
-                children: [{
-                    key: 'quickItem',
-                    order: 0,
-                    item: {
-                        id: 'quick-item',
-                        type: MenuItemType.BUTTON,
-                    },
-                }],
-            }]),
-        });
-        dependencyMap.set(ILayoutService, {
-            rootContainerElement: document.body,
-        });
-        dependencyMap.set(LocaleService, {
-            t: (key: string) => key,
-            direction$: new BehaviorSubject<'ltr'>('ltr'),
-        });
-
-        render(<ContextMenuPanel menuType="quick-layout-menu" />);
-
-        expect(screen.getAllByText('docs-ui.paragraphMenu.align').length).toBeGreaterThan(0);
-        expect(screen.getAllByTestId('tiny-menu-group').length).toBeGreaterThan(0);
-    });
-
-    it('supports keyboard focus, navigation, confirm, and cancel', async () => {
-        dependencyMap.clear();
-        const onOptionSelect = vi.fn();
-        const onCancel = vi.fn();
-
-        dependencyMap.set(IMenuManagerService, {
-            menuChanged$: new BehaviorSubject<void>(undefined),
-            getMenuByPositionKey: vi.fn(() => [{
-                key: 'insert',
-                order: 0,
-                children: [
+    it('renders paragraph quick menus with real tiny groups and submits the clicked command', () => {
+        renderWithDependencies(
+            <ContextMenuPanel
+                menuType="paragraph-menu"
+                sizeVariant="paragraph-t"
+                activeItemIds={['align-center']}
+                hiddenItemIds={['reset-format']}
+                onOptionSelect={(option) => TestState.selectedOptions.push(option)}
+            />,
+            {
+                'paragraph-menu': [
                     {
-                        key: 'heading-1',
+                        key: 'quickTop',
                         order: 0,
-                        item: {
-                            id: 'heading-1',
-                            type: MenuItemType.BUTTON,
-                            title: 'heading 1',
-                            tooltip: 'heading 1',
-                        },
+                        title: 'docs-ui.paragraphMenu.align',
+                        quickLayout: 'icon',
+                        children: [
+                            createButtonItem('align-left', {
+                                icon: 'AlignLeftIcon',
+                                tooltip: 'docs-ui.toolbar.alignLeft',
+                            }),
+                            createButtonItem('align-center', {
+                                icon: 'AlignCenterIcon',
+                                tooltip: 'docs-ui.toolbar.alignCenter',
+                                params: { horizontalAlign: 'center' },
+                            }),
+                        ],
                     },
                     {
-                        key: 'callout',
+                        key: 'quickBottom',
                         order: 1,
-                        item: {
-                            id: 'callout',
-                            type: MenuItemType.BUTTON,
-                            title: 'callout',
-                            tooltip: 'callout',
-                        },
+                        quickLayout: 'icon',
+                        children: [
+                            createButtonItem('reset-format', {
+                                icon: 'ResetIcon',
+                                tooltip: 'docs-ui.toolbar.resetFormat',
+                            }),
+                        ],
+                    },
+                    {
+                        key: 'insert',
+                        order: 2,
+                        children: [
+                            createButtonItem('insert-link', {
+                                title: 'docs-ui.toolbar.link',
+                                tooltip: 'docs-ui.toolbar.link',
+                            }),
+                        ],
                     },
                 ],
-            }]),
-        });
-        dependencyMap.set(ILayoutService, {
-            rootContainerElement: document.body,
-        });
-        dependencyMap.set(LocaleService, {
-            t: (key: string) => key,
-            direction$: new BehaviorSubject<'ltr'>('ltr'),
-        });
+            }
+        );
 
-        const { container } = render(
+        expect(screen.getByText('translated:docs-ui.paragraphMenu.align')).not.toBeNull();
+        expect(screen.queryByRole('button', { name: 'translated:docs-ui.toolbar.resetFormat' })).toBeNull();
+
+        const alignCenterButton = screen.getByRole('button', { name: 'translated:docs-ui.toolbar.alignCenter' });
+        expect(hasClassToken(alignCenterButton, 'univer-bg-gray-50')).toBe(true);
+
+        fireEvent.click(alignCenterButton);
+
+        expect(TestState.selectedOptions).toEqual([{
+            id: 'align-center',
+            label: 'align-center',
+            commandId: undefined,
+            params: { horizontalAlign: 'center' },
+            value: undefined,
+            tooltip: 'translated:docs-ui.toolbar.alignCenter',
+        }]);
+    });
+
+    it('removes a group when all of its children become hidden', async () => {
+        const visible$ = new BehaviorSubject(false);
+        const hidden$ = new BehaviorSubject(true);
+
+        renderWithDependencies(
+            <ContextMenuPanel menuType="context-menu" />,
+            {
+                'context-menu': [
+                    {
+                        key: 'hidden-group',
+                        order: 0,
+                        title: 'docs-ui.hiddenGroup',
+                        children: [
+                            createButtonItem('hidden-action', {
+                                title: 'docs-ui.hiddenAction',
+                                tooltip: 'docs-ui.hiddenAction',
+                                hidden$,
+                            }),
+                        ],
+                    },
+                    {
+                        key: 'visible-group',
+                        order: 1,
+                        title: 'docs-ui.visibleGroup',
+                        children: [
+                            createButtonItem('visible-action', {
+                                title: 'docs-ui.visibleAction',
+                                tooltip: 'docs-ui.visibleAction',
+                                hidden$: visible$,
+                            }),
+                        ],
+                    },
+                ],
+            }
+        );
+
+        await waitFor(() => {
+            expect(screen.queryByText('translated:docs-ui.hiddenGroup')).toBeNull();
+        });
+        expect(screen.getByText('translated:docs-ui.visibleGroup')).not.toBeNull();
+        expect(screen.getByRole('button', { name: 'translated:docs-ui.visibleAction' })).not.toBeNull();
+    });
+
+    it('supports keyboard navigation, confirm, and cancel from the real menu DOM', async () => {
+        renderWithDependencies(
             <ContextMenuPanel
                 menuType="keyboard-menu"
                 autoFocus
-                onCancel={onCancel}
-                onOptionSelect={onOptionSelect}
-            />
+                onCancel={() => {
+                    TestState.cancels += 1;
+                }}
+                onOptionSelect={(option) => TestState.selectedOptions.push(option)}
+            />,
+            {
+                'keyboard-menu': [
+                    {
+                        key: 'insert',
+                        order: 0,
+                        children: [
+                            createButtonItem('heading-1', {
+                                title: 'docs-ui.heading1',
+                                tooltip: 'docs-ui.heading1',
+                            }),
+                            createButtonItem('callout', {
+                                title: 'docs-ui.callout',
+                                tooltip: 'docs-ui.callout',
+                                params: { block: 'callout' },
+                            }),
+                        ],
+                    },
+                ],
+            }
         );
 
-        const panel = container.firstElementChild as HTMLDivElement;
-        const headingButton = document.querySelector('button[title="heading 1"]') as HTMLButtonElement | null;
-        const calloutButton = document.querySelector('button[title="callout"]') as HTMLButtonElement | null;
+        await nextFrame();
 
-        await act(async () => {
-            await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
-        });
+        const panel = document.querySelector('[tabindex="-1"]') as HTMLDivElement;
+        const headingButton = screen.getByRole('button', { name: 'translated:docs-ui.heading1' });
+        const calloutButton = screen.getByRole('button', { name: 'translated:docs-ui.callout' });
 
         expect(document.activeElement).toBe(headingButton);
 
         fireEvent.keyDown(panel, { key: 'ArrowDown' });
         expect(document.activeElement).toBe(calloutButton);
 
-        fireEvent.keyDown(panel, { key: 'ArrowLeft' });
-        expect(document.activeElement).toBe(headingButton);
-
-        fireEvent.keyDown(panel, { key: 'ArrowRight' });
-        expect(document.activeElement).toBe(calloutButton);
-
         fireEvent.keyDown(panel, { key: 'Enter' });
-        expect(onOptionSelect).toHaveBeenCalledWith(expect.objectContaining({
+        expect(TestState.selectedOptions).toEqual([{
             id: 'callout',
             label: 'callout',
-        }));
+            commandId: undefined,
+            params: { block: 'callout' },
+            value: undefined,
+        }]);
 
         fireEvent.keyDown(panel, { key: 'Escape' });
-        expect(onCancel).toHaveBeenCalledTimes(1);
+        expect(TestState.cancels).toBe(1);
     });
 
-    it('keeps left and right navigation on the same visual row until the row boundary', () => {
+    it('selects an option from a selector submenu with the selector command id', () => {
+        renderWithDependencies(
+            <ContextMenuPanel
+                menuType="format-menu"
+                onOptionSelect={(option) => TestState.selectedOptions.push(option)}
+            />,
+            {
+                'format-menu': [
+                    {
+                        key: 'format',
+                        order: 0,
+                        children: [
+                            {
+                                key: 'color',
+                                order: 0,
+                                item: {
+                                    id: 'text-color',
+                                    type: MenuItemType.BUTTON_SELECTOR,
+                                    icon: 'TextColorIcon',
+                                    title: 'docs-ui.textColor',
+                                    tooltip: 'docs-ui.textColor',
+                                    selectionsCommandId: 'doc.command.setTextColor',
+                                    selections: [
+                                        {
+                                            label: 'palette.red',
+                                            value: '#ff0000',
+                                        },
+                                        {
+                                            label: 'palette.blue',
+                                            value: '#0000ff',
+                                        },
+                                    ],
+                                },
+                            },
+                        ],
+                    },
+                ],
+            }
+        );
+
+        const colorButton = screen.getByRole('button', { name: 'translated:docs-ui.textColor' });
+        fireEvent.mouseEnter(colorButton.parentElement as HTMLElement);
+
+        fireEvent.click(screen.getByText('translated:palette.red').closest('button') as HTMLButtonElement);
+
+        expect(TestState.selectedOptions).toEqual([{
+            id: 'text-color',
+            label: 'color',
+            commandId: 'doc.command.setTextColor',
+            value: '#ff0000',
+        }]);
+        expect(document.querySelectorAll(`[${CONTEXT_MENU_SUBMENU_PORTAL_ATTR}="true"]`)).toHaveLength(0);
+    });
+
+    it('keeps the newly hovered submenu open when moving across sibling submenu items', () => {
+        vi.useFakeTimers();
+
+        renderWithDependencies(
+            <ContextMenuPanel menuType="submenu-root" />,
+            {
+                'submenu-root': [
+                    {
+                        key: 'indent',
+                        order: 0,
+                        item: {
+                            id: 'indent',
+                            type: MenuItemType.SUBITEMS,
+                            title: 'docs-ui.indent',
+                            tooltip: 'docs-ui.indent',
+                        },
+                    },
+                    {
+                        key: 'colors',
+                        order: 1,
+                        item: {
+                            id: 'colors',
+                            type: MenuItemType.SUBITEMS,
+                            title: 'docs-ui.colors',
+                            tooltip: 'docs-ui.colors',
+                        },
+                    },
+                ],
+                indent: [
+                    createButtonItem('indent-more', {
+                        title: 'docs-ui.indentMore',
+                        tooltip: 'docs-ui.indentMore',
+                    }),
+                ],
+                colors: [
+                    createButtonItem('fill-color', {
+                        title: 'docs-ui.fillColor',
+                        tooltip: 'docs-ui.fillColor',
+                    }),
+                ],
+            }
+        );
+
+        const indentButton = screen.getByRole('button', { name: 'translated:docs-ui.indent' });
+        const colorsButton = screen.getByRole('button', { name: 'translated:docs-ui.colors' });
+        const indentWrapper = indentButton.parentElement as HTMLElement;
+        const colorsWrapper = colorsButton.parentElement as HTMLElement;
+
+        act(() => {
+            fireEvent.mouseEnter(indentWrapper);
+        });
+        expect(screen.getByText('translated:docs-ui.indentMore')).not.toBeNull();
+
+        act(() => {
+            fireEvent.mouseLeave(indentWrapper, { relatedTarget: colorsWrapper });
+            fireEvent.mouseEnter(colorsWrapper);
+        });
+        expect(screen.getByText('translated:docs-ui.fillColor')).not.toBeNull();
+        expect(screen.queryByRole('button', { name: 'translated:docs-ui.indentMore' })).toBeNull();
+
+        act(() => {
+            vi.advanceTimersByTime(CONTEXT_MENU_SUBMENU_CLOSE_DELAY + 10);
+        });
+        expect(screen.getByText('translated:docs-ui.fillColor')).not.toBeNull();
+    });
+
+    it('keeps row navigation on the same visual row until the row boundary', () => {
         const createButton = (left: number, top: number) => ({
             getBoundingClientRect: () => ({
                 bottom: top + 32,
@@ -646,276 +481,11 @@ describe('ContextMenuPanel', () => {
                 toJSON: () => ({}),
             }),
         }) as HTMLButtonElement;
-        const h2 = createButton(56, 0);
-        const h3 = createButton(112, 0);
-        const visuallyCloseSecondRowItem = createButton(60, 40);
+        const first = createButton(0, 0);
+        const second = createButton(56, 0);
+        const nextRow = createButton(4, 40);
 
-        expect(getNextMenuButtonByDirection([
-            h2,
-            h3,
-            visuallyCloseSecondRowItem,
-        ], 0, 'ArrowRight')).toBe(h3);
-        expect(getNextMenuButtonByDirection([
-            h2,
-            h3,
-            visuallyCloseSecondRowItem,
-        ], 1, 'ArrowRight')).toBe(visuallyCloseSecondRowItem);
-    });
-
-    it('keeps the newly hovered submenu open when switching quickly between sibling submenu items', () => {
-        vi.useFakeTimers();
-        dependencyMap.clear();
-
-        dependencyMap.set(IMenuManagerService, {
-            menuChanged$: new BehaviorSubject<void>(undefined),
-            getMenuByPositionKey: vi.fn((key: string) => {
-                if (key === 'submenu-root') {
-                    return [
-                        {
-                            key: 'indent',
-                            order: 0,
-                            item: {
-                                id: 'indent',
-                                type: MenuItemType.SUBITEMS,
-                                title: 'indent',
-                                tooltip: 'indent',
-                            },
-                        },
-                        {
-                            key: 'colors',
-                            order: 1,
-                            item: {
-                                id: 'colors',
-                                type: MenuItemType.SUBITEMS,
-                                title: 'colors',
-                                tooltip: 'colors',
-                            },
-                        },
-                    ];
-                }
-
-                if (key === 'indent') {
-                    return [{
-                        key: 'indent-option',
-                        order: 0,
-                        item: {
-                            id: 'indent-option',
-                            type: MenuItemType.BUTTON,
-                            title: 'indent option',
-                        },
-                    }];
-                }
-
-                if (key === 'colors') {
-                    return [{
-                        key: 'colors-option',
-                        order: 0,
-                        item: {
-                            id: 'colors-option',
-                            type: MenuItemType.BUTTON,
-                            title: 'colors option',
-                        },
-                    }];
-                }
-
-                return [];
-            }),
-        });
-        dependencyMap.set(ILayoutService, {
-            rootContainerElement: document.body,
-        });
-        dependencyMap.set(LocaleService, {
-            t: (key: string) => key,
-            direction$: new BehaviorSubject<'ltr'>('ltr'),
-        });
-
-        render(<ContextMenuPanel menuType="submenu-root" />);
-
-        const indentButton = document.querySelector('button[title="indent"]') as HTMLButtonElement | null;
-        const colorsButton = document.querySelector('button[title="colors"]') as HTMLButtonElement | null;
-        expect(indentButton).not.toBeNull();
-        expect(colorsButton).not.toBeNull();
-
-        const indentWrapper = indentButton?.parentElement as HTMLDivElement | null;
-        const colorsWrapper = colorsButton?.parentElement as HTMLDivElement | null;
-        expect(indentWrapper).not.toBeNull();
-        expect(colorsWrapper).not.toBeNull();
-
-        act(() => {
-            fireEvent.mouseEnter(indentWrapper!);
-        });
-        expect(document.querySelectorAll(`[${CONTEXT_MENU_SUBMENU_PORTAL_ATTR}="true"]`)).toHaveLength(1);
-
-        act(() => {
-            fireEvent.mouseLeave(indentWrapper!, { relatedTarget: colorsWrapper });
-            fireEvent.mouseEnter(colorsWrapper!);
-        });
-        expect(document.querySelectorAll(`[${CONTEXT_MENU_SUBMENU_PORTAL_ATTR}="true"]`)).toHaveLength(1);
-
-        act(() => {
-            vi.advanceTimersByTime(CONTEXT_MENU_SUBMENU_CLOSE_DELAY + 10);
-        });
-        expect(document.querySelectorAll(`[${CONTEXT_MENU_SUBMENU_PORTAL_ATTR}="true"]`)).toHaveLength(1);
-
-        vi.useRealTimers();
-    });
-
-    it('closes an open submenu immediately when hovering a plain root menu item', () => {
-        vi.useFakeTimers();
-        dependencyMap.clear();
-
-        dependencyMap.set(IMenuManagerService, {
-            menuChanged$: new BehaviorSubject<void>(undefined),
-            getMenuByPositionKey: vi.fn((key: string) => {
-                if (key === 'submenu-root') {
-                    return [
-                        {
-                            key: 'insert',
-                            order: 0,
-                            item: {
-                                id: 'insert',
-                                type: MenuItemType.SUBITEMS,
-                                title: 'insert',
-                                tooltip: 'insert',
-                            },
-                        },
-                        {
-                            key: 'align',
-                            order: 1,
-                            item: {
-                                id: 'align',
-                                type: MenuItemType.BUTTON,
-                                title: 'align',
-                                tooltip: 'align',
-                            },
-                        },
-                    ];
-                }
-
-                if (key === 'insert') {
-                    return [{
-                        key: 'insert-option',
-                        order: 0,
-                        item: {
-                            id: 'insert-option',
-                            type: MenuItemType.BUTTON,
-                            title: 'insert option',
-                            tooltip: 'insert option',
-                        },
-                    }];
-                }
-
-                return [];
-            }),
-        });
-        dependencyMap.set(ILayoutService, {
-            rootContainerElement: document.body,
-        });
-        dependencyMap.set(LocaleService, {
-            t: (key: string) => key,
-            direction$: new BehaviorSubject<'ltr'>('ltr'),
-        });
-
-        render(<ContextMenuPanel menuType="submenu-root" />);
-
-        const insertButton = document.querySelector('button[title="insert"]') as HTMLButtonElement | null;
-        const alignButton = document.querySelector('button[title="align"]') as HTMLButtonElement | null;
-        expect(insertButton).not.toBeNull();
-        expect(alignButton).not.toBeNull();
-
-        act(() => {
-            fireEvent.mouseEnter(insertButton!.parentElement!);
-        });
-        expect(document.querySelector('button[title="insert option"]')).not.toBeNull();
-
-        act(() => {
-            fireEvent.mouseLeave(insertButton!.parentElement!, { relatedTarget: alignButton });
-            fireEvent.mouseEnter(alignButton!.parentElement!);
-        });
-
-        expect(document.querySelector('button[title="insert option"]')).toBeNull();
-
-        vi.useRealTimers();
-    });
-
-    it('does not report a menu pointer leave when moving from a portal submenu back to the root menu', () => {
-        dependencyMap.clear();
-        const onMenuPointerLeave = vi.fn();
-
-        dependencyMap.set(IMenuManagerService, {
-            menuChanged$: new BehaviorSubject<void>(undefined),
-            getMenuByPositionKey: vi.fn((key: string) => {
-                if (key === 'submenu-root') {
-                    return [
-                        {
-                            key: 'insert',
-                            order: 0,
-                            item: {
-                                id: 'insert',
-                                type: MenuItemType.SUBITEMS,
-                                title: 'insert',
-                                tooltip: 'insert',
-                            },
-                        },
-                        {
-                            key: 'align',
-                            order: 1,
-                            item: {
-                                id: 'align',
-                                type: MenuItemType.BUTTON,
-                                title: 'align',
-                                tooltip: 'align',
-                            },
-                        },
-                    ];
-                }
-
-                if (key === 'insert') {
-                    return [{
-                        key: 'insert-option',
-                        order: 0,
-                        item: {
-                            id: 'insert-option',
-                            type: MenuItemType.BUTTON,
-                            title: 'insert option',
-                            tooltip: 'insert option',
-                        },
-                    }];
-                }
-
-                return [];
-            }),
-        });
-        dependencyMap.set(ILayoutService, {
-            rootContainerElement: document.body,
-        });
-        dependencyMap.set(LocaleService, {
-            t: (key: string) => key,
-            direction$: new BehaviorSubject<'ltr'>('ltr'),
-        });
-
-        render(
-            <ContextMenuPanel
-                menuType="submenu-root"
-                onMenuPointerLeave={onMenuPointerLeave}
-            />
-        );
-
-        const insertButton = document.querySelector('button[title="insert"]') as HTMLButtonElement | null;
-        const alignButton = document.querySelector('button[title="align"]') as HTMLButtonElement | null;
-        expect(insertButton).not.toBeNull();
-        expect(alignButton).not.toBeNull();
-
-        act(() => {
-            fireEvent.mouseEnter(insertButton!.parentElement!);
-        });
-
-        const optionButton = Array.from(document.querySelectorAll<HTMLButtonElement>('button[title="insert option"]')).pop() ?? null;
-        const submenu = optionButton?.closest(`[${CONTEXT_MENU_SUBMENU_PORTAL_ATTR}="true"]`) as HTMLDivElement | null;
-        expect(submenu).not.toBeNull();
-
-        fireEvent.mouseLeave(submenu!, { relatedTarget: alignButton });
-
-        expect(onMenuPointerLeave).not.toHaveBeenCalled();
+        expect(getNextMenuButtonByDirection([first, second, nextRow], 0, 'ArrowRight')).toBe(second);
+        expect(getNextMenuButtonByDirection([first, second, nextRow], 1, 'ArrowRight')).toBe(nextRow);
     });
 });

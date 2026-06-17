@@ -14,10 +14,27 @@
  * limitations under the License.
  */
 
+import { Injector } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import * as conditionUtil from '../../models/filter-util/condition';
+import { TableManager } from '../../models/table-manager';
 import { TableConditionTypeEnum } from '../../types/enum';
 import { SheetTableService } from '../table.service';
+
+function createService(tableManager: Record<string, unknown>) {
+    class TestTableManager {
+        getTable = tableManager.getTable;
+        getTableList = tableManager.getTableList;
+        addTable = tableManager.addTable;
+        deleteTable = tableManager.deleteTable;
+        addFilter = tableManager.addFilter;
+    }
+
+    const injector = new Injector();
+    injector.add([TableManager, { useClass: TestTableManager }]);
+    injector.add([SheetTableService]);
+    return injector.get(SheetTableService);
+}
 
 describe('SheetTableService', () => {
     it('should proxy table CRUD and metadata calls to table manager', () => {
@@ -42,7 +59,7 @@ describe('SheetTableService', () => {
             addFilter: vi.fn(),
         };
 
-        const service = new SheetTableService(tableManager as any);
+        const service = createService(tableManager);
 
         expect(service.getTableInfo('u1', 'table-1')).toEqual({
             unitId: 'u1',
@@ -68,7 +85,7 @@ describe('SheetTableService', () => {
     });
 
     it('should return undefined when table does not exist', () => {
-        const service = new SheetTableService({ getTable: () => undefined } as any);
+        const service = createService({ getTable: () => undefined });
         expect(service.getTableInfo('u1', 'missing')).toBeUndefined();
         expect(service.getTableMeta('u1', 'missing')).toBeUndefined();
         expect(service.getTableColumnMeta('u1', 'missing', 0)).toBeUndefined();
@@ -76,7 +93,7 @@ describe('SheetTableService', () => {
 
     it('should delegate cell value extraction by condition type', () => {
         const spy = vi.spyOn(conditionUtil, 'getCellValueWithConditionType').mockReturnValue('ok' as any);
-        const service = new SheetTableService({} as any);
+        const service = createService({});
 
         const worksheet = { id: 'sheet' } as any;
         const value = service.getCellValueWithConditionType(worksheet, 2, 3, TableConditionTypeEnum.Number);

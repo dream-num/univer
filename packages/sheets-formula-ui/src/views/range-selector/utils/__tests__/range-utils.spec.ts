@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+import { RANGE_TYPE } from '@univerjs/core';
 import { matchToken, sequenceNodeType } from '@univerjs/engine-formula';
 import { describe, expect, it } from 'vitest';
 import { filterReferenceNode, isComma, isReference } from '../filter-reference-node';
+import { unitRangesToText } from '../unit-ranges-to-text';
 import { verifyRange } from '../verify-range';
 
 const referenceNode = { nodeType: sequenceNodeType.REFERENCE, token: 'A1' };
@@ -38,5 +40,24 @@ describe('range selector utils', () => {
         expect(verifyRange([referenceNode as never, matchToken.COMMA, referenceNode as never])).toBe(true);
         expect(verifyRange([referenceNode as never, functionNode as never])).toBe(false);
         expect(verifyRange([referenceNode as never, ';'])).toBe(false);
+    });
+
+    it('serializes selected ranges with sheet and workbook qualifiers only when the formula needs them', () => {
+        const ranges = [
+            {
+                unitId: 'book-1',
+                sheetName: 'Sheet1',
+                range: { startRow: 0, endRow: 1, startColumn: 0, endColumn: 1, rangeType: RANGE_TYPE.NORMAL },
+            },
+            {
+                unitId: 'book-1',
+                sheetName: 'Data Sheet',
+                range: { startRow: 2, endRow: 2, startColumn: 3, endColumn: 3, rangeType: RANGE_TYPE.NORMAL },
+            },
+        ];
+
+        expect(unitRangesToText(ranges, false, 'Sheet1')).toEqual(['A1:B2', 'D3']);
+        expect(unitRangesToText(ranges, true, 'Sheet1')).toEqual(['A1:B2', "'Data Sheet'!D3"]);
+        expect(unitRangesToText(ranges, true, 'Sheet1', true)).toEqual(["'[book-1]Sheet1'!A1:B2", "'[book-1]Data Sheet'!D3"]);
     });
 });

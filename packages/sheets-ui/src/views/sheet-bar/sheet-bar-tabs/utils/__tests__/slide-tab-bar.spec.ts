@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { SlideTabBar, SlideTabItem } from '../slide-tab-bar';
+
+const originalRequestAnimationFrame = window.requestAnimationFrame;
+const originalCancelAnimationFrame = window.cancelAnimationFrame;
+const originalConsoleError = console.error;
 
 function rect(x: number, width: number, y = 0, height = 24): DOMRect {
     return {
@@ -29,6 +33,51 @@ function rect(x: number, width: number, y = 0, height = 24): DOMRect {
         bottom: y + height,
         toJSON: () => ({}),
     } as DOMRect;
+}
+
+class TestSlideEvents {
+    readonly scrollStates: Array<{ leftEnd: boolean; rightEnd: boolean }> = [];
+    readonly slideEnds: Array<{ event: MouseEvent; compareIndex: number }> = [];
+    readonly changedTabs: Array<{ event: MouseEvent; id: string }> = [];
+    readonly changedNames: Array<{ id: string; name: string }> = [];
+    nameCheckAlerts: string[] = [];
+    errorCount = 0;
+
+    createConfig(root: HTMLDivElement) {
+        return {
+            slideTabBarSelector: '.tab-bar',
+            slideTabBarItemSelector: '.tab-item',
+            slideTabBarContainer: root,
+            slideTabBarItemAutoSort: true,
+            currentIndex: 0,
+            onScroll: (state: { leftEnd: boolean; rightEnd: boolean }) => this.scrollStates.push(state),
+            onSlideEnd: (event: MouseEvent, compareIndex: number) => this.slideEnds.push({ event, compareIndex }),
+            onChangeTab: (event: MouseEvent, id: string) => this.changedTabs.push({ event, id }),
+            onChangeName: (id: string, name: string) => this.changedNames.push({ id, name }),
+            onNameCheckAlert: (text: string) => {
+                this.nameCheckAlerts.push(text);
+                return false;
+            },
+            onNameChangeCheck: () => true,
+        };
+    }
+}
+
+class TestAnimationFrameState {
+    frameId = 0;
+    readonly requests: number[] = [];
+    readonly cancellations: number[] = [];
+
+    install(nextFrameId = 1): void {
+        this.frameId = nextFrameId;
+        window.requestAnimationFrame = () => {
+            this.requests.push(this.frameId);
+            return this.frameId;
+        };
+        window.cancelAnimationFrame = (frameId: number) => {
+            this.cancellations.push(frameId);
+        };
+    }
 }
 
 function setupDOM() {
@@ -63,52 +112,45 @@ function setupDOM() {
         },
     });
 
-    vi.spyOn(bar, 'getBoundingClientRect').mockImplementation(() => rect(0, 100));
+    bar.getBoundingClientRect = () => rect(0, 100);
 
-    Array.from(bar.querySelectorAll('.tab-item')).forEach((item, idx) => {
-        vi.spyOn(item, 'getBoundingClientRect').mockImplementation(() => rect(itemLefts[idx], itemWidths[idx]));
+    Array.from(bar.querySelectorAll<HTMLElement>('.tab-item')).forEach((item, idx) => {
+        item.getBoundingClientRect = () => rect(itemLefts[idx], itemWidths[idx]);
     });
 
     return {
         root,
         bar,
-        onScroll: vi.fn(),
-        onSlideEnd: vi.fn(),
-        onChangeTab: vi.fn(),
-        onChangeName: vi.fn(),
+        events: new TestSlideEvents(),
     };
+}
+
+function createBar(root: HTMLDivElement, events: TestSlideEvents, currentIndex = 0): SlideTabBar {
+    const config = events.createConfig(root);
+    config.currentIndex = currentIndex;
+    return new SlideTabBar(config);
 }
 
 describe('slide-tab-bar', () => {
     afterEach(() => {
-        vi.restoreAllMocks();
+        window.requestAnimationFrame = originalRequestAnimationFrame;
+        window.cancelAnimationFrame = originalCancelAnimationFrame;
+        console.error = originalConsoleError;
         document.body.innerHTML = '';
     });
 
     it('guards invalid constructor config', () => {
-        expect(() => new SlideTabBar({ slideTabBarContainer: null as any })).toThrowError('not found slide-tab-bar root element');
+        expect(() => new SlideTabBar({ slideTabBarContainer: null as never })).toThrowError('not found slide-tab-bar root element');
         const root = document.createElement('div');
         expect(() => new SlideTabBar({
-            slideTabBarContainer: root as any,
+            slideTabBarContainer: root as HTMLDivElement,
             slideTabBarSelector: '.missing',
         })).toThrowError('not found slide-tab-bar');
     });
 
-    it('handles scroll and calculation utilities', () => {
-        const { root, onScroll, onSlideEnd, onChangeTab, onChangeName } = setupDOM();
-        const bar = new SlideTabBar({
-            slideTabBarSelector: '.tab-bar',
-            slideTabBarItemSelector: '.tab-item',
-            slideTabBarContainer: root as HTMLDivElement,
-            slideTabBarItemAutoSort: true,
-            currentIndex: 0,
-            onScroll,
-            onSlideEnd,
-            onChangeTab,
-            onChangeName,
-            onNameCheckAlert: () => false,
-            onNameChangeCheck: () => true,
-        });
+    it('handles scroll boundaries and keeps the active sheet visible', () => {
+        const { root, events } = setupDOM();
+        const bar = createBar(root, events);
 
         expect(bar.getSlideTabItems().length).toBe(3);
         expect(bar.isLeftEnd()).toBe(true);
@@ -123,10 +165,12 @@ describe('slide-tab-bar', () => {
         bar.flipPage(-1);
         bar.scrollToItem(2);
 
-        const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+        console.error = () => {
+            events.errorCount += 1;
+        };
         bar.scrollToItem(99);
-        expect(errorSpy).toHaveBeenCalled();
-        expect(onScroll).toHaveBeenCalled();
+        expect(events.errorCount).toBe(1);
+        expect(events.scrollStates.length).toBeGreaterThan(0);
 
         bar.update(1);
         expect(bar.getActiveItem()?.getId()).toBe('sheet-1');
@@ -135,21 +179,10 @@ describe('slide-tab-bar', () => {
         expect(bar.getSlideTabItems()).toEqual([]);
     });
 
-    it('supports edit/fixed/animate behaviors on SlideTabItem', async () => {
-        const { root, onScroll, onSlideEnd, onChangeTab, onChangeName } = setupDOM();
-        const bar = new SlideTabBar({
-            slideTabBarSelector: '.tab-bar',
-            slideTabBarItemSelector: '.tab-item',
-            slideTabBarContainer: root as HTMLDivElement,
-            slideTabBarItemAutoSort: true,
-            currentIndex: 0,
-            onScroll,
-            onSlideEnd,
-            onChangeTab,
-            onChangeName,
-            onNameCheckAlert: () => false,
-            onNameChangeCheck: () => true,
-        });
+    it('supports editing, fixed dragging style, and per-item animation', () => {
+        const { root, events } = setupDOM();
+        const frameState = new TestAnimationFrameState();
+        const bar = createBar(root, events);
 
         const item = bar.getSlideTabItems()[0];
         const editor = item.getEditor() as HTMLSpanElement;
@@ -159,84 +192,74 @@ describe('slide-tab-bar', () => {
         expect(item.classList()).toBe(item.getSlideTabItem().classList);
         expect(item.equals(item)).toBe(true);
 
-        const callback = vi.fn();
-        item.setEditor(callback);
+        let renameFinishedCount = 0;
+        item.setEditor(() => {
+            renameFinishedCount += 1;
+        });
         expect(editor.getAttribute('contentEditable')).toBe('true');
         editor.innerText = 'Renamed';
         editor.dispatchEvent(new FocusEvent('focusout'));
 
-        expect(onChangeName).toHaveBeenCalledWith('sheet-0', 'Renamed');
-        expect(callback).toHaveBeenCalled();
+        expect(events.changedNames).toEqual([{ id: 'sheet-0', name: 'Renamed' }]);
+        expect(renameFinishedCount).toBe(1);
 
         item.enableFixed();
         expect(document.body.contains(item.getSlideTabItem())).toBe(true);
         item.disableFixed();
         expect(item.getSlideTabItem().style.position).toBe('');
 
-        const rafSpy = vi.spyOn(window, 'requestAnimationFrame').mockImplementation(() => 1);
-        const cafSpy = vi.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => {});
-        const anim = item.animate();
-        anim.translateX(30);
-        anim.cancel();
-        expect(rafSpy).toHaveBeenCalled();
-        expect(cafSpy).toHaveBeenCalled();
+        frameState.install(1);
+        const animation = item.animate();
+        animation.translateX(30);
+        animation.cancel();
+        expect(frameState.requests).toEqual([1]);
+        expect(frameState.cancellations).toEqual([1]);
     });
 
-    it('covers internal compare/sort/auto-scroll branches', () => {
-        const { root, onScroll, onSlideEnd, onChangeTab, onChangeName } = setupDOM();
-        const bar = new SlideTabBar({
-            slideTabBarSelector: '.tab-bar',
-            slideTabBarItemSelector: '.tab-item',
-            slideTabBarContainer: root as HTMLDivElement,
-            slideTabBarItemAutoSort: true,
-            currentIndex: 1,
-            onScroll,
-            onSlideEnd,
-            onChangeTab,
-            onChangeName,
-            onNameCheckAlert: () => false,
-            onNameChangeCheck: () => true,
-        });
+    it('sorts dragged sheet tabs and starts or closes edge auto-scroll', () => {
+        const { root, events } = setupDOM();
+        const frameState = new TestAnimationFrameState();
+        const bar = createBar(root, events, 1);
 
         const items = bar.getSlideTabItems();
         const active = items[1];
         let activeX = 45;
         active.getBoundingRect = () => rect(activeX, 40);
-        (bar as any)._activeTabItem = active;
-        (bar as any)._activeTabItemIndex = 1;
+        (bar as unknown as { _activeTabItem: SlideTabItem })._activeTabItem = active;
+        (bar as unknown as { _activeTabItemIndex: number })._activeTabItemIndex = 1;
 
         activeX = 110;
-        (bar as any)._compareRight();
-        expect((bar as any)._compareIndex).toBeGreaterThanOrEqual(1);
+        (bar as unknown as { _compareRight: () => void })._compareRight();
+        expect((bar as unknown as { _compareIndex: number })._compareIndex).toBeGreaterThanOrEqual(1);
 
         activeX = -30;
-        (bar as any)._compareLeft();
-        expect((bar as any)._compareIndex).toBeLessThanOrEqual(1);
+        (bar as unknown as { _compareLeft: () => void })._compareLeft();
+        expect((bar as unknown as { _compareIndex: number })._compareIndex).toBeLessThanOrEqual(1);
 
-        (bar as any)._compareIndex = 0;
-        (bar as any)._sortedItems();
+        (bar as unknown as { _compareIndex: number })._compareIndex = 0;
+        (bar as unknown as { _sortedItems: () => void })._sortedItems();
         expect(bar.getSlideTabItems()[0].getId()).toBe('sheet-1');
 
-        (bar as any)._leftBoundingLine = 20;
-        (bar as any)._rightBoundingLine = 20;
-        (bar as any)._scrollIncremental = 0;
-        (bar as any)._scrollLeft({ pageX: 0 } as MouseEvent);
-        expect((bar as any)._scrollIncremental).toBeLessThanOrEqual(0);
-        (bar as any)._scrollRight({ pageX: 500 } as MouseEvent);
-        expect((bar as any)._scrollIncremental).toBeGreaterThanOrEqual(0);
+        (bar as unknown as { _leftBoundingLine: number })._leftBoundingLine = 20;
+        (bar as unknown as { _rightBoundingLine: number })._rightBoundingLine = 20;
+        (bar as unknown as { _scrollIncremental: number })._scrollIncremental = 0;
+        (bar as unknown as { _scrollLeft: (event: MouseEvent) => void })._scrollLeft({ pageX: 0 } as MouseEvent);
+        expect((bar as unknown as { _scrollIncremental: number })._scrollIncremental).toBeLessThanOrEqual(0);
+        (bar as unknown as { _scrollRight: (event: MouseEvent) => void })._scrollRight({ pageX: 500 } as MouseEvent);
+        expect((bar as unknown as { _scrollIncremental: number })._scrollIncremental).toBeGreaterThanOrEqual(0);
 
-        const rafSpy = vi.spyOn(window, 'requestAnimationFrame').mockImplementation(() => 2);
-        const cafSpy = vi.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => {});
-        (bar as any)._moveActionX = 10;
-        (bar as any)._startAutoScroll();
-        expect((bar as any)._autoScrollTime).toBe(2);
-        (bar as any)._closeAutoScroll();
-        expect((bar as any)._autoScrollTime).toBeNull();
-        expect(rafSpy).toHaveBeenCalled();
-        expect(cafSpy).toHaveBeenCalled();
+        frameState.install(2);
+        (bar as unknown as { _moveActionX: number })._moveActionX = 10;
+        (bar as unknown as { _startAutoScroll: () => void })._startAutoScroll();
+        expect((bar as unknown as { _autoScrollTime: number })._autoScrollTime).toBe(2);
+        (bar as unknown as { _closeAutoScroll: () => void })._closeAutoScroll();
+        expect((bar as unknown as { _autoScrollTime: null })._autoScrollTime).toBeNull();
+        expect(frameState.requests.length).toBeGreaterThan(0);
+        expect(frameState.requests.every((frameId) => frameId === 2)).toBe(true);
+        expect(frameState.cancellations).toContain(2);
     });
 
-    it('handles static selection helpers', () => {
+    it('handles static text-selection and slide-skip helpers', () => {
         const el = document.createElement('span');
         el.innerText = 'abc';
         document.body.appendChild(el);

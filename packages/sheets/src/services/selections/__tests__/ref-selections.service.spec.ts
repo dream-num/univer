@@ -16,6 +16,7 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { WorkbookSelectionModel } from '../selection-data-model';
+import { Injector, IUniverInstanceService } from '@univerjs/core';
 import { firstValueFrom, Subject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { RefSelectionsService } from '../ref-selections.service';
@@ -78,22 +79,18 @@ describe('RefSelectionsService', () => {
 
     let add$: Subject<{ unit: Workbook }>;
     let disposed$: Subject<Workbook>;
-    let instanceService: {
-        getAllUnitsForType: ReturnType<typeof vi.fn>;
-        getTypeOfUnitAdded$: ReturnType<typeof vi.fn>;
-        getTypeOfUnitDisposed$: ReturnType<typeof vi.fn>;
-    };
+
+    class TestUniverInstanceService {
+        getAllUnitsForType = vi.fn(() => [workbookA]);
+        getTypeOfUnitAdded$ = vi.fn(() => add$.asObservable());
+        getTypeOfUnitDisposed$ = vi.fn(() => disposed$.asObservable());
+    }
 
     let service: TestRefSelectionsService;
 
     beforeEach(() => {
         add$ = new Subject<{ unit: Workbook }>();
         disposed$ = new Subject<Workbook>();
-        instanceService = {
-            getAllUnitsForType: vi.fn(() => [workbookA]),
-            getTypeOfUnitAdded$: vi.fn(() => add$.asObservable()),
-            getTypeOfUnitDisposed$: vi.fn(() => disposed$.asObservable()),
-        };
     });
 
     afterEach(() => {
@@ -103,7 +100,10 @@ describe('RefSelectionsService', () => {
     });
 
     it('merges all workbook selection streams and handles workbook lifecycle', () => {
-        service = new TestRefSelectionsService(instanceService as never);
+        const injector = new Injector();
+        injector.add([IUniverInstanceService, { useClass: TestUniverInstanceService as never }]);
+        injector.add([TestRefSelectionsService]);
+        service = injector.get(TestRefSelectionsService);
 
         const startEvents: unknown[] = [];
         const movingEvents: unknown[] = [];
@@ -138,7 +138,10 @@ describe('RefSelectionsService', () => {
     });
 
     it('clears workbook state and resets streams on dispose', async () => {
-        service = new TestRefSelectionsService(instanceService as never);
+        const injector = new Injector();
+        injector.add([IUniverInstanceService, { useClass: TestUniverInstanceService as never }]);
+        injector.add([TestRefSelectionsService]);
+        service = injector.get(TestRefSelectionsService);
         const modelA = service.modelMap.get('wb-a')!;
 
         service.dispose();

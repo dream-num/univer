@@ -14,164 +14,300 @@
  * limitations under the License.
  */
 
-import type { IAccessor } from '@univerjs/core';
-import { DataValidationType, IUniverInstanceService } from '@univerjs/core';
-import { AddDataValidationMutation, DataValidatorRegistryService, RemoveDataValidationMutation, UpdateDataValidationMutation, UpdateRuleType } from '@univerjs/data-validation';
-import { LexerTreeBuilder } from '@univerjs/engine-formula';
+import type { Injector, Workbook } from '@univerjs/core';
+import type { FUniver } from '@univerjs/core/facade';
+import { DataValidationErrorStyle, DataValidationOperator, DataValidationType, ICommandService } from '@univerjs/core';
+import {
+    AddDataValidationMutation,
+    RemoveDataValidationMutation,
+    UpdateDataValidationMutation,
+    UpdateRuleType,
+} from '@univerjs/data-validation';
 import { SetRangeValuesMutation } from '@univerjs/sheets';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { createFacadeTestBed } from '../../../facade/__tests__/create-test-bed';
 import { SheetDataValidationModel } from '../../../models/sheet-data-validation-model';
-import { getDataValidationDiffMutations } from '../data-validation.command';
+import {
+    AddSheetDataValidationCommand,
+    ClearRangeDataValidationCommand,
+    getDataValidationDiffMutations,
+    RemoveSheetAllDataValidationCommand,
+    RemoveSheetDataValidationCommand,
+    UpdateSheetDataValidationOptionsCommand,
+    UpdateSheetDataValidationRangeCommand,
+    UpdateSheetDataValidationSettingCommand,
+} from '../data-validation.command';
 
-function createAccessor(withTarget = true, offset = true) {
-    const worksheet = {
-        getSheetId: () => 'sheet-1',
-        getCellMatrix: vi.fn(() => ({
-            getValue: vi.fn(() => ({})),
-        })),
-        getCellRaw: vi.fn((row: number, col: number) => {
-            if (row === 0 && col === 0) {
-                return { v: '' };
-            }
+const unitId = 'test';
+const subUnitId = 'sheet1';
 
-            return { v: '0' };
-        }),
-    };
-    const workbook = {
-        getUnitId: () => 'unit-1',
-        getStyles: vi.fn(() => ({
-            getStyleByCell: vi.fn(() => null),
-        })),
-        getSheetBySheetId: vi.fn(() => (withTarget ? worksheet : null)),
-        getActiveSheet: vi.fn(() => worksheet),
-    };
-    const sheetDataValidationModel = {
-        getRuleById: vi.fn((_unitId: string, _subUnitId: string, ruleId: string) => ({
-            uid: ruleId,
-            type: DataValidationType.CHECKBOX,
-            formula1: '=A1',
-            formula2: '=B1',
-            ranges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 1 }],
-        })),
-        getValidator: vi.fn(() => ({
-            parseFormulaSync: vi.fn(() => ({ formula2: '0', originFormula2: '0' })),
-        })),
-    };
+describe('sheet data validation commands', () => {
+    let univerAPI: FUniver;
+    let workbook: Workbook;
+    let injector: Injector;
+    let commandService: ICommandService;
+    let model: SheetDataValidationModel;
+    let dispose: () => void;
 
-    return {
-        worksheet,
-        accessor: {
-            get(token: unknown) {
-                if (token === LexerTreeBuilder) {
-                    return {
-                        moveFormulaRefOffset: vi.fn((formula: string, col: number, row: number) => `${formula}:${col},${row}`),
-                    };
-                }
-                if (token === DataValidatorRegistryService) {
-                    return {
-                        getValidatorItem: vi.fn(() => ({ offsetFormulaByRange: offset })),
-                    };
-                }
-                if (token === SheetDataValidationModel) {
-                    return sheetDataValidationModel;
-                }
-                if (token === IUniverInstanceService) {
-                    return {
-                        getUnit: vi.fn(() => (withTarget ? workbook : null)),
-                        getCurrentUnitOfType: vi.fn(() => workbook),
-                        getUniverSheetInstance: vi.fn(() => workbook),
-                    };
-                }
+    beforeEach(() => {
+        const testBed = createFacadeTestBed();
+        univerAPI = testBed.univerAPI;
+        workbook = testBed.sheet as Workbook;
+        injector = testBed.injector;
+        commandService = testBed.get(ICommandService);
+        model = testBed.get(SheetDataValidationModel);
+        dispose = () => testBed.univer.dispose();
 
-                throw new Error(`Unknown token: ${String(token)}`);
-            },
-        } as IAccessor,
-        sheetDataValidationModel,
-    };
-}
+        const commands = [
+            SetRangeValuesMutation,
+            AddSheetDataValidationCommand,
+            UpdateSheetDataValidationRangeCommand,
+            UpdateSheetDataValidationSettingCommand,
+            UpdateSheetDataValidationOptionsCommand,
+            ClearRangeDataValidationCommand,
+            RemoveSheetDataValidationCommand,
+            RemoveSheetAllDataValidationCommand,
+        ];
 
-describe('getDataValidationDiffMutations', () => {
-    it('returns empty mutations when the target sheet cannot be resolved', () => {
-        const { accessor } = createAccessor(false);
-
-        expect(getDataValidationDiffMutations('unit-1', 'sheet-1', [], accessor)).toEqual({
-            redoMutations: [],
-            undoMutations: [],
-        });
+        for (const command of commands) {
+            commandService.registerCommand(command);
+        }
     });
 
-    it('builds delete, update, and add mutations including checkbox default fills', () => {
-        const { accessor } = createAccessor(true, true);
-        const diffs = [
+    afterEach(() => {
+        dispose();
+    });
+
+    it('adds checkbox validation to the selected range', async () => {
+        const activeSheet = univerAPI.getActiveWorkbook()!.getActiveSheet();
+        const rule = univerAPI.newDataValidation()
+            .requireCheckbox('Yes', 'No')
+            .build();
+
+        activeSheet.getRange(0, 0, 2, 1).setDataValidation(rule);
+
+        const rules = model.getRules(unitId, subUnitId);
+
+        expect(rules).toHaveLength(1);
+        expect(rules[0].type).toBe(DataValidationType.CHECKBOX);
+        expect(rules[0].formula1).toBe('Yes');
+        expect(rules[0].formula2).toBe('No');
+        expect(rules[0].ranges).toEqual([{ unitId, sheetId: subUnitId, startRow: 0, endRow: 1, startColumn: 0, endColumn: 0 }]);
+    });
+
+    it('moves a validation rule to a new range and applies checkbox defaults there', async () => {
+        const activeSheet = univerAPI.getActiveWorkbook()!.getActiveSheet();
+        const rule = univerAPI.newDataValidation()
+            .requireCheckbox('TRUE', 'FALSE')
+            .build();
+
+        activeSheet.getRange(0, 0, 1, 1).setDataValidation(rule);
+        const ruleId = model.getRules(unitId, subUnitId)[0].uid;
+
+        const result = await commandService.executeCommand(UpdateSheetDataValidationRangeCommand.id, {
+            unitId,
+            subUnitId,
+            ruleId,
+            ranges: [{ startRow: 2, endRow: 3, startColumn: 1, endColumn: 1 }],
+        });
+
+        const updatedRule = model.getRuleById(unitId, subUnitId, ruleId);
+        const worksheet = workbook.getSheetBySheetId(subUnitId);
+
+        expect(result).toBe(true);
+        expect(updatedRule?.ranges).toEqual([{ startRow: 2, endRow: 3, startColumn: 1, endColumn: 1 }]);
+        expect(worksheet?.getCellRaw(2, 1)?.v).toBe(0);
+        expect(worksheet?.getCellRaw(3, 1)?.v).toBe(0);
+    });
+
+    it('updates validation settings and options on an existing rule', async () => {
+        const activeSheet = univerAPI.getActiveWorkbook()!.getActiveSheet();
+        const rule = univerAPI.newDataValidation()
+            .requireNumberBetween(1, 10)
+            .build();
+
+        activeSheet.getRange(0, 1, 2, 1).setDataValidation(rule);
+        const ruleId = model.getRules(unitId, subUnitId)[0].uid;
+
+        const settingResult = await commandService.executeCommand(UpdateSheetDataValidationSettingCommand.id, {
+            unitId,
+            subUnitId,
+            ruleId,
+            setting: {
+                type: DataValidationType.DECIMAL,
+                operator: univerAPI.Enum.DataValidationOperator.GREATER_THAN,
+                formula1: '5',
+            },
+        });
+        const optionsResult = await commandService.executeCommand(UpdateSheetDataValidationOptionsCommand.id, {
+            unitId,
+            subUnitId,
+            ruleId,
+            options: {
+                errorStyle: DataValidationErrorStyle.STOP,
+                showErrorMessage: true,
+                error: 'Value must be greater than five',
+            },
+        });
+
+        const updatedRule = model.getRuleById(unitId, subUnitId, ruleId);
+
+        expect(settingResult).toBe(true);
+        expect(optionsResult).toBe(true);
+        expect(updatedRule?.operator).toBe(univerAPI.Enum.DataValidationOperator.GREATER_THAN);
+        expect(updatedRule?.formula1).toBe('5');
+        expect(updatedRule?.errorStyle).toBe(DataValidationErrorStyle.STOP);
+        expect(updatedRule?.error).toBe('Value must be greater than five');
+    });
+
+    it('updates checkbox settings and rewrites existing checkbox values', async () => {
+        const activeSheet = univerAPI.getActiveWorkbook()!.getActiveSheet();
+        const rule = univerAPI.newDataValidation()
+            .requireCheckbox('Y', 'N')
+            .build();
+        const worksheet = workbook.getSheetBySheetId(subUnitId);
+
+        activeSheet.getRange(0, 2, 2, 1).setDataValidation(rule);
+        worksheet?.getCellMatrix().setValue(0, 2, { v: 'N' });
+        worksheet?.getCellMatrix().setValue(1, 2, { v: 'Y' });
+        const ruleId = model.getRules(unitId, subUnitId)[0].uid;
+
+        const result = await commandService.executeCommand(UpdateSheetDataValidationSettingCommand.id, {
+            unitId,
+            subUnitId,
+            ruleId,
+            setting: {
+                type: DataValidationType.CHECKBOX,
+                formula1: 'Done',
+                formula2: 'Todo',
+            },
+        });
+
+        const updatedRule = model.getRuleById(unitId, subUnitId, ruleId);
+
+        expect(result).toBe(true);
+        expect(updatedRule?.formula1).toBe('Done');
+        expect(updatedRule?.formula2).toBe('Todo');
+        expect(worksheet?.getCellRaw(0, 2)?.v).toBe('Todo');
+        expect(worksheet?.getCellRaw(1, 2)?.v).toBe('Done');
+    });
+
+    it('clears validation from a range without removing unrelated rules', async () => {
+        const activeSheet = univerAPI.getActiveWorkbook()!.getActiveSheet();
+        const firstRule = univerAPI.newDataValidation().requireCheckbox().build();
+        const secondRule = univerAPI.newDataValidation().requireNumberEqualTo(1).build();
+
+        activeSheet.getRange(0, 0, 1, 1).setDataValidation(firstRule);
+        activeSheet.getRange(4, 4, 1, 1).setDataValidation(secondRule);
+
+        const result = await commandService.executeCommand(ClearRangeDataValidationCommand.id, {
+            unitId,
+            subUnitId,
+            ranges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }],
+        });
+        const rules = model.getRules(unitId, subUnitId);
+
+        expect(result).toBe(true);
+        expect(rules).toHaveLength(1);
+        expect(rules[0].type).toBe(DataValidationType.DECIMAL);
+        expect(rules[0].ranges).toEqual([{ unitId, sheetId: subUnitId, startRow: 4, endRow: 4, startColumn: 4, endColumn: 4 }]);
+    });
+
+    it('removes one rule or all rules from the sheet', async () => {
+        const activeSheet = univerAPI.getActiveWorkbook()!.getActiveSheet();
+        const firstRule = univerAPI.newDataValidation().requireCheckbox().build();
+        const secondRule = univerAPI.newDataValidation().requireNumberEqualTo(1).build();
+
+        activeSheet.getRange(0, 0, 1, 1).setDataValidation(firstRule);
+        activeSheet.getRange(4, 4, 1, 1).setDataValidation(secondRule);
+
+        const ruleId = model.getRules(unitId, subUnitId)[0].uid;
+        const removeOneResult = await commandService.executeCommand(RemoveSheetDataValidationCommand.id, {
+            unitId,
+            subUnitId,
+            ruleId,
+        });
+        const removeAllResult = await commandService.executeCommand(RemoveSheetAllDataValidationCommand.id, {
+            unitId,
+            subUnitId,
+        });
+
+        expect(removeOneResult).toBe(true);
+        expect(removeAllResult).toBe(true);
+        expect(model.getRules(unitId, subUnitId)).toEqual([]);
+    });
+
+    it('builds diff mutations for validation rule add and formula-offset range changes', () => {
+        const checkboxRule = {
+            uid: 'checkbox-diff',
+            type: DataValidationType.CHECKBOX,
+            formula1: '1',
+            formula2: '0',
+            ranges: [{ startRow: 6, endRow: 6, startColumn: 0, endColumn: 0 }],
+        };
+        const customFormulaRule = {
+            uid: 'formula-diff',
+            type: DataValidationType.CUSTOM,
+            operator: DataValidationOperator.BETWEEN,
+            formula1: '=A1>0',
+            formula2: '=B1<10',
+            ranges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }],
+        };
+
+        const { redoMutations, undoMutations } = getDataValidationDiffMutations(unitId, subUnitId, [
             {
-                type: 'delete',
-                rule: { uid: 'rule-delete', ranges: [] },
-                index: 0,
+                type: 'add',
+                rule: checkboxRule,
             },
             {
                 type: 'update',
-                ruleId: 'rule-update',
+                ruleId: customFormulaRule.uid,
+                rule: customFormulaRule,
                 oldRanges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }],
                 newRanges: [{ startRow: 1, endRow: 1, startColumn: 1, endColumn: 1 }],
-                rule: {
-                    uid: 'rule-update',
-                    type: DataValidationType.CHECKBOX,
-                    formula1: '=A1',
-                    formula2: '=B1',
-                    ranges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }],
-                },
             },
+        ] as never, injector);
+
+        let hasAddRule = false;
+        let hasFormulaUpdate = false;
+        let hasDefaultCellValue = false;
+        let hasUndoRemove = false;
+        for (const mutation of redoMutations) {
+            if (mutation.id === AddDataValidationMutation.id) {
+                hasAddRule = true;
+            }
+            if (mutation.id === UpdateDataValidationMutation.id && (mutation.params as never as { payload: { type: UpdateRuleType } }).payload.type === UpdateRuleType.ALL) {
+                hasFormulaUpdate = true;
+            }
+            if (mutation.id === SetRangeValuesMutation.id && (mutation.params as never as { cellValue: Record<number, Record<number, { v: unknown }>> }).cellValue[6]?.[0]?.v === '0') {
+                hasDefaultCellValue = true;
+            }
+        }
+        for (const mutation of undoMutations) {
+            if (mutation.id === RemoveDataValidationMutation.id) {
+                hasUndoRemove = true;
+            }
+        }
+
+        expect(hasAddRule).toBe(true);
+        expect(hasFormulaUpdate).toBe(true);
+        expect(hasDefaultCellValue).toBe(true);
+        expect(hasUndoRemove).toBe(true);
+    });
+
+    it('returns no diff mutations when the target sheet is missing', () => {
+        const result = getDataValidationDiffMutations(unitId, 'missing-sheet', [
             {
                 type: 'add',
                 rule: {
-                    uid: 'rule-add',
+                    uid: 'missing-target-rule',
                     type: DataValidationType.CHECKBOX,
-                    formula1: '=A1',
-                    formula2: '=B1',
-                    ranges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 1 }],
-                },
-            },
-        ] as any;
-
-        const { redoMutations, undoMutations } = getDataValidationDiffMutations('unit-1', 'sheet-1', diffs, accessor);
-
-        expect(redoMutations.map((m) => m.id)).toEqual([
-            RemoveDataValidationMutation.id,
-            UpdateDataValidationMutation.id,
-            AddDataValidationMutation.id,
-            SetRangeValuesMutation.id,
-        ]);
-        expect((redoMutations[1].params as any).payload.type).toBe(UpdateRuleType.ALL);
-        expect((redoMutations[3].params as any).cellValue).toBeTruthy();
-        expect(undoMutations.map((m) => m.id)).toContain(AddDataValidationMutation.id);
-        expect(undoMutations.map((m) => m.id)).toContain(RemoveDataValidationMutation.id);
-        expect(undoMutations.map((m) => m.id)).toContain(UpdateDataValidationMutation.id);
-        expect(undoMutations.map((m) => m.id)).toContain(SetRangeValuesMutation.id);
-    });
-
-    it('uses range-only updates when formulas do not offset or default filling is disabled', () => {
-        const { accessor } = createAccessor(true, false);
-        const diffs = [
-            {
-                type: 'update',
-                ruleId: 'rule-update',
-                oldRanges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }],
-                newRanges: [{ startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 }],
-                rule: {
-                    uid: 'rule-update',
-                    type: DataValidationType.DECIMAL,
-                    formula1: '1',
-                    formula2: '2',
                     ranges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }],
                 },
             },
-        ] as any;
+        ] as never, injector);
 
-        const { redoMutations, undoMutations } = getDataValidationDiffMutations('unit-1', 'sheet-1', diffs, accessor, 'command', false);
-
-        expect(redoMutations).toHaveLength(1);
-        expect((redoMutations[0].params as any).payload.type).toBe(UpdateRuleType.RANGE);
-        expect(undoMutations).toHaveLength(1);
-        expect((undoMutations[0].params as any).payload.type).toBe(UpdateRuleType.RANGE);
+        expect(result.redoMutations).toEqual([]);
+        expect(result.undoMutations).toEqual([]);
     });
 });

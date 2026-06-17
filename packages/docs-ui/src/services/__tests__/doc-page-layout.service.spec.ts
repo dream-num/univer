@@ -14,143 +14,246 @@
  * limitations under the License.
  */
 
-import { describe, expect, it, vi } from 'vitest';
+import type { DocumentDataModel } from '@univerjs/core';
+import type { IRenderContext } from '@univerjs/engine-render';
+import type { IDocFitToWidthOptions } from '../../config/config';
+import { Injector } from '@univerjs/core';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { DOCS_VIEW_KEY, VIEWPORT_KEY } from '../../basics/docs-view-key';
 import { DocPageLayoutService } from '../doc-page-layout.service';
+import { DocViewScaleService } from '../doc-view-scale';
 
-const mockDocObject = vi.hoisted(() => ({ current: null as unknown }));
+class TestDocViewScaleService {
+    static viewScale = 1;
+    static availableWidth = 1000;
+    static options: IDocFitToWidthOptions = { mode: 'none' };
 
-vi.mock('../../basics/component-tools', async (importOriginal) => {
-    const actual = await importOriginal<typeof import('../../basics/component-tools')>();
+    static reset() {
+        this.viewScale = 1;
+        this.availableWidth = 1000;
+        this.options = { mode: 'none' };
+    }
 
-    return {
-        ...actual,
-        neoGetDocObject: () => mockDocObject.current,
-    };
-});
+    getViewScale() {
+        return TestDocViewScaleService.viewScale;
+    }
 
-function createFixture(options: {
+    getOptions() {
+        return TestDocViewScaleService.options;
+    }
+
+    getAvailableWidth() {
+        return TestDocViewScaleService.availableWidth;
+    }
+}
+
+class TestViewport {
+    scrollX: number | undefined;
+
+    scrollToViewportPos(params: { viewportScrollX: number }) {
+        this.scrollX = params.viewportScrollX;
+    }
+}
+
+class TestScene {
+    scaleX = 1;
+    scaleY = 1;
+    width = 0;
+    height = 0;
+
+    constructor(
+        private readonly _parent: { width: number; height: number } | null,
+        private readonly _viewport = new TestViewport()
+    ) {}
+
+    scale(scaleX: number, scaleY: number) {
+        this.scaleX = scaleX;
+        this.scaleY = scaleY;
+    }
+
+    resize(width: number, height: number) {
+        this.width = width;
+        this.height = height;
+    }
+
+    getParent() {
+        return this._parent;
+    }
+
+    getViewport(key: string) {
+        return key === VIEWPORT_KEY.VIEW_MAIN ? this._viewport : null;
+    }
+
+    get viewport() {
+        return this._viewport;
+    }
+}
+
+class TestDocumentComponent {
+    left: number | undefined;
+    top: number | undefined;
+
+    constructor(
+        readonly width: number,
+        readonly height: number,
+        readonly pageMarginLeft: number,
+        readonly pageMarginTop: number
+    ) {}
+
+    translate(left: number, top: number) {
+        this.left = left;
+        this.top = top;
+    }
+}
+
+class TestDocBackground {
+    left: number | undefined;
+    top: number | undefined;
+
+    translate(left: number, top: number) {
+        this.left = left;
+        this.top = top;
+    }
+}
+
+function createLayoutService(params: {
+    documentWidth: number;
+    documentHeight: number;
+    pageMarginLeft: number;
+    pageMarginTop: number;
     engineWidth: number;
     engineHeight: number;
-    docsWidth?: number;
-    docsHeight?: number;
-    viewScale: number;
-    sceneScale?: number;
-    align?: 'center' | 'start';
-    paddingX?: number | `${number}%`;
 }) {
-    const docsComponent = {
-        width: options.docsWidth ?? 960,
-        height: options.docsHeight ?? 1000,
-        pageMarginLeft: 20,
-        pageMarginTop: 20,
-        translate: vi.fn(),
-    };
-    const docBackground = {
-        translate: vi.fn(),
-    };
-    const viewport = {
-        scrollToViewportPos: vi.fn(),
-    };
-    const scene = {
-        scaleX: options.sceneScale ?? options.viewScale,
-        scaleY: options.sceneScale ?? options.viewScale,
-        getParent: vi.fn(() => ({ width: options.engineWidth, height: options.engineHeight })),
-        scale: vi.fn(),
-        resize: vi.fn(),
-        getViewport: vi.fn(() => viewport),
-    };
-    mockDocObject.current = {
-        document: docsComponent,
-        docBackground,
-        scene,
-    };
+    const injector = new Injector();
+    injector.add([DocViewScaleService, { useClass: TestDocViewScaleService as never }]);
 
-    const viewScaleService = {
-        getViewScale: vi.fn(() => options.viewScale),
-        getAvailableWidth: vi.fn(() => options.engineWidth),
-        getOptions: vi.fn(() => ({
-            mode: 'fit-width',
-            target: 'viewport',
-            paddingX: options.paddingX ?? 20,
-            minScale: 0,
-            align: options.align ?? 'center',
-        })),
-    };
-    const service = new (DocPageLayoutService as unknown as new (...args: unknown[]) => DocPageLayoutService)(
-        {
-            unit: {
-                getSettings: () => ({ zoomRatio: 1 }),
-                getSnapshot: () => ({ documentStyle: {} }),
-            },
-        },
-        viewScaleService
+    const documentComponent = new TestDocumentComponent(
+        params.documentWidth,
+        params.documentHeight,
+        params.pageMarginLeft,
+        params.pageMarginTop
     );
+    const docBackground = new TestDocBackground();
+    const scene = new TestScene({ width: params.engineWidth, height: params.engineHeight });
+    const context = {
+        mainComponent: documentComponent,
+        scene,
+        engine: { width: params.engineWidth, height: params.engineHeight },
+        components: new Map([[DOCS_VIEW_KEY.BACKGROUND, docBackground]]),
+    } as unknown as IRenderContext<DocumentDataModel>;
 
     return {
         docBackground,
-        docsComponent,
+        documentComponent,
         scene,
-        service,
-        viewScaleService,
-        viewport,
+        service: injector.createInstance(DocPageLayoutService, context),
     };
 }
 
 describe('DocPageLayoutService', () => {
-    it('uses view scale for centered scene geometry', () => {
-        const { docsComponent, scene, service, viewport } = createFixture({
-            engineWidth: 1600,
+    beforeEach(() => {
+        TestDocViewScaleService.reset();
+    });
+
+    it('centers the document page when the viewport is wider than the page', () => {
+        const { docBackground, documentComponent, scene, service } = createLayoutService({
+            documentWidth: 600,
+            documentHeight: 900,
+            pageMarginLeft: 40,
+            pageMarginTop: 20,
+            engineWidth: 1000,
             engineHeight: 1200,
-            viewScale: 1.5,
         });
 
         service.calculatePagePosition();
 
-        expect(scene.resize).toHaveBeenCalledWith(1040, 773.3333333333334);
-        expect(docsComponent.translate).toHaveBeenCalledWith(53.333333333333336, 20);
-        expect(viewport.scrollToViewportPos).toHaveBeenCalledWith({ viewportScrollX: 0 });
+        expect(documentComponent.left).toBe(200);
+        expect(documentComponent.top).toBe(20);
+        expect(docBackground.left).toBe(200);
+        expect(docBackground.top).toBe(20);
+        expect(scene.width).toBe(920);
+        expect(scene.height).toBe(1160);
+        expect(scene.viewport.scrollX).toBe(0);
     });
 
-    it('starts at the container edge when configured with start alignment and no padding', () => {
-        const { docsComponent, service } = createFixture({
-            engineWidth: 480,
+    it('keeps the page margin and scrolls to the page center when the viewport is narrower than the page', () => {
+        const { documentComponent, scene, service } = createLayoutService({
+            documentWidth: 600,
+            documentHeight: 900,
+            pageMarginLeft: 40,
+            pageMarginTop: 20,
+            engineWidth: 500,
             engineHeight: 800,
-            viewScale: 0.5,
-            align: 'start',
-            paddingX: 0,
         });
 
         service.calculatePagePosition();
 
-        expect(docsComponent.translate).toHaveBeenCalledWith(0, 20);
+        expect(documentComponent.left).toBe(40);
+        expect(documentComponent.top).toBe(20);
+        expect(scene.width).toBe(680);
+        expect(scene.height).toBe(940);
+        expect(scene.viewport.scrollX).toBe(90);
     });
 
-    it('uses percentage padding for start-aligned fitting', () => {
-        const { docsComponent, service } = createFixture({
-            engineWidth: 1200,
-            engineHeight: 800,
-            viewScale: 1,
-            align: 'start',
-            paddingX: '10%',
+    it('uses fit-width start alignment padding instead of centering the page', () => {
+        TestDocViewScaleService.viewScale = 2;
+        TestDocViewScaleService.availableWidth = 1000;
+        TestDocViewScaleService.options = { mode: 'fit-width', align: 'start', paddingX: '10%' };
+
+        const { documentComponent, scene, service } = createLayoutService({
+            documentWidth: 500,
+            documentHeight: 900,
+            pageMarginLeft: 40,
+            pageMarginTop: 20,
+            engineWidth: 1400,
+            engineHeight: 1200,
         });
 
         service.calculatePagePosition();
 
-        expect(docsComponent.translate).toHaveBeenCalledWith(120, 20);
+        expect(scene.scaleX).toBe(2);
+        expect(scene.scaleY).toBe(2);
+        expect(documentComponent.left).toBe(50);
+        expect(scene.width).toBe(650);
+        expect(scene.viewport.scrollX).toBe(0);
     });
 
-    it('reapplies view scale when an early container measurement left the scene stale', () => {
-        const { scene, service } = createFixture({
-            engineWidth: 900,
-            engineHeight: 800,
-            viewScale: 1.5,
-            sceneScale: 1 / 600,
-            align: 'start',
-            paddingX: 0,
+    it('moves the page out of view while the engine has no usable width', () => {
+        const { docBackground, documentComponent, scene, service } = createLayoutService({
+            documentWidth: 600,
+            documentHeight: 900,
+            pageMarginLeft: 40,
+            pageMarginTop: 20,
+            engineWidth: 1,
+            engineHeight: 1200,
         });
 
         service.calculatePagePosition();
 
-        expect(scene.scale).toHaveBeenCalledWith(1.5, 1.5);
+        expect(documentComponent.left).toBe(-10000);
+        expect(documentComponent.top).toBe(-10000);
+        expect(docBackground.left).toBe(-10000);
+        expect(docBackground.top).toBe(-10000);
+        expect(scene.width).toBe(680);
+        expect(scene.height).toBe(1160);
+    });
+
+    it('leaves the current layout untouched when the document size is not ready', () => {
+        const { documentComponent, scene, service } = createLayoutService({
+            documentWidth: Number.POSITIVE_INFINITY,
+            documentHeight: 900,
+            pageMarginLeft: 40,
+            pageMarginTop: 20,
+            engineWidth: 1000,
+            engineHeight: 1200,
+        });
+
+        service.calculatePagePosition();
+
+        expect(documentComponent.left).toBeUndefined();
+        expect(documentComponent.top).toBeUndefined();
+        expect(scene.width).toBe(0);
+        expect(scene.height).toBe(0);
+        expect(scene.viewport.scrollX).toBeUndefined();
     });
 });

@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-/* eslint-disable max-lines-per-function */
-
-import type { Dependency, IDisposable, IWorkbookData, Workbook } from '@univerjs/core';
+import type { Dependency, IDisposable, IRange, IWorkbookData, Nullable, Workbook } from '@univerjs/core';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import {
     BooleanNumber,
+    Disposable,
     ICommandService,
     ILogService,
     Inject,
@@ -30,11 +29,19 @@ import {
     LogLevel,
     Plugin,
     RANGE_TYPE,
+    toDisposable,
     Tools,
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
-import { IActiveDirtyManagerService, RegisterOtherFormulaService } from '@univerjs/engine-formula';
+import {
+    ActiveDirtyManagerService,
+    IActiveDirtyManagerService,
+    OtherFormulaMarkDirty,
+    RegisterOtherFormulaService,
+    RemoveOtherFormulaMutation,
+    SetOtherFormulaMutation,
+} from '@univerjs/engine-formula';
 import {
     BorderStyleManagerService,
     RangeProtectionRuleModel,
@@ -65,7 +72,6 @@ import {
 import { ISheetClipboardService } from '@univerjs/sheets-ui';
 import { ComponentManager, ISidebarService } from '@univerjs/ui';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { vi } from 'vitest';
 
 const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
     id: 'test',
@@ -101,6 +107,153 @@ const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
     sheetOrder: [],
     styles: {},
 };
+
+class TestSidebarService extends Disposable {
+    private _sidebarOptions = { id: '', visible: false } as any;
+    readonly sidebarOptions$ = new BehaviorSubject(this._sidebarOptions);
+    readonly scrollEvent$ = new Subject<Event>();
+    private _container?: HTMLElement;
+    private _width?: number;
+
+    get visible(): boolean {
+        return Boolean(this._sidebarOptions.visible);
+    }
+
+    get options() {
+        return this._sidebarOptions;
+    }
+
+    get width(): number | undefined {
+        return this._width;
+    }
+
+    setWidth(value: number): void {
+        this._width = value;
+    }
+
+    open(params: any): IDisposable {
+        this._sidebarOptions = {
+            ...params,
+            visible: true,
+        };
+        this.sidebarOptions$.next(this._sidebarOptions);
+        params.onOpen?.();
+
+        return toDisposable(() => {
+            this.close(params.id);
+        });
+    }
+
+    close(id?: string): void {
+        if (id && this._sidebarOptions.id !== id) {
+            return;
+        }
+
+        this._sidebarOptions = {
+            ...this._sidebarOptions,
+            visible: false,
+        };
+        this.sidebarOptions$.next(this._sidebarOptions);
+        this._sidebarOptions.onClose?.();
+    }
+
+    getContainer() {
+        return this._container;
+    }
+
+    setContainer(element?: HTMLElement): void {
+        this._container = element;
+    }
+}
+
+class TestSheetClipboardService extends Disposable {
+    private _clipboardHooks: any[] = [];
+    private readonly _showMenu$ = new BehaviorSubject(false);
+    readonly showMenu$ = this._showMenu$.asObservable();
+    private readonly _pasteOptionsCache$ = new BehaviorSubject<any>(null);
+    readonly pasteOptionsCache$ = this._pasteOptionsCache$.asObservable();
+
+    setShowMenu(show: boolean): void {
+        this._showMenu$.next(show);
+    }
+
+    getPasteMenuVisible(): boolean {
+        return this._showMenu$.getValue();
+    }
+
+    getPasteOptionsCache(): any {
+        return this._pasteOptionsCache$.getValue();
+    }
+
+    updatePasteOptionsCache(cache: any): void {
+        this._pasteOptionsCache$.next(cache);
+    }
+
+    async copy(): Promise<boolean> {
+        return false;
+    }
+
+    async cut(): Promise<boolean> {
+        return false;
+    }
+
+    async paste(): Promise<boolean> {
+        return false;
+    }
+
+    async pasteByCopyId(): Promise<boolean> {
+        return false;
+    }
+
+    async legacyPaste(): Promise<boolean> {
+        return false;
+    }
+
+    rePasteWithPasteType(): boolean {
+        return false;
+    }
+
+    disposePasteOptionsCache(): void {
+        this._pasteOptionsCache$.next(null);
+    }
+
+    generateCopyContent(_workbookId: string, _worksheetId: string, _range: IRange): Nullable<unknown> {
+        return null;
+    }
+
+    copyContentCache(): any {
+        return null;
+    }
+
+    addClipboardHook(hook: any): IDisposable {
+        this._clipboardHooks.push(hook);
+
+        return toDisposable(() => {
+            const hooks = [];
+            for (const item of this._clipboardHooks) {
+                if (item !== hook) {
+                    hooks.push(item);
+                }
+            }
+            this._clipboardHooks = hooks;
+        });
+    }
+
+    getClipboardHooks(): any[] {
+        return this._clipboardHooks;
+    }
+
+    removeMarkSelection(): void {
+        // Mark selections are not created in these UI command tests.
+    }
+
+    override dispose(): void {
+        super.dispose();
+        this._showMenu$.complete();
+        this._pasteOptionsCache$.complete();
+        this._clipboardHooks = [];
+    }
+}
 
 function createLocalSheetsTestBed(workbookData?: IWorkbookData, dependencies?: Dependency[]) {
     const univer = new Univer();
@@ -166,53 +319,16 @@ export function createCfUiTestBed() {
     const commandService = get(ICommandService);
     const selectionsService = get(SheetsSelectionsService);
 
-    const formulaResult$ = new Subject<Record<string, Record<string, unknown[]>>>();
-    const componentManager = {
-        register: vi.fn((): IDisposable => ({
-            dispose: vi.fn(),
-        })),
-    };
-    const sidebarOptions$ = new BehaviorSubject({ id: '', visible: false } as any);
-    const sidebarService = {
-        open: vi.fn((): IDisposable => ({
-            dispose: vi.fn(),
-        })),
-        sidebarOptions$,
-    };
-    let clipboardHook: {
-        onBeforeCopy: (unitId: string, subUnitId: string, range: ISelectionWithStyle['range']) => void;
-        onPasteCells: (...args: any[]) => { redos: Array<{ id: string; params: unknown }>; undos: Array<{ id: string; params: unknown }> };
-    } | undefined;
-    const sheetClipboardService = {
-        addClipboardHook: vi.fn((hook) => {
-            clipboardHook = hook;
-            return {
-                dispose: vi.fn(),
-            };
-        }),
-    };
-
-    injector.add([RegisterOtherFormulaService, {
-        useValue: {
-            formulaResult$,
-            registerFormulaWithRange: vi.fn(() => 'formula-1'),
-            deleteFormula: vi.fn(),
-            getFormulaValueSync: vi.fn(() => null),
-        } as unknown as RegisterOtherFormulaService,
-    }]);
-    injector.add([IActiveDirtyManagerService, {
-        useValue: {
-            register: vi.fn(),
-        } as unknown as IActiveDirtyManagerService,
-    }]);
+    injector.add([IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }]);
+    injector.add([RegisterOtherFormulaService]);
     injector.add([ConditionalFormattingRuleModel]);
     injector.add([ConditionalFormattingRangeIndexModel]);
     injector.add([ConditionalFormattingFormulaService]);
     injector.add([ConditionalFormattingRangeTransformService]);
     injector.add([ConditionalFormattingViewModel]);
-    injector.add([ComponentManager, { useValue: componentManager as unknown as ComponentManager }]);
-    injector.add([ISidebarService, { useValue: sidebarService as unknown as ISidebarService }]);
-    injector.add([ISheetClipboardService, { useValue: sheetClipboardService as unknown as ISheetClipboardService }]);
+    injector.add([ComponentManager]);
+    injector.add([ISidebarService, { useClass: TestSidebarService as never }]);
+    injector.add([ISheetClipboardService, { useClass: TestSheetClipboardService as never }]);
 
     [
         AddConditionalRuleMutation,
@@ -221,8 +337,11 @@ export function createCfUiTestBed() {
         MoveConditionalRuleMutation,
         ClearRangeCfCommand,
         ClearWorksheetCfCommand,
+        OtherFormulaMarkDirty,
+        RemoveOtherFormulaMutation,
         SetRangeValuesCommand,
         SetRangeValuesMutation,
+        SetOtherFormulaMutation,
     ].forEach((command) => commandService.registerCommand(command));
 
     const setSelection = (range: ISelectionWithStyle['range']) => {
@@ -244,11 +363,16 @@ export function createCfUiTestBed() {
         selectionsService,
         ruleModel: injector.get(ConditionalFormattingRuleModel),
         viewModel: injector.get(ConditionalFormattingViewModel),
-        componentManager,
-        sidebarService,
-        sidebarOptions$,
-        sheetClipboardService,
-        getClipboardHook: () => clipboardHook,
+        componentManager: injector.get(ComponentManager),
+        sidebarService: injector.get(ISidebarService) as unknown as TestSidebarService,
+        sidebarOptions$: (injector.get(ISidebarService) as unknown as TestSidebarService).sidebarOptions$,
+        sheetClipboardService: injector.get(ISheetClipboardService) as unknown as TestSheetClipboardService,
+        getClipboardHook: () => (injector.get(ISheetClipboardService) as unknown as TestSheetClipboardService).getClipboardHooks()[0] as
+            | {
+                onBeforeCopy: (unitId: string, subUnitId: string, range: ISelectionWithStyle['range']) => void;
+                onPasteCells: (...args: any[]) => { redos: Array<{ id: string; params: unknown }>; undos: Array<{ id: string; params: unknown }> };
+            }
+            | undefined,
         unitId: 'test',
         subUnitId: 'sheet1',
         setSelection,

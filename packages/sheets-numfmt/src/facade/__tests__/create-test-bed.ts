@@ -30,6 +30,8 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
+import { DefinedNamesService, FormulaDataModel, IDefinedNamesService, LexerTreeBuilder } from '@univerjs/engine-formula';
+import { INumfmtService, NumfmtService, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 
 import enUS from '@univerjs/sheets/locale/en-US';
 import zhCN from '@univerjs/sheets/locale/zh-CN';
@@ -107,7 +109,15 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
         }
 
         override onStarting(): void {
+            injector.add([SheetsSelectionsService]);
+            injector.add([SheetInterceptorService]);
+            injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
+            injector.add([FormulaDataModel]);
+            injector.add([LexerTreeBuilder]);
+            injector.add([INumfmtService, { useClass: NumfmtService }]);
             dependencies?.forEach((d) => injector.add(d));
+
+            this._injector.get(SheetInterceptorService);
         }
 
         override onReady(): void {

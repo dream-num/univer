@@ -15,8 +15,9 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
+import { NodePositionConvertToCursor } from '../convert-text-range';
 import { RectRange } from '../rect-range';
-import { TextRange } from '../text-range';
+import { cursorConvertToTextRange, TextRange } from '../text-range';
 
 function getGetter<T extends object>(target: T, key: keyof T) {
     return Object.getOwnPropertyDescriptor(target, key)?.get as () => unknown;
@@ -53,7 +54,168 @@ interface IFakeRectRange {
     focusNodePosition: Record<string, unknown>;
 }
 
+function createNodePosition(glyph = 0) {
+    return {
+        page: 0,
+        section: 0,
+        column: 0,
+        line: 0,
+        divide: 0,
+        glyph,
+        isBack: true,
+    };
+}
+
+function createTextRangeHarness() {
+    const addedObjects: unknown[] = [];
+    const scene = {
+        addObject: (object: unknown) => {
+            addedObjects.push(object);
+        },
+    };
+    const document = {
+        getOffsetConfig: () => ({
+            docsLeft: 5,
+            docsTop: 7,
+        }),
+    };
+    const skeleton = {
+        findNodePositionByCharIndex: (index: number) => createNodePosition(index),
+        findGlyphByPosition: () => ({
+            ts: {},
+        }),
+        getViewModel: () => ({
+            getDataModel: () => ({
+                getSelfOrHeaderFooterModel: () => ({
+                    getBody: () => ({ dataStream: 'abcdef\r\n' }),
+                }),
+            }),
+        }),
+    };
+
+    return {
+        addedObjects,
+        document,
+        scene,
+        skeleton,
+    };
+}
+
 describe('selection range state', () => {
+    it('renders a collapsed cursor range and clamps cursor offsets before the final line break', () => {
+        const { addedObjects, document, scene, skeleton } = createTextRangeHarness();
+        const rangePointSpy = vi.spyOn(NodePositionConvertToCursor.prototype, 'getRangePointData').mockImplementation(() => ({
+            contentBoxPointGroup: [[
+                { x: 10, y: 20 },
+                { x: 12, y: 20 },
+                { x: 12, y: 25 },
+                { x: 10, y: 25 },
+            ]],
+            borderBoxPointGroup: [],
+            cursorList: [{ startOffset: 7, endOffset: 7, collapsed: true }],
+        }) as never);
+
+        const range = cursorConvertToTextRange(
+            scene as never,
+            { startOffset: 7, endOffset: 7, segmentId: '', segmentPage: -1 },
+            skeleton as never,
+            document as never
+        )!;
+
+        expect(range.startOffset).toBe(6);
+        expect(range.endOffset).toBe(6);
+        expect(range.collapsed).toBe(true);
+        expect(range.getAbsolutePosition()).toEqual({
+            left: 15,
+            top: 27,
+            width: 2,
+            height: 5,
+        });
+        expect(addedObjects).toHaveLength(1);
+        expect(range.getAnchor()).not.toBeNull();
+
+        range.dispose();
+        rangePointSpy.mockRestore();
+    });
+
+    it('renders expanded text ranges and reports document direction from anchor to focus', () => {
+        const { addedObjects, document, scene, skeleton } = createTextRangeHarness();
+        const rangePointSpy = vi.spyOn(NodePositionConvertToCursor.prototype, 'getRangePointData').mockImplementation(() => ({
+            contentBoxPointGroup: [],
+            borderBoxPointGroup: [[
+                { x: 10, y: 20 },
+                { x: 60, y: 20 },
+                { x: 60, y: 36 },
+                { x: 10, y: 36 },
+            ]],
+            cursorList: [{ startOffset: 1, endOffset: 4, collapsed: false }],
+        }) as never);
+
+        const range = new TextRange(
+            scene as never,
+            document as never,
+            skeleton as never,
+            createNodePosition(1) as never,
+            createNodePosition(4) as never,
+            undefined,
+            '',
+            -1
+        );
+
+        expect(range.startOffset).toBe(1);
+        expect(range.endOffset).toBe(4);
+        expect(range.collapsed).toBe(false);
+        expect(range.direction).toBe('forward');
+        expect(range.getAbsolutePosition()).toEqual({
+            left: 15,
+            top: 27,
+            width: 50,
+            height: 16,
+        });
+        expect(addedObjects).toHaveLength(1);
+
+        range.dispose();
+        rangePointSpy.mockRestore();
+    });
+
+    it('returns empty positions for empty ranges and reports backward document selections', () => {
+        const { document, scene, skeleton } = createTextRangeHarness();
+        const emptyRange = new TextRange(scene as never, document as never, skeleton as never, null, null);
+
+        expect(emptyRange.startNodePosition).toBeNull();
+        expect(emptyRange.endNodePosition).toBeNull();
+        expect(emptyRange.getAbsolutePosition()).toBeUndefined();
+        expect(emptyRange.direction).toBe('none');
+        emptyRange.dispose();
+
+        const rangePointSpy = vi.spyOn(NodePositionConvertToCursor.prototype, 'getRangePointData').mockImplementation(() => ({
+            contentBoxPointGroup: [],
+            borderBoxPointGroup: [[
+                { x: 10, y: 20 },
+                { x: 60, y: 20 },
+                { x: 60, y: 36 },
+                { x: 10, y: 36 },
+            ]],
+            cursorList: [{ startOffset: 1, endOffset: 4, collapsed: false }],
+        }) as never);
+        const anchor = createNodePosition(4);
+        const focus = createNodePosition(1);
+        const backwardRange = new TextRange(
+            scene as never,
+            document as never,
+            skeleton as never,
+            anchor as never,
+            focus as never
+        );
+
+        expect(backwardRange.startNodePosition).toBe(focus);
+        expect(backwardRange.endNodePosition).toBe(anchor);
+        expect(backwardRange.direction).toBe('backward');
+
+        backwardRange.dispose();
+        rangePointSpy.mockRestore();
+    });
+
     it('derives text range offsets, direction, and active state from prototype getters', () => {
         const fakeRange = Object.setPrototypeOf({
             _cursorList: [{ startOffset: 9, endOffset: 9, collapsed: true }],

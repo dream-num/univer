@@ -47,4 +47,13 @@ describe('DrawingImageClipService', () => {
 
         expect(values).toEqual([false, true]);
     });
+
+    it('clears registered clipping behavior when disposed', () => {
+        const delegate = vi.fn(() => ({ left: 0, top: 0, width: 20, height: 10 }));
+        service.registerClipDelegate(delegate);
+
+        service.dispose();
+
+        expect(service.applyShapeClip({} as never, 'rect', 20, 10)).toBe(false);
+    });
 });

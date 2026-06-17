@@ -16,6 +16,7 @@
 
 import type { IMutationInfo } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '../../commands/mutations/set-range-values.mutation';
+import { ICommandService, Injector, IUniverInstanceService } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { SheetLazyExecuteScheduleService } from '../lazy-execute-schedule.service';
 
@@ -33,34 +34,37 @@ function createMutation(unitId: string, subUnitId: string): IMutationInfo<ISetRa
 }
 
 describe('SheetLazyExecuteScheduleService', () => {
-    let commandService: {
-        syncExecuteCommand: ReturnType<typeof vi.fn>;
-    };
-
     let getSheetBySheetId: ReturnType<typeof vi.fn>;
 
-    let instanceService: {
-        getUnit: ReturnType<typeof vi.fn>;
-    };
+    class TestCommandService {
+        syncExecuteCommand = vi.fn();
+    }
 
+    class TestUniverInstanceService {
+        getUnit = vi.fn(() => ({
+            getSheetBySheetId,
+        }));
+    }
+
+    let commandService: TestCommandService;
     let service: SheetLazyExecuteScheduleService;
 
     beforeEach(() => {
-        commandService = {
-            syncExecuteCommand: vi.fn(),
-        };
-
         getSheetBySheetId = vi.fn(() => ({}));
-        instanceService = {
-            getUnit: vi.fn(() => ({
-                getSheetBySheetId,
-            })),
-        };
 
         vi.stubGlobal('requestIdleCallback', vi.fn(() => 1));
         vi.stubGlobal('cancelIdleCallback', vi.fn());
+        vi.stubGlobal('window', {
+            addEventListener: vi.fn(),
+            removeEventListener: vi.fn(),
+        });
 
-        service = new SheetLazyExecuteScheduleService(commandService as never, instanceService as never);
+        const injector = new Injector();
+        injector.add([ICommandService, { useClass: TestCommandService as never }]);
+        injector.add([IUniverInstanceService, { useClass: TestUniverInstanceService as never }]);
+        injector.add([SheetLazyExecuteScheduleService]);
+        commandService = injector.get(ICommandService) as unknown as TestCommandService;
+        service = injector.get(SheetLazyExecuteScheduleService);
     });
 
     afterEach(() => {

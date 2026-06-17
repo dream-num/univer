@@ -24,9 +24,9 @@ import { UnitModel, UniverInstanceType } from '../../../common/unit';
 import { DocumentDataModel } from '../../../docs/data-model/document-data-model';
 import { Workbook as WorkbookModel } from '../../../sheets/workbook';
 import { FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE, FOCUSING_UNIT } from '../../context/context';
-import { ContextService } from '../../context/context.service';
-import { DesktopLogService, LogLevel } from '../../log/log.service';
-import { UniverInstanceService } from '../instance.service';
+import { ContextService, IContextService } from '../../context/context.service';
+import { DesktopLogService, ILogService, LogLevel } from '../../log/log.service';
+import { IUniverInstanceService, UniverInstanceService } from '../instance.service';
 
 function createWorkbookData(id = 'sheet-unit'): Partial<IWorkbookData> {
     return {
@@ -77,22 +77,26 @@ describe('UniverInstanceService', () => {
     let logService: DesktopLogService;
 
     beforeEach(() => {
-        contextService = new ContextService();
-        logService = new DesktopLogService();
+        const injector = new Injector();
+        injector.add([IContextService, { useClass: ContextService }]);
+        injector.add([ILogService, { useClass: DesktopLogService }]);
+        injector.add([IUniverInstanceService, { useClass: UniverInstanceService }]);
+        contextService = injector.get(IContextService) as ContextService;
+        logService = injector.get(ILogService) as DesktopLogService;
         logService.setLogLevel(LogLevel.SILENT);
-        service = new UniverInstanceService(new Injector(), contextService, logService);
+        service = injector.get(IUniverInstanceService) as UniverInstanceService;
 
         service.registerCtorForType(UniverInstanceType.UNIVER_SHEET, WorkbookModel as never);
         service.registerCtorForType(UniverInstanceType.UNIVER_DOC, DocumentDataModel as never);
         service.registerCtorForType(UniverInstanceType.UNIVER_SLIDE, MockSlideUnit as never);
         service.__setCreateHandler((type, data, _ctor, options) => {
-            let unit;
+            let unit: UnitModel;
             if (type === UniverInstanceType.UNIVER_SHEET) {
-                unit = new WorkbookModel(data as Partial<IWorkbookData>, logService);
+                unit = injector.createInstance(WorkbookModel as never, data as Partial<IWorkbookData>, logService) as UnitModel;
             } else if (type === UniverInstanceType.UNIVER_DOC) {
-                unit = new DocumentDataModel(data as Partial<IDocumentData>);
+                unit = injector.createInstance(DocumentDataModel as never, data as Partial<IDocumentData>) as UnitModel;
             } else {
-                unit = new MockSlideUnit();
+                unit = injector.createInstance(MockSlideUnit);
             }
 
             service.__addUnit(unit, options);

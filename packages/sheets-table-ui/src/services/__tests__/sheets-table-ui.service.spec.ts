@@ -14,147 +14,212 @@
  * limitations under the License.
  */
 
+import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
+import { ICommandService, Inject, Injector, LocaleService, LocaleType, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import { SetRangeValuesMutation } from '@univerjs/sheets';
-import { SetSheetTableFilterCommand, TABLE_FILTER_EMPTY_VALUE, TableColumnFilterTypeEnum } from '@univerjs/sheets-table';
-import { describe, expect, it, vi } from 'vitest';
+import {
+    SetSheetTableFilterCommand,
+    SetSheetTableFilterMutation,
+    SheetTableService,
+    TABLE_FILTER_EMPTY_VALUE,
+    TableColumnFilterTypeEnum,
+    TableManager,
+} from '@univerjs/sheets-table';
+import { afterEach, describe, expect, it } from 'vitest';
 import { FilterByEnum } from '../../types';
 import { SheetsTableUiService } from '../sheets-table-ui.service';
 
-describe('SheetsTableUiService', () => {
-    it('should build panel props, compute cached filter items and clear cache on related commands', () => {
-        const listeners: Array<(command: any) => void> = [];
-        const executeCommand = vi.fn();
+interface ITestBed {
+    univer: Univer;
+    get: Injector['get'];
+    workbook: Workbook;
+}
 
-        const commandService = {
-            onCommandExecuted: vi.fn((listener: (command: any) => void) => {
-                listeners.push(listener);
-                return { dispose: vi.fn() };
-            }),
-            executeCommand,
-        };
-
-        const tableFilters = {
-            doColumnFilter: vi.fn(),
-        };
-
-        const table = {
-            getId: () => 't1',
-            getSubunitId: () => 's1',
-            getRange: () => ({ startRow: 0, endRow: 3, startColumn: 1, endColumn: 2 }),
-            getTableFilterRange: () => ({ startRow: 1, endRow: 3, startColumn: 1, endColumn: 2 }),
-            getTableFilterColumn: (index: number) => {
-                if (index === 0) {
-                    return { filterType: TableColumnFilterTypeEnum.condition, condition: [] };
-                }
-                return { filterType: TableColumnFilterTypeEnum.manual, values: ['A', 'B', TABLE_FILTER_EMPTY_VALUE] };
-            },
-            getTableFilters: () => tableFilters,
-        };
-
-        const tableManager = {
-            getTable: vi.fn(() => table),
-            getTablesBySubunitId: vi.fn(() => [table]),
-        };
-
-        const getCellValueWithConditionType = vi.fn((worksheet, row: number, col: number) => {
-            if (row === 1 && col === 2) {
-                return 'A';
-            }
-            if (row === 3 && col === 2) {
-                return undefined;
-            }
-            return 'B';
-        });
-
-        const worksheet = {
-            isRowFiltered: (row: number) => row === 2,
-        };
-
-        const univerInstanceService = {
-            getUnit: vi.fn(() => ({
-                getSheetBySheetId: vi.fn(() => worksheet),
-            })),
-        };
-
-        const service = new SheetsTableUiService(
-            tableManager as any,
-            { getCellValueWithConditionType } as any,
-            univerInstanceService as any,
-            commandService as any,
-            { t: (key: string) => (key === 'sheets-table-ui.condition.empty' ? '(empty)' : key) } as any
-        );
-
-        expect(service.getTableFilterPanelInitProps('u1', 's1', 't1', 1)).toEqual({
-            unitId: 'u1',
-            subUnitId: 's1',
-            tableFilter: { filterType: TableColumnFilterTypeEnum.condition, condition: [] },
-            currentFilterBy: FilterByEnum.Condition,
-            tableId: 't1',
-            columnIndex: 0,
-        });
-
-        expect(service.getTableFilterCheckedItems('u1', 't1', 1)).toEqual(['A', 'B', '(empty)']);
-
-        const first = service.getTableFilterItems('u1', 's1', 't1', 1);
-        expect(first.allItemsCount).toBe(3);
-        expect(first.data.map((item) => item.title)).toEqual(['A', 'B', '(empty)']);
-        expect(first.itemsCountMap.get('A')).toBe(1);
-        expect(first.itemsCountMap.get('B')).toBe(1);
-        expect(first.itemsCountMap.get('(empty)')).toBe(1);
-        expect(tableFilters.doColumnFilter).toHaveBeenCalledWith(
-            worksheet,
-            { startRow: 1, endRow: 3, startColumn: 1, endColumn: 2 },
-            0,
-            expect.any(Set)
-        );
-        expect(tableFilters.doColumnFilter).not.toHaveBeenCalledWith(
-            worksheet,
-            { startRow: 1, endRow: 3, startColumn: 1, endColumn: 2 },
-            1,
-            expect.any(Set)
-        );
-        const countAfterFirstBuild = getCellValueWithConditionType.mock.calls.length;
-
-        const second = service.getTableFilterItems('u1', 's1', 't1', 1);
-        expect(second).toEqual(first);
-        expect(getCellValueWithConditionType).toHaveBeenCalledTimes(countAfterFirstBuild);
-
-        listeners.forEach((listener) => listener({
-            id: SetRangeValuesMutation.id,
-            params: {
-                unitId: 'u1',
-                subUnitId: 's1',
-                cellValue: {
+function createWorkbookData(): IWorkbookData {
+    return {
+        id: 'test',
+        appVersion: '3.0.0-alpha',
+        locale: LocaleType.EN_US,
+        name: 'test',
+        sheetOrder: ['sheet1'],
+        sheets: {
+            sheet1: {
+                id: 'sheet1',
+                name: 'Sheet1',
+                rowCount: 20,
+                columnCount: 20,
+                cellData: {
+                    0: {
+                        0: { v: 'product' },
+                        1: { v: 'amount' },
+                    },
                     1: {
-                        2: { v: 'updated' },
+                        0: { v: 'book' },
+                        1: { v: 12 },
+                    },
+                    2: {
+                        0: { v: 'pen' },
+                        1: { v: 3 },
+                    },
+                    3: {
+                        1: { v: 8 },
                     },
                 },
             },
-        }));
+        },
+        styles: {},
+    };
+}
 
-        service.getTableFilterItems('u1', 's1', 't1', 1);
-        expect(getCellValueWithConditionType.mock.calls.length).toBeGreaterThan(countAfterFirstBuild);
+function createTestBed(): ITestBed {
+    const univer = new Univer();
+    const injector = univer.__getInjector();
 
-        const countAfterRangeUpdate = getCellValueWithConditionType.mock.calls.length;
-        listeners.forEach((listener) => listener({
-            id: SetSheetTableFilterCommand.id,
-            params: {
-                unitId: 'u1',
-                tableId: 't1',
+    class TestPlugin extends Plugin {
+        static override pluginName = 'test-plugin';
+        static override type = UniverInstanceType.UNIVER_SHEET;
+
+        constructor(
+            _config: undefined,
+            @Inject(Injector) override readonly _injector: Injector
+        ) {
+            super();
+        }
+
+        override onStarting(): void {
+            const dependencies: Dependency[] = [
+                [TableManager],
+                [SheetTableService],
+                [SheetsTableUiService],
+            ];
+            dependencies.forEach((dependency) => this._injector.add(dependency));
+        }
+    }
+
+    univer.registerPlugin(TestPlugin);
+    const localeService = injector.get(LocaleService);
+    localeService.load({
+        [LocaleType.EN_US]: {
+            'sheets-table-ui': {
+                condition: {
+                    empty: '(Empty)',
+                },
             },
-        }));
+        },
+    });
+    localeService.setLocale(LocaleType.EN_US);
 
-        service.getTableFilterItems('u1', 's1', 't1', 1);
-        expect(getCellValueWithConditionType.mock.calls.length).toBeGreaterThan(countAfterRangeUpdate);
+    const commandService = injector.get(ICommandService);
+    [SetSheetTableFilterCommand, SetSheetTableFilterMutation, SetRangeValuesMutation].forEach((command) => {
+        commandService.registerCommand(command);
+    });
 
-        service.setTableFilter('u1', 't1', 1, { filterType: TableColumnFilterTypeEnum.manual, values: ['A'] } as any);
-        expect(executeCommand).toHaveBeenCalledWith(SetSheetTableFilterCommand.id, {
-            unitId: 'u1',
-            tableId: 't1',
-            column: 1,
-            tableFilter: { filterType: TableColumnFilterTypeEnum.manual, values: ['A'] },
+    const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, createWorkbookData());
+    injector.get(SheetTableService).addTable(
+        workbook.getUnitId(),
+        'sheet1',
+        'Orders',
+        { startRow: 0, endRow: 3, startColumn: 0, endColumn: 1 },
+        ['Product', 'Amount'],
+        'table-orders',
+        {
+            filters: [
+                { filterType: TableColumnFilterTypeEnum.manual, values: ['book', TABLE_FILTER_EMPTY_VALUE] },
+            ],
+        }
+    );
+
+    return {
+        univer,
+        get: injector.get.bind(injector),
+        workbook,
+    };
+}
+
+describe('SheetsTableUiService', () => {
+    let testBed: ITestBed | undefined;
+
+    afterEach(() => {
+        testBed?.univer.dispose();
+        testBed = undefined;
+    });
+
+    it('builds filter panel state from the selected table column', () => {
+        testBed = createTestBed();
+        const service = testBed.get(SheetsTableUiService);
+
+        expect(service.getTableFilterPanelInitProps(testBed.workbook.getUnitId(), 'sheet1', 'table-orders', 0)).toEqual({
+            unitId: testBed.workbook.getUnitId(),
+            subUnitId: 'sheet1',
+            tableFilter: { filterType: TableColumnFilterTypeEnum.manual, values: ['book', TABLE_FILTER_EMPTY_VALUE] },
+            currentFilterBy: FilterByEnum.Items,
+            tableId: 'table-orders',
+            columnIndex: 0,
+        });
+    });
+
+    it('localizes checked manual filter values for blank cells', () => {
+        testBed = createTestBed();
+        const service = testBed.get(SheetsTableUiService);
+
+        expect(service.getTableFilterCheckedItems(testBed.workbook.getUnitId(), 'table-orders', 0)).toEqual(['book', '(Empty)']);
+    });
+
+    it('builds candidate values after applying filters from other table columns', () => {
+        testBed = createTestBed();
+        const service = testBed.get(SheetsTableUiService);
+
+        const items = service.getTableFilterItems(testBed.workbook.getUnitId(), 'sheet1', 'table-orders', 1);
+
+        expect(items.allItemsCount).toBe(2);
+        expect(items.data).toEqual([
+            { title: 12, key: '1_1', leaf: true },
+            { title: 8, key: '1_3', leaf: true },
+        ]);
+        expect(items.itemsCountMap.get(12 as unknown as string)).toBe(1);
+        expect(items.itemsCountMap.get(8 as unknown as string)).toBe(1);
+    });
+
+    it('refreshes cached candidates when table data changes inside the filter range', async () => {
+        testBed = createTestBed();
+        const service = testBed.get(SheetsTableUiService);
+        const commandService = testBed.get(ICommandService);
+
+        expect(service.getTableFilterItems(testBed.workbook.getUnitId(), 'sheet1', 'table-orders', 1).data).toEqual([
+            { title: 12, key: '1_1', leaf: true },
+            { title: 8, key: '1_3', leaf: true },
+        ]);
+
+        await commandService.executeCommand(SetRangeValuesMutation.id, {
+            unitId: testBed.workbook.getUnitId(),
+            subUnitId: 'sheet1',
+            cellValue: {
+                1: {
+                    1: { v: 15 },
+                },
+            },
         });
 
-        service.dispose();
+        expect(service.getTableFilterItems(testBed.workbook.getUnitId(), 'sheet1', 'table-orders', 1).data).toEqual([
+            { title: 15, key: '1_1', leaf: true },
+            { title: 8, key: '1_3', leaf: true },
+        ]);
+    });
+
+    it('updates the table through the filter command', async () => {
+        testBed = createTestBed();
+        const service = testBed.get(SheetsTableUiService);
+
+        service.setTableFilter(testBed.workbook.getUnitId(), 'table-orders', 0, {
+            filterType: TableColumnFilterTypeEnum.manual,
+            values: ['pen'],
+        });
+        await Promise.resolve();
+
+        const table = testBed.get(TableManager).getTable(testBed.workbook.getUnitId(), 'table-orders')!;
+        expect(table.getTableFilterColumn(0)).toEqual({
+            filterType: TableColumnFilterTypeEnum.manual,
+            values: ['pen'],
+        });
     });
 });

@@ -31,6 +31,20 @@ describe('Test FRange', () => {
     describe('FFilter', () => {
         it('create, modify and clear filters with Facade API without UI plugin', async () => {
             const activeSheet = univerAPI.getActiveWorkbook()!.getActiveSheet();
+            const filterEvents: string[] = [];
+            const beforeFilterDisposable = univerAPI.addEvent(univerAPI.Event.SheetBeforeRangeFilter, (params) => {
+                filterEvents.push(`before:${params.col}`);
+            });
+            const filteredDisposable = univerAPI.addEvent(univerAPI.Event.SheetRangeFiltered, (params) => {
+                filterEvents.push(`after:${params.col}`);
+            });
+            const beforeClearDisposable = univerAPI.addEvent(univerAPI.Event.SheetBeforeRangeFilterClear, (params) => {
+                filterEvents.push(`before-clear:${params.worksheet.getSheetId()}`);
+            });
+            const clearedDisposable = univerAPI.addEvent(univerAPI.Event.SheetRangeFilterCleared, (params) => {
+                filterEvents.push(`after-clear:${params.worksheet.getSheetId()}`);
+            });
+
             expect(activeSheet.getFilter()).toBeNull();
             expect(activeSheet.getRange(0, 0, 1, 1).getFilter()).toBeNull();
 
@@ -61,8 +75,24 @@ describe('Test FRange', () => {
             expect(await filter.removeFilterCriteria()).toBeTruthy();
             expect(filter.getColumnFilterCriteria(2)).toBeFalsy();
 
+            expect(filterEvents).toEqual([
+                'before:1',
+                'after:1',
+                'before:2',
+                'after:2',
+                'before:1',
+                'after:1',
+                'before-clear:sheet1',
+                'after-clear:sheet1',
+            ]);
+
             expect(await filter.remove()).toBeTruthy();
             expect(activeSheet.getFilter()).toBeNull();
+
+            beforeFilterDisposable.dispose();
+            filteredDisposable.dispose();
+            beforeClearDisposable.dispose();
+            clearedDisposable.dispose();
         });
     });
 });

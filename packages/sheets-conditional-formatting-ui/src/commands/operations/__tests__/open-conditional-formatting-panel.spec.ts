@@ -34,18 +34,31 @@ describe('OpenConditionalFormattingOperator', () => {
         // each test disposes its own univer instance
     });
 
-    it('opens the real sidebar panel with a rule seeded from the current selection', async () => {
+    function createPanelTestBed() {
         const testBed = createCfUiTestBed();
         testBed.injector.add([ConditionalFormattingPanelController]);
         testBed.injector.get(ConditionalFormattingPanelController);
         testBed.commandService.registerCommand(OpenConditionalFormattingOperator);
         testBed.setSelection(range);
 
+        return testBed;
+    }
+
+    async function openFromMenu(testBed: ReturnType<typeof createPanelTestBed>, value: CF_MENU_OPERATION) {
+        expect(await testBed.commandService.executeCommand(OpenConditionalFormattingOperator.id, { value })).toBe(true);
+
+        return testBed.sidebarService.options.children?.rule as IConditionFormattingRule | undefined;
+    }
+
+    it('opens the real sidebar panel with a rule seeded from the current selection', async () => {
+        const testBed = createPanelTestBed();
+
         expect(await testBed.commandService.executeCommand(OpenConditionalFormattingOperator.id, {
             value: CF_MENU_OPERATION.formula,
         })).toBe(true);
 
-        expect(testBed.sidebarService.open).toHaveBeenCalledWith(expect.objectContaining({
+        expect(testBed.sidebarService.visible).toBe(true);
+        expect(testBed.sidebarService.options).toMatchObject({
             id: 'sheet.conditional.formatting.panel',
             children: expect.objectContaining({
                 rule: {
@@ -57,17 +70,84 @@ describe('OpenConditionalFormattingOperator', () => {
                     },
                 },
             }),
-        }));
+        });
+
+        testBed.univer.dispose();
+    });
+
+    it('opens the default rule editor for creating a new conditional formatting rule', async () => {
+        const testBed = createPanelTestBed();
+
+        const rule = await openFromMenu(testBed, CF_MENU_OPERATION.createRule);
+
+        expect(testBed.sidebarService.visible).toBe(true);
+        expect(rule).toMatchObject({
+            ranges: [expect.objectContaining(range)],
+            rule: {
+                type: CFRuleType.highlightCell,
+                subType: CFSubRuleType.text,
+            },
+        });
+
+        testBed.univer.dispose();
+    });
+
+    it('opens specialized rule editors from the conditional formatting menu', async () => {
+        const testBed = createPanelTestBed();
+
+        let rule = await openFromMenu(testBed, CF_MENU_OPERATION.rank);
+        expect(rule).toMatchObject({
+            ranges: [expect.objectContaining(range)],
+            rule: {
+                type: CFRuleType.highlightCell,
+                subType: CFSubRuleType.rank,
+            },
+        });
+
+        rule = await openFromMenu(testBed, CF_MENU_OPERATION.colorScale);
+        expect(rule).toMatchObject({
+            ranges: [expect.objectContaining(range)],
+            rule: {
+                type: CFRuleType.colorScale,
+                config: [],
+            },
+        });
+
+        rule = await openFromMenu(testBed, CF_MENU_OPERATION.dataBar);
+        expect(rule).toMatchObject({
+            ranges: [expect.objectContaining(range)],
+            rule: {
+                type: CFRuleType.dataBar,
+                isShowValue: true,
+            },
+        });
+
+        rule = await openFromMenu(testBed, CF_MENU_OPERATION.icon);
+        expect(rule).toMatchObject({
+            ranges: [expect.objectContaining(range)],
+            rule: {
+                type: CFRuleType.iconSet,
+                config: [],
+                isShowValue: true,
+            },
+        });
+
+        testBed.univer.dispose();
+    });
+
+    it('opens the rule list without seeding a draft rule', async () => {
+        const testBed = createPanelTestBed();
+
+        const rule = await openFromMenu(testBed, CF_MENU_OPERATION.viewRule);
+
+        expect(testBed.sidebarService.visible).toBe(true);
+        expect(rule).toBeUndefined();
 
         testBed.univer.dispose();
     });
 
     it('clears range rules and worksheet rules through the real operator flow', async () => {
-        const testBed = createCfUiTestBed();
-        testBed.injector.add([ConditionalFormattingPanelController]);
-        testBed.injector.get(ConditionalFormattingPanelController);
-        testBed.commandService.registerCommand(OpenConditionalFormattingOperator);
-        testBed.setSelection(range);
+        const testBed = createPanelTestBed();
 
         const addRule = async (cfId: string, ranges = [range]) => {
             const rule: IConditionFormattingRule = {

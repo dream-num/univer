@@ -14,24 +14,42 @@
  * limitations under the License.
  */
 
-import { render, screen } from '@testing-library/react';
-import React from 'react';
-import { describe, expect, it, vi } from 'vitest';
+import type { ReactElement } from 'react';
+import { render } from '@testing-library/react';
+import { ILogService, Injector, LocaleService } from '@univerjs/core';
+import { describe, expect, it } from 'vitest';
+import { ComponentManager } from '../../../../common/component-manager';
+import { IconManager } from '../../../../common/icon-manager';
+import { RediContext } from '../../../../utils/di';
 import { DropdownMenuLabel } from '../TooltipButtonWrapper';
 
-vi.mock('../../../custom-label/CustomLabel', () => ({
-    CustomLabel: (props: { label?: unknown }) => React.createElement(
-        'span',
-        {
-            'data-testid': 'custom-label',
-        },
-        typeof props.label === 'string' ? props.label : 'custom-label'
-    ),
-}));
+class TestLocaleService {
+    t(key: string) {
+        return key;
+    }
+}
+
+class TestLogService {
+    warn(): void {}
+}
+
+function renderWithDependencies(element: ReactElement) {
+    const injector = new Injector();
+    injector.add([LocaleService, { useClass: TestLocaleService as never }]);
+    injector.add([ILogService, { useClass: TestLogService as never }]);
+    injector.add([ComponentManager]);
+    injector.add([IconManager]);
+
+    return render(
+        <RediContext.Provider value={{ injector }}>
+            {element}
+        </RediContext.Provider>
+    );
+}
 
 describe('DropdownMenuLabel', () => {
     it('keeps menu content left-aligned and renders the selected checkmark on the right', () => {
-        const { container } = render(
+        const { container, getByText } = renderWithDependencies(
             <DropdownMenuLabel
                 value="normal"
                 option={{
@@ -49,11 +67,11 @@ describe('DropdownMenuLabel', () => {
         expect(children[0].className).toContain('univer-gap-2');
         expect(children[1].className).toContain('univer-ml-auto');
         expect(children[1].querySelector('svg')).toBeTruthy();
-        expect(screen.getByTestId('custom-label').textContent).toBe('Normal');
+        expect(getByText('Normal')).toBeTruthy();
     });
 
     it('reserves the right-side checkmark slot for selectable items even when not selected', () => {
-        const { container } = render(
+        const { container } = renderWithDependencies(
             <DropdownMenuLabel
                 value="normal"
                 option={{

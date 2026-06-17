@@ -14,11 +14,21 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommand, Injector, IStyleBase, Univer } from '@univerjs/core';
-import { BooleanNumber, DOC_RANGE_TYPE, ICommandService, IUniverInstanceService, RedoCommand, UndoCommand, UniverInstanceType } from '@univerjs/core';
+import type { DocumentDataModel, ICommand, Injector, ITextStyle, Univer } from '@univerjs/core';
+import {
+    BaselineOffset,
+    BooleanNumber,
+    DOC_RANGE_TYPE,
+    ICommandService,
+    IUniverInstanceService,
+    RedoCommand,
+    UndoCommand,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
+    ResetInlineFormatTextBackgroundColorCommand,
     ResetInlineFormatTextColorCommand,
     SetInlineFormatBoldCommand,
     SetInlineFormatCommand,
@@ -26,7 +36,11 @@ import {
     SetInlineFormatFontSizeCommand,
     SetInlineFormatItalicCommand,
     SetInlineFormatStrikethroughCommand,
+    SetInlineFormatSubscriptCommand,
+    SetInlineFormatSuperscriptCommand,
+    SetInlineFormatTextBackgroundColorCommand,
     SetInlineFormatTextColorCommand,
+    SetInlineFormatTextFillCommand,
     SetInlineFormatUnderlineCommand,
 } from '../inline-format.command';
 import { createCommandTestBed } from './create-command-test-bed';
@@ -36,7 +50,7 @@ describe('Test inline format commands', () => {
     let get: Injector['get'];
     let commandService: ICommandService;
 
-    function getFormatValueAt(key: keyof IStyleBase, pos: number) {
+    function getFormatValueAt(key: keyof ITextStyle, pos: number) {
         const univerInstanceService = get(IUniverInstanceService);
         const docsModel = univerInstanceService.getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC);
 
@@ -60,7 +74,19 @@ describe('Test inline format commands', () => {
 
         commandService = get(ICommandService);
         commandService.registerCommand(SetInlineFormatCommand);
+        commandService.registerCommand(SetInlineFormatBoldCommand);
+        commandService.registerCommand(SetInlineFormatItalicCommand);
+        commandService.registerCommand(SetInlineFormatUnderlineCommand);
+        commandService.registerCommand(SetInlineFormatStrikethroughCommand);
+        commandService.registerCommand(SetInlineFormatSubscriptCommand);
+        commandService.registerCommand(SetInlineFormatSuperscriptCommand);
+        commandService.registerCommand(SetInlineFormatFontFamilyCommand);
+        commandService.registerCommand(SetInlineFormatFontSizeCommand);
+        commandService.registerCommand(SetInlineFormatTextColorCommand);
+        commandService.registerCommand(SetInlineFormatTextFillCommand);
+        commandService.registerCommand(SetInlineFormatTextBackgroundColorCommand);
         commandService.registerCommand(ResetInlineFormatTextColorCommand);
+        commandService.registerCommand(ResetInlineFormatTextBackgroundColorCommand);
         commandService.registerCommand(SetTextSelectionsOperation);
         commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
 
@@ -90,6 +116,81 @@ describe('Test inline format commands', () => {
     });
 
     afterEach(() => univer.dispose());
+
+    describe('Public inline format wrapper commands', () => {
+        it('applies document text styles through the menu command wrappers', async () => {
+            let appliedCommandCount = 0;
+
+            try {
+                await commandService.executeCommand(SetInlineFormatBoldCommand.id);
+                appliedCommandCount++;
+                await commandService.executeCommand(SetInlineFormatItalicCommand.id);
+                appliedCommandCount++;
+                await commandService.executeCommand(SetInlineFormatUnderlineCommand.id);
+                appliedCommandCount++;
+                await commandService.executeCommand(SetInlineFormatStrikethroughCommand.id);
+                appliedCommandCount++;
+
+                expect(getFormatValueAt('bl', 1)).toBe(BooleanNumber.TRUE);
+                expect(getFormatValueAt('it', 1)).toBe(BooleanNumber.TRUE);
+                expect(getFormatValueAt('ul', 1)).toStrictEqual({ s: BooleanNumber.TRUE });
+                expect(getFormatValueAt('st', 1)).toStrictEqual({ s: BooleanNumber.TRUE });
+
+                await commandService.executeCommand(SetInlineFormatSubscriptCommand.id);
+                appliedCommandCount++;
+                expect(getFormatValueAt('va', 1)).toBe(BaselineOffset.SUBSCRIPT);
+
+                await commandService.executeCommand(SetInlineFormatSuperscriptCommand.id);
+                appliedCommandCount++;
+                expect(getFormatValueAt('va', 1)).toBe(BaselineOffset.SUPERSCRIPT);
+
+                await commandService.executeCommand(SetInlineFormatSuperscriptCommand.id);
+                appliedCommandCount++;
+                expect(getFormatValueAt('va', 1)).toBe(BaselineOffset.NORMAL);
+
+                await commandService.executeCommand(SetInlineFormatFontFamilyCommand.id, { value: 'Inter' });
+                appliedCommandCount++;
+                await commandService.executeCommand(SetInlineFormatFontSizeCommand.id, { value: 32 });
+                appliedCommandCount++;
+                expect(getFormatValueAt('ff', 1)).toBe('Inter');
+                expect(getFormatValueAt('fs', 1)).toBe(32);
+
+                await commandService.executeCommand(SetInlineFormatTextColorCommand.id, { value: '#224466' });
+                appliedCommandCount++;
+                await commandService.executeCommand(SetInlineFormatTextBackgroundColorCommand.id, { value: '#ffeeaa' });
+                appliedCommandCount++;
+                expect(getFormatValueAt('cl', 1)).toStrictEqual({ rgb: '#224466' });
+                expect(getFormatValueAt('bg', 1)).toStrictEqual({ rgb: '#ffeeaa' });
+
+                await commandService.executeCommand(ResetInlineFormatTextColorCommand.id);
+                appliedCommandCount++;
+                await commandService.executeCommand(ResetInlineFormatTextBackgroundColorCommand.id);
+                appliedCommandCount++;
+                expect(getFormatValueAt('cl', 1)).toStrictEqual({ rgb: null });
+                expect(getFormatValueAt('bg', 1)).toStrictEqual({ rgb: null });
+
+                await commandService.executeCommand(SetInlineFormatTextFillCommand.id, {
+                    value: {
+                        textFill: {
+                            type: 'solid',
+                            color: '#445566',
+                            opacity: 0.8,
+                        },
+                    },
+                });
+                appliedCommandCount++;
+                expect(getFormatValueAt('textFill', 1)).toStrictEqual({
+                    type: 'solid',
+                    color: '#445566',
+                    opacity: 0.8,
+                });
+            } finally {
+                for (let i = 0; i < appliedCommandCount; i++) {
+                    await commandService.executeCommand(UndoCommand.id);
+                }
+            }
+        });
+    });
 
     describe('Set Bold by SetInlineFormatCommand', () => {
         it('Should change text in range(0, 5) to bold', async () => {

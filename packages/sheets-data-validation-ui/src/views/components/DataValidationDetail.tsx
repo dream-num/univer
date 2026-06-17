@@ -14,15 +14,46 @@
  * limitations under the License.
  */
 
-import type { DataValidationOperator, DataValidationType, IDataValidationRuleBase, IDataValidationRuleOptions, IExecutionOptions, ISheetDataValidationRule, IUnitRange, Workbook } from '@univerjs/core';
+import type {
+    DataValidationOperator,
+    DataValidationType,
+    IDataValidationRuleBase,
+    IDataValidationRuleOptions,
+    IExecutionOptions,
+    ISheetDataValidationRule,
+    IUnitRange,
+    Workbook,
+} from '@univerjs/core';
 import type { IUpdateSheetDataValidationRangeCommandParams } from '@univerjs/sheets-data-validation';
 import type { IRangeSelectorInstance } from '@univerjs/sheets-formula-ui';
-import { debounce, ICommandService, isUnitRangesEqual, IUniverInstanceService, LocaleService, RedoCommand, shallowEqual, UndoCommand, UniverInstanceType } from '@univerjs/core';
-import { DataValidationModel, DataValidatorRegistryScope, DataValidatorRegistryService, getRuleOptions, getRuleSetting, TWO_FORMULA_OPERATOR_COUNT } from '@univerjs/data-validation';
+import {
+    debounce,
+    ICommandService,
+    isUnitRangesEqual,
+    IUniverInstanceService,
+    LocaleService,
+    RedoCommand,
+    shallowEqual,
+    UndoCommand,
+    UniverInstanceType,
+} from '@univerjs/core';
+import {
+    DataValidationModel,
+    DataValidatorRegistryScope,
+    DataValidatorRegistryService,
+    getRuleOptions,
+    getRuleSetting,
+    TWO_FORMULA_OPERATOR_COUNT,
+} from '@univerjs/data-validation';
 import { Button, Checkbox, FormLayout, Select } from '@univerjs/design';
 import { deserializeRangeWithSheet, serializeRange } from '@univerjs/engine-formula';
 import { SetWorksheetActiveOperation, SheetsSelectionsService } from '@univerjs/sheets';
-import { RemoveSheetDataValidationCommand, UpdateSheetDataValidationOptionsCommand, UpdateSheetDataValidationRangeCommand, UpdateSheetDataValidationSettingCommand } from '@univerjs/sheets-data-validation';
+import {
+    RemoveSheetDataValidationCommand,
+    UpdateSheetDataValidationOptionsCommand,
+    UpdateSheetDataValidationRangeCommand,
+    UpdateSheetDataValidationSettingCommand,
+} from '@univerjs/sheets-data-validation';
 import { RangeSelector } from '@univerjs/sheets-formula-ui';
 import { ComponentManager, useDependency, useEvent, useObservable } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -46,10 +77,20 @@ function getSheetIdByName(univerInstanceService: IUniverInstanceService, unitId:
 }
 
 export function DataValidationDetail() {
-    const [key, setKey] = useState(0);
     const dataValidationPanelService = useDependency(DataValidationPanelService);
     const activeRuleInfo = useObservable(dataValidationPanelService.activeRule$, dataValidationPanelService.activeRule)!;
     const { unitId, subUnitId, rule } = activeRuleInfo || {};
+    if (!unitId || !subUnitId || !rule) {
+        return null;
+    }
+
+    return <DataValidationDetailInner activeRuleInfo={{ unitId, subUnitId, rule }} />;
+}
+
+function DataValidationDetailInner(props: { activeRuleInfo: { unitId: string; subUnitId: string; rule: ISheetDataValidationRule } }) {
+    const [key, setKey] = useState(0);
+    const dataValidationPanelService = useDependency(DataValidationPanelService);
+    const { unitId, subUnitId, rule } = props.activeRuleInfo;
     const ruleId = rule.uid;
     const validatorService = useDependency(DataValidatorRegistryService);
     const univerInstanceService = useDependency(IUniverInstanceService);

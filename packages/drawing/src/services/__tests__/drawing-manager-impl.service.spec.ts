@@ -15,7 +15,7 @@
  */
 
 import type { IDrawingParam, IDrawingSearch } from '@univerjs/core';
-import { BooleanNumber, DrawingTypeEnum } from '@univerjs/core';
+import { BooleanNumber, DrawingTypeEnum, Injector } from '@univerjs/core';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { UnitDrawingService } from '../drawing-manager-impl.service';
 
@@ -44,7 +44,9 @@ describe('UnitDrawingService', () => {
     let service: UnitDrawingService<IDrawingParam>;
 
     beforeEach(() => {
-        service = new UnitDrawingService<IDrawingParam>();
+        const injector = new Injector();
+        injector.add([UnitDrawingService]);
+        service = injector.get(UnitDrawingService);
     });
 
     it('should register, initialize and remove drawing data for a unit', () => {

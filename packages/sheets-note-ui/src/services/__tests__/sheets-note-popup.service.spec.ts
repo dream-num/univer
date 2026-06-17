@@ -16,17 +16,32 @@
 
 import { Injector } from '@univerjs/core';
 import { CellPopupManagerService } from '@univerjs/sheets-ui';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { SheetsNotePopupService } from '../sheets-note-popup.service';
+
+class TestCellPopupManagerService {
+    static disposedCount = 0;
+
+    static reset() {
+        this.disposedCount = 0;
+    }
+
+    showPopup() {
+        return {
+            dispose: () => {
+                TestCellPopupManagerService.disposedCount += 1;
+            },
+        };
+    }
+}
 
 describe('SheetsNotePopupService', () => {
     let service: SheetsNotePopupService;
-    let popupDispose: ReturnType<typeof vi.fn>;
 
     beforeEach(() => {
-        popupDispose = vi.fn();
+        TestCellPopupManagerService.reset();
         const injector = new Injector();
-        injector.add([CellPopupManagerService, { useValue: { showPopup: vi.fn(() => ({ dispose: popupDispose })) } }]);
+        injector.add([CellPopupManagerService, { useClass: TestCellPopupManagerService as never }]);
         injector.add([SheetsNotePopupService]);
         service = injector.get(SheetsNotePopupService);
     });
@@ -41,7 +56,7 @@ describe('SheetsNotePopupService', () => {
         expect(service.activePopup).toBeNull();
         expect(active.at(-2)).toEqual({ unitId: 'book-1', subUnitId: 'sheet-1', row: 1, col: 2, noteId: 'note-1', temp: true });
         expect(active.at(-1)).toBeNull();
-        expect(popupDispose).toHaveBeenCalledTimes(1);
+        expect(TestCellPopupManagerService.disposedCount).toBe(1);
     });
 
     it('persists an opened temporary note popup', () => {

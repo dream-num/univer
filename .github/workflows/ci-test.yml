@@ -19,21 +19,32 @@ permissions:
 jobs:
     test:
         runs-on: ubuntu-latest
+        env:
+            TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+            TURBO_TEAM: ${{ vars.TURBO_TEAM }}
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
               with:
                   persist-credentials: false
 
             - name: Setup Node.js
               uses: ./.github/actions/setup-node
 
+            - name: Restore Turborepo cache
+              uses: actions/cache@v5
+              with:
+                  path: .turbo/cache
+                  key: ${{ runner.os }}-turbo-coverage-${{ github.sha }}
+                  restore-keys: |
+                      ${{ runner.os }}-turbo-coverage-
+
             - name: 🩺 Run test
               run: pnpm coverage
 
             - name: 🧬 Report coverage
-              uses: codecov/codecov-action@v3
+              uses: codecov/codecov-action@v7
               env:
                   CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
@@ -42,7 +53,7 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
               with:
                   persist-credentials: false
 
@@ -54,10 +65,13 @@ jobs:
 
     typecheck:
         runs-on: ubuntu-latest
+        env:
+            TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+            TURBO_TEAM: ${{ vars.TURBO_TEAM }}
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
               with:
                   persist-credentials: false
 

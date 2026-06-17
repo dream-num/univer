@@ -14,59 +14,185 @@
  * limitations under the License.
  */
 
-import { TableManager } from '@univerjs/sheets-table';
-import { describe, expect, it, vi } from 'vitest';
+import type { Dependency, IDisposable, IWorkbookData, Workbook } from '@univerjs/core';
+import {
+    ICommandService,
+    Inject,
+    Injector,
+    LocaleService,
+    LocaleType,
+    Plugin,
+    toDisposable,
+    Univer,
+    UniverInstanceType,
+} from '@univerjs/core';
+import { SheetTableService, TableManager } from '@univerjs/sheets-table';
+import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
+import { IDialogService } from '@univerjs/ui';
+import { afterEach, describe, expect, it } from 'vitest';
 import { SheetsTableComponentController } from '../../../controllers/sheet-table-component.controller';
 import { OpenTableFilterPanelOperation } from '../open-table-filter-dialog.opration';
 
-function createAccessor(pairs: Array<[unknown, unknown]>) {
-    const map = new Map<unknown, unknown>(pairs);
+interface IAttachedPopup {
+    row: number;
+    column: number;
+}
+
+class TestSheetCanvasPopManagerService {
+    readonly attachedPopups: IAttachedPopup[] = [];
+
+    attachPopupToCell(row: number, column: number): IDisposable {
+        this.attachedPopups.push({ row, column });
+        return toDisposable(() => {
+            this.attachedPopups.length = 0;
+        });
+    }
+}
+
+class TestDialogService {
+    readonly closedIds: string[] = [];
+
+    open(): IDisposable {
+        return toDisposable(() => {});
+    }
+
+    close(id: string): void {
+        this.closedIds.push(id);
+    }
+
+    closeAll(): void {
+        this.closedIds.push('*');
+    }
+
+    getDialogs$() {
+        throw new Error('Dialogs are not observed in this command test.');
+    }
+}
+
+interface ITestBed {
+    univer: Univer;
+    get: Injector['get'];
+    workbook: Workbook;
+}
+
+function createWorkbookData(): IWorkbookData {
     return {
-        get(token: unknown) {
-            if (!map.has(token)) {
-                throw new Error(`Unknown token: ${String(token)}`);
-            }
-            return map.get(token);
+        id: 'test',
+        appVersion: '3.0.0-alpha',
+        locale: LocaleType.EN_US,
+        name: 'test',
+        sheetOrder: ['sheet1'],
+        sheets: {
+            sheet1: {
+                id: 'sheet1',
+                rowCount: 20,
+                columnCount: 20,
+                cellData: {},
+            },
         },
-    } as any;
+        styles: {},
+    };
+}
+
+function createTestBed(): ITestBed {
+    const univer = new Univer();
+    const injector = univer.__getInjector();
+
+    class TestPlugin extends Plugin {
+        static override pluginName = 'test-plugin';
+        static override type = UniverInstanceType.UNIVER_SHEET;
+
+        constructor(
+            _config: undefined,
+            @Inject(Injector) override readonly _injector: Injector
+        ) {
+            super();
+        }
+
+        override onStarting(): void {
+            const dependencies: Dependency[] = [
+                [TableManager],
+                [SheetTableService],
+                [SheetCanvasPopManagerService, { useClass: TestSheetCanvasPopManagerService }],
+                [IDialogService, { useClass: TestDialogService }],
+                [SheetsTableComponentController],
+            ];
+            dependencies.forEach((dependency) => this._injector.add(dependency));
+        }
+    }
+
+    univer.registerPlugin(TestPlugin);
+    injector.get(LocaleService).load({
+        [LocaleType.EN_US]: {
+            'sheets-table': {
+                columnPrefix: 'Column',
+            },
+        },
+    });
+
+    const commandService = injector.get(ICommandService);
+    commandService.registerCommand(OpenTableFilterPanelOperation);
+
+    const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, createWorkbookData());
+    injector.get(SheetTableService).addTable(
+        workbook.getUnitId(),
+        'sheet1',
+        'Orders',
+        { startRow: 0, endRow: 4, startColumn: 1, endColumn: 3 },
+        ['Name', 'Quantity', 'Owner'],
+        'table-orders'
+    );
+
+    return {
+        univer,
+        get: injector.get.bind(injector),
+        workbook,
+    };
 }
 
 describe('OpenTableFilterPanelOperation', () => {
-    it('should return false for missing params or missing table', async () => {
-        const accessor = createAccessor([
-            [TableManager, { getTable: () => undefined }],
-            [SheetsTableComponentController, { openOrToggleFilterPanel: vi.fn() }],
-        ]);
+    let testBed: ITestBed | undefined;
 
-        await expect(OpenTableFilterPanelOperation.handler(accessor, undefined as any)).resolves.toBe(false);
-        await expect(OpenTableFilterPanelOperation.handler(accessor, {
-            unitId: 'u1',
-            subUnitId: 's1',
-            tableId: 'missing',
-            row: 1,
-            col: 1,
-        })).resolves.toBe(false);
+    afterEach(() => {
+        testBed?.univer.dispose();
+        testBed = undefined;
     });
 
-    it('should delegate panel toggle to component controller', async () => {
-        const openOrToggleFilterPanel = vi.fn();
+    it('does not open a panel when params or table are missing', async () => {
+        testBed = createTestBed();
+        const commandService = testBed.get(ICommandService);
 
-        const accessor = createAccessor([
-            [TableManager, { getTable: () => ({ id: 't1' }) }],
-            [SheetsTableComponentController, {
-                openOrToggleFilterPanel,
-            }],
-        ]);
+        await expect(commandService.executeCommand(OpenTableFilterPanelOperation.id)).resolves.toBe(false);
+        await expect(commandService.executeCommand(OpenTableFilterPanelOperation.id, {
+            unitId: testBed.workbook.getUnitId(),
+            subUnitId: 'sheet1',
+            tableId: 'missing',
+            row: 1,
+            col: 2,
+        })).resolves.toBe(false);
 
-        const result = await OpenTableFilterPanelOperation.handler(accessor, {
-            unitId: 'u1',
-            subUnitId: 's1',
-            tableId: 't1',
-            row: 6,
-            col: 3,
+        expect(testBed.get(SheetsTableComponentController).getCurrentTableFilterInfo()).toBeNull();
+    });
+
+    it('opens the filter panel for the requested table column', async () => {
+        testBed = createTestBed();
+        const commandService = testBed.get(ICommandService);
+
+        await expect(commandService.executeCommand(OpenTableFilterPanelOperation.id, {
+            unitId: testBed.workbook.getUnitId(),
+            subUnitId: 'sheet1',
+            tableId: 'table-orders',
+            row: 0,
+            col: 2,
+        })).resolves.toBe(true);
+
+        expect(testBed.get(SheetsTableComponentController).getCurrentTableFilterInfo()).toEqual({
+            unitId: testBed.workbook.getUnitId(),
+            subUnitId: 'sheet1',
+            tableId: 'table-orders',
+            row: 0,
+            column: 2,
         });
-
-        expect(result).toBe(true);
-        expect(openOrToggleFilterPanel).toHaveBeenCalledWith({ unitId: 'u1', subUnitId: 's1', row: 6, tableId: 't1', column: 3 });
+        expect((testBed.get(SheetCanvasPopManagerService) as unknown as TestSheetCanvasPopManagerService).attachedPopups).toEqual([{ row: 0, column: 2 }]);
     });
 });

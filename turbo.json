@@ -5,7 +5,7 @@
         },
 
         "coverage": {
-            "cache": false
+            "outputs": ["coverage/**"]
         },
 
         "build": {

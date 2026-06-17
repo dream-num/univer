@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import type { Worksheet } from '@univerjs/core';
+import type { Injector, Worksheet } from '@univerjs/core';
 import type { Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { IFloatDomData } from '@univerjs/sheets-drawing';
 import type { IFloatDom, IFloatDomLayout } from '@univerjs/ui';
-import { PrintFloatDomSingle } from '@univerjs/ui';
+import type { ComponentType } from 'react';
+import { render, unmount } from '@univerjs/design';
+import { connectInjector, PrintFloatDomSingle } from '@univerjs/ui';
 import { useMemo } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { transformBound2DOMBound } from '../services/canvas-float-dom-manager.service';
@@ -84,3 +86,11 @@ export const PrintingFloatDom = (props: IPrintingFloatDomProps) => {
         </div>
     );
 };
+
+export function mountPrintingFloatDom(props: IPrintingFloatDomProps, root: HTMLElement, injector: Injector): () => void {
+    const PrintingFloatDomInjector = connectInjector(PrintingFloatDom, injector) as ComponentType<IPrintingFloatDomProps>;
+
+    render(<PrintingFloatDomInjector {...props} />, root);
+
+    return () => unmount(root);
+}

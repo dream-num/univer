@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import type { Injector, Workbook } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
 import {
     ICommandService,
     IConfirmService,
     ILogService,
+    Injector,
     IUniverInstanceService,
     RANGE_TYPE,
     TestConfirmService,
@@ -29,6 +30,9 @@ import {
     AddWorksheetMergeCommand,
     AddWorksheetMergeMutation,
     CancelFrozenCommand,
+    ClearSelectionAllCommand,
+    ClearSelectionContentCommand,
+    ClearSelectionFormatCommand,
     InsertColByRangeCommand,
     InsertColCommand,
     InsertColMutation,
@@ -71,9 +75,11 @@ import {
     SetTextWrapCommand,
     SetVerticalTextAlignCommand,
     SetWorksheetColWidthMutation,
+    SetWorksheetDefaultStyleMutation,
     SetWorksheetRowHeightMutation,
     SetWorksheetRowIsAutoHeightCommand,
     SetWorksheetRowIsAutoHeightMutation,
+    SheetSkeletonService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -101,6 +107,11 @@ describe('Test FWorksheet', () => {
         commandService.registerCommand(SetVerticalTextAlignCommand);
         commandService.registerCommand(SetHorizontalTextAlignCommand);
         commandService.registerCommand(SetTextWrapCommand);
+        commandService.registerCommand(ClearSelectionAllCommand);
+        commandService.registerCommand(ClearSelectionContentCommand);
+        commandService.registerCommand(ClearSelectionFormatCommand);
+        commandService.registerCommand(SetWorksheetDefaultStyleMutation);
+        get(SheetSkeletonService).ensureSkeleton('test', 'sheet1');
 
         // row
         commandService.registerCommand(InsertRowCommand);
@@ -199,6 +210,40 @@ describe('Test FWorksheet', () => {
         const activeSheet = univerAPI.getActiveWorkbook()?.getSheetByName('sheet1');
         const range = activeSheet?.getRange(0, 3, 1, 1);
         expect(range).toBeDefined();
+    });
+
+    it('Worksheet manages sheet-level styles and clears content or formats independently', () => {
+        const activeSheet = univerAPI.getActiveWorkbook()!.getSheetByName('sheet1')!;
+
+        expect(activeSheet.getSheet().getSheetId()).toBe('sheet1');
+        expect(activeSheet.getWorkbook().getUnitId()).toBe('test');
+        expect(activeSheet.getInject()).toBe(get(Injector));
+
+        activeSheet.setDefaultStyle({ ff: 'Inter', fs: 13 });
+        activeSheet.setRowDefaultStyle(4, { fs: 16, bg: { rgb: '#fff2cc' } });
+        activeSheet.setColumnDefaultStyle(2, { ff: 'Mono', cl: { rgb: '#3366ff' } });
+
+        expect(activeSheet.getDefaultStyle()).toMatchObject({ ff: 'Inter', fs: 13 });
+        expect(activeSheet.getRowDefaultStyle(4)).toMatchObject({ fs: 16, bg: { rgb: '#fff2cc' } });
+        expect(activeSheet.getColumnDefaultStyle(2)).toMatchObject({ ff: 'Mono', cl: { rgb: '#3366ff' } });
+        expect(activeSheet.getRowDefaultStyle(4, true)).toMatchObject({ fs: 16, bg: { rgb: '#fff2cc' } });
+        expect(activeSheet.getColumnDefaultStyle(2, true)).toMatchObject({ ff: 'Mono', cl: { rgb: '#3366ff' } });
+
+        const cell = activeSheet.getRange('A1');
+        cell.setValue('Budget').setBackground('#ddeeff');
+        activeSheet.clear({ contentsOnly: true });
+        expect(cell.getValue()).toBeNull();
+        expect(cell.getBackground()).toBe('#ddeeff');
+
+        cell.setValue('Budget');
+        activeSheet.clear({ formatOnly: true });
+        expect(cell.getValue()).toBe('Budget');
+        expect(cell.getBackground()).not.toBe('#ddeeff');
+
+        cell.setValue('Budget').setBackground('#ddeeff');
+        activeSheet.clear();
+        expect(cell.getValue()).toBeNull();
+        expect(cell.getBackground()).not.toBe('#ddeeff');
     });
 
     it('Worksheet getMaxColumns', async () => {

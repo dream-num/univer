@@ -101,4 +101,56 @@ describe('Test FDefinedName', () => {
         sheet.insertDefinedName('test11', 'A1');
         expect(activeSpreadsheet.getDefinedName('test11')?.getLocalSheetId()).eq(sheet.getSheetId());
     });
+
+    it('defined names can be maintained as workbook and worksheet level business aliases', () => {
+        const workbook = univerAPI.getActiveWorkbook()!;
+        const sheet = workbook.getActiveSheet();
+
+        const initialParam = workbook.newDefinedNameBuilder()
+            .setName('QuarterRevenue')
+            .setRefByRange(1, 1, 2, 1)
+            .setComment('Revenue input cells')
+            .setScopeToWorksheet(sheet)
+            .setHidden(false)
+            .build();
+        workbook.insertDefinedNameBuilder(initialParam);
+
+        const localName = workbook.getDefinedName('QuarterRevenue')!;
+        expect(localName.getFormulaOrRefString()).toBe('B2:B3');
+        expect(localName.getComment()).toBe('Revenue input cells');
+        expect(localName.getLocalSheetId()).toBe(sheet.getSheetId());
+        expect(localName.isWorkbookScope()).toBe(false);
+        expect(sheet.getDefinedNames().map((name) => name.getName())).toEqual(['QuarterRevenue']);
+
+        localName.setName('RegionalRevenue');
+        expect(workbook.getDefinedName('QuarterRevenue')).toBeNull();
+        expect(workbook.getDefinedName('RegionalRevenue')?.getFormulaOrRefString()).toBe('B2:B3');
+
+        const regionalRevenue = workbook.getDefinedName('RegionalRevenue')!;
+        regionalRevenue.setFormula('SUM(B2:B3)');
+        expect(regionalRevenue.getFormulaOrRefString()).toBe('=SUM(B2:B3)');
+        regionalRevenue.setRef('C2:C3');
+        expect(regionalRevenue.getFormulaOrRefString()).toBe('C2:C3');
+        regionalRevenue.setComment('Approved revenue range');
+        expect(regionalRevenue.getComment()).toBe('Approved revenue range');
+        regionalRevenue.setHidden(true);
+        regionalRevenue.setScopeToWorkbook();
+        expect(regionalRevenue.isWorkbookScope()).toBe(true);
+        expect(sheet.getDefinedNames()).toEqual([]);
+
+        const updatedParam = regionalRevenue.toBuilder()
+            .setName('ApprovedRevenue')
+            .setRefByRange(3, 3, 1, 2)
+            .setScopeToWorksheet(sheet)
+            .build();
+        workbook.updateDefinedNameBuilder(updatedParam);
+
+        expect(workbook.getDefinedName('RegionalRevenue')).toBeNull();
+        expect(workbook.getDefinedName('ApprovedRevenue')?.getFormulaOrRefString()).toBe('D4:E4');
+        expect(sheet.getDefinedNames().map((name) => name.getName())).toEqual(['ApprovedRevenue']);
+
+        workbook.getDefinedName('ApprovedRevenue')?.delete();
+        expect(workbook.getDefinedName('ApprovedRevenue')).toBeNull();
+        expect(workbook.deleteDefinedName('missing-name')).toBe(false);
+    });
 });

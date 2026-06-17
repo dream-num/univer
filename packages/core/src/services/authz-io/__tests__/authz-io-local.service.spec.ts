@@ -17,6 +17,8 @@
 import { UnitObject } from '@univerjs/protocol';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { Injector } from '../../../common/di';
+import { DesktopLogService, ILogService } from '../../log/log.service';
+import { ResourceManagerService } from '../../resource-manager/resource-manager.service';
 import { IResourceManagerService } from '../../resource-manager/type';
 import { UserManagerService } from '../../user-manager/user-manager.service';
 import { AuthzIoLocalService } from '../authz-io-local.service';
@@ -26,7 +28,8 @@ describe('AuthzIoLocalService', () => {
 
     beforeEach(() => {
         const injector = new Injector();
-        injector.add([IResourceManagerService, { useValue: { registerPluginResource: () => ({ dispose: () => {} }) } as unknown as IResourceManagerService }]);
+        injector.add([ILogService, { useClass: DesktopLogService }]);
+        injector.add([IResourceManagerService, { useClass: ResourceManagerService }]);
         injector.add([UserManagerService]);
         injector.add([AuthzIoLocalService]);
         service = injector.get(AuthzIoLocalService);

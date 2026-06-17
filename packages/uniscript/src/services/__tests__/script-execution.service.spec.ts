@@ -27,9 +27,13 @@ describe('UniscriptExecutionService', () => {
     beforeEach(() => {
         Reflect.deleteProperty(globalThis, '__uniscriptResult');
         const injector = new Injector();
+        class TestCommandService {}
+
+        class TestUniverInstanceService {}
+
         injector.add([ILogService, { useClass: DesktopLogService }]);
-        injector.add([ICommandService, { useValue: {} as ICommandService }]);
-        injector.add([IUniverInstanceService, { useValue: {} as IUniverInstanceService }]);
+        injector.add([ICommandService, { useClass: TestCommandService as never }]);
+        injector.add([IUniverInstanceService, { useClass: TestUniverInstanceService as never }]);
         injector.add([LifecycleService]);
         injector.add([IUniscriptExecutionService, { useClass: UniscriptExecutionService }]);
         service = injector.get(IUniscriptExecutionService);

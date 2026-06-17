@@ -16,9 +16,25 @@
 
 import type { DocumentDataModel, ICommand, IDocumentData, Injector, Univer } from '@univerjs/core';
 import { awaitTime, ICommandService, IUniverInstanceService, NamedStyleType, UniverInstanceType } from '@univerjs/core';
-import { DocSelectionManagerService, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
+import {
+    DocContentInsertService,
+    DocSelectionManagerService,
+    RichTextEditingMutation,
+    SetTextSelectionsOperation,
+} from '@univerjs/docs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { H1HeadingCommand, QuickHeadingCommand, SetParagraphNamedStyleCommand } from '../set-heading.command';
+import {
+    H1HeadingCommand,
+    H2HeadingCommand,
+    H3HeadingCommand,
+    H4HeadingCommand,
+    H5HeadingCommand,
+    NormalTextHeadingCommand,
+    QuickHeadingCommand,
+    SetParagraphNamedStyleCommand,
+    SubtitleHeadingCommand,
+    TitleHeadingCommand,
+} from '../set-heading.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
 function getHeadingDocumentData(): IDocumentData {
@@ -79,6 +95,13 @@ describe('set heading commands', () => {
         commandService = get(ICommandService);
         commandService.registerCommand(SetParagraphNamedStyleCommand);
         commandService.registerCommand(H1HeadingCommand);
+        commandService.registerCommand(H2HeadingCommand);
+        commandService.registerCommand(H3HeadingCommand);
+        commandService.registerCommand(H4HeadingCommand);
+        commandService.registerCommand(H5HeadingCommand);
+        commandService.registerCommand(NormalTextHeadingCommand);
+        commandService.registerCommand(TitleHeadingCommand);
+        commandService.registerCommand(SubtitleHeadingCommand);
         commandService.registerCommand(QuickHeadingCommand);
         commandService.registerCommand(SetTextSelectionsOperation);
         commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
@@ -101,7 +124,66 @@ describe('set heading commands', () => {
         await awaitTime(0);
 
         expect(getBody()?.paragraphs?.[0].paragraphStyle?.namedStyleType).toBe(NamedStyleType.HEADING_1);
-        expect(getBody()?.paragraphs?.[0].paragraphStyle?.headingId).toBeDefined();
+        expect(getBody()?.paragraphs?.[0].paragraphStyle?.headingId?.length).toBe(6);
+    });
+
+    it('applies heading levels and document title styles through public commands', async () => {
+        const selectionManager = get(DocSelectionManagerService);
+        selectionManager.__TEST_ONLY_add([{ startOffset: 0, endOffset: 7, collapsed: false, isActive: true, segmentId: '', style: null as never }]);
+
+        const headingCases = [
+            { commandId: H2HeadingCommand.id, namedStyleType: NamedStyleType.HEADING_2 },
+            { commandId: H3HeadingCommand.id, namedStyleType: NamedStyleType.HEADING_3 },
+            { commandId: H4HeadingCommand.id, namedStyleType: NamedStyleType.HEADING_4 },
+            { commandId: H5HeadingCommand.id, namedStyleType: NamedStyleType.HEADING_5 },
+            { commandId: TitleHeadingCommand.id, namedStyleType: NamedStyleType.TITLE },
+            { commandId: SubtitleHeadingCommand.id, namedStyleType: NamedStyleType.SUBTITLE },
+        ];
+
+        for (const { commandId, namedStyleType } of headingCases) {
+            await commandService.executeCommand(commandId);
+            await awaitTime(0);
+
+            expect(getBody()?.paragraphs?.[0].paragraphStyle?.namedStyleType).toBe(namedStyleType);
+            expect(getBody()?.paragraphs?.[0].paragraphStyle?.headingId?.length).toBe(6);
+        }
+
+        await commandService.executeCommand(NormalTextHeadingCommand.id);
+        await awaitTime(0);
+
+        expect(getBody()?.paragraphs?.[0].paragraphStyle).toEqual({
+            namedStyleType: NamedStyleType.NORMAL_TEXT,
+        });
+    });
+
+    it('inserts a styled paragraph when paragraph menu provides an insert range', async () => {
+        univer.dispose();
+
+        const testBed = createCommandTestBed(getHeadingDocumentData(), [[DocContentInsertService]]);
+        univer = testBed.univer;
+        get = testBed.get;
+
+        commandService = get(ICommandService);
+        commandService.registerCommand(SetParagraphNamedStyleCommand);
+        commandService.registerCommand(SetTextSelectionsOperation);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+
+        const contentInsertService = get(DocContentInsertService);
+        contentInsertService.setInsertRange({
+            unitId: 'test-doc',
+            startOffset: 7,
+            endOffset: 7,
+        });
+
+        await commandService.executeCommand(SetParagraphNamedStyleCommand.id, {
+            value: NamedStyleType.TITLE,
+        });
+
+        await awaitTime(0);
+
+        expect(getBody()?.dataStream).toBe('Heading\r\r\n');
+        expect(getBody()?.paragraphs?.[0].paragraphStyle?.namedStyleType).toBe(NamedStyleType.TITLE);
+        expect(getBody()?.paragraphs?.[0].paragraphStyle?.headingId?.length).toBe(6);
     });
 
     it('converts markdown-like quick headings through the real command chain', async () => {

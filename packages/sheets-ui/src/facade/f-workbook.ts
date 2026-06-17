@@ -15,12 +15,25 @@
  */
 
 import type { IDisposable, Nullable } from '@univerjs/core';
-import type { IColumnsHeaderCfgParam, IRowsHeaderCfgParam, RenderComponentType, RenderManagerService, SpreadsheetColumnHeader, SpreadsheetRowHeader } from '@univerjs/engine-render';
+import type {
+    IColumnsHeaderCfgParam,
+    IRowsHeaderCfgParam,
+    RenderComponentType,
+    RenderManagerService,
+    SpreadsheetColumnHeader,
+    SpreadsheetRowHeader,
+} from '@univerjs/engine-render';
 import type { IEditorBridgeServiceVisibleParam, IScrollState, SheetSelectionRenderService } from '@univerjs/sheets-ui';
 import type { IDialogPartMethodOptions, ISidebarMethodOptions } from '@univerjs/ui';
 import { awaitTime, ICommandService, ILogService } from '@univerjs/core';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
-import { IEditorBridgeService, ISheetSelectionRenderService, SetCellEditVisibleOperation, SHEET_VIEW_KEY, SheetScrollManagerService } from '@univerjs/sheets-ui';
+import {
+    IEditorBridgeService,
+    ISheetSelectionRenderService,
+    SetCellEditVisibleOperation,
+    SHEET_VIEW_KEY,
+    SheetScrollManagerService,
+} from '@univerjs/sheets-ui';
 import { FWorkbook } from '@univerjs/sheets/facade';
 import { IDialogService, ISidebarService, KeyCode } from '@univerjs/ui';
 
@@ -310,6 +323,7 @@ export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheet
         return renderComponent;
     }
 
+    /* istanbul ignore next -- deprecated API helper */
     private _logDeprecation(name: string): void {
         const logService = this._injector.get(ILogService);
 

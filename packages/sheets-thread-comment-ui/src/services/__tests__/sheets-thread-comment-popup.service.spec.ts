@@ -14,32 +14,63 @@
  * limitations under the License.
  */
 
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { createThreadCommentUiTestBed } from '../../__tests__/create-thread-comment-ui-test-bed';
+import type { IDisposable } from '@univerjs/core';
+import { Inject, Injector } from '@univerjs/core';
+import { CellPopupManagerService, SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SHEETS_THREAD_COMMENT_MODAL } from '../../types/const';
 import { SheetsThreadCommentPopupService } from '../sheets-thread-comment-popup.service';
 
+class TestSheetCanvasPopManagerService {}
+
+class TestCellPopupManagerService extends CellPopupManagerService {
+    disposed = false;
+    lastLocation?: Parameters<CellPopupManagerService['showPopup']>[0];
+    lastPopup?: Parameters<CellPopupManagerService['showPopup']>[1];
+
+    constructor(
+        @Inject(SheetCanvasPopManagerService) sheetCanvasPopManagerService: SheetCanvasPopManagerService
+    ) {
+        super(sheetCanvasPopManagerService);
+    }
+
+    override showPopup(
+        location: Parameters<CellPopupManagerService['showPopup']>[0],
+        popup: Parameters<CellPopupManagerService['showPopup']>[1]
+    ): IDisposable {
+        this.lastLocation = location;
+        this.lastPopup = popup;
+
+        return {
+            dispose: () => {
+                this.disposed = true;
+            },
+        };
+    }
+}
+
 describe('SheetsThreadCommentPopupService', () => {
-    const onHide = vi.fn();
-    let testBed: ReturnType<typeof createThreadCommentUiTestBed>;
+    let injector: Injector;
+    let service: SheetsThreadCommentPopupService;
+    let cellPopupManagerService: TestCellPopupManagerService;
+    let hideCount: number;
 
     beforeEach(() => {
-        onHide.mockReset();
-        vi.stubGlobal('document', {
-            querySelectorAll: vi.fn(() => []),
-            getElementById: vi.fn(() => null),
-        });
-        testBed = createThreadCommentUiTestBed();
+        hideCount = 0;
+        injector = new Injector();
+        injector.add([SheetCanvasPopManagerService, { useClass: TestSheetCanvasPopManagerService }]);
+        injector.add([CellPopupManagerService, { useClass: TestCellPopupManagerService }]);
+        injector.add([SheetsThreadCommentPopupService]);
+
+        service = injector.get(SheetsThreadCommentPopupService);
+        cellPopupManagerService = injector.get(CellPopupManagerService) as unknown as TestCellPopupManagerService;
     });
 
     afterEach(() => {
-        vi.unstubAllGlobals();
-        testBed.univer.dispose();
+        service.dispose();
     });
 
     it('shows, persists and hides the active popup through the popup manager boundary', () => {
-        const service = testBed.injector.createInstance(SheetsThreadCommentPopupService);
-
         service.showPopup({
             unitId: 'test',
             subUnitId: 'sheet1',
@@ -48,7 +79,9 @@ describe('SheetsThreadCommentPopupService', () => {
             commentId: 'comment-1',
             temp: true,
             trigger: 'hover',
-        }, onHide);
+        }, () => {
+            hideCount += 1;
+        });
 
         expect(service.activePopup).toEqual({
             unitId: 'test',
@@ -59,12 +92,13 @@ describe('SheetsThreadCommentPopupService', () => {
             temp: true,
             trigger: 'hover',
         });
-        expect(testBed.cellPopupManagerService.showPopup).toHaveBeenCalledWith({
+        expect(cellPopupManagerService.lastLocation).toEqual({
             unitId: 'test',
             subUnitId: 'sheet1',
             row: 1,
             col: 2,
-        }, expect.objectContaining({
+        });
+        expect(cellPopupManagerService.lastPopup).toEqual(expect.objectContaining({
             componentKey: SHEETS_THREAD_COMMENT_MODAL,
             direction: 'horizontal',
         }));
@@ -76,7 +110,35 @@ describe('SheetsThreadCommentPopupService', () => {
 
         service.hidePopup();
         expect(service.activePopup).toBeNull();
-        expect(testBed.popupDisposable.dispose).toHaveBeenCalled();
-        expect(onHide).toHaveBeenCalledTimes(1);
+        expect(cellPopupManagerService.disposed).toBe(true);
+        expect(hideCount).toBe(1);
+    });
+
+    it('updates the active popup in place when the same cell is targeted again', () => {
+        service.showPopup({
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            row: 1,
+            col: 2,
+            commentId: 'comment-1',
+        });
+        service.showPopup({
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            row: 1,
+            col: 2,
+            commentId: 'comment-2',
+            trigger: 'cell',
+        });
+
+        expect(service.activePopup).toEqual({
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            row: 1,
+            col: 2,
+            commentId: 'comment-2',
+            trigger: 'cell',
+        });
+        expect(cellPopupManagerService.disposed).toBe(false);
     });
 });

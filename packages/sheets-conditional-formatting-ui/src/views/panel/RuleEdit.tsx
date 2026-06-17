@@ -16,13 +16,34 @@
 
 import type { IRange, Workbook } from '@univerjs/core';
 import type { IRemoveSheetMutationParams } from '@univerjs/sheets';
-import type { IAddCfCommandParams, IConditionFormattingRule, ISetCfCommandParams } from '@univerjs/sheets-conditional-formatting';
+import type {
+    IAddCfCommandParams,
+    IConditionFormattingRule,
+    ISetCfCommandParams,
+} from '@univerjs/sheets-conditional-formatting';
 import type { IStyleEditorProps } from './rule-edit/type';
-import { ICommandService, InterceptorManager, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
+import {
+    ICommandService,
+    InterceptorManager,
+    IUniverInstanceService,
+    LocaleService,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { Button, Select } from '@univerjs/design';
 import { deserializeRangeWithSheet, serializeRange } from '@univerjs/engine-formula';
-import { RemoveSheetMutation, setEndForRange, SetWorksheetActiveOperation, SheetsSelectionsService } from '@univerjs/sheets';
-import { AddCfCommand, CFRuleType, CFSubRuleType, ConditionalFormattingRuleModel, SetCfCommand } from '@univerjs/sheets-conditional-formatting';
+import {
+    RemoveSheetMutation,
+    setEndForRange,
+    SetWorksheetActiveOperation,
+    SheetsSelectionsService,
+} from '@univerjs/sheets';
+import {
+    AddCfCommand,
+    CFRuleType,
+    CFSubRuleType,
+    ConditionalFormattingRuleModel,
+    SetCfCommand,
+} from '@univerjs/sheets-conditional-formatting';
 import { RangeSelector } from '@univerjs/sheets-formula-ui';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -53,6 +74,7 @@ export const RuleEdit = (props: IRuleEditProps) => {
 
     const [errorText, setErrorText] = useState<string | undefined>(undefined);
     const rangeResult = useRef<IRange[]>(props.rule?.ranges ?? []);
+    const rangeSelectorTouched = useRef(false);
 
     const rangeString = useMemo(() => {
         let ranges = props.rule?.ranges;
@@ -170,14 +192,16 @@ export const RuleEdit = (props: IRuleEditProps) => {
     };
 
     const onRangeSelectorChange = (rangeString: string) => {
+        if (!rangeSelectorTouched.current && rangeString.length < 1 && rangeResult.current.length > 0) {
+            return;
+        }
+
+        rangeSelectorTouched.current = true;
         const result = rangeString.split(',').filter((e) => !!e).map(deserializeRangeWithSheet).map((item) => item.range);
         rangeResult.current = result;
     };
 
     const handleSubmit = () => {
-        if (errorText) {
-            return;
-        }
         const getRanges = () => {
             const worksheet = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet();
             if (!worksheet) {
@@ -188,6 +212,10 @@ export const RuleEdit = (props: IRuleEditProps) => {
             return result;
         };
         const ranges = getRanges();
+        if (ranges.length < 1) {
+            setErrorText(localeService.t('sheets-conditional-formatting-ui.errorMessage.rangeError'));
+            return;
+        }
         const beforeSubmitResult = interceptorManager.fetchThroughInterceptors(interceptorManager.getInterceptPoints().beforeSubmit)(true, null);
         if (beforeSubmitResult) {
             const result = interceptorManager.fetchThroughInterceptors(interceptorManager.getInterceptPoints().submit)(null, null);
@@ -218,6 +246,11 @@ export const RuleEdit = (props: IRuleEditProps) => {
     };
 
     const handleVerify = (v: boolean, rangeText: string) => {
+        if (!rangeSelectorTouched.current && !v && rangeText.length < 1) {
+            setErrorText(undefined);
+            return;
+        }
+
         if (v) {
             if (rangeText.length < 1) {
                 setErrorText(localeService.t('sheets-conditional-formatting-ui.errorMessage.rangeError'));

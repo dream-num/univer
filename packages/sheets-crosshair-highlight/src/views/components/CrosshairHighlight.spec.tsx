@@ -14,74 +14,127 @@
  * limitations under the License.
  */
 
-import { of } from 'rxjs';
-import { describe, expect, it, vi } from 'vitest';
-import { CROSSHAIR_HIGHLIGHT_COLOR_THEME_PATHS } from '../../services/crosshair.service';
+import type { IDisposable } from '@univerjs/core';
+import type { Root } from 'react-dom/client';
+import { Injector, ThemeService, toDisposable } from '@univerjs/core';
+import { RediContext } from '@univerjs/ui';
+import { act } from 'react';
+import { createRoot } from 'react-dom/client';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import {
+    CROSSHAIR_HIGHLIGHT_COLOR_THEME_PATHS,
+    SheetsCrosshairHighlightService,
+} from '../../services/crosshair.service';
 import { CrosshairOverlay } from './CrosshairHighlight';
 
-const mocked = vi.hoisted(() => ({
-    useDependency: vi.fn(),
-    useObservable: vi.fn(),
-}));
+(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
-vi.mock('@univerjs/ui', async () => {
-    const actual = await vi.importActual<typeof import('@univerjs/ui')>('@univerjs/ui');
-    return {
-        ...actual,
-        useDependency: mocked.useDependency,
-        useObservable: mocked.useObservable,
-    };
-});
+class TestState {
+    static pickedTokens: string[] = [];
 
-vi.mock('@univerjs/design', async () => {
-    const actual = await vi.importActual<typeof import('@univerjs/design')>('@univerjs/design');
-    return {
-        ...actual,
-        borderClassName: 'border-class',
-        clsx: (...args: Array<string | Record<string, boolean>>) => args
-            .flatMap((arg) =>
-                typeof arg === 'string'
-                    ? [arg]
-                    : Object.keys(arg).filter((k) => arg[k])
-            )
-            .join(' '),
-    };
-});
+    static reset(): void {
+        this.pickedTokens = [];
+    }
+}
 
-vi.mock('react', async () => {
-    const actual = await vi.importActual<typeof import('react')>('react');
+function createOverlayTestBed() {
+    const injector = new Injector();
+    injector.add([ThemeService]);
+    injector.add([SheetsCrosshairHighlightService]);
+
+    const themeService = injector.get(ThemeService);
+    const highlightBackground = Object.fromEntries(CROSSHAIR_HIGHLIGHT_COLOR_THEME_PATHS.map((path, index) => [
+        path.replace('highlight.background.', ''),
+        {
+            color: index === 1 ? '#040506' : '#010203',
+            alpha: index === 1 ? 0.15 : 0.3,
+        },
+    ]));
+
+    themeService.setTheme({
+        ...themeService.getCurrentTheme(),
+        highlight: {
+            background: highlightBackground,
+        },
+    } as never);
+
     return {
-        ...actual,
-        useCallback: <T extends (...args: never[]) => unknown>(fn: T) => fn,
+        injector,
+        service: injector.get(SheetsCrosshairHighlightService),
     };
-});
+}
+
+function renderOverlay(injector: Injector) {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const root = createRoot(container);
+
+    act(() => {
+        root.render(
+            <RediContext.Provider value={{ injector }}>
+                <CrosshairOverlay onChange={(token) => TestState.pickedTokens.push(token)} />
+            </RediContext.Provider>
+        );
+    });
+
+    return { container, root };
+}
+
+function getColorCells(container: HTMLElement): HTMLElement[] {
+    return Array.from(container.querySelectorAll<HTMLElement>('div[style*="background-color"]'));
+}
+
+function hasClassToken(element: HTMLElement, token: string): boolean {
+    return element.className.split(/\s+/).includes(token);
+}
+
+function teardown(root?: Root, container?: HTMLElement): IDisposable {
+    return toDisposable(() => {
+        if (root) {
+            act(() => root.unmount());
+        }
+        container?.remove();
+    });
+}
 
 describe('CrosshairOverlay', () => {
-    it('should render theme color cells and trigger onChange with token path', () => {
-        const themeService = {
-            currentTheme$: of({}),
-            getColorFromTheme: vi.fn((path: string) => ({
-                'highlight.background.1': { color: 'purple.500', alpha: 0.3 },
-                'highlight.background.2': { color: 'red.500', alpha: 0.15 },
-                'purple.500': '#010203',
-                'red.500': '#040506',
-            })[path] ?? { color: 'purple.500', alpha: 0.3 }),
-        };
+    let disposable: IDisposable | undefined;
 
-        mocked.useDependency
-            .mockReturnValueOnce({ color$: of('rgba(1,2,3,0.3)') })
-            .mockReturnValueOnce(themeService);
-        mocked.useObservable.mockReturnValueOnce('rgba(1,2,3,0.3)').mockReturnValueOnce({});
-        const onChange = vi.fn();
+    beforeEach(() => {
+        TestState.reset();
+    });
 
-        const element = CrosshairOverlay({ onChange });
-        const children = element.props.children as Array<{ props: { onClick: () => void; style: { backgroundColor: string } } }>;
+    afterEach(() => {
+        disposable?.dispose();
+        disposable = undefined;
+    });
 
-        expect(children).toHaveLength(CROSSHAIR_HIGHLIGHT_COLOR_THEME_PATHS.length);
-        expect(children[0].props.style.backgroundColor).toBe('rgba(1,2,3,0.3)');
-        expect(children[1].props.style.backgroundColor).toBe('rgba(4,5,6,0.15)');
+    it('offers theme-backed highlight colors and reports the picked token', () => {
+        const testBed = createOverlayTestBed();
+        const rendered = renderOverlay(testBed.injector);
+        disposable = teardown(rendered.root, rendered.container);
 
-        children[1].props.onClick();
-        expect(onChange).toHaveBeenCalledWith('highlight.background.2');
+        const cells = getColorCells(rendered.container);
+        expect(cells).toHaveLength(CROSSHAIR_HIGHLIGHT_COLOR_THEME_PATHS.length);
+        expect(cells[0].style.backgroundColor).toBe('rgba(1, 2, 3, 0.3)');
+        expect(cells[1].style.backgroundColor).toBe('rgba(4, 5, 6, 0.15)');
+
+        act(() => {
+            cells[1].dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        });
+
+        expect(TestState.pickedTokens).toEqual([CROSSHAIR_HIGHLIGHT_COLOR_THEME_PATHS[1]]);
+    });
+
+    it('marks the service-selected color as the active swatch', () => {
+        const testBed = createOverlayTestBed();
+        testBed.service.setColor(CROSSHAIR_HIGHLIGHT_COLOR_THEME_PATHS[1]);
+
+        const rendered = renderOverlay(testBed.injector);
+        disposable = teardown(rendered.root, rendered.container);
+
+        const cells = getColorCells(rendered.container);
+        expect(hasClassToken(cells[1], 'univer-ring-primary-600')).toBe(true);
+        expect(hasClassToken(cells[0], 'univer-ring-primary-600')).toBe(false);
     });
 });

@@ -16,8 +16,10 @@
 
 import type { IDocumentBody } from '@univerjs/core';
 import type { IThreadComment } from '../../types/interfaces/i-thread-comment';
-import { describe, expect, it, vi } from 'vitest';
-import { ThreadCommentDataSourceService } from '../tc-datasource.service';
+import type { IThreadCommentDataSource } from '../tc-datasource.service';
+import { Injector } from '@univerjs/core';
+import { describe, expect, it } from 'vitest';
+import { IThreadCommentDataSourceService, ThreadCommentDataSourceService } from '../tc-datasource.service';
 
 function createBody(text: string): IDocumentBody {
     return {
@@ -47,9 +49,15 @@ function createComment(overrides: Partial<IThreadComment> = {}): IThreadComment 
     };
 }
 
+function createService(): IThreadCommentDataSourceService {
+    const injector = new Injector();
+    injector.add([IThreadCommentDataSourceService, { useClass: ThreadCommentDataSourceService }]);
+    return injector.get(IThreadCommentDataSourceService);
+}
+
 describe('ThreadCommentDataSourceService', () => {
     it('falls back to local defaults when no external data source is configured', async () => {
-        const service = new ThreadCommentDataSourceService();
+        const service = createService();
         const comment = createComment({ threadId: undefined });
 
         await expect(service.addComment({ ...comment, threadId: undefined as unknown as string })).resolves.toEqual({
@@ -72,7 +80,7 @@ describe('ThreadCommentDataSourceService', () => {
     });
 
     it('normalizes an empty threadId to the comment id when no external data source is configured', async () => {
-        const service = new ThreadCommentDataSourceService();
+        const service = createService();
         const comment = createComment({ id: 'root-1', threadId: '' });
 
         await expect(service.addComment(comment)).resolves.toEqual({
@@ -82,24 +90,39 @@ describe('ThreadCommentDataSourceService', () => {
     });
 
     it('delegates CRUD, query and snapshot behavior to the configured data source', async () => {
-        const service = new ThreadCommentDataSourceService();
+        const service = createService();
         const comment = createComment({ id: 'root-1' });
-
-        const dataSource = {
-            addComment: vi.fn(async (input: IThreadComment) => ({ ...input, threadId: 'server-thread' })),
-            updateComment: vi.fn(async () => false),
-            resolveComment: vi.fn(async () => false),
-            deleteComment: vi.fn(async () => false),
-            listComments: vi.fn(async () => [{
-                ...comment,
-                children: [createComment({ id: 'reply-1', parentId: 'root-1', threadId: 'root-1', ref: '' })],
-            }]),
-            saveCommentToSnapshot: vi.fn((input: IThreadComment) => ({
-                id: input.id,
-                threadId: input.threadId,
-                ref: input.ref,
-                personId: input.personId,
-            })),
+        const listRequests: Array<{ unitId: string; subUnitId: string; threadIds: string[] }> = [];
+        const savedSnapshots: IThreadComment[] = [];
+        const dataSource: IThreadCommentDataSource = {
+            async addComment(input) {
+                return { ...input, threadId: 'server-thread' };
+            },
+            async updateComment() {
+                return false;
+            },
+            async resolveComment() {
+                return false;
+            },
+            async deleteComment() {
+                return false;
+            },
+            async listComments(unitId, subUnitId, threadIds) {
+                listRequests.push({ unitId, subUnitId, threadIds });
+                return [{
+                    ...comment,
+                    children: [createComment({ id: 'reply-1', parentId: 'root-1', threadId: 'root-1', ref: '' })],
+                }];
+            },
+            saveCommentToSnapshot(input) {
+                savedSnapshots.push(input);
+                return {
+                    id: input.id,
+                    threadId: input.threadId,
+                    ref: input.ref,
+                    personId: input.personId,
+                };
+            },
         };
         service.dataSource = dataSource;
 
@@ -133,25 +156,39 @@ describe('ThreadCommentDataSourceService', () => {
             ],
         });
 
-        expect(dataSource.listComments).toHaveBeenNthCalledWith(1, 'unit-1', 'sheet-1', ['root-1']);
-        expect(dataSource.listComments).toHaveBeenNthCalledWith(2, 'unit-1', 'sheet-1', ['root-1']);
-        expect(dataSource.saveCommentToSnapshot).toHaveBeenCalledWith(comment, 0, [comment]);
+        expect(listRequests).toEqual([
+            { unitId: 'unit-1', subUnitId: 'sheet-1', threadIds: ['root-1'] },
+            { unitId: 'unit-1', subUnitId: 'sheet-1', threadIds: ['root-1'] },
+        ]);
+        expect(savedSnapshots).toEqual([comment]);
     });
 
     it('normalizes an empty threadId returned from an external data source to the returned comment id', async () => {
-        const service = new ThreadCommentDataSourceService();
+        const service = createService();
         const comment = createComment({ id: 'client-id', threadId: '' });
-        const dataSource = {
-            addComment: vi.fn(async (input: IThreadComment) => ({ ...input, id: 'server-id', threadId: '' })),
-            updateComment: vi.fn(async () => true),
-            resolveComment: vi.fn(async () => true),
-            deleteComment: vi.fn(async () => true),
-            listComments: vi.fn(async () => []),
-            saveCommentToSnapshot: vi.fn((input: IThreadComment) => ({
-                id: input.id,
-                threadId: input.threadId,
-                ref: input.ref,
-            })),
+        const dataSource: IThreadCommentDataSource = {
+            async addComment(input) {
+                return { ...input, id: 'server-id', threadId: '' };
+            },
+            async updateComment() {
+                return true;
+            },
+            async resolveComment() {
+                return true;
+            },
+            async deleteComment() {
+                return true;
+            },
+            async listComments() {
+                return [];
+            },
+            saveCommentToSnapshot(input) {
+                return {
+                    id: input.id,
+                    threadId: input.threadId,
+                    ref: input.ref,
+                };
+            },
         };
         service.dataSource = dataSource;
 

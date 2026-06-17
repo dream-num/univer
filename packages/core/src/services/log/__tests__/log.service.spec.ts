@@ -15,7 +15,14 @@
  */
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { DesktopLogService, LogLevel } from '../log.service';
+import { Injector } from '../../../common/di';
+import { DesktopLogService, ILogService, LogLevel } from '../log.service';
+
+function createService(): ILogService {
+    const injector = new Injector();
+    injector.add([ILogService, { useClass: DesktopLogService }]);
+    return injector.get(ILogService);
+}
 
 describe('DesktopLogService', () => {
     afterEach(() => {
@@ -23,7 +30,7 @@ describe('DesktopLogService', () => {
     });
 
     it('should respect log level thresholds', () => {
-        const service = new DesktopLogService();
+        const service = createService();
         const debugSpy = vi.spyOn(console, 'debug').mockImplementation(() => undefined);
         const logSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
         const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
@@ -42,7 +49,7 @@ describe('DesktopLogService', () => {
     });
 
     it('should format tagged messages when logging', () => {
-        const service = new DesktopLogService();
+        const service = createService();
         const logSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
 
         service.log('[core]', 'message');
@@ -51,7 +58,7 @@ describe('DesktopLogService', () => {
     });
 
     it('should deduplicate deprecate logs and clear cache on dispose', () => {
-        const service = new DesktopLogService();
+        const service = createService();
         const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
         service.deprecate('[deprecated]', { key: 'value' });
@@ -59,14 +66,14 @@ describe('DesktopLogService', () => {
 
         expect(errorSpy).toHaveBeenCalledTimes(1);
 
-        service.dispose();
+        (service as DesktopLogService).dispose();
         service.deprecate('[deprecated]', { key: 'value' });
 
         expect(errorSpy).toHaveBeenCalledTimes(2);
     });
 
     it('should suppress all output at silent level', () => {
-        const service = new DesktopLogService();
+        const service = createService();
         const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
         const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 

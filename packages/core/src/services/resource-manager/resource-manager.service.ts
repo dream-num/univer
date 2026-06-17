@@ -54,14 +54,19 @@ export class ResourceManagerService extends Disposable implements IResourceManag
     }
 
     public getResourcesByType(unitId: string, type: UniverInstanceType) {
-        const resourceHooks = this.getAllResourceHooks().filter((hook) => hook.businesses.includes(type));
-        const resources = resourceHooks.map((resourceHook) => {
+        const resourceHooks = this.getAllResourceHooks();
+        const resources: IResources = [];
+        for (let i = 0; i < resourceHooks.length; i++) {
+            const resourceHook = resourceHooks[i];
+            if (!resourceHook.businesses.includes(type)) {
+                continue;
+            }
             const data = resourceHook.toJson(unitId);
-            return {
+            resources.push({
                 name: resourceHook.pluginName,
                 data,
-            };
-        });
+            });
+        }
         return resources;
     }
 
@@ -80,7 +85,9 @@ export class ResourceManagerService extends Disposable implements IResourceManag
     }
 
     public loadResources(unitId: string, resources?: IResources) {
-        this.getAllResourceHooks().forEach((hook) => {
+        const hooks = this.getAllResourceHooks();
+        for (let i = 0; i < hooks.length; i++) {
+            const hook = hooks[i];
             const data = resources?.find((resource) => resource.name === hook.pluginName)?.data;
             if (data) {
                 try {
@@ -90,13 +97,18 @@ export class ResourceManagerService extends Disposable implements IResourceManag
                     this._logService.error('[ResourceManagerService]', 'loadResources error', err);
                 }
             }
-        });
+        }
     }
 
     public unloadResources(unitId: string, type: UniverInstanceType) {
-        this.getAllResourceHooks().filter((hook) => hook.businesses.includes(type)).forEach((hook) => {
+        const hooks = this.getAllResourceHooks();
+        for (let i = 0; i < hooks.length; i++) {
+            const hook = hooks[i];
+            if (!hook.businesses.includes(type)) {
+                continue;
+            }
             hook.onUnLoad(unitId);
-        });
+        }
     }
 
     override dispose(): void {

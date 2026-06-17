@@ -15,12 +15,19 @@
  */
 
 import type { IScrollState } from '../../views/sheet-bar/sheet-bar-tabs/utils/slide-tab-bar';
-import { describe, expect, it, vi } from 'vitest';
-import { SheetBarService } from '../sheet-bar/sheet-bar.service';
+import { Injector } from '@univerjs/core';
+import { describe, expect, it } from 'vitest';
+import { ISheetBarService, SheetBarService } from '../sheet-bar/sheet-bar.service';
+
+function createService(): ISheetBarService {
+    const injector = new Injector();
+    injector.add([ISheetBarService, { useClass: SheetBarService }]);
+    return injector.get(ISheetBarService);
+}
 
 describe('SheetBarService', () => {
     it('publishes sheet bar events and manages menu handler lifecycle', () => {
-        const service = new SheetBarService();
+        const service = createService();
 
         const renames: string[] = [];
         const removes: string[] = [];
@@ -46,17 +53,18 @@ describe('SheetBarService', () => {
         expect(scrollXs).toEqual([42]);
         expect(adds).toEqual([3]);
 
-        const handler = { handleSheetBarMenu: vi.fn() };
+        let opened = 0;
+        const handler = { handleSheetBarMenu: () => opened++ };
         const disposable = service.registerSheetBarMenuHandler(handler);
         service.triggerSheetBarMenu();
-        expect(handler.handleSheetBarMenu).toHaveBeenCalledTimes(1);
+        expect(opened).toBe(1);
 
-        expect(() => service.registerSheetBarMenuHandler({ handleSheetBarMenu: vi.fn() })).toThrow(
+        expect(() => service.registerSheetBarMenuHandler({ handleSheetBarMenu: () => {} })).toThrow(
             'There is already a context menu handler!'
         );
 
         disposable.dispose();
         service.triggerSheetBarMenu();
-        expect(handler.handleSheetBarMenu).toHaveBeenCalledTimes(1);
+        expect(opened).toBe(1);
     });
 });

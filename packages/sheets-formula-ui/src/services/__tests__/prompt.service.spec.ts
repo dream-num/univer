@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { IContextService } from '@univerjs/core';
 import type { ISequenceNode } from '@univerjs/engine-formula';
-import { Direction } from '@univerjs/core';
+import { Direction, IContextService, Injector } from '@univerjs/core';
 import { sequenceNodeType } from '@univerjs/engine-formula';
 import { map, Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
@@ -31,12 +30,10 @@ function createReferenceNode(token: string, startIndex: number, endIndex: number
     } as ISequenceNode;
 }
 
-function createContextService(): IContextService {
+function createService() {
     const contextChanged$ = new Subject<{ [key: string]: boolean }>();
     const contextMap = new Map<string, boolean>();
-
-    return {
-        contextChanged$: contextChanged$.asObservable(),
+    const contextService = {
         getContextValue: vi.fn((key: string) => contextMap.get(key) ?? false),
         setContextValue: vi.fn((key: string, value: boolean) => {
             contextMap.set(key, value);
@@ -44,12 +41,26 @@ function createContextService(): IContextService {
         }),
         subscribeContextValue$: vi.fn((key: string) => contextChanged$.pipe(map((event) => event[key] ?? false))),
     };
+
+    class TestContextService {
+        contextChanged$ = contextChanged$.asObservable();
+        getContextValue = contextService.getContextValue;
+        setContextValue = contextService.setContextValue;
+        subscribeContextValue$ = contextService.subscribeContextValue$;
+    }
+
+    const injector = new Injector();
+    injector.add([IContextService, { useClass: TestContextService }]);
+    injector.add([FormulaPromptService]);
+    return {
+        contextService,
+        service: injector.get(FormulaPromptService),
+    };
 }
 
 describe('FormulaPromptService', () => {
     it('tracks prompt visibility and forwards prompt events', () => {
-        const contextService = createContextService();
-        const service = new FormulaPromptService(contextService);
+        const { contextService, service } = createService();
         const searchEvents: unknown[] = [];
         const helpEvents: unknown[] = [];
         const navigateEvents: unknown[] = [];
@@ -81,7 +92,7 @@ describe('FormulaPromptService', () => {
     });
 
     it('updates and inserts sequence nodes while keeping later reference indexes aligned', () => {
-        const service = new FormulaPromptService(createContextService());
+        const { service } = createService();
 
         service.setSequenceNodes([
             '=',

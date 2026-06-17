@@ -14,13 +14,21 @@
  * limitations under the License.
  */
 
-import type { Injector, Univer } from '@univerjs/core';
+import type { Injector, Univer, Workbook } from '@univerjs/core';
+import type { FWorkbook } from '@univerjs/sheets/facade';
 import type { ISheetDrawing } from '../../services/sheet-drawing.service';
-import { DrawingTypeEnum, ICommandService, RedoCommand, UndoCommand } from '@univerjs/core';
-import { InsertSheetDrawingCommand } from '../../commands/commands/insert-sheet-drawing.command';
-import { ISheetDrawingService } from '../../services/sheet-drawing.service';
+import {
+    DrawingTypeEnum,
+    ICommandService,
+    IUniverInstanceService,
+    RedoCommand,
+    UndoCommand,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createSheetsDrawingTestBed } from '../../__tests__/create-sheets-drawing-test-bed';
+import { InsertSheetDrawingCommand } from '../../commands/commands/insert-sheet-drawing.command';
+import { ISheetDrawingService } from '../../services/sheet-drawing.service';
 import { FWorksheetDrawingMixin } from '../f-worksheet';
 
 describe('FWorksheetDrawingMixin group drawings', () => {
@@ -163,15 +171,9 @@ describe('FWorksheetDrawingMixin group drawings', () => {
 });
 
 function createFacade(injector: Injector): FWorksheetDrawingMixin {
-    const instance = Object.create(FWorksheetDrawingMixin.prototype) as any;
-
-    instance._commandService = injector.get(ICommandService);
-    instance._fWorkbook = { getId: () => 'test' };
-    instance._workbook = { getUnitId: () => 'test' };
-    instance._worksheet = { getSheetId: () => 'sheet1' };
-    instance._injector = injector;
-
-    return instance as FWorksheetDrawingMixin;
+    const workbook = injector.get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+    const worksheet = workbook.getSheetBySheetId('sheet1')!;
+    return injector.createInstance(FWorksheetDrawingMixin, { getId: () => 'test' } as FWorkbook, workbook, worksheet);
 }
 
 function createDrawing(drawingId: string, left: number, drawingType = DrawingTypeEnum.DRAWING_SHAPE): ISheetDrawing {

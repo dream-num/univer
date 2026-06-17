@@ -15,8 +15,9 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { Injector } from '../../../common/di';
 import { UniverInstanceType } from '../../../common/unit';
-import { DesktopLogService, LogLevel } from '../../log/log.service';
+import { DesktopLogService, ILogService, LogLevel } from '../../log/log.service';
 import { ResourceManagerService } from '../resource-manager.service';
 
 describe('ResourceManagerService', () => {
@@ -24,9 +25,12 @@ describe('ResourceManagerService', () => {
     let service: ResourceManagerService;
 
     beforeEach(() => {
-        logService = new DesktopLogService();
+        const injector = new Injector();
+        injector.add([ILogService, { useClass: DesktopLogService }]);
+        injector.add([ResourceManagerService]);
+        logService = injector.get(ILogService) as DesktopLogService;
         logService.setLogLevel(LogLevel.SILENT);
-        service = new ResourceManagerService(logService);
+        service = injector.get(ResourceManagerService);
     });
 
     afterEach(() => {

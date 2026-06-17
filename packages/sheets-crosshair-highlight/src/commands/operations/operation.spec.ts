@@ -14,14 +14,21 @@
  * limitations under the License.
  */
 
-import { MenuItemType } from '@univerjs/ui';
-import { of } from 'rxjs';
-import { describe, expect, it, vi } from 'vitest';
-import { CrosshairHighlightMenuItemFactory } from '../../menu/crosshair.menu';
-import { menuSchema } from '../../menu/schema';
 import {
-    SheetsCrosshairHighlightService,
-} from '../../services/crosshair.service';
+    CommandService,
+    ConfigService,
+    ContextService,
+    DesktopLogService,
+    ICommandService,
+    IConfigService,
+    IContextService,
+    ILogService,
+    Injector,
+    ThemeService,
+} from '@univerjs/core';
+import { firstValueFrom } from 'rxjs';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { CROSSHAIR_HIGHLIGHT_COLOR_THEME_PATHS, SheetsCrosshairHighlightService } from '../../services/crosshair.service';
 import {
     DisableCrosshairHighlightOperation,
     EnableCrosshairHighlightOperation,
@@ -29,73 +36,80 @@ import {
     ToggleCrosshairHighlightOperation,
 } from './operation';
 
-vi.mock('@univerjs/ui', async () => {
-    const actual = await vi.importActual<typeof import('@univerjs/ui')>('@univerjs/ui');
-    return {
-        ...actual,
-        getMenuHiddenObservable: vi.fn(() => of(false)),
-    };
-});
+function createOperationTestBed() {
+    const injector = new Injector();
+    injector.add([ICommandService, { useClass: CommandService }]);
+    injector.add([ILogService, { useClass: DesktopLogService }]);
+    injector.add([IContextService, { useClass: ContextService }]);
+    injector.add([IConfigService, { useClass: ConfigService }]);
+    injector.add([ThemeService]);
+    injector.add([SheetsCrosshairHighlightService]);
 
-function createThemeService() {
+    const commandService = injector.get(ICommandService);
+    commandService.registerCommand(ToggleCrosshairHighlightOperation);
+    commandService.registerCommand(EnableCrosshairHighlightOperation);
+    commandService.registerCommand(DisableCrosshairHighlightOperation);
+    commandService.registerCommand(SetCrosshairHighlightColorOperation);
+
+    const themeService = injector.get(ThemeService);
+    const highlightBackground: Array<{ color: string; alpha: number }> = [];
+    for (let index = 0; index < CROSSHAIR_HIGHLIGHT_COLOR_THEME_PATHS.length; index++) {
+        highlightBackground.push({
+            color: index === 2 ? '#00ff00' : '#ff0000',
+            alpha: index === 2 ? 0.5 : 1,
+        });
+    }
+
+    themeService.setTheme({
+        ...themeService.getCurrentTheme(),
+        highlight: {
+            background: highlightBackground,
+        },
+    } as never);
+
     return {
-        currentTheme$: of({}),
-        getColorFromTheme: vi.fn((path: string) => ({
-            'highlight.background.1': { color: 'purple.500', alpha: 0.3 },
-            'highlight.background.2': { color: 'red.500', alpha: 0.15 },
-            'purple.500': '#010203',
-            'red.500': '#040506',
-        })[path]),
+        commandService,
+        service: injector.get(SheetsCrosshairHighlightService),
     };
 }
 
-describe('crosshair operations/menu/service', () => {
-    it('should handle service state changes and dispose', () => {
-        const service = new SheetsCrosshairHighlightService(createThemeService() as never);
+describe('crosshair highlight operations', () => {
+    let commandService: ICommandService;
+    let service: SheetsCrosshairHighlightService;
+
+    beforeEach(() => {
+        const testBed = createOperationTestBed();
+        commandService = testBed.commandService;
+        service = testBed.service;
+    });
+
+    it('toggles crosshair highlighting for the current sheet view', async () => {
         expect(service.enabled).toBe(false);
 
-        service.setEnabled(true);
+        await commandService.executeCommand(ToggleCrosshairHighlightOperation.id);
         expect(service.enabled).toBe(true);
 
-        service.dispose();
+        await commandService.executeCommand(ToggleCrosshairHighlightOperation.id);
+        expect(service.enabled).toBe(false);
     });
 
-    it('should execute operation handlers with branch coverage', () => {
-        const service = new SheetsCrosshairHighlightService(createThemeService() as never);
-        const accessor = { get: vi.fn(() => service) };
-
-        expect(ToggleCrosshairHighlightOperation.handler(accessor as never, undefined as never)).toBe(true);
+    it('reports whether explicit enable and disable commands actually changed the state', async () => {
+        await expect(commandService.executeCommand(EnableCrosshairHighlightOperation.id)).resolves.toBe(true);
+        await expect(commandService.executeCommand(EnableCrosshairHighlightOperation.id)).resolves.toBe(false);
         expect(service.enabled).toBe(true);
 
-        service.setEnabled(false);
-        expect(EnableCrosshairHighlightOperation.handler(accessor as never, undefined as never)).toBe(true);
-        expect(EnableCrosshairHighlightOperation.handler(accessor as never, undefined as never)).toBe(false);
-
-        expect(DisableCrosshairHighlightOperation.handler(accessor as never, undefined as never)).toBe(true);
-        expect(DisableCrosshairHighlightOperation.handler(accessor as never, undefined as never)).toBe(false);
-
-        expect(SetCrosshairHighlightColorOperation.handler(accessor as never, { value: 'highlight.background.2' })).toBe(true);
-        expect(service.enabled).toBe(true);
+        await expect(commandService.executeCommand(DisableCrosshairHighlightOperation.id)).resolves.toBe(true);
+        await expect(commandService.executeCommand(DisableCrosshairHighlightOperation.id)).resolves.toBe(false);
+        expect(service.enabled).toBe(false);
     });
 
-    it('should create menu item schema and factory output', () => {
-        const service = new SheetsCrosshairHighlightService(createThemeService() as never);
-        service.setEnabled(true);
-        const accessor = { get: vi.fn(() => service) };
+    it('enables crosshair highlighting when the user chooses a highlight color', async () => {
+        const result = await commandService.executeCommand(SetCrosshairHighlightColorOperation.id, {
+            value: CROSSHAIR_HIGHLIGHT_COLOR_THEME_PATHS[1],
+        });
 
-        const item = CrosshairHighlightMenuItemFactory(accessor as never);
-        expect(item.id).toBe(ToggleCrosshairHighlightOperation.id);
-        expect(item.type).toBe(MenuItemType.BUTTON_SELECTOR);
-        expect(item.selectionsCommandId).toBe(SetCrosshairHighlightColorOperation.id);
-        expect(item.selections).toHaveLength(1);
-        expect(item.activated$).toBe(service.enabled$);
-        expect(item.hidden$).toBeDefined();
-
-        const firstLevel = Object.values(menuSchema)[0] as Record<string, Record<string, unknown>>;
-        const secondLevel = Object.values(firstLevel)[0] as Record<string, { menuItemFactory: unknown; order: number }>;
-        expect(secondLevel[ToggleCrosshairHighlightOperation.id].menuItemFactory).toBe(CrosshairHighlightMenuItemFactory);
-        expect(secondLevel[ToggleCrosshairHighlightOperation.id].order).toBe(0);
-
-        expect(accessor.get).toHaveBeenCalledWith(service.constructor);
+        expect(result).toBe(true);
+        expect(service.enabled).toBe(true);
+        await expect(firstValueFrom(service.color$)).resolves.toBe('rgba(0,255,0,0.5)');
     });
 });

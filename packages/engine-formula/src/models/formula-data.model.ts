@@ -164,51 +164,66 @@ export class FormulaDataModel extends Disposable {
     getFormulaData(): IFormulaData {
         const formulaData: IFormulaData = {};
         const allSheets = this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-        allSheets.forEach((workbook) => {
+        for (let i = 0; i < allSheets.length; i++) {
+            const workbook = allSheets[i];
             const unitId = workbook.getUnitId();
             formulaData[unitId] = {};
 
             const worksheets = workbook.getSheets();
-            worksheets.forEach((worksheet) => {
+            for (let j = 0; j < worksheets.length; j++) {
+                const worksheet = worksheets[j];
                 const cellMatrix = worksheet.getCellMatrix();
                 const sheetId = worksheet.getSheetId();
 
                 initSheetFormulaData(formulaData, unitId, sheetId, cellMatrix);
-            });
-        });
+            }
+        }
 
         const allBases = this._univerInstanceService.getAllUnitsForType<BaseDataModel>(UniverInstanceType.UNIVER_BASE);
-        allBases.forEach((base) => {
+        for (let i = 0; i < allBases.length; i++) {
+            const base = allBases[i];
             const snapshot = base.getSnapshot();
             const unitId = base.getUnitId();
             formulaData[unitId] = {};
 
-            Object.values(snapshot.tables).filter((table) => !table.deleted).forEach((table) => {
+            const tables = Object.values(snapshot.tables);
+            for (let j = 0; j < tables.length; j++) {
+                const table = tables[j];
+                if (table.deleted) {
+                    continue;
+                }
                 const tableFormulaData: Record<number, Record<number, IFormulaDataItem>> = {};
-                table.recordOrder?.forEach((recordId, row) => {
+                const recordOrder = table.recordOrder;
+                if (!recordOrder) {
+                    formulaData[unitId]![table.id] = tableFormulaData;
+                    continue;
+                }
+                for (let row = 0; row < recordOrder.length; row++) {
+                    const recordId = recordOrder[row];
                     const record = table.records[recordId];
                     if (!record || record.deleted) {
-                        return;
+                        continue;
                     }
-                    table.fieldOrder.forEach((fieldId, col) => {
+                    for (let col = 0; col < table.fieldOrder.length; col++) {
+                        const fieldId = table.fieldOrder[col];
                         const field = table.fields[fieldId];
                         if (!field || field.deleted || field.type !== 'formula') {
-                            return;
+                            continue;
                         }
                         const formula = String(field.config?.formula ?? '').trim();
                         if (!formula) {
-                            return;
+                            continue;
                         }
                         tableFormulaData[row] ??= {};
                         tableFormulaData[row][col] = {
                             f: normalizeBaseFormulaForEngine(formula, table, snapshot),
                             si: field.id,
                         };
-                    });
-                });
+                    }
+                }
                 formulaData[unitId]![table.id] = tableFormulaData;
-            });
-        });
+            }
+        }
 
         return formulaData;
     }
@@ -840,29 +855,70 @@ function createEngineThisRowRef(table: ITableSnapshot, fieldName: string, snapsh
 }
 
 function getEngineBaseTableName(table: ITableSnapshot, snapshot: IBaseSnapshot): string {
-    const sameNameCount = Object.values(snapshot.tables).filter((item) => !item.deleted && item.name === table.name).length;
+    const tables = Object.values(snapshot.tables);
+    let sameNameCount = 0;
+    for (let i = 0; i < tables.length; i++) {
+        const item = tables[i];
+        if (!item.deleted && item.name === table.name) {
+            sameNameCount++;
+            if (sameNameCount > 1) {
+                break;
+            }
+        }
+    }
     return sameNameCount === 1 ? table.name : table.id;
 }
 
 function buildBaseRuntimeCellData(table: ITableSnapshot): Record<number, Record<number, IBaseCellData>> {
     const cellData: Record<number, Record<number, IBaseCellData>> = { ...table.cellData };
-    const fieldOrder = table.fieldOrder.filter((fieldId) => table.fields[fieldId] && !table.fields[fieldId].deleted);
-    const recordOrder = table.recordOrder?.filter((recordId) => table.records[recordId] && !table.records[recordId].deleted)
-        ?? Object.values(table.records ?? {}).filter((record) => !record.deleted).sort((a, b) => a.orderKey.localeCompare(b.orderKey)).map((record) => record.id);
+    const fieldOrder: string[] = [];
+    for (let i = 0; i < table.fieldOrder.length; i++) {
+        const fieldId = table.fieldOrder[i];
+        if (table.fields[fieldId] && !table.fields[fieldId].deleted) {
+            fieldOrder.push(fieldId);
+        }
+    }
+    let recordOrder: string[];
+    if (table.recordOrder) {
+        recordOrder = [];
+        for (let i = 0; i < table.recordOrder.length; i++) {
+            const recordId = table.recordOrder[i];
+            if (table.records[recordId] && !table.records[recordId].deleted) {
+                recordOrder.push(recordId);
+            }
+        }
+    } else {
+        const allRecords = Object.values(table.records ?? {});
+        const records: typeof allRecords = [];
+        for (let i = 0; i < allRecords.length; i++) {
+            const record = allRecords[i];
+            if (!record.deleted) {
+                records.push(record);
+            }
+        }
+        records.sort((a, b) => a.orderKey.localeCompare(b.orderKey));
+        recordOrder = [];
+        for (let i = 0; i < records.length; i++) {
+            const record = records[i];
+            recordOrder.push(record.id);
+        }
+    }
 
-    recordOrder.forEach((recordId, row) => {
+    for (let row = 0; row < recordOrder.length; row++) {
+        const recordId = recordOrder[row];
         const record = table.records[recordId];
         if (!record || record.deleted) {
-            return;
+            continue;
         }
         cellData[row] = { ...cellData[row] };
-        fieldOrder.forEach((fieldId, col) => {
+        for (let col = 0; col < fieldOrder.length; col++) {
+            const fieldId = fieldOrder[col];
             if (!Object.prototype.hasOwnProperty.call(record.values ?? {}, fieldId)) {
-                return;
+                continue;
             }
             cellData[row][col] = toBaseRuntimeCellData(record.values[fieldId], table.fields[fieldId]);
-        });
-    });
+        }
+    }
 
     return cellData;
 }

@@ -14,61 +14,73 @@
  * limitations under the License.
  */
 
-import type { IAccessor } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
-import { SetDrawingSelectedOperation } from '@univerjs/drawing';
-import { getSheetCommandTarget } from '@univerjs/sheets';
-import { ISidebarService } from '@univerjs/ui';
-import { describe, expect, it, vi } from 'vitest';
+import { DrawingTypeEnum } from '@univerjs/core';
+import { IDrawingManagerService } from '@univerjs/drawing';
+import { afterEach, describe, expect, it } from 'vitest';
+import { createSheetsDrawingUiTestBed } from '../../../__tests__/create-sheets-drawing-ui-test-bed';
 import { COMPONENT_SHEET_DRAWING_PANEL } from '../../../views/sheet-image-panel/component-name';
 import { SidebarSheetDrawingOperation } from '../open-drawing-panel.operation';
 
-vi.mock('@univerjs/sheets', async (importActual) => {
-    const actual = await importActual<typeof import('@univerjs/sheets')>();
-    return { ...actual, getSheetCommandTarget: vi.fn() };
-});
-
-const mockedGetSheetCommandTarget = vi.mocked(getSheetCommandTarget);
-
-function createAccessor() {
-    const sidebarService = { open: vi.fn(), close: vi.fn() };
-    const commandService = { syncExecuteCommand: vi.fn() };
-    const accessor = {
-        get(token: unknown) {
-            if (token === ISidebarService) return sidebarService;
-            if (token === LocaleService) return { t: (key: string) => key };
-            if (token === IUniverInstanceService) return {};
-            if (token === ICommandService) return commandService;
-            throw new Error(`Unknown dependency: ${String(token)}`);
-        },
-    } as IAccessor;
-
-    return { accessor, sidebarService, commandService };
-}
-
 describe('SidebarSheetDrawingOperation', () => {
-    it('opens the sheet drawing panel and clears the selection on close', async () => {
-        mockedGetSheetCommandTarget.mockReturnValue({ unitId: 'book-1', subUnitId: 'sheet-1' } as never);
-        const { accessor, sidebarService, commandService } = createAccessor();
+    afterEach(() => {
+        // each test disposes its own univer instance
+    });
 
-        await expect(SidebarSheetDrawingOperation.handler(accessor, { value: 'open' })).resolves.toBe(true);
-        expect(sidebarService.open).toHaveBeenCalledWith(expect.objectContaining({
+    it('opens the sheet drawing panel for the active worksheet', async () => {
+        const testBed = createSheetsDrawingUiTestBed();
+        testBed.commandService.registerCommand(SidebarSheetDrawingOperation);
+
+        expect(await testBed.commandService.executeCommand(SidebarSheetDrawingOperation.id, { value: 'open' })).toBe(true);
+
+        expect(testBed.sidebarService.visible).toBe(true);
+        expect(testBed.sidebarService.options).toMatchObject({
             header: { title: 'sheets-drawing-ui.panel.title' },
             children: { label: COMPONENT_SHEET_DRAWING_PANEL },
             width: 360,
-        }));
-        const onClose = sidebarService.open.mock.calls[0][0].onClose;
-        onClose();
-        expect(commandService.syncExecuteCommand).toHaveBeenCalledWith(SetDrawingSelectedOperation.id, []);
+        });
+
+        testBed.univer.dispose();
     });
 
-    it('returns false without a sheet target and closes on non-open actions', async () => {
-        const { accessor, sidebarService } = createAccessor();
-        mockedGetSheetCommandTarget.mockReturnValue(null as never);
-        await expect(SidebarSheetDrawingOperation.handler(accessor, { value: 'open' })).resolves.toBe(false);
+    it('clears the focused drawing when the panel is closed', async () => {
+        const testBed = createSheetsDrawingUiTestBed();
+        const drawingManagerService = testBed.get(IDrawingManagerService);
+        testBed.commandService.registerCommand(SidebarSheetDrawingOperation);
 
-        mockedGetSheetCommandTarget.mockReturnValue({ unitId: 'book-1', subUnitId: 'sheet-1' } as never);
-        await expect(SidebarSheetDrawingOperation.handler(accessor, { value: 'close' })).resolves.toBe(true);
-        expect(sidebarService.close).toHaveBeenCalledTimes(1);
+        drawingManagerService.registerDrawingData(testBed.unitId, {
+            [testBed.subUnitId]: {
+                'drawing-1': {
+                    unitId: testBed.unitId,
+                    subUnitId: testBed.subUnitId,
+                    drawingId: 'drawing-1',
+                    drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+                },
+            },
+        } as never);
+        drawingManagerService.focusDrawing([{
+            unitId: testBed.unitId,
+            subUnitId: testBed.subUnitId,
+            drawingId: 'drawing-1',
+        }]);
+
+        await testBed.commandService.executeCommand(SidebarSheetDrawingOperation.id, { value: 'open' });
+        testBed.sidebarService.close();
+
+        expect(drawingManagerService.getFocusDrawings()).toEqual([]);
+
+        testBed.univer.dispose();
+    });
+
+    it('closes the panel for non-open actions', async () => {
+        const testBed = createSheetsDrawingUiTestBed();
+        testBed.commandService.registerCommand(SidebarSheetDrawingOperation);
+
+        await testBed.commandService.executeCommand(SidebarSheetDrawingOperation.id, { value: 'open' });
+        expect(testBed.sidebarService.visible).toBe(true);
+
+        expect(await testBed.commandService.executeCommand(SidebarSheetDrawingOperation.id, { value: 'close' })).toBe(true);
+        expect(testBed.sidebarService.visible).toBe(false);
+
+        testBed.univer.dispose();
     });
 });

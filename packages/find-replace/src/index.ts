@@ -30,4 +30,14 @@ export type {
     IFindReplaceState,
     IReplaceAllResult,
 } from './services/find-replace.service';
-export { createInitFindReplaceState, FindBy, FindDirection, FindModel, FindReplaceModel, FindReplaceState, FindScope, IFindReplaceService } from './services/find-replace.service';
+export {
+    createInitFindReplaceState,
+    FindBy,
+    FindDirection,
+    FindModel,
+    FindReplaceModel,
+    FindReplaceService,
+    FindReplaceState,
+    FindScope,
+    IFindReplaceService,
+} from './services/find-replace.service';

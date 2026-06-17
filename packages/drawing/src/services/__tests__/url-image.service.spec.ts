@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
+import { Injector, IURLImageService } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { URLImageService } from '../url-image.service';
 
 describe('URLImageService', () => {
-    let service: URLImageService;
+    let service: IURLImageService;
 
     beforeEach(() => {
-        service = new URLImageService();
+        const injector = new Injector();
+        injector.add([IURLImageService, { useClass: URLImageService }]);
+        service = injector.get(IURLImageService);
     });
 
     afterEach(() => {
@@ -52,23 +55,31 @@ describe('URLImageService', () => {
 
     it('should download blob through converted base64 when custom downloader succeeds', async () => {
         const blob = new Blob(['image']);
-        const fetchMock = vi.fn(async () => ({
-            blob: async () => blob,
-        }));
+        const requestedUrls: string[] = [];
+        const fetchMock = async (url: string) => {
+            requestedUrls.push(url);
+            return {
+                blob: async () => blob,
+            };
+        };
 
         vi.stubGlobal('fetch', fetchMock);
         service.registerURLImageDownloader(async () => 'data:image/png;base64,Zm9v');
 
         await expect(service.downloadImage('https://example.com/image.png')).resolves.toBe(blob);
-        expect(fetchMock).toHaveBeenCalledWith('data:image/png;base64,Zm9v');
+        expect(requestedUrls).toEqual(['data:image/png;base64,Zm9v']);
     });
 
     it('should fall back to the original url when custom blob download fails', async () => {
         const blob = new Blob(['image']);
         const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
-        const fetchMock = vi.fn(async () => ({
-            blob: async () => blob,
-        }));
+        const requestedUrls: string[] = [];
+        const fetchMock = async (url: string) => {
+            requestedUrls.push(url);
+            return {
+                blob: async () => blob,
+            };
+        };
 
         vi.stubGlobal('fetch', fetchMock);
         service.registerURLImageDownloader(async () => {
@@ -76,7 +87,7 @@ describe('URLImageService', () => {
         });
 
         await expect(service.downloadImage('https://example.com/image.png')).resolves.toBe(blob);
-        expect(fetchMock).toHaveBeenCalledWith('https://example.com/image.png');
+        expect(requestedUrls).toEqual(['https://example.com/image.png']);
         expect(errorSpy).toHaveBeenCalledTimes(1);
     });
 });

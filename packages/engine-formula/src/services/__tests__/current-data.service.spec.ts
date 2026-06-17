@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import { ObjectMatrix } from '@univerjs/core';
+import { Injector, IUniverInstanceService, LocaleService, ObjectMatrix } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
-import { FormulaCurrentConfigService } from '../current-data.service';
+import { FormulaDataModel } from '../../models/formula-data.model';
+import { FormulaCurrentConfigService, IFormulaCurrentConfigService } from '../current-data.service';
+import { ISheetRowFilteredService } from '../sheet-row-filtered.service';
 
 function createService() {
     const workbookForCurrentType = {
@@ -52,12 +54,33 @@ function createService() {
         getRowFiltered: vi.fn((_unitId: string, _sheetId: string, row: number) => row === 2 || row === 4),
     };
 
-    const service = new FormulaCurrentConfigService(
-        univerInstanceService as never,
-        localeService as never,
-        formulaDataModel as never,
-        sheetRowFilteredService as never
-    );
+    class TestUniverInstanceService {
+        getCurrentUnitOfType = univerInstanceService.getCurrentUnitOfType;
+        getUnit = univerInstanceService.getUnit;
+    }
+
+    class TestLocaleService {
+        getCurrentLocale = localeService.getCurrentLocale;
+    }
+
+    class TestFormulaDataModel {
+        getCalculateData = formulaDataModel.getCalculateData;
+        getFormulaData = formulaDataModel.getFormulaData;
+        getArrayFormulaCellData = formulaDataModel.getArrayFormulaCellData;
+        getArrayFormulaRange = formulaDataModel.getArrayFormulaRange;
+    }
+
+    class TestSheetRowFilteredService {
+        getRowFiltered = sheetRowFilteredService.getRowFiltered;
+    }
+
+    const injector = new Injector();
+    injector.add([IUniverInstanceService, { useClass: TestUniverInstanceService as never }]);
+    injector.add([LocaleService, { useClass: TestLocaleService as never }]);
+    injector.add([FormulaDataModel, { useClass: TestFormulaDataModel as never }]);
+    injector.add([ISheetRowFilteredService, { useClass: TestSheetRowFilteredService as never }]);
+    injector.add([IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }]);
+    const service = injector.get(IFormulaCurrentConfigService) as FormulaCurrentConfigService;
 
     return {
         service,

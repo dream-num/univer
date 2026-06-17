@@ -134,14 +134,14 @@ export const SetSelectedRowsVisibleCommand: ICommand = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
 
-        const ranges = selectionManagerService.getCurrentSelections()?.map((s) => s.range).filter((r) => r.rangeType === RANGE_TYPE.ROW);
-        if (!ranges?.length) return false;
+        const ranges = getSelectedRowRanges(selectionManagerService);
+        if (!ranges.length) return false;
 
         const target = getSheetCommandTarget(univerInstanceService);
         if (!target) return false;
 
         const { worksheet, unitId, subUnitId } = target;
-        const hiddenRanges = ranges.map((r) => worksheet.getHiddenRows(r.startRow, r.endRow)).flat();
+        const hiddenRanges = getHiddenRowRanges(worksheet, ranges);
         return commandService.executeCommand<ISetSpecificRowsVisibleCommandParams>(SetSpecificRowsVisibleCommand.id, {
             unitId,
             subUnitId,
@@ -167,8 +167,8 @@ export const SetRowHiddenCommand: ICommand<ISetRowHiddenCommandParams> = {
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
         // Ranges should be divided by already hidden rows.
-        let ranges = params?.ranges?.length ? params.ranges : selectionManagerService.getCurrentSelections()?.map((s) => s.range).filter((r) => r.rangeType === RANGE_TYPE.ROW);
-        if (!ranges?.length) return false;
+        let ranges = params?.ranges?.length ? params.ranges : getSelectedRowRanges(selectionManagerService);
+        if (!ranges.length) return false;
 
         const target = getSheetCommandTarget(univerInstanceService, params);
         if (!target) return false;
@@ -236,6 +236,32 @@ export const SetRowHiddenCommand: ICommand<ISetRowHiddenCommandParams> = {
         return true;
     },
 };
+
+function getSelectedRowRanges(selectionManagerService: SheetsSelectionsService): IRange[] {
+    const selections = selectionManagerService.getCurrentSelections();
+    const ranges: IRange[] = [];
+    if (!selections) {
+        return ranges;
+    }
+    for (let i = 0; i < selections.length; i++) {
+        const range = selections[i].range;
+        if (range.rangeType === RANGE_TYPE.ROW) {
+            ranges.push(range);
+        }
+    }
+    return ranges;
+}
+
+function getHiddenRowRanges(worksheet: Worksheet, ranges: IRange[]): IRange[] {
+    const hiddenRanges: IRange[] = [];
+    for (let i = 0; i < ranges.length; i++) {
+        const hiddenRows = worksheet.getHiddenRows(ranges[i].startRow, ranges[i].endRow);
+        for (let j = 0; j < hiddenRows.length; j++) {
+            hiddenRanges.push(hiddenRows[j]);
+        }
+    }
+    return hiddenRanges;
+}
 
 // TODO@wzhudev: this should be unit tested
 export function divideRangesByHiddenRows(worksheet: Worksheet, ranges: IRange[]): IRange[] {

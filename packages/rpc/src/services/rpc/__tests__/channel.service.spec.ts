@@ -15,7 +15,7 @@
  */
 
 import type { IMessageProtocol } from '../rpc.service';
-import { awaitTime } from '@univerjs/core';
+import { awaitTime, Injector } from '@univerjs/core';
 import { Observable, Subject } from 'rxjs';
 import { describe, expect, it } from 'vitest';
 import { ChannelService } from '../channel.service';
@@ -31,7 +31,8 @@ describe('ChannelService', () => {
             onMessage: message$.asObservable(),
         };
 
-        const service = new ChannelService(protocol);
+        const injector = new Injector();
+        const service = injector.createInstance(ChannelService, protocol);
 
         service.registerChannel('math', fromModule({
             add(a: number, b: number) {

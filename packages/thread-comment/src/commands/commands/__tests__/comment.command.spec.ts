@@ -29,6 +29,7 @@ import {
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ThreadCommentModel } from '../../../models/thread-comment.model';
 import { UniverThreadCommentPlugin } from '../../../plugin';
+import { UpdateCommentRefMutation } from '../../mutations/comment.mutation';
 import {
     AddCommentCommand,
     DeleteCommentCommand,
@@ -133,6 +134,11 @@ describe('Thread comment commands', () => {
 
         subscription.unsubscribe();
 
+        const eventSummary: Array<{ type: CommentUpdate['type']; isRoot?: boolean }> = [];
+        for (const event of events) {
+            eventSummary.push({ type: event.type, isRoot: event.type === 'add' ? event.isRoot : undefined });
+        }
+
         expect(threadCommentModel.getThread('unit-1', 'sheet-1', root.id)).toEqual({
             unitId: 'unit-1',
             subUnitId: 'sheet-1',
@@ -141,7 +147,7 @@ describe('Thread comment commands', () => {
             children: [reply],
             relativeUsers: new Set(['owner', 'guest']),
         });
-        expect(events.map((event) => ({ type: event.type, isRoot: event.type === 'add' ? event.isRoot : undefined }))).toEqual([
+        expect(eventSummary).toEqual([
             { type: 'add', isRoot: true },
             { type: 'add', isRoot: false },
         ]);
@@ -186,7 +192,18 @@ describe('Thread comment commands', () => {
 
         expect(threadCommentModel.getComment('unit-1', 'sheet-1', root.id)).toBeUndefined();
         expect(threadCommentModel.getThread('unit-1', 'sheet-1', root.id)).toBeUndefined();
-        expect(events.filter((event) => event.type === 'resolve')).toEqual([
+        const resolveEvents: CommentUpdate[] = [];
+        const deletedCommentIds: string[] = [];
+        for (const event of events) {
+            if (event.type === 'resolve') {
+                resolveEvents.push(event);
+            }
+            if (event.type === 'delete') {
+                deletedCommentIds.push(event.payload.commentId);
+            }
+        }
+
+        expect(resolveEvents).toEqual([
             {
                 unitId: 'unit-1',
                 subUnitId: 'sheet-1',
@@ -197,7 +214,92 @@ describe('Thread comment commands', () => {
                 },
             },
         ]);
-        expect(events.filter((event) => event.type === 'delete').map((event) => event.payload.commentId)).toEqual(['root-2', 'reply-2']);
+        expect(deletedCommentIds).toEqual(['root-2', 'reply-2']);
+    });
+
+    it('updates comment content and keeps the thread relationship', async () => {
+        const root = createComment({ id: 'root-3', attachments: ['before.png'] });
+
+        await commandService.executeCommand(AddCommentCommand.id, {
+            unitId: root.unitId,
+            subUnitId: root.subUnitId,
+            comment: root,
+        });
+
+        const result = await commandService.executeCommand(UpdateCommentCommand.id, {
+            unitId: root.unitId,
+            subUnitId: root.subUnitId,
+            payload: {
+                commentId: root.id,
+                text: createBody('updated text'),
+                attachments: ['after.png'],
+                updateT: '2024-01-02T00:00:00.000Z',
+            },
+        });
+
+        const updated = threadCommentModel.getComment('unit-1', 'sheet-1', root.id);
+
+        expect(result).toBe(true);
+        expect(updated?.text).toEqual(createBody('updated text'));
+        expect(updated?.attachments).toEqual(['after.png']);
+        expect(updated?.updated).toBe(true);
+        expect(updated?.updateT).toBe('2024-01-02T00:00:00.000Z');
+        expect(threadCommentModel.getThread('unit-1', 'sheet-1', root.id)?.root.id).toBe(root.id);
+    });
+
+    it('deletes a reply without removing the root thread', async () => {
+        const root = createComment({ id: 'root-4' });
+        const reply = createComment({
+            id: 'reply-4',
+            parentId: root.id,
+            threadId: root.id,
+            ref: '',
+        });
+
+        await commandService.executeCommand(AddCommentCommand.id, {
+            unitId: root.unitId,
+            subUnitId: root.subUnitId,
+            comment: root,
+        });
+        await commandService.executeCommand(AddCommentCommand.id, {
+            unitId: reply.unitId,
+            subUnitId: reply.subUnitId,
+            comment: reply,
+        });
+
+        const result = await commandService.executeCommand(DeleteCommentCommand.id, {
+            unitId: reply.unitId,
+            subUnitId: reply.subUnitId,
+            commentId: reply.id,
+        });
+        const thread = threadCommentModel.getThread('unit-1', 'sheet-1', root.id);
+
+        expect(result).toBe(true);
+        expect(thread?.root.id).toBe(root.id);
+        expect(thread?.children).toEqual([]);
+        expect(threadCommentModel.getComment('unit-1', 'sheet-1', reply.id)).toBeUndefined();
+    });
+
+    it('updates a comment reference through the mutation used by integrations', async () => {
+        const root = createComment({ id: 'root-5', ref: 'A1' });
+
+        await commandService.executeCommand(AddCommentCommand.id, {
+            unitId: root.unitId,
+            subUnitId: root.subUnitId,
+            comment: root,
+        });
+
+        const result = await commandService.executeCommand(UpdateCommentRefMutation.id, {
+            unitId: root.unitId,
+            subUnitId: root.subUnitId,
+            payload: {
+                commentId: root.id,
+                ref: 'B2',
+            },
+        });
+
+        expect(result).toBe(true);
+        expect(threadCommentModel.getComment('unit-1', 'sheet-1', root.id)?.ref).toBe('B2');
     });
 
     it('returns false when updating or deleting a missing comment', async () => {

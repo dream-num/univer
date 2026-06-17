@@ -14,12 +14,18 @@
  * limitations under the License.
  */
 
+import { IConfigService, Injector } from '@univerjs/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ErrorType } from '../../basics/error-type';
 import { ENGINE_FORMULA_PLUGIN_CONFIG_KEY } from '../../config/config';
+import { Lexer } from '../../engine/analysis/lexer';
+import { AstTreeBuilder } from '../../engine/analysis/parser';
+import { IFormulaDependencyGenerator } from '../../engine/dependency/formula-dependency';
+import { Interpreter } from '../../engine/interpreter/interpreter';
 import { FORMULA_REF_TO_ARRAY_CACHE } from '../../engine/reference-object/base-reference-object';
-import { CalculateFormulaService } from '../calculate-formula.service';
-import { FormulaExecuteStageType } from '../runtime.service';
+import { CalculateFormulaService, ICalculateFormulaService } from '../calculate-formula.service';
+import { IFormulaCurrentConfigService } from '../current-data.service';
+import { FormulaExecuteStageType, IFormulaRuntimeService } from '../runtime.service';
 
 function createService() {
     const configService = {
@@ -95,15 +101,76 @@ function createService() {
         parse: vi.fn(),
     };
 
-    const service = new CalculateFormulaService(
-        configService as never,
-        lexer as never,
-        currentConfigService as never,
-        runtimeService as never,
-        formulaDependencyGenerator as never,
-        interpreter as never,
-        astTreeBuilder as never
-    );
+    class TestConfigService {
+        getConfig = configService.getConfig;
+    }
+
+    class TestLexer {
+        treeBuilder = lexer.treeBuilder;
+    }
+
+    class TestCurrentConfigService {
+        load = currentConfigService.load;
+        loadDataLite = currentConfigService.loadDataLite;
+        loadDirtyRangesAndExcludedCell = currentConfigService.loadDirtyRangesAndExcludedCell;
+        getRuntimeState = currentConfigService.getRuntimeState;
+        getUnitData = currentConfigService.getUnitData;
+        getDirtyData = currentConfigService.getDirtyData;
+        getDirtyDefinedNameMap = currentConfigService.getDirtyDefinedNameMap;
+    }
+
+    class TestRuntimeService {
+        setFormulaExecuteStage = runtimeService.setFormulaExecuteStage;
+        getRuntimeState = runtimeService.getRuntimeState;
+        reset = runtimeService.reset;
+        setFormulaCycleIndex = runtimeService.setFormulaCycleIndex;
+        isCycleDependency = runtimeService.isCycleDependency;
+        setRuntimeFeatureCellData = runtimeService.setRuntimeFeatureCellData;
+        setRuntimeFeatureRange = runtimeService.setRuntimeFeatureRange;
+        stopExecution = runtimeService.stopExecution;
+        getAllRuntimeData = runtimeService.getAllRuntimeData;
+        setTotalArrayFormulasToCalculate = runtimeService.setTotalArrayFormulasToCalculate;
+        setTotalFormulasToCalculate = runtimeService.setTotalFormulasToCalculate;
+        setCompletedArrayFormulasCount = runtimeService.setCompletedArrayFormulasCount;
+        setCompletedFormulasCount = runtimeService.setCompletedFormulasCount;
+        isStopExecution = runtimeService.isStopExecution;
+        setCurrent = runtimeService.setCurrent;
+        setRuntimeData = runtimeService.setRuntimeData;
+        setRuntimeOtherData = runtimeService.setRuntimeOtherData;
+        markedAsSuccessfullyExecuted = runtimeService.markedAsSuccessfullyExecuted;
+        markedAsNoFunctionsExecuted = runtimeService.markedAsNoFunctionsExecuted;
+        markedAsStopFunctionsExecuted = runtimeService.markedAsStopFunctionsExecuted;
+    }
+
+    class TestFormulaDependencyGenerator {
+        generate = formulaDependencyGenerator.generate;
+        getAllDependencyJson = formulaDependencyGenerator.getAllDependencyJson;
+        getCellDependencyJson = formulaDependencyGenerator.getCellDependencyJson;
+        getRangeDependents = formulaDependencyGenerator.getRangeDependents;
+        getInRangeFormulas = formulaDependencyGenerator.getInRangeFormulas;
+        getRangeDependentsAndInRangeFormulas = formulaDependencyGenerator.getRangeDependentsAndInRangeFormulas;
+    }
+
+    class TestInterpreter {
+        checkAsyncNode = interpreter.checkAsyncNode;
+        executeAsync = interpreter.executeAsync;
+        execute = interpreter.execute;
+    }
+
+    class TestAstTreeBuilder {
+        parse = astTreeBuilder.parse;
+    }
+
+    const injector = new Injector();
+    injector.add([IConfigService, { useClass: TestConfigService as never }]);
+    injector.add([Lexer, { useClass: TestLexer as never }]);
+    injector.add([IFormulaCurrentConfigService, { useClass: TestCurrentConfigService as never }]);
+    injector.add([IFormulaRuntimeService, { useClass: TestRuntimeService as never }]);
+    injector.add([IFormulaDependencyGenerator, { useClass: TestFormulaDependencyGenerator as never }]);
+    injector.add([Interpreter, { useClass: TestInterpreter as never }]);
+    injector.add([AstTreeBuilder, { useClass: TestAstTreeBuilder as never }]);
+    injector.add([ICalculateFormulaService, { useClass: CalculateFormulaService }]);
+    const service = injector.get(ICalculateFormulaService) as CalculateFormulaService;
 
     // Make execution deterministic in tests.
     (service as any)._executeLock = {

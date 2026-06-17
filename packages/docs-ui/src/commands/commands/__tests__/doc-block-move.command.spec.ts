@@ -14,10 +14,18 @@
  * limitations under the License.
  */
 
-import type { IDocumentData } from '@univerjs/core';
-import { BlockType, CustomRangeType, DocumentBlockRangeType } from '@univerjs/core';
-import { describe, expect, it } from 'vitest';
-import { buildMoveDocBlockActions } from '../doc-block-move.command';
+import type { ICommand, IDocumentData } from '@univerjs/core';
+import {
+    awaitTime,
+    BlockType,
+    CustomRangeType,
+    DocumentBlockRangeType,
+    ICommandService,
+} from '@univerjs/core';
+import { RichTextEditingMutation } from '@univerjs/docs';
+import { afterEach, describe, expect, it } from 'vitest';
+import { buildMoveDocBlockActions, MoveDocBlockCommand } from '../doc-block-move.command';
+import { createCommandTestBed } from './create-command-test-bed';
 
 describe('buildMoveDocBlockActions', () => {
     it('moves a paragraph and remaps paragraph indexes', () => {
@@ -93,6 +101,128 @@ describe('buildMoveDocBlockActions', () => {
         expect(nextDocumentData.body?.dataStream).toBe('aa\r\b\r\n');
         expect(nextDocumentData.body?.customBlocks?.[0]).toMatchObject({ startIndex: 3 });
     });
+
+    it('keeps the document unchanged when there is no movable body range', () => {
+        const emptyDocument = createDocument('', {
+            paragraphs: [],
+            sectionBreaks: [],
+        });
+
+        expect(buildMoveDocBlockActions({
+            documentData: emptyDocument,
+            sourceRange: { startOffset: 0, endOffset: 3 },
+            targetOffset: 10,
+        })).toEqual({
+            nextDocumentData: emptyDocument,
+            movedRange: { startOffset: 0, endOffset: 3 },
+        });
+
+        const documentData = createDocument('A\rB\r\n', {
+            paragraphs: [{ paragraphId: 'para_docs_ui_fixture_20', startIndex: 1 }, { paragraphId: 'para_docs_ui_fixture_21', startIndex: 3 }],
+            sectionBreaks: [{ startIndex: 4 }],
+        });
+
+        const { nextDocumentData, movedRange } = buildMoveDocBlockActions({
+            documentData,
+            sourceRange: { startOffset: -5, endOffset: 2 },
+            targetOffset: 1,
+        });
+
+        expect(nextDocumentData.body?.dataStream).toBe('A\rB\r\n');
+        expect(movedRange).toEqual({ startOffset: 0, endOffset: 2 });
+    });
+
+    it('remaps custom decorations that move with their paragraph', () => {
+        const documentData = createDocument('aa\rDD\rcc\r\n', {
+            paragraphs: [{ paragraphId: 'para_docs_ui_fixture_22', startIndex: 2 }, { paragraphId: 'para_docs_ui_fixture_23', startIndex: 5 }, { paragraphId: 'para_docs_ui_fixture_24', startIndex: 8 }],
+            sectionBreaks: [{ startIndex: 9 }],
+            customDecorations: [{ id: 'decoration-1', startIndex: 3, endIndex: 5 } as never],
+        });
+
+        const { nextDocumentData, movedRange } = buildMoveDocBlockActions({
+            documentData,
+            sourceRange: { startOffset: 3, endOffset: 6 },
+            targetOffset: 0,
+        });
+
+        expect(nextDocumentData.body?.dataStream).toBe('DD\raa\rcc\r\n');
+        expect(nextDocumentData.body?.customDecorations?.[0]).toMatchObject({ startIndex: 0, endIndex: 2 });
+        expect(movedRange).toEqual({ startOffset: 0, endOffset: 3 });
+    });
+
+    it('keeps every document metadata collection ordered after moving content upward', () => {
+        const documentData = createDocument('aa\rMM\rzz\r\n', {
+            paragraphs: [{ paragraphId: 'para_docs_ui_fixture_29', startIndex: 2 }, { paragraphId: 'para_docs_ui_fixture_30', startIndex: 5 }, { paragraphId: 'para_docs_ui_fixture_31', startIndex: 8 }],
+            sectionBreaks: [{ startIndex: 6 }, { startIndex: 9 }],
+            customBlocks: [{ blockId: 'custom-2', blockType: BlockType.CUSTOM, startIndex: 3 }, { blockId: 'custom-3', blockType: BlockType.CUSTOM, startIndex: 6 }],
+            tables: [{ tableId: 'table-2', startIndex: 3, endIndex: 5 }, { tableId: 'table-3', startIndex: 6, endIndex: 8 }],
+            blockRanges: [{ blockId: 'quote-2', blockType: DocumentBlockRangeType.QUOTE, startIndex: 3, endIndex: 5 }, { blockId: 'quote-3', blockType: DocumentBlockRangeType.QUOTE, startIndex: 6, endIndex: 8 }],
+            customRanges: [{ rangeId: 'comment-2', rangeType: CustomRangeType.COMMENT, startIndex: 3, endIndex: 5 }, { rangeId: 'comment-3', rangeType: CustomRangeType.COMMENT, startIndex: 6, endIndex: 8 }],
+            customDecorations: [{ id: 'decoration-2', startIndex: 3, endIndex: 5 }, { id: 'decoration-3', startIndex: 6, endIndex: 8 }] as never,
+            textRuns: [{ st: 3, ed: 5, ts: {} }, { st: 6, ed: 8, ts: {} }],
+        });
+
+        const { nextDocumentData } = buildMoveDocBlockActions({
+            documentData,
+            sourceRange: { startOffset: 3, endOffset: 6 },
+            targetOffset: 0,
+        });
+
+        expect(nextDocumentData.body?.dataStream).toBe('MM\raa\rzz\r\n');
+        expect(collectStarts(nextDocumentData.body?.sectionBreaks)).toEqual([6, 9]);
+        expect(collectStarts(nextDocumentData.body?.customBlocks)).toEqual([0, 6]);
+        expect(collectStarts(nextDocumentData.body?.tables)).toEqual([0, 6]);
+        expect(collectStarts(nextDocumentData.body?.blockRanges)).toEqual([0, 6]);
+        expect(collectStarts(nextDocumentData.body?.customRanges)).toEqual([0, 6]);
+        expect(collectStarts(nextDocumentData.body?.customDecorations)).toEqual([0, 6]);
+        expect(collectTextRunStarts(nextDocumentData.body?.textRuns)).toEqual([0, 6]);
+    });
+});
+
+describe('MoveDocBlockCommand', () => {
+    let testBed: ReturnType<typeof createCommandTestBed> | undefined;
+
+    afterEach(() => {
+        testBed?.univer.dispose();
+        testBed = undefined;
+    });
+
+    it('moves a block through the real rich text mutation flow', async () => {
+        testBed = createCommandTestBed(createDocument('A\rB\rC\r\n', {
+            paragraphs: [{ paragraphId: 'para_docs_ui_fixture_25', startIndex: 1 }, { paragraphId: 'para_docs_ui_fixture_26', startIndex: 3 }, { paragraphId: 'para_docs_ui_fixture_27', startIndex: 5 }],
+            sectionBreaks: [{ startIndex: 6 }],
+        }));
+        const commandService = testBed.get(ICommandService);
+        commandService.registerCommand(MoveDocBlockCommand);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+
+        await expect(commandService.executeCommand(MoveDocBlockCommand.id, {
+            unitId: 'test-doc',
+            sourceRange: { startOffset: 0, endOffset: 2 },
+            targetOffset: 6,
+        })).resolves.toBe(true);
+
+        await awaitTime(0);
+        expect(testBed.doc.getSnapshot().body?.dataStream).toBe('B\rC\rA\r\n');
+        expect(testBed.doc.getSnapshot().body?.paragraphs?.map((paragraph) => paragraph.startIndex)).toEqual([1, 3, 5]);
+    });
+
+    it('does not mutate when the target document is missing', async () => {
+        testBed = createCommandTestBed(createDocument('A\r\n', {
+            paragraphs: [{ paragraphId: 'para_docs_ui_fixture_28', startIndex: 1 }],
+            sectionBreaks: [{ startIndex: 2 }],
+        }));
+        const commandService = testBed.get(ICommandService);
+        commandService.registerCommand(MoveDocBlockCommand);
+
+        await expect(commandService.executeCommand(MoveDocBlockCommand.id, {
+            unitId: 'missing-doc',
+            sourceRange: { startOffset: 0, endOffset: 2 },
+            targetOffset: 2,
+        })).resolves.toBe(false);
+
+        expect(testBed.doc.getSnapshot().body?.dataStream).toBe('A\r\n');
+    });
 });
 
 function createDocument(dataStream: string, body: Partial<NonNullable<IDocumentData['body']>>): IDocumentData {
@@ -114,4 +244,20 @@ function createDocument(dataStream: string, body: Partial<NonNullable<IDocumentD
             marginRight: 72,
         },
     };
+}
+
+function collectStarts(items: Array<{ startIndex: number }> | undefined): number[] {
+    const starts: number[] = [];
+    for (const item of items ?? []) {
+        starts.push(item.startIndex);
+    }
+    return starts;
+}
+
+function collectTextRunStarts(items: Array<{ st: number }> | undefined): number[] {
+    const starts: number[] = [];
+    for (const item of items ?? []) {
+        starts.push(item.st);
+    }
+    return starts;
 }

@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
+import type { Injector } from '@univerjs/core';
 import type { IDocFloatDom } from '@univerjs/docs-drawing';
 import type { DocumentSkeleton, IBoundRectNoAngle, Scene } from '@univerjs/engine-render';
 import type { IFloatDom, IFloatDomLayout } from '@univerjs/ui';
-import { PrintFloatDomSingle } from '@univerjs/ui';
+import type { ComponentType } from 'react';
+import { render, unmount } from '@univerjs/design';
+import { connectInjector, PrintFloatDomSingle } from '@univerjs/ui';
 import { useMemo } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { calcDocFloatDomPositionByRect } from '../controllers/doc-float-dom.controller';
@@ -75,3 +78,11 @@ export const DocPrintingFloatDom = (props: IPrintingFloatDomProps) => {
         </div>
     );
 };
+
+export function mountDocPrintingFloatDom(props: IPrintingFloatDomProps, root: HTMLElement, injector: Injector): () => void {
+    const PrintingFloatDomInjector = connectInjector(DocPrintingFloatDom, injector) as ComponentType<IPrintingFloatDomProps>;
+
+    render(<PrintingFloatDomInjector {...props} />, root);
+
+    return () => unmount(root);
+}

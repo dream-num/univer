@@ -27,17 +27,7 @@ describe('FOverGridImage', () => {
     let injector: Injector;
 
     beforeEach(() => {
-        const skeleton = {
-            getNoMergeCellWithCoordByIndex: (row: number, column: number) => ({
-                startX: column * 100,
-                endX: (column + 1) * 100,
-                startY: row * 20,
-                endY: (row + 1) * 20,
-            }),
-        };
-        const testBed = createSheetsDrawingTestBed(undefined, [
-            [SheetSkeletonService, { useValue: { getSkeleton: () => skeleton } }],
-        ]);
+        const testBed = createSheetsDrawingTestBed();
         univer = testBed.univer;
         injector = testBed.injector;
     });
@@ -85,6 +75,7 @@ describe('FOverGridImage', () => {
         };
 
         const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+        injector.get(SheetSkeletonService).ensureSkeleton('test', 'sheet1');
 
         const builder = injector.createInstance(FOverGridImage, image).toBuilder();
 

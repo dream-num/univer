@@ -74,9 +74,24 @@ describe('ResourceLoaderService', () => {
             }),
             getUnit: vi.fn(),
         };
+        class TestResourceManagerService {
+            getAllResourceHooks = resourceManagerService.getAllResourceHooks;
+            register$ = resourceManagerService.register$;
+            loadResources = resourceManagerService.loadResources;
+            unloadResources = resourceManagerService.unloadResources;
+            getResources = resourceManagerService.getResources;
+        }
+
+        class TestUniverInstanceService {
+            getAllUnitsForType = univerInstanceService.getAllUnitsForType;
+            getTypeOfUnitAdded$ = univerInstanceService.getTypeOfUnitAdded$;
+            getTypeOfUnitDisposed$ = univerInstanceService.getTypeOfUnitDisposed$;
+            getUnit = univerInstanceService.getUnit;
+        }
+
         const injector = new Injector();
-        injector.add([IResourceManagerService, { useValue: resourceManagerService as unknown as IResourceManagerService }]);
-        injector.add([IUniverInstanceService, { useValue: univerInstanceService as unknown as IUniverInstanceService }]);
+        injector.add([IResourceManagerService, { useClass: TestResourceManagerService as never }]);
+        injector.add([IUniverInstanceService, { useClass: TestUniverInstanceService as never }]);
         injector.add([ResourceLoaderService]);
         service = injector.get(ResourceLoaderService);
     });

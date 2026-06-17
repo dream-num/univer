@@ -254,9 +254,21 @@ export class FUniverSheetsDrawingUIMixin extends FUniver implements IFUniverShee
                     }
 
                     const { drawings } = params;
+                    const floatDomDrawingIds: string[] = [];
+                    for (let i = 0; i < drawings.length; i++) {
+                        const drawing = drawings[i];
+                        if (drawing.drawingType === DrawingTypeEnum.DRAWING_DOM) {
+                            floatDomDrawingIds.push(drawing.drawingId);
+                        }
+                    }
+
+                    if (floatDomDrawingIds.length === 0) {
+                        return;
+                    }
+
                     const eventParams: IFloatDomDeletedEventParams = {
                         workbook,
-                        drawings: drawings.filter((i) => i.drawingType === DrawingTypeEnum.DRAWING_DOM).map((i) => i.drawingId),
+                        drawings: floatDomDrawingIds,
                     };
                     this.fireEvent(this.Event.FloatDomDeleted, eventParams);
                 })

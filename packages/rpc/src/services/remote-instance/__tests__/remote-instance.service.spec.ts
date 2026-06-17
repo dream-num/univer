@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
-import type { ICommandService, ILogService, IUniverInstanceService } from '@univerjs/core';
-import { UniverInstanceType } from '@univerjs/core';
+import { ICommandService, ILogService, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
-import { RemoteSyncPrimaryService, WebWorkerRemoteInstanceService } from '../remote-instance.service';
+import { IRemoteInstanceService, IRemoteSyncService, RemoteSyncPrimaryService, WebWorkerRemoteInstanceService } from '../remote-instance.service';
 
 describe('remote-instance.service', () => {
     it('RemoteSyncPrimaryService should sync mutation with normalized options', async () => {
         const syncExecuteCommand = vi.fn(async () => true);
-        const commandService = {
-            syncExecuteCommand,
-        } as unknown as ICommandService;
+        class TestCommandService {
+            syncExecuteCommand = syncExecuteCommand;
+        }
 
-        const service = new RemoteSyncPrimaryService(commandService);
+        const injector = new Injector();
+        injector.add([ICommandService, { useClass: TestCommandService as never }]);
+        injector.add([IRemoteSyncService, { useClass: RemoteSyncPrimaryService }]);
+        const service = injector.get(IRemoteSyncService);
         await expect(service.syncMutation(
             {
                 mutationInfo: {
@@ -64,18 +66,25 @@ describe('remote-instance.service', () => {
         const syncExecuteCommand = vi.fn(() => true);
         const debug = vi.fn();
 
-        const univerInstanceService = {
-            createUnit,
-            disposeUnit,
-        } as unknown as IUniverInstanceService;
-        const commandService = {
-            syncExecuteCommand,
-        } as unknown as ICommandService;
-        const logService = {
-            debug,
-        } as unknown as ILogService;
+        class TestUniverInstanceService {
+            createUnit = createUnit;
+            disposeUnit = disposeUnit;
+        }
 
-        const service = new WebWorkerRemoteInstanceService(univerInstanceService, commandService, logService);
+        class TestCommandService {
+            syncExecuteCommand = syncExecuteCommand;
+        }
+
+        class TestLogService {
+            debug = debug;
+        }
+
+        const injector = new Injector();
+        injector.add([IUniverInstanceService, { useClass: TestUniverInstanceService as never }]);
+        injector.add([ICommandService, { useClass: TestCommandService as never }]);
+        injector.add([ILogService, { useClass: TestLogService as never }]);
+        injector.add([IRemoteInstanceService, { useClass: WebWorkerRemoteInstanceService }]);
+        const service = injector.get(IRemoteInstanceService);
 
         await expect(service.whenReady()).resolves.toBe(true);
 

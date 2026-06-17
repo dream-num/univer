@@ -132,15 +132,15 @@ export const SetSelectedColsVisibleCommand: ICommand = {
         const selectionManagerService = accessor.get(SheetsSelectionsService);
         const commandService = accessor.get(ICommandService);
 
-        const ranges = selectionManagerService.getCurrentSelections()?.map((s) => s.range).filter((r) => r.rangeType === RANGE_TYPE.COLUMN);
-        if (!ranges?.length) return false;
+        const ranges = getSelectedColRanges(selectionManagerService);
+        if (!ranges.length) return false;
 
         const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
         if (!target) return false;
 
         const { worksheet, unitId, subUnitId } = target;
         // `ranges` would not overlap each other, so `hiddenRanges` would not overlap each other either
-        const hiddenRanges = ranges.map((r) => worksheet.getHiddenCols(r.startColumn, r.endColumn)).flat();
+        const hiddenRanges = getHiddenColRanges(worksheet, ranges);
 
         return commandService.executeCommand<ISetSpecificColsVisibleCommandParams>(SetSpecificColsVisibleCommand.id, {
             unitId,
@@ -165,8 +165,8 @@ export const SetColHiddenCommand: ICommand = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
 
-        let ranges = params?.ranges?.length ? params.ranges : selectionManagerService.getCurrentSelections()?.map((s) => s.range).filter((r) => r.rangeType === RANGE_TYPE.COLUMN);
-        if (!ranges?.length) return false;
+        let ranges = params?.ranges?.length ? params.ranges : getSelectedColRanges(selectionManagerService);
+        if (!ranges.length) return false;
 
         const target = getSheetCommandTarget(univerInstanceService, params);
         if (!target) return false;
@@ -240,6 +240,32 @@ export const SetColHiddenCommand: ICommand = {
         return false;
     },
 };
+
+function getSelectedColRanges(selectionManagerService: SheetsSelectionsService): IRange[] {
+    const selections = selectionManagerService.getCurrentSelections();
+    const ranges: IRange[] = [];
+    if (!selections) {
+        return ranges;
+    }
+    for (let i = 0; i < selections.length; i++) {
+        const range = selections[i].range;
+        if (range.rangeType === RANGE_TYPE.COLUMN) {
+            ranges.push(range);
+        }
+    }
+    return ranges;
+}
+
+function getHiddenColRanges(worksheet: Worksheet, ranges: IRange[]): IRange[] {
+    const hiddenRanges: IRange[] = [];
+    for (let i = 0; i < ranges.length; i++) {
+        const hiddenCols = worksheet.getHiddenCols(ranges[i].startColumn, ranges[i].endColumn);
+        for (let j = 0; j < hiddenCols.length; j++) {
+            hiddenRanges.push(hiddenCols[j]);
+        }
+    }
+    return hiddenRanges;
+}
 
 export function divideRangesByHiddenCols(worksheet: Worksheet, ranges: IRange[]): IRange[] {
     const endRow = worksheet.getRowCount() - 1;

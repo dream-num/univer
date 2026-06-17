@@ -15,22 +15,25 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { ContextService } from '../context.service';
+import { Injector } from '../../../common/di';
+import { ContextService, IContextService } from '../context.service';
 
 const TEXT_CONTEXT_KEY = 'TEST_CONTEXT_KEY';
 
 describe('Test ContextService', () => {
-    let contextService: ContextService;
+    let contextService: IContextService;
 
     beforeEach(() => {
-        contextService = new ContextService();
+        const injector = new Injector();
+        injector.add([IContextService, { useClass: ContextService }]);
+        contextService = injector.get(IContextService);
     });
 
     afterEach(() => {
-        contextService.dispose();
+        (contextService as ContextService).dispose();
     });
 
-    it('Should "subscribeContextValue$" emit when context updated', () => {
+    it('notifies subscribers only while they are watching a context key', () => {
         let firstSubscriptionValue: boolean | undefined;
         const firstSubscription = contextService.subscribeContextValue$(TEXT_CONTEXT_KEY).subscribe((value) => {
             firstSubscriptionValue = value;

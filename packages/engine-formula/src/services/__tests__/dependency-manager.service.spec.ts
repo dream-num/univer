@@ -15,9 +15,16 @@
  */
 
 import type { AstRootNode } from '../../engine/ast-node';
+import { Injector } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { FormulaDependencyTree } from '../../engine/dependency/dependency-tree';
-import { DependencyManagerService } from '../dependency-manager.service';
+import { DependencyManagerBaseService, DependencyManagerService, IDependencyManagerService } from '../dependency-manager.service';
+
+class TestDependencyManagerBaseService extends DependencyManagerBaseService {
+    protected override _addAllTreeMap() {
+        // The base-service test exercises state handled by the base class; tree-map indexing belongs to the concrete service.
+    }
+}
 
 function createTree(treeId: number, row: number, column: number) {
     const tree = new FormulaDependencyTree(treeId);
@@ -40,9 +47,27 @@ function createTree(treeId: number, row: number, column: number) {
     return tree;
 }
 
+function createService(): IDependencyManagerService {
+    const injector = new Injector();
+    injector.add([IDependencyManagerService, { useClass: DependencyManagerService }]);
+    return injector.get(IDependencyManagerService);
+}
+
 describe('DependencyManagerService', () => {
+    it('should keep base dependency manager state through DI-created subclass', () => {
+        const injector = new Injector();
+        injector.add([DependencyManagerBaseService, { useClass: TestDependencyManagerBaseService }]);
+        const service = injector.get(DependencyManagerBaseService);
+
+        service.addOtherFormulaDependencyMainData('feature-formula');
+
+        expect(service.hasOtherFormulaDataMainData('feature-formula')).toBe(true);
+        expect(service.getLastTreeId()).toBe(0);
+        expect(service.getLastTreeId()).toBe(1);
+    });
+
     it('should track formula dependencies and remove their search cache by location', () => {
-        const service = new DependencyManagerService();
+        const service = createService();
         const treeA = createTree(1, 0, 0);
         const treeB = createTree(2, 1, 1);
         const searchA = [
@@ -91,7 +116,7 @@ describe('DependencyManagerService', () => {
     });
 
     it('should manage other-formula dependency matrices and main-data flag', () => {
-        const service = new DependencyManagerService();
+        const service = createService();
         const tree = createTree(10, 0, 0);
         tree.refOffsetX = 3;
         tree.refOffsetY = 4;
@@ -108,7 +133,7 @@ describe('DependencyManagerService', () => {
     });
 
     it('should manage feature formula dependencies', () => {
-        const service = new DependencyManagerService();
+        const service = createService();
         const tree = createTree(20, 2, 2);
 
         service.addFeatureFormulaDependency('unit-1', 'sheet-1', 'feature-a', tree);
@@ -119,7 +144,7 @@ describe('DependencyManagerService', () => {
     });
 
     it('should clear dependencies by defined name', () => {
-        const service = new DependencyManagerService();
+        const service = createService();
         const tree = createTree(30, 3, 3);
         const search = [
             {
@@ -148,7 +173,7 @@ describe('DependencyManagerService', () => {
     });
 
     it('should support tree id allocation and reset', () => {
-        const service = new DependencyManagerService();
+        const service = createService();
         expect(service.getLastTreeId()).toBe(0);
         expect(service.getLastTreeId()).toBe(1);
 

@@ -17,11 +17,28 @@
 import type { Injector } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
 import { ICommandService, IConfigService, LifecycleService, LifecycleStages } from '@univerjs/core';
-import { FormulaExecutedStateType, FormulaExecuteStageType, IFunctionService, ISuperTableService, SetFormulaCalculationNotificationMutation, SetFormulaCalculationResultMutation, SetFormulaCalculationStartMutation, SetTriggerFormulaCalculationStartMutation, SuperTableService } from '@univerjs/engine-formula';
+import {
+    FormulaExecutedStateType,
+    FormulaExecuteStageType,
+    IFunctionService,
+    ISuperTableService,
+    SetFormulaCalculationNotificationMutation,
+    SetFormulaCalculationResultMutation,
+    SetFormulaCalculationStartMutation,
+    SetTriggerFormulaCalculationStartMutation,
+    SuperTableService,
+} from '@univerjs/engine-formula';
 import { SetRangeValuesMutation } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { FormulaCalculationSessionController } from '../../controllers/formula-calculation-session.controller';
-import { CalculationMode, DescriptionService, IDescriptionService, IRegisterFunctionService, PLUGIN_CONFIG_KEY_BASE, RegisterFunctionService } from '../../index';
+import {
+    CalculationMode,
+    DescriptionService,
+    IDescriptionService,
+    IRegisterFunctionService,
+    PLUGIN_CONFIG_KEY_BASE,
+    RegisterFunctionService,
+} from '../../index';
 import { FormulaCalculationSessionService } from '../../services/formula-calculation-session.service';
 import { createFacadeTestBed } from './create-test-bed';
 

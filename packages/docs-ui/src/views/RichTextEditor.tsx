@@ -18,14 +18,14 @@ import type { IDocumentData } from '@univerjs/core';
 import type { CSSProperties, ReactNode, RefObject } from 'react';
 import type { Editor } from '../services/editor/editor';
 import type { IKeyboardEventConfig } from './rich-text-editor/hooks';
-import { BuildTextUtils, createInternalEditorID, generateRandomId, getPlainText } from '@univerjs/core';
+import { BuildTextUtils, createInternalEditorID, generateRandomId, getPlainText, ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { borderClassName, clsx } from '@univerjs/design';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useDependency, useEvent, useObservable } from '@univerjs/ui';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { IEditorService } from '../services/editor/editor-manager.service';
-import { useEditorClickOutside, useIsFocusing, useKeyboardEvent, useResize } from './rich-text-editor/hooks';
+import { createEditorUndoRedoKeyboardConfig, useEditorClickOutside, useIsFocusing, useKeyboardEvent, useResize } from './rich-text-editor/hooks';
 import { useEditor } from './rich-text-editor/hooks/use-editor';
 import { useLeftAndRightArrow } from './rich-text-editor/hooks/use-left-and-right-arrow';
 import { useOnChange } from './rich-text-editor/hooks/use-on-change';
@@ -73,6 +73,8 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
         noStyle,
     } = props;
     const editorService = useDependency(IEditorService);
+    const commandService = useDependency(ICommandService);
+    const univerInstanceService = useDependency(IUniverInstanceService);
     const onFocusChange = useEvent(_onFocusChange);
     const onClickOutside = useEvent(_onClickOutside);
     const [height, setHeight] = useState(defaultHeight);
@@ -132,8 +134,16 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
 
     useEditorClickOutside(editorId, sheetEmbeddingRef, onClickOutside);
 
+    const resolvedKeyboardEventConfig = useMemo(() => createEditorUndoRedoKeyboardConfig({
+        commandService,
+        univerInstanceService,
+        editorUnitId: editorId,
+        keyCodes: keyboardEventConfig?.keyCodes,
+        handler: keyboardEventConfig?.handler,
+    }), [commandService, editorId, keyboardEventConfig, univerInstanceService]);
+
     useLeftAndRightArrow(isFocusing && moveCursor, false, editor);
-    useKeyboardEvent(isFocusing, keyboardEventConfig, editor);
+    useKeyboardEvent(isFocusing, resolvedKeyboardEventConfig, editor);
     useOnChange(editor, onChange);
 
     return (

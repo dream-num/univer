@@ -182,6 +182,10 @@ export { getAnchorBounding, getLineBounding, TEXT_RANGE_LAYER_INDEX, TextRange }
 export { whenDocAndEditorFocused } from './shortcuts/utils';
 export { DOC_VERTICAL_PADDING } from './types/const/padding';
 export {
+    createEditorUndoRedoKeyboardConfig,
+    executeEditorUndoRedoCommand,
+    type ICreateEditorUndoRedoKeyboardConfigOptions,
+    type IExecuteEditorUndoRedoCommandOptions,
     type IKeyboardEventConfig,
     useEditor,
     useEditorClickOutside,

@@ -118,6 +118,20 @@ class TestSidebarService extends Disposable {
     }
 }
 
+function hasDependency(dependencies: Dependency[] | undefined, token: unknown): boolean {
+    if (!dependencies) {
+        return false;
+    }
+
+    for (const dependency of dependencies) {
+        if (Array.isArray(dependency) && dependency[0] === token) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 export function createSheetsDrawingUiTestBed(workbookData?: IWorkbookData, dependencies?: Dependency[]) {
     const univer = new Univer();
     const injector = univer.__getInjector();
@@ -135,7 +149,9 @@ export function createSheetsDrawingUiTestBed(workbookData?: IWorkbookData, depen
         }
 
         override onStarting(): void {
-            this._injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+            if (!hasDependency(dependencies, IRenderManagerService)) {
+                this._injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+            }
             this._injector.add([ISidebarService, { useClass: TestSidebarService as never }]);
             dependencies?.forEach((dependency) => this._injector.add(dependency));
         }

@@ -41,6 +41,7 @@ const EDITOR_DEFAULT_POSITION = {
 };
 
 const CELL_EDITOR_DARK_SURFACE_THEME_COLOR = 'gray.800';
+const CELL_EDITOR_LIGHT_SURFACE_THEME_COLOR = 'white';
 
 interface ICellEditorHostBackgroundOptions {
     darkMode?: boolean;
@@ -50,16 +51,23 @@ interface ICellEditorHostBackgroundOptions {
 /**
  * @returns the host background color for the cell editor.
  */
-function getCellEditorHostBackgroundColor(
+export function getCellEditorHostBackgroundColor(
     editState: Nullable<Pick<ICellEditorState, 'documentLayoutObject'>>,
     options: ICellEditorHostBackgroundOptions = {}
 ): string | undefined {
     const cellFill = editState?.documentLayoutObject.fill;
-    if (cellFill) {
+    if (cellFill && !isTransparentColor(cellFill)) {
         return cellFill;
     }
 
-    return options.darkMode ? options.getColorFromTheme?.(CELL_EDITOR_DARK_SURFACE_THEME_COLOR) : undefined;
+    return options.getColorFromTheme?.(
+        options.darkMode ? CELL_EDITOR_DARK_SURFACE_THEME_COLOR : CELL_EDITOR_LIGHT_SURFACE_THEME_COLOR
+    );
+}
+
+function isTransparentColor(color: string) {
+    const normalizedColor = color.trim().toLowerCase().replace(/\s+/g, '');
+    return normalizedColor === 'transparent' || normalizedColor === 'rgba(0,0,0,0)';
 }
 
 /**

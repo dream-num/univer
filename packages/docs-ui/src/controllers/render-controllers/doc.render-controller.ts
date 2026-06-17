@@ -23,7 +23,7 @@ import { DocBackground, Documents, IRenderManagerService, Layer, PageLayoutType,
 import { takeUntil } from 'rxjs';
 import { DOCS_COMPONENT_BACKGROUND_LAYER_INDEX, DOCS_COMPONENT_DEFAULT_Z_INDEX, DOCS_COMPONENT_HEADER_LAYER_INDEX, DOCS_COMPONENT_MAIN_LAYER_INDEX, DOCS_VIEW_KEY, VIEWPORT_KEY } from '../../basics/docs-view-key';
 import { DocPageLayoutService } from '../../services/doc-page-layout.service';
-import { resolveDocsCanvasBackground } from '../../services/docs-render.service';
+import { resolveDocRenderBackground } from '../../services/doc-render-background';
 import { IEditorService } from '../../services/editor/editor-manager.service';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
 
@@ -305,7 +305,7 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
     private _syncCanvasBackground(documentFlavor = this._context.unit.getSnapshot().documentStyle.documentFlavor) {
         const editorRenderConfig = this._editorService.getEditorRenderConfig(this._context.unitId);
         const editorBackgroundColor = editorRenderConfig?.canvasStyle.backgroundColor;
-        const resolvedBackground = resolveDocsCanvasBackground({
+        const resolvedBackground = resolveDocRenderBackground({
             documentFlavor,
             canvasColorService: this._context.engine.canvasColorService,
             editorBackgroundColor,

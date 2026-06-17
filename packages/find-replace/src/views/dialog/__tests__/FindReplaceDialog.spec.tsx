@@ -429,6 +429,37 @@ describe('FindReplaceDialog', () => {
         expect((testBed.get(IMessageService) as TestMessageService).messages.at(-1)?.content).toBe('find-replace.replace.all-success');
     });
 
+    it('moves to the next result when finding the same replace dialog input again', async () => {
+        const testBed = createDialogTestBed();
+        await act(async () => {
+            testBed.commandService.syncExecuteCommand(OpenReplaceDialogOperation.id);
+        });
+
+        const rendered = renderDialog(testBed.univer.__getInjector());
+        root = rendered.root;
+        container = rendered.container;
+
+        await act(async () => {
+            const inputs = getInputs(container!);
+            setInputValue(inputs[0], 'apple');
+            getButton(container!, FIND_LABEL).dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        });
+        await flushSearch();
+
+        expect(testBed.provider.queries).toHaveLength(1);
+        expect(readCurrentMatch(testBed.findReplaceService)?.range).toEqual({ id: 'A1' });
+        expect(readState(testBed.findReplaceService)).toMatchObject({ matchesCount: 3, matchesPosition: 1 });
+
+        await act(async () => {
+            getButton(container!, FIND_LABEL).dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        });
+        await flushSearch();
+
+        expect(testBed.provider.queries).toHaveLength(1);
+        expect(readCurrentMatch(testBed.findReplaceService)?.range).toEqual({ id: 'A2' });
+        expect(readState(testBed.findReplaceService)).toMatchObject({ matchesCount: 3, matchesPosition: 2 });
+    });
+
     it('uses the replace dialog options when searching', async () => {
         const testBed = createDialogTestBed();
         await act(async () => {

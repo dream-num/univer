@@ -35,25 +35,29 @@ import {
     LocaleService,
     LocaleType,
     NamedStyleType,
+    ObjectRelativeFromV,
     PAGE_SIZE,
     PageOrientType,
     PaperType,
+    PositionedObjectLayoutType,
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
 import {
+    DeleteTextCommand,
     DocSelectionManagerService,
     DocSkeletonManagerService,
     RichTextEditingMutation,
     SetTextSelectionsOperation,
 } from '@univerjs/docs';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 import { ISidebarService } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { afterEach, describe, expect, it } from 'vitest';
 import { HeaderFooterType } from '../../../controllers/doc-header-footer.controller';
 import { DocParagraphSettingController } from '../../../controllers/doc-paragraph-setting.controller';
 import { DocAutoFormatService } from '../../../services/doc-auto-format.service';
+import { DocIMEInputManagerService } from '../../../services/doc-ime-input-manager.service';
 import { DocSelectionRenderService } from '../../../services/selection/doc-selection-render.service';
 import { COMPONENT_DOC_HEADER_FOOTER_PANEL } from '../../../views/header-footer/panel/component-name';
 import { PAGE_SETTING_COMPONENT_ID } from '../../../views/PageSettings';
@@ -66,12 +70,13 @@ import { DocOpenPageSettingCommand } from '../../operations/open-page-setting.op
 import { SetDocZoomRatioOperation } from '../../operations/set-doc-zoom-ratio.operation';
 import { AfterSpaceCommand, EnterCommand, TabCommand } from '../auto-format.command';
 import { BreakLineCommand } from '../break-line.command';
-import { DeleteCurrentParagraphCommand, MergeTwoParagraphCommand, RemoveHorizontalLineCommand } from '../doc-delete.command';
-import { CoreHeaderFooterCommand, OpenHeaderFooterPanelCommand } from '../doc-header-footer.command';
+import { DeleteCurrentParagraphCommand, DeleteLeftCommand, DeleteRightCommand, MergeTwoParagraphCommand, RemoveHorizontalLineCommand } from '../doc-delete.command';
+import { CloseHeaderFooterCommand, CoreHeaderFooterCommand, OpenHeaderFooterPanelCommand } from '../doc-header-footer.command';
 import { HorizontalLineCommand, InsertHorizontalLineBellowCommand } from '../doc-horizontal-line.command';
 import { DocPageSetupCommand } from '../doc-page-setup.command';
 import { DocParagraphSettingCommand } from '../doc-paragraph-setting.command';
 import { DocSelectAllCommand } from '../doc-select-all.command';
+import { IMEInputCommand } from '../ime-input.command';
 import { InsertCustomRangeCommand } from '../insert-custom-range.command';
 import {
     AlignCenterCommand,
@@ -205,6 +210,55 @@ function createBaseDoc(dataStream = 'Hello world\r\n'): IDocumentData {
             marginLeft: 90,
         },
     };
+}
+
+function useLinearSkeleton(dataStream: string) {
+    return {
+        findNodeByCharIndex(index: number) {
+            const content = dataStream[index];
+            if (content == null) {
+                return null;
+            }
+
+            return {
+                content,
+                count: 1,
+                streamType: content,
+            };
+        },
+    };
+}
+
+function createDrawingModeDoc(): IDocumentData {
+    const doc = createBaseDoc('A\b\r\n');
+    return {
+        ...doc,
+        body: {
+            ...doc.body!,
+            customBlocks: [{
+                blockId: 'drawing-1',
+                startIndex: 1,
+                blockType: 'normal',
+            }],
+        },
+        documentStyle: {
+            ...doc.documentStyle!,
+            documentFlavor: DocumentFlavor.TRADITIONAL,
+        },
+        drawings: {
+            'drawing-1': {
+                drawingId: 'drawing-1',
+                layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
+                docTransform: {
+                    positionV: {
+                        relativeFrom: ObjectRelativeFromV.LINE,
+                        posOffset: 30,
+                    },
+                },
+            },
+        },
+        drawingsOrder: ['drawing-1'],
+    } as unknown as IDocumentData;
 }
 
 function createHeaderFooterDoc(): IDocumentData {
@@ -862,6 +916,40 @@ describe('misc document commands', () => {
         expect(getBody()?.paragraphs?.[0].startIndex).toBe(0);
     });
 
+    it('removes the character before the cursor when Backspace is pressed inside text', async () => {
+        ({ univer, get } = createCommandTestBed(createBaseDoc('ABC\r\n')));
+        commandService = get(ICommandService);
+        commandService.registerCommand(DeleteLeftCommand);
+        commandService.registerCommand(DeleteTextCommand);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+        setCollapsedSelection(2);
+
+        const skeletonManager = get(DocSkeletonManagerService) as unknown as { getSkeleton: () => unknown };
+        skeletonManager.getSkeleton = () => useLinearSkeleton('ABC\r\n');
+
+        expect(await commandService.executeCommand(DeleteLeftCommand.id)).toBe(true);
+        await awaitTime(0);
+
+        expect(getBody()?.dataStream).toBe('AC\r\n');
+    });
+
+    it('removes the character after the cursor when Delete is pressed inside text', async () => {
+        ({ univer, get } = createCommandTestBed(createBaseDoc('ABC\r\n')));
+        commandService = get(ICommandService);
+        commandService.registerCommand(DeleteRightCommand);
+        commandService.registerCommand(DeleteTextCommand);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+        setCollapsedSelection(1);
+
+        const skeletonManager = get(DocSkeletonManagerService) as unknown as { getSkeleton: () => unknown };
+        skeletonManager.getSkeleton = () => useLinearSkeleton('ABC\r\n');
+
+        expect(await commandService.executeCommand(DeleteRightCommand.id)).toBe(true);
+        await awaitTime(0);
+
+        expect(getBody()?.dataStream).toBe('AC\r\n');
+    });
+
     it('aligns selected paragraphs through the wrapper and toggles an existing alignment', async () => {
         ({ univer, get } = createCommandTestBed(createMultiParagraphDoc()));
         commandService = get(ICommandService);
@@ -983,6 +1071,36 @@ describe('misc document commands', () => {
         expect(result).toBe(true);
         expect(table?.size.width.v).toBe(460);
         expect(table?.tableColumns.map((column) => column.size.width.v)).toEqual([230, 230]);
+    });
+
+    it('inserts page setup values when the document has no explicit page style', async () => {
+        const doc = createBaseDoc();
+        doc.documentStyle = {};
+        ({ univer, get } = createCommandTestBed(doc));
+        commandService = get(ICommandService);
+        commandService.registerCommand(DocPageSetupCommand);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+
+        expect(await commandService.executeCommand(DocPageSetupCommand.id, {
+            documentFlavor: DocumentFlavor.MODERN,
+            pageSize: PAGE_SIZE[PaperType.A4],
+            pageOrient: PageOrientType.PORTRAIT,
+            marginTop: 12,
+            marginBottom: 18,
+            marginLeft: 24,
+            marginRight: 30,
+        })).toBe(true);
+        await awaitTime(0);
+
+        expect(getDoc()?.getDocumentStyle()).toEqual(expect.objectContaining({
+            documentFlavor: DocumentFlavor.MODERN,
+            pageSize: PAGE_SIZE[PaperType.A4],
+            pageOrient: PageOrientType.PORTRAIT,
+            marginTop: 12,
+            marginBottom: 18,
+            marginLeft: 24,
+            marginRight: 30,
+        }));
     });
 
     it('opens page settings and applies confirmed document setup', async () => {
@@ -1123,6 +1241,147 @@ describe('misc document commands', () => {
         expect(snapshot?.footers?.['even-footer-segment-1'].body?.dataStream).toBe('\r\n');
     });
 
+    it('replaces existing first-page header and footer links when the section header is recreated', async () => {
+        const doc = createHeaderFooterDoc();
+        doc.documentStyle = {
+            ...doc.documentStyle!,
+            firstPageHeaderId: 'old-first-header',
+            firstPageFooterId: 'old-first-footer',
+        };
+        doc.headers = {
+            'old-first-header': {
+                headerId: 'old-first-header',
+                body: { dataStream: '\r\n' },
+            },
+        };
+        doc.footers = {
+            'old-first-footer': {
+                footerId: 'old-first-footer',
+                body: { dataStream: '\r\n' },
+            },
+        };
+        ({ univer, get } = createCommandTestBed(doc));
+        commandService = get(ICommandService);
+        commandService.registerCommand(CoreHeaderFooterCommand);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+
+        expect(await commandService.executeCommand(CoreHeaderFooterCommand.id, {
+            unitId: 'test-doc',
+            segmentId: 'new-first-header',
+            createType: HeaderFooterType.FIRST_PAGE_HEADER,
+        })).toBe(true);
+        await awaitTime(0);
+
+        const snapshot = getDoc()?.getSnapshot();
+        expect(snapshot?.documentStyle.firstPageHeaderId).toBe('new-first-header');
+        expect(snapshot?.documentStyle.firstPageFooterId).not.toBe('old-first-footer');
+        expect(snapshot?.headers?.['new-first-header'].body?.textRuns?.[0].ts?.fs).toBe(9);
+    });
+
+    it('does not create header footer history when submitted settings match the document', async () => {
+        const doc = createHeaderFooterDoc();
+        doc.documentStyle = {
+            ...doc.documentStyle!,
+            marginHeader: 30,
+        };
+        ({ univer, get } = createCommandTestBed(doc));
+        commandService = get(ICommandService);
+        commandService.registerCommand(CoreHeaderFooterCommand);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+
+        expect(await commandService.executeCommand(CoreHeaderFooterCommand.id, {
+            unitId: 'test-doc',
+            headerFooterProps: {
+                marginHeader: 30,
+            },
+        })).toBe(false);
+    });
+
+    it('closes header footer editing and restores a body cursor', async () => {
+        ({ univer, get } = createCommandTestBed(createBaseDoc(), [
+            [ISidebarService, { useClass: TestSidebarService }],
+        ]));
+        commandService = get(ICommandService);
+        commandService.registerCommand(CloseHeaderFooterCommand);
+        commandService.registerCommand(SidebarDocHeaderFooterPanelOperation);
+        const sidebarService = get(ISidebarService) as TestSidebarService;
+        sidebarService.open({ visible: true });
+
+        const render = get(IRenderManagerService).getRenderById('test-doc')!;
+        let clearedSelectedObjects = false;
+        let markedDirty = false;
+        const mutableRender = render as unknown as {
+            scene: { getTransformerByCreate?: () => { clearSelectedObjects: () => void } };
+            mainComponent: unknown;
+            with: (dependency: unknown) => unknown;
+        };
+        mutableRender.scene.getTransformerByCreate = () => ({
+            clearSelectedObjects: () => {
+                clearedSelectedObjects = true;
+            },
+        });
+        mutableRender.mainComponent = {
+            makeDirty: (dirty: boolean) => {
+                markedDirty = dirty;
+            },
+        };
+
+        const skeletonManager = get(DocSkeletonManagerService) as unknown as {
+            getSkeleton: () => unknown;
+            getViewModel: () => { getEditArea: () => DocumentEditArea; setEditArea: (area: DocumentEditArea) => void };
+        };
+        let recalculated = false;
+        skeletonManager.getSkeleton = () => ({
+            calculate: () => {
+                recalculated = true;
+            },
+        });
+        skeletonManager.getViewModel().setEditArea(DocumentEditArea.HEADER);
+
+        let segment = 'header-1';
+        let segmentPage = 2;
+        const selectionRenderService = {
+            setSegment: (nextSegment: string) => {
+                segment = nextSegment;
+            },
+            getSegment: () => segment,
+            setSegmentPage: (nextSegmentPage: number) => {
+                segmentPage = nextSegmentPage;
+            },
+            getSegmentPage: () => segmentPage,
+        };
+        const originalWith = mutableRender.with.bind(mutableRender);
+        mutableRender.with = (dependency: unknown) => {
+            if (dependency === DocSkeletonManagerService) {
+                return skeletonManager;
+            }
+            if (dependency === DocSelectionRenderService) {
+                return selectionRenderService;
+            }
+            return originalWith(dependency);
+        };
+        const selectionManager = get(DocSelectionManagerService);
+        let latestSelectionRefresh: unknown;
+        const subscription = selectionManager.refreshSelection$.subscribe((refresh) => {
+            latestSelectionRefresh = refresh;
+        });
+
+        expect(await commandService.executeCommand(CloseHeaderFooterCommand.id, { unitId: 'test-doc' })).toBe(true);
+        await awaitTime(0);
+
+        expect(clearedSelectedObjects).toBe(true);
+        expect(recalculated).toBe(true);
+        expect(markedDirty).toBe(true);
+        expect(selectionRenderService.getSegment()).toBe('');
+        expect(selectionRenderService.getSegmentPage()).toBe(-1);
+        expect(skeletonManager.getViewModel().getEditArea()).toBe(DocumentEditArea.BODY);
+        expect(latestSelectionRefresh).toEqual(expect.objectContaining({
+            docRanges: [expect.objectContaining({ startOffset: 0, endOffset: 0 })],
+        }));
+        expect(sidebarService.visible).toBe(false);
+        subscription.unsubscribe();
+    });
+
     it('opens and closes the header footer sidebar panel through commands and operations', async () => {
         ({ univer, get } = createCommandTestBed(createBaseDoc(), [
             [ISidebarService, { useClass: TestSidebarService }],
@@ -1200,6 +1459,67 @@ describe('misc document commands', () => {
         expect(getDoc()?.getDocumentStyle().documentFlavor).toBe(DocumentFlavor.TRADITIONAL);
     });
 
+    it('converts body drawings to paragraph-relative vertical positions when switching from traditional mode', async () => {
+        ({ univer, get } = createCommandTestBed(createDrawingModeDoc()));
+        commandService = get(ICommandService);
+        commandService.registerCommand(SwitchDocModeCommand);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+        setCollapsedSelection(1);
+
+        const render = get(IRenderManagerService).getRenderById('test-doc')!;
+        const skeletonManager = get(DocSkeletonManagerService) as unknown as { getSkeleton: () => unknown };
+        const line = {
+            top: 10,
+            paragraphIndex: 0,
+            parent: undefined as unknown,
+        };
+        const column = {
+            lines: [{
+                paragraphIndex: 0,
+                paragraphStart: true,
+                top: 2,
+            }],
+            parent: {
+                parent: {
+                    marginTop: 50,
+                },
+            },
+        };
+        line.parent = column;
+        skeletonManager.getSkeleton = () => ({
+            findNodeByCharIndex: () => ({
+                parent: {
+                    parent: line,
+                },
+            }),
+        });
+        const selectionRenderService = {
+            getSegment: () => '',
+            getSegmentPage: () => -1,
+        };
+        const mutableRender = render as unknown as { with: (dependency: unknown) => unknown };
+        const originalWith = mutableRender.with.bind(mutableRender);
+        mutableRender.with = (dependency: unknown) => {
+            if (dependency === DocSkeletonManagerService) {
+                return skeletonManager;
+            }
+            if (dependency === DocSelectionRenderService) {
+                return selectionRenderService;
+            }
+            return originalWith(dependency);
+        };
+
+        expect(await commandService.executeCommand(SwitchDocModeCommand.id)).toBe(true);
+        await awaitTime(0);
+
+        const drawingPosition = getDoc()?.getSnapshot().drawings?.['drawing-1'].docTransform.positionV;
+        expect(getDoc()?.getDocumentStyle().documentFlavor).toBe(DocumentFlavor.MODERN);
+        expect(drawingPosition).toEqual(expect.objectContaining({
+            relativeFrom: ObjectRelativeFromV.PARAGRAPH,
+            posOffset: 38,
+        }));
+    });
+
     it('does not switch document mode when command skeleton is unavailable', async () => {
         ({ univer, get } = createCommandTestBed(createBaseDoc()));
         commandService = get(ICommandService);
@@ -1238,6 +1558,61 @@ describe('misc document commands', () => {
         })).toBe(true);
         expect(await commandService.executeCommand(MoveCursorOperation.id)).toBe(false);
         expect(await commandService.executeCommand(MoveSelectionOperation.id)).toBe(false);
+    });
+
+    it('inserts IME composition text at the cached active range', async () => {
+        ({ univer, get } = createCommandTestBed(createBaseDoc('AB\r\n')));
+        commandService = get(ICommandService);
+        commandService.registerCommand(IMEInputCommand);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+
+        const imeInputManagerService = get(DocIMEInputManagerService);
+        imeInputManagerService.setActiveRange({
+            startOffset: 1,
+            endOffset: 1,
+            collapsed: true,
+            segmentId: '',
+        });
+
+        expect(await commandService.executeCommand(IMEInputCommand.id, {
+            unitId: 'test-doc',
+            newText: '你',
+            oldTextLen: 0,
+            isCompositionStart: false,
+            isCompositionEnd: true,
+        })).toBe(true);
+        await awaitTime(0);
+
+        expect(getBody()?.dataStream).toBe('A你B\r\n');
+        const cache = imeInputManagerService.getUndoRedoMutationParamsCache();
+        expect(cache.undoCache).toHaveLength(1);
+        expect(cache.redoCache[0].isCompositionEnd).toBe(true);
+    });
+
+    it('replaces selected text when IME composition starts with a non-collapsed range', async () => {
+        ({ univer, get } = createCommandTestBed(createBaseDoc('Hello\r\n')));
+        commandService = get(ICommandService);
+        commandService.registerCommand(IMEInputCommand);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+
+        get(DocIMEInputManagerService).setActiveRange({
+            startOffset: 1,
+            endOffset: 4,
+            collapsed: false,
+            segmentId: '',
+        });
+
+        expect(await commandService.executeCommand(IMEInputCommand.id, {
+            unitId: 'test-doc',
+            newText: '你',
+            oldTextLen: 0,
+            isCompositionStart: true,
+            isCompositionEnd: false,
+        })).toBe(true);
+        await awaitTime(0);
+
+        expect(getBody()?.dataStream).toBe('H你o\r\n');
+        expect(get(DocIMEInputManagerService).getUndoRedoMutationParamsCache().redoCache[0].noHistory).toBe(true);
     });
 
     it('opens the create-table confirm flow and forwards the confirmed size to the table command', async () => {

@@ -14,24 +14,50 @@
  * limitations under the License.
  */
 
-import type { ISidebarMethodOptions } from '@univerjs/ui';
-import { Injector, IUniverInstanceService } from '@univerjs/core';
-import { ISidebarService } from '@univerjs/ui';
-import { of, Subject } from 'rxjs';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { IWorkbookData } from '@univerjs/core';
+import { IUniverInstanceService, LocaleType, Univer, UniverInstanceType } from '@univerjs/core';
+import { DesktopSidebarService, ISidebarService } from '@univerjs/ui';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ThreadCommentPanelService } from '../thread-comment-panel.service';
 
+const workbookData: IWorkbookData = {
+    id: 'panel-service-workbook',
+    appVersion: '3.0.0-alpha',
+    locale: LocaleType.EN_US,
+    name: 'panel service workbook',
+    sheetOrder: ['sheet-1'],
+    styles: {},
+    sheets: {
+        'sheet-1': {
+            id: 'sheet-1',
+            name: 'Sheet 1',
+            cellData: {},
+        },
+    },
+};
+
 describe('ThreadCommentPanelService', () => {
+    let univer: Univer;
     let service: ThreadCommentPanelService;
-    let sidebarOptions$: Subject<ISidebarMethodOptions>;
+    let sidebarService: ISidebarService;
+    let univerInstanceService: IUniverInstanceService;
 
     beforeEach(() => {
-        sidebarOptions$ = new Subject();
-        const injector = new Injector();
-        injector.add([ISidebarService, { useValue: { sidebarOptions$, close: vi.fn() } as unknown as ISidebarService }]);
-        injector.add([IUniverInstanceService, { useValue: { getCurrentTypeOfUnit$: () => of({}) } as unknown as IUniverInstanceService }]);
+        univer = new Univer();
+        const injector = univer.__getInjector();
+        injector.add([ISidebarService, { useClass: DesktopSidebarService }]);
         injector.add([ThreadCommentPanelService]);
+
+        univer.createUnit(UniverInstanceType.UNIVER_SHEET, workbookData);
+        univerInstanceService = injector.get(IUniverInstanceService);
+        univerInstanceService.focusUnit(workbookData.id);
+
         service = injector.get(ThreadCommentPanelService);
+        sidebarService = injector.get(ISidebarService);
+    });
+
+    afterEach(() => {
+        univer.dispose();
     });
 
     it('hides the comment panel when the host sidebar closes', () => {
@@ -39,7 +65,8 @@ describe('ThreadCommentPanelService', () => {
         service.panelVisible$.subscribe((visible) => visibleStates.push(visible));
 
         service.setPanelVisible(true);
-        sidebarOptions$.next({ visible: false });
+        sidebarService.open({});
+        sidebarService.close();
 
         expect(service.panelVisible).toBe(false);
         expect(visibleStates).toEqual([false, true, false]);
@@ -53,5 +80,15 @@ describe('ThreadCommentPanelService', () => {
 
         expect(service.activeCommentId).toEqual({ unitId: 'book-1', subUnitId: 'sheet-1', commentId: 'c-1', trigger: 'cell' });
         expect(activeComments.at(-1)).toEqual({ unitId: 'book-1', subUnitId: 'sheet-1', commentId: 'c-1', trigger: 'cell' });
+    });
+
+    it('closes the sidebar when the current sheet is removed', () => {
+        sidebarService.open({});
+        service.setPanelVisible(true);
+
+        univerInstanceService.disposeUnit(workbookData.id);
+
+        expect(sidebarService.visible).toBe(false);
+        expect(service.panelVisible).toBe(false);
     });
 });

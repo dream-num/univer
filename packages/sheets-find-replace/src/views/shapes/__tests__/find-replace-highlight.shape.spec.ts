@@ -96,4 +96,33 @@ describe('SheetFindReplaceHighlightShape', () => {
         expect(context.lineWidth).toBe(2);
         expect(context.strokeCount).toBe(1);
     });
+
+    it('removes the current result border after the shape is deactivated', () => {
+        const shape = new SheetFindReplaceHighlightShape('active-result', {
+            inHiddenRange: false,
+            color: { r: 7, g: 8, b: 9 },
+            activated: true,
+            width: 10,
+            height: 20,
+        });
+        const activeContext = new TestCanvasContext();
+
+        drawShape(shape, activeContext);
+
+        expect(activeContext.strokeStyle).toBe('rgb(7, 8, 9)');
+        expect(activeContext.strokeCount).toBe(1);
+
+        shape.setShapeProps({
+            activated: false,
+            width: 10,
+            height: 20,
+        });
+        const inactiveContext = new TestCanvasContext();
+
+        drawShape(shape, inactiveContext);
+
+        expect(inactiveContext.fillStyle).toBe('rgba(7, 8, 9, 0.35)');
+        expect(inactiveContext.lineWidth).toBe(0);
+        expect(inactiveContext.strokeCount).toBe(0);
+    });
 });

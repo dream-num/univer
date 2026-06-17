@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import type { IDocumentData } from '@univerjs/core';
-import { CommandType, ICommandService, IUniverInstanceService, Univer, UniverInstanceType } from '@univerjs/core';
-import { RichTextEditingMutation } from '@univerjs/docs';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
+import { CustomDecorationType, ICommandService, IUniverInstanceService, Univer, UniverInstanceType } from '@univerjs/core';
+import { DocSelectionManagerService, DocStateEmitService, RichTextEditingMutation } from '@univerjs/docs';
+import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { DeleteDocCommentComment } from '../delete-doc-comment.command';
 
 function createDocData(id: string): IDocumentData {
@@ -25,7 +26,7 @@ function createDocData(id: string): IDocumentData {
         id,
         body: {
             dataStream: 'Hello world\r\n',
-            customDecorations: [{ id: 'c1', startIndex: 0, endIndex: 5, type: 1 as never }],
+            customDecorations: [{ id: 'c1', startIndex: 0, endIndex: 5, type: CustomDecorationType.COMMENT }],
         },
         documentStyle: {
             pageSize: { width: 100, height: 100 },
@@ -40,40 +41,40 @@ function createDocData(id: string): IDocumentData {
 describe('DeleteDocCommentComment', () => {
     let univer: Univer;
     let injector: ReturnType<Univer['__getInjector']>;
+    let commandService: ICommandService;
 
     beforeEach(() => {
         univer = new Univer();
         injector = univer.__getInjector();
+        injector.add([DocSelectionManagerService]);
+        injector.add([DocStateEmitService]);
+        injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+        commandService = injector.get(ICommandService);
+        commandService.registerCommand(DeleteDocCommentComment);
+        commandService.registerCommand(RichTextEditingMutation);
     });
 
     afterEach(() => {
         univer.dispose();
     });
 
-    it('should delete decoration via sequenceExecute', async () => {
-        const doc = univer.createUnit(UniverInstanceType.UNIVER_DOC, createDocData('doc-1'));
+    it('removes the comment decoration from the document', async () => {
+        const doc = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, createDocData('doc-1'));
         injector.get(IUniverInstanceService).focusUnit(doc.getUnitId());
 
-        const executed: Array<{ id: string; params: unknown }> = [];
-        const commandService = injector.get(ICommandService);
-        commandService.registerCommand({
-            id: RichTextEditingMutation.id,
-            type: CommandType.MUTATION,
-            handler: (_accessor, params) => {
-                executed.push({ id: RichTextEditingMutation.id, params });
-                return true;
-            },
-        });
+        const ok = await commandService.executeCommand(DeleteDocCommentComment.id, { unitId: 'doc-1', commentId: 'c1' });
 
-        const ok = await DeleteDocCommentComment.handler(injector as any, { unitId: 'doc-1', commentId: 'c1' });
         expect(ok).toBe(true);
-        expect(executed).toHaveLength(1);
-        expect(executed[0]).toEqual(expect.objectContaining({ id: RichTextEditingMutation.id }));
-        expect(executed[0].params).toEqual(expect.objectContaining({ unitId: 'doc-1' }));
+        expect(doc.getBody()?.customDecorations).toEqual([]);
     });
 
-    it('should return false when missing params', async () => {
-        const ok = await DeleteDocCommentComment.handler({ get: vi.fn() } as any, undefined as any);
+    it('rejects an incomplete delete request without changing the document', async () => {
+        const doc = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, createDocData('doc-1'));
+        injector.get(IUniverInstanceService).focusUnit(doc.getUnitId());
+
+        const ok = await commandService.executeCommand(DeleteDocCommentComment.id);
+
         expect(ok).toBe(false);
+        expect(doc.getBody()?.customDecorations).toEqual([{ id: 'c1', startIndex: 0, endIndex: 5, type: CustomDecorationType.COMMENT }]);
     });
 });

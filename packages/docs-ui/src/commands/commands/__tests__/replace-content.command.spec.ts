@@ -18,7 +18,13 @@ import type { DocumentDataModel, ICommand, IDocumentData, Injector, Univer } fro
 import { ICommandService, IUniverInstanceService, RedoCommand, UndoCommand, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { CoverContentCommand, ReplaceContentCommand, ReplaceSelectionCommand, ReplaceTextRunsCommand } from '../replace-content.command';
+import {
+    CoverContentCommand,
+    ReplaceContentCommand,
+    ReplaceSelectionCommand,
+    ReplaceSnapshotCommand,
+    ReplaceTextRunsCommand,
+} from '../replace-content.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
 function getDocumentData() {
@@ -65,6 +71,7 @@ describe('replace or cover content of document', () => {
         commandService.registerCommand(ReplaceContentCommand);
         commandService.registerCommand(CoverContentCommand);
         commandService.registerCommand(ReplaceSelectionCommand);
+        commandService.registerCommand(ReplaceSnapshotCommand);
         commandService.registerCommand(ReplaceTextRunsCommand);
         commandService.registerCommand(SetTextSelectionsOperation);
         commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
@@ -144,6 +151,87 @@ describe('replace or cover content of document', () => {
     });
 
     describe('replace selected document content', () => {
+        it('replaces the document snapshot including style and table metadata', async () => {
+            const tableSource = {
+                table_1: {
+                    tableId: 'table_1',
+                    tableRows: [],
+                    tableColumns: [],
+                },
+            };
+            const nextSnapshot = {
+                ...getDocumentData(),
+                body: {
+                    dataStream: 'Snapshot\r\n',
+                    textRuns: [{
+                        st: 0,
+                        ed: 8,
+                        ts: {
+                            fs: 16,
+                        },
+                    }],
+                    paragraphs: [{ paragraphId: 'para_replace_snapshot', startIndex: 8 }],
+                    sectionBreaks: [{ startIndex: 9 }],
+                    customBlocks: [],
+                },
+                documentStyle: {
+                    pageSize: {
+                        width: 500,
+                        height: 700,
+                    },
+                    marginTop: 20,
+                    marginBottom: 20,
+                    marginRight: 30,
+                    marginLeft: 30,
+                },
+                tableSource,
+                lists: {
+                    list_1: {
+                        listType: 'BULLET_LIST',
+                        nestingLevel: [],
+                    },
+                },
+                drawings: {},
+                drawingsOrder: [],
+                headers: {},
+                footers: {},
+            } as never;
+
+            await expect(commandService.executeCommand(ReplaceSnapshotCommand.id, {
+                unitId: 'test-doc',
+                snapshot: nextSnapshot,
+                textRanges: [{
+                    startOffset: 8,
+                    endOffset: 8,
+                    collapsed: true,
+                }],
+                options: {
+                    noHistory: true,
+                },
+            })).resolves.toBe(true);
+
+            const univerInstanceService = get(IUniverInstanceService);
+            const docsModel = univerInstanceService.getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC);
+            expect(docsModel?.getBody()?.dataStream).toBe('Snapshot\r\n');
+            expect(docsModel?.getDocumentStyle().pageSize).toEqual({ width: 500, height: 700 });
+            expect(docsModel?.getSnapshot().tableSource).toEqual(tableSource);
+        });
+
+        it('updates only the selection when the replacement snapshot body is unchanged', async () => {
+            await expect(commandService.executeCommand(ReplaceSnapshotCommand.id, {
+                unitId: 'test-doc',
+                snapshot: getDocumentData(),
+                textRanges: [{
+                    startOffset: 1,
+                    endOffset: 4,
+                    collapsed: false,
+                }],
+                options: {},
+            })).resolves.toBe(true);
+
+            expect(getDataStream()).toBe('=SUM(A2:B4)\r\n');
+        });
+
         it('replaces the active selection through the real rich text mutation flow', async () => {
             univer.dispose();
             const testBed = createCommandTestBed(getDocumentData());

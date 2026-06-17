@@ -101,7 +101,6 @@ import { RemovePasteMenuCommands } from './const';
 import {
     generateBody,
     getClearAndSetMergeMutations,
-    getClearCellStyleMutations,
     getDefaultOnPasteCellMutations,
     getSetCellStyleMutations,
     getSetCellValueMutations,
@@ -607,7 +606,11 @@ export class SheetClipboardController extends RxDisposable {
             },
             onPasteCells: (pasteFrom, pasteTo, data) => {
                 return this._injector.invoke((accessor) => {
-                    return getSetCellValueMutations(pasteTo, pasteFrom, data, accessor);
+                    const { redo, undo } = getSetCellValueMutations(pasteTo, pasteFrom, data, accessor);
+                    return {
+                        redos: [redo],
+                        undos: [undo],
+                    };
                 });
             },
         };
@@ -620,12 +623,17 @@ export class SheetClipboardController extends RxDisposable {
                 const redoMutationsInfo: IMutationInfo[] = [];
                 const undoMutationsInfo: IMutationInfo[] = [];
 
-                // clear cell style
-                const { undos: styleUndos, redos: styleRedos } = this._injector.invoke((accessor) => {
-                    return getClearCellStyleMutations(pasteTo, matrix, accessor);
+                // Set cell style
+                const { redo, undo } = this._injector.invoke((accessor) => {
+                    return getSetCellStyleMutations(
+                        pasteTo,
+                        pasteFrom,
+                        matrix,
+                        accessor
+                    );
                 });
-                redoMutationsInfo.push(...styleRedos);
-                undoMutationsInfo.push(...styleUndos);
+                redoMutationsInfo.push(redo);
+                undoMutationsInfo.push(undo);
 
                 // clear and set merge
                 const { undos: mergeUndos, redos: mergeRedos } = this._injector.invoke((accessor) => {
@@ -637,18 +645,6 @@ export class SheetClipboardController extends RxDisposable {
                 });
                 redoMutationsInfo.push(...mergeRedos);
                 undoMutationsInfo.push(...mergeUndos);
-
-                const { undos: setStyleUndos, redos: setStyleRedos } = this._injector.invoke((accessor) => {
-                    return getSetCellStyleMutations(
-                        pasteTo,
-                        pasteFrom,
-                        matrix,
-                        accessor
-                    );
-                });
-
-                redoMutationsInfo.push(...setStyleRedos);
-                undoMutationsInfo.push(...setStyleUndos);
 
                 return {
                     undos: undoMutationsInfo,

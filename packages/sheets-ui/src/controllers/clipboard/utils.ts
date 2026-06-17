@@ -16,7 +16,7 @@
 
 /* eslint-disable max-lines-per-function */
 
-import type { IAccessor, IBorderData, ICellData, ICustomRange, IDocumentBody, IMutationInfo, IParagraph, IRange, IStyleData, Nullable } from '@univerjs/core';
+import type { IAccessor, ICellData, ICustomRange, IDocumentBody, IMutationInfo, IParagraph, IRange, IStyleData, Nullable } from '@univerjs/core';
 import type {
     IAddWorksheetMergeMutationParams,
     IDiscreteRange,
@@ -26,12 +26,9 @@ import type {
 import type { ICellDataWithSpanInfo, ICopyPastePayload, ISheetDiscreteRangeLocation } from '../../services/clipboard/type';
 import {
     CellValueType,
-    cloneCellData,
     cloneCellDataMatrix,
-    cloneValue,
     createParagraphId,
     CustomRangeType,
-    DEFAULT_STYLES,
     generateRandomId,
     getNumfmtParseValueFilter,
     isTextFormat,
@@ -41,7 +38,6 @@ import {
     Tools,
     willLoseNumericPrecision,
 } from '@univerjs/core';
-import { DEFAULT_PADDING_DATA } from '@univerjs/engine-render';
 import {
     AddMergeUndoMutationFactory,
     AddWorksheetMergeMutation,
@@ -56,6 +52,12 @@ import {
 import { COPY_TYPE } from '../../services/clipboard/type';
 import { isRichText } from '../editor/editing.render-controller';
 import { virtualizeDiscreteRanges } from '../utils/range-tools';
+
+interface IExternalPasteNumberFormatResult {
+    n?: IStyleData['n'];
+    t?: CellValueType;
+    v?: ICellData['v'];
+}
 
 // if special paste need append mutations instead of replace the default, it can use this function to generate default mutations.
 /**
@@ -73,62 +75,39 @@ export function getDefaultOnPasteCellMutations(
     payload: ICopyPastePayload,
     accessor: IAccessor
 ) {
-    const redoMutationsInfo: IMutationInfo[] = [];
-    const undoMutationsInfo: IMutationInfo[] = [];
     if (payload.copyType === COPY_TYPE.CUT) {
         const { undos, redos } = getMoveRangeMutations(pasteFrom, pasteTo, accessor);
-        redoMutationsInfo.push(...redos);
-        undoMutationsInfo.push(...undos);
-    } else {
-        // clear style
-        const { undos: clearStyleUndos, redos: clearStyleRedos } = getClearCellStyleMutations(pasteTo, data, accessor);
-        redoMutationsInfo.push(...clearStyleRedos);
-        undoMutationsInfo.push(...clearStyleUndos);
-
-        // clear value
-        const { undos: clearValueUndos, redos: clearValueRedos } = getClearCellValueMutations(pasteTo, data, accessor);
-        redoMutationsInfo.push(...clearValueRedos);
-        undoMutationsInfo.push(...clearValueUndos);
-
-        // set values
-        const { undos: setValuesUndos, redos: setValuesRedos } = getSetCellValueMutations(pasteTo, pasteFrom, data, accessor);
-        redoMutationsInfo.push(...setValuesRedos);
-        undoMutationsInfo.push(...setValuesUndos);
-
-        // set styles
-        const { undos: setStyleUndos, redos: setStyleRedos } = getSetCellStyleMutations(pasteTo, pasteFrom, data, accessor, true);
-        redoMutationsInfo.push(...setStyleRedos);
-        undoMutationsInfo.push(...setStyleUndos);
-
-        // Do not process the custom attribute here, users can extend the paste event by themselves
-
-        // clear and add merge
-        const { undos: clearMergeUndos, redos: clearMergeRedos } = getClearAndSetMergeMutations(
-            pasteTo,
-            data,
-            accessor
-        );
-        redoMutationsInfo.push(...clearMergeRedos);
-        undoMutationsInfo.push(...clearMergeUndos);
+        return { undos, redos };
     }
+
+    const redoMutationsInfo: IMutationInfo[] = [];
+    const undoMutationsInfo: IMutationInfo[] = [];
+
+    // Set cell value and style
+    const { redo, undo } = getSetCellDataMutations(
+        pasteTo,
+        pasteFrom,
+        data,
+        accessor
+    );
+    redoMutationsInfo.push(redo);
+    undoMutationsInfo.push(undo);
+
+    // clear and add merge
+    const { undos: clearMergeUndos, redos: clearMergeRedos } = getClearAndSetMergeMutations(
+        pasteTo,
+        data,
+        accessor
+    );
+    redoMutationsInfo.push(...clearMergeRedos);
+    undoMutationsInfo.push(...clearMergeUndos);
+
     return {
         undos: undoMutationsInfo,
         redos: redoMutationsInfo,
     };
 }
 
-/**
- *
- * @param from
- * @param from.unitId
- * @param from.subUnitId
- * @param from.range
- * @param to
- * @param to.unitId
- * @param to.subUnitId
- * @param to.range
- * @param accessor
- */
 export function getMoveRangeMutations(
     from: {
         unitId: string;
@@ -176,304 +155,276 @@ export function getMoveRangeMutations(
         };
 }
 
-/**
- *
- * @param pasteTo
- * @param pasteFrom
- * @param matrix
- * @param accessor
- */
+function getExternalPasteNumberFormatResult(
+    value: ICellData['v'],
+    currentCellStyle: Nullable<IStyleData> | undefined
+): IExternalPasteNumberFormatResult {
+    if (isTextFormat(currentCellStyle?.n?.pattern)) {
+        return {
+            n: currentCellStyle?.n,
+            t: CellValueType.STRING,
+        };
+    }
+
+    const content = String(value).trim();
+    const numfmtValue = getNumfmtParseValueFilter(content);
+    const result: IExternalPasteNumberFormatResult = {};
+
+    if (numfmtValue?.v !== undefined && typeof numfmtValue.v === 'number') {
+        // If the numeric string will lose precision when converted to a number, set the cell type to force string
+        // e.g. 123456789123456789
+        // e.g. 1212121212121212.2345
+        if (!numfmtValue.z && willLoseNumericPrecision(content)) {
+            result.t = CellValueType.FORCE_STRING;
+        } else {
+            result.v = numfmtValue.v;
+        }
+    }
+
+    if (numfmtValue?.z) {
+        result.n = { pattern: numfmtValue.z };
+    }
+
+    return result;
+}
+
+export function getSetCellDataMutations(
+    pasteTo: ISheetDiscreteRangeLocation,
+    pasteFrom: Nullable<ISheetDiscreteRangeLocation>,
+    matrix: ObjectMatrix<ICellDataWithSpanInfo>,
+    accessor: IAccessor
+): {
+    redo: IMutationInfo;
+    undo: IMutationInfo;
+} {
+    const { unitId, subUnitId, range } = pasteTo;
+    const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), { unitId, subUnitId });
+    const worksheet = target?.worksheet;
+    const { mapFunc } = virtualizeDiscreteRanges([range]);
+
+    const cellValueMatrix = new ObjectMatrix<ICellData>();
+
+    matrix.forValue((rowIndex, columnIndex, value) => {
+        const { row, col } = mapFunc(rowIndex, columnIndex);
+
+        const newStyle = { ...(value.s ?? {}) as IStyleData };
+        if (newStyle.bd && Object.keys(newStyle.bd).length === 0) {
+            newStyle.bd = {
+                t: null,
+                r: null,
+                b: null,
+                l: null,
+            };
+        }
+
+        let cellValue: ICellData = {
+            p: null,
+            v: value.v,
+            t: value.t,
+        };
+
+        if (value.p?.body && isRichText(value.p.body)) {
+            cellValue = {
+                p: value.p,
+                v: value.v,
+            };
+        } else if (!pasteFrom && value.v && !newStyle.n?.pattern) {
+            /**
+             * The `pasteFrom` is null, means the data is pasted from outside.
+             * If the value's style has no number format, handle it as follows:
+             * 1. The paste to cell has a number format, google sheets will apply the number format, but excel does not.
+             * Here we only handle the text format, other number format are left unhandled now.
+             * 2. If the above case does not apply, parse the value to check whether it has a number format.
+             */
+            const currentCellStyle = worksheet?.getCellStyle(row, col);
+            const numfmtResult = getExternalPasteNumberFormatResult(value.v, currentCellStyle);
+
+            if (numfmtResult.n) {
+                newStyle.n = numfmtResult.n;
+            }
+            if (numfmtResult.t !== undefined) {
+                cellValue.t = numfmtResult.t;
+            }
+            if (numfmtResult.v !== undefined) {
+                cellValue.v = numfmtResult.v;
+            }
+        }
+
+        cellValue.s = Object.keys(newStyle).length > 0 ? newStyle : null;
+
+        cellValueMatrix.setValue(row, col, cellValue);
+    });
+
+    const redoParams: ISetRangeValuesMutationParams = {
+        unitId,
+        subUnitId,
+        cellValue: cloneCellDataMatrix(cellValueMatrix.getMatrix()),
+        isOverrideStyle: true,
+    };
+    const undoParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
+        accessor,
+        redoParams
+    );
+
+    return {
+        redo: {
+            id: SetRangeValuesMutation.id,
+            params: redoParams,
+        },
+        undo: {
+            id: SetRangeValuesMutation.id,
+            params: undoParams,
+        },
+    };
+}
+
 export function getSetCellValueMutations(
     pasteTo: ISheetDiscreteRangeLocation,
     pasteFrom: Nullable<ISheetDiscreteRangeLocation>,
     matrix: ObjectMatrix<ICellDataWithSpanInfo>,
     accessor: IAccessor
-) {
+): {
+    redo: IMutationInfo;
+    undo: IMutationInfo;
+} {
     const { unitId, subUnitId, range } = pasteTo;
-    const worksheet = accessor.get(IUniverInstanceService).getUniverSheetInstance(unitId)?.getSheetBySheetId(subUnitId);
-    const redoMutationsInfo: IMutationInfo[] = [];
-    const undoMutationsInfo: IMutationInfo[] = [];
+    const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), { unitId, subUnitId });
+    const worksheet = target?.worksheet;
     const { mapFunc } = virtualizeDiscreteRanges([range]);
-    const valueMatrix = new ObjectMatrix<ICellData>();
 
-    matrix.forValue((row, col, value) => {
-        const { row: realRow, col: realCol } = mapFunc(row, col);
+    const cellValueMatrix = new ObjectMatrix<ICellData>();
 
-        const cellValue: ICellData = {
+    matrix.forValue((rowIndex, columnIndex, value) => {
+        const { row, col } = mapFunc(rowIndex, columnIndex);
+
+        let cellValue: ICellData = {
+            p: null,
             v: value.v,
             t: value.t,
         };
 
-        if (!value.p && value.v && !pasteFrom) {
-            // pasteFrom is null, means the data is pasted from outside, at this time, the data has no number format.
-            // If the paste to cell has a number format, google sheet will apply the number format, but excel will not.
-            // Here the text format need to be handled, other number format need to discuss. TODO: @wzhudev @ybzky
-            const style = worksheet?.getCellStyle(realRow, realCol);
+        if (value.p?.body && isRichText(value.p.body)) {
+            cellValue = {
+                p: value.p,
+                v: value.v,
+            };
+        } else if (value.v && !pasteFrom && !(value.s as IStyleData)?.n?.pattern) {
+            /**
+             * The `pasteFrom` is null, means the data is pasted from outside.
+             * If the value's style has no number format, handle it as follows:
+             * 1. The paste to cell has a number format, google sheets will apply the number format, but excel does not.
+             * Here we only handle the text format, other number format are left unhandled now.
+             * 2. If the above case does not apply, parse the value to check whether it has a number format.
+             */
+            const currentCellStyle = worksheet?.getCellStyle(row, col);
+            const numfmtResult = getExternalPasteNumberFormatResult(value.v, currentCellStyle);
 
-            if (isTextFormat(style?.n?.pattern)) {
-                cellValue.t = CellValueType.STRING;
-            } else {
-                const content = String(value.v).trim();
-                const numfmtValue = getNumfmtParseValueFilter(content);
-                if (numfmtValue?.v !== undefined && typeof numfmtValue.v === 'number') {
-                    // If the numeric string will lose precision when converted to a number, set the cell type to force string
-                    // e.g. 123456789123456789
-                    // e.g. 1212121212121212.2345
-                    if (!numfmtValue.z && willLoseNumericPrecision(content)) {
-                        cellValue.t = CellValueType.FORCE_STRING;
-                    } else {
-                        cellValue.v = numfmtValue.v;
-                    }
-                }
+            if (numfmtResult.t !== undefined) {
+                cellValue.t = numfmtResult.t;
+            }
+            if (numfmtResult.v !== undefined) {
+                cellValue.v = numfmtResult.v;
             }
         }
 
-        if (value.p?.body && isRichText(value.p.body)) {
-            const newValue = { p: cloneValue(value.p), v: value.v };
-            valueMatrix.setValue(realRow, realCol, newValue);
-        } else {
-            valueMatrix.setValue(realRow, realCol, cellValue && cloneCellData(cellValue)!);
-        }
+        cellValueMatrix.setValue(row, col, cellValue);
     });
-    // set cell value and style
-    const setValuesMutation: ISetRangeValuesMutationParams = {
+
+    const redoParams: ISetRangeValuesMutationParams = {
         unitId,
         subUnitId,
-        cellValue: cloneCellDataMatrix(valueMatrix.getMatrix()),
+        cellValue: cloneCellDataMatrix(cellValueMatrix.getMatrix()),
     };
-
-    redoMutationsInfo.push({
-        id: SetRangeValuesMutation.id,
-        params: setValuesMutation,
-    });
-
-    // undo
-    const undoSetValuesMutation: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
+    const undoParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
         accessor,
-        setValuesMutation
+        redoParams
     );
 
-    undoMutationsInfo.push({
-        id: SetRangeValuesMutation.id,
-        params: undoSetValuesMutation,
-    });
     return {
-        undos: undoMutationsInfo,
-        redos: redoMutationsInfo,
+        redo: {
+            id: SetRangeValuesMutation.id,
+            params: redoParams,
+        },
+        undo: {
+            id: SetRangeValuesMutation.id,
+            params: undoParams,
+        },
     };
 }
 
-/**
- *
- * @param pasteTo
- * @param pasteFrom
- * @param matrix
- * @param accessor
- * @param _withRichFormat
- */
 export function getSetCellStyleMutations(
     pasteTo: ISheetDiscreteRangeLocation,
     pasteFrom: Nullable<ISheetDiscreteRangeLocation>,
     matrix: ObjectMatrix<ICellDataWithSpanInfo>,
-    accessor: IAccessor,
-    _withRichFormat = false
-) {
-    const redoMutationsInfo: IMutationInfo[] = [];
-    const undoMutationsInfo: IMutationInfo[] = [];
+    accessor: IAccessor
+): {
+    redo: IMutationInfo;
+    undo: IMutationInfo;
+} {
     const { unitId, subUnitId, range } = pasteTo;
-    const worksheet = accessor.get(IUniverInstanceService).getUniverSheetInstance(unitId)?.getSheetBySheetId(subUnitId);
-    const valueMatrix = new ObjectMatrix<ICellData>();
-
+    const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), { unitId, subUnitId });
+    const worksheet = target?.worksheet;
     const { mapFunc } = virtualizeDiscreteRanges([range]);
 
-    matrix.forValue((row, col, value) => {
-        const newValue: ICellData = {
-            s: Object.assign({}, {
-                ...DEFAULT_STYLES,
-                pd: DEFAULT_PADDING_DATA,
-                bg: null,
-                cl: null,
-            }, value.s),
-        };
+    const cellValueMatrix = new ObjectMatrix<ICellData>();
 
-        // Here I don't know why when setting the border, an empty object is also assigned to the adjacent cells without borders.
-        // This is the fundamental cause of the problem. This should be unreasonable, so I bypassed this problem first.
-        const cellBd = (newValue.s as IStyleData).bd as IBorderData;
-        if (cellBd) {
-            const isValid = Object.keys(cellBd).length > 0;
-            if (!isValid) {
-                (newValue.s as IStyleData)!.bd = {
-                    b: null,
-                    l: null,
-                    r: null,
-                    t: null,
-                };
+    matrix.forValue((rowIndex, columnIndex, value) => {
+        const { row, col } = mapFunc(rowIndex, columnIndex);
+
+        const newStyle = { ...(value.s ?? {}) as IStyleData };
+        if (newStyle.bd && Object.keys(newStyle.bd).length === 0) {
+            newStyle.bd = {
+                t: null,
+                r: null,
+                b: null,
+                l: null,
+            };
+        }
+
+        if (!pasteFrom && value.v && !newStyle.n?.pattern) {
+            /**
+             * The `pasteFrom` is null, means the data is pasted from outside.
+             * If the value's style has no number format, handle it as follows:
+             * 1. The paste to cell has a number format, google sheets will apply the number format, but excel does not.
+             * Here we only handle the text format, other number format are left unhandled now.
+             * 2. If the above case does not apply, parse the value to check whether it has a number format.
+             */
+            const currentCellStyle = worksheet?.getCellStyle(row, col);
+            const numfmtResult = getExternalPasteNumberFormatResult(value.v, currentCellStyle);
+
+            if (numfmtResult.n) {
+                newStyle.n = numfmtResult.n;
             }
         }
 
-        const { row: actualRow, col: actualCol } = mapFunc(row, col);
-
-        // pasteFrom is null, means the data is pasted from outside, at this time, the data has no number format.
-        // If the paste to cell has a number format, google sheet will apply the number format, but excel will not.
-        // Here the text format need to be handled, other number format need to discuss. TODO: @wzhudev @ybzky
-        const style = worksheet?.getCellStyle(actualRow, actualCol);
-
-        if (value.v && !pasteFrom && isTextFormat(style?.n?.pattern)) {
-            if (!newValue.s) {
-                newValue.s = {};
-            }
-            (newValue.s as IStyleData).n = style?.n;
-        } else {
-            const content = String(value.v).trim();
-            const numfmtValue = getNumfmtParseValueFilter(content);
-            if (numfmtValue?.z) {
-                if (!newValue.s) {
-                    newValue.s = {};
-                }
-                if (typeof newValue.s === 'object') {
-                    if (!newValue.s?.n) {
-                        newValue.s.n = { pattern: numfmtValue.z };
-                    } else {
-                        newValue.s.n.pattern = numfmtValue.z;
-                    }
-                }
-            }
-        }
-
-        valueMatrix.setValue(actualRow, actualCol, newValue);
+        cellValueMatrix.setValue(row, col, {
+            s: Object.keys(newStyle).length > 0 ? newStyle : null,
+        });
     });
-    // set cell style
-    const setValuesMutation: ISetRangeValuesMutationParams = {
+
+    const redoParams: ISetRangeValuesMutationParams = {
         unitId,
         subUnitId,
-        cellValue: cloneCellDataMatrix(valueMatrix.getMatrix()),
+        cellValue: cloneCellDataMatrix(cellValueMatrix.getMatrix()),
+        isOverrideStyle: true,
     };
-
-    redoMutationsInfo.push({
-        id: SetRangeValuesMutation.id,
-        params: setValuesMutation,
-    });
-
-    // undo
-    const undoSetValuesMutation: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
+    const undoParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
         accessor,
-        setValuesMutation
+        redoParams
     );
 
-    undoMutationsInfo.push({
-        id: SetRangeValuesMutation.id,
-        params: undoSetValuesMutation,
-    });
     return {
-        undos: undoMutationsInfo,
-        redos: redoMutationsInfo,
+        redo: {
+            id: SetRangeValuesMutation.id,
+            params: redoParams,
+        },
+        undo: {
+            id: SetRangeValuesMutation.id,
+            params: undoParams,
+        },
     };
 }
 
-/**
- *
- * @param pasteTo
- * @param matrix
- * @param accessor
- */
-export function getClearCellStyleMutations(
-    pasteTo: ISheetDiscreteRangeLocation,
-    matrix: ObjectMatrix<ICellDataWithSpanInfo>,
-    accessor: IAccessor
-) {
-    const redoMutationsInfo: IMutationInfo[] = [];
-    const undoMutationsInfo: IMutationInfo[] = [];
-    const clearStyleMatrix = new ObjectMatrix<ICellData>();
-    const { unitId, subUnitId, range } = pasteTo;
-    const { mapFunc } = virtualizeDiscreteRanges([range]);
-
-    matrix.forEach((rowIndex, row) => {
-        Object.keys(row).forEach((colIndexStr) => {
-            const colIndex = Number(colIndexStr);
-            const { row: actualRow, col: actualCol } = mapFunc(rowIndex, colIndex);
-            clearStyleMatrix.setValue(actualRow, actualCol, { s: null });
-        });
-    });
-    // clear style
-    if (clearStyleMatrix.getLength() > 0) {
-        const clearMutation: ISetRangeValuesMutationParams = {
-            subUnitId,
-            unitId,
-            cellValue: cloneCellDataMatrix(clearStyleMatrix.getMatrix()),
-        };
-        redoMutationsInfo.push({
-            id: SetRangeValuesMutation.id,
-            params: clearMutation,
-        });
-
-        // undo
-        const undoClearMutation: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
-            accessor,
-            clearMutation
-        );
-
-        undoMutationsInfo.push({
-            id: SetRangeValuesMutation.id,
-            params: undoClearMutation,
-        });
-    }
-
-    return { undos: undoMutationsInfo, redos: redoMutationsInfo };
-}
-
-/**
- *
- * @param pasteTo
- * @param matrix
- * @param accessor
- */
-export function getClearCellValueMutations(
-    pasteTo: ISheetDiscreteRangeLocation,
-    matrix: ObjectMatrix<ICellDataWithSpanInfo>,
-    accessor: IAccessor
-) {
-    const redoMutationsInfo: IMutationInfo[] = [];
-    const undoMutationsInfo: IMutationInfo[] = [];
-    const clearValueMatrix = new ObjectMatrix<ICellData>();
-    const { unitId, subUnitId, range } = pasteTo;
-    const { mapFunc } = virtualizeDiscreteRanges([range]);
-
-    matrix.forValue((row, col, _value) => {
-        const { row: actualRow, col: actualCol } = mapFunc(row, col);
-        clearValueMatrix.setValue(actualRow, actualCol, { v: null, p: null });
-    });
-    if (clearValueMatrix.getLength() > 0) {
-        const clearMutation: ISetRangeValuesMutationParams = {
-            subUnitId,
-            unitId,
-            cellValue: cloneCellDataMatrix(clearValueMatrix.getMatrix()),
-        };
-        redoMutationsInfo.push({
-            id: SetRangeValuesMutation.id,
-            params: clearMutation,
-        });
-
-        // undo
-        const undoClearMutation: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
-            accessor,
-            clearMutation
-        );
-
-        undoMutationsInfo.push({
-            id: SetRangeValuesMutation.id,
-            params: undoClearMutation,
-        });
-    }
-
-    return { undos: undoMutationsInfo, redos: redoMutationsInfo };
-}
-
-/**
- *
- * @param pasteTo
- * @param matrix
- * @param accessor
- */
 export function getClearAndSetMergeMutations(
     pasteTo: ISheetDiscreteRangeLocation,
     matrix: ObjectMatrix<ICellDataWithSpanInfo>,
@@ -481,6 +432,7 @@ export function getClearAndSetMergeMutations(
 ) {
     const redoMutationsInfo: IMutationInfo[] = [];
     const undoMutationsInfo: IMutationInfo[] = [];
+
     const { unitId, subUnitId, range } = pasteTo;
     const { startColumn, startRow, endColumn, endRow } = discreteRangeToRange(range);
     const mergeRangeData: IRange[] = [];
@@ -565,10 +517,6 @@ export function getClearAndSetMergeMutations(
     return { redos: redoMutationsInfo, undos: undoMutationsInfo };
 }
 
-/**
- *
- * @param text
- */
 export function generateBody(text: string): IDocumentBody {
     if (!text.includes('\r') && Tools.isLegalUrl(text)) {
         const id = generateRandomId();

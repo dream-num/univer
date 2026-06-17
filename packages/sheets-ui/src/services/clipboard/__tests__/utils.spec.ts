@@ -177,6 +177,15 @@ describe('test "mergeSetRangeValues"', () => {
         ]);
     });
 
+    it('does not merge setRangeValues mutations with different style override behavior', () => {
+        const mutations: IMutationInfo[] = [
+            { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '2', isOverrideStyle: true, cellValue: { 1: { 2: { s: { fs: 12 } } } } } },
+            { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '2', cellValue: { 1: { 3: { s: { bl: 1 } } } } } },
+        ];
+
+        expect(mergeSetRangeValues(mutations)).toStrictEqual(mutations);
+    });
+
     it('If some setRangeValues appear discontinuously, they will be merged separately.', () => {
         const mutations: IMutationInfo[] = [
             { id: 'whatever', params: {} },

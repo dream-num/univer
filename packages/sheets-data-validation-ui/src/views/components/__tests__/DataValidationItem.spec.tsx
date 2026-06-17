@@ -32,6 +32,7 @@ import {
     ILogService,
     Inject,
     Injector,
+    IPermissionService,
     IUniverInstanceService,
     LocaleService,
     LocaleType,
@@ -71,6 +72,7 @@ import {
     SheetInterceptorService,
     SheetSkeletonService,
     SheetsSelectionsService,
+    WorkbookEditablePermission,
     WorkbookPermissionService,
     WorksheetPermissionService,
     WorksheetProtectionPointModel,
@@ -116,6 +118,7 @@ import { DataValidationPanel } from '../DataValidationPanel';
 
 const UNIT_ID = 'test';
 const SUB_UNIT_ID = 'sheet1';
+const OTHER_SUB_UNIT_ID = 'sheet2';
 
 const FIRST_RANGE: IRange = {
     startRow: 0,
@@ -326,10 +329,17 @@ function createWorkbookData(): IWorkbookData {
                 rowCount: 20,
                 columnCount: 20,
             },
+            [OTHER_SUB_UNIT_ID]: {
+                id: OTHER_SUB_UNIT_ID,
+                name: 'sheet2',
+                cellData: {},
+                rowCount: 20,
+                columnCount: 20,
+            },
         },
         locale: LocaleType.EN_US,
         name: 'test workbook',
-        sheetOrder: [SUB_UNIT_ID],
+        sheetOrder: [SUB_UNIT_ID, OTHER_SUB_UNIT_ID],
         styles: {},
     };
 }
@@ -341,6 +351,14 @@ function createCheckboxRule(uid = 'rule-checkbox'): ISheetDataValidationRule {
         ranges: [FIRST_RANGE, SECOND_RANGE],
         formula1: `${CHECKBOX_FORMULA_1}`,
         formula2: `${CHECKBOX_FORMULA_2}`,
+    };
+}
+
+function createInvalidCheckboxRule(): ISheetDataValidationRule {
+    return {
+        ...createCheckboxRule('rule-checkbox-invalid'),
+        formula1: `${CHECKBOX_FORMULA_1}`,
+        formula2: `${CHECKBOX_FORMULA_1}`,
     };
 }
 
@@ -641,6 +659,33 @@ describe('DataValidationList', () => {
         expect(container.textContent).not.toContain('A1:A2');
         expect(container.textContent).not.toContain('C5:D5');
     });
+
+    it('keeps workbook-locked rules from being highlighted, opened, or bulk removed', async () => {
+        currentTestBed = createItemTestBed();
+        currentTestBed.injector
+            .get(IPermissionService)
+            .updatePermissionPoint(new WorkbookEditablePermission(UNIT_ID).id, false);
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        renderList();
+
+        const item = container.querySelector('.univer-bg-secondary') as HTMLElement;
+
+        await enterItem(item);
+
+        expect(currentTestBed.markSelectionService.added).toEqual([]);
+
+        await act(async () => {
+            item.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            await Promise.resolve();
+        });
+
+        expect(currentTestBed.panelService.activeRule?.rule.uid).toBeUndefined();
+        expect(container.textContent).not.toContain('Remove all');
+        expect(currentTestBed.sheetDataValidationModel.getRules(UNIT_ID, SUB_UNIT_ID)).toHaveLength(1);
+    });
 });
 
 describe('DataValidationDetail', () => {
@@ -715,6 +760,25 @@ describe('DataValidationDetail', () => {
         expect(currentTestBed.sheetDataValidationModel.getRuleById(UNIT_ID, SUB_UNIT_ID, currentTestBed.rule.uid)).toBeDefined();
         expect(currentTestBed.panelService.activeRule).toBeNull();
     });
+
+    it('keeps the detail open when the rule formula is invalid', async () => {
+        currentTestBed = createItemTestBed(createInvalidCheckboxRule());
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        const detail = await renderDetail();
+        const buttons = Array.from(detail.querySelectorAll('[data-u-comp="button"]')) as HTMLElement[];
+        const doneButton = buttons[buttons.length - 1];
+
+        await act(async () => {
+            doneButton.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            await Promise.resolve();
+        });
+
+        expect(currentTestBed.panelService.activeRule?.rule.uid).toBe(currentTestBed.rule.uid);
+        expect(currentTestBed.sheetDataValidationModel.getRuleById(UNIT_ID, SUB_UNIT_ID, currentTestBed.rule.uid)).toBeDefined();
+    });
 });
 
 describe('DataValidationPanel', () => {
@@ -731,6 +795,38 @@ describe('DataValidationPanel', () => {
         root = undefined;
         container = undefined;
         currentTestBed = undefined;
+    });
+
+    it('ignores an active rule from another sheet until a current-sheet rule is selected', async () => {
+        currentTestBed = createItemTestBed();
+        currentTestBed.panelService.setActiveRule({
+            unitId: UNIT_ID,
+            subUnitId: OTHER_SUB_UNIT_ID,
+            rule: currentTestBed.rule,
+        });
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <DataValidationPanel />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        const item = container.querySelector('.univer-bg-secondary') as HTMLElement;
+
+        await act(async () => {
+            item.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            await Promise.resolve();
+        });
+
+        expect(currentTestBed.panelService.activeRule?.subUnitId).toBe(SUB_UNIT_ID);
+        expect(currentTestBed.panelService.activeRule?.rule.uid).toBe(currentTestBed.rule.uid);
+        expect(container.querySelector('[data-u-comp="data-validation-detail"]')).not.toBeNull();
     });
 
     it('opens the selected rule in detail and returns to the list after the rule is accepted', async () => {

@@ -33,9 +33,12 @@ import { IMessageService, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { afterEach, describe, expect, it } from 'vitest';
+import { AddDocHyperLinkCommand } from '../../commands/commands/add-link.command';
 import { DeleteDocHyperLinkCommand } from '../../commands/commands/delete-link.command';
+import { UpdateDocHyperLinkCommand } from '../../commands/commands/update-link.command';
 import { ShowDocHyperLinkEditPopupOperation } from '../../commands/operations/popup.operation';
 import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.service';
+import { DocHyperLinkEdit } from '../DocHyperLinkEdit';
 import { DocLinkPopup } from '../DocLinkPopup';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -54,6 +57,12 @@ class TestMessageService {
     show(message: unknown) {
         this.messages.push(message);
     }
+}
+
+function setInputText(input: HTMLInputElement, value: string) {
+    const valueSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
+    valueSetter?.call(input, value);
+    input.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
 function createDocData(): IDocumentData {
@@ -106,11 +115,22 @@ function createPopupTestBed() {
                     cancel: 'Remove link',
                     coped: 'Copied',
                 },
+                edit: {
+                    label: 'Label',
+                    labelError: 'Label is required',
+                    address: 'Address',
+                    addressError: 'Address is invalid',
+                    cancel: 'Cancel',
+                    confirm: 'Confirm',
+                },
             },
         },
     });
+    injector.get(LocaleService).setLocale(LocaleType.EN_US);
 
     const commandService = injector.get(ICommandService);
+    commandService.registerCommand(AddDocHyperLinkCommand);
+    commandService.registerCommand(UpdateDocHyperLinkCommand);
     commandService.registerCommand(DeleteDocHyperLinkCommand);
     commandService.registerCommand(ShowDocHyperLinkEditPopupOperation);
     commandService.registerCommand(RichTextEditingMutation);
@@ -148,6 +168,16 @@ function renderPopup(root: Root, container: HTMLDivElement, testBed: ReturnType<
         edit: actions[1],
         remove: actions[2],
     };
+}
+
+function renderEditPopup(root: Root, testBed: ReturnType<typeof createPopupTestBed>) {
+    act(() => {
+        root.render(
+            <RediContext.Provider value={{ injector: testBed.injector }}>
+                <DocHyperLinkEdit />
+            </RediContext.Provider>
+        );
+    });
 }
 
 describe('DocLinkPopup', () => {
@@ -215,5 +245,59 @@ describe('DocLinkPopup', () => {
 
         expect(body?.dataStream).toBe('Hello world\r\n');
         expect(body?.customRanges?.some((range) => range.rangeId === 'existing-link')).toBe(false);
+    });
+
+    it('updates an existing document hyperlink from the edit form', async () => {
+        currentTestBed = createPopupTestBed();
+        const selectionManager = currentTestBed.injector.get(DocSelectionManagerService);
+        selectionManager.__TEST_ONLY_setCurrentSelection({ unitId: UNIT_ID, subUnitId: UNIT_ID });
+        selectionManager.__TEST_ONLY_add([{
+            startOffset: 6,
+            endOffset: 11,
+            collapsed: false,
+            isActive: true,
+            segmentId: '',
+            style: null as never,
+        }]);
+        currentTestBed.popupService.showEditPopup(UNIT_ID, {
+            unitId: UNIT_ID,
+            linkId: 'existing-link',
+            segmentId: '',
+            startIndex: 6,
+            endIndex: 10,
+        });
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        renderEditPopup(root, currentTestBed);
+
+        const [labelInput, linkInput] = Array.from(container.querySelectorAll('input')) as HTMLInputElement[];
+        expect(labelInput.value).toBe('world');
+        expect(linkInput.value).toBe('https://univer.ai');
+
+        await act(async () => {
+            setInputText(labelInput, 'docs');
+            setInputText(linkInput, 'docs.univer.ai');
+            await Promise.resolve();
+        });
+
+        const confirm = Array.from(container.querySelectorAll('button, [data-u-comp="button"]'))
+            .find((button) => button.textContent === 'Confirm') as HTMLElement;
+        expect(confirm).toBeTruthy();
+
+        await act(async () => {
+            confirm.click();
+            await Promise.resolve();
+        });
+
+        const body = currentTestBed.doc.getBody();
+        const updatedLink = body?.customRanges?.find((range) => range.rangeId === 'existing-link');
+
+        expect(body?.dataStream).toBe('Hello docs\r\n');
+        expect(updatedLink?.properties).toEqual({
+            url: 'https://docs.univer.ai',
+        });
+        expect(currentTestBed.popupService.editing).toBeNull();
     });
 });

@@ -18,7 +18,13 @@ import type { AstRootNode } from '../../engine/ast-node';
 import { Injector } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { FormulaDependencyTree } from '../../engine/dependency/dependency-tree';
-import { DependencyManagerService, IDependencyManagerService } from '../dependency-manager.service';
+import { DependencyManagerBaseService, DependencyManagerService, IDependencyManagerService } from '../dependency-manager.service';
+
+class TestDependencyManagerBaseService extends DependencyManagerBaseService {
+    protected override _addAllTreeMap() {
+        // The base-service test exercises state handled by the base class; tree-map indexing belongs to the concrete service.
+    }
+}
 
 function createTree(treeId: number, row: number, column: number) {
     const tree = new FormulaDependencyTree(treeId);
@@ -48,6 +54,18 @@ function createService(): IDependencyManagerService {
 }
 
 describe('DependencyManagerService', () => {
+    it('should keep base dependency manager state through DI-created subclass', () => {
+        const injector = new Injector();
+        injector.add([DependencyManagerBaseService, { useClass: TestDependencyManagerBaseService }]);
+        const service = injector.get(DependencyManagerBaseService);
+
+        service.addOtherFormulaDependencyMainData('feature-formula');
+
+        expect(service.hasOtherFormulaDataMainData('feature-formula')).toBe(true);
+        expect(service.getLastTreeId()).toBe(0);
+        expect(service.getLastTreeId()).toBe(1);
+    });
+
     it('should track formula dependencies and remove their search cache by location', () => {
         const service = createService();
         const treeA = createTree(1, 0, 0);

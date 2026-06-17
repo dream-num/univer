@@ -15,9 +15,17 @@
  */
 
 import type { DocumentDataModel, ICommand, IDocumentData, Injector, Univer } from '@univerjs/core';
-import { awaitTime, ICommandService, IUniverInstanceService, PRESET_LIST_TYPE, PresetListType, UniverInstanceType } from '@univerjs/core';
+import {
+    awaitTime,
+    ICommandService,
+    IUniverInstanceService,
+    PRESET_LIST_TYPE,
+    PresetListType,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { InsertBulletBelowCommand } from '../insert-below/insert-bullet-below.command';
 import {
     BulletListCommand,
     ChangeListNestingLevelCommand,
@@ -26,8 +34,13 @@ import {
     CheckListCommand,
     findNearestSectionBreak,
     getParagraphsRelative,
+    InsertBulletListBellowCommand,
+    InsertCheckListBellowCommand,
+    InsertOrderListBellowCommand,
     ListOperationCommand,
+    OrderListCommand,
     QuickListCommand,
+    ToggleCheckListCommand,
 } from '../list.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
@@ -58,6 +71,7 @@ describe('list commands', () => {
     let univer: Univer;
     let get: Injector['get'];
     let commandService: ICommandService;
+    let selectionId: number;
 
     function getBody() {
         const univerInstanceService = get(IUniverInstanceService);
@@ -66,9 +80,10 @@ describe('list commands', () => {
 
     function setSelections(ranges: Array<{ startOffset: number; endOffset: number; collapsed: boolean }>) {
         const selectionManager = get(DocSelectionManagerService);
+        const subUnitId = `test-doc-selection-${selectionId++}`;
         selectionManager.__TEST_ONLY_setCurrentSelection({
             unitId: 'test-doc',
-            subUnitId: 'test-doc',
+            subUnitId,
         });
         selectionManager.__TEST_ONLY_add(ranges.map((range, index) => ({
             ...range,
@@ -82,6 +97,7 @@ describe('list commands', () => {
         const testBed = createCommandTestBed(getDocumentData());
         univer = testBed.univer;
         get = testBed.get;
+        selectionId = 0;
 
         commandService = get(ICommandService);
         commandService.registerCommand(ListOperationCommand);
@@ -89,7 +105,13 @@ describe('list commands', () => {
         commandService.registerCommand(ChangeListNestingLevelCommand);
         commandService.registerCommand(BulletListCommand);
         commandService.registerCommand(CheckListCommand);
+        commandService.registerCommand(OrderListCommand);
+        commandService.registerCommand(ToggleCheckListCommand);
         commandService.registerCommand(QuickListCommand);
+        commandService.registerCommand(InsertBulletListBellowCommand);
+        commandService.registerCommand(InsertOrderListBellowCommand);
+        commandService.registerCommand(InsertCheckListBellowCommand);
+        commandService.registerCommand(InsertBulletBelowCommand);
         commandService.registerCommand(SetTextSelectionsOperation);
         commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
     });
@@ -153,10 +175,123 @@ describe('list commands', () => {
         await awaitTime(0);
 
         expect(getBody()?.paragraphs?.[0].bullet?.listType).toBe(PresetListType.ORDER_LIST);
-        expect(getBody()?.paragraphs?.[0].bullet?.listId).toBeDefined();
+        expect(getBody()?.paragraphs?.[0].bullet?.nestingLevel).toBe(0);
         expect(getBody()?.paragraphs?.[0].paragraphStyle?.textStyle).toMatchObject(
             PRESET_LIST_TYPE[PresetListType.ORDER_LIST].nestingLevel[0].paragraphProperties?.textStyle ?? {}
         );
+    });
+
+    it('applies ordered lists and retypes selected list paragraphs through toolbar commands', async () => {
+        setSelections([
+            { startOffset: 0, endOffset: 4, collapsed: false },
+            { startOffset: 6, endOffset: 9, collapsed: false },
+        ]);
+
+        await commandService.executeCommand(OrderListCommand.id);
+        await commandService.executeCommand(BulletListCommand.id, {
+            value: PresetListType.CHECK_LIST,
+        });
+        await commandService.executeCommand(CheckListCommand.id, {
+            value: PresetListType.CHECK_LIST_CHECKED,
+        });
+        await awaitTime(0);
+
+        const paragraphs = getBody()?.paragraphs ?? [];
+        expect(paragraphs.map((paragraph) => paragraph.bullet?.listType)).toEqual([
+            PresetListType.CHECK_LIST_CHECKED,
+            PresetListType.CHECK_LIST_CHECKED,
+        ]);
+        expect(paragraphs[0].bullet?.listId).toBe(paragraphs[1].bullet?.listId);
+    });
+
+    it('toggles a checklist item between checked and unchecked states', async () => {
+        setSelections([{ startOffset: 0, endOffset: 4, collapsed: false }]);
+
+        await commandService.executeCommand(CheckListCommand.id);
+        await commandService.executeCommand(ToggleCheckListCommand.id, {
+            index: 5,
+            segmentId: '',
+            textRanges: [{ startOffset: 0, endOffset: 4, collapsed: false, segmentId: '' }],
+        });
+        await awaitTime(0);
+
+        expect(getBody()?.paragraphs?.[0].bullet?.listType).toBe(PresetListType.CHECK_LIST_CHECKED);
+
+        await commandService.executeCommand(ToggleCheckListCommand.id, {
+            index: 5,
+            segmentId: '',
+            textRanges: [{ startOffset: 0, endOffset: 4, collapsed: false, segmentId: '' }],
+        });
+        await awaitTime(0);
+
+        expect(getBody()?.paragraphs?.[0].bullet?.listType).toBe(PresetListType.CHECK_LIST);
+    });
+
+    it('inserts new list items below the current paragraph for every list menu action', async () => {
+        setSelections([{ startOffset: 2, endOffset: 2, collapsed: true }]);
+
+        await commandService.executeCommand(InsertBulletListBellowCommand.id);
+        await awaitTime(0);
+
+        expect(getBody()?.paragraphs).toHaveLength(3);
+        expect(getBody()?.paragraphs?.[1].bullet).toMatchObject({
+            listType: PresetListType.BULLET_LIST,
+            nestingLevel: 0,
+        });
+
+        setSelections([{ startOffset: 2, endOffset: 2, collapsed: true }]);
+        await commandService.executeCommand(InsertOrderListBellowCommand.id);
+        await awaitTime(0);
+
+        expect(getBody()?.paragraphs).toHaveLength(4);
+        expect(getBody()?.paragraphs?.[1].bullet).toMatchObject({
+            listType: PresetListType.ORDER_LIST,
+            nestingLevel: 0,
+        });
+
+        setSelections([{ startOffset: 2, endOffset: 2, collapsed: true }]);
+        await commandService.executeCommand(InsertCheckListBellowCommand.id);
+        await awaitTime(0);
+
+        expect(getBody()?.paragraphs).toHaveLength(5);
+        expect(getBody()?.paragraphs?.[1].bullet).toMatchObject({
+            listType: PresetListType.CHECK_LIST,
+            nestingLevel: 0,
+        });
+    });
+
+    it('inserts a bullet below the focused list item and keeps the active list identity', async () => {
+        setSelections([{ startOffset: 0, endOffset: 4, collapsed: false }]);
+
+        await commandService.executeCommand(BulletListCommand.id);
+        await awaitTime(0);
+
+        const sourceBullet = getBody()?.paragraphs?.[0].bullet;
+        setSelections([{ startOffset: 2, endOffset: 2, collapsed: true }]);
+
+        await commandService.executeCommand(InsertBulletBelowCommand.id, {
+            listType: PresetListType.BULLET_LIST,
+        });
+        await awaitTime(0);
+
+        expect(getBody()?.paragraphs).toHaveLength(3);
+        expect(getBody()?.paragraphs?.[1].bullet).toEqual({
+            listType: PresetListType.BULLET_LIST,
+            listId: sourceBullet?.listId,
+            nestingLevel: sourceBullet?.nestingLevel,
+        });
+    });
+
+    it('does not insert a bullet below when the active selection spans text', async () => {
+        setSelections([{ startOffset: 0, endOffset: 4, collapsed: false }]);
+
+        const result = await commandService.executeCommand(InsertBulletBelowCommand.id, {
+            listType: PresetListType.BULLET_LIST,
+        });
+
+        expect(result).toBe(false);
+        expect(getBody()?.paragraphs).toHaveLength(2);
+        expect(getBody()?.dataStream).toBe('Alpha\rBeta\r\n');
     });
 
     it('extends selected paragraphs to adjacent items in the same list and finds nearest section breaks', () => {

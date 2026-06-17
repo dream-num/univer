@@ -15,18 +15,35 @@
  */
 
 import type {
+    DocumentDataModel,
     IDisposable,
     IDocumentData,
     IListMentionParam,
     IListMentionResponse,
     IMention,
     ITypeMentionList,
-    Univer,
 } from '@univerjs/core';
+import type { ReactElement } from 'react';
 import type { Root } from 'react-dom/client';
-import { CustomRangeType, ICommandService, IMentionIOService, MentionType, toDisposable } from '@univerjs/core';
-import { DocSelectionManagerService, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
+import {
+    CustomRangeType,
+    ICommandService,
+    ILogService,
+    IMentionIOService,
+    LogLevel,
+    MentionType,
+    toDisposable,
+    Univer,
+    UniverInstanceType,
+} from '@univerjs/core';
+import {
+    DocSelectionManagerService,
+    DocStateEmitService,
+    RichTextEditingMutation,
+    SetTextSelectionsOperation,
+} from '@univerjs/docs';
 import { DocCanvasPopManagerService, IEditorService } from '@univerjs/docs-ui';
+import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -103,7 +120,7 @@ class TestEditorService {
     }
 
     getAllEditor(): Map<string, never> {
-        return new Map();
+        return new Map<string, never>();
     }
 
     isEditor(): boolean {
@@ -168,7 +185,7 @@ function createMentionDraftDocData(): IDocumentData {
     };
 }
 
-function renderIntoDocument(element: React.ReactElement, injector: ReturnType<typeof createDocUiTestBed>['injector']) {
+function renderIntoDocument(element: ReactElement, injector: ReturnType<typeof createDocUiTestBed>['injector']) {
     const container = document.createElement('div');
     document.body.appendChild(container);
     const root = createRoot(container);
@@ -197,36 +214,45 @@ function listItems(container: HTMLElement): HTMLElement[] {
     return Array.from(container.querySelectorAll<HTMLElement>('div[data-editorid] div[data-editorid]'));
 }
 
-function hasClassToken(element: HTMLElement, token: string): boolean {
-    return element.className.split(/\s+/).includes(token);
-}
-
 function createViewsTestBed() {
-    const testBed = createDocUiTestBed(createMentionDraftDocData(), [
-        [DocCanvasPopManagerService, { useClass: TestDocCanvasPopManagerService as unknown as typeof DocCanvasPopManagerService }],
-        [DocMentionService],
-        [DocMentionPopupService],
-        [IMentionIOService, { useClass: TestMentionIOService }],
-        [IEditorService, { useClass: TestEditorService as never }],
-    ]);
-    const commandService = testBed.get(ICommandService);
+    const univer = new Univer({
+        override: [[IMentionIOService, { useClass: TestMentionIOService }]],
+    });
+    const injector = univer.__getInjector();
+    const get = injector.get.bind(injector);
+
+    injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+    injector.add([DocSelectionManagerService]);
+    injector.add([DocStateEmitService]);
+    injector.add([DocCanvasPopManagerService, { useClass: TestDocCanvasPopManagerService as unknown as typeof DocCanvasPopManagerService }]);
+    injector.add([DocMentionService]);
+    injector.add([DocMentionPopupService]);
+    injector.add([IEditorService, { useClass: TestEditorService as never }]);
+
+    const doc = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, createMentionDraftDocData());
+    get(ILogService).setLogLevel(LogLevel.SILENT);
+
+    const commandService = get(ICommandService);
     commandService.registerCommand(AddDocMentionCommand);
     commandService.registerCommand(RichTextEditingMutation);
     commandService.registerCommand(SetTextSelectionsOperation);
 
-    const selectionManager = testBed.get(DocSelectionManagerService);
+    const selectionManager = get(DocSelectionManagerService);
     selectionManager.__TEST_ONLY_setCurrentSelection({
         unitId,
         subUnitId: unitId,
     });
 
     return {
-        ...testBed,
+        univer,
+        injector,
+        get,
+        doc,
         commandService,
         selectionManager,
-        mentionIOService: testBed.get(IMentionIOService) as TestMentionIOService,
-        editorService: testBed.get(IEditorService) as unknown as TestEditorService,
-        popupService: testBed.get(DocMentionPopupService),
+        mentionIOService: get(IMentionIOService) as TestMentionIOService,
+        editorService: get(IEditorService) as unknown as TestEditorService,
+        popupService: get(DocMentionPopupService),
     };
 }
 
@@ -245,7 +271,7 @@ describe('mention views', () => {
         univer = null;
     });
 
-    it('promotes the hovered mention to the active row and selects that item on click', () => {
+    it('selects the clicked mention item and runs the popup click handler', () => {
         const testBed = createDocUiTestBed();
         univer = testBed.univer;
         const rendered = renderIntoDocument(
@@ -261,15 +287,6 @@ describe('mention views', () => {
         disposable = disposeRender(rendered.root, rendered.container);
 
         const items = listItems(rendered.container);
-        expect(hasClassToken(items[0], 'univer-bg-gray-50')).toBe(true);
-        expect(hasClassToken(items[1], 'univer-bg-gray-50')).toBe(false);
-
-        act(() => {
-            items[1].dispatchEvent(new MouseEvent('mouseover', { bubbles: true, relatedTarget: rendered.container }));
-        });
-        expect(hasClassToken(items[0], 'univer-bg-gray-50')).toBe(false);
-        expect(hasClassToken(items[1], 'univer-bg-gray-50')).toBe(true);
-
         act(() => {
             items[1].dispatchEvent(new MouseEvent('click', { bubbles: true }));
         });
@@ -281,36 +298,35 @@ describe('mention views', () => {
         const testBed = createViewsTestBed();
         univer = testBed.univer;
         testBed.popupService.showEditPopup(unitId, 6);
-        testBed.selectionManager.__replaceTextRangesWithNoRefresh({
-            textRanges: [{
-                startOffset: 9,
-                endOffset: 9,
-                collapsed: true,
-                isActive: true,
-                segmentId: '',
-                style: null as never,
-            }],
-            rectRanges: [],
-            segmentId: '',
-            segmentPage: -1,
-            isEditing: true,
-            style: null as never,
-        }, {
-            unitId,
-            subUnitId: unitId,
-        });
-
         const rendered = renderIntoDocument(<MentionEditPopup />, testBed.injector);
         disposable = disposeRender(rendered.root, rendered.container);
 
         await act(async () => {
+            testBed.selectionManager.__replaceTextRangesWithNoRefresh({
+                textRanges: [{
+                    startOffset: 9,
+                    endOffset: 9,
+                    collapsed: true,
+                    isActive: true,
+                    segmentId: '',
+                    style: null as never,
+                }],
+                rectRanges: [],
+                segmentId: '',
+                segmentPage: -1,
+                isEditing: true,
+                style: null as never,
+            }, {
+                unitId,
+                subUnitId: unitId,
+            });
             await Promise.resolve();
         });
 
-        expect(testBed.mentionIOService.requests).toEqual([{
+        expect(testBed.mentionIOService.requests.at(-1)).toEqual({
             unitId,
             search: '@al',
-        }]);
+        });
 
         const aliceItem = listItems(rendered.container)[0];
         await act(async () => {

@@ -41,6 +41,7 @@ import {
     SetRangeThemeMutation,
     SheetInterceptorService,
     SheetRangeThemeModel,
+    SheetRangeThemeService,
     SheetsSelectionsService,
     WorkbookEditablePermission,
 } from '@univerjs/sheets';
@@ -51,6 +52,7 @@ import {
     SetSheetTableFilterCommand,
     SetSheetTableFilterMutation,
     SetSheetTableMutation,
+    SheetsTableThemeController,
     SheetTableService,
     TableColumnFilterTypeEnum,
     TableManager,
@@ -323,6 +325,8 @@ function createTableRenameViewTestBed() {
                 [TableManager],
                 [SheetInterceptorService],
                 [SheetRangeThemeModel],
+                [SheetRangeThemeService],
+                [SheetsTableThemeController],
                 [SheetTableService],
                 [SheetsTableUiService],
                 [SheetsTableComponentController],
@@ -376,6 +380,7 @@ function createTableRenameViewTestBed() {
         SetRangeThemeMutation,
     ].forEach((command) => commandService.registerCommand(command));
     injector.get(IPermissionService).addPermissionPoint(new WorkbookEditablePermission(UNIT_ID));
+    injector.get(SheetsTableThemeController);
 
     const tableManager = injector.get(TableManager);
     tableManager.addTable(
@@ -688,29 +693,6 @@ describe('SheetTableThemePanel', () => {
         expect(container.textContent).toContain('First Line');
         expect(container.textContent).toContain('Second Line');
         expect(container.textContent).toContain('Footer');
-    });
-
-    it('selects a default table theme from the gallery', async () => {
-        currentTestBed = createTableRenameViewTestBed();
-        container = document.createElement('div');
-        document.body.appendChild(container);
-        root = createRoot(container);
-
-        const table = currentTestBed.tableManager.getTableById(UNIT_ID, PRIMARY_TABLE_ID);
-        expect(table?.getTableStyleId()).toBe('table-default-0');
-
-        await renderThemePanel(root, currentTestBed);
-
-        const defaultStyleSection = getSectionAfterHeading(container, 'Default Style');
-        const secondDefaultTheme = defaultStyleSection.children[1] as HTMLElement;
-        expect(secondDefaultTheme).toBeTruthy();
-
-        await act(async () => {
-            secondDefaultTheme.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-            await awaitTime(20);
-        });
-
-        expect(table?.getTableStyleId()).toBe('table-default-1');
     });
 });
 

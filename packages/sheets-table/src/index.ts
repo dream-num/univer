@@ -23,7 +23,15 @@ export { RemoveTableThemeCommand } from './commands/commands/remove-table-theme.
 export { SetSheetTableCommand } from './commands/commands/set-sheet-table.command';
 export type { ISetSheetTableCommandParams } from './commands/commands/set-sheet-table.command';
 export { SetSheetTableFilterCommand } from './commands/commands/set-table-filter.command';
-export { SheetTableInsertColCommand, SheetTableInsertColumnAtCommand, SheetTableInsertRowAtCommand, SheetTableInsertRowCommand, SheetTableRemoveColCommand, SheetTableRemoveColumnAtCommand, SheetTableRemoveRowCommand } from './commands/commands/sheet-table-row-col.command';
+export {
+    SheetTableInsertColCommand,
+    SheetTableInsertColumnAtCommand,
+    SheetTableInsertRowAtCommand,
+    SheetTableInsertRowCommand,
+    SheetTableRemoveColCommand,
+    SheetTableRemoveColumnAtCommand,
+    SheetTableRemoveRowCommand,
+} from './commands/commands/sheet-table-row-col.command';
 export { AddSheetTableMutation } from './commands/mutations/add-sheet-table.mutation';
 export type { IAddSheetTableParams } from './commands/mutations/add-sheet-table.mutation';
 export { DeleteSheetTableMutation } from './commands/mutations/delete-sheet-table.mutation';
@@ -34,13 +42,36 @@ export { SetSheetTableFilterMutation } from './commands/mutations/set-table-filt
 export type { ISetSheetTableParams } from './commands/mutations/set-table-filter.mutation';
 export type { IUniverSheetsTableConfig } from './config/config';
 export { SHEET_TABLE_CUSTOM_THEME_PREFIX, TABLE_FILTER_EMPTY_VALUE } from './const';
+export { SheetsTableThemeController } from './controllers/sheet-table-theme.controller';
 export { SheetsTableController } from './controllers/sheets-table.controller';
 export { customEmptyThemeWithBorderStyle, processStyleWithBorderStyle } from './controllers/table-theme.factory';
 export { TableManager } from './models/table-manager';
 export { UniverSheetsTablePlugin } from './plugin';
 export { SheetTableService } from './services/table.service';
-export { SheetsTableButtonStateEnum, SheetsTableSortStateEnum, TableColumnDataTypeEnum, TableColumnFilterTypeEnum, TableConditionTypeEnum, TableDateCompareTypeEnum, TableNumberCompareTypeEnum, TableStringCompareTypeEnum } from './types/enum';
-export type { ITableColumnJson, ITableConditionFilterItem, ITableData, ITableFilterItem, ITableInfo, ITableInfoWithUnitId, ITableManualFilterItem, ITableOptions, ITableRange, ITableRangeWithState, TableMetaType, TableRelationTupleType } from './types/type';
+export {
+    SheetsTableButtonStateEnum,
+    SheetsTableSortStateEnum,
+    TableColumnDataTypeEnum,
+    TableColumnFilterTypeEnum,
+    TableConditionTypeEnum,
+    TableDateCompareTypeEnum,
+    TableNumberCompareTypeEnum,
+    TableStringCompareTypeEnum,
+} from './types/enum';
+export type {
+    ITableColumnJson,
+    ITableConditionFilterItem,
+    ITableData,
+    ITableFilterItem,
+    ITableInfo,
+    ITableInfoWithUnitId,
+    ITableManualFilterItem,
+    ITableOptions,
+    ITableRange,
+    ITableRangeWithState,
+    TableMetaType,
+    TableRelationTupleType,
+} from './types/type';
 export type { ITableJson, ITableSetConfig } from './types/type';
 export { getExistingNamesSet, isConditionFilter, isManualTableFilter } from './util';
 export { validateSheetTableName } from './util/table-name';

@@ -207,6 +207,8 @@ describe('SaveCellImagesCommand', () => {
             title: { title: 'sheets-drawing-ui.save.title (A1:B2)' },
             children: { label: BATCH_SAVE_IMAGES_DIALOG_ID },
         })]);
+        dialogService.dialogs[0].onClose();
+        expect(dialogService.dialogs).toEqual([]);
 
         testBed.univer.dispose();
     });

@@ -14,80 +14,134 @@
  * limitations under the License.
  */
 
-import { ImageSourceType, UniverInstanceType } from '@univerjs/core';
-import { describe, expect, it } from 'vitest';
-import { BatchSaveImagesService, FileNamePart } from '../batch-save-images.service';
+import type { ICellData, IWorkbookData } from '@univerjs/core';
+import type { ISelectionWithStyle } from '@univerjs/sheets';
+import { BooleanNumber, ImageSourceType, LocaleType } from '@univerjs/core';
+import { SheetsSelectionsService } from '@univerjs/sheets';
+import { afterEach, describe, expect, it } from 'vitest';
+import { createSheetsDrawingUiTestBed } from '../../__tests__/create-sheets-drawing-ui-test-bed';
+import { BatchSaveImagesService, FileNamePart, IBatchSaveImagesService } from '../batch-save-images.service';
 
-function createService() {
-    const cells = new Map<string, unknown>([
-        ['0:0', {
-            p: {
-                drawingsOrder: ['img-a1'],
-                drawings: {
-                    'img-a1': {
-                        drawingId: 'img-a1',
-                        source: 'data:image/png;base64,aaa',
-                        imageSourceType: ImageSourceType.BASE64,
-                    },
+const WORKBOOK_DATA: IWorkbookData = {
+    id: 'test',
+    appVersion: '3.0.0-alpha',
+    locale: LocaleType.EN_US,
+    name: '',
+    sheetOrder: ['sheet1'],
+    styles: {},
+    sheets: {
+        sheet1: {
+            id: 'sheet1',
+            name: 'Sheet1',
+            rowCount: 20,
+            columnCount: 20,
+            cellData: {
+                0: {
+                    0: createImageCell('img-a1', 'data:image/png;base64,aGVsbG8=', ImageSourceType.BASE64),
+                    3: { v: 'Report:Q1' },
+                },
+                1: {
+                    0: { v: 'Client/Name' },
+                    1: createImageCell('img-b2', 'https://cdn.example.com/photo.jpeg?version=1', ImageSourceType.URL),
+                    3: { p: { body: { dataStream: 'Summary' } } as ICellData['p'] },
                 },
             },
-        }],
-        ['1:1', {
-            p: {
-                drawingsOrder: ['img-b2'],
-                drawings: {
-                    'img-b2': {
-                        drawingId: 'img-b2',
-                        source: 'https://cdn.example.com/photo.jpeg?version=1',
-                        imageSourceType: ImageSourceType.URL,
-                    },
+            hidden: BooleanNumber.FALSE,
+        },
+    },
+};
+
+function createImageCell(drawingId: string, source: string, imageSourceType: ImageSourceType): ICellData {
+    return {
+        p: {
+            id: `${drawingId}-doc`,
+            documentStyle: {},
+            drawingsOrder: [drawingId],
+            drawings: {
+                [drawingId]: {
+                    drawingId,
+                    source,
+                    imageSourceType,
                 },
             },
-        }],
-        ['0:3', { v: 'Report:Q1' }],
-        ['1:0', { v: 'Client/Name' }],
-        ['1:3', { p: { body: { dataStream: 'Summary' } } }],
+        } as unknown as ICellData['p'],
+    };
+}
+
+function createSelection(startRow: number, endRow: number, startColumn: number, endColumn: number): ISelectionWithStyle {
+    return {
+        range: {
+            startRow,
+            endRow,
+            startColumn,
+            endColumn,
+        },
+        primary: {
+            actualRow: startRow,
+            actualColumn: startColumn,
+            startRow,
+            endRow,
+            startColumn,
+            endColumn,
+            isMerged: false,
+            isMergedMainCell: false,
+        },
+        style: null,
+    };
+}
+
+function setup() {
+    const testBed = createSheetsDrawingUiTestBed(WORKBOOK_DATA, [
+        [IBatchSaveImagesService, { useClass: BatchSaveImagesService }],
+    ]);
+    const service = testBed.get(IBatchSaveImagesService);
+    const selectionsService = testBed.get(SheetsSelectionsService);
+    selectionsService.setSelections([
+        createSelection(0, 0, 0, 1),
+        createSelection(1, 1, 1, 1),
     ]);
 
-    const cellMatrix = {
-        getValue: (row: number, col: number) => cells.get(`${row}:${col}`) as never,
-        getDataRange: () => ({ startRow: 0, endRow: 2, startColumn: 0, endColumn: 3 }),
+    return {
+        ...testBed,
+        service,
+        selectionsService,
     };
-    const worksheet = {
-        getCellMatrix: () => cellMatrix,
-    };
-    const workbook = {
-        getActiveSheet: () => worksheet,
-        getSheetBySheetId: () => worksheet,
-    };
-    const selections = [
-        { range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 1 } },
-        { range: { startRow: 1, endRow: 1, startColumn: 1, endColumn: 1 } },
-    ];
-
-    return new BatchSaveImagesService(
-        {
-            getCurrentUnitOfType: (type: UniverInstanceType) => (type === UniverInstanceType.UNIVER_SHEET ? workbook : null),
-            getUnit: () => workbook,
-        } as never,
-        {
-            getCurrentSelections: () => selections,
-        } as never,
-        {} as never,
-        {} as never
-    );
 }
 
 describe('BatchSaveImagesService', () => {
-    it('collects cell images from current selections and exposes selection metadata', () => {
-        const service = createService();
+    afterEach(() => {
+        Reflect.deleteProperty(window, 'showDirectoryPicker');
+    });
+
+    it('collects images from the active selection and reports the selected address space', () => {
+        const { service, univer } = setup();
 
         expect(service.getCellImagesInSelection()).toEqual([
             {
                 row: 0,
                 col: 0,
                 cellAddress: 'A1',
-                source: 'data:image/png;base64,aaa',
+                source: 'data:image/png;base64,aGVsbG8=',
+                imageSourceType: ImageSourceType.BASE64,
+                imageId: 'img-a1',
+            },
+            {
+                row: 1,
+                col: 1,
+                cellAddress: 'B2',
+                source: 'https://cdn.example.com/photo.jpeg?version=1',
+                imageSourceType: ImageSourceType.URL,
+                imageId: 'img-b2',
+            },
+        ]);
+        expect(service.getCellImagesFromRanges('test', 'sheet1', [
+            { startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 },
+        ])).toEqual([
+            {
+                row: 0,
+                col: 0,
+                cellAddress: 'A1',
+                source: 'data:image/png;base64,aGVsbG8=',
                 imageSourceType: ImageSourceType.BASE64,
                 imageId: 'img-a1',
             },
@@ -103,10 +157,12 @@ describe('BatchSaveImagesService', () => {
         expect(service.getSelectionRangeNotation()).toBe('A1:B1, B2');
         expect(service.getSelectionRowRange()).toEqual({ startRow: 0, endRow: 1 });
         expect(Array.from(service.getSelectionColumnIndices()).sort((a, b) => a - b)).toEqual([0, 1]);
+
+        univer.dispose();
     });
 
-    it('finds data columns outside the selection and builds sanitized file names', () => {
-        const service = createService();
+    it('uses neighboring data columns to build spreadsheet-friendly image file names', () => {
+        const { service, univer } = setup();
         const imageInfo = {
             row: 1,
             col: 1,
@@ -119,6 +175,11 @@ describe('BatchSaveImagesService', () => {
         expect(service.getDataColumns()).toEqual([
             { index: 3, label: 'D' },
         ]);
+        expect(service.getDataColumnsForRanges('test', 'sheet1', [
+            { startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 },
+        ])).toEqual([
+            { index: 3, label: 'D' },
+        ]);
         expect(service.generateFileName(imageInfo, {
             fileNameParts: [FileNamePart.COLUMN_VALUE, FileNamePart.CELL_ADDRESS],
             columnIndex: 0,
@@ -126,6 +187,49 @@ describe('BatchSaveImagesService', () => {
         expect(service.generateFileNameWithContext(imageInfo, {
             fileNameParts: [FileNamePart.CELL_ADDRESS, FileNamePart.COLUMN_VALUE],
             columnIndex: 3,
-        }, 'book-1', 'sheet-1')).toBe('B2_Summary.jpeg');
+        }, 'test', 'sheet1')).toBe('B2_Summary.jpeg');
+
+        univer.dispose();
+    });
+
+    it('keeps every image when batch saving would otherwise produce duplicate file names', async () => {
+        const { service, univer } = setup();
+        const savedFiles: string[] = [];
+        window.showDirectoryPicker = async () => ({
+            getFileHandle: async (name: string) => {
+                savedFiles.push(name);
+                return {
+                    createWritable: async () => ({
+                        write: async () => undefined,
+                        close: async () => undefined,
+                    }),
+                };
+            },
+        }) as unknown as FileSystemDirectoryHandle;
+
+        await service.saveImages([
+            {
+                row: 0,
+                col: 0,
+                cellAddress: 'A1',
+                source: 'data:image/png;base64,aGVsbG8=',
+                imageSourceType: ImageSourceType.BASE64,
+                imageId: 'img-a1',
+            },
+            {
+                row: 0,
+                col: 1,
+                cellAddress: 'A1',
+                source: 'data:image/png;base64,aGVsbG8=',
+                imageSourceType: ImageSourceType.BASE64,
+                imageId: 'img-a1-copy',
+            },
+        ], {
+            fileNameParts: [FileNamePart.CELL_ADDRESS],
+        });
+
+        expect(savedFiles).toEqual(['A1.png', 'A1_1.png']);
+
+        univer.dispose();
     });
 });

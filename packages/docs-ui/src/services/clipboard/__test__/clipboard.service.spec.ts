@@ -14,12 +14,33 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody, IDocumentData } from '@univerjs/core';
+import type { DocumentDataModel, IDocumentBody, IDocumentData } from '@univerjs/core';
 import type { IRectRangeWithStyle } from '@univerjs/engine-render';
-import { DataStreamTreeTokenType, DOC_RANGE_TYPE } from '@univerjs/core';
+import {
+    DataStreamTreeTokenType,
+    DOC_RANGE_TYPE,
+    ICommandService,
+    IUniverInstanceService,
+    UniverInstanceType,
+} from '@univerjs/core';
+import { DocSelectionManagerService, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
 import { ImageSourceType } from '@univerjs/drawing';
-import { describe, expect, it, vi } from 'vitest';
-import { DocClipboardService, getTableClipboardBodySlice } from '../clipboard.service';
+import { IClipboardInterfaceService } from '@univerjs/ui';
+import { describe, expect, it } from 'vitest';
+import { createCommandTestBed } from '../../../commands/commands/__tests__/create-command-test-bed';
+import { InnerPasteCommand } from '../../../commands/commands/clipboard.inner.command';
+import { DocClipboardService, getTableClipboardBodySlice, IDocClipboardService } from '../clipboard.service';
+
+class TestClipboardInterfaceService {
+    get supportClipboard(): boolean {
+        return true;
+    }
+
+    async writeText(): Promise<void> {}
+    async write(): Promise<void> {}
+    async readText(): Promise<string> { return ''; }
+    async read(): Promise<ClipboardItem[]> { return []; }
+}
 
 describe('DocClipboardService table copy helpers', () => {
     it('should keep table metadata when copying an entire selected docs table', () => {
@@ -68,46 +89,70 @@ describe('DocClipboardService table copy helpers', () => {
         }]);
     });
 
-    it('should upload base64 images embedded in pasted html before converting to docs drawings', async () => {
-        let pastedDoc: Partial<IDocumentData> | undefined;
-        const executeCommand = vi.fn(async (_id, params) => {
-            pastedDoc = params.doc;
-            return true;
-        });
-        const uploadImage = vi.fn(async (file: File) => {
-            expect(file.type).toBe('image/png');
-
-            return {
-                imageSourceType: ImageSourceType.UUID,
-                source: 'remote-file-id',
-            };
-        });
-        const service = new DocClipboardService(
-            { getCurrentUnitOfType: () => ({ getUnitId: () => 'doc-1' }) } as any,
-            { error: vi.fn(), warn: vi.fn() } as any,
-            { executeCommand } as any,
-            {} as any,
-            {
-                getActiveTextRange: () => ({ segmentId: '', endOffset: 0 }),
-                getTextRanges: () => [{ startOffset: 0, endOffset: 0 }],
-            } as any
-        ) as DocClipboardService;
+    it('uploads base64 images from pasted html and inserts remote drawings into the document', async () => {
+        const documentData: IDocumentData = {
+            id: 'test-doc',
+            body: {
+                dataStream: 'Body\r\n',
+                paragraphs: [{ paragraphId: 'para_docs_ui_clipboard_fixture_1', startIndex: 4 }],
+                sectionBreaks: [],
+                customBlocks: [],
+                textRuns: [],
+            },
+            drawings: {},
+            drawingsOrder: [],
+            documentStyle: {},
+        };
+        const testBed = createCommandTestBed(documentData, [
+            [IClipboardInterfaceService, { useClass: TestClipboardInterfaceService }],
+            [IDocClipboardService, { useClass: DocClipboardService }],
+        ]);
+        const commandService = testBed.get(ICommandService);
+        commandService.registerCommand(InnerPasteCommand);
+        commandService.registerCommand(RichTextEditingMutation);
+        commandService.registerCommand(SetTextSelectionsOperation);
+        const selectionManager = testBed.get(DocSelectionManagerService);
+        selectionManager.__TEST_ONLY_setCurrentSelection({ unitId: 'test-doc', subUnitId: '' });
+        selectionManager.__TEST_ONLY_add([{
+            startOffset: 0,
+            endOffset: 0,
+            collapsed: true,
+            isActive: true,
+            segmentId: '',
+        }]);
+        const service = testBed.get(IDocClipboardService);
         const source = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAFgwJ/lz6N4wAAAABJRU5ErkJggg==';
 
-        service.addClipboardHook({ onBeforePasteImage: uploadImage });
+        service.addClipboardHook({
+            async onBeforePasteImage(file: File) {
+                expect(file.type).toBe('image/png');
+                return {
+                    imageSourceType: ImageSourceType.UUID,
+                    source: 'remote-file-id',
+                };
+            },
+        });
         await service.legacyPaste({
             html: `<p><img src="${source}" width="2" height="3"></p>`,
             files: [],
         });
 
-        const block = pastedDoc?.body?.customBlocks?.[0];
-        const drawing = block ? pastedDoc?.drawings?.[block.blockId] : undefined;
+        const univerInstanceService = testBed.get(IUniverInstanceService);
+        const documentModel = univerInstanceService.getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC)!;
+        const snapshot = documentModel.getSnapshot();
+        const blocks = snapshot.body?.customBlocks ?? [];
+        let drawingSource = '';
+        for (const block of blocks) {
+            const drawing = snapshot.drawings?.[block.blockId];
+            const imageDrawing = drawing as { source?: string } | undefined;
+            if (imageDrawing?.source === 'remote-file-id') {
+                drawingSource = imageDrawing.source;
+            }
+        }
 
-        expect(uploadImage).toHaveBeenCalledTimes(1);
-        expect(drawing).toMatchObject({
-            imageSourceType: ImageSourceType.UUID,
-            source: 'remote-file-id',
-        });
-        expect(JSON.stringify(pastedDoc)).not.toContain('data:image');
+        expect(drawingSource).toBe('remote-file-id');
+        expect(JSON.stringify(snapshot)).not.toContain('data:image');
+
+        testBed.univer.dispose();
     });
 });

@@ -18,6 +18,8 @@ import {
     CommandService,
     ConfigService,
     ContextService,
+    CustomRangeType,
+    DataStreamTreeTokenType,
     DesktopLogService,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     DocumentBlockRangeType,
@@ -28,6 +30,7 @@ import {
     ILogService,
     Injector,
     IUniverInstanceService,
+    RANGE_DIRECTION,
     UniverInstanceService,
 } from '@univerjs/core';
 import { DocSelectionManagerService, SetTextSelectionsOperation } from '@univerjs/docs';
@@ -51,10 +54,12 @@ class InertDocSelectionRenderService {
 
 class RecordingDocCanvasPopManagerService {
     readonly ranges: string[] = [];
+    readonly directions: string[] = [];
     disposedCount = 0;
 
-    attachPopupToRange(range: { startOffset: number; endOffset: number }) {
+    attachPopupToRange(range: { startOffset: number; endOffset: number }, options: { direction: string }) {
         this.ranges.push(`${range.startOffset}:${range.endOffset}`);
+        this.directions.push(options.direction);
 
         return {
             dispose: () => {
@@ -77,6 +82,33 @@ const InertDocCanvasPopManagerServiceCtor = InertDocCanvasPopManagerService as u
 const InertDocSelectionRenderServiceCtor = InertDocSelectionRenderService as unknown as typeof DocSelectionRenderService;
 const RecordingDocCanvasPopManagerServiceCtor = RecordingDocCanvasPopManagerService as unknown as typeof DocCanvasPopManagerService;
 const ActiveDocSelectionRenderServiceCtor = ActiveDocSelectionRenderService as unknown as typeof DocSelectionRenderService;
+
+function createActiveFloatMenuHarness(unitId: string, body: ConstructorParameters<typeof DocumentDataModel>[0]['body']) {
+    const injector = new Injector();
+    injector.add([ILogService, { useClass: DesktopLogService }]);
+    injector.add([IConfigService, { useClass: ConfigService }]);
+    injector.add([IContextService, { useClass: ContextService }]);
+    injector.add([ICommandService, { useClass: CommandService }]);
+    injector.add([IUniverInstanceService, { useClass: UniverInstanceService }]);
+    injector.add([DocSelectionManagerService]);
+    injector.add([DocCanvasPopManagerService, { useClass: RecordingDocCanvasPopManagerServiceCtor }]);
+    injector.add([ComponentManager]);
+    injector.add([DocSelectionRenderService, { useClass: ActiveDocSelectionRenderServiceCtor }]);
+    injector.get(ICommandService).registerCommand(SetTextSelectionsOperation);
+    const univerInstanceService = injector.get(IUniverInstanceService) as UniverInstanceService;
+    univerInstanceService.__addUnit(new DocumentDataModel({ id: unitId, body }));
+    const service = injector.createInstance(DocFloatMenuService, { unitId } as never);
+    const selectionManager = injector.get(DocSelectionManagerService);
+    selectionManager.__TEST_ONLY_setCurrentSelection({ unitId, subUnitId: unitId });
+
+    return {
+        injector,
+        popupService: injector.get(DocCanvasPopManagerService) as unknown as RecordingDocCanvasPopManagerService,
+        selectionManager,
+        service,
+        univerInstanceService,
+    };
+}
 
 describe('DocFloatMenuService', () => {
     it('does not register or show a floating toolbar inside internal document editors', () => {
@@ -213,5 +245,118 @@ describe('DocFloatMenuService', () => {
         const popupService = injector.get(DocCanvasPopManagerService) as unknown as RecordingDocCanvasPopManagerService;
         expect(service.floatMenu).toBeNull();
         expect(popupService.ranges).toEqual([]);
+    });
+
+    it('skips document control tokens and whole custom ranges when deciding whether text needs a toolbar', () => {
+        const unitId = 'doc-token-menu';
+        const { popupService, selectionManager, service } = createActiveFloatMenuHarness(unitId, {
+            dataStream: `A${DataStreamTreeTokenType.PARAGRAPH}Link\r\n`,
+            paragraphs: [{ paragraphId: 'para_docs_ui_float_menu_fixture_3', startIndex: 6 }],
+            sectionBreaks: [],
+            customRanges: [{
+                startIndex: 2,
+                endIndex: 5,
+                rangeId: 'hyperlink-1',
+                rangeType: CustomRangeType.HYPERLINK,
+                wholeEntity: true,
+            }],
+            tables: [],
+            textRuns: [],
+        });
+
+        selectionManager.__replaceTextRangesWithNoRefresh({
+            textRanges: [{
+                startOffset: 1,
+                endOffset: 2,
+                collapsed: false,
+            }],
+            rectRanges: [],
+            segmentId: '',
+            segmentPage: -1,
+            style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+            isEditing: true,
+        }, { unitId, subUnitId: unitId });
+        selectionManager.__replaceTextRangesWithNoRefresh({
+            textRanges: [{
+                startOffset: 2,
+                endOffset: 6,
+                collapsed: false,
+            }],
+            rectRanges: [],
+            segmentId: '',
+            segmentPage: -1,
+            style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+            isEditing: true,
+        }, { unitId, subUnitId: unitId });
+
+        expect(service.floatMenu).toBeNull();
+        expect(popupService.ranges).toEqual([]);
+    });
+
+    it('does not show the floating toolbar when the document is disabled', () => {
+        const unitId = 'doc-disabled-menu';
+        const { popupService, selectionManager, service, univerInstanceService } = createActiveFloatMenuHarness(unitId, {
+            dataStream: 'Locked text\r\n',
+            paragraphs: [{ paragraphId: 'para_docs_ui_float_menu_fixture_4', startIndex: 11 }],
+            sectionBreaks: [],
+            customRanges: [],
+            tables: [],
+            textRuns: [],
+        });
+        univerInstanceService.getUnit<DocumentDataModel>(unitId)?.setDisabled(true);
+
+        selectionManager.__replaceTextRangesWithNoRefresh({
+            textRanges: [{
+                startOffset: 0,
+                endOffset: 6,
+                collapsed: false,
+            }],
+            rectRanges: [],
+            segmentId: '',
+            segmentPage: -1,
+            style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+            isEditing: true,
+        }, { unitId, subUnitId: unitId });
+
+        expect(service.floatMenu).toBeNull();
+        expect(popupService.ranges).toEqual([]);
+    });
+
+    it('places the floating toolbar below a forward selection that spans multiple lines', () => {
+        const unitId = 'doc-direction-menu';
+        const { popupService, selectionManager, service } = createActiveFloatMenuHarness(unitId, {
+            dataStream: 'First line\rSecond line\r\n',
+            paragraphs: [
+                { paragraphId: 'para_docs_ui_float_menu_fixture_5', startIndex: 10 },
+                { paragraphId: 'para_docs_ui_float_menu_fixture_6', startIndex: 22 },
+            ],
+            sectionBreaks: [],
+            customRanges: [],
+            tables: [],
+            textRuns: [],
+        });
+
+        selectionManager.__replaceTextRangesWithNoRefresh({
+            textRanges: [{
+                startOffset: 0,
+                endOffset: 18,
+                collapsed: false,
+                direction: RANGE_DIRECTION.FORWARD,
+                startNodePosition: { page: 0, section: 0, column: 0, line: 0, divide: 0, glyph: 0, isBack: false } as never,
+                endNodePosition: { page: 0, section: 0, column: 0, line: 1, divide: 0, glyph: 4, isBack: false } as never,
+            }],
+            rectRanges: [],
+            segmentId: '',
+            segmentPage: -1,
+            style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+            isEditing: true,
+        }, { unitId, subUnitId: unitId });
+
+        expect(service.floatMenu).toMatchObject({ start: 0, end: 18 });
+        expect(popupService.ranges).toEqual(['0:18']);
+        expect(popupService.directions).toEqual(['bottom-center']);
+
+        service.dispose();
+        expect(popupService.disposedCount).toBe(1);
     });
 });

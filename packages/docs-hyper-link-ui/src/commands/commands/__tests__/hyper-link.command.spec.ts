@@ -135,6 +135,25 @@ describe('doc hyperlink commands', () => {
         expect(removedLinkStillExists).toBe(false);
     });
 
+    it('does not remove document hyperlinks when delete parameters are missing or target a missing link', async () => {
+        expect(await commandService.executeCommand(DeleteDocHyperLinkCommand.id)).toBe(false);
+        expect(await commandService.executeCommand(DeleteDocHyperLinkCommand.id, {
+            unitId,
+            linkId: 'missing-link',
+        })).toBe(false);
+
+        let existingLinkStillExists = false;
+        for (const range of getDocBody()?.customRanges ?? []) {
+            if (range.rangeId === 'existing-link') {
+                existingLinkStillExists = true;
+                break;
+            }
+        }
+
+        expect(existingLinkStillExists).toBe(true);
+        expect(getDocBody()?.dataStream).toBe('Hello world\r\n');
+    });
+
     it('updates a hyperlink label and target for the selected document text', async () => {
         const selectionManager = univer.__getInjector().get(DocSelectionManagerService);
         selectionManager.__TEST_ONLY_setCurrentSelection({

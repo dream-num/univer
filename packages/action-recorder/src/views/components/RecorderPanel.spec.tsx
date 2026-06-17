@@ -14,132 +14,258 @@
  * limitations under the License.
  */
 
-import { ICommandService } from '@univerjs/core';
-import { describe, expect, it, vi } from 'vitest';
+import type { IAccessor } from '@univerjs/core';
+import type { Root } from 'react-dom/client';
+import {
+    CommandService,
+    CommandType,
+    ConfigService,
+    ContextService,
+    DesktopLogService,
+    ICommandService,
+    IConfigService,
+    IContextService,
+    ILogService,
+    Injector,
+    IUniverInstanceService,
+    LogLevel,
+} from '@univerjs/core';
+import { ILocalFileService, RediContext } from '@univerjs/ui';
+import { act } from 'react';
+import { createRoot } from 'react-dom/client';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { CompleteRecordingActionCommand, StartRecordingActionCommand, StopRecordingActionCommand } from '../../commands/commands/record.command';
-import { CloseRecordPanelOperation } from '../../commands/operations/operation';
+import { CloseRecordPanelOperation, OpenRecordPanelOperation } from '../../commands/operations/operation';
+import { ActionRecorderService } from '../../services/action-recorder.service';
 import { RecorderPanel } from './RecorderPanel';
 
-const mocked = vi.hoisted(() => ({
-    useDependency: vi.fn(),
-    useObservable: vi.fn(),
-    callbacks: [] as Array<(...args: unknown[]) => unknown>,
-}));
+(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
-vi.mock('@univerjs/ui', async () => {
-    const actual = await vi.importActual<typeof import('@univerjs/ui')>('@univerjs/ui');
-    return {
-        ...actual,
-        useDependency: mocked.useDependency,
-        useObservable: mocked.useObservable,
-    };
-});
+const APPLY_CELL_VALUE_COMMAND_ID = 'action-recorder.panel-test.apply-cell-value';
 
-vi.mock('react', async () => {
-    const actual = await vi.importActual<typeof import('react')>('react');
-    return {
-        ...actual,
-        useCallback: <T extends (...args: never[]) => unknown>(fn: T) => {
-            mocked.callbacks.push(fn as unknown as (...args: unknown[]) => unknown);
-            return fn;
+interface IAppliedCommandParams {
+    unitId?: string;
+    subUnitId?: string;
+    value?: string;
+}
+
+class TestState {
+    static downloads: Array<{ data: Blob; fileName: string }> = [];
+    static appliedParams: IAppliedCommandParams[] = [];
+
+    static reset() {
+        this.downloads = [];
+        this.appliedParams = [];
+    }
+}
+
+class TestLocalFileService implements ILocalFileService {
+    openFile(): Promise<File[]> {
+        return Promise.resolve([]);
+    }
+
+    downloadFile(data: Blob, fileName: string): void {
+        TestState.downloads.push({ data, fileName });
+    }
+}
+
+class TestWorkbook {
+    getUnitId() {
+        return 'focused-workbook';
+    }
+
+    getSheetBySheetId(sheetId: string) {
+        if (sheetId !== 'sheet-1') {
+            return null;
+        }
+
+        return { getName: () => 'Recorded Sheet' };
+    }
+}
+
+class TestUniverInstanceService {
+    private readonly _workbook = new TestWorkbook();
+
+    getFocusedUnit() {
+        return this._workbook;
+    }
+
+    getUnit() {
+        return this._workbook;
+    }
+}
+
+function createRecorderPanelTestBed() {
+    const injector = new Injector();
+    injector.add([ICommandService, { useClass: CommandService }]);
+    injector.add([ILogService, { useClass: DesktopLogService }]);
+    injector.add([IContextService, { useClass: ContextService }]);
+    injector.add([IConfigService, { useClass: ConfigService }]);
+    injector.add([ILocalFileService, { useClass: TestLocalFileService }]);
+    injector.add([IUniverInstanceService, { useClass: TestUniverInstanceService as never }]);
+    injector.add([ActionRecorderService]);
+
+    injector.get(ILogService).setLogLevel(LogLevel.SILENT);
+
+    const commandService = injector.get(ICommandService);
+    [
+        OpenRecordPanelOperation,
+        CloseRecordPanelOperation,
+        StartRecordingActionCommand,
+        CompleteRecordingActionCommand,
+        StopRecordingActionCommand,
+        {
+            id: APPLY_CELL_VALUE_COMMAND_ID,
+            type: CommandType.COMMAND,
+            handler: (_accessor: IAccessor, params?: IAppliedCommandParams) => {
+                TestState.appliedParams.push({ ...params });
+                return true;
+            },
         },
-    };
-});
+    ].forEach((command) => commandService.registerCommand(command));
 
-function getButtonsFromPanel(panelElement: {
-    props: { children: Array<{ props: Record<string, unknown> }> };
-}) {
-    const buttonContainer = panelElement.props.children[2] as {
-        props: { children: Array<{ props: { onClick: () => void } }> };
+    const recorderService = injector.get(ActionRecorderService);
+    recorderService.registerRecordedCommand({
+        id: APPLY_CELL_VALUE_COMMAND_ID,
+        type: CommandType.COMMAND,
+        handler: () => true,
+    });
+
+    return {
+        injector,
+        commandService,
+        recorderService,
     };
-    return buttonContainer.props.children;
+}
+
+async function renderRecorderPanel(root: Root, injector: Injector) {
+    await act(async () => {
+        root.render(
+            <RediContext.Provider value={{ injector }}>
+                <RecorderPanel />
+            </RediContext.Provider>
+        );
+    });
+}
+
+function getButton(container: HTMLElement, text: string) {
+    const button = Array.from(container.querySelectorAll('[data-u-comp="button"]'))
+        .find((item) => item.textContent === text);
+    expect(button).toBeTruthy();
+    return button as HTMLElement;
 }
 
 describe('RecorderPanel', () => {
-    it('should return null when panel is closed', () => {
-        mocked.useDependency.mockReturnValue({ panelOpened$: {} });
-        mocked.useObservable.mockReturnValue(false);
-        expect(RecorderPanel()).toBeNull();
+    let root: Root | undefined;
+    let container: HTMLDivElement | undefined;
+    let currentTestBed: ReturnType<typeof createRecorderPanelTestBed> | undefined;
+
+    beforeEach(() => {
+        TestState.reset();
     });
 
-    it('should trigger close/start/start(N) commands when not recording', () => {
-        mocked.callbacks.length = 0;
-        const executeCommand = vi.fn();
-        mocked.useDependency.mockImplementation((token: unknown) => {
-            if (token === ICommandService) {
-                return { executeCommand };
-            }
-            return { panelOpened$: {}, recording$: {}, recordedCommands$: {} };
+    afterEach(() => {
+        act(() => {
+            root?.unmount();
         });
-        mocked.useObservable
-            .mockReturnValueOnce(true)
-            .mockReturnValueOnce(false)
-            .mockReturnValueOnce([]);
-
-        const root = RecorderPanel() as { type: (props: unknown) => unknown; props: unknown };
-        const panelElement = root.type(root.props) as {
-            props: { children: Array<{ props: Record<string, unknown> }> };
-        };
-        const buttons = getButtonsFromPanel(panelElement);
-
-        buttons[0].props.onClick();
-        buttons[1].props.onClick();
-        buttons[2].props.onClick();
-        mocked.callbacks[2]();
-        mocked.callbacks[3]();
-
-        expect(executeCommand).toHaveBeenCalledWith(CloseRecordPanelOperation.id);
-        expect(executeCommand).toHaveBeenCalledWith(StartRecordingActionCommand.id, { replaceId: undefined });
-        expect(executeCommand).toHaveBeenCalledWith(StartRecordingActionCommand.id, { replaceId: true });
+        container?.remove();
+        currentTestBed = undefined;
+        root = undefined;
+        container = undefined;
     });
 
-    it('should trigger cancel/save commands when recording', () => {
-        mocked.callbacks.length = 0;
-        const executeCommand = vi.fn();
-        mocked.useDependency.mockImplementation((token: unknown) => {
-            if (token === ICommandService) {
-                return { executeCommand };
-            }
-            return { panelOpened$: {}, recording$: {}, recordedCommands$: {} };
+    it('opens the panel and starts recording from the Start action', async () => {
+        currentTestBed = createRecorderPanelTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        await renderRecorderPanel(root, currentTestBed.injector);
+        expect(container.textContent).toBe('');
+
+        await act(async () => {
+            await currentTestBed!.commandService.executeCommand(OpenRecordPanelOperation.id);
         });
-        mocked.useObservable
-            .mockReturnValueOnce(true)
-            .mockReturnValueOnce(true)
-            .mockReturnValueOnce([{ id: 'last.command' }]);
+        expect(container.textContent).toContain('Start Recording');
 
-        const root = RecorderPanel() as { type: (props: unknown) => unknown; props: unknown };
-        const panelElement = root.type(root.props) as {
-            props: { children: Array<{ props: Record<string, unknown> }> };
-        };
-        const buttons = getButtonsFromPanel(panelElement);
+        await act(async () => {
+            getButton(container!, 'Start').dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        });
 
-        buttons[0].props.onClick();
-        buttons[1].props.onClick();
-        mocked.callbacks[0]();
-        mocked.callbacks[1](true);
-
-        expect(executeCommand).toHaveBeenCalledWith(StopRecordingActionCommand.id);
-        expect(executeCommand).toHaveBeenCalledWith(CompleteRecordingActionCommand.id);
+        expect(currentTestBed.recorderService.recording).toBe(true);
+        expect(container.textContent).toContain('Recording...');
+        expect(container.textContent).toContain('Cancel');
+        expect(container.textContent).toContain('Save');
     });
 
-    it('should show recording placeholder title when command list is empty/undefined', () => {
-        mocked.callbacks.length = 0;
-        mocked.useDependency.mockImplementation((token: unknown) => {
-            if (token === ICommandService) {
-                return { executeCommand: vi.fn() };
-            }
-            return { panelOpened$: {}, recording$: {}, recordedCommands$: {} };
-        });
-        mocked.useObservable
-            .mockReturnValueOnce(true)
-            .mockReturnValueOnce(true)
-            .mockReturnValueOnce(undefined);
+    it('records a command with sheet names from Start(N) and exports it on Save', async () => {
+        currentTestBed = createRecorderPanelTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
 
-        const root = RecorderPanel() as { type: (props: unknown) => unknown; props: unknown };
-        const panelElement = root.type(root.props) as {
-            props: { children: Array<{ props: { children: unknown } }> };
-        };
-        const title = panelElement.props.children[1].props.children;
-        expect(title).toBe('Recording...');
+        await renderRecorderPanel(root, currentTestBed.injector);
+
+        await act(async () => {
+            await currentTestBed!.commandService.executeCommand(OpenRecordPanelOperation.id);
+        });
+
+        await act(async () => {
+            getButton(container!, 'Start(N)').dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        });
+
+        await act(async () => {
+            await currentTestBed!.commandService.executeCommand(APPLY_CELL_VALUE_COMMAND_ID, {
+                unitId: 'focused-workbook',
+                subUnitId: 'sheet-1',
+                value: '42',
+            });
+        });
+
+        expect(container.textContent).toContain(`1: ${APPLY_CELL_VALUE_COMMAND_ID}`);
+
+        await act(async () => {
+            getButton(container!, 'Save').dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        });
+
+        expect(currentTestBed.recorderService.recording).toBe(false);
+        expect(TestState.downloads).toHaveLength(1);
+        expect(TestState.downloads[0].fileName).toBe('recorded-commands.json');
+        expect(JSON.parse(await TestState.downloads[0].data.text())).toEqual([
+            {
+                id: APPLY_CELL_VALUE_COMMAND_ID,
+                type: CommandType.COMMAND,
+                params: {
+                    unitId: 'focused-workbook',
+                    subUnitId: 'Recorded Sheet',
+                    value: '42',
+                },
+            },
+        ]);
+    });
+
+    it('stops recording without exporting when the panel is closed', async () => {
+        currentTestBed = createRecorderPanelTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        await renderRecorderPanel(root, currentTestBed.injector);
+
+        await act(async () => {
+            await currentTestBed!.commandService.executeCommand(OpenRecordPanelOperation.id);
+        });
+
+        await act(async () => {
+            getButton(container!, 'Start').dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        });
+
+        await act(async () => {
+            await currentTestBed!.commandService.executeCommand(CloseRecordPanelOperation.id);
+        });
+
+        expect(currentTestBed.recorderService.recording).toBe(false);
+        expect(container.textContent).toBe('');
+        expect(TestState.downloads).toHaveLength(0);
     });
 });

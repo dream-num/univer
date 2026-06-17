@@ -21,6 +21,7 @@ import {
     BooleanNumber,
     Direction,
     DisposableCollection,
+    DrawingTypeEnum,
     ICommandService,
     IUniverInstanceService,
     ObjectRelativeFromH,
@@ -51,11 +52,13 @@ import { DocDrawingUpdateRenderController } from '../../../controllers/render-co
 import { DocRefreshDrawingsService } from '../../../services/doc-refresh-drawings.service';
 import { ClearDocDrawingTransformerOperation } from '../../operations/clear-drawing-transformer.operation';
 import { DeleteDocDrawingsCommand } from '../delete-doc-drawing.command';
+import { GroupDocDrawingCommand } from '../group-doc-drawing.command';
 import { InsertDocDrawingCommand } from '../insert-doc-drawing.command';
 import { InsertDocImageCommand } from '../insert-image.command';
 import { MoveDocDrawingsCommand } from '../move-drawings.command';
 import { RemoveDocDrawingCommand } from '../remove-doc-drawing.command';
 import { SetDocDrawingArrangeCommand } from '../set-drawing-arrange.command';
+import { UngroupDocDrawingCommand } from '../ungroup-doc-drawing.command';
 import {
     IMoveInlineDrawingCommand,
     ITransformNonInlineDrawingCommand,
@@ -176,6 +179,69 @@ function createMultiDrawingDocData(): IDocumentData {
     };
 }
 
+function createInlineMoveDocData(): IDocumentData {
+    return {
+        id: 'test-doc',
+        body: {
+            dataStream: 'A\bB\r\n',
+            customBlocks: [{
+                startIndex: 1,
+                blockId: 'shape-1',
+            }],
+        },
+        headers: {
+            'header-1': {
+                headerId: 'header-1',
+                body: {
+                    dataStream: 'Header\r\n',
+                    customBlocks: [],
+                },
+            },
+        },
+        drawings: {
+            'shape-1': {
+                drawingId: 'shape-1',
+                unitId: 'test-doc',
+                subUnitId: 'test-doc',
+                drawingType: 'image',
+                layoutType: PositionedObjectLayoutType.INLINE,
+                docTransform: {
+                    positionH: { posOffset: 1 },
+                    positionV: { posOffset: 2 },
+                },
+            } as never,
+        },
+        drawingsOrder: ['shape-1'],
+        documentStyle: {
+            pageSize: {
+                width: 594.3,
+                height: 840.51,
+            },
+            marginTop: 72,
+            marginBottom: 72,
+            marginRight: 90,
+            marginLeft: 90,
+        },
+    };
+}
+
+function createGroupedDrawingDocData(): IDocumentData {
+    const docData = createMultiDrawingDocData();
+    docData.drawings!['group-1'] = {
+        drawingId: 'group-1',
+        unitId: 'test-doc',
+        subUnitId: 'test-doc',
+        drawingType: DrawingTypeEnum.DRAWING_GROUP,
+        layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
+        docTransform: { positionH: { posOffset: 0 }, positionV: { posOffset: 0 } },
+    } as never;
+    docData.drawings!['drawing-a'].groupId = 'group-1';
+    docData.drawings!['drawing-b'].groupId = 'group-1';
+    docData.drawingsOrder = ['drawing-c', 'group-1'];
+
+    return docData;
+}
+
 class TestDocDrawingUpdateRenderController {
     private _inserted = false;
 
@@ -247,6 +313,8 @@ function setupDrawingTestBed(docData: IDocumentData, dependencies: Dependency[] 
         RemoveDocDrawingCommand,
         DeleteDocDrawingsCommand,
         MoveDocDrawingsCommand,
+        GroupDocDrawingCommand,
+        UngroupDocDrawingCommand,
         SetDocDrawingArrangeCommand,
         ClearDocDrawingTransformerOperation,
         InsertDocImageCommand,
@@ -766,6 +834,63 @@ describe('docs drawing commands integration', () => {
         testBed.univer.dispose();
     });
 
+    it('moves an inline drawing to an earlier text anchor in the same document segment', async () => {
+        const testBed = setupDrawingTestBed(createInlineMoveDocData());
+        const skeletonManager = testBed.injector.get(DocSkeletonManagerService);
+        vi.spyOn(skeletonManager, 'getSkeleton').mockReturnValue({} as never);
+
+        expect(await testBed.commandService.executeCommand(IMoveInlineDrawingCommand.id, {
+            unitId: 'test-doc',
+            subUnitId: 'test-doc',
+            drawing: {
+                drawingId: 'shape-1',
+            },
+            offset: 0,
+            segmentId: '',
+            segmentPage: 0,
+        })).toBe(true);
+        await awaitTime(0);
+
+        const doc = testBed.get(IUniverInstanceService)
+            .getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC)!;
+
+        expect(doc.getBody()?.dataStream).toBe('\bAB\r\n');
+        expect(doc.getBody()?.customBlocks).toEqual([{ startIndex: 0, blockId: 'shape-1' }]);
+        expect(testBed.refreshControls).toHaveBeenCalled();
+
+        testBed.univer.dispose();
+    });
+
+    it('moves an inline drawing from the document body into a header segment', async () => {
+        const testBed = setupDrawingTestBed(createInlineMoveDocData());
+        const skeletonManager = testBed.injector.get(DocSkeletonManagerService);
+        vi.spyOn(skeletonManager, 'getSkeleton').mockReturnValue({} as never);
+
+        expect(await testBed.commandService.executeCommand(IMoveInlineDrawingCommand.id, {
+            unitId: 'test-doc',
+            subUnitId: 'test-doc',
+            drawing: {
+                drawingId: 'shape-1',
+            },
+            offset: 2,
+            segmentId: 'header-1',
+            segmentPage: 1,
+        })).toBe(true);
+        await awaitTime(0);
+
+        const doc = testBed.get(IUniverInstanceService)
+            .getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC)!;
+        const header = doc.getSelfOrHeaderFooterModel('header-1');
+
+        expect(doc.getBody()?.dataStream).toBe('AB\r\n');
+        expect(doc.getBody()?.customBlocks).toEqual([]);
+        expect(header.getBody()?.dataStream).toBe('He\bader\r\n');
+        expect(header.getBody()?.customBlocks).toEqual([{ startIndex: 2, blockId: 'shape-1' }]);
+        expect(testBed.refreshControls).toHaveBeenCalled();
+
+        testBed.univer.dispose();
+    });
+
     it('arranges doc drawing order through the rich text mutation pipeline', async () => {
         const testBed = setupDrawingTestBed(createMultiDrawingDocData());
         const doc = testBed.get(IUniverInstanceService)
@@ -808,6 +933,58 @@ describe('docs drawing commands integration', () => {
         })).toBe(true);
         await awaitTime(0);
         expect(doc.getSnapshot().drawingsOrder).toEqual(['drawing-c', 'drawing-a', 'drawing-b']);
+
+        testBed.univer.dispose();
+    });
+
+    it('keeps doc drawings unchanged because docs grouping is currently not applied', async () => {
+        const testBed = setupDrawingTestBed(createMultiDrawingDocData());
+        const doc = testBed.get(IUniverInstanceService)
+            .getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC)!;
+
+        expect(await testBed.commandService.executeCommand(GroupDocDrawingCommand.id, [{
+            parent: {
+                unitId: 'test-doc',
+                subUnitId: 'test-doc',
+                drawingId: 'group-1',
+                drawingType: DrawingTypeEnum.DRAWING_GROUP,
+            },
+            children: [
+                { unitId: 'test-doc', subUnitId: 'test-doc', drawingId: 'drawing-a', groupId: 'group-1' },
+                { unitId: 'test-doc', subUnitId: 'test-doc', drawingId: 'drawing-b', groupId: 'group-1' },
+            ],
+        }])).toBe(false);
+
+        expect(doc.getSnapshot().drawings?.['group-1']).toBeUndefined();
+        expect(doc.getSnapshot().drawings?.['drawing-a'].groupId).toBeUndefined();
+        expect(doc.getSnapshot().drawings?.['drawing-b'].groupId).toBeUndefined();
+        expect(doc.getSnapshot().drawingsOrder).toEqual(['drawing-a', 'drawing-b', 'drawing-c']);
+
+        testBed.univer.dispose();
+    });
+
+    it('keeps grouped doc drawings unchanged because docs ungrouping is currently not applied', async () => {
+        const testBed = setupDrawingTestBed(createGroupedDrawingDocData());
+        const doc = testBed.get(IUniverInstanceService)
+            .getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC)!;
+
+        expect(await testBed.commandService.executeCommand(UngroupDocDrawingCommand.id, [{
+            parent: {
+                unitId: 'test-doc',
+                subUnitId: 'test-doc',
+                drawingId: 'group-1',
+                drawingType: DrawingTypeEnum.DRAWING_GROUP,
+            },
+            children: [
+                { unitId: 'test-doc', subUnitId: 'test-doc', drawingId: 'drawing-a' },
+                { unitId: 'test-doc', subUnitId: 'test-doc', drawingId: 'drawing-b' },
+            ],
+        }])).toBe(false);
+
+        expect(doc.getSnapshot().drawings?.['group-1']).toMatchObject({ drawingId: 'group-1' });
+        expect(doc.getSnapshot().drawings?.['drawing-a'].groupId).toBe('group-1');
+        expect(doc.getSnapshot().drawings?.['drawing-b'].groupId).toBe('group-1');
+        expect(doc.getSnapshot().drawingsOrder).toEqual(['drawing-c', 'group-1']);
 
         testBed.univer.dispose();
     });

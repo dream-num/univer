@@ -24,6 +24,7 @@ import { ComponentManager, DesktopSidebarService, ISidebarService } from '@unive
 import { beforeEach, describe, expect, it } from 'vitest';
 import { createTestBed } from '../../../controllers/__tests__/test.util';
 import { SheetNumfmtUIController } from '../../../controllers/ui.controller';
+import { CloseNumfmtPanelOperator } from '../close.numfmt.panel.operation';
 import { OpenNumfmtPanelOperator } from '../open.numfmt.panel.operation';
 
 function createSelection(row: number, column: number): ISelectionWithStyle {
@@ -91,5 +92,20 @@ describe('number format panel operation', () => {
         await commandService.executeCommand(OpenNumfmtPanelOperator.id);
 
         expect(sidebarService.visible).toBe(false);
+    });
+
+    it('publishes a close notification after the number format panel is dismissed', async () => {
+        const closedPanelEvents: string[] = [];
+        commandService.onCommandExecuted((commandInfo) => {
+            if (commandInfo.id === CloseNumfmtPanelOperator.id) {
+                closedPanelEvents.push(commandInfo.id);
+            }
+        });
+        selectionsService.setSelections(unitId, subUnitId, [createSelection(0, 1)]);
+        await commandService.executeCommand(OpenNumfmtPanelOperator.id);
+
+        await commandService.executeCommand(CloseNumfmtPanelOperator.id);
+
+        expect(closedPanelEvents).toEqual([CloseNumfmtPanelOperator.id]);
     });
 });

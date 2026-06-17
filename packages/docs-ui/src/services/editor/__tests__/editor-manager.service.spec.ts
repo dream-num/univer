@@ -561,4 +561,88 @@ describe('EditorService', () => {
         expect(service.isEditor(EDITOR_ID)).toBe(false);
         expect(service.getEditorRenderConfig(EDITOR_ID)).toBeNull();
     });
+
+    it('blurs a focused non-sheet editor when focus moves outside editor-owned DOM', () => {
+        const { service } = createService();
+        let blurred = 0;
+        service.getAllEditor().set(EDITOR_ID, {
+            getValue: () => 'abc',
+            focus: () => {},
+            blur: () => blurred++,
+            isSheetEditor: () => false,
+        } as never);
+        service.focus(EDITOR_ID);
+
+        const externalTarget = document.createElement('button');
+        const externalFocusEvent = new Event('focusin');
+        Object.defineProperty(externalFocusEvent, 'target', { value: externalTarget });
+        window.dispatchEvent(externalFocusEvent);
+
+        expect(blurred).toBe(1);
+        expect(service.getFocusId()).toBeNull();
+    });
+
+    it('keeps editor focus when focus moves within editor-owned DOM or the active editor is a sheet editor', () => {
+        const { service } = createService();
+        let standaloneBlurred = 0;
+        service.getAllEditor().set(EDITOR_ID, {
+            getValue: () => 'abc',
+            focus: () => {},
+            blur: () => standaloneBlurred++,
+            isSheetEditor: () => false,
+        } as never);
+        service.focus(EDITOR_ID);
+
+        const editorTarget = document.createElement('div');
+        editorTarget.dataset.uComp = 'editor';
+        const editorFocusEvent = new Event('focusin');
+        Object.defineProperty(editorFocusEvent, 'target', { value: editorTarget });
+        window.dispatchEvent(editorFocusEvent);
+
+        expect(standaloneBlurred).toBe(0);
+        expect(service.getFocusId()).toBe(EDITOR_ID);
+
+        service.getAllEditor().set(EDITOR_ID, {
+            getValue: () => 'cell',
+            focus: () => {},
+            blur: () => standaloneBlurred++,
+            isSheetEditor: () => true,
+        } as never);
+
+        const externalTarget = document.createElement('button');
+        const externalFocusEvent = new Event('focusin');
+        Object.defineProperty(externalFocusEvent, 'target', { value: externalTarget });
+        window.dispatchEvent(externalFocusEvent);
+
+        expect(service.isSheetEditor('missing-editor')).toBe(false);
+        expect(standaloneBlurred).toBe(0);
+        expect(service.getFocusId()).toBe(EDITOR_ID);
+    });
+
+    it('clears registered editor state when the service is disposed', () => {
+        const { service } = createService(TestMissingRenderManagerService);
+        service.register({
+            initialSnapshot: {
+                id: EDITOR_ID,
+                body: {
+                    dataStream: 'abc\r\n',
+                    paragraphs: [{ startIndex: 0, paragraphId: createParagraphId(new Set()) }],
+                    sectionBreaks: [],
+                    customRanges: [],
+                    tables: [],
+                    textRuns: [],
+                },
+                documentStyle: {},
+            },
+            canvasStyle: { fontSize: 12 },
+            scrollBar: true,
+        }, document.createElement('div'));
+
+        expect(service.isEditor(EDITOR_ID)).toBe(true);
+
+        (service as EditorService).dispose();
+
+        expect(service.isEditor(EDITOR_ID)).toBe(false);
+        expect(service.getEditorRenderConfig(EDITOR_ID)).toBeNull();
+    });
 });

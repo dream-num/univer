@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
+import type { IDisposable, IDocumentData } from '@univerjs/core';
 import type { Mock } from 'vitest';
-import { DataStreamTreeTokenType, DOC_RANGE_TYPE } from '@univerjs/core';
-import { GlyphType } from '@univerjs/engine-render';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { DataStreamTreeTokenType, DOC_RANGE_TYPE, Univer, UniverInstanceType } from '@univerjs/core';
+import { DocSkeletonManagerService } from '@univerjs/docs';
+import { GlyphType, RenderUnit } from '@univerjs/engine-render';
+import { ILayoutService } from '@univerjs/ui';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DocSelectionRenderService } from '../doc-selection-render.service';
 import { TextRange } from '../text-range';
 
@@ -178,6 +181,129 @@ function createService() {
         scene,
         service,
         skeleton,
+    };
+}
+
+class TestLayoutService {
+    static root: HTMLDivElement;
+    static registeredElements: HTMLElement[] = [];
+
+    static reset() {
+        this.root = document.createElement('div');
+        document.body.appendChild(this.root);
+        this.registeredElements = [];
+    }
+
+    get rootContainerElement() {
+        return TestLayoutService.root;
+    }
+
+    registerContainerElement(element: HTMLElement): IDisposable {
+        TestLayoutService.registeredElements.push(element);
+
+        return {
+            dispose: () => {
+                const nextElements: HTMLElement[] = [];
+                for (const current of TestLayoutService.registeredElements) {
+                    if (current !== element) {
+                        nextElements.push(current);
+                    }
+                }
+                TestLayoutService.registeredElements = nextElements;
+            },
+        };
+    }
+}
+
+class TestDocSkeletonManagerService {
+    static skeleton: {
+        findPositionByGlyph: () => unknown;
+        findNodeByCoord: () => unknown;
+    } = {
+        findPositionByGlyph: () => null,
+        findNodeByCoord: () => null,
+    };
+
+    static reset() {
+        this.skeleton = {
+            findPositionByGlyph: () => null,
+            findNodeByCoord: () => null,
+        };
+    }
+
+    getSkeleton() {
+        return TestDocSkeletonManagerService.skeleton;
+    }
+}
+
+class TestRenderEvent<T> {
+    private readonly _listeners: Array<(param: T) => void> = [];
+
+    subscribeEvent(listener: (param: T) => void) {
+        this._listeners.push(listener);
+
+        return {
+            unsubscribe: () => {
+                const nextListeners: Array<(param: T) => void> = [];
+                for (const current of this._listeners) {
+                    if (current !== listener) {
+                        nextListeners.push(current);
+                    }
+                }
+                this._listeners.length = 0;
+                this._listeners.push(...nextListeners);
+            },
+        };
+    }
+
+    emit(param: T) {
+        for (const listener of this._listeners) {
+            listener(param);
+        }
+    }
+}
+
+function createRealSelectionRenderService(options: {
+    mainComponent?: unknown;
+    scene?: unknown;
+} = {}) {
+    TestLayoutService.reset();
+    TestDocSkeletonManagerService.reset();
+    const univer = new Univer();
+    const injector = univer.__getInjector();
+    injector.add([ILayoutService, { useClass: TestLayoutService as never }]);
+    const documentData: IDocumentData = {
+        id: 'selection-render-doc',
+        body: {
+            dataStream: 'Hello\r\n',
+            paragraphs: [{ paragraphId: 'para_docs_ui_selection_fixture_1', startIndex: 5 }],
+            sectionBreaks: [],
+        },
+        documentStyle: {},
+    };
+    const doc = univer.createUnit(UniverInstanceType.UNIVER_DOC, documentData);
+    const renderUnit = injector.createInstance(RenderUnit, {
+        engine: { name: 'engine' } as never,
+        scene: (options.scene ?? {
+            getViewports: () => [],
+            getEngine: () => null,
+        }) as never,
+        isMainScene: true,
+        unit: doc,
+    });
+    if (options.mainComponent) {
+        renderUnit.mainComponent = options.mainComponent as never;
+    }
+    renderUnit.addRenderDependencies([
+        [DocSkeletonManagerService, { useClass: TestDocSkeletonManagerService as never }],
+        DocSelectionRenderService,
+    ] as never);
+
+    return {
+        input: document.getElementById('__editor_selection-render-doc') as HTMLDivElement,
+        renderUnit,
+        service: renderUnit.with(DocSelectionRenderService),
+        univer,
     };
 }
 
@@ -593,5 +719,459 @@ describe('doc selection render service internals', () => {
 
         expect(service._getCanvasOffset()).toEqual({ left: 8, top: 16 });
         expect(getCanvasOffsetByEngineMock).toHaveBeenCalledWith(engine);
+    });
+});
+
+describe('DocSelectionRenderService', () => {
+    let cleanup: Array<() => void> = [];
+
+    beforeEach(() => {
+        vi.clearAllMocks();
+        getCanvasOffsetByEngineMock.mockReturnValue({ left: 0, top: 0 });
+        getRangeListFromCharIndexMock.mockReturnValue(null);
+        getRangeListFromSelectionMock.mockReturnValue(null);
+        getRectRangeFromCharIndexMock.mockReturnValue(null);
+        getTextRangeFromCharIndexMock.mockReturnValue(null);
+    });
+
+    afterEach(() => {
+        for (const dispose of cleanup) {
+            dispose();
+        }
+        cleanup = [];
+        document.body.innerHTML = '';
+    });
+
+    it('keeps the editable input inside the Univer layout root and registers it as an app container', () => {
+        const { renderUnit, service, univer } = createRealSelectionRenderService();
+        cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
+
+        const container = document.getElementById('univer-doc-selection-container-selection-render-doc');
+
+        expect(container?.parentElement).toBe(TestLayoutService.root);
+        expect(TestLayoutService.registeredElements).toEqual([container]);
+
+        service.dispose();
+
+        expect(document.getElementById('univer-doc-selection-container-selection-render-doc')).toBeNull();
+        expect(TestLayoutService.registeredElements).toEqual([]);
+    });
+
+    it('publishes hidden editor input, paste, focus, and blur events with the typed content', () => {
+        const { input, renderUnit, service, univer } = createRealSelectionRenderService();
+        cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
+        const received: Array<{ type: string; content?: string }> = [];
+        const subscriptions = [
+            service.onInputBefore$.subscribe((config) => received.push({ type: 'before-input', content: config?.content })),
+            service.onInput$.subscribe((config) => received.push({ type: 'input', content: config.content })),
+            service.onPaste$.subscribe((config) => received.push({ type: 'paste', content: config.content })),
+            service.onFocus$.subscribe((config) => received.push({ type: 'focus', content: config.content })),
+            service.onBlur$.subscribe((config) => received.push({ type: 'blur', content: config.content })),
+        ];
+        cleanup.push(() => {
+            for (const subscription of subscriptions) {
+                subscription.unsubscribe();
+            }
+        });
+
+        input.textContent = 'typed text';
+        input.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText' }));
+        input.textContent = 'pasted text';
+        input.dispatchEvent(new Event('paste', { bubbles: true }));
+        input.dispatchEvent(new Event('focus', { bubbles: true }));
+        input.textContent = 'leaving editor';
+        input.dispatchEvent(new Event('blur', { bubbles: true }));
+
+        expect(received).toEqual([
+            { type: 'before-input', content: 'typed text' },
+            { type: 'input', content: 'typed text' },
+            { type: 'paste', content: 'pasted text' },
+            { type: 'focus', content: '' },
+            { type: 'blur', content: 'leaving editor' },
+        ]);
+        expect(input.textContent).toBe('');
+    });
+
+    it('suppresses normal keydown while IME composition is active, then resumes key events after composition ends', () => {
+        const { input, renderUnit, service, univer } = createRealSelectionRenderService();
+        cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
+        const events: Array<{ type: string; content?: string }> = [];
+        const subscriptions = [
+            service.onKeydown$.subscribe((config) => events.push({ type: 'keydown', content: config.content })),
+            service.onCompositionstart$.subscribe((config) => {
+                if (config) {
+                    events.push({ type: 'compositionstart', content: config.content });
+                }
+            }),
+            service.onCompositionupdate$.subscribe((config) => {
+                if (config) {
+                    events.push({ type: 'compositionupdate', content: config.content });
+                }
+            }),
+            service.onCompositionend$.subscribe((config) => {
+                if (config) {
+                    events.push({ type: 'compositionend', content: config.content });
+                }
+            }),
+        ];
+        cleanup.push(() => {
+            for (const subscription of subscriptions) {
+                subscription.unsubscribe();
+            }
+        });
+
+        input.textContent = '拼';
+        input.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true, data: '拼' }));
+        input.textContent = 'pin';
+        input.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'p' }));
+        input.dispatchEvent(new CompositionEvent('compositionupdate', { bubbles: true, data: '拼' }));
+        input.textContent = '拼';
+        input.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true, data: '拼' }));
+        input.textContent = 'done';
+        input.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'Enter' }));
+
+        expect(events).toEqual([
+            { type: 'compositionstart', content: '拼' },
+            { type: 'compositionupdate', content: 'pin' },
+            { type: 'compositionend', content: '拼' },
+            { type: 'keydown', content: 'done' },
+        ]);
+    });
+
+    it('keeps segment state stable while the editor is reused by header, footer, and body selection flows', () => {
+        const { renderUnit, service, univer } = createRealSelectionRenderService();
+        cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
+
+        service.setSegment('header-1');
+        service.setSegmentPage(3);
+        service.setReserveRangesStatus(true);
+
+        expect(service.getSegment()).toBe('header-1');
+        expect(service.getSegmentPage()).toBe(3);
+
+        service.setSegment('');
+        service.setSegmentPage(-1);
+
+        expect(service.getSegment()).toBe('');
+        expect(service.getSegmentPage()).toBe(-1);
+    });
+
+    it('selects the current word on double click and the paragraph on triple click', () => {
+        const viewport = {
+            transformVector2SceneCoord: () => ({ x: 8, y: 12 }),
+            getAbsoluteVector: () => ({ x: 16, y: 24 }),
+        };
+        const scene = {
+            getViewports: () => [viewport],
+            getEngine: () => ({ name: 'engine' }),
+        };
+        const documentTransform = {
+            clone: () => ({
+                invert: () => ({
+                    applyPoint: (point: unknown) => point,
+                }),
+            }),
+        };
+        const mainComponent = {
+            getOffsetConfig: () => ({
+                documentTransform,
+                pageMarginLeft: 0,
+                pageMarginTop: 0,
+            }),
+        };
+        const { renderUnit, service, univer } = createRealSelectionRenderService({ mainComponent, scene });
+        cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
+        const column = { lines: [] as unknown[] };
+        const line = { paragraphIndex: 5, st: 0, parent: column, divides: [] as unknown[] };
+        const divide = { parent: line, glyphGroup: [] as Array<{ content: string; count: number; glyphType: GlyphType; parent?: unknown }> };
+        const glyphs: Array<{ content: string; count: number; glyphType: GlyphType; parent?: unknown }> = [];
+        for (const content of ['H', 'e', 'l', 'l', 'o']) {
+            glyphs.push({ content, count: 1, glyphType: GlyphType.WORD, parent: divide });
+        }
+        divide.glyphGroup = glyphs;
+        line.divides = [divide];
+        column.lines = [line];
+        (service as unknown as { _findNodeByCoord: () => unknown })._findNodeByCoord = () => ({ node: glyphs[1], ratioX: 0.4, segmentPage: -1 });
+        const wordRange = {
+            ...createTextRange({ isActive: vi.fn(() => true) }),
+            startOffset: 0,
+            endOffset: 5,
+            collapsed: false,
+            rangeType: DOC_RANGE_TYPE.TEXT,
+            segmentId: '',
+            segmentPage: -1,
+            direction: 'forward',
+            startNodePosition: null,
+            endNodePosition: null,
+        };
+        const paragraphRange = {
+            ...createTextRange({ isActive: vi.fn(() => true) }),
+            startOffset: 0,
+            endOffset: 5,
+            collapsed: false,
+            rangeType: DOC_RANGE_TYPE.TEXT,
+            segmentId: '',
+            segmentPage: -1,
+            direction: 'forward',
+            startNodePosition: null,
+            endNodePosition: null,
+        };
+        getRangeListFromCharIndexMock
+            .mockReturnValueOnce({ textRanges: [wordRange], rectRanges: [] })
+            .mockReturnValueOnce({ textRanges: [paragraphRange], rectRanges: [] });
+        const selections: string[] = [];
+        const subscription = service.textSelectionInner$.subscribe((selection) => {
+            if (!selection) {
+                return;
+            }
+            for (const range of selection.textRanges) {
+                selections.push(`${range.startOffset}:${range.endOffset}`);
+            }
+        });
+        cleanup.push(() => subscription.unsubscribe());
+
+        service.__handleDblClick({ offsetX: 10, offsetY: 12 } as never);
+        service.__handleTripleClick({ offsetX: 10, offsetY: 12 } as never);
+
+        expect(selections).toEqual(['0:5', '0:5']);
+    });
+
+    it('moves the hidden editor to the active visible selection when syncing canvas selection to DOM input', () => {
+        getCanvasOffsetByEngineMock.mockReturnValue({ left: 5, top: 7 });
+        const viewport = {
+            getAbsoluteVector: () => ({ x: 30, y: 40 }),
+        };
+        const scene = {
+            getViewports: () => [viewport],
+            getEngine: () => ({ name: 'engine' }),
+        };
+        const { renderUnit, service, univer } = createRealSelectionRenderService({ scene });
+        cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
+        const activeRange = {
+            isActive: () => true,
+            getAnchor: () => ({ left: 12, top: 20, visible: true }),
+            dispose: vi.fn(),
+        };
+        (service as unknown as { _rangeList: TextRange[] })._rangeList = [activeRange as never];
+
+        service.sync();
+
+        const container = document.getElementById('univer-doc-selection-container-selection-render-doc')!;
+        expect(container.style.left).toBe('35px');
+        expect(container.style.top).toBe('47px');
+        expect(container.style.zIndex).toBe('1000');
+    });
+
+    it('parks the active selection while scrolling and restores the editor when the selection remains in view', () => {
+        getCanvasOffsetByEngineMock.mockReturnValue({ left: 1, top: 2 });
+        const scrollAfter$ = new TestRenderEvent<{ viewport: unknown }>();
+        const scrollEnd$ = new TestRenderEvent<{ viewport: unknown }>();
+        const activeStatic = vi.fn();
+        const deactivateStatic = vi.fn();
+        const viewport = {
+            onScrollAfter$: scrollAfter$,
+            onScrollEnd$: scrollEnd$,
+            getAbsoluteVector: () => ({ x: 4, y: 8 }),
+            getBounding: () => ({
+                viewBound: {
+                    left: 0,
+                    top: 0,
+                    right: 100,
+                    bottom: 100,
+                },
+            }),
+        };
+        const scene = {
+            getViewports: () => [viewport],
+            getEngine: () => ({ name: 'engine' }),
+        };
+        const { renderUnit, service, univer } = createRealSelectionRenderService({ scene });
+        cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
+        const activeRange = {
+            isActive: () => true,
+            activeStatic,
+            deactivateStatic,
+            getAnchor: () => ({ left: 10, top: 12, visible: true }),
+            dispose: vi.fn(),
+        };
+        (service as unknown as { _rangeList: TextRange[] })._rangeList = [activeRange as never];
+
+        service.__attachScrollEvent();
+        scrollAfter$.emit({ viewport });
+        scrollEnd$.emit({ viewport });
+
+        const container = document.getElementById('univer-doc-selection-container-selection-render-doc')!;
+        expect(activeStatic).toHaveBeenCalledTimes(1);
+        expect(deactivateStatic).not.toHaveBeenCalled();
+        expect(container.style.left).toBe('5px');
+        expect(container.style.top).toBe('10px');
+    });
+
+    it('commits a dragged text selection when the pointer is released', () => {
+        vi.spyOn(TextRange.prototype as unknown as Record<'_anchorBlink', () => void>, '_anchorBlink').mockImplementation(() => {});
+        vi.spyOn(TextRange.prototype, 'refresh').mockImplementation(() => {});
+        const pointerMove$ = new TestRenderEvent<{ offsetX: number; offsetY: number }>();
+        const pointerUp$ = new TestRenderEvent<Record<string, never>>();
+        const disableObjectsEvent = vi.fn();
+        const enableObjectsEvent = vi.fn();
+        const clearSelectedObjects = vi.fn();
+        const setCursor = vi.fn();
+        const scene = {
+            getViewports: () => [],
+            getEngine: () => ({ name: 'engine' }),
+            findViewportByPosToScene: () => ({
+                top: 0,
+                left: 0,
+                width: 500,
+                height: 500,
+                scrollByViewportDeltaVal: () => true,
+                transScroll2ViewportScrollValue: () => ({ x: 0, y: 0 }),
+            }),
+            disableObjectsEvent,
+            enableObjectsEvent,
+            getTransformer: () => ({ clearSelectedObjects }),
+            setCursor,
+            onPointerMove$: pointerMove$,
+            onPointerUp$: pointerUp$,
+        };
+        const { renderUnit, service, univer } = createRealSelectionRenderService({ scene });
+        cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
+        const dragRange = {
+            ...createTextRange({ isActive: vi.fn(() => true) }),
+            startOffset: 2,
+            endOffset: 6,
+            collapsed: false,
+            rangeType: DOC_RANGE_TYPE.TEXT,
+            segmentId: '',
+            segmentPage: -1,
+            direction: 'forward',
+            startNodePosition: null,
+            endNodePosition: null,
+        };
+        const focusNodePosition = {
+            page: 0,
+            section: 0,
+            column: 0,
+            line: 0,
+            divide: 0,
+            glyph: 6,
+            isBack: false,
+        };
+        (service as unknown as { _findNodeByCoord: () => unknown })._findNodeByCoord = () => ({
+            node: { streamType: DataStreamTreeTokenType.LETTER },
+            segmentId: '',
+            segmentPage: -1,
+        });
+        (service as unknown as { _getNodePosition: () => unknown })._getNodePosition = () => ({
+            page: 0,
+            section: 0,
+            column: 0,
+            line: 0,
+            divide: 0,
+            glyph: 2,
+            isBack: true,
+        });
+        (service as unknown as { _moving: () => void })._moving = () => {
+            (service as unknown as { _focusNodePosition: unknown })._focusNodePosition = focusNodePosition;
+            (service as unknown as { _rangeListCache: TextRange[] })._rangeListCache = [dragRange as never];
+        };
+        const selections: string[] = [];
+        const subscription = service.textSelectionInner$.subscribe((selection) => {
+            if (!selection) {
+                return;
+            }
+            for (const range of selection.textRanges) {
+                selections.push(`${range.startOffset}:${range.endOffset}`);
+            }
+        });
+        cleanup.push(() => subscription.unsubscribe());
+
+        service.__onPointDown({ offsetX: 10, offsetY: 10, button: 0 } as never);
+        pointerMove$.emit({ offsetX: 20, offsetY: 20 });
+        pointerUp$.emit({});
+
+        expect(disableObjectsEvent).toHaveBeenCalledTimes(1);
+        expect(enableObjectsEvent).toHaveBeenCalledTimes(1);
+        expect(clearSelectedObjects).toHaveBeenCalledTimes(1);
+        expect(setCursor).toHaveBeenCalledWith('text');
+        expect(selections.at(-1)).toBe('2:6');
+    });
+
+    it('places the manual cursor from transformed document coordinates', () => {
+        vi.spyOn(TextRange.prototype as unknown as Record<'_anchorBlink', () => void>, '_anchorBlink').mockImplementation(() => {});
+        vi.spyOn(TextRange.prototype, 'refresh').mockImplementation(() => {});
+        const transformedPoint = { x: 3, y: 4 };
+        const findNodeByCoord = vi.fn(() => ({
+            node: {
+                glyphType: GlyphType.LIST,
+                streamType: DataStreamTreeTokenType.LETTER,
+            },
+            ratioX: 0.8,
+            segmentPage: 2,
+        }));
+        const findPositionByGlyph = vi.fn(() => ({
+            page: 0,
+            section: 0,
+            column: 0,
+            line: 0,
+            divide: 0,
+            glyph: 1,
+            isBack: false,
+        }));
+        const viewport = {
+            transformVector2SceneCoord: () => ({ x: 30, y: 40 }),
+            getAbsoluteVector: () => ({ x: 5, y: 6 }),
+        };
+        const scene = {
+            getViewports: () => [viewport],
+            getEngine: () => ({ name: 'engine' }),
+        };
+        const documentTransform = {
+            clone: () => ({
+                invert: () => ({
+                    applyPoint: () => transformedPoint,
+                }),
+            }),
+        };
+        const mainComponent = {
+            getOffsetConfig: () => ({
+                documentTransform,
+                pageMarginLeft: 9,
+                pageMarginTop: 11,
+            }),
+        };
+        const { renderUnit, service, univer } = createRealSelectionRenderService({ mainComponent, scene });
+        cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
+        TestDocSkeletonManagerService.skeleton = {
+            findNodeByCoord,
+            findPositionByGlyph,
+        };
+        (service as unknown as { _getAllTextRanges: () => unknown[] })._getAllTextRanges = () => [{
+            startNodePosition: { glyph: 1, isBack: true },
+            segmentId: 'header-1',
+            segmentPage: 2,
+        }];
+        (service as unknown as { _getAllRectRanges: () => unknown[] })._getAllRectRanges = () => [];
+        service.setSegment('header-1');
+        service.setSegmentPage(2);
+
+        service.setCursorManually(12, 18);
+
+        expect(findNodeByCoord).toHaveBeenCalledWith(
+            transformedPoint,
+            0,
+            9,
+            11,
+            {
+                strict: true,
+                segmentId: 'header-1',
+                segmentPage: 2,
+            }
+        );
+        expect(service.getAllTextRanges()[0]).toMatchObject({
+            startNodePosition: expect.objectContaining({ glyph: 1, isBack: true }),
+            segmentId: 'header-1',
+            segmentPage: 2,
+        });
     });
 });

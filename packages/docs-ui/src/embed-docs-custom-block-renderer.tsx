@@ -32,6 +32,11 @@ export interface EmbedDocsCustomBlockRuntimeProps {
     };
 }
 
+export interface DocsTableLikeCustomBlockWheelHandlerOptions {
+    getLive: () => HTMLElement | null;
+    getMaxScrollLeft: () => number;
+}
+
 export function EmbedDocsCustomBlockRenderer(props: { data?: EmbedFloatDomData } & EmbedDocsCustomBlockRuntimeProps) {
     ensureEmbedDocsCustomBlockStyles();
 
@@ -42,7 +47,9 @@ export function EmbedDocsCustomBlockRenderer(props: { data?: EmbedFloatDomData }
     const rootRef = useRef<HTMLDivElement>(null);
     const liveRef = useRef<HTMLElement | null>(null);
     const [viewport, setViewport] = useState(() => createDefaultDocsTableLikeCustomBlockBleedViewport());
+    const viewportRef = useRef(viewport);
     const sheetLike = isSheetLikeDocsCustomBlock(data);
+    viewportRef.current = viewport;
 
     useEffect(() => {
         if (!hostUnitId) {
@@ -161,17 +168,10 @@ export function EmbedDocsCustomBlockRenderer(props: { data?: EmbedFloatDomData }
             return undefined;
         }
 
-        const onWheel = (event: WheelEvent) => {
-            const live = liveRef.current;
-            if (!live || (event.ctrlKey || event.metaKey)) {
-                return;
-            }
-
-            if (scrollDocsTableLikeCustomBlockLive(event, live, { maxScrollLeft: viewport.bleedLeft })) {
-                event.preventDefault();
-                event.stopPropagation();
-            }
-        };
+        const onWheel = createDocsTableLikeCustomBlockWheelHandler({
+            getLive: () => liveRef.current,
+            getMaxScrollLeft: () => viewportRef.current.bleedLeft,
+        });
 
         root.addEventListener('wheel', onWheel, { passive: false });
         return () => root.removeEventListener('wheel', onWheel);
@@ -199,6 +199,20 @@ export function EmbedDocsCustomBlockRenderer(props: { data?: EmbedFloatDomData }
             <EmbedFloatDomRenderer {...props} />
         </div>
     );
+}
+
+export function createDocsTableLikeCustomBlockWheelHandler(options: DocsTableLikeCustomBlockWheelHandlerOptions): (event: WheelEvent) => void {
+    return (event: WheelEvent) => {
+        const live = options.getLive();
+        if (!live || event.ctrlKey || event.metaKey) {
+            return;
+        }
+
+        if (scrollDocsTableLikeCustomBlockLive(event, live, { maxScrollLeft: options.getMaxScrollLeft() })) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+    };
 }
 
 function normalizeFloatDomData(data: unknown): EmbedFloatDomData | undefined {

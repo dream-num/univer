@@ -386,6 +386,25 @@ describe('DocDrawingPosition', () => {
         });
     });
 
+    it('keeps the image visually fixed when vertical positioning changes from paragraph to line', async () => {
+        currentTestBed = createPositionTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        renderPanel(root, currentTestBed);
+
+        await selectPositionRelativeFrom(container, 1, 'Line');
+
+        expect(currentDrawing(currentTestBed)).toMatchObject({
+            docTransform: {
+                positionV: {
+                    relativeFrom: ObjectRelativeFromV.LINE,
+                    posOffset: -12,
+                },
+            },
+        });
+    });
+
     it('persists vertical absolute position on the focused drawing', async () => {
         currentTestBed = createPositionTestBed();
         container = document.createElement('div');

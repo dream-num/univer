@@ -17,16 +17,77 @@
 import type { Dependency, ICellData, IDisposable, IRange, IWorkbookData, Nullable, Workbook } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import type { ICellDataWithSpanInfo } from '@univerjs/sheets-ui';
-import { DisposableCollection, ICommandService, ILogService, Inject, Injector, IUniverInstanceService, LocaleService, LocaleType, LogLevel, ObjectMatrix, Plugin, RANGE_TYPE, UndoCommand, Univer, UniverInstanceType } from '@univerjs/core';
-import { CalculateFormulaService, DefinedNamesService, FormulaCurrentConfigService, FormulaDataModel, FormulaRuntimeService, HyperlinkEngineFormulaService, ICalculateFormulaService, IDefinedNamesService, IFormulaCurrentConfigService, IFormulaRuntimeService, IHyperlinkEngineFormulaService, LexerTreeBuilder, SetArrayFormulaDataMutation, SetFormulaDataMutation } from '@univerjs/engine-formula';
+import {
+    DisposableCollection,
+    ICommandService,
+    ILogService,
+    Inject,
+    Injector,
+    IUniverInstanceService,
+    LocaleService,
+    LocaleType,
+    LogLevel,
+    ObjectMatrix,
+    Plugin,
+    RANGE_TYPE,
+    UndoCommand,
+    Univer,
+    UniverInstanceType,
+} from '@univerjs/core';
+import {
+    CalculateFormulaService,
+    DefinedNamesService,
+    FormulaCurrentConfigService,
+    FormulaDataModel,
+    FormulaRuntimeService,
+    HyperlinkEngineFormulaService,
+    ICalculateFormulaService,
+    IDefinedNamesService,
+    IFormulaCurrentConfigService,
+    IFormulaRuntimeService,
+    IHyperlinkEngineFormulaService,
+    LexerTreeBuilder,
+    SetArrayFormulaDataMutation,
+    SetFormulaDataMutation,
+} from '@univerjs/engine-formula';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
-import { discreteRangeToRange, MoveRangeMutation, SetRangeValuesMutation, SetSelectionsOperation, SetWorksheetActiveOperation, SetWorksheetRowAutoHeightMutation, SheetInterceptorService, SheetSkeletonService, SheetsSelectionsService } from '@univerjs/sheets';
+import {
+    discreteRangeToRange,
+    MoveRangeMutation,
+    SetRangeValuesMutation,
+    SetSelectionsOperation,
+    SetWorksheetActiveOperation,
+    SetWorksheetRowAutoHeightMutation,
+    SheetInterceptorService,
+    SheetSkeletonService,
+    SheetsSelectionsService,
+} from '@univerjs/sheets';
 import { UpdateFormulaController } from '@univerjs/sheets-formula';
-import { COPY_TYPE, IMarkSelectionService, ISheetClipboardService, ISheetSelectionRenderService, PREDEFINED_HOOK_NAME_PASTE, SheetClipboardController, SheetClipboardService, SheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
-import { BrowserClipboardService, DesktopMessageService, IClipboardInterfaceService, IMessageService, INotificationService, IPlatformService, IUIPartsService, UIPartsService } from '@univerjs/ui';
+import {
+    COPY_TYPE,
+    IMarkSelectionService,
+    ISheetClipboardService,
+    ISheetSelectionRenderService,
+    PREDEFINED_HOOK_NAME_COPY,
+    PREDEFINED_HOOK_NAME_PASTE,
+    SheetClipboardController,
+    SheetClipboardService,
+    SheetSelectionRenderService,
+    SheetSkeletonManagerService,
+} from '@univerjs/sheets-ui';
+import {
+    BrowserClipboardService,
+    DesktopMessageService,
+    IClipboardInterfaceService,
+    IMessageService,
+    INotificationService,
+    IPlatformService,
+    IUIPartsService,
+    UIPartsService,
+} from '@univerjs/ui';
 import { BehaviorSubject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { getSetCellFormulaMutations } from '../formula-clipboard.controller';
+import { FormulaClipboardController, getSetCellFormulaMutations } from '../formula-clipboard.controller';
 import { createCommandTestBed } from './create-command-test-bed';
 
 interface ITestSheetClipboardService extends ISheetClipboardService {
@@ -81,6 +142,112 @@ class testPlatformService {
     isMac: boolean = true;
     isLinux: boolean = false;
 }
+
+describe('FormulaClipboardController formula-only copy hook', () => {
+    it('copies only formulas, resolves shared formula strings and reports filtered rows', () => {
+        const hooks: any[] = [];
+        const worksheet = {
+            getSheetId: () => 'sheet1',
+            getUnitId: () => 'unit1',
+            getCellRaw: (row: number, col: number) => {
+                if (row === 0 && col === 0) return { f: '=A1' };
+                if (row === 0 && col === 1) return { si: 'shared-1' };
+                if (row === 0 && col === 2) return { v: 10 };
+                return null;
+            },
+            getRowFiltered: (row: number) => row === 2,
+        };
+        const workbook = {
+            getSheetBySheetId: () => worksheet,
+        };
+        const controller = new FormulaClipboardController(
+            {
+                getUnit: () => workbook,
+                getCurrentUnitOfType: () => ({ getActiveSheet: () => worksheet }),
+            } as never,
+            {} as never,
+            {
+                addClipboardHook: (hook: unknown) => {
+                    hooks.push(hook);
+                    return { dispose: () => undefined };
+                },
+            } as never,
+            {} as never,
+            { getFormulaStringByCell: () => '=A2' } as never
+        );
+        const formulaOnlyHook = hooks.find((hook) => hook.id === PREDEFINED_HOOK_NAME_COPY.SPECIAL_COPY_FORMULA_ONLY);
+
+        formulaOnlyHook.onBeforeCopy('unit1', 'sheet1');
+
+        expect(formulaOnlyHook.onCopyCellContent(0, 0)).toBe('=A1');
+        expect(formulaOnlyHook.onCopyCellContent(0, 1)).toBe('=A2');
+        expect(formulaOnlyHook.onCopyCellContent(0, 2)).toBe('');
+        expect(formulaOnlyHook.getFilteredOutRows('unit1', 'sheet1', {
+            startRow: 0,
+            endRow: 3,
+            startColumn: 0,
+            endColumn: 0,
+        })).toEqual([2]);
+
+        formulaOnlyHook.onAfterCopy();
+        expect(formulaOnlyHook.onCopyCellContent(0, 0)).toBe('');
+
+        controller.dispose();
+    });
+
+    it('writes formulas to copy matrices and clears non-formula cells in formula-only copy', () => {
+        const hooks: any[] = [];
+        const worksheet = {
+            getSheetId: () => 'sheet1',
+            getUnitId: () => 'unit1',
+            getCellRaw: () => null,
+            getRowFiltered: () => false,
+        };
+        const workbook = {
+            getSheetBySheetId: () => worksheet,
+        };
+        const controller = new FormulaClipboardController(
+            {
+                getUnit: () => workbook,
+                getCurrentUnitOfType: () => ({ getActiveSheet: () => worksheet }),
+            } as never,
+            {} as never,
+            {
+                addClipboardHook: (hook: unknown) => {
+                    hooks.push(hook);
+                    return { dispose: () => undefined };
+                },
+            } as never,
+            {} as never,
+            { getFormulaStringByCell: () => '=A2' } as never
+        );
+        const formulaOnlyHook = hooks.find((hook) => hook.id === PREDEFINED_HOOK_NAME_COPY.SPECIAL_COPY_FORMULA_ONLY);
+        const matrix = new ObjectMatrix<ICellDataWithSpanInfo>({
+            0: {
+                0: { f: '=A1' },
+                1: { si: 'shared-1' },
+                2: { v: 10 },
+            },
+        });
+        const matrixFragment = new ObjectMatrix<ICellDataWithSpanInfo>();
+        const plainMatrix = new ObjectMatrix<ICellDataWithSpanInfo>();
+
+        formulaOnlyHook.onBeforeCopy('unit1', 'sheet1');
+        formulaOnlyHook.handleMatrixOnCell(0, 0, 0, 0, matrix, matrixFragment, plainMatrix);
+        formulaOnlyHook.handleMatrixOnCell(0, 1, 0, 1, matrix, matrixFragment, plainMatrix);
+        formulaOnlyHook.handleMatrixOnCell(0, 2, 0, 2, matrix, matrixFragment, plainMatrix);
+
+        expect(matrixFragment.getValue(0, 0)).toMatchObject({ f: '=A1' });
+        expect(plainMatrix.getValue(0, 0)).toMatchObject({ f: '=A1', displayV: '=A1' });
+        expect(matrixFragment.getValue(0, 1)).toMatchObject({ f: '=A2' });
+        expect(plainMatrix.getValue(0, 1)).toMatchObject({ f: '=A2', displayV: '=A2' });
+        expect(matrixFragment.getValue(0, 2)).toMatchObject({ v: null, f: null, si: null, p: null });
+        expect(plainMatrix.getValue(0, 2)).toMatchObject({ v: null, f: null, si: null, p: null });
+        expect(matrix.getValue(0, 2)).toMatchObject({ v: null, f: null, si: null, p: null });
+
+        controller.dispose();
+    });
+});
 
 export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: Dependency[]) {
     const univer = new Univer();

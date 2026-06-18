@@ -382,6 +382,32 @@ describe('BatchSaveImagesDialog', () => {
         testBed.univer.dispose();
     });
 
+    it('keeps cell address naming when the user tries to clear the last file name option', async () => {
+        const { testBed, batchSaveService, dialogService, markSelectionService } = await renderDialog();
+        const cellAddressCheckbox = getCheckbox(container!, 0);
+
+        await act(async () => {
+            cellAddressCheckbox.click();
+            await Promise.resolve();
+        });
+
+        expect(markSelectionService.activeRanges).toEqual([]);
+
+        await act(async () => {
+            getButton(container!, 'sheets-drawing-ui.save.confirm').click();
+            await Promise.resolve();
+        });
+
+        expect(batchSaveService.savedImages.map((image) => image.imageId)).toEqual(['image-a', 'image-b']);
+        expect(batchSaveService.savedConfig).toEqual({
+            fileNameParts: [FileNamePart.CELL_ADDRESS],
+            columnIndex: undefined,
+        });
+        expect(dialogService.closedIds).toEqual([BATCH_SAVE_IMAGES_DIALOG_ID]);
+
+        testBed.univer.dispose();
+    });
+
     it('clears lookup column highlight without saving when the dialog is cancelled', async () => {
         const { testBed, batchSaveService, dialogService, markSelectionService } = await renderDialog();
         const columnValueCheckbox = getCheckbox(container!, 1);

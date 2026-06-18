@@ -20,6 +20,7 @@ import type { Root } from 'react-dom/client';
 import { BooleanNumber, createIdentifier, LocaleService, LocaleType } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { AddCfCommand, CFNumberOperator, CFRuleType, CFSubRuleType, SetCfCommand } from '@univerjs/sheets-conditional-formatting';
 import { IMarkSelectionService } from '@univerjs/sheets-ui';
 import { IShortcutService, RediContext } from '@univerjs/ui';
@@ -115,6 +116,7 @@ function createPanelTestBed() {
     testBed.injector.add([LexerTreeBuilder]);
     testBed.commandService.registerCommand(AddCfCommand);
     testBed.commandService.registerCommand(SetCfCommand);
+    testBed.commandService.registerCommand(SetWorksheetActiveOperation);
     testBed.get(LocaleService).load({
         [LocaleType.ZH_CN]: {
             'sheets-conditional-formatting-ui': {
@@ -390,6 +392,65 @@ describe('ConditionFormattingPanel and RuleEdit', () => {
 
         expect(container.textContent).toContain('Show');
         expect(container.textContent).toContain('A1');
+        expect(currentTestBed.ruleModel.getSubunitRules(currentTestBed.unitId, currentTestBed.subUnitId)).toEqual([
+            expect.objectContaining({
+                cfId: 'cf-active',
+                rule: expect.objectContaining({
+                    type: CFRuleType.highlightCell,
+                    subType: CFSubRuleType.number,
+                    value: 10,
+                }),
+            }),
+        ]);
+    });
+
+    it('cancels rule editing on worksheet activation without saving in-progress changes', async () => {
+        currentTestBed = createPanelTestBed();
+        const originalRule = createNumberHighlightRule('cf-active', 10);
+        await currentTestBed.commandService.executeCommand(AddCfCommand.id, {
+            unitId: currentTestBed.unitId,
+            subUnitId: currentTestBed.subUnitId,
+            rule: originalRule,
+        });
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        let cancelRequests = 0;
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <RuleEdit
+                        rule={originalRule}
+                        onCancel={() => {
+                            cancelRequests += 1;
+                        }}
+                    />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        const numberInput = Array.from(container.querySelectorAll('input'))
+            .find((input) => input.value === '10') as HTMLInputElement | undefined;
+        if (!numberInput) {
+            throw new Error('Number condition input was not rendered');
+        }
+
+        await act(async () => {
+            writeInput(numberInput, '99');
+            await Promise.resolve();
+        });
+
+        await act(async () => {
+            await currentTestBed!.commandService.executeCommand(SetWorksheetActiveOperation.id, {
+                unitId: currentTestBed!.unitId,
+                subUnitId: currentTestBed!.subUnitId,
+            });
+            await Promise.resolve();
+        });
+
+        expect(cancelRequests).toBe(1);
         expect(currentTestBed.ruleModel.getSubunitRules(currentTestBed.unitId, currentTestBed.subUnitId)).toEqual([
             expect.objectContaining({
                 cfId: 'cf-active',

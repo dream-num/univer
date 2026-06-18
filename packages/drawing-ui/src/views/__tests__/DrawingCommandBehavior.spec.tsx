@@ -409,4 +409,37 @@ describe('drawing command behavior', () => {
         ]);
         expect(document.querySelector('[data-u-comp="doc-image-floating-toolbar"]')).not.toBeNull();
     });
+
+    it('executes a selected sheet image popup menu item and closes the menu', async () => {
+        const editParams = { unitId, subUnitId, drawingId, source: 'sheet-popup' };
+        const rendered = renderWithRediContext(
+            univer.__getInjector(),
+            <ImagePopupMenu
+                popup={{
+                    extraProps: {
+                        menuItems: [{
+                            label: 'drawing-ui.image-popup.edit',
+                            index: 0,
+                            commandId: editCommandId,
+                            commandParams: editParams,
+                            disable: false,
+                        }],
+                    },
+                }}
+            />
+        );
+        root = rendered.root;
+        container = rendered.container;
+
+        clickElement(container.firstElementChild!.firstElementChild!);
+        clickElement(findByText('[role="menuitem"]', 'drawing-ui.image-popup.edit'));
+        await flushPendingCommands();
+
+        expect(executedCommands).toEqual([{
+            id: editCommandId,
+            type: CommandType.OPERATION,
+            params: editParams,
+        }]);
+        expect(document.querySelector('[role="menuitem"]')).toBeNull();
+    });
 });

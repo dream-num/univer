@@ -130,6 +130,15 @@ async function emitSelection(injector: Injector, range: ISelectionWithStyle['ran
     });
 }
 
+async function finishSelections(injector: Injector, ranges: Array<ISelectionWithStyle['range']>) {
+    const selectionsService = injector.get(SheetsSelectionsService) as never as TestSheetsSelectionsService;
+
+    await act(async () => {
+        selectionsService.selectionMoveEnd$.next(ranges.map((range) => ({ range }) as ISelectionWithStyle));
+        await Promise.resolve();
+    });
+}
+
 async function clickButton(text: string): Promise<void> {
     const button = Array.from(document.body.querySelectorAll('button'))
         .find((node) => node.textContent === text) as HTMLButtonElement | undefined;
@@ -355,6 +364,76 @@ describe('RangeSelectorDialog', () => {
                     startRow: 3,
                     endRow: 4,
                     startColumn: 3,
+                    endColumn: 3,
+                }),
+            }),
+        ]]);
+        expect(RangeDialogState.closed).toBe(0);
+    });
+
+    it('confirms only the first ranges from a multi-range sheet selection when capped', async () => {
+        const injector = createRangeDialogTestBed();
+        act(() => {
+            root.render(
+                <RediContext.Provider value={{ injector }}>
+                    <RangeSelectorDialog
+                        visible
+                        initialValue={[]}
+                        unitId="book-1"
+                        subUnitId="sheet-1"
+                        maxRangeCount={2}
+                        onConfirm={(ranges) => RangeDialogState.confirmed.push(ranges)}
+                        onClose={() => {
+                            RangeDialogState.closed += 1;
+                        }}
+                    />
+                </RediContext.Provider>
+            );
+        });
+
+        await finishSelections(injector, [
+            {
+                startRow: 0,
+                endRow: 0,
+                startColumn: 0,
+                endColumn: 0,
+                rangeType: RANGE_TYPE.NORMAL,
+            },
+            {
+                startRow: 2,
+                endRow: 3,
+                startColumn: 2,
+                endColumn: 3,
+                rangeType: RANGE_TYPE.NORMAL,
+            },
+            {
+                startRow: 4,
+                endRow: 4,
+                startColumn: 4,
+                endColumn: 4,
+                rangeType: RANGE_TYPE.NORMAL,
+            },
+        ]);
+
+        const inputs = Array.from(document.body.querySelectorAll('input')) as HTMLInputElement[];
+        expect(inputs.map((input) => input.value)).toEqual(['A1', 'C3:D4']);
+
+        await clickButton('Confirm');
+
+        expect(RangeDialogState.confirmed).toEqual([[
+            expect.objectContaining({
+                range: expect.objectContaining({
+                    startRow: 0,
+                    endRow: 0,
+                    startColumn: 0,
+                    endColumn: 0,
+                }),
+            }),
+            expect.objectContaining({
+                range: expect.objectContaining({
+                    startRow: 2,
+                    endRow: 3,
+                    startColumn: 2,
                     endColumn: 3,
                 }),
             }),

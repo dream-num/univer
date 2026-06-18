@@ -88,7 +88,7 @@ describe('FUniver integration', () => {
         commandService.registerCommand({
             id: TEST_COMMAND_ID,
             type: CommandType.COMMAND,
-            handler: (_accessor, params?: { value: string }) => params?.value === 'ok',
+            handler: (_accessor, params?: { value: string }) => params ? params.value === 'ok' : false,
         } as ICommand<{ value: string }, boolean>);
 
         disposables.push(
@@ -139,7 +139,11 @@ describe('FUniver integration', () => {
         expect(textStyle.ff).toBe('Inter');
         expect(paragraph.horizontalAlign).toBe(HorizontalAlign.CENTER);
         expect(univerAPI.newTextDecoration({ s: univerAPI.Enum.BooleanNumber.TRUE }).build().s).toBe(univerAPI.Enum.BooleanNumber.TRUE);
-        expect(univerAPI.newRichTextValue(createDocData('facade-rich-text') as IDocumentData).getData().body?.dataStream).toBe('Hello\r\n');
+        const richTextBody = univerAPI.newRichTextValue(createDocData('facade-rich-text') as IDocumentData).getData().body;
+        if (!richTextBody) {
+            throw new Error('Expected rich text value to keep the document body.');
+        }
+        expect(richTextBody.dataStream).toBe('Hello\r\n');
         expect(univerAPI.Util.rectangle.intersects(
             { startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 },
             { startRow: 1, endRow: 2, startColumn: 1, endColumn: 2 }
@@ -176,7 +180,7 @@ describe('FUniver integration', () => {
             id: TEST_MUTATION_ID,
             type: CommandType.MUTATION,
             handler: (_accessor, params?: { label: string }) => {
-                executed.push(params?.label ?? 'mutation');
+                executed.push(params ? params.label : 'mutation');
                 return true;
             },
         } as ICommand<{ label: string }, boolean>);
@@ -254,12 +258,12 @@ describe('FUniver integration', () => {
         commandService.registerCommand({
             id: 'facade.hook.command',
             type: CommandType.COMMAND,
-            handler: (_accessor, params?: { value: string }) => params?.value === 'ok',
+            handler: (_accessor, params?: { value: string }) => params ? params.value === 'ok' : false,
         } as ICommand<{ value: string }, boolean>);
 
         const hookEvents: string[] = [];
-        const beforeDisposable = extendedAPI.onBeforeCommandExecute((command, options) => hookEvents.push(`before:${command.id}:${options?.fromCollab}`));
-        const afterDisposable = extendedAPI.onCommandExecuted((command, options) => hookEvents.push(`after:${command.id}:${options?.fromCollab}`));
+        const beforeDisposable = extendedAPI.onBeforeCommandExecute((command, options) => hookEvents.push(`before:${command.id}:${options ? options.fromCollab : undefined}`));
+        const afterDisposable = extendedAPI.onCommandExecuted((command, options) => hookEvents.push(`after:${command.id}:${options ? options.fromCollab : undefined}`));
 
         await expect(extendedAPI.executeCommand('facade.hook.command', { value: 'ok' }, { fromCollab: true })).resolves.toBe(true);
         expect(extendedAPI.syncExecuteCommand('facade.hook.command', { value: 'ok' }, { fromCollab: false })).toBe(true);
@@ -273,7 +277,11 @@ describe('FUniver integration', () => {
         extendedAPI.loadLocales('frFR', { facade: { hello: 'Bonjour {0}' } } as never);
         extendedAPI.setLocale('frFR');
         expect(extendedAPI.getCurrentLocale()).toBe('frFR');
-        expect((extendedAPI.getLocales()?.facade as { hello: string }).hello).toBe('Bonjour {0}');
+        const locales = extendedAPI.getLocales();
+        if (!locales) {
+            throw new Error('Expected loaded facade locales to be available.');
+        }
+        expect((locales.facade as { hello: string }).hello).toBe('Bonjour {0}');
 
         expect(() => extendedAPI.addEvent('' as never, () => {})).toThrow('Cannot add empty event');
         expect(extendedAPI.fireEvent(extendedAPI.Event.CommandExecuted, { id: 'manual', type: CommandType.COMMAND, params: undefined })).toBeUndefined();

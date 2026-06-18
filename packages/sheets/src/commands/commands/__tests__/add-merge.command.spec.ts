@@ -153,6 +153,20 @@ describe('add-merge-command', () => {
     let injector: Injector;
     let commandService: ICommandService;
 
+    function getWorksheet(getter: Injector['get'] = get) {
+        const workbook = getter(IUniverInstanceService).getUniverSheetInstance('test');
+        if (!workbook) {
+            throw new Error('Expected workbook test to exist.');
+        }
+
+        const worksheet = workbook.getSheetBySheetId('sheet1');
+        if (!worksheet) {
+            throw new Error('Expected worksheet sheet1 to exist.');
+        }
+
+        return worksheet;
+    }
+
     beforeEach(() => {
         const testBed = createCommandTestBed(WORKBOOK_DATA_DEMO, [
             [IConfirmService, { useClass: TestConfirmService }],
@@ -197,8 +211,8 @@ describe('add-merge-command', () => {
             })
         ).toBeTruthy();
 
-        const worksheet = get(IUniverInstanceService)?.getUniverSheetInstance('test')?.getSheetBySheetId('sheet1');
-        const mergeData = worksheet?.getConfig().mergeData;
+        const worksheet = getWorksheet();
+        const mergeData = worksheet.getConfig().mergeData;
         const { startRow, startColumn, endColumn, endRow } = mergeData![0];
         expect({
             startRow,
@@ -223,8 +237,10 @@ describe('add-merge-command', () => {
             endRow: 3,
             endColumn: 5,
         });
-        expect(worksheet?.getCell(1, 5)?.v).toBe(3);
-        expect(worksheet?.getCell(2, 5)?.v ?? null).toBeNull();
+        const keptCell = worksheet.getCell(1, 5);
+        const clearedCell = worksheet.getCell(2, 5);
+        expect(keptCell && keptCell.v).toBe(3);
+        expect(clearedCell && clearedCell.v ? clearedCell.v : null).toBeNull();
     });
 
     it('keeps existing cells unchanged when the user cancels merging cells with content', async () => {
@@ -247,9 +263,11 @@ describe('add-merge-command', () => {
             defaultMerge: false,
         })).resolves.toBe(false);
 
-        const worksheet = localGet(IUniverInstanceService)?.getUniverSheetInstance('test')?.getSheetBySheetId('sheet1');
-        expect(worksheet?.getCell(1, 5)?.v).toBe(3);
-        expect(worksheet?.getCell(2, 5)?.v).toBe(1);
+        const worksheet = getWorksheet(localGet);
+        const firstCell = worksheet.getCell(1, 5);
+        const secondCell = worksheet.getCell(2, 5);
+        expect(firstCell && firstCell.v).toBe(3);
+        expect(secondCell && secondCell.v).toBe(1);
 
         testBed.univer.dispose();
     });
@@ -268,7 +286,7 @@ describe('add-merge-command', () => {
 
     it('merges current selections through all, vertical, and horizontal commands', async () => {
         const selectionManagerService = get(SheetsSelectionsService);
-        const worksheet = get(IUniverInstanceService)?.getUniverSheetInstance('test')?.getSheetBySheetId('sheet1')!;
+        const worksheet = getWorksheet();
 
         selectionManagerService.setSelections([
             {
@@ -304,7 +322,7 @@ describe('add-merge-command', () => {
     });
 
     it('force merges through facade utility after removing overlapping merged cells', async () => {
-        const worksheet = get(IUniverInstanceService)?.getUniverSheetInstance('test')?.getSheetBySheetId('sheet1')!;
+        const worksheet = getWorksheet();
         const ranges = [{ startRow: 0, endRow: 1, startColumn: 0, endColumn: 8 }];
 
         expect(() => addMergeCellsUtil(injector, 'test', 'sheet1', ranges)).toThrow(/overlap/);

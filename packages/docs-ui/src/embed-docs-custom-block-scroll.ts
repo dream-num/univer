@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-export function scrollDocsTableLikeCustomBlockLive(event: WheelEvent, live: HTMLElement): boolean {
+export interface DocsTableLikeCustomBlockScrollOptions {
+    maxScrollLeft?: number;
+}
+
+export function scrollDocsTableLikeCustomBlockLive(event: WheelEvent, live: HTMLElement, options: DocsTableLikeCustomBlockScrollOptions = {}): boolean {
     if (event.defaultPrevented || event.ctrlKey || event.metaKey) {
         return false;
     }
@@ -23,9 +27,10 @@ export function scrollDocsTableLikeCustomBlockLive(event: WheelEvent, live: HTML
     const deltaY = event.shiftKey ? 0 : event.deltaY;
     const previousLeft = live.scrollLeft;
     const previousTop = live.scrollTop;
+    const maxScrollLeft = resolveMaxScrollLeft(live, options.maxScrollLeft);
 
-    if (deltaX && canScrollX(live, deltaX)) {
-        live.scrollLeft = clampScroll(previousLeft + deltaX, 0, live.scrollWidth - live.clientWidth);
+    if (deltaX && canScrollX(live, deltaX, maxScrollLeft)) {
+        live.scrollLeft = clampScroll(previousLeft + deltaX, 0, maxScrollLeft);
     }
 
     if (deltaY && canScrollY(live, deltaY)) {
@@ -35,9 +40,9 @@ export function scrollDocsTableLikeCustomBlockLive(event: WheelEvent, live: HTML
     return live.scrollLeft !== previousLeft || live.scrollTop !== previousTop;
 }
 
-function canScrollX(element: HTMLElement, deltaX: number): boolean {
+function canScrollX(element: HTMLElement, deltaX: number, maxScrollLeft: number): boolean {
     return element.scrollWidth > element.clientWidth &&
-        (deltaX < 0 ? element.scrollLeft > 0 : element.scrollLeft + element.clientWidth < element.scrollWidth);
+        (deltaX < 0 ? element.scrollLeft > 0 : element.scrollLeft < maxScrollLeft);
 }
 
 function canScrollY(element: HTMLElement, deltaY: number): boolean {
@@ -47,4 +52,13 @@ function canScrollY(element: HTMLElement, deltaY: number): boolean {
 
 function clampScroll(value: number, min: number, max: number): number {
     return Math.max(min, Math.min(max, value));
+}
+
+function resolveMaxScrollLeft(element: HTMLElement, requestedMaxScrollLeft: number | undefined): number {
+    const nativeMaxScrollLeft = Math.max(0, element.scrollWidth - element.clientWidth);
+    if (!Number.isFinite(requestedMaxScrollLeft)) {
+        return nativeMaxScrollLeft;
+    }
+
+    return clampScroll(requestedMaxScrollLeft ?? nativeMaxScrollLeft, 0, nativeMaxScrollLeft);
 }

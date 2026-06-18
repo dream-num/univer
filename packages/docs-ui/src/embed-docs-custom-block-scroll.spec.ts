@@ -43,6 +43,28 @@ describe('scrollDocsTableLikeCustomBlockLive', () => {
         expect(live.scrollTop).toBe(0);
     });
 
+    it('caps the outer horizontal scroll at the allowed left bleed boundary', () => {
+        const live = createScrollableElement({
+            clientWidth: 300,
+            scrollWidth: 900,
+            scrollLeft: 250,
+        });
+
+        const handled = scrollDocsTableLikeCustomBlockLive(createWheelEvent({ deltaX: 300 }), live, {
+            maxScrollLeft: 310,
+        });
+
+        expect(handled).toBe(true);
+        expect(live.scrollLeft).toBe(310);
+
+        const chained = scrollDocsTableLikeCustomBlockLive(createWheelEvent({ deltaX: 10 }), live, {
+            maxScrollLeft: 310,
+        });
+
+        expect(chained).toBe(false);
+        expect(live.scrollLeft).toBe(310);
+    });
+
     it('chains vertical wheel to docs when the block cannot scroll further', () => {
         const live = createScrollableElement({
             clientHeight: 300,

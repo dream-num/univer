@@ -871,6 +871,50 @@ describe('SheetsThreadCommentPanel', () => {
         expect(TestState.shapes).toHaveLength(0);
     });
 
+    it('shows only resolved threads in the resolved filter and clears the active comment when one is clicked', async () => {
+        const testBed = createTestBed();
+        univer = testBed.univer;
+        testBed.threadCommentModel.addComment(unitId, sheet1, createComment('open-thread', sheet1, 'B2', 'Open thread'));
+        testBed.threadCommentModel.addComment(unitId, sheet1, createComment('resolved-thread', sheet1, 'C3', 'Resolved thread', true));
+        testBed.panelService.setActiveComment({
+            unitId,
+            subUnitId: sheet1,
+            commentId: 'open-thread',
+            trigger: 'cell',
+        });
+
+        const rendered = renderPanel(testBed.injector);
+        root = rendered.root;
+        container = rendered.container;
+
+        await act(async () => {
+            container!.querySelectorAll('[data-u-comp="select"]')[1].dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0 }));
+            await Promise.resolve();
+        });
+
+        const resolvedOption = Array.from(document.querySelectorAll('[data-slot="dropdown-menu-radio-item"]'))
+            .find((button) => button.textContent === 'Resolved');
+
+        expect(resolvedOption).toBeDefined();
+
+        await act(async () => {
+            resolvedOption!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            await Promise.resolve();
+        });
+
+        expect(container.textContent).toContain('Resolved thread');
+        expect(container.textContent).not.toContain('Open thread');
+
+        const resolvedThread = container.querySelector(`#PANEL-${unitId}-${sheet1}-resolved-thread`);
+        expect(resolvedThread).toBeInstanceOf(HTMLElement);
+
+        act(() => {
+            resolvedThread!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        });
+
+        expect(testBed.panelService.activeCommentId).toBeUndefined();
+    });
+
     it('opens the add-comment popup at the active sheet cell from the empty panel action', () => {
         const testBed = createTestBed();
         univer = testBed.univer;

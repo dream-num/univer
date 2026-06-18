@@ -54,6 +54,7 @@ import {
     SetSheetTableMutation,
     SheetsTableSortStateEnum,
     SheetTableInsertColumnAtCommand,
+    SheetTableRemoveColumnAtCommand,
     SheetTableService,
     TABLE_FILTER_EMPTY_VALUE,
     TableColumnFilterTypeEnum,
@@ -566,6 +567,7 @@ function createTestBed(): ITestBed {
         AddTableThemeCommand,
         RemoveTableThemeCommand,
         SheetTableInsertColumnAtCommand,
+        SheetTableRemoveColumnAtCommand,
     ].forEach((command) => {
         commandService.registerCommand(command);
     });
@@ -1211,6 +1213,35 @@ describe('sheet table view components', () => {
             startColumn: 0,
             endColumn: 2,
         });
+        expect(componentController.closeCount).toBe(1);
+    });
+
+    it('deletes the current table column from the filter panel column menu', async () => {
+        testBed = createTestBed();
+        const unitId = testBed.workbook.getUnitId();
+        const componentController = testBed.injector.get(SheetsTableComponentController) as TestComponentController;
+        componentController.setCurrentTableFilterInfo({
+            unitId,
+            subUnitId: 'sheet1',
+            tableId: 'table-orders',
+            row: 0,
+            column: 1,
+        });
+        const rendered = renderWithRediContext(testBed, <SheetTableFilterPanel />);
+        root = rendered.root;
+        container = rendered.container;
+
+        clickButtonByText(container, 'Delete table column');
+        await flushCommands();
+
+        const table = testBed.injector.get(TableManager).getTable(unitId, 'table-orders')!;
+        expect(table.getRange()).toEqual({
+            startRow: 0,
+            endRow: 3,
+            startColumn: 0,
+            endColumn: 0,
+        });
+        expect(table.getTableInfo().columns.map((column) => column.displayName)).toEqual(['Product']);
         expect(componentController.closeCount).toBe(1);
     });
 

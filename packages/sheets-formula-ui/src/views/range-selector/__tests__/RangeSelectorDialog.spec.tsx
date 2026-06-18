@@ -371,6 +371,43 @@ describe('RangeSelectorDialog', () => {
         expect(RangeDialogState.closed).toBe(0);
     });
 
+    it('does not append a duplicate range when the sheet selection matches a typed range', async () => {
+        const injector = createRangeDialogTestBed();
+        renderRangeDialog(root, injector);
+
+        const firstInput = document.body.querySelector('input') as HTMLInputElement;
+        expect(firstInput).toBeDefined();
+
+        await act(async () => {
+            writeInput(firstInput, 'A1:B2');
+            await Promise.resolve();
+        });
+
+        await emitSelection(injector, {
+            startRow: 0,
+            endRow: 1,
+            startColumn: 0,
+            endColumn: 1,
+            rangeType: RANGE_TYPE.NORMAL,
+        });
+
+        const inputs = Array.from(document.body.querySelectorAll('input')) as HTMLInputElement[];
+        expect(inputs.map((input) => input.value)).toEqual(['A1:B2']);
+
+        await clickButton('Confirm');
+
+        expect(RangeDialogState.confirmed).toEqual([[
+            expect.objectContaining({
+                range: expect.objectContaining({
+                    startRow: 0,
+                    endRow: 1,
+                    startColumn: 0,
+                    endColumn: 1,
+                }),
+            }),
+        ]]);
+    });
+
     it('confirms only the first ranges from a multi-range sheet selection when capped', async () => {
         const injector = createRangeDialogTestBed();
         act(() => {

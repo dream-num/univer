@@ -403,6 +403,24 @@ describe('DocDrawingTextWrap', () => {
         });
     });
 
+    it('disables side distance controls when text only wraps above and below the drawing', async () => {
+        currentTestBed = createPanelTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        renderPanel(root, currentTestBed);
+
+        await act(async () => {
+            inputByLabelText('Top and Bottom').click();
+            await Promise.resolve();
+        });
+
+        expect(inputInField('Top(px)').disabled).toBe(false);
+        expect(inputInField('Bottom(px)').disabled).toBe(false);
+        expect(inputInField('Left(px)').disabled).toBe(true);
+        expect(inputInField('Right(px)').disabled).toBe(true);
+    });
+
     it('persists right-only text wrapping on the focused drawing', async () => {
         currentTestBed = createPanelTestBed();
         container = document.createElement('div');

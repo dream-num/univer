@@ -68,14 +68,15 @@ async function generateLocales() {
     writeJsonFileSync(path.resolve(__dirname, '../package.json'), pkgJsonFile);
 
     discoverUniverUiLocales({ rootDir: root }).forEach((locale) => {
-        let statements = '/* eslint-disable */\n' + 'import { mergeLocales } from \'@univerjs/core\';\n\n';
+        let statements = '/* eslint-disable */\n';
 
         packageNames.forEach((pkg) => {
             const pkgName = pkg.replace(/@|univerjs|\/|-/g, '');
             statements += `import ${pkgName}Locale from '${pkg}/locale/${locale}';\n`;
         });
 
-        statements += '\nexport default mergeLocales(\n';
+        statements += '\nexport default Object.assign(\n';
+        statements += '    {},\n';
 
         packageNames.forEach((pkg) => {
             const pkgName = pkg.replace(/@|univerjs|\/|-/g, '');

@@ -207,6 +207,47 @@ describe('DataValidationOptions', () => {
         expect(container.querySelector<HTMLInputElement>('[data-u-comp="input"] input')?.value).toBe('Keep this instruction');
     });
 
+    it('keeps edited invalid-data options after the options section is collapsed and reopened', async () => {
+        currentTestBed = createOptionsTestBed();
+        const changes: IDataValidationRuleOptions[] = [];
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <OptionsHarness
+                        initialValue={{
+                            errorStyle: DataValidationErrorStyle.STOP,
+                            showErrorMessage: true,
+                            error: 'Initial instruction',
+                        }}
+                        changes={changes}
+                    />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        const optionsToggle = container.firstElementChild as HTMLElement;
+        await clickElement(optionsToggle);
+
+        await changeInputValue(container.querySelector<HTMLInputElement>('[data-u-comp="input"] input')!, 'Updated instruction');
+        expect(changes.at(-1)).toEqual({
+            errorStyle: DataValidationErrorStyle.STOP,
+            showErrorMessage: true,
+            error: 'Updated instruction',
+        });
+
+        await clickElement(optionsToggle);
+        expect(container.querySelector<HTMLInputElement>('[data-u-comp="input"] input')).toBeNull();
+
+        await clickElement(optionsToggle);
+
+        expect(container.querySelector<HTMLInputElement>('[data-u-comp="input"] input')?.value).toBe('Updated instruction');
+    });
+
     it('saves list render mode changes from the registered extra options component', async () => {
         currentTestBed = createOptionsTestBed();
         currentTestBed.injector

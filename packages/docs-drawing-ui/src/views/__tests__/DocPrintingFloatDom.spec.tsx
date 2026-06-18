@@ -166,4 +166,33 @@ describe('DocPrintingFloatDom', () => {
         expect(root.textContent).not.toContain('Before scrolled viewport');
         expect(root.textContent).not.toContain('Below scaled page');
     });
+
+    it('prints floating DOM content that partially intersects the page edge', () => {
+        currentTestBed = createDocUiTestBed(createDocData(), [
+            [ComponentManager],
+        ]);
+        currentTestBed.injector.get(ComponentManager).register(PRINTING_COMPONENT_KEY, PrintingVisibleContent);
+
+        root = document.createElement('div');
+        document.body.appendChild(root);
+
+        act(() => {
+            disposePrinting = mountDocPrintingFloatDom({
+                floatDomInfos: [
+                    createFloatDom('partially-visible-left', 'Partially visible on left edge', { left: -20, top: 10, right: 20, bottom: 40 }),
+                    createFloatDom('partially-visible-bottom', 'Partially visible on bottom edge', { left: 40, top: 80, right: 80, bottom: 120 }),
+                    createFloatDom('fully-before-page', 'Fully before printable page', { left: -60, top: 10, right: -10, bottom: 40 }),
+                ],
+                scene: new TestScene() as unknown as Scene,
+                skeleton: {} as never,
+                unitId: UNIT_ID,
+                offset: { x: 0, y: 0 },
+                bound: { left: 0, top: 0, right: 200, bottom: 100 },
+            }, root!, currentTestBed!.injector);
+        });
+
+        expect(root.textContent).toContain('Partially visible on left edge');
+        expect(root.textContent).toContain('Partially visible on bottom edge');
+        expect(root.textContent).not.toContain('Fully before printable page');
+    });
 });

@@ -23,7 +23,7 @@ import { useDependency } from '@univerjs/ui';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-ratio.operation';
 
-const DOCS_CUSTOM_BLOCK_VIEWPORT_INSET = 20;
+const DOCS_CUSTOM_BLOCK_VIEWPORT_INSET = 10;
 
 interface DocsCustomBlockBleedViewport {
     bleedLeft: number;

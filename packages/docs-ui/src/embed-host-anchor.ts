@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDocDrawingBase, IMutationInfo, JSONXActions, Serializable } from '@univerjs/core';
+import type { IDocDrawingBase, IMutationInfo, JSONXActions, Nullable, Serializable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { DocumentFlavor, DrawingTypeEnum, JSONX, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, TextX, TextXActionType, UniverInstanceType } from '@univerjs/core';
 import { RichTextEditingMutation } from '@univerjs/docs';
@@ -48,10 +48,15 @@ export interface EmbedDocsCustomBlockData {
 const DEFAULT_CUSTOM_BLOCK_SIZE = { width: 720, height: 360 };
 const SHEET_LIKE_CUSTOM_BLOCK_SIZE = { width: 960, height: 480 };
 const SLIDE_CUSTOM_BLOCK_SIZE = { width: 720, height: 405 };
-const MODERN_DOCS_CUSTOM_BLOCK_VIEWPORT_INSET = 20;
+const SHEET_CUSTOM_BLOCK_COLUMN_HEADER_HEIGHT = 24;
+const BASE_CUSTOM_BLOCK_GRID_HEADER_HEIGHT = 40;
+const BASE_CUSTOM_BLOCK_GRID_SUMMARY_HEIGHT = 42;
+const BASE_CUSTOM_BLOCK_GRID_ADD_RECORD_ROW_HEIGHT = 34;
+const MODERN_DOCS_CUSTOM_BLOCK_VIEWPORT_INSET = 10;
 
 export interface DocsCustomBlockRenderViewportParams {
     childType?: UniverInstanceType;
+    contentHeight?: number;
     docsLeft?: number;
     documentFlavor?: DocumentFlavor;
     fallbackHeight?: number;
@@ -60,6 +65,7 @@ export interface DocsCustomBlockRenderViewportParams {
     pageMarginRight?: number;
     pageWidth?: number;
     scale?: number;
+    visibleCanvasHeight?: number;
     visibleCanvasLeft?: number;
     visibleCanvasWidth?: number;
 }
@@ -71,6 +77,25 @@ export interface DocsCustomBlockRenderViewport {
     layoutWidth?: number;
     offsetLeft?: number;
     width: number;
+}
+
+interface BaseLikeTableSnapshot {
+    deleted?: boolean;
+    recordOrder?: string[];
+    records?: Record<string, { deleted?: boolean }>;
+    viewOrder?: string[];
+    views?: Record<string, BaseLikeViewSnapshot>;
+}
+
+interface BaseLikeViewSnapshot {
+    deleted?: boolean;
+    type?: string;
+    config?: Record<string, unknown>;
+}
+
+interface BaseLikeSnapshot {
+    tableOrder?: string[];
+    tables?: Record<string, BaseLikeTableSnapshot>;
 }
 
 export function createDocsCustomBlockInsertMutation(params: DocsCustomBlockMutationParams): IMutationInfo<IRichTextEditingMutationParams> {
@@ -183,14 +208,38 @@ export function isSheetLikeDocsCustomBlockChildType(childType?: UniverInstanceTy
     return childType === UniverInstanceType.UNIVER_SHEET || childType === UniverInstanceType.UNIVER_BASE;
 }
 
+export function resolveDocsCustomBlockContentHeight(params: {
+    childType?: UniverInstanceType;
+    childUnit?: unknown;
+    fallbackHeight?: number;
+}): number | undefined {
+    if (params.childType === UniverInstanceType.UNIVER_SHEET) {
+        return resolveSheetDocsCustomBlockContentHeight(params.childUnit) ?? params.fallbackHeight;
+    }
+
+    if (params.childType === UniverInstanceType.UNIVER_BASE) {
+        return resolveBaseDocsCustomBlockContentHeight(params.childUnit) ?? params.fallbackHeight;
+    }
+
+    return params.fallbackHeight;
+}
+
 export function resolveDocsCustomBlockRenderViewport(params: DocsCustomBlockRenderViewportParams): DocsCustomBlockRenderViewport {
     const defaultSize = resolveDocsCustomBlockSize(params.childType);
     const fallbackWidth = params.fallbackWidth ?? defaultSize.width;
     const fallbackHeight = params.fallbackHeight ?? defaultSize.height;
+    const sheetLike = isSheetLikeDocsCustomBlockChildType(params.childType);
+    const contentHeight = Number.isFinite(params.contentHeight) && (params.contentHeight ?? 0) > 0
+        ? params.contentHeight!
+        : fallbackHeight;
+    const visibleCanvasHeight = Number.isFinite(params.visibleCanvasHeight) && (params.visibleCanvasHeight ?? 0) > 0
+        ? params.visibleCanvasHeight!
+        : undefined;
+    const height = sheetLike && visibleCanvasHeight != null ? Math.min(contentHeight, visibleCanvasHeight) : (sheetLike ? contentHeight : fallbackHeight);
 
-    if (!isSheetLikeDocsCustomBlockChildType(params.childType)) {
+    if (!sheetLike) {
         return {
-            height: fallbackHeight,
+            height,
             width: fallbackWidth,
         };
     }
@@ -205,7 +254,7 @@ export function resolveDocsCustomBlockRenderViewport(params: DocsCustomBlockRend
     if (params.documentFlavor !== DocumentFlavor.MODERN || !Number.isFinite(pageWidth)) {
         const layoutWidth = Math.min(fallbackWidth, pageContentWidth || fallbackWidth);
         return {
-            height: fallbackHeight,
+            height,
             layoutWidth,
             offsetLeft: 0,
             width: layoutWidth,
@@ -230,11 +279,130 @@ export function resolveDocsCustomBlockRenderViewport(params: DocsCustomBlockRend
     return {
         bleedLeft: leadingInsetLeft,
         bleedWidth: viewportWidth,
-        height: fallbackHeight,
+        height,
         layoutWidth,
         offsetLeft: 0,
         width: layoutWidth,
     };
+}
+
+function resolveSheetDocsCustomBlockContentHeight(childUnit: unknown): number | undefined {
+    const workbook = childUnit as Nullable<{
+        getActiveSheet?: (allowNull?: true) => Nullable<{
+            getConfig?: () => { columnHeader?: { height?: number; hidden?: number } };
+            getRowCount?: () => number;
+            getRowHeight?: (row: number) => number;
+            getRowVisible?: (row: number) => boolean;
+        }>;
+    }>;
+    const worksheet = workbook?.getActiveSheet?.(true);
+    if (!worksheet) {
+        return undefined;
+    }
+
+    const rowCount = worksheet.getRowCount?.();
+    if (!Number.isFinite(rowCount) || rowCount == null || rowCount < 0) {
+        return undefined;
+    }
+
+    const columnHeader = worksheet.getConfig?.()?.columnHeader;
+    const headerHeight = columnHeader?.hidden
+        ? 0
+        : normalizePositiveNumber(columnHeader?.height, SHEET_CUSTOM_BLOCK_COLUMN_HEADER_HEIGHT);
+    let rowHeight = 0;
+
+    for (let row = 0; row < rowCount; row++) {
+        if (worksheet.getRowVisible?.(row) === false) {
+            continue;
+        }
+        rowHeight += normalizeNonNegativeNumber(worksheet.getRowHeight?.(row), 0);
+    }
+
+    return headerHeight + rowHeight;
+}
+
+function resolveBaseDocsCustomBlockContentHeight(childUnit: unknown): number | undefined {
+    const snapshot = (childUnit as Nullable<{ getSnapshot?: () => unknown }>)?.getSnapshot?.() as Nullable<BaseLikeSnapshot>;
+    const tables = snapshot?.tables;
+    if (!tables) {
+        return undefined;
+    }
+
+    const table = findFirstVisibleBaseTable(snapshot);
+    if (!table) {
+        return undefined;
+    }
+
+    const view = findFirstVisibleBaseView(table);
+    const rowCount = getVisibleBaseRecordCount(table);
+    const rowHeight = resolveBaseGridRowHeight(view?.config?.rowHeight);
+
+    return BASE_CUSTOM_BLOCK_GRID_HEADER_HEIGHT +
+        rowCount * rowHeight +
+        BASE_CUSTOM_BLOCK_GRID_ADD_RECORD_ROW_HEIGHT +
+        BASE_CUSTOM_BLOCK_GRID_SUMMARY_HEIGHT;
+}
+
+function findFirstVisibleBaseTable(snapshot: {
+    tableOrder?: string[];
+    tables?: Record<string, BaseLikeTableSnapshot>;
+}): BaseLikeTableSnapshot | undefined {
+    const tables = snapshot.tables ?? {};
+    const orderedIds = [
+        ...(snapshot.tableOrder ?? []),
+        ...Object.keys(tables).filter((tableId) => !(snapshot.tableOrder ?? []).includes(tableId)),
+    ];
+
+    return orderedIds
+        .map((tableId) => tables[tableId])
+        .find((table) => table && !table.deleted);
+}
+
+function findFirstVisibleBaseView(table: {
+    viewOrder?: string[];
+    views?: Record<string, BaseLikeViewSnapshot>;
+}): BaseLikeViewSnapshot | undefined {
+    const views = table.views ?? {};
+    const orderedIds = [
+        ...(table.viewOrder ?? []),
+        ...Object.keys(views).filter((viewId) => !(table.viewOrder ?? []).includes(viewId)),
+    ];
+
+    return orderedIds
+        .map((viewId) => views[viewId])
+        .find((view) => view && !view.deleted);
+}
+
+function getVisibleBaseRecordCount(table: {
+    recordOrder?: string[];
+    records?: Record<string, { deleted?: boolean }>;
+}): number {
+    const records = table.records ?? {};
+    const orderedIds = table.recordOrder?.length ? table.recordOrder : Object.keys(records);
+
+    return orderedIds.filter((recordId) => !records[recordId]?.deleted).length;
+}
+
+function resolveBaseGridRowHeight(rowHeight?: unknown): number {
+    switch (rowHeight) {
+        case 'short':
+            return 32;
+        case 'tall':
+            return 56;
+        case 'extraTall':
+            return 72;
+        case 'medium':
+        default:
+            return 42;
+    }
+}
+
+function normalizePositiveNumber(value: unknown, fallback: number): number {
+    return typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : fallback;
+}
+
+function normalizeNonNegativeNumber(value: unknown, fallback: number): number {
+    return typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value : fallback;
 }
 
 export function createEmbedDocsCustomBlockData(params: {

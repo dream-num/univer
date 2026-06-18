@@ -16,7 +16,7 @@
 
 import { DocumentFlavor, UniverInstanceType } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
-import { createDocsCustomBlockDrawing, resolveDocsCustomBlockRenderViewport, resolveDocsCustomBlockSize, shouldUseInlineTextSelectionForDocsCustomBlockDrawing } from './embed-host-anchor';
+import { createDocsCustomBlockDrawing, resolveDocsCustomBlockContentHeight, resolveDocsCustomBlockRenderViewport, resolveDocsCustomBlockSize, shouldUseInlineTextSelectionForDocsCustomBlockDrawing } from './embed-host-anchor';
 
 describe('resolveDocsCustomBlockSize', () => {
     it('uses a taller default size for docs custom blocks', () => {
@@ -74,9 +74,11 @@ describe('resolveDocsCustomBlockRenderViewport', () => {
     it('keeps non sheet-like custom blocks at their fallback size', () => {
         expect(resolveDocsCustomBlockRenderViewport({
             childType: UniverInstanceType.UNIVER_DOC,
+            contentHeight: 1200,
             documentFlavor: DocumentFlavor.MODERN,
             fallbackHeight: 360,
             fallbackWidth: 720,
+            visibleCanvasHeight: 900,
             pageMarginLeft: 96,
             pageMarginRight: 96,
             pageWidth: 1200,
@@ -99,13 +101,51 @@ describe('resolveDocsCustomBlockRenderViewport', () => {
             visibleCanvasLeft: 0,
             visibleCanvasWidth: 1440,
         })).toEqual({
-            bleedLeft: 196,
-            bleedWidth: 1400,
+            bleedLeft: 206,
+            bleedWidth: 1420,
             height: 480,
             layoutWidth: 960,
             offsetLeft: 0,
             width: 960,
         });
+    });
+
+    it('uses actual table height until it exceeds the docs viewport height', () => {
+        expect(resolveDocsCustomBlockRenderViewport({
+            childType: UniverInstanceType.UNIVER_BASE,
+            contentHeight: 720,
+            docsLeft: 120,
+            documentFlavor: DocumentFlavor.MODERN,
+            fallbackHeight: 480,
+            fallbackWidth: 960,
+            pageMarginLeft: 96,
+            pageMarginRight: 96,
+            pageWidth: 1200,
+            scale: 1,
+            visibleCanvasHeight: 900,
+            visibleCanvasLeft: 0,
+            visibleCanvasWidth: 1440,
+        })).toEqual(expect.objectContaining({
+            height: 720,
+        }));
+
+        expect(resolveDocsCustomBlockRenderViewport({
+            childType: UniverInstanceType.UNIVER_BASE,
+            contentHeight: 1200,
+            docsLeft: 120,
+            documentFlavor: DocumentFlavor.MODERN,
+            fallbackHeight: 480,
+            fallbackWidth: 960,
+            pageMarginLeft: 96,
+            pageMarginRight: 96,
+            pageWidth: 1200,
+            scale: 1,
+            visibleCanvasHeight: 900,
+            visibleCanvasLeft: 0,
+            visibleCanvasWidth: 1440,
+        })).toEqual(expect.objectContaining({
+            height: 900,
+        }));
     });
 
     it('falls back to page content width outside modern docs', () => {
@@ -123,5 +163,53 @@ describe('resolveDocsCustomBlockRenderViewport', () => {
             offsetLeft: 0,
             width: 600,
         });
+    });
+});
+
+describe('resolveDocsCustomBlockContentHeight', () => {
+    it('measures sheet content from active worksheet row heights', () => {
+        const height = resolveDocsCustomBlockContentHeight({
+            childType: UniverInstanceType.UNIVER_SHEET,
+            childUnit: {
+                getActiveSheet: () => ({
+                    getRowCount: () => 4,
+                    getRowHeight: (row: number) => [24, 40, 0, 32][row] ?? 24,
+                }),
+            },
+        });
+
+        expect(height).toBe(120);
+    });
+
+    it('measures base grid content from active table view and record order', () => {
+        const height = resolveDocsCustomBlockContentHeight({
+            childType: UniverInstanceType.UNIVER_BASE,
+            childUnit: {
+                getSnapshot: () => ({
+                    tableOrder: ['table-1'],
+                    tables: {
+                        'table-1': {
+                            deleted: false,
+                            recordOrder: ['record-1', 'record-2', 'record-3'],
+                            records: {
+                                'record-1': {},
+                                'record-2': {},
+                                'record-3': { deleted: true },
+                            },
+                            viewOrder: ['view-1'],
+                            views: {
+                                'view-1': {
+                                    deleted: false,
+                                    type: 'grid',
+                                    config: { rowHeight: 'tall' },
+                                },
+                            },
+                        },
+                    },
+                }),
+            },
+        });
+
+        expect(height).toBe(228);
     });
 });

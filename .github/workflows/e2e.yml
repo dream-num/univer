@@ -36,6 +36,8 @@ jobs:
 
         env:
             GH_TOKEN: ${{ github.token }}
+            TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+            TURBO_TEAM: ${{ vars.TURBO_TEAM }}
 
         steps:
             - name: Checkout
@@ -52,11 +54,22 @@ jobs:
                   path: ~/.cache/ms-playwright
                   key: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
 
+            - name: Restore Turborepo cache
+              uses: actions/cache@v4
+              with:
+                  path: .turbo/cache
+                  key: ${{ runner.os }}-turbo-e2e-${{ github.sha }}
+                  restore-keys: |
+                      ${{ runner.os }}-turbo-e2e-
+
             - name: Install Playwright Browsers
               run: pnpm exec playwright install --with-deps chromium
 
             - name: Build E2E Client
               run: pnpm build:e2e
+
+            - name: Build Presets UMD
+              run: pnpm build:e2e:presets-umd
 
             - name: Run Playwright Tests
               run: pnpm exec playwright test --shard=${{ matrix.shard-index }}/${{ matrix.shard-total }}

@@ -37,43 +37,63 @@ interface ICustomEventParamConfig {
 }
 
 export function customRegisterEvent(univer: Univer, univerAPI: FUniver) {
+    const disposableCollection = new DisposableCollection();
+    const pendingTimers = new Set<ReturnType<typeof setTimeout>>();
+
+    const scheduleTimer = (callback: () => void, delay: number) => {
+        const timer = setTimeout(() => {
+            pendingTimers.delete(timer);
+            callback();
+        }, delay);
+        pendingTimers.add(timer);
+    };
+
     registerMainRightClickEvent(univer, univerAPI);
 
-    univerAPI.addEvent(univerAPI.Event.LifeCycleChanged, ({ stage }) => {
-        if (stage === univerAPI.Enum.LifecycleStages.Steady) {
-            registerRemoveColumnEvent(univer, univerAPI);
-            registerBeforeRemoveColumnEvent(univer, univerAPI);
+    disposableCollection.add(
+        univerAPI.addEvent(univerAPI.Event.LifeCycleChanged, ({ stage }) => {
+            if (stage === univerAPI.Enum.LifecycleStages.Steady) {
+                registerRemoveColumnEvent(univer, univerAPI);
+                registerBeforeRemoveColumnEvent(univer, univerAPI);
 
-            univerAPI.addEvent('MainRightClickEvent', (params) => {
-                const { row, column } = params;
-                console.warn(`Right clicked on cell at ${univerAPI.Util.tools.chatAtABC(column as number)}${row as number + 1}`);
-                // If the cell is A1, do not show the context menu
-                if (row === 0 && column === 0) {
-                    params.cancel = true;
-                }
-            });
+                disposableCollection.add(univerAPI.addEvent('MainRightClickEvent', (params) => {
+                    const { row, column } = params;
+                    console.warn(`Right clicked on cell at ${univerAPI.Util.tools.chatAtABC(column as number)}${row as number + 1}`);
+                    // If the cell is A1, do not show the context menu
+                    if (row === 0 && column === 0) {
+                        params.cancel = true;
+                    }
+                }));
 
-            univerAPI.addEvent('RemoveColumnEvent', (params) => {
-                const { startColumn, endColumn } = params;
-                console.warn(`Removed columns from ${univerAPI.Util.tools.chatAtABC(startColumn)} to ${univerAPI.Util.tools.chatAtABC(endColumn)}`);
-            });
+                disposableCollection.add(univerAPI.addEvent('RemoveColumnEvent', (params) => {
+                    const { startColumn, endColumn } = params;
+                    console.warn(`Removed columns from ${univerAPI.Util.tools.chatAtABC(startColumn)} to ${univerAPI.Util.tools.chatAtABC(endColumn)}`);
+                }));
 
-            const beforeRemoveColumnEventDisposable = univerAPI.addEvent('BeforeRemoveColumnEvent', (params) => {
-                const { startColumn, endColumn } = params;
-                console.warn(`Before removing columns from ${univerAPI.Util.tools.chatAtABC(startColumn)} to ${univerAPI.Util.tools.chatAtABC(endColumn)}`);
-                // If the column to be deleted includes column C to E, prevent the deletion
-                if (!(startColumn > 4 || endColumn < 2)) {
-                    params.cancel = true;
-                    console.warn('Cannot delete column C to E');
-                }
-            });
+                const beforeRemoveColumnEventDisposable = univerAPI.addEvent('BeforeRemoveColumnEvent', (params) => {
+                    const { startColumn, endColumn } = params;
+                    console.warn(`Before removing columns from ${univerAPI.Util.tools.chatAtABC(startColumn)} to ${univerAPI.Util.tools.chatAtABC(endColumn)}`);
+                    // If the column to be deleted includes column C to E, prevent the deletion
+                    if (!(startColumn > 4 || endColumn < 2)) {
+                        params.cancel = true;
+                        console.warn('Cannot delete column C to E');
+                    }
+                });
+                disposableCollection.add(beforeRemoveColumnEventDisposable);
 
-            // Remove the BeforeRemoveColumnEvent listener after 10 seconds
-            setTimeout(() => {
-                beforeRemoveColumnEventDisposable.dispose();
-                console.warn('BeforeRemoveColumnEvent listener has been removed, you can delete any columns now.');
-            }, 10000);
-        }
+                // Remove the BeforeRemoveColumnEvent listener after 10 seconds
+                scheduleTimer(() => {
+                    beforeRemoveColumnEventDisposable.dispose();
+                    console.warn('BeforeRemoveColumnEvent listener has been removed, you can delete any columns now.');
+                }, 10000);
+            }
+        })
+    );
+
+    univer.onDispose(() => {
+        pendingTimers.forEach((timer) => clearTimeout(timer));
+        pendingTimers.clear();
+        disposableCollection.dispose();
     });
 }
 

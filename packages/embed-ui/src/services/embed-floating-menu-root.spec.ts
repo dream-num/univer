@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+/**
+ * @vitest-environment jsdom
+ */
+
 import { describe, expect, it } from 'vitest';
 import { resolveEmbedFloatingMenuRoot } from './embed-floating-menu-root';
 

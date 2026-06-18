@@ -46,6 +46,7 @@ describe('sheets embed floating menu', () => {
         expect(resolveSheetsFloatingMenuStage({
             embedId: 'embed-1',
             active: { hostUnitId: 'host-1', embedId: 'embed-1', childUnitId: 'child-1', stage: 'inactive' },
+            fullscreen: false,
             usesDomFloatingStage: false,
             renderScopeActive: true,
         })).toBe('stage2');
@@ -53,6 +54,17 @@ describe('sheets embed floating menu', () => {
         expect(resolveSheetsFloatingMenuStage({
             embedId: 'embed-1',
             active: { hostUnitId: 'host-1', embedId: 'embed-1', childUnitId: 'child-1', stage: 'stage2' },
+            fullscreen: false,
+            usesDomFloatingStage: true,
+            renderScopeActive: false,
+        })).toBe('stage2');
+    });
+
+    it('keeps the sheet floating toolbar visible in fullscreen sessions', () => {
+        expect(resolveSheetsFloatingMenuStage({
+            embedId: 'embed-1',
+            active: null,
+            fullscreen: true,
             usesDomFloatingStage: true,
             renderScopeActive: false,
         })).toBe('stage2');

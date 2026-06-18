@@ -15,6 +15,7 @@
  */
 
 import { ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType } from '@univerjs/core';
+import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import {
     IMoveInlineDrawingCommand,
@@ -257,5 +258,201 @@ describe('DocDrawingTransformerController business methods', () => {
             table,
             hostPage,
         });
+    });
+
+    it('limits page content size by the page containing the drawing and falls back when the skeleton is unavailable', () => {
+        const controller = createController();
+        controller._renderManagerService.getRenderById.mockReturnValue({
+            with: vi.fn(() => ({
+                getSkeleton: () => ({
+                    getSkeletonData: () => ({
+                        pages: [
+                            {
+                                pageWidth: 720,
+                                pageHeight: 960,
+                                marginLeft: 40,
+                                marginRight: 60,
+                                marginTop: 50,
+                                marginBottom: 70,
+                                skeDrawings: new Map([['drawing-1', {}]]),
+                            },
+                        ],
+                    }),
+                }),
+            })),
+        });
+
+        expect(controller._getPageContentSize(drawing())).toEqual({ width: 620, height: 840 });
+
+        controller._renderManagerService.getRenderById.mockReturnValue(null);
+        expect(controller._getPageContentSize(drawing())).toEqual({ width: 500, height: 500 });
+    });
+
+    it('creates and updates the inline anchor from resolved text range points', () => {
+        const controller = createController();
+        const scene = { addObject: vi.fn() };
+        controller._renderManagerService.getRenderById.mockReturnValue({
+            mainComponent: {
+                getOffsetConfig: () => ({ docsLeft: 8, docsTop: 12 }),
+            },
+            scene,
+        });
+
+        controller._createOrUpdateInlineAnchor('unit-1', [[
+            { x: 10, y: 20 },
+            { x: 10, y: 40 },
+            { x: 10, y: 60 },
+        ]]);
+
+        expect(scene.addObject).toHaveBeenCalledTimes(1);
+        const anchor = controller._anchorShape;
+        const transformByState = vi.spyOn(anchor, 'transformByState');
+        const show = vi.spyOn(anchor, 'show');
+
+        controller._createOrUpdateInlineAnchor('unit-1', [[
+            { x: 14, y: 26 },
+            { x: 14, y: 50 },
+            { x: 14, y: 76 },
+        ]]);
+
+        expect(transformByState).toHaveBeenCalledWith(expect.objectContaining({
+            left: 22,
+            top: 38,
+            height: 50,
+        }));
+        expect(show).toHaveBeenCalled();
+    });
+
+    it('finds the scene transformer for a drawing search only when render context exists', () => {
+        const controller = createController();
+        const transformer = {};
+        const scene = { getTransformerByCreate: vi.fn(() => transformer) };
+
+        expect(controller._getSceneAndTransformerByDrawingSearch(null)).toBeUndefined();
+
+        controller._renderManagerService.getRenderById.mockReturnValue({});
+        expect(controller._getSceneAndTransformerByDrawingSearch('unit-1')).toBeUndefined();
+
+        controller._renderManagerService.getRenderById.mockReturnValue({ scene });
+        expect(controller._getSceneAndTransformerByDrawingSearch('unit-1')).toEqual({ scene, transformer });
+    });
+
+    it('updates the inline drawing anchor only when a single drawing is being transformed', () => {
+        const controller = createController();
+        const points = [[
+            { x: 1, y: 2 },
+            { x: 1, y: 3 },
+            { x: 1, y: 4 },
+        ]];
+        controller._getInlineDrawingAnchor = vi.fn(() => ({ contentBoxPointGroup: points }));
+        controller._createOrUpdateInlineAnchor = vi.fn();
+
+        controller._updateInlineDrawingAnchor(drawing(), 10, 20);
+        expect(controller._createOrUpdateInlineAnchor).not.toHaveBeenCalled();
+
+        controller._transformerCache.set('drawing-1', {});
+        controller._updateInlineDrawingAnchor(drawing(), 10, 20);
+        expect(controller._createOrUpdateInlineAnchor).toHaveBeenCalledWith('unit-1', points);
+    });
+
+    it('converts pointer offsets from viewport coordinates into document coordinates', () => {
+        const controller = createController();
+        const invertedTransform = {
+            applyPoint: vi.fn((point) => ({ x: point.x - 5, y: point.y - 7 })),
+        };
+        const documentTransform = {
+            clone: vi.fn(() => ({
+                invert: vi.fn(() => invertedTransform),
+            })),
+        };
+        const document = {
+            getOffsetConfig: () => ({ documentTransform }),
+        };
+        const viewport = {
+            transformVector2SceneCoord: vi.fn(() => ({ x: 30, y: 40 })),
+        };
+
+        expect(controller._getTransformCoordForDocumentOffset(document, viewport, 12, 18)).toEqual({ x: 25, y: 33 });
+
+        viewport.transformVector2SceneCoord.mockReturnValueOnce(undefined as never);
+        expect(controller._getTransformCoordForDocumentOffset(document, viewport, 12, 18)).toBeUndefined();
+    });
+
+    it('listens to transformer changes for inline drawings and commits resize or move business actions', () => {
+        const controller = createController();
+        const changeStart$ = new Subject<any>();
+        const changing$ = new Subject<any>();
+        const changeEnd$ = new Subject<any>();
+        const transformer = { changeStart$, changing$, changeEnd$ };
+        const object = {
+            oKey: 'object-inline',
+            left: 10,
+            top: 20,
+            width: 80,
+            height: 60,
+            angle: 0,
+            setOpacity: vi.fn(),
+        };
+        const inlineDrawing = {
+            ...drawing('drawing-inline'),
+            layoutType: PositionedObjectLayoutType.INLINE,
+        };
+        controller.disposeWithMe = vi.fn();
+        controller._renderManagerService.getRenderById.mockReturnValue({
+            scene: {
+                getTransformerByCreate: vi.fn(() => transformer),
+            },
+        });
+        controller._drawingManagerService.getDrawingOKey = vi.fn(() => ({
+            unitId: 'unit-1',
+            subUnitId: 'doc-1',
+            drawingId: 'drawing-inline',
+        }));
+        controller._univerInstanceService = {
+            getUniverDocInstance: vi.fn(() => ({
+                getSnapshot: () => ({
+                    drawings: {
+                        'drawing-inline': inlineDrawing,
+                    },
+                }),
+            })),
+        };
+        controller._getPageContentSize = vi.fn(() => ({ width: 500, height: 500 }));
+        controller._updateInlineDrawingAnchor = vi.fn();
+        controller._anchorShape = { hide: vi.fn() };
+
+        controller._listenTransformerChange('unit-1');
+
+        changeStart$.next({ objects: new Map([['object-inline', object]]) });
+        expect(object.setOpacity).toHaveBeenCalledWith(0.2);
+        expect(controller._transformerCache.get('drawing-inline')).toMatchObject({
+            drawing: inlineDrawing,
+            top: 20,
+            left: 10,
+        });
+
+        changing$.next({
+            objects: new Map([['object-inline', { ...object, left: 30 }]]),
+            offsetX: 40,
+            offsetY: 50,
+        });
+        expect(controller._updateInlineDrawingAnchor).toHaveBeenCalledWith(inlineDrawing, 40, 50);
+
+        changeEnd$.next({
+            objects: new Map([['object-inline', { ...object, width: 100 }]]),
+            offsetX: 40,
+            offsetY: 50,
+        });
+
+        expect(object.setOpacity).toHaveBeenLastCalledWith(1);
+        expect(controller._anchorShape.hide).toHaveBeenCalled();
+        expect(controller._commandService.executeCommand).toHaveBeenCalledWith(UpdateDrawingDocTransformCommand.id, {
+            unitId: 'unit-1',
+            subUnitId: 'doc-1',
+            drawings: [
+                { drawingId: 'drawing-inline', key: 'size', value: { width: 100, height: 60 } },
+            ],
+        });
+        expect(controller._transformerCache.size).toBe(0);
     });
 });

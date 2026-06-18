@@ -303,6 +303,37 @@ describe('spreadsheet integration', () => {
         expect(skeleton.stylesCache.fontMatrix.getSizeOf()).toBe(0);
     });
 
+    it('builds border cache for row-wise merged cells on the selection left edge', () => {
+        const workbookData = workbookDataFactory();
+        workbookData.id = 'sheet-render-border-workbook';
+        workbookData.name = 'sheet-render-border-workbook';
+        workbookData.styles.leftBorder = {
+            bd: {
+                l: { s: BorderStyleTypes.THIN, cl: { rgb: '#000000' } },
+            },
+        };
+        workbookData.sheets['sheet-1'].mergeData = [
+            { startRow: 3, endRow: 3, startColumn: 2, endColumn: 4, rangeType: RANGE_TYPE.NORMAL },
+            { startRow: 4, endRow: 4, startColumn: 2, endColumn: 4, rangeType: RANGE_TYPE.NORMAL },
+            { startRow: 5, endRow: 5, startColumn: 2, endColumn: 4, rangeType: RANGE_TYPE.NORMAL },
+        ];
+        workbookData.sheets['sheet-1'].cellData = {
+            3: { 2: { s: 'leftBorder' } },
+            4: { 2: { s: 'leftBorder' } },
+            5: { 2: { s: 'leftBorder' } },
+        };
+
+        const workbook = fixture.univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, workbookData);
+        const worksheet = workbook.getActiveSheet()!;
+        const skeleton = fixture.univer.__getInjector().createInstance(SpreadsheetSkeleton, worksheet, workbook.getStyles()).calculate() as SpreadsheetSkeleton;
+        skeleton.setScene(fixture.scene);
+        skeleton.setStylesCache(createViewportInfo(fixture.scene, fixture.cacheCanvas));
+
+        expect(skeleton.stylesCache.border?.getValue(3, 2)?.l).toEqual(expect.objectContaining({ color: '#000000' }));
+        expect(skeleton.stylesCache.border?.getValue(4, 2)?.l).toEqual(expect.objectContaining({ color: '#000000' }));
+        expect(skeleton.stylesCache.border?.getValue(5, 2)?.l).toEqual(expect.objectContaining({ color: '#000000' }));
+    });
+
     it('renders spreadsheet with cache refresh and scrolling diff paths in scene viewport', () => {
         const { spreadsheet, skeleton, scene, cacheCanvas, mainCanvas } = fixture;
         const mainCtx = mainCanvas.getContext();

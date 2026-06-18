@@ -116,14 +116,14 @@ describe('embed product menu mounting', () => {
 
         expect(mountEmbedProductRibbonMenu({
             container,
-            injector: injector as Injector,
+            injector: injector as unknown as Injector,
             childType: UniverInstanceType.UNIVER_SHEET,
             menuSchema: 'invalid',
         })).toBeUndefined();
 
         const disposable = mountEmbedProductRibbonMenu({
             container,
-            injector: injector as Injector,
+            injector: injector as unknown as Injector,
             childType: UniverInstanceType.UNIVER_SHEET,
             childUnitId: 'child-sheet',
             menuSchema: { [MenuManagerPosition.RIBBON]: { start: { title: 'Start' } } },
@@ -147,7 +147,7 @@ describe('embed product menu mounting', () => {
 
     it('scopes product menu unit lookup and command execution to the child unit', async () => {
         const injector = createInjector();
-        const { injector: scopedInjector, ribbonService, disposable } = createEmbedProductMenuInjector(injector as Injector, {
+        const { injector: scopedInjector, ribbonService, disposable } = createEmbedProductMenuInjector(injector as unknown as Injector, {
             childType: UniverInstanceType.UNIVER_SHEET,
             childUnitId: 'child-sheet',
             menuSchema: {
@@ -171,7 +171,6 @@ describe('embed product menu mounting', () => {
         const childUnit = injector.units.get('child-sheet')!;
         const previousUnit = injector.units.get('previous-sheet')!;
 
-        expect(scopedInstanceService.focused).toBe(childUnit);
         expect(scopedInstanceService.getFocusedUnit()).toBe(childUnit);
         expect(scopedInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_SHEET)).toBe(childUnit);
         expect(scopedInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_DOC)).toBeNull();
@@ -183,7 +182,7 @@ describe('embed product menu mounting', () => {
         expect(currentUnits).toEqual([childUnit, childUnit, childUnit]);
 
         const ribbonTitles: string[][] = [];
-        ribbonService.ribbon$.subscribe((groups) => ribbonTitles.push(groups.map((group) => group.title)));
+        ribbonService.ribbon$.subscribe((groups) => ribbonTitles.push(groups.map((group) => group.title ?? '')));
         expect(ribbonTitles[0]).toEqual(['Sheets - translated(Start)', 'Sheets - translated(insert)']);
         ribbonService.setCollapsedIds(['a']);
         ribbonService.setFakeToolbarVisible(true);
@@ -222,7 +221,7 @@ describe('embed product menu mounting', () => {
 
     it('falls back to the root services when there is no child unit scope', () => {
         const injector = createInjector({ hasCreateScoped: true });
-        const { injector: scopedInjector } = createEmbedProductMenuInjector(injector as Injector, {
+        const { injector: scopedInjector } = createEmbedProductMenuInjector(injector as unknown as Injector, {
             childType: UniverInstanceType.UNIVER_SHEET,
         });
 

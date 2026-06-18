@@ -57,3 +57,53 @@ export function shouldRefreshDocsCustomBlockSizeForCommand(params: {
     const commandUnitId = getCommandUnitId(params.commandParams);
     return Boolean(commandUnitId && commandUnitId !== params.hostUnitId && params.childUnitIds.has(commandUnitId));
 }
+
+export interface DocsCustomBlockSizeRefreshScheduler {
+    dispose: () => void;
+    schedule: () => void;
+}
+
+export function createDocsCustomBlockSizeRefreshScheduler(
+    refresh: () => void,
+    frameApi: {
+        cancelFrame: (handle: number) => void;
+        requestFrame: (callback: () => void) => number;
+    } = getDefaultFrameApi()
+): DocsCustomBlockSizeRefreshScheduler {
+    let pendingFrame: number | undefined;
+
+    return {
+        dispose: () => {
+            if (pendingFrame == null) {
+                return;
+            }
+
+            frameApi.cancelFrame(pendingFrame);
+            pendingFrame = undefined;
+        },
+        schedule: () => {
+            if (pendingFrame != null) {
+                return;
+            }
+
+            pendingFrame = frameApi.requestFrame(() => {
+                pendingFrame = undefined;
+                refresh();
+            });
+        },
+    };
+}
+
+function getDefaultFrameApi(): { cancelFrame: (handle: number) => void; requestFrame: (callback: () => void) => number } {
+    if (typeof requestAnimationFrame === 'function' && typeof cancelAnimationFrame === 'function') {
+        return {
+            cancelFrame: cancelAnimationFrame,
+            requestFrame: requestAnimationFrame,
+        };
+    }
+
+    return {
+        cancelFrame: (handle) => clearTimeout(handle),
+        requestFrame: (callback) => setTimeout(callback, 16) as unknown as number,
+    };
+}

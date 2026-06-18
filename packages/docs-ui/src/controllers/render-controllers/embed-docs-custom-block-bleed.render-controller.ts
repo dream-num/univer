@@ -21,7 +21,7 @@ import { EmbedContentSizeRegistryService } from '@univerjs/embed-ui';
 import { setDocsCustomBlockRenderViewportProvider } from '@univerjs/engine-render';
 import { VIEWPORT_KEY } from '../../basics/docs-view-key';
 import { SetDocZoomRatioOperation } from '../../commands/operations/set-doc-zoom-ratio.operation';
-import { collectDocsTableLikeEmbedChildUnitIds, shouldRefreshDocsCustomBlockSizeForCommand } from '../../embed-docs-custom-block-refresh';
+import { collectDocsTableLikeEmbedChildUnitIds, createDocsCustomBlockSizeRefreshScheduler, shouldRefreshDocsCustomBlockSizeForCommand } from '../../embed-docs-custom-block-refresh';
 import { resolveDocsCustomBlockRenderViewport } from '../../embed-host-anchor';
 
 export class EmbedDocsCustomBlockBleedRenderController extends Disposable implements IRenderModule {
@@ -81,6 +81,19 @@ export class EmbedDocsCustomBlockBleedRenderController extends Disposable implem
             dispose: () => setDocsCustomBlockRenderViewportProvider(null),
         });
 
+        const refreshScheduler = createDocsCustomBlockSizeRefreshScheduler(() => {
+            const zoomRatio = this._context.unit.zoomRatio;
+            if (typeof zoomRatio !== 'number') {
+                return;
+            }
+
+            this._commandService.syncExecuteCommand(SetDocZoomRatioOperation.id, {
+                unitId: this._context.unitId,
+                zoomRatio,
+            });
+        });
+        this.disposeWithMe(refreshScheduler);
+
         this.disposeWithMe(this._commandService.onCommandExecuted((command) => {
             if (command.id === SetDocZoomRatioOperation.id) {
                 return;
@@ -95,15 +108,7 @@ export class EmbedDocsCustomBlockBleedRenderController extends Disposable implem
                 return;
             }
 
-            const zoomRatio = this._context.unit.zoomRatio;
-            if (typeof zoomRatio !== 'number') {
-                return;
-            }
-
-            this._commandService.syncExecuteCommand(SetDocZoomRatioOperation.id, {
-                unitId: this._context.unitId,
-                zoomRatio,
-            });
+            refreshScheduler.schedule();
         }));
     }
 

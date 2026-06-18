@@ -140,5 +140,5 @@ export function shouldSuppressSheetContextMenuForEmbedOverride(
     hostUnitId: string,
     override: Pick<ISheetHostChromeOverride, 'entry' | 'hostUnitId'> | null | undefined
 ): boolean {
-    return override?.hostUnitId === hostUnitId && override.entry === 'sheets-sheet-tab';
+    return override != null && override.hostUnitId === hostUnitId && override.entry === 'sheets-sheet-tab';
 }

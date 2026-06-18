@@ -1,16 +1,47 @@
-import type { Univer } from '@univerjs/core';
+/**
+ * Copyright 2023-present DreamNum Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import type { IDisposable, Univer } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
 import { LifecycleStages } from '@univerjs/core';
 
 export function simpleRangePopupDemo(univer: Univer, univerAPI: FUniver) {
-    const attachedWorkbookIds = new Set<string>();
+    let activePopupWorkbookId: string | null = null;
+    let activePopupDisposable: IDisposable | null = null;
+
     const attachPopup = (workbook = univerAPI.getActiveWorkbook()): boolean => {
-        if (!workbook || attachedWorkbookIds.has(workbook.getId())) {
+        if (!workbook) {
+            return false;
+        }
+
+        const workbookId = workbook.getId();
+        if (activePopupWorkbookId === workbookId) {
+            return false;
+        }
+
+        const activeWorkbookId = univerAPI.getActiveWorkbook()?.getId();
+        if (activeWorkbookId !== workbookId) {
             return false;
         }
 
         const worksheet = workbook.getActiveSheet();
         if (!worksheet) {
+            return false;
+        }
+        if (!isWorkbookCanvasMounted(workbookId)) {
             return false;
         }
 
@@ -27,7 +58,10 @@ export function simpleRangePopupDemo(univer: Univer, univerAPI: FUniver) {
             return false;
         }
 
-        attachedWorkbookIds.add(workbook.getId());
+        activePopupDisposable?.dispose();
+        activePopupDisposable = disposable;
+        activePopupWorkbookId = workbookId;
+
         return true;
     };
 
@@ -65,4 +99,14 @@ export function simpleRangePopupDemo(univer: Univer, univerAPI: FUniver) {
     univerAPI.addEvent(univerAPI.Event.WorkbookCreated, ({ workbook }) => {
         scheduleAttachPopup(workbook);
     });
+}
+
+function isWorkbookCanvasMounted(workbookId: string): boolean {
+    if (typeof document === 'undefined') {
+        return false;
+    }
+
+    const canvas = document.getElementById(`univer-sheet-main-canvas_${workbookId}`);
+    const rect = canvas?.getBoundingClientRect();
+    return !!canvas?.parentElement && !!rect && rect.width > 0 && rect.height > 0;
 }

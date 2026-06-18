@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import { resolveDocsTableLikeCustomBlockBleedViewport, resolveDocsTableLikeCustomBlockContentWidth } from './embed-docs-custom-block-bleed';
+import { resolveDocsTableLikeCustomBlockBleedViewport, resolveDocsTableLikeCustomBlockContentHeight, resolveDocsTableLikeCustomBlockContentWidth } from './embed-docs-custom-block-bleed';
 
 describe('resolveDocsTableLikeCustomBlockBleedViewport', () => {
     it('uses the clipping ancestor as the bleed boundary', () => {
@@ -52,6 +52,12 @@ describe('resolveDocsTableLikeCustomBlockBleedViewport', () => {
         expect(resolveDocsTableLikeCustomBlockContentWidth(1600, 960)).toBe(1600);
         expect(resolveDocsTableLikeCustomBlockContentWidth(undefined, 960)).toBe(960);
         expect(resolveDocsTableLikeCustomBlockContentWidth(0, 960)).toBe(960);
+    });
+
+    it('prefers authoritative product content height over runtime DOM fallback', () => {
+        expect(resolveDocsTableLikeCustomBlockContentHeight(1200, 480)).toBe(1200);
+        expect(resolveDocsTableLikeCustomBlockContentHeight(undefined, 480)).toBe(480);
+        expect(resolveDocsTableLikeCustomBlockContentHeight(0, 480)).toBe(480);
     });
 });
 

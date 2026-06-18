@@ -59,12 +59,6 @@ export class UniverDocsPlugin extends Plugin {
             this._config
         );
         this._configService.setConfig(DOCS_PLUGIN_CONFIG_KEY, rest);
-        if (rest.embed?.host) {
-            registerDocsEmbedHostCapabilities(this._injector);
-        }
-        if (rest.embed?.guest) {
-            registerDocsEmbedGuestContribution(this._injector);
-        }
     }
 
     override onStarting(): void {

@@ -17,21 +17,6 @@
 import './global.css';
 
 export type { IDocObjectParam } from './basics/component-tools';
-export { createDocsEmbedBlockContribution, createDocsEmbedChildViewContribution } from './embed-block';
-export {
-    createDocsCustomBlockHostAdapterContribution,
-    createDocsCustomBlockHostContainerContribution,
-} from './embed-host-adapter';
-export {
-    createDocsCustomBlockInsertMutation,
-    createDocsCustomBlockRemoveMutation,
-    createEmbedDocsCustomBlockData,
-    createInsertCustomBlockActions,
-    createRemoveCustomBlockActions,
-    EMBED_DOCS_CUSTOM_BLOCK_DEFAULT_COMPONENT_KEY,
-    type DocsCustomBlockMutationParams,
-    type EmbedDocsCustomBlockData,
-} from './embed-host-anchor';
 export { getDocObject, getDocObjectById, neoGetDocObject } from './basics/component-tools';
 export {
     addCustomDecorationBySelectionFactory,
@@ -162,6 +147,26 @@ export {
 } from './controllers/render-controllers/doc-paragraph-placeholder.render-controller';
 export { DocRenderController } from './controllers/render-controllers/doc.render-controller';
 export { DocUIController } from './controllers/ui.controller';
+export { createDocsEmbedBlockContribution, createDocsEmbedChildViewContribution } from './embed-block';
+export { createDocsFloatingMenuContributions, resolveDocsFloatingMenuStage } from './embed-floating-menu';
+export {
+    createDocsCustomBlockHostAdapterContribution,
+    createDocsCustomBlockHostContainerContribution,
+} from './embed-host-adapter';
+export {
+    createDocsCustomBlockInsertMutation,
+    createDocsCustomBlockRemoveMutation,
+    createEmbedDocsCustomBlockData,
+    createInsertCustomBlockActions,
+    createRemoveCustomBlockActions,
+    type DocsCustomBlockMutationParams,
+    type DocsCustomBlockRenderViewport,
+    type DocsCustomBlockRenderViewportParams,
+    EMBED_DOCS_CUSTOM_BLOCK_DEFAULT_COMPONENT_KEY,
+    type EmbedDocsCustomBlockData,
+    isSheetLikeDocsCustomBlockChildType,
+    resolveDocsCustomBlockRenderViewport,
+} from './embed-host-anchor';
 export { registerDocsEmbedUIContributions } from './embed-register';
 export {
     AlignMenuItemFactory,

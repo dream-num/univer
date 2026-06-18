@@ -1,17 +1,33 @@
-import type { EmbedDescriptor, EmbedLayout } from '@univerjs/embed';
+/**
+ * Copyright 2023-present DreamNum Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import type { IDisposable } from '@univerjs/core';
-import type { EmbedChildContainerContext, EmbedContainerContext, EmbedHostMountResult, EmbedHostContainerContribution, EmbedMountSession, EmbedRenderScope } from '../types/embed-ui';
-import { EmbedFocusOwnerService } from '@univerjs/embed';
+import type { EmbedDescriptor, EmbedLayout } from '@univerjs/embed';
+import type { EmbedChildContainerContext, EmbedContainerContext, EmbedHostContainerContribution, EmbedHostMountResult, EmbedMountSession, EmbedRenderScope } from '../types/embed-ui';
 import { FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE, FOCUSING_UNIT, IContextService, Inject, Injector, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { EmbedFocusOwnerService } from '@univerjs/embed';
 import { BehaviorSubject } from 'rxjs';
-import { EMBED_CANVAS_ROOT_ATTRIBUTE, EMBED_OVERLAY_ROOT_ATTRIBUTE, ensureEmbedDefaultRuntimeSlots, findEmbedRuntimeSlot } from '../common/embed-runtime-slots';
-import { EmbedChildViewRegistryService } from './embed-child-view-registry.service';
+import { EMBED_CANVAS_ROOT_ATTRIBUTE, EMBED_CONTENT_ROOT_ATTRIBUTE, EMBED_OVERLAY_ROOT_ATTRIBUTE, EMBED_POPUP_ROOT_ATTRIBUTE, ensureEmbedDefaultRuntimeSlots, findEmbedRuntimeSlot } from '../common/embed-runtime-slots';
 import { createEmbedChildRuntimeScope } from './embed-child-runtime-scope';
+import { EmbedChildViewRegistryService } from './embed-child-view-registry.service';
 import { EmbedFloatingActiveService } from './embed-floating-active.service';
 import { EmbedFloatingMenuRegistryService } from './embed-floating-menu-registry.service';
 import { EmbedHostContainerRegistryService } from './embed-host-container-registry.service';
 import { EmbedOverlayRootService } from './embed-overlay-root.service';
-import { EmbedScreenshotService } from './embed-screenshot.service';
+import { EmbedSceneCanvasCaptureService } from './embed-scene-canvas-capture.service';
 
 export const EMBED_DUPLICATE_CHILD_UNIT_ERROR_CODE = 'EMBED_DUPLICATE_CHILD_UNIT';
 
@@ -41,8 +57,8 @@ export class EmbedMountService {
         private readonly _childViewRegistry: EmbedChildViewRegistryService,
         @Inject(EmbedOverlayRootService)
         private readonly _overlayRootService: EmbedOverlayRootService,
-        @Inject(EmbedScreenshotService)
-        private readonly _screenshotService: EmbedScreenshotService,
+        @Inject(EmbedSceneCanvasCaptureService)
+        private readonly _sceneCanvasCaptureService: EmbedSceneCanvasCaptureService,
         @Inject(Injector)
         private readonly _injector: Injector
     ) {
@@ -53,8 +69,8 @@ export class EmbedMountService {
         return this._mountResolvedHost(descriptor);
     }
 
-    mountIntoHostElement(descriptor: EmbedDescriptor, hostElement: HTMLElement): EmbedMountSession {
-        return this._mountResolvedHost(descriptor, { hostElement });
+    mountIntoHostElement(descriptor: EmbedDescriptor, hostElement: HTMLElement, runtimeRoots?: EmbedHostMountResult['runtimeRoots']): EmbedMountSession {
+        return this._mountResolvedHost(descriptor, { hostElement, runtimeRoots });
     }
 
     private _mountResolvedHost(
@@ -102,11 +118,18 @@ export class EmbedMountService {
             [...disposables].reverse().forEach((disposable) => disposable.dispose());
             throw new Error('EMBED_MOUNT_HOST_CONTAINER_NOT_RESOLVED');
         }
-        disposables.push(ensureEmbedDefaultRuntimeSlots(context.hostElement));
+        if (!normalizedHostMountResult.runtimeRoots) {
+            disposables.push(ensureEmbedDefaultRuntimeSlots(context.hostElement));
+        }
 
-        const { renderScope, disposable: renderScopeDisposable, setActive } = this._createRenderScope(descriptor, layout, context.hostElement);
+        const { renderScope, disposable: renderScopeDisposable, setActive } = this._createRenderScope(
+            descriptor,
+            layout,
+            context.hostElement,
+            normalizedHostMountResult.runtimeRoots
+        );
         disposables.push(renderScopeDisposable);
-        disposables.push(this._registerChildFocusBridge(descriptor, context.hostElement));
+        disposables.push(this._registerChildFocusBridge(descriptor, context.hostElement, renderScope.mode));
         const childContextBase: Omit<EmbedChildContainerContext, 'runtimeScope'> = {
             ...context,
             hostElement: context.hostElement,
@@ -119,7 +142,7 @@ export class EmbedMountService {
             runtimeScope,
         };
         disposables.push(runtimeScopeDisposable);
-        disposables.push(this._screenshotService.registerContext(childContext));
+        disposables.push(this._sceneCanvasCaptureService.registerContext(childContext));
         const restoreFocusAfterMount = this._createMountFocusRestorer(descriptor);
         const childDisposable = childContribution.mount?.(childContext);
         if (childDisposable) {
@@ -141,12 +164,42 @@ export class EmbedMountService {
             entry: descriptor.entry,
             layout,
             hostElement: context.hostElement,
+            context: childContext,
         };
         this._sessions.set(descriptor.embedId, { session, disposables, setActive });
         if (layout === 'tab-peer') {
             this.activateSession(descriptor.embedId);
+        } else {
+            this._initializeFloatingSessionActiveState(descriptor, layout, setActive);
         }
         return session;
+    }
+
+    private _initializeFloatingSessionActiveState(
+        descriptor: EmbedDescriptor,
+        layout: EmbedLayout,
+        setActive: (active: boolean) => void
+    ): void {
+        if (layout === 'tab-peer') {
+            return;
+        }
+
+        if (this._injector.has(EmbedFocusOwnerService)) {
+            const owner = this._injector.get(EmbedFocusOwnerService).getFocusOwner();
+            if (owner?.hostUnitId === descriptor.hostUnitId) {
+                setActive(owner.embedId === descriptor.embedId);
+                return;
+            }
+        }
+
+        const hasEarlierFloatingSession = [...this._sessions.values()].some((entry) => (
+            entry.session.embedId !== descriptor.embedId &&
+            entry.session.hostUnitId === descriptor.hostUnitId &&
+            entry.session.layout !== 'tab-peer'
+        ));
+        if (hasEarlierFloatingSession) {
+            setActive(false);
+        }
     }
 
     unmount(embedId: string): void {
@@ -174,7 +227,13 @@ export class EmbedMountService {
         }
 
         if (current.session.layout !== 'tab-peer') {
-            current.setActive(true);
+            this._sessions.forEach((entry) => {
+                if (entry.session.layout === 'tab-peer' || entry.session.hostUnitId !== current.session.hostUnitId) {
+                    return;
+                }
+
+                entry.setActive(entry.session.embedId === embedId);
+            });
             return;
         }
 
@@ -188,6 +247,25 @@ export class EmbedMountService {
 
             entry.setActive(entry.session.embedId === embedId);
         });
+    }
+
+    deactivateTabSessions(embedId?: string): EmbedMountSession[] {
+        const deactivatedSessions: EmbedMountSession[] = [];
+
+        this._sessions.forEach((entry) => {
+            if (entry.session.layout !== 'tab-peer') {
+                return;
+            }
+
+            if (embedId && entry.session.embedId !== embedId) {
+                return;
+            }
+
+            entry.setActive(false);
+            deactivatedSessions.push(entry.session);
+        });
+
+        return deactivatedSessions;
     }
 
     setActive(embedId: string, active: boolean): void {
@@ -211,7 +289,8 @@ export class EmbedMountService {
     private _createRenderScope(
         descriptor: EmbedDescriptor,
         layout: EmbedLayout,
-        rootElement: HTMLElement
+        rootElement: HTMLElement,
+        runtimeRoots?: EmbedHostMountResult['runtimeRoots']
     ): { renderScope: EmbedRenderScope; disposable: IDisposable; setActive: (active: boolean) => void } {
         const active$ = new BehaviorSubject(true);
         const hostAnchorId = descriptor.hostAnchorId;
@@ -222,8 +301,10 @@ export class EmbedMountService {
                 ? 'float'
                 : 'inline';
 
-        const canvasRoot = findEmbedRuntimeSlot(rootElement, EMBED_CANVAS_ROOT_ATTRIBUTE) ?? rootElement;
-        const overlayRoot = findEmbedRuntimeSlot(rootElement, EMBED_OVERLAY_ROOT_ATTRIBUTE) ?? rootElement;
+        const contentRoot = runtimeRoots?.content ?? findEmbedRuntimeSlot(rootElement, EMBED_CONTENT_ROOT_ATTRIBUTE) ?? rootElement;
+        const canvasRoot = runtimeRoots?.canvas ?? findEmbedRuntimeSlot(rootElement, EMBED_CANVAS_ROOT_ATTRIBUTE) ?? rootElement;
+        const overlayRoot = runtimeRoots?.overlay ?? findEmbedRuntimeSlot(rootElement, EMBED_OVERLAY_ROOT_ATTRIBUTE) ?? rootElement;
+        const popupRoot = runtimeRoots?.popup ?? findEmbedRuntimeSlot(rootElement, EMBED_POPUP_ROOT_ATTRIBUTE) ?? overlayRoot;
         const overlayRootDisposable = this._overlayRootService.register({
             childUnitId: descriptor.childUnitId!,
             embedId: descriptor.embedId,
@@ -235,10 +316,10 @@ export class EmbedMountService {
                 return;
             }
 
-            applyRenderScopeActiveState(rootElement, active);
+            applyRenderScopeActiveState(rootElement, active, mode);
             active$.next(active);
         };
-        applyRenderScopeActiveState(rootElement, true);
+        applyRenderScopeActiveState(rootElement, true, mode);
 
         return {
             renderScope: {
@@ -250,9 +331,11 @@ export class EmbedMountService {
                 layout,
                 mode,
                 rootElement,
+                contentRoot,
                 canvasRoot,
                 overlayRoot,
-                menuOutlet: undefined,
+                popupRoot,
+                menuOutlet: runtimeRoots?.menuSlot ? { container: runtimeRoots.menuSlot } : undefined,
                 active$: active$.asObservable(),
             },
             disposable: toDisposable(() => {
@@ -275,6 +358,7 @@ export class EmbedMountService {
 
         return {
             hostElement: result.hostElement,
+            runtimeRoots: result.runtimeRoots,
             disposable: result.disposable ? toDisposable(() => result.disposable?.dispose()) : undefined,
         };
     }
@@ -301,13 +385,17 @@ export class EmbedMountService {
         return disposable ? toDisposable(() => disposable.dispose()) : undefined;
     }
 
-    private _registerChildFocusBridge(descriptor: EmbedDescriptor, rootElement: HTMLElement): IDisposable {
-        const focusChild = () => {
+    private _registerChildFocusBridge(descriptor: EmbedDescriptor, rootElement: HTMLElement, mode: EmbedRenderScope['mode']): IDisposable {
+        const focusChild = (event?: PointerEvent | FocusEvent) => {
+            const target = event?.target instanceof Element ? event.target : null;
+            if (target?.closest('[data-embed-float-drag-handle="true"], [data-embed-floating-menu="true"]')) {
+                return;
+            }
             if (!descriptor.childUnitId || descriptor.childType == null) {
                 return;
             }
 
-            if (this._injector.has(IUniverInstanceService)) {
+            if (mode === 'tab' && this._injector.has(IUniverInstanceService)) {
                 const instanceService = this._injector.get(IUniverInstanceService);
                 const getCurrentUnitOfType = (instanceService as unknown as {
                     getCurrentUnitOfType?: (type: UniverInstanceType) => { getUnitId: () => string } | null | undefined;
@@ -319,7 +407,7 @@ export class EmbedMountService {
                     instanceService.setCurrentUnitForType(descriptor.childUnitId);
                 }
             }
-            if (this._injector.has(IContextService)) {
+            if (mode === 'tab' && this._injector.has(IContextService)) {
                 const contextService = this._injector.get(IContextService);
                 contextService.setContextValue(FOCUSING_UNIT, true);
                 contextService.setContextValue(FOCUSING_DOC, descriptor.childType === UniverInstanceType.UNIVER_DOC);
@@ -346,6 +434,7 @@ export class EmbedMountService {
                     focusOwnerService.setFocusOwner(nextOwner);
                 }
             }
+            this.activateSession(descriptor.embedId);
         };
 
         rootElement.addEventListener('pointerdown', focusChild, { capture: true });
@@ -409,8 +498,16 @@ export class EmbedMountService {
     }
 }
 
-function applyRenderScopeActiveState(rootElement: HTMLElement, active: boolean): void {
+function applyRenderScopeActiveState(rootElement: HTMLElement, active: boolean, mode: EmbedRenderScope['mode']): void {
     rootElement.dataset.embedRenderScopeActive = active ? 'true' : 'false';
+    if (mode !== 'tab') {
+        rootElement.removeAttribute('inert');
+        rootElement.removeAttribute('aria-hidden');
+        rootElement.style.removeProperty('display');
+        rootElement.style.removeProperty('pointer-events');
+        return;
+    }
+
     rootElement.toggleAttribute('inert', !active);
 
     if (active) {

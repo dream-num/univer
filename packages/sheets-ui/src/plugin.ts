@@ -36,7 +36,6 @@ import { UI_PLUGIN_CONFIG_KEY } from '@univerjs/ui';
 import { filter } from 'rxjs/operators';
 import pkg from '../package.json';
 import { defaultPluginConfig, SHEETS_UI_PLUGIN_CONFIG_KEY } from './config/config';
-import { registerSheetsEmbedUIContributions } from './embed-register';
 import { AutoFillUIController } from './controllers/auto-fill-ui.controller';
 import { AutoHeightController } from './controllers/auto-height.controller';
 import { AutoWidthController } from './controllers/auto-width.controller';
@@ -145,9 +144,6 @@ export class UniverSheetsUIPlugin extends Plugin {
         }
 
         this._configService.setConfig(SHEETS_UI_PLUGIN_CONFIG_KEY, { ...rest });
-        if (rest.embed?.host || rest.embed?.guest) {
-            registerSheetsEmbedUIContributions(this._injector);
-        }
     }
 
     override onStarting(): void {

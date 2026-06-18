@@ -23,6 +23,7 @@ export interface IRibbonOverride {
     id: string;
     ribbonService: IRibbonService;
     placeholderTitle?: string;
+    hideToolbar?: boolean;
 }
 
 export interface IRibbonOverrideService {

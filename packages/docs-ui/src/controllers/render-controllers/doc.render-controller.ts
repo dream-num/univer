@@ -24,6 +24,7 @@ import { takeUntil } from 'rxjs';
 import { DOCS_COMPONENT_BACKGROUND_LAYER_INDEX, DOCS_COMPONENT_DEFAULT_Z_INDEX, DOCS_COMPONENT_HEADER_LAYER_INDEX, DOCS_COMPONENT_MAIN_LAYER_INDEX, DOCS_VIEW_KEY, VIEWPORT_KEY } from '../../basics/docs-view-key';
 import { DocPageLayoutService } from '../../services/doc-page-layout.service';
 import { resolveDocRenderBackground } from '../../services/doc-render-background';
+import { DocViewScaleService } from '../../services/doc-view-scale';
 import { IEditorService } from '../../services/editor/editor-manager.service';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
 
@@ -38,6 +39,7 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(DocPageLayoutService) private readonly _docPageLayoutService: DocPageLayoutService,
         @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService,
+        @Inject(DocViewScaleService) private readonly _docViewScaleService: DocViewScaleService,
         @Inject(ThemeService) private readonly _themeService: ThemeService
     ) {
         super();
@@ -122,7 +124,9 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         // const hasScroll = this._configService.getConfig('hasScroll') as Nullable<boolean>;
         // if (hasScroll !== false) {
         // eslint-disable-next-line no-new
-        new ScrollBar(viewMain);
+        new ScrollBar(viewMain, {
+            enableHorizontal: this._shouldEnableHorizontalScrollBar(),
+        });
         // }
 
         scene.addLayer(
@@ -145,6 +149,11 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
 
         // Attach scroll event after main viewport created.
         this._docSelectionRenderService.__attachScrollEvent();
+    }
+
+    private _shouldEnableHorizontalScrollBar(): boolean {
+        const options = this._docViewScaleService.getOptions();
+        return !(options.mode === 'fit-width' && options.target === 'container' && options.align === 'start');
     }
 
     private _addComponent() {

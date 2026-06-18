@@ -84,6 +84,10 @@ export enum DrawingTypeEnum {
      * Dom element, allows inserting HTML elements as floating objects into the document
      */
     DRAWING_DOM = 8,
+    /**
+     * Block element, allows host products to place embeddable unit-backed blocks as drawing objects.
+     */
+    DRAWING_BLOCK = 9,
 }
 
 export type DrawingType = DrawingTypeEnum | number;

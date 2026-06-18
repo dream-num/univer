@@ -3123,6 +3123,12 @@ importers:
       '@univerjs/docs-ui':
         specifier: workspace:*
         version: link:../../../packages/docs-ui
+      '@univerjs/embed':
+        specifier: workspace:*
+        version: link:../../../packages/embed
+      '@univerjs/embed-ui':
+        specifier: workspace:*
+        version: link:../../../packages/embed-ui
       '@univerjs/engine-formula':
         specifier: workspace:*
         version: link:../../../packages/engine-formula
@@ -3339,6 +3345,12 @@ importers:
       '@univerjs/docs-ui':
         specifier: workspace:*
         version: link:../../../packages/docs-ui
+      '@univerjs/embed':
+        specifier: workspace:*
+        version: link:../../../packages/embed
+      '@univerjs/embed-ui':
+        specifier: workspace:*
+        version: link:../../../packages/embed-ui
       '@univerjs/engine-formula':
         specifier: workspace:*
         version: link:../../../packages/engine-formula

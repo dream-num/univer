@@ -24,15 +24,18 @@ vi.mock('./embed-guest', () => ({
 }));
 
 describe('UniverSheetsPlugin embed boundary', () => {
-    it('does not auto-register embed contributions from product plugin config', () => {
-        new UniverSheetsPlugin(
-            { embed: { host: true, guest: true } } as never,
-            createInjector(),
+    it('registers product embed capabilities from the model plugin', () => {
+        const injector = createInjector();
+        const plugin = new UniverSheetsPlugin(
+            {},
+            injector,
             createConfigService()
         );
 
-        expect(registerSheetsEmbedHostCapabilities).not.toHaveBeenCalled();
-        expect(registerSheetsEmbedGuestContribution).not.toHaveBeenCalled();
+        plugin.onStarting();
+
+        expect(registerSheetsEmbedHostCapabilities).toHaveBeenCalledWith(injector);
+        expect(registerSheetsEmbedGuestContribution).toHaveBeenCalledWith(injector);
     });
 });
 
@@ -40,7 +43,9 @@ function createInjector() {
     return {
         add: vi.fn(),
         has: vi.fn(() => false),
-        get: vi.fn(),
+        get: vi.fn(() => ({
+            registerCommand: vi.fn(),
+        })),
     } as never;
 }
 

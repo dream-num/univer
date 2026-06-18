@@ -74,15 +74,15 @@ class TestPrintingWorksheet {
     }
 }
 
-function PrintingContent() {
-    return <span data-testid="printed-content">printed</span>;
+function PrintingContent(props: { data?: { label?: string } }) {
+    return <span data-testid="printed-content">{props.data?.label}</span>;
 }
 
-function createFloatDomInfo(): IFloatDomData {
+function createFloatDomInfo(drawingId = 'printed-float-dom', label = 'printing'): IFloatDomData {
     return {
         unitId: 'test',
         subUnitId: 'sheet1',
-        drawingId: 'printed-float-dom',
+        drawingId,
         drawingType: DrawingTypeEnum.DRAWING_DOM,
         componentKey: PRINTING_COMPONENT_KEY,
         transform: {
@@ -97,7 +97,7 @@ function createFloatDomInfo(): IFloatDomData {
             skewY: 0,
         },
         data: {
-            label: 'printing',
+            label,
         },
         axisAlignSheetTransform: {
             angle: 0,
@@ -156,5 +156,31 @@ describe('PrintingFloatDom', () => {
         expect(printedFloatDom.parentElement.style.width).toBe('298px');
         expect(printedFloatDom.parentElement.style.height).toBe('198px');
         expect(printedFloatDom.parentElement.style.transform).toBe('rotate(27deg)');
+    });
+
+    it('prints each floating DOM with its own component data', async () => {
+        currentTestBed = createSheetsDrawingUiTestBed(undefined, [
+            [ComponentManager],
+        ]);
+        currentTestBed.injector.get(ComponentManager).register(PRINTING_COMPONENT_KEY, PrintingContent);
+        const root = document.createElement('div');
+        container = root;
+        document.body.appendChild(root);
+
+        await act(async () => {
+            unmountPrintingFloatDom = mountPrintingFloatDom({
+                floatDomInfos: [
+                    createFloatDomInfo('first-printed-float-dom', 'First printed label'),
+                    createFloatDomInfo('second-printed-float-dom', 'Second printed label'),
+                ],
+                scene: new TestPrintingScene() as unknown as Scene,
+                skeleton: new TestPrintingSkeleton() as unknown as SpreadsheetSkeleton,
+                worksheet: new TestPrintingWorksheet() as unknown as Worksheet,
+            }, root, currentTestBed!.injector);
+            await Promise.resolve();
+        });
+
+        expect(root.textContent).toContain('First printed label');
+        expect(root.textContent).toContain('Second printed label');
     });
 });

@@ -178,6 +178,7 @@ describe('DocDrawingTransformUpdateController', () => {
             drawingId: 'multi-drawing',
             drawingOrigin: {
                 layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
+                behindDoc: BooleanNumber.FALSE,
                 isMultiTransform: BooleanNumber.TRUE,
             },
         };

@@ -53,12 +53,16 @@ const FAR_RANGE: IRange = {
 };
 
 class TestMarkSelectionService {
-    addShape() {
+    readonly addedRanges: IRange[] = [];
+    removeCount = 0;
+
+    addShape(selection: { range: IRange }) {
+        this.addedRanges.push(selection.range);
         return 'shape-id';
     }
 
     removeShape() {
-        // no canvas layer is created for these view tests.
+        this.removeCount += 1;
     }
 }
 
@@ -372,6 +376,46 @@ describe('RuleList', () => {
                 .getSubunitRules(currentTestBed.unitId, currentTestBed.subUnitId)
                 ?.map((rule) => rule.cfId)
         ).toEqual(ruleIdsBeforeOpen);
+    });
+
+    it('highlights the hovered conditional formatting rule range and clears it on leave', async () => {
+        currentTestBed = await createRuleListTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <RuleList onClick={() => undefined} onCreate={() => undefined} />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        const activeRangeText = Array.from(container.querySelectorAll('div'))
+            .find((element) => element.textContent === 'A1');
+        const activeRuleRow = activeRangeText?.parentElement?.parentElement as HTMLElement | undefined;
+        const markSelectionService = currentTestBed.injector.get(IMarkSelectionService) as unknown as TestMarkSelectionService;
+
+        if (!activeRuleRow) {
+            throw new Error('Rule row was not rendered');
+        }
+
+        await act(async () => {
+            activeRuleRow.dispatchEvent(new MouseEvent('mousemove', { bubbles: true }));
+            await Promise.resolve();
+        });
+
+        expect(markSelectionService.addedRanges).toEqual([ACTIVE_RANGE]);
+
+        await act(async () => {
+            activeRuleRow.dispatchEvent(new MouseEvent('mouseout', { bubbles: true }));
+            await Promise.resolve();
+            await Promise.resolve();
+        });
+
+        expect(markSelectionService.removeCount).toBe(1);
     });
 
     it('clears all worksheet conditional formatting rules in worksheet mode', async () => {

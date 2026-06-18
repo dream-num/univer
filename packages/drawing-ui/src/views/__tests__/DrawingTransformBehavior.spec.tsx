@@ -266,6 +266,45 @@ describe('DrawingTransform behavior', () => {
         expect(renderManagerService.transformer.notificationCount).toBe(1);
     });
 
+    it('clamps negative position inputs to the canvas origin', async () => {
+        const drawing = createDrawing('image-1');
+        const updates: IDrawingParam[][] = [];
+        drawingManagerService.featurePluginUpdate$.subscribe((update) => updates.push(update));
+
+        const rendered = renderWithRediContext(univer.__getInjector(), drawing);
+        root = rendered.root;
+        container = rendered.container;
+
+        act(() => {
+            setInputValue(inputInField(container!, 'drawing-ui.image-panel.transform.x'), '-30');
+        });
+        await waitForDebouncedInput();
+        act(() => {
+            setInputValue(inputInField(container!, 'drawing-ui.image-panel.transform.y'), '-40');
+        });
+        await waitForDebouncedInput();
+
+        expect(updates).toHaveLength(2);
+        expect(updates[0][0]).toMatchObject({
+            unitId,
+            subUnitId,
+            drawingId: 'image-1',
+            drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+            transform: {
+                left: expect.closeTo(0),
+            },
+        });
+        expect(updates[1][0]).toMatchObject({
+            unitId,
+            subUnitId,
+            drawingId: 'image-1',
+            drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+            transform: {
+                top: expect.closeTo(0),
+            },
+        });
+    });
+
     it('syncs transform fields from canvas transformer updates', () => {
         const drawing = createDrawing('image-1');
         drawingManagerService.registerDrawingData(unitId, {

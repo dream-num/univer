@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+/**
+ * @vitest-environment jsdom
+ */
+
 import type { UniverInstanceType } from '@univerjs/core';
 import type { EmbedDescriptor } from '@univerjs/embed';
 import type { Root } from 'react-dom/client';

@@ -22,7 +22,7 @@ import { EmbedFloatDomRenderer } from '@univerjs/embed-ui';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-ratio.operation';
-import { createDefaultDocsTableLikeCustomBlockBleedViewport, resolveDocsTableLikeCustomBlockBleedViewport, resolveDocsTableLikeCustomBlockContentWidth } from './embed-docs-custom-block-bleed';
+import { createDefaultDocsTableLikeCustomBlockBleedViewport, resolveDocsTableLikeCustomBlockBleedViewport, resolveDocsTableLikeCustomBlockContentHeight, resolveDocsTableLikeCustomBlockContentWidth } from './embed-docs-custom-block-bleed';
 import { scrollDocsTableLikeCustomBlockLive } from './embed-docs-custom-block-scroll';
 
 export interface EmbedDocsCustomBlockRuntimeProps {
@@ -228,12 +228,6 @@ function measureRuntimeContentWidth(root: HTMLElement, fallbackWidth: number): n
     collectElementContentWidth(liveCanvas, candidates);
 
     return Math.max(...candidates.filter((value) => Number.isFinite(value) && value > 0));
-}
-
-function resolveDocsTableLikeCustomBlockContentHeight(authoritativeContentHeight: number | undefined, fallbackContentHeight: number): number {
-    return Number.isFinite(authoritativeContentHeight) && (authoritativeContentHeight ?? 0) > 0
-        ? authoritativeContentHeight!
-        : Math.max(1, fallbackContentHeight);
 }
 
 function collectElementContentWidth(element: HTMLElement | null, candidates: number[]): void {

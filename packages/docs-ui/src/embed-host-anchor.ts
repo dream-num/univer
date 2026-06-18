@@ -243,7 +243,7 @@ export function resolveDocsCustomBlockRenderViewport(params: DocsCustomBlockRend
     const contentWidth = Number.isFinite(params.contentWidth) && (params.contentWidth ?? 0) > 0
         ? params.contentWidth!
         : fallbackWidth;
-    const desiredWidth = Math.max(fallbackWidth, contentWidth);
+    const desiredWidth = contentWidth;
     const maxBleedWidth = Math.max(1, viewportLeft + viewportWidth - paragraphTextStart);
     const layoutWidth = Math.min(desiredWidth, maxBleedWidth);
 

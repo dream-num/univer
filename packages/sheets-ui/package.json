@@ -89,7 +89,6 @@
         "@univerjs/design": "workspace:*",
         "@univerjs/docs": "workspace:*",
         "@univerjs/docs-ui": "workspace:*",
-        "@univerjs/drawing": "workspace:*",
         "@univerjs/embed": "workspace:*",
         "@univerjs/embed-ui": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
@@ -103,6 +102,7 @@
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
+        "@univerjs/drawing": "workspace:*",
         "@univerjs/themes": "workspace:*",
         "postcss": "^8.5.16",
         "react": "18.3.1",

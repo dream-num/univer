@@ -28,6 +28,7 @@ import {
     nameCharacterCheck,
     Quantity,
 } from '@univerjs/core';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { LockIcon } from '@univerjs/icons';
 import {
     InsertSheetMutation,
@@ -49,6 +50,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { merge } from 'rxjs';
 import { IEditorBridgeService } from '../../../services/editor-bridge.service';
 import { ISheetBarService } from '../../../services/sheet-bar/sheet-bar.service';
+import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
 import { useActiveWorkbook } from '../../hook';
 import { SheetBarItem } from './SheetBarItem';
 import { SheetBarTabsContextMenu } from './SheetBarTabsContextMenu';
@@ -110,6 +112,7 @@ export function SheetBarTabs() {
     const activeSheetIdRef = useRef(activeSheetId);
 
     const commandService = useDependency(ICommandService);
+    const renderManagerService = useDependency(IRenderManagerService);
     const sheetBarService = useDependency(ISheetBarService);
     const localeService = useDependency(LocaleService);
     const confirmService = useDependency(IConfirmService);
@@ -299,6 +302,17 @@ export function SheetBarTabs() {
         workbookRef.current = workbook;
     }, [workbook]);
 
+    const syncActiveSheetRender = useCallback((subUnitId: string) => {
+        const render = renderManagerService.getRenderById(workbookRef.current.getUnitId());
+        try {
+            render?.with(SheetSkeletonManagerService).setCurrent({ sheetId: subUnitId });
+            render?.scene.makeDirty(true);
+            render?.scene.render();
+        } catch {
+            // The normal command path owns render updates. This fallback only runs when that path was skipped.
+        }
+    }, [renderManagerService]);
+
     const activateSheetTab = useCallback((subUnitId?: string) => {
         if (!subUnitId || subUnitId === activeSheetIdRef.current) {
             return;
@@ -315,9 +329,10 @@ export function SheetBarTabs() {
             const worksheet = workbookRef.current.getSheetBySheetId(subUnitId);
             if (worksheet) {
                 workbookRef.current.setActiveSheet(worksheet);
+                syncActiveSheetRender(subUnitId);
             }
         });
-    }, [commandService]);
+    }, [commandService, syncActiveSheetRender]);
 
     const observeResize = useCallback((slideTabBar: SlideTabBar) => {
         const slideTabBarContainer = slideTabBarContainerRef.current?.querySelector('[data-u-comp=slide-tab-bar]');

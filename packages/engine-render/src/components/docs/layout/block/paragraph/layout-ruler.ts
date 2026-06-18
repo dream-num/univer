@@ -43,6 +43,7 @@ import {
     WrapStrategy,
 } from '@univerjs/core';
 import { GlyphType, LineType } from '../../../../../basics/i-document-skeleton-cached';
+import { getDocsCustomBlockRenderViewport } from '../../../custom-block-render-viewport';
 import { BreakPointType } from '../../line-breaker/break';
 import { addGlyphToDivide, createSkeletonBulletGlyph } from '../../model/glyph';
 import {
@@ -1565,6 +1566,7 @@ export function getLineHeightMetrics(
 export function updateInlineDrawingPosition(
     line: IDocumentSkeletonLine,
     paragraphInlineSkeDrawings?: Map<string, IDocumentSkeletonDrawing>,
+    unitId = '',
     blockAnchorTop?: number,
     paragraphNonInlineSkeDrawings?: Map<string, IDocumentSkeletonDrawing>
 ) {
@@ -1605,8 +1607,22 @@ export function updateInlineDrawingPosition(
                 const { size, angle } = docTransform;
                 const { width = 0, height = 0 } = size;
                 const glyphHeight = glyph.bBox.bd + glyph.bBox.ba;
+                const glyphLeft = divide.left + divide.paddingLeft + glyph.left;
+                const blockLeft = column.left + glyphLeft;
+                const viewport = getDocsCustomBlockRenderViewport(unitId, drawingId, {
+                    blockLeft,
+                    fallbackHeight: height,
+                    fallbackWidth: width,
+                    pageMarginLeft: page.marginLeft,
+                    pageMarginRight: page.marginRight,
+                    pageWidth: page.pageWidth,
+                });
+                const drawingWidth = viewport?.width ?? width;
+                const drawingHeight = viewport?.height ?? height;
 
-                drawing.aLeft = column.left + divide.left + divide.paddingLeft + glyph.left + 0.5 * glyph.width - 0.5 * width || 0;
+                drawing.aLeft = viewport
+                    ? blockLeft + (viewport.offsetLeft ?? 0)
+                    : blockLeft + 0.5 * glyph.width - 0.5 * drawingWidth || 0;
                 if (glyph.width > divide.width) {
                     for (const positionedDrawing of paragraphNonInlineSkeDrawings?.values() ?? []) {
                         const positionedOrigin = positionedDrawing.drawingOrigin;
@@ -1626,7 +1642,7 @@ export function updateInlineDrawingPosition(
                         }
 
                         const positionedRight = positionedDrawing.aLeft + positionedDrawing.width;
-                        const drawingRight = drawing.aLeft + width;
+                        const drawingRight = drawing.aLeft + drawingWidth;
                         if (positionedDrawing.aLeft < drawingRight && positionedRight > drawing.aLeft) {
                             drawing.aLeft = Math.max(
                                 drawing.aLeft,
@@ -1635,9 +1651,9 @@ export function updateInlineDrawingPosition(
                         }
                     }
                 }
-                drawing.aTop = lineTop + lineHeight - 0.5 * glyphHeight - 0.5 * height - marginBottom;
-                drawing.width = width;
-                drawing.height = height;
+                drawing.width = drawingWidth;
+                drawing.height = drawingHeight;
+                drawing.aTop = lineTop + lineHeight - 0.5 * glyphHeight - 0.5 * drawingHeight - marginBottom;
                 drawing.angle = angle;
                 drawing.isPageBreak = isPageBreak;
                 drawing.lineTop = lineTop;

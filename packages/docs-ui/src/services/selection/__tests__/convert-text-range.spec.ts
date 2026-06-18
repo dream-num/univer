@@ -15,6 +15,7 @@
  */
 
 import type { INodePosition } from '@univerjs/engine-render';
+import { DataStreamTreeTokenType } from '@univerjs/core';
 import { DocumentSkeletonPageType, setDocsTableRenderViewportProvider } from '@univerjs/engine-render';
 import { afterEach, describe, expect, it } from 'vitest';
 import {
@@ -613,4 +614,118 @@ describe('selection convert text range helpers', () => {
             top: 0,
         });
     });
+
+    it('uses normal caret height for non-inline embed custom blocks', () => {
+        const { position, skeleton } = createEmbedCustomBlockCursorHarness();
+        const convertor = new NodePositionConvertToCursor({
+            docsLeft: 0,
+            docsTop: 0,
+            pageLayoutType: 0,
+            pageMarginLeft: 0,
+            pageMarginTop: 0,
+        } as never, skeleton as never);
+
+        const result = convertor.getRangePointData(position, position);
+
+        expect(getAnchorBounding(result.contentBoxPointGroup).height).toBeLessThan(30);
+    });
+
+    it('does not draw text selection rectangles for non-inline embed custom blocks', () => {
+        const { position, skeleton } = createEmbedCustomBlockCursorHarness();
+        const convertor = new NodePositionConvertToCursor({
+            docsLeft: 0,
+            docsTop: 0,
+            pageLayoutType: 0,
+            pageMarginLeft: 0,
+            pageMarginTop: 0,
+        } as never, skeleton as never);
+
+        const result = convertor.getRangePointData(
+            { ...position, isBack: true },
+            { ...position, isBack: false }
+        );
+
+        expect(result.borderBoxPointGroup).toHaveLength(0);
+        expect(result.contentBoxPointGroup).toHaveLength(0);
+    });
 });
+
+function createEmbedCustomBlockCursorHarness() {
+    const drawingId = 'embed-block-1';
+    const glyph = {
+        bBox: { ba: 480, bd: 0 },
+        count: 1,
+        drawingId,
+        fontStyle: { fontSize: 14 },
+        glyphType: 'PLACEHOLDER',
+        left: 0,
+        streamType: DataStreamTreeTokenType.CUSTOM_BLOCK,
+        width: 720,
+    };
+    const line = {
+        asc: 13,
+        contentHeight: 480,
+        divides: [{
+            glyphGroup: [glyph],
+            left: 0,
+            paddingLeft: 0,
+            st: 0,
+        }],
+        lineHeight: 480,
+        marginBottom: 0,
+        marginTop: 0,
+        paddingBottom: 0,
+        paddingTop: 0,
+        top: 0,
+    };
+    const page = {
+        marginLeft: 0,
+        marginTop: 0,
+        pageHeight: 1000,
+        pageWidth: 1000,
+        sections: [{
+            columns: [{
+                left: 0,
+                lines: [line],
+            }],
+            top: 0,
+        }],
+    };
+    const skeleton = {
+        getSkeletonData: () => ({
+            pages: [page],
+            skeFooters: new Map(),
+            skeHeaders: new Map(),
+        }),
+        getViewModel: () => ({
+            getDataModel: () => ({
+                getSnapshot: () => ({
+                    drawings: {
+                        [drawingId]: {
+                            data: {
+                                version: 1,
+                                embedId: 'embed-1',
+                                hostAnchorId: drawingId,
+                                interactionMode: 'block',
+                            },
+                        },
+                    },
+                }),
+            }),
+        }),
+    };
+    const position: INodePosition = {
+        column: 0,
+        divide: 0,
+        glyph: 0,
+        isBack: false,
+        line: 0,
+        page: 0,
+        pageType: DocumentSkeletonPageType.BODY,
+        path: ['pages', 0],
+        section: 0,
+        segmentPage: -1,
+    };
+
+    return { position, skeleton };
+}

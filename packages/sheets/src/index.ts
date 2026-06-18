@@ -503,6 +503,7 @@ export { MERGE_CELL_INTERCEPTOR_CHECK, MergeCellController } from './controllers
 export { SheetPermissionCheckController } from './controllers/permission/sheet-permission-check.controller';
 export { SheetPermissionInitController } from './controllers/permission/sheet-permission-init.controller';
 export { ZebraCrossingCacheController } from './controllers/zebar-crossing.controller';
+export { createSheetsEmbedEmptySnapshot, registerSheetsEmbedGuestContribution, registerSheetsEmbedHostCapabilities } from './embed-guest';
 export { RangeProtectionRenderModel } from './models/range-protection-render.model';
 export type { ICellPermission } from './models/range-protection-render.model';
 export { EditStateEnum, RangeProtectionRuleModel, ViewStateEnum } from './models/range-protection-rule.model';
@@ -513,7 +514,6 @@ export type { IRangeThemeStyleJSON } from './models/range-theme-util';
 export { RangeThemeStyle } from './models/range-theme-util';
 export type { IRangeThemeStyleItem } from './models/range-theme-util';
 export { UniverSheetsPlugin } from './plugin';
-export { createSheetsEmbedEmptySnapshot, registerSheetsEmbedGuestContribution } from './embed-guest';
 export { AutoFillService, IAutoFillService } from './services/auto-fill/auto-fill.service';
 export { default as AutoFillRules } from './services/auto-fill/rules';
 export { default as AutoFillTools } from './services/auto-fill/tools';

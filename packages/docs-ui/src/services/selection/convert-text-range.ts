@@ -29,6 +29,7 @@ import type {
     INodePosition,
     IPoint,
 } from '@univerjs/engine-render';
+import { DataStreamTreeTokenType } from '@univerjs/core';
 import {
     compareDocumentSkeletonNestedPagePathOrder,
     DocumentSkeletonPageType,
@@ -39,6 +40,7 @@ import {
     GlyphType,
     Liquid,
 } from '@univerjs/engine-render';
+import { shouldUseInlineTextSelectionForDocsCustomBlockDrawing } from '../../embed-host-anchor';
 
 export enum NodePositionStateType {
     NORMAL,
@@ -312,7 +314,12 @@ export class NodePositionConvertToCursor {
             const isEndBack = end.glyph === end_sp && isLast ? end.isBack : false;
 
             const collapsed = start === end;
-            const anchorGlyph = isStartBack ? (preGlyph ?? firstGlyph) : firstGlyph;
+            const rawAnchorGlyph = isStartBack ? (preGlyph ?? firstGlyph) : firstGlyph;
+            const anchorGlyph = this._getCaretGlyph(rawAnchorGlyph, glyphGroup, start_sp);
+            const selectedGlyphs = glyphGroup.slice(start_sp, end_sp + 1);
+            const isSelectionOnlyNonInlineEmbedBlock = !collapsed &&
+                selectedGlyphs.length > 0 &&
+                selectedGlyphs.every((glyph) => this._isNonInlineEmbedCustomBlockGlyph(glyph));
             const borderBoxStartY = startY;
             const borderBoxEndY = contentHeight == null
                 ? startY + lineHeight - marginTop - marginBottom
@@ -353,10 +360,10 @@ export class NodePositionConvertToCursor {
             const clippedBorderBoxPosition = clipPositionToHorizontalRange(borderBoxPosition, this._horizontalClip);
             const clippedContentBoxPosition = clipPositionToHorizontalRange(contentBoxPosition, this._horizontalClip);
 
-            if (clippedBorderBoxPosition) {
+            if (clippedBorderBoxPosition && !isSelectionOnlyNonInlineEmbedBlock) {
                 borderBoxPointGroup.push(pushToPoints(clippedBorderBoxPosition));
             }
-            if (clippedContentBoxPosition) {
+            if (clippedContentBoxPosition && !isSelectionOnlyNonInlineEmbedBlock) {
                 contentBoxPointGroup.push(pushToPoints(clippedContentBoxPosition));
             }
 
@@ -372,6 +379,44 @@ export class NodePositionConvertToCursor {
             contentBoxPointGroup,
             cursorList,
         };
+    }
+
+    private _getCaretGlyph(
+        glyph: IDocumentSkeletonGlyph | undefined,
+        glyphGroup: IDocumentSkeletonGlyph[],
+        glyphIndex: number
+    ): IDocumentSkeletonGlyph {
+        if (!glyph || !this._isNonInlineEmbedCustomBlockGlyph(glyph)) {
+            return glyph!;
+        }
+
+        const neighbor = this._findTextLikeGlyph(glyphGroup, glyphIndex - 1, -1) ??
+            this._findTextLikeGlyph(glyphGroup, glyphIndex + 1, 1);
+
+        return neighbor ?? {
+            ...glyph,
+            bBox: getDefaultCaretBoundingBox(glyph),
+        };
+    }
+
+    private _findTextLikeGlyph(glyphGroup: IDocumentSkeletonGlyph[], startIndex: number, step: 1 | -1): IDocumentSkeletonGlyph | undefined {
+        for (let index = startIndex; index >= 0 && index < glyphGroup.length; index += step) {
+            const glyph = glyphGroup[index];
+            if (!this._isNonInlineEmbedCustomBlockGlyph(glyph)) {
+                return glyph;
+            }
+        }
+
+        return undefined;
+    }
+
+    private _isNonInlineEmbedCustomBlockGlyph(glyph: IDocumentSkeletonGlyph | undefined): boolean {
+        if (!glyph?.drawingId || glyph.streamType !== DataStreamTreeTokenType.CUSTOM_BLOCK) {
+            return false;
+        }
+
+        const drawing = this._docSkeleton.getViewModel?.().getDataModel?.().getSnapshot?.().drawings?.[glyph.drawingId];
+        return !shouldUseInlineTextSelectionForDocsCustomBlockDrawing(drawing);
     }
 
     private _isValidPosition(startOrigin: INodePosition, endOrigin: INodePosition) {
@@ -799,6 +844,20 @@ function getCellPageFromSegmentPath(
     }
 
     return null;
+}
+
+function getDefaultCaretBoundingBox(glyph: IDocumentSkeletonGlyph): IDocumentSkeletonGlyph['bBox'] {
+    const fontSize = getGlyphFontSize(glyph);
+    return {
+        ...glyph.bBox,
+        ba: fontSize,
+        bd: Math.max(2, Math.ceil(fontSize * 0.25)),
+    };
+}
+
+function getGlyphFontSize(glyph: IDocumentSkeletonGlyph): number {
+    const fontSize = glyph.fontStyle?.originFontSize ?? glyph.fontStyle?.fontSize ?? glyph.ts?.fs;
+    return typeof fontSize === 'number' && Number.isFinite(fontSize) && fontSize > 0 ? fontSize : 14;
 }
 
 function getDocumentUnitId(docSkeleton: DocumentSkeleton): string {

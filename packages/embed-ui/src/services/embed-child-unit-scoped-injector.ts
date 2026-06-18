@@ -1,9 +1,25 @@
+/**
+ * Copyright 2023-present DreamNum Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import type { IAccessor, IExecutionOptions, IUndoRedoItem, IUndoRedoService as IUndoRedoServiceType, UniverInstanceType } from '@univerjs/core';
-import type { IContextMenuService, IMenuManagerService } from '@univerjs/ui';
+import type { IContextMenuService, IMenuManagerService, MenuManagerService } from '@univerjs/ui';
 import type { EmbedChildContainerContext } from '../types/embed-ui';
 import { COMMAND_EXECUTION_INJECTOR_KEY, ICommandService, Injector, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
-import { IContextMenuService as IContextMenuServiceIdentifier, IMenuManagerService as IMenuManagerServiceIdentifier, MenuManagerService } from '@univerjs/ui';
-import { of } from 'rxjs';
+import { IContextMenuService as IContextMenuServiceIdentifier, IMenuManagerService as IMenuManagerServiceIdentifier } from '@univerjs/ui';
+import { BehaviorSubject } from 'rxjs';
 import { EmbedUndoBridgeService } from './embed-undo-bridge.service';
 
 export function createEmbedChildUnitScopedInjector(
@@ -15,6 +31,8 @@ export function createEmbedChildUnitScopedInjector(
         return undefined;
     }
 
+    const scopedCurrentChildUnit$ = new BehaviorSubject(childUnit);
+    const scopedFocusedUnitId$ = new BehaviorSubject<string | null>(childUnit.getUnitId());
     const scopedInstanceService = new Proxy(instanceService, {
         get(target, property, receiver) {
             if (property === 'dispose') {
@@ -22,19 +40,46 @@ export function createEmbedChildUnitScopedInjector(
             }
             if (property === 'getCurrentUnitOfType') {
                 return (type: UniverInstanceType) => type === context.childType
-                    ? childUnit
+                    ? scopedCurrentChildUnit$.getValue()
                     : target.getCurrentUnitOfType(type);
             }
             if (property === 'getCurrentTypeOfUnit$') {
                 return (type: UniverInstanceType) => type === context.childType
-                    ? of(childUnit)
+                    ? scopedCurrentChildUnit$.asObservable()
                     : target.getCurrentTypeOfUnit$(type);
             }
+            if (property === 'setCurrentUnitForType') {
+                return (unitId: string) => {
+                    if (unitId === context.childUnitId) {
+                        scopedCurrentChildUnit$.next(childUnit);
+                        return;
+                    }
+
+                    target.setCurrentUnitForType(unitId);
+                };
+            }
             if (property === 'getFocusedUnit') {
-                return () => childUnit ?? target.getFocusedUnit();
+                return () => {
+                    const focusedUnitId = scopedFocusedUnitId$.getValue();
+                    if (focusedUnitId === null) {
+                        return null;
+                    }
+
+                    return focusedUnitId === context.childUnitId ? childUnit : target.getFocusedUnit();
+                };
             }
             if (property === 'focused$') {
-                return of(childUnit.getUnitId());
+                return scopedFocusedUnitId$.asObservable();
+            }
+            if (property === 'focusUnit') {
+                return (unitId: string | null) => {
+                    if (unitId === null || unitId === context.childUnitId) {
+                        scopedFocusedUnitId$.next(unitId);
+                        return;
+                    }
+
+                    target.focusUnit(unitId);
+                };
             }
             return Reflect.get(target, property, receiver);
         },
@@ -181,8 +226,10 @@ function createScopedUndoRedoService(parentInjector: Injector, childUnitId: stri
 
 export function createEmbedScopedInjector(
     parentInjector: Injector,
-    overrides: ReadonlyMap<unknown, unknown>
+    overrides: ReadonlyMap<unknown, unknown>,
+    sharedRootInjector: Injector = parentInjector
 ): Injector {
+    const resolvedSharedRootInjector = getEmbedSharedRootInjector(parentInjector) ?? sharedRootInjector;
     const localOverrides = new Map(overrides);
     let childInjector: Injector | undefined;
 
@@ -267,7 +314,7 @@ export function createEmbedScopedInjector(
             parentInjector.add(dependency as never);
         },
         createChild: (dependencies: unknown[] = []) => {
-            const childScopedInjector = createEmbedScopedInjector(parentInjector, localOverrides);
+            const childScopedInjector = createEmbedScopedInjector(parentInjector, localOverrides, resolvedSharedRootInjector);
             dependencies.forEach((dependency) => {
                 childScopedInjector.add(dependency as never);
             });
@@ -290,12 +337,92 @@ export function createEmbedScopedInjector(
             return new Ctor(...rest);
         },
         dispose: () => {
-            childInjector?.dispose();
+            if (childInjector) {
+                disposeChildInjectorWithoutSharedResolved(childInjector, resolvedSharedRootInjector, localOverrides.values());
+            }
             childInjector = undefined;
         },
     };
 
+    (scopedInjector as { __embedSharedRootInjector?: Injector }).__embedSharedRootInjector = resolvedSharedRootInjector;
+
     return scopedInjector as Injector;
+}
+
+function getEmbedSharedRootInjector(injector: Injector): Injector | undefined {
+    return (injector as { __embedSharedRootInjector?: Injector }).__embedSharedRootInjector;
+}
+
+function disposeChildInjectorWithoutSharedResolved(
+    childInjector: Injector,
+    parentInjector: Injector,
+    extraSharedInstances: Iterable<unknown> = []
+): void {
+    const sharedInstances = collectResolvedInstances(parentInjector);
+    for (const item of extraSharedInstances) {
+        sharedInstances.add(item);
+    }
+    pruneSharedResolvedInstances(childInjector, sharedInstances);
+    childInjector.dispose();
+}
+
+function collectResolvedInstances(injector: Injector): Set<unknown> {
+    const instances = new Set<unknown>();
+    const resolvedDependencies = getResolvedDependencies(injector);
+    if (!resolvedDependencies) {
+        return instances;
+    }
+
+    resolvedDependencies.forEach((items) => {
+        if (!Array.isArray(items)) {
+            return;
+        }
+
+        items.forEach((item) => instances.add(item));
+    });
+
+    return instances;
+}
+
+function pruneSharedResolvedInstances(injector: Injector, sharedInstances: ReadonlySet<unknown>, visited = new Set<unknown>()): void {
+    if (visited.has(injector)) {
+        return;
+    }
+    visited.add(injector);
+
+    const children = (injector as unknown as { children?: Injector[] }).children;
+    children?.forEach((child) => pruneSharedResolvedInstances(child, sharedInstances, visited));
+
+    const resolvedDependencies = getResolvedDependencies(injector);
+    if (!resolvedDependencies) {
+        return;
+    }
+
+    resolvedDependencies.forEach((items, identifier) => {
+        if (!Array.isArray(items)) {
+            return;
+        }
+
+        const ownedItems = items.filter((item) => !sharedInstances.has(item));
+        if (ownedItems.length === items.length) {
+            return;
+        }
+
+        if (ownedItems.length === 0) {
+            resolvedDependencies.delete(identifier);
+            return;
+        }
+
+        resolvedDependencies.set(identifier, ownedItems);
+    });
+}
+
+function getResolvedDependencies(injector: Injector): Map<unknown, unknown[]> | undefined {
+    return (injector as unknown as {
+        resolvedDependencyCollection?: {
+            resolvedDependencies?: Map<unknown, unknown[]>;
+        };
+    }).resolvedDependencyCollection?.resolvedDependencies;
 }
 
 function createValueDependencies(overrides: ReadonlyMap<unknown, unknown>): unknown[] {

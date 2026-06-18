@@ -15,7 +15,6 @@
  */
 
 import type { DependencyOverride } from '@univerjs/core';
-import type { EmbedProductPluginConfig } from '@univerjs/embed';
 import type { IScrollBarProps } from '@univerjs/engine-render';
 import type { ComponentType, MenuConfig } from '@univerjs/ui';
 import type { IPermissionDetailUserPartProps } from '../views/permission/panel-detail/PermissionDetailUserPart';
@@ -27,7 +26,6 @@ export const configSymbol = Symbol(SHEETS_UI_PLUGIN_CONFIG_KEY);
 export interface IUniverSheetsUIConfig {
     menu?: MenuConfig;
     disableAutoFocus?: true;
-    embed?: EmbedProductPluginConfig;
     override?: DependencyOverride;
 
     /**

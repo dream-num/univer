@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-import type { EmbedDescriptor } from '@univerjs/embed';
 import type { Workbook, Worksheet } from '@univerjs/core';
 import type { IUniverSheetsUIConfig } from '../../config/config';
-import { EmbedModelService } from '@univerjs/embed';
-import { EmbedActivationService, EmbedMountService } from '@univerjs/embed-ui';
 import { Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { ComponentManager, ContextMenuPosition, IMenuManagerService, ToolbarItem, useConfigValue, useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useMemo } from 'react';
 import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { getEmbedSheetsTabCustomData } from '../../embed-tab-anchor';
+import { ISheetEmbedRuntimeService } from '../../services/sheet-embed-runtime.service';
 import { AutoFillPopupMenu } from '../auto-fill-popup-menu/AutoFillPopupMenu';
 import { EditorContainer } from '../editor-container/EditorContainer';
 import { FormulaBar } from '../formula-bar/FormulaBar';
@@ -103,7 +101,10 @@ export function RenderSheetHeader() {
         return (
             <div
                 aria-hidden
-                className="univer-h-7 univer-border-b univer-border-gray-200 univer-bg-white dark:!univer-border-gray-700 dark:!univer-bg-gray-900"
+                className="
+                  univer-h-7 univer-border-b univer-border-gray-200 univer-bg-white
+                  dark:!univer-border-gray-700 dark:!univer-bg-gray-900
+                "
                 data-u-comp="formula-bar-placeholder"
             />
         );
@@ -139,7 +140,7 @@ export function RenderSheetContent() {
         const instanceService = injector.get(IUniverInstanceService);
         instanceService.setCurrentUnitForType(workbook.getUnitId());
         instanceService.focusUnit(workbook.getUnitId());
-        tryGetEmbedActivationService(injector)?.clearTab();
+        tryGetSheetEmbedRuntimeService(injector)?.clearTab();
     }, [activeEmbedTab, activeWorkbookEmbeddedRender, injector, workbook]);
 
     if (!hasWorkbook) return null;
@@ -164,40 +165,41 @@ function RenderSheetEmbedTabHost(props: { workbook: Workbook; worksheet: Workshe
     const hostUnitId = workbook.getUnitId();
     const hostAnchorId = embedData?.hostAnchorId;
     const embedId = embedData?.embedId;
-    const embedModelService = useDependency(EmbedModelService);
 
     useEffect(() => {
         if (!embedId || !hostAnchorId) {
             return undefined;
         }
 
-        const mountService = tryGetEmbedMountService(injector);
-        if (!mountService) {
-            return undefined;
-        }
-
-        const descriptor = embedModelService.getDescriptor(hostUnitId, embedId) as EmbedDescriptor | undefined;
-        if (!descriptor || descriptor.hostAnchorId !== hostAnchorId) {
+        const embedRuntimeService = tryGetSheetEmbedRuntimeService(injector);
+        if (!embedRuntimeService) {
             return undefined;
         }
 
         try {
-            mountService.mount(descriptor);
-            injector.get(EmbedActivationService).activateTab(descriptor);
+            const disposable = embedRuntimeService.mountSheetTab({
+                hostUnitId,
+                hostAnchorId,
+                embedId,
+            });
+
+            return () => {
+                disposable?.dispose();
+            };
         } catch (error) {
             console.warn('[sheets-ui] failed to mount embedded sheet-tab block', error);
         }
 
-        return () => {
-            mountService.unmount(embedId);
-            injector.get(EmbedActivationService).clearTab(embedId);
-        };
-    }, [embedId, embedModelService, hostAnchorId, hostUnitId, injector]);
+        return undefined;
+    }, [embedId, hostAnchorId, hostUnitId, injector]);
 
     return (
         <div
             data-embed-sheets-sheet-tab-host={hostAnchorId}
-            className="univer-absolute univer-inset-0 univer-z-40 univer-bg-white dark:!univer-bg-gray-900"
+            className="
+              univer-absolute univer-inset-0 univer-z-40 univer-bg-white
+              dark:!univer-bg-gray-900
+            "
         />
     );
 }
@@ -235,17 +237,9 @@ function useActiveSheetEmbedTabData(workbook: Workbook | null): { worksheet: Wor
     return worksheet && getEmbedSheetsTabCustomData(worksheet.getConfig()) ? { worksheet } : undefined;
 }
 
-function tryGetEmbedMountService(injector: Injector): EmbedMountService | undefined {
+function tryGetSheetEmbedRuntimeService(injector: Injector) {
     try {
-        return injector.get(EmbedMountService);
-    } catch {
-        return undefined;
-    }
-}
-
-function tryGetEmbedActivationService(injector: Injector): EmbedActivationService | undefined {
-    try {
-        return injector.get(EmbedActivationService);
+        return injector.get(ISheetEmbedRuntimeService);
     } catch {
         return undefined;
     }

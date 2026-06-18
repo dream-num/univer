@@ -31,6 +31,7 @@ import {
     hasTibetan,
     startWithEmoji,
 } from '../../../../../basics/tools';
+import { getDocsCustomBlockRenderViewport } from '../../../custom-block-render-viewport';
 import { Lang } from '../../hyphenation/lang';
 import { LineBreaker } from '../../line-breaker';
 import { BreakPointType } from '../../line-breaker/break';
@@ -243,8 +244,21 @@ export function shaping(
                             const top = 0;
                             const left = 0;
                             const boundingBox = getBoundingBox(angle, left, width, top, height);
+                            const viewport = getDocsCustomBlockRenderViewport(
+                                viewModel.getDataModel().getUnitId?.() ?? '',
+                                drawingOrigin.drawingId,
+                                {
+                                    fallbackHeight: boundingBox.height ?? 0,
+                                    fallbackWidth: boundingBox.width ?? 0,
+                                }
+                            );
 
-                            newGlyph = createSkeletonCustomBlockGlyph(config, boundingBox.width, boundingBox.height, drawingOrigin.drawingId);
+                            newGlyph = createSkeletonCustomBlockGlyph(
+                                config,
+                                viewport?.layoutWidth ?? viewport?.width ?? boundingBox.width,
+                                viewport?.height ?? boundingBox.height,
+                                drawingOrigin.drawingId
+                            );
                         } else if (drawingOrigin != null) {
                             newGlyph = createSkeletonCustomBlockGlyph(config, 0, 0, drawingOrigin.drawingId);
                         }

@@ -1,16 +1,32 @@
-import type { IAccessor, IDisposable, IExecutionOptions, UniverInstanceType } from '@univerjs/core';
-import type { IMenuSchema } from '@univerjs/ui';
-import type { MenuSchemaType } from '@univerjs/ui';
+/**
+ * Copyright 2023-present DreamNum Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import type { IAccessor, IDisposable, IExecutionOptions, Injector, UniverInstanceType } from '@univerjs/core';
+import type { IMenuSchema, MenuSchemaType } from '@univerjs/ui';
 import type { EmbedProductMenuMountContext } from '../types/embed-ui';
-import { COMMAND_EXECUTION_INJECTOR_KEY, ICommandService, IConfigService, Injector, IUniverInstanceService, LocaleService, toDisposable } from '@univerjs/core';
-import { DesktopRibbonService, IMenuManagerService, IRibbonService, MenuManagerPosition, MenuManagerService, RediProvider, Ribbon } from '@univerjs/ui';
+import { COMMAND_EXECUTION_INJECTOR_KEY, ICommandService, IConfigService, IUniverInstanceService, LocaleService, toDisposable } from '@univerjs/core';
+import { DesktopRibbonService, IMenuManagerService, IRibbonService, MenuManagerPosition, MenuManagerService, Ribbon } from '@univerjs/ui';
 import { createElement } from 'react';
 import { map, merge, of } from 'rxjs';
+import { EmbedRuntimeProviders } from '../components/embed-runtime-providers';
 import { createEmbedReactRoot, disposeEmbedReactRoot } from './react-root-disposal';
 
 export function mountEmbedProductRibbonMenu(context: EmbedProductMenuMountContext): IDisposable | undefined {
     const { container, injector, childType, childUnitId, menuSchema, menuTitlePrefix, activeRibbonTab, toolbarOnly } = context;
-    if (!menuSchema || typeof menuSchema !== 'object') {
+    if (menuSchema != null && typeof menuSchema !== 'object') {
         return undefined;
     }
 
@@ -23,8 +39,8 @@ export function mountEmbedProductRibbonMenu(context: EmbedProductMenuMountContex
     });
     const root = createEmbedReactRoot(container);
     root.render(createElement(
-        RediProvider,
-        { value: { injector: scoped.injector as Injector } },
+        EmbedRuntimeProviders,
+        { injector: scoped.injector as Injector, mountContainer: container },
         createElement(Ribbon, { ribbonType: 'classic', headerMenu: false, toolbarOnly })
     ));
 
@@ -57,7 +73,7 @@ export function createEmbedProductMenuInjector(
     );
     let menuManager: IMenuManagerService;
     let menuManagerDisposable: IDisposable | undefined;
-    let ribbonService: DesktopRibbonService;
+    const ribbonServiceRef: { current?: DesktopRibbonService } = {};
     let exposedRibbonService: IRibbonService;
     const hasDependency = (identifier: Parameters<Injector['get']>[0]) => {
         if (
@@ -108,7 +124,8 @@ export function createEmbedProductMenuInjector(
             ? createScoped.call(rootMenuManager, scopedInjector as Injector)
             : rootMenuManager;
     }
-    ribbonService = new DesktopRibbonService(menuManager, scopedInstanceService);
+    const ribbonService = new DesktopRibbonService(menuManager, scopedInstanceService);
+    ribbonServiceRef.current = ribbonService;
     if (activeRibbonTab) {
         ribbonService.setActivatedTab(activeRibbonTab);
     }
@@ -120,7 +137,7 @@ export function createEmbedProductMenuInjector(
         injector: scopedInjector,
         ribbonService: exposedRibbonService,
         disposable: toDisposable(() => {
-            ribbonService.dispose();
+            ribbonServiceRef.current?.dispose();
             menuManagerDisposable?.dispose();
         }),
     };

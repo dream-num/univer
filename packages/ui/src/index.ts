@@ -91,7 +91,7 @@ export {
     RibbonStartGroup,
     RibbonViewGroup,
 } from './services/menu/types';
-export { MockMessageService } from './services/message/__testing__/mock-message.service';
+export { MockMessageService } from './services/message/__tests__/mock-message.service';
 export { DesktopMessageService } from './services/message/desktop-message.service';
 export { IMessageService } from './services/message/message.service';
 export { DesktopNotificationService } from './services/notification/desktop-notification.service';

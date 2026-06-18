@@ -346,6 +346,30 @@ describe('DocDrawingPosition', () => {
         });
     });
 
+    it('persists vertical absolute position on the focused drawing', async () => {
+        currentTestBed = createPositionTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        renderPanel(root, currentTestBed);
+
+        const verticalPositionInput = Array.from(container.querySelectorAll('input'))[1];
+
+        await act(async () => {
+            setInputValue(verticalPositionInput, '18.5');
+            await Promise.resolve();
+        });
+
+        expect(currentDrawing(currentTestBed)).toMatchObject({
+            docTransform: {
+                positionV: {
+                    relativeFrom: ObjectRelativeFromV.PARAGRAPH,
+                    posOffset: 18.5,
+                },
+            },
+        });
+    });
+
     it('hides the position controls when doc drawing focus is cleared', async () => {
         currentTestBed = createPositionTestBed();
         container = document.createElement('div');

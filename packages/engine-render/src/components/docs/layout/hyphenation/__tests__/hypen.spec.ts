@@ -18,6 +18,7 @@ import type { Nullable } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { Hyphen } from '../hyphen';
 import { Lang } from '../lang';
+import { PATTERN_LOADERS } from '../pattern-loaders.gen';
 
 describe('test hyphenation', () => {
     let hyphen: Nullable<Hyphen> = null;
@@ -41,6 +42,15 @@ describe('test hyphenation', () => {
             await hyphen?.loadPattern(Lang.Af);
 
             expect(hyphen?.hasPattern(Lang.Af)).toBe(true);
+        });
+
+        it('loads every generated hyphenation pattern module', async () => {
+            const entries = Object.entries(PATTERN_LOADERS);
+
+            const patterns = await Promise.all(entries.map(([, load]) => load?.()));
+
+            expect(patterns).toHaveLength(entries.length);
+            expect(patterns.every((pattern) => pattern != null)).toBe(true);
         });
     });
 

@@ -53,7 +53,7 @@ import { ILayoutService, IMessageService, IUIPartsService, RediContext, UIPartsS
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { afterEach, describe, expect, it } from 'vitest';
-import { WithValuesAndEmptyFilterModelFactory, WithValuesFilterModelFactory } from '../../../__testing__/data';
+import { WithValuesAndEmptyFilterModelFactory, WithValuesFilterModelFactory } from '../../../__tests__/data';
 import {
     ChangeFilterByOperation,
     CloseFilterPanelOperation,

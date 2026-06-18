@@ -59,7 +59,7 @@ import {
     WithTwoFilterColumnsFactory,
     WithValuesAndEmptyFilterModelFactory,
     WithValuesFilterModelFactory,
-} from '../../__testing__/data';
+} from '../../__tests__/data';
 import { CloseFilterPanelOperation, OpenFilterPanelOperation } from '../../commands/operations/sheets-filter.operation';
 import { FilterConditionItems } from '../../models/conditions';
 import { ExtendCustomFilterOperator } from '../../models/extended-operators';

@@ -1016,6 +1016,35 @@ describe('sheet table view components', () => {
         expect(selectAllLabel?.textContent).toContain('(1/3)');
     });
 
+    it('closes without changing the filter when confirmed value selections are unchanged', async () => {
+        testBed = createTestBed();
+        const componentController = testBed.injector.get(SheetsTableComponentController) as TestComponentController;
+        const table = testBed.injector.get(TableManager).getTable(testBed.workbook.getUnitId(), 'table-orders')!;
+        table.setTableFilterColumn(0, {
+            filterType: TableColumnFilterTypeEnum.manual,
+            values: ['book'],
+        });
+        componentController.setCurrentTableFilterInfo({
+            unitId: testBed.workbook.getUnitId(),
+            subUnitId: 'sheet1',
+            tableId: 'table-orders',
+            row: 0,
+            column: 0,
+        });
+        const rendered = renderWithRediContext(testBed, <SheetTableFilterPanel />);
+        root = rendered.root;
+        container = rendered.container;
+
+        clickButtonByText(container, 'Confirm');
+        await flushCommands();
+
+        expect(table.getTableFilterColumn(0)).toEqual({
+            filterType: TableColumnFilterTypeEnum.manual,
+            values: ['book'],
+        });
+        expect(componentController.closeCount).toBe(1);
+    });
+
     it('clears an existing table filter through the filter panel clear action', async () => {
         testBed = createTestBed();
         const componentController = testBed.injector.get(SheetsTableComponentController) as TestComponentController;

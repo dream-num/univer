@@ -128,6 +128,12 @@ function inputInField(container: HTMLElement, text: string) {
     return label?.parentElement?.querySelector('input') as HTMLInputElement;
 }
 
+function checkboxInField(container: HTMLElement, text: string) {
+    const label = Array.from(container.querySelectorAll('span'))
+        .find((span) => span.textContent === text);
+    return label?.parentElement?.querySelector('input[type="checkbox"]') as HTMLInputElement;
+}
+
 function setInputValue(input: HTMLInputElement, value: string) {
     const valueSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
     valueSetter?.call(input, value);
@@ -188,6 +194,39 @@ describe('DrawingTransform behavior', () => {
                 transform: {
                     width: 120,
                     height: 60,
+                },
+            },
+        ]]);
+        expect(renderManagerService.transformer.refreshCount).toBe(1);
+        expect(renderManagerService.transformer.notificationCount).toBe(1);
+    });
+
+    it('resizes only the edited dimension after aspect ratio is unlocked', async () => {
+        const drawing = createDrawing('image-1');
+        const updates: IDrawingParam[][] = [];
+        drawingManagerService.featurePluginUpdate$.subscribe((update) => updates.push(update));
+
+        const rendered = renderWithRediContext(univer.__getInjector(), drawing);
+        root = rendered.root;
+        container = rendered.container;
+
+        act(() => {
+            checkboxInField(container!, 'drawing-ui.image-panel.transform.lock').click();
+        });
+
+        expect(renderManagerService.transformer.keepRatio).toBe(false);
+
+        setInputValue(inputInField(container, 'drawing-ui.image-panel.transform.width'), '120');
+        await waitForDebouncedInput();
+
+        expect(updates).toEqual([[
+            {
+                unitId,
+                subUnitId,
+                drawingId: 'image-1',
+                drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+                transform: {
+                    width: 120,
                 },
             },
         ]]);

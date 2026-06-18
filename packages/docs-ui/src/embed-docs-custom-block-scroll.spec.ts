@@ -67,10 +67,25 @@ describe('scrollDocsTableLikeCustomBlockLive', () => {
         expect(handled).toBe(true);
         expect(live.scrollTop).toBe(120);
     });
+
+    it('does not scroll when the child runtime already consumed the wheel event', () => {
+        const live = createScrollableElement({
+            clientHeight: 300,
+            scrollHeight: 900,
+        });
+        const event = createWheelEvent({ deltaY: 120 });
+        event.preventDefault();
+
+        const handled = scrollDocsTableLikeCustomBlockLive(event, live);
+
+        expect(handled).toBe(false);
+        expect(live.scrollTop).toBe(0);
+    });
 });
 
 function createWheelEvent(params: { deltaX?: number; deltaY?: number; shiftKey?: boolean }): WheelEvent {
     return new WheelEvent('wheel', {
+        cancelable: true,
         deltaX: params.deltaX ?? 0,
         deltaY: params.deltaY ?? 0,
         shiftKey: params.shiftKey ?? false,

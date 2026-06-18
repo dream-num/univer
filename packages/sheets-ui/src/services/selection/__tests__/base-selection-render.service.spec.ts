@@ -43,6 +43,12 @@ import { BaseSelectionRenderService } from '../base-selection-render.service';
 import { SelectionLayer } from '../selection-layer';
 
 class TestSelectionRenderService extends BaseSelectionRenderService {
+    cleanupForTest() {
+        if (this._scene) {
+            this._clearUpdatingListeners();
+        }
+    }
+
     emitMoving() {
         this._selectionMoving$.next([]);
     }
@@ -217,6 +223,7 @@ function createSelectionRenderService() {
         injector.get(SheetSkeletonManagerService),
         contextService
     );
+    createdServices.push(service);
 
     return { injector, contextService, service };
 }
@@ -242,6 +249,8 @@ function viewportKey(viewport: unknown) {
     return (viewport as { viewportKey?: string } | null)?.viewportKey;
 }
 
+const createdServices: TestSelectionRenderService[] = [];
+
 const selections: ISelectionWithStyle[] = [
     createSelection({ startRow: 1, endRow: 1, startColumn: 1, endColumn: 1, rangeType: RANGE_TYPE.NORMAL }),
     createSelection({ startRow: 2, endRow: 3, startColumn: 2, endColumn: 4, rangeType: RANGE_TYPE.NORMAL }),
@@ -249,6 +258,8 @@ const selections: ISelectionWithStyle[] = [
 
 describe('BaseSelectionRenderService', () => {
     afterEach(() => {
+        createdServices.forEach((service) => service.cleanupForTest());
+        createdServices.length = 0;
         vi.unstubAllGlobals();
     });
 

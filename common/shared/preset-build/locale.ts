@@ -91,13 +91,14 @@ export function generatePresetLocales(options: IGeneratePresetLocalesOptions): s
             continue;
         }
 
-        let content = 'import { mergeLocales } from \'@univerjs/core\';\n\n';
+        let content = '';
 
         for (const { dependencyName, localeSubpath } of dependenciesWithLocale) {
             content += `import ${convertImportNameFromPackageName(dependencyName)} from '${dependencyName}/${localeSubpath}/${locale}';\n`;
         }
 
-        content += '\nexport default mergeLocales(\n';
+        content += '\nexport default Object.assign(\n';
+        content += '    {},\n';
 
         for (const { dependencyName } of dependenciesWithLocale) {
             content += `    ${convertImportNameFromPackageName(dependencyName)},\n`;

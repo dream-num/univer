@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IRangeWithCoord, Nullable, Workbook } from '@univerjs/core';
+import type { IDisposable, IRange, IRangeWithCoord, Nullable, Workbook } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
 import type { ISelectionStyle, ISelectionWithCoord, ISelectionWithStyle, SheetsSelectionsService, WorkbookSelectionModel } from '@univerjs/sheets';
 import { DisposableCollection, IContextService, Inject, Injector, RANGE_TYPE, Rectangle, ThemeService, toDisposable } from '@univerjs/core';
@@ -22,6 +22,25 @@ import { ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-r
 import { attachSelectionWithCoord, convertSelectionDataToRange, IRefSelectionsService, SelectionMoveType } from '@univerjs/sheets';
 import { BaseSelectionRenderService, checkInHeaderRanges, genNormalSelectionStyle, getAllSelection, getCoordByOffset, getSheetObject, SelectionControl, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { IShortcutService } from '@univerjs/ui';
+
+export function getActiveSelectionControlIndex(
+    selectionControls: SelectionControl[],
+    activeSelectionControl: Nullable<SelectionControl>
+): number {
+    const activeControlIndex = activeSelectionControl ? selectionControls.indexOf(activeSelectionControl) : -1;
+    return activeControlIndex === -1 ? selectionControls.length - 1 : activeControlIndex;
+}
+
+export function isSelectionRangeChanged(previous: Nullable<IRange>, current: Nullable<IRange>): boolean {
+    if (!previous || !current) {
+        return false;
+    }
+
+    return previous.startRow !== current.startRow ||
+        previous.startColumn !== current.startColumn ||
+        previous.endRow !== current.endRow ||
+        previous.endColumn !== current.endColumn;
+}
 
 /**
  * This service extends the existing `SelectionRenderService` to provide the rendering of prompt selections
@@ -378,6 +397,14 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
 
         const currentCell = activeSelectionControl?.model.currentCell;
         const expandByShiftKey = evt.shiftKey && currentCell;
+        const rangeBeforePointerDown = expandByShiftKey && activeSelectionControl
+            ? {
+                startRow: activeSelectionControl.model.startRow,
+                startColumn: activeSelectionControl.model.startColumn,
+                endRow: activeSelectionControl.model.endRow,
+                endColumn: activeSelectionControl.model.endColumn,
+            }
+            : null;
         const remainLastEnable = this._remainLastEnabled &&
             !evt.ctrlKey &&
             !evt.shiftKey &&
@@ -403,13 +430,20 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
             // In normal situation, pointerdown ---> Create new SelectionControl,
             activeSelectionControl = this.newSelectionControl(scene, skeleton, selectionWithStyle);
         }
-        // clear highlight except last one.
-        for (let i = 0; i < this.getSelectionControls().length - 1; i++) {
-            this.getSelectionControls()[i].clearHighlight();
+        // Clear highlight except the active selection. The active ref may not be the last one.
+        const selectionControls = this.getSelectionControls();
+        const activeControlIndex = getActiveSelectionControlIndex(selectionControls, activeSelectionControl);
+        for (let i = 0; i < selectionControls.length; i++) {
+            if (i !== activeControlIndex && selectionControls[i].model.currentCell) {
+                selectionControls[i].clearHighlight();
+            }
         }
         //#endregion
 
         this._selectionMoveStart$.next(this.getSelectionDataWithStyle());
+        if (expandByShiftKey && activeSelectionControl && isSelectionRangeChanged(rangeBeforePointerDown, activeSelectionControl.model)) {
+            this._selectionMoving$.next(this.getSelectionDataWithStyle());
+        }
 
         scene.disableObjectsEvent();
         this._clearUpdatingListeners();

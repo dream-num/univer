@@ -49,6 +49,7 @@
         "build:presets": "turbo build --filter './presets/**...' --filter '!./presets/**' && turbo build --filter './presets/**'",
         "build:demo": "pnpm --filter univer-examples build:demo",
         "build:e2e": "turbo build:e2e --filter univer-examples",
+        "build:e2e:presets-umd": "turbo build --filter '@univerjs/presets...' --filter '@univerjs/preset-sheets-core...' --filter '@univerjs/preset-docs-core...'",
         "serve:e2e": "serve ./examples/local",
         "test:e2e": "playwright test",
         "lint": "eslint .",

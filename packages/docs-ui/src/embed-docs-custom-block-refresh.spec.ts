@@ -48,6 +48,14 @@ describe('docs custom block refresh helpers', () => {
         })).toBe(false);
     });
 
+    it('accepts legacy unitID command params when detecting child unit changes', () => {
+        expect(shouldRefreshDocsCustomBlockSizeForCommand({
+            childUnitIds: new Set(['sheet-1']),
+            commandParams: { unitID: 'sheet-1' },
+            hostUnitId: 'doc-host',
+        })).toBe(true);
+    });
+
     it('coalesces repeated refresh requests into one frame', () => {
         const refresh = vi.fn();
         let frameCallback: (() => void) | undefined;

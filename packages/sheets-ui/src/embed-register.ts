@@ -29,6 +29,7 @@ import { EMBED_SHEETS_FLOATING_COMPONENT_KEY } from './embed-floating-anchor';
 import { createSheetsFloatingMenuContributions } from './embed-floating-menu';
 import { createSheetsFloatingObjectHostAdapterContribution, createSheetsFloatingObjectHostContainerContribution, createSheetsSheetTabHostAdapterContribution, createSheetsSheetTabHostContainerContribution } from './embed-host-adapter';
 import { createSheetsPassiveViewportProvider } from './embed-passive-viewport';
+import { registerSheetsEmbedProductMenus } from './embed-product-menu';
 import { ISheetEmbedRuntimeService } from './services/sheet-embed-runtime.service';
 import { ISheetHostChromeOverrideService } from './services/sheet-host-chrome-override.service';
 
@@ -47,6 +48,8 @@ function registerSheetsEmbedUIContributionsNow(injector: Injector): void {
     const passiveViewportRegistry = injector.get(EmbedPassiveViewportRegistryService);
     const anchorModelService = injector.has(EmbedHostAnchorModelService) ? injector.get(EmbedHostAnchorModelService) : undefined;
     const univerInstanceService = injector.has(IUniverInstanceService) ? injector.get(IUniverInstanceService) : undefined;
+    registerSheetsEmbedProductMenus(injector);
+
     if (!injector.has(ISheetHostChromeOverrideService)) {
         injector.add([ISheetHostChromeOverrideService, { useFactory: () => injector.get(EmbedHostMenuOverrideService) }]);
     }

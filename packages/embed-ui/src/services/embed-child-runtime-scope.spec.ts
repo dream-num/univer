@@ -18,7 +18,7 @@
  * @vitest-environment jsdom
  */
 
-import type { EmbedDescriptor } from '@univerjs/embed';
+import type { IEmbedDescriptor } from '@univerjs/embed';
 import type { EmbedChildRuntimeScopeCreateContext } from './embed-child-runtime-scope';
 import { Injector, UniverInstanceType } from '@univerjs/core';
 import { of } from 'rxjs';
@@ -78,7 +78,7 @@ function createContext(
     rootElement: HTMLElement,
     overrides: Partial<EmbedChildRuntimeScopeCreateContext['renderScope']> = {}
 ): EmbedChildRuntimeScopeCreateContext {
-    const descriptor: EmbedDescriptor = {
+    const descriptor: IEmbedDescriptor = {
         embedId: 'embed-1',
         hostUnitId: 'host-1',
         hostType: UniverInstanceType.UNIVER_SHEET,

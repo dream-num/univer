@@ -18,8 +18,8 @@
  * @vitest-environment jsdom
  */
 
-import type { EmbedDescriptor } from '@univerjs/embed';
-import type { EmbedFloatingMenuMountContext } from '../types/embed-ui';
+import type { IEmbedDescriptor } from '@univerjs/embed';
+import type { IEmbedFloatingMenuMountContext } from '../types/embed-ui';
 import { Injector, UniverInstanceType } from '@univerjs/core';
 import { of } from 'rxjs';
 import { describe, expect, it } from 'vitest';
@@ -51,8 +51,8 @@ function createContext(
     contentRoot: HTMLElement,
     overlayRoot: HTMLElement,
     injector: Injector
-): EmbedFloatingMenuMountContext {
-    const descriptor: EmbedDescriptor = {
+): IEmbedFloatingMenuMountContext {
+    const descriptor: IEmbedDescriptor = {
         embedId: 'embed-1',
         hostUnitId: 'host-1',
         hostType: UniverInstanceType.UNIVER_SHEET,

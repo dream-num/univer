@@ -15,13 +15,13 @@
  */
 
 import type { IDisposable, UniverInstanceType } from '@univerjs/core';
-import type { EmbedBlockContribution } from '../types/embed-ui';
+import type { IEmbedBlockContribution } from '../types/embed-ui';
 import { toDisposable } from '@univerjs/core';
 
 export class EmbedBlockRegistryService {
-    private readonly _contributions = new Map<UniverInstanceType, EmbedBlockContribution>();
+    private readonly _contributions = new Map<UniverInstanceType, IEmbedBlockContribution>();
 
-    register(contribution: EmbedBlockContribution): IDisposable {
+    register(contribution: IEmbedBlockContribution): IDisposable {
         this._contributions.set(contribution.childType, contribution);
 
         return toDisposable(() => {
@@ -31,11 +31,11 @@ export class EmbedBlockRegistryService {
         });
     }
 
-    get(childType: UniverInstanceType): EmbedBlockContribution | undefined {
+    get(childType: UniverInstanceType): IEmbedBlockContribution | undefined {
         return this._contributions.get(childType);
     }
 
-    list(): EmbedBlockContribution[] {
+    list(): IEmbedBlockContribution[] {
         return [...this._contributions.values()];
     }
 }

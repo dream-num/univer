@@ -18,15 +18,15 @@
  * @vitest-environment jsdom
  */
 
-import type { EmbedDescriptor } from '@univerjs/embed';
-import type { EmbedChildContainerContext } from '../types/embed-ui';
+import type { IEmbedDescriptor } from '@univerjs/embed';
+import type { IEmbedChildContainerContext } from '../types/embed-ui';
 import { UniverInstanceType } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { EmbedBlockRegistryService } from '../services/embed-block-registry.service';
 import { EmbedFloatingMenuRegistryService } from '../services/embed-floating-menu-registry.service';
 import { EmbedProductMenuRegistryService } from '../services/embed-product-menu-registry.service';
 import { EmbedHostChromeMode } from '../types/embed-ui';
-import { createFullscreenRenderScope, mountFullscreenWorkbenchMenus } from './embed-host-toolbar-menu';
+import { createFullscreenRenderScope, mountFullscreenWorkbenchMenus } from './EmbedHostToolbarMenu';
 
 describe('Embed fullscreen workbench', () => {
     it('creates standard runtime slots for fullscreen product chrome', () => {
@@ -59,7 +59,7 @@ describe('Embed fullscreen workbench', () => {
                 fullscreen: true,
                 mode: 'float',
             },
-        } as EmbedChildContainerContext;
+        } as IEmbedChildContainerContext;
         const dispose = vi.fn();
         const mount = vi.fn(() => ({ dispose }));
         const floatingRegistry = {
@@ -124,7 +124,7 @@ describe('Embed fullscreen workbench', () => {
                 fullscreen: true,
                 mode: 'float',
             },
-        } as EmbedChildContainerContext;
+        } as IEmbedChildContainerContext;
         const dispose = vi.fn();
         const productMenuRegistry = {
             mountMenu: vi.fn(() => ({ dispose })),
@@ -178,7 +178,7 @@ describe('Embed fullscreen workbench', () => {
     });
 });
 
-function createDescriptor(overrides: Partial<EmbedDescriptor> = {}): EmbedDescriptor {
+function createDescriptor(overrides: Partial<IEmbedDescriptor> = {}): IEmbedDescriptor {
     return {
         embedId: 'embed-1',
         hostUnitId: 'host-1',

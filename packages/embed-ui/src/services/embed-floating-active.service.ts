@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import type { EmbedFloatingActivation, EmbedFloatingStage } from '../types/embed-ui';
+import type { EmbedFloatingStage, IEmbedFloatingActivation } from '../types/embed-ui';
 import { BehaviorSubject } from 'rxjs';
 
 export class EmbedFloatingActiveService {
-    private readonly _active$ = new BehaviorSubject<EmbedFloatingActivation | null>(null);
+    private readonly _active$ = new BehaviorSubject<IEmbedFloatingActivation | null>(null);
 
     readonly active$ = this._active$.asObservable();
 
-    getActive(): EmbedFloatingActivation | null {
+    getActive(): IEmbedFloatingActivation | null {
         return this._active$.getValue();
     }
 
@@ -31,7 +31,7 @@ export class EmbedFloatingActiveService {
         return active?.embedId === embedId ? active.stage ?? 'stage1' : 'inactive';
     }
 
-    activate(next: EmbedFloatingActivation, stage?: Exclude<EmbedFloatingStage, 'inactive'>): void {
+    activate(next: IEmbedFloatingActivation, stage?: Exclude<EmbedFloatingStage, 'inactive'>): void {
         const current = this.getActive();
         const sameTarget = current?.hostUnitId === next.hostUnitId &&
             current.embedId === next.embedId &&

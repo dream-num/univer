@@ -16,13 +16,13 @@
 
 import type { IDisposable, UniverInstanceType } from '@univerjs/core';
 import type { EmbedHostEntry } from '@univerjs/embed';
-import type { EmbedFloatingMenuContribution } from '../types/embed-ui';
+import type { IEmbedFloatingMenuContribution } from '../types/embed-ui';
 import { toDisposable } from '@univerjs/core';
 
 export class EmbedFloatingMenuRegistryService {
-    private readonly _contributions = new Map<string, EmbedFloatingMenuContribution>();
+    private readonly _contributions = new Map<string, IEmbedFloatingMenuContribution>();
 
-    register(contribution: EmbedFloatingMenuContribution): IDisposable {
+    register(contribution: IEmbedFloatingMenuContribution): IDisposable {
         const key = this._key(contribution.hostType, contribution.entry, contribution.childType);
         if (this._contributions.has(key)) {
             throw new Error(`Embed floating menu contribution already registered: ${key}`);
@@ -37,7 +37,7 @@ export class EmbedFloatingMenuRegistryService {
         });
     }
 
-    get(hostType: UniverInstanceType, entry: EmbedHostEntry, childType?: UniverInstanceType): EmbedFloatingMenuContribution | undefined {
+    get(hostType: UniverInstanceType, entry: EmbedHostEntry, childType?: UniverInstanceType): IEmbedFloatingMenuContribution | undefined {
         if (childType != null) {
             const exact = this._contributions.get(this._key(hostType, entry, childType));
             if (exact) {
@@ -52,7 +52,7 @@ export class EmbedFloatingMenuRegistryService {
         return this._contributions.has(this._key(hostType, entry, childType));
     }
 
-    list(): EmbedFloatingMenuContribution[] {
+    list(): IEmbedFloatingMenuContribution[] {
         return [...this._contributions.values()];
     }
 

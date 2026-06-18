@@ -15,13 +15,13 @@
  */
 
 import type { IDisposable, UniverInstanceType } from '@univerjs/core';
-import type { EmbedContentSize, EmbedContentSizeMeasureContext, EmbedContentSizeProvider } from '../types/embed-ui';
+import type { IEmbedContentSize, IEmbedContentSizeMeasureContext, IEmbedContentSizeProvider } from '../types/embed-ui';
 import { toDisposable } from '@univerjs/core';
 
 export class EmbedContentSizeRegistryService {
-    private readonly _providers = new Map<UniverInstanceType, EmbedContentSizeProvider>();
+    private readonly _providers = new Map<UniverInstanceType, IEmbedContentSizeProvider>();
 
-    register(provider: EmbedContentSizeProvider): IDisposable {
+    register(provider: IEmbedContentSizeProvider): IDisposable {
         this._providers.set(provider.childType, provider);
         return toDisposable(() => {
             if (this._providers.get(provider.childType) === provider) {
@@ -30,15 +30,15 @@ export class EmbedContentSizeRegistryService {
         });
     }
 
-    get(childType: UniverInstanceType): EmbedContentSizeProvider | undefined {
+    get(childType: UniverInstanceType): IEmbedContentSizeProvider | undefined {
         return this._providers.get(childType);
     }
 
-    list(): EmbedContentSizeProvider[] {
+    list(): IEmbedContentSizeProvider[] {
         return [...this._providers.values()];
     }
 
-    measureContentSize(context: EmbedContentSizeMeasureContext): EmbedContentSize | undefined {
+    measureContentSize(context: IEmbedContentSizeMeasureContext): IEmbedContentSize | undefined {
         return this.get(context.childType)?.measureContentSize(context);
     }
 }

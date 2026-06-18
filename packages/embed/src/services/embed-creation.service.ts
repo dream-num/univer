@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { EmbedCreateContext, EmbedCreateResult, EmbedDescriptor } from '../types/embed';
+import type { IEmbedCreateContext, IEmbedCreateResult, IEmbedDescriptor } from '../types/embed';
 import { Inject } from '@univerjs/core';
 import { createDefaultEmbedSourceMeta, EmbedCapabilityRegistryService } from './embed-capability-registry.service';
 import { EmbedModelService } from './embed-model.service';
@@ -35,7 +35,7 @@ export class EmbedCreationService {
         // noop
     }
 
-    async prepareCreateEmbed(context: EmbedCreateContext): Promise<EmbedCreateResult> {
+    async prepareCreateEmbed(context: IEmbedCreateContext): Promise<IEmbedCreateResult> {
         this._nestedGuard.assertCanCreate(context);
 
         const resolvedSource = await this._sourceResolver.resolve(context.source);
@@ -48,7 +48,7 @@ export class EmbedCreationService {
             throw new Error('EMBED_CAPABILITY_NOT_SUPPORTED');
         }
 
-        const descriptor: EmbedDescriptor = {
+        const descriptor: IEmbedDescriptor = {
             embedId: context.embedId,
             hostUnitId: context.hostUnitId,
             hostType: context.hostType,
@@ -68,7 +68,7 @@ export class EmbedCreationService {
         };
     }
 
-    async createEmbed(context: EmbedCreateContext): Promise<EmbedCreateResult> {
+    async createEmbed(context: IEmbedCreateContext): Promise<IEmbedCreateResult> {
         const result = await this.prepareCreateEmbed(context);
         const { descriptor, resolvedSource } = result;
         this._model.addDescriptor(context.hostUnitId, descriptor);
@@ -83,13 +83,13 @@ export class EmbedCreationService {
         sourceEmbedId: string;
         nextEmbedId: string;
         nextHostAnchorId: string;
-    }): EmbedDescriptor {
+    }): IEmbedDescriptor {
         const sourceDescriptor = this._model.getDescriptor(params.hostUnitId, params.sourceEmbedId);
         if (!sourceDescriptor) {
             throw new Error('EMBED_DESCRIPTOR_NOT_FOUND');
         }
 
-        const descriptor: EmbedDescriptor = {
+        const descriptor: IEmbedDescriptor = {
             ...sourceDescriptor,
             embedId: params.nextEmbedId,
             hostAnchorId: params.nextHostAnchorId,
@@ -107,7 +107,7 @@ export class EmbedCreationService {
         sourceEmbedId: string;
         nextEmbedId: string;
         nextHostAnchorId: string;
-    }): EmbedDescriptor {
+    }): IEmbedDescriptor {
         const descriptor = this.prepareCopyEmbed(params);
         this._model.addDescriptor(params.hostUnitId, descriptor);
         return this._model.getDescriptor(params.hostUnitId, params.nextEmbedId)!;
@@ -117,7 +117,7 @@ export class EmbedCreationService {
         this._model.softDeleteDescriptor(params.hostUnitId, params.embedId);
     }
 
-    private _assertChildUnitAvailable(hostUnitId: string, descriptor: EmbedDescriptor): void {
+    private _assertChildUnitAvailable(hostUnitId: string, descriptor: IEmbedDescriptor): void {
         if (!descriptor.childUnitId) {
             return;
         }

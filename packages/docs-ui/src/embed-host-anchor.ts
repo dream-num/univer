@@ -19,7 +19,7 @@ import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { DocumentFlavor, DrawingTypeEnum, JSONX, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, TextX, TextXActionType, UniverInstanceType } from '@univerjs/core';
 import { RichTextEditingMutation } from '@univerjs/docs';
 
-export interface DocsCustomBlockMutationParams {
+export interface IDocsCustomBlockMutationParams {
     unitId: string;
     blockId: string;
     startIndex: number;
@@ -35,7 +35,7 @@ export interface DocsCustomBlockMutationParams {
 export const EMBED_DOCS_CUSTOM_BLOCK_DEFAULT_COMPONENT_KEY = 'UniverEmbedDocsCustomBlock';
 export type EmbedDocsCustomBlockInteractionMode = 'block' | 'inline';
 
-export interface EmbedDocsCustomBlockData {
+export interface IEmbedDocsCustomBlockData {
     version: 1;
     embedId: string;
     hostUnitId?: string;
@@ -50,7 +50,7 @@ const SHEET_LIKE_CUSTOM_BLOCK_SIZE = { width: 960, height: 480 };
 const SLIDE_CUSTOM_BLOCK_SIZE = { width: 720, height: 405 };
 const MODERN_DOCS_CUSTOM_BLOCK_VIEWPORT_INSET = 10;
 
-export interface DocsCustomBlockRenderViewportParams {
+export interface IDocsCustomBlockRenderViewportParams {
     childType?: UniverInstanceType;
     contentHeight?: number;
     contentWidth?: number;
@@ -67,7 +67,7 @@ export interface DocsCustomBlockRenderViewportParams {
     visibleCanvasWidth?: number;
 }
 
-export interface DocsCustomBlockRenderViewport {
+export interface IDocsCustomBlockRenderViewport {
     bleedLeft?: number;
     bleedWidth?: number;
     contentHeight?: number;
@@ -78,15 +78,15 @@ export interface DocsCustomBlockRenderViewport {
     width: number;
 }
 
-export function createDocsCustomBlockInsertMutation(params: DocsCustomBlockMutationParams): IMutationInfo<IRichTextEditingMutationParams> {
+export function createDocsCustomBlockInsertMutation(params: IDocsCustomBlockMutationParams): IMutationInfo<IRichTextEditingMutationParams> {
     return createRichTextMutation(params.unitId, params.segmentId, createInsertCustomBlockActions(params));
 }
 
-export function createDocsCustomBlockRemoveMutation(params: DocsCustomBlockMutationParams): IMutationInfo<IRichTextEditingMutationParams> {
+export function createDocsCustomBlockRemoveMutation(params: IDocsCustomBlockMutationParams): IMutationInfo<IRichTextEditingMutationParams> {
     return createRichTextMutation(params.unitId, params.segmentId, createRemoveCustomBlockActions(params));
 }
 
-export function createInsertCustomBlockActions(params: DocsCustomBlockMutationParams): JSONXActions {
+export function createInsertCustomBlockActions(params: IDocsCustomBlockMutationParams): JSONXActions {
     const textX = new TextX();
     if (params.startIndex > 0) {
         textX.push({
@@ -113,7 +113,7 @@ export function createInsertCustomBlockActions(params: DocsCustomBlockMutationPa
     ]);
 }
 
-export function createRemoveCustomBlockActions(params: DocsCustomBlockMutationParams): JSONXActions {
+export function createRemoveCustomBlockActions(params: IDocsCustomBlockMutationParams): JSONXActions {
     const textX = new TextX();
     if (params.startIndex > 0) {
         textX.push({
@@ -133,7 +133,7 @@ export function createRemoveCustomBlockActions(params: DocsCustomBlockMutationPa
     ]);
 }
 
-export function createDocsCustomBlockDrawing(params: DocsCustomBlockMutationParams): IDocDrawingBase {
+export function createDocsCustomBlockDrawing(params: IDocsCustomBlockMutationParams): IDocDrawingBase {
     const size = resolveDocsCustomBlockSize(params.childType);
     const drawing: IDocDrawingBase & { componentKey: string; data: Serializable } = {
         unitId: params.unitId,
@@ -188,7 +188,7 @@ export function isSheetLikeDocsCustomBlockChildType(childType?: UniverInstanceTy
     return childType === UniverInstanceType.UNIVER_SHEET || childType === UniverInstanceType.UNIVER_BASE;
 }
 
-export function resolveDocsCustomBlockRenderViewport(params: DocsCustomBlockRenderViewportParams): DocsCustomBlockRenderViewport {
+export function resolveDocsCustomBlockRenderViewport(params: IDocsCustomBlockRenderViewportParams): IDocsCustomBlockRenderViewport {
     const defaultSize = resolveDocsCustomBlockSize(params.childType);
     const fallbackWidth = params.fallbackWidth ?? defaultSize.width;
     const fallbackHeight = params.fallbackHeight ?? defaultSize.height;
@@ -266,7 +266,7 @@ export function createEmbedDocsCustomBlockData(params: {
     childUnitId?: string;
     childType?: UniverInstanceType;
     interactionMode?: EmbedDocsCustomBlockInteractionMode;
-}): EmbedDocsCustomBlockData {
+}): IEmbedDocsCustomBlockData {
     return {
         version: 1,
         embedId: params.embedId ?? params.blockId,
@@ -278,12 +278,12 @@ export function createEmbedDocsCustomBlockData(params: {
     };
 }
 
-export function isEmbedDocsCustomBlockData(data: unknown): data is EmbedDocsCustomBlockData {
+export function isEmbedDocsCustomBlockData(data: unknown): data is IEmbedDocsCustomBlockData {
     if (!data || typeof data !== 'object') {
         return false;
     }
 
-    const candidate = data as Partial<EmbedDocsCustomBlockData>;
+    const candidate = data as Partial<IEmbedDocsCustomBlockData>;
     return candidate.version === 1 &&
         typeof candidate.embedId === 'string' &&
         typeof candidate.hostAnchorId === 'string';
@@ -317,7 +317,7 @@ function toBodyEditActions(textX: TextX, segmentId?: string): JSONXActions {
     return action ?? [];
 }
 
-function createDrawingInsertActions(params: DocsCustomBlockMutationParams): JSONXActions {
+function createDrawingInsertActions(params: IDocsCustomBlockMutationParams): JSONXActions {
     if (params.segmentId) {
         return [];
     }
@@ -330,7 +330,7 @@ function createDrawingInsertActions(params: DocsCustomBlockMutationParams): JSON
     ]);
 }
 
-function createDrawingRemoveActions(params: DocsCustomBlockMutationParams): JSONXActions {
+function createDrawingRemoveActions(params: IDocsCustomBlockMutationParams): JSONXActions {
     if (params.segmentId) {
         return [];
     }

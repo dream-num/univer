@@ -15,13 +15,13 @@
  */
 
 import type { Serializable } from '@univerjs/core';
-import type { EmbedDescriptor } from '@univerjs/embed';
+import type { IEmbedDescriptor } from '@univerjs/embed';
 import type { ISheetDrawingPosition, ISheetFloatDom } from '@univerjs/sheets-drawing';
 import { DrawingTypeEnum } from '@univerjs/core';
 
 export const EMBED_SHEETS_FLOATING_COMPONENT_KEY = 'UniverEmbedSheetsFloatingObject';
 
-export interface EmbedSheetsFloatingObjectData {
+export interface IEmbedSheetsFloatingObjectData {
     version: 1;
     embedId: string;
     hostUnitId?: string;
@@ -36,7 +36,7 @@ export interface EmbedSheetsFloatingObjectData {
     disablePopup?: boolean;
 }
 
-export interface EmbedSheetsFloatingObjectParams {
+export interface IEmbedSheetsFloatingObjectParams {
     embedId: string;
     hostUnitId: string;
     hostSubUnitId: string;
@@ -48,9 +48,9 @@ export interface EmbedSheetsFloatingObjectParams {
     height?: number;
     sheetTransform?: ISheetDrawingPosition;
     allowTransform?: boolean;
-    resizeBehavior?: EmbedSheetsFloatingObjectData['resizeBehavior'];
+    resizeBehavior?: IEmbedSheetsFloatingObjectData['resizeBehavior'];
     aspectRatio?: number;
-    runtimeMountMode?: EmbedSheetsFloatingObjectData['runtimeMountMode'];
+    runtimeMountMode?: IEmbedSheetsFloatingObjectData['runtimeMountMode'];
 }
 
 const DEFAULT_LEFT = 80;
@@ -63,10 +63,10 @@ export function createEmbedSheetsFloatingObjectData(params: {
     embedId: string;
     hostUnitId?: string;
     hostAnchorId: string;
-    resizeBehavior?: EmbedSheetsFloatingObjectData['resizeBehavior'];
+    resizeBehavior?: IEmbedSheetsFloatingObjectData['resizeBehavior'];
     aspectRatio?: number;
-    runtimeMountMode?: EmbedSheetsFloatingObjectData['runtimeMountMode'];
-}): EmbedSheetsFloatingObjectData {
+    runtimeMountMode?: IEmbedSheetsFloatingObjectData['runtimeMountMode'];
+}): IEmbedSheetsFloatingObjectData {
     return {
         version: 1,
         embedId: params.embedId,
@@ -79,7 +79,7 @@ export function createEmbedSheetsFloatingObjectData(params: {
     };
 }
 
-export function createEmbedSheetsFloatingDrawing(params: EmbedSheetsFloatingObjectParams): ISheetFloatDom {
+export function createEmbedSheetsFloatingDrawing(params: IEmbedSheetsFloatingObjectParams): ISheetFloatDom {
     const left = params.left ?? DEFAULT_LEFT;
     const top = params.top ?? DEFAULT_TOP;
     const { width, height } = resolveEmbedSheetsFloatingObjectSize({
@@ -112,7 +112,7 @@ export function createEmbedSheetsFloatingDrawing(params: EmbedSheetsFloatingObje
 export function resolveEmbedSheetsFloatingObjectSize(params: {
     width?: number;
     height?: number;
-    resizeBehavior?: EmbedSheetsFloatingObjectData['resizeBehavior'];
+    resizeBehavior?: IEmbedSheetsFloatingObjectData['resizeBehavior'];
     aspectRatio?: number;
 }): { width: number; height: number } {
     const width = isValidPositiveNumber(params.width) ? params.width : DEFAULT_WIDTH;
@@ -144,7 +144,7 @@ export function resolveEmbedSheetsFloatingObjectSize(params: {
 }
 
 export function createEmbedSheetsFloatingDrawingFromDescriptor(
-    descriptor: EmbedDescriptor,
+    descriptor: IEmbedDescriptor,
     hostSubUnitId: string,
     hostContext?: Record<string, unknown>
 ): ISheetFloatDom {
@@ -166,7 +166,7 @@ export function createEmbedSheetsFloatingDrawingFromDescriptor(
     });
 }
 
-export function getEmbedSheetsFloatingObjectData(drawing: Pick<ISheetFloatDom, 'data'>): EmbedSheetsFloatingObjectData | undefined {
+export function getEmbedSheetsFloatingObjectData(drawing: Pick<ISheetFloatDom, 'data'>): IEmbedSheetsFloatingObjectData | undefined {
     if (!isEmbedSheetsFloatingObjectData(drawing.data)) {
         return undefined;
     }
@@ -211,14 +211,14 @@ function isValidPositiveNumber(value: unknown): value is number {
     return typeof value === 'number' && Number.isFinite(value) && value > 0;
 }
 
-function getResizeBehavior(hostContext: Record<string, unknown> | undefined): EmbedSheetsFloatingObjectData['resizeBehavior'] | undefined {
+function getResizeBehavior(hostContext: Record<string, unknown> | undefined): IEmbedSheetsFloatingObjectData['resizeBehavior'] | undefined {
     const value = hostContext?.resizeBehavior;
     return value === 'free' || value === 'aspect-ratio' || value === 'height-auto' || value === 'disabled'
         ? value
         : undefined;
 }
 
-function getRuntimeMountMode(hostContext: Record<string, unknown> | undefined): EmbedSheetsFloatingObjectData['runtimeMountMode'] | undefined {
+function getRuntimeMountMode(hostContext: Record<string, unknown> | undefined): IEmbedSheetsFloatingObjectData['runtimeMountMode'] | undefined {
     const value = hostContext?.runtimeMountMode;
     return value === 'always' || value === 'stage2' ? value : undefined;
 }
@@ -237,12 +237,12 @@ function getSheetTransform(hostContext: Record<string, unknown> | undefined): IS
     return candidate as ISheetDrawingPosition;
 }
 
-function isEmbedSheetsFloatingObjectData(value: unknown): value is EmbedSheetsFloatingObjectData {
+function isEmbedSheetsFloatingObjectData(value: unknown): value is IEmbedSheetsFloatingObjectData {
     if (!value || typeof value !== 'object') {
         return false;
     }
 
-    const candidate = value as Partial<EmbedSheetsFloatingObjectData>;
+    const candidate = value as Partial<IEmbedSheetsFloatingObjectData>;
     return candidate.version === 1 &&
         typeof candidate.embedId === 'string' &&
         typeof candidate.hostAnchorId === 'string';

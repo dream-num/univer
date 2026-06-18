@@ -15,13 +15,13 @@
  */
 
 import type { ICommand } from '@univerjs/core';
-import type { EmbedDescriptor } from '../../types/embed';
+import type { IEmbedDescriptor } from '../../types/embed';
 import { CommandType } from '@univerjs/core';
 import { EmbedModelService } from '../../services/embed-model.service';
 
 export interface ISetEmbedDescriptorMutationParams {
     hostUnitId: string;
-    descriptor: EmbedDescriptor;
+    descriptor: IEmbedDescriptor;
 }
 
 export interface ISoftDeleteEmbedDescriptorMutationParams {

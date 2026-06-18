@@ -15,23 +15,23 @@
  */
 
 import type { IDisposable, UniverInstanceType } from '@univerjs/core';
-import type { EmbedChildContainerContext } from '../types/embed-ui';
+import type { IEmbedChildContainerContext } from '../types/embed-ui';
 import { toDisposable } from '@univerjs/core';
 
 export type EmbedSceneCanvasCaptureResult = string | HTMLCanvasElement | ImageBitmap;
 
-export interface EmbedSceneCanvasCaptureProvider {
+export interface IEmbedSceneCanvasCaptureProvider {
     childType: UniverInstanceType;
-    capture(context: EmbedChildContainerContext): Promise<EmbedSceneCanvasCaptureResult | null | undefined> | EmbedSceneCanvasCaptureResult | null | undefined;
+    capture(context: IEmbedChildContainerContext): Promise<EmbedSceneCanvasCaptureResult | null | undefined> | EmbedSceneCanvasCaptureResult | null | undefined;
 }
 
 export class EmbedSceneCanvasCaptureService {
-    private readonly _providers = new Map<UniverInstanceType, EmbedSceneCanvasCaptureProvider>();
-    private readonly _contextsByEmbedId = new Map<string, EmbedChildContainerContext>();
-    private readonly _contextsByHostAnchorId = new Map<string, EmbedChildContainerContext>();
-    private readonly _contextsByChildUnitId = new Map<string, EmbedChildContainerContext>();
+    private readonly _providers = new Map<UniverInstanceType, IEmbedSceneCanvasCaptureProvider>();
+    private readonly _contextsByEmbedId = new Map<string, IEmbedChildContainerContext>();
+    private readonly _contextsByHostAnchorId = new Map<string, IEmbedChildContainerContext>();
+    private readonly _contextsByChildUnitId = new Map<string, IEmbedChildContainerContext>();
 
-    register(provider: EmbedSceneCanvasCaptureProvider): IDisposable {
+    register(provider: IEmbedSceneCanvasCaptureProvider): IDisposable {
         this._providers.set(provider.childType, provider);
 
         return toDisposable(() => {
@@ -41,11 +41,11 @@ export class EmbedSceneCanvasCaptureService {
         });
     }
 
-    get(childType: UniverInstanceType): EmbedSceneCanvasCaptureProvider | undefined {
+    get(childType: UniverInstanceType): IEmbedSceneCanvasCaptureProvider | undefined {
         return this._providers.get(childType);
     }
 
-    registerContext(context: EmbedChildContainerContext): IDisposable {
+    registerContext(context: IEmbedChildContainerContext): IDisposable {
         this._contextsByEmbedId.set(context.embedId, context);
         this._contextsByHostAnchorId.set(context.descriptor.hostAnchorId, context);
         this._contextsByChildUnitId.set(context.childUnitId, context);
@@ -63,19 +63,19 @@ export class EmbedSceneCanvasCaptureService {
         });
     }
 
-    getContextByEmbedId(embedId: string): EmbedChildContainerContext | undefined {
+    getContextByEmbedId(embedId: string): IEmbedChildContainerContext | undefined {
         return this._contextsByEmbedId.get(embedId);
     }
 
-    getContextByHostAnchorId(hostAnchorId: string): EmbedChildContainerContext | undefined {
+    getContextByHostAnchorId(hostAnchorId: string): IEmbedChildContainerContext | undefined {
         return this._contextsByHostAnchorId.get(hostAnchorId);
     }
 
-    getContextByChildUnitId(childUnitId: string): EmbedChildContainerContext | undefined {
+    getContextByChildUnitId(childUnitId: string): IEmbedChildContainerContext | undefined {
         return this._contextsByChildUnitId.get(childUnitId);
     }
 
-    capture(context: EmbedChildContainerContext): Promise<EmbedSceneCanvasCaptureResult | null | undefined> {
+    capture(context: IEmbedChildContainerContext): Promise<EmbedSceneCanvasCaptureResult | null | undefined> {
         const provider = this.get(context.childType);
         if (provider) {
             return Promise.resolve(provider.capture(context));
@@ -100,7 +100,7 @@ export class EmbedSceneCanvasCaptureService {
     }
 }
 
-export function captureEmbedContextSceneCanvas(context: EmbedChildContainerContext): string | undefined {
+export function captureEmbedContextSceneCanvas(context: IEmbedChildContainerContext): string | undefined {
     if (!context.renderScope) {
         return undefined;
     }

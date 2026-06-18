@@ -15,13 +15,13 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import type { EmbedContentSizeProvider } from '@univerjs/embed-ui';
+import type { IEmbedContentSizeProvider } from '@univerjs/embed-ui';
 import { DEFAULT_WORKSHEET_ROW_TITLE_WIDTH, UniverInstanceType } from '@univerjs/core';
 
 const DEFAULT_COLUMN_HEADER_HEIGHT = 24;
 const DEFAULT_COLUMN_WIDTH = 88;
 
-export function createSheetsContentSizeProvider(): EmbedContentSizeProvider {
+export function createSheetsContentSizeProvider(): IEmbedContentSizeProvider {
     return {
         childType: UniverInstanceType.UNIVER_SHEET,
         measureContentSize: (context) => {

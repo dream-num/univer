@@ -15,8 +15,8 @@
  */
 
 import type { IDisposable, UniverInstanceType } from '@univerjs/core';
-import type { EmbedDescriptor, EmbedLayout } from '@univerjs/embed';
-import type { EmbedChildContainerContext, EmbedFullscreenSession, EmbedRenderScope } from '../types/embed-ui';
+import type { EmbedLayout, IEmbedDescriptor } from '@univerjs/embed';
+import type { IEmbedChildContainerContext, IEmbedFullscreenSession, IEmbedRenderScope } from '../types/embed-ui';
 import { Injector, toDisposable } from '@univerjs/core';
 import { EmbedModelService } from '@univerjs/embed';
 import { useDependency } from '@univerjs/ui';
@@ -47,7 +47,7 @@ function EmbedFullscreenSurface() {
     const menuRef = useRef<HTMLDivElement>(null);
     const viewportRef = useRef<HTMLDivElement>(null);
     const footerRef = useRef<HTMLDivElement>(null);
-    const [session, setSession] = useState<EmbedFullscreenSession | null>(() => fullscreenService.getSession());
+    const [session, setSession] = useState<IEmbedFullscreenSession | null>(() => fullscreenService.getSession());
 
     useEffect(() => {
         const subscription = fullscreenService.session$.subscribe(setSession);
@@ -88,7 +88,7 @@ function EmbedFullscreenSurface() {
             menuSlot,
             footerSlot,
         });
-        const childContextBase: Omit<EmbedChildContainerContext, 'runtimeScope'> = {
+        const childContextBase: Omit<IEmbedChildContainerContext, 'runtimeScope'> = {
             descriptor,
             layout: session.layout,
             injector,
@@ -101,7 +101,7 @@ function EmbedFullscreenSurface() {
             childType: descriptor.childType,
         };
         const { runtimeScope, disposable: runtimeScopeDisposable } = createEmbedChildRuntimeScope(childContextBase, () => {});
-        const childContext: EmbedChildContainerContext = {
+        const childContext: IEmbedChildContainerContext = {
             ...childContextBase,
             runtimeScope,
         };
@@ -185,7 +185,7 @@ function scheduleFullscreenCleanupAfterUnmount(cleanup: () => void): void {
     schedule(() => cleanup());
 }
 
-function getEmbedDescriptorById(injector: Injector, hostUnitId: string, embedId: string): EmbedDescriptor | undefined {
+function getEmbedDescriptorById(injector: Injector, hostUnitId: string, embedId: string): IEmbedDescriptor | undefined {
     try {
         return injector.get(EmbedModelService).getDescriptor(hostUnitId, embedId);
     } catch {
@@ -202,14 +202,14 @@ function getChildProductLabel(injector: Injector, childType: UniverInstanceType)
 }
 
 export function createFullscreenRenderScope(
-    descriptor: EmbedDescriptor,
+    descriptor: IEmbedDescriptor,
     layout: EmbedLayout,
     roots: {
         viewport: HTMLElement;
         menuSlot: HTMLElement;
         footerSlot: HTMLElement;
     }
-): EmbedRenderScope {
+): IEmbedRenderScope {
     const { viewport, menuSlot, footerSlot } = roots;
     return {
         hostUnitId: descriptor.hostUnitId,
@@ -232,8 +232,8 @@ export function createFullscreenRenderScope(
 
 export function mountFullscreenWorkbenchMenus(params: {
     injector: Injector;
-    descriptor: EmbedDescriptor;
-    childContext: EmbedChildContainerContext;
+    descriptor: IEmbedDescriptor;
+    childContext: IEmbedChildContainerContext;
     menuContainer: HTMLElement;
 }): IDisposable | undefined {
     const ribbonDisposable = mountFullscreenProductRibbon(params);
@@ -246,7 +246,7 @@ export function mountFullscreenWorkbenchMenus(params: {
 
 function mountFullscreenProductRibbon(params: {
     injector: Injector;
-    descriptor: EmbedDescriptor;
+    descriptor: IEmbedDescriptor;
     menuContainer: HTMLElement;
 }): IDisposable | undefined {
     if (!params.injector.has(EmbedBlockRegistryService) || params.descriptor.childType == null) {
@@ -284,8 +284,8 @@ function mountFullscreenProductRibbon(params: {
 
 function mountFullscreenFloatingMenu(params: {
     injector: Injector;
-    descriptor: EmbedDescriptor;
-    childContext: EmbedChildContainerContext;
+    descriptor: IEmbedDescriptor;
+    childContext: IEmbedChildContainerContext;
 }): IDisposable | undefined {
     if (!params.injector.has(EmbedFloatingMenuRegistryService) || params.descriptor.childType == null || !params.descriptor.childUnitId) {
         return undefined;

@@ -19,7 +19,7 @@
  */
 
 import type { UniverInstanceType } from '@univerjs/core';
-import type { EmbedDescriptor } from '@univerjs/embed';
+import type { IEmbedDescriptor } from '@univerjs/embed';
 import type { Root } from 'react-dom/client';
 import { EmbedModelService } from '@univerjs/embed';
 import { createRoot } from 'react-dom/client';
@@ -32,7 +32,7 @@ import { EmbedFullscreenService } from '../services/embed-fullscreen.service';
 import { EmbedMountService } from '../services/embed-mount.service';
 import { EmbedPassiveViewportRegistryService } from '../services/embed-passive-viewport-registry.service';
 import { EmbedReadonlyPreviewRegistryService } from '../services/embed-readonly-preview-registry.service';
-import { EMBED_FLOAT_DRAG_HANDLE_POINTER_DOWN_EVENT, EmbedFloatDomRenderer } from './embed-float-dom-renderer';
+import { EMBED_FLOAT_DRAG_HANDLE_POINTER_DOWN_EVENT, EmbedFloatDomRenderer } from './EmbedFloatDomRenderer';
 
 const dependencyMap = vi.hoisted(() => new Map<unknown, unknown>());
 
@@ -903,7 +903,7 @@ describe('EmbedFloatDomRenderer', () => {
     }
 });
 
-function createFloatDescriptor(): EmbedDescriptor {
+function createFloatDescriptor(): IEmbedDescriptor {
     return {
         embedId: 'embed-1',
         hostUnitId: 'host-1',
@@ -921,7 +921,7 @@ function createFloatDescriptor(): EmbedDescriptor {
                 layout: 'aspect-fit',
             },
         },
-    } as EmbedDescriptor;
+    } as IEmbedDescriptor;
 }
 
 function createChildContext() {

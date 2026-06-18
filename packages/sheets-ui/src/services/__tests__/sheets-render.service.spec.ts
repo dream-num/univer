@@ -73,6 +73,10 @@ function createLifecycleService() {
             return type === UniverInstanceType.UNIVER_SHEET ? [initialWorkbook] : [];
         }
 
+        getUnitCreateOptions() {
+            return undefined;
+        }
+
         getTypeOfUnitDisposed$(type: UniverInstanceType) {
             return type === UniverInstanceType.UNIVER_SHEET ? disposed$.asObservable() : new Subject().asObservable();
         }

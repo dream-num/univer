@@ -16,7 +16,8 @@
 
 import type { ITextRange } from '../../../../sheets/typedef';
 import type { CustomRangeType, ICustomRange, IDocumentBody } from '../../../../types/interfaces';
-import { generateRandomId, Tools } from '../../../../shared';
+import { Tools } from '../../../../shared';
+import { generateRandomId } from '../../../../shared/random-id';
 
 /**
  * Check if two ranges intersect

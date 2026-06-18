@@ -16,7 +16,7 @@
 
 import type { IUser } from '@univerjs/protocol';
 import { UnitRole } from '@univerjs/protocol';
-import { generateRandomId } from '../../shared/tools';
+import { generateRandomId } from '../../shared/random-id';
 
 const nameMap = {
     [UnitRole.Editor]: 'Editor',

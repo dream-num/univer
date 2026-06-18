@@ -16,9 +16,9 @@
 
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
-import { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
+import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
-import { NumberValueObject } from '../../../../engine/value-object/primitive-object';
+import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
 import { Filter } from '../index';
@@ -76,6 +76,39 @@ describe('Test filter function', () => {
                 ['empty2'],
                 ['empty3'],
             ]);
+        });
+
+        it('filters columns when include is a single row', async () => {
+            const array = ArrayValueObject.create('{1,2,3;4,5,6}');
+            const include = ArrayValueObject.create('{true,false,1}');
+
+            const resultObject = testFunction.calculate(array, include);
+
+            expect(getObjectValue(resultObject)).toStrictEqual([
+                [1, 3],
+                [4, 6],
+            ]);
+        });
+
+        it('supports scalar array and string-number include values', async () => {
+            expect(getObjectValue(testFunction.calculate(NumberValueObject.create(42), StringValueObject.create('1')))).toBe(42);
+            expect(getObjectValue(testFunction.calculate(NumberValueObject.create(42), StringValueObject.create('0'), StringValueObject.create('empty')))).toBe('empty');
+        });
+
+        it('returns include conversion errors before building a filtered result', async () => {
+            const array = ArrayValueObject.create('{1,2,3;4,5,6}');
+            const includeWithError = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([[1], [ErrorType.NA]]),
+                rowCount: 2,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+
+            expect(getObjectValue(testFunction.calculate(array, ArrayValueObject.create('{"test",1,1}')))).toBe(ErrorType.VALUE);
+            expect(getObjectValue(testFunction.calculate(array, includeWithError))).toBe(ErrorType.NA);
         });
     });
 });

@@ -16,7 +16,6 @@
 
 import type { IStyleData } from '../types/interfaces';
 import type { Nullable } from './types';
-import { customAlphabet, nanoid } from 'nanoid';
 import { isLegalUrl, normalizeUrl, topLevelDomainSet } from '../common/url';
 
 /**
@@ -506,14 +505,6 @@ export class Tools {
         }
         return Date.now();
     }
-}
-
-export function generateRandomId(n: number = 21, alphabet?: string): string {
-    if (alphabet) {
-        return customAlphabet(alphabet, n)();
-    }
-
-    return nanoid(n);
 }
 
 interface IStyleDataObject {

@@ -53,6 +53,7 @@ import {
     SetSheetTableFilterMutation,
     SetSheetTableMutation,
     SheetsTableSortStateEnum,
+    SheetTableInsertColumnAtCommand,
     SheetTableService,
     TABLE_FILTER_EMPTY_VALUE,
     TableColumnFilterTypeEnum,
@@ -564,6 +565,7 @@ function createTestBed(): ITestBed {
         SetRangeThemeMutation,
         AddTableThemeCommand,
         RemoveTableThemeCommand,
+        SheetTableInsertColumnAtCommand,
     ].forEach((command) => {
         commandService.registerCommand(command);
     });
@@ -1182,6 +1184,34 @@ describe('sheet table view components', () => {
             endColumn: 3,
         });
         expect(componentController.closeCount).toBe(0);
+    });
+
+    it('inserts a table column to the right from the filter panel column menu', async () => {
+        testBed = createTestBed();
+        const unitId = testBed.workbook.getUnitId();
+        const componentController = testBed.injector.get(SheetsTableComponentController) as TestComponentController;
+        componentController.setCurrentTableFilterInfo({
+            unitId,
+            subUnitId: 'sheet1',
+            tableId: 'table-orders',
+            row: 0,
+            column: 1,
+        });
+        const rendered = renderWithRediContext(testBed, <SheetTableFilterPanel />);
+        root = rendered.root;
+        container = rendered.container;
+
+        clickButtonByText(container, 'Insert 1 table column right');
+        await flushCommands();
+
+        const table = testBed.injector.get(TableManager).getTable(unitId, 'table-orders')!;
+        expect(table.getRange()).toEqual({
+            startRow: 0,
+            endRow: 3,
+            startColumn: 0,
+            endColumn: 2,
+        });
+        expect(componentController.closeCount).toBe(1);
     });
 
     it('sorts the table body descending from the filter panel sort action', async () => {

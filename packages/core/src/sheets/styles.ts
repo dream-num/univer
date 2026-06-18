@@ -17,7 +17,8 @@
 import type { Nullable } from '../shared';
 import type { IStyleData } from '../types/interfaces';
 import type { ICellDataForSheetInterceptor } from './typedef';
-import { generateRandomId, LRUMap, Tools } from '../shared';
+import { LRUMap, Tools } from '../shared';
+import { generateRandomId } from '../shared/random-id';
 
 /**
  * Styles in a workbook, cells locate styles based on style IDs

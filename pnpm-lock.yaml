@@ -777,9 +777,6 @@ importers:
       lodash-es:
         specifier: ^4.18.1
         version: 4.18.1
-      nanoid:
-        specifier: 5.1.11
-        version: 5.1.11
       numfmt:
         specifier: 3.2.6
         version: 3.2.6
@@ -10111,11 +10108,6 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
-  nanoid@5.1.11:
-    resolution: {integrity: sha512-v+KEsUv2ps74PaSKv0gHTxTCgMXOIfBEbaqa6w6ISIGC7ZsvHN4N9oJ8d4cmf0n5oTzQz2SLmThbQWhjd/8eKg==}
-    engines: {node: ^18 || >=20}
-    hasBin: true
-
   natural-compare@1.4.0:
     resolution: {integrity: sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==}
 
@@ -19029,8 +19021,6 @@ snapshots:
   n-gram@2.0.2: {}
 
   nanoid@3.3.12: {}
-
-  nanoid@5.1.11: {}
 
   natural-compare@1.4.0: {}
 

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { Injector } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { SheetFindReplaceHighlightShape } from '../find-replace-highlight.shape';
 
@@ -54,6 +55,16 @@ class TestCanvasContext {
 
 function drawShape(shape: SheetFindReplaceHighlightShape, context: TestCanvasContext): void {
     (shape as unknown as { _draw: (ctx: TestCanvasContext) => void })._draw(context);
+}
+
+function createViewTestBed() {
+    const injector = new Injector();
+
+    return {
+        createHighlightShape(key: string, props: ConstructorParameters<typeof SheetFindReplaceHighlightShape>[1]) {
+            return injector.createInstance(SheetFindReplaceHighlightShape, key, props);
+        },
+    };
 }
 
 describe('SheetFindReplaceHighlightShape', () => {
@@ -250,5 +261,52 @@ describe('SheetFindReplaceHighlightShape', () => {
         expect(nextContext.lineWidth).toBe(2);
         expect(nextContext.fillCount).toBe(1);
         expect(nextContext.strokeCount).toBe(1);
+    });
+
+    it('creates search highlights as passive overlays above the sheet content', () => {
+        const testBed = createViewTestBed();
+        const shape = testBed.createHighlightShape('visible-result-overlay', {
+            left: 32,
+            top: 48,
+            inHiddenRange: false,
+            color: { r: 230, g: 180, b: 40 },
+            width: 96,
+            height: 24,
+            evented: false,
+            zIndex: 10000,
+        });
+
+        expect(shape.evented).toBe(false);
+        expect(shape.zIndex).toBe(10000);
+        expect(shape.left).toBe(32);
+        expect(shape.top).toBe(48);
+        expect(shape.width).toBe(96);
+        expect(shape.height).toBe(24);
+    });
+
+    it('keeps a found cell anchored when navigation only toggles the active match state', () => {
+        const testBed = createViewTestBed();
+        const shape = testBed.createHighlightShape('anchored-result', {
+            left: 120,
+            top: 72,
+            inHiddenRange: false,
+            color: { r: 24, g: 144, b: 255 },
+            width: 64,
+            height: 22,
+            evented: false,
+            zIndex: 10000,
+        });
+
+        shape.setShapeProps({ activated: true });
+        const context = new TestCanvasContext();
+
+        drawShape(shape, context);
+
+        expect(shape.left).toBe(120);
+        expect(shape.top).toBe(72);
+        expect(context.rects).toEqual([{ left: 0, top: 0, width: 64, height: 22 }]);
+        expect(context.strokeStyle).toBe('rgb(24, 144, 255)');
+        expect(context.lineWidth).toBe(2);
+        expect(context.strokeCount).toBe(1);
     });
 });

@@ -22,6 +22,21 @@ import { PATTERN_LOADERS } from '../pattern-loaders.gen';
 
 describe('test hyphenation', () => {
     let hyphen: Nullable<Hyphen> = null;
+    const PATTERN_LOADER_CHUNK_SIZE = 8;
+    const patternLoaderChunks = Object.entries(PATTERN_LOADERS).reduce<Array<Array<[string, () => Promise<unknown>]>>>(
+        (chunks, entry) => {
+            const lastChunk = chunks[chunks.length - 1];
+            if (!lastChunk || lastChunk.length >= PATTERN_LOADER_CHUNK_SIZE) {
+                chunks.push([entry]);
+            } else {
+                lastChunk.push(entry);
+            }
+
+            return chunks;
+        },
+        []
+    );
+
     beforeEach(() => {
         hyphen = new Hyphen();
     });
@@ -56,6 +71,12 @@ describe('test hyphenation', () => {
                 PATTERN_LOADERS[Lang.EnGb]?.(),
                 PATTERN_LOADERS[Lang.ZhLatnPinyin]?.(),
             ]);
+            expect(patterns.every((pattern) => pattern != null)).toBe(true);
+        });
+
+        it.each(patternLoaderChunks.map((entries) => [entries]))('loads generated hyphenation pattern modules %#', async (entries) => {
+            const patterns = await Promise.all(entries.map(([, loader]) => loader()));
+
             expect(patterns.every((pattern) => pattern != null)).toBe(true);
         });
     });

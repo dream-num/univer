@@ -17,7 +17,7 @@
 import type { IParagraphConfig } from '../../../../../../basics/interfaces';
 import { BooleanNumber, DataStreamTreeTokenType, GridType, SpacingRule } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
-import { getLineHeightMetrics, layoutParagraph } from '../layout-ruler';
+import { getLineHeightMetrics, layoutParagraph, updateInlineDrawingPosition } from '../layout-ruler';
 import { lineBreaking } from '../linebreaking';
 import { shaping } from '../shaping';
 import { createParagraphLayoutTestBed } from './create-paragraph-layout-test-bed';
@@ -302,5 +302,70 @@ describe('layout-ruler', () => {
 
         const divide = result[0].sections[0].columns[0].lines[0].divides[0];
         expect(divide.width).toBeGreaterThan(0);
+    });
+
+    it('positions inline custom block drawings relative to their glyph box', () => {
+        const drawing = {
+            drawingId: 'image-1',
+            drawingOrigin: {
+                docTransform: {
+                    size: { width: 30, height: 20 },
+                    angle: 15,
+                },
+            },
+        } as any;
+        const page = {
+            skeDrawings: new Map([['old-image', { drawingId: 'old-image' }]]),
+        } as any;
+        const section = {
+            columns: [],
+            parent: page,
+        } as any;
+        const column = {
+            left: 40,
+            lines: [],
+            parent: section,
+        } as any;
+        const line = {
+            top: 100,
+            lineHeight: 24,
+            marginBottom: 4,
+            paragraphStart: true,
+            parent: column,
+            divides: [{
+                left: 10,
+                paddingLeft: 2,
+                glyphGroup: [{
+                    streamType: DataStreamTreeTokenType.CUSTOM_BLOCK,
+                    width: 50,
+                    left: 8,
+                    bBox: { ba: 9, bd: 3 },
+                    drawingId: 'image-1',
+                }, {
+                    streamType: DataStreamTreeTokenType.CUSTOM_BLOCK,
+                    width: 20,
+                    left: 70,
+                    bBox: { ba: 5, bd: 5 },
+                }],
+            }],
+        } as any;
+        section.columns = [column];
+        column.lines = [line];
+
+        updateInlineDrawingPosition(line, new Map([['image-1', drawing]]), 80);
+
+        expect(page.skeDrawings.get('old-image')).toEqual({ drawingId: 'old-image' });
+        expect(page.skeDrawings.get('image-1')).toMatchObject({
+            aLeft: 30,
+            aTop: 104,
+            width: 30,
+            height: 20,
+            angle: 15,
+            isPageBreak: false,
+            lineTop: 100,
+            columnLeft: 40,
+            blockAnchorTop: 80,
+            lineHeight: 24,
+        });
     });
 });

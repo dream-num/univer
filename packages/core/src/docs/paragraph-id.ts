@@ -15,7 +15,7 @@
  */
 
 import type { IDocumentBody, IParagraph } from '../types/interfaces/i-document-data';
-import { generateRandomId } from '../shared/tools';
+import { generateRandomId } from '../shared/random-id';
 
 export const PARAGRAPH_ID_PREFIX = 'para_';
 

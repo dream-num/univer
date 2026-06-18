@@ -15,7 +15,8 @@
  */
 
 import type { ICustomRange, IDocumentBody, IParagraph } from '../../../../types/interfaces';
-import { generateRandomId, Tools } from '../../../../shared';
+import { Tools } from '../../../../shared';
+import { generateRandomId } from '../../../../shared/random-id';
 import { CustomRangeType } from '../../../../types/interfaces';
 import { createParagraphId } from '../../../paragraph-id';
 import { DataStreamTreeTokenType } from '../../types';

@@ -88,6 +88,7 @@ import {
     SheetDataValidationModel,
     SheetsDataValidationValidatorService,
     UpdateSheetDataValidationOptionsCommand,
+    UpdateSheetDataValidationRangeCommand,
     UpdateSheetDataValidationSettingCommand,
 } from '@univerjs/sheets-data-validation';
 import { IMarkSelectionService } from '@univerjs/sheets-ui';
@@ -214,6 +215,18 @@ class TestRangeEditor {
 
     setDocumentData(data: IDocumentData) {
         this._data = data;
+        this._change$.next();
+    }
+
+    replaceText(text: string) {
+        this._data = {
+            ...this._data,
+            body: {
+                ...this._data.body,
+                dataStream: `${text}\r\n`,
+                textRuns: [],
+            },
+        };
         this._change$.next();
     }
 
@@ -497,6 +510,7 @@ function createDetailTestBed(rule: ISheetDataValidationRule) {
     const commandService = injector.get(ICommandService);
     commandService.registerCommand(UpdateSheetDataValidationSettingCommand);
     commandService.registerCommand(UpdateSheetDataValidationOptionsCommand);
+    commandService.registerCommand(UpdateSheetDataValidationRangeCommand);
     commandService.registerCommand(RemoveSheetDataValidationCommand);
 
     const localeService = injector.get(LocaleService);
@@ -549,7 +563,7 @@ async function renderDetail(root: Root, testBed: ReturnType<typeof createDetailT
     });
 }
 
-async function clickElement(element: HTMLElement) {
+async function clickElement(element: Element) {
     await act(async () => {
         element.dispatchEvent(new MouseEvent('click', { bubbles: true }));
         await Promise.resolve();
@@ -671,6 +685,30 @@ describe('DataValidationDetail rule editing', () => {
             formula1: '2024-02-01',
             formula2: '2024-02-29',
         });
+    });
+
+    it('updates the active rule range after confirming a new apply-to range', async () => {
+        currentTestBed = createDetailTestBed(createDateRule('rule-date-range-selector'));
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        await renderDetail(root, currentTestBed);
+
+        const selectRangeIcon = container.querySelector<SVGElement>('svg')!;
+        await clickElement(selectRangeIcon);
+
+        const rangeInput = document.body.querySelector<HTMLInputElement>('[data-u-comp="input"] input')!;
+        await changeInputValue(rangeInput, 'B3:C4');
+        await clickElement(findButtonByText(document.body, 'rangeSelector.confirm'));
+        await waitForDebounce();
+
+        expect(currentTestBed.sheetDataValidationModel.getRuleById(UNIT_ID, SUB_UNIT_ID, currentTestBed.rule.uid)?.ranges).toEqual([{
+            startRow: 2,
+            endRow: 3,
+            startColumn: 1,
+            endColumn: 2,
+        }]);
     });
 
     it('clears date bounds and operator when switching the rule to checkbox validation', async () => {

@@ -41,8 +41,8 @@ export class Path2 {
             const from = this._lines[o - 1];
             const to = this._lines[o];
             for (let n = 1; n < lines.length; n++) {
-                const contrastFrom = this._lines[o - 1];
-                const contrastTo = this._lines[o];
+                const contrastFrom = lines[n - 1];
+                const contrastTo = lines[n];
 
                 const point = this._intersection(
                     {

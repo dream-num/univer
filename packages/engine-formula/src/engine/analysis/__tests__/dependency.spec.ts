@@ -188,5 +188,63 @@ describe('Test dependency', () => {
             expect(tree2.refOffsetX).toEqual(0);
             expect(tree2.refOffsetY).toEqual(2);
         });
+
+        it('should generate virtual dependency trees for shared formulas with offsets', async () => {
+            formulaCurrentConfigService.load({
+                formulaData: {
+                    [testUnitId]: {
+                        [testSheetId]: {
+                            0: {
+                                1: {
+                                    f: '=A1',
+                                    si: 'shared-formula-1',
+                                },
+                            },
+                            1: {
+                                1: {
+                                    f: '=A1',
+                                    si: 'shared-formula-1',
+                                    x: 0,
+                                    y: 1,
+                                },
+                            },
+                            2: {
+                                1: {
+                                    f: '=A1',
+                                    si: 'shared-formula-1',
+                                    x: 0,
+                                    y: 2,
+                                },
+                            },
+                        },
+                    },
+                },
+                arrayFormulaCellData: {},
+                arrayFormulaRange: {},
+                forceCalculate: true,
+                dirtyRanges: [],
+                dirtyNameMap: {},
+                dirtyDefinedNameMap: {},
+                dirtyUnitFeatureMap: {},
+                dirtyUnitOtherFormulaMap: {},
+                excludedCell: {},
+                allUnitData: {
+                    [testUnitId]: testSheetData,
+                },
+            });
+
+            const treeList = await formulaDependencyGenerator.generate();
+            const realTree = treeList.find((tree): tree is FormulaDependencyTree => tree instanceof FormulaDependencyTree && tree.row === 0 && tree.column === 1);
+            const virtualTrees = treeList.filter((tree): tree is FormulaDependencyTreeVirtual => !(tree instanceof FormulaDependencyTree));
+
+            expect(realTree?.formula).toBe('=A1');
+            expect(virtualTrees).toHaveLength(2);
+            expect(virtualTrees
+                .map((tree) => [tree.refTree, tree.refOffsetX, tree.refOffsetY])
+                .sort((a, b) => Number(a[2]) - Number(b[2]))).toEqual([
+                [realTree, 0, 1],
+                [realTree, 0, 2],
+            ]);
+        });
     });
 });

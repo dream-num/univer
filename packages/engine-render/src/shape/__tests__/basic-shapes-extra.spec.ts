@@ -21,6 +21,7 @@ import { Vector2 } from '../../basics/vector2';
 import { CustomObject } from '../../custom/custom-object';
 import { CheckboxShape } from '../checkbox';
 import { Circle } from '../circle';
+import { ListItem } from '../dropdown-item';
 import { Rect } from '../rect';
 
 function createShapeCtx() {
@@ -122,6 +123,90 @@ describe('basic shape and position helpers', () => {
         expect(unchecked.checked).toBe(false);
         expect(uncheckedCtx.fill).toHaveBeenCalledWith(expect.any(Path2D), 'evenodd');
         expect(unchecked.toJson()).not.toHaveProperty('checked');
+    });
+
+    it('draws a plain rect using its business bounds', () => {
+        const ctx = createShapeCtx();
+
+        Rect.drawWith(ctx, {
+            width: 80,
+            height: 32,
+            fill: '#ffffff',
+        });
+
+        expect(ctx.save).toHaveBeenCalled();
+        expect(ctx.rect).toHaveBeenCalledWith(0, 0, 80, 32);
+        expect(ctx.arc).not.toHaveBeenCalled();
+        expect(ctx.fill).toHaveBeenCalled();
+        expect(ctx.restore).toHaveBeenCalled();
+    });
+
+    it('draws a rounded visual rect centered in the interaction bounds', () => {
+        const rect = new Rect('rect-visual', {
+            width: 80,
+            height: 40,
+            radius: 12,
+            visualWidth: 60,
+            visualHeight: 20,
+            fill: '#ddeeff',
+            stroke: '#225588',
+            strokeWidth: 2,
+            strokeDashArray: [4, 2],
+            paintFirst: 'stroke',
+        });
+        const ctx = createShapeCtx();
+
+        expect(rect.radius).toBe(12);
+        expect(rect.visualWidth).toBe(60);
+        expect(rect.visualHeight).toBe(20);
+
+        rect.setOpacity(0.4);
+        rect.setObjectType(ObjectType.SHAPE);
+        expect(rect.opacity).toBe(0.4);
+        expect(rect.objectType).toBe(ObjectType.SHAPE);
+
+        Rect.drawWith(ctx, {
+            width: rect.width,
+            height: rect.height,
+            radius: rect.radius,
+            visualWidth: rect.visualWidth ?? undefined,
+            visualHeight: rect.visualHeight ?? undefined,
+            fill: rect.fill,
+            stroke: rect.stroke,
+            strokeWidth: rect.strokeWidth,
+            strokeDashArray: rect.strokeDashArray,
+            paintFirst: rect.paintFirst,
+        });
+
+        expect(ctx.setLineDash).toHaveBeenCalledWith([4, 2]);
+        expect(ctx.translate).toHaveBeenCalledWith(0, 10);
+        expect(ctx.translate).toHaveBeenCalledWith(10, 0);
+        expect(ctx.moveTo).toHaveBeenCalledWith(10, 0);
+        expect(ctx.lineTo).toHaveBeenCalledWith(50, 0);
+        expect(ctx.arc).toHaveBeenCalledTimes(4);
+        expect(ctx.arc).toHaveBeenNthCalledWith(1, 50, 10, 10, (Math.PI * 3) / 2, 0, false);
+        expect(ctx.arc).toHaveBeenNthCalledWith(4, 10, 10, 10, Math.PI, (Math.PI * 3) / 2, false);
+        expect(ctx.stroke.mock.invocationCallOrder[0]).toBeLessThan(ctx.fill.mock.invocationCallOrder[0]);
+        expect(rect.toJson()).toMatchObject({
+            width: 80,
+            height: 40,
+            radius: 12,
+            strokeDashArray: [4, 2],
+        });
+    });
+
+    it('keeps list item drawing isolated from the surrounding canvas state', () => {
+        const ctx = createShapeCtx();
+
+        ListItem.drawWith(ctx, {
+            text: 1,
+            fontString: '12px Arial',
+            fontFamily: 'Arial',
+            fontSize: '12',
+        } as any);
+
+        expect(ctx.save).toHaveBeenCalledBefore(ctx.restore);
+        expect(ctx.restore).toHaveBeenCalledTimes(1);
     });
 
     it('renders a custom object callback only when visible and in viewport', () => {

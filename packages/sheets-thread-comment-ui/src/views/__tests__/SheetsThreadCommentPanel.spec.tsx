@@ -661,6 +661,46 @@ describe('SheetsThreadCommentPanel', () => {
         expect(container.textContent).not.toContain('Other sheet C3');
     });
 
+    it('updates current-sheet scoped comments when the active sheet changes', async () => {
+        const testBed = createTestBed();
+        univer = testBed.univer;
+        testBed.threadCommentModel.addComment(unitId, sheet1, createComment('sheet-one-thread', sheet1, 'B2', 'Sheet one B2'));
+        testBed.threadCommentModel.addComment(unitId, sheet2, createComment('sheet-two-thread', sheet2, 'C3', 'Sheet two C3'));
+
+        const rendered = renderPanel(testBed.injector);
+        root = rendered.root;
+        container = rendered.container;
+
+        await act(async () => {
+            container!.querySelectorAll('[data-u-comp="select"]')[0].dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0 }));
+            await Promise.resolve();
+        });
+
+        const currentSheetOption = Array.from(document.querySelectorAll('[data-slot="dropdown-menu-radio-item"]'))
+            .find((button) => button.textContent === 'Current sheet');
+
+        expect(currentSheetOption).toBeDefined();
+
+        await act(async () => {
+            currentSheetOption!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            await Promise.resolve();
+        });
+
+        expect(container.textContent).toContain('Sheet one B2');
+        expect(container.textContent).not.toContain('Sheet two C3');
+
+        const workbook = testBed.get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const secondSheet = workbook.getSheetBySheetId(sheet2);
+        expect(secondSheet).toBeDefined();
+
+        act(() => {
+            workbook.setActiveSheet(secondSheet!);
+        });
+
+        expect(container.textContent).toContain('Sheet two C3');
+        expect(container.textContent).not.toContain('Sheet one B2');
+    });
+
     it('highlights only unresolved comments on the current sheet and closes the cell popup when resolved', () => {
         const testBed = createTestBed();
         univer = testBed.univer;

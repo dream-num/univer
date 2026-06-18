@@ -39,7 +39,7 @@ class RenderModuleB extends Disposable implements IRenderModule {
     }
 }
 
-function createRenderUnit() {
+function createRenderUnit(createUnitOptions?: any) {
     const parentInjector = new Injector();
     const unit = {
         getUnitId: () => 'unit-1',
@@ -51,6 +51,7 @@ function createRenderUnit() {
         scene: {} as any,
         isMainScene: true,
         unit,
+        createUnitOptions,
     });
 
     return renderUnit;
@@ -97,5 +98,40 @@ describe('render unit', () => {
         renderUnit.components.set('main', {} as any);
         renderUnit.dispose();
         expect(renderUnit.components.size).toBe(0);
+    });
+
+    it('exposes mutable render context state for scene lifecycle coordination', () => {
+        const renderUnit = createRenderUnit({ makeCurrent: false });
+        const states: boolean[] = [];
+        const sub = renderUnit.activated$.subscribe((v) => states.push(v));
+        const nextEngine = { name: 'engine-2' } as any;
+        const nextScene = { name: 'scene-2' } as any;
+        const component = { key: 'main-component' } as any;
+
+        expect(states).toEqual([false]);
+        expect(renderUnit.isMainScene).toBe(true);
+
+        renderUnit.activate();
+        renderUnit.isMainScene = false;
+        renderUnit.engine = nextEngine;
+        renderUnit.scene = nextScene;
+        renderUnit.mainComponent = component;
+        renderUnit.components.set('selection', component);
+
+        const context = renderUnit.getRenderContext();
+        expect(states).toEqual([false, true]);
+        expect(renderUnit.isMainScene).toBe(false);
+        expect(context.isMainScene).toBe(false);
+        expect(renderUnit.engine).toBe(nextEngine);
+        expect(context.engine).toBe(nextEngine);
+        expect(renderUnit.scene).toBe(nextScene);
+        expect(context.scene).toBe(nextScene);
+        expect(renderUnit.mainComponent).toBe(component);
+        expect(context.components.get('selection')).toBe(component);
+        expect(context.unitId).toBe('unit-1');
+
+        sub.unsubscribe();
+        renderUnit.dispose();
+        expect(renderUnit.isDisposed()).toBe(true);
     });
 });

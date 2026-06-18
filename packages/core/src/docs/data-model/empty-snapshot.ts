@@ -15,7 +15,7 @@
  */
 
 import type { IDocumentData } from '../../types/interfaces';
-import { generateRandomId } from '../../shared/tools';
+import { generateRandomId } from '../../shared/random-id';
 import { DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING, DEFAULT_DOCUMENT_PARAGRAPH_SPACE_ABOVE, DEFAULT_DOCUMENT_PARAGRAPH_SPACE_BELOW, MODERN_DOCUMENT_WIDTH, ModernDocumentWidthMode } from '../../types/const';
 import { BooleanNumber } from '../../types/enum';
 import { LocaleType } from '../../types/enum/locale-type';

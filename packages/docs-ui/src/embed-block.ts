@@ -82,9 +82,9 @@ function createDocsEmbedConfigService(configService: IConfigServiceType): IConfi
 
 function withDocsEmbedFitToWidthConfig(config: Partial<IUniverDocsUIConfig> | undefined): Partial<IUniverDocsUIConfig> {
     return {
-        ...(config ?? {}),
+        ...config,
         fitToWidth: {
-            ...(config?.fitToWidth ?? {}),
+            ...config?.fitToWidth,
             ...EMBED_DOC_FIT_TO_WIDTH_OPTIONS,
         },
     };

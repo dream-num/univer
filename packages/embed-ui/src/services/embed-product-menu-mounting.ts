@@ -324,7 +324,7 @@ function withEmbedProductMenuExecutionInjector(
     }
 
     return {
-        ...(options ?? {}),
+        ...options,
         [COMMAND_EXECUTION_INJECTOR_KEY]: scopedInjector as Injector,
     };
 }

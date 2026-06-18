@@ -14,8 +14,17 @@
  * limitations under the License.
  */
 
-import type { ICellData, Injector, IWorkbookData, Nullable, Univer } from '@univerjs/core';
-import { LocaleType, ObjectMatrix, RANGE_TYPE } from '@univerjs/core';
+import type { IBaseSnapshot, ICellData, Injector, IWorkbookData, Nullable, Univer } from '@univerjs/core';
+import {
+    BaseDataModel,
+    BooleanNumber,
+    CellValueType,
+    IUniverInstanceService,
+    LocaleType,
+    ObjectMatrix,
+    RANGE_TYPE,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { FormulaDataModel, initSheetFormulaData } from '../formula-data.model';
 import { createCommandTestBed } from './create-command-test-bed';
@@ -65,6 +74,10 @@ const TEST_WORKBOOK_DATA_EXTRA: IWorkbookData = {
         sheet1: {
             id: 'sheet1',
             name: 'Sheet1',
+            rowCount: 5,
+            rowData: {
+                2: { hd: BooleanNumber.TRUE },
+            },
             cellData: {
                 0: {
                     0: { f: '=A1' },
@@ -85,6 +98,118 @@ const TEST_WORKBOOK_DATA_EXTRA: IWorkbookData = {
     name: '',
     sheetOrder: [],
     styles: {},
+};
+
+const TEST_BASE_DATA: Partial<IBaseSnapshot> = {
+    id: 'base-test',
+    name: 'Base',
+    schemaVersion: 1,
+    tableOrder: ['table-main', 'tableOther', 'table-deleted'],
+    createdAt: 0,
+    updatedAt: 0,
+    tables: {
+        'table-main': {
+            id: 'table-main',
+            name: 'Sales',
+            primaryFieldId: 'name',
+            fieldOrder: ['name', 'amount', 'qty', 'tags', 'link', 'attachment', 'total', 'deleted-formula'],
+            fields: {
+                name: { id: 'name', name: 'Name', type: 'text', config: {} },
+                amount: { id: 'amount', name: 'Amount', type: 'number', config: {} },
+                qty: { id: 'qty', name: 'Qty', type: 'number', config: {} },
+                tags: { id: 'tags', name: 'Tags', type: 'text', config: {} },
+                link: { id: 'link', name: 'Link', type: 'link', config: {} },
+                attachment: { id: 'attachment', name: 'Files', type: 'attachment', config: {} },
+                total: {
+                    id: 'total',
+                    name: 'Total',
+                    type: 'formula',
+                    config: {
+                        formula: '=SUM({Amount}, [Qty], tableOther[External])',
+                    },
+                },
+                'deleted-formula': {
+                    id: 'deleted-formula',
+                    name: 'Deleted Formula',
+                    type: 'formula',
+                    deleted: true,
+                    config: { formula: '=1' },
+                },
+            },
+            records: {
+                'record-1': {
+                    id: 'record-1',
+                    orderKey: 'a',
+                    createdAt: 0,
+                    updatedAt: 0,
+                    values: {
+                        name: 'Order 1',
+                        amount: 10,
+                        qty: 2,
+                        tags: ['paid', 'online'],
+                        link: { text: 'Invoice', url: 'https://example.com/invoice' },
+                        attachment: ['file-1'],
+                    },
+                },
+                'record-deleted': {
+                    id: 'record-deleted',
+                    orderKey: 'b',
+                    createdAt: 0,
+                    updatedAt: 0,
+                    deleted: true,
+                    values: {
+                        amount: 999,
+                    },
+                },
+            },
+            recordOrder: ['record-1', 'record-deleted'],
+            views: {},
+            viewOrder: [],
+        },
+        tableOther: {
+            id: 'tableOther',
+            name: 'Sales',
+            primaryFieldId: 'external',
+            fieldOrder: ['external'],
+            fields: {
+                external: { id: 'external', name: 'External', type: 'number', config: {} },
+            },
+            records: {
+                'record-2': {
+                    id: 'record-2',
+                    orderKey: 'a',
+                    createdAt: 0,
+                    updatedAt: 0,
+                    values: { external: 8 },
+                },
+            },
+            recordOrder: ['record-2'],
+            views: {},
+            viewOrder: [],
+        },
+        'table-deleted': {
+            id: 'table-deleted',
+            name: 'Deleted',
+            deleted: true,
+            primaryFieldId: 'name',
+            fieldOrder: ['name'],
+            fields: {
+                name: { id: 'name', name: 'Name', type: 'formula', config: { formula: '=1' } },
+            },
+            records: {
+                'record-3': {
+                    id: 'record-3',
+                    orderKey: 'a',
+                    createdAt: 0,
+                    updatedAt: 0,
+                    values: {},
+                },
+            },
+            recordOrder: ['record-3'],
+            views: {},
+            viewOrder: [],
+        },
+    },
 };
 
 describe('Test formula data model', () => {
@@ -580,6 +705,45 @@ describe('Test formula data model', () => {
 
                 const sheetFormulaData = formulaDataModel.getSheetFormulaData('test', 'sheet1');
                 expect(sheetFormulaData?.[0]?.[0]?.f).toBe('=A1');
+            });
+
+            it('should expose manually hidden sheet rows for subtotal-style formulas', () => {
+                expect(formulaDataModel.getHiddenRowsFiltered()).toEqual({
+                    test: {
+                        sheet1: {
+                            2: { hd: BooleanNumber.TRUE },
+                        },
+                    },
+                });
+            });
+
+            it('should build formula and runtime data for base tables with live records and fields only', () => {
+                const univerInstanceService = get(IUniverInstanceService);
+                univerInstanceService.registerCtorForType(UniverInstanceType.UNIVER_BASE, BaseDataModel);
+                univer.createUnit(UniverInstanceType.UNIVER_BASE, TEST_BASE_DATA);
+
+                const formulaData = formulaDataModel.getFormulaData();
+                expect(formulaData['base-test']?.['table-deleted']).toBeUndefined();
+                expect(formulaData['base-test']?.['table-main']).toEqual({
+                    0: {
+                        6: {
+                            f: '=SUM(table-main[[#This Row],[Amount]], table-main[[#This Row],[Qty]], tableOther[[#This Row],[External]])',
+                            si: 'total',
+                        },
+                    },
+                });
+
+                const calculateData = formulaDataModel.getCalculateData();
+                const tableData = calculateData.allUnitData['base-test']?.['table-main'];
+
+                expect(calculateData.unitSheetNameMap['base-test']?.Sales).toBe('tableOther');
+                expect(tableData?.rowCount).toBe(1);
+                expect(tableData?.columnCount).toBe(7);
+                expect(tableData?.cellData.getValue(0, 0)).toEqual({ v: 'Order 1', t: CellValueType.STRING });
+                expect(tableData?.cellData.getValue(0, 1)).toEqual({ v: 10, t: CellValueType.NUMBER });
+                expect(tableData?.cellData.getValue(0, 3)).toEqual({ v: 'paid, online', t: CellValueType.STRING });
+                expect(tableData?.cellData.getValue(0, 4)).toEqual({ v: 'Invoice', t: CellValueType.STRING });
+                expect(tableData?.cellData.getValue(0, 5)).toEqual({ v: '', t: CellValueType.STRING });
             });
         });
     });

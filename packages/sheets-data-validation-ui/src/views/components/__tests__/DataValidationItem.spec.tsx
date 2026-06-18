@@ -69,6 +69,7 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import {
     RangeProtectionRuleModel,
     RefRangeService,
+    SetWorksheetActiveOperation,
     SheetInterceptorService,
     SheetSkeletonService,
     SheetsSelectionsService,
@@ -454,6 +455,7 @@ function createItemTestBed(rule: ISheetDataValidationRule = createCheckboxRule()
     commandService.registerCommand(AddSheetDataValidationCommand);
     commandService.registerCommand(RemoveSheetAllDataValidationCommand);
     commandService.registerCommand(RemoveSheetDataValidationCommand);
+    commandService.registerCommand(SetWorksheetActiveOperation);
 
     const validatorRegistry = injector.get(DataValidatorRegistryService);
     validatorRegistry.register(injector.createInstance(CheckboxValidator));
@@ -546,6 +548,29 @@ describe('DataValidationItem', () => {
         expect(currentTestBed.markSelectionService.added.every((entry) => entry.selection.primary === null)).toBe(true);
 
         await leaveItem(item);
+
+        expect(currentTestBed.markSelectionService.removed).toEqual(['shape-0', 'shape-1']);
+    });
+
+    it('clears highlighted rule ranges when the hovered item is unmounted', async () => {
+        currentTestBed = createItemTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        const item = renderItem(root, currentTestBed, () => undefined);
+
+        await enterItem(item);
+
+        expect(currentTestBed.markSelectionService.added.map((entry) => entry.selection.range)).toEqual([
+            FIRST_RANGE,
+            SECOND_RANGE,
+        ]);
+
+        act(() => {
+            root?.unmount();
+        });
+        root = undefined;
 
         expect(currentTestBed.markSelectionService.removed).toEqual(['shape-0', 'shape-1']);
     });
@@ -827,6 +852,67 @@ describe('DataValidationPanel', () => {
         expect(currentTestBed.panelService.activeRule?.subUnitId).toBe(SUB_UNIT_ID);
         expect(currentTestBed.panelService.activeRule?.rule.uid).toBe(currentTestBed.rule.uid);
         expect(container.querySelector('[data-u-comp="data-validation-detail"]')).not.toBeNull();
+    });
+
+    it('keeps showing a cross-sheet active rule while its formula editor has focus', async () => {
+        currentTestBed = createItemTestBed();
+        currentTestBed.panelService.setActiveRule({
+            unitId: UNIT_ID,
+            subUnitId: OTHER_SUB_UNIT_ID,
+            rule: currentTestBed.rule,
+        });
+        currentTestBed.panelService.setFocusFormulaEditorActiveRuleSubUnitId(OTHER_SUB_UNIT_ID);
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <DataValidationPanel />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        expect(container.querySelector('[data-u-comp="data-validation-detail"]')).not.toBeNull();
+        expect(currentTestBed.panelService.activeRule?.subUnitId).toBe(OTHER_SUB_UNIT_ID);
+    });
+
+    it('returns to the cross-sheet active rule sheet after the focused rule is accepted', async () => {
+        currentTestBed = createItemTestBed();
+        currentTestBed.panelService.setActiveRule({
+            unitId: UNIT_ID,
+            subUnitId: OTHER_SUB_UNIT_ID,
+            rule: currentTestBed.rule,
+        });
+        currentTestBed.panelService.setFocusFormulaEditorActiveRuleSubUnitId(OTHER_SUB_UNIT_ID);
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <DataValidationPanel />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        expect(currentTestBed.workbook.getActiveSheet().getSheetId()).toBe(SUB_UNIT_ID);
+
+        const detail = container.querySelector('[data-u-comp="data-validation-detail"]') as HTMLElement;
+        const buttons = Array.from(detail.querySelectorAll('[data-u-comp="button"]')) as HTMLElement[];
+        const doneButton = buttons[buttons.length - 1];
+
+        await act(async () => {
+            doneButton.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            await Promise.resolve();
+        });
+
+        expect(currentTestBed.workbook.getActiveSheet().getSheetId()).toBe(OTHER_SUB_UNIT_ID);
+        expect(currentTestBed.panelService.activeRule).toBeNull();
     });
 
     it('opens the selected rule in detail and returns to the list after the rule is accepted', async () => {

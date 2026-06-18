@@ -30,8 +30,9 @@ import {
 } from '@univerjs/core';
 import { IEditorService } from '@univerjs/docs-ui';
 import { FunctionType, sequenceNodeType } from '@univerjs/engine-formula';
+import { DeviceInputEventType } from '@univerjs/engine-render';
 import { IDescriptionService } from '@univerjs/sheets-formula';
-import { IShortcutService, ISidebarService, RediContext } from '@univerjs/ui';
+import { IShortcutService, ISidebarService, KeyCode, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Subject } from 'rxjs';
@@ -48,24 +49,38 @@ const sumInfo: IFunctionInfo = {
     functionParameter: [],
 };
 
+const subtotalInfo: IFunctionInfo = {
+    functionName: 'SUBTOTAL',
+    functionType: FunctionType.Math,
+    description: 'Returns a subtotal in a list.',
+    abstract: 'Returns subtotal.',
+    functionParameter: [],
+};
+
 class TestDescriptionService {
     getSearchListByNameFirstLetter(searchText: string) {
-        if (!sumInfo.functionName.startsWith(searchText.toUpperCase())) {
-            return [];
-        }
-        return [{
-            name: sumInfo.functionName,
-            desc: sumInfo.description,
-            functionType: sumInfo.functionType,
-        }];
+        return [sumInfo, subtotalInfo]
+            .filter((info) => info.functionName.startsWith(searchText.toUpperCase()))
+            .map((info) => ({
+                name: info.functionName,
+                desc: info.description,
+                functionType: info.functionType,
+            }));
     }
 }
 
 class TestCommandService {
     readonly registered: ICommandInfo[] = [];
 
-    executeCommand(): Promise<boolean> {
-        return Promise.resolve(true);
+    async executeCommand(id?: string, params?: unknown): Promise<boolean> {
+        const command = this.registered.find((item) => item.id === id);
+        const handler = (command as { handler?: (_accessor: unknown, params?: unknown) => boolean | Promise<boolean> | void } | undefined)?.handler;
+        if (!handler) {
+            return true;
+        }
+
+        const result = await handler(undefined, params);
+        return result !== false;
     }
 
     registerCommand(command: ICommandInfo): IDisposable {
@@ -158,11 +173,13 @@ class SearchFunctionState {
     static editor: unknown;
     static selected: Array<{ text: string; offset: number }> = [];
     static focused = 0;
+    static closed = 0;
 
     static reset(): void {
         this.editor = undefined;
         this.selected = [];
         this.focused = 0;
+        this.closed = 0;
     }
 }
 
@@ -200,7 +217,7 @@ function createSearchFunctionTestBed() {
     const editor = createEditor();
     SearchFunctionState.editor = editor;
 
-    return { injector, editor };
+    return { injector, editor, commandService: injector.get(ICommandService) as unknown as TestCommandService };
 }
 
 async function waitForSearchList(editor: Editor): Promise<void> {
@@ -210,16 +227,32 @@ async function waitForSearchList(editor: Editor): Promise<void> {
     });
 }
 
+async function runFormulaSearchKeyboardCommand(commandService: TestCommandService, editor: Editor, keyCode: KeyCode): Promise<void> {
+    await act(async () => {
+        await commandService.executeCommand(`sheet.formula-embedding-editor.search_function.${editor.getEditorId()}`, {
+            eventType: DeviceInputEventType.Keyboard,
+            keyCode,
+        });
+        await Promise.resolve();
+    });
+}
+
 describe('SearchFunction', () => {
     let container: HTMLDivElement;
     let popupRoot: HTMLDivElement;
     let root: Root;
     let resizeObserver: typeof ResizeObserver | undefined;
+    let scrollToDescriptor: PropertyDescriptor | undefined;
 
     beforeEach(() => {
         SearchFunctionState.reset();
         resizeObserver = globalThis.ResizeObserver;
         globalThis.ResizeObserver = TestResizeObserver as typeof ResizeObserver;
+        scrollToDescriptor = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'scrollTo');
+        Object.defineProperty(HTMLElement.prototype, 'scrollTo', {
+            configurable: true,
+            value() {},
+        });
         container = document.createElement('div');
         popupRoot = document.createElement('div');
         popupRoot.id = 'univer-popup-portal';
@@ -238,6 +271,11 @@ describe('SearchFunction', () => {
             globalThis.ResizeObserver = resizeObserver;
         } else {
             delete (globalThis as { ResizeObserver?: unknown }).ResizeObserver;
+        }
+        if (scrollToDescriptor) {
+            Object.defineProperty(HTMLElement.prototype, 'scrollTo', scrollToDescriptor);
+        } else {
+            delete (HTMLElement.prototype as { scrollTo?: unknown }).scrollTo;
         }
     });
 
@@ -272,5 +310,115 @@ describe('SearchFunction', () => {
         expect(SearchFunctionState.selected).toEqual([{ text: 'SUM(', offset: -2 }]);
         expect(SearchFunctionState.focused).toBe(1);
         expect(document.body.textContent).not.toContain('Adds selected values.');
+    });
+
+    it('accepts the highlighted formula suggestion from the registered keyboard command', async () => {
+        const { injector, editor, commandService } = createSearchFunctionTestBed();
+
+        await act(async () => {
+            root.render(
+                <RediContext.Provider value={{ injector }}>
+                    <SearchFunction
+                        isFocus
+                        editor={editor}
+                        sequenceNodes={[{ nodeType: sequenceNodeType.FUNCTION, token: 'SU' } as never]}
+                        onSelect={(result) => SearchFunctionState.selected.push(result)}
+                    />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        await waitForSearchList(editor);
+        expect(document.body.textContent).toContain('SUM');
+
+        await runFormulaSearchKeyboardCommand(commandService, editor, KeyCode.ENTER);
+
+        expect(SearchFunctionState.selected).toEqual([{ text: 'SUM(', offset: -2 }]);
+        expect(document.body.textContent).not.toContain('Adds selected values.');
+    });
+
+    it('accepts the next formula suggestion after keyboard navigation moves the highlight', async () => {
+        const { injector, editor, commandService } = createSearchFunctionTestBed();
+
+        await act(async () => {
+            root.render(
+                <RediContext.Provider value={{ injector }}>
+                    <SearchFunction
+                        isFocus
+                        editor={editor}
+                        sequenceNodes={[{ nodeType: sequenceNodeType.FUNCTION, token: 'SU' } as never]}
+                        onSelect={(result) => SearchFunctionState.selected.push(result)}
+                    />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        await waitForSearchList(editor);
+        expect(document.body.textContent).toContain('SUM');
+        expect(document.body.textContent).toContain('SUBTOTAL');
+
+        await runFormulaSearchKeyboardCommand(commandService, editor, KeyCode.ARROW_DOWN);
+        await runFormulaSearchKeyboardCommand(commandService, editor, KeyCode.ENTER);
+
+        expect(SearchFunctionState.selected).toEqual([{ text: 'SUBTOTAL(', offset: -7 }]);
+        expect(document.body.textContent).not.toContain('Returns a subtotal in a list.');
+    });
+
+    it('accepts the highlighted formula suggestion when tab completes the function token', async () => {
+        const { injector, editor, commandService } = createSearchFunctionTestBed();
+
+        await act(async () => {
+            root.render(
+                <RediContext.Provider value={{ injector }}>
+                    <SearchFunction
+                        isFocus
+                        editor={editor}
+                        sequenceNodes={[{ nodeType: sequenceNodeType.FUNCTION, token: 'SU' } as never]}
+                        onSelect={(result) => SearchFunctionState.selected.push(result)}
+                    />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        await waitForSearchList(editor);
+        expect(document.body.textContent).toContain('SUM');
+
+        await runFormulaSearchKeyboardCommand(commandService, editor, KeyCode.TAB);
+
+        expect(SearchFunctionState.selected).toEqual([{ text: 'SUM(', offset: -2 }]);
+        expect(document.body.textContent).not.toContain('Adds selected values.');
+    });
+
+    it('closes formula suggestions without selecting a function when escape is pressed', async () => {
+        const { injector, editor, commandService } = createSearchFunctionTestBed();
+
+        await act(async () => {
+            root.render(
+                <RediContext.Provider value={{ injector }}>
+                    <SearchFunction
+                        isFocus
+                        editor={editor}
+                        sequenceNodes={[{ nodeType: sequenceNodeType.FUNCTION, token: 'SU' } as never]}
+                        onSelect={(result) => SearchFunctionState.selected.push(result)}
+                        onClose={() => {
+                            SearchFunctionState.closed += 1;
+                        }}
+                    />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        await waitForSearchList(editor);
+        expect(document.body.textContent).toContain('SUM');
+
+        await runFormulaSearchKeyboardCommand(commandService, editor, KeyCode.ESC);
+
+        expect(SearchFunctionState.closed).toBe(1);
+        expect(SearchFunctionState.selected).toEqual([]);
+        expect(document.body.textContent).not.toContain('SUM');
     });
 });

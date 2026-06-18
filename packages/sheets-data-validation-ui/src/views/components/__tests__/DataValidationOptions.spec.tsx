@@ -15,12 +15,19 @@
  */
 
 import type { IDataValidationRuleOptions } from '@univerjs/core';
-import { DataValidationErrorStyle, LocaleService, LocaleType, Univer } from '@univerjs/core';
+import {
+    DataValidationErrorStyle,
+    DataValidationRenderMode,
+    LocaleService,
+    LocaleType,
+    Univer,
+} from '@univerjs/core';
 import { ComponentManager, RediContext } from '@univerjs/ui';
 import { act, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { afterEach, describe, expect, it } from 'vitest';
 import { DataValidationOptions } from '../DataValidationOptions';
+import { ListRenderModeInput } from '../ListRenderModeInput';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -40,6 +47,12 @@ function createOptionsTestBed() {
                     showInfo: 'Show message',
                     showWarning: 'Show warning',
                 },
+                renderMode: {
+                    arrow: 'Arrow',
+                    chip: 'Chip',
+                    label: 'Display style',
+                    text: 'Text',
+                },
             },
         },
     });
@@ -53,6 +66,7 @@ function createOptionsTestBed() {
 function OptionsHarness(props: {
     initialValue: IDataValidationRuleOptions;
     changes: IDataValidationRuleOptions[];
+    extraComponent?: string;
 }) {
     const [value, setValue] = useState(props.initialValue);
 
@@ -63,6 +77,7 @@ function OptionsHarness(props: {
                 props.changes.push(nextValue);
                 setValue(nextValue);
             }}
+            extraComponent={props.extraComponent}
         />
     );
 }
@@ -145,6 +160,87 @@ describe('DataValidationOptions', () => {
             errorStyle: DataValidationErrorStyle.STOP,
             showErrorMessage: true,
             error: 'Only choose approved values',
+        });
+    });
+
+    it('keeps a custom error message while message display is toggled off and back on', async () => {
+        currentTestBed = createOptionsTestBed();
+        const changes: IDataValidationRuleOptions[] = [];
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <OptionsHarness
+                        initialValue={{
+                            errorStyle: DataValidationErrorStyle.STOP,
+                            showErrorMessage: true,
+                            error: 'Keep this instruction',
+                        }}
+                        changes={changes}
+                    />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        await clickElement(container.firstElementChild as HTMLElement);
+        const showMessageCheckbox = container.querySelector<HTMLInputElement>('[data-u-comp="checkbox"] input')!;
+
+        await clickElement(showMessageCheckbox);
+
+        expect(changes.at(-1)).toEqual({
+            errorStyle: DataValidationErrorStyle.STOP,
+            showErrorMessage: false,
+            error: 'Keep this instruction',
+        });
+
+        await clickElement(showMessageCheckbox);
+
+        expect(changes.at(-1)).toEqual({
+            errorStyle: DataValidationErrorStyle.STOP,
+            showErrorMessage: true,
+            error: 'Keep this instruction',
+        });
+        expect(container.querySelector<HTMLInputElement>('[data-u-comp="input"] input')?.value).toBe('Keep this instruction');
+    });
+
+    it('saves list render mode changes from the registered extra options component', async () => {
+        currentTestBed = createOptionsTestBed();
+        currentTestBed.injector
+            .get(ComponentManager)
+            .register(ListRenderModeInput.componentKey, ListRenderModeInput);
+        const changes: IDataValidationRuleOptions[] = [];
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <OptionsHarness
+                        initialValue={{
+                            errorStyle: DataValidationErrorStyle.WARNING,
+                            renderMode: DataValidationRenderMode.CUSTOM,
+                            showErrorMessage: false,
+                        }}
+                        changes={changes}
+                        extraComponent={ListRenderModeInput.componentKey}
+                    />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        await clickElement(container.firstElementChild as HTMLElement);
+        await clickElement(container.querySelectorAll<HTMLInputElement>('[data-u-comp="radio"] input')[1]);
+
+        expect(changes.at(-1)).toEqual({
+            errorStyle: DataValidationErrorStyle.WARNING,
+            renderMode: DataValidationRenderMode.ARROW,
+            showErrorMessage: false,
         });
     });
 });

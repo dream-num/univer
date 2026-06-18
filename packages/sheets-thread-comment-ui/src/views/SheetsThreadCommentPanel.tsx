@@ -105,6 +105,11 @@ export const SheetsThreadCommentPanel = () => {
     };
 
     const handleHover = (comment: IThreadComment) => {
+        if (hoverShapeId.current) {
+            markSelectionService.removeShape(hoverShapeId.current);
+            hoverShapeId.current = null;
+        }
+
         if (
             activeCommentId &&
             activeCommentId.unitId === comment.unitId &&
@@ -112,11 +117,6 @@ export const SheetsThreadCommentPanel = () => {
             activeCommentId.commentId === comment.id
         ) {
             return;
-        }
-
-        if (hoverShapeId.current) {
-            markSelectionService.removeShape(hoverShapeId.current);
-            hoverShapeId.current = null;
         }
 
         hoverShapeId.current = showShape(comment);
@@ -138,6 +138,7 @@ export const SheetsThreadCommentPanel = () => {
     useEffect(() => {
         if (!panelVisible && hoverShapeId.current) {
             markSelectionService.removeShape(hoverShapeId.current);
+            hoverShapeId.current = null;
         }
     }, [markSelectionService, panelVisible]);
 

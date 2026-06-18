@@ -89,4 +89,34 @@ describe('FormulaAlertRenderController', () => {
         expect(vi.mocked(extractFormulaError)).toHaveBeenCalledWith({ v: 'plain-text' }, false);
         expect(ErrorType.DIV_BY_ZERO).toBeTruthy();
     });
+
+    it('hides alerts when the workbook has no active worksheet for the hovered cell', async () => {
+        vi.useFakeTimers();
+        const currentCell$ = new Subject<{ location: { unitId: string; subUnitId: string; row: number; col: number } }>();
+        const removedAlerts: string[] = [];
+        const shownAlerts: unknown[] = [];
+        const controller = new FormulaAlertRenderController(
+            { unit: { getActiveSheet: () => null } } as never,
+            { currentCell$ } as never,
+            {
+                currentAlert: new Map(),
+                removeAlert: (key: string) => {
+                    removedAlerts.push(key);
+                },
+                showAlert: (alert: unknown) => {
+                    shownAlerts.push(alert);
+                },
+            } as never,
+            { t: (key: string) => key } as never,
+            { getArrayFormulaCellData: () => null } as never
+        );
+
+        currentCell$.next({ location: { unitId: 'book-1', subUnitId: 'sheet-1', row: 3, col: 4 } });
+        await vi.advanceTimersByTimeAsync(120);
+
+        expect(removedAlerts).toEqual(['SHEET_FORMULA_ALERT']);
+        expect(shownAlerts).toEqual([]);
+
+        controller.dispose();
+    });
 });

@@ -55,8 +55,8 @@ export const SheetNumfmtPanel: FC<ISheetNumfmtPanelProps> = (props) => {
         [localeService]
     );
     const [type, setType] = useState(findDefaultType);
-    const [key, setKey] = useState(() => `${row}_${col}`);
-    const { mark, userHabitCurrency } = useCurrencyOptions(() => setKey(`${row}_${col}_userCurrency'`));
+    const [key, setKey] = useState(() => `${row}_${col}_${defaultPattern}`);
+    const { mark, userHabitCurrency } = useCurrencyOptions(() => setKey(`${row}_${col}_${defaultPattern}_userCurrency`));
 
     const BusinessComponent = useMemo(() => typeOptions.find((item) => item.label === type)?.component, [type]);
 
@@ -109,8 +109,8 @@ export const SheetNumfmtPanel: FC<ISheetNumfmtPanelProps> = (props) => {
 
     useEffect(() => {
         setType(findDefaultType());
-        setKey(`${row}_${col}`);
-    }, [row, col]);
+        setKey(`${row}_${col}_${defaultPattern}`);
+    }, [row, col, defaultPattern]);
 
     return (
         <div

@@ -18,6 +18,8 @@ import { RANGE_TYPE } from '@univerjs/core';
 import { matchToken, sequenceNodeType } from '@univerjs/engine-formula';
 import { describe, expect, it } from 'vitest';
 import { filterReferenceNode, isComma, isReference } from '../filter-reference-node';
+import { rangePreProcess } from '../range-pre-process';
+import { sequenceNodeToText } from '../sequence-node-to-text';
 import { unitRangesToText } from '../unit-ranges-to-text';
 import { verifyRange } from '../verify-range';
 
@@ -42,6 +44,14 @@ describe('range selector utils', () => {
         expect(verifyRange([referenceNode as never, ';'])).toBe(false);
     });
 
+    it('rebuilds typed range text with separators when editing multiple references', () => {
+        expect(sequenceNodeToText([
+            { nodeType: sequenceNodeType.REFERENCE, token: 'A1:B2' } as never,
+            matchToken.COMMA,
+            { nodeType: sequenceNodeType.REFERENCE, token: "'Data Sheet'!D3" } as never,
+        ])).toBe("A1:B2,'Data Sheet'!D3");
+    });
+
     it('serializes selected ranges with sheet and workbook qualifiers only when the formula needs them', () => {
         const ranges = [
             {
@@ -59,5 +69,19 @@ describe('range selector utils', () => {
         expect(unitRangesToText(ranges, false, 'Sheet1')).toEqual(['A1:B2', 'D3']);
         expect(unitRangesToText(ranges, true, 'Sheet1')).toEqual(['A1:B2', "'Data Sheet'!D3"]);
         expect(unitRangesToText(ranges, true, 'Sheet1', true)).toEqual(["'[book-1]Sheet1'!A1:B2", "'[book-1]Data Sheet'!D3"]);
+    });
+
+    it('normalizes a reverse-dragged range before the selector confirms it', () => {
+        expect(rangePreProcess({
+            startRow: 8,
+            endRow: 2,
+            startColumn: 5,
+            endColumn: 1,
+        })).toEqual({
+            startRow: 2,
+            endRow: 8,
+            startColumn: 1,
+            endColumn: 5,
+        });
     });
 });

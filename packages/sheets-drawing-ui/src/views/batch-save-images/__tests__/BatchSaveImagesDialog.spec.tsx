@@ -194,6 +194,26 @@ class TestBatchSaveImagesService implements IBatchSaveImagesService {
     }
 }
 
+class TestEmptyBatchSaveImagesService extends TestBatchSaveImagesService {
+    override getCellImagesInSelection(): ICellImageInfo[] {
+        return [];
+    }
+
+    override getCellImagesFromRanges(): ICellImageInfo[] {
+        return [];
+    }
+}
+
+class TestNoDataColumnsBatchSaveImagesService extends TestBatchSaveImagesService {
+    override getDataColumns(): Array<{ index: number; label: string }> {
+        return [];
+    }
+
+    override getDataColumnsForRanges(): Array<{ index: number; label: string }> {
+        return [];
+    }
+}
+
 function createImage(imageId: string, cellAddress: string, row: number, col: number): ICellImageInfo {
     return {
         row,
@@ -240,11 +260,11 @@ describe('BatchSaveImagesDialog', () => {
         container = undefined;
     });
 
-    async function renderDialog() {
+    async function renderDialog(batchSaveImagesService = TestBatchSaveImagesService) {
         const testBed = createSheetsDrawingUiTestBed(undefined, [
             [IDialogService, { useClass: TestDialogService }],
             [IMarkSelectionService, { useClass: TestMarkSelectionService }],
-            [IBatchSaveImagesService, { useClass: TestBatchSaveImagesService }],
+            [IBatchSaveImagesService, { useClass: batchSaveImagesService }],
         ]);
 
         container = document.createElement('div');
@@ -323,6 +343,107 @@ describe('BatchSaveImagesDialog', () => {
         testBed.univer.dispose();
     });
 
+    it('removes the highlighted lookup column when column values are no longer used in file names', async () => {
+        const { testBed, batchSaveService, dialogService, markSelectionService } = await renderDialog();
+        const columnValueCheckbox = getCheckbox(container!, 1);
+
+        await act(async () => {
+            columnValueCheckbox.click();
+            await Promise.resolve();
+        });
+
+        expect(markSelectionService.activeRanges).toEqual([{
+            startRow: 2,
+            endRow: 3,
+            startColumn: 4,
+            endColumn: 4,
+        }]);
+
+        await act(async () => {
+            columnValueCheckbox.click();
+            await Promise.resolve();
+        });
+
+        expect(markSelectionService.activeRanges).toEqual([]);
+        expect(markSelectionService.removedIds).toEqual(['shape-1']);
+
+        await act(async () => {
+            getButton(container!, 'sheets-drawing-ui.save.confirm').click();
+            await Promise.resolve();
+        });
+
+        expect(batchSaveService.savedImages.map((image) => image.imageId)).toEqual(['image-a', 'image-b']);
+        expect(batchSaveService.savedConfig).toEqual({
+            fileNameParts: [FileNamePart.CELL_ADDRESS],
+            columnIndex: undefined,
+        });
+        expect(dialogService.closedIds).toEqual([BATCH_SAVE_IMAGES_DIALOG_ID]);
+
+        testBed.univer.dispose();
+    });
+
+    it('keeps cell address naming when the user tries to clear the last file name option', async () => {
+        const { testBed, batchSaveService, dialogService, markSelectionService } = await renderDialog();
+        const cellAddressCheckbox = getCheckbox(container!, 0);
+
+        await act(async () => {
+            cellAddressCheckbox.click();
+            await Promise.resolve();
+        });
+
+        expect(markSelectionService.activeRanges).toEqual([]);
+
+        await act(async () => {
+            getButton(container!, 'sheets-drawing-ui.save.confirm').click();
+            await Promise.resolve();
+        });
+
+        expect(batchSaveService.savedImages.map((image) => image.imageId)).toEqual(['image-a', 'image-b']);
+        expect(batchSaveService.savedConfig).toEqual({
+            fileNameParts: [FileNamePart.CELL_ADDRESS],
+            columnIndex: undefined,
+        });
+        expect(dialogService.closedIds).toEqual([BATCH_SAVE_IMAGES_DIALOG_ID]);
+
+        testBed.univer.dispose();
+    });
+
+    it('clears lookup column highlight without saving when the dialog is cancelled', async () => {
+        const { testBed, batchSaveService, dialogService, markSelectionService } = await renderDialog();
+        const columnValueCheckbox = getCheckbox(container!, 1);
+
+        await act(async () => {
+            columnValueCheckbox.click();
+            await Promise.resolve();
+        });
+
+        expect(markSelectionService.activeRanges).toEqual([{
+            startRow: 2,
+            endRow: 3,
+            startColumn: 4,
+            endColumn: 4,
+        }]);
+
+        await act(async () => {
+            getButton(container!, 'sheets-drawing-ui.save.cancel').click();
+            await Promise.resolve();
+        });
+
+        expect(batchSaveService.savedConfig).toBeNull();
+        expect(dialogService.closedIds).toEqual([BATCH_SAVE_IMAGES_DIALOG_ID]);
+
+        await act(async () => {
+            root!.unmount();
+            root = undefined;
+            await Promise.resolve();
+        });
+
+        expect(markSelectionService.activeRanges).toEqual([]);
+        expect(markSelectionService.removedIds).toEqual(['shape-1']);
+
+        testBed.univer.dispose();
+    });
+
     it('keeps the dialog open and shows the save error when saving fails', async () => {
         const { testBed, batchSaveService, dialogService } = await renderDialog();
         batchSaveService.failSaving();
@@ -335,6 +456,46 @@ describe('BatchSaveImagesDialog', () => {
         expect(batchSaveService.savedConfig).toBeNull();
         expect(dialogService.closedIds).toEqual([]);
         expect(container!.textContent).toContain('sheets-drawing-ui.save.error');
+
+        testBed.univer.dispose();
+    });
+
+    it('saves by cell address when no lookup columns are available', async () => {
+        const { testBed, batchSaveService, dialogService, markSelectionService } = await renderDialog(TestNoDataColumnsBatchSaveImagesService);
+
+        expect(container!.querySelector('[data-u-comp="select"]')).toBeNull();
+        expect(container!.textContent).not.toContain('sheets-drawing-ui.save.useColumnValue');
+        expect(markSelectionService.activeRanges).toEqual([]);
+
+        await act(async () => {
+            getButton(container!, 'sheets-drawing-ui.save.confirm').click();
+            await Promise.resolve();
+        });
+
+        expect(batchSaveService.savedImages.map((image) => image.imageId)).toEqual(['image-a', 'image-b']);
+        expect(batchSaveService.savedConfig).toEqual({
+            fileNameParts: [FileNamePart.CELL_ADDRESS],
+            columnIndex: undefined,
+        });
+        expect(dialogService.closedIds).toEqual([BATCH_SAVE_IMAGES_DIALOG_ID]);
+
+        testBed.univer.dispose();
+    });
+
+    it('prevents confirming when the selection contains no images', async () => {
+        const { testBed, batchSaveService, dialogService, markSelectionService } = await renderDialog(TestEmptyBatchSaveImagesService);
+        const confirmButton = getButton(container!, 'sheets-drawing-ui.save.confirm');
+
+        expect(confirmButton.disabled).toBe(true);
+
+        await act(async () => {
+            confirmButton.click();
+            await Promise.resolve();
+        });
+
+        expect(batchSaveService.savedConfig).toBeNull();
+        expect(dialogService.closedIds).toEqual([]);
+        expect(markSelectionService.activeRanges).toEqual([]);
 
         testBed.univer.dispose();
     });

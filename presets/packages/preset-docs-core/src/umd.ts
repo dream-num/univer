@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+import type { IPreset } from '@univerjs/presets';
 import type { IUniverUIConfig } from '@univerjs/ui';
-import type { IPreset } from './types';
 import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';

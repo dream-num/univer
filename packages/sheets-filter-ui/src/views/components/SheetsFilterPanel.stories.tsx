@@ -23,7 +23,7 @@ import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand, SetSheetsF
 import { SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
 import { IShortcutService, IUIPartsService, RediContext, ShortcutService, UIPartsService } from '@univerjs/ui';
 import { useState } from 'react';
-import { WithCustomFilterModelFactory, WithValuesFilterModelFactory } from '../../__testing__/data';
+import { WithCustomFilterModelFactory, WithValuesFilterModelFactory } from '../../__tests__/data';
 import { ChangeFilterByOperation, CloseFilterPanelOperation, OpenFilterPanelOperation } from '../../commands/operations/sheets-filter.operation';
 import enUS from '../../locale/en-US';
 import ruRU from '../../locale/ru-RU';

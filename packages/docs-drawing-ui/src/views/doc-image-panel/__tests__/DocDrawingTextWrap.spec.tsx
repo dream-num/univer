@@ -321,6 +321,66 @@ describe('DocDrawingTextWrap', () => {
         });
     });
 
+    it('persists in-front-of-text wrapping on the focused drawing', async () => {
+        currentTestBed = createPanelTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        renderPanel(root, currentTestBed);
+
+        await act(async () => {
+            inputByLabelText('In front of text').click();
+            await Promise.resolve();
+        });
+
+        expect(currentDrawing(currentTestBed)).toMatchObject({
+            layoutType: PositionedObjectLayoutType.WRAP_NONE,
+            behindDoc: BooleanNumber.FALSE,
+            docTransform: {
+                positionH: {
+                    relativeFrom: ObjectRelativeFromH.PAGE,
+                    posOffset: 24,
+                },
+                positionV: {
+                    relativeFrom: ObjectRelativeFromV.PAGE,
+                    posOffset: 114,
+                },
+            },
+        });
+    });
+
+    it('preserves wrap metadata when switching to top-and-bottom text flow', async () => {
+        currentTestBed = createPanelTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        renderPanel(root, currentTestBed);
+
+        await act(async () => {
+            inputByLabelText('Top and Bottom').click();
+            await Promise.resolve();
+        });
+
+        expect(currentDrawing(currentTestBed)).toMatchObject({
+            layoutType: PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM,
+            wrapText: WrapTextType.BOTH_SIDES,
+            distT: 1,
+            distL: 2,
+            distB: 3,
+            distR: 4,
+            docTransform: {
+                positionH: {
+                    relativeFrom: ObjectRelativeFromH.PAGE,
+                    posOffset: 24,
+                },
+                positionV: {
+                    relativeFrom: ObjectRelativeFromV.PAGE,
+                    posOffset: 114,
+                },
+            },
+        });
+    });
+
     it('persists left distance from text on the focused drawing', async () => {
         currentTestBed = createPanelTestBed();
         container = document.createElement('div');
@@ -359,5 +419,22 @@ describe('DocDrawingTextWrap', () => {
             layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
             wrapText: WrapTextType.RIGHT,
         });
+    });
+
+    it('hides the text wrapping controls when doc drawing focus is cleared', async () => {
+        currentTestBed = createPanelTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        renderPanel(root, currentTestBed);
+
+        expect(container.firstElementChild?.classList.contains('univer-hidden')).toBe(false);
+
+        await act(async () => {
+            currentTestBed!.get(IDrawingManagerService).focusDrawing([]);
+            await Promise.resolve();
+        });
+
+        expect(container.firstElementChild?.classList.contains('univer-hidden')).toBe(true);
     });
 });

@@ -18,9 +18,25 @@ import type { Nullable } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { Hyphen } from '../hyphen';
 import { Lang } from '../lang';
+import { PATTERN_LOADERS } from '../pattern-loaders.gen';
 
 describe('test hyphenation', () => {
     let hyphen: Nullable<Hyphen> = null;
+    const PATTERN_LOADER_CHUNK_SIZE = 8;
+    const patternLoaderChunks = Object.entries(PATTERN_LOADERS).reduce<Array<Array<[string, () => Promise<unknown>]>>>(
+        (chunks, entry) => {
+            const lastChunk = chunks[chunks.length - 1];
+            if (!lastChunk || lastChunk.length >= PATTERN_LOADER_CHUNK_SIZE) {
+                chunks.push([entry]);
+            } else {
+                lastChunk.push(entry);
+            }
+
+            return chunks;
+        },
+        []
+    );
+
     beforeEach(() => {
         hyphen = new Hyphen();
     });
@@ -41,6 +57,27 @@ describe('test hyphenation', () => {
             await hyphen?.loadPattern(Lang.Af);
 
             expect(hyphen?.hasPattern(Lang.Af)).toBe(true);
+        });
+
+        it('registers generated hyphenation pattern loaders and loads representative modules', async () => {
+            const supportedLangs = Object.values(Lang).filter((lang) => lang !== Lang.UNKNOWN);
+            const entries = Object.entries(PATTERN_LOADERS);
+
+            expect(entries).toHaveLength(supportedLangs.length);
+            expect(supportedLangs.every((lang) => typeof PATTERN_LOADERS[lang] === 'function')).toBe(true);
+
+            const patterns = await Promise.all([
+                PATTERN_LOADERS[Lang.Af]?.(),
+                PATTERN_LOADERS[Lang.EnGb]?.(),
+                PATTERN_LOADERS[Lang.ZhLatnPinyin]?.(),
+            ]);
+            expect(patterns.every((pattern) => pattern != null)).toBe(true);
+        });
+
+        it.each(patternLoaderChunks.map((entries) => [entries]))('loads generated hyphenation pattern modules %#', async (entries) => {
+            const patterns = await Promise.all(entries.map(([, loader]) => loader()));
+
+            expect(patterns.every((pattern) => pattern != null)).toBe(true);
         });
     });
 

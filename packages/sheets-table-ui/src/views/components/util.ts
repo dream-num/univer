@@ -323,7 +323,7 @@ export function getInitConditionInfo(tableFilter?: ITableFilterItem) {
     if (!tableFilter || tableFilter.filterType !== 'condition') {
         return {
             type: TableConditionTypeEnum.String,
-            compareType: TableStringCompareTypeEnum.Equal,
+            compare: TableStringCompareTypeEnum.Equal,
             info: {},
         };
     }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IPreset } from './types';
+import type { IPreset } from '@univerjs/presets';
 
 import { IImageIoService } from '@univerjs/core';
 import { UniverDocsDrawingPlugin } from '@univerjs/docs-drawing';

@@ -103,8 +103,8 @@ export {
     cloneBodyWithFreshParagraphIds,
     cloneParagraphWithId,
     createParagraphId,
-    PARAGRAPH_ID_PREFIX,
     type IParagraphIdScope,
+    PARAGRAPH_ID_PREFIX,
 } from './docs/paragraph-id';
 export { EventState, EventSubject, fromEventSubject, type IEventObserver } from './observer/observable';
 export { AuthzIoLocalService } from './services/authz-io/authz-io-local.service';
@@ -183,6 +183,7 @@ export { isBlackColor, isWhiteColor } from './shared/color/color-kit';
 export { cellToRange } from './shared/common';
 export { customNameCharacterCheck, nameCharacterCheck } from './shared/name';
 export { type BBox, type IRTreeItem, RBush, RTree } from './shared/r-tree';
+export { generateRandomId } from './shared/random-id';
 export { getIntersectRange } from './shared/range';
 export { afterTime, bufferDebounceTime, convertObservableToBehaviorSubject, fromCallback, takeAfter } from './shared/rxjs';
 export { awaitTime, delayAnimationFrame } from './shared/timer';

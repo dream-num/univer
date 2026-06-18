@@ -14,8 +14,49 @@
  * limitations under the License.
  */
 
+import type { SpreadsheetSkeleton, UniverRenderingContext } from '@univerjs/engine-render';
 import { describe, expect, it } from 'vitest';
-import { buildCenteredPlusSegments, buildTableMenuRegions, hitTestTableControl, TABLE_CONTROL_INSERT_BUTTON_SIZE } from '../table-controls-util';
+import {
+    buildCenteredPlusSegments,
+    buildTableMenuRegions,
+    hitTestTableControl,
+    TABLE_CONTROL_INSERT_BUTTON_SIZE,
+} from '../table-controls-util';
+import { SheetTableControlsShape } from '../table-controls.shape';
+
+class DrawableSheetTableControlsShape extends SheetTableControlsShape {
+    drawForTest(ctx: UniverRenderingContext): void {
+        this._draw(ctx);
+    }
+}
+
+function createCanvasContext(): UniverRenderingContext {
+    return new Proxy({}, {
+        get(_target, property) {
+            if (property === 'measureText') {
+                return () => ({ width: 0 });
+            }
+
+            return () => {};
+        },
+        set() {
+            return true;
+        },
+    }) as UniverRenderingContext;
+}
+
+function createSkeleton(): SpreadsheetSkeleton {
+    return {
+        rowHeaderWidth: 40,
+        columnTotalWidth: 400,
+        columnHeaderHeight: 32,
+        rowTotalHeight: 600,
+        getNoMergeCellWithCoordByIndex: () => ({
+            startX: 40,
+            startY: 60,
+        }),
+    } as unknown as SpreadsheetSkeleton;
+}
 
 describe('table controls geometry', () => {
     it('hit-tests the topmost region first', () => {
@@ -47,5 +88,53 @@ describe('table controls geometry', () => {
             { fromX: 16, fromY: 30, toX: 24, toY: 30 },
             { fromX: 20, fromY: 26, toX: 20, toY: 34 },
         ]);
+    });
+
+    it('opens a table menu whose action rows can be hit-tested', () => {
+        const shape = new DrawableSheetTableControlsShape('table-controls', createSkeleton);
+        shape.setItems([{
+            tableId: 'table-orders',
+            tableName: 'Orders',
+            range: { startRow: 0, endRow: 3, startColumn: 0, endColumn: 1 },
+            fill: '#1f5eff',
+            text: '#ffffff',
+        }]);
+        shape.setOpenedMenuTableId('table-orders');
+
+        shape.drawForTest(createCanvasContext());
+
+        expect(shape.hitTest(56, 170)).toMatchObject({
+            type: 'menu-item',
+            tableId: 'table-orders',
+            action: 'delete',
+        });
+    });
+
+    it('activates the hovered insert region for row and column insertion', () => {
+        const shape = new DrawableSheetTableControlsShape('table-controls', createSkeleton);
+        shape.setItems([{
+            tableId: 'table-orders',
+            tableName: 'Orders',
+            range: { startRow: 0, endRow: 3, startColumn: 0, endColumn: 1 },
+            fill: '#1f5eff',
+            text: '#ffffff',
+        }]);
+        shape.setHoveredInsertRegion({
+            type: 'insert-row',
+            tableId: 'table-orders',
+            index: 2,
+            left: 100,
+            top: 120,
+            width: TABLE_CONTROL_INSERT_BUTTON_SIZE,
+            height: TABLE_CONTROL_INSERT_BUTTON_SIZE,
+        });
+
+        shape.drawForTest(createCanvasContext());
+
+        expect(shape.hitTest(111, 131)).toMatchObject({
+            type: 'insert-row',
+            tableId: 'table-orders',
+            index: 2,
+        });
     });
 });

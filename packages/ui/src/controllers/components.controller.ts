@@ -35,7 +35,6 @@ export class ComponentsController extends Disposable {
     ) {
         super();
 
-        this._registerComponents2();
         this._registerIcons();
         this._registerComponents();
     }
@@ -64,9 +63,7 @@ export class ComponentsController extends Disposable {
                 this._componentManager.register(key, comp)
             );
         });
-    }
 
-    private _registerComponents2(): void {
         // register the panel
         this.disposeWithMe(this._componentManager.register(ShortcutPanelComponentName, ShortcutPanel));
     }

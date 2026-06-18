@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
+import type { IScrollState } from '../../../../services/sheet-bar/type';
 import { Animate } from './animate';
+import { calculateSheetTabDragSort, reorderItems } from './sheet-tab-drag-sort';
+import { keepLastTextIndex, keepTextSelected, startSheetTabNameEditor } from './sheet-tab-name-editor';
 
-export interface IScrollState {
-    leftEnd: boolean;
-    rightEnd: boolean;
-}
 export interface ISlideTabBarConfig {
     slideTabBarSelector: string;
     slideTabBarItemSelector: string;
@@ -116,105 +115,36 @@ export class SlideTabItem {
         return this.getTranslateXDirection();
     }
 
-    // eslint-disable-next-line max-lines-per-function
     setEditor(callback?: (event: FocusEvent) => void): void {
-        if (!this._slideTabBar.getConfig().onNameChangeCheck()) {
+        if (this._editMode) {
             return;
         }
-        let compositionFlag = true;
-        if (this._editMode === false) {
-            const input = this._slideTabItem.querySelector('span');
 
-            const pasteAction = (e: ClipboardEvent) => {
-                e.preventDefault();
-                const text = e.clipboardData?.getData('text/plain');
-                if (text) {
-                    const savedText = text.replace(/\s/g, '');
-                    document.execCommand('insertText', false, savedText);
-                }
-            };
-
-            const blurAction = (focusEvent: FocusEvent) => {
-                if (this.nameCheck()) return;
-
-                this._editMode = false;
-
-                if (input) {
-                    input.removeAttribute('contentEditable');
-                    input.removeEventListener('focusout', blurAction);
-                    input.removeEventListener('compositionstart', compositionstartAction);
-                    input.removeEventListener('compositionend', compositionendAction);
-                    input.removeEventListener('input', inputAction);
-                    input.removeEventListener('keydown', keydownAction);
-                    input.removeEventListener('paste', pasteAction);
-                }
-
-                // Event must be removed before updateItems
+        startSheetTabNameEditor({
+            slideTabItem: this._slideTabItem,
+            canStart: () => this._slideTabBar.getConfig().onNameChangeCheck(),
+            checkName: (name) => this._slideTabBar.getConfig().onNameCheckAlert(name),
+            setEditMode: (editing) => {
+                this._editMode = editing;
+            },
+            beforeCommit: () => {
                 this._slideTabBar.removeListener();
                 this._slideTabBar.updateItems();
-                if (this._slideTabBar.getConfig().onChangeName) {
-                    const text = input?.innerText || '';
-                    const id = this.getId();
-                    this._slideTabBar.getConfig().onChangeName(id, text);
-                }
-
+            },
+            onCommit: (name, focusEvent) => {
+                this._slideTabBar.getConfig().onChangeName(this.getId(), name);
                 if (callback) {
                     callback(focusEvent);
                 }
-            };
-
-            const keydownAction = (e: KeyboardEvent) => {
-                if (!input) return;
-                e.stopPropagation();
-
-                if (e.key === 'Enter') {
-                    input.blur();
-                    e.preventDefault();
-                }
-            };
-
-            const compositionstartAction = () => {
-                compositionFlag = false;
-            };
-
-            const compositionendAction = () => {
-                compositionFlag = true;
-            };
-
-            const inputAction = (e: Event) => {
-                if (!input) return;
-                const maxLength = 31;
-
-                setTimeout(() => {
-                    if (compositionFlag) {
-                        const text = input.innerText;
-                        if (text.length > maxLength) {
-                            input.innerText = text.substring(0, maxLength);
-                            SlideTabBar.keepLastIndex(input);
-                        }
-                    }
-                }, 0);
-            };
-
-            if (input) {
-                input.setAttribute('contentEditable', 'true');
-                input.addEventListener('focusout', blurAction);
-                input.addEventListener('compositionstart', compositionstartAction);
-                input.addEventListener('compositionend', compositionendAction);
-                input.addEventListener('input', inputAction);
-                input.addEventListener('keydown', keydownAction);
-                input.addEventListener('paste', pasteAction);
-                this._editMode = true;
-                SlideTabBar.keepSelectAll(input);
-            }
-        }
+            },
+        });
     }
 
     nameCheck() {
         const input = this._slideTabItem.querySelector('span');
         if (!input) return false;
 
-        const text = input.innerText;
+        const text = input.textContent ?? '';
         const checkAlert = this._slideTabBar.getConfig().onNameCheckAlert(text);
         return checkAlert;
     }
@@ -316,7 +246,7 @@ export class SlideTabItem {
 
     addEventListener<K extends keyof HTMLElementEventMap>(
         type: K,
-        action: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any,
+        action: (this: HTMLElement, ev: HTMLElementEventMap[K]) => void,
         options?: boolean | AddEventListenerOptions
     ) {
         this._slideTabItem.addEventListener(type, action, options);
@@ -324,7 +254,7 @@ export class SlideTabItem {
 
     removeEventListener<K extends keyof HTMLElementEventMap>(
         type: K,
-        action: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any,
+        action: (this: HTMLElement, ev: HTMLElementEventMap[K]) => void,
         options?: boolean | AddEventListenerOptions
     ) {
         this._slideTabItem.removeEventListener(type, action, options);
@@ -629,26 +559,11 @@ export class SlideTabBar {
     }
 
     static keepLastIndex(inputHtml: HTMLElement) {
-        setTimeout(() => {
-            const range = window.getSelection();
-            if (range) {
-                range.selectAllChildren(inputHtml);
-                range.collapseToEnd();
-            }
-        });
+        keepLastTextIndex(inputHtml);
     }
 
     static keepSelectAll(inputHtml: HTMLElement) {
-        setTimeout(() => {
-            const selection = window.getSelection();
-            if (!selection) return;
-
-            const range = document.createRange();
-            range.selectNodeContents(inputHtml);
-
-            selection.removeAllRanges();
-            selection.addRange(range);
-        });
+        keepTextSelected(inputHtml);
     }
 
     /**
@@ -751,14 +666,14 @@ export class SlideTabBar {
     }
 
     scrollToItem(index?: number): void {
-        index = index ?? this._config.currentIndex;
+        const targetIndex = index ?? this._config.currentIndex;
         // Check index validity
-        if (index < 0 || index >= this._slideTabItems.length) {
+        if (targetIndex < 0 || targetIndex >= this._slideTabItems.length) {
             console.error('Index out of bounds');
             return;
         }
 
-        const right = this.calculateTabItemScrollX(index);
+        const right = this.calculateTabItemScrollX(targetIndex);
         this._slideScrollbar.scrollX(this._slideScrollbar.getScrollX() + right);
 
         // Trigger a scroll event
@@ -896,24 +811,8 @@ export class SlideTabBar {
 
     protected _autoScrollFrame(): void {
         if (this._activeTabItem) {
-            this._compareDirection = this._activeTabItem.translateX(this._moveActionX);
-            switch (this._compareDirection) {
-                case 1: {
-                    this._slideScrollbar.scrollX(this._slideScrollbar.getScrollX() + this._scrollIncremental);
-                    this._compareRight();
-                    break;
-                }
-                case 0: {
-                    this._slideScrollbar.scrollX(this._slideScrollbar.getScrollX() + this._scrollIncremental);
-                    this._compareIndex = this._activeTabItemIndex;
-                    break;
-                }
-                case -1: {
-                    this._slideScrollbar.scrollX(this._slideScrollbar.getScrollX() + this._scrollIncremental);
-                    this._compareLeft();
-                    break;
-                }
-            }
+            this._slideScrollbar.scrollX(this._slideScrollbar.getScrollX() + this._scrollIncremental);
+            this._updateDragSortState();
         }
         this._autoScrollTime = requestAnimationFrame(() => {
             this._autoScrollFrame();
@@ -951,9 +850,7 @@ export class SlideTabBar {
 
     protected _sortedItems(): void {
         if (this._activeTabItem != null && this._activeTabItemIndex != null && this._compareIndex != null) {
-            // data array list sort
-            this._slideTabItems.splice(this._activeTabItemIndex, 1);
-            this._slideTabItems.splice(this._compareIndex, 0, this._activeTabItem);
+            this._slideTabItems = reorderItems(this._slideTabItems, this._activeTabItemIndex, this._compareIndex);
 
             // dom list sort
             if (this._config.slideTabBarItemAutoSort) {
@@ -969,76 +866,42 @@ export class SlideTabBar {
     }
 
     protected _compareLeft(): void {
-        if (this._activeTabItem && this._activeTabItemIndex) {
-            const splice = this._slideTabItems.findIndex((item) => item.equals(this._activeTabItem));
-            const length = this._slideTabItems.length;
-            const collect = [];
-
-            // collect compare item
-            for (let i = 0; i < splice; i++) {
-                if (i >= splice) {
-                    break;
-                }
-                collect.push(this._slideTabItems[i]);
-            }
-
-            // reset right
-            for (let i = splice + 1; i < length; i++) {
-                this._slideTabItems[i].animate().translateX(0);
-            }
-
-            // diff item midline
-            let notFound = true;
-            for (let i = collect.length - 1; i >= 0; i--) {
-                const item = collect[i];
-                // Left side border reaches the midline
-                if (SlideTabItem.leftLine(this._activeTabItem) < item.getMidLine()) {
-                    item.animate().translateX(this._activeTabItem.getWidth());
-                    this._compareIndex = i;
-                    notFound = false;
-                } else {
-                    item.animate().translateX(0);
-                    if (notFound) {
-                        this._compareIndex = this._activeTabItemIndex;
-                    }
-                }
-            }
-        }
+        this._updateDragSortState();
     }
 
     protected _compareRight(): void {
-        if (this._activeTabItem) {
-            const splice = this._slideTabItems.findIndex((item) => item.equals(this._activeTabItem));
-            const length = this._slideTabItems.length;
-            const collect = [];
+        this._updateDragSortState();
+    }
 
-            // collect compare item
-            for (let i = splice + 1; i < length; i++) {
-                collect.push(this._slideTabItems[i]);
-            }
-
-            // reset left
-            for (let i = 0; i < splice; i++) {
-                this._slideTabItems[i].animate().translateX(0);
-            }
-
-            // diff item midline
-            let notFound = true;
-            for (let i = 0; i < collect.length; i++) {
-                const item = collect[i];
-                // Right side border reaches the midline
-                if (SlideTabItem.rightLine(this._activeTabItem) > item.getMidLine()) {
-                    item.animate().translateX(-this._activeTabItem.getWidth());
-                    this._compareIndex = splice + i + 1;
-                    notFound = false;
-                } else {
-                    item.animate().translateX(0);
-                    if (notFound) {
-                        this._compareIndex = this._activeTabItemIndex;
-                    }
-                }
-            }
+    protected _updateDragSortState(): void {
+        if (!this._activeTabItem) {
+            return;
         }
+
+        const dragSortResult = calculateSheetTabDragSort(
+            this._slideTabItems.map((item) => ({
+                id: item.getId(),
+                left: item.getMidLine() - item.getWidth() / 2,
+                width: item.getWidth(),
+            })),
+            this._activeTabItemIndex,
+            this._moveActionX
+        );
+
+        this._compareIndex = dragSortResult.targetIndex;
+        dragSortResult.itemOffsets.forEach((offset, index) => {
+            const item = this._slideTabItems[index];
+            if (!item) {
+                return;
+            }
+
+            if (item.equals(this._activeTabItem)) {
+                this._compareDirection = item.translateX(offset);
+                return;
+            }
+
+            item.animate().translateX(offset);
+        });
     }
 
     protected _initConfig(): void {

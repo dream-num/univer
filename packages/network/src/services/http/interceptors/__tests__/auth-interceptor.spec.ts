@@ -15,9 +15,9 @@
  */
 
 import type { Injector } from '@univerjs/core';
-import type { MockHTTPImplementation } from '../../__testing__/http-testing-utils';
+import type { MockHTTPImplementation } from '../../__tests__/http-testing-utils';
 import { afterEach, beforeEach, describe, expect, it, vitest } from 'vitest';
-import { createHTTPTestBed } from '../../__testing__/http-testing-utils';
+import { createHTTPTestBed } from '../../__tests__/http-testing-utils';
 import { HTTPHeaders } from '../../headers';
 import { HTTPService } from '../../http.service';
 import { IHTTPImplementation } from '../../implementations/implementation';

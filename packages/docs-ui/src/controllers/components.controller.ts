@@ -15,15 +15,98 @@
  */
 
 import { Disposable, Inject } from '@univerjs/core';
-import { AddImageIcon, AlignTextBothIcon, BoldIcon, CopyDoubleIcon, CutIcon, DeleteColumnDoubleIcon, DeleteIcon, DeleteRowDoubleIcon, DocSettingIcon, FontColorDoubleIcon, GridIcon, H1Icon, H2Icon, H3Icon, H4Icon, H5Icon, HeaderFooterIcon, HorizontallyIcon, InsertDoubleIcon, InsertRowAboveDoubleIcon, InsertRowBelowDoubleIcon, ItalicIcon, KeyboardIcon, LeftInsertColumnDoubleIcon, LeftJustifyingIcon, MenuIcon, MoreLeftIcon, MoreRightIcon, NoColorDoubleIcon, OrderIcon, PaintBucketDoubleIcon, PasteSpecialDoubleIcon, ReduceDoubleIcon, ReduceIcon, RightInsertColumnDoubleIcon, RightJustifyingIcon, ShapeIcon, StrikethroughIcon, SubscriptIcon, SuperscriptIcon, TextTypeIcon, TodoListDoubleIcon, UnderlineIcon, UnorderIcon } from '@univerjs/icons';
+import {
+    AddImageIcon,
+    AlignTextBothIcon,
+    BoldIcon,
+    CopyDoubleIcon,
+    CutIcon,
+    DeleteColumnDoubleIcon,
+    DeleteIcon,
+    DeleteRowDoubleIcon,
+    DocSettingIcon,
+    FontColorDoubleIcon,
+    GridIcon,
+    H1Icon,
+    H2Icon,
+    H3Icon,
+    H4Icon,
+    H5Icon,
+    HeaderFooterIcon,
+    HorizontallyIcon,
+    InsertDoubleIcon,
+    InsertRowAboveDoubleIcon,
+    InsertRowBelowDoubleIcon,
+    ItalicIcon,
+    KeyboardIcon,
+    LeftInsertColumnDoubleIcon,
+    LeftJustifyingIcon,
+    MenuIcon,
+    MoreLeftIcon,
+    MoreRightIcon,
+    NoColorDoubleIcon,
+    OrderIcon,
+    PaintBucketDoubleIcon,
+    PasteSpecialDoubleIcon,
+    ReduceDoubleIcon,
+    ReduceIcon,
+    RightInsertColumnDoubleIcon,
+    RightJustifyingIcon,
+    ShapeIcon,
+    StrikethroughIcon,
+    SubscriptIcon,
+    SuperscriptIcon,
+    TextTypeIcon,
+    TodoListDoubleIcon,
+    UnderlineIcon,
+    UnorderIcon,
+} from '@univerjs/icons';
 import { ComponentManager, IconManager } from '@univerjs/ui';
 import { COMPONENT_DOC_HEADER_FOOTER_PANEL } from '../views/header-footer/panel/component-name';
 import { DocHeaderFooterPanel } from '../views/header-footer/panel/DocHeaderFooterPanel';
-import { DefaultTextColorIcon, DocParagraphBackgroundColorSwatchIcon0, DocParagraphBackgroundColorSwatchIcon1, DocParagraphBackgroundColorSwatchIcon10, DocParagraphBackgroundColorSwatchIcon11, DocParagraphBackgroundColorSwatchIcon12, DocParagraphBackgroundColorSwatchIcon13, DocParagraphBackgroundColorSwatchIcon14, DocParagraphBackgroundColorSwatchIcon15, DocParagraphBackgroundColorSwatchIcon2, DocParagraphBackgroundColorSwatchIcon3, DocParagraphBackgroundColorSwatchIcon4, DocParagraphBackgroundColorSwatchIcon5, DocParagraphBackgroundColorSwatchIcon6, DocParagraphBackgroundColorSwatchIcon7, DocParagraphBackgroundColorSwatchIcon8, DocParagraphBackgroundColorSwatchIcon9, DocParagraphTextColorSwatchIcon0, DocParagraphTextColorSwatchIcon1, DocParagraphTextColorSwatchIcon2, DocParagraphTextColorSwatchIcon3, DocParagraphTextColorSwatchIcon4, DocParagraphTextColorSwatchIcon5, DocParagraphTextColorSwatchIcon6, HeaderTextColorIcon, SubtitleTypeIcon, TitleTypeIcon } from '../views/Icon';
-import { BULLET_LIST_TYPE_COMPONENT, BulletListTypePicker, ORDER_LIST_TYPE_COMPONENT, OrderListTypePicker } from '../views/list-type-picker/index';
+import {
+    DefaultTextColorIcon,
+    DocParagraphBackgroundColorSwatchIcon0,
+    DocParagraphBackgroundColorSwatchIcon1,
+    DocParagraphBackgroundColorSwatchIcon10,
+    DocParagraphBackgroundColorSwatchIcon11,
+    DocParagraphBackgroundColorSwatchIcon12,
+    DocParagraphBackgroundColorSwatchIcon13,
+    DocParagraphBackgroundColorSwatchIcon14,
+    DocParagraphBackgroundColorSwatchIcon15,
+    DocParagraphBackgroundColorSwatchIcon2,
+    DocParagraphBackgroundColorSwatchIcon3,
+    DocParagraphBackgroundColorSwatchIcon4,
+    DocParagraphBackgroundColorSwatchIcon5,
+    DocParagraphBackgroundColorSwatchIcon6,
+    DocParagraphBackgroundColorSwatchIcon7,
+    DocParagraphBackgroundColorSwatchIcon8,
+    DocParagraphBackgroundColorSwatchIcon9,
+    DocParagraphTextColorSwatchIcon0,
+    DocParagraphTextColorSwatchIcon1,
+    DocParagraphTextColorSwatchIcon2,
+    DocParagraphTextColorSwatchIcon3,
+    DocParagraphTextColorSwatchIcon4,
+    DocParagraphTextColorSwatchIcon5,
+    DocParagraphTextColorSwatchIcon6,
+    HeaderTextColorIcon,
+    SubtitleTypeIcon,
+    TitleTypeIcon,
+} from '../views/Icon';
+import {
+    BULLET_LIST_TYPE_COMPONENT,
+    BulletListTypePicker,
+    ORDER_LIST_TYPE_COMPONENT,
+    OrderListTypePicker,
+} from '../views/list-type-picker/index';
 import { PAGE_SETTING_COMPONENT_ID, PageSettings } from '../views/PageSettings';
 import { ParagraphSettingIndex } from '../views/paragraph-setting/index';
-import { DOC_PARAGRAPH_MENU_COMPONENT_KEY, DOC_TABLE_BLOCK_MENU_COMPONENT_KEY, ParagraphMenu, TableBlockMenu } from '../views/ParagraphMenu';
+import {
+    DOC_PARAGRAPH_MENU_COMPONENT_KEY,
+    DOC_TABLE_BLOCK_MENU_COMPONENT_KEY,
+    ParagraphMenu,
+    TableBlockMenu,
+} from '../views/ParagraphMenu';
 import { COMPONENT_DOC_CREATE_TABLE_CONFIRM } from '../views/table/create/component-name';
 import { DocCreateTableConfirm } from '../views/table/create/TableCreate';
 
@@ -37,20 +120,8 @@ export class ComponentsController extends Disposable {
         super();
 
         this._registerComponents();
-        this._registerComponents2();
         this._registerParts();
         this._registerIcons();
-        this._registerComponents3();
-    }
-
-    private _registerComponents(): void {
-        if (!this._componentManager.get(COMPONENT_DOC_HEADER_FOOTER_PANEL)) {
-            this.disposeWithMe(this._componentManager.register(COMPONENT_DOC_HEADER_FOOTER_PANEL, DocHeaderFooterPanel));
-        }
-    }
-
-    private _registerComponents2(): void {
-        this.disposeWithMe(this._componentManager.register(paragraphSettingIndexKey, ParagraphSettingIndex));
     }
 
     private _registerParts(): void {
@@ -134,7 +205,12 @@ export class ComponentsController extends Disposable {
         }));
     }
 
-    private _registerComponents3(): void {
+    private _registerComponents(): void {
+        if (!this._componentManager.get(COMPONENT_DOC_HEADER_FOOTER_PANEL)) {
+            this.disposeWithMe(this._componentManager.register(COMPONENT_DOC_HEADER_FOOTER_PANEL, DocHeaderFooterPanel));
+        }
+
+        this.disposeWithMe(this._componentManager.register(paragraphSettingIndexKey, ParagraphSettingIndex));
         ([
             [BULLET_LIST_TYPE_COMPONENT, BulletListTypePicker],
             [ORDER_LIST_TYPE_COMPONENT, OrderListTypePicker],

@@ -274,6 +274,33 @@ function inputByLabelText(text: string) {
     return label?.querySelector('input') as HTMLInputElement;
 }
 
+function setInputValue(input: HTMLInputElement, value: string) {
+    const valueSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
+    valueSetter?.call(input, value);
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+async function selectPositionRelativeFrom(container: HTMLDivElement, selectIndex: number, label: string) {
+    const select = Array.from(container.querySelectorAll('[data-u-comp="select"]'))[selectIndex] as HTMLElement | undefined;
+
+    expect(select).toBeDefined();
+
+    await act(async () => {
+        select!.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0 }));
+        await Promise.resolve();
+    });
+
+    const option = Array.from(document.querySelectorAll('[data-slot="dropdown-menu-radio-item"]'))
+        .find((button) => button.textContent === label) as HTMLElement | undefined;
+
+    expect(option).toBeDefined();
+
+    await act(async () => {
+        option!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        await Promise.resolve();
+    });
+}
+
 describe('DocDrawingPosition', () => {
     let root: Root | undefined;
     let container: HTMLDivElement | undefined;
@@ -314,5 +341,108 @@ describe('DocDrawingPosition', () => {
                 },
             },
         });
+    });
+
+    it('persists horizontal absolute position on the focused drawing', async () => {
+        currentTestBed = createPositionTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        renderPanel(root, currentTestBed);
+
+        const horizontalPositionInput = Array.from(container.querySelectorAll('input'))[0];
+
+        await act(async () => {
+            setInputValue(horizontalPositionInput, '36.5');
+            await Promise.resolve();
+        });
+
+        expect(currentDrawing(currentTestBed)).toMatchObject({
+            docTransform: {
+                positionH: {
+                    relativeFrom: ObjectRelativeFromH.PAGE,
+                    posOffset: 36.5,
+                },
+            },
+        });
+    });
+
+    it('keeps the image visually fixed when horizontal positioning changes from page to margin', async () => {
+        currentTestBed = createPositionTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        renderPanel(root, currentTestBed);
+
+        await selectPositionRelativeFrom(container, 0, 'Margin');
+
+        expect(currentDrawing(currentTestBed)).toMatchObject({
+            docTransform: {
+                positionH: {
+                    relativeFrom: ObjectRelativeFromH.MARGIN,
+                    posOffset: -90,
+                },
+            },
+        });
+    });
+
+    it('keeps the image visually fixed when vertical positioning changes from paragraph to line', async () => {
+        currentTestBed = createPositionTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        renderPanel(root, currentTestBed);
+
+        await selectPositionRelativeFrom(container, 1, 'Line');
+
+        expect(currentDrawing(currentTestBed)).toMatchObject({
+            docTransform: {
+                positionV: {
+                    relativeFrom: ObjectRelativeFromV.LINE,
+                    posOffset: -12,
+                },
+            },
+        });
+    });
+
+    it('persists vertical absolute position on the focused drawing', async () => {
+        currentTestBed = createPositionTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        renderPanel(root, currentTestBed);
+
+        const verticalPositionInput = Array.from(container.querySelectorAll('input'))[1];
+
+        await act(async () => {
+            setInputValue(verticalPositionInput, '18.5');
+            await Promise.resolve();
+        });
+
+        expect(currentDrawing(currentTestBed)).toMatchObject({
+            docTransform: {
+                positionV: {
+                    relativeFrom: ObjectRelativeFromV.PARAGRAPH,
+                    posOffset: 18.5,
+                },
+            },
+        });
+    });
+
+    it('hides the position controls when doc drawing focus is cleared', async () => {
+        currentTestBed = createPositionTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        renderPanel(root, currentTestBed);
+
+        expect(container.firstElementChild?.classList.contains('univer-hidden')).toBe(false);
+
+        await act(async () => {
+            currentTestBed!.get(IDrawingManagerService).focusDrawing([]);
+            await Promise.resolve();
+        });
+
+        expect(container.firstElementChild?.classList.contains('univer-hidden')).toBe(true);
     });
 });

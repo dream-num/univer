@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IPreset } from './types';
+import type { IPreset } from '@univerjs/presets';
 import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment';
 import { UniverSheetsThreadCommentUIPlugin } from '@univerjs/sheets-thread-comment-ui';
 import { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';

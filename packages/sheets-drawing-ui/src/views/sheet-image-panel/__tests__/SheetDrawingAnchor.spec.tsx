@@ -17,7 +17,7 @@
 import type { ISheetDrawing } from '@univerjs/sheets-drawing';
 import type { Root } from 'react-dom/client';
 import { DrawingTypeEnum, ImageSourceType } from '@univerjs/core';
-import { IDrawingManagerService } from '@univerjs/drawing';
+import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { InsertSheetDrawingCommand, ISheetDrawingService, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
 import { RediContext } from '@univerjs/ui';
@@ -152,6 +152,92 @@ describe('SheetDrawingAnchor', () => {
             SheetDrawingAnchorType.None,
             SheetDrawingAnchorType.None,
         ]);
+
+        testBed.univer.dispose();
+    });
+
+    it('hides anchor controls when the transformer clears the sheet image selection', async () => {
+        const testBed = createSheetsDrawingUiTestBed(undefined, [
+            [IRenderManagerService, { useClass: TestRenderManagerService as never }],
+        ]);
+        const renderManagerService = testBed.get(IRenderManagerService) as unknown as TestRenderManagerService;
+        const drawings = [
+            createSheetDrawing('drawing-a', SheetDrawingAnchorType.Position),
+        ];
+
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: testBed.injector }}>
+                    <SheetDrawingAnchor drawings={drawings} />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        expect(container.firstElementChild?.classList.contains('univer-hidden')).toBe(false);
+
+        await act(async () => {
+            renderManagerService.clearControl$.next(true);
+            await Promise.resolve();
+        });
+
+        expect(container.firstElementChild?.classList.contains('univer-hidden')).toBe(true);
+
+        testBed.univer.dispose();
+    });
+
+    it('syncs the selected anchor mode when the transformer starts editing another sheet image', async () => {
+        const testBed = createSheetsDrawingUiTestBed(undefined, [
+            [IRenderManagerService, { useClass: TestRenderManagerService as never }],
+        ]);
+        const renderManagerService = testBed.get(IRenderManagerService) as unknown as TestRenderManagerService;
+        const drawings = [
+            createSheetDrawing('drawing-a', SheetDrawingAnchorType.Both),
+            createSheetDrawing('drawing-b', SheetDrawingAnchorType.None),
+        ];
+
+        await testBed.commandService.executeCommand(InsertSheetDrawingCommand.id, {
+            unitId: testBed.unitId,
+            drawings,
+        });
+
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: testBed.injector }}>
+                    <SheetDrawingAnchor drawings={[drawings[0]]} />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        const options = Array.from(container.querySelectorAll<HTMLInputElement>('input[type="radio"]'));
+        expect(options.map((option) => option.checked)).toEqual([true, false, false]);
+
+        const drawingBShapeKey = getDrawingShapeKeyByDrawingSearch({
+            unitId: testBed.unitId,
+            subUnitId: testBed.subUnitId,
+            drawingId: 'drawing-b',
+        });
+
+        await act(async () => {
+            renderManagerService.changeStart$.next({
+                objects: new Map([[
+                    drawingBShapeKey,
+                    { oKey: drawingBShapeKey },
+                ]]),
+            });
+            await Promise.resolve();
+        });
+
+        expect(options.map((option) => option.checked)).toEqual([false, false, true]);
 
         testBed.univer.dispose();
     });

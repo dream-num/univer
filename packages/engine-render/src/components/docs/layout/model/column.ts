@@ -50,21 +50,28 @@ function _calculateColumnSize(
     let colWidth = 0;
     let spaceWidth = 0;
     let left = 0;
-    for (let i = 0; i <= columnIndex; i++) {
+    for (let i = 0; i < columnIndex; i++) {
         const { width, paddingEnd } = columnProperties[i];
-        if (i === columnProperties.length - 1) {
-            colWidth = pageWidth === Number.POSITIVE_INFINITY ? pageWidth - colWidth : width;
+        left += width + paddingEnd;
+    }
+
+    const { width, paddingEnd } = columnProperties[columnIndex];
+    if (columnIndex === columnProperties.length - 1) {
+        if (pageWidth === Number.POSITIVE_INFINITY) {
+            colWidth = pageWidth;
             spaceWidth = 0;
         } else {
-            spaceWidth = paddingEnd;
             colWidth = width;
-            left += colWidth + spaceWidth;
+            spaceWidth = 0;
         }
+    } else {
+        colWidth = width;
+        spaceWidth = paddingEnd;
     }
 
     return {
         width: colWidth,
         spaceWidth,
-        left: left - colWidth - spaceWidth,
+        left,
     };
 }

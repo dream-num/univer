@@ -31,13 +31,6 @@ export class ComponentsController extends Disposable {
 
         this._registerComponents();
         this._registerIcons();
-        this._registerComponents2();
-    }
-
-    private _registerComponents(): void {
-        this.disposeWithMe(
-            this._componentManager.register(SHEET_NUMFMT_PANEL, SheetNumfmtPanel)
-        );
     }
 
     private _registerIcons(): void {
@@ -52,7 +45,11 @@ export class ComponentsController extends Disposable {
         }));
     }
 
-    private _registerComponents2(): void {
+    private _registerComponents(): void {
+        this.disposeWithMe(
+            this._componentManager.register(SHEET_NUMFMT_PANEL, SheetNumfmtPanel)
+        );
+
         ([
             [MORE_NUMFMT_TYPE_KEY, MoreNumfmtType],
             [OPTIONS_KEY, Options],

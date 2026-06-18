@@ -20,6 +20,7 @@ import type { SheetInterceptorService } from '@univerjs/sheets';
 import {
     CancelMarkDirtyRowAutoHeightOperation,
     MarkDirtyRowAutoHeightOperation,
+    SetWorksheetRowAutoHeightMutation,
 } from '@univerjs/sheets';
 import { describe, expect, it } from 'vitest';
 import { AutoHeightController } from '../auto-height.controller';
@@ -109,5 +110,64 @@ describe('AutoHeightController', () => {
                 },
             },
         ]);
+    });
+
+    it('builds row auto-height undo/redo only for rows whose calculated height changed', () => {
+        const worksheet = {
+            getSheetId: () => 's-1',
+            getRowHeight: (row: number) => row === 1 ? 20 : 30,
+            getRowManager: () => ({
+                getRow: (row: number) => row === 1 ? { ah: 20 } : { ah: 30 },
+            }),
+            getConfig: () => ({ defaultRowHeight: 18 }),
+        } as unknown;
+
+        const workbook = {
+            getUnitId: () => 'u-1',
+            getActiveSheet: () => worksheet,
+            getSheetBySheetId: (sheetId: string) => (sheetId === 's-1' ? worksheet : null),
+        } as unknown as Workbook;
+
+        const controller = new AutoHeightController(
+            {
+                getRenderById: () => ({
+                    with: () => ({
+                        ensureSkeleton: () => ({
+                            calculateAutoHeightInRange: () => [
+                                { row: 1, autoHeight: 24 },
+                                { row: 2, autoHeight: 30 },
+                                { row: 3, autoHeight: 0 },
+                            ],
+                        }),
+                    }),
+                }),
+            } as unknown as RenderManagerService,
+            { interceptAutoHeight: () => ({ dispose: () => { } }) } as unknown as SheetInterceptorService,
+            {
+                getCurrentUnitOfType: () => workbook,
+                getUnit: () => workbook,
+            } as unknown as IUniverInstanceService
+        );
+
+        expect(controller.getUndoRedoParamsOfAutoHeight([
+            { startRow: 1, endRow: 3, startColumn: 0, endColumn: 0 },
+        ])).toEqual({
+            redos: [{
+                id: SetWorksheetRowAutoHeightMutation.id,
+                params: {
+                    unitId: 'u-1',
+                    subUnitId: 's-1',
+                    rowsAutoHeightInfo: [{ row: 1, autoHeight: 24 }],
+                },
+            }],
+            undos: [{
+                id: SetWorksheetRowAutoHeightMutation.id,
+                params: {
+                    unitId: 'u-1',
+                    subUnitId: 's-1',
+                    rowsAutoHeightInfo: [{ row: 1, autoHeight: 20 }],
+                },
+            }],
+        });
     });
 });

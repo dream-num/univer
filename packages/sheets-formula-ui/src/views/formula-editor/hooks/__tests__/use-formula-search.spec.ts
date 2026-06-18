@@ -35,6 +35,22 @@ describe('getFormulaReplaceResult', () => {
         });
     });
 
+    it('does not duplicate the call bracket when the typed function already has one', () => {
+        expect(getFormulaReplaceResult(
+            [
+                { nodeType: sequenceNodeType.FUNCTION, token: 'SU', startIndex: 0, endIndex: 1 },
+                '(',
+                'A1:A3)',
+            ],
+            0,
+            'SUM',
+            FunctionType.Math
+        )).toEqual({
+            text: 'SUM(A1:A3)',
+            offset: -1,
+        });
+    });
+
     it('does not append an open bracket when replacing table names', () => {
         expect(getFormulaReplaceResult(
             [{ nodeType: sequenceNodeType.FUNCTION, token: 'Ord', startIndex: 0, endIndex: 2 }],
@@ -44,6 +60,18 @@ describe('getFormulaReplaceResult', () => {
         )).toEqual({
             text: 'Orders',
             offset: -3,
+        });
+    });
+
+    it('does not append an open bracket when replacing defined names', () => {
+        expect(getFormulaReplaceResult(
+            [{ nodeType: sequenceNodeType.FUNCTION, token: 'Tax', startIndex: 0, endIndex: 2 }],
+            0,
+            'TaxRate',
+            FunctionType.DefinedName
+        )).toEqual({
+            text: 'TaxRate',
+            offset: -4,
         });
     });
 });

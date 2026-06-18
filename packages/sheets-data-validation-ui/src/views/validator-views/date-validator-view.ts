@@ -17,7 +17,7 @@
 import { DataValidationType } from '@univerjs/core';
 import { DataValidatorDropdownType } from '@univerjs/data-validation';
 import { DateShowTimeOption } from '../components/DateShowTimeOption';
-import { BASE_FORMULA_INPUT_NAME } from '../components/formula-input/formula-input';
+import { BASE_FORMULA_INPUT_NAME } from '../components/formula-input';
 import { BaseSheetDataValidatorView } from './sheet-validator-view';
 
 export class DateValidatorView extends BaseSheetDataValidatorView {

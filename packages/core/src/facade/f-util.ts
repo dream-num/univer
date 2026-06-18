@@ -89,7 +89,7 @@ export class FUtil {
      *
      * @example
      * ```ts
-     * const key = univerAPI.Util.tools.generateRandomId(6);
+     * const key = univerAPI.Util.tools.isDate();
      * console.log(key);
      * ```
      */

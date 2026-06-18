@@ -14,10 +14,19 @@
  * limitations under the License.
  */
 
-import type { ICommand, ICommandInfo, IDrawingParam } from '@univerjs/core';
+import type { ICommand, ICommandInfo, IDocumentData, IDrawingParam } from '@univerjs/core';
 import type { ReactElement } from 'react';
 import type { Root } from 'react-dom/client';
-import { CommandType, DrawingTypeEnum, ICommandService, LocaleType, Univer } from '@univerjs/core';
+import {
+    BooleanNumber,
+    CommandType,
+    DrawingTypeEnum,
+    ICommandService,
+    LocaleType,
+    PositionedObjectLayoutType,
+    Univer,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -33,6 +42,8 @@ const subUnitId = 'drawing-command-subunit';
 const drawingId = 'image-1';
 const wrappingStyleCommandId = 'doc.command.update-doc-drawing-wrapping-style';
 const editCommandId = 'drawing.command.open-image-setting';
+const cropCommandId = 'drawing.command.crop-image';
+const deleteCommandId = 'drawing.command.delete-image';
 
 function createDrawing(id: string): IDrawingParam {
     return {
@@ -46,6 +57,40 @@ function createDrawing(id: string): IDrawingParam {
             width: 120,
             height: 80,
             angle: 0,
+        },
+    };
+}
+
+function createDocData(layoutType: PositionedObjectLayoutType, behindDoc = BooleanNumber.FALSE): IDocumentData {
+    return {
+        id: unitId,
+        body: {
+            dataStream: '\b\r\n',
+            customBlocks: [{
+                startIndex: 0,
+                blockId: drawingId,
+            }],
+        },
+        drawings: {
+            [drawingId]: {
+                drawingId,
+                unitId,
+                subUnitId,
+                drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+                layoutType,
+                behindDoc,
+            } as never,
+        },
+        drawingsOrder: [drawingId],
+        documentStyle: {
+            pageSize: {
+                width: 594.3,
+                height: 840.51,
+            },
+            marginTop: 72,
+            marginBottom: 72,
+            marginRight: 90,
+            marginLeft: 90,
         },
     };
 }
@@ -111,6 +156,8 @@ describe('drawing command behavior', () => {
         commandService.registerCommand(SetDrawingAlignOperation);
         commandService.registerCommand(createOperation(wrappingStyleCommandId));
         commandService.registerCommand(createOperation(editCommandId));
+        commandService.registerCommand(createOperation(cropCommandId));
+        commandService.registerCommand(createOperation(deleteCommandId));
         executedCommands = [];
         commandService.onCommandExecuted((command) => executedCommands.push(command));
     });
@@ -182,6 +229,45 @@ describe('drawing command behavior', () => {
         }]);
     });
 
+    it('loads the current doc image wrapping style before changing it from the floating toolbar', async () => {
+        univer.createUnit(UniverInstanceType.UNIVER_DOC, createDocData(PositionedObjectLayoutType.WRAP_NONE, BooleanNumber.TRUE));
+        const rendered = renderWithRediContext(
+            univer.__getInjector(),
+            <ImagePopupMenu
+                popup={{
+                    extraProps: {
+                        variant: 'doc-floating-toolbar',
+                        unitId,
+                        subUnitId,
+                        drawingId,
+                        menuItems: [],
+                    },
+                }}
+            />
+        );
+        root = rendered.root;
+        container = rendered.container;
+
+        clickElement(document.querySelector('[data-u-comp="doc-image-floating-toolbar"] button')!);
+        const behindTextOption = findByText<HTMLButtonElement>('button', 'drawing-ui.image-text-wrap.behindText');
+
+        expect(behindTextOption.className).toContain('univer-bg-primary-50');
+
+        clickElement(findByText('button', 'drawing-ui.image-text-wrap.inFrontText'));
+        await flushPendingCommands();
+
+        expect(executedCommands).toEqual([{
+            id: wrappingStyleCommandId,
+            type: CommandType.OPERATION,
+            params: {
+                unitId,
+                subUnitId,
+                drawings: [{ unitId, subUnitId, drawingId }],
+                wrappingStyle: 'inFrontOfText',
+            },
+        }]);
+    });
+
     it('executes edit command and hides the doc image floating toolbar', async () => {
         const editParams = { unitId, subUnitId, drawingId, source: 'toolbar' };
         const rendered = renderWithRediContext(
@@ -216,5 +302,144 @@ describe('drawing command behavior', () => {
             params: editParams,
         }]);
         expect(document.querySelector('[data-u-comp="doc-image-floating-toolbar"]')).toBeNull();
+    });
+
+    it('keeps disabled doc image toolbar actions inert without hiding the toolbar', async () => {
+        const rendered = renderWithRediContext(
+            univer.__getInjector(),
+            <ImagePopupMenu
+                popup={{
+                    extraProps: {
+                        variant: 'doc-floating-toolbar',
+                        unitId,
+                        subUnitId,
+                        drawingId,
+                        menuItems: [
+                            {
+                                label: 'drawing-ui.image-popup.edit',
+                                index: 0,
+                                commandId: editCommandId,
+                                commandParams: { unitId, subUnitId, drawingId, source: 'toolbar' },
+                                disable: true,
+                            },
+                            {
+                                label: 'drawing-ui.image-popup.crop',
+                                index: 1,
+                                commandId: 'drawing.command.crop-image',
+                                commandParams: { unitId, subUnitId, drawingId },
+                                disable: true,
+                            },
+                            {
+                                label: 'drawing-ui.image-popup.delete',
+                                index: 2,
+                                commandId: 'drawing.command.delete-image',
+                                commandParams: { unitId, subUnitId, drawingId },
+                                disable: true,
+                            },
+                        ],
+                    },
+                }}
+            />
+        );
+        root = rendered.root;
+        container = rendered.container;
+
+        const toolbarButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-u-comp="doc-image-floating-toolbar"] button'));
+        const actionButtons = toolbarButtons.slice(1);
+        expect(actionButtons.map((button) => button.disabled)).toEqual([true, true, true]);
+
+        actionButtons.forEach(clickElement);
+        await flushPendingCommands();
+
+        expect(executedCommands).toEqual([]);
+        expect(document.querySelector('[data-u-comp="doc-image-floating-toolbar"]')).not.toBeNull();
+    });
+
+    it('executes crop and delete commands from the doc image floating toolbar', async () => {
+        const cropParams = { unitId, subUnitId, drawingId, source: 'toolbar-crop' };
+        const deleteParams = { unitId, subUnitId, drawingId, source: 'toolbar-delete' };
+        const rendered = renderWithRediContext(
+            univer.__getInjector(),
+            <ImagePopupMenu
+                popup={{
+                    extraProps: {
+                        variant: 'doc-floating-toolbar',
+                        unitId,
+                        subUnitId,
+                        drawingId,
+                        menuItems: [
+                            {
+                                label: 'drawing-ui.image-popup.crop',
+                                index: 1,
+                                commandId: cropCommandId,
+                                commandParams: cropParams,
+                                disable: false,
+                            },
+                            {
+                                label: 'drawing-ui.image-popup.delete',
+                                index: 2,
+                                commandId: deleteCommandId,
+                                commandParams: deleteParams,
+                                disable: false,
+                            },
+                        ],
+                    },
+                }}
+            />
+        );
+        root = rendered.root;
+        container = rendered.container;
+
+        const toolbarButtons = document.querySelectorAll('[data-u-comp="doc-image-floating-toolbar"] button');
+        clickElement(toolbarButtons[2]);
+        clickElement(toolbarButtons[3]);
+        await flushPendingCommands();
+
+        expect(executedCommands).toEqual([
+            {
+                id: cropCommandId,
+                type: CommandType.OPERATION,
+                params: cropParams,
+            },
+            {
+                id: deleteCommandId,
+                type: CommandType.OPERATION,
+                params: deleteParams,
+            },
+        ]);
+        expect(document.querySelector('[data-u-comp="doc-image-floating-toolbar"]')).not.toBeNull();
+    });
+
+    it('executes a selected sheet image popup menu item and closes the menu', async () => {
+        const editParams = { unitId, subUnitId, drawingId, source: 'sheet-popup' };
+        const rendered = renderWithRediContext(
+            univer.__getInjector(),
+            <ImagePopupMenu
+                popup={{
+                    extraProps: {
+                        menuItems: [{
+                            label: 'drawing-ui.image-popup.edit',
+                            index: 0,
+                            commandId: editCommandId,
+                            commandParams: editParams,
+                            disable: false,
+                        }],
+                    },
+                }}
+            />
+        );
+        root = rendered.root;
+        container = rendered.container;
+
+        clickElement(container.firstElementChild!.firstElementChild!);
+        clickElement(findByText('[role="menuitem"]', 'drawing-ui.image-popup.edit'));
+        await flushPendingCommands();
+
+        expect(executedCommands).toEqual([{
+            id: editCommandId,
+            type: CommandType.OPERATION,
+            params: editParams,
+        }]);
+        expect(document.querySelector('[role="menuitem"]')).toBeNull();
     });
 });

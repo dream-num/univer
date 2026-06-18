@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+import type { IPreset } from '@univerjs/presets';
 import type { IUniverSheetsHyperLinkUIConfig } from '@univerjs/sheets-hyper-link-ui';
-import type { IPreset } from './types';
 import { UniverSheetsHyperLinkPlugin } from '@univerjs/sheets-hyper-link';
 import { UniverSheetsHyperLinkUIPlugin } from '@univerjs/sheets-hyper-link-ui';
 

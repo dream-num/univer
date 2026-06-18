@@ -33,7 +33,7 @@ import type { IAuthzIoService } from './type';
 import { ObjectScope, UnitRole } from '@univerjs/protocol';
 import { Inject } from '../../common/di';
 import { UniverInstanceType } from '../../common/unit';
-import { generateRandomId } from '../../shared/tools';
+import { generateRandomId } from '../../shared/random-id';
 import { IResourceManagerService } from '../resource-manager/type';
 import { createDefaultUser, isDevRole } from '../user-manager/const';
 

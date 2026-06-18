@@ -17,8 +17,16 @@
 import type { IRange } from '@univerjs/core';
 import type { IConditionFormattingRule } from '@univerjs/sheets-conditional-formatting';
 import type { Root } from 'react-dom/client';
-import { BooleanNumber, LocaleService, LocaleType } from '@univerjs/core';
-import { AddCfCommand, CFNumberOperator, CFRuleType, CFSubRuleType, DeleteCfCommand } from '@univerjs/sheets-conditional-formatting';
+import { BooleanNumber, LocaleService, LocaleType, RANGE_TYPE } from '@univerjs/core';
+import { SetSelectionsOperation } from '@univerjs/sheets';
+import {
+    AddCfCommand,
+    CFNumberOperator,
+    CFRuleType,
+    CFSubRuleType,
+    DeleteCfCommand,
+    MoveCfCommand,
+} from '@univerjs/sheets-conditional-formatting';
 import { IMarkSelectionService } from '@univerjs/sheets-ui';
 import { RediContext } from '@univerjs/ui';
 import { act } from 'react';
@@ -78,6 +86,8 @@ async function createRuleListTestBed() {
     testBed.injector.add([IMarkSelectionService, { useClass: TestMarkSelectionService as never }]);
     testBed.commandService.registerCommand(AddCfCommand);
     testBed.commandService.registerCommand(DeleteCfCommand);
+    testBed.commandService.registerCommand(MoveCfCommand);
+    testBed.commandService.registerCommand(SetSelectionsOperation);
     testBed.get(LocaleService).load({
         [LocaleType.ZH_CN]: {
             sheets: {
@@ -233,7 +243,7 @@ describe('RuleList', () => {
         expect(container.textContent).not.toContain('A1');
     });
 
-    it('deletes only the clicked conditional formatting rule', async () => {
+    it('refreshes selected-range rules when the active sheet selection changes', async () => {
         currentTestBed = await createRuleListTestBed();
         container = document.createElement('div');
         document.body.appendChild(container);
@@ -243,6 +253,60 @@ describe('RuleList', () => {
             root!.render(
                 <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
                     <RuleList onClick={() => undefined} onCreate={() => undefined} />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        await act(async () => {
+            container!.querySelector('[data-u-comp="select"]')!.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0 }));
+            await Promise.resolve();
+        });
+
+        const selectedRangeOption = Array.from(document.querySelectorAll('[data-slot="dropdown-menu-radio-item"]'))
+            .find((button) => button.textContent === 'Selected range');
+
+        expect(selectedRangeOption).toBeDefined();
+
+        await act(async () => {
+            selectedRangeOption!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            await Promise.resolve();
+        });
+
+        expect(container.textContent).toContain('A1');
+        expect(container.textContent).not.toContain('F6');
+
+        await act(async () => {
+            await currentTestBed!.commandService.executeCommand(SetSelectionsOperation.id, {
+                unitId: currentTestBed!.unitId,
+                subUnitId: currentTestBed!.subUnitId,
+                selections: [{
+                    range: {
+                        ...FAR_RANGE,
+                        rangeType: RANGE_TYPE.NORMAL,
+                    },
+                    primary: null,
+                    style: null,
+                }],
+            });
+            await new Promise((resolve) => setTimeout(resolve, 32));
+        });
+
+        expect(container.textContent).not.toContain('A1');
+        expect(container.textContent).toContain('F6');
+    });
+
+    it('deletes only the clicked conditional formatting rule', async () => {
+        currentTestBed = await createRuleListTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        const openedRuleIds: string[] = [];
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <RuleList onClick={(rule) => openedRuleIds.push(rule.cfId)} onCreate={() => undefined} />
                 </RediContext.Provider>
             );
             await Promise.resolve();
@@ -264,9 +328,50 @@ describe('RuleList', () => {
 
         const remainingRules = currentTestBed.ruleModel.getSubunitRules(currentTestBed.unitId, currentTestBed.subUnitId);
 
+        expect(openedRuleIds).toEqual([]);
         expect(remainingRules?.map((rule) => rule.cfId)).toEqual(['cf-far']);
         expect(container.textContent).not.toContain('A1');
         expect(container.textContent).toContain('F6');
+    });
+
+    it('opens the clicked conditional formatting rule for editing without changing worksheet rules', async () => {
+        currentTestBed = await createRuleListTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        const openedRuleIds: string[] = [];
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <RuleList onClick={(rule) => openedRuleIds.push(rule.cfId)} onCreate={() => undefined} />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        const activeRangeText = Array.from(container.querySelectorAll('div'))
+            .find((element) => element.textContent === 'A1');
+        const activeRuleRow = activeRangeText?.parentElement?.parentElement as HTMLElement | undefined;
+        const ruleIdsBeforeOpen = currentTestBed.ruleModel
+            .getSubunitRules(currentTestBed.unitId, currentTestBed.subUnitId)
+            ?.map((rule) => rule.cfId);
+
+        if (!activeRuleRow) {
+            throw new Error('Rule row was not rendered');
+        }
+
+        await act(async () => {
+            activeRuleRow.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            await Promise.resolve();
+        });
+
+        expect(openedRuleIds).toEqual(['cf-active']);
+        expect(
+            currentTestBed.ruleModel
+                .getSubunitRules(currentTestBed.unitId, currentTestBed.subUnitId)
+                ?.map((rule) => rule.cfId)
+        ).toEqual(ruleIdsBeforeOpen);
     });
 
     it('clears all worksheet conditional formatting rules in worksheet mode', async () => {
@@ -299,5 +404,114 @@ describe('RuleList', () => {
         expect(currentTestBed.ruleModel.getSubunitRules(currentTestBed.unitId, currentTestBed.subUnitId)).toEqual([]);
         expect(container.textContent).not.toContain('A1');
         expect(container.textContent).not.toContain('F6');
+    });
+
+    it('starts the create-rule flow from the toolbar without changing existing worksheet rules', async () => {
+        currentTestBed = await createRuleListTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        let createRequests = 0;
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <RuleList
+                        onClick={() => undefined}
+                        onCreate={() => {
+                            createRequests += 1;
+                        }}
+                    />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        const createRuleButton = container.querySelectorAll('a')[0];
+        const ruleIdsBeforeCreate = currentTestBed.ruleModel
+            .getSubunitRules(currentTestBed.unitId, currentTestBed.subUnitId)
+            ?.map((rule) => rule.cfId);
+
+        await act(async () => {
+            createRuleButton.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            await Promise.resolve();
+        });
+
+        expect(createRequests).toBe(1);
+        expect(
+            currentTestBed.ruleModel
+                .getSubunitRules(currentTestBed.unitId, currentTestBed.subUnitId)
+                ?.map((rule) => rule.cfId)
+        ).toEqual(ruleIdsBeforeCreate);
+    });
+
+    it('moves a dragged worksheet rule after the drop target rule', async () => {
+        currentTestBed = await createRuleListTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <RuleList onClick={() => undefined} onCreate={() => undefined} />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        const ruleRows = Array.from(container.querySelectorAll<HTMLElement>('[data-draggable-list-item-id]'));
+        const firstRuleRow = ruleRows[0];
+        const secondRuleRow = ruleRows[1];
+        const dragHandle = firstRuleRow?.querySelector<HTMLElement>('.draggableHandle');
+
+        if (!firstRuleRow || !secondRuleRow || !dragHandle) {
+            throw new Error('Rule drag controls were not rendered');
+        }
+
+        expect(
+            currentTestBed.ruleModel
+                .getSubunitRules(currentTestBed.unitId, currentTestBed.subUnitId)
+                ?.map((rule) => rule.cfId)
+        ).toEqual(['cf-far', 'cf-active']);
+
+        Object.defineProperty(firstRuleRow, 'setPointerCapture', {
+            configurable: true,
+            value() {},
+        });
+
+        const elementFromPoint = document.elementFromPoint;
+        Object.defineProperty(document, 'elementFromPoint', {
+            configurable: true,
+            value: () => secondRuleRow,
+        });
+
+        try {
+            await act(async () => {
+                dragHandle.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, clientX: 1, clientY: 1, pointerId: 7 }));
+                await Promise.resolve();
+            });
+
+            await act(async () => {
+                window.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, clientX: 1, clientY: 80, pointerId: 7 }));
+                await Promise.resolve();
+            });
+
+            await act(async () => {
+                window.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, clientX: 1, clientY: 80, pointerId: 7 }));
+                await Promise.resolve();
+            });
+        } finally {
+            Object.defineProperty(document, 'elementFromPoint', {
+                configurable: true,
+                value: elementFromPoint,
+            });
+        }
+
+        expect(
+            currentTestBed.ruleModel
+                .getSubunitRules(currentTestBed.unitId, currentTestBed.subUnitId)
+                ?.map((rule) => rule.cfId)
+        ).toEqual(['cf-active', 'cf-far']);
     });
 });

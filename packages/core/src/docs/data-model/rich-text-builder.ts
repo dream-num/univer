@@ -16,8 +16,23 @@
 
 import type { Nullable } from '../../shared';
 import type { BaselineOffset, HorizontalAlign, TextDecoration, TextDirection } from '../../types/enum';
-import type { IBorderData, IColorStyle, IDocumentBody, IDocumentData, INumberUnit, IParagraphBorder, IParagraphStyle, IShading, ITabStop, ITextDecoration, ITextStyle, NamedStyleType, SpacingRule } from '../../types/interfaces';
-import { generateRandomId, Tools } from '../../shared';
+import type {
+    IBorderData,
+    IColorStyle,
+    IDocumentBody,
+    IDocumentData,
+    INumberUnit,
+    IParagraphBorder,
+    IParagraphStyle,
+    IShading,
+    ITabStop,
+    ITextDecoration,
+    ITextStyle,
+    NamedStyleType,
+    SpacingRule,
+} from '../../types/interfaces';
+import { Tools } from '../../shared';
+import { generateRandomId } from '../../shared/random-id';
 import { BooleanNumber } from '../../types/enum';
 import { CustomRangeType } from '../../types/interfaces';
 import { createParagraphId } from '../paragraph-id';

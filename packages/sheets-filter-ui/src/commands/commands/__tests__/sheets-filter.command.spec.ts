@@ -24,7 +24,7 @@ import { MarkDirtyFilterChangeMutation, RangeProtectionRuleModel, RefRangeServic
 import { SetSheetsFilterRangeMutation, SheetsFilterService, UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand, SetSheetsFilterCriteriaCommand, SmartToggleSheetsFilterCommand } from '@univerjs/sheets-filter/commands/commands/sheets-filter.command.js';
 import { IMessageService } from '@univerjs/ui';
-import { MockMessageService } from '@univerjs/ui/services/message/__testing__/mock-message.service.js';
+import { MockMessageService } from '@univerjs/ui/services/message/__tests__/mock-message.service.js';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 function testWorkbookDataFactory(): IWorkbookData {

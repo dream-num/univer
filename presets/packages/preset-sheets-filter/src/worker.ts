@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IPreset } from './types';
+import type { IPreset } from '@univerjs/presets';
 import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 
 export function UniverSheetsFilterWorkerPreset(): IPreset {

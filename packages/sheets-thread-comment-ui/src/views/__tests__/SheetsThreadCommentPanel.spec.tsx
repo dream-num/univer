@@ -48,6 +48,8 @@ import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
 import { CellPopupManagerService, IMarkSelectionService, SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import {
     AddCommentMutation,
+    DeleteCommentMutation,
+    DeleteCommentTreeCommand,
     IThreadCommentDataSourceService,
     ResolveCommentCommand,
     ResolveCommentMutation,
@@ -494,6 +496,8 @@ function createTestBed(testWorkbookData: IWorkbookData = workbookData) {
 
     const commandService = get(ICommandService);
     commandService.registerCommand(AddCommentMutation);
+    commandService.registerCommand(DeleteCommentMutation);
+    commandService.registerCommand(DeleteCommentTreeCommand);
     commandService.registerCommand(ResolveCommentMutation);
     commandService.registerCommand(ResolveCommentCommand);
     commandService.registerCommand(SetActiveCommentOperation);
@@ -555,6 +559,19 @@ function dispatchMouseEvent(element: Element, type: string) {
     act(() => {
         element.dispatchEvent(new MouseEvent(type, { bubbles: true }));
     });
+}
+
+function getRootDeleteAction(panelItem: Element) {
+    const header = panelItem.firstElementChild;
+    const controls = header?.lastElementChild;
+    const action = controls?.lastElementChild;
+    expect(action).toBeInstanceOf(HTMLElement);
+
+    return action as HTMLElement;
+}
+
+function waitForTreeRefresh() {
+    return new Promise((resolve) => setTimeout(resolve, 40));
 }
 
 describe('SheetsThreadCommentPanel', () => {
@@ -884,6 +901,32 @@ describe('SheetsThreadCommentPanel', () => {
 
         dispatchMouseEvent(currentThread!, 'mouseout');
 
+        expect(TestState.shapes).toHaveLength(0);
+        expect(TestState.removedShapeIds).toEqual(['shape-1']);
+    });
+
+    it('removes the sheet highlight and thread when a hovered panel comment is deleted', async () => {
+        const testBed = createTestBed();
+        univer = testBed.univer;
+        testBed.threadCommentModel.addComment(unitId, sheet1, createComment('delete-thread', sheet1, 'B2', 'Delete me'));
+
+        const rendered = renderPanel(testBed.injector);
+        root = rendered.root;
+        container = rendered.container;
+
+        const panelThread = container.querySelector(`#PANEL-${unitId}-${sheet1}-delete-thread`);
+        expect(panelThread).toBeInstanceOf(HTMLElement);
+
+        dispatchMouseEvent(panelThread!, 'mouseover');
+        expect(TestState.shapes).toHaveLength(1);
+
+        await act(async () => {
+            getRootDeleteAction(panelThread!).dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            await waitForTreeRefresh();
+        });
+
+        expect(testBed.threadCommentModel.getComment(unitId, sheet1, 'delete-thread')).toBeUndefined();
+        expect(container.textContent).not.toContain('Delete me');
         expect(TestState.shapes).toHaveLength(0);
         expect(TestState.removedShapeIds).toEqual(['shape-1']);
     });

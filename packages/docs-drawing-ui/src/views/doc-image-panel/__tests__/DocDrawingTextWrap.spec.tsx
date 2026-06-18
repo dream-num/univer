@@ -321,6 +321,34 @@ describe('DocDrawingTextWrap', () => {
         });
     });
 
+    it('persists in-front-of-text wrapping on the focused drawing', async () => {
+        currentTestBed = createPanelTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        renderPanel(root, currentTestBed);
+
+        await act(async () => {
+            inputByLabelText('In front of text').click();
+            await Promise.resolve();
+        });
+
+        expect(currentDrawing(currentTestBed)).toMatchObject({
+            layoutType: PositionedObjectLayoutType.WRAP_NONE,
+            behindDoc: BooleanNumber.FALSE,
+            docTransform: {
+                positionH: {
+                    relativeFrom: ObjectRelativeFromH.PAGE,
+                    posOffset: 24,
+                },
+                positionV: {
+                    relativeFrom: ObjectRelativeFromV.PAGE,
+                    posOffset: 114,
+                },
+            },
+        });
+    });
+
     it('preserves wrap metadata when switching to top-and-bottom text flow', async () => {
         currentTestBed = createPanelTestBed();
         container = document.createElement('div');

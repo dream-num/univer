@@ -19,7 +19,7 @@ import type { IDrawingGroupUpdateParam } from '@univerjs/drawing';
 import type { ReactElement } from 'react';
 import type { Root } from 'react-dom/client';
 import { DrawingTypeEnum, ICommandService, LocaleType, Univer } from '@univerjs/core';
-import { DrawingManagerService, IDrawingManagerService } from '@univerjs/drawing';
+import { DrawingManagerService, getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IconManager, RediContext } from '@univerjs/ui';
 import { act } from 'react';
@@ -105,6 +105,26 @@ function findButtonByText(text: string): HTMLButtonElement {
     }
 
     return button;
+}
+
+function buttonIsAvailable(text: string): boolean {
+    const button = Array.from(document.querySelectorAll<HTMLButtonElement>('button'))
+        .find((item) => item.textContent?.includes(text));
+
+    if (!button) {
+        return false;
+    }
+
+    let current: HTMLElement | null = button;
+    while (current && current !== document.body) {
+        if (current.classList.contains('univer-hidden')) {
+            return false;
+        }
+
+        current = current.parentElement;
+    }
+
+    return true;
 }
 
 function renderWithRediContext(injector: ReturnType<Univer['__getInjector']>, element: ReactElement) {
@@ -224,5 +244,42 @@ describe('DrawingGroup behavior', () => {
             { drawingId: 'image-1', groupId: undefined },
             { drawingId: 'image-2', groupId: undefined },
         ]);
+    });
+
+    it('shows only the group action when the transformer selects multiple ungrouped drawings', () => {
+        const drawings = [createDrawing('image-1', 0), createDrawing('image-2', 30)];
+        drawingManagerService.registerDrawingData(unitId, {
+            [subUnitId]: {
+                data: {
+                    'image-1': drawings[0],
+                    'image-2': drawings[1],
+                },
+                order: ['image-1', 'image-2'],
+            },
+        });
+
+        const rendered = renderWithRediContext(
+            univer.__getInjector(),
+            <DrawingGroup hasGroup drawings={drawings} />
+        );
+        root = rendered.root;
+        container = rendered.container;
+
+        const firstKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId: 'image-1' });
+        const secondKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId: 'image-2' });
+
+        act(() => {
+            (univer.__getInjector().get(IRenderManagerService) as unknown as TestRenderManagerService)
+                .changeStart$
+                .next({
+                    objects: new Map([
+                        [firstKey, { oKey: firstKey, left: 0, top: 10, width: 20, height: 30, angle: 0 }],
+                        [secondKey, { oKey: secondKey, left: 30, top: 10, width: 20, height: 30, angle: 0 }],
+                    ]),
+                });
+        });
+
+        expect(buttonIsAvailable('drawing-ui.image-panel.group.group')).toBe(true);
+        expect(buttonIsAvailable('drawing-ui.image-panel.group.unGroup')).toBe(false);
     });
 });

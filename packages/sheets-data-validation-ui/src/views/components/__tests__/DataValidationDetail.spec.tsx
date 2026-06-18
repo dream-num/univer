@@ -29,6 +29,7 @@ import {
     createIdentifier,
     DataValidationErrorStyle,
     DataValidationOperator,
+    DataValidationRenderMode,
     DataValidationType,
     ICommandService,
     ILogService,
@@ -64,6 +65,7 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import {
     RangeProtectionRuleModel,
     RefRangeService,
+    serializeListOptions,
     SheetInterceptorService,
     SheetSkeletonService,
     SheetsSelectionsService,
@@ -76,9 +78,12 @@ import {
     CheckboxValidator,
     DataValidationCacheService,
     DataValidationCustomFormulaService,
+    DataValidationFormulaController,
     DataValidationFormulaService,
     DataValidationListCacheService,
     DateValidator,
+    ListMultipleValidator,
+    ListValidator,
     RemoveSheetDataValidationCommand,
     SheetDataValidationModel,
     SheetsDataValidationValidatorService,
@@ -104,7 +109,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { DataValidationPanelService } from '../../../services/data-validation-panel.service';
 import { DataValidationDetail } from '../DataValidationDetail';
 import { DateShowTimeOption } from '../DateShowTimeOption';
-import { BASE_FORMULA_INPUT_NAME, FORMULA_INPUTS } from '../formula-input';
+import { BASE_FORMULA_INPUT_NAME, FORMULA_INPUTS, LIST_FORMULA_INPUT_NAME } from '../formula-input';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -349,6 +354,18 @@ function createDateBetweenRule(uid = 'rule-date-between'): ISheetDataValidationR
     };
 }
 
+function createListRule(uid = 'rule-list'): ISheetDataValidationRule {
+    return {
+        uid,
+        type: DataValidationType.LIST,
+        ranges: [FIRST_RANGE],
+        formula1: serializeListOptions(['Pending', 'Approved']),
+        formula2: '#FDCECE,#DEF6A2',
+        renderMode: DataValidationRenderMode.CUSTOM,
+        allowBlank: true,
+    };
+}
+
 function createDetailTestBed(rule: ISheetDataValidationRule) {
     const univer = new Univer();
     const injector = univer.__getInjector();
@@ -391,6 +408,7 @@ function createDetailTestBed(rule: ISheetDataValidationRule) {
                 [DataValidationListCacheService],
                 [DataValidationFormulaService],
                 [DataValidationCustomFormulaService],
+                [DataValidationFormulaController],
                 [RegisterOtherFormulaService],
                 [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
                 [ISheetRowFilteredService, { useClass: SheetRowFilteredService }],
@@ -415,12 +433,27 @@ function createDetailTestBed(rule: ISheetDataValidationRule) {
                 date: {
                     title: 'Date',
                 },
+                list: {
+                    title: 'Dropdown',
+                },
+                listMultiple: {
+                    title: 'Dropdown multiple',
+                },
                 validFail: {
                     date: 'Enter a valid date',
+                    list: 'Please input options',
+                    listIntersects: 'The selected range cannot intersect the rule range',
+                    listInvalid: 'Enter a valid range formula',
                     number: 'Enter a valid number',
                 },
             },
             'sheets-data-validation-ui': {
+                list: {
+                    add: 'Add item',
+                    customOptions: 'Custom options',
+                    options: 'Options',
+                    refOptions: 'From range',
+                },
                 operators: {
                     legal: 'Is valid',
                 },
@@ -473,6 +506,12 @@ function createDetailTestBed(rule: ISheetDataValidationRule) {
     dateValidator.optionsInput = DateShowTimeOption.componentKey;
     validatorRegistry.register(dateValidator);
     validatorRegistry.register(injector.createInstance(CheckboxValidator));
+    const listValidator = injector.createInstance(ListValidator);
+    listValidator.formulaInput = LIST_FORMULA_INPUT_NAME;
+    const listMultipleValidator = injector.createInstance(ListMultipleValidator);
+    listMultipleValidator.formulaInput = LIST_FORMULA_INPUT_NAME;
+    validatorRegistry.register(listValidator);
+    validatorRegistry.register(listMultipleValidator);
 
     const sheetDataValidationModel = injector.get(SheetDataValidationModel);
     commandService.syncExecuteCommand(AddDataValidationMutation.id, {
@@ -653,6 +692,28 @@ describe('DataValidationDetail rule editing', () => {
             operator: undefined,
             formula1: undefined,
             formula2: undefined,
+        });
+    });
+
+    it('preserves dropdown choices and colors when switching a list rule to multi-select', async () => {
+        currentTestBed = createDetailTestBed(createListRule('rule-list-to-multiple'));
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        await renderDetail(root, currentTestBed);
+
+        await openSelect(container.querySelectorAll<HTMLElement>('[data-u-comp="select"]')[0]);
+        const options = Array.from(document.querySelectorAll<HTMLElement>('[data-slot="dropdown-menu-radio-item"], [role="menuitemradio"]'));
+        const multipleListOption = options.find((item) => item.textContent?.includes('sheets-data-validation.listMultiple.title'))!;
+
+        await clickElement(multipleListOption);
+
+        expect(currentTestBed.sheetDataValidationModel.getRuleById(UNIT_ID, SUB_UNIT_ID, currentTestBed.rule.uid)).toMatchObject({
+            type: DataValidationType.LIST_MULTIPLE,
+            formula1: serializeListOptions(['Pending', 'Approved']),
+            formula2: '#FDCECE,#DEF6A2',
+            renderMode: DataValidationRenderMode.CUSTOM,
         });
     });
 

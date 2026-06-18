@@ -1145,6 +1145,45 @@ describe('sheet table view components', () => {
         expect(componentController.closeCount).toBe(1);
     });
 
+    it('does not delete or close from the filter panel when the table has only one column', async () => {
+        testBed = createTestBed();
+        const unitId = testBed.workbook.getUnitId();
+        const componentController = testBed.injector.get(SheetsTableComponentController) as TestComponentController;
+        const sheetTableService = testBed.injector.get(SheetTableService);
+        sheetTableService.addTable(
+            unitId,
+            'sheet1',
+            'SingleColumnTable',
+            { startRow: 0, endRow: 3, startColumn: 3, endColumn: 3 },
+            ['Only'],
+            'table-single-column'
+        );
+        componentController.setCurrentTableFilterInfo({
+            unitId,
+            subUnitId: 'sheet1',
+            tableId: 'table-single-column',
+            row: 0,
+            column: 3,
+        });
+        const rendered = renderWithRediContext(testBed, <SheetTableFilterPanel />);
+        root = rendered.root;
+        container = rendered.container;
+
+        const deleteButton = getButtonByText(container, 'Delete table column');
+        clickElement(deleteButton);
+        await flushCommands();
+
+        const table = testBed.injector.get(TableManager).getTable(unitId, 'table-single-column')!;
+        expect(deleteButton.disabled).toBe(true);
+        expect(table.getRange()).toEqual({
+            startRow: 0,
+            endRow: 3,
+            startColumn: 3,
+            endColumn: 3,
+        });
+        expect(componentController.closeCount).toBe(0);
+    });
+
     it('sorts the table body descending from the filter panel sort action', async () => {
         testBed = createTestBed();
         const componentController = testBed.injector.get(SheetsTableComponentController) as TestComponentController;

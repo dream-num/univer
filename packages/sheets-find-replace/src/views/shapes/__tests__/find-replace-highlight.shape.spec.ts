@@ -213,4 +213,42 @@ describe('SheetFindReplaceHighlightShape', () => {
         expect(context.fillCount).toBe(1);
         expect(context.strokeCount).toBe(1);
     });
+
+    it('moves the current-match border between result highlights while preserving both fills', () => {
+        const previousCurrent = new SheetFindReplaceHighlightShape('previous-current-result', {
+            inHiddenRange: false,
+            color: { r: 12, g: 34, b: 56 },
+            activated: true,
+            width: 18,
+            height: 22,
+        });
+        const nextCurrent = new SheetFindReplaceHighlightShape('next-current-result', {
+            inHiddenRange: false,
+            color: { r: 78, g: 90, b: 123 },
+            activated: false,
+            width: 24,
+            height: 28,
+        });
+
+        previousCurrent.setShapeProps({ activated: false });
+        nextCurrent.setShapeProps({ activated: true });
+
+        const previousContext = new TestCanvasContext();
+        const nextContext = new TestCanvasContext();
+
+        drawShape(previousCurrent, previousContext);
+        drawShape(nextCurrent, nextContext);
+
+        expect(previousContext.rects).toEqual([{ left: 0, top: 0, width: 18, height: 22 }]);
+        expect(previousContext.fillStyle).toBe('rgba(12, 34, 56, 0.35)');
+        expect(previousContext.lineWidth).toBe(0);
+        expect(previousContext.fillCount).toBe(1);
+        expect(previousContext.strokeCount).toBe(0);
+        expect(nextContext.rects).toEqual([{ left: 0, top: 0, width: 24, height: 28 }]);
+        expect(nextContext.fillStyle).toBe('rgba(78, 90, 123, 0.35)');
+        expect(nextContext.strokeStyle).toBe('rgb(78, 90, 123)');
+        expect(nextContext.lineWidth).toBe(2);
+        expect(nextContext.fillCount).toBe(1);
+        expect(nextContext.strokeCount).toBe(1);
+    });
 });

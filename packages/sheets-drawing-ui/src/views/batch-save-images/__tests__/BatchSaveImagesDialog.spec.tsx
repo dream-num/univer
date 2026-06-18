@@ -204,6 +204,16 @@ class TestEmptyBatchSaveImagesService extends TestBatchSaveImagesService {
     }
 }
 
+class TestNoDataColumnsBatchSaveImagesService extends TestBatchSaveImagesService {
+    override getDataColumns(): Array<{ index: number; label: string }> {
+        return [];
+    }
+
+    override getDataColumnsForRanges(): Array<{ index: number; label: string }> {
+        return [];
+    }
+}
+
 function createImage(imageId: string, cellAddress: string, row: number, col: number): ICellImageInfo {
     return {
         row,
@@ -420,6 +430,28 @@ describe('BatchSaveImagesDialog', () => {
         expect(batchSaveService.savedConfig).toBeNull();
         expect(dialogService.closedIds).toEqual([]);
         expect(container!.textContent).toContain('sheets-drawing-ui.save.error');
+
+        testBed.univer.dispose();
+    });
+
+    it('saves by cell address when no lookup columns are available', async () => {
+        const { testBed, batchSaveService, dialogService, markSelectionService } = await renderDialog(TestNoDataColumnsBatchSaveImagesService);
+
+        expect(container!.querySelector('[data-u-comp="select"]')).toBeNull();
+        expect(container!.textContent).not.toContain('sheets-drawing-ui.save.useColumnValue');
+        expect(markSelectionService.activeRanges).toEqual([]);
+
+        await act(async () => {
+            getButton(container!, 'sheets-drawing-ui.save.confirm').click();
+            await Promise.resolve();
+        });
+
+        expect(batchSaveService.savedImages.map((image) => image.imageId)).toEqual(['image-a', 'image-b']);
+        expect(batchSaveService.savedConfig).toEqual({
+            fileNameParts: [FileNamePart.CELL_ADDRESS],
+            columnIndex: undefined,
+        });
+        expect(dialogService.closedIds).toEqual([BATCH_SAVE_IMAGES_DIALOG_ID]);
 
         testBed.univer.dispose();
     });

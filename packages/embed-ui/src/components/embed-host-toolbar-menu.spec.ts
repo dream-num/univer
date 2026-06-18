@@ -20,6 +20,7 @@ import { UniverInstanceType } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { EmbedBlockRegistryService } from '../services/embed-block-registry.service';
 import { EmbedFloatingMenuRegistryService } from '../services/embed-floating-menu-registry.service';
+import { EmbedProductMenuRegistryService } from '../services/embed-product-menu-registry.service';
 import { EmbedHostChromeMode } from '../types/embed-ui';
 import { createFullscreenRenderScope, mountFullscreenWorkbenchMenus } from './embed-host-toolbar-menu';
 
@@ -100,6 +101,72 @@ describe('Embed fullscreen workbench', () => {
                 stage: 'stage2',
             },
         }));
+
+        disposable?.dispose();
+
+        expect(dispose).toHaveBeenCalled();
+    });
+
+    it('mounts registered product ribbon menus before using the fullscreen fallback ribbon', () => {
+        const descriptor = createDescriptor();
+        const childContext = {
+            descriptor,
+            hostUnitId: descriptor.hostUnitId,
+            embedId: descriptor.embedId,
+            childUnitId: descriptor.childUnitId,
+            childType: descriptor.childType,
+            layout: 'scroll-contained',
+            renderScope: {
+                fullscreen: true,
+                mode: 'float',
+            },
+        } as EmbedChildContainerContext;
+        const dispose = vi.fn();
+        const productMenuRegistry = {
+            mountMenu: vi.fn(() => ({ dispose })),
+        };
+        const floatingRegistry = {
+            get: vi.fn(),
+        };
+        const blockRegistry = {
+            get: vi.fn(() => ({
+                childType: UniverInstanceType.UNIVER_SHEET,
+                productName: 'Sheets',
+                hostChromeMode: EmbedHostChromeMode.RIBBON,
+            })),
+        };
+        const injector = {
+            has: vi.fn((token) => token === EmbedFloatingMenuRegistryService || token === EmbedBlockRegistryService || token === EmbedProductMenuRegistryService),
+            get: vi.fn((token) => {
+                if (token === EmbedFloatingMenuRegistryService) {
+                    return floatingRegistry;
+                }
+                if (token === EmbedBlockRegistryService) {
+                    return blockRegistry;
+                }
+                if (token === EmbedProductMenuRegistryService) {
+                    return productMenuRegistry;
+                }
+                throw new Error('unexpected token');
+            }),
+        };
+        const menuContainer = document.createElement('div');
+
+        const disposable = mountFullscreenWorkbenchMenus({
+            injector: injector as never,
+            descriptor,
+            childContext,
+            menuContainer,
+        });
+
+        expect(productMenuRegistry.mountMenu).toHaveBeenCalledWith(expect.objectContaining({
+            container: menuContainer,
+            childType: UniverInstanceType.UNIVER_SHEET,
+            childUnitId: 'child-1',
+            menuTitlePrefix: 'Sheets',
+            surface: 'ribbon',
+        }));
+        expect(floatingRegistry.get).not.toHaveBeenCalled();
 
         disposable?.dispose();
 

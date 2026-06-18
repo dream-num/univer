@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IPreset } from './types';
+import type { IPreset } from '@univerjs/presets';
 
 import { UniverSheetsNotePlugin } from '@univerjs/sheets-note';
 import { UniverSheetsNoteUIPlugin } from '@univerjs/sheets-note-ui';

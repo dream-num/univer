@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IPreset } from './types';
+import type { IPreset } from '@univerjs/presets';
 
 import { UniverDocsHyperLinkPlugin } from '@univerjs/docs-hyper-link';
 import { UniverDocsHyperLinkUIPlugin } from '@univerjs/docs-hyper-link-ui';

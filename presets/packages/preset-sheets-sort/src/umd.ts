@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IPreset } from './types';
+import type { IPreset } from '@univerjs/presets';
 
 import { UniverSheetsSortPlugin } from '@univerjs/sheets-sort';
 import { UniverSheetsSortUIPlugin } from '@univerjs/sheets-sort-ui';

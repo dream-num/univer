@@ -24,6 +24,7 @@ import {
     CFRuleType,
     CFSubRuleType,
     DeleteCfCommand,
+    MoveCfCommand,
 } from '@univerjs/sheets-conditional-formatting';
 import { IMarkSelectionService } from '@univerjs/sheets-ui';
 import { RediContext } from '@univerjs/ui';
@@ -84,6 +85,7 @@ async function createRuleListTestBed() {
     testBed.injector.add([IMarkSelectionService, { useClass: TestMarkSelectionService as never }]);
     testBed.commandService.registerCommand(AddCfCommand);
     testBed.commandService.registerCommand(DeleteCfCommand);
+    testBed.commandService.registerCommand(MoveCfCommand);
     testBed.get(LocaleService).load({
         [LocaleType.ZH_CN]: {
             sheets: {
@@ -386,5 +388,75 @@ describe('RuleList', () => {
                 .getSubunitRules(currentTestBed.unitId, currentTestBed.subUnitId)
                 ?.map((rule) => rule.cfId)
         ).toEqual(ruleIdsBeforeCreate);
+    });
+
+    it('moves a dragged worksheet rule after the drop target rule', async () => {
+        currentTestBed = await createRuleListTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <RuleList onClick={() => undefined} onCreate={() => undefined} />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        const ruleRows = Array.from(container.querySelectorAll<HTMLElement>('[data-draggable-list-item-id]'));
+        const firstRuleRow = ruleRows[0];
+        const secondRuleRow = ruleRows[1];
+        const dragHandle = firstRuleRow?.querySelector<HTMLElement>('.draggableHandle');
+
+        if (!firstRuleRow || !secondRuleRow || !dragHandle) {
+            throw new Error('Rule drag controls were not rendered');
+        }
+
+        expect(
+            currentTestBed.ruleModel
+                .getSubunitRules(currentTestBed.unitId, currentTestBed.subUnitId)
+                ?.map((rule) => rule.cfId)
+        ).toEqual(['cf-far', 'cf-active']);
+
+        Object.defineProperty(firstRuleRow, 'setPointerCapture', {
+            configurable: true,
+            value() {},
+        });
+
+        const elementFromPoint = document.elementFromPoint;
+        Object.defineProperty(document, 'elementFromPoint', {
+            configurable: true,
+            value: () => secondRuleRow,
+        });
+
+        try {
+            await act(async () => {
+                dragHandle.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, clientX: 1, clientY: 1, pointerId: 7 }));
+                await Promise.resolve();
+            });
+
+            await act(async () => {
+                window.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, clientX: 1, clientY: 80, pointerId: 7 }));
+                await Promise.resolve();
+            });
+
+            await act(async () => {
+                window.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, clientX: 1, clientY: 80, pointerId: 7 }));
+                await Promise.resolve();
+            });
+        } finally {
+            Object.defineProperty(document, 'elementFromPoint', {
+                configurable: true,
+                value: elementFromPoint,
+            });
+        }
+
+        expect(
+            currentTestBed.ruleModel
+                .getSubunitRules(currentTestBed.unitId, currentTestBed.subUnitId)
+                ?.map((rule) => rule.cfId)
+        ).toEqual(['cf-active', 'cf-far']);
     });
 });

@@ -211,4 +211,38 @@ describe('DrawingCommonPanel behavior', () => {
         expect(textIsAvailable(container, 'drawing-ui.image-panel.crop.title')).toBe(false);
         expect(textIsAvailable(container, 'drawing-ui.image-panel.arrange.title')).toBe(true);
     });
+
+    it('returns to the empty panel when the active transformer clears its controls', () => {
+        const drawing = createDrawing('image-1', 10);
+        drawingManagerService.registerDrawingData(unitId, {
+            [subUnitId]: {
+                data: {
+                    'image-1': drawing,
+                },
+                order: ['image-1'],
+            },
+        });
+        drawingManagerService.focusDrawing([{ unitId, subUnitId, drawingId: 'image-1' }]);
+
+        const rendered = renderWithRediContext(univer.__getInjector(), [drawing]);
+        root = rendered.root;
+        container = rendered.container;
+
+        expect(textIsAvailable(container, 'drawing-ui.image-panel.null')).toBe(false);
+        expect(textIsAvailable(container, 'drawing-ui.image-panel.transform.title')).toBe(true);
+        expect(textIsAvailable(container, 'drawing-ui.image-panel.crop.title')).toBe(true);
+        expect(textIsAvailable(container, 'drawing-ui.image-panel.arrange.title')).toBe(true);
+
+        act(() => {
+            (univer.__getInjector().get(IRenderManagerService) as unknown as TestRenderManagerService)
+                .transformer
+                .clearControl$
+                .next(true);
+        });
+
+        expect(textIsAvailable(container, 'drawing-ui.image-panel.null')).toBe(true);
+        expect(textIsAvailable(container, 'drawing-ui.image-panel.transform.title')).toBe(false);
+        expect(textIsAvailable(container, 'drawing-ui.image-panel.crop.title')).toBe(false);
+        expect(textIsAvailable(container, 'drawing-ui.image-panel.arrange.title')).toBe(false);
+    });
 });

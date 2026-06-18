@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
+import type { IPreset } from '@univerjs/presets';
 import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
 import type { IUniverSheetsNumfmtConfig } from '@univerjs/sheets-numfmt';
 import type { IUniverSheetsUIConfig } from '@univerjs/sheets-ui';
 import type { IUniverUIConfig } from '@univerjs/ui';
-import type { IPreset, IUniverDocsPresetConfig, IUniverFormulaConfig, IUniverSheetsPresetConfig } from './types';
+import type { IUniverDocsPresetConfig, IUniverFormulaConfig, IUniverSheetsPresetConfig } from './types';
 import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';

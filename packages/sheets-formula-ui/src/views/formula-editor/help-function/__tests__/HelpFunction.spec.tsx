@@ -313,4 +313,34 @@ describe('HelpFunction', () => {
         expect(editorBridgeService.helpFunctionVisible$.getValue()).toBe(true);
         expect(document.body.textContent).toContain('SUM(number1,[number2,...])');
     });
+
+    it('keeps the prior hidden preference until the compact tip restores help', async () => {
+        const { editor, editorBridgeService, injector } = createHelpFunctionTestBed();
+
+        editorBridgeService.helpFunctionVisible$.next(false);
+
+        renderWithInjector(
+            root,
+            injector, (
+                <HelpFunction
+                    isFocus
+                    editor={editor}
+                    formulaText="=SUM("
+                />
+            ));
+
+        await showHelpForSum(editor);
+
+        expect(editorBridgeService.helpFunctionVisible$.getValue()).toBe(false);
+        expect(document.body.textContent).not.toContain('SUM(number1,[number2,...])');
+        expect(document.body.textContent).toContain('?');
+
+        await act(async () => {
+            getTextElement('?', 'univer-cursor-pointer').click();
+            await Promise.resolve();
+        });
+
+        expect(editorBridgeService.helpFunctionVisible$.getValue()).toBe(true);
+        expect(document.body.textContent).toContain('SUM(number1,[number2,...])');
+    });
 });

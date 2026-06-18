@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IPreset } from './types';
+import type { IPreset } from '@univerjs/presets';
 import { UniverFindReplacePlugin } from '@univerjs/find-replace';
 import { UniverSheetsFindReplacePlugin } from '@univerjs/sheets-find-replace';
 

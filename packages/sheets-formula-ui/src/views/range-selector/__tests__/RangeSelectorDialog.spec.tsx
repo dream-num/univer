@@ -17,7 +17,14 @@
 import type { IUnitRangeName } from '@univerjs/core';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import type { Root } from 'react-dom/client';
-import { Injector, IUniverInstanceService, LocaleService, LocaleType, UniverInstanceType } from '@univerjs/core';
+import {
+    Injector,
+    IUniverInstanceService,
+    LocaleService,
+    LocaleType,
+    RANGE_TYPE,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { RediContext } from '@univerjs/ui';
@@ -112,6 +119,15 @@ function writeInput(input: HTMLInputElement, value: string) {
     const valueSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
     valueSetter?.call(input, value);
     input.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+async function emitSelection(injector: Injector, range: ISelectionWithStyle['range']) {
+    const selectionsService = injector.get(SheetsSelectionsService) as never as TestSheetsSelectionsService;
+
+    await act(async () => {
+        selectionsService.selectionMoveStart$.next([{ range } as ISelectionWithStyle]);
+        await Promise.resolve();
+    });
 }
 
 async function clickButton(text: string): Promise<void> {
@@ -236,6 +252,54 @@ describe('RangeSelectorDialog', () => {
                     endRow: 3,
                     startColumn: 2,
                     endColumn: 3,
+                }),
+            }),
+        ]]);
+        expect(RangeDialogState.closed).toBe(0);
+    });
+
+    it('replaces the active range input with a sheet selection before confirming', async () => {
+        const injector = createRangeDialogTestBed();
+        renderRangeDialog(root, injector);
+
+        const firstInput = document.body.querySelector('input') as HTMLInputElement;
+        expect(firstInput).toBeDefined();
+
+        await act(async () => {
+            writeInput(firstInput, 'A1:A2');
+            await Promise.resolve();
+        });
+
+        await clickButton('Add range');
+
+        await emitSelection(injector, {
+            startRow: 1,
+            endRow: 2,
+            startColumn: 1,
+            endColumn: 2,
+            rangeType: RANGE_TYPE.NORMAL,
+        });
+
+        const inputs = Array.from(document.body.querySelectorAll('input')) as HTMLInputElement[];
+        expect(inputs.map((input) => input.value)).toEqual(['A1:A2', 'B2:C3']);
+
+        await clickButton('Confirm');
+
+        expect(RangeDialogState.confirmed).toEqual([[
+            expect.objectContaining({
+                range: expect.objectContaining({
+                    startRow: 0,
+                    endRow: 1,
+                    startColumn: 0,
+                    endColumn: 0,
+                }),
+            }),
+            expect.objectContaining({
+                range: expect.objectContaining({
+                    startRow: 1,
+                    endRow: 2,
+                    startColumn: 1,
+                    endColumn: 2,
                 }),
             }),
         ]]);

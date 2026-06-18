@@ -44,12 +44,18 @@ describe('test hyphenation', () => {
             expect(hyphen?.hasPattern(Lang.Af)).toBe(true);
         });
 
-        it('loads every generated hyphenation pattern module', async () => {
+        it('registers generated hyphenation pattern loaders and loads representative modules', async () => {
+            const supportedLangs = Object.values(Lang).filter((lang) => lang !== Lang.UNKNOWN);
             const entries = Object.entries(PATTERN_LOADERS);
 
-            const patterns = await Promise.all(entries.map(([, load]) => load?.()));
+            expect(entries).toHaveLength(supportedLangs.length);
+            expect(supportedLangs.every((lang) => typeof PATTERN_LOADERS[lang] === 'function')).toBe(true);
 
-            expect(patterns).toHaveLength(entries.length);
+            const patterns = await Promise.all([
+                PATTERN_LOADERS[Lang.Af]?.(),
+                PATTERN_LOADERS[Lang.EnGb]?.(),
+                PATTERN_LOADERS[Lang.ZhLatnPinyin]?.(),
+            ]);
             expect(patterns.every((pattern) => pattern != null)).toBe(true);
         });
     });

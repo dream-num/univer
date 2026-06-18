@@ -759,6 +759,34 @@ describe('SheetsThreadCommentPanel', () => {
         expect(TestState.removedShapeIds).toEqual(['shape-1']);
     });
 
+    it('activates an unresolved sheet comment from the panel and skips hover highlight for the active item', () => {
+        const testBed = createTestBed();
+        univer = testBed.univer;
+        testBed.threadCommentModel.addComment(unitId, sheet1, createComment('panel-thread', sheet1, 'E5', 'Panel thread'));
+
+        const rendered = renderPanel(testBed.injector);
+        root = rendered.root;
+        container = rendered.container;
+
+        const panelThread = container.querySelector(`#PANEL-${unitId}-${sheet1}-panel-thread`);
+        expect(panelThread).toBeInstanceOf(HTMLElement);
+
+        act(() => {
+            panelThread!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        });
+
+        expect(testBed.panelService.activeCommentId).toEqual({
+            unitId,
+            subUnitId: sheet1,
+            commentId: 'panel-thread',
+            temp: false,
+        });
+
+        dispatchMouseEvent(panelThread!, 'mouseover');
+
+        expect(TestState.shapes).toHaveLength(0);
+    });
+
     it('removes the hover highlight when the panel is hidden by service state', () => {
         const testBed = createTestBed();
         univer = testBed.univer;

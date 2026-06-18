@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IPreset } from './types';
+import type { IPreset } from '@univerjs/presets';
 
 import { UniverSheetsTablePlugin } from '@univerjs/sheets-table';
 import { UniverSheetsTableUIPlugin } from '@univerjs/sheets-table-ui';

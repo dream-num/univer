@@ -924,6 +924,60 @@ describe('SheetNumfmtPanel', () => {
         expect(await currentTestBed.localStorageService.getItem<string[]>(CUSTOM_HISTORY_KEY)).toEqual(['0.000 kg']);
     });
 
+    it('keeps the loaded currency symbol when decimal places are changed and confirmed', async () => {
+        currentTestBed = createNumfmtViewTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        const commandResults: Array<Promise<unknown>> = [];
+        const currencySymbol = currencySymbols[3];
+        const loadedCurrencyPattern = `"${currencySymbol}"#,##0.00_);"${currencySymbol}"#,##0.00`;
+        const confirmedCurrencyPattern = `"${currencySymbol}"#,##0.0_);"${currencySymbol}"#,##0.0`;
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <SheetNumfmtPanel
+                        value={{
+                            defaultValue: 1234.5,
+                            defaultPattern: loadedCurrencyPattern,
+                            row: 0,
+                            col: 0,
+                        }}
+                        onChange={(event) => {
+                            if (event.type === 'confirm') {
+                                commandResults.push(currentTestBed!.commandService.executeCommand(SetNumfmtCommand.id, {
+                                    values: [{
+                                        row: 0,
+                                        col: 0,
+                                        pattern: event.value,
+                                        type: getPatternType(event.value),
+                                    }],
+                                }) as Promise<unknown>);
+                            }
+                        }}
+                    />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        const decrementDecimalButton = container.querySelector('[aria-label="decrement"]') as HTMLElement;
+
+        await act(async () => {
+            decrementDecimalButton.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            await Promise.resolve();
+        });
+
+        await confirmPanel();
+        const results = await Promise.all(commandResults);
+
+        expect(results).toEqual([true]);
+        expect(currentTestBed.numfmtService.getValue(UNIT_ID, SUB_UNIT_ID, 0, 0)).toEqual({
+            pattern: confirmedCurrencyPattern,
+        });
+    });
+
     it('does not apply or save a typed custom format when cancelled', async () => {
         currentTestBed = createNumfmtViewTestBed();
         container = document.createElement('div');

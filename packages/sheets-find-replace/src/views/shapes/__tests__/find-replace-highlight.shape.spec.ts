@@ -152,4 +152,24 @@ describe('SheetFindReplaceHighlightShape', () => {
         expect(context.fillCount).toBe(1);
         expect(context.strokeCount).toBe(1);
     });
+
+    it('marks the current match in a hidden range with a compact active highlight', () => {
+        const shape = new SheetFindReplaceHighlightShape('hidden-current-result', {
+            inHiddenRange: true,
+            color: { r: 70, g: 80, b: 90 },
+            activated: true,
+            width: 2,
+            height: 2,
+        });
+        const context = new TestCanvasContext();
+
+        drawShape(shape, context);
+
+        expect(context.rects).toEqual([{ left: 0, top: 0, width: 2, height: 2 }]);
+        expect(context.fillStyle).toBe('rgba(70, 80, 90, 0.35)');
+        expect(context.strokeStyle).toBe('rgb(70, 80, 90)');
+        expect(context.lineWidth).toBe(2);
+        expect(context.fillCount).toBe(1);
+        expect(context.strokeCount).toBe(1);
+    });
 });

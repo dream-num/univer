@@ -3041,6 +3041,9 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../../../packages/core
+      '@univerjs/presets':
+        specifier: workspace:*
+        version: link:../..
       react:
         specifier: 19.2.7
         version: 19.2.7
@@ -3075,6 +3078,9 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../../../packages/core
+      '@univerjs/presets':
+        specifier: workspace:*
+        version: link:../..
       react:
         specifier: 19.2.7
         version: 19.2.7
@@ -3103,6 +3109,9 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../../../packages/core
+      '@univerjs/presets':
+        specifier: workspace:*
+        version: link:../..
       react:
         specifier: 19.2.7
         version: 19.2.7
@@ -3143,6 +3152,9 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../../../packages/core
+      '@univerjs/presets':
+        specifier: workspace:*
+        version: link:../..
       rxjs:
         specifier: ^7.8.2
         version: 7.8.2
@@ -3168,6 +3180,9 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../../../packages/core
+      '@univerjs/presets':
+        specifier: workspace:*
+        version: link:../..
       react:
         specifier: 19.2.7
         version: 19.2.7
@@ -3196,6 +3211,9 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../../../packages/core
+      '@univerjs/presets':
+        specifier: workspace:*
+        version: link:../..
       react:
         specifier: 19.2.7
         version: 19.2.7
@@ -3260,6 +3278,9 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../../../packages/core
+      '@univerjs/presets':
+        specifier: workspace:*
+        version: link:../..
       react:
         specifier: 19.2.7
         version: 19.2.7
@@ -3291,6 +3312,9 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../../../packages/core
+      '@univerjs/presets':
+        specifier: workspace:*
+        version: link:../..
       react:
         specifier: 19.2.7
         version: 19.2.7
@@ -3328,6 +3352,9 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../../../packages/core
+      '@univerjs/presets':
+        specifier: workspace:*
+        version: link:../..
       react:
         specifier: 19.2.7
         version: 19.2.7
@@ -3356,6 +3383,9 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../../../packages/core
+      '@univerjs/presets':
+        specifier: workspace:*
+        version: link:../..
       react:
         specifier: 19.2.7
         version: 19.2.7
@@ -3384,6 +3414,9 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../../../packages/core
+      '@univerjs/presets':
+        specifier: workspace:*
+        version: link:../..
       react:
         specifier: 19.2.7
         version: 19.2.7
@@ -3412,6 +3445,9 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../../../packages/core
+      '@univerjs/presets':
+        specifier: workspace:*
+        version: link:../..
       react:
         specifier: 19.2.7
         version: 19.2.7
@@ -3473,6 +3509,9 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../../../packages/core
+      '@univerjs/presets':
+        specifier: workspace:*
+        version: link:../..
       rxjs:
         specifier: ^7.8.2
         version: 7.8.2
@@ -3495,6 +3534,9 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../../../packages/core
+      '@univerjs/presets':
+        specifier: workspace:*
+        version: link:../..
       react:
         specifier: 19.2.7
         version: 19.2.7
@@ -3523,6 +3565,9 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../../../packages/core
+      '@univerjs/presets':
+        specifier: workspace:*
+        version: link:../..
       react:
         specifier: 19.2.7
         version: 19.2.7
@@ -3551,6 +3596,9 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../../../packages/core
+      '@univerjs/presets':
+        specifier: workspace:*
+        version: link:../..
       react:
         specifier: 19.2.7
         version: 19.2.7
@@ -3585,6 +3633,9 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../../../packages/core
+      '@univerjs/presets':
+        specifier: workspace:*
+        version: link:../..
       react:
         specifier: 19.2.7
         version: 19.2.7

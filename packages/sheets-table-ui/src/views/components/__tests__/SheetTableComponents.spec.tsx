@@ -930,6 +930,28 @@ describe('sheet table view components', () => {
         expect(componentController.closeCount).toBe(1);
     });
 
+    it('leaves an unfiltered column unchanged when all values remain selected', async () => {
+        testBed = createTestBed();
+        const componentController = testBed.injector.get(SheetsTableComponentController) as TestComponentController;
+        componentController.setCurrentTableFilterInfo({
+            unitId: testBed.workbook.getUnitId(),
+            subUnitId: 'sheet1',
+            tableId: 'table-orders',
+            row: 0,
+            column: 0,
+        });
+        const rendered = renderWithRediContext(testBed, <SheetTableFilterPanel />);
+        root = rendered.root;
+        container = rendered.container;
+
+        clickButtonByText(container, 'Confirm');
+        await flushCommands();
+
+        const table = testBed.injector.get(TableManager).getTable(testBed.workbook.getUnitId(), 'table-orders')!;
+        expect(table.getTableFilterColumn(0)).toBeUndefined();
+        expect(componentController.closeCount).toBe(1);
+    });
+
     it('keeps the existing value filter when item changes are cancelled', async () => {
         testBed = createTestBed();
         const componentController = testBed.injector.get(SheetsTableComponentController) as TestComponentController;

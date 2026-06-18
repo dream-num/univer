@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+import type { IPreset } from '@univerjs/presets';
 import type { IUniverSheetsDataValidationUIConfig } from '@univerjs/sheets-data-validation-ui';
-import type { IPreset } from './types';
 import { UniverDataValidationPlugin } from '@univerjs/data-validation';
 import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validation';
 import { UniverSheetsDataValidationUIPlugin } from '@univerjs/sheets-data-validation-ui';

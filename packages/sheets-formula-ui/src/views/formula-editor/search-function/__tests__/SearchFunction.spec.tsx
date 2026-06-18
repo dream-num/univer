@@ -173,11 +173,13 @@ class SearchFunctionState {
     static editor: unknown;
     static selected: Array<{ text: string; offset: number }> = [];
     static focused = 0;
+    static closed = 0;
 
     static reset(): void {
         this.editor = undefined;
         this.selected = [];
         this.focused = 0;
+        this.closed = 0;
     }
 }
 
@@ -362,5 +364,35 @@ describe('SearchFunction', () => {
 
         expect(SearchFunctionState.selected).toEqual([{ text: 'SUBTOTAL(', offset: -7 }]);
         expect(document.body.textContent).not.toContain('Returns a subtotal in a list.');
+    });
+
+    it('closes formula suggestions without selecting a function when escape is pressed', async () => {
+        const { injector, editor, commandService } = createSearchFunctionTestBed();
+
+        await act(async () => {
+            root.render(
+                <RediContext.Provider value={{ injector }}>
+                    <SearchFunction
+                        isFocus
+                        editor={editor}
+                        sequenceNodes={[{ nodeType: sequenceNodeType.FUNCTION, token: 'SU' } as never]}
+                        onSelect={(result) => SearchFunctionState.selected.push(result)}
+                        onClose={() => {
+                            SearchFunctionState.closed += 1;
+                        }}
+                    />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        await waitForSearchList(editor);
+        expect(document.body.textContent).toContain('SUM');
+
+        await runFormulaSearchKeyboardCommand(commandService, editor, KeyCode.ESC);
+
+        expect(SearchFunctionState.closed).toBe(1);
+        expect(SearchFunctionState.selected).toEqual([]);
+        expect(document.body.textContent).not.toContain('SUM');
     });
 });

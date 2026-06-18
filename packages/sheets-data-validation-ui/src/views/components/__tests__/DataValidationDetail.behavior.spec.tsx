@@ -647,4 +647,31 @@ describe('DataValidationDetail rule editing', () => {
             formula2: undefined,
         });
     });
+
+    it('removes stale date bound inputs after changing validation type to checkbox', async () => {
+        currentTestBed = createDetailTestBed(createDateBetweenRule('rule-date-editor-to-checkbox'));
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        await renderDetail(root, currentTestBed);
+
+        const dateInputs = Array.from(container.querySelectorAll<HTMLInputElement>('[data-u-comp="input"] input'));
+
+        expect(dateInputs.map((input) => input.value)).toEqual(['2024-01-01', '2024-01-31']);
+
+        await openSelect(container.querySelectorAll<HTMLElement>('[data-u-comp="select"]')[0]);
+        const options = Array.from(document.querySelectorAll<HTMLElement>('[data-slot="dropdown-menu-radio-item"], [role="menuitemradio"]'));
+        const checkboxOption = options.find((item) => item.textContent?.includes('sheets-data-validation.checkbox.title'))!;
+
+        await clickElement(checkboxOption);
+
+        expect(Array.from(container.querySelectorAll<HTMLInputElement>('[data-u-comp="input"] input')).map((input) => input.value)).toEqual([]);
+        expect(currentTestBed.sheetDataValidationModel.getRuleById(UNIT_ID, SUB_UNIT_ID, currentTestBed.rule.uid)).toMatchObject({
+            type: DataValidationType.CHECKBOX,
+            operator: undefined,
+            formula1: undefined,
+            formula2: undefined,
+        });
+    });
 });

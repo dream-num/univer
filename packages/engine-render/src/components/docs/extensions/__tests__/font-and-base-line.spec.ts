@@ -31,6 +31,12 @@ type MockRenderContext = UniverRenderingContext & {
     fillText: ReturnType<typeof vi.fn>;
     translate: ReturnType<typeof vi.fn>;
     rotate: ReturnType<typeof vi.fn>;
+    createLinearGradient: ReturnType<typeof vi.fn>;
+    createRadialGradient: ReturnType<typeof vi.fn>;
+    createPattern: ReturnType<typeof vi.fn>;
+    _context: {
+        createConicGradient: ReturnType<typeof vi.fn>;
+    };
 };
 
 type GlyphOverrides = Omit<Partial<IDocumentSkeletonGlyph>, 'bBox' | 'parent'> & {
@@ -41,6 +47,9 @@ type GlyphOverrides = Omit<Partial<IDocumentSkeletonGlyph>, 'bBox' | 'parent'> &
 const DEFAULT_SCALE: IScale = { scaleX: 1, scaleY: 1 };
 
 function createContext(): MockRenderContext {
+    const gradient = {
+        addColorStop: vi.fn(),
+    };
     return {
         fillStyle: '',
         font: '10px Arial',
@@ -49,6 +58,12 @@ function createContext(): MockRenderContext {
         fillText: vi.fn(),
         translate: vi.fn(),
         rotate: vi.fn(),
+        createLinearGradient: vi.fn(() => gradient),
+        createRadialGradient: vi.fn(() => gradient),
+        createPattern: vi.fn(() => ({ setTransform: vi.fn() })),
+        _context: {
+            createConicGradient: vi.fn(() => gradient),
+        },
     } as unknown as MockRenderContext;
 }
 
@@ -205,5 +220,174 @@ describe('docs font and baseline extension', () => {
         TestContext.fillText.mockClear();
         extension.draw(TestContext, DEFAULT_SCALE, createGlyph('A', { parent: null }));
         expect(TestContext.fillText).not.toHaveBeenCalled();
+    });
+
+    it('renders solid and gradient text fills with normalized colors', () => {
+        const extension = new FontAndBaseLine() as any;
+        const TestContext = createContext();
+        extension.extensionOffset = {
+            spanPointWithFont: Vector2.create(10, 24),
+            spanStartPoint: Vector2.create(10, 24),
+            centerPoint: Vector2.create(8, 8),
+            renderConfig: {
+                vertexAngle: 0,
+                centerAngle: 0,
+            },
+        } as IExtensionConfig;
+
+        extension.draw(TestContext, DEFAULT_SCALE, createGlyph('S', {
+            ts: {
+                fs: 12,
+                cl: { rgb: '#000000' },
+                textFill: {
+                    type: 'solid',
+                    color: '#abc',
+                    opacity: 0.5,
+                },
+            } as any,
+        }));
+        expect(TestContext.fillStyle).toBe('rgba(170, 187, 204, 0.5)');
+
+        extension.draw(TestContext, DEFAULT_SCALE, createGlyph('L', {
+            ts: {
+                fs: 12,
+                cl: { rgb: '#111111' },
+                textFill: {
+                    type: 'gradient',
+                    color: '#123456',
+                    opacity: 0.5,
+                    gradient: {
+                        type: 'linear',
+                        angle: 45,
+                        stops: [
+                            { offset: 0, color: '#000000', opacity: 1 },
+                            { offset: 100, color: '#ffffff', opacity: 0.5 },
+                        ],
+                    },
+                },
+            } as any,
+        }));
+        expect(TestContext.createLinearGradient).toHaveBeenCalled();
+
+        extension.draw(TestContext, DEFAULT_SCALE, createGlyph('R', {
+            ts: {
+                fs: 12,
+                cl: { rgb: '#111111' },
+                textFill: {
+                    type: 'gradient',
+                    color: '#123456',
+                    gradient: { type: 'radial' },
+                },
+            } as any,
+        }));
+        extension.draw(TestContext, DEFAULT_SCALE, createGlyph('D', {
+            ts: {
+                fs: 12,
+                cl: { rgb: '#111111' },
+                textFill: {
+                    type: 'gradient',
+                    color: '#123456',
+                    gradient: { type: 'diamond' },
+                },
+            } as any,
+        }));
+        expect(TestContext.createRadialGradient).toHaveBeenCalledTimes(2);
+
+        extension.draw(TestContext, DEFAULT_SCALE, createGlyph('A', {
+            ts: {
+                fs: 12,
+                cl: { rgb: '#111111' },
+                textFill: {
+                    type: 'gradient',
+                    color: '#123456',
+                    gradient: { type: 'angular', angle: 180 },
+                },
+            } as any,
+        }));
+        expect(TestContext._context.createConicGradient).toHaveBeenCalled();
+
+        expect(extension._normalizeGradientStops(undefined, '#010203')).toEqual([
+            { color: '#010203', offset: 0, opacity: undefined },
+            { color: '#ffffff', offset: 1, opacity: undefined },
+        ]);
+        expect(extension._colorWithOpacity('#123456', 0.25)).toBe('rgba(18, 52, 86, 0.25)');
+        expect(extension._colorWithOpacity('rgb(1,2,3)', 0.25)).toBe('rgb(1,2,3)');
+        expect(extension._clamp(2, 0, 1)).toBe(1);
+    });
+
+    it('renders picture text fills from cached images and ignores unsupported fill cases', () => {
+        const extension = new FontAndBaseLine() as any;
+        const TestContext = createContext();
+        const image = document.createElement('canvas') as HTMLCanvasElement & {
+            complete: boolean;
+            naturalWidth: number;
+            naturalHeight: number;
+        };
+        image.width = 4;
+        image.height = 4;
+        image.complete = true;
+        image.naturalWidth = 4;
+        image.naturalHeight = 4;
+        extension._textFillImageCache.set('cached-image', image);
+        extension.extensionOffset = {
+            spanPointWithFont: Vector2.create(10, 24),
+            spanStartPoint: Vector2.create(10, 24),
+            centerPoint: Vector2.create(8, 8),
+            renderConfig: {
+                vertexAngle: 0,
+                centerAngle: 0,
+            },
+        } as IExtensionConfig;
+
+        extension.draw(TestContext, DEFAULT_SCALE, createGlyph('P', {
+            ts: {
+                fs: 12,
+                cl: { rgb: '#111111' },
+                textFill: {
+                    type: 'picture',
+                    picture: {
+                        source: 'cached-image',
+                        mode: 'tile',
+                        scaleX: 0.5,
+                        scaleY: 0.5,
+                        offsetX: 1,
+                        offsetY: 1,
+                        opacity: 0.75,
+                    },
+                },
+            } as any,
+        }));
+        expect(TestContext.createPattern).toHaveBeenCalled();
+
+        TestContext.fillText.mockClear();
+        extension.draw(TestContext, DEFAULT_SCALE, createGlyph('N', {
+            ts: {
+                fs: 12,
+                cl: { rgb: '#111111' },
+                textFill: { type: 'none' },
+            } as any,
+        }));
+        expect(TestContext.fillText).not.toHaveBeenCalled();
+
+        extension.extensionOffset = {
+            spanPointWithFont: Vector2.create(10, 24),
+            spanStartPoint: Vector2.create(10, 24),
+            centerPoint: Vector2.create(8, 8),
+            renderConfig: {
+                vertexAngle: 90,
+                centerAngle: 90,
+            },
+        } as IExtensionConfig;
+        extension.draw(TestContext, DEFAULT_SCALE, createGlyph('V', {
+            ts: {
+                fs: 12,
+                cl: { rgb: '#111111' },
+                textFill: {
+                    type: 'solid',
+                    color: '#ff0000',
+                },
+            } as any,
+        }));
+        expect(TestContext.fillText).toHaveBeenCalled();
     });
 });

@@ -194,6 +194,16 @@ class TestBatchSaveImagesService implements IBatchSaveImagesService {
     }
 }
 
+class TestEmptyBatchSaveImagesService extends TestBatchSaveImagesService {
+    override getCellImagesInSelection(): ICellImageInfo[] {
+        return [];
+    }
+
+    override getCellImagesFromRanges(): ICellImageInfo[] {
+        return [];
+    }
+}
+
 function createImage(imageId: string, cellAddress: string, row: number, col: number): ICellImageInfo {
     return {
         row,
@@ -240,11 +250,11 @@ describe('BatchSaveImagesDialog', () => {
         container = undefined;
     });
 
-    async function renderDialog() {
+    async function renderDialog(batchSaveImagesService = TestBatchSaveImagesService) {
         const testBed = createSheetsDrawingUiTestBed(undefined, [
             [IDialogService, { useClass: TestDialogService }],
             [IMarkSelectionService, { useClass: TestMarkSelectionService }],
-            [IBatchSaveImagesService, { useClass: TestBatchSaveImagesService }],
+            [IBatchSaveImagesService, { useClass: batchSaveImagesService }],
         ]);
 
         container = document.createElement('div');
@@ -410,6 +420,24 @@ describe('BatchSaveImagesDialog', () => {
         expect(batchSaveService.savedConfig).toBeNull();
         expect(dialogService.closedIds).toEqual([]);
         expect(container!.textContent).toContain('sheets-drawing-ui.save.error');
+
+        testBed.univer.dispose();
+    });
+
+    it('prevents confirming when the selection contains no images', async () => {
+        const { testBed, batchSaveService, dialogService, markSelectionService } = await renderDialog(TestEmptyBatchSaveImagesService);
+        const confirmButton = getButton(container!, 'sheets-drawing-ui.save.confirm');
+
+        expect(confirmButton.disabled).toBe(true);
+
+        await act(async () => {
+            confirmButton.click();
+            await Promise.resolve();
+        });
+
+        expect(batchSaveService.savedConfig).toBeNull();
+        expect(dialogService.closedIds).toEqual([]);
+        expect(markSelectionService.activeRanges).toEqual([]);
 
         testBed.univer.dispose();
     });

@@ -23,17 +23,20 @@ export * from '@univerjs/core/facade';
 /**
  * A collection of plugins and their default configs.
  */
-interface IPreset {
-    plugins: Array<PluginCtor<Plugin> | [PluginCtor<Plugin>, ConstructorParameters<PluginCtor<Plugin>>[0]]>;
+export type IPresetPlugin = PluginCtor<Plugin> | [PluginCtor<Plugin>, ConstructorParameters<PluginCtor<Plugin>>[0]];
+
+export interface IPreset {
+    plugins: IPresetPlugin[];
+    locales?: IUniverConfig['locales'];
 }
 
-interface IPresetOptions {
+export interface IPresetOptions {
     lazy?: boolean;
 }
 
 type CreateUniverOptions = Partial<IUniverConfig> & {
     presets: Array<IPreset | [IPreset, IPresetOptions]>;
-    plugins?: Array<PluginCtor<Plugin> | [PluginCtor<Plugin>, ConstructorParameters<PluginCtor<Plugin>>[0]]>;
+    plugins?: IPresetPlugin[];
     /**
      * Overrides the dependencies defined in the plugin. Only dependencies that are identified by `IdentifierDecorator` can be overridden.
      * If you override a dependency with `null`, the original dependency will be removed.

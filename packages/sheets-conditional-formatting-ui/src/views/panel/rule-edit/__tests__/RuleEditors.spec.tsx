@@ -142,6 +142,22 @@ function inputText(input: HTMLInputElement, value: string) {
     input.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
+async function selectOption(selectIndex: number, optionText: string) {
+    const select = Array.from(document.querySelectorAll<HTMLElement>('[data-u-comp="select"]'))[selectIndex];
+    select.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0 }));
+    select.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    await Promise.resolve();
+
+    const option = Array.from(document.querySelectorAll<HTMLElement>('[data-slot="dropdown-menu-radio-item"], [role="menuitemradio"]'))
+        .find((item) => item.textContent?.includes(optionText));
+
+    if (!option) {
+        throw new Error(`Rule editor option ${optionText} was not rendered`);
+    }
+
+    option.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+}
+
 describe('conditional formatting rule editors', () => {
     let root: Root | undefined;
     let container: HTMLDivElement | undefined;
@@ -618,6 +634,44 @@ describe('conditional formatting rule editors', () => {
                     rgb: '#fff2cc',
                 },
             },
+        });
+    });
+
+    it('submits a duplicate-values highlight rule after switching the condition type', async () => {
+        currentTestBed = createEditorTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        const interceptorManager = createRuleInterceptorManager();
+        let lastRule: unknown;
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <HighlightCellStyleEditor
+                        interceptorManager={interceptorManager}
+                        onChange={(rule) => {
+                            lastRule = rule;
+                        }}
+                    />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        await act(async () => {
+            await selectOption(0, 'duplicateValues');
+            await Promise.resolve();
+        });
+
+        expect(interceptorManager.fetchThroughInterceptors(beforeSubmit)(true, null)).toBe(true);
+        expect(submitRule(interceptorManager)).toMatchObject({
+            type: CFRuleType.highlightCell,
+            subType: CFSubRuleType.duplicateValues,
+        });
+        expect(lastRule).toMatchObject({
+            type: CFRuleType.highlightCell,
+            subType: CFSubRuleType.duplicateValues,
         });
     });
 

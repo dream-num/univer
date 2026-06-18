@@ -54,6 +54,10 @@ class TestUniverInstanceService {
         return this._disposed$.asObservable();
     }
 
+    getUnitCreateOptions() {
+        return undefined;
+    }
+
     addUnit(unit: DocumentDataModel) {
         this._units.push(unit);
         this._added$.next({ unit });

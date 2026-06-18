@@ -16,9 +16,9 @@
 
 import { ICommandService } from '@univerjs/core';
 import { SHEET_VIEWPORT_KEY, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
-import { SetWorksheetActiveOperation } from '@univerjs/sheets';
+import { SetFrozenCommand, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { BehaviorSubject } from 'rxjs';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { SheetScrollManagerService } from '../../../services/scroll-manager.service';
 import { HeaderFreezeRenderController } from '../freeze.render-controller';
 import { createRenderTestBed } from './render-test-bed';
@@ -222,6 +222,59 @@ describe('HeaderFreezeRenderController', () => {
 
         expect(viewMainTop.isActive).toBe(true);
         expect(viewMainLeft.isActive).toBe(true);
+
+        testBed.univer.dispose();
+    });
+
+    it('updates sheet freeze config after dragging the row freeze divider', () => {
+        const validViewportScrollInfo$ = new BehaviorSubject<any>(null);
+        const scrollManagerService = {
+            validViewportScrollInfo$,
+            getCurrentScrollState: () => ({
+                sheetViewStartRow: 0,
+                sheetViewStartColumn: 0,
+                offsetX: 0,
+                offsetY: 0,
+            }),
+        };
+
+        const testBed = createRenderTestBed({
+            dependencies: [
+                [SheetScrollManagerService, { useValue: scrollManagerService }],
+            ],
+        });
+
+        const { sheet, injector, context, scene, viewportMap, commandService } = testBed;
+        const controller = injector.createInstance(HeaderFreezeRenderController, context as any);
+        const executeCommand = vi.spyOn(commandService, 'executeCommand');
+        const worksheet = sheet.getActiveSheet();
+        worksheet.getConfig().freeze = { startRow: 2, startColumn: -1, ySplit: 2, xSplit: 0 };
+        (viewportMap.get(SHEET_VIEWPORT_KEY.VIEW_MAIN) as any).isHit = () => true;
+
+        const headerRect = {
+            transformByState: vi.fn(() => headerRect),
+            setProps: vi.fn(() => headerRect),
+        };
+        const mainRect = {
+            transformByState: vi.fn(() => mainRect),
+            setProps: vi.fn(() => mainRect),
+        };
+
+        (controller as any)._freezeDown({ offsetX: 120, offsetY: 40 }, headerRect, mainRect);
+        scene.onPointerMove$.emit({ offsetX: 120, offsetY: 90 }, { stopPropagation: () => { } });
+        scene.onPointerUp$.emit({}, { stopPropagation: () => { } });
+
+        expect(scene.getViewports().some((viewport: any) => viewport.isHit?.({ x: 120, y: 90 }))).toBe(true);
+        expect(headerRect.transformByState).toHaveBeenCalledWith({ top: 79 });
+        expect(mainRect.transformByState).toHaveBeenCalledWith({ top: 79 });
+        expect(executeCommand).toHaveBeenCalledWith(SetFrozenCommand.id, {
+            startRow: 4,
+            startColumn: -1,
+            ySplit: 4,
+            xSplit: 0,
+            unitId: sheet.getUnitId(),
+            subUnitId: worksheet.getSheetId(),
+        });
 
         testBed.univer.dispose();
     });

@@ -1,0 +1,201 @@
+/**
+ * Copyright 2023-present DreamNum Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import {
+    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    EDITOR_ACTIVATED,
+    FOCUSING_EDITOR_BUT_HIDDEN,
+    FOCUSING_EDITOR_INPUT_FORMULA,
+    FOCUSING_FX_BAR_EDITOR,
+    LocaleType,
+} from '@univerjs/core';
+import { VIEWPORT_KEY as DOC_VIEWPORT_KEY, MoveCursorOperation, MoveSelectionOperation } from '@univerjs/docs-ui';
+import { LexerTreeBuilder } from '@univerjs/engine-formula';
+import { SetRangeValuesCommand } from '@univerjs/sheets';
+import { KeyCode } from '@univerjs/ui';
+import { describe, expect, it, vi } from 'vitest';
+import { MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../../commands/commands/set-selection.command';
+import { EditingRenderController } from '../editing.render-controller';
+
+function createController() {
+    const worksheet = {
+        getSheetId: vi.fn(() => 'sheet-1'),
+        getCellRaw: vi.fn(() => ({ v: 'old' })),
+        getComposedCellStyleWithoutSelf: vi.fn(() => ({})),
+    };
+    const styles = { get: vi.fn(() => undefined) };
+    const workbook = {
+        getUnitId: vi.fn(() => 'unit-1'),
+        getActiveSheet: vi.fn(() => worksheet),
+        getSheetBySheetId: vi.fn(() => worksheet),
+        getStyles: vi.fn(() => styles),
+    };
+    const docModel = {
+        getSnapshot: vi.fn(() => ({
+            body: { dataStream: 'new value\r\n' },
+            documentStyle: {},
+        })),
+    };
+    const controller = Object.create(EditingRenderController.prototype) as any;
+    controller._editingUnit = 'unit-1';
+    controller._lexerTreeBuilder = new LexerTreeBuilder();
+    controller._localService = { getCurrentLocale: vi.fn(() => LocaleType.EN_US) };
+    controller._functionService = { getDescriptions: vi.fn(() => ({})) };
+    controller._undoRedoService = {
+        rollback: vi.fn(),
+        clearUndoRedo: vi.fn(),
+    };
+    controller._contextService = {
+        setContextValue: vi.fn(),
+        getContextValue: vi.fn(() => false),
+    };
+    controller._cellEditorManagerService = { setState: vi.fn() };
+    controller._editorService = { isSheetEditor: vi.fn(() => true) };
+    controller._editorBridgeService = {
+        getEditCellState: vi.fn(() => ({
+            unitId: 'unit-1',
+            sheetId: 'sheet-1',
+            row: 2,
+            column: 3,
+            documentLayoutObject: { documentModel: null },
+        })),
+        getEditLocation: vi.fn(() => ({ unitId: 'unit-1', sheetId: 'sheet-1', row: 2, column: 3 })),
+        getCurrentEditorId: vi.fn(() => DOCS_NORMAL_EDITOR_UNIT_ID_KEY),
+        isForceKeepVisible: vi.fn(() => false),
+        disableForceKeepVisible: vi.fn(),
+    };
+    controller._sheetInterceptorService = {
+        onWriteCell: vi.fn((_workbook, _worksheet, _row, _column, cellData) => cellData),
+        onValidateCell: vi.fn(() => true),
+    };
+    controller._commandService = {
+        syncExecuteCommand: vi.fn(() => true),
+        executeCommand: vi.fn(),
+    };
+    controller._univerInstanceService = {
+        getUnit: vi.fn((unitId: string) => unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY ? docModel : workbook),
+        getCurrentUnitOfType: vi.fn(() => workbook),
+        setCurrentUnitForType: vi.fn(),
+    };
+    const workbookSelections = {
+        getCurrentLastSelection: vi.fn(() => ({ range: { startRow: 1, startColumn: 1, endRow: 4, endColumn: 4 } })),
+        getSelectionsOfWorksheet: vi.fn(() => [{ range: { startRow: 2, startColumn: 3, endRow: 2, endColumn: 3 } }]),
+    };
+    controller._selectionManagerService = {
+        getWorkbookSelections: vi.fn(() => workbookSelections),
+    };
+    controller._renderManagerService = {
+        getRenderById: vi.fn(() => ({
+            scene: {
+                getViewport: vi.fn((key) => key === DOC_VIEWPORT_KEY.VIEW_MAIN
+                    ? { scrollToViewportPos: vi.fn() }
+                    : null),
+            },
+            with: vi.fn(() => ({ resetInitialWidth: vi.fn() })),
+        })),
+    };
+    controller._getEditorObject = vi.fn(() => ({
+        scene: {
+            getViewport: vi.fn((key) => key === DOC_VIEWPORT_KEY.VIEW_MAIN
+                ? { scrollToViewportPos: vi.fn() }
+                : null),
+        },
+    }));
+    controller._getEditorSkeleton = vi.fn(() => ({ resetInitialWidth: vi.fn() }));
+
+    return { controller, docModel, workbook, worksheet };
+}
+
+describe('EditingRenderController business methods', () => {
+    it('submits edited cell content and rolls back when validation rejects the value', async () => {
+        const { controller } = createController();
+        controller._sheetInterceptorService.onValidateCell.mockResolvedValue(false);
+
+        const result = await controller._submitEdit({
+            body: { dataStream: 'new value\r\n' },
+            documentStyle: {},
+        });
+
+        expect(result).toBe(false);
+        expect(controller._sheetInterceptorService.onWriteCell).toHaveBeenCalledWith(expect.any(Object), expect.any(Object), 2, 3, {
+            v: 'new value',
+            f: null,
+            si: null,
+            p: null,
+        });
+        expect(controller._commandService.syncExecuteCommand).toHaveBeenCalledWith(SetRangeValuesCommand.id, expect.objectContaining({
+            unitId: 'unit-1',
+            subUnitId: 'sheet-1',
+            range: { startRow: 2, startColumn: 3, endRow: 2, endColumn: 3 },
+            value: { v: 'new value', f: null, si: null, p: null },
+        }));
+        expect(controller._undoRedoService.rollback).toHaveBeenCalledWith(expect.any(String), 'unit-1');
+    });
+
+    it('uses the whole current selection when committing an array edit', async () => {
+        const { controller } = createController();
+
+        await controller._submitEdit({
+            body: { dataStream: 'fill\r\n' },
+            documentStyle: {},
+        }, true);
+
+        expect(controller._commandService.syncExecuteCommand).toHaveBeenCalledWith(SetRangeValuesCommand.id, expect.objectContaining({
+            range: { startRow: 1, startColumn: 1, endRow: 4, endColumn: 4 },
+        }));
+        expect(controller._undoRedoService.rollback).not.toHaveBeenCalled();
+    });
+
+    it('moves sheet selection after finishing edit and switches back to the edited workbook when needed', () => {
+        const { controller } = createController();
+        controller._univerInstanceService.getCurrentUnitOfType.mockReturnValue({ getUnitId: () => 'other-unit' });
+
+        controller._moveSelection(KeyCode.ENTER, 'unit-1', 'sheet-1');
+        controller._moveSelection(KeyCode.ARROW_LEFT, 'unit-1', 'sheet-1');
+        controller._moveSelection(undefined, 'unit-1', 'sheet-1');
+
+        expect(controller._univerInstanceService.setCurrentUnitForType).toHaveBeenCalledWith('unit-1');
+        expect(controller._commandService.executeCommand).toHaveBeenCalledWith(MoveSelectionEnterAndTabCommand.id, {
+            keycode: KeyCode.ENTER,
+            direction: 2,
+        });
+        expect(controller._commandService.executeCommand).toHaveBeenCalledWith(MoveSelectionCommand.id, {
+            direction: 3,
+        });
+        expect(controller._commandService.syncExecuteCommand).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({
+            subUnitId: 'sheet-1',
+        }));
+    });
+
+    it('moves the cursor inside the editor and resets editor state on exit', () => {
+        const { controller } = createController();
+
+        controller._moveInEditor(KeyCode.ARROW_RIGHT, false);
+        controller._moveInEditor(KeyCode.ARROW_UP, true);
+        controller._exitInput({ visible: false });
+
+        expect(controller._commandService.executeCommand).toHaveBeenCalledWith(MoveCursorOperation.id, { direction: 1 });
+        expect(controller._commandService.executeCommand).toHaveBeenCalledWith(MoveSelectionOperation.id, { direction: 0 });
+        expect(controller._contextService.setContextValue).toHaveBeenCalledWith(FOCUSING_EDITOR_INPUT_FORMULA, false);
+        expect(controller._contextService.setContextValue).toHaveBeenCalledWith(EDITOR_ACTIVATED, false);
+        expect(controller._contextService.setContextValue).toHaveBeenCalledWith(FOCUSING_EDITOR_BUT_HIDDEN, false);
+        expect(controller._contextService.setContextValue).toHaveBeenCalledWith(FOCUSING_FX_BAR_EDITOR, false);
+        expect(controller._cellEditorManagerService.setState).toHaveBeenCalledWith({ show: false });
+        expect(controller._undoRedoService.clearUndoRedo).toHaveBeenCalledWith(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+        expect(controller._undoRedoService.clearUndoRedo).toHaveBeenCalledWith(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
+    });
+});

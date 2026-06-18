@@ -204,4 +204,48 @@ describe('drawing panel actions', () => {
             },
         }]);
     });
+
+    it('reapplies image cropping when the crop mode changes while cropping', async () => {
+        const executedCommands: ICommandInfo[] = [];
+        commandService.onCommandExecuted((command) => executedCommands.push(command));
+
+        const rendered = renderWithRediContext(
+            univer.__getInjector(),
+            <ImageCropper cropperShow drawings={[createDrawing('image-1', 0)]} />
+        );
+        root = rendered.root;
+        container = rendered.container;
+
+        clickElement(findActionByText('drawing-ui.image-panel.crop.start'));
+        await flushPendingCommands();
+
+        await act(async () => {
+            container!.querySelector('[data-u-comp="select"]')!.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0 }));
+            await Promise.resolve();
+        });
+
+        const squareCropOption = findActionByText('1:1');
+
+        await act(async () => {
+            squareCropOption.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            await Promise.resolve();
+        });
+
+        expect(executedCommands).toEqual([
+            {
+                id: AutoImageCropOperation.id,
+                type: AutoImageCropOperation.type,
+                params: {
+                    cropType: CropType.FREE,
+                },
+            },
+            {
+                id: AutoImageCropOperation.id,
+                type: AutoImageCropOperation.type,
+                params: {
+                    cropType: CropType.R1_1,
+                },
+            },
+        ]);
+    });
 });

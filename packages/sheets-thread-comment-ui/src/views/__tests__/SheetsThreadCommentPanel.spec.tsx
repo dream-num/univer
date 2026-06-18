@@ -585,6 +585,38 @@ describe('SheetsThreadCommentPanel', () => {
         expect(sheet2A1).toBeLessThan(resolvedSheet1A1);
     });
 
+    it('filters panel comments to the active sheet when current-sheet scope is selected', async () => {
+        const testBed = createTestBed();
+        univer = testBed.univer;
+        testBed.threadCommentModel.addComment(unitId, sheet1, createComment('current-sheet-thread', sheet1, 'B2', 'Current sheet B2'));
+        testBed.threadCommentModel.addComment(unitId, sheet2, createComment('other-sheet-thread', sheet2, 'C3', 'Other sheet C3'));
+
+        const rendered = renderPanel(testBed.injector);
+        root = rendered.root;
+        container = rendered.container;
+
+        expect(container.textContent).toContain('Current sheet B2');
+        expect(container.textContent).toContain('Other sheet C3');
+
+        await act(async () => {
+            container!.querySelectorAll('[data-u-comp="select"]')[0].dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0 }));
+            await Promise.resolve();
+        });
+
+        const currentSheetOption = Array.from(document.querySelectorAll('[data-slot="dropdown-menu-radio-item"]'))
+            .find((button) => button.textContent === 'Current sheet');
+
+        expect(currentSheetOption).toBeDefined();
+
+        await act(async () => {
+            currentSheetOption!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            await Promise.resolve();
+        });
+
+        expect(container.textContent).toContain('Current sheet B2');
+        expect(container.textContent).not.toContain('Other sheet C3');
+    });
+
     it('highlights only unresolved comments on the current sheet and closes the cell popup when resolved', () => {
         const testBed = createTestBed();
         univer = testBed.univer;

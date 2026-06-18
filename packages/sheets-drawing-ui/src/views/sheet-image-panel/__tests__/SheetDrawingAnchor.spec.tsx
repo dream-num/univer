@@ -155,4 +155,38 @@ describe('SheetDrawingAnchor', () => {
 
         testBed.univer.dispose();
     });
+
+    it('hides anchor controls when the transformer clears the sheet image selection', async () => {
+        const testBed = createSheetsDrawingUiTestBed(undefined, [
+            [IRenderManagerService, { useClass: TestRenderManagerService as never }],
+        ]);
+        const renderManagerService = testBed.get(IRenderManagerService) as unknown as TestRenderManagerService;
+        const drawings = [
+            createSheetDrawing('drawing-a', SheetDrawingAnchorType.Position),
+        ];
+
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: testBed.injector }}>
+                    <SheetDrawingAnchor drawings={drawings} />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        expect(container.firstElementChild?.classList.contains('univer-hidden')).toBe(false);
+
+        await act(async () => {
+            renderManagerService.clearControl$.next(true);
+            await Promise.resolve();
+        });
+
+        expect(container.firstElementChild?.classList.contains('univer-hidden')).toBe(true);
+
+        testBed.univer.dispose();
+    });
 });

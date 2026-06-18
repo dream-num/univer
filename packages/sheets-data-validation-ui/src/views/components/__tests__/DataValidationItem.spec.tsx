@@ -550,6 +550,29 @@ describe('DataValidationItem', () => {
         expect(currentTestBed.markSelectionService.removed).toEqual(['shape-0', 'shape-1']);
     });
 
+    it('clears highlighted rule ranges when the hovered item is unmounted', async () => {
+        currentTestBed = createItemTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        const item = renderItem(root, currentTestBed, () => undefined);
+
+        await enterItem(item);
+
+        expect(currentTestBed.markSelectionService.added.map((entry) => entry.selection.range)).toEqual([
+            FIRST_RANGE,
+            SECOND_RANGE,
+        ]);
+
+        act(() => {
+            root?.unmount();
+        });
+        root = undefined;
+
+        expect(currentTestBed.markSelectionService.removed).toEqual(['shape-0', 'shape-1']);
+    });
+
     it('removes the hovered rule through the sheet data-validation command without selecting the item', async () => {
         currentTestBed = createItemTestBed();
         container = document.createElement('div');

@@ -579,6 +579,17 @@ function clickCustomThemeAddControl(container: HTMLElement): void {
     clickElement(addControl);
 }
 
+function clickCustomThemeRemoveControl(container: HTMLElement): void {
+    const removeControl = Array.from(container.querySelectorAll('div')).find((item) => {
+        return item.textContent?.trim() === 'x' && item.className.includes('univer-absolute');
+    });
+    if (!removeControl) {
+        throw new Error('Custom theme remove control was not found.');
+    }
+
+    clickElement(removeControl);
+}
+
 async function flushCommands(): Promise<void> {
     await act(async () => {
         await Promise.resolve();
@@ -805,6 +816,36 @@ describe('sheet table view components', () => {
         expect(componentController.closeCount).toBe(1);
     });
 
+    it('keeps the existing value filter when item changes are cancelled', async () => {
+        testBed = createTestBed();
+        const componentController = testBed.injector.get(SheetsTableComponentController) as TestComponentController;
+        const table = testBed.injector.get(TableManager).getTable(testBed.workbook.getUnitId(), 'table-orders')!;
+        table.setTableFilterColumn(0, {
+            filterType: TableColumnFilterTypeEnum.manual,
+            values: ['book'],
+        });
+        componentController.setCurrentTableFilterInfo({
+            unitId: testBed.workbook.getUnitId(),
+            subUnitId: 'sheet1',
+            tableId: 'table-orders',
+            row: 0,
+            column: 0,
+        });
+        const rendered = renderWithRediContext(testBed, <SheetTableFilterPanel />);
+        root = rendered.root;
+        container = rendered.container;
+
+        clickCheckboxByText(container, 'pen');
+        clickButtonByText(container, 'Cancel');
+        await flushCommands();
+
+        expect(table.getTableFilterColumn(0)).toEqual({
+            filterType: TableColumnFilterTypeEnum.manual,
+            values: ['book'],
+        });
+        expect(componentController.closeCount).toBe(1);
+    });
+
     it('applies a value filter from the currently searched items only', async () => {
         testBed = createTestBed();
         const componentController = testBed.injector.get(SheetsTableComponentController) as TestComponentController;
@@ -999,5 +1040,39 @@ describe('sheet table view components', () => {
 
         expect(rangeThemeModel.getCustomRangeThemeStyle(unitId, 'table-custom-1')).toBeDefined();
         expect(table.getTableStyleId()).toBe('table-custom-1');
+    });
+
+    it('removes an unused custom theme without changing the table style', async () => {
+        testBed = createTestBed();
+        const unitId = testBed.workbook.getUnitId();
+        const table = testBed.injector.get(TableManager).getTable(unitId, 'table-orders')!;
+        const rangeThemeModel = testBed.injector.get(SheetRangeThemeModel);
+        const rendered = renderWithRediContext(
+            testBed,
+            <SheetTableThemePanel
+                unitId={unitId}
+                subUnitId="sheet1"
+                tableId="table-orders"
+                oldConfig={{}}
+            />
+        );
+        root = rendered.root;
+        container = rendered.container;
+
+        clickCustomThemeAddControl(container);
+        await flushCommands();
+        clickCustomThemeAddControl(container);
+        await flushCommands();
+
+        expect(rangeThemeModel.getCustomRangeThemeStyle(unitId, 'table-custom-1')).toBeDefined();
+        expect(rangeThemeModel.getCustomRangeThemeStyle(unitId, 'table-custom-2')).toBeDefined();
+        expect(table.getTableStyleId()).toBe('table-custom-2');
+
+        clickCustomThemeRemoveControl(container);
+        await flushCommands();
+
+        expect(rangeThemeModel.getCustomRangeThemeStyle(unitId, 'table-custom-1')).toBeUndefined();
+        expect(rangeThemeModel.getCustomRangeThemeStyle(unitId, 'table-custom-2')).toBeDefined();
+        expect(table.getTableStyleId()).toBe('table-custom-2');
     });
 });

@@ -274,6 +274,12 @@ function inputByLabelText(text: string) {
     return label?.querySelector('input') as HTMLInputElement;
 }
 
+function setInputValue(input: HTMLInputElement, value: string) {
+    const valueSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
+    valueSetter?.call(input, value);
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
 describe('DocDrawingPosition', () => {
     let root: Root | undefined;
     let container: HTMLDivElement | undefined;
@@ -311,6 +317,30 @@ describe('DocDrawingPosition', () => {
                 positionV: {
                     relativeFrom: ObjectRelativeFromV.PAGE,
                     posOffset: 104,
+                },
+            },
+        });
+    });
+
+    it('persists horizontal absolute position on the focused drawing', async () => {
+        currentTestBed = createPositionTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        renderPanel(root, currentTestBed);
+
+        const horizontalPositionInput = Array.from(container.querySelectorAll('input'))[0];
+
+        await act(async () => {
+            setInputValue(horizontalPositionInput, '36.5');
+            await Promise.resolve();
+        });
+
+        expect(currentDrawing(currentTestBed)).toMatchObject({
+            docTransform: {
+                positionH: {
+                    relativeFrom: ObjectRelativeFromH.PAGE,
+                    posOffset: 36.5,
                 },
             },
         });

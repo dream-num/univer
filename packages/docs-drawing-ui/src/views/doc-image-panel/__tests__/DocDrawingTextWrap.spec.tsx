@@ -321,6 +321,38 @@ describe('DocDrawingTextWrap', () => {
         });
     });
 
+    it('preserves wrap metadata when switching to top-and-bottom text flow', async () => {
+        currentTestBed = createPanelTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        renderPanel(root, currentTestBed);
+
+        await act(async () => {
+            inputByLabelText('Top and Bottom').click();
+            await Promise.resolve();
+        });
+
+        expect(currentDrawing(currentTestBed)).toMatchObject({
+            layoutType: PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM,
+            wrapText: WrapTextType.BOTH_SIDES,
+            distT: 1,
+            distL: 2,
+            distB: 3,
+            distR: 4,
+            docTransform: {
+                positionH: {
+                    relativeFrom: ObjectRelativeFromH.PAGE,
+                    posOffset: 24,
+                },
+                positionV: {
+                    relativeFrom: ObjectRelativeFromV.PAGE,
+                    posOffset: 114,
+                },
+            },
+        });
+    });
+
     it('persists left distance from text on the focused drawing', async () => {
         currentTestBed = createPanelTestBed();
         container = document.createElement('div');

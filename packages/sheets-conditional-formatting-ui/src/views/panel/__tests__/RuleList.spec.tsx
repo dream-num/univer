@@ -244,11 +244,12 @@ describe('RuleList', () => {
         container = document.createElement('div');
         document.body.appendChild(container);
         root = createRoot(container);
+        const openedRuleIds: string[] = [];
 
         await act(async () => {
             root!.render(
                 <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
-                    <RuleList onClick={() => undefined} onCreate={() => undefined} />
+                    <RuleList onClick={(rule) => openedRuleIds.push(rule.cfId)} onCreate={() => undefined} />
                 </RediContext.Provider>
             );
             await Promise.resolve();
@@ -270,9 +271,50 @@ describe('RuleList', () => {
 
         const remainingRules = currentTestBed.ruleModel.getSubunitRules(currentTestBed.unitId, currentTestBed.subUnitId);
 
+        expect(openedRuleIds).toEqual([]);
         expect(remainingRules?.map((rule) => rule.cfId)).toEqual(['cf-far']);
         expect(container.textContent).not.toContain('A1');
         expect(container.textContent).toContain('F6');
+    });
+
+    it('opens the clicked conditional formatting rule for editing without changing worksheet rules', async () => {
+        currentTestBed = await createRuleListTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        const openedRuleIds: string[] = [];
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <RuleList onClick={(rule) => openedRuleIds.push(rule.cfId)} onCreate={() => undefined} />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        const activeRangeText = Array.from(container.querySelectorAll('div'))
+            .find((element) => element.textContent === 'A1');
+        const activeRuleRow = activeRangeText?.parentElement?.parentElement as HTMLElement | undefined;
+        const ruleIdsBeforeOpen = currentTestBed.ruleModel
+            .getSubunitRules(currentTestBed.unitId, currentTestBed.subUnitId)
+            ?.map((rule) => rule.cfId);
+
+        if (!activeRuleRow) {
+            throw new Error('Rule row was not rendered');
+        }
+
+        await act(async () => {
+            activeRuleRow.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            await Promise.resolve();
+        });
+
+        expect(openedRuleIds).toEqual(['cf-active']);
+        expect(
+            currentTestBed.ruleModel
+                .getSubunitRules(currentTestBed.unitId, currentTestBed.subUnitId)
+                ?.map((rule) => rule.cfId)
+        ).toEqual(ruleIdsBeforeOpen);
     });
 
     it('clears all worksheet conditional formatting rules in worksheet mode', async () => {

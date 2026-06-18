@@ -508,6 +508,15 @@ describe('SheetNumfmtPanel', () => {
         });
     }
 
+    async function cancelPanel() {
+        const cancelButton = Array.from(container!.querySelectorAll('[data-u-comp="button"]'))[0] as HTMLElement;
+
+        await act(async () => {
+            cancelButton.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            await Promise.resolve();
+        });
+    }
+
     async function changePanelInput(value: string) {
         const input = container!.querySelector('input') as HTMLInputElement | null;
 
@@ -862,6 +871,54 @@ describe('SheetNumfmtPanel', () => {
             pattern: '0.000 kg',
         });
         expect(await currentTestBed.localStorageService.getItem<string[]>(CUSTOM_HISTORY_KEY)).toEqual(['0.000 kg']);
+    });
+
+    it('does not apply or save a typed custom format when cancelled', async () => {
+        currentTestBed = createNumfmtViewTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        const events: Array<{ type: 'change' | 'cancel' | 'confirm'; value: string }> = [];
+        const commandResults: Array<Promise<unknown>> = [];
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <SheetNumfmtPanel
+                        value={{
+                            defaultValue: 1234.5,
+                            defaultPattern: '',
+                            row: 0,
+                            col: 0,
+                        }}
+                        onChange={(event) => {
+                            events.push(event);
+                            if (event.type === 'confirm') {
+                                commandResults.push(currentTestBed!.commandService.executeCommand(SetNumfmtCommand.id, {
+                                    values: [{
+                                        row: 0,
+                                        col: 0,
+                                        pattern: event.value,
+                                        type: getPatternType(event.value),
+                                    }],
+                                }) as Promise<unknown>);
+                            }
+                        }}
+                    />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        await selectPanelType('Custom format');
+        await changePanelInput('0.000 kg');
+        await cancelPanel();
+        const results = await Promise.all(commandResults);
+
+        expect(results).toEqual([]);
+        expect(events.at(-1)).toEqual({ type: 'cancel', value: '' });
+        expect(currentTestBed.numfmtService.getValue(UNIT_ID, SUB_UNIT_ID, 0, 0)).toBeNull();
+        expect(await currentTestBed.localStorageService.getItem<string[]>(CUSTOM_HISTORY_KEY)).toEqual([]);
     });
 
     it('records confirmed currency and accounting symbols in the user habit order', async () => {

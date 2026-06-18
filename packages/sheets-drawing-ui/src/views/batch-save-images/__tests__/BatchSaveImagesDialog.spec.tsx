@@ -362,6 +362,42 @@ describe('BatchSaveImagesDialog', () => {
         testBed.univer.dispose();
     });
 
+    it('clears lookup column highlight without saving when the dialog is cancelled', async () => {
+        const { testBed, batchSaveService, dialogService, markSelectionService } = await renderDialog();
+        const columnValueCheckbox = getCheckbox(container!, 1);
+
+        await act(async () => {
+            columnValueCheckbox.click();
+            await Promise.resolve();
+        });
+
+        expect(markSelectionService.activeRanges).toEqual([{
+            startRow: 2,
+            endRow: 3,
+            startColumn: 4,
+            endColumn: 4,
+        }]);
+
+        await act(async () => {
+            getButton(container!, 'sheets-drawing-ui.save.cancel').click();
+            await Promise.resolve();
+        });
+
+        expect(batchSaveService.savedConfig).toBeNull();
+        expect(dialogService.closedIds).toEqual([BATCH_SAVE_IMAGES_DIALOG_ID]);
+
+        await act(async () => {
+            root!.unmount();
+            root = undefined;
+            await Promise.resolve();
+        });
+
+        expect(markSelectionService.activeRanges).toEqual([]);
+        expect(markSelectionService.removedIds).toEqual(['shape-1']);
+
+        testBed.univer.dispose();
+    });
+
     it('keeps the dialog open and shows the save error when saving fails', async () => {
         const { testBed, batchSaveService, dialogService } = await renderDialog();
         batchSaveService.failSaving();

@@ -180,4 +180,41 @@ describe('FormulaProgressBar', () => {
 
         expect(controller.cleared).toBe(1);
     });
+
+    it('keeps in-progress calculation visible until completion finishes transitioning', async () => {
+        const { controller, injector } = createProgressTestBed();
+
+        renderProgress(injector);
+
+        await act(async () => {
+            controller.setProgress({ done: 1, count: 2, label: 'Halfway' });
+            await Promise.resolve();
+        });
+
+        const progressBarInner = Array.from(container.querySelectorAll('div'))
+            .find((node) => node.style.width === '50%') as HTMLDivElement | undefined;
+        expect(progressBarInner).toBeDefined();
+
+        await act(async () => {
+            progressBarInner!.dispatchEvent(new Event('transitionend', { bubbles: true }));
+            await Promise.resolve();
+        });
+
+        expect(controller.cleared).toBe(0);
+        expect(container.textContent).toContain('Halfway');
+
+        await act(async () => {
+            controller.setProgress({ done: 2, count: 2, label: 'Done' });
+            await Promise.resolve();
+        });
+
+        expect(progressBarInner!.style.width).toBe('100%');
+
+        await act(async () => {
+            progressBarInner!.dispatchEvent(new Event('transitionend', { bubbles: true }));
+            await Promise.resolve();
+        });
+
+        expect(controller.cleared).toBe(1);
+    });
 });

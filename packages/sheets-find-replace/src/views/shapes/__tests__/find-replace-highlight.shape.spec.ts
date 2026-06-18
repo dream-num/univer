@@ -125,4 +125,31 @@ describe('SheetFindReplaceHighlightShape', () => {
         expect(inactiveContext.lineWidth).toBe(0);
         expect(inactiveContext.strokeCount).toBe(0);
     });
+
+    it('redraws refreshed search results with the latest bounds and color', () => {
+        const shape = new SheetFindReplaceHighlightShape('refreshed-result', {
+            inHiddenRange: false,
+            color: { r: 10, g: 20, b: 30 },
+            activated: true,
+            width: 12,
+            height: 24,
+        });
+
+        shape.setShapeProps({
+            color: { r: 40, g: 50, b: 60 },
+            activated: true,
+            width: 36,
+            height: 48,
+        });
+        const context = new TestCanvasContext();
+
+        drawShape(shape, context);
+
+        expect(context.rects).toEqual([{ left: 0, top: 0, width: 36, height: 48 }]);
+        expect(context.fillStyle).toBe('rgba(40, 50, 60, 0.35)');
+        expect(context.strokeStyle).toBe('rgb(40, 50, 60)');
+        expect(context.lineWidth).toBe(2);
+        expect(context.fillCount).toBe(1);
+        expect(context.strokeCount).toBe(1);
+    });
 });

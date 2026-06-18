@@ -214,12 +214,15 @@ export function resolveDocsCustomBlockRenderViewport(params: DocsCustomBlockRend
     const pageContentWidth = Number.isFinite(pageWidth)
         ? Math.max(0, pageWidth! - pageMarginLeft - pageMarginRight)
         : fallbackWidth;
+    const contentWidth = Number.isFinite(params.contentWidth) && (params.contentWidth ?? 0) > 0
+        ? params.contentWidth!
+        : fallbackWidth;
 
     if (params.documentFlavor !== DocumentFlavor.MODERN || !Number.isFinite(pageWidth)) {
-        const layoutWidth = Math.min(fallbackWidth, pageContentWidth || fallbackWidth);
+        const layoutWidth = Math.min(contentWidth, pageContentWidth || contentWidth);
         return {
             contentHeight,
-            contentWidth: params.contentWidth,
+            contentWidth,
             height,
             layoutWidth,
             offsetLeft: 0,
@@ -240,9 +243,6 @@ export function resolveDocsCustomBlockRenderViewport(params: DocsCustomBlockRend
     const paragraphTextStart = docsLeft + pageMarginLeft;
     const leadingInsetLeft = Math.max(0, paragraphTextStart - viewportLeft);
 
-    const contentWidth = Number.isFinite(params.contentWidth) && (params.contentWidth ?? 0) > 0
-        ? params.contentWidth!
-        : fallbackWidth;
     const desiredWidth = contentWidth;
     const maxBleedWidth = Math.max(1, viewportLeft + viewportWidth - paragraphTextStart);
     const layoutWidth = Math.min(desiredWidth, maxBleedWidth);

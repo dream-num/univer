@@ -14,205 +14,208 @@
  * limitations under the License.
  */
 
-/**
- * @vitest-environment jsdom
- */
-
+import type { IEmbedDescriptor } from '@univerjs/embed';
+import type { IEmbedChildContainerContext, IEmbedFloatPreviewProvider, IEmbedFloatPreviewRenderRequest } from '../types/embed-ui';
 import { UniverInstanceType } from '@univerjs/core';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { EmbedFloatPreviewService } from './embed-float-preview.service';
 
 describe('EmbedFloatPreviewService', () => {
-    let service: EmbedFloatPreviewService;
-
-    beforeEach(() => {
-        service = new EmbedFloatPreviewService();
-    });
-
-    it('renders a ready preview through the registered child provider', async () => {
-        service.registerProvider({
-            childType: UniverInstanceType.UNIVER_SLIDE,
-            collectViewState: vi.fn(),
-            restoreViewState: vi.fn(),
-            renderPreview: vi.fn().mockResolvedValue('data:image/png;base64,slide'),
+    it('renders previews through providers and reuses pending or ready cache entries', async () => {
+        const service = new EmbedFloatPreviewService();
+        const updates: string[] = [];
+        service.previewUpdated$.subscribe((entry) => updates.push(entry.status));
+        const provider = createProvider({
+            renderPreview: vi.fn(async (request) => `image:${request.width}x${request.height}:${request.viewState?.scrollTop ?? 0}`),
         });
 
-        const entry = service.requestPreview({
-            descriptor: createDescriptor(),
-            childUnitId: 'slide-1',
-            childType: UniverInstanceType.UNIVER_SLIDE,
-            width: 320,
-            height: 180,
-            dpr: 2,
-            reason: 'initial',
-        });
+        service.registerProvider(provider);
 
-        expect(entry.status).toBe('pending');
+        const request = createRequest({ width: 10.4, height: 19.6, viewState: { scrollTop: 12 } });
+        const pending = service.requestPreview(request);
+        const cachedPending = service.requestPreview(request);
+
+        expect(cachedPending).toBe(pending);
+        expect(pending).toMatchObject({
+            status: 'pending',
+            width: 10,
+            height: 20,
+            revision: 1,
+            viewState: { scrollTop: 12 },
+        });
 
         await service.flushForTests();
 
-        expect(service.getPreview('embed-1')).toMatchObject({
-            embedId: 'embed-1',
+        const ready = service.getPreview('embed-1');
+        expect(ready).toBe(pending);
+        expect(ready).toMatchObject({
             status: 'ready',
-            image: 'data:image/png;base64,slide',
-            width: 320,
-            height: 180,
-            dpr: 2,
+            image: 'image:10x20:12',
         });
+        expect(provider.renderPreview).toHaveBeenCalledWith(expect.objectContaining({
+            width: 10,
+            height: 20,
+            viewState: { scrollTop: 12 },
+        }));
+        expect(service.requestPreview(request)).toBe(ready);
+        expect(updates).toEqual(['pending', 'ready']);
     });
 
-    it('keeps the last ready preview when a later render fails', async () => {
-        const renderPreview = vi.fn()
-            .mockResolvedValueOnce('data:image/png;base64,ok')
-            .mockRejectedValueOnce(new Error('render failed'));
-
-        service.registerProvider({
-            childType: UniverInstanceType.UNIVER_SLIDE,
-            collectViewState: vi.fn(),
-            restoreViewState: vi.fn(),
-            renderPreview,
+    it('keeps previous ready image when a later render fails', async () => {
+        const service = new EmbedFloatPreviewService();
+        const provider = createProvider({
+            renderPreview: vi.fn()
+                .mockResolvedValueOnce('first-image')
+                .mockResolvedValueOnce(null)
+                .mockRejectedValueOnce(new Error('render failed')),
         });
+        service.registerProvider(provider);
 
-        const descriptor = createDescriptor();
-        service.requestPreview({
-            descriptor,
-            childUnitId: 'slide-1',
-            childType: UniverInstanceType.UNIVER_SLIDE,
-            width: 320,
-            height: 180,
-            dpr: 1,
-            reason: 'initial',
-        });
+        service.requestPreview(createRequest({ width: 100, height: 50, viewState: { page: 1 } }));
         await service.flushForTests();
+        expect(service.getPreview('embed-1')).toMatchObject({ status: 'ready', image: 'first-image' });
 
-        service.requestPreview({
-            descriptor,
-            childUnitId: 'slide-1',
-            childType: UniverInstanceType.UNIVER_SLIDE,
-            width: 640,
-            height: 360,
-            dpr: 1,
-            reason: 'resize',
-        });
+        service.requestPreview(createRequest({ width: 101, height: 50 }));
         await service.flushForTests();
-
         expect(service.getPreview('embed-1')).toMatchObject({
             status: 'stale',
-            image: 'data:image/png;base64,ok',
-            width: 640,
-            height: 360,
-        });
-    });
-
-    it('stores provider view state as opaque data', () => {
-        const state = { pageId: 'page-1', scrollTop: 10 };
-
-        service.updateViewState('embed-1', state);
-
-        expect(service.getPreview('embed-1')?.viewState).toBe(state);
-    });
-
-    it('collects and restores provider view state through the child type', async () => {
-        const state = { pageId: 'page-2' };
-        const collectViewState = vi.fn().mockResolvedValue(state);
-        const restoreViewState = vi.fn();
-        const context = { embedId: 'embed-1', childType: UniverInstanceType.UNIVER_SLIDE } as any;
-        service.registerProvider({
-            childType: UniverInstanceType.UNIVER_SLIDE,
-            collectViewState,
-            restoreViewState,
-            renderPreview: vi.fn(),
+            image: 'first-image',
+            viewState: { page: 1 },
         });
 
-        await expect(service.collectViewState(context)).resolves.toBe(state);
-        await service.restoreViewState(context, state);
-
-        expect(collectViewState).toHaveBeenCalledWith(context);
-        expect(restoreViewState).toHaveBeenCalledWith(context, state);
-        expect(service.getPreview('embed-1')?.viewState).toBe(state);
-    });
-
-    it('deduplicates equivalent pending preview requests', async () => {
-        const renderPreview = vi.fn().mockResolvedValue('data:image/png;base64,slide');
-        const descriptor = createDescriptor();
-        service.registerProvider({
-            childType: UniverInstanceType.UNIVER_SLIDE,
-            collectViewState: vi.fn(),
-            restoreViewState: vi.fn(),
-            renderPreview,
-        });
-
-        const first = service.requestPreview({
-            descriptor,
-            childUnitId: 'slide-1',
-            childType: UniverInstanceType.UNIVER_SLIDE,
-            width: 320.4,
-            height: 180.4,
-            dpr: 2,
-            reason: 'initial',
-        });
-        const second = service.requestPreview({
-            descriptor,
-            childUnitId: 'slide-1',
-            childType: UniverInstanceType.UNIVER_SLIDE,
-            width: 320.2,
-            height: 180.2,
-            dpr: 2,
-            reason: 'initial',
-        });
-
-        expect(second).toBe(first);
-
+        service.requestPreview(createRequest({ width: 102, height: 50, viewState: { page: 2 } }));
         await service.flushForTests();
-
-        expect(renderPreview).toHaveBeenCalledTimes(1);
-    });
-
-    it('falls back to the mounted child scene canvas when no child provider is registered', async () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = 320;
-        canvas.height = 180;
-        const toDataURL = vi.spyOn(canvas, 'toDataURL').mockReturnValue('data:image/png;base64,canvas-preview');
-        const canvasRoot = document.createElement('div');
-        canvasRoot.appendChild(canvas);
-        const descriptor = createDescriptor();
-
-        service.requestPreview({
-            descriptor,
-            childUnitId: 'slide-1',
-            childType: UniverInstanceType.UNIVER_SLIDE,
-            width: 320,
-            height: 180,
-            dpr: 1,
-            reason: 'stage-exit',
-            context: {
-                embedId: 'embed-1',
-                childUnitId: 'slide-1',
-                childType: UniverInstanceType.UNIVER_SLIDE,
-                descriptor,
-                renderScope: {
-                    canvasRoot,
-                },
-            } as any,
-        });
-
-        await service.flushForTests();
-
-        expect(toDataURL).toHaveBeenCalledWith('image/png');
         expect(service.getPreview('embed-1')).toMatchObject({
-            status: 'ready',
-            image: 'data:image/png;base64,canvas-preview',
+            status: 'stale',
+            image: 'first-image',
+            viewState: { page: 2 },
         });
+        expect(service.getPreview('embed-1')?.error).toBeInstanceOf(Error);
+    });
+
+    it('marks missing providers as errors and supports view state lifecycle', async () => {
+        const service = new EmbedFloatPreviewService();
+        const updates: unknown[] = [];
+        service.previewUpdated$.subscribe((entry) => updates.push(entry));
+
+        service.requestPreview(createRequest({ childType: UniverInstanceType.UNIVER_BASE }));
+        await service.flushForTests();
+        expect(service.getPreview('embed-1')).toMatchObject({
+            status: 'error',
+            childType: UniverInstanceType.UNIVER_BASE,
+        });
+
+        service.updateViewState('standalone', { scrollLeft: 20 });
+        expect(service.getPreview('standalone')).toMatchObject({
+            status: 'stale',
+            viewState: { scrollLeft: 20 },
+        });
+        service.markStale('standalone', 'manual');
+        expect(service.getPreview('standalone')).toMatchObject({
+            status: 'stale',
+            error: 'manual',
+        });
+        service.invalidate('standalone');
+        expect(service.getPreview('standalone')).toBeUndefined();
+        expect(updates.length).toBeGreaterThan(1);
+    });
+
+    it('collects, restores, unregisters providers, and disposes state', async () => {
+        const service = new EmbedFloatPreviewService();
+        const provider = createProvider({
+            collectViewState: vi.fn(async () => ({ scrollTop: 5 })),
+            restoreViewState: vi.fn(),
+        });
+        const disposable = service.registerProvider(provider);
+        const childContainerContext = createChildContainerContext();
+
+        await expect(service.collectViewState(childContainerContext)).resolves.toEqual({ scrollTop: 5 });
+        expect(service.getPreview('embed-1')).toMatchObject({ viewState: { scrollTop: 5 } });
+        await service.restoreViewState(childContainerContext, { scrollTop: 6 });
+        await service.restoreViewState(childContainerContext, undefined);
+        expect(provider.restoreViewState).toHaveBeenCalledTimes(1);
+        expect(provider.restoreViewState).toHaveBeenCalledWith(childContainerContext, { scrollTop: 6 });
+
+        disposable.dispose();
+        expect(service.getProvider(UniverInstanceType.UNIVER_SHEET)).toBeUndefined();
+        await expect(service.collectViewState(childContainerContext)).resolves.toBeUndefined();
+        await expect(service.restoreViewState(childContainerContext, { scrollTop: 7 })).resolves.toBeUndefined();
+
+        service.requestPreview(createRequest());
+        service.dispose();
+        expect(service.getPreview('embed-1')).toBeUndefined();
+        await service.flushForTests();
     });
 });
 
-function createDescriptor() {
+function createProvider(overrides: Partial<IEmbedFloatPreviewProvider<{ scrollTop?: number; page?: number }>> = {}): IEmbedFloatPreviewProvider<{ scrollTop?: number; page?: number }> {
     return {
-        embedId: 'embed-1',
-        hostUnitId: 'host-1',
-        hostType: UniverInstanceType.UNIVER_SHEET,
-        entry: 'sheets-floating-object',
-        childUnitId: 'slide-1',
-        childType: UniverInstanceType.UNIVER_SLIDE,
-    } as any;
+        childType: UniverInstanceType.UNIVER_SHEET,
+        collectViewState: overrides.collectViewState ?? vi.fn(() => ({ scrollTop: 0 })),
+        restoreViewState: overrides.restoreViewState ?? vi.fn(),
+        renderPreview: overrides.renderPreview ?? vi.fn(() => 'preview-image'),
+        invalidateKeys: overrides.invalidateKeys,
+    };
+}
+
+function createRequest(overrides: Partial<IEmbedFloatPreviewRenderRequest<{ scrollTop?: number; page?: number }>> = {}): IEmbedFloatPreviewRenderRequest<{ scrollTop?: number; page?: number }> {
+    return {
+        descriptor: overrides.descriptor ?? createDescriptor(),
+        childUnitId: overrides.childUnitId ?? 'child-sheet',
+        childType: overrides.childType ?? UniverInstanceType.UNIVER_SHEET,
+        width: overrides.width ?? 100,
+        height: overrides.height ?? 80,
+        dpr: overrides.dpr ?? 2,
+        viewState: overrides.viewState,
+        reason: overrides.reason ?? 'mount',
+        context: overrides.context,
+    };
+}
+
+function createChildContainerContext(): IEmbedChildContainerContext {
+    const descriptor = createDescriptor();
+    return {
+        descriptor,
+        layout: 'doc-width-scale',
+        injector: {} as never,
+        hostElement: document.createElement('div'),
+        container: document.createElement('div'),
+        hostUnitId: descriptor.hostUnitId,
+        embedId: descriptor.embedId,
+        childUnitId: descriptor.childUnitId!,
+        childType: descriptor.childType!,
+        renderScope: {} as never,
+        runtimeScope: {} as never,
+    };
+}
+
+function createDescriptor(overrides: Partial<IEmbedDescriptor> = {}): IEmbedDescriptor {
+    return {
+        embedId: overrides.embedId ?? 'embed-1',
+        hostUnitId: overrides.hostUnitId ?? 'host-1',
+        hostType: overrides.hostType ?? UniverInstanceType.UNIVER_DOC,
+        hostAnchorId: overrides.hostAnchorId ?? 'anchor-1',
+        entry: overrides.entry ?? 'docs-custom-block',
+        source: overrides.source ?? {
+            kind: 'ref',
+            ref: {
+                file: { kind: 'self' },
+                unit: { selector: 'child-sheet', type: 'sheet' },
+            },
+        },
+        childUnitId: overrides.childUnitId ?? 'child-sheet',
+        childType: overrides.childType ?? UniverInstanceType.UNIVER_SHEET,
+        mode: overrides.mode ?? 'interactive',
+        sourceMeta: overrides.sourceMeta ?? {
+            floating: {
+                enabled: true,
+                layout: 'doc-width-scale',
+                fullscreen: true,
+            },
+            tab: false,
+        },
+        lifecycle: overrides.lifecycle ?? 'active',
+        createdAt: overrides.createdAt,
+        updatedAt: overrides.updatedAt,
+    };
 }

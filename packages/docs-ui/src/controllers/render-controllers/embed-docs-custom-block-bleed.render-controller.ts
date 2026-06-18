@@ -16,15 +16,17 @@
 
 import type { DocumentDataModel, Nullable } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { Disposable, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { Disposable, Inject, IUniverInstanceService, Optional, UniverInstanceType } from '@univerjs/core';
+import { EmbedContentSizeRegistryService } from '@univerjs/embed-ui';
 import { setDocsCustomBlockRenderViewportProvider } from '@univerjs/engine-render';
 import { VIEWPORT_KEY } from '../../basics/docs-view-key';
-import { resolveDocsCustomBlockContentHeight, resolveDocsCustomBlockRenderViewport } from '../../embed-host-anchor';
+import { resolveDocsCustomBlockRenderViewport } from '../../embed-host-anchor';
 
 export class EmbedDocsCustomBlockBleedRenderController extends Disposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
-        @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService
+        @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService,
+        @Optional(EmbedContentSizeRegistryService) private readonly _contentSizeRegistry?: EmbedContentSizeRegistryService
     ) {
         super();
 
@@ -45,14 +47,18 @@ export class EmbedDocsCustomBlockBleedRenderController extends Disposable implem
             const childUnit = drawing?.data?.childUnitId
                 ? this._univerInstanceService.getUnit(drawing.data.childUnitId, childType)
                 : undefined;
+            const contentSize = drawing?.data?.childUnitId
+                ? this._contentSizeRegistry?.measureContentSize({
+                    childType,
+                    childUnit,
+                    childUnitId: drawing.data.childUnitId,
+                    viewportWidth: input.fallbackWidth,
+                })
+                : undefined;
 
             return resolveDocsCustomBlockRenderViewport({
                 childType,
-                contentHeight: resolveDocsCustomBlockContentHeight({
-                    childType,
-                    childUnit,
-                    fallbackHeight: input.fallbackHeight,
-                }),
+                contentHeight: contentSize?.height ?? input.fallbackHeight,
                 docsLeft: this._getDocsLeft(),
                 documentFlavor: this._context.unit.getSnapshot().documentStyle?.documentFlavor,
                 fallbackHeight: input.fallbackHeight,

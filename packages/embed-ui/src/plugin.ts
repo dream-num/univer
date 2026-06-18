@@ -15,7 +15,7 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { EmbedBlockContribution, EmbedChildViewContribution, EmbedFloatingMenuContribution, EmbedFloatPreviewProvider, EmbedHostAdapterContribution, EmbedHostContainerContribution, EmbedPassiveViewportProvider, EmbedProductMenuContribution, EmbedReadonlyPreviewProvider } from './types/embed-ui';
+import type { EmbedBlockContribution, EmbedChildViewContribution, EmbedContentSizeProvider, EmbedFloatingMenuContribution, EmbedFloatPreviewProvider, EmbedHostAdapterContribution, EmbedHostContainerContribution, EmbedPassiveViewportProvider, EmbedProductMenuContribution, EmbedReadonlyPreviewProvider } from './types/embed-ui';
 import { DependentOn, ICommandService, Inject, Injector, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { UniverEmbedPlugin } from '@univerjs/embed';
 import { BuiltInUIPart, IUIPartsService } from '@univerjs/ui';
@@ -30,6 +30,7 @@ import { EmbedHostRibbonOverrideController } from './controllers/embed-host-ribb
 import { EmbedActivationService } from './services/embed-activation.service';
 import { EmbedBlockRegistryService } from './services/embed-block-registry.service';
 import { EmbedChildViewRegistryService } from './services/embed-child-view-registry.service';
+import { EmbedContentSizeRegistryService } from './services/embed-content-size-registry.service';
 import { createDefaultEmbedFloatingMenuContributions } from './services/embed-default-floating-menu';
 import { EmbedFloatPreviewService } from './services/embed-float-preview.service';
 import { EmbedFloatingActiveService } from './services/embed-floating-active.service';
@@ -57,6 +58,7 @@ export interface UniverEmbedUIPluginConfig {
     productMenus?: readonly EmbedProductMenuContribution[];
     floatingMenus?: readonly EmbedFloatingMenuContribution[];
     previewProviders?: readonly EmbedFloatPreviewProvider<any>[];
+    contentSizeProviders?: readonly EmbedContentSizeProvider[];
     passiveViewportProviders?: readonly EmbedPassiveViewportProvider[];
     readonlyPreviewProviders?: readonly EmbedReadonlyPreviewProvider<any>[];
     useDefaultFloatingMenus?: boolean;
@@ -90,6 +92,7 @@ export class UniverEmbedUIPlugin extends Plugin {
             [EmbedFloatingActiveService],
             [EmbedFloatingMenuRegistryService],
             [EmbedFloatPreviewService],
+            [EmbedContentSizeRegistryService],
             [EmbedFullscreenService],
             [EmbedHostMenuOverrideService],
             [EmbedHostAnchorCleanupController],
@@ -139,6 +142,13 @@ export class UniverEmbedUIPlugin extends Plugin {
         const previewService = this._injector.get(EmbedFloatPreviewService);
         (this._config.previewProviders ?? []).forEach((provider) => previewService.registerProvider(provider));
 
+        const contentSizeRegistry = this._injector.get(EmbedContentSizeRegistryService);
+        (this._config.contentSizeProviders ?? []).forEach((provider) => {
+            if (!contentSizeRegistry.get(provider.childType)) {
+                contentSizeRegistry.register(provider);
+            }
+        });
+
         const passiveViewportRegistry = this._injector.get(EmbedPassiveViewportRegistryService);
         (this._config.passiveViewportProviders ?? []).forEach((provider) => {
             if (!passiveViewportRegistry.get(provider.childType)) {
@@ -178,6 +188,7 @@ export class UniverEmbedUIPlugin extends Plugin {
             [EmbedFloatingActiveService],
             [EmbedFloatingMenuRegistryService],
             [EmbedFloatPreviewService],
+            [EmbedContentSizeRegistryService],
             [EmbedFullscreenService],
             [EmbedHostMenuOverrideService],
             [EmbedHostAnchorCleanupController],

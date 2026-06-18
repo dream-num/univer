@@ -245,6 +245,23 @@ export interface EmbedPassiveViewportProvider {
     handleWheel: (context: EmbedPassiveViewportWheelContext) => boolean | void;
 }
 
+export interface EmbedContentSize {
+    height?: number;
+    width?: number;
+}
+
+export interface EmbedContentSizeMeasureContext {
+    childType: UniverInstanceType;
+    childUnit?: unknown;
+    childUnitId: string;
+    viewportWidth?: number;
+}
+
+export interface EmbedContentSizeProvider {
+    childType: UniverInstanceType;
+    measureContentSize: (context: EmbedContentSizeMeasureContext) => EmbedContentSize | undefined;
+}
+
 export interface EmbedFullscreenSession {
     hostUnitId: string;
     embedId: string;

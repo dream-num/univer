@@ -25,8 +25,9 @@ import { ColumnReferenceObject } from '../reference-object/column-reference-obje
 import { RowReferenceObject } from '../reference-object/row-reference-object';
 import { ArrayValueObject } from '../value-object/array-value-object';
 import { ErrorValueObject } from '../value-object/base-value-object';
-import { BooleanValueObject, NumberValueObject } from '../value-object/primitive-object';
+import { BooleanValueObject, NullValueObject, NumberValueObject } from '../value-object/primitive-object';
 import { expandArrayValueObject } from './array-object';
+import { isWildcard } from './compare';
 import { booleanObjectIntersection, findCompareToken, valueObjectCompare } from './object-compare';
 
 export function convertTonNumber(valueObject: BaseValueObject) {
@@ -355,7 +356,29 @@ export function getPairedRangeAndCriteriaResult(
      * This avoiding store the all dimension comparison result in memory and then calculating all dimension criteria value's result, which may cause memory overflow when the range is large and there are multiple dimension criteria.
      * For example, `=COUNTIFS(Q$3:Q$10002,C$3:C$5002,R$3:R$10002,L6)`.
      */
+    // eslint-disable-next-line max-lines-per-function
     rangeAndCriteriaArrays[0].criteriaArray.iterator((_, rowIndex, columnIndex) => {
+        // Fast path: avoid building full-length boolean mask ArrayValueObjects per criterion.
+        // It collects matching cell positions directly and reuses the same reducer methods,
+        // producing bit-identical results. Returns undefined to fall back to the slow path below.
+        const fastResult = tryFastCriteriaReduce(
+            rangeAndCriteriaArrays,
+            rowIndex,
+            columnIndex,
+            formulaName,
+            targetRange,
+            isNumberSensitive
+        );
+
+        if (fastResult !== undefined) {
+            if (!results[rowIndex]) {
+                results[rowIndex] = [];
+            }
+
+            results[rowIndex][columnIndex] = fastResult;
+            return;
+        }
+
         let finalCompareResult: ArrayValueObject | undefined;
 
         for (let i = 0; i < rangeAndCriteriaArrays.length; i++) {
@@ -423,6 +446,183 @@ export function getPairedRangeAndCriteriaResult(
     });
 
     return results;
+}
+
+/**
+ * Fast path for a single criteria cell of COUNTIFS/SUMIFS/AVERAGEIFS/MAXIFS/MINIFS.
+ *
+ * Instead of building a full-length boolean mask ArrayValueObject per criterion (and then
+ * intersecting and picking), this collects the matching cell positions directly in row-major
+ * order and feeds the matched TARGET values to the SAME reducer methods used by the slow path.
+ * This keeps results bit-identical while avoiding per-criterion full-length allocations.
+ *
+ * @returns the computed result, or `undefined` to indicate the caller should fall back to the
+ * existing slow path (e.g. missing criteria cell, mismatched dims, wildcard criteria, or an
+ * unhandled formula name).
+ */
+// eslint-disable-next-line max-lines-per-function, complexity
+function tryFastCriteriaReduce(
+    rangeAndCriteriaArrays: Array<{ range: ArrayValueObject; criteriaArray: ArrayValueObject }>,
+    rowIndex: number,
+    columnIndex: number,
+    formulaName: string,
+    targetRange: ArrayValueObject | undefined,
+    isNumberSensitive: boolean
+): BaseValueObject | undefined {
+    // Parse all criteria up front; bail out (fall back) on any case the fast path does not handle.
+    const parsedCriteria: Array<{
+        range: ArrayValueObject;
+        operator: compareToken;
+        criteriaObj: BaseValueObject;
+    }> = [];
+
+    let rows = -1;
+    let cols = -1;
+
+    for (let i = 0; i < rangeAndCriteriaArrays.length; i++) {
+        const { range, criteriaArray } = rangeAndCriteriaArrays[i];
+        const criteriaValueObject = criteriaArray.get(rowIndex, columnIndex);
+
+        // The slow path's `continue` on a missing criteria cell is subtle; fall back instead.
+        if (criteriaValueObject == null) {
+            return undefined;
+        }
+
+        // All ranges must share identical dimensions; capture from the first range.
+        const rangeRows = range.getRowCount();
+        const rangeCols = range.getColumnCount();
+
+        if (rows === -1) {
+            rows = rangeRows;
+            cols = rangeCols;
+        } else if (rangeRows !== rows || rangeCols !== cols) {
+            return undefined;
+        }
+
+        const [operator, criteriaObj] = findCompareToken(`${criteriaValueObject.getValue()}`);
+
+        // Wildcards use a different compare path; let the slow path handle them.
+        if (criteriaObj.isString() && isWildcard(criteriaObj.getValue() as string)) {
+            return undefined;
+        }
+
+        parsedCriteria.push({ range, operator, criteriaObj });
+    }
+
+    if (rows <= 0 || cols <= 0) {
+        return undefined;
+    }
+
+    // Collect matching cell positions row-major, intersecting across criteria.
+    let matched: Array<[number, number]> = [];
+
+    for (let i = 0; i < parsedCriteria.length; i++) {
+        const { range, operator, criteriaObj } = parsedCriteria[i];
+
+        if (i === 0) {
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    if (cellMatchesCriteria(range.get(r, c), criteriaObj, operator, isNumberSensitive)) {
+                        matched.push([r, c]);
+                    }
+                }
+            }
+        } else {
+            matched = matched.filter(([r, c]) => cellMatchesCriteria(range.get(r, c), criteriaObj, operator, isNumberSensitive));
+        }
+
+        // Once nothing matches, further criteria cannot add matches.
+        if (matched.length === 0) {
+            break;
+        }
+    }
+
+    // Reduce, reusing the engine's own reducers for bit-identity with the slow path.
+    if (formulaName === 'COUNTIFS') {
+        return NumberValueObject.create(matched.length);
+    }
+
+    // Build a `pick`-equivalent single-row array of the matched TARGET cells, in row-major order.
+    const pickedValues = matched.map(([r, c]) => targetRange!.get(r, c) ?? NullValueObject.create());
+    const picked = ArrayValueObject.create({
+        calculateValueList: [pickedValues],
+        rowCount: 1,
+        columnCount: pickedValues.length,
+        unitId: '',
+        sheetId: '',
+        row: 0,
+        column: 0,
+    });
+
+    if (formulaName === 'SUMIFS') {
+        return picked.sum();
+    } else if (formulaName === 'AVERAGEIFS') {
+        return picked.sum().divided(picked.count());
+    } else if (formulaName === 'MAXIFS') {
+        return picked.getColumnCount() === 0 ? ArrayValueObject.create('0') : picked.max();
+    } else if (formulaName === 'MINIFS') {
+        return picked.getColumnCount() === 0 ? ArrayValueObject.create('0') : picked.min();
+    }
+
+    // Unhandled formula name: fall back to the slow path.
+    return undefined;
+}
+
+/**
+ * Determine whether a single range cell matches a parsed criteria, ported exactly from
+ * `valueObjectCompare` + `filterSameValueObjectResult` so the fast path stays bit-identical.
+ */
+function cellMatchesCriteria(
+    rangeCell: Nullable<BaseValueObject>,
+    criteriaObj: BaseValueObject,
+    operator: compareToken,
+    isNumberSensitive: boolean
+): boolean {
+    if (rangeCell == null) {
+        return false;
+    }
+
+    const raw = rangeCell.compare(criteriaObj, operator);
+    const rawTrue = raw.getValue() === true;
+
+    if (!isNumberSensitive) {
+        return rawTrue;
+    }
+
+    // Mirrors filterSameValueObjectResult.
+    if (isSameValueObjectType(rangeCell, criteriaObj)) {
+        return rawTrue;
+    }
+
+    if (rangeCell.isError() && criteriaObj.isError() && rangeCell.getValue() === criteriaObj.getValue()) {
+        return true;
+    }
+
+    if (operator === compareToken.EQUALS || operator === compareToken.NOT_EQUAL) {
+        if (rangeCell.isNumber() && criteriaObj.isString()) {
+            const cn = criteriaObj.convertToNumberObjectValue();
+            if (cn.isNumber()) {
+                return rangeCell.compare(cn, operator).getValue() === true;
+            }
+        }
+
+        if (criteriaObj.isNumber() && rangeCell.isString()) {
+            const rn = rangeCell.convertToNumberObjectValue();
+            if (rn.isNumber()) {
+                return rn.compare(criteriaObj, operator).getValue() === true;
+            }
+        }
+
+        if (operator === compareToken.EQUALS) {
+            return false;
+        }
+
+        if (operator === compareToken.NOT_EQUAL) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 /**

@@ -1093,4 +1093,58 @@ describe('SheetNumfmtPanel', () => {
             currencySymbol,
         ]);
     });
+
+    it('uses the most recent saved currency habit when a blank cell is confirmed as Currency', async () => {
+        currentTestBed = createNumfmtViewTestBed();
+        const topHabit = currencySymbols[19];
+        const previousHabit = currencySymbols[5];
+        await currentTestBed.localStorageService.setItem(CURRENCY_HABIT_KEY, [topHabit, previousHabit]);
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        const commandResults: Array<Promise<unknown>> = [];
+        const events: Array<{ type: 'change' | 'cancel' | 'confirm'; value: string }> = [];
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <SheetNumfmtPanel
+                        value={{
+                            defaultValue: 1234.5,
+                            defaultPattern: '',
+                            row: 0,
+                            col: 0,
+                        }}
+                        onChange={(event) => {
+                            events.push(event);
+                            if (event.type === 'confirm') {
+                                commandResults.push(currentTestBed!.commandService.executeCommand(SetNumfmtCommand.id, {
+                                    values: [{
+                                        row: 0,
+                                        col: 0,
+                                        pattern: event.value,
+                                        type: getPatternType(event.value),
+                                    }],
+                                }) as Promise<unknown>);
+                            }
+                        }}
+                    />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+            await Promise.resolve();
+            await Promise.resolve();
+        });
+
+        await selectPanelType('Currency');
+        await confirmPanel();
+        const results = await Promise.all(commandResults);
+        const confirmedPattern = events.at(-1)?.value ?? '';
+
+        expect(results).toEqual([true]);
+        expect(getCurrencyType(confirmedPattern)).toBe(topHabit);
+        expect(currentTestBed.numfmtService.getValue(UNIT_ID, SUB_UNIT_ID, 0, 0)).toEqual({
+            pattern: `"${topHabit}"#,##0.00_);"${topHabit}"#,##0.00`,
+        });
+    });
 });

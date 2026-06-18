@@ -17,7 +17,7 @@
 import type { IDrawingParam } from '@univerjs/core';
 import type { Root } from 'react-dom/client';
 import { DrawingTypeEnum, LocaleType, Univer } from '@univerjs/core';
-import { DrawingManagerService, IDrawingManagerService } from '@univerjs/drawing';
+import { DrawingManagerService, getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { RediContext } from '@univerjs/ui';
 import { act } from 'react';
@@ -140,6 +140,10 @@ function setInputValue(input: HTMLInputElement, value: string) {
     input.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
+function inputNumberValue(container: HTMLElement, text: string) {
+    return Number(inputInField(container, text).value);
+}
+
 async function waitForDebouncedInput() {
     await act(async () => {
         await new Promise((resolve) => setTimeout(resolve, 350));
@@ -260,5 +264,49 @@ describe('DrawingTransform behavior', () => {
         ]]);
         expect(renderManagerService.transformer.refreshCount).toBe(1);
         expect(renderManagerService.transformer.notificationCount).toBe(1);
+    });
+
+    it('syncs transform fields from canvas transformer updates', () => {
+        const drawing = createDrawing('image-1');
+        drawingManagerService.registerDrawingData(unitId, {
+            [subUnitId]: {
+                data: {
+                    [drawing.drawingId]: drawing,
+                },
+                order: [drawing.drawingId],
+            },
+        });
+
+        const rendered = renderWithRediContext(univer.__getInjector(), drawing);
+        root = rendered.root;
+        container = rendered.container;
+
+        const oKey = getDrawingShapeKeyByDrawingSearch({
+            unitId,
+            subUnitId,
+            drawingId: drawing.drawingId,
+        });
+
+        act(() => {
+            renderManagerService.transformer.changeEnd$.next({
+                objects: new Map([[
+                    oKey,
+                    {
+                        oKey,
+                        left: 44,
+                        top: 66,
+                        width: 180,
+                        height: 90,
+                        angle: 15,
+                    },
+                ]]),
+            });
+        });
+
+        expect(inputNumberValue(container, 'drawing-ui.image-panel.transform.width')).toBe(180);
+        expect(inputNumberValue(container, 'drawing-ui.image-panel.transform.height')).toBe(90);
+        expect(inputNumberValue(container, 'drawing-ui.image-panel.transform.x')).toBe(44);
+        expect(inputNumberValue(container, 'drawing-ui.image-panel.transform.y')).toBe(66);
+        expect(inputNumberValue(container, 'drawing-ui.image-panel.transform.rotate')).toBe(15);
     });
 });

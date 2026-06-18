@@ -305,4 +305,60 @@ describe('RangeSelectorDialog', () => {
         ]]);
         expect(RangeDialogState.closed).toBe(0);
     });
+
+    it('replaces the focused typed range when the user picks a sheet selection', async () => {
+        const injector = createRangeDialogTestBed();
+        renderRangeDialog(root, injector);
+
+        const firstInput = document.body.querySelector('input') as HTMLInputElement;
+        expect(firstInput).toBeDefined();
+
+        await act(async () => {
+            writeInput(firstInput, 'A1:A2');
+            await Promise.resolve();
+        });
+
+        await clickButton('Add range');
+
+        const inputs = Array.from(document.body.querySelectorAll('input')) as HTMLInputElement[];
+        expect(inputs.length).toBe(2);
+
+        await act(async () => {
+            writeInput(inputs[1], 'D4:D5');
+            inputs[0].dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+            await Promise.resolve();
+        });
+
+        await emitSelection(injector, {
+            startRow: 5,
+            endRow: 6,
+            startColumn: 2,
+            endColumn: 3,
+            rangeType: RANGE_TYPE.NORMAL,
+        });
+
+        expect(inputs.map((input) => input.value)).toEqual(['C6:D7', 'D4:D5']);
+
+        await clickButton('Confirm');
+
+        expect(RangeDialogState.confirmed).toEqual([[
+            expect.objectContaining({
+                range: expect.objectContaining({
+                    startRow: 5,
+                    endRow: 6,
+                    startColumn: 2,
+                    endColumn: 3,
+                }),
+            }),
+            expect.objectContaining({
+                range: expect.objectContaining({
+                    startRow: 3,
+                    endRow: 4,
+                    startColumn: 3,
+                    endColumn: 3,
+                }),
+            }),
+        ]]);
+        expect(RangeDialogState.closed).toBe(0);
+    });
 });

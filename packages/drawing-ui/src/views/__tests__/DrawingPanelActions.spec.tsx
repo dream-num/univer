@@ -25,7 +25,11 @@ import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SetDrawingArrangeOperation } from '../../commands/operations/drawing-arrange.operation';
-import { AutoImageCropOperation, CropType } from '../../commands/operations/image-crop.operation';
+import {
+    AutoImageCropOperation,
+    CloseImageCropOperation,
+    CropType,
+} from '../../commands/operations/image-crop.operation';
 import { DrawingImageClipService } from '../../services/drawing-image-clip.service';
 import { DrawingArrange } from '../panel/DrawingArrange';
 import { ImageCropper } from '../panel/ImageCropper';
@@ -108,6 +112,7 @@ describe('drawing panel actions', () => {
         commandService = injector.get(ICommandService);
         commandService.registerCommand(SetDrawingArrangeOperation);
         commandService.registerCommand(AutoImageCropOperation);
+        commandService.registerCommand(CloseImageCropOperation);
         drawingManagerService = injector.get(IDrawingManagerService);
     });
 
@@ -244,6 +249,46 @@ describe('drawing panel actions', () => {
                 type: AutoImageCropOperation.type,
                 params: {
                     cropType: CropType.R1_1,
+                },
+            },
+        ]);
+    });
+
+    it('does not reapply image cropping after manual crop close when the crop mode changes', async () => {
+        const executedCommands: ICommandInfo[] = [];
+        commandService.onCommandExecuted((command) => executedCommands.push(command));
+
+        const rendered = renderWithRediContext(
+            univer.__getInjector(),
+            <ImageCropper cropperShow drawings={[createDrawing('image-1', 0)]} />
+        );
+        root = rendered.root;
+        container = rendered.container;
+
+        clickElement(findActionByText('drawing-ui.image-panel.crop.start'));
+        await flushPendingCommands();
+
+        await act(async () => {
+            await commandService.executeCommand(CloseImageCropOperation.id);
+            await Promise.resolve();
+        });
+
+        await act(async () => {
+            container!.querySelector('[data-u-comp="select"]')!.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0 }));
+            await Promise.resolve();
+        });
+
+        await act(async () => {
+            findActionByText('16:9').dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            await Promise.resolve();
+        });
+
+        expect(executedCommands.filter((command) => command.id === AutoImageCropOperation.id)).toEqual([
+            {
+                id: AutoImageCropOperation.id,
+                type: AutoImageCropOperation.type,
+                params: {
+                    cropType: CropType.FREE,
                 },
             },
         ]);

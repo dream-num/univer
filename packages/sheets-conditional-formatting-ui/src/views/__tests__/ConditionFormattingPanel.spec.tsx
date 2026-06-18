@@ -254,6 +254,37 @@ describe('ConditionFormattingPanel and RuleEdit', () => {
         expect(cancelRequests).toBe(1);
     });
 
+    it('keeps the rule editor open and does not add a rule when the required condition input is empty', async () => {
+        currentTestBed = createPanelTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        let cancelRequests = 0;
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <RuleEdit
+                        onCancel={() => {
+                            cancelRequests += 1;
+                        }}
+                    />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        await act(async () => {
+            clickButton(container!, 'Submit');
+            await Promise.resolve();
+            await Promise.resolve();
+        });
+
+        expect(currentTestBed.ruleModel.getSubunitRules(currentTestBed.unitId, currentTestBed.subUnitId) ?? []).toEqual([]);
+        expect(cancelRequests).toBe(0);
+        expect(container.textContent).toContain('Style rule');
+    });
+
     it('saves changes to an existing number highlight rule without replacing its identity', async () => {
         currentTestBed = createPanelTestBed();
         const originalRule = {

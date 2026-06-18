@@ -43,6 +43,7 @@ import {
     UserManagerService,
 } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { SheetsSelectionsService } from '@univerjs/sheets';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
 import { CellPopupManagerService, IMarkSelectionService, SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import {
@@ -60,6 +61,7 @@ import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Subject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { ShowAddSheetCommentModalOperation } from '../../commands/operations/comment.operation';
 import { SheetsThreadCommentPopupService } from '../../services/sheets-thread-comment-popup.service';
 import { SheetsThreadCommentCell } from '../SheetsThreadCommentCell';
 import { SheetsThreadCommentPanel } from '../SheetsThreadCommentPanel';
@@ -439,6 +441,28 @@ function createComment(id: string, subUnitId: string, ref: string, text: string,
     };
 }
 
+function createSelection(row: number, column: number): ISelectionWithStyle {
+    return {
+        range: {
+            startRow: row,
+            endRow: row,
+            startColumn: column,
+            endColumn: column,
+        },
+        primary: {
+            startRow: row,
+            endRow: row,
+            startColumn: column,
+            endColumn: column,
+            actualRow: row,
+            actualColumn: column,
+            isMerged: false,
+            isMergedMainCell: false,
+        },
+        style: null,
+    };
+}
+
 function createTestBed(testWorkbookData: IWorkbookData = workbookData) {
     const univer = new Univer({
         locale: LocaleType.EN_US,
@@ -458,6 +482,7 @@ function createTestBed(testWorkbookData: IWorkbookData = workbookData) {
     injector.add([IEditorService, { useClass: TestEditorService as never }]);
     injector.add([IRenderManagerService, { useClass: TestRenderManagerService as never }]);
     injector.add([IShortcutService, { useClass: TestShortcutService as never }]);
+    injector.add([SheetsSelectionsService]);
     injector.add([SheetsThreadCommentPopupService]);
     injector.add([ISidebarService, { useClass: TestSidebarService as never }]);
     injector.add([ThreadCommentPanelService]);
@@ -472,6 +497,7 @@ function createTestBed(testWorkbookData: IWorkbookData = workbookData) {
     commandService.registerCommand(ResolveCommentMutation);
     commandService.registerCommand(ResolveCommentCommand);
     commandService.registerCommand(SetActiveCommentOperation);
+    commandService.registerCommand(ShowAddSheetCommentModalOperation);
 
     return {
         univer,
@@ -481,6 +507,7 @@ function createTestBed(testWorkbookData: IWorkbookData = workbookData) {
         threadCommentModel: get(ThreadCommentModel),
         popupService: get(SheetsThreadCommentPopupService),
         panelService: get(ThreadCommentPanelService),
+        selectionService: get(SheetsSelectionsService),
     };
 }
 
@@ -785,6 +812,31 @@ describe('SheetsThreadCommentPanel', () => {
         dispatchMouseEvent(panelThread!, 'mouseover');
 
         expect(TestState.shapes).toHaveLength(0);
+    });
+
+    it('opens the add-comment popup at the active sheet cell from the empty panel action', () => {
+        const testBed = createTestBed();
+        univer = testBed.univer;
+        testBed.selectionService.setSelections(unitId, sheet1, [createSelection(4, 4)]);
+
+        const rendered = renderPanel(testBed.injector);
+        root = rendered.root;
+        container = rendered.container;
+
+        const addButton = Array.from(container.querySelectorAll('button')).find((button) => button.textContent?.includes('Add Comment'));
+        expect(addButton).toBeInstanceOf(HTMLButtonElement);
+
+        act(() => {
+            addButton!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        });
+
+        expect(testBed.popupService.activePopup).toMatchObject({
+            unitId,
+            subUnitId: sheet1,
+            row: 4,
+            col: 4,
+        });
+        expect(testBed.panelService.activeCommentId).toBeUndefined();
     });
 
     it('removes the hover highlight when the panel is hidden by service state', () => {

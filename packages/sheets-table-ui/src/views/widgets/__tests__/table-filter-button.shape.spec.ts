@@ -88,6 +88,32 @@ describe('sheet table filter button shape', () => {
         }]);
     });
 
+    it('opens the filter panel with updated cell and table parameters after the shape is reused', async () => {
+        const executedParams: IOpenTableFilterPanelOperationParams[] = [];
+        const shape = createShape(executedParams);
+
+        shape.setShapeProps({
+            filterParams: {
+                row: 8,
+                col: 2,
+                unitId: 'unit-1',
+                subUnitId: 'sheet-1',
+                buttonState: SheetsTableButtonStateEnum.FilterNoneSortNone,
+                tableId: 'table-archive',
+            },
+        });
+        shape.onPointerDown(createPointerEvent(0));
+        await waitForFilterButtonDelay();
+
+        expect(executedParams).toEqual([{
+            row: 8,
+            col: 2,
+            unitId: 'unit-1',
+            subUnitId: 'sheet-1',
+            tableId: 'table-archive',
+        }]);
+    });
+
     it('keeps the filter panel closed for secondary pointer down', async () => {
         const executedParams: IOpenTableFilterPanelOperationParams[] = [];
         const shape = createShape(executedParams);

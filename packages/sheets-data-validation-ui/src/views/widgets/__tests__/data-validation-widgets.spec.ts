@@ -70,12 +70,14 @@ class TestThemeService {
 }
 
 class TestFormulaService {
+    results: { result: { v: string }[][][][] }[] | undefined;
+
     getRuleFormulaResult(): Promise<IFormulaResult[] | undefined> {
-        return Promise.resolve(undefined);
+        return Promise.resolve(this.results as IFormulaResult[] | undefined);
     }
 
     getRuleFormulaResultSync(): IFormulaResult[] | undefined {
-        return undefined;
+        return this.results as IFormulaResult[] | undefined;
     }
 }
 
@@ -219,6 +221,10 @@ function getCommandService(injector: Injector): RecordingCommandService {
 
 function getDataValidationModel(injector: Injector): TestSheetDataValidationModel {
     return injector.get(SheetDataValidationModel) as unknown as TestSheetDataValidationModel;
+}
+
+function getFormulaService(injector: Injector): TestFormulaService {
+    return injector.get(DataValidationFormulaService) as unknown as TestFormulaService;
 }
 
 function createSkeleton() {
@@ -384,6 +390,42 @@ describe('data validation canvas widgets', () => {
                     },
                     value: {
                         v: 'DONE',
+                        p: null,
+                    },
+                } satisfies ISetRangeValuesCommandParams,
+            },
+        ]);
+    });
+
+    it('writes the resolved unchecked value when a checked checkbox rule uses formulas', async () => {
+        const injector = createInjector();
+        const model = getDataValidationModel(injector);
+        model.rule = {
+            ...model.rule,
+            formula1: '=A1',
+            formula2: '=B1',
+        };
+        getFormulaService(injector).results = [
+            { result: [[[[{ v: 'DONE' }]]]] },
+            { result: [[[[{ v: 'TODO' }]]]] },
+        ];
+        const { CheckboxRender } = await import('../checkbox-widget');
+        const widget = injector.createInstance(CheckboxRender);
+
+        await widget.onPointerDown(createCellContext('DONE'), { button: 0 } as never);
+
+        expect(getCommandService(injector).commands).toEqual([
+            {
+                id: SetRangeValuesCommand.id,
+                params: {
+                    range: {
+                        startColumn: 9,
+                        endColumn: 9,
+                        startRow: 8,
+                        endRow: 8,
+                    },
+                    value: {
+                        v: 'TODO',
                         p: null,
                     },
                 } satisfies ISetRangeValuesCommandParams,

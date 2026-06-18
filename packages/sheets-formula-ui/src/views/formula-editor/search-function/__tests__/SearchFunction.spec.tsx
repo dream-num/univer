@@ -366,6 +366,32 @@ describe('SearchFunction', () => {
         expect(document.body.textContent).not.toContain('Returns a subtotal in a list.');
     });
 
+    it('accepts the highlighted formula suggestion when tab completes the function token', async () => {
+        const { injector, editor, commandService } = createSearchFunctionTestBed();
+
+        await act(async () => {
+            root.render(
+                <RediContext.Provider value={{ injector }}>
+                    <SearchFunction
+                        isFocus
+                        editor={editor}
+                        sequenceNodes={[{ nodeType: sequenceNodeType.FUNCTION, token: 'SU' } as never]}
+                        onSelect={(result) => SearchFunctionState.selected.push(result)}
+                    />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        await waitForSearchList(editor);
+        expect(document.body.textContent).toContain('SUM');
+
+        await runFormulaSearchKeyboardCommand(commandService, editor, KeyCode.TAB);
+
+        expect(SearchFunctionState.selected).toEqual([{ text: 'SUM(', offset: -2 }]);
+        expect(document.body.textContent).not.toContain('Adds selected values.');
+    });
+
     it('closes formula suggestions without selecting a function when escape is pressed', async () => {
         const { injector, editor, commandService } = createSearchFunctionTestBed();
 

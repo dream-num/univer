@@ -833,6 +833,33 @@ describe('sheet table view components', () => {
         expect(confirmed).toHaveLength(0);
     });
 
+    it('does not confirm a table range that only contains the header row', async () => {
+        testBed = createTestBed();
+        const unitId = testBed.workbook.getUnitId();
+        const confirmed: unknown[] = [];
+        const rendered = renderWithRediContext(
+            testBed,
+            <SheetTableSelector
+                unitId={unitId}
+                subUnitId="sheet1"
+                range={{ startRow: 0, endRow: 3, startColumn: 0, endColumn: 1 }}
+                onConfirm={(info) => {
+                    confirmed.push(info);
+                }}
+                onCancel={() => {}}
+            />
+        );
+        root = rendered.root;
+        container = rendered.container;
+
+        await selectRangeThroughDialog(container, 'A10:B10');
+        clickButtonByText(container, 'Confirm');
+        await flushCommands();
+
+        expect(container.textContent).toContain('Table range cannot be a single row');
+        expect(confirmed).toHaveLength(0);
+    });
+
     it('keeps the range selector editor stable when its delayed resize runs', async () => {
         vi.useFakeTimers();
         testBed = createTestBed();

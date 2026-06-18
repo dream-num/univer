@@ -167,4 +167,33 @@ describe('formula input behaviors', () => {
         expect(changes.at(-1)).toEqual({ formula1: undefined, formula2: undefined });
         expect(container.querySelectorAll<HTMLInputElement>('[data-u-comp="input"] input')).toHaveLength(0);
     });
+
+    it('keeps the paired checkbox value when editing one custom checkbox value', async () => {
+        currentTestBed = createFormulaInputTestBed();
+        const changes: IFormulaValue[] = [];
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <FormulaInputHarness
+                        Component={CheckboxFormulaInput}
+                        changes={changes}
+                        initialValue={{ formula1: 'DONE', formula2: 'TODO' }}
+                    />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        const inputs = container.querySelectorAll<HTMLInputElement>('[data-u-comp="input"] input');
+
+        await changeInputValue(inputs[0], 'YES');
+        expect(changes.at(-1)).toEqual({ formula1: 'YES', formula2: 'TODO' });
+
+        await changeInputValue(inputs[1], 'NO');
+        expect(changes.at(-1)).toEqual({ formula1: 'YES', formula2: 'NO' });
+    });
 });

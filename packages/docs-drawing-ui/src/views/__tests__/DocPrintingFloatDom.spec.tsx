@@ -29,17 +29,23 @@ const UNIT_ID = 'doc-printing-float-dom-doc';
 const PRINTING_COMPONENT_KEY = 'printing-visible-content';
 
 class TestScene {
+    constructor(
+        private readonly _scroll = { x: 0, y: 0 },
+        private readonly _scale = { x: 1, y: 1 }
+    ) {
+    }
+
     getViewport() {
         return {
-            viewportScrollX: 0,
-            viewportScrollY: 0,
+            viewportScrollX: this._scroll.x,
+            viewportScrollY: this._scroll.y,
         };
     }
 
     getAncestorScale() {
         return {
-            scaleX: 1,
-            scaleY: 1,
+            scaleX: this._scale.x,
+            scaleY: this._scale.y,
         };
     }
 }
@@ -130,5 +136,34 @@ describe('DocPrintingFloatDom', () => {
         });
 
         expect(root.textContent).toBe('');
+    });
+
+    it('prints floating DOM content based on viewport scroll and ancestor scale', () => {
+        currentTestBed = createDocUiTestBed(createDocData(), [
+            [ComponentManager],
+        ]);
+        currentTestBed.injector.get(ComponentManager).register(PRINTING_COMPONENT_KEY, PrintingVisibleContent);
+
+        root = document.createElement('div');
+        document.body.appendChild(root);
+
+        act(() => {
+            disposePrinting = mountDocPrintingFloatDom({
+                floatDomInfos: [
+                    createFloatDom('visible-after-scroll', 'Visible after scroll and zoom', { left: 110, top: 60, right: 130, bottom: 80 }),
+                    createFloatDom('before-scroll', 'Before scrolled viewport', { left: 0, top: 60, right: 20, bottom: 80 }),
+                    createFloatDom('below-scaled-page', 'Below scaled page', { left: 120, top: 140, right: 150, bottom: 170 }),
+                ],
+                scene: new TestScene({ x: 100, y: 50 }, { x: 2, y: 1.5 }) as unknown as Scene,
+                skeleton: {} as never,
+                unitId: UNIT_ID,
+                offset: { x: 0, y: 0 },
+                bound: { left: 0, top: 0, right: 200, bottom: 100 },
+            }, root!, currentTestBed!.injector);
+        });
+
+        expect(root.textContent).toContain('Visible after scroll and zoom');
+        expect(root.textContent).not.toContain('Before scrolled viewport');
+        expect(root.textContent).not.toContain('Below scaled page');
     });
 });

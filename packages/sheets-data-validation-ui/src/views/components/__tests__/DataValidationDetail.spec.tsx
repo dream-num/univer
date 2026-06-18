@@ -79,6 +79,7 @@ import {
     DataValidationFormulaService,
     DataValidationListCacheService,
     DateValidator,
+    RemoveSheetDataValidationCommand,
     SheetDataValidationModel,
     SheetsDataValidationValidatorService,
     UpdateSheetDataValidationOptionsCommand,
@@ -463,6 +464,7 @@ function createDetailTestBed(rule: ISheetDataValidationRule) {
     const commandService = injector.get(ICommandService);
     commandService.registerCommand(UpdateSheetDataValidationSettingCommand);
     commandService.registerCommand(UpdateSheetDataValidationOptionsCommand);
+    commandService.registerCommand(RemoveSheetDataValidationCommand);
 
     const localeService = injector.get(LocaleService);
     const validatorRegistry = injector.get(DataValidatorRegistryService);
@@ -543,6 +545,11 @@ function findElementByText(container: HTMLElement, text: string) {
     return Array.from(container.querySelectorAll<HTMLElement>('div'))
         .filter((element) => element.textContent?.includes(text))
         .sort((a, b) => (a.textContent?.length ?? 0) - (b.textContent?.length ?? 0))[0];
+}
+
+function findButtonByText(container: HTMLElement, text: string) {
+    return Array.from(container.querySelectorAll<HTMLButtonElement>('button'))
+        .find((element) => element.textContent?.includes(text))!;
 }
 
 describe('DataValidationDetail rule editing', () => {
@@ -700,5 +707,22 @@ describe('DataValidationDetail rule editing', () => {
             formula2: undefined,
             errorStyle: DataValidationErrorStyle.STOP,
         });
+    });
+
+    it('removes the active rule and closes the detail panel from the remove action', async () => {
+        currentTestBed = createDetailTestBed(createDateRule('rule-date-remove'));
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        await renderDetail(root, currentTestBed);
+
+        expect(currentTestBed.sheetDataValidationModel.getRuleById(UNIT_ID, SUB_UNIT_ID, currentTestBed.rule.uid)).toBeDefined();
+
+        await clickElement(findButtonByText(container, 'panel.removeRule'));
+
+        expect(currentTestBed.sheetDataValidationModel.getRuleById(UNIT_ID, SUB_UNIT_ID, currentTestBed.rule.uid)).toBeUndefined();
+        expect(currentTestBed.panelService.activeRule).toBe(null);
+        expect(container.querySelector('[data-u-comp="data-validation-detail"]')).toBe(null);
     });
 });

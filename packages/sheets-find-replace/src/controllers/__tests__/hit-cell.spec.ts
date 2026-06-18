@@ -65,4 +65,53 @@ describe('hitCell', () => {
         expect(res2.hit).toBe(true);
         expect(res2.replaceable).toBe(false);
     });
+
+    it('should support whole-cell matching with edge spaces', () => {
+        const worksheet = {
+            getCellRaw: () => ({ v: '  abc  ' }),
+        };
+
+        const res = hitCell(worksheet as any, 0, 0, {
+            ...baseQuery,
+            matchesTheWholeCell: true,
+            findString: 'abc',
+        }, { v: '  abc  ' } as any);
+
+        expect(res.hit).toBe(true);
+        expect(res.replaceable).toBe(true);
+    });
+
+    it('should extract number and boolean cell values for matching', () => {
+        const worksheet = {
+            getCellRaw: (_row: number, col: number) => (col === 0 ? { v: 123 } : { v: true }),
+        };
+
+        expect(hitCell(worksheet as any, 0, 0, { ...baseQuery, findString: '23' }, { v: 123 } as any).hit).toBe(true);
+        expect(hitCell(worksheet as any, 0, 1, { ...baseQuery, findString: '1' }, { v: true } as any).hit).toBe(true);
+    });
+
+    it('should report misses for empty values and unmatched formula display values', () => {
+        const formulaWorksheet = {
+            getCellRaw: () => ({ f: '=SUM(1)' }),
+        };
+        const formulaRawMiss = hitCell(formulaWorksheet as any, 0, 0, {
+            ...baseQuery,
+            findBy: FindBy.FORMULA,
+            findString: '=missing',
+        }, { v: 'alpha' } as any);
+        expect(formulaRawMiss.hit).toBe(false);
+        expect(formulaRawMiss.replaceable).toBe(false);
+
+        const formulaMiss = hitCell(formulaWorksheet as any, 0, 0, { ...baseQuery, findString: 'missing' }, { v: 'alpha' } as any);
+        expect(formulaMiss.hit).toBe(false);
+        expect(formulaMiss.replaceable).toBe(false);
+        expect(formulaMiss.isFormula).toBe(true);
+
+        const emptyWorksheet = {
+            getCellRaw: () => ({ v: '' }),
+        };
+        const emptyMiss = hitCell(emptyWorksheet as any, 0, 0, baseQuery, { v: '' } as any);
+        expect(emptyMiss.hit).toBe(false);
+        expect(emptyMiss.replaceable).toBe(false);
+    });
 });

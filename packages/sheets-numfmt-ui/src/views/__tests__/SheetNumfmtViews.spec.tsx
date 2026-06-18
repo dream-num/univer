@@ -735,6 +735,63 @@ describe('SheetNumfmtPanel', () => {
         });
     });
 
+    it('applies the selected negative number style through the real SetNumfmtCommand', async () => {
+        currentTestBed = createNumfmtViewTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        const commandResults: Array<Promise<unknown>> = [];
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <SheetNumfmtPanel
+                        value={{
+                            defaultValue: 1234.5,
+                            defaultPattern: '',
+                            row: 0,
+                            col: 0,
+                        }}
+                        onChange={(event) => {
+                            if (event.type === 'confirm') {
+                                commandResults.push(currentTestBed!.commandService.executeCommand(SetNumfmtCommand.id, {
+                                    values: [{
+                                        row: 0,
+                                        col: 0,
+                                        pattern: event.value,
+                                        type: getPatternType(event.value),
+                                    }],
+                                }) as Promise<unknown>);
+                            }
+                        }}
+                    />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        await selectPanelType('Number');
+        const redParenthesesOption = Array.from(container.querySelectorAll('a')).find((item) => {
+            const label = item.querySelector('span') as HTMLSpanElement | null;
+            return label?.textContent?.includes('(1,235)') && label.style.color === 'red';
+        }) as HTMLElement | undefined;
+
+        expect(redParenthesesOption).toBeDefined();
+
+        await act(async () => {
+            redParenthesesOption!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            await Promise.resolve();
+        });
+
+        await confirmPanel();
+        const results = await Promise.all(commandResults);
+
+        expect(results).toEqual([true]);
+        expect(currentTestBed.numfmtService.getValue(UNIT_ID, SUB_UNIT_ID, 0, 0)).toEqual({
+            pattern: '#,##0_);[Red](#,##0)',
+        });
+    });
+
     it('applies decreased decimal places from an existing number format through the real SetNumfmtCommand', async () => {
         currentTestBed = createNumfmtViewTestBed();
         container = document.createElement('div');

@@ -971,4 +971,49 @@ describe('SheetsThreadCommentPanel', () => {
         expect(container.textContent).toContain('Same cell on sheet two');
         expect(container.textContent).not.toContain('Same cell on sheet one');
     });
+
+    it('closes an empty cell popup when the user cancels the new comment editor', async () => {
+        const testBed = createTestBed();
+        univer = testBed.univer;
+        testBed.popupService.showPopup({
+            unitId,
+            subUnitId: sheet1,
+            row: 2,
+            col: 3,
+            trigger: 'context-menu',
+        });
+
+        const rendered = renderCell(testBed.injector);
+        root = rendered.root;
+        container = rendered.container;
+
+        expect(container.textContent).toContain('D3 · Sheet 1');
+        expect(testBed.popupService.activePopup).toMatchObject({
+            unitId,
+            subUnitId: sheet1,
+            row: 2,
+            col: 3,
+        });
+
+        const editorPlaceholder = Array.from(container.querySelectorAll('div')).reverse().find((element) => element.textContent === 'Reply or add others with @');
+        expect(editorPlaceholder).toBeInstanceOf(HTMLElement);
+        const editorSurface = editorPlaceholder!.parentElement?.parentElement?.parentElement;
+        expect(editorSurface).toBeInstanceOf(HTMLElement);
+
+        await act(async () => {
+            editorSurface!.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, button: 0 }));
+            await Promise.resolve();
+        });
+
+        const cancelButton = Array.from(container.querySelectorAll('button'))
+            .find((button) => button.textContent?.trim() === 'Cancel');
+        expect(cancelButton).toBeInstanceOf(HTMLButtonElement);
+
+        act(() => {
+            cancelButton!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        });
+
+        expect(testBed.popupService.activePopup).toBeNull();
+        expect(TestState.popupDisposeCount).toBe(1);
+    });
 });

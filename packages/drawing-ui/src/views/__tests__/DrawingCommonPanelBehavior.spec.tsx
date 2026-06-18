@@ -17,7 +17,7 @@
 import type { IDrawingParam } from '@univerjs/core';
 import type { Root } from 'react-dom/client';
 import { DrawingTypeEnum, LocaleType, Univer } from '@univerjs/core';
-import { DrawingManagerService, IDrawingManagerService } from '@univerjs/drawing';
+import { DrawingManagerService, getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ComponentManager, IconManager, RediContext } from '@univerjs/ui';
 import { act } from 'react';
@@ -209,6 +209,46 @@ describe('DrawingCommonPanel behavior', () => {
         expect(textIsAvailable(container, 'drawing-ui.image-panel.align.title')).toBe(true);
         expect(textIsAvailable(container, 'drawing-ui.image-panel.transform.title')).toBe(false);
         expect(textIsAvailable(container, 'drawing-ui.image-panel.crop.title')).toBe(false);
+        expect(textIsAvailable(container, 'drawing-ui.image-panel.arrange.title')).toBe(true);
+    });
+
+    it('switches from multi-select controls to single-image controls when the transformer starts editing one drawing', () => {
+        const drawings = [createDrawing('image-1', 10), createDrawing('image-2', 140)];
+        drawingManagerService.registerDrawingData(unitId, {
+            [subUnitId]: {
+                data: {
+                    'image-1': drawings[0],
+                    'image-2': drawings[1],
+                },
+                order: ['image-1', 'image-2'],
+            },
+        });
+        drawingManagerService.focusDrawing(drawings.map(({ unitId, subUnitId, drawingId }) => ({ unitId, subUnitId, drawingId })));
+
+        const rendered = renderWithRediContext(univer.__getInjector(), drawings);
+        root = rendered.root;
+        container = rendered.container;
+
+        expect(textIsAvailable(container, 'drawing-ui.image-panel.align.title')).toBe(true);
+        expect(textIsAvailable(container, 'drawing-ui.image-panel.transform.title')).toBe(false);
+        expect(textIsAvailable(container, 'drawing-ui.image-panel.crop.title')).toBe(false);
+
+        const oKey = getDrawingShapeKeyByDrawingSearch({
+            unitId,
+            subUnitId,
+            drawingId: 'image-1',
+        });
+
+        act(() => {
+            (univer.__getInjector().get(IRenderManagerService) as unknown as TestRenderManagerService)
+                .transformer
+                .changeStart$
+                .next({ objects: new Map([[oKey, { oKey }]]) });
+        });
+
+        expect(textIsAvailable(container, 'drawing-ui.image-panel.align.title')).toBe(false);
+        expect(textIsAvailable(container, 'drawing-ui.image-panel.transform.title')).toBe(true);
+        expect(textIsAvailable(container, 'drawing-ui.image-panel.crop.title')).toBe(true);
         expect(textIsAvailable(container, 'drawing-ui.image-panel.arrange.title')).toBe(true);
     });
 

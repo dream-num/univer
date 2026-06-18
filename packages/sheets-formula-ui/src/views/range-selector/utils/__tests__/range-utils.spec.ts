@@ -19,6 +19,7 @@ import { matchToken, sequenceNodeType } from '@univerjs/engine-formula';
 import { describe, expect, it } from 'vitest';
 import { filterReferenceNode, isComma, isReference } from '../filter-reference-node';
 import { rangePreProcess } from '../range-pre-process';
+import { sequenceNodeToText } from '../sequence-node-to-text';
 import { unitRangesToText } from '../unit-ranges-to-text';
 import { verifyRange } from '../verify-range';
 
@@ -41,6 +42,14 @@ describe('range selector utils', () => {
         expect(verifyRange([referenceNode as never, matchToken.COMMA, referenceNode as never])).toBe(true);
         expect(verifyRange([referenceNode as never, functionNode as never])).toBe(false);
         expect(verifyRange([referenceNode as never, ';'])).toBe(false);
+    });
+
+    it('rebuilds typed range text with separators when editing multiple references', () => {
+        expect(sequenceNodeToText([
+            { nodeType: sequenceNodeType.REFERENCE, token: 'A1:B2' } as never,
+            matchToken.COMMA,
+            { nodeType: sequenceNodeType.REFERENCE, token: "'Data Sheet'!D3" } as never,
+        ])).toBe("A1:B2,'Data Sheet'!D3");
     });
 
     it('serializes selected ranges with sheet and workbook qualifiers only when the formula needs them', () => {

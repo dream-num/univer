@@ -191,4 +191,26 @@ describe('SheetFindReplaceHighlightShape', () => {
         expect(context.fillCount).toBe(1);
         expect(context.strokeCount).toBe(0);
     });
+
+    it('activates an existing hidden-range highlight without changing its compact marker', () => {
+        const shape = new SheetFindReplaceHighlightShape('hidden-result-to-activate', {
+            inHiddenRange: true,
+            color: { r: 120, g: 130, b: 140 },
+            activated: false,
+            width: 2,
+            height: 2,
+        });
+
+        shape.setShapeProps({ activated: true });
+        const context = new TestCanvasContext();
+
+        drawShape(shape, context);
+
+        expect(context.rects).toEqual([{ left: 0, top: 0, width: 2, height: 2 }]);
+        expect(context.fillStyle).toBe('rgba(120, 130, 140, 0.35)');
+        expect(context.strokeStyle).toBe('rgb(120, 130, 140)');
+        expect(context.lineWidth).toBe(2);
+        expect(context.fillCount).toBe(1);
+        expect(context.strokeCount).toBe(1);
+    });
 });

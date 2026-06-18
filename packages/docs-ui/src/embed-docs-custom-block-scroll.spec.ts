@@ -43,7 +43,7 @@ describe('scrollDocsTableLikeCustomBlockLive', () => {
         expect(live.scrollTop).toBe(0);
     });
 
-    it('caps the outer horizontal scroll at the allowed left bleed boundary', () => {
+    it('uses the native horizontal range after the viewport has bled to the left boundary', () => {
         const live = createScrollableElement({
             clientWidth: 300,
             scrollWidth: 900,
@@ -51,18 +51,31 @@ describe('scrollDocsTableLikeCustomBlockLive', () => {
         });
 
         const handled = scrollDocsTableLikeCustomBlockLive(createWheelEvent({ deltaX: 300 }), live, {
-            maxScrollLeft: 310,
+            maxScrollLeft: undefined,
         });
 
         expect(handled).toBe(true);
-        expect(live.scrollLeft).toBe(310);
+        expect(live.scrollLeft).toBe(550);
 
         const chained = scrollDocsTableLikeCustomBlockLive(createWheelEvent({ deltaX: 10 }), live, {
-            maxScrollLeft: 310,
+            maxScrollLeft: undefined,
         });
 
-        expect(chained).toBe(false);
-        expect(live.scrollLeft).toBe(310);
+        expect(chained).toBe(true);
+        expect(live.scrollLeft).toBe(560);
+    });
+
+    it('chains horizontal wheel only after the native horizontal range is exhausted', () => {
+        const live = createScrollableElement({
+            clientWidth: 300,
+            scrollWidth: 900,
+            scrollLeft: 600,
+        });
+
+        const handled = scrollDocsTableLikeCustomBlockLive(createWheelEvent({ deltaX: 10 }), live);
+
+        expect(handled).toBe(false);
+        expect(live.scrollLeft).toBe(600);
     });
 
     it('chains vertical wheel to docs when the block cannot scroll further', () => {

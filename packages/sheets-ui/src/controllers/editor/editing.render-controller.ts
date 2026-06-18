@@ -117,6 +117,8 @@ export class EditingRenderController extends Disposable {
     /** If the corresponding unit is active and prepared for editing. */
     private _editingUnit = '';
 
+    private _submitEmptyCellImageEdit = false;
+
     _cursorTimeout: NodeJS.Timeout;
 
     constructor(
@@ -475,7 +477,10 @@ export class EditingRenderController extends Disposable {
                 }
             );
         };
-        if (this._isCellImageData(documentDataModel.getSnapshot())) {
+        const isCellImage = this._isCellImageData(documentDataModel.getSnapshot());
+        this._submitEmptyCellImageEdit = isCellImage && eventType === DeviceInputEventType.Keyboard && keycode === KeyCode.BACKSPACE;
+
+        if (isCellImage) {
             clearAndEdit();
         } else if (eventType === DeviceInputEventType.Keyboard && keycode === KeyCode.F2) {
             // f2, continue to edit
@@ -537,6 +542,8 @@ export class EditingRenderController extends Disposable {
         const documentDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
         const snapshot = Tools.deepClone(documentDataModel?.getSnapshot());
         const { keycode } = param;
+        const shouldSubmitEmptyCellImageEdit = this._submitEmptyCellImageEdit;
+        this._submitEmptyCellImageEdit = false;
         this._cursorChange = CursorChange.InitialState;
         const currentUnitId = editCellState?.unitId ?? '';
         this._exitInput(param);
@@ -578,7 +585,7 @@ export class EditingRenderController extends Disposable {
             ? this._isCellImageData(editCellState.documentLayoutObject.documentModel.getSnapshot())
             : false;
 
-        if (snapshot && !(isEmpty && isCellImage)) {
+        if (snapshot && shouldSubmitCellEdit({ isEmpty, isCellImage, shouldSubmitEmptyCellImageEdit })) {
             const res = await this._submitEdit(snapshot, keycode === (MetaKeys.CTRL_COMMAND | KeyCode.ENTER) || keycode === (MetaKeys.MAC_CTRL | KeyCode.ENTER));
             if (res === false) return; // if the submit was rejected, don't move selection
         }
@@ -970,6 +977,22 @@ export function isRichText(body: IDocumentBody): boolean {
         Boolean(customRanges?.length) ||
         customBlocks.length > 0
     );
+}
+
+export function shouldSubmitCellEdit({
+    isEmpty,
+    isCellImage,
+    shouldSubmitEmptyCellImageEdit,
+}: {
+    isEmpty?: boolean;
+    isCellImage: boolean;
+    shouldSubmitEmptyCellImageEdit: boolean;
+}): boolean {
+    if (!isEmpty || !isCellImage) {
+        return true;
+    }
+
+    return shouldSubmitEmptyCellImageEdit;
 }
 
 export function getCellStyleBySnapshot(snapshot: IDocumentData): Nullable<IStyleData> {

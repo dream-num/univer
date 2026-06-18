@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
-import type { Univer } from '@univerjs/core';
+import type { IDisposable, Univer } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
 import { LifecycleStages } from '@univerjs/core';
 
 export function simpleRangePopupDemo(univer: Univer, univerAPI: FUniver) {
     let activePopupWorkbookId: string | null = null;
+    let activePopupDisposable: IDisposable | null = null;
+    let disposed = false;
+    const pendingTimers = new Set<ReturnType<typeof setTimeout>>();
 
     const attachPopup = (workbook = univerAPI.getActiveWorkbook()): boolean => {
-        if (!workbook) {
+        if (disposed || !workbook) {
             return false;
         }
 
@@ -52,6 +55,7 @@ export function simpleRangePopupDemo(univer: Univer, univerAPI: FUniver) {
             return false;
         }
 
+        activePopupDisposable = disposable;
         activePopupWorkbookId = workbookId;
 
         return true;
@@ -60,9 +64,11 @@ export function simpleRangePopupDemo(univer: Univer, univerAPI: FUniver) {
     const scheduleAttachPopup = (workbook = univerAPI.getActiveWorkbook()) => {
         const delays = [0, 100, 300, 1000];
         delays.forEach((delay) => {
-            setTimeout(() => {
+            const timer = setTimeout(() => {
+                pendingTimers.delete(timer);
                 attachPopup(workbook);
             }, delay);
+            pendingTimers.add(timer);
         });
     };
 
@@ -90,6 +96,15 @@ export function simpleRangePopupDemo(univer: Univer, univerAPI: FUniver) {
 
     univerAPI.addEvent(univerAPI.Event.WorkbookCreated, ({ workbook }) => {
         scheduleAttachPopup(workbook);
+    });
+
+    univer.onDispose(() => {
+        disposed = true;
+        pendingTimers.forEach((timer) => clearTimeout(timer));
+        pendingTimers.clear();
+        activePopupDisposable?.dispose();
+        activePopupDisposable = null;
+        activePopupWorkbookId = null;
     });
 }
 

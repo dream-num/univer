@@ -35,7 +35,7 @@ export interface EmbedDocsCustomBlockRuntimeProps {
 
 export interface DocsTableLikeCustomBlockWheelHandlerOptions {
     getLive: () => HTMLElement | null;
-    getMaxScrollLeft: () => number;
+    getMaxScrollLeft?: () => number | undefined;
 }
 
 export function EmbedDocsCustomBlockRenderer(props: { data?: EmbedFloatDomData } & EmbedDocsCustomBlockRuntimeProps) {
@@ -171,7 +171,6 @@ export function EmbedDocsCustomBlockRenderer(props: { data?: EmbedFloatDomData }
 
         const onWheel = createDocsTableLikeCustomBlockWheelHandler({
             getLive: () => liveRef.current,
-            getMaxScrollLeft: () => viewportRef.current.bleedLeft,
         });
 
         root.addEventListener('wheel', onWheel, { passive: false });
@@ -212,7 +211,7 @@ export function createDocsTableLikeCustomBlockWheelHandler(options: DocsTableLik
             return;
         }
 
-        if (scrollDocsTableLikeCustomBlockLive(event, live, { maxScrollLeft: options.getMaxScrollLeft() })) {
+        if (scrollDocsTableLikeCustomBlockLive(event, live, { maxScrollLeft: options.getMaxScrollLeft?.() })) {
             event.preventDefault();
             event.stopPropagation();
         }

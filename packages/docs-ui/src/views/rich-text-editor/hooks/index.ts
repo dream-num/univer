@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+export { createEditorUndoRedoKeyboardConfig, executeEditorUndoRedoCommand, type ICreateEditorUndoRedoKeyboardConfigOptions, type IExecuteEditorUndoRedoCommandOptions } from './editor-undo-redo-keyboard';
 export { useEditor } from './use-editor';
 export { useEditorClickOutside } from './use-editor-click-outside';
 export { useIsFocusing } from './use-is-focusing';

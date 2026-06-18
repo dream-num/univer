@@ -27,6 +27,7 @@ import {
     DocumentFlavor,
     generateRandomId,
     HorizontalAlign,
+    ICommandService,
     IConfigService,
     IUniverInstanceService,
     noop,
@@ -34,7 +35,7 @@ import {
     VerticalAlign,
 } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
-import { DocBackScrollRenderController, DocSelectionRenderService, IEditorService, useKeyboardEvent, useResize } from '@univerjs/docs-ui';
+import { createEditorUndoRedoKeyboardConfig, DocBackScrollRenderController, DocSelectionRenderService, IEditorService, useKeyboardEvent, useResize } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { EMBEDDING_FORMULA_EDITOR } from '@univerjs/sheets-ui';
 import { useDependency, useEvent, useObservable, useUpdateEffect } from '@univerjs/ui';
@@ -124,6 +125,7 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
     } = props;
 
     const editorService = useDependency(IEditorService);
+    const commandService = useDependency(ICommandService);
     const sheetEmbeddingRef = useRef<HTMLDivElement>(null);
     const onChange = useEvent(propOnChange);
     useImperativeHandle(ref, () => ({
@@ -230,7 +232,15 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
         onFormulaSelectingChange(isSelecting, docSelectionRenderService?.isFocusing ?? true);
     }, [onFormulaSelectingChange, isSelecting]);
 
-    useKeyboardEvent(isFocus, keyboardEventConfig, editor);
+    const resolvedKeyboardEventConfig = useMemo(() => createEditorUndoRedoKeyboardConfig({
+        commandService,
+        univerInstanceService,
+        editorUnitId: editorId,
+        keyCodes: keyboardEventConfig?.keyCodes,
+        handler: keyboardEventConfig?.handler,
+    }), [commandService, editorId, keyboardEventConfig, univerInstanceService]);
+
+    useKeyboardEvent(isFocus, resolvedKeyboardEventConfig, editor);
 
     useLayoutEffect(() => {
         let dispose: IDisposable;

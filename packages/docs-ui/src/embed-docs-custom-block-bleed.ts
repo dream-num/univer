@@ -41,12 +41,23 @@ export function createDefaultDocsTableLikeCustomBlockBleedViewport(): DocsCustom
 
 export function resolveDocsTableLikeCustomBlockBleedViewport(root: HTMLElement, contentWidth: number): DocsCustomBlockBleedViewport {
     const rootRect = root.getBoundingClientRect();
+    const rootWidth = Math.max(1, rootRect.width);
+    const normalizedContentWidth = Math.max(1, contentWidth);
+    if (normalizedContentWidth <= rootWidth) {
+        return {
+            bleedLeft: 0,
+            bleedRight: 0,
+            bleedWidth: rootWidth,
+            contentWidth: normalizedContentWidth,
+            virtualWidth: rootWidth,
+        };
+    }
+
     const bounds = resolveDocsTableLikeCustomBlockBleedBounds(root);
     const viewportLeft = bounds.left + DOCS_CUSTOM_BLOCK_VIEWPORT_INSET;
     const viewportWidth = Math.max(1, bounds.width - DOCS_CUSTOM_BLOCK_VIEWPORT_INSET * 2);
     const bleedLeft = Math.max(0, rootRect.left - viewportLeft);
     const bleedRight = Math.max(0, viewportLeft + viewportWidth - rootRect.right);
-    const normalizedContentWidth = Math.max(1, contentWidth);
 
     return {
         bleedLeft,

@@ -18,6 +18,22 @@ import { describe, expect, it, vi } from 'vitest';
 import { resolveDocsTableLikeCustomBlockBleedViewport, resolveDocsTableLikeCustomBlockContentHeight, resolveDocsTableLikeCustomBlockContentWidth } from './embed-docs-custom-block-bleed';
 
 describe('resolveDocsTableLikeCustomBlockBleedViewport', () => {
+    it('keeps the viewport inside the block when content fits the block width', () => {
+        const boundary = createElementWithRect({ left: 100, right: 1200, width: 1100 });
+        const root = createElementWithRect({ left: 220, right: 1180, width: 960 });
+        boundary.style.overflow = 'hidden';
+        boundary.appendChild(root);
+        vi.spyOn(window, 'innerWidth', 'get').mockReturnValue(1800);
+
+        expect(resolveDocsTableLikeCustomBlockBleedViewport(root, 960)).toEqual({
+            bleedLeft: 0,
+            bleedRight: 0,
+            bleedWidth: 960,
+            contentWidth: 960,
+            virtualWidth: 960,
+        });
+    });
+
     it('uses the clipping ancestor as the bleed boundary', () => {
         const boundary = createElementWithRect({ left: 100, right: 1200, width: 1100 });
         const root = createElementWithRect({ left: 220, right: 1180, width: 960 });
@@ -34,17 +50,17 @@ describe('resolveDocsTableLikeCustomBlockBleedViewport', () => {
         });
     });
 
-    it('falls back to the visual window when no clipping ancestor exists', () => {
+    it('falls back to the visual window when wide content has no clipping ancestor', () => {
         const root = createElementWithRect({ left: 220, right: 1180, width: 960 });
         document.body.appendChild(root);
         vi.spyOn(window, 'innerWidth', 'get').mockReturnValue(1440);
 
-        expect(resolveDocsTableLikeCustomBlockBleedViewport(root, 960)).toEqual({
+        expect(resolveDocsTableLikeCustomBlockBleedViewport(root, 1200)).toEqual({
             bleedLeft: 210,
             bleedRight: 250,
             bleedWidth: 1420,
-            contentWidth: 960,
-            virtualWidth: 1420,
+            contentWidth: 1200,
+            virtualWidth: 1660,
         });
     });
 

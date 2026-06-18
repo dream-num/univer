@@ -185,7 +185,7 @@ describe('FDocument facade in Node', () => {
         expect(document.save().body?.dataStream).toBe('Hello,Line 1\rLine 2\r\r\n');
     });
 
-    it('throws when appending text to a document without a body', () => {
+    it('appends text to a document created without a body', () => {
         univer.dispose();
         createDocumentFacade({
             id: 'test',
@@ -193,7 +193,8 @@ describe('FDocument facade in Node', () => {
             documentStyle: {},
         });
 
-        expect(() => document.appendText('Univer')).toThrowError('The document body is empty');
+        expect(document.appendText('Univer')).toBe(true);
+        expect(document.save().body?.dataStream).toBe('Univer\r\n');
     });
 
     it('includes current document resources in snapshots', () => {

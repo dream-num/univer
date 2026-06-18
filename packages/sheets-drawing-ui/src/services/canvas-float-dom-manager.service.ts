@@ -236,7 +236,7 @@ export function syncFloatDomHostSelectionOnStageEnter(
         transformer: { clearControlByIds: (ids: string[]) => void };
         scene: {
             attachTransformerTo?: (object: BaseObject) => void;
-            getTransformer?: () => { clearSelectedObjects?: () => void } | undefined;
+            getTransformer?: () => Nullable<{ clearSelectedObjects?: () => void }>;
         };
     } | null | undefined,
     rect: BaseObject & { oKey?: string }
@@ -252,7 +252,8 @@ export function syncFloatDomHostSelectionOnStageEnter(
 
     if (stage === 'stage2' && rect.oKey) {
         renderObject.transformer.clearControlByIds([rect.oKey]);
-        renderObject.scene.getTransformer()?.clearSelectedObjects();
+        const clearSelectedObjects = renderObject.scene.getTransformer?.()?.clearSelectedObjects;
+        clearSelectedObjects?.();
     }
 }
 

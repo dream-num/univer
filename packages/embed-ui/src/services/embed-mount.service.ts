@@ -15,8 +15,8 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
-import type { EmbedDescriptor, EmbedLayout } from '@univerjs/embed';
-import type { EmbedChildContainerContext, EmbedContainerContext, EmbedHostContainerContribution, EmbedHostMountResult, EmbedMountSession, EmbedRenderScope } from '../types/embed-ui';
+import type { EmbedLayout, IEmbedDescriptor } from '@univerjs/embed';
+import type { IEmbedChildContainerContext, IEmbedContainerContext, IEmbedHostContainerContribution, IEmbedHostMountResult, IEmbedMountSession, IEmbedRenderScope } from '../types/embed-ui';
 import { FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE, FOCUSING_UNIT, IContextService, Inject, Injector, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { EmbedFocusOwnerService } from '@univerjs/embed';
 import { BehaviorSubject } from 'rxjs';
@@ -45,7 +45,7 @@ export class EmbedDuplicateChildUnitError extends Error {
 
 export class EmbedMountService {
     private readonly _sessions = new Map<string, {
-        session: EmbedMountSession;
+        session: IEmbedMountSession;
         disposables: IDisposable[];
         setActive: (active: boolean) => void;
     }>();
@@ -65,18 +65,18 @@ export class EmbedMountService {
         // noop
     }
 
-    mount(descriptor: EmbedDescriptor): EmbedMountSession {
+    mount(descriptor: IEmbedDescriptor): IEmbedMountSession {
         return this._mountResolvedHost(descriptor);
     }
 
-    mountIntoHostElement(descriptor: EmbedDescriptor, hostElement: HTMLElement, runtimeRoots?: EmbedHostMountResult['runtimeRoots']): EmbedMountSession {
+    mountIntoHostElement(descriptor: IEmbedDescriptor, hostElement: HTMLElement, runtimeRoots?: IEmbedHostMountResult['runtimeRoots']): IEmbedMountSession {
         return this._mountResolvedHost(descriptor, { hostElement, runtimeRoots });
     }
 
     private _mountResolvedHost(
-        descriptor: EmbedDescriptor,
-        resolvedHost?: EmbedHostMountResult
-    ): EmbedMountSession {
+        descriptor: IEmbedDescriptor,
+        resolvedHost?: IEmbedHostMountResult
+    ): IEmbedMountSession {
         if (!descriptor.childUnitId || descriptor.childType == null) {
             throw new Error('EMBED_MOUNT_CHILD_NOT_RESOLVED');
         }
@@ -96,7 +96,7 @@ export class EmbedMountService {
 
         this.unmount(descriptor.embedId);
 
-        const context: EmbedContainerContext = {
+        const context: IEmbedContainerContext = {
             descriptor,
             layout,
             injector: this._injector,
@@ -130,14 +130,14 @@ export class EmbedMountService {
         );
         disposables.push(renderScopeDisposable);
         disposables.push(this._registerChildFocusBridge(descriptor, context.hostElement, renderScope.mode));
-        const childContextBase: Omit<EmbedChildContainerContext, 'runtimeScope'> = {
+        const childContextBase: Omit<IEmbedChildContainerContext, 'runtimeScope'> = {
             ...context,
             hostElement: context.hostElement,
             container: context.container,
             renderScope,
         };
         const { runtimeScope, disposable: runtimeScopeDisposable } = createEmbedChildRuntimeScope(childContextBase, setActive);
-        const childContext: EmbedChildContainerContext = {
+        const childContext: IEmbedChildContainerContext = {
             ...childContextBase,
             runtimeScope,
         };
@@ -156,7 +156,7 @@ export class EmbedMountService {
             }
         }
 
-        const session: EmbedMountSession = {
+        const session: IEmbedMountSession = {
             hostUnitId: descriptor.hostUnitId,
             embedId: descriptor.embedId,
             childUnitId: descriptor.childUnitId,
@@ -176,7 +176,7 @@ export class EmbedMountService {
     }
 
     private _initializeFloatingSessionActiveState(
-        descriptor: EmbedDescriptor,
+        descriptor: IEmbedDescriptor,
         layout: EmbedLayout,
         setActive: (active: boolean) => void
     ): void {
@@ -212,11 +212,11 @@ export class EmbedMountService {
         this._sessions.delete(embedId);
     }
 
-    getSession(embedId: string): EmbedMountSession | undefined {
+    getSession(embedId: string): IEmbedMountSession | undefined {
         return this._sessions.get(embedId)?.session;
     }
 
-    listSessions(): EmbedMountSession[] {
+    listSessions(): IEmbedMountSession[] {
         return [...this._sessions.values()].map(({ session }) => session);
     }
 
@@ -249,8 +249,8 @@ export class EmbedMountService {
         });
     }
 
-    deactivateTabSessions(embedId?: string): EmbedMountSession[] {
-        const deactivatedSessions: EmbedMountSession[] = [];
+    deactivateTabSessions(embedId?: string): IEmbedMountSession[] {
+        const deactivatedSessions: IEmbedMountSession[] = [];
 
         this._sessions.forEach((entry) => {
             if (entry.session.layout !== 'tab-peer') {
@@ -272,7 +272,7 @@ export class EmbedMountService {
         this._sessions.get(embedId)?.setActive(active);
     }
 
-    private _resolveLayout(descriptor: EmbedDescriptor): EmbedLayout {
+    private _resolveLayout(descriptor: IEmbedDescriptor): EmbedLayout {
         const floatingConfig = descriptor.sourceMeta?.floating || undefined;
         if (floatingConfig?.layout) {
             return floatingConfig.layout;
@@ -287,11 +287,11 @@ export class EmbedMountService {
     }
 
     private _createRenderScope(
-        descriptor: EmbedDescriptor,
+        descriptor: IEmbedDescriptor,
         layout: EmbedLayout,
         rootElement: HTMLElement,
-        runtimeRoots?: EmbedHostMountResult['runtimeRoots']
-    ): { renderScope: EmbedRenderScope; disposable: IDisposable; setActive: (active: boolean) => void } {
+        runtimeRoots?: IEmbedHostMountResult['runtimeRoots']
+    ): { renderScope: IEmbedRenderScope; disposable: IDisposable; setActive: (active: boolean) => void } {
         const active$ = new BehaviorSubject(true);
         const hostAnchorId = descriptor.hostAnchorId;
         const tabConfig = descriptor.sourceMeta?.tab;
@@ -347,7 +347,7 @@ export class EmbedMountService {
         };
     }
 
-    private _normalizeHostMountResult(result: ReturnType<NonNullable<EmbedHostContainerContribution['mount']>>): EmbedHostMountResult {
+    private _normalizeHostMountResult(result: ReturnType<NonNullable<IEmbedHostContainerContribution['mount']>>): IEmbedHostMountResult {
         if (!result) {
             return {};
         }
@@ -363,7 +363,7 @@ export class EmbedMountService {
         };
     }
 
-    private _mountFloatingMenu(context: EmbedChildContainerContext): IDisposable | undefined {
+    private _mountFloatingMenu(context: IEmbedChildContainerContext): IDisposable | undefined {
         if (!this._injector.has(EmbedFloatingMenuRegistryService)) {
             return undefined;
         }
@@ -385,7 +385,7 @@ export class EmbedMountService {
         return disposable ? toDisposable(() => disposable.dispose()) : undefined;
     }
 
-    private _registerChildFocusBridge(descriptor: EmbedDescriptor, rootElement: HTMLElement, mode: EmbedRenderScope['mode']): IDisposable {
+    private _registerChildFocusBridge(descriptor: IEmbedDescriptor, rootElement: HTMLElement, mode: IEmbedRenderScope['mode']): IDisposable {
         const focusChild = (event?: PointerEvent | FocusEvent) => {
             const target = event?.target instanceof Element ? event.target : null;
             if (target?.closest('[data-embed-float-drag-handle="true"], [data-embed-floating-menu="true"]')) {
@@ -446,7 +446,7 @@ export class EmbedMountService {
         });
     }
 
-    private _createMountFocusRestorer(descriptor: EmbedDescriptor): IDisposable {
+    private _createMountFocusRestorer(descriptor: IEmbedDescriptor): IDisposable {
         if (!this._injector.has(IUniverInstanceService) || !descriptor.childUnitId) {
             return toDisposable(() => {});
         }
@@ -488,7 +488,7 @@ export class EmbedMountService {
         });
     }
 
-    private _assertChildUnitAvailable(descriptor: EmbedDescriptor): void {
+    private _assertChildUnitAvailable(descriptor: IEmbedDescriptor): void {
         const duplicated = [...this._sessions.values()].find(({ session }) =>
             session.embedId !== descriptor.embedId && session.childUnitId === descriptor.childUnitId
         );
@@ -498,7 +498,7 @@ export class EmbedMountService {
     }
 }
 
-function applyRenderScopeActiveState(rootElement: HTMLElement, active: boolean, mode: EmbedRenderScope['mode']): void {
+function applyRenderScopeActiveState(rootElement: HTMLElement, active: boolean, mode: IEmbedRenderScope['mode']): void {
     rootElement.dataset.embedRenderScopeActive = active ? 'true' : 'false';
     if (mode !== 'tab') {
         rootElement.removeAttribute('inert');

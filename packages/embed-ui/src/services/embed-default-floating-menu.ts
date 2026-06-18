@@ -15,13 +15,13 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
-import type { EmbedFloatingMenuContribution, EmbedFloatingMenuMountContext } from '../types/embed-ui';
+import type { IEmbedFloatingMenuContribution, IEmbedFloatingMenuMountContext } from '../types/embed-ui';
 import { toDisposable } from '@univerjs/core';
 
-export function createDefaultEmbedFloatingMenuContributions(): EmbedFloatingMenuContribution[] {
+export function createDefaultEmbedFloatingMenuContributions(): IEmbedFloatingMenuContribution[] {
     return [];
 }
 
-export function mountDefaultEmbedFloatingMenu(_context: EmbedFloatingMenuMountContext): IDisposable {
+export function mountDefaultEmbedFloatingMenu(_context: IEmbedFloatingMenuMountContext): IDisposable {
     return toDisposable(() => {});
 }

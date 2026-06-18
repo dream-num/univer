@@ -15,14 +15,14 @@
  */
 
 import type { UniverInstanceType } from '@univerjs/core';
-import type { EmbedDescriptor, EmbedHostEntry } from '@univerjs/embed';
-import type { EmbedHostAdapterContribution, EmbedHostAnchorMutationPlan, EmbedHostAnchorRemoveMutationPlan } from '../types/embed-ui';
+import type { EmbedHostEntry, IEmbedDescriptor } from '@univerjs/embed';
+import type { IEmbedHostAdapterContribution, IEmbedHostAnchorMutationPlan, IEmbedHostAnchorRemoveMutationPlan } from '../types/embed-ui';
 import { CREATE_EMBED_HOST_ANCHOR_MUTATION_ID, REMOVE_EMBED_HOST_ANCHOR_MUTATION_ID } from '../common/const';
 
 export class EmbedHostAdapterRegistryService {
-    private readonly _contributions = new Map<string, EmbedHostAdapterContribution>();
+    private readonly _contributions = new Map<string, IEmbedHostAdapterContribution>();
 
-    register(contribution: EmbedHostAdapterContribution): void {
+    register(contribution: IEmbedHostAdapterContribution): void {
         const key = this._key(contribution.hostType, contribution.entry);
         if (this._contributions.has(key)) {
             throw new Error(`Embed host adapter contribution already registered: ${key}`);
@@ -31,11 +31,11 @@ export class EmbedHostAdapterRegistryService {
         this._contributions.set(key, contribution);
     }
 
-    get(hostType: UniverInstanceType, entry: EmbedHostEntry): EmbedHostAdapterContribution | undefined {
+    get(hostType: UniverInstanceType, entry: EmbedHostEntry): IEmbedHostAdapterContribution | undefined {
         return this._contributions.get(this._key(hostType, entry));
     }
 
-    list(): EmbedHostAdapterContribution[] {
+    list(): IEmbedHostAdapterContribution[] {
         return [...this._contributions.values()];
     }
 
@@ -58,8 +58,8 @@ export class EmbedHostAdapterRegistryService {
         entry: EmbedHostEntry;
         requestedAnchorId?: string;
         hostContext?: Record<string, unknown>;
-        descriptor?: EmbedDescriptor;
-    }): EmbedHostAnchorMutationPlan {
+        descriptor?: IEmbedDescriptor;
+    }): IEmbedHostAnchorMutationPlan {
         const contribution = this.get(params.hostType, params.entry);
         if (contribution?.createAnchorPlan) {
             return contribution.createAnchorPlan(params);
@@ -98,7 +98,7 @@ export class EmbedHostAdapterRegistryService {
         entry: EmbedHostEntry;
         hostAnchorId: string;
         hostContext?: Record<string, unknown>;
-        descriptor: EmbedDescriptor;
+        descriptor: IEmbedDescriptor;
     }): void {
         this.get(params.hostType, params.entry)?.afterCreateAnchor?.(params);
     }
@@ -110,7 +110,7 @@ export class EmbedHostAdapterRegistryService {
         entry: EmbedHostEntry;
         hostAnchorId: string;
         hostContext?: Record<string, unknown>;
-        descriptor?: EmbedDescriptor;
+        descriptor?: IEmbedDescriptor;
     }): void {
         this.get(params.hostType, params.entry)?.afterRemoveAnchor?.(params);
     }
@@ -122,7 +122,7 @@ export class EmbedHostAdapterRegistryService {
         entry: EmbedHostEntry;
         hostAnchorId: string;
         hostContext?: Record<string, unknown>;
-        descriptor: EmbedDescriptor;
+        descriptor: IEmbedDescriptor;
     }): void {
         this.get(params.hostType, params.entry)?.activateAnchor?.(params);
     }
@@ -133,8 +133,8 @@ export class EmbedHostAdapterRegistryService {
         hostType: UniverInstanceType;
         entry: EmbedHostEntry;
         hostAnchorId: string;
-        descriptor?: EmbedDescriptor;
-    }): EmbedHostAnchorRemoveMutationPlan {
+        descriptor?: IEmbedDescriptor;
+    }): IEmbedHostAnchorRemoveMutationPlan {
         const contribution = this.get(params.hostType, params.entry);
         if (contribution?.removeAnchorPlan) {
             return contribution.removeAnchorPlan(params);

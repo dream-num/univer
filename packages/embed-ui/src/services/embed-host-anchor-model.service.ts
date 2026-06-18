@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import type { EmbedHostAnchorRecord } from '../types/host-anchor';
+import type { IEmbedHostAnchorRecord } from '../types/host-anchor';
 
 export class EmbedHostAnchorModelService {
-    private readonly _records = new Map<string, Record<string, EmbedHostAnchorRecord>>();
+    private readonly _records = new Map<string, Record<string, IEmbedHostAnchorRecord>>();
 
     clearUnit(hostUnitId: string): void {
         this._records.delete(hostUnitId);
     }
 
-    setAnchor(record: EmbedHostAnchorRecord): void {
+    setAnchor(record: IEmbedHostAnchorRecord): void {
         const records = this._ensureRecords(record.hostUnitId);
         const now = Date.now();
         records[record.hostAnchorId] = {
@@ -48,16 +48,16 @@ export class EmbedHostAnchorModelService {
         };
     }
 
-    getAnchor(hostUnitId: string, hostAnchorId: string): EmbedHostAnchorRecord | undefined {
+    getAnchor(hostUnitId: string, hostAnchorId: string): IEmbedHostAnchorRecord | undefined {
         const record = this._ensureRecords(hostUnitId)[hostAnchorId];
         return record ? { ...record } : undefined;
     }
 
-    listAnchors(hostUnitId: string): EmbedHostAnchorRecord[] {
+    listAnchors(hostUnitId: string): IEmbedHostAnchorRecord[] {
         return Object.values(this._ensureRecords(hostUnitId)).map((record) => ({ ...record }));
     }
 
-    private _ensureRecords(hostUnitId: string): Record<string, EmbedHostAnchorRecord> {
+    private _ensureRecords(hostUnitId: string): Record<string, IEmbedHostAnchorRecord> {
         let records = this._records.get(hostUnitId);
         if (!records) {
             records = {};

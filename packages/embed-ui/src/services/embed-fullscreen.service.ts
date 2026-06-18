@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-import type { EmbedDescriptor } from '@univerjs/embed';
-import type { EmbedFullscreenSession } from '../types/embed-ui';
+import type { IEmbedDescriptor } from '@univerjs/embed';
+import type { IEmbedFullscreenSession } from '../types/embed-ui';
 import { BehaviorSubject, Subject } from 'rxjs';
 
 export class EmbedFullscreenService {
-    private readonly _session$ = new BehaviorSubject<EmbedFullscreenSession | null>(null);
-    private readonly _exited$ = new Subject<EmbedFullscreenSession>();
+    private readonly _session$ = new BehaviorSubject<IEmbedFullscreenSession | null>(null);
+    private readonly _exited$ = new Subject<IEmbedFullscreenSession>();
 
     readonly session$ = this._session$.asObservable();
     readonly exited$ = this._exited$.asObservable();
 
-    getSession(): EmbedFullscreenSession | null {
+    getSession(): IEmbedFullscreenSession | null {
         return this._session$.getValue();
     }
 
-    enter(descriptor: EmbedDescriptor): EmbedFullscreenSession {
+    enter(descriptor: IEmbedDescriptor): IEmbedFullscreenSession {
         if (!descriptor.childUnitId || descriptor.childType == null) {
             throw new Error('EMBED_FULLSCREEN_CHILD_NOT_RESOLVED');
         }
@@ -47,7 +47,7 @@ export class EmbedFullscreenService {
             throw new Error('EMBED_FULLSCREEN_LAYOUT_NOT_RESOLVED');
         }
 
-        const session: EmbedFullscreenSession = {
+        const session: IEmbedFullscreenSession = {
             hostUnitId: descriptor.hostUnitId,
             embedId: descriptor.embedId,
             childUnitId: descriptor.childUnitId,
@@ -70,7 +70,7 @@ export class EmbedFullscreenService {
         }
     }
 
-    notifyExited(session: EmbedFullscreenSession): void {
+    notifyExited(session: IEmbedFullscreenSession): void {
         this._exited$.next(session);
     }
 }

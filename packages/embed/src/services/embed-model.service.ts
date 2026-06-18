@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import type { EmbedDescriptor, EmbedResource } from '../types/embed';
-import type { ResourceRef } from '../types/resource-ref';
+import type { IEmbedDescriptor, IEmbedResource } from '../types/embed';
+import type { IResourceRef } from '../types/resource-ref';
 import { cloneEmbedResource, createEmptyEmbedResource } from '../common/embed-resource';
 import { getResourceRefKey, normalizeResourceRef } from '../common/resource-ref';
 import { fromResourceRefUnitType } from '../common/unit-type';
 
 export class EmbedModelService {
-    private readonly _resources = new Map<string, EmbedResource>();
+    private readonly _resources = new Map<string, IEmbedResource>();
 
-    addDescriptor(hostUnitId: string, descriptor: EmbedDescriptor): void {
+    addDescriptor(hostUnitId: string, descriptor: IEmbedDescriptor): void {
         const now = Date.now();
         const normalizedDescriptor = this._normalizeDescriptor(hostUnitId, descriptor);
         this._assertActiveChildUnitAvailable(normalizedDescriptor);
@@ -35,41 +35,41 @@ export class EmbedModelService {
         };
     }
 
-    getDescriptor(hostUnitId: string, embedId: string): EmbedDescriptor | undefined {
+    getDescriptor(hostUnitId: string, embedId: string): IEmbedDescriptor | undefined {
         return this._resources.get(hostUnitId)?.embeds[embedId];
     }
 
-    getActiveDescriptors(hostUnitId: string): EmbedDescriptor[] {
+    getActiveDescriptors(hostUnitId: string): IEmbedDescriptor[] {
         return Object.values(this._resources.get(hostUnitId)?.embeds ?? {})
             .filter((descriptor) => descriptor.lifecycle !== 'soft-deleted');
     }
 
-    getActiveDescriptorsByChildUnit(childUnitId: string): EmbedDescriptor[] {
+    getActiveDescriptorsByChildUnit(childUnitId: string): IEmbedDescriptor[] {
         return [...this._resources.values()]
             .flatMap((resource) => Object.values(resource.embeds))
             .filter((descriptor) => descriptor.lifecycle !== 'soft-deleted' && descriptor.childUnitId === childUnitId);
     }
 
-    getDescriptors(hostUnitId: string): EmbedDescriptor[] {
+    getDescriptors(hostUnitId: string): IEmbedDescriptor[] {
         return Object.values(this._resources.get(hostUnitId)?.embeds ?? {});
     }
 
-    getDescriptorsByResourceRef(hostUnitId: string, ref: ResourceRef): EmbedDescriptor[] {
+    getDescriptorsByResourceRef(hostUnitId: string, ref: IResourceRef): IEmbedDescriptor[] {
         const key = getResourceRefKey(ref);
         return Object.values(this._resources.get(hostUnitId)?.embeds ?? {})
             .filter((descriptor) => getResourceRefKey(this._getDescriptorResourceRef(descriptor)) === key);
     }
 
-    getActiveDescriptorsByResourceRef(hostUnitId: string, ref: ResourceRef): EmbedDescriptor[] {
+    getActiveDescriptorsByResourceRef(hostUnitId: string, ref: IResourceRef): IEmbedDescriptor[] {
         return this.getDescriptorsByResourceRef(hostUnitId, ref)
             .filter((descriptor) => descriptor.lifecycle !== 'soft-deleted');
     }
 
-    countReferencesByResourceRef(hostUnitId: string, ref: ResourceRef): number {
+    countReferencesByResourceRef(hostUnitId: string, ref: IResourceRef): number {
         return this.getDescriptorsByResourceRef(hostUnitId, ref).length;
     }
 
-    countActiveReferencesByResourceRef(hostUnitId: string, ref: ResourceRef): number {
+    countActiveReferencesByResourceRef(hostUnitId: string, ref: IResourceRef): number {
         return this.getActiveDescriptorsByResourceRef(hostUnitId, ref).length;
     }
 
@@ -97,11 +97,11 @@ export class EmbedModelService {
         descriptor.updatedAt = Date.now();
     }
 
-    serializeUnit(unitId: string): EmbedResource {
+    serializeUnit(unitId: string): IEmbedResource {
         return this._cloneResource(this._resources.get(unitId) ?? this._createResource());
     }
 
-    loadUnit(unitId: string, resource: EmbedResource): void {
+    loadUnit(unitId: string, resource: IEmbedResource): void {
         const normalizedResource = this._createResource();
         for (const [embedId, descriptor] of Object.entries(resource.embeds ?? {})) {
             normalizedResource.embeds[embedId] = this._normalizeDescriptor(unitId, {
@@ -121,12 +121,12 @@ export class EmbedModelService {
         this._resources.delete(unitId);
     }
 
-    parseJson(json: string): EmbedResource {
+    parseJson(json: string): IEmbedResource {
         if (!json) {
             return this._createResource();
         }
 
-        const parsed = JSON.parse(json) as Partial<EmbedResource>;
+        const parsed = JSON.parse(json) as Partial<IEmbedResource>;
         const resource = {
             ...createEmptyEmbedResource(),
             embeds: Object.fromEntries(Object.entries(parsed.embeds ?? {}).map(([embedId, descriptor]) => [
@@ -145,11 +145,11 @@ export class EmbedModelService {
         return JSON.stringify(this.serializeUnit(unitId));
     }
 
-    private _normalizeDescriptor(hostUnitId: string, descriptor: EmbedDescriptor): EmbedDescriptor {
+    private _normalizeDescriptor(hostUnitId: string, descriptor: IEmbedDescriptor): IEmbedDescriptor {
         if (descriptor.source.kind !== 'ref') {
             throw new Error('EMBED_DESCRIPTOR_SOURCE_NOT_CANONICAL');
         }
-        const persistableDescriptor = { ...descriptor } as EmbedDescriptor & { hostContext?: Record<string, unknown> };
+        const persistableDescriptor = { ...descriptor } as IEmbedDescriptor & { hostContext?: Record<string, unknown> };
         delete persistableDescriptor.hostContext;
 
         const ref = normalizeResourceRef(descriptor.source.ref);
@@ -175,7 +175,7 @@ export class EmbedModelService {
         };
     }
 
-    private _getDescriptorResourceRef(descriptor: EmbedDescriptor): ResourceRef {
+    private _getDescriptorResourceRef(descriptor: IEmbedDescriptor): IResourceRef {
         if (descriptor.source.kind !== 'ref') {
             throw new Error('EMBED_DESCRIPTOR_SOURCE_NOT_CANONICAL');
         }
@@ -183,7 +183,7 @@ export class EmbedModelService {
         return descriptor.source.ref;
     }
 
-    private _assertActiveChildUnitAvailable(descriptor: EmbedDescriptor, replacingUnitId?: string): void {
+    private _assertActiveChildUnitAvailable(descriptor: IEmbedDescriptor, replacingUnitId?: string): void {
         if (descriptor.lifecycle === 'soft-deleted' || !descriptor.childUnitId) {
             return;
         }
@@ -204,8 +204,8 @@ export class EmbedModelService {
         }
     }
 
-    private _assertResourceHasNoDuplicateActiveChildUnits(resource: EmbedResource): void {
-        const activeByChildUnit = new Map<string, EmbedDescriptor>();
+    private _assertResourceHasNoDuplicateActiveChildUnits(resource: IEmbedResource): void {
+        const activeByChildUnit = new Map<string, IEmbedDescriptor>();
         for (const descriptor of Object.values(resource.embeds)) {
             if (descriptor.lifecycle === 'soft-deleted' || !descriptor.childUnitId) {
                 continue;
@@ -220,7 +220,7 @@ export class EmbedModelService {
         }
     }
 
-    private _ensureResource(unitId: string): EmbedResource {
+    private _ensureResource(unitId: string): IEmbedResource {
         let resource = this._resources.get(unitId);
         if (!resource) {
             resource = this._createResource();
@@ -230,11 +230,11 @@ export class EmbedModelService {
         return resource;
     }
 
-    private _createResource(): EmbedResource {
+    private _createResource(): IEmbedResource {
         return createEmptyEmbedResource();
     }
 
-    private _cloneResource(resource: EmbedResource): EmbedResource {
+    private _cloneResource(resource: IEmbedResource): IEmbedResource {
         return cloneEmbedResource(resource);
     }
 }

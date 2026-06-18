@@ -15,21 +15,21 @@
  */
 
 import type { IResources } from '@univerjs/core';
-import type { EmbedResource } from '../types/embed';
+import type { IEmbedResource } from '../types/embed';
 import { EMBED_RESOURCE_PLUGIN_NAME } from './const';
 
-export function createEmptyEmbedResource(): EmbedResource {
+export function createEmptyEmbedResource(): IEmbedResource {
     return {
         version: 1,
         embeds: {},
     };
 }
 
-export function cloneEmbedResource(resource: EmbedResource | undefined | null): EmbedResource {
-    return JSON.parse(JSON.stringify(resource ?? createEmptyEmbedResource())) as EmbedResource;
+export function cloneEmbedResource(resource: IEmbedResource | undefined | null): IEmbedResource {
+    return JSON.parse(JSON.stringify(resource ?? createEmptyEmbedResource())) as IEmbedResource;
 }
 
-export function createEmbedResourceEntry(resource: EmbedResource): IResources[number] {
+export function createEmbedResourceEntry(resource: IEmbedResource): IResources[number] {
     return {
         name: EMBED_RESOURCE_PLUGIN_NAME,
         data: JSON.stringify(resource),
@@ -40,19 +40,19 @@ export function getEmbedResourceEntry(resources: IResources | undefined | null):
     return resources?.find((resource) => resource.name === EMBED_RESOURCE_PLUGIN_NAME);
 }
 
-export function parseEmbedResourceEntry(entry: IResources[number] | undefined | null): EmbedResource | undefined {
+export function parseEmbedResourceEntry(entry: IResources[number] | undefined | null): IEmbedResource | undefined {
     if (!entry?.data) {
         return undefined;
     }
 
-    const parsed = JSON.parse(entry.data) as Partial<EmbedResource>;
+    const parsed = JSON.parse(entry.data) as Partial<IEmbedResource>;
     return {
         version: 1,
         embeds: { ...parsed.embeds },
     };
 }
 
-export function upsertEmbedResourceEntry(resources: IResources | undefined | null, resource: EmbedResource): IResources {
+export function upsertEmbedResourceEntry(resources: IResources | undefined | null, resource: IEmbedResource): IResources {
     const next = [...(resources ?? [])].filter((entry) => entry.name !== EMBED_RESOURCE_PLUGIN_NAME);
     next.push(createEmbedResourceEntry(resource));
     return next;

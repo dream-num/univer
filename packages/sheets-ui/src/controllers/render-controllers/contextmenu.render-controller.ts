@@ -16,7 +16,7 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, Spreadsheet, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
-import type { SheetHostChromeOverride } from '../../services/sheet-host-chrome-override.service';
+import type { ISheetHostChromeOverride } from '../../services/sheet-host-chrome-override.service';
 import {
     Disposable,
     Inject,
@@ -138,7 +138,7 @@ export class SheetContextMenuRenderController extends Disposable implements IRen
 
 export function shouldSuppressSheetContextMenuForEmbedOverride(
     hostUnitId: string,
-    override: Pick<SheetHostChromeOverride, 'entry' | 'hostUnitId'> | null | undefined
+    override: Pick<ISheetHostChromeOverride, 'entry' | 'hostUnitId'> | null | undefined
 ): boolean {
     return override?.hostUnitId === hostUnitId && override.entry === 'sheets-sheet-tab';
 }

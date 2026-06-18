@@ -16,11 +16,11 @@
 
 import type { DependencyIdentifier, IDisposable, UniverInstanceType } from '@univerjs/core';
 import type { EmbedLayout } from '@univerjs/embed';
-import type { EmbedChildContainerContext, EmbedChildViewContribution } from '../types/embed-ui';
+import type { IEmbedChildContainerContext, IEmbedChildViewContribution } from '../types/embed-ui';
 import { Injector, toDisposable } from '@univerjs/core';
 import { createEmbedChildUnitScopedInjector } from './embed-child-unit-scoped-injector';
 
-export interface EmbedRenderLike {
+export interface IEmbedRenderLike {
     engine: {
         mount: (target: HTMLElement) => void;
         unmount?: () => void;
@@ -45,30 +45,30 @@ export interface EmbedRenderLike {
     with?: <T>(dependency: DependencyIdentifier<T>) => T;
 }
 
-export interface EmbedRenderManagerServiceLike {
-    getRenderById: (unitId: string) => EmbedRenderLike | null | undefined | void;
+export interface IEmbedRenderManagerServiceLike {
+    getRenderById: (unitId: string) => IEmbedRenderLike | null | undefined | void;
     createRender: (unitId: string, options?: {
         embeddedRender?: boolean;
         makeCurrent?: boolean;
         renderParentInjector?: Injector;
         skipAutoRender?: boolean;
-    }) => EmbedRenderLike;
+    }) => IEmbedRenderLike;
     removeRender?: (unitId: string) => void;
 }
 
-export interface CreateEmbedRenderChildViewContributionOptions {
+export interface ICreateEmbedRenderChildViewContributionOptions {
     childType: UniverInstanceType;
     supportedLayouts: readonly EmbedLayout[];
-    renderManagerService: DependencyIdentifier<EmbedRenderManagerServiceLike>;
+    renderManagerService: DependencyIdentifier<IEmbedRenderManagerServiceLike>;
 }
 
-export interface MountEmbedRenderChildUnitOptions {
+export interface IMountEmbedRenderChildUnitOptions {
     activate?: boolean;
 }
 
 export function createEmbedRenderChildViewContribution(
-    options: CreateEmbedRenderChildViewContributionOptions
-): EmbedChildViewContribution {
+    options: ICreateEmbedRenderChildViewContributionOptions
+): IEmbedChildViewContribution {
     return {
         childType: options.childType,
         supportedLayouts: [...options.supportedLayouts],
@@ -77,10 +77,10 @@ export function createEmbedRenderChildViewContribution(
 }
 
 export function mountEmbedRenderChildUnit(
-    context: EmbedChildContainerContext,
-    renderManagerServiceIdentifier: DependencyIdentifier<EmbedRenderManagerServiceLike>,
+    context: IEmbedChildContainerContext,
+    renderManagerServiceIdentifier: DependencyIdentifier<IEmbedRenderManagerServiceLike>,
     target: HTMLElement = resolveEmbedRenderChildTarget(context),
-    options: MountEmbedRenderChildUnitOptions = {}
+    options: IMountEmbedRenderChildUnitOptions = {}
 ): IDisposable | undefined {
     const renderManagerService = context.injector.get(renderManagerServiceIdentifier);
     const scopedInjector = context.runtimeScope?.injector ?? createEmbedChildUnitScopedInjector(context);
@@ -119,14 +119,14 @@ export function mountEmbedRenderChildUnit(
     });
 }
 
-function resolveEmbedRenderChildTarget(context: EmbedChildContainerContext): HTMLElement {
+function resolveEmbedRenderChildTarget(context: IEmbedChildContainerContext): HTMLElement {
     return context.runtimeScope.roots.canvas
         ?? context.renderScope.canvasRoot
         ?? context.renderScope.contentRoot
         ?? context.renderScope.rootElement;
 }
 
-function ensureEmbedRenderCanvasAttached(render: EmbedRenderLike, target: HTMLElement): void {
+function ensureEmbedRenderCanvasAttached(render: IEmbedRenderLike, target: HTMLElement): void {
     const canvas = render.engine.getCanvasElement?.() ?? render.engine.getCanvas?.()?.getCanvasEle?.();
     if (!canvas || canvas.parentElement === target) {
         return;
@@ -135,7 +135,7 @@ function ensureEmbedRenderCanvasAttached(render: EmbedRenderLike, target: HTMLEl
     target.appendChild(canvas);
 }
 
-export function ensureEmbedChildRender(renderManagerService: EmbedRenderManagerServiceLike, childUnitId: string): EmbedRenderLike | undefined {
+export function ensureEmbedChildRender(renderManagerService: IEmbedRenderManagerServiceLike, childUnitId: string): IEmbedRenderLike | undefined {
     try {
         return renderManagerService.getRenderById(childUnitId)
             ?? renderManagerService.createRender(childUnitId, { embeddedRender: true, makeCurrent: false, skipAutoRender: true });
@@ -145,10 +145,10 @@ export function ensureEmbedChildRender(renderManagerService: EmbedRenderManagerS
 }
 
 export function createEmbedChildRender(
-    renderManagerService: EmbedRenderManagerServiceLike,
+    renderManagerService: IEmbedRenderManagerServiceLike,
     childUnitId: string,
     renderParentInjector?: Injector
-): EmbedRenderLike | undefined {
+): IEmbedRenderLike | undefined {
     try {
         const existingRender = renderManagerService.getRenderById(childUnitId);
         if (existingRender) {
@@ -167,7 +167,7 @@ export function createEmbedChildRender(
     }
 }
 
-function getRenderInjector(render: EmbedRenderLike): Injector | undefined {
+function getRenderInjector(render: IEmbedRenderLike): Injector | undefined {
     try {
         return render.with?.(Injector);
     } catch {
@@ -175,7 +175,7 @@ function getRenderInjector(render: EmbedRenderLike): Injector | undefined {
     }
 }
 
-export function refreshEmbedChildRender(render: EmbedRenderLike, options: { activate?: boolean } = {}): void {
+export function refreshEmbedChildRender(render: IEmbedRenderLike, options: { activate?: boolean } = {}): void {
     if (options.activate) {
         render.activate?.();
     }

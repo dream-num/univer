@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { EmbedCreateContext } from '../types/embed';
+import type { IEmbedCreateContext } from '../types/embed';
 import { Inject } from '@univerjs/core';
 import { EmbedCapabilityRegistryService } from './embed-capability-registry.service';
 
@@ -26,7 +26,7 @@ export class EmbedNestedGuardService {
         // noop
     }
 
-    assertCanCreate(context: EmbedCreateContext): void {
+    assertCanCreate(context: IEmbedCreateContext): void {
         if (context.parentEmbedId) {
             throw new Error('NESTED_EMBED_NOT_SUPPORTED');
         }

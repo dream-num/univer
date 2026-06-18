@@ -20,12 +20,12 @@ import { createEmbedRenderCanvasPreviewProvider, EmbedBlockRegistryService, Embe
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ComponentManager } from '@univerjs/ui';
 import { createDocsEmbedBlockContribution, createDocsEmbedChildViewContribution } from './embed-block';
-import { EmbedDocsCustomBlockRenderer } from './embed-docs-custom-block-renderer';
-import { createDocsFloatingMenuContributions } from './embed-floating-menu';
 import { createDocsCustomBlockHostAdapterContribution, createDocsCustomBlockHostContainerContribution } from './embed-host-adapter';
 import { EMBED_DOCS_CUSTOM_BLOCK_DEFAULT_COMPONENT_KEY } from './embed-host-anchor';
 import { createDocsPassiveViewportProvider } from './embed-passive-viewport';
 import { registerDocsEmbedProductMenus } from './embed-product-menu';
+import { EmbedDocsCustomBlockRenderer } from './EmbedDocsCustomBlockRenderer';
+import { createDocsFloatingMenuContributions } from './EmbedFloatingMenu';
 
 export function registerDocsEmbedUIContributions(injector: Injector): void {
     registerEmbedUIContribution(injector, 'docs-ui.embed', registerDocsEmbedUIContributionsNow);

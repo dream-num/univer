@@ -15,12 +15,12 @@
  */
 
 import type { UniverInstanceType } from '@univerjs/core';
-import type { EmbedChildViewContribution } from '../types/embed-ui';
+import type { IEmbedChildViewContribution } from '../types/embed-ui';
 
 export class EmbedChildViewRegistryService {
-    private readonly _contributions = new Map<UniverInstanceType, EmbedChildViewContribution>();
+    private readonly _contributions = new Map<UniverInstanceType, IEmbedChildViewContribution>();
 
-    register(contribution: EmbedChildViewContribution): void {
+    register(contribution: IEmbedChildViewContribution): void {
         if (this._contributions.has(contribution.childType)) {
             throw new Error(`Embed child view contribution already registered: ${contribution.childType}`);
         }
@@ -28,11 +28,11 @@ export class EmbedChildViewRegistryService {
         this._contributions.set(contribution.childType, contribution);
     }
 
-    get(childType: UniverInstanceType): EmbedChildViewContribution | undefined {
+    get(childType: UniverInstanceType): IEmbedChildViewContribution | undefined {
         return this._contributions.get(childType);
     }
 
-    list(): EmbedChildViewContribution[] {
+    list(): IEmbedChildViewContribution[] {
         return [...this._contributions.values()];
     }
 }

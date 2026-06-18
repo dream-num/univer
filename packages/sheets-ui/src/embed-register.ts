@@ -15,7 +15,7 @@
  */
 
 import type { Injector } from '@univerjs/core';
-import type { EmbedDescriptor } from '@univerjs/embed';
+import type { IEmbedDescriptor } from '@univerjs/embed';
 import { IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { EmbedModelService } from '@univerjs/embed';
 import { createEmbedRenderCanvasPreviewProvider, EmbedActivationService, EmbedBlockRegistryService, EmbedChildViewRegistryService, EmbedContentSizeRegistryService, EmbedFloatDomRenderer, EmbedFloatingMenuRegistryService, EmbedFloatPreviewService, EmbedHostAdapterRegistryService, EmbedHostAnchorModelService, EmbedHostContainerRegistryService, EmbedHostMenuOverrideService, EmbedMountService, EmbedPassiveViewportRegistryService, registerEmbedUIContribution } from '@univerjs/embed-ui';
@@ -23,13 +23,13 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { ISheetDrawingService } from '@univerjs/sheets-drawing';
 import { CanvasFloatDomPreviewService, ComponentManager } from '@univerjs/ui';
 import { Subscription } from 'rxjs';
-import { createSheetsEmbedBlockContribution, createSheetsEmbedChildViewContribution } from './embed-block';
 import { createSheetsContentSizeProvider } from './embed-content-size';
 import { EMBED_SHEETS_FLOATING_COMPONENT_KEY } from './embed-floating-anchor';
-import { createSheetsFloatingMenuContributions } from './embed-floating-menu';
 import { createSheetsFloatingObjectHostAdapterContribution, createSheetsFloatingObjectHostContainerContribution, createSheetsSheetTabHostAdapterContribution, createSheetsSheetTabHostContainerContribution } from './embed-host-adapter';
 import { createSheetsPassiveViewportProvider } from './embed-passive-viewport';
 import { registerSheetsEmbedProductMenus } from './embed-product-menu';
+import { createSheetsEmbedBlockContribution, createSheetsEmbedChildViewContribution } from './EmbedBlock';
+import { createSheetsFloatingMenuContributions } from './EmbedFloatingMenu';
 import { ISheetEmbedRuntimeService } from './services/sheet-embed-runtime.service';
 import { ISheetHostChromeOverrideService } from './services/sheet-host-chrome-override.service';
 
@@ -130,7 +130,7 @@ export function createSheetsEmbedRuntimeService(params: {
 }): ISheetEmbedRuntimeService {
     return {
         mountSheetTab: ({ hostUnitId, hostAnchorId, embedId }) => {
-            const descriptor = params.embedModelService.getDescriptor(hostUnitId, embedId) as EmbedDescriptor | undefined;
+            const descriptor = params.embedModelService.getDescriptor(hostUnitId, embedId) as IEmbedDescriptor | undefined;
             if (!descriptor || descriptor.hostAnchorId !== hostAnchorId) {
                 return undefined;
             }

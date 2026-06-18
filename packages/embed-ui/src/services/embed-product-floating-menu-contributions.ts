@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { EmbedFloatingMenuContribution } from '../types/embed-ui';
+import type { IEmbedFloatingMenuContribution } from '../types/embed-ui';
 import { UniverInstanceType } from '@univerjs/core';
 
-export function createEmbedProductFloatingMenuContributions(params: Pick<EmbedFloatingMenuContribution, 'childType' | 'mount'>): EmbedFloatingMenuContribution[] {
+export function createEmbedProductFloatingMenuContributions(params: Pick<IEmbedFloatingMenuContribution, 'childType' | 'mount'>): IEmbedFloatingMenuContribution[] {
     return [
         {
             hostType: UniverInstanceType.UNIVER_DOC,

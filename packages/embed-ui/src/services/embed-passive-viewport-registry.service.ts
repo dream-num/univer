@@ -16,13 +16,13 @@
 
 import type { IDisposable, UniverInstanceType } from '@univerjs/core';
 import type { EmbedLayout } from '@univerjs/embed';
-import type { EmbedPassiveViewportProvider } from '../types/embed-ui';
+import type { IEmbedPassiveViewportProvider } from '../types/embed-ui';
 import { toDisposable } from '@univerjs/core';
 
 export class EmbedPassiveViewportRegistryService {
-    private readonly _providers = new Map<UniverInstanceType, EmbedPassiveViewportProvider>();
+    private readonly _providers = new Map<UniverInstanceType, IEmbedPassiveViewportProvider>();
 
-    register(provider: EmbedPassiveViewportProvider): IDisposable {
+    register(provider: IEmbedPassiveViewportProvider): IDisposable {
         this._providers.set(provider.childType, provider);
         return toDisposable(() => {
             if (this._providers.get(provider.childType) === provider) {
@@ -31,7 +31,7 @@ export class EmbedPassiveViewportRegistryService {
         });
     }
 
-    get(childType: UniverInstanceType, layout?: EmbedLayout): EmbedPassiveViewportProvider | undefined {
+    get(childType: UniverInstanceType, layout?: EmbedLayout): IEmbedPassiveViewportProvider | undefined {
         const provider = this._providers.get(childType);
         if (!provider) {
             return undefined;
@@ -44,7 +44,7 @@ export class EmbedPassiveViewportRegistryService {
         return provider;
     }
 
-    list(): EmbedPassiveViewportProvider[] {
+    list(): IEmbedPassiveViewportProvider[] {
         return [...this._providers.values()];
     }
 }

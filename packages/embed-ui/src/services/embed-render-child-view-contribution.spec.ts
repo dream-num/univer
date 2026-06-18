@@ -18,7 +18,7 @@
  * @vitest-environment jsdom
  */
 
-import type { EmbedChildContainerContext } from '../types/embed-ui';
+import type { IEmbedChildContainerContext } from '../types/embed-ui';
 import { UniverInstanceType } from '@univerjs/core';
 import { of } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
@@ -105,7 +105,7 @@ function createContext(
     canvas: HTMLElement | undefined,
     overlay: HTMLElement,
     render: ReturnType<typeof createRender>
-): EmbedChildContainerContext {
+): IEmbedChildContainerContext {
     const renderManager = {
         getRenderById: vi.fn(() => undefined),
         createRender: vi.fn(() => render),

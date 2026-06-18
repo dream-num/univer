@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, IUniverInstanceService } from '@univerjs/core';
-import type { EmbedHostAdapterContribution, EmbedHostAnchorContext, EmbedHostAnchorModelService, EmbedHostAnchorMutationPlan, EmbedHostAnchorRecord, EmbedHostAnchorRemoveMutationPlan, EmbedHostContainerContribution } from '@univerjs/embed-ui';
+import type { EmbedHostAnchorModelService, IEmbedHostAdapterContribution, IEmbedHostAnchorContext, IEmbedHostAnchorMutationPlan, IEmbedHostAnchorRecord, IEmbedHostAnchorRemoveMutationPlan, IEmbedHostContainerContribution } from '@univerjs/embed-ui';
 import type { IRenderManagerService } from '@univerjs/engine-render';
 import type { EmbedDocsCustomBlockInteractionMode } from './embed-host-anchor';
 import { UniverInstanceType } from '@univerjs/core';
@@ -27,7 +27,7 @@ export function createDocsCustomBlockHostAdapterContribution(
     anchorModelService?: EmbedHostAnchorModelService,
     univerInstanceService?: IUniverInstanceService,
     renderManagerService?: IRenderManagerService
-): EmbedHostAdapterContribution {
+): IEmbedHostAdapterContribution {
     return {
         hostType: UniverInstanceType.UNIVER_DOC,
         entry: 'docs-custom-block',
@@ -50,7 +50,7 @@ export function createDocsCustomBlockHostAdapterContribution(
     };
 }
 
-export function createDocsCustomBlockHostContainerContribution(): EmbedHostContainerContribution {
+export function createDocsCustomBlockHostContainerContribution(): IEmbedHostContainerContribution {
     return {
         hostType: UniverInstanceType.UNIVER_DOC,
         entry: 'docs-custom-block',
@@ -61,9 +61,9 @@ export function createDocsCustomBlockHostContainerContribution(): EmbedHostConta
 }
 
 function createDocsCustomBlockAnchorPlan(
-    context: EmbedHostAnchorContext,
+    context: IEmbedHostAnchorContext,
     univerInstanceService?: IUniverInstanceService
-): EmbedHostAnchorMutationPlan | undefined {
+): IEmbedHostAnchorMutationPlan | undefined {
     if (!univerInstanceService) {
         return undefined;
     }
@@ -110,10 +110,10 @@ function createDocsCustomBlockAnchorPlan(
 }
 
 function createDocsCustomBlockRemoveAnchorPlan(
-    context: EmbedHostAnchorContext & { hostAnchorId: string },
-    record: EmbedHostAnchorRecord,
+    context: IEmbedHostAnchorContext & { hostAnchorId: string },
+    record: IEmbedHostAnchorRecord,
     univerInstanceService?: IUniverInstanceService
-): EmbedHostAnchorRemoveMutationPlan | undefined {
+): IEmbedHostAnchorRemoveMutationPlan | undefined {
     if (!univerInstanceService) {
         return undefined;
     }
@@ -154,7 +154,7 @@ function createDocsCustomBlockRemoveAnchorPlan(
     };
 }
 
-function createDocsCustomBlockRecord(context: EmbedHostAnchorContext): EmbedHostAnchorRecord {
+function createDocsCustomBlockRecord(context: IEmbedHostAnchorContext): IEmbedHostAnchorRecord {
     const hostAnchorId = context.requestedAnchorId ?? `docs-custom-block:${context.embedId}`;
     return {
         hostAnchorId,
@@ -168,7 +168,7 @@ function createDocsCustomBlockRecord(context: EmbedHostAnchorContext): EmbedHost
     };
 }
 
-function createRecordOnlyCreatePlan(record: EmbedHostAnchorRecord): EmbedHostAnchorMutationPlan {
+function createRecordOnlyCreatePlan(record: IEmbedHostAnchorRecord): IEmbedHostAnchorMutationPlan {
     return {
         hostAnchorId: record.hostAnchorId,
         redoMutations: [{ id: SET_EMBED_HOST_ANCHOR_RECORD_MUTATION_ID, params: { record } }],
@@ -176,7 +176,7 @@ function createRecordOnlyCreatePlan(record: EmbedHostAnchorRecord): EmbedHostAnc
     };
 }
 
-function getDocsCustomBlockInsertIndex(context: EmbedHostAnchorContext, univerInstanceService?: IUniverInstanceService): number | undefined {
+function getDocsCustomBlockInsertIndex(context: IEmbedHostAnchorContext, univerInstanceService?: IUniverInstanceService): number | undefined {
     const explicit = getNumber(context.hostContext, 'startIndex');
     if (explicit != null) {
         return explicit;

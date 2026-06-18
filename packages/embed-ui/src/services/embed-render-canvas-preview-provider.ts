@@ -16,23 +16,23 @@
 
 import type { DependencyIdentifier, Injector, UniverInstanceType } from '@univerjs/core';
 import type {
-    EmbedFloatPreviewProvider,
-    EmbedFloatPreviewRenderRequest,
     EmbedFloatPreviewRenderResult,
+    IEmbedFloatPreviewProvider,
+    IEmbedFloatPreviewRenderRequest,
 } from '../types/embed-ui';
-import type { EmbedRenderManagerServiceLike } from './embed-render-child-view-contribution';
+import type { IEmbedRenderManagerServiceLike } from './embed-render-child-view-contribution';
 import { ensureEmbedChildRender, refreshEmbedChildRender } from './embed-render-child-view-contribution';
 import { captureEmbedContextSceneCanvas } from './embed-scene-canvas-capture.service';
 
-export interface CreateEmbedRenderCanvasPreviewProviderOptions {
+export interface ICreateEmbedRenderCanvasPreviewProviderOptions {
     childType: UniverInstanceType;
-    renderManagerService: DependencyIdentifier<EmbedRenderManagerServiceLike>;
+    renderManagerService: DependencyIdentifier<IEmbedRenderManagerServiceLike>;
 }
 
 export function createEmbedRenderCanvasPreviewProvider(
     injector: Injector,
-    options: CreateEmbedRenderCanvasPreviewProviderOptions
-): EmbedFloatPreviewProvider {
+    options: ICreateEmbedRenderCanvasPreviewProviderOptions
+): IEmbedFloatPreviewProvider {
     return {
         childType: options.childType,
         collectViewState: () => undefined,
@@ -43,8 +43,8 @@ export function createEmbedRenderCanvasPreviewProvider(
 
 function renderEmbedCanvasPreview(
     injector: Injector,
-    renderManagerServiceIdentifier: DependencyIdentifier<EmbedRenderManagerServiceLike>,
-    request: EmbedFloatPreviewRenderRequest
+    renderManagerServiceIdentifier: DependencyIdentifier<IEmbedRenderManagerServiceLike>,
+    request: IEmbedFloatPreviewRenderRequest
 ): EmbedFloatPreviewRenderResult | undefined {
     if (request.context) {
         const contextResult = captureEmbedContextSceneCanvas(request.context);

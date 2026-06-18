@@ -15,17 +15,17 @@
  */
 
 import type { IMutationInfo } from '@univerjs/core';
-import type { EmbedCreateContext, EmbedDescriptor } from '@univerjs/embed';
+import type { IEmbedCreateContext, IEmbedDescriptor } from '@univerjs/embed';
 import { ICommandService, Inject, IUndoRedoService, sequenceExecute } from '@univerjs/core';
 import { EmbedCreationService, EmbedModelService, SetEmbedDescriptorMutation, SoftDeleteEmbedDescriptorMutation } from '@univerjs/embed';
 import { EmbedHostAdapterRegistryService } from './embed-host-adapter-registry.service';
 
-export interface EmbedHostCreateContext extends Omit<EmbedCreateContext, 'hostAnchorId'> {
+export interface IEmbedHostCreateContext extends Omit<IEmbedCreateContext, 'hostAnchorId'> {
     requestedHostAnchorId?: string;
     hostContext?: Record<string, unknown>;
 }
 
-export interface EmbedHostCopyContext {
+export interface IEmbedHostCopyContext {
     hostUnitId: string;
     sourceEmbedId: string;
     nextEmbedId: string;
@@ -33,7 +33,7 @@ export interface EmbedHostCopyContext {
     hostContext?: Record<string, unknown>;
 }
 
-export interface EmbedHostRemoveContext {
+export interface IEmbedHostRemoveContext {
     hostUnitId: string;
     embedId: string;
 }
@@ -54,7 +54,7 @@ export class EmbedHostLifecycleService {
         // noop
     }
 
-    async createEmbed(context: EmbedHostCreateContext): Promise<EmbedDescriptor> {
+    async createEmbed(context: IEmbedHostCreateContext): Promise<IEmbedDescriptor> {
         const initialHostAnchorPlan = this._hostAdapterRegistry.createAnchorPlan({
             embedId: context.embedId,
             hostUnitId: context.hostUnitId,
@@ -92,7 +92,7 @@ export class EmbedHostLifecycleService {
         return descriptor;
     }
 
-    copyEmbed(context: EmbedHostCopyContext): EmbedDescriptor {
+    copyEmbed(context: IEmbedHostCopyContext): IEmbedDescriptor {
         const sourceDescriptor = this._getDescriptor(context.hostUnitId, context.sourceEmbedId);
         const initialHostAnchorPlan = this._hostAdapterRegistry.createAnchorPlan({
             embedId: context.nextEmbedId,
@@ -133,7 +133,7 @@ export class EmbedHostLifecycleService {
         return copied;
     }
 
-    removeEmbed(context: EmbedHostRemoveContext): boolean {
+    removeEmbed(context: IEmbedHostRemoveContext): boolean {
         const descriptor = this._modelService.getDescriptor(context.hostUnitId, context.embedId);
         if (!descriptor) {
             return false;
@@ -180,7 +180,7 @@ export class EmbedHostLifecycleService {
         });
     }
 
-    private _getDescriptor(hostUnitId: string, embedId: string): EmbedDescriptor {
+    private _getDescriptor(hostUnitId: string, embedId: string): IEmbedDescriptor {
         const descriptor = this._modelService.getDescriptor(hostUnitId, embedId);
         if (!descriptor) {
             throw new Error('EMBED_DESCRIPTOR_NOT_FOUND');
@@ -189,7 +189,7 @@ export class EmbedHostLifecycleService {
         return descriptor;
     }
 
-    private _toSetDescriptorMutation(descriptor: EmbedDescriptor): IMutationInfo {
+    private _toSetDescriptorMutation(descriptor: IEmbedDescriptor): IMutationInfo {
         return {
             id: SetEmbedDescriptorMutation.id,
             params: {
@@ -199,7 +199,7 @@ export class EmbedHostLifecycleService {
         };
     }
 
-    private _toSoftDeleteDescriptorMutation(descriptor: EmbedDescriptor): IMutationInfo {
+    private _toSoftDeleteDescriptorMutation(descriptor: IEmbedDescriptor): IMutationInfo {
         return {
             id: SoftDeleteEmbedDescriptorMutation.id,
             params: {
@@ -209,7 +209,7 @@ export class EmbedHostLifecycleService {
         };
     }
 
-    private _afterCreateAnchor(descriptor: EmbedDescriptor, hostContext?: Record<string, unknown>): void {
+    private _afterCreateAnchor(descriptor: IEmbedDescriptor, hostContext?: Record<string, unknown>): void {
         try {
             this._hostAdapterRegistry.afterCreateAnchor({
                 embedId: descriptor.embedId,
@@ -225,7 +225,7 @@ export class EmbedHostLifecycleService {
         }
     }
 
-    private _afterRemoveAnchor(descriptor: EmbedDescriptor): void {
+    private _afterRemoveAnchor(descriptor: IEmbedDescriptor): void {
         try {
             this._hostAdapterRegistry.afterRemoveAnchor({
                 embedId: descriptor.embedId,

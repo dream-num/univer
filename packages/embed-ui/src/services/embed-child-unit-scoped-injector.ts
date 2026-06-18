@@ -16,14 +16,14 @@
 
 import type { IAccessor, IExecutionOptions, IUndoRedoItem, IUndoRedoService as IUndoRedoServiceType, UniverInstanceType } from '@univerjs/core';
 import type { IContextMenuService, IMenuManagerService, MenuManagerService } from '@univerjs/ui';
-import type { EmbedChildContainerContext } from '../types/embed-ui';
+import type { IEmbedChildContainerContext } from '../types/embed-ui';
 import { COMMAND_EXECUTION_INJECTOR_KEY, ICommandService, Injector, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
 import { IContextMenuService as IContextMenuServiceIdentifier, IMenuManagerService as IMenuManagerServiceIdentifier } from '@univerjs/ui';
 import { BehaviorSubject } from 'rxjs';
 import { EmbedUndoBridgeService } from './embed-undo-bridge.service';
 
 export function createEmbedChildUnitScopedInjector(
-    context: EmbedChildContainerContext
+    context: IEmbedChildContainerContext
 ): Injector | undefined {
     const instanceService = context.injector.get(IUniverInstanceService);
     const childUnit = instanceService.getUnit(context.childUnitId, context.childType);

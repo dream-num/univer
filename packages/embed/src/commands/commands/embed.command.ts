@@ -15,13 +15,13 @@
  */
 
 import type { ICommand } from '@univerjs/core';
-import type { EmbedCreateContext, EmbedDescriptor } from '../../types/embed';
+import type { IEmbedCreateContext, IEmbedDescriptor } from '../../types/embed';
 import { CommandType, IUndoRedoService } from '@univerjs/core';
 import { EmbedCreationService } from '../../services/embed-creation.service';
 import { EmbedModelService } from '../../services/embed-model.service';
 import { SetEmbedDescriptorMutation, SoftDeleteEmbedDescriptorMutation } from '../mutations/embed-descriptor.mutation';
 
-export type ICreateEmbedCommandParams = EmbedCreateContext;
+export type ICreateEmbedCommandParams = IEmbedCreateContext;
 
 export interface ICopyEmbedCommandParams {
     hostUnitId: string;
@@ -35,7 +35,7 @@ export interface IRemoveEmbedCommandParams {
     embedId: string;
 }
 
-export const CreateEmbedCommand: ICommand<ICreateEmbedCommandParams, EmbedDescriptor | false> = {
+export const CreateEmbedCommand: ICommand<ICreateEmbedCommandParams, IEmbedDescriptor | false> = {
     id: 'embed.command.create',
     type: CommandType.COMMAND,
     handler: async (accessor, params) => {
@@ -66,7 +66,7 @@ export const CreateEmbedCommand: ICommand<ICreateEmbedCommandParams, EmbedDescri
     },
 };
 
-export const CopyEmbedCommand: ICommand<ICopyEmbedCommandParams, EmbedDescriptor | false> = {
+export const CopyEmbedCommand: ICommand<ICopyEmbedCommandParams, IEmbedDescriptor | false> = {
     id: 'embed.command.copy',
     type: CommandType.COMMAND,
     handler: (accessor, params) => {

@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import type { EmbedDescriptor } from '../types/embed';
-import type { ResourceRef } from '../types/resource-ref';
+import type { IEmbedDescriptor } from '../types/embed';
+import type { IResourceRef } from '../types/resource-ref';
 import { Inject } from '@univerjs/core';
 import { getResourceRefKey } from '../common/resource-ref';
 import { EmbedModelService } from './embed-model.service';
 
-export interface EmbedChildRetentionState {
+export interface IEmbedChildRetentionState {
     hostUnitId: string;
-    ref: ResourceRef;
+    ref: IResourceRef;
     childUnitId: string;
     totalReferences: number;
     activeReferences: number;
@@ -39,13 +39,13 @@ export class EmbedChildRetentionService {
         // noop
     }
 
-    getRetentionState(hostUnitId: string, ref: ResourceRef): EmbedChildRetentionState {
+    getRetentionState(hostUnitId: string, ref: IResourceRef): IEmbedChildRetentionState {
         const descriptors = this._modelService.getDescriptorsByResourceRef(hostUnitId, ref);
         return this._toState(hostUnitId, ref, descriptors);
     }
 
-    listCleanupCandidates(hostUnitId: string): EmbedChildRetentionState[] {
-        const grouped = new Map<string, { ref: ResourceRef; descriptors: EmbedDescriptor[] }>();
+    listCleanupCandidates(hostUnitId: string): IEmbedChildRetentionState[] {
+        const grouped = new Map<string, { ref: IResourceRef; descriptors: IEmbedDescriptor[] }>();
         for (const descriptor of this._modelService.getDescriptors(hostUnitId)) {
             const ref = this._getDescriptorResourceRef(descriptor);
             const key = getResourceRefKey(ref);
@@ -62,7 +62,7 @@ export class EmbedChildRetentionService {
             .filter((state) => state.eligibleForCleanup);
     }
 
-    private _toState(hostUnitId: string, ref: ResourceRef, descriptors: EmbedDescriptor[]): EmbedChildRetentionState {
+    private _toState(hostUnitId: string, ref: IResourceRef, descriptors: IEmbedDescriptor[]): IEmbedChildRetentionState {
         const activeReferences = descriptors.filter((descriptor) => descriptor.lifecycle !== 'soft-deleted').length;
         return {
             hostUnitId,
@@ -76,7 +76,7 @@ export class EmbedChildRetentionService {
         };
     }
 
-    private _getDescriptorResourceRef(descriptor: EmbedDescriptor): ResourceRef {
+    private _getDescriptorResourceRef(descriptor: IEmbedDescriptor): IResourceRef {
         if (descriptor.source.kind !== 'ref') {
             throw new Error('EMBED_DESCRIPTOR_SOURCE_NOT_CANONICAL');
         }

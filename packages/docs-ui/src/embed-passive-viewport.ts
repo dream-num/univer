@@ -15,13 +15,13 @@
  */
 
 import type { Injector } from '@univerjs/core';
-import type { EmbedPassiveViewportProvider } from '@univerjs/embed-ui';
+import type { IEmbedPassiveViewportProvider } from '@univerjs/embed-ui';
 import { UniverInstanceType } from '@univerjs/core';
 import { scrollSceneViewportPassive } from '@univerjs/embed-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { VIEWPORT_KEY } from './basics/docs-view-key';
 
-export function createDocsPassiveViewportProvider(injector: Injector): EmbedPassiveViewportProvider {
+export function createDocsPassiveViewportProvider(injector: Injector): IEmbedPassiveViewportProvider {
     return {
         childType: UniverInstanceType.UNIVER_DOC,
         handleWheel: (context) => {

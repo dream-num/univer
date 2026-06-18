@@ -15,7 +15,7 @@
  */
 
 import type { ICreateUnitOptions, UniverInstanceType } from '@univerjs/core';
-import type { ResourceRef } from './resource-ref';
+import type { IResourceRef } from './resource-ref';
 
 export type EmbedHostEntry =
     | 'docs-custom-block'
@@ -40,7 +40,7 @@ export type EmbedLayout =
 
 export type EmbedSurfacePlacement = 'host' | 'child' | 'hidden' | 'compact';
 
-export interface EmbedLayoutPolicy {
+export interface IEmbedLayoutPolicy {
     ribbon?: EmbedSurfacePlacement;
     productToolbar?: EmbedSurfacePlacement;
     contextMenu?: EmbedSurfacePlacement;
@@ -50,13 +50,13 @@ export interface EmbedLayoutPolicy {
     floatingMenu?: EmbedSurfacePlacement;
 }
 
-export interface EmbedLayoutPolicies {
-    tab?: EmbedLayoutPolicy;
-    float?: EmbedLayoutPolicy;
-    docFlow?: EmbedLayoutPolicy;
+export interface IEmbedLayoutPolicies {
+    tab?: IEmbedLayoutPolicy;
+    float?: IEmbedLayoutPolicy;
+    docFlow?: IEmbedLayoutPolicy;
 }
 
-export const DEFAULT_EMBED_TAB_LAYOUT_POLICY: Required<EmbedLayoutPolicy> = {
+export const DEFAULT_EMBED_TAB_LAYOUT_POLICY: Required<IEmbedLayoutPolicy> = {
     ribbon: 'host',
     productToolbar: 'child',
     contextMenu: 'child',
@@ -66,7 +66,7 @@ export const DEFAULT_EMBED_TAB_LAYOUT_POLICY: Required<EmbedLayoutPolicy> = {
     floatingMenu: 'hidden',
 };
 
-export const DEFAULT_EMBED_FLOAT_LAYOUT_POLICY: Required<EmbedLayoutPolicy> = {
+export const DEFAULT_EMBED_FLOAT_LAYOUT_POLICY: Required<IEmbedLayoutPolicy> = {
     ribbon: 'hidden',
     productToolbar: 'child',
     contextMenu: 'child',
@@ -76,7 +76,7 @@ export const DEFAULT_EMBED_FLOAT_LAYOUT_POLICY: Required<EmbedLayoutPolicy> = {
     floatingMenu: 'child',
 };
 
-export const DEFAULT_EMBED_DOC_FLOW_LAYOUT_POLICY: Required<EmbedLayoutPolicy> = {
+export const DEFAULT_EMBED_DOC_FLOW_LAYOUT_POLICY: Required<IEmbedLayoutPolicy> = {
     ribbon: 'hidden',
     productToolbar: 'child',
     contextMenu: 'child',
@@ -86,7 +86,7 @@ export const DEFAULT_EMBED_DOC_FLOW_LAYOUT_POLICY: Required<EmbedLayoutPolicy> =
     floatingMenu: 'child',
 };
 
-export interface EmbedCapability {
+export interface IEmbedCapability {
     hostType: UniverInstanceType;
     childType: UniverInstanceType;
     entry: EmbedHostEntry;
@@ -97,7 +97,7 @@ export interface EmbedCapability {
     nestedEmbed: false;
 }
 
-export interface EmbedProductPluginConfig {
+export interface IEmbedProductPluginConfig {
     host?: boolean;
     guest?: boolean;
 }
@@ -105,7 +105,7 @@ export interface EmbedProductPluginConfig {
 export type EmbedSource =
     | {
         kind: 'ref';
-        ref: ResourceRef;
+        ref: IResourceRef;
     }
     | {
         kind: 'empty';
@@ -113,13 +113,13 @@ export type EmbedSource =
         creationConfig?: Record<string, unknown>;
     };
 
-export interface EmbedFloatingConfig {
+export interface IEmbedFloatingConfig {
     enabled?: boolean;
     layout?: EmbedLayout;
     fullscreen?: boolean;
 }
 
-export interface EmbedTabConfig {
+export interface IEmbedTabConfig {
     enabled?: boolean;
     container?: 'sheet-tab' | 'table-list' | 'slide-page-list';
     replaceHostMenu?: boolean;
@@ -128,12 +128,12 @@ export interface EmbedTabConfig {
     thumbnail?: boolean;
 }
 
-export interface EmbedSourceMeta {
+export interface IEmbedSourceMeta {
     renderHost?: EmbedRenderHost;
     verticalWheelMode?: 'self' | 'host';
     horizontalWheelMode?: 'self' | 'host' | 'expand-then-self';
-    floating?: false | EmbedFloatingConfig;
-    tab?: false | EmbedTabConfig;
+    floating?: false | IEmbedFloatingConfig;
+    tab?: false | IEmbedTabConfig;
     hostBlockChrome?: false | {
         leftHoverMenu?: boolean;
         draggable?: boolean;
@@ -143,7 +143,7 @@ export interface EmbedSourceMeta {
     };
 }
 
-export interface EmbedDescriptor {
+export interface IEmbedDescriptor {
     embedId: string;
     hostUnitId: string;
     hostType: UniverInstanceType;
@@ -153,18 +153,18 @@ export interface EmbedDescriptor {
     childUnitId?: string;
     childType?: UniverInstanceType;
     mode?: 'readonly' | 'interactive';
-    sourceMeta?: EmbedSourceMeta;
+    sourceMeta?: IEmbedSourceMeta;
     lifecycle?: 'active' | 'soft-deleted';
     createdAt?: number;
     updatedAt?: number;
 }
 
-export interface EmbedResource {
+export interface IEmbedResource {
     version: 1;
-    embeds: Record<string, EmbedDescriptor>;
+    embeds: Record<string, IEmbedDescriptor>;
 }
 
-export interface EmbeddedFocusOwner {
+export interface IEmbeddedFocusOwner {
     hostUnitId: string;
     embedId: string;
     childUnitId: string;
@@ -172,31 +172,31 @@ export interface EmbeddedFocusOwner {
     reason: 'pointer' | 'keyboard' | 'fullscreen';
 }
 
-export interface EmbedResolvedSource {
+export interface IEmbedResolvedSource {
     childUnitId: string;
     childType: UniverInstanceType;
     source: EmbedSource;
 }
 
-export interface EmbedCreateContext {
+export interface IEmbedCreateContext {
     embedId: string;
     hostUnitId: string;
     hostType: UniverInstanceType;
     hostAnchorId: string;
     entry: EmbedHostEntry;
     source: EmbedSource;
-    mode?: EmbedDescriptor['mode'];
-    sourceMeta?: EmbedSourceMeta;
+    mode?: IEmbedDescriptor['mode'];
+    sourceMeta?: IEmbedSourceMeta;
     hostContext?: Record<string, unknown>;
     parentEmbedId?: string;
 }
 
-export interface EmbedCreateResult {
-    descriptor: EmbedDescriptor;
-    resolvedSource: EmbedResolvedSource;
+export interface IEmbedCreateResult {
+    descriptor: IEmbedDescriptor;
+    resolvedSource: IEmbedResolvedSource;
 }
 
-export interface EmbedGuestContribution {
+export interface IEmbedGuestContribution {
     childType: UniverInstanceType;
     createEmptyUnit?: (config?: Record<string, unknown>, options?: ICreateUnitOptions) => {
         unitId: string;

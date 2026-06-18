@@ -15,7 +15,7 @@
  */
 
 import type { IConfigService as IConfigServiceType, Injector } from '@univerjs/core';
-import type { EmbedBlockContribution, EmbedChildViewContribution } from '@univerjs/embed-ui';
+import type { IEmbedBlockContribution, IEmbedChildViewContribution } from '@univerjs/embed-ui';
 import type { IDocFitToWidthOptions, IUniverDocsUIConfig } from './config/config';
 import { IConfigService, UniverInstanceType } from '@univerjs/core';
 import { createEmbedRibbonBlockContribution, mountEmbedRenderChildUnit } from '@univerjs/embed-ui';
@@ -30,14 +30,14 @@ const EMBED_DOC_FIT_TO_WIDTH_OPTIONS: IDocFitToWidthOptions = {
     align: 'start',
 };
 
-export function createDocsEmbedBlockContribution(): EmbedBlockContribution {
+export function createDocsEmbedBlockContribution(): IEmbedBlockContribution {
     return createEmbedRibbonBlockContribution({
         childType: UniverInstanceType.UNIVER_DOC,
         productName: 'Docs',
     });
 }
 
-export function createDocsEmbedChildViewContribution(): EmbedChildViewContribution {
+export function createDocsEmbedChildViewContribution(): IEmbedChildViewContribution {
     return {
         childType: UniverInstanceType.UNIVER_DOC,
         supportedLayouts: ['tab-peer', 'doc-width-scale', 'scroll-contained'],

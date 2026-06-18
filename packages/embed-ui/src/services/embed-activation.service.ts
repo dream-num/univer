@@ -15,8 +15,8 @@
  */
 
 import type { UniverInstanceType } from '@univerjs/core';
-import type { EmbedDescriptor } from '@univerjs/embed';
-import type { EmbedHostMenuOverride } from '../types/embed-ui';
+import type { IEmbedDescriptor } from '@univerjs/embed';
+import type { IEmbedHostMenuOverride } from '../types/embed-ui';
 import { Inject, IUniverInstanceService, Optional } from '@univerjs/core';
 import { EmbedFocusOwnerService } from '@univerjs/embed';
 import { EmbedHostChromeMode } from '../types/embed-ui';
@@ -41,7 +41,7 @@ export class EmbedActivationService {
         // noop
     }
 
-    activateTab(descriptor: EmbedDescriptor): EmbedHostMenuOverride | null {
+    activateTab(descriptor: IEmbedDescriptor): IEmbedHostMenuOverride | null {
         this._assertResolvedChild(descriptor);
         this._rememberPreviousChildCurrentUnit(descriptor);
         this._univerInstanceService.setCurrentUnitForType(descriptor.childUnitId!);
@@ -61,7 +61,7 @@ export class EmbedActivationService {
         });
     }
 
-    activateFloating(descriptor: EmbedDescriptor): void {
+    activateFloating(descriptor: IEmbedDescriptor): void {
         this._assertResolvedChild(descriptor);
         this._focusOwnerService.setFocusOwner({
             hostUnitId: descriptor.hostUnitId,
@@ -91,7 +91,7 @@ export class EmbedActivationService {
         });
     }
 
-    private _rememberPreviousChildCurrentUnit(descriptor: EmbedDescriptor): void {
+    private _rememberPreviousChildCurrentUnit(descriptor: IEmbedDescriptor): void {
         const childType = descriptor.childType!;
         const currentUnitId = this._getCurrentUnitId(childType);
         this._previousChildCurrentUnits.set(descriptor.embedId, {
@@ -136,7 +136,7 @@ export class EmbedActivationService {
             ?.getUnitId();
     }
 
-    private _assertResolvedChild(descriptor: EmbedDescriptor): void {
+    private _assertResolvedChild(descriptor: IEmbedDescriptor): void {
         if (!descriptor.childUnitId || descriptor.childType == null) {
             throw new Error('EMBED_ACTIVATION_CHILD_NOT_RESOLVED');
         }

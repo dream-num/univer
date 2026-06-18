@@ -15,7 +15,7 @@
  */
 
 import type { IResourceHook, IResourceManagerService } from '@univerjs/core';
-import type { EmbedResource } from '../types/embed';
+import type { IEmbedResource } from '../types/embed';
 import { UniverInstanceType } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { EMBED_RESOURCE_PLUGIN_NAME } from '../common/const';
@@ -24,10 +24,10 @@ import { EmbedResourceController } from './embed-resource.controller';
 
 describe('EmbedResourceController', () => {
     it('registers one canonical embed resource for all supported host products', () => {
-        let registered: IResourceHook<EmbedResource> | undefined;
+        let registered: IResourceHook<IEmbedResource> | undefined;
         const disposable = { dispose: vi.fn() };
         const resourceManager = {
-            registerPluginResource: vi.fn((hook: IResourceHook<EmbedResource>) => {
+            registerPluginResource: vi.fn((hook: IResourceHook<IEmbedResource>) => {
                 registered = hook;
                 return disposable;
             }),

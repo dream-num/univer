@@ -15,12 +15,12 @@
  */
 
 import type { ICommandService, IDisposable, IMutationInfo, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import type { EmbedDescriptor, EmbedHostEntry, EmbedLayout, EmbedLayoutPolicies, EmbedMenuBehavior } from '@univerjs/embed';
+import type { EmbedHostEntry, EmbedLayout, EmbedMenuBehavior, IEmbedDescriptor, IEmbedLayoutPolicies } from '@univerjs/embed';
 import type { IMenuManagerService, IRibbonService } from '@univerjs/ui';
 import type { Observable } from 'rxjs';
 
-export interface EmbedContainerContext {
-    descriptor: EmbedDescriptor;
+export interface IEmbedContainerContext {
+    descriptor: IEmbedDescriptor;
     layout: EmbedLayout;
     injector: Injector;
     hostElement?: HTMLElement;
@@ -31,18 +31,18 @@ export interface EmbedContainerContext {
     childType: UniverInstanceType;
 }
 
-export interface EmbedChildContainerContext extends EmbedContainerContext {
+export interface IEmbedChildContainerContext extends IEmbedContainerContext {
     hostElement: HTMLElement;
     container: HTMLElement;
-    renderScope: EmbedRenderScope;
-    runtimeScope: EmbedChildRuntimeScope;
+    renderScope: IEmbedRenderScope;
+    runtimeScope: IEmbedChildRuntimeScope;
 }
 
-export interface EmbedMenuOutlet {
+export interface IEmbedMenuOutlet {
     container: HTMLElement;
 }
 
-export interface EmbedRenderScope {
+export interface IEmbedRenderScope {
     hostUnitId: string;
     hostAnchorId: string;
     embedId: string;
@@ -55,13 +55,13 @@ export interface EmbedRenderScope {
     canvasRoot?: HTMLElement;
     overlayRoot?: HTMLElement;
     popupRoot?: HTMLElement;
-    menuOutlet?: EmbedMenuOutlet;
+    menuOutlet?: IEmbedMenuOutlet;
     active$: Observable<boolean>;
     fullscreen?: boolean;
 }
 
-export interface EmbedChildRuntimeScope {
-    descriptor: EmbedDescriptor;
+export interface IEmbedChildRuntimeScope {
+    descriptor: IEmbedDescriptor;
     host: {
         unitId: string;
         type: UniverInstanceType;
@@ -91,7 +91,7 @@ export interface EmbedChildRuntimeScope {
     dispose: () => void;
 }
 
-export interface EmbedHostMountResult {
+export interface IEmbedHostMountResult {
     hostElement?: HTMLElement;
     runtimeRoots?: {
         content?: HTMLElement;
@@ -104,61 +104,61 @@ export interface EmbedHostMountResult {
     disposable?: IDisposable;
 }
 
-export interface EmbedHostAnchorContext {
+export interface IEmbedHostAnchorContext {
     embedId: string;
     hostUnitId: string;
     hostType: UniverInstanceType;
     entry: EmbedHostEntry;
     requestedAnchorId?: string;
     hostContext?: Record<string, unknown>;
-    descriptor?: EmbedDescriptor;
+    descriptor?: IEmbedDescriptor;
 }
 
-export interface EmbedHostAnchorMutationPlan {
+export interface IEmbedHostAnchorMutationPlan {
     hostAnchorId: string;
     redoMutations: IMutationInfo[];
     undoMutations: IMutationInfo[];
 }
 
-export interface EmbedHostAnchorRemoveMutationPlan {
+export interface IEmbedHostAnchorRemoveMutationPlan {
     redoMutations: IMutationInfo[];
     undoMutations: IMutationInfo[];
 }
 
-export interface EmbedHostAdapterContribution {
+export interface IEmbedHostAdapterContribution {
     hostType: UniverInstanceType;
     entry: EmbedHostEntry;
-    createAnchor?: (context: EmbedHostAnchorContext) => string;
-    removeAnchor?: (context: EmbedHostAnchorContext & { hostAnchorId: string }) => void;
-    createAnchorPlan?: (context: EmbedHostAnchorContext) => EmbedHostAnchorMutationPlan;
-    removeAnchorPlan?: (context: EmbedHostAnchorContext & { hostAnchorId: string }) => EmbedHostAnchorRemoveMutationPlan;
-    afterCreateAnchor?: (context: EmbedHostAnchorContext & { hostAnchorId: string; descriptor: EmbedDescriptor }) => void;
-    afterRemoveAnchor?: (context: EmbedHostAnchorContext & { hostAnchorId: string; descriptor?: EmbedDescriptor }) => void;
-    activateAnchor?: (context: EmbedHostAnchorContext & { hostAnchorId: string; descriptor: EmbedDescriptor }) => void;
+    createAnchor?: (context: IEmbedHostAnchorContext) => string;
+    removeAnchor?: (context: IEmbedHostAnchorContext & { hostAnchorId: string }) => void;
+    createAnchorPlan?: (context: IEmbedHostAnchorContext) => IEmbedHostAnchorMutationPlan;
+    removeAnchorPlan?: (context: IEmbedHostAnchorContext & { hostAnchorId: string }) => IEmbedHostAnchorRemoveMutationPlan;
+    afterCreateAnchor?: (context: IEmbedHostAnchorContext & { hostAnchorId: string; descriptor: IEmbedDescriptor }) => void;
+    afterRemoveAnchor?: (context: IEmbedHostAnchorContext & { hostAnchorId: string; descriptor?: IEmbedDescriptor }) => void;
+    activateAnchor?: (context: IEmbedHostAnchorContext & { hostAnchorId: string; descriptor: IEmbedDescriptor }) => void;
 }
 
-export interface EmbedHostContainerContribution {
+export interface IEmbedHostContainerContribution {
     hostType: UniverInstanceType;
     entry: EmbedHostEntry;
     layout: EmbedLayout;
     supportedLayouts?: EmbedLayout[];
     menuBehavior: EmbedMenuBehavior;
-    mount?: (context: EmbedContainerContext) => EmbedHostMountResult | IDisposable | void;
+    mount?: (context: IEmbedContainerContext) => IEmbedHostMountResult | IDisposable | void;
 }
 
-export interface EmbedChildViewContribution {
+export interface IEmbedChildViewContribution {
     childType: UniverInstanceType;
     supportedLayouts: EmbedLayout[];
-    mount?: (context: EmbedChildContainerContext) => IDisposable | void;
+    mount?: (context: IEmbedChildContainerContext) => IDisposable | void;
 }
 
-export interface EmbedProductMenuContribution {
+export interface IEmbedProductMenuContribution {
     childType: UniverInstanceType;
     surface?: EmbedProductMenuSurface;
     menuSchema: unknown;
     id?: string;
     order?: number;
-    mountMenu?: (context: EmbedProductMenuMountContext) => IDisposable | void;
+    mountMenu?: (context: IEmbedProductMenuMountContext) => IDisposable | void;
 }
 
 export type EmbedProductMenuSurface =
@@ -170,7 +170,7 @@ export type EmbedProductMenuSurface =
     | 'side-panel'
     | 'floating-menu';
 
-export interface EmbedProductMenuMountContext {
+export interface IEmbedProductMenuMountContext {
     container: HTMLElement;
     childType: UniverInstanceType;
     surface?: EmbedProductMenuSurface;
@@ -182,7 +182,7 @@ export interface EmbedProductMenuMountContext {
     toolbarOnly?: boolean;
 }
 
-export interface EmbedProductRibbonOverride {
+export interface IEmbedProductRibbonOverride {
     mode?: EmbedHostChromeMode;
     ribbonService: IRibbonService;
     placeholderTitle?: string;
@@ -190,7 +190,7 @@ export interface EmbedProductRibbonOverride {
     disposable?: IDisposable;
 }
 
-export interface EmbedProductRibbonOverrideContext {
+export interface IEmbedProductRibbonOverrideContext {
     childType: UniverInstanceType;
     childUnitId?: string;
     injector: unknown;
@@ -199,13 +199,13 @@ export interface EmbedProductRibbonOverrideContext {
     entry: EmbedHostEntry;
 }
 
-export interface EmbedBlockContribution {
+export interface IEmbedBlockContribution {
     childType: UniverInstanceType;
     productName: string;
     hostChromeMode?: EmbedHostChromeMode;
     hostHeaderMode?: 'none' | 'placeholder';
-    layoutPolicy?: EmbedLayoutPolicies;
-    createRibbonOverride?: (context: EmbedProductRibbonOverrideContext) => EmbedProductRibbonOverride | undefined;
+    layoutPolicy?: IEmbedLayoutPolicies;
+    createRibbonOverride?: (context: IEmbedProductRibbonOverrideContext) => IEmbedProductRibbonOverride | undefined;
 }
 
 export enum EmbedHostChromeMode {
@@ -216,53 +216,53 @@ export enum EmbedHostChromeMode {
 
 export type EmbedFloatingStage = 'inactive' | 'stage1' | 'stage2';
 
-export interface EmbedFloatingActivation {
+export interface IEmbedFloatingActivation {
     hostUnitId: string;
     embedId: string;
     childUnitId: string;
     stage?: EmbedFloatingStage;
 }
 
-export interface EmbedFloatingMenuMountContext extends EmbedChildContainerContext {
-    active: EmbedFloatingActivation | null;
+export interface IEmbedFloatingMenuMountContext extends IEmbedChildContainerContext {
+    active: IEmbedFloatingActivation | null;
 }
 
-export interface EmbedFloatingMenuContribution {
+export interface IEmbedFloatingMenuContribution {
     hostType: UniverInstanceType;
     entry: EmbedHostEntry;
     childType?: UniverInstanceType;
-    mount: (context: EmbedFloatingMenuMountContext) => IDisposable | void;
+    mount: (context: IEmbedFloatingMenuMountContext) => IDisposable | void;
 }
 
-export interface EmbedPassiveViewportWheelContext extends EmbedChildContainerContext {
+export interface IEmbedPassiveViewportWheelContext extends IEmbedChildContainerContext {
     event: WheelEvent;
     stage: EmbedFloatingStage;
 }
 
-export interface EmbedPassiveViewportProvider {
+export interface IEmbedPassiveViewportProvider {
     childType: UniverInstanceType;
     supportedLayouts?: EmbedLayout[];
-    handleWheel: (context: EmbedPassiveViewportWheelContext) => boolean | void;
+    handleWheel: (context: IEmbedPassiveViewportWheelContext) => boolean | void;
 }
 
-export interface EmbedContentSize {
+export interface IEmbedContentSize {
     height?: number;
     width?: number;
 }
 
-export interface EmbedContentSizeMeasureContext {
+export interface IEmbedContentSizeMeasureContext {
     childType: UniverInstanceType;
     childUnit?: unknown;
     childUnitId: string;
     viewportWidth?: number;
 }
 
-export interface EmbedContentSizeProvider {
+export interface IEmbedContentSizeProvider {
     childType: UniverInstanceType;
-    measureContentSize: (context: EmbedContentSizeMeasureContext) => EmbedContentSize | undefined;
+    measureContentSize: (context: IEmbedContentSizeMeasureContext) => IEmbedContentSize | undefined;
 }
 
-export interface EmbedFullscreenSession {
+export interface IEmbedFullscreenSession {
     hostUnitId: string;
     embedId: string;
     childUnitId: string;
@@ -271,7 +271,7 @@ export interface EmbedFullscreenSession {
     layout: EmbedLayout;
 }
 
-export interface EmbedHostMenuOverride {
+export interface IEmbedHostMenuOverride {
     hostUnitId: string;
     embedId: string;
     childUnitId: string;
@@ -282,7 +282,7 @@ export interface EmbedHostMenuOverride {
     lockHostRibbon?: boolean;
 }
 
-export interface EmbedMountSession {
+export interface IEmbedMountSession {
     hostUnitId: string;
     embedId: string;
     childUnitId: string;
@@ -290,7 +290,7 @@ export interface EmbedMountSession {
     entry: EmbedHostEntry;
     layout: EmbedLayout;
     hostElement?: HTMLElement;
-    context?: EmbedChildContainerContext;
+    context?: IEmbedChildContainerContext;
 }
 
 export type EmbedFloatPreviewStatus = 'pending' | 'ready' | 'error' | 'stale';
@@ -310,7 +310,7 @@ export type EmbedFloatPreviewRenderResult =
     | HTMLCanvasElement
     | ImageBitmap;
 
-export interface EmbedFloatPreviewEntry<TViewState = unknown> {
+export interface IEmbedFloatPreviewEntry<TViewState = unknown> {
     embedId: string;
     childUnitId: string;
     childType: UniverInstanceType;
@@ -325,8 +325,8 @@ export interface EmbedFloatPreviewEntry<TViewState = unknown> {
     error?: unknown;
 }
 
-export interface EmbedFloatPreviewRenderRequest<TViewState = unknown> {
-    descriptor: EmbedDescriptor;
+export interface IEmbedFloatPreviewRenderRequest<TViewState = unknown> {
+    descriptor: IEmbedDescriptor;
     childUnitId: string;
     childType: UniverInstanceType;
     width: number;
@@ -334,45 +334,45 @@ export interface EmbedFloatPreviewRenderRequest<TViewState = unknown> {
     dpr: number;
     viewState?: TViewState;
     reason: EmbedFloatPreviewReason;
-    context?: EmbedChildContainerContext;
+    context?: IEmbedChildContainerContext;
 }
 
-export interface EmbedFloatPreviewInvalidationContext {
-    descriptor: EmbedDescriptor;
+export interface IEmbedFloatPreviewInvalidationContext {
+    descriptor: IEmbedDescriptor;
     childUnitId: string;
     childType: UniverInstanceType;
     reason: EmbedFloatPreviewInvalidationReason;
 }
 
-export interface EmbedFloatPreviewProvider<TViewState = unknown> {
+export interface IEmbedFloatPreviewProvider<TViewState = unknown> {
     childType: UniverInstanceType;
-    collectViewState: (context: EmbedChildContainerContext) => TViewState | Promise<TViewState>;
-    restoreViewState: (context: EmbedChildContainerContext, state: TViewState) => void | Promise<void>;
+    collectViewState: (context: IEmbedChildContainerContext) => TViewState | Promise<TViewState>;
+    restoreViewState: (context: IEmbedChildContainerContext, state: TViewState) => void | Promise<void>;
     renderPreview: (
-        request: EmbedFloatPreviewRenderRequest<TViewState>
+        request: IEmbedFloatPreviewRenderRequest<TViewState>
     ) => EmbedFloatPreviewRenderResult | null | undefined | Promise<EmbedFloatPreviewRenderResult | null | undefined>;
-    invalidateKeys?: (context: EmbedFloatPreviewInvalidationContext) => string[];
+    invalidateKeys?: (context: IEmbedFloatPreviewInvalidationContext) => string[];
 }
 
-export interface EmbedReadonlyPreviewRoots {
+export interface IEmbedReadonlyPreviewRoots {
     root: HTMLElement;
     content: HTMLElement;
     canvas?: HTMLElement;
 }
 
-export interface EmbedReadonlyPreviewContext<TViewState = unknown> extends EmbedContainerContext {
-    roots: EmbedReadonlyPreviewRoots;
+export interface IEmbedReadonlyPreviewContext<TViewState = unknown> extends IEmbedContainerContext {
+    roots: IEmbedReadonlyPreviewRoots;
     viewState?: TViewState;
     updateViewState: (viewState: TViewState) => void;
 }
 
-export interface EmbedReadonlyPreviewWheelContext<TViewState = unknown> extends EmbedReadonlyPreviewContext<TViewState> {
+export interface IEmbedReadonlyPreviewWheelContext<TViewState = unknown> extends IEmbedReadonlyPreviewContext<TViewState> {
     event: WheelEvent;
 }
 
-export interface EmbedReadonlyPreviewProvider<TViewState = unknown> {
+export interface IEmbedReadonlyPreviewProvider<TViewState = unknown> {
     childType: UniverInstanceType;
     supportedLayouts?: EmbedLayout[];
-    mount?: (context: EmbedReadonlyPreviewContext<TViewState>) => IDisposable | void;
-    handleWheel?: (context: EmbedReadonlyPreviewWheelContext<TViewState>) => boolean | void | Promise<boolean | void>;
+    mount?: (context: IEmbedReadonlyPreviewContext<TViewState>) => IDisposable | void;
+    handleWheel?: (context: IEmbedReadonlyPreviewWheelContext<TViewState>) => boolean | void | Promise<boolean | void>;
 }

@@ -15,9 +15,9 @@
  */
 
 import type { UniverInstanceType } from '@univerjs/core';
-import type { EmbedDescriptor, EmbedLayout } from '@univerjs/embed';
+import type { EmbedLayout, IEmbedDescriptor } from '@univerjs/embed';
 import type { PointerEvent as ReactPointerEvent } from 'react';
-import type { EmbedChildContainerContext, EmbedFloatingStage } from '../types/embed-ui';
+import type { EmbedFloatingStage, IEmbedChildContainerContext } from '../types/embed-ui';
 import { EmbedModelService } from '@univerjs/embed';
 import { useDependency } from '@univerjs/ui';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -27,7 +27,7 @@ import { EmbedFloatingActiveService } from '../services/embed-floating-active.se
 import { EmbedFullscreenService } from '../services/embed-fullscreen.service';
 import { EmbedMountService } from '../services/embed-mount.service';
 import { EmbedPassiveViewportRegistryService } from '../services/embed-passive-viewport-registry.service';
-import { EmbedFloatFullscreenButton } from './embed-float-fullscreen-button';
+import { EmbedFloatFullscreenButton } from './EmbedFloatFullscreenButton';
 
 const CLICK_DISTANCE_THRESHOLD = 4;
 const CLICK_DURATION_THRESHOLD = 500;
@@ -43,7 +43,7 @@ interface ClickIntentState {
 
 type FrameHandle = number | ReturnType<typeof globalThis.setTimeout>;
 
-export interface EmbedFloatDomData {
+export interface IEmbedFloatDomData {
     version: 1;
     embedId: string;
     hostUnitId?: string;
@@ -52,7 +52,7 @@ export interface EmbedFloatDomData {
     childType?: UniverInstanceType;
 }
 
-export function EmbedFloatDomRenderer(props: { data?: EmbedFloatDomData; initialStage?: EmbedFloatingStage; onRuntimeStageEnter?: (stage: EmbedFloatingStage) => void; onRuntimeStageExit?: () => void }) {
+export function EmbedFloatDomRenderer(props: { data?: IEmbedFloatDomData; initialStage?: EmbedFloatingStage; onRuntimeStageEnter?: (stage: EmbedFloatingStage) => void; onRuntimeStageExit?: () => void }) {
     ensureEmbedFloatDomStyles();
 
     const { initialStage, onRuntimeStageEnter, onRuntimeStageExit } = props;
@@ -76,7 +76,7 @@ export function EmbedFloatDomRenderer(props: { data?: EmbedFloatDomData; initial
     const [stage, setStage] = useState<EmbedFloatingStage>(() => initialStage ?? (data?.embedId ? floatingActiveService.getStage(data.embedId) : 'inactive'));
     const previousStageRef = useRef<EmbedFloatingStage>(stage);
     const clickIntentRef = useRef<ClickIntentState | undefined>(undefined);
-    const childContextRef = useRef<EmbedChildContainerContext | undefined>(undefined);
+    const childContextRef = useRef<IEmbedChildContainerContext | undefined>(undefined);
     const fullscreenRemountFrameRef = useRef<FrameHandle | undefined>(undefined);
     const fullscreenRemountTimerRef = useRef<ReturnType<typeof globalThis.setTimeout> | undefined>(undefined);
 
@@ -570,20 +570,20 @@ function cancelFrame(handle: FrameHandle): void {
     globalThis.clearTimeout(handle);
 }
 
-function normalizeFloatDomData(data: unknown): EmbedFloatDomData | undefined {
+function normalizeFloatDomData(data: unknown): IEmbedFloatDomData | undefined {
     if (!data || typeof data !== 'object') {
         return undefined;
     }
 
-    const candidate = data as Partial<EmbedFloatDomData>;
+    const candidate = data as Partial<IEmbedFloatDomData>;
     if (candidate.version !== 1 || !candidate.embedId || !candidate.hostAnchorId) {
         return undefined;
     }
 
-    return candidate as EmbedFloatDomData;
+    return candidate as IEmbedFloatDomData;
 }
 
-function resolveDescriptorLayout(descriptor: EmbedDescriptor): EmbedLayout | undefined {
+function resolveDescriptorLayout(descriptor: IEmbedDescriptor): EmbedLayout | undefined {
     const floating = descriptor.sourceMeta?.floating || undefined;
     if (floating && typeof floating === 'object' && floating.layout) {
         return floating.layout;

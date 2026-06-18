@@ -18,7 +18,7 @@
  * @vitest-environment jsdom
  */
 
-import type { EmbedDescriptor } from '@univerjs/embed';
+import type { IEmbedDescriptor } from '@univerjs/embed';
 import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { EmbedFocusOwnerService } from '@univerjs/embed';
 import { describe, expect, it, vi } from 'vitest';
@@ -134,7 +134,7 @@ describe('EmbedMountService focus bridge', () => {
             _sessions: Map<string, { session: { hostUnitId: string; embedId: string; layout: string }; setActive: (active: boolean) => void }>;
             _injector: { has: () => boolean };
             _initializeFloatingSessionActiveState: (
-                descriptor: EmbedDescriptor,
+                descriptor: IEmbedDescriptor,
                 layout: string,
                 setActive: (active: boolean) => void
             ) => void;
@@ -204,7 +204,7 @@ function registerFocusBridge(
             get: (identifier: unknown) => unknown;
         };
         _registerChildFocusBridge: (
-            descriptor: EmbedDescriptor,
+            descriptor: IEmbedDescriptor,
             rootElement: HTMLElement,
             mode: 'tab' | 'float' | 'inline'
         ) => { dispose: () => void };
@@ -249,7 +249,7 @@ function createRenderScopeService() {
     const service = Object.create(EmbedMountService.prototype) as unknown as {
         _overlayRootService: { register: () => { dispose: () => void } };
         _createRenderScope: (
-            descriptor: EmbedDescriptor,
+            descriptor: IEmbedDescriptor,
             layout: string,
             rootElement: HTMLElement
         ) => { setActive: (active: boolean) => void };
@@ -261,7 +261,7 @@ function createRenderScopeService() {
     return service;
 }
 
-function createDescriptor(): EmbedDescriptor {
+function createDescriptor(): IEmbedDescriptor {
     return {
         embedId: 'embed-1',
         hostUnitId: 'host-1',

@@ -15,12 +15,12 @@
  */
 
 import type { ICreateUnitOptions, Injector, IWorkbookData, IWorksheetData, Workbook } from '@univerjs/core';
-import type { EmbedCapability } from '@univerjs/embed';
+import type { IEmbedCapability } from '@univerjs/embed';
 import { BooleanNumber, generateRandomId, IUniverInstanceService, LocaleType, UniverInstanceType } from '@univerjs/core';
 import { registerEmbedCapabilities, registerEmbedGuestContribution } from '@univerjs/embed';
 import pkg from '../package.json';
 
-const SHEETS_HOST_EMBED_CAPABILITIES: readonly EmbedCapability[] = [
+const SHEETS_HOST_EMBED_CAPABILITIES: readonly IEmbedCapability[] = [
     {
         hostType: UniverInstanceType.UNIVER_SHEET,
         childType: UniverInstanceType.UNIVER_DOC,

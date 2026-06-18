@@ -17,7 +17,8 @@
 import { UniverInstanceType } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { EmbedHostChromeMode } from '../types/embed-ui';
-import { createEmbedNoHeaderBlockContribution } from './embed-block-contribution-factory';
+import { createEmbedNoHeaderBlockContribution, resolveEmbedProductRibbonMenuSchema } from './embed-block-contribution-factory';
+import { EmbedProductMenuRegistryService } from './embed-product-menu-registry.service';
 
 describe('createEmbedNoHeaderBlockContribution', () => {
     it('creates a title-only host chrome override without an empty ribbon toolbar', () => {
@@ -40,5 +41,52 @@ describe('createEmbedNoHeaderBlockContribution', () => {
         expect(override?.mode).toBe(EmbedHostChromeMode.TITLE_ONLY);
         expect(override?.placeholderTitle).toBe('Bases');
         expect(override?.hideToolbar).toBe(true);
+    });
+});
+
+describe('resolveEmbedProductRibbonMenuSchema', () => {
+    it('prefers registered product ribbon menu schemas over block fallback schemas', () => {
+        const registeredMenuSchema = { ribbon: { registered: true } };
+        const fallbackMenuSchema = { ribbon: { fallback: true } };
+        const registry = {
+            getMergedMenuSchema: () => registeredMenuSchema,
+        };
+        const injector = {
+            has: (token: unknown) => token === EmbedProductMenuRegistryService,
+            get: (token: unknown) => {
+                if (token !== EmbedProductMenuRegistryService) {
+                    throw new Error('unexpected token');
+                }
+                return registry;
+            },
+        };
+
+        expect(resolveEmbedProductRibbonMenuSchema(
+            injector as never,
+            UniverInstanceType.UNIVER_SHEET,
+            fallbackMenuSchema
+        )).toBe(registeredMenuSchema);
+    });
+
+    it('falls back to the block menu schema when no product ribbon menu is registered', () => {
+        const fallbackMenuSchema = { ribbon: { fallback: true } };
+        const registry = {
+            getMergedMenuSchema: () => undefined,
+        };
+        const injector = {
+            has: (token: unknown) => token === EmbedProductMenuRegistryService,
+            get: (token: unknown) => {
+                if (token !== EmbedProductMenuRegistryService) {
+                    throw new Error('unexpected token');
+                }
+                return registry;
+            },
+        };
+
+        expect(resolveEmbedProductRibbonMenuSchema(
+            injector as never,
+            UniverInstanceType.UNIVER_SHEET,
+            fallbackMenuSchema
+        )).toBe(fallbackMenuSchema);
     });
 });

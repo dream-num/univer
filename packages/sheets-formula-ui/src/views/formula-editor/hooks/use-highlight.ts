@@ -79,6 +79,7 @@ export function calcHighlightRanges(opts: {
     const skeleton = sheetSkeletonManagerService?.getSkeleton(currentSheetId);
     if (!skeleton) return;
     const endIndexes: number[] = [];
+    const currentSelections = refSelectionsService.getCurrentSelections();
     for (let i = 0, len = refSelections.length; i < len; i++) {
         const refSelection = refSelections[i];
         const { themeColor, token, refIndex, endIndex } = refSelection;
@@ -106,9 +107,10 @@ export function calcHighlightRanges(opts: {
         const range = setEndForRange(rawRange, worksheet.getRowCount(), worksheet.getColumnCount());
         range.unitId = unitId;
         range.sheetId = currentSheetId;
+        const currentSelection = currentSelections[selectionWithStyle.length];
         selectionWithStyle.push({
             range,
-            primary: null,
+            primary: currentSelection ? currentSelection.primary : undefined,
             style: genFormulaRefSelectionStyle(themeService, themeColor, refIndex.toString()),
         });
         endIndexes.push(endIndex);

@@ -48,6 +48,10 @@ export enum FormulaSelectingType {
     EDIT_OTHER_WORKBOOK_REFERENCE = 4,
 }
 
+export function shouldSkipReferenceEditingByPointer(isDisabledByPointer: boolean, disableOnClick?: boolean): boolean {
+    return isDisabledByPointer && !disableOnClick;
+}
+
 // eslint-disable-next-line max-lines-per-function
 export function useFormulaSelecting(opts: { editorId: string; isFocus: boolean; disableOnClick?: boolean; unitId: string; subUnitId: string }) {
     const { editorId, isFocus, disableOnClick, unitId, subUnitId } = opts;
@@ -109,9 +113,10 @@ export function useFormulaSelecting(opts: { editorId: string; isFocus: boolean; 
 
         if (dataStream?.substring(0, 1) === '=' && (adding || editing)) {
             if (editing) {
-                if (isDisabledByPointer.current) {
+                if (shouldSkipReferenceEditingByPointer(isDisabledByPointer.current, disableOnClick)) {
                     return;
                 }
+                isDisabledByPointer.current = false;
 
                 const { sheetName, unitId } = focusingNode.range;
                 const currentUnitId = univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_SHEET)?.getUnitId();

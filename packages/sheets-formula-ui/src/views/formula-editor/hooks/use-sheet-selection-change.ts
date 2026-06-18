@@ -76,6 +76,53 @@ const prepareSelectionChangeContext = (opts: { editor?: Editor; lexerTreeBuilder
     };
 };
 
+export function getSelectionsForFormulaRefUpdate(
+    selections: IRange[],
+    updatingRefIndex: number,
+    isCtrlAddMode?: boolean
+): { orderedSelections: IRange[]; insertedSelection?: IRange } {
+    const orderedSelections = [...selections];
+    if (updatingRefIndex === -1) {
+        return { orderedSelections };
+    }
+
+    const insertedSelection = isCtrlAddMode ? orderedSelections.pop() : undefined;
+    const activeSelection = orderedSelections.pop();
+    if (activeSelection) {
+        orderedSelections.splice(updatingRefIndex, 0, activeSelection);
+    }
+
+    return { orderedSelections, insertedSelection };
+}
+
+export function createSelectionChangeHandler<TSelection>(opts: {
+    initialSelectionsCount: number;
+    onSelectionsChange: (selections: TSelection[], isEnd: boolean, isCtrlAddMode?: boolean) => void;
+}) {
+    let prevSelectionsCount = opts.initialSelectionsCount;
+    let pendingCtrlAddCount = 0;
+
+    return (selections: TSelection[], isEnd: boolean, options?: { initial?: boolean }) => {
+        if (options?.initial) {
+            return;
+        }
+
+        const isCtrlAddMode = selections.length > prevSelectionsCount;
+        if (isCtrlAddMode && !isEnd) {
+            pendingCtrlAddCount = selections.length;
+            return;
+        }
+        const shouldApplyPendingCtrlAdd = isEnd && selections.length === pendingCtrlAddCount;
+
+        if (isEnd) {
+            prevSelectionsCount = selections.length;
+            pendingCtrlAddCount = 0;
+        }
+
+        opts.onSelectionsChange(selections, isEnd, isCtrlAddMode || shouldApplyPendingCtrlAdd);
+    };
+}
+
 export const useSheetSelectionChange = (
     isNeed: boolean,
     isFocus: boolean,
@@ -161,12 +208,19 @@ export const useSheetSelectionChange = (
                 handleRangeChange(generateStringWithSequence(sequenceNodes), newOffset, isEnd);
             }
         } else {
-            const orderedSelections = [...selections];
-            // When isCtrlAddMode is true, skip the updatingRefIndex logic and do not adjust selection order
-            if (!isCtrlAddMode && updatingRefIndex !== -1) {
-                const last = orderedSelections.pop();
-                last && orderedSelections.splice(updatingRefIndex, 0, last);
-            }
+            const { orderedSelections, insertedSelection } = getSelectionsForFormulaRefUpdate(selections, updatingRefIndex, isCtrlAddMode);
+            const getRefRangeText = (range: IRange) => {
+                const rangeSheetId = range.sheetId ?? subUnitId;
+                const unitRangeName = {
+                    range,
+                    unitId: range.unitId ?? currentUnit!.getUnitId(),
+                    sheetName: getSheetNameById(range.unitId ?? currentUnit!.getUnitId(), rangeSheetId),
+                };
+                const isAcrossWorkbook = currentUnit?.getUnitId() !== unitId;
+                const isAcrossSheet = rangeSheetId !== subUnitId;
+                const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet && (isAcrossSheet || isAcrossWorkbook), sheetName, isAcrossWorkbook);
+                return refRanges[0];
+            };
             // Update all ref Selections
             let currentRefIndex = 0;
             const newTokens = sequenceNodes.map((item) => {
@@ -189,21 +243,18 @@ export const useSheetSelectionChange = (
                             return item.token;
                         }
                     }
+                    const refIndex = currentRefIndex;
                     const selection = orderedSelections[currentRefIndex];
                     currentRefIndex++;
                     if (!selection) {
                         return '';
                     }
-                    const rangeSheetId = selection.sheetId ?? subUnitId;
-                    const unitRangeName = {
-                        range: selection,
-                        unitId: selection.unitId ?? currentUnit!.getUnitId(),
-                        sheetName: getSheetNameById(selection.unitId ?? currentUnit!.getUnitId(), rangeSheetId),
-                    };
-                    const isAcrossWorkbook = currentUnit?.getUnitId() !== unitId;
-                    const isAcrossSheet = rangeSheetId !== subUnitId;
-                    const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet && (isAcrossSheet || isAcrossWorkbook), sheetName, isAcrossWorkbook);
-                    return refRanges[0];
+                    const refRangeText = getRefRangeText(selection);
+                    if (insertedSelection && refIndex === updatingRefIndex) {
+                        return `${refRangeText},${getRefRangeText(insertedSelection)}`;
+                    }
+
+                    return refRangeText;
                 }
                 return item.token;
             });
@@ -217,18 +268,9 @@ export const useSheetSelectionChange = (
                 }
             });
             const theLastList: string[] = [];
-            for (let index = currentRefIndex; index <= selections.length - 1; index++) {
-                const selection = selections[index];
-                const rangeSheetId = selection.sheetId ?? subUnitId;
-                const unitRangeName = {
-                    range: selection,
-                    unitId: selection.unitId ?? currentUnit!.getUnitId(),
-                    sheetName: getSheetNameById(selection.unitId ?? currentUnit!.getUnitId(), rangeSheetId),
-                };
-                const isAcrossWorkbook = currentUnit?.getUnitId() !== unitId;
-                const isAcrossSheet = rangeSheetId !== subUnitId;
-                const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet && (isAcrossSheet || isAcrossWorkbook), sheetName, isAcrossWorkbook);
-                theLastList.push(refRanges[0]);
+            for (let index = currentRefIndex; index <= orderedSelections.length - 1; index++) {
+                const selection = orderedSelections[index];
+                theLastList.push(getRefRangeText(selection));
             }
             const preNode = sequenceNodes[sequenceNodes.length - 1];
             const isPreNodeRef = preNode && (typeof preNode === 'string' ? false : preNode.nodeType === sequenceNodeType.REFERENCE);
@@ -239,39 +281,33 @@ export const useSheetSelectionChange = (
 
     useEffect(() => {
         if (refSelectionsRenderService && isNeed) {
-            let isFirst = true;
-            let prevSelectionsCount = 0;
-
-            const handleSelectionsChange = (selections: ISelectionWithCoord[], isEnd: boolean) => {
-                if (isFirst) {
-                    isFirst = false;
-                    prevSelectionsCount = selections.length;
-                    return;
-                }
-
-                // Determine if it is ctrl add mode by comparing selection count
-                const isCtrlAddMode = selections.length > prevSelectionsCount;
-
-                if (isEnd) {
-                    prevSelectionsCount = selections.length;
-                }
-
-                onSelectionsChange(selections.map((i) => i.rangeWithCoord), isEnd, isCtrlAddMode);
-            };
+            const initialSelectionsCount = Math.max(
+                refSelectionsRenderService.getSelectionDataWithStyle().length,
+                refSelectionsService.getCurrentSelections().length,
+                getRefSelections().length
+            );
+            const handleSelectionsChange = createSelectionChangeHandler<ISelectionWithCoord>({
+                initialSelectionsCount,
+                onSelectionsChange: (selections, isEnd, isCtrlAddMode) => {
+                    onSelectionsChange(selections.map((i) => i.rangeWithCoord), isEnd, isCtrlAddMode);
+                },
+            });
+            let isInitialMoveEnd = true;
 
             const disposableCollection = new DisposableCollection();
             disposableCollection.add(refSelectionsRenderService.selectionMoving$.subscribe((selections) => {
                 handleSelectionsChange(selections, false);
             }));
             disposableCollection.add(refSelectionsRenderService.selectionMoveEnd$.subscribe((selections) => {
-                handleSelectionsChange(selections, true);
+                handleSelectionsChange(selections, true, { initial: isInitialMoveEnd });
+                isInitialMoveEnd = false;
             }));
 
             return () => {
                 disposableCollection.dispose();
             };
         }
-    }, [isNeed, onSelectionsChange, refSelectionsRenderService]);
+    }, [getRefSelections, isNeed, onSelectionsChange, refSelectionsRenderService, refSelectionsService]);
 
     useEffect(() => {
         if (isFocus && refSelectionsRenderService && editor) {

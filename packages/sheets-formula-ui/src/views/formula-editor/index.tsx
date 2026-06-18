@@ -24,6 +24,8 @@ import type { IRefSelection } from './hooks/use-highlight';
 import {
     BuildTextUtils,
     createInternalEditorID,
+    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     DocumentFlavor,
     generateRandomId,
     HorizontalAlign,
@@ -93,6 +95,32 @@ export interface IFormulaEditorProps {
 
 export interface IFormulaEditorRef {
     isClickOutSide: (e: MouseEvent) => boolean;
+}
+
+interface IFormulaEditorSelectionSyncService {
+    getEditor: (editorId: string) => Pick<Editor, 'setSelectionRanges'> | null | undefined | void;
+}
+
+export function syncCounterpartFormulaEditorSelection(
+    editorService: IFormulaEditorSelectionSyncService,
+    editorId: string,
+    selections: ITextRange[] | undefined
+): void {
+    if (!selections?.length) {
+        return;
+    }
+
+    const syncEditorId = editorId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY
+        ? DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY
+        : editorId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY
+            ? DOCS_NORMAL_EDITOR_UNIT_ID_KEY
+            : null;
+
+    if (!syncEditorId) {
+        return;
+    }
+
+    editorService.getEditor(syncEditorId)?.setSelectionRanges(selections);
 }
 
 export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IFormulaEditorRef>) => {
@@ -329,6 +357,7 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
 
         const newSelections = offset !== -1 ? [{ startOffset: offset + 1, endOffset: offset + 1, collapsed: true }] : undefined;
         highlight(`=${refString}`, true, isEnd, newSelections);
+        syncCounterpartFormulaEditorSelection(editorService, editorId, newSelections);
         if (isEnd) {
             focus();
             if (offset !== -1) {

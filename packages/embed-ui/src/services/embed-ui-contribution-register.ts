@@ -17,6 +17,7 @@
 import type { Injector } from '@univerjs/core';
 import { EmbedBlockRegistryService } from './embed-block-registry.service';
 import { EmbedChildViewRegistryService } from './embed-child-view-registry.service';
+import { EmbedContentSizeRegistryService } from './embed-content-size-registry.service';
 import { EmbedFloatPreviewService } from './embed-float-preview.service';
 import { EmbedFloatingMenuRegistryService } from './embed-floating-menu-registry.service';
 import { EmbedHostAdapterRegistryService } from './embed-host-adapter-registry.service';
@@ -69,6 +70,7 @@ function hasEmbedUIRegistries(injector: Pick<Injector, 'has'>): boolean {
         injector.has(EmbedProductMenuRegistryService) &&
         injector.has(EmbedFloatingMenuRegistryService) &&
         injector.has(EmbedFloatPreviewService) &&
+        injector.has(EmbedContentSizeRegistryService) &&
         injector.has(EmbedPassiveViewportRegistryService) &&
         injector.has(EmbedReadonlyPreviewRegistryService)
     );

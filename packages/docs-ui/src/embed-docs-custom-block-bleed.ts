@@ -63,6 +63,12 @@ export function resolveDocsTableLikeCustomBlockContentWidth(authoritativeContent
         : Math.max(1, fallbackContentWidth);
 }
 
+export function resolveDocsTableLikeCustomBlockContentHeight(authoritativeContentHeight: number | undefined, fallbackContentHeight: number): number {
+    return Number.isFinite(authoritativeContentHeight) && (authoritativeContentHeight ?? 0) > 0
+        ? authoritativeContentHeight!
+        : Math.max(1, fallbackContentHeight);
+}
+
 function resolveDocsTableLikeCustomBlockBleedBounds(root: HTMLElement): { left: number; width: number } {
     const clippingAncestor = findClippingAncestor(root);
     if (clippingAncestor) {

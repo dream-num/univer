@@ -97,13 +97,14 @@ interface IDocFloatDomRuntimeParam extends IDocFloatDom {
     customBlockRenderViewport?: Pick<IDocsCustomBlockRenderViewport, 'contentWidth'>;
 }
 
-function createDocFloatDomRuntimeProps(param: IDocFloatDomRuntimeParam): Record<string, unknown> | undefined {
+export function mergeDocFloatDomRuntimeProps(existingProps: Record<string, unknown> | undefined, param: IDocFloatDomRuntimeParam): Record<string, unknown> | undefined {
     const contentWidth = param.customBlockRenderViewport?.contentWidth;
     if (!Number.isFinite(contentWidth) || (contentWidth ?? 0) <= 0) {
-        return undefined;
+        return existingProps;
     }
 
     return {
+        ...existingProps,
         customBlockRenderViewport: {
             contentWidth,
         },
@@ -226,7 +227,7 @@ export class DocFloatDomController extends Disposable {
                         canvas.dispatchEvent(new WheelEvent(evt.type, evt));
                     },
                     data,
-                    props: createDocFloatDomRuntimeProps(rectParam as IDocFloatDomRuntimeParam),
+                    props: mergeDocFloatDomRuntimeProps(undefined, rectParam as IDocFloatDomRuntimeParam),
                     unitId,
                 });
 
@@ -254,8 +255,9 @@ export class DocFloatDomController extends Disposable {
                         return;
                     }
 
+                    const currentProps = this._canvasFloatDomService.domLayers.find(([id]) => id === param.drawingId)?.[1].props;
                     this._canvasFloatDomService.updateFloatDom(param.drawingId, {
-                        props: createDocFloatDomRuntimeProps(param as IDocFloatDomRuntimeParam),
+                        props: mergeDocFloatDomRuntimeProps(currentProps, param as IDocFloatDomRuntimeParam),
                     });
                 });
             })

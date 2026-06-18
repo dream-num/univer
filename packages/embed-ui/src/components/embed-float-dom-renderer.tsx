@@ -409,6 +409,10 @@ export function EmbedFloatDomRenderer(props: { data?: EmbedFloatDomData; initial
         }
 
         const onWheel = (event: WheelEvent) => {
+            if (event.ctrlKey || event.metaKey) {
+                return;
+            }
+
             const currentStage = data?.embedId ? floatingActiveService.getStage(data.embedId) : 'inactive';
             if (currentStage === 'stage2') {
                 return;

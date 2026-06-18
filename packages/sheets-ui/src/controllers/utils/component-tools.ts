@@ -55,6 +55,8 @@ export function getSheetObject(
     univerInstanceService: IUniverInstanceService | Workbook,
     renderManagerService: IRenderManagerService | IRenderContext
 ): Nullable<ISheetObjectParam> {
+    if (!univerInstanceService || !renderManagerService) return null;
+
     const workbook = univerInstanceService instanceof Workbook
         ? univerInstanceService
         : univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);

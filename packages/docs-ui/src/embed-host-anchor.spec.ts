@@ -214,4 +214,24 @@ describe('resolveDocsCustomBlockRenderViewport', () => {
             width: 600,
         });
     });
+
+    it('keeps narrow sheet-like docs blocks at their actual content width outside modern docs', () => {
+        expect(resolveDocsCustomBlockRenderViewport({
+            childType: UniverInstanceType.UNIVER_BASE,
+            contentWidth: 420,
+            documentFlavor: DocumentFlavor.TRADITIONAL,
+            fallbackHeight: 480,
+            fallbackWidth: 960,
+            pageMarginLeft: 120,
+            pageMarginRight: 120,
+            pageWidth: 840,
+        })).toEqual({
+            contentHeight: 480,
+            contentWidth: 420,
+            height: 480,
+            layoutWidth: 420,
+            offsetLeft: 0,
+            width: 420,
+        });
+    });
 });

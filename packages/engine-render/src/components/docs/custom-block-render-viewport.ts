@@ -24,6 +24,7 @@ export interface IDocsCustomBlockRenderViewportInput {
 }
 
 export interface IDocsCustomBlockRenderViewport {
+    contentHeight?: number;
     contentWidth?: number;
     height: number;
     layoutWidth?: number;

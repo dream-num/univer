@@ -167,6 +167,7 @@ export {
     isSheetLikeDocsCustomBlockChildType,
     resolveDocsCustomBlockRenderViewport,
 } from './embed-host-anchor';
+export { registerDocsEmbedProductMenus } from './embed-product-menu';
 export { registerDocsEmbedUIContributions } from './embed-register';
 export {
     AlignMenuItemFactory,

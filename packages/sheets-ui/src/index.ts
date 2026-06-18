@@ -160,6 +160,7 @@ export {
     createSheetsSheetTabHostContainerContribution,
     EMBED_SHEETS_FLOATING_COMPONENT_KEY,
 } from './embed-host-adapter';
+export { registerSheetsEmbedProductMenus } from './embed-product-menu';
 export { registerSheetsEmbedUIContributions } from './embed-register';
 export {
     createEmbedSheetsTabCustomData,

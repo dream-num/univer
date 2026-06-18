@@ -736,6 +736,35 @@ describe('EmbedFloatDomRenderer', () => {
         expect(floatingActiveService.activate).not.toHaveBeenCalledWith(expect.anything(), 'stage2');
     });
 
+    it('lets ctrl/meta wheel gestures pass through for host zoom', async () => {
+        mountIntoHostElement.mockReturnValue({ context: createChildContext() });
+        passiveViewportRegistry.get.mockReturnValue(passiveViewportProvider);
+        await renderFloatBlock();
+
+        const gate = document.querySelector('[data-embed-float-interaction-gate]');
+        expect(gate).not.toBeNull();
+        const [, , runtimeRoots] = mountIntoHostElement.mock.calls[0];
+        const runtimeTarget = document.createElement('div');
+        const onWheel = vi.fn((event: WheelEvent) => event.preventDefault());
+        runtimeTarget.addEventListener('wheel', onWheel);
+        runtimeRoots.content.appendChild(runtimeTarget);
+
+        const wheel = new WheelEvent('wheel', {
+            bubbles: true,
+            cancelable: true,
+            ctrlKey: true,
+            deltaY: 120,
+        });
+        await act(async () => {
+            gate!.dispatchEvent(wheel);
+        });
+
+        expect(passiveViewportProvider.handleWheel).not.toHaveBeenCalled();
+        expect(onWheel).not.toHaveBeenCalled();
+        expect(wheel.defaultPrevented).toBe(false);
+        expect(floatingActiveService.activate).not.toHaveBeenCalledWith(expect.anything(), 'stage2');
+    });
+
     it('lets host scrolling continue when the passive viewport provider cannot consume stage1 wheel events', async () => {
         mountIntoHostElement.mockReturnValue({ context: createChildContext() });
         passiveViewportProvider.handleWheel.mockReturnValue(false);

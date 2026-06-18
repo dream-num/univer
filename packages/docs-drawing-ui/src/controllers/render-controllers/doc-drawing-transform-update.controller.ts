@@ -16,7 +16,7 @@
 
 import type { DocumentDataModel, ICommandInfo, IDrawingParam, ITransformState } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import type { Documents, DocumentSkeleton, IDocsTableRenderViewport, IDocumentSkeletonHeaderFooter, IDocumentSkeletonPage, IDocumentSkeletonRow, IDocumentSkeletonTable, Image, IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import type { Documents, DocumentSkeleton, IDocsCustomBlockRenderViewport, IDocsTableRenderViewport, IDocumentSkeletonHeaderFooter, IDocumentSkeletonPage, IDocumentSkeletonRow, IDocumentSkeletonTable, Image, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import {
     AlignTypeH,
     AlignTypeV,
@@ -47,6 +47,7 @@ interface IDrawingParamsWithBehindText {
     hidden?: boolean;
     transform: ITransformState;
     transforms: ITransformState[];
+    customBlockRenderViewport?: Pick<IDocsCustomBlockRenderViewport, 'contentWidth'>;
     // The same drawing render in different place, like image in header and footer.
     // The default value is BooleanNumber.FALSE. if it's true, Please use transforms.
     isMultiTransform: BooleanNumber;
@@ -559,6 +560,7 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
                     behindText,
                     transform,
                     transforms: [transform],
+                    customBlockRenderViewport: drawing.customBlockRenderViewport,
                     isMultiTransform,
                 };
             } else if (isMultiTransform === BooleanNumber.TRUE) {

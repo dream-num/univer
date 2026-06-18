@@ -18,7 +18,7 @@ import type { DocumentDataModel, IDisposable, IDrawingSearch, Nullable } from '@
 import type { IDocFloatDom } from '@univerjs/docs-drawing';
 import type { ISetDocZoomRatioOperationParams } from '@univerjs/docs-ui';
 import type { IDocFloatDomDataBase } from '@univerjs/drawing';
-import type { IBoundRectNoAngle, IRender, Rect, Scene } from '@univerjs/engine-render';
+import type { IBoundRectNoAngle, IDocsCustomBlockRenderViewport, IRender, Rect, Scene } from '@univerjs/engine-render';
 import type { IFloatDomLayout } from '@univerjs/ui';
 import type { IInsertDrawingCommandParams } from '../commands/commands/interfaces';
 import {
@@ -93,6 +93,23 @@ interface ICanvasFloatDomInfo {
 interface IDocFloatDomParams extends IDocFloatDomDataBase {
 }
 
+interface IDocFloatDomRuntimeParam extends IDocFloatDom {
+    customBlockRenderViewport?: Pick<IDocsCustomBlockRenderViewport, 'contentWidth'>;
+}
+
+function createDocFloatDomRuntimeProps(param: IDocFloatDomRuntimeParam): Record<string, unknown> | undefined {
+    const contentWidth = param.customBlockRenderViewport?.contentWidth;
+    if (!Number.isFinite(contentWidth) || (contentWidth ?? 0) <= 0) {
+        return undefined;
+    }
+
+    return {
+        customBlockRenderViewport: {
+            contentWidth,
+        },
+    };
+}
+
 export class DocFloatDomController extends Disposable {
     private _domLayerInfoMap = new Map<string, ICanvasFloatDomInfo>();
 
@@ -115,6 +132,7 @@ export class DocFloatDomController extends Disposable {
 
     private _initialize() {
         this._drawingAddRemoveListener();
+        this._drawingRuntimePropsListener();
         this._initScrollAndZoomEvent();
     }
 
@@ -208,6 +226,7 @@ export class DocFloatDomController extends Disposable {
                         canvas.dispatchEvent(new WheelEvent(evt.type, evt));
                     },
                     data,
+                    props: createDocFloatDomRuntimeProps(rectParam as IDocFloatDomRuntimeParam),
                     unitId,
                 });
 
@@ -225,6 +244,22 @@ export class DocFloatDomController extends Disposable {
                 this._domLayerInfoMap.set(rectParam.drawingId, info);
             }
         });
+    }
+
+    private _drawingRuntimePropsListener() {
+        this.disposeWithMe(
+            this._drawingManagerService.refreshTransform$.subscribe((params) => {
+                params.forEach((param) => {
+                    if (!this._domLayerInfoMap.has(param.drawingId)) {
+                        return;
+                    }
+
+                    this._canvasFloatDomService.updateFloatDom(param.drawingId, {
+                        props: createDocFloatDomRuntimeProps(param as IDocFloatDomRuntimeParam),
+                    });
+                });
+            })
+        );
     }
 
     private _addHoverForRect(o: Rect) {

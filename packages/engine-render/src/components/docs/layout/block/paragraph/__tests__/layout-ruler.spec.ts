@@ -20,14 +20,17 @@ import {
     BooleanNumber,
     DataStreamTreeTokenType,
     DocumentFlavor,
+    DrawingTypeEnum,
     GridType,
     ObjectRelativeFromV,
     PositionedObjectLayoutType,
     SpacingRule,
     WrapTextType,
 } from '@univerjs/core';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { GlyphType, LineType } from '../../../../../../basics/i-document-skeleton-cached';
+import { setDocsCustomBlockRenderViewportProvider } from '../../../../custom-block-render-viewport';
+import { createSkeletonCustomBlockGlyph } from '../../../model/glyph';
 import { __testing, getLineHeightMetrics, layoutParagraph, updateInlineDrawingPosition } from '../layout-ruler';
 import { lineBreaking } from '../linebreaking';
 import { shaping } from '../shaping';
@@ -89,6 +92,10 @@ describe('layout-ruler', () => {
             count: content.length,
         };
     }
+
+    afterEach(() => {
+        setDocsCustomBlockRenderViewportProvider(null);
+    });
 
     function getLineBoxHeight(metrics: ReturnType<typeof getLineHeightMetrics>) {
         return metrics.paddingTop + metrics.contentHeight + metrics.paddingBottom;
@@ -621,7 +628,7 @@ describe('layout-ruler', () => {
         section.columns = [column];
         column.lines = [line];
 
-        updateInlineDrawingPosition(line, new Map([['image-1', drawing]]), 80);
+        updateInlineDrawingPosition(line, new Map([['image-1', drawing]]), '', 80);
 
         expect(page.skeDrawings.get('old-image')).toEqual({ drawingId: 'old-image' });
         expect(page.skeDrawings.get('image-1')).toMatchObject({
@@ -664,5 +671,86 @@ describe('layout-ruler', () => {
         __testing.avoidFlowAffectingDrawingsForTable(table, page, column);
 
         expect(table.left).toBe(108);
+    });
+
+    it('stores custom block render viewport on inline skeleton drawings', () => {
+        setDocsCustomBlockRenderViewportProvider(() => ({
+            contentWidth: 320,
+            height: 80,
+            layoutWidth: 180,
+            width: 180,
+        }));
+
+        const page = {
+            marginLeft: 20,
+            marginRight: 20,
+            pageWidth: 400,
+            skeDrawings: new Map(),
+        };
+        const section = { parent: page };
+        const column = { left: 0, parent: section };
+        const paragraphInlineSkeDrawings = new Map([
+            [
+                'b1',
+                {
+                    drawingId: 'b1',
+                    aLeft: 0,
+                    aTop: 0,
+                    width: 0,
+                    height: 0,
+                    angle: 0,
+                    initialState: false,
+                    columnLeft: 0,
+                    lineHeight: 0,
+                    lineTop: 0,
+                    blockAnchorTop: 0,
+                    isPageBreak: false,
+                    drawingOrigin: {
+                        drawingId: 'b1',
+                        drawingType: DrawingTypeEnum.DRAWING_DOM,
+                        layoutType: PositionedObjectLayoutType.INLINE,
+                        docTransform: {
+                            angle: 0,
+                            size: { height: 60, width: 120 },
+                        },
+                        transform: {
+                            height: 60,
+                            left: 0,
+                            top: 0,
+                            width: 120,
+                        },
+                    },
+                },
+            ],
+        ]);
+        const glyph = createSkeletonCustomBlockGlyph({
+            charSpace: 1,
+            fontStyle: {
+                fontCache: '',
+                fontFamily: 'Arial',
+                fontSize: 12,
+                fontString: '12px Arial',
+                originFontSize: 12,
+            },
+            snapToGrid: BooleanNumber.FALSE,
+            textStyle: {},
+        }, 180, 80, 'b1');
+
+        updateInlineDrawingPosition({
+            divides: [{
+                glyphGroup: [glyph],
+                left: 0,
+                paddingLeft: 0,
+            }],
+            lineHeight: 100,
+            marginBottom: 0,
+            parent: column,
+            top: 10,
+        } as never, paragraphInlineSkeDrawings as never, 'test-doc', 10);
+
+        const drawing = page.skeDrawings.get('b1');
+        expect(drawing?.width).toBe(180);
+        expect(drawing?.height).toBe(80);
+        expect(drawing?.customBlockRenderViewport?.contentWidth).toBe(320);
     });
 });

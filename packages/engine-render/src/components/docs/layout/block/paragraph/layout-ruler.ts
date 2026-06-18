@@ -1656,7 +1656,7 @@ export function updateInlineDrawingPosition(
                 drawing.aTop = lineTop + lineHeight - 0.5 * glyphHeight - 0.5 * drawingHeight - marginBottom;
                 drawing.angle = angle;
                 drawing.customBlockRenderViewport = viewport
-                    ? { contentWidth: viewport.contentWidth }
+                    ? { contentHeight: viewport.contentHeight, contentWidth: viewport.contentWidth }
                     : undefined;
                 drawing.isPageBreak = isPageBreak;
                 drawing.lineTop = lineTop;

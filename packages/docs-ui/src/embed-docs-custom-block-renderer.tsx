@@ -27,6 +27,7 @@ import { scrollDocsTableLikeCustomBlockLive } from './embed-docs-custom-block-sc
 
 export interface EmbedDocsCustomBlockRuntimeProps {
     customBlockRenderViewport?: {
+        contentHeight?: number;
         contentWidth?: number;
     };
 }
@@ -180,6 +181,7 @@ export function EmbedDocsCustomBlockRenderer(props: { data?: EmbedFloatDomData }
         ? ({
             '--univer-embed-docs-block-bleed-left': `${viewport.bleedLeft}px`,
             '--univer-embed-docs-block-bleed-width': `${viewport.bleedWidth}px`,
+            '--univer-embed-docs-block-content-height': `${resolveDocsTableLikeCustomBlockContentHeight(props.customBlockRenderViewport?.contentHeight, 1)}px`,
             '--univer-embed-docs-block-content-width': `${viewport.contentWidth}px`,
             '--univer-embed-docs-block-virtual-width': `${viewport.virtualWidth}px`,
         } as CSSProperties & Record<string, string>)
@@ -226,6 +228,12 @@ function measureRuntimeContentWidth(root: HTMLElement, fallbackWidth: number): n
     collectElementContentWidth(liveCanvas, candidates);
 
     return Math.max(...candidates.filter((value) => Number.isFinite(value) && value > 0));
+}
+
+function resolveDocsTableLikeCustomBlockContentHeight(authoritativeContentHeight: number | undefined, fallbackContentHeight: number): number {
+    return Number.isFinite(authoritativeContentHeight) && (authoritativeContentHeight ?? 0) > 0
+        ? authoritativeContentHeight!
+        : Math.max(1, fallbackContentHeight);
 }
 
 function collectElementContentWidth(element: HTMLElement | null, candidates: number[]): void {
@@ -282,7 +290,7 @@ function ensureEmbedDocsCustomBlockStyles(): void {
 .univer-embed-docs-custom-block[data-embed-docs-custom-block-sheet-like="true"] .univer-embed-float-dom__live::before {
     display: block;
     width: var(--univer-embed-docs-block-virtual-width, 100%);
-    height: 1px;
+    height: var(--univer-embed-docs-block-content-height, 1px);
     pointer-events: none;
     content: '';
 }
@@ -290,6 +298,7 @@ function ensureEmbedDocsCustomBlockStyles(): void {
 .univer-embed-docs-custom-block[data-embed-docs-custom-block-sheet-like="true"] .univer-embed-float-dom__live-content {
     left: var(--univer-embed-docs-block-bleed-left, 0px);
     width: var(--univer-embed-docs-block-content-width, 100%);
+    min-height: var(--univer-embed-docs-block-content-height, 100%);
 }
 `;
     document.head.appendChild(style);

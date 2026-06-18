@@ -16,16 +16,19 @@
 
 import type { DocumentDataModel, Nullable } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { Disposable, Inject, IUniverInstanceService, Optional, UniverInstanceType } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, IUniverInstanceService, Optional, UniverInstanceType } from '@univerjs/core';
 import { EmbedContentSizeRegistryService } from '@univerjs/embed-ui';
 import { setDocsCustomBlockRenderViewportProvider } from '@univerjs/engine-render';
 import { VIEWPORT_KEY } from '../../basics/docs-view-key';
+import { SetDocZoomRatioOperation } from '../../commands/operations/set-doc-zoom-ratio.operation';
+import { collectDocsTableLikeEmbedChildUnitIds, shouldRefreshDocsCustomBlockSizeForCommand } from '../../embed-docs-custom-block-refresh';
 import { resolveDocsCustomBlockRenderViewport } from '../../embed-host-anchor';
 
 export class EmbedDocsCustomBlockBleedRenderController extends Disposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
         @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService,
+        @Inject(ICommandService) private readonly _commandService: ICommandService,
         @Optional(EmbedContentSizeRegistryService) private readonly _contentSizeRegistry?: EmbedContentSizeRegistryService
     ) {
         super();
@@ -77,6 +80,31 @@ export class EmbedDocsCustomBlockBleedRenderController extends Disposable implem
         this.disposeWithMe({
             dispose: () => setDocsCustomBlockRenderViewportProvider(null),
         });
+
+        this.disposeWithMe(this._commandService.onCommandExecuted((command) => {
+            if (command.id === SetDocZoomRatioOperation.id) {
+                return;
+            }
+
+            const childUnitIds = collectDocsTableLikeEmbedChildUnitIds(this._context.unit.getSnapshot().drawings);
+            if (!shouldRefreshDocsCustomBlockSizeForCommand({
+                childUnitIds,
+                commandParams: command.params,
+                hostUnitId: this._context.unitId,
+            })) {
+                return;
+            }
+
+            const zoomRatio = this._context.unit.zoomRatio;
+            if (typeof zoomRatio !== 'number') {
+                return;
+            }
+
+            this._commandService.syncExecuteCommand(SetDocZoomRatioOperation.id, {
+                unitId: this._context.unitId,
+                zoomRatio,
+            });
+        }));
     }
 
     private _getDocsLeft(): number {

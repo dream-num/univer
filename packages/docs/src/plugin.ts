@@ -62,6 +62,9 @@ export class UniverDocsPlugin extends Plugin {
     }
 
     override onStarting(): void {
+        registerDocsEmbedHostCapabilities(this._injector);
+        registerDocsEmbedGuestContribution(this._injector);
+
         this._initializeDependencies();
         this._initializeCommands();
     }

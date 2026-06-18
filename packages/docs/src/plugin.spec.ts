@@ -24,22 +24,27 @@ vi.mock('./embed-guest', () => ({
 }));
 
 describe('UniverDocsPlugin embed boundary', () => {
-    it('does not auto-register embed contributions from product plugin config', () => {
-        new UniverDocsPlugin(
-            { embed: { host: true, guest: true } } as never,
-            createInjector(),
+    it('registers product embed capabilities from the model plugin', () => {
+        const injector = createInjector();
+        const plugin = new UniverDocsPlugin(
+            {},
+            injector,
             createConfigService()
         );
 
-        expect(registerDocsEmbedHostCapabilities).not.toHaveBeenCalled();
-        expect(registerDocsEmbedGuestContribution).not.toHaveBeenCalled();
+        plugin.onStarting();
+
+        expect(registerDocsEmbedHostCapabilities).toHaveBeenCalledWith(injector);
+        expect(registerDocsEmbedGuestContribution).toHaveBeenCalledWith(injector);
     });
 });
 
 function createInjector() {
     return {
         add: vi.fn(),
-        get: vi.fn(),
+        get: vi.fn(() => ({
+            registerCommand: vi.fn(),
+        })),
     } as never;
 }
 

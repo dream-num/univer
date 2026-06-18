@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ComponentProps } from 'react';
+import type { ComponentProps, ComponentPropsWithoutRef } from 'react';
 import {
     CheckboxItem,
     Content,
@@ -347,7 +347,7 @@ function DropdownMenuSeparator({
 function DropdownMenuShortcut({
     className,
     ...props
-}: ComponentProps<'span'>) {
+}: ComponentPropsWithoutRef<'span'>) {
     return (
         <span
             className={clsx('univer-ml-auto univer-text-sm univer-tracking-widest univer-opacity-60', className)}

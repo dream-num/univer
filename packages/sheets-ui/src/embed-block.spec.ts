@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { EmbedChildContainerContext } from '@univerjs/embed-ui';
+import type { IEmbedChildContainerContext } from '@univerjs/embed-ui';
 import { describe, expect, it, vi } from 'vitest';
 
 const mountEmbedRenderChildUnit = vi.fn((_context: unknown, _renderManagerService: unknown, target: HTMLElement) => {
@@ -44,14 +44,14 @@ describe('createSheetsEmbedChildViewContribution', () => {
         });
         cancelAnimationFrame.mockImplementation(() => {});
 
-        const { createSheetsEmbedChildViewContribution } = await import('./embed-block');
+        const { createSheetsEmbedChildViewContribution } = await import('./EmbedBlock');
         const rootElement = document.createElement('div');
         const contribution = createSheetsEmbedChildViewContribution();
         const disposable = contribution.mount?.({
             childUnitId: 'sheet-1',
             runtimeScope: { roots: { canvas: rootElement } },
             renderScope: { mode: 'float', canvasRoot: rootElement, contentRoot: rootElement, rootElement },
-        } as unknown as EmbedChildContainerContext);
+        } as unknown as IEmbedChildContainerContext);
 
         expect(callbacks).toHaveLength(1);
         callbacks[0](0);

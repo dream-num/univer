@@ -16,7 +16,7 @@
 
 const DOCS_CUSTOM_BLOCK_VIEWPORT_INSET = 10;
 
-export interface DocsCustomBlockBleedViewport {
+export interface IDocsCustomBlockBleedViewport {
     bleedLeft: number;
     bleedRight: number;
     bleedWidth: number;
@@ -24,7 +24,7 @@ export interface DocsCustomBlockBleedViewport {
     virtualWidth: number;
 }
 
-export function createDefaultDocsTableLikeCustomBlockBleedViewport(): DocsCustomBlockBleedViewport {
+export function createDefaultDocsTableLikeCustomBlockBleedViewport(): IDocsCustomBlockBleedViewport {
     if (typeof window === 'undefined') {
         return { bleedLeft: 0, bleedRight: 0, bleedWidth: 1, contentWidth: 1, virtualWidth: 1 };
     }
@@ -39,7 +39,7 @@ export function createDefaultDocsTableLikeCustomBlockBleedViewport(): DocsCustom
     };
 }
 
-export function resolveDocsTableLikeCustomBlockBleedViewport(root: HTMLElement, contentWidth: number): DocsCustomBlockBleedViewport {
+export function resolveDocsTableLikeCustomBlockBleedViewport(root: HTMLElement, contentWidth: number): IDocsCustomBlockBleedViewport {
     const rootRect = root.getBoundingClientRect();
     const rootWidth = Math.max(1, rootRect.width);
     const normalizedContentWidth = Math.max(1, contentWidth);

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { EmbedDescriptor } from '../types/embed';
+import type { IEmbedDescriptor } from '../types/embed';
 import { UniverInstanceType } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { EmbedModelService } from './embed-model.service';
@@ -79,7 +79,7 @@ describe('EmbedModelService child unit uniqueness', () => {
     });
 });
 
-function createDescriptor(overrides: Partial<EmbedDescriptor> = {}): EmbedDescriptor {
+function createDescriptor(overrides: Partial<IEmbedDescriptor> = {}): IEmbedDescriptor {
     const childUnitId = overrides.childUnitId ?? 'child-sheet';
     return {
         embedId: overrides.embedId ?? 'embed-1',

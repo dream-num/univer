@@ -25,7 +25,7 @@ export type EmbedHostAnchorKind =
     | 'slides-floating-object'
     | 'slides-page-list-block';
 
-export interface EmbedHostAnchorRecord {
+export interface IEmbedHostAnchorRecord {
     hostAnchorId: string;
     embedId: string;
     hostUnitId: string;

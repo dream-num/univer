@@ -18,7 +18,7 @@ import type { UniverInstanceType } from '@univerjs/core';
 import type { EmbedHostEntry } from '@univerjs/embed';
 import { UniverInstanceType as UniverType } from '@univerjs/core';
 
-export interface EmbedHostChromePolicyInput {
+export interface IEmbedHostChromePolicyInput {
     entry?: EmbedHostEntry | string;
     childType?: UniverInstanceType;
     hasMountedEmbedSlot?: boolean;
@@ -27,7 +27,7 @@ export interface EmbedHostChromePolicyInput {
     hasMountedBaseWorkbench?: boolean;
 }
 
-export interface EmbedHostChromePolicy {
+export interface IEmbedHostChromePolicy {
     hideHostHeaderChrome: boolean;
     hideHostFormulaBar: boolean;
     hideSheetFooterControls: boolean;
@@ -36,7 +36,7 @@ export interface EmbedHostChromePolicy {
     restoreEmbedBaseWorkbench: boolean;
 }
 
-export function getEmbedHostChromePolicy(input: EmbedHostChromePolicyInput): EmbedHostChromePolicy {
+export function getEmbedHostChromePolicy(input: IEmbedHostChromePolicyInput): IEmbedHostChromePolicy {
     const hasActiveEntry = Boolean(input.entry);
     const childType = input.childType;
     const activeBaseChild = childType === UniverType.UNIVER_BASE;

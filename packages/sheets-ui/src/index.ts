@@ -142,17 +142,15 @@ export {
 export { SheetsScrollRenderController } from './controllers/render-controllers/scroll.render-controller';
 export { SheetRenderController } from './controllers/render-controllers/sheet.render-controller';
 export type { ITelemetryData } from './controllers/render-controllers/sheet.render-controller';
-export { createSheetsEmbedBlockContribution, createSheetsEmbedChildViewContribution } from './embed-block';
 export {
     createEmbedSheetsFloatingDrawing,
     createEmbedSheetsFloatingDrawingFromDescriptor,
     createEmbedSheetsFloatingObjectData,
-    type EmbedSheetsFloatingObjectData,
-    type EmbedSheetsFloatingObjectParams,
     getEmbedSheetsFloatingObjectData,
+    type IEmbedSheetsFloatingObjectData,
+    type IEmbedSheetsFloatingObjectParams,
     isEmbedSheetsFloatingDrawing,
 } from './embed-floating-anchor';
-export { createSheetsFloatingMenuContributions, createSheetsFloatingToolbarItems, createVisibleSheetsFloatingToolbarItems, type SheetFloatingToolbarItem } from './embed-floating-menu';
 export {
     createSheetsFloatingObjectHostAdapterContribution,
     createSheetsFloatingObjectHostContainerContribution,
@@ -167,9 +165,9 @@ export {
     createEmbedSheetsTabSnapshot,
     createEmbedSheetsTabSnapshotFromDescriptor,
     EMBED_SHEETS_TAB_CUSTOM_KEY,
-    type EmbedSheetsTabCustomData,
-    type EmbedSheetsTabSnapshotParams,
     getEmbedSheetsTabCustomData,
+    type IEmbedSheetsTabCustomData,
+    type IEmbedSheetsTabSnapshotParams,
     isEmbedSheetsTabSnapshot,
 } from './embed-tab-anchor';
 export {
@@ -187,6 +185,8 @@ export {
 } from './controllers/utils/component-tools';
 export { virtualizeDiscreteRanges } from './controllers/utils/range-tools';
 export { matchedSelectionByRowColIndex as checkInHeaderRanges } from './controllers/utils/selections-tools';
+export { createSheetsEmbedBlockContribution, createSheetsEmbedChildViewContribution } from './EmbedBlock';
+export { createSheetsFloatingMenuContributions, createSheetsFloatingToolbarItems, createVisibleSheetsFloatingToolbarItems, type SheetFloatingToolbarItem } from './EmbedFloatingMenu';
 export { useHighlightRange } from './hooks/use-highlight-range';
 export {
     COPY_SPECIAL_MENU_ID,

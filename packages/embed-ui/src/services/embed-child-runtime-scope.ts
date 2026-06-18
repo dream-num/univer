@@ -16,22 +16,22 @@
 
 import type { ICommandService, IDisposable, Injector, IUniverInstanceService } from '@univerjs/core';
 import type { IMenuManagerService } from '@univerjs/ui';
-import type { EmbedChildContainerContext, EmbedChildRuntimeScope } from '../types/embed-ui';
+import type { IEmbedChildContainerContext, IEmbedChildRuntimeScope } from '../types/embed-ui';
 import { ICommandService as ICommandServiceIdentifier, IUniverInstanceService as IUniverInstanceServiceIdentifier, toDisposable } from '@univerjs/core';
 import { IMenuManagerService as IMenuManagerServiceIdentifier } from '@univerjs/ui';
 import { EMBED_CANVAS_ROOT_ATTRIBUTE, EMBED_CONTENT_ROOT_ATTRIBUTE, EMBED_FOOTER_SLOT_ATTRIBUTE, EMBED_MENU_SLOT_ATTRIBUTE, EMBED_OVERLAY_ROOT_ATTRIBUTE, EMBED_POPUP_ROOT_ATTRIBUTE, findEmbedRuntimeSlot } from '../common/embed-runtime-slots';
 import { createEmbedChildUnitScopedInjector } from './embed-child-unit-scoped-injector';
 
-export type EmbedChildRuntimeScopeCreateContext = Omit<EmbedChildContainerContext, 'runtimeScope'>;
+export type EmbedChildRuntimeScopeCreateContext = Omit<IEmbedChildContainerContext, 'runtimeScope'>;
 
 export function createEmbedChildRuntimeScope(
     context: EmbedChildRuntimeScopeCreateContext,
     setActive: (active: boolean) => void
-): { runtimeScope: EmbedChildRuntimeScope; disposable: IDisposable } {
+): { runtimeScope: IEmbedChildRuntimeScope; disposable: IDisposable } {
     const scopedInjector = createScopedChildInjectorIfPossible(context) ?? context.injector;
     const ownsScopedInjector = scopedInjector !== context.injector;
     const roots = resolveRuntimeRoots(context);
-    const runtimeScope: EmbedChildRuntimeScope = {
+    const runtimeScope: IEmbedChildRuntimeScope = {
         descriptor: context.descriptor,
         host: {
             unitId: context.hostUnitId,
@@ -64,7 +64,7 @@ export function createEmbedChildRuntimeScope(
     };
 }
 
-function resolveRuntimeRoots(context: EmbedChildRuntimeScopeCreateContext): EmbedChildRuntimeScope['roots'] {
+function resolveRuntimeRoots(context: EmbedChildRuntimeScopeCreateContext): IEmbedChildRuntimeScope['roots'] {
     const root = context.renderScope.rootElement;
     const content = context.renderScope.contentRoot
         ?? findEmbedRuntimeSlot(root, EMBED_CONTENT_ROOT_ATTRIBUTE)
@@ -95,7 +95,7 @@ function createScopedChildInjectorIfPossible(context: EmbedChildRuntimeScopeCrea
         return undefined;
     }
 
-    return createEmbedChildUnitScopedInjector(context as EmbedChildContainerContext);
+    return createEmbedChildUnitScopedInjector(context as IEmbedChildContainerContext);
 }
 
 function getOptional<T>(injector: Injector, identifier: unknown): T | undefined {
@@ -106,7 +106,7 @@ function getOptional<T>(injector: Injector, identifier: unknown): T | undefined 
     return injector.get(identifier as never) as T;
 }
 
-function resolveRuntimeHostLayout(context: EmbedChildRuntimeScopeCreateContext): EmbedChildRuntimeScope['host']['layout'] {
+function resolveRuntimeHostLayout(context: EmbedChildRuntimeScopeCreateContext): IEmbedChildRuntimeScope['host']['layout'] {
     switch (context.descriptor.entry) {
         case 'docs-custom-block':
             return 'doc-flow';

@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import type { EmbeddedFocusOwner } from '../types/embed';
+import type { IEmbeddedFocusOwner } from '../types/embed';
 import { BehaviorSubject } from 'rxjs';
 
 export class EmbedFocusOwnerService {
-    private readonly _focusOwner$ = new BehaviorSubject<EmbeddedFocusOwner | null>(null);
+    private readonly _focusOwner$ = new BehaviorSubject<IEmbeddedFocusOwner | null>(null);
 
     readonly focusOwner$ = this._focusOwner$.asObservable();
 
-    getFocusOwner(): EmbeddedFocusOwner | null {
+    getFocusOwner(): IEmbeddedFocusOwner | null {
         return this._focusOwner$.getValue();
     }
 
-    setFocusOwner(owner: EmbeddedFocusOwner): void {
+    setFocusOwner(owner: IEmbeddedFocusOwner): void {
         const current = this.getFocusOwner();
         if (
             current &&

@@ -16,7 +16,7 @@
 
 import type { IUniverInstanceService } from '@univerjs/core';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
-import type { EmbedHostAdapterContribution, EmbedHostAnchorContext, EmbedHostAnchorModelService, EmbedHostAnchorMutationPlan, EmbedHostAnchorRecord, EmbedHostAnchorRemoveMutationPlan, EmbedHostContainerContribution } from '@univerjs/embed-ui';
+import type { EmbedHostAnchorModelService, IEmbedHostAdapterContribution, IEmbedHostAnchorContext, IEmbedHostAnchorMutationPlan, IEmbedHostAnchorRecord, IEmbedHostAnchorRemoveMutationPlan, IEmbedHostContainerContribution } from '@univerjs/embed-ui';
 import type { ISheetDrawingPosition, ISheetDrawingService } from '@univerjs/sheets-drawing';
 import { UniverInstanceType } from '@univerjs/core';
 import { REMOVE_EMBED_HOST_ANCHOR_RECORD_MUTATION_ID, SET_EMBED_HOST_ANCHOR_RECORD_MUTATION_ID } from '@univerjs/embed-ui';
@@ -28,7 +28,7 @@ import { createEmbedSheetsTabCustomData, createEmbedSheetsTabSnapshot } from './
 export function createSheetsFloatingObjectHostAdapterContribution(
     anchorModelService?: EmbedHostAnchorModelService,
     sheetDrawingService?: ISheetDrawingService | (() => ISheetDrawingService | undefined)
-): EmbedHostAdapterContribution {
+): IEmbedHostAdapterContribution {
     return {
         hostType: UniverInstanceType.UNIVER_SHEET,
         entry: 'sheets-floating-object',
@@ -45,7 +45,7 @@ export function createSheetsFloatingObjectHostAdapterContribution(
 export function createSheetsSheetTabHostAdapterContribution(
     anchorModelService?: EmbedHostAnchorModelService,
     univerInstanceService?: IUniverInstanceService
-): EmbedHostAdapterContribution {
+): IEmbedHostAdapterContribution {
     return {
         hostType: UniverInstanceType.UNIVER_SHEET,
         entry: 'sheets-sheet-tab',
@@ -67,7 +67,7 @@ export function createSheetsSheetTabHostAdapterContribution(
     };
 }
 
-export function createSheetsFloatingObjectHostContainerContribution(): EmbedHostContainerContribution {
+export function createSheetsFloatingObjectHostContainerContribution(): IEmbedHostContainerContribution {
     return {
         hostType: UniverInstanceType.UNIVER_SHEET,
         entry: 'sheets-floating-object',
@@ -77,7 +77,7 @@ export function createSheetsFloatingObjectHostContainerContribution(): EmbedHost
     };
 }
 
-export function createSheetsSheetTabHostContainerContribution(): EmbedHostContainerContribution {
+export function createSheetsSheetTabHostContainerContribution(): IEmbedHostContainerContribution {
     return {
         hostType: UniverInstanceType.UNIVER_SHEET,
         entry: 'sheets-sheet-tab',
@@ -92,9 +92,9 @@ export function createSheetsSheetTabHostContainerContribution(): EmbedHostContai
 }
 
 function createSheetsFloatingObjectAnchorPlan(
-    context: EmbedHostAnchorContext,
+    context: IEmbedHostAnchorContext,
     sheetDrawingService?: ISheetDrawingService
-): EmbedHostAnchorMutationPlan | undefined {
+): IEmbedHostAnchorMutationPlan | undefined {
     const hostSubUnitId = getHostSubUnitId(context.hostContext);
     if (!sheetDrawingService || !hostSubUnitId) {
         return undefined;
@@ -135,10 +135,10 @@ function createSheetsFloatingObjectAnchorPlan(
 }
 
 function createSheetsFloatingObjectRemoveAnchorPlan(
-    context: EmbedHostAnchorContext & { hostAnchorId: string },
-    record: EmbedHostAnchorRecord,
+    context: IEmbedHostAnchorContext & { hostAnchorId: string },
+    record: IEmbedHostAnchorRecord,
     sheetDrawingService?: ISheetDrawingService
-): EmbedHostAnchorRemoveMutationPlan | undefined {
+): IEmbedHostAnchorRemoveMutationPlan | undefined {
     const hostSubUnitId = getHostSubUnitId(record.hostContext);
     if (!sheetDrawingService || !hostSubUnitId) {
         return undefined;
@@ -162,7 +162,7 @@ function createSheetsFloatingObjectRemoveAnchorPlan(
     };
 }
 
-function createSheetsSheetTabAnchorPlan(context: EmbedHostAnchorContext): EmbedHostAnchorMutationPlan {
+function createSheetsSheetTabAnchorPlan(context: IEmbedHostAnchorContext): IEmbedHostAnchorMutationPlan {
     const record = createSheetsSheetTabRecord(context);
     const sheetIndex = getSheetIndex(record.hostContext);
     const sheetName = getSheetName(record.hostContext) ?? context.embedId;
@@ -186,9 +186,9 @@ function createSheetsSheetTabAnchorPlan(context: EmbedHostAnchorContext): EmbedH
 }
 
 function createSheetsSheetTabRemoveAnchorPlan(
-    context: EmbedHostAnchorContext & { hostAnchorId: string },
-    record: EmbedHostAnchorRecord
-): EmbedHostAnchorRemoveMutationPlan {
+    context: IEmbedHostAnchorContext & { hostAnchorId: string },
+    record: IEmbedHostAnchorRecord
+): IEmbedHostAnchorRemoveMutationPlan {
     const sheetIndex = getSheetIndex(record.hostContext);
     const sheetName = getSheetName(record.hostContext) ?? record.embedId;
     const sheet = createEmbedSheetsTabSnapshot({
@@ -209,14 +209,14 @@ function createSheetsSheetTabRemoveAnchorPlan(
     };
 }
 
-function createSheetsFloatingObjectRecord(context: EmbedHostAnchorContext): EmbedHostAnchorRecord {
+function createSheetsFloatingObjectRecord(context: IEmbedHostAnchorContext): IEmbedHostAnchorRecord {
     return createRecord({
         ...context,
         hostContext: normalizeSheetsFloatingObjectHostContext(context),
     }, 'sheets-floating-object', 'sheets-floating');
 }
 
-function createSheetsSheetTabRecord(context: EmbedHostAnchorContext): EmbedHostAnchorRecord {
+function createSheetsSheetTabRecord(context: IEmbedHostAnchorContext): IEmbedHostAnchorRecord {
     const hostAnchorId = context.requestedAnchorId ?? `sheets-tab:${context.embedId}`;
     return {
         hostAnchorId,
@@ -238,7 +238,7 @@ function createSheetsSheetTabRecord(context: EmbedHostAnchorContext): EmbedHostA
     };
 }
 
-function createRecord(context: EmbedHostAnchorContext, kind: EmbedHostAnchorRecord['kind'], prefix: string): EmbedHostAnchorRecord {
+function createRecord(context: IEmbedHostAnchorContext, kind: IEmbedHostAnchorRecord['kind'], prefix: string): IEmbedHostAnchorRecord {
     return {
         hostAnchorId: context.requestedAnchorId ?? `${prefix}:${context.embedId}`,
         embedId: context.embedId,
@@ -252,16 +252,16 @@ function createRecord(context: EmbedHostAnchorContext, kind: EmbedHostAnchorReco
 }
 
 function createRecordOnlyRemovePlan(
-    context: EmbedHostAnchorContext & { hostAnchorId: string },
-    record: EmbedHostAnchorRecord
-): EmbedHostAnchorRemoveMutationPlan {
+    context: IEmbedHostAnchorContext & { hostAnchorId: string },
+    record: IEmbedHostAnchorRecord
+): IEmbedHostAnchorRemoveMutationPlan {
     return {
         redoMutations: [{ id: REMOVE_EMBED_HOST_ANCHOR_RECORD_MUTATION_ID, params: { hostUnitId: context.hostUnitId, hostAnchorId: context.hostAnchorId } }],
         undoMutations: [{ id: SET_EMBED_HOST_ANCHOR_RECORD_MUTATION_ID, params: { record: { ...record, lifecycle: 'active' } } }],
     };
 }
 
-function createRecordOnlyCreatePlan(record: EmbedHostAnchorRecord): EmbedHostAnchorMutationPlan {
+function createRecordOnlyCreatePlan(record: IEmbedHostAnchorRecord): IEmbedHostAnchorMutationPlan {
     return {
         hostAnchorId: record.hostAnchorId,
         redoMutations: [{ id: SET_EMBED_HOST_ANCHOR_RECORD_MUTATION_ID, params: { record } }],
@@ -311,7 +311,7 @@ function getSheetDrawingService(sheetDrawingService: ISheetDrawingService | (() 
     return typeof sheetDrawingService === 'function' ? sheetDrawingService() : sheetDrawingService;
 }
 
-function normalizeSheetsFloatingObjectHostContext(context: EmbedHostAnchorContext): Record<string, unknown> | undefined {
+function normalizeSheetsFloatingObjectHostContext(context: IEmbedHostAnchorContext): Record<string, unknown> | undefined {
     const hostContext = context.hostContext;
     const configuredResizeBehavior = getSheetsFloatingResizeBehavior(hostContext);
     const resizeBehavior = configuredResizeBehavior === 'aspect-ratio' || context.descriptor?.childType === UniverInstanceType.UNIVER_SLIDE

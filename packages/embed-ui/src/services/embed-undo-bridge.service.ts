@@ -18,7 +18,7 @@ import type { IUndoRedoItem, IUndoRedoService } from '@univerjs/core';
 import { Inject, IUndoRedoService as IUndoRedoServiceToken } from '@univerjs/core';
 import { EmbedFocusOwnerService } from '@univerjs/embed';
 
-export interface EmbedUndoBridgeResult {
+export interface IEmbedUndoBridgeResult {
     stackUnitId: string;
     routedToHost: boolean;
 }
@@ -33,7 +33,7 @@ export class EmbedUndoBridgeService {
         // noop
     }
 
-    pushUndoRedoForChild(item: IUndoRedoItem): EmbedUndoBridgeResult {
+    pushUndoRedoForChild(item: IUndoRedoItem): IEmbedUndoBridgeResult {
         const stackUnitId = this.resolveStackUnitId(item.unitID);
         this._undoRedoService.pushUndoRedo({
             ...item,

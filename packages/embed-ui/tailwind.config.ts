@@ -14,9 +14,14 @@
  * limitations under the License.
  */
 
-export {
-    captureEmbedContextSceneCanvas as captureEmbedContextCanvasScreenshot,
-    type IEmbedSceneCanvasCaptureProvider as EmbedScreenshotProvider,
-    type EmbedSceneCanvasCaptureResult as EmbedScreenshotResult,
-    EmbedSceneCanvasCaptureService as EmbedScreenshotService,
-} from './embed-scene-canvas-capture.service';
+import type { Config } from 'tailwindcss';
+import preset from '@univerjs-infra/shared/tailwind';
+
+const config: Config = {
+    presets: [preset],
+    content: [
+        './src/**/*.{js,ts,jsx,tsx}',
+    ],
+};
+
+export default config;

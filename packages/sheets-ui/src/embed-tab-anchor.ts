@@ -15,24 +15,24 @@
  */
 
 import type { IWorksheetData } from '@univerjs/core';
-import type { EmbedDescriptor } from '@univerjs/embed';
+import type { IEmbedDescriptor } from '@univerjs/embed';
 import { BooleanNumber } from '@univerjs/core';
 
 export const EMBED_SHEETS_TAB_CUSTOM_KEY = 'UNIVER_EMBED_SHEETS_TAB';
 
-export interface EmbedSheetsTabCustomData {
+export interface IEmbedSheetsTabCustomData {
     version: 1;
     embedId: string;
     hostAnchorId: string;
 }
 
-export interface EmbedSheetsTabSnapshotParams {
+export interface IEmbedSheetsTabSnapshotParams {
     embedId: string;
     hostAnchorId: string;
     name?: string;
 }
 
-export function createEmbedSheetsTabSnapshot(params: EmbedSheetsTabSnapshotParams): IWorksheetData {
+export function createEmbedSheetsTabSnapshot(params: IEmbedSheetsTabSnapshotParams): IWorksheetData {
     return {
         id: params.hostAnchorId,
         name: params.name ?? params.embedId,
@@ -71,7 +71,7 @@ export function createEmbedSheetsTabSnapshot(params: EmbedSheetsTabSnapshotParam
     };
 }
 
-export function createEmbedSheetsTabCustomData(params: EmbedSheetsTabSnapshotParams): EmbedSheetsTabCustomData {
+export function createEmbedSheetsTabCustomData(params: IEmbedSheetsTabSnapshotParams): IEmbedSheetsTabCustomData {
     return {
         version: 1,
         embedId: params.embedId,
@@ -79,7 +79,7 @@ export function createEmbedSheetsTabCustomData(params: EmbedSheetsTabSnapshotPar
     };
 }
 
-export function createEmbedSheetsTabSnapshotFromDescriptor(descriptor: EmbedDescriptor, name?: string): IWorksheetData {
+export function createEmbedSheetsTabSnapshotFromDescriptor(descriptor: IEmbedDescriptor, name?: string): IWorksheetData {
     return createEmbedSheetsTabSnapshot({
         embedId: descriptor.embedId,
         hostAnchorId: descriptor.hostAnchorId,
@@ -87,7 +87,7 @@ export function createEmbedSheetsTabSnapshotFromDescriptor(descriptor: EmbedDesc
     });
 }
 
-export function getEmbedSheetsTabCustomData(snapshot: Pick<IWorksheetData, 'custom'>): EmbedSheetsTabCustomData | undefined {
+export function getEmbedSheetsTabCustomData(snapshot: Pick<IWorksheetData, 'custom'>): IEmbedSheetsTabCustomData | undefined {
     const value = snapshot.custom?.[EMBED_SHEETS_TAB_CUSTOM_KEY];
     if (!isEmbedSheetsTabCustomData(value)) {
         return undefined;
@@ -100,12 +100,12 @@ export function isEmbedSheetsTabSnapshot(snapshot: Pick<IWorksheetData, 'custom'
     return getEmbedSheetsTabCustomData(snapshot) != null;
 }
 
-function isEmbedSheetsTabCustomData(value: unknown): value is EmbedSheetsTabCustomData {
+function isEmbedSheetsTabCustomData(value: unknown): value is IEmbedSheetsTabCustomData {
     if (!value || typeof value !== 'object') {
         return false;
     }
 
-    const candidate = value as Partial<EmbedSheetsTabCustomData>;
+    const candidate = value as Partial<IEmbedSheetsTabCustomData>;
     return candidate.version === 1 &&
         typeof candidate.embedId === 'string' &&
         typeof candidate.hostAnchorId === 'string';

@@ -15,12 +15,12 @@
  */
 
 import type { Injector } from '@univerjs/core';
-import type { EmbedPassiveViewportProvider } from '@univerjs/embed-ui';
+import type { IEmbedPassiveViewportProvider } from '@univerjs/embed-ui';
 import { UniverInstanceType } from '@univerjs/core';
 import { scrollSceneViewportPassive } from '@univerjs/embed-ui';
 import { IRenderManagerService, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 
-export function createSheetsPassiveViewportProvider(injector: Injector): EmbedPassiveViewportProvider {
+export function createSheetsPassiveViewportProvider(injector: Injector): IEmbedPassiveViewportProvider {
     return {
         childType: UniverInstanceType.UNIVER_SHEET,
         handleWheel: (context) => {

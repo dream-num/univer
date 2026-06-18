@@ -15,23 +15,23 @@
  */
 
 import type { Injector } from '@univerjs/core';
-import type { EmbedCapability, EmbedHostEntry, EmbedSourceMeta, EmbedTabConfig } from '../types/embed';
+import type { EmbedHostEntry, IEmbedCapability, IEmbedSourceMeta, IEmbedTabConfig } from '../types/embed';
 import { UniverInstanceType } from '@univerjs/core';
 
-const PENDING_EMBED_CAPABILITIES = new WeakMap<object, EmbedCapability[]>();
+const PENDING_EMBED_CAPABILITIES = new WeakMap<object, IEmbedCapability[]>();
 
-const TAB_CONTAINER = new Map<EmbedHostEntry, EmbedTabConfig['container']>([
+const TAB_CONTAINER = new Map<EmbedHostEntry, IEmbedTabConfig['container']>([
     ['sheets-sheet-tab', 'sheet-tab'],
     ['bases-table-list-block', 'table-list'],
     ['slides-page-list-block', 'slide-page-list'],
 ]);
 
-export function createDefaultEmbedCapabilities(): EmbedCapability[] {
+export function createDefaultEmbedCapabilities(): IEmbedCapability[] {
     return [];
 }
 
-export function createDefaultEmbedSourceMeta(capability: EmbedCapability): EmbedSourceMeta {
-    const sourceMeta: EmbedSourceMeta = {};
+export function createDefaultEmbedSourceMeta(capability: IEmbedCapability): IEmbedSourceMeta {
+    const sourceMeta: IEmbedSourceMeta = {};
     if (capability.renderHost) {
         sourceMeta.renderHost = capability.renderHost;
     }
@@ -67,9 +67,9 @@ export function createDefaultEmbedSourceMeta(capability: EmbedCapability): Embed
 }
 
 export class EmbedCapabilityRegistryService {
-    private readonly _capabilities = new Map<string, EmbedCapability>();
+    private readonly _capabilities = new Map<string, IEmbedCapability>();
 
-    register(capability: EmbedCapability): void {
+    register(capability: IEmbedCapability): void {
         if (capability.hostType === capability.childType) {
             throw new Error('Cannot register same product embed capability');
         }
@@ -82,7 +82,7 @@ export class EmbedCapabilityRegistryService {
         this._capabilities.set(key, capability);
     }
 
-    registerMany(capabilities: readonly EmbedCapability[]): void {
+    registerMany(capabilities: readonly IEmbedCapability[]): void {
         capabilities.forEach((capability) => this.register(capability));
     }
 
@@ -90,11 +90,11 @@ export class EmbedCapabilityRegistryService {
         hostType: UniverInstanceType;
         childType: UniverInstanceType;
         entry: EmbedHostEntry;
-    }): EmbedCapability | undefined {
+    }): IEmbedCapability | undefined {
         return this._capabilities.get(this._key(params.hostType, params.childType, params.entry));
     }
 
-    list(): EmbedCapability[] {
+    list(): IEmbedCapability[] {
         return [...this._capabilities.values()];
     }
 
@@ -105,7 +105,7 @@ export class EmbedCapabilityRegistryService {
 
 export function registerEmbedCapabilities(
     injector: Pick<Injector, 'get' | 'has'>,
-    capabilities: readonly EmbedCapability[]
+    capabilities: readonly IEmbedCapability[]
 ): void {
     if (injector.has(EmbedCapabilityRegistryService)) {
         const registry = injector.get(EmbedCapabilityRegistryService);
@@ -139,12 +139,12 @@ export function flushPendingEmbedCapabilities(injector: Pick<Injector, 'get' | '
     PENDING_EMBED_CAPABILITIES.delete(key);
 }
 
-function registerCapabilityIfMissing(registry: EmbedCapabilityRegistryService, capability: EmbedCapability): void {
+function registerCapabilityIfMissing(registry: EmbedCapabilityRegistryService, capability: IEmbedCapability): void {
     if (!registry.getCapability(capability)) {
         registry.register(capability);
     }
 }
 
-function isSameCapability(left: EmbedCapability, right: EmbedCapability): boolean {
+function isSameCapability(left: IEmbedCapability, right: IEmbedCapability): boolean {
     return left.hostType === right.hostType && left.childType === right.childType && left.entry === right.entry;
 }

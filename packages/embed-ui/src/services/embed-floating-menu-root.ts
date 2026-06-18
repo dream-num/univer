@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { EmbedFloatingMenuMountContext } from '../types/embed-ui';
+import type { IEmbedFloatingMenuMountContext } from '../types/embed-ui';
 
-export function resolveEmbedFloatingMenuRoot(context: Pick<EmbedFloatingMenuMountContext, 'renderScope' | 'runtimeScope'>): HTMLElement {
+export function resolveEmbedFloatingMenuRoot(context: Pick<IEmbedFloatingMenuMountContext, 'renderScope' | 'runtimeScope'>): HTMLElement {
     if (context.renderScope.fullscreen && context.runtimeScope.roots.menuSlot) {
         return context.runtimeScope.roots.menuSlot;
     }

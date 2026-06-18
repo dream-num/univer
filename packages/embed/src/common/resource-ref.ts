@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { ResourceRef, ResourceRefFile, ResourceRefPart, ResourceRefUnit, ResourceRefUnitType } from '../types/resource-ref';
+import type { IResourceRef, IResourceRefUnit, ResourceRefFile, ResourceRefPart, ResourceRefUnitType } from '../types/resource-ref';
 
 const RESOURCE_REF_UNIT_TYPES = new Set<ResourceRefUnitType>(['sheet', 'doc', 'slide', 'base']);
 
-export function normalizeResourceRef(ref: ResourceRef): ResourceRef {
+export function normalizeResourceRef(ref: IResourceRef): IResourceRef {
     assertResourceRef(ref);
     return {
         file: normalizeResourceRefFile(ref.file),
@@ -31,11 +31,11 @@ export function normalizeResourceRef(ref: ResourceRef): ResourceRef {
     };
 }
 
-export function getResourceRefKey(ref: ResourceRef): string {
+export function getResourceRefKey(ref: IResourceRef): string {
     return JSON.stringify(normalizeResourceRef(ref));
 }
 
-export function assertResourceRef(ref: ResourceRef): asserts ref is ResourceRef {
+export function assertResourceRef(ref: IResourceRef): asserts ref is IResourceRef {
     if (!ref || typeof ref !== 'object') {
         throw new Error('RESOURCE_REF_INVALID');
     }
@@ -86,7 +86,7 @@ function assertResourceRefFile(file: ResourceRefFile): void {
     }
 }
 
-function assertResourceRefUnit(unit: ResourceRefUnit): void {
+function assertResourceRefUnit(unit: IResourceRefUnit): void {
     if (!unit || typeof unit !== 'object' || !unit.selector) {
         throw new Error('RESOURCE_REF_INVALID_UNIT');
     }
@@ -147,7 +147,7 @@ function normalizeResourceRefPart(part: ResourceRefPart): ResourceRefPart {
     }
 }
 
-function normalizeResourceRefExtensions(extensions: NonNullable<ResourceRef['extensions']>): NonNullable<ResourceRef['extensions']> {
+function normalizeResourceRefExtensions(extensions: NonNullable<IResourceRef['extensions']>): NonNullable<IResourceRef['extensions']> {
     return Object.fromEntries(Object.entries(extensions)
         .sort(([left], [right]) => left.localeCompare(right))
         .map(([key, value]) => [key, Array.isArray(value) ? [...value] : value]));

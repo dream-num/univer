@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-export interface DocsTableLikeCustomBlockScrollOptions {
+export interface IDocsTableLikeCustomBlockScrollOptions {
     maxScrollLeft?: number;
 }
 
-export function scrollDocsTableLikeCustomBlockLive(event: WheelEvent, live: HTMLElement, options: DocsTableLikeCustomBlockScrollOptions = {}): boolean {
+export function scrollDocsTableLikeCustomBlockLive(event: WheelEvent, live: HTMLElement, options: IDocsTableLikeCustomBlockScrollOptions = {}): boolean {
     if (event.defaultPrevented || event.ctrlKey || event.metaKey) {
         return false;
     }

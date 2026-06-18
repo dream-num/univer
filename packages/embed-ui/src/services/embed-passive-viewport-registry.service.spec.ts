@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type { EmbedPassiveViewportProvider } from '../types/embed-ui';
+import type { IEmbedPassiveViewportProvider } from '../types/embed-ui';
 import { describe, expect, it, vi } from 'vitest';
 import { EmbedPassiveViewportRegistryService } from './embed-passive-viewport-registry.service';
 
 describe('EmbedPassiveViewportRegistryService', () => {
     it('registers and disposes passive viewport providers by child type', () => {
         const service = new EmbedPassiveViewportRegistryService();
-        const provider: EmbedPassiveViewportProvider = {
+        const provider: IEmbedPassiveViewportProvider = {
             childType: 2 as never,
             handleWheel: vi.fn(),
         };
@@ -39,7 +39,7 @@ describe('EmbedPassiveViewportRegistryService', () => {
 
     it('filters providers by supported layout', () => {
         const service = new EmbedPassiveViewportRegistryService();
-        const provider: EmbedPassiveViewportProvider = {
+        const provider: IEmbedPassiveViewportProvider = {
             childType: 2 as never,
             supportedLayouts: ['aspect-fit'],
             handleWheel: vi.fn(),

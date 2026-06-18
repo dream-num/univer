@@ -23,14 +23,14 @@ import { EmbedFullscreenService } from '../services/embed-fullscreen.service';
 
 const EMBED_FLOAT_FULLSCREEN_BUTTON_STYLE_ID = 'univer-embed-float-fullscreen-button-styles';
 
-export interface EmbedFloatFullscreenButtonProps {
+export interface IEmbedFloatFullscreenButtonProps {
     hostUnitId?: string;
     embedId?: string;
     className?: string;
     title?: string;
 }
 
-export function EmbedFloatFullscreenButton(props: EmbedFloatFullscreenButtonProps) {
+export function EmbedFloatFullscreenButton(props: IEmbedFloatFullscreenButtonProps) {
     ensureEmbedFloatFullscreenButtonStyles();
 
     const { hostUnitId, embedId, className, title = 'Fullscreen' } = props;

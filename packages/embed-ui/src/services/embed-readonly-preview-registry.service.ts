@@ -15,12 +15,12 @@
  */
 
 import type { UniverInstanceType } from '@univerjs/core';
-import type { EmbedReadonlyPreviewProvider } from '../types/embed-ui';
+import type { IEmbedReadonlyPreviewProvider } from '../types/embed-ui';
 
 export class EmbedReadonlyPreviewRegistryService {
-    private readonly _providers = new Map<UniverInstanceType, EmbedReadonlyPreviewProvider<any>>();
+    private readonly _providers = new Map<UniverInstanceType, IEmbedReadonlyPreviewProvider<any>>();
 
-    register(provider: EmbedReadonlyPreviewProvider<any>): void {
+    register(provider: IEmbedReadonlyPreviewProvider<any>): void {
         if (this._providers.has(provider.childType)) {
             throw new Error(`Embed readonly preview provider already registered: ${provider.childType}`);
         }
@@ -28,11 +28,11 @@ export class EmbedReadonlyPreviewRegistryService {
         this._providers.set(provider.childType, provider);
     }
 
-    get(childType: UniverInstanceType): EmbedReadonlyPreviewProvider<any> | undefined {
+    get(childType: UniverInstanceType): IEmbedReadonlyPreviewProvider<any> | undefined {
         return this._providers.get(childType);
     }
 
-    list(): EmbedReadonlyPreviewProvider<any>[] {
+    list(): IEmbedReadonlyPreviewProvider<any>[] {
         return [...this._providers.values()];
     }
 }

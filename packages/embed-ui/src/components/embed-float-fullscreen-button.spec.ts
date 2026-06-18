@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { EmbedDescriptor } from '@univerjs/embed';
+import type { IEmbedDescriptor } from '@univerjs/embed';
 import { UniverInstanceType } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
-import { enterEmbedFullscreen } from './embed-float-fullscreen-button';
+import { enterEmbedFullscreen } from './EmbedFloatFullscreenButton';
 
 describe('enterEmbedFullscreen', () => {
     it('enters fullscreen when a resolved descriptor exists', () => {
@@ -52,7 +52,7 @@ describe('enterEmbedFullscreen', () => {
     });
 });
 
-function createDescriptor(): EmbedDescriptor {
+function createDescriptor(): IEmbedDescriptor {
     return {
         embedId: 'embed-1',
         hostUnitId: 'host-1',

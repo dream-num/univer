@@ -21,7 +21,7 @@ export type ResourceRefFile =
     | { kind: 'relative'; path: string }
     | { kind: 'uri'; uri: string };
 
-export interface ResourceRefUnit {
+export interface IResourceRefUnit {
     selector: string;
     type: ResourceRefUnitType;
 }
@@ -30,9 +30,9 @@ export type ResourceRefPart =
     | { kind: 'sheet'; sheetName: string; sheetId?: string }
     | { kind: 'range'; ref: string; sheetName: string; range: string; sheetId?: string };
 
-export interface ResourceRef {
+export interface IResourceRef {
     file: ResourceRefFile;
-    unit: ResourceRefUnit;
+    unit: IResourceRefUnit;
     part?: ResourceRefPart;
     extensions?: Record<string, string | readonly string[]>;
 }

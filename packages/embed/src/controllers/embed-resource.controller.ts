@@ -16,7 +16,7 @@
 
 import type { IResourceManagerService } from '@univerjs/core';
 import type { EmbedModelService } from '../services/embed-model.service';
-import type { EmbedResource } from '../types/embed';
+import type { IEmbedResource } from '../types/embed';
 import { Disposable, IResourceManagerService as IResourceManagerServiceToken, UniverInstanceType } from '@univerjs/core';
 import { EMBED_RESOURCE_PLUGIN_NAME } from '../common/const';
 
@@ -31,7 +31,7 @@ export class EmbedResourceController extends Disposable {
     }
 
     private _initResource(): void {
-        this.disposeWithMe(this._resourceManagerService.registerPluginResource<EmbedResource>({
+        this.disposeWithMe(this._resourceManagerService.registerPluginResource<IEmbedResource>({
             pluginName: EMBED_RESOURCE_PLUGIN_NAME,
             businesses: [
                 UniverInstanceType.UNIVER_DOC,

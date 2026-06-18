@@ -15,7 +15,7 @@
  */
 
 import type { IConfigService as IConfigServiceType } from '@univerjs/core';
-import type { EmbedChildContainerContext } from '@univerjs/embed-ui';
+import type { IEmbedChildContainerContext } from '@univerjs/embed-ui';
 import { IConfigService, UniverInstanceType } from '@univerjs/core';
 import { mountEmbedRenderChildUnit } from '@univerjs/embed-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -117,7 +117,7 @@ function createContext(docsConfig: unknown, mode: 'float' | 'tab' = 'float') {
             runtimeScope: {
                 injector,
             },
-        } as unknown as EmbedChildContainerContext,
+        } as unknown as IEmbedChildContainerContext,
         getConfigService: () => configService,
     };
 }

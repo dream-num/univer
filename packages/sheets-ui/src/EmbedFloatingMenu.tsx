@@ -15,7 +15,7 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import type { EmbedFloatingActivation, EmbedFloatingMenuContribution, EmbedFloatingMenuMountContext } from '@univerjs/embed-ui';
+import type { IEmbedFloatingActivation, IEmbedFloatingMenuContribution, IEmbedFloatingMenuMountContext } from '@univerjs/embed-ui';
 import type { IMenuItem, IMenuSchema, IValueOption } from '@univerjs/ui';
 import type { ReactNode } from 'react';
 import type { Observable } from 'rxjs';
@@ -274,14 +274,14 @@ export function resolveMenuCommandRequest(item: IMenuItem | undefined, params?: 
     };
 }
 
-export function createSheetsFloatingMenuContributions(): EmbedFloatingMenuContribution[] {
+export function createSheetsFloatingMenuContributions(): IEmbedFloatingMenuContribution[] {
     return createEmbedProductFloatingMenuContributions({
         childType: UniverInstanceType.UNIVER_SHEET,
         mount: mountSheetsFloatingMenu,
     });
 }
 
-function mountSheetsFloatingMenu(context: EmbedFloatingMenuMountContext) {
+function mountSheetsFloatingMenu(context: IEmbedFloatingMenuMountContext) {
     ensureSheetFloatingMenuStyles();
 
     const root = resolveEmbedFloatingMenuRoot(context);
@@ -319,7 +319,7 @@ interface ISheetEmbedFloatingMenuProps {
 
 export function resolveSheetsFloatingMenuStage(params: {
     embedId: string;
-    active: EmbedFloatingActivation | null;
+    active: IEmbedFloatingActivation | null;
     fullscreen?: boolean;
     usesDomFloatingStage: boolean;
     renderScopeActive: boolean;

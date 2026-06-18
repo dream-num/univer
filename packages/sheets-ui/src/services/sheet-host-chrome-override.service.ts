@@ -17,14 +17,14 @@
 import type { Observable } from 'rxjs';
 import { createIdentifier } from '@univerjs/core';
 
-export interface SheetHostChromeOverride {
+export interface ISheetHostChromeOverride {
     entry?: string;
     hostUnitId?: string;
 }
 
 export interface ISheetHostChromeOverrideService {
-    readonly override$: Observable<SheetHostChromeOverride | null>;
-    getOverride?(): SheetHostChromeOverride | null;
+    readonly override$: Observable<ISheetHostChromeOverride | null>;
+    getOverride?(): ISheetHostChromeOverride | null;
 }
 
 export const ISheetHostChromeOverrideService = createIdentifier<ISheetHostChromeOverrideService>('sheet-ui.host-chrome-override.service');

@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import { resolveDocsTableLikeCustomBlockBleedViewport } from './embed-docs-custom-block-bleed';
+import { resolveDocsTableLikeCustomBlockBleedViewport, resolveDocsTableLikeCustomBlockContentWidth } from './embed-docs-custom-block-bleed';
 
 describe('resolveDocsTableLikeCustomBlockBleedViewport', () => {
     it('uses the clipping ancestor as the bleed boundary', () => {
@@ -46,6 +46,12 @@ describe('resolveDocsTableLikeCustomBlockBleedViewport', () => {
             contentWidth: 960,
             virtualWidth: 1420,
         });
+    });
+
+    it('prefers authoritative product content width over runtime DOM fallback', () => {
+        expect(resolveDocsTableLikeCustomBlockContentWidth(1600, 960)).toBe(1600);
+        expect(resolveDocsTableLikeCustomBlockContentWidth(undefined, 960)).toBe(960);
+        expect(resolveDocsTableLikeCustomBlockContentWidth(0, 960)).toBe(960);
     });
 });
 

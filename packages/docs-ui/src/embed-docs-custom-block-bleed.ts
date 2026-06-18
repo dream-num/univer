@@ -57,6 +57,12 @@ export function resolveDocsTableLikeCustomBlockBleedViewport(root: HTMLElement, 
     };
 }
 
+export function resolveDocsTableLikeCustomBlockContentWidth(authoritativeContentWidth: number | undefined, fallbackContentWidth: number): number {
+    return Number.isFinite(authoritativeContentWidth) && (authoritativeContentWidth ?? 0) > 0
+        ? authoritativeContentWidth!
+        : Math.max(1, fallbackContentWidth);
+}
+
 function resolveDocsTableLikeCustomBlockBleedBounds(root: HTMLElement): { left: number; width: number } {
     const clippingAncestor = findClippingAncestor(root);
     if (clippingAncestor) {

@@ -22,6 +22,7 @@ import { EmbedFloatDomRenderer } from '@univerjs/embed-ui';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-ratio.operation';
+import { scrollDocsTableLikeCustomBlockLive } from './embed-docs-custom-block-scroll';
 
 const DOCS_CUSTOM_BLOCK_VIEWPORT_INSET = 10;
 
@@ -175,14 +176,7 @@ export function EmbedDocsCustomBlockRenderer(props: { data?: EmbedFloatDomData }
                 return;
             }
 
-            const delta = event.deltaX || (event.shiftKey ? event.deltaY : 0);
-            if (!delta) {
-                return;
-            }
-
-            const previous = live.scrollLeft;
-            live.scrollLeft += delta;
-            if (live.scrollLeft !== previous) {
+            if (scrollDocsTableLikeCustomBlockLive(event, live)) {
                 event.preventDefault();
                 event.stopPropagation();
             }
@@ -307,7 +301,7 @@ function ensureEmbedDocsCustomBlockStyles(): void {
     left: calc(var(--univer-embed-docs-block-bleed-left, 0px) * -1);
     width: var(--univer-embed-docs-block-bleed-width, 100%);
     overflow-x: auto;
-    overflow-y: hidden;
+    overflow-y: auto;
     scrollbar-width: thin;
 }
 .univer-embed-docs-custom-block[data-embed-docs-custom-block-sheet-like="true"] .univer-embed-float-dom__live::before {

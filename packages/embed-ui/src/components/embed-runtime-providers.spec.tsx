@@ -18,16 +18,39 @@
  * @vitest-environment jsdom
  */
 
+import type { ReactNode } from 'react';
 import { Injector, LocaleService, LocaleType } from '@univerjs/core';
 import { ConfigContext } from '@univerjs/design';
 import enUS from '@univerjs/design/locale/en-US';
-import { useContext } from 'react';
+import { act, useContext } from 'react';
 import { createRoot } from 'react-dom/client';
-import { act } from 'react-dom/test-utils';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { EmbedRuntimeProviders } from './embed-runtime-providers';
 
 let container: HTMLElement | undefined;
+
+(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+
+vi.mock('@univerjs/ui', async () => {
+    const { createContext, useContext } = await import('react');
+    const MockRediContext = createContext<Injector | null>(null);
+
+    return {
+        RediProvider: ({ children, value }: { children?: ReactNode; value: { injector: Injector } }) => (
+            <MockRediContext.Provider value={value.injector}>
+                {children}
+            </MockRediContext.Provider>
+        ),
+        useDependency: <T,>(token: Parameters<Injector['get']>[0]): T => {
+            const injector = useContext(MockRediContext);
+            if (!injector) {
+                throw new Error('MockRediContext is missing an injector');
+            }
+
+            return injector.get(token) as T;
+        },
+    };
+});
 
 afterEach(() => {
     container?.remove();

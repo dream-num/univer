@@ -302,6 +302,26 @@ describe('data validation canvas widgets', () => {
         expect(widget.isHit({ x: dropdownInfo.left + 1, y: dropdownInfo.top - 1 }, cellContext)).toBe(false);
     });
 
+    it('limits arrow-mode single-select hit testing to the dropdown arrow region', async () => {
+        const injector = createInjector();
+        const model = getDataValidationModel(injector);
+        model.rule = {
+            ...model.rule,
+            type: DataValidationType.LIST,
+            renderMode: DataValidationRenderMode.ARROW,
+        };
+        const { DropdownWidget } = await import('../dropdown-widget');
+        const widget = injector.createInstance(DropdownWidget);
+        const ctx = new RecordingRenderContext();
+        const cellContext = createCellContext('Done');
+
+        widget.drawWith(ctx as never, cellContext, createSkeleton() as never);
+        const dropdownInfo = getRenderedDropdownInfo(widget);
+
+        expect(widget.isHit({ x: dropdownInfo.left + 1, y: dropdownInfo.top + 1 }, cellContext)).toBe(true);
+        expect(widget.isHit({ x: dropdownInfo.left - 10, y: dropdownInfo.top + 1 }, cellContext)).toBe(false);
+    });
+
     it('applies list option colors while drawing multi-select dropdown capsules', async () => {
         const injector = createInjector();
         const model = getDataValidationModel(injector);

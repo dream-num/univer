@@ -196,4 +196,49 @@ describe('RangeSelectorDialog', () => {
         expect(RangeDialogState.confirmed).toEqual([]);
         expect(RangeDialogState.closed).toBe(1);
     });
+
+    it('confirms only the remaining ranges after a typed range is removed', async () => {
+        renderRangeDialog(root, createRangeDialogTestBed());
+
+        const firstInput = document.body.querySelector('input') as HTMLInputElement;
+        expect(firstInput).toBeDefined();
+
+        await act(async () => {
+            writeInput(firstInput, 'A1:A2');
+            await Promise.resolve();
+        });
+
+        await clickButton('Add range');
+
+        const inputs = Array.from(document.body.querySelectorAll('input')) as HTMLInputElement[];
+        expect(inputs.length).toBe(2);
+
+        await act(async () => {
+            writeInput(inputs[1], 'C3:D4');
+            await Promise.resolve();
+        });
+
+        const removeFirstRangeIcon = Array.from(document.body.querySelectorAll<SVGElement>('svg'))
+            .find((node) => node.classList.contains('univer-cursor-pointer'));
+        expect(removeFirstRangeIcon).toBeDefined();
+
+        await act(async () => {
+            removeFirstRangeIcon!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            await Promise.resolve();
+        });
+
+        await clickButton('Confirm');
+
+        expect(RangeDialogState.confirmed).toEqual([[
+            expect.objectContaining({
+                range: expect.objectContaining({
+                    startRow: 2,
+                    endRow: 3,
+                    startColumn: 2,
+                    endColumn: 3,
+                }),
+            }),
+        ]]);
+        expect(RangeDialogState.closed).toBe(0);
+    });
 });

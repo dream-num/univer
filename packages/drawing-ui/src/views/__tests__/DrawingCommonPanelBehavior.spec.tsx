@@ -179,4 +179,36 @@ describe('DrawingCommonPanel behavior', () => {
         expect(textIsAvailable(container, 'drawing-ui.image-panel.crop.title')).toBe(false);
         expect(textIsAvailable(container, 'drawing-ui.image-panel.arrange.title')).toBe(true);
     });
+
+    it('switches from single-image controls to multi-select controls when drawing focus changes', () => {
+        const drawings = [createDrawing('image-1', 10), createDrawing('image-2', 140)];
+        drawingManagerService.registerDrawingData(unitId, {
+            [subUnitId]: {
+                data: {
+                    'image-1': drawings[0],
+                    'image-2': drawings[1],
+                },
+                order: ['image-1', 'image-2'],
+            },
+        });
+        drawingManagerService.focusDrawing([{ unitId, subUnitId, drawingId: 'image-1' }]);
+
+        const rendered = renderWithRediContext(univer.__getInjector(), [drawings[0]]);
+        root = rendered.root;
+        container = rendered.container;
+
+        expect(textIsAvailable(container, 'drawing-ui.image-panel.align.title')).toBe(false);
+        expect(textIsAvailable(container, 'drawing-ui.image-panel.transform.title')).toBe(true);
+        expect(textIsAvailable(container, 'drawing-ui.image-panel.crop.title')).toBe(true);
+        expect(textIsAvailable(container, 'drawing-ui.image-panel.arrange.title')).toBe(true);
+
+        act(() => {
+            drawingManagerService.focusDrawing(drawings.map(({ unitId, subUnitId, drawingId }) => ({ unitId, subUnitId, drawingId })));
+        });
+
+        expect(textIsAvailable(container, 'drawing-ui.image-panel.align.title')).toBe(true);
+        expect(textIsAvailable(container, 'drawing-ui.image-panel.transform.title')).toBe(false);
+        expect(textIsAvailable(container, 'drawing-ui.image-panel.crop.title')).toBe(false);
+        expect(textIsAvailable(container, 'drawing-ui.image-panel.arrange.title')).toBe(true);
+    });
 });

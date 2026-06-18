@@ -59,7 +59,7 @@ import { IDialogService, IShortcutService, RediContext } from '@univerjs/ui';
 import { act, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Subject } from 'rxjs';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { SheetsTableComponentController } from '../../../controllers/sheet-table-component.controller';
 import { SheetTableThemeUIController } from '../../../controllers/sheet-table-theme-ui.controller';
 import { SheetsTableUiService } from '../../../services/sheets-table-ui.service';
@@ -145,6 +145,70 @@ class TestEditorModel {
     }
 }
 
+class TestDocSkeletonDataModel {
+    updateDocumentDataPageSize(): void {
+        // no-op
+    }
+}
+
+class TestDocSkeletonViewModel {
+    private readonly _dataModel = new TestDocSkeletonDataModel();
+
+    getDataModel(): TestDocSkeletonDataModel {
+        return this._dataModel;
+    }
+}
+
+class TestDocSkeletonManagerService {
+    private readonly _viewModel = new TestDocSkeletonViewModel();
+
+    getViewModel(): TestDocSkeletonViewModel {
+        return this._viewModel;
+    }
+
+    getSkeleton() {
+        return {
+            getActualSize: () => ({
+                actualWidth: 160,
+                actualHeight: 32,
+            }),
+        };
+    }
+}
+
+class TestEditorRender {
+    private _disposed = false;
+    private readonly _docSkeletonManagerService = new TestDocSkeletonManagerService();
+    readonly components = new Map<string, { translate: (x: number, y: number) => void }>();
+    readonly scene = {
+        transformByState: () => {
+            // no-op
+        },
+        getViewport: () => undefined,
+    };
+
+    readonly mainComponent = {
+        resize: () => {
+            // no-op
+        },
+        translate: () => {
+            // no-op
+        },
+    };
+
+    with(): TestDocSkeletonManagerService {
+        return this._docSkeletonManagerService;
+    }
+
+    isDisposed(): boolean {
+        return this._disposed;
+    }
+
+    dispose(): void {
+        this._disposed = true;
+    }
+}
+
 class TestEditor {
     readonly change$ = new Subject<void>();
     readonly input$ = new Subject<void>();
@@ -152,6 +216,7 @@ class TestEditor {
     readonly blur$ = new Subject<void>();
     readonly focus$ = new Subject<void>();
     readonly selectionChange$ = new Subject<void>();
+    readonly render = new TestEditorRender();
     private readonly _model: TestEditorModel;
 
     constructor(
@@ -191,12 +256,33 @@ class TestEditor {
         // no-op
     }
 
+    getSelectionRanges(): [] {
+        return [];
+    }
+
+    getBoundingClientRect() {
+        return {
+            width: 160,
+            height: 32,
+        };
+    }
+
     blur(): void {
         this.blur$.next();
     }
 
     focus(): void {
         this.focus$.next();
+    }
+
+    dispose(): void {
+        this.render.dispose();
+        this.change$.complete();
+        this.input$.complete();
+        this.paste$.complete();
+        this.blur$.complete();
+        this.focus$.complete();
+        this.selectionChange$.complete();
     }
 }
 
@@ -208,9 +294,11 @@ class TestEditorService {
 
     register(config: { editorUnitId?: string; initialSnapshot: IDocumentData }): IDisposable {
         const editorId = config.editorUnitId ?? config.initialSnapshot.id!;
-        this._editors.set(editorId, new TestEditor(editorId, config.initialSnapshot));
+        const editor = new TestEditor(editorId, config.initialSnapshot);
+        this._editors.set(editorId, editor);
 
         return toDisposable(() => {
+            editor.dispose();
             this._editors.delete(editorId);
         });
     }
@@ -606,6 +694,7 @@ describe('sheet table view components', () => {
         act(() => {
             root?.unmount();
         });
+        vi.useRealTimers();
         closeDisposable?.dispose();
         container?.remove();
         testBed?.univer.dispose();
@@ -717,6 +806,31 @@ describe('sheet table view components', () => {
 
         expect(container.textContent).toContain('Table range cannot overlap with other tables');
         expect(confirmed).toHaveLength(0);
+    });
+
+    it('keeps the range selector editor stable when its delayed resize runs', async () => {
+        vi.useFakeTimers();
+        testBed = createTestBed();
+        const unitId = testBed.workbook.getUnitId();
+        const rendered = renderWithRediContext(
+            testBed,
+            <SheetTableSelector
+                unitId={unitId}
+                subUnitId="sheet1"
+                range={{ startRow: 0, endRow: 3, startColumn: 0, endColumn: 1 }}
+                onConfirm={() => {}}
+                onCancel={() => {}}
+            />
+        );
+        root = rendered.root;
+        container = rendered.container;
+
+        await act(async () => {
+            vi.advanceTimersByTime(500);
+            await Promise.resolve();
+        });
+
+        expect(container.querySelector('svg')).not.toBeNull();
     });
 
     it('cancels table range selection without submitting a range update', async () => {

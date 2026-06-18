@@ -865,4 +865,30 @@ describe('SheetsThreadCommentPanel', () => {
 
         expect(container.textContent).toContain('Created after popup opens');
     });
+
+    it('keeps an open cell popup scoped to its sheet when another sheet receives the same cell reference', () => {
+        const testBed = createTestBed();
+        univer = testBed.univer;
+        testBed.popupService.showPopup({
+            unitId,
+            subUnitId: sheet2,
+            row: 3,
+            col: 2,
+            trigger: 'context-menu',
+        });
+
+        const rendered = renderCell(testBed.injector);
+        root = rendered.root;
+        container = rendered.container;
+
+        expect(container.textContent).toContain('C4 · Sheet 2');
+
+        act(() => {
+            testBed.threadCommentModel.addComment(unitId, sheet1, createComment('same-cell-other-sheet', sheet1, 'C4', 'Same cell on sheet one'));
+            testBed.threadCommentModel.addComment(unitId, sheet2, createComment('same-cell-current-sheet', sheet2, 'C4', 'Same cell on sheet two'));
+        });
+
+        expect(container.textContent).toContain('Same cell on sheet two');
+        expect(container.textContent).not.toContain('Same cell on sheet one');
+    });
 });

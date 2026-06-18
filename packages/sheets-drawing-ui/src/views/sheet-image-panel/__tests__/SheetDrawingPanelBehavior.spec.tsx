@@ -189,6 +189,52 @@ describe('SheetDrawingPanel behavior', () => {
         })?.anchorType).toBe(SheetDrawingAnchorType.None);
     });
 
+    it('applies anchor changes when the image panel opens with an existing sheet image focus', async () => {
+        currentTestBed = createSheetsDrawingUiTestBed(undefined, [
+            [IRenderManagerService, { useClass: TestRenderManagerService as never }],
+            [IconManager],
+            [ComponentManager],
+            [DrawingImageClipService],
+        ]);
+        const drawingManagerService = currentTestBed.get(IDrawingManagerService);
+        const sheetDrawingService = currentTestBed.get(ISheetDrawingService);
+        const drawings = [
+            createSheetDrawing(currentTestBed.unitId, currentTestBed.subUnitId, 'drawing-a', SheetDrawingAnchorType.None),
+        ];
+
+        await currentTestBed.commandService.executeCommand(InsertSheetDrawingCommand.id, {
+            unitId: currentTestBed.unitId,
+            drawings,
+        });
+        drawingManagerService.focusDrawing(drawings.map(({ unitId, subUnitId, drawingId }) => ({ unitId, subUnitId, drawingId })));
+
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <SheetDrawingPanel />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        const resizeAndMoveOption = container.querySelectorAll<HTMLInputElement>('input[type="radio"]')[0];
+
+        await act(async () => {
+            resizeAndMoveOption.click();
+            await Promise.resolve();
+        });
+
+        expect(sheetDrawingService.getDrawingByParam({
+            unitId: currentTestBed.unitId,
+            subUnitId: currentTestBed.subUnitId,
+            drawingId: 'drawing-a',
+        })?.anchorType).toBe(SheetDrawingAnchorType.Both);
+    });
+
     it('removes image controls when sheet drawing focus is cleared', async () => {
         currentTestBed = createSheetsDrawingUiTestBed(undefined, [
             [IRenderManagerService, { useClass: TestRenderManagerService as never }],

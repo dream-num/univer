@@ -735,6 +735,57 @@ describe('SheetNumfmtPanel', () => {
         });
     });
 
+    it('applies decreased decimal places from an existing number format through the real SetNumfmtCommand', async () => {
+        currentTestBed = createNumfmtViewTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        const commandResults: Array<Promise<unknown>> = [];
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <SheetNumfmtPanel
+                        value={{
+                            defaultValue: 1234.5,
+                            defaultPattern: '#,##0.00_);(#,##0.00)',
+                            row: 0,
+                            col: 0,
+                        }}
+                        onChange={(event) => {
+                            if (event.type === 'confirm') {
+                                commandResults.push(currentTestBed!.commandService.executeCommand(SetNumfmtCommand.id, {
+                                    values: [{
+                                        row: 0,
+                                        col: 0,
+                                        pattern: event.value,
+                                        type: getPatternType(event.value),
+                                    }],
+                                }) as Promise<unknown>);
+                            }
+                        }}
+                    />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        const decrementDecimalButton = container.querySelector('[aria-label="decrement"]') as HTMLElement;
+
+        await act(async () => {
+            decrementDecimalButton.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            await Promise.resolve();
+        });
+
+        await confirmPanel();
+        const results = await Promise.all(commandResults);
+
+        expect(results).toEqual([true]);
+        expect(currentTestBed.numfmtService.getValue(UNIT_ID, SUB_UNIT_ID, 0, 0)).toEqual({
+            pattern: '#,##0.0_);(#,##0.0)',
+        });
+    });
+
     it('keeps the current date pattern when the selected date option is clicked again', async () => {
         currentTestBed = createNumfmtViewTestBed();
         container = document.createElement('div');

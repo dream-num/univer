@@ -103,6 +103,7 @@ class TestCommandService {
 
 class TestUniverInstanceService {
     workbook: any;
+    embeddedUnitIds = new Set<string>();
 
     getCurrentUnitOfType() {
         return this.workbook;
@@ -110,6 +111,10 @@ class TestUniverInstanceService {
 
     getUnit(unitId: string) {
         return this.workbook?.getUnitId() === unitId ? this.workbook : null;
+    }
+
+    getUnitCreateOptions(unitId: string) {
+        return this.embeddedUnitIds.has(unitId) ? { embeddedRender: true } : undefined;
     }
 }
 
@@ -213,6 +218,7 @@ function createSheetHarness() {
     };
     const sheetSelectionRenderService = { selectionMoving: false };
     const render = {
+        getInjector: vi.fn(() => injector),
         scene: {
             getAncestorScale: () => ({ scaleX: 1, scaleY: 1 }),
             getViewport: () => ({
@@ -377,6 +383,20 @@ describe('SheetCanvasPopManagerService', () => {
 
         disposable?.dispose();
         expect(popupService.removedIds).toEqual(['popup-1']);
+    });
+
+    it('uses a scoped popup injector only for embedded sheet render units', () => {
+        const { service, popupService, render, univerInstanceService } = createSheetHarness();
+        const bound = { top: 10, left: 20, right: 30, bottom: 40 };
+
+        service.attachPopupToAbsolutePosition(bound, { componentKey: 'normal-popup' } as never, 'unit-1', 'sheet-1');
+        expect(popupService.lastPopup()?.injector).toBeUndefined();
+        expect(render.getInjector).not.toHaveBeenCalled();
+
+        univerInstanceService.embeddedUnitIds.add('unit-1');
+        service.attachPopupToAbsolutePosition(bound, { componentKey: 'embed-popup' } as never, 'unit-1', 'sheet-1');
+        expect(popupService.lastPopup()?.injector).toBeDefined();
+        expect(render.getInjector).toHaveBeenCalledTimes(1);
     });
 
     it('anchors a popup to a sheet position and refreshes its hidden freeze area on viewport changes', () => {

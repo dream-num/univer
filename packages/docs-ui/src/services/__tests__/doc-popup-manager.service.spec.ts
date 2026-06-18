@@ -61,7 +61,8 @@ class TestRenderManagerService {
         getBoundingClientRect: () => ({ left: 10, top: 20, width: 1000 }),
         style: { width: '1000px' },
     };
-
+    popupInjector = new Injector();
+    getInjector = vi.fn(() => this.popupInjector);
     readonly onTransformChange$ = new EventSubject();
     readonly onScrollAfter$ = new EventSubject();
 
@@ -78,6 +79,7 @@ class TestRenderManagerService {
             engine: {
                 getCanvasElement: () => this.canvasElement,
             },
+            getInjector: this.getInjector,
             mainComponent: {
                 getOffsetConfig: () => ({
                     docsLeft: 0,
@@ -113,8 +115,14 @@ class TestRenderManagerService {
 }
 
 class TestUniverInstanceService {
+    embeddedUnitIds = new Set<string>();
+
     getUnit(unitId: string) {
         return unitId === 'missing-doc-data' ? undefined : {};
+    }
+
+    getUnitCreateOptions(unitId: string) {
+        return this.embeddedUnitIds.has(unitId) ? { embeddedRender: true } : undefined;
     }
 }
 
@@ -152,6 +160,7 @@ function createService() {
         service: injector.get(DocCanvasPopManagerService),
         popupService: injector.get(ICanvasPopupService) as unknown as TestCanvasPopupService,
         renderManagerService: injector.get(IRenderManagerService) as unknown as TestRenderManagerService,
+        univerInstanceService: injector.get(IUniverInstanceService) as unknown as TestUniverInstanceService,
         commandService: injector.get(ICommandService) as unknown as TestCommandService,
     };
 }
@@ -196,6 +205,19 @@ describe('DocCanvasPopManagerService', () => {
 
         const anchorRect$ = popup?.anchorRect$ as { value?: unknown } | undefined;
         expect(anchorRect$?.value).toEqual({ left: 25, right: 175, top: 50, bottom: 80 });
+    });
+
+    it('uses a scoped popup injector only for embedded document render units', () => {
+        const { service, popupService, renderManagerService, univerInstanceService } = createService();
+
+        service.attachPopupToRect({ left: 10, right: 110, top: 20, bottom: 40 }, { componentKey: 'normal-popup' }, 'doc-1');
+        expect(popupService.popups.get('popup-1')?.injector).toBeUndefined();
+        expect(renderManagerService.getInjector).not.toHaveBeenCalled();
+
+        univerInstanceService.embeddedUnitIds.add('doc-1');
+        service.attachPopupToRect({ left: 10, right: 110, top: 20, bottom: 40 }, { componentKey: 'embed-popup' }, 'doc-1');
+        expect(popupService.popups.get('popup-2')?.injector).toBe(renderManagerService.popupInjector);
+        expect(renderManagerService.getInjector).toHaveBeenCalledTimes(1);
     });
 
     it('refreshes function-based rect popup anchors after scroll and rich text changes', () => {

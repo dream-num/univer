@@ -1351,7 +1351,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         cacheItem?: ICacheItem;
     } | undefined) {
         const handledThisCell = Tools.isDefine(this._handleBorderMatrix.getValue(row, col));
-        if (handledThisCell) return;
+        if (handledThisCell && !options?.mergeRange) return;
         // by default, style cache should includes border and background info.
         const cacheItem = options?.cacheItem || { bg: true, border: true };
         if (!cacheItem.border) return;

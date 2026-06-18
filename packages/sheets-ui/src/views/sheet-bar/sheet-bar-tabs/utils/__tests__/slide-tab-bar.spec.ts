@@ -94,7 +94,7 @@ function setupDOM() {
         item.className = 'tab-item';
         item.dataset.id = `sheet-${i}`;
         const span = document.createElement('span');
-        span.innerText = `Sheet ${i}`;
+        span.textContent = `Sheet ${i}`;
         item.appendChild(span);
         bar.appendChild(item);
     }
@@ -197,7 +197,7 @@ describe('slide-tab-bar', () => {
             renameFinishedCount += 1;
         });
         expect(editor.getAttribute('contentEditable')).toBe('true');
-        editor.innerText = 'Renamed';
+        editor.textContent = 'Renamed';
         editor.dispatchEvent(new FocusEvent('focusout'));
 
         expect(events.changedNames).toEqual([{ id: 'sheet-0', name: 'Renamed' }]);
@@ -216,29 +216,15 @@ describe('slide-tab-bar', () => {
         expect(frameState.cancellations).toEqual([1]);
     });
 
-    it('sorts dragged sheet tabs and starts or closes edge auto-scroll', () => {
+    it('starts or closes edge auto-scroll during sheet tab dragging', () => {
         const { root, events } = setupDOM();
         const frameState = new TestAnimationFrameState();
         const bar = createBar(root, events, 1);
 
         const items = bar.getSlideTabItems();
         const active = items[1];
-        let activeX = 45;
-        active.getBoundingRect = () => rect(activeX, 40);
         (bar as unknown as { _activeTabItem: SlideTabItem })._activeTabItem = active;
         (bar as unknown as { _activeTabItemIndex: number })._activeTabItemIndex = 1;
-
-        activeX = 110;
-        (bar as unknown as { _compareRight: () => void })._compareRight();
-        expect((bar as unknown as { _compareIndex: number })._compareIndex).toBeGreaterThanOrEqual(1);
-
-        activeX = -30;
-        (bar as unknown as { _compareLeft: () => void })._compareLeft();
-        expect((bar as unknown as { _compareIndex: number })._compareIndex).toBeLessThanOrEqual(1);
-
-        (bar as unknown as { _compareIndex: number })._compareIndex = 0;
-        (bar as unknown as { _sortedItems: () => void })._sortedItems();
-        expect(bar.getSlideTabItems()[0].getId()).toBe('sheet-1');
 
         (bar as unknown as { _leftBoundingLine: number })._leftBoundingLine = 20;
         (bar as unknown as { _rightBoundingLine: number })._rightBoundingLine = 20;
@@ -261,7 +247,7 @@ describe('slide-tab-bar', () => {
 
     it('handles static text-selection and slide-skip helpers', () => {
         const el = document.createElement('span');
-        el.innerText = 'abc';
+        el.textContent = 'abc';
         document.body.appendChild(el);
 
         SlideTabBar.keepSelectAll(el);

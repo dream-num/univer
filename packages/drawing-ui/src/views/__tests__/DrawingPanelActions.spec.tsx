@@ -143,6 +143,45 @@ describe('drawing panel actions', () => {
         }]);
     });
 
+    it('uses the latest focused drawings when arranging after selection changes', () => {
+        const originalDrawing = createDrawing('image-1', 0);
+        const focusedDrawing = createDrawing('image-2', 30);
+        const orderUpdates: IDrawingOrderUpdateParam[] = [];
+        drawingManagerService.registerDrawingData(unitId, {
+            [subUnitId]: {
+                data: {
+                    [originalDrawing.drawingId]: originalDrawing,
+                    [focusedDrawing.drawingId]: focusedDrawing,
+                },
+                order: [originalDrawing.drawingId, focusedDrawing.drawingId],
+            },
+        });
+        drawingManagerService.featurePluginOrderUpdate$.subscribe((update) => orderUpdates.push(update));
+
+        const rendered = renderWithRediContext(
+            univer.__getInjector(),
+            <DrawingArrange arrangeShow drawings={[originalDrawing]} />
+        );
+        root = rendered.root;
+        container = rendered.container;
+
+        act(() => {
+            drawingManagerService.focusDrawing([{
+                unitId,
+                subUnitId,
+                drawingId: focusedDrawing.drawingId,
+            }]);
+        });
+        clickElement(findActionByText('drawing-ui.image-panel.arrange.forward'));
+
+        expect(orderUpdates).toEqual([{
+            unitId,
+            subUnitId,
+            drawingIds: [focusedDrawing.drawingId],
+            arrangeType: ArrangeTypeEnum.forward,
+        }]);
+    });
+
     it('starts image cropping with the current crop mode', async () => {
         const executedCommands: ICommandInfo[] = [];
         commandService.onCommandExecuted((command) => executedCommands.push(command));

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IScrollState } from '../../views/sheet-bar/sheet-bar-tabs/utils/slide-tab-bar';
+import type { IScrollState } from '../sheet-bar/type';
 import { Injector } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { ISheetBarService, SheetBarService } from '../sheet-bar/sheet-bar.service';

@@ -18,6 +18,7 @@ import type { Dependency, IDisposable, IWorkbookData, Workbook } from '@univerjs
 import type { Root } from 'react-dom/client';
 import {
     CellValueType,
+    currencySymbols,
     ICommandService,
     ILocalStorageService,
     ILogService,
@@ -42,7 +43,12 @@ import {
     SheetInterceptorService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import { getPatternType, SetNumfmtCommand, SheetsNumfmtCellContentController } from '@univerjs/sheets-numfmt';
+import {
+    getCurrencyType,
+    getPatternType,
+    SetNumfmtCommand,
+    SheetsNumfmtCellContentController,
+} from '@univerjs/sheets-numfmt';
 import { ILayoutService, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -57,6 +63,7 @@ import { SheetNumfmtPanel } from '../SheetNumfmtPanel';
 const UNIT_ID = 'test';
 const SUB_UNIT_ID = 'sheet1';
 const CUSTOM_HISTORY_KEY = 'numfmt_custom_pattern';
+const CURRENCY_HABIT_KEY = 'userHabitController_numfmtCurrency';
 
 class TestLocalStorageService implements ILocalStorageService {
     private readonly _data = new Map<string, unknown>();
@@ -462,6 +469,19 @@ describe('SheetNumfmtPanel', () => {
         });
     }
 
+    async function changePanelInput(value: string) {
+        const input = container!.querySelector('input') as HTMLInputElement | null;
+
+        expect(input).toBeDefined();
+
+        await act(async () => {
+            const valueSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
+            valueSetter?.call(input, value);
+            input!.dispatchEvent(new Event('input', { bubbles: true }));
+            await Promise.resolve();
+        });
+    }
+
     afterEach(() => {
         act(() => {
             root?.unmount();
@@ -611,5 +631,265 @@ describe('SheetNumfmtPanel', () => {
 
         expect(results).toEqual([true]);
         expect(currentTestBed.numfmtService.getValue(UNIT_ID, SUB_UNIT_ID, 0, 0)).toEqual({ pattern: 'yyyy/MM/dd' });
+    });
+
+    it('applies changed decimal places from the number panel through the real SetNumfmtCommand', async () => {
+        currentTestBed = createNumfmtViewTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        const commandResults: Array<Promise<unknown>> = [];
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <SheetNumfmtPanel
+                        value={{
+                            defaultValue: 1234.5,
+                            defaultPattern: '',
+                            row: 0,
+                            col: 0,
+                        }}
+                        onChange={(event) => {
+                            if (event.type === 'confirm') {
+                                commandResults.push(currentTestBed!.commandService.executeCommand(SetNumfmtCommand.id, {
+                                    values: [{
+                                        row: 0,
+                                        col: 0,
+                                        pattern: event.value,
+                                        type: getPatternType(event.value),
+                                    }],
+                                }) as Promise<unknown>);
+                            }
+                        }}
+                    />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        await selectPanelType('Number');
+        const incrementDecimalButton = container.querySelector('[aria-label="increment"]') as HTMLElement;
+
+        for (let i = 0; i < 2; i++) {
+            await act(async () => {
+                incrementDecimalButton.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+                await Promise.resolve();
+            });
+        }
+
+        await confirmPanel();
+        const results = await Promise.all(commandResults);
+
+        expect(results).toEqual([true]);
+        expect(currentTestBed.numfmtService.getValue(UNIT_ID, SUB_UNIT_ID, 0, 0)).toEqual({
+            pattern: '#,##0.00_);(#,##0.00)',
+        });
+    });
+
+    it('keeps the current date pattern when the selected date option is clicked again', async () => {
+        currentTestBed = createNumfmtViewTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        const commandResults: Array<Promise<unknown>> = [];
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <SheetNumfmtPanel
+                        value={{
+                            defaultValue: 1234.5,
+                            defaultPattern: 'yyyy-MM-dd',
+                            row: 0,
+                            col: 0,
+                        }}
+                        onChange={(event) => {
+                            if (event.type === 'confirm') {
+                                commandResults.push(currentTestBed!.commandService.executeCommand(SetNumfmtCommand.id, {
+                                    values: [{
+                                        row: 0,
+                                        col: 0,
+                                        pattern: event.value,
+                                        type: getPatternType(event.value),
+                                    }],
+                                }) as Promise<unknown>);
+                            }
+                        }}
+                    />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        await selectPanelListOption('1930-08-05');
+        await confirmPanel();
+        const results = await Promise.all(commandResults);
+
+        expect(results).toEqual([true]);
+        expect(currentTestBed.numfmtService.getValue(UNIT_ID, SUB_UNIT_ID, 0, 0)).toEqual({ pattern: 'yyyy-MM-dd' });
+    });
+
+    it('refreshes the active panel state when the loaded format changes for the same cell', async () => {
+        currentTestBed = createNumfmtViewTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        const commandResults: Array<Promise<unknown>> = [];
+
+        const renderPanel = async (defaultPattern: string) => {
+            await act(async () => {
+                root!.render(
+                    <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                        <SheetNumfmtPanel
+                            value={{
+                                defaultValue: 1234.5,
+                                defaultPattern,
+                                row: 0,
+                                col: 0,
+                            }}
+                            onChange={(event) => {
+                                if (event.type === 'confirm') {
+                                    commandResults.push(currentTestBed!.commandService.executeCommand(SetNumfmtCommand.id, {
+                                        values: [{
+                                            row: 0,
+                                            col: 0,
+                                            pattern: event.value,
+                                            type: getPatternType(event.value),
+                                        }],
+                                    }) as Promise<unknown>);
+                                }
+                            }}
+                        />
+                    </RediContext.Provider>
+                );
+                await Promise.resolve();
+            });
+        };
+
+        await renderPanel('yyyy-MM-dd');
+        await renderPanel('#,##0.00_);(#,##0.00)');
+        await confirmPanel();
+        const results = await Promise.all(commandResults);
+
+        expect(results).toEqual([true]);
+        expect(currentTestBed.numfmtService.getValue(UNIT_ID, SUB_UNIT_ID, 0, 0)).toEqual({
+            pattern: '#,##0.00_);(#,##0.00)',
+        });
+    });
+
+    it('applies a typed custom format through the real SetNumfmtCommand when confirmed', async () => {
+        currentTestBed = createNumfmtViewTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        const commandResults: Array<Promise<unknown>> = [];
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <SheetNumfmtPanel
+                        value={{
+                            defaultValue: 1234.5,
+                            defaultPattern: '',
+                            row: 0,
+                            col: 0,
+                        }}
+                        onChange={(event) => {
+                            if (event.type === 'confirm') {
+                                commandResults.push(currentTestBed!.commandService.executeCommand(SetNumfmtCommand.id, {
+                                    values: [{
+                                        row: 0,
+                                        col: 0,
+                                        pattern: event.value,
+                                        type: getPatternType(event.value),
+                                    }],
+                                }) as Promise<unknown>);
+                            }
+                        }}
+                    />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        await selectPanelType('Custom format');
+        await changePanelInput('0.000 kg');
+        await confirmPanel();
+        const results = await Promise.all(commandResults);
+
+        expect(results).toEqual([true]);
+        expect(currentTestBed.numfmtService.getValue(UNIT_ID, SUB_UNIT_ID, 0, 0)).toEqual({
+            pattern: '0.000 kg',
+        });
+        expect(await currentTestBed.localStorageService.getItem<string[]>(CUSTOM_HISTORY_KEY)).toEqual(['0.000 kg']);
+    });
+
+    it('records confirmed currency and accounting symbols in the user habit order', async () => {
+        currentTestBed = createNumfmtViewTestBed();
+        await currentTestBed.localStorageService.setItem(CURRENCY_HABIT_KEY, []);
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        const events: Array<{ type: 'change' | 'cancel' | 'confirm'; value: string }> = [];
+        const currencySymbol = currencySymbols[7];
+        const accountingSymbol = currencySymbols[8];
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <SheetNumfmtPanel
+                        value={{
+                            defaultValue: 1234.5,
+                            defaultPattern: `${currencySymbol}#,##0.00`,
+                            row: 0,
+                            col: 0,
+                        }}
+                        onChange={(event) => events.push(event)}
+                    />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        await confirmPanel();
+        await Promise.resolve();
+        await Promise.resolve();
+
+        const confirmedCurrencyPattern = events.at(-1)?.value ?? '';
+
+        expect(getCurrencyType(confirmedCurrencyPattern)).toBe(currencySymbol);
+        expect(await currentTestBed.localStorageService.getItem<string[]>(CURRENCY_HABIT_KEY)).toEqual([
+            currencySymbol,
+        ]);
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <SheetNumfmtPanel
+                        value={{
+                            defaultValue: 1234.5,
+                            defaultPattern: `_("${accountingSymbol}"* #,##0.00_)`,
+                            row: 1,
+                            col: 0,
+                        }}
+                        onChange={(event) => events.push(event)}
+                    />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        await confirmPanel();
+        await Promise.resolve();
+        await Promise.resolve();
+
+        const confirmedAccountingPattern = events.at(-1)?.value ?? '';
+
+        expect(getCurrencyType(confirmedAccountingPattern)).toBe(accountingSymbol);
+        expect(await currentTestBed.localStorageService.getItem<string[]>(CURRENCY_HABIT_KEY)).toEqual([
+            accountingSymbol,
+            currencySymbol,
+        ]);
     });
 });

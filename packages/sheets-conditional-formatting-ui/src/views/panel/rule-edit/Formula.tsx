@@ -15,11 +15,17 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import type { IAverageHighlightCell, IConditionalFormattingRuleConfig, IHighlightCell, IRankHighlightCell } from '@univerjs/sheets-conditional-formatting';
+import type {
+    IAverageHighlightCell,
+    IConditionalFormattingRuleConfig,
+    IHighlightCell,
+    IRankHighlightCell,
+} from '@univerjs/sheets-conditional-formatting';
 import type { IFormulaEditorRef } from '@univerjs/sheets-formula-ui';
 import type { IStyleEditorProps } from './type';
 import { IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { borderClassName, clsx } from '@univerjs/design';
+import { LexerTreeBuilder, operatorToken } from '@univerjs/engine-formula';
 import { CFRuleType, CFSubRuleType } from '@univerjs/sheets-conditional-formatting';
 import { FormulaEditor } from '@univerjs/sheets-formula-ui';
 import { useDependency, useSidebarClick } from '@univerjs/ui';
@@ -31,6 +37,7 @@ import { previewClassName } from './styles';
 export const FormulaStyleEditor = (props: IStyleEditorProps) => {
     const { onChange, interceptorManager } = props;
     const localeService = useDependency(LocaleService);
+    const lexerTreeBuilder = useDependency(LexerTreeBuilder);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const worksheet = workbook.getActiveSheet();
@@ -60,6 +67,7 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
             subType: CFSubRuleType.formula,
         };
     };
+
     useEffect(() => {
         const dispose = interceptorManager.intercept(interceptorManager.getInterceptPoints().submit, {
             handler() {
@@ -72,7 +80,11 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
     useEffect(() => {
         const dispose = interceptorManager.intercept(interceptorManager.getInterceptPoints().beforeSubmit, {
             handler: (v, _c, next) => {
-                if (formulaError || formula.length === 1 || !formula.startsWith('=')) {
+                const isFormulaValid = formula.length > 1
+                    && formula.startsWith(operatorToken.EQUALS)
+                    && lexerTreeBuilder.checkIfAddBracket(formula) === 0;
+
+                if (formulaError || !isFormulaValid) {
                     setFormulaError(localeService.t('sheets-conditional-formatting-ui.errorMessage.formulaError'));
                     return false;
                 }
@@ -80,7 +92,13 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
             },
         });
         return dispose as () => void;
-    }, [formulaError, formula]);
+    }, [
+        formulaError,
+        formula,
+        interceptorManager,
+        lexerTreeBuilder,
+        localeService,
+    ]);
 
     const _onChange = (config: {
         formula: string;

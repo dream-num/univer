@@ -17,8 +17,8 @@
 import type { ICommandInfo } from '@univerjs/core';
 import type { IUniverUIConfig } from '@univerjs/ui';
 import type { KeyboardEvent as ReactKeyboardEvent, MouseEvent as ReactMouseEvent } from 'react';
+import type { IScrollState } from '../../../services/sheet-bar/type';
 import type { IBaseSheetBarProps } from './SheetBarItem';
-import type { IScrollState } from './utils/slide-tab-bar';
 import {
     ICommandService,
     IConfirmService,
@@ -261,7 +261,9 @@ export function SheetBarTabs() {
                 } satisfies IBaseSheetBarProps;
             });
 
+        // eslint-disable-next-line react/set-state-in-effect
         setSheetList(sheetListItems);
+        // eslint-disable-next-line react/set-state-in-effect
         setActiveSheetId(currentSubUnitId);
     }, [rangeProtectionRuleModel, workbook, worksheetProtectionRuleModel]);
 
@@ -485,11 +487,9 @@ export function SheetBarTabs() {
     }, [
         canRenameActiveSheet,
         commandService,
-        getActiveTabRect,
         nameEmptyCheck,
         nameRepeatCheck,
         observeResize,
-        openContextMenu,
         sheetBarService,
         sheetNameSpecCharCheck,
         updateSheetItems,
@@ -549,6 +549,7 @@ export function SheetBarTabs() {
 
     useEffect(() => {
         if (!showContextMenu && contextMenuVisible) {
+            // eslint-disable-next-line react/set-state-in-effect
             setContextMenuVisible(false);
         }
     }, [contextMenuVisible, showContextMenu]);

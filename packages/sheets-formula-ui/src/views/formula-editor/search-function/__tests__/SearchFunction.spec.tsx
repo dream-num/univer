@@ -30,8 +30,9 @@ import {
 } from '@univerjs/core';
 import { IEditorService } from '@univerjs/docs-ui';
 import { FunctionType, sequenceNodeType } from '@univerjs/engine-formula';
+import { DeviceInputEventType } from '@univerjs/engine-render';
 import { IDescriptionService } from '@univerjs/sheets-formula';
-import { IShortcutService, ISidebarService, RediContext } from '@univerjs/ui';
+import { IShortcutService, ISidebarService, KeyCode, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Subject } from 'rxjs';
@@ -64,8 +65,15 @@ class TestDescriptionService {
 class TestCommandService {
     readonly registered: ICommandInfo[] = [];
 
-    executeCommand(): Promise<boolean> {
-        return Promise.resolve(true);
+    async executeCommand(id?: string, params?: unknown): Promise<boolean> {
+        const command = this.registered.find((item) => item.id === id);
+        const handler = (command as { handler?: (_accessor: unknown, params?: unknown) => boolean | Promise<boolean> | void } | undefined)?.handler;
+        if (!handler) {
+            return true;
+        }
+
+        const result = await handler(undefined, params);
+        return result !== false;
     }
 
     registerCommand(command: ICommandInfo): IDisposable {
@@ -200,13 +208,23 @@ function createSearchFunctionTestBed() {
     const editor = createEditor();
     SearchFunctionState.editor = editor;
 
-    return { injector, editor };
+    return { injector, editor, commandService: injector.get(ICommandService) as unknown as TestCommandService };
 }
 
 async function waitForSearchList(editor: Editor): Promise<void> {
     await act(async () => {
         (editor.input$ as unknown as Subject<void>).next();
         await new Promise((resolve) => setTimeout(resolve, 350));
+    });
+}
+
+async function runFormulaSearchKeyboardCommand(commandService: TestCommandService, editor: Editor, keyCode: KeyCode): Promise<void> {
+    await act(async () => {
+        await commandService.executeCommand(`sheet.formula-embedding-editor.search_function.${editor.getEditorId()}`, {
+            eventType: DeviceInputEventType.Keyboard,
+            keyCode,
+        });
+        await Promise.resolve();
     });
 }
 
@@ -271,6 +289,32 @@ describe('SearchFunction', () => {
 
         expect(SearchFunctionState.selected).toEqual([{ text: 'SUM(', offset: -2 }]);
         expect(SearchFunctionState.focused).toBe(1);
+        expect(document.body.textContent).not.toContain('Adds selected values.');
+    });
+
+    it('accepts the highlighted formula suggestion from the registered keyboard command', async () => {
+        const { injector, editor, commandService } = createSearchFunctionTestBed();
+
+        await act(async () => {
+            root.render(
+                <RediContext.Provider value={{ injector }}>
+                    <SearchFunction
+                        isFocus
+                        editor={editor}
+                        sequenceNodes={[{ nodeType: sequenceNodeType.FUNCTION, token: 'SU' } as never]}
+                        onSelect={(result) => SearchFunctionState.selected.push(result)}
+                    />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        await waitForSearchList(editor);
+        expect(document.body.textContent).toContain('SUM');
+
+        await runFormulaSearchKeyboardCommand(commandService, editor, KeyCode.ENTER);
+
+        expect(SearchFunctionState.selected).toEqual([{ text: 'SUM(', offset: -2 }]);
         expect(document.body.textContent).not.toContain('Adds selected values.');
     });
 });

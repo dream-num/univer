@@ -217,4 +217,55 @@ describe('drawing command behavior', () => {
         }]);
         expect(document.querySelector('[data-u-comp="doc-image-floating-toolbar"]')).toBeNull();
     });
+
+    it('keeps disabled doc image toolbar actions inert without hiding the toolbar', async () => {
+        const rendered = renderWithRediContext(
+            univer.__getInjector(),
+            <ImagePopupMenu
+                popup={{
+                    extraProps: {
+                        variant: 'doc-floating-toolbar',
+                        unitId,
+                        subUnitId,
+                        drawingId,
+                        menuItems: [
+                            {
+                                label: 'drawing-ui.image-popup.edit',
+                                index: 0,
+                                commandId: editCommandId,
+                                commandParams: { unitId, subUnitId, drawingId, source: 'toolbar' },
+                                disable: true,
+                            },
+                            {
+                                label: 'drawing-ui.image-popup.crop',
+                                index: 1,
+                                commandId: 'drawing.command.crop-image',
+                                commandParams: { unitId, subUnitId, drawingId },
+                                disable: true,
+                            },
+                            {
+                                label: 'drawing-ui.image-popup.delete',
+                                index: 2,
+                                commandId: 'drawing.command.delete-image',
+                                commandParams: { unitId, subUnitId, drawingId },
+                                disable: true,
+                            },
+                        ],
+                    },
+                }}
+            />
+        );
+        root = rendered.root;
+        container = rendered.container;
+
+        const toolbarButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-u-comp="doc-image-floating-toolbar"] button'));
+        const actionButtons = toolbarButtons.slice(1);
+        expect(actionButtons.map((button) => button.disabled)).toEqual([true, true, true]);
+
+        actionButtons.forEach(clickElement);
+        await flushPendingCommands();
+
+        expect(executedCommands).toEqual([]);
+        expect(document.querySelector('[data-u-comp="doc-image-floating-toolbar"]')).not.toBeNull();
+    });
 });

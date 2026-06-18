@@ -32,10 +32,10 @@ interface ISheetTableItemsFilterPanelProps {
     setCheckedItemSet: Dispatch<SetStateAction<Set<string>>>;
 }
 
-const getCheckedCount = (map: Map<string, number>) => {
+const getCheckedItemCount = (map: Map<string, number>, checkedItemSet: Set<string>) => {
     let count = 0;
-    map.forEach((value) => {
-        count += value;
+    checkedItemSet.forEach((item) => {
+        count += map.get(item) ?? 0;
     });
     return count;
 };
@@ -50,7 +50,7 @@ export function SheetTableItemsFilterPanel(props: ISheetTableItemsFilterPanelPro
     // const allChecked = tableFilter === undefined ? true : checkedItemSet.size === itemsCountMap.size;
     const [allChecked, setAllChecked] = useState<boolean>(tableFilter === undefined ? true : checkedItemSet.size === itemsCountMap.size);
 
-    const [checkedCount, setCheckedCount] = useState<number>(allChecked ? allItemsCount : getCheckedCount(itemsCountMap));
+    const [checkedCount, setCheckedCount] = useState<number>(allChecked ? allItemsCount : getCheckedItemCount(itemsCountMap, checkedItemSet));
 
     const indeterminate = !allChecked && checkedItemSet.size > 0;
     const [searchText, setSearchText] = useState('');
@@ -178,9 +178,7 @@ export function SheetTableItemsFilterPanel(props: ISheetTableItemsFilterPanelPro
                         })}
                     </div>
                 </div>
-
             </div>
         </div>
-
     );
 }

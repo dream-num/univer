@@ -18,7 +18,13 @@ import type { IRange } from '@univerjs/core';
 import type { IConditionFormattingRule } from '@univerjs/sheets-conditional-formatting';
 import type { Root } from 'react-dom/client';
 import { BooleanNumber, LocaleService, LocaleType } from '@univerjs/core';
-import { AddCfCommand, CFNumberOperator, CFRuleType, CFSubRuleType, DeleteCfCommand } from '@univerjs/sheets-conditional-formatting';
+import {
+    AddCfCommand,
+    CFNumberOperator,
+    CFRuleType,
+    CFSubRuleType,
+    DeleteCfCommand,
+} from '@univerjs/sheets-conditional-formatting';
 import { IMarkSelectionService } from '@univerjs/sheets-ui';
 import { RediContext } from '@univerjs/ui';
 import { act } from 'react';
@@ -299,5 +305,44 @@ describe('RuleList', () => {
         expect(currentTestBed.ruleModel.getSubunitRules(currentTestBed.unitId, currentTestBed.subUnitId)).toEqual([]);
         expect(container.textContent).not.toContain('A1');
         expect(container.textContent).not.toContain('F6');
+    });
+
+    it('starts the create-rule flow from the toolbar without changing existing worksheet rules', async () => {
+        currentTestBed = await createRuleListTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        let createRequests = 0;
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <RuleList
+                        onClick={() => undefined}
+                        onCreate={() => {
+                            createRequests += 1;
+                        }}
+                    />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        const createRuleButton = container.querySelectorAll('a')[0];
+        const ruleIdsBeforeCreate = currentTestBed.ruleModel
+            .getSubunitRules(currentTestBed.unitId, currentTestBed.subUnitId)
+            ?.map((rule) => rule.cfId);
+
+        await act(async () => {
+            createRuleButton.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            await Promise.resolve();
+        });
+
+        expect(createRequests).toBe(1);
+        expect(
+            currentTestBed.ruleModel
+                .getSubunitRules(currentTestBed.unitId, currentTestBed.subUnitId)
+                ?.map((rule) => rule.cfId)
+        ).toEqual(ruleIdsBeforeCreate);
     });
 });

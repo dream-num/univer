@@ -354,6 +354,10 @@ function writeInput(input: HTMLInputElement, value: string) {
     input.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
+function pressKey(element: HTMLElement, key: string) {
+    element.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }));
+}
+
 describe('formula function picker views', () => {
     let container: HTMLDivElement;
     let root: Root;
@@ -409,6 +413,37 @@ describe('formula function picker views', () => {
         expect(container.textContent).toContain('AVERAGE(A1:A3)');
     });
 
+    it('selects the highlighted function from the keyboard list and updates the preview', async () => {
+        const { injector } = createFormulaViewTestBed();
+
+        await act(async () => {
+            root.render(
+                <RediContext.Provider value={{ injector }}>
+                    <SelectFunction onChange={(value) => SelectionState.values.push(value)} />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        const input = container.querySelector('input') as HTMLInputElement;
+        expect(SelectionState.values.at(-1)?.functionName).toBe('SUM');
+
+        await act(async () => {
+            pressKey(input, 'ArrowDown');
+            await Promise.resolve();
+        });
+
+        await act(async () => {
+            pressKey(input, 'Enter');
+            await Promise.resolve();
+        });
+
+        expect(SelectionState.values.at(-1)?.functionName).toBe('AVERAGE');
+        expect(container.textContent).toContain('Returns the average value.');
+        expect(container.textContent).toContain('AVERAGE(A1:A3)');
+        expect(container.textContent).not.toContain('Adds values together.');
+    });
+
     it('inserts the selected function call into both sheet editors after confirmation', async () => {
         const { commandService, editorService, injector } = createFormulaViewTestBed();
 
@@ -447,5 +482,44 @@ describe('formula function picker views', () => {
         ]);
         expect(editorService.replaced.get(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)).toEqual([{ text: '=AVERAGE(', cover: undefined }]);
         expect(editorService.replaced.get(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY)).toEqual([{ text: '=AVERAGE(', cover: false }]);
+    });
+
+    it('does not insert a previously selected function after search removes all results', async () => {
+        const { commandService, editorService, injector } = createFormulaViewTestBed();
+
+        await act(async () => {
+            renderWithInjector(root, injector, <MoreFunctions />);
+            await Promise.resolve();
+        });
+
+        const averageItem = Array.from(container.querySelectorAll('li'))
+            .find((node) => node.textContent?.includes('AVERAGE')) as HTMLElement | undefined;
+        expect(averageItem).toBeDefined();
+
+        await act(async () => {
+            averageItem!.click();
+            await Promise.resolve();
+        });
+
+        const input = container.querySelector('input') as HTMLInputElement;
+        expect(input).toBeDefined();
+
+        await act(async () => {
+            writeInput(input, 'NOT_A_FUNCTION');
+            await Promise.resolve();
+        });
+
+        const confirmButton = Array.from(container.querySelectorAll('button'))
+            .find((node) => node.textContent === 'Confirm') as HTMLButtonElement | undefined;
+        expect(confirmButton).toBeDefined();
+        expect(confirmButton!.disabled).toBe(true);
+
+        await act(async () => {
+            confirmButton!.click();
+            await Promise.resolve();
+        });
+
+        expect(commandService.executed).toEqual([]);
+        expect(editorService.replaced.size).toBe(0);
     });
 });

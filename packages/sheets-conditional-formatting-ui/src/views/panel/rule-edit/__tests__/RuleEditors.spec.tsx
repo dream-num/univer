@@ -16,22 +16,28 @@
 
 import type { IConditionalFormattingRuleConfig } from '@univerjs/sheets-conditional-formatting';
 import type { Root } from 'react-dom/client';
-import { InterceptorManager, LocaleService, LocaleType } from '@univerjs/core';
+import { createIdentifier, InterceptorManager, LocaleService, LocaleType } from '@univerjs/core';
+import { LexerTreeBuilder } from '@univerjs/engine-formula';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { IRefSelectionsService } from '@univerjs/sheets';
 import {
     CFNumberOperator,
     CFRuleType,
     CFSubRuleType,
     CFTextOperator,
+    CFTimePeriodOperator,
     CFValueType,
     IIconSetType,
 } from '@univerjs/sheets-conditional-formatting';
-import { ILayoutService, RediContext } from '@univerjs/ui';
+import { IContextMenuService, ILayoutService, IShortcutService, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
+import { Subject } from 'rxjs';
 import { afterEach, describe, expect, it } from 'vitest';
 import { createCfUiTestBed } from '../../../../__tests__/create-cf-ui-test-bed';
 import { ColorScaleStyleEditor } from '../ColorScale';
 import { DataBarStyleEditor } from '../DataBar';
+import { FormulaStyleEditor } from '../Formula';
 import { HighlightCellStyleEditor } from '../HighlightCell';
 import { IconSet } from '../IconSet';
 import { RankStyleEditor } from '../Rank';
@@ -39,14 +45,85 @@ import { beforeSubmit, submit } from '../type';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
+const IEditorService = createIdentifier<TestEditorService>('univer.editor.service');
+const IDescriptionService = createIdentifier<TestDescriptionService>('formula.description-service');
+
 class TestLayoutService {
     readonly rootContainerElement = document.body;
+}
+
+class TestEditorService {
+    register() {
+        return { dispose() {} };
+    }
+
+    getEditor() {
+        return undefined;
+    }
+
+    getFocusId() {
+        return undefined;
+    }
+
+    focus(): void {}
+
+    blur(): void {}
+}
+
+class TestRenderManagerService {
+    getRenderById() {
+        return undefined;
+    }
+}
+
+class TestDocSelectionManagerService {
+    readonly textSelection$ = new Subject();
+}
+
+class TestDescriptionService {
+    hasDefinedNameDescription() {
+        return false;
+    }
+}
+
+class TestRefSelectionsService {
+    setSelections(): void {}
+
+    clear(): void {}
+}
+
+class TestShortcutService {
+    registerShortcut() {
+        return { dispose() {} };
+    }
+}
+
+class TestContextMenuService {
+    disable(): void {}
+
+    enable(): void {}
 }
 
 function createEditorTestBed() {
     const testBed = createCfUiTestBed();
     testBed.injector.add([ILayoutService, { useClass: TestLayoutService as never }]);
+    testBed.injector.add([IEditorService, { useClass: TestEditorService as never }]);
+    testBed.injector.add([IRenderManagerService, { useClass: TestRenderManagerService as never }]);
+    testBed.injector.add([IDescriptionService, { useClass: TestDescriptionService as never }]);
+    testBed.injector.add([IRefSelectionsService, { useClass: TestRefSelectionsService as never }]);
+    testBed.injector.add([IShortcutService, { useClass: TestShortcutService as never }]);
+    testBed.injector.add([IContextMenuService, { useClass: TestContextMenuService as never }]);
+    testBed.injector.add([LexerTreeBuilder]);
     testBed.get(LocaleService).load({ [LocaleType.ZH_CN]: {} });
+
+    return testBed;
+}
+
+async function createFormulaEditorTestBed() {
+    const testBed = createEditorTestBed();
+    const docsSelectionServiceUrl = new URL('../docs/src/services/doc-selection-manager.service.ts', `file://${process.cwd()}/`).href;
+    const { DocSelectionManagerService } = await import(/* @vite-ignore */ docsSelectionServiceUrl);
+    testBed.injector.add([DocSelectionManagerService, { useClass: TestDocSelectionManagerService as never }]);
 
     return testBed;
 }
@@ -165,6 +242,51 @@ describe('conditional formatting rule editors', () => {
         });
     });
 
+    it('preserves an existing bottom percent rank rule when reopening the editor', async () => {
+        currentTestBed = createEditorTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        const interceptorManager = createRuleInterceptorManager();
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <RankStyleEditor
+                        interceptorManager={interceptorManager}
+                        rule={{
+                            type: CFRuleType.highlightCell,
+                            subType: CFSubRuleType.rank,
+                            isBottom: true,
+                            isPercent: true,
+                            value: 15,
+                            style: {
+                                cl: {
+                                    rgb: '#c00000',
+                                },
+                            },
+                        }}
+                        onChange={() => undefined}
+                    />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        expect(submitRule(interceptorManager)).toMatchObject({
+            type: CFRuleType.highlightCell,
+            subType: CFSubRuleType.rank,
+            isBottom: true,
+            isPercent: true,
+            value: 15,
+            style: {
+                cl: {
+                    rgb: '#c00000',
+                },
+            },
+        });
+    });
+
     it('submits data bar rule configuration with min/max value types and visibility', async () => {
         currentTestBed = createEditorTestBed();
         container = document.createElement('div');
@@ -195,6 +317,49 @@ describe('conditional formatting rule editors', () => {
         });
     });
 
+    it('preserves custom colors, gradient fill, thresholds, and hidden cell values when reopening a data bar rule', async () => {
+        currentTestBed = createEditorTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        const interceptorManager = createRuleInterceptorManager();
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <DataBarStyleEditor
+                        interceptorManager={interceptorManager}
+                        rule={{
+                            type: CFRuleType.dataBar,
+                            isShowValue: false,
+                            config: {
+                                min: { type: CFValueType.percent, value: 15 },
+                                max: { type: CFValueType.percentile, value: 85 },
+                                isGradient: true,
+                                positiveColor: '#63be7b',
+                                nativeColor: '#f8696b',
+                            },
+                        }}
+                        onChange={() => undefined}
+                    />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        expect(submitRule(interceptorManager)).toMatchObject({
+            type: CFRuleType.dataBar,
+            isShowValue: false,
+            config: {
+                min: { type: CFValueType.percent, value: 15 },
+                max: { type: CFValueType.percentile, value: 85 },
+                isGradient: true,
+                positiveColor: '#63be7b',
+                nativeColor: '#f8696b',
+            },
+        });
+    });
+
     it('submits a two-point color scale when the median value type is disabled', async () => {
         currentTestBed = createEditorTestBed();
         container = document.createElement('div');
@@ -219,6 +384,67 @@ describe('conditional formatting rule editors', () => {
             config: [
                 { index: 0, value: { type: CFValueType.min } },
                 { index: 1, value: { type: CFValueType.max } },
+            ],
+        });
+    });
+
+    it('preserves an existing three-point color scale rule when reopening the editor', async () => {
+        currentTestBed = createEditorTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        const interceptorManager = createRuleInterceptorManager();
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <ColorScaleStyleEditor
+                        interceptorManager={interceptorManager}
+                        rule={{
+                            type: CFRuleType.colorScale,
+                            config: [
+                                {
+                                    index: 0,
+                                    color: '#63be7b',
+                                    value: { type: CFValueType.min },
+                                },
+                                {
+                                    index: 1,
+                                    color: '#ffeb84',
+                                    value: { type: CFValueType.percentile, value: 50 },
+                                },
+                                {
+                                    index: 2,
+                                    color: '#f8696b',
+                                    value: { type: CFValueType.max },
+                                },
+                            ],
+                        }}
+                        onChange={() => undefined}
+                    />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        expect(submitRule(interceptorManager)).toMatchObject({
+            type: CFRuleType.colorScale,
+            config: [
+                {
+                    index: 0,
+                    color: '#63be7b',
+                    value: { type: CFValueType.min },
+                },
+                {
+                    index: 1,
+                    color: '#ffeb84',
+                    value: { type: CFValueType.percentile, value: 50 },
+                },
+                {
+                    index: 2,
+                    color: '#f8696b',
+                    value: { type: CFValueType.max },
+                },
             ],
         });
     });
@@ -351,6 +577,128 @@ describe('conditional formatting rule editors', () => {
                 },
             },
         });
+    });
+
+    it('preserves an existing time period highlight rule without requiring an input value', async () => {
+        currentTestBed = createEditorTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        const interceptorManager = createRuleInterceptorManager();
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <HighlightCellStyleEditor
+                        interceptorManager={interceptorManager}
+                        rule={{
+                            type: CFRuleType.highlightCell,
+                            subType: CFSubRuleType.timePeriod,
+                            operator: CFTimePeriodOperator.last7Days,
+                            style: {
+                                bg: {
+                                    rgb: '#fff2cc',
+                                },
+                            },
+                        }}
+                        onChange={() => undefined}
+                    />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        expect(interceptorManager.fetchThroughInterceptors(beforeSubmit)(true, null)).toBe(true);
+        expect(submitRule(interceptorManager)).toMatchObject({
+            type: CFRuleType.highlightCell,
+            subType: CFSubRuleType.timePeriod,
+            operator: CFTimePeriodOperator.last7Days,
+            style: {
+                bg: {
+                    rgb: '#fff2cc',
+                },
+            },
+        });
+    });
+
+    it('preserves an existing formula highlight rule and validates it through beforeSubmit', async () => {
+        currentTestBed = await createFormulaEditorTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        const interceptorManager = createRuleInterceptorManager();
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <FormulaStyleEditor
+                        interceptorManager={interceptorManager}
+                        rule={{
+                            type: CFRuleType.highlightCell,
+                            subType: CFSubRuleType.formula,
+                            value: '=MOD(ROW(),2)=0',
+                            style: {
+                                bg: {
+                                    rgb: '#ddebf7',
+                                },
+                                cl: {
+                                    rgb: '#1f4e79',
+                                },
+                            },
+                        }}
+                        onChange={() => undefined}
+                    />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        expect(interceptorManager.fetchThroughInterceptors(beforeSubmit)(true, null)).toBe(true);
+        expect(submitRule(interceptorManager)).toMatchObject({
+            type: CFRuleType.highlightCell,
+            subType: CFSubRuleType.formula,
+            value: '=MOD(ROW(),2)=0',
+            style: {
+                bg: {
+                    rgb: '#ddebf7',
+                },
+                cl: {
+                    rgb: '#1f4e79',
+                },
+            },
+        });
+    });
+
+    it('blocks submitting a reopened formula highlight rule with an invalid formula', async () => {
+        currentTestBed = await createFormulaEditorTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        const interceptorManager = createRuleInterceptorManager();
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <FormulaStyleEditor
+                        interceptorManager={interceptorManager}
+                        rule={{
+                            type: CFRuleType.highlightCell,
+                            subType: CFSubRuleType.formula,
+                            value: '=SUM(',
+                            style: {
+                                bg: {
+                                    rgb: '#fce4d6',
+                                },
+                            },
+                        }}
+                        onChange={() => undefined}
+                    />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        expect(interceptorManager.fetchThroughInterceptors(beforeSubmit)(true, null)).toBe(false);
     });
 
     it('preserves an existing icon set rule with hidden cell values', async () => {

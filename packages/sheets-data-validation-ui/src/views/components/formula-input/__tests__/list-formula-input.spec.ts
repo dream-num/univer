@@ -28,4 +28,16 @@ describe('ListFormulaInput', () => {
         expect(deserializeListOptions(payload.formula1)).toEqual(['a,b', 'c']);
         expect(payload.formula2).toBe('#ff0000,');
     });
+
+    it('keeps colors aligned with the first non-empty occurrence of each custom option', () => {
+        const payload = buildCustomListFormulaPayload([
+            { label: '', color: '#ff0000' },
+            { label: 'Pending', color: '#ffffff' },
+            { label: 'Done', color: '#00ff00' },
+            { label: 'Pending', color: '#0000ff' },
+        ], '#ffffff');
+
+        expect(deserializeListOptions(payload.formula1)).toEqual(['Pending', 'Done']);
+        expect(payload.formula2).toBe(',#00ff00');
+    });
 });

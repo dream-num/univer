@@ -37,6 +37,36 @@ export interface IDrawingCommonPanelProps {
     hasGroup?: boolean;
 }
 
+function getPanelShowState(drawings: IDrawingParam[]) {
+    if (drawings.length === 0) {
+        return {
+            arrangeShow: false,
+            transformShow: false,
+            alignShow: false,
+            cropperShow: false,
+            nullShow: true,
+        };
+    }
+
+    if (drawings.length === 1) {
+        return {
+            arrangeShow: true,
+            transformShow: true,
+            alignShow: false,
+            cropperShow: true,
+            nullShow: false,
+        };
+    }
+
+    return {
+        arrangeShow: true,
+        transformShow: false,
+        alignShow: true,
+        cropperShow: false,
+        nullShow: false,
+    };
+}
+
 export const DrawingCommonPanel = (props: IDrawingCommonPanelProps) => {
     const drawingManagerService = useDependency(IDrawingManagerService);
     const renderManagerService = useDependency(IRenderManagerService);
@@ -59,11 +89,13 @@ export const DrawingCommonPanel = (props: IDrawingCommonPanelProps) => {
     }
     const transformer = scene.getTransformerByCreate();
 
-    const [arrangeShow, setArrangeShow] = useState(true);
-    const [transformShow, setTransformShow] = useState(true);
-    const [alignShow, setAlignShow] = useState(false);
-    const [cropperShow, setCropperShow] = useState(true);
-    const [nullShow, setNullShow] = useState(false);
+    const initialShowState = getPanelShowState(drawings);
+
+    const [arrangeShow, setArrangeShow] = useState(initialShowState.arrangeShow);
+    const [transformShow, setTransformShow] = useState(initialShowState.transformShow);
+    const [alignShow, setAlignShow] = useState(initialShowState.alignShow);
+    const [cropperShow, setCropperShow] = useState(initialShowState.cropperShow);
+    const [nullShow, setNullShow] = useState(initialShowState.nullShow);
     // const [groupShow, setGroupShow] = useState(false);
 
     useEffect(() => {

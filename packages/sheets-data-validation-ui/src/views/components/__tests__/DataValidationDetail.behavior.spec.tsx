@@ -27,6 +27,7 @@ import type { ISelectionWithStyle } from '@univerjs/sheets';
 import type { Root } from 'react-dom/client';
 import {
     createIdentifier,
+    DataValidationOperator,
     DataValidationType,
     ICommandService,
     ILogService,
@@ -71,6 +72,7 @@ import {
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
 import {
+    CheckboxValidator,
     DataValidationCacheService,
     DataValidationCustomFormulaService,
     DataValidationFormulaService,
@@ -100,6 +102,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { DataValidationPanelService } from '../../../services/data-validation-panel.service';
 import { DataValidationDetail } from '../DataValidationDetail';
 import { DateShowTimeOption } from '../DateShowTimeOption';
+import { BASE_FORMULA_INPUT_NAME, FORMULA_INPUTS } from '../formula-input';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -335,6 +338,15 @@ function createDateRule(uid = 'rule-date'): ISheetDataValidationRule {
     };
 }
 
+function createDateBetweenRule(uid = 'rule-date-between'): ISheetDataValidationRule {
+    return {
+        ...createDateRule(uid),
+        operator: DataValidationOperator.BETWEEN,
+        formula1: '2024-01-01',
+        formula2: '2024-01-31',
+    };
+}
+
 function createDetailTestBed(rule: ISheetDataValidationRule) {
     const univer = new Univer();
     const injector = univer.__getInjector();
@@ -395,6 +407,9 @@ function createDetailTestBed(rule: ISheetDataValidationRule) {
     injector.get(LocaleService).load({
         [LocaleType.EN_US]: {
             'sheets-data-validation': {
+                checkbox: {
+                    title: 'Checkbox',
+                },
                 date: {
                     title: 'Date',
                 },
@@ -440,6 +455,9 @@ function createDetailTestBed(rule: ISheetDataValidationRule) {
     const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, createWorkbookData());
     injector.get(ILogService).setLogLevel(LogLevel.SILENT);
     injector.get(ComponentManager).register(DateShowTimeOption.componentKey, DateShowTimeOption);
+    FORMULA_INPUTS.forEach(([key, component]) => {
+        injector.get(ComponentManager).register(key, component);
+    });
 
     const commandService = injector.get(ICommandService);
     commandService.registerCommand(UpdateSheetDataValidationSettingCommand);
@@ -448,8 +466,10 @@ function createDetailTestBed(rule: ISheetDataValidationRule) {
     const localeService = injector.get(LocaleService);
     const validatorRegistry = injector.get(DataValidatorRegistryService);
     const dateValidator = new DateValidator(localeService, injector);
+    dateValidator.formulaInput = BASE_FORMULA_INPUT_NAME;
     dateValidator.optionsInput = DateShowTimeOption.componentKey;
     validatorRegistry.register(dateValidator);
+    validatorRegistry.register(injector.createInstance(CheckboxValidator));
 
     const sheetDataValidationModel = injector.get(SheetDataValidationModel);
     commandService.syncExecuteCommand(AddDataValidationMutation.id, {
@@ -490,6 +510,24 @@ async function renderDetail(root: Root, testBed: ReturnType<typeof createDetailT
 async function clickElement(element: HTMLElement) {
     await act(async () => {
         element.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        await Promise.resolve();
+    });
+}
+
+async function openSelect(element: HTMLElement) {
+    await act(async () => {
+        const PointerEventCtor = window.PointerEvent ?? MouseEvent;
+        element.dispatchEvent(new PointerEventCtor('pointerdown', { bubbles: true, button: 0 }));
+        element.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        await Promise.resolve();
+    });
+}
+
+async function changeInputValue(input: HTMLInputElement, value: string) {
+    await act(async () => {
+        const valueSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
+        valueSetter?.call(input, value);
+        input.dispatchEvent(new Event('input', { bubbles: true }));
         await Promise.resolve();
     });
 }
@@ -556,6 +594,57 @@ describe('DataValidationDetail rule editing', () => {
 
         expect(currentTestBed.sheetDataValidationModel.getRuleById(UNIT_ID, SUB_UNIT_ID, currentTestBed.rule.uid)?.bizInfo).toEqual({
             showTime: true,
+        });
+    });
+
+    it('persists both date bounds when editing a between-rule formula', async () => {
+        currentTestBed = createDetailTestBed(createDateBetweenRule());
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        await renderDetail(root, currentTestBed);
+
+        const inputs = Array.from(container.querySelectorAll<HTMLInputElement>('[data-u-comp="input"] input'));
+
+        await changeInputValue(inputs[0], '2024-02-01');
+        await waitForDebounce();
+
+        expect(currentTestBed.sheetDataValidationModel.getRuleById(UNIT_ID, SUB_UNIT_ID, currentTestBed.rule.uid)).toMatchObject({
+            operator: DataValidationOperator.BETWEEN,
+            formula1: '2024-02-01',
+            formula2: '2024-01-31',
+        });
+
+        await changeInputValue(inputs[1], '2024-02-29');
+        await waitForDebounce();
+
+        expect(currentTestBed.sheetDataValidationModel.getRuleById(UNIT_ID, SUB_UNIT_ID, currentTestBed.rule.uid)).toMatchObject({
+            operator: DataValidationOperator.BETWEEN,
+            formula1: '2024-02-01',
+            formula2: '2024-02-29',
+        });
+    });
+
+    it('clears date bounds and operator when switching the rule to checkbox validation', async () => {
+        currentTestBed = createDetailTestBed(createDateBetweenRule('rule-date-to-checkbox'));
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        await renderDetail(root, currentTestBed);
+
+        await openSelect(container.querySelectorAll<HTMLElement>('[data-u-comp="select"]')[0]);
+        const options = Array.from(document.querySelectorAll<HTMLElement>('[data-slot="dropdown-menu-radio-item"], [role="menuitemradio"]'));
+        const checkboxOption = options.find((item) => item.textContent?.includes('sheets-data-validation.checkbox.title'))!;
+
+        await clickElement(checkboxOption);
+
+        expect(currentTestBed.sheetDataValidationModel.getRuleById(UNIT_ID, SUB_UNIT_ID, currentTestBed.rule.uid)).toMatchObject({
+            type: DataValidationType.CHECKBOX,
+            operator: undefined,
+            formula1: undefined,
+            formula2: undefined,
         });
     });
 });

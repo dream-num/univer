@@ -323,6 +323,45 @@ describe('BatchSaveImagesDialog', () => {
         testBed.univer.dispose();
     });
 
+    it('removes the highlighted lookup column when column values are no longer used in file names', async () => {
+        const { testBed, batchSaveService, dialogService, markSelectionService } = await renderDialog();
+        const columnValueCheckbox = getCheckbox(container!, 1);
+
+        await act(async () => {
+            columnValueCheckbox.click();
+            await Promise.resolve();
+        });
+
+        expect(markSelectionService.activeRanges).toEqual([{
+            startRow: 2,
+            endRow: 3,
+            startColumn: 4,
+            endColumn: 4,
+        }]);
+
+        await act(async () => {
+            columnValueCheckbox.click();
+            await Promise.resolve();
+        });
+
+        expect(markSelectionService.activeRanges).toEqual([]);
+        expect(markSelectionService.removedIds).toEqual(['shape-1']);
+
+        await act(async () => {
+            getButton(container!, 'sheets-drawing-ui.save.confirm').click();
+            await Promise.resolve();
+        });
+
+        expect(batchSaveService.savedImages.map((image) => image.imageId)).toEqual(['image-a', 'image-b']);
+        expect(batchSaveService.savedConfig).toEqual({
+            fileNameParts: [FileNamePart.CELL_ADDRESS],
+            columnIndex: undefined,
+        });
+        expect(dialogService.closedIds).toEqual([BATCH_SAVE_IMAGES_DIALOG_ID]);
+
+        testBed.univer.dispose();
+    });
+
     it('keeps the dialog open and shows the save error when saving fails', async () => {
         const { testBed, batchSaveService, dialogService } = await renderDialog();
         batchSaveService.failSaving();

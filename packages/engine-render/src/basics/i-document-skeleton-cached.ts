@@ -297,6 +297,7 @@ export interface IDocumentSkeletonDrawing {
     lineHeight: number;
     blockAnchorTop: number; // The paragraph top.
     customBlockRenderViewport?: {
+        contentHeight?: number;
         contentWidth?: number;
     };
 }

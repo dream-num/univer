@@ -20,9 +20,9 @@ import { mergeDocFloatDomRuntimeProps } from './doc-float-dom.controller';
 describe('mergeDocFloatDomRuntimeProps', () => {
     it('preserves existing props while adding custom block runtime viewport', () => {
         expect(mergeDocFloatDomRuntimeProps({ keep: true }, {
-            customBlockRenderViewport: { contentWidth: 1280 },
+            customBlockRenderViewport: { contentHeight: 720, contentWidth: 1280 },
         } as never)).toEqual({
-            customBlockRenderViewport: { contentWidth: 1280 },
+            customBlockRenderViewport: { contentHeight: 720, contentWidth: 1280 },
             keep: true,
         });
     });

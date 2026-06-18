@@ -29,8 +29,8 @@ import { useEffect, useRef, useState } from 'react';
 import { useStateRef } from '../formula-editor/hooks/use-state-ref';
 import { useRangesHighlight } from './hooks/use-ranges-highlight';
 import { useRangeSelectorSelectionChange } from './hooks/use-selection-change';
-import { verifyRange } from './util';
 import { rangePreProcess } from './utils/range-pre-process';
+import { verifyRange } from './utils/verify-range';
 
 export interface IRangeSelectorInstance {
     editor: Nullable<Editor>;

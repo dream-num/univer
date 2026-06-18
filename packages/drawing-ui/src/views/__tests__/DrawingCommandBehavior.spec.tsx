@@ -442,4 +442,50 @@ describe('drawing command behavior', () => {
         }]);
         expect(document.querySelector('[role="menuitem"]')).toBeNull();
     });
+
+    it('keeps disabled sheet image popup menu items inert while allowing enabled actions', async () => {
+        const disabledEditParams = { unitId, subUnitId, drawingId, source: 'disabled-sheet-popup' };
+        const cropParams = { unitId, subUnitId, drawingId, source: 'enabled-sheet-popup' };
+        const rendered = renderWithRediContext(
+            univer.__getInjector(),
+            <ImagePopupMenu
+                popup={{
+                    extraProps: {
+                        menuItems: [
+                            {
+                                label: 'drawing-ui.image-popup.edit',
+                                index: 0,
+                                commandId: editCommandId,
+                                commandParams: disabledEditParams,
+                                disable: true,
+                            },
+                            {
+                                label: 'drawing-ui.image-popup.crop',
+                                index: 1,
+                                commandId: cropCommandId,
+                                commandParams: cropParams,
+                                disable: false,
+                            },
+                        ],
+                    },
+                }}
+            />
+        );
+        root = rendered.root;
+        container = rendered.container;
+
+        clickElement(container.firstElementChild!.firstElementChild!);
+        clickElement(findByText('[role="menuitem"]', 'drawing-ui.image-popup.edit'));
+        clickElement(findByText('[role="menuitem"]', 'drawing-ui.image-popup.crop'));
+        await flushPendingCommands();
+
+        expect(executedCommands).toEqual([
+            {
+                id: cropCommandId,
+                type: CommandType.OPERATION,
+                params: cropParams,
+            },
+        ]);
+        expect(document.querySelector('[role="menuitem"]')).toBeNull();
+    });
 });

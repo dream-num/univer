@@ -22,10 +22,16 @@ import { EmbedFloatDomRenderer } from '@univerjs/embed-ui';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-ratio.operation';
-import { createDefaultDocsTableLikeCustomBlockBleedViewport, resolveDocsTableLikeCustomBlockBleedViewport } from './embed-docs-custom-block-bleed';
+import { createDefaultDocsTableLikeCustomBlockBleedViewport, resolveDocsTableLikeCustomBlockBleedViewport, resolveDocsTableLikeCustomBlockContentWidth } from './embed-docs-custom-block-bleed';
 import { scrollDocsTableLikeCustomBlockLive } from './embed-docs-custom-block-scroll';
 
-export function EmbedDocsCustomBlockRenderer(props: { data?: EmbedFloatDomData }) {
+export interface EmbedDocsCustomBlockRuntimeProps {
+    customBlockRenderViewport?: {
+        contentWidth?: number;
+    };
+}
+
+export function EmbedDocsCustomBlockRenderer(props: { data?: EmbedFloatDomData } & EmbedDocsCustomBlockRuntimeProps) {
     ensureEmbedDocsCustomBlockStyles();
 
     const commandService = useDependency(ICommandService);
@@ -88,7 +94,10 @@ export function EmbedDocsCustomBlockRenderer(props: { data?: EmbedFloatDomData }
         const sync = () => {
             frame = undefined;
             const rect = root.getBoundingClientRect();
-            const contentWidth = measureRuntimeContentWidth(root, rect.width);
+            const contentWidth = resolveDocsTableLikeCustomBlockContentWidth(
+                props.customBlockRenderViewport?.contentWidth,
+                measureRuntimeContentWidth(root, rect.width)
+            );
             const next = resolveDocsTableLikeCustomBlockBleedViewport(root, contentWidth);
 
             setViewport((previous) => (
@@ -122,7 +131,7 @@ export function EmbedDocsCustomBlockRenderer(props: { data?: EmbedFloatDomData }
             window.removeEventListener('resize', schedule);
             window.removeEventListener('scroll', schedule, true);
         };
-    }, [sheetLike]);
+    }, [props.customBlockRenderViewport?.contentWidth, sheetLike]);
 
     useLayoutEffect(() => {
         const root = rootRef.current;

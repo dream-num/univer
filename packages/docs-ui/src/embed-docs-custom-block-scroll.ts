@@ -15,7 +15,7 @@
  */
 
 export function scrollDocsTableLikeCustomBlockLive(event: WheelEvent, live: HTMLElement): boolean {
-    if (event.ctrlKey || event.metaKey) {
+    if (event.defaultPrevented || event.ctrlKey || event.metaKey) {
         return false;
     }
 

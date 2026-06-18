@@ -297,13 +297,11 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
                 // WARNING: SetSelectionsOperation with type=null would clear all exists selections
                 // SetSelectionsOperation ---> selectionManager@setSelections ---> moveEnd$ ---> selectionRenderService@_reset
                 // TODO @lumixraku why use such weird a way to clear existing selection? subscribe to currentSkeleton$ is much better?
-                Promise.resolve().then(() => {
-                    this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
-                        unitId,
-                        subUnitId: sheetId,
-                        selections: selections.length !== 0 ? selections : [getTopLeftSelectionOfCurrSheet(skeleton)],
-                    } as ISetSelectionsOperationParams);
-                });
+                this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
+                    unitId,
+                    subUnitId: sheetId,
+                    selections: selections.length !== 0 ? selections : [getTopLeftSelectionOfCurrSheet(skeleton)],
+                } as ISetSelectionsOperationParams);
             }
 
             const currentSelections = this._workbookSelections.getCurrentSelections();

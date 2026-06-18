@@ -16,14 +16,15 @@
 
 import type { DocumentDataModel, Nullable } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { Disposable, UniverInstanceType } from '@univerjs/core';
+import { Disposable, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { setDocsCustomBlockRenderViewportProvider } from '@univerjs/engine-render';
 import { VIEWPORT_KEY } from '../../basics/docs-view-key';
-import { resolveDocsCustomBlockRenderViewport } from '../../embed-host-anchor';
+import { resolveDocsCustomBlockContentHeight, resolveDocsCustomBlockRenderViewport } from '../../embed-host-anchor';
 
 export class EmbedDocsCustomBlockBleedRenderController extends Disposable implements IRenderModule {
     constructor(
-        private readonly _context: IRenderContext<DocumentDataModel>
+        private readonly _context: IRenderContext<DocumentDataModel>,
+        @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
 
@@ -33,7 +34,7 @@ export class EmbedDocsCustomBlockBleedRenderController extends Disposable implem
             }
 
             const drawing = this._context.unit.getSnapshot().drawings?.[blockId] as Nullable<{
-                data?: { childType?: UniverInstanceType };
+                data?: { childType?: UniverInstanceType; childUnitId?: string };
             }>;
             const childType = drawing?.data?.childType;
             if (childType !== UniverInstanceType.UNIVER_SHEET && childType !== UniverInstanceType.UNIVER_BASE) {
@@ -41,9 +42,17 @@ export class EmbedDocsCustomBlockBleedRenderController extends Disposable implem
             }
 
             const visibleCanvas = this._getVisibleCanvasDocumentRect();
+            const childUnit = drawing?.data?.childUnitId
+                ? this._univerInstanceService.getUnit(drawing.data.childUnitId, childType)
+                : undefined;
 
             return resolveDocsCustomBlockRenderViewport({
                 childType,
+                contentHeight: resolveDocsCustomBlockContentHeight({
+                    childType,
+                    childUnit,
+                    fallbackHeight: input.fallbackHeight,
+                }),
                 docsLeft: this._getDocsLeft(),
                 documentFlavor: this._context.unit.getSnapshot().documentStyle?.documentFlavor,
                 fallbackHeight: input.fallbackHeight,
@@ -52,6 +61,7 @@ export class EmbedDocsCustomBlockBleedRenderController extends Disposable implem
                 pageMarginRight: input.pageMarginRight,
                 pageWidth: input.pageWidth,
                 scale: this._context.scene.getAncestorScale().scaleX || 1,
+                visibleCanvasHeight: visibleCanvas?.height,
                 visibleCanvasLeft: visibleCanvas?.left,
                 visibleCanvasWidth: visibleCanvas?.width,
             });
@@ -68,18 +78,24 @@ export class EmbedDocsCustomBlockBleedRenderController extends Disposable implem
             ?.docsLeft ?? 0;
     }
 
-    private _getVisibleCanvasDocumentRect(): Nullable<{ left: number; width: number }> {
+    private _getVisibleCanvasDocumentRect(): Nullable<{ height: number; left: number; width: number }> {
         const scaleX = this._context.scene.getAncestorScale().scaleX || 1;
+        const scaleY = this._context.scene.getAncestorScale().scaleY || 1;
         const viewportLeft = this._context.scene.getViewport(VIEWPORT_KEY.VIEW_MAIN)?.viewportScrollX ?? 0;
-        const canvasWidth = this._context.engine.getCanvasElement?.()?.getBoundingClientRect?.()?.width;
+        const canvasRect = this._context.engine.getCanvasElement?.()?.getBoundingClientRect?.();
+        const canvasWidth = canvasRect?.width;
+        const canvasHeight = canvasRect?.height;
         const fallbackWidth = (this._context.mainComponent as Nullable<{ width?: number }>)?.width ?? this._context.scene.width;
         const visibleWidth = (canvasWidth ?? fallbackWidth ?? 0) / scaleX;
+        const fallbackHeight = (this._context.mainComponent as Nullable<{ height?: number }>)?.height ?? this._context.scene.height;
+        const visibleHeight = (canvasHeight ?? fallbackHeight ?? 0) / scaleY;
 
-        if (!visibleWidth || !Number.isFinite(visibleWidth) || visibleWidth <= 0) {
+        if (!visibleWidth || !Number.isFinite(visibleWidth) || visibleWidth <= 0 || !visibleHeight || !Number.isFinite(visibleHeight) || visibleHeight <= 0) {
             return null;
         }
 
         return {
+            height: visibleHeight,
             left: viewportLeft,
             width: visibleWidth,
         };

@@ -38,4 +38,32 @@ describe('createSheetsContentSizeProvider', () => {
             },
         })).toEqual({ height: 126, width: 406 });
     });
+
+    it('uses worksheet data range to avoid measuring empty trailing rows and columns', () => {
+        const provider = createSheetsContentSizeProvider();
+
+        expect(provider.measureContentSize({
+            childType: UniverInstanceType.UNIVER_SHEET,
+            childUnitId: 'sheet-1',
+            childUnit: {
+                getActiveSheet: () => ({
+                    getCellMatrix: () => ({
+                        getDataRange: () => ({
+                            endColumn: 1,
+                            endRow: 1,
+                            startColumn: 0,
+                            startRow: 0,
+                        }),
+                    }),
+                    getConfig: () => ({ columnHeader: { height: 30 }, rowHeader: { width: 50 } }),
+                    getColVisible: () => true,
+                    getColumnCount: () => 100,
+                    getColumnWidth: (column: number) => [80, 120][column] ?? 240,
+                    getRowCount: () => 100,
+                    getRowHeight: (row: number) => [24, 40][row] ?? 100,
+                    getRowVisible: () => true,
+                }),
+            },
+        })).toEqual({ height: 94, width: 250 });
+    });
 });

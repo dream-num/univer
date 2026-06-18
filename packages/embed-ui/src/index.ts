@@ -85,6 +85,7 @@ export {
 } from './services/embed-mount.service';
 export { type EmbedOverlayRootRegistration, EmbedOverlayRootService } from './services/embed-overlay-root.service';
 export { EmbedPassiveViewportRegistryService } from './services/embed-passive-viewport-registry.service';
+export { createEmbedProductFloatingMenuContributions } from './services/embed-product-floating-menu-contributions';
 export { createEmbedProductMenuInjector, mountEmbedProductRibbonMenu } from './services/embed-product-menu-mounting';
 export { EmbedProductMenuRegistryService, registerEmbedProductMenuContribution } from './services/embed-product-menu-registry.service';
 export { EmbedReadonlyPreviewRegistryService } from './services/embed-readonly-preview-registry.service';

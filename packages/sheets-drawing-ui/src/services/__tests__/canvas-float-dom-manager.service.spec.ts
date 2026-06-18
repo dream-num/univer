@@ -1024,7 +1024,7 @@ describe('SheetCanvasFloatDomManagerService', () => {
         ]);
 
         fixture.manager.updateFloatDomProps('test', 'sheet1', 'range-card', { fill: '#ff0000' });
-        expect(fixture.manager.getFloatDomInfo('range-card')?.rect.fill).toBe('#ff0000');
+        expect(fixture.manager.getFloatDomInfo('range-card')?.rect.toJson().fill).toBe('#ff0000');
 
         rangeDom.dispose();
         expect(findFloatDom(canvasFloatDomService, 'range-card')).toBeUndefined();

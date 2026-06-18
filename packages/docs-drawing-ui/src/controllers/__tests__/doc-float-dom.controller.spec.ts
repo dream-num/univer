@@ -33,6 +33,7 @@ function createScene() {
 function createController(options: { rects?: Rect[]; page?: any } = {}) {
     const add$ = new Subject<any[]>();
     const remove$ = new Subject<any[]>();
+    const refreshTransform$ = new Subject<any[]>();
     const commandHandlers: Array<(command: { id: string; params?: unknown }) => void> = [];
     const scene = createScene();
     const canvas = { dispatchEvent: vi.fn() };
@@ -59,6 +60,7 @@ function createController(options: { rects?: Rect[]; page?: any } = {}) {
     const drawingManagerService = {
         add$,
         remove$,
+        refreshTransform$,
         getDrawingByParam: vi.fn(() => drawing),
     };
     const drawingRenderService = {

@@ -32,7 +32,7 @@ import {
     WrapStrategy,
 } from '@univerjs/core';
 import { Button, ColorPicker, Dropdown, DropdownMenu, Tooltip } from '@univerjs/design';
-import { createEmbedReactRoot, disposeEmbedReactRoot, EmbedFloatingActiveService, EmbedRuntimeProviders, resolveEmbedFloatingMenuRoot } from '@univerjs/embed-ui';
+import { createEmbedProductFloatingMenuContributions, createEmbedReactRoot, disposeEmbedReactRoot, EmbedFloatingActiveService, EmbedRuntimeProviders, resolveEmbedFloatingMenuRoot } from '@univerjs/embed-ui';
 import {
     AlignBottomIcon,
     AlignTopIcon,
@@ -275,26 +275,10 @@ export function resolveMenuCommandRequest(item: IMenuItem | undefined, params?: 
 }
 
 export function createSheetsFloatingMenuContributions(): EmbedFloatingMenuContribution[] {
-    return [
-        {
-            hostType: UniverInstanceType.UNIVER_DOC,
-            entry: 'docs-custom-block',
-            childType: UniverInstanceType.UNIVER_SHEET,
-            mount: mountSheetsFloatingMenu,
-        },
-        {
-            hostType: UniverInstanceType.UNIVER_SHEET,
-            entry: 'sheets-floating-object',
-            childType: UniverInstanceType.UNIVER_SHEET,
-            mount: mountSheetsFloatingMenu,
-        },
-        {
-            hostType: UniverInstanceType.UNIVER_SLIDE,
-            entry: 'slides-floating-object',
-            childType: UniverInstanceType.UNIVER_SHEET,
-            mount: mountSheetsFloatingMenu,
-        },
-    ];
+    return createEmbedProductFloatingMenuContributions({
+        childType: UniverInstanceType.UNIVER_SHEET,
+        mount: mountSheetsFloatingMenu,
+    });
 }
 
 function mountSheetsFloatingMenu(context: EmbedFloatingMenuMountContext) {

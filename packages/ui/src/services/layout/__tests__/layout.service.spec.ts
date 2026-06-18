@@ -17,6 +17,7 @@
 import {
     ContextService,
     DesktopLogService,
+    FOCUSING_UNIVER_EDITOR,
     IContextService,
     ILogService,
     Injector,
@@ -27,7 +28,7 @@ import {
 } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { DesktopLayoutService, ILayoutService } from '../layout.service';
+import { DesktopLayoutService, FOCUSING_UNIVER, ILayoutService } from '../layout.service';
 
 class TestSlideUnit extends UnitModel {
     override type = UniverInstanceType.UNIVER_SLIDE;
@@ -58,12 +59,33 @@ class TestSlideUnit extends UnitModel {
 function createElement(name: string, containsSelf = true) {
     return {
         dataset: { uComp: name },
-        contains: (target: unknown) => containsSelf && target != null,
+        contains: (target: unknown) => containsSelf && target != null && (target as HTMLElement).dataset?.uComp !== 'outside',
     } as unknown as HTMLElement;
 }
 
+function dispatchFocusIn(target: HTMLElement): void {
+    const event = new Event('focusin');
+    Object.defineProperty(event, 'target', {
+        configurable: true,
+        value: target,
+    });
+    window.dispatchEvent(event);
+}
+
 function createService() {
-    vi.stubGlobal('window', new EventTarget());
+    const listeners = new Map<string, EventListener[]>();
+    vi.stubGlobal('window', {
+        addEventListener(type: string, listener: EventListener) {
+            listeners.set(type, [...(listeners.get(type) ?? []), listener]);
+        },
+        removeEventListener(type: string, listener: EventListener) {
+            listeners.set(type, (listeners.get(type) ?? []).filter((item) => item !== listener));
+        },
+        dispatchEvent(event: Event) {
+            (listeners.get(event.type) ?? []).forEach((listener) => listener(event));
+            return true;
+        },
+    });
     vi.stubGlobal('document', { activeElement: null });
     const injector = new Injector();
     injector.add([ILogService, { useClass: DesktopLogService }]);
@@ -75,7 +97,9 @@ function createService() {
     univerInstanceService.__addUnit(slide);
     univerInstanceService.focusUnit('slide-1');
     return {
+        injector,
         service: injector.get(ILayoutService),
+        contextService: injector.get(IContextService),
     };
 }
 
@@ -87,7 +111,7 @@ describe('DesktopLayoutService', () => {
     it('tracks registered containers and delegates focus to the focused Univer unit type', () => {
         const { service } = createService();
         const root = createElement('app-layout');
-        const content = createElement('workbench-layout');
+        const content = createElement('custom-content');
         const focused: string[] = [];
 
         const rootDisposable = service.registerRootContainerElement(root);
@@ -105,5 +129,58 @@ describe('DesktopLayoutService', () => {
         contentDisposable.dispose();
         rootDisposable.dispose();
         expect(service.rootContainerElement).toBeNull();
+    });
+
+    it('rejects duplicate registrations that would make focus ownership ambiguous', () => {
+        const { service } = createService();
+        const root = createElement('app-layout');
+        const content = createElement('custom-content');
+        const container = createElement('dialog');
+
+        service.registerRootContainerElement(root);
+        service.registerContentElement(content);
+        service.registerContainerElement(container);
+        service.registerFocusHandler(UniverInstanceType.UNIVER_SLIDE, () => {});
+
+        expect(() => service.registerRootContainerElement(createElement('other-root'))).toThrow('[DesktopLayoutService]: root container already registered!');
+        expect(() => service.registerContentElement(content)).toThrow('[DesktopLayoutService]: content container already registered!');
+        expect(() => service.registerContainerElement(container)).toThrow('[LayoutService]: container already registered!');
+        expect(() => service.registerFocusHandler(UniverInstanceType.UNIVER_SLIDE, () => {})).toThrow('[DesktopLayoutService]: handler of type 3 bas been registered!');
+    });
+
+    it('updates focus context from window focus events and editor active state', async () => {
+        const { service, contextService } = createService();
+        const focused: string[] = [];
+        const root = createElement('app-layout');
+        const content = createElement('custom-content');
+        const outside = createElement('outside', false);
+        const editor = createElement('editor');
+        const button = createElement('button');
+
+        service.registerRootContainerElement(root);
+        service.registerContentElement(content);
+        service.registerFocusHandler(UniverInstanceType.UNIVER_SLIDE, (unitId) => focused.push(unitId));
+
+        Object.defineProperty(globalThis.document, 'activeElement', {
+            configurable: true,
+            get: () => editor,
+        });
+        dispatchFocusIn(outside);
+        expect(service.isFocused).toBe(false);
+        expect(contextService.getContextValue(FOCUSING_UNIVER)).toBe(false);
+        expect(contextService.getContextValue(FOCUSING_UNIVER_EDITOR)).toBe(true);
+
+        Object.defineProperty(globalThis.document, 'activeElement', {
+            configurable: true,
+            get: () => content,
+        });
+        dispatchFocusIn(content);
+        expect(service.isFocused).toBe(true);
+        expect(contextService.getContextValue(FOCUSING_UNIVER)).toBe(true);
+        expect(contextService.getContextValue(FOCUSING_UNIVER_EDITOR)).toBe(false);
+
+        dispatchFocusIn(button);
+        await Promise.resolve();
+        expect(focused).toEqual(['slide-1']);
     });
 });

@@ -19,7 +19,29 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { TableOptionType } from '../../../basics/common';
 import { DefinedNamesService, IDefinedNamesService } from '../../../services/defined-names.service';
 import { ISuperTableService, SuperTableService } from '../../../services/super-table.service';
-import { RemoveDefinedNameMutation, SetDefinedNameMutation } from '../set-defined-name.mutation';
+import { RegisterFunctionMutation } from '../register-function.mutation';
+import { SetArrayFormulaDataMutation } from '../set-array-formula-data.mutation';
+import { RemoveDefinedNameMutation, SetDefinedNameMutation, SetDefinedNameMutationFactory } from '../set-defined-name.mutation';
+import { RemoveFeatureCalculationMutation, SetFeatureCalculationMutation } from '../set-feature-calculation.mutation';
+import {
+    SetCellFormulaDependencyCalculationMutation,
+    SetCellFormulaDependencyCalculationResultMutation,
+    SetFormulaCalculationNotificationMutation,
+    SetFormulaCalculationResultMutation,
+    SetFormulaCalculationStartMutation,
+    SetFormulaCalculationStopMutation,
+    SetFormulaDependencyCalculationMutation,
+    SetFormulaDependencyCalculationResultMutation,
+    SetFormulaStringBatchCalculationMutation,
+    SetFormulaStringBatchCalculationResultMutation,
+    SetQueryFormulaDependencyAllMutation,
+    SetQueryFormulaDependencyAllResultMutation,
+    SetQueryFormulaDependencyMutation,
+    SetQueryFormulaDependencyResultMutation,
+    SetTriggerFormulaCalculationStartMutation,
+} from '../set-formula-calculation.mutation';
+import { SetFormulaDataMutation } from '../set-formula-data.mutation';
+import { SetImageFormulaDataMutation } from '../set-image-formula-data.mutation';
 import { RemoveSuperTableMutation, SetSuperTableMutation, SetSuperTableOptionMutation } from '../set-super-table.mutation';
 
 describe('formula reference mutations', () => {
@@ -114,5 +136,69 @@ describe('formula reference mutations', () => {
 
         expect(result).toBe(true);
         expect(superTableService.getTableOptionMap().get('数据')).toBe(TableOptionType.DATA);
+    });
+
+    it('returns false for malformed defined-name mutations and restores existing values through undo factory', async () => {
+        await commandService.executeCommand(SetDefinedNameMutation.id, {
+            unitId: 'book-1',
+            id: 'name-1',
+            name: 'Original',
+            formulaOrRefString: 'Sheet1!A1',
+            hidden: true,
+            localSheetId: 'sheet-1',
+            formulaOrRefStringWithPrefix: '=Sheet1!A1',
+        });
+
+        const factoryAccessor = { get: () => definedNamesService };
+
+        expect(SetDefinedNameMutationFactory(factoryAccessor as never, { unitId: 'book-1', id: 'name-1' } as never)).toEqual({
+            id: 'name-1',
+            unitId: 'book-1',
+            name: 'Original',
+            formulaOrRefString: 'Sheet1!A1',
+            comment: undefined,
+            hidden: true,
+            localSheetId: 'sheet-1',
+            formulaOrRefStringWithPrefix: '=Sheet1!A1',
+        });
+        expect(SetDefinedNameMutationFactory(factoryAccessor as never, { unitId: 'book-1', id: 'missing' } as never)).toBeNull();
+        expect(SetDefinedNameMutation.handler(commandService as never, null as never)).toBe(false);
+        expect(RemoveDefinedNameMutation.handler(commandService as never, null as never)).toBe(false);
+        expect(definedNamesService.getValueById('book-1', 'name-1')).toMatchObject({
+            name: 'Original',
+            formulaOrRefString: 'Sheet1!A1',
+            hidden: true,
+        });
+    });
+
+    it('keeps RPC-only formula mutations as successful command messages', () => {
+        const accessor = {} as never;
+        const statelessMutations = [
+            RegisterFunctionMutation,
+            SetArrayFormulaDataMutation,
+            SetFormulaDataMutation,
+            SetImageFormulaDataMutation,
+            SetFeatureCalculationMutation,
+            RemoveFeatureCalculationMutation,
+            SetFormulaCalculationStartMutation,
+            SetTriggerFormulaCalculationStartMutation,
+            SetFormulaStringBatchCalculationMutation,
+            SetFormulaStringBatchCalculationResultMutation,
+            SetFormulaCalculationStopMutation,
+            SetFormulaCalculationNotificationMutation,
+            SetFormulaCalculationResultMutation,
+            SetFormulaDependencyCalculationMutation,
+            SetFormulaDependencyCalculationResultMutation,
+            SetCellFormulaDependencyCalculationMutation,
+            SetCellFormulaDependencyCalculationResultMutation,
+            SetQueryFormulaDependencyMutation,
+            SetQueryFormulaDependencyResultMutation,
+            SetQueryFormulaDependencyAllMutation,
+            SetQueryFormulaDependencyAllResultMutation,
+        ];
+
+        expect(statelessMutations.map((mutation) => mutation.handler(accessor, {} as never))).toEqual(
+            statelessMutations.map(() => true)
+        );
     });
 });

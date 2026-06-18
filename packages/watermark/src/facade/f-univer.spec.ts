@@ -14,92 +14,91 @@
  * limitations under the License.
  */
 
-import { describe, expect, it, vi } from 'vitest';
+import { Injector } from '@univerjs/core';
+import { FEnum, FUniver } from '@univerjs/core/facade';
+import { IWatermarkTypeEnum } from '@univerjs/engine-render';
+import { WatermarkService, WatermarkTextBaseConfig } from '@univerjs/watermark';
+import { describe, expect, it } from 'vitest';
+import { FUniverWatermarkMixin, FWatermarkEnumMixin } from './f-univer';
 
-const mocked = vi.hoisted(() => ({
-    extendUniver: vi.fn(),
-    extendEnum: vi.fn(),
-    IWatermarkTypeEnum: {
-        Text: 'text',
-        Image: 'image',
-    },
-}));
+class TestWatermarkService {
+    readonly updatedConfigs: unknown[] = [];
+    deleteCount = 0;
 
-vi.mock('@univerjs/core/facade', () => {
-    class FUniver {
-        static extend = mocked.extendUniver;
-    }
-    class FEnum {
-        static extend = mocked.extendEnum;
+    updateWatermarkConfig(config: unknown): void {
+        this.updatedConfigs.push(config);
     }
 
-    return {
-        FUniver,
-        FEnum,
-    };
-});
-
-vi.mock('@univerjs/engine-render', () => ({
-    IWatermarkTypeEnum: mocked.IWatermarkTypeEnum,
-}));
-
-class MockWatermarkService {}
-
-vi.mock('@univerjs/watermark', () => ({
-    WatermarkTextBaseConfig: { content: '', repeat: true },
-    WatermarkImageBaseConfig: { url: '', width: 100 },
-    WatermarkService: MockWatermarkService,
-}));
+    deleteWatermarkConfig(): void {
+        this.deleteCount += 1;
+    }
+}
 
 describe('watermark facade', () => {
-    it('should register facade mixins and support add/delete watermark', async () => {
-        const module = await import('./f-univer');
-
-        expect(mocked.extendUniver).toHaveBeenCalledWith(module.FUniverWatermarkMixin);
-        expect(mocked.extendEnum).toHaveBeenCalledWith(module.FWatermarkEnumMixin);
-
-        const updateWatermarkConfig = vi.fn();
-        const deleteWatermarkConfig = vi.fn();
+    it('adds text and image watermarks through the injected watermark service', () => {
+        const injector = new Injector();
+        injector.add([WatermarkService, { useClass: TestWatermarkService as never }]);
+        const service = injector.get(WatermarkService) as unknown as TestWatermarkService;
         const thisArg = {
-            _injector: {
-                get: vi.fn(() => ({ updateWatermarkConfig, deleteWatermarkConfig })),
-            },
+            _injector: injector,
         };
+        const addWatermark = FUniverWatermarkMixin.prototype.addWatermark as (
+            this: typeof thisArg,
+            type: IWatermarkTypeEnum,
+            config: unknown
+        ) => FUniver;
 
-        const textResult = module.FUniverWatermarkMixin.prototype.addWatermark.call(
+        expect(addWatermark.call(
             thisArg,
-            mocked.IWatermarkTypeEnum.Text as never,
-            { content: 'hello' } as never
-        );
-        expect(textResult).toBe(thisArg);
-        expect(updateWatermarkConfig).toHaveBeenCalledWith({
-            type: mocked.IWatermarkTypeEnum.Text,
-            config: { text: { content: 'hello', repeat: true } },
+            IWatermarkTypeEnum.Text,
+            { content: 'Confidential' } as never
+        )).toBe(thisArg);
+        expect(service.updatedConfigs.at(-1)).toEqual({
+            type: IWatermarkTypeEnum.Text,
+            config: {
+                text: {
+                    ...WatermarkTextBaseConfig,
+                    content: 'Confidential',
+                },
+            },
         });
 
-        module.FUniverWatermarkMixin.prototype.addWatermark.call(
+        addWatermark.call(
             thisArg,
-            mocked.IWatermarkTypeEnum.Image as never,
-            { url: 'https://img' } as never
+            IWatermarkTypeEnum.Image,
+            { url: 'https://example.com/watermark.png', width: 320 } as never
         );
-        expect(updateWatermarkConfig).toHaveBeenCalledWith({
-            type: mocked.IWatermarkTypeEnum.Image,
-            config: { image: { url: 'https://img', width: 100 } },
+        expect(service.updatedConfigs.at(-1)).toMatchObject({
+            type: IWatermarkTypeEnum.Image,
+            config: {
+                image: {
+                    url: 'https://example.com/watermark.png',
+                    width: 320,
+                },
+            },
         });
-
-        expect(() =>
-            module.FUniverWatermarkMixin.prototype.addWatermark.call(thisArg, 'unknown' as never, {} as never)
-        ).toThrow('Unknown watermark type');
-
-        const deleteResult = module.FUniverWatermarkMixin.prototype.deleteWatermark.call(thisArg);
-        expect(deleteResult).toBe(thisArg);
-        expect(deleteWatermarkConfig).toHaveBeenCalledTimes(1);
-
-        const enumObj = new module.FWatermarkEnumMixin();
-        expect(enumObj.IWatermarkTypeEnum).toBe(mocked.IWatermarkTypeEnum);
     });
 
-    it('should run facade entry export', async () => {
-        await expect(import('./index')).resolves.toBeDefined();
+    it('deletes watermark config, rejects unknown types and exposes watermark enum on real facade classes', () => {
+        const injector = new Injector();
+        injector.add([WatermarkService, { useClass: TestWatermarkService as never }]);
+        const service = injector.get(WatermarkService) as unknown as TestWatermarkService;
+        const thisArg = {
+            _injector: injector,
+        };
+        const addWatermark = FUniverWatermarkMixin.prototype.addWatermark as (
+            this: typeof thisArg,
+            type: IWatermarkTypeEnum,
+            config: unknown
+        ) => FUniver;
+
+        expect(() =>
+            addWatermark.call(thisArg, 'unknown' as never, {} as never)
+        ).toThrow('Unknown watermark type');
+        expect(FUniverWatermarkMixin.prototype.deleteWatermark.call(thisArg as never)).toBe(thisArg);
+        expect(service.deleteCount).toBe(1);
+        expect(FEnum.get().IWatermarkTypeEnum).toBe(IWatermarkTypeEnum);
+        expect(Object.create(FWatermarkEnumMixin.prototype).IWatermarkTypeEnum).toBe(IWatermarkTypeEnum);
+        expect(typeof FUniver.prototype.addWatermark).toBe('function');
     });
 });

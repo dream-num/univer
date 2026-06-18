@@ -18,11 +18,14 @@ import type { ICellData, Injector, Nullable, Univer } from '@univerjs/core';
 import { ICommandService, IConfirmService, RANGE_TYPE, TestConfirmService } from '@univerjs/core';
 import { ReorderRangeCommand, ReorderRangeMutation, SetRangeValuesMutation, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { SheetsSortUIService } from '../../../services/sheets-sort-ui.service';
 import {
     SortRangeAscCommand,
     SortRangeAscExtCommand,
     SortRangeAscExtInCtxMenuCommand,
     SortRangeAscInCtxMenuCommand,
+    SortRangeCustomCommand,
+    SortRangeCustomInCtxMenuCommand,
     SortRangeDescCommand,
     SortRangeDescExtCommand,
     SortRangeDescExtInCtxMenuCommand,
@@ -59,10 +62,12 @@ describe('Sheets sort commands integration', () => {
             SortRangeAscExtCommand,
             SortRangeAscInCtxMenuCommand,
             SortRangeAscExtInCtxMenuCommand,
+            SortRangeCustomCommand,
             SortRangeDescCommand,
             SortRangeDescExtCommand,
             SortRangeDescInCtxMenuCommand,
             SortRangeDescExtInCtxMenuCommand,
+            SortRangeCustomInCtxMenuCommand,
         ].forEach((command) => commandService.registerCommand(command));
 
         getValues = (startRow, startColumn, endRow, endColumn) =>
@@ -191,5 +196,40 @@ describe('Sheets sort commands integration', () => {
 
         expect(await commandService.executeCommand(SortRangeDescExtInCtxMenuCommand.id)).toBe(true);
         expectDescendingExtendedSortResult();
+    });
+
+    it('opens custom sort panel for the selected range', async () => {
+        selectSortRange();
+
+        expect(await commandService.executeCommand(SortRangeCustomCommand.id)).toBe(true);
+
+        const customSortState = get(SheetsSortUIService).customSortState();
+        expect(customSortState?.show).toBe(true);
+        expect(customSortState?.location).toMatchObject({
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            colIndex: 9,
+            range: {
+                startRow: 0,
+                startColumn: 9,
+                endRow: 6,
+                endColumn: 11,
+            },
+        });
+    });
+
+    it('opens custom sort panel from the context menu command', async () => {
+        selectSortRange();
+
+        expect(await commandService.executeCommand(SortRangeCustomInCtxMenuCommand.id)).toBe(true);
+
+        const customSortState = get(SheetsSortUIService).customSortState();
+        expect(customSortState?.show).toBe(true);
+        expect(customSortState?.location?.range).toMatchObject({
+            startRow: 0,
+            startColumn: 9,
+            endRow: 6,
+            endColumn: 11,
+        });
     });
 });

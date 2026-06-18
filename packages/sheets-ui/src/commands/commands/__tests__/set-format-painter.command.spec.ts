@@ -38,7 +38,11 @@ import {
 import { BehaviorSubject } from 'rxjs';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { FormatPainterController } from '../../../controllers/format-painter/format-painter.controller';
-import { FormatPainterService, IFormatPainterService } from '../../../services/format-painter/format-painter.service';
+import {
+    FormatPainterService,
+    FormatPainterStatus,
+    IFormatPainterService,
+} from '../../../services/format-painter/format-painter.service';
 import { IMarkSelectionService } from '../../../services/mark-selection/mark-selection.service';
 import { ISheetSelectionRenderService } from '../../../services/selection/base-selection-render.service';
 import { SetFormatPainterOperation } from '../../operations/set-format-painter.operation';
@@ -234,6 +238,24 @@ describe('Test format painter rules in controller', () => {
     });
 
     describe('format painter', () => {
+        it('toggles toolbar commands between active mode and off', async () => {
+            const formatPainterService = get(IFormatPainterService);
+
+            expect(formatPainterService.getStatus()).toBe(FormatPainterStatus.OFF);
+
+            expect(await commandService.executeCommand(SetInfiniteFormatPainterCommand.id)).toBeTruthy();
+            expect(formatPainterService.getStatus()).toBe(FormatPainterStatus.INFINITE);
+
+            expect(await commandService.executeCommand(SetInfiniteFormatPainterCommand.id)).toBeTruthy();
+            expect(formatPainterService.getStatus()).toBe(FormatPainterStatus.OFF);
+
+            expect(await commandService.executeCommand(SetOnceFormatPainterCommand.id)).toBeTruthy();
+            expect(formatPainterService.getStatus()).toBe(FormatPainterStatus.ONCE);
+
+            expect(await commandService.executeCommand(SetOnceFormatPainterCommand.id)).toBeTruthy();
+            expect(formatPainterService.getStatus()).toBe(FormatPainterStatus.OFF);
+        });
+
         describe('format painter the numbers', async () => {
             it('correct situation', async () => {
                 const workbook = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;

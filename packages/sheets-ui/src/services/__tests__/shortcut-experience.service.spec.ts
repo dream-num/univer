@@ -23,8 +23,10 @@ describe('ShortcutExperienceService', () => {
 
     beforeEach(() => {
         const injector = new Injector();
-        injector.add([IUniverInstanceService, { useValue: {} as IUniverInstanceService }]);
-        injector.add([LocaleService, { useValue: {} as LocaleService }]);
+        class TestUniverInstanceService {}
+
+        injector.add([IUniverInstanceService, { useClass: TestUniverInstanceService as never }]);
+        injector.add([LocaleService]);
         injector.add([ShortcutExperienceService]);
         service = injector.get(ShortcutExperienceService);
     });

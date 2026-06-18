@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Injector } from '../../../common/di';
 import { DesktopLogService, ILogService } from '../../log/log.service';
 import { LifecycleStages } from '../lifecycle';
@@ -127,5 +127,52 @@ describe('Test LifecycleService', () => {
         await expect(lifecycleService.onStage(LifecycleStages.Rendered)).rejects.toThrow(
             '[LifecycleService]: lifecycle stage "Rendered" will never be reached!'
         );
+    });
+
+    it('Should resolve "onStage" when the requested lifecycle stage is reached', async () => {
+        injector = createLifecycleTestBed().injector;
+        lifecycleService = injector.get(LifecycleService);
+
+        const rendered = lifecycleService.onStage(LifecycleStages.Rendered);
+        lifecycleService.stage = LifecycleStages.Ready;
+        lifecycleService.stage = LifecycleStages.Rendered;
+
+        await expect(rendered).resolves.toBeUndefined();
+        await expect(lifecycleService.onStage(LifecycleStages.Ready)).resolves.toBeUndefined();
+    });
+
+    it('Should complete previous-stage subscriptions at steady and guard reentrant stage changes', () => {
+        injector = createLifecycleTestBed().injector;
+        lifecycleService = injector.get(LifecycleService);
+        const completed = vi.fn();
+        const stages: LifecycleStages[] = [];
+        let reentrantError: Error | undefined;
+
+        lifecycleService.lifecycle$.subscribe((stage) => {
+            if (stage === LifecycleStages.Ready) {
+                try {
+                    lifecycleService.stage = LifecycleStages.Rendered;
+                } catch (error) {
+                    reentrantError = error as Error;
+                }
+            }
+        });
+        lifecycleService.subscribeWithPrevious().subscribe({
+            next: (stage) => stages.push(stage),
+            complete: completed,
+        });
+
+        lifecycleService.stage = LifecycleStages.Ready;
+        lifecycleService.stage = LifecycleStages.Rendered;
+        lifecycleService.stage = LifecycleStages.Steady;
+
+        expect(reentrantError?.message).toBe('[LifecycleService]: cannot set new stage when related logic is all handled!');
+        expect(stages).toEqual([
+            LifecycleStages.Starting,
+            LifecycleStages.Ready,
+            LifecycleStages.Rendered,
+            LifecycleStages.Steady,
+        ]);
+        expect(completed).toHaveBeenCalledTimes(1);
     });
 });

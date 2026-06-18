@@ -46,8 +46,12 @@ import { DocLinkPopup } from '../DocLinkPopup';
 const UNIT_ID = 'doc-link-popup-doc';
 
 class TestDocCanvasPopManagerService {
+    disposeCount = 0;
+
     attachPopupToRange() {
-        return toDisposable(() => undefined);
+        return toDisposable(() => {
+            this.disposeCount += 1;
+        });
     }
 }
 
@@ -299,5 +303,51 @@ describe('DocLinkPopup', () => {
             url: 'https://docs.univer.ai',
         });
         expect(currentTestBed.popupService.editing).toBeNull();
+    });
+
+    it('adds a document hyperlink from selected text and normalizes a bare URL', async () => {
+        currentTestBed = createPopupTestBed();
+        const selectionManager = currentTestBed.injector.get(DocSelectionManagerService);
+        const popManager = currentTestBed.injector.get(DocCanvasPopManagerService) as unknown as TestDocCanvasPopManagerService;
+        selectionManager.__TEST_ONLY_setCurrentSelection({ unitId: UNIT_ID, subUnitId: UNIT_ID });
+        selectionManager.__TEST_ONLY_add([{
+            startOffset: 0,
+            endOffset: 5,
+            collapsed: false,
+            isActive: true,
+            segmentId: '',
+            style: null as never,
+        }]);
+        currentTestBed.popupService.showEditPopup(UNIT_ID, null);
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        renderEditPopup(root, currentTestBed);
+
+        const [linkInput] = Array.from(container.querySelectorAll('input')) as HTMLInputElement[];
+        expect(linkInput.value).toBe('');
+
+        await act(async () => {
+            setInputText(linkInput, 'docs.univer.ai');
+            await Promise.resolve();
+        });
+
+        const confirm = Array.from(container.querySelectorAll('button, [data-u-comp="button"]'))
+            .find((button) => button.textContent === 'Confirm') as HTMLElement;
+
+        await act(async () => {
+            confirm.click();
+            await Promise.resolve();
+        });
+
+        const body = currentTestBed.doc.getBody();
+        const addedLink = body?.customRanges?.find((range) => range.properties?.url === 'https://docs.univer.ai');
+
+        expect(body?.dataStream).toBe('Hello world\r\n');
+        expect(addedLink?.startIndex).toBe(0);
+        expect(addedLink?.endIndex).toBe(4);
+        expect(currentTestBed.popupService.editing).toBeNull();
+        expect(popManager.disposeCount).toBe(1);
     });
 });

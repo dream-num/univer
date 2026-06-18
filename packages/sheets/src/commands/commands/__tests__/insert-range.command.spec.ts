@@ -498,6 +498,58 @@ describe('Test insert range commands', () => {
                 // reset data for next test
                 expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
             });
+
+            it('will append rows with anchor height when moving data below the current data range', async () => {
+                const localTestBed = createCommandTestBed({
+                    id: 'test',
+                    appVersion: '3.0.0-alpha',
+                    sheets: {
+                        sheet1: {
+                            id: 'sheet1',
+                            cellData: {
+                                1: {
+                                    0: { v: 'A2', s: 's1' },
+                                },
+                            },
+                            rowData: {
+                                0: { h: 40 },
+                            },
+                            rowCount: 10,
+                            columnCount: 10,
+                        },
+                    },
+                    locale: LocaleType.ZH_CN,
+                    name: '',
+                    sheetOrder: [],
+                    styles: {
+                        s1: { bg: { rgb: '#ff0000' } },
+                    },
+                }, [[MergeCellController], [RefRangeService]]);
+                const localGet = localTestBed.get;
+                localGet(MergeCellController);
+                const localCommandService = localGet(ICommandService);
+                [
+                    InsertRangeMoveDownCommand,
+                    AddWorksheetMergeMutation,
+                    RemoveWorksheetMergeMutation,
+                    InsertRowMutation,
+                    RemoveRowMutation,
+                    SetSelectionsOperation,
+                    SetRangeValuesMutation,
+                    MoveRangeMutation,
+                ].forEach((c) => localCommandService.registerCommand(c));
+
+                await expect(localCommandService.executeCommand(InsertRangeMoveDownCommand.id, {
+                    range: { startRow: 1, endRow: 3, startColumn: 0, endColumn: 0 },
+                })).resolves.toBe(true);
+
+                const worksheet = localGet(IUniverInstanceService).getUniverSheetInstance('test')!.getSheetBySheetId('sheet1')!;
+                expect(worksheet.getRowCount()).toBe(13);
+                expect(worksheet.getRowHeight(2)).toBe(40);
+                expect(worksheet.getCell(4, 0)?.v).toBe('A2');
+
+                localTestBed.univer.dispose();
+            });
         });
 
         describe('fault situations', () => {

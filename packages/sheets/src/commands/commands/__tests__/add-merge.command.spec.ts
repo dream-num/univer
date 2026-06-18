@@ -15,16 +15,40 @@
  */
 
 import type { Injector, IWorkbookData } from '@univerjs/core';
-import { ICommandService, IConfirmService, IUniverInstanceService, LocaleService, LocaleType, RANGE_TYPE, TestConfirmService } from '@univerjs/core';
+import {
+    ICommandService,
+    IConfirmService,
+    IUniverInstanceService,
+    LocaleService,
+    LocaleType,
+    RANGE_TYPE,
+    TestConfirmService,
+} from '@univerjs/core';
 import { beforeEach, describe, expect, it } from 'vitest';
 import enUS from '../../../locale/en-US';
 import zhCN from '../../../locale/zh-CN';
+import { SheetsSelectionsService } from '../../../services/selections/selection.service';
 import { AddWorksheetMergeMutation } from '../../mutations/add-worksheet-merge.mutation';
 import { RemoveWorksheetMergeMutation } from '../../mutations/remove-worksheet-merge.mutation';
 import { SetRangeValuesMutation } from '../../mutations/set-range-values.mutation';
 import { SetSelectionsOperation } from '../../operations/selection.operation';
-import { AddWorksheetMergeCommand } from '../add-worksheet-merge.command';
+import {
+    addMergeCellsUtil,
+    AddWorksheetMergeAllCommand,
+    AddWorksheetMergeCommand,
+    AddWorksheetMergeHorizontalCommand,
+    AddWorksheetMergeVerticalCommand,
+    getMergeableSelectionsByType,
+    MergeType,
+} from '../add-worksheet-merge.command';
+import { RemoveWorksheetMergeCommand } from '../remove-worksheet-merge.command';
 import { createCommandTestBed } from './create-command-test-bed';
+
+class DeclineConfirmService extends TestConfirmService<unknown> {
+    override confirm(): Promise<boolean> {
+        return Promise.resolve(false);
+    }
+}
 
 const WORKBOOK_DATA_DEMO: IWorkbookData = {
     id: 'test',
@@ -126,6 +150,7 @@ const WORKBOOK_DATA_DEMO: IWorkbookData = {
 
 describe('add-merge-command', () => {
     let get: Injector['get'];
+    let injector: Injector;
     let commandService: ICommandService;
 
     beforeEach(() => {
@@ -133,9 +158,14 @@ describe('add-merge-command', () => {
             [IConfirmService, { useClass: TestConfirmService }],
         ]);
         get = testBed.get;
+        injector = testBed.injector;
 
         commandService = get(ICommandService);
         commandService.registerCommand(AddWorksheetMergeCommand);
+        commandService.registerCommand(AddWorksheetMergeAllCommand);
+        commandService.registerCommand(AddWorksheetMergeVerticalCommand);
+        commandService.registerCommand(AddWorksheetMergeHorizontalCommand);
+        commandService.registerCommand(RemoveWorksheetMergeCommand);
         commandService.registerCommand(SetRangeValuesMutation);
         commandService.registerCommand(RemoveWorksheetMergeMutation);
         commandService.registerCommand(AddWorksheetMergeMutation);
@@ -193,5 +223,95 @@ describe('add-merge-command', () => {
             endRow: 3,
             endColumn: 5,
         });
+        expect(worksheet?.getCell(1, 5)?.v).toBe(3);
+        expect(worksheet?.getCell(2, 5)?.v ?? null).toBeNull();
+    });
+
+    it('keeps existing cells unchanged when the user cancels merging cells with content', async () => {
+        const testBed = createCommandTestBed(WORKBOOK_DATA_DEMO, [
+            [IConfirmService, { useClass: DeclineConfirmService }],
+        ]);
+        const localGet = testBed.get;
+        const localCommandService = localGet(ICommandService);
+        localCommandService.registerCommand(AddWorksheetMergeCommand);
+        localCommandService.registerCommand(SetRangeValuesMutation);
+        localCommandService.registerCommand(RemoveWorksheetMergeMutation);
+        localCommandService.registerCommand(AddWorksheetMergeMutation);
+        localCommandService.registerCommand(SetSelectionsOperation);
+        localGet(LocaleService).load({ zhCN, enUS });
+
+        await expect(localCommandService.executeCommand(AddWorksheetMergeCommand.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            selections: [{ startRow: 1, startColumn: 5, endRow: 2, endColumn: 5 }],
+            defaultMerge: false,
+        })).resolves.toBe(false);
+
+        const worksheet = localGet(IUniverInstanceService)?.getUniverSheetInstance('test')?.getSheetBySheetId('sheet1');
+        expect(worksheet?.getCell(1, 5)?.v).toBe(3);
+        expect(worksheet?.getCell(2, 5)?.v).toBe(1);
+
+        testBed.univer.dispose();
+    });
+
+    it('filters mergeable selections by requested merge type', () => {
+        const singleCell = { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 };
+        const oneRow = { startRow: 1, endRow: 1, startColumn: 1, endColumn: 3 };
+        const oneColumn = { startRow: 2, endRow: 4, startColumn: 2, endColumn: 2 };
+        const block = { startRow: 5, endRow: 6, startColumn: 5, endColumn: 6 };
+
+        expect(getMergeableSelectionsByType(MergeType.MergeAll, null)).toBeNull();
+        expect(getMergeableSelectionsByType(MergeType.MergeAll, [singleCell, oneRow, oneColumn, block])).toEqual([oneRow, oneColumn, block]);
+        expect(getMergeableSelectionsByType(MergeType.MergeVertical, [singleCell, oneRow, oneColumn, block])).toEqual([oneColumn, block]);
+        expect(getMergeableSelectionsByType(MergeType.MergeHorizontal, [singleCell, oneRow, oneColumn, block])).toEqual([oneRow, block]);
+    });
+
+    it('merges current selections through all, vertical, and horizontal commands', async () => {
+        const selectionManagerService = get(SheetsSelectionsService);
+        const worksheet = get(IUniverInstanceService)?.getUniverSheetInstance('test')?.getSheetBySheetId('sheet1')!;
+
+        selectionManagerService.setSelections([
+            {
+                range: { startRow: 5, endRow: 6, startColumn: 0, endColumn: 1, rangeType: RANGE_TYPE.NORMAL },
+                primary: null,
+                style: null,
+            },
+        ]);
+        await expect(commandService.executeCommand(AddWorksheetMergeAllCommand.id)).resolves.toBe(true);
+        expect(worksheet.getMergeData().some((range) => range.startRow === 5 && range.endRow === 6 && range.startColumn === 0 && range.endColumn === 1)).toBe(true);
+
+        selectionManagerService.setSelections([
+            {
+                range: { startRow: 7, endRow: 8, startColumn: 2, endColumn: 3, rangeType: RANGE_TYPE.NORMAL },
+                primary: null,
+                style: null,
+            },
+        ]);
+        await expect(commandService.executeCommand(AddWorksheetMergeVerticalCommand.id)).resolves.toBe(true);
+        expect(worksheet.getMergeData().some((range) => range.startRow === 7 && range.endRow === 8 && range.startColumn === 2 && range.endColumn === 2)).toBe(true);
+        expect(worksheet.getMergeData().some((range) => range.startRow === 7 && range.endRow === 8 && range.startColumn === 3 && range.endColumn === 3)).toBe(true);
+
+        selectionManagerService.setSelections([
+            {
+                range: { startRow: 9, endRow: 10, startColumn: 4, endColumn: 5, rangeType: RANGE_TYPE.NORMAL },
+                primary: null,
+                style: null,
+            },
+        ]);
+        await expect(commandService.executeCommand(AddWorksheetMergeHorizontalCommand.id)).resolves.toBe(true);
+        expect(worksheet.getMergeData().some((range) => range.startRow === 9 && range.endRow === 9 && range.startColumn === 4 && range.endColumn === 5)).toBe(true);
+        expect(worksheet.getMergeData().some((range) => range.startRow === 10 && range.endRow === 10 && range.startColumn === 4 && range.endColumn === 5)).toBe(true);
+    });
+
+    it('force merges through facade utility after removing overlapping merged cells', async () => {
+        const worksheet = get(IUniverInstanceService)?.getUniverSheetInstance('test')?.getSheetBySheetId('sheet1')!;
+        const ranges = [{ startRow: 0, endRow: 1, startColumn: 0, endColumn: 8 }];
+
+        expect(() => addMergeCellsUtil(injector, 'test', 'sheet1', ranges)).toThrow(/overlap/);
+
+        addMergeCellsUtil(injector, 'test', 'sheet1', ranges, { isForceMerge: true });
+        await Promise.resolve();
+
+        expect(worksheet.getMergeData().some((range) => range.startRow === 0 && range.endRow === 1 && range.startColumn === 0 && range.endColumn === 8)).toBe(true);
     });
 });

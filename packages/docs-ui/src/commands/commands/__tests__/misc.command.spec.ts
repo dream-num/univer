@@ -51,7 +51,7 @@ import {
     SetTextSelectionsOperation,
     UpdateTextCommand,
 } from '@univerjs/docs';
-import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
+import { DocumentEditArea, GlyphType, IRenderManagerService } from '@univerjs/engine-render';
 import { ISidebarService } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -352,6 +352,30 @@ function createMultiParagraphDoc(): IDocumentData {
             marginBottom: 72,
             marginRight: 90,
             marginLeft: 90,
+        },
+    };
+}
+
+function createListParagraphDoc(): IDocumentData {
+    const doc = createMultiParagraphDoc();
+    return {
+        ...doc,
+        body: {
+            ...doc.body!,
+            paragraphs: [
+                doc.body!.paragraphs![0],
+                {
+                    ...doc.body!.paragraphs![1],
+                    bullet: {
+                        listId: 'list-1',
+                        listType: 'BULLET_LIST',
+                        nestingLevel: 0,
+                    },
+                    paragraphStyle: {
+                        hanging: { v: 18 },
+                    },
+                },
+            ],
         },
     };
 }
@@ -1022,6 +1046,48 @@ describe('misc document commands', () => {
         expect(getBody()?.paragraphs?.[0].paragraphStyle?.borderBottom).toBeUndefined();
     });
 
+    it('turns a list paragraph into an indented paragraph when Backspace is pressed at its first glyph', async () => {
+        ({ univer, get } = createCommandTestBed(createListParagraphDoc()));
+        commandService = get(ICommandService);
+        commandService.registerCommand(DeleteLeftCommand);
+        commandService.registerCommand(UpdateTextCommand);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+        setCollapsedSelection(6);
+
+        const skeletonManager = get(DocSkeletonManagerService) as unknown as { getSkeleton: () => unknown };
+        skeletonManager.getSkeleton = () => {
+            const listGlyph = { glyphType: GlyphType.LIST };
+            const textGlyph = { content: 'B', count: 1, streamType: 'B' };
+            const divide = {
+                glyphGroup: [listGlyph, textGlyph],
+                parent: undefined as unknown,
+            };
+            const line = {
+                divides: [divide],
+                paragraphIndex: 10,
+            };
+            divide.parent = line;
+            (textGlyph as { parent?: unknown }).parent = divide;
+
+            return {
+                findNodeByCharIndex(index: number) {
+                    if (index === 6) {
+                        return textGlyph;
+                    }
+
+                    return useLinearSkeleton('Title\rBody\r\n').findNodeByCharIndex(index);
+                },
+            };
+        };
+
+        expect(await commandService.executeCommand(DeleteLeftCommand.id)).toBe(true);
+        await awaitTime(0);
+
+        const paragraphStyle = getBody()?.paragraphs?.[1].paragraphStyle;
+        expect(paragraphStyle?.hanging).toBeUndefined();
+        expect(paragraphStyle?.indentStart).toEqual({ v: 18 });
+    });
+
     it('removes the character after the cursor when Delete is pressed inside text', async () => {
         ({ univer, get } = createCommandTestBed(createBaseDoc('ABC\r\n')));
         commandService = get(ICommandService);
@@ -1055,6 +1121,23 @@ describe('misc document commands', () => {
 
         expect(getBody()?.dataStream).toBe('TitleBody\r\n');
         expect(getBody()?.paragraphs).toHaveLength(1);
+    });
+
+    it('cuts the selected content when Delete is pressed on a non-collapsed text range', async () => {
+        ({ univer, get } = createCommandTestBed(createBaseDoc('ABCD\r\n')));
+        commandService = get(ICommandService);
+        commandService.registerCommand(DeleteRightCommand);
+        commandService.registerCommand(CutContentCommand);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+        setCollapsedSelection(1, 3);
+
+        const skeletonManager = get(DocSkeletonManagerService) as unknown as { getSkeleton: () => unknown };
+        skeletonManager.getSkeleton = () => useLinearSkeleton('ABCD\r\n');
+
+        expect(await commandService.executeCommand(DeleteRightCommand.id)).toBe(true);
+        await awaitTime(0);
+
+        expect(getBody()?.dataStream).toBe('AD\r\n');
     });
 
     it('cuts the selected content when Backspace is pressed on a non-collapsed text range', async () => {
@@ -1100,6 +1183,38 @@ describe('misc document commands', () => {
         });
 
         expect(await commandService.executeCommand(DeleteLeftCommand.id)).toBe(true);
+        await awaitTime(0);
+
+        expect(getBody()?.dataStream).toBe('AB\r\n');
+        expect(getDoc()?.getSnapshot().drawings?.['drawing-1']).toBeUndefined();
+    });
+
+    it('removes an inline drawing when Delete is pressed before its object marker', async () => {
+        ({ univer, get } = createCommandTestBed(createInlineDrawingDoc()));
+        commandService = get(ICommandService);
+        commandService.registerCommand(DeleteRightCommand);
+        commandService.registerCommand(DeleteCustomBlockCommand);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+        setCollapsedSelection(1);
+
+        const skeletonManager = get(DocSkeletonManagerService) as unknown as { getSkeleton: () => unknown };
+        skeletonManager.getSkeleton = () => ({
+            findNodeByCharIndex(index: number) {
+                const content = 'A\bB\r\n'[index];
+                if (content == null) {
+                    return null;
+                }
+
+                return {
+                    content,
+                    count: 1,
+                    streamType: content,
+                    drawingId: content === '\b' ? 'drawing-1' : undefined,
+                };
+            },
+        });
+
+        expect(await commandService.executeCommand(DeleteRightCommand.id)).toBe(true);
         await awaitTime(0);
 
         expect(getBody()?.dataStream).toBe('AB\r\n');

@@ -17,7 +17,12 @@
 import { ICommandService, Univer } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { DocMentionService } from '../../../services/doc-mention.service';
-import { CloseMentionEditPopupOperation, ShowMentionEditPopupOperation } from '../mention-popup.operation';
+import {
+    CloseMentionEditPopupOperation,
+    CloseMentionInfoPopupOperation,
+    ShowMentionEditPopupOperation,
+    ShowMentionInfoPopupOperation,
+} from '../mention-popup.operation';
 
 describe('mention edit popup operations', () => {
     let univer: Univer;
@@ -32,6 +37,8 @@ describe('mention edit popup operations', () => {
         commandService = injector.get(ICommandService);
         commandService.registerCommand(ShowMentionEditPopupOperation);
         commandService.registerCommand(CloseMentionEditPopupOperation);
+        commandService.registerCommand(ShowMentionInfoPopupOperation);
+        commandService.registerCommand(CloseMentionInfoPopupOperation);
         mentionService = injector.get(DocMentionService);
     });
 
@@ -69,5 +76,13 @@ describe('mention edit popup operations', () => {
 
         expect(result).toBe(false);
         expect(mentionService.editing).toBeUndefined();
+    });
+
+    it('keeps info popup operations as event placeholders', async () => {
+        await expect(commandService.executeCommand(ShowMentionInfoPopupOperation.id, {
+            unitId: 'doc-1',
+            mentionId: 'mention-1',
+        })).resolves.toBe(false);
+        await expect(commandService.executeCommand(CloseMentionInfoPopupOperation.id)).resolves.toBe(false);
     });
 });

@@ -20,7 +20,7 @@ import { ICommandService, IUniverInstanceService, RANGE_TYPE, RedoCommand, UndoC
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SheetsSelectionsService } from '../../../services/selections/selection.service';
 import { SetWorksheetColWidthMutation } from '../../mutations/set-worksheet-col-width.mutation';
-import { DeltaColumnWidthCommand, SetColWidthCommand } from '../set-worksheet-col-width.command';
+import { DeltaColumnWidthCommand, SetColWidthCommand, SetWorksheetColIsAutoWidthCommand } from '../set-worksheet-col-width.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
 describe('Test set col width commands', () => {
@@ -70,6 +70,23 @@ describe('Test set col width commands', () => {
         ]);
     }
 
+    function selectWholeSheet(): void {
+        const worksheet = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()!;
+        selectionsService.setSelections([
+            {
+                range: {
+                    startRow: 0,
+                    endRow: worksheet.getMaxRows() - 1,
+                    startColumn: 0,
+                    endColumn: worksheet.getMaxColumns() - 1,
+                    rangeType: RANGE_TYPE.ALL,
+                },
+                primary: null,
+                style: null,
+            },
+        ]);
+    }
+
     beforeEach(() => {
         const testBed = createCommandTestBed();
         univer = testBed.univer;
@@ -78,6 +95,7 @@ describe('Test set col width commands', () => {
         commandService = get(ICommandService);
         commandService.registerCommand(DeltaColumnWidthCommand);
         commandService.registerCommand(SetColWidthCommand);
+        commandService.registerCommand(SetWorksheetColIsAutoWidthCommand);
         commandService.registerCommand(SetWorksheetColWidthMutation);
 
         const worksheet = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()!;
@@ -151,6 +169,22 @@ describe('Test set col width commands', () => {
             expect(getColumnWidth(5)).toBe(88);
             expect(getColumnWidth(7)).toBe(65);
         });
+
+        it('resizes every column when the whole sheet is selected', async () => {
+            selectWholeSheet();
+
+            await commandService.executeCommand<IDeltaColumnWidthCommandParams>(DeltaColumnWidthCommand.id, {
+                deltaX: 12,
+                anchorCol: 0,
+            });
+
+            expect(getColumnWidth(0)).toBe(100);
+            expect(getColumnWidth(3)).toBe(100);
+
+            await commandService.executeCommand(UndoCommand.id);
+            expect(getColumnWidth(0)).toBe(88);
+            expect(getColumnWidth(3)).toBe(88);
+        });
     });
 
     it('Direct change col widths', async () => {
@@ -180,5 +214,10 @@ describe('Test set col width commands', () => {
             ranges: [{ startRow: 0, endRow: 0, startColumn: 1, endColumn: 1 }],
         });
         expect(getColumnWidth(1)).toBe(50);
+    });
+
+    it('records auto-width work for the selected columns', async () => {
+        expect(await commandService.executeCommand(SetWorksheetColIsAutoWidthCommand.id)).toBe(true);
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
     });
 });

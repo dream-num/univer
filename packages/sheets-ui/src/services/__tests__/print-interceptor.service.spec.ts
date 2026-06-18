@@ -28,9 +28,15 @@ describe('SheetPrintInterceptorService', () => {
     });
 
     it('maps runtime components to printable component implementations', () => {
+        const interceptPoints = service.interceptor.getInterceptPoints();
+        const domCollection = { dispose: () => {} };
+
         service.registerPrintComponent('sheet-chart', 'print-sheet-chart');
 
         expect(service.getPrintComponent('sheet-chart')).toBe('print-sheet-chart');
         expect(service.getPrintComponent('unknown-component')).toBeUndefined();
+        expect(service.interceptor.fetchThroughInterceptors(interceptPoints.PRINTING_RANGE)({ startRow: 1, endRow: 2, startColumn: 3, endColumn: 4 }, { unitId: 'u-1', subUnitId: 's-1' })).toEqual({ startRow: 1, endRow: 2, startColumn: 3, endColumn: 4 });
+        expect(service.interceptor.fetchThroughInterceptors(interceptPoints.PRINTING_COMPONENT_COLLECT)(undefined, {} as never)).toBeUndefined();
+        expect(service.interceptor.fetchThroughInterceptors(interceptPoints.PRINTING_DOM_COLLECT)(domCollection as never, {} as never)).toBe(domCollection);
     });
 });

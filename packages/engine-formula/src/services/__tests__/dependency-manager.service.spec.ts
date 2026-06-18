@@ -26,6 +26,25 @@ class TestDependencyManagerBaseService extends DependencyManagerBaseService {
     }
 }
 
+class TestBuildDependencyManagerService extends DependencyManagerService {
+    trees: FormulaDependencyTree[] = [];
+
+    override getAllTree() {
+        return this.trees;
+    }
+
+    override getTreeById(treeId: number) {
+        return this.trees.find((tree) => tree.treeId === treeId);
+    }
+
+    override updateDependencyTreeDirtyState(treeId: number, isDirty: boolean): void {
+        const tree = this.getTreeById(treeId);
+        if (tree) {
+            tree.isDirty = isDirty;
+        }
+    }
+}
+
 function createTree(treeId: number, row: number, column: number) {
     const tree = new FormulaDependencyTree(treeId);
     tree.unitId = 'unit-1';
@@ -64,6 +83,22 @@ describe('DependencyManagerService', () => {
         expect(service.hasOtherFormulaDataMainData('feature-formula')).toBe(true);
         expect(service.getLastTreeId()).toBe(0);
         expect(service.getLastTreeId()).toBe(1);
+        expect(service.getOtherFormulaDependency('missing', 'sheet-1', 'f-1')).toBeUndefined();
+        expect(service.getFeatureFormulaDependency('missing', 'sheet-1', 'feature-1')).toBeUndefined();
+        expect(service.getFormulaDependency('missing', 'sheet-1', 0, 0)).toBeUndefined();
+        expect(() => service.reset()).toThrow('Method not implemented.');
+        expect(() => service.getTreeById(1)).toThrow('Method not implemented.');
+        expect(() => service.getAllTree()).toThrow('Method not implemented.');
+        expect(() => service.addOtherFormulaDependency('u', 's', 'f', createTree(1, 0, 0))).toThrow('Method not implemented.');
+        expect(() => service.removeOtherFormulaDependency('u', 's', ['f'])).toThrow('Method not implemented.');
+        expect(() => service.clearOtherFormulaDependency('u')).toThrow('Method not implemented.');
+        expect(() => service.addFeatureFormulaDependency('u', 's', 'f', createTree(2, 0, 0))).toThrow('Method not implemented.');
+        expect(() => service.removeFeatureFormulaDependency('u', 's', ['f'])).toThrow('Method not implemented.');
+        expect(() => service.clearFeatureFormulaDependency('u')).toThrow('Method not implemented.');
+        expect(() => service.addFormulaDependency('u', 's', 0, 0, createTree(3, 0, 0))).toThrow('Method not implemented.');
+        expect(() => service.removeFormulaDependency('u', 's', 0, 0)).toThrow('Method not implemented.');
+        expect(() => service.clearFormulaDependency('u')).toThrow('Method not implemented.');
+        expect(() => service.updateDependencyTreeDirtyState(1, true)).toThrow('Method not implemented.');
     });
 
     it('should track formula dependencies and remove their search cache by location', () => {
@@ -132,6 +167,32 @@ describe('DependencyManagerService', () => {
         expect(service.hasOtherFormulaDataMainData('f-1')).toBe(false);
     });
 
+    it('should clear other-formula dependencies for a sheet or an entire workbook', () => {
+        const service = createService();
+        const treeA = createTree(11, 0, 0);
+        const treeB = createTree(12, 1, 1);
+        treeA.refOffsetX = 0;
+        treeA.refOffsetY = 0;
+        treeB.refOffsetX = 1;
+        treeB.refOffsetY = 1;
+
+        service.addOtherFormulaDependency('unit-1', 'sheet-1', 'f-1', treeA);
+        service.addOtherFormulaDependency('unit-1', 'sheet-2', 'f-2', treeB);
+        service.addDependencyRTreeCache(treeA);
+        service.addDependencyRTreeCache(treeB);
+        service.addOtherFormulaDependencyMainData('f-1');
+        service.addOtherFormulaDependencyMainData('f-2');
+
+        service.clearOtherFormulaDependency('unit-1', 'sheet-1');
+        expect(service.getOtherFormulaDependency('unit-1', 'sheet-1', 'f-1')?.getValue(0, 0)).toBeUndefined();
+        expect(service.getOtherFormulaDependency('unit-1', 'sheet-2', 'f-2')?.getValue(1, 1)).toBe(12);
+        expect(service.hasOtherFormulaDataMainData('f-1')).toBe(false);
+
+        service.clearOtherFormulaDependency('unit-1');
+        expect(service.getOtherFormulaDependency('unit-1', 'sheet-2', 'f-2')).toBeUndefined();
+        expect(service.hasOtherFormulaDataMainData('f-2')).toBe(false);
+    });
+
     it('should manage feature formula dependencies', () => {
         const service = createService();
         const tree = createTree(20, 2, 2);
@@ -141,6 +202,24 @@ describe('DependencyManagerService', () => {
 
         service.removeFeatureFormulaDependency('unit-1', 'sheet-1', ['feature-a']);
         expect(service.getFeatureFormulaDependency('unit-1', 'sheet-1', 'feature-a')).toBeUndefined();
+    });
+
+    it('should clear feature dependencies by sheet or workbook', () => {
+        const service = createService();
+        const treeA = createTree(21, 2, 2);
+        const treeB = createTree(22, 3, 3);
+
+        service.addFeatureFormulaDependency('unit-1', 'sheet-1', 'feature-a', treeA);
+        service.addFeatureFormulaDependency('unit-1', 'sheet-2', 'feature-b', treeB);
+        service.addDependencyRTreeCache(treeA);
+        service.addDependencyRTreeCache(treeB);
+
+        service.clearFeatureFormulaDependency('unit-1', 'sheet-1');
+        expect(service.getFeatureFormulaDependency('unit-1', 'sheet-1', 'feature-a')).toBeUndefined();
+        expect(service.getFeatureFormulaDependency('unit-1', 'sheet-2', 'feature-b')).toBe(22);
+
+        service.clearFeatureFormulaDependency('unit-1');
+        expect(service.getFeatureFormulaDependency('unit-1', 'sheet-2', 'feature-b')).toBeUndefined();
     });
 
     it('should clear dependencies by defined name', () => {
@@ -194,5 +273,72 @@ describe('DependencyManagerService', () => {
             },
         ])).toEqual(new Set());
         expect(service.getLastTreeId()).toBe(0);
+    });
+
+    it('should clear formula dependencies across the whole workbook and dispose cached state', () => {
+        const service = createService();
+        const treeA = createTree(70, 7, 7);
+        const treeB = createTree(71, 8, 8);
+
+        service.addFormulaDependency('unit-1', 'sheet-1', 7, 7, treeA);
+        service.addFormulaDependency('unit-1', 'sheet-2', 8, 8, treeB);
+        service.addDependencyRTreeCache(treeA);
+        service.addDependencyRTreeCache(treeB);
+
+        service.clearFormulaDependency('unit-1');
+        expect(service.getFormulaDependency('unit-1', 'sheet-1', 7, 7)).toBeUndefined();
+        expect(service.getFormulaDependency('unit-1', 'sheet-2', 8, 8)).toBeUndefined();
+
+        service.addDependencyRTreeCache(treeA);
+        service.openKdTree();
+        service.closeKdTree();
+        service.dispose();
+        expect(service.searchDependency([{
+            unitId: 'unit-1',
+            sheetId: 'sheet-1',
+            range: {
+                startRow: 7,
+                startColumn: 7,
+                endRow: 7,
+                endColumn: 8,
+            },
+        }])).toEqual(new Set());
+    });
+
+    it('should build dependency relationships for selected trees and reverse dependencies for all trees', () => {
+        const injector = new Injector();
+        injector.add([TestBuildDependencyManagerService]);
+        const service = injector.get(TestBuildDependencyManagerService);
+        const parent = createTree(80, 1, 1);
+        const child = createTree(81, 0, 0);
+        parent.rangeList = [{
+            unitId: 'unit-1',
+            sheetId: 'sheet-1',
+            range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
+        }];
+        service.trees = [parent, child];
+        service.addDependencyRTreeCache(parent);
+
+        expect(service.buildDependencyTree([parent])).toEqual([parent, child]);
+
+        service.updateDependencyTreeDirtyState(parent.treeId, true);
+        expect(service.getTreeById(parent.treeId)?.isDirty).toBe(true);
+    });
+
+    it('should build reverse dependencies when no selected trees are provided', () => {
+        const injector = new Injector();
+        injector.add([TestBuildDependencyManagerService]);
+        const service = injector.get(TestBuildDependencyManagerService);
+        const parent = createTree(90, 1, 1);
+        const child = createTree(91, 0, 0);
+        parent.rangeList = [{
+            unitId: 'unit-1',
+            sheetId: 'sheet-1',
+            range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
+        }];
+        service.trees = [parent, child];
+        service.addDependencyRTreeCache(parent);
+
+        expect(service.buildDependencyTree([], [child])).toEqual([parent, child]);
     });
 });

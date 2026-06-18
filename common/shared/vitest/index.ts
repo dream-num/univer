@@ -66,6 +66,7 @@ export default function createConfig(options?: any) {
                     '**/src/menu/**',
                     '**/src/plugin.ts',
                     '**/src/mobile-plugin.ts',
+                    '**/src/facade/index.ts',
                     '**/src/config/config.ts',
                 ],
             },

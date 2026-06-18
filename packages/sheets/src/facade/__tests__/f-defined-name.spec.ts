@@ -131,12 +131,17 @@ describe('Test FDefinedName', () => {
         expect(regionalRevenue.getFormulaOrRefString()).toBe('=SUM(B2:B3)');
         regionalRevenue.setRef('C2:C3');
         expect(regionalRevenue.getFormulaOrRefString()).toBe('C2:C3');
+        regionalRevenue.setRefByRange(4, 4, 2, 1);
+        expect(regionalRevenue.getFormulaOrRefString()).toBe('E5:E6');
         regionalRevenue.setComment('Approved revenue range');
         expect(regionalRevenue.getComment()).toBe('Approved revenue range');
         regionalRevenue.setHidden(true);
         regionalRevenue.setScopeToWorkbook();
         expect(regionalRevenue.isWorkbookScope()).toBe(true);
         expect(sheet.getDefinedNames()).toEqual([]);
+        regionalRevenue.setScopeToWorksheet(sheet);
+        expect(regionalRevenue.isWorkbookScope()).toBe(false);
+        expect(sheet.getDefinedNames().map((name) => name.getName())).toEqual(['RegionalRevenue']);
 
         const updatedParam = regionalRevenue.toBuilder()
             .setName('ApprovedRevenue')
@@ -152,5 +157,16 @@ describe('Test FDefinedName', () => {
         workbook.getDefinedName('ApprovedRevenue')?.delete();
         expect(workbook.getDefinedName('ApprovedRevenue')).toBeNull();
         expect(workbook.deleteDefinedName('missing-name')).toBe(false);
+    });
+
+    it('generates a default name when an existing defined name is renamed to blank', () => {
+        const workbook = univerAPI.getActiveWorkbook()!;
+        workbook.insertDefinedName('Name1', 'A1');
+        const definedName = workbook.getDefinedName('Name1')!;
+
+        definedName.setName('');
+
+        expect(definedName.getName()).not.toBe('');
+        expect(workbook.getDefinedNames().map((name) => name.getName())).toContain(definedName.getName());
     });
 });

@@ -16,6 +16,7 @@
 
 import type { IPageElement, ISlideData, ISlidePage, SlideDataModel } from '@univerjs/slides';
 import { ICommandService, IUniverInstanceService, LocaleService, Univer, UniverInstanceType } from '@univerjs/core';
+import { IImageIoService, ImageSourceType, ImageUploadStatusType } from '@univerjs/drawing';
 import { ObjectType } from '@univerjs/engine-render';
 import { BasicShapes, PageElementType, PageType, UniverSlidesPlugin } from '@univerjs/slides';
 import { DesktopSidebarService, ILocalFileService, ISidebarService } from '@univerjs/ui';
@@ -34,6 +35,7 @@ import {
 } from '../insert-shape.operation';
 import { SlideAddTextCommand, SlideAddTextOperation } from '../insert-text.operation';
 import { SetSlidePageThumbOperation } from '../set-thumb.operation';
+import { SetTextEditArrowOperation } from '../text-edit.operation';
 import { UpdateSlideElementOperation } from '../update-element.operation';
 
 const unitId = 'slide-command-unit';
@@ -109,12 +111,41 @@ class TestCanvasView {
 }
 
 class TestLocalFileService implements ILocalFileService {
+    static files: File[] = [];
+
+    static reset() {
+        this.files = [];
+    }
+
     openFile(): Promise<File[]> {
-        return Promise.resolve([]);
+        return Promise.resolve(TestLocalFileService.files);
     }
 
     downloadFile(): void {
         // not used by slide image insertion
+    }
+}
+
+class TestImageIoService {
+    saveImage(): Promise<unknown> {
+        return Promise.resolve({
+            imageId: 'image-1',
+            imageSourceType: ImageSourceType.BASE64,
+            source: 'data:image/png;base64,ZmFrZQ==',
+            base64Cache: 'data:image/png;base64,ZmFrZQ==',
+            status: ImageUploadStatusType.SUCCUSS,
+        });
+    }
+}
+
+class TestImage {
+    width = 64;
+    height = 32;
+    onload: (() => void) | null = null;
+    onerror: ((error: unknown) => void) | null = null;
+
+    set src(_value: string) {
+        queueMicrotask(() => this.onload?.());
     }
 }
 
@@ -206,16 +237,21 @@ describe('slide element operations', () => {
     let univer: Univer;
     let commandService: ICommandService;
     let slide: SlideDataModel;
+    let originalImage: typeof Image;
 
     beforeEach(() => {
         univer = new Univer();
         univer.registerPlugin(UniverSlidesPlugin);
         TestCanvasView.reset();
+        TestLocalFileService.reset();
+        originalImage = globalThis.Image;
+        (globalThis as unknown as { Image: typeof Image }).Image = TestImage as unknown as typeof Image;
 
         const injector = univer.__getInjector();
         injector.add([CanvasView, { useClass: TestCanvasView as never }]);
         injector.add([ISidebarService, { useClass: DesktopSidebarService }]);
         injector.add([ILocalFileService, { useClass: TestLocalFileService }]);
+        injector.add([IImageIoService, { useClass: TestImageIoService as never }]);
 
         slide = univer.createUnit<ISlideData, SlideDataModel>(UniverInstanceType.UNIVER_SLIDE, createSlideSnapshot());
         injector.get(IUniverInstanceService).focusUnit(unitId);
@@ -233,10 +269,12 @@ describe('slide element operations', () => {
         commandService.registerCommand(SetSlidePageThumbOperation);
         commandService.registerCommand(InsertSlideFloatImageCommand);
         commandService.registerCommand(ToggleSlideEditSidebarOperation);
+        commandService.registerCommand(SetTextEditArrowOperation);
         injector.get(LocaleService).load({});
     });
 
     afterEach(() => {
+        (globalThis as unknown as { Image: typeof Image }).Image = originalImage;
         univer.dispose();
     });
 
@@ -381,6 +419,37 @@ describe('slide element operations', () => {
 
         expect(result).toBe(false);
         expect(getElementIds(page)).toEqual(beforeIds);
+    });
+
+    it('adds the selected image to the active slide and selects the created object', async () => {
+        const page = getActivePage(slide);
+        const beforeIds = getElementIds(page);
+        TestCanvasView.activateCreatedObject = true;
+        TestLocalFileService.files = [new File(['fake image'], 'chart.png', { type: 'image/png' })];
+
+        const result = await commandService.executeCommand(InsertSlideFloatImageCommand.id);
+
+        expect(result).toBe(true);
+        const element = findElementAddedAfter(page, beforeIds);
+        expect(element).toMatchObject({
+            id: 'image-1',
+            zIndex: 3,
+            width: 64,
+            height: 32,
+            type: PageElementType.IMAGE,
+            image: {
+                imageProperties: {
+                    imageSourceType: ImageSourceType.BASE64,
+                    source: 'data:image/png;base64,ZmFrZQ==',
+                    base64Cache: 'data:image/png;base64,ZmFrZQ==',
+                },
+            },
+        });
+        expect(TestCanvasView.activeObjectIds).toEqual(['created-object']);
+    });
+
+    it('keeps the current text-edit arrow operation as a no-op success', async () => {
+        await expect(commandService.executeCommand(SetTextEditArrowOperation.id, { direction: 'left' })).resolves.toBe(true);
     });
 
     it('opens and closes the slide edit sidebar for the selected object type', async () => {

@@ -19,6 +19,7 @@ import type { IPopup } from '@univerjs/ui';
 import type { Root } from 'react-dom/client';
 import {
     awaitTime,
+    CommandType,
     ICommandService,
     IConfigService,
     ILogService,
@@ -51,6 +52,12 @@ import { SheetsNote } from '../Note';
 
 const UNIT_ID = 'note-view-workbook';
 const SUB_UNIT_ID = 'sheet-1';
+
+const FailingUpdateNoteMutation = {
+    id: UpdateNoteMutation.id,
+    type: CommandType.MUTATION,
+    handler: () => false,
+};
 
 class TestRenderManagerService {
     getRenderById() {
@@ -96,16 +103,20 @@ function createWorkbookData(): IWorkbookData {
     };
 }
 
+function createNoteLocation(row: number, col: number) {
+    return {
+        unitId: UNIT_ID,
+        subUnitId: SUB_UNIT_ID,
+        row,
+        col,
+        trigger: 'context-menu',
+    };
+}
+
 function createNotePopup(row: number, col: number): IPopup<{ location: { unitId: string; subUnitId: string; row: number; col: number; trigger: string } }> {
     return {
         extraProps: {
-            location: {
-                unitId: UNIT_ID,
-                subUnitId: SUB_UNIT_ID,
-                row,
-                col,
-                trigger: 'context-menu',
-            },
+            location: createNoteLocation(row, col),
         },
     } as IPopup<{ location: { unitId: string; subUnitId: string; row: number; col: number; trigger: string } }>;
 }
@@ -150,6 +161,8 @@ function createNoteViewTestBed() {
         injector,
         workbook,
         noteModel: injector.get(SheetsNoteModel),
+        commandService,
+        notePopupService: injector.get(SheetsNotePopupService),
     };
 }
 
@@ -241,5 +254,55 @@ describe('SheetsNote', () => {
         expect(note?.note).toBe('Follow up with finance');
         expect(note?.width).toBe(180);
         expect(note?.height).toBe(96);
+    });
+
+    it('closes the popup when creating the initial note cannot be saved', async () => {
+        const testBed = createMountedNote();
+        testBed.commandService.unregisterCommand(UpdateNoteMutation.id);
+        testBed.commandService.registerCommand(FailingUpdateNoteMutation);
+        testBed.notePopupService.showPopup(createNoteLocation(2, 3));
+
+        await renderNote(root!, testBed);
+        await act(async () => {
+            await awaitTime(350);
+        });
+
+        expect(testBed.noteModel.getNote(UNIT_ID, SUB_UNIT_ID, { row: 2, col: 3 })).toBeUndefined();
+        expect(testBed.notePopupService.activePopup).toBeNull();
+    });
+
+    it('restores the previous note text when an edit cannot be saved', async () => {
+        const testBed = createMountedNote();
+
+        testBed.commandService.syncExecuteCommand(SheetUpdateNoteCommand.id, {
+            unitId: UNIT_ID,
+            sheetId: SUB_UNIT_ID,
+            row: 2,
+            col: 3,
+            note: {
+                id: 'existing-note',
+                width: 180,
+                height: 96,
+                note: 'Original note',
+            },
+        });
+        testBed.commandService.unregisterCommand(UpdateNoteMutation.id);
+        testBed.commandService.registerCommand(FailingUpdateNoteMutation);
+
+        await renderNote(root!, testBed);
+        await act(async () => {
+            await awaitTime(350);
+        });
+
+        const textarea = container!.querySelector('textarea') as HTMLTextAreaElement;
+
+        await act(async () => {
+            inputText(textarea, 'Unsaved edit');
+            await awaitTime(350);
+        });
+
+        const note = testBed.noteModel.getNote(UNIT_ID, SUB_UNIT_ID, { row: 2, col: 3 });
+        expect(note?.note).toBe('Original note');
+        expect(textarea.value).toBe('Original note');
     });
 });

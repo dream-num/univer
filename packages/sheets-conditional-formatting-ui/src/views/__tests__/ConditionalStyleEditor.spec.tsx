@@ -67,4 +67,46 @@ describe('ConditionalStyleEditor', () => {
             it: BooleanNumber.TRUE,
         });
     });
+
+    it('emits font color changes when a user picks a preset color', async () => {
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        let latestStyle: IHighlightCell['style'] | undefined;
+
+        await act(async () => {
+            root!.render(
+                <ConditionalStyleEditor
+                    onChange={(style) => {
+                        latestStyle = style;
+                    }}
+                />
+            );
+            await Promise.resolve();
+        });
+
+        const styleControls = Array.from(container.firstElementChild!.children) as HTMLElement[];
+
+        await act(async () => {
+            styleControls[4].click();
+            await Promise.resolve();
+        });
+
+        const firstPresetColor = document.querySelector('[data-u-comp="color-picker-presets"] button') as HTMLButtonElement;
+
+        if (!firstPresetColor) {
+            throw new Error('Preset colors were not rendered');
+        }
+
+        await act(async () => {
+            firstPresetColor.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            await Promise.resolve();
+        });
+
+        expect(latestStyle).toMatchObject({
+            cl: {
+                rgb: '#ffffff',
+            },
+        });
+    });
 });

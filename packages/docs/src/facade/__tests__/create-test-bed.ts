@@ -16,12 +16,43 @@
 
 import type { DocumentDataModel, IDocumentData, Injector } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
-import { DisposableCollection, ILogService, IUniverInstanceService, LogLevel, Univer, UniverInstanceType } from '@univerjs/core';
+import {
+    DisposableCollection,
+    DocumentBlockRangeType,
+    ILogService,
+    IUniverInstanceService,
+    LogLevel,
+    PresetListType,
+    Univer,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { FUniver as FUniverCtor } from '@univerjs/core/facade';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { BehaviorSubject } from 'rxjs';
 import { UniverDocsPlugin } from '../../plugin';
 import '../index';
+
+export const DOCUMENT_STYLE: IDocumentData['documentStyle'] = {
+    pageSize: {
+        width: 594.3,
+        height: 840.51,
+    },
+    marginTop: 72,
+    marginBottom: 72,
+    marginRight: 90,
+    marginLeft: 90,
+};
+
+export function createDocumentData(id: string, body: NonNullable<IDocumentData['body']>): IDocumentData {
+    return {
+        id,
+        body: {
+            customBlocks: [],
+            ...body,
+        },
+        documentStyle: DOCUMENT_STYLE,
+    };
+}
 
 function getTestDocumentDataDemo(): IDocumentData {
     return {
@@ -30,17 +61,102 @@ function getTestDocumentDataDemo(): IDocumentData {
             dataStream: 'Hello,\r\n',
             paragraphs: [{ startIndex: 6, paragraphId: 'para_fixture_19' }],
         },
-        documentStyle: {
-            pageSize: {
-                width: 594.3,
-                height: 840.51,
-            },
-            marginTop: 72,
-            marginBottom: 72,
-            marginRight: 90,
-            marginLeft: 90,
-        },
+        documentStyle: DOCUMENT_STYLE,
     };
+}
+
+export function createSimpleDocument(id = 'test'): IDocumentData {
+    return createDocumentData(id, {
+        dataStream: 'Alpha\rBeta\rGamma\r\n',
+        paragraphs: [
+            { startIndex: 5, paragraphId: 'para_alpha' },
+            { startIndex: 10, paragraphId: 'para_beta' },
+            { startIndex: 16, paragraphId: 'para_gamma' },
+        ],
+        sectionBreaks: [{ startIndex: 17 }],
+    });
+}
+
+export function createDuplicateDocument(id = 'test'): IDocumentData {
+    return createDocumentData(id, {
+        dataStream: 'Same\rSame\rTail\r\n',
+        paragraphs: [
+            { startIndex: 4, paragraphId: 'para_same_1' },
+            { startIndex: 9, paragraphId: 'para_same_2' },
+            { startIndex: 14, paragraphId: 'para_tail' },
+        ],
+        sectionBreaks: [{ startIndex: 15 }],
+    });
+}
+
+export function createTaskDocument(id = 'test'): IDocumentData {
+    return createDocumentData(id, {
+        dataStream: 'Todo\rDone\r\n',
+        paragraphs: [
+            {
+                startIndex: 4,
+                paragraphId: 'para_todo',
+                bullet: {
+                    listId: 'task-list',
+                    listType: PresetListType.CHECK_LIST,
+                    nestingLevel: 0,
+                },
+            },
+            { startIndex: 9, paragraphId: 'para_done' },
+        ],
+        sectionBreaks: [{ startIndex: 10 }],
+    });
+}
+
+export function createBulletDocument(id = 'test'): IDocumentData {
+    return createDocumentData(id, {
+        dataStream: 'Bullet\rTail\r\n',
+        paragraphs: [
+            {
+                startIndex: 6,
+                paragraphId: 'para_bullet',
+                bullet: {
+                    listId: 'bullet-list',
+                    listType: PresetListType.BULLET_LIST,
+                    nestingLevel: 0,
+                },
+            },
+            { startIndex: 11, paragraphId: 'para_bullet_tail' },
+        ],
+        sectionBreaks: [{ startIndex: 12 }],
+    });
+}
+
+export function createBlockRangeDocument(blockType = DocumentBlockRangeType.QUOTE, id = 'test'): IDocumentData {
+    return createDocumentData(id, {
+        dataStream: 'Block\rAfter\r\n',
+        paragraphs: [{ startIndex: 5, paragraphId: 'para_fixture_20' }, { startIndex: 11, paragraphId: 'para_after_block' }],
+        blockRanges: [{
+            blockId: `${blockType}-1`,
+            blockType,
+            startIndex: 0,
+            endIndex: 5,
+        }],
+        sectionBreaks: [{ startIndex: 12 }],
+    });
+}
+
+export function createTableDocument(id = 'test'): IDocumentData {
+    return createDocumentData(id, {
+        dataStream: 'TT\raa\r\n',
+        paragraphs: [{ startIndex: 2, paragraphId: 'para_fixture_21' }, { startIndex: 5, paragraphId: 'para_after_table' }],
+        tables: [{ tableId: 'table-1', startIndex: 0, endIndex: 2 }],
+        sectionBreaks: [{ startIndex: 6 }],
+    });
+}
+
+export function createCustomBlockDocument(id = 'test'): IDocumentData {
+    return createDocumentData(id, {
+        dataStream: '\b\raa\r\n',
+        paragraphs: [{ startIndex: 1, paragraphId: 'para_fixture_22' }, { startIndex: 4, paragraphId: 'para_after_custom_block' }],
+        customBlocks: [{ blockId: 'custom-1', blockType: 'custom' as never, startIndex: 0 }],
+        sectionBreaks: [{ startIndex: 5 }],
+    });
 }
 
 function cloneDocumentData(documentData: IDocumentData): IDocumentData {

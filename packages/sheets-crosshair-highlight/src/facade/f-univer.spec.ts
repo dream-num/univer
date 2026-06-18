@@ -14,106 +14,99 @@
  * limitations under the License.
  */
 
+import type { IDisposable } from '@univerjs/core';
+import { ICommandService, Injector } from '@univerjs/core';
+import { FEventName, FUniver } from '@univerjs/core/facade';
+import {
+    DisableCrosshairHighlightOperation,
+    EnableCrosshairHighlightOperation,
+    SheetsCrosshairHighlightService,
+    ToggleCrosshairHighlightOperation,
+} from '@univerjs/sheets-crosshair-highlight';
 import { describe, expect, it, vi } from 'vitest';
+import { FSheetsCrosshairHighlightEventNameMixin } from './f-event';
+import { FUniverSheetsCrosshairHighlightMixin } from './f-univer';
 
-const mocked = vi.hoisted(() => ({
-    extendUniver: vi.fn(),
-    extendEvent: vi.fn(),
-    colors: ['c1', 'c2'],
-    enableId: 'enable',
-    disableId: 'disable',
-    toggleId: 'toggle',
-}));
+class TestCommandService {
+    readonly callbacks: Array<(commandInfo: { id: string }) => void> = [];
+    readonly executedCommandIds: string[] = [];
 
-vi.mock('@univerjs/core/facade', () => {
-    class FUniver {
-        static extend = mocked.extendUniver;
-    }
-    class FEventName {
-        static extend = mocked.extendEvent;
+    onCommandExecuted(callback: (commandInfo: { id: string }) => void): IDisposable {
+        this.callbacks.push(callback);
+        return { dispose: () => undefined };
     }
 
-    return {
-        FUniver,
-        FEventName,
-    };
-});
+    syncExecuteCommand(id: string): boolean {
+        this.executedCommandIds.push(id);
+        return true;
+    }
+}
 
-vi.mock('@univerjs/sheets-crosshair-highlight', () => ({
-    DisableCrosshairHighlightOperation: { id: mocked.disableId },
-    EnableCrosshairHighlightOperation: { id: mocked.enableId },
-    ToggleCrosshairHighlightOperation: { id: mocked.toggleId },
-    SheetsCrosshairHighlightService: class {},
-}));
+class TestCrosshairHighlightService {
+    enabled = true;
+}
 
 describe('crosshair facade', () => {
-    it('should register mixins and cover event wiring + APIs', async () => {
-        const module1 = await import('./f-univer');
-        const module2 = await import('./f-event');
-
-        expect(mocked.extendEvent).toHaveBeenCalledWith(module2.FSheetsCrosshairHighlightEventNameMixin);
-        expect(mocked.extendUniver).toHaveBeenCalledWith(module1.FUniverSheetsCrosshairHighlightMixin);
-
-        const callbacks: Array<(commandInfo: { id: string }) => void> = [];
-        const commandService = {
-            onCommandExecuted: vi.fn((cb: (commandInfo: { id: string }) => void) => {
-                callbacks.push(cb);
-                return { dispose: vi.fn() };
-            }),
-        };
+    it('emits the enabled-change event for crosshair commands on the active sheet', () => {
+        const injector = new Injector();
+        injector.add([ICommandService, { useClass: TestCommandService as never }]);
+        injector.add([SheetsCrosshairHighlightService, { useClass: TestCrosshairHighlightService as never }]);
+        const commandService = injector.get(ICommandService) as unknown as TestCommandService;
         const fireEvent = vi.fn();
         const registerEventHandler = vi.fn((_eventName: string, setup: () => unknown) => setup());
         const thisArg = {
-            Event: {
-                CrosshairHighlightEnabledChanged: 'CrosshairHighlightEnabledChanged',
-            },
-            _injector: {
-                get: vi.fn(() => ({
-                    enabled: true,
-                })),
-            },
-            _commandService: {
-                syncExecuteCommand: vi.fn(),
-            },
+            Event: FEventName.get(),
+            _injector: injector,
+            _commandService: commandService,
             getActiveSheet: vi.fn(() => ({
-                workbook: { id: 'wb' },
-                worksheet: { id: 'ws' },
+                workbook: { id: 'workbook-1' },
+                worksheet: { id: 'sheet-1' },
             })),
-            getCrosshairHighlightEnabled: vi.fn(() => true),
+            getCrosshairHighlightEnabled: () => FUniverSheetsCrosshairHighlightMixin.prototype.getCrosshairHighlightEnabled.call(thisArg as never),
             fireEvent,
             registerEventHandler,
             disposeWithMe: vi.fn(),
         };
 
-        module1.FUniverSheetsCrosshairHighlightMixin.prototype._initialize.call(
-            thisArg,
-            { get: vi.fn(() => commandService) } as never
-        );
-        expect(registerEventHandler).toHaveBeenCalledTimes(1);
+        FUniverSheetsCrosshairHighlightMixin.prototype._initialize.call(thisArg as never, injector);
+        expect(registerEventHandler).toHaveBeenCalledWith('CrosshairHighlightEnabledChanged', expect.any(Function));
 
-        callbacks[0]({ id: mocked.enableId });
-        callbacks[0]({ id: mocked.disableId });
-        callbacks[0]({ id: mocked.toggleId });
-        callbacks[0]({ id: 'other-command' });
-        expect(fireEvent).toHaveBeenCalled();
+        commandService.callbacks[0]({ id: EnableCrosshairHighlightOperation.id });
+        commandService.callbacks[0]({ id: DisableCrosshairHighlightOperation.id });
+        commandService.callbacks[0]({ id: ToggleCrosshairHighlightOperation.id });
+        commandService.callbacks[0]({ id: 'unrelated-command' });
+
+        expect(fireEvent).toHaveBeenCalledTimes(3);
+        expect(fireEvent).toHaveBeenLastCalledWith('CrosshairHighlightEnabledChanged', {
+            enabled: true,
+            workbook: { id: 'workbook-1' },
+            worksheet: { id: 'sheet-1' },
+        });
 
         thisArg.getActiveSheet.mockReturnValue(undefined as never);
-        callbacks[0]({ id: mocked.enableId });
-
-        const enabledResult = module1.FUniverSheetsCrosshairHighlightMixin.prototype.setCrosshairHighlightEnabled.call(thisArg, true);
-        const disabledResult = module1.FUniverSheetsCrosshairHighlightMixin.prototype.setCrosshairHighlightEnabled.call(thisArg, false);
-        expect(enabledResult).toBe(thisArg);
-        expect(disabledResult).toBe(thisArg);
-        expect(thisArg._commandService.syncExecuteCommand).toHaveBeenCalledWith(mocked.enableId);
-        expect(thisArg._commandService.syncExecuteCommand).toHaveBeenCalledWith(mocked.disableId);
-
-        expect(module1.FUniverSheetsCrosshairHighlightMixin.prototype.getCrosshairHighlightEnabled.call(thisArg)).toBe(true);
-
-        const eventEnum = new module2.FSheetsCrosshairHighlightEventNameMixin();
-        expect(eventEnum.CrosshairHighlightEnabledChanged).toBe('CrosshairHighlightEnabledChanged');
+        commandService.callbacks[0]({ id: EnableCrosshairHighlightOperation.id });
+        expect(fireEvent).toHaveBeenCalledTimes(3);
     });
 
-    it('should run facade entry export', async () => {
-        await expect(import('./index')).resolves.toBeDefined();
+    it('updates crosshair state through commands and exposes the event name on real facade classes', () => {
+        const injector = new Injector();
+        injector.add([ICommandService, { useClass: TestCommandService as never }]);
+        injector.add([SheetsCrosshairHighlightService, { useClass: TestCrosshairHighlightService as never }]);
+        const commandService = injector.get(ICommandService) as unknown as TestCommandService;
+        const thisArg = {
+            _injector: injector,
+            _commandService: commandService,
+        };
+
+        expect(FUniverSheetsCrosshairHighlightMixin.prototype.setCrosshairHighlightEnabled.call(thisArg as never, true)).toBe(thisArg);
+        expect(FUniverSheetsCrosshairHighlightMixin.prototype.setCrosshairHighlightEnabled.call(thisArg as never, false)).toBe(thisArg);
+        expect(commandService.executedCommandIds).toEqual([
+            EnableCrosshairHighlightOperation.id,
+            DisableCrosshairHighlightOperation.id,
+        ]);
+        expect(FUniverSheetsCrosshairHighlightMixin.prototype.getCrosshairHighlightEnabled.call(thisArg as never)).toBe(true);
+        expect(FEventName.get().CrosshairHighlightEnabledChanged).toBe('CrosshairHighlightEnabledChanged');
+        expect(Object.create(FSheetsCrosshairHighlightEventNameMixin.prototype).CrosshairHighlightEnabledChanged).toBe('CrosshairHighlightEnabledChanged');
+        expect(typeof FUniver.prototype.setCrosshairHighlightEnabled).toBe('function');
     });
 });

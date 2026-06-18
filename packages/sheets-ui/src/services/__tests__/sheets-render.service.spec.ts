@@ -23,9 +23,11 @@ import {
     IUniverInstanceService,
     ThemeService,
     UniverInstanceService,
+    UniverInstanceType,
 } from '@univerjs/core';
-import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
-import { describe, expect, it } from 'vitest';
+import { IRenderManagerService, RenderManagerService, Spreadsheet } from '@univerjs/engine-render';
+import { BehaviorSubject, Subject } from 'rxjs';
+import { describe, expect, it, vi } from 'vitest';
 import { SheetsRenderService } from '../sheets-render.service';
 
 function createService(): SheetsRenderService {
@@ -39,6 +41,78 @@ function createService(): SheetsRenderService {
     return injector.get(SheetsRenderService);
 }
 
+function createWorkbook(unitId: string) {
+    return {
+        getUnitId: () => unitId,
+    };
+}
+
+function createLifecycleService() {
+    const added$ = new Subject<{ unit: ReturnType<typeof createWorkbook>; options?: Record<string, unknown> }>();
+    const disposed$ = new Subject<ReturnType<typeof createWorkbook>>();
+    const rawFormula$ = new BehaviorSubject(false);
+    const initialWorkbook = createWorkbook('book-1');
+    const created$ = new Subject<any>();
+    const createdRenderers: Array<{ unitId: string; options?: unknown }> = [];
+    const removedRenderers: string[] = [];
+    const spreadsheet = Object.create(Spreadsheet.prototype) as Spreadsheet & { makeForceDirty: any };
+    spreadsheet.makeForceDirty = vi.fn();
+
+    class TestContextService {
+        subscribeContextValue$() {
+            return rawFormula$.asObservable();
+        }
+    }
+
+    class TestUniverInstanceService {
+        getTypeOfUnitAdded$(type: UniverInstanceType) {
+            return type === UniverInstanceType.UNIVER_SHEET ? added$.asObservable() : new Subject().asObservable();
+        }
+
+        getAllUnitsForType(type: UniverInstanceType) {
+            return type === UniverInstanceType.UNIVER_SHEET ? [initialWorkbook] : [];
+        }
+
+        getTypeOfUnitDisposed$(type: UniverInstanceType) {
+            return type === UniverInstanceType.UNIVER_SHEET ? disposed$.asObservable() : new Subject().asObservable();
+        }
+    }
+
+    class TestRenderManagerService {
+        readonly created$ = created$.asObservable();
+
+        createRender(unitId: string, options?: unknown) {
+            createdRenderers.push({ unitId, options });
+        }
+
+        removeRender(unitId: string) {
+            removedRenderers.push(unitId);
+        }
+
+        getRenderAll() {
+            return [{ mainComponent: spreadsheet }];
+        }
+    }
+
+    const injector = new Injector();
+    injector.add([IContextService, { useClass: TestContextService as never }]);
+    injector.add([IUniverInstanceService, { useClass: TestUniverInstanceService as never }]);
+    injector.add([IRenderManagerService, { useClass: TestRenderManagerService as never }]);
+    injector.add([ThemeService]);
+    injector.add([SheetsRenderService]);
+
+    return {
+        service: injector.get(SheetsRenderService),
+        added$,
+        disposed$,
+        rawFormula$,
+        created$,
+        createdRenderers,
+        removedRenderers,
+        spreadsheet,
+    };
+}
+
 describe('SheetsRenderService', () => {
     it('tracks mutations that require rebuilding the sheet skeleton and unregisters them by disposable', () => {
         const service = createService();
@@ -47,7 +121,50 @@ describe('SheetsRenderService', () => {
         expect(service.checkMutationShouldTriggerRerender('sheet.mutation.resize-row')).toBe(true);
         expect(service.checkMutationShouldTriggerRerender('sheet.mutation.set-value')).toBe(false);
 
+        const duplicateDisposable = service.registerSkeletonChangingMutations('sheet.mutation.resize-row');
+        duplicateDisposable.dispose();
+        expect(service.checkMutationShouldTriggerRerender('sheet.mutation.resize-row')).toBe(true);
+
         disposable.dispose();
         expect(service.checkMutationShouldTriggerRerender('sheet.mutation.resize-row')).toBe(false);
+    });
+
+    it('creates and disposes sheet renderers as workbooks enter and leave the instance service', async () => {
+        const { added$, disposed$, created$, createdRenderers, removedRenderers } = createLifecycleService();
+
+        await Promise.resolve();
+        expect(createdRenderers.map(({ unitId }) => unitId)).toEqual(['book-1']);
+
+        added$.next({ unit: createWorkbook('book-2'), options: { mountContainer: 'container' } });
+        expect(createdRenderers.at(-1)).toEqual({
+            unitId: 'book-2',
+            options: { mountContainer: 'container' },
+        });
+
+        const canvas = { setId: vi.fn() };
+        const context = { setId: vi.fn() };
+        created$.next({
+            unitId: 'book-2',
+            engine: {
+                getCanvas: () => ({
+                    setId: canvas.setId,
+                    getContext: () => context,
+                }),
+            },
+        });
+        expect(canvas.setId).toHaveBeenCalledWith('univer-sheet-main-canvas_book-2');
+        expect(context.setId).toHaveBeenCalledWith('univer-sheet-main-canvas_book-2');
+
+        disposed$.next(createWorkbook('book-1'));
+        expect(removedRenderers).toEqual(['book-1']);
+    });
+
+    it('marks spreadsheet renderers dirty when raw formula display changes', async () => {
+        const { rawFormula$, spreadsheet } = createLifecycleService();
+
+        await Promise.resolve();
+        rawFormula$.next(true);
+
+        expect(spreadsheet.makeForceDirty).toHaveBeenCalledWith(true);
     });
 });

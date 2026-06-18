@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { IAccessor } from '@univerjs/core';
+import type { IAccessor, Workbook, Worksheet } from '@univerjs/core';
 import { ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
-import { getSheetCommandTarget, SheetsSelectionsService } from '@univerjs/sheets';
+import { SheetsSelectionsService } from '@univerjs/sheets';
 import { describe, expect, it, vi } from 'vitest';
 import { ConditionalFormattingRangeIndexModel } from '../../../models/conditional-formatting-range-index-model';
 import { ConditionalFormattingRuleModel } from '../../../models/conditional-formatting-rule-model';
@@ -26,16 +26,52 @@ import { SetConditionalRuleMutation } from '../../mutations/set-conditional-rule
 import { ClearRangeCfCommand } from '../clear-range-cf.command';
 import { ClearWorksheetCfCommand } from '../clear-worksheet-cf.command';
 
-vi.mock('@univerjs/sheets', async (importActual) => {
-    const actual = await importActual<typeof import('@univerjs/sheets')>();
+class TestWorksheet {
+    constructor(private readonly _sheetId = 'sheet-1') {}
 
-    return {
-        ...actual,
-        getSheetCommandTarget: vi.fn(),
-    };
-});
+    getSheetId() {
+        return this._sheetId;
+    }
+}
 
-const mockedGetSheetCommandTarget = vi.mocked(getSheetCommandTarget);
+class TestWorkbook {
+    constructor(
+        private readonly _unitId = 'unit-1',
+        private readonly _worksheet: TestWorksheet | null = new TestWorksheet()
+    ) {}
+
+    getUnitId() {
+        return this._unitId;
+    }
+
+    getSheetBySheetId(sheetId: string) {
+        if (this._worksheet?.getSheetId() === sheetId) {
+            return this._worksheet as unknown as Worksheet;
+        }
+
+        return null;
+    }
+
+    getActiveSheet() {
+        return this._worksheet as unknown as Worksheet;
+    }
+}
+
+class TestUniverInstanceService {
+    constructor(private readonly _workbook: TestWorkbook | null = new TestWorkbook()) {}
+
+    getUnit(unitId: string) {
+        if (this._workbook?.getUnitId() === unitId) {
+            return this._workbook as unknown as Workbook;
+        }
+
+        return null;
+    }
+
+    getCurrentUnitOfType() {
+        return this._workbook as unknown as Workbook;
+    }
+}
 
 function createRuleModel() {
     const ruleModel = new ConditionalFormattingRuleModel();
@@ -69,7 +105,7 @@ function createRuleModel() {
     return ruleModel;
 }
 
-function createAccessor(ruleModel: ConditionalFormattingRuleModel) {
+function createAccessor(ruleModel: ConditionalFormattingRuleModel, univerInstanceService = new TestUniverInstanceService()) {
     const rangeIndexModel = new ConditionalFormattingRangeIndexModel(ruleModel);
     const rangeTransformService = new ConditionalFormattingRangeTransformService();
     const commandService = {
@@ -83,8 +119,6 @@ function createAccessor(ruleModel: ConditionalFormattingRuleModel) {
             range: { startRow: 0, endRow: 0, startColumn: 2, endColumn: 2 },
         }]),
     };
-    const univerInstanceService = {};
-
     const accessor = {
         get(token: unknown) {
             if (token === ConditionalFormattingRuleModel) {
@@ -129,8 +163,6 @@ function createAccessor(ruleModel: ConditionalFormattingRuleModel) {
 
 describe('clear conditional formatting commands', () => {
     it('clears the selected range, updates overlapping rules, and records undo/redo', () => {
-        mockedGetSheetCommandTarget.mockReturnValue({ unitId: 'unit-1', subUnitId: 'sheet-1' } as never);
-
         const ruleModel = createRuleModel();
         const { accessor, commandService, undoRedoService } = createAccessor(ruleModel);
 
@@ -167,9 +199,26 @@ describe('clear conditional formatting commands', () => {
         }));
     });
 
-    it('clears every rule on the worksheet and records one delete per rule', () => {
-        mockedGetSheetCommandTarget.mockReturnValue({ unitId: 'unit-1', subUnitId: 'sheet-1' } as never);
+    it('clears conditional formatting from the current selection when ranges are omitted', () => {
+        const ruleModel = createRuleModel();
+        const { accessor, commandService, undoRedoService } = createAccessor(ruleModel);
 
+        expect(ClearRangeCfCommand.handler(accessor, {})).toBe(true);
+
+        expect(commandService.syncExecuteCommand).toHaveBeenCalledWith(DeleteConditionalRuleMutation.id, {
+            unitId: 'unit-1',
+            subUnitId: 'sheet-1',
+            cfId: 'rule-delete',
+        }, undefined);
+        expect(undoRedoService.pushUndoRedo).toHaveBeenCalledWith(expect.objectContaining({
+            unitID: 'unit-1',
+            redoMutations: expect.arrayContaining([
+                expect.objectContaining({ id: DeleteConditionalRuleMutation.id }),
+            ]),
+        }));
+    });
+
+    it('clears every rule on the worksheet and records one delete per rule', () => {
         const ruleModel = createRuleModel();
         const { accessor, commandService, undoRedoService } = createAccessor(ruleModel);
 
@@ -196,14 +245,24 @@ describe('clear conditional formatting commands', () => {
     it('returns false when the target, selection, or rules are missing', () => {
         const ruleModel = new ConditionalFormattingRuleModel();
         const { accessor, commandService, selectionManagerService } = createAccessor(ruleModel);
+        const missingTarget = createAccessor(ruleModel, new TestUniverInstanceService(null));
 
-        mockedGetSheetCommandTarget.mockReturnValue(null as never);
-        expect(ClearRangeCfCommand.handler(accessor, { ranges: [] })).toBe(false);
-        expect(ClearWorksheetCfCommand.handler(accessor, { unitId: 'unit-1', subUnitId: 'sheet-1' })).toBe(false);
+        expect(ClearRangeCfCommand.handler(accessor, undefined as never)).toBe(false);
 
-        mockedGetSheetCommandTarget.mockReturnValue({ unitId: 'unit-1', subUnitId: 'sheet-1' } as never);
+        expect(ClearRangeCfCommand.handler(missingTarget.accessor, { ranges: [] })).toBe(false);
+        expect(ClearWorksheetCfCommand.handler(missingTarget.accessor, { unitId: 'unit-1', subUnitId: 'sheet-1' })).toBe(false);
+
         selectionManagerService.getCurrentSelections.mockReturnValue([]);
-        expect(ClearRangeCfCommand.handler(accessor, { ranges: [] })).toBe(false);
+        expect(ClearRangeCfCommand.handler(accessor, {})).toBe(false);
         expect(commandService.syncExecuteCommand).not.toHaveBeenCalled();
+    });
+
+    it('does not record undo redo when clearing rules fails during mutation sequence', () => {
+        const ruleModel = createRuleModel();
+        const { accessor, commandService, undoRedoService } = createAccessor(ruleModel);
+        commandService.syncExecuteCommand.mockReturnValue(false);
+
+        expect(ClearRangeCfCommand.handler(accessor, { ranges: [{ startRow: 0, endRow: 0, startColumn: 2, endColumn: 2 }] })).toBe(false);
+        expect(undoRedoService.pushUndoRedo).not.toHaveBeenCalled();
     });
 });

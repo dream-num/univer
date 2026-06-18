@@ -25,6 +25,15 @@ afterEach(() => {
 });
 
 describe('FetchHTTPImplementation', () => {
+    function createRequest(responseType: string, extra: Record<string, unknown> = {}) {
+        return new HTTPRequest('GET', 'https://example.com', {
+            responseType,
+            headers: new HTTPHeaders(),
+            withCredentials: false,
+            ...extra,
+        } as any);
+    }
+
     it('should emit HTTPResponse for json response', async () => {
         const body = new ReadableStream({
             start(controller) {
@@ -92,5 +101,100 @@ describe('FetchHTTPImplementation', () => {
 
         expect(events.some((e) => e.type === 0)).toBe(true);
         expect(events.at(-1).body).toBe('ab');
+    });
+
+    it('should deserialize text, blob, and arraybuffer bodies', async () => {
+        const impl = new FetchHTTPImplementation({ debug: vi.fn(), error: vi.fn() } as any);
+
+        vi.stubGlobal('fetch', vi.fn(async () => new Response('plain', {
+            status: 200,
+            headers: { 'content-type': 'text/plain' },
+        })));
+        await expect(new Promise<any>((resolve, reject) => {
+            impl.send(createRequest('text')).subscribe({ next: resolve, error: reject });
+        })).resolves.toMatchObject({ body: 'plain' });
+
+        vi.stubGlobal('fetch', vi.fn(async () => new Response('blob-body', {
+            status: 200,
+            headers: { 'content-type': 'text/plain' },
+        })));
+        const blobResponse = await new Promise<any>((resolve, reject) => {
+            impl.send(createRequest('blob')).subscribe({ next: resolve, error: reject });
+        });
+        expect(blobResponse.body).toBeInstanceOf(Blob);
+        expect(await blobResponse.body.text()).toBe('blob-body');
+
+        vi.stubGlobal('fetch', vi.fn(async () => new Response(new Uint8Array([1, 2, 3]), {
+            status: 200,
+            headers: { 'content-type': 'application/octet-stream' },
+        })));
+        const arrayBufferResponse = await new Promise<any>((resolve, reject) => {
+            impl.send(createRequest('arraybuffer')).subscribe({ next: resolve, error: reject });
+        });
+        expect(Array.from(new Uint8Array(arrayBufferResponse.body))).toEqual([1, 2, 3]);
+    });
+
+    it('should emit a null body when the response has no stream', async () => {
+        vi.stubGlobal('fetch', vi.fn(async () => new Response(null, { status: 204, statusText: 'No Content' })));
+
+        const impl = new FetchHTTPImplementation({ debug: vi.fn(), error: vi.fn() } as any);
+
+        await expect(new Promise<any>((resolve, reject) => {
+            impl.send(createRequest('json')).subscribe({ next: resolve, error: reject });
+        })).resolves.toMatchObject({ status: 204, statusText: 'No Content', body: null });
+    });
+
+    it('should emit HTTPResponseError for failed status, bad JSON, unknown response type, and fetch rejection', async () => {
+        const logService = { debug: vi.fn(), error: vi.fn() };
+        const impl = new FetchHTTPImplementation(logService as any);
+
+        vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ message: 'bad' }), {
+            status: 500,
+            statusText: 'Server Error',
+            headers: { 'content-type': 'application/json' },
+        })));
+        await expect(new Promise((resolve, reject) => {
+            impl.send(createRequest('json')).subscribe({ next: resolve, error: reject });
+        })).rejects.toMatchObject({ status: 500, statusText: 'Server Error' });
+
+        vi.stubGlobal('fetch', vi.fn(async () => new Response('{bad', {
+            status: 200,
+            statusText: 'OK',
+            headers: { 'content-type': 'application/json' },
+        })));
+        await expect(new Promise((resolve, reject) => {
+            impl.send(createRequest('json')).subscribe({ next: resolve, error: reject });
+        })).rejects.toMatchObject({ status: 200, statusText: 'OK' });
+
+        vi.stubGlobal('fetch', vi.fn(async () => new Response('body', {
+            status: 200,
+            statusText: 'OK',
+        })));
+        await expect(new Promise((resolve, reject) => {
+            impl.send(createRequest('document')).subscribe({ next: resolve, error: reject });
+        })).rejects.toMatchObject({ status: 200, statusText: 'OK' });
+
+        vi.stubGlobal('fetch', vi.fn(async () => {
+            throw Object.assign(new Error('offline'), { status: 0, statusText: 'Offline' });
+        }));
+        await expect(new Promise((resolve, reject) => {
+            impl.send(createRequest('json')).subscribe({ next: resolve, error: reject });
+        })).rejects.toMatchObject({ status: 0, statusText: 'Offline' });
+        expect(logService.error).toHaveBeenCalled();
+    });
+
+    it('should abort the fetch request when unsubscribed', () => {
+        let capturedSignal: AbortSignal | undefined;
+        vi.stubGlobal('fetch', vi.fn((_url: string, init: RequestInit) => {
+            capturedSignal = init.signal as AbortSignal;
+            return new Promise(() => {});
+        }));
+
+        const impl = new FetchHTTPImplementation({ debug: vi.fn(), error: vi.fn() } as any);
+        const subscription = impl.send(createRequest('json')).subscribe();
+
+        expect(capturedSignal?.aborted).toBe(false);
+        subscription.unsubscribe();
+        expect(capturedSignal?.aborted).toBe(true);
     });
 });

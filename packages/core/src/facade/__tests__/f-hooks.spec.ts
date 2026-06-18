@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, IUniverInstanceService } from '../../index';
+import type { ICommand } from '../../index';
 import { BehaviorSubject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { Injector } from '../../common/di';
@@ -29,6 +29,7 @@ import {
     IContextService,
     ILogService,
     IUndoRedoService,
+    IUniverInstanceService,
     LifecycleService,
     LifecycleStages,
     LocalUndoRedoService,
@@ -47,35 +48,38 @@ class FocusedUnit {
     }
 }
 
+class TestUniverInstanceService {
+    static focused$ = new BehaviorSubject<FocusedUnit | null>(new FocusedUnit('unit-1'));
+
+    readonly focused$ = TestUniverInstanceService.focused$.asObservable();
+
+    getFocusedUnit() {
+        return TestUniverInstanceService.focused$.value;
+    }
+}
+
 describe('FHooks', () => {
     let injector: Injector;
     let commandService: ICommandService;
     let lifecycleService: LifecycleService;
     let undoRedoService: LocalUndoRedoService;
-    let focused$: BehaviorSubject<FocusedUnit | null>;
     let hooks: FHooks;
     let mutationLog: string[];
 
     beforeEach(() => {
+        TestUniverInstanceService.focused$ = new BehaviorSubject<FocusedUnit | null>(new FocusedUnit('unit-1'));
         injector = new Injector();
         injector.add([ICommandService, { useClass: CommandService }]);
         injector.add([ILogService, { useClass: DesktopLogService }]);
         injector.add([IContextService, { useClass: ContextService }]);
         injector.add([IConfigService, { useClass: ConfigService }]);
         injector.add([LifecycleService]);
+        injector.add([IUniverInstanceService, { useClass: TestUniverInstanceService as never }]);
+        injector.add([IUndoRedoService, { useClass: LocalUndoRedoService }]);
 
         commandService = injector.get(ICommandService);
         lifecycleService = injector.get(LifecycleService);
-        const contextService = injector.get(IContextService);
-
-        focused$ = new BehaviorSubject<FocusedUnit | null>(new FocusedUnit('unit-1'));
-        const instanceService = {
-            focused$: focused$.asObservable(),
-            getFocusedUnit: () => focused$.value,
-        } as IUniverInstanceService;
-
-        undoRedoService = new LocalUndoRedoService(instanceService, commandService, contextService);
-        injector.add([IUndoRedoService, { useValue: undoRedoService }]);
+        undoRedoService = injector.get(IUndoRedoService) as LocalUndoRedoService;
         hooks = injector.createInstance(FHooks);
 
         mutationLog = [];
@@ -91,7 +95,7 @@ describe('FHooks', () => {
 
     afterEach(() => {
         undoRedoService.dispose();
-        focused$.complete();
+        TestUniverInstanceService.focused$.complete();
         injector.dispose();
     });
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { MenuSchemaType } from '../../menu/menu-manager.service';
+import type { IMenuSchema, MenuSchemaType } from '../../menu/menu-manager.service';
 import {
     ConfigService,
     ContextService,
@@ -26,7 +26,9 @@ import {
     IUniverInstanceService,
     UniverInstanceService,
 } from '@univerjs/core';
+import { BehaviorSubject } from 'rxjs';
 import { describe, expect, it } from 'vitest';
+import { MenuItemType } from '../../menu/menu';
 import { IMenuManagerService, MenuManagerService } from '../../menu/menu-manager.service';
 import { MenuManagerPosition, RibbonPosition } from '../../menu/types';
 import { DesktopRibbonService, IRibbonService } from '../ribbon.service';
@@ -89,5 +91,62 @@ describe('DesktopRibbonService', () => {
         expect(fakeToolbarVisible).toEqual([false, true]);
         collapsedSub.unsubscribe();
         fakeToolbarSub.unsubscribe();
+    });
+
+    it('filters hidden ribbon commands and restores activation when contextual tabs disappear', () => {
+        const { service, menuManagerService } = createService();
+        const hidden$ = new BehaviorSubject(false);
+        const ribbons: IMenuSchema[][] = [];
+        const activated: string[] = [];
+        const ribbonSub = service.ribbon$.subscribe((ribbon) => ribbons.push(ribbon));
+        const activeSub = service.activatedTab$.subscribe((tab) => activated.push(tab));
+
+        menuManagerService.appendRootMenu({
+            [MenuManagerPosition.RIBBON]: {
+                [RibbonPosition.START]: {
+                    order: 0,
+                    [`${RibbonPosition.START}.visible-group`]: {
+                        order: 0,
+                        visibleCommand: {
+                            order: 0,
+                            menuItemFactory: () => ({ id: 'visible-command', type: MenuItemType.BUTTON }),
+                        },
+                        hiddenCommand: {
+                            order: 1,
+                            menuItemFactory: () => ({ id: 'hidden-command', type: MenuItemType.BUTTON, hidden$ }),
+                        },
+                    },
+                },
+                'picture-tools': {
+                    order: 99,
+                    contextual: true,
+                    [`${RibbonPosition.START}.picture-group`]: {
+                        order: 0,
+                        command: {
+                            order: 0,
+                            menuItemFactory: () => ({ id: 'picture-command', type: MenuItemType.BUTTON }),
+                        },
+                    },
+                },
+            },
+        } as MenuSchemaType);
+
+        service.setActivatedTab(RibbonPosition.START);
+        service.showContextualTab('picture-tools', { activate: true });
+        hidden$.next(true);
+        service.hideAllContextualTabs();
+        service.hideAllContextualTabs();
+        service.hideContextualTab('missing-tools');
+
+        const startRibbon = ribbons.at(-1)!
+            .find((group) => group.key === RibbonPosition.START);
+        const commandKeys = startRibbon?.children?.flatMap((group) => group.children ?? []).map((child) => child.key);
+        expect(commandKeys).toContain('visibleCommand');
+        expect(commandKeys).not.toContain('hiddenCommand');
+        expect(ribbons.at(-1)?.map((item) => item.key)).not.toContain('picture-tools');
+        expect(activated.at(-1)).toBe(RibbonPosition.START);
+
+        ribbonSub.unsubscribe();
+        activeSub.unsubscribe();
     });
 });

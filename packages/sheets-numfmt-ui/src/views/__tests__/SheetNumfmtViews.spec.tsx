@@ -42,7 +42,7 @@ import {
     SheetInterceptorService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import { SetNumfmtCommand, SheetsNumfmtCellContentController } from '@univerjs/sheets-numfmt';
+import { getPatternType, SetNumfmtCommand, SheetsNumfmtCellContentController } from '@univerjs/sheets-numfmt';
 import { ILayoutService, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -423,6 +423,45 @@ describe('SheetNumfmtPanel', () => {
     let container: HTMLDivElement | undefined;
     let currentTestBed: ReturnType<typeof createNumfmtViewTestBed> | undefined;
 
+    async function selectPanelType(label: string) {
+        await act(async () => {
+            container!.querySelector('[data-u-comp="select"]')!.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0 }));
+            await Promise.resolve();
+        });
+
+        const option = Array.from(document.querySelectorAll('[data-slot="dropdown-menu-radio-item"]'))
+            .find((button) => button.textContent === label) as HTMLElement | undefined;
+
+        expect(option).toBeDefined();
+
+        await act(async () => {
+            option!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            await Promise.resolve();
+            await Promise.resolve();
+        });
+    }
+
+    async function selectPanelListOption(label: string) {
+        const option = Array.from(container!.querySelectorAll('a'))
+            .find((item) => item.textContent === label) as HTMLElement | undefined;
+
+        expect(option).toBeDefined();
+
+        await act(async () => {
+            option!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            await Promise.resolve();
+        });
+    }
+
+    async function confirmPanel() {
+        const confirmButton = Array.from(container!.querySelectorAll('[data-u-comp="button"]'))[1] as HTMLElement;
+
+        await act(async () => {
+            confirmButton.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            await Promise.resolve();
+        });
+    }
+
     afterEach(() => {
         act(() => {
             root?.unmount();
@@ -528,5 +567,49 @@ describe('SheetNumfmtPanel', () => {
             { type: 'change', value: '' },
             { type: 'confirm', value: '' },
         ]);
+    });
+
+    it('applies the selected date format through the real SetNumfmtCommand when confirmed', async () => {
+        currentTestBed = createNumfmtViewTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        const commandResults: Array<Promise<unknown>> = [];
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <SheetNumfmtPanel
+                        value={{
+                            defaultValue: 1234.5,
+                            defaultPattern: '',
+                            row: 0,
+                            col: 0,
+                        }}
+                        onChange={(event) => {
+                            if (event.type === 'confirm') {
+                                commandResults.push(currentTestBed!.commandService.executeCommand(SetNumfmtCommand.id, {
+                                    values: [{
+                                        row: 0,
+                                        col: 0,
+                                        pattern: event.value,
+                                        type: getPatternType(event.value),
+                                    }],
+                                }) as Promise<unknown>);
+                            }
+                        }}
+                    />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        await selectPanelType('Date');
+        await selectPanelListOption('1930/08/05');
+        await confirmPanel();
+        const results = await Promise.all(commandResults);
+
+        expect(results).toEqual([true]);
+        expect(currentTestBed.numfmtService.getValue(UNIT_ID, SUB_UNIT_ID, 0, 0)).toEqual({ pattern: 'yyyy/MM/dd' });
     });
 });

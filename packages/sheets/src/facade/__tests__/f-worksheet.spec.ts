@@ -29,6 +29,7 @@ import {
 import {
     AddWorksheetMergeCommand,
     AddWorksheetMergeMutation,
+    AppendRowCommand,
     CancelFrozenCommand,
     ClearSelectionAllCommand,
     ClearSelectionContentCommand,
@@ -74,11 +75,21 @@ import {
     SetStyleCommand,
     SetTextWrapCommand,
     SetVerticalTextAlignCommand,
+    SetWorksheetActiveOperation,
+    SetWorksheetColumnCountCommand,
+    SetWorksheetColumnCountMutation,
     SetWorksheetColWidthMutation,
     SetWorksheetDefaultStyleMutation,
+    SetWorksheetHideCommand,
+    SetWorksheetHideMutation,
+    SetWorksheetNameCommand,
+    SetWorksheetNameMutation,
+    SetWorksheetRowCountCommand,
+    SetWorksheetRowCountMutation,
     SetWorksheetRowHeightMutation,
     SetWorksheetRowIsAutoHeightCommand,
     SetWorksheetRowIsAutoHeightMutation,
+    SetWorksheetShowCommand,
     SheetSkeletonService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
@@ -107,10 +118,21 @@ describe('Test FWorksheet', () => {
         commandService.registerCommand(SetVerticalTextAlignCommand);
         commandService.registerCommand(SetHorizontalTextAlignCommand);
         commandService.registerCommand(SetTextWrapCommand);
+        commandService.registerCommand(AppendRowCommand);
         commandService.registerCommand(ClearSelectionAllCommand);
         commandService.registerCommand(ClearSelectionContentCommand);
         commandService.registerCommand(ClearSelectionFormatCommand);
         commandService.registerCommand(SetWorksheetDefaultStyleMutation);
+        commandService.registerCommand(SetWorksheetRowCountCommand);
+        commandService.registerCommand(SetWorksheetRowCountMutation);
+        commandService.registerCommand(SetWorksheetColumnCountCommand);
+        commandService.registerCommand(SetWorksheetColumnCountMutation);
+        commandService.registerCommand(SetWorksheetHideCommand);
+        commandService.registerCommand(SetWorksheetHideMutation);
+        commandService.registerCommand(SetWorksheetShowCommand);
+        commandService.registerCommand(SetWorksheetActiveOperation);
+        commandService.registerCommand(SetWorksheetNameCommand);
+        commandService.registerCommand(SetWorksheetNameMutation);
         get(SheetSkeletonService).ensureSkeleton('test', 'sheet1');
 
         // row
@@ -602,6 +624,43 @@ describe('Test FWorksheet', () => {
         }
 
         warnSpy.mockRestore();
+    });
+
+    it('Worksheet appends rows and updates sheet dimensions through facade APIs', () => {
+        const activeSheet = univerAPI.getActiveWorkbook()!.getActiveSheet();
+
+        const initialLastRow = activeSheet.getLastRow();
+        activeSheet.appendRow(['North', 100, true]);
+        expect(activeSheet.getRange(initialLastRow + 1, 0, 1, 3).getValues()).toEqual([['North', 100, 1]]);
+        expect(activeSheet.getDataRange().getA1Notation()).toBe(`A1:C${initialLastRow + 2}`);
+
+        activeSheet.setRowCount(120);
+        activeSheet.setColumnCount(80);
+        expect(activeSheet.getMaxRows()).toBe(120);
+        expect(activeSheet.getMaxColumns()).toBe(80);
+    });
+
+    it('Worksheet exposes merge, active range, visibility, name, and equality state', () => {
+        const workbook = univerAPI.getActiveWorkbook()!;
+        const activeSheet = workbook.getActiveSheet();
+        const sameSheet = workbook.getSheetByName(activeSheet.getSheetName())!;
+
+        expect(activeSheet.equalTo(sameSheet)).toBe(true);
+        activeSheet.getRange('J1:K2').merge();
+        expect(activeSheet.getMergeData().map((range) => range.getA1Notation())).toContain('J1:K2');
+        expect(activeSheet.getMergedRanges().map((range) => range.getA1Notation())).toContain('J1:K2');
+        expect(activeSheet.getCellMergeData(0, 9)?.getA1Notation()).toBe('J1:K2');
+
+        activeSheet.setActiveRange(activeSheet.getRange('C3:D4'));
+        expect(activeSheet.getActiveRange()?.getA1Notation()).toBe('C3:D4');
+        expect(activeSheet.getActiveCell()?.getA1Notation()).toBe('C3');
+
+        expect(() => activeSheet.hideSheet()).toThrow('Cannot hide the only visible sheet');
+        expect(activeSheet.isSheetHidden()).toBe(false);
+
+        activeSheet.setName('Renamed');
+        expect(activeSheet.getSheetName()).toBe('Renamed');
+        expect(activeSheet.getIndex()).toBe(0);
     });
 
     // #endregion

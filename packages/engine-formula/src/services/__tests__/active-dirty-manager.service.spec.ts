@@ -43,4 +43,26 @@ describe('ActiveDirtyManagerService', () => {
         service.remove(converter.commandId);
         expect(service.has(converter.commandId)).toBe(false);
     });
+
+    it('exposes and clears the registered converter map on dispose', () => {
+        const converter = {
+            commandId: 'sheet.command.insert-row',
+            getDirtyData: () => ({
+                dirtyRanges: [{
+                    unitId: 'book-1',
+                    sheetId: 'sheet-1',
+                    range: { startRow: 1, endRow: 3, startColumn: 0, endColumn: 9 },
+                }],
+            }),
+        };
+
+        expect(service.get('missing')).toBeUndefined();
+        service.register(converter.commandId, converter);
+
+        expect(service.getDirtyConversionMap().get(converter.commandId)).toBe(converter);
+
+        service.dispose();
+        expect(service.getDirtyConversionMap().size).toBe(0);
+        expect(service.has(converter.commandId)).toBe(false);
+    });
 });

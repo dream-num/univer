@@ -17,6 +17,7 @@
 import type { Injector, IWorkbookData } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
 import {
+    DataValidationStatus,
     ICommandService,
     LocaleType,
 } from '@univerjs/core';
@@ -29,7 +30,7 @@ import {
     UpdateSheetDataValidationRangeCommand,
     UpdateSheetDataValidationSettingCommand,
 } from '@univerjs/sheets-data-validation';
-import { beforeEach, describe } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createFacadeTestBed } from './create-test-bed';
 
 function createWorkbookData(): IWorkbookData {
@@ -60,9 +61,11 @@ function createWorkbookData(): IWorkbookData {
 describe('Test FWorksheet data validation facade', () => {
     let get: Injector['get'];
     let univerAPI: FUniver;
+    let univer: ReturnType<typeof createFacadeTestBed>['univer'];
 
     beforeEach(() => {
         const testBed = createFacadeTestBed(createWorkbookData());
+        univer = testBed.univer;
         get = testBed.get;
         univerAPI = testBed.univerAPI;
 
@@ -76,5 +79,105 @@ describe('Test FWorksheet data validation facade', () => {
             UpdateSheetDataValidationRangeCommand,
             UpdateSheetDataValidationSettingCommand,
         ].forEach((command) => commandService.registerCommand(command));
+    });
+
+    afterEach(() => {
+        univer.dispose();
+    });
+
+    it('reads worksheet rules, validator status, and validation errors', async () => {
+        const workbook = univerAPI.getActiveWorkbook()!;
+        const worksheet = workbook.getActiveSheet();
+        const range = worksheet.getRange(0, 0, 4, 1);
+        const rule = univerAPI.newDataValidation()
+            .requireNumberBetween(1, 2)
+            .setOptions({
+                showErrorMessage: true,
+                error: 'Only values from 1 to 2 are valid',
+            })
+            .build();
+
+        range.setDataValidation(rule);
+
+        const rules = worksheet.getDataValidations();
+        expect(rules).toHaveLength(1);
+        expect(worksheet.getDataValidation(rules[0].rule.uid)?.getCriteriaValues()).toEqual(
+            rules[0].getCriteriaValues()
+        );
+        expect(worksheet.getDataValidation('missing-rule')).toBeNull();
+
+        const worksheetStatus = await worksheet.getValidatorStatusAsync();
+        expect(worksheetStatus.getValue(2, 0)).toBe(DataValidationStatus.INVALID);
+        expect(worksheetStatus.getValue(3, 0)).toBe(DataValidationStatus.INVALID);
+
+        await expect(range.getDataValidationErrorAsync()).resolves.toMatchObject([
+            {
+                sheetName: 'sheet1',
+                row: 2,
+                column: 0,
+                ruleId: rules[0].rule.uid,
+                inputValue: 3,
+            },
+            {
+                sheetName: 'sheet1',
+                row: 3,
+                column: 0,
+                ruleId: rules[0].rule.uid,
+                inputValue: 4,
+            },
+        ]);
+
+        await expect(worksheet.getAllDataValidationErrorAsync()).resolves.toMatchObject([
+            {
+                sheetName: 'sheet1',
+                row: 2,
+                column: 0,
+                inputValue: 3,
+            },
+            {
+                sheetName: 'sheet1',
+                row: 3,
+                column: 0,
+                inputValue: 4,
+            },
+        ]);
+    });
+
+    it('aggregates validation status and errors at workbook level', async () => {
+        const workbook = univerAPI.getActiveWorkbook()!;
+        const worksheet = workbook.getActiveSheet();
+        const rule = univerAPI.newDataValidation()
+            .requireNumberLessThanOrEqualTo(2)
+            .build();
+
+        worksheet.getRange(0, 0, 4, 1).setDataValidation(rule);
+
+        const status = await workbook.getValidatorStatus();
+        expect(status.sheet1.getValue(2, 0)).toBe(DataValidationStatus.INVALID);
+        expect(status.sheet1.getValue(3, 0)).toBe(DataValidationStatus.INVALID);
+
+        await expect(workbook.getAllDataValidationErrorAsync()).resolves.toMatchObject([
+            {
+                sheetName: 'sheet1',
+                row: 2,
+                column: 0,
+                inputValue: 3,
+            },
+            {
+                sheetName: 'sheet1',
+                row: 3,
+                column: 0,
+                inputValue: 4,
+            },
+        ]);
+    });
+
+    it('returns empty error lists when no rule is applied', async () => {
+        const workbook = univerAPI.getActiveWorkbook()!;
+        const worksheet = workbook.getActiveSheet();
+
+        await expect(worksheet.getAllDataValidationErrorAsync()).resolves.toEqual([]);
+        await expect(workbook.getAllDataValidationErrorAsync()).resolves.toEqual([]);
+        await expect(worksheet.getRange(0, 0, 1, 1).getDataValidationErrorAsync()).resolves.toEqual([]);
     });
 });

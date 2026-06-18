@@ -15,7 +15,7 @@
  */
 
 import type { FUniver } from '@univerjs/core/facade';
-import { DataValidationOperator, DataValidationType } from '@univerjs/core';
+import { DataValidationErrorStyle, DataValidationOperator, DataValidationType } from '@univerjs/core';
 import { deserializeListOptions } from '@univerjs/sheets';
 import { FDataValidationBuilder } from '@univerjs/sheets-data-validation/facade/f-data-validation-builder.js';
 import { beforeEach, describe, expect, it } from 'vitest';
@@ -135,6 +135,20 @@ describe('Test FDataValidationBuilder', () => {
         expect(builder.getCriteriaValues()).toEqual([DataValidationOperator.NOT_BETWEEN, '1', '2']);
     });
 
+    it('should build decimal and whole number not equal rules', () => {
+        const decimalBuilder = new FDataValidationBuilder();
+        decimalBuilder.requireNumberNotEqualTo(10);
+
+        expect(decimalBuilder.getCriteriaType()).toBe(DataValidationType.DECIMAL);
+        expect(decimalBuilder.getCriteriaValues()).toEqual([DataValidationOperator.NOT_EQUAL, '10', undefined]);
+
+        const wholeBuilder = new FDataValidationBuilder();
+        wholeBuilder.requireNumberNotEqualTo(7, true);
+
+        expect(wholeBuilder.getCriteriaType()).toBe(DataValidationType.WHOLE);
+        expect(wholeBuilder.getCriteriaValues()).toEqual([DataValidationOperator.NOT_EQUAL, '7', undefined]);
+    });
+
     it('should build date equal', () => {
         const builder = new FDataValidationBuilder();
         builder.requireDateEqualTo(new Date('2020-01-01'));
@@ -220,5 +234,39 @@ describe('Test FDataValidationBuilder', () => {
         builder.requireValueInRange(range1);
         expect(builder.build().getCriteriaType()).toEqual(DataValidationType.LIST);
         expect(builder.getCriteriaValues()).toEqual([undefined, '=[test]sheet1!A1', undefined]);
+    });
+
+    it('copies configured rules and keeps user-facing validation options', () => {
+        const builder = new FDataValidationBuilder();
+        builder
+            .requireValueInList(['Approved', 'Rejected'])
+            .setAllowInvalid(false)
+            .setAllowBlank(false)
+            .setOptions({
+                error: 'Choose an approval state',
+                showErrorMessage: true,
+            });
+
+        expect(builder.getCriteriaType()).toBe(DataValidationType.LIST);
+        expect(builder.getHelpText()).toBe('Choose an approval state');
+        expect(builder.getAllowInvalid()).toBe(false);
+
+        const rule = builder.build().rule;
+        expect(rule).toMatchObject({
+            errorStyle: DataValidationErrorStyle.STOP,
+            allowBlank: false,
+            error: 'Choose an approval state',
+            showErrorMessage: true,
+        });
+
+        const copiedRule = builder.copy().build().rule;
+        expect(copiedRule).toMatchObject({
+            type: rule.type,
+            formula1: rule.formula1,
+            errorStyle: DataValidationErrorStyle.STOP,
+            allowBlank: false,
+            error: 'Choose an approval state',
+        });
+        expect(copiedRule.uid).not.toBe(rule.uid);
     });
 });

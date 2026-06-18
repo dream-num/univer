@@ -14,18 +14,39 @@
  * limitations under the License.
  */
 
+import type { IUniverUIConfig } from '../config/config';
 import { ConfigService, IConfigService, Injector } from '@univerjs/core';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { UI_PLUGIN_CONFIG_KEY } from '../config/config';
 import { FontService, IFontService } from './font.service';
 
-function createService(): IFontService {
+class CustomFontConfigService extends ConfigService {
+    override getConfig<T>(key: string): T {
+        if (key === UI_PLUGIN_CONFIG_KEY) {
+            return {
+                customFontFamily: {
+                    override: true,
+                    list: [{ value: 'OnlyCustom', label: 'Only Custom', category: 'display' }],
+                },
+            } as IUniverUIConfig as T;
+        }
+
+        return super.getConfig<T>(key);
+    }
+}
+
+function createService(configService: new (...args: any[]) => IConfigService = ConfigService): IFontService {
     const injector = new Injector();
-    injector.add([IConfigService, { useClass: ConfigService }]);
+    injector.add([IConfigService, { useClass: configService }]);
     injector.add([IFontService, { useClass: FontService }]);
     return injector.get(IFontService);
 }
 
 describe('FontService', () => {
+    afterEach(() => {
+        vi.unstubAllGlobals();
+    });
+
     it('maintains the font catalog used by font family pickers', () => {
         const service = createService();
 
@@ -42,5 +63,43 @@ describe('FontService', () => {
         const arial = service.getFontByValue('Arial')!;
 
         expect(() => service.addFont(arial)).toThrow('[FontService]: Font with value "Arial" already exists.');
+    });
+
+    it('loads override font configuration and rejects updates to missing fonts', () => {
+        const service = createService(CustomFontConfigService);
+
+        expect(service.getFonts()).toEqual([{ value: 'OnlyCustom', label: 'Only Custom', category: 'display' }]);
+        expect(() => service.updateFont('Arial', { label: 'Missing' })).toThrow('Font with value "Arial" not found.');
+        expect(service.removeFont('Arial')).toBe(false);
+    });
+
+    it('checks font support by comparing measured text widths', () => {
+        const measured: string[] = [];
+        vi.stubGlobal('document', {
+            createElement: () => ({
+                getContext: () => ({
+                    font: '',
+                    measureText() {
+                        measured.push(this.font);
+                        return { width: this.font.includes('"CustomFont"') ? 120 : 100 };
+                    },
+                }),
+            }),
+        });
+        const service = createService();
+
+        expect(service.isFontSupported('CustomFont')).toBe(true);
+        expect(measured).toContain('72px "CustomFont", monospace');
+    });
+
+    it('returns false when the canvas context is unavailable', () => {
+        vi.stubGlobal('document', {
+            createElement: () => ({
+                getContext: () => null,
+            }),
+        });
+        const service = createService();
+
+        expect(service.isFontSupported('MissingFont')).toBe(false);
     });
 });

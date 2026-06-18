@@ -34,7 +34,16 @@ import {
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { CutContentCommand, DocCanvasPopManagerService, DocEventManagerService } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { ComponentManager, IconManager, IPlatformService, IShortcutService, KeyCode, PlatformService, RediContext, ShortcutService } from '@univerjs/ui';
+import {
+    ComponentManager,
+    IconManager,
+    IPlatformService,
+    IShortcutService,
+    KeyCode,
+    PlatformService,
+    RediContext,
+    ShortcutService,
+} from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BehaviorSubject } from 'rxjs';
@@ -42,6 +51,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { DeleteSearchKeyCommand } from '../../commands/commands/doc-quick-insert.command';
 import { CloseQuickInsertPopupOperation } from '../../commands/operations/quick-insert-popup.operation';
 import { DocQuickInsertPopupService } from '../../services/doc-quick-insert-popup.service';
+import { QuickInsertPlaceholder } from '../QuickInsertPlaceholder';
 import { QuickInsertPopup } from '../QuickInsertPopup';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -163,6 +173,9 @@ function createQuickInsertPopupTestBed(options?: {
             },
         },
     });
+
+    const componentManager = injector.get(ComponentManager);
+    componentManager.register(QuickInsertPlaceholder.componentKey, QuickInsertPlaceholder);
 
     const commandService = injector.get(ICommandService);
     commandService.registerCommand(CloseQuickInsertPopupOperation);
@@ -384,5 +397,38 @@ describe('QuickInsertPopup', () => {
         });
 
         expect(documentArrowDownShortcut.preconditions()).toBe(true);
+    });
+
+    it('keeps the typed trigger intact when enter is pressed with no matching menu', async () => {
+        const { getCutContentParams, getSelectedMenu, injector, popupService } = createQuickInsertPopupTestBed({
+            dataStream: '/unknown\r\n',
+            inputOffset: { start: 0, end: 8 },
+        });
+        const commandService = injector.get(ICommandService);
+        const shortcutService = injector.get(IShortcutService);
+
+        await act(async () => {
+            root.render(
+                <RediContext.Provider value={{ injector }}>
+                    <QuickInsertPopup />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        expect(container.textContent).toContain('No result');
+        expect(container.textContent).not.toContain('Table');
+
+        const enterShortcut = shortcutService.getAllShortcuts().find((shortcut) => shortcut.binding === KeyCode.ENTER);
+        expect(enterShortcut).toBeDefined();
+
+        await act(async () => {
+            await commandService.executeCommand(enterShortcut!.id);
+            await new Promise((resolve) => setTimeout(resolve, 0));
+        });
+
+        expect(getSelectedMenu()).toBeUndefined();
+        expect(getCutContentParams()).toBeUndefined();
+        expect(popupService.editPopup).not.toBeNull();
     });
 });

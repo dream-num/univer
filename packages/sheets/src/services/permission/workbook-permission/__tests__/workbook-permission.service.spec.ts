@@ -14,48 +14,93 @@
  * limitations under the License.
  */
 
+import type { Workbook } from '@univerjs/core';
+import type { IRangeProtectionRule } from '../../../../models/range-protection-rule.model';
 import { Injector, IPermissionService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { UnitObject } from '@univerjs/protocol';
 import { Subject } from 'rxjs';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { RangeProtectionRuleModel } from '../../../../models/range-protection-rule.model';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { EditStateEnum, RangeProtectionRuleModel, ViewStateEnum } from '../../../../models/range-protection-rule.model';
 import { WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '../../worksheet-permission';
 import { WorkbookPermissionService } from '../workbook-permission.service';
 
+class TestPermissionService {
+    readonly addedPermissionIds: string[] = [];
+    readonly deletedPermissionIds: string[] = [];
+
+    addPermissionPoint(point: { id: string }) {
+        this.addedPermissionIds.push(point.id);
+        return true;
+    }
+
+    deletePermissionPoint(id: string) {
+        this.deletedPermissionIds.push(id);
+    }
+}
+
+class TestUniverInstanceService {
+    readonly sheetAdded$ = new Subject<{ unit: Workbook }>();
+    readonly sheetDisposed$ = new Subject<Workbook>();
+
+    getAllUnitsForType(): Workbook[] {
+        return [];
+    }
+
+    getTypeOfUnitAdded$(type: UniverInstanceType) {
+        return type === UniverInstanceType.UNIVER_SHEET ? this.sheetAdded$ : new Subject<{ unit: Workbook }>();
+    }
+
+    getTypeOfUnitDisposed$(type: UniverInstanceType) {
+        return type === UniverInstanceType.UNIVER_SHEET ? this.sheetDisposed$ : new Subject<Workbook>();
+    }
+}
+
 describe('WorkbookPermissionService', () => {
     let service: WorkbookPermissionService;
-    let addedPermissionIds: string[];
-    let sheetAdded$: Subject<unknown>;
-    let sheetDisposed$: Subject<unknown>;
+    let permissionService: TestPermissionService;
+    let univerInstanceService: TestUniverInstanceService;
+    let rangeRuleModel: RangeProtectionRuleModel;
+    let worksheetRuleModel: WorksheetProtectionRuleModel;
+    let worksheetPointModel: WorksheetProtectionPointModel;
+
+    const createWorkbook = (unitId = 'book-1') => ({
+        getUnitId: () => unitId,
+        getSheets: () => [{ getSheetId: () => 'sheet-1' }],
+    }) as unknown as Workbook;
+
+    const rangeRule: IRangeProtectionRule = {
+        id: 'range-rule-1',
+        permissionId: 'range-perm-1',
+        ranges: [{ startRow: 1, endRow: 2, startColumn: 1, endColumn: 2 }],
+        unitType: UnitObject.SelectRange,
+        unitId: 'book-1',
+        subUnitId: 'sheet-1',
+        viewState: ViewStateEnum.OthersCanView,
+        editState: EditStateEnum.OnlyMe,
+    };
 
     beforeEach(() => {
-        addedPermissionIds = [];
-        sheetAdded$ = new Subject();
-        sheetDisposed$ = new Subject();
         const injector = new Injector();
-        injector.add([IPermissionService, { useValue: {
-            addPermissionPoint: (point: { id: string }) => {
-                addedPermissionIds.push(point.id);
-                return true;
-            },
-            deletePermissionPoint: vi.fn(),
-        } as unknown as IPermissionService }]);
-        injector.add([IUniverInstanceService, { useValue: {
-            getAllUnitsForType: () => [],
-            getTypeOfUnitAdded$: (type: UniverInstanceType) => type === UniverInstanceType.UNIVER_SHEET ? sheetAdded$ : new Subject(),
-            getTypeOfUnitDisposed$: (type: UniverInstanceType) => type === UniverInstanceType.UNIVER_SHEET ? sheetDisposed$ : new Subject(),
-        } as unknown as IUniverInstanceService }]);
-        injector.add([RangeProtectionRuleModel, { useValue: { getSubunitRuleList: () => [], deleteUnitModel: vi.fn() } as unknown as RangeProtectionRuleModel }]);
-        injector.add([WorksheetProtectionRuleModel, { useValue: { deleteUnitModel: vi.fn() } as unknown as WorksheetProtectionRuleModel }]);
-        injector.add([WorksheetProtectionPointModel, { useValue: { deleteUnitModel: vi.fn() } as unknown as WorksheetProtectionPointModel }]);
+        injector.add([IPermissionService, { useClass: TestPermissionService as never }]);
+        injector.add([IUniverInstanceService, { useClass: TestUniverInstanceService as never }]);
+        injector.add([RangeProtectionRuleModel]);
+        injector.add([WorksheetProtectionRuleModel]);
+        injector.add([WorksheetProtectionPointModel]);
         injector.add([WorkbookPermissionService]);
+
+        permissionService = injector.get(IPermissionService) as unknown as TestPermissionService;
+        univerInstanceService = injector.get(IUniverInstanceService) as unknown as TestUniverInstanceService;
+        rangeRuleModel = injector.get(RangeProtectionRuleModel);
+        worksheetRuleModel = injector.get(WorksheetProtectionRuleModel);
+        worksheetPointModel = injector.get(WorksheetProtectionPointModel);
         service = injector.get(WorkbookPermissionService);
     });
 
     it('registers workbook permission points when a workbook is added', () => {
-        sheetAdded$.next({ unit: { getUnitId: () => 'book-1' } });
+        univerInstanceService.sheetAdded$.next({ unit: createWorkbook() });
 
-        expect(addedPermissionIds.length).toBeGreaterThan(0);
-        expect(addedPermissionIds.every((id) => id.includes('book-1'))).toBe(true);
+        expect(permissionService.addedPermissionIds.length).toBeGreaterThan(0);
+        expect(permissionService.addedPermissionIds.every((id) => id.includes('book-1'))).toBe(true);
     });
 
     it('publishes workbook permission initialization state changes', () => {
@@ -65,5 +110,27 @@ describe('WorkbookPermissionService', () => {
         service.changeUnitInitState(true);
 
         expect(states).toEqual([false, true]);
+    });
+
+    it('deletes workbook, worksheet, and range permission points when a workbook is disposed', () => {
+        rangeRuleModel.addRule('book-1', 'sheet-1', rangeRule);
+        worksheetRuleModel.addRule('book-1', {
+            permissionId: 'worksheet-rule-perm',
+            unitType: UnitObject.Worksheet,
+            unitId: 'book-1',
+            subUnitId: 'sheet-1',
+            viewState: ViewStateEnum.OthersCanView,
+            editState: EditStateEnum.OnlyMe,
+        });
+        worksheetPointModel.addRule({ unitId: 'book-1', subUnitId: 'sheet-1', permissionId: 'worksheet-point-perm' });
+
+        univerInstanceService.sheetDisposed$.next(createWorkbook());
+
+        expect(permissionService.deletedPermissionIds.some((id) => id.includes('range-perm-1'))).toBe(true);
+        expect(permissionService.deletedPermissionIds.some((id) => id.includes('sheet-1'))).toBe(true);
+        expect(permissionService.deletedPermissionIds.some((id) => id.includes('book-1'))).toBe(true);
+        expect(rangeRuleModel.getSubunitRuleList('book-1', 'sheet-1')).toEqual([]);
+        expect(worksheetRuleModel.getRule('book-1', 'sheet-1')).toBeUndefined();
+        expect(worksheetPointModel.getRule('book-1', 'sheet-1')).toBeUndefined();
     });
 });

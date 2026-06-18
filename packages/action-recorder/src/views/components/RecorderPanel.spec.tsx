@@ -268,4 +268,50 @@ describe('RecorderPanel', () => {
         expect(container.textContent).toBe('');
         expect(TestState.downloads).toHaveLength(0);
     });
+
+    it('completes an active recording from the panel cancel action using the stop command', async () => {
+        currentTestBed = createRecorderPanelTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        await renderRecorderPanel(root, currentTestBed.injector);
+
+        await act(async () => {
+            await currentTestBed!.commandService.executeCommand(OpenRecordPanelOperation.id);
+        });
+
+        await act(async () => {
+            getButton(container!, 'Start').dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        });
+
+        await act(async () => {
+            await currentTestBed!.commandService.executeCommand(APPLY_CELL_VALUE_COMMAND_ID, {
+                unitId: 'focused-workbook',
+                subUnitId: 'sheet-1',
+                value: 'cancelled',
+            });
+        });
+
+        expect(container.textContent).toContain(`1: ${APPLY_CELL_VALUE_COMMAND_ID}`);
+
+        await act(async () => {
+            getButton(container!, 'Cancel').dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        });
+
+        expect(currentTestBed.recorderService.recording).toBe(false);
+        expect(container.textContent).toContain('Start Recording');
+        expect(TestState.downloads).toHaveLength(1);
+        expect(JSON.parse(await TestState.downloads[0].data.text())).toEqual([
+            {
+                id: APPLY_CELL_VALUE_COMMAND_ID,
+                type: CommandType.COMMAND,
+                params: {
+                    unitId: 'focused-workbook',
+                    subUnitId: 'sheet-1',
+                    value: 'cancelled',
+                },
+            },
+        ]);
+    });
 });

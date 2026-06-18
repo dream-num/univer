@@ -17,12 +17,18 @@
 import type { DocumentDataModel, ICustomRange, IDocumentData } from '@univerjs/core';
 import {
     CustomRangeType,
+    ICommandService,
     IResourceManagerService,
     LocaleType,
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import {
+    AddHyperLinkMuatation,
+    DeleteHyperLinkMuatation,
+    UpdateHyperLinkMuatation,
+} from '../../commands/mutations/hyper-link.mutation';
 import { DOC_HYPER_LINK_PLUGIN, DocHyperLinkResourceController } from '../resource.controller';
 
 function createDocData(): IDocumentData {
@@ -106,6 +112,7 @@ function getRange(model: DocumentDataModel, rangeId: string, segment: 'body' | '
 
 describe('DocHyperLinkResourceController', () => {
     let univer: Univer;
+    let commandService: ICommandService;
     let resourceManagerService: IResourceManagerService;
 
     beforeEach(() => {
@@ -114,6 +121,11 @@ describe('DocHyperLinkResourceController', () => {
 
         injector.add([DocHyperLinkResourceController]);
         injector.get(DocHyperLinkResourceController);
+
+        commandService = injector.get(ICommandService);
+        commandService.registerCommand(AddHyperLinkMuatation);
+        commandService.registerCommand(UpdateHyperLinkMuatation);
+        commandService.registerCommand(DeleteHyperLinkMuatation);
 
         resourceManagerService = injector.get(IResourceManagerService);
     });
@@ -165,5 +177,11 @@ describe('DocHyperLinkResourceController', () => {
 
         expect(resource).toBeDefined();
         expect(resource?.data).toBe(JSON.stringify({ links: [] }));
+    });
+
+    it('should execute hyperlink resource mutations successfully', async () => {
+        await expect(commandService.executeCommand(AddHyperLinkMuatation.id)).resolves.toBe(true);
+        await expect(commandService.executeCommand(UpdateHyperLinkMuatation.id)).resolves.toBe(true);
+        await expect(commandService.executeCommand(DeleteHyperLinkMuatation.id)).resolves.toBe(true);
     });
 });

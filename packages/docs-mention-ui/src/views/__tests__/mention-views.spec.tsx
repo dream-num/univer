@@ -252,6 +252,7 @@ function createViewsTestBed() {
         selectionManager,
         mentionIOService: get(IMentionIOService) as TestMentionIOService,
         editorService: get(IEditorService) as unknown as TestEditorService,
+        popupManagerService: get(DocCanvasPopManagerService) as unknown as TestDocCanvasPopManagerService,
         popupService: get(DocMentionPopupService),
     };
 }
@@ -350,5 +351,27 @@ describe('mention views', () => {
         });
         expect(testBed.popupService.editPopup).toBeNull();
         expect(testBed.editorService.focusedUnitIds).toEqual([unitId, unitId]);
+    });
+
+    it('dismisses the edit popup from the empty list area without inserting a mention', async () => {
+        const testBed = createViewsTestBed();
+        univer = testBed.univer;
+        testBed.popupService.showEditPopup(unitId, 6);
+        const rendered = renderIntoDocument(<MentionEditPopup />, testBed.injector);
+        disposable = disposeRender(rendered.root, rendered.container);
+
+        const popupRoot = rendered.container.querySelector<HTMLElement>(`[data-editorid="${unitId}"]`);
+        expect(popupRoot).toBeDefined();
+
+        await act(async () => {
+            popupRoot!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            await Promise.resolve();
+        });
+
+        expect(testBed.doc.getBody()?.dataStream).toBe('Hello @al\r\n');
+        expect(testBed.doc.getBody()?.customRanges).toBeUndefined();
+        expect(testBed.popupService.editPopup).toBeNull();
+        expect(testBed.editorService.focusedUnitIds).toEqual([unitId]);
+        expect(testBed.popupManagerService.disposed).toHaveLength(1);
     });
 });

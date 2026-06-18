@@ -130,6 +130,119 @@ class PasteRecorderService {
     }
 }
 
+class TestSheetClipboardService {
+    readonly showMenu$ = new Subject<boolean>();
+    readonly pasteOptionsCache$ = new Subject<unknown>();
+
+    private _showMenu = false;
+    private _pasteOptionsCache: unknown = null;
+
+    setShowMenu(show: boolean): void {
+        this._showMenu = show;
+        this.showMenu$.next(show);
+    }
+
+    getPasteMenuVisible(): boolean {
+        return this._showMenu;
+    }
+
+    getPasteOptionsCache(): unknown {
+        return this._pasteOptionsCache;
+    }
+
+    updatePasteOptionsCache(cache: unknown): void {
+        this._pasteOptionsCache = cache;
+        this.pasteOptionsCache$.next(cache);
+    }
+
+    disposePasteOptionsCache(): void {
+        this.updatePasteOptionsCache(null);
+    }
+
+    generateCopyContent(): { html: string; plain: string } {
+        return { html: '<b>a</b>', plain: 'a' };
+    }
+
+    copy(): Promise<boolean> {
+        return Promise.resolve(true);
+    }
+
+    cut(): Promise<boolean> {
+        return Promise.resolve(true);
+    }
+
+    paste(): Promise<boolean> {
+        return Promise.resolve(true);
+    }
+
+    pasteByCopyId(): Promise<boolean> {
+        return Promise.resolve(true);
+    }
+
+    legacyPaste(): Promise<boolean> {
+        return Promise.resolve(true);
+    }
+
+    rePasteWithPasteType(): boolean {
+        return true;
+    }
+
+    copyContentCache(): never {
+        throw new Error('copyContentCache is not used in this facade spec.');
+    }
+
+    addClipboardHook(): never {
+        throw new Error('addClipboardHook is not used in this facade spec.');
+    }
+
+    getClipboardHooks(): never {
+        throw new Error('getClipboardHooks is not used in this facade spec.');
+    }
+
+    removeMarkSelection(): void { }
+}
+
+class TestClipboardInterfaceService {
+    readonly supportClipboard = true;
+
+    writeText(): Promise<void> {
+        return Promise.resolve();
+    }
+
+    write(): Promise<void> {
+        return Promise.resolve();
+    }
+
+    readText(): Promise<string> {
+        return Promise.resolve('');
+    }
+
+    read(): Promise<ClipboardItem[]> {
+        return Promise.resolve([]);
+    }
+}
+
+class TestHoverManagerService {
+    readonly currentClickedCell$ = new Subject<ITestHoverCell>();
+    readonly currentRichText$ = new Subject<ITestHoverCell['location']>();
+    readonly currentPointerDownCell$ = new Subject<ITestHoverCell['location']>();
+    readonly currentPointerUpCell$ = new Subject<ITestHoverCell['location']>();
+    readonly currentCellPosWithEvent$ = new Subject<ITestHoverCell['location']>();
+    readonly currentRowHeaderClick$ = new Subject<ITestHeaderEvent>();
+    readonly currentRowHeaderPointerDown$ = new Subject<ITestHeaderEvent>();
+    readonly currentRowHeaderPointerUp$ = new Subject<ITestHeaderEvent>();
+    readonly currentHoveredRowHeader$ = new Subject<ITestHeaderEvent>();
+    readonly currentColHeaderClick$ = new Subject<ITestHeaderEvent>();
+    readonly currentColHeaderPointerDown$ = new Subject<ITestHeaderEvent>();
+    readonly currentColHeaderPointerUp$ = new Subject<ITestHeaderEvent>();
+    readonly currentHoveredColHeader$ = new Subject<ITestHeaderEvent>();
+}
+
+class TestDragManagerService {
+    readonly currentCell$ = new Subject<ITestDragCell>();
+    readonly endCell$ = new Subject<ITestDragCell>();
+}
+
 const TestPasteCommand: ICommand<ISheetPasteByShortKeyParams> = {
     id: SheetPasteShortKeyCommand.id,
     type: CommandType.COMMAND,
@@ -165,20 +278,6 @@ const TestZoomCommand: ICommand<{ unitId: string; subUnitId: string; zoomRatio: 
 };
 
 describe('Test FUniver UI mixin', () => {
-    const clipboardService = {
-        generateCopyContent: vi.fn(() => ({ html: '<b>a</b>', plain: 'a' })),
-    };
-
-    const renderPermissionService = {
-        setProtectedRangeShadowStrategy: vi.fn(),
-        getProtectedRangeShadowStrategy: vi.fn(() => 'always' as const),
-        getProtectedRangeShadowStrategy$: vi.fn(() => ({ subscribe: vi.fn() })),
-    };
-
-    const clipboardInterfaceService = {
-        read: vi.fn(async () => []),
-    };
-
     beforeEach(() => {
         vi.clearAllMocks();
     });
@@ -400,9 +499,9 @@ describe('Test FUniver UI mixin', () => {
 
     it('should handle common facade methods and clipboard internals', async () => {
         const testBed = createFacadeTestBed(undefined, [
-            [ISheetClipboardService, { useValue: clipboardService }],
-            [SheetPermissionRenderManagerService, { useValue: renderPermissionService }],
-            [IClipboardInterfaceService, { useValue: clipboardInterfaceService }],
+            [ISheetClipboardService, { useClass: TestSheetClipboardService as never }],
+            [SheetPermissionRenderManagerService],
+            [IClipboardInterfaceService, { useClass: TestClipboardInterfaceService }],
             [IEditorBridgeService, { useClass: EditorBridgeService }],
             [IEditorService, { useClass: EditorService }],
             [DocSelectionManagerService],
@@ -430,14 +529,19 @@ describe('Test FUniver UI mixin', () => {
         });
 
         testBed.univerAPI.setProtectedRangeShadowStrategy('none');
-        expect(renderPermissionService.setProtectedRangeShadowStrategy).toHaveBeenCalledWith('none');
-        expect(testBed.univerAPI.getProtectedRangeShadowStrategy()).toBe('always');
-        expect(testBed.univerAPI.getProtectedRangeShadowStrategy$()).toBeTruthy();
+        expect(testBed.get(SheetPermissionRenderManagerService).getProtectedRangeShadowStrategy()).toBe('none');
+        expect(testBed.univerAPI.getProtectedRangeShadowStrategy()).toBe('none');
+        const strategies: string[] = [];
+        const subscription = testBed.univerAPI.getProtectedRangeShadowStrategy$().subscribe((strategy) => {
+            strategies.push(strategy);
+        });
+        testBed.univerAPI.setProtectedRangeShadowStrategy('non-editable');
+        expect(strategies).toEqual(['none', 'non-editable']);
+        subscription.unsubscribe();
 
         const permissionService = testBed.get(IPermissionService);
-        const setShowComponentsSpy = vi.spyOn(permissionService, 'setShowComponents');
         testBed.univerAPI.setPermissionDialogVisible(false);
-        expect(setShowComponentsSpy).toHaveBeenCalledWith(false);
+        expect(permissionService.getShowComponents()).toBe(false);
 
         const copyParams = univerAPI._generateClipboardCopyParam();
         expect(copyParams?.text).toBe('a');
@@ -524,46 +628,9 @@ describe('Test FUniver UI mixin', () => {
     });
 
     it('should bridge render-layer hover and drag events', () => {
-        const currentClickedCell$ = new Subject<ITestHoverCell>();
-        const currentRichText$ = new Subject<ITestHoverCell['location']>();
-        const currentPointerDownCell$ = new Subject<ITestHoverCell['location']>();
-        const currentPointerUpCell$ = new Subject<ITestHoverCell['location']>();
-        const currentCellPosWithEvent$ = new Subject<ITestHoverCell['location']>();
-        const currentRowHeaderClick$ = new Subject<ITestHeaderEvent>();
-        const currentRowHeaderPointerDown$ = new Subject<ITestHeaderEvent>();
-        const currentRowHeaderPointerUp$ = new Subject<ITestHeaderEvent>();
-        const currentHoveredRowHeader$ = new Subject<ITestHeaderEvent>();
-        const currentColHeaderClick$ = new Subject<ITestHeaderEvent>();
-        const currentColHeaderPointerDown$ = new Subject<ITestHeaderEvent>();
-        const currentColHeaderPointerUp$ = new Subject<ITestHeaderEvent>();
-        const currentHoveredColHeader$ = new Subject<ITestHeaderEvent>();
-        const currentDragCell$ = new Subject<ITestDragCell>();
-        const endDragCell$ = new Subject<ITestDragCell>();
-
-        const hoverManagerService = {
-            currentClickedCell$,
-            currentRichText$,
-            currentPointerDownCell$,
-            currentPointerUpCell$,
-            currentCellPosWithEvent$,
-            currentRowHeaderClick$,
-            currentRowHeaderPointerDown$,
-            currentRowHeaderPointerUp$,
-            currentHoveredRowHeader$,
-            currentColHeaderClick$,
-            currentColHeaderPointerDown$,
-            currentColHeaderPointerUp$,
-            currentHoveredColHeader$,
-        };
-
-        const dragManagerService = {
-            currentCell$: currentDragCell$,
-            endCell$: endDragCell$,
-        };
-
         const testBed = createFacadeTestBed(undefined, [
-            [HoverManagerService, { useValue: hoverManagerService }],
-            [DragManagerService, { useValue: dragManagerService }],
+            [HoverManagerService, { useClass: TestHoverManagerService as never }],
+            [DragManagerService, { useClass: TestDragManagerService as never }],
             [IEditorBridgeService, { useClass: EditorBridgeService }],
             [IEditorService, { useClass: EditorService }],
             [DocSelectionManagerService],
@@ -574,6 +641,8 @@ describe('Test FUniver UI mixin', () => {
 
         const workbook = testBed.univerAPI.getActiveWorkbook()!;
         const worksheet = workbook.getActiveSheet()!;
+        const hoverManagerService = testBed.get(HoverManagerService) as unknown as TestHoverManagerService;
+        const dragManagerService = testBed.get(DragManagerService) as unknown as TestDragManagerService;
         const logs: string[] = [];
         const disposables = [
             testBed.univerAPI.addEvent(testBed.univerAPI.Event.CellClicked, ({ row, column }) => logs.push(`cell:${row},${column}`)),
@@ -596,28 +665,28 @@ describe('Test FUniver UI mixin', () => {
         const lifecycleService = testBed.get(LifecycleService);
         lifecycleService.stage = LifecycleStages.Rendered;
 
-        currentClickedCell$.next({
+        hoverManagerService.currentClickedCell$.next({
             location: { unitId: workbook.getId(), subUnitId: worksheet.getSheetId(), row: 1, col: 2 },
             position: { startX: 0, startY: 0, endX: 10, endY: 10 },
         });
-        currentRichText$.next({ unitId: workbook.getId(), subUnitId: worksheet.getSheetId(), row: 2, col: 3 });
-        currentPointerDownCell$.next({ unitId: workbook.getId(), subUnitId: worksheet.getSheetId(), row: 3, col: 4 });
-        currentPointerUpCell$.next({ unitId: workbook.getId(), subUnitId: worksheet.getSheetId(), row: 4, col: 5 });
-        currentCellPosWithEvent$.next({ unitId: workbook.getId(), subUnitId: worksheet.getSheetId(), row: 5, col: 6 });
-        currentRowHeaderClick$.next({ unitId: workbook.getId(), subUnitId: worksheet.getSheetId(), index: 3 });
-        currentRowHeaderPointerDown$.next({ unitId: workbook.getId(), subUnitId: worksheet.getSheetId(), index: 4 });
-        currentRowHeaderPointerUp$.next({ unitId: workbook.getId(), subUnitId: worksheet.getSheetId(), index: 6 });
-        currentHoveredRowHeader$.next({ unitId: workbook.getId(), subUnitId: worksheet.getSheetId(), index: 5 });
-        currentColHeaderClick$.next({ unitId: workbook.getId(), subUnitId: worksheet.getSheetId(), index: 4 });
-        currentColHeaderPointerDown$.next({ unitId: workbook.getId(), subUnitId: worksheet.getSheetId(), index: 6 });
-        currentColHeaderPointerUp$.next({ unitId: workbook.getId(), subUnitId: worksheet.getSheetId(), index: 7 });
-        currentHoveredColHeader$.next({ unitId: workbook.getId(), subUnitId: worksheet.getSheetId(), index: 8 });
-        currentDragCell$.next({
+        hoverManagerService.currentRichText$.next({ unitId: workbook.getId(), subUnitId: worksheet.getSheetId(), row: 2, col: 3 });
+        hoverManagerService.currentPointerDownCell$.next({ unitId: workbook.getId(), subUnitId: worksheet.getSheetId(), row: 3, col: 4 });
+        hoverManagerService.currentPointerUpCell$.next({ unitId: workbook.getId(), subUnitId: worksheet.getSheetId(), row: 4, col: 5 });
+        hoverManagerService.currentCellPosWithEvent$.next({ unitId: workbook.getId(), subUnitId: worksheet.getSheetId(), row: 5, col: 6 });
+        hoverManagerService.currentRowHeaderClick$.next({ unitId: workbook.getId(), subUnitId: worksheet.getSheetId(), index: 3 });
+        hoverManagerService.currentRowHeaderPointerDown$.next({ unitId: workbook.getId(), subUnitId: worksheet.getSheetId(), index: 4 });
+        hoverManagerService.currentRowHeaderPointerUp$.next({ unitId: workbook.getId(), subUnitId: worksheet.getSheetId(), index: 6 });
+        hoverManagerService.currentHoveredRowHeader$.next({ unitId: workbook.getId(), subUnitId: worksheet.getSheetId(), index: 5 });
+        hoverManagerService.currentColHeaderClick$.next({ unitId: workbook.getId(), subUnitId: worksheet.getSheetId(), index: 4 });
+        hoverManagerService.currentColHeaderPointerDown$.next({ unitId: workbook.getId(), subUnitId: worksheet.getSheetId(), index: 6 });
+        hoverManagerService.currentColHeaderPointerUp$.next({ unitId: workbook.getId(), subUnitId: worksheet.getSheetId(), index: 7 });
+        hoverManagerService.currentHoveredColHeader$.next({ unitId: workbook.getId(), subUnitId: worksheet.getSheetId(), index: 8 });
+        dragManagerService.currentCell$.next({
             location: { unitId: workbook.getId(), subUnitId: worksheet.getSheetId(), row: 3, col: 4 },
             position: { startX: 0, startY: 0, endX: 10, endY: 10 },
             dataTransfer: {} as DataTransfer,
         });
-        endDragCell$.next({
+        dragManagerService.endCell$.next({
             location: { unitId: workbook.getId(), subUnitId: worksheet.getSheetId(), row: 7, col: 8 },
             position: { startX: 0, startY: 0, endX: 10, endY: 10 },
             dataTransfer: {} as DataTransfer,

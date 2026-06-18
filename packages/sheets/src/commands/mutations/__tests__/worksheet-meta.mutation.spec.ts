@@ -15,7 +15,7 @@
  */
 
 import type { IAccessor } from '@univerjs/core';
-import { IUniverInstanceService } from '@univerjs/core';
+import { BooleanNumber, IUniverInstanceService } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import {
     SetGridlinesColorMutation,
@@ -23,6 +23,14 @@ import {
 } from '../set-gridlines-color.mutation';
 import { SetWorksheetHideMutation, SetWorksheetHideMutationFactory } from '../set-worksheet-hide.mutation';
 import { SetWorksheetNameMutation, SetWorksheetNameMutationFactory } from '../set-worksheet-name.mutation';
+import {
+    SetWorksheetRowAutoHeightMutation,
+    SetWorksheetRowAutoHeightMutationFactory,
+    SetWorksheetRowHeightMutation,
+    SetWorksheetRowHeightMutationFactory,
+    SetWorksheetRowIsAutoHeightMutation,
+    SetWorksheetRowIsAutoHeightMutationFactory,
+} from '../set-worksheet-row-height.mutation';
 
 function createAccessor(instanceService: unknown): IAccessor {
     return {
@@ -243,5 +251,76 @@ describe('worksheet meta mutations', () => {
                 name: 'new-name',
             })
         ).toThrowError('[SetWorksheetNameMutationFactory]: worksheet is null error!');
+    });
+
+    it('row height mutations should update height, auto-height flag, and measured auto height', () => {
+        const rows: Record<number, { h?: number; ia?: BooleanNumber; ah?: number }> = {
+            1: { h: 24, ia: BooleanNumber.TRUE, ah: 28 },
+            2: {},
+        };
+        const manager = {
+            getRow: (row: number) => rows[row],
+            getRowOrCreate: (row: number) => {
+                rows[row] ??= {};
+                return rows[row];
+            },
+            setRowHeight: (row: number, height: number) => {
+                rows[row] ??= {};
+                rows[row].h = height;
+            },
+        };
+        const worksheet = {
+            getSheetId: () => 'sheet-1',
+            getConfig: () => ({ defaultRowHeight: 19 }),
+            getRowManager: () => manager,
+        };
+        const workbook = {
+            getUnitId: () => 'unit-1',
+            getSheetBySheetId: vi.fn((subUnitId: string) => subUnitId === 'sheet-1' ? worksheet : null),
+        };
+        const accessor = createAccessor({
+            getUnit: vi.fn((unitId: string) => unitId === 'unit-1' ? workbook : null),
+            getCurrentUnitOfType: vi.fn(() => workbook),
+        });
+        const ranges = [{ startRow: 1, endRow: 2, startColumn: 0, endColumn: 3 }];
+
+        expect(SetWorksheetRowHeightMutationFactory({ unitId: 'unit-1', subUnitId: 'sheet-1', ranges, rowHeight: 40 }, worksheet as never)).toEqual({
+            unitId: 'unit-1',
+            subUnitId: 'sheet-1',
+            ranges,
+            rowHeight: { 1: 24, 2: 19 },
+        });
+        expect(SetWorksheetRowHeightMutation.handler(accessor, { unitId: 'unit-1', subUnitId: 'sheet-1', ranges, rowHeight: { 1: 31, 2: null } })).toBe(true);
+        expect(rows[1].h).toBe(31);
+        expect(rows[2].h).toBeUndefined();
+        expect(SetWorksheetRowHeightMutation.handler(accessor, { unitId: 'unit-1', subUnitId: 'sheet-1', ranges, rowHeight: 33 })).toBe(true);
+        expect(rows[1].h).toBe(33);
+        expect(rows[2].h).toBe(33);
+
+        expect(SetWorksheetRowIsAutoHeightMutationFactory({ unitId: 'unit-1', subUnitId: 'sheet-1', ranges, autoHeightInfo: BooleanNumber.FALSE }, worksheet as never)).toEqual({
+            unitId: 'unit-1',
+            subUnitId: 'sheet-1',
+            ranges,
+            autoHeightInfo: { 1: BooleanNumber.TRUE, 2: undefined },
+        });
+        expect(SetWorksheetRowIsAutoHeightMutation.handler(accessor, { unitId: 'unit-1', subUnitId: 'sheet-1', ranges, autoHeightInfo: { 1: BooleanNumber.FALSE, 2: null } })).toBe(true);
+        expect(rows[1].ia).toBe(BooleanNumber.FALSE);
+        expect(rows[2].ia).toBeUndefined();
+        expect(SetWorksheetRowIsAutoHeightMutation.handler(accessor, { unitId: 'unit-1', subUnitId: 'sheet-1', ranges, autoHeightInfo: BooleanNumber.TRUE })).toBe(true);
+        expect(rows[1].ia).toBe(BooleanNumber.TRUE);
+        expect(rows[2].ia).toBe(BooleanNumber.TRUE);
+
+        expect(SetWorksheetRowAutoHeightMutationFactory({ unitId: 'unit-1', subUnitId: 'sheet-1', rowsAutoHeightInfo: [{ row: 1, autoHeight: 50 }, { row: 2, autoHeight: 60 }] }, worksheet as never)).toEqual({
+            unitId: 'unit-1',
+            subUnitId: 'sheet-1',
+            rowsAutoHeightInfo: [{ row: 1, autoHeight: 28 }, { row: 2, autoHeight: 19 }],
+        });
+        expect(SetWorksheetRowAutoHeightMutation.handler(accessor, { unitId: 'unit-1', subUnitId: 'sheet-1', rowsAutoHeightInfo: [{ row: 1, autoHeight: 51 }, { row: 3, autoHeight: 61 }] })).toBe(true);
+        expect(rows[1].ah).toBe(51);
+        expect(rows[3].ah).toBe(61);
+
+        expect(SetWorksheetRowHeightMutation.handler(createAccessor({ getUnit: vi.fn(() => null) }), { unitId: 'missing', subUnitId: 'sheet-1', ranges, rowHeight: 20 })).toBe(false);
+        expect(SetWorksheetRowIsAutoHeightMutation.handler(createAccessor({ getUnit: vi.fn(() => null) }), { unitId: 'missing', subUnitId: 'sheet-1', ranges, autoHeightInfo: BooleanNumber.TRUE })).toBe(false);
+        expect(SetWorksheetRowAutoHeightMutation.handler(createAccessor({ getUnit: vi.fn(() => null) }), { unitId: 'missing', subUnitId: 'sheet-1', rowsAutoHeightInfo: [] })).toBe(false);
     });
 });

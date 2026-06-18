@@ -42,22 +42,22 @@ describe('Test insert function operation', () => {
     let commandService: ICommandService;
     let editorService: IEditorService;
 
-    beforeEach(() => {
-        const fakeEditorService = {
-            getEditor: vi.fn(() => null),
-            register: vi.fn(),
-            getAllEditor: vi.fn(() => new Map()),
-            isEditor: vi.fn(() => false),
-            isSheetEditor: vi.fn(() => false),
-            blur$: { subscribe: vi.fn() },
-            blur: vi.fn(),
-            focus$: { subscribe: vi.fn() },
-            focus: vi.fn(),
-            getFocusId: vi.fn(() => null),
-            getFocusEditor: vi.fn(() => null),
-        } as unknown as IEditorService;
+    class TestEditorService {
+        getEditor = vi.fn(() => null);
+        register = vi.fn();
+        getAllEditor = vi.fn(() => new Map());
+        isEditor = vi.fn(() => false);
+        isSheetEditor = vi.fn(() => false);
+        blur$ = { subscribe: vi.fn() };
+        blur = vi.fn();
+        focus$ = { subscribe: vi.fn() };
+        focus = vi.fn();
+        getFocusId = vi.fn(() => null);
+        getFocusEditor = vi.fn(() => null);
+    }
 
-        const testBed = createCommandTestBed(undefined, [[IEditorServiceToken, { useValue: fakeEditorService }]]);
+    beforeEach(() => {
+        const testBed = createCommandTestBed(undefined, [[IEditorServiceToken, { useClass: TestEditorService as never }]]);
         univer = testBed.univer;
         get = testBed.get;
         editorService = get(IEditorServiceToken);

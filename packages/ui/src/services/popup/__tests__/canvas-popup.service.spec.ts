@@ -44,6 +44,46 @@ describe('CanvasPopupService', () => {
         expect(service.activePopupId).toBeNull();
     });
 
+    it('keeps the active popup when another popup is deactivated', () => {
+        const firstPopupId = service.addPopup({
+            unitId: 'book-1',
+            subUnitId: 'sheet-1',
+            componentKey: 'first-comment',
+            anchorRect$: new BehaviorSubject({ left: 0, top: 0, right: 10, bottom: 10 }),
+            canvasElement: {} as HTMLCanvasElement,
+        });
+        service.addPopup({
+            unitId: 'book-1',
+            subUnitId: 'sheet-1',
+            componentKey: 'second-comment',
+            anchorRect$: new BehaviorSubject({ left: 20, top: 20, right: 30, bottom: 30 }),
+            canvasElement: {} as HTMLCanvasElement,
+        });
+
+        service.popups[0][1].onActiveChange?.(true);
+        service.popups[1][1].onActiveChange?.(false);
+
+        expect(service.activePopupId).toBe(firstPopupId);
+    });
+
+    it('clears all popups for canvas teardown', () => {
+        const sizes: number[] = [];
+        const sub = service.popups$.subscribe((popups) => sizes.push(popups.length));
+        service.addPopup({
+            unitId: 'book-1',
+            subUnitId: 'sheet-1',
+            componentKey: 'cell-comment',
+            anchorRect$: new BehaviorSubject({ left: 0, top: 0, right: 10, bottom: 10 }),
+            canvasElement: {} as HTMLCanvasElement,
+        });
+
+        service.removeAll();
+
+        expect(service.popups).toEqual([]);
+        expect(sizes).toEqual([0, 1, 0]);
+        sub.unsubscribe();
+    });
+
     it('notifies renderers when popup entries are added or removed', () => {
         const sizes: number[] = [];
         service.popups$.subscribe((popups) => sizes.push(popups.length));

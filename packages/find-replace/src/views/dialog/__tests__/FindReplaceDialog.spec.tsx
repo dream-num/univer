@@ -488,6 +488,36 @@ describe('FindReplaceDialog', () => {
         expect(readState(testBed.findReplaceService)).toMatchObject({ matchesCount: 1, matchesPosition: 1 });
         expect(readCurrentMatch(testBed.findReplaceService)?.range).toEqual({ id: 'A3' });
     });
+
+    it('warns and keeps replace actions disabled when a replace dialog search has no results', async () => {
+        const testBed = createDialogTestBed();
+        await act(async () => {
+            testBed.commandService.syncExecuteCommand(OpenReplaceDialogOperation.id);
+        });
+
+        const rendered = renderDialog(testBed.univer.__getInjector());
+        root = rendered.root;
+        container = rendered.container;
+
+        await act(async () => {
+            const inputs = getInputs(container!);
+            setInputValue(inputs[0], 'kiwi');
+            setInputValue(inputs[1], 'orange');
+            getButton(container!, FIND_LABEL).dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        });
+        await flushSearch();
+
+        expect(testBed.provider.queries.at(-1)).toMatchObject({
+            findString: 'kiwi',
+            replaceRevealed: true,
+        });
+        expect(readState(testBed.findReplaceService)).toMatchObject({ matchesCount: 0, matchesPosition: 0 });
+        expect(readCurrentMatch(testBed.findReplaceService)).toBeNull();
+        expect((testBed.get(IMessageService) as TestMessageService).messages.at(-1)?.content).toBe('find-replace.dialog.no-match');
+        expect(getButton(container!, REPLACE_LABEL).disabled).toBe(true);
+        expect(getButton(container!, REPLACE_ALL_LABEL).disabled).toBe(true);
+        expect(testBed.provider.rows.map((row) => row.text)).toEqual(INITIAL_ROWS.map((row) => row.text));
+    });
 });
 
 function readState(findReplaceService: IFindReplaceService): IFindReplaceState {

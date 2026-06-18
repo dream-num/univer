@@ -17,6 +17,7 @@
 import type { IMultiCommand } from '../command.service';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Injector } from '../../../common/di';
+import { CustomCommandExecutionError } from '../../../common/error';
 import { ConfigService, IConfigService } from '../../config/config.service';
 import { ContextService, IContextService } from '../../context/context.service';
 import { DesktopLogService, ILogService } from '../../log/log.service';
@@ -135,6 +136,14 @@ describe('Test CommandService', () => {
     });
 
     describe('Test registering command', () => {
+        it('Should report command registration state and execute the built-in nil command', () => {
+            expect(commandService.hasCommand('nil')).toBe(true);
+            expect(commandService.syncExecuteCommand('nil')).toBe(true);
+
+            commandService.unregisterCommand('nil');
+            expect(commandService.hasCommand('nil')).toBe(false);
+        });
+
         it('Should throw error when registering a command with the same id', () => {
             expect(() => {
                 commandService.registerCommand({
@@ -256,6 +265,89 @@ describe('Test CommandService', () => {
                 `command "${pushValCommandID}" skipped because CommandService is disposed.`
             );
         });
+
+        it('Should notify collaboration listeners for mutations and skip regular listeners for sync-only mutations', async () => {
+            const mutationID = 'mutation-for-collab-listener';
+            const regular = vi.fn();
+            const collab = vi.fn();
+            const regularDisposable = commandService.onCommandExecuted(regular);
+            const collabDisposable = commandService.onMutationExecutedForCollab(collab);
+
+            expect(() => commandService.onMutationExecutedForCollab(collab)).toThrow(
+                '[CommandService]: could not add a collab mutation listener twice.'
+            );
+
+            commandService.registerCommand({
+                id: mutationID,
+                type: CommandType.MUTATION,
+                handler: () => true,
+            });
+
+            await expect(commandService.executeCommand(mutationID, {}, { onlyLocal: true })).resolves.toBe(true);
+            expect(regular).toHaveBeenCalledTimes(1);
+            expect(collab).toHaveBeenCalledTimes(1);
+            expect(collab).toHaveBeenLastCalledWith(
+                { id: mutationID, type: CommandType.MUTATION, params: {} },
+                { onlyLocal: true }
+            );
+
+            regular.mockClear();
+            collab.mockClear();
+            await expect(commandService.executeCommand(mutationID, {}, { syncOnly: true })).resolves.toBe(true);
+            expect(regular).not.toHaveBeenCalled();
+            expect(collab).toHaveBeenCalledTimes(1);
+
+            regular.mockClear();
+            collab.mockClear();
+            expect(commandService.syncExecuteCommand(mutationID, {}, { syncOnly: true })).toBe(true);
+            expect(regular).not.toHaveBeenCalled();
+            expect(collab).toHaveBeenCalledTimes(1);
+
+            regularDisposable.dispose();
+            collabDisposable.dispose();
+            regular.mockClear();
+            collab.mockClear();
+            commandService.syncExecuteCommand(mutationID);
+            expect(regular).not.toHaveBeenCalled();
+            expect(collab).not.toHaveBeenCalled();
+        });
+
+        it('Should attach the triggering command id to nested synchronous mutations', () => {
+            const mutationID = 'nested-trigger-mutation';
+            const commandID = 'nested-trigger-command';
+            const params: { trigger?: string } = {};
+
+            commandService.registerCommand({
+                id: mutationID,
+                type: CommandType.MUTATION,
+                handler: (_accessor, mutationParams: { trigger?: string }) => {
+                    expect(mutationParams.trigger).toBe(commandID);
+                    return true;
+                },
+            });
+            commandService.registerCommand({
+                id: commandID,
+                type: CommandType.COMMAND,
+                handler: (accessor) => accessor.get(ICommandService).syncExecuteCommand(mutationID, params),
+            });
+
+            expect(commandService.syncExecuteCommand(commandID)).toBe(true);
+            expect(params.trigger).toBe(commandID);
+        });
+
+        it('Should convert custom command execution errors into a false result', async () => {
+            const customErrorCommandID = 'custom-error-command';
+            commandService.registerCommand({
+                id: customErrorCommandID,
+                type: CommandType.COMMAND,
+                handler: () => {
+                    throw new CustomCommandExecutionError('canceled by test');
+                },
+            });
+
+            await expect(commandService.executeCommand(customErrorCommandID)).resolves.toBe(false);
+            expect(commandService.syncExecuteCommand(customErrorCommandID)).toBe(false);
+        });
     });
 
     describe('Test MultiCommand', () => {
@@ -306,6 +398,54 @@ describe('Test CommandService', () => {
             await expect(commandService.executeCommand(commandID)).rejects.toThrow(
                 `[CommandService]: command "${commandID}" is not registered.`
             );
+        });
+
+        it('Should reject mixing single commands with multi command implementations', () => {
+            commandService.registerCommand({
+                id: anotherCommandID,
+                type: CommandType.COMMAND,
+                handler: () => true,
+            });
+
+            expect(() => commandService.registerMultipleCommand({
+                id: anotherCommandID,
+                type: CommandType.COMMAND,
+                name: 'multi',
+                multi: true,
+                priority: 1,
+                handler: () => true,
+            } as IMultiCommand)).toThrow('Command has registered as a single command.');
+        });
+
+        it('Should continue to lower priority implementations when a multi command returns false', async () => {
+            const commandID = 'fallback-multi-command';
+            const calls: string[] = [];
+
+            commandService.registerMultipleCommand({
+                id: commandID,
+                type: CommandType.COMMAND,
+                name: 'first',
+                multi: true,
+                priority: 10,
+                handler: () => {
+                    calls.push('first');
+                    return false;
+                },
+            } as IMultiCommand);
+            commandService.registerMultipleCommand({
+                id: commandID,
+                type: CommandType.COMMAND,
+                name: 'second',
+                multi: true,
+                priority: 1,
+                handler: () => {
+                    calls.push('second');
+                    return true;
+                },
+            } as IMultiCommand);
+
+            await expect(commandService.executeCommand(commandID)).resolves.toBe(true);
+            expect(calls).toEqual(['first', 'second']);
         });
     });
 });

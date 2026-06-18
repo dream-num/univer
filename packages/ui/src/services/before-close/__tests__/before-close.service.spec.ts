@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { IDisposable } from '@univerjs/core';
+import type { INotificationOptions } from '../../../views/notification/Notification';
 import { Injector } from '@univerjs/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DesktopNotificationService } from '../../notification/desktop-notification.service';
@@ -21,10 +23,19 @@ import { INotificationService } from '../../notification/notification.service';
 import { BuiltInUIPart, IUIPartsService, UIPartsService } from '../../parts/parts.service';
 import { DesktopBeforeCloseService, IBeforeCloseService } from '../before-close.service';
 
+class FakeNotificationService extends DesktopNotificationService {
+    static notifications: INotificationOptions[] = [];
+
+    override show(params: INotificationOptions): IDisposable {
+        FakeNotificationService.notifications.push(params);
+        return { dispose: () => {} };
+    }
+}
+
 function createService(): IBeforeCloseService {
     const injector = new Injector();
     injector.add([IUIPartsService, { useClass: UIPartsService }]);
-    injector.add([INotificationService, { useClass: DesktopNotificationService }]);
+    injector.add([INotificationService, { useClass: FakeNotificationService }]);
     injector.add([IBeforeCloseService, { useClass: DesktopBeforeCloseService }]);
     return injector.get(IBeforeCloseService);
 }
@@ -32,6 +43,31 @@ function createService(): IBeforeCloseService {
 describe('DesktopBeforeCloseService', () => {
     afterEach(() => {
         vi.unstubAllGlobals();
+        FakeNotificationService.notifications = [];
+    });
+
+    it('blocks unload with combined messages and clears handlers on dispose', () => {
+        const windowTarget = new EventTarget();
+        vi.stubGlobal('window', windowTarget);
+        const service = createService();
+        service.registerBeforeClose(() => 'Unsaved sheet');
+        const disposable = service.registerBeforeClose(() => 'Pending upload');
+
+        const event = new Event('beforeunload') as BeforeUnloadEvent;
+        windowTarget.dispatchEvent(event);
+
+        expect(event.returnValue).toBe('Unsaved sheet\nPending upload');
+        expect(FakeNotificationService.notifications).toEqual([{
+            type: 'error',
+            title: 'Some changes are not saved',
+            content: 'Unsaved sheet\nPending upload',
+        }]);
+
+        disposable.dispose();
+        (service as DesktopBeforeCloseService).dispose();
+        const nextEvent = new Event('beforeunload') as BeforeUnloadEvent;
+        windowTarget.dispatchEvent(nextEvent);
+        expect(nextEvent.returnValue).toBeUndefined();
     });
 
     it('runs close callbacks when the page unloads and stops after disposal', () => {
@@ -53,7 +89,7 @@ describe('DesktopBeforeCloseService', () => {
         vi.stubGlobal('window', windowTarget);
         const injector = new Injector();
         injector.add([IUIPartsService, { useClass: UIPartsService }]);
-        injector.add([INotificationService, { useClass: DesktopNotificationService }]);
+        injector.add([INotificationService, { useClass: FakeNotificationService }]);
         injector.add([IBeforeCloseService, { useClass: DesktopBeforeCloseService }]);
 
         injector.get(IBeforeCloseService);

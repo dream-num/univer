@@ -14,48 +14,79 @@
  * limitations under the License.
  */
 
-import { IContextService, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { ContextService, IContextService, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { Subject } from 'rxjs';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { SlideRenderService } from '../slide-render.service';
 
+function createSlide(unitId: string) {
+    return {
+        getUnitId: () => unitId,
+    };
+}
+
+class TestUniverInstanceService {
+    readonly slideAdded$ = new Subject<{ unit: ReturnType<typeof createSlide> }>();
+    readonly slideDisposed$ = new Subject<ReturnType<typeof createSlide>>();
+    private readonly _initialSlides = [createSlide('existing-slide')];
+
+    getTypeOfUnitAdded$(type: UniverInstanceType) {
+        return type === UniverInstanceType.UNIVER_SLIDE ? this.slideAdded$.asObservable() : new Subject().asObservable();
+    }
+
+    getTypeOfUnitDisposed$(type: UniverInstanceType) {
+        return type === UniverInstanceType.UNIVER_SLIDE ? this.slideDisposed$.asObservable() : new Subject().asObservable();
+    }
+
+    getAllUnitsForType(type: UniverInstanceType) {
+        return type === UniverInstanceType.UNIVER_SLIDE ? this._initialSlides : [];
+    }
+
+    getUnit(unitId: string) {
+        return createSlide(unitId);
+    }
+}
+
+class TestRenderManagerService {
+    readonly createdRenderers: string[] = [];
+    readonly removedRenderers: string[] = [];
+
+    createRender(unitId: string) {
+        this.createdRenderers.push(unitId);
+    }
+
+    removeRender(unitId: string) {
+        this.removedRenderers.push(unitId);
+    }
+}
+
 describe('SlideRenderService', () => {
-    let slideAdded$: Subject<unknown>;
-    let slideDisposed$: Subject<unknown>;
-    let createRender: ReturnType<typeof vi.fn>;
-    let removeRender: ReturnType<typeof vi.fn>;
+    let instanceService: TestUniverInstanceService;
+    let renderManagerService: TestRenderManagerService;
 
     beforeEach(() => {
-        slideAdded$ = new Subject();
-        slideDisposed$ = new Subject();
-        createRender = vi.fn();
-        removeRender = vi.fn();
         const injector = new Injector();
-        injector.add([IContextService, { useValue: {} as IContextService }]);
-        injector.add([IUniverInstanceService, { useValue: {
-            getTypeOfUnitAdded$: (type: UniverInstanceType) => type === UniverInstanceType.UNIVER_SLIDE ? slideAdded$ : new Subject(),
-            getTypeOfUnitDisposed$: (type: UniverInstanceType) => type === UniverInstanceType.UNIVER_SLIDE ? slideDisposed$ : new Subject(),
-            getAllUnitsForType: () => [{ getUnitId: () => 'existing-slide' }],
-            getUnit: (unitId: string) => ({ getUnitId: () => unitId }),
-        } as unknown as IUniverInstanceService }]);
-        injector.add([IRenderManagerService, { useValue: { createRender, removeRender } as unknown as IRenderManagerService }]);
+        injector.add([IContextService, { useClass: ContextService }]);
+        injector.add([IUniverInstanceService, { useClass: TestUniverInstanceService as never }]);
+        injector.add([IRenderManagerService, { useClass: TestRenderManagerService as never }]);
         injector.add([SlideRenderService]);
+        instanceService = injector.get(IUniverInstanceService) as unknown as TestUniverInstanceService;
+        renderManagerService = injector.get(IRenderManagerService) as unknown as TestRenderManagerService;
         injector.get(SlideRenderService);
     });
 
     it('creates renderers for existing and newly added slide units', async () => {
         await Promise.resolve();
-        slideAdded$.next({ unit: { getUnitId: () => 'new-slide' } });
+        instanceService.slideAdded$.next({ unit: createSlide('new-slide') });
 
-        expect(createRender).toHaveBeenCalledWith('existing-slide');
-        expect(createRender).toHaveBeenCalledWith('new-slide');
+        expect(renderManagerService.createdRenderers).toEqual(['existing-slide', 'new-slide']);
     });
 
     it('removes the renderer when a slide unit is disposed', async () => {
         await Promise.resolve();
-        slideDisposed$.next({ getUnitId: () => 'old-slide' });
+        instanceService.slideDisposed$.next(createSlide('old-slide'));
 
-        expect(removeRender).toHaveBeenCalledWith('old-slide');
+        expect(renderManagerService.removedRenderers).toEqual(['old-slide']);
     });
 });

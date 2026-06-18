@@ -114,9 +114,9 @@ import { DocParagraphPlaceholderRenderController } from './controllers/render-co
 import { DocResizeRenderController } from './controllers/render-controllers/doc-resize.render-controller';
 import { DocSelectionRenderController } from './controllers/render-controllers/doc-selection-render.controller';
 import { DocRenderController } from './controllers/render-controllers/doc.render-controller';
+import { EmbedDocsCustomBlockBleedRenderController } from './controllers/render-controllers/embed-docs-custom-block-bleed.render-controller';
 import { DocZoomRenderController } from './controllers/render-controllers/zoom.render-controller';
 import { DocUIController } from './controllers/ui.controller';
-import { registerDocsEmbedUIContributions } from './embed-register';
 import { DocClipboardService, IDocClipboardService } from './services/clipboard/clipboard.service';
 import { DocHtmlExportService } from './services/clipboard/udm-to-html/doc-html-export.service';
 import { DocAutoFormatService } from './services/doc-auto-format.service';
@@ -195,9 +195,6 @@ export class UniverDocsUIPlugin extends Plugin {
         this._initDependencies(_injector);
         this._initializeShortcut();
         this._initCommand();
-        if (rest.embed?.host || rest.embed?.guest) {
-            registerDocsEmbedUIContributions(this._injector);
-        }
     }
 
     override onReady(): void {
@@ -440,6 +437,7 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocInputController],
             [DocIMEInputController],
             [DocEditorBridgeController],
+            [EmbedDocsCustomBlockBleedRenderController],
         ] as Dependency[]).forEach((m) => {
             this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, m);
         });

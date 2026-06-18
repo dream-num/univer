@@ -15,7 +15,6 @@
  */
 
 import type { DependencyOverride } from '@univerjs/core';
-import type { EmbedProductPluginConfig } from '@univerjs/embed';
 import type { MenuConfig } from '@univerjs/ui';
 
 export const DOCS_UI_PLUGIN_CONFIG_KEY = 'docs-ui.config';
@@ -43,7 +42,6 @@ export interface IUniverDocsUIConfig {
     footer?: boolean;
     placeholder?: boolean;
     fitToWidth?: IDocFitToWidthOptions;
-    embed?: EmbedProductPluginConfig;
     override?: DependencyOverride;
 }
 

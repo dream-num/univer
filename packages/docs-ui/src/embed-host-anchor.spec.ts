@@ -1,0 +1,127 @@
+/**
+ * Copyright 2023-present DreamNum Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { DocumentFlavor, UniverInstanceType } from '@univerjs/core';
+import { describe, expect, it } from 'vitest';
+import { createDocsCustomBlockDrawing, resolveDocsCustomBlockRenderViewport, resolveDocsCustomBlockSize, shouldUseInlineTextSelectionForDocsCustomBlockDrawing } from './embed-host-anchor';
+
+describe('resolveDocsCustomBlockSize', () => {
+    it('uses a taller default size for docs custom blocks', () => {
+        expect(resolveDocsCustomBlockSize(UniverInstanceType.UNIVER_DOC)).toEqual({ width: 720, height: 360 });
+    });
+
+    it('uses a wider and taller viewport for sheet-like content in docs', () => {
+        expect(resolveDocsCustomBlockSize(UniverInstanceType.UNIVER_SHEET)).toEqual({ width: 960, height: 480 });
+        expect(resolveDocsCustomBlockSize(UniverInstanceType.UNIVER_BASE)).toEqual({ width: 960, height: 480 });
+    });
+
+    it('keeps slide docs blocks at a 16:9 aspect size', () => {
+        expect(resolveDocsCustomBlockSize(UniverInstanceType.UNIVER_SLIDE)).toEqual({ width: 720, height: 405 });
+    });
+});
+
+describe('createDocsCustomBlockDrawing', () => {
+    it('writes the resolved size to both doc transform and drawing transform', () => {
+        const drawing = createDocsCustomBlockDrawing({
+            unitId: 'doc-1',
+            blockId: 'block-1',
+            startIndex: 0,
+            childType: UniverInstanceType.UNIVER_BASE,
+        });
+
+        expect(drawing.docTransform?.size).toEqual({ width: 960, height: 480 });
+        expect(drawing.transform).toMatchObject({ width: 960, height: 480 });
+    });
+
+    it('disables host transformer and text-selection semantics for block embeds by default', () => {
+        const drawing = createDocsCustomBlockDrawing({
+            unitId: 'doc-1',
+            blockId: 'block-1',
+            startIndex: 0,
+            childType: UniverInstanceType.UNIVER_SHEET,
+        });
+
+        expect(drawing.allowTransform).toBe(false);
+        expect(shouldUseInlineTextSelectionForDocsCustomBlockDrawing(drawing)).toBe(false);
+    });
+
+    it('allows explicit inline embeds to keep text-selection semantics', () => {
+        const drawing = createDocsCustomBlockDrawing({
+            unitId: 'doc-1',
+            blockId: 'block-1',
+            startIndex: 0,
+            interactionMode: 'inline',
+        });
+
+        expect(shouldUseInlineTextSelectionForDocsCustomBlockDrawing(drawing)).toBe(true);
+    });
+});
+
+describe('resolveDocsCustomBlockRenderViewport', () => {
+    it('keeps non sheet-like custom blocks at their fallback size', () => {
+        expect(resolveDocsCustomBlockRenderViewport({
+            childType: UniverInstanceType.UNIVER_DOC,
+            documentFlavor: DocumentFlavor.MODERN,
+            fallbackHeight: 360,
+            fallbackWidth: 720,
+            pageMarginLeft: 96,
+            pageMarginRight: 96,
+            pageWidth: 1200,
+            visibleCanvasLeft: 0,
+            visibleCanvasWidth: 1440,
+        })).toEqual({ width: 720, height: 360 });
+    });
+
+    it('uses the modern visible canvas viewport for sheet-like docs blocks', () => {
+        expect(resolveDocsCustomBlockRenderViewport({
+            childType: UniverInstanceType.UNIVER_SHEET,
+            docsLeft: 120,
+            documentFlavor: DocumentFlavor.MODERN,
+            fallbackHeight: 480,
+            fallbackWidth: 960,
+            pageMarginLeft: 96,
+            pageMarginRight: 96,
+            pageWidth: 1200,
+            scale: 1,
+            visibleCanvasLeft: 0,
+            visibleCanvasWidth: 1440,
+        })).toEqual({
+            bleedLeft: 196,
+            bleedWidth: 1400,
+            height: 480,
+            layoutWidth: 960,
+            offsetLeft: 0,
+            width: 960,
+        });
+    });
+
+    it('falls back to page content width outside modern docs', () => {
+        expect(resolveDocsCustomBlockRenderViewport({
+            childType: UniverInstanceType.UNIVER_BASE,
+            documentFlavor: DocumentFlavor.TRADITIONAL,
+            fallbackHeight: 480,
+            fallbackWidth: 960,
+            pageMarginLeft: 120,
+            pageMarginRight: 120,
+            pageWidth: 840,
+        })).toEqual({
+            height: 480,
+            layoutWidth: 600,
+            offsetLeft: 0,
+            width: 600,
+        });
+    });
+});

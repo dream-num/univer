@@ -163,8 +163,8 @@ export class DrawingPopupMenuController extends RxDisposable {
 
             const { unitId, subUnitId, drawingId, drawingType } = drawingParam;
             // drawingParam should be  ICanvasFloatDom, use for disable popup dialog
-            const data = (drawingParam as ISheetFloatDom).data as Record<string, boolean>;
-            if (data && data.disablePopup) {
+            const data = (drawingParam as ISheetFloatDom).data as Record<string, unknown> | undefined;
+            if (data && (data.disablePopup || (data.version === 1 && typeof data.embedId === 'string'))) {
                 return;
             }
 

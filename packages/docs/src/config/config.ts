@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
-import type { EmbedProductPluginConfig } from '@univerjs/embed';
-
 export const DOCS_PLUGIN_CONFIG_KEY = 'docs.config';
 
 export const configSymbol = Symbol(DOCS_PLUGIN_CONFIG_KEY);
 
 export interface IUniverDocsConfig {
     hasScroll?: boolean;
-    embed?: EmbedProductPluginConfig;
 }
 
 export const defaultPluginConfig: IUniverDocsConfig = {};

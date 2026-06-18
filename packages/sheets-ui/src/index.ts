@@ -143,7 +143,16 @@ export { SheetsScrollRenderController } from './controllers/render-controllers/s
 export { SheetRenderController } from './controllers/render-controllers/sheet.render-controller';
 export type { ITelemetryData } from './controllers/render-controllers/sheet.render-controller';
 export { createSheetsEmbedBlockContribution, createSheetsEmbedChildViewContribution } from './embed-block';
-export { registerSheetsEmbedUIContributions } from './embed-register';
+export {
+    createEmbedSheetsFloatingDrawing,
+    createEmbedSheetsFloatingDrawingFromDescriptor,
+    createEmbedSheetsFloatingObjectData,
+    type EmbedSheetsFloatingObjectData,
+    type EmbedSheetsFloatingObjectParams,
+    getEmbedSheetsFloatingObjectData,
+    isEmbedSheetsFloatingDrawing,
+} from './embed-floating-anchor';
+export { createSheetsFloatingMenuContributions, createSheetsFloatingToolbarItems, createVisibleSheetsFloatingToolbarItems, type SheetFloatingToolbarItem } from './embed-floating-menu';
 export {
     createSheetsFloatingObjectHostAdapterContribution,
     createSheetsFloatingObjectHostContainerContribution,
@@ -151,24 +160,16 @@ export {
     createSheetsSheetTabHostContainerContribution,
     EMBED_SHEETS_FLOATING_COMPONENT_KEY,
 } from './embed-host-adapter';
-export {
-    createEmbedSheetsFloatingDrawing,
-    createEmbedSheetsFloatingDrawingFromDescriptor,
-    createEmbedSheetsFloatingObjectData,
-    getEmbedSheetsFloatingObjectData,
-    isEmbedSheetsFloatingDrawing,
-    type EmbedSheetsFloatingObjectData,
-    type EmbedSheetsFloatingObjectParams,
-} from './embed-floating-anchor';
+export { registerSheetsEmbedUIContributions } from './embed-register';
 export {
     createEmbedSheetsTabCustomData,
     createEmbedSheetsTabSnapshot,
     createEmbedSheetsTabSnapshotFromDescriptor,
     EMBED_SHEETS_TAB_CUSTOM_KEY,
-    getEmbedSheetsTabCustomData,
-    isEmbedSheetsTabSnapshot,
     type EmbedSheetsTabCustomData,
     type EmbedSheetsTabSnapshotParams,
+    getEmbedSheetsTabCustomData,
+    isEmbedSheetsTabSnapshot,
 } from './embed-tab-anchor';
 export {
     whenFormulaEditorActivated,

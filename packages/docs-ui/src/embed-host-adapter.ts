@@ -1,8 +1,25 @@
-import type { EmbedHostAdapterContribution, EmbedHostAnchorContext, EmbedHostAnchorMutationPlan, EmbedHostAnchorRemoveMutationPlan, EmbedHostAnchorRecord, EmbedHostContainerContribution, EmbedHostAnchorModelService } from '@univerjs/embed-ui';
+/**
+ * Copyright 2023-present DreamNum Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import type { DocumentDataModel, IUniverInstanceService } from '@univerjs/core';
+import type { EmbedHostAdapterContribution, EmbedHostAnchorContext, EmbedHostAnchorModelService, EmbedHostAnchorMutationPlan, EmbedHostAnchorRecord, EmbedHostAnchorRemoveMutationPlan, EmbedHostContainerContribution } from '@univerjs/embed-ui';
 import type { IRenderManagerService } from '@univerjs/engine-render';
-import { REMOVE_EMBED_HOST_ANCHOR_RECORD_MUTATION_ID, SET_EMBED_HOST_ANCHOR_RECORD_MUTATION_ID } from '@univerjs/embed-ui';
+import type { EmbedDocsCustomBlockInteractionMode } from './embed-host-anchor';
 import { UniverInstanceType } from '@univerjs/core';
+import { REMOVE_EMBED_HOST_ANCHOR_RECORD_MUTATION_ID, SET_EMBED_HOST_ANCHOR_RECORD_MUTATION_ID } from '@univerjs/embed-ui';
 import { createDocsCustomBlockInsertMutation, createDocsCustomBlockRemoveMutation } from './embed-host-anchor';
 import { DocPageLayoutService } from './services/doc-page-layout.service';
 
@@ -76,6 +93,7 @@ function createDocsCustomBlockAnchorPlan(
                 childUnitId: context.descriptor?.childUnitId,
                 childType: context.descriptor?.childType,
                 componentKey: getString(record.hostContext, 'componentKey') ?? undefined,
+                interactionMode: getInteractionMode(record.hostContext),
             }),
             { id: SET_EMBED_HOST_ANCHOR_RECORD_MUTATION_ID, params: { record } },
         ],
@@ -129,6 +147,7 @@ function createDocsCustomBlockRemoveAnchorPlan(
                 childUnitId: context.descriptor?.childUnitId,
                 childType: context.descriptor?.childType,
                 componentKey: getString(record.hostContext, 'componentKey') ?? undefined,
+                interactionMode: getInteractionMode(record.hostContext),
             }),
             { id: SET_EMBED_HOST_ANCHOR_RECORD_MUTATION_ID, params: { record: { ...record, lifecycle: 'active', hostContext: { ...record.hostContext, startIndex, drawingOrderIndex } } } },
         ],
@@ -194,6 +213,11 @@ function getNumber(hostContext: Record<string, unknown> | undefined, key: string
 
 function getString(hostContext: Record<string, unknown> | undefined, key: string): string | undefined {
     return typeof hostContext?.[key] === 'string' ? hostContext[key] : undefined;
+}
+
+function getInteractionMode(hostContext: Record<string, unknown> | undefined): EmbedDocsCustomBlockInteractionMode | undefined {
+    const value = getString(hostContext, 'interactionMode');
+    return value === 'inline' || value === 'block' ? value : undefined;
 }
 
 function refreshDocsCustomBlockLayout(renderManagerService: IRenderManagerService | undefined, unitId: string): void {

@@ -1,12 +1,28 @@
-import type { EmbedHostAdapterContribution, EmbedHostAnchorContext, EmbedHostAnchorMutationPlan, EmbedHostAnchorRemoveMutationPlan, EmbedHostAnchorRecord, EmbedHostContainerContribution, EmbedHostAnchorModelService } from '@univerjs/embed-ui';
+/**
+ * Copyright 2023-present DreamNum Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import type { IUniverInstanceService } from '@univerjs/core';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
-import type { ISheetDrawingPosition } from '@univerjs/sheets-drawing';
-import type { ISheetDrawingService } from '@univerjs/sheets-drawing';
+import type { EmbedHostAdapterContribution, EmbedHostAnchorContext, EmbedHostAnchorModelService, EmbedHostAnchorMutationPlan, EmbedHostAnchorRecord, EmbedHostAnchorRemoveMutationPlan, EmbedHostContainerContribution } from '@univerjs/embed-ui';
+import type { ISheetDrawingPosition, ISheetDrawingService } from '@univerjs/sheets-drawing';
+import { UniverInstanceType } from '@univerjs/core';
 import { REMOVE_EMBED_HOST_ANCHOR_RECORD_MUTATION_ID, SET_EMBED_HOST_ANCHOR_RECORD_MUTATION_ID } from '@univerjs/embed-ui';
-import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { InsertSheetMutation, RemoveSheetMutation } from '@univerjs/sheets';
 import { DrawingApplyType, SetDrawingApplyMutation } from '@univerjs/sheets-drawing';
-import { createEmbedSheetsFloatingDrawing, EMBED_SHEETS_FLOATING_COMPONENT_KEY } from './embed-floating-anchor';
+import { createEmbedSheetsFloatingDrawing, EMBED_SHEETS_FLOATING_COMPONENT_KEY, resolveEmbedSheetsFloatingObjectSize } from './embed-floating-anchor';
 import { createEmbedSheetsTabCustomData, createEmbedSheetsTabSnapshot } from './embed-tab-anchor';
 
 export function createSheetsFloatingObjectHostAdapterContribution(
@@ -97,6 +113,10 @@ function createSheetsFloatingObjectAnchorPlan(
         height: getNumber(record.hostContext, 'height'),
         sheetTransform: getSheetTransform(record.hostContext),
         allowTransform: getBoolean(record.hostContext, 'allowTransform'),
+        resizeBehavior: getString(record.hostContext, 'resizeBehavior') === 'aspect-ratio' || context.descriptor?.childType === UniverInstanceType.UNIVER_SLIDE
+            ? 'aspect-ratio'
+            : undefined,
+        aspectRatio: getNumber(record.hostContext, 'aspectRatio') ?? (context.descriptor?.childType === UniverInstanceType.UNIVER_SLIDE ? 16 / 9 : undefined),
     });
     const jsonOp = sheetDrawingService.getBatchAddOp([drawing]) as IDrawingJsonUndo1;
     const drawingSearch = { unitId: record.hostUnitId, subUnitId: hostSubUnitId, drawingId: record.hostAnchorId };
@@ -190,7 +210,10 @@ function createSheetsSheetTabRemoveAnchorPlan(
 }
 
 function createSheetsFloatingObjectRecord(context: EmbedHostAnchorContext): EmbedHostAnchorRecord {
-    return createRecord(context, 'sheets-floating-object', 'sheets-floating');
+    return createRecord({
+        ...context,
+        hostContext: normalizeSheetsFloatingObjectHostContext(context),
+    }, 'sheets-floating-object', 'sheets-floating');
 }
 
 function createSheetsSheetTabRecord(context: EmbedHostAnchorContext): EmbedHostAnchorRecord {
@@ -286,6 +309,41 @@ function getSheetTransform(hostContext: Record<string, unknown> | undefined): IS
 
 function getSheetDrawingService(sheetDrawingService: ISheetDrawingService | (() => ISheetDrawingService | undefined) | undefined): ISheetDrawingService | undefined {
     return typeof sheetDrawingService === 'function' ? sheetDrawingService() : sheetDrawingService;
+}
+
+function normalizeSheetsFloatingObjectHostContext(context: EmbedHostAnchorContext): Record<string, unknown> | undefined {
+    const hostContext = context.hostContext;
+    const configuredResizeBehavior = getSheetsFloatingResizeBehavior(hostContext);
+    const resizeBehavior = configuredResizeBehavior === 'aspect-ratio' || context.descriptor?.childType === UniverInstanceType.UNIVER_SLIDE
+        ? 'aspect-ratio'
+        : configuredResizeBehavior;
+    const aspectRatio = getNumber(hostContext, 'aspectRatio') ?? (context.descriptor?.childType === UniverInstanceType.UNIVER_SLIDE ? 16 / 9 : undefined);
+
+    if (resizeBehavior !== 'aspect-ratio' || aspectRatio == null) {
+        return hostContext;
+    }
+
+    const size = resolveEmbedSheetsFloatingObjectSize({
+        width: getNumber(hostContext, 'width'),
+        height: getNumber(hostContext, 'height'),
+        resizeBehavior,
+        aspectRatio,
+    });
+
+    return {
+        ...hostContext,
+        width: size.width,
+        height: size.height,
+        resizeBehavior,
+        aspectRatio,
+    };
+}
+
+function getSheetsFloatingResizeBehavior(hostContext: Record<string, unknown> | undefined): 'free' | 'aspect-ratio' | 'height-auto' | 'disabled' | undefined {
+    const value = getString(hostContext, 'resizeBehavior');
+    return value === 'free' || value === 'aspect-ratio' || value === 'height-auto' || value === 'disabled'
+        ? value
+        : undefined;
 }
 
 function queryEmbedHostElement(attribute: string, value: string): HTMLElement | null {

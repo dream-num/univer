@@ -37,7 +37,7 @@ describe('EmbedCapabilityRegistryService', () => {
             childType: UniverInstanceType.UNIVER_SLIDE,
             entry: 'slides-page-list-block',
             menuBehavior: 'host-override',
-            renderHost: 'child',
+            renderHost: 'dom',
         });
 
         expect(createDefaultEmbedCapabilities()).toEqual([]);
@@ -62,7 +62,7 @@ describe('EmbedCapabilityRegistryService', () => {
             tab: false,
         });
         expect(createDefaultEmbedSourceMeta(tabCapability)).toEqual({
-            renderHost: 'child',
+            renderHost: 'dom',
             floating: false,
             tab: {
                 enabled: true,
@@ -224,7 +224,7 @@ describe('EmbedSourceResolverService', () => {
         provider.resolve.mockResolvedValueOnce({
             unitId: 'external-doc',
             unitType: UniverInstanceType.UNIVER_DOC,
-        });
+        } as never);
         await expect(resolver.resolve({
             kind: 'ref',
             ref: {
@@ -316,12 +316,13 @@ function createCapability(overrides: Partial<IEmbedCapability> = {}): IEmbedCapa
         entry: overrides.entry ?? 'docs-custom-block',
         mode: overrides.mode ?? 'float',
         layout: overrides.layout ?? 'doc-width-scale',
-        menuBehavior: overrides.menuBehavior,
+        menuBehavior: overrides.menuBehavior ?? 'floating',
         renderHost: overrides.renderHost,
+        nestedEmbed: overrides.nestedEmbed ?? false,
     };
 }
 
-function createCapabilityInjector(registry?: EmbedCapabilityRegistryService, key: object = {}) {
+function createCapabilityInjector(registry?: EmbedCapabilityRegistryService, key: object = {}): Pick<import('@univerjs/core').Injector, 'get' | 'has'> {
     return Object.assign(key, {
         has: vi.fn((token: unknown) => Boolean(registry) && token === EmbedCapabilityRegistryService),
         get: vi.fn((token: unknown) => {
@@ -331,7 +332,7 @@ function createCapabilityInjector(registry?: EmbedCapabilityRegistryService, key
 
             return registry;
         }),
-    });
+    }) as unknown as Pick<import('@univerjs/core').Injector, 'get' | 'has'>;
 }
 
 function createInstanceService() {
@@ -341,7 +342,7 @@ function createInstanceService() {
             type,
         })),
         getUnitType: vi.fn(() => UniverInstanceType.UNRECOGNIZED),
-        getUnit: vi.fn(() => null),
+        getUnit: vi.fn((): unknown => null),
     };
 }
 
@@ -372,7 +373,7 @@ function createModel() {
             store.set(nextDescriptor.embedId, nextDescriptor);
         }),
         getDescriptor: vi.fn((_hostUnitId: string, embedId: string) => store.get(embedId)),
-        getActiveDescriptorsByChildUnit: vi.fn(() => []),
+        getActiveDescriptorsByChildUnit: vi.fn((): IEmbedDescriptor[] => []),
         softDeleteDescriptor: vi.fn(),
     };
 }

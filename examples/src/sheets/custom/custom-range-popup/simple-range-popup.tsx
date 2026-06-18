@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import type { IDisposable, Univer } from '@univerjs/core';
+import type { Univer } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
 import { LifecycleStages } from '@univerjs/core';
 
 export function simpleRangePopupDemo(univer: Univer, univerAPI: FUniver) {
     let activePopupWorkbookId: string | null = null;
-    let activePopupDisposable: IDisposable | null = null;
 
     const attachPopup = (workbook = univerAPI.getActiveWorkbook()): boolean => {
         if (!workbook) {
@@ -28,12 +27,7 @@ export function simpleRangePopupDemo(univer: Univer, univerAPI: FUniver) {
         }
 
         const workbookId = workbook.getId();
-        if (activePopupWorkbookId === workbookId) {
-            return false;
-        }
-
-        const activeWorkbookId = univerAPI.getActiveWorkbook()?.getId();
-        if (activeWorkbookId !== workbookId) {
+        if (activePopupWorkbookId) {
             return false;
         }
 
@@ -58,8 +52,6 @@ export function simpleRangePopupDemo(univer: Univer, univerAPI: FUniver) {
             return false;
         }
 
-        activePopupDisposable?.dispose();
-        activePopupDisposable = disposable;
         activePopupWorkbookId = workbookId;
 
         return true;

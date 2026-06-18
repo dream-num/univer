@@ -94,15 +94,17 @@ interface IDocFloatDomParams extends IDocFloatDomDataBase {
 }
 
 interface IDocFloatDomRuntimeParam extends IDocFloatDom {
-    customBlockRenderViewport?: Pick<IDocsCustomBlockRenderViewport, 'contentHeight' | 'contentWidth'>;
+    customBlockRenderViewport?: Partial<Pick<IDocsCustomBlockRenderViewport, 'contentHeight' | 'contentWidth' | 'height'>>;
 }
 
 export function mergeDocFloatDomRuntimeProps(existingProps: Record<string, unknown> | undefined, param: IDocFloatDomRuntimeParam): Record<string, unknown> | undefined {
     const contentWidth = param.customBlockRenderViewport?.contentWidth;
     const contentHeight = param.customBlockRenderViewport?.contentHeight;
+    const height = param.customBlockRenderViewport?.height;
     const hasContentWidth = Number.isFinite(contentWidth) && (contentWidth ?? 0) > 0;
     const hasContentHeight = Number.isFinite(contentHeight) && (contentHeight ?? 0) > 0;
-    if (!hasContentWidth && !hasContentHeight) {
+    const hasHeight = Number.isFinite(height) && (height ?? 0) > 0;
+    if (!hasContentWidth && !hasContentHeight && !hasHeight) {
         return existingProps;
     }
 
@@ -111,6 +113,7 @@ export function mergeDocFloatDomRuntimeProps(existingProps: Record<string, unkno
         customBlockRenderViewport: {
             ...(hasContentHeight ? { contentHeight } : {}),
             ...(hasContentWidth ? { contentWidth } : {}),
+            ...(hasHeight ? { height } : {}),
         },
     };
 }

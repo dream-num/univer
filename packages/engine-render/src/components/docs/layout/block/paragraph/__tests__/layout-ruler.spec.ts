@@ -754,5 +754,6 @@ describe('layout-ruler', () => {
         expect(drawing?.height).toBe(80);
         expect(drawing?.customBlockRenderViewport?.contentHeight).toBe(120);
         expect(drawing?.customBlockRenderViewport?.contentWidth).toBe(320);
+        expect(drawing?.customBlockRenderViewport?.height).toBe(80);
     });
 });

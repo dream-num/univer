@@ -32,7 +32,7 @@ import {
     WrapStrategy,
 } from '@univerjs/core';
 import { Button, ColorPicker, Dropdown, DropdownMenu, Tooltip } from '@univerjs/design';
-import { createEmbedReactRoot, disposeEmbedReactRoot, EmbedFloatingActiveService, EmbedRuntimeProviders } from '@univerjs/embed-ui';
+import { createEmbedReactRoot, disposeEmbedReactRoot, EmbedFloatingActiveService, EmbedRuntimeProviders, resolveEmbedFloatingMenuRoot } from '@univerjs/embed-ui';
 import {
     AlignBottomIcon,
     AlignTopIcon,
@@ -300,11 +300,7 @@ export function createSheetsFloatingMenuContributions(): EmbedFloatingMenuContri
 function mountSheetsFloatingMenu(context: EmbedFloatingMenuMountContext) {
     ensureSheetFloatingMenuStyles();
 
-    const root = context.renderScope.fullscreen && context.runtimeScope.roots.menuSlot
-        ? context.runtimeScope.roots.menuSlot
-        : context.runtimeScope.roots.overlay
-        ?? context.renderScope.overlayRoot
-        ?? context.renderScope.rootElement;
+    const root = resolveEmbedFloatingMenuRoot(context);
     const menu = document.createElement('div');
     root.appendChild(menu);
 

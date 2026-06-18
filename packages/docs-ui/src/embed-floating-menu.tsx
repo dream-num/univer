@@ -17,7 +17,7 @@
 import type { EmbedFloatingActivation, EmbedFloatingMenuContribution, EmbedFloatingMenuMountContext } from '@univerjs/embed-ui';
 import type { Observable } from 'rxjs';
 import { Injector, toDisposable, UniverInstanceType } from '@univerjs/core';
-import { createEmbedReactRoot, disposeEmbedReactRoot, EmbedFloatingActiveService, EmbedRuntimeProviders, mountEmbedProductRibbonMenu } from '@univerjs/embed-ui';
+import { createEmbedReactRoot, disposeEmbedReactRoot, EmbedFloatingActiveService, EmbedRuntimeProviders, mountEmbedProductRibbonMenu, resolveEmbedFloatingMenuRoot } from '@univerjs/embed-ui';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { createElement, useEffect, useRef } from 'react';
 
@@ -49,11 +49,7 @@ export function createDocsFloatingMenuContributions(): EmbedFloatingMenuContribu
 function mountDocsFloatingMenu(context: EmbedFloatingMenuMountContext) {
     ensureDocsFloatingMenuStyles();
 
-    const root = context.renderScope.fullscreen && context.runtimeScope.roots.menuSlot
-        ? context.runtimeScope.roots.menuSlot
-        : context.runtimeScope.roots.overlay
-        ?? context.renderScope.overlayRoot
-        ?? context.renderScope.rootElement;
+    const root = resolveEmbedFloatingMenuRoot(context);
     const menu = document.createElement('div');
     root.appendChild(menu);
 

@@ -71,6 +71,7 @@ export { createEmbedDomPassiveViewportProvider, type CreateEmbedDomPassiveViewpo
 export { EmbedFloatPreviewService } from './services/embed-float-preview.service';
 export { EmbedFloatingActiveService } from './services/embed-floating-active.service';
 export { EmbedFloatingMenuRegistryService } from './services/embed-floating-menu-registry.service';
+export { resolveEmbedFloatingMenuRoot } from './services/embed-floating-menu-root';
 export { EmbedFullscreenService } from './services/embed-fullscreen.service';
 export { EmbedHostAdapterRegistryService } from './services/embed-host-adapter-registry.service';
 export { EmbedHostAnchorModelService } from './services/embed-host-anchor-model.service';

@@ -15,8 +15,8 @@
  */
 
 import { UniverInstanceType } from '@univerjs/core';
-import { describe, expect, it } from 'vitest';
-import { collectDocsTableLikeEmbedChildUnitIds, shouldRefreshDocsCustomBlockSizeForCommand } from './embed-docs-custom-block-refresh';
+import { describe, expect, it, vi } from 'vitest';
+import { collectDocsTableLikeEmbedChildUnitIds, createDocsCustomBlockSizeRefreshScheduler, shouldRefreshDocsCustomBlockSizeForCommand } from './embed-docs-custom-block-refresh';
 
 describe('docs custom block refresh helpers', () => {
     it('collects only sheet-like custom block child unit ids', () => {
@@ -46,5 +46,38 @@ describe('docs custom block refresh helpers', () => {
             commandParams: { unitId: 'other' },
             hostUnitId: 'doc-host',
         })).toBe(false);
+    });
+
+    it('coalesces repeated refresh requests into one frame', () => {
+        const refresh = vi.fn();
+        let frameCallback: (() => void) | undefined;
+        const scheduler = createDocsCustomBlockSizeRefreshScheduler(refresh, {
+            cancelFrame: vi.fn(),
+            requestFrame: (callback) => {
+                frameCallback = callback;
+                return 1;
+            },
+        });
+
+        scheduler.schedule();
+        scheduler.schedule();
+        frameCallback?.();
+
+        expect(refresh).toHaveBeenCalledTimes(1);
+    });
+
+    it('cancels a pending refresh when disposed', () => {
+        const refresh = vi.fn();
+        const cancelFrame = vi.fn();
+        const scheduler = createDocsCustomBlockSizeRefreshScheduler(refresh, {
+            cancelFrame,
+            requestFrame: () => 7,
+        });
+
+        scheduler.schedule();
+        scheduler.dispose();
+
+        expect(cancelFrame).toHaveBeenCalledWith(7);
+        expect(refresh).not.toHaveBeenCalled();
     });
 });

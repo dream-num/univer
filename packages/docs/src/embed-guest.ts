@@ -15,11 +15,11 @@
  */
 
 import type { ICreateUnitOptions, IDocumentData, Injector } from '@univerjs/core';
-import type { EmbedCapability } from '@univerjs/embed';
+import type { IEmbedCapability } from '@univerjs/embed';
 import { DocumentDataModel, DocumentFlavor, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { registerEmbedCapabilities, registerEmbedGuestContribution } from '@univerjs/embed';
 
-const DOCS_HOST_EMBED_CAPABILITIES: readonly EmbedCapability[] = [
+const DOCS_HOST_EMBED_CAPABILITIES: readonly IEmbedCapability[] = [
     {
         hostType: UniverInstanceType.UNIVER_DOC,
         childType: UniverInstanceType.UNIVER_SHEET,

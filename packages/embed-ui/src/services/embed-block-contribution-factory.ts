@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import type { UniverInstanceType } from '@univerjs/core';
+import type { Injector, UniverInstanceType } from '@univerjs/core';
 import type { IRibbonService } from '@univerjs/ui';
 import type { EmbedBlockContribution } from '../types/embed-ui';
 import { DEFAULT_EMBED_DOC_FLOW_LAYOUT_POLICY, DEFAULT_EMBED_FLOAT_LAYOUT_POLICY, DEFAULT_EMBED_TAB_LAYOUT_POLICY } from '@univerjs/embed';
 import { of } from 'rxjs';
 import { EmbedHostChromeMode } from '../types/embed-ui';
 import { createEmbedProductMenuInjector } from './embed-product-menu-mounting';
+import { EmbedProductMenuRegistryService } from './embed-product-menu-registry.service';
 
 export interface CreateEmbedRibbonBlockContributionOptions {
     childType: UniverInstanceType;
@@ -51,7 +52,7 @@ export function createEmbedRibbonBlockContribution(options: CreateEmbedRibbonBlo
             const scoped = createEmbedProductMenuInjector(injector as never, {
                 childType,
                 childUnitId,
-                menuSchema: options.menuSchema,
+                menuSchema: resolveEmbedProductRibbonMenuSchema(injector, childType, options.menuSchema),
                 menuTitlePrefix: productName,
             });
 
@@ -63,6 +64,22 @@ export function createEmbedRibbonBlockContribution(options: CreateEmbedRibbonBlo
             };
         },
     };
+}
+
+export function resolveEmbedProductRibbonMenuSchema(
+    injector: Pick<Injector, 'get' | 'has'> | unknown,
+    childType: UniverInstanceType,
+    fallbackMenuSchema?: unknown
+): unknown {
+    const candidate = injector as Partial<Pick<Injector, 'get' | 'has'>>;
+    if (typeof candidate.has === 'function' && typeof candidate.get === 'function' && candidate.has(EmbedProductMenuRegistryService)) {
+        const menuSchema = candidate.get(EmbedProductMenuRegistryService).getMergedMenuSchema(childType, 'ribbon');
+        if (menuSchema) {
+            return menuSchema;
+        }
+    }
+
+    return fallbackMenuSchema;
 }
 
 export function createEmbedNoHeaderBlockContribution(options: CreateEmbedNoHeaderBlockContributionOptions): EmbedBlockContribution {

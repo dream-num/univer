@@ -34,6 +34,12 @@ export function createSheetsContentSizeProvider(): EmbedContentSizeProvider {
 
 interface SheetLikeWorksheet {
     getColVisible?: (column: number) => boolean;
+    getCellMatrix?: () => {
+        getDataRange?: () => {
+            endColumn?: number;
+            endRow?: number;
+        } | null | undefined;
+    };
     getColumnCount?: () => number;
     getColumnWidth?: (column: number) => number;
     getConfig?: () => {
@@ -54,7 +60,7 @@ function resolveSheetsContentHeight(childUnit: unknown): number | undefined {
         return undefined;
     }
 
-    const rowCount = worksheet.getRowCount?.();
+    const rowCount = resolveSheetsContentRowCount(worksheet);
     if (!Number.isFinite(rowCount) || rowCount == null || rowCount < 0) {
         return undefined;
     }
@@ -84,7 +90,7 @@ function resolveSheetsContentWidth(childUnit: unknown): number | undefined {
         return undefined;
     }
 
-    const columnCount = worksheet.getColumnCount?.();
+    const columnCount = resolveSheetsContentColumnCount(worksheet);
     if (!Number.isFinite(columnCount) || columnCount == null || columnCount < 0) {
         return undefined;
     }
@@ -103,6 +109,33 @@ function resolveSheetsContentWidth(childUnit: unknown): number | undefined {
     }
 
     return rowHeaderWidth + columnWidth;
+}
+
+function resolveSheetsContentRowCount(worksheet: SheetLikeWorksheet): number | undefined {
+    return resolveBoundedContentCount(worksheet.getRowCount?.(), worksheet.getCellMatrix?.()?.getDataRange?.()?.endRow);
+}
+
+function resolveSheetsContentColumnCount(worksheet: SheetLikeWorksheet): number | undefined {
+    return resolveBoundedContentCount(worksheet.getColumnCount?.(), worksheet.getCellMatrix?.()?.getDataRange?.()?.endColumn);
+}
+
+function resolveBoundedContentCount(totalCount: unknown, dataRangeEndIndex: unknown): number | undefined {
+    const normalizedTotalCount = typeof totalCount === 'number' && Number.isFinite(totalCount) && totalCount >= 0
+        ? totalCount
+        : undefined;
+    const dataCount = typeof dataRangeEndIndex === 'number' && Number.isFinite(dataRangeEndIndex) && dataRangeEndIndex >= 0
+        ? dataRangeEndIndex + 1
+        : undefined;
+
+    if (normalizedTotalCount == null) {
+        return dataCount;
+    }
+
+    if (dataCount == null) {
+        return normalizedTotalCount;
+    }
+
+    return Math.min(normalizedTotalCount, dataCount);
 }
 
 function normalizePositiveNumber(value: unknown, fallback: number): number {

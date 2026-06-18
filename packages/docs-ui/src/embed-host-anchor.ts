@@ -67,7 +67,7 @@ export interface IDocsCustomBlockRenderViewportParams {
     visibleCanvasWidth?: number;
 }
 
-export interface IDocsCustomBlockRenderViewport {
+export interface IDocsCustomBlockLayoutViewport {
     bleedLeft?: number;
     bleedWidth?: number;
     contentHeight?: number;
@@ -188,7 +188,7 @@ export function isSheetLikeDocsCustomBlockChildType(childType?: UniverInstanceTy
     return childType === UniverInstanceType.UNIVER_SHEET || childType === UniverInstanceType.UNIVER_BASE;
 }
 
-export function resolveDocsCustomBlockRenderViewport(params: IDocsCustomBlockRenderViewportParams): IDocsCustomBlockRenderViewport {
+export function resolveDocsCustomBlockRenderViewport(params: IDocsCustomBlockRenderViewportParams): IDocsCustomBlockLayoutViewport {
     const defaultSize = resolveDocsCustomBlockSize(params.childType);
     const fallbackWidth = params.fallbackWidth ?? defaultSize.width;
     const fallbackHeight = params.fallbackHeight ?? defaultSize.height;

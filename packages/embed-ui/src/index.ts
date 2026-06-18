@@ -65,6 +65,7 @@ export { EmbedBlockRegistryService } from './services/embed-block-registry.servi
 export { createEmbedChildRuntimeScope } from './services/embed-child-runtime-scope';
 export { createEmbedChildUnitScopedInjector, createEmbedScopedInjector } from './services/embed-child-unit-scoped-injector';
 export { EmbedChildViewRegistryService } from './services/embed-child-view-registry.service';
+export { EmbedContentSizeRegistryService } from './services/embed-content-size-registry.service';
 export { createDefaultEmbedFloatingMenuContributions, mountDefaultEmbedFloatingMenu } from './services/embed-default-floating-menu';
 export { createEmbedDomPassiveViewportProvider, type CreateEmbedDomPassiveViewportProviderOptions } from './services/embed-dom-passive-viewport-provider';
 export { EmbedFloatPreviewService } from './services/embed-float-preview.service';
@@ -121,6 +122,9 @@ export type {
     EmbedChildRuntimeScope,
     EmbedChildViewContribution,
     EmbedContainerContext,
+    EmbedContentSize,
+    EmbedContentSizeMeasureContext,
+    EmbedContentSizeProvider,
     EmbedFloatingActivation,
     EmbedFloatingMenuContribution,
     EmbedFloatingMenuMountContext,

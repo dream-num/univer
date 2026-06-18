@@ -18,12 +18,13 @@ import type { Injector } from '@univerjs/core';
 import type { EmbedDescriptor } from '@univerjs/embed';
 import { IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { EmbedModelService } from '@univerjs/embed';
-import { createEmbedRenderCanvasPreviewProvider, EmbedActivationService, EmbedBlockRegistryService, EmbedChildViewRegistryService, EmbedFloatDomRenderer, EmbedFloatingMenuRegistryService, EmbedFloatPreviewService, EmbedHostAdapterRegistryService, EmbedHostAnchorModelService, EmbedHostContainerRegistryService, EmbedHostMenuOverrideService, EmbedMountService, EmbedPassiveViewportRegistryService, registerEmbedUIContribution } from '@univerjs/embed-ui';
+import { createEmbedRenderCanvasPreviewProvider, EmbedActivationService, EmbedBlockRegistryService, EmbedChildViewRegistryService, EmbedContentSizeRegistryService, EmbedFloatDomRenderer, EmbedFloatingMenuRegistryService, EmbedFloatPreviewService, EmbedHostAdapterRegistryService, EmbedHostAnchorModelService, EmbedHostContainerRegistryService, EmbedHostMenuOverrideService, EmbedMountService, EmbedPassiveViewportRegistryService, registerEmbedUIContribution } from '@univerjs/embed-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ISheetDrawingService } from '@univerjs/sheets-drawing';
 import { CanvasFloatDomPreviewService, ComponentManager } from '@univerjs/ui';
 import { Subscription } from 'rxjs';
 import { createSheetsEmbedBlockContribution, createSheetsEmbedChildViewContribution } from './embed-block';
+import { createSheetsContentSizeProvider } from './embed-content-size';
 import { EMBED_SHEETS_FLOATING_COMPONENT_KEY } from './embed-floating-anchor';
 import { createSheetsFloatingMenuContributions } from './embed-floating-menu';
 import { createSheetsFloatingObjectHostAdapterContribution, createSheetsFloatingObjectHostContainerContribution, createSheetsSheetTabHostAdapterContribution, createSheetsSheetTabHostContainerContribution } from './embed-host-adapter';
@@ -42,6 +43,7 @@ function registerSheetsEmbedUIContributionsNow(injector: Injector): void {
     const blockRegistry = injector.get(EmbedBlockRegistryService);
     const floatingMenuRegistry = injector.get(EmbedFloatingMenuRegistryService);
     const previewService = injector.get(EmbedFloatPreviewService);
+    const contentSizeRegistry = injector.get(EmbedContentSizeRegistryService);
     const passiveViewportRegistry = injector.get(EmbedPassiveViewportRegistryService);
     const anchorModelService = injector.has(EmbedHostAnchorModelService) ? injector.get(EmbedHostAnchorModelService) : undefined;
     const univerInstanceService = injector.has(IUniverInstanceService) ? injector.get(IUniverInstanceService) : undefined;
@@ -102,6 +104,9 @@ function registerSheetsEmbedUIContributionsNow(injector: Injector): void {
         childType: UniverInstanceType.UNIVER_SHEET,
         renderManagerService: IRenderManagerService,
     }));
+    if (!contentSizeRegistry.get(UniverInstanceType.UNIVER_SHEET)) {
+        contentSizeRegistry.register(createSheetsContentSizeProvider());
+    }
     if (!passiveViewportRegistry.get(UniverInstanceType.UNIVER_SHEET)) {
         passiveViewportRegistry.register(createSheetsPassiveViewportProvider(injector));
     }

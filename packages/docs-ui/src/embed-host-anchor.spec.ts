@@ -16,7 +16,7 @@
 
 import { DocumentFlavor, UniverInstanceType } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
-import { createDocsCustomBlockDrawing, resolveDocsCustomBlockContentHeight, resolveDocsCustomBlockRenderViewport, resolveDocsCustomBlockSize, shouldUseInlineTextSelectionForDocsCustomBlockDrawing } from './embed-host-anchor';
+import { createDocsCustomBlockDrawing, resolveDocsCustomBlockRenderViewport, resolveDocsCustomBlockSize, shouldUseInlineTextSelectionForDocsCustomBlockDrawing } from './embed-host-anchor';
 
 describe('resolveDocsCustomBlockSize', () => {
     it('uses a taller default size for docs custom blocks', () => {
@@ -163,53 +163,5 @@ describe('resolveDocsCustomBlockRenderViewport', () => {
             offsetLeft: 0,
             width: 600,
         });
-    });
-});
-
-describe('resolveDocsCustomBlockContentHeight', () => {
-    it('measures sheet content from active worksheet row heights', () => {
-        const height = resolveDocsCustomBlockContentHeight({
-            childType: UniverInstanceType.UNIVER_SHEET,
-            childUnit: {
-                getActiveSheet: () => ({
-                    getRowCount: () => 4,
-                    getRowHeight: (row: number) => [24, 40, 0, 32][row] ?? 24,
-                }),
-            },
-        });
-
-        expect(height).toBe(120);
-    });
-
-    it('measures base grid content from active table view and record order', () => {
-        const height = resolveDocsCustomBlockContentHeight({
-            childType: UniverInstanceType.UNIVER_BASE,
-            childUnit: {
-                getSnapshot: () => ({
-                    tableOrder: ['table-1'],
-                    tables: {
-                        'table-1': {
-                            deleted: false,
-                            recordOrder: ['record-1', 'record-2', 'record-3'],
-                            records: {
-                                'record-1': {},
-                                'record-2': {},
-                                'record-3': { deleted: true },
-                            },
-                            viewOrder: ['view-1'],
-                            views: {
-                                'view-1': {
-                                    deleted: false,
-                                    type: 'grid',
-                                    config: { rowHeight: 'tall' },
-                                },
-                            },
-                        },
-                    },
-                }),
-            },
-        });
-
-        expect(height).toBe(228);
     });
 });

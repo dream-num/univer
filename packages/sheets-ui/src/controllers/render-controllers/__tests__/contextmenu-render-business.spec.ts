@@ -64,7 +64,8 @@ function createController(rangeType = RANGE_TYPE.NORMAL) {
         } as any,
         contextMenuService as any,
         { getCurrentSelections: vi.fn(() => [selection]) } as any,
-        { getSkeleton: vi.fn(() => skeleton) } as any
+        { getSkeleton: vi.fn(() => skeleton) } as any,
+        { has: vi.fn(() => false), get: vi.fn() } as any
     );
 
     return {

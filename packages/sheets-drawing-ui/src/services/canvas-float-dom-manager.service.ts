@@ -704,7 +704,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             this._canvasFloatDomService.updateFloatDom(id, {
                 eventPassThrough: false,
                 props: {
-                    ...(info.floatDomConfig.props ?? {}),
+                    ...info.floatDomConfig.props,
                     initialStage: 'stage2',
                     onRuntimeStageExit: () => this.unmountFloatDomRuntime(id),
                 },
@@ -714,7 +714,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 ...info.floatDomConfig,
                 eventPassThrough: false,
                 props: {
-                    ...(info.floatDomConfig.props ?? {}),
+                    ...info.floatDomConfig.props,
                     initialStage: 'stage2',
                     onRuntimeStageExit: () => this.unmountFloatDomRuntime(id),
                 },

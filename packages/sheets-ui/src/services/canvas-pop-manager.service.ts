@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DrawingTypeEnum, ICommandInfo, INeedCheckDisposable, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { DrawingTypeEnum, ICommandInfo, INeedCheckDisposable, Injector, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { BaseObject, IBoundRectNoAngle, IRender, IShapeProps, Shape, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
 import type { ISetWorksheetRowAutoHeightMutationParams, ISheetLocationBase } from '@univerjs/sheets';
 import type { IPopup } from '@univerjs/ui';
@@ -305,7 +305,7 @@ export class SheetCanvasPopManagerService extends Disposable {
         };
 
         const { position, position$, disposable } = this._createPositionObserver(bound, currentRender, skeleton, worksheet);
-        const popupInjector = currentRender.getInjector?.();
+        const popupInjector = this._resolveEmbeddedPopupInjector(unitId, currentRender);
 
         const id = this._globalPopupManagerService.addPopup({
             ...popup,
@@ -361,7 +361,7 @@ export class SheetCanvasPopManagerService extends Disposable {
             skeleton,
             currentRender,
         });
-        const popupInjector = currentRender.getInjector?.();
+        const popupInjector = this._resolveEmbeddedPopupInjector(unitId, currentRender);
         const id = this._globalPopupManagerService.addPopup({
             ...popup,
             unitId,
@@ -415,7 +415,7 @@ export class SheetCanvasPopManagerService extends Disposable {
         }
 
         const position$ = new BehaviorSubject(bound);
-        const popupInjector = currentRender.getInjector?.();
+        const popupInjector = this._resolveEmbeddedPopupInjector(unitId, currentRender);
         const id = this._globalPopupManagerService.addPopup({
             ...popup,
             unitId,
@@ -487,7 +487,7 @@ export class SheetCanvasPopManagerService extends Disposable {
             skeleton,
             currentRender,
         });
-        const popupInjector = currentRender.getInjector?.();
+        const popupInjector = this._resolveEmbeddedPopupInjector(unitId, currentRender);
         const id = this._globalPopupManagerService.addPopup({
             ...popup,
             unitId,
@@ -575,7 +575,7 @@ export class SheetCanvasPopManagerService extends Disposable {
             skeleton,
             currentRender,
         });
-        const popupInjector = currentRender.getInjector?.();
+        const popupInjector = this._resolveEmbeddedPopupInjector(unitId, currentRender);
         const id = this._globalPopupManagerService.addPopup({
             ...popup,
             unitId,
@@ -611,6 +611,12 @@ export class SheetCanvasPopManagerService extends Disposable {
             },
             canDispose: () => this._globalPopupManagerService.activePopupId !== id,
         };
+    }
+
+    private _resolveEmbeddedPopupInjector(unitId: string, currentRender: IRender): Injector | undefined {
+        return this._univerInstanceService.getUnitCreateOptions(unitId)?.embeddedRender === true
+            ? currentRender.getInjector?.()
+            : undefined;
     }
 
     /**

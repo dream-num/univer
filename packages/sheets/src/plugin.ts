@@ -33,6 +33,7 @@ import { SheetPermissionCheckController } from './controllers/permission/sheet-p
 import { SheetPermissionInitController } from './controllers/permission/sheet-permission-init.controller';
 import { SheetPermissionViewModelController } from './controllers/permission/sheet-permission-view-model.controller';
 import { ZebraCrossingCacheController } from './controllers/zebar-crossing.controller';
+import { registerSheetsEmbedGuestContribution, registerSheetsEmbedHostCapabilities } from './embed-guest';
 import { RangeProtectionRenderModel } from './models/range-protection-render.model';
 import { RangeProtectionRuleModel } from './models/range-protection-rule.model';
 import { RangeProtectionCache } from './models/range-protection.cache';
@@ -153,6 +154,9 @@ export class UniverSheetsPlugin extends Plugin {
     }
 
     override onStarting(): void {
+        registerSheetsEmbedHostCapabilities(this._injector);
+        registerSheetsEmbedGuestContribution(this._injector);
+
         touchDependencies(this._injector, [
             [BasicWorksheetController],
             [MergeCellController],

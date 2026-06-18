@@ -17,7 +17,8 @@
 import type { IRange } from '@univerjs/core';
 import type { IConditionFormattingRule } from '@univerjs/sheets-conditional-formatting';
 import type { Root } from 'react-dom/client';
-import { BooleanNumber, LocaleService, LocaleType } from '@univerjs/core';
+import { BooleanNumber, LocaleService, LocaleType, RANGE_TYPE } from '@univerjs/core';
+import { SetSelectionsOperation } from '@univerjs/sheets';
 import {
     AddCfCommand,
     CFNumberOperator,
@@ -86,6 +87,7 @@ async function createRuleListTestBed() {
     testBed.commandService.registerCommand(AddCfCommand);
     testBed.commandService.registerCommand(DeleteCfCommand);
     testBed.commandService.registerCommand(MoveCfCommand);
+    testBed.commandService.registerCommand(SetSelectionsOperation);
     testBed.get(LocaleService).load({
         [LocaleType.ZH_CN]: {
             sheets: {
@@ -239,6 +241,59 @@ describe('RuleList', () => {
 
         expect(remainingRules?.map((rule) => rule.cfId)).toEqual(['cf-far']);
         expect(container.textContent).not.toContain('A1');
+    });
+
+    it('refreshes selected-range rules when the active sheet selection changes', async () => {
+        currentTestBed = await createRuleListTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <RuleList onClick={() => undefined} onCreate={() => undefined} />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        await act(async () => {
+            container!.querySelector('[data-u-comp="select"]')!.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0 }));
+            await Promise.resolve();
+        });
+
+        const selectedRangeOption = Array.from(document.querySelectorAll('[data-slot="dropdown-menu-radio-item"]'))
+            .find((button) => button.textContent === 'Selected range');
+
+        expect(selectedRangeOption).toBeDefined();
+
+        await act(async () => {
+            selectedRangeOption!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            await Promise.resolve();
+        });
+
+        expect(container.textContent).toContain('A1');
+        expect(container.textContent).not.toContain('F6');
+
+        await act(async () => {
+            await currentTestBed!.commandService.executeCommand(SetSelectionsOperation.id, {
+                unitId: currentTestBed!.unitId,
+                subUnitId: currentTestBed!.subUnitId,
+                selections: [{
+                    range: {
+                        ...FAR_RANGE,
+                        rangeType: RANGE_TYPE.NORMAL,
+                    },
+                    primary: null,
+                    style: null,
+                }],
+            });
+            await new Promise((resolve) => setTimeout(resolve, 32));
+        });
+
+        expect(container.textContent).not.toContain('A1');
+        expect(container.textContent).toContain('F6');
     });
 
     it('deletes only the clicked conditional formatting rule', async () => {

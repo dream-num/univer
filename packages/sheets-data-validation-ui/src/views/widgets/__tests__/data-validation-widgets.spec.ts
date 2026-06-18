@@ -345,6 +345,21 @@ describe('data validation canvas widgets', () => {
         expect(ctx.fillStyles).toContain('#ffcc00');
     });
 
+    it('calculates autofit dimensions for multi-select list capsules', async () => {
+        const injector = createInjector();
+        const model = getDataValidationModel(injector);
+        model.rule = {
+            ...model.rule,
+            type: DataValidationType.LIST_MULTIPLE,
+        };
+        const { DropdownMultipleWidget } = await import('../dropdown-multiple-widget');
+        const widget = injector.createInstance(DropdownMultipleWidget);
+        const cellContext = createCellContext('Done,Hold,Done,Hold,Done,Hold');
+
+        expect(widget.calcCellAutoHeight(cellContext)).toBe(12);
+        expect(widget.calcCellAutoWidth(cellContext)).toBe(94);
+    });
+
     it('toggles checkbox cells from the checked formula value to the unchecked formula value', async () => {
         const injector = createInjector();
         const { CheckboxRender } = await import('../checkbox-widget');

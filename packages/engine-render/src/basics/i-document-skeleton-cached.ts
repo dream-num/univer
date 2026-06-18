@@ -299,6 +299,7 @@ export interface IDocumentSkeletonDrawing {
     customBlockRenderViewport?: {
         contentHeight?: number;
         contentWidth?: number;
+        height?: number;
     };
 }
 

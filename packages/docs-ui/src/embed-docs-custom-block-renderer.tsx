@@ -29,6 +29,7 @@ export interface EmbedDocsCustomBlockRuntimeProps {
     customBlockRenderViewport?: {
         contentHeight?: number;
         contentWidth?: number;
+        height?: number;
     };
 }
 
@@ -177,12 +178,15 @@ export function EmbedDocsCustomBlockRenderer(props: { data?: EmbedFloatDomData }
         return () => root.removeEventListener('wheel', onWheel);
     }, [sheetLike]);
 
+    const contentHeight = resolveDocsTableLikeCustomBlockContentHeight(props.customBlockRenderViewport?.contentHeight, 1);
+    const viewportHeight = resolveDocsTableLikeCustomBlockContentHeight(props.customBlockRenderViewport?.height, contentHeight);
     const style = sheetLike
         ? ({
             '--univer-embed-docs-block-bleed-left': `${viewport.bleedLeft}px`,
             '--univer-embed-docs-block-bleed-width': `${viewport.bleedWidth}px`,
-            '--univer-embed-docs-block-content-height': `${resolveDocsTableLikeCustomBlockContentHeight(props.customBlockRenderViewport?.contentHeight, 1)}px`,
+            '--univer-embed-docs-block-content-height': `${contentHeight}px`,
             '--univer-embed-docs-block-content-width': `${viewport.contentWidth}px`,
+            '--univer-embed-docs-block-viewport-height': `${viewportHeight}px`,
             '--univer-embed-docs-block-virtual-width': `${viewport.virtualWidth}px`,
         } as CSSProperties & Record<string, string>)
         : undefined;
@@ -291,6 +295,7 @@ function ensureEmbedDocsCustomBlockStyles(): void {
 .univer-embed-docs-custom-block[data-embed-docs-custom-block-sheet-like="true"] .univer-embed-float-dom__live {
     left: calc(var(--univer-embed-docs-block-bleed-left, 0px) * -1);
     width: var(--univer-embed-docs-block-bleed-width, 100%);
+    height: var(--univer-embed-docs-block-viewport-height, 100%);
     overflow-x: auto;
     overflow-y: auto;
     scrollbar-width: thin;

@@ -296,6 +296,7 @@ function mountSheetsFloatingMenu(context: EmbedFloatingMenuMountContext) {
             hostUnitId: context.hostUnitId,
             embedId: context.embedId,
             childUnitId: context.childUnitId,
+            fullscreen: Boolean(context.renderScope.fullscreen),
             usesDomFloatingStage: context.descriptor.entry !== 'slides-floating-object',
             renderScopeActive$: context.renderScope.active$,
         })
@@ -311,6 +312,7 @@ interface ISheetEmbedFloatingMenuProps {
     hostUnitId: string;
     embedId: string;
     childUnitId: string;
+    fullscreen: boolean;
     usesDomFloatingStage: boolean;
     renderScopeActive$: Observable<boolean>;
 }
@@ -318,9 +320,14 @@ interface ISheetEmbedFloatingMenuProps {
 export function resolveSheetsFloatingMenuStage(params: {
     embedId: string;
     active: EmbedFloatingActivation | null;
+    fullscreen?: boolean;
     usesDomFloatingStage: boolean;
     renderScopeActive: boolean;
 }): SheetFloatingMenuStage {
+    if (params.fullscreen) {
+        return 'stage2';
+    }
+
     if (params.active?.embedId === params.embedId && params.active.stage === 'stage2') {
         return 'stage2';
     }
@@ -333,7 +340,7 @@ export function resolveSheetsFloatingMenuStage(params: {
 }
 
 function SheetEmbedFloatingMenu(props: ISheetEmbedFloatingMenuProps) {
-    const { hostUnitId, embedId, childUnitId, usesDomFloatingStage, renderScopeActive$ } = props;
+    const { hostUnitId, embedId, childUnitId, fullscreen, usesDomFloatingStage, renderScopeActive$ } = props;
     const commandService = useDependency(ICommandService);
     const instanceService = useDependency(IUniverInstanceService);
     const menuManagerService = useDependency(IMenuManagerService);
@@ -345,6 +352,7 @@ function SheetEmbedFloatingMenu(props: ISheetEmbedFloatingMenuProps) {
     const stage = resolveSheetsFloatingMenuStage({
         embedId,
         active,
+        fullscreen,
         usesDomFloatingStage,
         renderScopeActive,
     });

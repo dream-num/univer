@@ -44,9 +44,16 @@ function getDrawingData(drawing: unknown): Record<string, unknown> | undefined {
 }
 
 export function getCommandUnitId(commandParams: unknown): string | undefined {
-    return commandParams && typeof commandParams === 'object' && typeof (commandParams as { unitId?: unknown }).unitId === 'string'
-        ? (commandParams as { unitId: string }).unitId
-        : undefined;
+    if (!commandParams || typeof commandParams !== 'object') {
+        return undefined;
+    }
+
+    const params = commandParams as { unitID?: unknown; unitId?: unknown };
+    if (typeof params.unitId === 'string') {
+        return params.unitId;
+    }
+
+    return typeof params.unitID === 'string' ? params.unitID : undefined;
 }
 
 export function shouldRefreshDocsCustomBlockSizeForCommand(params: {

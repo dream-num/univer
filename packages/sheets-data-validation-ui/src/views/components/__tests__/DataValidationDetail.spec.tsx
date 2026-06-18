@@ -27,6 +27,7 @@ import type { ISelectionWithStyle } from '@univerjs/sheets';
 import type { Root } from 'react-dom/client';
 import {
     createIdentifier,
+    DataValidationErrorStyle,
     DataValidationOperator,
     DataValidationType,
     ICommandService,
@@ -672,6 +673,32 @@ describe('DataValidationDetail rule editing', () => {
             operator: undefined,
             formula1: undefined,
             formula2: undefined,
+        });
+    });
+
+    it('keeps the switched checkbox rule while saving panel options after a type change', async () => {
+        currentTestBed = createDetailTestBed(createDateBetweenRule('rule-date-checkbox-options'));
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        await renderDetail(root, currentTestBed);
+
+        await openSelect(container.querySelectorAll<HTMLElement>('[data-u-comp="select"]')[0]);
+        const options = Array.from(document.querySelectorAll<HTMLElement>('[data-slot="dropdown-menu-radio-item"], [role="menuitemradio"]'));
+        const checkboxOption = options.find((item) => item.textContent?.includes('sheets-data-validation.checkbox.title'))!;
+
+        await clickElement(checkboxOption);
+        await clickElement(findElementByText(container, 'panel.options'));
+        await clickElement(container.querySelectorAll<HTMLInputElement>('[data-u-comp="radio"] input')[1]);
+        await waitForDebounce();
+
+        expect(currentTestBed.sheetDataValidationModel.getRuleById(UNIT_ID, SUB_UNIT_ID, currentTestBed.rule.uid)).toMatchObject({
+            type: DataValidationType.CHECKBOX,
+            operator: undefined,
+            formula1: undefined,
+            formula2: undefined,
+            errorStyle: DataValidationErrorStyle.STOP,
         });
     });
 });

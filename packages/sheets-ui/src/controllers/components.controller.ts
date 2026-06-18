@@ -16,10 +16,98 @@
 
 import type { IUniverSheetsUIConfig } from '../config/config';
 import { Disposable, IConfigService, Inject, Injector } from '@univerjs/core';
-import { AddImageIcon, AdjustHeightDoubleIcon, AdjustWidthDoubleIcon, AlignBottomIcon, AlignTopIcon, AllBorderIcon, AutoHeightDoubleIcon, AutoWidthDoubleIcon, AutowrapIcon, BackSlashDoubleIcon, BoldIcon, BrushIcon, CancelFreezeIcon, CancelMergeIcon, CheckMarkIcon, ClearFormatDoubleIcon, CodeIcon, CopyDoubleIcon, CutIcon, DeleteCellShiftLeftDoubleIcon, DeleteCellShiftUpDoubleIcon, DeleteColumnDoubleIcon, DeleteIcon, DeleteRowDoubleIcon, DownBorderDoubleIcon, DownloadImageIcon, EyeOutlineIcon, FontColorDoubleIcon, FontSizeIncreaseIcon, FontSizeReduceIcon, FreezeColumnIcon, FreezeRowIcon, FreezeToSelectedIcon, HideDoubleIcon, HideGridlinesDoubleIcon, HorizontalBorderDoubleIcon, HorizontallyIcon, HorizontalMergeIcon, InnerBorderDoubleIcon, InsertCellDownDoubleIcon, InsertCellShiftRightDoubleIcon, InsertDoubleIcon, InsertRowAboveDoubleIcon, InsertRowBelowDoubleIcon, ItalicIcon, LeftBorderDoubleIcon, LeftDoubleDiagonalDoubleIcon, LeftInsertColumnDoubleIcon, LeftJustifyingIcon, LeftRotationFortyFiveDegreesIcon, LeftRotationNinetyDegreesIcon, LeftTridiagonalDoubleIcon, LockIcon, MergeAllIcon, NoBorderIcon, NoColorDoubleIcon, NoRotationIcon, OuterBorderDoubleIcon, OverflowIcon, PaintBucketDoubleIcon, PasteSpecialDoubleIcon, PipingIcon, ProtectIcon, ReduceDoubleIcon, RightBorderDoubleIcon, RightDoubleDiagonalDoubleIcon, RightInsertColumnDoubleIcon, RightJustifyingIcon, RightRotationFortyFiveDegreesIcon, RightRotationNinetyDegreesIcon, SlashDoubleIcon, StrikethroughIcon, SubscriptIcon, SuperscriptIcon, TruncationIcon, UnderlineIcon, UpBorderDoubleIcon, VerticalBorderDoubleIcon, VerticalCenterIcon, VerticalIntegrationIcon, VerticalTextIcon, WriteIcon } from '@univerjs/icons';
+import {
+    AddImageIcon,
+    AdjustHeightDoubleIcon,
+    AdjustWidthDoubleIcon,
+    AlignBottomIcon,
+    AlignTopIcon,
+    AllBorderIcon,
+    AutoHeightDoubleIcon,
+    AutoWidthDoubleIcon,
+    AutowrapIcon,
+    BackSlashDoubleIcon,
+    BoldIcon,
+    BrushIcon,
+    CancelFreezeIcon,
+    CancelMergeIcon,
+    CheckMarkIcon,
+    ClearFormatDoubleIcon,
+    CodeIcon,
+    CopyDoubleIcon,
+    CutIcon,
+    DeleteCellShiftLeftDoubleIcon,
+    DeleteCellShiftUpDoubleIcon,
+    DeleteColumnDoubleIcon,
+    DeleteIcon,
+    DeleteRowDoubleIcon,
+    DownBorderDoubleIcon,
+    DownloadImageIcon,
+    EyeOutlineIcon,
+    FontColorDoubleIcon,
+    FontSizeIncreaseIcon,
+    FontSizeReduceIcon,
+    FreezeColumnIcon,
+    FreezeRowIcon,
+    FreezeToSelectedIcon,
+    HideDoubleIcon,
+    HideGridlinesDoubleIcon,
+    HorizontalBorderDoubleIcon,
+    HorizontallyIcon,
+    HorizontalMergeIcon,
+    InnerBorderDoubleIcon,
+    InsertCellDownDoubleIcon,
+    InsertCellShiftRightDoubleIcon,
+    InsertDoubleIcon,
+    InsertRowAboveDoubleIcon,
+    InsertRowBelowDoubleIcon,
+    ItalicIcon,
+    LeftBorderDoubleIcon,
+    LeftDoubleDiagonalDoubleIcon,
+    LeftInsertColumnDoubleIcon,
+    LeftJustifyingIcon,
+    LeftRotationFortyFiveDegreesIcon,
+    LeftRotationNinetyDegreesIcon,
+    LeftTridiagonalDoubleIcon,
+    LockIcon,
+    MergeAllIcon,
+    NoBorderIcon,
+    NoColorDoubleIcon,
+    NoRotationIcon,
+    OuterBorderDoubleIcon,
+    OverflowIcon,
+    PaintBucketDoubleIcon,
+    PasteSpecialDoubleIcon,
+    PipingIcon,
+    ProtectIcon,
+    ReduceDoubleIcon,
+    RightBorderDoubleIcon,
+    RightDoubleDiagonalDoubleIcon,
+    RightInsertColumnDoubleIcon,
+    RightJustifyingIcon,
+    RightRotationFortyFiveDegreesIcon,
+    RightRotationNinetyDegreesIcon,
+    SlashDoubleIcon,
+    StrikethroughIcon,
+    SubscriptIcon,
+    SuperscriptIcon,
+    TruncationIcon,
+    UnderlineIcon,
+    UpBorderDoubleIcon,
+    VerticalBorderDoubleIcon,
+    VerticalCenterIcon,
+    VerticalIntegrationIcon,
+    VerticalTextIcon,
+    WriteIcon,
+} from '@univerjs/icons';
 import { ComponentManager, IconManager } from '@univerjs/ui';
 import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../config/config';
-import { UNIVER_SHEET_PERMISSION_DIALOG, UNIVER_SHEET_PERMISSION_PANEL, UNIVER_SHEET_PERMISSION_USER_DIALOG, UNIVER_SHEET_PERMISSION_USER_PART } from '../consts/permission';
+import {
+    UNIVER_SHEET_PERMISSION_DIALOG,
+    UNIVER_SHEET_PERMISSION_PANEL,
+    UNIVER_SHEET_PERMISSION_USER_DIALOG,
+    UNIVER_SHEET_PERMISSION_USER_PART,
+} from '../consts/permission';
 import { BorderPanel } from '../views/border-panel/BorderPanel';
 import { BORDER_PANEL_COMPONENT } from '../views/border-panel/interface';
 import { CELL_ALERT_KEY } from '../views/cell-alert';
@@ -44,19 +132,14 @@ export class ComponentsController extends Disposable {
 
         this._registerComponents();
         this._registerParts();
-        this._registerIcons2();
-        this._registerComponents2();
         this._registerIcons();
-        this._registerComponents3();
     }
 
     private _registerComponents(): void {
         this.disposeWithMe(
             this._componentManager.register(CELL_ALERT_KEY, CellAlert)
         );
-    }
 
-    private _registerComponents2(): void {
         ([
             [UNIVER_SHEET_PERMISSION_PANEL, SheetPermissionPanel],
             [UNIVER_SHEET_PERMISSION_USER_DIALOG, SheetPermissionUserDialog],
@@ -68,19 +151,7 @@ export class ComponentsController extends Disposable {
                 comp
             ));
         });
-    }
 
-    private _registerIcons(): void {
-        this.disposeWithMe(this._iconManager.register({
-            ProtectIcon,
-            DeleteIcon,
-            WriteIcon,
-            CheckMarkIcon,
-            LockIcon,
-        }));
-    }
-
-    private _registerComponents3(): void {
         const configService = this._injector.get(IConfigService);
         const config = configService.getConfig<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
 
@@ -106,7 +177,15 @@ export class ComponentsController extends Disposable {
     }
 
     // eslint-disable-next-line max-lines-per-function
-    private _registerIcons2(): void {
+    private _registerIcons(): void {
+        this.disposeWithMe(this._iconManager.register({
+            ProtectIcon,
+            DeleteIcon,
+            WriteIcon,
+            CheckMarkIcon,
+            LockIcon,
+        }));
+
         this.disposeWithMe(this._iconManager.register({
             AdjustHeightDoubleIcon,
             AdjustWidthDoubleIcon,

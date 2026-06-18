@@ -14,10 +14,19 @@
  * limitations under the License.
  */
 
-import type { ICommand, ICommandInfo, IDrawingParam } from '@univerjs/core';
+import type { ICommand, ICommandInfo, IDocumentData, IDrawingParam } from '@univerjs/core';
 import type { ReactElement } from 'react';
 import type { Root } from 'react-dom/client';
-import { CommandType, DrawingTypeEnum, ICommandService, LocaleType, Univer } from '@univerjs/core';
+import {
+    BooleanNumber,
+    CommandType,
+    DrawingTypeEnum,
+    ICommandService,
+    LocaleType,
+    PositionedObjectLayoutType,
+    Univer,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -48,6 +57,40 @@ function createDrawing(id: string): IDrawingParam {
             width: 120,
             height: 80,
             angle: 0,
+        },
+    };
+}
+
+function createDocData(layoutType: PositionedObjectLayoutType, behindDoc = BooleanNumber.FALSE): IDocumentData {
+    return {
+        id: unitId,
+        body: {
+            dataStream: '\b\r\n',
+            customBlocks: [{
+                startIndex: 0,
+                blockId: drawingId,
+            }],
+        },
+        drawings: {
+            [drawingId]: {
+                drawingId,
+                unitId,
+                subUnitId,
+                drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+                layoutType,
+                behindDoc,
+            } as never,
+        },
+        drawingsOrder: [drawingId],
+        documentStyle: {
+            pageSize: {
+                width: 594.3,
+                height: 840.51,
+            },
+            marginTop: 72,
+            marginBottom: 72,
+            marginRight: 90,
+            marginLeft: 90,
         },
     };
 }
@@ -182,6 +225,45 @@ describe('drawing command behavior', () => {
                 subUnitId,
                 drawings: [{ unitId, subUnitId, drawingId }],
                 wrappingStyle: 'wrapSquare',
+            },
+        }]);
+    });
+
+    it('loads the current doc image wrapping style before changing it from the floating toolbar', async () => {
+        univer.createUnit(UniverInstanceType.UNIVER_DOC, createDocData(PositionedObjectLayoutType.WRAP_NONE, BooleanNumber.TRUE));
+        const rendered = renderWithRediContext(
+            univer.__getInjector(),
+            <ImagePopupMenu
+                popup={{
+                    extraProps: {
+                        variant: 'doc-floating-toolbar',
+                        unitId,
+                        subUnitId,
+                        drawingId,
+                        menuItems: [],
+                    },
+                }}
+            />
+        );
+        root = rendered.root;
+        container = rendered.container;
+
+        clickElement(document.querySelector('[data-u-comp="doc-image-floating-toolbar"] button')!);
+        const behindTextOption = findByText<HTMLButtonElement>('button', 'drawing-ui.image-text-wrap.behindText');
+
+        expect(behindTextOption.className).toContain('univer-bg-primary-50');
+
+        clickElement(findByText('button', 'drawing-ui.image-text-wrap.inFrontText'));
+        await flushPendingCommands();
+
+        expect(executedCommands).toEqual([{
+            id: wrappingStyleCommandId,
+            type: CommandType.OPERATION,
+            params: {
+                unitId,
+                subUnitId,
+                drawings: [{ unitId, subUnitId, drawingId }],
+                wrappingStyle: 'inFrontOfText',
             },
         }]);
     });

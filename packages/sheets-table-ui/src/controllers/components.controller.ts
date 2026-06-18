@@ -31,7 +31,6 @@ export class ComponentsController extends Disposable {
         super();
 
         this._registerComponents();
-        this._registerComponents2();
         this._registerIcons();
     }
 
@@ -42,9 +41,7 @@ export class ComponentsController extends Disposable {
         ] as const).forEach(([key, comp]) => {
             this.disposeWithMe(this._componentManager.register(key, comp));
         });
-    }
 
-    private _registerComponents2(): void {
         ([
             [TABLE_SELECTOR_DIALOG, SheetTableSelector],
             [SHEET_TABLE_THEME_PANEL, SheetTableThemePanel],

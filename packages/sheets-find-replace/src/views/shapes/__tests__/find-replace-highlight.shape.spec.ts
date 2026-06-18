@@ -172,4 +172,23 @@ describe('SheetFindReplaceHighlightShape', () => {
         expect(context.fillCount).toBe(1);
         expect(context.strokeCount).toBe(1);
     });
+
+    it('keeps a hidden non-current match compact without drawing an active border', () => {
+        const shape = new SheetFindReplaceHighlightShape('hidden-result', {
+            inHiddenRange: true,
+            color: { r: 90, g: 100, b: 110 },
+            activated: false,
+            width: 2,
+            height: 2,
+        });
+        const context = new TestCanvasContext();
+
+        drawShape(shape, context);
+
+        expect(context.rects).toEqual([{ left: 0, top: 0, width: 2, height: 2 }]);
+        expect(context.fillStyle).toBe('rgba(90, 100, 110, 0.35)');
+        expect(context.lineWidth).toBe(0);
+        expect(context.fillCount).toBe(1);
+        expect(context.strokeCount).toBe(0);
+    });
 });

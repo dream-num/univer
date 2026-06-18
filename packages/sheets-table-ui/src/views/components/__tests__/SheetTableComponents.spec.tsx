@@ -22,6 +22,7 @@ import {
     ICommandService,
     Inject,
     Injector,
+    IPermissionService,
     LocaleService,
     LocaleType,
     Plugin,
@@ -29,16 +30,21 @@ import {
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
-import { DefinedNamesService, IDefinedNamesService, LexerTreeBuilder } from '@univerjs/engine-formula';
+import { DefinedNamesService, FormulaDataModel, IDefinedNamesService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import {
     AddRangeThemeMutation,
     RemoveRangeThemeMutation,
+    ReorderRangeCommand,
+    ReorderRangeMutation,
     SetRangeThemeMutation,
     SheetInterceptorService,
     SheetRangeThemeModel,
+    SheetSkeletonService,
     SheetsSelectionsService,
+    WorkbookEditablePermission,
 } from '@univerjs/sheets';
+import { SheetsSortController, SheetsSortService } from '@univerjs/sheets-sort';
 import {
     AddTableThemeCommand,
     RemoveTableThemeCommand,
@@ -46,6 +52,7 @@ import {
     SetSheetTableFilterCommand,
     SetSheetTableFilterMutation,
     SetSheetTableMutation,
+    SheetsTableSortStateEnum,
     SheetTableService,
     TABLE_FILTER_EMPTY_VALUE,
     TableColumnFilterTypeEnum,
@@ -456,9 +463,13 @@ function createTestBed(): ITestBed {
                 [TableManager],
                 [SheetTableService],
                 [SheetsTableUiService],
+                [SheetsSortService, { useClass: SheetsSortService }],
+                [SheetsSortController, { useClass: SheetsSortController }],
+                [FormulaDataModel, { useClass: FormulaDataModel }],
                 [SheetRangeThemeModel],
                 [SheetTableThemeUIController],
                 [SheetInterceptorService],
+                [SheetSkeletonService, { useClass: SheetSkeletonService }],
                 [SheetsSelectionsService],
                 [IRenderManagerService, { useClass: TestRenderManagerService }],
                 [IEditorService, { useClass: TestEditorService as never }],
@@ -495,6 +506,15 @@ function createTestBed(): ITestBed {
                 footer: 'Footer',
                 renamePlaceholder: 'Enter table name',
                 tableNameError: 'Invalid table name',
+                columnMenu: {
+                    'insert-left': 'Insert 1 table column left',
+                    'insert-right': 'Insert 1 table column right',
+                    delete: 'Delete table column',
+                },
+                sort: {
+                    'sort-asc': 'Ascending',
+                    'sort-desc': 'Descending',
+                },
                 tableRangeWithOtherTableError: 'Table range cannot overlap with other tables',
                 tableRangeSingleRowError: 'Table range cannot be a single row',
                 updateError: 'Cannot set table range to an area that does not overlap with the original and is not in the same row',
@@ -537,6 +557,8 @@ function createTestBed(): ITestBed {
         SetSheetTableMutation,
         SetSheetTableFilterCommand,
         SetSheetTableFilterMutation,
+        ReorderRangeCommand,
+        ReorderRangeMutation,
         AddRangeThemeMutation,
         RemoveRangeThemeMutation,
         SetRangeThemeMutation,
@@ -547,6 +569,8 @@ function createTestBed(): ITestBed {
     });
 
     const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, createWorkbookData());
+    const permissionService = injector.get(IPermissionService);
+    permissionService.addPermissionPoint(new WorkbookEditablePermission(workbook.getUnitId()));
     const sheetTableService = injector.get(SheetTableService);
     sheetTableService.addTable(
         workbook.getUnitId(),
@@ -564,6 +588,7 @@ function createTestBed(): ITestBed {
         ['Product', 'Amount'],
         'table-archive'
     );
+    injector.get(SheetsSortController);
 
     return {
         univer,
@@ -1090,6 +1115,36 @@ describe('sheet table view components', () => {
         await flushCommands();
 
         expect(table.getTableFilterColumn(0)).toBeUndefined();
+        expect(componentController.closeCount).toBe(1);
+    });
+
+    it('sorts the table body descending from the filter panel sort action', async () => {
+        testBed = createTestBed();
+        const componentController = testBed.injector.get(SheetsTableComponentController) as TestComponentController;
+        const unitId = testBed.workbook.getUnitId();
+        const worksheet = testBed.workbook.getSheetBySheetId('sheet1')!;
+        componentController.setCurrentTableFilterInfo({
+            unitId,
+            subUnitId: 'sheet1',
+            tableId: 'table-orders',
+            row: 0,
+            column: 0,
+        });
+        const rendered = renderWithRediContext(testBed, <SheetTableFilterPanel />);
+        root = rendered.root;
+        container = rendered.container;
+
+        clickButtonByText(container, 'Descending');
+        await flushCommands();
+
+        const table = testBed.injector.get(TableManager).getTable(unitId, 'table-orders')!;
+        expect(worksheet.getCellRaw(1, 0)?.v).toBe('pen');
+        expect(worksheet.getCellRaw(2, 0)?.v).toBe('book');
+        expect(worksheet.getCellRaw(3, 0)?.v).toBe(undefined);
+        expect(table.getTableFilters().getSortState()).toEqual({
+            columnIndex: 0,
+            sortState: SheetsTableSortStateEnum.Desc,
+        });
         expect(componentController.closeCount).toBe(1);
     });
 

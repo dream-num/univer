@@ -30,7 +30,6 @@ export class ComponentsController extends Disposable {
     ) {
         super();
 
-        this._registerComponents2();
         this._registerIcons();
         this._registerComponents();
     }
@@ -42,10 +41,8 @@ export class ComponentsController extends Disposable {
     }
 
     private _registerComponents(): void {
-        this._componentManager.register(MORE_FUNCTIONS_COMPONENT, MoreFunctions);
-    }
+        this.disposeWithMe(this._componentManager.register(MORE_FUNCTIONS_COMPONENT, MoreFunctions));
 
-    private _registerComponents2(): void {
         this.disposeWithMe(this._componentManager.register(RANGE_SELECTOR_COMPONENT_KEY, RangeSelector));
 
         this.disposeWithMe(this._componentManager.register(EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, FormulaEditor));

@@ -25,6 +25,7 @@ import { createDocsFloatingMenuContributions } from './embed-floating-menu';
 import { createDocsCustomBlockHostAdapterContribution, createDocsCustomBlockHostContainerContribution } from './embed-host-adapter';
 import { EMBED_DOCS_CUSTOM_BLOCK_DEFAULT_COMPONENT_KEY } from './embed-host-anchor';
 import { createDocsPassiveViewportProvider } from './embed-passive-viewport';
+import { registerDocsEmbedProductMenus } from './embed-product-menu';
 
 export function registerDocsEmbedUIContributions(injector: Injector): void {
     registerEmbedUIContribution(injector, 'docs-ui.embed', registerDocsEmbedUIContributionsNow);
@@ -41,6 +42,8 @@ function registerDocsEmbedUIContributionsNow(injector: Injector): void {
     const anchorModelService = injector.has(EmbedHostAnchorModelService) ? injector.get(EmbedHostAnchorModelService) : undefined;
     const univerInstanceService = injector.has(IUniverInstanceService) ? injector.get(IUniverInstanceService) : undefined;
     const renderManagerService = injector.has(IRenderManagerService) ? injector.get(IRenderManagerService) : undefined;
+    registerDocsEmbedProductMenus(injector);
+
     if (injector.has(ComponentManager)) {
         injector.get(ComponentManager).register(EMBED_DOCS_CUSTOM_BLOCK_DEFAULT_COMPONENT_KEY, EmbedDocsCustomBlockRenderer);
     }

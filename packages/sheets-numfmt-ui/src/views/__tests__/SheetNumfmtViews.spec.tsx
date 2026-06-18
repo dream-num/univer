@@ -309,6 +309,45 @@ describe('MoreNumfmtType Options', () => {
         expect(currentTestBed.numfmtService.getValue(UNIT_ID, SUB_UNIT_ID, 0, 0)).toBeNull();
         expect(currentTestBed.numfmtService.getValue(UNIT_ID, SUB_UNIT_ID, 0, 1)).toBeNull();
     });
+
+    it('applies percent format to the current sheet selection and returns focus to the sheet', async () => {
+        currentTestBed = createNumfmtViewTestBed();
+        currentTestBed.selectionService.setSelections([{
+            range: {
+                startRow: 0,
+                endRow: 0,
+                startColumn: 0,
+                endColumn: 0,
+                rangeType: RANGE_TYPE.NORMAL,
+            },
+            primary: null,
+        }] as never);
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <Options />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        const percentItem = Array.from(container.querySelectorAll('.univer-flex.univer-h-7'))
+            .find((item) => item.textContent?.includes('Percent')) as HTMLElement | undefined;
+
+        expect(percentItem).toBeDefined();
+
+        await act(async () => {
+            percentItem!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            await Promise.resolve();
+        });
+
+        expect(currentTestBed.numfmtService.getValue(UNIT_ID, SUB_UNIT_ID, 0, 0)).toEqual({ pattern: '0.00%' });
+        expect((currentTestBed.injector.get(ILayoutService) as unknown as TestLayoutService).checkContentIsFocused()).toBe(true);
+    });
 });
 
 describe('CustomFormat', () => {

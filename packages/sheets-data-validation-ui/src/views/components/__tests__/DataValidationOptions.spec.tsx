@@ -163,6 +163,50 @@ describe('DataValidationOptions', () => {
         });
     });
 
+    it('keeps a custom error message while message display is toggled off and back on', async () => {
+        currentTestBed = createOptionsTestBed();
+        const changes: IDataValidationRuleOptions[] = [];
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <OptionsHarness
+                        initialValue={{
+                            errorStyle: DataValidationErrorStyle.STOP,
+                            showErrorMessage: true,
+                            error: 'Keep this instruction',
+                        }}
+                        changes={changes}
+                    />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        await clickElement(container.firstElementChild as HTMLElement);
+        const showMessageCheckbox = container.querySelector<HTMLInputElement>('[data-u-comp="checkbox"] input')!;
+
+        await clickElement(showMessageCheckbox);
+
+        expect(changes.at(-1)).toEqual({
+            errorStyle: DataValidationErrorStyle.STOP,
+            showErrorMessage: false,
+            error: 'Keep this instruction',
+        });
+
+        await clickElement(showMessageCheckbox);
+
+        expect(changes.at(-1)).toEqual({
+            errorStyle: DataValidationErrorStyle.STOP,
+            showErrorMessage: true,
+            error: 'Keep this instruction',
+        });
+        expect(container.querySelector<HTMLInputElement>('[data-u-comp="input"] input')?.value).toBe('Keep this instruction');
+    });
+
     it('saves list render mode changes from the registered extra options component', async () => {
         currentTestBed = createOptionsTestBed();
         currentTestBed.injector

@@ -315,4 +315,21 @@ describe('DocDrawingPosition', () => {
             },
         });
     });
+
+    it('hides the position controls when doc drawing focus is cleared', async () => {
+        currentTestBed = createPositionTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        renderPanel(root, currentTestBed);
+
+        expect(container.firstElementChild?.classList.contains('univer-hidden')).toBe(false);
+
+        await act(async () => {
+            currentTestBed!.get(IDrawingManagerService).focusDrawing([]);
+            await Promise.resolve();
+        });
+
+        expect(container.firstElementChild?.classList.contains('univer-hidden')).toBe(true);
+    });
 });

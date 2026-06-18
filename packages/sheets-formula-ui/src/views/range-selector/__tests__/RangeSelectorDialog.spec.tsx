@@ -179,4 +179,21 @@ describe('RangeSelectorDialog', () => {
         ]]);
         expect(RangeDialogState.closed).toBe(0);
     });
+
+    it('closes without confirming typed ranges when the user cancels the dialog', async () => {
+        renderRangeDialog(root, createRangeDialogTestBed());
+
+        const firstInput = document.body.querySelector('input') as HTMLInputElement;
+        expect(firstInput).toBeDefined();
+
+        await act(async () => {
+            writeInput(firstInput, 'A1:B2');
+            await Promise.resolve();
+        });
+
+        await clickButton('Cancel');
+
+        expect(RangeDialogState.confirmed).toEqual([]);
+        expect(RangeDialogState.closed).toBe(1);
+    });
 });

@@ -708,6 +708,43 @@ describe('sheet table view components', () => {
         expect(confirmed).toHaveLength(0);
     });
 
+    it('cancels table range selection without submitting a range update', async () => {
+        testBed = createTestBed();
+        const unitId = testBed.workbook.getUnitId();
+        const confirmed: unknown[] = [];
+        let cancelCount = 0;
+        const rendered = renderWithRediContext(
+            testBed,
+            <SheetTableSelector
+                unitId={unitId}
+                subUnitId="sheet1"
+                tableId="table-orders"
+                range={{ startRow: 0, endRow: 3, startColumn: 0, endColumn: 1 }}
+                onConfirm={(info) => {
+                    confirmed.push(info);
+                }}
+                onCancel={() => {
+                    cancelCount += 1;
+                }}
+            />
+        );
+        root = rendered.root;
+        container = rendered.container;
+
+        clickButtonByText(container, 'Cancel');
+        await flushCommands();
+
+        const table = testBed.injector.get(TableManager).getTable(unitId, 'table-orders')!;
+        expect(confirmed).toEqual([]);
+        expect(cancelCount).toBe(1);
+        expect(table.getRange()).toEqual({
+            startRow: 0,
+            endRow: 3,
+            startColumn: 0,
+            endColumn: 1,
+        });
+    });
+
     it('confirms a same-header-row range update for the existing table', async () => {
         testBed = createTestBed();
         const unitId = testBed.workbook.getUnitId();

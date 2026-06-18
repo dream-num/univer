@@ -15,13 +15,13 @@
  */
 
 import type { Injector, UniverInstanceType } from '@univerjs/core';
-import type { EmbedGuestContribution } from '../types/embed';
+import type { IEmbedGuestContribution } from '../types/embed';
 
-const PENDING_GUEST_CONTRIBUTIONS = new WeakMap<object, EmbedGuestContribution[]>();
+const PENDING_GUEST_CONTRIBUTIONS = new WeakMap<object, IEmbedGuestContribution[]>();
 
 export function registerEmbedGuestContribution(
     injector: Pick<Injector, 'get' | 'has'>,
-    contribution: EmbedGuestContribution
+    contribution: IEmbedGuestContribution
 ): void {
     if (injector.has(EmbedGuestContributionRegistryService)) {
         registerGuestContributionIfMissing(injector.get(EmbedGuestContributionRegistryService), contribution);
@@ -53,9 +53,9 @@ export function flushPendingEmbedGuestContributions(injector: Pick<Injector, 'ge
 }
 
 export class EmbedGuestContributionRegistryService {
-    private readonly _contributions = new Map<UniverInstanceType, EmbedGuestContribution>();
+    private readonly _contributions = new Map<UniverInstanceType, IEmbedGuestContribution>();
 
-    register(contribution: EmbedGuestContribution): void {
+    register(contribution: IEmbedGuestContribution): void {
         if (this._contributions.has(contribution.childType)) {
             throw new Error(`Embed guest contribution already registered: ${contribution.childType}`);
         }
@@ -63,18 +63,18 @@ export class EmbedGuestContributionRegistryService {
         this._contributions.set(contribution.childType, contribution);
     }
 
-    get(childType: UniverInstanceType): EmbedGuestContribution | undefined {
+    get(childType: UniverInstanceType): IEmbedGuestContribution | undefined {
         return this._contributions.get(childType);
     }
 
-    list(): EmbedGuestContribution[] {
+    list(): IEmbedGuestContribution[] {
         return [...this._contributions.values()];
     }
 }
 
 function registerGuestContributionIfMissing(
     registry: EmbedGuestContributionRegistryService,
-    contribution: EmbedGuestContribution
+    contribution: IEmbedGuestContribution
 ): void {
     if (!registry.get(contribution.childType)) {
         registry.register(contribution);

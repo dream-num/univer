@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { EmbedPassiveViewportWheelContext } from '../types/embed-ui';
+import type { IEmbedPassiveViewportWheelContext } from '../types/embed-ui';
 
 export function normalizePassiveWheelDelta(event: WheelEvent, scaleX = 1, scaleY = 1): { offsetX: number; offsetY: number } {
     let offsetX = event.deltaX / (Math.abs(scaleX) || 1);
@@ -37,7 +37,7 @@ export function normalizePassiveWheelDelta(event: WheelEvent, scaleX = 1, scaleY
 }
 
 export function scrollSceneViewportPassive(
-    context: EmbedPassiveViewportWheelContext,
+    context: IEmbedPassiveViewportWheelContext,
     viewport: {
         viewportScrollX?: number;
         viewportScrollY?: number;

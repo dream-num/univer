@@ -19,7 +19,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { createDocsTableLikeCustomBlockWheelHandler } from './embed-docs-custom-block-renderer';
+import { createDocsTableLikeCustomBlockWheelHandler } from './EmbedDocsCustomBlockRenderer';
 
 describe('createDocsTableLikeCustomBlockWheelHandler', () => {
     it('uses the latest bleed boundary when scrolling horizontally', () => {

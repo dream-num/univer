@@ -14,30 +14,30 @@
  * limitations under the License.
  */
 
-import type { EmbedDescriptor, EmbedLayoutPolicy } from '@univerjs/embed';
-import type { EmbedHostMenuOverride } from '../types/embed-ui';
+import type { IEmbedDescriptor, IEmbedLayoutPolicy } from '@univerjs/embed';
+import type { IEmbedHostMenuOverride } from '../types/embed-ui';
 import { DEFAULT_EMBED_TAB_LAYOUT_POLICY } from '@univerjs/embed';
 import { BehaviorSubject } from 'rxjs';
 
-export interface EmbedHostMenuOverrideActivateOptions {
-    layoutPolicy?: EmbedLayoutPolicy;
+export interface IEmbedHostMenuOverrideActivateOptions {
+    layoutPolicy?: IEmbedLayoutPolicy;
     allowPlaceholder?: boolean;
 }
 
 export class EmbedHostMenuOverrideService {
-    private readonly _override$ = new BehaviorSubject<EmbedHostMenuOverride | null>(null);
+    private readonly _override$ = new BehaviorSubject<IEmbedHostMenuOverride | null>(null);
 
     readonly override$ = this._override$.asObservable();
 
-    getOverride(): EmbedHostMenuOverride | null {
+    getOverride(): IEmbedHostMenuOverride | null {
         return this._override$.getValue();
     }
 
     activate(
-        descriptor: EmbedDescriptor,
-        reason: EmbedHostMenuOverride['reason'],
-        options: EmbedHostMenuOverrideActivateOptions = {}
-    ): EmbedHostMenuOverride | null {
+        descriptor: IEmbedDescriptor,
+        reason: IEmbedHostMenuOverride['reason'],
+        options: IEmbedHostMenuOverrideActivateOptions = {}
+    ): IEmbedHostMenuOverride | null {
         if (!descriptor.childUnitId || descriptor.childType == null) {
             throw new Error('EMBED_MENU_OVERRIDE_CHILD_NOT_RESOLVED');
         }
@@ -53,7 +53,7 @@ export class EmbedHostMenuOverrideService {
             return null;
         }
 
-        const override: EmbedHostMenuOverride = {
+        const override: IEmbedHostMenuOverride = {
             hostUnitId: descriptor.hostUnitId,
             embedId: descriptor.embedId,
             childUnitId: descriptor.childUnitId,

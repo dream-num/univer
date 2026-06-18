@@ -16,27 +16,27 @@
 
 import type { IDisposable, UniverInstanceType } from '@univerjs/core';
 import type {
-    EmbedChildContainerContext,
-    EmbedFloatPreviewEntry,
-    EmbedFloatPreviewProvider,
-    EmbedFloatPreviewRenderRequest,
     EmbedFloatPreviewRenderResult,
+    IEmbedChildContainerContext,
+    IEmbedFloatPreviewEntry,
+    IEmbedFloatPreviewProvider,
+    IEmbedFloatPreviewRenderRequest,
 } from '../types/embed-ui';
 import { toDisposable } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { captureEmbedContextSceneCanvas } from './embed-scene-canvas-capture.service';
 
 export class EmbedFloatPreviewService {
-    readonly previewUpdated$ = new Subject<EmbedFloatPreviewEntry>();
+    readonly previewUpdated$ = new Subject<IEmbedFloatPreviewEntry>();
 
-    private readonly _providers = new Map<UniverInstanceType, EmbedFloatPreviewProvider<any>>();
-    private readonly _entriesByEmbedId = new Map<string, EmbedFloatPreviewEntry>();
-    private readonly _entriesByKey = new Map<string, EmbedFloatPreviewEntry>();
-    private readonly _queue: EmbedFloatPreviewRenderRequest[] = [];
+    private readonly _providers = new Map<UniverInstanceType, IEmbedFloatPreviewProvider<any>>();
+    private readonly _entriesByEmbedId = new Map<string, IEmbedFloatPreviewEntry>();
+    private readonly _entriesByKey = new Map<string, IEmbedFloatPreviewEntry>();
+    private readonly _queue: IEmbedFloatPreviewRenderRequest[] = [];
     private _rendering = false;
     private _activeDrain: Promise<void> | null = null;
 
-    registerProvider(provider: EmbedFloatPreviewProvider<any>): IDisposable {
+    registerProvider(provider: IEmbedFloatPreviewProvider<any>): IDisposable {
         this._providers.set(provider.childType, provider);
 
         return toDisposable(() => {
@@ -46,25 +46,25 @@ export class EmbedFloatPreviewService {
         });
     }
 
-    getProvider(childType: UniverInstanceType): EmbedFloatPreviewProvider<any> | undefined {
+    getProvider(childType: UniverInstanceType): IEmbedFloatPreviewProvider<any> | undefined {
         return this._providers.get(childType);
     }
 
-    getPreview(embedId: string): EmbedFloatPreviewEntry | undefined {
+    getPreview(embedId: string): IEmbedFloatPreviewEntry | undefined {
         return this._entriesByEmbedId.get(embedId);
     }
 
     requestPreview<TViewState = unknown>(
-        request: EmbedFloatPreviewRenderRequest<TViewState>
-    ): EmbedFloatPreviewEntry<TViewState> {
+        request: IEmbedFloatPreviewRenderRequest<TViewState>
+    ): IEmbedFloatPreviewEntry<TViewState> {
         const key = this.getCacheKey(request);
-        const cached = this._entriesByKey.get(key) as EmbedFloatPreviewEntry<TViewState> | undefined;
+        const cached = this._entriesByKey.get(key) as IEmbedFloatPreviewEntry<TViewState> | undefined;
         if (cached && (cached.status === 'pending' || cached.status === 'ready')) {
             return cached;
         }
 
-        const previous = this._entriesByEmbedId.get(request.descriptor.embedId) as EmbedFloatPreviewEntry<TViewState> | undefined;
-        const entry: EmbedFloatPreviewEntry<TViewState> = {
+        const previous = this._entriesByEmbedId.get(request.descriptor.embedId) as IEmbedFloatPreviewEntry<TViewState> | undefined;
+        const entry: IEmbedFloatPreviewEntry<TViewState> = {
             embedId: request.descriptor.embedId,
             childUnitId: request.childUnitId,
             childType: request.childType,
@@ -85,8 +85,8 @@ export class EmbedFloatPreviewService {
         return entry;
     }
 
-    async collectViewState<TViewState = unknown>(context: EmbedChildContainerContext): Promise<TViewState | undefined> {
-        const provider = this._providers.get(context.childType) as EmbedFloatPreviewProvider<TViewState> | undefined;
+    async collectViewState<TViewState = unknown>(context: IEmbedChildContainerContext): Promise<TViewState | undefined> {
+        const provider = this._providers.get(context.childType) as IEmbedFloatPreviewProvider<TViewState> | undefined;
         if (!provider) {
             return undefined;
         }
@@ -97,21 +97,21 @@ export class EmbedFloatPreviewService {
     }
 
     async restoreViewState<TViewState = unknown>(
-        context: EmbedChildContainerContext,
+        context: IEmbedChildContainerContext,
         viewState: TViewState | undefined
     ): Promise<void> {
         if (viewState == null) {
             return;
         }
 
-        const provider = this._providers.get(context.childType) as EmbedFloatPreviewProvider<TViewState> | undefined;
+        const provider = this._providers.get(context.childType) as IEmbedFloatPreviewProvider<TViewState> | undefined;
         await provider?.restoreViewState(context, viewState);
     }
 
     updateViewState<TViewState = unknown>(embedId: string, viewState: TViewState): void {
         const current = this._entriesByEmbedId.get(embedId);
         if (!current) {
-            const entry: EmbedFloatPreviewEntry<TViewState> = {
+            const entry: IEmbedFloatPreviewEntry<TViewState> = {
                 embedId,
                 childUnitId: '',
                 childType: undefined as unknown as UniverInstanceType,
@@ -159,7 +159,7 @@ export class EmbedFloatPreviewService {
         });
     }
 
-    getCacheKey(request: EmbedFloatPreviewRenderRequest): string {
+    getCacheKey(request: IEmbedFloatPreviewRenderRequest): string {
         return [
             request.descriptor.embedId,
             request.childUnitId,
@@ -210,7 +210,7 @@ export class EmbedFloatPreviewService {
         }
     }
 
-    private async _renderOne(request: EmbedFloatPreviewRenderRequest): Promise<void> {
+    private async _renderOne(request: IEmbedFloatPreviewRenderRequest): Promise<void> {
         const key = this.getCacheKey(request);
         const entry = this._entriesByKey.get(key);
         if (!entry || entry.status !== 'pending') {
@@ -259,7 +259,7 @@ export class EmbedFloatPreviewService {
         }
     }
 
-    private _findPreviousReadyEntry(embedId: string, current: EmbedFloatPreviewEntry): EmbedFloatPreviewEntry | undefined {
+    private _findPreviousReadyEntry(embedId: string, current: IEmbedFloatPreviewEntry): IEmbedFloatPreviewEntry | undefined {
         const latest = this._entriesByEmbedId.get(embedId);
         if (latest && latest !== current && latest.image) {
             return latest;
@@ -270,7 +270,7 @@ export class EmbedFloatPreviewService {
             .find((entry) => entry.embedId === embedId && entry !== current && entry.image);
     }
 
-    private _setRenderFailure(entry: EmbedFloatPreviewEntry, previous: EmbedFloatPreviewEntry | undefined, error: unknown): void {
+    private _setRenderFailure(entry: IEmbedFloatPreviewEntry, previous: IEmbedFloatPreviewEntry | undefined, error: unknown): void {
         entry.status = previous?.image ? 'stale' : 'error';
         entry.image = previous?.image;
         entry.viewState = entry.viewState ?? previous?.viewState;

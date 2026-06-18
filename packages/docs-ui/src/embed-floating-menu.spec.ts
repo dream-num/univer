@@ -16,7 +16,7 @@
 
 import { UniverInstanceType } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
-import { createDocsFloatingMenuContributions } from './embed-floating-menu';
+import { createDocsFloatingMenuContributions } from './EmbedFloatingMenu';
 
 describe('createDocsFloatingMenuContributions', () => {
     it('registers docs floating menus for doc, sheet, and slide hosts', () => {

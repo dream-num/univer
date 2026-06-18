@@ -15,7 +15,7 @@
  */
 
 import type { ICreateUnitOptions, IUniverInstanceService } from '@univerjs/core';
-import type { EmbedResolvedSource, EmbedSource } from '../types/embed';
+import type { EmbedSource, IEmbedResolvedSource } from '../types/embed';
 import { generateRandomId, IUniverInstanceService as IUniverInstanceServiceToken, Optional, PluginService, UniverInstanceType } from '@univerjs/core';
 import { normalizeResourceRef } from '../common/resource-ref';
 import { fromResourceRefUnitType, toResourceRefUnitType } from '../common/unit-type';
@@ -38,7 +38,7 @@ export class EmbedSourceResolverService {
         // noop
     }
 
-    async resolve(source: EmbedSource): Promise<EmbedResolvedSource> {
+    async resolve(source: EmbedSource): Promise<IEmbedResolvedSource> {
         if (source.kind === 'ref') {
             return this._resolveResourceRef(source);
         }
@@ -81,7 +81,7 @@ export class EmbedSourceResolverService {
         return guestContribution;
     }
 
-    private async _resolveResourceRef(source: Extract<EmbedSource, { kind: 'ref' }>): Promise<EmbedResolvedSource> {
+    private async _resolveResourceRef(source: Extract<EmbedSource, { kind: 'ref' }>): Promise<IEmbedResolvedSource> {
         const ref = normalizeResourceRef(source.ref);
         const expectedType = fromResourceRefUnitType(ref.unit.type);
         if (ref.file.kind !== 'self') {

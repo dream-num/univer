@@ -16,27 +16,27 @@
 
 import type { Injector, UniverInstanceType } from '@univerjs/core';
 import type { IRibbonService } from '@univerjs/ui';
-import type { EmbedBlockContribution } from '../types/embed-ui';
+import type { IEmbedBlockContribution } from '../types/embed-ui';
 import { DEFAULT_EMBED_DOC_FLOW_LAYOUT_POLICY, DEFAULT_EMBED_FLOAT_LAYOUT_POLICY, DEFAULT_EMBED_TAB_LAYOUT_POLICY } from '@univerjs/embed';
 import { of } from 'rxjs';
 import { EmbedHostChromeMode } from '../types/embed-ui';
 import { createEmbedProductMenuInjector } from './embed-product-menu-mounting';
 import { EmbedProductMenuRegistryService } from './embed-product-menu-registry.service';
 
-export interface CreateEmbedRibbonBlockContributionOptions {
+export interface ICreateEmbedRibbonBlockContributionOptions {
     childType: UniverInstanceType;
     productName: string;
     menuSchema?: unknown;
 }
 
-export interface CreateEmbedNoHeaderBlockContributionOptions {
+export interface ICreateEmbedNoHeaderBlockContributionOptions {
     childType: UniverInstanceType;
     productName: string;
     hostChromeMode?: EmbedHostChromeMode.TITLE_ONLY | EmbedHostChromeMode.NONE;
     hostHeaderMode?: 'none' | 'placeholder';
 }
 
-export function createEmbedRibbonBlockContribution(options: CreateEmbedRibbonBlockContributionOptions): EmbedBlockContribution {
+export function createEmbedRibbonBlockContribution(options: ICreateEmbedRibbonBlockContributionOptions): IEmbedBlockContribution {
     const { childType, productName } = options;
 
     return {
@@ -82,7 +82,7 @@ export function resolveEmbedProductRibbonMenuSchema(
     return fallbackMenuSchema;
 }
 
-export function createEmbedNoHeaderBlockContribution(options: CreateEmbedNoHeaderBlockContributionOptions): EmbedBlockContribution {
+export function createEmbedNoHeaderBlockContribution(options: ICreateEmbedNoHeaderBlockContributionOptions): IEmbedBlockContribution {
     const hostChromeMode = resolveNoHeaderHostChromeMode(options);
 
     return {
@@ -109,7 +109,7 @@ export function createEmbedNoHeaderBlockContribution(options: CreateEmbedNoHeade
     };
 }
 
-function resolveNoHeaderHostChromeMode(options: CreateEmbedNoHeaderBlockContributionOptions): EmbedHostChromeMode.TITLE_ONLY | EmbedHostChromeMode.NONE {
+function resolveNoHeaderHostChromeMode(options: ICreateEmbedNoHeaderBlockContributionOptions): EmbedHostChromeMode.TITLE_ONLY | EmbedHostChromeMode.NONE {
     if (options.hostChromeMode) {
         return options.hostChromeMode;
     }

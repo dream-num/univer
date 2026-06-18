@@ -15,13 +15,13 @@
  */
 
 import type { ICommand } from '@univerjs/core';
-import type { EmbedHostAnchorRecord } from '../../types/host-anchor';
+import type { IEmbedHostAnchorRecord } from '../../types/host-anchor';
 import { CommandType } from '@univerjs/core';
 import { REMOVE_EMBED_HOST_ANCHOR_RECORD_MUTATION_ID, SET_EMBED_HOST_ANCHOR_RECORD_MUTATION_ID } from '../../common/const';
 import { EmbedHostAnchorModelService } from '../../services/embed-host-anchor-model.service';
 
 export interface ISetEmbedHostAnchorMutationParams {
-    record: EmbedHostAnchorRecord;
+    record: IEmbedHostAnchorRecord;
 }
 
 export interface IRemoveEmbedHostAnchorMutationParams {

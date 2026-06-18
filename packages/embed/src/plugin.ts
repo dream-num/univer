@@ -15,8 +15,8 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { EmbedResourceRefProvider } from './services/embed-resource-ref-provider-registry.service';
-import type { EmbedCapability, EmbedGuestContribution } from './types/embed';
+import type { IEmbedResourceRefProvider } from './services/embed-resource-ref-provider-registry.service';
+import type { IEmbedCapability, IEmbedGuestContribution } from './types/embed';
 import { ICommandService, Inject, Injector, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import pkg from '../package.json';
 import { CopyEmbedCommand, CreateEmbedCommand, RemoveEmbedCommand } from './commands/commands/embed.command';
@@ -33,11 +33,11 @@ import { EmbedNestedGuardService } from './services/embed-nested-guard.service';
 import { EmbedResourceRefProviderRegistryService } from './services/embed-resource-ref-provider-registry.service';
 import { EmbedSourceResolverService } from './services/embed-source-resolver.service';
 
-export interface UniverEmbedPluginConfig {
+export interface IUniverEmbedPluginConfig {
     useDefaultCapabilities?: boolean;
-    capabilities?: readonly EmbedCapability[];
-    guestContributions?: readonly EmbedGuestContribution[];
-    resourceRefProviders?: readonly EmbedResourceRefProvider[];
+    capabilities?: readonly IEmbedCapability[];
+    guestContributions?: readonly IEmbedGuestContribution[];
+    resourceRefProviders?: readonly IEmbedResourceRefProvider[];
 }
 
 export class UniverEmbedPlugin extends Plugin {
@@ -47,7 +47,7 @@ export class UniverEmbedPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_UNKNOWN;
 
     constructor(
-        private readonly _config: UniverEmbedPluginConfig = {},
+        private readonly _config: IUniverEmbedPluginConfig = {},
         @Inject(Injector) protected override readonly _injector: Injector,
         @ICommandService private readonly _commandService: ICommandService
     ) {

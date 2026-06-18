@@ -15,7 +15,7 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { EmbedBlockContribution, EmbedChildViewContribution, EmbedContentSizeProvider, EmbedFloatingMenuContribution, EmbedFloatPreviewProvider, EmbedHostAdapterContribution, EmbedHostContainerContribution, EmbedPassiveViewportProvider, EmbedProductMenuContribution, EmbedReadonlyPreviewProvider } from './types/embed-ui';
+import type { IEmbedBlockContribution, IEmbedChildViewContribution, IEmbedContentSizeProvider, IEmbedFloatingMenuContribution, IEmbedFloatPreviewProvider, IEmbedHostAdapterContribution, IEmbedHostContainerContribution, IEmbedPassiveViewportProvider, IEmbedProductMenuContribution, IEmbedReadonlyPreviewProvider } from './types/embed-ui';
 import { DependentOn, ICommandService, Inject, Injector, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { UniverEmbedPlugin } from '@univerjs/embed';
 import { BuiltInUIPart, IUIPartsService } from '@univerjs/ui';
@@ -24,7 +24,7 @@ import { CopyHostEmbedCommand, CreateHostEmbedCommand, RemoveHostEmbedCommand } 
 import { RemoveEmbedHostAnchorRecordMutation, SetEmbedHostAnchorRecordMutation } from './commands/mutations/embed-host-anchor-record.mutation';
 import { CreateEmbedHostAnchorMutation, RemoveEmbedHostAnchorMutation } from './commands/mutations/embed-host-anchor.mutation';
 import { EMBED_UI_PLUGIN_NAME } from './common/const';
-import { EmbedHostToolbarMenu } from './components/embed-host-toolbar-menu';
+import { EmbedHostToolbarMenu } from './components/EmbedHostToolbarMenu';
 import { EmbedHostAnchorCleanupController } from './controllers/embed-host-anchor-cleanup.controller';
 import { EmbedHostRibbonOverrideController } from './controllers/embed-host-ribbon-override.controller';
 import { EmbedActivationService } from './services/embed-activation.service';
@@ -50,17 +50,17 @@ import { EmbedSceneCanvasCaptureService } from './services/embed-scene-canvas-ca
 import { flushPendingEmbedUIContributions } from './services/embed-ui-contribution-register';
 import { EmbedUndoBridgeService } from './services/embed-undo-bridge.service';
 
-export interface UniverEmbedUIPluginConfig {
-    hostAdapters?: readonly EmbedHostAdapterContribution[];
-    hostContainers?: readonly EmbedHostContainerContribution[];
-    childViews?: readonly EmbedChildViewContribution[];
-    blocks?: readonly EmbedBlockContribution[];
-    productMenus?: readonly EmbedProductMenuContribution[];
-    floatingMenus?: readonly EmbedFloatingMenuContribution[];
-    previewProviders?: readonly EmbedFloatPreviewProvider<any>[];
-    contentSizeProviders?: readonly EmbedContentSizeProvider[];
-    passiveViewportProviders?: readonly EmbedPassiveViewportProvider[];
-    readonlyPreviewProviders?: readonly EmbedReadonlyPreviewProvider<any>[];
+export interface IUniverEmbedUIPluginConfig {
+    hostAdapters?: readonly IEmbedHostAdapterContribution[];
+    hostContainers?: readonly IEmbedHostContainerContribution[];
+    childViews?: readonly IEmbedChildViewContribution[];
+    blocks?: readonly IEmbedBlockContribution[];
+    productMenus?: readonly IEmbedProductMenuContribution[];
+    floatingMenus?: readonly IEmbedFloatingMenuContribution[];
+    previewProviders?: readonly IEmbedFloatPreviewProvider<any>[];
+    contentSizeProviders?: readonly IEmbedContentSizeProvider[];
+    passiveViewportProviders?: readonly IEmbedPassiveViewportProvider[];
+    readonlyPreviewProviders?: readonly IEmbedReadonlyPreviewProvider<any>[];
     useDefaultFloatingMenus?: boolean;
     useDefaultHostToolbar?: boolean;
 }
@@ -73,7 +73,7 @@ export class UniverEmbedUIPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_UNKNOWN;
 
     constructor(
-        private readonly _config: UniverEmbedUIPluginConfig = {},
+        private readonly _config: IUniverEmbedUIPluginConfig = {},
         @Inject(Injector) protected override readonly _injector: Injector,
         @ICommandService private readonly _commandService: ICommandService
     ) {

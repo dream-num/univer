@@ -17,7 +17,7 @@
 import { UniverInstanceType } from '@univerjs/core';
 import { MenuItemType } from '@univerjs/ui';
 import { describe, expect, it } from 'vitest';
-import { createSheetsFloatingMenuContributions, createSheetsFloatingToolbarItems, createVisibleSheetsFloatingToolbarItems, getStaticMenuSelections, resolveMenuCommandRequest, resolveSheetsFloatingMenuStage, resolveSheetsFloatingToolbarMenuItems } from './embed-floating-menu';
+import { createSheetsFloatingMenuContributions, createSheetsFloatingToolbarItems, createVisibleSheetsFloatingToolbarItems, getStaticMenuSelections, resolveMenuCommandRequest, resolveSheetsFloatingMenuStage, resolveSheetsFloatingToolbarMenuItems } from './EmbedFloatingMenu';
 
 describe('sheets embed floating menu', () => {
     it('registers the sheet block toolbar for every supported host entry', () => {

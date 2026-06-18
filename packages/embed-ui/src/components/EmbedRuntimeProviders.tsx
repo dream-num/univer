@@ -21,13 +21,13 @@ import { ConfigProvider } from '@univerjs/design';
 import { RediProvider, useDependency } from '@univerjs/ui';
 import { useEffect, useMemo, useState } from 'react';
 
-export interface EmbedRuntimeProvidersProps {
+export interface IEmbedRuntimeProvidersProps {
     injector: Injector;
     children?: ReactNode;
     mountContainer?: HTMLElement | null;
 }
 
-export function EmbedRuntimeProviders(props: EmbedRuntimeProvidersProps) {
+export function EmbedRuntimeProviders(props: IEmbedRuntimeProvidersProps) {
     const { injector, children, mountContainer } = props;
 
     return (
@@ -39,7 +39,7 @@ export function EmbedRuntimeProviders(props: EmbedRuntimeProvidersProps) {
     );
 }
 
-function EmbedDesignRuntimeProvider(props: Pick<EmbedRuntimeProvidersProps, 'children' | 'mountContainer'>) {
+function EmbedDesignRuntimeProvider(props: Pick<IEmbedRuntimeProvidersProps, 'children' | 'mountContainer'>) {
     const { children, mountContainer } = props;
     const localeService = useDependency(LocaleService);
     const [locale, setLocale] = useState(localeService.getLocales());

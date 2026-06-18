@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel } from '@univerjs/core';
-import type { EmbedFloatDomData } from '@univerjs/embed-ui';
+import type { IEmbedFloatDomData } from '@univerjs/embed-ui';
 import type { CSSProperties } from 'react';
 import { ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { EmbedFloatDomRenderer } from '@univerjs/embed-ui';
@@ -25,7 +25,7 @@ import { SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-rat
 import { createDefaultDocsTableLikeCustomBlockBleedViewport, resolveDocsTableLikeCustomBlockBleedViewport, resolveDocsTableLikeCustomBlockContentHeight, resolveDocsTableLikeCustomBlockContentWidth } from './embed-docs-custom-block-bleed';
 import { scrollDocsTableLikeCustomBlockLive } from './embed-docs-custom-block-scroll';
 
-export interface EmbedDocsCustomBlockRuntimeProps {
+export interface IEmbedDocsCustomBlockRuntimeProps {
     customBlockRenderViewport?: {
         contentHeight?: number;
         contentWidth?: number;
@@ -33,12 +33,12 @@ export interface EmbedDocsCustomBlockRuntimeProps {
     };
 }
 
-export interface DocsTableLikeCustomBlockWheelHandlerOptions {
+export interface IDocsTableLikeCustomBlockWheelHandlerOptions {
     getLive: () => HTMLElement | null;
     getMaxScrollLeft?: () => number | undefined;
 }
 
-export function EmbedDocsCustomBlockRenderer(props: { data?: EmbedFloatDomData } & EmbedDocsCustomBlockRuntimeProps) {
+export function EmbedDocsCustomBlockRenderer(props: { data?: IEmbedFloatDomData } & IEmbedDocsCustomBlockRuntimeProps) {
     ensureEmbedDocsCustomBlockStyles();
 
     const commandService = useDependency(ICommandService);
@@ -204,7 +204,7 @@ export function EmbedDocsCustomBlockRenderer(props: { data?: EmbedFloatDomData }
     );
 }
 
-export function createDocsTableLikeCustomBlockWheelHandler(options: DocsTableLikeCustomBlockWheelHandlerOptions): (event: WheelEvent) => void {
+export function createDocsTableLikeCustomBlockWheelHandler(options: IDocsTableLikeCustomBlockWheelHandlerOptions): (event: WheelEvent) => void {
     return (event: WheelEvent) => {
         const live = options.getLive();
         if (!live || event.ctrlKey || event.metaKey) {
@@ -218,20 +218,20 @@ export function createDocsTableLikeCustomBlockWheelHandler(options: DocsTableLik
     };
 }
 
-function normalizeFloatDomData(data: unknown): EmbedFloatDomData | undefined {
+function normalizeFloatDomData(data: unknown): IEmbedFloatDomData | undefined {
     if (!data || typeof data !== 'object') {
         return undefined;
     }
 
-    const candidate = data as Partial<EmbedFloatDomData>;
+    const candidate = data as Partial<IEmbedFloatDomData>;
     if (candidate.version !== 1 || !candidate.embedId || !candidate.hostAnchorId) {
         return undefined;
     }
 
-    return candidate as EmbedFloatDomData;
+    return candidate as IEmbedFloatDomData;
 }
 
-function isSheetLikeDocsCustomBlock(data: EmbedFloatDomData | undefined): boolean {
+function isSheetLikeDocsCustomBlock(data: IEmbedFloatDomData | undefined): boolean {
     return data?.childType === UniverInstanceType.UNIVER_SHEET || data?.childType === UniverInstanceType.UNIVER_BASE;
 }
 

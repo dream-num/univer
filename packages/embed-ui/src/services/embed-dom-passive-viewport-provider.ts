@@ -16,16 +16,16 @@
 
 import type { UniverInstanceType } from '@univerjs/core';
 import type { EmbedLayout } from '@univerjs/embed';
-import type { EmbedPassiveViewportProvider } from '../types/embed-ui';
+import type { IEmbedPassiveViewportProvider } from '../types/embed-ui';
 
-export interface CreateEmbedDomPassiveViewportProviderOptions {
+export interface ICreateEmbedDomPassiveViewportProviderOptions {
     childType: UniverInstanceType;
     supportedLayouts?: EmbedLayout[];
 }
 
 export function createEmbedDomPassiveViewportProvider(
-    options: CreateEmbedDomPassiveViewportProviderOptions
-): EmbedPassiveViewportProvider {
+    options: ICreateEmbedDomPassiveViewportProviderOptions
+): IEmbedPassiveViewportProvider {
     return {
         childType: options.childType,
         supportedLayouts: options.supportedLayouts,

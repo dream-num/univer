@@ -17,7 +17,7 @@
 import type { IDisposable } from '@univerjs/core';
 import { toDisposable } from '@univerjs/core';
 
-export interface EmbedOverlayRootRegistration {
+export interface IEmbedOverlayRootRegistration {
     childUnitId: string;
     embedId?: string;
     hostAnchorId?: string;
@@ -25,13 +25,13 @@ export interface EmbedOverlayRootRegistration {
 }
 
 export class EmbedOverlayRootService {
-    private readonly _rootsByChildUnitId = new Map<string, EmbedOverlayRootRegistration>();
-    private readonly _rootsByEmbedId = new Map<string, EmbedOverlayRootRegistration>();
-    private readonly _rootsByHostAnchorId = new Map<string, EmbedOverlayRootRegistration>();
+    private readonly _rootsByChildUnitId = new Map<string, IEmbedOverlayRootRegistration>();
+    private readonly _rootsByEmbedId = new Map<string, IEmbedOverlayRootRegistration>();
+    private readonly _rootsByHostAnchorId = new Map<string, IEmbedOverlayRootRegistration>();
 
     register(childUnitId: string, root: HTMLElement): IDisposable;
-    register(registration: EmbedOverlayRootRegistration): IDisposable;
-    register(registrationOrChildUnitId: EmbedOverlayRootRegistration | string, root?: HTMLElement): IDisposable {
+    register(registration: IEmbedOverlayRootRegistration): IDisposable;
+    register(registrationOrChildUnitId: IEmbedOverlayRootRegistration | string, root?: HTMLElement): IDisposable {
         const registration = typeof registrationOrChildUnitId === 'string'
             ? { childUnitId: registrationOrChildUnitId, root: root! }
             : registrationOrChildUnitId;

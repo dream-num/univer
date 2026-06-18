@@ -15,13 +15,13 @@
  */
 
 import type { IDisposable, Injector, UniverInstanceType } from '@univerjs/core';
-import type { EmbedProductMenuContribution, EmbedProductMenuMountContext, EmbedProductMenuSurface } from '../types/embed-ui';
+import type { EmbedProductMenuSurface, IEmbedProductMenuContribution, IEmbedProductMenuMountContext } from '../types/embed-ui';
 import { toDisposable } from '@univerjs/core';
 import { mountEmbedProductRibbonMenu } from './embed-product-menu-mounting';
 
 export function registerEmbedProductMenuContribution(
     injector: Pick<Injector, 'get' | 'has'>,
-    contribution: EmbedProductMenuContribution
+    contribution: IEmbedProductMenuContribution
 ): IDisposable | undefined {
     if (!injector.has(EmbedProductMenuRegistryService)) {
         return undefined;
@@ -39,14 +39,14 @@ export function registerEmbedProductMenuContribution(
 }
 
 export class EmbedProductMenuRegistryService {
-    private readonly _contributions = new Map<UniverInstanceType, Array<{ contribution: EmbedProductMenuContribution; index: number }>>();
+    private readonly _contributions = new Map<UniverInstanceType, Array<{ contribution: IEmbedProductMenuContribution; index: number }>>();
     private _nextIndex = 0;
 
     constructor() {
         // noop
     }
 
-    register(contribution: EmbedProductMenuContribution): IDisposable {
+    register(contribution: IEmbedProductMenuContribution): IDisposable {
         const item = { contribution, index: this._nextIndex++ };
         const contributions = this._contributions.get(contribution.childType) ?? [];
         contributions.push(item);
@@ -68,11 +68,11 @@ export class EmbedProductMenuRegistryService {
         });
     }
 
-    get(childType: UniverInstanceType): EmbedProductMenuContribution | undefined {
+    get(childType: UniverInstanceType): IEmbedProductMenuContribution | undefined {
         return this.getAll(childType)[0];
     }
 
-    getAll(childType: UniverInstanceType, surface?: EmbedProductMenuSurface): readonly EmbedProductMenuContribution[] {
+    getAll(childType: UniverInstanceType, surface?: EmbedProductMenuSurface): readonly IEmbedProductMenuContribution[] {
         return (this._contributions.get(childType) ?? [])
             .map((entry) => entry.contribution)
             .filter((contribution) => !surface || getContributionSurface(contribution) === surface);
@@ -90,7 +90,7 @@ export class EmbedProductMenuRegistryService {
         return mergeMenuSchemas(schemas);
     }
 
-    mountMenu(context: Omit<EmbedProductMenuMountContext, 'menuSchema'>): IDisposable | undefined {
+    mountMenu(context: Omit<IEmbedProductMenuMountContext, 'menuSchema'>): IDisposable | undefined {
         const surface = context.surface ?? 'ribbon';
         const contributions = this.getAll(context.childType, surface);
         if (!contributions.length) {
@@ -129,13 +129,13 @@ export class EmbedProductMenuRegistryService {
     }
 }
 
-function getContributionSurface(contribution: EmbedProductMenuContribution): EmbedProductMenuSurface {
+function getContributionSurface(contribution: IEmbedProductMenuContribution): EmbedProductMenuSurface {
     return contribution.surface ?? 'ribbon';
 }
 
 function compareContributionItems(
-    left: { contribution: EmbedProductMenuContribution; index: number },
-    right: { contribution: EmbedProductMenuContribution; index: number }
+    left: { contribution: IEmbedProductMenuContribution; index: number },
+    right: { contribution: IEmbedProductMenuContribution; index: number }
 ): number {
     const leftOrder = left.contribution.order ?? left.index;
     const rightOrder = right.contribution.order ?? right.index;

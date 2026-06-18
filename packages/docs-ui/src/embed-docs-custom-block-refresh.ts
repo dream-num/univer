@@ -65,7 +65,7 @@ export function shouldRefreshDocsCustomBlockSizeForCommand(params: {
     return Boolean(commandUnitId && commandUnitId !== params.hostUnitId && params.childUnitIds.has(commandUnitId));
 }
 
-export interface DocsCustomBlockSizeRefreshScheduler {
+export interface IDocsCustomBlockSizeRefreshScheduler {
     dispose: () => void;
     schedule: () => void;
 }
@@ -76,7 +76,7 @@ export function createDocsCustomBlockSizeRefreshScheduler(
         cancelFrame: (handle: number) => void;
         requestFrame: (callback: () => void) => number;
     } = getDefaultFrameApi()
-): DocsCustomBlockSizeRefreshScheduler {
+): IDocsCustomBlockSizeRefreshScheduler {
     let pendingFrame: number | undefined;
 
     return {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { EmbedFloatingActivation, EmbedFloatingMenuContribution, EmbedFloatingMenuMountContext } from '@univerjs/embed-ui';
+import type { IEmbedFloatingActivation, IEmbedFloatingMenuContribution, IEmbedFloatingMenuMountContext } from '@univerjs/embed-ui';
 import type { Observable } from 'rxjs';
 import { Injector, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { createEmbedProductFloatingMenuContributions, createEmbedReactRoot, disposeEmbedReactRoot, EmbedFloatingActiveService, EmbedRuntimeProviders, mountEmbedProductRibbonMenu, resolveEmbedFloatingMenuRoot } from '@univerjs/embed-ui';
@@ -23,14 +23,14 @@ import { createElement, useEffect, useRef } from 'react';
 
 const DOCS_FLOATING_MENU_STYLE_ID = 'univer-docs-embed-floating-menu-styles';
 
-export function createDocsFloatingMenuContributions(): EmbedFloatingMenuContribution[] {
+export function createDocsFloatingMenuContributions(): IEmbedFloatingMenuContribution[] {
     return createEmbedProductFloatingMenuContributions({
         childType: UniverInstanceType.UNIVER_DOC,
         mount: mountDocsFloatingMenu,
     });
 }
 
-function mountDocsFloatingMenu(context: EmbedFloatingMenuMountContext) {
+function mountDocsFloatingMenu(context: IEmbedFloatingMenuMountContext) {
     ensureDocsFloatingMenuStyles();
 
     const root = resolveEmbedFloatingMenuRoot(context);
@@ -124,7 +124,7 @@ function DocsEmbedFloatingMenu(props: IDocsEmbedFloatingMenuProps) {
 
 export function resolveDocsFloatingMenuStage(params: {
     embedId: string;
-    active: EmbedFloatingActivation | null;
+    active: IEmbedFloatingActivation | null;
     fullscreen: boolean;
     usesDomFloatingStage: boolean;
     renderScopeActive: boolean;

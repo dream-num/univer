@@ -16,12 +16,12 @@
 
 import type { UniverInstanceType } from '@univerjs/core';
 import type { EmbedHostEntry } from '@univerjs/embed';
-import type { EmbedHostContainerContribution } from '../types/embed-ui';
+import type { IEmbedHostContainerContribution } from '../types/embed-ui';
 
 export class EmbedHostContainerRegistryService {
-    private readonly _contributions = new Map<string, EmbedHostContainerContribution>();
+    private readonly _contributions = new Map<string, IEmbedHostContainerContribution>();
 
-    register(contribution: EmbedHostContainerContribution): void {
+    register(contribution: IEmbedHostContainerContribution): void {
         const key = this._key(contribution.hostType, contribution.entry);
         if (this._contributions.has(key)) {
             throw new Error(`Embed host container contribution already registered: ${key}`);
@@ -30,15 +30,15 @@ export class EmbedHostContainerRegistryService {
         this._contributions.set(key, contribution);
     }
 
-    get(hostType: UniverInstanceType, entry: EmbedHostEntry): EmbedHostContainerContribution | undefined {
+    get(hostType: UniverInstanceType, entry: EmbedHostEntry): IEmbedHostContainerContribution | undefined {
         return this._contributions.get(this._key(hostType, entry));
     }
 
-    list(): EmbedHostContainerContribution[] {
+    list(): IEmbedHostContainerContribution[] {
         return [...this._contributions.values()];
     }
 
-    supports(hostType: UniverInstanceType, entry: EmbedHostEntry, layout: EmbedHostContainerContribution['layout']): boolean {
+    supports(hostType: UniverInstanceType, entry: EmbedHostEntry, layout: IEmbedHostContainerContribution['layout']): boolean {
         const contribution = this.get(hostType, entry);
         if (!contribution) {
             return false;

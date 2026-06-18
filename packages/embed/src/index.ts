@@ -40,38 +40,38 @@ export {
 export { assertResourceRef, getResourceRefKey, normalizeResourceRef } from './common/resource-ref';
 export { fromResourceRefUnitType, toResourceRefUnitType } from './common/unit-type';
 export { EmbedResourceController } from './controllers/embed-resource.controller';
-export { UniverEmbedPlugin, type UniverEmbedPluginConfig } from './plugin';
+export { type IUniverEmbedPluginConfig, UniverEmbedPlugin } from './plugin';
 export { createDefaultEmbedCapabilities, createDefaultEmbedSourceMeta, EmbedCapabilityRegistryService, flushPendingEmbedCapabilities, registerEmbedCapabilities } from './services/embed-capability-registry.service';
-export { EmbedChildRetentionService, type EmbedChildRetentionState } from './services/embed-child-retention.service';
+export { EmbedChildRetentionService, type IEmbedChildRetentionState } from './services/embed-child-retention.service';
 export { EmbedCreationService } from './services/embed-creation.service';
 export { EmbedFocusOwnerService } from './services/embed-focus-owner.service';
 export { EmbedGuestContributionRegistryService, flushPendingEmbedGuestContributions, registerEmbedGuestContribution } from './services/embed-guest-contribution-registry.service';
 export { EmbedModelService } from './services/embed-model.service';
 export { EmbedNestedGuardService } from './services/embed-nested-guard.service';
-export { type EmbedResourceRefProvider, EmbedResourceRefProviderRegistryService, type EmbedResourceRefResolveResult } from './services/embed-resource-ref-provider-registry.service';
+export { EmbedResourceRefProviderRegistryService, type IEmbedResourceRefProvider, type IEmbedResourceRefResolveResult } from './services/embed-resource-ref-provider-registry.service';
 export { EmbedSourceResolverService } from './services/embed-source-resolver.service';
 export type {
-    EmbedCapability,
-    EmbedCreateContext,
-    EmbedCreateResult,
-    EmbeddedFocusOwner,
-    EmbedDescriptor,
-    EmbedFloatingConfig,
-    EmbedGuestContribution,
     EmbedHostEntry,
     EmbedLayout,
-    EmbedLayoutPolicies,
-    EmbedLayoutPolicy,
     EmbedMenuBehavior,
     EmbedMode,
-    EmbedProductPluginConfig,
     EmbedRenderHost,
-    EmbedResolvedSource,
-    EmbedResource,
     EmbedSource,
-    EmbedSourceMeta,
     EmbedSurfacePlacement,
-    EmbedTabConfig,
+    IEmbedCapability,
+    IEmbedCreateContext,
+    IEmbedCreateResult,
+    IEmbeddedFocusOwner,
+    IEmbedDescriptor,
+    IEmbedFloatingConfig,
+    IEmbedGuestContribution,
+    IEmbedLayoutPolicies,
+    IEmbedLayoutPolicy,
+    IEmbedProductPluginConfig,
+    IEmbedResolvedSource,
+    IEmbedResource,
+    IEmbedSourceMeta,
+    IEmbedTabConfig,
 } from './types/embed';
 export {
     DEFAULT_EMBED_DOC_FLOW_LAYOUT_POLICY,
@@ -79,9 +79,9 @@ export {
     DEFAULT_EMBED_TAB_LAYOUT_POLICY,
 } from './types/embed';
 export type {
-    ResourceRef,
+    IResourceRef,
+    IResourceRefUnit,
     ResourceRefFile,
     ResourceRefPart,
-    ResourceRefUnit,
     ResourceRefUnitType,
 } from './types/resource-ref';

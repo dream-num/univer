@@ -15,16 +15,16 @@
  */
 
 import type { ICommand } from '@univerjs/core';
-import type { EmbedDescriptor } from '@univerjs/embed';
-import type { EmbedHostCopyContext, EmbedHostCreateContext, EmbedHostRemoveContext } from '../../services/embed-host-lifecycle.service';
+import type { IEmbedDescriptor } from '@univerjs/embed';
+import type { IEmbedHostCopyContext, IEmbedHostCreateContext, IEmbedHostRemoveContext } from '../../services/embed-host-lifecycle.service';
 import { CommandType } from '@univerjs/core';
 import { EmbedHostLifecycleService } from '../../services/embed-host-lifecycle.service';
 
-export type ICreateHostEmbedCommandParams = EmbedHostCreateContext;
-export type ICopyHostEmbedCommandParams = EmbedHostCopyContext;
-export type IRemoveHostEmbedCommandParams = EmbedHostRemoveContext;
+export type ICreateHostEmbedCommandParams = IEmbedHostCreateContext;
+export type ICopyHostEmbedCommandParams = IEmbedHostCopyContext;
+export type IRemoveHostEmbedCommandParams = IEmbedHostRemoveContext;
 
-export const CreateHostEmbedCommand: ICommand<ICreateHostEmbedCommandParams, EmbedDescriptor | false> = {
+export const CreateHostEmbedCommand: ICommand<ICreateHostEmbedCommandParams, IEmbedDescriptor | false> = {
     id: 'embed-ui.command.create-host-embed',
     type: CommandType.COMMAND,
     handler: async (accessor, params) => {
@@ -36,7 +36,7 @@ export const CreateHostEmbedCommand: ICommand<ICreateHostEmbedCommandParams, Emb
     },
 };
 
-export const CopyHostEmbedCommand: ICommand<ICopyHostEmbedCommandParams, EmbedDescriptor | false> = {
+export const CopyHostEmbedCommand: ICommand<ICopyHostEmbedCommandParams, IEmbedDescriptor | false> = {
     id: 'embed-ui.command.copy-host-embed',
     type: CommandType.COMMAND,
     handler: (accessor, params) => {

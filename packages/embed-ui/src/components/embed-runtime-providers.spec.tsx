@@ -25,7 +25,7 @@ import enUS from '@univerjs/design/locale/en-US';
 import { act, useContext } from 'react';
 import { createRoot } from 'react-dom/client';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { EmbedRuntimeProviders } from './embed-runtime-providers';
+import { EmbedRuntimeProviders } from './EmbedRuntimeProviders';
 
 let container: HTMLElement | undefined;
 

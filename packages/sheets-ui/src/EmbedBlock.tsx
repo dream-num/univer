@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import type { EmbedBlockContribution, EmbedChildViewContribution } from '@univerjs/embed-ui';
+import type { IEmbedBlockContribution, IEmbedChildViewContribution } from '@univerjs/embed-ui';
 import { toDisposable, UniverInstanceType } from '@univerjs/core';
 import { createEmbedRibbonBlockContribution, mountEmbedRenderChildUnit } from '@univerjs/embed-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 
-export function createSheetsEmbedBlockContribution(): EmbedBlockContribution {
+export function createSheetsEmbedBlockContribution(): IEmbedBlockContribution {
     return createEmbedRibbonBlockContribution({
         childType: UniverInstanceType.UNIVER_SHEET,
         productName: 'Sheets',
     });
 }
 
-export function createSheetsEmbedChildViewContribution(): EmbedChildViewContribution {
+export function createSheetsEmbedChildViewContribution(): IEmbedChildViewContribution {
     return {
         childType: UniverInstanceType.UNIVER_SHEET,
         supportedLayouts: ['tab-peer', 'docs-sticky-sheet', 'scroll-contained'],

@@ -15,35 +15,35 @@
  */
 
 import type { UniverInstanceType } from '@univerjs/core';
-import type { ResourceRef, ResourceRefFile } from '../types/resource-ref';
+import type { IResourceRef, ResourceRefFile } from '../types/resource-ref';
 
-export interface EmbedResourceRefResolveResult {
+export interface IEmbedResourceRefResolveResult {
     unitId: string;
     unitType: UniverInstanceType;
-    ref?: ResourceRef;
+    ref?: IResourceRef;
 }
 
-export interface EmbedResourceRefProvider {
+export interface IEmbedResourceRefProvider {
     fileKind: ResourceRefFile['kind'];
-    resolve: (ref: ResourceRef) => EmbedResourceRefResolveResult | Promise<EmbedResourceRefResolveResult>;
+    resolve: (ref: IResourceRef) => IEmbedResourceRefResolveResult | Promise<IEmbedResourceRefResolveResult>;
 }
 
 export class EmbedResourceRefProviderRegistryService {
-    private readonly _providers = new Map<ResourceRefFile['kind'], EmbedResourceRefProvider>();
+    private readonly _providers = new Map<ResourceRefFile['kind'], IEmbedResourceRefProvider>();
 
-    register(provider: EmbedResourceRefProvider): void {
+    register(provider: IEmbedResourceRefProvider): void {
         if (this._providers.has(provider.fileKind)) {
-            throw new Error(`Embed ResourceRef provider already registered: ${provider.fileKind}`);
+            throw new Error(`Embed IResourceRef provider already registered: ${provider.fileKind}`);
         }
 
         this._providers.set(provider.fileKind, provider);
     }
 
-    get(fileKind: ResourceRefFile['kind']): EmbedResourceRefProvider | undefined {
+    get(fileKind: ResourceRefFile['kind']): IEmbedResourceRefProvider | undefined {
         return this._providers.get(fileKind);
     }
 
-    list(): EmbedResourceRefProvider[] {
+    list(): IEmbedResourceRefProvider[] {
         return [...this._providers.values()];
     }
 }

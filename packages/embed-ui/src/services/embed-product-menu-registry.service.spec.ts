@@ -15,7 +15,7 @@
  */
 
 import type { Injector } from '@univerjs/core';
-import type { EmbedProductMenuContribution } from '../types/embed-ui';
+import type { IEmbedProductMenuContribution } from '../types/embed-ui';
 import { UniverInstanceType } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { EmbedProductMenuRegistryService, registerEmbedProductMenuContribution } from './embed-product-menu-registry.service';
@@ -74,7 +74,7 @@ describe('EmbedProductMenuRegistryService', () => {
 
     it('deduplicates product menu contributions by id through the helper', () => {
         const service = new EmbedProductMenuRegistryService();
-        const contribution: EmbedProductMenuContribution = {
+        const contribution: IEmbedProductMenuContribution = {
             id: 'sheet-ribbon',
             childType: UniverInstanceType.UNIVER_SHEET,
             menuSchema: { tabs: { start: true } },

@@ -16,15 +16,15 @@
 
 import type { IAccessor, IDisposable, IExecutionOptions, Injector, UniverInstanceType } from '@univerjs/core';
 import type { IMenuSchema, MenuSchemaType } from '@univerjs/ui';
-import type { EmbedProductMenuMountContext } from '../types/embed-ui';
+import type { IEmbedProductMenuMountContext } from '../types/embed-ui';
 import { COMMAND_EXECUTION_INJECTOR_KEY, ICommandService, IConfigService, IUniverInstanceService, LocaleService, toDisposable } from '@univerjs/core';
 import { DesktopRibbonService, IMenuManagerService, IRibbonService, MenuManagerPosition, MenuManagerService, Ribbon } from '@univerjs/ui';
 import { createElement } from 'react';
 import { map, merge, of } from 'rxjs';
-import { EmbedRuntimeProviders } from '../components/embed-runtime-providers';
+import { EmbedRuntimeProviders } from '../components/EmbedRuntimeProviders';
 import { createEmbedReactRoot, disposeEmbedReactRoot } from './react-root-disposal';
 
-export function mountEmbedProductRibbonMenu(context: EmbedProductMenuMountContext): IDisposable | undefined {
+export function mountEmbedProductRibbonMenu(context: IEmbedProductMenuMountContext): IDisposable | undefined {
     const { container, injector, childType, childUnitId, menuSchema, menuTitlePrefix, activeRibbonTab, toolbarOnly } = context;
     if (menuSchema != null && typeof menuSchema !== 'object') {
         return undefined;

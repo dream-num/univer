@@ -41,25 +41,25 @@ export {
     SET_EMBED_HOST_ANCHOR_RECORD_MUTATION_ID,
 } from './common/const';
 export {
-    type EmbedHostChromePolicy,
-    type EmbedHostChromePolicyInput,
     getEmbedHostChromePolicy,
+    type IEmbedHostChromePolicy,
+    type IEmbedHostChromePolicyInput,
 } from './common/embed-host-chrome-policy';
 export { getEmbedTabPeerHostHeaderMode, getEmbedTabPeerWorkbenchRole, isEmbedTabPeerEntry } from './common/tab-peer-workbench';
 export type { EmbedTabPeerHostHeaderMode, EmbedTabPeerWorkbenchRole } from './common/tab-peer-workbench';
-export { type EmbedFloatDomData, EmbedFloatDomRenderer } from './components/embed-float-dom-renderer';
-export { EmbedFloatFullscreenButton, type EmbedFloatFullscreenButtonProps, enterEmbedFullscreen } from './components/embed-float-fullscreen-button';
-export { EmbedHostToolbarMenu } from './components/embed-host-toolbar-menu';
-export { EmbedRuntimeProviders, type EmbedRuntimeProvidersProps } from './components/embed-runtime-providers';
+export { EmbedFloatDomRenderer, type IEmbedFloatDomData } from './components/EmbedFloatDomRenderer';
+export { EmbedFloatFullscreenButton, enterEmbedFullscreen, type IEmbedFloatFullscreenButtonProps } from './components/EmbedFloatFullscreenButton';
+export { EmbedHostToolbarMenu } from './components/EmbedHostToolbarMenu';
+export { EmbedRuntimeProviders, type IEmbedRuntimeProvidersProps } from './components/EmbedRuntimeProviders';
 export { EmbedHostAnchorCleanupController } from './controllers/embed-host-anchor-cleanup.controller';
 export { EmbedHostRibbonOverrideController } from './controllers/embed-host-ribbon-override.controller';
-export { UniverEmbedUIPlugin, type UniverEmbedUIPluginConfig } from './plugin';
+export { type IUniverEmbedUIPluginConfig, UniverEmbedUIPlugin } from './plugin';
 export { EmbedActivationService } from './services/embed-activation.service';
 export {
     createEmbedNoHeaderBlockContribution,
-    type CreateEmbedNoHeaderBlockContributionOptions,
     createEmbedRibbonBlockContribution,
-    type CreateEmbedRibbonBlockContributionOptions,
+    type ICreateEmbedNoHeaderBlockContributionOptions,
+    type ICreateEmbedRibbonBlockContributionOptions,
 } from './services/embed-block-contribution-factory';
 export { EmbedBlockRegistryService } from './services/embed-block-registry.service';
 export { createEmbedChildRuntimeScope } from './services/embed-child-runtime-scope';
@@ -67,7 +67,7 @@ export { createEmbedChildUnitScopedInjector, createEmbedScopedInjector } from '.
 export { EmbedChildViewRegistryService } from './services/embed-child-view-registry.service';
 export { EmbedContentSizeRegistryService } from './services/embed-content-size-registry.service';
 export { createDefaultEmbedFloatingMenuContributions, mountDefaultEmbedFloatingMenu } from './services/embed-default-floating-menu';
-export { createEmbedDomPassiveViewportProvider, type CreateEmbedDomPassiveViewportProviderOptions } from './services/embed-dom-passive-viewport-provider';
+export { createEmbedDomPassiveViewportProvider, type ICreateEmbedDomPassiveViewportProviderOptions } from './services/embed-dom-passive-viewport-provider';
 export { EmbedFloatPreviewService } from './services/embed-float-preview.service';
 export { EmbedFloatingActiveService } from './services/embed-floating-active.service';
 export { EmbedFloatingMenuRegistryService } from './services/embed-floating-menu-registry.service';
@@ -76,14 +76,14 @@ export { EmbedFullscreenService } from './services/embed-fullscreen.service';
 export { EmbedHostAdapterRegistryService } from './services/embed-host-adapter-registry.service';
 export { EmbedHostAnchorModelService } from './services/embed-host-anchor-model.service';
 export { EmbedHostContainerRegistryService } from './services/embed-host-container-registry.service';
-export { type EmbedHostCopyContext, type EmbedHostCreateContext, EmbedHostLifecycleService, type EmbedHostRemoveContext } from './services/embed-host-lifecycle.service';
+export { EmbedHostLifecycleService, type IEmbedHostCopyContext, type IEmbedHostCreateContext, type IEmbedHostRemoveContext } from './services/embed-host-lifecycle.service';
 export { EmbedHostMenuOverrideService } from './services/embed-host-menu-override.service';
 export {
     EMBED_DUPLICATE_CHILD_UNIT_ERROR_CODE,
     EmbedDuplicateChildUnitError,
     EmbedMountService,
 } from './services/embed-mount.service';
-export { type EmbedOverlayRootRegistration, EmbedOverlayRootService } from './services/embed-overlay-root.service';
+export { EmbedOverlayRootService, type IEmbedOverlayRootRegistration } from './services/embed-overlay-root.service';
 export { EmbedPassiveViewportRegistryService } from './services/embed-passive-viewport-registry.service';
 export { createEmbedProductFloatingMenuContributions } from './services/embed-product-floating-menu-contributions';
 export { createEmbedProductMenuInjector, mountEmbedProductRibbonMenu } from './services/embed-product-menu-mounting';
@@ -91,21 +91,21 @@ export { EmbedProductMenuRegistryService, registerEmbedProductMenuContribution }
 export { EmbedReadonlyPreviewRegistryService } from './services/embed-readonly-preview-registry.service';
 export {
     createEmbedRenderCanvasPreviewProvider,
-    type CreateEmbedRenderCanvasPreviewProviderOptions,
+    type ICreateEmbedRenderCanvasPreviewProviderOptions,
 } from './services/embed-render-canvas-preview-provider';
 export {
     createEmbedChildRender,
     createEmbedRenderChildViewContribution,
-    type CreateEmbedRenderChildViewContributionOptions,
     ensureEmbedChildRender,
+    type ICreateEmbedRenderChildViewContributionOptions,
     mountEmbedRenderChildUnit,
     refreshEmbedChildRender,
 } from './services/embed-render-child-view-contribution';
 export {
     captureEmbedContextSceneCanvas,
-    type EmbedSceneCanvasCaptureProvider,
     type EmbedSceneCanvasCaptureResult,
     EmbedSceneCanvasCaptureService,
+    type IEmbedSceneCanvasCaptureProvider,
 } from './services/embed-scene-canvas-capture.service';
 export { normalizePassiveWheelDelta, scrollSceneViewportPassive } from './services/embed-scene-passive-wheel';
 export {
@@ -115,51 +115,51 @@ export {
     EmbedScreenshotService,
 } from './services/embed-screenshot.service';
 export { flushPendingEmbedUIContributions, registerEmbedUIContribution } from './services/embed-ui-contribution-register';
-export { type EmbedUndoBridgeResult, EmbedUndoBridgeService } from './services/embed-undo-bridge.service';
+export { EmbedUndoBridgeService, type IEmbedUndoBridgeResult } from './services/embed-undo-bridge.service';
 export { createEmbedReactRoot, disposeEmbedReactRoot } from './services/react-root-disposal';
 export { EmbedHostChromeMode } from './types/embed-ui';
 export type {
-    EmbedBlockContribution,
-    EmbedChildContainerContext,
-    EmbedChildRuntimeScope,
-    EmbedChildViewContribution,
-    EmbedContainerContext,
-    EmbedContentSize,
-    EmbedContentSizeMeasureContext,
-    EmbedContentSizeProvider,
-    EmbedFloatingActivation,
-    EmbedFloatingMenuContribution,
-    EmbedFloatingMenuMountContext,
-    EmbedFloatPreviewEntry,
-    EmbedFloatPreviewInvalidationContext,
     EmbedFloatPreviewInvalidationReason,
-    EmbedFloatPreviewProvider,
     EmbedFloatPreviewReason,
-    EmbedFloatPreviewRenderRequest,
     EmbedFloatPreviewRenderResult,
     EmbedFloatPreviewStatus,
-    EmbedFullscreenSession,
-    EmbedHostAdapterContribution,
-    EmbedHostAnchorContext,
-    EmbedHostAnchorMutationPlan,
-    EmbedHostAnchorRemoveMutationPlan,
-    EmbedHostContainerContribution,
-    EmbedHostMenuOverride,
-    EmbedHostMountResult,
-    EmbedMenuOutlet,
-    EmbedMountSession,
-    EmbedPassiveViewportProvider,
-    EmbedPassiveViewportWheelContext,
-    EmbedProductMenuContribution,
-    EmbedProductMenuMountContext,
     EmbedProductMenuSurface,
-    EmbedReadonlyPreviewContext,
-    EmbedReadonlyPreviewProvider,
-    EmbedReadonlyPreviewRoots,
-    EmbedReadonlyPreviewWheelContext,
-    EmbedRenderScope,
+    IEmbedBlockContribution,
+    IEmbedChildContainerContext,
+    IEmbedChildRuntimeScope,
+    IEmbedChildViewContribution,
+    IEmbedContainerContext,
+    IEmbedContentSize,
+    IEmbedContentSizeMeasureContext,
+    IEmbedContentSizeProvider,
+    IEmbedFloatingActivation,
+    IEmbedFloatingMenuContribution,
+    IEmbedFloatingMenuMountContext,
+    IEmbedFloatPreviewEntry,
+    IEmbedFloatPreviewInvalidationContext,
+    IEmbedFloatPreviewProvider,
+    IEmbedFloatPreviewRenderRequest,
+    IEmbedFullscreenSession,
+    IEmbedHostAdapterContribution,
+    IEmbedHostAnchorContext,
+    IEmbedHostAnchorMutationPlan,
+    IEmbedHostAnchorRemoveMutationPlan,
+    IEmbedHostContainerContribution,
+    IEmbedHostMenuOverride,
+    IEmbedHostMountResult,
+    IEmbedMenuOutlet,
+    IEmbedMountSession,
+    IEmbedPassiveViewportProvider,
+    IEmbedPassiveViewportWheelContext,
+    IEmbedProductMenuContribution,
+    IEmbedProductMenuMountContext,
+    IEmbedReadonlyPreviewContext,
+    IEmbedReadonlyPreviewProvider,
+    IEmbedReadonlyPreviewRoots,
+    IEmbedReadonlyPreviewWheelContext,
+    IEmbedRenderScope,
 } from './types/embed-ui';
 export type {
     EmbedHostAnchorKind,
-    EmbedHostAnchorRecord,
+    IEmbedHostAnchorRecord,
 } from './types/host-anchor';

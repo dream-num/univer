@@ -147,7 +147,6 @@ export {
 export { DocRenderController } from './controllers/render-controllers/doc.render-controller';
 export { DocUIController } from './controllers/ui.controller';
 export { createDocsEmbedBlockContribution, createDocsEmbedChildViewContribution } from './embed-block';
-export { createDocsFloatingMenuContributions, resolveDocsFloatingMenuStage } from './embed-floating-menu';
 export {
     createDocsCustomBlockHostAdapterContribution,
     createDocsCustomBlockHostContainerContribution,
@@ -158,16 +157,17 @@ export {
     createEmbedDocsCustomBlockData,
     createInsertCustomBlockActions,
     createRemoveCustomBlockActions,
-    type DocsCustomBlockMutationParams,
-    type DocsCustomBlockRenderViewport,
-    type DocsCustomBlockRenderViewportParams,
     EMBED_DOCS_CUSTOM_BLOCK_DEFAULT_COMPONENT_KEY,
-    type EmbedDocsCustomBlockData,
+    type IDocsCustomBlockMutationParams,
+    type IDocsCustomBlockRenderViewport,
+    type IDocsCustomBlockRenderViewportParams,
+    type IEmbedDocsCustomBlockData,
     isSheetLikeDocsCustomBlockChildType,
     resolveDocsCustomBlockRenderViewport,
 } from './embed-host-anchor';
 export { registerDocsEmbedProductMenus } from './embed-product-menu';
 export { registerDocsEmbedUIContributions } from './embed-register';
+export { createDocsFloatingMenuContributions, resolveDocsFloatingMenuStage } from './EmbedFloatingMenu';
 export {
     AlignMenuItemFactory,
     BackgroundColorSelectorMenuItemFactory,

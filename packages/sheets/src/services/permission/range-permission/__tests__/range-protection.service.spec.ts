@@ -14,43 +14,167 @@
  * limitations under the License.
  */
 
-import { Injector, IPermissionService, IResourceManagerService, IUniverInstanceService } from '@univerjs/core';
-import { Subject } from 'rxjs';
+import type { IDisposable, IPermissionPoint, IRange, Workbook } from '@univerjs/core';
+import type { IRangeProtectionRule } from '../../../../models/range-protection-rule.model';
+import { Injector, IPermissionService, IResourceManagerService, IUniverInstanceService, PermissionStatus } from '@univerjs/core';
+import { UnitAction, UnitObject } from '@univerjs/protocol';
+import { of, Subject } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { RangeProtectionRuleModel } from '../../../../models/range-protection-rule.model';
+import { EditStateEnum, RangeProtectionRuleModel, ViewStateEnum } from '../../../../models/range-protection-rule.model';
 import { RangeProtectionCache } from '../../../../models/range-protection.cache';
 import { RangeProtectionService } from '../range-protection.service';
 
+class TestPermissionService {
+    readonly permissionPointUpdate$ = new Subject<unknown>();
+    readonly addedPermissionIds: string[] = [];
+    readonly deletedPermissionIds: string[] = [];
+
+    addPermissionPoint(point: { id: string }) {
+        this.addedPermissionIds.push(point.id);
+        return true;
+    }
+
+    deletePermissionPoint(id: string) {
+        this.deletedPermissionIds.push(id);
+    }
+
+    updatePermissionPoint() {
+        return true;
+    }
+
+    getPermissionPoint(permissionId: string): IPermissionPoint<boolean> {
+        return { id: permissionId, value: true, type: UnitObject.SelectRange, subType: UnitAction.Edit, status: PermissionStatus.DONE };
+    }
+
+    getPermissionPoint$(permissionId: string) {
+        return of(this.getPermissionPoint(permissionId));
+    }
+
+    clearPermissionMap() {
+        this.addedPermissionIds.length = 0;
+        this.deletedPermissionIds.length = 0;
+    }
+
+    composePermission(permissionIds: string[]) {
+        return permissionIds.map((id) => this.getPermissionPoint(id));
+    }
+
+    composePermission$(permissionIds: string[]) {
+        return of(this.composePermission(permissionIds));
+    }
+
+    getAllPermissionPoint() {
+        return new Map();
+    }
+
+    getShowComponents() {
+        return true;
+    }
+
+    setShowComponents() {
+        return undefined;
+    }
+}
+
+class TestResourceManagerService {
+    registeredResource!: {
+        toJson: (unitId: string) => string;
+        parseJson: (json: string) => unknown;
+        onLoad: (unitId: string, resources: Record<string, IRangeProtectionRule[]>) => void;
+        onUnLoad: (unitId: string) => void;
+    };
+
+    registerPluginResource(resource: TestResourceManagerService['registeredResource']): IDisposable {
+        this.registeredResource = resource;
+        return { dispose: vi.fn() };
+    }
+}
+
+class TestUniverInstanceService {
+    getAllUnitsForType(): Workbook[] {
+        return [];
+    }
+
+    getUnit(): Workbook | null {
+        return null;
+    }
+}
+
 describe('RangeProtectionService', () => {
-    let ruleChange$: Subject<unknown>;
-    let addedPermissionIds: string[];
-    let deletedPermissionIds: string[];
+    let ruleModel: RangeProtectionRuleModel;
+    let permissionService: TestPermissionService;
+    let resourceManagerService: TestResourceManagerService;
+    let cache: RangeProtectionCache;
+
+    const createRule = (id: string, permissionId: string, ranges: IRange[] = [{ startRow: 1, endRow: 2, startColumn: 1, endColumn: 2 }]): IRangeProtectionRule => ({
+        id,
+        permissionId,
+        ranges,
+        unitType: UnitObject.SelectRange,
+        unitId: 'book-1',
+        subUnitId: 'sheet-1',
+        viewState: ViewStateEnum.OthersCanView,
+        editState: EditStateEnum.OnlyMe,
+    });
 
     beforeEach(() => {
-        ruleChange$ = new Subject();
-        addedPermissionIds = [];
-        deletedPermissionIds = [];
         const injector = new Injector();
-        injector.add([RangeProtectionRuleModel, { useValue: { ruleChange$, toObject: () => ({}), fromObject: vi.fn(), getSubunitRuleList: () => [] } as unknown as RangeProtectionRuleModel }]);
-        injector.add([IPermissionService, { useValue: {
-            addPermissionPoint: (point: { id: string }) => {
-                addedPermissionIds.push(point.id);
-                return true;
-            },
-            deletePermissionPoint: (id: string) => deletedPermissionIds.push(id),
-        } as unknown as IPermissionService }]);
-        injector.add([IResourceManagerService, { useValue: { registerPluginResource: vi.fn(() => ({ dispose: vi.fn() })) } as unknown as IResourceManagerService }]);
-        injector.add([RangeProtectionCache, { useValue: { reBuildCache: vi.fn(), deleteUnit: vi.fn() } as unknown as RangeProtectionCache }]);
-        injector.add([IUniverInstanceService, { useValue: {} as IUniverInstanceService }]);
+        injector.add([IPermissionService, { useClass: TestPermissionService as never }]);
+        injector.add([IResourceManagerService, { useClass: TestResourceManagerService as never }]);
+        injector.add([IUniverInstanceService, { useClass: TestUniverInstanceService as never }]);
+        injector.add([RangeProtectionRuleModel]);
+        injector.add([RangeProtectionCache]);
         injector.add([RangeProtectionService]);
+
+        permissionService = injector.get(IPermissionService) as unknown as TestPermissionService;
+        resourceManagerService = injector.get(IResourceManagerService) as unknown as TestResourceManagerService;
+        ruleModel = injector.get(RangeProtectionRuleModel);
+        cache = injector.get(RangeProtectionCache);
+        vi.spyOn(cache, 'reBuildCache');
+        vi.spyOn(cache, 'deleteUnit');
         injector.get(RangeProtectionService);
     });
 
     it('adds and removes range permission points when protection rules change', () => {
-        ruleChange$.next({ type: 'add', unitId: 'book-1', subUnitId: 'sheet-1', rule: { permissionId: 'perm-1' } });
-        ruleChange$.next({ type: 'delete', unitId: 'book-1', subUnitId: 'sheet-1', rule: { permissionId: 'perm-1' } });
+        const rule = createRule('rule-1', 'perm-1');
 
-        expect(addedPermissionIds.every((id) => id.includes('perm-1'))).toBe(true);
-        expect(deletedPermissionIds).toEqual(addedPermissionIds);
+        ruleModel.addRule('book-1', 'sheet-1', rule);
+        ruleModel.deleteRule('book-1', 'sheet-1', 'rule-1');
+
+        expect(permissionService.addedPermissionIds.every((id) => id.includes('perm-1'))).toBe(true);
+        expect(permissionService.deletedPermissionIds).toEqual(permissionService.addedPermissionIds);
+    });
+
+    it('replaces permission points when a range rule moves to a new permission id', () => {
+        const oldRule = createRule('rule-1', 'old-perm');
+        const newRule = createRule('rule-1', 'new-perm');
+
+        ruleModel.addRule('book-1', 'sheet-1', oldRule);
+        permissionService.addedPermissionIds.length = 0;
+        ruleModel.setRule('book-1', 'sheet-1', 'rule-1', newRule);
+
+        expect(permissionService.deletedPermissionIds.every((id) => id.includes('old-perm'))).toBe(true);
+        expect(permissionService.addedPermissionIds.every((id) => id.includes('new-perm'))).toBe(true);
+    });
+
+    it('restores range protection snapshot and rebuilds cache for loaded sheets', () => {
+        const loadedRule = createRule('loaded-rule', 'perm-loaded');
+        ruleModel.addRule('book-1', 'sheet-1', createRule('json-rule', 'perm-json'));
+
+        expect(resourceManagerService.registeredResource.toJson('book-1')).toContain('perm-json');
+        expect(resourceManagerService.registeredResource.toJson('missing')).toBe('');
+        expect(resourceManagerService.registeredResource.parseJson('')).toEqual({});
+        expect(resourceManagerService.registeredResource.parseJson('{bad json')).toEqual({});
+        expect(resourceManagerService.registeredResource.parseJson('{"sheet-1":[]}')).toEqual({ 'sheet-1': [] });
+
+        permissionService.addedPermissionIds.length = 0;
+        resourceManagerService.registeredResource.onLoad('book-2', { 'sheet-2': [loadedRule] });
+
+        expect(ruleModel.getRule('book-2', 'sheet-2', 'loaded-rule')).toEqual(loadedRule);
+        expect(permissionService.addedPermissionIds.every((id) => id.includes('perm-loaded'))).toBe(true);
+        expect(cache.reBuildCache).toHaveBeenCalledWith('book-2', 'sheet-2');
+
+        resourceManagerService.registeredResource.onUnLoad('book-2');
+        expect(cache.deleteUnit).toHaveBeenCalledWith('book-2');
     });
 });

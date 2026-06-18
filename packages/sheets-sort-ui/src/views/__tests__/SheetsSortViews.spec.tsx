@@ -51,6 +51,7 @@ import enUS from '../../locale/en-US';
 import { SheetsSortUIService } from '../../services/sheets-sort-ui.service';
 import { CustomSortPanel } from '../CustomSortPanel';
 import EmbedSortBtn from '../EmbedSortBtn';
+import { ExtendConfirm } from '../ExtendConfirm';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -190,6 +191,33 @@ function getButton(container: HTMLElement, text: string) {
     return button as HTMLElement;
 }
 
+function getRadio(container: HTMLElement, text: string, position = 0) {
+    const radios = Array.from(container.querySelectorAll('[data-u-comp="radio"]'))
+        .filter((item) => item.textContent === text);
+    expect(radios[position]).toBeTruthy();
+    return radios[position].querySelector('input') as HTMLInputElement;
+}
+
+function getAddCondition(container: HTMLElement) {
+    const trigger = Array.from(container.querySelectorAll('div'))
+        .find((item) => item.textContent === 'Add condition');
+    expect(trigger).toBeTruthy();
+    return trigger as HTMLElement;
+}
+
+function setCellValue(worksheet: Worksheet, row: number, col: number, value: string | number) {
+    worksheet.getCellMatrix().setValue(row, col, { v: value, t: typeof value === 'number' ? 2 : 1 });
+}
+
+function setDuplicateNamesForConditionTests(worksheet: Worksheet) {
+    setCellValue(worksheet, 1, 0, 'Sam');
+    setCellValue(worksheet, 1, 1, 20);
+    setCellValue(worksheet, 2, 0, 'Amy');
+    setCellValue(worksheet, 2, 1, 10);
+    setCellValue(worksheet, 3, 0, 'Sam');
+    setCellValue(worksheet, 3, 1, 30);
+}
+
 describe('Sheets sort views', () => {
     let root: Root | undefined;
     let container: HTMLDivElement | undefined;
@@ -264,6 +292,113 @@ describe('Sheets sort views', () => {
 
         expect(getColumnValues(currentTestBed.worksheet, 0, [0, 1, 2, 3])).toEqual(['Name', 'Amy', 'Ben', 'Cat']);
         expect(getColumnValues(currentTestBed.worksheet, 1, [0, 1, 2, 3])).toEqual(['Score', 10, 30, 20]);
+        expect(currentTestBed.sortUIService.customSortState()).toEqual({ show: false });
+    });
+
+    it('reports the selected extend range option through the rendered confirmation body', async () => {
+        currentTestBed = createSortViewTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        const selectedOptions: string[] = [];
+
+        await renderWithInjector(
+            root,
+            currentTestBed,
+            <ExtendConfirm onChange={(value) => selectedOptions.push(value)} />
+        );
+
+        await act(async () => {
+            getRadio(container!, 'Extend range sorting').click();
+            await awaitTime(20);
+        });
+
+        await act(async () => {
+            getRadio(container!, 'Keep range sorting').click();
+            await awaitTime(20);
+        });
+
+        expect(selectedOptions).toEqual(['1', '0']);
+    });
+
+    it('applies an added custom sort condition as a secondary rule', async () => {
+        currentTestBed = createSortViewTestBed();
+        setDuplicateNamesForConditionTests(currentTestBed.worksheet);
+        currentTestBed.sortUIService.showCustomSortPanel({
+            unitId: UNIT_ID,
+            subUnitId: SUB_UNIT_ID,
+            range: { startRow: 1, endRow: 3, startColumn: 0, endColumn: 1 },
+            colIndex: 0,
+        });
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        await renderWithInjector(root, currentTestBed, <CustomSortPanel />);
+
+        await act(async () => {
+            getAddCondition(container!).click();
+            await awaitTime(260);
+        });
+
+        await act(async () => {
+            getRadio(container!, 'Descending', 1).click();
+            await awaitTime(20);
+        });
+
+        await act(async () => {
+            getButton(container!, 'Confirm').dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            await awaitTime(20);
+        });
+
+        expect(getColumnValues(currentTestBed.worksheet, 0, [1, 2, 3])).toEqual(['Amy', 'Sam', 'Sam']);
+        expect(getColumnValues(currentTestBed.worksheet, 1, [1, 2, 3])).toEqual([10, 30, 20]);
+        expect(currentTestBed.sortUIService.customSortState()).toEqual({ show: false });
+    });
+
+    it('removes an added custom sort condition before confirming', async () => {
+        currentTestBed = createSortViewTestBed();
+        setDuplicateNamesForConditionTests(currentTestBed.worksheet);
+        currentTestBed.sortUIService.showCustomSortPanel({
+            unitId: UNIT_ID,
+            subUnitId: SUB_UNIT_ID,
+            range: { startRow: 1, endRow: 3, startColumn: 0, endColumn: 1 },
+            colIndex: 0,
+        });
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        await renderWithInjector(root, currentTestBed, <CustomSortPanel />);
+
+        await act(async () => {
+            getAddCondition(container!).click();
+            await awaitTime(260);
+        });
+
+        await act(async () => {
+            getRadio(container!, 'Descending', 1).click();
+            await awaitTime(20);
+        });
+
+        const removeLinks = Array.from(container.querySelectorAll('a'));
+        expect(removeLinks[1]).toBeTruthy();
+
+        await act(async () => {
+            removeLinks[1].dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            await awaitTime(20);
+        });
+
+        expect(Array.from(container.querySelectorAll('[data-u-comp="radio"]'))
+            .filter((item) => item.textContent === 'Descending')).toHaveLength(1);
+
+        await act(async () => {
+            getButton(container!, 'Confirm').dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            await awaitTime(20);
+        });
+
+        expect(getColumnValues(currentTestBed.worksheet, 0, [1, 2, 3])).toEqual(['Amy', 'Sam', 'Sam']);
+        expect(getColumnValues(currentTestBed.worksheet, 1, [1, 2, 3])).toEqual([10, 20, 30]);
         expect(currentTestBed.sortUIService.customSortState()).toEqual({ show: false });
     });
 });

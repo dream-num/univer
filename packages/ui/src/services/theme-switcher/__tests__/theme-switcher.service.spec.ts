@@ -63,4 +63,42 @@ describe('ThemeSwitcherService', () => {
         expect(appended[0].textContent).toContain('--univer-primary-color: red;');
         expect(appended[0].textContent).toContain('--univer-radius: 4;');
     });
+
+    it('injects a theme when no previous style element exists', () => {
+        const appended: Array<{ textContent?: string }> = [];
+        vi.stubGlobal('document', {
+            getElementById: () => null,
+            createElement: () => ({
+                setAttribute: vi.fn(),
+                textContent: '',
+            }),
+            head: {
+                appendChild: (element: { textContent?: string }) => appended.push(element),
+            },
+        });
+        const service = createService();
+
+        service.injectThemeToHead({ color: { text: '#111' } } as unknown as Theme);
+
+        expect(appended[0].textContent).toContain('--univer-color-text: #111;');
+    });
+
+    it('disposes without removing the active theme style element', () => {
+        const existing = { remove: vi.fn() };
+        vi.stubGlobal('document', {
+            getElementById: () => existing,
+            createElement: () => ({
+                setAttribute: vi.fn(),
+                textContent: '',
+            }),
+            head: {
+                appendChild: vi.fn(),
+            },
+        });
+        const service = createService();
+
+        service.dispose();
+
+        expect(existing.remove).not.toHaveBeenCalled();
+    });
 });

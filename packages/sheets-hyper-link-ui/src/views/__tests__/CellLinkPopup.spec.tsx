@@ -42,6 +42,7 @@ import {
     CancelHyperLinkCommand,
     HyperLinkModel,
     RemoveHyperLinkMutation,
+    SheetHyperLinkType,
     SheetsHyperLinkParserService,
     UpdateHyperLinkMutation,
 } from '@univerjs/sheets-hyper-link';
@@ -317,6 +318,20 @@ function inputText(input: HTMLInputElement, value: string) {
     input.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
+async function selectOption(trigger: Element, optionText: string) {
+    trigger.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0 }));
+    trigger.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    await Promise.resolve();
+
+    const option = Array.from(document.querySelectorAll('button, [data-slot="dropdown-menu-radio-item"]')).find((item) => item.textContent === optionText);
+
+    if (!option) {
+        throw new Error(`Option ${optionText} was not rendered`);
+    }
+
+    option.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+}
+
 function renderPopup(
     root: Root,
     container: HTMLDivElement,
@@ -473,6 +488,63 @@ describe('CellLinkEdit', () => {
 
         expect(body?.dataStream).toBe('Univer\r\n');
         expect(linkRange?.properties?.url).toBe('http://docs.univer.ai');
+        expect(popupService.currentEditing).toBeNull();
+    });
+
+    it('switches from URL to worksheet link and saves the selected sheet target', async () => {
+        currentTestBed = createPopupTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        const popupService = currentTestBed.injector.get(SheetsHyperLinkPopupService);
+        const renderManagerService = currentTestBed.injector.get(IRenderManagerService) as unknown as TestRenderManagerService;
+
+        act(() => {
+            popupService.startAddEditing({
+                unitId: UNIT_ID,
+                subUnitId: SUB_UNIT_ID,
+                row: 0,
+                col: 0,
+                type: HyperLinkEditSourceType.VIEWING,
+            });
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <CellLinkEdit />
+                </RediContext.Provider>
+            );
+        });
+
+        const typeSelect = container.querySelector('[data-u-comp="select"]');
+        expect(typeSelect?.textContent).toContain('sheets-hyper-link-ui.form.link');
+
+        await act(async () => {
+            await selectOption(typeSelect!, 'sheets-hyper-link-ui.form.worksheet');
+            await Promise.resolve();
+        });
+
+        const selects = Array.from(container.querySelectorAll('[data-u-comp="select"]'));
+        expect(selects).toHaveLength(2);
+
+        await act(async () => {
+            await selectOption(selects[1], 'Sheet 1');
+            await Promise.resolve();
+        });
+        renderManagerService.enableScrollRender = true;
+
+        const formButtons = Array.from(container.querySelectorAll<HTMLButtonElement>('[data-u-comp="button"]'));
+        const okButton = formButtons[formButtons.length - 1];
+
+        await act(async () => {
+            okButton!.click();
+            await Promise.resolve();
+        });
+
+        const cell = currentTestBed.workbook.getSheetBySheetId(SUB_UNIT_ID)?.getCellRaw(0, 0);
+        const body = cell?.p?.body;
+        const sheetLink = body?.customRanges?.find((range) => range.properties?.url === `#${SheetHyperLinkType.SHEET}=${SUB_UNIT_ID}`);
+
+        expect(body?.dataStream).toBe('Univer\r\n');
+        expect(sheetLink?.rangeType).toBe(CustomRangeType.HYPERLINK);
         expect(popupService.currentEditing).toBeNull();
     });
 });

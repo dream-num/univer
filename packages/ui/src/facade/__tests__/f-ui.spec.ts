@@ -14,7 +14,15 @@
  * limitations under the License.
  */
 
-import { CommandType, ICommandService, ILogService, LogLevel, Univer } from '@univerjs/core';
+import {
+    CommandType,
+    ICommandService,
+    ILogService,
+    Injector,
+    IUniverInstanceService,
+    LogLevel,
+    Univer,
+} from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import { MessageType } from '@univerjs/design';
 import { Engine, IRenderingEngine, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
@@ -42,7 +50,37 @@ import {
     UIPartsService,
 } from '@univerjs/ui';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { FShortcut } from '../f-shortcut';
 import '@univerjs/ui/facade';
+
+class FakeShortcutService {
+    static dispatched: KeyboardEvent[] = [];
+
+    forceDisable() {
+        return { dispose: () => {} };
+    }
+
+    dispatch(event: KeyboardEvent) {
+        FakeShortcutService.dispatched.push(event);
+        return { id: 'fake.shortcut', binding: event.keyCode };
+    }
+}
+
+class FakeRenderManagerService {
+    static renderUnit: unknown;
+
+    getRenderById(_unitId: string) {
+        return FakeRenderManagerService.renderUnit;
+    }
+}
+
+class FakeUniverInstanceService {
+    static workbook: unknown;
+
+    getCurrentUnitOfType() {
+        return FakeUniverInstanceService.workbook;
+    }
+}
 
 describe('ui facade', () => {
     let univer: Univer;
@@ -208,5 +246,35 @@ describe('ui facade', () => {
 
         disposable.dispose();
         expect(componentManager.get('custom-component')).toBeUndefined();
+    });
+
+    it('triggers shortcuts through the active workbook render canvas', () => {
+        const injector = new Injector();
+        injector.add([IShortcutService, { useClass: FakeShortcutService as never }]);
+        injector.add([IRenderManagerService, { useClass: FakeRenderManagerService as never }]);
+        injector.add([IUniverInstanceService, { useClass: FakeUniverInstanceService as never }]);
+        const shortcut = injector.createInstance(FShortcut);
+        const event = new KeyboardEvent('keydown', { key: 'k', keyCode: KeyCode.K });
+        const canvasEvents: KeyboardEvent[] = [];
+
+        FakeShortcutService.dispatched = [];
+        FakeUniverInstanceService.workbook = undefined;
+        FakeRenderManagerService.renderUnit = undefined;
+        expect(shortcut.triggerShortcut(event)).toBeUndefined();
+
+        FakeUniverInstanceService.workbook = { getUnitId: () => 'sheet-1' };
+        expect(shortcut.triggerShortcut(event)).toBeUndefined();
+
+        FakeRenderManagerService.renderUnit = {
+            engine: {
+                getCanvasElement: () => ({
+                    dispatchEvent: (dispatchedEvent: KeyboardEvent) => canvasEvents.push(dispatchedEvent),
+                }),
+            },
+        };
+
+        expect(shortcut.triggerShortcut(event)?.id).toBe('fake.shortcut');
+        expect(canvasEvents).toEqual([event]);
+        expect(FakeShortcutService.dispatched).toEqual([event]);
     });
 });

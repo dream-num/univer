@@ -19,12 +19,12 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { FormulaEditorManagerService, IFormulaEditorManagerService } from '../formula-editor-manager.service';
 
 describe('FormulaEditorManagerService', () => {
-    let service: IFormulaEditorManagerService;
+    let service: FormulaEditorManagerService;
 
     beforeEach(() => {
         const injector = new Injector();
         injector.add([IFormulaEditorManagerService, { useClass: FormulaEditorManagerService }]);
-        service = injector.get(IFormulaEditorManagerService);
+        service = injector.get(IFormulaEditorManagerService) as FormulaEditorManagerService;
     });
 
     it('publishes formula editor position and toolbar button interactions', () => {
@@ -47,5 +47,9 @@ describe('FormulaEditorManagerService', () => {
         expect(focus).toEqual([false, true]);
         expect(fxClicks).toEqual([true]);
         expect(foldClicks).toEqual([false]);
+        expect(service.getPosition()).toBe(rect);
+
+        service.dispose();
+        expect(service.getPosition()).toBeNull();
     });
 });

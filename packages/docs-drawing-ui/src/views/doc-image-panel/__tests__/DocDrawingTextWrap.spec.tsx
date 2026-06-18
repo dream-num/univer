@@ -342,4 +342,22 @@ describe('DocDrawingTextWrap', () => {
             distR: 4,
         });
     });
+
+    it('persists right-only text wrapping on the focused drawing', async () => {
+        currentTestBed = createPanelTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        renderPanel(root, currentTestBed);
+
+        await act(async () => {
+            inputByLabelText('Right only').click();
+            await Promise.resolve();
+        });
+
+        expect(currentDrawing(currentTestBed)).toMatchObject({
+            layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
+            wrapText: WrapTextType.RIGHT,
+        });
+    });
 });

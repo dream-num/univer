@@ -14,13 +14,26 @@
  * limitations under the License.
  */
 
-import type { IAccessor } from '@univerjs/core';
+import type { Dependency, IDataValidationRule, IDisposable, IWorkbookData, Workbook } from '@univerjs/core';
+import type { ISidebarMethodOptions } from '@univerjs/ui';
 import type { IDataValidationDropdownParam } from '../../../services/dropdown-manager.service';
-import { ICommandService, IUniverInstanceService } from '@univerjs/core';
+import {
+    DataValidationOperator,
+    DataValidationType,
+    ICommandService,
+    Inject,
+    Injector,
+    IUniverInstanceService,
+    LocaleType,
+    Plugin,
+    toDisposable,
+    Univer,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { DataValidationModel } from '@univerjs/data-validation';
-import { getSheetCommandTarget } from '@univerjs/sheets';
 import { ISidebarService } from '@univerjs/ui';
-import { describe, expect, it, vi } from 'vitest';
+import { BehaviorSubject } from 'rxjs';
+import { afterEach, describe, expect, it } from 'vitest';
 import { DataValidationPanelService } from '../../../services/data-validation-panel.service';
 import { DataValidationDropdownManagerService } from '../../../services/dropdown-manager.service';
 import {
@@ -32,115 +45,235 @@ import {
     ToggleValidationPanelOperation,
 } from '../data-validation.operation';
 
-vi.mock('@univerjs/sheets', async (importActual) => {
-    const actual = await importActual<typeof import('@univerjs/sheets')>();
-    return { ...actual, getSheetCommandTarget: vi.fn() };
-});
+interface ITestBed {
+    univer: Univer;
+    get: Injector['get'];
+    workbook?: Workbook;
+}
 
-const mockedGetSheetCommandTarget = vi.mocked(getSheetCommandTarget);
+const RULE: IDataValidationRule = {
+    uid: 'rule-1',
+    type: DataValidationType.DECIMAL,
+    operator: DataValidationOperator.EQUAL,
+    formula1: '100',
+    ranges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }],
+};
 
-function createAccessor() {
-    const commandService = { executeCommand: vi.fn() };
-    const panelService = {
-        open: vi.fn(),
-        close: vi.fn(),
-        setActiveRule: vi.fn(),
-        setCloseDisposable: vi.fn(),
-        isOpen: false,
-    };
-    const rule = { uid: 'rule-1' };
-    const dropdownService: {
-        activeDropdown: IDataValidationDropdownParam | null;
-        showDataValidationDropdown: ReturnType<typeof vi.fn>;
-        hideDropdown: ReturnType<typeof vi.fn>;
-    } = {
-        activeDropdown: null,
-        showDataValidationDropdown: vi.fn(),
-        hideDropdown: vi.fn(),
-    };
-    const sidebarService = {
-        open: vi.fn(() => ({ dispose: vi.fn() })),
-    };
-    const accessor = {
-        get(token: unknown) {
-            if (token === ICommandService) return commandService;
-            if (token === DataValidationPanelService) return panelService;
-            if (token === DataValidationModel) return { getRuleById: vi.fn(() => rule) };
-            if (token === IUniverInstanceService) return {};
-            if (token === ISidebarService) return sidebarService;
-            if (token === DataValidationDropdownManagerService) return dropdownService;
-            throw new Error(`Unknown dependency: ${String(token)}`);
+class TestDataValidationModel {
+    getRuleById(unitId: string, subUnitId: string, ruleId: string): IDataValidationRule | undefined {
+        return unitId === 'book-1' && subUnitId === 'sheet-1' && ruleId === RULE.uid ? RULE : undefined;
+    }
+}
+
+class TestSidebarService {
+    readonly sidebarOptions$ = new BehaviorSubject<ISidebarMethodOptions>({ visible: true });
+    readonly openedPanels: ISidebarMethodOptions[] = [];
+    disposeCount = 0;
+
+    open(options: ISidebarMethodOptions): IDisposable {
+        this.openedPanels.push(options);
+        return toDisposable(() => {
+            this.disposeCount++;
+        });
+    }
+}
+
+class TestDropdownManagerService {
+    activeDropdown: IDataValidationDropdownParam | null = null;
+    readonly shownLocations: Array<{ unitId: string; subUnitId: string; row: number; column: number }> = [];
+    hideCount = 0;
+
+    showDataValidationDropdown(unitId: string, subUnitId: string, row: number, column: number): void {
+        this.shownLocations.push({ unitId, subUnitId, row, column });
+        this.activeDropdown = {
+            location: {
+                unitId,
+                subUnitId,
+                row,
+                col: column,
+            },
+        } as IDataValidationDropdownParam;
+    }
+
+    hideDropdown(): void {
+        this.hideCount++;
+        this.activeDropdown = null;
+    }
+}
+
+function createWorkbookData(): IWorkbookData {
+    return {
+        id: 'book-1',
+        appVersion: '3.0.0-alpha',
+        locale: LocaleType.EN_US,
+        name: 'test',
+        sheetOrder: ['sheet-1'],
+        sheets: {
+            'sheet-1': {
+                id: 'sheet-1',
+                name: 'Sheet1',
+                rowCount: 20,
+                columnCount: 20,
+                cellData: {},
+            },
         },
-    } as IAccessor;
+        styles: {},
+    };
+}
 
-    return { accessor, commandService, panelService, dropdownService, sidebarService, rule };
+function registerDependencies(injector: Injector): void {
+    const dependencies: Dependency[] = [
+        [DataValidationModel, { useClass: TestDataValidationModel }],
+        [ISidebarService, { useClass: TestSidebarService }],
+        [DataValidationPanelService],
+        [DataValidationDropdownManagerService, { useClass: TestDropdownManagerService }],
+    ];
+    dependencies.forEach((dependency) => injector.add(dependency));
+}
+
+function createTestBed(createWorkbook = true): ITestBed {
+    const univer = new Univer();
+    const injector = univer.__getInjector();
+
+    class TestPlugin extends Plugin {
+        static override pluginName = 'test-plugin';
+        static override type = UniverInstanceType.UNIVER_SHEET;
+
+        constructor(
+            _config: undefined,
+            @Inject(Injector) override readonly _injector: Injector
+        ) {
+            super();
+        }
+
+        override onStarting(): void {
+            registerDependencies(this._injector);
+        }
+    }
+
+    univer.registerPlugin(TestPlugin);
+    if (!createWorkbook) {
+        registerDependencies(injector);
+    }
+
+    const commandService = injector.get(ICommandService);
+    [
+        OpenValidationPanelOperation,
+        CloseValidationPanelOperation,
+        ToggleValidationPanelOperation,
+        ShowDataValidationDropdown,
+        HideDataValidationDropdown,
+    ].forEach((command) => commandService.registerCommand(command));
+
+    const workbook = createWorkbook
+        ? univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, createWorkbookData())
+        : undefined;
+    if (workbook) {
+        injector.get(IUniverInstanceService).focusUnit(workbook.getUnitId());
+    }
+
+    return {
+        univer,
+        get: injector.get.bind(injector),
+        workbook,
+    };
 }
 
 describe('data validation operations', () => {
-    it('opens the validation panel for the active sheet rule and wires close disposal', () => {
-        mockedGetSheetCommandTarget.mockReturnValue({ unitId: 'book-1', subUnitId: 'sheet-1' } as never);
-        const { accessor, panelService, sidebarService, rule } = createAccessor();
+    let testBed: ITestBed | undefined;
 
-        expect(OpenValidationPanelOperation.handler(accessor, { ruleId: 'rule-1', isAdd: true })).toBe(true);
-        expect(panelService.open).toHaveBeenCalledTimes(1);
-        expect(panelService.setActiveRule).toHaveBeenCalledWith({ unitId: 'book-1', subUnitId: 'sheet-1', rule });
-        expect(sidebarService.open).toHaveBeenCalledWith(expect.objectContaining({
+    afterEach(() => {
+        testBed?.univer.dispose();
+        testBed = undefined;
+    });
+
+    it('opens the panel for an active sheet rule and closes it from the sidebar callback', async () => {
+        testBed = createTestBed();
+        const commandService = testBed.get(ICommandService);
+        const panelService = testBed.get(DataValidationPanelService);
+        const sidebarService = testBed.get(ISidebarService) as unknown as TestSidebarService;
+
+        await expect(commandService.executeCommand(OpenValidationPanelOperation.id, { ruleId: RULE.uid, isAdd: true })).resolves.toBe(true);
+
+        expect(panelService.isOpen).toBe(true);
+        expect(panelService.activeRule).toEqual({
+            unitId: 'book-1',
+            subUnitId: 'sheet-1',
+            rule: RULE,
+        });
+        expect(sidebarService.openedPanels.at(-1)).toMatchObject({
             id: DATA_VALIDATION_PANEL,
             header: { title: 'sheets-data-validation-ui.panel.addTitle' },
             children: { label: DATA_VALIDATION_PANEL },
             width: 312,
-        }));
-        expect(panelService.setCloseDisposable).toHaveBeenCalledTimes(1);
-    });
-
-    it('closes and toggles the panel through the command service', () => {
-        const { accessor, panelService, commandService } = createAccessor();
-
-        expect(CloseValidationPanelOperation.handler(accessor)).toBe(true);
-        expect(panelService.close).toHaveBeenCalledTimes(1);
-
-        panelService.isOpen = true;
-        expect(ToggleValidationPanelOperation.handler(accessor)).toBe(true);
-        expect(commandService.executeCommand).toHaveBeenCalledWith(CloseValidationPanelOperation.id);
-
-        panelService.isOpen = false;
-        ToggleValidationPanelOperation.handler(accessor);
-        expect(commandService.executeCommand).toHaveBeenCalledWith(OpenValidationPanelOperation.id);
-    });
-
-    it('shows and hides dropdowns only when location changes, and guards invalid params', () => {
-        const { accessor, dropdownService } = createAccessor();
-
-        expect(ShowDataValidationDropdown.handler(accessor, null as never)).toBe(false);
-        expect(HideDataValidationDropdown.handler(accessor, null as never)).toBe(false);
-
-        expect(ShowDataValidationDropdown.handler(accessor, {
-            unitId: 'book-1',
-            subUnitId: 'sheet-1',
-            row: 1,
-            column: 2,
-        })).toBe(true);
-        expect(dropdownService.showDataValidationDropdown).toHaveBeenCalledWith('book-1', 'sheet-1', 1, 2);
-
-        dropdownService.activeDropdown = { location: { unitId: 'book-1', subUnitId: 'sheet-1', row: 1, col: 2 } } as unknown as IDataValidationDropdownParam;
-        ShowDataValidationDropdown.handler(accessor, {
-            unitId: 'book-1',
-            subUnitId: 'sheet-1',
-            row: 1,
-            column: 2,
         });
-        expect(dropdownService.showDataValidationDropdown).toHaveBeenCalledTimes(1);
 
-        expect(HideDataValidationDropdown.handler(accessor, { ok: true } as never)).toBe(true);
-        expect(dropdownService.hideDropdown).toHaveBeenCalledTimes(1);
+        sidebarService.openedPanels.at(-1)!.onClose?.();
+
+        expect(panelService.isOpen).toBe(false);
     });
 
-    it('returns false when there is no active sheet target or no params', () => {
-        const { accessor, panelService } = createAccessor();
-        mockedGetSheetCommandTarget.mockReturnValue(null as never);
+    it('opens the rule list with empty params and returns false when no sheet is active', async () => {
+        testBed = createTestBed();
+        const commandService = testBed.get(ICommandService);
+        const panelService = testBed.get(DataValidationPanelService);
 
-        expect(OpenValidationPanelOperation.handler(accessor, { ruleId: 'rule-1' })).toBe(false);
-        expect(OpenValidationPanelOperation.handler(accessor, null as never)).toBe(false);
-        expect(panelService.open).not.toHaveBeenCalled();
+        await expect(commandService.executeCommand(OpenValidationPanelOperation.id)).resolves.toBe(false);
+        expect(panelService.isOpen).toBe(false);
+
+        await expect(commandService.executeCommand(OpenValidationPanelOperation.id, {})).resolves.toBe(true);
+        expect(panelService.isOpen).toBe(true);
+        expect(panelService.activeRule).toBeUndefined();
+
+        testBed.univer.dispose();
+        testBed = createTestBed(false);
+
+        await expect(testBed.get(ICommandService).executeCommand(OpenValidationPanelOperation.id, {})).resolves.toBe(false);
+    });
+
+    it('toggles an opened validation panel closed through the command service', async () => {
+        testBed = createTestBed();
+        const commandService = testBed.get(ICommandService);
+        const panelService = testBed.get(DataValidationPanelService);
+        const sidebarService = testBed.get(ISidebarService) as unknown as TestSidebarService;
+
+        await expect(commandService.executeCommand(OpenValidationPanelOperation.id, {})).resolves.toBe(true);
+        expect(panelService.isOpen).toBe(true);
+        expect(sidebarService.openedPanels).toHaveLength(1);
+
+        await expect(commandService.executeCommand(ToggleValidationPanelOperation.id)).resolves.toBe(true);
+        expect(panelService.isOpen).toBe(false);
+        expect(sidebarService.disposeCount).toBe(1);
+    });
+
+    it('does not recreate dropdowns for the same cell and hides an active dropdown on demand', async () => {
+        testBed = createTestBed();
+        const commandService = testBed.get(ICommandService);
+        const dropdownService = testBed.get(DataValidationDropdownManagerService) as unknown as TestDropdownManagerService;
+
+        await expect(commandService.executeCommand(ShowDataValidationDropdown.id)).resolves.toBe(false);
+        await expect(commandService.executeCommand(HideDataValidationDropdown.id)).resolves.toBe(false);
+
+        await expect(commandService.executeCommand(ShowDataValidationDropdown.id, {
+            unitId: 'book-1',
+            subUnitId: 'sheet-1',
+            row: 1,
+            column: 2,
+        })).resolves.toBe(true);
+        await expect(commandService.executeCommand(ShowDataValidationDropdown.id, {
+            unitId: 'book-1',
+            subUnitId: 'sheet-1',
+            row: 1,
+            column: 2,
+        })).resolves.toBe(true);
+
+        expect(dropdownService.shownLocations).toEqual([
+            { unitId: 'book-1', subUnitId: 'sheet-1', row: 1, column: 2 },
+        ]);
+
+        await expect(commandService.executeCommand(HideDataValidationDropdown.id, { reason: 'selection-change' })).resolves.toBe(true);
+
+        expect(dropdownService.hideCount).toBe(1);
+        expect(dropdownService.activeDropdown).toBeNull();
     });
 });

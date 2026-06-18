@@ -19,7 +19,7 @@ import type { ISheetLocation } from '../utils/interceptor';
 import { createInterceptorKey, InterceptorEffectEnum, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { INTERCEPTOR_POINT } from '../interceptor-const';
-import { SheetInterceptorService } from '../sheet-interceptor.service';
+import { AFTER_CELL_EDIT, SheetInterceptorService, VALIDATE_CELL } from '../sheet-interceptor.service';
 import { createSheetTestBed } from './create-core-test-bed';
 
 describe('Test SheetInterceptorService', () => {
@@ -187,6 +187,104 @@ describe('Test SheetInterceptorService', () => {
     });
 
     describe('Test intercept in general case', () => {
+        it('collects command, after-command, range, auto-height, and before-command interceptor results in priority order', async () => {
+            const interceptorService = get(SheetInterceptorService);
+            const high = {
+                priority: 100,
+                getMutations: () => ({
+                    preRedos: [{ id: 'high-pre-redo', params: {} }],
+                    redos: [{ id: 'high-redo', params: {} }],
+                    preUndos: [{ id: 'high-pre-undo', params: {} }],
+                    undos: [{ id: 'high-undo', params: {} }],
+                }),
+            };
+            const low = {
+                priority: 0,
+                getMutations: () => ({
+                    redos: [{ id: 'low-redo', params: {} }],
+                    undos: [{ id: 'low-undo', params: {} }],
+                }),
+            };
+
+            const commandDisposable = interceptorService.interceptCommand(low);
+            interceptorService.interceptCommand(high);
+            expect(interceptorService.onCommandExecute({ id: 'cmd', params: {} })).toEqual({
+                preRedos: [{ id: 'high-pre-redo', params: {} }],
+                redos: [{ id: 'high-redo', params: {} }, { id: 'low-redo', params: {} }],
+                preUndos: [{ id: 'high-pre-undo', params: {} }],
+                undos: [{ id: 'high-undo', params: {} }, { id: 'low-undo', params: {} }],
+            });
+            expect(() => interceptorService.interceptCommand(high)).toThrow('Interceptor already exists');
+            commandDisposable.dispose();
+
+            const afterDisposable = interceptorService.interceptAfterCommand(high);
+            interceptorService.interceptAfterCommand(low);
+            expect(interceptorService.afterCommandExecute({ id: 'cmd', params: {} })).toEqual({
+                redos: [{ id: 'high-redo', params: {} }, { id: 'low-redo', params: {} }],
+                undos: [{ id: 'high-undo', params: {} }, { id: 'low-undo', params: {} }],
+            });
+            expect(() => interceptorService.interceptAfterCommand(high)).toThrow('Interceptor already exists');
+            afterDisposable.dispose();
+
+            const rangeDisposable = interceptorService.interceptRanges(high);
+            interceptorService.interceptRanges(low);
+            expect(interceptorService.generateMutationsByRanges({ unitId: 'unit', subUnitId: 'sheet', ranges: [] })).toEqual({
+                preRedos: [{ id: 'high-pre-redo', params: {} }],
+                redos: [{ id: 'high-redo', params: {} }, { id: 'low-redo', params: {} }],
+                preUndos: [{ id: 'high-pre-undo', params: {} }],
+                undos: [{ id: 'high-undo', params: {} }, { id: 'low-undo', params: {} }],
+            });
+            expect(() => interceptorService.interceptRanges(high)).toThrow('Interceptor already exists');
+            rangeDisposable.dispose();
+
+            const autoHeightDisposable = interceptorService.interceptAutoHeight(high);
+            interceptorService.interceptAutoHeight(low);
+            expect(interceptorService.generateMutationsOfAutoHeight({ unitId: 'unit', subUnitId: 'sheet', ranges: [] })).toEqual({
+                preRedos: [{ id: 'high-pre-redo', params: {} }],
+                redos: [{ id: 'high-redo', params: {} }, { id: 'low-redo', params: {} }],
+                preUndos: [{ id: 'high-pre-undo', params: {} }],
+                undos: [{ id: 'high-undo', params: {} }, { id: 'low-undo', params: {} }],
+            });
+            expect(() => interceptorService.interceptAutoHeight(high)).toThrow('Interceptor already exists');
+            autoHeightDisposable.dispose();
+
+            const before = { priority: 10, performCheck: vi.fn(async () => true) };
+            interceptorService.interceptBeforeCommand(before);
+            interceptorService.interceptBeforeCommand({ priority: 0, performCheck: async () => false });
+            await expect(interceptorService.beforeCommandExecute({ id: 'cmd', params: {} })).resolves.toBe(false);
+            expect(before.performCheck).toHaveBeenCalledWith({ id: 'cmd', params: {} });
+            expect(() => interceptorService.interceptBeforeCommand(before)).toThrow('Interceptor already exists');
+        });
+
+        it('runs write-cell and validation interceptors with workbook context', async () => {
+            const interceptorService = get(SheetInterceptorService);
+            const workbook = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+            const worksheet = workbook.getActiveSheet()!;
+
+            interceptorService.writeCellInterceptor.intercept(AFTER_CELL_EDIT, {
+                priority: 100,
+                handler(value, location, next) {
+                    expect(location.unitId).toBe(workbook.getUnitId());
+                    expect(location.subUnitId).toBe(worksheet.getSheetId());
+                    expect(location.origin).toEqual({ v: 'origin' });
+                    return next({ ...value, v: `${value?.v} edited` });
+                },
+            });
+
+            interceptorService.writeCellInterceptor.intercept(VALIDATE_CELL, {
+                priority: 100,
+                handler(value, location, next) {
+                    if (location.row === 3 && location.col === 4) {
+                        return Promise.resolve(false);
+                    }
+                    return next(value);
+                },
+            });
+
+            expect(interceptorService.onWriteCell(workbook, worksheet, 1, 2, { v: 'origin' })).toEqual({ v: 'origin edited' });
+            await expect(interceptorService.onValidateCell(workbook, worksheet, 3, 4)).resolves.toBe(false);
+        });
+
         it('should intercept BEFORE_CELL_EDIT and sum the values', () => {
             get(SheetInterceptorService).intercept(numberIntercept, {
                 priority: 0,

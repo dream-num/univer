@@ -41,6 +41,27 @@ describe('DesktopConfirmService', () => {
         sub.unsubscribe();
     });
 
+    it('updates duplicate confirm ids and resolves close callbacks as cancellation', async () => {
+        const service = createService();
+        const snapshots: IConfirmPartMethodOptions[][] = [];
+        const sub = service.confirmOptions$.subscribe((options) => snapshots.push(options));
+
+        const disposable = service.open({ id: 'save-confirm', children: 'Save changes?' });
+        service.open({ id: 'save-confirm', children: 'Discard changes?' });
+        service.close('save-confirm');
+
+        expect(snapshots.at(-2)?.[0]).toMatchObject({ id: 'save-confirm', children: 'Discard changes?', visible: true });
+        expect(snapshots.at(-1)?.[0]).toMatchObject({ id: 'save-confirm', visible: false });
+
+        const promise = service.confirm({ id: 'cancel-confirm', children: 'Cancel?' });
+        snapshots.at(-1)?.find((item) => item.id === 'cancel-confirm')?.onClose?.();
+        await expect(promise).resolves.toBe(false);
+
+        disposable.dispose();
+        expect(snapshots.at(-1)).toEqual([]);
+        sub.unsubscribe();
+    });
+
     it('registers the global confirm UI part when constructed', () => {
         const injector = new Injector();
         injector.add([IUIPartsService, { useClass: UIPartsService }]);

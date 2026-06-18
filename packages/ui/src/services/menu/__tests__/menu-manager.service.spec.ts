@@ -17,6 +17,7 @@
 import type { MenuSchemaType } from '../menu-manager.service';
 import { ConfigService, IConfigService, Injector } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
+import { isMenuButtonSelectorItem, isMenuSelectorItem, MenuItemType } from '../menu';
 import { IMenuManagerService, MenuManagerService } from '../menu-manager.service';
 
 function createService(): IMenuManagerService {
@@ -52,5 +53,12 @@ describe('MenuManagerService', () => {
         expect(service.getFlatMenuByPositionKey('testMerge').map((item) => item.key)).toEqual(['group', 'command']);
         expect(changes.length).toBeGreaterThanOrEqual(2);
         sub.unsubscribe();
+    });
+
+    it('identifies selector menu item variants used by menu renderers', () => {
+        expect(isMenuSelectorItem({ id: 'font-family', type: MenuItemType.SELECTOR })).toBe(true);
+        expect(isMenuSelectorItem({ id: 'more-actions', type: MenuItemType.SUBITEMS })).toBe(true);
+        expect(isMenuSelectorItem({ id: 'copy', type: MenuItemType.BUTTON })).toBe(false);
+        expect(isMenuButtonSelectorItem({ id: 'fill-color', type: MenuItemType.BUTTON_SELECTOR })).toBe(true);
     });
 });

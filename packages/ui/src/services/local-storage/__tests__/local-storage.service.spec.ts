@@ -57,4 +57,16 @@ describe('DesktopLocalStorageService', () => {
         await service.removeItem('sidebar');
         await expect(service.getItem('sidebar')).resolves.toBeNull();
     });
+
+    it('reads key positions and clears stored values', async () => {
+        vi.stubGlobal('localStorage', createMemoryLocalStorage());
+        const service = createService();
+
+        await service.setItem('first', 1);
+        await expect(service.key(0)).resolves.toBe('first');
+
+        await service.clear();
+        await expect(service.keys()).resolves.toEqual([]);
+        await expect(service.key(0)).resolves.toBeNull();
+    });
 });

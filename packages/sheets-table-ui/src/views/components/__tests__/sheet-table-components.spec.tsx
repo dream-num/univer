@@ -16,7 +16,17 @@
 
 import type { Dependency, IDisposable, IWorkbookData, Workbook } from '@univerjs/core';
 import type { Root } from 'react-dom/client';
-import { ICommandService, Inject, Injector, LocaleService, LocaleType, Plugin, toDisposable, Univer, UniverInstanceType } from '@univerjs/core';
+import {
+    ICommandService,
+    Inject,
+    Injector,
+    LocaleService,
+    LocaleType,
+    Plugin,
+    toDisposable,
+    Univer,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { DefinedNamesService, IDefinedNamesService } from '@univerjs/engine-formula';
 import { SheetInterceptorService } from '@univerjs/sheets';
 import {
@@ -27,7 +37,9 @@ import {
     SheetTableService,
     TABLE_FILTER_EMPTY_VALUE,
     TableColumnFilterTypeEnum,
+    TableConditionTypeEnum,
     TableManager,
+    TableStringCompareTypeEnum,
 } from '@univerjs/sheets-table';
 import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import { IDialogService, RediContext } from '@univerjs/ui';
@@ -231,6 +243,9 @@ function renderWithRediContext(testBed: ITestBed, element: React.ReactElement) {
 
 function changeInput(input: HTMLInputElement, value: string): void {
     act(() => {
+        if (!input.getAttribute('type')) {
+            input.setAttribute('type', 'text');
+        }
         const valueSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
         valueSetter?.call(input, value);
         input.dispatchEvent(new Event('input', { bubbles: true }));
@@ -364,6 +379,48 @@ describe('sheet table view components', () => {
         expect(table.getTableFilterColumn(0)).toEqual({
             filterType: TableColumnFilterTypeEnum.manual,
             values: ['pen', TABLE_FILTER_EMPTY_VALUE],
+        });
+        expect(componentController.closeCount).toBe(1);
+    });
+
+    it('applies a condition filter from the condition tab input', async () => {
+        testBed = createTestBed();
+        const componentController = testBed.injector.get(SheetsTableComponentController) as TestComponentController;
+        const table = testBed.injector.get(TableManager).getTable(testBed.workbook.getUnitId(), 'table-orders')!;
+        table.setTableFilterColumn(0, {
+            filterType: TableColumnFilterTypeEnum.condition,
+            filterInfo: {
+                conditionType: TableConditionTypeEnum.String,
+                compareType: TableStringCompareTypeEnum.Equal,
+                expectedValue: 'pen',
+            },
+        });
+        componentController.setCurrentTableFilterInfo({
+            unitId: testBed.workbook.getUnitId(),
+            subUnitId: 'sheet1',
+            tableId: 'table-orders',
+            row: 0,
+            column: 0,
+        });
+        const rendered = renderWithRediContext(testBed, <SheetTableFilterPanel />);
+        root = rendered.root;
+        container = rendered.container;
+
+        const conditionInput = container.querySelector('input') as HTMLInputElement | null;
+        if (!conditionInput) {
+            throw new Error('Condition input was not found.');
+        }
+        changeInput(conditionInput, 'book');
+        clickButtonByText(container, 'Confirm');
+        await flushCommands();
+
+        expect(table.getTableFilterColumn(0)).toEqual({
+            filterType: TableColumnFilterTypeEnum.condition,
+            filterInfo: {
+                conditionType: TableConditionTypeEnum.String,
+                compareType: TableStringCompareTypeEnum.Equal,
+                expectedValue: 'book',
+            },
         });
         expect(componentController.closeCount).toBe(1);
     });

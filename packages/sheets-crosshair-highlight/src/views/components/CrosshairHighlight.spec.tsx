@@ -46,7 +46,7 @@ function createOverlayTestBed() {
     const highlightBackground = Object.fromEntries(CROSSHAIR_HIGHLIGHT_COLOR_THEME_PATHS.map((path, index) => [
         path.replace('highlight.background.', ''),
         {
-            color: index === 1 ? '#040506' : '#010203',
+            color: index === 0 ? '#010203' : index === 1 ? '#040506' : `#${String(index + 10).padStart(2, '0')}0a0b`,
             alpha: index === 1 ? 0.15 : 0.3,
         },
     ]));
@@ -136,5 +136,23 @@ describe('CrosshairOverlay', () => {
         const cells = getColorCells(rendered.container);
         expect(hasClassToken(cells[1], 'univer-ring-primary-600')).toBe(true);
         expect(hasClassToken(cells[0], 'univer-ring-primary-600')).toBe(false);
+    });
+
+    it('moves the active swatch when the service color changes after render', () => {
+        const testBed = createOverlayTestBed();
+        const rendered = renderOverlay(testBed.injector);
+        disposable = teardown(rendered.root, rendered.container);
+
+        let cells = getColorCells(rendered.container);
+        expect(hasClassToken(cells[0], 'univer-ring-primary-600')).toBe(true);
+        expect(hasClassToken(cells[2], 'univer-ring-primary-600')).toBe(false);
+
+        act(() => {
+            testBed.service.setColor(CROSSHAIR_HIGHLIGHT_COLOR_THEME_PATHS[2]);
+        });
+
+        cells = getColorCells(rendered.container);
+        expect(hasClassToken(cells[0], 'univer-ring-primary-600')).toBe(false);
+        expect(hasClassToken(cells[2], 'univer-ring-primary-600')).toBe(true);
     });
 });

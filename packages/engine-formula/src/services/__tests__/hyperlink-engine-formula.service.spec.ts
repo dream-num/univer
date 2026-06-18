@@ -23,7 +23,9 @@ describe('HyperlinkEngineFormulaService', () => {
 
     beforeEach(() => {
         const injector = new Injector();
-        injector.add([IUniverInstanceService, { useValue: {} as IUniverInstanceService }]);
+        class TestUniverInstanceService {}
+
+        injector.add([IUniverInstanceService, { useClass: TestUniverInstanceService as never }]);
         injector.add([IHyperlinkEngineFormulaService, { useClass: HyperlinkEngineFormulaService }]);
         service = injector.get(IHyperlinkEngineFormulaService);
     });

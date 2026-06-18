@@ -20,6 +20,7 @@ import type { ISheetDrawing } from '../../services/sheet-drawing.service';
 import {
     DrawingTypeEnum,
     ICommandService,
+    ImageSourceType,
     IUniverInstanceService,
     RedoCommand,
     UndoCommand,
@@ -167,6 +168,78 @@ describe('FWorksheetDrawingMixin group drawings', () => {
         const recursiveChildren = fWorksheet.getDrawingGroupChildren('group-2', true).map((drawing: ISheetDrawing) => drawing.drawingId);
         expect(recursiveChildren).toHaveLength(4);
         expect(recursiveChildren).toEqual(expect.arrayContaining(['drawing-1', 'drawing-2', 'drawing-3', 'group-1']));
+    });
+
+    it('inserts, reads, updates, and deletes over-grid images through the worksheet facade', async () => {
+        const sheetDrawingService = injector.get(ISheetDrawingService);
+        const fWorksheet = createFacade(injector);
+        const image = await fWorksheet.newOverGridImage()
+            .setSource('https://example.com/image.png', ImageSourceType.URL)
+            .setColumn(2)
+            .setRow(3)
+            .setColumnOffset(4)
+            .setRowOffset(5)
+            .setWidth(120)
+            .setHeight(80)
+            .setCropTop(1)
+            .setCropLeft(2)
+            .setCropBottom(3)
+            .setCropRight(4)
+            .setRotate(15)
+            .buildAsync();
+
+        expect(fWorksheet.insertImages([image])).toBe(fWorksheet);
+
+        const images = fWorksheet.getImages();
+        expect(images).toHaveLength(1);
+        expect(images[0].getId()).toBe(image.drawingId);
+        expect(fWorksheet.getImageById(image.drawingId)?.toBuilder().getSource()).toBe('https://example.com/image.png');
+
+        const updatedImage = {
+            ...image,
+            source: 'https://example.com/updated.png',
+        };
+        expect(fWorksheet.updateImages([updatedImage])).toBe(fWorksheet);
+        expect((sheetDrawingService.getDrawingByParam({
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            drawingId: image.drawingId,
+        }) as { source: string }).source).toBe('https://example.com/updated.png');
+
+        expect(fWorksheet.deleteImages(images)).toBe(fWorksheet);
+        expect(fWorksheet.getImageById(image.drawingId)).toBeNull();
+        expect(fWorksheet.getImages()).toEqual([]);
+    });
+
+    it('returns only images from sheet drawing data and exposes active images from the drawing selection', () => {
+        const commandService = injector.get(ICommandService);
+        const fWorksheet = createFacade(injector);
+        const image = createDrawing('image-1', 10, DrawingTypeEnum.DRAWING_IMAGE);
+        const shape = createDrawing('shape-1', 80, DrawingTypeEnum.DRAWING_SHAPE);
+
+        expect(commandService.syncExecuteCommand(InsertSheetDrawingCommand.id, { unitId: 'test', drawings: [image, shape] })).toBe(true);
+        expect(fWorksheet.getImages().map((drawing) => drawing.getId())).toEqual(['image-1']);
+
+        injector.get(ISheetDrawingService).focusDrawing([{
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            drawingId: 'image-1',
+        }]);
+
+        expect(fWorksheet.getActiveImages().map((drawing) => drawing.getId())).toEqual(['image-1']);
+    });
+
+    it('keeps grouping APIs inert when requested drawings or groups do not exist', () => {
+        const commandService = injector.get(ICommandService);
+        const fWorksheet = createFacade(injector);
+        const image = createDrawing('drawing-1', 10);
+
+        expect(commandService.syncExecuteCommand(InsertSheetDrawingCommand.id, { unitId: 'test', drawings: [image] })).toBe(true);
+
+        expect(fWorksheet.groupDrawings(['drawing-1', 'missing-drawing'], 'group-1')).toBeNull();
+        expect(fWorksheet.ungroupDrawings(['missing-group'])).toBe(false);
+        expect(fWorksheet.getDrawingGroupChildren('missing-group', true)).toEqual([]);
+        expect(fWorksheet.getDrawingParentGroup('drawing-1')).toBeNull();
     });
 });
 

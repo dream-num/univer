@@ -257,6 +257,7 @@ function createTestBed() {
         commandService,
         threadCommentModel: get(ThreadCommentModel),
         popupService: get(SheetsThreadCommentPopupService),
+        panelService: get(ThreadCommentPanelService),
     };
 }
 
@@ -401,5 +402,29 @@ describe('SheetsThreadCommentPanel', () => {
 
         expect(testBed.popupService.activePopup).toBeNull();
         expect(TestState.popupDisposeCount).toBe(1);
+    });
+
+    it('removes the hover highlight when the panel is hidden by service state', () => {
+        const testBed = createTestBed();
+        univer = testBed.univer;
+        testBed.panelService.setPanelVisible(true);
+        testBed.threadCommentModel.addComment(unitId, sheet1, createComment('current-sheet-thread', sheet1, 'B2', 'Current sheet B2'));
+
+        const rendered = renderPanel(testBed.injector);
+        root = rendered.root;
+        container = rendered.container;
+
+        const currentThread = container.querySelector(`#PANEL-${unitId}-${sheet1}-current-sheet-thread`);
+        expect(currentThread).toBeInstanceOf(HTMLElement);
+
+        dispatchMouseEvent(currentThread!, 'mouseover');
+        expect(TestState.shapes).toHaveLength(1);
+
+        act(() => {
+            testBed.panelService.setPanelVisible(false);
+        });
+
+        expect(TestState.shapes).toHaveLength(0);
+        expect(TestState.removedShapeIds).toEqual(['shape-1']);
     });
 });

@@ -14,8 +14,21 @@
  * limitations under the License.
  */
 
-import { CommandService, ConfigService, ContextService, DesktopLogService, ICommandService, IConfigService, IContextService, ILogService, Injector, IUniverInstanceService, UniverInstanceService } from '@univerjs/core';
+import {
+    CommandService,
+    ConfigService,
+    ContextService,
+    DesktopLogService,
+    ICommandService,
+    IConfigService,
+    IContextService,
+    ILogService,
+    Injector,
+    IUniverInstanceService,
+    UniverInstanceService,
+} from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
+import { SetTextSelectionsOperation } from '../../commands/operations/text-selection.operation';
 import { DocSelectionManagerService } from '../doc-selection-manager.service';
 
 function createService() {
@@ -26,6 +39,7 @@ function createService() {
     injector.add([ICommandService, { useClass: CommandService }]);
     injector.add([IUniverInstanceService, { useClass: UniverInstanceService }]);
     injector.add([DocSelectionManagerService]);
+    injector.get(ICommandService).registerCommand(SetTextSelectionsOperation);
     return injector.get(DocSelectionManagerService);
 }
 
@@ -51,6 +65,22 @@ describe('DocSelectionManagerService', () => {
         expect(service.getDocRanges().map((range) => range.startOffset)).toEqual([1, 5]);
     });
 
+    it('keeps empty selections inert until a document selection is current', () => {
+        const service = createService();
+
+        service.__TEST_ONLY_add([{ startOffset: 1, endOffset: 1, collapsed: true }] as never);
+        service.refreshSelection();
+        service.replaceTextRanges([{ startOffset: 2, endOffset: 2 }]);
+
+        expect(service.__getCurrentSelection()).toBeNull();
+        expect(service.getSelectionInfo()).toBeUndefined();
+        expect(service.getTextRanges()).toBeUndefined();
+        expect(service.getRectRanges()).toBeUndefined();
+        expect(service.getActiveTextRange()).toBeUndefined();
+        expect(service.getActiveRectRange()).toBeUndefined();
+        expect(service.getDocRanges()).toEqual([]);
+    });
+
     it('publishes refresh selection requests for current document ranges', () => {
         const service = createService();
         const refreshes: unknown[] = [];
@@ -66,6 +96,35 @@ describe('DocSelectionManagerService', () => {
             isEditing: false,
             options: { keepVisible: true },
         });
+        sub.unsubscribe();
+    });
+
+    it('replaces render selections, publishes them, and sorts text and rect ranges together', async () => {
+        const service = createService();
+        const selections: unknown[] = [];
+        const sub = service.textSelection$.subscribe((value) => selections.push(value));
+        service.__TEST_ONLY_setCurrentSelection({ unitId: 'doc-1', subUnitId: 'doc-1' });
+
+        service.__replaceTextRangesWithNoRefresh({
+            textRanges: [{ startOffset: 8, endOffset: 9, collapsed: false, isActive: false }],
+            rectRanges: [{ startOffset: 2, endOffset: 4, isActive: true }],
+            segmentId: 'header-1',
+            segmentPage: 0,
+            isEditing: true,
+            style: { stroke: 'red' },
+        } as never, { unitId: 'doc-1', subUnitId: 'doc-1' });
+
+        expect(service.getTextRanges()?.map((range) => range.startOffset)).toEqual([8]);
+        expect(service.getRectRanges()?.map((range) => range.startOffset)).toEqual([2]);
+        expect(service.getActiveRectRange()?.startOffset).toBe(2);
+        expect(service.getDocRanges().map((range) => range.startOffset)).toEqual([2, 8]);
+        expect(selections.at(-1)).toMatchObject({
+            unitId: 'doc-1',
+            subUnitId: 'doc-1',
+            segmentId: 'header-1',
+            isEditing: true,
+        });
+
         sub.unsubscribe();
     });
 });

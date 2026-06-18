@@ -19,22 +19,27 @@ import { describe, expect, it, vi } from 'vitest';
 import { DocQuickInsertPopupService } from '../../../services/doc-quick-insert-popup.service';
 import { CloseQuickInsertPopupOperation, ShowQuickInsertPopupOperation } from '../quick-insert-popup.operation';
 
+class RecordingQuickInsertPopupService {
+    readonly showPopup = vi.fn();
+    readonly closePopup = vi.fn();
+}
+
 function createAccessor(bindings: Array<[unknown, unknown]>) {
     const injector = new Injector();
 
-    bindings.forEach(([token, value]) => {
-        injector.add([token as never, { useValue: value }]);
+    bindings.forEach(([token, useClass]) => {
+        injector.add([token as never, { useClass: useClass as never }]);
     });
 
-    return injector as never;
+    return injector;
 }
 
 describe('quick insert popup operations', () => {
     it('shows a popup only when parameters are provided', () => {
-        const showPopup = vi.fn();
         const accessor = createAccessor([
-            [DocQuickInsertPopupService, { showPopup }],
+            [DocQuickInsertPopupService, RecordingQuickInsertPopupService],
         ]);
+        const popupService = accessor.get(DocQuickInsertPopupService) as unknown as RecordingQuickInsertPopupService;
         const params = {
             unitId: 'doc-1',
             index: 3,
@@ -46,16 +51,16 @@ describe('quick insert popup operations', () => {
 
         expect(ShowQuickInsertPopupOperation.handler(accessor, undefined)).toBe(false);
         expect(ShowQuickInsertPopupOperation.handler(accessor, params)).toBe(true);
-        expect(showPopup).toHaveBeenCalledWith(params);
+        expect(popupService.showPopup).toHaveBeenCalledWith(params);
     });
 
     it('closes the active popup session', () => {
-        const closePopup = vi.fn();
         const accessor = createAccessor([
-            [DocQuickInsertPopupService, { closePopup }],
+            [DocQuickInsertPopupService, RecordingQuickInsertPopupService],
         ]);
+        const popupService = accessor.get(DocQuickInsertPopupService) as unknown as RecordingQuickInsertPopupService;
 
         expect(CloseQuickInsertPopupOperation.handler(accessor)).toBe(true);
-        expect(closePopup).toHaveBeenCalledTimes(1);
+        expect(popupService.closePopup).toHaveBeenCalledTimes(1);
     });
 });

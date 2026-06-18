@@ -223,8 +223,18 @@ function clickElement(element: Element) {
     element.dispatchEvent(new MouseEvent('click', { bubbles: true }));
 }
 
+function openSelect(element: Element) {
+    element.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0 }));
+}
+
 function changeCheckbox(input: HTMLInputElement) {
     input.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+}
+
+function changeInput(input: HTMLInputElement, value: string) {
+    const valueSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
+    valueSetter?.call(input, value);
+    input.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
 function getButton(container: HTMLElement, text: string): HTMLElement {
@@ -236,6 +246,28 @@ function getButton(container: HTMLElement, text: string): HTMLElement {
     }
 
     return button as HTMLElement;
+}
+
+function getSelect(container: HTMLElement, index = 0): HTMLElement {
+    const select = container.querySelectorAll<HTMLElement>('[data-u-comp="select"]').item(index);
+    if (!select) {
+        throw new Error(`Select at index "${index}" was not rendered.`);
+    }
+
+    return select;
+}
+
+function getDropdownOption(text: string): HTMLElement {
+    const option = Array.from(document.querySelectorAll<HTMLElement>('[data-slot="dropdown-menu-radio-item"]'))
+        .find((item) => item.textContent === text);
+    if (!option) {
+        const renderedOptions = Array.from(document.querySelectorAll<HTMLElement>('[data-slot="dropdown-menu-radio-item"]'))
+            .map((item) => item.textContent)
+            .join(', ');
+        throw new Error(`Dropdown option "${text}" was not rendered. Options: ${renderedOptions}`);
+    }
+
+    return option;
 }
 
 function getValueItemCheckbox(container: HTMLElement, title: string): HTMLInputElement {
@@ -421,6 +453,87 @@ describe('FilterPanel', () => {
         const filters = currentTestBed.filterService.activeFilterModel?.getFilterColumn(0)?.getColumnData().filters?.filters;
         expect(filters).toContain('Jackson');
         expect(filters).not.toContain('Michael');
+        expect(currentTestBed.contextService.getContextValue(FILTER_PANEL_OPENED_KEY)).toBe(false);
+    });
+
+    it('keeps value criteria unchanged when a changed candidate is cancelled', async () => {
+        currentTestBed = createFilterPanelViewTestBed(WithValuesAndEmptyFilterModelFactory());
+        await openPanel(currentTestBed);
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        await renderPanel(root, currentTestBed);
+
+        const michaelCheckbox = getValueItemCheckbox(container, 'Michael');
+        expect(michaelCheckbox.checked).toBe(false);
+
+        await act(async () => {
+            changeCheckbox(michaelCheckbox);
+            await awaitTime(20);
+        });
+
+        expect(getValueItemCheckbox(container, 'Michael').checked).toBe(true);
+
+        await act(async () => {
+            clickElement(getButton(container!, 'Cancel'));
+            await awaitTime(20);
+        });
+
+        expect(currentTestBed.filterService.activeFilterModel?.getFilterColumn(0)?.getColumnData().filters).toEqual({
+            blank: true,
+            filters: ['1'],
+        });
+        expect(currentTestBed.contextService.getContextValue(FILTER_PANEL_OPENED_KEY)).toBe(false);
+    });
+
+    it('applies text contains criteria from the conditions panel', async () => {
+        currentTestBed = createFilterPanelViewTestBed(WithValuesFilterModelFactory());
+        await openPanel(currentTestBed);
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        await renderPanel(root, currentTestBed);
+
+        const conditionButton = Array.from(container.querySelectorAll('[data-u-comp="segmented"] button'))
+            .find((button) => button.textContent === 'By Conditions') as HTMLElement;
+
+        await act(async () => {
+            clickElement(conditionButton);
+            await awaitTime(20);
+        });
+
+        await act(async () => {
+            openSelect(getSelect(container!));
+            await awaitTime(20);
+        });
+
+        await act(async () => {
+            clickElement(getDropdownOption('Text Contains'));
+            await awaitTime(20);
+        });
+
+        const input = container.querySelector<HTMLInputElement>('[data-u-comp="sheets-filter-panel-conditions-container-inner"] input');
+        if (!input) {
+            throw new Error('Condition value input was not rendered.');
+        }
+
+        await act(async () => {
+            changeInput(input, 'Michael');
+            await awaitTime(20);
+        });
+
+        await act(async () => {
+            clickElement(getButton(container!, 'Confirm'));
+            await awaitTime(20);
+        });
+
+        const columnData = currentTestBed.filterService.activeFilterModel?.getFilterColumn(0)?.getColumnData();
+        expect(columnData?.customFilters).toEqual({
+            customFilters: [{ val: '*Michael*' }],
+        });
+        expect(columnData?.filters).toBeUndefined();
         expect(currentTestBed.contextService.getContextValue(FILTER_PANEL_OPENED_KEY)).toBe(false);
     });
 

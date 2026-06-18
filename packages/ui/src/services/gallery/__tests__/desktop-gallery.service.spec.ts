@@ -44,6 +44,17 @@ describe('DesktopGalleryService', () => {
         sub.unsubscribe();
     });
 
+    it('completes gallery state when the open handle is disposed', () => {
+        const service = createService();
+        let completed = false;
+        service.gallery$.subscribe({ complete: () => completed = true });
+
+        const disposable = service.open({ images: ['a.png'] });
+        disposable.dispose();
+
+        expect(completed).toBe(true);
+    });
+
     it('registers the global gallery UI part when constructed', () => {
         const injector = new Injector();
         injector.add([IUIPartsService, { useClass: UIPartsService }]);

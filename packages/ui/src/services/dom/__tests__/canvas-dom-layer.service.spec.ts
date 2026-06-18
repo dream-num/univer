@@ -62,4 +62,20 @@ describe('CanvasFloatDomService', () => {
         expect(snapshots[2][0][1].domId).toBe('runtime-dom-1');
         sub.unsubscribe();
     });
+
+    it('ignores missing updates and publishes remove-all changes', () => {
+        const service = createService();
+        const sizes: number[] = [];
+        const sub = service.domLayers$.subscribe((layers) => sizes.push(layers.length));
+
+        service.updateFloatDom('missing', { domId: 'ignored' });
+        service.addFloatDom(createFloatDom('dom-1'));
+        service.addFloatDom(createFloatDom('dom-2'));
+        service.removeFloatDom('missing');
+        service.removeAll();
+
+        expect(service.domLayers).toEqual([]);
+        expect(sizes).toEqual([0, 1, 2, 0]);
+        sub.unsubscribe();
+    });
 });

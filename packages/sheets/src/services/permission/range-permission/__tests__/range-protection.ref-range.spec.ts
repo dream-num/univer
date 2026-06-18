@@ -24,6 +24,7 @@ import { AddRangeProtectionMutation } from '../../../../commands/mutations/add-r
 import { DeleteRangeProtectionMutation } from '../../../../commands/mutations/delete-range-protection.mutation';
 import { InsertColMutation, InsertRowMutation } from '../../../../commands/mutations/insert-row-col.mutation';
 import { MoveColsMutation, MoveRowsMutation } from '../../../../commands/mutations/move-rows-cols.mutation';
+import { RemoveColMutation, RemoveRowMutation } from '../../../../commands/mutations/remove-row-col.mutation';
 import { SetRangeProtectionMutation } from '../../../../commands/mutations/set-range-protection.mutation';
 import { RangeProtectionRenderModel } from '../../../../models/range-protection-render.model';
 import { EditStateEnum, RangeProtectionRuleModel, ViewStateEnum } from '../../../../models/range-protection-rule.model';
@@ -90,6 +91,8 @@ describe('RangeProtectionRefRangeService', () => {
             SetRangeProtectionMutation,
             InsertColMutation,
             InsertRowMutation,
+            RemoveColMutation,
+            RemoveRowMutation,
             MoveRowsMutation,
             MoveColsMutation,
         ].forEach((command) => commandService.registerCommand(command));
@@ -157,6 +160,34 @@ describe('RangeProtectionRefRangeService', () => {
         expect(fullResult.redos.some((redo: any) => redo.id === DeleteRangeProtectionMutation.id)).toBe(true);
     });
 
+    it('shrinks protected ranges when protected rows are removed', () => {
+        const rule = createRule({
+            ranges: [{ startRow: 1, endRow: 5, startColumn: 2, endColumn: 4 }],
+        });
+        ruleModel.addRule(unitId, subUnitId, rule);
+
+        const result = service.refRangeHandle({
+            id: 'sheet.command.remove-row',
+            params: { range: { startRow: 3, endRow: 4, startColumn: 0, endColumn: 10 } },
+        } as any, unitId, subUnitId);
+
+        expect(result.redos).toEqual([{
+            id: SetRangeProtectionMutation.id,
+            params: {
+                unitId,
+                subUnitId,
+                ruleId: rule.id,
+                rule: expect.objectContaining({
+                    ranges: [{ startRow: 1, endRow: 3, startColumn: 2, endColumn: 4 }],
+                }),
+            },
+        }]);
+        expect(result.undos[0]).toEqual({
+            id: SetRangeProtectionMutation.id,
+            params: { unitId, subUnitId, rule, ruleId: rule.id },
+        });
+    });
+
     it('should generate insert and move mutations for overlap rules', () => {
         const rule = createRule({
             ranges: [{ startRow: 5, endRow: 8, startColumn: 5, endColumn: 8 }],
@@ -210,6 +241,68 @@ describe('RangeProtectionRefRangeService', () => {
         });
 
         expect(rebuildSpy).toHaveBeenCalledWith(unitId, subUnitId);
+    });
+
+    it('keeps range protection aligned when rows and columns are inserted or removed before it', async () => {
+        const rule = createRule({
+            ranges: [{ startRow: 5, endRow: 6, startColumn: 5, endColumn: 6 }],
+        });
+        ruleModel.addRule(unitId, subUnitId, rule);
+
+        await commandService.executeCommand(InsertRowMutation.id, {
+            unitId,
+            subUnitId,
+            range: { startRow: 2, endRow: 3, startColumn: 0, endColumn: 10 },
+        });
+        expect(ruleModel.getRule(unitId, subUnitId, rule.id)?.ranges[0]).toMatchObject({ startRow: 7, endRow: 8 });
+
+        await commandService.executeCommand(RemoveRowMutation.id, {
+            unitId,
+            subUnitId,
+            range: { startRow: 1, endRow: 1, startColumn: 0, endColumn: 10 },
+        });
+        expect(ruleModel.getRule(unitId, subUnitId, rule.id)?.ranges[0]).toMatchObject({ startRow: 6, endRow: 7 });
+
+        await commandService.executeCommand(InsertColMutation.id, {
+            unitId,
+            subUnitId,
+            range: { startRow: 0, endRow: 10, startColumn: 2, endColumn: 3 },
+        });
+        expect(ruleModel.getRule(unitId, subUnitId, rule.id)?.ranges[0]).toMatchObject({ startColumn: 7, endColumn: 8 });
+
+        await commandService.executeCommand(RemoveColMutation.id, {
+            unitId,
+            subUnitId,
+            range: { startRow: 0, endRow: 10, startColumn: 1, endColumn: 1 },
+        });
+        expect(ruleModel.getRule(unitId, subUnitId, rule.id)?.ranges[0]).toMatchObject({ startColumn: 6, endColumn: 7 });
+    });
+
+    it('keeps non-intersecting protected ranges aligned after row and column moves', async () => {
+        const rowRule = createRule({
+            ranges: [{ startRow: 5, endRow: 6, startColumn: 1, endColumn: 2 }],
+        });
+        const colRule = createRule({
+            ranges: [{ startRow: 1, endRow: 2, startColumn: 5, endColumn: 6 }],
+        });
+        ruleModel.addRule(unitId, subUnitId, rowRule);
+        ruleModel.addRule(unitId, subUnitId, colRule);
+
+        await commandService.executeCommand(MoveRowsMutation.id, {
+            unitId,
+            subUnitId,
+            sourceRange: { startRow: 1, endRow: 2, startColumn: 0, endColumn: 10 },
+            targetRange: { startRow: 8, endRow: 9, startColumn: 0, endColumn: 10 },
+        });
+        expect(ruleModel.getRule(unitId, subUnitId, rowRule.id)?.ranges[0]).toMatchObject({ startRow: 3, endRow: 4 });
+
+        await commandService.executeCommand(MoveColsMutation.id, {
+            unitId,
+            subUnitId,
+            sourceRange: { startRow: 0, endRow: 10, startColumn: 1, endColumn: 2 },
+            targetRange: { startRow: 0, endRow: 10, startColumn: 8, endColumn: 9 },
+        });
+        expect(ruleModel.getRule(unitId, subUnitId, colRule.id)?.ranges[0]).toMatchObject({ startColumn: 3, endColumn: 4 });
     });
 
     it('should register ref ranges after range protection mutation', async () => {

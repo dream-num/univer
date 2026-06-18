@@ -20,13 +20,19 @@ import type { IInsertColCommandParams, IInsertRowCommandParams } from '../../../
 import type { IRemoveRowColCommandInterceptParams } from '../../../commands/commands/remove-row-col.command';
 import type { IMoveRowsMutationParams } from '../../../commands/mutations/move-rows-cols.mutation';
 import type { IRemoveRowColCommand } from '../type';
-import { Direction } from '@univerjs/core';
+import { Direction, RANGE_TYPE } from '@univerjs/core';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { MoveRowsMutation } from '../../../commands/mutations/move-rows-cols.mutation';
+import { InsertColMutation, InsertRowMutation } from '../../../commands/mutations/insert-row-col.mutation';
+import { MoveColsMutation, MoveRowsMutation } from '../../../commands/mutations/move-rows-cols.mutation';
+import { RemoveColMutation, RemoveRowMutation } from '../../../commands/mutations/remove-row-col.mutation';
 import { RemoveSheetMutation } from '../../../commands/mutations/remove-sheet.mutation';
 import { EffectRefRangId } from '../type';
 import {
     adjustRangeOnMutation,
+    getEffectedRangesOnCommand,
+    getEffectedRangesOnMutation,
+    handleDefaultRangeChangeWithEffectRefCommands,
+    handleDefaultRangeChangeWithEffectRefCommandsSkipNoInterests,
     handleDeleteRangeMoveLeft,
     handleDeleteRangeMoveLeftCommon,
     handleDeleteRangeMoveUp,
@@ -41,11 +47,18 @@ import {
     handleInsertRowCommon,
     handleIRemoveCol,
     handleIRemoveRow,
+    handleMoveCols,
+    handleMoveColsCommon,
     handleMoveRange,
     handleMoveRangeCommon,
     handleMoveRows,
     handleMoveRowsCommon,
+    handleRangeTypeInput,
+    handleRangeTypeOutput,
     handleRemoveRowCommon,
+    handleReorderRange,
+    handleReorderRangeCommon,
+    rotateRange,
     runRefRangeMutations,
 } from '../util';
 
@@ -54,6 +67,91 @@ const countRange = ([a, b, c, d]: readonly [number, number, number, number]) => 
 const formatRanges = (ranges: IRange[]) => ranges.map((range) => [range.startRow, range.endRow, range.startColumn, range.endColumn] as const).sort((prev, aft) => countRange(prev) - countRange(aft));
 
 describe('test ref-range move', () => {
+    describe('range type and effect-range helpers', () => {
+        it('normalizes row, column, all, and NaN range coordinates', () => {
+            expect(handleRangeTypeInput({ startRow: Number.NaN, endRow: Number.NaN, startColumn: 2, endColumn: 4 })).toMatchObject({
+                startRow: 0,
+                startColumn: 2,
+                endColumn: 4,
+            });
+            expect(handleRangeTypeInput({ startRow: 3, endRow: 5, startColumn: Number.NaN, endColumn: Number.NaN })).toMatchObject({
+                startRow: 3,
+                endRow: 5,
+                startColumn: 0,
+            });
+            expect(handleRangeTypeInput({ startRow: 1, endRow: 1, startColumn: 1, endColumn: 1, rangeType: RANGE_TYPE.ALL })).toMatchObject({
+                startRow: 0,
+                startColumn: 0,
+            });
+            expect(handleRangeTypeOutput({ startRow: -3, endRow: 20, startColumn: -4, endColumn: 30 }, 10, 12)).toEqual({
+                startRow: 0,
+                endRow: 10,
+                startColumn: 0,
+                endColumn: 12,
+            });
+            expect(handleRangeTypeOutput({ startRow: 2, endRow: 4, startColumn: 1, endColumn: 3, rangeType: RANGE_TYPE.ROW }, 10, 12)).toMatchObject({
+                startColumn: 0,
+                endColumn: 12,
+            });
+            expect(rotateRange({ startRow: 1, endRow: 3, startColumn: 5, endColumn: 7, rangeType: RANGE_TYPE.ROW })).toEqual({
+                startRow: 5,
+                endRow: 7,
+                startColumn: 1,
+                endColumn: 3,
+                rangeType: RANGE_TYPE.COLUMN,
+            });
+        });
+
+        it('handles column movement and row reorder common transformations', () => {
+            const fromRange = { startRow: 0, endRow: 99, startColumn: 2, endColumn: 3 };
+            const toRange = { startRow: 0, endRow: 99, startColumn: 7, endColumn: 8 };
+            const targetRange = { startRow: 1, endRow: 2, startColumn: 4, endColumn: 5 };
+
+            const operators = handleMoveCols({ id: EffectRefRangId.MoveColsCommandId, params: { fromRange, toRange } }, targetRange);
+            expect(runRefRangeMutations(operators, targetRange)).toEqual({ startRow: 1, endRow: 2, startColumn: 2, endColumn: 3 });
+            expect(formatRanges(handleMoveColsCommon({ id: EffectRefRangId.MoveColsCommandId, params: { fromRange, toRange } }, targetRange))).toEqual([[1, 2, 2, 3]]);
+            expect(handleMoveCols({ id: EffectRefRangId.MoveColsCommandId, params: undefined }, targetRange)).toEqual([]);
+            expect(handleMoveColsCommon({ id: EffectRefRangId.MoveColsCommandId, params: undefined }, targetRange)).toEqual([targetRange]);
+
+            const reorderRange = { startRow: 1, endRow: 3, startColumn: 0, endColumn: 1 };
+            const order = { 1: 3, 2: 1, 3: 2 };
+            const reorderOperators = handleReorderRange({ id: EffectRefRangId.ReorderRangeCommandId, params: { unitId: 'unit', subUnitId: 'sheet', range: reorderRange, order } }, { startRow: 2, endRow: 2, startColumn: 0, endColumn: 1 });
+            expect(runRefRangeMutations(reorderOperators, { startRow: 2, endRow: 2, startColumn: 0, endColumn: 1 })).toEqual({ startRow: 3, endRow: 3, startColumn: 0, endColumn: 1 });
+            expect(formatRanges(handleReorderRangeCommon({ id: EffectRefRangId.ReorderRangeCommandId, params: { unitId: 'unit', subUnitId: 'sheet', range: reorderRange, order } }, reorderRange))).toEqual([[1, 3, 0, 1]]);
+            expect(handleReorderRangeCommon({ id: EffectRefRangId.ReorderRangeCommandId, params: undefined }, reorderRange)).toEqual([reorderRange]);
+        });
+
+        it('finds command and mutation effect ranges and skips unrelated commands', () => {
+            const selectionManagerService = {
+                getCurrentSelections: () => [{ range: { startRow: 5, endRow: 6, startColumn: 5, endColumn: 6 } }],
+            } as never;
+            const targetRange = { startRow: 10, endRow: 11, startColumn: 10, endColumn: 11 };
+
+            expect(getEffectedRangesOnCommand({ id: EffectRefRangId.InsertRangeMoveDownCommandId }, { selectionManagerService })).toEqual([
+                { startRow: 5, endRow: 6, startColumn: 5, endColumn: 6 },
+            ]);
+            expect(getEffectedRangesOnCommand({ id: EffectRefRangId.InsertRangeMoveRightCommandId, params: { range: targetRange } }, { selectionManagerService })).toEqual([targetRange]);
+            expect(getEffectedRangesOnCommand({ id: EffectRefRangId.ReorderRangeCommandId, params: { unitId: 'unit', subUnitId: 'sheet', range: { startRow: 1, endRow: 3, startColumn: 0, endColumn: 1 }, order: { 2: 1 } } }, { selectionManagerService })).toEqual([
+                { startRow: 2, endRow: 2, startColumn: 0, endColumn: 1 },
+            ]);
+            expect(handleDefaultRangeChangeWithEffectRefCommandsSkipNoInterests(targetRange, { id: EffectRefRangId.InsertRowCommandId, params: { range: { startRow: 0, endRow: 1, startColumn: 0, endColumn: 9 }, direction: Direction.DOWN, unitId: 'u', subUnitId: 's' } } as never, { selectionManagerService })).toEqual(targetRange);
+            expect(handleDefaultRangeChangeWithEffectRefCommands(targetRange, { id: EffectRefRangId.InsertRowCommandId, params: { range: { startRow: 9, endRow: 9, startColumn: 0, endColumn: 9 }, direction: Direction.DOWN, unitId: 'u', subUnitId: 's' } } as never)).toEqual({
+                startRow: 10,
+                endRow: 11,
+                startColumn: 10,
+                endColumn: 11,
+            });
+
+            expect(getEffectedRangesOnMutation({ id: MoveColsMutation.id, params: { sourceRange: { startRow: 0, endRow: 9, startColumn: 1, endColumn: 1 }, targetRange: { startRow: 0, endRow: 9, startColumn: 4, endColumn: 4 } } as never })).toHaveLength(2);
+            expect(getEffectedRangesOnMutation({ id: MoveRowsMutation.id, params: { sourceRange: { startRow: 1, endRow: 1, startColumn: 0, endColumn: 9 }, targetRange: { startRow: 4, endRow: 4, startColumn: 0, endColumn: 9 } } as never })).toHaveLength(2);
+            expect(getEffectedRangesOnMutation({ id: InsertColMutation.id, params: { range: { startRow: 0, endRow: 9, startColumn: 2, endColumn: 3 } } as never })).toEqual([{ startRow: 0, endRow: 9, startColumn: 1.5, endColumn: 1.5 }]);
+            expect(getEffectedRangesOnMutation({ id: InsertRowMutation.id, params: { range: { startRow: 2, endRow: 3, startColumn: 0, endColumn: 9 } } as never })).toEqual([{ startRow: 1.5, endRow: 1.5, startColumn: 0, endColumn: 9 }]);
+            expect(getEffectedRangesOnMutation({ id: RemoveColMutation.id, params: { range: { startRow: 0, endRow: 9, startColumn: 2, endColumn: 3 } } as never })).toEqual([{ startRow: 0, endRow: 9, startColumn: 2, endColumn: 3 }]);
+            expect(getEffectedRangesOnMutation({ id: RemoveRowMutation.id, params: { range: { startRow: 2, endRow: 3, startColumn: 0, endColumn: 9 } } as never })).toEqual([{ startRow: 2, endRow: 3, startColumn: 0, endColumn: 9 }]);
+            expect(getEffectedRangesOnMutation({ id: 'unknown', params: {} as never })).toBeUndefined();
+        });
+    });
+
     describe('handleMoveRows', () => {
         // see docs/tldr/handMoveRowsCols.tldr
         const startCol = 0;

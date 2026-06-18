@@ -14,8 +14,19 @@
  * limitations under the License.
  */
 
-import type { ICommand, IDisposable, IDocumentData } from '@univerjs/core';
-import { CommandType, HorizontalAlign, ICommandService, IUndoRedoService, IUniverInstanceService, LocaleService, ThemeService, Univer, UniverInstanceType } from '@univerjs/core';
+import type { ICommand, IDisposable, IDocumentData, Injector } from '@univerjs/core';
+import {
+    BooleanNumber,
+    CommandType,
+    HorizontalAlign,
+    ICommandService,
+    IUndoRedoService,
+    IUniverInstanceService,
+    LocaleService,
+    ThemeService,
+    Univer,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { FUniver } from '../f-univer';
 
@@ -77,7 +88,7 @@ describe('FUniver integration', () => {
         commandService.registerCommand({
             id: TEST_COMMAND_ID,
             type: CommandType.COMMAND,
-            handler: (_accessor, params?: { value: string }) => params?.value === 'ok',
+            handler: (_accessor, params?: { value: string }) => params ? params.value === 'ok' : false,
         } as ICommand<{ value: string }, boolean>);
 
         disposables.push(
@@ -128,7 +139,11 @@ describe('FUniver integration', () => {
         expect(textStyle.ff).toBe('Inter');
         expect(paragraph.horizontalAlign).toBe(HorizontalAlign.CENTER);
         expect(univerAPI.newTextDecoration({ s: univerAPI.Enum.BooleanNumber.TRUE }).build().s).toBe(univerAPI.Enum.BooleanNumber.TRUE);
-        expect(univerAPI.newRichTextValue(createDocData('facade-rich-text') as IDocumentData).getData().body?.dataStream).toBe('Hello\r\n');
+        const richTextBody = univerAPI.newRichTextValue(createDocData('facade-rich-text') as IDocumentData).getData().body;
+        if (!richTextBody) {
+            throw new Error('Expected rich text value to keep the document body.');
+        }
+        expect(richTextBody.dataStream).toBe('Hello\r\n');
         expect(univerAPI.Util.rectangle.intersects(
             { startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 },
             { startRow: 1, endRow: 2, startColumn: 1, endColumn: 2 }
@@ -165,7 +180,7 @@ describe('FUniver integration', () => {
             id: TEST_MUTATION_ID,
             type: CommandType.MUTATION,
             handler: (_accessor, params?: { label: string }) => {
-                executed.push(params?.label ?? 'mutation');
+                executed.push(params ? params.label : 'mutation');
                 return true;
             },
         } as ICommand<{ label: string }, boolean>);
@@ -214,5 +229,70 @@ describe('FUniver integration', () => {
         beforeRedo.dispose();
         undoEvent.dispose();
         redoEvent.dispose();
+    });
+
+    it('should expose extension hooks, locale getters, command hooks, and builder factories', async () => {
+        const injector = univer.__getInjector();
+        const commandService = injector.get(ICommandService);
+        const observed: string[] = [];
+
+        class FacadeExtension {
+            static staticValue = 'extended';
+
+            _initialize(_injector: Injector) {
+                observed.push('initialized');
+            }
+
+            extendedMethod() {
+                return 'method-result';
+            }
+        }
+
+        FUniver.extend(FacadeExtension);
+        const extendedAPI = FUniver.newAPI(injector) as FUniver & { extendedMethod: () => string };
+
+        expect((FUniver as unknown as { staticValue: string }).staticValue).toBe('extended');
+        expect(extendedAPI.extendedMethod()).toBe('method-result');
+        expect(observed).toContain('initialized');
+
+        commandService.registerCommand({
+            id: 'facade.hook.command',
+            type: CommandType.COMMAND,
+            handler: (_accessor, params?: { value: string }) => params ? params.value === 'ok' : false,
+        } as ICommand<{ value: string }, boolean>);
+
+        const hookEvents: string[] = [];
+        const beforeDisposable = extendedAPI.onBeforeCommandExecute((command, options) => hookEvents.push(`before:${command.id}:${options ? options.fromCollab : undefined}`));
+        const afterDisposable = extendedAPI.onCommandExecuted((command, options) => hookEvents.push(`after:${command.id}:${options ? options.fromCollab : undefined}`));
+
+        await expect(extendedAPI.executeCommand('facade.hook.command', { value: 'ok' }, { fromCollab: true })).resolves.toBe(true);
+        expect(extendedAPI.syncExecuteCommand('facade.hook.command', { value: 'ok' }, { fromCollab: false })).toBe(true);
+        expect(hookEvents).toEqual([
+            'before:facade.hook.command:true',
+            'after:facade.hook.command:true',
+            'before:facade.hook.command:false',
+            'after:facade.hook.command:false',
+        ]);
+
+        extendedAPI.loadLocales('frFR', { facade: { hello: 'Bonjour {0}' } } as never);
+        extendedAPI.setLocale('frFR');
+        expect(extendedAPI.getCurrentLocale()).toBe('frFR');
+        const locales = extendedAPI.getLocales();
+        if (!locales) {
+            throw new Error('Expected loaded facade locales to be available.');
+        }
+        expect((locales.facade as { hello: string }).hello).toBe('Bonjour {0}');
+
+        expect(() => extendedAPI.addEvent('' as never, () => {})).toThrow('Cannot add empty event');
+        expect(extendedAPI.fireEvent(extendedAPI.Event.CommandExecuted, { id: 'manual', type: CommandType.COMMAND, params: undefined })).toBeUndefined();
+
+        const documentData = createDocData('facade-builder') as IDocumentData;
+        expect(extendedAPI.newRichText(documentData).getData().id).toBe('facade-builder');
+        expect(extendedAPI.newParagraphStyleValue({ horizontalAlign: HorizontalAlign.RIGHT }).horizontalAlign).toBe(HorizontalAlign.RIGHT);
+        expect(extendedAPI.newTextStyleValue({ ff: 'Inter', fs: 14, bl: BooleanNumber.TRUE }).fontFamily).toBe('Inter');
+        expect(extendedAPI.newTextStyleValue({ ff: 'Inter', fs: 14, bl: BooleanNumber.TRUE }).bold).toBe(true);
+
+        beforeDisposable.dispose();
+        afterDisposable.dispose();
     });
 });

@@ -14,14 +14,48 @@
  * limitations under the License.
  */
 
-import type { IUniverInstanceService } from '@univerjs/core';
-import type { IRenderManagerService } from '@univerjs/engine-render';
-import { SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
+import { Injector, IUniverInstanceService } from '@univerjs/core';
+import { IRenderManagerService, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { describe, expect, it } from 'vitest';
 import { HoverManagerService } from '../hover-manager.service';
 import { SheetScrollManagerService } from '../scroll-manager.service';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
+
+class TestUniverInstanceService {
+    static service: Partial<IUniverInstanceService>;
+
+    getUnit(...args: Parameters<IUniverInstanceService['getUnit']>) {
+        return TestUniverInstanceService.service.getUnit!(...args);
+    }
+
+    getCurrentTypeOfUnit$(...args: Parameters<IUniverInstanceService['getCurrentTypeOfUnit$']>) {
+        return TestUniverInstanceService.service.getCurrentTypeOfUnit$!(...args);
+    }
+
+    get unitDisposed$() {
+        return TestUniverInstanceService.service.unitDisposed$!;
+    }
+}
+
+class TestRenderManagerService {
+    static service: Partial<IRenderManagerService>;
+
+    getRenderById(...args: Parameters<IRenderManagerService['getRenderById']>) {
+        return TestRenderManagerService.service.getRenderById!(...args);
+    }
+}
+
+function createHoverManagerService(univerInstanceService: Partial<IUniverInstanceService>, renderManagerService: Partial<IRenderManagerService>) {
+    TestUniverInstanceService.service = univerInstanceService;
+    TestRenderManagerService.service = renderManagerService;
+
+    const injector = new Injector();
+    injector.add([IUniverInstanceService, { useClass: TestUniverInstanceService as never }]);
+    injector.add([IRenderManagerService, { useClass: TestRenderManagerService as never }]);
+    injector.add([HoverManagerService]);
+    return injector.get(HoverManagerService);
+}
 
 describe('HoverManagerService', () => {
     it('emits row/col header hover and click positions based on active viewport', () => {
@@ -84,7 +118,7 @@ describe('HoverManagerService', () => {
             getRenderById: () => render as any,
         };
 
-        const service = new HoverManagerService(univerInstanceService as IUniverInstanceService, renderManagerService as IRenderManagerService);
+        const service = createHoverManagerService(univerInstanceService, renderManagerService);
 
         let hoveredRow: any = null;
         service.currentHoveredRowHeader$.subscribe((v) => {
@@ -210,7 +244,14 @@ describe('HoverManagerService', () => {
             getRenderById: () => render as any,
         };
 
-        const service = new HoverManagerService(univerInstanceService as IUniverInstanceService, renderManagerService as IRenderManagerService);
+        const service = createHoverManagerService(univerInstanceService, renderManagerService);
+
+        const currentCells: any[] = [];
+        service.currentCell$.subscribe((v) => currentCells.push(v));
+        const richTextNoDistinct: any[] = [];
+        service.currentRichTextNoDistinct$.subscribe((v) => richTextNoDistinct.push(v));
+        const richTextDistinct: any[] = [];
+        service.currentRichText$.subscribe((v) => richTextDistinct.push(v));
 
         let currentCellWithEvent: any = null;
         service.currentCellPosWithEvent$.subscribe((v) => {
@@ -245,6 +286,7 @@ describe('HoverManagerService', () => {
         service.triggerPointerUp('u-1', event);
         service.triggerClick('u-1', 150, 30);
         service.triggerDbClick('u-1', 150, 30);
+        service.triggerMouseMove('u-1', event);
 
         expect(currentCellWithEvent).toEqual(
             expect.objectContaining({
@@ -255,6 +297,9 @@ describe('HoverManagerService', () => {
                 event,
             })
         );
+        expect(currentCells.at(-1)).toEqual(expect.objectContaining({ location: expect.objectContaining({ row: 1, col: 1 }) }));
+        expect(richTextNoDistinct.at(-1)).toEqual(expect.objectContaining({ unitId: 'u-1', row: 1, col: 1 }));
+        expect(richTextDistinct.at(-1)).toEqual(expect.objectContaining({ unitId: 'u-1', row: 1, col: 1 }));
         expect(pointerDowns.at(-1)).toEqual(expect.objectContaining({ unitId: 'u-1', row: 1, col: 1 }));
         expect(pointerUps.at(-1)).toEqual(expect.objectContaining({ unitId: 'u-1', row: 1, col: 1 }));
         expect(clicks.at(-1)).toEqual(expect.objectContaining({ location: expect.objectContaining({ row: 1, col: 1 }) }));
@@ -280,6 +325,10 @@ describe('HoverManagerService', () => {
             currentPos = v;
         });
         expect(currentPos).toBeNull();
+
+        currentSheet$.next(null);
+        unitDisposed$.next(workbook);
+        expect(currentCells.at(-1)).toBeNull();
 
         service.dispose();
     });

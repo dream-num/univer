@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, Injector, IStyleData, Nullable } from '@univerjs/core';
+import type { ICellData, IDocumentData, Injector, IStyleData, Nullable, RichTextValue } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
 import {
     AbsoluteRefType,
@@ -31,13 +31,25 @@ import {
 } from '@univerjs/core';
 import {
     AddWorksheetMergeCommand,
+    AddWorksheetMergeMutation,
     ClearSelectionAllCommand,
     ClearSelectionContentCommand,
     ClearSelectionFormatCommand,
+    DeleteRangeMoveLeftCommand,
+    DeleteRangeMoveUpCommand,
     DeleteWorksheetRangeThemeStyleCommand,
     DeleteWorksheetRangeThemeStyleMutation,
+    InsertColMutation,
+    InsertRangeMoveDownCommand,
+    InsertRangeMoveRightCommand,
+    InsertRowMutation,
+    MoveRangeMutation,
     RegisterWorksheetRangeThemeStyleCommand,
     RegisterWorksheetRangeThemeStyleMutation,
+    RemoveColMutation,
+    RemoveRowMutation,
+    RemoveWorksheetMergeCommand,
+    RemoveWorksheetMergeMutation,
     SetHorizontalTextAlignCommand,
     SetRangeCustomMetadataCommand,
     SetRangeValuesCommand,
@@ -92,6 +104,18 @@ describe('Test FRange', () => {
         commandService.registerCommand(SetHorizontalTextAlignCommand);
         commandService.registerCommand(SetTextWrapCommand);
         commandService.registerCommand(AddWorksheetMergeCommand);
+        commandService.registerCommand(RemoveWorksheetMergeCommand);
+        commandService.registerCommand(AddWorksheetMergeMutation);
+        commandService.registerCommand(RemoveWorksheetMergeMutation);
+        commandService.registerCommand(InsertRangeMoveDownCommand);
+        commandService.registerCommand(InsertRangeMoveRightCommand);
+        commandService.registerCommand(DeleteRangeMoveUpCommand);
+        commandService.registerCommand(DeleteRangeMoveLeftCommand);
+        commandService.registerCommand(InsertRowMutation);
+        commandService.registerCommand(InsertColMutation);
+        commandService.registerCommand(RemoveRowMutation);
+        commandService.registerCommand(RemoveColMutation);
+        commandService.registerCommand(MoveRangeMutation);
         commandService.registerCommand(SetRangeCustomMetadataCommand);
         commandService.registerCommand(SetTextRotationCommand);
         commandService.registerCommand(ClearSelectionAllCommand);
@@ -689,7 +713,87 @@ describe('Test FRange', () => {
         }
         expect(hasError).toBeTruthy();
     });
+
+    it('Range merge variants and breakApart update merged ranges', async () => {
+        const activeSheet = univerAPI.getActiveWorkbook()!.getActiveSheet()!;
+
+        const across = activeSheet.getRange('A10:C11').mergeAcross();
+        await Promise.resolve();
+        expect(across.isPartOfMerge()).toBe(true);
+        expect(activeSheet.getRange('A10:C10').isMerged()).toBe(true);
+        expect(activeSheet.getRange('A11:C11').isMerged()).toBe(true);
+        across.breakApart();
+        expect(across.isPartOfMerge()).toBe(false);
+
+        const vertical = activeSheet.getRange('E10:F12').mergeVertically();
+        await Promise.resolve();
+        expect(activeSheet.getRange('E10:E12').isMerged()).toBe(true);
+        expect(activeSheet.getRange('F10:F12').isMerged()).toBe(true);
+        vertical.breakApart();
+        expect(vertical.isPartOfMerge()).toBe(false);
+    });
     //#endregion
+
+    it('Range supports rich text values and per-cell writes', () => {
+        const activeSheet = univerAPI.getActiveWorkbook()!.getActiveSheet()!;
+        const richText = univerAPI.newRichTextValue({ body: { dataStream: 'Hello\r\n' } } as IDocumentData);
+        const docData = { body: { dataStream: 'World\r\n' } } as IDocumentData;
+
+        activeSheet.getRange('H1:I1').setRichTextValues([[richText, docData]]);
+        const values = activeSheet.getRange('H1:I1').getValues(true);
+        expect((values[0][0] as RichTextValue).toPlainText()).toBe('Hello');
+        expect((values[0][1] as RichTextValue).toPlainText()).toBe('World');
+
+        activeSheet.getRange('H2:I2').setValueForCell('only first');
+        expect(activeSheet.getRange('H2').getValue()).toBe('only first');
+        expect(activeSheet.getRange('I2').getValue()).toBeNull();
+
+        activeSheet.getRange('H3:I3').setRichTextValueForCell(richText);
+        expect((activeSheet.getRange('H3').getValue(true) as RichTextValue).toPlainText()).toBe('Hello');
+        expect(activeSheet.getRange('I3').getValue(true)).toBeUndefined();
+    });
+
+    it('Range inserts and deletes cells along both dimensions', async () => {
+        const activeSheet = univerAPI.getActiveWorkbook()!.getActiveSheet()!;
+        activeSheet.getRange('A20:D23').setValues([
+            [1, 2, 3, 4],
+            [5, 6, 7, 8],
+            [9, 10, 11, 12],
+            [13, 14, 15, 16],
+        ]);
+
+        activeSheet.getRange('A20:B21').insertCells(Dimension.COLUMNS);
+        await Promise.resolve();
+        expect(activeSheet.getRange('A20:D21').getValues()).toEqual([
+            [null, null, 1, 2],
+            [null, null, 5, 6],
+        ]);
+
+        activeSheet.getRange('A20:B21').deleteCells(Dimension.COLUMNS);
+        await Promise.resolve();
+        expect(activeSheet.getRange('A20:D21').getValues()).toEqual([
+            [1, 2, 3, 4],
+            [5, 6, 7, 8],
+        ]);
+
+        activeSheet.getRange('A20:B21').insertCells(Dimension.ROWS);
+        await Promise.resolve();
+        expect(activeSheet.getRange('A20:B23').getValues()).toEqual([
+            [null, null],
+            [null, null],
+            [1, 2],
+            [5, 6],
+        ]);
+
+        activeSheet.getRange('A20:B21').deleteCells(Dimension.ROWS);
+        await Promise.resolve();
+        expect(activeSheet.getRange('A20:B23').getValues()).toEqual([
+            [1, 2],
+            [5, 6],
+            [9, 10],
+            [13, 14],
+        ]);
+    });
 
     // Add these new test cases
     it('Range getRow, getColumn, getWidth, getHeight with A1 notation', () => {

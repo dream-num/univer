@@ -67,4 +67,37 @@ describe('DocMentionPopupService', () => {
 
         sub.unsubscribe();
     });
+
+    it('replaces an existing edit popup and closes when the popup reports outside clicks', () => {
+        const { service, mentionService, attached, popupDisposals } = createService();
+
+        mentionService.startEditing({ unitId: 'doc-1', index: 4 });
+        mentionService.startEditing({ unitId: 'doc-1', index: 7 });
+
+        expect(service.editPopup).toMatchObject({ anchor: 7, unitId: 'doc-1' });
+        expect(popupDisposals).toEqual([1]);
+        expect(attached).toMatchObject([
+            { range: { startOffset: 4, endOffset: 4, collapsed: true }, unitId: 'doc-1' },
+            { range: { startOffset: 7, endOffset: 7, collapsed: true }, unitId: 'doc-1' },
+        ]);
+
+        const latestPopup = attached.at(-1) as { popup: { onClickOutside: () => void } };
+        latestPopup.popup.onClickOutside();
+
+        expect(mentionService.editing).toBeUndefined();
+        expect(service.editPopup).toBeNull();
+        expect(popupDisposals).toEqual([1, 2]);
+    });
+
+    it('leaves empty popup states unchanged when there is nothing to close', () => {
+        const { service, popupDisposals } = createService();
+
+        service.closeEditPopup();
+        service.showInfoPopup();
+        service.closeInfoPopup();
+
+        expect(service.editPopup).toBeUndefined();
+        expect(service.infoPopup).toBeUndefined();
+        expect(popupDisposals).toEqual([]);
+    });
 });

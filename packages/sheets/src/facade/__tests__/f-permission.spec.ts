@@ -23,7 +23,7 @@ import {
     DeleteWorksheetProtectionMutation,
     SetRangeProtectionMutation,
 } from '@univerjs/sheets';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createFacadeTestBed } from './create-test-bed';
 
 describe('sheets facade permissions', () => {
@@ -110,22 +110,40 @@ describe('sheets facade permissions', () => {
 
         await rule.setPoint(univerAPI.Enum.RangePermissionPoint.Edit, false);
         await rule.setPoint(univerAPI.Enum.RangePermissionPoint.View, true);
+        await rule.setPoint(univerAPI.Enum.RangePermissionPoint.ManageCollaborator, false);
+        await rule.setPoint(univerAPI.Enum.RangePermissionPoint.Delete, false);
         expect(rule.canEdit()).toBe(false);
         expect(rule.canView()).toBe(true);
+        expect(rule.canManageCollaborator()).toBe(false);
+        expect(rule.canDelete()).toBe(false);
         expect(rule.getSnapshot()[univerAPI.Enum.RangePermissionPoint.Edit]).toBe(false);
         expect(worksheetPermission.canEditCell(0, 0)).toBe(false);
         expect(worksheetPermission.canEditCell(5, 5)).toBe(true);
 
+        await expect(rule.updateRanges([])).rejects.toThrow('Ranges cannot be empty');
         await rule.updateRanges([worksheet.getRange('C1:C2')]);
         expect(rule.ranges.map((range) => range.getA1Notation())).toEqual(['C1:C2']);
         expect((await worksheetPermission.listRangeProtectionRules({ ignoreCollaborators: true })).map((item) => item.id)).toEqual([rule.id]);
         expect((await rangePermission.listRules({ ignoreCollaborators: true }))).toEqual([]);
         expect((await worksheet.getRange('C1').getRangePermission().listRules({ ignoreCollaborators: true })).map((item) => item.id)).toEqual([rule.id]);
 
+        const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+        const collaboratorRule = await worksheet.getRange('E1:E2').getRangePermission().protect({
+            name: 'Missing collaborator range',
+            allowedUsers: ['missing-user'],
+        });
+        consoleErrorSpy.mockRestore();
+        expect(collaboratorRule.options.name).toBe('Missing collaborator range');
+
+        await expect(rule.updateRanges([worksheet.getRange('E2:E3')]))
+            .rejects
+            .toThrow('Range protection cannot intersect with other protection rules');
+
         await expect(worksheet.getRange('C2:D3').getRangePermission().protect({ name: 'Overlapping range' }))
             .rejects
             .toThrow('Range is already protected');
 
+        expect(await collaboratorRule.remove()).toBe(true);
         expect(await rule.remove()).toBe(true);
         expect(await rangePermission.unprotect()).toBe(true);
         expect(worksheet.getRange('C1').getRangePermission().isProtected()).toBe(false);
@@ -200,5 +218,19 @@ describe('sheets facade permissions', () => {
 
         expect(await worksheetPermission.unprotect()).toBe(true);
         expect(worksheetPermission.isProtected()).toBe(false);
+    });
+
+    it('reports a failed range unprotect when the delete mutation cannot run', async () => {
+        const { univerAPI, get } = testBed;
+        const worksheet = univerAPI.getActiveWorkbook()!.getActiveSheet();
+        const rangePermission = worksheet.getRange('G1:G2').getRangePermission();
+
+        await rangePermission.protect({ name: 'Locked scenario cells' });
+        get(ICommandService).unregisterCommand(DeleteRangeProtectionMutation.id);
+
+        const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+        await expect(rangePermission.unprotect()).rejects.toThrow('is not registered');
+        consoleErrorSpy.mockRestore();
+        expect(rangePermission.isProtected()).toBe(true);
     });
 });

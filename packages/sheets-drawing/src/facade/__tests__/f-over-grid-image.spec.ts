@@ -16,10 +16,12 @@
 
 import type { Injector, Univer } from '@univerjs/core';
 import type { ISheetImage } from '@univerjs/sheets-drawing';
-import { DrawingTypeEnum, ImageSourceType } from '@univerjs/core';
+import { DrawingTypeEnum, ICommandService, ImageSourceType } from '@univerjs/core';
 import { SheetSkeletonService } from '@univerjs/sheets';
+import { ISheetDrawingService } from '@univerjs/sheets-drawing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createSheetsDrawingTestBed } from '../../__tests__/create-sheets-drawing-test-bed';
+import { InsertSheetDrawingCommand } from '../../commands/commands/insert-sheet-drawing.command';
 import { FOverGridImage } from '../f-over-grid-image';
 
 describe('FOverGridImage', () => {
@@ -85,4 +87,103 @@ describe('FOverGridImage', () => {
 
         warnSpy.mockRestore();
     });
+
+    it('updates image data and removes the image through facade methods', async () => {
+        const image = createImage();
+        const commandService = injector.get(ICommandService);
+        const sheetDrawingService = injector.get(ISheetDrawingService);
+        expect(commandService.syncExecuteCommand(InsertSheetDrawingCommand.id, { unitId: 'test', drawings: [image] })).toBe(true);
+
+        const fImage = injector.createInstance(FOverGridImage, image);
+
+        expect(fImage.setSource('https://example.com/updated.png', ImageSourceType.URL)).toBe(true);
+        expect(getStoredImage('drawing-1').source).toBe('https://example.com/updated.png');
+
+        expect(await fImage.setPositionAsync(4, 5, 6, 7)).toBe(true);
+        expect(getStoredImage('drawing-1').sheetTransform.from).toEqual(expect.objectContaining({
+            row: 4,
+            column: 5,
+            rowOffset: 6,
+            columnOffset: 7,
+        }));
+
+        expect(await fImage.setSizeAsync(160, 90)).toBe(true);
+        expect(getStoredImage('drawing-1').transform).toEqual(expect.objectContaining({
+            width: 160,
+            height: 90,
+        }));
+
+        expect(fImage.setCrop(1, 2, 3, 4)).toBe(true);
+        expect(getStoredImage('drawing-1').srcRect).toEqual({ top: 1, left: 2, bottom: 3, right: 4 });
+
+        expect(fImage.setRotate(30)).toBe(true);
+        expect(getStoredImage('drawing-1').sheetTransform.angle).toBe(30);
+
+        expect(fImage.setForward()).toBe(true);
+        expect(fImage.setBackward()).toBe(true);
+        expect(fImage.setFront()).toBe(true);
+        expect(fImage.setBack()).toBe(true);
+
+        expect(fImage.remove()).toBe(true);
+        expect(sheetDrawingService.getDrawingByParam({ unitId: 'test', subUnitId: 'sheet1', drawingId: 'drawing-1' })).toBeUndefined();
+    });
+
+    function getStoredImage(drawingId: string): ISheetImage {
+        const image = injector.get(ISheetDrawingService).getDrawingByParam({
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            drawingId,
+        }) as ISheetImage | undefined;
+
+        if (!image) {
+            throw new Error(`Image ${drawingId} was not stored`);
+        }
+
+        return image;
+    }
 });
+
+function createImage(): ISheetImage {
+    return {
+        unitId: 'test',
+        subUnitId: 'sheet1',
+        drawingId: 'drawing-1',
+        drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+        imageSourceType: ImageSourceType.URL,
+        source: 'https://example.com/drawing-1.png',
+        transform: {
+            left: 20,
+            top: 30,
+            width: 100,
+            height: 60,
+        },
+        sheetTransform: {
+            from: {
+                row: 1,
+                rowOffset: 0,
+                column: 1,
+                columnOffset: 0,
+            },
+            to: {
+                row: 4,
+                rowOffset: 0,
+                column: 3,
+                columnOffset: 0,
+            },
+        },
+        axisAlignSheetTransform: {
+            from: {
+                row: 1,
+                rowOffset: 0,
+                column: 1,
+                columnOffset: 0,
+            },
+            to: {
+                row: 4,
+                rowOffset: 0,
+                column: 3,
+                columnOffset: 0,
+            },
+        },
+    };
+}

@@ -14,11 +14,19 @@
  * limitations under the License.
  */
 
-import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY } from '@univerjs/core';
-import { DeviceInputEventType } from '@univerjs/engine-render';
+import {
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    IContextService,
+    Injector,
+    IUniverInstanceService,
+    ThemeService,
+} from '@univerjs/core';
+import { IEditorService } from '@univerjs/docs-ui';
+import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
+import { SheetInterceptorService, SheetSkeletonService } from '@univerjs/sheets';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
-import { EditorBridgeService } from '../editor-bridge.service';
+import { EditorBridgeService, IEditorBridgeService } from '../editor-bridge.service';
 
 function createService(options?: { hasFocusEditor?: boolean }) {
     const unitDisposed$ = new Subject<any>();
@@ -55,15 +63,46 @@ function createService(options?: { hasFocusEditor?: boolean }) {
         },
     };
 
-    const service = new EditorBridgeService(
-        mocks.sheetInterceptorService as any,
-        mocks.sheetSkeletonService as any,
-        mocks.renderManagerService as any,
-        mocks.themeService as any,
-        mocks.univerInstanceService as any,
-        mocks.editorService as any,
-        mocks.contextService as any
-    );
+    class TestSheetInterceptorService {
+        writeCellInterceptor = mocks.sheetInterceptorService.writeCellInterceptor;
+    }
+
+    class TestSheetSkeletonService {
+        getSkeleton = mocks.sheetSkeletonService.getSkeleton;
+    }
+
+    class TestRenderManagerService {
+        getRenderUnitById = mocks.renderManagerService.getRenderUnitById;
+    }
+
+    class TestThemeService {
+        getColorFromTheme = mocks.themeService.getColorFromTheme;
+    }
+
+    class TestUniverInstanceService {
+        getTypeOfUnitDisposed$ = mocks.univerInstanceService.getTypeOfUnitDisposed$;
+        getCurrentUnitOfType = mocks.univerInstanceService.getCurrentUnitOfType;
+    }
+
+    class TestEditorService {
+        getFocusEditor = mocks.editorService.getFocusEditor;
+        focus = mocks.editorService.focus;
+    }
+
+    class TestContextService {
+        setContextValue = mocks.contextService.setContextValue;
+    }
+
+    const injector = new Injector();
+    injector.add([SheetInterceptorService, { useClass: TestSheetInterceptorService as never }]);
+    injector.add([SheetSkeletonService, { useClass: TestSheetSkeletonService as never }]);
+    injector.add([IRenderManagerService, { useClass: TestRenderManagerService as never }]);
+    injector.add([ThemeService, { useClass: TestThemeService as never }]);
+    injector.add([IUniverInstanceService, { useClass: TestUniverInstanceService as never }]);
+    injector.add([IEditorService, { useClass: TestEditorService as never }]);
+    injector.add([IContextService, { useClass: TestContextService as never }]);
+    injector.add([IEditorBridgeService, { useClass: EditorBridgeService }]);
+    const service = injector.get(IEditorBridgeService) as EditorBridgeService;
 
     return { service, mocks };
 }
@@ -106,6 +145,21 @@ function createEditCellParam() {
             actualColumn: 2,
             isMerged: false,
             isMergedMainCell: true,
+        },
+    } as any;
+}
+
+function createPositionedEditCellParam() {
+    return {
+        ...createEditCellParam(),
+        scene: {
+            getAncestorScale: () => ({ scaleX: 2, scaleY: 1.5 }),
+            getViewportScrollXY: () => ({ x: 5, y: 10 }),
+        },
+        engine: {
+            getCanvasElement: () => ({
+                getBoundingClientRect: () => ({ left: 12, top: 18 }),
+            }),
         },
     } as any;
 }
@@ -203,5 +257,64 @@ describe('EditorBridgeService', () => {
         service.refreshEditCellPosition();
         expect(getLatestSpy).toHaveBeenCalled();
         expect(mocks.editorService.focus).not.toHaveBeenCalled();
+    });
+
+    it('builds the edit cell state from workbook, skeleton, render and intercepted cell data', () => {
+        const { service, mocks } = createService();
+        const body: any = {
+            dataStream: '=SUM(A1:A2)\r\n',
+            textRuns: [],
+        };
+        const documentModel = {
+            documentStyle: {
+                renderConfig: {},
+            },
+            getBody: () => body,
+            setZoomRatio: vi.fn(),
+        };
+        const worksheet = {
+            getSheetId: () => 'sheet-1',
+            getCellRaw: vi.fn(() => ({ v: '=SUM(A1:A2)' })),
+            getCell: vi.fn(() => ({ isInArrayFormulaRange: true })),
+            getCellDocumentModelWithFormula: vi.fn(() => ({ documentModel })),
+            getBlankCellDocumentModel: vi.fn(() => ({ documentModel })),
+        };
+        mocks.univerInstanceService.getCurrentUnitOfType.mockReturnValue({
+            getUnitId: () => 'unit-1',
+            getActiveSheet: () => worksheet,
+        } as never);
+        mocks.sheetSkeletonService.getSkeleton.mockReturnValue({
+            getNoMergeCellWithCoordByIndex: (row: number, column: number) => ({
+                startX: column * 100,
+                startY: row * 20,
+                endX: column * 100 + 100,
+                endY: row * 20 + 20,
+            }),
+        } as never);
+        mocks.renderManagerService.getRenderUnitById.mockReturnValue({
+            with: () => ({
+                getViewPort: () => ({ viewportKey: 'main' }),
+            }),
+        } as never);
+
+        service.setEditCell(createPositionedEditCellParam());
+
+        expect(service.getEditLocation()).toEqual(expect.objectContaining({
+            unitId: 'unit-1',
+            sheetId: 'sheet-1',
+            row: 1,
+            column: 2,
+            editorUnitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+        }));
+        expect(service.getEditCellLayout()).toEqual(expect.objectContaining({
+            scaleX: 2,
+            scaleY: 1.5,
+            canvasOffset: { left: 12, top: 18 },
+        }));
+        expect(documentModel.setZoomRatio).toHaveBeenCalledWith(2);
+        expect(body.textRuns[0].ts.cl.rgb).toBe('#d0d0d0');
+
+        service.refreshEditCellPosition(true);
+        expect(service.getEditCellLayout()?.position.startX).toBeGreaterThan(0);
     });
 });

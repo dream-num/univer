@@ -15,25 +15,23 @@
  */
 
 import type { DocumentSkeleton } from '@univerjs/engine-render';
-import { HorizontalAlign, IUniverInstanceService, VerticalAlign } from '@univerjs/core';
+import {
+    CustomRangeType,
+    HorizontalAlign,
+    IUniverInstanceService,
+    PresetListType,
+    VerticalAlign,
+} from '@univerjs/core';
+import { NodePositionConvertToCursor } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { describe, expect, it, vi } from 'vitest';
 import { IEditorBridgeService } from '../../editor-bridge.service';
-import { calcPadding, calculateDocSkeletonRects, getCustomRangePosition, getEditingCustomRangePosition } from '../doc-skeleton-util';
-
-vi.mock('@univerjs/docs-ui', async (importOriginal) => {
-    const actual = await importOriginal<typeof import('@univerjs/docs-ui')>();
-    return {
-        ...actual,
-        DOC_VERTICAL_PADDING: 2,
-        getLineBounding: () => [{ top: 1, bottom: 3, left: 2, right: 4 }],
-        NodePositionConvertToCursor: class {
-            getRangePointData() {
-                return { borderBoxPointGroup: [{}] };
-            }
-        },
-    };
-});
+import {
+    calcPadding,
+    calculateDocSkeletonRects,
+    getCustomRangePosition,
+    getEditingCustomRangePosition,
+} from '../doc-skeleton-util';
 
 function createAccessor(pairs: Array<[unknown, unknown]>) {
     const map = new Map<unknown, unknown>(pairs);
@@ -60,6 +58,19 @@ function createDocSkeleton(customRangeId = 'range-1') {
             }),
         }),
     } as any;
+}
+
+function spyCursorRange() {
+    return vi.spyOn(NodePositionConvertToCursor.prototype, 'getRangePointData').mockReturnValue({
+        borderBoxPointGroup: [[
+            { x: 2, y: 1 },
+            { x: 4, y: 1 },
+            { x: 4, y: 3 },
+            { x: 2, y: 3 },
+        ]],
+        contentBoxPointGroup: [],
+        cursorList: [],
+    } as never);
 }
 
 describe('doc-skeleton-util', () => {
@@ -131,7 +142,65 @@ describe('doc-skeleton-util', () => {
         });
     });
 
+    it('collects hyperlink and checklist hit rects with cell padding applied', () => {
+        const cursorSpy = spyCursorRange();
+        const bulletGlyph = { glyphType: 'list-mark' };
+        const docSkeleton = {
+            findNodePositionByCharIndex: () => ({ segmentPage: 0, left: 0, top: 0 }),
+            findPositionByGlyph: (glyph: unknown) => glyph === bulletGlyph ? { segmentPage: 0, left: 0, top: 0 } : null,
+            findNodeByCharIndex: () => ({
+                parent: {
+                    parent: {
+                        parent: {
+                            lines: [{
+                                paragraphStart: true,
+                                paragraphIndex: 4,
+                                divides: [{ glyphGroup: [bulletGlyph] }],
+                            }],
+                        },
+                    },
+                },
+            }),
+            getSkeletonData: () => ({
+                pages: [{
+                    height: 4,
+                    width: 6,
+                    skeDrawings: new Map(),
+                }],
+            }),
+            getViewModel: () => ({
+                getDataModel: () => ({
+                    getBody: () => ({
+                        customRanges: [{
+                            rangeId: 'link-1',
+                            rangeType: CustomRangeType.HYPERLINK,
+                            startIndex: 0,
+                            endIndex: 2,
+                        }],
+                        paragraphs: [{
+                            startIndex: 4,
+                            bullet: { listType: PresetListType.CHECK_LIST_CHECKED },
+                        }],
+                    }),
+                }),
+            }),
+        } as any;
+
+        const rects = calculateDocSkeletonRects(docSkeleton, 10, 20);
+
+        expect(rects.links[0]).toMatchObject({
+            range: { rangeId: 'link-1' },
+            rects: [{ top: 21, bottom: 23, left: 12, right: 14 }],
+        });
+        expect(rects.checkLists[0]).toMatchObject({
+            paragraph: { startIndex: 4 },
+            rect: { top: 21, bottom: 23, left: 12, right: 14 },
+        });
+        cursorSpy.mockRestore();
+    });
+
     it('getCustomRangePosition returns transformed rects and label', () => {
+        const cursorSpy = spyCursorRange();
         const docSkeleton = createDocSkeleton();
         const font = {
             documentSkeleton: docSkeleton,
@@ -180,7 +249,8 @@ describe('doc-skeleton-util', () => {
 
         const result = getCustomRangePosition(injector, 'unit-1', 'sheet-1', 1, 2, 'range-1');
         expect(result?.label).toBe('abcd');
-        expect(result?.rects).toEqual([{ top: 30, bottom: 32, left: 58, right: 60 }]);
+        expect(result?.rects).toEqual([{ top: 32, bottom: 34, left: 58, right: 60 }]);
+        cursorSpy.mockRestore();
     });
 
     it('getCustomRangePosition returns null for missing workbook/worksheet/customRange', () => {
@@ -217,9 +287,32 @@ describe('doc-skeleton-util', () => {
             [IRenderManagerService, { getRenderById: () => ({ with: () => ({ getSkeletonParam: () => ({ skeleton }) }) }) }],
         ]);
         expect(getCustomRangePosition(noRangeInjector, 'unit-1', 'sheet-1', 1, 2, 'range-1')).toBeNull();
+
+        const noSkeletonInjector = createAccessor([
+            [IUniverInstanceService, { getUnit: () => ({ getUnitId: () => 'unit-1', getSheetBySheetId: () => worksheet }) }],
+            [IRenderManagerService, { getRenderById: () => ({ with: () => ({ getSkeletonParam: () => null }) }) }],
+        ]);
+        expect(getCustomRangePosition(noSkeletonInjector, 'unit-1', 'sheet-1', 1, 2, 'range-1')).toBeUndefined();
+
+        const noDocSkeletonInjector = createAccessor([
+            [IUniverInstanceService, { getUnit: () => ({ getUnitId: () => 'unit-1', getSheetBySheetId: () => worksheet }) }],
+            [IRenderManagerService, {
+                getRenderById: () => ({
+                    with: () => ({
+                        getSkeletonParam: () => ({
+                            skeleton: {
+                                getFont: () => null,
+                            },
+                        }),
+                    }),
+                }),
+            }],
+        ]);
+        expect(getCustomRangePosition(noDocSkeletonInjector, 'unit-1', 'sheet-1', 1, 2, 'range-1')).toBeNull();
     });
 
     it('getEditingCustomRangePosition handles guards and success path', () => {
+        const cursorSpy = spyCursorRange();
         const docSkeleton = createDocSkeleton();
         const editorBridgeService = {
             getEditCellState: () => ({ editorUnitId: 'doc-1', unitId: 'unit-1', sheetId: 'sheet-1', row: 1, column: 2 }),
@@ -265,5 +358,40 @@ describe('doc-skeleton-util', () => {
             [IRenderManagerService, renderManagerService],
         ]);
         expect(getEditingCustomRangePosition(hiddenInjector, 'unit-1', 'sheet-1', 1, 2, 'range-1')).toBeNull();
+
+        const mismatchedCellInjector = createAccessor([
+            [IEditorBridgeService, { getEditCellState: () => ({ editorUnitId: 'doc-1', unitId: 'unit-1', sheetId: 'sheet-1', row: 9, column: 2 }), isVisible: () => ({ visible: true }) }],
+            [IRenderManagerService, renderManagerService],
+        ]);
+        expect(getEditingCustomRangePosition(mismatchedCellInjector, 'unit-1', 'sheet-1', 1, 2, 'range-1')).toBeNull();
+
+        const missingRendererInjector = createAccessor([
+            [IEditorBridgeService, editorBridgeService],
+            [IRenderManagerService, { getRenderById: () => null }],
+        ]);
+        expect(getEditingCustomRangePosition(missingRendererInjector, 'unit-1', 'sheet-1', 1, 2, 'range-1')).toBeNull();
+
+        const noEditingRangeInjector = createAccessor([
+            [IEditorBridgeService, editorBridgeService],
+            [IRenderManagerService, {
+                getRenderById: (id: string) => {
+                    if (id === 'doc-1') {
+                        return {
+                            with: () => ({ getSkeleton: () => createDocSkeleton('other-id') }),
+                            engine: {
+                                getCanvasElement: () => ({
+                                    getBoundingClientRect: () => ({ top: 100, left: 200 }),
+                                }),
+                            },
+                        };
+                    }
+                    return {
+                        with: () => ({ getSkeletonParam: () => ({ skeleton: {} }) }),
+                    };
+                },
+            }],
+        ]);
+        expect(getEditingCustomRangePosition(noEditingRangeInjector, 'unit-1', 'sheet-1', 1, 2, 'range-1')).toBeNull();
+        cursorSpy.mockRestore();
     });
 });

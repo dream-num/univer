@@ -17,6 +17,7 @@
 import type { ICellData, Injector, IRange, IStyleData, IWorkbookData, Nullable, Univer, Workbook } from '@univerjs/core';
 import type { IRemoveRowColCommandParams } from '../remove-row-col.command';
 import {
+    Direction,
     ICommandService,
     IUniverInstanceService,
     LocaleType,
@@ -30,6 +31,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { MergeCellController } from '../../../controllers/merge-cell.controller';
 import { RefRangeService } from '../../../services/ref-range/ref-range.service';
 import { SheetsSelectionsService } from '../../../services/selections/selection.service';
+import { SheetInterceptorService } from '../../../services/sheet-interceptor/sheet-interceptor.service';
 import { AddWorksheetMergeMutation } from '../../mutations/add-worksheet-merge.mutation';
 import { InsertColMutation, InsertRowMutation } from '../../mutations/insert-row-col.mutation';
 import { MoveRangeMutation } from '../../mutations/move-range.mutation';
@@ -102,7 +104,7 @@ describe('Test insert and remove rows cols commands', () => {
     function selectRow(rowStart: number, rowEnd: number): void {
         const selectionManagerService = get(SheetsSelectionsService);
         const endColumn = getColCount() - 1;
-        selectionManagerService.addSelections([
+        selectionManagerService.setSelections([
             {
                 range: { startRow: rowStart, startColumn: 0, endColumn, endRow: rowEnd, rangeType: RANGE_TYPE.ROW },
                 primary: {
@@ -123,7 +125,7 @@ describe('Test insert and remove rows cols commands', () => {
     function selectColumn(columnStart: number, columnEnd: number): void {
         const selectionManagerService = get(SheetsSelectionsService);
         const endRow = getRowCount() - 1;
-        selectionManagerService.addSelections([
+        selectionManagerService.setSelections([
             {
                 range: {
                     startRow: 0,
@@ -243,6 +245,64 @@ describe('Test insert and remove rows cols commands', () => {
             // Insert row style
             expect(getCellStyle(1, 0)).toBe('s1');
         });
+
+        it('does not insert rows when a before-command interceptor denies the operation', async () => {
+            const sheetInterceptorService = get(SheetInterceptorService);
+            const disposable = sheetInterceptorService.interceptBeforeCommand({
+                performCheck: async (info) => info.id !== InsertRowCommand.id,
+            });
+
+            selectRow(0, 0);
+            await expect(commandService.executeCommand(InsertRowCommand.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                direction: Direction.DOWN,
+                range: { startRow: 1, endRow: 1, startColumn: 0, endColumn: getColCount() - 1 },
+            })).resolves.toBe(false);
+            expect(getRowCount()).toBe(20);
+
+            disposable.dispose();
+        });
+
+        it('copies non-default row height when inserting through the row range command', async () => {
+            const result = await commandService.executeCommand(InsertRowByRangeCommand.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                direction: Direction.DOWN,
+                range: { startRow: 1, endRow: 2, startColumn: 0, endColumn: getColCount() - 1 },
+                cellValue: { 1: { 0: { s: 's1' } } },
+            });
+
+            expect(result).toBeTruthy();
+            const worksheet = get(IUniverInstanceService).getUniverSheetInstance('test')!.getSheetBySheetId('sheet1')!;
+            expect(worksheet.getRowHeight(1)).toBe(36);
+            expect(getCellStyle(1, 0)).toBe('s1');
+        });
+
+        it('inserts multiple rows above and below the selected planning rows', async () => {
+            selectRow(1, 1);
+
+            await expect(commandService.executeCommand(InsertMultiRowsAboveCommand.id, { value: 2 })).resolves.toBe(true);
+            expect(getRowCount()).toBe(22);
+            expect(getCellStyle(1, 0)).toBe('s1');
+
+            await commandService.executeCommand(UndoCommand.id);
+            expect(getRowCount()).toBe(20);
+
+            selectRow(1, 2);
+            await expect(commandService.executeCommand(InsertMultiRowsAfterCommand.id, { value: 3 })).resolves.toBe(true);
+            expect(getRowCount()).toBe(23);
+            expect(getMergedInfo(5, 2)).toMatchObject({ startRow: 2, endRow: 6, startColumn: 2, endColumn: 2 });
+        });
+
+        it('rejects row insertion when the requested anchor is outside the worksheet', async () => {
+            await expect(commandService.executeCommand(InsertRowByRangeCommand.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                direction: Direction.DOWN,
+                range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: getColCount() - 1 },
+            })).rejects.toThrow('Anchor row is out of bounds');
+        });
     });
 
     describe('Insert columns', () => {
@@ -284,6 +344,63 @@ describe('Test insert and remove rows cols commands', () => {
 
             // Insert column style
             expect(getCellStyle(0, 1)).toBe('s1');
+        });
+
+        it('does not insert columns when a before-command interceptor denies the operation', async () => {
+            const sheetInterceptorService = get(SheetInterceptorService);
+            const disposable = sheetInterceptorService.interceptBeforeCommand({
+                performCheck: async (info) => info.id !== InsertColCommand.id,
+            });
+
+            await expect(commandService.executeCommand(InsertColCommand.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                direction: Direction.RIGHT,
+                range: { startRow: 0, endRow: getRowCount() - 1, startColumn: 1, endColumn: 1 },
+            })).resolves.toBe(false);
+            expect(getColCount()).toBe(20);
+
+            disposable.dispose();
+        });
+
+        it('copies non-default column width when inserting through the column range command', async () => {
+            const result = await commandService.executeCommand(InsertColByRangeCommand.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                direction: Direction.RIGHT,
+                range: { startRow: 0, endRow: getRowCount() - 1, startColumn: 1, endColumn: 2 },
+                cellValue: { 0: { 1: { s: 's1' } } },
+            });
+
+            expect(result).toBeTruthy();
+            const worksheet = get(IUniverInstanceService).getUniverSheetInstance('test')!.getSheetBySheetId('sheet1')!;
+            expect(worksheet.getColumnWidth(1)).toBe(112);
+            expect(getCellStyle(0, 1)).toBe('s1');
+        });
+
+        it('inserts multiple columns on both sides of a selected report block', async () => {
+            selectColumn(1, 1);
+
+            await expect(commandService.executeCommand(InsertMultiColsLeftCommand.id, { value: 2 })).resolves.toBe(true);
+            expect(getColCount()).toBe(22);
+            expect(getCellStyle(0, 1)).toBe('s1');
+
+            await commandService.executeCommand(UndoCommand.id);
+            expect(getColCount()).toBe(20);
+
+            selectColumn(1, 2);
+            await expect(commandService.executeCommand(InsertMultiColsRightCommand.id, { value: 3 })).resolves.toBe(true);
+            expect(getColCount()).toBe(23);
+            expect(getMergedInfo(1, 6)).toMatchObject({ startRow: 1, endRow: 1, startColumn: 2, endColumn: 6 });
+        });
+
+        it('rejects column insertion when the requested anchor is outside the worksheet', async () => {
+            await expect(commandService.executeCommand(InsertColByRangeCommand.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                direction: Direction.RIGHT,
+                range: { startRow: 0, endRow: getRowCount() - 1, startColumn: 0, endColumn: 0 },
+            })).rejects.toThrow('Anchor column is out of bounds');
         });
     });
 
@@ -406,6 +523,12 @@ const TEST_ROW_COL_INSERTION_DEMO: IWorkbookData = {
             ],
             rowCount: 20,
             columnCount: 20,
+            rowData: {
+                0: { h: 36 },
+            },
+            columnData: {
+                0: { w: 112 },
+            },
         },
     },
     locale: LocaleType.ZH_CN,

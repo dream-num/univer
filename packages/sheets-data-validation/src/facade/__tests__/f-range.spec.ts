@@ -14,18 +14,30 @@
  * limitations under the License.
  */
 
-/* eslint-disable ts/no-non-null-asserted-optional-chain */
-
 import type { Injector } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
-import { DataValidationType, ICommandService } from '@univerjs/core';
+import {
+    DataValidationErrorStyle,
+    DataValidationOperator,
+    DataValidationStatus,
+    DataValidationType,
+    ICommandService,
+} from '@univerjs/core';
 import {
     FormulaExecuteStageType,
     SetFormulaCalculationNotificationMutation,
     SetFormulaCalculationResultMutation,
     SetFormulaCalculationStartMutation,
 } from '@univerjs/engine-formula';
-import { AddSheetDataValidationCommand, DataValidationCustomFormulaService } from '@univerjs/sheets-data-validation';
+import {
+    AddSheetDataValidationCommand,
+    ClearRangeDataValidationCommand,
+    DataValidationCustomFormulaService,
+    RemoveSheetDataValidationCommand,
+    UpdateSheetDataValidationOptionsCommand,
+    UpdateSheetDataValidationRangeCommand,
+    UpdateSheetDataValidationSettingCommand,
+} from '@univerjs/sheets-data-validation';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createFacadeTestBed } from './create-test-bed';
 
@@ -43,7 +55,14 @@ describe('Test FRange', () => {
         univerAPI = testBed.univerAPI;
 
         commandService = get(ICommandService);
-        commandService.registerCommand(AddSheetDataValidationCommand);
+        [
+            AddSheetDataValidationCommand,
+            ClearRangeDataValidationCommand,
+            RemoveSheetDataValidationCommand,
+            UpdateSheetDataValidationOptionsCommand,
+            UpdateSheetDataValidationRangeCommand,
+            UpdateSheetDataValidationSettingCommand,
+        ].forEach((command) => commandService.registerCommand(command));
         commandService.registerCommand(SetFormulaCalculationStartMutation);
         commandService.registerCommand(SetFormulaCalculationNotificationMutation);
         commandService.registerCommand(SetFormulaCalculationResultMutation);
@@ -55,7 +74,10 @@ describe('Test FRange', () => {
     });
 
     it('Range set data validation', async () => {
-        const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet()!;
+        const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+        if (!activeSheet) {
+            throw new Error('Active sheet not found');
+        }
         const range = activeSheet.getRange(0, 0, 10, 10);
         const range2 = activeSheet.getRange(11, 11, 2, 2);
         await range.setDataValidation(univerAPI.newDataValidation().requireCheckbox().build());
@@ -76,6 +98,58 @@ describe('Test FRange', () => {
         expect(range3?.getDataValidations().length).toEqual(2);
 
         expect(activeSheet?.getDataValidations().length).toEqual(2);
+    });
+
+    it('manages an applied validation rule from a range facade', async () => {
+        const activeSheet = univerAPI.getActiveWorkbook()!.getActiveSheet();
+        const sourceRange = activeSheet.getRange(0, 0, 2, 1);
+        const targetRange = activeSheet.getRange(3, 0, 2, 1);
+
+        const rule = univerAPI.newDataValidation()
+            .requireNumberBetween(1, 10)
+            .setOptions({
+                errorStyle: DataValidationErrorStyle.STOP,
+                showErrorMessage: true,
+                error: 'Use a number from 1 to 10',
+            })
+            .build();
+
+        sourceRange.setDataValidation(rule);
+        const appliedRule = sourceRange.getDataValidation()!;
+
+        expect(appliedRule.getApplied()).toBe(true);
+        expect(appliedRule.getAllowInvalid()).toBe(false);
+        expect(appliedRule.getCriteriaType()).toBe(DataValidationType.DECIMAL);
+        expect(appliedRule.getCriteriaValues()).toEqual([DataValidationOperator.BETWEEN, '1', '10']);
+        expect(appliedRule.getHelpText()).toBe('Use a number from 1 to 10');
+        expect(appliedRule.getUnitId()).toBe(univerAPI.getActiveWorkbook()!.getId());
+        expect(appliedRule.getSheetId()).toBe(activeSheet.getSheetId());
+        expect(appliedRule.getRanges().map((range) => range.getA1Notation())).toEqual(['A1:A2']);
+        expect(appliedRule.copy().getCriteriaValues()).toEqual([DataValidationOperator.BETWEEN, '1', '10']);
+
+        appliedRule
+            .setCriteria(DataValidationType.DECIMAL, [DataValidationOperator.GREATER_THAN, '2', undefined as never], false)
+            .setOptions({ error: 'Use a whole number greater than 2', showErrorMessage: false })
+            .setRanges([targetRange]);
+
+        const movedRule = targetRange.getDataValidation()!;
+        expect(sourceRange.getDataValidation()).toBeUndefined();
+        expect(movedRule.getCriteriaType()).toBe(DataValidationType.DECIMAL);
+        expect(movedRule.getCriteriaValues()).toEqual([DataValidationOperator.GREATER_THAN, '2', undefined]);
+        expect(movedRule.getHelpText()).toBe('Use a whole number greater than 2');
+        expect(movedRule.getRanges().map((range) => range.getA1Notation())).toEqual(['A4:A5']);
+
+        expect(await targetRange.getValidatorStatus()).toEqual([
+            [DataValidationStatus.INVALID, DataValidationStatus.INVALID],
+        ]);
+
+        expect(movedRule.delete()).toBe(true);
+        expect(targetRange.getDataValidation()).toBeUndefined();
+
+        targetRange.setDataValidation(rule);
+        expect(targetRange.getDataValidations()).toHaveLength(1);
+        targetRange.setDataValidation(null);
+        expect(targetRange.getDataValidations()).toEqual([]);
     });
 
     it('resolves onCalculationResultApplied after data-validation custom formula results are emitted', async () => {

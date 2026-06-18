@@ -26,12 +26,24 @@ describe('ConditionalFormattingStyleComposer', () => {
     const rules = new Map<string, unknown>();
     let cellCfs: Array<{ cfId: string; result: unknown; priority: number }>;
 
+    class TestConditionalFormattingRuleModel {
+        getRule(_unitId: string, _subUnitId: string, cfId: string) {
+            return rules.get(cfId);
+        }
+    }
+
+    class TestConditionalFormattingViewModel {
+        getCellCfs() {
+            return cellCfs;
+        }
+    }
+
     beforeEach(() => {
         rules.clear();
         cellCfs = [];
         const injector = new Injector();
-        injector.add([ConditionalFormattingRuleModel, { useValue: { getRule: (_unitId: string, _subUnitId: string, cfId: string) => rules.get(cfId) } as unknown as ConditionalFormattingRuleModel }]);
-        injector.add([ConditionalFormattingViewModel, { useValue: { getCellCfs: () => cellCfs } as unknown as ConditionalFormattingViewModel }]);
+        injector.add([ConditionalFormattingRuleModel, { useClass: TestConditionalFormattingRuleModel as never }]);
+        injector.add([ConditionalFormattingViewModel, { useClass: TestConditionalFormattingViewModel as never }]);
         injector.add([ConditionalFormattingStyleComposer]);
         service = injector.get(ConditionalFormattingStyleComposer);
     });

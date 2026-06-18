@@ -19,27 +19,31 @@ import { CutContentCommand } from '@univerjs/docs-ui';
 import { describe, expect, it, vi } from 'vitest';
 import { DeleteSearchKeyCommand } from '../doc-quick-insert.command';
 
+class RecordingCommandService {
+    readonly syncExecuteCommand = vi.fn(() => true);
+}
+
 function createAccessor(bindings: Array<[unknown, unknown]>) {
     const injector = new Injector();
 
-    bindings.forEach(([token, value]) => {
-        injector.add([token as never, { useValue: value }]);
+    bindings.forEach(([token, useClass]) => {
+        injector.add([token as never, { useClass: useClass as never }]);
     });
 
-    return injector as never;
+    return injector;
 }
 
 describe('DeleteSearchKeyCommand', () => {
     it('cuts the slash-triggered keyword range from the document', () => {
-        const syncExecuteCommand = vi.fn(() => true);
         const accessor = createAccessor([
-            [ICommandService, { syncExecuteCommand }],
+            [ICommandService, RecordingCommandService],
         ]);
+        const commandService = accessor.get(ICommandService) as unknown as RecordingCommandService;
 
         const result = DeleteSearchKeyCommand.handler(accessor, { start: 4, end: 9 });
 
         expect(result).toBe(true);
-        expect(syncExecuteCommand).toHaveBeenCalledWith(CutContentCommand.id, {
+        expect(commandService.syncExecuteCommand).toHaveBeenCalledWith(CutContentCommand.id, {
             segmentId: '',
             textRanges: [{
                 startOffset: 4,

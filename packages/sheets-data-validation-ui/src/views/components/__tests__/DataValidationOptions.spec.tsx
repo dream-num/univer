@@ -1,0 +1,150 @@
+/**
+ * Copyright 2023-present DreamNum Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import type { IDataValidationRuleOptions } from '@univerjs/core';
+import { DataValidationErrorStyle, LocaleService, LocaleType, Univer } from '@univerjs/core';
+import { ComponentManager, RediContext } from '@univerjs/ui';
+import { act, useState } from 'react';
+import { createRoot } from 'react-dom/client';
+import { afterEach, describe, expect, it } from 'vitest';
+import { DataValidationOptions } from '../DataValidationOptions';
+
+(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+
+function createOptionsTestBed() {
+    const univer = new Univer();
+    const injector = univer.__getInjector();
+    injector.add([ComponentManager]);
+
+    injector.get(LocaleService).load({
+        [LocaleType.EN_US]: {
+            'sheets-data-validation-ui': {
+                panel: {
+                    invalid: 'Invalid data',
+                    messageInfo: 'Message',
+                    options: 'Options',
+                    rejectInput: 'Reject input',
+                    showInfo: 'Show message',
+                    showWarning: 'Show warning',
+                },
+            },
+        },
+    });
+
+    return {
+        injector,
+        univer,
+    };
+}
+
+function OptionsHarness(props: {
+    initialValue: IDataValidationRuleOptions;
+    changes: IDataValidationRuleOptions[];
+}) {
+    const [value, setValue] = useState(props.initialValue);
+
+    return (
+        <DataValidationOptions
+            value={value}
+            onChange={(nextValue) => {
+                props.changes.push(nextValue);
+                setValue(nextValue);
+            }}
+        />
+    );
+}
+
+async function clickElement(element: HTMLElement) {
+    await act(async () => {
+        element.click();
+        await Promise.resolve();
+    });
+}
+
+async function changeInputValue(input: HTMLInputElement, value: string) {
+    await act(async () => {
+        const valueSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
+        valueSetter?.call(input, value);
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        await Promise.resolve();
+    });
+}
+
+describe('DataValidationOptions', () => {
+    let root: ReturnType<typeof createRoot> | undefined;
+    let container: HTMLDivElement | undefined;
+    let currentTestBed: ReturnType<typeof createOptionsTestBed> | undefined;
+
+    afterEach(() => {
+        act(() => {
+            root?.unmount();
+        });
+        container?.remove();
+        currentTestBed?.univer.dispose();
+        root = undefined;
+        container = undefined;
+        currentTestBed = undefined;
+    });
+
+    it('saves invalid-data handling and custom error message options through change parameters', async () => {
+        currentTestBed = createOptionsTestBed();
+        const changes: IDataValidationRuleOptions[] = [];
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <OptionsHarness
+                        initialValue={{
+                            errorStyle: DataValidationErrorStyle.WARNING,
+                            showErrorMessage: false,
+                            error: 'old message',
+                        }}
+                        changes={changes}
+                    />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        await clickElement(container.firstElementChild as HTMLElement);
+        await clickElement(container.querySelectorAll<HTMLInputElement>('[data-u-comp="radio"] input')[1]);
+
+        expect(changes.at(-1)).toEqual({
+            errorStyle: DataValidationErrorStyle.STOP,
+            showErrorMessage: false,
+            error: 'old message',
+        });
+
+        await clickElement(container.querySelector<HTMLInputElement>('[data-u-comp="checkbox"] input')!);
+
+        expect(changes.at(-1)).toEqual({
+            errorStyle: DataValidationErrorStyle.STOP,
+            showErrorMessage: true,
+            error: 'old message',
+        });
+
+        await changeInputValue(container.querySelector<HTMLInputElement>('[data-u-comp="input"] input')!, 'Only choose approved values');
+
+        expect(changes.at(-1)).toEqual({
+            errorStyle: DataValidationErrorStyle.STOP,
+            showErrorMessage: true,
+            error: 'Only choose approved values',
+        });
+    });
+});

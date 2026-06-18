@@ -15,7 +15,7 @@
  */
 
 import { Direction, RANGE_TYPE } from '@univerjs/core';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
     checkIfShrink,
     expandToNextCell,
@@ -29,14 +29,6 @@ import {
     MergeType,
     shrinkToNextCell,
 } from '../utils/selection-utils';
-
-vi.mock('@univerjs/sheets', async (importOriginal) => {
-    const actual = await importOriginal<typeof import('@univerjs/sheets')>();
-    return {
-        ...actual,
-        alignToMergedCellsBorders: (range: any) => range,
-    };
-});
 
 function createMatrix(hasValue = false) {
     return {

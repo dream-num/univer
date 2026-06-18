@@ -29,6 +29,8 @@ import {
     IUniverInstanceService,
     LocaleService,
     LocalUndoRedoService,
+    ObjectMatrix,
+    RANGE_TYPE,
     ThemeService,
     UniverInstanceService,
     Workbook,
@@ -36,7 +38,6 @@ import {
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { SheetSkeletonService, SheetsSelectionsService } from '@univerjs/sheets';
 import {
-    BrowserClipboardService,
     IClipboardInterfaceService,
     INotificationService,
     IPlatformService,
@@ -44,7 +45,14 @@ import {
 } from '@univerjs/ui';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { IMarkSelectionService, MarkSelectionService } from '../../mark-selection/mark-selection.service';
-import { ISheetClipboardService, SheetClipboardService } from '../clipboard.service';
+import {
+    ISheetClipboardService,
+    PREDEFINED_HOOK_NAME_COPY,
+    PREDEFINED_HOOK_NAME_PASTE,
+    SheetClipboardService,
+} from '../clipboard.service';
+import { COPY_TYPE } from '../type';
+import { MockClipboardItem } from './mock-clipboard';
 
 class NoopNotificationService {
     show() {
@@ -52,7 +60,84 @@ class NoopNotificationService {
     }
 }
 
-function createService(): ISheetClipboardService {
+class TestClipboardInterfaceService {
+    readonly writes: Array<{ text: string; html: string }> = [];
+
+    get supportClipboard(): boolean {
+        return true;
+    }
+
+    async writeText(text: string): Promise<void> {
+        this.writes.push({ text, html: '' });
+    }
+
+    async write(text: string, html: string): Promise<void> {
+        this.writes.push({ text, html });
+    }
+
+    async readText(): Promise<string> {
+        return '';
+    }
+
+    async read(): Promise<ClipboardItem[]> {
+        return [];
+    }
+}
+
+interface ITestCell {
+    v?: string;
+    s?: unknown;
+    rowSpan?: number;
+    colSpan?: number;
+}
+
+interface ITestDiscreteRange {
+    rows: number[];
+    cols: number[];
+}
+
+interface IPrivateClipboardServiceAccess {
+    _pasteUSM(
+        data: { cellMatrix: ObjectMatrix<ITestCell>; rowProperties: unknown[]; colProperties: unknown[] },
+        target: { unitId: string; subUnitId: string; pastedRange: ITestDiscreteRange },
+        pasteType: string
+    ): boolean;
+    _transformPastedData(
+        rowCount: number,
+        colCount: number,
+        cellMatrix: ObjectMatrix<ITestCell>
+    ): { unitId: string; subUnitId: string; pastedRange: ITestDiscreteRange } | null;
+    _expandOrShrinkRowsCols(
+        unitId: string,
+        subUnitId: string,
+        range: ITestDiscreteRange,
+        colCount: number,
+        rowCount: number
+    ): ITestDiscreteRange;
+    _getSetSelectionOperation(
+        unitId: string,
+        subUnitId: string,
+        range: ITestDiscreteRange,
+        cellMatrix: ObjectMatrix<ITestCell>,
+        pasteType: string
+    ): {
+        params: {
+            selections: Array<{
+                primary: {
+                    startRow: number;
+                    endRow: number;
+                    startColumn: number;
+                    endColumn: number;
+                    isMerged?: boolean;
+                    isMergedMainCell?: boolean;
+                };
+            }>;
+        };
+    };
+    _topLeftCellsMatch(rowCount: number, colCount: number, range: { topRow: number; leftCol: number }): boolean;
+}
+
+function createTestContext() {
     vi.stubGlobal('navigator', { appVersion: 'Linux' });
     const injector = new Injector();
     injector.add([ILogService, { useClass: DesktopLogService }]);
@@ -60,7 +145,7 @@ function createService(): ISheetClipboardService {
     injector.add([IContextService, { useClass: ContextService }]);
     injector.add([IUniverInstanceService, { useClass: UniverInstanceService }]);
     injector.add([SheetsSelectionsService]);
-    injector.add([IClipboardInterfaceService, { useClass: BrowserClipboardService }]);
+    injector.add([IClipboardInterfaceService, { useClass: TestClipboardInterfaceService }]);
     injector.add([IUndoRedoService, { useClass: LocalUndoRedoService }]);
     injector.add([ICommandService, { useClass: CommandService }]);
     injector.add([SheetSkeletonService]);
@@ -75,12 +160,59 @@ function createService(): ISheetClipboardService {
     const univerInstanceService = injector.get(IUniverInstanceService) as UniverInstanceService;
     const workbook = injector.createInstance(Workbook, {
         id: 'unit-1',
-        sheets: { 'sheet-1': { id: 'sheet-1' } },
+        sheets: {
+            'sheet-1': {
+                id: 'sheet-1',
+                cellData: {
+                    0: {
+                        0: {
+                            v: 'Quarterly revenue',
+                        },
+                    },
+                },
+                mergeData: [
+                    {
+                        startRow: 1,
+                        startColumn: 1,
+                        endRow: 2,
+                        endColumn: 2,
+                    },
+                ],
+            },
+        },
         sheetOrder: ['sheet-1'],
     });
     univerInstanceService.__addUnit(workbook);
     univerInstanceService.focusUnit('unit-1');
-    return injector.get(ISheetClipboardService);
+    return {
+        injector,
+        service: injector.get(ISheetClipboardService),
+    };
+}
+
+function createService(): ISheetClipboardService {
+    return createTestContext().service;
+}
+
+function selectCell(injector: Injector, row = 0, column = 0) {
+    selectRange(injector, row, column, row, column);
+}
+
+function selectRange(injector: Injector, startRow: number, startColumn: number, endRow: number, endColumn: number) {
+    const selectionManager = injector.get(SheetsSelectionsService);
+    selectionManager.addSelections([
+        {
+            range: {
+                startRow,
+                startColumn,
+                endRow,
+                endColumn,
+                rangeType: RANGE_TYPE.NORMAL,
+            },
+            primary: null,
+            style: null,
+        },
+    ]);
 }
 
 describe('SheetClipboardService', () => {
@@ -106,5 +238,270 @@ describe('SheetClipboardService', () => {
         expect(service.getClipboardHooks()).toEqual([]);
         expect(service.getPasteMenuVisible()).toBe(false);
         expect(service.getPasteOptionsCache()).toBeNull();
+    });
+
+    it('keeps clipboard hooks in priority order and ignores duplicate hook ids', () => {
+        const service = createService();
+        const lowPriority = { id: 'after-default', priority: 20 };
+        const highPriority = { id: 'before-default', priority: 1 };
+        const duplicateHighPriority = { id: 'before-default', priority: 0 };
+
+        service.addClipboardHook(lowPriority as never);
+        service.addClipboardHook(highPriority as never);
+        service.addClipboardHook(duplicateHighPriority as never);
+
+        expect(service.getClipboardHooks().map((hook) => hook.id)).toEqual(['before-default', 'after-default']);
+    });
+
+    it('copies the current sheet selection into clipboard text/html and internal paste cache', async () => {
+        const { injector, service } = createTestContext();
+        selectCell(injector);
+
+        const copied = await service.copy();
+        const clipboard = injector.get(IClipboardInterfaceService) as unknown as TestClipboardInterfaceService;
+        const copyId = clipboard.writes[0].html.match(/data-copy-id="([^"]+)"/)?.[1];
+
+        expect(copied).toBe(true);
+        expect(clipboard.writes[0].text).toBe('Quarterly revenue');
+        expect(clipboard.writes[0].html).toContain('data-copy-id=');
+        expect(copyId && service.copyContentCache().get(copyId)?.copyType).toBe(COPY_TYPE.COPY);
+    });
+
+    it('records cut selections as cut copy cache entries', async () => {
+        const { injector, service } = createTestContext();
+        selectCell(injector);
+
+        const cut = await service.cut();
+        const clipboard = injector.get(IClipboardInterfaceService) as unknown as TestClipboardInterfaceService;
+        const copyId = clipboard.writes[0].html.match(/data-copy-id="([^"]+)"/)?.[1];
+
+        expect(cut).toBe(true);
+        expect(service.copyContentCache().get(copyId!)?.copyType).toBe(COPY_TYPE.CUT);
+    });
+
+    it('routes plain text and image clipboard items to paste hooks with the requested paste type', async () => {
+        const { injector, service } = createTestContext();
+        selectCell(injector);
+        const pastedTexts: Array<{ text: string; pasteType: string }> = [];
+        const pastedFiles: Array<{ name: string; pasteType: string }> = [];
+
+        service.addClipboardHook({
+            id: 'plain-and-image-paste',
+            onPastePlainText(_payload: unknown, text: string, options: { pasteType: string }) {
+                pastedTexts.push({ text, pasteType: options.pasteType });
+                return { redos: [], undos: [] };
+            },
+            onPasteFiles(_payload: unknown, files: File[], options: { pasteType: string }) {
+                pastedFiles.push({ name: files[0].name, pasteType: options.pasteType });
+                return { redos: [], undos: [] };
+            },
+        } as never);
+
+        const textItem = new MockClipboardItem({ 'text/plain': 'North\tSouth' });
+        const imageItem = new MockClipboardItem({ 'image/png': 'image-bytes' });
+
+        expect(await service.paste(textItem as unknown as ClipboardItem, PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_VALUE)).toBe(true);
+        expect(await service.paste(imageItem as unknown as ClipboardItem, PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_FORMAT)).toBe(true);
+        expect(pastedTexts).toEqual([{ text: 'North\tSouth', pasteType: PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_VALUE }]);
+        expect(pastedFiles).toEqual([{ name: 'clipboard-image.png', pasteType: PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_FORMAT }]);
+    });
+
+    it('returns false when a clipboard item has no usable sheet content', async () => {
+        const service = createService();
+        const emptyItem = new MockClipboardItem({});
+
+        expect(await service.paste(emptyItem as unknown as ClipboardItem)).toBe(false);
+    });
+
+    it('returns false when internal paste and repaste have no cached business content', async () => {
+        const service = createService();
+
+        expect(await service.pasteByCopyId('missing-copy-id')).toBe(false);
+        expect(service.rePasteWithPasteType('SPECIAL_PASTE_VALUE')).toBe(false);
+    });
+
+    it('lets a special copy hook provide business-only cell values', () => {
+        const service = createService();
+        const lifecycle: string[] = [];
+
+        service.addClipboardHook({
+            id: PREDEFINED_HOOK_NAME_COPY.SPECIAL_COPY_FORMULA_ONLY,
+            onBeforeCopy() {
+                lifecycle.push('before');
+            },
+            getCellValueBySpecialMatrix() {
+                return {
+                    v: '=SUM(A1:A4)',
+                    displayV: 'Projected revenue',
+                };
+            },
+            onAfterCopy() {
+                lifecycle.push('after');
+            },
+        } as never);
+
+        const copyContent = service.generateCopyContent('unit-1', 'sheet-1', {
+            startRow: 0,
+            startColumn: 0,
+            endRow: 0,
+            endColumn: 0,
+        }, { copyHookType: PREDEFINED_HOOK_NAME_COPY.SPECIAL_COPY_FORMULA_ONLY });
+
+        expect(copyContent?.plain).toBe('Projected revenue');
+        expect(copyContent?.matrixFragment.getValue(0, 0)?.v).toBe('=SUM(A1:A4)');
+        expect(lifecycle).toEqual(['before', 'after']);
+    });
+
+    it('stops paste execution when a hook blocks the target range', async () => {
+        const { injector, service } = createTestContext();
+        selectCell(injector);
+        const pasteResults: boolean[] = [];
+
+        service.addClipboardHook({
+            id: 'protected-range-paste',
+            onBeforePaste() {
+                return false;
+            },
+            onAfterPaste(result: boolean) {
+                pasteResults.push(result);
+            },
+            onPastePlainText() {
+                return { redos: [], undos: [] };
+            },
+        } as never);
+
+        const textItem = new MockClipboardItem({ 'text/plain': 'Blocked update' });
+
+        expect(await service.paste(textItem as unknown as ClipboardItem)).toBe(false);
+        expect(pasteResults).toEqual([false]);
+    });
+
+    it('stops structured sheet paste when a hook blocks the computed range', () => {
+        const service = createService();
+        const matrix = new ObjectMatrix<ITestCell>();
+        const pasteResults: boolean[] = [];
+        matrix.setValue(0, 0, { v: 'Blocked matrix' });
+
+        service.addClipboardHook({
+            id: 'structured-protection',
+            onBeforePaste() {
+                return false;
+            },
+            onAfterPaste(result: boolean) {
+                pasteResults.push(result);
+            },
+        } as never);
+
+        const pasted = (service as unknown as IPrivateClipboardServiceAccess)._pasteUSM(
+            {
+                cellMatrix: matrix,
+                rowProperties: [],
+                colProperties: [],
+            },
+            {
+                unitId: 'unit-1',
+                subUnitId: 'sheet-1',
+                pastedRange: {
+                    rows: [0],
+                    cols: [0],
+                },
+            },
+            PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE
+        );
+
+        expect(pasted).toBe(false);
+        expect(pasteResults).toEqual([false]);
+    });
+
+    it('computes pasted target ranges when a one-cell source fills a business selection', () => {
+        const { injector, service } = createTestContext();
+        selectCell(injector, 3, 3);
+        const matrix = new ObjectMatrix<ITestCell>();
+        matrix.setValue(0, 0, { v: 'Region total' });
+
+        const target = (service as unknown as IPrivateClipboardServiceAccess)._transformPastedData(1, 1, matrix);
+
+        expect(target).toMatchObject({
+            unitId: 'unit-1',
+            subUnitId: 'sheet-1',
+            pastedRange: {
+                rows: [3],
+                cols: [3],
+            },
+        });
+        expect(matrix.getValue(0, 0)?.v).toBe('Region total');
+    });
+
+    it('keeps a single pasted cell inside an existing merged target and strips source span styling', () => {
+        const { injector, service } = createTestContext();
+        selectRange(injector, 1, 1, 2, 2);
+        const matrix = new ObjectMatrix<ITestCell>();
+        matrix.setValue(0, 0, {
+            v: 'Merged-region note',
+            s: { bl: 1 },
+            rowSpan: 2,
+            colSpan: 2,
+        });
+
+        const target = (service as unknown as IPrivateClipboardServiceAccess)._transformPastedData(1, 1, matrix);
+
+        expect(target?.pastedRange).toEqual({
+            rows: [1, 2],
+            cols: [1, 2],
+        });
+        expect(matrix.getValue(0, 0)).toMatchObject({
+            v: 'Merged-region note',
+            s: null,
+        });
+        expect(matrix.getValue(0, 0)?.rowSpan).toBeUndefined();
+        expect(matrix.getValue(0, 0)?.colSpan).toBeUndefined();
+    });
+
+    it('expands paste rows and columns beyond the current selection when pasted data is larger', () => {
+        const service = createService();
+
+        const range = (service as unknown as IPrivateClipboardServiceAccess)._expandOrShrinkRowsCols(
+            'unit-1',
+            'sheet-1',
+            { rows: [4], cols: [2] },
+            3,
+            2
+        );
+
+        expect(range).toEqual({
+            rows: [4, 5],
+            cols: [2, 3, 4],
+        });
+    });
+
+    it('expands the primary selection when default paste creates a merged cell', () => {
+        const service = createService();
+        const matrix = new ObjectMatrix<ITestCell>();
+        matrix.setValue(0, 0, { v: 'Merged header', rowSpan: 2, colSpan: 2 });
+
+        const operation = (service as unknown as IPrivateClipboardServiceAccess)._getSetSelectionOperation(
+            'unit-1',
+            'sheet-1',
+            { rows: [6, 7], cols: [1, 2] },
+            matrix,
+            PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE
+        );
+
+        expect(operation.params.selections[0].primary).toMatchObject({
+            startRow: 6,
+            endRow: 7,
+            startColumn: 1,
+            endColumn: 2,
+            isMerged: true,
+            isMergedMainCell: true,
+        });
+    });
+
+    it('detects whether the top-left paste target crosses existing merged cells', () => {
+        const service = createService();
+        const access = service as unknown as IPrivateClipboardServiceAccess;
+
+        expect(access._topLeftCellsMatch(1, 2, { topRow: 1, leftCol: 1 })).toBe(false);
+        expect(access._topLeftCellsMatch(1, 1, { topRow: 5, leftCol: 5 })).toBe(true);
     });
 });

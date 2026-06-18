@@ -61,6 +61,16 @@ describe('auto-fill rules', () => {
         expect(rightResult?.map((c) => c?.v)).toEqual([3, 4, 5]);
         expect(leftResult?.map((c) => c?.v)).toEqual([-2, -1, 0]);
         expect(dateRule.isContinue({ type: AUTO_FILL_DATA_TYPE.DATE, cellData: { v: 1 } }, { v: 2 })).toBe(true);
+        expect(dateRule.isContinue({ type: AUTO_FILL_DATA_TYPE.NUMBER, cellData: { v: 1 } }, { v: 2 })).toBe(false);
+
+        expect(dateRule.match({ v: 45292, s: 'date-style' }, {
+            get: () => ({
+                getCurrentUnitOfType: () => ({
+                    getStyles: () => ({ get: () => ({ n: { pattern: 'yyyy-mm-dd' } }) }),
+                }),
+            }),
+        } as any)).toBe(true);
+        expect(dateRule.match({ v: 45292, s: 'date-style' }, { get: () => ({ getCurrentUnitOfType: () => null }) } as any)).toBe(false);
     });
 
     it('number rule should match numeric cells and generate series', () => {
@@ -76,6 +86,15 @@ describe('auto-fill rules', () => {
             {} as any
         );
         expect(result?.map((cell) => cell?.v)).toEqual([6, 8, 10]);
+
+        const reverse = numberRule.applyFunctions?.[AUTO_FILL_APPLY_TYPE.SERIES]?.(
+            { data: [{ v: 10 }, { v: 12 }], index: [0, 1] },
+            2,
+            Direction.UP,
+            {} as any
+        );
+        expect(reverse?.map((cell) => cell?.v)).toEqual([6, 8]);
+        expect(numberRule.isContinue({ type: AUTO_FILL_DATA_TYPE.OTHER, cellData: { v: 1 } }, { v: 2 })).toBe(false);
     });
 
     it('extend-number rule should support continue and copy fallback', () => {
@@ -120,6 +139,15 @@ describe('auto-fill rules', () => {
             {} as any
         );
         expect(multipleCellsWithPadStart0?.map((c) => `${c?.v}`)).toEqual(['A2B3C003D', 'A2B3C004D', 'A2B3C005D', 'A2B3C006D']);
+        expect(extendNumberRule.isContinue({ type: AUTO_FILL_DATA_TYPE.EXTEND_NUMBER, cellData: { v: 'A-001-Z' } }, { v: 'B-002-Z' })).toBe(false);
+
+        const reverse = extendNumberRule.applyFunctions?.[AUTO_FILL_APPLY_TYPE.SERIES]?.(
+            { data: [{ v: 'A-003' }, { v: 'A-004' }], index: [0, 1] },
+            2,
+            Direction.LEFT,
+            {} as any
+        );
+        expect(reverse?.map((c) => `${c?.v}`)).toEqual(['A-001', 'A-002']);
     });
 
     it('chinese-number rule should handle normal numbers and week cycle', () => {
@@ -142,6 +170,22 @@ describe('auto-fill rules', () => {
             {} as any
         );
         expect(week?.map((c) => c?.v)).toEqual(['一', '二', '三']);
+
+        const reverseNormal = chnNumberRule.applyFunctions?.[AUTO_FILL_APPLY_TYPE.SERIES]?.(
+            { data: [{ v: '三' }, { v: '四' }], index: [0, 1] },
+            2,
+            Direction.LEFT,
+            {} as any
+        );
+        expect(reverseNormal?.map((c) => c?.v)).toEqual(['一', '二']);
+
+        const copyFallback = chnNumberRule.applyFunctions?.[AUTO_FILL_APPLY_TYPE.SERIES]?.(
+            { data: [{ v: '一' }, { v: '三' }, { v: '四' }], index: [0, 1, 2] },
+            2,
+            Direction.DOWN,
+            {} as any
+        );
+        expect(copyFallback?.map((c) => c?.v)).toEqual(['一', '三']);
     });
 
     it('chinese week rules should produce weekday sequence', () => {
@@ -158,6 +202,22 @@ describe('auto-fill rules', () => {
         );
         expect(week2?.map((c) => c?.v)).toEqual(['周一', '周二']);
 
+        const week2OneReverse = chnWeek2Rule.applyFunctions?.[AUTO_FILL_APPLY_TYPE.SERIES]?.(
+            { data: [{ v: '周一' }], index: [0] },
+            2,
+            Direction.UP,
+            {} as any
+        );
+        expect(week2OneReverse?.map((c) => c?.v)).toEqual(['周六', '周日']);
+
+        const week2Fallback = chnWeek2Rule.applyFunctions?.[AUTO_FILL_APPLY_TYPE.SERIES]?.(
+            { data: [{ v: '周一' }, { v: '周三' }, { v: '周四' }], index: [0, 1, 2] },
+            2,
+            Direction.DOWN,
+            {} as any
+        );
+        expect(week2Fallback?.map((c) => c?.v)).toEqual(['周一', '周三']);
+
         const week3 = chnWeek3Rule.applyFunctions?.[AUTO_FILL_APPLY_TYPE.SERIES]?.(
             { data: [{ v: '星期六' }], index: [0] },
             2,
@@ -165,6 +225,22 @@ describe('auto-fill rules', () => {
             {} as any
         );
         expect(week3?.map((c) => c?.v)).toEqual(['星期日', '星期一']);
+
+        const week3Multi = chnWeek3Rule.applyFunctions?.[AUTO_FILL_APPLY_TYPE.SERIES]?.(
+            { data: [{ v: '星期六' }, { v: '星期日' }], index: [0, 1] },
+            2,
+            Direction.DOWN,
+            {} as any
+        );
+        expect(week3Multi?.map((c) => c?.v)).toEqual(['星期一', '星期二']);
+
+        const week3Fallback = chnWeek3Rule.applyFunctions?.[AUTO_FILL_APPLY_TYPE.SERIES]?.(
+            { data: [{ v: '星期一' }, { v: '星期三' }, { v: '星期四' }], index: [0, 1, 2] },
+            2,
+            Direction.DOWN,
+            {} as any
+        );
+        expect(week3Fallback?.map((c) => c?.v)).toEqual(['星期一', '星期三']);
     });
 
     it('loop-series rule should match and fill cyclic values', () => {
@@ -192,6 +268,15 @@ describe('auto-fill rules', () => {
             {} as any
         );
         expect(reversed?.length).toBe(2);
+        expect(loopSeriesRule.isContinue({ type: AUTO_FILL_DATA_TYPE.NUMBER, cellData: { v: 'Mon' } }, { v: 'Tue' })).toBe(false);
+
+        const fallback = loopSeriesRule.applyFunctions?.[AUTO_FILL_APPLY_TYPE.SERIES]?.(
+            { data: [{ v: 'Mon' }, { v: 'Wed' }, { v: 'Thu' }], index: [0, 1, 2] },
+            2,
+            Direction.DOWN,
+            {} as any
+        );
+        expect(fallback?.map((c) => c?.v)).toEqual(['Mon', 'Wed']);
     });
 
     it('other rule should always match and continue only from OTHER', () => {

@@ -42,5 +42,11 @@ describe('CellEditorManagerService', () => {
         expect(states.at(-1)).toEqual({ show: true, startX: 20, startY: 40, endX: 100, endY: 70 });
         expect(rects.at(-1)).toEqual({ left: 10, top: 20, width: 100, height: 30 });
         expect(focus).toEqual([false, true]);
+        expect(service.getState()).toEqual({ show: true, startX: 20, startY: 40, endX: 100, endY: 70 });
+        expect(service.getRect()).toEqual({ left: 10, top: 20, width: 100, height: 30 });
+
+        service.dispose();
+        expect(service.getState()).toBeNull();
+        expect(service.getRect()).toBeNull();
     });
 });

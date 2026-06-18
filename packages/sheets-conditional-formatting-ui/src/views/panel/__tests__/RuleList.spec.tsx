@@ -233,6 +233,42 @@ describe('RuleList', () => {
         expect(container.textContent).not.toContain('A1');
     });
 
+    it('deletes only the clicked conditional formatting rule', async () => {
+        currentTestBed = await createRuleListTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <RuleList onClick={() => undefined} onCreate={() => undefined} />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        const activeRangeText = Array.from(container.querySelectorAll('div'))
+            .find((element) => element.textContent === 'A1');
+        const activeRuleRow = activeRangeText?.parentElement?.parentElement as HTMLElement | undefined;
+        const activeRuleDeleteButton = activeRuleRow?.lastElementChild as HTMLElement | undefined;
+
+        if (!activeRuleDeleteButton) {
+            throw new Error('Rule delete control was not rendered');
+        }
+
+        await act(async () => {
+            activeRuleDeleteButton.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            await Promise.resolve();
+        });
+
+        const remainingRules = currentTestBed.ruleModel.getSubunitRules(currentTestBed.unitId, currentTestBed.subUnitId);
+
+        expect(remainingRules?.map((rule) => rule.cfId)).toEqual(['cf-far']);
+        expect(container.textContent).not.toContain('A1');
+        expect(container.textContent).toContain('F6');
+    });
+
     it('clears all worksheet conditional formatting rules in worksheet mode', async () => {
         currentTestBed = await createRuleListTestBed();
         container = document.createElement('div');

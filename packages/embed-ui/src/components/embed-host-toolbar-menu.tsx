@@ -30,6 +30,7 @@ import { EmbedChildViewRegistryService } from '../services/embed-child-view-regi
 import { EmbedFloatingMenuRegistryService } from '../services/embed-floating-menu-registry.service';
 import { EmbedFullscreenService } from '../services/embed-fullscreen.service';
 import { mountEmbedProductRibbonMenu } from '../services/embed-product-menu-mounting';
+import { EmbedProductMenuRegistryService } from '../services/embed-product-menu-registry.service';
 import { EmbedHostChromeMode } from '../types/embed-ui';
 
 const EMBED_HOST_TOOLBAR_STYLE_ID = 'univer-embed-host-toolbar-menu-styles';
@@ -255,6 +256,20 @@ function mountFullscreenProductRibbon(params: {
     const contribution = params.injector.get(EmbedBlockRegistryService).get(params.descriptor.childType);
     if (contribution?.hostChromeMode !== EmbedHostChromeMode.RIBBON) {
         return undefined;
+    }
+
+    if (params.injector.has(EmbedProductMenuRegistryService)) {
+        const productMenuDisposable = params.injector.get(EmbedProductMenuRegistryService).mountMenu({
+            container: params.menuContainer,
+            injector: params.injector,
+            childType: params.descriptor.childType,
+            childUnitId: params.descriptor.childUnitId,
+            menuTitlePrefix: contribution.productName,
+            surface: 'ribbon',
+        });
+        if (productMenuDisposable) {
+            return productMenuDisposable;
+        }
     }
 
     return mountEmbedProductRibbonMenu({

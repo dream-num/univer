@@ -90,8 +90,8 @@ describe('EmbedModelService', () => {
         expect(model.getDescriptor('host-1', 'embed-1')).not.toHaveProperty('hostContext');
         expect(model.getActiveDescriptors('host-1')).toHaveLength(1);
         expect(model.getActiveDescriptorsByChildUnit('child-sheet')).toHaveLength(1);
-        expect(model.countReferencesByResourceRef('host-1', descriptor.source.ref)).toBe(1);
-        expect(model.countActiveReferencesByResourceRef('host-1', descriptor.source.ref)).toBe(1);
+        expect(model.countReferencesByResourceRef('host-1', getDescriptorRef(descriptor))).toBe(1);
+        expect(model.countActiveReferencesByResourceRef('host-1', getDescriptorRef(descriptor))).toBe(1);
 
         const serialized = model.serializeUnit('host-1');
         serialized.embeds['embed-1'].lifecycle = 'soft-deleted';
@@ -99,7 +99,7 @@ describe('EmbedModelService', () => {
 
         model.softDeleteDescriptor('host-1', 'embed-1');
         expect(model.getActiveDescriptors('host-1')).toEqual([]);
-        expect(model.countActiveReferencesByResourceRef('host-1', descriptor.source.ref)).toBe(0);
+        expect(model.countActiveReferencesByResourceRef('host-1', getDescriptorRef(descriptor))).toBe(0);
         model.restoreDescriptor('host-1', 'embed-1');
         expect(model.getDescriptor('host-1', 'embed-1')?.lifecycle).toBe('active');
 
@@ -175,7 +175,7 @@ describe('embed guest contributions and providers', () => {
 describe('retention and focus services', () => {
     it('reports cleanup candidates only when all references are soft deleted', () => {
         const model = new EmbedModelService();
-        const ref = createDescriptor().source.ref;
+        const ref = getDescriptorRef(createDescriptor());
         const retention = new EmbedChildRetentionService(model);
 
         expect(retention.getRetentionState('host-1', ref)).toMatchObject({
@@ -227,7 +227,7 @@ describe('embed commands and mutations', () => {
             removeEmbed: vi.fn(),
         };
         const modelService = {
-            getDescriptor: vi.fn(() => descriptor),
+            getDescriptor: vi.fn((): IEmbedDescriptor | undefined => descriptor),
             addDescriptor: vi.fn(),
             softDeleteDescriptor: vi.fn(),
         };
@@ -257,9 +257,9 @@ describe('embed commands and mutations', () => {
         expect(RemoveEmbedCommand.handler(accessor, { hostUnitId: 'host-1', embedId: 'embed-1' })).toBe(true);
         expect(creationService.removeEmbed).toHaveBeenCalledWith({ hostUnitId: 'host-1', embedId: 'embed-1' });
 
-        expect(await CreateEmbedCommand.handler(accessor, undefined as never)).toBe(false);
-        expect(CopyEmbedCommand.handler(accessor, undefined as never)).toBe(false);
-        expect(RemoveEmbedCommand.handler(accessor, undefined as never)).toBe(false);
+        expect(await CreateEmbedCommand.handler(accessor, undefined)).toBe(false);
+        expect(CopyEmbedCommand.handler(accessor, undefined)).toBe(false);
+        expect(RemoveEmbedCommand.handler(accessor, undefined)).toBe(false);
         modelService.getDescriptor.mockReturnValueOnce(undefined);
         expect(RemoveEmbedCommand.handler(accessor, { hostUnitId: 'host-1', embedId: 'missing' })).toBe(false);
     });
@@ -319,7 +319,7 @@ function createGuestContribution(childType: UniverInstanceType): IEmbedGuestCont
     };
 }
 
-function createInjector(registry?: EmbedGuestContributionRegistryService, key: object = {}) {
+function createInjector(registry?: EmbedGuestContributionRegistryService, key: object = {}): Pick<import('@univerjs/core').Injector, 'get' | 'has'> {
     return Object.assign(key, {
         has: vi.fn((token: unknown) => Boolean(registry) && token === EmbedGuestContributionRegistryService),
         get: vi.fn((token: unknown) => {
@@ -329,7 +329,7 @@ function createInjector(registry?: EmbedGuestContributionRegistryService, key: o
 
             return registry;
         }),
-    });
+    }) as unknown as Pick<import('@univerjs/core').Injector, 'get' | 'has'>;
 }
 
 function createCommandAccessor(
@@ -352,4 +352,12 @@ function createCommandAccessor(
             throw new Error('unexpected token');
         }),
     } as never;
+}
+
+function getDescriptorRef(descriptor: IEmbedDescriptor): IResourceRef {
+    if (descriptor.source.kind !== 'ref') {
+        throw new Error('test descriptor must use a ref source');
+    }
+
+    return descriptor.source.ref;
 }

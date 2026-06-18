@@ -48,7 +48,7 @@ describe('embed-ui registries and commands', () => {
         const descriptor = createDescriptor();
         const contribution = {
             hostType: UniverInstanceType.UNIVER_SHEET,
-            entry: 'sheets-sheet-tab',
+            entry: 'sheets-sheet-tab' as const,
             createAnchor: vi.fn(() => 'custom-anchor'),
             createAnchorPlan: vi.fn(() => ({ hostAnchorId: 'planned', redoMutations: [], undoMutations: [] })),
             removeAnchorPlan: vi.fn(() => ({ redoMutations: [], undoMutations: [] })),
@@ -118,6 +118,7 @@ describe('embed-ui registries and commands', () => {
             hostAnchorId: 'anchor-1',
             embedId: 'embed-1',
             entry: 'docs-custom-block' as const,
+            kind: 'docs-custom-block' as const,
             hostType: UniverInstanceType.UNIVER_DOC,
         };
         anchorModel.setAnchor(record);
@@ -273,6 +274,7 @@ describe('embed-ui registries and commands', () => {
                 hostAnchorId: 'anchor-1',
                 embedId: 'embed-1',
                 entry: 'docs-custom-block',
+                kind: 'docs-custom-block',
                 hostType: UniverInstanceType.UNIVER_DOC,
             },
         })).toBe(true);

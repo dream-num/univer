@@ -147,7 +147,7 @@ function withScopedExecutionInjector(
     options: IExecutionOptions | undefined,
     injector: Injector
 ): IExecutionOptions {
-    const scopedOptions: IExecutionOptions = { ...(options ?? {}) };
+    const scopedOptions: IExecutionOptions = { ...options };
     scopedOptions[COMMAND_EXECUTION_INJECTOR_KEY] = injector;
     return scopedOptions;
 }

@@ -45,6 +45,27 @@ describe('createDocsTableLikeCustomBlockWheelHandler', () => {
         expect(live.scrollLeft).toBe(120);
         expect(event.defaultPrevented).toBe(true);
     });
+
+    it('uses the live element native scroll range when no explicit max is provided', () => {
+        const live = createScrollableElement({
+            clientWidth: 300,
+            scrollWidth: 900,
+        });
+        const onWheel = createDocsTableLikeCustomBlockWheelHandler({
+            getLive: () => live,
+        });
+
+        const event = new WheelEvent('wheel', {
+            bubbles: true,
+            cancelable: true,
+            deltaX: 600,
+        });
+
+        onWheel(event);
+
+        expect(live.scrollLeft).toBe(600);
+        expect(event.defaultPrevented).toBe(true);
+    });
 });
 
 function createScrollableElement(params: {

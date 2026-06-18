@@ -167,7 +167,7 @@ export function EmbedDocsCustomBlockRenderer(props: { data?: EmbedFloatDomData }
                 return;
             }
 
-            if (scrollDocsTableLikeCustomBlockLive(event, live)) {
+            if (scrollDocsTableLikeCustomBlockLive(event, live, { maxScrollLeft: viewport.bleedLeft })) {
                 event.preventDefault();
                 event.stopPropagation();
             }

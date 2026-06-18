@@ -14,135 +14,273 @@
  * limitations under the License.
  */
 
-import type { ICommandService, IUniverInstanceService } from '@univerjs/core';
-import { ICommandService as ICommandServiceIdentifier, Inject, Injector, IUniverInstanceService as IUniverInstanceServiceIdentifier, UniverInstanceType } from '@univerjs/core';
+/**
+ * @vitest-environment jsdom
+ */
+
+import type { IEmbedDescriptor } from '@univerjs/embed';
+import type { IEmbedChildContainerContext } from '../types/embed-ui';
+import { COMMAND_EXECUTION_INJECTOR_KEY, ICommandService, Injector, IUndoRedoService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { IContextMenuService, IMenuManagerService } from '@univerjs/ui';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { createEmbedChildUnitScopedInjector, createEmbedScopedInjector } from './embed-child-unit-scoped-injector';
+import { EmbedUndoBridgeService } from './embed-undo-bridge.service';
 
-class ParentService {
-    disposed = false;
-
-    dispose(): void {
-        this.disposed = true;
-    }
-}
-
-class ChildService {
-    disposed = false;
-
-    constructor(readonly parent: ParentService) {}
-
-    dispose(): void {
-        this.disposed = true;
-    }
-}
-
-class CreatedWithParentService {
-    constructor(
-        @Inject(ParentService) readonly parent: ParentService
-    ) {}
-}
-
-describe('createEmbedScopedInjector', () => {
-    it('does not dispose parent fallback services when disposing a child scope', () => {
-        const parentInjector = new Injector([
-            [ParentService, { useClass: ParentService }],
-        ]);
-        const parentService = parentInjector.get(ParentService);
-        const scopedInjector = createEmbedScopedInjector(parentInjector, new Map());
-        const childInjector = scopedInjector.createChild();
-
-        childInjector.add([
-            ChildService,
-            {
-                useFactory: () => new ChildService(childInjector.get(ParentService)),
-            },
-        ]);
-        const childService = childInjector.get(ChildService);
-
-        childInjector.dispose();
-
-        expect(childService.disposed).toBe(true);
-        expect(parentService.disposed).toBe(false);
-    });
-
-    it('does not dispose parent fallback services resolved while creating scoped instances', () => {
-        const parentInjector = new Injector([
-            [ParentService, { useClass: ParentService }],
-        ]);
-        const parentService = parentInjector.get(ParentService);
-        const scopedInjector = createEmbedScopedInjector(parentInjector, new Map());
-
-        const created = scopedInjector.createInstance(CreatedWithParentService);
-
-        expect(created.parent).toBe(parentService);
-
-        scopedInjector.dispose();
-
-        expect(parentService.disposed).toBe(false);
-    });
-
-    it('does not dispose local override values owned by the embed scope', () => {
-        const parentService = new ParentService();
-        const commandLikeProxy = new Proxy(parentService, {
-            get(target, property, receiver) {
-                return Reflect.get(target, property, receiver);
-            },
-        });
-        const parentInjector = new Injector([
-            [ParentService, { useValue: parentService }],
-        ]);
-        const scopedInjector = createEmbedScopedInjector(parentInjector, new Map([
-            [ParentService, commandLikeProxy],
-        ]));
-
-        const created = scopedInjector.createInstance(CreatedWithParentService);
-
-        expect(created.parent).toBe(commandLikeProxy);
-
-        scopedInjector.dispose();
-
-        expect(parentService.disposed).toBe(false);
-    });
-});
-
-describe('createEmbedChildUnitScopedInjector', () => {
-    it('keeps child current and focus writes local to the scoped runtime', () => {
-        const childUnit = {
-            type: UniverInstanceType.UNIVER_SLIDE,
-            getUnitId: () => 'child-slide',
-        };
+describe('embed child unit scoped injector', () => {
+    it('scopes instance, command, undo redo, menu, and context menu services to the child unit', async () => {
+        const childUnit = createUnit('child-sheet');
+        const previousUnit = createUnit('previous-sheet');
+        const focusedUnit = createUnit('focused-host');
         const instanceService = {
-            getUnit: vi.fn((unitId: string) => unitId === 'child-slide' ? childUnit : null),
-            getCurrentUnitOfType: vi.fn(() => null),
-            getCurrentTypeOfUnit$: vi.fn(),
-            getFocusedUnit: vi.fn(() => null),
-            focused$: undefined,
-            focusUnit: vi.fn(),
+            getUnit: vi.fn(() => childUnit),
+            getCurrentUnitOfType: vi.fn(() => previousUnit),
+            getCurrentTypeOfUnit$: vi.fn(() => new BehaviorSubject(previousUnit)),
             setCurrentUnitForType: vi.fn(),
-        } as unknown as IUniverInstanceService;
+            getFocusedUnit: vi.fn(() => focusedUnit),
+            focused$: new Subject<string | null>(),
+            focusUnit: vi.fn(),
+        };
         const commandService = {
-            executeCommand: vi.fn(),
-            syncExecuteCommand: vi.fn(),
-        } as unknown as ICommandService;
-        const injector = new Injector([
-            [IUniverInstanceServiceIdentifier, { useValue: instanceService }],
-            [ICommandServiceIdentifier, { useValue: commandService }],
+            executeCommand: vi.fn(async () => true),
+            syncExecuteCommand: vi.fn(() => true),
+        };
+        const undoRedoService = {
+            pushUndoRedo: vi.fn(),
+            __tempBatchingUndoRedo: vi.fn((unitId: string) => `batch:${unitId}`),
+            clearUndoRedo: vi.fn(),
+            rollback: vi.fn((id: string, unitId: string) => `rollback:${id}:${unitId}`),
+            pitchTopUndoElement: vi.fn(() => 'undo'),
+            pitchTopRedoElement: vi.fn(() => 'redo'),
+            popUndoToRedo: vi.fn(() => 'undo-to-redo'),
+            popRedoToUndo: vi.fn(() => 'redo-to-undo'),
+        };
+        const undoBridgeService = {
+            resolveStackUnitId: vi.fn((unitId: string) => unitId === 'child-sheet' ? 'host-stack' : unitId),
+            pushUndoRedoForChild: vi.fn(),
+        };
+        const scopedMenuManager = { scoped: true };
+        const menuManagerService = {
+            createScoped: vi.fn(() => scopedMenuManager),
+        };
+        const contextMenuService = {
+            disabled: false,
+            visible: false,
+            enable: vi.fn(),
+            disable: vi.fn(),
+            triggerContextMenu: vi.fn(),
+            hideContextMenu: vi.fn(),
+            registerContextMenuHandler: vi.fn(),
+        };
+        const parentInjector = createParentInjector([
+            [IUniverInstanceService, instanceService],
+            [ICommandService, commandService],
+            [IUndoRedoService, undoRedoService],
+            [EmbedUndoBridgeService, undoBridgeService],
+            [IMenuManagerService, menuManagerService],
+            [IContextMenuService, contextMenuService],
         ]);
 
-        const scopedInjector = createEmbedChildUnitScopedInjector({
-            injector,
-            childUnitId: 'child-slide',
-            childType: UniverInstanceType.UNIVER_SLIDE,
-        } as never);
-        const scopedInstanceService = scopedInjector!.get(IUniverInstanceServiceIdentifier);
+        const scopedInjector = createEmbedChildUnitScopedInjector(createChildContext(parentInjector as unknown as Injector));
 
-        scopedInstanceService.focusUnit('child-slide');
-        scopedInstanceService.setCurrentUnitForType('child-slide');
+        expect(scopedInjector).toBeDefined();
+        expect(scopedInjector?.get(IMenuManagerService)).toBe(scopedMenuManager);
+        expect(scopedInjector?.get(IContextMenuService)).not.toBe(contextMenuService);
 
-        expect(instanceService.focusUnit).not.toHaveBeenCalled();
-        expect(instanceService.setCurrentUnitForType).not.toHaveBeenCalled();
+        const scopedInstanceService = scopedInjector?.get(IUniverInstanceService) as typeof instanceService;
+        expect(scopedInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_SHEET)).toBe(childUnit);
+        expect(scopedInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_DOC)).toBe(previousUnit);
+        const scopedUnits: unknown[] = [];
+        scopedInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SHEET).subscribe((unit) => scopedUnits.push(unit));
+        scopedInstanceService.setCurrentUnitForType('child-sheet');
+        scopedInstanceService.setCurrentUnitForType('other');
+        expect(scopedUnits).toEqual([childUnit, childUnit]);
+        expect(instanceService.setCurrentUnitForType).toHaveBeenCalledWith('other');
         expect(scopedInstanceService.getFocusedUnit()).toBe(childUnit);
-        expect(scopedInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_SLIDE)).toBe(childUnit);
+        scopedInstanceService.focusUnit(null);
+        expect(scopedInstanceService.getFocusedUnit()).toBeNull();
+        scopedInstanceService.focusUnit('other');
+        expect(instanceService.focusUnit).toHaveBeenCalledWith('other');
+
+        const scopedCommandService = scopedInjector?.get(ICommandService) as typeof commandService;
+        await expect(scopedCommandService.executeCommand('cmd.async', { value: 1 })).resolves.toBe(true);
+        expect(commandService.executeCommand).toHaveBeenCalledWith(
+            'cmd.async',
+            { value: 1 },
+            expect.objectContaining({ [COMMAND_EXECUTION_INJECTOR_KEY]: scopedInjector })
+        );
+        expect(instanceService.setCurrentUnitForType).toHaveBeenCalledWith('child-sheet');
+        expect(instanceService.setCurrentUnitForType).toHaveBeenCalledWith('previous-sheet');
+        expect(scopedCommandService.syncExecuteCommand('cmd.sync')).toBe(true);
+
+        const scopedUndoRedoService = scopedInjector?.get(IUndoRedoService) as typeof undoRedoService;
+        scopedUndoRedoService.pushUndoRedo({ unitID: 'child-sheet' } as never);
+        scopedUndoRedoService.pushUndoRedo({ unitID: 'other' } as never);
+        expect(undoBridgeService.pushUndoRedoForChild).toHaveBeenCalledWith({ unitID: 'child-sheet' });
+        expect(undoRedoService.pushUndoRedo).toHaveBeenCalledWith({ unitID: 'other' });
+        expect(scopedUndoRedoService.__tempBatchingUndoRedo('child-sheet')).toBe('batch:host-stack');
+        scopedUndoRedoService.clearUndoRedo('child-sheet');
+        expect(undoRedoService.clearUndoRedo).toHaveBeenCalledWith('host-stack');
+        expect(scopedUndoRedoService.rollback('r1')).toBe('rollback:r1:host-stack');
+        expect(scopedUndoRedoService.pitchTopUndoElement()).toBe('undo');
+        expect(scopedUndoRedoService.pitchTopRedoElement()).toBe('redo');
+        expect(scopedUndoRedoService.popUndoToRedo()).toBe('undo-to-redo');
+        expect(scopedUndoRedoService.popRedoToUndo()).toBe('redo-to-undo');
+        expect(instanceService.focusUnit).toHaveBeenCalledWith('host-stack');
+        expect(instanceService.focusUnit).toHaveBeenCalledWith('focused-host');
+
+        const scopedContextMenuService = scopedInjector?.get(IContextMenuService) as typeof contextMenuService;
+        scopedContextMenuService.disabled = true;
+        expect(contextMenuService.disabled).toBe(true);
+        scopedContextMenuService.enable();
+        scopedContextMenuService.disable();
+        scopedContextMenuService.hideContextMenu();
+        scopedContextMenuService.registerContextMenuHandler(vi.fn());
+        scopedContextMenuService.triggerContextMenu({} as never, 'menu', {});
+        expect(contextMenuService.triggerContextMenu).toHaveBeenCalledWith({}, 'menu', {
+            injector: scopedInjector,
+        });
+    });
+
+    it('returns undefined when the child unit cannot be resolved', () => {
+        const parentInjector = createParentInjector([
+            [IUniverInstanceService, { getUnit: vi.fn(() => null) }],
+            [ICommandService, {}],
+        ]);
+
+        expect(createEmbedChildUnitScopedInjector(createChildContext(parentInjector as unknown as Injector))).toBeUndefined();
+    });
+
+    it('supports standalone scoped injector overrides, child creation, and disposal pruning', () => {
+        const overrideToken = Symbol('override');
+        const parentToken = Symbol('parent');
+        const childToken = Symbol('child');
+        const sharedInstance = { shared: true };
+        const ownedInstance = { owned: true };
+        const childDispose = vi.fn();
+        const childAdd = vi.fn();
+        const childInjector = {
+            children: [],
+            resolvedDependencyCollection: {
+                resolvedDependencies: new Map<unknown, unknown[]>([
+                    [overrideToken, [sharedInstance, ownedInstance]],
+                ]),
+            },
+            has: vi.fn((token: unknown) => token === childToken),
+            get: vi.fn((token: unknown) => token === childToken ? 'child-value' : undefined),
+            add: childAdd,
+            createInstance: vi.fn((Ctor: new (value: string) => unknown, value: string) => new Ctor(`child:${value}`)),
+            dispose: childDispose,
+        };
+        const parentInjector = {
+            resolvedDependencyCollection: {
+                resolvedDependencies: new Map<unknown, unknown[]>([
+                    [overrideToken, [sharedInstance]],
+                ]),
+            },
+            has: vi.fn((token: unknown) => token === parentToken),
+            get: vi.fn((token: unknown) => token === parentToken ? 'parent-value' : undefined),
+            add: vi.fn(),
+            createChild: vi.fn(() => childInjector),
+            createInstance: vi.fn((Ctor: new (value: string) => unknown, value: string) => new Ctor(`parent:${value}`)),
+        };
+
+        class Sample {
+            constructor(readonly value: string) {}
+        }
+
+        const scopedInjector = createEmbedScopedInjector(
+            parentInjector as unknown as Injector,
+            new Map([[overrideToken, 'override-value']])
+        );
+
+        expect(scopedInjector.has(Injector)).toBe(true);
+        expect(scopedInjector.get(Injector)).toBe(scopedInjector);
+        expect(scopedInjector.get(overrideToken as never)).toBe('override-value');
+        expect(scopedInjector.get(parentToken as never)).toBe('parent-value');
+        expect(scopedInjector.get(childToken as never)).toBe('child-value');
+        scopedInjector.add([Symbol('local'), { useValue: 'local-value' }] as never);
+        scopedInjector.add(['non-value'] as never);
+        expect(childAdd).toHaveBeenCalledWith(['non-value']);
+        expect(scopedInjector.createInstance(Sample as never, 'x' as never)).toMatchObject({ value: 'child:x' });
+
+        const nested = scopedInjector.createChild([[Symbol('nested'), { useValue: 'nested-value' }]] as never);
+        expect(nested.get(overrideToken as never)).toBe('override-value');
+
+        scopedInjector.dispose();
+        expect(childDispose).toHaveBeenCalled();
+        expect(childInjector.resolvedDependencyCollection.resolvedDependencies.get(overrideToken)).toEqual([ownedInstance]);
     });
 });
+
+function createParentInjector(entries: Array<[unknown, unknown]>) {
+    const map = new Map(entries);
+    return {
+        has: vi.fn((token: unknown) => map.has(token)),
+        get: vi.fn((token: unknown) => {
+            if (!map.has(token)) {
+                throw new Error(`unexpected token: ${String(token)}`);
+            }
+
+            return map.get(token);
+        }),
+        add: vi.fn((dependency: [unknown, { useValue: unknown }]) => {
+            map.set(dependency[0], dependency[1].useValue);
+        }),
+    };
+}
+
+function createChildContext(injector: Injector): IEmbedChildContainerContext {
+    const descriptor = createDescriptor();
+    const root = document.createElement('div');
+    return {
+        descriptor,
+        layout: 'doc-width-scale',
+        injector,
+        hostElement: root,
+        container: root,
+        hostUnitId: descriptor.hostUnitId,
+        embedId: descriptor.embedId,
+        childUnitId: descriptor.childUnitId!,
+        childType: descriptor.childType!,
+        renderScope: {} as never,
+        runtimeScope: {} as never,
+    };
+}
+
+function createUnit(unitId: string) {
+    return {
+        getUnitId: () => unitId,
+    };
+}
+
+function createDescriptor(overrides: Partial<IEmbedDescriptor> = {}): IEmbedDescriptor {
+    return {
+        embedId: overrides.embedId ?? 'embed-1',
+        hostUnitId: overrides.hostUnitId ?? 'host-1',
+        hostType: overrides.hostType ?? UniverInstanceType.UNIVER_DOC,
+        hostAnchorId: overrides.hostAnchorId ?? 'anchor-1',
+        entry: overrides.entry ?? 'docs-custom-block',
+        source: overrides.source ?? {
+            kind: 'ref',
+            ref: {
+                file: { kind: 'self' },
+                unit: { selector: 'child-sheet', type: 'sheet' },
+            },
+        },
+        childUnitId: overrides.childUnitId ?? 'child-sheet',
+        childType: overrides.childType ?? UniverInstanceType.UNIVER_SHEET,
+        mode: overrides.mode ?? 'interactive',
+        sourceMeta: overrides.sourceMeta ?? {
+            floating: {
+                enabled: true,
+                layout: 'doc-width-scale',
+                fullscreen: true,
+            },
+            tab: false,
+        },
+        lifecycle: overrides.lifecycle ?? 'active',
+        createdAt: overrides.createdAt,
+        updatedAt: overrides.updatedAt,
+    };
+}

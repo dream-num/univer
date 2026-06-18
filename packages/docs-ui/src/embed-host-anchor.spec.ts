@@ -103,6 +103,7 @@ describe('resolveDocsCustomBlockRenderViewport', () => {
         })).toEqual({
             bleedLeft: 206,
             bleedWidth: 1420,
+            contentWidth: 960,
             height: 480,
             layoutWidth: 960,
             offsetLeft: 0,
@@ -164,6 +165,7 @@ describe('resolveDocsCustomBlockRenderViewport', () => {
             visibleCanvasWidth: 1440,
         })).toEqual(expect.objectContaining({
             bleedWidth: 1420,
+            contentWidth: 1600,
             layoutWidth: 1214,
             width: 1214,
         }));
@@ -180,6 +182,7 @@ describe('resolveDocsCustomBlockRenderViewport', () => {
             pageMarginRight: 120,
             pageWidth: 840,
         })).toEqual({
+            contentWidth: 1600,
             height: 480,
             layoutWidth: 600,
             offsetLeft: 0,

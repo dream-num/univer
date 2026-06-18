@@ -70,6 +70,7 @@ export interface DocsCustomBlockRenderViewportParams {
 export interface DocsCustomBlockRenderViewport {
     bleedLeft?: number;
     bleedWidth?: number;
+    contentWidth?: number;
     height: number;
     layoutWidth?: number;
     offsetLeft?: number;
@@ -216,6 +217,7 @@ export function resolveDocsCustomBlockRenderViewport(params: DocsCustomBlockRend
     if (params.documentFlavor !== DocumentFlavor.MODERN || !Number.isFinite(pageWidth)) {
         const layoutWidth = Math.min(fallbackWidth, pageContentWidth || fallbackWidth);
         return {
+            contentWidth: params.contentWidth,
             height,
             layoutWidth,
             offsetLeft: 0,
@@ -246,6 +248,7 @@ export function resolveDocsCustomBlockRenderViewport(params: DocsCustomBlockRend
     return {
         bleedLeft: leadingInsetLeft,
         bleedWidth: viewportWidth,
+        contentWidth,
         height,
         layoutWidth,
         offsetLeft: 0,

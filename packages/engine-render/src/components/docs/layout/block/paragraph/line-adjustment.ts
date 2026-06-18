@@ -19,7 +19,7 @@ import type { ISectionBreakConfig } from '../../../../../basics';
 import type { IDocumentSkeletonDivide, IDocumentSkeletonLine, IDocumentSkeletonPage } from '../../../../../basics/i-document-skeleton-cached';
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../../view-model/document-view-model';
-import { HorizontalAlign } from '@univerjs/core';
+import { HorizontalAlign, WrapStrategy } from '@univerjs/core';
 import { hasCJK, hasCJKText, isCjkLeftAlignedPunctuation, isCjkRightAlignedPunctuation } from '../../../../../basics/tools';
 import { BreakPointType } from '../../line-breaker/break';
 import { isLetter } from '../../line-breaker/enhancers/utils';
@@ -124,7 +124,38 @@ function adjustGlyphsInDivide(divide: IDocumentSkeletonDivide, justificationRati
  * Therefore, multiple calculations are performed, which may impact performance.
  * Needs optimization for efficiency.
  */
-function horizontalAlignHandler(line: IDocumentSkeletonLine, horizontalAlign: HorizontalAlign) {
+function shouldAllowOverflowHorizontalOffset(sectionBreakConfig: ISectionBreakConfig): boolean {
+    const wrapStrategy = sectionBreakConfig.renderConfig?.wrapStrategy;
+
+    return wrapStrategy === WrapStrategy.OVERFLOW;
+}
+
+function getGlyphGroupInkBounds(divide: IDocumentSkeletonDivide): { left: number; right: number } | null {
+    if (divide.glyphGroup.length === 0) {
+        return null;
+    }
+
+    let left = Infinity;
+    let right = -Infinity;
+
+    for (const glyph of divide.glyphGroup) {
+        const glyphLeft = glyph.left + glyph.xOffset;
+        left = Math.min(left, glyphLeft);
+        right = Math.max(right, glyphLeft + glyph.bBox.width);
+    }
+
+    if (!Number.isFinite(left) || !Number.isFinite(right)) {
+        return null;
+    }
+
+    return { left, right };
+}
+
+function horizontalAlignHandler(
+    line: IDocumentSkeletonLine,
+    horizontalAlign: HorizontalAlign,
+    allowOverflowHorizontalOffset = false
+) {
     const { divides } = line;
 
     for (let i = 0; i < divides.length; i++) {
@@ -184,14 +215,22 @@ function horizontalAlignHandler(line: IDocumentSkeletonLine, horizontalAlign: Ho
             }
         }
 
-        if (horizontalAlign === HorizontalAlign.CENTER) {
+        const inkBounds = allowOverflowHorizontalOffset ? getGlyphGroupInkBounds(divide) : null;
+
+        if (horizontalAlign === HorizontalAlign.CENTER && inkBounds) {
+            divide.paddingLeft = width / 2 - (inkBounds.left + inkBounds.right) / 2;
+        } else if (horizontalAlign === HorizontalAlign.RIGHT && inkBounds) {
+            divide.paddingLeft = width - inkBounds.right;
+        } else if (horizontalAlign === HorizontalAlign.CENTER) {
             divide.paddingLeft = (width - glyphGroupWidth) / 2;
         } else if (horizontalAlign === HorizontalAlign.RIGHT) {
             divide.paddingLeft = width - glyphGroupWidth;
         }
 
-        // To fix https://github.com/dream-num/univer-pro/issues/2930
-        divide.paddingLeft = Math.max(divide.paddingLeft, 0);
+        if (!allowOverflowHorizontalOffset) {
+            // To fix https://github.com/dream-num/univer-pro/issues/2930
+            divide.paddingLeft = Math.max(divide.paddingLeft, 0);
+        }
     }
 }
 
@@ -296,6 +335,6 @@ export function lineAdjustment(
         // Add dash to the end of divide when divide is break by Hyphen.
         addHyphenDash(line, viewModel, paragraphNode, sectionBreakConfig, paragraphStyle);
         // Handle horizontal align: left\center\right\justified.
-        horizontalAlignHandler(line, horizontalAlign);
+        horizontalAlignHandler(line, horizontalAlign, shouldAllowOverflowHorizontalOffset(sectionBreakConfig));
     });
 }

@@ -30,7 +30,7 @@ import type {
     IFloatObject,
     ILayoutContext,
 } from '../../tools';
-import { BooleanNumber, DataStreamTreeTokenType, GridType, NAMED_STYLE_SPACE_MAP, ObjectRelativeFromV, PositionedObjectLayoutType, SpacingRule, TableTextWrapType } from '@univerjs/core';
+import { BooleanNumber, DataStreamTreeTokenType, GridType, NAMED_STYLE_SPACE_MAP, ObjectRelativeFromV, PositionedObjectLayoutType, SpacingRule, TableTextWrapType, WrapStrategy } from '@univerjs/core';
 import { GlyphType, LineType } from '../../../../../basics/i-document-skeleton-cached';
 import { BreakPointType } from '../../line-breaker/break';
 import { addGlyphToDivide, createSkeletonBulletGlyph } from '../../model/glyph';
@@ -146,6 +146,12 @@ function isGlyphGroupBeyondContentBox(glyphGroup: IDocumentSkeletonGlyph[], left
     return isBeyondContentBox;
 }
 
+function shouldKeepOverflowingTextOnLine(sectionBreakConfig: ISectionBreakConfig): boolean {
+    const wrapStrategy = sectionBreakConfig.renderConfig?.wrapStrategy;
+
+    return wrapStrategy === WrapStrategy.CLIP || wrapStrategy === WrapStrategy.OVERFLOW;
+}
+
 // Gets the number of consecutive lines ending with a hyphen.
 function _getConsecutiveHyphenLineCount(divide: IDocumentSkeletonDivide) {
     const column = divide.parent?.parent;
@@ -213,6 +219,12 @@ function _divideOperator(
         const { hyphenationZone } = sectionBreakConfig;
 
         if (preOffsetLeft + width > divide.width) {
+            if (shouldKeepOverflowingTextOnLine(sectionBreakConfig)) {
+                addGlyphToDivide(divide, glyphGroup, preOffsetLeft);
+                updateDivideInfo(divide, { breakType: breakPointType });
+                return;
+            }
+
             // width exceeds divide width
             updateDivideInfo(divide, {
                 isFull: true,

@@ -22,6 +22,8 @@ import { describe, expect, it, vi } from 'vitest';
 import { DOCS_VIEW_KEY } from '../../basics/docs-view-key';
 import { DocRenderController } from '../render-controllers/doc.render-controller';
 
+const mockScrollBarProps = vi.hoisted(() => [] as unknown[]);
+
 vi.mock('@univerjs/engine-render', async (importOriginal) => {
     const actual = await importOriginal<typeof import('@univerjs/engine-render')>();
     const PageLayoutType = {
@@ -81,7 +83,9 @@ vi.mock('@univerjs/engine-render', async (importOriginal) => {
         },
         PageLayoutType,
         ScrollBar: class MockScrollBar {
-            constructor(..._args: unknown[]) { }
+            constructor(...args: unknown[]) {
+                mockScrollBarProps.push(args[1]);
+            }
         },
         Viewport: class MockViewport {
             constructor(..._args: unknown[]) { }
@@ -92,10 +96,16 @@ vi.mock('@univerjs/engine-render', async (importOriginal) => {
 
 function createControllerFixture(options?: {
     documentFlavor?: DocumentFlavor;
+    fitToWidth?: {
+        align?: 'center' | 'start';
+        mode?: 'none' | 'fit-width';
+        target?: 'viewport' | 'container';
+    };
     pendingEditorBackgroundColor?: string | null;
     pages?: Array<Record<string, unknown>>;
     unitId?: string;
 }) {
+    mockScrollBarProps.length = 0;
     const commandCallbacks: Array<(command: ICommandInfo) => void> = [];
     const darkMode$ = new Subject<boolean>();
     const canvasElement = { style: {} as Record<string, string> };
@@ -197,6 +207,13 @@ function createControllerFixture(options?: {
         },
         pageLayoutService,
         selectionManager,
+        {
+            getOptions: vi.fn(() => ({
+                mode: options?.fitToWidth?.mode ?? 'none',
+                target: options?.fitToWidth?.target ?? 'viewport',
+                align: options?.fitToWidth?.align ?? 'center',
+            })),
+        },
         { darkMode$ }
     );
 
@@ -213,6 +230,28 @@ function createControllerFixture(options?: {
 }
 
 describe('doc render controller', () => {
+    it('disables only the horizontal scrollbar for container-fitted embedded docs', () => {
+        createControllerFixture({
+            fitToWidth: {
+                mode: 'fit-width',
+                target: 'container',
+                align: 'start',
+            },
+        });
+
+        expect(mockScrollBarProps[0]).toMatchObject({
+            enableHorizontal: false,
+        });
+    });
+
+    it('keeps the horizontal scrollbar for normal docs', () => {
+        createControllerFixture();
+
+        expect(mockScrollBarProps[0]).toMatchObject({
+            enableHorizontal: true,
+        });
+    });
+
     it('refreshes page layout and selection after rich text mutations resize the document', () => {
         const { commandCallbacks, pageLayoutService, selectionManager } = createControllerFixture();
 

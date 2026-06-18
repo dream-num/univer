@@ -35,7 +35,7 @@ import { ContextMenuHostService, IContextMenuHostService } from './services/cont
 import { ContextMenuService, IContextMenuService } from './services/contextmenu/contextmenu.service';
 import { DesktopDialogService } from './services/dialog/desktop-dialog.service';
 import { IDialogService } from './services/dialog/dialog.service';
-import { CanvasFloatDomService } from './services/dom/canvas-dom-layer.service';
+import { CanvasFloatDomPreviewService, CanvasFloatDomService } from './services/dom/canvas-dom-layer.service';
 import { FontService, IFontService } from './services/font.service';
 import { DesktopGalleryService } from './services/gallery/desktop-gallery.service';
 import { IGalleryService } from './services/gallery/gallery.service';
@@ -124,6 +124,7 @@ export class UniverMobileUIPlugin extends Plugin {
             [ICanvasPopupService, { useClass: CanvasPopupService }],
             [IFontService, { useClass: FontService }],
             [CanvasFloatDomService],
+            [CanvasFloatDomPreviewService],
 
             [
                 IUIController,

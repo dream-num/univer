@@ -15,9 +15,8 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import type { EmbedHostMenuOverride } from '@univerjs/embed-ui';
 import type { IRenderContext, IRenderModule, Spreadsheet, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
-import { EmbedHostMenuOverrideService } from '@univerjs/embed-ui';
+import type { SheetHostChromeOverride } from '../../services/sheet-host-chrome-override.service';
 import {
     Disposable,
     Inject,
@@ -28,6 +27,7 @@ import { attachSelectionWithCoord, SheetsSelectionsService } from '@univerjs/she
 import { ContextMenuPosition, IContextMenuService } from '@univerjs/ui';
 import { SHEET_VIEW_KEY } from '../../common/keys';
 import { ISheetSelectionRenderService } from '../../services/selection/base-selection-render.service';
+import { ISheetHostChromeOverrideService } from '../../services/sheet-host-chrome-override.service';
 
 /**
  * This controller subscribe to context menu events in sheet rendering views and invoke context menu at a correct
@@ -125,20 +125,20 @@ export class SheetContextMenuRenderController extends Disposable implements IRen
     private _shouldSuppressHostContextMenu(): boolean {
         return shouldSuppressSheetContextMenuForEmbedOverride(
             this._context.unitId,
-            this._getEmbedHostMenuOverrideService()?.getOverride()
+            this._getSheetHostChromeOverrideService()?.getOverride?.()
         );
     }
 
-    private _getEmbedHostMenuOverrideService(): EmbedHostMenuOverrideService | undefined {
-        return this._injector.has(EmbedHostMenuOverrideService)
-            ? this._injector.get(EmbedHostMenuOverrideService)
+    private _getSheetHostChromeOverrideService(): ISheetHostChromeOverrideService | undefined {
+        return this._injector.has(ISheetHostChromeOverrideService)
+            ? this._injector.get(ISheetHostChromeOverrideService)
             : undefined;
     }
 }
 
 export function shouldSuppressSheetContextMenuForEmbedOverride(
     hostUnitId: string,
-    override: Pick<EmbedHostMenuOverride, 'entry' | 'hostUnitId'> | null | undefined
+    override: Pick<SheetHostChromeOverride, 'entry' | 'hostUnitId'> | null | undefined
 ): boolean {
     return override?.hostUnitId === hostUnitId && override.entry === 'sheets-sheet-tab';
 }

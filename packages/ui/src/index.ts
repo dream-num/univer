@@ -65,8 +65,8 @@ export { ContextMenuService, IContextMenuService } from './services/contextmenu/
 export type { IContextMenuHandler } from './services/contextmenu/contextmenu.service';
 export { DesktopDialogService } from './services/dialog/desktop-dialog.service';
 export { IDialogService } from './services/dialog/dialog.service';
-export { CanvasFloatDomService } from './services/dom/canvas-dom-layer.service';
-export type { IFloatDom, IFloatDomLayout } from './services/dom/canvas-dom-layer.service';
+export { CanvasFloatDomPreviewService, CanvasFloatDomService } from './services/dom/canvas-dom-layer.service';
+export type { ICanvasFloatDomPreview, ICanvasFloatDomPreviewRequest, IFloatDom, IFloatDomLayout } from './services/dom/canvas-dom-layer.service';
 export { FontService, IFontService } from './services/font.service';
 export type { IFontConfig } from './services/font.service';
 export { DesktopGalleryService } from './services/gallery/desktop-gallery.service';
@@ -113,8 +113,9 @@ export { BuiltInUIPart, IUIPartsService, UIPartsService } from './services/parts
 export { IPlatformService, PlatformService } from './services/platform/platform.service';
 export { CanvasPopupService, ICanvasPopupService } from './services/popup/canvas-popup.service';
 export type { IPopup } from './services/popup/canvas-popup.service';
+export { IRibbonOverrideService, RibbonOverrideService } from './services/ribbon/ribbon-override.service';
+export type { IRibbonOverride } from './services/ribbon/ribbon-override.service';
 export { DesktopRibbonService, IRibbonService } from './services/ribbon/ribbon.service';
-export { IRibbonOverrideService, RibbonOverrideService, type IRibbonOverride } from './services/ribbon/ribbon-override.service';
 export { KeyCode, MetaKeys } from './services/shortcut/keycode';
 export { ShortcutPanelService } from './services/shortcut/shortcut-panel.service';
 export { IShortcutService, ShortcutService } from './services/shortcut/shortcut.service';

@@ -1,6 +1,22 @@
+/**
+ * Copyright 2023-present DreamNum Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import type { DependencyIdentifier, IDisposable, UniverInstanceType } from '@univerjs/core';
-import type { EmbedChildContainerContext, EmbedChildViewContribution } from '../types/embed-ui';
 import type { EmbedLayout } from '@univerjs/embed';
+import type { EmbedChildContainerContext, EmbedChildViewContribution } from '../types/embed-ui';
 import { Injector, toDisposable } from '@univerjs/core';
 import { createEmbedChildUnitScopedInjector } from './embed-child-unit-scoped-injector';
 
@@ -46,6 +62,10 @@ export interface CreateEmbedRenderChildViewContributionOptions {
     renderManagerService: DependencyIdentifier<EmbedRenderManagerServiceLike>;
 }
 
+export interface MountEmbedRenderChildUnitOptions {
+    activate?: boolean;
+}
+
 export function createEmbedRenderChildViewContribution(
     options: CreateEmbedRenderChildViewContributionOptions
 ): EmbedChildViewContribution {
@@ -59,7 +79,8 @@ export function createEmbedRenderChildViewContribution(
 export function mountEmbedRenderChildUnit(
     context: EmbedChildContainerContext,
     renderManagerServiceIdentifier: DependencyIdentifier<EmbedRenderManagerServiceLike>,
-    target: HTMLElement = context.renderScope.rootElement
+    target: HTMLElement = resolveEmbedRenderChildTarget(context),
+    options: MountEmbedRenderChildUnitOptions = {}
 ): IDisposable | undefined {
     const renderManagerService = context.injector.get(renderManagerServiceIdentifier);
     const scopedInjector = context.runtimeScope?.injector ?? createEmbedChildUnitScopedInjector(context);
@@ -81,7 +102,7 @@ export function mountEmbedRenderChildUnit(
     }
     render.engine.mount(target);
     ensureEmbedRenderCanvasAttached(render, target);
-    refreshEmbedChildRender(render, { activate: true });
+    refreshEmbedChildRender(render, { activate: options.activate ?? true });
 
     return toDisposable(() => {
         try {
@@ -96,6 +117,13 @@ export function mountEmbedRenderChildUnit(
             scopedInjector?.dispose();
         }
     });
+}
+
+function resolveEmbedRenderChildTarget(context: EmbedChildContainerContext): HTMLElement {
+    return context.runtimeScope.roots.canvas
+        ?? context.renderScope.canvasRoot
+        ?? context.renderScope.contentRoot
+        ?? context.renderScope.rootElement;
 }
 
 function ensureEmbedRenderCanvasAttached(render: EmbedRenderLike, target: HTMLElement): void {

@@ -1315,8 +1315,8 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
     private _getOutlinePosition(width: number, height: number, borderSpacing: number, borderStrokeWidth: number) {
         return {
-            left: borderSpacing - borderStrokeWidth,
-            top: -borderSpacing - this.borderStrokeWidth,
+            left: -borderSpacing - borderStrokeWidth,
+            top: -borderSpacing - borderStrokeWidth,
             width: width + borderSpacing * 2,
             height: height + borderSpacing * 2,
         };
@@ -1403,7 +1403,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
                 break;
             case TransformerManagerType.RESIZE_LM:
-                left += borderSpacing - borderStrokeWidth;
+                left += -borderSpacing - borderStrokeWidth;
                 top += height / 2 - longEdge / 2;
 
                 break;
@@ -1413,7 +1413,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
                 break;
             case TransformerManagerType.RESIZE_LB:
-                left += -this.borderSpacing - borderStrokeWidth;
+                left += -borderSpacing - borderStrokeWidth;
                 top += height + borderSpacing - borderStrokeWidth - longEdge;
 
                 break;
@@ -1472,7 +1472,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
                 break;
             case TransformerManagerType.RESIZE_LM:
-                left += borderSpacing - borderStrokeWidth;
+                left += -borderSpacing - borderStrokeWidth;
                 top += height / 2;
 
                 break;
@@ -1482,7 +1482,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
                 break;
             case TransformerManagerType.RESIZE_LB:
-                left += -this.borderSpacing - borderStrokeWidth;
+                left += -borderSpacing - borderStrokeWidth;
                 top += height + borderSpacing - borderStrokeWidth;
 
                 break;

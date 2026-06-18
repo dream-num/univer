@@ -19,6 +19,8 @@ export * from './basics';
 export { getOffsetRectForDom } from './basics/position';
 export * from './canvas';
 export * from './components';
+export type { DocsCustomBlockRenderViewportProvider, IDocsCustomBlockRenderViewport, IDocsCustomBlockRenderViewportInput } from './components/docs/custom-block-render-viewport';
+export { getDocsCustomBlockRenderViewport, setDocsCustomBlockRenderViewportProvider } from './components/docs/custom-block-render-viewport';
 export { DocBackground } from './components/docs/doc-background';
 export { Documents } from './components/docs/document';
 export type { IPageRenderConfig } from './components/docs/document';

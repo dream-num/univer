@@ -20,7 +20,7 @@ import { DocumentDataModel, IUniverInstanceService } from '@univerjs/core';
 import { memo, useEffect, useMemo, useRef } from 'react';
 import { distinctUntilChanged, first } from 'rxjs';
 import { ComponentManager } from '../../../common';
-import { CanvasFloatDomService } from '../../../services/dom/canvas-dom-layer.service';
+import { CanvasFloatDomService, shouldForwardFloatDomEvents, shouldRenderFloatDomLayer } from '../../../services/dom/canvas-dom-layer.service';
 import { useDependency, useObservable } from '../../../utils/di';
 
 export const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => {
@@ -133,16 +133,24 @@ export const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => 
                 transformOrigin: 'center center',
             }}
             onPointerMove={(e) => {
-                layer.onPointerMove(e.nativeEvent);
+                if (shouldForwardFloatDomEvents(layer)) {
+                    layer.onPointerMove(e.nativeEvent);
+                }
             }}
             onPointerDown={(e) => {
-                layer.onPointerDown(e.nativeEvent);
+                if (shouldForwardFloatDomEvents(layer)) {
+                    layer.onPointerDown(e.nativeEvent);
+                }
             }}
             onPointerUp={(e) => {
-                layer.onPointerUp(e.nativeEvent);
+                if (shouldForwardFloatDomEvents(layer)) {
+                    layer.onPointerUp(e.nativeEvent);
+                }
             }}
             onWheel={(e) => {
-                layer.onWheel(e.nativeEvent);
+                if (shouldForwardFloatDomEvents(layer)) {
+                    layer.onWheel(e.nativeEvent);
+                }
             }}
         >
             <div
@@ -162,9 +170,9 @@ export const FloatDom = ({ unitId }: { unitId?: string }) => {
     const domLayerService = useDependency(CanvasFloatDomService);
     const layers = useObservable(domLayerService.domLayers$);
     const focusUnit = useObservable(instanceService.focused$);
-    const currentUnitId = unitId || focusUnit;
+    const currentUnitId = typeof unitId === 'string' ? unitId : typeof focusUnit === 'string' ? focusUnit : null;
 
-    return layers?.filter((layer) => layer[1].unitId === currentUnitId)?.map((layer) => (
+    return layers?.filter((layer) => shouldRenderFloatDomLayer(layer[1], currentUnitId))?.map((layer) => (
         <FloatDomSingle
             id={layer[1].domId ?? layer[0]}
             layer={layer[1]}

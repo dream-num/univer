@@ -82,7 +82,7 @@ describe('SheetSelectionRenderService', () => {
         return { ...testBed, service };
     }
 
-    it('renders selections from model changes and respects SELECTIONS_ENABLED', () => {
+    it('renders selections from model changes and respects SELECTIONS_ENABLED', async () => {
         const testBed = createRenderTestBed({
             dependencies: [
                 [IShortcutService, { useClass: TestShortcutService }],
@@ -102,6 +102,7 @@ describe('SheetSelectionRenderService', () => {
             sheetId: 'sheet1',
             skeleton: skeleton as any,
         });
+        await Promise.resolve();
 
         // The skeleton change listener ensures there is at least one selection.
         expect(renderService.getSelectionControls().length).toBeGreaterThan(0);

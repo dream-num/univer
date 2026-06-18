@@ -22,17 +22,8 @@ import { EmbedFloatDomRenderer } from '@univerjs/embed-ui';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-ratio.operation';
+import { createDefaultDocsTableLikeCustomBlockBleedViewport, resolveDocsTableLikeCustomBlockBleedViewport } from './embed-docs-custom-block-bleed';
 import { scrollDocsTableLikeCustomBlockLive } from './embed-docs-custom-block-scroll';
-
-const DOCS_CUSTOM_BLOCK_VIEWPORT_INSET = 10;
-
-interface DocsCustomBlockBleedViewport {
-    bleedLeft: number;
-    bleedRight: number;
-    bleedWidth: number;
-    contentWidth: number;
-    virtualWidth: number;
-}
 
 export function EmbedDocsCustomBlockRenderer(props: { data?: EmbedFloatDomData }) {
     ensureEmbedDocsCustomBlockStyles();
@@ -43,7 +34,7 @@ export function EmbedDocsCustomBlockRenderer(props: { data?: EmbedFloatDomData }
     const hostUnitId = data?.hostUnitId;
     const rootRef = useRef<HTMLDivElement>(null);
     const liveRef = useRef<HTMLElement | null>(null);
-    const [viewport, setViewport] = useState(() => createDefaultBleedViewport());
+    const [viewport, setViewport] = useState(() => createDefaultDocsTableLikeCustomBlockBleedViewport());
     const sheetLike = isSheetLikeDocsCustomBlock(data);
 
     useEffect(() => {
@@ -97,18 +88,8 @@ export function EmbedDocsCustomBlockRenderer(props: { data?: EmbedFloatDomData }
         const sync = () => {
             frame = undefined;
             const rect = root.getBoundingClientRect();
-            const viewportLeft = DOCS_CUSTOM_BLOCK_VIEWPORT_INSET;
-            const viewportWidth = Math.max(1, window.innerWidth - DOCS_CUSTOM_BLOCK_VIEWPORT_INSET * 2);
-            const bleedLeft = Math.max(0, rect.left - viewportLeft);
-            const bleedRight = Math.max(0, viewportLeft + viewportWidth - rect.right);
             const contentWidth = measureRuntimeContentWidth(root, rect.width);
-            const next = {
-                bleedLeft,
-                bleedRight,
-                bleedWidth: viewportWidth,
-                contentWidth,
-                virtualWidth: Math.max(viewportWidth, bleedLeft + contentWidth + bleedRight),
-            };
+            const next = resolveDocsTableLikeCustomBlockBleedViewport(root, contentWidth);
 
             setViewport((previous) => (
                 Math.abs(previous.bleedLeft - next.bleedLeft) < 0.5 &&
@@ -207,21 +188,6 @@ export function EmbedDocsCustomBlockRenderer(props: { data?: EmbedFloatDomData }
             <EmbedFloatDomRenderer {...props} />
         </div>
     );
-}
-
-function createDefaultBleedViewport(): DocsCustomBlockBleedViewport {
-    if (typeof window === 'undefined') {
-        return { bleedLeft: 0, bleedRight: 0, bleedWidth: 1, contentWidth: 1, virtualWidth: 1 };
-    }
-
-    const bleedWidth = Math.max(1, window.innerWidth - DOCS_CUSTOM_BLOCK_VIEWPORT_INSET * 2);
-    return {
-        bleedLeft: 0,
-        bleedRight: 0,
-        bleedWidth,
-        contentWidth: 1,
-        virtualWidth: bleedWidth,
-    };
 }
 
 function normalizeFloatDomData(data: unknown): EmbedFloatDomData | undefined {

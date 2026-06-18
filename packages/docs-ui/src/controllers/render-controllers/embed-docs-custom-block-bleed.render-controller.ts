@@ -59,6 +59,7 @@ export class EmbedDocsCustomBlockBleedRenderController extends Disposable implem
             return resolveDocsCustomBlockRenderViewport({
                 childType,
                 contentHeight: contentSize?.height ?? input.fallbackHeight,
+                contentWidth: contentSize?.width,
                 docsLeft: this._getDocsLeft(),
                 documentFlavor: this._context.unit.getSnapshot().documentStyle?.documentFlavor,
                 fallbackHeight: input.fallbackHeight,

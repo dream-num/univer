@@ -19,7 +19,7 @@ import { describe, expect, it } from 'vitest';
 import { createSheetsContentSizeProvider } from './embed-content-size';
 
 describe('createSheetsContentSizeProvider', () => {
-    it('measures active worksheet height from visible row heights', () => {
+    it('measures active worksheet size from visible row and column spans', () => {
         const provider = createSheetsContentSizeProvider();
 
         expect(provider.measureContentSize({
@@ -28,11 +28,14 @@ describe('createSheetsContentSizeProvider', () => {
             childUnit: {
                 getActiveSheet: () => ({
                     getConfig: () => ({ columnHeader: { height: 30 } }),
+                    getColVisible: (column: number) => column !== 2,
+                    getColumnCount: () => 4,
+                    getColumnWidth: (column: number) => [80, 120, 240, 160][column] ?? 88,
                     getRowCount: () => 4,
                     getRowHeight: (row: number) => [24, 40, 100, 32][row] ?? 24,
                     getRowVisible: (row: number) => row !== 2,
                 }),
             },
-        })).toEqual({ height: 126 });
+        })).toEqual({ height: 126, width: 406 });
     });
 });

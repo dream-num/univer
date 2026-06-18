@@ -16,28 +16,38 @@
 
 import type { Nullable } from '@univerjs/core';
 import type { EmbedContentSizeProvider } from '@univerjs/embed-ui';
-import { UniverInstanceType } from '@univerjs/core';
+import { DEFAULT_WORKSHEET_ROW_TITLE_WIDTH, UniverInstanceType } from '@univerjs/core';
 
 const DEFAULT_COLUMN_HEADER_HEIGHT = 24;
+const DEFAULT_COLUMN_WIDTH = 88;
 
 export function createSheetsContentSizeProvider(): EmbedContentSizeProvider {
     return {
         childType: UniverInstanceType.UNIVER_SHEET,
         measureContentSize: (context) => {
             const height = resolveSheetsContentHeight(context.childUnit);
-            return height == null ? undefined : { height };
+            const width = resolveSheetsContentWidth(context.childUnit);
+            return height == null && width == null ? undefined : { height, width };
         },
     };
 }
 
+interface SheetLikeWorksheet {
+    getColVisible?: (column: number) => boolean;
+    getColumnCount?: () => number;
+    getColumnWidth?: (column: number) => number;
+    getConfig?: () => {
+        columnHeader?: { height?: number; hidden?: number };
+        rowHeader?: { hidden?: number; width?: number };
+    };
+    getRowCount?: () => number;
+    getRowHeight?: (row: number) => number;
+    getRowVisible?: (row: number) => boolean;
+}
+
 function resolveSheetsContentHeight(childUnit: unknown): number | undefined {
     const workbook = childUnit as Nullable<{
-        getActiveSheet?: (allowNull?: true) => Nullable<{
-            getConfig?: () => { columnHeader?: { height?: number; hidden?: number } };
-            getRowCount?: () => number;
-            getRowHeight?: (row: number) => number;
-            getRowVisible?: (row: number) => boolean;
-        }>;
+        getActiveSheet?: (allowNull?: true) => Nullable<SheetLikeWorksheet>;
     }>;
     const worksheet = workbook?.getActiveSheet?.(true);
     if (!worksheet) {
@@ -63,6 +73,36 @@ function resolveSheetsContentHeight(childUnit: unknown): number | undefined {
     }
 
     return headerHeight + rowHeight;
+}
+
+function resolveSheetsContentWidth(childUnit: unknown): number | undefined {
+    const workbook = childUnit as Nullable<{
+        getActiveSheet?: (allowNull?: true) => Nullable<SheetLikeWorksheet>;
+    }>;
+    const worksheet = workbook?.getActiveSheet?.(true);
+    if (!worksheet) {
+        return undefined;
+    }
+
+    const columnCount = worksheet.getColumnCount?.();
+    if (!Number.isFinite(columnCount) || columnCount == null || columnCount < 0) {
+        return undefined;
+    }
+
+    const rowHeader = worksheet.getConfig?.()?.rowHeader;
+    const rowHeaderWidth = rowHeader?.hidden
+        ? 0
+        : normalizePositiveNumber(rowHeader?.width, DEFAULT_WORKSHEET_ROW_TITLE_WIDTH);
+    let columnWidth = 0;
+
+    for (let column = 0; column < columnCount; column++) {
+        if (worksheet.getColVisible?.(column) === false) {
+            continue;
+        }
+        columnWidth += normalizePositiveNumber(worksheet.getColumnWidth?.(column), DEFAULT_COLUMN_WIDTH);
+    }
+
+    return rowHeaderWidth + columnWidth;
 }
 
 function normalizePositiveNumber(value: unknown, fallback: number): number {

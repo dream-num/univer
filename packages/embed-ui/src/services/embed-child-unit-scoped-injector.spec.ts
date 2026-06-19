@@ -27,6 +27,30 @@ import { describe, expect, it, vi } from 'vitest';
 import { createEmbedChildUnitScopedInjector, createEmbedScopedInjector } from './embed-child-unit-scoped-injector';
 import { EmbedUndoBridgeService } from './embed-undo-bridge.service';
 
+interface IScopedInstanceService {
+    getCurrentUnitOfType: (type: UniverInstanceType) => unknown;
+    getCurrentTypeOfUnit$: (type: UniverInstanceType) => BehaviorSubject<unknown>;
+    setCurrentUnitForType: (unitId: string) => void;
+    getFocusedUnit: () => unknown;
+    focusUnit: (unitId: string | null) => void;
+}
+
+interface IScopedCommandService {
+    executeCommand: (id: string, params?: object) => Promise<boolean>;
+    syncExecuteCommand: (id: string, params?: object) => boolean;
+}
+
+interface IScopedUndoRedoService {
+    pushUndoRedo: (item: { unitID: string }) => void;
+    __tempBatchingUndoRedo: (unitId: string) => string;
+    clearUndoRedo: (unitId: string) => void;
+    rollback: (id: string, unitId?: string) => string;
+    pitchTopUndoElement: () => string;
+    pitchTopRedoElement: () => string;
+    popUndoToRedo: () => string;
+    popRedoToUndo: () => string;
+}
+
 describe('embed child unit scoped injector', () => {
     it('scopes instance, command, undo redo, menu, and context menu services to the child unit', async () => {
         const childUnit = createUnit('child-sheet');
@@ -87,11 +111,11 @@ describe('embed child unit scoped injector', () => {
         expect(scopedInjector?.get(IMenuManagerService)).toBe(scopedMenuManager);
         expect(scopedInjector?.get(IContextMenuService)).not.toBe(contextMenuService);
 
-        const scopedInstanceService = scopedInjector?.get(IUniverInstanceService) as typeof instanceService;
+        const scopedInstanceService = scopedInjector?.get(IUniverInstanceService) as unknown as IScopedInstanceService;
         expect(scopedInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_SHEET)).toBe(childUnit);
         expect(scopedInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_DOC)).toBe(previousUnit);
         const scopedUnits: unknown[] = [];
-        scopedInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SHEET).subscribe((unit) => scopedUnits.push(unit));
+        scopedInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SHEET).subscribe((unit: unknown) => scopedUnits.push(unit));
         scopedInstanceService.setCurrentUnitForType('child-sheet');
         scopedInstanceService.setCurrentUnitForType('other');
         expect(scopedUnits).toEqual([childUnit, childUnit]);
@@ -102,7 +126,7 @@ describe('embed child unit scoped injector', () => {
         scopedInstanceService.focusUnit('other');
         expect(instanceService.focusUnit).toHaveBeenCalledWith('other');
 
-        const scopedCommandService = scopedInjector?.get(ICommandService) as typeof commandService;
+        const scopedCommandService = scopedInjector?.get(ICommandService) as unknown as IScopedCommandService;
         await expect(scopedCommandService.executeCommand('cmd.async', { value: 1 })).resolves.toBe(true);
         expect(commandService.executeCommand).toHaveBeenCalledWith(
             'cmd.async',
@@ -113,7 +137,7 @@ describe('embed child unit scoped injector', () => {
         expect(instanceService.setCurrentUnitForType).toHaveBeenCalledWith('previous-sheet');
         expect(scopedCommandService.syncExecuteCommand('cmd.sync')).toBe(true);
 
-        const scopedUndoRedoService = scopedInjector?.get(IUndoRedoService) as typeof undoRedoService;
+        const scopedUndoRedoService = scopedInjector?.get(IUndoRedoService) as unknown as IScopedUndoRedoService;
         scopedUndoRedoService.pushUndoRedo({ unitID: 'child-sheet' } as never);
         scopedUndoRedoService.pushUndoRedo({ unitID: 'other' } as never);
         expect(undoBridgeService.pushUndoRedoForChild).toHaveBeenCalledWith({ unitID: 'child-sheet' });

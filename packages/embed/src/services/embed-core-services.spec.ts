@@ -19,6 +19,7 @@ import { UniverInstanceType } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { createDefaultEmbedCapabilities, createDefaultEmbedSourceMeta, EmbedCapabilityRegistryService, flushPendingEmbedCapabilities, registerEmbedCapabilities } from './embed-capability-registry.service';
 import { EmbedCreationService } from './embed-creation.service';
+import { EmbedNestedGuardService } from './embed-nested-guard.service';
 import { EMBED_CHILD_CREATE_OPTIONS, EmbedSourceResolverService } from './embed-source-resolver.service';
 
 describe('EmbedCapabilityRegistryService', () => {
@@ -232,6 +233,46 @@ describe('EmbedSourceResolverService', () => {
                 unit: { selector: 'remote-sheet', type: 'sheet' },
             },
         })).rejects.toThrow('UNIT_TYPE_MISMATCH');
+    });
+});
+
+describe('EmbedNestedGuardService', () => {
+    it('rejects nested embeds and unsupported empty child capabilities', () => {
+        const capabilityRegistry = {
+            getCapability: vi.fn()
+                .mockReturnValueOnce(undefined)
+                .mockReturnValueOnce(createCapability()),
+        };
+        const guard = new EmbedNestedGuardService(capabilityRegistry as never);
+
+        expect(() => guard.assertCanCreate({
+            ...createCreateContext(),
+            parentEmbedId: 'parent-embed',
+        })).toThrow('NESTED_EMBED_NOT_SUPPORTED');
+        expect(() => guard.assertCanCreate({
+            ...createCreateContext(),
+            source: {
+                kind: 'empty',
+                unitType: UniverInstanceType.UNIVER_SLIDE,
+            },
+        })).toThrow('EMBED_CAPABILITY_NOT_SUPPORTED');
+        expect(() => guard.assertCanCreate({
+            ...createCreateContext(),
+            source: {
+                kind: 'empty',
+                unitType: UniverInstanceType.UNIVER_SLIDE,
+            },
+        })).not.toThrow();
+        expect(() => guard.assertCanCreate({
+            ...createCreateContext(),
+            source: {
+                kind: 'ref',
+                ref: {
+                    file: { kind: 'self' },
+                    unit: { selector: 'child-1', type: 'doc' },
+                },
+            },
+        })).not.toThrow();
     });
 });
 

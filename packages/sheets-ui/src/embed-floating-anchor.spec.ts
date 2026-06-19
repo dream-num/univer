@@ -16,7 +16,7 @@
 
 import { DrawingTypeEnum } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
-import { createEmbedSheetsFloatingDrawing, resolveEmbedSheetsFloatingObjectSize } from './embed-floating-anchor';
+import { createEmbedSheetsFloatingDrawing, createEmbedSheetsFloatingDrawingFromDescriptor, createEmbedSheetsFloatingObjectData, getEmbedSheetsFloatingObjectData, isEmbedSheetsFloatingDrawing, resolveEmbedSheetsFloatingObjectSize } from './embed-floating-anchor';
 
 describe('embed floating anchor', () => {
     it('normalizes aspect-ratio floating object size from width', () => {
@@ -80,5 +80,89 @@ describe('embed floating anchor', () => {
         expect(drawing.data).not.toHaveProperty('stage');
         expect(drawing.data).not.toHaveProperty('isDomMounted');
         expect(drawing.data).not.toHaveProperty('domPortalId');
+    });
+
+    it('creates floating drawings from descriptors and host context overrides', () => {
+        const sheetTransform = {
+            from: { column: 1, columnOffset: 2, row: 3, rowOffset: 4 },
+            to: { column: 5, columnOffset: 6, row: 7, rowOffset: 8 },
+        };
+        const drawing = createEmbedSheetsFloatingDrawingFromDescriptor({
+            embedId: 'embed-1',
+            hostAnchorId: 'anchor-1',
+            hostUnitId: 'host-1',
+        } as never, 'sheet-1', {
+            allowTransform: false,
+            aspectRatio: 4 / 3,
+            componentKey: 'CustomComponent',
+            height: 240,
+            left: 12,
+            resizeBehavior: 'aspect-ratio',
+            runtimeMountMode: 'always',
+            sheetTransform,
+            top: 24,
+        });
+
+        expect(drawing).toMatchObject({
+            allowTransform: false,
+            axisAlignSheetTransform: sheetTransform,
+            componentKey: 'CustomComponent',
+            data: {
+                aspectRatio: 4 / 3,
+                embedId: 'embed-1',
+                hostAnchorId: 'anchor-1',
+                resizeBehavior: 'aspect-ratio',
+                runtimeMountMode: 'always',
+            },
+            drawingId: 'anchor-1',
+            sheetTransform,
+            transform: {
+                height: 240,
+                left: 12,
+                top: 24,
+                width: 320,
+            },
+        });
+    });
+
+    it('guards floating object data and drawing identity', () => {
+        const data = createEmbedSheetsFloatingObjectData({
+            embedId: 'embed-1',
+            hostAnchorId: 'anchor-1',
+            hostUnitId: 'host-1',
+            resizeBehavior: 'free',
+        });
+
+        expect(getEmbedSheetsFloatingObjectData({ data: data as never })).toEqual(data);
+        expect(getEmbedSheetsFloatingObjectData({ data: { version: 2 } })).toBeUndefined();
+        expect(isEmbedSheetsFloatingDrawing({
+            componentKey: 'UniverEmbedSheetsFloatingObject',
+            data: data as never,
+        })).toBe(true);
+        expect(isEmbedSheetsFloatingDrawing({
+            componentKey: 'OtherComponent',
+            data: data as never,
+        })).toBe(false);
+    });
+
+    it('uses default size when requested size is invalid or resize behavior is not aspect-ratio', () => {
+        expect(resolveEmbedSheetsFloatingObjectSize({
+            aspectRatio: 16 / 9,
+            height: -1,
+            resizeBehavior: 'aspect-ratio',
+            width: 0,
+        })).toEqual({
+            height: 315,
+            width: 560,
+        });
+        expect(resolveEmbedSheetsFloatingObjectSize({
+            aspectRatio: 16 / 9,
+            height: 200,
+            resizeBehavior: 'free',
+            width: 300,
+        })).toEqual({
+            height: 200,
+            width: 300,
+        });
     });
 });

@@ -48,7 +48,6 @@ export function EmbedDocsCustomBlockRenderer(props: { data?: IEmbedFloatDomData 
     const data = normalizeFloatDomData(props.data);
     const hostUnitId = data?.hostUnitId;
     const rootRef = useRef<HTMLDivElement>(null);
-    const liveRef = useRef<HTMLElement | null>(null);
     const [viewport, setViewport] = useState(() => createDefaultDocsTableLikeCustomBlockBleedViewport());
     const viewportRef = useRef(viewport);
     const sheetLike = isSheetLikeDocsCustomBlock(data);
@@ -155,41 +154,6 @@ export function EmbedDocsCustomBlockRenderer(props: { data?: IEmbedFloatDomData 
         renderViewportContentWidth,
         sheetLike,
     ]);
-
-    useLayoutEffect(() => {
-        const root = rootRef.current;
-        if (!root || !sheetLike) {
-            liveRef.current = null;
-            return undefined;
-        }
-
-        const findLiveRoot = () => {
-            liveRef.current = root.querySelector<HTMLElement>('.univer-embed-float-dom__live');
-        };
-        findLiveRoot();
-
-        const observer = new MutationObserver(findLiveRoot);
-        observer.observe(root, { childList: true, subtree: true });
-
-        return () => {
-            liveRef.current = null;
-            observer.disconnect();
-        };
-    }, [sheetLike]);
-
-    useEffect(() => {
-        const root = rootRef.current;
-        if (!root || !sheetLike) {
-            return undefined;
-        }
-
-        const onWheel = createDocsTableLikeCustomBlockWheelHandler({
-            getLive: () => liveRef.current,
-        });
-
-        root.addEventListener('wheel', onWheel, { passive: false });
-        return () => root.removeEventListener('wheel', onWheel);
-    }, [sheetLike]);
 
     const contentHeight = resolveDocsTableLikeCustomBlockContentHeight(props.customBlockRenderViewport?.contentHeight, 1);
     const viewportHeight = resolveDocsTableLikeCustomBlockContentHeight(props.customBlockRenderViewport?.height, contentHeight);
@@ -303,18 +267,19 @@ function ensureEmbedDocsCustomBlockStyles(): void {
     contain: layout style;
 }
 .univer-embed-docs-custom-block[data-embed-docs-custom-block-sheet-like="true"] .univer-embed-float-dom__content {
-    overflow: visible;
-}
-.univer-embed-docs-custom-block[data-embed-docs-custom-block-sheet-like="true"] .univer-embed-float-dom__live {
     left: calc(var(--univer-embed-docs-block-bleed-left, 0px) * -1);
     width: var(--univer-embed-docs-block-bleed-width, 100%);
     height: var(--univer-embed-docs-block-viewport-height, 100%);
-    overflow-x: auto;
-    overflow-y: auto;
-    scrollbar-width: thin;
+    overflow: hidden;
+}
+.univer-embed-docs-custom-block[data-embed-docs-custom-block-sheet-like="true"] .univer-embed-float-dom__live {
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
 }
 .univer-embed-docs-custom-block[data-embed-docs-custom-block-sheet-like="true"] .univer-embed-float-dom__live::before {
-    display: block;
+    display: none;
     width: var(--univer-embed-docs-block-virtual-width, 100%);
     height: var(--univer-embed-docs-block-content-height, 1px);
     pointer-events: none;
@@ -323,7 +288,7 @@ function ensureEmbedDocsCustomBlockStyles(): void {
 .univer-embed-docs-custom-block[data-embed-docs-custom-block-sheet-like="true"] .univer-embed-float-dom__live-canvas,
 .univer-embed-docs-custom-block[data-embed-docs-custom-block-sheet-like="true"] .univer-embed-float-dom__live-content {
     left: var(--univer-embed-docs-block-bleed-left, 0px);
-    width: var(--univer-embed-docs-block-content-width, 100%);
+    width: var(--univer-embed-docs-block-bleed-width, 100%);
     min-height: var(--univer-embed-docs-block-content-height, 100%);
 }
 `;

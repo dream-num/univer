@@ -14,110 +14,81 @@
  * limitations under the License.
  */
 
-import type { IConfigService as IConfigServiceType } from '@univerjs/core';
-import type { IEmbedChildContainerContext } from '@univerjs/embed-ui';
 import { IConfigService, UniverInstanceType } from '@univerjs/core';
-import { mountEmbedRenderChildUnit } from '@univerjs/embed-ui';
-import { IRenderManagerService } from '@univerjs/engine-render';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { DOCS_UI_PLUGIN_CONFIG_KEY } from './config/config';
-import { createDocsEmbedChildViewContribution } from './embed-block';
+import { createDocsEmbedBlockContribution, createDocsEmbedChildViewContribution } from './embed-block';
 
 vi.mock('@univerjs/embed-ui', async (importOriginal) => {
     const actual = await importOriginal<typeof import('@univerjs/embed-ui')>();
-
     return {
         ...actual,
         mountEmbedRenderChildUnit: vi.fn(() => ({ dispose: vi.fn() })),
     };
 });
 
-describe('createDocsEmbedChildViewContribution', () => {
-    beforeEach(() => {
-        vi.mocked(mountEmbedRenderChildUnit).mockClear();
-    });
-
-    it('fits embedded floating doc blocks to the container without horizontal overflow', () => {
-        const { context, getConfigService } = createContext({
-            footer: true,
-            fitToWidth: {
-                mode: 'none',
-                target: 'viewport',
-                paddingX: 20,
-                minScale: 1,
-                align: 'start',
-            },
-        });
-
-        createDocsEmbedChildViewContribution().mount?.(context);
-
-        expect(mountEmbedRenderChildUnit).toHaveBeenCalledWith(context, IRenderManagerService);
-        expect(getConfigService().getConfig(DOCS_UI_PLUGIN_CONFIG_KEY)).toMatchObject({
-            footer: true,
-            fitToWidth: {
-                mode: 'fit-width',
-                target: 'container',
-                paddingX: 0,
-                minScale: 0,
-                align: 'start',
-            },
+describe('docs embed block contribution', () => {
+    it('uses a ribbon block contribution for docs child units', () => {
+        expect(createDocsEmbedBlockContribution()).toMatchObject({
+            childType: UniverInstanceType.UNIVER_DOC,
+            productName: 'Docs',
         });
     });
 
-    it('does not override fit-to-width config for embedded doc tabs', () => {
-        const docsConfig = {
-            fitToWidth: {
-                mode: 'none',
-                target: 'viewport',
-                paddingX: 20,
-                minScale: 1,
-                align: 'start',
-            },
+    it('injects fit-to-width config only for floating docs blocks', () => {
+        const childView = createDocsEmbedChildViewContribution();
+        const configService = {
+            getConfig: vi.fn((id: string | symbol) => id === DOCS_UI_PLUGIN_CONFIG_KEY
+                ? { fitToWidth: { align: 'center', paddingX: '10%' } }
+                : { id }),
         };
-        const { context, getConfigService } = createContext(docsConfig, 'tab');
+        const injector = createInjector(configService);
 
-        createDocsEmbedChildViewContribution().mount?.(context);
+        childView.mount?.({
+            renderScope: { mode: 'float' },
+            runtimeScope: { injector },
+        } as never);
 
-        expect(mountEmbedRenderChildUnit).toHaveBeenCalledWith(context, IRenderManagerService);
-        expect(getConfigService().getConfig(DOCS_UI_PLUGIN_CONFIG_KEY)).toBe(docsConfig);
+        const replacement = injector.add.mock.calls[0][0][1].useValue;
+        expect(replacement.getConfig(DOCS_UI_PLUGIN_CONFIG_KEY)).toMatchObject({
+            fitToWidth: {
+                align: 'start',
+                minScale: 0,
+                mode: 'fit-width',
+                paddingX: 0,
+                target: 'container',
+            },
+        });
+        expect(replacement.getConfig('other')).toEqual({ id: 'other' });
+
+        const tabInjector = createInjector(configService);
+        childView.mount?.({
+            renderScope: { mode: 'tab' },
+            runtimeScope: { injector: tabInjector },
+        } as never);
+        expect(tabInjector.add).not.toHaveBeenCalled();
+    });
+
+    it('skips config injection when config service is unavailable', () => {
+        const childView = createDocsEmbedChildViewContribution();
+        const injector = {
+            add: vi.fn(),
+            has: vi.fn(() => false),
+        };
+
+        childView.mount?.({
+            renderScope: { mode: 'float' },
+            runtimeScope: { injector },
+        } as never);
+
+        expect(injector.add).not.toHaveBeenCalled();
     });
 });
 
-function createContext(docsConfig: unknown, mode: 'float' | 'tab' = 'float') {
-    let configService: IConfigServiceType = {
-        getConfig: <T>(id: string | symbol) => (id === DOCS_UI_PLUGIN_CONFIG_KEY ? docsConfig : undefined) as T,
-        setConfig: vi.fn(),
-        deleteConfig: vi.fn(),
-        subscribeConfigValue$: vi.fn(),
-    };
-
-    const injector = {
-        has: vi.fn((identifier: unknown) => identifier === IConfigService),
-        get: vi.fn((identifier: unknown) => {
-            if (identifier === IConfigService) {
-                return configService;
-            }
-
-            throw new Error('unexpected dependency');
-        }),
-        add: vi.fn((dependency: unknown) => {
-            const [identifier, options] = dependency as [unknown, { useValue: IConfigServiceType }];
-            if (identifier === IConfigService) {
-                configService = options.useValue;
-            }
-        }),
-    };
-
+function createInjector(configService: unknown) {
     return {
-        context: {
-            childType: UniverInstanceType.UNIVER_DOC,
-            renderScope: {
-                mode,
-            },
-            runtimeScope: {
-                injector,
-            },
-        } as unknown as IEmbedChildContainerContext,
-        getConfigService: () => configService,
+        add: vi.fn(),
+        get: vi.fn((token: unknown) => token === IConfigService ? configService : undefined),
+        has: vi.fn((token: unknown) => token === IConfigService),
     };
 }

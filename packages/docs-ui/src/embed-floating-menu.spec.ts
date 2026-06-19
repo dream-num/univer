@@ -16,7 +16,7 @@
 
 import { UniverInstanceType } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
-import { createDocsFloatingMenuContributions } from './EmbedFloatingMenu';
+import { createDocsFloatingMenuContributions, resolveDocsFloatingMenuStage } from './EmbedFloatingMenu';
 
 describe('createDocsFloatingMenuContributions', () => {
     it('registers docs floating menus for doc, sheet, and slide hosts', () => {
@@ -39,5 +39,58 @@ describe('createDocsFloatingMenuContributions', () => {
                 childType: UniverInstanceType.UNIVER_DOC,
             },
         ]);
+    });
+
+    it('resolves menu visibility from fullscreen, active state, and slide host render activity', () => {
+        expect(resolveDocsFloatingMenuStage({
+            active: null,
+            embedId: 'embed-1',
+            fullscreen: true,
+            renderScopeActive: false,
+            usesDomFloatingStage: true,
+        })).toBe('stage2');
+        expect(resolveDocsFloatingMenuStage({
+            active: {
+                hostUnitId: 'host-1',
+                embedId: 'embed-1',
+                childUnitId: 'child-1',
+                stage: 'stage2',
+            },
+            embedId: 'embed-1',
+            fullscreen: false,
+            renderScopeActive: false,
+            usesDomFloatingStage: true,
+        })).toBe('stage2');
+        expect(resolveDocsFloatingMenuStage({
+            active: {
+                hostUnitId: 'host-1',
+                embedId: 'embed-1',
+                childUnitId: 'child-1',
+                stage: 'stage1',
+            },
+            embedId: 'embed-1',
+            fullscreen: false,
+            renderScopeActive: false,
+            usesDomFloatingStage: true,
+        })).toBe('inactive');
+        expect(resolveDocsFloatingMenuStage({
+            active: null,
+            embedId: 'embed-1',
+            fullscreen: false,
+            renderScopeActive: true,
+            usesDomFloatingStage: false,
+        })).toBe('stage2');
+        expect(resolveDocsFloatingMenuStage({
+            active: {
+                hostUnitId: 'host-1',
+                embedId: 'other',
+                childUnitId: 'child-1',
+                stage: 'stage2',
+            },
+            embedId: 'embed-1',
+            fullscreen: false,
+            renderScopeActive: false,
+            usesDomFloatingStage: true,
+        })).toBe('inactive');
     });
 });

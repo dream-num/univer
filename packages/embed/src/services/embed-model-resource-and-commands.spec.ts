@@ -67,8 +67,14 @@ describe('resource refs', () => {
         expect(() => assertResourceRef({ file: { kind: 'self' }, unit: { selector: 'sheet-1', type: 'sheet' }, extensions: { '': 'bad' } } as never)).toThrow('RESOURCE_REF_INVALID_EXTENSION_KEY');
         expect(() => assertResourceRef({ file: { kind: 'self' }, unit: { selector: 'sheet-1', type: 'sheet' }, extensions: { bad: [1] } } as never)).toThrow('RESOURCE_REF_INVALID_EXTENSION_VALUE');
 
+        expect(toResourceRefUnitType(UniverInstanceType.UNIVER_SHEET)).toBe('sheet');
+        expect(toResourceRefUnitType(UniverInstanceType.UNIVER_DOC)).toBe('doc');
+        expect(toResourceRefUnitType(UniverInstanceType.UNIVER_SLIDE)).toBe('slide');
         expect(toResourceRefUnitType(UniverInstanceType.UNIVER_BASE)).toBe('base');
+        expect(fromResourceRefUnitType('sheet')).toBe(UniverInstanceType.UNIVER_SHEET);
+        expect(fromResourceRefUnitType('doc')).toBe(UniverInstanceType.UNIVER_DOC);
         expect(fromResourceRefUnitType('slide')).toBe(UniverInstanceType.UNIVER_SLIDE);
+        expect(fromResourceRefUnitType('base')).toBe(UniverInstanceType.UNIVER_BASE);
         expect(() => toResourceRefUnitType(UniverInstanceType.UNRECOGNIZED)).toThrow('UNSUPPORTED_UNIT_TYPE');
         expect(() => fromResourceRefUnitType('unknown' as never)).toThrow('UNSUPPORTED_UNIT_TYPE');
     });

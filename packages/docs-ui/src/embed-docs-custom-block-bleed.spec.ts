@@ -81,6 +81,21 @@ describe('resolveDocsTableLikeCustomBlockBleedViewport', () => {
         });
     });
 
+    it('keeps authoritative bleed hints even when runtime content width has not caught up', () => {
+        const root = createElementWithRect({ left: 220, right: 1180, width: 960 });
+
+        expect(resolveDocsTableLikeCustomBlockBleedViewport(root, 960, {
+            bleedLeft: 210,
+            bleedWidth: 1420,
+        })).toEqual({
+            bleedLeft: 210,
+            bleedRight: 250,
+            bleedWidth: 1420,
+            contentWidth: 960,
+            virtualWidth: 1420,
+        });
+    });
+
     it('prefers authoritative product content width over runtime DOM fallback', () => {
         expect(resolveDocsTableLikeCustomBlockContentWidth(1600, 960)).toBe(1600);
         expect(resolveDocsTableLikeCustomBlockContentWidth(undefined, 960)).toBe(960);

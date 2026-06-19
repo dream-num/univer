@@ -17,15 +17,31 @@
 import { UniverInstanceType } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { EmbedHostChromeMode } from '../types/embed-ui';
-import { createEmbedNoHeaderBlockContribution, resolveEmbedProductRibbonMenuSchema } from './embed-block-contribution-factory';
+import { createEmbedNoHeaderBlockContribution, createEmbedRibbonBlockContribution, resolveEmbedProductRibbonMenuSchema } from './embed-block-contribution-factory';
 import { EmbedProductMenuRegistryService } from './embed-product-menu-registry.service';
 
 describe('createEmbedNoHeaderBlockContribution', () => {
+    it('creates no-header contributions with hidden tab ribbon by default', () => {
+        const contribution = createEmbedNoHeaderBlockContribution({
+            childType: UniverInstanceType.UNIVER_BASE,
+            productName: 'Bases',
+        });
+
+        expect(contribution).toMatchObject({
+            childType: UniverInstanceType.UNIVER_BASE,
+            hostChromeMode: EmbedHostChromeMode.NONE,
+            hostHeaderMode: 'none',
+            productName: 'Bases',
+        });
+        expect(contribution.layoutPolicy?.tab?.ribbon).toBe('hidden');
+        expect(contribution.createRibbonOverride).toBeUndefined();
+    });
+
     it('creates a title-only host chrome override without an empty ribbon toolbar', () => {
         const contribution = createEmbedNoHeaderBlockContribution({
             childType: UniverInstanceType.UNIVER_BASE,
             productName: 'Bases',
-            hostChromeMode: EmbedHostChromeMode.TITLE_ONLY,
+            hostHeaderMode: 'placeholder',
         });
 
         const override = contribution.createRibbonOverride?.({
@@ -41,6 +57,33 @@ describe('createEmbedNoHeaderBlockContribution', () => {
         expect(override?.mode).toBe(EmbedHostChromeMode.TITLE_ONLY);
         expect(override?.placeholderTitle).toBe('Bases');
         expect(override?.hideToolbar).toBe(true);
+        expect(override?.ribbonService.fakeToolbarVisible$).toBeDefined();
+        override?.ribbonService.setActivatedTab('start');
+        override?.ribbonService.showContextualTab('ctx');
+        override?.ribbonService.hideContextualTab('ctx');
+        override?.ribbonService.hideAllContextualTabs();
+        override?.ribbonService.setCollapsedIds(['ctx']);
+        override?.ribbonService.setFakeToolbarVisible(true);
+    });
+});
+
+describe('createEmbedRibbonBlockContribution', () => {
+    it('creates ribbon block contributions with default layout policies', () => {
+        const contribution = createEmbedRibbonBlockContribution({
+            childType: UniverInstanceType.UNIVER_SHEET,
+            menuSchema: { ribbon: true },
+            productName: 'Sheets',
+        });
+
+        expect(contribution).toMatchObject({
+            childType: UniverInstanceType.UNIVER_SHEET,
+            hostChromeMode: EmbedHostChromeMode.RIBBON,
+            productName: 'Sheets',
+        });
+        expect(contribution.layoutPolicy?.tab).toBeDefined();
+        expect(contribution.layoutPolicy?.float).toBeDefined();
+        expect(contribution.layoutPolicy?.docFlow).toBeDefined();
+        expect(contribution.createRibbonOverride).toBeDefined();
     });
 });
 
@@ -85,6 +128,16 @@ describe('resolveEmbedProductRibbonMenuSchema', () => {
 
         expect(resolveEmbedProductRibbonMenuSchema(
             injector as never,
+            UniverInstanceType.UNIVER_SHEET,
+            fallbackMenuSchema
+        )).toBe(fallbackMenuSchema);
+    });
+
+    it('falls back when the injector shape cannot provide product menu schemas', () => {
+        const fallbackMenuSchema = { ribbon: { fallback: true } };
+
+        expect(resolveEmbedProductRibbonMenuSchema(
+            {},
             UniverInstanceType.UNIVER_SHEET,
             fallbackMenuSchema
         )).toBe(fallbackMenuSchema);

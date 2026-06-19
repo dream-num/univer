@@ -24,6 +24,11 @@ export interface IDocsCustomBlockBleedViewport {
     virtualWidth: number;
 }
 
+export interface IDocsCustomBlockBleedViewportHint {
+    bleedLeft?: number;
+    bleedWidth?: number;
+}
+
 export function createDefaultDocsTableLikeCustomBlockBleedViewport(): IDocsCustomBlockBleedViewport {
     if (typeof window === 'undefined') {
         return { bleedLeft: 0, bleedRight: 0, bleedWidth: 1, contentWidth: 1, virtualWidth: 1 };
@@ -39,7 +44,7 @@ export function createDefaultDocsTableLikeCustomBlockBleedViewport(): IDocsCusto
     };
 }
 
-export function resolveDocsTableLikeCustomBlockBleedViewport(root: HTMLElement, contentWidth: number): IDocsCustomBlockBleedViewport {
+export function resolveDocsTableLikeCustomBlockBleedViewport(root: HTMLElement, contentWidth: number, hint?: IDocsCustomBlockBleedViewportHint): IDocsCustomBlockBleedViewport {
     const rootRect = root.getBoundingClientRect();
     const rootWidth = Math.max(1, rootRect.width);
     const normalizedContentWidth = Math.max(1, contentWidth);
@@ -50,6 +55,20 @@ export function resolveDocsTableLikeCustomBlockBleedViewport(root: HTMLElement, 
             bleedWidth: rootWidth,
             contentWidth: normalizedContentWidth,
             virtualWidth: rootWidth,
+        };
+    }
+
+    const hintedBleedLeft = hint?.bleedLeft;
+    const hintedBleedWidth = hint?.bleedWidth;
+    if (Number.isFinite(hintedBleedWidth) && (hintedBleedWidth ?? 0) > 0) {
+        const bleedLeft = Math.max(0, hintedBleedLeft ?? 0);
+        const bleedWidth = Math.max(1, hintedBleedWidth!);
+        return {
+            bleedLeft,
+            bleedRight: Math.max(0, bleedWidth - bleedLeft - rootWidth),
+            bleedWidth,
+            contentWidth: normalizedContentWidth,
+            virtualWidth: Math.max(bleedWidth, bleedLeft + normalizedContentWidth),
         };
     }
 
@@ -64,7 +83,7 @@ export function resolveDocsTableLikeCustomBlockBleedViewport(root: HTMLElement, 
         bleedRight,
         bleedWidth: viewportWidth,
         contentWidth: normalizedContentWidth,
-        virtualWidth: Math.max(viewportWidth, bleedLeft + normalizedContentWidth + bleedRight),
+        virtualWidth: Math.max(viewportWidth, bleedLeft + normalizedContentWidth),
     };
 }
 

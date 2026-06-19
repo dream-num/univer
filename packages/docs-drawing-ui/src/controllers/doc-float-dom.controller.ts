@@ -93,29 +93,52 @@ interface ICanvasFloatDomInfo {
 interface IDocFloatDomParams extends IDocFloatDomDataBase {
 }
 
+type IDocFloatDomRuntimeViewport = Partial<Pick<IDocsCustomBlockRenderViewport, 'bleedLeft' | 'bleedWidth' | 'contentHeight' | 'contentWidth' | 'height'>>;
+
 interface IDocFloatDomRuntimeParam extends IDocFloatDom {
-    customBlockRenderViewport?: Partial<Pick<IDocsCustomBlockRenderViewport, 'contentHeight' | 'contentWidth' | 'height'>>;
+    customBlockRenderViewport?: IDocFloatDomRuntimeViewport;
 }
 
 export function mergeDocFloatDomRuntimeProps(existingProps: Record<string, unknown> | undefined, param: IDocFloatDomRuntimeParam): Record<string, unknown> | undefined {
-    const contentWidth = param.customBlockRenderViewport?.contentWidth;
-    const contentHeight = param.customBlockRenderViewport?.contentHeight;
-    const height = param.customBlockRenderViewport?.height;
-    const hasContentWidth = Number.isFinite(contentWidth) && (contentWidth ?? 0) > 0;
-    const hasContentHeight = Number.isFinite(contentHeight) && (contentHeight ?? 0) > 0;
-    const hasHeight = Number.isFinite(height) && (height ?? 0) > 0;
-    if (!hasContentWidth && !hasContentHeight && !hasHeight) {
+    const customBlockRenderViewport = pickValidCustomBlockRenderViewport(param.customBlockRenderViewport);
+    if (!customBlockRenderViewport) {
         return existingProps;
     }
 
     return {
         ...existingProps,
-        customBlockRenderViewport: {
-            ...(hasContentHeight ? { contentHeight } : {}),
-            ...(hasContentWidth ? { contentWidth } : {}),
-            ...(hasHeight ? { height } : {}),
-        },
+        customBlockRenderViewport,
     };
+}
+
+function pickValidCustomBlockRenderViewport(viewport: IDocFloatDomRuntimeViewport | undefined): IDocFloatDomRuntimeViewport | undefined {
+    const result: IDocFloatDomRuntimeViewport = {};
+
+    if (isNonNegativeNumber(viewport?.bleedLeft)) {
+        result.bleedLeft = viewport!.bleedLeft;
+    }
+    if (isPositiveNumber(viewport?.bleedWidth)) {
+        result.bleedWidth = viewport!.bleedWidth;
+    }
+    if (isPositiveNumber(viewport?.contentHeight)) {
+        result.contentHeight = viewport!.contentHeight;
+    }
+    if (isPositiveNumber(viewport?.contentWidth)) {
+        result.contentWidth = viewport!.contentWidth;
+    }
+    if (isPositiveNumber(viewport?.height)) {
+        result.height = viewport!.height;
+    }
+
+    return Object.keys(result).length ? result : undefined;
+}
+
+function isPositiveNumber(value: unknown): value is number {
+    return typeof value === 'number' && Number.isFinite(value) && value > 0;
+}
+
+function isNonNegativeNumber(value: unknown): value is number {
+    return typeof value === 'number' && Number.isFinite(value) && value >= 0;
 }
 
 export class DocFloatDomController extends Disposable {

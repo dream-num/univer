@@ -152,7 +152,7 @@ describe('resolveDocsCustomBlockRenderViewport', () => {
         }));
     });
 
-    it('uses sheet-like content width within the modern docs bleed viewport', () => {
+    it('keeps sheet-like layout within page content while the modern docs viewport bleeds', () => {
         expect(resolveDocsCustomBlockRenderViewport({
             childType: UniverInstanceType.UNIVER_SHEET,
             contentWidth: 1600,
@@ -169,8 +169,8 @@ describe('resolveDocsCustomBlockRenderViewport', () => {
         })).toEqual(expect.objectContaining({
             bleedWidth: 1420,
             contentWidth: 1600,
-            layoutWidth: 1214,
-            width: 1214,
+            layoutWidth: 1008,
+            width: 1008,
         }));
     });
 

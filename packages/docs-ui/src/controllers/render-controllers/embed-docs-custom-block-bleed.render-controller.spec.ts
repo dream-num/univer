@@ -69,7 +69,8 @@ describe('EmbedDocsCustomBlockBleedRenderController', () => {
             contentHeight: 700,
             contentWidth: 1500,
             height: 300,
-            layoutWidth: expect.any(Number),
+            layoutWidth: 1000,
+            width: 1000,
         });
         expect(contentSizeRegistry.measureContentSize).toHaveBeenCalledWith({
             childType: UniverInstanceType.UNIVER_SHEET,

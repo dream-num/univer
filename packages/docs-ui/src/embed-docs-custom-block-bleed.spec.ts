@@ -46,7 +46,7 @@ describe('resolveDocsTableLikeCustomBlockBleedViewport', () => {
             bleedRight: 10,
             bleedWidth: 1080,
             contentWidth: 1500,
-            virtualWidth: 1620,
+            virtualWidth: 1610,
         });
     });
 
@@ -60,7 +60,24 @@ describe('resolveDocsTableLikeCustomBlockBleedViewport', () => {
             bleedRight: 250,
             bleedWidth: 1420,
             contentWidth: 1200,
-            virtualWidth: 1660,
+            virtualWidth: 1420,
+        });
+    });
+
+    it('uses authoritative render viewport bleed hints without expanding the layout root', () => {
+        const root = createElementWithRect({ left: 220, right: 1180, width: 960 });
+        document.body.appendChild(root);
+        vi.spyOn(window, 'innerWidth', 'get').mockReturnValue(1440);
+
+        expect(resolveDocsTableLikeCustomBlockBleedViewport(root, 1800, {
+            bleedLeft: 210,
+            bleedWidth: 1420,
+        })).toEqual({
+            bleedLeft: 210,
+            bleedRight: 250,
+            bleedWidth: 1420,
+            contentWidth: 1800,
+            virtualWidth: 2010,
         });
     });
 

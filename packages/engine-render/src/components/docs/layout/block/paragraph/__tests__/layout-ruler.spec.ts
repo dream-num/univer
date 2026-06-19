@@ -675,6 +675,8 @@ describe('layout-ruler', () => {
 
     it('stores custom block render viewport on inline skeleton drawings', () => {
         setDocsCustomBlockRenderViewportProvider(() => ({
+            bleedLeft: 12,
+            bleedWidth: 360,
             contentHeight: 120,
             contentWidth: 320,
             height: 80,
@@ -752,6 +754,8 @@ describe('layout-ruler', () => {
         const drawing = page.skeDrawings.get('b1');
         expect(drawing?.width).toBe(180);
         expect(drawing?.height).toBe(80);
+        expect(drawing?.customBlockRenderViewport?.bleedLeft).toBe(12);
+        expect(drawing?.customBlockRenderViewport?.bleedWidth).toBe(360);
         expect(drawing?.customBlockRenderViewport?.contentHeight).toBe(120);
         expect(drawing?.customBlockRenderViewport?.contentWidth).toBe(320);
         expect(drawing?.customBlockRenderViewport?.height).toBe(80);

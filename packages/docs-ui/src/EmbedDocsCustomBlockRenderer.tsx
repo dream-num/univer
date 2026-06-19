@@ -27,6 +27,8 @@ import { scrollDocsTableLikeCustomBlockLive } from './embed-docs-custom-block-sc
 
 export interface IEmbedDocsCustomBlockRuntimeProps {
     customBlockRenderViewport?: {
+        bleedLeft?: number;
+        bleedWidth?: number;
         contentHeight?: number;
         contentWidth?: number;
         height?: number;
@@ -50,6 +52,10 @@ export function EmbedDocsCustomBlockRenderer(props: { data?: IEmbedFloatDomData 
     const [viewport, setViewport] = useState(() => createDefaultDocsTableLikeCustomBlockBleedViewport());
     const viewportRef = useRef(viewport);
     const sheetLike = isSheetLikeDocsCustomBlock(data);
+    const customBlockRenderViewport = props.customBlockRenderViewport;
+    const renderViewportBleedLeft = customBlockRenderViewport?.bleedLeft;
+    const renderViewportBleedWidth = customBlockRenderViewport?.bleedWidth;
+    const renderViewportContentWidth = customBlockRenderViewport?.contentWidth;
     viewportRef.current = viewport;
 
     useEffect(() => {
@@ -104,10 +110,13 @@ export function EmbedDocsCustomBlockRenderer(props: { data?: IEmbedFloatDomData 
             frame = undefined;
             const rect = root.getBoundingClientRect();
             const contentWidth = resolveDocsTableLikeCustomBlockContentWidth(
-                props.customBlockRenderViewport?.contentWidth,
+                renderViewportContentWidth,
                 measureRuntimeContentWidth(root, rect.width)
             );
-            const next = resolveDocsTableLikeCustomBlockBleedViewport(root, contentWidth);
+            const next = resolveDocsTableLikeCustomBlockBleedViewport(root, contentWidth, {
+                bleedLeft: renderViewportBleedLeft,
+                bleedWidth: renderViewportBleedWidth,
+            });
 
             setViewport((previous) => (
                 Math.abs(previous.bleedLeft - next.bleedLeft) < 0.5 &&
@@ -140,7 +149,12 @@ export function EmbedDocsCustomBlockRenderer(props: { data?: IEmbedFloatDomData 
             window.removeEventListener('resize', schedule);
             window.removeEventListener('scroll', schedule, true);
         };
-    }, [props.customBlockRenderViewport?.contentWidth, sheetLike]);
+    }, [
+        renderViewportBleedLeft,
+        renderViewportBleedWidth,
+        renderViewportContentWidth,
+        sheetLike,
+    ]);
 
     useLayoutEffect(() => {
         const root = rootRef.current;

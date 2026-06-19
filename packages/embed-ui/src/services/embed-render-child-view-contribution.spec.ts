@@ -18,24 +18,38 @@
  * @vitest-environment jsdom
  */
 
+import type { Injector } from '@univerjs/core';
 import type { IEmbedChildContainerContext } from '../types/embed-ui';
 import { UniverInstanceType } from '@univerjs/core';
 import { of } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
-import { mountEmbedRenderChildUnit } from './embed-render-child-view-contribution';
+import { createEmbedChildRender, createEmbedRenderChildViewContribution, ensureEmbedChildRender, mountEmbedRenderChildUnit, refreshEmbedChildRender } from './embed-render-child-view-contribution';
 
 class RenderManagerToken {}
 
 describe('mountEmbedRenderChildUnit', () => {
+    it('creates child view contributions from render manager tokens', () => {
+        const contribution = createEmbedRenderChildViewContribution({
+            childType: UniverInstanceType.UNIVER_DOC,
+            renderManagerService: RenderManagerToken as never,
+            supportedLayouts: ['tab-peer', 'doc-width-scale'] as never,
+        });
+
+        expect(contribution).toMatchObject({
+            childType: UniverInstanceType.UNIVER_DOC,
+            supportedLayouts: ['tab-peer', 'doc-width-scale'],
+        });
+    });
+
     it('mounts render children into the runtime canvas root by default', () => {
         const root = document.createElement('div');
         const content = document.createElement('div');
         const canvas = document.createElement('div');
         const overlay = document.createElement('div');
         const render = createRender();
-        const context = createContext(root, content, canvas, overlay, render);
+        const embedMount = createEmbedMount(root, content, canvas, overlay, render);
 
-        const disposable = mountEmbedRenderChildUnit(context, RenderManagerToken as never);
+        const disposable = mountEmbedRenderChildUnit(embedMount, RenderManagerToken as never);
 
         expect(render.engine.mount).toHaveBeenCalledWith(canvas);
         expect(canvas.dataset.embedChildRenderUnitId).toBe('child-1');
@@ -52,9 +66,9 @@ describe('mountEmbedRenderChildUnit', () => {
         const content = document.createElement('div');
         const overlay = document.createElement('div');
         const render = createRender();
-        const context = createContext(root, content, undefined, overlay, render);
+        const embedMount = createEmbedMount(root, content, undefined, overlay, render);
 
-        const disposable = mountEmbedRenderChildUnit(context, RenderManagerToken as never);
+        const disposable = mountEmbedRenderChildUnit(embedMount, RenderManagerToken as never);
 
         expect(render.engine.mount).toHaveBeenCalledWith(content);
 
@@ -67,23 +81,100 @@ describe('mountEmbedRenderChildUnit', () => {
         const canvas = document.createElement('div');
         const overlay = document.createElement('div');
         const render = createRender();
-        const context = createContext(root, content, canvas, overlay, render);
+        const embedMount = createEmbedMount(root, content, canvas, overlay, render);
 
-        const disposable = mountEmbedRenderChildUnit(context, RenderManagerToken as never, canvas, { activate: false });
+        const disposable = mountEmbedRenderChildUnit(embedMount, RenderManagerToken as never, canvas, { activate: false });
 
         expect(render.engine.mount).toHaveBeenCalledWith(canvas);
         expect(render.activate).not.toHaveBeenCalled();
 
         disposable?.dispose();
     });
+
+    it('attaches an existing canvas and tolerates stale unmount errors', () => {
+        const root = document.createElement('div');
+        const content = document.createElement('div');
+        const canvas = document.createElement('div');
+        const overlay = document.createElement('div');
+        const childCanvas = document.createElement('canvas');
+        const render = createRender({
+            getCanvasElement: () => childCanvas,
+            unmount: vi.fn(() => {
+                throw new Error('already detached');
+            }),
+        });
+        const embedMount = createEmbedMount(root, content, canvas, overlay, render);
+
+        const disposable = mountEmbedRenderChildUnit(embedMount, RenderManagerToken as never);
+
+        expect(canvas.contains(childCanvas)).toBe(true);
+        disposable?.dispose();
+        expect(canvas.dataset.embedChildRenderUnitId).toBeUndefined();
+    });
+
+    it('reuses, recreates, and cleans failed child renders', () => {
+        const parentA = {} as Injector;
+        const parentB = {} as Injector;
+        const existing = createRender({
+            with: vi.fn(() => parentA),
+        });
+        const replacement = createRender({
+            with: vi.fn(() => parentB),
+        });
+        const renderManager = {
+            createRender: vi.fn(() => replacement),
+            getRenderById: vi.fn(() => existing),
+            removeRender: vi.fn(),
+        };
+
+        expect(ensureEmbedChildRender(renderManager as never, 'child-1')).toBe(existing);
+        expect(createEmbedChildRender(renderManager as never, 'child-1', parentA)).toBe(existing);
+        expect(createEmbedChildRender(renderManager as never, 'child-1', parentB)).toBe(replacement);
+        expect(renderManager.removeRender).toHaveBeenCalledWith('child-1');
+
+        const failingRenderManager = {
+            createRender: vi.fn(() => {
+                throw new Error('render failed');
+            }),
+            getRenderById: vi.fn(() => undefined),
+            removeRender: vi.fn(),
+        };
+        expect(ensureEmbedChildRender(failingRenderManager, 'child-2')).toBeUndefined();
+        expect(createEmbedChildRender(failingRenderManager, 'child-2')).toBeUndefined();
+        expect(failingRenderManager.removeRender).toHaveBeenCalledWith('child-2');
+    });
+
+    it('refreshes child renders and marks all components dirty', () => {
+        const dirtyComponent = {
+            makeDirty: vi.fn(),
+            makeForceDirty: vi.fn(),
+        };
+        const render = createRender();
+        render.components.forEach.mockImplementation((callback) => callback(dirtyComponent));
+
+        refreshEmbedChildRender(render as never, { activate: true });
+
+        expect(render.activate).toHaveBeenCalled();
+        expect(render.engine.resize).toHaveBeenCalled();
+        expect(dirtyComponent.makeForceDirty).toHaveBeenCalledWith(true);
+        expect(dirtyComponent.makeDirty).toHaveBeenCalledWith(true);
+        expect(render.mainComponent.makeDirty).toHaveBeenCalledWith(true);
+        expect(render.scene.makeDirty).toHaveBeenCalled();
+        expect(render.scene.render).toHaveBeenCalled();
+    });
 });
 
-function createRender() {
+function createRender(overrides: {
+    getCanvasElement?: () => HTMLCanvasElement | undefined;
+    unmount?: () => void;
+    with?: (token: unknown) => unknown;
+} = {}) {
     return {
         engine: {
             mount: vi.fn(),
-            unmount: vi.fn(),
+            unmount: overrides.unmount ?? vi.fn(),
             resize: vi.fn(),
+            getCanvasElement: overrides.getCanvasElement,
         },
         components: {
             forEach: vi.fn(),
@@ -96,10 +187,11 @@ function createRender() {
             render: vi.fn(),
         },
         activate: vi.fn(),
+        with: overrides.with,
     };
 }
 
-function createContext(
+function createEmbedMount(
     root: HTMLElement,
     content: HTMLElement,
     canvas: HTMLElement | undefined,

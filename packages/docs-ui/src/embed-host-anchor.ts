@@ -243,9 +243,7 @@ export function resolveDocsCustomBlockRenderViewport(params: IDocsCustomBlockRen
     const paragraphTextStart = docsLeft + pageMarginLeft;
     const leadingInsetLeft = Math.max(0, paragraphTextStart - viewportLeft);
 
-    const desiredWidth = contentWidth;
-    const maxBleedWidth = Math.max(1, viewportLeft + viewportWidth - paragraphTextStart);
-    const layoutWidth = Math.min(desiredWidth, maxBleedWidth);
+    const layoutWidth = Math.min(contentWidth, pageContentWidth || contentWidth);
 
     return {
         bleedLeft: leadingInsetLeft,

@@ -167,7 +167,7 @@ function createRequest(overrides: Partial<IEmbedFloatPreviewRenderRequest<{ scro
         height: overrides.height ?? 80,
         dpr: overrides.dpr ?? 2,
         viewState: overrides.viewState,
-        reason: overrides.reason ?? 'mount',
+        reason: overrides.reason ?? 'initial',
         context: overrides.context,
     };
 }

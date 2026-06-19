@@ -55,12 +55,31 @@ describe('resource refs', () => {
             ...ref,
             extensions: { a: 'first', z: ['2', '1'] },
         }));
+        expect(normalizeResourceRef({
+            file: { kind: 'self' },
+            unit: { selector: 'doc-1', type: 'doc' },
+            part: { kind: 'sheet', sheetName: 'Sheet1', sheetId: 'sid-1' },
+        })).toEqual({
+            file: { kind: 'self' },
+            unit: { selector: 'doc-1', type: 'doc' },
+            part: { kind: 'sheet', sheetName: 'Sheet1', sheetId: 'sid-1' },
+        });
+        expect(normalizeResourceRef({
+            file: { kind: 'relative', path: './book.univer' },
+            unit: { selector: 'base-1', type: 'base' },
+        })).toEqual({
+            file: { kind: 'relative', path: './book.univer' },
+            unit: { selector: 'base-1', type: 'base' },
+        });
 
         expect(() => assertResourceRef(null as never)).toThrow('RESOURCE_REF_INVALID');
+        expect(() => assertResourceRef({ file: null, unit: { selector: 'sheet-1', type: 'sheet' } } as never)).toThrow('RESOURCE_REF_INVALID_FILE');
+        expect(() => assertResourceRef({ file: { kind: 'remote' }, unit: { selector: 'sheet-1', type: 'sheet' } } as never)).toThrow('RESOURCE_REF_INVALID_FILE_KIND');
         expect(() => assertResourceRef({ file: { kind: 'relative', path: '' }, unit: { selector: 'sheet-1', type: 'sheet' } } as never)).toThrow('RESOURCE_REF_INVALID_RELATIVE_PATH');
         expect(() => assertResourceRef({ file: { kind: 'uri', uri: '' }, unit: { selector: 'sheet-1', type: 'sheet' } } as never)).toThrow('RESOURCE_REF_INVALID_URI');
         expect(() => assertResourceRef({ file: { kind: 'self' }, unit: { selector: '', type: 'sheet' } } as never)).toThrow('RESOURCE_REF_INVALID_UNIT');
         expect(() => assertResourceRef({ file: { kind: 'self' }, unit: { selector: 'sheet-1', type: 'unknown' } } as never)).toThrow('RESOURCE_REF_INVALID_UNIT_TYPE');
+        expect(() => assertResourceRef({ file: { kind: 'self' }, unit: { selector: 'sheet-1', type: 'sheet' }, part: { kind: 'unknown' } } as never)).toThrow('RESOURCE_REF_INVALID_PART_KIND');
         expect(() => assertResourceRef({ file: { kind: 'self' }, unit: { selector: 'sheet-1', type: 'sheet' }, part: { kind: 'sheet', sheetName: '' } } as never)).toThrow('RESOURCE_REF_INVALID_SHEET_PART');
         expect(() => assertResourceRef({ file: { kind: 'self' }, unit: { selector: 'sheet-1', type: 'sheet' }, part: { kind: 'range', ref: 'A1', sheetName: '', range: 'A1' } } as never)).toThrow('RESOURCE_REF_INVALID_RANGE_PART');
         expect(() => assertResourceRef({ file: { kind: 'self' }, unit: { selector: 'sheet-1', type: 'sheet' }, extensions: [] } as never)).toThrow('RESOURCE_REF_INVALID_EXTENSIONS');

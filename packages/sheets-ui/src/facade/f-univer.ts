@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICellCustomRender, IDisposable, Injector, Nullable } from '@univerjs/core';
+import type { DependencyIdentifier, DocumentDataModel, ICellCustomRender, IDisposable, Injector, Nullable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type {
     IRender,
@@ -796,7 +796,7 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
             combined$Disposable.dispose();
 
             const scrollManagerService = sheetRenderUnit.with(SheetScrollManagerService);
-            const selectionService = sheetRenderUnit.with(SheetsSelectionsService);
+            const selectionService = this._tryGetRenderDependency(sheetRenderUnit, SheetsSelectionsService);
 
             // Register scroll event handler
             combined$Disposable.add(
@@ -815,66 +815,80 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
             );
 
             // Register selection event handlers
-            combined$Disposable.add(
-                this.registerEventHandler(
-                    this.Event.SelectionMoveStart,
-                    () => selectionService.selectionMoveStart$.subscribe((selections) => {
-                        const eventParams: ISelectionEventParams = {
-                            workbook,
-                            worksheet: workbook.getActiveSheet(),
-                            selections: selections?.map((s) => s.range) ?? [],
-                        };
-                        this.fireEvent(this.Event.SelectionMoveStart, eventParams);
-                    })
-                )
-            );
+            if (selectionService) {
+                combined$Disposable.add(
+                    this.registerEventHandler(
+                        this.Event.SelectionMoveStart,
+                        () => selectionService.selectionMoveStart$.subscribe((selections) => {
+                            const eventParams: ISelectionEventParams = {
+                                workbook,
+                                worksheet: workbook.getActiveSheet(),
+                                selections: selections?.map((s) => s.range) ?? [],
+                            };
+                            this.fireEvent(this.Event.SelectionMoveStart, eventParams);
+                        })
+                    )
+                );
 
-            combined$Disposable.add(
-                this.registerEventHandler(
-                    this.Event.SelectionMoving,
-                    () => selectionService.selectionMoving$.subscribe((selections) => {
-                        const eventParams: ISelectionEventParams = {
-                            workbook,
-                            worksheet: workbook.getActiveSheet(),
-                            selections: selections?.map((s) => s.range) ?? [],
-                        };
-                        this.fireEvent(this.Event.SelectionMoving, eventParams);
-                    })
-                )
-            );
+                combined$Disposable.add(
+                    this.registerEventHandler(
+                        this.Event.SelectionMoving,
+                        () => selectionService.selectionMoving$.subscribe((selections) => {
+                            const eventParams: ISelectionEventParams = {
+                                workbook,
+                                worksheet: workbook.getActiveSheet(),
+                                selections: selections?.map((s) => s.range) ?? [],
+                            };
+                            this.fireEvent(this.Event.SelectionMoving, eventParams);
+                        })
+                    )
+                );
 
-            combined$Disposable.add(
-                this.registerEventHandler(
-                    this.Event.SelectionMoveEnd,
-                    () => selectionService.selectionMoveEnd$.subscribe((selections) => {
-                        const eventParams: ISelectionEventParams = {
-                            workbook,
-                            worksheet: workbook.getActiveSheet(),
-                            selections: selections?.map((s) => s.range) ?? [],
-                        };
-                        this.fireEvent(this.Event.SelectionMoveEnd, eventParams);
-                    })
-                )
-            );
+                combined$Disposable.add(
+                    this.registerEventHandler(
+                        this.Event.SelectionMoveEnd,
+                        () => selectionService.selectionMoveEnd$.subscribe((selections) => {
+                            const eventParams: ISelectionEventParams = {
+                                workbook,
+                                worksheet: workbook.getActiveSheet(),
+                                selections: selections?.map((s) => s.range) ?? [],
+                            };
+                            this.fireEvent(this.Event.SelectionMoveEnd, eventParams);
+                        })
+                    )
+                );
 
-            combined$Disposable.add(
-                this.registerEventHandler(
-                    this.Event.SelectionChanged,
-                    () => selectionService.selectionChanged$.subscribe((selections) => {
-                        const eventParams: ISelectionEventParams = {
-                            workbook,
-                            worksheet: workbook.getActiveSheet(),
-                            selections: selections?.map((s) => s.range) ?? [],
-                        };
-                        this.fireEvent(this.Event.SelectionChanged, eventParams);
-                    })
-                )
-            );
+                combined$Disposable.add(
+                    this.registerEventHandler(
+                        this.Event.SelectionChanged,
+                        () => selectionService.selectionChanged$.subscribe((selections) => {
+                            const eventParams: ISelectionEventParams = {
+                                workbook,
+                                worksheet: workbook.getActiveSheet(),
+                                selections: selections?.map((s) => s.range) ?? [],
+                            };
+                            this.fireEvent(this.Event.SelectionChanged, eventParams);
+                        })
+                    )
+                );
+            }
             // for pro, in pro, life cycle & created$ is not same as univer sdk
             // if not clear sheetRenderUnit, that would cause event bind twice!
             sheetRenderUnit = null;
             this.disposeWithMe(combined$Disposable);
         }));
+    }
+
+    private _tryGetRenderDependency<T>(render: IRender, dependency: DependencyIdentifier<T>): Nullable<T> {
+        try {
+            return render.with(dependency);
+        } catch (error) {
+            if (error instanceof Error && (error.message.includes('DependencyNotFoundError') || error.message.includes('Cannot find'))) {
+                return null;
+            }
+
+            throw error;
+        }
     }
 
     /**

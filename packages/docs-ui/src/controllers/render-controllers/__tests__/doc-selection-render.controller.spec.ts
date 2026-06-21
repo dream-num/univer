@@ -15,7 +15,8 @@
  */
 
 import { CURSOR_TYPE, DocumentEditArea } from '@univerjs/engine-render';
-import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, EmbedInteractionBoundaryService } from '@univerjs/embed-ui';
+import type { EmbedInteractionBoundaryService } from '@univerjs/embed-ui';
+import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE } from '@univerjs/embed-ui';
 import { Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { SetDocZoomRatioOperation } from '../../../commands/operations/set-doc-zoom-ratio.operation';

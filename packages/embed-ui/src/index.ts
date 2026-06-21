@@ -67,8 +67,8 @@ export { createEmbedChildUnitScopedInjector, createEmbedScopedInjector } from '.
 export { EmbedChildViewRegistryService } from './services/embed-child-view-registry.service';
 export { EmbedContentSizeRegistryService } from './services/embed-content-size-registry.service';
 export { createDefaultEmbedFloatingMenuContributions, mountDefaultEmbedFloatingMenu } from './services/embed-default-floating-menu';
-export { createEmbedDomPassiveViewportProvider, type ICreateEmbedDomPassiveViewportProviderOptions } from './services/embed-dom-passive-viewport-provider';
 export { shouldPassDocsStickyVerticalWheelToHost } from './services/embed-docs-sticky-wheel';
+export { createEmbedDomPassiveViewportProvider, type ICreateEmbedDomPassiveViewportProviderOptions } from './services/embed-dom-passive-viewport-provider';
 export { EmbedFloatPreviewService } from './services/embed-float-preview.service';
 export { EmbedFloatingActiveService } from './services/embed-floating-active.service';
 export {

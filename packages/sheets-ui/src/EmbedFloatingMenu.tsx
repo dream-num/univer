@@ -291,7 +291,7 @@ function mountSheetsFloatingMenu(context: IEmbedFloatingMenuMountContext) {
     const reactRoot = createEmbedReactRoot(menu);
     reactRoot.render(createElement(
         EmbedRuntimeProviders,
-        { injector: context.runtimeScope.injector, mountContainer: root },
+        { injector: context.runtimeScope.injector, mountContainer: root, embedId: context.embedId },
         createElement(SheetEmbedFloatingMenu, {
             hostUnitId: context.hostUnitId,
             embedId: context.embedId,
@@ -1060,7 +1060,7 @@ function ensureSheetFloatingMenuStyles(): void {
     style.textContent = `
 .univer-sheet-embed-floating-menu {
     position: absolute;
-    top: -36px;
+    top: var(--univer-embed-floating-menu-top, -36px);
     left: 34px;
     z-index: 30;
     max-width: min(calc(100vw - 72px), 880px);

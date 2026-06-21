@@ -28,8 +28,14 @@ class TestPermissionService {
     readonly permissionPointUpdate$ = new Subject<unknown>();
     readonly addedPermissionIds: string[] = [];
     readonly deletedPermissionIds: string[] = [];
+    readonly updatedPermissionPoints: Array<{ id: string; value: unknown }> = [];
+    readonly permissionPoints = new Map<string, IPermissionPoint<boolean>>();
 
-    addPermissionPoint(point: { id: string }) {
+    addPermissionPoint(point: IPermissionPoint<boolean>) {
+        if (this.permissionPoints.has(point.id)) {
+            return false;
+        }
+        this.permissionPoints.set(point.id, point);
         this.addedPermissionIds.push(point.id);
         return true;
     }
@@ -38,12 +44,17 @@ class TestPermissionService {
         this.deletedPermissionIds.push(id);
     }
 
-    updatePermissionPoint() {
+    updatePermissionPoint(permissionId: string, value: boolean) {
+        const point = this.permissionPoints.get(permissionId);
+        if (point) {
+            point.value = value;
+        }
+        this.updatedPermissionPoints.push({ id: permissionId, value });
         return true;
     }
 
-    getPermissionPoint(permissionId: string): IPermissionPoint<boolean> {
-        return { id: permissionId, value: true, type: UnitObject.SelectRange, subType: UnitAction.Edit, status: PermissionStatus.DONE };
+    getPermissionPoint(permissionId: string): IPermissionPoint<boolean> | undefined {
+        return this.permissionPoints.get(permissionId);
     }
 
     getPermissionPoint$(permissionId: string) {
@@ -53,6 +64,8 @@ class TestPermissionService {
     clearPermissionMap() {
         this.addedPermissionIds.length = 0;
         this.deletedPermissionIds.length = 0;
+        this.updatedPermissionPoints.length = 0;
+        this.permissionPoints.clear();
     }
 
     composePermission(permissionIds: string[]) {
@@ -176,5 +189,17 @@ describe('RangeProtectionService', () => {
 
         resourceManagerService.registeredResource.onUnLoad('book-2');
         expect(cache.deleteUnit).toHaveBeenCalledWith('book-2');
+    });
+
+    it('updates existing range permission points when snapshot resources load', () => {
+        const rule = createRule('rule-1', 'perm-existing');
+        ruleModel.addRule('book-1', 'sheet-1', rule);
+        const existingAddCount = permissionService.addedPermissionIds.length;
+
+        resourceManagerService.registeredResource.onLoad('book-1', { 'sheet-1': [rule] });
+
+        expect(permissionService.addedPermissionIds.length).toBe(existingAddCount);
+        expect(permissionService.updatedPermissionPoints.length).toBeGreaterThan(0);
+        expect(permissionService.updatedPermissionPoints.every((item) => item.id.includes('perm-existing') && item.value === false)).toBe(true);
     });
 });

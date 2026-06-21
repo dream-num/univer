@@ -55,6 +55,7 @@ describe('DocZoomRenderController', () => {
 
     it('applies composed view scale while receiving user zoom', () => {
         const controller = Object.create(DocZoomRenderController.prototype) as DocZoomRenderController;
+        const refreshSelection = vi.fn();
         Object.assign(controller, {
             _context: { unitId: 'doc-unit' },
             _docViewScaleService: {
@@ -67,7 +68,10 @@ describe('DocZoomRenderController', () => {
                 calculatePagePosition: vi.fn(),
             },
             _textSelectionManagerService: {
-                refreshSelection: vi.fn(),
+                refreshSelection,
+            },
+            _embedInteractionBoundaryService: {
+                hasRecentInteraction: vi.fn(() => false),
             },
         });
 
@@ -75,5 +79,33 @@ describe('DocZoomRenderController', () => {
 
         expect((controller as never as { _docViewScaleService: { getViewScale: ReturnType<typeof vi.fn> } })._docViewScaleService.getViewScale).toHaveBeenCalledWith(1.25);
         expect(mockSceneScale).toHaveBeenCalledWith(1.875, 1.875);
+        expect(refreshSelection).toHaveBeenCalled();
+    });
+
+    it('does not refresh host document selection while embed interaction is active', () => {
+        const controller = Object.create(DocZoomRenderController.prototype) as DocZoomRenderController;
+        const refreshSelection = vi.fn();
+        Object.assign(controller, {
+            _context: { unitId: 'doc-unit' },
+            _docViewScaleService: {
+                getViewScale: vi.fn(() => 1.875),
+            },
+            _editorService: {
+                isEditor: vi.fn(() => false),
+            },
+            _docPageLayoutService: {
+                calculatePagePosition: vi.fn(),
+            },
+            _textSelectionManagerService: {
+                refreshSelection,
+            },
+            _embedInteractionBoundaryService: {
+                hasRecentInteraction: vi.fn(() => true),
+            },
+        });
+
+        controller.updateViewZoom(1.25);
+
+        expect(refreshSelection).not.toHaveBeenCalled();
     });
 });

@@ -129,7 +129,6 @@ export class EmbedMountService {
             normalizedHostMountResult.runtimeRoots
         );
         disposables.push(renderScopeDisposable);
-        disposables.push(this._registerChildFocusBridge(descriptor, context.hostElement, renderScope.mode));
         const childContextBase: Omit<IEmbedChildContainerContext, 'runtimeScope'> = {
             ...context,
             hostElement: context.hostElement,
@@ -142,6 +141,7 @@ export class EmbedMountService {
             runtimeScope,
         };
         disposables.push(runtimeScopeDisposable);
+        disposables.push(this._registerChildFocusBridge(descriptor, context.hostElement, renderScope.mode, runtimeScope.instanceService));
         disposables.push(this._sceneCanvasCaptureService.registerContext(childContext));
         const restoreFocusAfterMount = this._createMountFocusRestorer(descriptor);
         const childDisposable = childContribution.mount?.(childContext);
@@ -192,14 +192,7 @@ export class EmbedMountService {
             }
         }
 
-        const hasEarlierFloatingSession = [...this._sessions.values()].some((entry) => (
-            entry.session.embedId !== descriptor.embedId &&
-            entry.session.hostUnitId === descriptor.hostUnitId &&
-            entry.session.layout !== 'tab-peer'
-        ));
-        if (hasEarlierFloatingSession) {
-            setActive(false);
-        }
+        setActive(false);
     }
 
     unmount(embedId: string): void {
@@ -385,7 +378,12 @@ export class EmbedMountService {
         return disposable ? toDisposable(() => disposable.dispose()) : undefined;
     }
 
-    private _registerChildFocusBridge(descriptor: IEmbedDescriptor, rootElement: HTMLElement, mode: IEmbedRenderScope['mode']): IDisposable {
+    private _registerChildFocusBridge(
+        descriptor: IEmbedDescriptor,
+        rootElement: HTMLElement,
+        mode: IEmbedRenderScope['mode'],
+        scopedInstanceService?: IUniverInstanceService
+    ): IDisposable {
         const focusChild = (event?: PointerEvent | FocusEvent) => {
             const target = event?.target instanceof Element ? event.target : null;
             if (target?.closest('[data-embed-float-drag-handle="true"], [data-embed-floating-menu="true"]')) {
@@ -395,6 +393,10 @@ export class EmbedMountService {
                 return;
             }
 
+            if (mode === 'float' && scopedInstanceService) {
+                scopedInstanceService.setCurrentUnitForType(descriptor.childUnitId);
+                scopedInstanceService.focusUnit(descriptor.childUnitId);
+            }
             if (mode === 'tab' && this._injector.has(IUniverInstanceService)) {
                 const instanceService = this._injector.get(IUniverInstanceService);
                 const getCurrentUnitOfType = (instanceService as unknown as {
@@ -407,7 +409,7 @@ export class EmbedMountService {
                     instanceService.setCurrentUnitForType(descriptor.childUnitId);
                 }
             }
-            if (mode === 'tab' && this._injector.has(IContextService)) {
+            if ((mode === 'tab' || mode === 'float') && this._injector.has(IContextService)) {
                 const contextService = this._injector.get(IContextService);
                 contextService.setContextValue(FOCUSING_UNIT, true);
                 contextService.setContextValue(FOCUSING_DOC, descriptor.childType === UniverInstanceType.UNIVER_DOC);

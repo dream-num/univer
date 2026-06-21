@@ -17,6 +17,7 @@
 import type { Injector } from '@univerjs/core';
 import { UniverInstanceType } from '@univerjs/core';
 import { EmbedProductMenuRegistryService } from '@univerjs/embed-ui';
+import { MenuManagerPosition, RibbonPosition } from '@univerjs/ui';
 import { describe, expect, it } from 'vitest';
 import { registerSheetsEmbedProductMenus } from './embed-product-menu';
 import { menuSchema } from './menu/schema';
@@ -32,7 +33,7 @@ describe('registerSheetsEmbedProductMenus', () => {
         expect(disposable).toBeDefined();
         expect(registered).toHaveLength(1);
         expect(registered[0].id).toBe('sheets-ui.ribbon');
-        expect(registry.getMergedMenuSchema(UniverInstanceType.UNIVER_SHEET)).toEqual(menuSchema);
+        expect(registry.getMergedMenuSchema(UniverInstanceType.UNIVER_SHEET)).toEqual(normalizeRibbonMenuSchema(menuSchema));
 
         const duplicate = registerSheetsEmbedProductMenus(injector);
         expect(duplicate).toBeUndefined();
@@ -51,4 +52,22 @@ function createRegistryInjector(service: EmbedProductMenuRegistryService): Pick<
             return service;
         },
     } as Pick<Injector, 'get' | 'has'>;
+}
+
+function normalizeRibbonMenuSchema(schema: Record<string, unknown>): Record<string, unknown> {
+    const ribbonPositionKeys = new Set<string>(Object.values(RibbonPosition));
+    const normalized: Record<string, unknown> = {};
+    const ribbon: Record<string, unknown> = {};
+
+    Object.entries(schema).forEach(([key, value]) => {
+        if (ribbonPositionKeys.has(key)) {
+            ribbon[key] = value;
+            return;
+        }
+
+        normalized[key] = value;
+    });
+
+    normalized[MenuManagerPosition.RIBBON] = ribbon;
+    return normalized;
 }

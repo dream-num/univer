@@ -19,7 +19,7 @@ import type { IMouseEvent, IPointerEvent, Scene, SpreadsheetSkeleton, Viewport }
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import type { Subscription } from 'rxjs';
 import type { SelectionControl } from './selection-control';
-import { ColorKit, IUniverInstanceService, Quantity, UniverInstanceType } from '@univerjs/core';
+import { ColorKit, IUniverInstanceService, LookUp, Quantity, UniverInstanceType } from '@univerjs/core';
 import { CURSOR_TYPE, IRenderManagerService, Rect, ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2, withCurrentTypeOfRenderer } from '@univerjs/engine-render';
 import { attachSelectionWithCoord, SELECTION_CONTROL_BORDER_BUFFER_WIDTH } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
@@ -186,7 +186,7 @@ export class SelectionShapeExtension {
 
         [leftControl, rightControl, topControl, bottomControl].forEach((control) => {
             control.onPointerEnter$.subscribeEvent(() => {
-                const permissionCheck = this._injector.get(ISheetSelectionRenderService, Quantity.OPTIONAL)
+                const permissionCheck = this._injector.get(ISheetSelectionRenderService, Quantity.OPTIONAL, LookUp.SELF)
                     ?.interceptor
                     .fetchThroughInterceptors(RANGE_MOVE_PERMISSION_CHECK)(false, null);
                 if (permissionCheck === false) {
@@ -358,7 +358,7 @@ export class SelectionShapeExtension {
             }
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
 
-            const permissionCheck = this._injector.get(ISheetSelectionRenderService, Quantity.OPTIONAL)
+            const permissionCheck = this._injector.get(ISheetSelectionRenderService, Quantity.OPTIONAL, LookUp.SELF)
                 ?.interceptor
                 .fetchThroughInterceptors(RANGE_MOVE_PERMISSION_CHECK)(false, null);
             if (permissionCheck === false) {
@@ -599,7 +599,7 @@ export class SelectionShapeExtension {
         const { fillControl } = this._control;
 
         fillControl.onPointerEnter$.subscribeEvent((evt: IPointerEvent | IMouseEvent) => {
-            const permissionCheck = this._injector.get(ISheetSelectionRenderService).interceptor.fetchThroughInterceptors(RANGE_FILL_PERMISSION_CHECK)(false, { x: evt.offsetX, y: evt.offsetY, skeleton: this._skeleton, scene: this._scene });
+            const permissionCheck = this._injector.get(ISheetSelectionRenderService, LookUp.SELF).interceptor.fetchThroughInterceptors(RANGE_FILL_PERMISSION_CHECK)(false, { x: evt.offsetX, y: evt.offsetY, skeleton: this._skeleton, scene: this._scene });
 
             if (!permissionCheck) {
                 return;
@@ -841,7 +841,7 @@ export class SelectionShapeExtension {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
             const currentViewport = scene.getActiveViewportByCoord(Vector2.FromArray([moveOffsetX, moveOffsetY]));
 
-            const permissionCheck = this._injector.get(ISheetSelectionRenderService).interceptor.fetchThroughInterceptors(RANGE_FILL_PERMISSION_CHECK)(false, { x: evt.offsetX, y: evt.offsetY, skeleton: this._skeleton, scene: this._scene });
+            const permissionCheck = this._injector.get(ISheetSelectionRenderService, LookUp.SELF).interceptor.fetchThroughInterceptors(RANGE_FILL_PERMISSION_CHECK)(false, { x: evt.offsetX, y: evt.offsetY, skeleton: this._skeleton, scene: this._scene });
 
             if (!permissionCheck) {
                 return;

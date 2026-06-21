@@ -17,18 +17,28 @@
 import type { Injector } from '@univerjs/core';
 import type { IEmbedPassiveViewportProvider } from '@univerjs/embed-ui';
 import { UniverInstanceType } from '@univerjs/core';
-import { scrollSceneViewportPassive } from '@univerjs/embed-ui';
+import { scrollSceneViewportPassive, shouldPassDocsStickyVerticalWheelToHost } from '@univerjs/embed-ui';
 import { IRenderManagerService, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 
-export function createSheetsPassiveViewportProvider(injector: Injector): IEmbedPassiveViewportProvider {
+export function createSheetsPassiveViewportProvider(rootInjector: Injector): IEmbedPassiveViewportProvider {
     return {
         childType: UniverInstanceType.UNIVER_SHEET,
         handleWheel: (context) => {
-            if (!injector.has(IRenderManagerService)) {
+            if (context.source !== 'host-scroll-sync' && shouldPassDocsStickyVerticalWheelToHost(context.layout, context.event)) {
                 return false;
             }
 
-            const render = injector.get(IRenderManagerService).getRenderById(context.childUnitId);
+            const injector = context.runtimeScope?.injector ?? rootInjector;
+            const renderManagerService = injector.has(IRenderManagerService)
+                ? injector.get(IRenderManagerService)
+                : rootInjector.has(IRenderManagerService)
+                    ? rootInjector.get(IRenderManagerService)
+                    : undefined;
+            if (!renderManagerService) {
+                return false;
+            }
+
+            const render = renderManagerService.getRenderById(context.childUnitId);
             const scene = render?.scene;
             return scrollSceneViewportPassive(
                 context,

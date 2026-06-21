@@ -98,30 +98,102 @@ function _hasOnlyCustomBlockGlyphs(glyphs: IDocumentSkeletonGlyph[]): boolean {
     return glyphs.length > 0 && glyphs.every((glyph) => glyph.streamType === DataStreamTreeTokenType.CUSTOM_BLOCK);
 }
 
-function _mergeAdjacentCustomBlockShapedTexts(shapedTextList: IShapedText[]): IShapedText[] {
+function _mergeAdjacentCustomBlockShapedTexts(
+    shapedTextList: IShapedText[],
+    customBlockDrawings: Map<string, IDocumentSkeletonDrawing>
+): IShapedText[] {
     const mergedShapedTextList: IShapedText[] = [];
 
-    for (const shapedText of shapedTextList) {
-        const lastShapedText = mergedShapedTextList[mergedShapedTextList.length - 1];
+    for (const originShapedText of shapedTextList) {
+        const splitShapedTexts = _splitTopBottomCustomBlockShapedText(originShapedText, customBlockDrawings);
 
-        if (
-            lastShapedText &&
-            _hasOnlyCustomBlockGlyphs(lastShapedText.glyphs) &&
-            _hasOnlyCustomBlockGlyphs(shapedText.glyphs)
-        ) {
-            lastShapedText.text += shapedText.text;
-            lastShapedText.glyphs.push(...shapedText.glyphs);
-            lastShapedText.breakPointType = shapedText.breakPointType;
-            continue;
+        for (const shapedText of splitShapedTexts) {
+            const lastShapedText = mergedShapedTextList[mergedShapedTextList.length - 1];
+
+            if (
+                lastShapedText &&
+                _hasOnlyCustomBlockGlyphs(lastShapedText.glyphs) &&
+                _hasOnlyCustomBlockGlyphs(shapedText.glyphs) &&
+                !_hasTopBottomCustomBlockGlyph(lastShapedText.glyphs, customBlockDrawings) &&
+                !_hasTopBottomCustomBlockGlyph(shapedText.glyphs, customBlockDrawings)
+            ) {
+                lastShapedText.text += shapedText.text;
+                lastShapedText.glyphs.push(...shapedText.glyphs);
+                lastShapedText.breakPointType = shapedText.breakPointType;
+                continue;
+            }
+
+            mergedShapedTextList.push({
+                ...shapedText,
+                glyphs: [...shapedText.glyphs],
+            });
         }
-
-        mergedShapedTextList.push({
-            ...shapedText,
-            glyphs: [...shapedText.glyphs],
-        });
     }
 
     return mergedShapedTextList;
+}
+
+function _splitTopBottomCustomBlockShapedText(
+    shapedText: IShapedText,
+    customBlockDrawings: Map<string, IDocumentSkeletonDrawing>
+): IShapedText[] {
+    const splitShapedTexts: IShapedText[] = [];
+    let pendingGlyphs: IDocumentSkeletonGlyph[] = [];
+    let pendingText = '';
+    let textOffset = 0;
+
+    const flushPending = () => {
+        if (pendingGlyphs.length === 0) {
+            return;
+        }
+
+        splitShapedTexts.push({
+            ...shapedText,
+            text: pendingText,
+            glyphs: pendingGlyphs,
+        });
+        pendingGlyphs = [];
+        pendingText = '';
+    };
+
+    for (const glyph of shapedText.glyphs) {
+        const glyphText = shapedText.text.slice(textOffset, textOffset + glyph.count);
+        textOffset += glyph.count;
+
+        if (_isTopBottomCustomBlockGlyph(glyph, customBlockDrawings)) {
+            flushPending();
+            splitShapedTexts.push({
+                ...shapedText,
+                text: glyphText,
+                glyphs: [glyph],
+            });
+            continue;
+        }
+
+        pendingGlyphs.push(glyph);
+        pendingText += glyphText;
+    }
+
+    flushPending();
+    return splitShapedTexts.length > 0 ? splitShapedTexts : [shapedText];
+}
+
+function _hasTopBottomCustomBlockGlyph(
+    glyphs: IDocumentSkeletonGlyph[],
+    customBlockDrawings: Map<string, IDocumentSkeletonDrawing>
+): boolean {
+    return glyphs.some((glyph) => _isTopBottomCustomBlockGlyph(glyph, customBlockDrawings));
+}
+
+function _isTopBottomCustomBlockGlyph(
+    glyph: IDocumentSkeletonGlyph,
+    customBlockDrawings: Map<string, IDocumentSkeletonDrawing>
+): boolean {
+    if (glyph.streamType !== DataStreamTreeTokenType.CUSTOM_BLOCK || glyph.drawingId == null) {
+        return false;
+    }
+
+    return customBlockDrawings.get(glyph.drawingId)?.drawingOrigin.layoutType === PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM;
 }
 
 function _getListLevelAncestors(
@@ -499,7 +571,7 @@ export function lineBreaking(
     let allPages = [curPage];
     let isParagraphFirstShapedText = true; // First shaped text
     let shapedTextOffset = 0;
-    for (const [_index, { text, glyphs, breakPointType }] of _mergeAdjacentCustomBlockShapedTexts(shapedTextList).entries()) {
+    for (const [_index, { text, glyphs, breakPointType }] of _mergeAdjacentCustomBlockShapedTexts(shapedTextList, paragraphNonInlineSkeDrawingsByBlockId).entries()) {
         const textStartIndex = paragraphNode.startIndex + shapedTextOffset;
         const textGlyphCount = _glyphCount(glyphs);
         const textEndIndex = textStartIndex + textGlyphCount;

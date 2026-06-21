@@ -31,6 +31,11 @@ vi.mock('@univerjs/engine-render', async (importOriginal) => {
         ...actual,
         setDocsCustomBlockRenderViewportProvider: vi.fn((provider) => {
             providerState.provider = provider;
+            return () => {
+                if (providerState.provider === provider) {
+                    providerState.provider = null;
+                }
+            };
         }),
     };
 });
@@ -68,8 +73,9 @@ describe('EmbedDocsCustomBlockBleedRenderController', () => {
         expect(viewport).toMatchObject({
             contentHeight: 700,
             contentWidth: 1500,
-            height: 300,
+            height: 700,
             layoutWidth: 1000,
+            viewportHeight: 300,
             width: 1000,
         });
         expect(contentSizeRegistry.measureContentSize).toHaveBeenCalledWith({
@@ -113,6 +119,57 @@ describe('EmbedDocsCustomBlockBleedRenderController', () => {
         });
         controller.dispose();
     });
+
+    it('keeps sheet-like custom block visible while async child units resolve', async () => {
+        vi.useFakeTimers();
+        const commandService = {
+            onCommandExecuted: vi.fn(() => ({ dispose: vi.fn() })),
+            syncExecuteCommand: vi.fn(),
+        };
+        const context = createRenderContext();
+        const childUnit = { unit: true };
+        const contentSizeRegistry = {
+            measureContentSize: vi.fn((measureContext: { childUnit?: unknown }) => {
+                return measureContext.childUnit === childUnit ? { height: 700, width: 1500 } : undefined;
+            }),
+        };
+        const controller = new EmbedDocsCustomBlockBleedRenderController(
+            context as never,
+            { getUnit: vi.fn(() => Promise.resolve(childUnit)) } as never,
+            commandService as never,
+            contentSizeRegistry as never
+        );
+
+        const loadingViewport = providerState.provider?.('doc-1', 'sheet-block', createCollapsedViewportInput());
+        expect(loadingViewport).toMatchObject({
+            contentHeight: 480,
+            height: 480,
+            width: 960,
+        });
+        expect(contentSizeRegistry.measureContentSize).not.toHaveBeenCalled();
+
+        await Promise.resolve();
+        vi.runOnlyPendingTimers();
+        expect(commandService.syncExecuteCommand).toHaveBeenCalledWith(SetDocZoomRatioOperation.id, {
+            unitId: 'doc-1',
+            zoomRatio: 1.5,
+        });
+
+        const measuredViewport = providerState.provider?.('doc-1', 'sheet-block', createCollapsedViewportInput());
+        expect(measuredViewport).toMatchObject({
+            contentHeight: 700,
+            contentWidth: 1500,
+            height: 700,
+        });
+        expect(contentSizeRegistry.measureContentSize).toHaveBeenCalledWith({
+            childType: UniverInstanceType.UNIVER_SHEET,
+            childUnit,
+            childUnitId: 'sheet-1',
+            viewportWidth: 1,
+        });
+
+        controller.dispose();
+    });
 });
 
 function createViewportInput() {
@@ -122,6 +179,14 @@ function createViewportInput() {
         pageMarginLeft: 100,
         pageMarginRight: 100,
         pageWidth: 1200,
+    };
+}
+
+function createCollapsedViewportInput() {
+    return {
+        ...createViewportInput(),
+        fallbackHeight: 1,
+        fallbackWidth: 1,
     };
 }
 

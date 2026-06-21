@@ -17,31 +17,48 @@
 import type { IEmbedChildContainerContext } from '@univerjs/embed-ui';
 import { describe, expect, it, vi } from 'vitest';
 
-const mountEmbedRenderChildUnit = vi.fn((_context: unknown, _renderManagerService: unknown, target: HTMLElement) => {
+vi.mock('./views/editor-container/EditorContainer', () => ({
+    EditorContainer: () => null,
+}));
+vi.mock('./views/auto-fill-popup-menu/AutoFillPopupMenu', () => ({
+    AutoFillPopupMenu: () => null,
+}));
+vi.mock('@univerjs/ui', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('@univerjs/ui')>();
+    return {
+        ...actual,
+        useConfigValue: vi.fn(() => ({})),
+        useDependency: vi.fn(() => ({ get: vi.fn(() => null) })),
+    };
+});
+
+const mountEmbedRenderChildUnit = vi.fn((_context: unknown, _renderManagerService: unknown, target: HTMLElement, _options?: unknown) => {
     const wrapper = document.createElement('div');
     const canvas = document.createElement('canvas');
     wrapper.appendChild(canvas);
     target.appendChild(wrapper);
     return { dispose: vi.fn() };
 });
+const scopedInjector = {};
+const reactRoot = { render: vi.fn() };
+const disposeEmbedReactRoot = vi.fn();
 
 vi.mock('@univerjs/embed-ui', async (importOriginal) => {
     const actual = await importOriginal<typeof import('@univerjs/embed-ui')>();
     return {
         ...actual,
         mountEmbedRenderChildUnit,
+        createEmbedReactRoot: vi.fn(() => reactRoot),
+        disposeEmbedReactRoot,
+        EmbedRuntimeProviders: ({ children }: { children?: unknown }) => children,
     };
 });
 
 describe('createSheetsEmbedChildViewContribution', () => {
-    it('stops retrying once the embedded render canvas is mounted', async () => {
+    it('mounts the embedded render once without RAF remount loops', async () => {
         const requestAnimationFrame = vi.spyOn(window, 'requestAnimationFrame');
         const cancelAnimationFrame = vi.spyOn(window, 'cancelAnimationFrame');
-        const callbacks: FrameRequestCallback[] = [];
-        requestAnimationFrame.mockImplementation((callback) => {
-            callbacks.push(callback);
-            return callbacks.length;
-        });
+        requestAnimationFrame.mockImplementation(() => 1);
         cancelAnimationFrame.mockImplementation(() => {});
 
         const { createSheetsEmbedChildViewContribution } = await import('./EmbedBlock');
@@ -49,18 +66,21 @@ describe('createSheetsEmbedChildViewContribution', () => {
         const contribution = createSheetsEmbedChildViewContribution();
         const disposable = contribution.mount?.({
             childUnitId: 'sheet-1',
-            runtimeScope: { roots: { canvas: rootElement } },
+            runtimeScope: { injector: scopedInjector, roots: { canvas: rootElement } },
             renderScope: { mode: 'float', canvasRoot: rootElement, contentRoot: rootElement, rootElement },
         } as unknown as IEmbedChildContainerContext);
 
-        expect(callbacks).toHaveLength(1);
-        callbacks[0](0);
-
         expect(mountEmbedRenderChildUnit).toHaveBeenCalledTimes(1);
+        expect(mountEmbedRenderChildUnit.mock.calls[0]).toHaveLength(4);
+        expect(mountEmbedRenderChildUnit.mock.calls[0][2]).toBe(rootElement);
+        expect(mountEmbedRenderChildUnit.mock.calls[0][3]).toEqual({ scopedRenderInjector: true });
         expect(rootElement.querySelector('canvas')).not.toBeNull();
-        expect(callbacks).toHaveLength(1);
+        expect(requestAnimationFrame).not.toHaveBeenCalled();
+        expect(mountEmbedRenderChildUnit).toHaveBeenCalledTimes(1);
 
         disposable?.dispose();
+        expect(disposeEmbedReactRoot).toHaveBeenCalledWith(reactRoot);
+        expect(cancelAnimationFrame).not.toHaveBeenCalled();
         requestAnimationFrame.mockRestore();
         cancelAnimationFrame.mockRestore();
     });

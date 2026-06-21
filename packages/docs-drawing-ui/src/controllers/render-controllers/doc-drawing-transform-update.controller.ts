@@ -47,7 +47,7 @@ interface IDrawingParamsWithBehindText {
     hidden?: boolean;
     transform: ITransformState;
     transforms: ITransformState[];
-    customBlockRenderViewport?: Partial<Pick<IDocsCustomBlockRenderViewport, 'bleedLeft' | 'bleedWidth' | 'contentHeight' | 'contentWidth' | 'height'>>;
+    customBlockRenderViewport?: Partial<Pick<IDocsCustomBlockRenderViewport, 'bleedLeft' | 'bleedWidth' | 'contentHeight' | 'contentWidth' | 'height' | 'viewportHeight'>>;
     // The same drawing render in different place, like image in header and footer.
     // The default value is BooleanNumber.FALSE. if it's true, Please use transforms.
     isMultiTransform: BooleanNumber;

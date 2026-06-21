@@ -133,6 +133,7 @@ export interface IParagraphConfig {
     docxFallbackAnchorLeft?: IParagraphStyle['indentStart'];
     paragraphNonInlineSkeDrawings?: Map<string, IDocumentSkeletonDrawing>;
     paragraphInlineSkeDrawings?: Map<string, IDocumentSkeletonDrawing>;
+    topBottomCustomBlockFlowBottom?: number;
     skeTablesInParagraph?: IParagraphTableCache[];
     // headerAndFooterAffectSkeDrawings?: Map<string, IDocumentSkeletonDrawing>;
     bulletSkeleton?: IDocumentSkeletonBullet;

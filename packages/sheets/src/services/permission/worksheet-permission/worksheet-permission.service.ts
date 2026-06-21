@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Workbook, Worksheet } from '@univerjs/core';
+import type { IPermissionPoint, Workbook, Worksheet } from '@univerjs/core';
 import type { IObjectModel, IObjectPointModel } from '../type';
 import { ILogService, Inject, Injector, IPermissionService, IResourceManagerService, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 
@@ -151,7 +151,7 @@ export class WorksheetPermissionService extends RxDisposable {
                         getAllWorksheetPermissionPoint().forEach((F) => {
                             const instance = new F(unitId, subUnitId);
                             instance.value = false;
-                            this._permissionService.addPermissionPoint(instance);
+                            this._addOrUpdatePermissionPoint(instance);
                         });
                     });
                     this._worksheetProtectionRuleModel.changeRuleInitState(true);
@@ -205,7 +205,7 @@ export class WorksheetPermissionService extends RxDisposable {
                     Object.keys(resources).forEach((subUnitId) => {
                         getAllWorksheetPermissionPointByPointPanel().forEach((F) => {
                             const instance = new F(unitId, subUnitId);
-                            this._permissionService.addPermissionPoint(instance);
+                            this._addOrUpdatePermissionPoint(instance);
                         });
                     });
                 },
@@ -214,5 +214,14 @@ export class WorksheetPermissionService extends RxDisposable {
                 },
             })
         );
+    }
+
+    private _addOrUpdatePermissionPoint(instance: IPermissionPoint) {
+        if (this._permissionService.getPermissionPoint(instance.id)) {
+            this._permissionService.updatePermissionPoint(instance.id, instance.value);
+            return;
+        }
+
+        this._permissionService.addPermissionPoint(instance);
     }
 }

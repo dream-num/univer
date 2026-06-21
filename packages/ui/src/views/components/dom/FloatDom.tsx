@@ -49,6 +49,7 @@ export const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => 
         data: layer.data,
         ...layer.props,
     }), [layer.data, layer.props]);
+    const floatDomOverflow = resolveFloatDomOverflow(layerProps);
 
     useEffect(() => {
         const subscription = layer.position$.subscribe((position) => {
@@ -129,7 +130,7 @@ export const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => 
                 width: Math.max(position.endX - position.startX - 2, 0),
                 height: Math.max(position.endY - position.startY - 2, 0),
                 transform: transformRef.current,
-                overflow: 'hidden',
+                overflow: floatDomOverflow.outerOverflow,
                 transformOrigin: 'center center',
             }}
             onPointerMove={(e) => {
@@ -157,7 +158,7 @@ export const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => 
                 id={id}
                 ref={innerDomRef}
                 className="univer-absolute univer-overflow-hidden"
-                style={{ ...innerStyle.current }}
+                style={{ ...innerStyle.current, overflow: floatDomOverflow.innerOverflow }}
             >
                 {component}
             </div>
@@ -180,3 +181,24 @@ export const FloatDom = ({ unitId }: { unitId?: string }) => {
         />
     ));
 };
+
+export function resolveFloatDomOverflow(props: {
+    customBlockRenderViewport?: {
+        bleedLeft?: number;
+        bleedWidth?: number;
+    };
+}): { outerOverflow: CSSProperties['overflow']; innerOverflow: CSSProperties['overflow'] } {
+    const viewport = props.customBlockRenderViewport;
+    const hasBleedViewport = Number.isFinite(viewport?.bleedWidth) && (viewport?.bleedWidth ?? 0) > 0;
+    if (!hasBleedViewport) {
+        return {
+            outerOverflow: 'hidden',
+            innerOverflow: 'hidden',
+        };
+    }
+
+    return {
+        outerOverflow: 'visible',
+        innerOverflow: 'visible',
+    };
+}

@@ -125,17 +125,26 @@ export interface IEmbedHostAnchorRemoveMutationPlan {
     undoMutations: IMutationInfo[];
 }
 
-export interface IEmbedHostAdapterContribution {
+interface IEmbedHostAdapterContributionBase {
     hostType: UniverInstanceType;
     entry: EmbedHostEntry;
-    createAnchor?: (context: IEmbedHostAnchorContext) => string;
     removeAnchor?: (context: IEmbedHostAnchorContext & { hostAnchorId: string }) => void;
-    createAnchorPlan?: (context: IEmbedHostAnchorContext) => IEmbedHostAnchorMutationPlan;
     removeAnchorPlan?: (context: IEmbedHostAnchorContext & { hostAnchorId: string }) => IEmbedHostAnchorRemoveMutationPlan;
     afterCreateAnchor?: (context: IEmbedHostAnchorContext & { hostAnchorId: string; descriptor: IEmbedDescriptor }) => void;
     afterRemoveAnchor?: (context: IEmbedHostAnchorContext & { hostAnchorId: string; descriptor?: IEmbedDescriptor }) => void;
     activateAnchor?: (context: IEmbedHostAnchorContext & { hostAnchorId: string; descriptor: IEmbedDescriptor }) => void;
 }
+
+export type IEmbedHostAdapterContribution = IEmbedHostAdapterContributionBase & (
+    | {
+        createAnchorPlan: (context: IEmbedHostAnchorContext) => IEmbedHostAnchorMutationPlan;
+        createAnchor?: (context: IEmbedHostAnchorContext) => string;
+    }
+    | {
+        createAnchor: (context: IEmbedHostAnchorContext) => string;
+        createAnchorPlan?: (context: IEmbedHostAnchorContext) => IEmbedHostAnchorMutationPlan;
+    }
+);
 
 export interface IEmbedHostContainerContribution {
     hostType: UniverInstanceType;
@@ -175,6 +184,7 @@ export interface IEmbedProductMenuMountContext {
     childType: UniverInstanceType;
     surface?: EmbedProductMenuSurface;
     childUnitId?: string;
+    embedId?: string;
     injector: unknown;
     menuSchema: unknown;
     menuTitlePrefix?: string;
@@ -215,6 +225,7 @@ export enum EmbedHostChromeMode {
 }
 
 export type EmbedFloatingStage = 'inactive' | 'stage1' | 'stage2';
+export type EmbedInteractionFlow = 'floating-stage' | 'doc-block';
 
 export interface IEmbedFloatingActivation {
     hostUnitId: string;
@@ -237,6 +248,9 @@ export interface IEmbedFloatingMenuContribution {
 export interface IEmbedPassiveViewportWheelContext extends IEmbedChildContainerContext {
     event: WheelEvent;
     stage: EmbedFloatingStage;
+    source?: 'wheel' | 'host-scroll-sync';
+    viewportScrollX?: number;
+    viewportScrollY?: number;
 }
 
 export interface IEmbedPassiveViewportProvider {

@@ -367,6 +367,7 @@ export class Documents extends DocComponent {
                             this._drawLiquid.translateLine(line, true, true);
 
                             rotateTranslateXListApply && this._drawLiquid.translate(rotateTranslateXListApply[i]); // x axis offset
+                            this._drawLineBackground(ctx, page, line);
 
                             const divideLength = divides.length;
 
@@ -678,6 +679,38 @@ export class Documents extends DocComponent {
         return dataModel?.getUnitId?.() ?? this.oKey;
     }
 
+    private _drawLineBackground(
+        ctx: UniverRenderingContext,
+        page: IDocumentSkeletonPage,
+        line: IDocumentSkeletonLine,
+        left = 0,
+        top = 0
+    ) {
+        const color = line.backgroundColor?.rgb;
+        if (!color || this._drawLiquid == null) {
+            return;
+        }
+
+        let { x, y } = this._drawLiquid;
+        const { pageWidth, marginLeft, marginRight, marginTop } = page;
+
+        x += marginLeft + (left ?? 0);
+        y -= line.marginTop;
+        y -= line.paddingTop;
+        y += marginTop + top;
+
+        ctx.save();
+        ctx.fillStyle = color;
+        fillRectByPrecisionBounds(
+            ctx,
+            x,
+            y,
+            pageWidth - marginLeft - marginRight,
+            line.lineHeight
+        );
+        ctx.restore();
+    }
+
     private _drawBorderBottom(
         ctx: UniverRenderingContext,
         page: IDocumentSkeletonPage,
@@ -813,6 +846,7 @@ export class Documents extends DocComponent {
                     } else {
                         this._drawLiquid.translateSave();
                         this._drawLiquid.translateLine(line, true, true);
+                        this._drawLineBackground(ctx, cell, line, page.marginLeft, page.marginTop);
 
                         const divideLength = divides.length;
 
@@ -1099,6 +1133,7 @@ export class Documents extends DocComponent {
                                 continue;
                             }
                         }
+                        this._drawLineBackground(ctx, page, line, parentPage.marginLeft);
 
                         const divideLength = divides.length;
 

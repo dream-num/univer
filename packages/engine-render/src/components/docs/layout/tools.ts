@@ -498,6 +498,10 @@ export function updateInlineDrawingCoordsAndBorder(ctx: ILayoutContext, pages: I
         }
 
         const paragraphStyle = paragraphConfig?.paragraphStyle;
+        if (paragraphStyle?.backgroundColor) {
+            line.backgroundColor = paragraphStyle.backgroundColor;
+        }
+
         if (line.divides.length > 0) {
             const lastDivide = line.divides[line.divides.length - 1];
             const lastGlyph = lastDivide.glyphGroup[lastDivide.glyphGroup.length - 1];

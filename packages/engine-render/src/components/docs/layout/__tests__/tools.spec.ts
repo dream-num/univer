@@ -18,6 +18,7 @@ import {
     AlignTypeH,
     AlignTypeV,
     BooleanNumber,
+    DataStreamTreeTokenType,
     DocumentFlavor,
     GridType,
     NumberUnitType,
@@ -65,6 +66,7 @@ import {
     resetContext,
     setPageParent,
     updateBlockIndex,
+    updateInlineDrawingCoordsAndBorder,
     validationGrid,
 } from '../tools';
 
@@ -247,6 +249,38 @@ describe('docs layout tools extra', () => {
         const columns: any[] = [];
         columnIterator([page] as any, (col) => columns.push(col));
         expect(columns.length).toBe(1);
+    });
+
+    it('copies paragraph background color to the rendered line', () => {
+        const { page, line1 } = createPageSkeleton();
+        const paragraphMark = {
+            streamType: DataStreamTreeTokenType.PARAGRAPH,
+            count: 1,
+            glyphType: GlyphType.WORD,
+            width: 0,
+            bBox: { ba: 0, bd: 0 },
+            xOffset: 0,
+        };
+        line1.divides = [{
+            glyphGroup: [paragraphMark],
+        }];
+        const ctx = {
+            paragraphConfigCache: new Map([[
+                undefined,
+                new Map([[
+                    0,
+                    {
+                        paragraphStyle: {
+                            backgroundColor: { rgb: '#ffffff' },
+                        },
+                    },
+                ]]),
+            ]]),
+        };
+
+        updateInlineDrawingCoordsAndBorder(ctx as any, [page] as any);
+
+        expect(line1.backgroundColor).toEqual({ rgb: '#ffffff' });
     });
 
     it('computes horizontal and vertical positioned object coordinates', () => {

@@ -1285,4 +1285,49 @@ describe('documents render', () => {
 
         documents.dispose();
     });
+
+    it('draws paragraph background colors behind line text', () => {
+        const bodyPage = createPage(DocumentSkeletonPageType.BODY, '');
+        const paragraphLine = createLine(LineType.PARAGRAPH, 24);
+        paragraphLine.backgroundColor = { rgb: '#ffffff' };
+        paragraphLine.parent = bodyPage.sections[0].columns[0];
+        bodyPage.sections[0].columns[0].lines = [paragraphLine];
+        bodyPage.skeTables.clear();
+
+        const skeletonData = {
+            pages: [bodyPage],
+            skeHeaders: new Map(),
+            skeFooters: new Map(),
+        };
+        bodyPage.parent = skeletonData;
+
+        const skeleton = {
+            getSkeletonData: () => skeletonData,
+        } as any;
+
+        const documents = new Documents('docs-paragraph-background', skeleton, {
+            pageLayoutType: PageLayoutType.VERTICAL,
+            pageMarginLeft: 0,
+            pageMarginTop: 0,
+        });
+        documents.transformByState({
+            left: 0,
+            top: 0,
+            width: 260,
+            height: 180,
+        });
+        scene.addObject(documents, 1);
+
+        const ctx = canvas.getContext();
+        const fillRect = vi.spyOn(ctx, 'fillRect');
+
+        documents.draw(ctx, {
+            viewBound: { left: 0, top: 0, right: 900, bottom: 700 },
+            cacheBound: { left: 0, top: 0, right: 900, bottom: 700 },
+        } as any);
+
+        expect(fillRect).toHaveBeenCalled();
+
+        documents.dispose();
+    });
 });

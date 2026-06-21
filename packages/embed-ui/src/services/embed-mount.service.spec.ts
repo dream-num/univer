@@ -21,7 +21,7 @@
 import type { IDisposable, Injector } from '@univerjs/core';
 import type { IEmbedDescriptor } from '@univerjs/embed';
 import type { IEmbedChildContainerContext } from '../types/embed-ui';
-import { FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE, FOCUSING_UNIT, IContextService, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE, FOCUSING_UNIT, ICommandService, IContextService, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { EmbedFocusOwnerService } from '@univerjs/embed';
 import { describe, expect, it, vi } from 'vitest';
 import { EmbedChildViewRegistryService } from './embed-child-view-registry.service';
@@ -70,7 +70,7 @@ describe('EmbedMountService', () => {
             layout: 'doc-width-scale',
             hostElement,
         });
-        expect(hostElement.dataset.embedRenderScopeActive).toBe('true');
+        expect(hostElement.dataset.embedRenderScopeActive).toBe('false');
         expect(overlayRootService.get('child-sheet')).toBe(hostElement.querySelector('[data-embed-overlay-root]'));
         expect(childMount).toHaveBeenCalledWith(expect.objectContaining({
             childUnitId: 'child-sheet',
@@ -90,6 +90,86 @@ describe('EmbedMountService', () => {
         expect(floatingMenuDispose).toHaveBeenCalled();
         expect(childDispose).toHaveBeenCalled();
         expect(hostDispose).toHaveBeenCalled();
+    });
+
+    it('keeps floating render scopes inactive until an existing focus owner matches the embed', () => {
+        const firstHost = document.createElement('div');
+        const secondHost = document.createElement('div');
+        const focusOwnerService = new EmbedFocusOwnerService();
+        const inactiveService = createMountService({
+            hostRegistry: createHostRegistry(() => ({ hostElement: firstHost })),
+            childRegistry: createChildRegistry(),
+            injectorEntries: [
+                [EmbedFocusOwnerService, focusOwnerService],
+            ],
+        });
+
+        inactiveService.mount(createDescriptor());
+
+        expect(firstHost.dataset.embedRenderScopeActive).toBe('false');
+
+        focusOwnerService.setFocusOwner({
+            hostUnitId: 'host-1',
+            embedId: 'embed-1',
+            childUnitId: 'child-sheet',
+            childType: UniverInstanceType.UNIVER_SHEET,
+            reason: 'pointer',
+        });
+        const activeService = createMountService({
+            hostRegistry: createHostRegistry(() => ({ hostElement: secondHost })),
+            childRegistry: createChildRegistry(),
+            injectorEntries: [
+                [EmbedFocusOwnerService, focusOwnerService],
+            ],
+        });
+
+        activeService.mount(createDescriptor());
+
+        expect(secondHost.dataset.embedRenderScopeActive).toBe('true');
+    });
+
+    it('focuses the child unit in the scoped runtime when a floating child receives pointer focus', () => {
+        const hostElement = document.createElement('div');
+        const childUnit = { getUnitId: () => 'child-sheet' };
+        let childContext: IEmbedChildContainerContext | undefined;
+        const instanceService = {
+            currentUnitId: 'host-doc',
+            getUnit: vi.fn(() => childUnit),
+            setCurrentUnitForType: vi.fn((unitId: string) => {
+                instanceService.currentUnitId = unitId;
+            }),
+            getCurrentUnitOfType: vi.fn(() => ({ getUnitId: () => instanceService.currentUnitId })),
+            getFocusedUnit: vi.fn(() => ({ getUnitId: () => 'host-doc' })),
+            focusUnit: vi.fn(),
+        };
+        const commandService = {
+            executeCommand: vi.fn(),
+            syncExecuteCommand: vi.fn(),
+        };
+        const contextService = { setContextValue: vi.fn() };
+        const focusOwnerService = new EmbedFocusOwnerService();
+        const service = createMountService({
+            hostRegistry: createHostRegistry(() => ({ hostElement })),
+            childRegistry: createChildRegistry((context) => {
+                childContext = context;
+            }),
+            injectorEntries: [
+                [IUniverInstanceService, instanceService],
+                [ICommandService, commandService],
+                [IContextService, contextService],
+                [EmbedFocusOwnerService, focusOwnerService],
+            ],
+        });
+
+        service.mount(createDescriptor());
+        hostElement.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+
+        expect(childContext?.runtimeScope.instanceService?.getFocusedUnit()?.getUnitId()).toBe('child-sheet');
+        expect(contextService.setContextValue).toHaveBeenCalledWith(FOCUSING_SHEET, true);
+        expect(contextService.setContextValue).toHaveBeenCalledWith(FOCUSING_DOC, false);
+        expect(instanceService.setCurrentUnitForType).not.toHaveBeenCalledWith('child-sheet');
+        expect(instanceService.focusUnit).not.toHaveBeenCalledWith('child-sheet');
+        expect(focusOwnerService.getFocusOwner()).toMatchObject({ embedId: 'embed-1', childUnitId: 'child-sheet' });
     });
 
     it('activates tab sessions and updates host focus contexts', () => {

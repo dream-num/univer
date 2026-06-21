@@ -17,9 +17,10 @@
 import type { Nullable } from '@univerjs/core';
 import type { KeyCode } from '@univerjs/ui';
 import type { ICellEditorState } from '../../services/editor-bridge.service';
-import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, IContextService, ThemeService } from '@univerjs/core';
+import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, IContextService, Injector, ThemeService } from '@univerjs/core';
 import { DocSelectionRenderService, IEditorService } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
+import { EmbedFloatingGeometryService } from '@univerjs/embed-ui';
 import { ComponentManager, DISABLE_AUTO_FOCUS_KEY, MetaKeys, useDependency, useEvent, useObservable, useSidebarClick } from '@univerjs/ui';
 import * as React from 'react';
 import { useEffect, useState } from 'react';
@@ -27,6 +28,8 @@ import { SetCellEditVisibleArrowOperation, SetCellEditVisibleOperation } from '.
 import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY } from '../../common/keys';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
+import { SheetCellEditorResizeService } from '../../services/editor/cell-editor-resize.service';
+import { focusSheetCellEditorElement } from './focus-editor';
 import { useKeyEventConfig } from './hooks';
 
 interface ICellIEditorProps { }
@@ -79,11 +82,13 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
         ...EDITOR_DEFAULT_POSITION,
     });
     const cellEditorManagerService = useDependency(ICellEditorManagerService);
+    const injector = useDependency(Injector);
     const editorService = useDependency(IEditorService);
     const contextService = useDependency(IContextService);
     const themeService = useDependency(ThemeService);
     const componentManager = useDependency(ComponentManager);
     const editorBridgeService = useDependency(IEditorBridgeService);
+    const cellEditorResizeService = useDependency(SheetCellEditorResizeService);
     const visible = useObservable(editorBridgeService.visible$);
     const commandService = useDependency(ICommandService);
     const disableAutoFocus = useObservable(
@@ -139,6 +144,19 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
     }, []); // Empty dependency array means this effect runs once on mount and clean up on unmount
 
     useEffect(() => {
+        if (!injector.has(EmbedFloatingGeometryService)) {
+            return undefined;
+        }
+
+        const geometryService = injector.get(EmbedFloatingGeometryService);
+        const subscription = geometryService.geometryInvalidated$.subscribe(() => {
+            cellEditorResizeService.resizeCellEditor();
+        });
+
+        return () => subscription.unsubscribe();
+    }, [cellEditorResizeService, injector]);
+
+    useEffect(() => {
         if (!disableAutoFocus) {
             cellEditorManagerService.setFocus(true);
         }
@@ -151,6 +169,7 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
 
         let focusRetryFrame = 0;
         let finalFocusRetryFrame = 0;
+        const focusRetryTimers: number[] = [];
 
         const focusEditor = () => {
             const editor = editorService.getEditor(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
@@ -159,6 +178,8 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
             if (!docSelectionRenderService?.isFocusing) {
                 docSelectionRenderService?.focus();
             }
+
+            focusSheetCellEditorElement();
         };
 
         focusEditor();
@@ -166,10 +187,14 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
             focusEditor();
             finalFocusRetryFrame = requestAnimationFrame(focusEditor);
         });
+        [0, 80, 200, 500, 1000].forEach((delay) => {
+            focusRetryTimers.push(window.setTimeout(focusEditor, delay));
+        });
 
         return () => {
             cancelAnimationFrame(focusRetryFrame);
             cancelAnimationFrame(finalFocusRetryFrame);
+            focusRetryTimers.forEach((timer) => window.clearTimeout(timer));
         };
     }, [editorService, visible?.visible]);
 

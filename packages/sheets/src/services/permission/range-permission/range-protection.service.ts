@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IPermissionPoint } from '@univerjs/core';
 import type { UnitAction } from '@univerjs/protocol';
 
 import type { IObjectModel } from '../../../models/range-protection-rule.model';
@@ -121,7 +122,7 @@ export class RangeProtectionService extends Disposable {
                             getAllRangePermissionPoint().forEach((Factor) => {
                                 const instance = new Factor(unitId, subUnitId, rule.permissionId);
                                 instance.value = false;
-                                this._permissionService.addPermissionPoint(instance);
+                                this._addOrUpdatePermissionPoint(instance);
                             });
                         });
                         this._selectionProtectionCache.reBuildCache(unitId, subUnitId);
@@ -132,5 +133,14 @@ export class RangeProtectionService extends Disposable {
                 },
             })
         );
+    }
+
+    private _addOrUpdatePermissionPoint(instance: IPermissionPoint) {
+        if (this._permissionService.getPermissionPoint(instance.id)) {
+            this._permissionService.updatePermissionPoint(instance.id, instance.value);
+            return;
+        }
+
+        this._permissionService.addPermissionPoint(instance);
     }
 }

@@ -148,17 +148,18 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         }
 
         const dependencies = this._renderDependencies.get(type)!;
-        dependencies.push(...deps);
+        const registeredDeps = deps.filter((dep) => !hasRenderDependency(dependencies, dep));
+        dependencies.push(...registeredDeps);
 
         for (const [_, render] of this._renderMap) {
             const renderType = render.type;
             if (renderType === type) {
-                this._tryAddRenderDependencies(render, deps);
+                this._tryAddRenderDependencies(render, registeredDeps);
             }
         }
 
         return toDisposable(() => {
-            deps.forEach((dep) => remove(dependencies, dep));
+            registeredDeps.forEach((dep) => remove(dependencies, dep));
         });
     }
 
@@ -173,6 +174,10 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         }
 
         const dependencies = this._renderDependencies.get(type)!;
+        if (hasRenderDependency(dependencies, depCtor)) {
+            return toDisposable(() => {});
+        }
+
         dependencies.push(depCtor);
 
         for (const [_, render] of this._renderMap) {
@@ -380,6 +385,25 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
 
         this._renderDisposed$.next(item.unitId);
     }
+}
+
+function hasRenderDependency(dependencies: Dependency[], dep: Dependency): boolean {
+    const identifier = getRenderDependencyIdentifier(dep);
+    const key = getRenderDependencyIdentifierKey(identifier);
+    return dependencies.some((registered) => getRenderDependencyIdentifierKey(getRenderDependencyIdentifier(registered)) === key);
+}
+
+function getRenderDependencyIdentifier(dep: Dependency): DependencyIdentifier<unknown> {
+    return (Array.isArray(dep) ? dep[0] : dep) as DependencyIdentifier<unknown>;
+}
+
+function getRenderDependencyIdentifierKey(identifier: DependencyIdentifier<unknown>): DependencyIdentifier<unknown> | string {
+    const decoratorName = (identifier as unknown as { decoratorName?: unknown }).decoratorName;
+    if (typeof decoratorName === 'string' && decoratorName) {
+        return `identifier:${decoratorName}`;
+    }
+
+    return identifier;
 }
 
 export const IRenderManagerService = createIdentifier<IRenderManagerService>('engine-render.render-manager.service');

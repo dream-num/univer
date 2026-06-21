@@ -25,7 +25,8 @@ import {
     PositionedObjectLayoutType,
     WrapTextType,
 } from '@univerjs/core';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { setDocsCustomBlockRenderViewportProvider } from '../../../../custom-block-render-viewport';
 import { updateInlineDrawingCoordsAndBorder } from '../../../tools';
 import { lineBreaking } from '../linebreaking';
 import { shaping } from '../shaping';
@@ -60,6 +61,9 @@ describe('linebreaking', () => {
                 }),
             }),
         });
+    });
+    afterEach(() => {
+        setDocsCustomBlockRenderViewportProvider(null);
     });
 
     it('lays out short text on a single page', () => {
@@ -121,6 +125,86 @@ describe('linebreaking', () => {
         const result = lineBreaking(ctx, viewModel, [], curPage, paragraphNode, sectionBreakConfig, null);
 
         expect(result.length).toBe(1);
+    });
+
+    it('keeps top-bottom custom blocks in the positioned drawing bucket', () => {
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed(DataStreamTreeTokenType.CUSTOM_BLOCK, {
+            body: {
+                customBlocks: [{ startIndex: 0, blockId: 'b1' }],
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.MODERN,
+            },
+            drawings: {
+                b1: {
+                    drawingId: 'b1',
+                    layoutType: PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM,
+                    docTransform: {
+                        angle: 0,
+                        positionH: { relativeFrom: ObjectRelativeFromH.COLUMN, posOffset: 0 },
+                        positionV: { relativeFrom: ObjectRelativeFromV.PARAGRAPH, posOffset: 0 },
+                        size: { width: 100, height: 120 },
+                    },
+                },
+            },
+        });
+        const shapedTextList = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+
+        lineBreaking(ctx, viewModel, shapedTextList, curPage, paragraphNode, sectionBreakConfig, null);
+
+        const paragraphConfig = ctx.paragraphConfigCache.get(curPage.segmentId)?.get(paragraphNode.endIndex);
+        expect(paragraphConfig?.paragraphInlineSkeDrawings?.has('b1')).toBe(false);
+        expect(paragraphConfig?.paragraphNonInlineSkeDrawings?.has('b1')).toBe(true);
+
+        const line = curPage.sections[0].columns[0].lines[0];
+        expect(line.lineHeight).toBeLessThan(120);
+
+        const drawing = curPage.skeDrawings.get('b1');
+        expect(drawing?.height).toBe(120);
+    });
+
+    it('uses measured custom block viewport height to push following paragraphs', () => {
+        setDocsCustomBlockRenderViewportProvider(() => ({
+            contentHeight: 240,
+            contentWidth: 160,
+            height: 240,
+            viewportHeight: 120,
+            width: 160,
+        }));
+
+        const { viewModel, ctx, sectionNode, sectionBreakConfig, curPage } = createSectionLayoutTestBed([DataStreamTreeTokenType.CUSTOM_BLOCK, 'After block'], {
+            body: {
+                customBlocks: [{ startIndex: 0, blockId: 'b1' }],
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.MODERN,
+                pageSize: { width: 400, height: 1200 },
+            },
+            drawings: {
+                b1: {
+                    drawingId: 'b1',
+                    layoutType: PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM,
+                    docTransform: {
+                        angle: 0,
+                        positionH: { relativeFrom: ObjectRelativeFromH.COLUMN, posOffset: 0 },
+                        positionV: { relativeFrom: ObjectRelativeFromV.PARAGRAPH, posOffset: 0 },
+                        size: { width: 160, height: 80 },
+                    },
+                },
+            },
+        });
+        const [blockParagraph, textParagraph] = sectionNode.children;
+        const blockShapedTextList = shaping(ctx, blockParagraph.content!, viewModel, blockParagraph, sectionBreakConfig);
+        const afterBlockPages = lineBreaking(ctx, viewModel, blockShapedTextList, curPage, blockParagraph, sectionBreakConfig, null);
+        const textShapedTextList = shaping(ctx, textParagraph.content!, viewModel, textParagraph, sectionBreakConfig);
+        const result = lineBreaking(ctx, viewModel, textShapedTextList, afterBlockPages[afterBlockPages.length - 1], textParagraph, sectionBreakConfig, null);
+
+        const page = result[0];
+        const drawing = page.skeDrawings.get('b1');
+        const textLine = page.sections[0].columns[0].lines.find((line) => line.paragraphIndex === textParagraph.endIndex);
+
+        expect(drawing?.height).toBe(240);
+        expect(textLine?.top).toBeGreaterThanOrEqual((drawing?.aTop ?? 0) + (drawing?.height ?? 0));
     });
 
     it('ignores custom blocks that reference missing drawings', () => {
@@ -1481,4 +1565,320 @@ describe('linebreaking', () => {
         expect(ctx.paragraphConfigCache.get('segment-1')?.get(3)?.useWordStyleLineHeight).toBe(false);
         expect(paragraphStyle).toEqual({});
     });
+
+    it('keeps multiple measured top-bottom custom blocks in document-flow order', () => {
+        const heights: Record<string, number> = {
+            b1: 19004,
+            b2: 5156,
+            b3: 405,
+        };
+        setDocsCustomBlockRenderViewportProvider((_unitId, blockId, input) => {
+            const height = heights[blockId];
+            if (height == null) {
+                return null;
+            }
+
+            return {
+                contentHeight: height,
+                contentWidth: input.fallbackWidth,
+                height,
+                viewportHeight: Math.min(height, 1123),
+                width: input.fallbackWidth,
+            };
+        });
+
+        const contents = ['Embed host document', 'Inserted line above block', DataStreamTreeTokenType.CUSTOM_BLOCK, DataStreamTreeTokenType.CUSTOM_BLOCK, DataStreamTreeTokenType.CUSTOM_BLOCK];
+        const { viewModel, ctx, sectionNode, sectionBreakConfig, curPage } = createSectionLayoutTestBed(contents, {
+            body: {
+                customBlocks: [
+                    { startIndex: 46, blockId: 'b1' },
+                    { startIndex: 48, blockId: 'b2' },
+                    { startIndex: 50, blockId: 'b3' },
+                ],
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.MODERN,
+                pageSize: { width: 1200, height: Number.POSITIVE_INFINITY },
+            },
+            drawings: {
+                b1: createTopBottomDrawing('b1', 960, 480),
+                b2: createTopBottomDrawing('b2', 960, 480),
+                b3: createTopBottomDrawing('b3', 720, 405),
+            },
+        });
+
+        let pages = [curPage];
+        for (const paragraph of sectionNode.children) {
+            const shapedTextList = shaping(ctx, paragraph.content!, viewModel, paragraph, sectionBreakConfig);
+            pages = lineBreaking(ctx, viewModel, shapedTextList, pages[pages.length - 1], paragraph, sectionBreakConfig, null);
+        }
+
+        const page = pages[0];
+        const sheet = page.skeDrawings.get('b1')!;
+        const base = page.skeDrawings.get('b2')!;
+        const slide = page.skeDrawings.get('b3')!;
+
+        expect(sheet.height).toBe(19004);
+        expect(base.height).toBe(5156);
+        expect(sheet.aTop).toBeLessThan(sheet.height);
+        expect(base.aTop).toBeGreaterThanOrEqual(sheet.aTop + sheet.height);
+        expect(slide.aTop).toBeGreaterThanOrEqual(base.aTop + base.height);
+    });
+
+    it('keeps consecutive measured top-bottom custom blocks in document-flow order on finite pages', () => {
+        const heights: Record<string, number> = {
+            b1: 19004,
+            b2: 5156,
+            b3: 405,
+        };
+        setDocsCustomBlockRenderViewportProvider((_unitId, blockId, input) => {
+            const height = heights[blockId];
+            if (height == null) {
+                return null;
+            }
+
+            return {
+                contentHeight: height,
+                contentWidth: input.fallbackWidth,
+                height,
+                viewportHeight: Math.min(height, 923),
+                width: input.fallbackWidth,
+            };
+        });
+
+        const contents = ['Embed host document', DataStreamTreeTokenType.CUSTOM_BLOCK, DataStreamTreeTokenType.CUSTOM_BLOCK, DataStreamTreeTokenType.CUSTOM_BLOCK];
+        const { viewModel, ctx, sectionNode, sectionBreakConfig, curPage } = createSectionLayoutTestBed(contents, {
+            body: {
+                customBlocks: [
+                    { startIndex: 20, blockId: 'b1' },
+                    { startIndex: 22, blockId: 'b2' },
+                    { startIndex: 24, blockId: 'b3' },
+                ],
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.MODERN,
+                pageSize: { width: 1200, height: 960 },
+            },
+            drawings: {
+                b1: createTopBottomDrawing('b1', 960, 480),
+                b2: createTopBottomDrawing('b2', 960, 480),
+                b3: createTopBottomDrawing('b3', 720, 405),
+            },
+        });
+
+        let pages = [curPage];
+        for (const paragraph of sectionNode.children) {
+            const shapedTextList = shaping(ctx, paragraph.content!, viewModel, paragraph, sectionBreakConfig);
+            pages = lineBreaking(ctx, viewModel, shapedTextList, pages[pages.length - 1], paragraph, sectionBreakConfig, null);
+        }
+
+        const drawings = pages.flatMap((page) => [...page.skeDrawings.values()]);
+        const lines = pages.flatMap((page) => page.sections.flatMap((section) => section.columns.flatMap((column) => column.lines)));
+        const sheet = drawings.find((drawing) => drawing.drawingId === 'b1')!;
+        const base = drawings.find((drawing) => drawing.drawingId === 'b2')!;
+        const slide = drawings.find((drawing) => drawing.drawingId === 'b3')!;
+        const slideLine = lines.find((line) => line.divides.some((divide) => divide.glyphGroup.some((glyph) => glyph.drawingId === 'b3')))!;
+
+        expect(sheet.height).toBe(19004);
+        expect(base.height).toBe(5156);
+        expect(slide.height).toBe(405);
+        expect(sheet.aTop).toBeLessThan(sheet.height);
+        expect(base.aTop).toBeGreaterThanOrEqual(sheet.aTop + sheet.height);
+        expect(slide.aTop).toBeGreaterThanOrEqual(slideLine.top);
+        expect(slide.aTop).toBeGreaterThanOrEqual(base.aTop + base.height);
+    });
+
+    it('does not collapse adjacent top-bottom custom blocks in the same paragraph', () => {
+        const heights: Record<string, number> = {
+            b1: 300,
+            b2: 200,
+            b3: 100,
+        };
+        setDocsCustomBlockRenderViewportProvider((_unitId, blockId, input) => {
+            const height = heights[blockId];
+            if (height == null) {
+                return null;
+            }
+
+            return {
+                contentHeight: height,
+                contentWidth: input.fallbackWidth,
+                height,
+                viewportHeight: height,
+                width: input.fallbackWidth,
+            };
+        });
+
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed(
+            `${DataStreamTreeTokenType.CUSTOM_BLOCK}${DataStreamTreeTokenType.CUSTOM_BLOCK}${DataStreamTreeTokenType.CUSTOM_BLOCK}`,
+            {
+                body: {
+                    customBlocks: [
+                        { startIndex: 0, blockId: 'b1' },
+                        { startIndex: 1, blockId: 'b2' },
+                        { startIndex: 2, blockId: 'b3' },
+                    ],
+                },
+                documentStyle: {
+                    documentFlavor: DocumentFlavor.MODERN,
+                    pageSize: { width: 1200, height: Number.POSITIVE_INFINITY },
+                },
+                drawings: {
+                    b1: createTopBottomDrawing('b1', 960, 480),
+                    b2: createTopBottomDrawing('b2', 960, 480),
+                    b3: createTopBottomDrawing('b3', 720, 405),
+                },
+            }
+        );
+        const shapedTextList = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+
+        lineBreaking(ctx, viewModel, shapedTextList, curPage, paragraphNode, sectionBreakConfig, null);
+
+        const sheet = curPage.skeDrawings.get('b1')!;
+        const base = curPage.skeDrawings.get('b2')!;
+        const slide = curPage.skeDrawings.get('b3')!;
+
+        expect(sheet.height).toBe(300);
+        expect(base.aTop).toBeGreaterThanOrEqual(sheet.aTop + sheet.height);
+        expect(slide.aTop).toBeGreaterThanOrEqual(base.aTop + base.height);
+    });
+
+    it('overwrites stale measured top-bottom drawing positions during relayout', () => {
+        const heights: Record<string, number> = {
+            b1: 19004,
+            b2: 5156,
+            b3: 405,
+        };
+        setDocsCustomBlockRenderViewportProvider((_unitId, blockId, input) => {
+            const height = heights[blockId];
+            if (height == null) {
+                return null;
+            }
+
+            return {
+                contentHeight: height,
+                contentWidth: input.fallbackWidth,
+                height,
+                viewportHeight: Math.min(height, 923),
+                width: input.fallbackWidth,
+            };
+        });
+
+        const contents = ['Embed host document', DataStreamTreeTokenType.CUSTOM_BLOCK, DataStreamTreeTokenType.CUSTOM_BLOCK, DataStreamTreeTokenType.CUSTOM_BLOCK];
+        const { dataModel, viewModel, ctx, sectionNode, sectionBreakConfig, curPage } = createSectionLayoutTestBed(contents, {
+            body: {
+                customBlocks: [
+                    { startIndex: 20, blockId: 'b1' },
+                    { startIndex: 22, blockId: 'b2' },
+                    { startIndex: 24, blockId: 'b3' },
+                ],
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.MODERN,
+                pageSize: { width: 1200, height: 960 },
+            },
+            drawings: {
+                b1: createTopBottomDrawing('b1', 960, 480),
+                b2: createTopBottomDrawing('b2', 960, 480),
+                b3: createTopBottomDrawing('b3', 720, 405),
+            },
+        });
+        const originDrawings = dataModel.getSnapshot().drawings!;
+        curPage.skeDrawings.set('b1', createStaleTopBottomSkeleton('b1', originDrawings.b1, 19040, 19004));
+        curPage.skeDrawings.set('b2', createStaleTopBottomSkeleton('b2', originDrawings.b2, 5204, 5156));
+        curPage.skeDrawings.set('b3', createStaleTopBottomSkeleton('b3', originDrawings.b3, 465, 405));
+
+        let pages = [curPage];
+        for (const paragraph of sectionNode.children) {
+            const shapedTextList = shaping(ctx, paragraph.content!, viewModel, paragraph, sectionBreakConfig);
+            pages = lineBreaking(ctx, viewModel, shapedTextList, pages[pages.length - 1], paragraph, sectionBreakConfig, null);
+        }
+
+        const drawings = pages.flatMap((page) => [...page.skeDrawings.values()]);
+        const sheet = drawings.find((drawing) => drawing.drawingId === 'b1')!;
+        const base = drawings.find((drawing) => drawing.drawingId === 'b2')!;
+        const slide = drawings.find((drawing) => drawing.drawingId === 'b3')!;
+
+        expect(base.aTop).toBeGreaterThanOrEqual(sheet.aTop + sheet.height);
+        expect(slide.aTop).toBeGreaterThanOrEqual(base.aTop + base.height);
+    });
+
+    it('moves measured top-bottom custom block with preceding document-flow content', () => {
+        setDocsCustomBlockRenderViewportProvider((_unitId, blockId, input) => {
+            if (blockId !== 'b1') {
+                return null;
+            }
+
+            return {
+                contentHeight: 640,
+                contentWidth: input.fallbackWidth,
+                height: 640,
+                viewportHeight: 640,
+                width: input.fallbackWidth,
+            };
+        });
+
+        const layoutBlockTop = (contents: string[], blockParagraphIndex: number) => {
+            const startIndex = contents
+                .slice(0, blockParagraphIndex)
+                .reduce((index, content) => index + content.length + 1, 0);
+            const { viewModel, ctx, sectionNode, sectionBreakConfig, curPage } = createSectionLayoutTestBed(contents, {
+                body: {
+                    customBlocks: [{ startIndex, blockId: 'b1' }],
+                },
+                documentStyle: {
+                    documentFlavor: DocumentFlavor.MODERN,
+                    pageSize: { width: 1200, height: Number.POSITIVE_INFINITY },
+                },
+                drawings: {
+                    b1: createTopBottomDrawing('b1', 960, 480),
+                },
+            });
+
+            let pages = [curPage];
+            for (const paragraph of sectionNode.children) {
+                const shapedTextList = shaping(ctx, paragraph.content!, viewModel, paragraph, sectionBreakConfig);
+                pages = lineBreaking(ctx, viewModel, shapedTextList, pages[pages.length - 1], paragraph, sectionBreakConfig, null);
+            }
+
+            return pages[0].skeDrawings.get('b1')!.aTop;
+        };
+
+        const originalTop = layoutBlockTop(['Embed host document', DataStreamTreeTokenType.CUSTOM_BLOCK], 1);
+        const shiftedTop = layoutBlockTop(['Embed host document', 'Inserted paragraph before block', DataStreamTreeTokenType.CUSTOM_BLOCK], 2);
+
+        expect(shiftedTop).toBeGreaterThan(originalTop);
+    });
 });
+
+function createTopBottomDrawing(drawingId: string, width: number, height: number) {
+    return {
+        drawingId,
+        layoutType: PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM,
+        docTransform: {
+            angle: 0,
+            positionH: { relativeFrom: ObjectRelativeFromH.COLUMN, posOffset: 0 },
+            positionV: { relativeFrom: ObjectRelativeFromV.PARAGRAPH, posOffset: 0 },
+            size: { width, height },
+        },
+    };
+}
+
+function createStaleTopBottomSkeleton(drawingId: string, drawingOrigin: unknown, aTop: number, height: number) {
+    return {
+        aLeft: 0,
+        aTop,
+        angle: 0,
+        blockAnchorTop: aTop,
+        columnLeft: 0,
+        customBlockRenderViewport: { height, viewportHeight: Math.min(height, 923) },
+        drawingId,
+        drawingOrigin,
+        height,
+        initialState: true,
+        isPageBreak: false,
+        lineHeight: 0,
+        lineTop: aTop,
+        width: 960,
+    } as never;
+}

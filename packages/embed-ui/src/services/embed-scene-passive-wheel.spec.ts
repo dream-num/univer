@@ -59,6 +59,34 @@ describe('embed scene passive wheel helpers', () => {
         expect(makeDirty).toHaveBeenCalledWith(true);
     });
 
+    it('uses absolute viewport position for host scroll sync when available', () => {
+        const makeDirty = vi.fn();
+        const viewport = {
+            viewportScrollX: 0,
+            viewportScrollY: 20,
+            scrollToViewportPos: vi.fn(({ viewportScrollY }) => {
+                viewport.viewportScrollY = viewportScrollY ?? viewport.viewportScrollY;
+            }),
+            scrollByViewportDeltaVal: vi.fn(),
+        };
+
+        const handled = scrollSceneViewportPassive(
+            {
+                event: new WheelEvent('wheel', { deltaY: 999 }),
+                source: 'host-scroll-sync',
+                viewportScrollY: 320,
+            } as any,
+            viewport,
+            { makeDirty }
+        );
+
+        expect(handled).toBe(true);
+        expect(viewport.scrollToViewportPos).toHaveBeenCalledWith({ viewportScrollX: 0, viewportScrollY: 320 });
+        expect(viewport.scrollByViewportDeltaVal).not.toHaveBeenCalled();
+        expect(viewport.viewportScrollY).toBe(320);
+        expect(makeDirty).toHaveBeenCalledWith(true);
+    });
+
     it('does not consume wheel events when the viewport cannot move', () => {
         const makeDirty = vi.fn();
         const viewport = {

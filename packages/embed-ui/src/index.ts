@@ -68,8 +68,15 @@ export { EmbedChildViewRegistryService } from './services/embed-child-view-regis
 export { EmbedContentSizeRegistryService } from './services/embed-content-size-registry.service';
 export { createDefaultEmbedFloatingMenuContributions, mountDefaultEmbedFloatingMenu } from './services/embed-default-floating-menu';
 export { createEmbedDomPassiveViewportProvider, type ICreateEmbedDomPassiveViewportProviderOptions } from './services/embed-dom-passive-viewport-provider';
+export { shouldPassDocsStickyVerticalWheelToHost } from './services/embed-docs-sticky-wheel';
 export { EmbedFloatPreviewService } from './services/embed-float-preview.service';
 export { EmbedFloatingActiveService } from './services/embed-floating-active.service';
+export {
+    type EmbedFloatingGeometryInvalidationReason,
+    EmbedFloatingGeometryService,
+    type IEmbedFloatingGeometryInvalidation,
+    type IEmbedFloatingGeometryRegistration,
+} from './services/embed-floating-geometry.service';
 export { EmbedFloatingMenuRegistryService } from './services/embed-floating-menu-registry.service';
 export { resolveEmbedFloatingMenuRoot } from './services/embed-floating-menu-root';
 export { EmbedFullscreenService } from './services/embed-fullscreen.service';
@@ -78,6 +85,7 @@ export { EmbedHostAnchorModelService } from './services/embed-host-anchor-model.
 export { EmbedHostContainerRegistryService } from './services/embed-host-container-registry.service';
 export { EmbedHostLifecycleService, type IEmbedHostCopyContext, type IEmbedHostCreateContext, type IEmbedHostRemoveContext } from './services/embed-host-lifecycle.service';
 export { EmbedHostMenuOverrideService } from './services/embed-host-menu-override.service';
+export { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, EmbedInteractionBoundaryService } from './services/embed-interaction-boundary.service';
 export {
     EMBED_DUPLICATE_CHILD_UNIT_ERROR_CODE,
     EmbedDuplicateChildUnitError,
@@ -99,6 +107,7 @@ export {
     ensureEmbedChildRender,
     type ICreateEmbedRenderChildViewContributionOptions,
     mountEmbedRenderChildUnit,
+    observeEmbedRenderTargetResize,
     refreshEmbedChildRender,
 } from './services/embed-render-child-view-contribution';
 export {
@@ -123,6 +132,7 @@ export type {
     EmbedFloatPreviewReason,
     EmbedFloatPreviewRenderResult,
     EmbedFloatPreviewStatus,
+    EmbedInteractionFlow,
     EmbedProductMenuSurface,
     IEmbedBlockContribution,
     IEmbedChildContainerContext,

@@ -48,7 +48,15 @@ export class EmbedHostAdapterRegistryService {
         hostContext?: Record<string, unknown>;
     }): string {
         const contribution = this.get(params.hostType, params.entry);
-        return contribution?.createAnchor?.(params) ?? params.requestedAnchorId ?? `${params.embedId}-anchor`;
+        if (!contribution) {
+            throw new Error(`EMBED_HOST_ADAPTER_NOT_REGISTERED:${params.hostType}:${params.entry}`);
+        }
+
+        if (!contribution.createAnchor) {
+            throw new Error(`EMBED_HOST_ADAPTER_CREATE_ANCHOR_NOT_IMPLEMENTED:${params.hostType}:${params.entry}`);
+        }
+
+        return contribution.createAnchor(params);
     }
 
     createAnchorPlan(params: {
@@ -61,8 +69,15 @@ export class EmbedHostAdapterRegistryService {
         descriptor?: IEmbedDescriptor;
     }): IEmbedHostAnchorMutationPlan {
         const contribution = this.get(params.hostType, params.entry);
+        if (!contribution) {
+            throw new Error(`EMBED_HOST_ADAPTER_NOT_REGISTERED:${params.hostType}:${params.entry}`);
+        }
+
         if (contribution?.createAnchorPlan) {
             return contribution.createAnchorPlan(params);
+        }
+        if (!contribution.createAnchor) {
+            throw new Error(`EMBED_HOST_ADAPTER_CREATE_ANCHOR_NOT_IMPLEMENTED:${params.hostType}:${params.entry}`);
         }
 
         const hostAnchorId = params.requestedAnchorId ?? `${params.embedId}-anchor`;

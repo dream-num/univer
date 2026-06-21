@@ -34,6 +34,7 @@ import { EmbedContentSizeRegistryService } from './services/embed-content-size-r
 import { createDefaultEmbedFloatingMenuContributions } from './services/embed-default-floating-menu';
 import { EmbedFloatPreviewService } from './services/embed-float-preview.service';
 import { EmbedFloatingActiveService } from './services/embed-floating-active.service';
+import { EmbedFloatingGeometryService } from './services/embed-floating-geometry.service';
 import { EmbedFloatingMenuRegistryService } from './services/embed-floating-menu-registry.service';
 import { EmbedFullscreenService } from './services/embed-fullscreen.service';
 import { EmbedHostAdapterRegistryService } from './services/embed-host-adapter-registry.service';
@@ -41,6 +42,7 @@ import { EmbedHostAnchorModelService } from './services/embed-host-anchor-model.
 import { EmbedHostContainerRegistryService } from './services/embed-host-container-registry.service';
 import { EmbedHostLifecycleService } from './services/embed-host-lifecycle.service';
 import { EmbedHostMenuOverrideService } from './services/embed-host-menu-override.service';
+import { EmbedInteractionBoundaryService } from './services/embed-interaction-boundary.service';
 import { EmbedMountService } from './services/embed-mount.service';
 import { EmbedOverlayRootService } from './services/embed-overlay-root.service';
 import { EmbedPassiveViewportRegistryService } from './services/embed-passive-viewport-registry.service';
@@ -90,11 +92,13 @@ export class UniverEmbedUIPlugin extends Plugin {
             [EmbedChildViewRegistryService],
             [EmbedBlockRegistryService],
             [EmbedFloatingActiveService],
+            [EmbedFloatingGeometryService],
             [EmbedFloatingMenuRegistryService],
             [EmbedFloatPreviewService],
             [EmbedContentSizeRegistryService],
             [EmbedFullscreenService],
             [EmbedHostMenuOverrideService],
+            [EmbedInteractionBoundaryService],
             [EmbedHostAnchorCleanupController],
             [EmbedHostRibbonOverrideController],
             [EmbedMountService],

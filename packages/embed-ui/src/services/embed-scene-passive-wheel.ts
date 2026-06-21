@@ -41,25 +41,36 @@ export function scrollSceneViewportPassive(
     viewport: {
         viewportScrollX?: number;
         viewportScrollY?: number;
+        scrollToViewportPos?: (position: Partial<{ viewportScrollX: number; viewportScrollY: number }>) => unknown;
         scrollByViewportDeltaVal?: (delta: { viewportScrollX: number; viewportScrollY: number }) => unknown;
     } | null | undefined,
     scene?: { scaleX?: number; scaleY?: number; makeDirty?: (force?: boolean) => void }
 ): boolean {
-    if (!viewport?.scrollByViewportDeltaVal) {
+    if (!viewport) {
         return false;
     }
 
-    const { offsetX, offsetY } = normalizePassiveWheelDelta(context.event, scene?.scaleX, scene?.scaleY);
+    const { offsetX, offsetY } = resolvePassiveViewportDelta(context, viewport, scene);
     if (!offsetX && !offsetY) {
         return false;
     }
 
     const previousX = viewport.viewportScrollX ?? 0;
     const previousY = viewport.viewportScrollY ?? 0;
-    viewport.scrollByViewportDeltaVal({
-        viewportScrollX: offsetX,
-        viewportScrollY: offsetY,
-    });
+    if (context.source === 'host-scroll-sync' && viewport.scrollToViewportPos && (context.viewportScrollX != null || context.viewportScrollY != null)) {
+        viewport.scrollToViewportPos({
+            viewportScrollX: context.viewportScrollX ?? previousX,
+            viewportScrollY: context.viewportScrollY ?? previousY,
+        });
+    } else if (viewport.scrollByViewportDeltaVal) {
+        viewport.scrollByViewportDeltaVal({
+            viewportScrollX: offsetX,
+            viewportScrollY: offsetY,
+        });
+    } else {
+        return false;
+    }
+
     const changed = (viewport.viewportScrollX ?? 0) !== previousX ||
         (viewport.viewportScrollY ?? 0) !== previousY;
     if (changed) {
@@ -67,4 +78,19 @@ export function scrollSceneViewportPassive(
     }
 
     return changed;
+}
+
+function resolvePassiveViewportDelta(
+    context: IEmbedPassiveViewportWheelContext,
+    viewport: { viewportScrollX?: number; viewportScrollY?: number },
+    scene?: { scaleX?: number; scaleY?: number }
+): { offsetX: number; offsetY: number } {
+    if (context.source === 'host-scroll-sync' && (context.viewportScrollX != null || context.viewportScrollY != null)) {
+        return {
+            offsetX: (context.viewportScrollX ?? viewport.viewportScrollX ?? 0) - (viewport.viewportScrollX ?? 0),
+            offsetY: (context.viewportScrollY ?? viewport.viewportScrollY ?? 0) - (viewport.viewportScrollY ?? 0),
+        };
+    }
+
+    return normalizePassiveWheelDelta(context.event, scene?.scaleX, scene?.scaleY);
 }

@@ -27,7 +27,7 @@ import type { Observable } from 'rxjs';
 import type { Engine } from '../engine';
 import type { Scene } from '../scene';
 import type { RenderComponentType } from './render-manager.service';
-import { Disposable, Inject, Injector, isClassDependencyItem } from '@univerjs/core';
+import { Disposable, Inject, Injector, isClassDependencyItem, LookUp } from '@univerjs/core';
 import { BehaviorSubject, distinctUntilChanged } from 'rxjs';
 
 /**
@@ -157,7 +157,7 @@ export class RenderUnit extends Disposable implements IRender {
      * Get a dependency from the RenderUnit's injector.
      */
     with<T>(dependency: DependencyIdentifier<T>): T {
-        return this._injector.get(dependency);
+        return this._injector.get(dependency, LookUp.SELF);
     }
 
     getInjector(): Injector {
@@ -174,8 +174,9 @@ export class RenderUnit extends Disposable implements IRender {
 
     private _initDependencies(dependencies: Dependency[]): void {
         const j = this._injector;
+        const uniqueDependencies = dedupeRenderDependencies(dependencies);
 
-        dependencies.forEach((dep) => {
+        uniqueDependencies.forEach((dep) => {
             const [identifier, implOrNull] = Array.isArray(dep) ? dep : [dep, null];
 
             if (!implOrNull) {
@@ -191,9 +192,9 @@ export class RenderUnit extends Disposable implements IRender {
             }
         });
 
-        dependencies.forEach((dep) => {
+        uniqueDependencies.forEach((dep) => {
             const [identifier] = Array.isArray(dep) ? dep : [dep, null];
-            j.get(identifier);
+            j.get(identifier, LookUp.SELF);
         });
     }
 
@@ -208,4 +209,27 @@ export class RenderUnit extends Disposable implements IRender {
     deactivate(): void {
         this._renderContext.deactivate();
     }
+}
+
+function dedupeRenderDependencies(dependencies: Dependency[]): Dependency[] {
+    const seen = new Set<unknown>();
+    return dependencies.filter((dependency) => {
+        const identifier = Array.isArray(dependency) ? dependency[0] : dependency;
+        const key = getRenderDependencyIdentifierKey(identifier);
+        if (seen.has(key)) {
+            return false;
+        }
+
+        seen.add(key);
+        return true;
+    });
+}
+
+function getRenderDependencyIdentifierKey(identifier: unknown): unknown {
+    const decoratorName = (identifier as { decoratorName?: unknown } | undefined)?.decoratorName;
+    if (typeof decoratorName === 'string' && decoratorName) {
+        return `identifier:${decoratorName}`;
+    }
+
+    return identifier;
 }

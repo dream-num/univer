@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DocumentFlavor, UniverInstanceType } from '@univerjs/core';
+import { DocumentFlavor, PositionedObjectLayoutType, UniverInstanceType } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { createDocsCustomBlockDrawing, resolveDocsCustomBlockRenderViewport, resolveDocsCustomBlockSize, shouldUseInlineTextSelectionForDocsCustomBlockDrawing } from './embed-host-anchor';
 
@@ -55,6 +55,7 @@ describe('createDocsCustomBlockDrawing', () => {
         });
 
         expect(drawing.allowTransform).toBe(false);
+        expect(drawing.layoutType).toBe(PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM);
         expect(shouldUseInlineTextSelectionForDocsCustomBlockDrawing(drawing)).toBe(false);
     });
 
@@ -66,6 +67,7 @@ describe('createDocsCustomBlockDrawing', () => {
             interactionMode: 'inline',
         });
 
+        expect(drawing.layoutType).toBe(PositionedObjectLayoutType.INLINE);
         expect(shouldUseInlineTextSelectionForDocsCustomBlockDrawing(drawing)).toBe(true);
     });
 });
@@ -108,11 +110,12 @@ describe('resolveDocsCustomBlockRenderViewport', () => {
             height: 480,
             layoutWidth: 960,
             offsetLeft: 0,
+            viewportHeight: 480,
             width: 960,
         });
     });
 
-    it('uses actual table height until it exceeds the docs viewport height', () => {
+    it('uses actual table height for sheet-like docs blocks so docs owns vertical scrolling', () => {
         expect(resolveDocsCustomBlockRenderViewport({
             childType: UniverInstanceType.UNIVER_BASE,
             contentHeight: 720,
@@ -130,6 +133,7 @@ describe('resolveDocsCustomBlockRenderViewport', () => {
         })).toEqual(expect.objectContaining({
             contentHeight: 720,
             height: 720,
+            viewportHeight: 720,
         }));
 
         expect(resolveDocsCustomBlockRenderViewport({
@@ -148,7 +152,8 @@ describe('resolveDocsCustomBlockRenderViewport', () => {
             visibleCanvasWidth: 1440,
         })).toEqual(expect.objectContaining({
             contentHeight: 1200,
-            height: 900,
+            height: 1200,
+            viewportHeight: 900,
         }));
     });
 
@@ -211,6 +216,7 @@ describe('resolveDocsCustomBlockRenderViewport', () => {
             height: 480,
             layoutWidth: 600,
             offsetLeft: 0,
+            viewportHeight: 480,
             width: 600,
         });
     });
@@ -231,6 +237,7 @@ describe('resolveDocsCustomBlockRenderViewport', () => {
             height: 480,
             layoutWidth: 420,
             offsetLeft: 0,
+            viewportHeight: 480,
             width: 420,
         });
     });

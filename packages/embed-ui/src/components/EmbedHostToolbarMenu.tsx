@@ -264,6 +264,7 @@ function mountFullscreenProductRibbon(params: {
             injector: params.injector,
             childType: params.descriptor.childType,
             childUnitId: params.descriptor.childUnitId,
+            embedId: params.descriptor.embedId,
             menuTitlePrefix: contribution.productName,
             surface: 'ribbon',
         });
@@ -277,6 +278,7 @@ function mountFullscreenProductRibbon(params: {
         injector: params.injector,
         childType: params.descriptor.childType,
         childUnitId: params.descriptor.childUnitId,
+        embedId: params.descriptor.embedId,
         menuSchema: undefined,
         menuTitlePrefix: contribution.productName,
     });

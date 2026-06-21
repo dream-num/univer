@@ -22,10 +22,17 @@ import type { Injector } from '@univerjs/core';
 import type { IEmbedChildContainerContext } from '../types/embed-ui';
 import { UniverInstanceType } from '@univerjs/core';
 import { of } from 'rxjs';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createEmbedChildRender, createEmbedRenderChildViewContribution, ensureEmbedChildRender, mountEmbedRenderChildUnit, refreshEmbedChildRender } from './embed-render-child-view-contribution';
 
 class RenderManagerToken {}
+
+let resizeObserverInstances: TestResizeObserver[] = [];
+
+afterEach(() => {
+    resizeObserverInstances = [];
+    vi.unstubAllGlobals();
+});
 
 describe('mountEmbedRenderChildUnit', () => {
     it('creates child view contributions from render manager tokens', () => {
@@ -112,6 +119,37 @@ describe('mountEmbedRenderChildUnit', () => {
         expect(canvas.dataset.embedChildRenderUnitId).toBeUndefined();
     });
 
+    it('refreshes the child render when the mounted target resizes', () => {
+        vi.stubGlobal('ResizeObserver', TestResizeObserver);
+        vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+            callback(0);
+            return 1;
+        });
+        vi.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => {});
+        const root = document.createElement('div');
+        const content = document.createElement('div');
+        const canvas = document.createElement('div');
+        const overlay = document.createElement('div');
+        const render = createRender();
+        const embedMount = createEmbedMount(root, content, canvas, overlay, render);
+
+        const disposable = mountEmbedRenderChildUnit(embedMount, RenderManagerToken as never);
+
+        expect(resizeObserverInstances).toHaveLength(1);
+        expect(resizeObserverInstances[0].observed).toContain(canvas);
+        render.engine.resize.mockClear();
+        render.scene.render.mockClear();
+
+        resizeObserverInstances[0].emit();
+
+        expect(render.engine.resize).toHaveBeenCalledTimes(1);
+        expect(render.scene.render).toHaveBeenCalledTimes(1);
+
+        disposable?.dispose();
+
+        expect(resizeObserverInstances[0].disconnected).toBe(true);
+    });
+
     it('reuses, recreates, and cleans failed child renders', () => {
         const parentA = {} as Injector;
         const parentB = {} as Injector;
@@ -128,6 +166,8 @@ describe('mountEmbedRenderChildUnit', () => {
         };
 
         expect(ensureEmbedChildRender(renderManager as never, 'child-1')).toBe(existing);
+        expect(ensureEmbedChildRender(renderManager as never, 'child-1', parentA)).toBe(existing);
+        expect(ensureEmbedChildRender(renderManager as never, 'child-1', parentB)).toBe(replacement);
         expect(createEmbedChildRender(renderManager as never, 'child-1', parentA)).toBe(existing);
         expect(createEmbedChildRender(renderManager as never, 'child-1', parentB)).toBe(replacement);
         expect(renderManager.removeRender).toHaveBeenCalledWith('child-1');
@@ -163,6 +203,31 @@ describe('mountEmbedRenderChildUnit', () => {
         expect(render.scene.render).toHaveBeenCalled();
     });
 });
+
+class TestResizeObserver {
+    observed: Element[] = [];
+    disconnected = false;
+
+    constructor(private readonly _callback: ResizeObserverCallback) {
+        resizeObserverInstances.push(this);
+    }
+
+    observe(element: Element): void {
+        this.observed.push(element);
+    }
+
+    unobserve(element: Element): void {
+        this.observed = this.observed.filter((item) => item !== element);
+    }
+
+    disconnect(): void {
+        this.disconnected = true;
+    }
+
+    emit(): void {
+        this._callback([], this as unknown as ResizeObserver);
+    }
+}
 
 function createRender(overrides: {
     getCanvasElement?: () => HTMLCanvasElement | undefined;

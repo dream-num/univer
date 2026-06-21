@@ -154,4 +154,64 @@ describe('render manager service', () => {
         disposableB.dispose();
         service.dispose();
     });
+
+    it('deduplicates render dependencies by identifier', () => {
+        const darkMode$ = new Subject<boolean>();
+        const injector = {
+            createInstance: vi.fn(() => new Engine()),
+        } as unknown as Injector;
+        const instanceService = {
+            getUnit: vi.fn(() => null),
+            getUnitType: vi.fn(() => UniverInstanceType.UNIVER_SHEET),
+            getCurrentUnitOfType: vi.fn(() => null),
+        } as any;
+        const service = new RenderManagerService(injector, instanceService, { darkMode$ } as any);
+        const token = Symbol('render-dep') as any;
+        const otherToken = Symbol('other-render-dep') as any;
+        const firstDep = [token, { useClass: class FirstRenderModule {} }] as any;
+        const duplicateDep = [token, { useClass: class SecondRenderModule {} }] as any;
+
+        const firstDisposable = service.registerRenderModule(UniverInstanceType.UNIVER_SHEET, firstDep);
+        const duplicateDisposable = service.registerRenderModule(UniverInstanceType.UNIVER_SHEET, duplicateDep);
+        const mixedDisposable = service.registerRenderModules(UniverInstanceType.UNIVER_SHEET, [
+            duplicateDep,
+            otherToken,
+        ]);
+
+        const dependencies = (service as any)._renderDependencies.get(UniverInstanceType.UNIVER_SHEET);
+        expect(dependencies).toEqual([firstDep, otherToken]);
+
+        firstDisposable.dispose();
+        duplicateDisposable.dispose();
+        mixedDisposable.dispose();
+        expect((service as any)._renderDependencies.get(UniverInstanceType.UNIVER_SHEET)).toEqual([]);
+        service.dispose();
+    });
+
+    it('deduplicates identifier decorators by stable name across module copies', () => {
+        const darkMode$ = new Subject<boolean>();
+        const injector = {
+            createInstance: vi.fn(() => new Engine()),
+        } as unknown as Injector;
+        const instanceService = {
+            getUnit: vi.fn(() => null),
+            getUnitType: vi.fn(() => UniverInstanceType.UNIVER_SHEET),
+            getCurrentUnitOfType: vi.fn(() => null),
+        } as any;
+        const service = new RenderManagerService(injector, instanceService, { darkMode$ } as any);
+        const tokenA = Object.assign(() => undefined, { decoratorName: 'univer.sheet.selection-render-service' }) as any;
+        const tokenB = Object.assign(() => undefined, { decoratorName: 'univer.sheet.selection-render-service' }) as any;
+        const firstDep = [tokenA, { useClass: class FirstRenderModule {} }] as any;
+        const duplicateDep = [tokenB, { useClass: class SecondRenderModule {} }] as any;
+
+        const firstDisposable = service.registerRenderModule(UniverInstanceType.UNIVER_SHEET, firstDep);
+        const duplicateDisposable = service.registerRenderModule(UniverInstanceType.UNIVER_SHEET, duplicateDep);
+
+        expect((service as any)._renderDependencies.get(UniverInstanceType.UNIVER_SHEET)).toEqual([firstDep]);
+
+        firstDisposable.dispose();
+        duplicateDisposable.dispose();
+        expect((service as any)._renderDependencies.get(UniverInstanceType.UNIVER_SHEET)).toEqual([]);
+        service.dispose();
+    });
 });

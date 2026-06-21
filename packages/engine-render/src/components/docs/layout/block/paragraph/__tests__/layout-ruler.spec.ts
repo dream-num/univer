@@ -680,6 +680,7 @@ describe('layout-ruler', () => {
             contentHeight: 120,
             contentWidth: 320,
             height: 80,
+            viewportHeight: 64,
             layoutWidth: 180,
             width: 180,
         }));
@@ -759,5 +760,7 @@ describe('layout-ruler', () => {
         expect(drawing?.customBlockRenderViewport?.contentHeight).toBe(120);
         expect(drawing?.customBlockRenderViewport?.contentWidth).toBe(320);
         expect(drawing?.customBlockRenderViewport?.height).toBe(80);
+        expect(drawing?.customBlockRenderViewport?.viewportHeight).toBe(64);
+        expect(drawing?.aTop).toBe(30);
     });
 });

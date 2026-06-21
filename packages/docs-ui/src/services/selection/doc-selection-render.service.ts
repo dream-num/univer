@@ -33,8 +33,9 @@ import type {
 } from '@univerjs/engine-render';
 import type { Subscription } from 'rxjs';
 import type { RectRange } from './rect-range';
-import { DataStreamTreeTokenType, DOC_RANGE_TYPE, ILogService, Inject, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import { DataStreamTreeTokenType, DOC_RANGE_TYPE, ILogService, Inject, IUniverInstanceService, Optional, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
+import { EmbedInteractionBoundaryService } from '@univerjs/embed-ui';
 import { CURSOR_TYPE, getSystemHighlightColor, GlyphType, NORMAL_TEXT_SELECTION_PLUGIN_STYLE, PageLayoutType, ScrollTimer, Vector2 } from '@univerjs/engine-render';
 import { ILayoutService, KeyCode } from '@univerjs/ui';
 import { BehaviorSubject, filter, fromEvent, merge, Subject, takeUntil } from 'rxjs';
@@ -144,7 +145,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     }
 
     get canFocusing() {
-        return this.isFocusing || document.activeElement === document.body || document.activeElement === null;
+        return !this._shouldPreserveExternalFocus() && (this.isFocusing || document.activeElement === document.body || document.activeElement === null);
     }
 
     constructor(
@@ -152,7 +153,8 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         @ILayoutService private readonly _layoutService: ILayoutService,
         @ILogService private readonly _logService: ILogService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService
+        @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
+        @Optional(EmbedInteractionBoundaryService) private readonly _embedInteractionBoundaryService?: EmbedInteractionBoundaryService
     ) {
         super();
         this._initDOM();
@@ -982,6 +984,9 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         const anchor = activeRangeInstance?.getAnchor();
 
         if (!anchor || (anchor && !anchor.visible) || this.activeViewPort == null) {
+            if (this._shouldPreserveExternalFocus()) {
+                return;
+            }
             this.focus();
             return;
         }
@@ -1336,6 +1341,16 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         );
 
         return nodeInfo;
+    }
+
+    private _shouldPreserveExternalFocus(): boolean {
+        const activeElement = document.activeElement;
+        if (this._embedInteractionBoundaryService?.contains(undefined, activeElement)) {
+            return true;
+        }
+
+        const ownerDocument = activeElement?.ownerDocument ?? document;
+        return this._embedInteractionBoundaryService?.hasRecentInteraction(ownerDocument) === true;
     }
 
     private _detachEvent() {

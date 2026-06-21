@@ -40,7 +40,7 @@ function mountDocsFloatingMenu(context: IEmbedFloatingMenuMountContext) {
     const reactRoot = createEmbedReactRoot(menu);
     reactRoot.render(createElement(
         EmbedRuntimeProviders,
-        { injector: context.runtimeScope.injector, mountContainer: root },
+        { injector: context.runtimeScope.injector, mountContainer: root, embedId: context.embedId },
         createElement(DocsEmbedFloatingMenu, {
             childUnitId: context.childUnitId,
             embedId: context.embedId,
@@ -101,6 +101,7 @@ function DocsEmbedFloatingMenu(props: IDocsEmbedFloatingMenuProps) {
             childType: UniverInstanceType.UNIVER_DOC,
             childUnitId,
             injector,
+            embedId,
             menuSchema: undefined,
             menuTitlePrefix: 'Docs',
             toolbarOnly: true,

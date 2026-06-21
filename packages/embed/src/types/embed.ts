@@ -97,11 +97,6 @@ export interface IEmbedCapability {
     nestedEmbed: false;
 }
 
-export interface IEmbedProductPluginConfig {
-    host?: boolean;
-    guest?: boolean;
-}
-
 export type EmbedSource =
     | {
         kind: 'ref';
@@ -134,13 +129,6 @@ export interface IEmbedSourceMeta {
     horizontalWheelMode?: 'self' | 'host' | 'expand-then-self';
     floating?: false | IEmbedFloatingConfig;
     tab?: false | IEmbedTabConfig;
-    hostBlockChrome?: false | {
-        leftHoverMenu?: boolean;
-        draggable?: boolean;
-        resizable?: boolean;
-        menuIcon?: 'text' | 'sheet' | 'doc' | 'slide' | 'table' | 'canvas' | 'block';
-        menuLabel?: string;
-    };
 }
 
 export interface IEmbedDescriptor {

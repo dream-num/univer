@@ -22,9 +22,12 @@ import { setDocsCustomBlockRenderViewportProvider } from '@univerjs/engine-rende
 import { VIEWPORT_KEY } from '../../basics/docs-view-key';
 import { SetDocZoomRatioOperation } from '../../commands/operations/set-doc-zoom-ratio.operation';
 import { collectDocsTableLikeEmbedChildUnitIds, createDocsCustomBlockSizeRefreshScheduler, shouldRefreshDocsCustomBlockSizeForCommand } from '../../embed-docs-custom-block-refresh';
-import { resolveDocsCustomBlockRenderViewport } from '../../embed-host-anchor';
+import { resolveDocsCustomBlockRenderViewport, resolveDocsCustomBlockSize } from '../../embed-host-anchor';
 
 export class EmbedDocsCustomBlockBleedRenderController extends Disposable implements IRenderModule {
+    private readonly _resolvedChildUnits = new Map<string, unknown>();
+    private readonly _pendingChildUnits = new Map<string, Promise<unknown>>();
+
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
         @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService,
@@ -33,7 +36,26 @@ export class EmbedDocsCustomBlockBleedRenderController extends Disposable implem
     ) {
         super();
 
-        setDocsCustomBlockRenderViewportProvider((unitId, blockId, input) => {
+        const refreshScheduler = createDocsCustomBlockSizeRefreshScheduler(() => {
+            const zoomRatio = this._context.unit.zoomRatio;
+            if (typeof zoomRatio !== 'number') {
+                return;
+            }
+
+            this._commandService.syncExecuteCommand(SetDocZoomRatioOperation.id, {
+                unitId: this._context.unitId,
+                zoomRatio,
+            });
+        });
+        this.disposeWithMe(refreshScheduler);
+        this.disposeWithMe({
+            dispose: () => {
+                this._resolvedChildUnits.clear();
+                this._pendingChildUnits.clear();
+            },
+        });
+
+        const unregisterRenderViewportProvider = setDocsCustomBlockRenderViewportProvider((unitId, blockId, input) => {
             if (unitId !== this._context.unitId) {
                 return null;
             }
@@ -48,9 +70,9 @@ export class EmbedDocsCustomBlockBleedRenderController extends Disposable implem
 
             const visibleCanvas = this._getVisibleCanvasDocumentRect();
             const childUnit = drawing?.data?.childUnitId
-                ? this._univerInstanceService.getUnit(drawing.data.childUnitId, childType)
+                ? this._getChildUnitForMeasurement(drawing.data.childUnitId, childType, refreshScheduler.schedule)
                 : undefined;
-            const contentSize = drawing?.data?.childUnitId
+            const contentSize = drawing?.data?.childUnitId && childUnit != null
                 ? this._contentSizeRegistry?.measureContentSize({
                     childType,
                     childUnit,
@@ -58,15 +80,18 @@ export class EmbedDocsCustomBlockBleedRenderController extends Disposable implem
                     viewportWidth: input.fallbackWidth,
                 })
                 : undefined;
+            const fallbackSize = resolveDocsCustomBlockSize(childType);
+            const fallbackHeight = normalizeFallbackSize(input.fallbackHeight, fallbackSize.height);
+            const fallbackWidth = normalizeFallbackSize(input.fallbackWidth, fallbackSize.width);
 
             return resolveDocsCustomBlockRenderViewport({
                 childType,
-                contentHeight: contentSize?.height ?? input.fallbackHeight,
+                contentHeight: contentSize?.height ?? fallbackHeight,
                 contentWidth: contentSize?.width,
                 docsLeft: this._getDocsLeft(),
                 documentFlavor: this._context.unit.getSnapshot().documentStyle?.documentFlavor,
-                fallbackHeight: input.fallbackHeight,
-                fallbackWidth: input.fallbackWidth,
+                fallbackHeight,
+                fallbackWidth,
                 pageMarginLeft: input.pageMarginLeft,
                 pageMarginRight: input.pageMarginRight,
                 pageWidth: input.pageWidth,
@@ -78,21 +103,8 @@ export class EmbedDocsCustomBlockBleedRenderController extends Disposable implem
         });
 
         this.disposeWithMe({
-            dispose: () => setDocsCustomBlockRenderViewportProvider(null),
+            dispose: unregisterRenderViewportProvider,
         });
-
-        const refreshScheduler = createDocsCustomBlockSizeRefreshScheduler(() => {
-            const zoomRatio = this._context.unit.zoomRatio;
-            if (typeof zoomRatio !== 'number') {
-                return;
-            }
-
-            this._commandService.syncExecuteCommand(SetDocZoomRatioOperation.id, {
-                unitId: this._context.unitId,
-                zoomRatio,
-            });
-        });
-        this.disposeWithMe(refreshScheduler);
 
         this.disposeWithMe(this._commandService.onCommandExecuted((command) => {
             if (command.id === SetDocZoomRatioOperation.id) {
@@ -110,6 +122,36 @@ export class EmbedDocsCustomBlockBleedRenderController extends Disposable implem
 
             refreshScheduler.schedule();
         }));
+    }
+
+    private _getChildUnitForMeasurement(childUnitId: string, childType: UniverInstanceType, scheduleRefresh: () => void): unknown {
+        const cacheKey = `${childType}:${childUnitId}`;
+        if (this._resolvedChildUnits.has(cacheKey)) {
+            return this._resolvedChildUnits.get(cacheKey);
+        }
+
+        const unitOrPromise = this._univerInstanceService.getUnit(childUnitId, childType) as unknown;
+        if (!isPromiseLike(unitOrPromise)) {
+            this._resolvedChildUnits.set(cacheKey, unitOrPromise);
+            return unitOrPromise;
+        }
+
+        if (!this._pendingChildUnits.has(cacheKey)) {
+            const pending = Promise.resolve(unitOrPromise).then((unit) => {
+                this._pendingChildUnits.delete(cacheKey);
+                this._resolvedChildUnits.set(cacheKey, unit);
+                if (!this._disposed) {
+                    scheduleRefresh();
+                }
+                return unit;
+            }, () => {
+                this._pendingChildUnits.delete(cacheKey);
+                return undefined;
+            });
+            this._pendingChildUnits.set(cacheKey, pending);
+        }
+
+        return undefined;
     }
 
     private _getDocsLeft(): number {
@@ -140,4 +182,12 @@ export class EmbedDocsCustomBlockBleedRenderController extends Disposable implem
             width: visibleWidth,
         };
     }
+}
+
+function isPromiseLike(value: unknown): value is PromiseLike<unknown> {
+    return !!value && typeof (value as PromiseLike<unknown>).then === 'function';
+}
+
+function normalizeFallbackSize(value: unknown, fallback: number): number {
+    return typeof value === 'number' && Number.isFinite(value) && value > 1 ? value : fallback;
 }

@@ -17,6 +17,7 @@
 import type { IDisposable, Injector, UniverInstanceType } from '@univerjs/core';
 import type { EmbedProductMenuSurface, IEmbedProductMenuContribution, IEmbedProductMenuMountContext } from '../types/embed-ui';
 import { toDisposable } from '@univerjs/core';
+import { MenuManagerPosition, RibbonPosition } from '@univerjs/ui';
 import { mountEmbedProductRibbonMenu } from './embed-product-menu-mounting';
 
 export function registerEmbedProductMenuContribution(
@@ -144,7 +145,38 @@ function compareContributionItems(
 }
 
 function mergeMenuSchemas(schemas: readonly unknown[]): unknown {
-    return schemas.reduce<unknown>((merged, schema) => mergeMenuSchema(merged, schema), {});
+    return schemas.reduce<unknown>((merged, schema) => mergeMenuSchema(merged, normalizeRibbonMenuSchema(schema)), {});
+}
+
+function normalizeRibbonMenuSchema(schema: unknown): unknown {
+    if (!isPlainObject(schema)) {
+        return schema;
+    }
+
+    const ribbonPositionKeys = new Set<string>(Object.values(RibbonPosition));
+    const ribbonEntries = Object.entries(schema).filter(([key]) => ribbonPositionKeys.has(key));
+    if (!ribbonEntries.length) {
+        return schema;
+    }
+
+    const result: Record<string, unknown> = {};
+    Object.entries(schema).forEach(([key, value]) => {
+        if (!ribbonPositionKeys.has(key)) {
+            result[key] = cloneMenuSchema(value);
+        }
+    });
+
+    const ribbonRoot = isPlainObject(result[MenuManagerPosition.RIBBON])
+        ? result[MenuManagerPosition.RIBBON] as Record<string, unknown>
+        : {};
+    ribbonEntries.forEach(([key, value]) => {
+        ribbonRoot[key] = key in ribbonRoot
+            ? mergeMenuSchema(ribbonRoot[key], value)
+            : cloneMenuSchema(value);
+    });
+    result[MenuManagerPosition.RIBBON] = ribbonRoot;
+
+    return result;
 }
 
 function mergeMenuSchema(target: unknown, source: unknown): unknown {

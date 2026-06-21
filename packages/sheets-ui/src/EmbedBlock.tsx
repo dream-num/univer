@@ -15,9 +15,14 @@
  */
 
 import type { IEmbedBlockContribution, IEmbedChildViewContribution } from '@univerjs/embed-ui';
-import { toDisposable, UniverInstanceType } from '@univerjs/core';
-import { createEmbedRibbonBlockContribution, mountEmbedRenderChildUnit } from '@univerjs/embed-ui';
+import type { IUniverSheetsUIConfig } from './config/config';
+import { Injector, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { ComponentManager, useConfigValue, useDependency } from '@univerjs/ui';
+import { createEmbedReactRoot, createEmbedRibbonBlockContribution, disposeEmbedReactRoot, EmbedRuntimeProviders, mountEmbedRenderChildUnit } from '@univerjs/embed-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { SHEETS_UI_PLUGIN_CONFIG_KEY } from './config/config';
+import { AutoFillPopupMenu } from './views/auto-fill-popup-menu/AutoFillPopupMenu';
+import { EditorContainer } from './views/editor-container/EditorContainer';
 
 export function createSheetsEmbedBlockContribution(): IEmbedBlockContribution {
     return createEmbedRibbonBlockContribution({
@@ -31,43 +36,54 @@ export function createSheetsEmbedChildViewContribution(): IEmbedChildViewContrib
         childType: UniverInstanceType.UNIVER_SHEET,
         supportedLayouts: ['tab-peer', 'docs-sticky-sheet', 'scroll-contained'],
         mount: (context) => {
-            let disposed = false;
-            let frame = 0;
-            let renderDisposable = toDisposable(() => {});
+            const scopedInjector = context.runtimeScope.injector as Injector;
             const rootElement = context.runtimeScope.roots.canvas
                 ?? context.renderScope.canvasRoot
                 ?? context.renderScope.contentRoot
                 ?? context.renderScope.rootElement;
+            const contentRoot = context.runtimeScope.roots.content
+                ?? context.renderScope.contentRoot
+                ?? rootElement;
 
             rootElement.dataset.embedChildRenderUnitId = context.childUnitId;
             rootElement.dataset.embedChildRenderMode = 'sheet-workbench';
+            contentRoot.dataset.embedChildRenderUnitId = context.childUnitId;
+            contentRoot.dataset.embedChildRenderMode = 'sheet-overlay';
 
-            const remount = () => {
-                if (disposed) {
-                    return;
-                }
-
-                const canvas = rootElement.querySelector('canvas');
-                if (!canvas || !rootElement.contains(canvas)) {
-                    renderDisposable.dispose();
-                    renderDisposable = mountEmbedRenderChildUnit(context, IRenderManagerService, rootElement) ?? toDisposable(() => {});
-                    const mountedCanvas = rootElement.querySelector('canvas');
-                    if (!mountedCanvas || !rootElement.contains(mountedCanvas)) {
-                        frame = window.requestAnimationFrame(remount);
-                    }
-                }
-            };
-            frame = window.requestAnimationFrame(remount);
+            const renderDisposable = mountEmbedRenderChildUnit(context, IRenderManagerService, rootElement, { scopedRenderInjector: true }) ?? toDisposable(() => {});
+            const overlayRoot = createEmbedReactRoot(contentRoot);
+            overlayRoot.render(
+                <EmbedRuntimeProviders injector={scopedInjector as Injector} mountContainer={context.runtimeScope.roots.popup} embedId={context.embedId}>
+                    <SheetEmbedChildOverlay />
+                </EmbedRuntimeProviders>
+            );
 
             return toDisposable(() => {
-                disposed = true;
-                window.cancelAnimationFrame(frame);
                 renderDisposable.dispose();
+                disposeEmbedReactRoot(overlayRoot);
                 if (rootElement.isConnected) {
                     rootElement.removeAttribute('data-embed-child-render-unit-id');
                     rootElement.removeAttribute('data-embed-child-render-mode');
                 }
+                if (contentRoot.isConnected) {
+                    contentRoot.removeAttribute('data-embed-child-render-unit-id');
+                    contentRoot.removeAttribute('data-embed-child-render-mode');
+                }
             });
         },
     };
+}
+
+function SheetEmbedChildOverlay() {
+    const config = useConfigValue<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
+    const componentManager = useDependency(ComponentManager);
+    const ShapeTextEditorContainer = componentManager.get('ShapeTextEditorContainer');
+
+    return (
+        <>
+            {ShapeTextEditorContainer && <ShapeTextEditorContainer />}
+            {!config?.disableEdit && <EditorContainer />}
+            <AutoFillPopupMenu />
+        </>
+    );
 }

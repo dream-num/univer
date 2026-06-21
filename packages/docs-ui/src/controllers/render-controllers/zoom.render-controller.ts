@@ -28,9 +28,11 @@ import {
     Inject,
     isInternalEditorID,
     IUniverInstanceService,
+    Optional,
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
+import { EmbedInteractionBoundaryService } from '@univerjs/embed-ui';
 import { getNextWheelZoomRatio, IRenderManagerService } from '@univerjs/engine-render';
 import { neoGetDocObject } from '../../basics/component-tools';
 import { DocPageSetupCommand } from '../../commands/commands/doc-page-setup.command';
@@ -65,7 +67,8 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
         @IEditorService private readonly _editorService: IEditorService,
         @Inject(DocPageLayoutService) private readonly _docPageLayoutService: DocPageLayoutService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @Inject(DocViewScaleService) private readonly _docViewScaleService: DocViewScaleService
+        @Inject(DocViewScaleService) private readonly _docViewScaleService: DocViewScaleService,
+        @Optional(EmbedInteractionBoundaryService) private readonly _embedInteractionBoundaryService?: EmbedInteractionBoundaryService
     ) {
         super();
 
@@ -147,7 +150,11 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
             this._docPageLayoutService.calculatePagePosition();
         }
 
-        if (needRefreshSelection && !this._editorService.isEditor(this._context.unitId)) {
+        if (
+            needRefreshSelection &&
+            !this._editorService.isEditor(this._context.unitId) &&
+            !this._embedInteractionBoundaryService?.hasRecentInteraction()
+        ) {
             this._textSelectionManagerService.refreshSelection();
         }
 

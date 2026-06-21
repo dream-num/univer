@@ -105,8 +105,12 @@ export function captureEmbedContextSceneCanvas(context: IEmbedChildContainerCont
         return undefined;
     }
 
-    const root = context.renderScope.canvasRoot ?? context.renderScope.rootElement;
-    const canvases = Array.from(root.querySelectorAll('canvas'))
+    const roots = [
+        context.renderScope.canvasRoot,
+        context.renderScope.contentRoot,
+        context.renderScope.rootElement,
+    ].filter((root): root is HTMLElement => !!root);
+    const canvases = Array.from(new Set(roots.flatMap((root) => Array.from(root.querySelectorAll('canvas')))))
         .filter((canvas) => canvas.width > 1 && canvas.height > 1)
         .sort((a, b) => (b.width * b.height) - (a.width * a.height));
 

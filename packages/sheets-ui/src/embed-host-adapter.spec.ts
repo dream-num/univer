@@ -26,24 +26,12 @@ import { describe, expect, it, vi } from 'vitest';
 import { createSheetsFloatingObjectHostAdapterContribution, createSheetsFloatingObjectHostContainerContribution, createSheetsSheetTabHostAdapterContribution, createSheetsSheetTabHostContainerContribution } from './embed-host-adapter';
 
 describe('sheets embed host adapter', () => {
-    it('creates record-only floating plans when drawing services are unavailable', () => {
+    it('rejects floating anchor creation when drawing services are unavailable', () => {
         const adapter = createSheetsFloatingObjectHostAdapterContribution();
-        const plan = adapter.createAnchorPlan!(createFloatingContext({
+        expect(() => adapter.createAnchorPlan!(createFloatingContext({
             requestedAnchorId: 'float-1',
             hostContext: { subUnitId: 'sheet-1' },
-        }) as never);
-
-        expect(plan).toEqual({
-            hostAnchorId: 'float-1',
-            redoMutations: [{
-                id: SET_EMBED_HOST_ANCHOR_RECORD_MUTATION_ID,
-                params: { record: expect.objectContaining({ hostAnchorId: 'float-1', kind: 'sheets-floating-object' }) },
-            }],
-            undoMutations: [{
-                id: REMOVE_EMBED_HOST_ANCHOR_RECORD_MUTATION_ID,
-                params: { hostUnitId: 'host-sheet', hostAnchorId: 'float-1' },
-            }],
-        });
+        }) as never)).toThrow('EMBED_SHEETS_FLOATING_ANCHOR_UNAVAILABLE');
 
         const removePlan = adapter.removeAnchorPlan!({
             ...createFloatingContext({ requestedAnchorId: 'float-1' }),

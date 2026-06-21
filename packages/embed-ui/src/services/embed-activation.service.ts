@@ -44,7 +44,6 @@ export class EmbedActivationService {
     activateTab(descriptor: IEmbedDescriptor): IEmbedHostMenuOverride | null {
         this._assertResolvedChild(descriptor);
         this._rememberPreviousChildCurrentUnit(descriptor);
-        this._univerInstanceService.setCurrentUnitForType(descriptor.childUnitId!);
         this._hostAdapterRegistry.activateAnchor({
             embedId: descriptor.embedId,
             hostUnitId: descriptor.hostUnitId,
@@ -61,7 +60,7 @@ export class EmbedActivationService {
         });
     }
 
-    activateFloating(descriptor: IEmbedDescriptor): void {
+    activateFloating(descriptor: IEmbedDescriptor, stage?: 'stage1' | 'stage2'): void {
         this._assertResolvedChild(descriptor);
         this._focusOwnerService.setFocusOwner({
             hostUnitId: descriptor.hostUnitId,
@@ -71,11 +70,40 @@ export class EmbedActivationService {
             reason: 'pointer',
         });
         this._mountService.activateSession(descriptor.embedId);
-        this._floatingActiveService?.activate({
+        const activation = {
             hostUnitId: descriptor.hostUnitId,
             embedId: descriptor.embedId,
             childUnitId: descriptor.childUnitId!,
-        });
+        };
+        if (stage) {
+            this._floatingActiveService?.activate(activation, stage);
+        } else {
+            this._floatingActiveService?.activate(activation);
+        }
+    }
+
+    focusFloatingRuntime(descriptor: IEmbedDescriptor): void {
+        this.activateFloating(descriptor, 'stage2');
+        this._univerInstanceService.setCurrentUnitForType(descriptor.childUnitId!);
+    }
+
+    clearFloating(embedId?: string, hostUnitId?: string): void {
+        const owner = this._focusOwnerService.getFocusOwner();
+        if (embedId && owner?.embedId && owner.embedId !== embedId) {
+            return;
+        }
+        const nextHostUnitId = hostUnitId ?? owner?.hostUnitId;
+
+        this._floatingActiveService?.clear(embedId);
+        this._focusOwnerService.clearFocusOwner(embedId);
+        if (embedId) {
+            this._mountService.setActive(embedId, false);
+        }
+
+        if (nextHostUnitId) {
+            this._univerInstanceService.setCurrentUnitForType(nextHostUnitId);
+            this._univerInstanceService.focusUnit(nextHostUnitId);
+        }
     }
 
     clearTab(embedId?: string): void {

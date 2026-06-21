@@ -16,7 +16,7 @@
 
 import type { IDocDrawingBase, IMutationInfo, JSONXActions, Serializable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import { DocumentFlavor, DrawingTypeEnum, JSONX, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, TextX, TextXActionType, UniverInstanceType } from '@univerjs/core';
+import { AlignTypeH, DocumentFlavor, DrawingTypeEnum, JSONX, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, TextX, TextXActionType, UniverInstanceType } from '@univerjs/core';
 import { RichTextEditingMutation } from '@univerjs/docs';
 
 export interface IDocsCustomBlockMutationParams {
@@ -75,6 +75,7 @@ export interface IDocsCustomBlockLayoutViewport {
     height: number;
     layoutWidth?: number;
     offsetLeft?: number;
+    viewportHeight?: number;
     width: number;
 }
 
@@ -135,6 +136,7 @@ export function createRemoveCustomBlockActions(params: IDocsCustomBlockMutationP
 
 export function createDocsCustomBlockDrawing(params: IDocsCustomBlockMutationParams): IDocDrawingBase {
     const size = resolveDocsCustomBlockSize(params.childType);
+    const isInline = params.interactionMode === 'inline';
     const drawing: IDocDrawingBase & { componentKey: string; data: Serializable } = {
         unitId: params.unitId,
         subUnitId: params.unitId,
@@ -144,7 +146,7 @@ export function createDocsCustomBlockDrawing(params: IDocsCustomBlockMutationPar
         data: createEmbedDocsCustomBlockData(params) as unknown as Serializable,
         title: params.blockId,
         description: 'Univer embedded unit custom block',
-        layoutType: PositionedObjectLayoutType.INLINE,
+        layoutType: isInline ? PositionedObjectLayoutType.INLINE : PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM,
         allowTransform: false,
         docTransform: {
             size: {
@@ -152,11 +154,11 @@ export function createDocsCustomBlockDrawing(params: IDocsCustomBlockMutationPar
                 height: size.height,
             },
             positionH: {
-                relativeFrom: ObjectRelativeFromH.PAGE,
-                posOffset: 0,
+                relativeFrom: isInline ? ObjectRelativeFromH.PAGE : ObjectRelativeFromH.COLUMN,
+                ...(isInline ? { posOffset: 0 } : { align: AlignTypeH.LEFT }),
             },
             positionV: {
-                relativeFrom: ObjectRelativeFromV.PAGE,
+                relativeFrom: isInline ? ObjectRelativeFromV.PAGE : ObjectRelativeFromV.PARAGRAPH,
                 posOffset: 0,
             },
             angle: 0,
@@ -199,7 +201,8 @@ export function resolveDocsCustomBlockRenderViewport(params: IDocsCustomBlockRen
     const visibleCanvasHeight = Number.isFinite(params.visibleCanvasHeight) && (params.visibleCanvasHeight ?? 0) > 0
         ? params.visibleCanvasHeight!
         : undefined;
-    const height = sheetLike && visibleCanvasHeight != null ? Math.min(contentHeight, visibleCanvasHeight) : (sheetLike ? contentHeight : fallbackHeight);
+    const height = sheetLike ? contentHeight : fallbackHeight;
+    const viewportHeight = sheetLike && visibleCanvasHeight != null ? Math.min(contentHeight, visibleCanvasHeight) : height;
 
     if (!sheetLike) {
         return {
@@ -226,6 +229,7 @@ export function resolveDocsCustomBlockRenderViewport(params: IDocsCustomBlockRen
             height,
             layoutWidth,
             offsetLeft: 0,
+            viewportHeight,
             width: layoutWidth,
         };
     }
@@ -253,6 +257,7 @@ export function resolveDocsCustomBlockRenderViewport(params: IDocsCustomBlockRen
         height,
         layoutWidth,
         offsetLeft: 0,
+        viewportHeight,
         width: layoutWidth,
     };
 }

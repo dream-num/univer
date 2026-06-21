@@ -64,6 +64,22 @@ describe('EmbedSceneCanvasCaptureService', () => {
         expect(captureEmbedContextSceneCanvas(createChildContainer({ canvasRoot: document.createElement('div') }))).toBeUndefined();
         expect(captureEmbedContextSceneCanvas({ ...createChildContainer(), renderScope: undefined as never })).toBeUndefined();
     });
+
+    it('falls back to content and root canvases when the canvas slot is empty', () => {
+        const canvasRoot = document.createElement('div');
+        const contentRoot = document.createElement('div');
+        const rootElement = document.createElement('div');
+        const contentCanvas = createCanvas(20, 10, 'content');
+        const rootCanvas = createCanvas(10, 10, 'root');
+        contentRoot.append(contentCanvas);
+        rootElement.append(rootCanvas);
+
+        expect(captureEmbedContextSceneCanvas(createChildContainer({
+            canvasRoot,
+            contentRoot,
+            rootElement,
+        }))).toBe('content');
+    });
 });
 
 function createCanvas(width: number, height: number, dataUrl: string, throws = false): HTMLCanvasElement {

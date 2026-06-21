@@ -43,7 +43,7 @@ import { EmbedProductMenuRegistryService, registerEmbedProductMenuContribution }
 import { EmbedReadonlyPreviewRegistryService } from './embed-readonly-preview-registry.service';
 
 describe('embed-ui registries and commands', () => {
-    it('manages host adapter contributions and fallback mutation plans', () => {
+    it('manages host adapter contributions and rejects missing create adapters', () => {
         const service = new EmbedHostAdapterRegistryService();
         const descriptor = createDescriptor();
         const contribution = {
@@ -88,17 +88,28 @@ describe('embed-ui registries and commands', () => {
         service.afterRemoveAnchor({ embedId: 'embed-1', hostUnitId: 'host-1', hostType: UniverInstanceType.UNIVER_SHEET, entry: 'sheets-sheet-tab', hostAnchorId: 'anchor-1', descriptor });
         service.activateAnchor({ embedId: 'embed-1', hostUnitId: 'host-1', hostType: UniverInstanceType.UNIVER_SHEET, entry: 'sheets-sheet-tab', hostAnchorId: 'anchor-1', descriptor });
 
-        const fallbackPlan = service.createAnchorPlan({
+        expect(() => service.createAnchorPlan({
             embedId: 'fallback',
             hostUnitId: 'host-1',
             hostType: UniverInstanceType.UNIVER_DOC,
             entry: 'docs-custom-block',
+        })).toThrow('EMBED_HOST_ADAPTER_NOT_REGISTERED');
+        service.register({
+            hostType: UniverInstanceType.UNIVER_DOC,
+            entry: 'docs-custom-block',
         });
-        expect(fallbackPlan).toEqual({
-            hostAnchorId: 'fallback-anchor',
-            redoMutations: [{ id: CREATE_EMBED_HOST_ANCHOR_MUTATION_ID, params: expect.any(Object) }],
-            undoMutations: [{ id: REMOVE_EMBED_HOST_ANCHOR_MUTATION_ID, params: expect.any(Object) }],
-        });
+        expect(() => service.createAnchor({
+            embedId: 'fallback',
+            hostUnitId: 'host-1',
+            hostType: UniverInstanceType.UNIVER_DOC,
+            entry: 'docs-custom-block',
+        })).toThrow('EMBED_HOST_ADAPTER_CREATE_ANCHOR_NOT_IMPLEMENTED');
+        expect(() => service.createAnchorPlan({
+            embedId: 'fallback',
+            hostUnitId: 'host-1',
+            hostType: UniverInstanceType.UNIVER_DOC,
+            entry: 'docs-custom-block',
+        })).toThrow('EMBED_HOST_ADAPTER_CREATE_ANCHOR_NOT_IMPLEMENTED');
         expect(service.removeAnchorPlan({
             embedId: 'fallback',
             hostUnitId: 'host-1',

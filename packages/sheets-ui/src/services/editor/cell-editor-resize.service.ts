@@ -16,9 +16,10 @@
 
 import type { DocumentDataModel, IPosition, Nullable } from '@univerjs/core';
 import type { DocumentSkeleton, IDocumentLayoutObject, Scene } from '@univerjs/engine-render';
-import { Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, HorizontalAlign, IConfigService, IUniverInstanceService, UniverInstanceType, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import { Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, HorizontalAlign, IConfigService, IUniverInstanceService, Optional, UniverInstanceType, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { DOCS_COMPONENT_MAIN_LAYER_INDEX, VIEWPORT_KEY } from '@univerjs/docs-ui';
+import { EmbedFloatingGeometryService } from '@univerjs/embed-ui';
 import { convertTextRotation, fixLineWidthByScale, getCurrentTypeOfRenderer, IRenderManagerService, Rect, ScrollBar } from '@univerjs/engine-render';
 import { ILayoutService } from '@univerjs/ui';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
@@ -42,7 +43,8 @@ export class SheetCellEditorResizeService extends Disposable {
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @IConfigService private readonly _configService: IConfigService
+        @IConfigService private readonly _configService: IConfigService,
+        @Optional(EmbedFloatingGeometryService) private readonly _embedFloatingGeometryService?: EmbedFloatingGeometryService
     ) {
         super();
     }
@@ -345,7 +347,7 @@ export class SheetCellEditorResizeService extends Disposable {
             callback?.();
         }, 0);
 
-        const contentBoundingRect = this._layoutService.getContentElement().getBoundingClientRect();
+        const contentBoundingRect = this._getEditorContentElement().getBoundingClientRect();
         const canvasBoundingRect = canvasElement.getBoundingClientRect();
         startX = startX * scaleAdjust + (canvasBoundingRect.left - contentBoundingRect.left);
         startY = startY * scaleAdjust + (canvasBoundingRect.top - contentBoundingRect.top);
@@ -365,6 +367,12 @@ export class SheetCellEditorResizeService extends Disposable {
             endY: physicHeight * scaleAdjust + startY,
             show: true,
         });
+    }
+
+    private _getEditorContentElement(): HTMLElement {
+        return this._embedFloatingGeometryService
+            ?.getRegistrationByChildUnitId(this._editingUnitId)
+            ?.contentRoot ?? this._layoutService.getContentElement();
     }
 
     /**

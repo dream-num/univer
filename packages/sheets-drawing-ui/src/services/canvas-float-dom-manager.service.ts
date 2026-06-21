@@ -252,8 +252,7 @@ export function syncFloatDomHostSelectionOnStageEnter(
 
     if (stage === 'stage2' && rect.oKey) {
         renderObject.transformer.clearControlByIds([rect.oKey]);
-        const clearSelectedObjects = renderObject.scene.getTransformer?.()?.clearSelectedObjects;
-        clearSelectedObjects?.();
+        renderObject.scene.getTransformer?.()?.clearSelectedObjects?.();
     }
 }
 

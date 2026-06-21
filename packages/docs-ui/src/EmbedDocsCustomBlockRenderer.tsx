@@ -15,15 +15,19 @@
  */
 
 import type { DocumentDataModel } from '@univerjs/core';
-import type { IEmbedFloatDomData } from '@univerjs/embed-ui';
+import type { IEmbedChildContainerContext, IEmbedFloatDomData, IEmbedPassiveViewportWheelContext } from '@univerjs/embed-ui';
 import type { CSSProperties } from 'react';
 import { ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { EmbedFloatDomRenderer } from '@univerjs/embed-ui';
+import { EmbedFloatDomRenderer, scrollSceneViewportPassive } from '@univerjs/embed-ui';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { useDependency } from '@univerjs/ui';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { VIEWPORT_KEY } from './basics/docs-view-key';
 import { SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-ratio.operation';
 import { createDefaultDocsTableLikeCustomBlockBleedViewport, resolveDocsTableLikeCustomBlockBleedViewport, resolveDocsTableLikeCustomBlockContentHeight, resolveDocsTableLikeCustomBlockContentWidth } from './embed-docs-custom-block-bleed';
 import { scrollDocsTableLikeCustomBlockLive } from './embed-docs-custom-block-scroll';
+
+const SHEET_LIKE_CUSTOM_BLOCK_DEFAULT_CONTENT_HEIGHT = 480;
 
 export interface IEmbedDocsCustomBlockRuntimeProps {
     customBlockRenderViewport?: {
@@ -32,6 +36,7 @@ export interface IEmbedDocsCustomBlockRuntimeProps {
         contentHeight?: number;
         contentWidth?: number;
         height?: number;
+        viewportHeight?: number;
     };
 }
 
@@ -45,8 +50,10 @@ export function EmbedDocsCustomBlockRenderer(props: { data?: IEmbedFloatDomData 
 
     const commandService = useDependency(ICommandService);
     const univerInstanceService = useDependency(IUniverInstanceService);
+    const renderManagerService = useDependency(IRenderManagerService);
     const data = normalizeFloatDomData(props.data);
     const hostUnitId = data?.hostUnitId;
+    const resolvedHostUnitId = hostUnitId ?? univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)?.getUnitId();
     const rootRef = useRef<HTMLDivElement>(null);
     const [viewport, setViewport] = useState(() => createDefaultDocsTableLikeCustomBlockBleedViewport());
     const viewportRef = useRef(viewport);
@@ -108,9 +115,9 @@ export function EmbedDocsCustomBlockRenderer(props: { data?: IEmbedFloatDomData 
         const sync = () => {
             frame = undefined;
             const rect = root.getBoundingClientRect();
-            const contentWidth = resolveDocsTableLikeCustomBlockContentWidth(
+            const contentWidth = resolveDocsTableLikeCustomBlockRuntimeContentWidth(
                 renderViewportContentWidth,
-                measureRuntimeContentWidth(root, rect.width)
+                () => measureRuntimeContentWidth(root, rect.width)
             );
             const next = resolveDocsTableLikeCustomBlockBleedViewport(root, contentWidth, {
                 bleedLeft: renderViewportBleedLeft,
@@ -133,12 +140,19 @@ export function EmbedDocsCustomBlockRenderer(props: { data?: IEmbedFloatDomData 
             }
             frame = window.requestAnimationFrame(sync);
         };
+        const scheduleFromScroll = (event: Event) => {
+            if (!shouldSyncDocsTableLikeCustomBlockBleedOnScroll(root, event.target)) {
+                return;
+            }
+
+            schedule();
+        };
 
         sync();
         const resizeObserver = new ResizeObserver(schedule);
         resizeObserver.observe(root);
         window.addEventListener('resize', schedule);
-        window.addEventListener('scroll', schedule, true);
+        window.addEventListener('scroll', scheduleFromScroll, true);
 
         return () => {
             if (frame != null) {
@@ -146,7 +160,7 @@ export function EmbedDocsCustomBlockRenderer(props: { data?: IEmbedFloatDomData 
             }
             resizeObserver.disconnect();
             window.removeEventListener('resize', schedule);
-            window.removeEventListener('scroll', schedule, true);
+            window.removeEventListener('scroll', scheduleFromScroll, true);
         };
     }, [
         renderViewportBleedLeft,
@@ -155,8 +169,14 @@ export function EmbedDocsCustomBlockRenderer(props: { data?: IEmbedFloatDomData 
         sheetLike,
     ]);
 
-    const contentHeight = resolveDocsTableLikeCustomBlockContentHeight(props.customBlockRenderViewport?.contentHeight, 1);
-    const viewportHeight = resolveDocsTableLikeCustomBlockContentHeight(props.customBlockRenderViewport?.height, contentHeight);
+    const contentHeight = sheetLike
+        ? resolveDocsTableLikeCustomBlockRuntimeContentHeight(props.customBlockRenderViewport?.contentHeight)
+        : resolveDocsTableLikeCustomBlockContentHeight(props.customBlockRenderViewport?.contentHeight, 1);
+    const viewportHeight = resolveDocsCustomBlockRuntimeViewportHeight({
+        contentHeight,
+        sheetLike,
+        viewportHeight: props.customBlockRenderViewport?.viewportHeight,
+    });
     const style = sheetLike
         ? ({
             '--univer-embed-docs-block-bleed-left': `${viewport.bleedLeft}px`,
@@ -167,6 +187,56 @@ export function EmbedDocsCustomBlockRenderer(props: { data?: IEmbedFloatDomData 
             '--univer-embed-docs-block-virtual-width': `${viewport.virtualWidth}px`,
         } as CSSProperties & Record<string, string>)
         : undefined;
+    const handleHostWheel = useCallback((event: WheelEvent, context: IEmbedChildContainerContext) => {
+        const scene = renderManagerService.getRenderById(context.hostUnitId)?.scene;
+        return scrollSceneViewportPassive(
+            { ...context, event, source: 'wheel', stage: 'stage2' },
+            scene?.getViewport(VIEWPORT_KEY.VIEW_MAIN),
+            scene
+        );
+    }, [renderManagerService]);
+
+    const scrollHostViewportByWheel = useCallback((event: WheelEvent) => {
+        if (!resolvedHostUnitId) {
+            return false;
+        }
+
+        const scene = renderManagerService.getRenderById(resolvedHostUnitId)?.scene;
+        return scrollSceneViewportPassive(
+            { event, source: 'wheel', stage: 'stage2' } as IEmbedPassiveViewportWheelContext,
+            scene?.getViewport(VIEWPORT_KEY.VIEW_MAIN),
+            scene
+        );
+    }, [renderManagerService, resolvedHostUnitId]);
+
+    useEffect(() => {
+        const root = rootRef.current;
+        if (!root || !sheetLike) {
+            return undefined;
+        }
+
+        const onWheel = (event: WheelEvent) => {
+            if (!isDominantVerticalWheel(event)) {
+                return;
+            }
+
+            const stage = root.querySelector<HTMLElement>('[data-embed-float-dom]')?.dataset.embedFloatStage;
+            if (stage !== 'stage2') {
+                return;
+            }
+
+            if (!scrollHostViewportByWheel(event)) {
+                return;
+            }
+
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+        };
+
+        root.addEventListener('wheel', onWheel, { capture: true, passive: false });
+        return () => root.removeEventListener('wheel', onWheel, { capture: true });
+    }, [scrollHostViewportByWheel, sheetLike]);
 
     return (
         <div
@@ -177,7 +247,12 @@ export function EmbedDocsCustomBlockRenderer(props: { data?: IEmbedFloatDomData 
             data-embed-docs-custom-block-sheet-like={sheetLike ? 'true' : undefined}
             style={style}
         >
-            <EmbedFloatDomRenderer {...props} />
+            <EmbedFloatDomRenderer
+                {...props}
+                interactionFlow="doc-block"
+                onHostWheel={sheetLike ? handleHostWheel : undefined}
+                syncHostVerticalScroll={sheetLike}
+            />
         </div>
     );
 }
@@ -196,6 +271,37 @@ export function createDocsTableLikeCustomBlockWheelHandler(options: IDocsTableLi
     };
 }
 
+export function resolveDocsTableLikeCustomBlockRuntimeContentHeight(authoritativeContentHeight: number | undefined): number {
+    return resolveDocsTableLikeCustomBlockContentHeight(authoritativeContentHeight, SHEET_LIKE_CUSTOM_BLOCK_DEFAULT_CONTENT_HEIGHT);
+}
+
+export function resolveDocsCustomBlockRuntimeViewportHeight(params: {
+    contentHeight: number;
+    sheetLike: boolean;
+    viewportHeight?: number;
+}): number {
+    return resolveDocsTableLikeCustomBlockContentHeight(params.viewportHeight, params.contentHeight);
+}
+
+export function resolveDocsTableLikeCustomBlockRuntimeContentWidth(
+    authoritativeContentWidth: number | undefined,
+    measureFallback: () => number
+): number {
+    if (Number.isFinite(authoritativeContentWidth) && (authoritativeContentWidth ?? 0) > 0) {
+        return authoritativeContentWidth!;
+    }
+
+    return resolveDocsTableLikeCustomBlockContentWidth(undefined, measureFallback());
+}
+
+export function shouldSyncDocsTableLikeCustomBlockBleedOnScroll(root: HTMLElement, target: EventTarget | null): boolean {
+    if (target instanceof Node && root.contains(target)) {
+        return false;
+    }
+
+    return true;
+}
+
 function normalizeFloatDomData(data: unknown): IEmbedFloatDomData | undefined {
     if (!data || typeof data !== 'object') {
         return undefined;
@@ -211,6 +317,14 @@ function normalizeFloatDomData(data: unknown): IEmbedFloatDomData | undefined {
 
 function isSheetLikeDocsCustomBlock(data: IEmbedFloatDomData | undefined): boolean {
     return data?.childType === UniverInstanceType.UNIVER_SHEET || data?.childType === UniverInstanceType.UNIVER_BASE;
+}
+
+function isDominantVerticalWheel(event: WheelEvent): boolean {
+    if (event.shiftKey || event.ctrlKey || event.metaKey) {
+        return false;
+    }
+
+    return Math.abs(event.deltaY) > Math.abs(event.deltaX);
 }
 
 function measureRuntimeContentWidth(root: HTMLElement, fallbackWidth: number): number {
@@ -265,12 +379,15 @@ function ensureEmbedDocsCustomBlockStyles(): void {
 }
 .univer-embed-docs-custom-block[data-embed-docs-custom-block-sheet-like="true"] {
     contain: layout style;
+    height: var(--univer-embed-docs-block-content-height, 100%);
+    min-height: var(--univer-embed-docs-block-content-height, 100%);
 }
 .univer-embed-docs-custom-block[data-embed-docs-custom-block-sheet-like="true"] .univer-embed-float-dom__content {
     left: calc(var(--univer-embed-docs-block-bleed-left, 0px) * -1);
     width: var(--univer-embed-docs-block-bleed-width, 100%);
     height: var(--univer-embed-docs-block-viewport-height, 100%);
     overflow: hidden;
+    transform: translateY(var(--univer-embed-docs-scroll-offset, 0px));
 }
 .univer-embed-docs-custom-block[data-embed-docs-custom-block-sheet-like="true"] .univer-embed-float-dom__live {
     inset: 0;
@@ -289,7 +406,8 @@ function ensureEmbedDocsCustomBlockStyles(): void {
 .univer-embed-docs-custom-block[data-embed-docs-custom-block-sheet-like="true"] .univer-embed-float-dom__live-content {
     left: var(--univer-embed-docs-block-bleed-left, 0px);
     width: var(--univer-embed-docs-block-bleed-width, 100%);
-    min-height: var(--univer-embed-docs-block-content-height, 100%);
+    height: var(--univer-embed-docs-block-viewport-height, 100%);
+    min-height: var(--univer-embed-docs-block-viewport-height, 100%);
 }
 `;
     document.head.appendChild(style);

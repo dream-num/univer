@@ -21,7 +21,7 @@
 import type { IEmbedDescriptor } from '@univerjs/embed';
 import type { IEmbedChildContainerContext } from '../types/embed-ui';
 import { COMMAND_EXECUTION_INJECTOR_KEY, ICommandService, Injector, IUndoRedoService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { IContextMenuService, IMenuManagerService } from '@univerjs/ui';
+import { IContextMenuService, ILayoutService, IMenuManagerService } from '@univerjs/ui';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { createEmbedChildUnitScopedInjector, createEmbedScopedInjector } from './embed-child-unit-scoped-injector';
@@ -96,6 +96,18 @@ describe('embed child unit scoped injector', () => {
             hideContextMenu: vi.fn(),
             registerContextMenuHandler: vi.fn(),
         };
+        const layoutService = {
+            isFocused: false,
+            rootContainerElement: document.createElement('div'),
+            focus: vi.fn(),
+            registerFocusHandler: vi.fn(),
+            registerRootContainerElement: vi.fn(),
+            registerContentElement: vi.fn(),
+            registerContainerElement: vi.fn(),
+            getContentElement: vi.fn(() => document.body),
+            checkElementInCurrentContainers: vi.fn(() => false),
+            checkContentIsFocused: vi.fn(() => false),
+        };
         const parentInjector = createParentInjector([
             [IUniverInstanceService, instanceService],
             [ICommandService, commandService],
@@ -103,13 +115,16 @@ describe('embed child unit scoped injector', () => {
             [EmbedUndoBridgeService, undoBridgeService],
             [IMenuManagerService, menuManagerService],
             [IContextMenuService, contextMenuService],
+            [ILayoutService, layoutService],
         ]);
 
-        const scopedInjector = createEmbedChildUnitScopedInjector(createChildContext(parentInjector as unknown as Injector));
+        const childContext = createChildContext(parentInjector as unknown as Injector);
+        const scopedInjector = createEmbedChildUnitScopedInjector(childContext);
 
         expect(scopedInjector).toBeDefined();
         expect(scopedInjector?.get(IMenuManagerService)).toBe(scopedMenuManager);
         expect(scopedInjector?.get(IContextMenuService)).not.toBe(contextMenuService);
+        expect(scopedInjector?.get(ILayoutService).getContentElement()).toBe(childContext.renderScope.contentRoot);
 
         const scopedInstanceService = scopedInjector?.get(IUniverInstanceService) as unknown as IScopedInstanceService;
         expect(scopedInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_SHEET)).toBe(childUnit);
@@ -235,6 +250,39 @@ describe('embed child unit scoped injector', () => {
         expect(childDispose).toHaveBeenCalled();
         expect(childInjector.resolvedDependencyCollection.resolvedDependencies.get(overrideToken)).toEqual([ownedInstance]);
     });
+
+    it('deduplicates identifier decorators by stable name when adding local dependencies', () => {
+        const childAdd = vi.fn();
+        const factory = vi.fn(() => 'local-render-module');
+        const childInjector = {
+            has: vi.fn(() => false),
+            get: vi.fn(() => undefined),
+            add: childAdd,
+            createInstance: vi.fn(),
+            dispose: vi.fn(),
+        };
+        const parentInjector = {
+            has: vi.fn(() => false),
+            get: vi.fn(() => undefined),
+            add: vi.fn(),
+            createChild: vi.fn(() => childInjector),
+            createInstance: vi.fn(),
+        };
+        const scopedInjector = createEmbedScopedInjector(parentInjector as unknown as Injector, new Map());
+        const tokenA = Object.assign(() => undefined, { decoratorName: 'univer.sheet.selection-render-service' });
+        const tokenB = Object.assign(() => undefined, { decoratorName: 'univer.sheet.selection-render-service' });
+        const firstDep = [tokenA, { useFactory: factory }];
+        const duplicateDep = [tokenB, { useClass: class SecondRenderModule {} }];
+
+        scopedInjector.add(firstDep as never);
+        scopedInjector.add(duplicateDep as never);
+
+        expect(childAdd).not.toHaveBeenCalled();
+        expect(scopedInjector.get(tokenA as never)).toBe('local-render-module');
+        expect(scopedInjector.get(tokenA as never)).toBe('local-render-module');
+        expect(factory).toHaveBeenCalledTimes(1);
+        expect(childInjector.get).not.toHaveBeenCalledWith(tokenA);
+    });
 });
 
 function createParentInjector(entries: Array<[unknown, unknown]>) {
@@ -257,6 +305,8 @@ function createParentInjector(entries: Array<[unknown, unknown]>) {
 function createChildContext(injector: Injector): IEmbedChildContainerContext {
     const descriptor = createDescriptor();
     const root = document.createElement('div');
+    const contentRoot = document.createElement('div');
+    root.appendChild(contentRoot);
     return {
         descriptor,
         layout: 'doc-width-scale',
@@ -267,7 +317,10 @@ function createChildContext(injector: Injector): IEmbedChildContainerContext {
         embedId: descriptor.embedId,
         childUnitId: descriptor.childUnitId!,
         childType: descriptor.childType!,
-        renderScope: {} as never,
+        renderScope: {
+            rootElement: root,
+            contentRoot,
+        } as never,
         runtimeScope: {} as never,
     };
 }

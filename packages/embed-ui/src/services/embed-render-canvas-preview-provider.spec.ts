@@ -51,6 +51,7 @@ describe('createEmbedRenderCanvasPreviewProvider', () => {
         const canvas = createCanvas('data:image/png;base64,initial-render');
         canvas.width = 0;
         canvas.height = 0;
+        const scopedInjector = new Injector();
         const render = {
             engine: {
                 mount: vi.fn(() => {
@@ -80,12 +81,16 @@ describe('createEmbedRenderCanvasPreviewProvider', () => {
             height: 180,
             dpr: 1,
             reason: 'initial',
+            context: {
+                runtimeScope: { injector: scopedInjector },
+            } as any,
         });
 
         expect(result).toBe('data:image/png;base64,initial-render');
         expect(createRender).toHaveBeenCalledWith('child-1', {
             embeddedRender: true,
             makeCurrent: false,
+            renderParentInjector: scopedInjector,
             skipAutoRender: true,
         });
         expect(render.engine.mount).toHaveBeenCalled();

@@ -32,7 +32,10 @@ export function createSheetsFloatingObjectHostAdapterContribution(
     return {
         hostType: UniverInstanceType.UNIVER_SHEET,
         entry: 'sheets-floating-object',
-        createAnchorPlan: (context) => createSheetsFloatingObjectAnchorPlan(context, getSheetDrawingService(sheetDrawingService)) ?? createRecordOnlyCreatePlan(createSheetsFloatingObjectRecord(context)),
+        createAnchorPlan: (context) => requireAnchorPlan(
+            createSheetsFloatingObjectAnchorPlan(context, getSheetDrawingService(sheetDrawingService)),
+            'EMBED_SHEETS_FLOATING_ANCHOR_UNAVAILABLE'
+        ),
         removeAnchorPlan: (context) => {
             const previous = anchorModelService?.getAnchor(context.hostUnitId, context.hostAnchorId);
             const record = previous ?? createSheetsFloatingObjectRecord(context);
@@ -261,14 +264,6 @@ function createRecordOnlyRemovePlan(
     };
 }
 
-function createRecordOnlyCreatePlan(record: IEmbedHostAnchorRecord): IEmbedHostAnchorMutationPlan {
-    return {
-        hostAnchorId: record.hostAnchorId,
-        redoMutations: [{ id: SET_EMBED_HOST_ANCHOR_RECORD_MUTATION_ID, params: { record } }],
-        undoMutations: [{ id: REMOVE_EMBED_HOST_ANCHOR_RECORD_MUTATION_ID, params: { hostUnitId: record.hostUnitId, hostAnchorId: record.hostAnchorId } }],
-    };
-}
-
 function getSheetIndex(hostContext: Record<string, unknown> | undefined): number {
     return typeof hostContext?.sheetIndex === 'number' ? hostContext.sheetIndex : Number.MAX_SAFE_INTEGER;
 }
@@ -309,6 +304,14 @@ function getSheetTransform(hostContext: Record<string, unknown> | undefined): IS
 
 function getSheetDrawingService(sheetDrawingService: ISheetDrawingService | (() => ISheetDrawingService | undefined) | undefined): ISheetDrawingService | undefined {
     return typeof sheetDrawingService === 'function' ? sheetDrawingService() : sheetDrawingService;
+}
+
+function requireAnchorPlan(plan: IEmbedHostAnchorMutationPlan | undefined, errorCode: string): IEmbedHostAnchorMutationPlan {
+    if (!plan) {
+        throw new Error(errorCode);
+    }
+
+    return plan;
 }
 
 function normalizeSheetsFloatingObjectHostContext(context: IEmbedHostAnchorContext): Record<string, unknown> | undefined {

@@ -100,6 +100,50 @@ describe('render unit', () => {
         expect(renderUnit.components.size).toBe(0);
     });
 
+    it('deduplicates identifier decorators before adding render dependencies', () => {
+        RenderModuleB.calls = 0;
+        const renderUnit = createRenderUnit();
+        const tokenA = Object.assign(() => undefined, { decoratorName: 'univer.sheet.selection-render-service' });
+        const tokenB = Object.assign(() => undefined, { decoratorName: 'univer.sheet.selection-render-service' });
+
+        renderUnit.addRenderDependencies([
+            [tokenA, { useClass: RenderModuleB }],
+            [tokenB, { useClass: RenderModuleB }],
+        ] as any);
+
+        expect(RenderModuleB.calls).toBe(1);
+        expect(renderUnit.with(tokenA as never)).toBeInstanceOf(RenderModuleB);
+
+        renderUnit.dispose();
+    });
+
+    it('resolves render dependencies from the render unit injector itself', () => {
+        RenderModuleB.calls = 0;
+        const parentInjector = new Injector();
+        const token = Object.assign(() => undefined, { decoratorName: 'univer.sheet.selection-render-service' }) as any;
+        parentInjector.add([token, { useValue: 'parent-a' }]);
+        parentInjector.add([token, { useValue: 'parent-b' }]);
+        const unit = {
+            getUnitId: () => 'unit-1',
+            type: UniverInstanceType.UNIVER_SHEET,
+        } as any;
+        const renderUnit = parentInjector.createInstance(RenderUnit, {
+            engine: {} as any,
+            scene: {} as any,
+            isMainScene: true,
+            unit,
+        });
+
+        renderUnit.addRenderDependencies([
+            [token, { useClass: RenderModuleB }],
+        ] as any);
+
+        expect(RenderModuleB.calls).toBe(1);
+        expect(renderUnit.with(token)).toBeInstanceOf(RenderModuleB);
+
+        renderUnit.dispose();
+    });
+
     it('exposes mutable render context state for scene lifecycle coordination', () => {
         const renderUnit = createRenderUnit({ makeCurrent: false });
         const states: boolean[] = [];

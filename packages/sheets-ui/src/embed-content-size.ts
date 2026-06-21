@@ -16,10 +16,9 @@
 
 import type { Nullable } from '@univerjs/core';
 import type { IEmbedContentSizeProvider } from '@univerjs/embed-ui';
-import { DEFAULT_WORKSHEET_ROW_TITLE_WIDTH, UniverInstanceType } from '@univerjs/core';
+import { DEFAULT_WORKSHEET_COLUMN_WIDTH, DEFAULT_WORKSHEET_ROW_HEIGHT, DEFAULT_WORKSHEET_ROW_TITLE_WIDTH, UniverInstanceType } from '@univerjs/core';
 
 const DEFAULT_COLUMN_HEADER_HEIGHT = 24;
-const DEFAULT_COLUMN_WIDTH = 88;
 
 export function createSheetsContentSizeProvider(): IEmbedContentSizeProvider {
     return {
@@ -35,20 +34,26 @@ export function createSheetsContentSizeProvider(): IEmbedContentSizeProvider {
 interface SheetLikeWorksheet {
     getColVisible?: (column: number) => boolean;
     getCellMatrix?: () => {
-        getDataRange?: () => {
-            endColumn?: number;
-            endRow?: number;
-        } | null | undefined;
+        getDataRange?: () => SheetLikeDataRange | null | undefined;
     };
     getColumnCount?: () => number;
     getColumnWidth?: (column: number) => number;
     getConfig?: () => {
         columnHeader?: { height?: number; hidden?: number };
+        defaultColumnWidth?: number;
+        defaultRowHeight?: number;
         rowHeader?: { hidden?: number; width?: number };
     };
     getRowCount?: () => number;
     getRowHeight?: (row: number) => number;
     getRowVisible?: (row: number) => boolean;
+}
+
+interface SheetLikeDataRange {
+    endColumn?: number;
+    endRow?: number;
+    startColumn?: number;
+    startRow?: number;
 }
 
 function resolveSheetsContentHeight(childUnit: unknown): number | undefined {
@@ -66,6 +71,7 @@ function resolveSheetsContentHeight(childUnit: unknown): number | undefined {
     }
 
     const columnHeader = worksheet.getConfig?.()?.columnHeader;
+    const defaultRowHeight = normalizePositiveNumber(worksheet.getConfig?.()?.defaultRowHeight, DEFAULT_WORKSHEET_ROW_HEIGHT);
     const headerHeight = columnHeader?.hidden
         ? 0
         : normalizePositiveNumber(columnHeader?.height, DEFAULT_COLUMN_HEADER_HEIGHT);
@@ -75,7 +81,7 @@ function resolveSheetsContentHeight(childUnit: unknown): number | undefined {
         if (worksheet.getRowVisible?.(row) === false) {
             continue;
         }
-        rowHeight += normalizeNonNegativeNumber(worksheet.getRowHeight?.(row), 0);
+        rowHeight += normalizeNonNegativeNumber(worksheet.getRowHeight?.(row), defaultRowHeight);
     }
 
     return headerHeight + rowHeight;
@@ -96,6 +102,7 @@ function resolveSheetsContentWidth(childUnit: unknown): number | undefined {
     }
 
     const rowHeader = worksheet.getConfig?.()?.rowHeader;
+    const defaultColumnWidth = normalizePositiveNumber(worksheet.getConfig?.()?.defaultColumnWidth, DEFAULT_WORKSHEET_COLUMN_WIDTH);
     const rowHeaderWidth = rowHeader?.hidden
         ? 0
         : normalizePositiveNumber(rowHeader?.width, DEFAULT_WORKSHEET_ROW_TITLE_WIDTH);
@@ -105,37 +112,55 @@ function resolveSheetsContentWidth(childUnit: unknown): number | undefined {
         if (worksheet.getColVisible?.(column) === false) {
             continue;
         }
-        columnWidth += normalizePositiveNumber(worksheet.getColumnWidth?.(column), DEFAULT_COLUMN_WIDTH);
+        columnWidth += normalizePositiveNumber(worksheet.getColumnWidth?.(column), defaultColumnWidth);
     }
 
     return rowHeaderWidth + columnWidth;
 }
 
 function resolveSheetsContentRowCount(worksheet: SheetLikeWorksheet): number | undefined {
-    return resolveBoundedContentCount(worksheet.getRowCount?.(), worksheet.getCellMatrix?.()?.getDataRange?.()?.endRow);
+    return normalizeContentCount(worksheet.getRowCount?.());
 }
 
 function resolveSheetsContentColumnCount(worksheet: SheetLikeWorksheet): number | undefined {
-    return resolveBoundedContentCount(worksheet.getColumnCount?.(), worksheet.getCellMatrix?.()?.getDataRange?.()?.endColumn);
+    const cellMatrix = worksheet.getCellMatrix?.();
+    const dataRange = cellMatrix?.getDataRange?.();
+
+    return resolveEffectiveContentCount(cellMatrix, dataRange, dataRange?.endColumn, worksheet.getColumnCount?.());
 }
 
-function resolveBoundedContentCount(totalCount: unknown, dataRangeEndIndex: unknown): number | undefined {
-    const normalizedTotalCount = typeof totalCount === 'number' && Number.isFinite(totalCount) && totalCount >= 0
-        ? totalCount
-        : undefined;
-    const dataCount = typeof dataRangeEndIndex === 'number' && Number.isFinite(dataRangeEndIndex) && dataRangeEndIndex >= 0
-        ? dataRangeEndIndex + 1
-        : undefined;
-
-    if (normalizedTotalCount == null) {
-        return dataCount;
+function resolveEffectiveContentCount(cellMatrix: unknown, dataRange: SheetLikeDataRange | null | undefined, endIndex: unknown, totalCount: unknown): number | undefined {
+    if (cellMatrix == null) {
+        return normalizeContentCount(totalCount);
     }
 
-    if (dataCount == null) {
-        return normalizedTotalCount;
+    if (!isValidDataRange(dataRange)) {
+        return undefined;
     }
 
-    return Math.min(normalizedTotalCount, dataCount);
+    if (typeof endIndex !== 'number' || !Number.isFinite(endIndex) || endIndex < 0) {
+        return undefined;
+    }
+
+    const contentCount = Math.floor(endIndex) + 1;
+    const normalizedTotal = normalizeContentCount(totalCount);
+
+    return normalizedTotal == null ? contentCount : Math.min(contentCount, normalizedTotal);
+}
+
+function normalizeContentCount(value: unknown): number | undefined {
+    return typeof value === 'number' && Number.isFinite(value) && value >= 0
+        ? Math.floor(value)
+        : undefined;
+}
+
+function isValidDataRange(dataRange: SheetLikeDataRange | null | undefined): dataRange is SheetLikeDataRange {
+    return typeof dataRange?.endRow === 'number' &&
+        Number.isFinite(dataRange.endRow) &&
+        dataRange.endRow >= 0 &&
+        typeof dataRange.endColumn === 'number' &&
+        Number.isFinite(dataRange.endColumn) &&
+        dataRange.endColumn >= 0;
 }
 
 function normalizePositiveNumber(value: unknown, fallback: number): number {

@@ -167,7 +167,7 @@ export enum DocStyleType {
 /**
  * Properties of doc footer
  */
-export interface IFooterData {
+export interface IFooterData extends IReferenceSource {
     footerId: string;
     body: IDocumentBody;
 }
@@ -175,7 +175,7 @@ export interface IFooterData {
 /**
  * Properties of doc header
  */
-export interface IHeaderData {
+export interface IHeaderData extends IReferenceSource {
     headerId: string;
     body: IDocumentBody;
 }
@@ -480,6 +480,12 @@ export enum GridType {
 
 export interface IDocumentStyle extends IDocStyleBase, IDocumentLayout, IHeaderAndFooterBase {
     textStyle?: ITextStyle; // default style for text
+    background?: IDocumentBackground; // Page background image.
+}
+
+export interface IDocumentBackground {
+    source?: string;
+    sourceType?: ImageSourceType;
 }
 
 /**

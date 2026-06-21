@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import { DrawingTypeEnum, UniverInstanceType } from '@univerjs/core';
+import { DrawingTypeEnum, ImageSourceType, UniverInstanceType } from '@univerjs/core';
 import { SetDrawingSelectedOperation } from '@univerjs/drawing';
 import { Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ImageResetSizeOperation } from '../../commands/operations/image-reset-size.operation';
+import { DOC_DRAWING_BEHIND_TEXT_LAYER_INDEX } from '../../services/drawing-render.service';
 import { ImageUpdateController } from '../image-update.controller';
 
 afterEach(() => {
@@ -140,5 +141,69 @@ describe('ImageUpdateController', () => {
 
         expect(renderImages).toHaveBeenCalledTimes(1);
         expect(drawingManagerService.refreshTransform).toHaveBeenCalledWith([imageParam]);
+    });
+
+    it('applies refreshed transform, clip bounds, and behind-text layer to existing images', () => {
+        const add$ = new Subject();
+        const update$ = new Subject<Array<{ unitId: string; subUnitId: string; drawingId: string }>>();
+        const transform = {
+            angle: 0,
+            clipBounds: { height: 120, left: 0, top: 0, width: 80 },
+            height: 60,
+            left: 10,
+            top: 20,
+            width: 100,
+        };
+        const imageParam = {
+            behindText: true,
+            drawingId: 'shape-3',
+            drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+            imageSourceType: ImageSourceType.BASE64,
+            source: 'data:image/png;base64,Zm9v',
+            srcRect: { bottom: 0, left: 0, right: 0, top: 0 },
+            subUnitId: 'sheet-1',
+            transform,
+            unitId: 'book-1',
+        };
+        const imageShape = {
+            changeSource: vi.fn(),
+            layer: { zIndex: 4 },
+            setClipBounds: vi.fn(),
+            setPrstGeom: vi.fn(),
+            setSrcRect: vi.fn(),
+            transformByState: vi.fn(),
+        };
+        const scene = {
+            addObject: vi.fn(),
+            getObject: vi.fn(() => imageShape),
+            getTransformerByCreate: vi.fn(),
+            removeObject: vi.fn(),
+        };
+        const drawingManagerService = {
+            add$,
+            update$,
+            getDrawingByParam: vi.fn(() => imageParam),
+        };
+
+        const controller = new ImageUpdateController(
+            { onCommandExecuted: vi.fn(() => ({ dispose: vi.fn() })), syncExecuteCommand: vi.fn() } as never,
+            {
+                getRenderById: vi.fn(() => ({ scene })),
+            } as never,
+            drawingManagerService as never,
+            {} as never,
+            {} as never,
+            { getUnit: vi.fn(() => createSheetUnit()), getFocusedUnit: vi.fn(() => createSheetUnit()) } as never,
+            { renderImages: vi.fn() } as never
+        );
+
+        expect(controller).toBeTruthy();
+
+        update$.next([{ unitId: 'book-1', subUnitId: 'sheet-1', drawingId: 'shape-3' }]);
+
+        expect(imageShape.transformByState).toHaveBeenCalledWith(transform);
+        expect(imageShape.setClipBounds).toHaveBeenCalledWith(transform.clipBounds);
+        expect(scene.removeObject).toHaveBeenCalledWith(imageShape);
+        expect(scene.addObject).toHaveBeenCalledWith(imageShape, DOC_DRAWING_BEHIND_TEXT_LAYER_INDEX);
     });
 });

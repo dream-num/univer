@@ -126,4 +126,68 @@ describe('image extra', () => {
         expect(image.width).toBe(100);
         expect(image.height).toBe(60);
     });
+
+    it('registers load handlers before assigning url image source', () => {
+        const originalCreateElement = document.createElement.bind(document);
+        const events: Array<{ hasOnload: boolean; value: string }> = [];
+        let nativeSrc = '';
+        const native = {
+            crossOrigin: '',
+            height: 60,
+            onerror: undefined,
+            onload: undefined,
+            width: 100,
+            get src() {
+                return nativeSrc;
+            },
+            set src(value: string) {
+                events.push({ hasOnload: typeof native.onload === 'function', value });
+                nativeSrc = value;
+                native.onload?.(new Event('load'));
+            },
+        } as unknown as HTMLImageElement;
+        const createElement = vi.spyOn(document, 'createElement');
+        createElement.mockImplementation((tagName: string) => {
+            if (tagName === 'img') {
+                return native;
+            }
+            return originalCreateElement(tagName);
+        });
+        const success = vi.fn();
+
+        try {
+            new Image('img-sync-load', {
+                fail: vi.fn(),
+                height: 60,
+                left: 0,
+                success,
+                top: 0,
+                url: 'data:image/png;base64,abc',
+                width: 100,
+            });
+        } finally {
+            createElement.mockRestore();
+        }
+
+        expect(events).toEqual([{ hasOnload: true, value: 'data:image/png;base64,abc' }]);
+        expect(success).toHaveBeenCalled();
+    });
+
+    it('clips rendering to an absolute document page bound before applying image transform', () => {
+        const image = new Image('img4', {
+            image: createNativeImage(100, 60),
+            left: -30,
+            top: 10,
+            width: 100,
+            height: 60,
+            clipBounds: { left: 0, top: 0, width: 80, height: 120 },
+        });
+
+        const ctx = createCtxMock();
+        image.render(ctx);
+
+        expect(ctx.rect).toHaveBeenCalledWith(0, 0, 80, 120);
+        expect(ctx.clip).toHaveBeenCalledBefore(ctx.transform);
+        expect(ctx.drawImage).toHaveBeenCalled();
+    });
 });

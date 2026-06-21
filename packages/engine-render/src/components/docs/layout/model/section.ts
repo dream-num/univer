@@ -34,21 +34,13 @@ export function createSkeletonSection(
     if (columnProperties.length === 0) {
         columns.push(_getSkeletonColumn(left, sectionWidth, 0, ColumnSeparatorType.NONE));
     } else {
-        for (let i = 0; i < columnProperties.length; i++) {
-            const { width, paddingEnd } = columnProperties[i];
-
+        for (const { width, paddingEnd } of _fitColumnProperties(columnProperties, sectionWidth)) {
             spaceWidth = paddingEnd;
             colWidth = width;
 
             columns.push(_getSkeletonColumn(left, colWidth, spaceWidth, columnSeparatorType));
 
             left += colWidth + spaceWidth;
-
-            if (i === columnProperties.length - 1) {
-                colWidth = sectionWidth !== Number.POSITIVE_INFINITY ? sectionWidth - colWidth : width;
-                spaceWidth = 0;
-                columns.push(_getSkeletonColumn(left, colWidth, spaceWidth, columnSeparatorType));
-            }
         }
     }
     const newSection = {
@@ -65,6 +57,60 @@ export function createSkeletonSection(
     });
 
     return newSection;
+}
+
+function _fitColumnProperties(
+    columnProperties: ISectionColumnProperties[],
+    sectionWidth: number
+): ISectionColumnProperties[] {
+    if (sectionWidth === Number.POSITIVE_INFINITY || columnProperties.length === 0) {
+        return columnProperties;
+    }
+
+    const safeSectionWidth = Math.max(0, sectionWidth);
+    const widths = columnProperties.map(({ width }) => Math.max(0, width));
+    const spaces = columnProperties.map(({ paddingEnd }, index) =>
+        index === columnProperties.length - 1 ? 0 : Math.max(0, paddingEnd)
+    );
+    const totalWidth = widths.reduce((sum, width) => sum + width, 0);
+
+    if (safeSectionWidth === 0) {
+        return columnProperties.map((columnProperty) => ({
+            ...columnProperty,
+            width: 0,
+            paddingEnd: 0,
+        }));
+    }
+
+    if (totalWidth <= 0) {
+        const equalWidth = safeSectionWidth / columnProperties.length;
+        return columnProperties.map((columnProperty, index) => ({
+            ...columnProperty,
+            width: equalWidth,
+            paddingEnd: 0,
+        }));
+    }
+
+    if (totalWidth > safeSectionWidth) {
+        const scale = safeSectionWidth / totalWidth;
+        return columnProperties.map((columnProperty, index) => ({
+            ...columnProperty,
+            width: widths[index] * scale,
+            paddingEnd: 0,
+        }));
+    }
+
+    const spaceBudget = safeSectionWidth - totalWidth;
+    const totalSpace = spaces.reduce((sum, space) => sum + space, 0);
+    const fittedSpaces = totalSpace > spaceBudget && totalSpace > 0
+        ? spaces.map((space) => (space / totalSpace) * spaceBudget)
+        : spaces;
+
+    return columnProperties.map((columnProperty, index) => ({
+        ...columnProperty,
+        width: widths[index],
+        paddingEnd: fittedSpaces[index],
+    }));
 }
 
 export function setColumnFullState(column: IDocumentSkeletonColumn, state: boolean) {

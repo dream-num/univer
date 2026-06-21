@@ -18,6 +18,8 @@ import type { DocumentDataModel, ICommandInfo, IDrawingParam, ITransformState } 
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { Documents, DocumentSkeleton, IDocsTableRenderViewport, IDocumentSkeletonHeaderFooter, IDocumentSkeletonPage, IDocumentSkeletonRow, IDocumentSkeletonTable, Image, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import {
+    AlignTypeH,
+    AlignTypeV,
     BooleanNumber,
     Disposable,
     fromEventSubject,
@@ -26,6 +28,8 @@ import {
     IUniverInstanceService,
     LifecycleService,
     LifecycleStages,
+    ObjectRelativeFromH,
+    ObjectRelativeFromV,
     PositionedObjectLayoutType,
 } from '@univerjs/core';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
@@ -45,6 +49,149 @@ interface IDrawingParamsWithBehindText {
     // The same drawing render in different place, like image in header and footer.
     // The default value is BooleanNumber.FALSE. if it's true, Please use transforms.
     isMultiTransform: BooleanNumber;
+}
+
+interface IDrawingClipBounds {
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+}
+
+interface IDrawingTransformStateWithClipBounds extends ITransformState {
+    clipBounds?: IDrawingClipBounds;
+}
+
+export function getDocsDrawingPageClipBounds(config: {
+    docsLeft: number;
+    docsTop: number;
+    pageOffsetLeft: number;
+    pageOffsetTop: number;
+    clipOffsetLeft?: number;
+    clipOffsetTop?: number;
+    page: Pick<IDocumentSkeletonPage | IDocumentSkeletonHeaderFooter, 'pageWidth' | 'pageHeight'>;
+}): IDrawingClipBounds | undefined {
+    const { docsLeft, docsTop, pageOffsetLeft, pageOffsetTop, clipOffsetLeft = 0, clipOffsetTop = 0, page } = config;
+    const { pageWidth, pageHeight } = page;
+    if (!Number.isFinite(pageWidth) || !Number.isFinite(pageHeight) || pageWidth <= 0 || pageHeight <= 0) {
+        return;
+    }
+
+    return {
+        left: docsLeft + pageOffsetLeft + clipOffsetLeft,
+        top: docsTop + pageOffsetTop + clipOffsetTop,
+        width: pageWidth,
+        height: pageHeight,
+    };
+}
+
+export function getDocsDrawingClipPage(config: {
+    drawing: Pick<IDrawingParamsWithBehindText, 'behindText'> & {
+        transform?: Pick<ITransformState, 'width' | 'height'>;
+    };
+    hostPage?: Pick<IDocumentSkeletonPage, 'pageWidth' | 'pageHeight'>;
+    page: Pick<IDocumentSkeletonPage | IDocumentSkeletonHeaderFooter, 'pageWidth' | 'pageHeight'>;
+}): Pick<IDocumentSkeletonPage | IDocumentSkeletonHeaderFooter, 'pageWidth' | 'pageHeight'> {
+    const { drawing, hostPage, page } = config;
+    if (hostPage == null || drawing.behindText !== true || drawing.transform == null) {
+        return page;
+    }
+
+    const { width, height } = drawing.transform;
+    if (width == null || height == null) {
+        return page;
+    }
+
+    const widthRatio = width / hostPage.pageWidth;
+    const heightRatio = height / hostPage.pageHeight;
+    if (widthRatio >= 0.8 && heightRatio >= 0.8) {
+        return hostPage;
+    }
+
+    return page;
+}
+
+export function getDocsPageRelativeDrawingLeft(config: {
+    hostPage: Pick<IDocumentSkeletonPage, 'pageWidth'>;
+    positionH: {
+        align?: AlignTypeH;
+        posOffset?: number;
+        relativeFrom?: ObjectRelativeFromH;
+    };
+    width: number;
+}): number | undefined {
+    const { hostPage, positionH, width } = config;
+    if (positionH.relativeFrom !== ObjectRelativeFromH.PAGE) {
+        return;
+    }
+
+    if (positionH.align === AlignTypeH.RIGHT) {
+        return hostPage.pageWidth - width;
+    }
+    if (positionH.align === AlignTypeH.CENTER) {
+        return hostPage.pageWidth / 2 - width / 2;
+    }
+    if (positionH.posOffset != null) {
+        return positionH.posOffset;
+    }
+
+    return 0;
+}
+
+export function getDocsPageRelativeDrawingTop(config: {
+    hostPage: Pick<IDocumentSkeletonPage, 'pageHeight'>;
+    positionV: {
+        align?: AlignTypeV;
+        posOffset?: number;
+        relativeFrom?: ObjectRelativeFromV;
+    };
+    height: number;
+}): number | undefined {
+    const { hostPage, positionV, height } = config;
+    if (positionV.relativeFrom !== ObjectRelativeFromV.PAGE) {
+        return;
+    }
+
+    if (positionV.align === AlignTypeV.BOTTOM) {
+        return hostPage.pageHeight - height;
+    }
+    if (positionV.align === AlignTypeV.CENTER) {
+        return hostPage.pageHeight / 2 - height / 2;
+    }
+    if (positionV.posOffset != null) {
+        return positionV.posOffset;
+    }
+
+    return 0;
+}
+
+export function getDocsPageRelativeDrawingAnchorPage(config: {
+    page: Pick<IDocumentSkeletonPage | IDocumentSkeletonHeaderFooter, 'pageWidth' | 'pageHeight'>;
+    clipPage: Pick<IDocumentSkeletonPage | IDocumentSkeletonHeaderFooter, 'pageWidth' | 'pageHeight'>;
+    hostPage?: Pick<IDocumentSkeletonPage, 'pageWidth' | 'pageHeight'>;
+}): Pick<IDocumentSkeletonPage | IDocumentSkeletonHeaderFooter, 'pageWidth' | 'pageHeight'> | undefined {
+    const { page, clipPage, hostPage } = config;
+    if (hostPage != null && hostPage === clipPage) {
+        return hostPage;
+    }
+    if (hostPage == null && page === clipPage) {
+        return page;
+    }
+}
+
+export function getDocsDrawingBehindText(config: {
+    drawingOrigin: {
+        layoutType?: PositionedObjectLayoutType;
+        behindDoc?: BooleanNumber;
+    };
+    hostPage?: Pick<IDocumentSkeletonPage, 'pageWidth' | 'pageHeight'>;
+}): boolean {
+    const { drawingOrigin, hostPage } = config;
+    if (hostPage != null) {
+        return true;
+    }
+
+    return drawingOrigin.layoutType === PositionedObjectLayoutType.WRAP_NONE && drawingOrigin.behindDoc === BooleanNumber.TRUE;
 }
 
 export function getDocsTableCellDrawingOffset(
@@ -175,6 +322,10 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
         }
 
         const { left: docsLeft, top: docsTop, pageLayoutType, pageMarginLeft, pageMarginTop } = documentComponent;
+        if (docsLeft <= -10000 || docsTop <= -10000) {
+            return;
+        }
+
         const { pages, skeHeaders, skeFooters } = skeletonData;
         const updateDrawingMap: Record<string, IDrawingParamsWithBehindText> = {}; // IFloatingObjectManagerParam
 
@@ -197,7 +348,8 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
                         docsTop,
                         updateDrawingMap,
                         headerPage.marginTop,
-                        page.marginLeft
+                        page.marginLeft,
+                        page
                     );
                     this._calculateTableCellDrawingPositions(
                         unitId,
@@ -223,7 +375,8 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
                         docsTop,
                         updateDrawingMap,
                         footerTop,
-                        page.marginLeft
+                        page.marginLeft,
+                        page
                     );
                     this._calculateTableCellDrawingPositions(
                         unitId,
@@ -299,9 +452,13 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
         docsTop: number,
         updateDrawingMap: Record<string, IDrawingParamsWithBehindText>,
         marginTop: number,
-        marginLeft: number
+        marginLeft: number,
+        hostPage?: IDocumentSkeletonPage,
+        clipOffset?: { left: number; top: number }
     ) {
         const { skeDrawings } = page;
+        const pageOffsetLeft = this._liquid.x;
+        const pageOffsetTop = this._liquid.y;
         this._liquid.translatePagePadding({
             marginTop,
             marginLeft,
@@ -309,15 +466,56 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
 
         skeDrawings.forEach((drawing) => {
             const { aLeft, aTop, height, width, angle, drawingId, drawingOrigin } = drawing;
-            const behindText = drawingOrigin.layoutType === PositionedObjectLayoutType.WRAP_NONE && drawingOrigin.behindDoc === BooleanNumber.TRUE;
+            const behindText = getDocsDrawingBehindText({ drawingOrigin, hostPage });
             const { isMultiTransform = BooleanNumber.FALSE } = drawingOrigin;
+            const clipDrawing = {
+                behindText,
+                transform: {
+                    width,
+                    height,
+                },
+            };
+            const clipPage = getDocsDrawingClipPage({
+                drawing: clipDrawing,
+                hostPage,
+                page,
+            });
+            const pageClipBounds = getDocsDrawingPageClipBounds({
+                docsLeft,
+                docsTop,
+                pageOffsetLeft,
+                pageOffsetTop,
+                clipOffsetLeft: clipOffset?.left,
+                clipOffsetTop: clipOffset?.top,
+                page: clipPage,
+            });
+            const pageRelativeAnchorPage = getDocsPageRelativeDrawingAnchorPage({
+                page,
+                clipPage,
+                hostPage,
+            });
+            const pageRelativeLeft = pageRelativeAnchorPage != null
+                ? getDocsPageRelativeDrawingLeft({
+                    hostPage: pageRelativeAnchorPage,
+                    positionH: drawingOrigin.docTransform.positionH,
+                    width,
+                })
+                : undefined;
+            const pageRelativeTop = pageRelativeAnchorPage != null
+                ? getDocsPageRelativeDrawingTop({
+                    hostPage: pageRelativeAnchorPage,
+                    positionV: drawingOrigin.docTransform.positionV,
+                    height,
+                })
+                : undefined;
             const transform = {
-                left: aLeft + docsLeft + this._liquid.x,
-                top: aTop + docsTop + this._liquid.y,
+                left: (pageRelativeLeft ?? aLeft) + docsLeft + (pageRelativeLeft == null ? this._liquid.x : pageOffsetLeft),
+                top: (pageRelativeTop ?? aTop) + docsTop + (pageRelativeTop == null ? this._liquid.y : pageOffsetTop),
                 width,
                 height,
                 angle,
-            };
+                clipBounds: pageClipBounds,
+            } as IDrawingTransformStateWithClipBounds;
             if (updateDrawingMap[drawingId] == null) {
                 updateDrawingMap[drawingId] = {
                     unitId,
@@ -362,7 +560,9 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
                         docsTop,
                         updateDrawingMap,
                         marginTop,
-                        marginLeft
+                        marginLeft,
+                        undefined,
+                        { left: marginLeft, top: marginTop }
                     );
                     this._calculateTableCellDrawingPositions(
                         unitId,

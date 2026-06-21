@@ -218,7 +218,7 @@ export function shaping(
                     if (customBlock != null) {
                         const { blockId } = customBlock;
                         const drawingOrigin = drawings[blockId];
-                        if (drawingOrigin.layoutType === PositionedObjectLayoutType.INLINE) {
+                        if (drawingOrigin?.layoutType === PositionedObjectLayoutType.INLINE) {
                             const { angle } = drawingOrigin.docTransform;
                             const { width = 0, height = 0 } = drawingOrigin.docTransform.size;
                             const top = 0;
@@ -226,7 +226,7 @@ export function shaping(
                             const boundingBox = getBoundingBox(angle, left, width, top, height);
 
                             newGlyph = createSkeletonCustomBlockGlyph(config, boundingBox.width, boundingBox.height, drawingOrigin.drawingId);
-                        } else {
+                        } else if (drawingOrigin != null) {
                             newGlyph = createSkeletonCustomBlockGlyph(config, 0, 0, drawingOrigin.drawingId);
                         }
                     }

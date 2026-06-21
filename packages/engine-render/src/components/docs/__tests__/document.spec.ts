@@ -440,6 +440,50 @@ describe('documents render', () => {
         docBackground.dispose();
     });
 
+    it('draws DOCX page background images on every traditional page', () => {
+        const firstPage = createPage(DocumentSkeletonPageType.BODY, 'first');
+        const secondPage = createPage(DocumentSkeletonPageType.BODY, 'second');
+        const backgroundImage = { complete: true };
+        vi.spyOn(document, 'createElement').mockReturnValue(backgroundImage as any);
+        const skeleton = {
+            getSkeletonData: () => ({ pages: [firstPage, secondPage] }),
+            getViewModel: () => ({
+                getDataModel: () => ({
+                    getSnapshot: () => ({
+                        documentStyle: {
+                            documentFlavor: DocumentFlavor.TRADITIONAL,
+                            background: {
+                                source: 'data:image/png;base64,background',
+                            },
+                        },
+                    }),
+                }),
+            }),
+        } as any;
+        const docBackground = new DocBackground('docs-background-docx', skeleton, {
+            pageLayoutType: PageLayoutType.VERTICAL,
+            pageMarginLeft: 20,
+            pageMarginTop: 20,
+        });
+
+        vi.spyOn(Rect, 'drawWith').mockImplementation(() => {});
+        vi.spyOn(Path, 'drawWith').mockImplementation(() => {});
+        const drawImage = vi.fn();
+
+        docBackground.draw({
+            restore: vi.fn(),
+            save: vi.fn(),
+            translate: vi.fn(),
+            drawImage,
+        } as any);
+
+        expect(drawImage).toHaveBeenCalledTimes(2);
+        expect(drawImage).toHaveBeenNthCalledWith(1, backgroundImage, 0, 0, 200, 420);
+        expect(drawImage).toHaveBeenNthCalledWith(2, backgroundImage, 0, 0, 200, 420);
+
+        docBackground.dispose();
+    });
+
     it('treats unspecified document flavor as traditional when drawing the page background', () => {
         const page = createPage(DocumentSkeletonPageType.BODY, '');
         const skeleton = {
@@ -1042,6 +1086,7 @@ describe('documents render', () => {
         const headerPage = createPage(DocumentSkeletonPageType.HEADER, 'header-main');
         const footerPage = createPage(DocumentSkeletonPageType.FOOTER, 'footer-main');
         attachTable(bodyPage);
+        attachTable(headerPage);
 
         const skeletonData = {
             pages: [bodyPage],
@@ -1106,6 +1151,7 @@ describe('documents render', () => {
         const offsetConfig = documents.getOffsetConfig();
         expect(offsetConfig.pageMarginLeft).toBe(6);
         expect(documents.getEngine()).toBe(engine);
+        const tableDraw = vi.spyOn(documents as any, '_drawTable');
 
         documents.draw(canvas.getContext(), {
             viewBound: { left: 0, top: 0, right: 900, bottom: 700 },
@@ -1116,6 +1162,7 @@ describe('documents render', () => {
         expect(clearCache).toHaveBeenCalled();
         expect(lineDraw).toHaveBeenCalled();
         expect(spanDraw).toHaveBeenCalled();
+        expect(tableDraw).toHaveBeenCalledTimes(2);
 
         documents.draw(canvas.getContext(), {
             viewBound: { left: 2000, top: 2000, right: 2200, bottom: 2200 },
@@ -1129,6 +1176,59 @@ describe('documents render', () => {
         documents.draw(canvas.getContext(), {
             viewBound: { left: 0, top: 0, right: 300, bottom: 300 },
         } as any);
+
+        documents.dispose();
+    });
+
+    it('draws lower-page header content for DOCX page-relative header backgrounds', () => {
+        const bodyPage = createPage(DocumentSkeletonPageType.BODY, '');
+        bodyPage.sections[0].columns[0].lines = [];
+        bodyPage.skeTables.clear();
+
+        const headerPage = createPage(DocumentSkeletonPageType.HEADER, 'header-main');
+        const headerLine = createLine(LineType.PARAGRAPH, 260);
+        headerLine.parent = headerPage.sections[0].columns[0];
+        headerPage.sections[0].columns[0].lines = [headerLine];
+        headerPage.skeTables.clear();
+
+        const skeletonData = {
+            pages: [bodyPage],
+            skeHeaders: new Map([['header-main', new Map([[bodyPage.pageWidth, headerPage]])]]),
+            skeFooters: new Map(),
+        };
+        bodyPage.parent = skeletonData;
+        headerPage.parent = skeletonData;
+
+        const documents = new Documents('docs-page-header-background', { getSkeletonData: () => skeletonData } as any, {
+            pageLayoutType: PageLayoutType.VERTICAL,
+            pageMarginLeft: 0,
+            pageMarginTop: 0,
+        });
+        documents.transformByState({
+            left: 0,
+            top: 0,
+            width: 260,
+            height: 480,
+        });
+        scene.addObject(documents, 1);
+
+        const spanDraw = vi.fn();
+        vi.spyOn(documents as any, 'getExtensionsByOrder').mockReturnValue([
+            {
+                uKey: 'DocsSpanExtension',
+                type: DOCS_EXTENSION_TYPE.SPAN,
+                extensionOffset: {},
+                clearCache: vi.fn(),
+                draw: spanDraw,
+            },
+        ] as any);
+
+        documents.draw(canvas.getContext(), {
+            viewBound: { left: 0, top: 0, right: 900, bottom: 700 },
+            cacheBound: { left: 0, top: 0, right: 900, bottom: 700 },
+        } as any);
+
+        expect(spanDraw).toHaveBeenCalled();
 
         documents.dispose();
     });

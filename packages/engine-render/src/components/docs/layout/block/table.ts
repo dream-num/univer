@@ -151,6 +151,10 @@ export function rollbackListCache(listLevel: Map<string, IParagraphList[][]>, ta
 
     for (const paragraphLists of listLevel.values()) {
         for (const paragraphList of paragraphLists) {
+            if (paragraphList == null) {
+                continue;
+            }
+
             const paragraphListIndex = paragraphList.findIndex((p) => p.paragraph.startIndex > startIndex && p.paragraph.startIndex < endIndex);
 
             if (paragraphListIndex > -1) {

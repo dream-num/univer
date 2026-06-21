@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ColumnSeparatorType, createDocumentModelWithStyle, LocaleService, Univer } from '@univerjs/core';
+import { ColumnSeparatorType, createDocumentModelWithStyle, DocumentDataModel, DocumentFlavor, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, SectionType, TableSizeType, Univer } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { DocumentSkeletonPageType, GlyphType, PageLayoutType } from '../../../../basics/i-document-skeleton-cached';
 import { Vector2 } from '../../../../basics/vector2';
@@ -379,6 +379,322 @@ describe('doc skeleton', () => {
             expect(typeof index).toBe('number');
             expect(skeleton.findNodeByCharIndex(index as number)).toBeTruthy();
         }
+
+        skeleton.dispose();
+        univer.dispose();
+    });
+
+    it('creates an initial page when the first laid out section is continuous', () => {
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+
+        const documentModel = new DocumentDataModel({
+            id: 'continuous-doc',
+            body: {
+                dataStream: 'A\r\n',
+                textRuns: [
+                    {
+                        st: 0,
+                        ed: 1,
+                        ts: {},
+                    },
+                ],
+                paragraphs: [
+                    {
+                        startIndex: 1,
+                        paragraphId: 'para_continuous',
+                    },
+                ],
+                sectionBreaks: [
+                    {
+                        startIndex: 2,
+                        sectionType: SectionType.CONTINUOUS,
+                    },
+                ],
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                pageSize: {
+                    width: 160,
+                    height: 220,
+                },
+            },
+        });
+
+        const viewModel = new DocumentViewModel(documentModel);
+        const skeleton = DocumentSkeleton.create(viewModel, localeService);
+
+        expect(() => skeleton.calculate()).not.toThrow();
+        expect(skeleton.getSkeletonData()?.pages.length).toBeGreaterThan(0);
+
+        skeleton.dispose();
+        univer.dispose();
+    });
+
+    it('lays out a traditional form document with header footer and long fields', () => {
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+        const lines = [
+            'FORM AUTHORIZATION',
+            '',
+            'Customer __________________________________',
+            'Identifier __________________________________',
+            'Agent',
+            'Name __________________________________',
+            'Identifier __________________________________',
+            'Permissions',
+            'review account history and invoices in the customer portal',
+            'create and close agreements',
+            'other',
+            'Valid until ________________________________',
+            'Signatures',
+            '________________________________ (identifier __________-______)',
+            '________________________________ (identifier __________-______)',
+            '________________________________ (identifier __________-______)',
+            '________________________________ (identifier __________-______)',
+        ];
+        const dataStream = `${lines.join('\r')}\r\n`;
+        const paragraphs = Array.from(dataStream.matchAll(/\r/g)).map((match) => ({
+            startIndex: match.index!,
+            paragraphId: `p-${match.index}`,
+            paragraphStyle: {
+                spaceBelow: { v: 8 },
+            },
+        }));
+        const documentModel = new DocumentDataModel({
+            id: 'docx-form-doc',
+            body: {
+                dataStream,
+                textRuns: [
+                    {
+                        st: 0,
+                        ed: dataStream.length - 2,
+                        ts: {},
+                    },
+                ],
+                paragraphs,
+                sectionBreaks: [
+                    {
+                        startIndex: dataStream.length - 1,
+                        pageSize: {
+                            width: 793.7333333333332,
+                            height: 1122.5333333333333,
+                        },
+                        marginTop: 37.8,
+                        marginBottom: 61.6,
+                        marginLeft: 86.93333333333334,
+                        marginRight: 98.26666666666667,
+                        marginHeader: 37.8,
+                        marginFooter: 0,
+                        linePitch: 24,
+                        defaultHeaderId: 'header',
+                        defaultFooterId: 'footer',
+                    },
+                ],
+            },
+            headers: {
+                header: {
+                    headerId: 'header',
+                    body: {
+                        dataStream: '\x1A\x1B\x1C\b\r\n\x1D\x1C\r\n\x1D\x1C\r\n\x1D\x0E\x0F\r\r\n',
+                        paragraphs: [
+                            {
+                                startIndex: 4,
+                                paragraphId: 'header-p-1',
+                            },
+                            {
+                                startIndex: 8,
+                                paragraphId: 'header-p-2',
+                            },
+                            {
+                                startIndex: 12,
+                                paragraphId: 'header-p-3',
+                            },
+                            {
+                                startIndex: 18,
+                                paragraphId: 'header-p-4',
+                            },
+                            {
+                                startIndex: 19,
+                                paragraphId: 'header-p-5',
+                            },
+                        ],
+                        sectionBreaks: [
+                            {
+                                startIndex: 5,
+                            },
+                            {
+                                startIndex: 9,
+                            },
+                            {
+                                startIndex: 13,
+                            },
+                            {
+                                startIndex: 20,
+                            },
+                        ],
+                        tables: [
+                            {
+                                startIndex: 0,
+                                endIndex: 16,
+                                tableId: 'header-table',
+                            },
+                        ],
+                    },
+                    tableSource: {
+                        'header-table': {
+                            tableId: 'header-table',
+                            align: 0,
+                            indent: {
+                                v: 0,
+                            },
+                            size: {
+                                type: 0,
+                                width: {
+                                    v: 0,
+                                },
+                            },
+                            position: {
+                                positionH: { relativeFrom: ObjectRelativeFromH.PAGE, posOffset: 0 },
+                                positionV: { relativeFrom: ObjectRelativeFromV.PAGE, posOffset: 0 },
+                            },
+                            dist: {
+                                distT: 0,
+                                distB: 0,
+                                distL: 0,
+                                distR: 0,
+                            },
+                            tableRows: [
+                                {
+                                    tableCells: [{}, {}, {}],
+                                    trHeight: {
+                                        val: { v: 0 },
+                                        hRule: 0,
+                                    },
+                                },
+                            ],
+                            tableColumns: [
+                                { size: { type: TableSizeType.SPECIFIED, width: { v: 356.8666666666666 } } },
+                                { size: { type: TableSizeType.SPECIFIED, width: { v: 264.59999999999997 } } },
+                                { size: { type: TableSizeType.SPECIFIED, width: { v: 56.73333333333333 } } },
+                            ],
+                            textWrap: 0,
+                        },
+                    },
+                },
+            },
+            footers: {
+                footer: {
+                    footerId: 'footer',
+                    body: {
+                        dataStream: '\x1A\x1B\x1CFooter company address\rFooter postal address\rFooter website\r\n\x1D\x1CFooter legal name\rBusiness id\r\n\x1D\x1CNetwork company\rBusiness id\r\n\x1D\x0E\x0F\r\r\n',
+                        paragraphs: [
+                            {
+                                startIndex: 22,
+                                paragraphId: 'footer-p-1',
+                            },
+                            {
+                                startIndex: 44,
+                                paragraphId: 'footer-p-2',
+                            },
+                            {
+                                startIndex: 59,
+                                paragraphId: 'footer-p-3',
+                            },
+                            {
+                                startIndex: 78,
+                                paragraphId: 'footer-p-4',
+                            },
+                            {
+                                startIndex: 90,
+                                paragraphId: 'footer-p-5',
+                            },
+                            {
+                                startIndex: 107,
+                                paragraphId: 'footer-p-6',
+                            },
+                            {
+                                startIndex: 119,
+                                paragraphId: 'footer-p-7',
+                            },
+                            {
+                                startIndex: 125,
+                                paragraphId: 'footer-p-8',
+                            },
+                        ],
+                        sectionBreaks: [
+                            {
+                                startIndex: 60,
+                            },
+                            {
+                                startIndex: 91,
+                            },
+                            {
+                                startIndex: 120,
+                            },
+                            {
+                                startIndex: 127,
+                            },
+                        ],
+                        tables: [
+                            {
+                                startIndex: 0,
+                                endIndex: 124,
+                                tableId: 'footer-table',
+                            },
+                        ],
+                    },
+                    tableSource: {
+                        'footer-table': {
+                            tableId: 'footer-table',
+                            align: 0,
+                            indent: {
+                                v: 0,
+                            },
+                            size: {
+                                type: 0,
+                                width: {
+                                    v: 0,
+                                },
+                            },
+                            position: {
+                                positionH: { relativeFrom: ObjectRelativeFromH.PAGE, posOffset: 0 },
+                                positionV: { relativeFrom: ObjectRelativeFromV.PAGE, posOffset: 0 },
+                            },
+                            dist: {
+                                distT: 0,
+                                distB: 0,
+                                distL: 0,
+                                distR: 0,
+                            },
+                            tableRows: [
+                                {
+                                    tableCells: [{}, {}, {}],
+                                    trHeight: {
+                                        val: { v: 0 },
+                                        hRule: 0,
+                                    },
+                                },
+                            ],
+                            tableColumns: [
+                                { size: { type: TableSizeType.SPECIFIED, width: { v: 239.33333333333334 } } },
+                                { size: { type: TableSizeType.SPECIFIED, width: { v: 204.86666666666667 } } },
+                                { size: { type: TableSizeType.SPECIFIED, width: { v: 170.13333333333333 } } },
+                            ],
+                            textWrap: 0,
+                        },
+                    },
+                },
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+            },
+        });
+
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(documentModel), localeService);
+
+        expect(() => skeleton.calculate()).not.toThrow();
+        expect(skeleton.getSkeletonData()?.pages.length).toBeGreaterThan(0);
 
         skeleton.dispose();
         univer.dispose();

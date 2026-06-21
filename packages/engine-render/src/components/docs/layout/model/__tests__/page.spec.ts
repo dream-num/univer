@@ -122,6 +122,8 @@ describe('page model', () => {
         expect(firstPage.footerId).toBe('f-first');
         expect(firstPage.pageWidth).toBe(200);
         expect(firstPage.pageHeight).toBe(300);
+        expect(firstPage.marginTop).toBe(12);
+        expect(firstPage.marginBottom).toBe(14);
         expect(firstPage.sections.length).toBeGreaterThan(0);
         expect(skeletonResourceReference.skeHeaders.get('h-first')?.has(200)).toBe(true);
         expect(skeletonResourceReference.skeFooters.get('f-first')?.has(200)).toBe(true);
@@ -129,6 +131,71 @@ describe('page model', () => {
         const evenPage = createSkeletonPage(ctx, sectionBreakConfig, skeletonResourceReference, 2);
         expect(evenPage.headerId).toBe('h-even');
         expect(evenPage.footerId).toBe('f-even');
+    });
+
+    it('does not create negative-width columns for oversized single-column section properties', () => {
+        const skeletonResourceReference = createSkeletonResourceReference();
+        const ctx = {
+            layoutStartPointer: {},
+            skeletonResourceReference,
+            isDirty: false,
+        } as any;
+
+        const page = createSkeletonPage(
+            ctx,
+            {
+                pageNumberStart: 1,
+                pageSize: { width: 816, height: 1056 },
+                marginLeft: 120,
+                marginRight: 120,
+                marginTop: 96,
+                marginBottom: 96,
+                headerTreeMap: new Map(),
+                footerTreeMap: new Map(),
+                columnProperties: [{ width: 624, paddingEnd: 720 }],
+                columnSeparatorType: ColumnSeparatorType.NONE,
+            } as any,
+            skeletonResourceReference,
+            1
+        );
+
+        expect(page.sections[0].columns.map((column) => column.width)).toEqual([576]);
+    });
+
+    it('keeps every oversized DOCX multi-column section usable after fitting gaps', () => {
+        const skeletonResourceReference = createSkeletonResourceReference();
+        const ctx = {
+            layoutStartPointer: {},
+            skeletonResourceReference,
+            isDirty: false,
+        } as any;
+
+        const page = createSkeletonPage(
+            ctx,
+            {
+                pageNumberStart: 1,
+                pageSize: { width: 793.7333333333332, height: 1122.5333333333333 },
+                marginLeft: 48,
+                marginRight: 48,
+                marginTop: 48,
+                marginBottom: 48,
+                headerTreeMap: new Map(),
+                footerTreeMap: new Map(),
+                columnProperties: [
+                    { width: 201.06666666666663, paddingEnd: 709 },
+                    { width: 201.06666666666663, paddingEnd: 709 },
+                    { width: 201.06666666666663, paddingEnd: 0 },
+                ],
+                columnSeparatorType: ColumnSeparatorType.NONE,
+            } as any,
+            skeletonResourceReference,
+            1
+        );
+
+        const columns = page.sections[0].columns;
+        expect(columns).toHaveLength(3);
+        expect(columns.every((column) => column.width > 0)).toBe(true);
+        expect(columns.at(-1)!.left + columns.at(-1)!.width).toBeLessThanOrEqual(697.7333333333332);
     });
 
     it('creates null cell page and skeleton cell pages', () => {
@@ -209,6 +276,39 @@ describe('page model', () => {
         expect(pages[0].segmentId).toBe('table-1');
         expect(updateBlockIndexMock).toHaveBeenCalled();
         expect(updateInlineDrawingCoordsAndBorderMock).toHaveBeenCalled();
+    });
+
+    it('shrinks default cell margins for extremely narrow table columns', () => {
+        const ctx = {
+            layoutStartPointer: {},
+            skeletonResourceReference: createSkeletonResourceReference(),
+            isDirty: false,
+        } as any;
+        const sectionBreakConfig = {
+            lists: [],
+            localeService: {} as any,
+            drawings: {},
+            pageSize: { width: 300, height: 200 },
+            headerTreeMap: new Map(),
+            footerTreeMap: new Map(),
+        } as any;
+        const tableConfig = {
+            tableId: 'narrow-table',
+            tableRows: [{ tableCells: [{}] }],
+            tableColumns: [{ size: { width: { v: 0.8 } } }],
+        } as any;
+
+        const { page, sectionBreakConfig: cellSectionBreakConfig } = createNullCellPage(
+            ctx,
+            sectionBreakConfig,
+            tableConfig,
+            0,
+            0
+        );
+
+        expect(page.pageWidth).toBe(0.8);
+        expect(cellSectionBreakConfig.marginLeft! + cellSectionBreakConfig.marginRight!).toBeLessThan(page.pageWidth);
+        expect(page.sections[0].columns[0].width).toBeGreaterThan(0);
     });
 
     it('adds trailing block range spacing to table cell height when the block range is the last cell element', () => {

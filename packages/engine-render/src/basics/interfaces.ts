@@ -128,6 +128,7 @@ export interface IParagraphTableCache {
 export interface IParagraphConfig {
     paragraphIndex: number;
     useWordStyleLineHeight?: boolean;
+    docxFallbackAnchorLeft?: IParagraphStyle['indentStart'];
     paragraphNonInlineSkeDrawings?: Map<string, IDocumentSkeletonDrawing>;
     paragraphInlineSkeDrawings?: Map<string, IDocumentSkeletonDrawing>;
     skeTablesInParagraph?: IParagraphTableCache[];

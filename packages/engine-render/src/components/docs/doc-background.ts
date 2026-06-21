@@ -35,6 +35,8 @@ export class DocBackground extends DocComponent {
     private _pageFillColor?: string;
     private _pageStrokeColor?: string;
     private _marginStrokeColor?: string;
+    private _pageBackgroundSource?: string;
+    private _pageBackgroundImage?: HTMLImageElement;
 
     constructor(oKey: string, documentSkeleton?: DocumentSkeleton, config?: IDocumentsConfig) {
         super(oKey, documentSkeleton, config);
@@ -77,7 +79,7 @@ export class DocBackground extends DocComponent {
             return;
         }
 
-        const { documentFlavor } = docDataModel.getSnapshot().documentStyle;
+        const { documentFlavor, background } = docDataModel.getSnapshot().documentStyle;
 
         const workspaceFill = this._backgroundFillColor ?? (documentFlavor === DocumentFlavor.MODERN ? PAGE_FILL_COLOR : DOCS_WORKSPACE_FILL_COLOR);
         this._drawWorkspaceBackground(ctx, workspaceFill, bounds);
@@ -125,6 +127,7 @@ export class DocBackground extends DocComponent {
             };
 
             Rect.drawWith(ctx, backgroundOptions);
+            this._drawPageBackgroundImage(ctx, background?.source, pageWidth ?? width, pageHeight ?? height);
 
             const IDENTIFIER_WIDTH = 15;
             const marginIdentification: IPathProps = {
@@ -203,6 +206,34 @@ export class DocBackground extends DocComponent {
             zIndex: 0,
         });
         ctx.restore();
+    }
+
+    private _drawPageBackgroundImage(ctx: UniverRenderingContext, source: string | undefined, width: number, height: number) {
+        if (!source || width <= 0 || height <= 0) {
+            return;
+        }
+
+        const image = this._getPageBackgroundImage(source);
+        if (!image.complete) {
+            return;
+        }
+
+        ctx.drawImage(image, 0, 0, width, height);
+    }
+
+    private _getPageBackgroundImage(source: string) {
+        if (this._pageBackgroundSource === source && this._pageBackgroundImage != null) {
+            return this._pageBackgroundImage;
+        }
+
+        const image = document.createElement('img');
+        image.crossOrigin = 'anonymous';
+        image.onload = () => this.makeDirty(true);
+        image.src = source;
+        this._pageBackgroundSource = source;
+        this._pageBackgroundImage = image;
+
+        return image;
     }
 
     changeSkeleton(newSkeleton: DocumentSkeleton) {

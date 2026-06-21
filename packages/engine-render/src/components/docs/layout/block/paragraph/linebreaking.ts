@@ -15,7 +15,7 @@
  */
 
 import type { IBullet, IDocDrawingBase, IDocumentBody, IDrawings, IParagraph, IParagraphStyle, Nullable } from '@univerjs/core';
-import type { IDocumentSkeletonBullet, IDocumentSkeletonDrawing, IDocumentSkeletonPage, IDocumentSkeletonTable, IParagraphList } from '../../../../../basics/i-document-skeleton-cached';
+import type { IDocumentSkeletonBullet, IDocumentSkeletonDrawing, IDocumentSkeletonGlyph, IDocumentSkeletonPage, IDocumentSkeletonTable, IParagraphList } from '../../../../../basics/i-document-skeleton-cached';
 import type { IParagraphConfig, ISectionBreakConfig } from '../../../../../basics/interfaces';
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../../view-model/document-view-model';
@@ -43,6 +43,51 @@ const BLOCK_LAYOUT_OUTER_SPACING_MAP = new Map([
     [DocumentBlockRangeType.CODE, 32],
     [DocumentBlockRangeType.QUOTE, 24],
 ]);
+
+function _endsWithToken(text: string, glyphs: IDocumentSkeletonGlyph[], token: DataStreamTreeTokenType): boolean {
+    return text.endsWith(token) || glyphs[glyphs.length - 1]?.raw === token || glyphs[glyphs.length - 1]?.streamType === token;
+}
+
+function _isMarkedDocxColumnBreak(viewModel: DocumentViewModel, absoluteIndex: number): boolean {
+    const customRange = viewModel.getCustomRange(absoluteIndex);
+    const properties = customRange?.properties as { docxBreakType?: unknown } | undefined;
+
+    return properties?.docxBreakType === 'column';
+}
+
+function _glyphCount(glyphs: IDocumentSkeletonGlyph[]): number {
+    return glyphs.reduce((count, glyph) => count + glyph.count, 0);
+}
+
+function _hasOnlyCustomBlockGlyphs(glyphs: IDocumentSkeletonGlyph[]): boolean {
+    return glyphs.length > 0 && glyphs.every((glyph) => glyph.streamType === DataStreamTreeTokenType.CUSTOM_BLOCK);
+}
+
+function _mergeAdjacentCustomBlockShapedTexts(shapedTextList: IShapedText[]): IShapedText[] {
+    const mergedShapedTextList: IShapedText[] = [];
+
+    for (const shapedText of shapedTextList) {
+        const lastShapedText = mergedShapedTextList[mergedShapedTextList.length - 1];
+
+        if (
+            lastShapedText &&
+            _hasOnlyCustomBlockGlyphs(lastShapedText.glyphs) &&
+            _hasOnlyCustomBlockGlyphs(shapedText.glyphs)
+        ) {
+            lastShapedText.text += shapedText.text;
+            lastShapedText.glyphs.push(...shapedText.glyphs);
+            lastShapedText.breakPointType = shapedText.breakPointType;
+            continue;
+        }
+
+        mergedShapedTextList.push({
+            ...shapedText,
+            glyphs: [...shapedText.glyphs],
+        });
+    }
+
+    return mergedShapedTextList;
+}
 
 function _getListLevelAncestors(
     bullet?: IBullet,
@@ -201,6 +246,16 @@ function _applyBlockRangeLayoutParagraphStyle(
 
 function _shouldApplyDocumentDefaultParagraphStyle(viewModel: DocumentViewModel): boolean {
     const snapshot = viewModel.getSnapshot?.();
+
+    if (snapshot == null) {
+        return true;
+    }
+
+    return snapshot.documentStyle.documentFlavor === DocumentFlavor.MODERN;
+}
+
+function _shouldUseWordStyleLineHeight(viewModel: DocumentViewModel): boolean {
+    const snapshot = viewModel.getSnapshot?.();
     const documentFlavor = snapshot?.documentStyle.documentFlavor;
 
     if (snapshot == null) {
@@ -208,6 +263,65 @@ function _shouldApplyDocumentDefaultParagraphStyle(viewModel: DocumentViewModel)
     }
 
     return documentFlavor != null && documentFlavor !== DocumentFlavor.UNSPECIFIED;
+}
+
+function _isTraditionalDoc(viewModel: DocumentViewModel): boolean {
+    return viewModel.getSnapshot?.()?.documentStyle.documentFlavor === DocumentFlavor.TRADITIONAL;
+}
+
+function _isOnlyFloatingCustomBlockParagraph(
+    viewModel: DocumentViewModel,
+    paragraphNode: DataStreamTreeNode,
+    drawings: IDrawings
+): boolean {
+    if (!paragraphNode.blocks?.length) {
+        return false;
+    }
+
+    const content = paragraphNode.content ?? '';
+    const hasOnlyCustomBlockContent = content.split('').every((char) =>
+        char === DataStreamTreeTokenType.CUSTOM_BLOCK ||
+        char === DataStreamTreeTokenType.PARAGRAPH ||
+        char === DataStreamTreeTokenType.SECTION_BREAK
+    );
+
+    if (!hasOnlyCustomBlockContent) {
+        return false;
+    }
+
+    return paragraphNode.blocks.every((charIndex) => {
+        const customBlock = viewModel.getCustomBlock(charIndex);
+        const drawing = customBlock == null ? null : drawings[customBlock.blockId];
+
+        return drawing != null && drawing.layoutType !== PositionedObjectLayoutType.INLINE;
+    });
+}
+
+function _getFollowingIndentedParagraphAnchorLeft(
+    viewModel: DocumentViewModel,
+    paragraph: IParagraph,
+    paragraphNode: DataStreamTreeNode,
+    drawings: IDrawings
+): IParagraphStyle['indentStart'] | undefined {
+    if (!_isTraditionalDoc(viewModel)) {
+        return;
+    }
+
+    if ((paragraph.paragraphStyle?.indentStart?.v ?? 0) > 0) {
+        return;
+    }
+
+    if (!_isOnlyFloatingCustomBlockParagraph(viewModel, paragraphNode, drawings)) {
+        return;
+    }
+
+    const paragraphs = [...(viewModel.getBody?.()?.paragraphs ?? [])]
+        .filter((item) => item.startIndex > paragraph.startIndex)
+        .sort((left, right) => left.startIndex - right.startIndex);
+
+    return (paragraphs[0]?.paragraphStyle?.indentStart?.v ?? 0) > 0
+        ? paragraphs[0].paragraphStyle?.indentStart
+        : undefined;
 }
 
 function _changeDrawingToSkeletonFormat(
@@ -268,12 +382,15 @@ export function lineBreaking(
     const paragraph = viewModel.getParagraph(endIndex) || { startIndex: 0, paragraphId: 'para_render_fallback' };
 
     const { paragraphStyle = {}, bullet } = paragraph;
-    const useWordStyleLineHeight = _shouldApplyDocumentDefaultParagraphStyle(viewModel);
+    const shouldApplyDocumentDefaults = _shouldApplyDocumentDefaultParagraphStyle(viewModel);
+    const useWordStyleLineHeight = _shouldUseWordStyleLineHeight(viewModel);
 
     const { skeHeaders, skeFooters, skeListLevel, drawingAnchor } = skeletonResourceReference;
 
     const paragraphNonInlineSkeDrawings: Map<string, IDocumentSkeletonDrawing> = new Map();
     const paragraphInlineSkeDrawings: Map<string, IDocumentSkeletonDrawing> = new Map();
+    const paragraphNonInlineSkeDrawingsByBlockId: Map<string, IDocumentSkeletonDrawing> = new Map();
+    const paragraphInlineSkeDrawingsByBlockId: Map<string, IDocumentSkeletonDrawing> = new Map();
 
     let segmentDrawingAnchorCache = drawingAnchor?.get(segmentId);
 
@@ -288,8 +405,9 @@ export function lineBreaking(
             viewModel.getBody?.() ?? null,
             paragraph,
             paragraphStyle,
-            useWordStyleLineHeight
+            shouldApplyDocumentDefaults
         ),
+        docxFallbackAnchorLeft: _getFollowingIndentedParagraphAnchorLeft(viewModel, paragraph, paragraphNode, drawings),
         useWordStyleLineHeight,
         paragraphNonInlineSkeDrawings,
         paragraphInlineSkeDrawings,
@@ -340,10 +458,14 @@ export function lineBreaking(
         const { blockId } = customBlock;
         const drawingOrigin = drawings[blockId];
 
+        if (drawingOrigin == null) {
+            continue;
+        }
+
         if (drawingOrigin.layoutType === PositionedObjectLayoutType.INLINE) {
-            paragraphInlineSkeDrawings.set(blockId, _getDrawingSkeletonFormat(drawingOrigin));
+            paragraphInlineSkeDrawingsByBlockId.set(blockId, _getDrawingSkeletonFormat(drawingOrigin));
         } else {
-            paragraphNonInlineSkeDrawings.set(blockId, _getDrawingSkeletonFormat(drawingOrigin));
+            paragraphNonInlineSkeDrawingsByBlockId.set(blockId, _getDrawingSkeletonFormat(drawingOrigin));
         }
     }
 
@@ -351,11 +473,23 @@ export function lineBreaking(
 
     let allPages = [curPage];
     let isParagraphFirstShapedText = true; // First shaped text
-    for (const [_index, { text, glyphs, breakPointType }] of shapedTextList.entries()) {
+    let shapedTextOffset = 0;
+    for (const [_index, { text, glyphs, breakPointType }] of _mergeAdjacentCustomBlockShapedTexts(shapedTextList).entries()) {
+        const textStartIndex = paragraphNode.startIndex + shapedTextOffset;
+        const textGlyphCount = _glyphCount(glyphs);
+        const textEndIndex = textStartIndex + textGlyphCount;
         const pushPending = () => {
             if (glyphs.length === 0) {
                 return;
             }
+
+            syncActiveParagraphDrawings(
+                glyphs,
+                paragraphNonInlineSkeDrawings,
+                paragraphInlineSkeDrawings,
+                paragraphNonInlineSkeDrawingsByBlockId,
+                paragraphInlineSkeDrawingsByBlockId
+            );
 
             allPages = layoutParagraph(
                 ctx,
@@ -363,14 +497,14 @@ export function lineBreaking(
                 allPages,
                 sectionBreakConfig,
                 paragraphConfig,
-                isParagraphFirstShapedText,
+                isParagraphFirstShapedText || hasOnlyFloatingCustomBlockGlyphs(glyphs, paragraphNonInlineSkeDrawingsByBlockId),
                 breakPointType
             );
 
             isParagraphFirstShapedText = false;
         };
 
-        if (text.endsWith(DataStreamTreeTokenType.PAGE_BREAK)) {
+        if (_endsWithToken(text, glyphs, DataStreamTreeTokenType.PAGE_BREAK)) {
             pushPending();
             allPages.push(
                 createSkeletonPage(
@@ -382,9 +516,13 @@ export function lineBreaking(
                 )
             );
             paragraphNonInlineSkeDrawings.clear();
-            paragraphInlineSkeDrawings.clear();
+            isParagraphFirstShapedText = true;
+            shapedTextOffset += textGlyphCount;
             continue;
-        } else if (text.endsWith(DataStreamTreeTokenType.COLUMN_BREAK)) {
+        } else if (_endsWithToken(text, glyphs, DataStreamTreeTokenType.COLUMN_BREAK) && (
+            viewModel.getDataModel().documentStyle.documentFlavor !== DocumentFlavor.TRADITIONAL ||
+            _isMarkedDocxColumnBreak(viewModel, textEndIndex - 1)
+        )) {
             pushPending();
             // Column break mark, still within the same section
             const lastPage = allPages[allPages.length - 1];
@@ -403,11 +541,49 @@ export function lineBreaking(
                     )
                 );
             }
+            shapedTextOffset += textGlyphCount;
             continue;
         }
 
         pushPending();
+        shapedTextOffset += textGlyphCount;
     }
 
     return allPages;
+}
+
+function syncActiveParagraphDrawings(
+    glyphs: IDocumentSkeletonGlyph[],
+    paragraphNonInlineSkeDrawings: Map<string, IDocumentSkeletonDrawing>,
+    paragraphInlineSkeDrawings: Map<string, IDocumentSkeletonDrawing>,
+    paragraphNonInlineSkeDrawingsByBlockId: Map<string, IDocumentSkeletonDrawing>,
+    paragraphInlineSkeDrawingsByBlockId: Map<string, IDocumentSkeletonDrawing>
+) {
+    for (const glyph of glyphs) {
+        if (glyph.streamType !== DataStreamTreeTokenType.CUSTOM_BLOCK || glyph.drawingId == null) {
+            continue;
+        }
+
+        const inlineDrawing = paragraphInlineSkeDrawingsByBlockId.get(glyph.drawingId);
+        if (inlineDrawing != null) {
+            paragraphInlineSkeDrawings.set(glyph.drawingId, inlineDrawing);
+            continue;
+        }
+
+        const nonInlineDrawing = paragraphNonInlineSkeDrawingsByBlockId.get(glyph.drawingId);
+        if (nonInlineDrawing != null) {
+            paragraphNonInlineSkeDrawings.set(glyph.drawingId, nonInlineDrawing);
+        }
+    }
+}
+
+function hasOnlyFloatingCustomBlockGlyphs(
+    glyphs: IDocumentSkeletonGlyph[],
+    paragraphNonInlineSkeDrawingsByBlockId: Map<string, IDocumentSkeletonDrawing>
+): boolean {
+    return glyphs.length > 0 && glyphs.every((glyph) =>
+        glyph.streamType === DataStreamTreeTokenType.CUSTOM_BLOCK &&
+        glyph.drawingId != null &&
+        paragraphNonInlineSkeDrawingsByBlockId.has(glyph.drawingId)
+    );
 }

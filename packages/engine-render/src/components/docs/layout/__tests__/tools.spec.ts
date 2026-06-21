@@ -24,6 +24,7 @@ import {
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     SectionType,
+    SpacingRule,
 } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { GlyphType } from '../../../../basics/i-document-skeleton-cached';
@@ -172,6 +173,8 @@ describe('docs layout tools extra', () => {
         expect(isBlankPage({ sections: [{ columns: [{ lines: [blankLine] }] }] } as any)).toBe(true);
 
         expect(getNumberUnitValue(null, 100)).toBe(0);
+        expect(getNumberUnitValue({} as any, 100)).toBe(0);
+        expect(getNumberUnitValue({ v: Number.NaN } as any, 100)).toBe(0);
         expect(getNumberUnitValue({ v: 10, u: NumberUnitType.PIXEL } as any, 100)).toBe(10);
         expect(getNumberUnitValue({ v: 2, u: NumberUnitType.POINT } as any, 10)).toBe(2);
 
@@ -207,6 +210,21 @@ describe('docs layout tools extra', () => {
             defaultTabStop: 5,
             documentFontSize: 11,
         }));
+    });
+
+    it('defaults word-style docx paragraphs to snap when the section uses a document grid', () => {
+        const lineCfg = getLineHeightConfig({
+            linePitch: 30.46666666666667,
+            gridType: GridType.LINES_AND_CHARS,
+        } as any, {
+            useWordStyleLineHeight: true,
+            paragraphStyle: {
+                lineSpacing: 26.666666666666668,
+                spacingRule: SpacingRule.EXACT,
+            },
+        } as any);
+
+        expect(lineCfg.snapToGrid).toBe(BooleanNumber.TRUE);
     });
 
     it('updates block index values and iterates skeleton blocks', () => {
@@ -248,6 +266,21 @@ describe('docs layout tools extra', () => {
             relativeFrom: ObjectRelativeFromH.COLUMN,
             posOffset: 50,
         } as any, column as any, page as any, 20)).toBe(60);
+
+        expect(getPositionHorizon({
+            relativeFrom: ObjectRelativeFromH.COLUMN,
+            posOffset: 0,
+        } as any, column as any, page as any, 20)).toBe(10);
+
+        expect(getPositionHorizon({
+            relativeFrom: ObjectRelativeFromH.MARGIN,
+            posOffset: 50,
+        } as any, column as any, page as any, 20)).toBe(70);
+
+        expect(getPositionHorizon({
+            relativeFrom: ObjectRelativeFromH.COLUMN,
+            posOffset: -603.2,
+        } as any, column as any, page as any, 1895.68)).toBeCloseTo(-593.2);
 
         expect(getPositionHorizon({
             relativeFrom: ObjectRelativeFromH.PAGE,
@@ -331,6 +364,15 @@ describe('docs layout tools extra', () => {
             { paragraphStyle: {}, bullet: { listType: 'bullet' } } as any
         );
         expect(configWithBullet.textStyle.bl).toBe(1);
+
+        const configWithMissingBulletList = getFontCreateConfig(
+            0,
+            viewModel as any,
+            paragraphNode as any,
+            sectionBreakConfig as any,
+            { paragraphStyle: {}, bullet: { listType: 'missing' } } as any
+        );
+        expect(configWithMissingBulletList.textStyle.bl).toBeUndefined();
     });
 
     it('creates default skeleton, prepares section config, and resolves page paths', () => {

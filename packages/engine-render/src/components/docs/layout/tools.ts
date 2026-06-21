@@ -253,6 +253,10 @@ export function getNumberUnitValue(unitValue: Nullable<INumberUnit>, benchMark: 
 
     const { v: value, u: unit } = unitValue;
 
+    if (typeof value !== 'number' || !Number.isFinite(value)) {
+        return 0;
+    }
+
     if (!unit) {
         return value;
     }
@@ -292,7 +296,8 @@ export function validationGrid(gridType = GridType.LINES, snapToGrid = BooleanNu
 export function getLineHeightConfig(sectionBreakConfig: ISectionBreakConfig, paragraphConfig: IParagraphConfig) {
     const { paragraphStyle = {}, useWordStyleLineHeight = false } = paragraphConfig;
     const { linePitch = 15.6, gridType = GridType.LINES, paragraphLineGapDefault = 0 } = sectionBreakConfig;
-    const defaultSnapToGrid = useWordStyleLineHeight ? BooleanNumber.FALSE : BooleanNumber.TRUE;
+    const hasDocumentGrid = gridType === GridType.LINES_AND_CHARS || gridType === GridType.SNAP_TO_CHARS;
+    const defaultSnapToGrid = useWordStyleLineHeight && !hasDocumentGrid ? BooleanNumber.FALSE : BooleanNumber.TRUE;
     const { lineSpacing = 0, spacingRule = SpacingRule.AUTO, snapToGrid = defaultSnapToGrid } = paragraphStyle;
 
     // Flavored docs use Word-style single spacing by default.
@@ -641,12 +646,9 @@ export function getPositionHorizon(
                 return absoluteLeft;
             }
         }
-    } else if (posOffset) {
-        const { pageWidth, marginLeft, marginRight } = page;
-        const boundaryLeft = marginLeft;
-        const boundaryRight = pageWidth - marginRight;
-
+    } else if (posOffset != null) {
         let absoluteLeft = 0;
+        const { marginLeft } = page;
         if (relativeFrom === ObjectRelativeFromH.COLUMN) {
             absoluteLeft = (isPageBreak ? 0 : column?.left || 0) + posOffset;
         } else if (relativeFrom === ObjectRelativeFromH.LEFT_MARGIN) {
@@ -663,9 +665,6 @@ export function getPositionHorizon(
             absoluteLeft = posOffset;
         }
 
-        if (absoluteLeft + objectWidth > boundaryRight) {
-            absoluteLeft = boundaryRight - objectWidth;
-        }
         return absoluteLeft;
     } else if (percent) {
         const { pageWidth, marginLeft, marginRight } = page;
@@ -827,7 +826,7 @@ function getBulletParagraphTextStyle(bullet: IBullet, viewModel: DocumentViewMod
     const { listType } = bullet;
     const lists = viewModel.getDataModel().getBulletPresetList();
 
-    return lists[listType].nestingLevel[0].paragraphProperties?.textStyle;
+    return lists[listType]?.nestingLevel?.[0]?.paragraphProperties?.textStyle;
 }
 
 const DEFAULT_TEXT_RUN = { ts: {}, st: 0, ed: 0 };
@@ -946,6 +945,7 @@ export interface IFloatObject {
     width: number;
     height: number;
     angle: number;
+    behindDoc?: BooleanNumber;
     type: FloatObjectType;
     positionV: IObjectPositionV;
 }

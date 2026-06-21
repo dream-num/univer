@@ -80,7 +80,7 @@ export function ArabicHandler(
     for (let i = 0; i < charArray.length; i++) {
         const newChar = charArray[i];
         if (hasArabic(newChar)) {
-            glyph.unshift(newChar);
+            glyph.push(newChar);
             step++;
         } else {
             break;

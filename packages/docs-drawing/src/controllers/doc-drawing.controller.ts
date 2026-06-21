@@ -109,14 +109,6 @@ export class DocDrawingController extends Disposable {
 
         // TODO@wzhudev: should move to docs-drawing.
 
-        Object.keys(drawingDataModels).forEach((drawingId) => {
-            const drawingDataModel = drawingDataModels[drawingId];
-            // const docTransform = drawingDataModel.docTransform;
-            // const transform = docDrawingPositionToTransform(docTransform);
-
-            drawingDataModels[drawingId] = { ...drawingDataModel } as IDocDrawing;
-        });
-
         const subDrawings = {
             [subUnitId]: {
                 unitId,

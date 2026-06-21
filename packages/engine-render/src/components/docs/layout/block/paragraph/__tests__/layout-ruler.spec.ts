@@ -15,9 +15,10 @@
  */
 
 import type { IParagraphConfig } from '../../../../../../basics/interfaces';
-import { BooleanNumber, DataStreamTreeTokenType, GridType, SpacingRule } from '@univerjs/core';
+import { BooleanNumber, DataStreamTreeTokenType, GridType, ObjectRelativeFromV, PositionedObjectLayoutType, SpacingRule, WrapTextType } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
-import { getLineHeightMetrics, layoutParagraph, updateInlineDrawingPosition } from '../layout-ruler';
+import { GlyphType, LineType } from '../../../../../../basics/i-document-skeleton-cached';
+import { __testing, getLineHeightMetrics, layoutParagraph, updateInlineDrawingPosition } from '../layout-ruler';
 import { lineBreaking } from '../linebreaking';
 import { shaping } from '../shaping';
 import { createParagraphLayoutTestBed } from './create-paragraph-layout-test-bed';
@@ -116,6 +117,194 @@ describe('layout-ruler', () => {
         expect(result.length).toBeGreaterThanOrEqual(1);
     });
 
+    it('does not recurse indefinitely when floating drawings cover the available line width', () => {
+        const { ctx, sectionBreakConfig, curPage } = createParagraphLayoutTestBed('');
+        curPage.skeDrawings = new Map(
+            Array.from({ length: 4 }, (_, index) => [`float-${index}`, {
+                drawingId: `float-${index}`,
+                aTop: index,
+                aLeft: 20,
+                width: 280,
+                height: 120,
+                angle: 0,
+                drawingOrigin: {
+                    layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
+                    wrapText: WrapTextType.BOTH_SIDES,
+                    behindDoc: BooleanNumber.FALSE,
+                    distL: 0,
+                    distR: 0,
+                    distT: 0,
+                    distB: 0,
+                    docTransform: {
+                        positionV: { relativeFrom: ObjectRelativeFromV.PARAGRAPH },
+                    },
+                },
+            }])
+        ) as any;
+        const paragraphConfig = {
+            paragraphIndex: 0,
+            paragraphStyle: {},
+        } as unknown as IParagraphConfig;
+        const glyphGroup = [{
+            glyphType: GlyphType.WORD,
+            content: 'Dense',
+            count: 5,
+            width: 80,
+            left: 0,
+            xOffset: 0,
+            bBox: { ba: 8, bd: 4 },
+        }] as any;
+
+        expect(() =>
+            layoutParagraph(ctx, glyphGroup, [curPage], sectionBreakConfig, paragraphConfig, true)
+        ).not.toThrow(RangeError);
+    });
+
+    it('closes zero-width floating anchor lines without recursing through every divide', () => {
+        const { ctx, sectionBreakConfig, curPage } = createParagraphLayoutTestBed('');
+        const column = curPage.sections[0].columns[0];
+        const anchorGlyph = {
+            glyphType: GlyphType.PLACEHOLDER,
+            streamType: DataStreamTreeTokenType.CUSTOM_BLOCK,
+            content: '',
+            count: 1,
+            width: 0,
+            left: 0,
+            xOffset: 0,
+            drawingId: 'anchor',
+            bBox: { ba: 0, bd: 0 },
+        };
+        const zeroWidthAnchorLine = {
+            paragraphIndex: 0,
+            type: LineType.PARAGRAPH,
+            divides: Array.from({ length: 20_000 }, (_, index) => ({
+                glyphGroup: index === 0 ? [anchorGlyph] : [],
+                width: 100,
+                left: index,
+                paddingLeft: 0,
+                isFull: false,
+                st: 0,
+                ed: 0,
+            })),
+            lineHeight: 0,
+            contentHeight: 0,
+            top: 0,
+            lineIndex: 0,
+            parent: column,
+        } as any;
+        column.lines.push(zeroWidthAnchorLine);
+        const paragraphConfig = {
+            paragraphIndex: 0,
+            paragraphStyle: {},
+            paragraphNonInlineSkeDrawings: new Map([['anchor', {
+                drawingId: 'anchor',
+                aTop: 0,
+                aLeft: 0,
+                width: 10,
+                height: 10,
+                drawingOrigin: {
+                    layoutType: PositionedObjectLayoutType.WRAP_NONE,
+                    behindDoc: BooleanNumber.FALSE,
+                    docTransform: {
+                        positionV: { relativeFrom: ObjectRelativeFromV.PARAGRAPH },
+                    },
+                },
+            }]]),
+        } as unknown as IParagraphConfig;
+        const glyphGroup = [{
+            glyphType: GlyphType.WORD,
+            content: 'Text',
+            count: 4,
+            width: 40,
+            left: 0,
+            xOffset: 0,
+            bBox: { ba: 8, bd: 4 },
+        }] as any;
+
+        expect(() =>
+            layoutParagraph(ctx, glyphGroup, [curPage], sectionBreakConfig, paragraphConfig, false)
+        ).not.toThrow(RangeError);
+    });
+
+    it('treats empty zero-size glyphs as ignorable in zero-width floating anchor lines', () => {
+        const { ctx, sectionBreakConfig, curPage } = createParagraphLayoutTestBed('');
+        const column = curPage.sections[0].columns[0];
+        const anchorGlyph = {
+            glyphType: GlyphType.PLACEHOLDER,
+            streamType: DataStreamTreeTokenType.CUSTOM_BLOCK,
+            content: '',
+            count: 1,
+            width: 0,
+            left: 0,
+            xOffset: 0,
+            drawingId: 'anchor',
+            bBox: { ba: 0, bd: 0 },
+        };
+        const emptyGlyph = {
+            glyphType: GlyphType.WORD,
+            content: '',
+            count: 0,
+            width: 0,
+            left: 0,
+            xOffset: 0,
+            bBox: { ba: 0, bd: 0 },
+        };
+        const divide = {
+            glyphGroup: [anchorGlyph, emptyGlyph],
+            width: 100,
+            left: 0,
+            paddingLeft: 0,
+            isFull: false,
+            st: 0,
+            ed: 0,
+        } as any;
+        const zeroWidthAnchorLine = {
+            paragraphIndex: 0,
+            type: LineType.PARAGRAPH,
+            divides: [divide],
+            lineHeight: 0,
+            contentHeight: 0,
+            top: 0,
+            lineIndex: 0,
+            parent: column,
+        } as any;
+        divide.parent = zeroWidthAnchorLine;
+        column.lines.push(zeroWidthAnchorLine);
+        const paragraphConfig = {
+            paragraphIndex: 0,
+            paragraphStyle: {},
+            paragraphNonInlineSkeDrawings: new Map([['anchor', {
+                drawingId: 'anchor',
+                aTop: 0,
+                aLeft: 0,
+                width: 10,
+                height: 10,
+                drawingOrigin: {
+                    layoutType: PositionedObjectLayoutType.WRAP_NONE,
+                    behindDoc: BooleanNumber.FALSE,
+                    docTransform: {
+                        positionV: { relativeFrom: ObjectRelativeFromV.PARAGRAPH },
+                    },
+                },
+            }]]),
+        } as unknown as IParagraphConfig;
+        const glyphGroup = [{
+            glyphType: GlyphType.WORD,
+            content: 'Y',
+            count: 1,
+            width: 8,
+            left: 0,
+            xOffset: 0,
+            bBox: { ba: 8, bd: 4 },
+        }] as any;
+
+        layoutParagraph(ctx, glyphGroup, [curPage], sectionBreakConfig, paragraphConfig, false);
+
+        expect(column.lines).toHaveLength(2);
+        expect(column.lines[0].divides.every((divide) => divide.isFull)).toBe(true);
+        expect(column.lines[1].divides[0].glyphGroup).toEqual(glyphGroup);
+    });
+
     it('end-to-end: shapes and lays out text through lineBreaking', () => {
         const { viewModel, ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed('Hello world');
         const shapedTextList = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
@@ -131,6 +320,12 @@ describe('layout-ruler', () => {
         const metrics = getLineHeightMetrics(16, 0, 15.6, GridType.LINES, 1.5, SpacingRule.AUTO, BooleanNumber.FALSE, true);
 
         expect(getLineBoxHeight(metrics)).toBeCloseTo(24, 4);
+    });
+
+    it('does not multiply inline custom block height by auto line spacing', () => {
+        const metrics = getLineHeightMetrics(624, 0, 15.6, GridType.LINES, 1.5, SpacingRule.AUTO, BooleanNumber.FALSE, true, false);
+
+        expect(getLineBoxHeight(metrics)).toBeCloseTo(624, 4);
     });
 
     it('keeps document-grid line pitch behavior when auto line spacing explicitly snaps to the grid', () => {
@@ -152,6 +347,88 @@ describe('layout-ruler', () => {
 
         expect(getLineBoxHeight(metrics)).toBeCloseTo(10, 4);
         expect(metrics.contentHeight).toBeGreaterThan(getLineBoxHeight(metrics));
+    });
+
+    it('uses document grid line pitch as the minimum exact line box height for snapped docx paragraphs', () => {
+        const metrics = getLineHeightMetrics(16, 0, 30.46666666666667, GridType.LINES_AND_CHARS, 26.666666666666668, SpacingRule.EXACT, BooleanNumber.TRUE, true);
+
+        expect(getLineBoxHeight(metrics)).toBeCloseTo(30.46666666666667, 4);
+    });
+
+    it('stops dirty relayout after a floating object reaches the reposition limit', () => {
+        const cachedPage: any = {
+            segmentId: '',
+            skeDrawings: new Map([['floating', {}]]),
+            sections: [{ columns: [{ lines: [{ paragraphIndex: 1, top: 0, lineHeight: 20 }] }] }],
+        };
+        const page: any = {
+            segmentId: '',
+            sections: [{ columns: [] }],
+        };
+        const column: any = {
+            width: 100,
+            left: 0,
+            lines: [{ paragraphIndex: 2, top: 0, lineHeight: 20 }],
+            parent: { parent: page },
+        };
+        page.sections[0].columns = [column];
+        const floatObject: any = {
+            id: 'floating',
+            top: 0,
+            left: 0,
+            width: 50,
+            height: 50,
+            angle: 0,
+            positionV: { relativeFrom: ObjectRelativeFromV.PARAGRAPH },
+        };
+        const ctx: any = {
+            floatObjectsCache: new Map([['floating', { count: 5, floatObject, page: cachedPage }]]),
+            isDirty: false,
+            layoutStartPointer: { '': null },
+            paragraphsOpenNewPage: new Set(),
+        };
+
+        __testing.reLayoutCheck(ctx, [floatObject], column, 9);
+
+        expect(ctx.isDirty).toBe(false);
+        expect(ctx.floatObjectsCache.has('floating')).toBe(true);
+        expect(ctx.paragraphsOpenNewPage.has(9)).toBe(false);
+    });
+
+    it('does not dirty relayout for behind-doc floating objects', () => {
+        const page: any = {
+            segmentId: '',
+            sections: [{ columns: [] }],
+        };
+        const column: any = {
+            width: 100,
+            left: 0,
+            lines: [{ paragraphIndex: 2, top: 0, lineHeight: 20 }],
+            parent: { parent: page },
+        };
+        page.sections[0].columns = [column];
+        const floatObject: any = {
+            id: 'behind-floating',
+            top: 0,
+            left: 0,
+            width: 50,
+            height: 50,
+            angle: 0,
+            behindDoc: BooleanNumber.TRUE,
+            positionV: { relativeFrom: ObjectRelativeFromV.PARAGRAPH },
+        };
+        const ctx: any = {
+            floatObjectsCache: new Map(),
+            isDirty: false,
+            layoutStartPointer: { '': null },
+            paragraphsOpenNewPage: new Set(),
+        };
+
+        __testing.reLayoutCheck(ctx, [floatObject], column, 9);
+
+        expect(ctx.isDirty).toBe(false);
+        expect(ctx.floatObjectsCache.has('behind-floating')).toBe(false);
+        expect(ctx.paragraphsOpenNewPage.has(9)).toBe(false);
     });
 
     it('keeps the legacy line-height behavior for embedded sheet documents', () => {

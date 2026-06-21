@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { IDrawingSearch, Workbook } from '@univerjs/core';
+import type { IDrawingParam, IDrawingSearch, Workbook } from '@univerjs/core';
 import type { IDocFloatDomData, IImageData } from '@univerjs/drawing';
-import type { IImageProps, IRectProps, Scene } from '@univerjs/engine-render';
-import { DrawingTypeEnum, Inject, IUniverInstanceService, IURLImageService, UniverInstanceType } from '@univerjs/core';
+import type { BaseObject, IImageProps, IRectProps, Scene } from '@univerjs/engine-render';
+import { BooleanNumber, DrawingTypeEnum, Inject, IUniverInstanceService, IURLImageService, UniverInstanceType } from '@univerjs/core';
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService, IImageIoService, ImageSourceType } from '@univerjs/drawing';
 import { DRAWING_OBJECT_LAYER_INDEX, Image, Rect } from '@univerjs/engine-render';
 import { IGalleryService } from '@univerjs/ui';
@@ -25,6 +25,36 @@ import { insertGroupObject } from '../controllers/utils';
 import { DrawingImageClipService } from './drawing-image-clip.service';
 
 // const IMAGE_VIEWER_DROPDOWN_PADDING = 50;
+
+interface IDrawingTransformStateWithClipBounds {
+    clipBounds?: { left: number; top: number; width: number; height: number } | null;
+}
+
+type IDrawingParamWithBehindText = (Partial<IDrawingParam> | Partial<IImageData>) & {
+    behindText?: boolean | BooleanNumber;
+};
+
+export const DOC_DRAWING_BEHIND_TEXT_LAYER_INDEX = 1;
+
+export function getDrawingRenderLayerIndex(param: IDrawingParamWithBehindText): number {
+    return param.behindText === true || param.behindText === BooleanNumber.TRUE
+        ? DOC_DRAWING_BEHIND_TEXT_LAYER_INDEX
+        : DRAWING_OBJECT_LAYER_INDEX;
+}
+
+export function ensureDrawingRenderLayer(scene: Scene, object: BaseObject, param: IDrawingParamWithBehindText): void {
+    const layerIndex = getDrawingRenderLayerIndex(param);
+    if (object.layer == null || object.layer.zIndex === layerIndex) {
+        return;
+    }
+
+    scene.removeObject(object);
+    scene.addObject(object, layerIndex);
+}
+
+function isRenderableImageCache(image: HTMLImageElement | null | undefined | void): image is HTMLImageElement {
+    return image?.complete === true && image.naturalWidth > 0 && image.naturalHeight > 0;
+}
 
 export class DrawingRenderService {
     constructor(
@@ -82,6 +112,8 @@ export class DrawingRenderService {
             const imageShape = scene.getObject(imageShapeKey);
             if (imageShape != null) {
                 imageShape.transformByState({ left, top, width, height, angle, flipX, flipY, skewX, skewY });
+                (imageShape as Image).setClipBounds?.((transform as IDrawingTransformStateWithClipBounds).clipBounds);
+                ensureDrawingRenderLayer(scene, imageShape, imageParam as IDrawingParamWithBehindText);
                 continue;
             }
 
@@ -91,7 +123,7 @@ export class DrawingRenderService {
             const imageNativeCache = this._imageIoService.getImageSourceCache(source, imageSourceType);
 
             let shouldBeCache = false;
-            if (imageNativeCache != null) {
+            if (isRenderableImageCache(imageNativeCache)) {
                 imageConfig.image = imageNativeCache;
             } else {
                 if (imageSourceType === ImageSourceType.UUID) {
@@ -131,7 +163,7 @@ export class DrawingRenderService {
                 this._imageIoService.addImageSourceCache(source, imageSourceType, image.getNative());
             }
 
-            scene.addObject(image, DRAWING_OBJECT_LAYER_INDEX);
+            scene.addObject(image, getDrawingRenderLayerIndex(imageParam as IDrawingParamWithBehindText));
             if (this._drawingManagerService.getDrawingEditable()) {
                 scene.attachTransformerTo(image);
             }

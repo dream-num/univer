@@ -26,7 +26,17 @@ type MockLoadEvent = ProgressEvent<FileReader> & {
 };
 
 class MockImage {
-    src = '';
+    onload: null | (() => void) = null;
+    private _src = '';
+
+    get src() {
+        return this._src;
+    }
+
+    set src(value: string) {
+        this._src = value;
+        queueMicrotask(() => this.onload?.());
+    }
 }
 
 class SuccessFileReader {
@@ -85,6 +95,18 @@ describe('ImageIoService', () => {
             src: 'data:image/png;base64,Zm9v',
         });
         expect(counts).toEqual([2]);
+    });
+
+    it('should cache base64 images and emit after they load', async () => {
+        const counts: number[] = [];
+        service.change$.subscribe((count) => counts.push(count));
+
+        const image = service.getImageSourceCache('data:image/png;base64,Zm9v', ImageSourceType.BASE64);
+        const cached = service.getImageSourceCache('data:image/png;base64,Zm9v', ImageSourceType.BASE64);
+
+        expect(cached).toBe(image);
+        await Promise.resolve();
+        expect(counts).toEqual([0]);
     });
 
     it('should ignore invalid cache insertions and resolve image ids directly', async () => {

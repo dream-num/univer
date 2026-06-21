@@ -31,7 +31,7 @@ import { CURSOR_TYPE, IRenderManagerService } from '@univerjs/engine-render';
 import { IDialogService } from '@univerjs/ui';
 import { bufferTime, filter, map } from 'rxjs';
 import { ImageResetSizeOperation } from '../commands/operations/image-reset-size.operation';
-import { DrawingRenderService } from '../services/drawing-render.service';
+import { DrawingRenderService, ensureDrawingRenderLayer } from '../services/drawing-render.service';
 import { getCurrentUnitInfo } from './utils';
 
 export class ImageUpdateController extends Disposable {
@@ -247,6 +247,9 @@ export class ImageUpdateController extends Disposable {
                         return true;
                     }
 
+                    imageShape.transformByState(transform);
+                    (imageShape as Image & { setClipBounds?: (clipBounds?: unknown) => void }).setClipBounds?.((transform as { clipBounds?: unknown }).clipBounds);
+                    ensureDrawingRenderLayer(scene, imageShape, drawingParam);
                     imageShape.setSrcRect(srcRect);
                     imageShape.setPrstGeom(prstGeom);
                     if (source != null && source.length > 0 && (imageSourceType === ImageSourceType.BASE64 || imageSourceType === ImageSourceType.URL)) {

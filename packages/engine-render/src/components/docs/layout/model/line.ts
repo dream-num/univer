@@ -27,7 +27,7 @@ import type {
     LineType,
 } from '../../../../basics/i-document-skeleton-cached';
 import type { IFloatObject } from '../tools';
-import { PositionedObjectLayoutType, TableTextWrapType, WrapTextType } from '@univerjs/core';
+import { BooleanNumber, PositionedObjectLayoutType, TableTextWrapType, WrapTextType } from '@univerjs/core';
 import { Path2 } from '../../../../basics/path2';
 import { Transform } from '../../../../basics/transform';
 import { Vector2 } from '../../../../basics/vector2';
@@ -109,7 +109,11 @@ export function createSkeletonLine(
         lineSke.tableId = tableId;
     }
 
-    const affectSkeDrawings = new Map(Array.from(pageSkeDrawings).filter(([_, drawing]) => drawing.drawingOrigin.layoutType !== PositionedObjectLayoutType.INLINE));
+    const affectSkeDrawings = new Map(Array.from(pageSkeDrawings).filter(([_, drawing]) =>
+        drawing.drawingOrigin.layoutType !== PositionedObjectLayoutType.INLINE &&
+        drawing.drawingOrigin.layoutType !== PositionedObjectLayoutType.WRAP_NONE &&
+        drawing.drawingOrigin.behindDoc !== BooleanNumber.TRUE
+    ));
     const wrapTypeTables = new Map(Array.from(pageSkeTables).filter(([_, table]) => table.tableSource.textWrap === TableTextWrapType.WRAP));
 
     lineSke.divides = _calculateDividesByDrawings(
@@ -139,7 +143,9 @@ export function calculateLineTopByDrawings(
     lineTop: number = 0,
     page: IDocumentSkeletonPage,
     headerPage: Nullable<IDocumentSkeletonPage>,
-    footerPage: Nullable<IDocumentSkeletonPage>
+    footerPage: Nullable<IDocumentSkeletonPage>,
+    columnLeft: number = 0,
+    columnWidth: number = 0
 ) {
     let maxTop = lineTop;
     const pageSkeDrawings = page.skeDrawings;
@@ -172,6 +178,10 @@ export function calculateLineTopByDrawings(
         if (top) {
             maxTop = Math.max(maxTop, top);
         }
+        const blockingWrapTop = _getLineTopWithFullColumnWrap(drawing, lineHeight, lineTop, columnLeft, columnWidth);
+        if (blockingWrapTop) {
+            maxTop = Math.max(maxTop, blockingWrapTop);
+        }
     });
 
     skeNonWrapTables?.forEach((table) => {
@@ -182,6 +192,74 @@ export function calculateLineTopByDrawings(
     });
 
     return maxTop;
+}
+
+function _getLineTopWithFullColumnWrap(
+    drawing: IDocumentSkeletonDrawing,
+    lineHeight: number,
+    lineTop: number,
+    columnLeft: number,
+    columnWidth: number
+) {
+    if (columnWidth <= 0) {
+        return;
+    }
+
+    const { aTop, height, aLeft, width, angle = 0, drawingOrigin } = drawing;
+    const { layoutType, behindDoc, distL = 0, distT = 0, distB = 0, distR = 0, wrapText } = drawingOrigin;
+
+    if (
+        behindDoc === BooleanNumber.TRUE ||
+        layoutType === PositionedObjectLayoutType.INLINE ||
+        layoutType === PositionedObjectLayoutType.WRAP_NONE ||
+        layoutType === PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM
+    ) {
+        return;
+    }
+
+    let top = aTop;
+    let drawingHeight = height;
+    let left = aLeft - columnLeft;
+    let drawingWidth = width;
+
+    if (angle !== 0) {
+        const boundingBox = getBoundingBox(angle, left, width, top, height);
+        top = boundingBox.top ?? top;
+        drawingHeight = boundingBox.height ?? drawingHeight;
+        left = boundingBox.left ?? left;
+        drawingWidth = boundingBox.width ?? drawingWidth;
+    }
+
+    const newTop = top - (layoutType === PositionedObjectLayoutType.WRAP_SQUARE ? distT : 0);
+    const newHeight = drawingHeight + (layoutType === PositionedObjectLayoutType.WRAP_SQUARE ? distB + distT : 0);
+    const bottom = newTop + newHeight;
+
+    if (bottom <= lineTop) {
+        return;
+    }
+
+    const split = __getSplitWidthNoAngle(
+        top,
+        drawingHeight,
+        left,
+        drawingWidth,
+        newTop,
+        Math.max(1, newHeight),
+        columnWidth,
+        { distL, distT, distB, distR },
+        layoutType,
+        wrapText
+    );
+
+    if (!split) {
+        return;
+    }
+
+    if (split.left > 0 || split.left + split.width < columnWidth) {
+        return;
+    }
+
+    return bottom;
 }
 
 function _getLineTopWidthWrapNone(table: IDocumentSkeletonTable, lineHeight: number, lineTop: number) {
@@ -197,9 +275,9 @@ function _getLineTopWidthWrapNone(table: IDocumentSkeletonTable, lineHeight: num
 
 function _getLineTopWidthWrapTopBottom(drawing: IDocumentSkeletonDrawing, lineHeight: number, lineTop: number) {
     const { aTop, height, aLeft, width, angle = 0, drawingOrigin } = drawing;
-    const { layoutType, distT = 0, distB = 0 } = drawingOrigin;
+    const { layoutType, distT = 0, distB = 0, behindDoc } = drawingOrigin;
 
-    if (layoutType !== PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM) {
+    if (layoutType !== PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM || behindDoc === BooleanNumber.TRUE) {
         return;
     }
 
@@ -340,9 +418,10 @@ function _calculateSplit(
     columnWidth: number
 ): Nullable<IDrawingsSplit> {
     const { aTop, height, aLeft, width, angle = 0, drawingOrigin } = drawing;
-    const { layoutType } = drawingOrigin;
+    const { layoutType, behindDoc } = drawingOrigin;
 
     if (
+        behindDoc === BooleanNumber.TRUE ||
         layoutType === PositionedObjectLayoutType.WRAP_NONE ||
         layoutType === PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM
     ) {
@@ -577,6 +656,10 @@ function _calculateDivideByDrawings(columnWidth: number, drawingSplit: IDrawings
             const divide = __getDivideSKe(left + width, columnWidth - left - width);
             divideSkeleton.push(divide);
         }
+    }
+
+    if (divideSkeleton.length === 0 && columnWidth > 0) {
+        return [__getDivideSKe(0, columnWidth)];
     }
 
     return divideSkeleton;

@@ -299,7 +299,7 @@ export function createNullCellPage(
     const { cellMargin, tableRows, tableColumns, tableId } = tableConfig;
     const cellConfig = tableRows[row].tableCells[col];
 
-    const {
+    let {
         start = { v: 10 },
         end = { v: 10 },
         top = { v: 5 },
@@ -309,6 +309,14 @@ export function createNullCellPage(
     const pageWidth = tableColumns
         .slice(col, col + columnSpan)
         .reduce((sum, column) => sum + column.size.width.v, 0);
+    if (start.v + end.v >= pageWidth) {
+        const marginWidth = start.v + end.v;
+        const availableMarginWidth = Math.max(0, pageWidth - 1);
+        const startRatio = marginWidth > 0 ? start.v / marginWidth : 0.5;
+
+        start = { ...start, v: availableMarginWidth * startRatio };
+        end = { ...end, v: availableMarginWidth - start.v };
+    }
     const pageHeight = maxCellPageHeight;
 
     const cellSectionBreakConfig: ISectionBreakConfig = {
@@ -439,16 +447,8 @@ function applyTrailingCellBlockRangeSpaceBelow(pages: IDocumentSkeletonPage[], b
 
 function _getVerticalMargin(
     marginTB: number,
-    headerOrFooter: Nullable<IDocumentSkeletonHeaderFooter>,
-    pageHeight: number
+    _headerOrFooter: Nullable<IDocumentSkeletonHeaderFooter>,
+    _pageHeight: number
 ) {
-    if (!headerOrFooter || headerOrFooter.sections[0].columns[0].lines.length === 0) {
-        return marginTB;
-    }
-
-    const HeaderFooterPageHeight = headerOrFooter.height + headerOrFooter.marginTop + headerOrFooter.marginBottom;
-    // Content height should be at least 100px.
-    const maxMargin = getHeaderFooterMaxHeight(pageHeight);
-
-    return Math.min(maxMargin, Math.max(marginTB, HeaderFooterPageHeight));
+    return marginTB;
 }

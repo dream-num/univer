@@ -1328,7 +1328,7 @@ describe('linebreaking', () => {
         expect(paragraphStyle).toEqual({});
     });
 
-    it('keeps DOCX paragraphs without source default spacing on explicit spacing while using Word line height', () => {
+    it('keeps traditional documents on explicit paragraph spacing while using Word line height', () => {
         const ctx = createContext();
         const paragraphStyle = {};
         const paragraph = {
@@ -1343,7 +1343,6 @@ describe('linebreaking', () => {
             getSnapshot: vi.fn(() => ({
                 documentStyle: {
                     documentFlavor: DocumentFlavor.TRADITIONAL,
-                    docxHasDefaultParagraphSpacing: false,
                 },
             })),
             getCustomBlock: vi.fn(() => null),

@@ -480,11 +480,10 @@ export enum GridType {
 
 export interface IDocumentStyle extends IDocStyleBase, IDocumentLayout, IHeaderAndFooterBase {
     textStyle?: ITextStyle; // default style for text
-    docxHasDefaultParagraphSpacing?: boolean; // DOCX compatibility: source uses Univer default paragraph spacing.
-    docxBackground?: IDocxBackground; // DOCX page background image.
+    background?: IDocumentBackground; // Page background image.
 }
 
-export interface IDocxBackground {
+export interface IDocumentBackground {
     source?: string;
     sourceType?: ImageSourceType;
 }

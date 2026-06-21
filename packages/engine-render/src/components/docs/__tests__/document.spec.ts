@@ -452,7 +452,7 @@ describe('documents render', () => {
                     getSnapshot: () => ({
                         documentStyle: {
                             documentFlavor: DocumentFlavor.TRADITIONAL,
-                            docxBackground: {
+                            background: {
                                 source: 'data:image/png;base64,background',
                             },
                         },

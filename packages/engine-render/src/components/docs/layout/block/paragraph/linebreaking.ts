@@ -251,11 +251,7 @@ function _shouldApplyDocumentDefaultParagraphStyle(viewModel: DocumentViewModel)
         return true;
     }
 
-    if (snapshot.documentStyle.docxHasDefaultParagraphSpacing === false) {
-        return false;
-    }
-
-    return _shouldUseWordStyleLineHeight(viewModel);
+    return snapshot.documentStyle.documentFlavor === DocumentFlavor.MODERN;
 }
 
 function _shouldUseWordStyleLineHeight(viewModel: DocumentViewModel): boolean {

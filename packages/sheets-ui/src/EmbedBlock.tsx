@@ -15,8 +15,9 @@
  */
 
 import type { IEmbedBlockContribution, IEmbedChildViewContribution } from '@univerjs/embed-ui';
+import type { Injector } from '@univerjs/core';
 import type { IUniverSheetsUIConfig } from './config/config';
-import { Injector, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { toDisposable, UniverInstanceType } from '@univerjs/core';
 import { ComponentManager, useConfigValue, useDependency } from '@univerjs/ui';
 import { createEmbedReactRoot, createEmbedRibbonBlockContribution, disposeEmbedReactRoot, EmbedRuntimeProviders, mountEmbedRenderChildUnit } from '@univerjs/embed-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';

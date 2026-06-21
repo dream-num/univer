@@ -125,6 +125,9 @@ export class DrawingRenderService {
             if (imageShape != null) {
                 imageShape.transformByState({ left, top, width, height, angle, flipX, flipY, skewX, skewY });
                 (imageShape as Image).setClipBounds?.((transform as IDrawingTransformStateWithClipBounds).clipBounds);
+                if ('hidden' in imageParam) {
+                    hidden ? imageShape.hide() : imageShape.show();
+                }
                 ensureDrawingRenderLayer(scene, imageShape, imageParam as IDrawingParamWithBehindText);
                 continue;
             }

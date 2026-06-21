@@ -192,6 +192,18 @@ describe('DocDrawingTransformUpdateController', () => {
                 docTransform: defaultDocTransform,
             },
         };
+        const inlineDrawing = {
+            aLeft: 15,
+            aTop: 25,
+            width: 35,
+            height: 45,
+            angle: 0,
+            drawingId: 'inline-drawing',
+            drawingOrigin: {
+                layoutType: PositionedObjectLayoutType.INLINE,
+                docTransform: defaultDocTransform,
+            },
+        };
         const multiDrawingOnPage = {
             aLeft: 6,
             aTop: 8,
@@ -236,6 +248,7 @@ describe('DocDrawingTransformUpdateController', () => {
             marginBottom: 17,
             skeDrawings: new Map([
                 ['normal-drawing', normalDrawing],
+                ['inline-drawing', inlineDrawing],
                 ['multi-drawing', multiDrawingOnPage],
             ]),
             skeTables: [table],
@@ -267,6 +280,10 @@ describe('DocDrawingTransformUpdateController', () => {
                 drawingId: 'normal-drawing',
                 behindText: true,
                 transform: expect.objectContaining({ left: 26, top: 40, width: 30, height: 40, angle: 5 }),
+            }),
+            expect.objectContaining({
+                drawingId: 'inline-drawing',
+                transform: expect.objectContaining({ left: 31, top: 45, width: 35, height: 45, angle: 0 }),
             }),
             expect.objectContaining({
                 drawingId: 'cell-drawing',

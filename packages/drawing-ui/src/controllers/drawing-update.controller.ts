@@ -62,6 +62,14 @@ interface IDrawingTransformStateWithClipBounds extends ITransformState {
     clipBounds?: Nullable<{ left: number; top: number; width: number; height: number }>;
 }
 
+function syncDrawingHiddenState(shape: BaseObject, drawingParam: IDrawingParam): void {
+    if (!('hidden' in drawingParam)) {
+        return;
+    }
+
+    drawingParam.hidden === true ? shape.hide() : shape.show();
+}
+
 export class DrawingUpdateController extends Disposable {
     constructor(
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
@@ -699,6 +707,7 @@ export class DrawingUpdateController extends Disposable {
 
                     drawingShape.transformByState({ left, top, width, height, angle, flipX, flipY, skewX, skewY });
                     (drawingShape as Image).setClipBounds?.((transform as IDrawingTransformStateWithClipBounds).clipBounds);
+                    syncDrawingHiddenState(drawingShape, drawingParam);
                     ensureDrawingRenderLayer(scene, drawingShape, drawingParam);
 
                     scene.getTransformer()?.debounceRefreshControls();
@@ -750,6 +759,7 @@ export class DrawingUpdateController extends Disposable {
 
                     drawingShape.transformByState({ left, top, width, height, angle, flipX, flipY, skewX, skewY });
                     (drawingShape as Image).setClipBounds?.((transform as IDrawingTransformStateWithClipBounds).clipBounds);
+                    syncDrawingHiddenState(drawingShape as BaseObject, drawingParam);
                     ensureDrawingRenderLayer(scene, drawingShape as BaseObject, drawingParam);
                 });
             })

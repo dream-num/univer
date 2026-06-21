@@ -357,6 +357,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
                         });
                     }
                 }
+                this._updateDrawingsEditStatus();
             })
         );
     }

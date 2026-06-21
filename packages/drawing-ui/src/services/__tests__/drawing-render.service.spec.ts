@@ -348,6 +348,25 @@ describe('DrawingRenderService', () => {
         expect(imageIoService.cacheWrites).toEqual([{ source: 'image-source', imageSourceType: ImageSourceType.BASE64, image: image.getNative() }]);
     });
 
+    it('syncs hidden state when an existing image shape is refreshed', async () => {
+        const { service, scene } = createHarness();
+        const key = drawingKey({ unitId: 'book-1', subUnitId: 'sheet-1', drawingId: 'drawing-1' });
+        const image = new Image(key, { ...BASE_TRANSFORM, url: 'existing-image' });
+        scene.objects.set(key, image);
+
+        await service.renderImages(imageParam({ hidden: true, transform: SECOND_TRANSFORM }), scene as unknown as Scene);
+
+        expect(image.visible).toBe(false);
+        expect(image.left).toBe(50);
+        expect(image.top).toBe(60);
+        expect(image.width).toBe(70);
+        expect(image.height).toBe(80);
+
+        await service.renderImages(imageParam({ hidden: false, transform: BASE_TRANSFORM }), scene as unknown as Scene);
+
+        expect(image.visible).toBe(true);
+    });
+
     it('uses cached native images instead of resolving the source again', async () => {
         const { service, scene, imageIoService } = createHarness();
         const nativeImage = document.createElement('img');

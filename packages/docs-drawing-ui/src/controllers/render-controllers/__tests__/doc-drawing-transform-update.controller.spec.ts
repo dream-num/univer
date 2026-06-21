@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { BooleanNumber, PositionedObjectLayoutType } from '@univerjs/core';
+import { AlignTypeH, AlignTypeV, BooleanNumber, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType } from '@univerjs/core';
 import { Liquid, setDocsTableRenderViewportProvider } from '@univerjs/engine-render';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { getDocsTableCellAnchorContext } from '../../doc-drawing-transformer-update.controller';
-import { DocDrawingTransformUpdateController, getDocsTableCellDrawingOffset } from '../doc-drawing-transform-update.controller';
+import { DocDrawingTransformUpdateController, getDocsDrawingBehindText, getDocsDrawingClipPage, getDocsDrawingPageClipBounds, getDocsPageRelativeDrawingAnchorPage, getDocsPageRelativeDrawingLeft, getDocsPageRelativeDrawingTop, getDocsTableCellDrawingOffset } from '../doc-drawing-transform-update.controller';
 
 describe('DocDrawingTransformUpdateController', () => {
     afterEach(() => {
@@ -134,6 +134,10 @@ describe('DocDrawingTransformUpdateController', () => {
         controller._context = context;
         controller._drawingManagerService = drawingManagerService;
         controller._liquid = new Liquid();
+        const defaultDocTransform = {
+            positionH: {},
+            positionV: {},
+        };
 
         const normalDrawing = {
             aLeft: 10,
@@ -145,6 +149,7 @@ describe('DocDrawingTransformUpdateController', () => {
             drawingOrigin: {
                 layoutType: PositionedObjectLayoutType.WRAP_NONE,
                 behindDoc: BooleanNumber.TRUE,
+                docTransform: defaultDocTransform,
             },
         };
         const headerDrawing = {
@@ -156,6 +161,7 @@ describe('DocDrawingTransformUpdateController', () => {
             drawingId: 'header-drawing',
             drawingOrigin: {
                 layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
+                docTransform: defaultDocTransform,
             },
         };
         const tableCellDrawing = {
@@ -167,6 +173,7 @@ describe('DocDrawingTransformUpdateController', () => {
             drawingId: 'cell-drawing',
             drawingOrigin: {
                 layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
+                docTransform: defaultDocTransform,
             },
         };
         const multiDrawingOnPage = {
@@ -180,6 +187,7 @@ describe('DocDrawingTransformUpdateController', () => {
                 layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
                 behindDoc: BooleanNumber.FALSE,
                 isMultiTransform: BooleanNumber.TRUE,
+                docTransform: defaultDocTransform,
             },
         };
         const multiDrawingInHeader = {
@@ -237,16 +245,16 @@ describe('DocDrawingTransformUpdateController', () => {
         expect(drawingManagerService.refreshTransform).toHaveBeenCalledWith([
             expect.objectContaining({
                 drawingId: 'header-drawing',
-                transform: { left: 19, top: 30, width: 9, height: 10, angle: 0 },
+                transform: expect.objectContaining({ left: 19, top: 30, width: 9, height: 10, angle: 0 }),
             }),
             expect.objectContaining({
                 drawingId: 'normal-drawing',
                 behindText: true,
-                transform: { left: 26, top: 40, width: 30, height: 40, angle: 5 },
+                transform: expect.objectContaining({ left: 26, top: 40, width: 30, height: 40, angle: 5 }),
             }),
             expect.objectContaining({
                 drawingId: 'cell-drawing',
-                transform: { left: 56, top: 69, width: 11, height: 12, angle: 0 },
+                transform: expect.objectContaining({ left: 56, top: 69, width: 11, height: 12, angle: 0 }),
             }),
         ]);
         expect(drawingManagerService.removeNotification).toHaveBeenCalledWith([
@@ -258,11 +266,155 @@ describe('DocDrawingTransformUpdateController', () => {
                 drawingId: 'multi-drawing',
                 isMultiTransform: BooleanNumber.TRUE,
                 transforms: [
-                    { left: 32, top: 44, width: 13, height: 14, angle: 2 },
-                    { left: 22, top: 28, width: 13, height: 14, angle: 2 },
+                    expect.objectContaining({ left: 32, top: 44, width: 13, height: 14, angle: 2 }),
+                    expect.objectContaining({ left: 22, top: 28, width: 13, height: 14, angle: 2 }),
                 ],
             }),
         ]);
         expect(transformer.setSelectedControl).toHaveBeenCalledWith(selectedShape);
+    });
+
+    it('projects a document page clip bound in scene coordinates before page padding is applied', () => {
+        expect(getDocsDrawingPageClipBounds({
+            docsLeft: 20,
+            docsTop: 30,
+            pageOffsetLeft: 100,
+            pageOffsetTop: 200,
+            page: {
+                pageWidth: 793,
+                pageHeight: 1122,
+                marginLeft: 48,
+                marginTop: 48,
+            },
+        } as never)).toEqual({
+            left: 120,
+            top: 230,
+            width: 793,
+            height: 1122,
+        });
+    });
+
+    it('projects a table cell drawing clip bound through the cell offset', () => {
+        expect(getDocsDrawingPageClipBounds({
+            docsLeft: 20,
+            docsTop: 30,
+            pageOffsetLeft: 100,
+            pageOffsetTop: 200,
+            clipOffsetLeft: 138,
+            clipOffsetTop: 98,
+            page: {
+                pageWidth: 321,
+                pageHeight: 300,
+            },
+        })).toEqual({
+            left: 258,
+            top: 328,
+            width: 321,
+            height: 300,
+        });
+    });
+
+    it('clips page-sized header background drawings to the host document page', () => {
+        const headerPage = {
+            pageWidth: 589,
+            pageHeight: 476,
+        };
+        const hostPage = {
+            pageWidth: 816,
+            pageHeight: 1056,
+        };
+
+        expect(getDocsDrawingClipPage({
+            drawing: {
+                behindText: true,
+                transform: {
+                    width: 815,
+                    height: 1055,
+                },
+            },
+            hostPage,
+            page: headerPage,
+        })).toBe(hostPage);
+
+        expect(getDocsDrawingClipPage({
+            drawing: {
+                behindText: true,
+                transform: {
+                    width: 120,
+                    height: 40,
+                },
+            },
+            hostPage,
+            page: headerPage,
+        })).toBe(headerPage);
+    });
+
+    it('positions page-sized header backgrounds against the host page width', () => {
+        expect(getDocsPageRelativeDrawingLeft({
+            hostPage: {
+                pageWidth: 816,
+            },
+            positionH: {
+                align: AlignTypeH.RIGHT,
+                relativeFrom: ObjectRelativeFromH.PAGE,
+            },
+            width: 815,
+        })).toBe(1);
+    });
+
+    it('positions page-sized header backgrounds against the host page height', () => {
+        expect(getDocsPageRelativeDrawingTop({
+            hostPage: {
+                pageHeight: 1056,
+            },
+            positionV: {
+                align: AlignTypeV.TOP,
+                relativeFrom: ObjectRelativeFromV.PAGE,
+            },
+            height: 1055,
+        })).toBe(0);
+
+        expect(getDocsPageRelativeDrawingTop({
+            hostPage: {
+                pageHeight: 1056,
+            },
+            positionV: {
+                align: AlignTypeV.BOTTOM,
+                relativeFrom: ObjectRelativeFromV.PAGE,
+            },
+            height: 1055,
+        })).toBe(1);
+    });
+
+    it('uses body pages as page-relative drawing anchors when no host page exists', () => {
+        const bodyPage = {
+            pageWidth: 816,
+            pageHeight: 1056,
+        };
+
+        expect(getDocsPageRelativeDrawingAnchorPage({
+            page: bodyPage,
+            clipPage: bodyPage,
+        })).toBe(bodyPage);
+    });
+
+    it('renders header and footer drawings in the host page behind-text layer', () => {
+        expect(getDocsDrawingBehindText({
+            drawingOrigin: {
+                layoutType: PositionedObjectLayoutType.WRAP_NONE,
+                behindDoc: BooleanNumber.FALSE,
+            },
+            hostPage: {
+                pageWidth: 816,
+                pageHeight: 1056,
+            },
+        } as never)).toBe(true);
+
+        expect(getDocsDrawingBehindText({
+            drawingOrigin: {
+                layoutType: PositionedObjectLayoutType.WRAP_NONE,
+                behindDoc: BooleanNumber.FALSE,
+            },
+        } as never)).toBe(false);
     });
 });

@@ -130,7 +130,8 @@ describe('UnitDrawingService', () => {
             transform: { left: 1, top: 2 } as NonNullable<IDrawingParam['transform']>,
             transforms: [{ left: 3, top: 4 } as NonNullable<IDrawingParam['transform']>] as NonNullable<IDrawingParam['transforms']>,
             isMultiTransform: BooleanNumber.TRUE,
-        });
+            behindText: true,
+        } as Partial<IDrawingParam>);
         service.refreshTransform([transformed]);
 
         expect(refreshed).toEqual([[transformed]]);
@@ -138,6 +139,7 @@ describe('UnitDrawingService', () => {
             transform: { left: 1, top: 2 },
             transforms: [{ left: 3, top: 4 }],
             isMultiTransform: BooleanNumber.TRUE,
+            behindText: true,
         });
 
         service.visibleNotification([{ ...createSearch('a'), visible: false }]);

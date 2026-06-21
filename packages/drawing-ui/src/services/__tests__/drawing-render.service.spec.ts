@@ -37,7 +37,7 @@ import { IGalleryService } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { DrawingImageClipService } from '../drawing-image-clip.service';
-import { DrawingRenderService } from '../drawing-render.service';
+import { DOC_DRAWING_BEHIND_TEXT_LAYER_INDEX, DrawingRenderService } from '../drawing-render.service';
 
 const BASE_TRANSFORM = {
     left: 10,
@@ -351,6 +351,9 @@ describe('DrawingRenderService', () => {
     it('uses cached native images instead of resolving the source again', async () => {
         const { service, scene, imageIoService } = createHarness();
         const nativeImage = document.createElement('img');
+        Object.defineProperty(nativeImage, 'complete', { value: true });
+        Object.defineProperty(nativeImage, 'naturalWidth', { value: 1 });
+        Object.defineProperty(nativeImage, 'naturalHeight', { value: 1 });
         imageIoService.cache.set(cacheKey('image-source', ImageSourceType.BASE64), nativeImage);
 
         await service.renderImages(imageParam(), scene as unknown as Scene);
@@ -526,5 +529,64 @@ describe('DrawingRenderService', () => {
 
         expect(galleryService.lastOpen?.images).toEqual(['preview-src']);
         expect(galleryService.closeCount).toBe(1);
+    });
+
+    it('renders incomplete cached images through url loading so onload can repaint', async () => {
+        const { imageIoService, scene, service } = createHarness();
+        const incompleteImage = document.createElement('img');
+        Object.defineProperty(incompleteImage, 'complete', { value: false });
+        imageIoService.cache.set(cacheKey('image-source', ImageSourceType.BASE64), incompleteImage);
+
+        await service.renderImages(imageParam(), scene as unknown as Scene);
+
+        const image = scene.addedObjects[0]?.object as Image;
+        expect(image.getNative()).not.toBe(incompleteImage);
+        expect(imageIoService.cacheWrites).toEqual([{ source: 'image-source', imageSourceType: ImageSourceType.BASE64, image: image.getNative() }]);
+    });
+
+    it('uses completed cached images directly', async () => {
+        const { imageIoService, scene, service } = createHarness();
+        const completeImage = document.createElement('img');
+        Object.defineProperty(completeImage, 'complete', { value: true });
+        Object.defineProperty(completeImage, 'naturalWidth', { value: 1 });
+        Object.defineProperty(completeImage, 'naturalHeight', { value: 1 });
+        imageIoService.cache.set(cacheKey('image-source', ImageSourceType.BASE64), completeImage);
+
+        await service.renderImages(imageParam(), scene as unknown as Scene);
+
+        const image = scene.addedObjects[0]?.object as Image;
+        expect(image.getNative()).toBe(completeImage);
+        expect(imageIoService.cacheWrites).toEqual([]);
+    });
+
+    it('reloads completed cached images without natural dimensions', async () => {
+        const { imageIoService, scene, service } = createHarness();
+        const brokenCompleteImage = document.createElement('img');
+        Object.defineProperty(brokenCompleteImage, 'complete', { value: true });
+        Object.defineProperty(brokenCompleteImage, 'naturalWidth', { value: 0 });
+        Object.defineProperty(brokenCompleteImage, 'naturalHeight', { value: 0 });
+        imageIoService.cache.set(cacheKey('image-source', ImageSourceType.BASE64), brokenCompleteImage);
+
+        await service.renderImages(imageParam(), scene as unknown as Scene);
+
+        const image = scene.addedObjects[0]?.object as Image;
+        expect(image.getNative()).not.toBe(brokenCompleteImage);
+        expect(imageIoService.cacheWrites).toEqual([{ source: 'image-source', imageSourceType: ImageSourceType.BASE64, image: image.getNative() }]);
+    });
+
+    it('renders docs behind-text images between page background and document text', async () => {
+        const { scene, service } = createHarness();
+
+        await service.renderImages(imageParam({ behindText: true } as never), scene as unknown as Scene);
+
+        expect(scene.addedObjects[0]?.layerIndex).toBe(DOC_DRAWING_BEHIND_TEXT_LAYER_INDEX);
+    });
+
+    it('keeps normal images on the regular drawing layer', async () => {
+        const { scene, service } = createHarness();
+
+        await service.renderImages(imageParam(), scene as unknown as Scene);
+
+        expect(scene.addedObjects[0]?.layerIndex).toBe(DRAWING_OBJECT_LAYER_INDEX);
     });
 });

@@ -35,12 +35,19 @@ export class ImageIoService implements IImageIoService {
 
     private _imageSourceCache: Map<string, HTMLImageElement> = new Map();
     getImageSourceCache(source: string, imageSourceType: ImageSourceType) {
+        const cachedImage = this._imageSourceCache.get(source);
+        if (cachedImage != null) {
+            return cachedImage;
+        }
         if (imageSourceType === ImageSourceType.BASE64) {
             const image = new Image();
+            image.onload = () => this._change$.next(this._waitCount);
+            image.onerror = () => this._change$.next(this._waitCount);
             image.src = source;
+            this._imageSourceCache.set(source, image);
             return image;
         }
-        return this._imageSourceCache.get(source);
+        return undefined;
     }
 
     addImageSourceCache(source: string, imageSourceType: ImageSourceType, imageSource: Nullable<HTMLImageElement>) {

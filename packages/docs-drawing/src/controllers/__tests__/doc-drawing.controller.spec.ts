@@ -68,9 +68,41 @@ describe('DocDrawingController', () => {
         expect(capturedResource.parseJson('')).toEqual({ data: {}, order: [] });
         expect(capturedResource.parseJson('{bad json')).toEqual({ data: {}, order: [] });
 
-        capturedResource.onLoad('doc-1', { data: { d2: { id: 'd2' } }, order: ['d2'] });
+        capturedResource.onLoad('doc-1', {
+            data: {
+                d2: {
+                    id: 'd2',
+                    docTransform: {
+                        size: { width: 320, height: 180 },
+                        positionH: { posOffset: 12 },
+                        positionV: { posOffset: 34 },
+                        angle: 15,
+                    },
+                },
+            },
+            order: ['d2'],
+        });
         expect(registerDrawingData).toHaveBeenCalledWith('doc-1', expect.any(Object));
         expect(registerDrawingDataForManager).toHaveBeenCalledWith('doc-1', expect.any(Object));
+        const loadedDrawingData = registerDrawingDataForManager.mock.calls.at(-1)?.[1];
+        expect(loadedDrawingData).toMatchObject({
+            'doc-1': {
+                unitId: 'doc-1',
+                subUnitId: 'doc-1',
+                data: {
+                    d2: expect.objectContaining({
+                        docTransform: {
+                            size: { width: 320, height: 180 },
+                            positionH: { posOffset: 12 },
+                            positionV: { posOffset: 34 },
+                            angle: 15,
+                        },
+                    }),
+                },
+                order: ['d2'],
+            },
+        });
+        expect(loadedDrawingData?.['doc-1']?.data?.d2).not.toHaveProperty('transform');
 
         capturedResource.onUnLoad('doc-1');
         expect(registerDrawingData).toHaveBeenLastCalledWith('doc-1', {

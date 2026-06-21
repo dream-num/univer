@@ -96,6 +96,17 @@ describe('shaping', () => {
         expect(allGlyphs.length).toBeGreaterThan(0);
     });
 
+    it('keeps Arabic glyph groups in logical order for canvas text shaping', () => {
+        const arabicText = '\u0627\u0637\u0644\u0627\u0639\u064A\u0647';
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed(arabicText);
+
+        const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+
+        const allGlyphs = result.flatMap((r) => r.glyphs);
+        expect(allGlyphs.some((glyph) => glyph.content === arabicText)).toBe(true);
+        expect(allGlyphs.some((glyph) => glyph.content === '\u0647\u064A\u0639\u0627\u0644\u0637\u0627')).toBe(false);
+    });
+
     it('returns breakPointType for each shaped text', () => {
         const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('Hello world');
 
@@ -167,6 +178,21 @@ describe('shaping', () => {
     it('shapes custom block when drawing is not found', () => {
         const content = `A${DataStreamTreeTokenType.CUSTOM_BLOCK}B`;
         const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed(content);
+
+        const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+
+        const allGlyphs = result.flatMap((r) => r.glyphs);
+        expect(allGlyphs.length).toBeGreaterThan(0);
+    });
+
+    it('falls back when a custom block references a missing drawing', () => {
+        const content = `A${DataStreamTreeTokenType.CUSTOM_BLOCK}B`;
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed(content, {
+            body: {
+                customBlocks: [{ startIndex: 1, blockId: 'missing' }],
+            },
+            drawings: {},
+        });
 
         const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
 

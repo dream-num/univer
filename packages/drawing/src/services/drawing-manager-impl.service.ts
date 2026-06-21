@@ -42,6 +42,10 @@ enum DrawingMapItemType {
     order = 'order',
 }
 
+interface IDrawingRefreshMetadata {
+    behindText?: unknown;
+}
+
 /**
  * unitId -> subUnitId -> drawingId -> drawingParam
  */
@@ -132,6 +136,10 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
             param.transform = updateParam.transform;
             param.transforms = updateParam.transforms;
             param.isMultiTransform = updateParam.isMultiTransform;
+
+            if ('behindText' in updateParam) {
+                (param as T & IDrawingRefreshMetadata).behindText = (updateParam as T & IDrawingRefreshMetadata).behindText;
+            }
         });
 
         this.refreshTransformNotification(updateParams);

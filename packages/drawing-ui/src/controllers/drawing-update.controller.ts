@@ -29,6 +29,7 @@ import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService, SetDrawingSe
 import { DRAWING_OBJECT_LAYER_INDEX, DrawingGroupObject, Group, IRenderManagerService, RENDER_CLASS_TYPE } from '@univerjs/engine-render';
 import { AlignType, SetDrawingAlignOperation } from '../commands/operations/drawing-align.operation';
 import { CloseImageCropOperation } from '../commands/operations/image-crop.operation';
+import { ensureDrawingRenderLayer } from '../services/drawing-render.service';
 import { getUpdateParams } from '../utils/get-update-params';
 import { getCurrentUnitInfo, insertGroupObject } from './utils';
 
@@ -38,6 +39,10 @@ interface IDrawingTransformCache {
     drawingId: string;
     drawingType: DrawingTypeEnum;
     transform: ITransformState;
+}
+
+interface IDrawingTransformStateWithClipBounds extends ITransformState {
+    clipBounds?: Nullable<{ left: number; top: number; width: number; height: number }>;
 }
 
 export class DrawingUpdateController extends Disposable {
@@ -676,6 +681,8 @@ export class DrawingUpdateController extends Disposable {
                     }
 
                     drawingShape.transformByState({ left, top, width, height, angle, flipX, flipY, skewX, skewY });
+                    (drawingShape as Image).setClipBounds?.((transform as IDrawingTransformStateWithClipBounds).clipBounds);
+                    ensureDrawingRenderLayer(scene, drawingShape, drawingParam);
 
                     scene.getTransformer()?.debounceRefreshControls();
                 });
@@ -700,10 +707,15 @@ export class DrawingUpdateController extends Disposable {
                     const { transform } = drawingParam;
                     const { scene } = renderObject;
 
+                    if (transform == null) {
+                        return true;
+                    }
+
                     const drawingShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
                     const drawingShape = scene.getObject(drawingShapeKey);
 
-                    if (drawingShape == null || transform == null) {
+                    if (drawingShape == null) {
+                        this._drawingManagerService.addNotification([{ unitId, subUnitId, drawingId }]);
                         return true;
                     }
 
@@ -720,6 +732,8 @@ export class DrawingUpdateController extends Disposable {
                     } = transform;
 
                     drawingShape.transformByState({ left, top, width, height, angle, flipX, flipY, skewX, skewY });
+                    (drawingShape as Image).setClipBounds?.((transform as IDrawingTransformStateWithClipBounds).clipBounds);
+                    ensureDrawingRenderLayer(scene, drawingShape as BaseObject, drawingParam);
                 });
             })
         );

@@ -114,6 +114,22 @@ describe('text shaping runtime', () => {
         expect(h.parse).toHaveBeenCalledTimes(1);
     });
 
+    it('keeps rtl text runs in logical order for canvas shaping', () => {
+        const result = textShape({
+            dataStream: 'ABC\r',
+            textRuns: [{
+                st: 0,
+                ed: 3,
+                ts: {
+                    ff: 'Arial',
+                    rtl: BooleanNumber.TRUE,
+                },
+            }],
+        } as any);
+
+        expect(result.slice(0, 3).map((glyph) => glyph.char)).toEqual(['A', 'B', 'C']);
+    });
+
     it('falls back to null glyph when no valid font family exists', () => {
         h.fontLibrary.getValidFontFamilies.mockReturnValueOnce([]);
         const result = textShape({

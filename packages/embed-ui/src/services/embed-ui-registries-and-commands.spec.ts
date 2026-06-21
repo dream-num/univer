@@ -97,7 +97,7 @@ describe('embed-ui registries and commands', () => {
         service.register({
             hostType: UniverInstanceType.UNIVER_DOC,
             entry: 'docs-custom-block',
-        });
+        } as never);
         expect(() => service.createAnchor({
             embedId: 'fallback',
             hostUnitId: 'host-1',

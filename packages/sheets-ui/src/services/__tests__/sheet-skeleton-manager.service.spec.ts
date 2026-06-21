@@ -161,4 +161,51 @@ describe('SheetSkeletonManagerService', () => {
         expect(resetSelections).toEqual([selections, selections]);
         expect((param as { commandId?: string }).commandId).toBe('sheet.command.set-row-header-width');
     });
+
+    it('keeps header size updates safe when selection services are unavailable', () => {
+        const skeleton = {
+            columnHeaderHeight: 20,
+            rowHeaderWidth: 46,
+            registerGetCellHeight: () => {},
+        };
+        const param = { unitId: 'unit-1', sheetId: 'sheet-1', skeleton, dirty: false };
+        TestSheetSkeletonService.skeleton = skeleton;
+        TestSheetSkeletonService.param = param;
+
+        const injector = new Injector();
+        injector.add([SheetSkeletonService, { useClass: TestSheetSkeletonService as never }]);
+        const service = injector.createInstance(SheetSkeletonManagerService, {
+            unit: {},
+            unitId: 'unit-1',
+            type: UniverInstanceType.UNIVER_SHEET,
+            scene: {},
+        } as never);
+
+        const viewportState = new Map<string, any>([
+            [SHEET_VIEWPORT_KEY.VIEW_COLUMN_RIGHT, { left: 100, setViewportSize(params: object) { Object.assign(this, params); } }],
+            [SHEET_VIEWPORT_KEY.VIEW_COLUMN_LEFT, { setViewportSize(params: object) { Object.assign(this, params); } }],
+            [SHEET_VIEWPORT_KEY.VIEW_ROW_BOTTOM, { setViewportSize(params: object) { Object.assign(this, params); } }],
+            [SHEET_VIEWPORT_KEY.VIEW_ROW_TOP, { setViewportSize(params: object) { Object.assign(this, params); } }],
+            [SHEET_VIEWPORT_KEY.VIEW_LEFT_TOP, { width: 46, setViewportSize(params: object) { Object.assign(this, params); } }],
+        ]);
+        const mainViewport = { top: 0, left: 46 };
+        const render = {
+            unitId: 'unit-1',
+            scene: {
+                getViewports: () => [mainViewport],
+                getViewport: (key: string) => viewportState.get(key),
+            },
+            with: () => {
+                throw new Error('[redi]: Cannot find "SheetsSelectionsService" registered by any injector.');
+            },
+        };
+
+        expect(() => service.setColumnHeaderSize(render as never, 'sheet-1', 32)).not.toThrow();
+        expect(() => service.setRowHeaderSize(render as never, 'sheet-1', 60)).not.toThrow();
+
+        expect(skeleton.columnHeaderHeight).toBe(32);
+        expect(skeleton.rowHeaderWidth).toBe(60);
+        expect(mainViewport).toEqual({ top: 32, left: 60 });
+        expect((param as { commandId?: string }).commandId).toBe('sheet.command.set-row-header-width');
+    });
 });

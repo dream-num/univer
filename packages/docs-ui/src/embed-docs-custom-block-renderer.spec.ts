@@ -19,7 +19,13 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { createDocsTableLikeCustomBlockWheelHandler } from './EmbedDocsCustomBlockRenderer';
+import {
+    createDocsTableLikeCustomBlockWheelHandler,
+    resolveDocsCustomBlockRuntimeViewportHeight,
+    resolveDocsTableLikeCustomBlockRuntimeContentHeight,
+    resolveDocsTableLikeCustomBlockRuntimeContentWidth,
+    shouldSyncDocsTableLikeCustomBlockBleedOnScroll,
+} from './EmbedDocsCustomBlockRenderer';
 
 describe('createDocsTableLikeCustomBlockWheelHandler', () => {
     it('uses the latest bleed boundary when scrolling horizontally', () => {
@@ -65,6 +71,73 @@ describe('createDocsTableLikeCustomBlockWheelHandler', () => {
 
         expect(live.scrollLeft).toBe(600);
         expect(event.defaultPrevented).toBe(true);
+    });
+});
+
+describe('resolveDocsCustomBlockRuntimeViewportHeight', () => {
+    it('uses the visible runtime viewport height for sheet-like docs custom blocks', () => {
+        expect(resolveDocsCustomBlockRuntimeViewportHeight({
+            contentHeight: 1087,
+            sheetLike: true,
+            viewportHeight: 887,
+        })).toBe(887);
+    });
+
+    it('keeps explicit viewport height for non-sheet-like custom blocks', () => {
+        expect(resolveDocsCustomBlockRuntimeViewportHeight({
+            contentHeight: 720,
+            sheetLike: false,
+            viewportHeight: 405,
+        })).toBe(405);
+    });
+});
+
+describe('resolveDocsTableLikeCustomBlockRuntimeContentHeight', () => {
+    it('keeps sheet-like docs custom block content visible without runtime viewport props', () => {
+        expect(resolveDocsTableLikeCustomBlockRuntimeContentHeight(undefined)).toBe(480);
+        expect(resolveDocsTableLikeCustomBlockRuntimeContentHeight(0)).toBe(480);
+    });
+
+    it('uses authoritative measured content height when available', () => {
+        expect(resolveDocsTableLikeCustomBlockRuntimeContentHeight(1087)).toBe(1087);
+    });
+});
+
+describe('resolveDocsTableLikeCustomBlockRuntimeContentWidth', () => {
+    it('uses authoritative width without measuring the runtime DOM', () => {
+        let measured = false;
+
+        const width = resolveDocsTableLikeCustomBlockRuntimeContentWidth(1280, () => {
+            measured = true;
+            return 640;
+        });
+
+        expect(width).toBe(1280);
+        expect(measured).toBe(false);
+    });
+
+    it('measures the runtime DOM when authoritative width is unavailable', () => {
+        expect(resolveDocsTableLikeCustomBlockRuntimeContentWidth(undefined, () => 640)).toBe(640);
+        expect(resolveDocsTableLikeCustomBlockRuntimeContentWidth(0, () => 640)).toBe(640);
+    });
+});
+
+describe('shouldSyncDocsTableLikeCustomBlockBleedOnScroll', () => {
+    it('ignores scroll events from the inner live runtime', () => {
+        const root = document.createElement('div');
+        const live = document.createElement('div');
+        root.appendChild(live);
+
+        expect(shouldSyncDocsTableLikeCustomBlockBleedOnScroll(root, live)).toBe(false);
+    });
+
+    it('keeps syncing when an outer scrolling ancestor changes geometry', () => {
+        const root = document.createElement('div');
+        const outer = document.createElement('div');
+        outer.appendChild(root);
+
+        expect(shouldSyncDocsTableLikeCustomBlockBleedOnScroll(root, outer)).toBe(true);
+        expect(shouldSyncDocsTableLikeCustomBlockBleedOnScroll(root, window)).toBe(true);
     });
 });
 

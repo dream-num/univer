@@ -22,18 +22,21 @@ import { InsertDocDrawingCommand } from '../../commands/commands/insert-doc-draw
 import { calcDocFloatDomPositionByRect, DocFloatDomController } from '../doc-float-dom.controller';
 
 function createScene() {
+    const viewport = { viewportScrollX: 10, viewportScrollY: 20, onScrollAfter$: new Subject() };
     return {
-        getViewport: vi.fn(() => ({ viewportScrollX: 10, viewportScrollY: 20, onScrollAfter$: new Subject() })),
+        viewport,
+        getViewport: vi.fn(() => viewport),
         getAncestorScale: vi.fn(() => ({ scaleX: 2, scaleY: 3 })),
         getTransformerByCreate: vi.fn(() => ({})),
         removeObject: vi.fn(),
     };
 }
 
-function createController(options: { rects?: Rect[]; page?: any } = {}) {
+function createController(options: { drawing?: Record<string, unknown>; rects?: Rect[]; page?: any } = {}) {
     const add$ = new Subject<any[]>();
     const remove$ = new Subject<any[]>();
     const refreshTransform$ = new Subject<any[]>();
+    const currentSkeleton$ = new Subject<any>();
     const commandHandlers: Array<(command: { id: string; params?: unknown }) => void> = [];
     const scene = createScene();
     const canvas = { dispatchEvent: vi.fn() };
@@ -41,6 +44,7 @@ function createController(options: { rects?: Rect[]; page?: any } = {}) {
         scene,
         engine: { getCanvasElement: () => canvas },
         with: vi.fn(() => ({
+            currentSkeleton$,
             getSkeleton: () => ({
                 getSkeletonData: () => ({ pages: [options.page ?? { pageWidth: 240, marginLeft: 20, marginRight: 30 }] }),
             }),
@@ -56,6 +60,7 @@ function createController(options: { rects?: Rect[]; page?: any } = {}) {
         componentKey: 'FloatDom',
         drawingType: DrawingTypeEnum.DRAWING_DOM,
         data: { value: 1 },
+        ...options.drawing,
     };
     const drawingManagerService = {
         add$,
@@ -66,8 +71,18 @@ function createController(options: { rects?: Rect[]; page?: any } = {}) {
     const drawingRenderService = {
         renderFloatDom: vi.fn(async () => options.rects ?? []),
     };
+    const domLayers: Array<[string, any]> = [];
     const canvasFloatDomService = {
-        addFloatDom: vi.fn(),
+        domLayers,
+        addFloatDom: vi.fn((layer) => {
+            domLayers.push([layer.id, layer]);
+        }),
+        updateFloatDom: vi.fn((id, patch) => {
+            const layer = domLayers.find(([layerId]) => layerId === id);
+            if (layer) {
+                Object.assign(layer[1], patch);
+            }
+        }),
         removeFloatDom: vi.fn(),
     };
     const doc = { getUnitId: () => 'doc-1' };
@@ -96,7 +111,9 @@ function createController(options: { rects?: Rect[]; page?: any } = {}) {
     return {
         controller,
         add$,
+        currentSkeleton$,
         remove$,
+        refreshTransform$,
         commandHandlers,
         scene,
         canvas,
@@ -161,6 +178,281 @@ describe('DocFloatDomController', () => {
         remove$.next([{ drawingId: 'dom-1' }]);
         expect(canvasFloatDomService.removeFloatDom).toHaveBeenCalledWith('dom-1');
         expect(scene.removeObject).toHaveBeenCalledWith(rect);
+
+        sub.unsubscribe();
+        controller.dispose();
+    });
+
+    it('updates float dom position from its own host viewport scroll even when current doc focus changes', async () => {
+        const rect = new Rect('dom-rect', {
+            left: 30,
+            top: 50,
+            width: 50,
+            height: 40,
+        } as never);
+        const { controller, add$, scene, canvasFloatDomService } = createController({ rects: [rect] });
+
+        add$.next([{ unitId: 'doc-1', subUnitId: 'doc-1', drawingId: 'dom-1' }]);
+        await Promise.resolve();
+
+        const position$ = canvasFloatDomService.addFloatDom.mock.calls[0][0].position$;
+        const positions: unknown[] = [];
+        const sub = position$.subscribe((position: unknown) => positions.push(position));
+
+        scene.viewport.viewportScrollY = 80;
+        scene.viewport.onScrollAfter$.next({} as never);
+
+        expect(positions.at(-1)).toMatchObject({
+            startX: 40,
+            startY: -90,
+            width: 100,
+            height: 120,
+        });
+
+        sub.unsubscribe();
+        controller.dispose();
+    });
+
+    it('updates rendered float dom bounds from doc drawing transform refreshes', async () => {
+        const rect = new Rect('dom-rect', {
+            left: 30,
+            top: 50,
+            width: 50,
+            height: 40,
+        } as never);
+        const { controller, add$, refreshTransform$, canvasFloatDomService } = createController({
+            rects: [rect],
+            drawing: {
+                data: { version: 1, embedId: 'embed-1', hostAnchorId: 'anchor-1' },
+            },
+        });
+
+        add$.next([{ unitId: 'doc-1', subUnitId: 'doc-1', drawingId: 'dom-1' }]);
+        await Promise.resolve();
+
+        const position$ = canvasFloatDomService.addFloatDom.mock.calls[0][0].position$;
+        const positions: unknown[] = [];
+        const sub = position$.subscribe((position: unknown) => positions.push(position));
+
+        refreshTransform$.next([{
+            drawingId: 'dom-1',
+            transform: { left: 40, top: 60, width: 160, height: 240, angle: 0 },
+            customBlockRenderViewport: { contentHeight: 240, height: 240, viewportHeight: 120 },
+        }]);
+
+        expect(positions.at(-1)).toMatchObject({
+            startX: 60,
+            startY: 120,
+            width: 320,
+            height: 720,
+        });
+        expect(canvasFloatDomService.updateFloatDom).toHaveBeenCalledWith('dom-1', expect.objectContaining({
+            props: expect.objectContaining({
+                customBlockRenderViewport: { contentHeight: 240, height: 240, viewportHeight: 120 },
+            }),
+        }));
+
+        sub.unsubscribe();
+        controller.dispose();
+    });
+
+    it('uses custom block viewport height when creating the initial float dom position', async () => {
+        const rect = new Rect('dom-rect', {
+            left: 30,
+            top: 50,
+            width: 50,
+            height: 40,
+        } as never);
+        const { controller, add$, canvasFloatDomService } = createController({
+            rects: [rect],
+            drawing: {
+                customBlockRenderViewport: { contentHeight: 240, height: 240, viewportHeight: 120 },
+            },
+        });
+
+        add$.next([{ unitId: 'doc-1', subUnitId: 'doc-1', drawingId: 'dom-1' }]);
+        await Promise.resolve();
+
+        const position$ = canvasFloatDomService.addFloatDom.mock.calls[0][0].position$;
+        const positions: unknown[] = [];
+        const sub = position$.subscribe((position: unknown) => positions.push(position));
+
+        expect(positions.at(-1)).toMatchObject({
+            startX: 40,
+            startY: 90,
+            width: 100,
+            height: 720,
+        });
+
+        sub.unsubscribe();
+        controller.dispose();
+    });
+
+    it('disables host event pass-through for embed float dom runtimes', async () => {
+        const rect = new Rect('dom-rect', {
+            left: 30,
+            top: 50,
+            width: 50,
+            height: 40,
+        } as never);
+        const { controller, add$, canvasFloatDomService } = createController({
+            rects: [rect],
+            drawing: {
+                data: { version: 1, embedId: 'embed-1', hostAnchorId: 'anchor-1' },
+            },
+        });
+
+        add$.next([{ unitId: 'doc-1', subUnitId: 'doc-1', drawingId: 'dom-1' }]);
+        await Promise.resolve();
+
+        expect(canvasFloatDomService.addFloatDom).toHaveBeenCalledWith(expect.objectContaining({
+            eventPassThrough: false,
+        }));
+
+        controller.dispose();
+    });
+
+    it('falls back to custom block viewport height when refreshes omit transform data', async () => {
+        const rect = new Rect('dom-rect', {
+            left: 30,
+            top: 50,
+            width: 50,
+            height: 40,
+        } as never);
+        const { controller, add$, refreshTransform$, canvasFloatDomService } = createController({
+            rects: [rect],
+            drawing: {
+                data: { version: 1, embedId: 'embed-1', hostAnchorId: 'anchor-1' },
+            },
+        });
+
+        add$.next([{ unitId: 'doc-1', subUnitId: 'doc-1', drawingId: 'dom-1' }]);
+        await Promise.resolve();
+
+        const position$ = canvasFloatDomService.addFloatDom.mock.calls[0][0].position$;
+        const positions: unknown[] = [];
+        const sub = position$.subscribe((position: unknown) => positions.push(position));
+
+        refreshTransform$.next([{
+            drawingId: 'dom-1',
+            customBlockRenderViewport: { contentHeight: 240, height: 240, viewportHeight: 120 },
+        }]);
+
+        expect(positions.at(-1)).toMatchObject({
+            startX: 40,
+            startY: 90,
+            width: 100,
+            height: 720,
+        });
+
+        sub.unsubscribe();
+        controller.dispose();
+    });
+
+    it('keeps the measured custom block size while following refreshed doc-flow position', async () => {
+        const rect = new Rect('dom-rect', {
+            left: 30,
+            top: 50,
+            width: 50,
+            height: 40,
+        } as never);
+        const { controller, add$, refreshTransform$, canvasFloatDomService } = createController({
+            rects: [rect],
+            drawing: {
+                data: { version: 1, embedId: 'embed-1', hostAnchorId: 'anchor-1' },
+            },
+        });
+
+        add$.next([{ unitId: 'doc-1', subUnitId: 'doc-1', drawingId: 'dom-1' }]);
+        await Promise.resolve();
+
+        const position$ = canvasFloatDomService.addFloatDom.mock.calls[0][0].position$;
+        const positions: unknown[] = [];
+        const sub = position$.subscribe((position: unknown) => positions.push(position));
+
+        refreshTransform$.next([{
+            drawingId: 'dom-1',
+            transform: { left: 40, top: 60, width: 160, height: 240, angle: 0 },
+            customBlockRenderViewport: { contentHeight: 240, height: 240, viewportHeight: 120 },
+        }]);
+        rect.transformByState({ left: 45, top: 65, width: 160, height: 40, angle: 0 } as never);
+        refreshTransform$.next([{
+            drawingId: 'dom-1',
+            transform: { left: 45, top: 65, width: 160, height: 40, angle: 0 },
+        }]);
+
+        expect(positions.at(-1)).toMatchObject({
+            startX: 70,
+            startY: 135,
+            width: 320,
+            height: 720,
+        });
+
+        sub.unsubscribe();
+        controller.dispose();
+    });
+
+    it('keeps embed custom block size while moving slide-like blocks with doc flow refreshes', async () => {
+        const rect = new Rect('dom-rect', {
+            left: 30,
+            top: 240,
+            width: 720,
+            height: 405,
+        } as never);
+        const { controller, add$, refreshTransform$, canvasFloatDomService } = createController({
+            rects: [rect],
+            drawing: {
+                data: { version: 1, embedId: 'embed-1', hostAnchorId: 'anchor-1' },
+            },
+        });
+
+        add$.next([{ unitId: 'doc-1', subUnitId: 'doc-1', drawingId: 'dom-1' }]);
+        await Promise.resolve();
+
+        const position$ = canvasFloatDomService.addFloatDom.mock.calls[0][0].position$;
+        const positions: unknown[] = [];
+        const sub = position$.subscribe((position: unknown) => positions.push(position));
+
+        rect.transformByState({ left: 30, top: 60, width: 720, height: 405, angle: 0 } as never);
+        refreshTransform$.next([{
+            drawingId: 'dom-1',
+            transform: { left: 30, top: 60, width: 720, height: 405, angle: 0 },
+        }]);
+
+        expect(positions.at(-1)).toMatchObject({
+            startY: 120,
+            height: 1215,
+        });
+
+        sub.unsubscribe();
+        controller.dispose();
+    });
+
+
+    it('falls back to custom block content height when viewport layout height is omitted', async () => {
+        const rect = new Rect('dom-rect', {
+            left: 30,
+            top: 50,
+            width: 50,
+            height: 40,
+        } as never);
+        const { controller, add$, canvasFloatDomService } = createController({
+            rects: [rect],
+            drawing: {
+                customBlockRenderViewport: { contentHeight: 240, viewportHeight: 120 },
+            },
+        });
+
+        add$.next([{ unitId: 'doc-1', subUnitId: 'doc-1', drawingId: 'dom-1' }]);
+        await Promise.resolve();
+
+        const position$ = canvasFloatDomService.addFloatDom.mock.calls[0][0].position$;
+        const positions: unknown[] = [];
+        const sub = position$.subscribe((position: unknown) => positions.push(position));
+
+        expect(positions.at(-1)).toMatchObject({
+            height: 720,
+        });
 
         sub.unsubscribe();
         controller.dispose();

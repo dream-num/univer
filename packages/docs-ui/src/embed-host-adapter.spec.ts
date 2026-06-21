@@ -20,34 +20,17 @@ import { describe, expect, it, vi } from 'vitest';
 import { createDocsCustomBlockHostAdapterContribution, createDocsCustomBlockHostContainerContribution } from './embed-host-adapter';
 
 describe('docs custom block host adapter', () => {
-    it('creates record-only anchor plans when the doc model is not available', () => {
+    it('rejects custom block anchor creation when the doc model is not available', () => {
         const adapter = createDocsCustomBlockHostAdapterContribution();
-        const plan = adapter.createAnchorPlan!({
+
+        expect(() => adapter.createAnchorPlan!({
             embedId: 'embed-1',
             hostUnitId: 'doc-1',
             hostType: UniverInstanceType.UNIVER_DOC,
             entry: 'docs-custom-block',
             requestedAnchorId: 'block-1',
             hostContext: { componentKey: 'CustomBlock' },
-        });
-
-        expect(plan.hostAnchorId).toBe('block-1');
-        expect(plan.redoMutations).toEqual([{
-            id: SET_EMBED_HOST_ANCHOR_RECORD_MUTATION_ID,
-            params: {
-                record: expect.objectContaining({
-                    hostAnchorId: 'block-1',
-                    embedId: 'embed-1',
-                    hostUnitId: 'doc-1',
-                    kind: 'docs-custom-block',
-                    lifecycle: 'active',
-                }),
-            },
-        }]);
-        expect(plan.undoMutations).toEqual([{
-            id: REMOVE_EMBED_HOST_ANCHOR_RECORD_MUTATION_ID,
-            params: { hostUnitId: 'doc-1', hostAnchorId: 'block-1' },
-        }]);
+        })).toThrow('EMBED_DOCS_CUSTOM_BLOCK_ANCHOR_UNAVAILABLE');
     });
 
     it('creates rich text insert and remove plans from the host document body', () => {

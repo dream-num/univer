@@ -20,27 +20,29 @@ import { LocaleService } from '@univerjs/core';
 import { ConfigProvider } from '@univerjs/design';
 import { RediProvider, useDependency } from '@univerjs/ui';
 import { useEffect, useMemo, useState } from 'react';
+import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE } from '../services/embed-interaction-boundary.service';
 
 export interface IEmbedRuntimeProvidersProps {
     injector: Injector;
     children?: ReactNode;
     mountContainer?: HTMLElement | null;
+    embedId?: string;
 }
 
 export function EmbedRuntimeProviders(props: IEmbedRuntimeProvidersProps) {
-    const { injector, children, mountContainer } = props;
+    const { injector, children, mountContainer, embedId } = props;
 
     return (
         <RediProvider value={{ injector }}>
-            <EmbedDesignRuntimeProvider mountContainer={mountContainer}>
+            <EmbedDesignRuntimeProvider mountContainer={mountContainer} embedId={embedId}>
                 {children}
             </EmbedDesignRuntimeProvider>
         </RediProvider>
     );
 }
 
-function EmbedDesignRuntimeProvider(props: Pick<IEmbedRuntimeProvidersProps, 'children' | 'mountContainer'>) {
-    const { children, mountContainer } = props;
+function EmbedDesignRuntimeProvider(props: Pick<IEmbedRuntimeProvidersProps, 'children' | 'mountContainer' | 'embedId'>) {
+    const { children, mountContainer, embedId } = props;
     const localeService = useDependency(LocaleService);
     const [locale, setLocale] = useState(localeService.getLocales());
     const [direction, setDirection] = useState(localeService.getDirection());
@@ -84,6 +86,24 @@ function EmbedDesignRuntimeProvider(props: Pick<IEmbedRuntimeProvidersProps, 'ch
             resolvedMountContainer.dir = direction;
         }
     }, [direction, resolvedMountContainer]);
+
+    useEffect(() => {
+        if (!resolvedMountContainer || !embedId) {
+            return;
+        }
+
+        const previousOwner = resolvedMountContainer.getAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE);
+        resolvedMountContainer.setAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, embedId);
+
+        return () => {
+            if (previousOwner == null) {
+                resolvedMountContainer.removeAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE);
+                return;
+            }
+
+            resolvedMountContainer.setAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, previousOwner);
+        };
+    }, [embedId, resolvedMountContainer]);
 
     return (
         <ConfigProvider locale={locale?.design} direction={direction} mountContainer={resolvedMountContainer}>

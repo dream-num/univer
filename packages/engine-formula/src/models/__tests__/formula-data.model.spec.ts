@@ -698,6 +698,39 @@ describe('Test formula data model', () => {
                 ]);
             });
 
+            it('should ignore non-sheet formula units when calculating sheet dirty ranges', () => {
+                const univerInstanceService = get(IUniverInstanceService);
+                univerInstanceService.registerCtorForType(UniverInstanceType.UNIVER_BASE, BaseDataModel);
+                univer.createUnit(UniverInstanceType.UNIVER_BASE, TEST_BASE_DATA);
+
+                const dirtyRanges = formulaDataModel.getFormulaDirtyRanges();
+
+                expect(dirtyRanges).toEqual([
+                    {
+                        unitId: 'test',
+                        sheetId: 'sheet1',
+                        range: {
+                            rangeType: RANGE_TYPE.NORMAL,
+                            startRow: 0,
+                            endRow: 1,
+                            startColumn: 0,
+                            endColumn: 0,
+                        },
+                    },
+                    {
+                        unitId: 'test',
+                        sheetId: 'sheet1',
+                        range: {
+                            rangeType: RANGE_TYPE.NORMAL,
+                            startRow: 3,
+                            endRow: 3,
+                            startColumn: 0,
+                            endColumn: 0,
+                        },
+                    },
+                ]);
+            });
+
             it('should expose calculate data and per-sheet formula data', () => {
                 const calculateData = formulaDataModel.getCalculateData();
                 expect(calculateData.allUnitData.test?.sheet1.rowCount).toBeGreaterThan(0);

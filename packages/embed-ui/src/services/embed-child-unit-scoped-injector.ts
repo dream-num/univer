@@ -15,10 +15,10 @@
  */
 
 import type { IAccessor, IExecutionOptions, IUndoRedoItem, IUndoRedoService as IUndoRedoServiceType, UniverInstanceType } from '@univerjs/core';
-import type { IContextMenuService, IMenuManagerService, MenuManagerService } from '@univerjs/ui';
+import type { IContextMenuService, ILayoutService, IMenuManagerService, MenuManagerService } from '@univerjs/ui';
 import type { IEmbedChildContainerContext } from '../types/embed-ui';
 import { COMMAND_EXECUTION_INJECTOR_KEY, ICommandService, Injector, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
-import { IContextMenuService as IContextMenuServiceIdentifier, IMenuManagerService as IMenuManagerServiceIdentifier } from '@univerjs/ui';
+import { IContextMenuService as IContextMenuServiceIdentifier, ILayoutService as ILayoutServiceIdentifier, IMenuManagerService as IMenuManagerServiceIdentifier } from '@univerjs/ui';
 import { BehaviorSubject } from 'rxjs';
 import { EmbedUndoBridgeService } from './embed-undo-bridge.service';
 
@@ -139,6 +139,10 @@ export function createEmbedChildUnitScopedInjector(
     if (scopedContextMenuService) {
         scopedInjector.add([IContextMenuServiceIdentifier, { useValue: scopedContextMenuService }]);
     }
+    const scopedLayoutService = createScopedLayoutService(context.injector, context);
+    if (scopedLayoutService) {
+        scopedInjector.add([ILayoutServiceIdentifier, { useValue: scopedLayoutService }]);
+    }
 
     return scopedInjector;
 }
@@ -231,7 +235,25 @@ export function createEmbedScopedInjector(
 ): Injector {
     const resolvedSharedRootInjector = getEmbedSharedRootInjector(parentInjector) ?? sharedRootInjector;
     const localOverrides = new Map(overrides);
+    const localFactories = new Map<unknown, () => unknown>();
+    const localDependencyIdentifiers = new Set<unknown>();
     let childInjector: Injector | undefined;
+    const getLocal = (identifier: unknown) => {
+        if (localOverrides.has(identifier)) {
+            return localOverrides.get(identifier);
+        }
+
+        const factory = localFactories.get(identifier);
+        if (!factory) {
+            return undefined;
+        }
+
+        const value = factory();
+        localFactories.delete(identifier);
+        localOverrides.set(identifier, value);
+        return value;
+    };
+    const hasLocal = (identifier: unknown) => localOverrides.has(identifier) || localFactories.has(identifier);
 
     const getChildInjector = (): Injector | undefined => {
         if (childInjector) {
@@ -255,7 +277,7 @@ export function createEmbedScopedInjector(
             if (identifier === Injector) {
                 return true;
             }
-            if (localOverrides.has(identifier)) {
+            if (hasLocal(identifier)) {
                 return true;
             }
 
@@ -266,8 +288,8 @@ export function createEmbedScopedInjector(
             if (identifier === Injector) {
                 return scopedInjector;
             }
-            if (localOverrides.has(identifier)) {
-                return localOverrides.get(identifier);
+            if (hasLocal(identifier)) {
+                return getLocal(identifier);
             }
 
             const child = getChildInjector();
@@ -278,7 +300,7 @@ export function createEmbedScopedInjector(
                 if (identifier === Injector) {
                     return true;
                 }
-                if (localOverrides.has(identifier)) {
+                if (hasLocal(identifier)) {
                     return true;
                 }
 
@@ -289,8 +311,8 @@ export function createEmbedScopedInjector(
                 if (identifier === Injector) {
                     return scopedInjector as never;
                 }
-                if (localOverrides.has(identifier)) {
-                    return localOverrides.get(identifier) as never;
+                if (hasLocal(identifier)) {
+                    return getLocal(identifier) as never;
                 }
 
                 const child = getChildInjector();
@@ -298,11 +320,32 @@ export function createEmbedScopedInjector(
             },
         } as IAccessor, ...args),
         add: (dependency: unknown) => {
-            const valueDependency = parseValueDependency(dependency);
-            if (valueDependency) {
-                localOverrides.set(valueDependency.identifier, valueDependency.value);
+            const localDependency = parseLocalDependency(dependency);
+            if (localDependency) {
+                const dependencyIdentifier = getDependencyIdentifierKey(localDependency.identifier);
+                if (localDependencyIdentifiers.has(dependencyIdentifier)) {
+                    return;
+                }
+
+                localDependencyIdentifiers.add(dependencyIdentifier);
+                if (localDependency.kind === 'value') {
+                    localFactories.delete(localDependency.identifier);
+                    localOverrides.set(localDependency.identifier, localDependency.value);
+                } else {
+                    localOverrides.delete(localDependency.identifier);
+                    localFactories.set(localDependency.identifier, localDependency.factory);
+                }
                 childInjector?.add(dependency as never);
                 return;
+            }
+
+            const dependencyIdentifier = getDependencyIdentifierKey(getDependencyIdentifier(dependency));
+            if (dependencyIdentifier != null) {
+                if (localDependencyIdentifiers.has(dependencyIdentifier)) {
+                    return;
+                }
+
+                localDependencyIdentifiers.add(dependencyIdentifier);
             }
 
             const child = getChildInjector();
@@ -341,12 +384,27 @@ export function createEmbedScopedInjector(
                 disposeChildInjectorWithoutSharedResolved(childInjector, resolvedSharedRootInjector, localOverrides.values());
             }
             childInjector = undefined;
+            localDependencyIdentifiers.clear();
+            localFactories.clear();
         },
     };
 
     (scopedInjector as { __embedSharedRootInjector?: Injector }).__embedSharedRootInjector = resolvedSharedRootInjector;
 
     return scopedInjector as Injector;
+}
+
+function getDependencyIdentifier(dependency: unknown): unknown {
+    return Array.isArray(dependency) ? dependency[0] : dependency;
+}
+
+function getDependencyIdentifierKey(identifier: unknown): unknown {
+    const decoratorName = (identifier as { decoratorName?: unknown } | undefined)?.decoratorName;
+    if (typeof decoratorName === 'string' && decoratorName) {
+        return `identifier:${decoratorName}`;
+    }
+
+    return identifier;
 }
 
 function getEmbedSharedRootInjector(injector: Injector): Injector | undefined {
@@ -429,20 +487,33 @@ function createValueDependencies(overrides: ReadonlyMap<unknown, unknown>): unkn
     return Array.from(overrides, ([identifier, value]) => [identifier, { useValue: value }]);
 }
 
-function parseValueDependency(dependency: unknown): { identifier: unknown; value: unknown } | undefined {
+function parseLocalDependency(dependency: unknown): { kind: 'factory'; identifier: unknown; factory: () => unknown } | { kind: 'value'; identifier: unknown; value: unknown } | undefined {
     if (!Array.isArray(dependency) || dependency.length < 2) {
         return undefined;
     }
 
-    const [identifier, dependencyItem] = dependency as [unknown, { useValue?: unknown }];
-    if (!dependencyItem || typeof dependencyItem !== 'object' || !('useValue' in dependencyItem)) {
+    const [identifier, dependencyItem] = dependency as [unknown, { useFactory?: () => unknown; useValue?: unknown }];
+    if (!dependencyItem || typeof dependencyItem !== 'object') {
         return undefined;
     }
 
-    return {
-        identifier,
-        value: dependencyItem.useValue,
-    };
+    if ('useValue' in dependencyItem) {
+        return {
+            kind: 'value',
+            identifier,
+            value: dependencyItem.useValue,
+        };
+    }
+
+    if (typeof dependencyItem.useFactory === 'function') {
+        return {
+            kind: 'factory',
+            identifier,
+            factory: dependencyItem.useFactory,
+        };
+    }
+
+    return undefined;
 }
 
 function createScopedMenuManagerService(parentInjector: Injector, scopedInjector: Injector): IMenuManagerService | undefined {
@@ -482,5 +553,32 @@ function createScopedContextMenuService(parentInjector: Injector, scopedInjector
         }),
         hideContextMenu: () => contextMenuService.hideContextMenu(),
         registerContextMenuHandler: (handler) => contextMenuService.registerContextMenuHandler(handler),
+    };
+}
+
+function createScopedLayoutService(parentInjector: Injector, context: IEmbedChildContainerContext): ILayoutService | undefined {
+    if (!parentInjector.has(ILayoutServiceIdentifier)) {
+        return undefined;
+    }
+
+    const layoutService = parentInjector.get(ILayoutServiceIdentifier);
+    const contentElement = context.renderScope.contentRoot ?? context.renderScope.rootElement;
+    const rootElement = context.renderScope.rootElement;
+
+    return {
+        get isFocused() {
+            return layoutService.isFocused;
+        },
+        get rootContainerElement() {
+            return layoutService.rootContainerElement;
+        },
+        focus: () => layoutService.focus(),
+        registerFocusHandler: (type, handler) => layoutService.registerFocusHandler(type, handler),
+        registerRootContainerElement: (container) => layoutService.registerRootContainerElement(container),
+        registerContentElement: (container) => layoutService.registerContentElement(container),
+        registerContainerElement: (container) => layoutService.registerContainerElement(container),
+        getContentElement: () => contentElement,
+        checkElementInCurrentContainers: (element) => rootElement.contains(element) || layoutService.checkElementInCurrentContainers(element),
+        checkContentIsFocused: () => contentElement.contains(contentElement.ownerDocument.activeElement) || layoutService.checkContentIsFocused(),
     };
 }

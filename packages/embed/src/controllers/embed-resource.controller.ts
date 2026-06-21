@@ -15,14 +15,15 @@
  */
 
 import type { IResourceManagerService } from '@univerjs/core';
-import type { EmbedModelService } from '../services/embed-model.service';
 import type { IEmbedResource } from '../types/embed';
-import { Disposable, IResourceManagerService as IResourceManagerServiceToken, UniverInstanceType } from '@univerjs/core';
+import { Disposable, Inject, IResourceManagerService as IResourceManagerServiceToken, UniverInstanceType } from '@univerjs/core';
 import { EMBED_RESOURCE_PLUGIN_NAME } from '../common/const';
+import { EmbedModelService } from '../services/embed-model.service';
 
 export class EmbedResourceController extends Disposable {
     constructor(
         @IResourceManagerServiceToken private readonly _resourceManagerService: IResourceManagerService,
+        @Inject(EmbedModelService)
         private readonly _embedModelService: EmbedModelService
     ) {
         super();

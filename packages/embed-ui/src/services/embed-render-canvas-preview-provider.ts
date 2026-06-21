@@ -17,10 +17,13 @@
 import type { DependencyIdentifier, Injector, UniverInstanceType } from '@univerjs/core';
 import type {
     EmbedFloatPreviewRenderResult,
+    IEmbedChildContainerContext,
     IEmbedFloatPreviewProvider,
     IEmbedFloatPreviewRenderRequest,
 } from '../types/embed-ui';
 import type { IEmbedRenderManagerServiceLike } from './embed-render-child-view-contribution';
+import { of } from 'rxjs';
+import { createEmbedChildUnitScopedInjector } from './embed-child-unit-scoped-injector';
 import { ensureEmbedChildRender, refreshEmbedChildRender } from './embed-render-child-view-contribution';
 import { captureEmbedContextSceneCanvas } from './embed-scene-canvas-capture.service';
 
@@ -57,12 +60,6 @@ function renderEmbedCanvasPreview(
         return undefined;
     }
 
-    const renderManagerService = injector.get(renderManagerServiceIdentifier);
-    const render = ensureEmbedChildRender(renderManagerService, request.childUnitId);
-    if (!render) {
-        return undefined;
-    }
-
     const host = document.createElement('div');
     host.style.position = 'fixed';
     host.style.left = '-100000px';
@@ -71,6 +68,18 @@ function renderEmbedCanvasPreview(
     host.style.height = `${Math.max(1, Math.round(request.height))}px`;
     host.style.pointerEvents = 'none';
     document.body.appendChild(host);
+
+    const renderManagerService = injector.get(renderManagerServiceIdentifier);
+    const ownedScopedInjector = request.context?.runtimeScope?.injector
+        ? undefined
+        : createEmbedChildUnitScopedInjector(createPreviewChildContext(injector, request, host));
+    const renderParentInjector = request.context?.runtimeScope?.injector ?? ownedScopedInjector;
+    const render = ensureEmbedChildRender(renderManagerService, request.childUnitId, renderParentInjector);
+    if (!render) {
+        ownedScopedInjector?.dispose();
+        host.remove();
+        return undefined;
+    }
 
     try {
         render.engine.mount(host);
@@ -89,6 +98,78 @@ function renderEmbedCanvasPreview(
         } catch {
             // The render engine may already have been detached by the render service.
         }
+        if (ownedScopedInjector) {
+            renderManagerService.removeRender?.(request.childUnitId);
+            ownedScopedInjector.dispose();
+        }
         host.remove();
     }
+}
+
+function createPreviewChildContext(
+    injector: Injector,
+    request: IEmbedFloatPreviewRenderRequest,
+    host: HTMLElement
+): IEmbedChildContainerContext {
+    const layout = resolvePreviewLayout(request);
+    const noop = () => {};
+
+    return {
+        descriptor: request.descriptor,
+        layout,
+        injector,
+        hostElement: host,
+        container: host,
+        hostUnitId: request.descriptor.hostUnitId,
+        embedId: request.descriptor.embedId,
+        childUnitId: request.childUnitId,
+        childType: request.childType,
+        renderScope: {
+            hostUnitId: request.descriptor.hostUnitId,
+            hostAnchorId: request.descriptor.hostAnchorId,
+            embedId: request.descriptor.embedId,
+            childUnitId: request.childUnitId,
+            childType: request.childType,
+            layout,
+            mode: 'float',
+            rootElement: host,
+            contentRoot: host,
+            canvasRoot: host,
+            active$: of(false),
+        },
+        runtimeScope: {
+            descriptor: request.descriptor,
+            host: {
+                unitId: request.descriptor.hostUnitId,
+                type: request.descriptor.hostType,
+                anchorId: request.descriptor.hostAnchorId,
+                entry: request.descriptor.entry,
+                layout: 'float',
+            },
+            child: {
+                unitId: request.childUnitId,
+                type: request.childType,
+            },
+            injector,
+            roots: {
+                root: host,
+                content: host,
+                canvas: host,
+                overlay: host,
+                popup: host,
+            },
+            activate: noop,
+            deactivate: noop,
+            dispose: noop,
+        },
+    };
+}
+
+function resolvePreviewLayout(request: IEmbedFloatPreviewRenderRequest): IEmbedChildContainerContext['layout'] {
+    const floating = request.descriptor.sourceMeta?.floating;
+    if (floating && typeof floating === 'object' && typeof floating.layout === 'string') {
+        return floating.layout as IEmbedChildContainerContext['layout'];
+    }
+
+    return request.context?.layout ?? 'scroll-contained';
 }

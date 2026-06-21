@@ -21,8 +21,10 @@ import {
     Inject,
     Injector,
     IUniverInstanceService,
+    Optional,
     UniverInstanceType,
 } from '@univerjs/core';
+import { EmbedInteractionBoundaryService } from '@univerjs/embed-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import {
     BuiltInUIPart,
@@ -63,7 +65,8 @@ export class DocUIController extends Disposable {
         @IUIPartsService protected readonly _uiPartsService: IUIPartsService,
         @IUniverInstanceService protected readonly _univerInstanceService: IUniverInstanceService,
         @IShortcutService protected readonly _shortcutService: IShortcutService,
-        @IConfigService protected readonly _configService: IConfigService
+        @IConfigService protected readonly _configService: IConfigService,
+        @Optional(EmbedInteractionBoundaryService) protected readonly _embedInteractionBoundaryService?: EmbedInteractionBoundaryService
     ) {
         super();
 
@@ -119,11 +122,25 @@ export class DocUIController extends Disposable {
     private _initFocusHandler(): void {
         this.disposeWithMe(
             this._layoutService.registerFocusHandler(UniverInstanceType.UNIVER_DOC, (unitId: string) => {
+                if (this._shouldPreserveEmbedFocus()) {
+                    return;
+                }
+
                 const renderManagerService = this._injector.get(IRenderManagerService);
                 const docSelectionRenderService = renderManagerService.getRenderById(unitId)!.with(DocSelectionRenderService);
 
                 docSelectionRenderService.focus();
             })
         );
+    }
+
+    private _shouldPreserveEmbedFocus(): boolean {
+        const activeElement = document.activeElement;
+        if (this._embedInteractionBoundaryService?.contains(undefined, activeElement)) {
+            return true;
+        }
+
+        const ownerDocument = activeElement?.ownerDocument ?? document;
+        return this._embedInteractionBoundaryService?.hasRecentInteraction(ownerDocument) === true;
     }
 }

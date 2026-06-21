@@ -661,7 +661,7 @@ export class FormulaDataModel extends Disposable {
 
             if (!workbook) continue;
 
-            const workbookInstance = this._univerInstanceService.getUnit<Workbook>(unitId);
+            const workbookInstance = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
 
             if (!workbookInstance) continue;
 

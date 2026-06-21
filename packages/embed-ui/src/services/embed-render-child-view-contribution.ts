@@ -17,7 +17,7 @@
 import type { DependencyIdentifier, IDisposable, UniverInstanceType } from '@univerjs/core';
 import type { EmbedLayout } from '@univerjs/embed';
 import type { IEmbedChildContainerContext, IEmbedChildViewContribution } from '../types/embed-ui';
-import { Injector, toDisposable } from '@univerjs/core';
+import { ICommandService, Injector, IUniverInstanceService, toDisposable } from '@univerjs/core';
 import { createEmbedChildUnitScopedInjector } from './embed-child-unit-scoped-injector';
 
 export interface IEmbedRenderLike {
@@ -64,6 +64,8 @@ export interface ICreateEmbedRenderChildViewContributionOptions {
 
 export interface IMountEmbedRenderChildUnitOptions {
     activate?: boolean;
+    scopedRenderInjector?: boolean;
+    scopedInjector?: Injector;
 }
 
 export function createEmbedRenderChildViewContribution(
@@ -83,8 +85,10 @@ export function mountEmbedRenderChildUnit(
     options: IMountEmbedRenderChildUnitOptions = {}
 ): IDisposable | undefined {
     const renderManagerService = context.injector.get(renderManagerServiceIdentifier);
-    const scopedInjector = context.runtimeScope?.injector ?? createEmbedChildUnitScopedInjector(context);
-    const ownsScopedInjector = scopedInjector !== context.runtimeScope?.injector;
+    const scopedInjector = options.scopedInjector ?? (options.scopedRenderInjector === false
+        ? undefined
+        : context.runtimeScope?.injector ?? createEmbedRenderScopedInjector(context));
+    const ownsScopedInjector = !options.scopedInjector && scopedInjector !== context.runtimeScope?.injector;
     const render = createEmbedChildRender(renderManagerService, context.childUnitId, scopedInjector);
     if (!render) {
         if (ownsScopedInjector) {
@@ -103,8 +107,10 @@ export function mountEmbedRenderChildUnit(
     render.engine.mount(target);
     ensureEmbedRenderCanvasAttached(render, target);
     refreshEmbedChildRender(render, { activate: options.activate ?? true });
+    const resizeDisposable = observeEmbedRenderTargetResize(render, target, { activate: false });
 
     return toDisposable(() => {
+        resizeDisposable.dispose();
         try {
             render.engine.unmount?.();
         } catch {
@@ -116,6 +122,59 @@ export function mountEmbedRenderChildUnit(
         if (ownsScopedInjector) {
             scopedInjector?.dispose();
         }
+    });
+}
+
+function createEmbedRenderScopedInjector(context: IEmbedChildContainerContext): Injector | undefined {
+    if (typeof context.injector.has !== 'function') {
+        return undefined;
+    }
+
+    if (!context.injector.has(IUniverInstanceService) || !context.injector.has(ICommandService)) {
+        return undefined;
+    }
+
+    return createEmbedChildUnitScopedInjector(context);
+}
+
+export function observeEmbedRenderTargetResize(
+    render: IEmbedRenderLike,
+    target: HTMLElement,
+    options: { activate?: boolean } = {}
+): IDisposable {
+    if (typeof ResizeObserver === 'undefined') {
+        return toDisposable(() => {});
+    }
+
+    let lastWidth = -1;
+    let lastHeight = -1;
+    let frame = 0;
+    const resizeObserver = new ResizeObserver((entries) => {
+        const rect = entries[0]?.contentRect;
+        const width = rect?.width ?? target.clientWidth;
+        const height = rect?.height ?? target.clientHeight;
+        if (width === lastWidth && height === lastHeight) {
+            return;
+        }
+
+        lastWidth = width;
+        lastHeight = height;
+        if (frame) {
+            window.cancelAnimationFrame(frame);
+        }
+
+        frame = window.requestAnimationFrame(() => {
+            frame = 0;
+            refreshEmbedChildRender(render, { activate: options.activate ?? false });
+        });
+    });
+    resizeObserver.observe(target);
+
+    return toDisposable(() => {
+        if (frame) {
+            window.cancelAnimationFrame(frame);
+        }
+        resizeObserver.disconnect();
     });
 }
 
@@ -135,10 +194,22 @@ function ensureEmbedRenderCanvasAttached(render: IEmbedRenderLike, target: HTMLE
     target.appendChild(canvas);
 }
 
-export function ensureEmbedChildRender(renderManagerService: IEmbedRenderManagerServiceLike, childUnitId: string): IEmbedRenderLike | undefined {
+export function ensureEmbedChildRender(
+    renderManagerService: IEmbedRenderManagerServiceLike,
+    childUnitId: string,
+    renderParentInjector?: Injector
+): IEmbedRenderLike | undefined {
     try {
-        return renderManagerService.getRenderById(childUnitId)
-            ?? renderManagerService.createRender(childUnitId, { embeddedRender: true, makeCurrent: false, skipAutoRender: true });
+        const existingRender = renderManagerService.getRenderById(childUnitId);
+        if (existingRender) {
+            if (!renderParentInjector || getRenderInjector(existingRender) === renderParentInjector) {
+                return existingRender;
+            }
+
+            renderManagerService.removeRender?.(childUnitId);
+        }
+
+        return renderManagerService.createRender(childUnitId, { embeddedRender: true, makeCurrent: false, renderParentInjector, skipAutoRender: true });
     } catch {
         return undefined;
     }

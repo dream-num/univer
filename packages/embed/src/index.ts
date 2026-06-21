@@ -67,7 +67,6 @@ export type {
     IEmbedGuestContribution,
     IEmbedLayoutPolicies,
     IEmbedLayoutPolicy,
-    IEmbedProductPluginConfig,
     IEmbedResolvedSource,
     IEmbedResource,
     IEmbedSourceMeta,

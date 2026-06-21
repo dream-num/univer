@@ -565,11 +565,18 @@ describe('SheetCanvasFloatDomManagerService', () => {
         const attachTransformerTo = vi.fn();
         const clearControlByIds = vi.fn();
         const clearSelectedObjects = vi.fn();
+        const transformer = {
+            cleared: false,
+            clearSelectedObjects() {
+                this.cleared = true;
+                clearSelectedObjects();
+            },
+        };
         const renderObject = {
             transformer: { clearControlByIds },
             scene: {
                 attachTransformerTo,
-                getTransformer: () => ({ clearSelectedObjects }),
+                getTransformer: () => transformer,
             },
         };
         const rect = { oKey: 'rect-key-1' };
@@ -580,6 +587,7 @@ describe('SheetCanvasFloatDomManagerService', () => {
         syncFloatDomHostSelectionOnStageEnter('stage2', renderObject as any, rect as any);
         expect(clearControlByIds).toHaveBeenCalledWith(['rect-key-1']);
         expect(clearSelectedObjects).toHaveBeenCalled();
+        expect(transformer.cleared).toBe(true);
     });
 
     it('allows host-level block body clicks to activate stage2 after stage1 selection', () => {

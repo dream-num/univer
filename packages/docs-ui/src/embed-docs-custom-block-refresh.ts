@@ -104,8 +104,8 @@ export function createDocsCustomBlockSizeRefreshScheduler(
 function getDefaultFrameApi(): { cancelFrame: (handle: number) => void; requestFrame: (callback: () => void) => number } {
     if (typeof requestAnimationFrame === 'function' && typeof cancelAnimationFrame === 'function') {
         return {
-            cancelFrame: cancelAnimationFrame,
-            requestFrame: requestAnimationFrame,
+            cancelFrame: (handle) => cancelAnimationFrame(handle),
+            requestFrame: (callback) => requestAnimationFrame(callback),
         };
     }
 

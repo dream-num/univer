@@ -147,6 +147,21 @@ export class AutoFillUIController extends Disposable {
 
     private _initSelectionControlFillChanged() {
         const disposableCollection = new DisposableCollection();
+        let pendingRetry = false;
+        let retryCount = 0;
+
+        const scheduleUpdateListener = (listener: () => void) => {
+            if (pendingRetry) {
+                return;
+            }
+
+            pendingRetry = true;
+            setTimeout(() => {
+                pendingRetry = false;
+                listener();
+            }, 0);
+        };
+
         const updateListener = () => {
             // Each range change requires re-listening.
             disposableCollection.dispose();
@@ -154,7 +169,17 @@ export class AutoFillUIController extends Disposable {
             const currentRenderer = getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET, this._univerInstanceService, this._renderManagerService);
             if (!currentRenderer) return;
 
-            const selectionRenderService = currentRenderer.with(ISheetSelectionRenderService);
+            const selectionRenderService = getResolvedSelectionRenderService(currentRenderer);
+            if (!selectionRenderService) {
+                retryCount += 1;
+                if (retryCount <= 3) {
+                    scheduleUpdateListener(updateListener);
+                }
+                return;
+            }
+
+            retryCount = 0;
+
             const selectionControls = selectionRenderService.getSelectionControls();
             selectionControls.forEach((controlSelection) => {
                 disposableCollection.add(controlSelection.selectionFilled$.subscribe((filled) => {
@@ -211,18 +236,18 @@ export class AutoFillUIController extends Disposable {
             });
         };
 
-        updateListener();
+        scheduleUpdateListener(updateListener);
 
         // Should subscribe current current renderer change as well.
         // TODO@yuhongz: this seems not ideal. This should be an `IRenderModule` for running with multiple renderers?
         this.disposeWithMe(this._commandService.onCommandExecuted((command: ICommandInfo) => {
             if (command.id === SetSelectionsOperation.id) {
-                updateListener();
+                scheduleUpdateListener(updateListener);
             }
         }));
 
         this.disposeWithMe(this._univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SHEET)
-            .subscribe(() => updateListener()));
+            .subscribe(() => scheduleUpdateListener(updateListener)));
     }
 
     private _handleDbClickFill(source: IRange) {
@@ -276,4 +301,25 @@ export class AutoFillUIController extends Disposable {
             endRow: detectEndRow,
         };
     }
+}
+
+function getResolvedSelectionRenderService(renderer: unknown): ISheetSelectionRenderService | undefined {
+    const injector = (renderer as { getInjector?: () => unknown }).getInjector?.();
+    const resolvedDependencies = (injector as {
+        resolvedDependencyCollection?: {
+            resolvedDependencies?: Map<unknown, unknown[]>;
+        };
+    } | undefined)?.resolvedDependencyCollection?.resolvedDependencies;
+
+    if (!resolvedDependencies) {
+        return undefined;
+    }
+
+    for (const [identifier, values] of resolvedDependencies) {
+        if ((identifier as { decoratorName?: unknown }).decoratorName === (ISheetSelectionRenderService as unknown as { decoratorName?: unknown }).decoratorName) {
+            return values.length === 1 ? values[0] as ISheetSelectionRenderService : undefined;
+        }
+    }
+
+    return undefined;
 }

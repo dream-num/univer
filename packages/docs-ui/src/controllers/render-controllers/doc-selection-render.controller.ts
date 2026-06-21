@@ -29,9 +29,11 @@ import {
     Inject,
     isInternalEditorID,
     IUniverInstanceService,
+    Optional,
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
+import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, EmbedInteractionBoundaryService } from '@univerjs/embed-ui';
 import { CURSOR_TYPE, DocumentEditArea, PageLayoutType, Vector2 } from '@univerjs/engine-render';
 import { neoGetDocObject } from '../../basics/component-tools';
 import { findFirstCursorOffset } from '../../basics/selection';
@@ -49,7 +51,8 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
         @IUniverInstanceService private readonly _instanceSrv: IUniverInstanceService,
         @Inject(DocSelectionRenderService) private readonly _docSelectionRenderService: DocSelectionRenderService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
-        @Inject(DocSelectionManagerService) private readonly _docSelectionManagerService: DocSelectionManagerService
+        @Inject(DocSelectionManagerService) private readonly _docSelectionManagerService: DocSelectionManagerService,
+        @Optional(EmbedInteractionBoundaryService) private readonly _embedInteractionBoundaryService?: EmbedInteractionBoundaryService
     ) {
         super();
 
@@ -131,6 +134,9 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
             if (this._isEditorReadOnly(unitId)) {
                 return;
             }
+            if (this._isEmbedInteractionEvent(evt)) {
+                return;
+            }
 
             // FIXME:@Jocs: editor status should not be coupled with the instance service.
             const docDataModel = this._instanceSrv.getCurrentUnitOfType(UniverInstanceType.UNIVER_DOC);
@@ -195,12 +201,18 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
             if (this._isEditorReadOnly(unitId)) {
                 return;
             }
+            if (this._isEmbedInteractionEvent(evt)) {
+                return;
+            }
 
             this._docSelectionRenderService.__handleDblClick(evt);
         }));
 
         this.disposeWithMe(document.onTripleClick$.subscribeEvent((evt: IPointerEvent | IMouseEvent) => {
             if (this._isEditorReadOnly(unitId)) {
+                return;
+            }
+            if (this._isEmbedInteractionEvent(evt)) {
                 return;
             }
 
@@ -236,6 +248,15 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
         this._editorService.focus(unitId);
     }
 
+    private _isEmbedInteractionEvent(evt: IPointerEvent | IMouseEvent): boolean {
+        const target = (evt as Event).target;
+        if (this._embedInteractionBoundaryService?.contains(undefined, target, evt as Event)) {
+            return true;
+        }
+
+        return isEmbedInteractionEvent(evt);
+    }
+
     private _commandExecutedListener() {
         const updateCommandList = [SetDocZoomRatioOperation.id];
 
@@ -247,6 +268,10 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
                 const unitId = this._docSelectionManagerService.__getCurrentSelection()?.unitId;
 
                 if (documentId !== unitId) {
+                    return;
+                }
+
+                if (this._embedInteractionBoundaryService?.hasRecentInteraction()) {
                     return;
                 }
 
@@ -286,4 +311,44 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
             }
         }));
     }
+}
+
+function isEmbedInteractionEvent(evt: IPointerEvent | IMouseEvent): boolean {
+    const target = (evt as Event).target;
+    if (target instanceof Element && target.closest(`[${EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}]`) != null) {
+        return true;
+    }
+
+    if (typeof document === 'undefined') {
+        return false;
+    }
+
+    const point = getEventClientPoint(evt, target);
+    const clientX = point?.clientX;
+    const clientY = point?.clientY;
+    if (typeof clientX !== 'number' || typeof clientY !== 'number' || !Number.isFinite(clientX) || !Number.isFinite(clientY)) {
+        return false;
+    }
+
+    return document.elementFromPoint(clientX, clientY)?.closest(`[${EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}]`) != null;
+}
+
+function getEventClientPoint(evt: IPointerEvent | IMouseEvent, target: EventTarget | null): { clientX: number; clientY: number } | undefined {
+    if (Number.isFinite(evt.clientX) && Number.isFinite(evt.clientY)) {
+        return { clientX: evt.clientX, clientY: evt.clientY };
+    }
+
+    if (target instanceof Element && Number.isFinite(evt.offsetX) && Number.isFinite(evt.offsetY)) {
+        const rect = target.getBoundingClientRect();
+        return {
+            clientX: rect.left + evt.offsetX,
+            clientY: rect.top + evt.offsetY,
+        };
+    }
+
+    if (Number.isFinite(evt.x) && Number.isFinite(evt.y)) {
+        return { clientX: evt.x, clientY: evt.y };
+    }
+
+    return undefined;
 }

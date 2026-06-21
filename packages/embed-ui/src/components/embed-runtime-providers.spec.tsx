@@ -25,6 +25,7 @@ import enUS from '@univerjs/design/locale/en-US';
 import { act, useContext } from 'react';
 import { createRoot } from 'react-dom/client';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE } from '../services/embed-interaction-boundary.service';
 import { EmbedRuntimeProviders } from './EmbedRuntimeProviders';
 
 let container: HTMLElement | undefined;
@@ -92,6 +93,34 @@ describe('EmbedRuntimeProviders', () => {
         expect(resolvedMountContainer).toBe(mountContainer);
 
         act(() => root.unmount());
+        document.body.removeChild(mountContainer);
+    });
+
+    it('marks the design mount container as owned by the embed while mounted', () => {
+        const injector = new Injector();
+        const localeService = new LocaleService();
+        injector.add([LocaleService, { useValue: localeService }]);
+
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        const mountContainer = document.createElement('div');
+        mountContainer.setAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, 'previous-embed');
+        document.body.appendChild(mountContainer);
+
+        const root = createRoot(container);
+        act(() => {
+            root.render(
+                <EmbedRuntimeProviders injector={injector} mountContainer={mountContainer} embedId="embed-1">
+                    <span />
+                </EmbedRuntimeProviders>
+            );
+        });
+
+        expect(mountContainer.getAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE)).toBe('embed-1');
+
+        act(() => root.unmount());
+
+        expect(mountContainer.getAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE)).toBe('previous-embed');
         document.body.removeChild(mountContainer);
     });
 });

@@ -18,6 +18,7 @@ import type { IDisposable, IDocumentData } from '@univerjs/core';
 import type { Mock } from 'vitest';
 import { DataStreamTreeTokenType, DOC_RANGE_TYPE, Univer, UniverInstanceType } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
+import { EmbedInteractionBoundaryService } from '@univerjs/embed-ui';
 import { GlyphType, RenderUnit } from '@univerjs/engine-render';
 import { ILayoutService } from '@univerjs/ui';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -264,6 +265,7 @@ class TestRenderEvent<T> {
 }
 
 function createRealSelectionRenderService(options: {
+    embedInteractionBoundaryService?: Partial<EmbedInteractionBoundaryService>;
     mainComponent?: unknown;
     scene?: unknown;
 } = {}) {
@@ -272,6 +274,9 @@ function createRealSelectionRenderService(options: {
     const univer = new Univer();
     const injector = univer.__getInjector();
     injector.add([ILayoutService, { useClass: TestLayoutService as never }]);
+    if (options.embedInteractionBoundaryService) {
+        injector.add([EmbedInteractionBoundaryService, { useValue: options.embedInteractionBoundaryService as never }]);
+    }
     const documentData: IDocumentData = {
         id: 'selection-render-doc',
         body: {
@@ -755,6 +760,25 @@ describe('DocSelectionRenderService', () => {
 
         expect(document.getElementById('univer-doc-selection-container-selection-render-doc')).toBeNull();
         expect(TestLayoutService.registeredElements).toEqual([]);
+    });
+
+    it('does not steal focus back from an embedded runtime during selection sync', () => {
+        const embedCanvas = document.createElement('canvas');
+        embedCanvas.tabIndex = 0;
+        document.body.appendChild(embedCanvas);
+        const embedInteractionBoundaryService = {
+            contains: vi.fn((_embedId: string | undefined, target: EventTarget | null | undefined) => target === embedCanvas),
+            hasRecentInteraction: vi.fn(() => false),
+        };
+        const { input, renderUnit, service, univer } = createRealSelectionRenderService({ embedInteractionBoundaryService });
+        cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
+
+        embedCanvas.focus();
+        service.sync();
+
+        expect(document.activeElement).toBe(embedCanvas);
+        expect(document.activeElement).not.toBe(input);
+        expect(embedInteractionBoundaryService.contains).toHaveBeenCalledWith(undefined, embedCanvas);
     });
 
     it('publishes hidden editor input, paste, focus, and blur events with the typed content', () => {

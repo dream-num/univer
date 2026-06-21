@@ -31,6 +31,7 @@ export interface IDocsCustomBlockRenderViewport {
     height: number;
     layoutWidth?: number;
     offsetLeft?: number;
+    viewportHeight?: number;
     width: number;
 }
 
@@ -41,9 +42,22 @@ export type DocsCustomBlockRenderViewportProvider = (
 ) => IDocsCustomBlockRenderViewport | null | undefined;
 
 let docsCustomBlockRenderViewportProvider: DocsCustomBlockRenderViewportProvider | null = null;
+const docsCustomBlockRenderViewportProviders = new Set<DocsCustomBlockRenderViewportProvider>();
 
-export function setDocsCustomBlockRenderViewportProvider(provider: DocsCustomBlockRenderViewportProvider | null): void {
+export function setDocsCustomBlockRenderViewportProvider(provider: DocsCustomBlockRenderViewportProvider | null): () => void {
+    if (provider == null) {
+        docsCustomBlockRenderViewportProvider = null;
+        docsCustomBlockRenderViewportProviders.clear();
+        return () => {};
+    }
+
     docsCustomBlockRenderViewportProvider = provider;
+    docsCustomBlockRenderViewportProviders.add(provider);
+    return () => {
+        docsCustomBlockRenderViewportProviders.delete(provider);
+        const providers = Array.from(docsCustomBlockRenderViewportProviders);
+        docsCustomBlockRenderViewportProvider = providers[providers.length - 1] ?? null;
+    };
 }
 
 export function getDocsCustomBlockRenderViewport(
@@ -51,5 +65,18 @@ export function getDocsCustomBlockRenderViewport(
     blockId: string,
     input: IDocsCustomBlockRenderViewportInput
 ): IDocsCustomBlockRenderViewport | null {
-    return docsCustomBlockRenderViewportProvider?.(unitId, blockId, input) ?? null;
+    const providers = docsCustomBlockRenderViewportProviders.size
+        ? Array.from(docsCustomBlockRenderViewportProviders).reverse()
+        : docsCustomBlockRenderViewportProvider
+            ? [docsCustomBlockRenderViewportProvider]
+            : [];
+
+    for (const provider of providers) {
+        const viewport = provider(unitId, blockId, input);
+        if (viewport != null) {
+            return viewport;
+        }
+    }
+
+    return null;
 }

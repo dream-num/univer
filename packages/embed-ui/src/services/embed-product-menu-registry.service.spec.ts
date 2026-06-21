@@ -17,6 +17,7 @@
 import type { Injector } from '@univerjs/core';
 import type { IEmbedProductMenuContribution } from '../types/embed-ui';
 import { UniverInstanceType } from '@univerjs/core';
+import { MenuManagerPosition, RibbonPosition } from '@univerjs/ui';
 import { describe, expect, it, vi } from 'vitest';
 import { EmbedProductMenuRegistryService, registerEmbedProductMenuContribution } from './embed-product-menu-registry.service';
 
@@ -48,6 +49,52 @@ describe('EmbedProductMenuRegistryService', () => {
             tabs: {
                 start: { title: 'Start' },
                 data: { title: 'Data', items: ['filter'] },
+            },
+        });
+    });
+
+    it('normalizes top-level ribbon positions before merging with ribbon-root schemas', () => {
+        const service = new EmbedProductMenuRegistryService();
+
+        service.register({
+            childType: UniverInstanceType.UNIVER_SLIDE,
+            order: 0,
+            menuSchema: {
+                [RibbonPosition.START]: {
+                    format: {
+                        theme: { order: 0 },
+                    },
+                },
+            },
+        });
+        service.register({
+            childType: UniverInstanceType.UNIVER_SLIDE,
+            order: 10,
+            menuSchema: {
+                [MenuManagerPosition.RIBBON]: {
+                    contextual: {
+                        contextual: true,
+                        format: {
+                            shape: { order: 0 },
+                        },
+                    },
+                },
+            },
+        });
+
+        expect(service.getMergedMenuSchema(UniverInstanceType.UNIVER_SLIDE)).toEqual({
+            [MenuManagerPosition.RIBBON]: {
+                [RibbonPosition.START]: {
+                    format: {
+                        theme: { order: 0 },
+                    },
+                },
+                contextual: {
+                    contextual: true,
+                    format: {
+                        shape: { order: 0 },
+                    },
+                },
             },
         });
     });

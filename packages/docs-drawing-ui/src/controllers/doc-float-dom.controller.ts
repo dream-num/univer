@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDisposable, IDrawingSearch, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, IDisposable, IDrawingSearch, ITransformState, Nullable } from '@univerjs/core';
 import type { IDocFloatDom } from '@univerjs/docs-drawing';
 import type { ISetDocZoomRatioOperationParams } from '@univerjs/docs-ui';
 import type { IDocFloatDomDataBase } from '@univerjs/drawing';
@@ -86,17 +86,22 @@ function calcDocFloatDomPosition(
 interface ICanvasFloatDomInfo {
     position$: BehaviorSubject<IFloatDomLayout>;
     dispose: IDisposable;
+    preserveRuntimeGeometry?: boolean;
     rect: Rect;
+    runtimeTransform?: Partial<ITransformState>;
+    runtimeViewport?: IDocFloatDomRuntimeViewport;
     unitId: string;
 }
 
 interface IDocFloatDomParams extends IDocFloatDomDataBase {
 }
 
-type IDocFloatDomRuntimeViewport = Partial<Pick<IDocsCustomBlockRenderViewport, 'bleedLeft' | 'bleedWidth' | 'contentHeight' | 'contentWidth' | 'height'>>;
+type IDocFloatDomRuntimeViewport = Partial<Pick<IDocsCustomBlockRenderViewport, 'bleedLeft' | 'bleedWidth' | 'contentHeight' | 'contentWidth' | 'height' | 'viewportHeight'>>;
 
 interface IDocFloatDomRuntimeParam extends IDocFloatDom {
     customBlockRenderViewport?: IDocFloatDomRuntimeViewport;
+    transform?: Partial<ITransformState>;
+    transforms?: Array<Partial<ITransformState>>;
 }
 
 export function mergeDocFloatDomRuntimeProps(existingProps: Record<string, unknown> | undefined, param: IDocFloatDomRuntimeParam): Record<string, unknown> | undefined {
@@ -128,6 +133,9 @@ function pickValidCustomBlockRenderViewport(viewport: IDocFloatDomRuntimeViewpor
     }
     if (isPositiveNumber(viewport?.height)) {
         result.height = viewport!.height;
+    }
+    if (isPositiveNumber(viewport?.viewportHeight)) {
+        result.viewportHeight = viewport!.viewportHeight;
     }
 
     return Object.keys(result).length ? result : undefined;
@@ -226,6 +234,11 @@ export class DocFloatDomController extends Disposable {
             }
 
             for (const rect of rects) {
+                const runtimeParam = rectParam as IDocFloatDomRuntimeParam;
+                const runtimeViewport = pickValidCustomBlockRenderViewport(runtimeParam.customBlockRenderViewport);
+                const preserveRuntimeGeometry = isEmbedFloatDomRuntimeParam(runtimeParam);
+                syncRectWithRuntimeParam(rect, runtimeParam, runtimeViewport, undefined, preserveRuntimeGeometry);
+                const runtimeTransform = runtimeViewport || preserveRuntimeGeometry ? createTransformFromRect(rect) : undefined;
                 this._addHoverForRect(rect);
                 const disposableCollection = new DisposableCollection();
                 const initPosition = calcDocFloatDomPosition(rect, renderObject.renderUnit);
@@ -235,7 +248,10 @@ export class DocFloatDomController extends Disposable {
 
                 const info: ICanvasFloatDomInfo = {
                     dispose: disposableCollection,
+                    preserveRuntimeGeometry,
                     rect,
+                    runtimeTransform,
+                    runtimeViewport,
                     position$,
                     unitId,
                 };
@@ -244,6 +260,7 @@ export class DocFloatDomController extends Disposable {
                     position$,
                     id: rectParam.drawingId,
                     componentKey: rectParam.componentKey,
+                    eventPassThrough: preserveRuntimeGeometry ? false : undefined,
                     onPointerDown: (evt) => {
                         canvas.dispatchEvent(new PointerEvent(evt.type, evt));
                     },
@@ -267,11 +284,16 @@ export class DocFloatDomController extends Disposable {
                         newPosition
                     );
                 });
+                const scrollListener = subscribeViewportScrollAfter(
+                    renderObject.scene.getViewport(VIEWPORT_KEY.VIEW_MAIN)?.onScrollAfter$,
+                    () => position$.next(calcDocFloatDomPosition(rect, renderObject.renderUnit))
+                );
 
                 disposableCollection.add(() => {
                     this._canvasFloatDomService.removeFloatDom(rectParam.drawingId);
                 });
                 listener && disposableCollection.add(listener);
+                scrollListener && disposableCollection.add(scrollListener);
                 this._domLayerInfoMap.set(rectParam.drawingId, info);
             }
         });
@@ -281,8 +303,32 @@ export class DocFloatDomController extends Disposable {
         this.disposeWithMe(
             this._drawingManagerService.refreshTransform$.subscribe((params) => {
                 params.forEach((param) => {
-                    if (!this._domLayerInfoMap.has(param.drawingId)) {
+                    const floatDomInfo = this._domLayerInfoMap.get(param.drawingId);
+                    if (!floatDomInfo) {
                         return;
+                    }
+
+                    const runtimeParam = param as IDocFloatDomRuntimeParam;
+                    const runtimeViewport = pickValidCustomBlockRenderViewport(runtimeParam.customBlockRenderViewport);
+                    if (runtimeViewport) {
+                        floatDomInfo.runtimeViewport = runtimeViewport;
+                    }
+
+                    const synced = syncRectWithRuntimeParam(
+                        floatDomInfo.rect,
+                        runtimeParam,
+                        floatDomInfo.runtimeViewport,
+                        floatDomInfo.runtimeTransform,
+                        floatDomInfo.preserveRuntimeGeometry
+                    );
+                    if (synced) {
+                        if (runtimeViewport || floatDomInfo.preserveRuntimeGeometry) {
+                            floatDomInfo.runtimeTransform = createTransformFromRect(floatDomInfo.rect);
+                        }
+                        const renderObject = this._getSceneAndTransformerByDrawingSearch(floatDomInfo.unitId);
+                        if (renderObject) {
+                            floatDomInfo.position$.next(calcDocFloatDomPosition(floatDomInfo.rect, renderObject.renderUnit));
+                        }
                     }
 
                     const currentProps = this._canvasFloatDomService.domLayers.find(([id]) => id === param.drawingId)?.[1].props;
@@ -418,4 +464,102 @@ export class DocFloatDomController extends Disposable {
 
         return drawingId;
     }
+}
+
+function syncRectWithRuntimeParam(
+    rect: Rect,
+    param: IDocFloatDomRuntimeParam,
+    fallbackViewport?: IDocFloatDomRuntimeViewport,
+    fallbackTransform?: Partial<ITransformState>,
+    preserveRuntimeGeometry?: boolean
+): boolean {
+    const transform = getRuntimeTransform(param, rect, fallbackViewport, fallbackTransform, preserveRuntimeGeometry);
+    if (!transform) {
+        return false;
+    }
+
+    rect.transformByState(transform as never);
+    return true;
+}
+
+function getRuntimeTransform(
+    param: IDocFloatDomRuntimeParam,
+    rect: Rect,
+    fallbackViewport?: IDocFloatDomRuntimeViewport,
+    fallbackTransform?: Partial<ITransformState>,
+    preserveRuntimeGeometry?: boolean
+): Partial<ITransformState> | undefined {
+    const transform = param.transform ?? param.transforms?.[0];
+    const runtimeViewport = param.customBlockRenderViewport ?? fallbackViewport;
+    if (!param.customBlockRenderViewport && preserveRuntimeGeometry && fallbackTransform && transform) {
+        return {
+            ...transform,
+            width: fallbackTransform.width ?? transform.width,
+            height: fallbackTransform.height ?? transform.height,
+        };
+    }
+
+    if (!transform) {
+        const height = runtimeViewport?.height ?? runtimeViewport?.contentHeight;
+        if (!isPositiveNumber(height)) {
+            return undefined;
+        }
+
+        return {
+            left: rect.left,
+            top: rect.top,
+            width: rect.width,
+            height,
+            angle: rect.angle,
+        };
+    }
+
+    const height = runtimeViewport?.height ?? runtimeViewport?.contentHeight;
+    if (!isPositiveNumber(height)) {
+        return transform;
+    }
+
+    return {
+        ...transform,
+        height,
+    };
+}
+
+function isEmbedFloatDomRuntimeParam(param: IDocFloatDomRuntimeParam): boolean {
+    const data = param.data;
+    if (!data || typeof data !== 'object') {
+        return false;
+    }
+
+    const candidate = data as { embedId?: unknown; hostAnchorId?: unknown; version?: unknown };
+    return candidate.version === 1 && typeof candidate.embedId === 'string' && typeof candidate.hostAnchorId === 'string';
+}
+
+function createTransformFromRect(rect: Rect): Partial<ITransformState> {
+    return {
+        angle: rect.angle,
+        height: rect.height,
+        left: rect.left,
+        top: rect.top,
+        width: rect.width,
+    };
+}
+
+function subscribeViewportScrollAfter(scrollEvent: unknown, callback: () => void): IDisposable | undefined {
+    if (!scrollEvent || typeof scrollEvent !== 'object') {
+        return undefined;
+    }
+
+    const eventSubject = scrollEvent as { subscribeEvent?: (listener: () => void) => IDisposable };
+    if (typeof eventSubject.subscribeEvent === 'function') {
+        return eventSubject.subscribeEvent(callback);
+    }
+
+    const observable = scrollEvent as { subscribe?: (listener: () => void) => { unsubscribe?: () => void } };
+    if (typeof observable.subscribe === 'function') {
+        const subscription = observable.subscribe(callback);
+        return toDisposable(() => subscription.unsubscribe?.());
+    }
+
+    return undefined;
 }

@@ -130,6 +130,7 @@ describe('image extra', () => {
     it('registers load handlers before assigning url image source', () => {
         const originalCreateElement = document.createElement.bind(document);
         const events: Array<{ hasOnload: boolean; value: string }> = [];
+        let nativeSrc = '';
         const native = {
             crossOrigin: '',
             height: 60,
@@ -137,14 +138,14 @@ describe('image extra', () => {
             onload: undefined,
             width: 100,
             get src() {
-                return this._src ?? '';
+                return nativeSrc;
             },
             set src(value: string) {
-                events.push({ hasOnload: typeof this.onload === 'function', value });
-                this._src = value;
-                this.onload?.(new Event('load'));
+                events.push({ hasOnload: typeof native.onload === 'function', value });
+                nativeSrc = value;
+                native.onload?.(new Event('load'));
             },
-        } as unknown as HTMLImageElement & { _src?: string };
+        } as unknown as HTMLImageElement;
         const createElement = vi.spyOn(document, 'createElement');
         createElement.mockImplementation((tagName: string) => {
             if (tagName === 'img') {

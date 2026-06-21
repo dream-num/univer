@@ -61,5 +61,4 @@ describe('paragraph-layout', () => {
         const lastPage = result[result.length - 1];
         expect(lastPage.sections.length).toBeGreaterThan(0);
     });
-
 });

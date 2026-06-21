@@ -307,7 +307,7 @@ describe('page model', () => {
         );
 
         expect(page.pageWidth).toBe(0.8);
-        expect(cellSectionBreakConfig.marginLeft + cellSectionBreakConfig.marginRight).toBeLessThan(page.pageWidth);
+        expect(cellSectionBreakConfig.marginLeft! + cellSectionBreakConfig.marginRight!).toBeLessThan(page.pageWidth);
         expect(page.sections[0].columns[0].width).toBeGreaterThan(0);
     });
 

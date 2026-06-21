@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDrawingSearch, Workbook } from '@univerjs/core';
+import type { IDrawingParam, IDrawingSearch, Workbook } from '@univerjs/core';
 import type { IDocFloatDomData, IImageData } from '@univerjs/drawing';
 import type { BaseObject, IImageProps, IRectProps, Scene } from '@univerjs/engine-render';
 import { BooleanNumber, DrawingTypeEnum, Inject, IUniverInstanceService, IURLImageService, UniverInstanceType } from '@univerjs/core';
@@ -30,9 +30,9 @@ interface IDrawingTransformStateWithClipBounds {
     clipBounds?: { left: number; top: number; width: number; height: number } | null;
 }
 
-interface IDrawingParamWithBehindText {
+type IDrawingParamWithBehindText = (Partial<IDrawingParam> | Partial<IImageData>) & {
     behindText?: boolean | BooleanNumber;
-}
+};
 
 export const DOC_DRAWING_BEHIND_TEXT_LAYER_INDEX = 1;
 
@@ -52,7 +52,7 @@ export function ensureDrawingRenderLayer(scene: Scene, object: BaseObject, param
     scene.addObject(object, layerIndex);
 }
 
-function isRenderableImageCache(image: HTMLImageElement | undefined): image is HTMLImageElement {
+function isRenderableImageCache(image: HTMLImageElement | null | undefined | void): image is HTMLImageElement {
     return image?.complete === true && image.naturalWidth > 0 && image.naturalHeight > 0;
 }
 

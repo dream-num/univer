@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ColumnSeparatorType, createDocumentModelWithStyle, DocumentDataModel, DocumentFlavor, LocaleService, SectionType, Univer } from '@univerjs/core';
+import { ColumnSeparatorType, createDocumentModelWithStyle, DocumentDataModel, DocumentFlavor, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, SectionType, TableSizeType, Univer } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { DocumentSkeletonPageType, GlyphType, PageLayoutType } from '../../../../basics/i-document-skeleton-cached';
 import { Vector2 } from '../../../../basics/vector2';
@@ -494,6 +494,7 @@ describe('doc skeleton', () => {
             },
             headers: {
                 header: {
+                    headerId: 'header',
                     body: {
                         dataStream: '\x1A\x1B\x1C\b\r\n\x1D\x1C\r\n\x1D\x1C\r\n\x1D\x0E\x0F\r\r\n',
                         paragraphs: [
@@ -553,6 +554,16 @@ describe('doc skeleton', () => {
                                     v: 0,
                                 },
                             },
+                            position: {
+                                positionH: { relativeFrom: ObjectRelativeFromH.PAGE, posOffset: 0 },
+                                positionV: { relativeFrom: ObjectRelativeFromV.PAGE, posOffset: 0 },
+                            },
+                            dist: {
+                                distT: 0,
+                                distB: 0,
+                                distL: 0,
+                                distR: 0,
+                            },
                             tableRows: [
                                 {
                                     tableCells: [{}, {}, {}],
@@ -563,18 +574,18 @@ describe('doc skeleton', () => {
                                 },
                             ],
                             tableColumns: [
-                                { size: { width: { v: 356.8666666666666 } } },
-                                { size: { width: { v: 264.59999999999997 } } },
-                                { size: { width: { v: 56.73333333333333 } } },
+                                { size: { type: TableSizeType.SPECIFIED, width: { v: 356.8666666666666 } } },
+                                { size: { type: TableSizeType.SPECIFIED, width: { v: 264.59999999999997 } } },
+                                { size: { type: TableSizeType.SPECIFIED, width: { v: 56.73333333333333 } } },
                             ],
                             textWrap: 0,
                         },
                     },
-                    documentStyle: {},
                 },
             },
             footers: {
                 footer: {
+                    footerId: 'footer',
                     body: {
                         dataStream: '\x1A\x1B\x1CFooter company address\rFooter postal address\rFooter website\r\n\x1D\x1CFooter legal name\rBusiness id\r\n\x1D\x1CNetwork company\rBusiness id\r\n\x1D\x0E\x0F\r\r\n',
                         paragraphs: [
@@ -646,6 +657,16 @@ describe('doc skeleton', () => {
                                     v: 0,
                                 },
                             },
+                            position: {
+                                positionH: { relativeFrom: ObjectRelativeFromH.PAGE, posOffset: 0 },
+                                positionV: { relativeFrom: ObjectRelativeFromV.PAGE, posOffset: 0 },
+                            },
+                            dist: {
+                                distT: 0,
+                                distB: 0,
+                                distL: 0,
+                                distR: 0,
+                            },
                             tableRows: [
                                 {
                                     tableCells: [{}, {}, {}],
@@ -656,14 +677,13 @@ describe('doc skeleton', () => {
                                 },
                             ],
                             tableColumns: [
-                                { size: { width: { v: 239.33333333333334 } } },
-                                { size: { width: { v: 204.86666666666667 } } },
-                                { size: { width: { v: 170.13333333333333 } } },
+                                { size: { type: TableSizeType.SPECIFIED, width: { v: 239.33333333333334 } } },
+                                { size: { type: TableSizeType.SPECIFIED, width: { v: 204.86666666666667 } } },
+                                { size: { type: TableSizeType.SPECIFIED, width: { v: 170.13333333333333 } } },
                             ],
                             textWrap: 0,
                         },
                     },
-                    documentStyle: {},
                 },
             },
             documentStyle: {

@@ -701,9 +701,7 @@ function _lineOperator(
         paragraphConfig,
         lastPage,
         headerPage,
-        footerPage,
-        column.left ?? 0,
-        column.width
+        footerPage
     );
 
     column.lines.push(newLine);
@@ -1383,8 +1381,8 @@ export function getLineHeightMetrics(
         const lineSpacingApply = usesDocumentGrid
             ? lineSpacing * linePitch
             : scaleAutoLineSpacingByGlyphHeight
-              ? lineSpacing * glyphLineHeight
-              : glyphLineHeight;
+                ? lineSpacing * glyphLineHeight
+                : glyphLineHeight;
         const padding = (lineSpacingApply - glyphLineHeight) / 2;
 
         return {
@@ -1649,5 +1647,5 @@ function __getGlyphGroupByLine({ divides }: IDocumentSkeletonLine) {
 function __isNullLine(line: IDocumentSkeletonLine) {
     const glyphGroup = __getGlyphGroupByLine(line);
 
-    return glyphGroup.length === 0 || glyphGroup.every((glyph) => !glyph.content && !glyph.drawingId);
+    return glyphGroup.every((glyph) => !glyph.content && !glyph.drawingId);
 }

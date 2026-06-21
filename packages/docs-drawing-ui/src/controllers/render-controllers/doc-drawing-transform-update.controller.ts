@@ -19,6 +19,7 @@ import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { Documents, DocumentSkeleton, IDocsTableRenderViewport, IDocumentSkeletonHeaderFooter, IDocumentSkeletonPage, IDocumentSkeletonRow, IDocumentSkeletonTable, Image, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import {
     AlignTypeH,
+    AlignTypeV,
     BooleanNumber,
     Disposable,
     fromEventSubject,
@@ -30,7 +31,6 @@ import {
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     PositionedObjectLayoutType,
-    AlignTypeV,
 } from '@univerjs/core';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { IEditorService, SetDocZoomRatioOperation } from '@univerjs/docs-ui';
@@ -97,8 +97,13 @@ export function getDocsDrawingClipPage(config: {
         return page;
     }
 
-    const widthRatio = drawing.transform.width / hostPage.pageWidth;
-    const heightRatio = drawing.transform.height / hostPage.pageHeight;
+    const { width, height } = drawing.transform;
+    if (width == null || height == null) {
+        return page;
+    }
+
+    const widthRatio = width / hostPage.pageWidth;
+    const heightRatio = height / hostPage.pageHeight;
     if (widthRatio >= 0.8 && heightRatio >= 0.8) {
         return hostPage;
     }

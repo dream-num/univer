@@ -167,7 +167,7 @@ export enum DocStyleType {
 /**
  * Properties of doc footer
  */
-export interface IFooterData {
+export interface IFooterData extends IReferenceSource {
     footerId: string;
     body: IDocumentBody;
 }
@@ -175,7 +175,7 @@ export interface IFooterData {
 /**
  * Properties of doc header
  */
-export interface IHeaderData {
+export interface IHeaderData extends IReferenceSource {
     headerId: string;
     body: IDocumentBody;
 }
@@ -481,6 +481,12 @@ export enum GridType {
 export interface IDocumentStyle extends IDocStyleBase, IDocumentLayout, IHeaderAndFooterBase {
     textStyle?: ITextStyle; // default style for text
     docxHasDefaultParagraphSpacing?: boolean; // DOCX compatibility: source uses Univer default paragraph spacing.
+    docxBackground?: IDocxBackground; // DOCX page background image.
+}
+
+export interface IDocxBackground {
+    source?: string;
+    sourceType?: ImageSourceType;
 }
 
 /**

@@ -103,7 +103,7 @@ describe('language-ruler', () => {
     });
 
     describe('ArabicHandler', () => {
-        it('combines Arabic characters into one glyph in reverse order', () => {
+        it('combines Arabic characters into one glyph in logical order', () => {
             const arabicText = '\u0645\u0631\u062D\u0628\u0627'; // 'مرحبا'
             const { viewModel } = createViewModel(arabicText);
             const paragraphNode = getParagraphNode(viewModel);
@@ -113,8 +113,7 @@ describe('language-ruler', () => {
             const result = ArabicHandler(0, arabicText, viewModel, paragraphNode, sectionBreakConfig, paragraph);
             expect(result.step).toBe(5);
             expect(result.glyphGroup.length).toBe(1);
-            // Arabic characters are unshifted, so they should be in reverse order
-            expect(result.glyphGroup[0].content).toBe('\u0627\u0628\u062D\u0631\u0645'); // 'ابحرم'
+            expect(result.glyphGroup[0].content).toBe(arabicText);
         });
 
         it('stops at non-Arabic characters', () => {

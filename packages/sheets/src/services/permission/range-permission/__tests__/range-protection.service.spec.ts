@@ -16,8 +16,8 @@
 
 import type { IDisposable, IPermissionPoint, IRange, Workbook } from '@univerjs/core';
 import type { IRangeProtectionRule } from '../../../../models/range-protection-rule.model';
-import { Injector, IPermissionService, IResourceManagerService, IUniverInstanceService, PermissionStatus } from '@univerjs/core';
-import { UnitAction, UnitObject } from '@univerjs/protocol';
+import { Injector, IPermissionService, IResourceManagerService, IUniverInstanceService } from '@univerjs/core';
+import { UnitObject } from '@univerjs/protocol';
 import { of, Subject } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { EditStateEnum, RangeProtectionRuleModel, ViewStateEnum } from '../../../../models/range-protection-rule.model';

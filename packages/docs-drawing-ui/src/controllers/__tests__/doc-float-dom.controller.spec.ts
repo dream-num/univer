@@ -428,7 +428,6 @@ describe('DocFloatDomController', () => {
         controller.dispose();
     });
 
-
     it('falls back to custom block content height when viewport layout height is omitted', async () => {
         const rect = new Rect('dom-rect', {
             left: 30,

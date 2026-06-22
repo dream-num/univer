@@ -64,7 +64,7 @@
         "build": "pnpm run build:bundle && pnpm run build:types"
     },
     "dependencies": {
-        "@grpc/grpc-js": "^1.14.3"
+        "@grpc/grpc-js": "^1.14.4"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",

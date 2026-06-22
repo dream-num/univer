@@ -75,6 +75,42 @@ function createDocSnapshot(id = 'doc-main'): IDocumentData {
 }
 
 describe('DocumentDataModel + RichTextBuilder integration', () => {
+    it('should hydrate missing default fields for partial document snapshots', () => {
+        const model = new DocumentDataModel({ id: 'partial-doc', title: 'Partial Doc' });
+
+        expect(model.getUnitId()).toBe('partial-doc');
+        expect(model.getTitle()).toBe('Partial Doc');
+        expect(model.getBody()?.dataStream).toBe('\r\n');
+        expect(model.getSnapshot().headers).toEqual({});
+        expect(model.getSnapshot().footers).toEqual({});
+        expect(model.getDrawings()).toEqual({});
+        expect(model.getDrawingsOrder()).toEqual([]);
+        expect(model.getSettings()).toEqual({});
+        expect(model.getSnapshot().tableSource).toEqual({});
+        expect(model.getDocumentStyle().pageSize).toBeDefined();
+        expect(() => model.updateDocumentDataMargin({ t: 10 })).not.toThrow();
+        expect(model.getDocumentStyle().marginTop).toBe(10);
+
+        model.dispose();
+    });
+
+    it('should hydrate missing default fields when resetting with a partial snapshot', () => {
+        const model = new DocumentDataModel(createDocSnapshot('reset-partial-doc'));
+
+        model.reset({ id: 'reset-partial-doc', title: 'Reset Partial Doc' });
+
+        expect(model.getTitle()).toBe('Reset Partial Doc');
+        expect(model.getBody()?.dataStream).toBe('\r\n');
+        expect(model.getSnapshot().headers).toEqual({});
+        expect(model.getSnapshot().footers).toEqual({});
+        expect(model.getDrawings()).toEqual({});
+        expect(model.getDrawingsOrder()).toEqual([]);
+        expect(model.getSettings()).toEqual({});
+        expect(model.getSnapshot().tableSource).toEqual({});
+
+        model.dispose();
+    });
+
     it('should perform typical editing operations and reflect them in the document snapshot', () => {
         const model = new DocumentDataModel(createDocSnapshot());
         expect(model.getUnitId()).toBe('doc-main');
@@ -211,7 +247,7 @@ describe('DocumentDataModel + RichTextBuilder integration', () => {
 
         expect(model.getCustomRanges()).toEqual([]);
         expect(model.getCustomDecorations()).toEqual([]);
-        expect(model.getSettings()).toBeUndefined();
+        expect(model.getSettings()).toEqual({});
         expect(model.apply(null as never)).toBeUndefined();
         expect(model.change$.getValue()).toBe(initialChangeCount);
 

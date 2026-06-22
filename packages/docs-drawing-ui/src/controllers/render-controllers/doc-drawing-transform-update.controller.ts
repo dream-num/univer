@@ -103,6 +103,10 @@ export function getDocsDrawingClipPage(config: {
         return page;
     }
 
+    if (width > page.pageWidth || height > page.pageHeight) {
+        return hostPage;
+    }
+
     const widthRatio = width / hostPage.pageWidth;
     const heightRatio = height / hostPage.pageHeight;
     if (widthRatio >= 0.8 && heightRatio >= 0.8) {

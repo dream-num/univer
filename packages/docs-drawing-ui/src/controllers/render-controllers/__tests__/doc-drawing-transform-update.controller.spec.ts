@@ -391,6 +391,29 @@ describe('DocDrawingTransformUpdateController', () => {
         })).toBe(headerPage);
     });
 
+    it('clips overflowing header cover drawings to the host document page', () => {
+        const headerPage = {
+            pageWidth: 601,
+            pageHeight: 510,
+        };
+        const hostPage = {
+            pageWidth: 794,
+            pageHeight: 1123,
+        };
+
+        expect(getDocsDrawingClipPage({
+            drawing: {
+                behindText: true,
+                transform: {
+                    width: 803,
+                    height: 682,
+                },
+            },
+            hostPage,
+            page: headerPage,
+        })).toBe(hostPage);
+    });
+
     it('positions page-sized header backgrounds against the host page width', () => {
         expect(getDocsPageRelativeDrawingLeft({
             hostPage: {

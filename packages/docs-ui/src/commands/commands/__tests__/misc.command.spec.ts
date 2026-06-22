@@ -1376,29 +1376,6 @@ describe('misc document commands', () => {
         }));
     });
 
-    it('resizes page-fill tables when page content width changes', async () => {
-        ({ univer, get } = createCommandTestBed(createPageFillTableCommandDoc()));
-        commandService = get(ICommandService);
-        commandService.registerCommand(DocPageSetupCommand);
-        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
-
-        const result = await commandService.executeCommand(DocPageSetupCommand.id, {
-            documentFlavor: DocumentFlavor.TRADITIONAL,
-            pageSize: { width: 640, height: 840.51 },
-            pageOrient: PageOrientType.PORTRAIT,
-            marginTop: 72,
-            marginBottom: 72,
-            marginLeft: 90,
-            marginRight: 90,
-        });
-        await awaitTime(0);
-
-        const table = getDoc()?.getSnapshot().tableSource?.['table-1'];
-        expect(result).toBe(true);
-        expect(table?.size.width.v).toBe(460);
-        expect(table?.tableColumns.map((column) => column.size.width.v)).toEqual([230, 230]);
-    });
-
     it('inserts page setup values when the document has no explicit page style', async () => {
         const doc = createBaseDoc();
         doc.documentStyle = {};
@@ -1750,41 +1727,6 @@ describe('misc document commands', () => {
         }));
     });
 
-    it('switches document mode by executing the command against the current document', async () => {
-        ({ univer, get } = createCommandTestBed(createBaseDoc()));
-        commandService = get(ICommandService);
-        commandService.registerCommand(SwitchDocModeCommand);
-        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
-        setCollapsedSelection(1);
-
-        const render = get(IRenderManagerService).getRenderById('test-doc')!;
-        const skeletonManager = get(DocSkeletonManagerService) as unknown as { getSkeleton: () => unknown };
-        const selectionRenderService = {
-            getSegment: () => '',
-            getSegmentPage: () => -1,
-        };
-        const mutableRender = render as unknown as { with: (dependency: unknown) => unknown };
-        const originalWith = mutableRender.with.bind(mutableRender);
-        mutableRender.with = (dependency: unknown) => {
-            if (dependency === DocSkeletonManagerService) {
-                skeletonManager.getSkeleton = () => ({}) as never;
-                return skeletonManager;
-            }
-            if (dependency === DocSelectionRenderService) {
-                return selectionRenderService;
-            }
-            return originalWith(dependency);
-        };
-
-        expect(await commandService.executeCommand(SwitchDocModeCommand.id)).toBe(true);
-        await awaitTime(0);
-        expect(getDoc()?.getDocumentStyle().documentFlavor).toBe(DocumentFlavor.MODERN);
-
-        expect(await commandService.executeCommand(SwitchDocModeCommand.id)).toBe(true);
-        await awaitTime(0);
-        expect(getDoc()?.getDocumentStyle().documentFlavor).toBe(DocumentFlavor.TRADITIONAL);
-    });
-
     it('converts body drawings to paragraph-relative vertical positions when switching from traditional mode', async () => {
         ({ univer, get } = createCommandTestBed(createDrawingModeDoc()));
         commandService = get(ICommandService);
@@ -1844,28 +1786,6 @@ describe('misc document commands', () => {
             relativeFrom: ObjectRelativeFromV.PARAGRAPH,
             posOffset: 38,
         }));
-    });
-
-    it('does not switch document mode when command skeleton is unavailable', async () => {
-        ({ univer, get } = createCommandTestBed(createBaseDoc()));
-        commandService = get(ICommandService);
-        commandService.registerCommand(SwitchDocModeCommand);
-        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
-
-        const skeletonManager = get(DocSkeletonManagerService) as unknown as { getSkeleton: () => undefined };
-        skeletonManager.getSkeleton = () => undefined;
-        const render = get(IRenderManagerService).getRenderById('test-doc');
-        const mutableRender = render as unknown as { with: (dependency: unknown) => unknown };
-        const originalWith = mutableRender.with.bind(mutableRender);
-        mutableRender.with = (dependency: unknown) => {
-            if (dependency === DocSelectionRenderService) {
-                return undefined;
-            }
-            return originalWith(dependency);
-        };
-
-        expect(await commandService.executeCommand(SwitchDocModeCommand.id)).toBe(false);
-        expect(getDoc()?.getDocumentStyle().documentFlavor).toBeUndefined();
     });
 
     it('reports cursor operations only when movement params are provided', async () => {

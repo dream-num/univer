@@ -1,36 +1,50 @@
 /* eslint-disable header/header */
 import type { Rules } from '@antfu/eslint-config';
-import type { Linter } from 'eslint';
+import type { ESLint, Linter } from 'eslint';
 import os from 'node:os';
 import path from 'node:path';
+import antfu, { regexp as antfuRegexpPreset } from '@antfu/eslint-config';
 import { fixupPluginRules } from '@eslint/compat';
 import typescriptParser from '@typescript-eslint/parser';
 import eslintPluginBetterTailwindcss from 'eslint-plugin-better-tailwindcss';
 import header from 'eslint-plugin-header';
 import barrel from 'eslint-plugin-no-barrel-import';
 import penetrating from 'eslint-plugin-no-penetrating-import';
+import reactHooks from 'eslint-plugin-react-hooks';
 import noExternalImportsInFacade from './plugins/no-external-imports-in-facade';
 import noFacadeImportsOutsideFacade from './plugins/no-facade-imports-outside-facade';
 import noSelfPackageImports from './plugins/no-self-package-imports';
+
+export interface IUniverEslintConfigOptions {
+    ignores?: string[];
+    header?: boolean;
+    noFacadeImportsOutsideFacade?: {
+        ignore?: string[];
+    };
+    rules?: Partial<Rules>;
+}
 
 /**
  * Base ESLint rules configuration for Univer project.
  * These rules apply to all TypeScript and JavaScript files.
  */
-
-export const baseRules: Partial<Rules> = {
+const qualityRules: Partial<Rules> = {
     // Code style and formatting rules
     curly: ['error', 'multi-line'],
     'antfu/if-newline': 'off',
     'no-param-reassign': ['warn'],
     'eol-last': ['error', 'always'],
     'no-empty-function': 'off',
+};
 
+const typescriptRules: Partial<Rules> = {
     // TypeScript specific rules
     'ts/no-explicit-any': 'warn',
     'ts/no-redeclare': 'off',
     'ts/method-signature-style': 'off',
+};
 
+const styleRules: Partial<Rules> = {
     // Style and formatting rules
     'style/no-multiple-empty-lines': ['error', { max: 1, maxEOF: 0 }],
     'style/brace-style': ['warn', '1tbs', { allowSingleLine: true }],
@@ -61,7 +75,9 @@ export const baseRules: Partial<Rules> = {
         enums: 'always-multiline',
         functions: 'never',
     }],
+};
 
+const filenameRules: Partial<Rules> = {
     // Filename conventions
     'unicorn/filename-case': [
         'error',
@@ -82,7 +98,9 @@ export const baseRules: Partial<Rules> = {
             ],
         },
     ],
+};
 
+const reactRules: Partial<Rules> = {
     // JSX and React rules
     'style/jsx-self-closing-comp': ['error', {
         component: true,
@@ -107,7 +125,9 @@ export const baseRules: Partial<Rules> = {
     'react-hooks/use-memo': 'warn',
     'react-hooks/purity': 'warn',
     'react-hooks/globals': 'warn',
+};
 
+const importRules: Partial<Rules> = {
     // Import and export rules
     'sort-imports': [
         'error',
@@ -141,7 +161,9 @@ export const baseRules: Partial<Rules> = {
             ],
         },
     ],
+};
 
+const disabledDebatableRules: Partial<Rules> = {
     // IMPORTANT: To ensure compatibility, some features of React 19 will be disabled.
     'react/no-forward-ref': 'off',
     'react/no-context-provider': 'off',
@@ -156,7 +178,9 @@ export const baseRules: Partial<Rules> = {
     'prefer-arrow-callback': 'off',
     'no-restricted-globals': 'off',
     'unicorn/prefer-string-starts-ends-with': 'warn',
+};
 
+const migrationWarningRules: Partial<Rules> = {
     // Compatibility rules for legacy code - set to warn for gradual migration
     'unused-imports/no-unused-vars': 'warn',
     'ts/no-restricted-types': 'warn',
@@ -186,6 +210,28 @@ export const baseRules: Partial<Rules> = {
     'ts/no-import-type-side-effects': 'warn',
     'unicorn/number-literal-case': 'warn',
     'unicorn/prefer-type-error': 'warn',
+};
+
+export const baseRules: Partial<Rules> = {
+    ...qualityRules,
+    ...typescriptRules,
+    ...styleRules,
+    ...filenameRules,
+    ...reactRules,
+    ...importRules,
+    ...disabledDebatableRules,
+    ...migrationWarningRules,
+};
+
+const regexpDefinitionsPreset = async (): Promise<Linter.Config[]> => {
+    const configs = await antfuRegexpPreset();
+
+    return configs.map((config) => ({
+        ...config,
+        rules: Object.fromEntries(
+            Object.keys(config.rules ?? {}).map((ruleName) => [ruleName, 'off'])
+        ),
+    }) as Linter.Config);
 };
 
 /**
@@ -316,8 +362,6 @@ export const tailwindcssPreset = (): Linter.Config => {
             },
         },
         rules: {
-            // enable all recommended rules to warn
-            ...eslintPluginBetterTailwindcss.configs['recommended-warn'].rules,
             // enable all recommended rules to error
             ...eslintPluginBetterTailwindcss.configs['recommended-error'].rules,
             'better-tailwindcss/enforce-consistent-line-wrapping': ['error', {
@@ -449,4 +493,58 @@ export const headerPreset = (): Linter.Config => {
             ],
         },
     };
+};
+
+export const createUniverEslintConfig = (options: IUniverEslintConfigOptions = {}) => {
+    const configs: Linter.Config[] = [
+        {
+            plugins: {
+                'react-hooks': reactHooks as unknown as ESLint.Plugin,
+            },
+            rules: {
+                ...baseRules,
+                ...(options.rules ?? {}),
+            },
+        },
+        penetratingPreset(),
+        typescriptPreset(),
+        univerSourcePreset({
+            noFacadeImportsOutsideFacade: options.noFacadeImportsOutsideFacade,
+        }),
+        facadePreset(),
+        noBarrelImportPreset(),
+        tailwindcssPreset(),
+        specPreset(),
+    ];
+
+    if (options.header ?? true) {
+        configs.push(headerPreset());
+    }
+
+    return antfu(
+        {
+            ignores: options.ignores,
+            stylistic: {
+                indent: 4,
+                semi: true,
+            },
+            e18e: false,
+            regexp: false,
+            react: true,
+            pnpm: false,
+            yaml: {
+                overrides: {
+                    'yaml/indent': ['error', 4, { indicatorValueIndent: 2 }],
+                },
+            },
+            markdown: false,
+            typescript: true,
+            formatters: {
+                css: true,
+                html: true,
+            },
+        },
+        ...configs,
+        regexpDefinitionsPreset()
+    );
 };

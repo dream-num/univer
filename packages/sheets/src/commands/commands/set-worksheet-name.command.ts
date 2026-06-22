@@ -16,7 +16,6 @@
 
 import type { IAccessor, ICommand } from '@univerjs/core';
 import type { ISetWorksheetNameMutationParams } from '../mutations/set-worksheet-name.mutation';
-
 import {
     CommandType,
     ICommandService,

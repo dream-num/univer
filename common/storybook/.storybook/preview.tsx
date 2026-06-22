@@ -30,7 +30,6 @@ import enUS from '@univerjs/design/locale/en-US';
 import zhCN from '@univerjs/design/locale/zh-CN';
 import { defaultTheme, greenTheme } from '@univerjs/themes';
 import { DesktopLocalStorageService, RediContext, ThemeSwitcherService } from '@univerjs/ui';
-
 import { useEffect, useMemo } from 'react';
 import './global.css';
 
@@ -64,7 +63,6 @@ const preview: Preview = {
             toolbar: {
                 icon: 'cog',
                 items: Object.keys(themes),
-                showName: true,
             },
         },
         i18n: {
@@ -74,7 +72,6 @@ const preview: Preview = {
             toolbar: {
                 icon: 'globe',
                 items: [LocaleType.ZH_CN, LocaleType.EN_US],
-                showName: true,
             },
         },
         darkMode: {
@@ -84,7 +81,6 @@ const preview: Preview = {
             toolbar: {
                 icon: 'sun',
                 items: ['light', 'dark'],
-                showName: true,
             },
         },
     },

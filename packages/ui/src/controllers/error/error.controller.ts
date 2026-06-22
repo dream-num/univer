@@ -16,7 +16,6 @@
 
 import { Disposable, ErrorService, Inject } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
-
 import { IMessageService } from '../../services/message/message.service';
 
 export class ErrorController extends Disposable {

@@ -24,7 +24,6 @@ import type {
     IRange,
     IStyleData,
 } from '@univerjs/core';
-
 import type { IBorderInfo } from '../../services/border-style-manager.service';
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 import type { IResult } from './utils/target-util';

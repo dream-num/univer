@@ -32,8 +32,15 @@ import type {
     IUnitSheetNameMap,
     IUnitStylesData,
 } from '../basics/common';
-
-import { createIdentifier, Disposable, Inject, IUniverInstanceService, LocaleService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
+import {
+    createIdentifier,
+    Disposable,
+    Inject,
+    IUniverInstanceService,
+    LocaleService,
+    ObjectMatrix,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { convertUnitDataToRuntime } from '../basics/runtime';
 import { FormulaDataModel } from '../models/formula-data.model';
 import { ISheetRowFilteredService } from './sheet-row-filtered.service';

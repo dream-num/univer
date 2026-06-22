@@ -16,7 +16,6 @@
 
 import { SetTextSelectionsOperation } from '@univerjs/docs';
 import { SetActiveCommentOperation } from '@univerjs/thread-comment-ui';
-
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { ShowCommentPanelOperation } from '../../commands/operations/show-comment-panel.operation';

@@ -16,7 +16,6 @@
 
 import { ICommandService, IUndoRedoService, IUniverInstanceService, ObjectMatrix } from '@univerjs/core';
 import { MoveRangeMutation, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
-
 import { describe, expect, it, vi } from 'vitest';
 import { SheetsTableController } from '../../../controllers/sheets-table.controller';
 import { TableManager } from '../../../models/table-manager';

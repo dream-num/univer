@@ -16,7 +16,6 @@
 
 import type { IAccessor, ICommand, IRange, Worksheet } from '@univerjs/core';
 import type { ISelectionWithStyle } from '../../basics';
-
 import type { IMoveColumnsMutationParams, IMoveRowsMutationParams } from '../mutations/move-rows-cols.mutation';
 import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
 import {

@@ -15,7 +15,6 @@
  */
 
 import type { IDialogProps } from '@univerjs/design';
-
 import type { ICustomLabelProps } from '../../custom-label/CustomLabel';
 
 export type IDialogPartMethodOptions = {

@@ -21,7 +21,6 @@ import { getCompare } from '../../../engine/utils/compare';
 import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NumberValueObject } from '../../../engine/value-object/primitive-object';
-
 import { BaseFunction } from '../../base-function';
 
 export class Sort extends BaseFunction {

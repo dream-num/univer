@@ -14,7 +14,18 @@
  * limitations under the License.
  */
 
-import { ColumnSeparatorType, createDocumentModelWithStyle, DocumentDataModel, DocumentFlavor, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, SectionType, TableSizeType, Univer } from '@univerjs/core';
+import {
+    ColumnSeparatorType,
+    createDocumentModelWithStyle,
+    DocumentDataModel,
+    DocumentFlavor,
+    LocaleService,
+    ObjectRelativeFromH,
+    ObjectRelativeFromV,
+    SectionType,
+    TableSizeType,
+    Univer,
+} from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { DocumentSkeletonPageType, GlyphType, PageLayoutType } from '../../../../basics/i-document-skeleton-cached';
 import { Vector2 } from '../../../../basics/vector2';

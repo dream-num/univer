@@ -27,7 +27,12 @@ import type { DocumentViewModel } from '../view-model/document-view-model';
 import type { ILayoutContext } from './tools';
 import { PRESET_LIST_TYPE, SectionType, Skeleton } from '@univerjs/core';
 import { Subject } from 'rxjs';
-import { DocumentSkeletonPageType, GlyphType, LineType, PageLayoutType } from '../../../basics/i-document-skeleton-cached';
+import {
+    DocumentSkeletonPageType,
+    GlyphType,
+    LineType,
+    PageLayoutType,
+} from '../../../basics/i-document-skeleton-cached';
 import { Liquid } from '../liquid';
 import { getDocsTableRenderViewport, hasDocsTableHorizontalViewport } from '../table-render-viewport';
 import { DocumentEditArea } from '../view-model/document-view-model';
@@ -37,7 +42,16 @@ import { Hyphen } from './hyphenation/hyphen';
 import { LanguageDetector } from './hyphenation/language-detector';
 import { createSkeletonPage } from './model/page';
 import { createSkeletonSection } from './model/section';
-import { getLastPage, getNullSkeleton, getPageFromPath, prepareSectionBreakConfig, resetContext, setPageParent, updateBlockIndex, updateInlineDrawingCoordsAndBorder } from './tools';
+import {
+    getLastPage,
+    getNullSkeleton,
+    getPageFromPath,
+    prepareSectionBreakConfig,
+    resetContext,
+    setPageParent,
+    updateBlockIndex,
+    updateInlineDrawingCoordsAndBorder,
+} from './tools';
 
 export enum DocumentSkeletonState {
     PENDING = 'pending',

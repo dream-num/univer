@@ -9,7 +9,6 @@ import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverUIPlugin } from '@univerjs/ui';
 import { UniverUniscriptPlugin } from '@univerjs/uniscript';
-
 import '../global.css';
 
 // univer

@@ -16,7 +16,6 @@
 
 import type { IAccessor, ICommand } from '@univerjs/core';
 import type { ISearchFunctionOperationParams } from '../../services/prompt.service';
-
 import { CommandType } from '@univerjs/core';
 import { IFormulaPromptService } from '../../services/prompt.service';
 

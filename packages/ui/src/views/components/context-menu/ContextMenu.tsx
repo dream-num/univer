@@ -17,7 +17,6 @@
 import type { IMouseEvent } from '@univerjs/engine-render';
 import type { IContextMenuAnchorRect } from './AnchoredContextMenu';
 import { ICommandService } from '@univerjs/core';
-
 import { useEffect, useRef, useState } from 'react';
 import { IContextMenuService } from '../../../services/contextmenu/contextmenu.service';
 import { ILayoutService } from '../../../services/layout/layout.service';

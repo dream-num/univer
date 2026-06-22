@@ -16,7 +16,6 @@
 
 import type { IDisposable } from '@univerjs/core';
 import { createIdentifier, Disposable } from '@univerjs/core';
-
 import { INotificationService } from '../notification/notification.service';
 
 export interface IBeforeCloseService {

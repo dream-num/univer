@@ -15,7 +15,6 @@
  */
 
 import { Subject } from 'rxjs';
-
 import { Disposable } from '../../shared/lifecycle';
 
 export interface IError {

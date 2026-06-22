@@ -21,8 +21,11 @@ import type {
     IRuntimeOtherUnitDataType,
     IRuntimeUnitDataPrimitiveType,
 } from '../../basics/common';
-
-import type { IFormulaDependencyTreeFullJson, IFormulaDependencyTreeJson, IFormulaDependentsAndInRangeResults } from '../../engine/dependency/dependency-tree';
+import type {
+    IFormulaDependencyTreeFullJson,
+    IFormulaDependencyTreeJson,
+    IFormulaDependentsAndInRangeResults,
+} from '../../engine/dependency/dependency-tree';
 import type { IFormulaDirtyData } from '../../services/current-data.service';
 import type { FormulaExecutedStateType, IExecutionInProgressParams } from '../../services/runtime.service';
 import { CommandType } from '@univerjs/core';

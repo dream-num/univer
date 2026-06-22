@@ -15,7 +15,13 @@
  */
 
 import type { ICommandInfo, IUnitRange, Nullable } from '@univerjs/core';
-import type { IDirtyUnitDefinedNameMap, IDirtyUnitFeatureMap, IDirtyUnitOtherFormulaMap, IDirtyUnitSheetNameMap, IDirtyUnitSuperTableMap } from '../basics/common';
+import type {
+    IDirtyUnitDefinedNameMap,
+    IDirtyUnitFeatureMap,
+    IDirtyUnitOtherFormulaMap,
+    IDirtyUnitSheetNameMap,
+    IDirtyUnitSuperTableMap,
+} from '../basics/common';
 import { createIdentifier, Disposable } from '@univerjs/core';
 
 export interface IDirtyConversionManagerParams {

@@ -17,7 +17,6 @@ import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
 import { UniverSheetsFormulaUIPlugin } from '@univerjs/sheets-formula-ui';
 import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsNumfmtUIPlugin } from '@univerjs/sheets-numfmt-ui';
-
 import { UniverSheetsMobileUIPlugin } from '@univerjs/sheets-ui';
 import { UniverMobileUIPlugin } from '@univerjs/ui';
 import '../global.css';

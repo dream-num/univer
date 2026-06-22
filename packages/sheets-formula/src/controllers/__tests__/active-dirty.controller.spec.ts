@@ -40,7 +40,6 @@ import {
     SetStyleCommand,
 } from '@univerjs/sheets';
 import { afterEach, describe, expect, it } from 'vitest';
-
 import { createFacadeTestBed } from '../../facade/__tests__/create-test-bed';
 import { ActiveDirtyController } from '../active-dirty.controller';
 

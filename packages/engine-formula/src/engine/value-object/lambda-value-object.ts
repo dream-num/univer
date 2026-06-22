@@ -15,7 +15,6 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-
 import type { BaseAstNode } from '../ast-node/base-ast-node';
 import type { LambdaParameterNode } from '../ast-node/lambda-parameter-node';
 import type { Interpreter } from '../interpreter/interpreter';

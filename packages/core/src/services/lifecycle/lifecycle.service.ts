@@ -16,7 +16,6 @@
 
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, filter, firstValueFrom, map, merge, of, skip } from 'rxjs';
-
 import { Disposable } from '../../shared/lifecycle';
 import { takeAfter } from '../../shared/rxjs';
 import { ILogService } from '../log/log.service';

@@ -14,9 +14,17 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICellData, ICommand, IRange, ISelectionCell, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type {
+    IAccessor,
+    ICellData,
+    ICommand,
+    IRange,
+    ISelectionCell,
+    Nullable,
+    Workbook,
+    Worksheet,
+} from '@univerjs/core';
 import type { IMoveRangeMutationParams } from '../mutations/move-range.mutation';
-
 import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
 import {
     cellToRange,

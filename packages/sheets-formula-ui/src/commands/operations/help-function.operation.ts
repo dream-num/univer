@@ -16,7 +16,6 @@
 
 import type { IAccessor, ICommand } from '@univerjs/core';
 import type { IHelpFunctionOperationParams } from '../../services/prompt.service';
-
 import { CommandType } from '@univerjs/core';
 import { IFormulaPromptService } from '../../services/prompt.service';
 

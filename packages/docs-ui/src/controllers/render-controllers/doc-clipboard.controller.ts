@@ -16,7 +16,6 @@
 
 import type { DocumentDataModel } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-
 import {
     ICommandService,
     IContextService,

@@ -10,7 +10,6 @@ import zhCN from '@univerjs/mockdata/locales/zh-CN';
 import { UniverSlidesPlugin } from '@univerjs/slides';
 import { UniverSlidesUIPlugin } from '@univerjs/slides-ui';
 import { UniverUIPlugin } from '@univerjs/ui';
-
 import { UniverWatermarkPlugin } from '@univerjs/watermark';
 import '../global.css';
 import '@univerjs/watermark/facade';

@@ -36,7 +36,6 @@ import { UniverInstanceType } from '../../common/unit';
 import { generateRandomId } from '../../shared/random-id';
 import { IResourceManagerService } from '../resource-manager/type';
 import { createDefaultUser, isDevRole } from '../user-manager/const';
-
 import { UserManagerService } from '../user-manager/user-manager.service';
 
 /**

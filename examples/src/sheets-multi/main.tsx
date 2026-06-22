@@ -15,9 +15,7 @@ import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverUIPlugin } from '@univerjs/ui';
 import { useEffect } from 'react';
 import { Mosaic, MosaicWindow } from 'react-mosaic-component';
-
 import 'react-mosaic-component/react-mosaic-component.css';
-
 import '../global.css';
 
 function factory(id: string) {

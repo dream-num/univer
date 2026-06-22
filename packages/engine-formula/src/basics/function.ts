@@ -15,7 +15,6 @@
  */
 
 import type { BooleanNumber } from '@univerjs/core';
-
 import type { FUNCTION_NAMES_ARRAY } from '../functions/array/function-names';
 import type { FUNCTION_NAMES_COMPATIBILITY } from '../functions/compatibility/function-names';
 import type { FUNCTION_NAMES_CUBE } from '../functions/cube/function-names';

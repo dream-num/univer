@@ -26,8 +26,7 @@ import type {
     VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
-
-import type { BORDER_TYPE as BORDER_LTRB } from '../../basics/const';
+import type { BORDER_TYPE } from '../../basics/const';
 import type { Canvas } from '../../canvas';
 import type { UniverRenderingContext } from '../../context';
 import type { DocumentSkeleton } from '../docs/layout/doc-skeleton';
@@ -37,7 +36,7 @@ export interface IBorderCache {
 }
 
 export interface IBorderCacheItem {
-    type: BORDER_LTRB;
+    type: BORDER_TYPE;
     style: BorderStyleTypes;
     color: string;
 }

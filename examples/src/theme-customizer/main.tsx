@@ -1,7 +1,6 @@
 import { ConfigProvider, render } from '@univerjs/design';
 import enUS from '@univerjs/mockdata/locales/en-US';
 import { ThemeCustomizerApp } from './theme-customizer-app';
-
 import '../global.css';
 
 render(

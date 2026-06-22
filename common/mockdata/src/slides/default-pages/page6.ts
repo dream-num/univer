@@ -1,5 +1,4 @@
 import { BasicShapes, PageElementType, PageType } from '@univerjs/slides';
-
 import { DEFAULT_DOCUMENT_DATA_EN } from '../../docs/default-document-data-en';
 
 export const DEFAULT_SIXTH_PAGE = {

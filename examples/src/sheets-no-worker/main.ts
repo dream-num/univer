@@ -22,7 +22,6 @@ import { UniverSheetsTablePlugin } from '@univerjs/sheets-table';
 import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverUIPlugin } from '@univerjs/ui';
-
 import '@univerjs/sheets/facade';
 import '@univerjs/ui/facade';
 import '@univerjs/sheets-ui/facade';

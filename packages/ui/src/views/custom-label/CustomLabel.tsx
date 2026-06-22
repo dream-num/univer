@@ -19,7 +19,6 @@ import type { Observable } from 'rxjs';
 import type { IMenuSelectorItem } from '../../services/menu/menu';
 import { ColorKit, LocaleService } from '@univerjs/core';
 import { useEffect, useMemo, useState } from 'react';
-
 import { isObservable } from 'rxjs';
 import { ComponentManager, IconManager } from '../../common';
 import { useDependency } from '../../utils/di';

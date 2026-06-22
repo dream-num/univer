@@ -19,7 +19,6 @@ import type {
     ISetWorksheetRowHeightMutationParams,
     ISetWorksheetRowIsAutoHeightMutationParams,
 } from '../mutations/set-worksheet-row-height.mutation';
-
 import {
     BooleanNumber,
     CommandType,

@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import type { IDocumentSkeletonGlyph, IDocumentSkeletonLine, IDocumentSkeletonPage } from '../../basics/i-document-skeleton-cached';
+import type {
+    IDocumentSkeletonGlyph,
+    IDocumentSkeletonLine,
+    IDocumentSkeletonPage,
+} from '../../basics/i-document-skeleton-cached';
 import type { IBoundRectNoAngle, IViewportInfo } from '../../basics/vector2';
 import type { UniverRenderingContext } from '../../context';
 import type { DOCS_EXTENSION_TYPE } from './doc-extension';

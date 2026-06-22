@@ -16,7 +16,6 @@
 
 import type { IAccessor, IColumnData, ICommand, IObjectArrayPrimitiveType, Nullable } from '@univerjs/core';
 import type { ISetColDataMutationParams } from '../mutations/set-col-data.mutation';
-
 import type { ISheetCommandSharedParams } from '../utils/interface';
 import {
     CommandType,

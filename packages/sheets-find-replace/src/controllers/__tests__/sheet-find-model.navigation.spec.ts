@@ -18,7 +18,6 @@ import type { IFindQuery } from '@univerjs/find-replace';
 import { FindBy, FindDirection, FindScope } from '@univerjs/find-replace';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
-
 import { SheetFindModel, SheetsFindReplaceController } from '../sheet-find-replace.controller';
 
 describe('SheetFindModel navigation', () => {

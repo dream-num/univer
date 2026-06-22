@@ -31,7 +31,14 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
-import { DefinedNamesService, FormulaDataModel, FunctionService, IDefinedNamesService, IFunctionService, LexerTreeBuilder } from '@univerjs/engine-formula';
+import {
+    DefinedNamesService,
+    FormulaDataModel,
+    FunctionService,
+    IDefinedNamesService,
+    IFunctionService,
+    LexerTreeBuilder,
+} from '@univerjs/engine-formula';
 import { Engine, IRenderingEngine, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import {
     RangeProtectionRuleModel,
@@ -46,7 +53,6 @@ import {
 } from '@univerjs/sheets';
 import enUS from '@univerjs/sheets/locale/en-US';
 import zhCN from '@univerjs/sheets/locale/zh-CN';
-
 import '@univerjs/sheets/facade';
 import '../f-workbook';
 import '../f-range';

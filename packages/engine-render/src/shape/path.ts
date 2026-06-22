@@ -15,7 +15,6 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-
 import type { IObjectFullState } from '../basics/interfaces';
 import type { UniverRenderingContext } from '../context';
 import type { IShapeProps } from './shape';

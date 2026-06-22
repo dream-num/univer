@@ -14,8 +14,26 @@
  * limitations under the License.
  */
 
-import type { CellValueType, IDocumentData, IPaddingData, IStyleBase, IStyleData, ITextRotation, ITextStyle, Nullable, TextDirection } from '@univerjs/core';
-import { createParagraphId, DEFAULT_EMPTY_DOCUMENT_VALUE, DocumentDataModel, DocumentFlavor, HorizontalAlign, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import type {
+    CellValueType,
+    IDocumentData,
+    IPaddingData,
+    IStyleBase,
+    IStyleData,
+    ITextRotation,
+    ITextStyle,
+    Nullable,
+    TextDirection,
+} from '@univerjs/core';
+import {
+    createParagraphId,
+    DEFAULT_EMPTY_DOCUMENT_VALUE,
+    DocumentDataModel,
+    DocumentFlavor,
+    HorizontalAlign,
+    VerticalAlign,
+    WrapStrategy,
+} from '@univerjs/core';
 import { convertTextRotation } from '../../basics/text-rotation';
 import { DEFAULT_PADDING_DATA } from './sheet.render-skeleton';
 

@@ -1,6 +1,5 @@
 import type { IWorksheetData } from '@univerjs/core';
 import { BasicShapes, PageElementType, PageType } from '@univerjs/slides';
-
 import { SLIDE_WORKBOOK_DATA } from '../../sheets/slide-workbook-data';
 
 const worksheetConfig = SLIDE_WORKBOOK_DATA.sheets[SLIDE_WORKBOOK_DATA.sheetOrder[0]] as IWorksheetData;

@@ -15,7 +15,6 @@
  */
 
 import type { Ctor, IDisposable } from '../../common/di';
-
 import { skip } from 'rxjs';
 import pkg from '../../../package.json';
 import { Inject, Injector } from '../../common/di';

@@ -13,7 +13,6 @@ import { UniverSheetsNumfmtUIPlugin } from '@univerjs/sheets-numfmt-ui';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverUIPlugin } from '@univerjs/ui';
 import { UniverUniscriptPlugin } from '@univerjs/uniscript';
-
 import '../global.css';
 
 /* eslint-disable-next-line node/prefer-global/process */

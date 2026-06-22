@@ -16,7 +16,6 @@
 
 import type { EventState, IPosition, IRange, Nullable } from '@univerjs/core';
 import type { BaseObject } from './base-object';
-
 import type { IWheelEvent } from './basics/i-events';
 import type { IBoundRectNoAngle, IViewportInfo } from './basics/vector2';
 import type { UniverRenderingContext } from './context';

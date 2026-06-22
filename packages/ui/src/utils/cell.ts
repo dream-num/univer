@@ -23,9 +23,15 @@ import type {
     ITextDecoration,
     ITextRun,
 } from '@univerjs/core';
-import { BaselineOffset, BorderStyleTypes, ColorKit, generateRandomId, getBorderStyleType, Tools } from '@univerjs/core';
+import {
+    BaselineOffset,
+    BorderStyleTypes,
+    ColorKit,
+    generateRandomId,
+    getBorderStyleType,
+    Tools,
+} from '@univerjs/core';
 import { ptToPx } from '@univerjs/engine-render';
-
 import { parseHtmlDocument, parseHtmlFragment } from './html';
 import { textTrim } from './util';
 

@@ -16,7 +16,6 @@ import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
 import { UniverSheetsHyperLinkPlugin } from '@univerjs/sheets-hyper-link';
 import { UniverSheetsSortPlugin } from '@univerjs/sheets-sort';
 import { UniverThreadCommentPlugin } from '@univerjs/thread-comment';
-
 import './facade';
 
 export interface ICreateUniverOnNodeOptions {

@@ -45,7 +45,6 @@ import {
 } from '@univerjs/sheets-conditional-formatting';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createFacadeTestBed } from './create-test-bed';
-
 import '@univerjs/sheets-formula/facade';
 
 describe('Test conditional formatting facade', () => {

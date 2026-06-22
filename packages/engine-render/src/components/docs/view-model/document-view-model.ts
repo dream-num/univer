@@ -14,7 +14,19 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICustomBlock, ICustomDecorationForInterceptor, ICustomRangeForInterceptor, ICustomTable, IDisposable, IParagraph, ISectionBreak, ITable, ITextRun, Nullable } from '@univerjs/core';
+import type {
+    DocumentDataModel,
+    ICustomBlock,
+    ICustomDecorationForInterceptor,
+    ICustomRangeForInterceptor,
+    ICustomTable,
+    IDisposable,
+    IParagraph,
+    ISectionBreak,
+    ITable,
+    ITextRun,
+    Nullable,
+} from '@univerjs/core';
 import { DataStreamTreeNodeType, DataStreamTreeTokenType, toDisposable } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
 import { DataStreamTreeNode } from './data-stream-tree-node';

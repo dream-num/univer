@@ -15,7 +15,6 @@
  */
 
 import type { Meta } from '@storybook/react';
-
 import { Radio } from './Radio';
 
 const meta: Meta<typeof Radio> = {

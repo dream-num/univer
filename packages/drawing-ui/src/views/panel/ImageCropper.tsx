@@ -20,8 +20,11 @@ import { Button, clsx, Select } from '@univerjs/design';
 import { CreateCopyIcon } from '@univerjs/icons';
 import { ComponentManager, useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
-
-import { AutoImageCropOperation, CloseImageCropOperation, CropType } from '../../commands/operations/image-crop.operation';
+import {
+    AutoImageCropOperation,
+    CloseImageCropOperation,
+    CropType,
+} from '../../commands/operations/image-crop.operation';
 import { DrawingImageClipService, IMAGE_CLIP_SHAPE_PICKER_COMPONENT } from '../../services/drawing-image-clip.service';
 
 export interface IImageCropperProps {

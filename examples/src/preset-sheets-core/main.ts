@@ -23,7 +23,6 @@ import { UniverSheetsThreadCommentPreset } from '@univerjs/preset-sheets-thread-
 import UniverPresetSheetsThreadCommentZhCN from '@univerjs/preset-sheets-thread-comment/locales/zh-CN';
 import { createUniver, defaultTheme, LocaleType, mergeLocales } from '@univerjs/presets';
 import ImportCSVButtonPlugin from './custom-plugin/import-csv-button';
-
 import '../global.css';
 
 const { univer, univerAPI } = createUniver({

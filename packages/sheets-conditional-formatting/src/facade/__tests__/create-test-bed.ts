@@ -74,7 +74,6 @@ import {
 } from '@univerjs/sheets-formula';
 import enUS from '@univerjs/sheets/locale/en-US';
 import zhCN from '@univerjs/sheets/locale/zh-CN';
-
 import '@univerjs/sheets/facade';
 import '@univerjs/sheets-conditional-formatting/facade';
 

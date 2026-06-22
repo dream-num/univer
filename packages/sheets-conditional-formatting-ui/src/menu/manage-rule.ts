@@ -17,15 +17,30 @@
 import type { IAccessor, Workbook } from '@univerjs/core';
 import type { IMenuSelectorItem } from '@univerjs/ui';
 import { ICommandService, IUniverInstanceService, Rectangle, UniverInstanceType } from '@univerjs/core';
-import { checkRangesEditablePermission, RangeProtectionPermissionEditPoint, SetWorksheetActiveOperation, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission } from '@univerjs/sheets';
-import { AddConditionalRuleMutation, ConditionalFormattingRuleModel, DeleteConditionalRuleMutation, MoveConditionalRuleMutation, SetConditionalRuleMutation } from '@univerjs/sheets-conditional-formatting';
-
+import {
+    checkRangesEditablePermission,
+    RangeProtectionPermissionEditPoint,
+    SetWorksheetActiveOperation,
+    SheetsSelectionsService,
+    WorkbookEditablePermission,
+    WorksheetEditPermission,
+    WorksheetSetCellStylePermission,
+} from '@univerjs/sheets';
+import {
+    AddConditionalRuleMutation,
+    ConditionalFormattingRuleModel,
+    DeleteConditionalRuleMutation,
+    MoveConditionalRuleMutation,
+    SetConditionalRuleMutation,
+} from '@univerjs/sheets-conditional-formatting';
 import { getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { merge, Observable } from 'rxjs';
-
 import { debounceTime } from 'rxjs/operators';
-import { CF_MENU_OPERATION, OpenConditionalFormattingOperator } from '../commands/operations/open-conditional-formatting-panel';
+import {
+    CF_MENU_OPERATION,
+    OpenConditionalFormattingOperator,
+} from '../commands/operations/open-conditional-formatting-panel';
 
 const commandList = [
     SetWorksheetActiveOperation.id,

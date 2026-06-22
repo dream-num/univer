@@ -16,7 +16,6 @@
 
 import { BooleanNumber } from '@univerjs/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-
 import { textShape } from '../text-shaping';
 
 const h = vi.hoisted(() => {

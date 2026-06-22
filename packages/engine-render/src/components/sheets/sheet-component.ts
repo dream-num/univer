@@ -15,7 +15,6 @@
  */
 
 import type { IRange, Nullable } from '@univerjs/core';
-
 import type { IViewportInfo, Vector2 } from '../../basics/vector2';
 import type { UniverRenderingContext } from '../../context';
 import type { SHEET_EXTENSION_TYPE } from './extensions/sheet-extension';

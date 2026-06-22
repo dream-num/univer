@@ -9,7 +9,6 @@ import UniverPresetDocsHyperLinkZhCN from '@univerjs/preset-docs-hyper-link/loca
 import { UniverDocsThreadCommentPreset } from '@univerjs/preset-docs-thread-comment';
 import UniverPresetDocsThreadCommentZhCN from '@univerjs/preset-docs-thread-comment/locales/zh-CN';
 import { createUniver, defaultTheme, LocaleType, LogLevel, mergeLocales, UniverInstanceType } from '@univerjs/presets';
-
 import '../global.css';
 
 const { univer, univerAPI } = createUniver({

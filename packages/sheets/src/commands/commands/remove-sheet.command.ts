@@ -20,7 +20,6 @@ import type {
     IRemoveSheetMutationParams,
 } from '../../basics/interfaces/mutation-interface';
 import type { IUniverSheetsConfig } from '../../config/config';
-
 import {
     CommandType,
     ICommandService,

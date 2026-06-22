@@ -24,7 +24,6 @@ import {
 import { SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { Slider, useDependency, useObservable } from '@univerjs/ui';
 import { useCallback, useEffect, useState } from 'react';
-
 import { SetZoomRatioCommand } from '../../commands/commands/set-zoom-ratio.command';
 import { SetZoomRatioOperation } from '../../commands/operations/set-zoom-ratio.operation';
 import { SHEET_ZOOM_RANGE } from '../../common/keys';

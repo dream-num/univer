@@ -17,9 +17,13 @@
 import type { IMutation, IRange, Nullable } from '@univerjs/core';
 import type { ISheetCommandSharedParams } from '@univerjs/sheets';
 import type { IFilterColumn } from '../../models/types';
-
 import { CommandType } from '@univerjs/core';
-import { ReCalcSheetsFilterMutationId, RemoveSheetsFilterMutationId, SetSheetsFilterCriteriaMutationId, SetSheetsFilterRangeMutationId } from '../../common/const';
+import {
+    ReCalcSheetsFilterMutationId,
+    RemoveSheetsFilterMutationId,
+    SetSheetsFilterCriteriaMutationId,
+    SetSheetsFilterRangeMutationId,
+} from '../../common/const';
 import { SheetsFilterService } from '../../services/sheet-filter.service';
 
 /**

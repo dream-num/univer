@@ -15,7 +15,6 @@
  */
 
 import type { IAccessor, IDisposable } from '../../common/di';
-
 import { findLast, remove } from '../../common/array';
 import { createIdentifier, Inject, Injector } from '../../common/di';
 import { CustomCommandExecutionError } from '../../common/error';

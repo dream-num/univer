@@ -14,12 +14,23 @@
  * limitations under the License.
  */
 
-import type { ICellData, IInterceptor, IObjectMatrixPrimitiveType, IRange, ISelectionCell, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type {
+    ICellData,
+    IInterceptor,
+    IObjectMatrixPrimitiveType,
+    IRange,
+    ISelectionCell,
+    Nullable,
+    Workbook,
+    Worksheet,
+} from '@univerjs/core';
 import type { ISelectionWithStyle } from '../../../basics/selection';
-
 import type { ISetSelectionsOperationParams } from '../../operations/selection.operation';
 import { RANGE_TYPE, Rectangle, selectionToArray, Tools } from '@univerjs/core';
-import { IgnoreRangeThemeInterceptorKey, RangeThemeInterceptorId } from '../../../services/sheet-interceptor/interceptor-const';
+import {
+    IgnoreRangeThemeInterceptorKey,
+    RangeThemeInterceptorId,
+} from '../../../services/sheet-interceptor/interceptor-const';
 import { SetSelectionsOperation } from '../../operations/selection.operation';
 
 export interface IExpandParams {

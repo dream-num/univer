@@ -16,7 +16,6 @@
 
 import type { IAccessor, ICommand } from '@univerjs/core';
 import type { ISetDocZoomRatioOperationParams } from '../operations/set-doc-zoom-ratio.operation';
-
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
 import {
     SetDocZoomRatioOperation,

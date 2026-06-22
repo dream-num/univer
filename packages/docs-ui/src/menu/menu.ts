@@ -53,13 +53,33 @@ import {
     HEADING_LIST,
     MenuItemType,
 } from '@univerjs/ui';
-
 import { combineLatest, map, Observable } from 'rxjs';
 import { OpenHeaderFooterPanelCommand } from '../commands/commands/doc-header-footer.command';
 import { HorizontalLineCommand } from '../commands/commands/doc-horizontal-line.command';
-import { getStyleInTextRange, ResetInlineFormatTextBackgroundColorCommand, ResetInlineFormatTextColorCommand, SetInlineFormatBoldCommand, SetInlineFormatCommand, SetInlineFormatFontFamilyCommand, SetInlineFormatFontSizeCommand, SetInlineFormatItalicCommand, SetInlineFormatStrikethroughCommand, SetInlineFormatSubscriptCommand, SetInlineFormatSuperscriptCommand, SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand, SetInlineFormatUnderlineCommand } from '../commands/commands/inline-format.command';
+import {
+    getStyleInTextRange,
+    ResetInlineFormatTextBackgroundColorCommand,
+    ResetInlineFormatTextColorCommand,
+    SetInlineFormatBoldCommand,
+    SetInlineFormatCommand,
+    SetInlineFormatFontFamilyCommand,
+    SetInlineFormatFontSizeCommand,
+    SetInlineFormatItalicCommand,
+    SetInlineFormatStrikethroughCommand,
+    SetInlineFormatSubscriptCommand,
+    SetInlineFormatSuperscriptCommand,
+    SetInlineFormatTextBackgroundColorCommand,
+    SetInlineFormatTextColorCommand,
+    SetInlineFormatUnderlineCommand,
+} from '../commands/commands/inline-format.command';
 import { BulletListCommand, CheckListCommand, OrderListCommand } from '../commands/commands/list.command';
-import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignOperationCommand, AlignRightCommand } from '../commands/commands/paragraph-align.command';
+import {
+    AlignCenterCommand,
+    AlignJustifyCommand,
+    AlignLeftCommand,
+    AlignOperationCommand,
+    AlignRightCommand,
+} from '../commands/commands/paragraph-align.command';
 import { SetParagraphNamedStyleCommand } from '../commands/commands/set-heading.command';
 import { SwitchDocModeCommand } from '../commands/commands/switch-doc-mode.command';
 import { CreateDocTableCommand } from '../commands/commands/table/doc-table-create.command';

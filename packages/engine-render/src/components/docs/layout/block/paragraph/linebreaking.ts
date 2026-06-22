@@ -14,8 +14,23 @@
  * limitations under the License.
  */
 
-import type { IBullet, IDocDrawingBase, IDocumentBody, IDrawings, IParagraph, IParagraphStyle, Nullable } from '@univerjs/core';
-import type { IDocumentSkeletonBullet, IDocumentSkeletonDrawing, IDocumentSkeletonGlyph, IDocumentSkeletonPage, IDocumentSkeletonTable, IParagraphList } from '../../../../../basics/i-document-skeleton-cached';
+import type {
+    IBullet,
+    IDocDrawingBase,
+    IDocumentBody,
+    IDrawings,
+    IParagraph,
+    IParagraphStyle,
+    Nullable,
+} from '@univerjs/core';
+import type {
+    IDocumentSkeletonBullet,
+    IDocumentSkeletonDrawing,
+    IDocumentSkeletonGlyph,
+    IDocumentSkeletonPage,
+    IDocumentSkeletonTable,
+    IParagraphList,
+} from '../../../../../basics/i-document-skeleton-cached';
 import type { IParagraphConfig, ISectionBreakConfig } from '../../../../../basics/interfaces';
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../../view-model/document-view-model';

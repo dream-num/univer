@@ -15,7 +15,6 @@
  */
 
 import type { Meta } from '@storybook/react';
-
 import { KBD } from './Kbd';
 
 const meta: Meta<typeof KBD> = {

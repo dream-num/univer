@@ -18,7 +18,6 @@ import type { Injector } from '@univerjs/core';
 import type { ISheetData } from '@univerjs/engine-formula';
 import { AstTreeBuilder, IFormulaCurrentConfigService, Interpreter, Lexer } from '@univerjs/engine-formula';
 import { describe, expect, it, vi } from 'vitest';
-
 import { calculateFormula } from '../calculate';
 
 describe('calculateFormula', () => {

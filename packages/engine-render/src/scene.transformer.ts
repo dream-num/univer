@@ -16,7 +16,6 @@
 
 import type { IAbsoluteTransform, Nullable } from '@univerjs/core';
 import type { Subscription } from 'rxjs';
-
 import type { BaseObject } from './base-object';
 import type { IMouseEvent, IPointerEvent } from './basics/i-events';
 import type { ITransformerConfig } from './basics/transformer-config';
@@ -29,7 +28,6 @@ import { Disposable, MOVE_BUFFER_VALUE, requestImmediateMacroTask, toDisposable 
 import { Subject } from 'rxjs';
 import { ObjectType } from './base-object';
 import { CURSOR_TYPE } from './basics/const';
-
 import { offsetRotationAxis } from './basics/offset-rotation-axis';
 import { getCurrentScrollXY } from './basics/scroll-xy';
 import { degToRad, precisionTo, radToDeg } from './basics/tools';

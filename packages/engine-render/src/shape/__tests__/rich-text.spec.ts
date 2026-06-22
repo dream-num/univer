@@ -16,7 +16,6 @@
 
 import { BooleanNumber } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
-
 import { RichText } from '../rich-text';
 
 const h = vi.hoisted(() => ({

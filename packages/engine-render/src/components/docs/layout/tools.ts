@@ -39,7 +39,6 @@ import type {
     ISkeletonResourceReference,
 } from '../../../basics/i-document-skeleton-cached';
 import type { IDocsConfig, IParagraphConfig, ISectionBreakConfig } from '../../../basics/interfaces';
-
 import type { DataStreamTreeNode } from '../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../view-model/document-view-model';
 import type { Hyphen } from './hyphenation/hyphen';

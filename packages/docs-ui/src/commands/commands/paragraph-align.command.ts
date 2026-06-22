@@ -16,7 +16,6 @@
 
 import type { ICommand, IMutationInfo, IParagraphStyle } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-
 import {
     BuildTextUtils,
     CommandType,

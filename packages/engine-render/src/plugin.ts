@@ -16,7 +16,6 @@
 
 import type { IUniverEngineRenderConfig } from './config/config';
 import { createIdentifier, IConfigService, Inject, Injector, merge, Plugin, registerDependencies } from '@univerjs/core';
-
 import pkg from '../package.json';
 import { defaultPluginConfig, ENGINE_RENDER_PLUGIN_CONFIG_KEY } from './config/config';
 import { Engine } from './engine';

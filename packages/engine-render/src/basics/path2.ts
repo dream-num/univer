@@ -15,7 +15,6 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-
 import { Vector2 } from './vector2';
 
 export const INITIAL_Path2: Vector2[] = [new Vector2(0, 0), new Vector2(1, 1)];

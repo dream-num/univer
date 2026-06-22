@@ -35,7 +35,6 @@ import {
 } from '@univerjs/core';
 import { IMessageService } from '@univerjs/ui';
 import enUS from '../locale/en-US';
-
 import { IFindReplaceService } from '../services/find-replace.service';
 
 const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {

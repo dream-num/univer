@@ -16,7 +16,6 @@
 
 import type { Nullable } from '@univerjs/core';
 import type { IDirtyUnitOtherFormulaMap, IOtherFormulaData, IOtherFormulaDataItem } from '../basics/common';
-
 import { createIdentifier, Disposable } from '@univerjs/core';
 
 export interface IOtherFormulaManagerSearchParam {

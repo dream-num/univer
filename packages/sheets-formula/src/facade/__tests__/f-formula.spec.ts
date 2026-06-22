@@ -41,7 +41,6 @@ import {
 } from '../../index';
 import { FormulaCalculationSessionService } from '../../services/formula-calculation-session.service';
 import { createFacadeTestBed } from './create-test-bed';
-
 import '@univerjs/engine-formula/facade';
 import '@univerjs/sheets/facade';
 import '../../facade';

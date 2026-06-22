@@ -15,14 +15,16 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
-
 import type { IWorksheetRangeThemeStyleMutationParams } from '../../basics/interfaces/mutation-interface';
 import {
     CommandType,
     ICommandService,
     IUndoRedoService,
 } from '@univerjs/core';
-import { SetWorksheetRangeThemeStyleMutation, SetWorksheetRangeThemeStyleMutationFactory } from '../mutations/add-worksheet-range-theme.mutation';
+import {
+    SetWorksheetRangeThemeStyleMutation,
+    SetWorksheetRangeThemeStyleMutationFactory,
+} from '../mutations/add-worksheet-range-theme.mutation';
 import { DeleteWorksheetRangeThemeStyleMutation } from '../mutations/delete-worksheet-range-theme.mutation';
 
 export const SetWorksheetRangeThemeStyleCommand: ICommand = {

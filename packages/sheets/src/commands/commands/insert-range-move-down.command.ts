@@ -20,7 +20,6 @@ import type {
     IInsertRowMutationParams,
     IRemoveRowsMutationParams,
 } from '../../basics/interfaces/mutation-interface';
-
 import {
     BooleanNumber,
     CommandType,

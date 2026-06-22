@@ -17,7 +17,6 @@
 import type { IDisposable } from '@univerjs/core';
 import type { IDialogPartMethodOptions } from '../../views/components/dialog-part/interface';
 import type { IDialogService } from './dialog.service';
-
 import { Disposable, Inject, Injector, toDisposable } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { connectInjector } from '../../utils/di';

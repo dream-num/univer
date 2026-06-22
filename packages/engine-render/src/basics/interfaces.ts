@@ -29,7 +29,6 @@ import type {
     ITransformState,
     LocaleService,
 } from '@univerjs/core';
-
 import type { DataStreamTreeNode } from '../components/docs/view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../components/docs/view-model/document-view-model';
 import type {

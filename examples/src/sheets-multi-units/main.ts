@@ -22,7 +22,6 @@ import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
 import { UniverUIPlugin } from '@univerjs/ui';
 import { SwitchUnits } from './switch-units';
-
 import '@univerjs/sheets/facade';
 import '@univerjs/ui/facade';
 import '@univerjs/sheets-ui/facade';

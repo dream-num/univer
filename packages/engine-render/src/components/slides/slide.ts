@@ -16,7 +16,6 @@
 
 import type { Nullable } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent } from '../../basics/i-events';
-
 import type { UniverRenderingContext } from '../../context';
 import type { Scene } from '../../scene';
 import { COLORS, EventSubject } from '@univerjs/core';

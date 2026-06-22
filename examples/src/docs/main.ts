@@ -14,11 +14,9 @@ import { DEFAULT_DOCUMENT_DATA_SIMPLE, loadDebuggerLocale } from '@univerjs/mock
 import zhCN from '@univerjs/mockdata/locales/zh-CN';
 import { UniverUIPlugin } from '@univerjs/ui';
 import { UniverWatermarkPlugin } from '@univerjs/watermark';
-
 import '@univerjs/docs/facade';
 import '@univerjs/docs-ui/facade';
 import '@univerjs/watermark/facade';
-
 import '../global.css';
 
 /* eslint-disable node/prefer-global/process */

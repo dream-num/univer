@@ -55,7 +55,6 @@ import { ReplaySubject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import formulaEnUS from '../../locale/en-US';
 import { UniverRemoteSheetsFormulaPlugin, UniverSheetsFormulaPlugin } from '../../plugin';
-
 import '@univerjs/engine-formula/facade';
 
 const unitId = 'test';

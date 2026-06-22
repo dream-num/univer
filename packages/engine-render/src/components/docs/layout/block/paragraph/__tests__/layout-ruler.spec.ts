@@ -15,7 +15,15 @@
  */
 
 import type { IParagraphConfig } from '../../../../../../basics/interfaces';
-import { BooleanNumber, DataStreamTreeTokenType, GridType, ObjectRelativeFromV, PositionedObjectLayoutType, SpacingRule, WrapTextType } from '@univerjs/core';
+import {
+    BooleanNumber,
+    DataStreamTreeTokenType,
+    GridType,
+    ObjectRelativeFromV,
+    PositionedObjectLayoutType,
+    SpacingRule,
+    WrapTextType,
+} from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { GlyphType, LineType } from '../../../../../../basics/i-document-skeleton-cached';
 import { __testing, getLineHeightMetrics, layoutParagraph, updateInlineDrawingPosition } from '../layout-ruler';

@@ -36,11 +36,20 @@ import {
     IUniverInstanceService,
     RANGE_DIRECTION,
 } from '@univerjs/core';
-
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import { DocumentSkeletonPageType, IRenderManagerService } from '@univerjs/engine-render';
 import { getDocObject } from '../basics/component-tools';
-import { findAboveCell, findBellowCell, findLineBeforeAndAfterTable, findTableAfterLine, findTableBeforeLine, firstLineInCell, firstLineInTable, lastLineInCell, lastLineInTable } from '../basics/table';
+import {
+    findAboveCell,
+    findBellowCell,
+    findLineBeforeAndAfterTable,
+    findTableAfterLine,
+    findTableBeforeLine,
+    firstLineInCell,
+    firstLineInTable,
+    lastLineInCell,
+    lastLineInTable,
+} from '../basics/table';
 import { MoveCursorOperation, MoveSelectionOperation } from '../commands/operations/doc-cursor.operation';
 import { NodePositionConvertToCursor } from '../services/selection/convert-text-range';
 import { getParagraphInfoByGlyph } from '../services/selection/selection-utils';

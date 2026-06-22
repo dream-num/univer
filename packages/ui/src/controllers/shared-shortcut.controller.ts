@@ -16,8 +16,15 @@
 
 import type { IContextService } from '@univerjs/core';
 import type { IShortcutItem } from '../services/shortcut/shortcut.service';
-
-import { Disposable, EDITOR_ACTIVATED, FOCUSING_FX_BAR_EDITOR, FOCUSING_UNIVER_EDITOR, ICommandService, RedoCommand, UndoCommand } from '@univerjs/core';
+import {
+    Disposable,
+    EDITOR_ACTIVATED,
+    FOCUSING_FX_BAR_EDITOR,
+    FOCUSING_UNIVER_EDITOR,
+    ICommandService,
+    RedoCommand,
+    UndoCommand,
+} from '@univerjs/core';
 import { CopyCommand, CutCommand, PasteCommand } from '../services/clipboard/clipboard.command';
 import { KeyCode, MetaKeys } from '../services/shortcut/keycode';
 import { IShortcutService } from '../services/shortcut/shortcut.service';

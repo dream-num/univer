@@ -15,7 +15,6 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-
 import { ErrorType } from '../../basics/error-type';
 import {
     regexTestReferenceTableAllColumn,

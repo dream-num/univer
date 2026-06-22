@@ -18,7 +18,6 @@ import type { Observable } from 'rxjs';
 import type { IAccessor, IDisposable } from '../../common/di';
 import type { Nullable } from '../../shared/types';
 import type { ICommand, IMutationInfo } from '../command/command.service';
-
 import { BehaviorSubject } from 'rxjs';
 import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY } from '../../common/const';
 import { createIdentifier } from '../../common/di';

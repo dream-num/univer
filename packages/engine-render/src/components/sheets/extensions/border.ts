@@ -20,7 +20,7 @@ import type { IDrawInfo } from '../../extension';
 import type { IBorderCache, IBorderCacheItem } from '../interfaces';
 import type { SpreadsheetSkeleton } from '../sheet.render-skeleton';
 import { BorderStyleTypes, Range } from '@univerjs/core';
-import { BORDER_TYPE as BORDER_LTRB, COLOR_BLACK_RGB, FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics/const';
+import { BORDER_TYPE, COLOR_BLACK_RGB, FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics/const';
 import { drawDiagonalLineByBorderType, drawLineByBorderType, getLineWidth, setLineType } from '../../../basics/draw';
 import { SpreadsheetExtensionRegistry } from '../../extension';
 import { SheetExtension } from './sheet-extension';
@@ -128,7 +128,7 @@ export class Border extends SheetExtension {
             let startX = cellStartX;
             let endX = cellEndX;
 
-            if (type !== BORDER_LTRB.TOP && type !== BORDER_LTRB.BOTTOM && type !== BORDER_LTRB.LEFT && type !== BORDER_LTRB.RIGHT) {
+            if (type !== BORDER_TYPE.TOP && type !== BORDER_TYPE.BOTTOM && type !== BORDER_TYPE.LEFT && type !== BORDER_TYPE.RIGHT) {
                 if (isMerged) {
                     return true;
                 }
@@ -169,10 +169,10 @@ export class Border extends SheetExtension {
             if (
                 style === BorderStyleTypes.DOUBLE &&
                 (
-                    type === BORDER_LTRB.LEFT ||
-                    type === BORDER_LTRB.RIGHT ||
-                    type === BORDER_LTRB.TOP ||
-                    type === BORDER_LTRB.BOTTOM
+                    type === BORDER_TYPE.LEFT ||
+                    type === BORDER_TYPE.RIGHT ||
+                    type === BORDER_TYPE.TOP ||
+                    type === BORDER_TYPE.BOTTOM
                 )
             ) {
                 this._renderDoubleBorder({ renderBorderContext, row, col, type, lineWidth, startX, startY, endX, endY });
@@ -182,12 +182,12 @@ export class Border extends SheetExtension {
 
     private _getOverflowExclusion(
         overflowCache: ObjectMatrix<IRange>,
-        type: BORDER_LTRB,
+        type: BORDER_TYPE,
         borderRow: number,
         borderColumn: number
     ) {
         let isDraw = false;
-        if (type === BORDER_LTRB.TOP || type === BORDER_LTRB.BOTTOM) {
+        if (type === BORDER_TYPE.TOP || type === BORDER_TYPE.BOTTOM) {
             return isDraw;
         }
 
@@ -198,12 +198,12 @@ export class Border extends SheetExtension {
             rowArray.forEach((column) => {
                 const rectangle = overflowCache.getValue(row, column)!;
                 const { startColumn, endColumn } = rectangle;
-                if (type === BORDER_LTRB.LEFT && borderColumn > startColumn && borderColumn <= endColumn) {
+                if (type === BORDER_TYPE.LEFT && borderColumn > startColumn && borderColumn <= endColumn) {
                     isDraw = true;
                     return false;
                 }
 
-                if (type === BORDER_LTRB.RIGHT && borderColumn >= startColumn && borderColumn < endColumn) {
+                if (type === BORDER_TYPE.RIGHT && borderColumn >= startColumn && borderColumn < endColumn) {
                     isDraw = true;
                     return false;
                 }
@@ -227,7 +227,7 @@ export class Border extends SheetExtension {
         renderBorderContext: IRenderBorderContext;
         row: number;
         col: number;
-        type: BORDER_LTRB;
+        type: BORDER_TYPE;
         lineWidth: number;
         startX: number;
         startY: number;
@@ -306,7 +306,7 @@ export class Border extends SheetExtension {
             endYOffset: defaultOffset,
         };
 
-        if (type === BORDER_LTRB.LEFT || type === BORDER_LTRB.RIGHT) {
+        if (type === BORDER_TYPE.LEFT || type === BORDER_TYPE.RIGHT) {
             if (topCellBorder.bottom && topCellBorder.bottom.style !== BorderStyleTypes.DOUBLE) {
                 outerLineOffsets.startYOffset = 0;
                 innerLineOffsets.startYOffset = 0;
@@ -316,18 +316,18 @@ export class Border extends SheetExtension {
 
                 if (
                     (
-                        type === BORDER_LTRB.LEFT &&
+                        type === BORDER_TYPE.LEFT &&
                         (leftCellBorder.top?.style === BorderStyleTypes.DOUBLE || leftTopCellBorder.bottom?.style === BorderStyleTypes.DOUBLE)
                     ) ||
                     (
-                        type === BORDER_LTRB.RIGHT &&
+                        type === BORDER_TYPE.RIGHT &&
                         (rightCellBorder.top?.style === BorderStyleTypes.DOUBLE || rightTopCellBorder.bottom?.style === BorderStyleTypes.DOUBLE)
                     )
                 ) {
                     outerLineOffsets.startYOffset = -defaultOffset;
                 } else if (
-                    (type === BORDER_LTRB.LEFT && leftTopCellBorder.bottom && leftTopCellBorder.bottom.style !== BorderStyleTypes.DOUBLE) ||
-                    (type === BORDER_LTRB.RIGHT && rightTopCellBorder.bottom && rightTopCellBorder.bottom.style !== BorderStyleTypes.DOUBLE)
+                    (type === BORDER_TYPE.LEFT && leftTopCellBorder.bottom && leftTopCellBorder.bottom.style !== BorderStyleTypes.DOUBLE) ||
+                    (type === BORDER_TYPE.RIGHT && rightTopCellBorder.bottom && rightTopCellBorder.bottom.style !== BorderStyleTypes.DOUBLE)
                 ) {
                     outerLineOffsets.startYOffset = 0;
                 } else {
@@ -346,18 +346,18 @@ export class Border extends SheetExtension {
 
                 if (
                     (
-                        type === BORDER_LTRB.LEFT &&
+                        type === BORDER_TYPE.LEFT &&
                         (leftCellBorder.bottom?.style === BorderStyleTypes.DOUBLE || leftBottomCellBorder.top?.style === BorderStyleTypes.DOUBLE)
                     ) ||
                     (
-                        type === BORDER_LTRB.RIGHT &&
+                        type === BORDER_TYPE.RIGHT &&
                         (rightCellBorder.bottom?.style === BorderStyleTypes.DOUBLE || rightBottomCellBorder.top?.style === BorderStyleTypes.DOUBLE)
                     )
                 ) {
                     outerLineOffsets.endYOffset = -defaultOffset;
                 } else if (
-                    (type === BORDER_LTRB.LEFT && leftBottomCellBorder.top && leftBottomCellBorder.top.style !== BorderStyleTypes.DOUBLE) ||
-                    (type === BORDER_LTRB.RIGHT && rightBottomCellBorder.top && rightBottomCellBorder.top.style !== BorderStyleTypes.DOUBLE)
+                    (type === BORDER_TYPE.LEFT && leftBottomCellBorder.top && leftBottomCellBorder.top.style !== BorderStyleTypes.DOUBLE) ||
+                    (type === BORDER_TYPE.RIGHT && rightBottomCellBorder.top && rightBottomCellBorder.top.style !== BorderStyleTypes.DOUBLE)
                 ) {
                     outerLineOffsets.endYOffset = 0;
                 } else {
@@ -372,14 +372,14 @@ export class Border extends SheetExtension {
             clearMiddleLine(clearLine);
 
             if (
-                (type === BORDER_LTRB.LEFT && !leftCellBorder.right) ||
-                (type === BORDER_LTRB.RIGHT && !rightCellBorder.left)
+                (type === BORDER_TYPE.LEFT && !leftCellBorder.right) ||
+                (type === BORDER_TYPE.RIGHT && !rightCellBorder.left)
             ) {
                 drawOuterLine(outerLineOffsets);
             }
 
             drawInnerLine(innerLineOffsets);
-        } else if (type === BORDER_LTRB.TOP || type === BORDER_LTRB.BOTTOM) {
+        } else if (type === BORDER_TYPE.TOP || type === BORDER_TYPE.BOTTOM) {
             if (leftCellBorder.right && leftCellBorder.right.style !== BorderStyleTypes.DOUBLE) {
                 outerLineOffsets.startXOffset = 0;
                 innerLineOffsets.startXOffset = 0;
@@ -389,18 +389,18 @@ export class Border extends SheetExtension {
 
                 if (
                     (
-                        type === BORDER_LTRB.TOP &&
+                        type === BORDER_TYPE.TOP &&
                         (topCellBorder.left?.style === BorderStyleTypes.DOUBLE || topLeftCellBorder.right?.style === BorderStyleTypes.DOUBLE)
                     ) ||
                     (
-                        type === BORDER_LTRB.BOTTOM &&
+                        type === BORDER_TYPE.BOTTOM &&
                         (bottomCellBorder.left?.style === BorderStyleTypes.DOUBLE || bottomLeftCellBorder.right?.style === BorderStyleTypes.DOUBLE)
                     )
                 ) {
                     outerLineOffsets.startXOffset = -defaultOffset;
                 } else if (
-                    (type === BORDER_LTRB.TOP && topLeftCellBorder.right && topLeftCellBorder.right.style !== BorderStyleTypes.DOUBLE) ||
-                    (type === BORDER_LTRB.BOTTOM && bottomLeftCellBorder.right && bottomLeftCellBorder.right.style !== BorderStyleTypes.DOUBLE)
+                    (type === BORDER_TYPE.TOP && topLeftCellBorder.right && topLeftCellBorder.right.style !== BorderStyleTypes.DOUBLE) ||
+                    (type === BORDER_TYPE.BOTTOM && bottomLeftCellBorder.right && bottomLeftCellBorder.right.style !== BorderStyleTypes.DOUBLE)
                 ) {
                     outerLineOffsets.startXOffset = 0;
                 } else {
@@ -419,18 +419,18 @@ export class Border extends SheetExtension {
 
                 if (
                     (
-                        type === BORDER_LTRB.TOP &&
+                        type === BORDER_TYPE.TOP &&
                         (topCellBorder.right?.style === BorderStyleTypes.DOUBLE || topRightCellBorder.left?.style === BorderStyleTypes.DOUBLE)
                     ) ||
                     (
-                        type === BORDER_LTRB.BOTTOM &&
+                        type === BORDER_TYPE.BOTTOM &&
                         (bottomCellBorder.right?.style === BorderStyleTypes.DOUBLE || bottomRightCellBorder.left?.style === BorderStyleTypes.DOUBLE)
                     )
                 ) {
                     outerLineOffsets.endXOffset = -defaultOffset;
                 } else if (
-                    (type === BORDER_LTRB.TOP && topRightCellBorder.left && topRightCellBorder.left.style !== BorderStyleTypes.DOUBLE) ||
-                    (type === BORDER_LTRB.BOTTOM && bottomRightCellBorder.left && bottomRightCellBorder.left.style !== BorderStyleTypes.DOUBLE)
+                    (type === BORDER_TYPE.TOP && topRightCellBorder.left && topRightCellBorder.left.style !== BorderStyleTypes.DOUBLE) ||
+                    (type === BORDER_TYPE.BOTTOM && bottomRightCellBorder.left && bottomRightCellBorder.left.style !== BorderStyleTypes.DOUBLE)
                 ) {
                     outerLineOffsets.endXOffset = 0;
                 } else {
@@ -445,8 +445,8 @@ export class Border extends SheetExtension {
             clearMiddleLine(clearLine);
 
             if (
-                (type === BORDER_LTRB.TOP && !topCellBorder.bottom) ||
-                (type === BORDER_LTRB.BOTTOM && !bottomCellBorder.top)
+                (type === BORDER_TYPE.TOP && !topCellBorder.bottom) ||
+                (type === BORDER_TYPE.BOTTOM && !bottomCellBorder.top)
             ) {
                 drawOuterLine(outerLineOffsets);
             }
@@ -464,20 +464,20 @@ export class Border extends SheetExtension {
         let bottom = null;
 
         if (cellBorder) {
-            if (cellBorder[BORDER_LTRB.LEFT] && Object.prototype.hasOwnProperty.call(cellBorder[BORDER_LTRB.LEFT], 'type')) {
-                left = cellBorder[BORDER_LTRB.LEFT] as IBorderCacheItem;
+            if (cellBorder[BORDER_TYPE.LEFT] && Object.prototype.hasOwnProperty.call(cellBorder[BORDER_TYPE.LEFT], 'type')) {
+                left = cellBorder[BORDER_TYPE.LEFT] as IBorderCacheItem;
             }
 
-            if (cellBorder[BORDER_LTRB.RIGHT] && Object.prototype.hasOwnProperty.call(cellBorder[BORDER_LTRB.RIGHT], 'type')) {
-                right = cellBorder[BORDER_LTRB.RIGHT] as IBorderCacheItem;
+            if (cellBorder[BORDER_TYPE.RIGHT] && Object.prototype.hasOwnProperty.call(cellBorder[BORDER_TYPE.RIGHT], 'type')) {
+                right = cellBorder[BORDER_TYPE.RIGHT] as IBorderCacheItem;
             }
 
-            if (cellBorder[BORDER_LTRB.TOP] && Object.prototype.hasOwnProperty.call(cellBorder[BORDER_LTRB.TOP], 'type')) {
-                top = cellBorder[BORDER_LTRB.TOP] as IBorderCacheItem;
+            if (cellBorder[BORDER_TYPE.TOP] && Object.prototype.hasOwnProperty.call(cellBorder[BORDER_TYPE.TOP], 'type')) {
+                top = cellBorder[BORDER_TYPE.TOP] as IBorderCacheItem;
             }
 
-            if (cellBorder[BORDER_LTRB.BOTTOM] && Object.prototype.hasOwnProperty.call(cellBorder[BORDER_LTRB.BOTTOM], 'type')) {
-                bottom = cellBorder[BORDER_LTRB.BOTTOM] as IBorderCacheItem;
+            if (cellBorder[BORDER_TYPE.BOTTOM] && Object.prototype.hasOwnProperty.call(cellBorder[BORDER_TYPE.BOTTOM], 'type')) {
+                bottom = cellBorder[BORDER_TYPE.BOTTOM] as IBorderCacheItem;
             }
         }
 

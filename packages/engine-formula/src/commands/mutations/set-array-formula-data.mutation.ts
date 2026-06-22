@@ -16,7 +16,6 @@
 
 import type { IAccessor, IMutation } from '@univerjs/core';
 import type { IArrayFormulaEmbeddedMap, IArrayFormulaRangeType, IArrayFormulaUnitCellType } from '../../basics/common';
-
 import { CommandType } from '@univerjs/core';
 
 export interface ISetArrayFormulaDataMutationParams {

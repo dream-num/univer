@@ -30,7 +30,6 @@ import { simpleRangePopupDemo } from './custom/custom-range-popup/simple-range-p
 import { customRegisterEvent } from './custom/custom-register-event';
 import { UniverSheetsCustomShortcutPlugin } from './custom/custom-shortcut';
 import ImportCSVButtonPlugin from './custom/import-csv-button';
-
 import '@univerjs/sheets/facade';
 import '@univerjs/ui/facade';
 import '@univerjs/docs/facade';

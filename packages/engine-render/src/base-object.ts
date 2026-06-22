@@ -16,7 +16,6 @@
 
 import type { IGroupBaseBound, ITransformState, Nullable } from '@univerjs/core';
 import type { IDragEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './basics/i-events';
-
 import type { IObjectFullState, ITransformChangeState } from './basics/interfaces';
 import type { ITransformerConfig } from './basics/transformer-config';
 import type { IViewportInfo, Vector2 } from './basics/vector2';

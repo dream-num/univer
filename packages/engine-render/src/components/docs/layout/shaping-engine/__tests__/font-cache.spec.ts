@@ -186,5 +186,4 @@ describe('font cache', () => {
         expect(fromGlyphInfo.width).toBeGreaterThan(0);
         expect(fromGlyphInfo.aba).toBeGreaterThan(0);
     });
-
 });

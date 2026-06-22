@@ -26,6 +26,7 @@ import type {
     ISectionBreak,
     ITextStyle,
     Nullable,
+    PositionedObjectLayoutType,
 } from '@univerjs/core';
 import type {
     IDocumentSkeletonCached,
@@ -62,7 +63,6 @@ import {
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     PageOrientType,
-    PositionedObjectLayoutType,
     SectionType,
     SpacingRule,
     VerticalAlign,

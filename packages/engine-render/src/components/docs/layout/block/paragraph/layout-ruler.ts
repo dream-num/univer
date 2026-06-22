@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { INumberUnit, IParagraphProperties, IParagraphStyle, Nullable } from '@univerjs/core';
+import type { INumberUnit, IParagraphProperties, Nullable } from '@univerjs/core';
 import type {
     IDocumentSkeletonColumn,
     IDocumentSkeletonDivide,

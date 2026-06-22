@@ -526,6 +526,15 @@ importers:
       '@univerjs/preset-docs-core':
         specifier: workspace:*
         version: link:../presets/packages/preset-docs-core
+      '@univerjs/preset-docs-drawing':
+        specifier: workspace:*
+        version: link:../presets/packages/preset-docs-drawing
+      '@univerjs/preset-docs-hyper-link':
+        specifier: workspace:*
+        version: link:../presets/packages/preset-docs-hyper-link
+      '@univerjs/preset-docs-thread-comment':
+        specifier: workspace:*
+        version: link:../presets/packages/preset-docs-thread-comment
       '@univerjs/preset-sheets-core':
         specifier: workspace:*
         version: link:../presets/packages/preset-sheets-core

@@ -1033,6 +1033,62 @@ describe('documents render', () => {
         documents.dispose();
     });
 
+    it('does not clip DOCX tables that extend into margins while fitting the physical page', () => {
+        const bodyPage = createPage(DocumentSkeletonPageType.BODY, '');
+        attachTable(bodyPage);
+        const table = bodyPage.skeTables.get('table-1')!;
+        table.left = -6;
+        table.width = 190;
+        table.tableSource = {
+            docxWidth: {
+                value: '2850',
+                type: 'dxa',
+            },
+        };
+        table.rows[0].cells[0].pageWidth = 190;
+
+        const documents = new Documents('docs-main', {
+            getSkeletonData: () => ({ pages: [bodyPage] }),
+        } as any, {
+            pageLayoutType: PageLayoutType.VERTICAL,
+            pageMarginLeft: 0,
+            pageMarginTop: 0,
+        });
+
+        const ctx = {
+            save: vi.fn(),
+            restore: vi.fn(),
+            getScale: vi.fn(() => ({ scaleX: 1, scaleY: 1 })),
+            beginPath: vi.fn(),
+            rect: vi.fn(),
+            fill: vi.fn(),
+            rectByPrecision: vi.fn(),
+            closePath: vi.fn(),
+            clip: vi.fn(),
+            set fillStyle(_value: string) {},
+        } as any;
+
+        vi.spyOn(documents as any, '_drawTableCell').mockImplementation(() => {});
+
+        (documents as any)._drawTable(
+            ctx,
+            bodyPage,
+            bodyPage.skeTables,
+            [],
+            null,
+            [],
+            {} as any,
+            0,
+            0,
+            {},
+            { scaleX: 1, scaleY: 1 }
+        );
+
+        expect(ctx.clip).not.toHaveBeenCalled();
+
+        documents.dispose();
+    });
+
     it('uses explicit table cell border width and skips no-border markers', () => {
         const skeleton = { getSkeletonData: () => ({ pages: [] }) } as any;
         const documents = new Documents('docs-border', skeleton, {

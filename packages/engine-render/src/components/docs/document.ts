@@ -653,7 +653,9 @@ export class Documents extends DocComponent {
             return null;
         }
 
-        const viewportWidth = Math.max(0, pageWidth - marginLeft - marginRight - tableSkeleton.left);
+        const viewportWidth = isDocxImportedTable(tableSkeleton.tableSource)
+            ? Math.max(0, pageWidth - Math.max(0, marginLeft + tableSkeleton.left))
+            : Math.max(0, pageWidth - marginLeft - marginRight - tableSkeleton.left);
         if (viewportWidth <= 0 || tableSkeleton.width <= viewportWidth) {
             return null;
         }
@@ -1304,6 +1306,10 @@ export class Documents extends DocComponent {
             this.register(extension);
         });
     }
+}
+
+function isDocxImportedTable(tableSource: unknown): boolean {
+    return tableSource != null && typeof tableSource === 'object' && 'docxWidth' in tableSource;
 }
 
 function setTableCellBorderDash(ctx: UniverRenderingContext, dashStyle?: DashStyleType) {

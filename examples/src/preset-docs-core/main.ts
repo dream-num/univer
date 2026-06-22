@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { FUniver, Univer } from '@univerjs/presets';
+
 import { DEFAULT_DOCUMENT_DATA_SIMPLE } from '@univerjs/mockdata';
 
 import { UniverDocsCorePreset } from '@univerjs/preset-docs-core';
@@ -56,13 +58,13 @@ const { univer, univerAPI } = createUniver({
 
 univer.createUnit(UniverInstanceType.UNIVER_DOC, DEFAULT_DOCUMENT_DATA_SIMPLE);
 
+window.univer = univer;
+window.univerAPI = univerAPI;
+
 declare global {
     // eslint-disable-next-line ts/naming-convention
     interface Window {
-        univer?: typeof univer;
-        univerAPI?: typeof univerAPI;
+        univer?: Univer;
+        univerAPI?: FUniver;
     }
 }
-
-window.univer = univer;
-window.univerAPI = univerAPI;

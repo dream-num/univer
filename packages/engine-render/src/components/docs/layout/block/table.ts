@@ -310,7 +310,7 @@ function dealWithTableRow(
     const { trHeight, cantSplit } = rowSource;
     const rowSkeletons: IDocumentSkeletonRow[] = [];
     const { hRule, val } = trHeight;
-    const canRowSplit = cantSplit === BooleanNumber.TRUE && trHeight.hRule === TableRowHeightRule.AUTO;
+    const canRowSplit = cantSplit !== BooleanNumber.TRUE && trHeight.hRule === TableRowHeightRule.AUTO;
     // If the remain height is less than 50 pixels, you can't fit the next line, so you can start typography directly from the second page.
     const MAX_FONT_SIZE = 72;
     const needOpenNewTable = cache.remainHeight <= MAX_FONT_SIZE;

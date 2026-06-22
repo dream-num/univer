@@ -433,6 +433,29 @@ describe('docs table layout', () => {
         expect(result.fromCurrentPage).toBe(true);
     });
 
+    it('lays out splittable auto rows against the remaining page height', () => {
+        const { ctx, curPage, viewModel, tableNode, sectionBreakConfig, tableSource } = createContextAndTable();
+        tableSource.tableRows[0].repeatHeaderRow = BooleanNumber.FALSE;
+        tableSource.tableRows[0].trHeight = {
+            hRule: TableRowHeightRule.EXACT,
+            val: { v: 140 },
+        };
+        tableSource.tableRows[1].trHeight = {
+            hRule: TableRowHeightRule.AUTO,
+            val: { v: 0 },
+        };
+        tableSource.tableRows[1].cantSplit = BooleanNumber.FALSE;
+        createSkeletonCellPagesMock.mockImplementation(
+            (_ctx: unknown, _viewModel: unknown, _cellNode: unknown, _section: unknown, _table: unknown, row: number, _col: number) =>
+                row === 0 ? [makeCellPage(60, 20)] : [makeCellPage(60, 80)]
+        );
+
+        createTableSkeletons(ctx, curPage, viewModel, tableNode, sectionBreakConfig, 240);
+
+        const secondRowCall = createSkeletonCellPagesMock.mock.calls.find((call) => call[5] === 1 && call[6] === 0);
+        expect(secondRowCall?.[7]).toBe(100);
+    });
+
     it('repeats multiple leading header rows on sliced table pages', () => {
         const { ctx, curPage, viewModel, tableNode, sectionBreakConfig, tableSource } = createContextAndTable();
         tableSource.tableRows[1].repeatHeaderRow = BooleanNumber.TRUE;

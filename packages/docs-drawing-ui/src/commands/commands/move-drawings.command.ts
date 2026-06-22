@@ -17,7 +17,13 @@
 import type { IAccessor, ICommand } from '@univerjs/core';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
 import type { IDrawingDocTransform, IUpdateDrawingDocTransformParams } from './update-doc-drawing.command';
-import { CommandType, Direction, ICommandService, IUniverInstanceService, PositionedObjectLayoutType } from '@univerjs/core';
+import {
+    CommandType,
+    Direction,
+    ICommandService,
+    IUniverInstanceService,
+    PositionedObjectLayoutType,
+} from '@univerjs/core';
 import { IDocDrawingService } from '@univerjs/docs-drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { UpdateDrawingDocTransformCommand } from './update-doc-drawing.command';

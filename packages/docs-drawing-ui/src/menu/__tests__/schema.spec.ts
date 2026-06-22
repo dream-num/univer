@@ -14,11 +14,20 @@
  * limitations under the License.
  */
 
-import { DOC_CONTENT_INSERT_MENU_ID, DOC_PARAGRAPH_T_INSERT_BELOW_MENU_ID, DOC_PARAGRAPH_T_INSERT_MENU_ID, EMPTY_PARAGRAPH_MENU_ID, INSERT_BELLOW_MENU_ID } from '@univerjs/docs-ui';
+import {
+    DOC_CONTENT_INSERT_MENU_ID,
+    DOC_PARAGRAPH_T_INSERT_BELOW_MENU_ID,
+    DOC_PARAGRAPH_T_INSERT_MENU_ID,
+    EMPTY_PARAGRAPH_MENU_ID,
+    INSERT_BELLOW_MENU_ID,
+} from '@univerjs/docs-ui';
 import { ContextMenuGroup, ContextMenuPosition } from '@univerjs/ui';
 import { describe, expect, it } from 'vitest';
 import { InsertDocImageCommand } from '../../commands/commands/insert-image.command';
-import { InsertDocEllipseShapeCommand, InsertDocRectangleShapeCommand } from '../../commands/commands/insert-shape.command';
+import {
+    InsertDocEllipseShapeCommand,
+    InsertDocRectangleShapeCommand,
+} from '../../commands/commands/insert-shape.command';
 import { UploadFloatImageMenuFactory } from '../image.menu';
 import { menuSchema } from '../schema';
 import {

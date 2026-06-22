@@ -19,7 +19,11 @@ import { DataValidationOperator, DataValidationType, ICommandService, Univer } f
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { DataValidationModel } from '../../../models/data-validation-model';
 import { UpdateRuleType } from '../../../types/enum/update-rule-type';
-import { AddDataValidationMutation, RemoveDataValidationMutation, UpdateDataValidationMutation } from '../data-validation.mutation';
+import {
+    AddDataValidationMutation,
+    RemoveDataValidationMutation,
+    UpdateDataValidationMutation,
+} from '../data-validation.mutation';
 
 const unitId = 'validation-workbook';
 const subUnitId = 'validation-sheet';

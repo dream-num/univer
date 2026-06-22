@@ -17,10 +17,22 @@
 import type { IRange, Workbook } from '@univerjs/core';
 import type { IRangeProtectionRule } from '@univerjs/sheets';
 import type { IPermissionPanelRule } from '../../../services/permission/sheet-permission-panel.model';
-import { IAuthzIoService, ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
+import {
+    IAuthzIoService,
+    ICommandService,
+    IUniverInstanceService,
+    LocaleService,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { Button } from '@univerjs/design';
-import { ObjectScope, UnitAction, UnitRole } from '@univerjs/protocol';
-import { AddRangeProtectionCommand, AddWorksheetProtectionCommand, EditStateEnum, SetProtectionCommand, UnitObject, ViewStateEnum } from '@univerjs/sheets';
+import { ObjectScope, UnitAction, UnitObject, UnitRole } from '@univerjs/protocol';
+import {
+    AddRangeProtectionCommand,
+    AddWorksheetProtectionCommand,
+    EditStateEnum,
+    SetProtectionCommand,
+    ViewStateEnum,
+} from '@univerjs/sheets';
 import { ISidebarService, useDependency } from '@univerjs/ui';
 import { getUserListEqual } from '../../../common/utils';
 import { UNIVER_SHEET_PERMISSION_PANEL } from '../../../consts/permission';

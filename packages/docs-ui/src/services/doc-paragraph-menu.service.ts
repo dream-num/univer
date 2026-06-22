@@ -18,14 +18,30 @@ import type { DocumentDataModel, ICustomBlock, ICustomTable, IDocumentBlockRange
 import type { IBoundRectNoAngle, IRenderContext, IRenderModule, ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IMutiPageParagraphBound, ITableBound, ITableParagraphBound } from './doc-event-manager.service';
 import type { IEditorInputConfig } from './selection/doc-selection-render.service';
-import { BlockType, DataStreamTreeTokenType, Disposable, DOC_RANGE_TYPE, Inject, isInternalEditorID, PresetListType } from '@univerjs/core';
+import {
+    BlockType,
+    DataStreamTreeTokenType,
+    Disposable,
+    DOC_RANGE_TYPE,
+    Inject,
+    isInternalEditorID,
+    PresetListType,
+} from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import { DocumentEditArea } from '@univerjs/engine-render';
 import { BehaviorSubject, combineLatest, first, throttleTime } from 'rxjs';
 import { VIEWPORT_KEY } from '../basics/docs-view-key';
-import { DOC_PARAGRAPH_MENU_COMPONENT_KEY, DOC_TABLE_BLOCK_MENU_COMPONENT_KEY } from '../views/paragraph-menu/component-keys';
+import {
+    DOC_PARAGRAPH_MENU_COMPONENT_KEY,
+    DOC_TABLE_BLOCK_MENU_COMPONENT_KEY,
+} from '../views/paragraph-menu/component-keys';
 import { DocEventManagerService } from './doc-event-manager.service';
-import { calcDocRangePositions, DocCanvasPopManagerService, transformBound2OffsetBound, transformOffset2Bound } from './doc-popup-manager.service';
+import {
+    calcDocRangePositions,
+    DocCanvasPopManagerService,
+    transformBound2OffsetBound,
+    transformOffset2Bound,
+} from './doc-popup-manager.service';
 import { DocFloatMenuService } from './float-menu.service';
 import { DocSelectionRenderService } from './selection/doc-selection-render.service';
 

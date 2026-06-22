@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDrawingParam, ISrcRect, Nullable, Serializable } from '@univerjs/core';
-import type { ImageSourceType } from '../services/image-io.service';
+import type { IDrawingParam, ImageSourceType, ISrcRect, Nullable, Serializable } from '@univerjs/core';
 
 export interface IImageData extends IDrawingParam {
     imageSourceType: ImageSourceType;

@@ -33,7 +33,12 @@ import {
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
-import { DocSelectionManagerService, DocSkeletonManagerService, DocStateChangeManagerService, DocStateEmitService } from '@univerjs/docs';
+import {
+    DocSelectionManagerService,
+    DocSkeletonManagerService,
+    DocStateChangeManagerService,
+    DocStateEmitService,
+} from '@univerjs/docs';
 import { DocumentViewModel, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { BehaviorSubject, takeUntil } from 'rxjs';
 import { DocIMEInputManagerService } from '../../../services/doc-ime-input-manager.service';

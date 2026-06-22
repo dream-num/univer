@@ -264,4 +264,3 @@ export { type IPermissionDetailUserPartProps } from './views/permission/panel-de
 export { type IBaseSheetBarProps } from './views/sheet-bar/sheet-bar-tabs/SheetBarItem';
 export { type IStatisticItem } from './views/status-bar/CopyableStatisticItem';
 export { functionDisplayNames } from './views/status-bar/CopyableStatisticItem';
-export { SheetCopyDownCommand, SheetCopyRightCommand } from '@univerjs/sheets';

@@ -21,7 +21,11 @@ import { DefinedNamesService, IDefinedNamesService } from '../../../services/def
 import { ISuperTableService, SuperTableService } from '../../../services/super-table.service';
 import { RegisterFunctionMutation } from '../register-function.mutation';
 import { SetArrayFormulaDataMutation } from '../set-array-formula-data.mutation';
-import { RemoveDefinedNameMutation, SetDefinedNameMutation, SetDefinedNameMutationFactory } from '../set-defined-name.mutation';
+import {
+    RemoveDefinedNameMutation,
+    SetDefinedNameMutation,
+    SetDefinedNameMutationFactory,
+} from '../set-defined-name.mutation';
 import { RemoveFeatureCalculationMutation, SetFeatureCalculationMutation } from '../set-feature-calculation.mutation';
 import {
     SetCellFormulaDependencyCalculationMutation,
@@ -42,7 +46,11 @@ import {
 } from '../set-formula-calculation.mutation';
 import { SetFormulaDataMutation } from '../set-formula-data.mutation';
 import { SetImageFormulaDataMutation } from '../set-image-formula-data.mutation';
-import { RemoveSuperTableMutation, SetSuperTableMutation, SetSuperTableOptionMutation } from '../set-super-table.mutation';
+import {
+    RemoveSuperTableMutation,
+    SetSuperTableMutation,
+    SetSuperTableOptionMutation,
+} from '../set-super-table.mutation';
 
 describe('formula reference mutations', () => {
     let univer: Univer;

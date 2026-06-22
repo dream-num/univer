@@ -19,7 +19,16 @@ import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IUniverDocsUIConfig } from '../config/config';
 import type { IMutiPageParagraphBound } from '../services/doc-event-manager.service';
 import type { ISideMenuItem } from './SideMenu';
-import { debounce, fromEventSubject, getPlainText, ICommandService, isInternalEditorID, IUniverInstanceService, NamedStyleType, UniverInstanceType } from '@univerjs/core';
+import {
+    debounce,
+    fromEventSubject,
+    getPlainText,
+    ICommandService,
+    isInternalEditorID,
+    IUniverInstanceService,
+    NamedStyleType,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useConfigValue, useDependency, useEvent, useObservable } from '@univerjs/ui';

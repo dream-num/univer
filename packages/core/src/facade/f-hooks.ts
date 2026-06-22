@@ -15,7 +15,17 @@
  */
 
 import type { IDisposable, IUndoRedoItem } from '@univerjs/core';
-import { ICommandService, Inject, Injector, IUndoRedoService, LifecycleService, LifecycleStages, RedoCommand, toDisposable, UndoCommand } from '@univerjs/core';
+import {
+    ICommandService,
+    Inject,
+    Injector,
+    IUndoRedoService,
+    LifecycleService,
+    LifecycleStages,
+    RedoCommand,
+    toDisposable,
+    UndoCommand,
+} from '@univerjs/core';
 import { filter } from 'rxjs';
 import { FBase } from './f-base';
 

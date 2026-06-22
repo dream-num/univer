@@ -16,10 +16,25 @@
 
 import type { DocumentDataModel, IDisposable, Nullable } from '@univerjs/core';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
-import { DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, Inject, isInternalEditorID, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import {
+    DrawingTypeEnum,
+    FOCUSING_COMMON_DRAWINGS,
+    ICommandService,
+    IContextService,
+    Inject,
+    isInternalEditorID,
+    IUniverInstanceService,
+    RxDisposable,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
-import { COMPONENT_IMAGE_POPUP_MENU, ImageCropperObject, ImageResetSizeOperation, OpenImageCropOperation } from '@univerjs/drawing-ui';
+import {
+    COMPONENT_IMAGE_POPUP_MENU,
+    ImageCropperObject,
+    ImageResetSizeOperation,
+    OpenImageCropOperation,
+} from '@univerjs/drawing-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { takeUntil } from 'rxjs';
 import { RemoveDocDrawingCommand } from '../commands/commands/remove-doc-drawing.command';

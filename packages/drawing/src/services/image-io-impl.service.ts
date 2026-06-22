@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
+import type { IImageIoService, IImageIoServiceParam, Nullable } from '@univerjs/core';
 import type { Observable } from 'rxjs';
-import type { IImageIoService, IImageIoServiceParam } from './image-io.service';
-import { generateRandomId } from '@univerjs/core';
+import { generateRandomId, ImageSourceType, ImageUploadStatusType } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { DRAWING_IMAGE_ALLOW_IMAGE_LIST, getDrawingImageAllowSize } from '../basics/config';
-import { ImageSourceType, ImageUploadStatusType } from './image-io.service';
 
 export class ImageIoService implements IImageIoService {
     private _waitCount = 0;

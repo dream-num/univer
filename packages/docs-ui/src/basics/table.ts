@@ -15,7 +15,13 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import type { IDocumentSkeletonCached, IDocumentSkeletonLine, IDocumentSkeletonPage, IDocumentSkeletonRow, IDocumentSkeletonTable } from '@univerjs/engine-render';
+import type {
+    IDocumentSkeletonCached,
+    IDocumentSkeletonLine,
+    IDocumentSkeletonPage,
+    IDocumentSkeletonRow,
+    IDocumentSkeletonTable,
+} from '@univerjs/engine-render';
 import { DocumentSkeletonPageType, getLastColumn, getLastLine, lineIterator } from '@univerjs/engine-render';
 
 export function firstLineInTable(table: IDocumentSkeletonTable) {

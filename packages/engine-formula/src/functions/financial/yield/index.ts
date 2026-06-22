@@ -17,7 +17,13 @@
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { getDateSerialNumberByObject, getTwoDateDaysByBasis } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
-import { calculateCoupdaybs, calculateCoupdays, calculateCoupnum, calculatePrice, validCouppcdIsGte0ByTwoDate } from '../../../basics/financial';
+import {
+    calculateCoupdaybs,
+    calculateCoupdays,
+    calculateCoupnum,
+    calculatePrice,
+    validCouppcdIsGte0ByTwoDate,
+} from '../../../basics/financial';
 import { checkVariantsErrorIsNullorArrayOrBoolean } from '../../../engine/utils/check-variant-error';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';

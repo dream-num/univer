@@ -30,9 +30,18 @@ import type {
     WorksheetMode,
     WorksheetPermissionSnapshot,
 } from './permission-types';
-import { cellToRange, generateRandomId, IAuthzIoService, ICommandService, Inject, Injector, IPermissionService, Rectangle } from '@univerjs/core';
+import {
+    cellToRange,
+    generateRandomId,
+    IAuthzIoService,
+    ICommandService,
+    Inject,
+    Injector,
+    IPermissionService,
+    Rectangle,
+} from '@univerjs/core';
 import { FBase } from '@univerjs/core/facade';
-import { UnitAction, UnitRole } from '@univerjs/protocol';
+import { UnitAction, UnitObject, UnitRole } from '@univerjs/protocol';
 import {
     AddRangeProtectionMutation,
     AddWorksheetProtectionMutation,
@@ -44,7 +53,6 @@ import {
     RangeProtectionPermissionEditPoint,
     RangeProtectionPermissionViewPoint,
     RangeProtectionRuleModel,
-    UnitObject,
     ViewStateEnum,
     WorksheetProtectionPointModel,
     WorksheetProtectionRuleModel,
@@ -52,7 +60,13 @@ import {
 import { FRangeProtectionRule } from './f-range-protection-rule';
 import { WORKSHEET_PERMISSION_POINT_MAP } from './permission-point-map';
 import { WorksheetPermissionPoint } from './permission-types';
-import { determineEditState, determineScope, determineViewState, getListRangeProtectionRules, handleWorksheetRangePermissionIsEmpty } from './util';
+import {
+    determineEditState,
+    determineScope,
+    determineViewState,
+    getListRangeProtectionRules,
+    handleWorksheetRangePermissionIsEmpty,
+} from './util';
 
 /**
  * Implementation class for WorksheetPermission

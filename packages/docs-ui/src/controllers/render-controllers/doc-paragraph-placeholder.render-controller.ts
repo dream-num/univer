@@ -15,9 +15,29 @@
  */
 
 import type { DocumentDataModel, IDocumentBody, IParagraph, Nullable } from '@univerjs/core';
-import type { Documents, IDocumentSkeletonColumn, IDocumentSkeletonLine, IDocumentSkeletonPage, IDocumentSkeletonSection, IPageRenderConfig, IRenderContext, IRenderModule, UniverRenderingContext } from '@univerjs/engine-render';
+import type {
+    Documents,
+    IDocumentSkeletonColumn,
+    IDocumentSkeletonLine,
+    IDocumentSkeletonPage,
+    IDocumentSkeletonSection,
+    IPageRenderConfig,
+    IRenderContext,
+    IRenderModule,
+    UniverRenderingContext,
+} from '@univerjs/engine-render';
 import type { IUniverDocsUIConfig } from '../../config/config';
-import { DataStreamTreeTokenType, Disposable, DocumentFlavor, IConfigService, Inject, isInternalEditorID, LocaleService, NAMED_STYLE_MAP, NamedStyleType } from '@univerjs/core';
+import {
+    DataStreamTreeTokenType,
+    Disposable,
+    DocumentFlavor,
+    IConfigService,
+    Inject,
+    isInternalEditorID,
+    LocaleService,
+    NAMED_STYLE_MAP,
+    NamedStyleType,
+} from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { DOCS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 

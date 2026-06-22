@@ -16,7 +16,14 @@
 
 import type { ICommand, ICommandInfo, JSONXActions } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import { CommandType, DocumentFlavor, ICommandService, IUniverInstanceService, JSONX, ObjectRelativeFromV } from '@univerjs/core';
+import {
+    CommandType,
+    DocumentFlavor,
+    ICommandService,
+    IUniverInstanceService,
+    JSONX,
+    ObjectRelativeFromV,
+} from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';

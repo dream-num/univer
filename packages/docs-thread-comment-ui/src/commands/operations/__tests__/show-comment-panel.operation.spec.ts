@@ -17,7 +17,14 @@
 import type { DocumentDataModel, IDisposable, IDocumentData } from '@univerjs/core';
 import type { IRender } from '@univerjs/engine-render';
 import type { ISidebarMethodOptions } from '@univerjs/ui';
-import { Disposable, ICommandService, IUniverInstanceService, toDisposable, Univer, UniverInstanceType } from '@univerjs/core';
+import {
+    Disposable,
+    ICommandService,
+    IUniverInstanceService,
+    toDisposable,
+    Univer,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
@@ -26,7 +33,11 @@ import { Subject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { DEFAULT_DOC_SUBUNIT_ID, DOCS_THREAD_COMMENT_PANEL } from '../../../common/const';
 import { DocThreadCommentService } from '../../../services/doc-thread-comment.service';
-import { ShowCommentPanelOperation, StartAddCommentOperation, ToggleCommentPanelOperation } from '../show-comment-panel.operation';
+import {
+    ShowCommentPanelOperation,
+    StartAddCommentOperation,
+    ToggleCommentPanelOperation,
+} from '../show-comment-panel.operation';
 
 const unitId = 'doc-thread-comment-operation-doc';
 

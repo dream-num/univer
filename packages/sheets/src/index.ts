@@ -658,4 +658,3 @@ export {
 export { SheetSkeletonService } from './skeleton/skeleton.service';
 export type { ISheetSkeletonManagerParam } from './skeleton/skeleton.service';
 export { attachPrimaryWithCoord, attachRangeWithCoord, attachSelectionWithCoord } from './skeleton/util';
-export { UnitAction, UnitObject } from '@univerjs/protocol';

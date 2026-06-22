@@ -17,7 +17,12 @@
 import type { ICommand, IDisposable, IDocumentData, Univer } from '@univerjs/core';
 import type { IInsertTextCommandParams } from '@univerjs/docs';
 import { awaitTime, CustomRangeType, Direction, ICommandService, IUniverInstanceService } from '@univerjs/core';
-import { DocSelectionManagerService, InsertTextCommand, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
+import {
+    DocSelectionManagerService,
+    InsertTextCommand,
+    RichTextEditingMutation,
+    SetTextSelectionsOperation,
+} from '@univerjs/docs';
 import { DeleteLeftCommand, DocCanvasPopManagerService, MoveCursorOperation } from '@univerjs/docs-ui';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { AddDocMentionCommand, DeleteDocMentionCommand } from '../commands/commands/doc-mention.command';

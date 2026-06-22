@@ -16,8 +16,17 @@
 
 import type { ICommandInfo } from '@univerjs/core';
 import type { ISetArrayFormulaDataMutationParams } from '../commands/mutations/set-array-formula-data.mutation';
-import type { ISetFormulaCalculationStartMutation, ISetFormulaDependencyCalculationMutation, ISetFormulaStringBatchCalculationMutation, ISetQueryFormulaDependencyAllMutation, ISetQueryFormulaDependencyMutation } from '../commands/mutations/set-formula-calculation.mutation';
-import type { IFormulaDependencyTreeJson, IFormulaDependentsAndInRangeResults } from '../engine/dependency/dependency-tree';
+import type {
+    ISetFormulaCalculationStartMutation,
+    ISetFormulaDependencyCalculationMutation,
+    ISetFormulaStringBatchCalculationMutation,
+    ISetQueryFormulaDependencyAllMutation,
+    ISetQueryFormulaDependencyMutation,
+} from '../commands/mutations/set-formula-calculation.mutation';
+import type {
+    IFormulaDependencyTreeJson,
+    IFormulaDependentsAndInRangeResults,
+} from '../engine/dependency/dependency-tree';
 import type { IFormulaDirtyData } from '../services/current-data.service';
 import type { IAllRuntimeData } from '../services/runtime.service';
 import { Disposable, ICommandService, Inject } from '@univerjs/core';

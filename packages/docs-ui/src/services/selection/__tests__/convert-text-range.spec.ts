@@ -17,7 +17,13 @@
 import type { INodePosition } from '@univerjs/engine-render';
 import { DocumentSkeletonPageType, setDocsTableRenderViewportProvider } from '@univerjs/engine-render';
 import { afterEach, describe, expect, it } from 'vitest';
-import { compareNodePosition, compareNodePositionLogic, getOneTextSelectionRange, NodePositionConvertToCursor, pushToPoints } from '../convert-text-range';
+import {
+    compareNodePosition,
+    compareNodePositionLogic,
+    getOneTextSelectionRange,
+    NodePositionConvertToCursor,
+    pushToPoints,
+} from '../convert-text-range';
 import { getAnchorBounding, getLineBounding } from '../text-range';
 
 describe('selection convert text range helpers', () => {

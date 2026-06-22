@@ -29,7 +29,14 @@ import type {
     INodePosition,
     IPoint,
 } from '@univerjs/engine-render';
-import { DocumentSkeletonPageType, getDocsTableRenderViewport, getPageFromPath, getTableIdAndSliceIndex, GlyphType, Liquid } from '@univerjs/engine-render';
+import {
+    DocumentSkeletonPageType,
+    getDocsTableRenderViewport,
+    getPageFromPath,
+    getTableIdAndSliceIndex,
+    GlyphType,
+    Liquid,
+} from '@univerjs/engine-render';
 
 export enum NodePositionStateType {
     NORMAL,

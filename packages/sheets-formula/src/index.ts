@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-export { type IInsertFunction, type IInsertFunctionCommandParams, InsertFunctionCommand } from './commands/commands/insert-function.command';
+export { InsertFunctionCommand } from './commands/commands/insert-function.command';
+export type { IInsertFunction, IInsertFunctionCommandParams } from './commands/commands/insert-function.command';
 export { QuickSumCommand } from './commands/commands/quick-sum.command';
 export { CalculationMode, PLUGIN_CONFIG_KEY_BASE } from './config/config';
 export type { IUniverSheetsFormulaBaseConfig, IUniverSheetsFormulaRemoteConfig } from './config/config';
@@ -30,9 +31,16 @@ export type { ISearchItem, ISearchItemWithType } from './services/description.se
 export { FormulaCalculationSessionService } from './services/formula-calculation-session.service';
 export type { IFormulaCalculationSessionState } from './services/formula-calculation-session.service';
 export { FormulaRefRangeService } from './services/formula-ref-range.service';
-export type { IRegisterAsyncFunction, IRegisterFunction, ISingleFunctionRegisterParams } from './services/register-function.service';
+export type {
+    IRegisterAsyncFunction,
+    IRegisterFunction,
+    ISingleFunctionRegisterParams,
+} from './services/register-function.service';
 export type { IRegisterFunctionParams, IUnregisterFunctionParams } from './services/register-function.service';
 export { RegisterFunctionService } from './services/register-function.service';
 export { IRegisterFunctionService } from './services/register-function.service';
-export { IRemoteRegisterFunctionService, RemoteRegisterFunctionService } from './services/remote/remote-register-function.service';
+export {
+    IRemoteRegisterFunctionService,
+    RemoteRegisterFunctionService,
+} from './services/remote/remote-register-function.service';
 export { calculateFormula } from './util/calculate';

@@ -14,15 +14,34 @@
  * limitations under the License.
  */
 
-export { drawingPositionToTransform, transformToAxisAlignPosition, transformToDrawingPosition } from './basics/transform-position';
-export { type IInsertDrawingCommandParams, InsertSheetDrawingCommand } from './commands/commands/insert-sheet-drawing.command';
-export { type IDeleteDrawingCommandParam, type IDeleteDrawingCommandParams, RemoveSheetDrawingCommand } from './commands/commands/remove-sheet-drawing.command';
-export { type ISetDrawingArrangeCommandParams, SetDrawingArrangeCommand } from './commands/commands/set-drawing-arrange.command';
-export { type ISetDrawingCommandParams, SetSheetDrawingCommand } from './commands/commands/set-sheet-drawing.command';
-export { DrawingApplyType, type ISetDrawingApplyMutationParams, SetDrawingApplyMutation } from './commands/mutations/set-drawing-apply.mutation';
+export {
+    drawingPositionToTransform,
+    transformToAxisAlignPosition,
+    transformToDrawingPosition,
+} from './basics/transform-position';
+export { InsertSheetDrawingCommand } from './commands/commands/insert-sheet-drawing.command';
+export type { IInsertDrawingCommandParams } from './commands/commands/insert-sheet-drawing.command';
+export { RemoveSheetDrawingCommand } from './commands/commands/remove-sheet-drawing.command';
+export type {
+    IDeleteDrawingCommandParam,
+    IDeleteDrawingCommandParams,
+} from './commands/commands/remove-sheet-drawing.command';
+export { SetDrawingArrangeCommand } from './commands/commands/set-drawing-arrange.command';
+export type { ISetDrawingArrangeCommandParams } from './commands/commands/set-drawing-arrange.command';
+export { SetSheetDrawingCommand } from './commands/commands/set-sheet-drawing.command';
+export type { ISetDrawingCommandParams } from './commands/commands/set-sheet-drawing.command';
+export { DrawingApplyType, SetDrawingApplyMutation } from './commands/mutations/set-drawing-apply.mutation';
+export type { ISetDrawingApplyMutationParams } from './commands/mutations/set-drawing-apply.mutation';
 export { ClearSheetDrawingTransformerOperation } from './commands/operations/clear-drawing-transformer.operation';
 export type { IUniverSheetsDrawingConfig } from './config/config';
 export { SHEET_DRAWING_PLUGIN } from './controllers/sheet-drawing.controller';
 export { UniverSheetsDrawingPlugin } from './plugin';
 export { ISheetDrawingService, SheetDrawingAnchorType } from './services/sheet-drawing.service';
-export type { IFloatDomData, ISheetDrawing, ISheetDrawingPosition, ISheetFloatDom, ISheetImage, ISheetShape } from './services/sheet-drawing.service';
+export type {
+    IFloatDomData,
+    ISheetDrawing,
+    ISheetDrawingPosition,
+    ISheetFloatDom,
+    ISheetImage,
+    ISheetShape,
+} from './services/sheet-drawing.service';

@@ -18,7 +18,8 @@ import './global.css';
 
 export { DeleteDrawingsCommand } from './commands/commands/delete-drawings.command';
 export { GroupSheetDrawingCommand } from './commands/commands/group-sheet-drawing.command';
-export { type IInsertImageCommandParams, InsertFloatImageCommand } from './commands/commands/insert-image.command';
+export { InsertFloatImageCommand } from './commands/commands/insert-image.command';
+export type { IInsertImageCommandParams } from './commands/commands/insert-image.command';
 export { MoveDrawingsCommand } from './commands/commands/move-drawings.command';
 export { SaveCellImagesCommand } from './commands/commands/save-cell-images.command';
 export { UngroupSheetDrawingCommand } from './commands/commands/ungroup-sheet-drawing.command';
@@ -29,19 +30,12 @@ export { SheetsDrawingGroupCopyPasteController } from './controllers/sheet-drawi
 export { SheetDrawingUpdateController } from './controllers/sheet-drawing-update.controller';
 export { SHEETS_IMAGE_MENU_ID } from './menu/image.menu';
 export { UniverSheetsDrawingUIPlugin } from './plugin';
-export {
-    BatchSaveImagesService,
-    FileNamePart,
-    type IBatchSaveImagesConfig,
-    IBatchSaveImagesService,
-    type ICellImageInfo,
-} from './services/batch-save-images.service';
+export { BatchSaveImagesService, FileNamePart, IBatchSaveImagesService } from './services/batch-save-images.service';
+export type { IBatchSaveImagesConfig, ICellImageInfo } from './services/batch-save-images.service';
 export {
     calcSheetFloatDomPosition,
-    type ICanvasFloatDom,
-    type ICanvasFloatDomInfo,
-    type IDOMAnchor,
     SHEET_FLOAT_DOM_PREFIX,
     SheetCanvasFloatDomManagerService,
 } from './services/canvas-float-dom-manager.service';
+export type { ICanvasFloatDom, ICanvasFloatDomInfo, IDOMAnchor } from './services/canvas-float-dom-manager.service';
 export { SheetDrawingAnchor } from './views/sheet-image-panel/SheetDrawingAnchor';

@@ -14,21 +14,35 @@
  * limitations under the License.
  */
 
-export { AddHyperLinkCommand, AddRichHyperLinkCommand, type IAddHyperLinkCommandParams, type IAddRichHyperLinkCommandParams } from './commands/commands/add-hyper-link.command';
-export { CancelHyperLinkCommand, CancelRichHyperLinkCommand, type ICancelHyperLinkCommandParams, type ICancelRichHyperLinkCommandParams } from './commands/commands/remove-hyper-link.command';
-export { type IUpdateHyperLinkCommandParams, type IUpdateRichHyperLinkCommandParams, UpdateHyperLinkCommand, UpdateRichHyperLinkCommand } from './commands/commands/update-hyper-link.command';
-export { AddHyperLinkMutation, type IAddHyperLinkMutationParams } from './commands/mutations/add-hyper-link.mutation';
-export { type IRemoveHyperLinkMutationParams, RemoveHyperLinkMutation } from './commands/mutations/remove-hyper-link.mutation';
-export {
-    type IUpdateHyperLinkMutationParams,
-    type IUpdateHyperLinkRefMutationParams,
-    UpdateHyperLinkMutation,
-    UpdateHyperLinkRefMutation,
+export { AddHyperLinkCommand, AddRichHyperLinkCommand } from './commands/commands/add-hyper-link.command';
+export type {
+    IAddHyperLinkCommandParams,
+    IAddRichHyperLinkCommandParams,
+} from './commands/commands/add-hyper-link.command';
+export { CancelHyperLinkCommand, CancelRichHyperLinkCommand } from './commands/commands/remove-hyper-link.command';
+export type {
+    ICancelHyperLinkCommandParams,
+    ICancelRichHyperLinkCommandParams,
+} from './commands/commands/remove-hyper-link.command';
+export { UpdateHyperLinkCommand, UpdateRichHyperLinkCommand } from './commands/commands/update-hyper-link.command';
+export type {
+    IUpdateHyperLinkCommandParams,
+    IUpdateRichHyperLinkCommandParams,
+} from './commands/commands/update-hyper-link.command';
+export { AddHyperLinkMutation } from './commands/mutations/add-hyper-link.mutation';
+export type { IAddHyperLinkMutationParams } from './commands/mutations/add-hyper-link.mutation';
+export { RemoveHyperLinkMutation } from './commands/mutations/remove-hyper-link.mutation';
+export type { IRemoveHyperLinkMutationParams } from './commands/mutations/remove-hyper-link.mutation';
+export { UpdateHyperLinkMutation, UpdateHyperLinkRefMutation } from './commands/mutations/update-hyper-link.mutation';
+export type {
+    IUpdateHyperLinkMutationParams,
+    IUpdateHyperLinkRefMutationParams,
 } from './commands/mutations/update-hyper-link.mutation';
 export type { IUniverSheetsHyperLinkConfig } from './config/config';
 export { HyperLinkModel } from './models/hyper-link.model';
 export { UniverSheetsHyperLinkPlugin } from './plugin';
-export { type ISheetHyperLinkInfo, type ISheetUrlParams, SheetsHyperLinkParserService } from './services/parser.service';
+export { SheetsHyperLinkParserService } from './services/parser.service';
+export type { ISheetHyperLinkInfo, ISheetUrlParams } from './services/parser.service';
 export { ERROR_RANGE } from './types/const';
 export { SheetHyperLinkType } from './types/enums/hyper-link-type';
 export type { ICellLinkContent, ISheetHyperLink } from './types/interfaces/i-hyper-link';

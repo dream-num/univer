@@ -3,6 +3,7 @@ export type { IUniverEslintConfigOptions } from './config';
 export {
     facadePreset,
     headerPreset,
+    indexEntryPreset,
     noBarrelImportPreset,
     penetratingPreset,
     specPreset,

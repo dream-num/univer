@@ -53,7 +53,8 @@ export { mixinClass } from './common/mixin';
 export { isNumeric, isSafeNumeric, willLoseNumericPrecision } from './common/number';
 export { Registry, RegistryAsMap } from './common/registry';
 export { requestImmediateMacroTask } from './common/request-immediate-macro-task';
-export { type ISequenceExecuteResult, sequence, sequenceAsync } from './common/sequence';
+export { sequence, sequenceAsync } from './common/sequence';
+export type { ISequenceExecuteResult } from './common/sequence';
 export { mergeSets } from './common/set';
 export { UnitModel, UniverInstanceType } from './common/unit';
 export { isSafeUrl, normalizeUrl, resolveWithBasePath } from './common/url';
@@ -72,13 +73,8 @@ export {
 } from './docs/data-model/rich-text-builder';
 export { DEFAULT_DOCUMENT_SUB_COMPONENT_ID } from './docs/data-model/subdocument';
 export { ActionIterator } from './docs/data-model/text-x/action-iterator';
-export {
-    type IDeleteAction,
-    type IInsertAction,
-    type IRetainAction,
-    type TextXAction,
-    TextXActionType,
-} from './docs/data-model/text-x/action-types';
+export { TextXActionType } from './docs/data-model/text-x/action-types';
+export type { IDeleteAction, IInsertAction, IRetainAction, TextXAction } from './docs/data-model/text-x/action-types';
 export { normalizeTextRuns } from './docs/data-model/text-x/apply-utils/common';
 export { updateAttributeByDelete } from './docs/data-model/text-x/apply-utils/delete-apply';
 export { updateAttributeByInsert } from './docs/data-model/text-x/apply-utils/insert-apply';
@@ -103,48 +99,54 @@ export {
     cloneBodyWithFreshParagraphIds,
     cloneParagraphWithId,
     createParagraphId,
-    type IParagraphIdScope,
     PARAGRAPH_ID_PREFIX,
 } from './docs/paragraph-id';
-export { EventState, EventSubject, fromEventSubject, type IEventObserver } from './observer/observable';
+export type { IParagraphIdScope } from './docs/paragraph-id';
+export { EventState, EventSubject, fromEventSubject } from './observer/observable';
+export type { IEventObserver } from './observer/observable';
 export { AuthzIoLocalService } from './services/authz-io/authz-io-local.service';
 export { IAuthzIoService } from './services/authz-io/type';
 export {
     COMMAND_LOG_EXECUTION_CONFIG_KEY,
-    type CommandListener,
     CommandService,
     CommandType,
-    type ICommand,
-    type ICommandInfo,
     ICommandService,
-    type IExecutionOptions,
-    type IMultiCommand,
-    type IMutation,
-    type IMutationCommonParams,
-    type IMutationInfo,
-    type IOperation,
-    type IOperationInfo,
     NilCommand,
     sequenceExecute,
     sequenceExecuteAsync,
+} from './services/command/command.service';
+export type {
+    CommandListener,
+    ICommand,
+    ICommandInfo,
+    IExecutionOptions,
+    IMultiCommand,
+    IMutation,
+    IMutationCommonParams,
+    IMutationInfo,
+    IOperation,
+    IOperationInfo,
 } from './services/command/command.service';
 export { IConfigService } from './services/config/config.service';
 export { ConfigService } from './services/config/config.service';
 export { IConfirmService, TestConfirmService } from './services/confirm/confirm.service';
 export * from './services/context/context';
 export { ContextService, IContextService } from './services/context/context.service';
-export { ErrorService, type IError } from './services/error/error.service';
+export { ErrorService } from './services/error/error.service';
+export type { IError } from './services/error/error.service';
 export { IImageIoService, ImageSourceType, ImageUploadStatusType } from './services/image-io/image-io.service';
 export type { IImageIoServiceParam } from './services/image-io/image-io.service';
 export { IURLImageService } from './services/image-io/url-image.service';
-export { type ICreateUnitOptions, IUniverInstanceService, UniverInstanceService } from './services/instance/instance.service';
+export { IUniverInstanceService, UniverInstanceService } from './services/instance/instance.service';
+export type { ICreateUnitOptions } from './services/instance/instance.service';
 export { LifecycleStages } from './services/lifecycle/lifecycle';
 export { LifecycleService, LifecycleUnreachableError } from './services/lifecycle/lifecycle.service';
 export { ILocalStorageService } from './services/local-storage/local-storage.service';
 export { LocaleService } from './services/locale/locale.service';
 export { DesktopLogService, ILogService, LogLevel } from './services/log/log.service';
 export { MentionIOLocalService } from './services/mention-io/mention-io-local.service';
-export { type IListMentionParam, type IListMentionResponse, IMentionIOService, type ITypeMentionList } from './services/mention-io/type';
+export { IMentionIOService } from './services/mention-io/type';
+export type { IListMentionParam, IListMentionResponse, ITypeMentionList } from './services/mention-io/type';
 export { PermissionService } from './services/permission/permission.service';
 export { IPermissionService, PermissionStatus } from './services/permission/type';
 export type { IPermissionParam } from './services/permission/type';
@@ -155,7 +157,8 @@ export type {
     WorkbookPermissionPointConstructor,
     WorkSheetPermissionPointConstructor,
 } from './services/permission/type';
-export { type DependencyOverride, mergeOverrideWithDependencies } from './services/plugin/plugin-override';
+export { mergeOverrideWithDependencies } from './services/plugin/plugin-override';
+export type { DependencyOverride } from './services/plugin/plugin-override';
 export type { PluginCtor } from './services/plugin/plugin.service';
 export { DependentOn, Plugin, PluginService } from './services/plugin/plugin.service';
 export { IResourceLoaderService } from './services/resource-loader/type';
@@ -164,28 +167,38 @@ export type { IResourceHook, IResources } from './services/resource-manager/type
 export { IResourceManagerService } from './services/resource-manager/type';
 export { ThemeService } from './services/theme/theme.service';
 export {
-    type IUndoRedoCommandInfos,
-    type IUndoRedoCommandInfosByInterceptor,
-    type IUndoRedoItem,
     IUndoRedoService,
-    type IUndoRedoStatus,
     LocalUndoRedoService,
     RedoCommand,
     RedoCommandId,
     UndoCommand,
     UndoCommandId,
 } from './services/undoredo/undoredo.service';
+export type {
+    IUndoRedoCommandInfos,
+    IUndoRedoCommandInfosByInterceptor,
+    IUndoRedoItem,
+    IUndoRedoStatus,
+} from './services/undoredo/undoredo.service';
 export { createDefaultUser } from './services/user-manager/const';
-export { type IUser, UserManagerService } from './services/user-manager/user-manager.service';
+export { UserManagerService } from './services/user-manager/user-manager.service';
+export type { IUser } from './services/user-manager/user-manager.service';
 export * from './shared';
 export { ImageCacheMap } from './shared/cache/image-cache';
 export { isBlackColor, isWhiteColor } from './shared/color/color-kit';
 export { cellToRange } from './shared/common';
 export { customNameCharacterCheck, nameCharacterCheck } from './shared/name';
-export { type BBox, type IRTreeItem, RBush, RTree } from './shared/r-tree';
+export { RBush, RTree } from './shared/r-tree';
+export type { BBox, IRTreeItem } from './shared/r-tree';
 export { generateRandomId } from './shared/random-id';
 export { getIntersectRange } from './shared/range';
-export { afterTime, bufferDebounceTime, convertObservableToBehaviorSubject, fromCallback, takeAfter } from './shared/rxjs';
+export {
+    afterTime,
+    bufferDebounceTime,
+    convertObservableToBehaviorSubject,
+    fromCallback,
+    takeAfter,
+} from './shared/rxjs';
 export { awaitTime, delayAnimationFrame } from './shared/timer';
 export { isNodeEnv } from './shared/tools';
 export * from './sheets/clone';
@@ -209,10 +222,15 @@ export {
     mergeWorksheetSnapshotWithDefault,
 } from './sheets/sheet-snapshot-utils';
 export { Styles } from './sheets/styles';
-
 export * from './sheets/typedef';
 export type { IPosition } from './sheets/typedef';
-export { addLinkToDocumentModel, getEmptyCell, isNotNullOrUndefined, isRangesEqual, isUnitRangesEqual } from './sheets/util';
+export {
+    addLinkToDocumentModel,
+    getEmptyCell,
+    isNotNullOrUndefined,
+    isRangesEqual,
+    isUnitRangesEqual,
+} from './sheets/util';
 export { createDocumentModelWithStyle } from './sheets/util';
 export { SheetViewModel } from './sheets/view-model';
 export { getWorksheetUID, Workbook } from './sheets/workbook';
@@ -236,4 +254,5 @@ export type {
     IDataValidationRuleOptions,
     ISheetDataValidationRule,
 } from './types/interfaces/i-data-validation';
-export { type IUniverConfig, Univer } from './univer';
+export { Univer } from './univer';
+export type { IUniverConfig } from './univer';

@@ -15,8 +15,10 @@
  */
 
 export type { IUniverDocsDrawingConfig } from './config/config';
-export { DOCS_DRAWING_PLUGIN, type IDocDrawingModel } from './controllers/doc-drawing.controller';
+export { DOCS_DRAWING_PLUGIN } from './controllers/doc-drawing.controller';
+export type { IDocDrawingModel } from './controllers/doc-drawing.controller';
 export { DocDrawingController } from './controllers/doc-drawing.controller';
 export { UniverDocsDrawingPlugin } from './plugin';
-export { DocDrawingService, type IDocDrawing, IDocDrawingService, type IDocImage } from './services/doc-drawing.service';
+export { DocDrawingService, IDocDrawingService } from './services/doc-drawing.service';
+export type { IDocDrawing, IDocImage } from './services/doc-drawing.service';
 export { type IDocFloatDom } from './services/doc-drawing.service';

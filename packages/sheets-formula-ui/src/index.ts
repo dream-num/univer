@@ -16,7 +16,10 @@
 
 import './global.css';
 
-export { SheetCopyFormulaOnlyCommand, SheetOnlyPasteFormulaCommand } from './commands/commands/formula-clipboard.command';
+export {
+    SheetCopyFormulaOnlyCommand,
+    SheetOnlyPasteFormulaCommand,
+} from './commands/commands/formula-clipboard.command';
 export { HelpFunctionOperation } from './commands/operations/help-function.operation';
 export { InsertFunctionOperation } from './commands/operations/insert-function.operation';
 export { MoreFunctionsOperation } from './commands/operations/more-functions.operation';
@@ -26,7 +29,10 @@ export type { IUniverSheetsFormulaUIConfig } from './config/config';
 export { FormulaReorderController } from './controllers/formula-reorder.controller';
 export { UniverSheetsFormulaUIPlugin } from './plugin';
 export { FORMULA_PROMPT_ACTIVATED } from './services/prompt.service';
-export { GlobalRangeSelectorService, type IShowRangeSelectorDialogOptions } from './services/range-selector.service';
+export { GlobalRangeSelectorService } from './services/range-selector.service';
+export type { IShowRangeSelectorDialogOptions } from './services/range-selector.service';
 export { RefSelectionsRenderService } from './services/render-services/ref-selections.render.service';
-export { FormulaEditor, type IFormulaEditorRef } from './views/formula-editor/index';
-export { type IRangeSelectorInstance, type IRangeSelectorProps, RangeSelector } from './views/range-selector/index';
+export { FormulaEditor } from './views/formula-editor/index';
+export type { IFormulaEditorRef } from './views/formula-editor/index';
+export { RangeSelector } from './views/range-selector/index';
+export type { IRangeSelectorInstance, IRangeSelectorProps } from './views/range-selector/index';

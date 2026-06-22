@@ -5,6 +5,7 @@ import reactHooks from 'eslint-plugin-react-hooks';
 import {
     facadePreset,
     headerPreset,
+    indexEntryPreset,
     noBarrelImportPreset,
     penetratingPreset,
     specPreset,
@@ -36,6 +37,7 @@ export const createUniverEslintConfig = (options: IUniverEslintConfigOptions = {
         },
         penetratingPreset(),
         typescriptPreset(),
+        indexEntryPreset(),
         univerSourcePreset({
             noFacadeImportsOutsideFacade: options.noFacadeImportsOutsideFacade,
         }),

@@ -19,13 +19,14 @@ import './global.css';
 export {
     CloseHyperLinkPopupOperation,
     InsertHyperLinkOperation,
-    type IOpenHyperLinkEditPanelOperationParams,
     OpenHyperLinkEditPanelOperation,
 } from './commands/operations/popup.operations';
+export type { IOpenHyperLinkEditPanelOperationParams } from './commands/operations/popup.operations';
 export type { IUniverSheetsHyperLinkUIConfig } from './config/config';
 export { SheetsHyperLinkCopyPasteController } from './controllers/copy-paste.controller';
 export { InsertLinkShortcut } from './menu/menu';
 export { UniverSheetsHyperLinkUIPlugin } from './plugin';
 export { SheetsHyperLinkPopupService } from './services/popup.service';
 export { SheetsHyperLinkResolverService } from './services/resolver.service';
-export { type ICustomHyperLinkView, SheetsHyperLinkSidePanelService } from './services/side-panel.service';
+export { SheetsHyperLinkSidePanelService } from './services/side-panel.service';
+export type { ICustomHyperLinkView } from './services/side-panel.service';

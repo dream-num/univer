@@ -9,6 +9,7 @@ import barrel from 'eslint-plugin-no-barrel-import';
 import penetrating from 'eslint-plugin-no-penetrating-import';
 import noExternalImportsInFacade from './plugins/no-external-imports-in-facade';
 import noFacadeImportsOutsideFacade from './plugins/no-facade-imports-outside-facade';
+import noMixedTypeSpecifiersInIndex from './plugins/no-mixed-type-specifiers-in-index';
 import noSelfPackageImports from './plugins/no-self-package-imports';
 
 const univerPlugin = {
@@ -16,6 +17,7 @@ const univerPlugin = {
         'no-external-imports-in-facade': noExternalImportsInFacade,
         'no-self-package-imports': noSelfPackageImports,
         'no-facade-imports-outside-facade': noFacadeImportsOutsideFacade,
+        'no-mixed-type-specifiers-in-index': noMixedTypeSpecifiersInIndex,
     },
 } satisfies ESLint.Plugin;
 
@@ -49,6 +51,27 @@ export const typescriptPreset = (): Linter.Config => {
                 },
             ],
             // 'ts/consistent-type-exports': 'warn',
+        },
+        languageOptions: {
+            parser: typescriptParser,
+        },
+    };
+};
+
+/**
+ * Index entry preset configuration for ESLint.
+ * Keeps type-only imports and exports separate from value imports and exports.
+ *
+ * @returns ESLint configuration object for package entry files
+ */
+export const indexEntryPreset = (): Linter.Config => {
+    return {
+        files: ['**/src/index.ts'],
+        rules: {
+            'univer/no-mixed-type-specifiers-in-index': 'error',
+        },
+        plugins: {
+            univer: univerPlugin,
         },
         languageOptions: {
             parser: typescriptParser,

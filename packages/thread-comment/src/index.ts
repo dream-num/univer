@@ -45,14 +45,14 @@ export type {
 } from './commands/mutations/comment.mutation';
 export { getDT } from './common/utils';
 export type { IUniverThreadCommentConfig } from './config/config';
-export { SHEET_UNIVER_THREAD_COMMENT_PLUGIN, ThreadCommentResourceController } from './controllers/tc-resource.controller';
-export { type CommentUpdate, type IThreadInfo, ThreadCommentModel } from './models/thread-comment.model';
-export { UniverThreadCommentPlugin } from './plugin';
 export {
-    type IThreadCommentDataSource,
-    IThreadCommentDataSourceService,
-    ThreadCommentDataSourceService,
-    type ThreadCommentJSON,
-} from './services/tc-datasource.service';
+    SHEET_UNIVER_THREAD_COMMENT_PLUGIN,
+    ThreadCommentResourceController,
+} from './controllers/tc-resource.controller';
+export { ThreadCommentModel } from './models/thread-comment.model';
+export type { CommentUpdate, IThreadInfo } from './models/thread-comment.model';
+export { UniverThreadCommentPlugin } from './plugin';
+export { IThreadCommentDataSourceService, ThreadCommentDataSourceService } from './services/tc-datasource.service';
+export type { IThreadCommentDataSource, ThreadCommentJSON } from './services/tc-datasource.service';
 export { TC_PLUGIN_NAME } from './types/const';
 export type { IBaseComment, IThreadComment, IThreadCommentMention } from './types/interfaces/i-thread-comment';

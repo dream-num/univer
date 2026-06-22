@@ -14,25 +14,33 @@
  * limitations under the License.
  */
 
-export {
-    DeleteTextCommand,
-    type IDeleteTextCommandParams,
-    type IInsertTextCommandParams,
-    InsertTextCommand,
-    type IUpdateTextCommandParams,
-    UpdateTextCommand,
+export { DeleteTextCommand, InsertTextCommand, UpdateTextCommand } from './commands/commands/core-editing.command';
+export type {
+    IDeleteTextCommandParams,
+    IInsertTextCommandParams,
+    IUpdateTextCommandParams,
 } from './commands/commands/core-editing.command';
-export { type IRichTextEditingMutationParams, RichTextEditingMutation } from './commands/mutations/core-editing.mutation';
-export { type ISetTextSelectionsOperationParams, SetTextSelectionsOperation } from './commands/operations/text-selection.operation';
+export { RichTextEditingMutation } from './commands/mutations/core-editing.mutation';
+export type { IRichTextEditingMutationParams } from './commands/mutations/core-editing.mutation';
+export { SetTextSelectionsOperation } from './commands/operations/text-selection.operation';
+export type { ISetTextSelectionsOperationParams } from './commands/operations/text-selection.operation';
 export type { IUniverDocsConfig } from './config/config';
 export { UniverDocsPlugin } from './plugin';
-export { DocContentInsertService, type IDocContentInsertRange } from './services/doc-content-insert.service';
+export { DocContentInsertService } from './services/doc-content-insert.service';
+export type { IDocContentInsertRange } from './services/doc-content-insert.service';
 export { DocInterceptorService } from './services/doc-interceptor/doc-interceptor.service';
 export { DOC_INTERCEPTOR_POINT } from './services/doc-interceptor/interceptor-const';
 export { DocSelectionManagerService } from './services/doc-selection-manager.service';
 export { DocSkeletonManagerService } from './services/doc-skeleton-manager.service';
-export { DocStateChangeManagerService, IDocStateChangeInterceptorService } from './services/doc-state-change-manager.service';
+export {
+    DocStateChangeManagerService,
+    IDocStateChangeInterceptorService,
+} from './services/doc-state-change-manager.service';
 export type { IDocStateChangeInfo, IDocStateChangeParams } from './services/doc-state-emit.service';
 export { DocStateEmitService } from './services/doc-state-emit.service';
-export { addCustomRangeBySelectionFactory, addCustomRangeFactory, deleteCustomRangeFactory } from './utils/custom-range-factory';
+export {
+    addCustomRangeBySelectionFactory,
+    addCustomRangeFactory,
+    deleteCustomRangeFactory,
+} from './utils/custom-range-factory';
 export { replaceSelectionFactory } from './utils/replace-selection-factory';

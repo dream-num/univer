@@ -70,7 +70,6 @@ import {
     getPositionVertical,
     isColumnFull,
     lineIterator,
-    mergeByV,
 } from '../../tools';
 import { createTableSkeletons, rollbackListCache } from '../table';
 
@@ -98,8 +97,15 @@ export function layoutParagraph(
             const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
             const bulletGlyph = createSkeletonBulletGlyph(glyphGroup[0], bulletSkeleton, charSpaceApply);
             const paragraphProperties = bulletSkeleton.paragraphProperties || {};
+            const bulletParagraphStyle = {
+                ...paragraphProperties,
+                hanging: paragraphProperties.hanging ?? { v: bulletGlyph.width },
+            } as IParagraphProperties;
 
-            paragraphConfig.paragraphStyle = mergeByV<IParagraphStyle>(paragraphConfig.paragraphStyle, { ...paragraphProperties, hanging: { v: bulletGlyph.width } } as IParagraphProperties, 'max');
+            paragraphConfig.paragraphStyle = {
+                ...bulletParagraphStyle,
+                ...paragraphConfig.paragraphStyle,
+            };
 
             _lineOperator(ctx, [bulletGlyph, ...glyphGroup], pages, sectionBreakConfig, paragraphConfig, isParagraphFirstShapedText, breakPointType);
         } else {

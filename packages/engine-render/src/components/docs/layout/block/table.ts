@@ -28,6 +28,8 @@ import type { ILayoutContext } from '../tools';
 import { BooleanNumber, TableAlignmentType, TableRowHeightRule, VerticalAlignmentType } from '@univerjs/core';
 import { createNullCellPage, createSkeletonCellPages } from '../model/page';
 
+const TABLE_ROW_LAYOUT_OVERFLOW_TOLERANCE = 4;
+
 export function createTableSkeleton(
     ctx: ILayoutContext,
     curPage: IDocumentSkeletonPage,
@@ -423,8 +425,12 @@ function dealWithTableRow(
     while (rowSkeletons.length > 0) {
         const rowSkeleton = rowSkeletons.shift()!;
         const lastRow = curTableSkeleton.rows[curTableSkeleton.rows.length - 1];
+        const rowOverflowHeight = rowSkeleton.height - cache.remainHeight;
+        const shouldOpenNewTable =
+            cache.remainHeight < MAX_FONT_SIZE ||
+            rowOverflowHeight > TABLE_ROW_LAYOUT_OVERFLOW_TOLERANCE;
 
-        if (cache.remainHeight < MAX_FONT_SIZE || cache.remainHeight < rowSkeleton.height) {
+        if (shouldOpenNewTable) {
             cache.remainHeight = getAvailableHeight(curPage, cache, row !== 0 && rowSkeleton.index !== lastRow.index);
             cache.rowTop = 0;
 

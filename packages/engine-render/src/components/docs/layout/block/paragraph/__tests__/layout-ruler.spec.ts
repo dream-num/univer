@@ -88,6 +88,43 @@ describe('layout-ruler', () => {
         expect(result[0].sections.length).toBeGreaterThan(0);
     });
 
+    it('keeps direct paragraph indents before bullet list defaults', () => {
+        const { ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed('Item');
+        const shapedTextList = shaping(ctx, paragraphNode.content!, ctx.viewModel, paragraphNode, sectionBreakConfig);
+        const bulletSkeleton = {
+            listId: 'list-1',
+            symbol: '-',
+            ts: { ff: 'Arial', fs: 9 },
+            startIndexItem: 1,
+            paragraphProperties: {
+                indentFirstLine: { v: 0 },
+                hanging: { v: 24 },
+                indentStart: { v: 48 },
+            },
+        };
+
+        const paragraphConfig = {
+            paragraphIndex: paragraphNode.endIndex,
+            paragraphStyle: {
+                hanging: { v: 12 },
+                indentStart: { v: 12 },
+            },
+            bulletSkeleton,
+        } as unknown as IParagraphConfig;
+
+        layoutParagraph(
+            ctx,
+            shapedTextList[0].glyphs,
+            [curPage],
+            sectionBreakConfig,
+            paragraphConfig,
+            true
+        );
+
+        expect(paragraphConfig.paragraphStyle?.indentStart).toEqual({ v: 12 });
+        expect(paragraphConfig.paragraphStyle?.hanging).toEqual({ v: 12 });
+    });
+
     it('lays out first shaped text without bullet', () => {
         const { ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed('Hello world');
         const shapedTextList = shaping(ctx, paragraphNode.content!, ctx.viewModel, paragraphNode, sectionBreakConfig);

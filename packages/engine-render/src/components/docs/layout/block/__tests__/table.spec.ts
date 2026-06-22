@@ -456,6 +456,29 @@ describe('docs table layout', () => {
         expect(secondRowCall?.[7]).toBe(100);
     });
 
+    it('keeps a splittable auto row on the current page when its first slice slightly overflows', () => {
+        const { ctx, curPage, viewModel, tableNode, sectionBreakConfig, tableSource } = createContextAndTable();
+        tableSource.tableRows[0].repeatHeaderRow = BooleanNumber.FALSE;
+        tableSource.tableRows[0].trHeight = {
+            hRule: TableRowHeightRule.EXACT,
+            val: { v: 140 },
+        };
+        tableSource.tableRows[1].trHeight = {
+            hRule: TableRowHeightRule.AUTO,
+            val: { v: 0 },
+        };
+        tableSource.tableRows[1].cantSplit = BooleanNumber.FALSE;
+        createSkeletonCellPagesMock.mockImplementation(
+            (_ctx: unknown, _viewModel: unknown, _cellNode: unknown, _section: unknown, _table: unknown, row: number) =>
+                row === 0 ? [makeCellPage(60, 20)] : [makeCellPage(60, 100.5)]
+        );
+
+        const result = createTableSkeletons(ctx, curPage, viewModel, tableNode, sectionBreakConfig, 240);
+
+        expect(result.skeTables[0].rows.map((row) => row.index)).toEqual([0, 1]);
+        expect(result.skeTables[1]?.rows.map((row) => row.index) ?? []).not.toContain(1);
+    });
+
     it('repeats multiple leading header rows on sliced table pages', () => {
         const { ctx, curPage, viewModel, tableNode, sectionBreakConfig, tableSource } = createContextAndTable();
         tableSource.tableRows[1].repeatHeaderRow = BooleanNumber.TRUE;

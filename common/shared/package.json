@@ -32,16 +32,16 @@
     },
     "dependencies": {
         "@tsdown/css": "^0.22.3",
-        "@typescript-eslint/parser": "^8.60.1",
+        "@typescript-eslint/parser": "^8.61.1",
         "@vitest/coverage-istanbul": "^4.1.9",
         "autoprefixer": "^10.5.0",
-        "eslint-plugin-better-tailwindcss": "^4.5.0",
+        "eslint-plugin-better-tailwindcss": "^4.6.0",
         "eslint-plugin-header": "^3.1.1",
         "eslint-plugin-no-barrel-import": "^0.0.2",
         "eslint-plugin-no-penetrating-import": "^0.0.1",
-        "happy-dom": "20.10.1",
+        "happy-dom": "20.10.6",
         "javascript-obfuscator": "^5.4.3",
-        "postcss-preset-env": "^11.3.0",
+        "postcss-preset-env": "^11.3.1",
         "postcss-replace": "^2.0.1",
         "sort-keys": "^6.0.0",
         "tailwind-scrollbar": "^3",
@@ -55,6 +55,6 @@
         "@univerjs/icons-svg": "^1.12.0",
         "@univerjs/protocol": "workspace:*",
         "typescript": "^6.0.3",
-        "vue-tsc": "^3.3.2"
+        "vue-tsc": "^3.3.5"
     }
 }

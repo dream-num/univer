@@ -8,9 +8,8 @@ packages:
     - tests/*
 publicHoistPattern:
     - '@storybook/react'
-    - tsx
 overrides:
-    '@types/react': 19.2.16
+    '@types/react': 19.2.17
     '@types/react-dom': 19.2.3
     basic-ftp: 5.2.0
     react: 19.2.7

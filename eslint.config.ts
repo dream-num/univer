@@ -11,7 +11,6 @@ export default createUniverEslintConfig({
     header: true,
     noFacadeImportsOutsideFacade: {
         ignore: [
-            'packages/uniscript/src/services/script-execution.service.ts',
             'presets/packages/preset-',
         ],
     },

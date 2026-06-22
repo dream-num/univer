@@ -17,7 +17,14 @@
 import type { DocumentDataModel } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { CustomDecorationType, Disposable, ICommandService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import {
+    CustomDecorationType,
+    Disposable,
+    ICommandService,
+    Inject,
+    IUniverInstanceService,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { DOC_INTERCEPTOR_POINT, DocInterceptorService, RichTextEditingMutation } from '@univerjs/docs';
 import { DocRenderController } from '@univerjs/docs-ui';
 import { ThreadCommentModel } from '@univerjs/thread-comment';

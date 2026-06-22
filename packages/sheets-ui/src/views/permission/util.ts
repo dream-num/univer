@@ -17,7 +17,14 @@
 import type { Injector, IRange, Workbook, Worksheet } from '@univerjs/core';
 import type { IPermissionPanelRule } from '../../services/permission/sheet-permission-panel.model';
 import { IUniverInstanceService, LocaleService, RANGE_TYPE, Rectangle, UniverInstanceType } from '@univerjs/core';
-import { EditStateEnum, RangeProtectionRuleModel, SheetsSelectionsService, UnitObject, ViewStateEnum, WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import { UnitObject } from '@univerjs/protocol';
+import {
+    EditStateEnum,
+    RangeProtectionRuleModel,
+    SheetsSelectionsService,
+    ViewStateEnum,
+    WorksheetProtectionRuleModel,
+} from '@univerjs/sheets';
 
 export const checkRangeValid = (injector: Injector, permissionRanges: IRange[], permissionId: string, unitId: string, subUnitId: string) => {
     const localeService = injector.get(LocaleService);

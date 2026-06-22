@@ -14,9 +14,27 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommand, ICommandInfo, IDocumentStyle, ISize, ITable, ITables, JSONXActions, PageOrientType } from '@univerjs/core';
+import type {
+    DocumentDataModel,
+    ICommand,
+    ICommandInfo,
+    IDocumentStyle,
+    ISize,
+    ITable,
+    ITables,
+    JSONXActions,
+    PageOrientType,
+} from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import { CommandType, DocumentFlavor, ICommandService, IUniverInstanceService, JSONX, MODERN_DOCUMENT_DEFAULT_MARGIN, UniverInstanceType } from '@univerjs/core';
+import {
+    CommandType,
+    DocumentFlavor,
+    ICommandService,
+    IUniverInstanceService,
+    JSONX,
+    MODERN_DOCUMENT_DEFAULT_MARGIN,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { RichTextEditingMutation } from '@univerjs/docs';
 
 export interface IDocPageSetupCommandParams {

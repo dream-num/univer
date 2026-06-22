@@ -18,8 +18,8 @@ import type { IDeleteRangeProtectionMutationParams, ISetRangeProtectionMutationP
 import type { FRange } from '../f-range';
 import type { IRangeProtectionOptions, RangePermissionSnapshot } from './permission-types';
 import { IAuthzIoService, ICommandService, Inject, Injector, IPermissionService, Rectangle } from '@univerjs/core';
-import { UnitRole } from '@univerjs/protocol';
-import { DeleteRangeProtectionMutation, RangeProtectionRuleModel, SetRangeProtectionMutation, UnitObject } from '@univerjs/sheets';
+import { UnitObject, UnitRole } from '@univerjs/protocol';
+import { DeleteRangeProtectionMutation, RangeProtectionRuleModel, SetRangeProtectionMutation } from '@univerjs/sheets';
 import { RANGE_PERMISSION_POINT_MAP } from './permission-point-map';
 import { RangePermissionPoint } from './permission-types';
 import { handleWorksheetRangePermissionIsEmpty } from './util';

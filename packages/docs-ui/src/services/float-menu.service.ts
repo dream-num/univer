@@ -16,7 +16,17 @@
 
 import type { DocumentDataModel, IDisposable, ITextRangeParam, Nullable } from '@univerjs/core';
 import type { INodePosition, IRenderContext, IRenderModule, ITextRangeWithStyle } from '@univerjs/engine-render';
-import { DataStreamTreeTokenType, deepCompare, Disposable, DocumentBlockRangeType, Inject, isInternalEditorID, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
+import {
+    DataStreamTreeTokenType,
+    deepCompare,
+    Disposable,
+    DocumentBlockRangeType,
+    Inject,
+    isInternalEditorID,
+    IUniverInstanceService,
+    toDisposable,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { ComponentManager } from '@univerjs/ui';
 import { FloatToolbar } from '../views/float-toolbar/FloatToolbar';

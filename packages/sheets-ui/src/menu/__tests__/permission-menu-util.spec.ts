@@ -23,11 +23,11 @@ import {
     RANGE_TYPE,
     UserManagerService,
 } from '@univerjs/core';
+import { UnitAction } from '@univerjs/protocol';
 import {
     RangeProtectionCache,
     RangeProtectionRuleModel,
     SheetsSelectionsService,
-    UnitAction,
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
 import { BehaviorSubject, firstValueFrom, of, skip, take } from 'rxjs';

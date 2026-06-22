@@ -17,7 +17,15 @@
 import type { DocumentDataModel, ICommandInfo, Nullable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { checkForSubstrings, Disposable, DisposableCollection, ICommandService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import {
+    checkForSubstrings,
+    Disposable,
+    DisposableCollection,
+    ICommandService,
+    Inject,
+    IUniverInstanceService,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { fromEvent } from 'rxjs';

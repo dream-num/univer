@@ -24,12 +24,11 @@ import {
     LocaleService,
     UniverInstanceType,
 } from '@univerjs/core';
-import { ObjectScope, UnitAction, UnitRole } from '@univerjs/protocol';
+import { ObjectScope, UnitAction, UnitObject, UnitRole } from '@univerjs/protocol';
 import {
     AddRangeProtectionCommand,
     AddWorksheetProtectionCommand,
     EditStateEnum,
-    UnitObject,
     ViewStateEnum,
 } from '@univerjs/sheets';
 import { ISidebarService, RediContext } from '@univerjs/ui';

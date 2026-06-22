@@ -30,17 +30,25 @@ import { borderBottomClassName, borderRightClassName, clsx } from '@univerjs/des
 import { IEditorService } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { CheckMarkIcon, CloseIcon, DropdownIcon, FxIcon } from '@univerjs/icons';
+import { UnitAction } from '@univerjs/protocol';
 import {
     RangeProtectionCache,
     RangeProtectionRuleModel,
     SheetsSelectionsService,
-    UnitAction,
     WorkbookEditablePermission,
     WorksheetEditPermission,
     WorksheetProtectionRuleModel,
     WorksheetViewPermission,
 } from '@univerjs/sheets';
-import { ComponentContainer, ComponentManager, KeyCode, useComponentsOfPart, useConfigValue, useDependency, useObservable } from '@univerjs/ui';
+import {
+    ComponentContainer,
+    ComponentManager,
+    KeyCode,
+    useComponentsOfPart,
+    useConfigValue,
+    useDependency,
+    useObservable,
+} from '@univerjs/ui';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { EMPTY, merge, of, switchMap } from 'rxjs';
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { UnitAction } from '@univerjs/sheets';
+import { UnitAction } from '@univerjs/protocol';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { CellCustomRenderController } from '../cell-custom-render.controller';

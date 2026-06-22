@@ -17,7 +17,14 @@
 import type { DocumentDataModel, ITextRange } from '@univerjs/core';
 import type { ISetTextSelectionsOperationParams } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
-import { Disposable, ICommandService, Inject, isInternalEditorID, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import {
+    Disposable,
+    ICommandService,
+    Inject,
+    isInternalEditorID,
+    IUniverInstanceService,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { SetTextSelectionsOperation } from '@univerjs/docs';
 import { DocBackScrollRenderController } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';

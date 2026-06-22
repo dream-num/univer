@@ -14,11 +14,27 @@
  * limitations under the License.
  */
 
-import { AlignTypeH, AlignTypeV, BooleanNumber, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType } from '@univerjs/core';
+import {
+    AlignTypeH,
+    AlignTypeV,
+    BooleanNumber,
+    ObjectRelativeFromH,
+    ObjectRelativeFromV,
+    PositionedObjectLayoutType,
+} from '@univerjs/core';
 import { Liquid, setDocsTableRenderViewportProvider } from '@univerjs/engine-render';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { getDocsTableCellAnchorContext } from '../../doc-drawing-transformer-update.controller';
-import { DocDrawingTransformUpdateController, getDocsDrawingBehindText, getDocsDrawingClipPage, getDocsDrawingPageClipBounds, getDocsPageRelativeDrawingAnchorPage, getDocsPageRelativeDrawingLeft, getDocsPageRelativeDrawingTop, getDocsTableCellDrawingOffset } from '../doc-drawing-transform-update.controller';
+import {
+    DocDrawingTransformUpdateController,
+    getDocsDrawingBehindText,
+    getDocsDrawingClipPage,
+    getDocsDrawingPageClipBounds,
+    getDocsPageRelativeDrawingAnchorPage,
+    getDocsPageRelativeDrawingLeft,
+    getDocsPageRelativeDrawingTop,
+    getDocsTableCellDrawingOffset,
+} from '../doc-drawing-transform-update.controller';
 
 describe('DocDrawingTransformUpdateController', () => {
     afterEach(() => {

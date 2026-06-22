@@ -21,7 +21,12 @@ import { DocSkeletonManagerService } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { AfterSpaceCommand, EnterCommand, TabCommand } from '../commands/commands/auto-format.command';
 import { BreakLineCommand } from '../commands/commands/break-line.command';
-import { ChangeListNestingLevelCommand, ChangeListNestingLevelType, ListOperationCommand, QuickListCommand } from '../commands/commands/list.command';
+import {
+    ChangeListNestingLevelCommand,
+    ChangeListNestingLevelType,
+    ListOperationCommand,
+    QuickListCommand,
+} from '../commands/commands/list.command';
 import { QUICK_HEADING_MAP, QuickHeadingCommand } from '../commands/commands/set-heading.command';
 import { DocTableTabCommand } from '../commands/commands/table/doc-table-tab.command';
 import { DocAutoFormatService } from '../services/doc-auto-format.service';

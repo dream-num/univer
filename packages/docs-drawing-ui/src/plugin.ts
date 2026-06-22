@@ -29,8 +29,12 @@ import { DocDrawingAddRemoveController } from './controllers/doc-drawing-notific
 import { DocDrawingPrintingController } from './controllers/doc-drawing-printing.controller';
 import { DocDrawingTransformerController } from './controllers/doc-drawing-transformer-update.controller';
 import { DocFloatDomController } from './controllers/doc-float-dom.controller';
-import { DocDrawingTransformUpdateController } from './controllers/render-controllers/doc-drawing-transform-update.controller';
-import { DocDrawingUpdateRenderController } from './controllers/render-controllers/doc-drawing-update.render-controller';
+import {
+    DocDrawingTransformUpdateController,
+} from './controllers/render-controllers/doc-drawing-transform-update.controller';
+import {
+    DocDrawingUpdateRenderController,
+} from './controllers/render-controllers/doc-drawing-update.render-controller';
 import { DocDrawingUIController } from './controllers/ui.controller';
 import { DocDrawingPopupMenuController } from './menu/drawing-popup-menu.controller';
 import { DocRefreshDrawingsService } from './services/doc-refresh-drawings.service';

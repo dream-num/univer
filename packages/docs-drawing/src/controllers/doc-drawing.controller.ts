@@ -22,7 +22,10 @@ import { IDrawingManagerService } from '@univerjs/drawing';
 import { IDocDrawingService } from '../services/doc-drawing.service';
 
 export const DOCS_DRAWING_PLUGIN = 'DOC_DRAWING_PLUGIN';
-export interface IDocDrawingModel { drawings?: IDocumentData['drawings']; drawingsOrder?: IDocumentData['drawingsOrder'] };
+export interface IDocDrawingModel {
+    drawings?: IDocumentData['drawings'];
+    drawingsOrder?: IDocumentData['drawingsOrder'];
+};
 
 export class DocDrawingController extends Disposable {
     constructor(

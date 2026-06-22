@@ -15,13 +15,33 @@
  */
 
 import type { DocumentDataModel } from '@univerjs/core';
-import type { IDeleteTextCommandParams, IInsertTextCommandParams, IRichTextEditingMutationParams } from '@univerjs/docs';
+import type {
+    IDeleteTextCommandParams,
+    IInsertTextCommandParams,
+    IRichTextEditingMutationParams,
+} from '@univerjs/docs';
 import type { IIMEInputCommandParams, IMoveCursorOperationParams } from '@univerjs/docs-ui';
-import { DeleteDirection, Direction, Disposable, ICommandService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { DeleteTextCommand, DocSelectionManagerService, InsertTextCommand, RichTextEditingMutation } from '@univerjs/docs';
+import {
+    DeleteDirection,
+    Direction,
+    Disposable,
+    ICommandService,
+    Inject,
+    IUniverInstanceService,
+    UniverInstanceType,
+} from '@univerjs/core';
+import {
+    DeleteTextCommand,
+    DocSelectionManagerService,
+    InsertTextCommand,
+    RichTextEditingMutation,
+} from '@univerjs/docs';
 import { DeleteLeftCommand, IMEInputCommand, MoveCursorOperation } from '@univerjs/docs-ui';
 import { IShortcutService, KeyCode } from '@univerjs/ui';
-import { CloseQuickInsertPopupOperation, ShowQuickInsertPopupOperation } from '../commands/operations/quick-insert-popup.operation';
+import {
+    CloseQuickInsertPopupOperation,
+    ShowQuickInsertPopupOperation,
+} from '../commands/operations/quick-insert-popup.operation';
 import { builtInMenuCommandIds, textMenu } from '../menu/menu';
 import { DocQuickInsertPopupService } from '../services/doc-quick-insert-popup.service';
 

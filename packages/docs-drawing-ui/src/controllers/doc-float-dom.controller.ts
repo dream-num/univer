@@ -21,7 +21,21 @@ import type { IDocFloatDomDataBase } from '@univerjs/drawing';
 import type { IBoundRectNoAngle, IRender, Rect, Scene } from '@univerjs/engine-render';
 import type { IFloatDomLayout } from '@univerjs/ui';
 import type { IInsertDrawingCommandParams } from '../commands/commands/interfaces';
-import { Disposable, DisposableCollection, DrawingTypeEnum, fromEventSubject, generateRandomId, ICommandService, Inject, IUniverInstanceService, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, toDisposable, UniverInstanceType } from '@univerjs/core';
+import {
+    Disposable,
+    DisposableCollection,
+    DrawingTypeEnum,
+    fromEventSubject,
+    generateRandomId,
+    ICommandService,
+    Inject,
+    IUniverInstanceService,
+    ObjectRelativeFromH,
+    ObjectRelativeFromV,
+    PositionedObjectLayoutType,
+    toDisposable,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { docDrawingPositionToTransform, SetDocZoomRatioOperation, VIEWPORT_KEY } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';

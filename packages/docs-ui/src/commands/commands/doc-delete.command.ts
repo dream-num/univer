@@ -36,7 +36,12 @@ import {
     UniverInstanceType,
     UpdateDocsAttributeType,
 } from '@univerjs/core';
-import { DeleteTextCommand, DocSelectionManagerService, RichTextEditingMutation, UpdateTextCommand } from '@univerjs/docs';
+import {
+    DeleteTextCommand,
+    DocSelectionManagerService,
+    RichTextEditingMutation,
+    UpdateTextCommand,
+} from '@univerjs/docs';
 import { getParagraphByGlyph, hasListGlyph, isFirstGlyph, isIndentByGlyph } from '@univerjs/engine-render';
 import { DocAutoFormatService } from '../../services/doc-auto-format.service';
 import { getCommandSkeleton } from '../util';

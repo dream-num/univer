@@ -20,16 +20,51 @@ import { ICommandService, NamedStyleType, ThemeService, UniverInstanceType } fro
 import { SetTextSelectionsOperation } from '@univerjs/docs';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { Observable } from 'rxjs';
-import { DocCopyCommand, DocCopyCurrentParagraphCommand, DocCutCurrentParagraphCommand, DocPasteCommand } from '../commands/commands/clipboard.command';
+import {
+    DocCopyCommand,
+    DocCopyCurrentParagraphCommand,
+    DocCutCurrentParagraphCommand,
+    DocPasteCommand,
+} from '../commands/commands/clipboard.command';
 import { DeleteCurrentParagraphCommand } from '../commands/commands/doc-delete.command';
-import { HorizontalLineCommand, InsertHorizontalLineBellowCommand } from '../commands/commands/doc-horizontal-line.command';
-import { ResetInlineFormatTextBackgroundColorCommand, ResetInlineFormatTextColorCommand, SetInlineFormatFontSizeCommand, SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand } from '../commands/commands/inline-format.command';
-import { BulletListCommand, CheckListCommand, InsertBulletListBellowCommand, InsertCheckListBellowCommand, InsertOrderListBellowCommand, OrderListCommand } from '../commands/commands/list.command';
-import { H1HeadingCommand, H2HeadingCommand, H3HeadingCommand, H4HeadingCommand, H5HeadingCommand, NormalTextHeadingCommand, SubtitleHeadingCommand, TitleHeadingCommand } from '../commands/commands/set-heading.command';
+import {
+    HorizontalLineCommand,
+    InsertHorizontalLineBellowCommand,
+} from '../commands/commands/doc-horizontal-line.command';
+import {
+    ResetInlineFormatTextBackgroundColorCommand,
+    ResetInlineFormatTextColorCommand,
+    SetInlineFormatFontSizeCommand,
+    SetInlineFormatTextBackgroundColorCommand,
+    SetInlineFormatTextColorCommand,
+} from '../commands/commands/inline-format.command';
+import {
+    BulletListCommand,
+    CheckListCommand,
+    InsertBulletListBellowCommand,
+    InsertCheckListBellowCommand,
+    InsertOrderListBellowCommand,
+    OrderListCommand,
+} from '../commands/commands/list.command';
+import {
+    H1HeadingCommand,
+    H2HeadingCommand,
+    H3HeadingCommand,
+    H4HeadingCommand,
+    H5HeadingCommand,
+    NormalTextHeadingCommand,
+    SubtitleHeadingCommand,
+    TitleHeadingCommand,
+} from '../commands/commands/set-heading.command';
 import { DocTableDeleteTableCommand } from '../commands/commands/table/doc-table-delete.command';
 import { DocCreateTableOperation } from '../commands/operations/doc-create-table.operation';
 import { getHighlightBackgroundColor } from '../views/paragraph-menu/theme-color';
-import { BackgroundColorSelectorMenuItemFactory, disableMenuWhenNoDocRange, getParagraphStyleAtCursor, TextColorSelectorMenuItemFactory } from './menu';
+import {
+    BackgroundColorSelectorMenuItemFactory,
+    disableMenuWhenNoDocRange,
+    getParagraphStyleAtCursor,
+    TextColorSelectorMenuItemFactory,
+} from './menu';
 
 export const TEXT_COLORS = ['#FE4B4B', '#FF8C51', '#A4DC16', '#2DAEFF', '#3A60F7', '#9E6DE3', '#F248A6'];
 export const TEXT_COLOR_SWATCH_ICONS = [

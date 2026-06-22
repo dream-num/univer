@@ -16,7 +16,8 @@
 
 import { Injector, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { IEditorService } from '@univerjs/docs-ui';
-import { EditStateEnum, UnitObject, ViewStateEnum } from '@univerjs/sheets';
+import { UnitObject } from '@univerjs/protocol';
+import { EditStateEnum, ViewStateEnum } from '@univerjs/sheets';
 import { IDialogService, ISidebarService } from '@univerjs/ui';
 import { describe, expect, it } from 'vitest';
 import {

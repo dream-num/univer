@@ -17,7 +17,15 @@
 import type { DocumentDataModel, ICommand, IDocumentBody, IMutationInfo, JSONXActions } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
-import { BooleanNumber, CommandType, createParagraphId, generateRandomId, ICommandService, IUniverInstanceService, JSONX } from '@univerjs/core';
+import {
+    BooleanNumber,
+    CommandType,
+    createParagraphId,
+    generateRandomId,
+    ICommandService,
+    IUniverInstanceService,
+    JSONX,
+} from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 import { findFirstCursorOffset } from '../../basics/selection';

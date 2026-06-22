@@ -19,7 +19,10 @@ import type { IDocumentSkeletonLine, IDocumentSkeletonPage } from '@univerjs/eng
 import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DocumentFlavor, NamedStyleType } from '@univerjs/core';
 import { DocumentSkeletonPageType, GlyphType, LineType } from '@univerjs/engine-render';
 import { describe, expect, it } from 'vitest';
-import { getParagraphPlaceholderLayouts, shouldRenderParagraphPlaceholder } from '../doc-paragraph-placeholder.render-controller';
+import {
+    getParagraphPlaceholderLayouts,
+    shouldRenderParagraphPlaceholder,
+} from '../doc-paragraph-placeholder.render-controller';
 
 const locale = {
     heading1: '标题1',

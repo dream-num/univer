@@ -15,7 +15,16 @@
  */
 
 import type { ITextRange, Nullable } from '@univerjs/core';
-import type { Documents, DocumentSkeleton, IDocumentSkeletonGlyph, INodePosition, IPoint, ISuccinctDocRangeParam, ITextSelectionStyle, Scene } from '@univerjs/engine-render';
+import type {
+    Documents,
+    DocumentSkeleton,
+    IDocumentSkeletonGlyph,
+    INodePosition,
+    IPoint,
+    ISuccinctDocRangeParam,
+    ITextSelectionStyle,
+    Scene,
+} from '@univerjs/engine-render';
 import type { IDocRange } from './range-interface';
 import { BooleanNumber, COLORS, DOC_RANGE_TYPE, generateRandomId, RANGE_DIRECTION } from '@univerjs/core';
 import { getColor, NORMAL_TEXT_SELECTION_PLUGIN_STYLE, Rect, RegularPolygon } from '@univerjs/engine-render';

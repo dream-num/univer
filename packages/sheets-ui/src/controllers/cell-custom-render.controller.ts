@@ -14,12 +14,33 @@
  * limitations under the License.
  */
 
-import type { ICellCustomRender, ICellDataForSheetInterceptor, ICellRenderContext, Nullable, Workbook } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, RenderManagerService, Spreadsheet } from '@univerjs/engine-render';
+import type {
+    ICellCustomRender,
+    ICellDataForSheetInterceptor,
+    ICellRenderContext,
+    Nullable,
+    Workbook,
+} from '@univerjs/core';
+import type {
+    IMouseEvent,
+    IPointerEvent,
+    IRenderContext,
+    IRenderModule,
+    RenderManagerService,
+    Spreadsheet,
+} from '@univerjs/engine-render';
 import type { ICellPermission, ISheetSkeletonManagerParam } from '@univerjs/sheets';
-import { Disposable, DisposableCollection, fromEventSubject, Inject, IPermissionService, sortRules } from '@univerjs/core';
+import {
+    Disposable,
+    DisposableCollection,
+    fromEventSubject,
+    Inject,
+    IPermissionService,
+    sortRules,
+} from '@univerjs/core';
 import { IRenderManagerService, Vector2 } from '@univerjs/engine-render';
-import { UnitAction, WorkbookEditablePermission, WorksheetEditPermission } from '@univerjs/sheets';
+import { UnitAction } from '@univerjs/protocol';
+import { WorkbookEditablePermission, WorksheetEditPermission } from '@univerjs/sheets';
 import { throttleTime } from 'rxjs';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 

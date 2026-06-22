@@ -15,7 +15,14 @@
  */
 
 import type { IDocumentBody } from '@univerjs/core';
-import { BooleanNumber, DataStreamTreeTokenType, DocumentBlockRangeType, NamedStyleType, TableRowHeightRule, TableSizeType } from '@univerjs/core';
+import {
+    BooleanNumber,
+    DataStreamTreeTokenType,
+    DocumentBlockRangeType,
+    NamedStyleType,
+    TableRowHeightRule,
+    TableSizeType,
+} from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { convertBodyToHtml, covertTextRunToHtml, getBodySliceHtml, UDMToHtmlService } from '../convertor';
 

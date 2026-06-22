@@ -1,4 +1,4 @@
-import type { Linter } from 'eslint';
+import type { ESLint, Linter } from 'eslint';
 import os from 'node:os';
 import path from 'node:path';
 import { fixupPluginRules } from '@eslint/compat';
@@ -13,14 +13,11 @@ import noSelfPackageImports from './plugins/no-self-package-imports';
 
 const univerPlugin = {
     rules: {
-        // eslint-disable-next-line ts/no-explicit-any
-        'no-external-imports-in-facade': noExternalImportsInFacade as any,
-        // eslint-disable-next-line ts/no-explicit-any
-        'no-self-package-imports': noSelfPackageImports as any,
-        // eslint-disable-next-line ts/no-explicit-any
-        'no-facade-imports-outside-facade': noFacadeImportsOutsideFacade as any,
+        'no-external-imports-in-facade': noExternalImportsInFacade,
+        'no-self-package-imports': noSelfPackageImports,
+        'no-facade-imports-outside-facade': noFacadeImportsOutsideFacade,
     },
-};
+} satisfies ESLint.Plugin;
 
 /**
  * TypeScript preset configuration for ESLint.
@@ -30,10 +27,7 @@ const univerPlugin = {
  */
 export const typescriptPreset = (): Linter.Config => {
     return {
-        files: ['{packages,presets}/**/*.{ts,tsx}'],
-        plugins: {
-            univer: univerPlugin,
-        },
+        files: ['**/*.{ts,tsx,mts,cts}'],
         rules: {
             'ts/naming-convention': [
                 'warn',
@@ -243,19 +237,11 @@ export const headerPreset = (): Linter.Config => {
     header.rules.header.meta.schema = false;
 
     return {
-        files: ['**/*.ts', '**/*.tsx'],
+        files: ['{packages,presets}/**/*.{ts,tsx}'],
         ignores: [
-            '*.ts',
-            '*.tsx',
-            'common/**/*',
-            'examples/**/*',
-            'mockdata/**/*',
-            'scripts/**/*',
-            'tests/**/*',
             '**/*.d.ts',
             '**/vitest.config.ts',
             '**/vitest.workspace.ts',
-            'playwright.config.ts',
         ],
         plugins: {
             header: fixupPluginRules(header),

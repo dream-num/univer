@@ -41,7 +41,7 @@
         "typecheck": "turbo typecheck",
         "serve:umd": "serve .",
         "test": "turbo test -- --passWithNoTests",
-        "coverage": "turbo coverage -- --passWithNoTests",
+        "coverage": "turbo --concurrency 50% coverage -- --passWithNoTests ",
         "analyze:build": "node --experimental-strip-types ./scripts/build-analysis.mts",
         "build": "pnpm run build:plugins && pnpm run build:presets",
         "build:ci": "pnpm run build",

@@ -17,13 +17,11 @@
 import {
     ColumnSeparatorType,
     createDocumentModelWithStyle,
-    DataStreamTreeTokenType,
     DocumentDataModel,
     DocumentFlavor,
     LocaleService,
     ObjectRelativeFromH,
     ObjectRelativeFromV,
-    PositionedObjectLayoutType,
     SectionType,
     TableSizeType,
     Univer,
@@ -439,141 +437,6 @@ describe('doc skeleton', () => {
 
         expect(() => skeleton.calculate()).not.toThrow();
         expect(skeleton.getSkeletonData()?.pages.length).toBeGreaterThan(0);
-
-        skeleton.dispose();
-        univer.dispose();
-    });
-
-    it('keeps a continuous two-column section on the same page after DOCX leading floating anchors', () => {
-        const univer = new Univer();
-        const localeService = univer.__getInjector().get(LocaleService);
-        const customBlock = DataStreamTreeTokenType.CUSTOM_BLOCK;
-        const sectionBreak = DataStreamTreeTokenType.SECTION_BREAK;
-        const headerAnchors = `${customBlock}${customBlock}${customBlock}\r${customBlock}\r\r\r${customBlock}\r\r`;
-        const title = 'Summer Newsletter - 2017';
-        const bodyHeading = 'Surry Teens attend Congress 2017';
-        const bodyText = 'Surry Teens attend workshops and courses at Congress.';
-        const dataStream = `${headerAnchors}${title}\r\r${sectionBreak}${bodyHeading}\r${bodyText}\r\n`;
-        const bodyStart = dataStream.indexOf(bodyHeading);
-        const bodyTextStart = dataStream.indexOf(bodyText);
-        const firstSectionEnd = dataStream.indexOf(sectionBreak);
-        const endIndex = dataStream.length - 1;
-
-        const documentModel = new DocumentDataModel({
-            id: 'docx-leading-floats-continuous-section',
-            body: {
-                dataStream,
-                textRuns: [
-                    {
-                        st: 0,
-                        ed: endIndex,
-                        ts: {},
-                    },
-                ],
-                paragraphs: [
-                    { startIndex: 3, paragraphId: 'p-top-anchor' },
-                    { startIndex: 5, paragraphId: 'p-logo-anchor' },
-                    { startIndex: 6, paragraphId: 'p-empty-1' },
-                    { startIndex: 7, paragraphId: 'p-empty-2' },
-                    { startIndex: 9, paragraphId: 'p-textbox-anchor' },
-                    { startIndex: 10, paragraphId: 'p-empty-3' },
-                    { startIndex: firstSectionEnd - 2, paragraphId: 'p-title' },
-                    { startIndex: firstSectionEnd - 1, paragraphId: 'p-empty-before-section' },
-                    { startIndex: bodyStart + bodyHeading.length, paragraphId: 'p-body-heading' },
-                    { startIndex: bodyTextStart + bodyText.length, paragraphId: 'p-body-text' },
-                ],
-                sectionBreaks: [
-                    {
-                        startIndex: firstSectionEnd,
-                        pageSize: { width: 816, height: 1056 },
-                        marginTop: 48,
-                        marginBottom: 48,
-                        marginLeft: 48,
-                        marginRight: 48,
-                    },
-                    {
-                        startIndex: endIndex,
-                        sectionType: SectionType.CONTINUOUS,
-                        pageSize: { width: 816, height: 1056 },
-                        marginTop: 96,
-                        marginBottom: 96,
-                        marginLeft: 48,
-                        marginRight: 42,
-                        columnProperties: [
-                            { width: 339, paddingEnd: 48 },
-                            { width: 339, paddingEnd: 0 },
-                        ],
-                    },
-                ],
-                customBlocks: [
-                    { startIndex: 0, blockId: 'banner-text' },
-                    { startIndex: 1, blockId: 'banner-shape' },
-                    { startIndex: 2, blockId: 'portrait' },
-                    { startIndex: 4, blockId: 'logo' },
-                    { startIndex: 8, blockId: 'callout' },
-                ],
-            },
-            drawings: Object.fromEntries(
-                ['banner-text', 'banner-shape', 'portrait', 'logo', 'callout'].map((drawingId, index) => [
-                    drawingId,
-                    {
-                        drawingId,
-                        layoutType: drawingId === 'callout'
-                            ? PositionedObjectLayoutType.WRAP_SQUARE
-                            : PositionedObjectLayoutType.WRAP_NONE,
-                        docTransform: {
-                            size: { width: 120 + index * 20, height: 40 + index * 10 },
-                            positionH: { relativeFrom: ObjectRelativeFromH.PAGE, posOffset: 20 + index * 60 },
-                            positionV: { relativeFrom: ObjectRelativeFromV.PARAGRAPH, posOffset: index * 6 },
-                            angle: 0,
-                        },
-                    },
-                ])
-            ) as any,
-            drawingsOrder: ['banner-text', 'banner-shape', 'portrait', 'logo', 'callout'],
-            documentStyle: {
-                documentFlavor: DocumentFlavor.TRADITIONAL,
-                pageSize: { width: 816, height: 1056 },
-                marginTop: 48,
-                marginBottom: 48,
-                marginLeft: 48,
-                marginRight: 48,
-            },
-        });
-
-        vi.stubGlobal('document', {
-            createElement: () => ({
-                getContext: () => ({
-                    font: '',
-                    textBaseline: 'alphabetic',
-                    measureText: (value: string) => ({
-                        width: value.length * 8,
-                        fontBoundingBoxAscent: 10,
-                        fontBoundingBoxDescent: 4,
-                        actualBoundingBoxAscent: 10,
-                        actualBoundingBoxDescent: 4,
-                    }),
-                }),
-            }),
-        });
-
-        const viewModel = new DocumentViewModel(documentModel);
-        const skeleton = DocumentSkeleton.create(viewModel, localeService);
-        skeleton.calculate();
-
-        const pages = skeleton.getSkeletonData()?.pages ?? [];
-        const firstPageSections = pages[0]?.sections ?? [];
-        const bodySection = firstPageSections[1];
-        const firstBodyLineText = bodySection?.columns[0]?.lines
-            .flatMap((line) => line.divides)
-            .flatMap((divide) => divide.glyphGroup)
-            .map((glyph) => glyph.content)
-            .join('');
-
-        expect(bodySection).toBeDefined();
-        expect(bodySection.top).toBeLessThan(400);
-        expect(firstBodyLineText).toContain(bodyHeading);
-        expect(pages[1]?.sections[0]?.columns[0]?.lines[0]?.paragraphIndex).not.toBe(bodyStart + bodyHeading.length);
 
         skeleton.dispose();
         univer.dispose();

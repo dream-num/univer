@@ -1304,6 +1304,11 @@ describe('linebreaking', () => {
             getBody: vi.fn(() => ({
                 paragraphs: [paragraph],
             })),
+            getSnapshot: vi.fn(() => ({
+                documentStyle: {
+                    documentFlavor: DocumentFlavor.MODERN,
+                },
+            })),
             getCustomBlock: vi.fn(() => null),
         } as any;
 

@@ -19,12 +19,14 @@ import type { IParagraphList } from '../../../../../basics/i-document-skeleton-c
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
 import {
     BooleanNumber,
+    DocumentFlavor,
     TableAlignmentType,
     TableRowHeightRule,
     TableSizeType,
     VerticalAlignmentType,
 } from '@univerjs/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { getDocumentCompatibilityPolicy } from '../../../document-compatibility';
 import {
     createTableSkeleton,
     createTableSkeletons,
@@ -146,6 +148,10 @@ function makeCellPage(width: number, height: number) {
         originMarginBottom: 1,
         sections: [],
     };
+}
+
+function useDocumentFlavor(sectionBreakConfig: Record<string, unknown>, documentFlavor: DocumentFlavor) {
+    sectionBreakConfig.documentCompatibilityPolicy = getDocumentCompatibilityPolicy(documentFlavor);
 }
 
 describe('table utilities', () => {
@@ -410,6 +416,7 @@ describe('docs table layout', () => {
 
     it('keeps a table on the current page when it only slightly overflows available height', () => {
         const { ctx, curPage, viewModel, tableNode, sectionBreakConfig, tableSource } = createContextAndTable();
+        useDocumentFlavor(sectionBreakConfig, DocumentFlavor.TRADITIONAL);
         tableSource.tableRows = [
             {
                 repeatHeaderRow: BooleanNumber.FALSE,
@@ -431,6 +438,32 @@ describe('docs table layout', () => {
 
         expect(result.skeTables[0].height).toBe(117);
         expect(result.fromCurrentPage).toBe(true);
+    });
+
+    it('opens a new table slice in modern documents when it overflows available height', () => {
+        const { ctx, curPage, viewModel, tableNode, sectionBreakConfig, tableSource } = createContextAndTable();
+        useDocumentFlavor(sectionBreakConfig, DocumentFlavor.MODERN);
+        tableSource.tableRows = [
+            {
+                repeatHeaderRow: BooleanNumber.FALSE,
+                trHeight: {
+                    hRule: TableRowHeightRule.AUTO,
+                    val: { v: 16 },
+                },
+                cantSplit: BooleanNumber.FALSE,
+                tableCells: [
+                    { vAlign: VerticalAlignmentType.TOP },
+                    { vAlign: VerticalAlignmentType.TOP },
+                ],
+            },
+        ];
+        tableNode.children = [createRowNode(1, 20, 2) as any];
+        createSkeletonCellPagesMock.mockImplementation(() => [makeCellPage(60, 115)]);
+
+        const result = createTableSkeletons(ctx, curPage, viewModel, tableNode, sectionBreakConfig, 109);
+
+        expect(result.skeTables[0].height).toBe(117);
+        expect(result.fromCurrentPage).toBe(false);
     });
 
     it('lays out splittable auto rows against the remaining page height', () => {
@@ -458,6 +491,7 @@ describe('docs table layout', () => {
 
     it('keeps a splittable auto row on the current page when its first slice slightly overflows', () => {
         const { ctx, curPage, viewModel, tableNode, sectionBreakConfig, tableSource } = createContextAndTable();
+        useDocumentFlavor(sectionBreakConfig, DocumentFlavor.TRADITIONAL);
         tableSource.tableRows[0].repeatHeaderRow = BooleanNumber.FALSE;
         tableSource.tableRows[0].trHeight = {
             hRule: TableRowHeightRule.EXACT,

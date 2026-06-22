@@ -31,6 +31,7 @@ import { Viewport } from '../../../viewport';
 import { DocBackground } from '../doc-background';
 import { DOCS_EXTENSION_TYPE } from '../doc-extension';
 import { Documents } from '../document';
+import { getDocumentCompatibilityPolicy } from '../document-compatibility';
 import { setDocsTableRenderViewportProvider } from '../table-render-viewport';
 
 function createGlyph(content: string, left: number, width = 16, backgroundColor?: string) {
@@ -992,6 +993,13 @@ describe('documents render', () => {
 
         const documents = new Documents('docs-main', {
             getSkeletonData: () => ({ pages: [bodyPage] }),
+            getViewModel: () => ({
+                getSnapshot: () => ({
+                    documentStyle: {
+                        documentFlavor: DocumentFlavor.TRADITIONAL,
+                    },
+                }),
+            }),
         } as any, {
             pageLayoutType: PageLayoutType.VERTICAL,
             pageMarginLeft: 0,
@@ -1069,6 +1077,9 @@ describe('documents render', () => {
         } as any;
 
         vi.spyOn(documents as any, '_drawTableCell').mockImplementation(() => {});
+        vi.spyOn(documents as any, '_getDocumentCompatibilityPolicy').mockReturnValue(
+            getDocumentCompatibilityPolicy(DocumentFlavor.TRADITIONAL)
+        );
 
         (documents as any)._drawTable(
             ctx,

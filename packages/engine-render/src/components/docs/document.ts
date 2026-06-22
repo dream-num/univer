@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDocumentRenderConfig, IScale, ITableCell, ITableCellBorder, Nullable } from '@univerjs/core';
+import type { DocumentFlavor, IDocumentRenderConfig, IScale, ITableCell, ITableCellBorder, Nullable } from '@univerjs/core';
 import type {
     IDocumentSkeletonGlyph,
     IDocumentSkeletonLine,
@@ -42,6 +42,7 @@ import { DocumentsSpanAndLineExtensionRegistry } from '../extension';
 import { DocComponent } from './doc-component';
 import { DOCS_EXTENSION_TYPE } from './doc-extension';
 import { collectBackgroundGlyphRuns } from './extensions/background-runs';
+import { getDocumentCompatibilityPolicy, shouldAllowImportedTableMarginOverflow } from './document-compatibility';
 import { getTableIdAndSliceIndex } from './layout/block/table';
 import { Liquid } from './liquid';
 import { getDocsTableRenderViewport, hasDocsTableHorizontalViewport } from './table-render-viewport';
@@ -653,7 +654,8 @@ export class Documents extends DocComponent {
             return null;
         }
 
-        const viewportWidth = isDocxImportedTable(tableSkeleton.tableSource)
+        const compatibilityPolicy = this._getDocumentCompatibilityPolicy();
+        const viewportWidth = shouldAllowImportedTableMarginOverflow(compatibilityPolicy, tableSkeleton.tableSource)
             ? Math.max(0, pageWidth - Math.max(0, marginLeft + tableSkeleton.left))
             : Math.max(0, pageWidth - marginLeft - marginRight - tableSkeleton.left);
         if (viewportWidth <= 0 || tableSkeleton.width <= viewportWidth) {
@@ -679,6 +681,21 @@ export class Documents extends DocComponent {
         const dataModel = viewModel?.getDataModel?.();
 
         return dataModel?.getUnitId?.() ?? this.oKey;
+    }
+
+    private _getDocumentCompatibilityPolicy() {
+        const skeleton = this.getSkeleton() as {
+            getViewModel?: () => {
+                getSnapshot?: () => {
+                    documentStyle?: {
+                        documentFlavor?: DocumentFlavor;
+                    };
+                };
+            };
+        } | undefined;
+        const documentFlavor = skeleton?.getViewModel?.()?.getSnapshot?.()?.documentStyle?.documentFlavor;
+
+        return getDocumentCompatibilityPolicy(documentFlavor);
     }
 
     private _drawLineBackground(
@@ -1306,10 +1323,6 @@ export class Documents extends DocComponent {
             this.register(extension);
         });
     }
-}
-
-function isDocxImportedTable(tableSource: unknown): boolean {
-    return tableSource != null && typeof tableSource === 'object' && 'docxWidth' in tableSource;
 }
 
 function setTableCellBorderDash(ctx: UniverRenderingContext, dashStyle?: DashStyleType) {

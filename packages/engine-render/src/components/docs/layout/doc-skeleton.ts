@@ -38,6 +38,7 @@ import { getDocsTableRenderViewport, hasDocsTableHorizontalViewport } from '../t
 import { DocumentEditArea } from '../view-model/document-view-model';
 import { dealWithSection } from './block/section';
 import { getTableIdAndSliceIndex } from './block/table';
+import { getDocumentCompatibilityPolicy } from '../document-compatibility';
 import { Hyphen } from './hyphenation/hyphen';
 import { LanguageDetector } from './hyphenation/language-detector';
 import { createSkeletonPage } from './model/page';
@@ -1059,6 +1060,7 @@ export class DocumentSkeleton extends Skeleton {
             drawings,
 
             localeService: this._localeService,
+            documentCompatibilityPolicy: getDocumentCompatibilityPolicy(documentStyle.documentFlavor),
             paragraphLineGapDefault,
             defaultTabStop,
             documentTextStyle: textStyle,

@@ -26,9 +26,8 @@ import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node'
 import type { DocumentViewModel } from '../../view-model/document-view-model';
 import type { ILayoutContext } from '../tools';
 import { BooleanNumber, TableAlignmentType, TableRowHeightRule, VerticalAlignmentType } from '@univerjs/core';
+import { getDocumentCompatibilityPolicy } from '../../document-compatibility';
 import { createNullCellPage, createSkeletonCellPages } from '../model/page';
-
-const TABLE_ROW_LAYOUT_OVERFLOW_TOLERANCE = 4;
 
 export function createTableSkeleton(
     ctx: ILayoutContext,
@@ -185,8 +184,6 @@ interface ICreateTableCache {
     repeatRowsHeight: number;
 }
 
-const WORD_COMPATIBLE_TABLE_CURRENT_PAGE_OVERFLOW_TOLERANCE = 12;
-
 // Create skeletons of a table, which may be divided into different pages according to the available height of the page.
 export function createTableSkeletons(
     ctx: ILayoutContext,
@@ -239,8 +236,9 @@ export function createTableSkeletons(
 
     updateTableSkeletonsPosition(createCache, curPage, skeTables, table);
 
+    const documentCompatibilityPolicy = sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy();
     const fromCurrentPage =
-        skeTables[0].height <= availableHeight + WORD_COMPATIBLE_TABLE_CURRENT_PAGE_OVERFLOW_TOLERANCE;
+        skeTables[0].height <= availableHeight + documentCompatibilityPolicy.table.currentPageOverflowTolerance;
 
     return {
         skeTables,
@@ -307,6 +305,7 @@ function dealWithTableRow(
 ) {
     const pageContentHeight = getAvailableHeight(curPage, cache, false);
     const availableHeight = getAvailableHeight(curPage, cache, true);
+    const documentCompatibilityPolicy = sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy();
     const { children: cellNodes, startIndex, endIndex } = rowNode;
     const rowSource = table.tableRows[row];
     const { trHeight, cantSplit } = rowSource;
@@ -428,7 +427,7 @@ function dealWithTableRow(
         const rowOverflowHeight = rowSkeleton.height - cache.remainHeight;
         const shouldOpenNewTable =
             cache.remainHeight < MAX_FONT_SIZE ||
-            rowOverflowHeight > TABLE_ROW_LAYOUT_OVERFLOW_TOLERANCE;
+            rowOverflowHeight > documentCompatibilityPolicy.table.rowOverflowTolerance;
 
         if (shouldOpenNewTable) {
             cache.remainHeight = getAvailableHeight(curPage, cache, row !== 0 && rowSkeleton.index !== lastRow.index);

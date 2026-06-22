@@ -535,9 +535,39 @@ importers:
       '@univerjs/preset-docs-thread-comment':
         specifier: workspace:*
         version: link:../presets/packages/preset-docs-thread-comment
+      '@univerjs/preset-sheets-conditional-formatting':
+        specifier: workspace:*
+        version: link:../presets/packages/preset-sheets-conditional-formatting
       '@univerjs/preset-sheets-core':
         specifier: workspace:*
         version: link:../presets/packages/preset-sheets-core
+      '@univerjs/preset-sheets-data-validation':
+        specifier: workspace:*
+        version: link:../presets/packages/preset-sheets-data-validation
+      '@univerjs/preset-sheets-drawing':
+        specifier: workspace:*
+        version: link:../presets/packages/preset-sheets-drawing
+      '@univerjs/preset-sheets-filter':
+        specifier: workspace:*
+        version: link:../presets/packages/preset-sheets-filter
+      '@univerjs/preset-sheets-find-replace':
+        specifier: workspace:*
+        version: link:../presets/packages/preset-sheets-find-replace
+      '@univerjs/preset-sheets-hyper-link':
+        specifier: workspace:*
+        version: link:../presets/packages/preset-sheets-hyper-link
+      '@univerjs/preset-sheets-note':
+        specifier: workspace:*
+        version: link:../presets/packages/preset-sheets-note
+      '@univerjs/preset-sheets-sort':
+        specifier: workspace:*
+        version: link:../presets/packages/preset-sheets-sort
+      '@univerjs/preset-sheets-table':
+        specifier: workspace:*
+        version: link:../presets/packages/preset-sheets-table
+      '@univerjs/preset-sheets-thread-comment':
+        specifier: workspace:*
+        version: link:../presets/packages/preset-sheets-thread-comment
       '@univerjs/presets':
         specifier: workspace:*
         version: link:../presets

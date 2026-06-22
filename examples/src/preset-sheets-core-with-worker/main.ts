@@ -16,6 +16,8 @@
 
 import type { FUniver, Univer } from '@univerjs/presets';
 
+import { DEFAULT_WORKBOOK_DATA_DEMO } from '@univerjs/mockdata';
+
 import { UniverSheetsConditionalFormattingPreset } from '@univerjs/preset-sheets-conditional-formatting';
 import UniverPresetSheetsConditionalFormattingZhCN from '@univerjs/preset-sheets-conditional-formatting/locales/zh-CN';
 
@@ -50,7 +52,6 @@ import { UniverSheetsThreadCommentPreset } from '@univerjs/preset-sheets-thread-
 import UniverPresetSheetsThreadCommentZhCN from '@univerjs/preset-sheets-thread-comment/locales/zh-CN';
 
 import { createUniver, defaultTheme, LocaleType, mergeLocales } from '@univerjs/presets';
-import ImportCSVButtonPlugin from './custom-plugin/import-csv-button';
 
 import '../global.css';
 
@@ -73,7 +74,9 @@ const { univer, univerAPI } = createUniver({
     },
     theme: defaultTheme,
     presets: [
-        UniverSheetsCorePreset(),
+        UniverSheetsCorePreset({
+            workerURL: new Worker(new URL('./worker.js', import.meta.url), { type: 'module' }),
+        }),
         UniverSheetsDrawingPreset(),
         UniverSheetsConditionalFormattingPreset(),
         UniverSheetsFilterPreset(),
@@ -85,12 +88,9 @@ const { univer, univerAPI } = createUniver({
         UniverSheetsTablePreset(),
         UniverSheetsThreadCommentPreset(),
     ],
-    plugins: [
-        ImportCSVButtonPlugin,
-    ],
 });
 
-univerAPI.createWorkbook({ name: 'Test Sheet' });
+univerAPI.createWorkbook(DEFAULT_WORKBOOK_DATA_DEMO);
 
 window.univer = univer;
 window.univerAPI = univerAPI;

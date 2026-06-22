@@ -14,8 +14,21 @@
  * limitations under the License.
  */
 
-import type { ICommand, IMutationInfo, Workbook } from '@univerjs/core';
-import type { ISetRangeValuesMutationParams, ISetWorksheetColumnCountMutationParams, ISetWorksheetRowCountMutationParams } from '@univerjs/sheets';
+import type { ISetRangeValuesMutationParams, ISetWorksheetColumnCountMutationParams, ISetWorksheetRowCountMutationParams } from '@univerjs/preset-sheets-core';
+import type { ICommand, IMutationInfo, Workbook } from '@univerjs/presets';
+import { FolderIcon } from '@univerjs/icons';
+import {
+    IconManager,
+    IMenuManagerService,
+    MenuItemType,
+    RibbonStartGroup,
+    SetRangeValuesMutation,
+    SetRangeValuesUndoMutationFactory,
+    SetWorksheetColumnCountMutation,
+    SetWorksheetColumnCountUndoMutationFactory,
+    SetWorksheetRowCountMutation,
+    SetWorksheetRowCountUndoMutationFactory,
+} from '@univerjs/preset-sheets-core';
 import {
     CommandType,
     covertCellValues,
@@ -27,22 +40,7 @@ import {
     Plugin,
     sequenceExecute,
     UniverInstanceType,
-} from '@univerjs/core';
-import { FolderIcon } from '@univerjs/icons';
-import {
-    SetRangeValuesMutation,
-    SetRangeValuesUndoMutationFactory,
-    SetWorksheetColumnCountMutation,
-    SetWorksheetColumnCountUndoMutationFactory,
-    SetWorksheetRowCountMutation,
-    SetWorksheetRowCountUndoMutationFactory,
-} from '@univerjs/sheets';
-import {
-    IconManager,
-    IMenuManagerService,
-    MenuItemType,
-    RibbonOthersGroup,
-} from '@univerjs/ui';
+} from '@univerjs/presets';
 
 /**
  * wait user select csv file
@@ -60,11 +58,16 @@ function waitUserSelectCSVFile(onSelect: (data: {
 
         input.onchange = () => {
             const file = input.files?.[0];
-            if (!file) return;
+            if (!file) {
+                return;
+            }
+
             const reader = new FileReader();
             reader.onload = () => {
                 const text = reader.result;
-                if (typeof text !== 'string') return;
+                if (typeof text !== 'string') {
+                    return;
+                }
 
                 // tip: use npm package to parse csv
                 const rows = text.split(/\r\n|\n/);
@@ -108,7 +111,7 @@ class ImportCSVButtonPlugin extends Plugin {
      * The plugin should add its own module to the dependency injection system at this lifecycle.
      * It is not recommended to initialize the internal module of the plugin outside this lifecycle.
      */
-    // eslint-disable-next-line max-lines-per-function
+
     override onStarting() {
         // register icon component
         this.disposeWithMe(
@@ -209,7 +212,7 @@ class ImportCSVButtonPlugin extends Plugin {
         });
 
         this._menuManagerService.mergeMenu({
-            [RibbonOthersGroup.OTHERS]: {
+            [RibbonStartGroup.OTHERS]: {
                 [buttonId]: {
                     order: 10,
                     menuItemFactory,

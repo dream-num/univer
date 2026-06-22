@@ -3,5 +3,5 @@
     "compilerOptions": {
         "target": "ESNext"
     },
-    "include": ["esbuild.config.ts", "scripts/**/*.ts"]
+    "include": ["esbuild.config.mts", "scripts/**/*.mts"]
 }

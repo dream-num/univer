@@ -15,7 +15,6 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-
 import { InsertLinkShortcut } from '../../menu/menu';
 import { SheetsHyperLinkPermissionController } from '../hyper-link-permission.controller';
 

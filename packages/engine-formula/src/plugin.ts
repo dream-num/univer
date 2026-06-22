@@ -53,7 +53,10 @@ import {
 } from './services/feature-calculation-manager.service';
 import { FunctionService, IFunctionService } from './services/function.service';
 import { GlobalComputingStatusService } from './services/global-computing-status.service';
-import { HyperlinkEngineFormulaService, IHyperlinkEngineFormulaService } from './services/hyperlink-engine-formula.service';
+import {
+    HyperlinkEngineFormulaService,
+    IHyperlinkEngineFormulaService,
+} from './services/hyperlink-engine-formula.service';
 import { IOtherFormulaManagerService, OtherFormulaManagerService } from './services/other-formula-manager.service';
 import { RegisterOtherFormulaService } from './services/register-other-formula.service';
 import { FormulaRuntimeService, IFormulaRuntimeService } from './services/runtime.service';

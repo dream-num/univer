@@ -16,7 +16,6 @@
 
 import type { Nullable } from '@univerjs/core';
 import type { UniverRenderingContext } from './context';
-
 import type { Scene } from './scene';
 import type { SceneViewer } from './scene-viewer';
 import { Disposable, requestImmediateMacroTask, sortRules, toDisposable } from '@univerjs/core';

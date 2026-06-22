@@ -27,11 +27,24 @@ export { getTableIdAndSliceIndex } from './components/docs/layout/block/table';
 export * from './components/docs/layout/doc-simple-skeleton';
 export { DocumentSkeleton } from './components/docs/layout/doc-skeleton';
 export type { IFindNodeRestrictions } from './components/docs/layout/doc-skeleton';
-export { getCharSpaceApply, getLastLine, getNumberUnitValue, getPageFromPath, glyphIterator, lineIterator } from './components/docs/layout/tools';
+export {
+    getCharSpaceApply,
+    getLastLine,
+    getNumberUnitValue,
+    getPageFromPath,
+    glyphIterator,
+    lineIterator,
+} from './components/docs/layout/tools';
 export { getLastColumn } from './components/docs/layout/tools';
 export { Liquid } from './components/docs/liquid';
-export type { DocsTableRenderViewportProvider, IDocsTableRenderViewport } from './components/docs/table-render-viewport';
-export { getDocsTableRenderViewport, setDocsTableRenderViewportProvider } from './components/docs/table-render-viewport';
+export type {
+    DocsTableRenderViewportProvider,
+    IDocsTableRenderViewport,
+} from './components/docs/table-render-viewport';
+export {
+    getDocsTableRenderViewport,
+    setDocsTableRenderViewportProvider,
+} from './components/docs/table-render-viewport';
 export { DataStreamTreeNode } from './components/docs/view-model/data-stream-tree-node';
 export { DocumentViewModel } from './components/docs/view-model/document-view-model';
 export { DocumentEditArea } from './components/docs/view-model/document-view-model';
@@ -45,9 +58,15 @@ export * from './engine';
 export * from './group';
 export * from './layer';
 export { IRenderingEngine, UniverRenderEnginePlugin } from './plugin';
-export { getCurrentTypeOfRenderer, IRenderManagerService, RenderManagerService, withCurrentTypeOfRenderer } from './render-manager/render-manager.service';
+export {
+    getCurrentTypeOfRenderer,
+    IRenderManagerService,
+    RenderManagerService,
+    withCurrentTypeOfRenderer,
+} from './render-manager/render-manager.service';
 export { type RenderComponentType } from './render-manager/render-manager.service';
-export { type IRender, type IRenderContext, type IRenderModule, RenderUnit } from './render-manager/render-unit';
+export { RenderUnit } from './render-manager/render-unit';
+export type { IRender, IRenderContext, IRenderModule } from './render-manager/render-unit';
 export * from './scene';
 export * from './scene-viewer';
 export { type IChangeObserverConfig } from './scene.transformer';

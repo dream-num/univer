@@ -17,7 +17,12 @@
 import { DocumentFlavor } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { setupRenderTestEnv } from '../../../__tests__/render-test-utils';
-import { DocumentSkeletonPageType, GlyphType, LineType, PageLayoutType } from '../../../basics/i-document-skeleton-cached';
+import {
+    DocumentSkeletonPageType,
+    GlyphType,
+    LineType,
+    PageLayoutType,
+} from '../../../basics/i-document-skeleton-cached';
 import { Canvas } from '../../../canvas';
 import { Engine } from '../../../engine';
 import { MAIN_VIEW_PORT_KEY, Scene } from '../../../scene';

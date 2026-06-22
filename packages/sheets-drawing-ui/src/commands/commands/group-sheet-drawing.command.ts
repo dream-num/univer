@@ -16,13 +16,17 @@
 
 import type { IAccessor, ICommand } from '@univerjs/core';
 import type { IDrawingGroupUpdateParam, IDrawingJsonUndo1 } from '@univerjs/drawing';
-
 import {
     CommandType,
     ICommandService,
     IUndoRedoService,
 } from '@univerjs/core';
-import { ClearSheetDrawingTransformerOperation, DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets-drawing';
+import {
+    ClearSheetDrawingTransformerOperation,
+    DrawingApplyType,
+    ISheetDrawingService,
+    SetDrawingApplyMutation,
+} from '@univerjs/sheets-drawing';
 import { groupToUngroup } from './utils';
 
 /**

@@ -15,7 +15,6 @@
  */
 
 import type { EventState, Nullable } from '@univerjs/core';
-
 import type { IMouseEvent, IPointerEvent } from '../basics/i-events';
 import type { Vector2 } from '../basics/vector2';
 import type { UniverRenderingContext } from '../context';

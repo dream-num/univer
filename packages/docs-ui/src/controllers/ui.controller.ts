@@ -24,7 +24,6 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-
 import {
     BuiltInUIPart,
     connectInjector,

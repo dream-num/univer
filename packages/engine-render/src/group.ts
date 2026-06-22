@@ -16,7 +16,6 @@
 
 import type { Nullable } from '@univerjs/core';
 import type { CURSOR_TYPE } from './basics/const';
-
 import type { IViewportInfo } from './basics/vector2';
 import type { UniverRenderingContext } from './context';
 import { sortRules } from '@univerjs/core';

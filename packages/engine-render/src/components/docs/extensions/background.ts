@@ -16,7 +16,6 @@
 
 import type { IScale } from '@univerjs/core';
 import type { IDocumentSkeletonGlyph } from '../../../basics/i-document-skeleton-cached';
-
 import type { UniverRenderingContext } from '../../../context';
 import { getColorStyle } from '@univerjs/core';
 import { Vector2 } from '../../../basics/vector2';

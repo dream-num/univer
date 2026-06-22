@@ -16,7 +16,6 @@
 
 import type { IScale, ITextDecoration } from '@univerjs/core';
 import type { IDocumentSkeletonGlyph } from '../../../basics/i-document-skeleton-cached';
-
 import type { UniverRenderingContext } from '../../../context';
 import { BaselineOffset, BooleanNumber, getColorStyle, TextDecoration } from '@univerjs/core';
 import { COLOR_BLACK_RGB, DEFAULT_OFFSET_SPACING } from '../../../basics/const';

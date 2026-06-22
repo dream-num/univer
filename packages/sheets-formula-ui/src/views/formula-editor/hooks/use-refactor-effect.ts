@@ -19,7 +19,6 @@ import { EDITOR_ACTIVATED, IContextService, IUniverInstanceService, UniverInstan
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService, REF_SELECTIONS_ENABLED } from '@univerjs/sheets';
 import { IContextMenuService, useDependency, useObservable } from '@univerjs/ui';
-
 import { useEffect, useLayoutEffect, useMemo } from 'react';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render.service';
 

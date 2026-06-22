@@ -15,7 +15,6 @@
  */
 
 import type { IConfirmProps } from '@univerjs/design';
-
 import type { ICustomLabelProps } from '../../custom-label/CustomLabel';
 
 export interface IConfirmChildrenProps {

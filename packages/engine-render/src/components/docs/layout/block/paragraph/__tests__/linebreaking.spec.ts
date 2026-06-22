@@ -14,11 +14,20 @@
  * limitations under the License.
  */
 
-import { AlignTypeH, AlignTypeV, DataStreamTreeTokenType, DocumentBlockRangeType, DocumentFlavor, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType } from '@univerjs/core';
+import {
+    AlignTypeH,
+    AlignTypeV,
+    DataStreamTreeTokenType,
+    DocumentBlockRangeType,
+    DocumentFlavor,
+    ObjectRelativeFromH,
+    ObjectRelativeFromV,
+    PositionedObjectLayoutType,
+} from '@univerjs/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { updateInlineDrawingCoordsAndBorder } from '../../../tools';
 import { lineBreaking } from '../linebreaking';
 import { shaping } from '../shaping';
-import { updateInlineDrawingCoordsAndBorder } from '../../../tools';
 import { createParagraphLayoutTestBed, createSectionLayoutTestBed } from './create-paragraph-layout-test-bed';
 
 function createContext() {

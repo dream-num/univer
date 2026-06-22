@@ -35,9 +35,15 @@ import { CalculateFormulaService, ICalculateFormulaService } from '../../../serv
 import { FormulaCurrentConfigService, IFormulaCurrentConfigService } from '../../../services/current-data.service';
 import { DefinedNamesService, IDefinedNamesService } from '../../../services/defined-names.service';
 import { DependencyManagerService, IDependencyManagerService } from '../../../services/dependency-manager.service';
-import { FeatureCalculationManagerService, IFeatureCalculationManagerService } from '../../../services/feature-calculation-manager.service';
+import {
+    FeatureCalculationManagerService,
+    IFeatureCalculationManagerService,
+} from '../../../services/feature-calculation-manager.service';
 import { FunctionService, IFunctionService } from '../../../services/function.service';
-import { HyperlinkEngineFormulaService, IHyperlinkEngineFormulaService } from '../../../services/hyperlink-engine-formula.service';
+import {
+    HyperlinkEngineFormulaService,
+    IHyperlinkEngineFormulaService,
+} from '../../../services/hyperlink-engine-formula.service';
 import {
     IOtherFormulaManagerService,
     OtherFormulaManagerService,

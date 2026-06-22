@@ -16,7 +16,6 @@
 
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-
 import { BaseFunction } from '../../base-function';
 
 export class Transpose extends BaseFunction {

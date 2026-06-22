@@ -19,10 +19,10 @@ import './global.css';
 export {
     DisableCrosshairHighlightOperation,
     EnableCrosshairHighlightOperation,
-    type ISetCrosshairHighlightColorOperationParams,
     SetCrosshairHighlightColorOperation,
     ToggleCrosshairHighlightOperation,
 } from './commands/operations/operation';
+export type { ISetCrosshairHighlightColorOperationParams } from './commands/operations/operation';
 export type { IUniverSheetsCrosshairHighlightConfig } from './config/config';
 export { UniverSheetsCrosshairHighlightPlugin } from './plugin';
 export { SheetsCrosshairHighlightService } from './services/crosshair.service';

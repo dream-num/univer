@@ -16,7 +16,6 @@
 
 import type { ICellData, IObjectMatrixPrimitiveType, Nullable } from '@univerjs/core';
 import type { IArrayFormulaUnitCellType, IRuntimeUnitDataPrimitiveType, IRuntimeUnitDataType } from './common';
-
 import { ObjectMatrix } from '@univerjs/core';
 
 export function convertUnitDataToRuntime(unitData: IArrayFormulaUnitCellType) {

@@ -35,7 +35,12 @@ export class Custom extends SheetExtension {
 
     override uKey: string = UNIQUE_KEY;
 
-    override draw(ctx: UniverRenderingContext, _parentScale: IScale, skeleton: SpreadsheetSkeleton, diffRanges: IRange[] | undefined): void {
+    override draw(
+        ctx: UniverRenderingContext,
+        _parentScale: IScale,
+        skeleton: SpreadsheetSkeleton,
+        diffRanges: IRange[] | undefined
+    ) {
         const { worksheet, rowColumnSegment } = skeleton;
         if (!worksheet) {
             return;

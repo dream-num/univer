@@ -14,7 +14,13 @@
  * limitations under the License.
  */
 
-import { BooleanNumber, ColumnSeparatorType, DocumentBlockRangeType, PageOrientType, PositionedObjectLayoutType } from '@univerjs/core';
+import {
+    BooleanNumber,
+    ColumnSeparatorType,
+    DocumentBlockRangeType,
+    PageOrientType,
+    PositionedObjectLayoutType,
+} from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { DocumentSkeletonPageType } from '../../../../../basics/i-document-skeleton-cached';
 import {

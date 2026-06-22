@@ -15,10 +15,12 @@
  */
 
 import type { IRange, Nullable } from '@univerjs/core';
-
 import type { IOtherFormulaMarkDirtyParams } from '../commands/mutations/formula.mutation';
 import type { ISetFormulaCalculationResultMutation } from '../commands/mutations/set-formula-calculation.mutation';
-import type { IRemoveOtherFormulaMutationParams, ISetOtherFormulaMutationParams } from '../commands/mutations/set-other-formula.mutation';
+import type {
+    IRemoveOtherFormulaMutationParams,
+    ISetOtherFormulaMutationParams,
+} from '../commands/mutations/set-other-formula.mutation';
 import type { IOtherFormulaResult } from './formula-common';
 import { Disposable, generateRandomId, ICommandService, Inject, LifecycleService, ObjectMatrix } from '@univerjs/core';
 import { BehaviorSubject, bufferWhen, filter, skip, Subject } from 'rxjs';

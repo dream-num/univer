@@ -14,7 +14,15 @@
  * limitations under the License.
  */
 
-import type { Dependency, DependencyIdentifier, ICreateUnitOptions, IDisposable, Nullable, UnitModel, UniverInstanceType } from '@univerjs/core';
+import type {
+    Dependency,
+    DependencyIdentifier,
+    ICreateUnitOptions,
+    IDisposable,
+    Nullable,
+    UnitModel,
+    UniverInstanceType,
+} from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import type { Engine } from '../engine';
 import type { Scene } from '../scene';

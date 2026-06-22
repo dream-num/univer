@@ -17,7 +17,13 @@
 import type { ITable } from '@univerjs/core';
 import type { IParagraphList } from '../../../../../basics/i-document-skeleton-cached';
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
-import { BooleanNumber, TableAlignmentType, TableRowHeightRule, TableSizeType, VerticalAlignmentType } from '@univerjs/core';
+import {
+    BooleanNumber,
+    TableAlignmentType,
+    TableRowHeightRule,
+    TableSizeType,
+    VerticalAlignmentType,
+} from '@univerjs/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
     createTableSkeleton,

@@ -16,11 +16,20 @@
 
 import type { IParagraphStyle } from '@univerjs/core';
 import type { ISectionBreakConfig } from '../../../../../basics';
-import type { IDocumentSkeletonDivide, IDocumentSkeletonLine, IDocumentSkeletonPage } from '../../../../../basics/i-document-skeleton-cached';
+import type {
+    IDocumentSkeletonDivide,
+    IDocumentSkeletonLine,
+    IDocumentSkeletonPage,
+} from '../../../../../basics/i-document-skeleton-cached';
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../../view-model/document-view-model';
 import { HorizontalAlign, WrapStrategy } from '@univerjs/core';
-import { hasCJK, hasCJKText, isCjkLeftAlignedPunctuation, isCjkRightAlignedPunctuation } from '../../../../../basics/tools';
+import {
+    hasCJK,
+    hasCJKText,
+    isCjkLeftAlignedPunctuation,
+    isCjkRightAlignedPunctuation,
+} from '../../../../../basics/tools';
 import { BreakPointType } from '../../line-breaker/break';
 import { isLetter } from '../../line-breaker/enhancers/utils';
 import { createHyphenDashGlyph, glyphShrinkLeft, glyphShrinkRight, setGlyphGroupLeft } from '../../model/glyph';

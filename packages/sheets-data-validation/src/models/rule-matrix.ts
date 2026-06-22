@@ -15,7 +15,6 @@
  */
 
 import type { BBox, IRange, ISheetDataValidationRule, IUniverInstanceService, Workbook } from '@univerjs/core';
-
 import { debounce, Range, RBush, Rectangle, Tools, UniverInstanceType } from '@univerjs/core';
 
 interface IRuleItem extends BBox {

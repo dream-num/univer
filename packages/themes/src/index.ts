@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-export { default as defaultTheme, type Theme } from './default';
+export { default as defaultTheme } from './default';
+export type { Theme } from './default';
 export { default as greenTheme } from './green';
 export { default as orangeTheme } from './orange';
 export { default as purpleTheme } from './purple';

@@ -16,21 +16,25 @@
 
 export {
     ClearSheetsFilterCriteriaCommand,
-    type ISetSheetFilterRangeCommandParams,
-    type ISetSheetsFilterCriteriaCommandParams,
     ReCalcSheetsFilterCommand,
     RemoveSheetFilterCommand,
     SetSheetFilterRangeCommand,
     SetSheetsFilterCriteriaCommand,
     SmartToggleSheetsFilterCommand,
 } from './commands/commands/sheets-filter.command';
+export type {
+    ISetSheetFilterRangeCommandParams,
+    ISetSheetsFilterCriteriaCommandParams,
+} from './commands/commands/sheets-filter.command';
 export {
-    type ISetSheetsFilterCriteriaMutationParams,
-    type ISetSheetsFilterRangeMutationParams,
     ReCalcSheetsFilterMutation,
     RemoveSheetsFilterMutation,
     SetSheetsFilterCriteriaMutation,
     SetSheetsFilterRangeMutation,
+} from './commands/mutations/sheets-filter.mutation';
+export type {
+    ISetSheetsFilterCriteriaMutationParams,
+    ISetSheetsFilterRangeMutationParams,
 } from './commands/mutations/sheets-filter.mutation';
 export { FILTER_MUTATIONS } from './common/const';
 export type { IUniverSheetsFilterConfig } from './config/config';
@@ -45,7 +49,14 @@ export {
     notEquals,
 } from './models/custom-filters';
 export { FilterColumn, FilterModel } from './models/filter-model';
-export type { IAutoFilter, IColorFilters, ICustomFilter, ICustomFilters, IFilterColumn, IFilters } from './models/types';
+export type {
+    IAutoFilter,
+    IColorFilters,
+    ICustomFilter,
+    ICustomFilters,
+    IFilterColumn,
+    IFilters,
+} from './models/types';
 export { CustomFilterOperator, FilterBy } from './models/types';
 export { UniverSheetsFilterPlugin } from './plugin';
 export { SHEET_FILTER_SNAPSHOT_ID, SheetsFilterService } from './services/sheet-filter.service';

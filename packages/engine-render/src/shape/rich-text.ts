@@ -18,7 +18,6 @@ import type {
     IBorderData,
     IColorStyle,
     IDocumentData,
-
     IStyleBase,
     ITextDecoration,
     ITransformState,
@@ -26,7 +25,6 @@ import type {
     Nullable,
 } from '@univerjs/core';
 import type { BASE_OBJECT_ARRAY } from '../base-object';
-
 import type { IViewportInfo } from '../basics/vector2';
 import type { UniverRenderingContext } from '../context';
 import { BooleanNumber, DEFAULT_EMPTY_DOCUMENT_VALUE, DocumentDataModel } from '@univerjs/core';

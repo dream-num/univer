@@ -15,7 +15,6 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-
 import type { IObjectFullState } from './basics/interfaces';
 import type { IViewportInfo, Vector2 } from './basics/vector2';
 import type { UniverRenderingContext } from './context';

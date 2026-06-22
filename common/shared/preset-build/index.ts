@@ -1,38 +1,22 @@
-/**
- * Copyright 2023-present DreamNum Co., Ltd.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import type { TModuleFormat } from '../tsdown/configs/module';
-import type { IPackageJson } from '../tsdown/types';
-import type { IPresetBuildConfig, IPresetBuildOptions, IPresetPackageJson } from './types';
+import type { TModuleFormat } from '../tsdown/configs/module.ts';
+import type { IPackageJson } from '../tsdown/types.ts';
+import type { IPresetBuildConfig, IPresetBuildOptions, IPresetPackageJson } from './types.ts';
 import { existsSync, readFileSync, rmSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import { mergeConfig, build as tsdownBuild } from 'tsdown';
-import { createModuleConfig } from '../tsdown/configs/module';
-import { createUmdConfig } from '../tsdown/configs/umd';
-import { BUILD_OUTPUT_DIRECTORIES, CLEANUP_DIRECTORIES } from '../tsdown/constants';
-import { createBaseConfig, createInputPlugins } from '../tsdown/utils/base-config';
-import { getPresetModuleEntries, getPresetUmdEntries } from './entries';
-import { generatePresetLocales } from './locale';
-import { buildPresetStyles } from './style';
-import { prependPresetUmd } from './umd';
+import { createModuleConfig } from '../tsdown/configs/module.ts';
+import { createUmdConfig } from '../tsdown/configs/umd.ts';
+import { BUILD_OUTPUT_DIRECTORIES, CLEANUP_DIRECTORIES } from '../tsdown/constants.ts';
+import { createBaseConfig, createInputPlugins } from '../tsdown/utils/base-config.ts';
+import { getPresetModuleEntries, getPresetUmdEntries } from './entries.ts';
+import { generatePresetLocales } from './locale.ts';
+import { buildPresetStyles } from './style.ts';
+import { prependPresetUmd } from './umd.ts';
 
-export { generatePresetLocales } from './locale';
-export type { IPresetBuildConfig, IPresetBuildOptions } from './types';
-export { prependPresetUmd } from './umd';
+export { generatePresetLocales } from './locale.ts';
+export type { IPresetBuildConfig, IPresetBuildOptions } from './types.ts';
+export { prependPresetUmd } from './umd.ts';
 
 const PRESET_BUILD_CONFIG_FILENAMES = [
     'univer-preset.config.mjs',

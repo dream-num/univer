@@ -27,11 +27,19 @@ export class SpreadsheetRowHeader extends SpreadsheetHeader {
         throw new Error('Method not implemented.');
     }
 
-    override getNoMergeCellPositionByIndex(rowIndex: number, columnIndex: number): Nullable<{ startY: number; startX: number; endX: number; endY: number }> {
+    override getNoMergeCellPositionByIndex(
+        rowIndex: number,
+        columnIndex: number
+    ): Nullable<{ startY: number; startX: number; endX: number; endY: number }> {
         throw new Error('Method not implemented.');
     }
 
-    override getSelectionBounding(startRow: number, startColumn: number, endRow: number, endColumn: number): Nullable<{ startRow: number; startColumn: number; endRow: number; endColumn: number }> {
+    override getSelectionBounding(
+        startRow: number,
+        startColumn: number,
+        endRow: number,
+        endColumn: number
+    ): Nullable<{ startRow: number; startColumn: number; endRow: number; endColumn: number }> {
         throw new Error('Method not implemented.');
     }
 

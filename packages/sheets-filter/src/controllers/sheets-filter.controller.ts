@@ -14,16 +14,82 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICommandInfo, IMutationInfo, IObjectArrayPrimitiveType, IRange, Nullable, Workbook } from '@univerjs/core';
-import type { EffectRefRangeParams, IAddWorksheetMergeMutationParams, ICopySheetCommandParams, IInsertColCommandParams, IInsertRowCommandParams, IInsertRowMutationParams, IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandParams, IRemoveColMutationParams, IRemoveRowsMutationParams, IRemoveSheetCommandParams, ISetRangeValuesMutationParams, ISetWorksheetActiveOperationParams, ISheetCommandSharedParams } from '@univerjs/sheets';
-import type { ISetSheetsFilterCriteriaMutationParams, ISetSheetsFilterRangeMutationParams } from '../commands/mutations/sheets-filter.mutation';
+import type {
+    ICellData,
+    ICommandInfo,
+    IMutationInfo,
+    IObjectArrayPrimitiveType,
+    IRange,
+    Nullable,
+    Workbook,
+} from '@univerjs/core';
+import type {
+    EffectRefRangeParams,
+    IAddWorksheetMergeMutationParams,
+    ICopySheetCommandParams,
+    IInsertColCommandParams,
+    IInsertRowCommandParams,
+    IInsertRowMutationParams,
+    IMoveColsCommandParams,
+    IMoveRangeCommandParams,
+    IMoveRowsCommandParams,
+    IRemoveColMutationParams,
+    IRemoveRowsMutationParams,
+    IRemoveSheetCommandParams,
+    ISetRangeValuesMutationParams,
+    ISetWorksheetActiveOperationParams,
+    ISheetCommandSharedParams,
+} from '@univerjs/sheets';
+import type {
+    ISetSheetsFilterCriteriaMutationParams,
+    ISetSheetsFilterRangeMutationParams,
+} from '../commands/mutations/sheets-filter.mutation';
 import type { FilterColumn } from '../models/filter-model';
-
-import { Disposable, DisposableCollection, ICommandService, Inject, IUniverInstanceService, moveMatrixArray, Optional, Rectangle } from '@univerjs/core';
+import {
+    Disposable,
+    DisposableCollection,
+    ICommandService,
+    Inject,
+    IUniverInstanceService,
+    moveMatrixArray,
+    Optional,
+    Rectangle,
+} from '@univerjs/core';
 import { DataSyncPrimaryController } from '@univerjs/rpc';
-import { CopySheetCommand, EffectRefRangId, expandToContinuousRange, getSheetCommandTarget, InsertColCommand, InsertRowCommand, InsertRowMutation, INTERCEPTOR_POINT, MoveRangeCommand, MoveRowsCommand, RefRangeService, RemoveColCommand, RemoveRowCommand, RemoveRowMutation, RemoveSheetCommand, SetRangeValuesMutation, SetWorksheetActiveOperation, SheetInterceptorService, ZebraCrossingCacheController } from '@univerjs/sheets';
-import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand, RemoveSheetFilterCommand, SetSheetFilterRangeCommand, SetSheetsFilterCriteriaCommand } from '../commands/commands/sheets-filter.command';
-import { ReCalcSheetsFilterMutation, RemoveSheetsFilterMutation, SetSheetsFilterCriteriaMutation, SetSheetsFilterRangeMutation } from '../commands/mutations/sheets-filter.mutation';
+import {
+    CopySheetCommand,
+    EffectRefRangId,
+    expandToContinuousRange,
+    getSheetCommandTarget,
+    InsertColCommand,
+    InsertRowCommand,
+    InsertRowMutation,
+    INTERCEPTOR_POINT,
+    MoveRangeCommand,
+    MoveRowsCommand,
+    RefRangeService,
+    RemoveColCommand,
+    RemoveRowCommand,
+    RemoveRowMutation,
+    RemoveSheetCommand,
+    SetRangeValuesMutation,
+    SetWorksheetActiveOperation,
+    SheetInterceptorService,
+    ZebraCrossingCacheController,
+} from '@univerjs/sheets';
+import {
+    ClearSheetsFilterCriteriaCommand,
+    ReCalcSheetsFilterCommand,
+    RemoveSheetFilterCommand,
+    SetSheetFilterRangeCommand,
+    SetSheetsFilterCriteriaCommand,
+} from '../commands/commands/sheets-filter.command';
+import {
+    ReCalcSheetsFilterMutation,
+    RemoveSheetsFilterMutation,
+    SetSheetsFilterCriteriaMutation,
+    SetSheetsFilterRangeMutation,
+} from '../commands/mutations/sheets-filter.mutation';
 import { SheetsFilterService } from '../services/sheet-filter.service';
 import { mergeSetFilterCriteria } from '../utils';
 

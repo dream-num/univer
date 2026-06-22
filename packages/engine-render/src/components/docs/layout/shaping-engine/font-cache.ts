@@ -15,7 +15,10 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import type { IDocumentSkeletonBoundingBox, IDocumentSkeletonFontStyle } from '../../../../basics/i-document-skeleton-cached';
+import type {
+    IDocumentSkeletonBoundingBox,
+    IDocumentSkeletonFontStyle,
+} from '../../../../basics/i-document-skeleton-cached';
 import type { IOpenTypeGlyphInfo } from './text-shaping';
 import { ptToPixel } from '../../../../basics/tools';
 

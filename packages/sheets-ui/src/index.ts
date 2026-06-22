@@ -18,8 +18,6 @@ import './global.css';
 
 export { getEditorObject } from './basics/editor/get-editor-object';
 export {
-    type ISheetPasteByShortKeyParams,
-    type ISheetPasteParams,
     SheetCopyCommand,
     SheetCutCommand,
     SheetPasteBesidesBorderCommand,
@@ -29,6 +27,7 @@ export {
     SheetPasteShortKeyCommand,
     SheetPasteValueCommand,
 } from './commands/commands/clipboard.command';
+export type { ISheetPasteByShortKeyParams, ISheetPasteParams } from './commands/commands/clipboard.command';
 export { DeleteRangeMoveLeftConfirmCommand } from './commands/commands/delete-range-move-left-confirm.command';
 export { DeleteRangeMoveUpConfirmCommand } from './commands/commands/delete-range-move-up-confirm.command';
 export { SetColumnHeaderHeightCommand, SetRowHeaderWidthCommand } from './commands/commands/headersize-changed.command';
@@ -60,24 +59,50 @@ export {
 } from './commands/commands/range-protection.command';
 export { RemoveColConfirmCommand, RemoveRowConfirmCommand } from './commands/commands/remove-row-col-confirm.command';
 export { RemoveSheetConfirmCommand } from './commands/commands/remove-sheet-confirm.command';
-export { ApplyFormatPainterCommand, SetInfiniteFormatPainterCommand, SetOnceFormatPainterCommand } from './commands/commands/set-format-painter.command';
-export { SetColumnFrozenCommand, SetFirstColumnFrozenCommand, SetFirstRowFrozenCommand, SetRowFrozenCommand, SetSelectionFrozenCommand } from './commands/commands/set-frozen.command';
 export {
-    type IScrollCommandParams,
-    type IScrollToCellCommandParams,
-    type ISetScrollRelativeCommandParams,
+    ApplyFormatPainterCommand,
+    SetInfiniteFormatPainterCommand,
+    SetOnceFormatPainterCommand,
+} from './commands/commands/set-format-painter.command';
+export {
+    SetColumnFrozenCommand,
+    SetFirstColumnFrozenCommand,
+    SetFirstRowFrozenCommand,
+    SetRowFrozenCommand,
+    SetSelectionFrozenCommand,
+} from './commands/commands/set-frozen.command';
+export {
     ResetScrollCommand,
     ScrollCommand,
     ScrollToCellCommand,
     SetScrollRelativeCommand,
 } from './commands/commands/set-scroll.command';
-export { ExpandSelectionCommand, JumpOver, MoveSelectionCommand, MoveSelectionEnterAndTabCommand, SelectAllCommand } from './commands/commands/set-selection.command';
+export type {
+    IScrollCommandParams,
+    IScrollToCellCommandParams,
+    ISetScrollRelativeCommandParams,
+} from './commands/commands/set-scroll.command';
+export {
+    ExpandSelectionCommand,
+    JumpOver,
+    MoveSelectionCommand,
+    MoveSelectionEnterAndTabCommand,
+    SelectAllCommand,
+} from './commands/commands/set-selection.command';
 export { SetWorksheetColAutoWidthCommand } from './commands/commands/set-worksheet-auto-col-width.command';
-export { ChangeZoomRatioCommand, type ISetZoomRatioCommandParams, SetZoomRatioCommand } from './commands/commands/set-zoom-ratio.command';
+export { ChangeZoomRatioCommand, SetZoomRatioCommand } from './commands/commands/set-zoom-ratio.command';
+export type { ISetZoomRatioCommandParams } from './commands/commands/set-zoom-ratio.command';
 export { ShowMenuListCommand } from './commands/commands/unhide.command';
-export { ChangeSheetProtectionFromSheetBarCommand, DeleteWorksheetProtectionFormSheetBarCommand } from './commands/commands/worksheet-protection.command';
+export {
+    ChangeSheetProtectionFromSheetBarCommand,
+    DeleteWorksheetProtectionFormSheetBarCommand,
+} from './commands/commands/worksheet-protection.command';
 export { SetActivateCellEditOperation } from './commands/operations/activate-cell-edit.operation';
-export { SetCellEditVisibleArrowOperation, SetCellEditVisibleOperation, SetCellEditVisibleWithF2Operation } from './commands/operations/cell-edit.operation';
+export {
+    SetCellEditVisibleArrowOperation,
+    SetCellEditVisibleOperation,
+    SetCellEditVisibleWithF2Operation,
+} from './commands/operations/cell-edit.operation';
 export { RenameSheetOperation } from './commands/operations/rename-sheet.operation';
 export { ScrollToRangeOperation } from './commands/operations/scroll-to-range.operation';
 export { SetScrollOperation } from './commands/operations/scroll.operation';
@@ -100,55 +125,125 @@ export { SheetClipboardController } from './controllers/clipboard/clipboard.cont
 export { DragRenderController } from './controllers/drag-render.controller';
 export { EditingRenderController } from './controllers/editor/editing.render-controller';
 export { FormulaEditorController } from './controllers/editor/formula-editor.controller';
-export { EMBEDDING_FORMULA_EDITOR, isEmbeddingFormulaEditor } from './controllers/editor/utils/is-embedding-formula-editor';
+export {
+    EMBEDDING_FORMULA_EDITOR,
+    isEmbeddingFormulaEditor,
+} from './controllers/editor/utils/is-embedding-formula-editor';
 export { isRangeSelector, RANGE_SELECTOR_SYMBOLS } from './controllers/editor/utils/is-range-selector';
 export { HoverRenderController } from './controllers/hover-render.controller';
 export { SheetPermissionCheckUIController } from './controllers/permission/sheet-permission-check-ui.controller';
 export { HeaderFreezeRenderController } from './controllers/render-controllers/freeze.render-controller';
 export { HeaderMoveRenderController } from './controllers/render-controllers/header-move.render-controller';
 export { HeaderResizeRenderController } from './controllers/render-controllers/header-resize.render-controller';
-export { HEADER_UNHIDE_RANGE_VISIBLE_CHECK, HeaderUnhideRenderController } from './controllers/render-controllers/header-unhide.render-controller';
+export {
+    HEADER_UNHIDE_RANGE_VISIBLE_CHECK,
+    HeaderUnhideRenderController,
+} from './controllers/render-controllers/header-unhide.render-controller';
 export { SheetsScrollRenderController } from './controllers/render-controllers/scroll.render-controller';
-export { type ITelemetryData, SheetRenderController } from './controllers/render-controllers/sheet.render-controller';
-export { whenFormulaEditorActivated, whenSheetEditorActivated, whenSheetEditorFocused } from './controllers/shortcuts/utils';
+export { SheetRenderController } from './controllers/render-controllers/sheet.render-controller';
+export type { ITelemetryData } from './controllers/render-controllers/sheet.render-controller';
+export {
+    whenFormulaEditorActivated,
+    whenSheetEditorActivated,
+    whenSheetEditorFocused,
+} from './controllers/shortcuts/utils';
 export { StatusBarController } from './controllers/status-bar.controller';
 export { SheetUIController } from './controllers/ui.controller';
-export { getCoordByCell, getCoordByOffset, getSheetObject, getTransformCoord } from './controllers/utils/component-tools';
+export {
+    getCoordByCell,
+    getCoordByOffset,
+    getSheetObject,
+    getTransformCoord,
+} from './controllers/utils/component-tools';
 export { virtualizeDiscreteRanges } from './controllers/utils/range-tools';
 export { matchedSelectionByRowColIndex as checkInHeaderRanges } from './controllers/utils/selections-tools';
 export { useHighlightRange } from './hooks/use-highlight-range';
-export { COPY_SPECIAL_MENU_ID, menuClipboardDisabledObservable, PASTE_SPECIAL_MENU_ID, SheetMenuPosition } from './menu/menu';
-export { deriveStateFromActiveSheet$, getCurrentExclusiveRangeInterest$, getCurrentRangeDisable$, getObservableWithExclusiveRange$ } from './menu/menu-util';
+export {
+    COPY_SPECIAL_MENU_ID,
+    menuClipboardDisabledObservable,
+    PASTE_SPECIAL_MENU_ID,
+    SheetMenuPosition,
+} from './menu/menu';
+export {
+    deriveStateFromActiveSheet$,
+    getCurrentExclusiveRangeInterest$,
+    getCurrentRangeDisable$,
+    getObservableWithExclusiveRange$,
+} from './menu/menu-util';
 export { menuSchema as SheetsUIMenuSchema } from './menu/schema';
 export { UniverSheetsMobileUIPlugin } from './mobile-plugin';
 export { UniverSheetsUIPlugin } from './plugin';
-export { type ICanvasPopup, SheetCanvasPopManagerService } from './services/canvas-pop-manager.service';
-export { CellAlertManagerService, CellAlertType, type ICellAlert } from './services/cell-alert-manager.service';
-export { type IDropdownParam, ISheetCellDropdownManagerService, SheetCellDropdownManagerService } from './services/cell-dropdown-manager.service';
+export { SheetCanvasPopManagerService } from './services/canvas-pop-manager.service';
+export type { ICanvasPopup } from './services/canvas-pop-manager.service';
+export { CellAlertManagerService, CellAlertType } from './services/cell-alert-manager.service';
+export type { ICellAlert } from './services/cell-alert-manager.service';
+export {
+    ISheetCellDropdownManagerService,
+    SheetCellDropdownManagerService,
+} from './services/cell-dropdown-manager.service';
+export type { IDropdownParam } from './services/cell-dropdown-manager.service';
 export { CellPopupManagerService } from './services/cell-popup-manager.service';
-export { getMatrixPlainText, ISheetClipboardService, PREDEFINED_HOOK_NAME, PREDEFINED_HOOK_NAME_COPY, PREDEFINED_HOOK_NAME_PASTE, SheetClipboardService } from './services/clipboard/clipboard.service';
+export {
+    getMatrixPlainText,
+    ISheetClipboardService,
+    PREDEFINED_HOOK_NAME,
+    PREDEFINED_HOOK_NAME_COPY,
+    PREDEFINED_HOOK_NAME_PASTE,
+    SheetClipboardService,
+} from './services/clipboard/clipboard.service';
 export { COPY_TYPE } from './services/clipboard/type';
-export type { ICellDataWithSpanInfo, ICopyHookKeyType, ICopyHookValueType, ICopyPastePayload, IPasteHookKeyType, IPasteHookValueType, ISheetClipboardHook, ISheetDiscreteRangeLocation } from './services/clipboard/type';
+export type {
+    ICellDataWithSpanInfo,
+    ICopyHookKeyType,
+    ICopyHookValueType,
+    ICopyPastePayload,
+    IPasteHookKeyType,
+    IPasteHookValueType,
+    ISheetClipboardHook,
+    ISheetDiscreteRangeLocation,
+} from './services/clipboard/type';
 export { getRepeatRange, mergeSetRangeValues } from './services/clipboard/utils';
-export { DragManagerService, type IDragCellPosition } from './services/drag-manager.service';
-export { EditorBridgeService, IEditorBridgeService, type IEditorBridgeServiceVisibleParam } from './services/editor-bridge.service';
+export { DragManagerService } from './services/drag-manager.service';
+export type { IDragCellPosition } from './services/drag-manager.service';
+export { EditorBridgeService, IEditorBridgeService } from './services/editor-bridge.service';
+export type { IEditorBridgeServiceVisibleParam } from './services/editor-bridge.service';
 export type { IEditorBridgeServiceParam } from './services/editor-bridge.service';
 export { CellEditorManagerService, ICellEditorManagerService } from './services/editor/cell-editor-manager.service';
 export { SheetCellEditorResizeService } from './services/editor/cell-editor-resize.service';
 export { IFormulaEditorManagerService } from './services/editor/formula-editor-manager.service';
 export { FormatPainterStatus, IFormatPainterService } from './services/format-painter/format-painter.service';
-export type { IFormatPainterBeforeApplyHookParams, IFormatPainterHook } from './services/format-painter/format-painter.service';
-export { HeaderUnhideRangeAxis, HeaderUnhideRangeService, type HeaderUnhideRangeVisibleHandler, type IHeaderUnhideRangeVisibleCheck } from './services/header-unhide-range.service';
+export type {
+    IFormatPainterBeforeApplyHookParams,
+    IFormatPainterHook,
+} from './services/format-painter/format-painter.service';
+export { HeaderUnhideRangeAxis, HeaderUnhideRangeService } from './services/header-unhide-range.service';
+export type {
+    HeaderUnhideRangeVisibleHandler,
+    IHeaderUnhideRangeVisibleCheck,
+} from './services/header-unhide-range.service';
 export { HoverManagerService } from './services/hover-manager.service';
-export type { ICellPosWithEvent, IHoverCellPosition, IHoverRichTextInfo, IHoverRichTextPosition } from './services/hover-manager.service';
+export type {
+    ICellPosWithEvent,
+    IHoverCellPosition,
+    IHoverRichTextInfo,
+    IHoverRichTextPosition,
+} from './services/hover-manager.service';
 export { IMarkSelectionService, MarkSelectionService } from './services/mark-selection/mark-selection.service';
-export { type ProtectedRangeShadowStrategy, SheetPermissionRenderManagerService } from './services/permission/sheet-permission-render-manager.service';
+export { SheetPermissionRenderManagerService } from './services/permission/sheet-permission-render-manager.service';
+export type { ProtectedRangeShadowStrategy } from './services/permission/sheet-permission-render-manager.service';
 export { SheetPermissionUserManagerService } from './services/permission/sheet-permission-user-list.service';
 export { SheetPrintInterceptorService } from './services/print-interceptor.service';
-export { IRepeatLastActionService, type RepeatableCommandHandler, RepeatLastActionPermission } from './services/repeat-last-action.service';
+export { IRepeatLastActionService, RepeatLastActionPermission } from './services/repeat-last-action.service';
+export type { RepeatableCommandHandler } from './services/repeat-last-action.service';
 export { SheetScrollManagerService } from './services/scroll-manager.service';
 export type { IScrollState, IViewportScrollState } from './services/scroll-manager.service';
-export { BaseSelectionRenderService, genSelectionByRange, selectionDataForSelectAll as getAllSelection, getTopLeftSelectionOfCurrSheet, ISheetSelectionRenderService } from './services/selection/base-selection-render.service';
+export {
+    BaseSelectionRenderService,
+    genSelectionByRange,
+    selectionDataForSelectAll as getAllSelection,
+    getTopLeftSelectionOfCurrSheet,
+    ISheetSelectionRenderService,
+} from './services/selection/base-selection-render.service';
 export { genNormalSelectionStyle } from './services/selection/const';
 export { SELECTION_SHAPE_DEPTH } from './services/selection/const';
 export { SelectionControl, SelectionControl as SelectionShape } from './services/selection/selection-control';
@@ -157,7 +252,11 @@ export { SelectionShapeExtension } from './services/selection/selection-shape-ex
 export { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';
 export { SheetsRenderService } from './services/sheets-render.service';
 export { IStatusBarService, StatusBarService } from './services/status-bar.service';
-export { calculateDocSkeletonRects, getCustomRangePosition, getEditingCustomRangePosition } from './services/utils/doc-skeleton-util';
+export {
+    calculateDocSkeletonRects,
+    getCustomRangePosition,
+    getEditingCustomRangePosition,
+} from './services/utils/doc-skeleton-util';
 export { useKeyEventConfig } from './views/editor-container';
 export { useActiveWorkbook, useActiveWorksheet, useWorkbooks } from './views/hook';
 export type { IRangeProtectionRenderCellData } from './views/permission/extensions/range-protection.render';

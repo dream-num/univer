@@ -1,63 +1,16 @@
-/* eslint-disable header/header */
-import antfu from '@antfu/eslint-config';
-import {
-    baseRules,
-    facadePreset,
-    headerPreset,
-    noBarrelImportPreset,
-    penetratingPreset,
-    specPreset,
-    tailwindcssPreset,
-    typescriptPreset,
-    univerSourcePreset,
-} from '@univerjs-infra/shared/eslint';
-import reactHooks from 'eslint-plugin-react-hooks';
+import { createUniverEslintConfig } from '@univerjs-infra/shared/eslint';
 
-export default antfu(
-    {
-        ignores: [
-            'mockdata/**/*.json',
-            'pnpm-lock.yaml',
-            'examples/src/demos.ts',
-            'examples/public',
+export default createUniverEslintConfig({
+    ignores: [
+        'mockdata/**/*.json',
+        'pnpm-lock.yaml',
+        'examples/src/demos.ts',
+        'examples/public',
+    ],
+    header: true,
+    noFacadeImportsOutsideFacade: {
+        ignore: [
+            'presets/packages/preset-',
         ],
-        stylistic: {
-            indent: 4,
-            semi: true,
-        },
-        e18e: false,
-        regexp: false,
-        react: true,
-        pnpm: false,
-        yaml: {
-            overrides: {
-                'yaml/indent': ['error', 4, { indicatorValueIndent: 2 }],
-            },
-        },
-        markdown: false,
-        typescript: true,
-        formatters: {
-            css: true,
-            html: true,
-        },
-        plugins: {
-            'react-hooks': reactHooks,
-        },
-        rules: baseRules,
     },
-    headerPreset(),
-    penetratingPreset(),
-    typescriptPreset(),
-    univerSourcePreset({
-        noFacadeImportsOutsideFacade: {
-            ignore: [
-                'packages/uniscript/src/services/script-execution.service.ts',
-                'presets/packages/preset-',
-            ],
-        },
-    }),
-    facadePreset(),
-    noBarrelImportPreset(),
-    tailwindcssPreset(),
-    specPreset()
-);
+});

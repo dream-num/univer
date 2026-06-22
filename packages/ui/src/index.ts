@@ -20,7 +20,8 @@ export { ToggleShortcutPanelOperation } from './commands/operations/toggle-short
 export * from './common';
 export { getHeaderFooterMenuHiddenObservable, getMenuHiddenObservable } from './common/menu-hidden-observable';
 export { mergeMenuConfigs } from './common/menu-merge-configs';
-export { type IUniverUIConfig, UI_PLUGIN_CONFIG_KEY } from './config/config';
+export { UI_PLUGIN_CONFIG_KEY } from './config/config';
+export type { IUniverUIConfig } from './config/config';
 export { UNI_DISABLE_CHANGING_FOCUS_KEY } from './const';
 export { ErrorController } from './controllers/error/error.controller';
 export {
@@ -33,7 +34,8 @@ export {
 export { ShortcutPanelController } from './controllers/shortcut-display/shortcut-panel.controller';
 export { DesktopUIController } from './controllers/ui/ui-desktop.controller';
 export { SingleUnitUIController } from './controllers/ui/ui-shared.controller';
-export { IUIController, type IWorkbenchOptions } from './controllers/ui/ui.controller';
+export { IUIController } from './controllers/ui/ui.controller';
+export type { IWorkbenchOptions } from './controllers/ui/ui.controller';
 export { menuSchema as UIMenuSchema } from './menu/schema';
 export { UniverMobileUIPlugin } from './mobile-plugin';
 export { DISABLE_AUTO_FOCUS_KEY, UniverUIPlugin } from './plugin';
@@ -51,33 +53,43 @@ export {
     PLAIN_TEXT_CLIPBOARD_MIME_TYPE,
 } from './services/clipboard/clipboard-interface.service';
 export { supportClipboardAPI } from './services/clipboard/clipboard-utils';
-export { CopyCommand, CutCommand, PasteCommand, SheetPasteShortKeyCommandName } from './services/clipboard/clipboard.command';
+export {
+    CopyCommand,
+    CutCommand,
+    PasteCommand,
+    SheetPasteShortKeyCommandName,
+} from './services/clipboard/clipboard.command';
 export { DesktopConfirmService } from './services/confirm/desktop-confirm.service';
 export { ContextMenuHostService, IContextMenuHostService } from './services/contextmenu/contextmenu-host.service';
-export { ContextMenuService, type IContextMenuHandler, IContextMenuService } from './services/contextmenu/contextmenu.service';
+export { ContextMenuService, IContextMenuService } from './services/contextmenu/contextmenu.service';
+export type { IContextMenuHandler } from './services/contextmenu/contextmenu.service';
 export { DesktopDialogService } from './services/dialog/desktop-dialog.service';
 export { IDialogService } from './services/dialog/dialog.service';
-export { CanvasFloatDomService, type IFloatDom, type IFloatDomLayout } from './services/dom/canvas-dom-layer.service';
-export { FontService, type IFontConfig, IFontService } from './services/font.service';
+export { CanvasFloatDomService } from './services/dom/canvas-dom-layer.service';
+export type { IFloatDom, IFloatDomLayout } from './services/dom/canvas-dom-layer.service';
+export { FontService, IFontService } from './services/font.service';
+export type { IFontConfig } from './services/font.service';
 export { DesktopGalleryService } from './services/gallery/desktop-gallery.service';
 export { IGalleryService } from './services/gallery/gallery.service';
 export { DesktopLayoutService, ILayoutService } from './services/layout/layout.service';
 export { DesktopLocalFileService } from './services/local-file/desktop-local-file.service';
-export { ILocalFileService, type IOpenFileOptions } from './services/local-file/local-file.service';
+export { ILocalFileService } from './services/local-file/local-file.service';
+export type { IOpenFileOptions } from './services/local-file/local-file.service';
 export { DesktopLocalStorageService } from './services/local-storage/local-storage.service';
-export {
-    type ICustomComponentProps,
-    type IDisplayMenuItem,
-    type IMenuButtonItem,
-    type IMenuItem,
-    type IMenuItemFactory,
-    type IMenuSelectorItem,
-    type IValueOption,
-    type MenuConfig,
-    type MenuItemDefaultValueType,
-    MenuItemType,
+export { MenuItemType } from './services/menu/menu';
+export type {
+    ICustomComponentProps,
+    IDisplayMenuItem,
+    IMenuButtonItem,
+    IMenuItem,
+    IMenuItemFactory,
+    IMenuSelectorItem,
+    IValueOption,
+    MenuConfig,
+    MenuItemDefaultValueType,
 } from './services/menu/menu';
-export { IMenuManagerService, MenuManagerService, type MenuSchemaType } from './services/menu/menu-manager.service';
+export { IMenuManagerService, MenuManagerService } from './services/menu/menu-manager.service';
+export type { MenuSchemaType } from './services/menu/menu-manager.service';
 export { type IMenuSchema } from './services/menu/menu-manager.service';
 export {
     ContextMenuGroup,
@@ -98,21 +110,25 @@ export { DesktopNotificationService } from './services/notification/desktop-noti
 export { INotificationService } from './services/notification/notification.service';
 export { BuiltInUIPart, IUIPartsService, UIPartsService } from './services/parts/parts.service';
 export { IPlatformService, PlatformService } from './services/platform/platform.service';
-export { CanvasPopupService, ICanvasPopupService, type IPopup } from './services/popup/canvas-popup.service';
+export { CanvasPopupService, ICanvasPopupService } from './services/popup/canvas-popup.service';
+export type { IPopup } from './services/popup/canvas-popup.service';
 export { DesktopRibbonService, IRibbonService } from './services/ribbon/ribbon.service';
 export { KeyCode, MetaKeys } from './services/shortcut/keycode';
 export { ShortcutPanelService } from './services/shortcut/shortcut-panel.service';
-export { type IShortcutItem, IShortcutService, ShortcutService } from './services/shortcut/shortcut.service';
+export { IShortcutService, ShortcutService } from './services/shortcut/shortcut.service';
+export type { IShortcutItem } from './services/shortcut/shortcut.service';
 export { DesktopSidebarService } from './services/sidebar/desktop-sidebar.service';
 export { useSidebarClick } from './services/sidebar/hooks/use-sidebar-click';
 export { ILeftSidebarService, ISidebarService } from './services/sidebar/sidebar.service';
 export { ThemeSwitcherService } from './services/theme-switcher/theme-switcher.service';
 export * from './utils';
 export { COLOR_PICKER_COMPONENT } from './views/color-picker/interface';
-export { ComponentContainer, type IComponentContainerProps, useComponentsOfPart } from './views/components/ComponentContainer';
+export { ComponentContainer, useComponentsOfPart } from './views/components/ComponentContainer';
+export type { IComponentContainerProps } from './views/components/ComponentContainer';
 export type { IConfirmChildrenProps } from './views/components/confirm-part/interface';
 export { type IConfirmPartMethodOptions } from './views/components/confirm-part/interface';
-export { AnchoredContextMenu, type IContextMenuAnchorRect } from './views/components/context-menu/AnchoredContextMenu';
+export { AnchoredContextMenu } from './views/components/context-menu/AnchoredContextMenu';
+export type { IContextMenuAnchorRect } from './views/components/context-menu/AnchoredContextMenu';
 export { DesktopContextMenu as ContextMenu } from './views/components/context-menu/ContextMenu';
 export { ContextMenuPanel } from './views/components/context-menu/ContextMenuPanel';
 export { MobileContextMenu } from './views/components/context-menu/MobileContextMenu';
@@ -121,15 +137,18 @@ export { FloatDomSingle } from './views/components/dom/FloatDom';
 export { FloatDom } from './views/components/dom/FloatDom';
 export { PrintFloatDomSingle } from './views/components/dom/Print';
 export { CanvasPopup, SingleCanvasPopup } from './views/components/popup/CanvasPopup';
-export { RectPopup, type RectPopupDirection } from './views/components/popup/RectPopup';
+export { RectPopup } from './views/components/popup/RectPopup';
+export type { RectPopupDirection } from './views/components/popup/RectPopup';
 export { useToolbarItemStatus } from './views/components/ribbon/hook';
 export { Ribbon } from './views/components/ribbon/Ribbon';
 export { ToolbarButton } from './views/components/ribbon/ToolbarButton';
 export { ToolbarItem } from './views/components/ribbon/ToolbarItem';
-export { type ISidebarMethodOptions, Sidebar } from './views/components/sidebar/Sidebar';
+export { Sidebar } from './views/components/sidebar/Sidebar';
+export type { ISidebarMethodOptions } from './views/components/sidebar/Sidebar';
 export { FontFamily } from './views/font-family/FontFamily';
 export { FontFamilyItem } from './views/font-family/FontFamilyItem';
-export { FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT, type IFontFamilyProps } from './views/font-family/interface';
+export { FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT } from './views/font-family/interface';
+export type { IFontFamilyProps } from './views/font-family/interface';
 export { FontSize } from './views/font-size/FontSize';
 export { FONT_SIZE_COMPONENT, FONT_SIZE_LIST, HEADING_LIST } from './views/font-size/interface';
 export * from './views/hooks/index';

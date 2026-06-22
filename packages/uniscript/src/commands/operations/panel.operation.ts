@@ -17,7 +17,6 @@
 import type { IAccessor, IOperation } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
 import { ISidebarService } from '@univerjs/ui';
-
 import { ScriptPanelService } from '../../services/script-panel.service';
 
 export const ScriptPanelComponentName = 'ScriptPanel';

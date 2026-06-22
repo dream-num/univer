@@ -18,7 +18,6 @@ import { Injector } from '@univerjs/core';
 import { ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import { ISidebarService } from '@univerjs/ui';
 import { describe, expect, it } from 'vitest';
-
 import { DocThreadCommentService } from '../doc-thread-comment.service';
 
 class TestSidebarService {}

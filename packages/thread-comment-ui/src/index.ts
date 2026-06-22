@@ -16,10 +16,12 @@
 
 import './global.css';
 
-export { type ISetActiveCommentOperationParams, SetActiveCommentOperation } from './commands/operations/comment.operations';
+export { SetActiveCommentOperation } from './commands/operations/comment.operations';
+export type { ISetActiveCommentOperationParams } from './commands/operations/comment.operations';
 export type { IUniverThreadCommentUIConfig } from './config/config';
 export { UniverThreadCommentUIPlugin } from './plugin';
-export { type ActiveCommentInfo, ThreadCommentPanelService } from './services/thread-comment-panel.service';
+export { ThreadCommentPanelService } from './services/thread-comment-panel.service';
+export type { ActiveCommentInfo } from './services/thread-comment-panel.service';
 export { ThreadCommentPanel } from './views/ThreadCommentPanel';
 export type { IThreadCommentPanelProps } from './views/ThreadCommentPanel';
 export { ThreadCommentTree, ThreadCommentTreeLocation } from './views/ThreadCommentTree';

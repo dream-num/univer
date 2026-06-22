@@ -16,7 +16,6 @@
 
 import type { ICellData, Nullable } from '@univerjs/core';
 import type { ICellValueCompareFn } from '../commands/commands/sheets-sort.command';
-
 import { CellValueType, Disposable, ICommandService, Inject } from '@univerjs/core';
 import { SortRangeCommand } from '../commands/commands/sheets-sort.command';
 import { SheetsSortService } from '../services/sheets-sort.service';

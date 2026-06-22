@@ -16,7 +16,6 @@
 
 import type { IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
-
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import { ColorKit, Disposable, IContextService, Inject, RANGE_TYPE } from '@univerjs/core';
 import { IRefSelectionsService, REF_SELECTIONS_ENABLED, SheetsSelectionsService } from '@univerjs/sheets';

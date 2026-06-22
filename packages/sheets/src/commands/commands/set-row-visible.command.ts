@@ -16,7 +16,6 @@
 
 import type { IAccessor, ICommand, IRange, Nullable, Worksheet } from '@univerjs/core';
 import type { ISetRowHiddenMutationParams, ISetRowVisibleMutationParams } from '../mutations/set-row-visible.mutation';
-
 import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
 import {
     CommandType,

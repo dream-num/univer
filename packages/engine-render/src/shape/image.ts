@@ -15,7 +15,6 @@
  */
 
 import type { ISrcRect, Nullable } from '@univerjs/core';
-
 import type { IObjectFullState, ITransformChangeState, IViewportInfo } from '../basics';
 import type { UniverRenderingContext } from '../context';
 import type { Scene } from '../scene';

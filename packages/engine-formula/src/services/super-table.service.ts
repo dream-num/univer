@@ -17,7 +17,6 @@
 import type { Nullable } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import type { ISuperTable } from '../basics/common';
-
 import { createIdentifier, Disposable } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { TableOptionType } from '../basics/common';

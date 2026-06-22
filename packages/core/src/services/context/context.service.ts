@@ -16,7 +16,6 @@
 
 import { filter, Observable, Subject } from 'rxjs';
 import { createIdentifier } from '../../common/di';
-
 import { Disposable } from '../../shared/lifecycle';
 
 export interface IContextService {

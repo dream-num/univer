@@ -17,7 +17,6 @@
 import { LocaleService } from '@univerjs/core';
 import { InputNumber } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
-
 import { useEffect, useState } from 'react';
 
 interface IDocCreateTableConfirmProps {

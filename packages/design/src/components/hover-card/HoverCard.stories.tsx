@@ -15,7 +15,6 @@
  */
 
 import type { Meta } from '@storybook/react';
-
 import { borderClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
 import { HoverCard } from './HoverCard';

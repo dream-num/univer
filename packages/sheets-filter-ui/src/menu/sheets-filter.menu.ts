@@ -17,9 +17,17 @@
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import { UniverInstanceType } from '@univerjs/core';
-import { RangeProtectionPermissionViewPoint, WorksheetFilterPermission, WorksheetViewPermission } from '@univerjs/sheets';
-import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand, SheetsFilterService, SmartToggleSheetsFilterCommand } from '@univerjs/sheets-filter';
-
+import {
+    RangeProtectionPermissionViewPoint,
+    WorksheetFilterPermission,
+    WorksheetViewPermission,
+} from '@univerjs/sheets';
+import {
+    ClearSheetsFilterCriteriaCommand,
+    ReCalcSheetsFilterCommand,
+    SheetsFilterService,
+    SmartToggleSheetsFilterCommand,
+} from '@univerjs/sheets-filter';
 import { getCurrentRangeDisable$, getObservableWithExclusiveRange$ } from '@univerjs/sheets-ui';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { map, of, switchMap } from 'rxjs';

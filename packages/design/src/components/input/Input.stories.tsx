@@ -15,7 +15,6 @@
  */
 
 import type { Meta } from '@storybook/react';
-
 import { Pager } from '../pager/Pager';
 import { Input } from './Input';
 

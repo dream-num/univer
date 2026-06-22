@@ -16,7 +16,6 @@
 
 import type { IDistFromText, Nullable } from '@univerjs/core';
 import type { IParagraphConfig } from '../../../../basics';
-
 import type {
     IDocumentSkeletonDivide,
     IDocumentSkeletonDrawing,

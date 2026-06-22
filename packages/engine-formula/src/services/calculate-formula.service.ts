@@ -27,10 +27,13 @@ import type {
     IUnitExcludedCell,
     IUnitRowData,
 } from '../basics/common';
-
 import type { IUniverEngineFormulaConfig } from '../config/config';
 import type { LexerNode } from '../engine/analysis/lexer-node';
-import type { IFormulaDependencyTreeFullJson, IFormulaDependencyTreeJson, IFormulaDependentsAndInRangeResults } from '../engine/dependency/dependency-tree';
+import type {
+    IFormulaDependencyTreeFullJson,
+    IFormulaDependencyTreeJson,
+    IFormulaDependentsAndInRangeResults,
+} from '../engine/dependency/dependency-tree';
 import type { BaseReferenceObject, FunctionVariantType } from '../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../engine/value-object/base-value-object';

@@ -15,7 +15,6 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
-
 import type { ISetWorksheetDefaultStyleMutationParams } from '../mutations/set-worksheet-default-style.mutation';
 import {
     CommandType,

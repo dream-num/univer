@@ -30,7 +30,18 @@ import type {
     IFloatObject,
     ILayoutContext,
 } from '../../tools';
-import { BooleanNumber, DataStreamTreeTokenType, GridType, NAMED_STYLE_SPACE_MAP, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, SpacingRule, TableTextWrapType, WrapStrategy } from '@univerjs/core';
+import {
+    BooleanNumber,
+    DataStreamTreeTokenType,
+    GridType,
+    NAMED_STYLE_SPACE_MAP,
+    ObjectRelativeFromH,
+    ObjectRelativeFromV,
+    PositionedObjectLayoutType,
+    SpacingRule,
+    TableTextWrapType,
+    WrapStrategy,
+} from '@univerjs/core';
 import { GlyphType, LineType } from '../../../../../basics/i-document-skeleton-cached';
 import { BreakPointType } from '../../line-breaker/break';
 import { addGlyphToDivide, createSkeletonBulletGlyph } from '../../model/glyph';

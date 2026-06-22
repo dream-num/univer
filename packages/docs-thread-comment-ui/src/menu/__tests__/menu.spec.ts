@@ -17,7 +17,6 @@
 import { FLOAT_TOOLBAR_MENU_POSITION } from '@univerjs/docs-ui';
 import { DocumentEditArea } from '@univerjs/engine-render';
 import { describe, expect, it, vi } from 'vitest';
-
 import { StartAddCommentOperation } from '../../commands/operations/show-comment-panel.operation';
 import { AddDocCommentMenuItemFactory, shouldDisableAddComment, ToolbarDocCommentMenuItemFactory } from '../menu';
 import { menuSchema } from '../schema';

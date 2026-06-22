@@ -15,14 +15,26 @@
  */
 
 import type { Dependency, IWorkbookData } from '@univerjs/core';
-import { ILogService, Inject, Injector, IUniverInstanceService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
-
+import {
+    ILogService,
+    Inject,
+    Injector,
+    IUniverInstanceService,
+    LocaleType,
+    LogLevel,
+    Plugin,
+    Univer,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { Lexer } from '../../engine/analysis/lexer';
 import { LexerTreeBuilder } from '../../engine/analysis/lexer-tree-builder';
 import { CalculateFormulaService, ICalculateFormulaService } from '../../services/calculate-formula.service';
 import { FormulaCurrentConfigService, IFormulaCurrentConfigService } from '../../services/current-data.service';
 import { DefinedNamesService, IDefinedNamesService } from '../../services/defined-names.service';
-import { HyperlinkEngineFormulaService, IHyperlinkEngineFormulaService } from '../../services/hyperlink-engine-formula.service';
+import {
+    HyperlinkEngineFormulaService,
+    IHyperlinkEngineFormulaService,
+} from '../../services/hyperlink-engine-formula.service';
 import { FormulaRuntimeService, IFormulaRuntimeService } from '../../services/runtime.service';
 import { ISheetRowFilteredService, SheetRowFilteredService } from '../../services/sheet-row-filtered.service';
 import { FormulaDataModel } from '../formula-data.model';

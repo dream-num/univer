@@ -1,10 +1,9 @@
-#!/usr/bin/env -S node --import tsx/esm
-/* eslint-disable header/header */
+#!/usr/bin/env -S node --experimental-strip-types
 
-import type { IBuildOptions } from '../tsdown/types';
+import type { IBuildOptions } from '../tsdown/types.ts';
 import process from 'node:process';
-import { buildPresetPackage, preparePresetPackage } from '../preset-build/index';
-import { build } from '../tsdown/index';
+import { buildPresetPackage, preparePresetPackage } from '../preset-build/index.ts';
+import { build } from '../tsdown/index.ts';
 
 interface IPresetCliBuildOptions {
     cleanup?: boolean;

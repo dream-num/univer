@@ -16,7 +16,6 @@
 
 import type { IRange } from '@univerjs/core';
 import type { SpreadsheetSkeleton } from '../sheet.render-skeleton';
-
 import { Rectangle } from '@univerjs/core';
 import { ComponentExtension } from '../../extension';
 

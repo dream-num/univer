@@ -16,7 +16,6 @@
 
 import type { IAccessor, ICommand, IRange } from '@univerjs/core';
 import type { ISetWorksheetColWidthMutationParams } from '../mutations/set-worksheet-col-width.mutation';
-
 import {
     CommandType,
     ICommandService,

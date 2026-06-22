@@ -16,7 +16,6 @@
 
 import type { ISectionColumnProperties } from '@univerjs/core';
 import type { IDocumentSkeletonColumn } from '../../../../basics/i-document-skeleton-cached';
-
 import { ColumnSeparatorType } from '@univerjs/core';
 
 export function createSkeletonColumn(

@@ -22,7 +22,6 @@ import type {
     IUnitExcludedCell,
 } from '../../basics/common';
 import type { IFormulaDirtyData } from '../../services/current-data.service';
-
 import type { IAllRuntimeData } from '../../services/runtime.service';
 import type { AstRootNode, FunctionNode } from '../ast-node';
 import { moveRangeByOffset } from '@univerjs/core';

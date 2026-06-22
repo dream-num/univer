@@ -16,7 +16,6 @@
 
 import type { BorderStyleTypes, IBorderData, IBorderStyleData, IScale, Nullable } from '@univerjs/core';
 import type { IDocumentSkeletonGlyph } from '../../../basics/i-document-skeleton-cached';
-
 import type { UniverRenderingContext } from '../../../context';
 import { getColorStyle } from '@univerjs/core';
 import { BORDER_TYPE as BORDER_LTRB, COLOR_BLACK_RGB, FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics/const';

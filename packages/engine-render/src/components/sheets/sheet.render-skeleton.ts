@@ -67,13 +67,10 @@ import {
 } from '@univerjs/core';
 import { distinctUntilChanged, startWith } from 'rxjs';
 import { FontCache } from '../../basics';
-import { BORDER_TYPE as BORDER_LTRB, COLOR_BLACK_RGB, MAXIMUM_COL_WIDTH, MAXIMUM_ROW_HEIGHT, MIN_COL_WIDTH } from '../../basics/const';
+import { BORDER_TYPE, COLOR_BLACK_RGB, MAXIMUM_COL_WIDTH, MAXIMUM_ROW_HEIGHT, MIN_COL_WIDTH } from '../../basics/const';
 import { getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
 import { convertTextRotation, VERTICAL_ROTATE_ANGLE } from '../../basics/text-rotation';
-import {
-    degToRad,
-    getFontStyleString,
-} from '../../basics/tools';
+import { degToRad, getFontStyleString } from '../../basics/tools';
 import { DocSimpleSkeleton } from '../docs/layout/doc-simple-skeleton';
 import { DocumentSkeleton } from '../docs/layout/doc-skeleton';
 import { columnIterator } from '../docs/layout/tools';
@@ -1360,23 +1357,23 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         if (style && style.bd) {
             const mergeRange = options?.mergeRange;
             if (mergeRange) {
-                this._setMergeBorderProps(BORDER_LTRB.TOP, this._stylesCache, mergeRange);
-                this._setMergeBorderProps(BORDER_LTRB.BOTTOM, this._stylesCache, mergeRange);
-                this._setMergeBorderProps(BORDER_LTRB.LEFT, this._stylesCache, mergeRange);
-                this._setMergeBorderProps(BORDER_LTRB.RIGHT, this._stylesCache, mergeRange);
+                this._setMergeBorderProps(BORDER_TYPE.TOP, this._stylesCache, mergeRange);
+                this._setMergeBorderProps(BORDER_TYPE.BOTTOM, this._stylesCache, mergeRange);
+                this._setMergeBorderProps(BORDER_TYPE.LEFT, this._stylesCache, mergeRange);
+                this._setMergeBorderProps(BORDER_TYPE.RIGHT, this._stylesCache, mergeRange);
             } else if (!this.intersectMergeRange(row, col)) {
-                this._setBorderProps(row, col, BORDER_LTRB.TOP, style, this._stylesCache);
-                this._setBorderProps(row, col, BORDER_LTRB.BOTTOM, style, this._stylesCache);
-                this._setBorderProps(row, col, BORDER_LTRB.LEFT, style, this._stylesCache);
-                this._setBorderProps(row, col, BORDER_LTRB.RIGHT, style, this._stylesCache);
+                this._setBorderProps(row, col, BORDER_TYPE.TOP, style, this._stylesCache);
+                this._setBorderProps(row, col, BORDER_TYPE.BOTTOM, style, this._stylesCache);
+                this._setBorderProps(row, col, BORDER_TYPE.LEFT, style, this._stylesCache);
+                this._setBorderProps(row, col, BORDER_TYPE.RIGHT, style, this._stylesCache);
             }
 
-            this._setBorderProps(row, col, BORDER_LTRB.TL_BR, style, this._stylesCache);
-            this._setBorderProps(row, col, BORDER_LTRB.TL_BC, style, this._stylesCache);
-            this._setBorderProps(row, col, BORDER_LTRB.TL_MR, style, this._stylesCache);
-            this._setBorderProps(row, col, BORDER_LTRB.BL_TR, style, this._stylesCache);
-            this._setBorderProps(row, col, BORDER_LTRB.ML_TR, style, this._stylesCache);
-            this._setBorderProps(row, col, BORDER_LTRB.BC_TR, style, this._stylesCache);
+            this._setBorderProps(row, col, BORDER_TYPE.TL_BR, style, this._stylesCache);
+            this._setBorderProps(row, col, BORDER_TYPE.TL_BC, style, this._stylesCache);
+            this._setBorderProps(row, col, BORDER_TYPE.TL_MR, style, this._stylesCache);
+            this._setBorderProps(row, col, BORDER_TYPE.BL_TR, style, this._stylesCache);
+            this._setBorderProps(row, col, BORDER_TYPE.ML_TR, style, this._stylesCache);
+            this._setBorderProps(row, col, BORDER_TYPE.BC_TR, style, this._stylesCache);
         }
     }
 
@@ -1527,7 +1524,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
      * pro/issues/344
      * In Excel, for the border rendering of merged cells to take effect, the outermost cells need to have the same border style.
      */
-    private _setMergeBorderProps(type: BORDER_LTRB, cache: IStylesCache, mergeRange: IRange): void {
+    private _setMergeBorderProps(type: BORDER_TYPE, cache: IStylesCache, mergeRange: IRange): void {
         if (!this.worksheet || !cache.border) return;
 
         const borders: Array<{ style: BorderStyleTypes; color: string; r: number; c: number }> = [];
@@ -1537,32 +1534,32 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         let row = mergeRange.startRow;
         let column = mergeRange.startColumn;
 
-        if (type === BORDER_LTRB.TOP) {
+        if (type === BORDER_TYPE.TOP) {
             row = mergeRange.startRow;
             forStart = mergeRange.startColumn;
             forEnd = mergeRange.endColumn;
-        } else if (type === BORDER_LTRB.BOTTOM) {
+        } else if (type === BORDER_TYPE.BOTTOM) {
             row = mergeRange.endRow;
             forStart = mergeRange.startColumn;
             forEnd = mergeRange.endColumn;
-        } else if (type === BORDER_LTRB.LEFT) {
+        } else if (type === BORDER_TYPE.LEFT) {
             column = mergeRange.startColumn;
             forStart = mergeRange.startRow;
             forEnd = mergeRange.endRow;
-        } else if (type === BORDER_LTRB.RIGHT) {
+        } else if (type === BORDER_TYPE.RIGHT) {
             column = mergeRange.endColumn;
             forStart = mergeRange.startRow;
             forEnd = mergeRange.endRow;
         }
 
         for (let i = forStart; i <= forEnd; i++) {
-            if (type === BORDER_LTRB.TOP) {
+            if (type === BORDER_TYPE.TOP) {
                 column = i;
-            } else if (type === BORDER_LTRB.BOTTOM) {
+            } else if (type === BORDER_TYPE.BOTTOM) {
                 column = i;
-            } else if (type === BORDER_LTRB.LEFT) {
+            } else if (type === BORDER_TYPE.LEFT) {
                 row = i;
-            } else if (type === BORDER_LTRB.RIGHT) {
+            } else if (type === BORDER_TYPE.RIGHT) {
                 row = i;
             }
 
@@ -1608,7 +1605,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         });
     }
 
-    private _setBorderProps(r: number, c: number, type: BORDER_LTRB, style: IStyleData, cache: IStylesCache): void {
+    private _setBorderProps(r: number, c: number, type: BORDER_TYPE, style: IStyleData, cache: IStylesCache): void {
         const props: Nullable<IBorderStyleData> = style.bd?.[type];
         if (!props || !cache.border) {
             return;
@@ -1627,13 +1624,13 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
          * When the top border of a cell and the bottom border of the cell above it (r-1) overlap,
          * if the top border of cell r is white, then the rendering is ignored.
          */
-        if (type === BORDER_LTRB.TOP) {
-            const borderBottom = borderCache.getValue(r - 1, c)?.[BORDER_LTRB.BOTTOM];
+        if (type === BORDER_TYPE.TOP) {
+            const borderBottom = borderCache.getValue(r - 1, c)?.[BORDER_TYPE.BOTTOM];
             if (borderBottom && isWhiteColor(rgb)) {
                 return;
             }
-        } else if (type === BORDER_LTRB.LEFT) {
-            const borderRight = borderCache.getValue(r, c - 1)?.[BORDER_LTRB.RIGHT];
+        } else if (type === BORDER_TYPE.LEFT) {
+            const borderRight = borderCache.getValue(r, c - 1)?.[BORDER_TYPE.RIGHT];
             if (borderRight && isWhiteColor(rgb)) {
                 return;
             }

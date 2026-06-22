@@ -16,7 +16,6 @@
 
 import type { IMutation } from '@univerjs/core';
 import type { IOtherFormulaDataItem } from '../../basics/common';
-
 import { CommandType } from '@univerjs/core';
 
 export interface ISetOtherFormulaMutationParams {

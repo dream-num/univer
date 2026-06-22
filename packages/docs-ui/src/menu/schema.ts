@@ -16,18 +16,65 @@
 
 import type { MenuSchemaType } from '@univerjs/ui';
 import { ContextMenuGroup, ContextMenuPosition, RibbonInsertGroup, RibbonStartGroup } from '@univerjs/ui';
-import { DocCopyCommand, DocCopyCurrentParagraphCommand, DocCutCommand, DocCutCurrentParagraphCommand, DocPasteCommand } from '../commands/commands/clipboard.command';
+import {
+    DocCopyCommand,
+    DocCopyCurrentParagraphCommand,
+    DocCutCommand,
+    DocCutCurrentParagraphCommand,
+    DocPasteCommand,
+} from '../commands/commands/clipboard.command';
 import { DeleteCurrentParagraphCommand, DeleteLeftCommand } from '../commands/commands/doc-delete.command';
 import { OpenHeaderFooterPanelCommand } from '../commands/commands/doc-header-footer.command';
-import { HorizontalLineCommand, InsertHorizontalLineBellowCommand } from '../commands/commands/doc-horizontal-line.command';
-
-import { ResetInlineFormatTextBackgroundColorCommand, ResetInlineFormatTextColorCommand, SetInlineFormatBoldCommand, SetInlineFormatFontFamilyCommand, SetInlineFormatFontSizeCommand, SetInlineFormatItalicCommand, SetInlineFormatStrikethroughCommand, SetInlineFormatSubscriptCommand, SetInlineFormatSuperscriptCommand, SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand, SetInlineFormatUnderlineCommand } from '../commands/commands/inline-format.command';
-import { BulletListCommand, CheckListCommand, InsertBulletListBellowCommand, InsertCheckListBellowCommand, InsertOrderListBellowCommand, OrderListCommand } from '../commands/commands/list.command';
+import {
+    HorizontalLineCommand,
+    InsertHorizontalLineBellowCommand,
+} from '../commands/commands/doc-horizontal-line.command';
+import {
+    ResetInlineFormatTextBackgroundColorCommand,
+    ResetInlineFormatTextColorCommand,
+    SetInlineFormatBoldCommand,
+    SetInlineFormatFontFamilyCommand,
+    SetInlineFormatFontSizeCommand,
+    SetInlineFormatItalicCommand,
+    SetInlineFormatStrikethroughCommand,
+    SetInlineFormatSubscriptCommand,
+    SetInlineFormatSuperscriptCommand,
+    SetInlineFormatTextBackgroundColorCommand,
+    SetInlineFormatTextColorCommand,
+    SetInlineFormatUnderlineCommand,
+} from '../commands/commands/inline-format.command';
+import {
+    BulletListCommand,
+    CheckListCommand,
+    InsertBulletListBellowCommand,
+    InsertCheckListBellowCommand,
+    InsertOrderListBellowCommand,
+    OrderListCommand,
+} from '../commands/commands/list.command';
 import { AlignOperationCommand } from '../commands/commands/paragraph-align.command';
-import { H1HeadingCommand, H2HeadingCommand, H3HeadingCommand, H4HeadingCommand, H5HeadingCommand, NormalTextHeadingCommand, SetParagraphNamedStyleCommand, SubtitleHeadingCommand, TitleHeadingCommand } from '../commands/commands/set-heading.command';
+import {
+    H1HeadingCommand,
+    H2HeadingCommand,
+    H3HeadingCommand,
+    H4HeadingCommand,
+    H5HeadingCommand,
+    NormalTextHeadingCommand,
+    SetParagraphNamedStyleCommand,
+    SubtitleHeadingCommand,
+    TitleHeadingCommand,
+} from '../commands/commands/set-heading.command';
 import { SwitchDocModeCommand } from '../commands/commands/switch-doc-mode.command';
-import { DocTableDeleteColumnsCommand, DocTableDeleteRowsCommand, DocTableDeleteTableCommand } from '../commands/commands/table/doc-table-delete.command';
-import { DocTableInsertColumnLeftCommand, DocTableInsertColumnRightCommand, DocTableInsertRowAboveCommand, DocTableInsertRowBellowCommand } from '../commands/commands/table/doc-table-insert.command';
+import {
+    DocTableDeleteColumnsCommand,
+    DocTableDeleteRowsCommand,
+    DocTableDeleteTableCommand,
+} from '../commands/commands/table/doc-table-delete.command';
+import {
+    DocTableInsertColumnLeftCommand,
+    DocTableInsertColumnRightCommand,
+    DocTableInsertRowAboveCommand,
+    DocTableInsertRowBellowCommand,
+} from '../commands/commands/table/doc-table-insert.command';
 import { DocCreateTableOperation } from '../commands/operations/doc-create-table.operation';
 import { DocParagraphSettingPanelOperation } from '../commands/operations/doc-paragraph-setting-panel.operation';
 import { DocOpenPageSettingCommand } from '../commands/operations/open-page-setting.operation';

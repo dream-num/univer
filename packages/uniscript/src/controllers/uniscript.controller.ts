@@ -16,7 +16,6 @@
 
 import { Disposable, ICommandService } from '@univerjs/core';
 import { IMenuManagerService } from '@univerjs/ui';
-
 import { ToggleScriptPanelOperation } from '../commands/operations/panel.operation';
 import { menuSchema } from '../menu/schema';
 

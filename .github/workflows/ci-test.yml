@@ -16,6 +16,9 @@ permissions:
     contents: read
     pull-requests: write
 
+env:
+    TURBO_TELEMETRY_DISABLED: '1'
+
 jobs:
     test:
         runs-on: ubuntu-latest
@@ -31,14 +34,6 @@ jobs:
 
             - name: Setup Node.js
               uses: ./.github/actions/setup-node
-
-            - name: Restore Turborepo cache
-              uses: actions/cache@v5
-              with:
-                  path: .turbo/cache
-                  key: ${{ runner.os }}-turbo-coverage-${{ github.sha }}
-                  restore-keys: |
-                      ${{ runner.os }}-turbo-coverage-
 
             - name: 🩺 Run test
               run: pnpm coverage

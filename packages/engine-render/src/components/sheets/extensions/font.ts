@@ -17,7 +17,16 @@
 /* eslint-disable max-lines-per-function */
 /* eslint-disable complexity */
 
-import type { ICellDataForSheetInterceptor, ICellWithCoord, IDocDrawingBase, ImageSourceType, IRange, IScale, Nullable, ObjectMatrix } from '@univerjs/core';
+import type {
+    ICellDataForSheetInterceptor,
+    ICellWithCoord,
+    IDocDrawingBase,
+    ImageSourceType,
+    IRange,
+    IScale,
+    Nullable,
+    ObjectMatrix,
+} from '@univerjs/core';
 import type { IBoundRectNoAngle, IViewportInfo } from '../../../basics';
 import type { UniverRenderingContext } from '../../../context';
 import type { Documents } from '../../docs/document';
@@ -25,7 +34,15 @@ import type { IDrawInfo } from '../../extension';
 import type { IFontCacheItem } from '../interfaces';
 import type { SheetComponent } from '../sheet-component';
 import type { SpreadsheetSkeleton } from '../sheet.render-skeleton';
-import { CellValueType, getDisplayValueFromCell, HorizontalAlign, Range, Tools, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import {
+    CellValueType,
+    getDisplayValueFromCell,
+    HorizontalAlign,
+    Range,
+    Tools,
+    VerticalAlign,
+    WrapStrategy,
+} from '@univerjs/core';
 import { FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics';
 import { VERTICAL_ROTATE_ANGLE } from '../../../basics/text-rotation';
 import { clampRange, inViewRanges } from '../../../basics/tools';
@@ -165,7 +182,12 @@ export class Font extends SheetExtension {
         expandedViewRanges.forEach((range) => {
             // collect unique merge ranges intersect with view range.
             // The ranges in mergeRanges must be unique. Otherwise, the font will render, text redrawing causes jagged edges or artifacts.
-            const intersectMergeRangesWithViewRanges = spreadsheetSkeleton.worksheet.getMergedCellRange(range.startRow, range.startColumn, range.endRow, range.endColumn);
+            const intersectMergeRangesWithViewRanges = spreadsheetSkeleton.worksheet.getMergedCellRange(
+                range.startRow,
+                range.startColumn,
+                range.endRow,
+                range.endColumn
+            );
             intersectMergeRangesWithViewRanges.forEach((mergeRange) => {
                 const mergeRangeIndex = spreadsheetSkeleton.worksheet.getSpanModel().getMergeDataIndex(mergeRange.startRow, mergeRange.startColumn);
                 if (!mergeRangeIDSet.has(mergeRangeIndex)) {

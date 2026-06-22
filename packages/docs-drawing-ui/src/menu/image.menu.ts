@@ -17,7 +17,6 @@
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuItem } from '@univerjs/ui';
 import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { Observable } from 'rxjs';

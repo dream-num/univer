@@ -17,7 +17,6 @@
 /* eslint-disable ts/naming-convention */
 
 import type { Nullable } from '@univerjs/core';
-
 import type { ILineBreakRule } from './rule';
 import { Break, BreakPointType } from './break';
 import { AI, AL, BA, BK, CJ, CR, HL, HY, LF, NL, NS, RI, SA, SG, SP, WJ, XX, ZWJ } from './classes';

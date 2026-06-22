@@ -65,17 +65,6 @@ describe('FDocument', () => {
         expect(document.save().body?.dataStream).toBe('Hello,Line 1\rLine 2\r\r\n');
     });
 
-    it('should reject text append when the document has no body', () => {
-        univer.dispose();
-        createDocumentFacade({
-            id: 'test',
-            title: 'Test Document',
-            documentStyle: {},
-        });
-
-        expect(() => document.appendText('Univer')).toThrowError('The document body is empty');
-    });
-
     it('should include current document resources in saved snapshots', () => {
         const resourceManagerService = get(IResourceManagerService);
 

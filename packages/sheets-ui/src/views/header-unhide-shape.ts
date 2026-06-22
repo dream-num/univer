@@ -16,7 +16,6 @@
 
 import type { IShapeProps, UniverRenderingContext } from '@univerjs/engine-render';
 import { Rect, RegularPolygon, Shape } from '@univerjs/engine-render';
-
 import { HEADER_MENU_BACKGROUND_COLOR, HEADER_MENU_SHAPE_TRIANGLE_FILL } from '../menu/header-menu-shape';
 
 export enum HeaderUnhideShapeType {

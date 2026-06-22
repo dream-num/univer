@@ -36,7 +36,12 @@ export class Marker extends SheetExtension {
     override uKey: string = UNIQUE_KEY;
 
     // eslint-disable-next-line max-lines-per-function
-    override draw(ctx: UniverRenderingContext, parentScale: IScale, skeleton: SpreadsheetSkeleton, diffRanges: IRange[]): void {
+    override draw(
+        ctx: UniverRenderingContext,
+        parentScale: IScale,
+        skeleton: SpreadsheetSkeleton,
+        diffRanges: IRange[]
+    ) {
         if (ctx.__mode === 'printing') {
             return;
         }

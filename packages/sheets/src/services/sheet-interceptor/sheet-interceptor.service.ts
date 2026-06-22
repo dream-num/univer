@@ -32,7 +32,6 @@ import type {
     Worksheet,
 } from '@univerjs/core';
 import type { ISheetLocation, ISheetRowLocation } from './utils/interceptor';
-
 import {
     composeInterceptors,
     createInterceptorKey,

@@ -17,9 +17,12 @@
 import type { Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { ISheetCommandSharedParams } from '@univerjs/sheets';
 import type { FilterModel, IFilterColumn, ISetSheetsFilterCriteriaCommandParams } from '@univerjs/sheets-filter';
-
 import { ICommandService, Inject, Injector } from '@univerjs/core';
-import { ClearSheetsFilterCriteriaCommand, RemoveSheetFilterCommand, SetSheetsFilterCriteriaCommand } from '@univerjs/sheets-filter';
+import {
+    ClearSheetsFilterCriteriaCommand,
+    RemoveSheetFilterCommand,
+    SetSheetsFilterCriteriaCommand,
+} from '@univerjs/sheets-filter';
 import { FRange } from '@univerjs/sheets/facade';
 
 /**

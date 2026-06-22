@@ -15,29 +15,38 @@
  */
 
 export * from './base/const';
-export { AddCfCommand, type IAddCfCommandParams } from './commands/commands/add-cf.command';
-export { ClearRangeCfCommand, type IClearRangeCfParams } from './commands/commands/clear-range-cf.command';
-export { ClearWorksheetCfCommand, type IClearWorksheetCfParams } from './commands/commands/clear-worksheet-cf.command';
-export { DeleteCfCommand, type IDeleteCfCommandParams } from './commands/commands/delete-cf.command';
-export { type IMoveCfCommandParams, MoveCfCommand } from './commands/commands/move-cf.command';
-export { type ISetCfCommandParams, SetCfCommand } from './commands/commands/set-cf.command';
+export { AddCfCommand } from './commands/commands/add-cf.command';
+export type { IAddCfCommandParams } from './commands/commands/add-cf.command';
+export { ClearRangeCfCommand } from './commands/commands/clear-range-cf.command';
+export type { IClearRangeCfParams } from './commands/commands/clear-range-cf.command';
+export { ClearWorksheetCfCommand } from './commands/commands/clear-worksheet-cf.command';
+export type { IClearWorksheetCfParams } from './commands/commands/clear-worksheet-cf.command';
+export { DeleteCfCommand } from './commands/commands/delete-cf.command';
+export type { IDeleteCfCommandParams } from './commands/commands/delete-cf.command';
+export { MoveCfCommand } from './commands/commands/move-cf.command';
+export type { IMoveCfCommandParams } from './commands/commands/move-cf.command';
+export { SetCfCommand } from './commands/commands/set-cf.command';
+export type { ISetCfCommandParams } from './commands/commands/set-cf.command';
 export {
     AddConditionalRuleMutation,
     AddConditionalRuleMutationUndoFactory,
-    type IAddConditionalRuleMutationParams,
 } from './commands/mutations/add-conditional-rule.mutation';
+export type { IAddConditionalRuleMutationParams } from './commands/mutations/add-conditional-rule.mutation';
 export {
     DeleteConditionalRuleMutation,
     DeleteConditionalRuleMutationUndoFactory,
-    type IDeleteConditionalRuleMutationParams,
 } from './commands/mutations/delete-conditional-rule.mutation';
+export type { IDeleteConditionalRuleMutationParams } from './commands/mutations/delete-conditional-rule.mutation';
 export {
-    type IMoveConditionalRuleMutationParams,
     MoveConditionalRuleMutation,
     MoveConditionalRuleMutationUndoFactory,
 } from './commands/mutations/move-conditional-rule.mutation';
+export type { IMoveConditionalRuleMutationParams } from './commands/mutations/move-conditional-rule.mutation';
 export type { ISetConditionalRuleMutationParams } from './commands/mutations/set-conditional-rule.mutation';
-export { SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory } from './commands/mutations/set-conditional-rule.mutation';
+export {
+    SetConditionalRuleMutation,
+    setConditionalRuleMutationUndoFactory,
+} from './commands/mutations/set-conditional-rule.mutation';
 export type { IUniverSheetsConditionalFormattingConfig } from './config/config';
 export * from './models/calculate-unit-v2/utils';
 export * from './models/conditional-formatting-range-index-model';

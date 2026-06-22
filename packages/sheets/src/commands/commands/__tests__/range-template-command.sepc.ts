@@ -17,7 +17,6 @@
 import type { IColorStyle, Injector, Univer, Workbook } from '@univerjs/core';
 import type { RangeThemeStyle } from '../../../models/range-theme-util';
 import type { ISetStyleCommandParams } from '../set-style.command';
-
 import { ICommandService, IUniverInstanceService, UndoCommand, UniverInstanceType } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SheetRangeThemeModel } from '../../../models/range-theme-model';

@@ -28,7 +28,6 @@ import type {
     WrapStrategy,
 } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
-
 import type { ISheetCommandSharedParams } from '../utils/interface';
 import {
     BooleanNumber,

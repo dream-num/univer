@@ -15,7 +15,13 @@
  */
 
 import type { INumberUnit, ITable, ITableCell, ITableRow, Nullable } from '@univerjs/core';
-import type { IDocumentSkeletonPage, IDocumentSkeletonRow, IDocumentSkeletonTable, IParagraphList, ISectionBreakConfig } from '../../../../basics';
+import type {
+    IDocumentSkeletonPage,
+    IDocumentSkeletonRow,
+    IDocumentSkeletonTable,
+    IParagraphList,
+    ISectionBreakConfig,
+} from '../../../../basics';
 import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../view-model/document-view-model';
 import type { ILayoutContext } from '../tools';

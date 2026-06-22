@@ -19,9 +19,9 @@ import process from 'node:process';
 import detect from 'detect-port';
 import esbuild from 'esbuild';
 import minimist from 'minimist';
-import { createBuildConfig } from './scripts/esbuild/build-config';
-import { monacoBuildTask, nodeBuildTask } from './scripts/esbuild/build-tasks';
-import { createLogger, formatDuration } from './scripts/esbuild/logger';
+import { createBuildConfig } from './scripts/esbuild/build-config.mts';
+import { monacoBuildTask, nodeBuildTask } from './scripts/esbuild/build-tasks.mts';
+import { createLogger, formatDuration } from './scripts/esbuild/logger.mts';
 
 const args = minimist(process.argv.slice(2));
 const isE2E = !!args.e2e;

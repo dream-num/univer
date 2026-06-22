@@ -15,12 +15,12 @@
  */
 
 /* eslint-disable max-lines-per-function */
-import type { IPackageJson } from '../types';
+import type { IPackageJson } from '../types.ts';
 import fs from 'node:fs';
 import path from 'node:path';
 import sortKeys from 'sort-keys';
 import * as ts from 'typescript';
-import { peerDepsMap } from '../data/peer-deps';
+import { peerDepsMap } from '../data/peer-deps.ts';
 
 type StringMap = Record<string, string>;
 type PeerDepValue = (typeof peerDepsMap)[keyof typeof peerDepsMap] & { optional?: boolean };

@@ -1,8 +1,6 @@
-/* eslint-disable header/header */
 import type { Linter } from 'eslint';
 import os from 'node:os';
 import path from 'node:path';
-import { regexp as antfuRegexpPreset } from '@antfu/eslint-config';
 import { fixupPluginRules } from '@eslint/compat';
 import typescriptParser from '@typescript-eslint/parser';
 import eslintPluginBetterTailwindcss from 'eslint-plugin-better-tailwindcss';
@@ -13,6 +11,17 @@ import noExternalImportsInFacade from './plugins/no-external-imports-in-facade';
 import noFacadeImportsOutsideFacade from './plugins/no-facade-imports-outside-facade';
 import noSelfPackageImports from './plugins/no-self-package-imports';
 
+const univerPlugin = {
+    rules: {
+        // eslint-disable-next-line ts/no-explicit-any
+        'no-external-imports-in-facade': noExternalImportsInFacade as any,
+        // eslint-disable-next-line ts/no-explicit-any
+        'no-self-package-imports': noSelfPackageImports as any,
+        // eslint-disable-next-line ts/no-explicit-any
+        'no-facade-imports-outside-facade': noFacadeImportsOutsideFacade as any,
+    },
+};
+
 /**
  * TypeScript preset configuration for ESLint.
  * Applies TypeScript-specific rules and custom Univer rules.
@@ -21,18 +30,9 @@ import noSelfPackageImports from './plugins/no-self-package-imports';
  */
 export const typescriptPreset = (): Linter.Config => {
     return {
-        files: ['**/*.ts', '**/*.tsx'],
+        files: ['{packages,presets}/**/*.{ts,tsx}'],
         plugins: {
-            univer: {
-                rules: {
-                    // eslint-disable-next-line ts/no-explicit-any
-                    'no-external-imports-in-facade': noExternalImportsInFacade as any,
-                    // eslint-disable-next-line ts/no-explicit-any
-                    'no-self-package-imports': noSelfPackageImports as any,
-                    // eslint-disable-next-line ts/no-explicit-any
-                    'no-facade-imports-outside-facade': noFacadeImportsOutsideFacade as any,
-                },
-            },
+            univer: univerPlugin,
         },
         rules: {
             'ts/naming-convention': [
@@ -86,6 +86,9 @@ export const univerSourcePreset = (options: {
                 ignore: options.noFacadeImportsOutsideFacade?.ignore ?? [],
             }],
         },
+        plugins: {
+            univer: univerPlugin,
+        },
         languageOptions: {
             parser: typescriptParser,
         },
@@ -109,6 +112,9 @@ export const facadePreset = (): Linter.Config => {
         rules: {
             'ts/explicit-function-return-type': 'error',
             'univer/no-external-imports-in-facade': 'error',
+        },
+        plugins: {
+            univer: univerPlugin,
         },
     };
 };
@@ -229,7 +235,7 @@ export const noBarrelImportPreset = (): Linter.Config => {
 
 /**
  * Header preset configuration for ESLint.
- * Enforces Apache License 2.0 header in all source files.
+ * Enforces Apache License 2.0 header in package and preset source files.
  *
  * @returns ESLint configuration object for enforcing file headers
  */
@@ -239,6 +245,13 @@ export const headerPreset = (): Linter.Config => {
     return {
         files: ['**/*.ts', '**/*.tsx'],
         ignores: [
+            '*.ts',
+            '*.tsx',
+            'common/**/*',
+            'examples/**/*',
+            'mockdata/**/*',
+            'scripts/**/*',
+            'tests/**/*',
             '**/*.d.ts',
             '**/vitest.config.ts',
             '**/vitest.workspace.ts',
@@ -272,15 +285,4 @@ export const headerPreset = (): Linter.Config => {
             ],
         },
     };
-};
-
-export const regexpDefinitionsPreset = async (): Promise<Linter.Config[]> => {
-    const configs = await antfuRegexpPreset();
-
-    return configs.map((config) => ({
-        ...config,
-        rules: Object.fromEntries(
-            Object.keys(config.rules ?? {}).map((ruleName) => [ruleName, 'off'])
-        ),
-    }) as Linter.Config);
 };

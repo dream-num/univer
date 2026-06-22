@@ -1,5 +1,6 @@
 {
     "name": "univer-examples",
+    "type": "module",
     "private": true,
     "description": "Univer vanilla ts demo project",
     "author": "DreamNum <developer@univer.ai>",
@@ -8,11 +9,11 @@
         "./*": "./src/*"
     },
     "scripts": {
-        "prepare": "tsx ./scripts/sync-demos.ts",
-        "build:demo": "tsx ./esbuild.config.ts",
-        "dev:demo": "tsx ./esbuild.config.ts --watch",
-        "dev:e2e": "tsx ./esbuild.config.ts --watch --e2e",
-        "build:e2e": "tsx ./esbuild.config.ts --e2e",
+        "prepare": "node --experimental-strip-types ./scripts/sync-demos.mts",
+        "build:demo": "node --experimental-strip-types ./esbuild.config.mts",
+        "dev:demo": "node --experimental-strip-types ./esbuild.config.mts --watch",
+        "dev:e2e": "node --experimental-strip-types ./esbuild.config.mts --watch --e2e",
+        "build:e2e": "node --experimental-strip-types ./esbuild.config.mts --e2e",
         "typecheck": "tsc --noEmit"
     },
     "dependencies": {
@@ -100,7 +101,7 @@
         "rxjs": "^7.8.2"
     },
     "devDependencies": {
-        "@clack/prompts": "^1.5.1",
+        "@clack/prompts": "^1.6.0",
         "@types/minimist": "^1.2.5",
         "@univerjs-infra/shared": "workspace:*",
         "detect-port": "^2.1.0",

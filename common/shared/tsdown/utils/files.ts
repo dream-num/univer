@@ -16,7 +16,7 @@
 
 import { existsSync, readdirSync, unlinkSync } from 'node:fs';
 import path from 'node:path';
-import { SOURCE_DIRECTORY } from '../constants';
+import { SOURCE_DIRECTORY } from '../constants.ts';
 
 /**
  * Walks the package source tree and returns whether a given file suffix exists.

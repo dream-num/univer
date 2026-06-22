@@ -26,7 +26,7 @@ import vue3 from 'esbuild-plugin-vue3';
 import stylePlugin from 'esbuild-style-plugin';
 import * as React from 'react';
 import tailwindcss from 'tailwindcss';
-import { syncDemoArtifacts } from '../sync-demos';
+import { syncDemoArtifacts } from '../sync-demos.mts';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const nodeModules = path.resolve(process.cwd(), './node_modules');
@@ -61,7 +61,7 @@ export async function createBuildConfig(args: IBuildArgs): Promise<SameShape<Bui
     let entryPoints: string[];
 
     if (args.watch && !isAll) {
-        const { selectEntries } = await import('../select-entries');
+        const { selectEntries } = await import('../select-entries.mts');
         const result = await selectEntries();
         entryPoints = result.entryPoints;
     } else {

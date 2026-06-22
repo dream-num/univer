@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { IEntryConfig } from '../types';
+import type { IEntryConfig } from '../types.ts';
 import { existsSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
-import { DEFAULT_ENTRY_FILE, FACADE_ENTRY_FILE, LOCALE_DIRECTORY } from '../constants';
+import { DEFAULT_ENTRY_FILE, FACADE_ENTRY_FILE, LOCALE_DIRECTORY } from '../constants.ts';
 
 /**
  * Collects all canonical build entries for a package.

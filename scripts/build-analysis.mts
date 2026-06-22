@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable max-lines-per-function */
-
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';

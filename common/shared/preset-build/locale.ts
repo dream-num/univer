@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { IGeneratePresetLocalesOptions, IPresetPackageJson } from './types';
+import type { IGeneratePresetLocalesOptions, IPresetPackageJson } from './types.ts';
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { discoverUniverUiLocales } from '../locale';
-import { PRESET_LOCALE_SOURCE_DIR } from './constants';
+import { discoverUniverUiLocales } from '../locale/index.ts';
+import { PRESET_LOCALE_SOURCE_DIR } from './constants.ts';
 
 function readPackageJson(packageDir: string): IPresetPackageJson {
     return JSON.parse(readFileSync(path.join(packageDir, 'package.json'), 'utf8')) as IPresetPackageJson;

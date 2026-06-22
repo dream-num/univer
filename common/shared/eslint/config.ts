@@ -1,4 +1,3 @@
-/* eslint-disable header/header */
 import type { Rules } from '@antfu/eslint-config';
 import type { ESLint, Linter } from 'eslint';
 import antfu from '@antfu/eslint-config';
@@ -8,7 +7,6 @@ import {
     headerPreset,
     noBarrelImportPreset,
     penetratingPreset,
-    regexpDefinitionsPreset,
     specPreset,
     tailwindcssPreset,
     typescriptPreset,
@@ -74,7 +72,6 @@ export const createUniverEslintConfig = (options: IUniverEslintConfigOptions = {
                 html: true,
             },
         },
-        ...configs,
-        regexpDefinitionsPreset()
+        ...configs
     );
 };

@@ -5,7 +5,7 @@
         "skipLibCheck": true
     },
     "include": [
-        "bin/**/*.ts",
+        "bin/**/*.mts",
         "esbuild/**/*.ts",
         "eslint/**/*.ts",
         "eslint/**/*.d.ts",

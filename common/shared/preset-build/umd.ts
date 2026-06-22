@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { IPrependPresetUmdOptions } from './types';
+import type { IPrependPresetUmdOptions } from './types.ts';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { discoverUniverUiLocales } from '../locale';
-import { PRESET_UMD_OUTPUT_DIR } from './constants';
+import { discoverUniverUiLocales } from '../locale/index.ts';
+import { PRESET_UMD_OUTPUT_DIR } from './constants.ts';
 
 function readRequiredFile(filePath: string, label: string) {
     if (!existsSync(filePath)) {

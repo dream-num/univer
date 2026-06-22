@@ -23,9 +23,9 @@
         "./locale": "./locale/index.ts",
         "./preset-build": "./preset-build/index.ts"
     },
-    "main": "bin/index.ts",
+    "main": "bin/index.mts",
     "bin": {
-        "univer-cli": "bin/index.ts"
+        "univer-cli": "bin/index.mts"
     },
     "scripts": {
         "typecheck": "tsc --noEmit"

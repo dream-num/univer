@@ -15,12 +15,12 @@
  */
 
 import type { UserConfig } from 'tsdown';
-import type { IEntryConfig } from '../types';
+import type { IEntryConfig } from '../types.ts';
 import { defineConfig } from 'tsdown';
-import { peerDepsMap } from '../data/peer-deps';
-import { createCssNoopInputOptions } from '../plugins/css-noop';
-import { createOutputAliasPlugin } from '../plugins/output-alias';
-import { createOutputObfuscatorPlugin } from '../plugins/output-obfuscator';
+import { peerDepsMap } from '../data/peer-deps.ts';
+import { createCssNoopInputOptions } from '../plugins/css-noop.ts';
+import { createOutputAliasPlugin } from '../plugins/output-alias.ts';
+import { createOutputObfuscatorPlugin } from '../plugins/output-obfuscator.ts';
 
 export interface ICreateUmdConfigOptions {
     baseConfig: Partial<UserConfig>;

@@ -1,4 +1,3 @@
-/* eslint-disable header/header */
 import type { Rule } from 'eslint';
 import path from 'node:path';
 

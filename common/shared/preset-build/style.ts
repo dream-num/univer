@@ -15,11 +15,11 @@
  */
 
 import type { UserConfig } from 'tsdown';
-import type { IPresetPackageJson } from './types';
+import type { IPresetPackageJson } from './types.ts';
 import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { defineConfig, build as tsdownBuild } from 'tsdown';
-import { createOutputAliasPlugin } from '../tsdown/plugins/output-alias';
+import { createOutputAliasPlugin } from '../tsdown/plugins/output-alias.ts';
 
 const PRESET_STYLE_TEMP_DIR = '.preset-build';
 const PRESET_STYLE_OUTPUT_DIR = 'lib/.preset-style';

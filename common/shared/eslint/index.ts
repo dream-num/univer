@@ -1,4 +1,3 @@
-/* eslint-disable header/header */
 export { createUniverEslintConfig } from './config';
 export type { IUniverEslintConfigOptions } from './config';
 export {

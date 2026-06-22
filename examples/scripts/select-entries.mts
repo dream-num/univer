@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import type { IDemoDefinition } from './sync-demos';
+import type { IDemoDefinition } from './sync-demos.mts';
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { cancel, isCancel, multiselect } from '@clack/prompts';
-import { discoverDemos, syncDemoArtifacts } from './sync-demos';
+import { discoverDemos, syncDemoArtifacts } from './sync-demos.mts';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const EXAMPLES_ROOT = path.resolve(__dirname, '..');

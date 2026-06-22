@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { IEntryConfig } from '../tsdown/types';
+import type { IEntryConfig } from '../tsdown/types.ts';
 import { existsSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
-import { PRESET_LOCALE_SOURCE_DIR } from './constants';
+import { PRESET_LOCALE_SOURCE_DIR } from './constants.ts';
 
 function getPresetLocaleEntries(packageDir: string): IEntryConfig[] {
     const localeDir = path.join(packageDir, PRESET_LOCALE_SOURCE_DIR);

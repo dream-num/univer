@@ -1,4 +1,3 @@
-/* eslint-disable header/header */
 import type { Rules } from '@antfu/eslint-config';
 
 /**

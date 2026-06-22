@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-import type { TModuleFormat } from './configs/module';
-import type { IBuildContext, IBuildOptions } from './types';
+import type { TModuleFormat } from './configs/module.ts';
+import type { IBuildContext, IBuildOptions } from './types.ts';
 import { existsSync, rmSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import { mergeConfig, build as tsdownBuild } from 'tsdown';
-import { createModuleConfig } from './configs/module';
-import { createUmdConfig } from './configs/umd';
-import { BUILD_OUTPUT_DIRECTORIES, BUILD_OUTPUT_ROOT, CLEANUP_DIRECTORIES } from './constants';
-import { createBaseConfig, createInputOptions, createInputPlugins } from './utils/base-config';
-import { cleanupPackageJson } from './utils/cleanup-pkg';
-import { getEntries } from './utils/entries';
-import { removeCssArtifacts } from './utils/files';
-import { createExternalPackages, readPackageJson } from './utils/package';
-import { emitPublishPackageJson } from './utils/publish-manifest';
+import { createModuleConfig } from './configs/module.ts';
+import { createUmdConfig } from './configs/umd.ts';
+import { BUILD_OUTPUT_DIRECTORIES, BUILD_OUTPUT_ROOT, CLEANUP_DIRECTORIES } from './constants.ts';
+import { createBaseConfig, createInputOptions, createInputPlugins } from './utils/base-config.ts';
+import { cleanupPackageJson } from './utils/cleanup-pkg.ts';
+import { getEntries } from './utils/entries.ts';
+import { removeCssArtifacts } from './utils/files.ts';
+import { createExternalPackages, readPackageJson } from './utils/package.ts';
+import { emitPublishPackageJson } from './utils/publish-manifest.ts';
 
 /**
  * Builds the shared context consumed by all output format factories.

@@ -1,4 +1,3 @@
-/* eslint-disable header/header */
 import { createUniverEslintConfig } from '@univerjs-infra/shared/eslint';
 
 export default createUniverEslintConfig({

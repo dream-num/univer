@@ -14,6 +14,9 @@ permissions:
     pull-requests: write
     actions: write
 
+env:
+    TURBO_TELEMETRY_DISABLED: '1'
+
 jobs:
     e2e-test:
         runs-on: ubuntu-latest

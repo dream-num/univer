@@ -16,6 +16,9 @@ permissions:
     contents: read
     pull-requests: write
 
+env:
+    TURBO_TELEMETRY_DISABLED: '1'
+
 jobs:
     test:
         runs-on: ubuntu-latest

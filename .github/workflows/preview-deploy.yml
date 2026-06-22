@@ -16,6 +16,9 @@ permissions:
     pull-requests: write
     actions: read
 
+env:
+    TURBO_TELEMETRY_DISABLED: '1'
+
 jobs:
     setup:
         if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_repository.full_name == github.repository }}

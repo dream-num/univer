@@ -33,7 +33,7 @@ export const createUniverEslintConfig = (options: IUniverEslintConfigOptions = {
             },
             rules: {
                 ...baseRules,
-                ...(options.rules ?? {}),
+                ...options.rules,
             },
         },
         penetratingPreset(),

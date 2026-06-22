@@ -53,7 +53,6 @@
     "devDependencies": {
         "@univerjs/icons": "1.12.0",
         "@univerjs/icons-svg": "^1.12.0",
-        "@univerjs/protocol": "workspace:*",
         "typescript": "^6.0.3",
         "vue-tsc": "^3.3.5"
     }

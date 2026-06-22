@@ -191,7 +191,7 @@ describe('line model', () => {
         expect(line.divides.every((divide) => divide.parent === line)).toBe(true);
     });
 
-    it('does not split line divides for behind-doc drawings', () => {
+    it('splits line divides for behind-doc drawings with wrap tight', () => {
         const page = {
             skeDrawings: new Map([
                 ['behind', {
@@ -202,6 +202,51 @@ describe('line model', () => {
                     angle: 0,
                     drawingOrigin: {
                         layoutType: PositionedObjectLayoutType.WRAP_TIGHT,
+                        behindDoc: BooleanNumber.TRUE,
+                        distL: 0,
+                        distR: 0,
+                        distT: 0,
+                        distB: 0,
+                        wrapText: WrapTextType.BOTH_SIDES,
+                    },
+                }],
+            ]),
+            skeTables: new Map(),
+        } as any;
+
+        const line = createSkeletonLine(
+            1,
+            LineType.PARAGRAPH,
+            {
+                lineHeight: 20,
+                lineTop: 0,
+                contentHeight: 14,
+            },
+            100,
+            0,
+            true,
+            {} as any,
+            page,
+            null,
+            null
+        );
+
+        expect(line.divides).toHaveLength(1);
+        expect(line.divides[0].left).toBe(80);
+        expect(line.divides[0].width).toBe(20);
+    });
+
+    it('does not split line divides for behind-doc wrap-none drawings', () => {
+        const page = {
+            skeDrawings: new Map([
+                ['behind', {
+                    aTop: 0,
+                    aLeft: 0,
+                    width: 80,
+                    height: 20,
+                    angle: 0,
+                    drawingOrigin: {
+                        layoutType: PositionedObjectLayoutType.WRAP_NONE,
                         behindDoc: BooleanNumber.TRUE,
                         distL: 0,
                         distR: 0,

@@ -142,6 +142,10 @@ describe('DocDrawingTransformUpdateController', () => {
             getDrawingData: vi.fn(() => ({
                 'multi-drawing': { drawingId: 'multi-drawing', isMultiTransform: BooleanNumber.TRUE },
                 'stale-multi': { drawingId: 'stale-multi', isMultiTransform: BooleanNumber.TRUE },
+                'stale-normal': {
+                    drawingId: 'stale-normal',
+                    transform: { left: 0, top: 0, width: 100, height: 100, angle: 0 },
+                },
             })),
             removeNotification: vi.fn(),
             addNotification: vi.fn(),
@@ -288,6 +292,11 @@ describe('DocDrawingTransformUpdateController', () => {
             expect.objectContaining({
                 drawingId: 'cell-drawing',
                 transform: expect.objectContaining({ left: 56, top: 69, width: 11, height: 12, angle: 0 }),
+            }),
+            expect.objectContaining({
+                drawingId: 'stale-normal',
+                hidden: true,
+                transform: expect.objectContaining({ left: 0, top: 0, width: 100, height: 100, angle: 0 }),
             }),
         ]);
         expect(drawingManagerService.removeNotification).toHaveBeenCalledWith([

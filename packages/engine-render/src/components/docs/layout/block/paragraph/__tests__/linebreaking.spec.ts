@@ -23,6 +23,7 @@ import {
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     PositionedObjectLayoutType,
+    WrapTextType,
 } from '@univerjs/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { updateInlineDrawingCoordsAndBorder } from '../../../tools';
@@ -342,6 +343,51 @@ describe('linebreaking', () => {
         expect(inlineMapRight).toMatchObject({ width: 120, height: 90 });
         expect(inlineMapRight?.lineTop).toBe(inlineMapLeft?.lineTop);
         expect(inlineMapRight?.aLeft).toBeGreaterThan(inlineMapLeft?.aLeft ?? 0);
+    });
+
+    it('places an oversized inline custom block in the usable divide after a paragraph-relative wrap drawing', () => {
+        const content = `${DataStreamTreeTokenType.CUSTOM_BLOCK}${DataStreamTreeTokenType.CUSTOM_BLOCK}`;
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed(content, {
+            body: {
+                customBlocks: [
+                    { startIndex: 0, blockId: 'inline-photo' },
+                    { startIndex: 1, blockId: 'left-wrap' },
+                ],
+            },
+            drawings: {
+                'inline-photo': {
+                    drawingId: 'inline-photo',
+                    layoutType: PositionedObjectLayoutType.INLINE,
+                    docTransform: {
+                        size: { width: 120, height: 80 },
+                        positionH: {},
+                        positionV: {},
+                        angle: 0,
+                    },
+                },
+                'left-wrap': {
+                    drawingId: 'left-wrap',
+                    layoutType: PositionedObjectLayoutType.WRAP_TIGHT,
+                    behindDoc: 1,
+                    wrapText: WrapTextType.BOTH_SIDES,
+                    docTransform: {
+                        size: { width: 50, height: 180 },
+                        positionH: { relativeFrom: ObjectRelativeFromH.COLUMN, posOffset: 1.25 },
+                        positionV: { relativeFrom: ObjectRelativeFromV.PARAGRAPH, posOffset: 1.25 },
+                        angle: 0,
+                    },
+                },
+            },
+        });
+        const shapedTextList = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+
+        const result = lineBreaking(ctx, viewModel, shapedTextList, curPage, paragraphNode, sectionBreakConfig, null);
+        updateInlineDrawingCoordsAndBorder(ctx, result);
+
+        const inlinePhoto = result[0].skeDrawings.get('inline-photo');
+        const leftWrap = result[0].skeDrawings.get('left-wrap');
+
+        expect(inlinePhoto?.aLeft).toBeGreaterThanOrEqual((leftWrap?.aLeft ?? 0) + (leftWrap?.width ?? 0));
     });
 
     it('does not move a zero-width wrap-none floating anchor to a new page at the page bottom', () => {

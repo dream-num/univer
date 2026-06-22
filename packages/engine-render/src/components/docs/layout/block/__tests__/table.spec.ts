@@ -408,6 +408,31 @@ describe('docs table layout', () => {
         }
     });
 
+    it('keeps a table on the current page when it only slightly overflows available height', () => {
+        const { ctx, curPage, viewModel, tableNode, sectionBreakConfig, tableSource } = createContextAndTable();
+        tableSource.tableRows = [
+            {
+                repeatHeaderRow: BooleanNumber.FALSE,
+                trHeight: {
+                    hRule: TableRowHeightRule.AUTO,
+                    val: { v: 16 },
+                },
+                cantSplit: BooleanNumber.FALSE,
+                tableCells: [
+                    { vAlign: VerticalAlignmentType.TOP },
+                    { vAlign: VerticalAlignmentType.TOP },
+                ],
+            },
+        ];
+        tableNode.children = [createRowNode(1, 20, 2) as any];
+        createSkeletonCellPagesMock.mockImplementation(() => [makeCellPage(60, 115)]);
+
+        const result = createTableSkeletons(ctx, curPage, viewModel, tableNode, sectionBreakConfig, 109);
+
+        expect(result.skeTables[0].height).toBe(117);
+        expect(result.fromCurrentPage).toBe(true);
+    });
+
     it('repeats multiple leading header rows on sliced table pages', () => {
         const { ctx, curPage, viewModel, tableNode, sectionBreakConfig, tableSource } = createContextAndTable();
         tableSource.tableRows[1].repeatHeaderRow = BooleanNumber.TRUE;

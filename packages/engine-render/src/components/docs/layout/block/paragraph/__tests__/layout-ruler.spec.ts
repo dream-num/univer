@@ -24,7 +24,7 @@ import {
     SpacingRule,
     WrapTextType,
 } from '@univerjs/core';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { GlyphType, LineType } from '../../../../../../basics/i-document-skeleton-cached';
 import { __testing, getLineHeightMetrics, layoutParagraph, updateInlineDrawingPosition } from '../layout-ruler';
 import { lineBreaking } from '../linebreaking';
@@ -32,6 +32,24 @@ import { shaping } from '../shaping';
 import { createParagraphLayoutTestBed } from './create-paragraph-layout-test-bed';
 
 describe('layout-ruler', () => {
+    beforeEach(() => {
+        vi.stubGlobal('document', {
+            createElement: () => ({
+                getContext: () => ({
+                    font: '',
+                    textBaseline: 'alphabetic',
+                    measureText: (value: string) => ({
+                        width: value.length * 8,
+                        fontBoundingBoxAscent: 10,
+                        fontBoundingBoxDescent: 4,
+                        actualBoundingBoxAscent: 10,
+                        actualBoundingBoxDescent: 4,
+                    }),
+                }),
+            }),
+        });
+    });
+
     function getLineBoxHeight(metrics: ReturnType<typeof getLineHeightMetrics>) {
         return metrics.paddingTop + metrics.contentHeight + metrics.paddingBottom;
     }
@@ -508,5 +526,33 @@ describe('layout-ruler', () => {
             blockAnchorTop: 80,
             lineHeight: 24,
         });
+    });
+
+    it('moves non-wrap tables into the usable area beside flow-affecting drawings', () => {
+        const table = {
+            top: 120,
+            left: 0,
+            width: 280,
+            height: 80,
+        } as any;
+        const page = {
+            skeDrawings: new Map([['left-wrap', {
+                aTop: 40,
+                aLeft: 10,
+                width: 90,
+                height: 220,
+                drawingOrigin: {
+                    layoutType: PositionedObjectLayoutType.WRAP_TIGHT,
+                    distR: 8,
+                },
+            }]]),
+        } as any;
+        const column = {
+            width: 420,
+        } as any;
+
+        __testing.avoidFlowAffectingDrawingsForTable(table, page, column);
+
+        expect(table.left).toBe(108);
     });
 });

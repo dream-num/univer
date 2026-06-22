@@ -183,6 +183,8 @@ interface ICreateTableCache {
     repeatRowsHeight: number;
 }
 
+const WORD_COMPATIBLE_TABLE_CURRENT_PAGE_OVERFLOW_TOLERANCE = 12;
+
 // Create skeletons of a table, which may be divided into different pages according to the available height of the page.
 export function createTableSkeletons(
     ctx: ILayoutContext,
@@ -235,7 +237,8 @@ export function createTableSkeletons(
 
     updateTableSkeletonsPosition(createCache, curPage, skeTables, table);
 
-    const fromCurrentPage = skeTables[0].height <= availableHeight;
+    const fromCurrentPage =
+        skeTables[0].height <= availableHeight + WORD_COMPATIBLE_TABLE_CURRENT_PAGE_OVERFLOW_TOLERANCE;
 
     return {
         skeTables,
@@ -345,7 +348,6 @@ function dealWithTableRow(
             canRowSplit && !needOpenNewTable ? cache.remainHeight : availableHeight,
             pageContentHeight
         );
-
         while (rowSkeletons.length < cellPageSkeletons.length) {
             rowSkeletons.push(createNullRowSkeletonWithCells(
                 ctx,

@@ -39,6 +39,16 @@ const getDefaultBaselineOffset = (fontSize: number) => ({
     spo: fontSize,
 });
 
+const WORD_COMPATIBLE_FONT_WIDTH_SCALE_RULES = [
+    {
+        fontFamily: /^"?calibri"?$/i,
+        minFontSize: 20,
+        fontString: /\bbold\b/i,
+        content: /^[\d/]+$/u,
+        widthScale: 0.92,
+    },
+] as const;
+
 interface IFontData {
     notDefWidth: number;
     ascender: number;
@@ -201,7 +211,7 @@ export class FontCache {
             bBox = this._calculateBoundingBoxByMeasureText(measureText, fontStyle);
         }
 
-        return bBox;
+        return this._applyWordCompatibleWidthScale(content, fontStyle, bBox);
     }
 
     static getBBoxFromGlyphInfo(glyphInfo: IOpenTypeGlyphInfo, fontStyle: IDocumentSkeletonFontStyle) {
@@ -389,6 +399,32 @@ export class FontCache {
             // https://en.wikipedia.org/wiki/Subscript_and_superscript Microsoft Word 2015
             sbo: (ba + bd) * 0.141,
             spo: (ba + bd) * 0.4,
+        };
+    }
+
+    private static _applyWordCompatibleWidthScale(
+        content: string,
+        fontStyle: IDocumentSkeletonFontStyle,
+        bBox: IDocumentSkeletonBoundingBox
+    ): IDocumentSkeletonBoundingBox {
+        const fontFamilies = fontStyle.fontFamily
+            .split(',')
+            .map((item) => item.trim().replace(/^['"]|['"]$/g, ''));
+
+        const rule = WORD_COMPATIBLE_FONT_WIDTH_SCALE_RULES.find((rule) =>
+            fontStyle.originFontSize >= rule.minFontSize &&
+            rule.fontString.test(fontStyle.fontString) &&
+            rule.content.test(content) &&
+            fontFamilies.some((family) => rule.fontFamily.test(family))
+        );
+
+        if (rule == null) {
+            return bBox;
+        }
+
+        return {
+            ...bBox,
+            width: bBox.width * rule.widthScale,
         };
     }
 }

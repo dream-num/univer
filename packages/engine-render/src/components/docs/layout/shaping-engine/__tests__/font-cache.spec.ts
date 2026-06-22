@@ -139,6 +139,18 @@ describe('font cache', () => {
         expect(byFont.ba).toBeCloseTo(9.6);
         expect(byFont.abd).toBeCloseTo(1.8);
 
+        (FontCache as any)._context = {
+            font: '',
+            textBaseline: 'alphabetic',
+            measureText: vi.fn(() => ({
+                width: 12,
+                fontBoundingBoxAscent: 8,
+                fontBoundingBoxDescent: 3,
+                actualBoundingBoxAscent: 8,
+                actualBoundingBoxDescent: 3,
+            })),
+        };
+
         const byMeasure = FontCache.getTextSize('Z', {
             fontString: '11px Other Font',
             fontSize: 11,
@@ -174,4 +186,31 @@ describe('font cache', () => {
         expect(fromGlyphInfo.width).toBeGreaterThan(0);
         expect(fromGlyphInfo.aba).toBeGreaterThan(0);
     });
+
+    it('scales Word-compatible bold Calibri numeric glyph widths', () => {
+        (FontCache as any)._context = {
+            font: '',
+            textBaseline: 'alphabetic',
+            measureText: vi.fn(() => ({
+                width: 16,
+                fontBoundingBoxAscent: 30,
+                fontBoundingBoxDescent: 9,
+                actualBoundingBoxAscent: 30,
+                actualBoundingBoxDescent: 9,
+            })),
+        };
+
+        const scaled = FontCache.getTextSize('5', {
+            fontString: 'normal bold 24pt "Calibri", Arial ',
+            fontSize: 24,
+            originFontSize: 24,
+            fontFamily: '"Calibri"',
+            fontCache: 'normal bold 24pt "Calibri"',
+        } as any);
+
+        expect(scaled.width).toBeCloseTo(14.72);
+        expect(scaled.ba).toBe(30);
+        expect(scaled.bd).toBe(9);
+    });
+
 });

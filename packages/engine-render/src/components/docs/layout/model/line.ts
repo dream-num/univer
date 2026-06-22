@@ -26,7 +26,7 @@ import type {
     LineType,
 } from '../../../../basics/i-document-skeleton-cached';
 import type { IFloatObject } from '../tools';
-import { BooleanNumber, PositionedObjectLayoutType, TableTextWrapType, WrapTextType } from '@univerjs/core';
+import { PositionedObjectLayoutType, TableTextWrapType, WrapTextType } from '@univerjs/core';
 import { Path2 } from '../../../../basics/path2';
 import { Transform } from '../../../../basics/transform';
 import { Vector2 } from '../../../../basics/vector2';
@@ -110,8 +110,7 @@ export function createSkeletonLine(
 
     const affectSkeDrawings = new Map(Array.from(pageSkeDrawings).filter(([_, drawing]) =>
         drawing.drawingOrigin.layoutType !== PositionedObjectLayoutType.INLINE &&
-        drawing.drawingOrigin.layoutType !== PositionedObjectLayoutType.WRAP_NONE &&
-        drawing.drawingOrigin.behindDoc !== BooleanNumber.TRUE
+        drawing.drawingOrigin.layoutType !== PositionedObjectLayoutType.WRAP_NONE
     ));
     const wrapTypeTables = new Map(Array.from(pageSkeTables).filter(([_, table]) => table.tableSource.textWrap === TableTextWrapType.WRAP));
 
@@ -205,10 +204,9 @@ function _getLineTopWithFullColumnWrap(
     }
 
     const { aTop, height, aLeft, width, angle = 0, drawingOrigin } = drawing;
-    const { layoutType, behindDoc, distL = 0, distT = 0, distB = 0, distR = 0, wrapText } = drawingOrigin;
+    const { layoutType, distL = 0, distT = 0, distB = 0, distR = 0, wrapText } = drawingOrigin;
 
     if (
-        behindDoc === BooleanNumber.TRUE ||
         layoutType === PositionedObjectLayoutType.INLINE ||
         layoutType === PositionedObjectLayoutType.WRAP_NONE ||
         layoutType === PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM
@@ -274,9 +272,9 @@ function _getLineTopWidthWrapNone(table: IDocumentSkeletonTable, lineHeight: num
 
 function _getLineTopWidthWrapTopBottom(drawing: IDocumentSkeletonDrawing, lineHeight: number, lineTop: number) {
     const { aTop, height, aLeft, width, angle = 0, drawingOrigin } = drawing;
-    const { layoutType, distT = 0, distB = 0, behindDoc } = drawingOrigin;
+    const { layoutType, distT = 0, distB = 0 } = drawingOrigin;
 
-    if (layoutType !== PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM || behindDoc === BooleanNumber.TRUE) {
+    if (layoutType !== PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM) {
         return;
     }
 
@@ -417,10 +415,9 @@ function _calculateSplit(
     columnWidth: number
 ): Nullable<IDrawingsSplit> {
     const { aTop, height, aLeft, width, angle = 0, drawingOrigin } = drawing;
-    const { layoutType, behindDoc } = drawingOrigin;
+    const { layoutType } = drawingOrigin;
 
     if (
-        behindDoc === BooleanNumber.TRUE ||
         layoutType === PositionedObjectLayoutType.WRAP_NONE ||
         layoutType === PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM
     ) {

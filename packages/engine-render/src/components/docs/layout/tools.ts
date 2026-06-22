@@ -62,6 +62,7 @@ import {
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     PageOrientType,
+    PositionedObjectLayoutType,
     SectionType,
     SpacingRule,
     VerticalAlign,
@@ -491,10 +492,11 @@ export function updateInlineDrawingCoordsAndBorder(ctx: ILayoutContext, pages: I
         const paragraphConfig = ctx.paragraphConfigCache.get(segmentId)?.get(line.paragraphIndex);
 
         const affectInlineDrawings = paragraphConfig?.paragraphInlineSkeDrawings;
+        const affectNonInlineDrawings = paragraphConfig?.paragraphNonInlineSkeDrawings;
         const drawingAnchor = ctx.skeletonResourceReference?.drawingAnchor?.get(segmentId)?.get(line.paragraphIndex);
         // Update inline drawings after the line is layout.
         if (affectInlineDrawings && affectInlineDrawings.size > 0) {
-            updateInlineDrawingPosition(line, affectInlineDrawings, drawingAnchor?.top);
+            updateInlineDrawingPosition(line, affectInlineDrawings, drawingAnchor?.top, affectNonInlineDrawings);
         }
 
         const paragraphStyle = paragraphConfig?.paragraphStyle;
@@ -949,6 +951,7 @@ export interface IFloatObject {
     height: number;
     angle: number;
     behindDoc?: BooleanNumber;
+    layoutType?: PositionedObjectLayoutType;
     type: FloatObjectType;
     positionV: IObjectPositionV;
 }

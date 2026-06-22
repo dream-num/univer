@@ -70,6 +70,18 @@ function syncDrawingHiddenState(shape: BaseObject, drawingParam: IDrawingParam):
     drawingParam.hidden === true ? shape.hide() : shape.show();
 }
 
+function mergeRefreshMetadata(drawingParam: IDrawingParam, refreshParam: IDrawingSearch): IDrawingParam {
+    const metadata = refreshParam as Partial<IDrawingParam>;
+    if (!('hidden' in metadata) && !('behindText' in metadata)) {
+        return drawingParam;
+    }
+
+    return {
+        ...drawingParam,
+        ...metadata,
+    };
+}
+
 export class DrawingUpdateController extends Disposable {
     constructor(
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
@@ -739,8 +751,12 @@ export class DrawingUpdateController extends Disposable {
 
                     const drawingShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
                     const drawingShape = scene.getObject(drawingShapeKey);
+                    const drawingParamWithRefreshMetadata = mergeRefreshMetadata(drawingParam, param);
 
                     if (drawingShape == null) {
+                        if (drawingParamWithRefreshMetadata.hidden === true) {
+                            return true;
+                        }
                         this._drawingManagerService.addNotification([{ unitId, subUnitId, drawingId }]);
                         return true;
                     }
@@ -759,8 +775,8 @@ export class DrawingUpdateController extends Disposable {
 
                     drawingShape.transformByState({ left, top, width, height, angle, flipX, flipY, skewX, skewY });
                     (drawingShape as Image).setClipBounds?.((transform as IDrawingTransformStateWithClipBounds).clipBounds);
-                    syncDrawingHiddenState(drawingShape as BaseObject, drawingParam);
-                    ensureDrawingRenderLayer(scene, drawingShape as BaseObject, drawingParam);
+                    syncDrawingHiddenState(drawingShape as BaseObject, drawingParamWithRefreshMetadata);
+                    ensureDrawingRenderLayer(scene, drawingShape as BaseObject, drawingParamWithRefreshMetadata);
                 });
             })
         );

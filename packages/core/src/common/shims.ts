@@ -58,6 +58,23 @@ function installRequestIdleCallback() {
 }
 
 /**
+ * Polyfill for queueMicrotask
+ */
+function installQueueMicrotask() {
+    if (typeof glob.queueMicrotask !== 'function') {
+        glob.queueMicrotask = function shimQueueMicrotask(callback: VoidFunction) {
+            Promise.resolve()
+                .then(callback)
+                .catch((error) => {
+                    setTimeout(() => {
+                        throw error;
+                    }, 0);
+                });
+        };
+    }
+}
+
+/**
  * Polyfill for Array.prototype.findLastIndex and Array.prototype.findLast
  */
 function installArrayFindLastIndex() {
@@ -110,6 +127,7 @@ function installStringAt() {
 
 export function installShims() {
     installRequestIdleCallback();
+    installQueueMicrotask();
     installArrayFindLastIndex();
     installStringAt();
 }

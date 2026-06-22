@@ -516,6 +516,7 @@ describe('layout-ruler', () => {
         const section = {
             columns: [],
             parent: page,
+            top: 126,
         } as any;
         const column = {
             left: 40,
@@ -552,15 +553,15 @@ describe('layout-ruler', () => {
 
         expect(page.skeDrawings.get('old-image')).toEqual({ drawingId: 'old-image' });
         expect(page.skeDrawings.get('image-1')).toMatchObject({
-            aLeft: 30,
-            aTop: 104,
+            aLeft: 70,
+            aTop: 230,
             width: 30,
             height: 20,
             angle: 15,
             isPageBreak: false,
-            lineTop: 100,
+            lineTop: 226,
             columnLeft: 40,
-            blockAnchorTop: 80,
+            blockAnchorTop: 206,
             lineHeight: 24,
         });
     });

@@ -1514,6 +1514,7 @@ export function updateInlineDrawingPosition(
     paragraphNonInlineSkeDrawings?: Map<string, IDocumentSkeletonDrawing>
 ) {
     const column = line.parent;
+    const section = column?.parent;
     const page = line?.parent?.parent?.parent;
 
     if (page == null || column == null) {
@@ -1524,6 +1525,8 @@ export function updateInlineDrawingPosition(
 
     const drawings: Map<string, IDocumentSkeletonDrawing> = new Map();
     const { top, lineHeight, marginBottom = 0 } = line;
+    const sectionTop = section?.top ?? 0;
+    const lineTop = sectionTop + top;
 
     for (const divide of line.divides) {
         for (const glyph of divide.glyphGroup) {
@@ -1548,7 +1551,7 @@ export function updateInlineDrawingPosition(
                 const { width = 0, height = 0 } = size;
                 const glyphHeight = glyph.bBox.bd + glyph.bBox.ba;
 
-                drawing.aLeft = divide.left + divide.paddingLeft + glyph.left + 0.5 * glyph.width - 0.5 * width || 0;
+                drawing.aLeft = column.left + divide.left + divide.paddingLeft + glyph.left + 0.5 * glyph.width - 0.5 * width || 0;
                 if (glyph.width > divide.width) {
                     for (const positionedDrawing of paragraphNonInlineSkeDrawings?.values() ?? []) {
                         const positionedOrigin = positionedDrawing.drawingOrigin;
@@ -1562,8 +1565,8 @@ export function updateInlineDrawingPosition(
                         }
 
                         const positionedBottom = positionedDrawing.aTop + positionedDrawing.height;
-                        const lineBottom = top + lineHeight;
-                        if (positionedDrawing.aTop >= lineBottom || positionedBottom <= top) {
+                        const lineBottom = lineTop + lineHeight;
+                        if (positionedDrawing.aTop >= lineBottom || positionedBottom <= lineTop) {
                             continue;
                         }
 
@@ -1577,14 +1580,14 @@ export function updateInlineDrawingPosition(
                         }
                     }
                 }
-                drawing.aTop = top + lineHeight - 0.5 * glyphHeight - 0.5 * height - marginBottom;
+                drawing.aTop = lineTop + lineHeight - 0.5 * glyphHeight - 0.5 * height - marginBottom;
                 drawing.width = width;
                 drawing.height = height;
                 drawing.angle = angle;
                 drawing.isPageBreak = isPageBreak;
-                drawing.lineTop = top;
+                drawing.lineTop = lineTop;
                 drawing.columnLeft = column.left;
-                drawing.blockAnchorTop = blockAnchorTop ?? top;
+                drawing.blockAnchorTop = blockAnchorTop == null ? lineTop : sectionTop + blockAnchorTop;
                 drawing.lineHeight = line.lineHeight;
 
                 drawings.set(drawing.drawingId, drawing);

@@ -271,7 +271,9 @@ describe('docs layout tools extra', () => {
                     0,
                     {
                         paragraphStyle: {
-                            backgroundColor: { rgb: '#ffffff' },
+                            shading: {
+                                backgroundColor: { rgb: '#ffffff' },
+                            },
                         },
                     },
                 ]]),

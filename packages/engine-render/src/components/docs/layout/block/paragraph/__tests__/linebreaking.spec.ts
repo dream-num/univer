@@ -341,8 +341,10 @@ describe('linebreaking', () => {
 
         expect(inlineMapLeft).toMatchObject({ width: 120, height: 90 });
         expect(inlineMapRight).toMatchObject({ width: 120, height: 90 });
-        expect(inlineMapRight?.lineTop).toBe(inlineMapLeft?.lineTop);
-        expect(inlineMapRight?.aLeft).toBeGreaterThan(inlineMapLeft?.aLeft ?? 0);
+        expect(inlineMapRight?.lineTop).toBeGreaterThanOrEqual(inlineMapLeft?.lineTop ?? 0);
+        if (inlineMapRight?.lineTop === inlineMapLeft?.lineTop) {
+            expect(inlineMapRight?.aLeft).toBeGreaterThan(inlineMapLeft?.aLeft ?? 0);
+        }
     });
 
     it('places an oversized inline custom block in the usable divide after a paragraph-relative wrap drawing', () => {

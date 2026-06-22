@@ -500,8 +500,9 @@ export function updateInlineDrawingCoordsAndBorder(ctx: ILayoutContext, pages: I
         }
 
         const paragraphStyle = paragraphConfig?.paragraphStyle;
-        if (paragraphStyle?.backgroundColor) {
-            line.backgroundColor = paragraphStyle.backgroundColor;
+        const paragraphBackgroundColor = paragraphStyle?.shading?.backgroundColor;
+        if (paragraphBackgroundColor) {
+            line.backgroundColor = paragraphBackgroundColor;
         }
 
         if (line.divides.length > 0) {

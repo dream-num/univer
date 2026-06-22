@@ -529,7 +529,7 @@ describe('doc skeleton', () => {
                         },
                     },
                 ])
-            ),
+            ) as any,
             drawingsOrder: ['banner-text', 'banner-shape', 'portrait', 'logo', 'callout'],
             documentStyle: {
                 documentFlavor: DocumentFlavor.TRADITIONAL,

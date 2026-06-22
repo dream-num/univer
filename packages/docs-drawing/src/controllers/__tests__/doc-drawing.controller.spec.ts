@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { UniverInstanceType } from '@univerjs/core';
+import { BooleanNumber, PositionedObjectLayoutType, UniverInstanceType } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { DocDrawingController, DOCS_DRAWING_PLUGIN } from '../doc-drawing.controller';
 
@@ -70,6 +70,16 @@ describe('DocDrawingController', () => {
 
         capturedResource.onLoad('doc-1', {
             data: {
+                mask: {
+                    id: 'mask',
+                    layoutType: PositionedObjectLayoutType.WRAP_NONE,
+                    behindDoc: BooleanNumber.FALSE,
+                },
+                photo: {
+                    id: 'photo',
+                    layoutType: PositionedObjectLayoutType.WRAP_NONE,
+                    behindDoc: BooleanNumber.TRUE,
+                },
                 d2: {
                     id: 'd2',
                     docTransform: {
@@ -80,7 +90,7 @@ describe('DocDrawingController', () => {
                     },
                 },
             },
-            order: ['d2'],
+            order: ['mask', 'photo', 'd2'],
         });
         expect(registerDrawingData).toHaveBeenCalledWith('doc-1', expect.any(Object));
         expect(registerDrawingDataForManager).toHaveBeenCalledWith('doc-1', expect.any(Object));
@@ -99,9 +109,11 @@ describe('DocDrawingController', () => {
                         },
                     }),
                 },
-                order: ['d2'],
+                order: ['photo', 'mask', 'd2'],
             },
         });
+        const loadedDocDrawingData = registerDrawingData.mock.calls.at(-1)?.[1];
+        expect(loadedDocDrawingData?.['doc-1']?.order).toEqual(['mask', 'photo', 'd2']);
         expect(loadedDrawingData?.['doc-1']?.data?.d2).not.toHaveProperty('transform');
 
         capturedResource.onUnLoad('doc-1');

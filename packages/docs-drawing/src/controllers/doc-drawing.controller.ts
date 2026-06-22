@@ -17,7 +17,7 @@
 import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
 import type { IDrawingMapItem, IDrawingMapItemData } from '@univerjs/drawing';
 import type { IDocDrawing } from '../services/doc-drawing.service';
-import { Disposable, IResourceManagerService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { BooleanNumber, Disposable, IResourceManagerService, IUniverInstanceService, PositionedObjectLayoutType, UniverInstanceType } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IDocDrawingService } from '../services/doc-drawing.service';
 
@@ -26,6 +26,26 @@ export interface IDocDrawingModel {
     drawings?: IDocumentData['drawings'];
     drawingsOrder?: IDocumentData['drawingsOrder'];
 };
+
+export function getDocDrawingRenderOrder(order: string[], drawings: IDocumentData['drawings'] = {}): string[] {
+    return order
+        .map((drawingId, index) => ({ drawingId, index }))
+        .sort((a, b) => {
+            const aBehind = isDocDrawingBehindText(drawings[a.drawingId]);
+            const bBehind = isDocDrawingBehindText(drawings[b.drawingId]);
+
+            if (aBehind !== bBehind) {
+                return aBehind ? -1 : 1;
+            }
+
+            return a.index - b.index;
+        })
+        .map(({ drawingId }) => drawingId);
+}
+
+function isDocDrawingBehindText(drawing: NonNullable<IDocumentData['drawings']>[string] | undefined): boolean {
+    return drawing?.layoutType === PositionedObjectLayoutType.WRAP_NONE && drawing.behindDoc === BooleanNumber.TRUE;
+}
 
 export class DocDrawingController extends Disposable {
     constructor(
@@ -120,9 +140,15 @@ export class DocDrawingController extends Disposable {
                 order: drawingOrderModel,
             },
         };
+        const renderSubDrawings = {
+            [subUnitId]: {
+                ...subDrawings[subUnitId],
+                order: getDocDrawingRenderOrder(drawingOrderModel, drawingDataModels),
+            },
+        };
 
         this._docDrawingService.registerDrawingData(unitId, subDrawings);
-        this._drawingManagerService.registerDrawingData(unitId, subDrawings);
+        this._drawingManagerService.registerDrawingData(unitId, renderSubDrawings);
         return true;
     }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { UndoCommand } from '@univerjs/core';
+import { BooleanNumber, PositionedObjectLayoutType, UndoCommand } from '@univerjs/core';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { describe, expect, it, vi } from 'vitest';
 import { DocDrawingAddRemoveController } from '../doc-drawing-notification.controller';
@@ -43,7 +43,21 @@ function createController() {
     const controller = new DocDrawingAddRemoveController(
         {
             getCurrentUniverDocInstance: vi.fn(() => ({ getUnitId: () => 'doc-1' })),
-            getUniverDocInstance: vi.fn(() => ({ getSnapshot: () => ({ drawingsOrder: ['drawing-2', 'drawing-1'] }) })),
+            getUniverDocInstance: vi.fn(() => ({
+                getSnapshot: () => ({
+                    drawings: {
+                        'drawing-1': {
+                            layoutType: PositionedObjectLayoutType.WRAP_NONE,
+                            behindDoc: BooleanNumber.TRUE,
+                        },
+                        'drawing-2': {
+                            layoutType: PositionedObjectLayoutType.WRAP_NONE,
+                            behindDoc: BooleanNumber.FALSE,
+                        },
+                    },
+                    drawingsOrder: ['drawing-2', 'drawing-1'],
+                }),
+            })),
         } as never,
         {
             beforeCommandExecuted: vi.fn((handler) => {
@@ -108,12 +122,12 @@ describe('DocDrawingAddRemoveController', () => {
         });
         executedHandlers[1]({ id: UndoCommand.id });
 
-        expect(drawingManagerService.setDrawingOrder).toHaveBeenCalledWith('doc-1', 'doc-1', ['drawing-2', 'drawing-1']);
+        expect(drawingManagerService.setDrawingOrder).toHaveBeenCalledWith('doc-1', 'doc-1', ['drawing-1', 'drawing-2']);
         expect(docDrawingService.setDrawingOrder).toHaveBeenCalledWith('doc-1', 'doc-1', ['drawing-2', 'drawing-1']);
         expect(drawingManagerService.orderNotification).toHaveBeenCalledWith({
             unitId: 'doc-1',
             subUnitId: 'doc-1',
-            drawingIds: ['drawing-2', 'drawing-1'],
+            drawingIds: ['drawing-1', 'drawing-2'],
         });
         expect(docDrawingService.orderNotification).toHaveBeenCalledWith({
             unitId: 'doc-1',

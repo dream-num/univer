@@ -15,12 +15,27 @@
  */
 
 import type { ITable } from '@univerjs/core';
+import type {
+    IDocumentSkeletonBoundingBox,
+    IDocumentSkeletonFontStyle,
+} from '../../basics/i-document-skeleton-cached';
 import { DocumentFlavor } from '@univerjs/core';
+
+interface IFontMetricScaleRule {
+    fontFamily: RegExp;
+    minFontSize?: number;
+    fontString?: RegExp;
+    content?: RegExp;
+    widthScale?: number;
+}
 
 export interface IDocumentCompatibilityPolicy {
     mode: 'modern' | 'traditional' | 'unspecified';
     applyDocumentDefaultParagraphStyle: boolean;
     useWordStyleLineHeight: boolean;
+    font: {
+        metricScaleRules: IFontMetricScaleRule[];
+    };
     table: {
         currentPageOverflowTolerance: number;
         rowOverflowTolerance: number;
@@ -32,6 +47,9 @@ const MODERN_DOCUMENT_COMPATIBILITY_POLICY: IDocumentCompatibilityPolicy = {
     mode: 'modern',
     applyDocumentDefaultParagraphStyle: true,
     useWordStyleLineHeight: true,
+    font: {
+        metricScaleRules: [],
+    },
     table: {
         currentPageOverflowTolerance: 0,
         rowOverflowTolerance: 0,
@@ -43,6 +61,17 @@ const TRADITIONAL_DOCUMENT_COMPATIBILITY_POLICY: IDocumentCompatibilityPolicy = 
     mode: 'traditional',
     applyDocumentDefaultParagraphStyle: false,
     useWordStyleLineHeight: true,
+    font: {
+        metricScaleRules: [
+            {
+                fontFamily: /^calibri$/i,
+                minFontSize: 20,
+                fontString: /\bbold\b/i,
+                content: /^[\d/]+$/u,
+                widthScale: 0.92,
+            },
+        ],
+    },
     table: {
         currentPageOverflowTolerance: 12,
         rowOverflowTolerance: 4,
@@ -54,6 +83,9 @@ const UNSPECIFIED_DOCUMENT_COMPATIBILITY_POLICY: IDocumentCompatibilityPolicy = 
     mode: 'unspecified',
     applyDocumentDefaultParagraphStyle: false,
     useWordStyleLineHeight: false,
+    font: {
+        metricScaleRules: [],
+    },
     table: {
         currentPageOverflowTolerance: 0,
         rowOverflowTolerance: 0,
@@ -71,6 +103,33 @@ export function getDocumentCompatibilityPolicy(documentFlavor?: DocumentFlavor):
     }
 
     return UNSPECIFIED_DOCUMENT_COMPATIBILITY_POLICY;
+}
+
+export function applyFontMetricCompatibility(
+    content: string,
+    fontStyle: IDocumentSkeletonFontStyle,
+    bBox: IDocumentSkeletonBoundingBox,
+    policy: IDocumentCompatibilityPolicy
+): IDocumentSkeletonBoundingBox {
+    const fontFamilies = fontStyle.fontFamily
+        .split(',')
+        .map((item) => item.trim().replace(/^['"]|['"]$/g, ''));
+
+    const rule = policy.font.metricScaleRules.find((rule) =>
+        (rule.minFontSize == null || fontStyle.originFontSize >= rule.minFontSize) &&
+        (rule.fontString == null || rule.fontString.test(fontStyle.fontString)) &&
+        (rule.content == null || rule.content.test(content)) &&
+        fontFamilies.some((family) => rule.fontFamily.test(family))
+    );
+
+    if (rule?.widthScale == null) {
+        return bBox;
+    }
+
+    return {
+        ...bBox,
+        width: bBox.width * rule.widthScale,
+    };
 }
 
 export function isTraditionalDocumentCompatibility(policy: IDocumentCompatibilityPolicy): boolean {

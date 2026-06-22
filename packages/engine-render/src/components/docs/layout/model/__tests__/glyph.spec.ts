@@ -15,8 +15,10 @@
  */
 
 import type { IDocumentSkeletonGlyph } from '../../../../../basics/i-document-skeleton-cached';
-import { describe, expect, it } from 'vitest';
-import { baseAdjustability, glyphShrinkLeft, glyphShrinkRight, isJustifiable, isSpace } from '../glyph';
+import { DocumentFlavor } from '@univerjs/core';
+import { describe, expect, it, vi } from 'vitest';
+import { getDocumentCompatibilityPolicy } from '../../../document-compatibility';
+import { baseAdjustability, createSkeletonLetterGlyph, glyphShrinkLeft, glyphShrinkRight, isJustifiable, isSpace } from '../glyph';
 
 describe('Glyph utils test cases', () => {
     describe('test baseAdjustability', () => {
@@ -131,6 +133,50 @@ describe('Glyph utils test cases', () => {
             expect(glyph.adjustability.shrinkability).toEqual([5, 10]);
             expect(glyph.width).toBe(15);
             expect(glyph.xOffset).toBe(-5);
+        });
+    });
+
+    describe('test font compatibility policy', () => {
+        it('should apply traditional font metric width rules to letter glyphs only when enabled', () => {
+            vi.stubGlobal('document', {
+                createElement: () => ({
+                    getContext: () => ({
+                        font: '',
+                        textBaseline: 'alphabetic',
+                        measureText: () => ({
+                            width: 16,
+                            fontBoundingBoxAscent: 30,
+                            fontBoundingBoxDescent: 9,
+                            actualBoundingBoxAscent: 30,
+                            actualBoundingBoxDescent: 9,
+                        }),
+                    }),
+                }),
+            });
+            const config = {
+                fontStyle: {
+                    fontString: 'normal bold 24pt "Calibri", Arial',
+                    fontSize: 24,
+                    originFontSize: 24,
+                    fontFamily: '"Calibri", Arial',
+                    fontCache: 'normal bold 24pt "Calibri"',
+                },
+                textStyle: {},
+                charSpace: 0,
+                snapToGrid: 0,
+            } as any;
+
+            const traditionalGlyph = createSkeletonLetterGlyph('5', {
+                ...config,
+                documentCompatibilityPolicy: getDocumentCompatibilityPolicy(DocumentFlavor.TRADITIONAL),
+            });
+            const modernGlyph = createSkeletonLetterGlyph('5', {
+                ...config,
+                documentCompatibilityPolicy: getDocumentCompatibilityPolicy(DocumentFlavor.MODERN),
+            });
+
+            expect(traditionalGlyph.width).toBeCloseTo(14.72);
+            expect(modernGlyph.width).toBe(16);
         });
     });
 });

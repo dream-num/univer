@@ -150,6 +150,7 @@ export interface IFontCreateConfig {
     textStyle: ITextStyle;
     charSpace: number;
     snapToGrid: BooleanNumber;
+    documentCompatibilityPolicy?: IDocumentCompatibilityPolicy;
     gridType?: GridType;
     pageWidth?: number;
 }

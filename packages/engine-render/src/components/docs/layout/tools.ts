@@ -71,6 +71,7 @@ import {
 import { DEFAULT_DOCUMENT_FONTSIZE } from '../../../basics/const';
 import { GlyphType } from '../../../basics/i-document-skeleton-cached';
 import { getFontStyleString, isFunction } from '../../../basics/tools';
+import { getDocumentCompatibilityPolicy } from '../document-compatibility';
 import { updateInlineDrawingPosition } from './block/paragraph/layout-ruler';
 import { getCustomDecorationStyle } from './style/custom-decoration';
 import { getCustomRangeStyle } from './style/custom-range';
@@ -908,6 +909,7 @@ export function getFontCreateConfig(
         charSpace,
         gridType,
         snapToGrid,
+        documentCompatibilityPolicy: sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy(),
         pageWidth,
     };
 

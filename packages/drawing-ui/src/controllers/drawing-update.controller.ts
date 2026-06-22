@@ -14,7 +14,14 @@
  * limitations under the License.
  */
 
-import type { DrawingTypeEnum, ICommandInfo, IDrawingParam, IDrawingSearch, ITransformState, Nullable } from '@univerjs/core';
+import type {
+    DrawingTypeEnum,
+    ICommandInfo,
+    IDrawingParam,
+    IDrawingSearch,
+    ITransformState,
+    Nullable,
+} from '@univerjs/core';
 import type { IDrawingGroupUpdateParam, IDrawingOrderMapParam } from '@univerjs/drawing';
 import type { BaseObject, Image, IShapeProps, Scene, Shape } from '@univerjs/engine-render';
 import type { ISetDrawingAlignOperationParams } from '../commands/operations/drawing-align.operation';
@@ -25,8 +32,18 @@ import {
     IUniverInstanceService,
     toDisposable,
 } from '@univerjs/core';
-import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService, SetDrawingSelectedOperation } from '@univerjs/drawing';
-import { DRAWING_OBJECT_LAYER_INDEX, DrawingGroupObject, Group, IRenderManagerService, RENDER_CLASS_TYPE } from '@univerjs/engine-render';
+import {
+    getDrawingShapeKeyByDrawingSearch,
+    IDrawingManagerService,
+    SetDrawingSelectedOperation,
+} from '@univerjs/drawing';
+import {
+    DRAWING_OBJECT_LAYER_INDEX,
+    DrawingGroupObject,
+    Group,
+    IRenderManagerService,
+    RENDER_CLASS_TYPE,
+} from '@univerjs/engine-render';
 import { AlignType, SetDrawingAlignOperation } from '../commands/operations/drawing-align.operation';
 import { CloseImageCropOperation } from '../commands/operations/image-crop.operation';
 import { ensureDrawingRenderLayer } from '../services/drawing-render.service';

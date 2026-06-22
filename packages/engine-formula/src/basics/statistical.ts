@@ -27,7 +27,14 @@ import { NumberValueObject } from '../engine/value-object/primitive-object';
 import { FUNCTION_NAMES_MATH } from '../functions/math/function-names';
 import { erf, erfcINV } from './engineering';
 import { ErrorType } from './error-type';
-import { calculateCombin, calculateFactorial, calculateMmult, inverseMatrixByLUD, inverseMatrixByUSV, matrixTranspose } from './math';
+import {
+    calculateCombin,
+    calculateFactorial,
+    calculateMmult,
+    inverseMatrixByLUD,
+    inverseMatrixByUSV,
+    matrixTranspose,
+} from './math';
 
 export function betaCDF(x: number, alpha: number, beta: number): number {
     if (x <= 0) {

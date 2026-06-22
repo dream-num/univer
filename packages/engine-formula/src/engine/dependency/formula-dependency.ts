@@ -15,7 +15,13 @@
  */
 
 import type { IRange, IUnitRange, Nullable, Workbook } from '@univerjs/core';
-import type { IFeatureDirtyRangeType, IFormulaData, IFormulaDataItem, IOtherFormulaData, IUnitData } from '../../basics/common';
+import type {
+    IFeatureDirtyRangeType,
+    IFormulaData,
+    IFormulaDataItem,
+    IOtherFormulaData,
+    IUnitData,
+} from '../../basics/common';
 import type { IFormulaDirtyData } from '../../services/current-data.service';
 import type { IFeatureCalculationManagerParam } from '../../services/feature-calculation-manager.service';
 import type { IAllRuntimeData } from '../../services/runtime.service';
@@ -24,8 +30,21 @@ import type { BaseAstNode } from '../ast-node/base-ast-node';
 import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
 import type { IExecuteAstNodeData } from '../utils/ast-node-tool';
 import type { PreCalculateNodeType } from '../utils/node-type';
-import type { IFormulaDependencyTree, IFormulaDependencyTreeFullJson, IFormulaDependencyTreeJson, IFormulaDependentsAndInRangeResults } from './dependency-tree';
-import { createIdentifier, Disposable, Inject, IUniverInstanceService, ObjectMatrix, RTree, UniverInstanceType } from '@univerjs/core';
+import type {
+    IFormulaDependencyTree,
+    IFormulaDependencyTreeFullJson,
+    IFormulaDependencyTreeJson,
+    IFormulaDependentsAndInRangeResults,
+} from './dependency-tree';
+import {
+    createIdentifier,
+    Disposable,
+    Inject,
+    IUniverInstanceService,
+    ObjectMatrix,
+    RTree,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { prefixToken, suffixToken } from '../../basics/token';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
 import { IDependencyManagerService } from '../../services/dependency-manager.service';
@@ -38,13 +57,12 @@ import { AstTreeBuilder } from '../analysis/parser';
 import { NodeType } from '../ast-node/node-type';
 import { Interpreter } from '../interpreter/interpreter';
 import { FORMULA_AST_CACHE, generateAstNode, includeDefinedName } from '../utils/generate-ast-node';
-import { FormulaDependencyTree, FormulaDependencyTreeModel, FormulaDependencyTreeType, FormulaDependencyTreeVirtual } from './dependency-tree';
-
-interface IFeatureFormulaParam {
-    unitId: string;
-    subUnitId: string;
-    featureId: string;
-}
+import {
+    FormulaDependencyTree,
+    FormulaDependencyTreeModel,
+    FormulaDependencyTreeType,
+    FormulaDependencyTreeVirtual,
+} from './dependency-tree';
 
 export function generateRandomDependencyTreeId(dependencyManagerService: IDependencyManagerService): number {
     const idNum = dependencyManagerService.getLastTreeId() || 0;

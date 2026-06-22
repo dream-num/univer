@@ -15,7 +15,14 @@
  */
 
 import { ErrorValueObject } from '../engine/value-object/base-value-object';
-import { dateAddMonths, excelDateSerial, excelSerialToDate, getDaysInMonth, getTwoDateDaysByBasis, lastDayOfMonth } from './date';
+import {
+    dateAddMonths,
+    excelDateSerial,
+    excelSerialToDate,
+    getDaysInMonth,
+    getTwoDateDaysByBasis,
+    lastDayOfMonth,
+} from './date';
 import { ErrorType } from './error-type';
 
 export function calculateCoupdaybs(settlementSerialNumber: number, maturitySerialNumber: number, frequency: number, basis: number): number {

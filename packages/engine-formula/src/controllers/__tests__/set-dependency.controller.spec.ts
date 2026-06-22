@@ -18,9 +18,15 @@ import type { ICommandInfo } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { SetDefinedNameMutation } from '../../commands/mutations/set-defined-name.mutation';
-import { RemoveFeatureCalculationMutation, SetFeatureCalculationMutation } from '../../commands/mutations/set-feature-calculation.mutation';
+import {
+    RemoveFeatureCalculationMutation,
+    SetFeatureCalculationMutation,
+} from '../../commands/mutations/set-feature-calculation.mutation';
 import { SetFormulaDataMutation } from '../../commands/mutations/set-formula-data.mutation';
-import { RemoveOtherFormulaMutation, SetOtherFormulaMutation } from '../../commands/mutations/set-other-formula.mutation';
+import {
+    RemoveOtherFormulaMutation,
+    SetOtherFormulaMutation,
+} from '../../commands/mutations/set-other-formula.mutation';
 import { SetDependencyController } from '../set-dependency.controller';
 
 interface ICommandServiceMock {

@@ -15,7 +15,12 @@
  */
 
 import type { ICommandService, IUniverInstanceService } from '@univerjs/core';
-import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, RedoCommand, UndoCommand } from '@univerjs/core';
+import {
+    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    RedoCommand,
+    UndoCommand,
+} from '@univerjs/core';
 import { KeyCode, MetaKeys } from '@univerjs/ui';
 import { describe, expect, it, vi } from 'vitest';
 import { createEditorUndoRedoKeyboardConfig, executeEditorUndoRedoCommand } from '../editor-undo-redo-keyboard';

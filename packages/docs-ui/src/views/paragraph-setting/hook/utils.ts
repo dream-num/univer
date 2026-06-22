@@ -16,7 +16,16 @@
 
 import type { DocumentDataModel, IParagraph, ISectionBreak } from '@univerjs/core';
 import type { IDocParagraphSettingCommandParams } from '../../../commands/commands/doc-paragraph-setting.command';
-import { BuildTextUtils, DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING, DEFAULT_DOCUMENT_PARAGRAPH_SPACE_ABOVE, DEFAULT_DOCUMENT_PARAGRAPH_SPACE_BELOW, ICommandService, IUniverInstanceService, SpacingRule, UniverInstanceType } from '@univerjs/core';
+import {
+    BuildTextUtils,
+    DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING,
+    DEFAULT_DOCUMENT_PARAGRAPH_SPACE_ABOVE,
+    DEFAULT_DOCUMENT_PARAGRAPH_SPACE_BELOW,
+    ICommandService,
+    IUniverInstanceService,
+    SpacingRule,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import { getNumberUnitValue, IRenderManagerService } from '@univerjs/engine-render';
 import { useDependency } from '@univerjs/ui';
@@ -26,7 +35,12 @@ import { bufferTime, filter, map } from 'rxjs/operators';
 import { DocParagraphSettingCommand } from '../../../commands/commands/doc-paragraph-setting.command';
 import { findNearestSectionBreak } from '../../../commands/commands/list.command';
 import { DocParagraphSettingController } from '../../../controllers/doc-paragraph-setting.controller';
-import { convertDisplayLineSpacingToStoredValue, convertLineSpacingForRuleChange, convertStoredLineSpacingToDisplayValue, getLineSpacingMetrics } from '../line-spacing';
+import {
+    convertDisplayLineSpacingToStoredValue,
+    convertLineSpacingForRuleChange,
+    convertStoredLineSpacingToDisplayValue,
+    getLineSpacingMetrics,
+} from '../line-spacing';
 
 const useDocRanges = () => {
     const docSelectionManagerService = useDependency(DocSelectionManagerService);

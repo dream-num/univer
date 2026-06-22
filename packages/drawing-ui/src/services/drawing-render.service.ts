@@ -17,8 +17,20 @@
 import type { IDrawingParam, IDrawingSearch, Workbook } from '@univerjs/core';
 import type { IDocFloatDomData, IImageData } from '@univerjs/drawing';
 import type { BaseObject, IImageProps, IRectProps, Scene } from '@univerjs/engine-render';
-import { BooleanNumber, DrawingTypeEnum, Inject, IUniverInstanceService, IURLImageService, UniverInstanceType } from '@univerjs/core';
-import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService, IImageIoService, ImageSourceType } from '@univerjs/drawing';
+import {
+    BooleanNumber,
+    DrawingTypeEnum,
+    Inject,
+    IUniverInstanceService,
+    IURLImageService,
+    UniverInstanceType,
+} from '@univerjs/core';
+import {
+    getDrawingShapeKeyByDrawingSearch,
+    IDrawingManagerService,
+    IImageIoService,
+    ImageSourceType,
+} from '@univerjs/drawing';
 import { DRAWING_OBJECT_LAYER_INDEX, Image, Rect } from '@univerjs/engine-render';
 import { IGalleryService } from '@univerjs/ui';
 import { insertGroupObject } from '../controllers/utils';

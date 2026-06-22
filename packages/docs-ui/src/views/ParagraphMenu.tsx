@@ -20,23 +20,66 @@ import type { IPopup, IValueOption, RectPopupDirection } from '@univerjs/ui';
 import type { CSSProperties } from 'react';
 import type { IMutiPageParagraphBound } from '../services/doc-event-manager.service';
 import type { IDocBlockMenuTarget } from '../services/doc-paragraph-menu.service';
-import { DataStreamTreeTokenType, DocumentBlockRangeType, ICommandService, IUniverInstanceService, JSONX, NamedStyleType, SliceBodyType, Tools, UniverInstanceType } from '@univerjs/core';
+import {
+    DataStreamTreeTokenType,
+    DocumentBlockRangeType,
+    ICommandService,
+    IUniverInstanceService,
+    JSONX,
+    NamedStyleType,
+    SliceBodyType,
+    Tools,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { clsx } from '@univerjs/design';
 import { DocContentInsertService, DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { ContextMenuPanel, IClipboardInterfaceService, IconManager, ILayoutService, RectPopup, useDependency, useObservable } from '@univerjs/ui';
+import {
+    ContextMenuPanel,
+    IClipboardInterfaceService,
+    IconManager,
+    ILayoutService,
+    RectPopup,
+    useDependency,
+    useObservable,
+} from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { BreakLineCommand } from '../commands/commands/break-line.command';
-import { DocCopyCommand, DocCopyCurrentParagraphCommand, DocCutCurrentParagraphCommand, DocPasteCommand } from '../commands/commands/clipboard.command';
+import {
+    DocCopyCommand,
+    DocCopyCurrentParagraphCommand,
+    DocCutCurrentParagraphCommand,
+    DocPasteCommand,
+} from '../commands/commands/clipboard.command';
 import { MoveDocBlockCommand } from '../commands/commands/doc-block-move.command';
 import { DeleteCurrentParagraphCommand } from '../commands/commands/doc-delete.command';
 import { HorizontalLineCommand } from '../commands/commands/doc-horizontal-line.command';
 import { DocParagraphSettingCommand } from '../commands/commands/doc-paragraph-setting.command';
-import { ResetInlineFormatTextBackgroundColorCommand, ResetInlineFormatTextColorCommand, SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand } from '../commands/commands/inline-format.command';
+import {
+    ResetInlineFormatTextBackgroundColorCommand,
+    ResetInlineFormatTextColorCommand,
+    SetInlineFormatTextBackgroundColorCommand,
+    SetInlineFormatTextColorCommand,
+} from '../commands/commands/inline-format.command';
 import { BulletListCommand, CheckListCommand, OrderListCommand } from '../commands/commands/list.command';
-import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignRightCommand } from '../commands/commands/paragraph-align.command';
-import { H1HeadingCommand, H2HeadingCommand, H3HeadingCommand, H4HeadingCommand, H5HeadingCommand, NormalTextHeadingCommand, SetParagraphNamedStyleCommand, SubtitleHeadingCommand, TitleHeadingCommand } from '../commands/commands/set-heading.command';
+import {
+    AlignCenterCommand,
+    AlignJustifyCommand,
+    AlignLeftCommand,
+    AlignRightCommand,
+} from '../commands/commands/paragraph-align.command';
+import {
+    H1HeadingCommand,
+    H2HeadingCommand,
+    H3HeadingCommand,
+    H4HeadingCommand,
+    H5HeadingCommand,
+    NormalTextHeadingCommand,
+    SetParagraphNamedStyleCommand,
+    SubtitleHeadingCommand,
+    TitleHeadingCommand,
+} from '../commands/commands/set-heading.command';
 import { DocTableDeleteTableCommand } from '../commands/commands/table/doc-table-delete.command';
 import {
     DOC_PARAGRAPH_T_DIVIDER_MENU_ID,

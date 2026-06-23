@@ -22,6 +22,13 @@ const locale: typeof enUS = {
         upload: {
             float: 'Wstaw obraz',
         },
+        shape: {
+            insert: {
+                title: 'Wstaw kształt',
+                rectangle: 'Wstaw prostokąt',
+                ellipse: 'Wstaw elipsę',
+            },
+        },
         panel: {
             title: 'Edytuj obraz',
         },

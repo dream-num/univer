@@ -22,6 +22,13 @@ const locale: typeof enUS = {
         upload: {
             float: 'إدراج صورة',
         },
+        shape: {
+            insert: {
+                title: 'إدراج شكل',
+                rectangle: 'إدراج مستطيل',
+                ellipse: 'إدراج قطع ناقص',
+            },
+        },
         panel: {
             title: 'تحرير الصورة',
         },

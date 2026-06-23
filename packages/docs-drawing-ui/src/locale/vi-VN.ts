@@ -22,6 +22,13 @@ const locale: typeof enUS = {
         upload: {
             float: 'Chèn hình ảnh',
         },
+        shape: {
+            insert: {
+                title: 'Insert Shape',
+                rectangle: 'Insert Rectangle',
+                ellipse: 'Insert Ellipse',
+            },
+        },
         panel: {
             title: 'Chỉnh sửa hình ảnh',
         },

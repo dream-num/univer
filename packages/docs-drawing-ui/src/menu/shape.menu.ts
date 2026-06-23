@@ -28,8 +28,8 @@ export function ShapeMenuFactory(accessor: IAccessor): IMenuItem {
         id: DOCS_SHAPE_MENU_ID,
         type: MenuItemType.SUBITEMS,
         icon: 'ShapeIcon',
-        title: 'Insert Shape',
-        tooltip: 'Insert Shape',
+        title: 'docs-drawing-ui.shape.insert.title',
+        tooltip: 'docs-drawing-ui.shape.insert.title',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
@@ -39,8 +39,8 @@ export function ShapeBelowMenuFactory(accessor: IAccessor): IMenuItem {
         id: DOCS_SHAPE_BELOW_MENU_ID,
         type: MenuItemType.SUBITEMS,
         icon: 'ShapeIcon',
-        title: 'Insert Shape',
-        tooltip: 'Insert Shape',
+        title: 'docs-drawing-ui.shape.insert.title',
+        tooltip: 'docs-drawing-ui.shape.insert.title',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
@@ -48,7 +48,7 @@ export function ShapeBelowMenuFactory(accessor: IAccessor): IMenuItem {
 export function InsertRectangleShapeMenuFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: InsertDocRectangleShapeCommand.id,
-        title: 'Insert Rectangle',
+        title: 'docs-drawing-ui.shape.insert.rectangle',
         type: MenuItemType.BUTTON,
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
@@ -57,7 +57,7 @@ export function InsertRectangleShapeMenuFactory(accessor: IAccessor): IMenuButto
 export function InsertEllipseShapeMenuFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: InsertDocEllipseShapeCommand.id,
-        title: 'Insert Ellipse',
+        title: 'docs-drawing-ui.shape.insert.ellipse',
         type: MenuItemType.BUTTON,
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
@@ -67,7 +67,7 @@ export function InsertRectangleShapeBelowMenuFactory(accessor: IAccessor): IMenu
     return {
         id: `${InsertDocRectangleShapeCommand.id}.below`,
         commandId: InsertDocRectangleShapeCommand.id,
-        title: 'Insert Rectangle',
+        title: 'docs-drawing-ui.shape.insert.rectangle',
         type: MenuItemType.BUTTON,
         params: {
             paragraphMenuPlacement: 'below',
@@ -80,7 +80,7 @@ export function InsertEllipseShapeBelowMenuFactory(accessor: IAccessor): IMenuBu
     return {
         id: `${InsertDocEllipseShapeCommand.id}.below`,
         commandId: InsertDocEllipseShapeCommand.id,
-        title: 'Insert Ellipse',
+        title: 'docs-drawing-ui.shape.insert.ellipse',
         type: MenuItemType.BUTTON,
         params: {
             paragraphMenuPlacement: 'below',

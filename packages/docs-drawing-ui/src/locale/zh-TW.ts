@@ -22,6 +22,13 @@ const locale: typeof enUS = {
         upload: {
             float: '插入圖片',
         },
+        shape: {
+            insert: {
+                title: 'Insert Shape',
+                rectangle: 'Insert Rectangle',
+                ellipse: 'Insert Ellipse',
+            },
+        },
         panel: {
             title: '編圖',
         },

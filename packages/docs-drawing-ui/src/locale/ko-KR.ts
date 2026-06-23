@@ -22,6 +22,13 @@ const locale: typeof enUS = {
         upload: {
             float: '이미지 삽입',
         },
+        shape: {
+            insert: {
+                title: '도형 삽입',
+                rectangle: '사각형 삽입',
+                ellipse: '타원 삽입',
+            },
+        },
         panel: {
             title: '이미지 편집',
         },

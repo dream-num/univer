@@ -17,6 +17,7 @@
 import type { DocumentDataModel, IAccessor, ITextRangeParam, Nullable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IMenuButtonItem, IMenuItem, IMenuSelectorItem } from '@univerjs/ui';
+import type { LocaleKey } from '../locale/types';
 import {
     BaselineOffset,
     BooleanNumber,
@@ -302,14 +303,14 @@ export function hideMenuWhenSelectionInBlockRange(accessor: IAccessor): Observab
     });
 }
 
-export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     const commandService = accessor.get(ICommandService);
 
     return {
         id: SetInlineFormatBoldCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'BoldIcon',
-        title: 'Set bold',
+        title: 'docs-ui.toolbar.bold',
         tooltip: 'docs-ui.toolbar.bold',
         activated$: new Observable<boolean>((subscriber) => {
             const calc = () => {
@@ -341,14 +342,14 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     };
 }
 
-export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     const commandService = accessor.get(ICommandService);
 
     return {
         id: SetInlineFormatItalicCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'ItalicIcon',
-        title: 'Set italic',
+        title: 'docs-ui.toolbar.italic',
         tooltip: 'docs-ui.toolbar.italic',
         activated$: new Observable<boolean>((subscriber) => {
             const calc = () => {
@@ -380,14 +381,14 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     };
 }
 
-export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     const commandService = accessor.get(ICommandService);
 
     return {
         id: SetInlineFormatUnderlineCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'UnderlineIcon',
-        title: 'Set underline',
+        title: 'docs-ui.toolbar.underline',
         tooltip: 'docs-ui.toolbar.underline',
         activated$: new Observable<boolean>((subscriber) => {
             const calc = () => {
@@ -419,14 +420,14 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     };
 }
 
-export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     const commandService = accessor.get(ICommandService);
 
     return {
         id: SetInlineFormatStrikethroughCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'StrikethroughIcon',
-        title: 'Set strike through',
+        title: 'docs-ui.toolbar.strikethrough',
         tooltip: 'docs-ui.toolbar.strikethrough',
         activated$: new Observable<boolean>((subscriber) => {
             const calc = () => {
@@ -458,7 +459,7 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
     };
 }
 
-export function SubscriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function SubscriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     const commandService = accessor.get(ICommandService);
 
     return {
@@ -496,7 +497,7 @@ export function SubscriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     };
 }
 
-export function SuperscriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function SuperscriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     const commandService = accessor.get(ICommandService);
 
     return {
@@ -534,7 +535,7 @@ export function SuperscriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem
     };
 }
 
-export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
+export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey, string, string> {
     const commandService = accessor.get(ICommandService);
 
     return {
@@ -589,7 +590,7 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
     };
 }
 
-export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<number> {
+export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey, number> {
     const commandService = accessor.get(ICommandService);
 
     return {
@@ -635,13 +636,13 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
     };
 }
 
-export function HeadingSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<number> {
+export function HeadingSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey, NamedStyleType> {
     const commandService = accessor.get(ICommandService);
 
     return {
         id: SetParagraphNamedStyleCommand.id,
         type: MenuItemType.SELECTOR,
-        tooltip: 'ui.toolbar.heading.tooltip',
+        tooltip: 'docs-ui.toolbar.heading.tooltip',
         label: {
             name: COMMON_LABEL_COMPONENT,
             props: {
@@ -694,32 +695,32 @@ export const FLOAT_TOOLBAR_MENU_POSITION = 'doc.menu.float-toolbar';
 const FLOAT_TEXT_STYLE_OPTIONS = [
     {
         icon: 'TextTypeIcon',
-        label: 'ui.toolbar.heading.normal',
+        label: 'docs-ui.toolbar.heading.normal',
         value: NamedStyleType.NORMAL_TEXT,
     },
     {
         icon: 'H1Icon',
-        label: 'ui.toolbar.heading.1',
+        label: 'docs-ui.toolbar.heading.1',
         value: NamedStyleType.HEADING_1,
     },
     {
         icon: 'H2Icon',
-        label: 'ui.toolbar.heading.2',
+        label: 'docs-ui.toolbar.heading.2',
         value: NamedStyleType.HEADING_2,
     },
     {
         icon: 'H3Icon',
-        label: 'ui.toolbar.heading.3',
+        label: 'docs-ui.toolbar.heading.3',
         value: NamedStyleType.HEADING_3,
     },
     {
         icon: 'H4Icon',
-        label: 'ui.toolbar.heading.4',
+        label: 'docs-ui.toolbar.heading.4',
         value: NamedStyleType.HEADING_4,
     },
     {
         icon: 'H5Icon',
-        label: 'ui.toolbar.heading.5',
+        label: 'docs-ui.toolbar.heading.5',
         value: NamedStyleType.HEADING_5,
     },
     {
@@ -760,7 +761,7 @@ function normalizeFloatingTextStyleValue(paragraph: ReturnType<typeof getParagra
     return paragraph?.paragraphStyle?.namedStyleType ?? NamedStyleType.NORMAL_TEXT;
 }
 
-export function FloatTextStyleMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string | number> {
+export function FloatTextStyleMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey, string | number> {
     const commandService = accessor.get(ICommandService);
 
     return {
@@ -768,7 +769,7 @@ export function FloatTextStyleMenuItemFactory(accessor: IAccessor): IMenuSelecto
         commandId: SetParagraphNamedStyleCommand.id,
         type: MenuItemType.SELECTOR,
         icon: 'TextTypeIcon',
-        tooltip: 'ui.toolbar.heading.tooltip',
+        tooltip: 'docs-ui.toolbar.heading.tooltip',
         selections: FLOAT_TEXT_STYLE_OPTIONS,
         value$: new Observable((subscriber) => {
             const calc = () => {
@@ -797,7 +798,7 @@ export function FloatTextStyleMenuItemFactory(accessor: IAccessor): IMenuSelecto
     };
 }
 
-export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string, string | undefined> {
+export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey, string, string | undefined> {
     const commandService = accessor.get(ICommandService);
     const themeService = accessor.get(ThemeService);
 
@@ -858,7 +859,7 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
     };
 }
 
-export function HeaderFooterMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function HeaderFooterMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: OpenHeaderFooterPanelCommand.id,
         type: MenuItemType.BUTTON,
@@ -873,7 +874,7 @@ export function HeaderFooterMenuItemFactory(accessor: IAccessor): IMenuButtonIte
 export const TableIcon = 'GridIcon';
 export const TABLE_MENU_ID = 'doc.menu.table';
 
-export function TableMenuFactory(accessor: IAccessor): IMenuItem {
+export function TableMenuFactory(accessor: IAccessor): IMenuItem<LocaleKey> {
     return {
         id: TABLE_MENU_ID,
         type: MenuItemType.SUBITEMS,
@@ -886,7 +887,7 @@ export function TableMenuFactory(accessor: IAccessor): IMenuItem {
     };
 }
 
-export function InsertTableMenuFactory(_accessor: IAccessor): IMenuButtonItem {
+export function InsertTableMenuFactory(_accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: DocCreateTableOperation.id,
         title: 'docs-ui.toolbar.table.insert',
@@ -896,7 +897,7 @@ export function InsertTableMenuFactory(_accessor: IAccessor): IMenuButtonItem {
     };
 }
 
-export function InsertDefaultTableMenuFactory(_accessor: IAccessor): IMenuButtonItem {
+export function InsertDefaultTableMenuFactory(_accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: DocCreateTableOperation.id,
         commandId: CreateDocTableCommand.id,
@@ -911,7 +912,7 @@ export function InsertDefaultTableMenuFactory(_accessor: IAccessor): IMenuButton
     };
 }
 
-export function AlignLeftMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function AlignLeftMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     const commandService = accessor.get(ICommandService);
 
     return {
@@ -945,7 +946,7 @@ export function AlignLeftMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     };
 }
 
-export function AlignCenterMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function AlignCenterMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     const commandService = accessor.get(ICommandService);
 
     return {
@@ -979,7 +980,7 @@ export function AlignCenterMenuItemFactory(accessor: IAccessor): IMenuButtonItem
     };
 }
 
-export function AlignRightMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function AlignRightMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     const commandService = accessor.get(ICommandService);
 
     return {
@@ -1013,7 +1014,7 @@ export function AlignRightMenuItemFactory(accessor: IAccessor): IMenuButtonItem 
     };
 }
 
-export function AlignJustifyMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function AlignJustifyMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     const commandService = accessor.get(ICommandService);
 
     return {
@@ -1074,7 +1075,7 @@ const HORIZONTAL_ALIGN_OPTIONS = [
     },
 ];
 
-export function AlignMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<HorizontalAlign, HorizontalAlign> {
+export function AlignMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey, HorizontalAlign, HorizontalAlign> {
     const commandService = accessor.get(ICommandService);
 
     const value$ = new Observable<HorizontalAlign>((subscriber) => {
@@ -1105,7 +1106,7 @@ export function AlignMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<Hor
     };
 }
 
-export function HorizontalLineFactory(accessor: IAccessor): IMenuButtonItem {
+export function HorizontalLineFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: HorizontalLineCommand.id,
         type: MenuItemType.BUTTON,
@@ -1158,7 +1159,7 @@ const listValueFactory$ = (accessor: IAccessor) => {
     });
 };
 
-export function OrderListMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<PresetListType, PresetListType | undefined> {
+export function OrderListMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey, PresetListType | undefined, PresetListType | undefined> {
     return {
         id: OrderListCommand.id,
         type: MenuItemType.BUTTON_SELECTOR,
@@ -1181,7 +1182,7 @@ export function OrderListMenuItemFactory(accessor: IAccessor): IMenuSelectorItem
     };
 }
 
-export function BulletListMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<PresetListType, PresetListType | undefined> {
+export function BulletListMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey, PresetListType | undefined, PresetListType | undefined> {
     return {
         id: BulletListCommand.id,
         type: MenuItemType.BUTTON_SELECTOR,
@@ -1204,7 +1205,7 @@ export function BulletListMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
     };
 }
 
-export function CheckListMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function CheckListMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: CheckListCommand.id,
         type: MenuItemType.BUTTON,
@@ -1216,7 +1217,7 @@ export function CheckListMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     };
 }
 
-export function DocSwitchModeMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function DocSwitchModeMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     const commandService = accessor.get(ICommandService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
 
@@ -1244,7 +1245,7 @@ export function DocSwitchModeMenuItemFactory(accessor: IAccessor): IMenuButtonIt
     };
 }
 
-export function ResetTextColorMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function ResetTextColorMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: ResetInlineFormatTextColorCommand.id,
         type: MenuItemType.BUTTON,
@@ -1253,7 +1254,7 @@ export function ResetTextColorMenuItemFactory(accessor: IAccessor): IMenuButtonI
     };
 }
 
-export function ResetBackgroundColorMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function ResetBackgroundColorMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: ResetInlineFormatTextBackgroundColorCommand.id,
         type: MenuItemType.BUTTON,
@@ -1262,7 +1263,7 @@ export function ResetBackgroundColorMenuItemFactory(accessor: IAccessor): IMenuB
     };
 }
 
-export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string, string | undefined> {
+export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey, string, string | undefined> {
     const commandService = accessor.get(ICommandService);
     const themeService = accessor.get(ThemeService);
 
@@ -1405,7 +1406,7 @@ export function getParagraphStyleAtCursor(accessor: IAccessor) {
     return null;
 }
 
-export function PageSettingMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function PageSettingMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: DocOpenPageSettingCommand.id,
         type: MenuItemType.BUTTON,

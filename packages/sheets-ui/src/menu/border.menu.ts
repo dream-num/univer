@@ -17,18 +17,30 @@
 import type { IAccessor } from '@univerjs/core';
 import type { IBorderInfo } from '@univerjs/sheets';
 import type { IMenuSelectorItem } from '@univerjs/ui';
+import type { LocaleKey } from '../locale/types';
 import { FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, UniverInstanceType } from '@univerjs/core';
-import { BorderStyleManagerService, RangeProtectionPermissionEditPoint, SetBorderBasicCommand, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission } from '@univerjs/sheets';
+import {
+    BorderStyleManagerService,
+    RangeProtectionPermissionEditPoint,
+    SetBorderBasicCommand,
+    WorkbookEditablePermission,
+    WorksheetEditPermission,
+    WorksheetSetCellStylePermission,
+} from '@univerjs/sheets';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { combineLatest, map, Observable, startWith } from 'rxjs';
 
 import { BORDER_LINE_CHILDREN, BORDER_PANEL_COMPONENT } from '../views/border-panel/interface';
 import { getCurrentRangeDisable$ } from './menu-util';
 
-export function CellBorderSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<IBorderInfo, IBorderInfo> {
+export function CellBorderSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey, IBorderInfo, IBorderInfo> {
     const borderStyleManagerService = accessor.get(BorderStyleManagerService);
 
-    const disabled$ = getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission], rangeTypes: [RangeProtectionPermissionEditPoint] });
+    const disabled$ = getCurrentRangeDisable$(accessor, {
+        workbookTypes: [WorkbookEditablePermission],
+        worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
+        rangeTypes: [RangeProtectionPermissionEditPoint],
+    });
 
     return {
         id: SetBorderBasicCommand.id,

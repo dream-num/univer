@@ -53,6 +53,17 @@ const locale: typeof enUS = {
             horizontalLine: 'Línea horizontal',
             headerFooter: 'Encabezado y pie de página',
             pageSetup: 'Configuración de página',
+            heading: {
+                tooltip: 'Heading',
+                normal: 'Normal text',
+                1: 'Heading 1',
+                2: 'Heading 2',
+                3: 'Heading 3',
+                4: 'Heading 4',
+                5: 'Heading 5',
+                title: 'Title',
+                subTitle: 'Subtitle',
+            },
         },
         table: {
             insert: 'Insertar',

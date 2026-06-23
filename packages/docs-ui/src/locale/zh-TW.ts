@@ -53,6 +53,17 @@ const locale: typeof enUS = {
             horizontalLine: 'Horizontal line',
             headerFooter: '頁眉頁腳',
             pageSetup: '頁面設置',
+            heading: {
+                tooltip: '標題',
+                normal: '普通文字',
+                1: '標題1',
+                2: '標題2',
+                3: '標題3',
+                4: '標題4',
+                5: '標題5',
+                title: '標題',
+                subTitle: '副標題',
+            },
         },
         table: {
             insert: '插入',

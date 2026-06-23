@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
+import type { LocaleKey } from '../../locale/types';
 import type { IMenuButtonItem } from '../../services/menu/menu';
 import { ToggleShortcutPanelOperation } from '../../commands/operations/toggle-shortcut-panel.operation';
 import { MenuItemType } from '../../services/menu/menu';
 
-export function ShortcutPanelMenuItemFactory(): IMenuButtonItem {
+export function ShortcutPanelMenuItemFactory(): IMenuButtonItem<LocaleKey> {
     return {
         id: ToggleShortcutPanelOperation.id,
         title: 'ui.toggle-shortcut-panel',

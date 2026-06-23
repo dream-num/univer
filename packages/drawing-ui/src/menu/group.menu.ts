@@ -16,13 +16,21 @@
 
 import type { IAccessor, IDrawingParam } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
+import type { LocaleKey } from '../locale/types';
 import { DrawingTypeEnum } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { MenuItemType } from '@univerjs/ui';
 import { Observable } from 'rxjs';
-import { CancelDrawingGroupOperation, DRAWING_GROUP_TYPES, SetDrawingGroupOperation } from '../commands/operations/drawing-group.operation';
+import {
+    CancelDrawingGroupOperation,
+    DRAWING_GROUP_TYPES,
+    SetDrawingGroupOperation,
+} from '../commands/operations/drawing-group.operation';
 
-const getMenuStateByDrawingFocusChangedObservable$ = (accessor: IAccessor, type?: 'group' | 'unGroup'): Observable<boolean> => {
+function getMenuStateByDrawingFocusChangedObservable$(
+    accessor: IAccessor,
+    type?: 'group' | 'unGroup'
+): Observable<boolean> {
     const drawingManagerService = accessor.get(IDrawingManagerService);
 
     return new Observable((subscriber) => {
@@ -72,7 +80,7 @@ const getMenuStateByDrawingFocusChangedObservable$ = (accessor: IAccessor, type?
 };
 
 export const DRAWING_GROUP_CONTEXT_MENU_ID = 'contextMenu.drawing-group';
-export function DrawingGroupContextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
+export function DrawingGroupContextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey> {
     return {
         id: DRAWING_GROUP_CONTEXT_MENU_ID,
         type: MenuItemType.SUBITEMS,
@@ -82,7 +90,7 @@ export function DrawingGroupContextMenuItemFactory(accessor: IAccessor): IMenuSe
     };
 }
 
-export function SetDrawingGroupMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function SetDrawingGroupMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: SetDrawingGroupOperation.id,
         type: MenuItemType.BUTTON,
@@ -92,7 +100,7 @@ export function SetDrawingGroupMenuItemFactory(accessor: IAccessor): IMenuButton
     };
 }
 
-export function CancelDrawingGroupMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function CancelDrawingGroupMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: CancelDrawingGroupOperation.id,
         type: MenuItemType.BUTTON,

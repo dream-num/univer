@@ -17,6 +17,7 @@
 import type { CellValue, Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { IUniverSheetsNumfmtConfig } from '@univerjs/sheets-numfmt';
+import type { LocaleKey } from '../locale/types';
 import { Disposable, IConfigService, Inject, isRealNum, isTextFormat, LocaleService, Tools } from '@univerjs/core';
 import { INumfmtService } from '@univerjs/sheets';
 import { SHEETS_NUMFMT_PLUGIN_CONFIG_KEY } from '@univerjs/sheets-numfmt';
@@ -94,8 +95,8 @@ export class NumfmtAlertRenderController extends Disposable implements IRenderMo
 
                     this._cellAlertManagerService.showAlert({
                         type: CellAlertType.ERROR,
-                        title: this._localeService.t('sheets-numfmt-ui.info.error'),
-                        message: this._localeService.t('sheets-numfmt-ui.info.forceStringInfo'),
+                        title: this._localeService.t<LocaleKey>('sheets-numfmt-ui.info.error'),
+                        message: this._localeService.t<LocaleKey>('sheets-numfmt-ui.info.forceStringInfo'),
                         location,
                         width: 200,
                         height: 74,

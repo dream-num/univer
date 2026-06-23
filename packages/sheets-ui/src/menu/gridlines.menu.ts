@@ -16,13 +16,26 @@
 
 import type { IAccessor, Workbook } from '@univerjs/core';
 import type { IMenuButtonItem } from '@univerjs/ui';
-import { BooleanNumber, DisposableCollection, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { SetWorksheetActiveOperation, ToggleGridlinesCommand, ToggleGridlinesMutation, WorkbookEditablePermission, WorksheetEditPermission } from '@univerjs/sheets';
+import type { LocaleKey } from '../locale/types';
+import {
+    BooleanNumber,
+    DisposableCollection,
+    ICommandService,
+    IUniverInstanceService,
+    UniverInstanceType,
+} from '@univerjs/core';
+import {
+    SetWorksheetActiveOperation,
+    ToggleGridlinesCommand,
+    ToggleGridlinesMutation,
+    WorkbookEditablePermission,
+    WorksheetEditPermission,
+} from '@univerjs/sheets';
 import { MenuItemType } from '@univerjs/ui';
 import { Observable } from 'rxjs';
 import { getCurrentRangeDisable$ } from './menu-util';
 
-export function ToggleGridlinesMenuFactory(accessor: IAccessor): IMenuButtonItem {
+export function ToggleGridlinesMenuFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     const commandService = accessor.get(ICommandService);
     const instanceService = accessor.get(IUniverInstanceService);
 

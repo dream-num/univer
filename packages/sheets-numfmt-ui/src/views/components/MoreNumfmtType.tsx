@@ -15,6 +15,7 @@
  */
 
 import type { FormatType } from '@univerjs/sheets';
+import type { LocaleKey } from '../../locale/types';
 import { ICommandService, LocaleService, Range } from '@univerjs/core';
 import { Separator } from '@univerjs/design';
 import { SheetsSelectionsService } from '@univerjs/sheets';
@@ -36,7 +37,7 @@ export const OPTIONS_KEY = 'sheets-numfmt-ui.moreNumfmtType.options';
 export function MoreNumfmtType(props: { value?: string }) {
     const { value } = props;
     const localeService = useDependency(LocaleService);
-    const text = value ?? localeService.t('sheets-numfmt-ui.general');
+    const text = value ?? localeService.t<LocaleKey>('sheets-numfmt-ui.general');
 
     return <span className="univer-text-sm">{text}</span>;
 };
@@ -106,7 +107,7 @@ export function Options() {
                         `}
                         onClick={() => handleClick(index)}
                     >
-                        <span>{localeService.t(item.label)}</span>
+                        <span>{localeService.t<LocaleKey>(item.label)}</span>
 
                         <span
                             className={`

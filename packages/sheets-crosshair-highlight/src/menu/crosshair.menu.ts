@@ -16,14 +16,18 @@
 
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuSelectorItem } from '@univerjs/ui';
+import type { LocaleKey } from '../locale/types';
 import { UniverInstanceType } from '@univerjs/core';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
-import { SetCrosshairHighlightColorOperation, ToggleCrosshairHighlightOperation } from '../commands/operations/operation';
+import {
+    SetCrosshairHighlightColorOperation,
+    ToggleCrosshairHighlightOperation,
+} from '../commands/operations/operation';
 import { SheetsCrosshairHighlightService } from '../services/crosshair.service';
 
 export const CROSSHAIR_HIGHLIGHT_OVERLAY_COMPONENT = 'CROSSHAIR_HIGHLIGHT_OVERLAY_COMPONENT';
 
-export function CrosshairHighlightMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
+export function CrosshairHighlightMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey> {
     const crosshairHighlightService = accessor.get(SheetsCrosshairHighlightService);
 
     return {

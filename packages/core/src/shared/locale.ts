@@ -24,6 +24,16 @@ export interface ILocales {
     [key: string]: ILanguagePack;
 }
 
+export type LocaleLeafKeys<T> = {
+    [K in keyof T & string]: T[K] extends string
+        ? K
+        : T[K] extends readonly unknown[]
+            ? never
+            : T[K] extends Record<string, unknown>
+                ? `${K}.${LocaleLeafKeys<T[K]>}`
+                : never;
+}[keyof T & string];
+
 // eslint-disable-next-line ts/no-explicit-any
 type MergeLocalesInput = Record<string, any>;
 

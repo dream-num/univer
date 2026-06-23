@@ -16,14 +16,18 @@
 
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuItem } from '@univerjs/ui';
+import type { LocaleKey } from '../locale/types';
 import { UniverInstanceType } from '@univerjs/core';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
-import { InsertDocEllipseShapeCommand, InsertDocRectangleShapeCommand } from '../commands/commands/insert-shape.command';
+import {
+    InsertDocEllipseShapeCommand,
+    InsertDocRectangleShapeCommand,
+} from '../commands/commands/insert-shape.command';
 
 export const DOCS_SHAPE_MENU_ID = 'doc.command.menu-insert-shape';
 export const DOCS_SHAPE_BELOW_MENU_ID = 'doc.command.menu-insert-shape.below';
 
-export function ShapeMenuFactory(accessor: IAccessor): IMenuItem {
+export function ShapeMenuFactory(accessor: IAccessor): IMenuItem<LocaleKey> {
     return {
         id: DOCS_SHAPE_MENU_ID,
         type: MenuItemType.SUBITEMS,
@@ -34,7 +38,7 @@ export function ShapeMenuFactory(accessor: IAccessor): IMenuItem {
     };
 }
 
-export function ShapeBelowMenuFactory(accessor: IAccessor): IMenuItem {
+export function ShapeBelowMenuFactory(accessor: IAccessor): IMenuItem<LocaleKey> {
     return {
         id: DOCS_SHAPE_BELOW_MENU_ID,
         type: MenuItemType.SUBITEMS,
@@ -45,7 +49,7 @@ export function ShapeBelowMenuFactory(accessor: IAccessor): IMenuItem {
     };
 }
 
-export function InsertRectangleShapeMenuFactory(accessor: IAccessor): IMenuButtonItem {
+export function InsertRectangleShapeMenuFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: InsertDocRectangleShapeCommand.id,
         title: 'docs-drawing-ui.shape.insert.rectangle',
@@ -54,7 +58,7 @@ export function InsertRectangleShapeMenuFactory(accessor: IAccessor): IMenuButto
     };
 }
 
-export function InsertEllipseShapeMenuFactory(accessor: IAccessor): IMenuButtonItem {
+export function InsertEllipseShapeMenuFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: InsertDocEllipseShapeCommand.id,
         title: 'docs-drawing-ui.shape.insert.ellipse',
@@ -63,7 +67,7 @@ export function InsertEllipseShapeMenuFactory(accessor: IAccessor): IMenuButtonI
     };
 }
 
-export function InsertRectangleShapeBelowMenuFactory(accessor: IAccessor): IMenuButtonItem {
+export function InsertRectangleShapeBelowMenuFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: `${InsertDocRectangleShapeCommand.id}.below`,
         commandId: InsertDocRectangleShapeCommand.id,
@@ -76,7 +80,7 @@ export function InsertRectangleShapeBelowMenuFactory(accessor: IAccessor): IMenu
     };
 }
 
-export function InsertEllipseShapeBelowMenuFactory(accessor: IAccessor): IMenuButtonItem {
+export function InsertEllipseShapeBelowMenuFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: `${InsertDocEllipseShapeCommand.id}.below`,
         commandId: InsertDocEllipseShapeCommand.id,

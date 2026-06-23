@@ -16,6 +16,7 @@
 
 import type { IAccessor, IDrawingParam } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
+import type { LocaleKey } from '../locale/types';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { MenuItemType } from '@univerjs/ui';
 import { Observable } from 'rxjs';
@@ -61,7 +62,7 @@ const getMenuStateByDrawingFocusChangedObservable$ = (accessor: IAccessor): Obse
 };
 
 export const DRAWING_ALIGN_CONTEXT_MENU_ID = 'contextMenu.drawing-align';
-export function DrawingAlignContextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
+export function DrawingAlignContextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey> {
     return {
         id: DRAWING_ALIGN_CONTEXT_MENU_ID,
         type: MenuItemType.SUBITEMS,
@@ -71,7 +72,7 @@ export function DrawingAlignContextMenuItemFactory(accessor: IAccessor): IMenuSe
     };
 }
 
-export function SetDrawingAlignLeftMenuItemFactory(): IMenuButtonItem {
+export function SetDrawingAlignLeftMenuItemFactory(): IMenuButtonItem<LocaleKey> {
     return {
         id: SetDrawingAlignLeftOperation.id,
         type: MenuItemType.BUTTON,
@@ -80,7 +81,7 @@ export function SetDrawingAlignLeftMenuItemFactory(): IMenuButtonItem {
     };
 }
 
-export function SetDrawingAlignCenterMenuItemFactory(): IMenuButtonItem {
+export function SetDrawingAlignCenterMenuItemFactory(): IMenuButtonItem<LocaleKey> {
     return {
         id: SetDrawingAlignCenterOperation.id,
         type: MenuItemType.BUTTON,
@@ -89,7 +90,7 @@ export function SetDrawingAlignCenterMenuItemFactory(): IMenuButtonItem {
     };
 }
 
-export function SetDrawingAlignRightMenuItemFactory(): IMenuButtonItem {
+export function SetDrawingAlignRightMenuItemFactory(): IMenuButtonItem<LocaleKey> {
     return {
         id: SetDrawingAlignRightOperation.id,
         type: MenuItemType.BUTTON,
@@ -98,7 +99,7 @@ export function SetDrawingAlignRightMenuItemFactory(): IMenuButtonItem {
     };
 }
 
-export function SetDrawingAlignTopMenuItemFactory(): IMenuButtonItem {
+export function SetDrawingAlignTopMenuItemFactory(): IMenuButtonItem<LocaleKey> {
     return {
         id: SetDrawingAlignTopOperation.id,
         type: MenuItemType.BUTTON,
@@ -107,7 +108,7 @@ export function SetDrawingAlignTopMenuItemFactory(): IMenuButtonItem {
     };
 }
 
-export function SetDrawingAlignMiddleMenuItemFactory(): IMenuButtonItem {
+export function SetDrawingAlignMiddleMenuItemFactory(): IMenuButtonItem<LocaleKey> {
     return {
         id: SetDrawingAlignMiddleOperation.id,
         type: MenuItemType.BUTTON,
@@ -116,7 +117,7 @@ export function SetDrawingAlignMiddleMenuItemFactory(): IMenuButtonItem {
     };
 }
 
-export function SetDrawingAlignBottomMenuItemFactory(): IMenuButtonItem {
+export function SetDrawingAlignBottomMenuItemFactory(): IMenuButtonItem<LocaleKey> {
     return {
         id: SetDrawingAlignBottomOperation.id,
         type: MenuItemType.BUTTON,
@@ -125,7 +126,7 @@ export function SetDrawingAlignBottomMenuItemFactory(): IMenuButtonItem {
     };
 }
 
-export function SetDrawingAlignHorizonMenuItemFactory(): IMenuButtonItem {
+export function SetDrawingAlignHorizonMenuItemFactory(): IMenuButtonItem<LocaleKey> {
     return {
         id: SetDrawingAlignHorizonOperation.id,
         type: MenuItemType.BUTTON,
@@ -134,7 +135,7 @@ export function SetDrawingAlignHorizonMenuItemFactory(): IMenuButtonItem {
     };
 }
 
-export function SetDrawingAlignVerticalMenuItemFactory(): IMenuButtonItem {
+export function SetDrawingAlignVerticalMenuItemFactory(): IMenuButtonItem<LocaleKey> {
     return {
         id: SetDrawingAlignVerticalOperation.id,
         type: MenuItemType.BUTTON,

@@ -18,14 +18,24 @@ import type { IAccessor } from '@univerjs/core';
 import type { IRectRangeWithStyle } from '@univerjs/engine-render';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import type { Subscriber } from 'rxjs';
+import type { LocaleKey } from '../locale/types';
 import { DOC_RANGE_TYPE, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { combineLatest, Observable } from 'rxjs';
 import { DocCopyCommand, DocCutCommand, DocPasteCommand } from '../commands/commands/clipboard.command';
 import { DeleteLeftCommand } from '../commands/commands/doc-delete.command';
-import { DocTableDeleteColumnsCommand, DocTableDeleteRowsCommand, DocTableDeleteTableCommand } from '../commands/commands/table/doc-table-delete.command';
-import { DocTableInsertColumnLeftCommand, DocTableInsertColumnRightCommand, DocTableInsertRowAboveCommand, DocTableInsertRowBellowCommand } from '../commands/commands/table/doc-table-insert.command';
+import {
+    DocTableDeleteColumnsCommand,
+    DocTableDeleteRowsCommand,
+    DocTableDeleteTableCommand,
+} from '../commands/commands/table/doc-table-delete.command';
+import {
+    DocTableInsertColumnLeftCommand,
+    DocTableInsertColumnRightCommand,
+    DocTableInsertRowAboveCommand,
+    DocTableInsertRowBellowCommand,
+} from '../commands/commands/table/doc-table-insert.command';
 import { DocParagraphSettingPanelOperation } from '../commands/operations/doc-paragraph-setting-panel.operation';
 
 const getDisableOnCollapsedObservable = (accessor: IAccessor) => {
@@ -96,7 +106,7 @@ const getDisableWhenSelectionNotInTableObservable = (accessor: IAccessor) => {
     });
 };
 
-export const CopyMenuFactory = (accessor: IAccessor): IMenuButtonItem => {
+export function CopyMenuFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: DocCopyCommand.name,
         commandId: DocCopyCommand.id,
@@ -108,7 +118,7 @@ export const CopyMenuFactory = (accessor: IAccessor): IMenuButtonItem => {
     };
 };
 
-export const ParagraphSettingMenuFactory = (accessor: IAccessor): IMenuButtonItem => {
+export function ParagraphSettingMenuFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: DocParagraphSettingPanelOperation.id,
         type: MenuItemType.BUTTON,
@@ -118,7 +128,7 @@ export const ParagraphSettingMenuFactory = (accessor: IAccessor): IMenuButtonIte
     };
 };
 
-export const CutMenuFactory = (accessor: IAccessor): IMenuButtonItem => {
+export function CutMenuFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: DocCutCommand.id,
         type: MenuItemType.BUTTON,
@@ -129,7 +139,7 @@ export const CutMenuFactory = (accessor: IAccessor): IMenuButtonItem => {
     };
 };
 
-export const PasteMenuFactory = (accessor: IAccessor): IMenuButtonItem => {
+export function PasteMenuFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: DocPasteCommand.id,
         type: MenuItemType.BUTTON,
@@ -139,7 +149,7 @@ export const PasteMenuFactory = (accessor: IAccessor): IMenuButtonItem => {
     };
 };
 
-export const DeleteMenuFactory = (accessor: IAccessor): IMenuButtonItem => {
+export function DeleteMenuFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: DeleteLeftCommand.id,
         type: MenuItemType.BUTTON,
@@ -151,7 +161,7 @@ export const DeleteMenuFactory = (accessor: IAccessor): IMenuButtonItem => {
 };
 
 export const TABLE_INSERT_MENU_ID = 'doc.menu.table-insert';
-export function TableInsertMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
+export function TableInsertMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey> {
     return {
         id: TABLE_INSERT_MENU_ID,
         type: MenuItemType.SUBITEMS,
@@ -163,7 +173,7 @@ export function TableInsertMenuItemFactory(accessor: IAccessor): IMenuSelectorIt
     };
 }
 
-export function InsertRowBeforeMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function InsertRowBeforeMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: DocTableInsertRowAboveCommand.id,
         type: MenuItemType.BUTTON,
@@ -174,7 +184,7 @@ export function InsertRowBeforeMenuItemFactory(accessor: IAccessor): IMenuButton
     };
 }
 
-export function InsertRowAfterMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function InsertRowAfterMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: DocTableInsertRowBellowCommand.id,
         type: MenuItemType.BUTTON,
@@ -185,7 +195,7 @@ export function InsertRowAfterMenuItemFactory(accessor: IAccessor): IMenuButtonI
     };
 }
 
-export function InsertColumnLeftMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function InsertColumnLeftMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: DocTableInsertColumnLeftCommand.id,
         type: MenuItemType.BUTTON,
@@ -196,7 +206,7 @@ export function InsertColumnLeftMenuItemFactory(accessor: IAccessor): IMenuButto
     };
 }
 
-export function InsertColumnRightMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function InsertColumnRightMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: DocTableInsertColumnRightCommand.id,
         type: MenuItemType.BUTTON,
@@ -208,7 +218,7 @@ export function InsertColumnRightMenuItemFactory(accessor: IAccessor): IMenuButt
 }
 
 export const TABLE_DELETE_MENU_ID = 'doc.menu.table-delete';
-export function TableDeleteMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
+export function TableDeleteMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey> {
     return {
         id: TABLE_DELETE_MENU_ID,
         type: MenuItemType.SUBITEMS,
@@ -220,7 +230,7 @@ export function TableDeleteMenuItemFactory(accessor: IAccessor): IMenuSelectorIt
     };
 }
 
-export function DeleteRowsMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function DeleteRowsMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: DocTableDeleteRowsCommand.id,
         type: MenuItemType.BUTTON,
@@ -231,7 +241,7 @@ export function DeleteRowsMenuItemFactory(accessor: IAccessor): IMenuButtonItem 
     };
 }
 
-export function DeleteColumnsMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function DeleteColumnsMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: DocTableDeleteColumnsCommand.id,
         type: MenuItemType.BUTTON,
@@ -242,7 +252,7 @@ export function DeleteColumnsMenuItemFactory(accessor: IAccessor): IMenuButtonIt
     };
 }
 
-export function DeleteTableMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function DeleteTableMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: DocTableDeleteTableCommand.id,
         type: MenuItemType.BUTTON,

@@ -16,6 +16,7 @@
 
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuButtonItem, IShortcutItem } from '@univerjs/ui';
+import type { LocaleKey } from '../locale/types';
 import { UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { whenDocAndEditorFocused } from '@univerjs/docs-ui';
@@ -23,7 +24,7 @@ import { getMenuHiddenObservable, KeyCode, MenuItemType, MetaKeys } from '@unive
 import { debounceTime, Observable } from 'rxjs';
 import { shouldDisableAddLink, ShowDocHyperLinkEditPopupOperation } from '../commands/operations/popup.operation';
 
-export function AddHyperLinkMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function AddHyperLinkMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: ShowDocHyperLinkEditPopupOperation.id,
         type: MenuItemType.BUTTON,

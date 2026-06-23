@@ -16,6 +16,7 @@
 
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuItem, IValueOption } from '@univerjs/ui';
+import type { LocaleKey } from '../locale/types';
 import { UniverInstanceType } from '@univerjs/core';
 import { FunctionType } from '@univerjs/engine-formula';
 import {
@@ -31,13 +32,31 @@ import { IDescriptionService } from '@univerjs/sheets-formula';
 import { getCurrentRangeDisable$, menuClipboardDisabledObservable } from '@univerjs/sheets-ui';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { combineLatestWith, map } from 'rxjs';
-import { SheetCopyFormulaOnlyCommand, SheetOnlyPasteFormulaCommand } from '../commands/commands/formula-clipboard.command';
+import {
+    SheetCopyFormulaOnlyCommand,
+    SheetOnlyPasteFormulaCommand,
+} from '../commands/commands/formula-clipboard.command';
 import { InsertFunctionOperation } from '../commands/operations/insert-function.operation';
 import { MoreFunctionsOperation } from '../commands/operations/more-functions.operation';
 
-export function InsertCommonFunctionMenuItemFactory(accessor: IAccessor): IMenuItem {
+type FunctionCategoryKey =
+    | 'financial'
+    | 'logical'
+    | 'text'
+    | 'date'
+    | 'lookup'
+    | 'math'
+    | 'statistical'
+    | 'engineering'
+    | 'information'
+    | 'database';
+
+type EnsureLocaleKey<T extends LocaleKey> = T;
+type FunctionCategoryLocaleKey = EnsureLocaleKey<`sheets-formula-ui.functionType.${FunctionCategoryKey}`>;
+
+export function InsertCommonFunctionMenuItemFactory(accessor: IAccessor): IMenuItem<LocaleKey> {
     const commonFunctions = ['SUMIF', 'SUM', 'AVERAGE', 'IF', 'COUNT', 'SIN', 'MAX'];
-    let selections: IValueOption[] = commonFunctions.map((name) => ({
+    let selections: IValueOption<LocaleKey>[] = commonFunctions.map((name) => ({
         label: {
             name,
             selectable: false,
@@ -73,9 +92,13 @@ export function InsertCommonFunctionMenuItemFactory(accessor: IAccessor): IMenuI
     };
 }
 
-function createInsertFunctionCategoryMenuItemFactory(functionType: FunctionType, categoryKey: string, icon?: string) {
-    return function insertFunctionCategoryMenuItemFactory(accessor: IAccessor): IMenuItem {
-        let selections: IValueOption[] = [];
+function createInsertFunctionCategoryMenuItemFactory(
+    functionType: FunctionType,
+    categoryKey: FunctionCategoryKey,
+    icon?: string
+) {
+    return function insertFunctionCategoryMenuItemFactory(accessor: IAccessor): IMenuItem<LocaleKey> {
+        let selections: IValueOption<LocaleKey>[] = [];
 
         try {
             const descriptionService = accessor.get(IDescriptionService);
@@ -93,7 +116,7 @@ function createInsertFunctionCategoryMenuItemFactory(functionType: FunctionType,
         return {
             id: `${InsertFunctionOperation.id}.${categoryKey}`,
             commandId: InsertFunctionOperation.id,
-            title: `sheets-formula-ui.functionType.${categoryKey}`,
+            title: `sheets-formula-ui.functionType.${categoryKey}` as FunctionCategoryLocaleKey,
             tooltip: 'sheets-formula-ui.insert.tooltip',
             icon,
             type: MenuItemType.SELECTOR,
@@ -115,7 +138,7 @@ export const InsertInformationFunctionMenuItemFactory = createInsertFunctionCate
 export const InsertDatabaseFunctionMenuItemFactory = createInsertFunctionCategoryMenuItemFactory(FunctionType.Database, 'database');
 
 // All Functions entry displayed at the bottom of category dropdowns.
-export function AllFunctionsMenuItemFactory(accessor: IAccessor): IMenuItem {
+export function AllFunctionsMenuItemFactory(accessor: IAccessor): IMenuItem<LocaleKey> {
     return {
         id: MoreFunctionsOperation.id,
         title: 'sheets-formula-ui.moreFunctions.allFunctions',
@@ -131,7 +154,7 @@ export function AllFunctionsMenuItemFactory(accessor: IAccessor): IMenuItem {
 }
 
 // Right click menu - Copy Formula Only
-export function CopyFormulaOnlyMenuItemFactory(accessor: IAccessor): IMenuItem {
+export function CopyFormulaOnlyMenuItemFactory(accessor: IAccessor): IMenuItem<LocaleKey> {
     return {
         id: SheetCopyFormulaOnlyCommand.id,
         type: MenuItemType.BUTTON,
@@ -146,7 +169,7 @@ export function CopyFormulaOnlyMenuItemFactory(accessor: IAccessor): IMenuItem {
 }
 
 // Right click menu - Paste Formula
-export function PasteFormulaMenuItemFactory(accessor: IAccessor): IMenuItem {
+export function PasteFormulaMenuItemFactory(accessor: IAccessor): IMenuItem<LocaleKey> {
     return {
         id: SheetOnlyPasteFormulaCommand.id,
         type: MenuItemType.BUTTON,

@@ -15,7 +15,8 @@
  */
 
 import type { ISelectProps } from '@univerjs/design';
-import type { FC } from 'react';
+import type { ComponentType } from 'react';
+import type { LocaleKey } from '../locale/types';
 import type { IBusinessComponentProps } from './components/interface';
 import { LocaleService } from '@univerjs/core';
 import { Button, clsx, scrollbarClassName, Select } from '@univerjs/design';
@@ -37,21 +38,25 @@ export interface ISheetNumfmtPanelProps {
     onChange: (config: { type: 'change' | 'cancel' | 'confirm'; value: string }) => void;
 }
 
-export const SheetNumfmtPanel: FC<ISheetNumfmtPanelProps> = (props) => {
+export function SheetNumfmtPanel(props: ISheetNumfmtPanelProps) {
     const { defaultValue, defaultPattern, row, col } = props.value;
     const localeService = useDependency(LocaleService);
-    const getCurrentPattern = useRef<() => string | null>(() => '');
+    const currentPatternRef = useRef<() => string | null>(() => '');
     const nextTick = useNextTick();
+
     const typeOptions = useMemo(
-        () =>
-            [
+        () => {
+            const typeOptions: Array<{ label: LocaleKey; component: ComponentType<IBusinessComponentProps> }> = [
                 { label: 'sheets-numfmt-ui.general', component: GeneralPanel },
                 { label: 'sheets-numfmt-ui.accounting', component: AccountingPanel },
                 { label: 'sheets-numfmt-ui.currency', component: CurrencyPanel },
                 { label: 'sheets-numfmt-ui.date', component: DatePanel },
                 { label: 'sheets-numfmt-ui.thousandthPercentile', component: ThousandthPercentilePanel },
                 { label: 'sheets-numfmt-ui.customFormat', component: CustomFormat },
-            ].map((item) => ({ ...item, label: localeService.t(item.label) })),
+            ];
+
+            return typeOptions.map((item) => ({ ...item, label: localeService.t<LocaleKey>(item.label) }));
+        },
         [localeService]
     );
     const [type, setType] = useState(findDefaultType);
@@ -76,7 +81,7 @@ export const SheetNumfmtPanel: FC<ISheetNumfmtPanelProps> = (props) => {
     const handleSelect: ISelectProps['onChange'] = (value) => {
         setType(value);
         // after the BusinessComponent render.
-        nextTick(() => props.onChange({ type: 'change', value: getCurrentPattern.current() || '' }));
+        nextTick(() => props.onChange({ type: 'change', value: currentPatternRef.current() || '' }));
     };
 
     const handleChange = useCallback((v: string) => {
@@ -84,11 +89,11 @@ export const SheetNumfmtPanel: FC<ISheetNumfmtPanelProps> = (props) => {
     }, []);
 
     const handleActionChange = useCallback((action: () => string | null) => {
-        getCurrentPattern.current = action;
+        currentPatternRef.current = action;
     }, []);
 
     const handleConfirm = () => {
-        const pattern = getCurrentPattern.current() || '';
+        const pattern = currentPatternRef.current() || '';
         const currency = getCurrencyType(pattern);
         if (currency) {
             mark(currency);
@@ -114,12 +119,15 @@ export const SheetNumfmtPanel: FC<ISheetNumfmtPanelProps> = (props) => {
 
     return (
         <div
-            className={clsx(`
-              univer-flex univer-h-full univer-flex-col univer-justify-between univer-overflow-y-auto univer-pb-5
-            `, scrollbarClassName)}
+            className={clsx(
+                'univer-flex univer-h-full univer-flex-col univer-justify-between univer-overflow-y-auto univer-pb-5',
+                scrollbarClassName
+            )}
         >
             <div>
-                <div className="univer-mt-3.5 univer-text-sm univer-text-gray-400">{localeService.t('sheets-numfmt-ui.numfmtType')}</div>
+                <div className="univer-mt-3.5 univer-text-sm univer-text-gray-400">
+                    {localeService.t<LocaleKey>('sheets-numfmt-ui.numfmtType')}
+                </div>
                 <div className="univer-mt-2">
                     <Select className="univer-w-full" value={type} options={selectOptions} onChange={handleSelect} />
                 </div>
@@ -134,10 +142,10 @@ export const SheetNumfmtPanel: FC<ISheetNumfmtPanelProps> = (props) => {
 
             <div className="univer-mb-5 univer-mt-3.5 univer-flex univer-justify-end">
                 <Button onClick={handleCancel} className="univer-mr-3">
-                    {localeService.t('sheets-numfmt-ui.cancel')}
+                    {localeService.t<LocaleKey>('sheets-numfmt-ui.cancel')}
                 </Button>
                 <Button variant="primary" onClick={handleConfirm}>
-                    {localeService.t('sheets-numfmt-ui.confirm')}
+                    {localeService.t<LocaleKey>('sheets-numfmt-ui.confirm')}
                 </Button>
             </div>
         </div>

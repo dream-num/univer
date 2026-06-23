@@ -16,6 +16,7 @@
 
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
+import type { LocaleKey } from '../locale/types';
 import { ICommandService, IUniverInstanceService } from '@univerjs/core';
 import {
     InsertColAfterCommand,
@@ -36,47 +37,65 @@ import {
     WorksheetInsertColumnPermission,
     WorksheetInsertRowPermission,
 } from '@univerjs/sheets';
-
 import { MenuItemType } from '@univerjs/ui';
 import { Observable } from 'rxjs';
 import { InsertRangeMoveDownConfirmCommand } from '../commands/commands/insert-range-move-down-confirm.command';
 import { InsertRangeMoveRightConfirmCommand } from '../commands/commands/insert-range-move-right-confirm.command';
 import { MENU_ITEM_INPUT_COMPONENT } from '../views/menu-item-input/index';
-import { deriveStateFromActiveSheet$, getBaseRangeMenuHidden$, getCellMenuHidden$, getCurrentRangeDisable$, getInsertAfterMenuHidden$, getInsertBeforeMenuHidden$, getObservableWithExclusiveRange$ } from './menu-util';
+import {
+    deriveStateFromActiveSheet$,
+    getBaseRangeMenuHidden$,
+    getCellMenuHidden$,
+    getCurrentRangeDisable$,
+    getInsertAfterMenuHidden$,
+    getInsertBeforeMenuHidden$,
+    getObservableWithExclusiveRange$,
+} from './menu-util';
 
 export const COL_INSERT_MENU_ID = 'sheet.menu.col-insert';
-export function ColInsertMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
+export function ColInsertMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey> {
     return {
         id: COL_INSERT_MENU_ID,
         type: MenuItemType.SUBITEMS,
         title: 'sheets-ui.rightClick.insert',
         icon: 'InsertDoubleIcon',
         hidden$: getBaseRangeMenuHidden$(accessor),
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission, WorkbookInsertColumnPermission], worksheetTypes: [WorksheetEditPermission, WorksheetInsertColumnPermission] }),
+        disabled$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission, WorkbookInsertColumnPermission],
+            worksheetTypes: [WorksheetEditPermission, WorksheetInsertColumnPermission],
+        }),
     };
 }
 
 export const ROW_INSERT_MENU_ID = 'sheet.menu.row-insert';
-export function RowInsertMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
+export function RowInsertMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey> {
     return {
         id: ROW_INSERT_MENU_ID,
         type: MenuItemType.SUBITEMS,
         title: 'sheets-ui.rightClick.insert',
         icon: 'InsertDoubleIcon',
         hidden$: getBaseRangeMenuHidden$(accessor),
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission, WorkbookInsertRowPermission], worksheetTypes: [WorksheetInsertRowPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
+        disabled$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission, WorkbookInsertRowPermission],
+            worksheetTypes: [WorksheetInsertRowPermission, WorksheetEditPermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        }),
     };
 }
 
 export const CELL_INSERT_MENU_ID = 'sheet.menu.cell-insert';
-export function CellInsertMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
+export function CellInsertMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey> {
     return {
         id: CELL_INSERT_MENU_ID,
         type: MenuItemType.SUBITEMS,
         title: 'sheets-ui.rightClick.insert',
         icon: 'InsertDoubleIcon',
         hidden$: getObservableWithExclusiveRange$(accessor, getBaseRangeMenuHidden$(accessor)),
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission, WorkbookInsertColumnPermission, WorkbookInsertRowPermission], worksheetTypes: [WorksheetInsertColumnPermission, WorksheetInsertRowPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
+        disabled$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission, WorkbookInsertColumnPermission, WorkbookInsertRowPermission],
+            worksheetTypes: [WorksheetInsertColumnPermission, WorksheetInsertRowPermission, WorksheetEditPermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        }),
     };
 }
 
@@ -85,7 +104,7 @@ export function CellInsertMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
  * @param accessor
  * @returns
  */
-export function InsertRowBeforeMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function InsertRowBeforeMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: InsertRowBeforeCommand.id,
         type: MenuItemType.BUTTON,
@@ -105,7 +124,7 @@ export function InsertRowBeforeMenuItemFactory(accessor: IAccessor): IMenuButton
  * @param accessor
  * @returns
  */
-export function InsertRowBeforeCellMenuItemFactory(accessor: IAccessor): IMenuButtonItem<number> {
+export function InsertRowBeforeCellMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey, number> {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SheetsSelectionsService);
     const commandService = accessor.get(ICommandService);
@@ -157,7 +176,7 @@ export function InsertRowBeforeCellMenuItemFactory(accessor: IAccessor): IMenuBu
     };
 }
 
-export function InsertRowAfterMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function InsertRowAfterMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: InsertRowAfterCommand.id,
         type: MenuItemType.BUTTON,
@@ -176,7 +195,7 @@ export function InsertRowAfterMenuItemFactory(accessor: IAccessor): IMenuButtonI
  * context menu when right click cell
  * @param accessor
  */
-export function InsertColLeftCellMenuItemFactory(accessor: IAccessor): IMenuButtonItem<number> {
+export function InsertColLeftCellMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey, number> {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SheetsSelectionsService);
     const commandService = accessor.get(ICommandService);
@@ -228,7 +247,7 @@ export function InsertColLeftCellMenuItemFactory(accessor: IAccessor): IMenuButt
     };
 }
 
-export function InsertColBeforeMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function InsertColBeforeMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: InsertColBeforeCommand.id,
         type: MenuItemType.BUTTON,
@@ -243,7 +262,7 @@ export function InsertColBeforeMenuItemFactory(accessor: IAccessor): IMenuButton
     };
 }
 
-export function InsertColAfterMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function InsertColAfterMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: InsertColAfterCommand.id,
         type: MenuItemType.BUTTON,
@@ -258,7 +277,7 @@ export function InsertColAfterMenuItemFactory(accessor: IAccessor): IMenuButtonI
     };
 }
 
-export function InsertRangeMoveRightMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function InsertRangeMoveRightMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: InsertRangeMoveRightConfirmCommand.id,
         type: MenuItemType.BUTTON,
@@ -277,7 +296,7 @@ export function InsertRangeMoveRightMenuItemFactory(accessor: IAccessor): IMenuB
  * For insert range in cell context menu
  * @param accessor
  */
-export function InsertRangeMoveDownMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function InsertRangeMoveDownMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: InsertRangeMoveDownConfirmCommand.id,
         type: MenuItemType.BUTTON,
@@ -296,7 +315,7 @@ export function InsertRangeMoveDownMenuItemFactory(accessor: IAccessor): IMenuBu
  * Context menu in rowheader.
  * @param accessor
  */
-export function InsertMultiRowsAfterHeaderMenuItemFactory(accessor: IAccessor): IMenuButtonItem<number> {
+export function InsertMultiRowsAfterHeaderMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey, number> {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SheetsSelectionsService);
     const commandService = accessor.get(ICommandService);
@@ -353,7 +372,7 @@ export function InsertMultiRowsAfterHeaderMenuItemFactory(accessor: IAccessor): 
  * Context menu in rowheader.
  * @param accessor
  */
-export function InsertMultiRowsAboveHeaderMenuItemFactory(accessor: IAccessor): IMenuButtonItem<number> {
+export function InsertMultiRowsAboveHeaderMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey, number> {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SheetsSelectionsService);
     const commandService = accessor.get(ICommandService);
@@ -409,7 +428,7 @@ export function InsertMultiRowsAboveHeaderMenuItemFactory(accessor: IAccessor): 
  * Context menu in rowheader.
  * @param accessor
  */
-export function InsertMultiColsLeftHeaderMenuItemFactory(accessor: IAccessor): IMenuButtonItem<number> {
+export function InsertMultiColsLeftHeaderMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey, number> {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SheetsSelectionsService);
     const commandService = accessor.get(ICommandService);
@@ -465,7 +484,7 @@ export function InsertMultiColsLeftHeaderMenuItemFactory(accessor: IAccessor): I
  * Context menu in rowheader.
  * @param accessor
  */
-export function InsertMultiColsRightHeaderMenuItemFactory(accessor: IAccessor): IMenuButtonItem<number> {
+export function InsertMultiColsRightHeaderMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey, number> {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SheetsSelectionsService);
     const commandService = accessor.get(ICommandService);

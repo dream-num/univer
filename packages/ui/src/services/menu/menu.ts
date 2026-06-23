@@ -30,7 +30,14 @@ export enum MenuItemType {
     SUBITEMS,
 }
 
-interface IMenuItemBase<V> {
+type MenuLabel = string | {
+    name: string;
+    hoverable?: boolean;
+    selectable?: boolean;
+    props?: Record<string, any>;
+};
+
+interface IMenuItemBase<TLocaleKey extends string, TValue> {
     /** ID of the menu item. Normally it should be the same as the ID of the command that it would invoke.  */
     id: string;
 
@@ -41,53 +48,39 @@ interface IMenuItemBase<V> {
     commandId?: string;
 
     subId?: string;
-    title?: string;
+    title?: TLocaleKey;
     description?: string;
     icon?: string | Observable<string>;
-    tooltip?: string;
+    tooltip?: TLocaleKey;
     slot?: boolean;
     type: MenuItemType;
     /**
      * Custom label component id.
      */
-    label?:
-    | string
-    | {
-        name: string;
-        hoverable?: boolean;
-        selectable?: boolean;
-        props?: Record<string, any>;
-    }; // custom component, send to CustomLabel label property
+    label?: MenuLabel; // custom component, send to CustomLabel label property
 
     hidden$?: Observable<boolean>;
     disabled$?: Observable<boolean>;
     params?: any | Function;
     /** On observable value that should emit the value of the corresponding selection component. */
-    value$?: Observable<V>;
+    value$?: Observable<TValue>;
 }
 
-export interface IMenuButtonItem<V = undefined> extends IMenuItemBase<V> {
+export interface IMenuButtonItem<TLocaleKey extends string = string, TValue = undefined> extends IMenuItemBase<TLocaleKey, TValue> {
     type: MenuItemType.BUTTON;
 
     activated$?: Observable<boolean>;
 }
 
-export interface IValueOption<T = undefined> {
+export interface IValueOption<TLocaleKey extends string = string, TValue = undefined> {
     id?: string;
     value?: string | number;
-    value$?: Observable<T>;
+    value$?: Observable<TValue>;
     params?: any;
     slot?: boolean;
-    label?:
-    | string
-    | {
-        name: string;
-        hoverable?: boolean;
-        selectable?: boolean;
-        props?: Record<string, string | number | Array<{ [x: string | number]: string }>>;
-    }; // custom component, send to CustomLabel label property
+    label?: MenuLabel; // custom component, send to CustomLabel label property
     icon?: string;
-    tooltip?: string;
+    tooltip?: TLocaleKey;
     style?: object;
     disabled?: boolean;
     commandId?: string;
@@ -98,7 +91,11 @@ export interface ICustomComponentProps<T> {
     onChange: (v: T) => void;
 }
 
-export interface IMenuSelectorItem<V = MenuItemDefaultValueType, T = undefined> extends IMenuItemBase<V> {
+export interface IMenuSelectorItem<
+    TLocaleKey extends string = string,
+    TValue = MenuItemDefaultValueType,
+    TOptionValue = undefined
+> extends IMenuItemBase<TLocaleKey, TValue> {
     type: MenuItemType.SELECTOR | MenuItemType.BUTTON_SELECTOR | MenuItemType.SUBITEMS;
 
     /**
@@ -113,32 +110,38 @@ export interface IMenuSelectorItem<V = MenuItemDefaultValueType, T = undefined> 
     // One is a special component, such as color picker, after selection directly use its value to trigger command
     // One is another menu's id, directly rendered as another menu
     /** Options or IDs of registered components. */
-    selections?: Array<IValueOption<T>> | Observable<Array<IValueOption<T>>>;
+    selections?: Array<IValueOption<TLocaleKey, TOptionValue>> | Observable<Array<IValueOption<TLocaleKey, TOptionValue>>>;
 
     /** If `type` is `MenuItemType.BUTTON_SELECTOR`, this determines if the button is activated. */
     activated$?: Observable<boolean>;
 }
 
-export function isMenuSelectorItem<T extends MenuItemDefaultValueType>(v: IMenuItem): v is IMenuSelectorItem<T> {
+export type MenuItemDefaultValueType = string | number | undefined;
+
+export type IMenuItem<TLocaleKey extends string = string> =
+    | IMenuButtonItem<TLocaleKey, MenuItemDefaultValueType>
+    | IMenuSelectorItem<TLocaleKey, MenuItemDefaultValueType, any>;
+
+export function isMenuSelectorItem<T extends MenuItemDefaultValueType, TLocaleKey extends string = string>(
+    v: IMenuItem<TLocaleKey>
+): v is IMenuSelectorItem<TLocaleKey, T, any> {
     return v.type === MenuItemType.SELECTOR || v.type === MenuItemType.SUBITEMS;
 }
 
-export function isMenuButtonSelectorItem<T extends MenuItemDefaultValueType>(v: IMenuItem): v is IMenuSelectorItem<T> {
+export function isMenuButtonSelectorItem<T extends MenuItemDefaultValueType, TLocaleKey extends string = string>(
+    v: IMenuItem<TLocaleKey>
+): v is IMenuSelectorItem<TLocaleKey, T, any> {
     return v.type === MenuItemType.BUTTON_SELECTOR;
 }
 
-export type MenuItemDefaultValueType = string | number | undefined;
-
-export type IMenuItem = IMenuButtonItem<MenuItemDefaultValueType> | IMenuSelectorItem<MenuItemDefaultValueType, any>;
-
-export type IDisplayMenuItem<T extends IMenuItem> = T & {
+export type IDisplayMenuItem<T extends IMenuItem = IMenuItem> = T & {
     shortcut?: string;
 };
 
-export type MenuItemConfig = Partial<Omit<IMenuItem, 'id' | 'subId' | 'value$' | 'hidden$' | 'disabled$' | 'activated$' | 'icon$'> & {
+export type MenuItemConfig<TLocaleKey extends string = string> = Partial<Omit<IMenuItem<TLocaleKey>, 'id' | 'subId' | 'value$' | 'hidden$' | 'disabled$' | 'activated$' | 'icon$'> & {
     hidden?: boolean;
     disabled?: boolean;
     activated?: boolean;
 }>;
-export type MenuConfig = Record<string, MenuItemConfig>;
-export type IMenuItemFactory = (accessor: IAccessor, menuConfig?: MenuConfig) => IMenuItem;
+export type MenuConfig<TLocaleKey extends string = string> = Record<string, MenuItemConfig<TLocaleKey>>;
+export type IMenuItemFactory<TLocaleKey extends string = string> = (accessor: IAccessor, menuConfig?: MenuConfig<TLocaleKey>) => IMenuItem<TLocaleKey>;

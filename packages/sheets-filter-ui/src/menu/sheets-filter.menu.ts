@@ -16,6 +16,7 @@
 
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
+import type { LocaleKey } from '../locale/types';
 import { UniverInstanceType } from '@univerjs/core';
 import {
     RangeProtectionPermissionViewPoint,
@@ -32,7 +33,7 @@ import { getCurrentRangeDisable$, getObservableWithExclusiveRange$ } from '@univ
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { map, of, switchMap } from 'rxjs';
 
-export function SmartToggleFilterMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+export function SmartToggleFilterMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey> {
     const sheetsFilterService = accessor.get(SheetsFilterService);
 
     return {
@@ -55,7 +56,7 @@ export function SmartToggleFilterMenuItemFactory(accessor: IAccessor): IMenuSele
     };
 }
 
-export function ClearFilterCriteriaMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function ClearFilterCriteriaMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     const sheetsFilterService = accessor.get(SheetsFilterService);
 
     return {
@@ -63,11 +64,13 @@ export function ClearFilterCriteriaMenuItemFactory(accessor: IAccessor): IMenuBu
         type: MenuItemType.BUTTON,
         title: 'sheets-filter-ui.toolbar.clear-filter-criteria',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
-        disabled$: sheetsFilterService.activeFilterModel$.pipe(switchMap((model) => model?.hasCriteria$.pipe(map((m) => !m)) ?? of(true))),
+        disabled$: sheetsFilterService
+            .activeFilterModel$
+            .pipe(switchMap((model) => model?.hasCriteria$.pipe(map((m) => !m)) ?? of(true))),
     };
 }
 
-export function ReCalcFilterMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function ReCalcFilterMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     const sheetsFilterService = accessor.get(SheetsFilterService);
 
     return {
@@ -75,6 +78,8 @@ export function ReCalcFilterMenuItemFactory(accessor: IAccessor): IMenuButtonIte
         type: MenuItemType.BUTTON,
         title: 'sheets-filter-ui.toolbar.re-calc-filter-conditions',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
-        disabled$: sheetsFilterService.activeFilterModel$.pipe(switchMap((model) => model?.hasCriteria$.pipe(map((m) => !m)) ?? of(true))),
+        disabled$: sheetsFilterService
+            .activeFilterModel$
+            .pipe(switchMap((model) => model?.hasCriteria$.pipe(map((m) => !m)) ?? of(true))),
     };
 }

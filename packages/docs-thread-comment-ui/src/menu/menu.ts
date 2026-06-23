@@ -16,12 +16,16 @@
 
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuButtonItem } from '@univerjs/ui';
+import type { LocaleKey } from '../locale/types';
 import { IUniverInstanceService, SHEET_EDITOR_UNITS, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService, withCurrentTypeOfRenderer } from '@univerjs/engine-render';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { debounceTime, Observable } from 'rxjs';
-import { StartAddCommentOperation, ToggleCommentPanelOperation } from '../commands/operations/show-comment-panel.operation';
+import {
+    StartAddCommentOperation,
+    ToggleCommentPanelOperation,
+} from '../commands/operations/show-comment-panel.operation';
 
 export const shouldDisableAddComment = (accessor: IAccessor) => {
     const renderManagerService = accessor.get(IRenderManagerService);
@@ -47,7 +51,7 @@ export const shouldDisableAddComment = (accessor: IAccessor) => {
     return false;
 };
 
-export function AddDocCommentMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function AddDocCommentMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: StartAddCommentOperation.id,
         type: MenuItemType.BUTTON,
@@ -68,7 +72,7 @@ export function AddDocCommentMenuItemFactory(accessor: IAccessor): IMenuButtonIt
     };
 }
 
-export function ToolbarDocCommentMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function ToolbarDocCommentMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: ToggleCommentPanelOperation.id,
         type: MenuItemType.BUTTON,

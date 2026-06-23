@@ -51,6 +51,17 @@ const locale = {
             horizontalLine: 'Horizontal line',
             headerFooter: 'Header & Footer',
             pageSetup: 'Page Setup',
+            heading: {
+                tooltip: 'Heading',
+                normal: 'Normal text',
+                1: 'Heading 1',
+                2: 'Heading 2',
+                3: 'Heading 3',
+                4: 'Heading 4',
+                5: 'Heading 5',
+                title: 'Title',
+                subTitle: 'Subtitle',
+            },
         },
         table: {
             insert: 'Insert',

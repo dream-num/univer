@@ -15,7 +15,8 @@
  */
 
 import type { IAccessor, Workbook } from '@univerjs/core';
-import type { IMenuSelectorItem } from '@univerjs/ui';
+import type { IMenuSelectorItem, IValueOption } from '@univerjs/ui';
+import type { LocaleKey } from '../locale/types';
 import { ICommandService, IUniverInstanceService, Rectangle, UniverInstanceType } from '@univerjs/core';
 import {
     checkRangesEditablePermission,
@@ -50,7 +51,7 @@ const commandList = [
     MoveConditionalRuleMutation.id,
 ];
 
-const commonSelections = [
+const commonSelections: IValueOption<LocaleKey>[] = [
     {
         label: {
             name: 'sheets-conditional-formatting-ui.ruleType.highlightCell',
@@ -125,7 +126,7 @@ const commonSelections = [
 ];
 
 // eslint-disable-next-line max-lines-per-function
-export const FactoryManageConditionalFormattingRule = (accessor: IAccessor): IMenuSelectorItem => {
+export function FactoryManageConditionalFormattingRule(accessor: IAccessor): IMenuSelectorItem<LocaleKey> {
     const selectionManagerService = accessor.get(SheetsSelectionsService);
     const commandService = accessor.get(ICommandService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -137,7 +138,9 @@ export const FactoryManageConditionalFormattingRule = (accessor: IAccessor): IMe
         new Observable<null>((commandSubscribe) => {
             const disposable = commandService.onCommandExecuted((commandInfo) => {
                 const { id, params } = commandInfo;
-                const unitId = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getUnitId();
+                const unitId = univerInstanceService
+                    .getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)
+                    ?.getUnitId();
                 if (commandList.includes(id) && (params as { unitId: string }).unitId === unitId) {
                     commandSubscribe.next(null);
                 }
@@ -186,7 +189,7 @@ export const FactoryManageConditionalFormattingRule = (accessor: IAccessor): IMe
             subscriber.next(hasPermission);
         })
     );
-    const selections$ = new Observable((subscriber) => {
+    const selections$ = new Observable<IValueOption<LocaleKey>[]>((subscriber) => {
         clearRangeEnable$.subscribe((v) => {
             const item = commonSelections.find((item) => item.value === CF_MENU_OPERATION.clearRangeRules);
             if (item) {
@@ -210,6 +213,10 @@ export const FactoryManageConditionalFormattingRule = (accessor: IAccessor): IMe
         tooltip: 'sheets-conditional-formatting-ui.title',
         selections: selections$,
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetSetCellStylePermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
-    } as IMenuSelectorItem;
+        disabled$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetSetCellStylePermission, WorksheetEditPermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        }),
+    };
 };

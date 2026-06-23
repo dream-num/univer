@@ -53,6 +53,17 @@ const locale: typeof enUS = {
             horizontalLine: '水平分割线',
             headerFooter: '页眉页脚',
             pageSetup: '页面设置',
+            heading: {
+                tooltip: '标题',
+                normal: '普通文本',
+                1: '标题1',
+                2: '标题2',
+                3: '标题3',
+                4: '标题4',
+                5: '标题5',
+                title: '标题',
+                subTitle: '副标题',
+            },
         },
         table: {
             insert: '插入',

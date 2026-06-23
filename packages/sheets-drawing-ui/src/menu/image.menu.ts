@@ -16,39 +16,48 @@
 
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuItem } from '@univerjs/ui';
+import type { LocaleKey } from '../locale/types';
 import { UniverInstanceType } from '@univerjs/core';
-import { RangeProtectionPermissionEditPoint, WorkbookEditablePermission, WorksheetEditPermission } from '@univerjs/sheets';
+import {
+    RangeProtectionPermissionEditPoint,
+    WorkbookEditablePermission,
+    WorksheetEditPermission,
+} from '@univerjs/sheets';
 import { getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { InsertCellImageCommand, InsertFloatImageCommand } from '../commands/commands/insert-image.command';
 
 export const SHEETS_IMAGE_MENU_ID = 'sheet.menu.image';
 
-export function ImageMenuFactory(accessor: IAccessor): IMenuItem {
+export function ImageMenuFactory(accessor: IAccessor): IMenuItem<LocaleKey> {
     return {
         id: SHEETS_IMAGE_MENU_ID,
         type: MenuItemType.SUBITEMS,
         icon: 'AddImageIcon',
         tooltip: 'sheets-drawing-ui.title',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
+        disabled$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetEditPermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        }),
     };
 }
 
-export function UploadFloatImageMenuFactory(_accessor: IAccessor): IMenuItem {
+export function UploadFloatImageMenuFactory(accessor: IAccessor): IMenuItem<LocaleKey> {
     return {
         id: InsertFloatImageCommand.id,
         title: 'sheets-drawing-ui.upload.float',
         type: MenuItemType.BUTTON,
-        hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_SHEET),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
 
-export function UploadCellImageMenuFactory(_accessor: IAccessor): IMenuItem {
+export function UploadCellImageMenuFactory(accessor: IAccessor): IMenuItem<LocaleKey> {
     return {
         id: InsertCellImageCommand.id,
         title: 'sheets-drawing-ui.upload.cell',
         type: MenuItemType.BUTTON,
-        hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_SHEET),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }

@@ -16,6 +16,7 @@
 
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuItem } from '@univerjs/ui';
+import type { LocaleKey } from '../locale/types';
 import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
@@ -60,7 +61,7 @@ const getDisableWhenSelectionInTableObservable = (accessor: IAccessor) => {
     });
 };
 
-export function ImageMenuFactory(accessor: IAccessor): IMenuItem {
+export function ImageMenuFactory(accessor: IAccessor): IMenuItem<LocaleKey> {
     return {
         id: DOCS_IMAGE_MENU_ID,
         type: MenuItemType.SUBITEMS,
@@ -71,17 +72,17 @@ export function ImageMenuFactory(accessor: IAccessor): IMenuItem {
     };
 }
 
-export function UploadFloatImageMenuFactory(_accessor: IAccessor): IMenuItem {
+export function UploadFloatImageMenuFactory(accessor: IAccessor): IMenuItem<LocaleKey> {
     return {
         id: IMAGE_MENU_UPLOAD_FLOAT_ID,
         title: 'docs-drawing-ui.upload.float',
         type: MenuItemType.BUTTON,
         icon: 'AddImageIcon',
-        hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_DOC),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
 
-export function UploadFloatImageBelowMenuFactory(_accessor: IAccessor): IMenuItem {
+export function UploadFloatImageBelowMenuFactory(accessor: IAccessor): IMenuItem<LocaleKey> {
     return {
         id: `${IMAGE_MENU_UPLOAD_FLOAT_ID}.below`,
         commandId: IMAGE_MENU_UPLOAD_FLOAT_ID,
@@ -91,6 +92,6 @@ export function UploadFloatImageBelowMenuFactory(_accessor: IAccessor): IMenuIte
         params: {
             paragraphMenuPlacement: 'below',
         },
-        hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_DOC),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }

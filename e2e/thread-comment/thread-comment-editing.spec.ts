@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 import { generateSnapshotName } from '../visual-comparison/const';
 
@@ -81,18 +81,38 @@ async function clickThreadMoreMenu(page: Page, commentText: string) {
     return card;
 }
 
+async function maskDynamicCommentCardHeader(card: Locator) {
+    await card.evaluate((element) => {
+        if (element.querySelector('[data-e2e-comment-card-header-mask]')) {
+            return;
+        }
+
+        const mask = document.createElement('div');
+        mask.dataset.e2eCommentCardHeaderMask = 'true';
+        Object.assign(mask.style, {
+            position: 'absolute',
+            top: '0',
+            left: '0',
+            right: '0',
+            height: '44px',
+            background: '#ff00ff',
+            pointerEvents: 'none',
+            zIndex: '2147483647',
+        });
+        element.append(mask);
+    });
+}
+
 async function editCommentFromThread(page: Page, originalText: string, updatedText: string, locale: 'zh' | 'en', snapshotName?: string) {
     const card = await clickThreadMoreMenu(page, originalText);
     await page.getByText(locale === 'zh' ? '编辑' : 'Edit', { exact: true }).last().click();
 
     await expectCommentEditorText(page, originalText);
     if (snapshotName) {
+        await maskDynamicCommentCardHeader(card);
         await expect(card).toHaveScreenshot(generateSnapshotName(snapshotName), {
             maxDiffPixels: 100,
-            mask: [
-                card.locator(':scope > div').first(),
-                card.locator('time'),
-            ],
+            mask: [card.locator('time')],
         });
     }
 

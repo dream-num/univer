@@ -123,9 +123,7 @@ export async function buildPresetPackage(options: IPresetBuildOptions = {}) {
     }
 
     await buildPresetStyles({
-        baseConfig,
         packageDir,
         packageJson,
-        plugins,
     });
 }

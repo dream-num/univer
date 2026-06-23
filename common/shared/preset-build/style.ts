@@ -1,93 +1,58 @@
-import type { UserConfig } from 'tsdown';
 import type { IPresetPackageJson } from './types.ts';
-import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { defineConfig, build as tsdownBuild } from 'tsdown';
-import { createOutputAliasPlugin } from '../tsdown/plugins/output-alias.ts';
-
-const PRESET_STYLE_TEMP_DIR = '.preset-build';
-const PRESET_STYLE_OUTPUT_DIR = 'lib/.preset-style';
 
 function getDependencyDir(packageDir: string, dependencyName: string) {
     return path.join(packageDir, 'node_modules', dependencyName);
 }
 
-function getStyleDependencyNames(packageDir: string, packageJson: IPresetPackageJson) {
+function getBuiltStyleDependencyCssFiles(packageDir: string, packageJson: IPresetPackageJson) {
     return Object.keys(packageJson.dependencies ?? {})
-        .filter((dependencyName) => {
+        .flatMap((dependencyName) => {
             if (!dependencyName.startsWith('@univerjs')) {
-                return false;
+                return [];
             }
 
-            return existsSync(path.join(getDependencyDir(packageDir, dependencyName), 'src/global.css'));
-        })
-        .sort((left, right) => left.localeCompare(right));
+            const dependencyDir = getDependencyDir(packageDir, dependencyName);
+            const sourceGlobalCss = path.join(dependencyDir, 'src/global.css');
+            const builtCss = path.join(dependencyDir, 'lib/index.css');
+
+            if (!existsSync(sourceGlobalCss)) {
+                return [];
+            }
+
+            if (!existsSync(builtCss)) {
+                throw new Error(`Missing built CSS for ${dependencyName}. Build dependency packages before building preset CSS.`);
+            }
+
+            return [builtCss];
+        });
 }
 
-function normalizePath(filePath: string) {
-    return filePath.split(path.sep).join('/');
-}
+function writePresetCss(packageDir: string, cssFiles: string[]) {
+    const outputFile = path.join(packageDir, 'lib/index.css');
 
-function writeStyleEntry(packageDir: string, dependencyNames: string[]) {
-    const tempDir = path.join(packageDir, PRESET_STYLE_TEMP_DIR);
-    const entryFile = path.join(tempDir, 'style.ts');
+    mkdirSync(path.dirname(outputFile), { recursive: true });
 
-    mkdirSync(tempDir, { recursive: true });
-
-    const content = dependencyNames
-        .map((dependencyName) => {
-            const dependencyCss = normalizePath(path.join(getDependencyDir(packageDir, dependencyName), 'src/global.css'));
-            return `import ${JSON.stringify(dependencyCss)};`;
-        })
+    const content = cssFiles
+        .map((cssFile) => readFileSync(cssFile, 'utf8').trimEnd())
+        .filter(Boolean)
         .join('\n');
 
-    writeFileSync(entryFile, `${content}\n`);
-
-    return entryFile;
-}
-
-function cleanup(packageDir: string) {
-    rmSync(path.join(packageDir, PRESET_STYLE_TEMP_DIR), { force: true, recursive: true });
-    rmSync(path.join(packageDir, PRESET_STYLE_OUTPUT_DIR), { force: true, recursive: true });
+    writeFileSync(outputFile, `${content}\n`);
 }
 
 export async function buildPresetStyles(options: {
-    baseConfig: Partial<UserConfig>;
     packageDir: string;
     packageJson: IPresetPackageJson;
-    plugins: any[];
 }) {
-    const { baseConfig, packageDir, packageJson, plugins } = options;
-    const dependencyNames = getStyleDependencyNames(packageDir, packageJson);
+    const { packageDir, packageJson } = options;
+    const cssFiles = getBuiltStyleDependencyCssFiles(packageDir, packageJson);
 
-    if (dependencyNames.length === 0) {
+    if (cssFiles.length === 0) {
         rmSync(path.join(packageDir, 'lib/index.css'), { force: true });
         return;
     }
 
-    const entryFile = writeStyleEntry(packageDir, dependencyNames);
-
-    try {
-        await tsdownBuild(defineConfig({
-            ...baseConfig,
-            dts: false,
-            entry: { index: entryFile },
-            format: 'esm',
-            outDir: PRESET_STYLE_OUTPUT_DIR,
-            outputOptions: {
-                entryFileNames: '[name].js',
-                minify: true,
-            },
-            plugins: [
-                ...plugins,
-                createOutputAliasPlugin({
-                    copyToRoot: false,
-                    keepRootIndexCss: true,
-                    packageDir,
-                }),
-            ],
-        }));
-    } finally {
-        cleanup(packageDir);
-    }
+    writePresetCss(packageDir, cssFiles);
 }

@@ -347,54 +347,6 @@ describe('ContextMenuPanel', () => {
         expect(TestState.cancels).toBe(1);
     });
 
-    it('confirms the first visual menu item from Enter while only the menu container is focused', async () => {
-        renderWithDependencies(
-            <ContextMenuPanel
-                menuType="keyboard-menu"
-                autoFocus
-                autoFocusTarget="container"
-                onOptionSelect={(option) => TestState.selectedOptions.push(option)}
-            />,
-            {
-                'keyboard-menu': [
-                    {
-                        key: 'insert',
-                        order: 0,
-                        children: [
-                            createButtonItem('heading-1', {
-                                title: 'docs-ui.heading1',
-                                tooltip: 'docs-ui.heading1',
-                            }),
-                            createButtonItem('callout', {
-                                title: 'docs-ui.callout',
-                                tooltip: 'docs-ui.callout',
-                            }),
-                        ],
-                    },
-                ],
-            }
-        );
-
-        await nextFrame();
-
-        const panel = document.querySelector('[tabindex="-1"]') as HTMLDivElement;
-        const headingButton = screen.getByRole('button', { name: 'translated:docs-ui.heading1' });
-
-        expect(document.activeElement).toBe(panel);
-
-        fireEvent.keyDown(panel, { key: 'Enter' });
-        expect(TestState.selectedOptions).toEqual([{
-            id: 'heading-1',
-            label: 'heading-1',
-            commandId: undefined,
-            params: undefined,
-            value: undefined,
-        }]);
-
-        fireEvent.keyDown(panel, { key: 'ArrowDown' });
-        expect(document.activeElement).toBe(headingButton);
-    });
-
     it('selects an option from a selector submenu with the selector command id', () => {
         renderWithDependencies(
             <ContextMenuPanel

@@ -1,5 +1,6 @@
 import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
+import { generateSnapshotName } from '../visual-comparison/const';
 
 test.use({ viewport: { width: 1400, height: 900 } });
 
@@ -54,22 +55,39 @@ async function expectCommentEditorText(page: Page, text: string) {
     await expect.poll(() => getCommentEditorText(page), { timeout: 5_000 }).toBe(text);
 }
 
-async function clickThreadMoreMenu(page: Page, commentText: string) {
-    await page.evaluate((text) => {
-        const textElement = [...document.querySelectorAll<HTMLElement>('*')]
-            .find((element) => element.textContent?.trim() === text);
-        const commentItem = textElement?.closest<HTMLElement>('.univer-relative.univer-mb-3');
-        const moreButton = [...(commentItem?.querySelectorAll<HTMLElement>('[class*="univer-cursor-pointer"]') ?? [])].at(-1);
+async function getThreadCommentCardId(page: Page, commentText: string) {
+    const id = await page.evaluate((text) => {
+        const commentCard = [...document.querySelectorAll<HTMLElement>('[id^="PANEL-"]')]
+            .find((element) => element.textContent?.includes(text));
 
-        moreButton?.click();
+        return commentCard?.id ?? null;
     }, commentText);
+
+    expect(id).not.toBeNull();
+
+    return id!;
 }
 
-async function editCommentFromThread(page: Page, originalText: string, updatedText: string, locale: 'zh' | 'en') {
-    await clickThreadMoreMenu(page, originalText);
+async function clickThreadMoreMenu(page: Page, commentText: string) {
+    const cardId = await getThreadCommentCardId(page, commentText);
+    const card = page.locator(`[id="${cardId}"]`);
+
+    await card.locator('[class*="univer-cursor-pointer"]').last().click();
+
+    return card;
+}
+
+async function editCommentFromThread(page: Page, originalText: string, updatedText: string, locale: 'zh' | 'en', snapshotName?: string) {
+    const card = await clickThreadMoreMenu(page, originalText);
     await page.getByText(locale === 'zh' ? '编辑' : 'Edit', { exact: true }).last().click();
 
     await expectCommentEditorText(page, originalText);
+    if (snapshotName) {
+        await expect(card).toHaveScreenshot(generateSnapshotName(snapshotName), {
+            maxDiffPixels: 100,
+            mask: [card.locator('time')],
+        });
+    }
 
     await page.keyboard.type(' updated');
     await expectCommentEditorText(page, updatedText);
@@ -100,7 +118,7 @@ test('docs comment keeps content visible while editing, saves, and edits again',
     await page.getByRole('button', { name: '回复' }).last().click();
     await expect(page.getByText(DOC_INITIAL_COMMENT)).toBeVisible({ timeout: 5_000 });
 
-    await editCommentFromThread(page, DOC_INITIAL_COMMENT, DOC_UPDATED_COMMENT, 'zh');
+    await editCommentFromThread(page, DOC_INITIAL_COMMENT, DOC_UPDATED_COMMENT, 'zh', 'doc-comment-editing');
 
     expect(errors).toEqual([]);
 });
@@ -121,7 +139,7 @@ test('sheets comment keeps content visible while editing, saves, and edits again
     }, SHEET_INITIAL_COMMENT);
 
     await expect(page.getByText(SHEET_INITIAL_COMMENT)).toBeVisible({ timeout: 5_000 });
-    await editCommentFromThread(page, SHEET_INITIAL_COMMENT, SHEET_UPDATED_COMMENT, 'en');
+    await editCommentFromThread(page, SHEET_INITIAL_COMMENT, SHEET_UPDATED_COMMENT, 'en', 'sheet-comment-editing');
 
     expect(errors).toEqual([]);
 });

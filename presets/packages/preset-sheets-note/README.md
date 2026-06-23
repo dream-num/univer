@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package                        | UMD global               | CSS | Locales | Facade entry |
-| ------------------------------ | ------------------------ | :-: | :-----: | :----------: |
-| `@univerjs/preset-sheets-note` | `UniverSheetsNotePreset` | Yes |   Yes   |     Yes      |
+| Package                        | CSS | Locales | Facade entry |
+| ------------------------------ | :-: | :-----: | :----------: |
+| `@univerjs/preset-sheets-note` | Yes |   Yes   |     Yes      |
 
 ## Installation
 

@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package                                | UMD global                      | CSS | Locales | Facade entry |
-| -------------------------------------- | ------------------------------- | :-: | :-----: | :----------: |
-| `@univerjs/preset-sheets-find-replace` | `UniverSheetsFindReplacePreset` | Yes |   Yes   |     Yes      |
+| Package                                | CSS | Locales | Facade entry |
+| -------------------------------------- | :-: | :-----: | :----------: |
+| `@univerjs/preset-sheets-find-replace` | Yes |   Yes   |     Yes      |
 
 ## Installation
 

@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package                         | UMD global                | CSS | Locales | Facade entry |
-| ------------------------------- | ------------------------- | :-: | :-----: | :----------: |
-| `@univerjs/preset-sheets-table` | `UniverSheetsTablePreset` | Yes |   Yes   |     Yes      |
+| Package                         | CSS | Locales | Facade entry |
+| ------------------------------- | :-: | :-----: | :----------: |
+| `@univerjs/preset-sheets-table` | Yes |   Yes   |     Yes      |
 
 ## Installation
 

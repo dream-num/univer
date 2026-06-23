@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package                              | UMD global                    | CSS | Locales | Facade entry |
-| ------------------------------------ | ----------------------------- | :-: | :-----: | :----------: |
-| `@univerjs/preset-sheets-hyper-link` | `UniverSheetsHyperLinkPreset` | Yes |   Yes   |     Yes      |
+| Package                              | CSS | Locales | Facade entry |
+| ------------------------------------ | :-: | :-----: | :----------: |
+| `@univerjs/preset-sheets-hyper-link` | Yes |   Yes   |     Yes      |
 
 ## Installation
 

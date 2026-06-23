@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package                          | UMD global                 | CSS | Locales | Facade entry |
-| -------------------------------- | -------------------------- | :-: | :-----: | :----------: |
-| `@univerjs/preset-sheets-filter` | `UniverSheetsFilterPreset` | Yes |   Yes   |     Yes      |
+| Package                          | CSS | Locales | Facade entry |
+| -------------------------------- | :-: | :-----: | :----------: |
+| `@univerjs/preset-sheets-filter` | Yes |   Yes   |     Yes      |
 
 ## Installation
 

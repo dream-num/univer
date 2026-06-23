@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-export * from './umd';
-
+export * from './preset';
 export * from '@univerjs/sheets-table';
 export * from '@univerjs/sheets-table-ui';

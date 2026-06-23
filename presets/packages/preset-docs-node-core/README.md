@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package                           | UMD global                 | CSS | Locales | Facade entry |
-| --------------------------------- | -------------------------- | :-: | :-----: | :----------: |
-| `@univerjs/preset-docs-node-core` | `UniverDocsNodeCorePreset` | No  |   Yes   |     Yes      |
+| Package                           | CSS | Locales | Facade entry |
+| --------------------------------- | :-: | :-----: | :----------: |
+| `@univerjs/preset-docs-node-core` | No  |   Yes   |     Yes      |
 
 ## Installation
 

@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package                                | UMD global                      | CSS | Locales | Facade entry |
-| -------------------------------------- | ------------------------------- | :-: | :-----: | :----------: |
-| `@univerjs/preset-docs-thread-comment` | `UniverDocsThreadCommentPreset` | Yes |   Yes   |      No      |
+| Package                                | CSS | Locales | Facade entry |
+| -------------------------------------- | :-: | :-----: | :----------: |
+| `@univerjs/preset-docs-thread-comment` | Yes |   Yes   |      No      |
 
 ## Installation
 

@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package                                          | UMD global                                | CSS | Locales | Facade entry |
-| ------------------------------------------------ | ----------------------------------------- | :-: | :-----: | :----------: |
-| `@univerjs/preset-sheets-conditional-formatting` | `UniverSheetsConditionalFormattingPreset` | Yes |   Yes   |     Yes      |
+| Package                                          | CSS | Locales | Facade entry |
+| ------------------------------------------------ | :-: | :-----: | :----------: |
+| `@univerjs/preset-sheets-conditional-formatting` | Yes |   Yes   |     Yes      |
 
 ## Installation
 

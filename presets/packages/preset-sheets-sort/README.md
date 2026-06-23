@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package                        | UMD global               | CSS | Locales | Facade entry |
-| ------------------------------ | ------------------------ | :-: | :-----: | :----------: |
-| `@univerjs/preset-sheets-sort` | `UniverSheetsSortPreset` | Yes |   Yes   |     Yes      |
+| Package                        | CSS | Locales | Facade entry |
+| ------------------------------ | :-: | :-----: | :----------: |
+| `@univerjs/preset-sheets-sort` | Yes |   Yes   |     Yes      |
 
 ## Installation
 

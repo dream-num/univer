@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDocumentRenderConfig, IScale, ITableCell, ITableCellBorder, Nullable } from '@univerjs/core';
+import type { DocumentFlavor, IDocumentRenderConfig, IScale, ITableCell, ITableCellBorder, Nullable } from '@univerjs/core';
 import type {
     IDocumentSkeletonGlyph,
     IDocumentSkeletonLine,
@@ -42,6 +42,7 @@ import { DocumentsSpanAndLineExtensionRegistry } from '../extension';
 import { DocComponent } from './doc-component';
 import { DOCS_EXTENSION_TYPE } from './doc-extension';
 import { collectBackgroundGlyphRuns } from './extensions/background-runs';
+import { getDocumentCompatibilityPolicy, shouldAllowImportedTableMarginOverflow } from './document-compatibility';
 import { getTableIdAndSliceIndex } from './layout/block/table';
 import { Liquid } from './liquid';
 import { getDocsTableRenderViewport, hasDocsTableHorizontalViewport } from './table-render-viewport';
@@ -367,6 +368,7 @@ export class Documents extends DocComponent {
                             this._drawLiquid.translateLine(line, true, true);
 
                             rotateTranslateXListApply && this._drawLiquid.translate(rotateTranslateXListApply[i]); // x axis offset
+                            this._drawLineBackground(ctx, page, line);
 
                             const divideLength = divides.length;
 
@@ -652,7 +654,10 @@ export class Documents extends DocComponent {
             return null;
         }
 
-        const viewportWidth = Math.max(0, pageWidth - marginLeft - marginRight - tableSkeleton.left);
+        const compatibilityPolicy = this._getDocumentCompatibilityPolicy();
+        const viewportWidth = shouldAllowImportedTableMarginOverflow(compatibilityPolicy, tableSkeleton.tableSource)
+            ? Math.max(0, pageWidth - Math.max(0, marginLeft + tableSkeleton.left))
+            : Math.max(0, pageWidth - marginLeft - marginRight - tableSkeleton.left);
         if (viewportWidth <= 0 || tableSkeleton.width <= viewportWidth) {
             return null;
         }
@@ -676,6 +681,53 @@ export class Documents extends DocComponent {
         const dataModel = viewModel?.getDataModel?.();
 
         return dataModel?.getUnitId?.() ?? this.oKey;
+    }
+
+    private _getDocumentCompatibilityPolicy() {
+        const skeleton = this.getSkeleton() as {
+            getViewModel?: () => {
+                getSnapshot?: () => {
+                    documentStyle?: {
+                        documentFlavor?: DocumentFlavor;
+                    };
+                };
+            };
+        } | undefined;
+        const documentFlavor = skeleton?.getViewModel?.()?.getSnapshot?.()?.documentStyle?.documentFlavor;
+
+        return getDocumentCompatibilityPolicy(documentFlavor);
+    }
+
+    private _drawLineBackground(
+        ctx: UniverRenderingContext,
+        page: IDocumentSkeletonPage,
+        line: IDocumentSkeletonLine,
+        left = 0,
+        top = 0
+    ) {
+        const color = line.backgroundColor?.rgb;
+        if (!color || this._drawLiquid == null) {
+            return;
+        }
+
+        let { x, y } = this._drawLiquid;
+        const { pageWidth, marginLeft, marginRight, marginTop } = page;
+
+        x += marginLeft + (left ?? 0);
+        y -= line.marginTop;
+        y -= line.paddingTop;
+        y += marginTop + top;
+
+        ctx.save();
+        ctx.fillStyle = color;
+        fillRectByPrecisionBounds(
+            ctx,
+            x,
+            y,
+            pageWidth - marginLeft - marginRight,
+            line.lineHeight
+        );
+        ctx.restore();
     }
 
     private _drawBorderBottom(
@@ -813,6 +865,7 @@ export class Documents extends DocComponent {
                     } else {
                         this._drawLiquid.translateSave();
                         this._drawLiquid.translateLine(line, true, true);
+                        this._drawLineBackground(ctx, cell, line, page.marginLeft, page.marginTop);
 
                         const divideLength = divides.length;
 
@@ -1099,6 +1152,7 @@ export class Documents extends DocComponent {
                                 continue;
                             }
                         }
+                        this._drawLineBackground(ctx, page, line, parentPage.marginLeft);
 
                         const divideLength = divides.length;
 

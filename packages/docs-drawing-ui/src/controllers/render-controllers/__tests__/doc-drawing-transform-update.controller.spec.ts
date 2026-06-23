@@ -142,6 +142,10 @@ describe('DocDrawingTransformUpdateController', () => {
             getDrawingData: vi.fn(() => ({
                 'multi-drawing': { drawingId: 'multi-drawing', isMultiTransform: BooleanNumber.TRUE },
                 'stale-multi': { drawingId: 'stale-multi', isMultiTransform: BooleanNumber.TRUE },
+                'stale-normal': {
+                    drawingId: 'stale-normal',
+                    transform: { left: 0, top: 0, width: 100, height: 100, angle: 0 },
+                },
             })),
             removeNotification: vi.fn(),
             addNotification: vi.fn(),
@@ -192,6 +196,18 @@ describe('DocDrawingTransformUpdateController', () => {
                 docTransform: defaultDocTransform,
             },
         };
+        const inlineDrawing = {
+            aLeft: 15,
+            aTop: 25,
+            width: 35,
+            height: 45,
+            angle: 0,
+            drawingId: 'inline-drawing',
+            drawingOrigin: {
+                layoutType: PositionedObjectLayoutType.INLINE,
+                docTransform: defaultDocTransform,
+            },
+        };
         const multiDrawingOnPage = {
             aLeft: 6,
             aTop: 8,
@@ -236,6 +252,7 @@ describe('DocDrawingTransformUpdateController', () => {
             marginBottom: 17,
             skeDrawings: new Map([
                 ['normal-drawing', normalDrawing],
+                ['inline-drawing', inlineDrawing],
                 ['multi-drawing', multiDrawingOnPage],
             ]),
             skeTables: [table],
@@ -269,8 +286,17 @@ describe('DocDrawingTransformUpdateController', () => {
                 transform: expect.objectContaining({ left: 26, top: 40, width: 30, height: 40, angle: 5 }),
             }),
             expect.objectContaining({
+                drawingId: 'inline-drawing',
+                transform: expect.objectContaining({ left: 31, top: 45, width: 35, height: 45, angle: 0 }),
+            }),
+            expect.objectContaining({
                 drawingId: 'cell-drawing',
                 transform: expect.objectContaining({ left: 56, top: 69, width: 11, height: 12, angle: 0 }),
+            }),
+            expect.objectContaining({
+                drawingId: 'stale-normal',
+                hidden: true,
+                transform: expect.objectContaining({ left: 0, top: 0, width: 100, height: 100, angle: 0 }),
             }),
         ]);
         expect(drawingManagerService.removeNotification).toHaveBeenCalledWith([
@@ -363,6 +389,29 @@ describe('DocDrawingTransformUpdateController', () => {
             hostPage,
             page: headerPage,
         })).toBe(headerPage);
+    });
+
+    it('clips overflowing header cover drawings to the host document page', () => {
+        const headerPage = {
+            pageWidth: 601,
+            pageHeight: 510,
+        };
+        const hostPage = {
+            pageWidth: 794,
+            pageHeight: 1123,
+        };
+
+        expect(getDocsDrawingClipPage({
+            drawing: {
+                behindText: true,
+                transform: {
+                    width: 803,
+                    height: 682,
+                },
+            },
+            hostPage,
+            page: headerPage,
+        })).toBe(hostPage);
     });
 
     it('positions page-sized header backgrounds against the host page width', () => {

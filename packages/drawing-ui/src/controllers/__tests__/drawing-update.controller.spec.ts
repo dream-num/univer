@@ -29,6 +29,8 @@ interface IDrawingNotification {
     unitId: string;
     subUnitId: string;
     drawingId: string;
+    behindText?: boolean;
+    hidden?: boolean;
 }
 
 interface IDrawingTransformObject {
@@ -70,7 +72,7 @@ function createHarness() {
     const zIndexShape = { setProps: vi.fn(), makeDirty: vi.fn() };
     const disposeShape = { dispose: vi.fn() };
     const showHideShape = { show: vi.fn(), hide: vi.fn() };
-    const transformShape = { layer: { zIndex: DRAWING_OBJECT_LAYER_INDEX }, transformByState: vi.fn(), setClipBounds: vi.fn() };
+    const transformShape = { layer: { zIndex: DRAWING_OBJECT_LAYER_INDEX }, transformByState: vi.fn(), setClipBounds: vi.fn(), show: vi.fn(), hide: vi.fn() };
 
     const scene = {
         getTransformerByCreate: vi.fn(() => transformer),
@@ -96,10 +98,11 @@ function createHarness() {
         getRenderById: vi.fn(() => ({ scene })),
     };
 
-    const drawingParams = new Map<string, { unitId: string; subUnitId: string; drawingId: string; drawingType: DrawingTypeEnum; behindText?: boolean; transform: { left: number; top: number; width: number; height: number; angle: number; clipBounds?: { left: number; top: number; width: number; height: number } } }>([
+    const drawingParams = new Map<string, { unitId: string; subUnitId: string; drawingId: string; drawingType: DrawingTypeEnum; behindText?: boolean; hidden?: boolean; transform: { left: number; top: number; width: number; height: number; angle: number; clipBounds?: { left: number; top: number; width: number; height: number } } }>([
         ['drawing-a', { unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'drawing-a', drawingType: DrawingTypeEnum.DRAWING_IMAGE, transform: { left: 0, top: 0, width: 10, height: 10, angle: 0 } }],
         ['drawing-b', { unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'drawing-b', drawingType: DrawingTypeEnum.DRAWING_IMAGE, transform: { left: 20, top: 0, width: 10, height: 10, angle: 0 } }],
-        ['drawing-transform', { unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'drawing-transform', drawingType: DrawingTypeEnum.DRAWING_IMAGE, behindText: true, transform: { left: 1, top: 2, width: 3, height: 4, angle: 0, clipBounds: { left: 0, top: 0, width: 80, height: 120 } } }],
+        ['drawing-transform', { unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'drawing-transform', drawingType: DrawingTypeEnum.DRAWING_IMAGE, behindText: true, hidden: true, transform: { left: 1, top: 2, width: 3, height: 4, angle: 0, clipBounds: { left: 0, top: 0, width: 80, height: 120 } } }],
+        ['drawing-transform-refresh-hidden', { unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'drawing-transform-refresh-hidden', drawingType: DrawingTypeEnum.DRAWING_IMAGE, transform: { left: 1, top: 2, width: 3, height: 4, angle: 0, clipBounds: { left: 0, top: 0, width: 80, height: 120 } } }],
         ['drawing-refresh-missing', { unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'drawing-refresh-missing', drawingType: DrawingTypeEnum.DRAWING_IMAGE, transform: { left: 4, top: 5, width: 6, height: 7, angle: 0 } }],
     ]);
 
@@ -217,11 +220,13 @@ describe('DrawingUpdateController', () => {
         const drawingId = 'drawing-transform';
         harness.update$.next([{ unitId: 'unit-1', subUnitId: 'sheet-1', drawingId }]);
         expect(harness.transformShape.transformByState).toHaveBeenCalled();
+        expect(harness.transformShape.hide).toHaveBeenCalledTimes(1);
         expect(harness.debounceRefreshControls).toHaveBeenCalledTimes(1);
 
         harness.refreshTransform$.next([{ unitId: 'unit-1', subUnitId: 'sheet-1', drawingId }]);
         expect(harness.transformShape.transformByState).toHaveBeenCalledTimes(2);
         expect(harness.transformShape.setClipBounds).toHaveBeenCalledWith({ left: 0, top: 0, width: 80, height: 120 });
+        expect(harness.transformShape.hide).toHaveBeenCalledTimes(2);
         expect(harness.scene.removeObject).toHaveBeenCalledWith(harness.transformShape);
         expect(harness.scene.addObject).toHaveBeenCalledWith(harness.transformShape, DOC_DRAWING_BEHIND_TEXT_LAYER_INDEX);
 
@@ -245,6 +250,33 @@ describe('DrawingUpdateController', () => {
         expect(harness.drawingManagerService.addNotification).toHaveBeenCalledWith([
             { unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'drawing-refresh-missing' },
         ]);
+
+        harness.controller.dispose();
+    });
+
+    it('uses refresh metadata to hide stale drawings without re-adding missing hidden shapes', () => {
+        const harness = createHarness();
+
+        harness.refreshTransform$.next([{
+            unitId: 'unit-1',
+            subUnitId: 'sheet-1',
+            drawingId: 'drawing-transform-refresh-hidden',
+            behindText: true,
+            hidden: true,
+        }]);
+
+        expect(harness.transformShape.hide).toHaveBeenCalledTimes(1);
+        expect(harness.scene.removeObject).toHaveBeenCalledWith(harness.transformShape);
+        expect(harness.scene.addObject).toHaveBeenCalledWith(harness.transformShape, DOC_DRAWING_BEHIND_TEXT_LAYER_INDEX);
+
+        harness.refreshTransform$.next([{
+            unitId: 'unit-1',
+            subUnitId: 'sheet-1',
+            drawingId: 'drawing-refresh-missing',
+            hidden: true,
+        }]);
+
+        expect(harness.drawingManagerService.addNotification).not.toHaveBeenCalled();
 
         harness.controller.dispose();
     });

@@ -26,6 +26,7 @@ import { DocDrawingUpdateRenderController } from '../doc-drawing-update.render-c
 function createController(options: {
     editArea?: DocumentEditArea;
     drawings?: Record<string, unknown>;
+    isFocusing?: boolean;
 } = {}) {
     const featurePluginOrderUpdate$ = new Subject<any>();
     const featurePluginGroupUpdate$ = new Subject<any>();
@@ -34,8 +35,11 @@ function createController(options: {
     const changeEnd$ = new Subject<any>();
     const editAreaChange$ = new Subject<void>();
     const refreshDrawings$ = new Subject<unknown>();
+    const onFocus$ = new Subject<unknown>();
+    const onBlur$ = new Subject<unknown>();
     const commandHandlers: Array<(command: { id: string }) => void> = [];
     let editArea = options.editArea ?? DocumentEditArea.BODY;
+    let isFocusing = options.isFocusing ?? true;
 
     const transformer = {
         changeEnd$,
@@ -129,8 +133,13 @@ function createController(options: {
         setContextValue: vi.fn(),
     };
     const docSelectionRenderService = {
+        get isFocusing() {
+            return isFocusing;
+        },
         getActiveTextRange: vi.fn(() => null),
         getSegment: vi.fn(() => ''),
+        onBlur$,
+        onFocus$,
         setSegment: vi.fn(),
     };
 
@@ -162,10 +171,15 @@ function createController(options: {
         editAreaChange$,
         focus$,
         getShape: (drawingId: string) => shapeByDrawingId.get(drawingId),
+        onBlur$,
+        onFocus$,
         refreshDrawings$,
         scene,
         setEditArea: (value: DocumentEditArea) => {
             editArea = value;
+        },
+        setIsFocusing: (value: boolean) => {
+            isFocusing = value;
         },
         transformer,
     };
@@ -258,5 +272,46 @@ describe('DocDrawingUpdateRenderController', () => {
         expect(scene.attachTransformerTo).toHaveBeenCalledWith(getShape('header-drawing'));
         expect(getShape('header-drawing').setOpacity).toHaveBeenLastCalledWith(1);
         expect(getShape('body-drawing').setOpacity).toHaveBeenLastCalledWith(0.5);
+    });
+
+    it('keeps all drawings opaque while the document input is not focused', () => {
+        const bodyDrawing = {
+            drawingId: 'body-drawing',
+            isMultiTransform: BooleanNumber.FALSE,
+        };
+        const headerDrawing = {
+            drawingId: 'header-drawing',
+            isMultiTransform: BooleanNumber.TRUE,
+        };
+        const {
+            getShape,
+            onBlur$,
+            onFocus$,
+            scene,
+            setIsFocusing,
+        } = createController({
+            drawings: {
+                'body-drawing': bodyDrawing,
+                'header-drawing': headerDrawing,
+            },
+            isFocusing: false,
+        });
+
+        expect(scene.attachTransformerTo).not.toHaveBeenCalled();
+        expect(getShape('body-drawing').setOpacity).toHaveBeenLastCalledWith(1);
+        expect(getShape('header-drawing').setOpacity).toHaveBeenLastCalledWith(1);
+
+        setIsFocusing(true);
+        onFocus$.next({});
+
+        expect(scene.attachTransformerTo).toHaveBeenCalledWith(getShape('body-drawing'));
+        expect(getShape('body-drawing').setOpacity).toHaveBeenLastCalledWith(1);
+        expect(getShape('header-drawing').setOpacity).toHaveBeenLastCalledWith(0.5);
+
+        setIsFocusing(false);
+        onBlur$.next({});
+
+        expect(getShape('body-drawing').setOpacity).toHaveBeenLastCalledWith(1);
+        expect(getShape('header-drawing').setOpacity).toHaveBeenLastCalledWith(1);
     });
 });

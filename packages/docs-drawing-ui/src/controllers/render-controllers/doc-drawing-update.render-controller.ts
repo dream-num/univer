@@ -357,6 +357,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
                         });
                     }
                 }
+                this._updateDrawingsEditStatus();
             })
         );
     }
@@ -404,6 +405,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
         const snapshot = docDataModel.getSnapshot();
         const { drawings = {} } = snapshot;
         const isEditBody = viewModel.getEditArea() === DocumentEditArea.BODY;
+        const isDocInputFocusing = this._docSelectionRenderService.isFocusing;
 
         for (const key of Object.keys(drawings)) {
             const drawing = drawings[key];
@@ -414,8 +416,11 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
                 for (const shape of drawingShapes) {
                     scene.detachTransformerFrom(shape);
                     try {
-                        (shape as Image).setOpacity(0.5);
+                        (shape as Image).setOpacity(isDocInputFocusing ? 0.5 : 1);
                     } catch (e) {
+                    }
+                    if (!isDocInputFocusing) {
+                        continue;
                     }
                     if (
                         (isEditBody && drawing.isMultiTransform !== BooleanNumber.TRUE)
@@ -450,6 +455,18 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
 
         this.disposeWithMe(
             viewModel.editAreaChange$.subscribe(() => {
+                this._updateDrawingsEditStatus();
+            })
+        );
+
+        this.disposeWithMe(
+            this._docSelectionRenderService.onFocus$.subscribe(() => {
+                this._updateDrawingsEditStatus();
+            })
+        );
+
+        this.disposeWithMe(
+            this._docSelectionRenderService.onBlur$.subscribe(() => {
                 this._updateDrawingsEditStatus();
             })
         );

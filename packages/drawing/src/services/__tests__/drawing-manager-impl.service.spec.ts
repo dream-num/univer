@@ -131,6 +131,7 @@ describe('UnitDrawingService', () => {
             transforms: [{ left: 3, top: 4 } as NonNullable<IDrawingParam['transform']>] as NonNullable<IDrawingParam['transforms']>,
             isMultiTransform: BooleanNumber.TRUE,
             behindText: true,
+            hidden: true,
         } as Partial<IDrawingParam>);
         service.refreshTransform([transformed]);
 
@@ -140,6 +141,7 @@ describe('UnitDrawingService', () => {
             transforms: [{ left: 3, top: 4 }],
             isMultiTransform: BooleanNumber.TRUE,
             behindText: true,
+            hidden: true,
         });
 
         service.visibleNotification([{ ...createSearch('a'), visible: false }]);

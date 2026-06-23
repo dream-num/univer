@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { INumberUnit, IParagraphProperties, IParagraphStyle, Nullable } from '@univerjs/core';
+import type { INumberUnit, IParagraphProperties, Nullable } from '@univerjs/core';
 import type {
     IDocumentSkeletonColumn,
     IDocumentSkeletonDivide,
@@ -70,7 +70,6 @@ import {
     getPositionVertical,
     isColumnFull,
     lineIterator,
-    mergeByV,
 } from '../../tools';
 import { createTableSkeletons, rollbackListCache } from '../table';
 
@@ -98,8 +97,15 @@ export function layoutParagraph(
             const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
             const bulletGlyph = createSkeletonBulletGlyph(glyphGroup[0], bulletSkeleton, charSpaceApply);
             const paragraphProperties = bulletSkeleton.paragraphProperties || {};
+            const bulletParagraphStyle = {
+                ...paragraphProperties,
+                hanging: paragraphProperties.hanging ?? { v: bulletGlyph.width },
+            } as IParagraphProperties;
 
-            paragraphConfig.paragraphStyle = mergeByV<IParagraphStyle>(paragraphConfig.paragraphStyle, { ...paragraphProperties, hanging: { v: bulletGlyph.width } } as IParagraphProperties, 'max');
+            paragraphConfig.paragraphStyle = {
+                ...bulletParagraphStyle,
+                ...paragraphConfig.paragraphStyle,
+            };
 
             _lineOperator(ctx, [bulletGlyph, ...glyphGroup], pages, sectionBreakConfig, paragraphConfig, isParagraphFirstShapedText, breakPointType);
         } else {
@@ -261,6 +267,27 @@ function _divideOperator(
                 divideInfo.isLast && !isGlyphGroupBeyondContentBox(glyphGroup, preOffsetLeft, divide.width) && isGlyphGroupEndWithWhiteSpaces(glyphGroup)
             ) {
                 addGlyphToDivide(divide, glyphGroup, preOffsetLeft);
+            } else if (
+                !isLast &&
+                divide?.glyphGroup.length === 0 &&
+                glyphGroup.length === 1 &&
+                glyphGroup[0].streamType === DataStreamTreeTokenType.CUSTOM_BLOCK &&
+                glyphGroup[0].width > divide.width
+            ) {
+                updateDivideInfo(divide, {
+                    isFull: true,
+                });
+                _divideOperator(
+                    ctx,
+                    glyphGroup,
+                    pages,
+                    sectionBreakConfig,
+                    paragraphConfig,
+                    isParagraphFirstShapedText,
+
+                    breakPointType,
+                    defaultSpanLineHeight
+                );
             } else if (divide?.glyphGroup.length === 0) {
                 const sliceGlyphGroup: IDocumentSkeletonGlyph[] = [];
 
@@ -621,8 +648,11 @@ function _lineOperator(
             .filter((drawing) => drawing.drawingOrigin.docTransform.positionV.relativeFrom !== ObjectRelativeFromV.LINE);
 
         if (hasInlineCustomBlock) {
-            deferredInlineGroupAnchorDrawings = targetDrawings.filter((drawing) => glyphGroupCustomBlockIds.has(drawing.drawingId));
-            targetDrawings = targetDrawings.filter((drawing) => !glyphGroupCustomBlockIds.has(drawing.drawingId));
+            deferredInlineGroupAnchorDrawings = targetDrawings.filter((drawing) =>
+                glyphGroupCustomBlockIds.has(drawing.drawingId) &&
+                drawing.drawingOrigin.docTransform.positionV.relativeFrom === ObjectRelativeFromV.LINE
+            );
+            targetDrawings = targetDrawings.filter((drawing) => !deferredInlineGroupAnchorDrawings.includes(drawing));
         }
 
         __updateAndPositionDrawings(ctx, lineTop, lineHeight, column, targetDrawings, paragraphConfig.paragraphIndex, isParagraphFirstShapedText, pDrawingAnchor?.get(paragraphIndex)?.top, paragraphAnchorLeft);
@@ -784,6 +814,7 @@ function __updateAndPositionDrawings(
                 height,
                 angle,
                 behindDoc: drawingOrigin.behindDoc,
+                layoutType: drawingOrigin.layoutType,
                 type: FloatObjectType.IMAGE,
                 positionV,
             };
@@ -864,6 +895,43 @@ function __getWrapTablePosition(
     return { left, top };
 }
 
+function __avoidFlowAffectingDrawingsForTable(
+    table: IDocumentSkeletonTable,
+    page: IDocumentSkeletonPage,
+    column: IDocumentSkeletonColumn
+) {
+    const tableTop = table.top;
+    const tableBottom = table.top + table.height;
+    const tableRight = table.left + table.width;
+
+    for (const drawing of page.skeDrawings.values()) {
+        const drawingOrigin = drawing.drawingOrigin;
+        if (
+            drawingOrigin == null ||
+            drawingOrigin.layoutType === PositionedObjectLayoutType.INLINE ||
+            drawingOrigin.layoutType === PositionedObjectLayoutType.WRAP_NONE ||
+            drawingOrigin.layoutType === PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM
+        ) {
+            continue;
+        }
+
+        const drawingTop = drawing.aTop;
+        const drawingBottom = drawing.aTop + drawing.height;
+        if (drawingTop >= tableBottom || drawingBottom <= tableTop) {
+            continue;
+        }
+
+        const drawingRight = drawing.aLeft + drawing.width + (drawingOrigin.distR ?? 0);
+        if (drawing.aLeft >= tableRight || drawingRight <= table.left) {
+            continue;
+        }
+
+        if (drawingRight + table.width <= column.width) {
+            table.left = Math.max(table.left, drawingRight);
+        }
+    }
+}
+
 function _updateAndPositionTable(
     ctx: ILayoutContext,
     lineTop: number,
@@ -894,6 +962,7 @@ function _updateAndPositionTable(
         switch (tableSource.textWrap) {
             case TableTextWrapType.NONE: {
                 table.top = lineTop;
+                __avoidFlowAffectingDrawingsForTable(table, page, column);
                 break;
             }
             case TableTextWrapType.WRAP: {
@@ -938,7 +1007,6 @@ function _updateAndPositionTable(
             sectionBreakConfig,
             availableHeight
         );
-
         // Reset the position of the first table.
         skeTables.forEach((table, i) => {
             table.top = i === 0 && fromCurrentPage ? top : 0;
@@ -1028,7 +1096,7 @@ function __getZeroWidthNonFlowFloatingAnchorDrawings(
             return [];
         }
 
-        if (drawingOrigin.layoutType !== PositionedObjectLayoutType.WRAP_NONE && drawingOrigin.behindDoc !== BooleanNumber.TRUE) {
+        if (drawingOrigin.layoutType !== PositionedObjectLayoutType.WRAP_NONE) {
             return [];
         }
 
@@ -1074,7 +1142,13 @@ function _reLayoutCheck(
     paragraphIndex: number
 ) {
     const page = column.parent?.parent;
-    const flowAffectingFloatObjects = floatObjects.filter((floatObject) => floatObject.behindDoc !== BooleanNumber.TRUE);
+    const flowAffectingFloatObjects = floatObjects.filter((floatObject) =>
+        floatObject.behindDoc !== BooleanNumber.TRUE ||
+        (
+            floatObject.layoutType != null &&
+            floatObject.layoutType !== PositionedObjectLayoutType.WRAP_NONE
+        )
+    );
 
     if (flowAffectingFloatObjects.length === 0 || page == null) {
         return;
@@ -1198,6 +1272,7 @@ function checkRelativeDrawingNeedRePosition(ctx: ILayoutContext, floatObject: IF
 
 export const __testing = {
     reLayoutCheck: _reLayoutCheck,
+    avoidFlowAffectingDrawingsForTable: __avoidFlowAffectingDrawingsForTable,
 };
 
 function _columnOperator(
@@ -1435,9 +1510,11 @@ export function getLineHeightMetrics(
 export function updateInlineDrawingPosition(
     line: IDocumentSkeletonLine,
     paragraphInlineSkeDrawings?: Map<string, IDocumentSkeletonDrawing>,
-    blockAnchorTop?: number
+    blockAnchorTop?: number,
+    paragraphNonInlineSkeDrawings?: Map<string, IDocumentSkeletonDrawing>
 ) {
     const column = line.parent;
+    const section = column?.parent;
     const page = line?.parent?.parent?.parent;
 
     if (page == null || column == null) {
@@ -1448,6 +1525,8 @@ export function updateInlineDrawingPosition(
 
     const drawings: Map<string, IDocumentSkeletonDrawing> = new Map();
     const { top, lineHeight, marginBottom = 0 } = line;
+    const sectionTop = section?.top ?? 0;
+    const lineTop = sectionTop + top;
 
     for (const divide of line.divides) {
         for (const glyph of divide.glyphGroup) {
@@ -1472,15 +1551,43 @@ export function updateInlineDrawingPosition(
                 const { width = 0, height = 0 } = size;
                 const glyphHeight = glyph.bBox.bd + glyph.bBox.ba;
 
-                drawing.aLeft = divide.left + divide.paddingLeft + glyph.left + 0.5 * glyph.width - 0.5 * width || 0;
-                drawing.aTop = top + lineHeight - 0.5 * glyphHeight - 0.5 * height - marginBottom;
+                drawing.aLeft = column.left + divide.left + divide.paddingLeft + glyph.left + 0.5 * glyph.width - 0.5 * width || 0;
+                if (glyph.width > divide.width) {
+                    for (const positionedDrawing of paragraphNonInlineSkeDrawings?.values() ?? []) {
+                        const positionedOrigin = positionedDrawing.drawingOrigin;
+                        if (
+                            positionedOrigin == null ||
+                            positionedOrigin.layoutType === PositionedObjectLayoutType.INLINE ||
+                            positionedOrigin.layoutType === PositionedObjectLayoutType.WRAP_NONE ||
+                            positionedOrigin.layoutType === PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM
+                        ) {
+                            continue;
+                        }
+
+                        const positionedBottom = positionedDrawing.aTop + positionedDrawing.height;
+                        const lineBottom = lineTop + lineHeight;
+                        if (positionedDrawing.aTop >= lineBottom || positionedBottom <= lineTop) {
+                            continue;
+                        }
+
+                        const positionedRight = positionedDrawing.aLeft + positionedDrawing.width;
+                        const drawingRight = drawing.aLeft + width;
+                        if (positionedDrawing.aLeft < drawingRight && positionedRight > drawing.aLeft) {
+                            drawing.aLeft = Math.max(
+                                drawing.aLeft,
+                                positionedDrawing.aLeft + positionedDrawing.width + (positionedOrigin.distR ?? 0)
+                            );
+                        }
+                    }
+                }
+                drawing.aTop = lineTop + lineHeight - 0.5 * glyphHeight - 0.5 * height - marginBottom;
                 drawing.width = width;
                 drawing.height = height;
                 drawing.angle = angle;
                 drawing.isPageBreak = isPageBreak;
-                drawing.lineTop = top;
+                drawing.lineTop = lineTop;
                 drawing.columnLeft = column.left;
-                drawing.blockAnchorTop = blockAnchorTop ?? top;
+                drawing.blockAnchorTop = blockAnchorTop == null ? lineTop : sectionTop + blockAnchorTop;
                 drawing.lineHeight = line.lineHeight;
 
                 drawings.set(drawing.drawingId, drawing);

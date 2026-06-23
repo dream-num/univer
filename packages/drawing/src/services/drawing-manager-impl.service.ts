@@ -140,6 +140,9 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
             if ('behindText' in updateParam) {
                 (param as T & IDrawingRefreshMetadata).behindText = (updateParam as T & IDrawingRefreshMetadata).behindText;
             }
+            if ('hidden' in updateParam) {
+                param.hidden = updateParam.hidden;
+            }
         });
 
         this.refreshTransformNotification(updateParams);

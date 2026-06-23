@@ -29,7 +29,7 @@ import {
     UndoCommand,
 } from '@univerjs/core';
 import { RichTextEditingMutation } from '@univerjs/docs';
-import { IDocDrawingService } from '@univerjs/docs-drawing';
+import { getDocDrawingRenderOrder, IDocDrawingService } from '@univerjs/docs-drawing';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 
@@ -244,26 +244,31 @@ export class DocDrawingAddRemoveController extends Disposable {
             return;
         }
 
-        const drawingsOrder = documentDataModel.getSnapshot().drawingsOrder;
+        const { drawings, drawingsOrder } = documentDataModel.getSnapshot();
 
         if (drawingsOrder == null) {
             return;
         }
+        const renderOrder = getDocDrawingRenderOrder(drawingsOrder, drawings);
 
         const drawingManagerService = this._drawingManagerService;
         const docDrawingService = this._docDrawingService;
 
-        drawingManagerService.setDrawingOrder(unitId, unitId, drawingsOrder);
+        drawingManagerService.setDrawingOrder(unitId, unitId, renderOrder);
         docDrawingService.setDrawingOrder(unitId, unitId, drawingsOrder);
 
         // FIXME: @Jocs, Only need to update the affected drawings.
         const objects: IDrawingOrderMapParam = {
             unitId,
             subUnitId: unitId,
-            drawingIds: drawingsOrder,
+            drawingIds: renderOrder,
         };
 
         drawingManagerService.orderNotification(objects);
-        docDrawingService.orderNotification(objects);
+        docDrawingService.orderNotification({
+            unitId,
+            subUnitId: unitId,
+            drawingIds: drawingsOrder,
+        });
     }
 }

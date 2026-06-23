@@ -35,6 +35,7 @@ import {
 } from '../../../../basics/tools';
 import { FontCache } from '../shaping-engine/font-cache';
 import { validationGrid } from '../tools';
+import { applyFontMetricCompatibility, getDocumentCompatibilityPolicy } from '../../document-compatibility';
 
 export function isSpace(char: string) {
     const SPACE_CHARS = [' ', '\u{00A0}', '　'];
@@ -213,6 +214,12 @@ export function _createSkeletonWordOrLetter(
     } else {
         bBox = FontCache.getTextSize(content, fontStyle);
     }
+    bBox = applyFontMetricCompatibility(
+        content,
+        fontStyle,
+        bBox,
+        config.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy()
+    );
 
     const { width: contentWidth = 0 } = bBox;
     let width = glyphWidth ?? contentWidth;

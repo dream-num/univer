@@ -139,6 +139,18 @@ describe('font cache', () => {
         expect(byFont.ba).toBeCloseTo(9.6);
         expect(byFont.abd).toBeCloseTo(1.8);
 
+        (FontCache as any)._context = {
+            font: '',
+            textBaseline: 'alphabetic',
+            measureText: vi.fn(() => ({
+                width: 12,
+                fontBoundingBoxAscent: 8,
+                fontBoundingBoxDescent: 3,
+                actualBoundingBoxAscent: 8,
+                actualBoundingBoxDescent: 3,
+            })),
+        };
+
         const byMeasure = FontCache.getTextSize('Z', {
             fontString: '11px Other Font',
             fontSize: 11,

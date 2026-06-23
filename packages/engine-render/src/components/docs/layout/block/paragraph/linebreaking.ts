@@ -42,11 +42,11 @@ import {
     DEFAULT_DOCUMENT_PARAGRAPH_SPACE_ABOVE,
     DEFAULT_DOCUMENT_PARAGRAPH_SPACE_BELOW,
     DocumentBlockRangeType,
-    DocumentFlavor,
     PositionedObjectLayoutType,
     Tools,
 } from '@univerjs/core';
 import { BreakType } from '../../../../../basics/i-document-skeleton-cached';
+import { getDocumentCompatibilityPolicy, isTraditionalDocumentCompatibility } from '../../../document-compatibility';
 import { createSkeletonPage } from '../../model/page';
 import { setColumnFullState } from '../../model/section';
 import { getLastNotFullColumnInfo } from '../../tools';
@@ -259,31 +259,6 @@ function _applyBlockRangeLayoutParagraphStyle(
     return style;
 }
 
-function _shouldApplyDocumentDefaultParagraphStyle(viewModel: DocumentViewModel): boolean {
-    const snapshot = viewModel.getSnapshot?.();
-
-    if (snapshot == null) {
-        return true;
-    }
-
-    return snapshot.documentStyle.documentFlavor === DocumentFlavor.MODERN;
-}
-
-function _shouldUseWordStyleLineHeight(viewModel: DocumentViewModel): boolean {
-    const snapshot = viewModel.getSnapshot?.();
-    const documentFlavor = snapshot?.documentStyle.documentFlavor;
-
-    if (snapshot == null) {
-        return true;
-    }
-
-    return documentFlavor != null && documentFlavor !== DocumentFlavor.UNSPECIFIED;
-}
-
-function _isTraditionalDoc(viewModel: DocumentViewModel): boolean {
-    return viewModel.getSnapshot?.()?.documentStyle.documentFlavor === DocumentFlavor.TRADITIONAL;
-}
-
 function _isOnlyFloatingCustomBlockParagraph(
     viewModel: DocumentViewModel,
     paragraphNode: DataStreamTreeNode,
@@ -316,9 +291,10 @@ function _getFollowingIndentedParagraphAnchorLeft(
     viewModel: DocumentViewModel,
     paragraph: IParagraph,
     paragraphNode: DataStreamTreeNode,
-    drawings: IDrawings
+    drawings: IDrawings,
+    isTraditionalDocument: boolean
 ): IParagraphStyle['indentStart'] | undefined {
-    if (!_isTraditionalDoc(viewModel)) {
+    if (!isTraditionalDocument) {
         return;
     }
 
@@ -397,8 +373,10 @@ export function lineBreaking(
     const paragraph = viewModel.getParagraph(endIndex) || { startIndex: 0, paragraphId: 'para_render_fallback' };
 
     const { paragraphStyle = {}, bullet } = paragraph;
-    const shouldApplyDocumentDefaults = _shouldApplyDocumentDefaultParagraphStyle(viewModel);
-    const useWordStyleLineHeight = _shouldUseWordStyleLineHeight(viewModel);
+    const documentCompatibilityPolicy = sectionBreakConfig.documentCompatibilityPolicy ??
+        getDocumentCompatibilityPolicy(viewModel.getSnapshot?.()?.documentStyle.documentFlavor);
+    const shouldApplyDocumentDefaults = documentCompatibilityPolicy.applyDocumentDefaultParagraphStyle;
+    const useWordStyleLineHeight = documentCompatibilityPolicy.useWordStyleLineHeight;
 
     const { skeHeaders, skeFooters, skeListLevel, drawingAnchor } = skeletonResourceReference;
 
@@ -416,13 +394,20 @@ export function lineBreaking(
 
     const paragraphConfig: IParagraphConfig = {
         paragraphIndex: endIndex,
+        documentCompatibilityPolicy,
         paragraphStyle: _applyBlockRangeLayoutParagraphStyle(
             viewModel.getBody?.() ?? null,
             paragraph,
             paragraphStyle,
             shouldApplyDocumentDefaults
         ),
-        docxFallbackAnchorLeft: _getFollowingIndentedParagraphAnchorLeft(viewModel, paragraph, paragraphNode, drawings),
+        docxFallbackAnchorLeft: _getFollowingIndentedParagraphAnchorLeft(
+            viewModel,
+            paragraph,
+            paragraphNode,
+            drawings,
+            isTraditionalDocumentCompatibility(documentCompatibilityPolicy)
+        ),
         useWordStyleLineHeight,
         paragraphNonInlineSkeDrawings,
         paragraphInlineSkeDrawings,
@@ -534,10 +519,10 @@ export function lineBreaking(
             isParagraphFirstShapedText = true;
             shapedTextOffset += textGlyphCount;
             continue;
-        } else if (_endsWithToken(text, glyphs, DataStreamTreeTokenType.COLUMN_BREAK) && (
-            viewModel.getDataModel().documentStyle.documentFlavor !== DocumentFlavor.TRADITIONAL ||
-            _isMarkedDocxColumnBreak(viewModel, textEndIndex - 1)
-        )) {
+        } else if (
+            _endsWithToken(text, glyphs, DataStreamTreeTokenType.COLUMN_BREAK) &&
+            (!isTraditionalDocumentCompatibility(documentCompatibilityPolicy) || _isMarkedDocxColumnBreak(viewModel, textEndIndex - 1))
+        ) {
             pushPending();
             // Column break mark, still within the same section
             const lastPage = allPages[allPages.length - 1];

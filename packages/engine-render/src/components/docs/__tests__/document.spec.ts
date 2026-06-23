@@ -31,6 +31,7 @@ import { Viewport } from '../../../viewport';
 import { DocBackground } from '../doc-background';
 import { DOCS_EXTENSION_TYPE } from '../doc-extension';
 import { Documents } from '../document';
+import { getDocumentCompatibilityPolicy } from '../document-compatibility';
 import { setDocsTableRenderViewportProvider } from '../table-render-viewport';
 
 function createGlyph(content: string, left: number, width = 16, backgroundColor?: string) {
@@ -992,6 +993,13 @@ describe('documents render', () => {
 
         const documents = new Documents('docs-main', {
             getSkeletonData: () => ({ pages: [bodyPage] }),
+            getViewModel: () => ({
+                getSnapshot: () => ({
+                    documentStyle: {
+                        documentFlavor: DocumentFlavor.TRADITIONAL,
+                    },
+                }),
+            }),
         } as any, {
             pageLayoutType: PageLayoutType.VERTICAL,
             pageMarginLeft: 0,
@@ -1029,6 +1037,65 @@ describe('documents render', () => {
 
         expect(ctx.clip).toHaveBeenCalledTimes(1);
         expect(ctx.rectByPrecision).toHaveBeenCalledWith(20, 30, 172, 64);
+
+        documents.dispose();
+    });
+
+    it('does not clip DOCX tables that extend into margins while fitting the physical page', () => {
+        const bodyPage = createPage(DocumentSkeletonPageType.BODY, '');
+        attachTable(bodyPage);
+        const table = bodyPage.skeTables.get('table-1')!;
+        table.left = -6;
+        table.width = 190;
+        table.tableSource = {
+            docxWidth: {
+                value: '2850',
+                type: 'dxa',
+            },
+        };
+        table.rows[0].cells[0].pageWidth = 190;
+
+        const documents = new Documents('docs-main', {
+            getSkeletonData: () => ({ pages: [bodyPage] }),
+        } as any, {
+            pageLayoutType: PageLayoutType.VERTICAL,
+            pageMarginLeft: 0,
+            pageMarginTop: 0,
+        });
+
+        const ctx = {
+            save: vi.fn(),
+            restore: vi.fn(),
+            getScale: vi.fn(() => ({ scaleX: 1, scaleY: 1 })),
+            beginPath: vi.fn(),
+            rect: vi.fn(),
+            fill: vi.fn(),
+            rectByPrecision: vi.fn(),
+            closePath: vi.fn(),
+            clip: vi.fn(),
+            set fillStyle(_value: string) {},
+        } as any;
+
+        vi.spyOn(documents as any, '_drawTableCell').mockImplementation(() => {});
+        vi.spyOn(documents as any, '_getDocumentCompatibilityPolicy').mockReturnValue(
+            getDocumentCompatibilityPolicy(DocumentFlavor.TRADITIONAL)
+        );
+
+        (documents as any)._drawTable(
+            ctx,
+            bodyPage,
+            bodyPage.skeTables,
+            [],
+            null,
+            [],
+            {} as any,
+            0,
+            0,
+            {},
+            { scaleX: 1, scaleY: 1 }
+        );
+
+        expect(ctx.clip).not.toHaveBeenCalled();
 
         documents.dispose();
     });
@@ -1282,6 +1349,51 @@ describe('documents render', () => {
 
         expect(bgDraw).toHaveBeenCalledTimes(1);
         expect(bgDraw.mock.calls.map((call) => call[2].width)).toEqual([34]);
+
+        documents.dispose();
+    });
+
+    it('draws paragraph background colors behind line text', () => {
+        const bodyPage = createPage(DocumentSkeletonPageType.BODY, '');
+        const paragraphLine = createLine(LineType.PARAGRAPH, 24);
+        paragraphLine.backgroundColor = { rgb: '#ffffff' };
+        paragraphLine.parent = bodyPage.sections[0].columns[0];
+        bodyPage.sections[0].columns[0].lines = [paragraphLine];
+        bodyPage.skeTables.clear();
+
+        const skeletonData = {
+            pages: [bodyPage],
+            skeHeaders: new Map(),
+            skeFooters: new Map(),
+        };
+        bodyPage.parent = skeletonData;
+
+        const skeleton = {
+            getSkeletonData: () => skeletonData,
+        } as any;
+
+        const documents = new Documents('docs-paragraph-background', skeleton, {
+            pageLayoutType: PageLayoutType.VERTICAL,
+            pageMarginLeft: 0,
+            pageMarginTop: 0,
+        });
+        documents.transformByState({
+            left: 0,
+            top: 0,
+            width: 260,
+            height: 180,
+        });
+        scene.addObject(documents, 1);
+
+        const ctx = canvas.getContext();
+        const fillRect = vi.spyOn(ctx, 'fillRect');
+
+        documents.draw(ctx, {
+            viewBound: { left: 0, top: 0, right: 900, bottom: 700 },
+            cacheBound: { left: 0, top: 0, right: 900, bottom: 700 },
+        } as any);
+
+        expect(fillRect).toHaveBeenCalled();
 
         documents.dispose();
     });

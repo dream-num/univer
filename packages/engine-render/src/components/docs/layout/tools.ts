@@ -26,6 +26,7 @@ import type {
     ISectionBreak,
     ITextStyle,
     Nullable,
+    PositionedObjectLayoutType,
 } from '@univerjs/core';
 import type {
     IDocumentSkeletonCached,
@@ -70,6 +71,7 @@ import {
 import { DEFAULT_DOCUMENT_FONTSIZE } from '../../../basics/const';
 import { GlyphType } from '../../../basics/i-document-skeleton-cached';
 import { getFontStyleString, isFunction } from '../../../basics/tools';
+import { getDocumentCompatibilityPolicy } from '../document-compatibility';
 import { updateInlineDrawingPosition } from './block/paragraph/layout-ruler';
 import { getCustomDecorationStyle } from './style/custom-decoration';
 import { getCustomRangeStyle } from './style/custom-range';
@@ -491,13 +493,19 @@ export function updateInlineDrawingCoordsAndBorder(ctx: ILayoutContext, pages: I
         const paragraphConfig = ctx.paragraphConfigCache.get(segmentId)?.get(line.paragraphIndex);
 
         const affectInlineDrawings = paragraphConfig?.paragraphInlineSkeDrawings;
+        const affectNonInlineDrawings = paragraphConfig?.paragraphNonInlineSkeDrawings;
         const drawingAnchor = ctx.skeletonResourceReference?.drawingAnchor?.get(segmentId)?.get(line.paragraphIndex);
         // Update inline drawings after the line is layout.
         if (affectInlineDrawings && affectInlineDrawings.size > 0) {
-            updateInlineDrawingPosition(line, affectInlineDrawings, drawingAnchor?.top);
+            updateInlineDrawingPosition(line, affectInlineDrawings, drawingAnchor?.top, affectNonInlineDrawings);
         }
 
         const paragraphStyle = paragraphConfig?.paragraphStyle;
+        const paragraphBackgroundColor = paragraphStyle?.shading?.backgroundColor;
+        if (paragraphBackgroundColor) {
+            line.backgroundColor = paragraphBackgroundColor;
+        }
+
         if (line.divides.length > 0) {
             const lastDivide = line.divides[line.divides.length - 1];
             const lastGlyph = lastDivide.glyphGroup[lastDivide.glyphGroup.length - 1];
@@ -901,6 +909,7 @@ export function getFontCreateConfig(
         charSpace,
         gridType,
         snapToGrid,
+        documentCompatibilityPolicy: sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy(),
         pageWidth,
     };
 
@@ -945,6 +954,7 @@ export interface IFloatObject {
     height: number;
     angle: number;
     behindDoc?: BooleanNumber;
+    layoutType?: PositionedObjectLayoutType;
     type: FloatObjectType;
     positionV: IObjectPositionV;
 }

@@ -30,6 +30,7 @@ import type {
     LocaleService,
 } from '@univerjs/core';
 import type { DataStreamTreeNode } from '../components/docs/view-model/data-stream-tree-node';
+import type { IDocumentCompatibilityPolicy } from '../components/docs/document-compatibility';
 import type { DocumentViewModel } from '../components/docs/view-model/document-view-model';
 import type {
     DocumentSkeletonPageType,
@@ -93,6 +94,7 @@ export interface IFontLocale {
 export interface IDocsConfig extends IReferenceSource, IDocumentLayout {
     localeService: LocaleService;
     documentTextStyle?: ITextStyle;
+    documentCompatibilityPolicy?: IDocumentCompatibilityPolicy;
     headerTreeMap: Map<string, DocumentViewModel>;
     footerTreeMap: Map<string, DocumentViewModel>;
 }
@@ -126,6 +128,7 @@ export interface IParagraphTableCache {
 
 export interface IParagraphConfig {
     paragraphIndex: number;
+    documentCompatibilityPolicy?: IDocumentCompatibilityPolicy;
     useWordStyleLineHeight?: boolean;
     docxFallbackAnchorLeft?: IParagraphStyle['indentStart'];
     paragraphNonInlineSkeDrawings?: Map<string, IDocumentSkeletonDrawing>;
@@ -147,6 +150,7 @@ export interface IFontCreateConfig {
     textStyle: ITextStyle;
     charSpace: number;
     snapToGrid: BooleanNumber;
+    documentCompatibilityPolicy?: IDocumentCompatibilityPolicy;
     gridType?: GridType;
     pageWidth?: number;
 }

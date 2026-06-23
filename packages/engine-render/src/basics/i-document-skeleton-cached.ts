@@ -18,6 +18,7 @@ import type {
     BulletAlignment,
     ColumnSeparatorType,
     DataStreamTreeTokenType,
+    IColorStyle,
     IDocDrawingBase,
     IDocumentRenderConfig,
     INestingLevel,
@@ -187,6 +188,7 @@ export interface IDocumentSkeletonLine {
     tableId: string; // tableId if paragraph contains table, tableId is not empty, mainly used to calculate st\ed.
 
     borderBottom?: IParagraphBorder; // borderBottom
+    backgroundColor?: IColorStyle; // backgroundColor
     bullet?: IDocumentSkeletonBullet; // unordered and ordered list bullet
     width?: number; // the actual width of a line
     // dtId: string[]; // drawingTBIds element ids affecting rows, splitting divides, affecting top and bottom

@@ -26,6 +26,7 @@ import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node'
 import type { DocumentViewModel } from '../../view-model/document-view-model';
 import type { ILayoutContext } from '../tools';
 import { BooleanNumber, TableAlignmentType, TableRowHeightRule, VerticalAlignmentType } from '@univerjs/core';
+import { getDocumentCompatibilityPolicy } from '../../document-compatibility';
 import { createNullCellPage, createSkeletonCellPages } from '../model/page';
 
 export function createTableSkeleton(
@@ -235,7 +236,9 @@ export function createTableSkeletons(
 
     updateTableSkeletonsPosition(createCache, curPage, skeTables, table);
 
-    const fromCurrentPage = skeTables[0].height <= availableHeight;
+    const documentCompatibilityPolicy = sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy();
+    const fromCurrentPage =
+        skeTables[0].height <= availableHeight + documentCompatibilityPolicy.table.currentPageOverflowTolerance;
 
     return {
         skeTables,
@@ -302,12 +305,13 @@ function dealWithTableRow(
 ) {
     const pageContentHeight = getAvailableHeight(curPage, cache, false);
     const availableHeight = getAvailableHeight(curPage, cache, true);
+    const documentCompatibilityPolicy = sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy();
     const { children: cellNodes, startIndex, endIndex } = rowNode;
     const rowSource = table.tableRows[row];
     const { trHeight, cantSplit } = rowSource;
     const rowSkeletons: IDocumentSkeletonRow[] = [];
     const { hRule, val } = trHeight;
-    const canRowSplit = cantSplit === BooleanNumber.TRUE && trHeight.hRule === TableRowHeightRule.AUTO;
+    const canRowSplit = cantSplit !== BooleanNumber.TRUE && trHeight.hRule === TableRowHeightRule.AUTO;
     // If the remain height is less than 50 pixels, you can't fit the next line, so you can start typography directly from the second page.
     const MAX_FONT_SIZE = 72;
     const needOpenNewTable = cache.remainHeight <= MAX_FONT_SIZE;
@@ -345,7 +349,6 @@ function dealWithTableRow(
             canRowSplit && !needOpenNewTable ? cache.remainHeight : availableHeight,
             pageContentHeight
         );
-
         while (rowSkeletons.length < cellPageSkeletons.length) {
             rowSkeletons.push(createNullRowSkeletonWithCells(
                 ctx,
@@ -421,8 +424,12 @@ function dealWithTableRow(
     while (rowSkeletons.length > 0) {
         const rowSkeleton = rowSkeletons.shift()!;
         const lastRow = curTableSkeleton.rows[curTableSkeleton.rows.length - 1];
+        const rowOverflowHeight = rowSkeleton.height - cache.remainHeight;
+        const shouldOpenNewTable =
+            cache.remainHeight < MAX_FONT_SIZE ||
+            rowOverflowHeight > documentCompatibilityPolicy.table.rowOverflowTolerance;
 
-        if (cache.remainHeight < MAX_FONT_SIZE || cache.remainHeight < rowSkeleton.height) {
+        if (shouldOpenNewTable) {
             cache.remainHeight = getAvailableHeight(curPage, cache, row !== 0 && rowSkeleton.index !== lastRow.index);
             cache.rowTop = 0;
 

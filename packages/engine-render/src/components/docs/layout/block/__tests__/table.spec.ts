@@ -19,12 +19,14 @@ import type { IParagraphList } from '../../../../../basics/i-document-skeleton-c
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
 import {
     BooleanNumber,
+    DocumentFlavor,
     TableAlignmentType,
     TableRowHeightRule,
     TableSizeType,
     VerticalAlignmentType,
 } from '@univerjs/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { getDocumentCompatibilityPolicy } from '../../../document-compatibility';
 import {
     createTableSkeleton,
     createTableSkeletons,
@@ -146,6 +148,10 @@ function makeCellPage(width: number, height: number) {
         originMarginBottom: 1,
         sections: [],
     };
+}
+
+function useDocumentFlavor(sectionBreakConfig: Record<string, unknown>, documentFlavor: DocumentFlavor) {
+    sectionBreakConfig.documentCompatibilityPolicy = getDocumentCompatibilityPolicy(documentFlavor);
 }
 
 describe('table utilities', () => {
@@ -406,6 +412,105 @@ describe('docs table layout', () => {
         if (result.skeTables.length > 1) {
             expect(result.skeTables[1].tableId).toContain('#-#');
         }
+    });
+
+    it('keeps a table on the current page when it only slightly overflows available height', () => {
+        const { ctx, curPage, viewModel, tableNode, sectionBreakConfig, tableSource } = createContextAndTable();
+        useDocumentFlavor(sectionBreakConfig, DocumentFlavor.TRADITIONAL);
+        tableSource.tableRows = [
+            {
+                repeatHeaderRow: BooleanNumber.FALSE,
+                trHeight: {
+                    hRule: TableRowHeightRule.AUTO,
+                    val: { v: 16 },
+                },
+                cantSplit: BooleanNumber.FALSE,
+                tableCells: [
+                    { vAlign: VerticalAlignmentType.TOP },
+                    { vAlign: VerticalAlignmentType.TOP },
+                ],
+            },
+        ];
+        tableNode.children = [createRowNode(1, 20, 2) as any];
+        createSkeletonCellPagesMock.mockImplementation(() => [makeCellPage(60, 115)]);
+
+        const result = createTableSkeletons(ctx, curPage, viewModel, tableNode, sectionBreakConfig, 109);
+
+        expect(result.skeTables[0].height).toBe(117);
+        expect(result.fromCurrentPage).toBe(true);
+    });
+
+    it('opens a new table slice in modern documents when it overflows available height', () => {
+        const { ctx, curPage, viewModel, tableNode, sectionBreakConfig, tableSource } = createContextAndTable();
+        useDocumentFlavor(sectionBreakConfig, DocumentFlavor.MODERN);
+        tableSource.tableRows = [
+            {
+                repeatHeaderRow: BooleanNumber.FALSE,
+                trHeight: {
+                    hRule: TableRowHeightRule.AUTO,
+                    val: { v: 16 },
+                },
+                cantSplit: BooleanNumber.FALSE,
+                tableCells: [
+                    { vAlign: VerticalAlignmentType.TOP },
+                    { vAlign: VerticalAlignmentType.TOP },
+                ],
+            },
+        ];
+        tableNode.children = [createRowNode(1, 20, 2) as any];
+        createSkeletonCellPagesMock.mockImplementation(() => [makeCellPage(60, 115)]);
+
+        const result = createTableSkeletons(ctx, curPage, viewModel, tableNode, sectionBreakConfig, 109);
+
+        expect(result.skeTables[0].height).toBe(117);
+        expect(result.fromCurrentPage).toBe(false);
+    });
+
+    it('lays out splittable auto rows against the remaining page height', () => {
+        const { ctx, curPage, viewModel, tableNode, sectionBreakConfig, tableSource } = createContextAndTable();
+        tableSource.tableRows[0].repeatHeaderRow = BooleanNumber.FALSE;
+        tableSource.tableRows[0].trHeight = {
+            hRule: TableRowHeightRule.EXACT,
+            val: { v: 140 },
+        };
+        tableSource.tableRows[1].trHeight = {
+            hRule: TableRowHeightRule.AUTO,
+            val: { v: 0 },
+        };
+        tableSource.tableRows[1].cantSplit = BooleanNumber.FALSE;
+        createSkeletonCellPagesMock.mockImplementation(
+            (_ctx: unknown, _viewModel: unknown, _cellNode: unknown, _section: unknown, _table: unknown, row: number, _col: number) =>
+                row === 0 ? [makeCellPage(60, 20)] : [makeCellPage(60, 80)]
+        );
+
+        createTableSkeletons(ctx, curPage, viewModel, tableNode, sectionBreakConfig, 240);
+
+        const secondRowCall = createSkeletonCellPagesMock.mock.calls.find((call) => call[5] === 1 && call[6] === 0);
+        expect(secondRowCall?.[7]).toBe(100);
+    });
+
+    it('keeps a splittable auto row on the current page when its first slice slightly overflows', () => {
+        const { ctx, curPage, viewModel, tableNode, sectionBreakConfig, tableSource } = createContextAndTable();
+        useDocumentFlavor(sectionBreakConfig, DocumentFlavor.TRADITIONAL);
+        tableSource.tableRows[0].repeatHeaderRow = BooleanNumber.FALSE;
+        tableSource.tableRows[0].trHeight = {
+            hRule: TableRowHeightRule.EXACT,
+            val: { v: 140 },
+        };
+        tableSource.tableRows[1].trHeight = {
+            hRule: TableRowHeightRule.AUTO,
+            val: { v: 0 },
+        };
+        tableSource.tableRows[1].cantSplit = BooleanNumber.FALSE;
+        createSkeletonCellPagesMock.mockImplementation(
+            (_ctx: unknown, _viewModel: unknown, _cellNode: unknown, _section: unknown, _table: unknown, row: number) =>
+                row === 0 ? [makeCellPage(60, 20)] : [makeCellPage(60, 100.5)]
+        );
+
+        const result = createTableSkeletons(ctx, curPage, viewModel, tableNode, sectionBreakConfig, 240);
+
+        expect(result.skeTables[0].rows.map((row) => row.index)).toEqual([0, 1]);
+        expect(result.skeTables[1]?.rows.map((row) => row.index) ?? []).not.toContain(1);
     });
 
     it('repeats multiple leading header rows on sliced table pages', () => {

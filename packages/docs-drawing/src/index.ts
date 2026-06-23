@@ -15,7 +15,7 @@
  */
 
 export type { IUniverDocsDrawingConfig } from './config/config';
-export { DOCS_DRAWING_PLUGIN } from './controllers/doc-drawing.controller';
+export { DOCS_DRAWING_PLUGIN, getDocDrawingRenderOrder } from './controllers/doc-drawing.controller';
 export type { IDocDrawingModel } from './controllers/doc-drawing.controller';
 export { DocDrawingController } from './controllers/doc-drawing.controller';
 export { UniverDocsDrawingPlugin } from './plugin';

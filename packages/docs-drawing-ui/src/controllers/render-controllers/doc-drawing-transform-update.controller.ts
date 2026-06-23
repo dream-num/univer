@@ -44,6 +44,7 @@ interface IDrawingParamsWithBehindText {
     subUnitId: string;
     drawingId: string;
     behindText: boolean;
+    hidden?: boolean;
     transform: ITransformState;
     transforms: ITransformState[];
     // The same drawing render in different place, like image in header and footer.
@@ -100,6 +101,10 @@ export function getDocsDrawingClipPage(config: {
     const { width, height } = drawing.transform;
     if (width == null || height == null) {
         return page;
+    }
+
+    if (width > page.pageWidth || height > page.pageHeight) {
+        return hostPage;
     }
 
     const widthRatio = width / hostPage.pageWidth;
@@ -397,7 +402,14 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
 
         const updateDrawings = Object.values(updateDrawingMap);
 
-        const nonMultiDrawings = updateDrawings.filter((drawing) => !drawing.isMultiTransform);
+        for (const drawing of updateDrawings) {
+            drawing.hidden = false;
+        }
+
+        const staleNonMultiDrawings = this._getStaleNonMultiDrawings(unitId, updateDrawingMap);
+        const nonMultiDrawings = updateDrawings
+            .filter((drawing) => !drawing.isMultiTransform)
+            .concat(staleNonMultiDrawings);
         const multiDrawings = updateDrawings.filter((drawing) => drawing.isMultiTransform);
         if (nonMultiDrawings.length > 0) {
             this._drawingManagerService.refreshTransform(nonMultiDrawings as unknown as IDrawingParam[]);
@@ -405,6 +417,27 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
 
         // if multiDrawings length is 0, also need to remove current multi drawings.
         this._handleMultiDrawingsTransform(multiDrawings as unknown as IDrawingParam[]);
+    }
+
+    private _getStaleNonMultiDrawings(
+        unitId: string,
+        updateDrawingMap: Record<string, IDrawingParamsWithBehindText>
+    ): IDrawingParamsWithBehindText[] {
+        const drawingData = this._drawingManagerService.getDrawingData(unitId, unitId) ?? {};
+
+        return Object.values(drawingData)
+            .filter((drawing) => drawing.isMultiTransform !== BooleanNumber.TRUE)
+            .filter((drawing) => updateDrawingMap[drawing.drawingId] == null)
+            .map((drawing) => ({
+                unitId,
+                subUnitId: unitId,
+                drawingId: drawing.drawingId,
+                behindText: false,
+                hidden: true,
+                transform: drawing.transform,
+                transforms: drawing.transforms ?? [],
+                isMultiTransform: drawing.isMultiTransform ?? BooleanNumber.FALSE,
+            } as IDrawingParamsWithBehindText));
     }
 
     private _handleMultiDrawingsTransform(multiDrawings: IDrawingParam[]) {
@@ -585,9 +618,8 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
                 return;
             }
 
-            this._refreshDrawing(skeleton);
-
             this._drawingManagerService.initializeNotification(this._context.unitId);
+            this._refreshDrawing(skeleton);
         };
 
         if (this._lifecycleService.stage >= LifecycleStages.Rendered) {

@@ -24,7 +24,7 @@ import {
     SpacingRule,
     WrapTextType,
 } from '@univerjs/core';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { GlyphType, LineType } from '../../../../../../basics/i-document-skeleton-cached';
 import { __testing, getLineHeightMetrics, layoutParagraph, updateInlineDrawingPosition } from '../layout-ruler';
 import { lineBreaking } from '../linebreaking';
@@ -32,6 +32,24 @@ import { shaping } from '../shaping';
 import { createParagraphLayoutTestBed } from './create-paragraph-layout-test-bed';
 
 describe('layout-ruler', () => {
+    beforeEach(() => {
+        vi.stubGlobal('document', {
+            createElement: () => ({
+                getContext: () => ({
+                    font: '',
+                    textBaseline: 'alphabetic',
+                    measureText: (value: string) => ({
+                        width: value.length * 8,
+                        fontBoundingBoxAscent: 10,
+                        fontBoundingBoxDescent: 4,
+                        actualBoundingBoxAscent: 10,
+                        actualBoundingBoxDescent: 4,
+                    }),
+                }),
+            }),
+        });
+    });
+
     function getLineBoxHeight(metrics: ReturnType<typeof getLineHeightMetrics>) {
         return metrics.paddingTop + metrics.contentHeight + metrics.paddingBottom;
     }
@@ -68,6 +86,43 @@ describe('layout-ruler', () => {
 
         expect(result.length).toBe(1);
         expect(result[0].sections.length).toBeGreaterThan(0);
+    });
+
+    it('keeps direct paragraph indents before bullet list defaults', () => {
+        const { ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed('Item');
+        const shapedTextList = shaping(ctx, paragraphNode.content!, ctx.viewModel, paragraphNode, sectionBreakConfig);
+        const bulletSkeleton = {
+            listId: 'list-1',
+            symbol: '-',
+            ts: { ff: 'Arial', fs: 9 },
+            startIndexItem: 1,
+            paragraphProperties: {
+                indentFirstLine: { v: 0 },
+                hanging: { v: 24 },
+                indentStart: { v: 48 },
+            },
+        };
+
+        const paragraphConfig = {
+            paragraphIndex: paragraphNode.endIndex,
+            paragraphStyle: {
+                hanging: { v: 12 },
+                indentStart: { v: 12 },
+            },
+            bulletSkeleton,
+        } as unknown as IParagraphConfig;
+
+        layoutParagraph(
+            ctx,
+            shapedTextList[0].glyphs,
+            [curPage],
+            sectionBreakConfig,
+            paragraphConfig,
+            true
+        );
+
+        expect(paragraphConfig.paragraphStyle?.indentStart).toEqual({ v: 12 });
+        expect(paragraphConfig.paragraphStyle?.hanging).toEqual({ v: 12 });
     });
 
     it('lays out first shaped text without bullet', () => {
@@ -461,6 +516,7 @@ describe('layout-ruler', () => {
         const section = {
             columns: [],
             parent: page,
+            top: 126,
         } as any;
         const column = {
             left: 40,
@@ -497,16 +553,44 @@ describe('layout-ruler', () => {
 
         expect(page.skeDrawings.get('old-image')).toEqual({ drawingId: 'old-image' });
         expect(page.skeDrawings.get('image-1')).toMatchObject({
-            aLeft: 30,
-            aTop: 104,
+            aLeft: 70,
+            aTop: 230,
             width: 30,
             height: 20,
             angle: 15,
             isPageBreak: false,
-            lineTop: 100,
+            lineTop: 226,
             columnLeft: 40,
-            blockAnchorTop: 80,
+            blockAnchorTop: 206,
             lineHeight: 24,
         });
+    });
+
+    it('moves non-wrap tables into the usable area beside flow-affecting drawings', () => {
+        const table = {
+            top: 120,
+            left: 0,
+            width: 280,
+            height: 80,
+        } as any;
+        const page = {
+            skeDrawings: new Map([['left-wrap', {
+                aTop: 40,
+                aLeft: 10,
+                width: 90,
+                height: 220,
+                drawingOrigin: {
+                    layoutType: PositionedObjectLayoutType.WRAP_TIGHT,
+                    distR: 8,
+                },
+            }]]),
+        } as any;
+        const column = {
+            width: 420,
+        } as any;
+
+        __testing.avoidFlowAffectingDrawingsForTable(table, page, column);
+
+        expect(table.left).toBe(108);
     });
 });

@@ -23,6 +23,10 @@ async function waitForUniverCanvas(page: Page) {
     await page.waitForFunction(() => document.querySelectorAll('canvas').length > 0, undefined, { timeout: 30_000 });
 }
 
+async function waitForE2EController(page: Page) {
+    await page.waitForFunction(() => Boolean(window.E2EControllerAPI), undefined, { timeout: 30_000 });
+}
+
 async function getCommentEditorText(page: Page) {
     return page.evaluate(() => {
         const univer = window.univer;
@@ -103,8 +107,9 @@ test('docs comment keeps content visible while editing, saves, and edits again',
     const errors = collectPageErrors(page);
 
     await page.goto('/docs/');
-    await waitForUniverCanvas(page);
+    await waitForE2EController(page);
     await page.evaluate(() => window.E2EControllerAPI.loadDefaultDoc());
+    await waitForUniverCanvas(page);
     await page.waitForTimeout(2_000);
 
     await page.mouse.move(370, 195);
@@ -127,8 +132,9 @@ test('sheets comment keeps content visible while editing, saves, and edits again
     const errors = collectPageErrors(page);
 
     await page.goto('/sheets/');
-    await waitForUniverCanvas(page);
+    await waitForE2EController(page);
     await page.evaluate(() => window.E2EControllerAPI.loadDefaultSheet());
+    await waitForUniverCanvas(page);
     await page.waitForTimeout(2_000);
     await page.evaluate(async (commentText) => {
         const workbook = window.univerAPI.getActiveWorkbook();

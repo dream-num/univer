@@ -19,6 +19,7 @@ import type { IDocumentSkeletonGlyph } from '../../../../../../basics/i-document
 import {
     BooleanNumber,
     DataStreamTreeTokenType,
+    DocumentFlavor,
     GridType,
     ObjectRelativeFromV,
     PositionedObjectLayoutType,
@@ -422,6 +423,7 @@ describe('layout-ruler', () => {
         const text = '\u4F01\u4E1A\u6587\u5316\u5EFA\u8BBE';
         const { ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed(text, {
             documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
                 pageSize: { width: 365.3740157480315, height: 120 },
                 marginTop: 0,
                 marginBottom: 0,

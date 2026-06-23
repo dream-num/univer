@@ -135,6 +135,50 @@ describe('drawing group', () => {
         expect(childRenderSpy).toHaveBeenCalled();
     });
 
+    it('maps children of nested drawing groups through the parent rendered bound', () => {
+        const outerGroup = new DrawingGroupObject('outer-group');
+        outerGroup.transformByState({
+            left: 0,
+            top: 0,
+            width: 500,
+            height: 500,
+        });
+        outerGroup.setBaseBound({
+            left: 0,
+            top: 0,
+            width: 10,
+            height: 10,
+        });
+
+        const innerGroup = new DrawingGroupObject('inner-group');
+        innerGroup.transformByState({
+            left: 1,
+            top: 1,
+            width: 2,
+            height: 2,
+        });
+        innerGroup.setBaseBound({
+            left: 100,
+            top: 100,
+            width: 50,
+            height: 50,
+        });
+
+        const child = new Rect('nested-child', {
+            left: 100,
+            top: 100,
+            width: 50,
+            height: 50,
+            fill: '#333333',
+        });
+
+        innerGroup.addObject(child);
+        outerGroup.addObject(innerGroup);
+
+        expect(innerGroup.getRealBound().width).toBe(100);
+        expect(child.getRealBound().width).toBe(100);
+    });
+
     it('covers group object management, transform recalculation and dispose flow', () => {
         const sceneChild = new Rect('scene-child', {
             left: 5,

@@ -75,6 +75,18 @@ import { createTableSkeletons, rollbackListCache } from '../table';
 
 const LINE_LAYOUT_OVERFLOW_TOLERANCE = 2;
 const FLOAT_OBJECT_RELAYOUT_LIMIT = 5;
+const MIN_LINE_WIDTH_TOLERANCE = 1;
+const MAX_LINE_WIDTH_TOLERANCE = 3;
+const RELATIVE_LINE_WIDTH_TOLERANCE = 0.01;
+
+function isBeyondDivideWidth(width: number, divideWidth: number) {
+    const tolerance = Math.min(
+        MAX_LINE_WIDTH_TOLERANCE,
+        Math.max(MIN_LINE_WIDTH_TOLERANCE, divideWidth * RELATIVE_LINE_WIDTH_TOLERANCE)
+    );
+
+    return width - divideWidth > tolerance;
+}
 
 export function layoutParagraph(
     ctx: ILayoutContext,
@@ -237,7 +249,7 @@ function _divideOperator(
         const lastLeft = lastGlyph?.left || 0;
         const preOffsetLeft = lastWidth + lastLeft;
         const { hyphenationZone } = sectionBreakConfig;
-        if (preOffsetLeft + width > divide.width) {
+        if (isBeyondDivideWidth(preOffsetLeft + width, divide.width)) {
             if (shouldKeepOverflowingTextOnLine(sectionBreakConfig)) {
                 addGlyphToDivide(divide, glyphGroup, preOffsetLeft);
                 updateDivideInfo(divide, { breakType: breakPointType });
@@ -295,7 +307,7 @@ function _divideOperator(
                     sliceGlyphGroup.push(glyphGroup.shift()!);
 
                     const sliceGlyphGroupWidth = __getGlyphGroupWidth(sliceGlyphGroup);
-                    if (sliceGlyphGroupWidth > divide.width) {
+                    if (isBeyondDivideWidth(sliceGlyphGroupWidth, divide.width)) {
                         // To avoid infinity loop when width is less than one char's width.
                         if (sliceGlyphGroup.length > 1) { // || (sliceGlyphGroup.length > 0 && sliceGlyphGroup[sliceGlyphGroup.length - 1].drawingId)) {
                             glyphGroup.unshift(sliceGlyphGroup.pop()!);

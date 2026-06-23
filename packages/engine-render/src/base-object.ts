@@ -613,11 +613,14 @@ export abstract class BaseObject extends Disposable {
         }
         if (baseBound) {
             const parentState = this.getParent();
+            const parentRealBound = typeof parentState.getRealBound === 'function'
+                ? parentState.getRealBound()
+                : parentState;
             const parentBound = {
-                top: parentState.top || 0,
-                left: parentState.left,
-                width: parentState.width || 0,
-                height: parentState.height || 0,
+                top: parentRealBound.top || 0,
+                left: parentRealBound.left,
+                width: parentRealBound.width || 0,
+                height: parentRealBound.height || 0,
             };
             const realBound = getRenderTransformBaseOnParentBound(baseBound, parentBound, { width: realWidth, height: realHeight, left: realLeft, top: realTop });
 

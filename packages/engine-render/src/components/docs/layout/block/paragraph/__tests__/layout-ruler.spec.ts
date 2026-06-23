@@ -15,6 +15,7 @@
  */
 
 import type { IParagraphConfig } from '../../../../../../basics/interfaces';
+import type { IDocumentSkeletonGlyph } from '../../../../../../basics/i-document-skeleton-cached';
 import {
     BooleanNumber,
     DataStreamTreeTokenType,
@@ -49,6 +50,44 @@ describe('layout-ruler', () => {
             }),
         });
     });
+
+    function createGlyph(content: string, width: number): IDocumentSkeletonGlyph {
+        return {
+            content,
+            raw: content,
+            ts: {},
+            fontStyle: {
+                fontString: 'bold 40.5pt "Microsoft YaHei"',
+                fontSize: 40.5,
+                originFontSize: 40.5,
+                fontFamily: 'Microsoft YaHei',
+                fontCache: 'Microsoft YaHei-40.5-bold',
+            },
+            width,
+            bBox: {
+                width,
+                ba: 40,
+                bd: 10,
+                aba: 40,
+                abd: 10,
+                sp: 0,
+                sbr: 0,
+                sbo: 0,
+                spr: 0,
+                spo: 0,
+            },
+            xOffset: 0,
+            left: 0,
+            glyphType: GlyphType.LETTER,
+            streamType: DataStreamTreeTokenType.LETTER,
+            isJustifiable: true,
+            adjustability: {
+                stretchability: [0, 0],
+                shrinkability: [0, 0],
+            },
+            count: content.length,
+        };
+    }
 
     function getLineBoxHeight(metrics: ReturnType<typeof getLineHeightMetrics>) {
         return metrics.paddingTop + metrics.contentHeight + metrics.paddingBottom;
@@ -377,6 +416,37 @@ describe('layout-ruler', () => {
         expect(result.length).toBeGreaterThanOrEqual(1);
         const lastPage = result[result.length - 1];
         expect(lastPage.sections.length).toBeGreaterThan(0);
+    });
+
+    it('keeps imported shape text on one line when browser glyph bboxes slightly exceed the box', () => {
+        const text = '\u4F01\u4E1A\u6587\u5316\u5EFA\u8BBE';
+        const { ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed(text, {
+            documentStyle: {
+                pageSize: { width: 365.3740157480315, height: 120 },
+                marginTop: 0,
+                marginBottom: 0,
+                marginLeft: 20,
+                marginRight: 20,
+                paragraphLineGapDefault: 0,
+            },
+        });
+        const glyphs = text.split('').map((char) => createGlyph(char, 54.65998840332031));
+        const paragraphConfig = {
+            paragraphIndex: paragraphNode.endIndex,
+            paragraphStyle: {
+                lineSpacing: 1,
+                snapToGrid: BooleanNumber.FALSE,
+                spaceAbove: { v: 0 },
+                spaceBelow: { v: 0 },
+            },
+            useWordStyleLineHeight: false,
+        } as unknown as IParagraphConfig;
+
+        const result = layoutParagraph(ctx, glyphs, [curPage], sectionBreakConfig, paragraphConfig, true);
+        const lines = result[0].sections[0].columns[0].lines;
+
+        expect(lines).toHaveLength(1);
+        expect(lines[0].divides[0].glyphGroup.map((glyph) => glyph.content).join('')).toBe(text);
     });
 
     it('uses glyph height as the base for auto line spacing when grid snapping is not explicitly enabled', () => {

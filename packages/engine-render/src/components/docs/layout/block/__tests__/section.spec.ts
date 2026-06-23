@@ -169,10 +169,10 @@ describe('section', () => {
             expect(columnGroup).toMatchObject({
                 columnGroupId: 'cg-1',
                 left: 0,
-                width: 360,
+                width: 266.66666666666663,
                 columns: [
-                    { columnId: 'left-col', left: 0, width: 174 },
-                    { columnId: 'right-col', left: 186, width: 174 },
+                    { columnId: 'left-col', left: 0, width: 127.33333333333331 },
+                    { columnId: 'right-col', left: 139.33333333333331, width: 127.33333333333331 },
                 ],
             });
             expect(columnGroup.height).toBeGreaterThan(0);

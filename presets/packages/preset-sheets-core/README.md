@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package                        | UMD global               | CSS | Locales | Facade entry |
-| ------------------------------ | ------------------------ | :-: | :-----: | :----------: |
-| `@univerjs/preset-sheets-core` | `UniverSheetsCorePreset` | Yes |   Yes   |     Yes      |
+| Package                        | CSS | Locales | Facade entry |
+| ------------------------------ | :-: | :-----: | :----------: |
+| `@univerjs/preset-sheets-core` | Yes |   Yes   |     Yes      |
 
 ## Installation
 

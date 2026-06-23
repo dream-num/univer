@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-export * from './umd';
-
+export * from './preset';
 export * from '@univerjs/design';
 export * from '@univerjs/docs';
 export * from '@univerjs/docs-ui';

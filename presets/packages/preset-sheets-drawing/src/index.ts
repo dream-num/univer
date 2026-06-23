@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-export * from './umd';
-
+export * from './preset';
 export * from '@univerjs/docs-drawing';
 export * from '@univerjs/drawing';
 export * from '@univerjs/drawing-ui';

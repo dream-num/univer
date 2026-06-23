@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-export * from './umd';
-
+export * from './preset';
 export * from '@univerjs/docs';
 export * from '@univerjs/engine-formula';
 export * from '@univerjs/rpc-node';

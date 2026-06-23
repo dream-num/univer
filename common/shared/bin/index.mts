@@ -7,10 +7,7 @@ import { build } from '../tsdown/index.ts';
 
 interface IPresetCliBuildOptions {
     cleanup?: boolean;
-    skipUMD?: boolean;
     tsdownConfigPath?: string;
-    umdAdditionalFiles?: string[];
-    umdDeps?: string[];
 }
 
 const argvs = process.argv.slice(2);
@@ -47,21 +44,8 @@ if (command === 'preset') {
     } else if (presetCommand === 'build') {
         const options: IPresetCliBuildOptions = {};
 
-        if (presetArgs.includes('--skipUMD')) {
-            options.skipUMD = true;
-        }
         if (presetArgs.includes('--cleanup')) {
             options.cleanup = true;
-        }
-
-        const umdDeps = collectOptionValues(presetArgs, '--umdDeps');
-        if (umdDeps.length > 0) {
-            options.umdDeps = umdDeps;
-        }
-
-        const umdAdditionalFiles = collectOptionValues(presetArgs, '--umdAdditionalFiles');
-        if (umdAdditionalFiles.length > 0) {
-            options.umdAdditionalFiles = umdAdditionalFiles;
         }
 
         const configIdx = presetArgs.indexOf('--config');

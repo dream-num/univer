@@ -1,12 +1,7 @@
 export interface IPresetBuildOptions {
     cleanup?: boolean;
-    skipUMD?: boolean;
     tsdownConfigPath?: string;
-    umdAdditionalFiles?: string[];
-    umdDeps?: string[];
 }
-
-export type IPresetBuildConfig = Pick<IPresetBuildOptions, 'umdAdditionalFiles' | 'umdDeps'>;
 
 export interface IPresetPackageJson {
     dependencies?: Record<string, string>;
@@ -17,10 +12,4 @@ export interface IPresetPackageJson {
 
 export interface IGeneratePresetLocalesOptions {
     packageDir: string;
-}
-
-export interface IPrependPresetUmdOptions {
-    packageDir: string;
-    umdAdditionalFiles?: string[];
-    umdDeps?: string[];
 }

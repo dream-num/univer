@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-export * from './umd';
-
+export * from './preset';
 export * from '@univerjs/data-validation';
 export * from '@univerjs/sheets-data-validation';
 export * from '@univerjs/sheets-data-validation-ui';

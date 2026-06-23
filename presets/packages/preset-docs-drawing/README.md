@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package                         | UMD global                | CSS | Locales | Facade entry |
-| ------------------------------- | ------------------------- | :-: | :-----: | :----------: |
-| `@univerjs/preset-docs-drawing` | `UniverDocsDrawingPreset` | Yes |   Yes   |      No      |
+| Package                         | CSS | Locales | Facade entry |
+| ------------------------------- | :-: | :-----: | :----------: |
+| `@univerjs/preset-docs-drawing` | Yes |   Yes   |      No      |
 
 ## Installation
 

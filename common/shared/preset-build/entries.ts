@@ -47,18 +47,3 @@ export function getPresetModuleEntries(packageDir: string): IEntryConfig[] {
 
     return [...entries, ...getPresetLocaleEntries(packageDir)];
 }
-
-export function getPresetUmdEntries(packageDir: string): IEntryConfig[] {
-    const entries: IEntryConfig[] = [];
-    const umdEntry = path.join(packageDir, 'src/umd.ts');
-
-    if (existsSync(umdEntry)) {
-        entries.push({
-            key: 'index',
-            path: umdEntry,
-            type: 'index',
-        });
-    }
-
-    return [...entries, ...getPresetLocaleEntries(packageDir)];
-}

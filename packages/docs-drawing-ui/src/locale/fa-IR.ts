@@ -22,6 +22,13 @@ const locale: typeof enUS = {
         upload: {
             float: 'درج تصویر',
         },
+        shape: {
+            insert: {
+                title: 'درج شکل',
+                rectangle: 'درج مستطیل',
+                ellipse: 'بیضی را درج کنید',
+            },
+        },
         panel: {
             title: 'ویرایش تصویر',
         },

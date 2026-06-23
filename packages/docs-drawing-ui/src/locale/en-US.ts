@@ -20,6 +20,13 @@ const locale = {
         upload: {
             float: 'Insert Image',
         },
+        shape: {
+            insert: {
+                title: 'Insert Shape',
+                rectangle: 'Insert Rectangle',
+                ellipse: 'Insert Ellipse',
+            },
+        },
         panel: {
             title: 'Edit Image',
         },

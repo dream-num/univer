@@ -22,6 +22,13 @@ const locale: typeof enUS = {
         upload: {
             float: 'Sisipkan Gambar',
         },
+        shape: {
+            insert: {
+                title: 'Sisipkan Bentuk',
+                rectangle: 'Sisipkan Persegi Panjang',
+                ellipse: 'Sisipkan Elips',
+            },
+        },
         panel: {
             title: 'Edit Gambar',
         },

@@ -22,6 +22,13 @@ const locale: typeof enUS = {
         upload: {
             float: '画像を挿入',
         },
+        shape: {
+            insert: {
+                title: '図形の挿入',
+                rectangle: '四角形を挿入',
+                ellipse: '楕円を挿入',
+            },
+        },
         panel: {
             title: '画像の編集',
         },

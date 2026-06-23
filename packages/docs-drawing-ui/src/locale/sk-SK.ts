@@ -22,6 +22,13 @@ const locale: typeof enUS = {
         upload: {
             float: 'Vložiť obrázok',
         },
+        shape: {
+            insert: {
+                title: 'Vložiť tvar',
+                rectangle: 'Vložiť obdĺžnik',
+                ellipse: 'Vložiť elipsu',
+            },
+        },
         panel: {
             title: 'Upraviť obrázok',
         },

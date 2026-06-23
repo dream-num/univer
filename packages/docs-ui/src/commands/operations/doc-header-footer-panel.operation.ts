@@ -15,6 +15,7 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
+import type { LocaleKey } from '../../locale/types';
 import { CommandType, LocaleService } from '@univerjs/core';
 import { ISidebarService } from '@univerjs/ui';
 import { COMPONENT_DOC_HEADER_FOOTER_PANEL } from '../../views/header-footer/panel/component-name';
@@ -33,7 +34,7 @@ export const SidebarDocHeaderFooterPanelOperation: ICommand = {
         switch (params.value) {
             case 'open':
                 sidebarService.open({
-                    header: { title: localeService.t('docs-ui.headerFooter.panel') },
+                    header: { title: localeService.t<LocaleKey>('docs-ui.headerFooter.panel') },
                     children: { label: COMPONENT_DOC_HEADER_FOOTER_PANEL },
                     onClose: () => {},
                     width: 400,

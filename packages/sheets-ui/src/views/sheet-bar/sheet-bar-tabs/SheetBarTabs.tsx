@@ -17,6 +17,7 @@
 import type { ICommandInfo } from '@univerjs/core';
 import type { IUniverUIConfig } from '@univerjs/ui';
 import type { KeyboardEvent as ReactKeyboardEvent, MouseEvent as ReactMouseEvent } from 'react';
+import type { LocaleKey } from '../../../locale/types';
 import type { IScrollState } from '../../../services/sheet-bar/type';
 import type { IBaseSheetBarProps } from './SheetBarItem';
 import {
@@ -151,10 +152,10 @@ export function SheetBarTabs() {
     const openSheetNameErrorDialog = useCallback((id: string, description: string) => {
         confirmService.open({
             id,
-            title: { title: localeService.t('sheets-ui.sheetConfig.sheetNameErrorTitle') },
+            title: { title: localeService.t<LocaleKey>('sheets-ui.sheetConfig.sheetNameErrorTitle') },
             children: { title: description },
-            cancelText: localeService.t('sheets-ui.button.cancel'),
-            confirmText: localeService.t('sheets-ui.button.confirm'),
+            cancelText: localeService.t<LocaleKey>('sheets-ui.button.cancel'),
+            confirmText: localeService.t<LocaleKey>('sheets-ui.button.confirm'),
             onClose() {
                 focusTabEditor();
                 confirmService.close(id);
@@ -171,7 +172,7 @@ export function SheetBarTabs() {
             return false;
         }
 
-        openSheetNameErrorDialog('sheetNameEmptyAlert', localeService.t('sheets-ui.sheetConfig.sheetNameCannotIsEmptyError'));
+        openSheetNameErrorDialog('sheetNameEmptyAlert', localeService.t<LocaleKey>('sheets-ui.sheetConfig.sheetNameCannotIsEmptyError'));
         return true;
     }, [localeService, openSheetNameErrorDialog]);
 
@@ -180,7 +181,7 @@ export function SheetBarTabs() {
             return false;
         }
 
-        openSheetNameErrorDialog('sheetNameSpecCharAlert', localeService.t('sheets-ui.sheetConfig.sheetNameSpecCharError'));
+        openSheetNameErrorDialog('sheetNameSpecCharAlert', localeService.t<LocaleKey>('sheets-ui.sheetConfig.sheetNameSpecCharError'));
         return true;
     }, [localeService, openSheetNameErrorDialog]);
 
@@ -198,10 +199,10 @@ export function SheetBarTabs() {
         const id = 'sheetNameRepeatAlert';
         confirmService.open({
             id,
-            title: { title: localeService.t('sheets-ui.sheetConfig.sheetNameErrorTitle') },
-            children: { title: localeService.t('sheets-ui.sheetConfig.sheetNameAlreadyExistsError') },
-            cancelText: localeService.t('sheets-ui.button.cancel'),
-            confirmText: localeService.t('sheets-ui.button.confirm'),
+            title: { title: localeService.t<LocaleKey>('sheets-ui.sheetConfig.sheetNameErrorTitle') },
+            children: { title: localeService.t<LocaleKey>('sheets-ui.sheetConfig.sheetNameAlreadyExistsError') },
+            cancelText: localeService.t<LocaleKey>('sheets-ui.button.cancel'),
+            confirmText: localeService.t<LocaleKey>('sheets-ui.button.confirm'),
             onClose() {
                 confirmService.close(id);
                 focusTabEditor();

@@ -15,7 +15,15 @@
  */
 
 import type { ICellDataForSheetInterceptor, IRange, Workbook } from '@univerjs/core';
-import { Disposable, DisposableCollection, Inject, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
+import type { LocaleKey } from '../../locale/types';
+import {
+    Disposable,
+    DisposableCollection,
+    Inject,
+    IUniverInstanceService,
+    LocaleService,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { UnitAction } from '@univerjs/protocol';
 import { SheetPermissionCheckController, SheetsSelectionsService } from '@univerjs/sheets';
 import { ISheetClipboardService } from '../../services/clipboard/clipboard.service';
@@ -76,7 +84,9 @@ export class SheetPermissionInterceptorClipboardController extends Disposable {
                     }
 
                     if (!hasPermission) {
-                        this._sheetPermissionCheckController.blockExecuteWithoutPermission(this._localService.t('sheets-ui.permission.dialog.pasteErr'));
+                        this._sheetPermissionCheckController.blockExecuteWithoutPermission(
+                            this._localService.t<LocaleKey>('sheets-ui.permission.dialog.pasteErr')
+                        );
                     }
 
                     return hasPermission;

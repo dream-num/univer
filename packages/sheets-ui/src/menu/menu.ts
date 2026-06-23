@@ -16,6 +16,7 @@
 
 import type { IAccessor, IColorStyle, Nullable, Workbook } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
+import type { LocaleKey } from '../locale/types';
 import {
     BooleanNumber,
     composeStyles,
@@ -100,7 +101,10 @@ import {
     SetRangeTextColorCommand,
     SetRangeUnderlineCommand,
 } from '../commands/commands/inline-format.command';
-import { SetInfiniteFormatPainterCommand, SetOnceFormatPainterCommand } from '../commands/commands/set-format-painter.command';
+import {
+    SetInfiniteFormatPainterCommand,
+    SetOnceFormatPainterCommand,
+} from '../commands/commands/set-format-painter.command';
 import { SetWorksheetColAutoWidthCommand } from '../commands/commands/set-worksheet-auto-col-width.command';
 import { ISheetClipboardService } from '../services/clipboard/clipboard.service';
 import { FormatPainterStatus, IFormatPainterService } from '../services/format-painter/format-painter.service';
@@ -115,7 +119,7 @@ export enum SheetMenuPosition {
     SHEET_FOOTER = 'SHEET_FOOTER',
 }
 
-export function FormatPainterMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function FormatPainterMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     const formatPainterService = accessor.get(IFormatPainterService);
 
     return {
@@ -123,7 +127,7 @@ export function FormatPainterMenuItemFactory(accessor: IAccessor): IMenuButtonIt
         subId: SetInfiniteFormatPainterCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'BrushIcon',
-        title: 'Format Painter',
+        title: 'sheets-ui.toolbar.formatPainter',
         tooltip: 'sheets-ui.toolbar.formatPainter',
         activated$: new Observable<boolean>((subscriber) => {
             let active = false;
@@ -140,11 +144,15 @@ export function FormatPainterMenuItemFactory(accessor: IAccessor): IMenuButtonIt
             };
         }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetCopyPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }, true),
+        disabled$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetCopyPermission, WorksheetEditPermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        }, true),
     };
 }
 
-export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     const commandService = accessor.get(ICommandService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const contextService = accessor.get(IContextService);
@@ -154,9 +162,13 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         id: SetRangeBoldCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'BoldIcon',
-        title: 'Set bold',
+        title: 'sheets-ui.toolbar.bold',
         tooltip: 'sheets-ui.toolbar.bold',
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission], rangeTypes: [RangeProtectionPermissionEditPoint] }, true),
+        disabled$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        }, true),
         activated$: deriveStateFromActiveSheet$(univerInstanceService, false, ({ worksheet }) => new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
@@ -206,7 +218,7 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     };
 }
 
-export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     const commandService = accessor.get(ICommandService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SheetsSelectionsService);
@@ -216,7 +228,7 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         id: SetRangeItalicCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'ItalicIcon',
-        title: 'Set italic',
+        title: 'sheets-ui.toolbar.italic',
         tooltip: 'sheets-ui.toolbar.italic',
         disabled$: getCurrentRangeDisable$(
             accessor,
@@ -268,7 +280,7 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     };
 }
 
-export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     const commandService = accessor.get(ICommandService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SheetsSelectionsService);
@@ -278,7 +290,7 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         id: SetRangeUnderlineCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'UnderlineIcon',
-        title: 'Set underline',
+        title: 'sheets-ui.toolbar.underline',
         tooltip: 'sheets-ui.toolbar.underline',
         activated$: deriveStateFromActiveSheet$(univerInstanceService, false, ({ worksheet }) => new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
@@ -326,7 +338,7 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     };
 }
 
-export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     const commandService = accessor.get(ICommandService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SheetsSelectionsService);
@@ -336,7 +348,7 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
         id: SetRangeStrickThroughCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'StrikethroughIcon',
-        title: 'Set strike through',
+        title: 'sheets-ui.toolbar.strikethrough',
         tooltip: 'sheets-ui.toolbar.strikethrough',
         disabled$: getCurrentRangeDisable$(accessor, {
             workbookTypes: [WorkbookEditablePermission],
@@ -388,7 +400,7 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
     };
 }
 
-export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
+export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey, string> {
     const commandService = accessor.get(ICommandService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SheetsSelectionsService);
@@ -467,7 +479,7 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
     };
 }
 
-export function ResetTextColorMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function ResetTextColorMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: ResetRangeTextColorCommand.id,
         type: MenuItemType.BUTTON,
@@ -482,7 +494,7 @@ export function ResetTextColorMenuItemFactory(accessor: IAccessor): IMenuButtonI
     };
 }
 
-export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string, string | undefined> {
+export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey, string, string | undefined> {
     const commandService = accessor.get(ICommandService);
     const themeService = accessor.get(ThemeService);
     const selectionManagerService = accessor.get(SheetsSelectionsService);
@@ -532,7 +544,7 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
     };
 }
 
-export function ResetBackgroundColorMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function ResetBackgroundColorMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: ResetBackgroundColorCommand.id,
         type: MenuItemType.BUTTON,
@@ -546,7 +558,7 @@ export function ResetBackgroundColorMenuItemFactory(accessor: IAccessor): IMenuB
     };
 }
 
-export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string, string | undefined> {
+export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey, string, string | undefined> {
     const commandService = accessor.get(ICommandService);
     const themeService = accessor.get(ThemeService);
     const selectionManagerService = accessor.get(SheetsSelectionsService);
@@ -617,7 +629,7 @@ export const HORIZONTAL_ALIGN_CHILDREN = [
     },
 ];
 
-export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<HorizontalAlign> {
+export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey, HorizontalAlign> {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SheetsSelectionsService);
 
@@ -692,7 +704,7 @@ export const VERTICAL_ALIGN_CHILDREN = [
     },
 ];
 
-export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<VerticalAlign> {
+export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey, VerticalAlign> {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SheetsSelectionsService);
 
@@ -767,7 +779,7 @@ export const TEXT_WRAP_CHILDREN = [
     },
 ];
 
-export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<WrapStrategy> {
+export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey, WrapStrategy> {
     const selectionManagerService = accessor.get(SheetsSelectionsService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
 
@@ -857,7 +869,7 @@ export const TEXT_ROTATE_CHILDREN = [
     },
 ];
 
-export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<number | string> {
+export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey, number | string> {
     const selectionManagerService = accessor.get(SheetsSelectionsService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
 
@@ -936,7 +948,7 @@ export function menuClipboardDisabledObservable(injector: IAccessor): Observable
     });
 }
 
-export function CopyMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function CopyMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: SheetCopyCommand.name,
         commandId: SheetCopyCommand.id,
@@ -952,7 +964,7 @@ export function CopyMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     };
 }
 
-export function CutMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function CutMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: SheetCutCommand.name,
         commandId: CutCommand.id,
@@ -968,7 +980,7 @@ export function CutMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     };
 }
 
-export function PasteMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function PasteMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: SheetPasteCommand.name,
         commandId: SheetPasteCommand.id,
@@ -989,7 +1001,7 @@ export function PasteMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
 // Right click menu - Copy Special
 export const COPY_SPECIAL_MENU_ID = 'sheet.menu.copy-special';
-export function CopySpacialMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+export function CopySpacialMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey> {
     return {
         id: COPY_SPECIAL_MENU_ID,
         type: MenuItemType.SUBITEMS,
@@ -1001,7 +1013,7 @@ export function CopySpacialMenuItemFactory(accessor: IAccessor): IMenuSelectorIt
 
 // Right click menu - Paste Special
 export const PASTE_SPECIAL_MENU_ID = 'sheet.menu.paste-special';
-export function PasteSpacialMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+export function PasteSpacialMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey> {
     return {
         id: PASTE_SPECIAL_MENU_ID,
         type: MenuItemType.SUBITEMS,
@@ -1011,7 +1023,7 @@ export function PasteSpacialMenuItemFactory(accessor: IAccessor): IMenuSelectorI
     };
 }
 
-export function PasteValueMenuItemFactory(accessor: IAccessor): IMenuButtonItem<string> {
+export function PasteValueMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey, string> {
     return {
         id: SheetPasteValueCommand.id,
         type: MenuItemType.BUTTON,
@@ -1028,7 +1040,7 @@ export function PasteValueMenuItemFactory(accessor: IAccessor): IMenuButtonItem<
     };
 }
 
-export function PasteFormatMenuItemFactory(accessor: IAccessor): IMenuButtonItem<string> {
+export function PasteFormatMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey, string> {
     return {
         id: SheetPasteFormatCommand.id,
         type: MenuItemType.BUTTON,
@@ -1045,7 +1057,7 @@ export function PasteFormatMenuItemFactory(accessor: IAccessor): IMenuButtonItem
     };
 }
 
-export function PasteColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem<string> {
+export function PasteColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey, string> {
     return {
         id: SheetPasteColWidthCommand.id,
         type: MenuItemType.BUTTON,
@@ -1061,7 +1073,7 @@ export function PasteColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonIt
     };
 }
 
-export function PasteBesidesBorderMenuItemFactory(accessor: IAccessor): IMenuButtonItem<string> {
+export function PasteBesidesBorderMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey, string> {
     return {
         id: SheetPasteBesidesBorderCommand.id,
         type: MenuItemType.BUTTON,
@@ -1086,7 +1098,7 @@ export function PasteBesidesBorderMenuItemFactory(accessor: IAccessor): IMenuBut
 
 //#endregion
 
-export function FitContentMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function FitContentMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: SetWorksheetRowIsAutoHeightCommand.id,
         type: MenuItemType.BUTTON,
@@ -1101,7 +1113,7 @@ export function FitContentMenuItemFactory(accessor: IAccessor): IMenuButtonItem 
     };
 }
 
-export function ColAutoWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function ColAutoWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: SetWorksheetColAutoWidthCommand.id,
         type: MenuItemType.BUTTON,
@@ -1116,7 +1128,7 @@ export function ColAutoWidthMenuItemFactory(accessor: IAccessor): IMenuButtonIte
     };
 }
 
-export function HideRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function HideRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: HideRowConfirmCommand.id,
         type: MenuItemType.BUTTON,
@@ -1131,7 +1143,7 @@ export function HideRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     };
 }
 
-export function HideColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function HideColMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: HideColConfirmCommand.id,
         type: MenuItemType.BUTTON,
@@ -1146,7 +1158,7 @@ export function HideColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     };
 }
 
-export function ShowRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function ShowRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SheetsSelectionsService);
 
@@ -1187,7 +1199,7 @@ export function ShowRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     };
 }
 
-export function ShowColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function ShowColMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SheetsSelectionsService);
     const commandService = accessor.get(ICommandService);
@@ -1227,7 +1239,7 @@ export function ShowColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     };
 }
 
-export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuButtonItem<number> {
+export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey, number> {
     const commandService = accessor.get(ICommandService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SheetsSelectionsService);
@@ -1272,7 +1284,7 @@ export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuButtonIte
     };
 }
 
-export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem<number> {
+export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey, number> {
     const commandService = accessor.get(ICommandService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SheetsSelectionsService);

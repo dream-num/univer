@@ -15,6 +15,7 @@
  */
 
 import type { IAccessor } from '@univerjs/core';
+import type { LocaleKey } from '../../locale/types';
 import type { IMenuButtonItem } from '../../services/menu/menu';
 import {
     EDITOR_ACTIVATED,
@@ -40,23 +41,23 @@ const undoRedoDisableFactory$ = (accessor: IAccessor, isUndo: boolean) => {
     }));
 };
 
-export function UndoMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function UndoMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: UndoCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'UndoIcon',
-        title: 'Undo',
+        title: 'ui.shortcut.undo',
         tooltip: 'ui.shortcut.undo',
         disabled$: undoRedoDisableFactory$(accessor, true),
     };
 }
 
-export function RedoMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function RedoMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: RedoCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'RedoIcon',
-        title: 'Redo',
+        title: 'ui.shortcut.redo',
         tooltip: 'ui.shortcut.redo',
         disabled$: undoRedoDisableFactory$(accessor, false),
     };

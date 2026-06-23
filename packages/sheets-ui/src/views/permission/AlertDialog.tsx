@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { LocaleKey } from '../../locale/types';
 import { LocaleService } from '@univerjs/core';
 import { useDependency } from '@univerjs/ui';
 
@@ -23,7 +24,7 @@ export const AlertDialog = ({ errorMsg }: { errorMsg: string }) => {
     return (
         <div>
             <p className="univer-m-0">
-                {errorMsg || localeService.t('sheets-ui.permission.dialog.alertContent')}
+                {errorMsg || localeService.t<LocaleKey>('sheets-ui.permission.dialog.alertContent')}
             </p>
         </div>
     );

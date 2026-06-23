@@ -20,6 +20,7 @@ import type { IImageIoServiceParam } from '@univerjs/drawing';
 import type { Documents, Image, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { IInsertDrawingCommandParams } from '../../commands/commands/interfaces';
 import type { ISetDrawingArrangeCommandParams } from '../../commands/commands/set-drawing-arrange.command';
+import type { LocaleKey } from '../../locale/types';
 import {
     BooleanNumber,
     Disposable,
@@ -106,7 +107,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
         if (fileLength > DRAWING_IMAGE_COUNT_LIMIT) {
             this._messageService.show({
                 type: MessageType.Error,
-                content: this._localeService.t('docs-drawing-ui.update-status.exceedMaxCount', String(DRAWING_IMAGE_COUNT_LIMIT)),
+                content: this._localeService.t<LocaleKey>('docs-drawing-ui.update-status.exceedMaxCount', String(DRAWING_IMAGE_COUNT_LIMIT)),
             });
             return false;
         } else if (fileLength === 0) {
@@ -129,13 +130,13 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
 
             switch (type) {
                 case ImageUploadStatusType.ERROR_EXCEED_SIZE:
-                    content = this._localeService.t('docs-drawing-ui.update-status.exceedMaxSize', String(getDrawingImageAllowSize() / (1024 * 1024)));
+                    content = this._localeService.t<LocaleKey>('docs-drawing-ui.update-status.exceedMaxSize', String(getDrawingImageAllowSize() / (1024 * 1024)));
                     break;
                 case ImageUploadStatusType.ERROR_IMAGE_TYPE:
-                    content = this._localeService.t('docs-drawing-ui.update-status.invalidImageType');
+                    content = this._localeService.t<LocaleKey>('docs-drawing-ui.update-status.invalidImageType');
                     break;
                 case ImageUploadStatusType.ERROR_IMAGE:
-                    content = this._localeService.t('docs-drawing-ui.update-status.invalidImage');
+                    content = this._localeService.t<LocaleKey>('docs-drawing-ui.update-status.invalidImage');
                     break;
                 default:
                     break;

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { LocaleKey } from '../../locale/types';
 import type { ByValuesModel, IFilterByValueWithTreeItem } from '../../services/sheets-filter-panel.service';
 import { LocaleService } from '@univerjs/core';
 import { borderClassName, Checkbox, clsx, Input, Tree } from '@univerjs/design';
@@ -31,7 +32,7 @@ export function FilterByValue(props: { model: ByValuesModel }) {
 
     const searchText = useObservable(model.searchString$, '', true);
     const items = useObservable(model.filterItems$, undefined, true);
-    const filterOnly = localeService.t('sheets-filter-ui.panel.filter-only');
+    const filterOnly = localeService.t<LocaleKey>('sheets-filter-ui.panel.filter-only');
 
     const stat = statisticFilterByValueItems(items);
     const allChecked = stat.checked > 0 && stat.unchecked === 0;
@@ -68,7 +69,7 @@ export function FilterByValue(props: { model: ByValuesModel }) {
             <Input
                 autoFocus
                 value={searchText}
-                placeholder={localeService.t('sheets-filter-ui.panel.search-placeholder')}
+                placeholder={localeService.t<LocaleKey>('sheets-filter-ui.panel.search-placeholder')}
                 onChange={onSearchValueChange}
             />
             <div
@@ -103,7 +104,7 @@ export function FilterByValue(props: { model: ByValuesModel }) {
                               dark:!univer-text-white
                             `}
                         >
-                            {`${localeService.t('sheets-filter-ui.panel.select-all')}`}
+                            {`${localeService.t<LocaleKey>('sheets-filter-ui.panel.select-all')}`}
                         </span>
                         <span
                             data-u-comp="sheets-filter-panel-values-item-count"

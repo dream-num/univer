@@ -16,6 +16,7 @@
 
 import type { IDisposable } from '@univerjs/core';
 import type { IConditionFormattingRule } from '@univerjs/sheets-conditional-formatting';
+import type { LocaleKey } from '../locale/types';
 import { Disposable, generateRandomId, Inject, Injector, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { ComponentManager, ISidebarService } from '@univerjs/ui';
 
@@ -52,7 +53,7 @@ export class ConditionalFormattingPanelController extends Disposable {
     openPanel(rule?: IConditionFormattingRule) {
         const props = {
             id: CF_PANEL_KEY,
-            header: { title: this._localeService.t('sheets-conditional-formatting-ui.title') },
+            header: { title: this._localeService.t<LocaleKey>('sheets-conditional-formatting-ui.title') },
             children: {
                 label: CF_PANEL_KEY,
                 rule,

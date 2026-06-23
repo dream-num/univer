@@ -15,11 +15,38 @@
  */
 
 import type { Workbook, Worksheet } from '@univerjs/core';
-import type { IDeleteDrawingCommandParams, IInsertDrawingCommandParams, ISetDrawingArrangeCommandParams, ISetDrawingCommandParams } from '@univerjs/sheets-drawing';
-import { Disposable, ICommandService, Inject, IPermissionService, IUniverInstanceService, LocaleService, UniverInstanceType, UserManagerService } from '@univerjs/core';
+import type {
+    IDeleteDrawingCommandParams,
+    IInsertDrawingCommandParams,
+    ISetDrawingArrangeCommandParams,
+    ISetDrawingCommandParams,
+} from '@univerjs/sheets-drawing';
+import type { LocaleKey } from '../locale/types';
+import {
+    Disposable,
+    ICommandService,
+    Inject,
+    IPermissionService,
+    IUniverInstanceService,
+    LocaleService,
+    UniverInstanceType,
+    UserManagerService,
+} from '@univerjs/core';
 import { IRenderManagerService, ObjectType } from '@univerjs/engine-render';
-import { SheetPermissionCheckController, WorkbookEditablePermission, WorkbookViewPermission, WorksheetEditPermission, WorksheetViewPermission } from '@univerjs/sheets';
-import { InsertSheetDrawingCommand, ISheetDrawingService, RemoveSheetDrawingCommand, SetDrawingArrangeCommand, SetSheetDrawingCommand } from '@univerjs/sheets-drawing';
+import {
+    SheetPermissionCheckController,
+    WorkbookEditablePermission,
+    WorkbookViewPermission,
+    WorksheetEditPermission,
+    WorksheetViewPermission,
+} from '@univerjs/sheets';
+import {
+    InsertSheetDrawingCommand,
+    ISheetDrawingService,
+    RemoveSheetDrawingCommand,
+    SetDrawingArrangeCommand,
+    SetSheetDrawingCommand,
+} from '@univerjs/sheets-drawing';
 import { combineLatest, distinctUntilChanged, EMPTY, map, switchMap, tap } from 'rxjs';
 
 const drawingObjectTypes = [
@@ -430,7 +457,7 @@ export class SheetDrawingPermissionController extends Disposable {
                     worksheetTypes: [WorksheetEditPermission],
                 }, unitId, subUnitId);
                 if (!permission) {
-                    this._sheetPermissionCheckController.blockExecuteWithoutPermission(this._localeService.t('sheets-drawing-ui.permission.dialog.editErr'));
+                    this._sheetPermissionCheckController.blockExecuteWithoutPermission(this._localeService.t<LocaleKey>('sheets-drawing-ui.permission.dialog.editErr'));
                 }
             })
         );

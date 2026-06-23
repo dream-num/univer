@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { LocaleKey } from '../locale/types';
 import { LocaleService } from '@univerjs/core';
 import { Radio, RadioGroup } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
@@ -29,7 +30,7 @@ export const ExtendConfirm = (props: IExtendConfirmProps) => {
     return (
         <div className="univer-text-sm">
             <div className="extend-confirm-desc">
-                {localeService.t('sheets-sort-ui.dialog.sort-reminder-desc')}
+                {localeService.t<LocaleKey>('sheets-sort-ui.dialog.sort-reminder-desc')}
             </div>
 
             <RadioGroup
@@ -42,10 +43,10 @@ export const ExtendConfirm = (props: IExtendConfirmProps) => {
                 }}
             >
                 <Radio value="0">
-                    {localeService.t('sheets-sort-ui.dialog.sort-reminder-no')}
+                    {localeService.t<LocaleKey>('sheets-sort-ui.dialog.sort-reminder-no')}
                 </Radio>
                 <Radio value="1">
-                    {localeService.t('sheets-sort-ui.dialog.sort-reminder-ext')}
+                    {localeService.t<LocaleKey>('sheets-sort-ui.dialog.sort-reminder-ext')}
                 </Radio>
             </RadioGroup>
         </div>

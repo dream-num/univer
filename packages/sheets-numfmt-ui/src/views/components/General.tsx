@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { FC } from 'react';
+import type { LocaleKey } from '../../locale/types';
 import type { IBusinessComponentProps } from './interface';
 import { LocaleService } from '@univerjs/core';
 import { useDependency } from '@univerjs/ui';
@@ -22,7 +22,7 @@ import { useLayoutEffect } from 'react';
 
 export const isGeneralPanel = (pattern: string) => !pattern;
 
-export const GeneralPanel: FC<IBusinessComponentProps> = (props) => {
+export function GeneralPanel(props: IBusinessComponentProps) {
     const localeService = useDependency(LocaleService);
     const { onActionChange } = props;
 
@@ -38,8 +38,8 @@ export const GeneralPanel: FC<IBusinessComponentProps> = (props) => {
                   dark:!univer-text-gray-200
                 `}
             >
-                {localeService.t('sheets-numfmt-ui.generalDes')}
+                {localeService.t<LocaleKey>('sheets-numfmt-ui.generalDes')}
             </div>
         </div>
     );
-};
+}

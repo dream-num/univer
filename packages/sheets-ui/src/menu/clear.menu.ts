@@ -16,6 +16,7 @@
 
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
+import type { LocaleKey } from '../locale/types';
 import { UniverInstanceType } from '@univerjs/core';
 import {
     ClearSelectionAllCommand,
@@ -31,7 +32,7 @@ import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { getCurrentRangeDisable$, getObservableWithExclusiveRange$ } from './menu-util';
 
 export const CLEAR_SELECTION_MENU_ID = 'sheet.menu.clear-selection';
-export function ClearSelectionMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
+export function ClearSelectionMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey> {
     return {
         id: CLEAR_SELECTION_MENU_ID,
         type: MenuItemType.SUBITEMS,
@@ -41,7 +42,7 @@ export function ClearSelectionMenuItemFactory(accessor: IAccessor): IMenuSelecto
     };
 }
 
-export function ClearSelectionContentMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function ClearSelectionContentMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: ClearSelectionContentCommand.id,
         type: MenuItemType.BUTTON,
@@ -55,7 +56,7 @@ export function ClearSelectionContentMenuItemFactory(accessor: IAccessor): IMenu
     };
 }
 
-export function ClearSelectionFormatMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function ClearSelectionFormatMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: ClearSelectionFormatCommand.id,
         type: MenuItemType.BUTTON,
@@ -69,7 +70,7 @@ export function ClearSelectionFormatMenuItemFactory(accessor: IAccessor): IMenuB
     };
 }
 
-export function ClearSelectionAllToolbarMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function ClearSelectionAllToolbarMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: ClearSelectionAllCommand.id,
         type: MenuItemType.BUTTON,
@@ -84,7 +85,7 @@ export function ClearSelectionAllToolbarMenuItemFactory(accessor: IAccessor): IM
     };
 }
 
-export function ClearSelectionAllMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function ClearSelectionAllMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: ClearSelectionAllCommand.id,
         type: MenuItemType.BUTTON,

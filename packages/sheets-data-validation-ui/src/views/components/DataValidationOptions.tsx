@@ -15,6 +15,7 @@
  */
 
 import type { IDataValidationRuleOptions } from '@univerjs/core';
+import type { LocaleKey } from '../../locale/types';
 import { DataValidationErrorStyle, LocaleService } from '@univerjs/core';
 import { Checkbox, FormLayout, Input, Radio, RadioGroup } from '@univerjs/design';
 import { MoreDownIcon, MoreUpIcon } from '@univerjs/icons';
@@ -44,7 +45,7 @@ export function DataValidationOptions(props: IDataValidationOptionsParams) {
                 `}
                 onClick={() => setShow(!show)}
             >
-                {localeService.t('sheets-data-validation-ui.panel.options')}
+                {localeService.t<LocaleKey>('sheets-data-validation-ui.panel.options')}
                 {show
                     ? (
                         <MoreUpIcon className="univer-ml-1" />
@@ -57,22 +58,22 @@ export function DataValidationOptions(props: IDataValidationOptionsParams) {
                 <>
                     {ExtraOptions ? <ExtraOptions value={value} onChange={onChange} /> : null}
                     <FormLayout
-                        label={localeService.t('sheets-data-validation-ui.panel.invalid')}
+                        label={localeService.t<LocaleKey>('sheets-data-validation-ui.panel.invalid')}
                     >
                         <RadioGroup
                             value={`${value.errorStyle ?? DataValidationErrorStyle.WARNING}`}
                             onChange={(errorStyle) => onChange({ ...value, errorStyle: +errorStyle })}
                         >
                             <Radio value={`${DataValidationErrorStyle.WARNING}`}>
-                                {localeService.t('sheets-data-validation-ui.panel.showWarning')}
+                                {localeService.t<LocaleKey>('sheets-data-validation-ui.panel.showWarning')}
                             </Radio>
                             <Radio value={`${DataValidationErrorStyle.STOP}`}>
-                                {localeService.t('sheets-data-validation-ui.panel.rejectInput')}
+                                {localeService.t<LocaleKey>('sheets-data-validation-ui.panel.rejectInput')}
                             </Radio>
                         </RadioGroup>
                     </FormLayout>
                     <FormLayout
-                        label={localeService.t('sheets-data-validation-ui.panel.messageInfo')}
+                        label={localeService.t<LocaleKey>('sheets-data-validation-ui.panel.messageInfo')}
                     >
                         <Checkbox
                             checked={value.showErrorMessage}
@@ -81,7 +82,7 @@ export function DataValidationOptions(props: IDataValidationOptionsParams) {
                                 showErrorMessage: !value.showErrorMessage,
                             })}
                         >
-                            {localeService.t('sheets-data-validation-ui.panel.showInfo')}
+                            {localeService.t<LocaleKey>('sheets-data-validation-ui.panel.showInfo')}
                         </Checkbox>
                     </FormLayout>
                     {value.showErrorMessage

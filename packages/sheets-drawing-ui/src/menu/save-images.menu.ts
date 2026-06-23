@@ -16,6 +16,7 @@
 
 import type { IAccessor, ICellData, IRange, Nullable, Workbook } from '@univerjs/core';
 import type { IMenuItem } from '@univerjs/ui';
+import type { LocaleKey } from '../locale/types';
 import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
@@ -63,7 +64,7 @@ function isFileSystemAccessSupported(): boolean {
     return 'showDirectoryPicker' in window;
 }
 
-export function SaveCellImagesMenuFactory(accessor: IAccessor): IMenuItem {
+export function SaveCellImagesMenuFactory(accessor: IAccessor): IMenuItem<LocaleKey> {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionService = accessor.get(SheetsSelectionsService);
 

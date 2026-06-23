@@ -17,6 +17,7 @@
 import type { IDrawingParam, Nullable } from '@univerjs/core';
 import type { BaseObject } from '@univerjs/engine-render';
 import type { ISheetDrawing } from '@univerjs/sheets-drawing';
+import type { LocaleKey } from '../../locale/types';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import { clsx, Radio, RadioGroup } from '@univerjs/design';
 import { IDrawingManagerService } from '@univerjs/drawing';
@@ -146,14 +147,14 @@ export const SheetDrawingAnchor = (props: ISheetDrawingAnchorProps) => {
                   dark:!univer-text-gray-200
                 `}
             >
-                <div>{localeService.t('sheets-drawing-ui.drawing-anchor.title')}</div>
+                <div>{localeService.t<LocaleKey>('sheets-drawing-ui.drawing-anchor.title')}</div>
             </header>
 
             <div>
                 <RadioGroup value={value} onChange={handleChange} direction="vertical">
-                    <Radio value={SheetDrawingAnchorType.Both}>{localeService.t('sheets-drawing-ui.drawing-anchor.both')}</Radio>
-                    <Radio value={SheetDrawingAnchorType.Position}>{localeService.t('sheets-drawing-ui.drawing-anchor.position')}</Radio>
-                    <Radio value={SheetDrawingAnchorType.None}>{localeService.t('sheets-drawing-ui.drawing-anchor.none')}</Radio>
+                    <Radio value={SheetDrawingAnchorType.Both}>{localeService.t<LocaleKey>('sheets-drawing-ui.drawing-anchor.both')}</Radio>
+                    <Radio value={SheetDrawingAnchorType.Position}>{localeService.t<LocaleKey>('sheets-drawing-ui.drawing-anchor.position')}</Radio>
+                    <Radio value={SheetDrawingAnchorType.None}>{localeService.t<LocaleKey>('sheets-drawing-ui.drawing-anchor.none')}</Radio>
                 </RadioGroup>
             </div>
         </div>

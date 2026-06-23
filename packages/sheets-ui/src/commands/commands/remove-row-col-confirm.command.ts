@@ -16,9 +16,9 @@
 
 import type { IAccessor, ICommand } from '@univerjs/core';
 import type { IRemoveRowColCommandParams } from '@univerjs/sheets';
+import type { LocaleKey } from '../../locale/types';
 import { CommandType, ICommandService, IConfirmService, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { getSheetCommandTarget, RemoveColCommand, RemoveRowCommand, SheetsSelectionsService } from '@univerjs/sheets';
-
 import { isAllColumnsCovered, isAllRowsCovered } from './utils/selection-utils';
 
 export const RemoveRowConfirmCommand: ICommand = {
@@ -51,11 +51,11 @@ export const RemoveRowConfirmCommand: ICommand = {
             await confirmService.confirm({
                 id: 'sheet.confirm.remove-row',
                 title: {
-                    title: localeService.t('sheets-ui.info.problem'),
+                    title: localeService.t<LocaleKey>('sheets-ui.info.problem'),
                 },
-                children: { title: localeService.t('sheets-ui.rightClick.deleteAllRowsAlert') },
-                cancelText: localeService.t('sheets-ui.button.cancel'),
-                confirmText: localeService.t('sheets-ui.button.confirm'),
+                children: { title: localeService.t<LocaleKey>('sheets-ui.rightClick.deleteAllRowsAlert') },
+                cancelText: localeService.t<LocaleKey>('sheets-ui.button.cancel'),
+                confirmText: localeService.t<LocaleKey>('sheets-ui.button.confirm'),
             });
 
             return false;
@@ -96,11 +96,11 @@ export const RemoveColConfirmCommand: ICommand = {
             await confirmService.confirm({
                 id: 'sheet.confirm.remove-col',
                 title: {
-                    title: localeService.t('sheets-ui.info.problem'),
+                    title: localeService.t<LocaleKey>('sheets-ui.info.problem'),
                 },
-                children: { title: localeService.t('sheets-ui.rightClick.deleteAllColumnsAlert') },
-                cancelText: localeService.t('sheets-ui.button.cancel'),
-                confirmText: localeService.t('sheets-ui.button.confirm'),
+                children: { title: localeService.t<LocaleKey>('sheets-ui.rightClick.deleteAllColumnsAlert') },
+                cancelText: localeService.t<LocaleKey>('sheets-ui.button.cancel'),
+                confirmText: localeService.t<LocaleKey>('sheets-ui.button.confirm'),
             });
 
             return false;

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { LocaleKey } from '../../locale/types';
 import type { IBusinessComponentProps } from './interface';
 import { ILocalStorageService, LocaleService } from '@univerjs/core';
 import { borderClassName, clsx, Input } from '@univerjs/design';
@@ -72,16 +73,21 @@ export function CustomFormat(props: IBusinessComponentProps) {
 
     return (
         <div>
-            <div className="univer-mt-4 univer-text-sm univer-text-gray-400">{localeService.t('sheets-numfmt-ui.customFormat')}</div>
+            <div className="univer-mt-4 univer-text-sm univer-text-gray-400">
+                {localeService.t<LocaleKey>('sheets-numfmt-ui.customFormat')}
+            </div>
             <Input
-                placeholder={localeService.t('sheets-numfmt-ui.customFormat')}
+                placeholder={localeService.t<LocaleKey>('sheets-numfmt-ui.customFormat')}
                 onBlur={handleBlur}
                 value={pattern}
                 onChange={setPattern}
                 className="univer-mt-2 univer-w-full"
             />
             <div
-                className={clsx('univer-mt-2 univer-max-h-[400px] univer-overflow-auto univer-rounded-lg univer-p-2', borderClassName)}
+                className={clsx(
+                    'univer-mt-2 univer-max-h-[400px] univer-overflow-auto univer-rounded-lg univer-p-2',
+                    borderClassName
+                )}
             >
                 {options.map((p) => (
                     <div
@@ -107,7 +113,7 @@ export function CustomFormat(props: IBusinessComponentProps) {
                   dark:!univer-text-gray-200
                 `}
             >
-                {localeService.t('sheets-numfmt-ui.customFormatDes')}
+                {localeService.t<LocaleKey>('sheets-numfmt-ui.customFormatDes')}
             </div>
         </div>
     );

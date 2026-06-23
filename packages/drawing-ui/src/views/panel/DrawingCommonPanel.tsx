@@ -15,6 +15,7 @@
  */
 
 import type { IDrawingParam } from '@univerjs/core';
+import type { LocaleKey } from '../../locale/types';
 import { LocaleService } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
 import { IDrawingManagerService } from '@univerjs/drawing';
@@ -172,7 +173,7 @@ export const DrawingCommonPanel = (props: IDrawingCommonPanelProps) => {
             >
                 <div className="univer-flex univer-h-full univer-items-center univer-justify-center">
                     <span>
-                        {localeService.t('drawing-ui.image-panel.null')}
+                        {localeService.t<LocaleKey>('drawing-ui.image-panel.null')}
                     </span>
                 </div>
             </div>

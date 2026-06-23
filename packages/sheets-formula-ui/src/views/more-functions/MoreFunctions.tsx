@@ -15,7 +15,14 @@
  */
 
 import type { IFunctionInfo } from '@univerjs/engine-formula';
-import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
+import type { LocaleKey } from '../../locale/types';
+import {
+    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    ICommandService,
+    IUniverInstanceService,
+    LocaleService,
+} from '@univerjs/core';
 import { Button } from '@univerjs/design';
 import { IEditorService } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
@@ -77,12 +84,12 @@ export function MoreFunctions() {
                         onClick={handleClickNextPrev}
                         className="univer-mb-5 univer-ml-4 univer-mr-0 univer-mt-0"
                     >
-                        {localeService.t('sheets-formula-ui.moreFunctions.next')}
+                        {localeService.t<LocaleKey>('sheets-formula-ui.moreFunctions.next')}
                     </Button>
                 )}
                 {inputParams && (
                     <Button onClick={handleClickNextPrev} className="univer-mb-5 univer-ml-4 univer-mr-0 univer-mt-0">
-                        {localeService.t('sheets-formula-ui.moreFunctions.prev')}
+                        {localeService.t<LocaleKey>('sheets-formula-ui.moreFunctions.prev')}
                     </Button>
                 )}
                 {selectFunction && !!workbook && (
@@ -92,7 +99,7 @@ export function MoreFunctions() {
                         onClick={handleConfirm}
                         className="univer-mb-5 univer-ml-4 univer-mr-0 univer-mt-0"
                     >
-                        {localeService.t('sheets-formula-ui.moreFunctions.confirm')}
+                        {localeService.t<LocaleKey>('sheets-formula-ui.moreFunctions.confirm')}
                     </Button>
                 )}
             </div>

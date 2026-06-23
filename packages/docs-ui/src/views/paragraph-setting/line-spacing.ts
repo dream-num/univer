@@ -15,6 +15,7 @@
  */
 
 import type { LocaleService } from '@univerjs/core';
+import type { LocaleKey } from '../../locale/types';
 import { DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING, DEFAULT_STYLES, SpacingRule } from '@univerjs/core';
 
 interface ILineSpacingMetrics {
@@ -50,9 +51,9 @@ function clamp(value: number, min: number, max: number) {
 
 export function getLineSpacingRuleOptions(localeService: LocaleService) {
     return [
-        { label: localeService.t('docs-ui.doc.paragraphSetting.multiSpace'), value: `${SpacingRule.AUTO}` },
-        { label: localeService.t('docs-ui.doc.paragraphSetting.atLeast'), value: `${SpacingRule.AT_LEAST}` },
-        { label: localeService.t('docs-ui.doc.paragraphSetting.exactly'), value: `${SpacingRule.EXACT}` },
+        { label: localeService.t<LocaleKey>('docs-ui.doc.paragraphSetting.multiSpace'), value: `${SpacingRule.AUTO}` },
+        { label: localeService.t<LocaleKey>('docs-ui.doc.paragraphSetting.atLeast'), value: `${SpacingRule.AT_LEAST}` },
+        { label: localeService.t<LocaleKey>('docs-ui.doc.paragraphSetting.exactly'), value: `${SpacingRule.EXACT}` },
     ];
 }
 

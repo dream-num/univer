@@ -16,8 +16,15 @@
 
 import type { ICommandInfo } from '@univerjs/core';
 import type { IAddCfCommandParams } from '@univerjs/sheets-conditional-formatting';
+import type { LocaleKey } from '../locale/types';
 import { Disposable, ICommandService, Inject, LocaleService } from '@univerjs/core';
-import { RangeProtectionPermissionEditPoint, SheetPermissionCheckController, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission } from '@univerjs/sheets';
+import {
+    RangeProtectionPermissionEditPoint,
+    SheetPermissionCheckController,
+    WorkbookEditablePermission,
+    WorksheetEditPermission,
+    WorksheetSetCellStylePermission,
+} from '@univerjs/sheets';
 import { AddCfCommand } from '@univerjs/sheets-conditional-formatting';
 
 export class ConditionalFormattingPermissionController extends Disposable {
@@ -43,7 +50,9 @@ export class ConditionalFormattingPermissionController extends Disposable {
                         worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
                     }, ranges, unitId, subUnitId);
                     if (!permission) {
-                        this._sheetPermissionCheckController.blockExecuteWithoutPermission(this._localeService.t('sheets-conditional-formatting-ui.permission.dialog.setStyleErr'));
+                        this._sheetPermissionCheckController.blockExecuteWithoutPermission(
+                            this._localeService.t<LocaleKey>('sheets-conditional-formatting-ui.permission.dialog.setStyleErr')
+                        );
                     }
                 }
             })

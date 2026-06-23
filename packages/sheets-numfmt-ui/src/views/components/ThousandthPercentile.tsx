@@ -14,10 +14,16 @@
  * limitations under the License.
  */
 
+import type { LocaleKey } from '../../locale/types';
 import type { IBusinessComponentProps } from './interface';
 import { isPatternEqualWithoutDecimal, LocaleService } from '@univerjs/core';
 import { InputNumber, SelectList } from '@univerjs/design';
-import { getDecimalFromPattern, getNumberFormatOptions, isPatternHasDecimal, setPatternDecimal } from '@univerjs/sheets-numfmt';
+import {
+    getDecimalFromPattern,
+    getNumberFormatOptions,
+    isPatternHasDecimal,
+    setPatternDecimal,
+} from '@univerjs/sheets-numfmt';
 import { useDependency } from '@univerjs/ui';
 import { useLayoutEffect, useMemo, useState } from 'react';
 
@@ -59,7 +65,9 @@ export function ThousandthPercentilePanel(props: IBusinessComponentProps) {
 
     return (
         <div>
-            <div className="univer-mt-4 univer-text-sm univer-text-gray-400">{localeService.t('sheets-numfmt-ui.decimalLength')}</div>
+            <div className="univer-mt-4 univer-text-sm univer-text-gray-400">
+                {localeService.t<LocaleKey>('sheets-numfmt-ui.decimalLength')}
+            </div>
             <div className="univer-mt-2">
                 <InputNumber
                     disabled={isInputDisable}
@@ -71,7 +79,7 @@ export function ThousandthPercentilePanel(props: IBusinessComponentProps) {
             </div>
             <div className="univer-mt-4 univer-text-sm univer-text-gray-400">
                 {' '}
-                {localeService.t('sheets-numfmt-ui.negType')}
+                {localeService.t<LocaleKey>('sheets-numfmt-ui.negType')}
             </div>
             <div className="univer-mt-2">
                 <SelectList onChange={handleClick} options={options} value={suffix} />
@@ -82,7 +90,7 @@ export function ThousandthPercentilePanel(props: IBusinessComponentProps) {
                   dark:!univer-text-gray-200
                 `}
             >
-                {localeService.t('sheets-numfmt-ui.thousandthPercentileDes')}
+                {localeService.t<LocaleKey>('sheets-numfmt-ui.thousandthPercentileDes')}
             </div>
         </div>
     );

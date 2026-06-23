@@ -16,6 +16,7 @@
 
 import type { CellValue, DataValidationOperator, IDataValidationRule, IDataValidationRuleBase } from '@univerjs/core';
 import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
+import type { LocaleKey } from '../locale/types';
 import { CellValueType, DataValidationType, isFormulaString, Tools } from '@univerjs/core';
 import { LexerTreeBuilder, operatorToken } from '@univerjs/engine-formula';
 import { DataValidationCustomFormulaService } from '../services/dv-custom-formula.service';
@@ -40,7 +41,7 @@ export class CustomFormulaValidator extends BaseSheetValidator {
 
         return {
             success: success && valid,
-            formula1: success && valid ? '' : this.localeService.t('sheets-data-validation.validFail.formula'),
+            formula1: success && valid ? '' : this.localeService.t<LocaleKey>('sheets-data-validation.validFail.formula'),
         };
     }
 
@@ -85,10 +86,10 @@ export class CustomFormulaValidator extends BaseSheetValidator {
     }
 
     override generateRuleErrorMessage(rule: IDataValidationRuleBase): string {
-        return this.localeService.t('sheets-data-validation.custom.error');
+        return this.localeService.t<LocaleKey>('sheets-data-validation.custom.error');
     }
 
     override generateRuleName(rule: IDataValidationRuleBase): string {
-        return (this.localeService.t('sheets-data-validation.custom.ruleName')).replace('{FORMULA1}', rule.formula1 ?? '');
+        return (this.localeService.t<LocaleKey>('sheets-data-validation.custom.ruleName')).replace('{FORMULA1}', rule.formula1 ?? '');
     }
 }

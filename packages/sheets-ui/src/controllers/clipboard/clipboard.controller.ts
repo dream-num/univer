@@ -32,6 +32,7 @@ import type {
     ISetWorksheetColWidthMutationParams,
 } from '@univerjs/sheets';
 import type { IUniverSheetsUIConfig } from '../../config/config';
+import type { LocaleKey } from '../../locale/types';
 import type {
     ICellDataWithSpanInfo,
     IClipboardPropertyItem,
@@ -93,7 +94,12 @@ import {
 } from '../../commands/commands/clipboard.command';
 import { SetScrollOperation } from '../../commands/operations/scroll.operation';
 import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
-import { escapeSpecialCode, ISheetClipboardService, PREDEFINED_HOOK_NAME_COPY, PREDEFINED_HOOK_NAME_PASTE } from '../../services/clipboard/clipboard.service';
+import {
+    escapeSpecialCode,
+    ISheetClipboardService,
+    PREDEFINED_HOOK_NAME_COPY,
+    PREDEFINED_HOOK_NAME_PASTE,
+} from '../../services/clipboard/clipboard.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { ClipboardPopupMenu } from '../../views/clipboard/ClipboardPopupMenu';
 import { whenSheetEditorFocused } from '../shortcuts/utils';
@@ -350,7 +356,7 @@ export class SheetClipboardController extends RxDisposable {
                 if (maxConfig && endRow * endColumn > maxConfig) {
                     self._messageService.show({
                         type: MessageType.Error,
-                        content: self._localService.t('sheets-ui.clipboard.paste.exceedMaxCells'),
+                        content: self._localService.t<LocaleKey>('sheets-ui.clipboard.paste.exceedMaxCells'),
                     }); // TODO: show error info
                     return false;
                 }

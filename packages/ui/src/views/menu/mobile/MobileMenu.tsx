@@ -38,7 +38,7 @@ type MobileMenuView =
         kind: 'options';
         title?: string;
         options: IValueOption[];
-        menuItem: IDisplayMenuItem<IMenuSelectorItem<MenuItemDefaultValueType, any>>;
+        menuItem: IDisplayMenuItem<IMenuSelectorItem<string, MenuItemDefaultValueType, any>>;
         menuKey: string;
         currentValue: MenuItemDefaultValueType;
     };
@@ -281,7 +281,7 @@ function MobileSchemaRow(props: {
 function MobileSelectionOptionsView(props: {
     options: IValueOption[];
     menuKey: string;
-    menuItem: IDisplayMenuItem<IMenuSelectorItem<MenuItemDefaultValueType, any>>;
+    menuItem: IDisplayMenuItem<IMenuSelectorItem<string, MenuItemDefaultValueType, any>>;
     currentValue: MenuItemDefaultValueType;
     onExecute?: IBaseMenuProps['onOptionSelect'];
 }) {
@@ -307,7 +307,7 @@ function MobileSelectionOptionsView(props: {
 function MobileSelectionOptionRow(props: {
     option: IValueOption;
     menuKey: string;
-    menuItem: IDisplayMenuItem<IMenuSelectorItem<MenuItemDefaultValueType, any>>;
+    menuItem: IDisplayMenuItem<IMenuSelectorItem<string, MenuItemDefaultValueType, any>>;
     currentValue: MenuItemDefaultValueType;
     bordered: boolean;
     onExecute?: IBaseMenuProps['onOptionSelect'];
@@ -365,7 +365,7 @@ function useMobileSchemaInteraction(props: {
     const menuManagerService = useDependency(IMenuManagerService);
     const localeService = useDependency(LocaleService);
     const menuItem = schema.item as IDisplayMenuItem<IMenuItem> | undefined;
-    const selectorItem = menuItem as IDisplayMenuItem<IMenuSelectorItem<MenuItemDefaultValueType, any>> | undefined;
+    const selectorItem = menuItem as IDisplayMenuItem<IMenuSelectorItem<string, MenuItemDefaultValueType, any>> | undefined;
     const disabled = useObservable<boolean>(menuItem?.disabled$, false);
     const hidden = useObservable<boolean>(menuItem?.hidden$, false);
     const value = useObservable<MenuItemDefaultValueType>(menuItem?.value$);
@@ -436,7 +436,7 @@ function useMobileSchemaInteraction(props: {
             return;
         }
 
-        const buttonItem = menuItem as IDisplayMenuItem<IMenuButtonItem<MenuItemDefaultValueType>>;
+        const buttonItem = menuItem as IDisplayMenuItem<IMenuButtonItem<string, MenuItemDefaultValueType>>;
         onExecute?.({
             commandId: buttonItem.commandId,
             value,

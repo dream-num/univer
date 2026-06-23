@@ -16,21 +16,32 @@
 
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuButtonItem } from '@univerjs/ui';
+import type { LocaleKey } from '../locale/types';
 import { UniverInstanceType } from '@univerjs/core';
-import { RangeProtectionPermissionEditPoint, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission } from '@univerjs/sheets';
+import {
+    RangeProtectionPermissionEditPoint,
+    WorkbookEditablePermission,
+    WorksheetEditPermission,
+    WorksheetSetCellStylePermission,
+    WorksheetSetCellValuePermission,
+} from '@univerjs/sheets';
 import { getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { ToggleScriptPanelOperation } from '../commands/operations/panel.operation';
 
-export function UniscriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function UniscriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: ToggleScriptPanelOperation.id,
-        title: 'toggle-script-panel',
+        title: 'uniscript.title',
         tooltip: 'uniscript.tooltip.menu-button',
         icon: 'CodeIcon',
         type: MenuItemType.BUTTON,
         // FIXME hidden$ and disabled$ are not correctly in doc
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
+        disabled$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        }),
     };
 }

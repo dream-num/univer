@@ -16,6 +16,7 @@
 
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
+import type { LocaleKey } from '../locale/types';
 import {
     DEFAULT_STYLES,
     EDITOR_ACTIVATED,
@@ -97,7 +98,7 @@ function updateFontSizeValue(accessor: IAccessor, defaultValue: number) {
     }));
 }
 
-export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<number> {
+export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey, number> {
     const defaultValue = DEFAULT_STYLES.fs;
     const disabled$ = getCurrentRangeDisable$(accessor, {
         workbookTypes: [WorkbookEditablePermission],
@@ -124,7 +125,7 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
     };
 }
 
-export function FontSizeIncreaseMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function FontSizeIncreaseMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     const disabled$ = getCurrentRangeDisable$(accessor, {
         workbookTypes: [WorkbookEditablePermission],
         worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],

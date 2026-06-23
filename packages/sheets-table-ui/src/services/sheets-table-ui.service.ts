@@ -17,10 +17,27 @@
 import type { Workbook } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import type { ISetSheetTableParams, ITableFilterItem } from '@univerjs/sheets-table';
+import type { LocaleKey } from '../locale/types';
 import type { IFilterByValueWithTreeItem, ITableFilterItemList } from '../types';
-import { cellToRange, Disposable, ICommandService, Inject, IUniverInstanceService, LocaleService, ObjectMatrix, Rectangle } from '@univerjs/core';
+import {
+    cellToRange,
+    Disposable,
+    ICommandService,
+    Inject,
+    IUniverInstanceService,
+    LocaleService,
+    ObjectMatrix,
+    Rectangle,
+} from '@univerjs/core';
 import { SetRangeValuesMutation } from '@univerjs/sheets';
-import { isConditionFilter, isManualTableFilter, SetSheetTableFilterCommand, SheetTableService, TABLE_FILTER_EMPTY_VALUE, TableManager } from '@univerjs/sheets-table';
+import {
+    isConditionFilter,
+    isManualTableFilter,
+    SetSheetTableFilterCommand,
+    SheetTableService,
+    TABLE_FILTER_EMPTY_VALUE,
+    TableManager,
+} from '@univerjs/sheets-table';
 import { FilterByEnum } from '../types';
 
 interface ISheetTableFilterPanelProps {
@@ -104,7 +121,7 @@ export class SheetsTableUiService extends Disposable {
         if (table) {
             const filter = table.getTableFilterColumn(columnIndex);
             if (filter && isManualTableFilter(filter)) {
-                checkedItems.push(...filter.values.map((value) => value === TABLE_FILTER_EMPTY_VALUE ? this._localeService.t('sheets-table-ui.condition.empty') : value));
+                checkedItems.push(...filter.values.map((value) => value === TABLE_FILTER_EMPTY_VALUE ? this._localeService.t<LocaleKey>('sheets-table-ui.condition.empty') : value));
             }
         }
         return checkedItems;
@@ -160,7 +177,7 @@ export class SheetsTableUiService extends Disposable {
             let stringItem = this._sheetTableService.getCellValueWithConditionType(worksheet, row, column) as string;
 
             if (stringItem == null) {
-                stringItem = this._localeService.t('sheets-table-ui.condition.empty');
+                stringItem = this._localeService.t<LocaleKey>('sheets-table-ui.condition.empty');
             }
 
             if (!map.has(stringItem)) {

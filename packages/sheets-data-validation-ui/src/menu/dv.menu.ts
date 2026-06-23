@@ -16,8 +16,14 @@
 
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuItem } from '@univerjs/ui';
+import type { LocaleKey } from '../locale/types';
 import { UniverInstanceType } from '@univerjs/core';
-import { RangeProtectionPermissionEditPoint, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission } from '@univerjs/sheets';
+import {
+    RangeProtectionPermissionEditPoint,
+    WorkbookEditablePermission,
+    WorksheetEditPermission,
+    WorksheetSetCellStylePermission,
+} from '@univerjs/sheets';
 import { getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { AddSheetDataValidationAndOpenCommand } from '../commands/commands/data-validation-ui.command';
@@ -25,18 +31,22 @@ import { OpenValidationPanelOperation } from '../commands/operations/data-valida
 
 export const DATA_VALIDATION_MENU_ID = 'sheet.menu.data-validation';
 
-export function dataValidationMenuFactory(accessor: IAccessor): IMenuItem {
+export function dataValidationMenuFactory(accessor: IAccessor): IMenuItem<LocaleKey> {
     return {
         id: DATA_VALIDATION_MENU_ID,
         type: MenuItemType.SUBITEMS,
         icon: 'DataValidationIcon',
         tooltip: 'sheets-data-validation-ui.title',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetSetCellStylePermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
+        disabled$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetSetCellStylePermission, WorksheetEditPermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        }),
     };
 }
 
-export function openDataValidationMenuFactory(_accessor: IAccessor): IMenuItem {
+export function openDataValidationMenuFactory(): IMenuItem<LocaleKey> {
     return {
         id: OpenValidationPanelOperation.id,
         title: 'sheets-data-validation-ui.panel.title',
@@ -44,7 +54,7 @@ export function openDataValidationMenuFactory(_accessor: IAccessor): IMenuItem {
     };
 }
 
-export function addDataValidationMenuFactory(_accessor: IAccessor): IMenuItem {
+export function addDataValidationMenuFactory(): IMenuItem<LocaleKey> {
     return {
         id: AddSheetDataValidationAndOpenCommand.id,
         title: 'sheets-data-validation-ui.panel.add',

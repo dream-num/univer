@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { LocaleKey } from '../../../locale/types';
 import type { IFormulaInputProps } from './interface';
 import { LocaleService } from '@univerjs/core';
 import { FormLayout, Input } from '@univerjs/design';
@@ -31,7 +32,7 @@ export const BaseFormulaInput = (props: IFormulaInputProps) => {
                 <FormLayout error={formula1Res}>
                     <Input
                         className="univer-w-full"
-                        placeholder={localeService.t('sheets-data-validation-ui.panel.formulaPlaceholder')}
+                        placeholder={localeService.t<LocaleKey>('sheets-data-validation-ui.panel.formulaPlaceholder')}
                         value={value?.formula1}
                         onChange={(newValue) => {
                             onChange?.({
@@ -42,12 +43,12 @@ export const BaseFormulaInput = (props: IFormulaInputProps) => {
                     />
                 </FormLayout>
                 <div className="-univer-mt-2 univer-mb-1 univer-text-sm univer-text-gray-400">
-                    {localeService.t('sheets-data-validation-ui.panel.formulaAnd')}
+                    {localeService.t<LocaleKey>('sheets-data-validation-ui.panel.formulaAnd')}
                 </div>
                 <FormLayout error={formula2Res}>
                     <Input
                         className="univer-w-full"
-                        placeholder={localeService.t('sheets-data-validation-ui.panel.formulaPlaceholder')}
+                        placeholder={localeService.t<LocaleKey>('sheets-data-validation-ui.panel.formulaPlaceholder')}
                         value={value?.formula2}
                         onChange={(newValue) => {
                             onChange?.({
@@ -65,7 +66,7 @@ export const BaseFormulaInput = (props: IFormulaInputProps) => {
         <FormLayout error={formula1Res}>
             <Input
                 className="univer-w-full"
-                placeholder={localeService.t('sheets-data-validation-ui.panel.formulaPlaceholder')}
+                placeholder={localeService.t<LocaleKey>('sheets-data-validation-ui.panel.formulaPlaceholder')}
                 value={value?.formula1}
                 onChange={(newValue) => {
                     onChange?.({ formula1: newValue });

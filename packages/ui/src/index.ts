@@ -86,6 +86,7 @@ export type {
     IMenuSelectorItem,
     IValueOption,
     MenuConfig,
+    MenuItemConfig,
     MenuItemDefaultValueType,
 } from './services/menu/menu';
 export { IMenuManagerService, MenuManagerService } from './services/menu/menu-manager.service';

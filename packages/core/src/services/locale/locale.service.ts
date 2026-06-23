@@ -80,7 +80,7 @@ export class LocaleService extends Disposable {
      * }
      * t('foo.bar', 'World') => 'Hello World'
      */
-    t = (key: string, ...args: string[]): string => {
+    t = <TKey extends string = string>(key: TKey, ...args: string[]): string => {
         if (!this._locales) throw new Error('[LocaleService]: Locale not initialized');
 
         const keys = key.split('.');

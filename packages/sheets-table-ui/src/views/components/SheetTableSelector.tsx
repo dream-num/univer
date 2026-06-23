@@ -15,6 +15,7 @@
  */
 
 import type { ITableSelectionInfo } from '../../commands/operations/open-table-selector.operation';
+import type { LocaleKey } from '../../locale/types';
 import { IUniverInstanceService, LocaleService, Rectangle } from '@univerjs/core';
 import { Button } from '@univerjs/design';
 import { deserializeRangeWithSheet, serializeRange } from '@univerjs/engine-formula';
@@ -57,7 +58,7 @@ export const SheetTableSelector = (props: ITableSelectionInfo & {
                     });
 
                     if (hasOverlapWithMerge) {
-                        setRangeError(localeService.t('sheets-table-ui.tableRangeWithMergeError'));
+                        setRangeError(localeService.t<LocaleKey>('sheets-table-ui.tableRangeWithMergeError'));
                         return;
                     }
 
@@ -70,13 +71,13 @@ export const SheetTableSelector = (props: ITableSelectionInfo & {
                     });
 
                     if (hasOverlapWithOtherTable) {
-                        setRangeError(localeService.t('sheets-table-ui.tableRangeWithOtherTableError'));
+                        setRangeError(localeService.t<LocaleKey>('sheets-table-ui.tableRangeWithOtherTableError'));
                         return;
                     }
                     const { startRow, endRow } = newRange;
                     const isSingleRow = startRow === endRow;
                     if (isSingleRow) {
-                        setRangeError(localeService.t('sheets-table-ui.tableRangeSingleRowError'));
+                        setRangeError(localeService.t<LocaleKey>('sheets-table-ui.tableRangeSingleRowError'));
                         return;
                     }
 
@@ -98,7 +99,7 @@ export const SheetTableSelector = (props: ITableSelectionInfo & {
                                 });
                                 return;
                             } else {
-                                setRangeError(localeService.t('sheets-table-ui.updateError'));
+                                setRangeError(localeService.t<LocaleKey>('sheets-table-ui.updateError'));
                                 return;
                             }
                         }
@@ -116,7 +117,7 @@ export const SheetTableSelector = (props: ITableSelectionInfo & {
             )}
 
             <div className="univer-mt-4 univer-flex univer-justify-end">
-                <Button onClick={onCancel}>{localeService.t('sheets-table-ui.cancel')}</Button>
+                <Button onClick={onCancel}>{localeService.t<LocaleKey>('sheets-table-ui.cancel')}</Button>
                 <Button
                     variant="primary"
                     onClick={() => {
@@ -131,7 +132,7 @@ export const SheetTableSelector = (props: ITableSelectionInfo & {
                     }}
                     className="univer-ml-2"
                 >
-                    {localeService.t('sheets-table-ui.confirm')}
+                    {localeService.t<LocaleKey>('sheets-table-ui.confirm')}
                 </Button>
             </div>
         </>

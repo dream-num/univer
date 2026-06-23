@@ -16,6 +16,7 @@
 
 import type { ListValidator } from '@univerjs/sheets-data-validation';
 import type { IFormulaEditorRef } from '@univerjs/sheets-formula-ui';
+import type { LocaleKey } from '../../../locale/types';
 import type { IFormulaInputProps } from './interface';
 import { awaitTime, DataValidationType, generateRandomId, isFormulaString, LocaleService } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
@@ -295,7 +296,7 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                 formula2,
             });
             setFormulaStr('=');
-            setLocalError(localeService.t('sheets-data-validation-ui.validFail.formulaError'));
+            setLocalError(localeService.t<LocaleKey>('sheets-data-validation-ui.validFail.formulaError'));
         }
     });
 
@@ -317,7 +318,7 @@ export function ListFormulaInput(props: IFormulaInputProps) {
 
     return (
         <>
-            <FormLayout label={localeService.t('sheets-data-validation-ui.list.options')}>
+            <FormLayout label={localeService.t<LocaleKey>('sheets-data-validation-ui.list.options')}>
                 <RadioGroup
                     value={isFormulaStr}
                     onChange={(v) => {
@@ -331,8 +332,8 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                         }
                     }}
                 >
-                    <Radio value="0">{localeService.t('sheets-data-validation-ui.list.customOptions')}</Radio>
-                    <Radio value="1">{localeService.t('sheets-data-validation-ui.list.refOptions')}</Radio>
+                    <Radio value="0">{localeService.t<LocaleKey>('sheets-data-validation-ui.list.customOptions')}</Radio>
+                    <Radio value="1">{localeService.t<LocaleKey>('sheets-data-validation-ui.list.refOptions')}</Radio>
                 </RadioGroup>
             </FormLayout>
             {isFormulaStr === '1'
@@ -407,7 +408,7 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                                 onClick={handleAdd}
                             >
                                 <IncreaseIcon className="univer-mr-1" />
-                                {localeService.t('sheets-data-validation-ui.list.add')}
+                                {localeService.t<LocaleKey>('sheets-data-validation-ui.list.add')}
                             </a>
                         </div>
                     </FormLayout>

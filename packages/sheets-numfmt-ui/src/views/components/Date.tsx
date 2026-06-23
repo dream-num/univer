@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { LocaleKey } from '../../locale/types';
 import type { IBusinessComponentProps } from './interface';
 import { LocaleService, numfmt } from '@univerjs/core';
 import { SelectList } from '@univerjs/design';
@@ -60,7 +61,9 @@ export function DatePanel(props: IBusinessComponentProps) {
 
     return (
         <div>
-            <div className="univer-mt-4 univer-text-sm univer-text-gray-400">{localeService.t('sheets-numfmt-ui.dateType')}</div>
+            <div className="univer-mt-4 univer-text-sm univer-text-gray-400">
+                {localeService.t<LocaleKey>('sheets-numfmt-ui.dateType')}
+            </div>
             <div className="univer-mt-2">
                 <SelectList value={suffix} options={options} onChange={handleChange} />
             </div>
@@ -70,7 +73,7 @@ export function DatePanel(props: IBusinessComponentProps) {
                   dark:!univer-text-gray-200
                 `}
             >
-                {localeService.t('sheets-numfmt-ui.dateDes')}
+                {localeService.t<LocaleKey>('sheets-numfmt-ui.dateDes')}
             </div>
         </div>
     );

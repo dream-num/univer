@@ -18,10 +18,18 @@ import type { IUnitRangeName, Nullable } from '@univerjs/core';
 import type { Editor, IRichTextEditorProps } from '@univerjs/docs-ui';
 import type { ISelectionWithStyle, ISetSelectionsOperationParams } from '@univerjs/sheets';
 import type { RefObject } from 'react';
+import type { LocaleKey } from '../../locale/types';
 import { ICommandService, LocaleService, RichTextBuilder } from '@univerjs/core';
 import { Button, clsx, Dialog, Input, scrollbarClassName, Tooltip } from '@univerjs/design';
 import { IEditorService, RichTextEditor } from '@univerjs/docs-ui';
-import { deserializeRangeWithSheet, LexerTreeBuilder, matchToken, sequenceNodeType, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
+import {
+    deserializeRangeWithSheet,
+    LexerTreeBuilder,
+    matchToken,
+    sequenceNodeType,
+    serializeRange,
+    serializeRangeWithSheet,
+} from '@univerjs/engine-formula';
 import { DeleteIcon, IncreaseIcon, SelectRangeIcon } from '@univerjs/icons';
 import { SetSelectionsOperation } from '@univerjs/sheets';
 import { useDependency, useEvent } from '@univerjs/ui';
@@ -160,13 +168,13 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
         <Dialog
             width="328px"
             open={visible}
-            title={localeService.t('sheets-formula-ui.rangeSelector.title')}
+            title={localeService.t<LocaleKey>('sheets-formula-ui.rangeSelector.title')}
             draggable
             mask={false}
             maskClosable={false}
             footer={(
                 <footer className="univer-flex univer-gap-2">
-                    <Button onClick={onClose}>{localeService.t('sheets-formula-ui.rangeSelector.cancel')}</Button>
+                    <Button onClick={onClose}>{localeService.t<LocaleKey>('sheets-formula-ui.rangeSelector.cancel')}</Button>
                     <Button
                         variant="primary"
                         onClick={() => {
@@ -180,7 +188,7 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
                             );
                         }}
                     >
-                        {localeService.t('sheets-formula-ui.rangeSelector.confirm')}
+                        {localeService.t<LocaleKey>('sheets-formula-ui.rangeSelector.confirm')}
                     </Button>
                 </footer>
             )}
@@ -199,7 +207,7 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
                             className={clsx('univer-w-full', {
                                 'univer-border-primary-600': focusIndex === index,
                             })}
-                            placeholder={localeService.t('sheets-formula-ui.rangeSelector.placeHolder')}
+                            placeholder={localeService.t<LocaleKey>('sheets-formula-ui.rangeSelector.placeHolder')}
                             onFocus={() => setFocusIndex(index)}
                             value={text}
                             onChange={(value) => handleRangeInput(index, value)}
@@ -216,7 +224,7 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
                     <div>
                         <Button variant="link" onClick={handleRangeAdd}>
                             <IncreaseIcon />
-                            <span>{localeService.t('sheets-formula-ui.rangeSelector.addAnotherRange')}</span>
+                            <span>{localeService.t<LocaleKey>('sheets-formula-ui.rangeSelector.addAnotherRange')}</span>
                         </Button>
                     </div>
                 )}
@@ -338,7 +346,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
                             onClickOutside?.();
                         }}
                         icon={(
-                            <Tooltip title={localeService.t('sheets-formula-ui.rangeSelector.buttonTooltip')} placement="bottom">
+                            <Tooltip title={localeService.t<LocaleKey>('sheets-formula-ui.rangeSelector.buttonTooltip')} placement="bottom">
                                 <SelectRangeIcon
                                     className={`
                                       univer-cursor-pointer

@@ -16,6 +16,7 @@
 
 import type { IDocumentStyle } from '@univerjs/core';
 import type { IHeaderFooterProps } from '../../../commands/commands/doc-header-footer.command';
+import type { LocaleKey } from '../../../locale/types';
 import {
     BooleanNumber,
     generateRandomId,
@@ -227,7 +228,7 @@ export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
                         checked={options.useFirstPageHeaderFooter === BooleanNumber.TRUE}
                         onChange={(val) => { handleCheckboxChange(val as boolean, 'useFirstPageHeaderFooter'); }}
                     >
-                        {localeService.t('docs-ui.headerFooter.firstPageCheckBox')}
+                        {localeService.t<LocaleKey>('docs-ui.headerFooter.firstPageCheckBox')}
                     </Checkbox>
                 </div>
                 <div>
@@ -235,14 +236,14 @@ export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
                         checked={options.evenAndOddHeaders === BooleanNumber.TRUE}
                         onChange={(val) => { handleCheckboxChange(val as boolean, 'evenAndOddHeaders'); }}
                     >
-                        {localeService.t('docs-ui.headerFooter.oddEvenCheckBox')}
+                        {localeService.t<LocaleKey>('docs-ui.headerFooter.oddEvenCheckBox')}
                     </Checkbox>
                 </div>
             </div>
 
             <div className="univer-mb-1 univer-flex">
                 <div>
-                    <span>{localeService.t('docs-ui.headerFooter.headerTopMargin')}</span>
+                    <span>{localeService.t<LocaleKey>('docs-ui.headerFooter.headerTopMargin')}</span>
                     <InputNumber
                         className="univer-mt-1.5 univer-w-4/5"
                         min={0}
@@ -253,7 +254,7 @@ export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
                     />
                 </div>
                 <div>
-                    <span>{localeService.t('docs-ui.headerFooter.footerBottomMargin')}</span>
+                    <span>{localeService.t<LocaleKey>('docs-ui.headerFooter.footerBottomMargin')}</span>
                     <InputNumber
                         className="univer-mt-1.5 univer-w-4/5"
                         min={0}
@@ -266,7 +267,7 @@ export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
             </div>
 
             <div className="univer-flex univer-justify-end">
-                <Button onClick={closeHeaderFooter}>{localeService.t('docs-ui.headerFooter.closeHeaderFooter')}</Button>
+                <Button onClick={closeHeaderFooter}>{localeService.t<LocaleKey>('docs-ui.headerFooter.closeHeaderFooter')}</Button>
             </div>
         </div>
     );

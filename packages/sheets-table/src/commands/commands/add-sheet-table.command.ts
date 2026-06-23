@@ -15,8 +15,18 @@
  */
 
 import type { ICommand, IMutationInfo, IRange } from '@univerjs/core';
+import type { LocaleKey } from '../../locale/types';
 import type { ITableOptions } from '../../types/type';
-import { CommandType, customNameCharacterCheck, generateRandomId, ICommandService, IUndoRedoService, IUniverInstanceService, LocaleService, sequenceExecute } from '@univerjs/core';
+import {
+    CommandType,
+    customNameCharacterCheck,
+    generateRandomId,
+    ICommandService,
+    IUndoRedoService,
+    IUniverInstanceService,
+    LocaleService,
+    sequenceExecute,
+} from '@univerjs/core';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
 import { TableManager } from '../../models/table-manager';
 import { getExistingNamesSet } from '../../util';
@@ -53,7 +63,7 @@ export const AddSheetTableCommand: ICommand<IAddSheetTableCommandParams> = {
 
         let tableName = params.name;
         if (!tableName || !customNameCharacterCheck(tableName.toLowerCase(), existingNamesSet)) {
-            const prefix = localeService.t('sheets-table.tablePrefix');
+            const prefix = localeService.t<LocaleKey>('sheets-table.tablePrefix');
             let index = tableManager.getTableList(params.unitId).length + 1;
 
             for (const name of existingNamesSet) {
@@ -72,7 +82,7 @@ export const AddSheetTableCommand: ICommand<IAddSheetTableCommandParams> = {
         const undos: IMutationInfo[] = [];
 
         const { unitId, subUnitId, range } = params;
-        const header = tableManager.getColumnHeader(unitId, subUnitId, range, localeService.t('sheets-table.columnPrefix'));
+        const header = tableManager.getColumnHeader(unitId, subUnitId, range, localeService.t<LocaleKey>('sheets-table.columnPrefix'));
 
         redos.push({ id: AddSheetTableMutation.id, params: { ...params, tableId, name: tableName, header } });
         undos.push({ id: DeleteSheetTableMutation.id, params: { tableId, unitId: params.unitId } });

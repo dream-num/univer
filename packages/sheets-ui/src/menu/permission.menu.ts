@@ -16,6 +16,7 @@
 
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuItem, IMenuSelectorItem } from '@univerjs/ui';
+import type { LocaleKey } from '../locale/types';
 import { UniverInstanceType } from '@univerjs/core';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import {
@@ -45,7 +46,7 @@ import {
 
 export const SHEET_PERMISSION_CONTEXT_MENU_ID = 'sheet.contextMenu.permission';
 
-export function sheetPermissionToolbarMenuFactory(accessor: IAccessor): IMenuItem {
+export function sheetPermissionToolbarMenuFactory(accessor: IAccessor): IMenuItem<LocaleKey> {
     return {
         id: AddRangeProtectionFromToolbarCommand.id,
         type: MenuItemType.BUTTON,
@@ -56,7 +57,7 @@ export function sheetPermissionToolbarMenuFactory(accessor: IAccessor): IMenuIte
     };
 }
 
-export function sheetPermissionContextMenuFactory(accessor: IAccessor): IMenuSelectorItem<string> {
+export function sheetPermissionContextMenuFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey> {
     return {
         id: SHEET_PERMISSION_CONTEXT_MENU_ID,
         type: MenuItemType.SUBITEMS,
@@ -66,7 +67,7 @@ export function sheetPermissionContextMenuFactory(accessor: IAccessor): IMenuSel
     };
 }
 
-export function sheetPermissionAddProtectContextMenuFactory(accessor: IAccessor): IMenuButtonItem {
+export function sheetPermissionAddProtectContextMenuFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: AddRangeProtectionFromContextMenuCommand.id,
         type: MenuItemType.BUTTON,
@@ -76,7 +77,7 @@ export function sheetPermissionAddProtectContextMenuFactory(accessor: IAccessor)
     };
 }
 
-export function sheetPermissionEditProtectContextMenuFactory(accessor: IAccessor): IMenuButtonItem {
+export function sheetPermissionEditProtectContextMenuFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: SetRangeProtectionFromContextMenuCommand.id,
         type: MenuItemType.BUTTON,
@@ -86,7 +87,7 @@ export function sheetPermissionEditProtectContextMenuFactory(accessor: IAccessor
     };
 }
 
-export function sheetPermissionRemoveProtectContextMenuFactory(accessor: IAccessor): IMenuButtonItem {
+export function sheetPermissionRemoveProtectContextMenuFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: DeleteRangeProtectionFromContextMenuCommand.id,
         type: MenuItemType.BUTTON,
@@ -96,7 +97,7 @@ export function sheetPermissionRemoveProtectContextMenuFactory(accessor: IAccess
     };
 }
 
-export function sheetPermissionViewAllProtectRuleContextMenuFactory(accessor: IAccessor): IMenuButtonItem {
+export function sheetPermissionViewAllProtectRuleContextMenuFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: ViewSheetPermissionFromContextMenuCommand.id,
         type: MenuItemType.BUTTON,
@@ -106,7 +107,7 @@ export function sheetPermissionViewAllProtectRuleContextMenuFactory(accessor: IA
     };
 }
 
-export function sheetPermissionProtectSheetInSheetBarMenuFactory(accessor: IAccessor): IMenuButtonItem {
+export function sheetPermissionProtectSheetInSheetBarMenuFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: AddRangeProtectionFromSheetBarCommand.id,
         type: MenuItemType.BUTTON,
@@ -116,7 +117,7 @@ export function sheetPermissionProtectSheetInSheetBarMenuFactory(accessor: IAcce
     };
 }
 
-export function sheetPermissionRemoveProtectionSheetBarMenuFactory(accessor: IAccessor): IMenuButtonItem {
+export function sheetPermissionRemoveProtectionSheetBarMenuFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: DeleteWorksheetProtectionFormSheetBarCommand.id,
         type: MenuItemType.BUTTON,
@@ -126,7 +127,7 @@ export function sheetPermissionRemoveProtectionSheetBarMenuFactory(accessor: IAc
     };
 }
 
-export function sheetPermissionChangeSheetPermissionSheetBarMenuFactory(accessor: IAccessor): IMenuButtonItem {
+export function sheetPermissionChangeSheetPermissionSheetBarMenuFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: ChangeSheetProtectionFromSheetBarCommand.id,
         type: MenuItemType.BUTTON,
@@ -136,7 +137,7 @@ export function sheetPermissionChangeSheetPermissionSheetBarMenuFactory(accessor
     };
 }
 
-export function sheetPermissionViewAllProtectRuleSheetBarMenuFactory(accessor: IAccessor): IMenuButtonItem {
+export function sheetPermissionViewAllProtectRuleSheetBarMenuFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: ViewSheetPermissionFromSheetBarCommand.id,
         type: MenuItemType.BUTTON,

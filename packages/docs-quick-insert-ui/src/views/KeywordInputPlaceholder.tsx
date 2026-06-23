@@ -15,6 +15,7 @@
  */
 
 import type { IPopup } from '@univerjs/ui';
+import type { LocaleKey } from '../locale/types';
 import { LocaleService } from '@univerjs/core';
 import { ptToPixel } from '@univerjs/engine-render';
 import { useDependency } from '@univerjs/ui';
@@ -53,7 +54,7 @@ function measureTextWidth(text: string, font: string) {
 
 export const KeywordInputPlaceholder = ({ popup }: { popup: IPopup<IKeywordInputPlaceholderExtraProps> }) => {
     const localeService = useDependency(LocaleService);
-    const placeholder = localeService.t('docs-quick-insert-ui.keywordInputPlaceholder');
+    const placeholder = localeService.t<LocaleKey>('docs-quick-insert-ui.keywordInputPlaceholder');
     const fontSize = popup.extraProps?.fontSize ?? DEFAULT_FONT_SIZE;
     const fontSizePx = ptToPixel(fontSize);
     const fontString = popup.extraProps?.fontString ?? `${fontSizePx}px sans-serif`;

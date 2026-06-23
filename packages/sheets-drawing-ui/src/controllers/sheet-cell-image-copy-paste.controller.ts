@@ -16,7 +16,19 @@
 
 import type { DocumentDataModel, IDocDrawingBase } from '@univerjs/core';
 import type { IInnerPasteCommandParams } from '@univerjs/docs-ui';
-import { BuildTextUtils, createDocumentModelWithStyle, Disposable, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, Inject, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
+import type { LocaleKey } from '../locale/types';
+import {
+    BuildTextUtils,
+    createDocumentModelWithStyle,
+    Disposable,
+    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    ICommandService,
+    Inject,
+    IUniverInstanceService,
+    LocaleService,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { InnerPasteCommand } from '@univerjs/docs-ui';
 import { getCurrentTypeOfRenderer, IRenderManagerService } from '@univerjs/engine-render';
 import { EditingRenderController, SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
@@ -86,10 +98,10 @@ export class SheetCellImageCopyPasteController extends Disposable {
                             this._dialogService.open({
                                 id: 'sheet-cell-image-copy-paste',
                                 title: {
-                                    label: this._localeService.t('sheets-drawing-ui.cell-image.pasteTitle'),
+                                    label: this._localeService.t<LocaleKey>('sheets-drawing-ui.cell-image.pasteTitle'),
                                 },
                                 children: {
-                                    label: this._localeService.t('sheets-drawing-ui.cell-image.pasteContent'),
+                                    label: this._localeService.t<LocaleKey>('sheets-drawing-ui.cell-image.pasteContent'),
                                 },
                                 width: 320,
                                 destroyOnClose: true,

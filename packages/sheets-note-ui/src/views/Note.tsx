@@ -18,6 +18,7 @@ import type { ISheetLocationBase } from '@univerjs/sheets';
 import type { ISheetNote } from '@univerjs/sheets-note';
 import type { IPopup } from '@univerjs/ui';
 import type { IUniverSheetsNoteUIConfig } from '../config/config';
+import type { LocaleKey } from '../locale/types';
 import { generateRandomId, ICommandService, LocaleService } from '@univerjs/core';
 import { clsx, Textarea } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -142,7 +143,7 @@ export const SheetsNote = (props: { popup: IPopup<{ location: INotePopupLocation
               dark:!univer-bg-gray-800
             `)}
             value={note?.note}
-            placeholder={localeService.t('sheets-note-ui.note.placeholder')}
+            placeholder={localeService.t<LocaleKey>('sheets-note-ui.note.placeholder')}
             onResize={handleResize}
             onValueChange={handleNoteChange}
             onWheel={(e) => {

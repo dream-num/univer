@@ -18,13 +18,31 @@ import type { ICommandInfo, IDrawingSearch, ISrcRect, ITransformState, Nullable,
 import type { IImageData } from '@univerjs/drawing';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
 import type { IOpenImageCropOperationBySrcRectParams } from '../commands/operations/image-crop.operation';
-import { checkIfMove, Disposable, ICommandService, Inject, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
+import type { LocaleKey } from '../locale/types';
+import {
+    checkIfMove,
+    Disposable,
+    ICommandService,
+    Inject,
+    IUniverInstanceService,
+    LocaleService,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
-import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService, SetDrawingSelectedOperation } from '@univerjs/drawing';
+import {
+    getDrawingShapeKeyByDrawingSearch,
+    IDrawingManagerService,
+    SetDrawingSelectedOperation,
+} from '@univerjs/drawing';
 import { CURSOR_TYPE, degToRad, Image, IRenderManagerService, precisionTo, Vector2 } from '@univerjs/engine-render';
 import { IMessageService } from '@univerjs/ui';
 import { of, switchMap } from 'rxjs';
-import { AutoImageCropOperation, CloseImageCropOperation, CropType, OpenImageCropOperation } from '../commands/operations/image-crop.operation';
+import {
+    AutoImageCropOperation,
+    CloseImageCropOperation,
+    CropType,
+    OpenImageCropOperation,
+} from '../commands/operations/image-crop.operation';
 import { ImageCropperObject } from '../views/crop/image-cropper-object';
 
 export class ImageCropperController extends Disposable {
@@ -94,7 +112,7 @@ export class ImageCropperController extends Disposable {
                 if (!(imageShape instanceof Image)) {
                     this._messageService.show({
                         type: MessageType.Error,
-                        content: this._localeService.t('drawing-ui.image-cropper.error'),
+                        content: this._localeService.t<LocaleKey>('drawing-ui.image-cropper.error'),
                     });
                     return;
                 }
@@ -240,7 +258,7 @@ export class ImageCropperController extends Disposable {
                 if (!(imageShape instanceof Image)) {
                     this._messageService.show({
                         type: MessageType.Error,
-                        content: this._localeService.t('drawing-ui.image-cropper.error'),
+                        content: this._localeService.t<LocaleKey>('drawing-ui.image-cropper.error'),
                     });
                     return;
                 }

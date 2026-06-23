@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { LocaleKey } from '../locale/types';
 import { DataValidationErrorStyle, DataValidationStatus, Disposable, Inject, LocaleService } from '@univerjs/core';
 import { DataValidatorRegistryService } from '@univerjs/data-validation';
 import { Button } from '@univerjs/design';
@@ -64,7 +65,7 @@ export class DataValidationRejectInputController extends Disposable {
                     this._dialogService.open({
                         width: 368,
                         title: {
-                            title: this._localeService.t('sheets-data-validation-ui.alert.title'),
+                            title: this._localeService.t<LocaleKey>('sheets-data-validation-ui.alert.title'),
                         },
                         id: 'reject-input-dialog',
                         children: {
@@ -77,7 +78,7 @@ export class DataValidationRejectInputController extends Disposable {
                                     variant: 'primary',
                                     onClick: () => this._dialogService.close('reject-input-dialog'),
                                 },
-                                this._localeService.t('sheets-data-validation-ui.alert.ok')
+                                this._localeService.t<LocaleKey>('sheets-data-validation-ui.alert.ok')
                             ),
                         },
                         onClose: () => {
@@ -95,7 +96,7 @@ export class DataValidationRejectInputController extends Disposable {
         this._dialogService.open({
             width: 368,
             title: {
-                title: this._localeService.t('sheets-data-validation-ui.alert.title'),
+                title: this._localeService.t<LocaleKey>('sheets-data-validation-ui.alert.title'),
             },
             id: 'reject-input-dialog',
             children: {
@@ -108,7 +109,7 @@ export class DataValidationRejectInputController extends Disposable {
                         variant: 'primary',
                         onClick: () => this._dialogService.close('reject-input-dialog'),
                     },
-                    this._localeService.t('sheets-data-validation-ui.alert.ok')
+                    this._localeService.t<LocaleKey>('sheets-data-validation-ui.alert.ok')
                 ),
             },
             onClose: () => {

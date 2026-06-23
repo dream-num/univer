@@ -15,13 +15,17 @@
  */
 
 import type { IDrawingParam } from '@univerjs/core';
+import type { LocaleKey } from '../../locale/types';
 import { DrawingTypeEnum, ICommandService, LocaleService } from '@univerjs/core';
 import { Button, clsx } from '@univerjs/design';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IconManager, useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
-import { CancelDrawingGroupOperation, SetDrawingGroupOperation } from '../../commands/operations/drawing-group.operation';
+import {
+    CancelDrawingGroupOperation,
+    SetDrawingGroupOperation,
+} from '../../commands/operations/drawing-group.operation';
 import { getUpdateParams } from '../../utils/get-update-params';
 
 export interface IDrawingGroupProps {
@@ -115,7 +119,7 @@ export const DrawingGroup = (props: IDrawingGroupProps) => {
                   dark:!univer-text-gray-200
                 `}
             >
-                <div>{localeService.t('drawing-ui.image-panel.group.title')}</div>
+                <div>{localeService.t<LocaleKey>('drawing-ui.image-panel.group.title')}</div>
             </header>
 
             <div className="univer-flex univer-items-center univer-justify-center univer-gap-2">
@@ -126,7 +130,7 @@ export const DrawingGroup = (props: IDrawingGroupProps) => {
                     onClick={onGroupBtnClick}
                 >
                     <GroupIcon />
-                    {localeService.t('drawing-ui.image-panel.group.group')}
+                    {localeService.t<LocaleKey>('drawing-ui.image-panel.group.group')}
                 </Button>
                 <Button
                     className={clsx({
@@ -135,7 +139,7 @@ export const DrawingGroup = (props: IDrawingGroupProps) => {
                     onClick={onUngroupBtnClick}
                 >
                     <UngroupIcon />
-                    {localeService.t('drawing-ui.image-panel.group.unGroup')}
+                    {localeService.t<LocaleKey>('drawing-ui.image-panel.group.unGroup')}
                 </Button>
             </div>
         </div>

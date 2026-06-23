@@ -17,9 +17,16 @@
 import type { IAccessor, Workbook } from '@univerjs/core';
 import type { IMenuItem, IMenuSelectorItem } from '@univerjs/ui';
 import type { Observable } from 'rxjs';
+import type { LocaleKey } from '../locale/types';
 import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { SheetsSelectionsService } from '@univerjs/sheets';
-import { SheetsTableController, SheetTableInsertColCommand, SheetTableInsertRowCommand, SheetTableRemoveColCommand, SheetTableRemoveRowCommand } from '@univerjs/sheets-table';
+import {
+    SheetsTableController,
+    SheetTableInsertColCommand,
+    SheetTableInsertRowCommand,
+    SheetTableRemoveColCommand,
+    SheetTableRemoveRowCommand,
+} from '@univerjs/sheets-table';
 import { getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { of, switchMap } from 'rxjs';
@@ -28,7 +35,7 @@ import { OpenTableSelectorOperation } from '../commands/operations/open-table-se
 export const SHEET_TABLE_CONTEXT_INSERT_MENU_ID = 'sheet.table.context-insert_menu-id';
 export const SHEET_TABLE_CONTEXT_REMOVE_MENU_ID = 'sheet.table.context-remove_menu-id';
 
-export function sheetTableToolbarInsertMenuFactory(accessor: IAccessor): IMenuItem {
+export function sheetTableToolbarInsertMenuFactory(accessor: IAccessor): IMenuItem<LocaleKey> {
     return {
         id: OpenTableSelectorOperation.id,
         type: MenuItemType.BUTTON,
@@ -40,7 +47,7 @@ export function sheetTableToolbarInsertMenuFactory(accessor: IAccessor): IMenuIt
     };
 }
 
-export function SheetTableInsertContextMenuFactory(accessor: IAccessor): IMenuSelectorItem<string> {
+export function SheetTableInsertContextMenuFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey> {
     return {
         id: SHEET_TABLE_CONTEXT_INSERT_MENU_ID,
         type: MenuItemType.SUBITEMS,
@@ -50,7 +57,7 @@ export function SheetTableInsertContextMenuFactory(accessor: IAccessor): IMenuSe
     };
 }
 
-export function SheetTableRemoveContextMenuFactory(accessor: IAccessor): IMenuSelectorItem<string> {
+export function SheetTableRemoveContextMenuFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey> {
     return {
         id: SHEET_TABLE_CONTEXT_REMOVE_MENU_ID,
         type: MenuItemType.SUBITEMS,
@@ -69,7 +76,7 @@ export function SheetTableInsertRowMenuFactory(accessor: IAccessor) {
     };
 }
 
-export function SheetTableInsertColMenuFactory(accessor: IAccessor) {
+export function SheetTableInsertColMenuFactory() {
     return {
         id: SheetTableInsertColCommand.id,
         title: 'sheets-table-ui.insert.col',
@@ -86,7 +93,7 @@ export function SheetTableRemoveRowMenuFactory(accessor: IAccessor) {
     };
 }
 
-export function SheetTableRemoveColMenuFactory(accessor: IAccessor) {
+export function SheetTableRemoveColMenuFactory() {
     return {
         id: SheetTableRemoveColCommand.id,
         title: 'sheets-table-ui.remove.col',
@@ -112,7 +119,11 @@ export function getSheetTableRowColOperationHidden$(accessor: IAccessor): Observ
                             const range = selection.range;
                             const sheetsTableController = accessor.get(SheetsTableController);
 
-                            const isInTable = sheetsTableController.getContainerTableWithRange(workbook.getUnitId(), sheet.getSheetId(), range);
+                            const isInTable = sheetsTableController.getContainerTableWithRange(
+                                workbook.getUnitId(),
+                                sheet.getSheetId(),
+                                range
+                            );
                             return of(!isInTable);
                         })
                     );
@@ -140,7 +151,11 @@ export function getSheetTableHeaderOperationHidden$(accessor: IAccessor): Observ
                             const range = selection.range;
                             const sheetsTableController = accessor.get(SheetsTableController);
 
-                            const isInTable = sheetsTableController.getContainerTableWithRange(workbook.getUnitId(), sheet.getSheetId(), range);
+                            const isInTable = sheetsTableController.getContainerTableWithRange(
+                                workbook.getUnitId(),
+                                sheet.getSheetId(),
+                                range
+                            );
                             if (!isInTable) {
                                 return of(true);
                             }

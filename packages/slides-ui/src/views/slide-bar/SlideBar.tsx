@@ -15,6 +15,7 @@
  */
 
 import type { SlideDataModel } from '@univerjs/slides';
+import type { LocaleKey } from '../../locale/types';
 import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { borderClassName, clsx, scrollbarClassName } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -104,7 +105,7 @@ export function SlideSideBar() {
                         `, borderClassName)}
                         onClick={handleAppendSlide}
                     >
-                        {localeService.t('slides-ui.append')}
+                        {localeService.t<LocaleKey>('slides-ui.append')}
                     </a>
                 </header>
 

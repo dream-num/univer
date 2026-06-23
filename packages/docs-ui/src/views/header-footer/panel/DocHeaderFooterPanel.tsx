@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { LocaleKey } from '../../../locale/types';
 import { IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
@@ -52,7 +53,7 @@ export const DocHeaderFooterPanel = () => {
         <div className="univer-text-sm">
             {isEditHeaderFooter
                 ? <DocHeaderFooterOptions unitId={unitId} />
-                : <div className="univer-text-gray-400">{localeService.t('docs-ui.headerFooter.disableText')}</div>}
+                : <div className="univer-text-gray-400">{localeService.t<LocaleKey>('docs-ui.headerFooter.disableText')}</div>}
         </div>
     );
 };

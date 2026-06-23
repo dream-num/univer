@@ -15,7 +15,16 @@
  */
 
 import type { DocumentDataModel } from '@univerjs/core';
-import { BuildTextUtils, getBodySlice, ICommandService, IUniverInstanceService, LocaleService, Tools, UniverInstanceType } from '@univerjs/core';
+import type { LocaleKey } from '../locale/types';
+import {
+    BuildTextUtils,
+    getBodySlice,
+    ICommandService,
+    IUniverInstanceService,
+    LocaleService,
+    Tools,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { borderClassName, Button, clsx, FormLayout, Input } from '@univerjs/design';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { KeyCode, useDependency, useObservable } from '@univerjs/ui';
@@ -125,8 +134,8 @@ export const DocHyperLinkEdit = () => {
                 {editing
                     ? (
                         <FormLayout
-                            label={localeService.t('docs-hyper-link-ui.edit.label')}
-                            error={showError && isBlankInput(label) ? localeService.t('docs-hyper-link-ui.edit.labelError') : ''}
+                            label={localeService.t<LocaleKey>('docs-hyper-link-ui.edit.label')}
+                            error={showError && isBlankInput(label) ? localeService.t<LocaleKey>('docs-hyper-link-ui.edit.labelError') : ''}
                         >
                             <Input
                                 value={label}
@@ -142,8 +151,8 @@ export const DocHyperLinkEdit = () => {
                     )
                     : null}
                 <FormLayout
-                    label={localeService.t('docs-hyper-link-ui.edit.address')}
-                    error={showError && !isLegal ? localeService.t('docs-hyper-link-ui.edit.addressError') : ''}
+                    label={localeService.t<LocaleKey>('docs-hyper-link-ui.edit.address')}
+                    error={showError && !isLegal ? localeService.t<LocaleKey>('docs-hyper-link-ui.edit.addressError') : ''}
                 >
                     <Input
                         value={link}
@@ -159,14 +168,14 @@ export const DocHyperLinkEdit = () => {
             </div>
             <div className="univer-flex univer-justify-end univer-gap-3">
                 <Button onClick={handleCancel}>
-                    {localeService.t('docs-hyper-link-ui.edit.cancel')}
+                    {localeService.t<LocaleKey>('docs-hyper-link-ui.edit.cancel')}
                 </Button>
                 <Button
                     variant="primary"
                     disabled={isBlankInput(link)}
                     onClick={handleConfirm}
                 >
-                    {localeService.t('docs-hyper-link-ui.edit.confirm')}
+                    {localeService.t<LocaleKey>('docs-hyper-link-ui.edit.confirm')}
                 </Button>
             </div>
         </div>

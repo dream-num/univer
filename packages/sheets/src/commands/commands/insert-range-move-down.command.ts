@@ -20,6 +20,7 @@ import type {
     IInsertRowMutationParams,
     IRemoveRowsMutationParams,
 } from '../../basics/interfaces/mutation-interface';
+import type { LocaleKey } from '../../locale/types';
 import {
     BooleanNumber,
     CommandType,
@@ -63,7 +64,7 @@ export const InsertRangeMoveDownCommand: ICommand = {
         const localeService = accessor.get(LocaleService);
 
         if (selectionManagerService.isOverlapping()) {
-            errorService.emit(localeService.t('sheets.info.overlappingSelections'));
+            errorService.emit(localeService.t<LocaleKey>('sheets.info.overlappingSelections'));
             return false;
         }
 

@@ -17,6 +17,7 @@
 import type { IRange, Workbook } from '@univerjs/core';
 import type { ComponentType } from 'react';
 import type { IRangeSelectorProps } from '../../../basics/editor/range';
+import type { LocaleKey } from '../../../locale/types';
 import { Injector, isValidRange, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { FormLayout, Input } from '@univerjs/design';
 import { deserializeRangeWithSheet, serializeRange } from '@univerjs/engine-formula';
@@ -78,7 +79,7 @@ export const PermissionDetailMainPart = (props: IPermissionDetailMainPartProps) 
         <>
             <FormLayout
                 className="univer-font-medium"
-                label={localeService.t('sheets-ui.permission.panel.protectedRange')}
+                label={localeService.t<LocaleKey>('sheets-ui.permission.panel.protectedRange')}
                 error={rangesErrMsg}
             >
                 {RangeSelector && (
@@ -90,11 +91,14 @@ export const PermissionDetailMainPart = (props: IPermissionDetailMainPartProps) 
                     />
                 )}
             </FormLayout>
-            <FormLayout className="univer-font-medium" label={localeService.t('sheets-ui.permission.panel.permissionDirection')}>
+            <FormLayout
+                className="univer-font-medium"
+                label={localeService.t<LocaleKey>('sheets-ui.permission.panel.permissionDirection')}
+            >
                 <Input
                     value={desc}
                     onChange={(v) => onDescChange(v)}
-                    placeholder={localeService.t('sheets-ui.permission.panel.permissionDirectionPlaceholder')}
+                    placeholder={localeService.t<LocaleKey>('sheets-ui.permission.panel.permissionDirectionPlaceholder')}
                 />
             </FormLayout>
         </>

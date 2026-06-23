@@ -15,7 +15,11 @@
  */
 
 import type { IAccessor, ICommand, IWorksheetData } from '@univerjs/core';
-import type { IInsertSheetMutationParams, IRemoveSheetMutationParams } from '../../basics/interfaces/mutation-interface';
+import type {
+    IInsertSheetMutationParams,
+    IRemoveSheetMutationParams,
+} from '../../basics/interfaces/mutation-interface';
+import type { LocaleKey } from '../../locale/types';
 import {
     CommandType,
     generateRandomId,
@@ -62,10 +66,10 @@ export const InsertSheetCommand: ICommand = {
             sheetConfig.id = sheetId || generateRandomId();
             sheetConfig.name = sheetName
                 ? workbook.uniqueSheetName(sheetName)
-                : workbook.generateNewSheetName(`${localeService.t('sheets.tabs.sheet')}`);
+                : workbook.generateNewSheetName(`${localeService.t<LocaleKey>('sheets.tabs.sheet')}`);
         } else {
             sheetConfig.id = generateRandomId();
-            sheetConfig.name = workbook.generateNewSheetName(`${localeService.t('sheets.tabs.sheet')}`);
+            sheetConfig.name = workbook.generateNewSheetName(`${localeService.t<LocaleKey>('sheets.tabs.sheet')}`);
         }
 
         // prepare do mutations

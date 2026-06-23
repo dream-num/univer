@@ -16,8 +16,16 @@
 
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
-
-import { RangeProtectionPermissionEditPoint, WorkbookDeleteColumnPermission, WorkbookDeleteRowPermission, WorkbookEditablePermission, WorksheetDeleteColumnPermission, WorksheetDeleteRowPermission, WorksheetEditPermission } from '@univerjs/sheets';
+import type { LocaleKey } from '../locale/types';
+import {
+    RangeProtectionPermissionEditPoint,
+    WorkbookDeleteColumnPermission,
+    WorkbookDeleteRowPermission,
+    WorkbookEditablePermission,
+    WorksheetDeleteColumnPermission,
+    WorksheetDeleteRowPermission,
+    WorksheetEditPermission,
+} from '@univerjs/sheets';
 import { MenuItemType } from '@univerjs/ui';
 import { DeleteRangeMoveLeftConfirmCommand } from '../commands/commands/delete-range-move-left-confirm.command';
 import { DeleteRangeMoveUpConfirmCommand } from '../commands/commands/delete-range-move-up-confirm.command';
@@ -25,60 +33,83 @@ import {
     RemoveColConfirmCommand,
     RemoveRowConfirmCommand,
 } from '../commands/commands/remove-row-col-confirm.command';
-import { getBaseRangeMenuHidden$, getCellMenuHidden$, getCurrentRangeDisable$, getDeleteMenuHidden$, getObservableWithExclusiveRange$ } from './menu-util';
+import {
+    getBaseRangeMenuHidden$,
+    getCellMenuHidden$,
+    getCurrentRangeDisable$,
+    getDeleteMenuHidden$,
+    getObservableWithExclusiveRange$,
+} from './menu-util';
 
 export const DELETE_RANGE_MENU_ID = 'sheet.menu.delete';
-export function DeleteRangeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
+export function DeleteRangeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey> {
     return {
         id: DELETE_RANGE_MENU_ID,
         type: MenuItemType.SUBITEMS,
         title: 'sheets-ui.rightClick.delete',
         icon: 'ReduceDoubleIcon',
         hidden$: getObservableWithExclusiveRange$(accessor, getBaseRangeMenuHidden$(accessor)),
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission] }),
+        disabled$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetEditPermission],
+        }),
     };
 }
 
-export function RemoveColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function RemoveColMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: RemoveColConfirmCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'DeleteColumnDoubleIcon',
         title: 'sheets-ui.rightClick.deleteSelectedColumn',
         hidden$: getDeleteMenuHidden$(accessor, 'col'),
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission, WorkbookDeleteColumnPermission], worksheetTypes: [WorksheetEditPermission, WorksheetDeleteColumnPermission] }),
+        disabled$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission, WorkbookDeleteColumnPermission],
+            worksheetTypes: [WorksheetEditPermission, WorksheetDeleteColumnPermission],
+        }),
     };
 }
 
-export function RemoveRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function RemoveRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: RemoveRowConfirmCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'DeleteRowDoubleIcon',
         title: 'sheets-ui.rightClick.deleteSelectedRow',
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission, WorkbookDeleteRowPermission], worksheetTypes: [WorksheetEditPermission, WorksheetDeleteRowPermission] }),
+        disabled$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission, WorkbookDeleteRowPermission],
+            worksheetTypes: [WorksheetEditPermission, WorksheetDeleteRowPermission],
+        }),
         hidden$: getDeleteMenuHidden$(accessor, 'row'),
     };
 }
 
-export function DeleteRangeMoveLeftMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function DeleteRangeMoveLeftMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: DeleteRangeMoveLeftConfirmCommand.id,
         type: MenuItemType.BUTTON,
         title: 'sheets-ui.rightClick.moveLeft',
         icon: 'DeleteCellShiftLeftDoubleIcon',
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
+        disabled$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetEditPermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        }),
         hidden$: getCellMenuHidden$(accessor, 'col'),
     };
 }
 
-export function DeleteRangeMoveUpMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function DeleteRangeMoveUpMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: DeleteRangeMoveUpConfirmCommand.id,
         type: MenuItemType.BUTTON,
         title: 'sheets-ui.rightClick.moveUp',
         icon: 'DeleteCellShiftUpDoubleIcon',
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
+        disabled$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetEditPermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        }),
         hidden$: getCellMenuHidden$(accessor, 'row'),
     };
 }

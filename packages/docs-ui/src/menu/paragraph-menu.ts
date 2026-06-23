@@ -16,6 +16,7 @@
 
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuItem, IMenuSelectorItem } from '@univerjs/ui';
+import type { LocaleKey } from '../locale/types';
 import { ICommandService, NamedStyleType, ThemeService, UniverInstanceType } from '@univerjs/core';
 import { SetTextSelectionsOperation } from '@univerjs/docs';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
@@ -125,104 +126,104 @@ function getHeadingActivatedObservable(accessor: IAccessor, headingType: NamedSt
     });
 }
 
-export function H1HeadingMenuItemFactory(accessor: IAccessor): IMenuItem {
+export function H1HeadingMenuItemFactory(accessor: IAccessor): IMenuItem<LocaleKey> {
     return {
         id: H1HeadingCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'H1Icon',
-        title: 'ui.toolbar.heading.1',
-        tooltip: 'ui.toolbar.heading.1',
+        title: 'docs-ui.toolbar.heading.leading1',
+        tooltip: 'docs-ui.toolbar.heading.leading1',
         disabled$: disableMenuWhenNoDocRange(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
         activated$: getHeadingActivatedObservable(accessor, NamedStyleType.HEADING_1),
     };
 }
 
-export function H2HeadingMenuItemFactory(accessor: IAccessor): IMenuItem {
+export function H2HeadingMenuItemFactory(accessor: IAccessor): IMenuItem<LocaleKey> {
     return {
         id: H2HeadingCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'H2Icon',
-        title: 'ui.toolbar.heading.2',
-        tooltip: 'ui.toolbar.heading.2',
+        title: 'docs-ui.toolbar.heading.leading2',
+        tooltip: 'docs-ui.toolbar.heading.leading2',
         disabled$: disableMenuWhenNoDocRange(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
         activated$: getHeadingActivatedObservable(accessor, NamedStyleType.HEADING_2),
     };
 }
 
-export function H3HeadingMenuItemFactory(accessor: IAccessor): IMenuItem {
+export function H3HeadingMenuItemFactory(accessor: IAccessor): IMenuItem<LocaleKey> {
     return {
         id: H3HeadingCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'H3Icon',
-        title: 'ui.toolbar.heading.3',
-        tooltip: 'ui.toolbar.heading.3',
+        title: 'docs-ui.toolbar.heading.leading3',
+        tooltip: 'docs-ui.toolbar.heading.leading3',
         disabled$: disableMenuWhenNoDocRange(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
         activated$: getHeadingActivatedObservable(accessor, NamedStyleType.HEADING_3),
     };
 }
 
-export function H4HeadingMenuItemFactory(accessor: IAccessor): IMenuItem {
+export function H4HeadingMenuItemFactory(accessor: IAccessor): IMenuItem<LocaleKey> {
     return {
         id: H4HeadingCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'H4Icon',
-        title: 'ui.toolbar.heading.4',
-        tooltip: 'ui.toolbar.heading.4',
+        title: 'docs-ui.toolbar.heading.leading4',
+        tooltip: 'docs-ui.toolbar.heading.leading4',
         disabled$: disableMenuWhenNoDocRange(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
         activated$: getHeadingActivatedObservable(accessor, NamedStyleType.HEADING_4),
     };
 }
 
-export function H5HeadingMenuItemFactory(accessor: IAccessor): IMenuItem {
+export function H5HeadingMenuItemFactory(accessor: IAccessor): IMenuItem<LocaleKey> {
     return {
         id: H5HeadingCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'H5Icon',
-        title: 'ui.toolbar.heading.5',
-        tooltip: 'ui.toolbar.heading.5',
+        title: 'docs-ui.toolbar.heading.leading5',
+        tooltip: 'docs-ui.toolbar.heading.leading5',
         disabled$: disableMenuWhenNoDocRange(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
         activated$: getHeadingActivatedObservable(accessor, NamedStyleType.HEADING_5),
     };
 }
 
-export function NormalTextHeadingMenuItemFactory(accessor: IAccessor): IMenuItem {
+export function NormalTextHeadingMenuItemFactory(accessor: IAccessor): IMenuItem<LocaleKey> {
     return {
         id: NormalTextHeadingCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'TextTypeIcon',
-        title: 'ui.toolbar.heading.normal',
-        tooltip: 'ui.toolbar.heading.normal',
+        title: 'docs-ui.toolbar.heading.normal',
+        tooltip: 'docs-ui.toolbar.heading.normal',
         disabled$: disableMenuWhenNoDocRange(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
         activated$: getHeadingActivatedObservable(accessor, NamedStyleType.NORMAL_TEXT),
     };
 }
 
-export function TitleHeadingMenuItemFactory(accessor: IAccessor): IMenuItem {
+export function TitleHeadingMenuItemFactory(accessor: IAccessor): IMenuItem<LocaleKey> {
     return {
         id: TitleHeadingCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'TitleTypeIcon',
-        title: 'ui.toolbar.heading.title',
-        tooltip: 'ui.toolbar.heading.title',
+        title: 'docs-ui.toolbar.heading.title',
+        tooltip: 'docs-ui.toolbar.heading.title',
         disabled$: disableMenuWhenNoDocRange(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
         activated$: getHeadingActivatedObservable(accessor, NamedStyleType.TITLE),
     };
 }
 
-export function SubtitleHeadingMenuItemFactory(accessor: IAccessor): IMenuItem {
+export function SubtitleHeadingMenuItemFactory(accessor: IAccessor): IMenuItem<LocaleKey> {
     return {
         id: SubtitleHeadingCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'SubtitleTypeIcon',
-        title: 'ui.toolbar.heading.subTitle',
-        tooltip: 'ui.toolbar.heading.subTitle',
+        title: 'docs-ui.toolbar.heading.subTitle',
+        tooltip: 'docs-ui.toolbar.heading.subTitle',
         disabled$: disableMenuWhenNoDocRange(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
         activated$: getHeadingActivatedObservable(accessor, NamedStyleType.SUBTITLE),
@@ -230,67 +231,67 @@ export function SubtitleHeadingMenuItemFactory(accessor: IAccessor): IMenuItem {
 }
 
 export const EMPTY_PARAGRAPH_MENU_ID = 'doc.menu.empty-paragraph';
-export function EmptyParagraphH1MenuItemFactory(_accessor: IAccessor): IMenuButtonItem {
+export function EmptyParagraphH1MenuItemFactory(): IMenuButtonItem<LocaleKey> {
     return {
         id: H1HeadingCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'H1Icon',
-        title: 'ui.toolbar.heading.1',
-        tooltip: 'ui.toolbar.heading.1',
+        title: 'docs-ui.toolbar.heading.leading1',
+        tooltip: 'docs-ui.toolbar.heading.leading1',
     };
 }
 
-export function EmptyParagraphH2MenuItemFactory(_accessor: IAccessor): IMenuButtonItem {
+export function EmptyParagraphH2MenuItemFactory(): IMenuButtonItem<LocaleKey> {
     return {
         id: H2HeadingCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'H2Icon',
-        title: 'ui.toolbar.heading.2',
-        tooltip: 'ui.toolbar.heading.2',
+        title: 'docs-ui.toolbar.heading.leading2',
+        tooltip: 'docs-ui.toolbar.heading.leading2',
     };
 }
 
-export function EmptyParagraphH3MenuItemFactory(_accessor: IAccessor): IMenuButtonItem {
+export function EmptyParagraphH3MenuItemFactory(): IMenuButtonItem<LocaleKey> {
     return {
         id: H3HeadingCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'H3Icon',
-        title: 'ui.toolbar.heading.3',
-        tooltip: 'ui.toolbar.heading.3',
+        title: 'docs-ui.toolbar.heading.leading3',
+        tooltip: 'docs-ui.toolbar.heading.leading3',
     };
 }
 
-export function EmptyParagraphH4MenuItemFactory(_accessor: IAccessor): IMenuButtonItem {
+export function EmptyParagraphH4MenuItemFactory(): IMenuButtonItem<LocaleKey> {
     return {
         id: H4HeadingCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'H4Icon',
-        title: 'ui.toolbar.heading.4',
-        tooltip: 'ui.toolbar.heading.4',
+        title: 'docs-ui.toolbar.heading.leading4',
+        tooltip: 'docs-ui.toolbar.heading.leading4',
     };
 }
 
-export function EmptyParagraphH5MenuItemFactory(_accessor: IAccessor): IMenuButtonItem {
+export function EmptyParagraphH5MenuItemFactory(): IMenuButtonItem<LocaleKey> {
     return {
         id: H5HeadingCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'H5Icon',
-        title: 'ui.toolbar.heading.5',
-        tooltip: 'ui.toolbar.heading.5',
+        title: 'docs-ui.toolbar.heading.leading5',
+        tooltip: 'docs-ui.toolbar.heading.leading5',
     };
 }
 
-export function EmptyParagraphNormalTextMenuItemFactory(_accessor: IAccessor): IMenuButtonItem {
+export function EmptyParagraphNormalTextMenuItemFactory(): IMenuButtonItem<LocaleKey> {
     return {
         id: NormalTextHeadingCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'TextTypeIcon',
-        title: 'ui.toolbar.heading.normal',
-        tooltip: 'ui.toolbar.heading.normal',
+        title: 'docs-ui.toolbar.heading.normal',
+        tooltip: 'docs-ui.toolbar.heading.normal',
     };
 }
 
-export function EmptyParagraphOrderListMenuItemFactory(_accessor: IAccessor): IMenuButtonItem {
+export function EmptyParagraphOrderListMenuItemFactory(): IMenuButtonItem<LocaleKey> {
     return {
         id: OrderListCommand.id,
         type: MenuItemType.BUTTON,
@@ -300,7 +301,7 @@ export function EmptyParagraphOrderListMenuItemFactory(_accessor: IAccessor): IM
     };
 }
 
-export function EmptyParagraphBulletListMenuItemFactory(_accessor: IAccessor): IMenuButtonItem {
+export function EmptyParagraphBulletListMenuItemFactory(): IMenuButtonItem<LocaleKey> {
     return {
         id: BulletListCommand.id,
         type: MenuItemType.BUTTON,
@@ -310,7 +311,7 @@ export function EmptyParagraphBulletListMenuItemFactory(_accessor: IAccessor): I
     };
 }
 
-export function EmptyParagraphCheckListMenuItemFactory(_accessor: IAccessor): IMenuButtonItem {
+export function EmptyParagraphCheckListMenuItemFactory(): IMenuButtonItem<LocaleKey> {
     return {
         id: CheckListCommand.id,
         type: MenuItemType.BUTTON,
@@ -320,7 +321,7 @@ export function EmptyParagraphCheckListMenuItemFactory(_accessor: IAccessor): IM
     };
 }
 
-export function EmptyParagraphHorizontalLineMenuItemFactory(_accessor: IAccessor): IMenuButtonItem {
+export function EmptyParagraphHorizontalLineMenuItemFactory(): IMenuButtonItem<LocaleKey> {
     return {
         id: HorizontalLineCommand.id,
         type: MenuItemType.BUTTON,
@@ -330,7 +331,7 @@ export function EmptyParagraphHorizontalLineMenuItemFactory(_accessor: IAccessor
     };
 }
 
-export function CopyCurrentParagraphMenuItemFactory(_accessor: IAccessor): IMenuItem {
+export function CopyCurrentParagraphMenuItemFactory(): IMenuItem<LocaleKey> {
     return {
         id: DocCopyCurrentParagraphCommand.id,
         type: MenuItemType.BUTTON,
@@ -339,7 +340,7 @@ export function CopyCurrentParagraphMenuItemFactory(_accessor: IAccessor): IMenu
     };
 }
 
-export function CutCurrentParagraphMenuItemFactory(_accessor: IAccessor): IMenuItem {
+export function CutCurrentParagraphMenuItemFactory(): IMenuItem<LocaleKey> {
     return {
         id: DocCutCurrentParagraphCommand.id,
         type: MenuItemType.BUTTON,
@@ -348,7 +349,7 @@ export function CutCurrentParagraphMenuItemFactory(_accessor: IAccessor): IMenuI
     };
 }
 
-export function DeleteCurrentParagraphMenuItemFactory(_accessor: IAccessor): IMenuItem {
+export function DeleteCurrentParagraphMenuItemFactory(): IMenuItem<LocaleKey> {
     return {
         id: DeleteCurrentParagraphCommand.id,
         type: MenuItemType.BUTTON,
@@ -357,7 +358,7 @@ export function DeleteCurrentParagraphMenuItemFactory(_accessor: IAccessor): IMe
     };
 }
 
-export function InsertBulletListBellowMenuItemFactory(_accessor: IAccessor): IMenuItem {
+export function InsertBulletListBellowMenuItemFactory(): IMenuItem<LocaleKey> {
     return {
         id: InsertBulletListBellowCommand.id,
         type: MenuItemType.BUTTON,
@@ -367,7 +368,7 @@ export function InsertBulletListBellowMenuItemFactory(_accessor: IAccessor): IMe
     };
 }
 
-export function InsertOrderListBellowMenuItemFactory(_accessor: IAccessor): IMenuItem {
+export function InsertOrderListBellowMenuItemFactory(): IMenuItem<LocaleKey> {
     return {
         id: InsertOrderListBellowCommand.id,
         type: MenuItemType.BUTTON,
@@ -377,7 +378,7 @@ export function InsertOrderListBellowMenuItemFactory(_accessor: IAccessor): IMen
     };
 }
 
-export function InsertCheckListBellowMenuItemFactory(_accessor: IAccessor): IMenuItem {
+export function InsertCheckListBellowMenuItemFactory(): IMenuItem<LocaleKey> {
     return {
         id: InsertCheckListBellowCommand.id,
         type: MenuItemType.BUTTON,
@@ -387,7 +388,7 @@ export function InsertCheckListBellowMenuItemFactory(_accessor: IAccessor): IMen
     };
 }
 
-export function InsertHorizontalLineBellowMenuItemFactory(_accessor: IAccessor): IMenuItem {
+export function InsertHorizontalLineBellowMenuItemFactory(): IMenuItem<LocaleKey> {
     return {
         id: InsertHorizontalLineBellowCommand.id,
         type: MenuItemType.BUTTON,
@@ -415,7 +416,7 @@ export function getDocBlockRangeMenuId(blockType: string): string {
     return `doc.block-range.${blockType}.menu`;
 }
 
-export function TableBlockCopyMenuItemFactory(_accessor: IAccessor): IMenuItem {
+export function TableBlockCopyMenuItemFactory(): IMenuItem<LocaleKey> {
     return {
         id: DocCopyCommand.name,
         commandId: DocCopyCommand.id,
@@ -425,7 +426,7 @@ export function TableBlockCopyMenuItemFactory(_accessor: IAccessor): IMenuItem {
     };
 }
 
-export function TableBlockPasteMenuItemFactory(_accessor: IAccessor): IMenuItem {
+export function TableBlockPasteMenuItemFactory(): IMenuItem<LocaleKey> {
     return {
         id: DocPasteCommand.id,
         type: MenuItemType.BUTTON,
@@ -434,7 +435,7 @@ export function TableBlockPasteMenuItemFactory(_accessor: IAccessor): IMenuItem 
     };
 }
 
-export function TableBlockDeleteMenuItemFactory(_accessor: IAccessor): IMenuItem {
+export function TableBlockDeleteMenuItemFactory(): IMenuItem<LocaleKey> {
     return {
         id: DocTableDeleteTableCommand.id,
         type: MenuItemType.BUTTON,
@@ -443,7 +444,7 @@ export function TableBlockDeleteMenuItemFactory(_accessor: IAccessor): IMenuItem
     };
 }
 
-export function DocInsertBellowMenuItemFactory(_accessor: IAccessor): IMenuSelectorItem<string> {
+export function DocInsertBellowMenuItemFactory(): IMenuSelectorItem<LocaleKey> {
     return {
         id: INSERT_BELLOW_MENU_ID,
         type: MenuItemType.SUBITEMS,
@@ -451,7 +452,7 @@ export function DocInsertBellowMenuItemFactory(_accessor: IAccessor): IMenuSelec
     };
 }
 
-export function ParagraphMenuAlignSubmenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
+export function ParagraphMenuAlignSubmenuItemFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey> {
     return {
         id: DOC_PARAGRAPH_T_ALIGN_MENU_ID,
         type: MenuItemType.SUBITEMS,
@@ -462,7 +463,7 @@ export function ParagraphMenuAlignSubmenuItemFactory(accessor: IAccessor): IMenu
     };
 }
 
-export function ParagraphMenuColorsSubmenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
+export function ParagraphMenuColorsSubmenuItemFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey> {
     return {
         id: DOC_PARAGRAPH_T_COLORS_MENU_ID,
         type: MenuItemType.SUBITEMS,
@@ -473,8 +474,8 @@ export function ParagraphMenuColorsSubmenuItemFactory(accessor: IAccessor): IMen
     };
 }
 
-export function ParagraphMenuTextColorHeaderActionMenuItemFactory(accessor: IAccessor): IMenuItem {
-    const baseItem = TextColorSelectorMenuItemFactory(accessor) as IMenuSelectorItem<string, string | undefined>;
+export function ParagraphMenuTextColorHeaderActionMenuItemFactory(accessor: IAccessor): IMenuItem<LocaleKey> {
+    const baseItem = TextColorSelectorMenuItemFactory(accessor);
 
     return {
         ...baseItem,
@@ -484,8 +485,8 @@ export function ParagraphMenuTextColorHeaderActionMenuItemFactory(accessor: IAcc
     };
 }
 
-export function ParagraphMenuBackgroundColorHeaderActionMenuItemFactory(accessor: IAccessor): IMenuItem {
-    const baseItem = BackgroundColorSelectorMenuItemFactory(accessor) as IMenuSelectorItem<string, string | undefined>;
+export function ParagraphMenuBackgroundColorHeaderActionMenuItemFactory(accessor: IAccessor): IMenuItem<LocaleKey> {
+    const baseItem = BackgroundColorSelectorMenuItemFactory(accessor);
 
     return {
         ...baseItem,
@@ -495,7 +496,7 @@ export function ParagraphMenuBackgroundColorHeaderActionMenuItemFactory(accessor
     };
 }
 
-export function ParagraphMenuInsertBelowSubmenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
+export function ParagraphMenuInsertBelowSubmenuItemFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey> {
     return {
         id: DOC_PARAGRAPH_T_INSERT_BELOW_MENU_ID,
         type: MenuItemType.SUBITEMS,
@@ -506,72 +507,72 @@ export function ParagraphMenuInsertBelowSubmenuItemFactory(accessor: IAccessor):
     };
 }
 
-export function ParagraphMenuInsertBelowHeadingH1MenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function ParagraphMenuInsertBelowHeadingH1MenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: `${DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID}.h1`,
         commandId: DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID,
         type: MenuItemType.BUTTON,
         icon: 'H1Icon',
-        title: 'ui.toolbar.heading.1',
-        tooltip: 'ui.toolbar.heading.1',
+        title: 'docs-ui.toolbar.heading.leading1',
+        tooltip: 'docs-ui.toolbar.heading.leading1',
         params: { commandId: H1HeadingCommand.id, paragraphMenuPlacement: 'below', paragraphMenuInsertMode: 'breakline' },
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
 
-export function ParagraphMenuInsertBelowHeadingH2MenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function ParagraphMenuInsertBelowHeadingH2MenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: `${DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID}.h2`,
         commandId: DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID,
         type: MenuItemType.BUTTON,
         icon: 'H2Icon',
-        title: 'ui.toolbar.heading.2',
-        tooltip: 'ui.toolbar.heading.2',
+        title: 'docs-ui.toolbar.heading.leading2',
+        tooltip: 'docs-ui.toolbar.heading.leading2',
         params: { commandId: H2HeadingCommand.id, paragraphMenuPlacement: 'below', paragraphMenuInsertMode: 'breakline' },
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
 
-export function ParagraphMenuInsertBelowHeadingH3MenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function ParagraphMenuInsertBelowHeadingH3MenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: `${DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID}.h3`,
         commandId: DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID,
         type: MenuItemType.BUTTON,
         icon: 'H3Icon',
-        title: 'ui.toolbar.heading.3',
-        tooltip: 'ui.toolbar.heading.3',
+        title: 'docs-ui.toolbar.heading.leading3',
+        tooltip: 'docs-ui.toolbar.heading.leading3',
         params: { commandId: H3HeadingCommand.id, paragraphMenuPlacement: 'below', paragraphMenuInsertMode: 'breakline' },
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
 
-export function ParagraphMenuInsertBelowHeadingH4MenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function ParagraphMenuInsertBelowHeadingH4MenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: `${DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID}.h4`,
         commandId: DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID,
         type: MenuItemType.BUTTON,
         icon: 'H4Icon',
-        title: 'ui.toolbar.heading.4',
-        tooltip: 'ui.toolbar.heading.4',
+        title: 'docs-ui.toolbar.heading.leading4',
+        tooltip: 'docs-ui.toolbar.heading.leading4',
         params: { commandId: H4HeadingCommand.id, paragraphMenuPlacement: 'below', paragraphMenuInsertMode: 'breakline' },
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
 
-export function ParagraphMenuInsertBelowHeadingH5MenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function ParagraphMenuInsertBelowHeadingH5MenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: `${DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID}.h5`,
         commandId: DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID,
         type: MenuItemType.BUTTON,
         icon: 'H5Icon',
-        title: 'ui.toolbar.heading.5',
-        tooltip: 'ui.toolbar.heading.5',
+        title: 'docs-ui.toolbar.heading.leading5',
+        tooltip: 'docs-ui.toolbar.heading.leading5',
         params: { commandId: H5HeadingCommand.id, paragraphMenuPlacement: 'below', paragraphMenuInsertMode: 'breakline' },
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
 
-export function ParagraphMenuInsertBelowTableMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function ParagraphMenuInsertBelowTableMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: `${DocCreateTableOperation.id}.below`,
         commandId: DocCreateTableOperation.id,
@@ -584,7 +585,7 @@ export function ParagraphMenuInsertBelowTableMenuItemFactory(accessor: IAccessor
     };
 }
 
-export function ParagraphMenuIndentIncreaseMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function ParagraphMenuIndentIncreaseMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: DOC_PARAGRAPH_T_INDENT_INCREASE_ID,
         type: MenuItemType.BUTTON,
@@ -595,7 +596,7 @@ export function ParagraphMenuIndentIncreaseMenuItemFactory(accessor: IAccessor):
     };
 }
 
-export function ParagraphMenuIndentDecreaseMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function ParagraphMenuIndentDecreaseMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: DOC_PARAGRAPH_T_INDENT_DECREASE_ID,
         type: MenuItemType.BUTTON,
@@ -606,7 +607,7 @@ export function ParagraphMenuIndentDecreaseMenuItemFactory(accessor: IAccessor):
     };
 }
 
-export function ParagraphMenuDefaultTextColorMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function ParagraphMenuDefaultTextColorMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: `${SetInlineFormatTextColorCommand.id}.default`,
         commandId: SetInlineFormatTextColorCommand.id,
@@ -618,7 +619,7 @@ export function ParagraphMenuDefaultTextColorMenuItemFactory(accessor: IAccessor
     };
 }
 
-export function ParagraphMenuNoBackgroundMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function ParagraphMenuNoBackgroundMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: ResetInlineFormatTextBackgroundColorCommand.id,
         type: MenuItemType.BUTTON,
@@ -628,7 +629,7 @@ export function ParagraphMenuNoBackgroundMenuItemFactory(accessor: IAccessor): I
     };
 }
 
-export function ParagraphMenuResetTextColorMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function ParagraphMenuResetTextColorMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: ResetInlineFormatTextColorCommand.id,
         type: MenuItemType.BUTTON,
@@ -639,7 +640,7 @@ export function ParagraphMenuResetTextColorMenuItemFactory(accessor: IAccessor):
     };
 }
 
-export function ParagraphMenuResetColorsMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function ParagraphMenuResetColorsMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: DOC_PARAGRAPH_T_RESET_COLORS_ID,
         type: MenuItemType.BUTTON,
@@ -650,11 +651,11 @@ export function ParagraphMenuResetColorsMenuItemFactory(accessor: IAccessor): IM
     };
 }
 
-export const ParagraphMenuTextColorSwatchMenuItemFactories = TEXT_COLORS.reduce<Record<string, { order: number; menuItemFactory: (accessor: IAccessor) => IMenuButtonItem }>>((items, color, index) => {
+export const ParagraphMenuTextColorSwatchMenuItemFactories = TEXT_COLORS.reduce<Record<string, { order: number; menuItemFactory: (accessor: IAccessor) => IMenuButtonItem<LocaleKey> }>>((items, color, index) => {
     const id = `doc.menu.paragraph-t.text-color.${index}`;
     items[id] = {
         order: index,
-        menuItemFactory: (accessor: IAccessor): IMenuButtonItem => ({
+        menuItemFactory: (accessor: IAccessor): IMenuButtonItem<LocaleKey> => ({
             id,
             commandId: SetInlineFormatTextColorCommand.id,
             type: MenuItemType.BUTTON,
@@ -668,11 +669,11 @@ export const ParagraphMenuTextColorSwatchMenuItemFactories = TEXT_COLORS.reduce<
     return items;
 }, {});
 
-export const ParagraphMenuBackgroundColorSwatchMenuItemFactories = BACKGROUND_COLOR_SWATCH_ICONS.reduce<Record<string, { order: number; menuItemFactory: (accessor: IAccessor) => IMenuButtonItem }>>((items, icon, index) => {
+export const ParagraphMenuBackgroundColorSwatchMenuItemFactories = BACKGROUND_COLOR_SWATCH_ICONS.reduce<Record<string, { order: number; menuItemFactory: (accessor: IAccessor) => IMenuButtonItem<LocaleKey> }>>((items, icon, index) => {
     const id = `doc.menu.paragraph-t.background-color.${index}`;
     items[id] = {
         order: index,
-        menuItemFactory: (accessor: IAccessor): IMenuButtonItem => {
+        menuItemFactory: (accessor: IAccessor): IMenuButtonItem<LocaleKey> => {
             const themeService = accessor.get(ThemeService);
             const color = getHighlightBackgroundColor(themeService, index);
 

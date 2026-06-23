@@ -15,6 +15,7 @@
  */
 
 import type { Injector, Univer, Workbook } from '@univerjs/core';
+import type { LocaleKey } from '../../../locale/types';
 import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { InsertSheetMutation } from '../../mutations/insert-sheet.mutation';
@@ -50,7 +51,7 @@ describe('Test insert worksheet commands', () => {
         it('should auto-generate incremental names when name is not provided', async () => {
             const workbook = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
             const localeService = get(LocaleService);
-            const sheetPrefix = localeService.t('sheets.tabs.sheet');
+            const sheetPrefix = localeService.t<LocaleKey>('sheets.tabs.sheet');
             expect(workbook.getSheetSize()).toBe(1);
 
             await commandService.executeCommand(InsertSheetCommand.id, {

@@ -17,6 +17,7 @@
 import type { IDisposable, IRange, Workbook } from '@univerjs/core';
 import type { ISetNumfmtMutationParams } from '@univerjs/sheets';
 import type { ISetNumfmtCommandParams } from '@univerjs/sheets-numfmt';
+import type { LocaleKey } from '../locale/types';
 import type { ISheetNumfmtPanelProps } from '../views/SheetNumfmtPanel';
 import {
     CellValueType,
@@ -152,7 +153,9 @@ export class SheetNumfmtUIController extends Disposable {
         };
 
         this._sidebarDisposable = sidebarService.open({
-            header: { title: localeService.t('sheets-numfmt-ui.title') },
+            header: {
+                title: localeService.t<LocaleKey>('sheets-numfmt-ui.title'),
+            },
             children: {
                 label: SHEET_NUMFMT_PANEL,
                 ...(props as any), // need passthrough to react props.

@@ -28,7 +28,17 @@ import type {
 } from '@univerjs/engine-formula';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import type { IUniverSheetsFormulaBaseConfig } from '../config/config';
-import { Disposable, ICommandService, IConfigService, ILogService, Inject, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
+import type { LocaleKey } from '../locale/types';
+import {
+    Disposable,
+    ICommandService,
+    IConfigService,
+    ILogService,
+    Inject,
+    IUniverInstanceService,
+    LocaleService,
+    UniverInstanceType,
+} from '@univerjs/core';
 import {
     ENGINE_FORMULA_CYCLE_REFERENCE_COUNT,
     ENGINE_FORMULA_RETURN_DEPENDENCY_TREE,
@@ -108,7 +118,7 @@ export class TriggerCalculationController extends Disposable {
         this._doneCalculationTaskCount = 0;
         this._totalCalculationTaskCount = 1;
 
-        const analyzing = this._localeService.t('sheets-formula.progress.analyzing');
+        const analyzing = this._localeService.t<LocaleKey>('sheets-formula.progress.analyzing');
         this._emitProgress(analyzing);
     }
 
@@ -129,7 +139,7 @@ export class TriggerCalculationController extends Disposable {
     private _completeProgress(): void {
         this._doneCalculationTaskCount = this._totalCalculationTaskCount = 1;
 
-        const done = this._localeService.t('sheets-formula.progress.done');
+        const done = this._localeService.t<LocaleKey>('sheets-formula.progress.done');
         this._emitProgress(done);
     }
 
@@ -445,21 +455,21 @@ export class TriggerCalculationController extends Disposable {
                         this._executionInProgressParams = params.stageInfo;
 
                         if (startDependencyTimer === null) {
-                            const calculating = this._localeService.t('sheets-formula.progress.calculating');
+                            const calculating = this._localeService.t<LocaleKey>('sheets-formula.progress.calculating');
                             this._calculateProgress(calculating);
                         }
                     } else if (stage === FormulaExecuteStageType.START_DEPENDENCY_ARRAY_FORMULA) {
                         this._executionInProgressParams = params.stageInfo;
 
                         if (startDependencyTimer === null) {
-                            const arrayAnalysis = this._localeService.t('sheets-formula.progress.array-analysis');
+                            const arrayAnalysis = this._localeService.t<LocaleKey>('sheets-formula.progress.array-analysis');
                             this._calculateProgress(arrayAnalysis);
                         }
                     } else if (stage === FormulaExecuteStageType.CURRENTLY_CALCULATING_ARRAY_FORMULA) {
                         this._executionInProgressParams = params.stageInfo;
 
                         if (startDependencyTimer === null) {
-                            const arrayCalculation = this._localeService.t('sheets-formula.progress.array-calculation');
+                            const arrayCalculation = this._localeService.t<LocaleKey>('sheets-formula.progress.array-calculation');
                             this._calculateProgress(arrayCalculation);
                         }
                     }

@@ -16,9 +16,19 @@
 
 import type { IRange, Nullable } from '@univerjs/core';
 import type { IOrderRule } from '@univerjs/sheets-sort';
+import type { LocaleKey } from '../locale/types';
 import type { ICustomSortState } from '../services/sheets-sort-ui.service';
 import { LocaleService, throttle } from '@univerjs/core';
-import { Button, Checkbox, clsx, DraggableList, Dropdown, Radio, RadioGroup, scrollbarClassName } from '@univerjs/design';
+import {
+    Button,
+    Checkbox,
+    clsx,
+    DraggableList,
+    Dropdown,
+    Radio,
+    RadioGroup,
+    scrollbarClassName,
+} from '@univerjs/design';
 import { CheckMarkIcon, DeleteEmptyIcon, GripVerticalIcon, IncreaseIcon, MoreDownIcon } from '@univerjs/icons';
 import { SheetsSortService, SortType } from '@univerjs/sheets-sort';
 import { useDependency, useObservable } from '@univerjs/ui';
@@ -114,7 +124,7 @@ function CustomSortPanelImpl({ state }: { state: ICustomSortState }) {
             <div onMouseDown={(e) => { e.stopPropagation(); }}>
                 <div className="univer-mb-2 univer-flex univer-items-center univer-justify-between">
                     <Checkbox checked={hasTitle} onChange={(value) => setTitle(!!value)}>
-                        {localeService.t('sheets-sort-ui.dialog.first-row-check')}
+                        {localeService.t<LocaleKey>('sheets-sort-ui.dialog.first-row-check')}
                     </Checkbox>
                     {canNew
                         ? (
@@ -126,7 +136,7 @@ function CustomSortPanelImpl({ state }: { state: ICustomSortState }) {
                                 onClick={newItem}
                             >
                                 <IncreaseIcon />
-                                <span className="univer-ml-1.5">{localeService.t('sheets-sort-ui.dialog.add-condition')}</span>
+                                <span className="univer-ml-1.5">{localeService.t<LocaleKey>('sheets-sort-ui.dialog.add-condition')}</span>
                             </div>
                         )
                         : (
@@ -139,7 +149,7 @@ function CustomSortPanelImpl({ state }: { state: ICustomSortState }) {
                                 `}
                             >
                                 <IncreaseIcon />
-                                <span className="univer-ml-1.5 univer-text-xs">{localeService.t('sheets-sort-ui.dialog.add-condition')}</span>
+                                <span className="univer-ml-1.5 univer-text-xs">{localeService.t<LocaleKey>('sheets-sort-ui.dialog.add-condition')}</span>
                             </div>
                         )}
 
@@ -176,14 +186,14 @@ function CustomSortPanelImpl({ state }: { state: ICustomSortState }) {
                     className="univer-ml-3"
                     onClick={() => cancel()}
                 >
-                    {localeService.t('sheets-sort-ui.dialog.cancel')}
+                    {localeService.t<LocaleKey>('sheets-sort-ui.dialog.cancel')}
                 </Button>
                 <Button
                     className="univer-ml-3"
                     variant="primary"
                     onClick={() => apply(list, hasTitle)}
                 >
-                    {localeService.t('sheets-sort-ui.dialog.confirm')}
+                    {localeService.t<LocaleKey>('sheets-sort-ui.dialog.confirm')}
                 </Button>
             </div>
         </div>
@@ -296,8 +306,8 @@ export function SortOptionItem(props: ISortOptionItemProps) {
                         onChange({ ...item, type: value as SortType }, currentIndex);
                     }}
                 >
-                    <Radio value={SortType.ASC}>{localeService.t('sheets-sort-ui.general.sort-asc')}</Radio>
-                    <Radio value={SortType.DESC}>{localeService.t('sheets-sort-ui.general.sort-desc')}</Radio>
+                    <Radio value={SortType.ASC}>{localeService.t<LocaleKey>('sheets-sort-ui.general.sort-asc')}</Radio>
+                    <Radio value={SortType.DESC}>{localeService.t<LocaleKey>('sheets-sort-ui.general.sort-desc')}</Radio>
                 </RadioGroup>
                 <a
                     className={`

@@ -16,6 +16,7 @@
 
 import type { CellValue, DataValidationOperator, IDataValidationRule, IDataValidationRuleBase } from '@univerjs/core';
 import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
+import type { LocaleKey } from '../locale/types';
 import { DataValidationType } from '@univerjs/core';
 import { BaseSheetValidator } from './base-sheet-validator';
 
@@ -47,6 +48,6 @@ export class AnyValidator extends BaseSheetValidator {
     }
 
     override generateRuleErrorMessage(rule: IDataValidationRuleBase): string {
-        return this.localeService.t('sheets-data-validation.any.error');
+        return this.localeService.t<LocaleKey>('sheets-data-validation.any.error');
     }
 }

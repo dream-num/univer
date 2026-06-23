@@ -18,10 +18,28 @@ import type { IDisposable, Nullable, Workbook } from '@univerjs/core';
 import type { ImageIoService } from '@univerjs/drawing';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
 import type { ISheetFloatDom } from '@univerjs/sheets-drawing';
-import { DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, IImageIoService, Inject, Injector, IUniverInstanceService, LocaleService, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import type { LocaleKey } from '../locale/types';
+import {
+    DrawingTypeEnum,
+    FOCUSING_COMMON_DRAWINGS,
+    ICommandService,
+    IContextService,
+    IImageIoService,
+    Inject,
+    Injector,
+    IUniverInstanceService,
+    LocaleService,
+    RxDisposable,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import { IDrawingManagerService, SetDrawingSelectedOperation } from '@univerjs/drawing';
-import { COMPONENT_IMAGE_POPUP_MENU, ImageCropperObject, ImageResetSizeOperation, OpenImageCropOperation } from '@univerjs/drawing-ui';
+import {
+    COMPONENT_IMAGE_POPUP_MENU,
+    ImageCropperObject,
+    ImageResetSizeOperation,
+    OpenImageCropOperation,
+} from '@univerjs/drawing-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { RemoveSheetDrawingCommand } from '@univerjs/sheets-drawing';
 import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
@@ -66,7 +84,7 @@ export class DrawingPopupMenuController extends RxDisposable {
                 messageDisposable = this._messageService.show({
                     id: MESSAGE_ID,
                     type: MessageType.Loading,
-                    content: `${this._localeService.t('sheets-drawing-ui.uploadLoading.loading')}: ${status}`,
+                    content: `${this._localeService.t<LocaleKey>('sheets-drawing-ui.uploadLoading.loading')}: ${status}`,
                     duration: 0,
                 });
             } else if (status === 0) {

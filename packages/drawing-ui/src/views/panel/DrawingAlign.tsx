@@ -15,6 +15,7 @@
  */
 
 import type { IDrawingParam } from '@univerjs/core';
+import type { LocaleKey } from '../../locale/types';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import { clsx, Select } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
@@ -35,21 +36,21 @@ export const DrawingAlign = (props: IDrawingAlignProps) => {
     const [alignValue, setAlignValue] = useState<string>(AlignType.default as string);
     const alignOptions = [
         {
-            label: localeService.t('drawing-ui.image-panel.align.default'),
+            label: localeService.t<LocaleKey>('drawing-ui.image-panel.align.default'),
             value: AlignType.default,
         },
         {
             options: [
                 {
-                    label: localeService.t('drawing-ui.image-panel.align.left'),
+                    label: localeService.t<LocaleKey>('drawing-ui.image-panel.align.left'),
                     value: AlignType.left,
                 },
                 {
-                    label: localeService.t('drawing-ui.image-panel.align.center'),
+                    label: localeService.t<LocaleKey>('drawing-ui.image-panel.align.center'),
                     value: AlignType.center,
                 },
                 {
-                    label: localeService.t('drawing-ui.image-panel.align.right'),
+                    label: localeService.t<LocaleKey>('drawing-ui.image-panel.align.right'),
                     value: AlignType.right,
                 },
             ],
@@ -57,15 +58,15 @@ export const DrawingAlign = (props: IDrawingAlignProps) => {
         {
             options: [
                 {
-                    label: localeService.t('drawing-ui.image-panel.align.top'),
+                    label: localeService.t<LocaleKey>('drawing-ui.image-panel.align.top'),
                     value: AlignType.top,
                 },
                 {
-                    label: localeService.t('drawing-ui.image-panel.align.middle'),
+                    label: localeService.t<LocaleKey>('drawing-ui.image-panel.align.middle'),
                     value: AlignType.middle,
                 },
                 {
-                    label: localeService.t('drawing-ui.image-panel.align.bottom'),
+                    label: localeService.t<LocaleKey>('drawing-ui.image-panel.align.bottom'),
                     value: AlignType.bottom,
                 },
             ],
@@ -73,11 +74,11 @@ export const DrawingAlign = (props: IDrawingAlignProps) => {
         {
             options: [
                 {
-                    label: localeService.t('drawing-ui.image-panel.align.horizon'),
+                    label: localeService.t<LocaleKey>('drawing-ui.image-panel.align.horizon'),
                     value: AlignType.horizon,
                 },
                 {
-                    label: localeService.t('drawing-ui.image-panel.align.vertical'),
+                    label: localeService.t<LocaleKey>('drawing-ui.image-panel.align.vertical'),
                     value: AlignType.vertical,
                 },
             ],
@@ -104,7 +105,7 @@ export const DrawingAlign = (props: IDrawingAlignProps) => {
                   dark:!univer-text-gray-200
                 `}
             >
-                <div>{localeService.t('drawing-ui.image-panel.align.title')}</div>
+                <div>{localeService.t<LocaleKey>('drawing-ui.image-panel.align.title')}</div>
             </header>
 
             <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">

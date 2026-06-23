@@ -14,8 +14,21 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICellData, ICommand, IMutationInfo, Injector, IRange, Nullable, Worksheet } from '@univerjs/core';
-import type { IAddWorksheetMergeMutationParams, IRemoveWorksheetMergeMutationParams } from '../../basics/interfaces/mutation-interface';
+import type {
+    IAccessor,
+    ICellData,
+    ICommand,
+    IMutationInfo,
+    Injector,
+    IRange,
+    Nullable,
+    Worksheet,
+} from '@univerjs/core';
+import type {
+    IAddWorksheetMergeMutationParams,
+    IRemoveWorksheetMergeMutationParams,
+} from '../../basics/interfaces/mutation-interface';
+import type { LocaleKey } from '../../locale/types';
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 import type { ISheetCommandSharedParams } from '../utils/interface';
 import {
@@ -36,9 +49,15 @@ import { getAddMergeMutationRangeByType } from '../../controllers/merge-cell.con
 import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { AddMergeUndoMutationFactory, AddWorksheetMergeMutation } from '../mutations/add-worksheet-merge.mutation';
-import { RemoveMergeUndoMutationFactory, RemoveWorksheetMergeMutation } from '../mutations/remove-worksheet-merge.mutation';
+import {
+    RemoveMergeUndoMutationFactory,
+    RemoveWorksheetMergeMutation,
+} from '../mutations/remove-worksheet-merge.mutation';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
-import { AddMergeRedoSelectionsOperationFactory, AddMergeUndoSelectionsOperationFactory } from '../utils/handle-merge-operation';
+import {
+    AddMergeRedoSelectionsOperationFactory,
+    AddMergeUndoSelectionsOperationFactory,
+} from '../utils/handle-merge-operation';
 import { RemoveWorksheetMergeCommand } from './remove-worksheet-merge.command';
 import { getSheetCommandTarget } from './utils/target-util';
 
@@ -184,8 +203,8 @@ export const AddWorksheetMergeCommand: ICommand = {
                 children: {
                     title: 'sheets.merge.confirm.title',
                 },
-                cancelText: localeService.t('sheets.merge.confirm.cancel'),
-                confirmText: localeService.t('sheets.merge.confirm.confirm'),
+                cancelText: localeService.t<LocaleKey>('sheets.merge.confirm.cancel'),
+                confirmText: localeService.t<LocaleKey>('sheets.merge.confirm.confirm'),
             });
 
             if (!result) return false;

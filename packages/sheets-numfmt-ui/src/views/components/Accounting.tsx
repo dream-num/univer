@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { FC } from 'react';
+import type { LocaleKey } from '../../locale/types';
 import type { IBusinessComponentProps } from './interface';
 import { LocaleService } from '@univerjs/core';
 import { InputNumber, Select } from '@univerjs/design';
@@ -28,7 +28,7 @@ export const isAccountingPanel = (pattern: string) => {
     return !!type && pattern.startsWith('_(');
 };
 
-export const AccountingPanel: FC<IBusinessComponentProps> = (props) => {
+export function AccountingPanel(props: IBusinessComponentProps) {
     const { defaultPattern, onActionChange, onChange } = props;
 
     const [decimal, setDecimal] = useState(() => getDecimalFromPattern(defaultPattern || '', 2));
@@ -57,7 +57,9 @@ export const AccountingPanel: FC<IBusinessComponentProps> = (props) => {
         <div>
             <div className="univer-mt-4 univer-flex univer-justify-between">
                 <div className="option">
-                    <div className="univer-text-sm univer-text-gray-400">{localeService.t('sheets-numfmt-ui.decimalLength')}</div>
+                    <div className="univer-text-sm univer-text-gray-400">
+                        {localeService.t<LocaleKey>('sheets-numfmt-ui.decimalLength')}
+                    </div>
 
                     <div className="univer-mt-2 univer-w-32">
                         <InputNumber
@@ -71,7 +73,9 @@ export const AccountingPanel: FC<IBusinessComponentProps> = (props) => {
                     </div>
                 </div>
                 <div className="option">
-                    <div className="univer-text-sm univer-text-gray-400">{localeService.t('sheets-numfmt-ui.currencyType')}</div>
+                    <div className="univer-text-sm univer-text-gray-400">
+                        {localeService.t<LocaleKey>('sheets-numfmt-ui.currencyType')}
+                    </div>
 
                     <div className="univer-mt-2 univer-w-36">
                         <Select
@@ -83,7 +87,9 @@ export const AccountingPanel: FC<IBusinessComponentProps> = (props) => {
                 </div>
             </div>
 
-            <div className="univer-mt-4 univer-text-sm univer-text-gray-400">{localeService.t('sheets-numfmt-ui.accountingDes')}</div>
+            <div className="univer-mt-4 univer-text-sm univer-text-gray-400">
+                {localeService.t<LocaleKey>('sheets-numfmt-ui.accountingDes')}
+            </div>
         </div>
     );
 };

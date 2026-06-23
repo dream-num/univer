@@ -33,7 +33,7 @@ export type ICustomLabelProps<T = undefined> = {
     onChange?(v: string | number): void;
 
     title?: ReactNode;
-} & Pick<IMenuSelectorItem<unknown>, 'label' | 'icon'>;
+} & Pick<IMenuSelectorItem<string, unknown>, 'label' | 'icon'>;
 
 /**
  * The component to render toolbar item label and menu item label.

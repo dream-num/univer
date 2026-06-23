@@ -16,8 +16,22 @@
 
 import type { IAccessor, ICommand } from '@univerjs/core';
 import type { IUniverSheetsConfig } from '@univerjs/sheets';
-import { CommandType, ICommandService, IConfigService, IConfirmService, IUniverInstanceService, LocaleService } from '@univerjs/core';
-import { countCells, defaultLargeSheetOperationConfig, getSheetCommandTarget, RemoveSheetCommand, SHEETS_PLUGIN_CONFIG_KEY } from '@univerjs/sheets';
+import type { LocaleKey } from '../../locale/types';
+import {
+    CommandType,
+    ICommandService,
+    IConfigService,
+    IConfirmService,
+    IUniverInstanceService,
+    LocaleService,
+} from '@univerjs/core';
+import {
+    countCells,
+    defaultLargeSheetOperationConfig,
+    getSheetCommandTarget,
+    RemoveSheetCommand,
+    SHEETS_PLUGIN_CONFIG_KEY,
+} from '@univerjs/sheets';
 
 interface IRemoveSheetConfirmCommandParams {
     subUnitId: string;
@@ -51,11 +65,11 @@ export const RemoveSheetConfirmCommand: ICommand = {
         const result = await confirmService.confirm({
             id: 'sheet.confirm.remove-sheet',
             title: {
-                title: localeService.t('sheets-ui.sheetConfig.deleteSheet'),
+                title: localeService.t<LocaleKey>('sheets-ui.sheetConfig.deleteSheet'),
             },
-            children: { title: isLargeSheet ? localeService.t('sheets-ui.sheetConfig.deleteLargeSheetContent') : localeService.t('sheets-ui.sheetConfig.deleteSheetContent') },
-            cancelText: localeService.t('sheets-ui.button.cancel'),
-            confirmText: localeService.t('sheets-ui.button.confirm'),
+            children: { title: isLargeSheet ? localeService.t<LocaleKey>('sheets-ui.sheetConfig.deleteLargeSheetContent') : localeService.t<LocaleKey>('sheets-ui.sheetConfig.deleteSheetContent') },
+            cancelText: localeService.t<LocaleKey>('sheets-ui.button.cancel'),
+            confirmText: localeService.t<LocaleKey>('sheets-ui.button.confirm'),
         });
 
         if (!result) {

@@ -15,6 +15,7 @@
  */
 
 import type { IInputProps } from '@univerjs/design';
+import type { LocaleKey } from '../../locale/types';
 import type { IFindReplaceService } from '../../services/find-replace.service';
 import { LocaleService } from '@univerjs/core';
 import { Input, Pager } from '@univerjs/design';
@@ -45,7 +46,7 @@ export function SearchInput(props: ISearchInputProps) {
     const [value, setValue] = useState(initialFindString);
     const noResult = findComplete && matchesCount === 0;
     const text = noResult
-        ? localeService.t('find-replace.dialog.no-result')
+        ? localeService.t<LocaleKey>('find-replace.dialog.no-result')
         : matchesCount === 0
             ? ' '
             : undefined;
@@ -67,7 +68,7 @@ export function SearchInput(props: ISearchInputProps) {
             <Input
                 data-u-comp="search-input"
                 autoFocus
-                placeholder={localeService.t('find-replace.dialog.find-placeholder')}
+                placeholder={localeService.t<LocaleKey>('find-replace.dialog.find-placeholder')}
                 value={value}
                 onChange={(value) => {
                     setValue(value);

@@ -14,7 +14,13 @@
  * limitations under the License.
  */
 
-import type { IAverageHighlightCell, IConditionalFormattingRuleConfig, IHighlightCell, IRankHighlightCell } from '@univerjs/sheets-conditional-formatting';
+import type {
+    IAverageHighlightCell,
+    IConditionalFormattingRuleConfig,
+    IHighlightCell,
+    IRankHighlightCell,
+} from '@univerjs/sheets-conditional-formatting';
+import type { LocaleKey } from '../../../locale/types';
 import type { IStyleEditorProps } from './type';
 import { LocaleService } from '@univerjs/core';
 import { Checkbox, InputNumber, Select } from '@univerjs/design';
@@ -30,7 +36,7 @@ export const RankStyleEditor = (props: IStyleEditorProps) => {
     const localeService = useDependency(LocaleService);
 
     const rule = props.rule?.type === CFRuleType.highlightCell ? props.rule : undefined as IRankHighlightCell | IAverageHighlightCell | undefined;
-    const options = [{ label: localeService.t('sheets-conditional-formatting-ui.panel.isNotBottom'), value: 'isNotBottom' }, { label: localeService.t('sheets-conditional-formatting-ui.panel.isBottom'), value: 'isBottom' }, { label: localeService.t('sheets-conditional-formatting-ui.panel.greaterThanAverage'), value: 'greaterThanAverage' }, { label: localeService.t('sheets-conditional-formatting-ui.panel.lessThanAverage'), value: 'lessThanAverage' }];
+    const options = [{ label: localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.isNotBottom'), value: 'isNotBottom' }, { label: localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.isBottom'), value: 'isBottom' }, { label: localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.greaterThanAverage'), value: 'greaterThanAverage' }, { label: localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.lessThanAverage'), value: 'lessThanAverage' }];
 
     const [type, setType] = useState(() => {
         const defaultV = options[0].value;
@@ -147,7 +153,7 @@ export const RankStyleEditor = (props: IStyleEditorProps) => {
                   dark:!univer-text-gray-200
                 `}
             >
-                {localeService.t('sheets-conditional-formatting-ui.panel.styleRule')}
+                {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.styleRule')}
             </div>
             <Select
                 className="univer-mt-3 univer-w-full"
@@ -180,7 +186,7 @@ export const RankStyleEditor = (props: IStyleEditorProps) => {
                                 _onChange({ type, isPercent: !!v, value, style });
                             }}
                         />
-                        {localeService.t('sheets-conditional-formatting-ui.valueType.percent')}
+                        {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.valueType.percent')}
                     </div>
 
                 </div>

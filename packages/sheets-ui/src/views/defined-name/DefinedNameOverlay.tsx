@@ -16,6 +16,7 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { IDefinedNamesServiceParam } from '@univerjs/engine-formula';
+import type { LocaleKey } from '../../locale/types';
 import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { borderBottomClassName, clsx, scrollbarClassName } from '@univerjs/design';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
@@ -169,10 +170,10 @@ export function DefinedNameOverlay({ search, isInputEvent }: { search: string; i
                       dark:!univer-text-gray-200
                     `}
                 >
-                    {localeService.t('sheets-ui.definedName.managerTitle')}
+                    {localeService.t<LocaleKey>('sheets-ui.definedName.managerTitle')}
                 </div>
                 <div className="univer-text-xs univer-text-gray-400">
-                    {localeService.t('sheets-ui.definedName.managerDescription')}
+                    {localeService.t<LocaleKey>('sheets-ui.definedName.managerDescription')}
                 </div>
             </div>
         </div>

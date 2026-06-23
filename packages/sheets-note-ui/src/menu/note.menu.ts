@@ -15,10 +15,16 @@
  */
 
 import type { IAccessor } from '@univerjs/core';
-import type { IMenuItem } from '@univerjs/ui';
+import type { IMenuButtonItem } from '@univerjs/ui';
 import type { Observable } from 'rxjs';
+import type { LocaleKey } from '../locale/types';
 import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { getSheetCommandTarget, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission } from '@univerjs/sheets';
+import {
+    getSheetCommandTarget,
+    SheetsSelectionsService,
+    WorkbookEditablePermission,
+    WorksheetEditPermission,
+} from '@univerjs/sheets';
 import { SheetDeleteNoteCommand, SheetsNoteModel, SheetToggleNotePopupCommand } from '@univerjs/sheets-note';
 import { getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
@@ -41,30 +47,38 @@ function getHasNote$(accessor: IAccessor): Observable<boolean> {
     }));
 }
 
-export function sheetNoteContextMenuFactory(accessor: IAccessor): IMenuItem {
+export function sheetNoteContextMenuFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: AddNotePopupOperation.id,
         type: MenuItemType.BUTTON,
         title: 'sheets-note-ui.rightClick.addNote',
         icon: 'AddNoteIcon',
-        hidden$: combineLatest([getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET), getHasNote$(accessor)])
-            .pipe(map(([hidden, hasNote]) => hidden || hasNote)),
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission] }),
+        hidden$: combineLatest([
+            getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+            getHasNote$(accessor),
+        ]).pipe(map(([hidden, hasNote]) => hidden || hasNote)),
+        disabled$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetEditPermission],
+        }),
         commandId: AddNotePopupOperation.id,
     };
 }
 
-export function sheetDeleteNoteMenuFactory(accessor: IAccessor): IMenuItem {
+export function sheetDeleteNoteMenuFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: SheetDeleteNoteCommand.id,
         type: MenuItemType.BUTTON,
         title: 'sheets-note-ui.rightClick.deleteNote',
         icon: 'DeleteNoteIcon',
         hidden$: getHasNote$(accessor).pipe(map((hasNote) => !hasNote)),
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission] }),
+        disabled$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetEditPermission],
+        }),
     };
 }
-export function sheetNoteToggleMenuFactory(accessor: IAccessor): IMenuItem {
+export function sheetNoteToggleMenuFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: SheetToggleNotePopupCommand.id,
         type: MenuItemType.BUTTON,

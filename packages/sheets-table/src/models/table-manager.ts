@@ -15,7 +15,25 @@
  */
 
 import type { IRange, Workbook } from '@univerjs/core';
-import type { ITableAddedEvent, ITableDeletedEvent, ITableFilterChangedEvent, ITableFilterItem, ITableInfoWithUnitId, ITableJson, ITableNameChangedEvent, ITableOptions, ITableRange, ITableRangeChangedEvent, ITableRangeRowColOperation, ITableRangeUpdate, ITableRangeWithState, ITableResource, ITableSetConfig, ITableThemeChangedEvent } from '../types/type';
+import type { LocaleKey } from '../locale/types';
+import type {
+    ITableAddedEvent,
+    ITableDeletedEvent,
+    ITableFilterChangedEvent,
+    ITableFilterItem,
+    ITableInfoWithUnitId,
+    ITableJson,
+    ITableNameChangedEvent,
+    ITableOptions,
+    ITableRange,
+    ITableRangeChangedEvent,
+    ITableRangeRowColOperation,
+    ITableRangeUpdate,
+    ITableRangeWithState,
+    ITableResource,
+    ITableSetConfig,
+    ITableThemeChangedEvent,
+} from '../types/type';
 import { Disposable, generateRandomId, Inject, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { getSheetCommandTarget } from '@univerjs/sheets';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -268,7 +286,7 @@ export class TableManager extends Disposable {
 
                 for (let i = 0; i < count; i++) {
                     // There is no need to enforce column name uniqueness.
-                    const columnPrefix = this._localeService.t('sheets-table.columnPrefix');
+                    const columnPrefix = this._localeService.t<LocaleKey>('sheets-table.columnPrefix');
                     const column = new TableColumn(generateRandomId(), getColumnName(table.getColumnsCount() + 1 + i, columnPrefix));
                     if (columnsJson?.[i]) {
                         column.fromJSON(columnsJson[i]);
@@ -307,7 +325,7 @@ export class TableManager extends Disposable {
         const newRange = config.newRange;
         if (newRange.startColumn < oldRange.startColumn) {
             const diff = oldRange.startColumn - newRange.startColumn;
-            const columnPrefix = this._localeService.t('sheets-table.columnPrefix');
+            const columnPrefix = this._localeService.t<LocaleKey>('sheets-table.columnPrefix');
             for (let i = 0; i < diff; i++) {
                 table.insertColumn(oldRange.startColumn, new TableColumn(generateRandomId(), getColumnName(table.getColumnsCount() + 1, columnPrefix)));
             }
@@ -327,7 +345,7 @@ export class TableManager extends Disposable {
             }
         } else if (newRange.endColumn > oldRange.endColumn) {
             const diff = newRange.endColumn - oldRange.endColumn;
-            const columnPrefix = this._localeService.t('sheets-table.columnPrefix');
+            const columnPrefix = this._localeService.t<LocaleKey>('sheets-table.columnPrefix');
             for (let i = 0; i < diff; i++) {
                 table.insertColumn(oldRange.endColumn, new TableColumn(generateRandomId(), getColumnName(table.getColumnsCount() + 1, columnPrefix)));
             }

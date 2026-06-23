@@ -15,6 +15,7 @@
  */
 
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
+import type { LocaleKey } from '../locale/types';
 import { MenuItemType } from '@univerjs/ui';
 import {
     SetDrawingArrangeBackOperation,
@@ -24,7 +25,7 @@ import {
 } from '../commands/operations/drawing-arrange.operation';
 
 export const DRAWING_ARRANGE_CONTEXT_MENU_ID = 'contextMenu.drawing-arrange';
-export function DrawingArrangeContextMenuItemFactory(): IMenuSelectorItem<string> {
+export function DrawingArrangeContextMenuItemFactory(): IMenuSelectorItem<LocaleKey> {
     return {
         id: DRAWING_ARRANGE_CONTEXT_MENU_ID,
         type: MenuItemType.SUBITEMS,
@@ -33,7 +34,7 @@ export function DrawingArrangeContextMenuItemFactory(): IMenuSelectorItem<string
     };
 }
 
-export function SetDrawingArrangeFrontMenuItemFactory(): IMenuButtonItem {
+export function SetDrawingArrangeFrontMenuItemFactory(): IMenuButtonItem<LocaleKey> {
     return {
         id: SetDrawingArrangeFrontOperation.id,
         type: MenuItemType.BUTTON,
@@ -42,7 +43,7 @@ export function SetDrawingArrangeFrontMenuItemFactory(): IMenuButtonItem {
     };
 }
 
-export function SetDrawingArrangeForwardMenuItemFactory(): IMenuButtonItem {
+export function SetDrawingArrangeForwardMenuItemFactory(): IMenuButtonItem<LocaleKey> {
     return {
         id: SetDrawingArrangeForwardOperation.id,
         type: MenuItemType.BUTTON,
@@ -51,7 +52,7 @@ export function SetDrawingArrangeForwardMenuItemFactory(): IMenuButtonItem {
     };
 }
 
-export function SetDrawingArrangeBackMenuItemFactory(): IMenuButtonItem {
+export function SetDrawingArrangeBackMenuItemFactory(): IMenuButtonItem<LocaleKey> {
     return {
         id: SetDrawingArrangeBackOperation.id,
         type: MenuItemType.BUTTON,
@@ -60,7 +61,7 @@ export function SetDrawingArrangeBackMenuItemFactory(): IMenuButtonItem {
     };
 }
 
-export function SetDrawingArrangeBackwardMenuItemFactory(): IMenuButtonItem {
+export function SetDrawingArrangeBackwardMenuItemFactory(): IMenuButtonItem<LocaleKey> {
     return {
         id: SetDrawingArrangeBackwardOperation.id,
         type: MenuItemType.BUTTON,

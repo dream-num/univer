@@ -16,13 +16,18 @@
 
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuSelectorItem, MenuSchemaType } from '@univerjs/ui';
+import type { LocaleKey } from '../locale/types';
 import { MenuItemType, RibbonOthersGroup } from '@univerjs/ui';
-import { ReplayLocalRecordCommand, ReplayLocalRecordOnActiveCommand, ReplayLocalRecordOnNamesakeCommand } from '../commands/commands/replay.command';
+import {
+    ReplayLocalRecordCommand,
+    ReplayLocalRecordOnActiveCommand,
+    ReplayLocalRecordOnNamesakeCommand,
+} from '../commands/commands/replay.command';
 import { OpenRecordPanelOperation } from '../commands/operations/operation';
 import { ActionRecorderService } from '../services/action-recorder.service';
 
 export const RECORD_MENU_ITEM_ID = 'RECORD_MENU_ITEM';
-export function RecordMenuItemFactory(): IMenuSelectorItem {
+export function RecordMenuItemFactory(): IMenuSelectorItem<LocaleKey> {
     return {
         id: RECORD_MENU_ITEM_ID,
         type: MenuItemType.SUBITEMS,
@@ -31,7 +36,7 @@ export function RecordMenuItemFactory(): IMenuSelectorItem {
     };
 }
 
-export function OpenRecorderMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function OpenRecorderMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     const actionRecorderService = accessor.get(ActionRecorderService);
 
     return {
@@ -42,7 +47,7 @@ export function OpenRecorderMenuItemFactory(accessor: IAccessor): IMenuButtonIte
     };
 }
 
-export function ReplayLocalRecordMenuItemFactory(): IMenuButtonItem {
+export function ReplayLocalRecordMenuItemFactory(): IMenuButtonItem<LocaleKey> {
     return {
         id: ReplayLocalRecordCommand.id,
         title: 'action-recorder.menu.replay-local',
@@ -50,7 +55,7 @@ export function ReplayLocalRecordMenuItemFactory(): IMenuButtonItem {
     };
 }
 
-export function ReplayLocalRecordOnNamesakeMenuItemFactory(): IMenuButtonItem {
+export function ReplayLocalRecordOnNamesakeMenuItemFactory(): IMenuButtonItem<LocaleKey> {
     return {
         id: ReplayLocalRecordOnNamesakeCommand.id,
         title: 'action-recorder.menu.replay-local-name',
@@ -58,7 +63,7 @@ export function ReplayLocalRecordOnNamesakeMenuItemFactory(): IMenuButtonItem {
     };
 }
 
-export function ReplayLocalRecordOnActiveMenuItemFactory(): IMenuButtonItem {
+export function ReplayLocalRecordOnActiveMenuItemFactory(): IMenuButtonItem<LocaleKey> {
     return {
         id: ReplayLocalRecordOnActiveCommand.id,
         title: 'action-recorder.menu.replay-local-active',

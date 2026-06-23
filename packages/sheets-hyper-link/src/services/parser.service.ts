@@ -15,8 +15,14 @@
  */
 
 import type { IRange, Nullable, Workbook } from '@univerjs/core';
+import type { LocaleKey } from '../locale/types';
 import { Inject, isValidRange, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
-import { deserializeRangeWithSheet, IDefinedNamesService, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
+import {
+    deserializeRangeWithSheet,
+    IDefinedNamesService,
+    serializeRange,
+    serializeRangeWithSheet,
+} from '@univerjs/engine-formula';
 import { ERROR_RANGE } from '../types/const';
 import { SheetHyperLinkType } from '../types/enums/hyper-link-type';
 
@@ -91,7 +97,7 @@ export class SheetsHyperLinkParserService {
             : this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         const invalidLink = {
             type: SheetHyperLinkType.INVALID,
-            name: this._localeService.t('sheets-hyper-link.message.refError'),
+            name: this._localeService.t<LocaleKey>('sheets-hyper-link.message.refError'),
         };
 
         if (!workbook) {

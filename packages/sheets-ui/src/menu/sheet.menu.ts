@@ -17,6 +17,7 @@
 import type { IAccessor, Workbook } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import type { Subscriber } from 'rxjs';
+import type { LocaleKey } from '../locale/types';
 import { BooleanNumber, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import {
     CopySheetCommand,
@@ -34,13 +35,12 @@ import {
 } from '@univerjs/sheets';
 import { COLOR_PICKER_COMPONENT, getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { combineLatest, combineLatestWith, map, Observable } from 'rxjs';
-
 import { RemoveSheetConfirmCommand } from '../commands/commands/remove-sheet-confirm.command';
 import { ShowMenuListCommand } from '../commands/commands/unhide.command';
 import { RenameSheetOperation } from '../commands/operations/rename-sheet.operation';
 import { getWorkbookPermissionDisable$ } from './menu-util';
 
-export function DeleteSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function DeleteSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const commandService = accessor.get(ICommandService);
     const defaultDisable$ = new Observable<boolean>((subscriber) => {
@@ -60,7 +60,10 @@ export function DeleteSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem
 
         return disposable.dispose;
     });
-    const permissionDisable$ = getWorkbookPermissionDisable$(accessor, [WorkbookEditablePermission, WorkbookDeleteSheetPermission]);
+    const permissionDisable$ = getWorkbookPermissionDisable$(accessor, [
+        WorkbookEditablePermission,
+        WorkbookDeleteSheetPermission,
+    ]);
 
     return {
         id: RemoveSheetConfirmCommand.id,
@@ -75,7 +78,7 @@ export function DeleteSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem
     };
 }
 
-export function CopySheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function CopySheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: CopySheetCommand.id,
         type: MenuItemType.BUTTON,
@@ -85,7 +88,7 @@ export function CopySheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     };
 }
 
-export function RenameSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function RenameSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: RenameSheetOperation.id,
         type: MenuItemType.BUTTON,
@@ -95,7 +98,7 @@ export function RenameSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem
     };
 }
 
-export function ChangeColorSheetMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
+export function ChangeColorSheetMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey> {
     return {
         id: SetTabColorCommand.id,
         title: 'sheets-ui.sheetConfig.changeColor',
@@ -113,7 +116,7 @@ export function ChangeColorSheetMenuItemFactory(accessor: IAccessor): IMenuSelec
     };
 }
 
-export function HideSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function HideSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const commandService = accessor.get(ICommandService);
 
@@ -138,14 +141,17 @@ export function HideSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
             return disposable.dispose;
         }).pipe(
-            combineLatestWith(getWorkbookPermissionDisable$(accessor, [WorkbookEditablePermission, WorkbookHideSheetPermission])),
+            combineLatestWith(getWorkbookPermissionDisable$(accessor, [
+                WorkbookEditablePermission,
+                WorkbookHideSheetPermission,
+            ])),
             map(([defaultDisabled, permissionDisabled]) => defaultDisabled || permissionDisabled)
         ),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
 
-export function UnHideSheetMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<any> {
+export function UnHideSheetMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey> {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const commandService = accessor.get(ICommandService);
 
@@ -172,7 +178,10 @@ export function UnHideSheetMenuItemFactory(accessor: IAccessor): IMenuSelectorIt
         type: MenuItemType.SELECTOR,
         title: 'sheets-ui.sheetConfig.unhide',
         disabled$: defaultDisable$.pipe(
-            combineLatestWith(getWorkbookPermissionDisable$(accessor, [WorkbookEditablePermission, WorkbookHideSheetPermission])),
+            combineLatestWith(getWorkbookPermissionDisable$(accessor, [
+                WorkbookEditablePermission,
+                WorkbookHideSheetPermission,
+            ])),
             map(([defaultDisabled, permissionDisabled]) => defaultDisabled || permissionDisabled)
         ),
         selections: new Observable((subscriber) => {
@@ -193,7 +202,7 @@ export function UnHideSheetMenuItemFactory(accessor: IAccessor): IMenuSelectorIt
     };
 }
 
-export function ShowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function ShowMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const commandService = accessor.get(ICommandService);
 
@@ -224,7 +233,10 @@ export function ShowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
             return disposable.dispose;
         }).pipe(
-            combineLatestWith(getWorkbookPermissionDisable$(accessor, [WorkbookEditablePermission, WorkbookHideSheetPermission])),
+            combineLatestWith(getWorkbookPermissionDisable$(accessor, [
+                WorkbookEditablePermission,
+                WorkbookHideSheetPermission,
+            ])),
             map(([defaultDisabled, permissionDisabled]) => defaultDisabled || permissionDisabled)
         ),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),

@@ -15,6 +15,7 @@
  */
 
 import type { IDisposable, Nullable } from '@univerjs/core';
+import type { LocaleKey } from '../locale/types';
 import {
     ICommandService,
     Inject,
@@ -116,7 +117,7 @@ export class FindReplaceController extends RxDisposable {
             id: FIND_REPLACE_DIALOG_ID,
             draggable: true,
             width: FIND_REPLACE_PANEL_WIDTH,
-            title: { title: this._localeService.t('find-replace.dialog.title') },
+            title: { title: this._localeService.t<LocaleKey>('find-replace.dialog.title') },
             children: { label: 'FindReplaceDialog' },
             destroyOnClose: true,
             mask: false,
@@ -126,11 +127,13 @@ export class FindReplaceController extends RxDisposable {
             onClose: () => this.closePanel(),
         });
 
-        this._closingListenerDisposable = toDisposable(this._univerInstanceService.focused$.pipe(takeUntil(this.dispose$)).subscribe((focused) => {
-            if (!focused || !this._univerInstanceService.getUniverSheetInstance(focused)) {
-                this.closePanel();
-            }
-        }));
+        this._closingListenerDisposable = toDisposable(
+            this._univerInstanceService.focused$.pipe(takeUntil(this.dispose$)).subscribe((focused) => {
+                if (!focused || !this._univerInstanceService.getUniverSheetInstance(focused)) {
+                    this.closePanel();
+                }
+            })
+        );
     }
 
     private _closingListenerDisposable: Nullable<IDisposable>;

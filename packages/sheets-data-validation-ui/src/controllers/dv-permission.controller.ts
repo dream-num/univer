@@ -15,9 +15,19 @@
  */
 
 import type { ICommandInfo } from '@univerjs/core';
-import type { IAddSheetDataValidationCommandParams, IUpdateSheetDataValidationRangeCommandParams } from '@univerjs/sheets-data-validation';
+import type {
+    IAddSheetDataValidationCommandParams,
+    IUpdateSheetDataValidationRangeCommandParams,
+} from '@univerjs/sheets-data-validation';
+import type { LocaleKey } from '../locale/types';
 import { Disposable, ICommandService, Inject, LocaleService } from '@univerjs/core';
-import { RangeProtectionPermissionEditPoint, SheetPermissionCheckController, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission } from '@univerjs/sheets';
+import {
+    RangeProtectionPermissionEditPoint,
+    SheetPermissionCheckController,
+    WorkbookEditablePermission,
+    WorksheetEditPermission,
+    WorksheetSetCellStylePermission,
+} from '@univerjs/sheets';
 import { AddSheetDataValidationCommand, UpdateSheetDataValidationRangeCommand } from '@univerjs/sheets-data-validation';
 
 export class DataValidationPermissionController extends Disposable {
@@ -41,7 +51,7 @@ export class DataValidationPermissionController extends Disposable {
                         worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
                     }, ranges, unitId, subUnitId);
                     if (!permission) {
-                        this._sheetPermissionCheckController.blockExecuteWithoutPermission(this._localeService.t('sheets-data-validation-ui.permission.dialog.setStyleErr'));
+                        this._sheetPermissionCheckController.blockExecuteWithoutPermission(this._localeService.t<LocaleKey>('sheets-data-validation-ui.permission.dialog.setStyleErr'));
                     }
                 }
                 if (command.id === UpdateSheetDataValidationRangeCommand.id) {
@@ -52,7 +62,7 @@ export class DataValidationPermissionController extends Disposable {
                         worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
                     }, ranges, unitId, subUnitId);
                     if (!permission) {
-                        this._sheetPermissionCheckController.blockExecuteWithoutPermission(this._localeService.t('sheets-data-validation-ui.permission.dialog.setStyleErr'));
+                        this._sheetPermissionCheckController.blockExecuteWithoutPermission(this._localeService.t<LocaleKey>('sheets-data-validation-ui.permission.dialog.setStyleErr'));
                     }
                 }
             })

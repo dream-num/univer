@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { LocaleKey } from '../../locale/types';
 import { createIdentifier, Disposable, ILogService, Inject, LocaleService, Optional } from '@univerjs/core';
 import { sanitizeParsedHtml } from '../../utils/html';
 import { INotificationService } from '../notification/notification.service';
@@ -324,8 +325,8 @@ export class BrowserClipboardService extends Disposable implements IClipboardInt
     private _showClipboardAuthenticationNotification(): void {
         this._notificationService?.show({
             type: 'warning',
-            title: this._localeService.t('ui.clipboard.authentication.title'),
-            content: this._localeService.t('ui.clipboard.authentication.content'),
+            title: this._localeService.t<LocaleKey>('ui.clipboard.authentication.title'),
+            content: this._localeService.t<LocaleKey>('ui.clipboard.authentication.content'),
         });
     }
 }

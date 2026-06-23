@@ -30,12 +30,12 @@ function createCommandService() {
 
     return {
         executeCommand,
-    } satisfies Pick<ICommandService, 'executeCommand'> & {
+    } as unknown as ICommandService & {
         executeCommand: ReturnType<typeof vi.fn>;
     };
 }
 
-function createUniverInstanceService(focusedUnitId: string | null = null) {
+function createUniverInstanceService(focusedUnitId: string | null = null, editorDataStream: string = '') {
     let currentFocusedUnitId = focusedUnitId;
     const focusUnit = vi.fn((unitId: string) => {
         currentFocusedUnitId = unitId;
@@ -46,7 +46,10 @@ function createUniverInstanceService(focusedUnitId: string | null = null) {
         getFocusedUnit: vi.fn(() => currentFocusedUnitId == null
             ? undefined
             : { getUnitId: () => currentFocusedUnitId }),
-    } as unknown as Pick<IUniverInstanceService, 'focusUnit' | 'getFocusedUnit'> & {
+        getUnit: vi.fn(() => ({
+            getBody: () => ({ dataStream: editorDataStream }),
+        })),
+    } as unknown as IUniverInstanceService & {
         focusUnit: ReturnType<typeof vi.fn>;
     };
 }
@@ -76,10 +79,10 @@ describe('editor undo redo keyboard helper', () => {
         expect(univerInstanceService.focusUnit).toHaveBeenNthCalledWith(2, 'host-doc');
     });
 
-    it('keeps sheet editor undo redo on the existing sheet context', async () => {
+    it('ignores undo redo shortcuts while editing formulas in sheet editors', async () => {
         for (const editorUnitId of [DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY]) {
             const commandService = createCommandService();
-            const univerInstanceService = createUniverInstanceService('sheet-unit');
+            const univerInstanceService = createUniverInstanceService('sheet-unit', '=SUM(A1\r\n');
 
             executeEditorUndoRedoCommand({
                 commandId: RedoCommand.id,
@@ -91,7 +94,26 @@ describe('editor undo redo keyboard helper', () => {
             await waitForCommandFinally();
 
             expect(univerInstanceService.focusUnit).not.toHaveBeenCalled();
-            expect(commandService.executeCommand).toHaveBeenCalledWith(RedoCommand.id);
+            expect(commandService.executeCommand).not.toHaveBeenCalled();
+        }
+    });
+
+    it('keeps undo redo available for non-formula text in sheet editors', async () => {
+        for (const editorUnitId of [DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY]) {
+            const commandService = createCommandService();
+            const univerInstanceService = createUniverInstanceService('sheet-unit', 'plain text\r\n');
+
+            executeEditorUndoRedoCommand({
+                commandId: UndoCommand.id,
+                commandService,
+                editorUnitId,
+                univerInstanceService,
+            });
+
+            await waitForCommandFinally();
+
+            expect(univerInstanceService.focusUnit).not.toHaveBeenCalled();
+            expect(commandService.executeCommand).toHaveBeenCalledWith(UndoCommand.id);
         }
     });
 

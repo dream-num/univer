@@ -14,24 +14,33 @@
  * limitations under the License.
  */
 
-import type { ICommandService, IUniverInstanceService } from '@univerjs/core';
+import type { DocumentDataModel, ICommandService, IUniverInstanceService } from '@univerjs/core';
 import type { IKeyboardEventConfig } from './use-keyboard-event';
-import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, RedoCommand, UndoCommand } from '@univerjs/core';
+import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, RedoCommand, UndoCommand, UniverInstanceType } from '@univerjs/core';
 import { KeyCode, MetaKeys } from '@univerjs/ui';
 
 export interface IExecuteEditorUndoRedoCommandOptions {
     commandId: string;
-    commandService: Pick<ICommandService, 'executeCommand'>;
+    commandService: ICommandService;
     editorUnitId: string;
-    univerInstanceService: Pick<IUniverInstanceService, 'focusUnit' | 'getFocusedUnit'>;
+    univerInstanceService: IUniverInstanceService;
 }
 
 export interface ICreateEditorUndoRedoKeyboardConfigOptions {
-    commandService: Pick<ICommandService, 'executeCommand'>;
-    univerInstanceService: Pick<IUniverInstanceService, 'focusUnit' | 'getFocusedUnit'>;
+    commandService: ICommandService;
+    univerInstanceService: IUniverInstanceService;
     editorUnitId: string;
     keyCodes?: IKeyboardEventConfig['keyCodes'];
     handler?: IKeyboardEventConfig['handler'];
+}
+
+function isSheetFormulaEditor(editorUnitId: string, univerInstanceService: IUniverInstanceService): boolean {
+    if (editorUnitId !== DOCS_NORMAL_EDITOR_UNIT_ID_KEY && editorUnitId !== DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
+        return false;
+    }
+
+    const documentModel = univerInstanceService.getUnit<DocumentDataModel>(editorUnitId, UniverInstanceType.UNIVER_DOC);
+    return documentModel?.getBody()?.dataStream?.startsWith('=') ?? false;
 }
 
 export function executeEditorUndoRedoCommand(options: IExecuteEditorUndoRedoCommandOptions): void {
@@ -39,6 +48,11 @@ export function executeEditorUndoRedoCommand(options: IExecuteEditorUndoRedoComm
     const shouldUseSheetEditorContext =
         editorUnitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY ||
         editorUnitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY;
+
+    if (isSheetFormulaEditor(editorUnitId, univerInstanceService)) {
+        return;
+    }
+
     const previousFocusedUnitId = univerInstanceService.getFocusedUnit()?.getUnitId() ?? null;
     const shouldRestoreFocus = !shouldUseSheetEditorContext && previousFocusedUnitId !== null && previousFocusedUnitId !== editorUnitId;
 

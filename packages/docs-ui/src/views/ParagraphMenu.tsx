@@ -362,10 +362,7 @@ export function getParagraphMenuCommand(params: IValueOption, targetRange?: ITex
     const fallbackParams = typeof params.params === 'function' ? params.params() : params.params;
     const commandParams = typeof params.value === 'undefined'
         ? fallbackParams
-        : (fallbackParams && typeof fallbackParams === 'object'
-            ? { ...fallbackParams, value: params.value }
-            : { value: params.value }
-        );
+        : { value: params.value };
 
     return {
         commandId,
@@ -1327,8 +1324,7 @@ export function shouldUseInsertBelowRange(commandId: string, params: IValueOptio
         return true;
     }
 
-    const rawParams = typeof params.params === 'function' ? params.params() : params.params;
-    if (rawParams && typeof rawParams === 'object' && 'paragraphMenuPlacement' in rawParams && rawParams.paragraphMenuPlacement === 'below') {
+    if (typeof params.id === 'string' && params.id.toLowerCase().includes('below')) {
         return true;
     }
 

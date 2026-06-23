@@ -155,33 +155,9 @@ describe('ParagraphMenu command behavior', () => {
 
     it('routes explicit and declared insert actions below the active block', () => {
         expect(shouldUseInsertBelowRange('doc.command.insert-image', { id: 'image' })).toBe(true);
-        expect(shouldUseInsertBelowRange('docs.operation.insert-embed', {
-            id: 'embed',
-            params: {
-                paragraphMenuPlacement: 'below',
-            },
-        })).toBe(true);
+        expect(shouldUseInsertBelowRange('docs.operation.insert-embed', { id: 'docs.operation.insert-embed.below' })).toBe(true);
         expect(shouldUseInsertBelowRange('docs.operation.insert-divider', { id: INSERT_BELLOW_MENU_ID })).toBe(true);
         expect(shouldUseInsertBelowRange(AlignCenterCommand.id, { id: AlignCenterCommand.id })).toBe(false);
-    });
-
-    it('keeps insert-below placement when a selector option supplies a value', () => {
-        const resolved = getParagraphMenuResolvedCommand({
-            id: 'doc.command.insert-column-group',
-            commandId: 'doc.command.insert-column-group',
-            value: '3',
-            params: {
-                paragraphMenuPlacement: 'below',
-            },
-        });
-
-        expect(resolved).toEqual({
-            commandId: 'doc.command.insert-column-group',
-            params: {
-                paragraphMenuPlacement: 'below',
-                value: '3',
-            },
-        });
     });
 
     it('does not treat a whitespace-only paragraph as an empty paragraph target', () => {

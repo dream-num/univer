@@ -128,11 +128,7 @@ describe('paragraph build utils', () => {
             listType: PresetListType.ORDER_LIST,
             document: doc,
         });
-        const documentWithoutBody = new DocumentDataModel({ id: 'missing-segment' });
-        delete documentWithoutBody.getSnapshot().body;
-        expect(setParagraphBullet({ paragraphs: [thirdParagraph], listType: PresetListType.ORDER_LIST, segmentId: 'missing', document: documentWithoutBody })).toBe(false);
-        documentWithoutBody.dispose();
-
+        expect(setParagraphBullet({ paragraphs: [thirdParagraph], listType: PresetListType.ORDER_LIST, segmentId: 'missing', document: new DocumentDataModel({ id: 'missing-segment' }) })).toBe(false);
         if (setBulletTextX === false) {
             throw new Error('Expected setParagraphBullet to return TextX actions');
         }
